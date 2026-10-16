@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createRowStore, createColumnModel, localeCtx, NO_OVERLAY, compileQuick, filterIndices, quickWords, canNarrow } from '@dzgrid/core';
-import { ColumnCache } from '@dzgrid/core/internal';
+import { createColumnModel, localeCtx, NO_OVERLAY, quickWords } from '@dzgrid/core';
+import { createRowStore, compileQuick, filterIndices, canNarrow, ColumnCache } from '@dzgrid/core/internal';
 
 type Row = { id: string; name: string };
 

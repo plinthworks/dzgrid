@@ -1,6 +1,7 @@
 import { fold } from '../i18n/fold.js';
 import type { ColumnEnv } from '../model/column-cache.js';
 import type { ResolvedColumn } from '../columns/defs.js';
+import type { Haystack } from '../model/haystack.js';
 import type { CompiledFilter } from './compile.js';
 
 /** The words of a search, folded, split on whitespace. */
@@ -18,7 +19,6 @@ export function canNarrow(prev: readonly string[], next: readonly string[]): boo
   return prev.every((w, i) => next[i]!.includes(w));
 }
 
-type Probe = (src: number, word: string) => boolean;
 
 /**
  * One search box over the visible columns (quick-filter.md). Every word must
@@ -31,42 +31,36 @@ export function compileQuick<T>(text: string, columns: readonly ResolvedColumn<T
   const words = quickWords(text);
   if (!words.length) return { active: false, test: () => true, problems: [] };
 
-  const always: Probe[] = [];
-  const withDigits: Probe[] = [];
+  // Per column, the haystacks a word is looked for in: text and enum always,
+  // numbers and dates only for a word with a digit.
+  const always: Haystack[] = [];
+  const withDigits: Haystack[] = [];
   for (const col of columns) {
     if (col.type === 'text' || col.type === 'enum' || (col.type === 'custom' && col.codec.keyKind === 'text')) {
-      const cells = env.cache.searchable(col, env);
-      if (col.type === 'enum') {
-        const values = env.cache.exports(col, env);
-        always.push((src, w) => {
-          const c = cells[src];
-          return (c != null && c.includes(w)) || !!values[src]?.toLowerCase().includes(w);
-        });
-      } else {
-        always.push((src, w) => {
-          const c = cells[src];
-          return c != null && c.includes(w);
-        });
-      }
+      always.push(env.cache.haystack('search', col, env));
+      if (col.type === 'enum') always.push(env.cache.haystack('export', col, env));
     } else if (col.type === 'number' || col.type === 'day' || col.type === 'instant') {
-      const shown = env.cache.displays(col, env);
-      const raw = env.cache.exports(col, env);
-      withDigits.push((src, w) => !!shown[src]?.includes(w) || !!raw[src]?.toLowerCase().includes(w));
+      withDigits.push(env.cache.haystack('display', col, env), env.cache.haystack('export', col, env));
     }
   }
-  const plans = words.map((w) => ({ w, probes: /[0-9]/.test(w) ? [...always, ...withDigits] : always }));
+  // Every word in at least one column: OR across columns, AND across words, once.
+  const n = env.source.count;
+  const pass = new Uint8Array(n).fill(1);
+  for (const w of words) {
+    const any = new Uint8Array(n);
+    for (const hay of /[0-9]/.test(w) ? [...always, ...withDigits] : always) {
+      const m = hay.containsMask(w);
+      for (let i = 0; i < n; i++) any[i]! |= m[i]!;
+    }
+    for (let i = 0; i < n; i++) pass[i]! &= any[i]!;
+  }
   const stats = env.cache.stats;
   return {
     active: true,
     problems: [],
     test: (src) => {
       stats.quickScanned++;
-      for (const { w, probes } of plans) {
-        let found = false;
-        for (const p of probes) if (p(src, w)) { found = true; break; }
-        if (!found) return false;
-      }
-      return true;
+      return pass[src] === 1;
     },
   };
 }

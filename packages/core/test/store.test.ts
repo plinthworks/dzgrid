@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createRowStore, dataKey, type RowTransaction } from '@dzgrid/core';
-import { flatDisplayed } from '@dzgrid/core/internal';
+import { dataKey, type RowTransaction } from '@dzgrid/core';
+import { createRowStore, flatDisplayed } from '@dzgrid/core/internal';
 
 type Row = { readonly id: string; readonly v: number };
 

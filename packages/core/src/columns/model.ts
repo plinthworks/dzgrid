@@ -7,7 +7,10 @@ export interface ColumnLookup<T> {
   get(id: string): ResolvedColumn<T> | undefined;
   /** Displayed columns, start segment first, then centre, then end. */
   visible(): readonly ResolvedColumn<T>[];
+  /** Bumped by any change, widths included: what layout follows. */
   readonly version: number;
+  /** Bumped only when what the cells hold or which columns show changes: what sorting and filtering follow. */
+  readonly dataVersion: number;
 }
 
 /** What the user (or the host) changed about a column. Sorting lives in the query, not here (D6). */
@@ -56,6 +59,7 @@ export function createColumnModel<T>(initial: readonly ColumnDef<T, any>[], o: {
   const user = new Map<string, ColumnState>();
   let available = o.availableInline;
   let version = 0;
+  let dataVersion = 0;
   let layout: ColumnLayout;
   let visibleList: readonly ResolvedColumn<T>[] = [];
 
@@ -119,17 +123,21 @@ export function createColumnModel<T>(initial: readonly ColumnDef<T, any>[], o: {
     JSON.stringify([layout.start, layout.center, layout.end].map((sl) => sl.columns.map((col, i) => [col.id, sl.widths.sizeAt(i)])));
 
   /** `problems` is read after `mutate`, so a change reports what it found, not what the last one did. */
-  const change = (mutate: () => readonly string[], problems: () => readonly Problem[] = () => []): ColumnChange => {
+  const shownIds = (): string => visibleList.map((c) => c.id).sort().join(',');
+  const change = (mutate: () => readonly string[], problems: () => readonly Problem[] = () => [], data = false): ColumnChange => {
     const before = signature();
+    const shownBefore = shownIds();
     const changed = mutate();
     recompute();
     const layoutChanged = signature() !== before;
     if (changed.length || layoutChanged) version++;
+    if (data || shownIds() !== shownBefore) dataVersion++;
     return { changed, layoutChanged, problems: problems() };
   };
 
   return {
     get version() { return version; },
+    get dataVersion() { return dataVersion; },
     get layout() { return layout; },
     get problems() { return defProblems; },
     get: (id) => byId.get(id),
@@ -160,7 +168,7 @@ export function createColumnModel<T>(initial: readonly ColumnDef<T, any>[], o: {
       return change(() => {
         setColumns(defs);
         return columns.map((col) => col.id);
-      }, () => defProblems);
+      }, () => defProblems, true);
     },
     setAvailableInline(px) {
       if (!(Number.isFinite(px) && px >= 0)) {

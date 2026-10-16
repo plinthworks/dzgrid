@@ -129,7 +129,7 @@ describe('fold, per character', () => {
     for (const r of rows) {
       for (const s of [r.t0, r.t1, r.a0, r.a1]) if (fold(s) !== foldSlow(s)) throw new Error(`disagree on ${JSON.stringify(s)}`);
     }
-    for (const s of ['Hélène', 'ÉRIC', 'İstanbul', 'ﻻ', 'ﷲ', 'مُحَمَّد', 'أحـمد', 'مصطفى', '١٢٣', 'é', '‏x', '𝐀', 'ß', 'Œuvre', 'ǅ']) {
+    for (const s of ['Hélène', 'ÉRIC', 'İstanbul', 'ﻻ', 'ﷲ', 'مُحَمَّد', 'أحـمد', 'مصطفى', '١٢٣', 'é', '\u200fx', '𝐀', 'ß', 'Œuvre', 'ǅ']) {
       expect(fold(s), s).toBe(foldSlow(s));
     }
   });

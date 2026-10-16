@@ -1,4 +1,4 @@
-import { clientRows, createColumnModel, localeCtx, makeQuery, type Query } from '@dzgrid/core';
+import { clientRows, createColumnModel, localeCtx, makeQuery, dataKey, type Query } from '@dzgrid/core';
 import type { Suite } from './index.js';
 
 type Row = Record<string, unknown> & { id: string };
@@ -17,11 +17,7 @@ export const model: Record<string, Suite> = {
     const d = m.displayed;
     const displayed = Array.from({ length: d.count }, (_, i) => String(d.nodeAt(d.index(i)!).id));
     const atIndex = Object.fromEntries((at as number[]).map((i) => [String(i), String(d.nodeAt(d.index(i)!).id)]));
-    const store = m.store;
-    const indexOf = Object.fromEntries((of as string[]).map((id) => {
-      const key = store.snapshot.lookup(id) >= 0 ? store.snapshot.keyAt(store.snapshot.lookup(id)) : null;
-      return [id, key === null ? -1 : d.indexOf(key)];
-    }));
+    const indexOf = Object.fromEntries((of as string[]).map((id) => [id, d.indexOf(dataKey(id)!)]));
     return { displayed, atIndex, indexOf };
   },
 };

@@ -1,8 +1,10 @@
 import { collatorFor, collatorKey, type CollatorSpec } from '../i18n/collate.js';
 import { fold } from '../i18n/fold.js';
+import { Haystack } from './haystack.js';
 import type { ColumnLookup } from '../columns/model.js';
 import type { ResolvedColumn, ValueReader } from '../columns/defs.js';
 import { problem, type Problem } from '../problems.js';
+import type { SourceIndex } from '../ids.js';
 import type { RowSnapshot, StoreDelta } from '../row/store.js';
 import { isBlank } from '../value/codec.js';
 import type { LocaleCtx } from '../value/locale.js';
@@ -40,15 +42,29 @@ interface RankEntry<T> { col: ResolvedColumn<T>; version: number; reader: number
  * are collated once, then rows sort by an integer). An update that only
  * changes values already present patches the ranks in place.
  */
-/** The source row a cell problem's path names, or −1. */
-const rowOf = (path: string): number => {
-  const m = /^rows\[(\d+)\]/.exec(path);
-  return m ? Number(m[1]) : -1;
-};
+export type HayKind = 'search' | 'exact' | 'display' | 'export';
+
+const listCtx = <T>(env: ColumnEnv<T>): string => `${env.ctx.locale}|${env.ctx.numerals}|${env.ctx.timeZone}`;
+
+/** One cell's text for a haystack of `kind`, or null when blank or unreadable. */
+function hayCell<T>(kind: HayKind, col: ResolvedColumn<T>, env: ColumnEnv<T>, src: number): string | null {
+  const { v } = coerceCell(col, ColumnCache.raw(col, env, src), env);
+  if (v === null) return null;
+  switch (kind) {
+    case 'search': return fold(col.type === 'enum' ? col.codec.format(v, env.ctx) : String(v));
+    case 'exact': return (col.type === 'enum' ? col.codec.format(v, env.ctx) : String(v)).normalize('NFC');
+    case 'display': return fold(col.codec.format(v, env.ctx));
+    case 'export': return col.codec.toExport(v).toLowerCase();
+  }
+}
+
+/** Past this many patched rows a haystack is rebuilt rather than patched further. */
+const MAX_PATCHED = 1000;
 
 export class ColumnCache<T> {
   readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0, displayBuilds: 0, quickScanned: 0 };
   #lists = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; values: (string | null | undefined)[] }>();
+  #hays = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; hay: Haystack }>();
   #keys = new Map<string, KeyEntry<T>>();
   #ranks = new Map<string, RankEntry<T>>();
   #clock = 0;
@@ -58,7 +74,7 @@ export class ColumnCache<T> {
    * A host accessor that throws gives THREW: the cell is read as blank and
    * reported, and one bad row never stops a sort.
    */
-  static raw<T>(col: ResolvedColumn<T>, env: ColumnEnv<T>, src: number): unknown {
+  static raw<T>(col: ResolvedColumn<T>, env: ColumnEnv<T>, src: number | SourceIndex): unknown {
     const row = env.source.rows[src]!;
     try {
       return env.reader.overlay ? env.reader.value(col, row, env.source.ids[src]!) : col.read(row);
@@ -141,9 +157,9 @@ export class ColumnCache<T> {
     return entry;
   }
 
-  #list(kind: 'text' | 'export' | 'display' | 'search', col: ResolvedColumn<T>, env: ColumnEnv<T>, build: () => (string | null | undefined)[]): (string | null | undefined)[] {
+  #list(kind: 'export', col: ResolvedColumn<T>, env: ColumnEnv<T>, build: () => (string | null | undefined)[]): (string | null | undefined)[] {
     const id = `${kind}|${col.id}`;
-    const ctx = `${env.ctx.locale}|${env.ctx.timeZone}`;
+    const ctx = listCtx(env);
     const hit = this.#lists.get(id);
     if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return hit.values;
     const values = build();
@@ -151,48 +167,26 @@ export class ColumnCache<T> {
     return values;
   }
 
-  /** Each cell as text — the value, or an enum's label — or null for a blank or unreadable cell. */
-  texts(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | null)[] {
-    return this.#list('text', col, env, () => {
-      this.stats.textBuilds++;
-      const out: (string | null)[] = new Array(env.source.count);
-      for (let i = 0; i < out.length; i++) {
-        const { v } = coerceCell(col, ColumnCache.raw(col, env, i), env);
-        out[i] = v === null ? null : col.type === 'enum' ? col.codec.format(v, env.ctx) : String(v);
-      }
-      return out;
-    }) as (string | null)[];
-  }
-
   /**
-   * Each cell as a search compares it: folded, lowercased — the ASCII ones
-   * too, so a search never lowercases a cell twice. Built on first search.
+   * A column joined for searching (see `Haystack`):
+   * - `search` — the cell's text (an enum's label), folded;
+   * - `exact` — the cell's text in NFC, for a case-sensitive filter;
+   * - `display` — the cell as displayed in the user's language, folded (numbers, dates);
+   * - `export` — the cell's export text, lowercased (an enum's value, a number's raw form).
    */
-  searchable(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | null)[] {
-    const texts = this.texts(col, env);
-    return this.#list('search', col, env, () => {
-      this.stats.foldBuilds++;
-      const out: (string | null)[] = new Array(texts.length);
-      for (let i = 0; i < texts.length; i++) {
-        const t = texts[i];
-        // fold() lowercases ASCII itself, cheaply.
-        out[i] = t == null ? null : fold(t);
-      }
-      return out;
-    }) as (string | null)[];
-  }
-
-  /** Each cell as displayed in the user's language, folded — what a search reads for numbers and dates. */
-  displays(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | null)[] {
-    return this.#list('display', col, env, () => {
-      this.stats.displayBuilds++;
-      const out: (string | null)[] = new Array(env.source.count);
-      for (let i = 0; i < out.length; i++) {
-        const { v } = coerceCell(col, ColumnCache.raw(col, env, i), env);
-        out[i] = v === null ? null : fold(col.codec.format(v, env.ctx));
-      }
-      return out;
-    }) as (string | null)[];
+  haystack(kind: HayKind, col: ResolvedColumn<T>, env: ColumnEnv<T>): Haystack {
+    const id = `${kind}|${col.id}`;
+    const ctx = listCtx(env);
+    const hit = this.#hays.get(id);
+    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return hit.hay;
+    if (kind === 'display') this.stats.displayBuilds++;
+    else this.stats.foldBuilds++;
+    const n = env.source.count;
+    const cells: (string | null)[] = new Array(n);
+    for (let i = 0; i < n; i++) cells[i] = hayCell(kind, col, env, i);
+    const hay = new Haystack(cells);
+    this.#hays.set(id, { col, version: env.source.version, reader: env.reader.version, ctx, hay });
+    return hay;
   }
 
   /** Each cell's stable export text (what value lists match on), or null for a blank. */
@@ -216,39 +210,56 @@ export class ColumnCache<T> {
   patch(delta: StoreDelta, next: RowSnapshot<T>, envOf: (source: RowSnapshot<T>) => Omit<ColumnEnv<T>, 'source' | 'cache'>): void {
     if (delta.kind === 'none') return;
     if (delta.kind !== 'update' || !delta.changedSrc) return this.invalidateAll();
-    this.#patchLists(delta, next, envOf);
     const base = envOf(next);
     const env: ColumnEnv<T> = { ...base, source: next, cache: this };
+    const lctx = listCtx(env);
+    const keyCtx = `${env.ctx.locale}|${env.ctx.timeZone}`;
+    // An entry built under another column definition, reader or context is not
+    // this one's to patch: patched with today's rules, it would answer later
+    // for yesterday's. It is dropped and rebuilt when asked for.
+    const current = (col: ResolvedColumn<T>) => base.columns.get(col.id) === col;
+    for (const [id, e] of this.#lists) if (e.ctx !== lctx || e.reader !== env.reader.version || !current(e.col)) this.#lists.delete(id);
+    for (const [id, e] of this.#hays) if (e.ctx !== lctx || e.reader !== env.reader.version || !current(e.col)) this.#hays.delete(id);
+    for (const [id, e] of this.#hays) {
+      if (e.version !== delta.from || e.hay.patchedCount + delta.changedSrc.length > Math.max(MAX_PATCHED, e.hay.count >> 4)) {
+        this.#hays.delete(id);
+        continue;
+      }
+      const kind = id.slice(0, id.indexOf('|')) as HayKind;
+      for (const src of delta.changedSrc) e.hay.patch(src, hayCell(kind, e.col, env, src));
+      e.version = next.version;
+    }
+    for (const [id, e] of this.#keys) if (e.ctx !== keyCtx || e.reader !== env.reader.version || !current(e.col)) this.#keys.delete(id);
+    for (const [id, e] of this.#ranks) if (e.reader !== env.reader.version || !current(e.col) || !id.endsWith(`|${collatorKey(env.ctx)}`)) this.#ranks.delete(id);
+    this.#patchLists(delta, next, envOf);
     for (const [id, e] of this.#keys) {
       if (e.version !== delta.from) { this.#keys.delete(id); continue; }
-      // Problems are per row: drop the changed rows' reports, then report again what is still bad.
-      const changed = new Set(delta.changedSrc);
-      e.problems = e.problems.filter((p) => !changed.has(rowOf(p.path)));
+      // Problems carry a cap and a summary: an entry that has any, or would gain
+      // one, is rebuilt rather than patched, so it always reads as a fresh build.
+      let clean = e.problems.length === 0;
       for (const src of delta.changedSrc) {
-        const { v, bad } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
+        const { v, bad, warn } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
+        if (bad || warn) { clean = false; break; }
         const wasBlank = Number.isNaN(e.keys[src]!);
         e.keys[src] = v === null ? Number.NaN : (e.col.codec.sortKey(v, env.ctx) as number);
         e.blanks += (v === null ? 1 : 0) - (wasBlank ? 1 : 0);
-        if (bad) e.problems.push(problem('invalid-cell-value', 'warning', `rows[${src}].${e.col.id}`, bad));
       }
-      e.problems.sort((a, b) => rowOf(a.path) - rowOf(b.path));
+      if (!clean) { this.#keys.delete(id); continue; }
       e.version = next.version;
     }
     for (const [id, e] of this.#ranks) {
       if (e.version !== delta.from) { this.#ranks.delete(id); continue; }
-      let ok = true;
-      const changed = new Set(delta.changedSrc);
-      e.problems = e.problems.filter((p) => !changed.has(rowOf(p.path)));
+      let ok = e.problems.length === 0;
       for (const src of delta.changedSrc) {
-        const { v, bad } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
-        if (bad) e.problems.push(problem('invalid-cell-value', 'warning', `rows[${src}].${e.col.id}`, bad));
+        if (!ok) break;
+        const { v, bad, warn } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
+        if (bad || warn) { ok = false; break; }
         if (v === null) { e.ranks[src] = Number.NaN; continue; }
         const r = e.dict.get(String(e.col.codec.sortKey(v, env.ctx)));
         if (r === undefined) { ok = false; break; }
         e.ranks[src] = r;
       }
       if (ok) {
-        e.problems.sort((a, b) => rowOf(a.path) - rowOf(b.path));
         e.version = next.version;
         this.stats.rankPatches++;
       }
@@ -264,16 +275,8 @@ export class ColumnCache<T> {
       const kind = id.slice(0, id.indexOf('|'));
       for (const src of delta.changedSrc!) {
         const { v } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
-        let out: string | null = null;
-        if (v !== null) {
-          if (kind === 'export') out = e.col.codec.toExport(v);
-          else if (kind === 'display') out = fold(e.col.codec.format(v, env.ctx));
-          else {
-            const text = e.col.type === 'enum' ? e.col.codec.format(v, env.ctx) : String(v);
-            out = kind === 'search' ? fold(text) : text;
-          }
-        }
-        e.values[src] = out;
+        void kind;
+        e.values[src] = v === null ? null : e.col.codec.toExport(v);
       }
       e.version = next.version;
     }
@@ -283,5 +286,11 @@ export class ColumnCache<T> {
     this.#keys.clear();
     this.#ranks.clear();
     this.#lists.clear();
+    this.#hays.clear();
+  }
+
+  /** Drops the search haystacks: a model calls this when its search box is emptied. */
+  releaseSearch(): void {
+    for (const [id] of this.#hays) if (!id.startsWith('exact|')) this.#hays.delete(id);
   }
 }

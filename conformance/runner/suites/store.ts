@@ -1,4 +1,5 @@
-import { createRowStore, type Problem } from '@dzgrid/core';
+import { type Problem } from '@dzgrid/core';
+import { createRowStore } from '@dzgrid/core/internal';
 import type { Suite } from './index.js';
 
 type Row = { id: string | number; v?: number };

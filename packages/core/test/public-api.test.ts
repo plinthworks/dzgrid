@@ -9,19 +9,21 @@ import * as internal from '@dzgrid/core/internal';
  */
 const PUBLIC = [
   'EMPTY_QUERY', 'MAX_INSTANT', 'MAX_PHYSICAL', 'NO_OVERLAY', 'NO_SELECTION', 'PROBLEM_CODES', 'PrefixSums', 'REBASE', 'REJECTED',
-  'addDays', 'anchorFor', 'assignKeys', 'booleanCodec', 'booleanCodecWith', 'canNarrow', 'canonicalId', 'civilToEpochDay',
-  'clearSelection', 'clientRows', 'collatorFor', 'compareDays', 'compileFilter', 'compilePath', 'compileQuick',
-  'createColumnModel', 'createRowStore', 'dataKey', 'dayCodec', 'dayFieldOrder', 'dayToEpochDay', 'daysInMonth', 'detailKey',
-  'enumCodec', 'epochDayToCivil', 'epochDayToDay', 'filterIndices', 'fold', 'formattersFor', 'groupKey', 'idOfDataKey',
+  'addDays', 'anchorFor', 'assignKeys', 'booleanCodec', 'booleanCodecWith', 'canonicalId', 'civilToEpochDay',
+  'clearSelection', 'clientRows', 'collatorFor', 'compareDays', 'compilePath', 'createColumnModel', 'dataKey', 'dayCodec', 'dayFieldOrder', 'dayToEpochDay', 'daysInMonth', 'detailKey',
+  'enumCodec', 'epochDayToCivil', 'epochDayToDay', 'fold', 'formattersFor', 'groupKey', 'idOfDataKey',
   'instantCodec', 'instantToDayIn', 'instantToIso', 'isAscii', 'isBlank', 'isKnownZone', 'isLeapYear', 'isSelected',
   'layerPlacement', 'localeCtx', 'makeQuery', 'normalizeDigits', 'numberCodec', 'numberCodecWith', 'offsetAt',
   'overscanRows', 'parseDay', 'parseInstant', 'pinnedKey', 'problem', 'quickWords', 'readDayText', 'readInstant',
   'readMachineNumber', 'readNumber', 'reconcileSelection', 'resolveColumns', 'resolveInstantRange', 'resolveWall',
-  'scrollMapper', 'scrollTopFor', 'selectAll', 'selectOnly', 'selectRange', 'selectionCount', 'sortIndices', 'stripMarks',
+  'scrollMapper', 'scrollTopFor', 'selectAll', 'selectOnly', 'selectRange', 'selectionCount', 'stripMarks',
   'textCodec', 'toggle', 'uniformRowLayout', 'variableRowLayout', 'visibleWindow', 'zoneDayBounds',
 ];
 
-const INTERNAL = ['ColumnCache', 'THREW', 'canonical', 'clearFormatCaches', 'collatorKey', 'ctxKey', 'flatDisplayed', 'foldSlow', 'formatParts', 'intlTag', 'separatorsFor'];
+const INTERNAL = [
+  'ColumnCache', 'Haystack', 'THREW', 'canNarrow', 'canonical', 'clearFormatCaches', 'collatorKey', 'compileFilter', 'compileQuick', 'createRowStore',
+  'ctxKey', 'filterIndices', 'flatDisplayed', 'foldSlow', 'formatParts', 'intlTag', 'separatorsFor', 'sortIndices', 'storeOf',
+];
 
 describe('the public surface', () => {
   it('is exactly the list above', () => {

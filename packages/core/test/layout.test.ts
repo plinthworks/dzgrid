@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { PrefixSums, uniformRowLayout, variableRowLayout, scrollMapper, visibleWindow, overscanRows, MAX_PHYSICAL, createRowStore } from '@dzgrid/core';
-import { flatDisplayed } from '@dzgrid/core/internal';
+import { PrefixSums, uniformRowLayout, variableRowLayout, scrollMapper, visibleWindow, overscanRows, MAX_PHYSICAL } from '@dzgrid/core';
+import { createRowStore, flatDisplayed } from '@dzgrid/core/internal';
 
 const rng = (seed: number) => () => {
   seed = (seed + 0x6d2b79f5) | 0;

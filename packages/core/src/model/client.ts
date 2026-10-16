@@ -2,10 +2,15 @@ import type { ColumnLookup } from '../columns/model.js';
 import { NO_OVERLAY, type ValueReader } from '../columns/defs.js';
 import { compileFilter, filterIndices } from '../filter/compile.js';
 import { canNarrow, compileQuick, quickWords } from '../filter/quick.js';
-import type { RowIdInput } from '../ids.js';
+import type { RowIdInput, RowKey } from '../ids.js';
+import type { DataNode } from '../row/node.js';
 import type { Problem } from '../problems.js';
 import { flatDisplayed, type DisplayedRows } from '../row/displayed.js';
 import { createRowStore, type RowStore, type RowTransaction, type TransactionResult } from '../row/store.js';
+
+/** The store behind a client model — for the grid's own layers, through `@dzgrid/core/internal`. */
+export const storeOf = <T>(m: ClientModel<T>): RowStore<T> => (m as unknown as { [STORE]: RowStore<T> })[STORE];
+const STORE = Symbol('dzgrid.store');
 import { sortIndices } from '../sort/compile.js';
 import { ctxKey, type LocaleCtx } from '../value/locale.js';
 import { ColumnCache, type ColumnEnv } from './column-cache.js';
@@ -42,10 +47,11 @@ export interface ClientOptions<T> {
 
 export interface ClientModel<T> extends RowModel<T> {
   readonly kind: 'client';
-  readonly store: RowStore<T>;
+  /** A row by its key, whatever the filter. */
+  row(key: RowKey): DataNode<T> | undefined;
   readonly query: Query;
   readonly counts: { readonly total: number; readonly filtered: number };
-  /** From the last run: the query's and the cells' problems. */
+  /** The last load or transaction's problems, then the query's and the cells'. */
   readonly problems: readonly Problem[];
   setRows(rows: Iterable<T>, source?: ChangeSource): TransactionResult;
   applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
@@ -62,6 +68,7 @@ export interface ClientModel<T> extends RowModel<T> {
     readonly keyBuilds: number;
     readonly rankBuilds: number;
     readonly quickScanned: number;
+    readonly displayBuilds: number;
   };
 }
 
@@ -91,7 +98,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   const d = { filterRuns: 0, sortRuns: 0, displayedBuilds: 0, retested: 0 };
 
   /** What a stage's result depends on, besides the rows. */
-  interface Inputs { snap: number; cols: number; ctx: string; reader: number; filter: string; quick: string; quickCols: string }
+  interface Inputs { snap: number; colsRef: ColumnLookup<T>; cols: number; ctx: string; reader: number; filter: string; quick: string; quickCols: string }
   let filtered: { in: Inputs; words: readonly string[]; order: Uint32Array | null; mask: Uint8Array | null; problems: readonly Problem[] } | null = null;
   let sorted: { in: Inputs; sort: string; input: Uint32Array | null; order: Uint32Array | null; problems: readonly Problem[] } | null = null;
   let displayed: DisplayedRows<T>;
@@ -99,7 +106,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache });
   const inputs = (): Inputs => ({
     snap: store.snapshot.version,
-    cols: columns.version,
+    colsRef: columns,
+    // Data, not layout: resizing a column must not filter and sort again.
+    cols: columns.dataVersion,
     ctx: ctxKey(ctx),
     reader: reader.version,
     filter: canonical(query.filter),
@@ -107,7 +116,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     quickCols: columns.visible().map((c) => c.id).join(','),
   });
   const same = (a: Inputs, b: Inputs, ignore?: 'quick'): boolean =>
-    a.snap === b.snap && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader && a.filter === b.filter && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick);
+    a.snap === b.snap && a.colsRef === b.colsRef && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader && a.filter === b.filter && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick);
 
   /** Runs the stages whose inputs changed; true when the displayed rows changed. */
   const run = (): boolean => {
@@ -142,7 +151,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     const c: ModelChange<T> = { source, displayed, kind, problems: currentProblems(), ...(transaction && { transaction }) };
     for (const fn of [...listeners]) fn(c);
   };
-  const currentProblems = (): readonly Problem[] => [...(filtered?.problems ?? []), ...(sorted?.problems ?? [])];
+  let loadProblems: readonly Problem[] = [];
+  const currentProblems = (): readonly Problem[] => [...loadProblems, ...(filtered?.problems ?? []), ...(sorted?.problems ?? [])];
 
   /** A sort column's key array for the current generation. */
   const keysOf = (col: NonNullable<ReturnType<ColumnLookup<T>['get']>>): Float64Array => {
@@ -152,6 +162,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
 
   /** After a transaction: an update re-tests only its rows; anything else recomputes. */
   const afterTransaction = (r: TransactionResult, source: ChangeSource): void => {
+    loadProblems = r.problems;
     if (r.kind === 'none') return;
     const delta = store.lastDelta;
     const follow = () => cache.patch(delta, store.snapshot, () => ({ columns, ctx, reader }));
@@ -186,10 +197,11 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       run();
       return notify('rows', source, r);
     }
-    // Same rows in the same order: only their data changed.
+    // Same rows in the same order: only their data changed. Problems follow the patched cells.
     const now = inputs();
-    filtered = { ...filtered, in: now };
-    sorted = { ...sorted, in: now };
+    const sortProblems = sortCols.flatMap((c) => (c.codec.keyKind === 'number' ? cache.keys(c, e).problems : cache.ranks(c, e).problems));
+    filtered = { ...filtered, in: now, problems: f.problems };
+    sorted = { ...sorted, in: now, problems: sortProblems };
     show();
     notify('rows', source, r);
   };
@@ -203,25 +215,29 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     return r;
   };
 
-  store.replaceAll(o.rows);
+  loadProblems = store.replaceAll(o.rows).problems;
   run();
 
-  return {
+  const model: ClientModel<T> & { [STORE]: RowStore<T> } = {
+    [STORE]: store,
     kind: 'client',
     status: { phase: 'idle' },
-    store,
+    row: (key) => store.get(key),
     get query() { return query; },
     get displayed() { return displayed; },
     get problems() { return currentProblems(); },
     get counts() { return { total: store.size, filtered: filtered?.order ? filtered.order.length : store.size }; },
     get diagnostics() {
-      return { ...d, keyBuilds: cache.stats.keyBuilds, rankBuilds: cache.stats.rankBuilds, quickScanned: cache.stats.quickScanned };
+      return { ...d, keyBuilds: cache.stats.keyBuilds, rankBuilds: cache.stats.rankBuilds, quickScanned: cache.stats.quickScanned, displayBuilds: cache.stats.displayBuilds };
     },
     setQuery(q, source = 'api') {
       if (q.key === query.key) return;
+      // The search box emptied: its haystacks are the largest caches; let them go.
+      if (query.quick.trim() && !q.quick.trim()) cache.releaseSearch();
       query = q;
       if (run()) notify('query', source);
     },
+    // keepScroll is the DOM's concern; the model has no scroll to keep.
     invalidate() {
       cache.invalidateAll();
       filtered = null;
@@ -261,6 +277,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       listeners.clear();
     },
   };
+  return model;
 }
 
 function maskOf(order: Uint32Array | null, count: number): Uint8Array | null {

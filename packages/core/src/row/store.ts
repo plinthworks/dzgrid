@@ -1,4 +1,4 @@
-import { canonicalId, dataKey, idOfDataKey, type RowIdInput, type RowKey } from '../ids.js';
+import { canonicalId, dataKey, idOfDataKey, type RowIdInput, type RowKey, type SourceIndex } from '../ids.js';
 import { problem, type Problem } from '../problems.js';
 import type { DataNode } from './node.js';
 
@@ -30,9 +30,9 @@ export interface RowSnapshot<T> {
   /** Canonical ids, parallel to `rows`. */
   readonly ids: readonly string[];
   /** The source index of an id, or −1. */
-  lookup(id: string): number;
-  keyAt(src: number): RowKey;
-  nodeAt(src: number): DataNode<T>;
+  lookup(id: string): SourceIndex | -1;
+  keyAt(src: SourceIndex): RowKey;
+  nodeAt(src: SourceIndex): DataNode<T>;
 }
 
 /** What the last change did to source positions, for the pipeline to patch rather than redo. */
@@ -65,7 +65,7 @@ function snapshot<T>(version: number, rows: readonly T[], ids: readonly string[]
     // past this generation's end, or for another id, is not ours.
     lookup: (id) => {
       const i = index.get(id);
-      return i !== undefined && i < count && ids[i] === id ? i : -1;
+      return i !== undefined && i < count && ids[i] === id ? (i as SourceIndex) : -1;
     },
     keyAt: (src) => dataKey(ids[src]!)!,
     nodeAt: (src) => {
@@ -136,7 +136,7 @@ export function createRowStore<T>(getRowId: (row: T) => RowIdInput): RowStore<T>
       const id = idOfDataKey(key);
       if (id === null) return undefined;
       const i = snap.lookup(id);
-      return i < 0 ? undefined : snap.nodeAt(i);
+      return i === -1 ? undefined : snap.nodeAt(i);
     },
 
     apply(tx) {

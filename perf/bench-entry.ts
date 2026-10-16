@@ -1,5 +1,5 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, NO_OVERLAY, sortIndices, compileFilter, filterIndices, compileQuick, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
-import { ColumnCache } from '../packages/core/src/internal.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
+import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache } from '../packages/core/src/internal.js';
 import { datasetA, type RowA } from './dataset.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
@@ -248,6 +248,47 @@ const heap = (): number => {
 
 /** Bytes measured after collection; see scripts/bench.mjs. */
 export const MEMORY: Record<string, () => number> = {
+  'client model + caches after filters and a digit search, bytes/row (100 000 x 30)': () => {
+    const rows = datasetA();
+    const columns = createColumnModel<RowA>([
+      { id: 'id' }, { id: 't0' }, { id: 't1' }, { id: 't2' }, { id: 't3' }, { id: 't4' }, { id: 'a0' }, { id: 'a1' }, { id: 'a2' }, { id: 'a3' }, { id: 'a4' },
+      { id: 'n0', type: 'number' }, { id: 'n1', type: 'number' }, { id: 'n2', type: 'number' }, { id: 'n3', type: 'number' },
+      { id: 'n4', type: 'number' }, { id: 'n5', type: 'number' }, { id: 'n6', type: 'number' }, { id: 'n7', type: 'number' },
+      { id: 'd0', type: 'day' }, { id: 'd1', type: 'day' }, { id: 'd2', type: 'day' }, { id: 'd3', type: 'day' },
+      { id: 'i0', type: 'instant' }, { id: 'i1', type: 'instant' }, { id: 'e0' }, { id: 'e1' }, { id: 'e2' },
+      { id: 'b0', type: 'boolean' }, { id: 'b1', type: 'boolean' },
+    ]);
+    const before = heap();
+    const m = clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'fr-FR' }) });
+    m.setQuery(makeQuery({
+      quick: 'ma 12',
+      sort: [{ column: 'n0', dir: 'asc' }, { column: 't0', dir: 'desc' }],
+      filter: { e1: { type: 'set', exclude: ['radiology'] }, t1: { type: 'text', op: 'contains', value: 'a' } },
+    }));
+    const after = heap();
+    void m.displayed.count;
+    return (after - before) / rows.length;
+  },
+  'client model at rest (sort + filters, no search), bytes/row (100 000 x 30)': () => {
+    const rows = datasetA();
+    const columns = createColumnModel<RowA>([
+      { id: 'id' }, { id: 't0' }, { id: 't1' }, { id: 't2' }, { id: 't3' }, { id: 't4' }, { id: 'a0' }, { id: 'a1' }, { id: 'a2' }, { id: 'a3' }, { id: 'a4' },
+      { id: 'n0', type: 'number' }, { id: 'n1', type: 'number' }, { id: 'n2', type: 'number' }, { id: 'n3', type: 'number' },
+      { id: 'n4', type: 'number' }, { id: 'n5', type: 'number' }, { id: 'n6', type: 'number' }, { id: 'n7', type: 'number' },
+      { id: 'd0', type: 'day' }, { id: 'd1', type: 'day' }, { id: 'd2', type: 'day' }, { id: 'd3', type: 'day' },
+      { id: 'i0', type: 'instant' }, { id: 'i1', type: 'instant' }, { id: 'e0' }, { id: 'e1' }, { id: 'e2' },
+      { id: 'b0', type: 'boolean' }, { id: 'b1', type: 'boolean' },
+    ]);
+    const before = heap();
+    const m = clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'fr-FR' }) });
+    m.setQuery(makeQuery({
+      sort: [{ column: 'n0', dir: 'asc' }, { column: 't0', dir: 'desc' }],
+      filter: { e1: { type: 'set', exclude: ['radiology'] }, t1: { type: 'text', op: 'contains', value: 'a' } },
+    }));
+    const after = heap();
+    void m.displayed.count;
+    return (after - before) / rows.length;
+  },
   'store overhead bytes/row (100 000 rows)': () => {
     const rows = datasetA();
     const before = heap();

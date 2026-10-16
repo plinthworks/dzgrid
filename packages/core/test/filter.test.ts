@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createRowStore, createColumnModel, localeCtx, NO_OVERLAY, compileFilter, filterIndices, resolveInstantRange, type FilterModel } from '@dzgrid/core';
-import { ColumnCache } from '@dzgrid/core/internal';
+import { createColumnModel, localeCtx, NO_OVERLAY, resolveInstantRange, type FilterModel } from '@dzgrid/core';
+import { createRowStore, compileFilter, filterIndices, ColumnCache } from '@dzgrid/core/internal';
 
 type Row = { id: string; t: string | null; n: unknown; d: string | null };
 

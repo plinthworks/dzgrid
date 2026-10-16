@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { readInstant, parseInstant, instantCodec, localeCtx, REJECTED, createColumnModel, resolveColumns, createRowStore, NO_OVERLAY, sortIndices, enumCodec, dataKey, readNumber, PrefixSums, type RowKey } from '@dzgrid/core';
-import { ColumnCache, flatDisplayed } from '@dzgrid/core/internal';
+import { readInstant, parseInstant, instantCodec, localeCtx, REJECTED, createColumnModel, resolveColumns, NO_OVERLAY, enumCodec, dataKey, readNumber, PrefixSums, type RowKey } from '@dzgrid/core';
+import { createRowStore, sortIndices, ColumnCache, flatDisplayed } from '@dzgrid/core/internal';
 
 /** Findings of the review of Phase 1 steps 1–8, each pinned by a test that failed first. */
 

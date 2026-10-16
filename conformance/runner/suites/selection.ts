@@ -17,7 +17,7 @@ export const selection: Record<string, Suite> = {
       else if (op.op === 'clear') s = clearSelection();
       else if (op.op === 'sort') m.setQuery(makeQuery({ sort: op.sort }));
       else if (op.op === 'remove') m.applyTransaction({ remove: op.ids });
-      else if (op.op === 'reconcile') s = reconcileSelection(s, (key) => m.store.get(key) !== undefined);
+      else if (op.op === 'reconcile') s = reconcileSelection(s, (key) => m.row(key) !== undefined);
       else if (op.op === 'range') {
         const r = selectRange(s, m.displayed, k(op.anchor), k(op.target), { additive: op.additive ?? false });
         if (r.ok) s = r.state;
@@ -27,7 +27,7 @@ export const selection: Record<string, Suite> = {
     const out: Record<string, unknown> = {
       mode: s.mode,
       keys: [...s.keys].map((key) => idOfDataKey(key)).sort(),
-      count: selectionCount(s, m.store.size),
+      count: selectionCount(s, m.counts.total),
     };
     if (reason) out['reason'] = reason;
     return out;

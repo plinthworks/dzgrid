@@ -52,20 +52,15 @@ export type { ColumnLookup, ColumnState, ColumnSlice, ColumnLayout, ColumnChange
 export { createColumnModel } from './columns/model.js';
 
 export type { RowKind, DataNode, RowNode } from './row/node.js';
-export type { RowTransaction, TransactionResult, RowSnapshot, StoreDelta, RowStore } from './row/store.js';
-export { createRowStore } from './row/store.js';
+export type { RowTransaction, TransactionResult } from './row/store.js';
 export type { DisplayedRows } from './row/displayed.js';
 
-export type { ColumnEnv } from './model/column-cache.js';
 export type { SortItem } from './sort/compile.js';
-export { sortIndices } from './sort/compile.js';
 
 export type { FilterModel, ColumnFilter, TextOp, NumOp, InstantOp, InstantFilter } from './filter/model.js';
 export type { InstantRange } from './filter/instant.js';
 export { resolveInstantRange } from './filter/instant.js';
-export type { RowTest, CompiledFilter } from './filter/compile.js';
-export { compileFilter, filterIndices } from './filter/compile.js';
-export { compileQuick, quickWords, canNarrow } from './filter/quick.js';
+export { quickWords } from './filter/quick.js';
 export type { Query } from './model/query.js';
 export { makeQuery, EMPTY_QUERY } from './model/query.js';
 export type { ModelStatus, ModelChange, RowModel, ClientOptions, ClientModel } from './model/client.js';

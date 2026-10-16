@@ -43,7 +43,7 @@ describe('formatters', () => {
 describe('digits and marks', () => {
   it('fold Arabic-Indic and Persian digits, and drop direction marks', () => {
     expect(normalizeDigits('٠١٢٣٤٥٦٧٨٩ ۰۱۲۳۴۵۶۷۸۹')).toBe('0123456789 0123456789');
-    expect(stripMarks('‏‎؜1⁦⁩')).toBe('1');
+    expect(stripMarks('\u200f\u200e\u061c1\u2066\u2069')).toBe('1');
   });
 });
 
@@ -52,7 +52,7 @@ describe('readNumber', () => {
   const en = localeCtx({ locale: 'en-US' });
 
   it("knows each locale's signs", () => {
-    expect(separatorsFor(fr)).toEqual({ group: ' ', decimal: ',' });
+    expect(separatorsFor(fr)).toEqual({ group: '\u202f', decimal: ',' });
     expect(separatorsFor(en)).toEqual({ group: ',', decimal: '.' });
   });
 

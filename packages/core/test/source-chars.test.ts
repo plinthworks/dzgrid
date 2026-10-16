@@ -17,14 +17,17 @@ const files = (dir: string): string[] =>
     return statSync(p).isDirectory() ? files(p) : p.endsWith('.ts') ? [p] : [];
   });
 
-const INVISIBLE = /[ ؜​-‏‪- ⁠-⁩  ﻿]/;
+const INVISIBLE = /[\u00A0\u061C\u200B-\u200F\u202A-\u202F\u2060-\u2069\u2007\u2009\uFEFF]/;
+/** Combining marks typed raw in code (outside comments) read as nothing on their own. */
+const MARK = /\p{M}/u;
+const isComment = (line: string): boolean => /^\s*(\*|\/\*\*|\/\/)/.test(line);
 
 describe('core sources', () => {
   it('hold no invisible or bidi-control character', () => {
     const offenders = files(SRC).flatMap((f) =>
       readFileSync(f, 'utf8')
         .split('\n')
-        .flatMap((line, i) => (INVISIBLE.test(line) ? [`${f.slice(SRC.length + 1)}:${i + 1}`] : [])),
+        .flatMap((line, i) => (INVISIBLE.test(line) || (!isComment(line) && MARK.test(line)) ? [`${f.slice(SRC.length + 1)}:${i + 1}`] : [])),
     );
     expect(offenders).toEqual([]);
   });

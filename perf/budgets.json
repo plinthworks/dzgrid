@@ -29,7 +29,7 @@
     "quick filter 100 000 x 10 text columns (cold, ASCII)": 150,
     "quick filter 100 000 x 10 text columns (cold, fr+ar)": 700,
     "quick filter 100 000 x 4 ASCII columns (cold)": 90,
-    "quick filter narrowing step (warm)": 55,
+    "quick filter narrowing step (warm)": 20,
     "load 100 000 x 30 (clientRows)": 80,
     "setQuery sort change on 100 000 (numeric, warm keys)": 25,
     "transaction update 1 row on 100 000 (sorted and filtered)": 1,
@@ -40,6 +40,8 @@
     "scrollMapper build x 100 000": 20
   },
   "memory": {
-    "store overhead bytes/row (100 000 rows)": 120
+    "store overhead bytes/row (100 000 rows)": 120,
+    "client model at rest (sort + filters, no search), bytes/row (100 000 x 30)": 250,
+    "client model + caches after filters and a digit search, bytes/row (100 000 x 30)": 600
   }
 }

@@ -102,27 +102,27 @@ function textTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 't
   if (col.type !== 'text' && col.type !== 'enum' && col.codec.keyKind !== 'text') return bad(problems, path);
   if (!TEXT_OPS.has(f.op)) return bad(problems, `${path}.op`);
   if (f.value !== undefined && typeof f.value !== 'string') return bad(problems, `${path}.value`);
-  const texts = env.cache.texts(col, env);
-  if (f.op === 'blank') return (src) => texts[src] === null;
-  if (f.op === 'notBlank') return (src) => texts[src] !== null;
+  const exact = f.caseSensitive === true;
+  const hay = env.cache.haystack(exact ? 'exact' : 'search', col, env);
+  if (f.op === 'blank') return (src) => hay.isBlank(src);
+  if (f.op === 'notBlank') return (src) => !hay.isBlank(src);
   // An empty box is no filter at all.
   if (f.value === undefined || f.value === '') return INACTIVE;
 
-  const exact = f.caseSensitive === true;
   const needle = exact ? f.value.normalize('NFC') : fold(f.value);
-  const searchable = exact ? null : env.cache.searchable(col, env);
-  const cell = exact ? (src: number): string | null => texts[src]?.normalize('NFC') ?? null : (src: number): string | null => searchable![src]!;
-  const base = (pred: (s: string) => boolean): RowTest => (src) => {
-    const s = cell(src);
-    return s !== null && pred(s);
-  };
   switch (f.op) {
-    case 'contains': return base((s) => s.includes(needle));
-    case 'notContains': return negate(base((s) => s.includes(needle)));
-    case 'equals': return base((s) => s === needle);
-    case 'notEqual': return negate(base((s) => s === needle));
-    case 'startsWith': return base((s) => s.startsWith(needle));
-    case 'endsWith': return base((s) => s.endsWith(needle));
+    case 'contains': {
+      const mask = hay.containsMask(needle);
+      return (src) => mask[src] === 1;
+    }
+    case 'notContains': {
+      const mask = hay.containsMask(needle);
+      return (src) => mask[src] !== 1;
+    }
+    case 'equals': return (src) => hay.equalsAt(src, needle);
+    case 'notEqual': return (src) => !hay.equalsAt(src, needle);
+    case 'startsWith': return (src) => hay.startsAt(src, needle);
+    case 'endsWith': return (src) => hay.endsAt(src, needle);
   }
 }
 
@@ -179,9 +179,10 @@ function instantTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type:
   problems.push(...r.problems);
   if (r.problems.length) return null;
   if (!r.range) return INACTIVE;
-  const { from, to, fromExclusive } = r.range;
+  const from = r.range.from ?? -Infinity;
+  const to = r.range.to ?? Infinity;
   // NaN (blank) fails every comparison, so blanks never match a range.
-  return fromExclusive ? (src) => keys[src]! > from && keys[src]! < to : (src) => keys[src]! >= from && keys[src]! < to;
+  return (src) => keys[src]! >= from && keys[src]! < to;
 }
 
 function setTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 'set' }>, path: string, env: ColumnEnv<T>, problems: Problem[]): Compiled {

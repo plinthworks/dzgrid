@@ -1,4 +1,4 @@
-import { sortIndices } from '@dzgrid/core';
+import { sortIndices } from '@dzgrid/core/internal';
 import { harness } from '../harness.js';
 import type { Suite } from './index.js';
 

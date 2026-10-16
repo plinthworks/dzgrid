@@ -1,4 +1,4 @@
-import { compileQuick, filterIndices } from '@dzgrid/core';
+import { compileQuick, filterIndices } from '@dzgrid/core/internal';
 import { harness } from '../harness.js';
 import type { Suite } from './index.js';
 

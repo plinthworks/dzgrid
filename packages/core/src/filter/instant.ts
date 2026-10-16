@@ -5,15 +5,17 @@ import { zoneDayBounds } from '../value/zone-day.js';
 import type { InstantFilter } from './model.js';
 
 /**
- * The span an instant filter keeps: `[from, to)`, start in, end out — or
- * `(from, to)` when the start is exclusive (*after* a moment). Computed once,
+ * The span an instant filter keeps: `[from, to)`, start in, end out, with
+ * null for an open end. *After* a moment starts one millisecond later — the
+ * grid's instants are whole milliseconds — so every range is half-open. Computed once,
  * from `zoneDayBounds` for days, so a 23- or 25-hour day is the right length
  * and the server can receive the bounds already resolved.
  */
 export interface InstantRange {
-  readonly from: number;
-  readonly to: number;
-  readonly fromExclusive?: boolean;
+  /** Inclusive start, or null for no start. */
+  readonly from: number | null;
+  /** Exclusive end, or null for no end. Finite numbers and null only: the range travels as JSON. */
+  readonly to: number | null;
 }
 
 const day = (v: unknown, path: string, problems: Problem[]): Day | null | undefined => {
@@ -57,13 +59,13 @@ export function resolveInstantRange(f: InstantFilter, zone: string, path = 'filt
       return { range: { from: zoneDayBounds(lo, zone).from, to: zoneDayBounds(hi, zone).to }, problems };
     }
     case 'before': {
-      if (a1 != null) return { range: { from: -Infinity, to: a1 }, problems };
-      if (d1) return { range: { from: -Infinity, to: zoneDayBounds(d1, zone).from }, problems };
+      if (a1 != null) return { range: { from: null, to: a1 }, problems };
+      if (d1) return { range: { from: null, to: zoneDayBounds(d1, zone).from }, problems };
       return { range: null, problems };
     }
     case 'after': {
-      if (a1 != null) return { range: { from: a1, to: Infinity, fromExclusive: true }, problems };
-      if (d1) return { range: { from: zoneDayBounds(d1, zone).to, to: Infinity }, problems };
+      if (a1 != null) return { range: { from: Math.floor(a1) + 1, to: null }, problems };
+      if (d1) return { range: { from: zoneDayBounds(d1, zone).to, to: null }, problems };
       return { range: null, problems };
     }
     case 'between': {

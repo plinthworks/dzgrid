@@ -1,4 +1,5 @@
-import { createRowStore, resolveColumns, compileFilter, sortIndices, type Problem } from '@dzgrid/core';
+import { resolveColumns, type Problem } from '@dzgrid/core';
+import { createRowStore, compileFilter, sortIndices } from '@dzgrid/core/internal';
 import { harness } from '../harness.js';
 import type { Suite } from './index.js';
 

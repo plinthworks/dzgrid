@@ -36,6 +36,7 @@ export function uniformRowLayout(rows: IndexMint, height: number): RowLayout {
 /** Rows of their own heights (auto height): running totals in a Fenwick tree. */
 export function variableRowLayout(rows: IndexMint, estimate: number, heights?: ArrayLike<number>): RowLayout {
   const count = rows.count;
+  if (heights && heights.length !== count) throw new RangeError(`${heights.length} heights for ${count} rows`);
   const sizes = heights ?? new Float64Array(count).fill(Number.isFinite(estimate) && estimate > 0 ? estimate : 0);
   const ps = new PrefixSums(sizes);
   return {

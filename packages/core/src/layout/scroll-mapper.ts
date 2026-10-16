@@ -37,13 +37,15 @@ export function scrollMapper(logicalHeight: number, maxPhysical: number, viewpor
       toPhysical: (l) => clamp(l, 0, max),
     };
   }
-  const maxL = L - vp;
+  const maxL = Math.max(0, L - vp);
   const maxP = Math.max(0, maxPhysical - vp);
   const ratio = maxP === 0 ? 0 : maxL / maxP;
   return {
     scaled: true, logicalHeight: L, physicalHeight: maxPhysical, ratio, maxLogical: maxL, maxPhysical: maxP,
     // The end points are exact on purpose: p × (maxL / maxP) need not round to maxL.
     toLogical: (p) => {
+      // A view as tall as the cap leaves no physical range: the top is the only place.
+      if (maxP === 0) return 0;
       const c = clamp(p, 0, maxP);
       return c === maxP ? maxL : c * ratio;
     },

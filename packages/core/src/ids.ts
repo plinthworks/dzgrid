@@ -24,6 +24,14 @@ declare const displayIndexBrand: unique symbol;
  */
 export type DisplayIndex = number & { readonly [displayIndexBrand]: true };
 
+declare const sourceIndexBrand: unique symbol;
+/**
+ * A position among the host's rows as stored — internal plumbing only. Its
+ * own brand keeps a `DisplayIndex` from being passed where a source position
+ * is expected: that confusion was bug 1 of the grid this one replaces.
+ */
+export type SourceIndex = number & { readonly [sourceIndexBrand]: true };
+
 /** Prefixes keep the families apart: a host id can never pass for a group or a detail row. */
 const lengthPrefixed = (s: string): string => `${s.length}:${s}`;
 

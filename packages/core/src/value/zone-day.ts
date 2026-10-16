@@ -6,7 +6,7 @@ export type Disambiguation = 'compatible' | 'earlier' | 'later' | 'reject';
 
 export type WallResolution =
   | { readonly ok: true; readonly value: InstantMs; readonly warning?: 'wall-time-skipped' | 'wall-time-ambiguous' }
-  | { readonly ok: false; readonly code: 'unknown-zone' | 'wall-time-skipped' | 'wall-time-ambiguous' };
+  | { readonly ok: false; readonly code: 'unknown-zone' | 'invalid-instant' | 'wall-time-skipped' | 'wall-time-ambiguous' };
 
 /**
  * Where a calendar day begins and ends in a time zone.
@@ -169,6 +169,8 @@ export function zoneDayBounds(day: Day, zone: string): { readonly from: InstantM
  */
 export function resolveWall(wallMs: number, zone: string, disambiguation: Disambiguation = 'compatible'): WallResolution {
   if (!isKnownZone(zone)) return { ok: false, code: 'unknown-zone' };
+  // ±36 h of probing must stay inside what Intl can format.
+  if (!Number.isFinite(wallMs) || Math.abs(wallMs) > 8.64e15 - 2 * 86_400_000) return { ok: false, code: 'invalid-instant' };
   // Zones change on whole seconds: resolve the second, carry the milliseconds.
   const wall = Math.floor(wallMs / 1000) * 1000;
   const ms = wallMs - wall;

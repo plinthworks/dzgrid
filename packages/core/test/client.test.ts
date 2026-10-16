@@ -120,3 +120,19 @@ describe('the client model', () => {
     expect(shown(m)).toEqual(['a', 'd']);
   });
 });
+
+describe('emptying the search box', () => {
+  it('releases the search caches and still filters by text afterwards', () => {
+    const m = clientRows<{ id: string; n: string }>({
+      rows: [{ id: 'a', n: 'Hélène' }, { id: 'b', n: 'Zoé' }],
+      getRowId: (r) => r.id,
+      columns: createColumnModel([{ id: 'n' }]),
+      ctx: localeCtx({ locale: 'fr-FR' }),
+    });
+    m.setQuery(makeQuery({ quick: 'hel' }));
+    expect(m.counts.filtered).toBe(1);
+    m.setQuery(makeQuery({ filter: { n: { type: 'text', op: 'contains', value: 'zo' } } }));
+    expect(m.counts.filtered).toBe(1);
+    expect(m.displayed.nodeAt(m.displayed.index(0)!).id).toBe('b');
+  });
+});
