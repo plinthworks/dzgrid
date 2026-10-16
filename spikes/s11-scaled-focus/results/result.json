@@ -1,0 +1,6138 @@
+{
+  "at": "2026-10-16T20:19:44.516Z",
+  "node": "v22.20.0",
+  "passed": 322,
+  "failed": 0,
+  "checks": [
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=none",
+      "label": "A witness loses focus (proves the test sees it)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "dir=ltr&contain=content",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "dir=ltr&contain=none",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "dir=rtl&contain=content",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "dir=rtl&contain=none",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000",
+      "label": "J2 re-anchored layer: every row within 0.5 px of its place",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "contain=content",
+      "label": "J3 retained row is in the AX tree, focused, not ignored",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=none",
+      "label": "A witness loses focus (proves the test sees it)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "dir=ltr&contain=content",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "dir=ltr&contain=none",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "dir=rtl&contain=content",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "dir=rtl&contain=none",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000",
+      "label": "J2 re-anchored layer: every row within 0.5 px of its place",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=none",
+      "label": "A witness loses focus (proves the test sees it)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "A same node focused, no blur, retained while away, sane DOM",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D editor scrolled away: same input, text and caret kept, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "F reversed: row 0 now last and in view, still focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "F reversed back, away: row 0 retained, focused, sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "dir=ltr&contain=content",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "dir=ltr&contain=none",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "dir=rtl&contain=content",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "dir=rtl&contain=none",
+      "label": "J1 pinned segments stay at their edges, over the centre, header aligned (scaled)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000",
+      "label": "J2 re-anchored layer: every row within 0.5 px of its place",
+      "ok": true
+    }
+  ],
+  "observations": [
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 0,
+        "cellTop": 437
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 0,
+        "cellTop": 437
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=none",
+      "label": "A witness: focus without a retained row",
+      "value": [
+        {
+          "active": "body",
+          "blurs": 2
+        },
+        {
+          "active": "body",
+          "blurs": 2
+        },
+        {
+          "active": "body",
+          "blurs": 2
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 0,
+        "delta": 1352,
+        "active": "div 59/22"
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "chrome",
+      "cfg": "intercept=1",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 0,
+          "delta": 1352,
+          "active": "div 59/22"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 5,
+        "delta": 3288.4085920200673,
+        "active": "div vp"
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "chrome",
+      "cfg": "intercept=0",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 5,
+          "delta": 3288.4085920200673,
+          "active": "div vp"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "ltr contain=strict",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "ltr contain=strict",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "ltr contain=content",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "ltr contain=size+layout+style",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "ltr contain=size+layout+style",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "ltr contain=paint",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "ltr contain=paint",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "ltr contain=none",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rtl contain=strict",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rtl contain=strict",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rtl contain=content",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rtl contain=size+layout+style",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rtl contain=size+layout+style",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rtl contain=paint",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rtl contain=paint",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rtl contain=none",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000",
+      "label": "J2 placement offsets (px)",
+      "value": [
+        {
+          "i": 0,
+          "off": 0,
+          "layerTop": 0
+        },
+        {
+          "i": 99998,
+          "off": 0,
+          "layerTop": 345734
+        },
+        {
+          "i": 199996,
+          "off": 0,
+          "layerTop": 691469
+        },
+        {
+          "i": 299994,
+          "off": 0,
+          "layerTop": 1037200
+        },
+        {
+          "i": 399992,
+          "off": 0,
+          "layerTop": 1382940
+        },
+        {
+          "i": 499990,
+          "off": 0,
+          "layerTop": 1728670
+        },
+        {
+          "i": 599988,
+          "off": 0,
+          "layerTop": 2074410
+        },
+        {
+          "i": 699986,
+          "off": 0,
+          "layerTop": 2420140
+        },
+        {
+          "i": 799984,
+          "off": 0,
+          "layerTop": 2765880
+        },
+        {
+          "i": 899982,
+          "off": 0,
+          "layerTop": 3111610
+        },
+        {
+          "i": 999980,
+          "off": 0,
+          "layerTop": 3457340
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "contain=content",
+      "label": "J3 AX of the retained row",
+      "value": {
+        "cell": true,
+        "cellIgnored": false,
+        "focused": true,
+        "row": "generic"
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "scroll=absolute",
+      "label": "H touch fling of 600 px (logical delta)",
+      "value": {
+        "delta": 4800.596484700828,
+        "scrollTopDelta": 601,
+        "native": 45,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "scroll=relative",
+      "label": "H touch fling of 600 px (logical delta)",
+      "value": {
+        "delta": 601,
+        "scrollTopDelta": 75,
+        "native": 46,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=50000 (not scaled)",
+      "label": "H touch fling of 600 px (reference)",
+      "value": {
+        "delta": 598,
+        "scrollTopDelta": 599,
+        "native": 45,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 32.93333435058594
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 32.93333435058594
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 32.93333435058594
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 0,
+        "cellTop": 436.93333435058594
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 568.9333343505859
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 0,
+        "cellTop": 436.93333435058594
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 568.9333343505859
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 568.9333343505859
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33.06666564941406
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 568.9333343505859
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33.06666564941406
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=none",
+      "label": "A witness: focus without a retained row",
+      "value": [
+        {
+          "active": "body",
+          "blurs": 0
+        },
+        {
+          "active": "body",
+          "blurs": 0
+        },
+        {
+          "active": "body",
+          "blurs": 0
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569.0666961669922
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 0,
+        "delta": 1352,
+        "active": "div 59/22"
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "firefox",
+      "cfg": "intercept=1",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 0,
+          "delta": 1352,
+          "active": "div 59/22"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 5,
+        "delta": 2808.348943549984,
+        "active": "div vp"
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "firefox",
+      "cfg": "intercept=0",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 5,
+          "delta": 2808.348943549984,
+          "active": "div vp"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "ltr contain=strict",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "ltr contain=strict",
+      "label": "J1 sticky holds",
+      "value": false
+    },
+    {
+      "engine": "firefox",
+      "cfg": "ltr contain=content",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "ltr contain=size+layout+style",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "ltr contain=size+layout+style",
+      "label": "J1 sticky holds",
+      "value": false
+    },
+    {
+      "engine": "firefox",
+      "cfg": "ltr contain=paint",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "ltr contain=paint",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "ltr contain=none",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rtl contain=strict",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rtl contain=strict",
+      "label": "J1 sticky holds",
+      "value": false
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rtl contain=content",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rtl contain=size+layout+style",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 1900,
+          "headAlign": 1900,
+          "hitStart": "seg start",
+          "hitEnd": null
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 950,
+          "endEdge": 950,
+          "headAlign": 950,
+          "hitStart": null,
+          "hitEnd": null
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 1900,
+          "endEdge": 0,
+          "headAlign": 1900,
+          "hitStart": null,
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rtl contain=size+layout+style",
+      "label": "J1 sticky holds",
+      "value": false
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rtl contain=paint",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rtl contain=paint",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rtl contain=none",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000",
+      "label": "J2 placement offsets (px)",
+      "value": [
+        {
+          "i": 0,
+          "off": 0,
+          "layerTop": 0
+        },
+        {
+          "i": 99998,
+          "off": 0,
+          "layerTop": 345734
+        },
+        {
+          "i": 199996,
+          "off": 0,
+          "layerTop": 691469
+        },
+        {
+          "i": 299994,
+          "off": -0.133,
+          "layerTop": 1037200
+        },
+        {
+          "i": 399992,
+          "off": 0.067,
+          "layerTop": 1382940
+        },
+        {
+          "i": 499990,
+          "off": -0.067,
+          "layerTop": 1728670
+        },
+        {
+          "i": 599988,
+          "off": -0.267,
+          "layerTop": 2074410
+        },
+        {
+          "i": 699986,
+          "off": 0,
+          "layerTop": 2420140
+        },
+        {
+          "i": 799984,
+          "off": 0.133,
+          "layerTop": 2765870
+        },
+        {
+          "i": 899982,
+          "off": 0.067,
+          "layerTop": 3111610
+        },
+        {
+          "i": 999980,
+          "off": -0.067,
+          "layerTop": 3457340
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&contain=none",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&contain=none",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 0,
+        "cellTop": 435.375
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 437
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 0,
+        "cellTop": 435.375
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 437
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=content",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped&contain=strict",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 33
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=none",
+      "label": "A witness: focus without a retained row",
+      "value": [
+        {
+          "active": "body",
+          "blurs": 0
+        },
+        {
+          "active": "body",
+          "blurs": 0
+        },
+        {
+          "active": "body",
+          "blurs": 0
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "B scroll events",
+      "value": {
+        "native": 0,
+        "ours": 1
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "C scroll events (native jump, then ours)",
+      "value": {
+        "native": 1,
+        "ours": 1,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "label": "D scroll events after typing off screen",
+      "value": {
+        "native": 1,
+        "ours": 2,
+        "cellTop": 569
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 0,
+        "delta": 1352,
+        "active": "div 59/22"
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "webkit",
+      "cfg": "intercept=1",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 0,
+          "delta": 1352,
+          "active": "div 59/22"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 3,
+        "delta": 1632.2028047982815,
+        "active": "div vp"
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=0",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "webkit",
+      "cfg": "intercept=0",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 3,
+          "delta": 1632.2028047982815,
+          "active": "div vp"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "ltr contain=strict",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "ltr contain=strict",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "ltr contain=content",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "ltr contain=size+layout+style",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "ltr contain=size+layout+style",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "ltr contain=paint",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "ltr contain=paint",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "ltr contain=none",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rtl contain=strict",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rtl contain=strict",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rtl contain=content",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rtl contain=size+layout+style",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rtl contain=size+layout+style",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rtl contain=paint",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rtl contain=paint",
+      "label": "J1 sticky holds",
+      "value": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rtl contain=none",
+      "label": "J1 pinned",
+      "value": [
+        {
+          "where": "top",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "top",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "mid",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "0",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "mid",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        },
+        {
+          "where": "end",
+          "x": "max",
+          "startEdge": 0,
+          "endEdge": 0,
+          "headAlign": 0,
+          "hitStart": "seg start",
+          "hitEnd": "seg end"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000",
+      "label": "J2 placement offsets (px)",
+      "value": [
+        {
+          "i": 0,
+          "off": 0,
+          "layerTop": 0
+        },
+        {
+          "i": 99998,
+          "off": 0,
+          "layerTop": 345734
+        },
+        {
+          "i": 199996,
+          "off": 0,
+          "layerTop": 691468
+        },
+        {
+          "i": 299994,
+          "off": 0,
+          "layerTop": 1037202
+        },
+        {
+          "i": 399992,
+          "off": 0,
+          "layerTop": 1382937
+        },
+        {
+          "i": 499990,
+          "off": 0,
+          "layerTop": 1728671
+        },
+        {
+          "i": 599988,
+          "off": 0,
+          "layerTop": 2074405
+        },
+        {
+          "i": 699986,
+          "off": 0,
+          "layerTop": 2420140
+        },
+        {
+          "i": 799984,
+          "off": 0,
+          "layerTop": 2765874
+        },
+        {
+          "i": 899982,
+          "off": 0,
+          "layerTop": 3111608
+        },
+        {
+          "i": 999980,
+          "off": 0,
+          "layerTop": 3457343
+        }
+      ]
+    }
+  ]
+}

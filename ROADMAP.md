@@ -70,17 +70,16 @@ machine, not this one). Details in each `spikes/<id>/README.md`.
 - Real wheel, trackpad and touch scrolling; a mid-range laptop; Safari itself.
 - Before Phase 4: Enter in an editor (stay or move down); an edited row that disappears (commit or cancel).
 
-### Open, to settle before Phase 2
-- **Retained row in scaled mode** (architect review): S10 needs the focused
-  row at its true position, S1 forbids lengths above 2²⁴ px and maps the
-  scroll range above ~125 000 rows; never measured together. Spike before
-  Phase 2: clamped physical position + `focus({preventScroll: true})` + the
-  grid's own scroll-to-row.
-- Combinations never measured: `contain: strict` with sticky pinned segments
-  in RTL; auto height with the scaled mapper; the re-anchored layer with
-  `inset-block-start` rows; the retained row with `contain: strict`.
-- Native keyboard scrolling (PageDown, Space), touch and momentum in scaled
-  mode move `ratio` times too far: only the wheel is intercepted.
+### Settled before Phase 2 by spike S11 (2026-10-16, 322 checks, three engines)
+- **Retained row in scaled mode**: placed at its physical image
+  (`toPhysical(offset) − layerTop`); a native scroll right after a focus or key
+  event is redone logically. Focus, editor text and caret survive (D4).
+- **Keys** intercepted at the viewport; **touch** mapped relatively (Chrome
+  measured: 601 px for 600, fling kept); scrollbar drag absolute (D5).
+- **`contain: strict` breaks sticky pinned columns in Firefox** (its `size`
+  part): rows take `contain: content`, same gain per S9.
+- Still open: scrollbar drag and touch on real devices (owner); auto height in
+  scaled mode (when auto height comes, problem `autoheight-scaled` meanwhile).
 
 ### Exit criteria (Phase 0)
 - [x] the ten questions have measured answers (sequential re-run passed)
