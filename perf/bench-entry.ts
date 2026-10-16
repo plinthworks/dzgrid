@@ -1,4 +1,4 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, compileFilter, filterIndices, compileQuick, fold, type SortItem, type FilterModel } from '../packages/core/src/index.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, compileFilter, filterIndices, compileQuick, fold, clientRows, makeQuery, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { datasetA, type RowA } from './dataset.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
@@ -57,7 +57,44 @@ export const CASES: Record<string, Case> = {
   ...sortCases(),
   ...filterCases(),
   ...quickCases(),
+  ...modelCases(),
 };
+
+/** The client model's lines on dataset A. */
+function modelCases(): Record<string, Case> {
+  const columns = createColumnModel<RowA>([{ id: 'n0', type: 'number' }, { id: 'n1', type: 'number' }, { id: 't0' }, { id: 'e1' }]);
+  let rows: RowA[] | null = null;
+  const model = () => {
+    rows ??= datasetA();
+    return clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'fr-FR' }) });
+  };
+  const sortedFiltered = () => {
+    const m = model();
+    m.setQuery(makeQuery({ sort: [{ column: 'n0', dir: 'asc' }], filter: { e1: { type: 'set', exclude: ['radiology'] } } }));
+    return m;
+  };
+  let tick = 0;
+  return {
+    'load 100 000 x 30 (clientRows)': { setup: () => (rows ??= datasetA()), run: (r: RowA[]) => clientRows<RowA>({ rows: r, getRowId: (x) => x.id, columns, ctx: localeCtx({ locale: 'fr-FR' }) }).displayed.count },
+    'setQuery sort change on 100 000 (numeric, warm keys)': {
+      setup: () => {
+        const m = model();
+        m.setQuery(makeQuery({ sort: [{ column: 'n0', dir: 'asc' }] }));
+        m.setQuery(makeQuery({ sort: [{ column: 'n1', dir: 'asc' }] }));
+        return m;
+      },
+      run: (m: ReturnType<typeof model>) => m.setQuery(makeQuery({ sort: [{ column: 'n0', dir: 'desc' }] })),
+    },
+    'transaction update 1 row on 100 000 (sorted and filtered)': {
+      setup: sortedFiltered,
+      run: (m: ReturnType<typeof model>) => m.applyTransaction({ patch: [{ id: 'r500', set: { t0: `edited ${tick++}` } }] }).version,
+    },
+    'transaction append 1 000 rows on 100 000': {
+      setup: sortedFiltered,
+      run: (m: ReturnType<typeof model>) => m.applyTransaction({ add: Array.from({ length: 1000 }, (_, i) => ({ ...rows![i]!, id: `new${tick}-${i}` })) }).version,
+    },
+  };
+}
 
 /** The quick search lines of K.8: ten text columns of dataset A. */
 function quickCases(): Record<string, Case> {

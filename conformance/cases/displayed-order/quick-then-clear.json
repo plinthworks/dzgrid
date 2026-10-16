@@ -1,0 +1,66 @@
+{
+  "id": "quick-then-clear",
+  "suite": "displayed-order",
+  "description": "A search, then an empty search, shows every row again.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "ops": [
+      {
+        "quick": "x"
+      },
+      {
+        "quick": ""
+      }
+    ],
+    "at": [
+      3
+    ],
+    "of": [
+      "d"
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "a",
+      "b",
+      "c",
+      "d"
+    ],
+    "atIndex": {
+      "3": "d"
+    },
+    "indexOf": {
+      "d": 3
+    }
+  }
+}

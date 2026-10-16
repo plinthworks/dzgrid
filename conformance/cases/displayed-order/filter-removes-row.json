@@ -1,0 +1,69 @@
+{
+  "id": "filter-removes-row",
+  "suite": "displayed-order",
+  "description": "A filtered-out row has no position.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "ops": [
+      {
+        "filter": {
+          "n": {
+            "type": "text",
+            "op": "equals",
+            "value": "x"
+          }
+        }
+      }
+    ],
+    "at": [
+      1
+    ],
+    "of": [
+      "b",
+      "c"
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "a",
+      "c"
+    ],
+    "atIndex": {
+      "1": "c"
+    },
+    "indexOf": {
+      "b": -1,
+      "c": 1
+    }
+  }
+}

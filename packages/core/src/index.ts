@@ -68,3 +68,7 @@ export { resolveInstantRange } from './filter/instant.js';
 export type { RowTest, CompiledFilter } from './filter/compile.js';
 export { compileFilter, filterIndices } from './filter/compile.js';
 export { compileQuick, quickWords, canNarrow } from './filter/quick.js';
+export type { Query } from './model/query.js';
+export { makeQuery, EMPTY_QUERY, canonical } from './model/query.js';
+export type { ModelStatus, ModelChange, RowModel, ClientOptions, ClientModel } from './model/client.js';
+export { clientRows } from './model/client.js';

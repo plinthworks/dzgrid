@@ -212,7 +212,7 @@ export class ColumnCache<T> {
   patch(delta: StoreDelta, next: RowSnapshot<T>, envOf: (source: RowSnapshot<T>) => Omit<ColumnEnv<T>, 'source' | 'cache'>): void {
     if (delta.kind === 'none') return;
     if (delta.kind !== 'update' || !delta.changedSrc) return this.invalidateAll();
-    this.#lists.clear();
+    this.#patchLists(delta, next, envOf);
     const base = envOf(next);
     const env: ColumnEnv<T> = { ...base, source: next, cache: this };
     for (const [id, e] of this.#keys) {
@@ -249,6 +249,29 @@ export class ColumnCache<T> {
         this.stats.rankPatches++;
       }
       else this.#ranks.delete(id);
+    }
+  }
+
+  /** Text, export, display and search lists: recompute the changed rows only. */
+  #patchLists(delta: StoreDelta, next: RowSnapshot<T>, envOf: (source: RowSnapshot<T>) => Omit<ColumnEnv<T>, 'source' | 'cache'>): void {
+    const env: ColumnEnv<T> = { ...envOf(next), source: next, cache: this };
+    for (const [id, e] of this.#lists) {
+      if (e.version !== delta.from) { this.#lists.delete(id); continue; }
+      const kind = id.slice(0, id.indexOf('|'));
+      for (const src of delta.changedSrc!) {
+        const { v } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
+        let out: string | null = null;
+        if (v !== null) {
+          if (kind === 'export') out = e.col.codec.toExport(v);
+          else if (kind === 'display') out = fold(e.col.codec.format(v, env.ctx));
+          else {
+            const text = e.col.type === 'enum' ? e.col.codec.format(v, env.ctx) : String(v);
+            out = kind === 'search' ? fold(text) : text;
+          }
+        }
+        e.values[src] = out;
+      }
+      e.version = next.version;
     }
   }
 

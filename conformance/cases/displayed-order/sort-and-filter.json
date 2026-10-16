@@ -1,0 +1,77 @@
+{
+  "id": "sort-and-filter",
+  "suite": "displayed-order",
+  "description": "Filter and sort together.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "ops": [
+      {
+        "filter": {
+          "n": {
+            "type": "text",
+            "op": "equals",
+            "value": "y"
+          }
+        }
+      },
+      {
+        "sort": [
+          {
+            "column": "v",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "at": [
+      0
+    ],
+    "of": [
+      "d",
+      "a"
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "b",
+      "d"
+    ],
+    "atIndex": {
+      "0": "b"
+    },
+    "indexOf": {
+      "d": 1,
+      "a": -1
+    }
+  }
+}

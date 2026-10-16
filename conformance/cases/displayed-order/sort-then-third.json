@@ -1,0 +1,70 @@
+{
+  "id": "sort-then-third",
+  "suite": "displayed-order",
+  "description": "After a sort, the third row shown is the third row on screen \u2014 not the third of the source.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "ops": [
+      {
+        "sort": [
+          {
+            "column": "v",
+            "dir": "asc"
+          }
+        ]
+      }
+    ],
+    "at": [
+      2
+    ],
+    "of": [
+      "a",
+      "d"
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "d",
+      "b",
+      "c",
+      "a"
+    ],
+    "atIndex": {
+      "2": "c"
+    },
+    "indexOf": {
+      "a": 3,
+      "d": 0
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "id": "remove-shifts-positions",
+  "suite": "displayed-order",
+  "description": "Removing a row shifts the positions after it.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "remove": [
+            "a"
+          ]
+        }
+      }
+    ],
+    "at": [
+      0
+    ],
+    "of": [
+      "d"
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "b",
+      "c",
+      "d"
+    ],
+    "atIndex": {
+      "0": "b"
+    },
+    "indexOf": {
+      "d": 2
+    }
+  }
+}

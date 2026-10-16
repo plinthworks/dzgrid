@@ -1,0 +1,92 @@
+{
+  "id": "transaction-while-sorted",
+  "suite": "displayed-order",
+  "description": "A row updated while sorted moves to its new place; one added joins in order.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "ops": [
+      {
+        "sort": [
+          {
+            "column": "v",
+            "dir": "asc"
+          }
+        ]
+      },
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "d",
+              "set": {
+                "v": 9
+              }
+            }
+          ],
+          "add": [
+            {
+              "id": "e",
+              "v": 1.5,
+              "n": "z"
+            }
+          ]
+        }
+      }
+    ],
+    "at": [
+      0,
+      4
+    ],
+    "of": [
+      "d",
+      "e"
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "b",
+      "e",
+      "c",
+      "a",
+      "d"
+    ],
+    "atIndex": {
+      "0": "b",
+      "4": "d"
+    },
+    "indexOf": {
+      "d": 4,
+      "e": 1
+    }
+  }
+}
