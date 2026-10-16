@@ -22,6 +22,7 @@ export const PROBLEM_CODES = [
   'invalid-sort',
   'invalid-filter',
   'invalid-cell-value',
+  'too-many-pinned',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

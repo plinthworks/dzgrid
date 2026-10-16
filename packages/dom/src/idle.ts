@@ -6,8 +6,10 @@ import type { Scope } from './render/scope.js';
  * (Safari), paused while `busy()` (the user is scrolling). Stops with the
  * scope; returns a stop of its own.
  */
-export function idleLoop(step: () => boolean, scope: Scope, o: { readonly win: Window | null; readonly busy: () => boolean }): () => void {
+export function idleLoop(work: () => boolean, scope: Scope, o: { readonly win: Window | null; readonly busy: () => boolean }): () => void {
   let stopped = false;
+  // Dropped on stop: the work holds a model snapshot.
+  let step: (() => boolean) | null = work;
   const win = o.win;
   const now = () => win?.performance.now() ?? 0;
   const ric = win && 'requestIdleCallback' in win ? win.requestIdleCallback.bind(win) : null;
@@ -19,7 +21,7 @@ export function idleLoop(step: () => boolean, scope: Scope, o: { readonly win: W
   const run = (deadline: () => number): void => {
     if (stopped || scope.isDisposed) return;
     if (o.busy()) return void later(next, 100);
-    while (deadline() > 1) if (step()) return void (stopped = true);
+    while (deadline() > 1) if (!step || step()) return void stop();
     next();
   };
   const next = (): void => {
@@ -33,11 +35,15 @@ export function idleLoop(step: () => boolean, scope: Scope, o: { readonly win: W
         run(() => end - now());
       }, 0);
   };
-  next();
-  const stop = () => {
+  const stop = (): void => {
+    if (stopped && !step) return;
     stopped = true;
+    step = null;
     cancelIdle?.();
+    cancelIdle = null;
+    remove();
   };
-  scope.add(stop);
+  const remove = scope.add(stop);
+  next();
   return stop;
 }

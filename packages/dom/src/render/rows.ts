@@ -40,8 +40,13 @@ export function cellText<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: Local
     return '';
   }
   if (isBlank(raw)) return '';
-  const v = col.codec.coerce(raw, ctx);
-  return v === null ? '' : col.codec.format(v, ctx);
+  // A host codec that throws costs its cell, never the paint.
+  try {
+    const v = col.codec.coerce(raw, ctx);
+    return v === null ? '' : col.codec.format(v, ctx);
+  } catch {
+    return '';
+  }
 }
 
 
@@ -143,6 +148,7 @@ export class RowRenderer<T> {
       v.el.remove();
       this.#mounted.delete(k);
       v.key = null;
+      v.data = undefined;
       this.#pool.push(v);
     }
     const kept = retained !== null ? this.#mounted.get(retained) ?? null : null;
@@ -308,6 +314,11 @@ export class RowRenderer<T> {
       cell.el.append(cell.text);
       cell.value?.remove();
     }
+  }
+
+  /** What pooled rows still hold (tests: nothing). */
+  pooledData(): unknown[] {
+    return this.#pool.map((v) => v.data);
   }
 
   /** Each mounted row, for attributes that follow state rather than data (selection). */

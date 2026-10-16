@@ -64,11 +64,17 @@ export function selectRange<T>(s: SelectionState, displayed: DisplayedRows<T>, a
 
 /** Drops the keys of rows that no longer exist. */
 export function reconcileSelection(s: SelectionState, has: (k: RowKey) => boolean): SelectionState {
-  let changed = false;
-  const keys = new Set<RowKey>();
+  // Look first: a sort or a transaction usually removes no selected row, and a million-key
+  // selection should not be copied on every model change.
+  let gone = false;
   for (const k of s.keys) {
-    if (has(k)) keys.add(k);
-    else changed = true;
+    if (!has(k)) {
+      gone = true;
+      break;
+    }
   }
-  return changed ? { mode: s.mode, keys } : s;
+  if (!gone) return s;
+  const keys = new Set<RowKey>();
+  for (const k of s.keys) if (has(k)) keys.add(k);
+  return { mode: s.mode, keys };
 }

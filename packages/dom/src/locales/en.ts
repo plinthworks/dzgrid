@@ -26,6 +26,7 @@ export const EN = {
     'resize.handle': "Resize {column}",
     'pinned.start': "Pinned at the start",
     'pinned.end': "Pinned at the end",
+    'header.withSort': "{header}, {priority}",
     'header.sortHint': "Press Enter to sort, Shift+Enter to add to the sort",
   },
 } satisfies GridMessages;

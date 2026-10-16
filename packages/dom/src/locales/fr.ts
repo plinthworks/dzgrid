@@ -26,6 +26,7 @@ export const FR = {
     'resize.handle': "Redimensionner {column}",
     'pinned.start': "Épinglée au début",
     'pinned.end': "Épinglée à la fin",
+    'header.withSort': "{header}, {priority}",
     'header.sortHint': "Entrée pour trier, Maj+Entrée pour ajouter au tri",
   },
 } satisfies GridMessages;

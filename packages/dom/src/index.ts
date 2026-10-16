@@ -10,3 +10,5 @@ export { createGrid } from './grid.js';
 export type { GridApi, GridEnv, GridInstance } from './grid.js';
 export type { GridSettings } from './settings.js';
 export type { Geometry, ViewportBox } from './render/measure.js';
+export { LAYOUT_CSS, injectStyles } from './styles.js';
+export { checkMessages } from './messages.js';

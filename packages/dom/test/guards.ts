@@ -130,7 +130,11 @@ export function checkSource(source: string, file: string): Finding[] {
     if (ts.isCallExpression(n)) {
       const callee = propName(n.expression) ?? (ts.isIdentifier(n.expression) ? n.expression.text : null);
       const [a0, a1] = n.arguments;
-      if (callee === 'setAttribute' && a0 && ts.isStringLiteral(a0) && a1) {
+      // Our own wrapper, setAttr(el, name, value), counts as setAttribute(name, value).
+      const [n0, n1] = callee === 'setAttr' ? [n.arguments[1], n.arguments[2]] : [a0, a1];
+      if ((callee === 'setAttribute' || callee === 'setAttr') && n0 && ts.isStringLiteral(n0) && n1) {
+        const a0 = n0;
+        const a1 = n1;
         if (TEXT_ATTRS.has(a0.text) && literalTexts(a1).some(hasLetters)) add('literal-text', n, `setAttribute('${a0.text}', literal text)`);
         if (a0.text === 'style' && literalTexts(a1).some((t) => COLOUR_DECL.test(t))) add('colour', n, "setAttribute('style') with a colour");
       }

@@ -128,7 +128,12 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
     if (!sameFocus(prevFocus, focus)) emit({ type: 'focusChanged', source: 'data', focus });
   };
 
-  const unsubscribe = rows.subscribe((c) => onModel({ type: 'modelUpdated', source: c.source, displayed: c.displayed, kind: c.kind }));
+  const unsubscribe = rows.subscribe((c) => {
+    onModel({ type: 'modelUpdated', source: c.source, displayed: c.displayed, kind: c.kind });
+    // Rows the host gave that were refused or bent: told, not only stored on the model.
+    const told = c.transaction?.problems ?? [];
+    if (told.length) emit({ type: 'problems', source: c.source, problems: told });
+  });
 
   const setQuery = (q: Query, source: ChangeSource): void => {
     const before = rows.query;
@@ -265,7 +270,18 @@ export const emit = <T>(k: GridKernel<T>, e: GridEvent<T>): void => (k as unknow
 /** The header box over the displayed rows: none, some or all of them selected. */
 export type HeaderSelection = 'none' | 'some' | 'all';
 
+const headerMemo = new WeakMap<SelectionState, { displayed: DisplayedRows<unknown>; state: HeaderSelection }>();
+
+/** Read once per selection and displayed rows: it runs on every paint while a box shows it. */
 export function headerSelection<T>(s: SelectionState, d: DisplayedRows<T>): HeaderSelection {
+  const hit = headerMemo.get(s);
+  if (hit && hit.displayed === d) return hit.state;
+  const state = readHeader(s, d);
+  headerMemo.set(s, { displayed: d as DisplayedRows<unknown>, state });
+  return state;
+}
+
+function readHeader<T>(s: SelectionState, d: DisplayedRows<T>): HeaderSelection {
   if (d.count === 0) return 'none';
   let selected = 0;
   if (s.mode === 'include' && s.keys.size <= d.count) {

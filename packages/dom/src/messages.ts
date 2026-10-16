@@ -30,6 +30,7 @@ export const MESSAGE_KEYS = [
   'pinned.start',
   'pinned.end',
   'header.sortHint',
+  'header.withSort',
 ] as const;
 
 export type MessageKey = (typeof MESSAGE_KEYS)[number];
@@ -49,6 +50,13 @@ export interface GridMessages {
   /** The language the bundle is written in: plural forms follow it, numbers follow the context. */
   readonly locale: string;
   readonly text: { readonly [K in MessageKey]: MessageValue };
+}
+
+/** A bundle missing a key fails at once, naming it — not on some later paint. */
+export function checkMessages(m: GridMessages): void {
+  if (!m || typeof m.locale !== 'string' || !m.text) throw new TypeError('messages: a bundle needs a locale and a text table');
+  const missing = MESSAGE_KEYS.filter((k) => m.text[k] === undefined);
+  if (missing.length) throw new TypeError(`messages: missing ${missing.join(', ')}`);
 }
 
 const plurals = new Map<string, Intl.PluralRules>();

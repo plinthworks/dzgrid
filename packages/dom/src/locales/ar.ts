@@ -26,6 +26,7 @@ export const AR = {
     'resize.handle': "تغيير عرض {column}",
     'pinned.start': "مثبت في البداية",
     'pinned.end': "مثبت في النهاية",
+    'header.withSort': "{header}\u060C {priority}",
     'header.sortHint': "اضغط Enter للترتيب، وShift+Enter للإضافة إلى الترتيب",
   },
 } satisfies GridMessages;

@@ -146,5 +146,10 @@ export function resolveColumns<T>(defs: readonly ColumnDef<T, any>[]): {
     seen.add(def.id);
     columns.push({ id: def.id, def, type, codec, read, sortable: def.sortable !== false, filterable: def.filter !== false });
   });
+  // More than six pinned on a side leave little room to scroll the rest: accepted, with a warning (D14).
+  for (const side of ['start', 'end'] as const) {
+    const n = defs.filter((d) => d.pinned === side).length;
+    if (n > 6) problems.push(problem('too-many-pinned', 'warning', 'columns', `${side}:${n}`));
+  }
   return { columns, problems };
 }

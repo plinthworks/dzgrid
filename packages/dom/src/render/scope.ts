@@ -39,9 +39,14 @@ export class Scope {
     return cancel;
   }
 
-  add(cleanup: () => void): void {
-    if (this.#disposed) cleanup();
-    else this.#cleanups.add(cleanup);
+  /** Returns a remover: something stopped early lets go of its cleanup (and what it holds). */
+  add(cleanup: () => void): () => void {
+    if (this.#disposed) {
+      cleanup();
+      return () => {};
+    }
+    this.#cleanups.add(cleanup);
+    return () => void this.#cleanups.delete(cleanup);
   }
 
   /** Cleanups still held: listeners, observers, timers not yet fired. */

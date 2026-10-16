@@ -16,7 +16,9 @@ export function quickWords(text: string): readonly string[] {
  */
 export function canNarrow(prev: readonly string[], next: readonly string[]): boolean {
   if (!prev.length || next.length < prev.length) return false;
-  return prev.every((w, i) => next[i]!.includes(w));
+  // A word that gains a digit searches number and date columns its shorter form did not:
+  // the rows it left out may match now.
+  return prev.every((w, i) => next[i]!.includes(w) && (/[0-9]/.test(w) || !/[0-9]/.test(next[i]!)));
 }
 
 

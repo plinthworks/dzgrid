@@ -1,0 +1,54 @@
+{
+  "id": "too-many-pinned",
+  "suite": "problems",
+  "description": "More than six columns pinned on one side: accepted, with a warning (D14).",
+  "input": {
+    "op": "columns",
+    "columns": [
+      {
+        "id": "s0",
+        "pinned": "start"
+      },
+      {
+        "id": "s1",
+        "pinned": "start"
+      },
+      {
+        "id": "s2",
+        "pinned": "start"
+      },
+      {
+        "id": "s3",
+        "pinned": "start"
+      },
+      {
+        "id": "s4",
+        "pinned": "start"
+      },
+      {
+        "id": "s5",
+        "pinned": "start"
+      },
+      {
+        "id": "s6",
+        "pinned": "start"
+      },
+      {
+        "id": "e0",
+        "pinned": "end"
+      },
+      {
+        "id": "c"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "too-many-pinned",
+        "severity": "warning",
+        "path": "columns"
+      }
+    ]
+  }
+}

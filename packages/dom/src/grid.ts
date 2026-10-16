@@ -7,7 +7,8 @@ import { LiveRegion } from './a11y/live-region.js';
 import { isOnScrollbar, watchDirection, wheelInline, type Dir } from './dir.js';
 import { ScrollController } from './interact/scroll.js';
 import { attachResize } from './interact/resize.js';
-import { msg } from './messages.js';
+import { checkMessages, msg } from './messages.js';
+import { emit } from '@dzgrid/core/internal';
 import { HeaderRenderer } from './render/header.js';
 import { domGeometry, type Geometry, type ViewportBox } from './render/measure.js';
 import { CHECK_WIDTH, RowRenderer, setAttr, setPx, type Frame } from './render/rows.js';
@@ -56,6 +57,7 @@ const OVERSCAN_COLS = 1;
 export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: GridEnv = {}): GridInstance<T> {
   const doc = host.ownerDocument;
   const win = doc.defaultView;
+  checkMessages(initial.messages);
   const scope = new Scope();
   let settings = initial;
   const styleRoot = host.getRootNode();
@@ -67,6 +69,8 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   const viewport = doc.createElement('div');
   viewport.className = 'dzg-viewport';
   viewport.setAttribute('role', 'grid');
+  // Phase 2 shows rows; nothing is editable yet, and screen readers should not offer to.
+  viewport.setAttribute('aria-readonly', 'true');
   viewport.tabIndex = -1;
   const header = doc.createElement('div');
   header.className = 'dzg-header';
@@ -158,7 +162,8 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     // Everything a cell's text depends on, but the row: when it changes, cells are rechecked.
     const check = settings.selection?.checkbox === true && (settings.selection.mode ?? 'none') !== 'none';
     const extra = check ? CHECK_WIDTH : 0;
-    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}`;
+    // Direction too: whether a value is isolated depends on it.
+    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}`;
     if (ek !== epochKey) {
       epochKey = ek;
       epoch++;
@@ -289,6 +294,12 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       paint(box);
     },
   };
+  function report(err: unknown): void {
+    const w = win as (Window & { reportError?: (e: unknown) => void }) | null;
+    if (w?.reportError) w.reportError(err);
+    else setTimeout(() => { throw err; }, 0);
+  }
+
   function announceSort(sort: readonly { column: string; dir: 'asc' | 'desc' }[]): void {
     const m = settings.messages;
     if (!sort.length) return live.announce(msg(m, 'announce.sortCleared', {}, ctx));
@@ -378,6 +389,8 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     intentAt = now();
     const owner: KeyOwner = ownerOf(e.target, viewport);
     const intent = intentFor(e, { dir, owner, mac });
+    // Space on a header does nothing here, and must not scroll the page either.
+    if (!intent && owner === 'header' && (e.key === ' ' || e.key === 'Spacebar')) e.preventDefault();
     if (!intent) return;
     e.preventDefault();
     apply(intent, owner);
@@ -460,7 +473,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   }
 
   function focusTo(to: FocusPos): void {
-    if (to.kind === 'cell') return api.focusCell(to.row, to.column);
+    if (to.kind === 'cell') return focusCellAs(to.row, to.column, 'user');
     if (!kernel.dispatch({ type: 'focus.set', focus: to }, 'user').ok) return;
     scrollInlineTo(to.column);
     schedule();
@@ -490,11 +503,23 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   scope.add(kernel.subscribe((e) => {
     if (e.type === 'modelUpdated' && e.kind === 'rows') anchorNext = true;
     if (e.type === 'sortChanged' && e.source === 'user') announceSort(e.sort);
+    if (e.type === 'focusChanged' && e.source !== 'data' && pendingFocus) {
+      const p = pendingFocus;
+      const same = e.focus && ('header' in p ? e.focus.kind === 'header' && e.focus.column === p.header : e.focus.kind === 'cell' && e.focus.row === p.row && e.focus.column === p.column);
+      if (!same) pendingFocus = null;
+    }
     if (e.type === 'focusChanged' && e.source === 'data' && e.focus && hasFocus && !viewport.contains(doc.activeElement)) {
       pendingFocus = e.focus.kind === 'cell' ? { row: e.focus.row, column: e.focus.column } : { header: e.focus.column };
     }
-    settings.onEvent?.(e);
+
     if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized' || e.type === 'columnsChanged') schedule();
+    // The host's callback last, and fenced: a bug there must not stop the grid repainting or
+    // the other listeners hearing the event. The error is reported, not swallowed.
+    try {
+      settings.onEvent?.(e);
+    } catch (err) {
+      report(err);
+    }
   }));
   if (win && 'ResizeObserver' in win) {
     const ro = new win.ResizeObserver(() => {
@@ -535,14 +560,22 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       stop();
     };
   }
+  // Prepared again after a load, a language change, or the search box emptied (which releases it).
+  let quickBefore = rows.query.quick;
   scope.add(kernel.subscribe((e) => {
-    if (e.type === 'modelUpdated' && (e.kind === 'rows' || e.kind === 'context')) warm();
+    if (e.type !== 'modelUpdated') return;
+    const emptied = quickBefore.trim() !== '' && rows.query.quick.trim() === '';
+    quickBefore = rows.query.quick;
+    if (e.kind === 'rows' || e.kind === 'context' || emptied) warm();
   }));
 
   const initialBox = geometry.read();
   columns.setAvailableInline(initialBox.inline);
   schedule();
   warm();
+  // Column definitions refused or bent are told, like the rows' (D14: too-many-pinned).
+  if (columns.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: columns.problems });
+  if (rows.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: rows.problems });
 
   /**
    * A header's sort state (APG): `aria-sort` on the first sorted column only;
@@ -580,7 +613,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     setAttr(mark, 'data-dir', sort[at]!.dir);
     const n = sort.length > 1 ? formattersFor(ctx).number()(at + 1) : '';
     if (mark.textContent !== n) mark.textContent = n;
-    setAttr(el, 'aria-label', sort.length > 1 ? `${col.def.header ?? col.id}, ${msg(settings.messages, 'sort.priority', { n: at + 1 }, ctx)}` : null);
+    setAttr(el, 'aria-label', sort.length > 1 ? msg(settings.messages, 'header.withSort', { header: col.def.header ?? col.id, priority: msg(settings.messages, 'sort.priority', { n: at + 1 }, ctx) }, ctx) : null);
   }
 
   function isLastEnd(id: string): boolean {
@@ -622,17 +655,18 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const row = cell?.closest('.dzg-row');
     const key = row ? rowRenderer.keyOf(row) : undefined;
     const col = cell?.dataset['col'] ? columns.get(cell.dataset['col']) : undefined;
-    if (!key || !col?.def.tooltip) return null;
+    if (!key || typeof col?.def.tooltip !== 'function') return null;
     const node = rows.row(key);
     if (!node) return null;
-    let raw: unknown;
+    // A host function that throws shows no tooltip; the error is reported.
     try {
-      raw = col.read(node.data);
-    } catch {
-      raw = null;
+      const raw = col.read(node.data);
+      const value = isBlank(raw) ? null : col.codec.coerce(raw, ctx);
+      return col.def.tooltip(value, node.data) ?? null;
+    } catch (err) {
+      report(err);
+      return null;
     }
-    const value = isBlank(raw) ? null : col.codec.coerce(raw, ctx);
-    return col.def.tooltip(value, node.data) ?? null;
   }
   const delay = () => settings.tooltips?.delayMs ?? 500;
   scope.on(viewport, 'pointerover', (e: PointerEvent) => {
@@ -705,8 +739,18 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
 
   const api: GridApi = {
     focusCell(row, column) {
-      if (!kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row, column } }, 'api').ok) return;
-      api.ensureVisible(row, column);
+      focusCellAs(row, column, 'api');
+    },
+    ensureVisible(row, column) {
+      ensureVisible(row, column);
+    },
+    refresh: () => schedule(),
+    announce: (text) => live.announce(text),
+  };
+
+  function focusCellAs(row: RowKey, column: string, source: 'api' | 'user'): void {
+      if (!kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row, column } }, source).ok) return;
+      ensureVisible(row, column);
       // Mounted now, or at the next paint: the grid scrolls, then focuses without scrolling (S10).
       const cell = rowRenderer.cell(row, column);
       if (cell && !queued) cell.focus({ preventScroll: true });
@@ -714,8 +758,9 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
         pendingFocus = { row, column };
         schedule();
       }
-    },
-    ensureVisible(row, column) {
+  }
+
+  function ensureVisible(row: RowKey, column?: string): void {
       const i = rows.displayed.indexOf(row);
       if (i === -1) return;
       const box = geometry.read();
@@ -730,16 +775,14 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
         scroll.scrollTo(next);
         schedule();
       }
-    },
-    refresh: () => schedule(),
-    announce: (text) => live.announce(text),
-  };
+  }
 
-  const instance: GridInstance<T> & { readonly scope: Scope; readonly paints: number; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
+  const instance: GridInstance<T> & { readonly scope: Scope; readonly paints: number; pooledData(): unknown[]; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
     kernel,
     api,
     scope,
     get paints() { return paints; },
+    pooledData: () => rowRenderer.pooledData(),
     scroll: {
       get logicalTop() { return scroll.logicalTop; },
       get mapper() { return scroll.mapper; },
@@ -750,14 +793,20 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     },
     update(patch) {
       const prev = settings;
-      settings = { ...settings, ...patch };
+      const next = { ...settings, ...patch };
+      if (patch.messages) checkMessages(patch.messages);
+      // `in`, not `!== undefined`: clearing a setting goes back to its default. Computed before
+      // anything changes: a locale that does not exist throws and leaves the grid as it was.
+      const contextChanged = 'locale' in patch || 'timeZone' in patch || 'numerals' in patch || (!!patch.messages && patch.messages.locale !== prev.messages.locale && !next.locale);
+      const nextCtx = contextChanged ? ctxOf(next) : ctx;
+      settings = next;
       if (patch.columns && patch.columns !== prev.columns) {
-        columns.setDefs(patch.columns);
+        const change = columns.setDefs(patch.columns);
         rows.setColumns(columns, 'host');
+        if (change.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: change.problems });
       }
-      // `in`, not `!== undefined`: clearing a setting goes back to its default.
-      if ('locale' in patch || 'timeZone' in patch || 'numerals' in patch || (patch.messages && patch.messages.locale !== prev.messages.locale && !settings.locale)) {
-        ctx = ctxOf(settings);
+      if (contextChanged) {
+        ctx = nextCtx;
         rows.setContext(ctx, 'host');
       }
       if (patch.rows) rows.setRows(patch.rows, 'host');
