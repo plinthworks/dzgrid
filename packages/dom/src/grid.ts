@@ -153,7 +153,10 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const mk = `${d.count}|${h}|${box.block}`;
     if (!scroll.mapper || mk !== mapperKey) {
       mapperKey = mk;
-      scroll.setMapper(scrollMapper(d.count * h, env.maxPhysical ?? MAX_PHYSICAL, box.block));
+      const next = scrollMapper(d.count * h, env.maxPhysical ?? MAX_PHYSICAL, box.block);
+      // The body grows first: a scroll written before would be clamped to the old height.
+      setPx(body, 'block-size', next.physicalHeight);
+      scroll.setMapper(next);
     }
     const mapper = scroll.mapper!;
     // Rows added or removed by a transaction: the row at the top of the view stays where it was,
@@ -248,6 +251,9 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     if (f?.kind === 'cell') target = rowRenderer.cell(f.row, f.column);
     else if (f?.kind === 'header') target = headerRenderer.cell(f.column);
     else if (visible[0]) target = d.count ? rowRenderer.cell(d.keyAt(d.index(0)!), visible[0].id) : headerRenderer.cell(visible[0].id);
+    // The first cell scrolled out with nothing focused: the first cell in view takes the stop,
+    // so Tab still enters the grid (and the keys start from the first cell, `current()`).
+    target ??= layer.querySelector<HTMLElement>('.dzg-cell') ?? header.querySelector<HTMLElement>('.dzg-hcell[data-col]');
     if (target === stop) return;
     if (stop) stop.tabIndex = -1;
     stop = target;
@@ -299,10 +305,19 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   let hasFocus = false;
   scope.on(viewport, 'focusout', (e: FocusEvent) => {
     const to = e.relatedTarget as Node | null;
-    if (to && !viewport.contains(to)) hasFocus = false;
+    if (to) {
+      if (!viewport.contains(to)) hasFocus = false;
+      return;
+    }
+    // No related target: the focused element was removed (keep the focus to hand it on),
+    // or the user went elsewhere — a click on the page, another window (let it go).
+    const from = e.target as Node;
+    if (from.isConnected && viewport.contains(from)) hasFocus = false;
   });
   scope.on(viewport, 'focusin', (e: FocusEvent) => {
     hasFocus = true;
+    // The user's own choice wins over a focus still waiting for its cell.
+    pendingFocus = null;
     intentAt = now();
     const pos = positionOf(e.target as HTMLElement);
     if (pos) kernel.dispatch({ type: 'focus.set', focus: pos }, 'user');
@@ -392,6 +407,8 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   }
   // Above the cap the wheel is the grid's: the browser would move ratio times too far.
   scope.on(viewport, 'wheel', (e: WheelEvent) => {
+    // Ctrl or Cmd with the wheel is a zoom (a trackpad pinch too): the page's, never a scroll.
+    if (e.ctrlKey || e.metaKey) return;
     const box = geometry.read();
     const h = rowHeight();
     const page = Math.max(h, box.block - h);
@@ -405,6 +422,8 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   scope.on(viewport, 'pointerdown', (e: PointerEvent) => scroll.pointerDown(env.isOnScrollbar ? env.isOnScrollbar(e) : isOnScrollbar(e, viewport)));
   scope.on(doc, 'pointerup', () => scroll.pointerUp());
   scope.on(doc, 'pointercancel', () => scroll.pointerUp());
+  // A drag can end outside the window, where no pointerup comes.
+  if (win) scope.on(win, 'blur', () => scroll.pointerUp());
   scope.add(kernel.subscribe((e) => {
     if (e.type === 'modelUpdated' && e.kind === 'rows') anchorNext = true;
     if (e.type === 'sortChanged' && e.source === 'user') announceSort(e.sort);
