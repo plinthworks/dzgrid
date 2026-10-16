@@ -1,0 +1,40 @@
+{
+  "id": "numeric-collation",
+  "suite": "sort",
+  "description": "Numbers inside text sort as numbers: 2 before 10.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "Dossier 10"
+      },
+      {
+        "id": "2",
+        "n": "Dossier 2"
+      },
+      {
+        "id": "3",
+        "n": "Dossier 1"
+      }
+    ],
+    "sort": [
+      {
+        "column": "n",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "3",
+      "2",
+      "1"
+    ]
+  }
+}

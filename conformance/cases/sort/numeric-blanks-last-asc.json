@@ -1,0 +1,46 @@
+{
+  "id": "numeric-blanks-last-asc",
+  "suite": "sort",
+  "description": "Blank cells go last.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": null
+      },
+      {
+        "id": "c",
+        "v": 1
+      },
+      {
+        "id": "d",
+        "v": 2
+      }
+    ],
+    "sort": [
+      {
+        "column": "v",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "c",
+      "d",
+      "a",
+      "b"
+    ]
+  }
+}

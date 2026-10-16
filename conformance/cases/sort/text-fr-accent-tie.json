@@ -1,0 +1,50 @@
+{
+  "id": "text-fr-accent-tie",
+  "suite": "sort",
+  "description": "é and e are equal at base level, so their source order stays.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "b"
+      },
+      {
+        "id": "2",
+        "n": "a"
+      },
+      {
+        "id": "3",
+        "n": "é"
+      },
+      {
+        "id": "4",
+        "n": "e"
+      },
+      {
+        "id": "5",
+        "n": "z"
+      }
+    ],
+    "sort": [
+      {
+        "column": "n",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "1",
+      "3",
+      "4",
+      "5"
+    ]
+  }
+}

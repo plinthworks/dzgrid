@@ -1,0 +1,45 @@
+{
+  "id": "ar-hamza-fold",
+  "suite": "sort",
+  "description": "Hamza on the alef does not change the order at base level; equal names keep source order.",
+  "input": {
+    "locale": "ar",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "أحمد"
+      },
+      {
+        "id": "2",
+        "n": "احمد"
+      },
+      {
+        "id": "3",
+        "n": "بسام"
+      },
+      {
+        "id": "4",
+        "n": "ابراهيم"
+      }
+    ],
+    "sort": [
+      {
+        "column": "n",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "4",
+      "1",
+      "2",
+      "3"
+    ]
+  }
+}

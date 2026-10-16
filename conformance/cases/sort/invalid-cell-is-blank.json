@@ -1,0 +1,47 @@
+{
+  "id": "invalid-cell-is-blank",
+  "suite": "sort",
+  "description": "A number cell holding text sorts as blank, with a warning.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": "abc"
+      },
+      {
+        "id": "c",
+        "v": 1
+      }
+    ],
+    "sort": [
+      {
+        "column": "v",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "c",
+      "a",
+      "b"
+    ],
+    "problems": [
+      [
+        "invalid-cell-value",
+        "rows[1].v"
+      ]
+    ]
+  }
+}

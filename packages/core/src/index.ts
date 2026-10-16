@@ -33,7 +33,8 @@ export type { NumberFormatSpec, InstantFormatSpec, Formatters } from './i18n/for
 export { formattersFor, clearFormatCaches, dayFieldOrder, formatParts } from './i18n/format.js';
 
 export { fold } from './i18n/fold.js';
-export { collatorFor } from './i18n/collate.js';
+export type { CollatorSpec } from './i18n/collate.js';
+export { collatorFor, collatorKey } from './i18n/collate.js';
 export type { ValueCodec, ColumnType, Rejected } from './value/codec.js';
 export { REJECTED, isBlank } from './value/codec.js';
 export { textCodec } from './value/codecs/text.js';
@@ -55,3 +56,8 @@ export type { RowTransaction, TransactionResult, RowSnapshot, StoreDelta, RowSto
 export { createRowStore } from './row/store.js';
 export type { DisplayedRows } from './row/displayed.js';
 export { flatDisplayed } from './row/displayed.js';
+
+export type { ColumnEnv } from './model/column-cache.js';
+export { ColumnCache } from './model/column-cache.js';
+export type { SortItem } from './sort/compile.js';
+export { sortIndices } from './sort/compile.js';

@@ -1,0 +1,57 @@
+{
+  "id": "multi-key",
+  "suite": "sort",
+  "description": "First by group ascending, then by score descending.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "s",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "g": "b",
+        "s": 1
+      },
+      {
+        "id": "2",
+        "g": "a",
+        "s": 1
+      },
+      {
+        "id": "3",
+        "g": "b",
+        "s": 5
+      },
+      {
+        "id": "4",
+        "g": "a",
+        "s": 9
+      }
+    ],
+    "sort": [
+      {
+        "column": "g",
+        "dir": "asc"
+      },
+      {
+        "column": "s",
+        "dir": "desc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "4",
+      "2",
+      "3",
+      "1"
+    ]
+  }
+}

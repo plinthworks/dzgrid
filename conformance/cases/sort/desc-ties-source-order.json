@@ -1,0 +1,46 @@
+{
+  "id": "desc-ties-source-order",
+  "suite": "sort",
+  "description": "Equal keys keep the source order when descending.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 1
+      },
+      {
+        "id": "d",
+        "v": 2
+      }
+    ],
+    "sort": [
+      {
+        "column": "v",
+        "dir": "desc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "b",
+      "d",
+      "a",
+      "c"
+    ]
+  }
+}

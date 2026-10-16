@@ -1,4 +1,4 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore } from '../packages/core/src/index.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, type SortItem } from '../packages/core/src/index.js';
 import { datasetA, type RowA } from './dataset.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
@@ -54,7 +54,43 @@ export const CASES: Record<string, Case> = {
     },
     run: (s: ReturnType<typeof createRowStore<RowA>>) => s.apply({ patch: [{ id: 'r500', set: { n0: 1 } }] }).version,
   },
+  ...sortCases(),
 };
+
+/** The sort lines of K.8, each on dataset A with a fresh cache (cold) or a warmed one. */
+function sortCases(): Record<string, Case> {
+  const columns = createColumnModel<RowA>([
+    { id: 'n0', type: 'number' }, { id: 'n1', type: 'number' }, { id: 'd0', type: 'day' },
+    { id: 't0' }, { id: 'a0' }, { id: 'i0', type: 'instant' },
+  ]);
+  let rows: RowA[] | null = null;
+  const env = (cache: ColumnCache<RowA>, locale = 'fr-FR') => {
+    rows ??= datasetA();
+    const store = createRowStore<RowA>((r) => r.id);
+    store.replaceAll(rows);
+    return { source: store.snapshot, columns, ctx: localeCtx({ locale }), reader: NO_OVERLAY, cache };
+  };
+  const cold = (items: SortItem[], locale?: string): Case => ({
+    setup: () => env(new ColumnCache<RowA>(), locale),
+    run: (e: ReturnType<typeof env>) => sortIndices(items, null, e).order.length,
+  });
+  return {
+    'numeric sort 100 000 (cold keys + sort)': cold([{ column: 'n0', dir: 'asc' }]),
+    'day sort 100 000 (string days, cold)': cold([{ column: 'd0', dir: 'asc' }]),
+    'text sort 100 000 fr (cold rank keys)': cold([{ column: 't0', dir: 'asc' }]),
+    'text sort 100 000 ar (cold rank keys)': cold([{ column: 'a0', dir: 'asc' }], 'ar'),
+    'text sort 100 000 fr (warm ranks)': {
+      setup: () => {
+        const e = env(new ColumnCache<RowA>());
+        sortIndices([{ column: 't0', dir: 'asc' }], null, e);
+        return e;
+      },
+      run: (e: ReturnType<typeof env>) => sortIndices([{ column: 't0', dir: 'desc' }], null, e).order.length,
+    },
+    'sort two numeric keys 100 000': cold([{ column: 'n1', dir: 'asc' }, { column: 'n0', dir: 'desc' }]),
+    'sort instant ISO strings 100 000 (cold)': cold([{ column: 'i0', dir: 'asc' }]),
+  };
+}
 
 const heap = (): number => {
   (globalThis as { gc?: () => void }).gc?.();

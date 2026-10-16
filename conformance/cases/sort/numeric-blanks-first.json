@@ -1,0 +1,47 @@
+{
+  "id": "numeric-blanks-first",
+  "suite": "sort",
+  "description": "nulls: first puts them first.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": null
+      },
+      {
+        "id": "c",
+        "v": 1
+      },
+      {
+        "id": "d",
+        "v": 2
+      }
+    ],
+    "sort": [
+      {
+        "column": "v",
+        "dir": "asc",
+        "nulls": "first"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "b",
+      "c",
+      "d",
+      "a"
+    ]
+  }
+}

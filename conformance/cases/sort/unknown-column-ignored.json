@@ -1,0 +1,52 @@
+{
+  "id": "unknown-column-ignored",
+  "suite": "sort",
+  "description": "A sort on an unknown column is ignored with a problem; the rows keep their order.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": null
+      },
+      {
+        "id": "c",
+        "v": 1
+      },
+      {
+        "id": "d",
+        "v": 2
+      }
+    ],
+    "sort": [
+      {
+        "column": "zz",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c",
+      "d"
+    ],
+    "problems": [
+      [
+        "unknown-column",
+        "sort[0]"
+      ]
+    ]
+  }
+}

@@ -4,13 +4,20 @@
   "budgets": {
     "zoneDayBounds x 10 000 (Paris, cached formatter)": 1000,
     "assignKeys 100 000 ids": 60,
-    "parseDay x 100 000": 40,
+    "parseDay x 100 000": 20,
     "readInstant ISO x 100 000": 120,
     "readNumber x 100 000 (fr-FR)": 120,
     "format number x 100 000 (cached Intl, ar-DZ)": 50,
     "coerce ISO instants x 100 000": 50,
     "load 100 000 x 30 (row store)": 80,
-    "update 1 row of 100 000": 1
+    "update 1 row of 100 000": 1,
+    "numeric sort 100 000 (cold keys + sort)": 40,
+    "day sort 100 000 (string days, cold)": 40,
+    "text sort 100 000 fr (cold rank keys)": 250,
+    "text sort 100 000 ar (cold rank keys)": 250,
+    "text sort 100 000 fr (warm ranks)": 40,
+    "sort two numeric keys 100 000": 120,
+    "sort instant ISO strings 100 000 (cold)": 100
   },
   "memory": {
     "store overhead bytes/row (100 000 rows)": 120

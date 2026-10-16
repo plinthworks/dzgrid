@@ -1,0 +1,46 @@
+{
+  "id": "numeric-blanks-last-desc",
+  "suite": "sort",
+  "description": "Blank cells go last in descending order too (D3).",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": null
+      },
+      {
+        "id": "c",
+        "v": 1
+      },
+      {
+        "id": "d",
+        "v": 2
+      }
+    ],
+    "sort": [
+      {
+        "column": "v",
+        "dir": "desc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "d",
+      "c",
+      "b"
+    ]
+  }
+}

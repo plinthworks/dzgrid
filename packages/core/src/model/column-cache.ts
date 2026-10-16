@@ -1,0 +1,156 @@
+import { collatorFor, collatorKey, type CollatorSpec } from '../i18n/collate.js';
+import type { ColumnLookup } from '../columns/model.js';
+import type { ResolvedColumn, ValueReader } from '../columns/defs.js';
+import { problem, type Problem } from '../problems.js';
+import type { RowSnapshot, StoreDelta } from '../row/store.js';
+import { isBlank } from '../value/codec.js';
+import type { LocaleCtx } from '../value/locale.js';
+
+/** What sorting and filtering read: one generation of rows, their columns, the user's language, the edit overlay. */
+export interface ColumnEnv<T> {
+  readonly source: RowSnapshot<T>;
+  readonly columns: ColumnLookup<T>;
+  readonly ctx: LocaleCtx;
+  readonly reader: ValueReader<T>;
+  readonly cache: ColumnCache<T>;
+}
+
+/** At most this many invalid cells are reported per column; the rest are counted. */
+const MAX_CELL_PROBLEMS = 10;
+
+interface KeyEntry<T> { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; keys: Float64Array; blanks: number; problems: Problem[] }
+interface RankEntry<T> { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; ranks: Float64Array; dict: Map<string, number>; distinct: number; problems: Problem[]; used: number }
+
+/**
+ * Sort keys per column, computed once per generation and reused: a number
+ * per row (`NaN` for a blank), or for text a rank (S5 — the distinct values
+ * are collated once, then rows sort by an integer). An update that only
+ * changes values already present patches the ranks in place.
+ */
+export class ColumnCache<T> {
+  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0 };
+  #keys = new Map<string, KeyEntry<T>>();
+  #ranks = new Map<string, RankEntry<T>>();
+  #clock = 0;
+
+  /** The raw value a cell holds, through the edit overlay when there is one. */
+  static raw<T>(col: ResolvedColumn<T>, env: ColumnEnv<T>, src: number): unknown {
+    const row = env.source.rows[src]!;
+    return env.reader.overlay ? env.reader.value(col, row, env.source.ids[src]!) : col.read(row);
+  }
+
+  keys(col: ResolvedColumn<T>, env: ColumnEnv<T>): { keys: Float64Array; blanks: number; problems: readonly Problem[] } {
+    const ctx = `${env.ctx.locale}|${env.ctx.timeZone}`;
+    const hit = this.#keys.get(col.id);
+    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return hit;
+    this.stats.keyBuilds++;
+    const n = env.source.count;
+    const keys = new Float64Array(n);
+    const problems: Problem[] = [];
+    let blanks = 0;
+    let invalid = 0;
+    for (let i = 0; i < n; i++) {
+      const raw = ColumnCache.raw(col, env, i);
+      const v = isBlank(raw) ? null : col.codec.coerce(raw, env.ctx);
+      if (v === null) {
+        keys[i] = Number.NaN;
+        blanks++;
+        if (!isBlank(raw) && invalid++ < MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows[${i}].${col.id}`, typeof raw));
+      } else keys[i] = col.codec.sortKey(v, env.ctx) as number;
+    }
+    if (invalid > MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows.${col.id}`, `${invalid - MAX_CELL_PROBLEMS} more`));
+    const entry = { col, version: env.source.version, reader: env.reader.version, ctx, keys, blanks, problems };
+    this.#keys.set(col.id, entry);
+    return entry;
+  }
+
+  ranks(col: ResolvedColumn<T>, env: ColumnEnv<T>, spec: CollatorSpec = {}): { ranks: Float64Array; distinct: number; problems: readonly Problem[] } {
+    const ckey = collatorKey(env.ctx, spec);
+    const id = `${col.id}|${ckey}`;
+    const hit = this.#ranks.get(id);
+    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ckey) {
+      hit.used = ++this.#clock;
+      return hit;
+    }
+    this.stats.rankBuilds++;
+    const n = env.source.count;
+    const texts: (string | null)[] = new Array(n);
+    const problems: Problem[] = [];
+    let invalid = 0;
+    const seen = new Set<string>();
+    for (let i = 0; i < n; i++) {
+      const raw = ColumnCache.raw(col, env, i);
+      const v = isBlank(raw) ? null : col.codec.coerce(raw, env.ctx);
+      if (v === null) {
+        texts[i] = null;
+        if (!isBlank(raw) && invalid++ < MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows[${i}].${col.id}`, typeof raw));
+        continue;
+      }
+      const t = String(col.codec.sortKey(v, env.ctx));
+      texts[i] = t;
+      seen.add(t);
+    }
+    if (invalid > MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows.${col.id}`, `${invalid - MAX_CELL_PROBLEMS} more`));
+    // Collate the distinct values once; collator-equal values share a rank.
+    const collator = collatorFor(env.ctx, spec);
+    const distinct = [...seen].sort(collator.compare);
+    const dict = new Map<string, number>();
+    let rank = 0;
+    distinct.forEach((t, k) => {
+      if (k > 0 && collator.compare(distinct[k - 1]!, t) !== 0) rank++;
+      dict.set(t, rank);
+    });
+    const ranks = new Float64Array(n);
+    for (let i = 0; i < n; i++) ranks[i] = texts[i] === null ? Number.NaN : dict.get(texts[i]!)!;
+    const entry: RankEntry<T> = { col, version: env.source.version, reader: env.reader.version, ctx: ckey, ranks, dict, distinct: rank + (distinct.length ? 1 : 0), problems, used: ++this.#clock };
+    this.#ranks.set(id, entry);
+    if (this.#ranks.size > 8) {
+      let oldest: string | null = null;
+      for (const [k, e] of this.#ranks) if (oldest === null || e.used < this.#ranks.get(oldest)!.used) oldest = k;
+      this.#ranks.delete(oldest!);
+    }
+    return entry;
+  }
+
+  /**
+   * Follows the store: an update that only rewrites some rows patches the
+   * keys of those rows, and their ranks when the new text already has one;
+   * anything else drops the cache.
+   */
+  patch(delta: StoreDelta, next: RowSnapshot<T>, envOf: (source: RowSnapshot<T>) => Omit<ColumnEnv<T>, 'source' | 'cache'>): void {
+    if (delta.kind === 'none') return;
+    if (delta.kind !== 'update' || !delta.changedSrc) return this.invalidateAll();
+    const base = envOf(next);
+    const env: ColumnEnv<T> = { ...base, source: next, cache: this };
+    for (const [id, e] of this.#keys) {
+      if (e.version !== delta.from) { this.#keys.delete(id); continue; }
+      for (const src of delta.changedSrc) {
+        const raw = ColumnCache.raw(e.col, env, src);
+        const v = isBlank(raw) ? null : e.col.codec.coerce(raw, env.ctx);
+        const wasBlank = Number.isNaN(e.keys[src]!);
+        e.keys[src] = v === null ? Number.NaN : (e.col.codec.sortKey(v, env.ctx) as number);
+        e.blanks += (v === null ? 1 : 0) - (wasBlank ? 1 : 0);
+      }
+      e.version = next.version;
+    }
+    for (const [id, e] of this.#ranks) {
+      if (e.version !== delta.from) { this.#ranks.delete(id); continue; }
+      let ok = true;
+      for (const src of delta.changedSrc) {
+        const raw = ColumnCache.raw(e.col, env, src);
+        const v = isBlank(raw) ? null : e.col.codec.coerce(raw, env.ctx);
+        if (v === null) { e.ranks[src] = Number.NaN; continue; }
+        const r = e.dict.get(String(e.col.codec.sortKey(v, env.ctx)));
+        if (r === undefined) { ok = false; break; }
+        e.ranks[src] = r;
+      }
+      if (ok) { e.version = next.version; this.stats.rankPatches++; }
+      else this.#ranks.delete(id);
+    }
+  }
+
+  invalidateAll(): void {
+    this.#keys.clear();
+    this.#ranks.clear();
+  }
+}

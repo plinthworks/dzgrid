@@ -12,22 +12,32 @@
 declare const dayBrand: unique symbol;
 export type Day = string & { readonly [dayBrand]: true };
 
-const DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
-
 export const isLeapYear = (y: number): boolean => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
 
 export function daysInMonth(y: number, m: number): number {
   return m === 2 ? (isLeapYear(y) ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31;
 }
 
-/** A day, or null — `2026-02-31` is not one, and is not rolled into March. */
+/** The digit at `i`, or −1. */
+const digit = (s: string, i: number): number => {
+  const c = s.charCodeAt(i) - 48;
+  return c >= 0 && c <= 9 ? c : -1;
+};
+
+/**
+ * A day, or null — `2026-02-31` is not one, and is not rolled into March.
+ *
+ * Read character by character rather than with a regular expression: a sort
+ * of 100 000 days reads every one of them, and this is most of its cost.
+ */
 export function parseDay(s: unknown): Day | null {
-  if (typeof s !== 'string') return null;
-  const m = DAY.exec(s);
-  if (!m) return null;
-  const y = Number(m[1]);
-  const mo = Number(m[2]);
-  const d = Number(m[3]);
+  if (typeof s !== 'string' || s.length !== 10 || s.charCodeAt(4) !== 45 || s.charCodeAt(7) !== 45) return null;
+  const y0 = digit(s, 0), y1 = digit(s, 1), y2 = digit(s, 2), y3 = digit(s, 3);
+  const m0 = digit(s, 5), m1 = digit(s, 6), d0 = digit(s, 8), d1 = digit(s, 9);
+  if ((y0 | y1 | y2 | y3 | m0 | m1 | d0 | d1) < 0) return null;
+  const y = y0 * 1000 + y1 * 100 + y2 * 10 + y3;
+  const mo = m0 * 10 + m1;
+  const d = d0 * 10 + d1;
   if (mo < 1 || mo > 12 || d < 1 || d > daysInMonth(y, mo)) return null;
   return s as Day;
 }
@@ -61,7 +71,8 @@ export function epochDayToCivil(n: number): { y: number; m: number; d: number } 
 }
 
 export function dayToEpochDay(day: Day): number {
-  return civilToEpochDay(Number(day.slice(0, 4)), Number(day.slice(5, 7)), Number(day.slice(8, 10)));
+  const y = digit(day, 0) * 1000 + digit(day, 1) * 100 + digit(day, 2) * 10 + digit(day, 3);
+  return civilToEpochDay(y, digit(day, 5) * 10 + digit(day, 6), digit(day, 8) * 10 + digit(day, 9));
 }
 
 /**

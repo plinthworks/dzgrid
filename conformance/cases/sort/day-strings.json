@@ -1,0 +1,41 @@
+{
+  "id": "day-strings",
+  "suite": "sort",
+  "description": "Days sort as days.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "x",
+        "d": "2026-03-05"
+      },
+      {
+        "id": "y",
+        "d": "1999-12-31"
+      },
+      {
+        "id": "z",
+        "d": null
+      }
+    ],
+    "sort": [
+      {
+        "column": "d",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "y",
+      "x",
+      "z"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "instant-offsets",
+  "suite": "sort",
+  "description": "10:00+01:00 is 09:00Z, before 09:30Z: instants sort by time, not by their text.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "late",
+        "t": "2026-03-05T09:30:00Z"
+      },
+      {
+        "id": "early",
+        "t": "2026-03-05T10:00:00+01:00"
+      }
+    ],
+    "sort": [
+      {
+        "column": "t",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "early",
+      "late"
+    ]
+  }
+}
