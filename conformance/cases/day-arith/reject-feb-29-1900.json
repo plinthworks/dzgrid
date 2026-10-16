@@ -1,0 +1,12 @@
+{
+  "id": "reject-feb-29-1900",
+  "suite": "day-arith",
+  "description": "Century years are leap only when divisible by 400.",
+  "input": {
+    "op": "parse",
+    "text": "1900-02-29"
+  },
+  "expected": {
+    "day": null
+  }
+}

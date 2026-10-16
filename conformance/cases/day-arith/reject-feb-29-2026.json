@@ -1,0 +1,12 @@
+{
+  "id": "reject-feb-29-2026",
+  "suite": "day-arith",
+  "description": "2026 is not a leap year.",
+  "input": {
+    "op": "parse",
+    "text": "2026-02-29"
+  },
+  "expected": {
+    "day": null
+  }
+}

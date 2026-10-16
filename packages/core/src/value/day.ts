@@ -1,0 +1,77 @@
+/**
+ * A calendar day: `YYYY-MM-DD`, in no time zone at all.
+ *
+ * A birth date, an expiry date, the day of an appointment as booked: none of
+ * these is an instant, and turning one into an instant is how the "off by a
+ * day" bug happens — midnight UTC is the previous evening west of Greenwich.
+ * So a `Day` is a string, compared as a string, and its arithmetic is done on
+ * whole days since 1970-01-01 with the proleptic Gregorian calendar. Nothing
+ * here touches a clock or a zone.
+ */
+
+declare const dayBrand: unique symbol;
+export type Day = string & { readonly [dayBrand]: true };
+
+const DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+export const isLeapYear = (y: number): boolean => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+
+export function daysInMonth(y: number, m: number): number {
+  return m === 2 ? (isLeapYear(y) ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31;
+}
+
+/** A day, or null — `2026-02-31` is not one, and is not rolled into March. */
+export function parseDay(s: unknown): Day | null {
+  if (typeof s !== 'string') return null;
+  const m = DAY.exec(s);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  if (mo < 1 || mo > 12 || d < 1 || d > daysInMonth(y, mo)) return null;
+  return s as Day;
+}
+
+/**
+ * Days since 1970-01-01, for a civil date. Exact for every year, with no
+ * `Date` and no floating point: the year is shifted to start in March, so the
+ * leap day falls at the end and each 400-year era has the same length.
+ */
+export function civilToEpochDay(y: number, m: number, d: number): number {
+  const yy = m <= 2 ? y - 1 : y;
+  const era = Math.floor(yy / 400);
+  const yoe = yy - era * 400;
+  const mp = (m + 9) % 12;
+  const doy = Math.floor((153 * mp + 2) / 5) + d - 1;
+  const doe = yoe * 365 + Math.floor(yoe / 4) - Math.floor(yoe / 100) + doy;
+  return era * 146097 + doe - 719468;
+}
+
+/** The civil date of a day count — the inverse of {@link civilToEpochDay}. */
+export function epochDayToCivil(n: number): { y: number; m: number; d: number } {
+  const z = n + 719468;
+  const era = Math.floor(z / 146097);
+  const doe = z - era * 146097;
+  const yoe = Math.floor((doe - Math.floor(doe / 1460) + Math.floor(doe / 36524) - Math.floor(doe / 146096)) / 365);
+  const doy = doe - (365 * yoe + Math.floor(yoe / 4) - Math.floor(yoe / 100));
+  const mp = Math.floor((5 * doy + 2) / 153);
+  const d = doy - Math.floor((153 * mp + 2) / 5) + 1;
+  const m = mp < 10 ? mp + 3 : mp - 9;
+  return { y: yoe + era * 400 + (m <= 2 ? 1 : 0), m, d };
+}
+
+export function dayToEpochDay(day: Day): number {
+  return civilToEpochDay(Number(day.slice(0, 4)), Number(day.slice(5, 7)), Number(day.slice(8, 10)));
+}
+
+/** The day `n` days after 1970-01-01. Years outside 0000–9999 cannot be written as a `Day`. */
+export function epochDayToDay(n: number): Day {
+  const { y, m, d } = epochDayToCivil(n);
+  if (y < 0 || y > 9999) throw new RangeError(`day ${n} is outside the years 0000–9999`);
+  return `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}` as Day;
+}
+
+export const addDays = (day: Day, n: number): Day => epochDayToDay(dayToEpochDay(day) + n);
+
+/** Negative, zero or positive. Days compare as strings, which is why they are written in full. */
+export const compareDays = (a: Day, b: Day): number => (a < b ? -1 : a > b ? 1 : 0);

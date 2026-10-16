@@ -1,0 +1,12 @@
+{
+  "id": "y2k",
+  "suite": "day-arith",
+  "description": "2000-01-01, 30 years and 7 leap days after the epoch.",
+  "input": {
+    "op": "toEpochDay",
+    "day": "2000-01-01"
+  },
+  "expected": {
+    "epochDay": 10957
+  }
+}

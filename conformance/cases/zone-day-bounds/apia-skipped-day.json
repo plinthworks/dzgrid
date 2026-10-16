@@ -1,0 +1,13 @@
+{
+  "id": "apia-skipped-day",
+  "suite": "zone-day-bounds",
+  "description": "Samoa moved across the date line: 2011-12-30 never happened there.",
+  "input": {
+    "day": "2011-12-30",
+    "zone": "Pacific/Apia"
+  },
+  "expected": {
+    "from": "2011-12-30T10:00:00Z",
+    "to": "2011-12-30T10:00:00Z"
+  }
+}

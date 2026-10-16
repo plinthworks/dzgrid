@@ -1,0 +1,13 @@
+{
+  "id": "add-across-year",
+  "suite": "day-arith",
+  "description": "Adding a day to New Year's Eve.",
+  "input": {
+    "op": "add",
+    "day": "2026-12-31",
+    "days": 1
+  },
+  "expected": {
+    "day": "2027-01-01"
+  }
+}

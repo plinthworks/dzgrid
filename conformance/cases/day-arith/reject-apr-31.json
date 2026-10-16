@@ -1,0 +1,12 @@
+{
+  "id": "reject-apr-31",
+  "suite": "day-arith",
+  "description": "April has 30 days, and the 31st is not rolled into May.",
+  "input": {
+    "op": "parse",
+    "text": "2026-04-31"
+  },
+  "expected": {
+    "day": null
+  }
+}

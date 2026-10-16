@@ -1,0 +1,13 @@
+{
+  "id": "utc",
+  "suite": "zone-day-bounds",
+  "description": "UTC itself: midnight to midnight.",
+  "input": {
+    "day": "2026-03-05",
+    "zone": "UTC"
+  },
+  "expected": {
+    "from": "2026-03-05T00:00:00Z",
+    "to": "2026-03-06T00:00:00Z"
+  }
+}

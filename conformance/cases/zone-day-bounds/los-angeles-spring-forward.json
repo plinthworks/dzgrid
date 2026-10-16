@@ -1,0 +1,13 @@
+{
+  "id": "los-angeles-spring-forward",
+  "suite": "zone-day-bounds",
+  "description": "Los Angeles, second Sunday of March.",
+  "input": {
+    "day": "2026-03-08",
+    "zone": "America/Los_Angeles"
+  },
+  "expected": {
+    "from": "2026-03-08T08:00:00Z",
+    "to": "2026-03-09T07:00:00Z"
+  }
+}

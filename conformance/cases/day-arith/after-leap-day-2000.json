@@ -1,0 +1,12 @@
+{
+  "id": "after-leap-day-2000",
+  "suite": "day-arith",
+  "description": "2000 is a leap year: 2000-03-01 comes 60 days after New Year.",
+  "input": {
+    "op": "toEpochDay",
+    "day": "2000-03-01"
+  },
+  "expected": {
+    "epochDay": 11017
+  }
+}

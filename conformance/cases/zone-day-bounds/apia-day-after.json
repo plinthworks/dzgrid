@@ -1,0 +1,13 @@
+{
+  "id": "apia-day-after",
+  "suite": "zone-day-bounds",
+  "description": "The first day at UTC+14:00, right after the skipped one.",
+  "input": {
+    "day": "2011-12-31",
+    "zone": "Pacific/Apia"
+  },
+  "expected": {
+    "from": "2011-12-30T10:00:00Z",
+    "to": "2011-12-31T10:00:00Z"
+  }
+}

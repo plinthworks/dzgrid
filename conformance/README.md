@@ -1,0 +1,29 @@
+# DzGrid conformance suite
+
+Language-independent cases: an input, and the output any implementation of
+DzGrid's core must produce. The TypeScript core runs them today
+(`runner/runner.test.ts`); another implementation would read the same files.
+
+## Format
+
+One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.json`:
+
+```json
+{ "id": "…", "suite": "zone-day-bounds", "description": "…", "refs": ["AGG#1234"],
+  "input": { … }, "expected": { … } }
+```
+
+- Values are ISO 8601 strings, numbers, booleans or null — nothing specific to one language.
+- Expected values are written **by hand**, from the published zone rules or the
+  calendar's arithmetic, never generated from an implementation's output.
+- `refs` cites the public issue whose symptom a case covers.
+
+## Suites
+
+| Suite | Input | Expected |
+|---|---|---|
+| `zone-day-bounds` | `{day, zone}` | `{from, to}` — start inclusive, end exclusive, ISO UTC |
+| `day-arith` | `{op: 'toEpochDay' \| 'parse' \| 'add', …}` | `{epochDay}` or `{day}` (null when refused) |
+| `row-key` | `{ids}` | `{accepted[], problems: [code, path][]}` |
+
+Later phases add `sort`, `filter-*`, `server-gate`, `edit-saves`, `paste-plan`, …

@@ -1,0 +1,23 @@
+{
+  "id": "number-and-string",
+  "suite": "row-key",
+  "description": "A number id and its string are the same row: the second is a duplicate.",
+  "input": {
+    "ids": [
+      1,
+      "1"
+    ]
+  },
+  "expected": {
+    "accepted": [
+      true,
+      false
+    ],
+    "problems": [
+      [
+        "duplicate-row-id",
+        "rows[1]"
+      ]
+    ]
+  }
+}

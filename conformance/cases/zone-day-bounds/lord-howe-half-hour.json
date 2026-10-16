@@ -1,0 +1,13 @@
+{
+  "id": "lord-howe-half-hour",
+  "suite": "zone-day-bounds",
+  "description": "Lord Howe Island moves its clocks by half an hour: a 24.5-hour day.",
+  "input": {
+    "day": "2026-04-05",
+    "zone": "Australia/Lord_Howe"
+  },
+  "expected": {
+    "from": "2026-04-04T13:00:00Z",
+    "to": "2026-04-05T13:30:00Z"
+  }
+}

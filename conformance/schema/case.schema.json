@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DzGrid conformance case",
+  "type": "object",
+  "required": ["id", "suite", "description", "input", "expected"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "suite": { "type": "string" },
+    "description": { "type": "string" },
+    "refs": { "type": "array", "items": { "type": "string" } },
+    "input": {},
+    "expected": {}
+  }
+}

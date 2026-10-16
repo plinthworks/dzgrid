@@ -1,0 +1,13 @@
+{
+  "id": "apia-day-before",
+  "suite": "zone-day-bounds",
+  "description": "The last day Samoa spent at UTC-10:00.",
+  "input": {
+    "day": "2011-12-29",
+    "zone": "Pacific/Apia"
+  },
+  "expected": {
+    "from": "2011-12-29T10:00:00Z",
+    "to": "2011-12-30T10:00:00Z"
+  }
+}

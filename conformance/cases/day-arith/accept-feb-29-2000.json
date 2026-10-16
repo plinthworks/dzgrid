@@ -1,0 +1,12 @@
+{
+  "id": "accept-feb-29-2000",
+  "suite": "day-arith",
+  "description": "2000 is divisible by 400.",
+  "input": {
+    "op": "parse",
+    "text": "2000-02-29"
+  },
+  "expected": {
+    "day": "2000-02-29"
+  }
+}

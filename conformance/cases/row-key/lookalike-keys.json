@@ -1,0 +1,20 @@
+{
+  "id": "lookalike-keys",
+  "suite": "row-key",
+  "description": "Ids shaped like group or detail keys stay plain ids and do not collide.",
+  "input": {
+    "ids": [
+      "g:1:a",
+      "x:d:1:a",
+      "a"
+    ]
+  },
+  "expected": {
+    "accepted": [
+      true,
+      true,
+      true
+    ],
+    "problems": []
+  }
+}

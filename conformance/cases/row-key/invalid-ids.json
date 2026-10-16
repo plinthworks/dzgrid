@@ -1,0 +1,35 @@
+{
+  "id": "invalid-ids",
+  "suite": "row-key",
+  "description": "An empty string, NaN, null and an object identify nothing.",
+  "input": {
+    "ids": [
+      "",
+      "NaN",
+      null,
+      {}
+    ]
+  },
+  "expected": {
+    "accepted": [
+      false,
+      true,
+      false,
+      false
+    ],
+    "problems": [
+      [
+        "invalid-row-id",
+        "rows[0]"
+      ],
+      [
+        "invalid-row-id",
+        "rows[2]"
+      ],
+      [
+        "invalid-row-id",
+        "rows[3]"
+      ]
+    ]
+  }
+}

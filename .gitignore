@@ -1,0 +1,5 @@
+node_modules/
+dist/
+packed/
+spikes/**/results/*.png
+.DS_Store

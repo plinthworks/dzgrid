@@ -1,0 +1,13 @@
+{
+  "id": "havana-no-midnight",
+  "suite": "zone-day-bounds",
+  "description": "Havana starts summer time at 00:00 standard time: the day begins at 01:00.",
+  "input": {
+    "day": "2023-03-12",
+    "zone": "America/Havana"
+  },
+  "expected": {
+    "from": "2023-03-12T05:00:00Z",
+    "to": "2023-03-13T04:00:00Z"
+  }
+}

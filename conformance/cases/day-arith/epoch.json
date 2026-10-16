@@ -1,0 +1,12 @@
+{
+  "id": "epoch",
+  "suite": "day-arith",
+  "description": "1970-01-01 is day zero.",
+  "input": {
+    "op": "toEpochDay",
+    "day": "1970-01-01"
+  },
+  "expected": {
+    "epochDay": 0
+  }
+}

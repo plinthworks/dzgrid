@@ -1,0 +1,12 @@
+{
+  "id": "2026-03-05",
+  "suite": "day-arith",
+  "description": "56 years after the epoch, 14 of them leap.",
+  "input": {
+    "op": "toEpochDay",
+    "day": "2026-03-05"
+  },
+  "expected": {
+    "epochDay": 20517
+  }
+}

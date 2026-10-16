@@ -1,0 +1,12 @@
+{
+  "id": "before-epoch",
+  "suite": "day-arith",
+  "description": "The day before is -1.",
+  "input": {
+    "op": "toEpochDay",
+    "day": "1969-12-31"
+  },
+  "expected": {
+    "epochDay": -1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "1900-not-leap",
+  "suite": "day-arith",
+  "description": "1900 is not a leap year: 59 days from New Year to 1 March.",
+  "input": {
+    "op": "toEpochDay",
+    "day": "1900-03-01"
+  },
+  "expected": {
+    "epochDay": -25508
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "first-wins",
+  "suite": "row-key",
+  "description": "Of two rows with one id, the first is kept, whatever follows.",
+  "input": {
+    "ids": [
+      "a",
+      "b",
+      "a"
+    ]
+  },
+  "expected": {
+    "accepted": [
+      true,
+      true,
+      false
+    ],
+    "problems": [
+      [
+        "duplicate-row-id",
+        "rows[2]"
+      ]
+    ]
+  }
+}
