@@ -1,0 +1,38 @@
+{
+  "id": "hidden",
+  "suite": "columns-layout",
+  "description": "A hidden column takes no room.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "width": 100
+      },
+      {
+        "id": "b",
+        "width": 100,
+        "hidden": true
+      },
+      {
+        "id": "c",
+        "width": 100
+      }
+    ],
+    "available": 800
+  },
+  "expected": {
+    "start": [],
+    "center": [
+      [
+        "a",
+        100
+      ],
+      [
+        "c",
+        100
+      ]
+    ],
+    "end": [],
+    "total": 200
+  }
+}

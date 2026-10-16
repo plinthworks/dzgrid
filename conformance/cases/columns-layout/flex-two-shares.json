@@ -1,0 +1,62 @@
+{
+  "id": "flex-two-shares",
+  "suite": "columns-layout",
+  "description": "520 px left over, shared 1:2 in whole pixels; the extra pixel goes to the largest remainder (d).",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "width": 100,
+        "pinned": "start"
+      },
+      {
+        "id": "b",
+        "width": 100
+      },
+      {
+        "id": "c",
+        "flex": 1,
+        "minWidth": 50
+      },
+      {
+        "id": "d",
+        "flex": 2
+      },
+      {
+        "id": "e",
+        "width": 80,
+        "pinned": "end"
+      }
+    ],
+    "available": 800
+  },
+  "expected": {
+    "start": [
+      [
+        "a",
+        100
+      ]
+    ],
+    "center": [
+      [
+        "b",
+        100
+      ],
+      [
+        "c",
+        173
+      ],
+      [
+        "d",
+        347
+      ]
+    ],
+    "end": [
+      [
+        "e",
+        80
+      ]
+    ],
+    "total": 800
+  }
+}

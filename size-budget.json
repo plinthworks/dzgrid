@@ -1,6 +1,9 @@
 {
-  "$comment": "Gzipped, minified bytes per entry. Raised only by a decision written in ROADMAP.md. Profiles from K.8 join as their packages arrive: audit screen <= 85 000, everything but charts <= 150 000.",
+  "$comment": "Gzipped, minified bytes per entry. Raised only by a decision written in ROADMAP.md. Profiles from K.8 join as their packages arrive: audit screen <= 85 000, everything but charts <= 150 000. Core raised from 4 000 to 20 000 for Phase 1 (2026-10-16): codecs, columns, store, sort, filters and layout join it; re-set at the Phase 1 close from the measured size.",
   "entries": {
-    "@dzgrid/core": { "file": "packages/core/src/index.ts", "maxGzip": 4000 }
+    "@dzgrid/core": {
+      "file": "packages/core/src/index.ts",
+      "maxGzip": 20000
+    }
   }
 }

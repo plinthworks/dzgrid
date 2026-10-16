@@ -1,0 +1,34 @@
+{
+  "id": "no-room-for-flex",
+  "suite": "columns-layout",
+  "description": "When fixed columns fill the space, flexible ones fall back to their minimum.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "width": 700
+      },
+      {
+        "id": "b",
+        "flex": 1,
+        "minWidth": 60
+      }
+    ],
+    "available": 500
+  },
+  "expected": {
+    "start": [],
+    "center": [
+      [
+        "a",
+        700
+      ],
+      [
+        "b",
+        60
+      ]
+    ],
+    "end": [],
+    "total": 760
+  }
+}

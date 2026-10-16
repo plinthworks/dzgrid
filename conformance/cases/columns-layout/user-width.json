@@ -1,0 +1,39 @@
+{
+  "id": "user-width",
+  "suite": "columns-layout",
+  "description": "A width the user set wins over the definition.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "width": 100
+      },
+      {
+        "id": "b",
+        "width": 100
+      }
+    ],
+    "available": 800,
+    "state": [
+      {
+        "id": "b",
+        "width": 150
+      }
+    ]
+  },
+  "expected": {
+    "start": [],
+    "center": [
+      [
+        "a",
+        100
+      ],
+      [
+        "b",
+        150
+      ]
+    ],
+    "end": [],
+    "total": 250
+  }
+}

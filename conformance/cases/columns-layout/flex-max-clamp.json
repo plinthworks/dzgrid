@@ -1,0 +1,34 @@
+{
+  "id": "flex-max-clamp",
+  "suite": "columns-layout",
+  "description": "A flexible column held at its maximum gives the rest away.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "flex": 1,
+        "maxWidth": 100
+      },
+      {
+        "id": "b",
+        "flex": 1
+      }
+    ],
+    "available": 400
+  },
+  "expected": {
+    "start": [],
+    "center": [
+      [
+        "a",
+        100
+      ],
+      [
+        "b",
+        300
+      ]
+    ],
+    "end": [],
+    "total": 400
+  }
+}

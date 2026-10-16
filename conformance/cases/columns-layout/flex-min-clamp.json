@@ -1,0 +1,34 @@
+{
+  "id": "flex-min-clamp",
+  "suite": "columns-layout",
+  "description": "A flexible column held at its minimum leaves the rest to the other.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "flex": 1,
+        "minWidth": 300
+      },
+      {
+        "id": "b",
+        "flex": 1
+      }
+    ],
+    "available": 400
+  },
+  "expected": {
+    "start": [],
+    "center": [
+      [
+        "a",
+        300
+      ],
+      [
+        "b",
+        100
+      ]
+    ],
+    "end": [],
+    "total": 400
+  }
+}

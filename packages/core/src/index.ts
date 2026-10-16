@@ -43,3 +43,9 @@ export type { EnumOption } from './value/codecs/enum.js';
 export { enumCodec } from './value/codecs/enum.js';
 export { dayCodec, readDayText } from './value/codecs/day.js';
 export { instantCodec, instantToIso } from './value/codecs/instant.js';
+
+export { PrefixSums } from './layout/prefix-sums.js';
+export type { Side, ColumnDef, ResolvedColumn, ValueReader } from './columns/defs.js';
+export { NO_OVERLAY, compilePath, resolveColumns } from './columns/defs.js';
+export type { ColumnLookup, ColumnState, ColumnSlice, ColumnLayout, ColumnChange, ColumnModel } from './columns/model.js';
+export { createColumnModel } from './columns/model.js';
