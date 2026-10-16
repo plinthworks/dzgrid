@@ -6,6 +6,7 @@ import { isMac, ownerOf } from './keys/owner.js';
 import { LiveRegion } from './a11y/live-region.js';
 import { isOnScrollbar, watchDirection, wheelInline, type Dir } from './dir.js';
 import { ScrollController } from './interact/scroll.js';
+import { attachResize } from './interact/resize.js';
 import { msg } from './messages.js';
 import { HeaderRenderer } from './render/header.js';
 import { domGeometry, type Geometry, type ViewportBox } from './render/measure.js';
@@ -450,8 +451,20 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
    * the direction and, in a multi-column sort, the precedence shown, the
    * precedence also in the header's name.
    */
-  function decorateHeader(col: { id: string; sortable: boolean; def: { header?: string } }, el: HTMLElement, sort: readonly { column: string; dir: 'asc' | 'desc' }[]): void {
+  function decorateHeader(col: { id: string; sortable: boolean; def: { header?: string; resizable?: boolean } }, el: HTMLElement, sort: readonly { column: string; dir: 'asc' | 'desc' }[]): void {
     el.classList.toggle('dzg-sortable', col.sortable);
+    // The resize handle: on the end edge, or the start edge for the last end-pinned column.
+    let grip = el.querySelector<HTMLElement>(':scope > .dzg-resize');
+    if (col.def.resizable === false) grip?.remove();
+    else {
+      if (!grip) {
+        grip = doc.createElement('span');
+        grip.className = 'dzg-resize';
+        grip.setAttribute('aria-hidden', 'true');
+        el.append(grip);
+      }
+      grip.classList.toggle('dzg-resize-start', isLastEnd(col.id));
+    }
     const at = sort.findIndex((s) => s.column === col.id);
     setAttr(el, 'aria-sort', at === 0 ? (sort[0]!.dir === 'asc' ? 'ascending' : 'descending') : null);
     let mark = el.querySelector<HTMLElement>(':scope > .dzg-sort');
@@ -472,9 +485,32 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     setAttr(el, 'aria-label', sort.length > 1 ? `${col.def.header ?? col.id}, ${msg(settings.messages, 'sort.priority', { n: at + 1 }, ctx)}` : null);
   }
 
+  function isLastEnd(id: string): boolean {
+    const end = columns.layout.end.columns;
+    return end.length > 0 && end[end.length - 1]!.id === id;
+  }
+  function widthOf(id: string): number {
+    const L = columns.layout;
+    for (const slice of [L.start, L.center, L.end]) {
+      const i = slice.columns.findIndex((c) => c.id === id);
+      if (i !== -1) return slice.widths.sizeAt(i);
+    }
+    return 0;
+  }
+  const resizing = attachResize({
+    scope, header,
+    dir: () => dir,
+    widthOf,
+    reversed: isLastEnd,
+    resize: (column, width, finished) => void kernel.dispatch({ type: 'column.resize', column, width, finished }, 'user'),
+    nextFrame: (fn) => scheduler.schedule({ read: () => 0, write: fn }),
+  });
+
   // ---------- pointer: sort by header click, row selection ----------
   scope.on(header, 'click', (e: MouseEvent) => {
+    if (resizing.consumeClick()) return;
     const t = e.target as HTMLElement;
+    if (t.closest('.dzg-resize')) return;
     if (headerRenderer.check && headerRenderer.check.contains(t)) {
       const all = headerSelection(kernel.selection, rows.displayed) === 'all';
       kernel.dispatch(all ? { type: 'selection.clear' } : { type: 'selection.allDisplayed' }, 'user');

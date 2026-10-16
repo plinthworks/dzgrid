@@ -246,3 +246,15 @@ describe('column.state events', () => {
     expect(events).toEqual(['columnsChanged:host:a:true']);
   });
 });
+
+describe('column.resize', () => {
+  it('reports the width drawn, clamped by min and max', () => {
+    const columns = createColumnModel<{ id: string }>([{ id: 'a', width: 100, maxWidth: 140 }]);
+    const model = clientRows<{ id: string }>({ rows: [], getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }) });
+    const kernel = createKernel({ rows: model, columns });
+    const widths: number[] = [];
+    kernel.subscribe((e) => { if (e.type === 'columnResized') widths.push(e.width); });
+    kernel.dispatch({ type: 'column.resize', column: 'a', width: 200, finished: true }, 'user');
+    expect(widths).toEqual([140]);
+  });
+});

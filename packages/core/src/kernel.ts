@@ -204,7 +204,13 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
         if (!columns.get(cmd.column)) return refuse('unknown-column', [problem('unknown-column', 'error', 'column', cmd.column)]);
         if (!Number.isFinite(cmd.width) || cmd.width <= 0) return refuse('invalid-width', [problem('invalid-column', 'error', 'width', String(cmd.width))]);
         const change = columns.apply([{ id: cmd.column, width: cmd.width }], source);
-        const width = columns.state().find((s) => s.id === cmd.column)?.width ?? cmd.width;
+        // The width drawn: the layout clamps to min and max (the state keeps what was asked).
+        const L = columns.layout;
+        let width = cmd.width;
+        for (const slice of [L.start, L.center, L.end]) {
+          const i = slice.columns.findIndex((c) => c.id === cmd.column);
+          if (i !== -1) width = slice.widths.sizeAt(i);
+        }
         if (change.problems.length) emit({ type: 'problems', source, problems: change.problems });
         emit({ type: 'columnResized', source, column: cmd.column, width, finished: cmd.finished });
         return OK;
