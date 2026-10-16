@@ -4,6 +4,27 @@
 > **Aucune ligne d'ag-Grid, ni d'aucune autre bibliothèque de grille, n'a été lue.** Seuls comptent le comportement observable et la liste publique de fonctionnalités, conformément à `CLEANROOM.md`. Les niveaux « Community / Enterprise » du §2 viennent de ma connaissance générale de cette liste : ils sont à confirmer sur la documentation publique à jour **[À VÉRIFIER]**.
 > Ce que je n'ai pas vérifié est marqué **[À VÉRIFIER]**.
 
+## Décisions validées par le propriétaire (2026-10-16)
+
+Le propriétaire a accepté toutes les recommandations du §1. Elles priment sur le reste du document quand il dit autre chose.
+
+| Sujet | Décision |
+|---|---|
+| K.1 Licence | Tout en MIT pour l'instant ; le niveau « Enterprise » vit dans `src/enterprise/`, exposé par sous-chemins d'export, isolé par un test de graphe d'imports. |
+| K.2 Dates | Pas de Temporal dans `core` ni `dom` : `Day` (`YYYY-MM-DD`) et `InstantMs` distincts ; `zoneDayBounds` sur `Intl` ; aucun `Date` dans le cœur ; sélecteur de date par adaptateur, tzslot en option. |
+| K.3 Virtualisation | DOM recyclé, lignes et colonnes, un seul conteneur de défilement ; jamais de canvas ; plafond + pagination si S1 échoue. |
+| K.4 Données | Lignes du consommateur jamais modifiées ; `getRowId` requis ; transactions `{add, update, remove}` ; modifications en surcouche. |
+| K.5 Moteurs | `client` (P1) → `paged` serveur, total inconnu accepté (P3) → `infinite` et `serverSide` (P7) ; `viewport` hors v1 ; pas de worker en v1. |
+| K.6 Priorité Enterprise | Plages/presse-papiers/remplissage/édition en masse → filtre à valeurs → master/detail → regroupement → arbre → Excel → menus → filtre avancé → pivot ; graphiques hors v1. |
+| K.7 Cibles | Chrome/Edge 123, Safari 17.5, Firefox 120 ; Angular ^19 \|\| ^20 \|\| ^21 ; Node ≥ 22. |
+| K.8 Budgets | Profil audit ≤ 85 kB gz ; tout sauf graphiques ≤ 150 kB gz ; 100 000 × 30 : premier rendu ≤ 120 ms, défilement ≥ 58 fps, tri numérique ≤ 40 ms, tri texte ≤ 250 ms, filtre texte ≤ 35 ms, ≤ 25 Mo. |
+| K.9 Nommage | `DzGrid`, scope `@dzgrid` ; palette partagée `--tz-*`, propre à la grille `--dzg-*` / `.dzg-*` ; playground 4700. Le scope npm reste à réserver. |
+| K.10 Dépendances | Aucune dépendance d'exécution dans `core`, `dom`, `theme` ; pas de RxJS. |
+| K.11 Excel | Writer XLSX maison, RTL compris, sans SheetJS (P8). |
+| K.12 Compat ag-Grid | Hors v1. |
+| K.13 Graphiques | Hors v1 ; `rangeAsSeries` seulement. |
+| K.14 Après édition | La ligne ne bouge pas tant qu'aucun tri/filtre n'est relancé (`reapplyAfterEdit: false`), avec indicateur discret. |
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.
