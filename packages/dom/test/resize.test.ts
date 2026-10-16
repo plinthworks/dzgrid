@@ -82,7 +82,8 @@ describe('column resize', () => {
   it('does not sort when a resize ends on the header', () => {
     const { g, handle, drag, host } = make();
     drag(handle('a')!, 500, 520);
-    handle('a')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    // The click that ends the drag lands on the header cell itself, not only the handle.
+    host.querySelector<HTMLElement>('.dzg-hcell[data-col="a"]')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(g.kernel.rows.query.sort).toEqual([]);
     expect(host.querySelector('.dzg-hcell[data-col="a"]')!.hasAttribute('aria-sort')).toBe(false);
   });

@@ -89,14 +89,20 @@ describe('sort by click', () => {
   });
 
   it('keeps focus, selection and scroll through a sort', () => {
-    const { g, head, click, box } = make({ selection: { mode: 'multi' } });
+    const { g, head, click, box, vp } = make({ selection: { mode: 'multi' } });
     g.api.focusCell(dataKey('r500')!, 'name');
+    const focused = document.activeElement;
     g.kernel.dispatch({ type: 'selection.toggle', row: dataKey('r500')! }, 'user');
     box.scrollTop = 1234;
+    vp.dispatchEvent(new Event('scroll'));
+    const top = (g as unknown as { scroll: { logicalTop: number } }).scroll.logicalTop;
+    expect(top).toBe(1234);
     click(head('n'));
     click(head('n'));
     expect(g.kernel.focus).toMatchObject({ row: dataKey('r500') });
+    expect(document.activeElement).toBe(focused);
     expect([...g.kernel.selection.keys]).toEqual([dataKey('r500')]);
+    expect((g as unknown as { scroll: { logicalTop: number } }).scroll.logicalTop).toBe(1234);
     expect(box.scrollTop).toBe(1234);
   });
 });
