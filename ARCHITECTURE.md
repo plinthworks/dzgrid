@@ -57,6 +57,20 @@ Ils priment sur les sections citées. Validés par le propriétaire le 2026-10-1
 - **§3.16 et K.11 Export (S8)** : writer XLSX validé (zip, CRC-32, 0 cellule fausse sur 100 010, 3,9 kB gz) ; `deflate-raw` gardé, stockage sans compression en repli. Instants écrits en heure murale de la zone d'affichage, zone nommée dans l'en-tête ; une cellule texte n'est jamais une formule ; échappement `_xHHHH_` ; jours avant 1900-03-01 en texte avec un `Problem` ; 32 767 caractères par cellule ; le vrai writer sera découpé et en flux ; ZIP64 hors v1. Fidélité Excel **[À VÉRIFIER à la main]**.
 - **Outillage** : `@angular/build` manque pour compiler Angular avec Vite ; S6 a compilé en AOT par `ngc` + linker + esbuild. À ajouter avant la Phase 3.
 
+### Décisions de la Phase 1 (validées par le propriétaire le 2026-10-16)
+
+Détail et raisons dans `docs/phase-1-plan.md` §0. Elles priment sur les sections citées.
+
+- **D1** — Le magasin de lignes garde des tableaux parallèles (`rows[]`, `ids[]`, `Map<id, index>`) ; un `DataNode` est une vue créée à la demande ; `TransactionResult` porte des `RowKey[]`. Les nœuds se comparent par `key`, jamais par `===`.
+- **D2** — Les filtres texte ignorent par défaut la casse, les accents et les marques arabes (harakat, tatwil, formes de l'alif) ; `caseSensitive: true` rend le filtre exact.
+- **D3** — Les vides sont triés en dernier dans les deux sens ; à égalité, l'ordre source est gardé, en descendant aussi. `nulls: 'first'` l'inverse.
+- **D4** — Les négations sont des compléments exacts : `notEqual` et `notContains` incluent les vides ; les comparaisons (`equals`, `lt`, `between`…) n'acceptent jamais un vide. Une cellule illisible compte comme vide, avec un avertissement.
+- **D5** — Saisie sans devinette : `%` final (ou U+066A) divise par 100 ; un seul `.` ou `,` est lu selon la locale ; l'ordre jour/mois vient de la locale ; années à deux chiffres et noms de mois refusés.
+- **D6** — `ColumnState` perd `sort`, `sortIndex`, `groupIndex`, `aggFunc` : le tri ne vit que dans `Query`. `Query` n'a que `sort`, `filter`, `quick` pour l'instant.
+- **D7** — `ValueCodec` gagne `coerce` (valeur machine : JSON, ISO) à côté de `parse` (texte humain), et `keyKind`/`sortKey` requis. Tri et filtres prennent un indice source (`RowTest = (src: number) => boolean`), pas un `DataNode`.
+- **D8** — Un instant **tapé** qui tombe dans un changement d'heure est refusé (`reject`) ; un instant **chargé** depuis l'hôte est lu en `compatible`, avec un avertissement.
+- **D9** — Codecs dans `value/codecs/*.ts` ; pas de noyau en Phase 1 (§3.17 passe en Phase 2) ; `ChangeSource` et `ModelChange` définis dès maintenant.
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.
