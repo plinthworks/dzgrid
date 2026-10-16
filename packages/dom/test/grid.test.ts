@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { dataKey, type ColumnDef, type GridEvent } from '@dzgrid/core';
-import { createGrid, type GridInstance, type GridSettings } from '../src/grid.js';
+import { createGrid, type GridInstance } from '../src/grid.js';
+import type { GridSettings } from '../src/settings.js';
 import type { Geometry, ViewportBox } from '../src/render/measure.js';
 import { EN } from '../src/locales/en.js';
 import { FR } from '../src/locales/fr.js';
@@ -11,7 +12,7 @@ const rows = (n: number, tag = ''): R[] => Array.from({ length: n }, (_, i) => (
 
 /** A viewport that never lays out: the test moves it. */
 function fakeGeometry(o: Partial<ViewportBox> = {}) {
-  const box: ViewportBox = { block: 400, inline: 800, scrollTop: 0, scrollInline: 0, ...o };
+  const box: { -readonly [K in keyof ViewportBox]: ViewportBox[K] } = { block: 400, inline: 800, scrollTop: 0, scrollInline: 0, ...o };
   const geometry: Geometry = {
     read: () => ({ ...box }),
     writeScrollTop: (px) => { box.scrollTop = px; },
