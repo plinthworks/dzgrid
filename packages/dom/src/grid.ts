@@ -1,5 +1,5 @@
 import {
-  clientRows, createColumnModel, createKernel, intentFor, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, windowAt,
+  clientRows, createColumnModel, createKernel, formattersFor, headerSelection, isSelected, intentFor, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, windowAt,
   type ClientModel, type ColumnModel, type DisplayedRows, type FocusPos, type GridKernel, type Intent, type KeyOwner, type LocaleCtx, type RowKey,
 } from '@dzgrid/core';
 import { isMac, ownerOf } from './keys/owner.js';
@@ -9,7 +9,7 @@ import { ScrollController } from './interact/scroll.js';
 import { msg } from './messages.js';
 import { HeaderRenderer } from './render/header.js';
 import { domGeometry, type Geometry, type ViewportBox } from './render/measure.js';
-import { RowRenderer, setAttr, setPx, type Frame } from './render/rows.js';
+import { CHECK_WIDTH, RowRenderer, setAttr, setPx, type Frame } from './render/rows.js';
 import { FrameScheduler } from './render/scheduler.js';
 import { Scope } from './render/scope.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
@@ -143,7 +143,9 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const visible = columns.visible();
 
     // Everything a cell's text depends on, but the row: when it changes, cells are rechecked.
-    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}`;
+    const check = settings.selection?.checkbox === true && (settings.selection.mode ?? 'none') !== 'none';
+    const extra = check ? CHECK_WIDTH : 0;
+    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}`;
     if (ek !== epochKey) {
       epochKey = ek;
       epoch++;
@@ -166,7 +168,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     }
     anchorNext = false;
     const layout = uniformRowLayout(d, h);
-    const centerView = Math.max(0, box.inline - L.start.width - L.end.width);
+    const centerView = Math.max(0, box.inline - L.start.width - extra - L.end.width);
     const w = windowAt(layout, L.center.widths, scroll.logicalTop, scroll.physicalTop, box.scrollInline, { block: box.block, inline: centerView }, {
       overscanRows: settings.overscan?.rows ?? OVERSCAN_ROWS,
       overscanCols: settings.overscan?.cols ?? OVERSCAN_COLS,
@@ -174,25 +176,36 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
 
     // ---- grid attributes ----
     setAttr(viewport, 'aria-rowcount', String(d.count + 1));
-    setAttr(viewport, 'aria-colcount', String(visible.length));
+    setAttr(viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
+    const mode = settings.selection?.mode ?? 'none';
+    setAttr(viewport, 'aria-multiselectable', mode === 'multi' ? 'true' : null);
     setAttr(viewport, 'aria-label', settings.label ?? msg(settings.messages, 'grid.label', {}, ctx));
     setAttr(viewport, 'aria-busy', settings.overlay === 'loading' ? 'true' : null);
     setPx(body, 'block-size', mapper.physicalHeight);
-    setPx(body, 'inline-size', L.totalWidth);
+    setPx(body, 'inline-size', L.totalWidth + extra);
     setPx(layer, 'inset-block-start', w.placement.layerTop);
 
-    if (colIndexOf.version !== columns.version) colIndexOf = { version: columns.version, index: new Map(visible.map((c, i) => [c.id, i + 1])) };
+    const ciKey = columns.version * 2 + (check ? 1 : 0);
+    if (colIndexOf.version !== ciKey) colIndexOf = { version: ciKey, index: new Map(visible.map((c, i) => [c.id, i + 1 + (check ? 1 : 0)])) };
     const index = colIndexOf.index;
     const colIndex = (id: string) => index.get(id) ?? 0;
     const focus0 = kernel.focus;
     const focusCenter = focus0 ? L.center.columns.findIndex((c) => c.id === focus0.column) : -1;
-    headerRenderer.render(L, w.cols, h, colIndex, () => {}, focus0?.kind === 'header' ? focusCenter : -1);
+    const sort = rows.query.sort;
+    headerRenderer.render(L, w.cols, h, colIndex, (col, el) => decorateHeader(col, el, sort), focus0?.kind === 'header' ? focusCenter : -1, check);
+    if (headerRenderer.checkBox) {
+      const state = headerSelection(kernel.selection, d);
+      setAttr(headerRenderer.checkBox, 'aria-checked', state === 'all' ? 'true' : state === 'some' ? 'mixed' : 'false');
+      setAttr(headerRenderer.checkBox, 'aria-label', msg(settings.messages, 'selection.all', {}, ctx));
+    }
 
     const wanted: number[] = [];
     if (w.rows) for (let i = w.rows.first; i <= w.rows.last; i++) wanted.push(i);
     const frame: Frame<T> = {
       displayed: d, layout: L, cols: w.cols, rowHeight: h, base: w.placement.base, ctx, epoch,
-      rowHeader: visible[0]?.id ?? null, colIndex, rowAttrs: () => {},
+      rowHeader: visible[0]?.id ?? null, colIndex,
+      rowAttrs: (key, el) => setAttr(el, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
+      check,
       focusRow: focus0?.kind === 'cell' ? focus0.row : null, focusCenter,
     };
     const focus = kernel.focus;
@@ -250,6 +263,18 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       paint(box);
     },
   };
+  function announceSort(sort: readonly { column: string; dir: 'asc' | 'desc' }[]): void {
+    const m = settings.messages;
+    if (!sort.length) return live.announce(msg(m, 'announce.sortCleared', {}, ctx));
+    const first = sort[0]!;
+    const col = columns.get(first.column);
+    live.announce(msg(m, 'announce.sorted', {
+      column: col?.def.header ?? first.column,
+      direction: msg(m, first.dir === 'asc' ? 'sort.ascending' : 'sort.descending', {}, ctx),
+      rows: msg(m, 'announce.rows', { n: rows.displayed.count }, ctx),
+    }, ctx));
+  }
+
   function schedule(): void {
     if (scope.isDisposed || queued) return;
     queued = true;
@@ -338,9 +363,14 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       case 'page':
         to = from.kind === 'header' ? cell(page - 1, ci) : cell(ri + intent.delta * page, ci);
         break;
-      case 'toggleSelect':
-        if (from.kind === 'cell' && (settings.selection?.mode ?? 'none') !== 'none') kernel.dispatch({ type: 'selection.toggle', row: from.row }, 'user');
+      case 'toggleSelect': {
+        const mode = settings.selection?.mode ?? 'none';
+        if (from.kind !== 'cell' || mode === 'none') return;
+        // Single: Space selects this row alone, or clears it.
+        if (mode === 'single') kernel.dispatch(isSelected(kernel.selection, from.row) ? { type: 'selection.clear' } : { type: 'selection.only', row: from.row }, 'user');
+        else kernel.dispatch({ type: 'selection.toggle', row: from.row }, 'user');
         return;
+      }
       case 'selectAll':
         if (settings.selection?.mode === 'multi') kernel.dispatch({ type: 'selection.allDisplayed' }, 'user');
         return;
@@ -377,6 +407,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   scope.on(doc, 'pointercancel', () => scroll.pointerUp());
   scope.add(kernel.subscribe((e) => {
     if (e.type === 'modelUpdated' && e.kind === 'rows') anchorNext = true;
+    if (e.type === 'sortChanged' && e.source === 'user') announceSort(e.sort);
     if (e.type === 'focusChanged' && e.source === 'data' && e.focus && hasFocus && !viewport.contains(doc.activeElement)) {
       pendingFocus = e.focus.kind === 'cell' ? { row: e.focus.row, column: e.focus.column } : { header: e.focus.column };
     }
@@ -395,13 +426,71 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   columns.setAvailableInline(initialBox.inline);
   schedule();
 
+  /**
+   * A header's sort state (APG): `aria-sort` on the first sorted column only;
+   * the direction and, in a multi-column sort, the precedence shown, the
+   * precedence also in the header's name.
+   */
+  function decorateHeader(col: { id: string; sortable: boolean; def: { header?: string } }, el: HTMLElement, sort: readonly { column: string; dir: 'asc' | 'desc' }[]): void {
+    el.classList.toggle('dzg-sortable', col.sortable);
+    const at = sort.findIndex((s) => s.column === col.id);
+    setAttr(el, 'aria-sort', at === 0 ? (sort[0]!.dir === 'asc' ? 'ascending' : 'descending') : null);
+    let mark = el.querySelector<HTMLElement>(':scope > .dzg-sort');
+    if (at === -1) {
+      mark?.remove();
+      setAttr(el, 'aria-label', null);
+      return;
+    }
+    if (!mark) {
+      mark = doc.createElement('span');
+      mark.className = 'dzg-sort';
+      mark.setAttribute('aria-hidden', 'true');
+      el.append(mark);
+    }
+    setAttr(mark, 'data-dir', sort[at]!.dir);
+    const n = sort.length > 1 ? formattersFor(ctx).number()(at + 1) : '';
+    if (mark.textContent !== n) mark.textContent = n;
+    setAttr(el, 'aria-label', sort.length > 1 ? `${col.def.header ?? col.id}, ${msg(settings.messages, 'sort.priority', { n: at + 1 }, ctx)}` : null);
+  }
+
+  // ---------- pointer: sort by header click, row selection ----------
+  scope.on(header, 'click', (e: MouseEvent) => {
+    const t = e.target as HTMLElement;
+    if (headerRenderer.check && headerRenderer.check.contains(t)) {
+      const all = headerSelection(kernel.selection, rows.displayed) === 'all';
+      kernel.dispatch(all ? { type: 'selection.clear' } : { type: 'selection.allDisplayed' }, 'user');
+      return;
+    }
+    const id = t.closest<HTMLElement>('.dzg-hcell')?.dataset['col'];
+    const col = id ? columns.get(id) : undefined;
+    if (col?.sortable) kernel.dispatch({ type: 'sort.toggle', column: col.id, multi: e.shiftKey }, 'user');
+  });
+  scope.on(body, 'click', (e: MouseEvent) => {
+    const mode = settings.selection?.mode ?? 'none';
+    if (mode === 'none') return;
+    const t = e.target as HTMLElement;
+    const row = t.closest('.dzg-row');
+    const key = row ? rowRenderer.keyOf(row) : undefined;
+    if (!key) return;
+    const onBox = !!t.closest('.dzg-check');
+    if (!onBox && settings.selection?.click !== true) return;
+    const toggle = onBox || (mac ? e.metaKey : e.ctrlKey);
+    if (mode === 'multi' && e.shiftKey) {
+      const r = kernel.dispatch({ type: 'selection.range', target: key, additive: toggle }, 'user');
+      if (!r.ok && r.reason === 'anchor-not-displayed') live.announce(msg(settings.messages, 'announce.rangeCancelled', {}, ctx));
+    } else if (toggle && mode === 'multi') kernel.dispatch({ type: 'selection.toggle', row: key }, 'user');
+    else if (toggle && isSelected(kernel.selection, key)) kernel.dispatch({ type: 'selection.clear' }, 'user');
+    else kernel.dispatch({ type: 'selection.only', row: key }, 'user');
+  });
+
   /** A centre column comes clear of the pinned segments. */
   function scrollInlineTo(column: string): void {
     const box = geometry.read();
     const L = columns.layout;
     const c = L.center.columns.findIndex((x) => x.id === column);
     if (c === -1) return;
-    const view = Math.max(0, box.inline - L.start.width - L.end.width);
+    const extra = settings.selection?.checkbox && (settings.selection.mode ?? 'none') !== 'none' ? CHECK_WIDTH : 0;
+    const view = Math.max(0, box.inline - L.start.width - extra - L.end.width);
     const start = L.center.widths.offsetOf(c);
     const end = start + L.center.widths.sizeAt(c);
     let x = box.scrollInline;

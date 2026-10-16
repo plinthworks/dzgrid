@@ -1,5 +1,5 @@
 import type { ColumnLayout, ResolvedColumn } from '@dzgrid/core';
-import { setAttr, setPx } from './rows.js';
+import { CHECK_WIDTH, setAttr, setPx } from './rows.js';
 
 /**
  * The header row, virtualised with the body's column window: assistive
@@ -11,6 +11,9 @@ export class HeaderRenderer {
   readonly #doc: Document;
   readonly #segs: { readonly start: HTMLElement; readonly center: HTMLElement; readonly end: HTMLElement };
   readonly #cells = new Map<string, HTMLElement>();
+  /** The select-all box's header cell, when the grid shows a selection column. */
+  check: HTMLElement | null = null;
+  checkBox: HTMLElement | null = null;
 
   constructor(doc: Document, group: HTMLElement) {
     this.#doc = doc;
@@ -29,10 +32,12 @@ export class HeaderRenderer {
     group.append(this.row);
   }
 
-  render(layout: ColumnLayout, cols: { first: number; last: number } | null, height: number, colIndex: (id: string) => number, decorate: (col: ResolvedColumn<any>, el: HTMLElement) => void, keep = -1): void {
+  render(layout: ColumnLayout, cols: { first: number; last: number } | null, height: number, colIndex: (id: string) => number, decorate: (col: ResolvedColumn<any>, el: HTMLElement) => void, keep = -1, check = false): void {
+    const extra = check ? CHECK_WIDTH : 0;
     setPx(this.row, 'block-size', height);
-    setPx(this.row, 'inline-size', layout.totalWidth);
-    setPx(this.#segs.start, 'inline-size', layout.start.width);
+    setPx(this.row, 'inline-size', layout.totalWidth + extra);
+    setPx(this.#segs.start, 'inline-size', layout.start.width + extra);
+    this.#checkCell(check);
     setPx(this.#segs.center, 'inline-size', layout.center.width);
     setPx(this.#segs.end, 'inline-size', layout.end.width);
     // The centre window, and the focused header's column out of it (D6).
@@ -50,6 +55,7 @@ export class HeaderRenderer {
     }
     const place = (seg: HTMLElement, slice: ColumnLayout['start'], indices: readonly number[], absolute: boolean) => {
       let cursor: ChildNode | null = seg.firstChild;
+      if (cursor && cursor === this.check) cursor = cursor.nextSibling;
       for (const c of indices) {
         const col = slice.columns[c]!;
         let el = this.#cells.get(col.id);
@@ -81,6 +87,30 @@ export class HeaderRenderer {
     place(this.#segs.start, layout.start, range(layout.start.columns.length), false);
     place(this.#segs.center, layout.center, center, true);
     place(this.#segs.end, layout.end, range(layout.end.columns.length), false);
+  }
+
+  /** The select-all box: a real checkbox for assistive technologies, tri-state (D8). */
+  #checkCell(on: boolean): void {
+    if (!on) {
+      this.check?.remove();
+      this.check = this.checkBox = null;
+      return;
+    }
+    if (!this.check) {
+      const cell = this.#doc.createElement('div');
+      cell.className = 'dzg-hcell dzg-check';
+      cell.setAttribute('role', 'columnheader');
+      cell.setAttribute('aria-colindex', '1');
+      const box = this.#doc.createElement('span');
+      box.className = 'dzg-box';
+      box.setAttribute('role', 'checkbox');
+      box.tabIndex = -1;
+      cell.append(box);
+      setPx(cell, 'inline-size', CHECK_WIDTH);
+      this.check = cell;
+      this.checkBox = box;
+    }
+    if (this.#segs.start.firstChild !== this.check) this.#segs.start.prepend(this.check);
   }
 
   cell(column: string): HTMLElement | null {

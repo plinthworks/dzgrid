@@ -22,7 +22,12 @@ export interface RowView {
   epoch: number;
   readonly cells: Map<string, CellView>;
   top: number;
+  /** The selection box, first in the start segment, when the grid shows one (D8). */
+  check: HTMLElement | null;
 }
+
+/** Width of the selection box column. */
+export const CHECK_WIDTH = 40;
 
 /** The text of one cell: the codec's display, blank for a blank or unreadable value. */
 export function cellText<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): string {
@@ -65,6 +70,8 @@ export interface Frame<T> {
   /** The focused cell: its centre column stays mounted in its row out of the window (D6). */
   readonly focusRow: RowKey | null;
   readonly focusCenter: number;
+  /** A selection box column before the start columns (D8): widths and indices shift by it. */
+  readonly check: boolean;
   readonly colIndex: (id: string) => number;
   readonly rowAttrs: (key: RowKey, el: HTMLElement) => void;
 }
@@ -101,7 +108,7 @@ export class RowRenderer<T> {
     };
     const segs = { start: seg('start'), center: seg('center'), end: seg('end') };
     this.made++;
-    return { el, segs, key: null, data: undefined, epoch: -1, cells: new Map(), top: Number.NaN };
+    return { el, segs, key: null, data: undefined, epoch: -1, cells: new Map(), top: Number.NaN, check: null };
   }
 
   #makeCell(): CellView {
@@ -192,8 +199,10 @@ export class RowRenderer<T> {
     v.data = data;
     v.epoch = f.epoch;
     setPx(v.el, 'block-size', f.rowHeight);
-    setPx(v.el, 'inline-size', L.totalWidth);
-    setPx(v.segs.start, 'inline-size', L.start.width);
+    const extra = f.check ? CHECK_WIDTH : 0;
+    setPx(v.el, 'inline-size', L.totalWidth + extra);
+    setPx(v.segs.start, 'inline-size', L.start.width + extra);
+    this.#checkCell(v, f.check);
     setPx(v.segs.center, 'inline-size', L.center.width);
     setPx(v.segs.end, 'inline-size', L.end.width);
     // Cells that go are taken out first: a focused cell is then never moved past them (a move blurs).
@@ -210,6 +219,7 @@ export class RowRenderer<T> {
     }
     const place = (seg: HTMLElement, cols: readonly ResolvedColumn<any>[], widths: ColumnLayout['start']['widths'], indices: Iterable<number>, absolute: boolean) => {
       let cursor: ChildNode | null = seg.firstChild;
+      if (cursor && cursor === v.check) cursor = cursor.nextSibling;
       for (const c of indices) {
         const col = cols[c]!;
         let cell = v.cells.get(col.id);
@@ -230,9 +240,33 @@ export class RowRenderer<T> {
 
   readonly #spare: CellView[] = [];
 
+  /** The row's selection box: a cell for the column count, its box decorative (the row's aria-selected is the truth). */
+  #checkCell(v: RowView, on: boolean): void {
+    if (!on) {
+      v.check?.remove();
+      v.check = null;
+      return;
+    }
+    if (!v.check) {
+      const el = this.#doc.createElement('div');
+      el.className = 'dzg-check';
+      el.setAttribute('role', 'gridcell');
+      el.setAttribute('aria-colindex', '1');
+      el.tabIndex = -1;
+      const box = this.#doc.createElement('span');
+      box.className = 'dzg-box';
+      box.setAttribute('aria-hidden', 'true');
+      el.append(box);
+      setPx(el, 'inline-size', CHECK_WIDTH);
+      v.check = el;
+    }
+    if (v.segs.start.firstChild !== v.check) v.segs.start.prepend(v.check);
+  }
+
   /** True when the row holds exactly the cells it should: then nothing needs placing. */
   #matches(v: RowView, f: Frame<T>, center: readonly number[]): boolean {
     const L = f.layout;
+    if (!!v.check !== f.check) return false;
     if (v.cells.size !== L.start.columns.length + L.end.columns.length + center.length) return false;
     for (const c of center) if (!v.cells.has(L.center.columns[c]!.id)) return false;
     return true;
@@ -264,6 +298,11 @@ export class RowRenderer<T> {
     }
     const text = data === undefined ? '' : cellText(col, data as never, f.ctx);
     if (cell.text.data !== text) cell.text.data = text;
+  }
+
+  /** Each mounted row, for attributes that follow state rather than data (selection). */
+  forEach(fn: (key: RowKey, v: RowView) => void): void {
+    for (const [k, v] of this.#mounted) fn(k, v);
   }
 
   keyOf(rowEl: Element): RowKey | undefined {
