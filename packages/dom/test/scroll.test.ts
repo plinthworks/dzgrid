@@ -35,8 +35,10 @@ function make(count = 5000, maxPhysical = 40_000) {
   const rowTop = (id: string) => {
     // Where a row shows, relative to the viewport's body top: layer + row offset − scroll.
     const layer = parseFloat(host.querySelector<HTMLElement>('.dzg-layer')!.style.insetBlockStart);
-    const row = host.querySelector<HTMLElement>(`.dzg-layer > .dzg-row[data-key="${dataKey(id)}"]`);
-    return row ? layer + parseFloat(row.style.insetBlockStart) - box.scrollTop : null;
+    const at = g.kernel.rows.displayed.indexOf(dataKey(id)!);
+    const row = host.querySelector<HTMLElement>(`.dzg-layer > .dzg-row[aria-rowindex="${at + 2}"]`);
+    if (!row) throw new Error(`${id} is not mounted`);
+    return layer + parseFloat(row.style.insetBlockStart) - box.scrollTop;
   };
   return { g, vp, box, writes, s: internals.scroll, nativeScroll, first, rowTop };
 }
