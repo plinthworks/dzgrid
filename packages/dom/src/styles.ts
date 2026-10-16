@@ -19,6 +19,9 @@ export const LAYOUT_CSS = `
 :where(.dzg-seg-end) { position: sticky; inset-inline-end: 0; z-index: 2; }
 :where(.dzg-seg-center > .dzg-cell, .dzg-seg-center > .dzg-hcell) { position: absolute; inset-block: 0; }
 :where(.dzg-cell, .dzg-hcell) { box-sizing: border-box; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+:where(.dzg-cell[data-align=end]) { text-align: end; }
+:where(.dzg-cell[data-align=center]) { text-align: center; }
+:where(.dzg-hrow) { display: flex; }
 :where(.dzg-free) { unicode-bidi: plaintext; }
 :where(.dzg-num) { unicode-bidi: isolate; direction: ltr; }
 :where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: 0; display: grid; place-items: center; pointer-events: none; }

@@ -6,3 +6,7 @@
  */
 export { MESSAGE_KEYS, msg } from './messages.js';
 export type { GridMessages, MessageKey, MessageValue, PluralForms } from './messages.js';
+export { createGrid } from './grid.js';
+export type { GridApi, GridEnv, GridInstance } from './grid.js';
+export type { GridSettings } from './settings.js';
+export type { Geometry, ViewportBox } from './render/measure.js';
