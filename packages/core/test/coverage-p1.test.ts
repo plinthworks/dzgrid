@@ -5,7 +5,9 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { it, expect } from 'vitest';
-import * as C from '@dzgrid/core';
+import * as P from '@dzgrid/core';
+import * as I from '@dzgrid/core/internal';
+const C = { ...P, ...I };
 const { localeCtx, readNumber, readInstant, parseInstant, parseDay, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, resolveColumns, compilePath, enumCodec, fold, instantCodec, formattersFor, flatDisplayed, REJECTED, instantToDayIn, resolveWall } = C as any;
 const en = localeCtx({ locale: 'en-US' }); const fr = localeCtx({ locale: 'fr-FR', timeZone: 'Europe/Paris' }); const de = localeCtx({ locale: 'de-DE' });
 it('number', () => {

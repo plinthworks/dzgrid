@@ -1,4 +1,4 @@
-import { ColumnCache, type ColumnEnv } from '../model/column-cache.js';
+import type { ColumnEnv } from '../model/column-cache.js';
 import { problem, type Problem } from '../problems.js';
 
 export interface SortItem {
@@ -63,5 +63,3 @@ function identity(n: number): Uint32Array {
   return o;
 }
 
-/** Re-exported for hosts that read a cell the way sorting does. */
-export const rawCell = ColumnCache.raw;

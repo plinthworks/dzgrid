@@ -26,15 +26,15 @@ export { zoneDayBounds, instantToDayIn, offsetAt, isKnownZone, resolveWall } fro
 
 export { stripMarks, normalizeDigits } from './value/digits.js';
 export type { LocaleCtx } from './value/locale.js';
-export { localeCtx, ctxKey, intlTag } from './value/locale.js';
+export { localeCtx } from './value/locale.js';
 export type { NumberSeparators } from './value/number.js';
-export { readNumber, readMachineNumber, separatorsFor } from './value/number.js';
+export { readNumber, readMachineNumber } from './value/number.js';
 export type { NumberFormatSpec, InstantFormatSpec, Formatters } from './i18n/format.js';
-export { formattersFor, clearFormatCaches, dayFieldOrder, formatParts } from './i18n/format.js';
+export { formattersFor, dayFieldOrder } from './i18n/format.js';
 
 export { fold, isAscii } from './i18n/fold.js';
 export type { CollatorSpec } from './i18n/collate.js';
-export { collatorFor, collatorKey } from './i18n/collate.js';
+export { collatorFor } from './i18n/collate.js';
 export type { ValueCodec, ColumnType, Rejected } from './value/codec.js';
 export { REJECTED, isBlank } from './value/codec.js';
 export { textCodec } from './value/codecs/text.js';
@@ -55,10 +55,8 @@ export type { RowKind, DataNode, RowNode } from './row/node.js';
 export type { RowTransaction, TransactionResult, RowSnapshot, StoreDelta, RowStore } from './row/store.js';
 export { createRowStore } from './row/store.js';
 export type { DisplayedRows } from './row/displayed.js';
-export { flatDisplayed } from './row/displayed.js';
 
 export type { ColumnEnv } from './model/column-cache.js';
-export { ColumnCache } from './model/column-cache.js';
 export type { SortItem } from './sort/compile.js';
 export { sortIndices } from './sort/compile.js';
 
@@ -69,7 +67,7 @@ export type { RowTest, CompiledFilter } from './filter/compile.js';
 export { compileFilter, filterIndices } from './filter/compile.js';
 export { compileQuick, quickWords, canNarrow } from './filter/quick.js';
 export type { Query } from './model/query.js';
-export { makeQuery, EMPTY_QUERY, canonical } from './model/query.js';
+export { makeQuery, EMPTY_QUERY } from './model/query.js';
 export type { ModelStatus, ModelChange, RowModel, ClientOptions, ClientModel } from './model/client.js';
 export { clientRows } from './model/client.js';
 export type { ScrollMapper, LayerPlacement } from './layout/scroll-mapper.js';

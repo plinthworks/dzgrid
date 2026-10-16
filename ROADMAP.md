@@ -82,31 +82,58 @@ machine, not this one). Details in each `spikes/<id>/README.md`.
 - Native keyboard scrolling (PageDown, Space), touch and momentum in scaled
   mode move `ratio` times too far: only the wheel is intercepted.
 
-## Phase 1 — data core (in progress)
-
-### Measured gaps (to revisit)
-- Quick search, first keystroke, 10 text columns of accented French and
-  Arabic over 100 000 rows: ~0.3 s (K.8's 150 ms holds for ASCII text:
-  97 ms). The cost is folding a million cells once; later keystrokes take
-  ~27 ms. Phase 2 can build the search caches in idle time after a load.
-
-
-First steps, in order (architect review):
-1. `parseInstant(v, { assumeZone })` with a zone resolver and a stated policy
-   for wall times inside a clock change; `instant-parse` conformance suite;
-   one conformance case per `ProblemCode`.
-2. Behaviour sheets **before** the code: sort, text / number / day / instant
-   filters, quick filter (with its own Arabic folding).
-3. `test/types.test.ts` (a `number` is never accepted as a `DisplayIndex`),
-   then `row/{store,displayed,transaction}`, codecs with the S5 number-reader
-   rules, `columns/*`, `sort/` with rank keys, `filter/*`, `layout/` ported
-   from the S1 and S3 spikes, `model/client`, the conformance suites, and the
-   K.8 lines in `perf/budgets.json`.
-
-### Exit criteria (ARCHITECTURE.md §6)
+### Exit criteria (Phase 0)
 - [x] the ten questions have measured answers (sequential re-run passed)
 - [x] K.1–K.9 decided
 - [x] `npm test` and `npm run typecheck` green
 - [x] `npm run build` produces `dist/`
 - [x] `purity.test.ts` fails on a planted `new Date()`
 - [x] architect review and code review of the phase, findings fixed
+
+## Phase 1 — data core (closing)
+
+### Done (2026-10-16/17), each step tests first
+1. Offset-less date-times read only in a named zone; `resolveWall` with Temporal's policies, warnings on every choice.
+2. Thirteen behaviour sheets before code.
+3. Foundations: full `ProblemCode` list, canonical ids, the type test (a number is never a `DisplayIndex`), dataset A, bench with untimed setup and memory.
+4. Locale context (always Gregorian, digits stated), `readNumber` (no guessing), cached formatters.
+5. Codecs: text, number, boolean (fr/en/ar), enum, day (locale order, four-digit year, no swap), instant (typed wall times in a clock change refused).
+6. Columns: definitions checked into problems, user state kept by id, flex in whole pixels; `PrefixSums` (Fenwick).
+7. Row store: parallel arrays, immutable generations, transactions with per-entry problems; displayed rows mint positions only through `index()`.
+8. Sort with a per-column key cache and rank keys; `parseDay` on char codes.
+9–10. Filters: text (folded), number, day, instant (bounds from `zoneDayBounds`, half-open), boolean, value list, combined; negations are exact complements.
+11. Quick search, narrowing as the user types.
+12. Client model: filter → sort → displayed, memoised; one-row updates patched; K.14.
+13. Layout: row layouts, the S1 scroll mapper, layer placement, 2D window, the S3 anchor.
+14. Selection by key, everything-except for select all.
+15. One conformance case per problem code; the public surface frozen; internals in `@dzgrid/core/internal`.
+
+Two mid-phase reviews (code, and a mutation run of 175 mutants) were fixed with tests that failed first.
+
+### Measured on dataset A (100 000 × 30)
+| Line | K.8 | Measured |
+|---|---|---|
+| Load | ≤ 80 ms | 20 ms |
+| Numeric sort | ≤ 40 ms | 18 ms |
+| Text sort (cold, fr / ar) | ≤ 250 ms | 162 / 206 ms |
+| Text filter (cold, fr / ar) | ≤ 35 ms | 30 / 33 ms |
+| Memory | ≤ 120 B/row | 55 B/row |
+| Core size | ≤ 28 kB gz | 17 kB gz (budget 18.8 kB) |
+
+### Measured gaps (to revisit)
+- Quick search, first keystroke, 10 text columns of accented French and
+  Arabic over 100 000 rows: ~0.3 s (K.8's 150 ms holds for ASCII text:
+  97 ms). The cost is folding a million cells once; later keystrokes take
+  ~27 ms. Phase 2 can build the search caches in idle time after a load.
+- Appending 1 000 rows to 100 000 sorted and filtered rows recomputes
+  (24 ms): appends do not patch the caches yet.
+
+### Exit criteria (Phase 1)
+- [x] dataset A loads in ≤ 80 ms (20 ms)
+- [x] numeric sort ≤ 40 ms, text sort ≤ 250 ms, text filter ≤ 35 ms, ≤ 120 B/row
+- [x] `types.test.ts`: a `number` is never a `DisplayIndex`
+- [x] `zoneDayBounds` correct on the 12 zones
+- [x] `purity.test.ts` green
+- [x] one conformance case per `ProblemCode`
+- [x] `npm test`, `test:ci`, `test:tz`, `typecheck` green
+- [ ] phase-end architect review and code review, findings fixed

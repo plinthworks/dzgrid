@@ -1,8 +1,7 @@
-import { fold, isAscii } from '../i18n/fold.js';
-import { ColumnCache, type ColumnEnv } from '../model/column-cache.js';
+import { fold } from '../i18n/fold.js';
+import type { ColumnEnv } from '../model/column-cache.js';
 import type { ResolvedColumn } from '../columns/defs.js';
 import { problem, type Problem } from '../problems.js';
-import { isBlank } from '../value/codec.js';
 import { dayToEpochDay, parseDay } from '../value/day.js';
 import { resolveInstantRange } from './instant.js';
 import { INSTANT_OPS, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel } from './model.js';
@@ -200,5 +199,3 @@ function setTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 'se
   return (src) => (exports[src] === null ? blanks : !wanted.has(exports[src]!));
 }
 
-/** Exported for tests of the cache's reuse. */
-export const _internal = { isAscii, raw: ColumnCache.raw, isBlank };

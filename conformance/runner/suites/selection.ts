@@ -1,7 +1,4 @@
-import {
-  clientRows, createColumnModel, localeCtx, makeQuery, dataKey, NO_SELECTION, toggle, selectOnly, selectAll, clearSelection,
-  selectRange, reconcileSelection, selectionCount, idOfDataKey, type SelectionState,
-} from '@dzgrid/core';
+import { clientRows, createColumnModel, localeCtx, makeQuery, dataKey, NO_SELECTION, toggle, selectOnly, selectAll, clearSelection, selectRange, reconcileSelection, selectionCount, idOfDataKey, type SelectionState } from '@dzgrid/core';
 import type { Suite } from './index.js';
 
 type Row = { id: string; v: number };

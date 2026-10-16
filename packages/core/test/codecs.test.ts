@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  localeCtx, REJECTED, textCodec, numberCodec, booleanCodec, booleanCodecWith, enumCodec, dayCodec, instantCodec,
-  instantToIso, parseInstant, parseDay, fold, type InstantMs,
-} from '@dzgrid/core';
+import { localeCtx, REJECTED, textCodec, numberCodec, booleanCodec, booleanCodecWith, enumCodec, dayCodec, instantCodec, instantToIso, parseInstant, parseDay, fold, type InstantMs } from '@dzgrid/core';
 import { iso } from '../../../conformance/runner/iso.js';
 
 const fr = localeCtx({ locale: 'fr-FR', timeZone: 'Europe/Paris' });

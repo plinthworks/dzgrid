@@ -1,4 +1,5 @@
-import { localeCtx, readNumber, formattersFor, formatParts, parseDay, parseInstant, stripMarks, REJECTED, dayCodec, instantCodec, booleanCodec, enumCodec, instantToIso, type InstantMs } from '@dzgrid/core';
+import { localeCtx, readNumber, formattersFor, parseDay, parseInstant, stripMarks, REJECTED, dayCodec, instantCodec, booleanCodec, enumCodec, instantToIso, type InstantMs } from '@dzgrid/core';
+import { formatParts } from '@dzgrid/core/internal';
 import type { Suite } from './index.js';
 
 export const format: Record<string, Suite> = {

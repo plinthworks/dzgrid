@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { localeCtx, intlTag, formattersFor, readNumber, readMachineNumber, normalizeDigits, stripMarks, dayFieldOrder, separatorsFor } from '@dzgrid/core';
+import { localeCtx, formattersFor, readNumber, readMachineNumber, normalizeDigits, stripMarks, dayFieldOrder } from '@dzgrid/core';
+import { intlTag, separatorsFor } from '@dzgrid/core/internal';
 
 describe('localeCtx', () => {
   it('refuses a bad locale or zone as a programming error', () => {

@@ -1,4 +1,5 @@
-import { createColumnModel, createRowStore, localeCtx, NO_OVERLAY, ColumnCache, type ColumnDef } from '@dzgrid/core';
+import { createColumnModel, createRowStore, localeCtx, NO_OVERLAY, type ColumnDef } from '@dzgrid/core';
+import { ColumnCache } from '@dzgrid/core/internal';
 
 type Row = Record<string, unknown> & { id: string };
 

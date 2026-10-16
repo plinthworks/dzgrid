@@ -6,7 +6,10 @@ import { fileURLToPath } from 'node:url';
  * pass under jsdom and break the day the core runs in a worker or on a server.
  * jsdom arrives with @dzgrid/dom, as a separate project.
  */
-const alias = { '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)) };
+const alias = {
+  '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
+  '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
+};
 
 export default defineConfig({
   test: {

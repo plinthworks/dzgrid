@@ -50,6 +50,7 @@ function typescript(name) {
     types: './index.d.ts',
     exports: {
       '.': { types: './index.d.ts', default: './index.js' },
+      ...(source.exports?.['./internal'] && { './internal': { types: './internal.d.ts', default: './internal.js' } }),
       './package.json': './package.json',
     },
     ...(source.dependencies && { dependencies: source.dependencies }),
