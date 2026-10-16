@@ -80,6 +80,12 @@ Plan: `docs/phase-2-plan.md`; decisions D1–D14 validated 2026-10-16.
 - [x] step 3 kernel: sort toggle, selection, anchor, focus fallback (suites `sort-toggle`, `focus-fallback`).
   **Size budget raised** (decision): the kernel lives in the core (D2), 19.5 kB gz measured,
   budget 21.5 kB (+10 %), K.8's 28 kB untouched.
+- [x] steps 2-3 reviewed (code, tests): events queued, reconcile before modelUpdated, refusals
+- [x] step 4 @dzgrid/dom scaffold and five guards (planted files)
+- [x] step 5 messages en/fr/ar (23 keys; **Arabic to be read by an Arabic reader**)
+- [x] steps 6-7 dir.ts, scheduler, scope, layout CSS
+- [x] steps 4-7 reviewed (code, tests): guards widened, plurals by bundle, scheduler errors
+- [x] steps 8-9 grid shell, virtual rows and columns, pinned segments (jsdom); browser checks with step 19
 
 ### Settled before Phase 2 by spike S11 (2026-10-16, 346 checks, three engines)
 - **Retained row in scaled mode**: at its true distance from the visible rows
