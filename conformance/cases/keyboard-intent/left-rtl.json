@@ -1,0 +1,22 @@
+{
+  "id": "left-rtl",
+  "suite": "keyboard-intent",
+  "description": "ArrowLeft moves toward the end in RTL.",
+  "input": {
+    "key": "ArrowLeft",
+    "dir": "rtl",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "move",
+      "axis": "col",
+      "delta": 1
+    }
+  }
+}

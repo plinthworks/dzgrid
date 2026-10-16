@@ -1,0 +1,22 @@
+{
+  "id": "ctrl-end",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+End goes to the last cell of the grid.",
+  "input": {
+    "key": "End",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "both",
+      "to": "last"
+    }
+  }
+}

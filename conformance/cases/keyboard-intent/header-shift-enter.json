@@ -1,0 +1,21 @@
+{
+  "id": "header-shift-enter",
+  "suite": "keyboard-intent",
+  "description": "Shift+Enter on a header adds it to the sort.",
+  "input": {
+    "key": "Enter",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": true,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "sort",
+      "multi": true
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "ctrl-down",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+ArrowDown goes to the last row.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "row",
+      "to": "last"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "cmd-home-mac",
+  "suite": "keyboard-intent",
+  "description": "On a Mac, Cmd+Home goes to the first cell of the grid.",
+  "input": {
+    "key": "Home",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": true,
+    "ctrl": false,
+    "meta": true,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "both",
+      "to": "first"
+    }
+  }
+}

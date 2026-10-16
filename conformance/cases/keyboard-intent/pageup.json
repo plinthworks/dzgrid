@@ -1,0 +1,21 @@
+{
+  "id": "pageup",
+  "suite": "keyboard-intent",
+  "description": "PageUp moves a page up.",
+  "input": {
+    "key": "PageUp",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "page",
+      "delta": -1
+    }
+  }
+}

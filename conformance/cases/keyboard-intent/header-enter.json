@@ -1,0 +1,21 @@
+{
+  "id": "header-enter",
+  "suite": "keyboard-intent",
+  "description": "Enter on a header sorts by it.",
+  "input": {
+    "key": "Enter",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "sort",
+      "multi": false
+    }
+  }
+}

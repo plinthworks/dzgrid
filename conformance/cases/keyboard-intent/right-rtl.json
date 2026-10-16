@@ -1,0 +1,22 @@
+{
+  "id": "right-rtl",
+  "suite": "keyboard-intent",
+  "description": "ArrowRight moves toward the start in RTL (the start is on the right).",
+  "input": {
+    "key": "ArrowRight",
+    "dir": "rtl",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "move",
+      "axis": "col",
+      "delta": -1
+    }
+  }
+}

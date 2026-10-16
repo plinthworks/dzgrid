@@ -1,0 +1,22 @@
+{
+  "id": "left-ltr",
+  "suite": "keyboard-intent",
+  "description": "ArrowLeft moves toward the start in LTR.",
+  "input": {
+    "key": "ArrowLeft",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "move",
+      "axis": "col",
+      "delta": -1
+    }
+  }
+}

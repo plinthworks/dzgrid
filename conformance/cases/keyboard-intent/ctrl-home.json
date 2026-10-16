@@ -1,0 +1,22 @@
+{
+  "id": "ctrl-home",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+Home goes to the first cell of the grid.",
+  "input": {
+    "key": "Home",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "both",
+      "to": "first"
+    }
+  }
+}

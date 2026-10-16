@@ -1,0 +1,18 @@
+{
+  "id": "header-space",
+  "suite": "keyboard-intent",
+  "description": "Space on a header is no intent (it would select, and a header has no row).",
+  "input": {
+    "key": " ",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

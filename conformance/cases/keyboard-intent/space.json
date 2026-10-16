@@ -1,0 +1,20 @@
+{
+  "id": "space",
+  "suite": "keyboard-intent",
+  "description": "Space toggles the selection of the focused row (older engines name the key Spacebar).",
+  "input": {
+    "key": "Spacebar",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "toggleSelect"
+    }
+  }
+}

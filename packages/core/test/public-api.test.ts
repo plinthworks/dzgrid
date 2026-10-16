@@ -8,11 +8,11 @@ import * as internal from '@dzgrid/core/internal';
  * grid's own layers and tests need lives in `@dzgrid/core/internal`.
  */
 const PUBLIC = [
-  'EMPTY_QUERY', 'MAX_INSTANT', 'MAX_PHYSICAL', 'NO_OVERLAY', 'NO_SELECTION', 'PROBLEM_CODES', 'PrefixSums', 'REBASE', 'REJECTED',
+  'EMPTY_QUERY', 'INTENT_OWNERS', 'MAX_INSTANT', 'MAX_PHYSICAL', 'NO_OVERLAY', 'NO_SELECTION', 'PROBLEM_CODES', 'PrefixSums', 'REBASE', 'REJECTED',
   'addDays', 'anchorFor', 'assignKeys', 'booleanCodec', 'booleanCodecWith', 'canonicalId', 'civilToEpochDay',
   'clearSelection', 'clientRows', 'collatorFor', 'compareDays', 'compilePath', 'createColumnModel', 'dataKey', 'dayCodec', 'dayFieldOrder', 'dayToEpochDay', 'daysInMonth', 'detailKey',
   'enumCodec', 'epochDayToCivil', 'epochDayToDay', 'fold', 'formattersFor', 'groupKey', 'idOfDataKey',
-  'instantCodec', 'instantToDayIn', 'instantToIso', 'isAscii', 'isBlank', 'isKnownZone', 'isLeapYear', 'isSelected',
+  'instantCodec', 'instantToDayIn', 'intentFor', 'instantToIso', 'isAscii', 'isBlank', 'isKnownZone', 'isLeapYear', 'isSelected',
   'layerPlacement', 'localeCtx', 'makeQuery', 'normalizeDigits', 'numberCodec', 'numberCodecWith', 'offsetAt',
   'overscanRows', 'parseDay', 'parseInstant', 'pinnedKey', 'problem', 'quickWords', 'readDayText', 'readInstant',
   'readMachineNumber', 'readNumber', 'reconcileSelection', 'resolveColumns', 'resolveInstantRange', 'resolveWall',

@@ -1,0 +1,22 @@
+{
+  "id": "cmd-down-mac",
+  "suite": "keyboard-intent",
+  "description": "On a Mac, Cmd+ArrowDown goes to the last row.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": true,
+    "ctrl": false,
+    "meta": true,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "row",
+      "to": "last"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "header-up",
+  "suite": "keyboard-intent",
+  "description": "ArrowUp from a header goes nowhere.",
+  "input": {
+    "key": "ArrowUp",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

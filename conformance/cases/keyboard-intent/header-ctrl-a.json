@@ -1,0 +1,20 @@
+{
+  "id": "header-ctrl-a",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+A on a header selects all.",
+  "input": {
+    "key": "a",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "selectAll"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "pagedown",
+  "suite": "keyboard-intent",
+  "description": "PageDown moves a page down.",
+  "input": {
+    "key": "PageDown",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "page",
+      "delta": 1
+    }
+  }
+}

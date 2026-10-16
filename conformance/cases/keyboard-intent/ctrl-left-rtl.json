@@ -1,0 +1,22 @@
+{
+  "id": "ctrl-left-rtl",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+ArrowLeft goes to the last column in RTL.",
+  "input": {
+    "key": "ArrowLeft",
+    "dir": "rtl",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "col",
+      "to": "last"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "outside",
+  "suite": "keyboard-intent",
+  "description": "Keys outside the grid are not the grid's.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "ltr",
+    "owner": "outside",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

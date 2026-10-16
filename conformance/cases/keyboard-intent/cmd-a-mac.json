@@ -1,0 +1,20 @@
+{
+  "id": "cmd-a-mac",
+  "suite": "keyboard-intent",
+  "description": "On a Mac, Cmd+A selects all.",
+  "input": {
+    "key": "a",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": true,
+    "ctrl": false,
+    "meta": true,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "selectAll"
+    }
+  }
+}

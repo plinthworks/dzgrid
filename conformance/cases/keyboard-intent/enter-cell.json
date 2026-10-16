@@ -1,0 +1,18 @@
+{
+  "id": "enter-cell",
+  "suite": "keyboard-intent",
+  "description": "Enter on a cell is no intent in Phase 2 (editing is Phase 4).",
+  "input": {
+    "key": "Enter",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "alt-down",
+  "suite": "keyboard-intent",
+  "description": "Alt with an arrow is left to the system.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": true
+  },
+  "expected": {
+    "intent": null
+  }
+}

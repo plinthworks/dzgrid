@@ -1,0 +1,22 @@
+{
+  "id": "home-rtl",
+  "suite": "keyboard-intent",
+  "description": "Home is logical: the first cell, on the right in RTL.",
+  "input": {
+    "key": "Home",
+    "dir": "rtl",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "col",
+      "to": "first"
+    }
+  }
+}

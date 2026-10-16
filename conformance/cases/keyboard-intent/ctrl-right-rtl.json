@@ -1,0 +1,22 @@
+{
+  "id": "ctrl-right-rtl",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+ArrowRight goes to the first column in RTL.",
+  "input": {
+    "key": "ArrowRight",
+    "dir": "rtl",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "col",
+      "to": "first"
+    }
+  }
+}

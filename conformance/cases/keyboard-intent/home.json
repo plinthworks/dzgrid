@@ -1,0 +1,22 @@
+{
+  "id": "home",
+  "suite": "keyboard-intent",
+  "description": "Home goes to the first cell of the row.",
+  "input": {
+    "key": "Home",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "col",
+      "to": "first"
+    }
+  }
+}

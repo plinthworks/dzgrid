@@ -1,0 +1,18 @@
+{
+  "id": "editor-arrow",
+  "suite": "keyboard-intent",
+  "description": "An editor owns its arrows: no grid intent.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "ltr",
+    "owner": "editor",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

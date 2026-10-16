@@ -1,0 +1,22 @@
+{
+  "id": "up",
+  "suite": "keyboard-intent",
+  "description": "ArrowUp moves one row up.",
+  "input": {
+    "key": "ArrowUp",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "move",
+      "axis": "row",
+      "delta": -1
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "header-right-rtl",
+  "suite": "keyboard-intent",
+  "description": "Arrows move between headers, mirrored in RTL.",
+  "input": {
+    "key": "ArrowRight",
+    "dir": "rtl",
+    "owner": "header",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "move",
+      "axis": "col",
+      "delta": -1
+    }
+  }
+}

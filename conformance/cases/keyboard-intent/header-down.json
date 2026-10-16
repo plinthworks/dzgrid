@@ -1,0 +1,22 @@
+{
+  "id": "header-down",
+  "suite": "keyboard-intent",
+  "description": "ArrowDown from a header goes to the first row.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "move",
+      "axis": "row",
+      "delta": 1
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "filter-input-ctrl-a",
+  "suite": "keyboard-intent",
+  "description": "A filter input owns Ctrl+A (select its text).",
+  "input": {
+    "key": "a",
+    "dir": "ltr",
+    "owner": "filter-input",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

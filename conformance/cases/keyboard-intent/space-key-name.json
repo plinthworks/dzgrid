@@ -1,0 +1,20 @@
+{
+  "id": "space-key-name",
+  "suite": "keyboard-intent",
+  "description": "Space arrives as the key ' '.",
+  "input": {
+    "key": " ",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "toggleSelect"
+    }
+  }
+}

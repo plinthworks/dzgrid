@@ -1,0 +1,18 @@
+{
+  "id": "popup-arrow",
+  "suite": "keyboard-intent",
+  "description": "A popup owns its arrows.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "ltr",
+    "owner": "popup",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

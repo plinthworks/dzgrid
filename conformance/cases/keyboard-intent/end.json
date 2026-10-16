@@ -1,0 +1,22 @@
+{
+  "id": "end",
+  "suite": "keyboard-intent",
+  "description": "End goes to the last cell of the row.",
+  "input": {
+    "key": "End",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "edge",
+      "axis": "col",
+      "to": "last"
+    }
+  }
+}

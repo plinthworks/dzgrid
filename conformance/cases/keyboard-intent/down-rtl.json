@@ -1,0 +1,22 @@
+{
+  "id": "down-rtl",
+  "suite": "keyboard-intent",
+  "description": "Vertical arrows do not depend on direction.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "rtl",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "move",
+      "axis": "row",
+      "delta": 1
+    }
+  }
+}
