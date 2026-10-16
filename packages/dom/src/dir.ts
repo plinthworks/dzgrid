@@ -150,3 +150,9 @@ export function watchDirection(host: HTMLElement, onChange: (d: Dir) => void, sc
     recheck,
   };
 }
+
+/** A wheel's inline distance, logically: toward the end is positive in either direction. */
+export function wheelInline(e: { readonly deltaX: number; readonly deltaMode: number }, dir: Dir, line: number, page: number): number {
+  const d = e.deltaX * (e.deltaMode === 1 ? line : e.deltaMode === 2 ? page : 1);
+  return dir === 'rtl' ? -d : d;
+}

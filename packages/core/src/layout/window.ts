@@ -31,7 +31,25 @@ export function visibleWindow(
   o: { readonly overscanRows: number; readonly overscanCols: number },
 ): Window2D {
   const top = mapper.toLogical(physicalScrollTop);
-  const placement = layerPlacement(top, mapper.toPhysical(top));
+  return windowAt(rows, centerCols, top, mapper.toPhysical(top), scrollInline, view, o);
+}
+
+/**
+ * The same, from a logical offset the grid keeps itself (S11, D5): touch is
+ * mapped relatively, so the physical position is not `toPhysical(logical)`.
+ * The layer goes where the browser's actual `scrollTop` puts the view.
+ */
+export function windowAt(
+  rows: RowLayout,
+  centerCols: PrefixSums,
+  logicalTop: number,
+  physicalScrollTop: number,
+  scrollInline: number,
+  view: WindowView,
+  o: { readonly overscanRows: number; readonly overscanCols: number },
+): Window2D {
+  const top = Math.max(0, logicalTop);
+  const placement = layerPlacement(top, physicalScrollTop);
   const span = (start: number, length: number) => [start, Math.max(start, start + length - 1)] as const;
 
   let r: Window2D['rows'] = null;

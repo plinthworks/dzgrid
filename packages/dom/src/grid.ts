@@ -1,9 +1,10 @@
 import {
-  clientRows, createColumnModel, createKernel, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, visibleWindow,
-  type ClientModel, type ColumnModel, type GridKernel, type LocaleCtx, type RowKey, type ScrollMapper,
+  clientRows, createColumnModel, createKernel, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, windowAt,
+  type ClientModel, type ColumnModel, type DisplayedRows, type GridKernel, type LocaleCtx, type RowKey,
 } from '@dzgrid/core';
 import { LiveRegion } from './a11y/live-region.js';
-import { watchDirection, type Dir } from './dir.js';
+import { isOnScrollbar, watchDirection, wheelInline, type Dir } from './dir.js';
+import { ScrollController } from './interact/scroll.js';
 import { msg } from './messages.js';
 import { HeaderRenderer } from './render/header.js';
 import { domGeometry, type Geometry, type ViewportBox } from './render/measure.js';
@@ -32,6 +33,10 @@ export interface GridEnv {
   readonly geometry?: Geometry;
   /** Render at once instead of on the next frame (tests). */
   readonly sync?: boolean;
+  /** The physical cap above which scrolling is mapped (tests lower it). */
+  readonly maxPhysical?: number;
+  /** Where a pointer is, for the scrollbar drag (tests without layout). */
+  readonly isOnScrollbar?: (e: PointerEvent) => boolean;
 }
 
 const OVERSCAN_ROWS = 4;
@@ -108,8 +113,11 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   const rowRenderer = new RowRenderer<T>(doc, layer);
   let epoch = 0;
   let epochKey = '';
-  let mapper: ScrollMapper | null = null;
   let mapperKey = '';
+  const scroll = new ScrollController(geometry);
+  // What the view showed at the last paint, to keep it in place when rows arrive (anchor, S3).
+  let shown: { displayed: DisplayedRows<T>; key: RowKey | null; delta: number; atTop: boolean; atEnd: boolean } | null = null;
+  let anchorNext = false;
 
   const rowHeight = () => ROW_HEIGHT[settings.density ?? 'comfortable'];
 
@@ -126,13 +134,25 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       epoch++;
     }
     const mk = `${d.count}|${h}|${box.block}`;
-    if (!mapper || mk !== mapperKey) {
+    if (!scroll.mapper || mk !== mapperKey) {
       mapperKey = mk;
-      mapper = scrollMapper(d.count * h, MAX_PHYSICAL, box.block);
+      scroll.setMapper(scrollMapper(d.count * h, env.maxPhysical ?? MAX_PHYSICAL, box.block));
     }
+    const mapper = scroll.mapper!;
+    // Rows added or removed by a transaction: the row at the top of the view stays where it was,
+    // the top stays the top and the end stays the end.
+    if (anchorNext && shown && shown.displayed !== d) {
+      if (shown.atTop) scroll.scrollTo(0);
+      else if (shown.atEnd) scroll.scrollTo(mapper.maxLogical);
+      else if (shown.key !== null) {
+        const at = d.indexOf(shown.key);
+        if (at !== -1) scroll.scrollTo(at * h + shown.delta);
+      }
+    }
+    anchorNext = false;
     const layout = uniformRowLayout(d, h);
     const centerView = Math.max(0, box.inline - L.start.width - L.end.width);
-    const w = visibleWindow(layout, L.center.widths, mapper, box.scrollTop, box.scrollInline, { block: box.block, inline: centerView }, {
+    const w = windowAt(layout, L.center.widths, scroll.logicalTop, scroll.physicalTop, box.scrollInline, { block: box.block, inline: centerView }, {
       overscanRows: settings.overscan?.rows ?? OVERSCAN_ROWS,
       overscanCols: settings.overscan?.cols ?? OVERSCAN_COLS,
     });
@@ -158,6 +178,14 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     };
     const focus = kernel.focus;
     rowRenderer.render(frame, wanted, focus?.kind === 'cell' ? focus.row : null);
+    const topIndex = d.count ? Math.min(d.count - 1, Math.floor(scroll.logicalTop / h)) : -1;
+    shown = {
+      displayed: d,
+      key: topIndex >= 0 ? d.keyAt(d.index(topIndex)!) : null,
+      delta: topIndex >= 0 ? scroll.logicalTop - topIndex * h : 0,
+      atTop: scroll.atTop,
+      atEnd: scroll.atEnd,
+    };
 
     // ---- overlay: the host's state first, then what the counts say ----
     const state = settings.overlay ?? (rows.counts.total === 0 ? 'noRows' : d.count === 0 ? 'noMatches' : null);
@@ -174,8 +202,27 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     scheduler.schedule({ read: () => geometry.read(), write: (box) => paint(box) });
   }
 
-  scope.on(viewport, 'scroll', () => schedule(), { passive: true });
+  scope.on(viewport, 'scroll', () => {
+    scroll.onScroll();
+    schedule();
+  }, { passive: true });
+  // Above the cap the wheel is the grid's: the browser would move ratio times too far.
+  scope.on(viewport, 'wheel', (e: WheelEvent) => {
+    const box = geometry.read();
+    const h = rowHeight();
+    const page = Math.max(h, box.block - h);
+    const block = e.deltaY * (e.deltaMode === 1 ? h : e.deltaMode === 2 ? page : 1);
+    if (!scroll.onWheel(block)) return;
+    e.preventDefault();
+    const inline = wheelInline(e, dir, h, page);
+    if (inline) geometry.writeScrollInline(box.scrollInline + inline);
+    schedule();
+  }, { passive: false });
+  scope.on(viewport, 'pointerdown', (e: PointerEvent) => scroll.pointerDown(env.isOnScrollbar ? env.isOnScrollbar(e) : isOnScrollbar(e, viewport)));
+  scope.on(doc, 'pointerup', () => scroll.pointerUp());
+  scope.on(doc, 'pointercancel', () => scroll.pointerUp());
   scope.add(kernel.subscribe((e) => {
+    if (e.type === 'modelUpdated' && e.kind === 'rows') anchorNext = true;
     settings.onEvent?.(e);
     if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized') schedule();
   }));
@@ -199,16 +246,16 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     },
     ensureVisible(row) {
       const i = rows.displayed.indexOf(row);
-      if (i === -1 || !mapper) return;
+      if (i === -1) return;
       const box = geometry.read();
       const h = rowHeight();
-      const top = mapper.toLogical(box.scrollTop);
+      const top = scroll.logicalTop;
       const off = i * h;
       let next = top;
       if (off < top) next = off;
       else if (off + h > top + box.block) next = off + h - box.block;
       if (next !== top) {
-        geometry.writeScrollTop(mapper.toPhysical(next));
+        scroll.scrollTo(next);
         schedule();
       }
     },
@@ -216,10 +263,18 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     announce: (text) => live.announce(text),
   };
 
-  const instance: GridInstance<T> & { readonly scope: Scope } = {
+  const instance: GridInstance<T> & { readonly scope: Scope; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
     kernel,
     api,
     scope,
+    scroll: {
+      get logicalTop() { return scroll.logicalTop; },
+      get mapper() { return scroll.mapper; },
+      scrollTo(l: number) {
+        scroll.scrollTo(l);
+        schedule();
+      },
+    },
     update(patch) {
       const prev = settings;
       settings = { ...settings, ...patch };

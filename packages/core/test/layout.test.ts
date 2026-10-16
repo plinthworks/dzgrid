@@ -80,3 +80,14 @@ describe('overscanRows', () => {
     expect(overscanRows(Number.NaN, 32)).toBe(4);
   });
 });
+
+describe('windowAt', () => {
+  it('takes the logical offset as given and puts the layer where the physical scroll is', async () => {
+    const { windowAt, uniformRowLayout, PrefixSums } = await import('@dzgrid/core');
+    const rows = { count: 1000, index: (n: number) => (n >= 0 && n < 1000 ? (n as never) : null) };
+    const w = windowAt(uniformRowLayout(rows, 32), new PrefixSums([100, 100]), 3200 + 5, 777, 0, { block: 320, inline: 200 }, { overscanRows: 0, overscanCols: 0 });
+    expect(w.rows).toEqual({ first: 100, last: 110 });
+    // The layer's top plus a row's offset from the base is where the view shows it.
+    expect(w.placement.layerTop + (3200 - w.placement.base)).toBe(777 - 5);
+  });
+});
