@@ -37,6 +37,8 @@ export interface GridEnv {
   readonly maxPhysical?: number;
   /** Where a pointer is, for the scrollbar drag (tests without layout). */
   readonly isOnScrollbar?: (e: PointerEvent) => boolean;
+  /** Frames, when not the window's (tests). */
+  readonly raf?: Pick<Window, 'requestAnimationFrame' | 'cancelAnimationFrame'>;
 }
 
 const OVERSCAN_ROWS = 4;
@@ -107,7 +109,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   const rows: ClientModel<T> = clientRows<T>({ rows: settings.rows ?? [], getRowId: settings.getRowId, columns, ctx });
   const kernel = createKernel<T>({ rows, columns });
   const geometry = env.geometry ?? domGeometry(viewport, header, () => dir);
-  const scheduler = new FrameScheduler(win, env.sync === true);
+  const scheduler = new FrameScheduler(env.raf ?? win, env.sync === true);
 
   const headerRenderer = new HeaderRenderer(doc, header);
   const rowRenderer = new RowRenderer<T>(doc, layer);
@@ -121,7 +123,19 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
 
   const rowHeight = () => ROW_HEIGHT[settings.density ?? 'comfortable'];
 
+  let available = -1;
+  let colIndexOf: { version: number; index: Map<string, number> } = { version: -1, index: new Map() };
+  /** A cell to focus once it is mounted (focusCell on a row or column not yet rendered). */
+  let pendingFocus: { row: RowKey; column: string } | null = null;
+
+  let paints = 0;
   function paint(box: ViewportBox): void {
+    paints++;
+    // Flexible columns share what the view has: follow it.
+    if (box.inline !== available && box.inline > 0) {
+      available = box.inline;
+      columns.setAvailableInline(box.inline);
+    }
     const d = rows.displayed;
     const h = rowHeight();
     const L = columns.layout;
@@ -166,7 +180,8 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     setPx(body, 'inline-size', L.totalWidth);
     setPx(layer, 'inset-block-start', w.placement.layerTop);
 
-    const index = new Map(visible.map((c, i) => [c.id, i + 1]));
+    if (colIndexOf.version !== columns.version) colIndexOf = { version: columns.version, index: new Map(visible.map((c, i) => [c.id, i + 1])) };
+    const index = colIndexOf.index;
     const colIndex = (id: string) => index.get(id) ?? 0;
     headerRenderer.render(L, w.cols, h, colIndex, () => {});
 
@@ -186,6 +201,13 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       atTop: scroll.atTop,
       atEnd: scroll.atEnd,
     };
+    if (pendingFocus) {
+      const cell = rowRenderer.cell(pendingFocus.row, pendingFocus.column);
+      if (cell) {
+        pendingFocus = null;
+        cell.focus({ preventScroll: true });
+      }
+    }
 
     // ---- overlay: the host's state first, then what the counts say ----
     const state = settings.overlay ?? (rows.counts.total === 0 ? 'noRows' : d.count === 0 ? 'noMatches' : null);
@@ -194,12 +216,22 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       const text = msg(settings.messages, state === 'loading' ? 'grid.loading' : state === 'error' ? 'grid.error' : state === 'noRows' ? 'grid.noRows' : 'grid.noMatches', {}, ctx);
       if (overlay.textContent !== text) overlay.textContent = text;
       setPx(overlay, 'inset-block-start', h);
-    }
+    } else if (overlay.textContent) overlay.textContent = '';
   }
 
+  // One paint per frame, whatever asked for it.
+  let queued = false;
+  const job = {
+    read: () => geometry.read(),
+    write: (box: ViewportBox) => {
+      queued = false;
+      paint(box);
+    },
+  };
   function schedule(): void {
-    if (scope.isDisposed) return;
-    scheduler.schedule({ read: () => geometry.read(), write: (box) => paint(box) });
+    if (scope.isDisposed || queued) return;
+    queued = true;
+    scheduler.schedule(job);
   }
 
   scope.on(viewport, 'scroll', () => {
@@ -224,7 +256,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   scope.add(kernel.subscribe((e) => {
     if (e.type === 'modelUpdated' && e.kind === 'rows') anchorNext = true;
     settings.onEvent?.(e);
-    if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized') schedule();
+    if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized' || e.type === 'columnsChanged') schedule();
   }));
   if (win && 'ResizeObserver' in win) {
     const ro = new win.ResizeObserver(() => {
@@ -240,14 +272,32 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
 
   const api: GridApi = {
     focusCell(row, column) {
-      kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row, column } }, 'api');
+      if (!kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row, column } }, 'api').ok) return;
       api.ensureVisible(row, column);
-      rowRenderer.cell(row, column)?.focus({ preventScroll: true });
+      // Mounted now, or at the next paint: the grid scrolls, then focuses without scrolling (S10).
+      const cell = rowRenderer.cell(row, column);
+      if (cell && !queued) cell.focus({ preventScroll: true });
+      else {
+        pendingFocus = { row, column };
+        schedule();
+      }
     },
-    ensureVisible(row) {
+    ensureVisible(row, column) {
       const i = rows.displayed.indexOf(row);
       if (i === -1) return;
       const box = geometry.read();
+      // Inline: a centre column comes clear of the pinned segments.
+      const L = columns.layout;
+      const c = column === undefined ? -1 : L.center.columns.findIndex((x) => x.id === column);
+      if (c !== -1) {
+        const view = Math.max(0, box.inline - L.start.width - L.end.width);
+        const start = L.center.widths.offsetOf(c);
+        const end = start + L.center.widths.sizeAt(c);
+        let x = box.scrollInline;
+        if (start < x) x = start;
+        else if (end > x + view) x = end - view;
+        if (x !== box.scrollInline) geometry.writeScrollInline(x);
+      }
       const h = rowHeight();
       const top = scroll.logicalTop;
       const off = i * h;
@@ -263,10 +313,11 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     announce: (text) => live.announce(text),
   };
 
-  const instance: GridInstance<T> & { readonly scope: Scope; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
+  const instance: GridInstance<T> & { readonly scope: Scope; readonly paints: number; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
     kernel,
     api,
     scope,
+    get paints() { return paints; },
     scroll: {
       get logicalTop() { return scroll.logicalTop; },
       get mapper() { return scroll.mapper; },
@@ -282,13 +333,14 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
         columns.setDefs(patch.columns);
         rows.setColumns(columns, 'host');
       }
-      if (patch.locale !== undefined || patch.timeZone !== undefined || patch.numerals !== undefined || (patch.messages && patch.messages.locale !== prev.messages.locale && !settings.locale)) {
+      // `in`, not `!== undefined`: clearing a setting goes back to its default.
+      if ('locale' in patch || 'timeZone' in patch || 'numerals' in patch || (patch.messages && patch.messages.locale !== prev.messages.locale && !settings.locale)) {
         ctx = ctxOf(settings);
         rows.setContext(ctx, 'host');
       }
       if (patch.rows) rows.setRows(patch.rows, 'host');
       direction.recheck();
-      if (patch.direction !== undefined) applyDir();
+      if ('direction' in patch) applyDir();
       schedule();
     },
     destroy() {

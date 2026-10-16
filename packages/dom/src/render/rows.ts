@@ -225,11 +225,12 @@ export class RowRenderer<T> {
     if (cell.col !== col) {
       cell.col = col;
       setAttr(cell.el, 'data-col', col.id);
-      setAttr(cell.el, 'role', col.id === f.rowHeader ? 'rowheader' : 'gridcell');
       setAttr(cell.el, 'data-align', col.def.align ?? (col.type === 'number' ? 'end' : null));
       const cls = valueClass(col);
       if (cell.value.className !== cls) cell.value.className = cls;
     }
+    // The identity column is the frame's (it moves when columns are hidden or moved).
+    setAttr(cell.el, 'role', col.id === f.rowHeader ? 'rowheader' : 'gridcell');
     setAttr(cell.el, 'aria-colindex', String(f.colIndex(col.id)));
     if (cell.inlineSize !== w) {
       cell.inlineSize = w;

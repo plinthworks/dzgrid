@@ -4,7 +4,7 @@
  * cannot forget one as features add theirs. Taken from DzCalendar.
  */
 export class Scope {
-  readonly #cleanups: (() => void)[] = [];
+  readonly #cleanups = new Set<() => void>();
   #listeners = 0;
   #disposed = false;
 
@@ -24,14 +24,29 @@ export class Scope {
     this.add(() => o.disconnect());
   }
 
-  timeout(fn: () => void, ms: number): void {
-    const id = setTimeout(fn, ms);
-    this.add(() => clearTimeout(id));
+  /** A timer, cleared on dispose; returns its cancel. A timer that fired lets go of its cleanup. */
+  timeout(fn: () => void, ms: number): () => void {
+    if (this.#disposed) return () => {};
+    const cancel = (): void => {
+      clearTimeout(id);
+      this.#cleanups.delete(cancel);
+    };
+    const id = setTimeout(() => {
+      this.#cleanups.delete(cancel);
+      fn();
+    }, ms);
+    this.#cleanups.add(cancel);
+    return cancel;
   }
 
   add(cleanup: () => void): void {
     if (this.#disposed) cleanup();
-    else this.#cleanups.push(cleanup);
+    else this.#cleanups.add(cleanup);
+  }
+
+  /** Cleanups still held: listeners, observers, timers not yet fired. */
+  get pending(): number {
+    return this.#cleanups.size;
   }
 
   get listenerCount(): number {
@@ -44,7 +59,9 @@ export class Scope {
 
   dispose(): void {
     this.#disposed = true;
-    for (const fn of this.#cleanups.splice(0).reverse()) {
+    const all = [...this.#cleanups].reverse();
+    this.#cleanups.clear();
+    for (const fn of all) {
       try {
         fn();
       } catch (err) {

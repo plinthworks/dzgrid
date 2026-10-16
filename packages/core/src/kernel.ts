@@ -42,6 +42,7 @@ export type GridEvent<T> =
   | { readonly type: 'sortChanged'; readonly source: ChangeSource; readonly sort: readonly SortItem[] }
   | { readonly type: 'selectionChanged'; readonly source: ChangeSource; readonly selection: SelectionState; readonly count: number | null }
   | { readonly type: 'columnResized'; readonly source: ChangeSource; readonly column: string; readonly width: number; readonly finished: boolean }
+  | { readonly type: 'columnsChanged'; readonly source: ChangeSource; readonly changed: readonly string[]; readonly layoutChanged: boolean }
   | { readonly type: 'focusChanged'; readonly source: ChangeSource; readonly focus: FocusPos | null }
   | { readonly type: 'cellClicked'; readonly source: 'user'; readonly row: RowNode<T>; readonly column: string }
   | { readonly type: 'problems'; readonly source: ChangeSource; readonly problems: readonly Problem[] }
@@ -211,6 +212,7 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
       case 'column.state': {
         const change = columns.apply(cmd.patch, source);
         if (change.problems.length) emit({ type: 'problems', source, problems: change.problems });
+        if (change.changed.length) emit({ type: 'columnsChanged', source, changed: change.changed, layoutChanged: change.layoutChanged });
         const before = rows.displayed;
         rows.setColumns(columns, source);
         // Columns can change without the rows changing (a column hidden that no filter reads):

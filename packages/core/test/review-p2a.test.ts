@@ -160,7 +160,7 @@ describe('phase 2 kernel review', () => {
       k2.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: k('r0'), column: 't' } }, 'user');
       events = log(k2);
       k2.dispatch({ type: 'column.state', patch: [{ id: 't', hidden: true }] }, 'user');
-      expect(events).toEqual(['modelUpdated:user:context', 'focusChanged:data']);
+      expect(events).toEqual(['columnsChanged:user', 'modelUpdated:user:context', 'focusChanged:data']);
       expect(k2.focus).toEqual({ kind: 'cell', row: k('r0'), column: 'n' });
     });
 
@@ -232,5 +232,17 @@ describe('phase 2 kernel review', () => {
       expect(kernel.dispatch({ type: 'sort.set', sort: [{ column: 'zz', dir: 'asc' }] }, 'user')).toMatchObject({ ok: false, reason: 'unknown-column' });
       expect(events).toEqual([]);
     });
+  });
+});
+
+describe('column.state events', () => {
+  it('says which columns changed, a width alone included', () => {
+    const columns = createColumnModel<{ id: string }>([{ id: 'a' }, { id: 'b' }]);
+    const model = clientRows<{ id: string }>({ rows: [{ id: '1' }], getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }) });
+    const kernel = createKernel({ rows: model, columns });
+    const events: string[] = [];
+    kernel.subscribe((e) => events.push(e.type === 'columnsChanged' ? `columnsChanged:${e.source}:${e.changed.join()}:${e.layoutChanged}` : e.type));
+    kernel.dispatch({ type: 'column.state', patch: [{ id: 'a', width: 222 }] }, 'host');
+    expect(events).toEqual(['columnsChanged:host:a:true']);
   });
 });

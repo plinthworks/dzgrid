@@ -16,9 +16,14 @@ export class LiveRegion {
     this.#scope = scope;
   }
 
+  #cancel: (() => void) | null = null;
+
+  /** A newer sentence replaces one not yet said: it is never read late, out of order. */
   announce(text: string): void {
+    this.#cancel?.();
     this.el.textContent = '';
-    this.#scope.timeout(() => {
+    this.#cancel = this.#scope.timeout(() => {
+      this.#cancel = null;
       this.el.textContent = text;
     }, 50);
   }
