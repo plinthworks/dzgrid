@@ -1,0 +1,31 @@
+{
+  "id": "multi-in-place",
+  "suite": "sort-toggle",
+  "description": "Shift on a sorted column cycles it in place, keeping precedence.",
+  "input": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc"
+      },
+      {
+        "column": "b",
+        "dir": "asc"
+      }
+    ],
+    "column": "a",
+    "multi": true
+  },
+  "expected": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "desc"
+      },
+      {
+        "column": "b",
+        "dir": "asc"
+      }
+    ]
+  }
+}

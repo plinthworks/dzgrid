@@ -1,0 +1,29 @@
+{
+  "id": "no-columns",
+  "suite": "focus-fallback",
+  "description": "No visible column: no focus.",
+  "input": {
+    "before": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "after": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "focus": {
+      "kind": "header",
+      "column": "x"
+    },
+    "columns": []
+  },
+  "expected": {
+    "focus": null
+  }
+}

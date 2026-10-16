@@ -1,0 +1,18 @@
+{
+  "id": "first-click",
+  "suite": "sort-toggle",
+  "description": "A first click sorts ascending.",
+  "input": {
+    "sort": [],
+    "column": "a",
+    "multi": false
+  },
+  "expected": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc"
+      }
+    ]
+  }
+}

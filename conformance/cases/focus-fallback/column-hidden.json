@@ -1,0 +1,37 @@
+{
+  "id": "column-hidden",
+  "suite": "focus-fallback",
+  "description": "A column no longer visible gives way to the first visible column.",
+  "input": {
+    "before": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "after": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "focus": {
+      "kind": "cell",
+      "row": "c",
+      "column": "z"
+    },
+    "columns": [
+      "x",
+      "y"
+    ]
+  },
+  "expected": {
+    "focus": {
+      "kind": "cell",
+      "row": "c",
+      "column": "x"
+    }
+  }
+}

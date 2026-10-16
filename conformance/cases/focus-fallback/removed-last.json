@@ -1,0 +1,36 @@
+{
+  "id": "removed-last",
+  "suite": "focus-fallback",
+  "description": "The last row removed gives focus to the new last row.",
+  "input": {
+    "before": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "after": [
+      "a",
+      "b",
+      "c",
+      "d"
+    ],
+    "focus": {
+      "kind": "cell",
+      "row": "e",
+      "column": "y"
+    },
+    "columns": [
+      "x",
+      "y"
+    ]
+  },
+  "expected": {
+    "focus": {
+      "kind": "cell",
+      "row": "d",
+      "column": "y"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "third-click",
+  "suite": "sort-toggle",
+  "description": "A third click removes the sort.",
+  "input": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "desc"
+      }
+    ],
+    "column": "a",
+    "multi": false
+  },
+  "expected": {
+    "sort": []
+  }
+}

@@ -70,6 +70,17 @@ machine, not this one). Details in each `spikes/<id>/README.md`.
 - Real wheel, trackpad and touch scrolling; a mid-range laptop; Safari itself.
 - Before Phase 4: Enter in an editor (stay or move down); an edited row that disappears (commit or cancel).
 
+## Phase 2 — read-only DOM, theme, RTL, accessibility (in progress)
+
+Plan: `docs/phase-2-plan.md`; decisions D1–D14 validated 2026-10-16.
+
+- [x] step 0 spike S11 (above)
+- [x] step 1 behaviour sheets
+- [x] step 2 keyboard intents in the core (45 cases)
+- [x] step 3 kernel: sort toggle, selection, anchor, focus fallback (suites `sort-toggle`, `focus-fallback`).
+  **Size budget raised** (decision): the kernel lives in the core (D2), 19.5 kB gz measured,
+  budget 21.5 kB (+10 %), K.8's 28 kB untouched.
+
 ### Settled before Phase 2 by spike S11 (2026-10-16, 346 checks, three engines)
 - **Retained row in scaled mode**: at its true distance from the visible rows
   (bounded to ±2·REBASE), with `overflow: clip` on the body so it never grows

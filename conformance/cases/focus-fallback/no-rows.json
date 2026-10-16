@@ -1,0 +1,30 @@
+{
+  "id": "no-rows",
+  "suite": "focus-fallback",
+  "description": "No rows left: focus goes to the header of its column.",
+  "input": {
+    "before": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "after": [],
+    "focus": {
+      "kind": "cell",
+      "row": "c",
+      "column": "y"
+    },
+    "columns": [
+      "x",
+      "y"
+    ]
+  },
+  "expected": {
+    "focus": {
+      "kind": "header",
+      "column": "y"
+    }
+  }
+}

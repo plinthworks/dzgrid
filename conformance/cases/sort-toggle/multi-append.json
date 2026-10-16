@@ -1,0 +1,27 @@
+{
+  "id": "multi-append",
+  "suite": "sort-toggle",
+  "description": "Shift adds a column at the end of the sort.",
+  "input": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc"
+      }
+    ],
+    "column": "b",
+    "multi": true
+  },
+  "expected": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc"
+      },
+      {
+        "column": "b",
+        "dir": "asc"
+      }
+    ]
+  }
+}

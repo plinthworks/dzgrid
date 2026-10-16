@@ -1,0 +1,29 @@
+{
+  "id": "header-stays",
+  "suite": "focus-fallback",
+  "description": "A header focus stays while its column is visible.",
+  "input": {
+    "before": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "after": [],
+    "focus": {
+      "kind": "header",
+      "column": "y"
+    },
+    "columns": [
+      "x",
+      "y"
+    ]
+  },
+  "expected": {
+    "focus": {
+      "kind": "header",
+      "column": "y"
+    }
+  }
+}

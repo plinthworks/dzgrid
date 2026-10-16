@@ -1,0 +1,27 @@
+{
+  "id": "other-column",
+  "suite": "sort-toggle",
+  "description": "A click on another column replaces the sort.",
+  "input": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc"
+      },
+      {
+        "column": "b",
+        "dir": "desc"
+      }
+    ],
+    "column": "c",
+    "multi": false
+  },
+  "expected": {
+    "sort": [
+      {
+        "column": "c",
+        "dir": "asc"
+      }
+    ]
+  }
+}

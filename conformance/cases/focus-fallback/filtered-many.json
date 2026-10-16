@@ -1,0 +1,32 @@
+{
+  "id": "filtered-many",
+  "suite": "focus-fallback",
+  "description": "Many rows filtered out: focus takes the row at its old index, or the last.",
+  "input": {
+    "before": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "after": [
+      "a"
+    ],
+    "focus": {
+      "kind": "cell",
+      "row": "d",
+      "column": "x"
+    },
+    "columns": [
+      "x"
+    ]
+  },
+  "expected": {
+    "focus": {
+      "kind": "cell",
+      "row": "a",
+      "column": "x"
+    }
+  }
+}

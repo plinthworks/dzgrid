@@ -1,0 +1,25 @@
+{
+  "id": "keeps-nulls",
+  "suite": "sort-toggle",
+  "description": "Cycling keeps a column's blank placement.",
+  "input": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc",
+        "nulls": "first"
+      }
+    ],
+    "column": "a",
+    "multi": false
+  },
+  "expected": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "desc",
+        "nulls": "first"
+      }
+    ]
+  }
+}

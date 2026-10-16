@@ -21,3 +21,5 @@ export { compileQuick, canNarrow } from './filter/quick.js';
 export { storeOf } from './model/client.js';
 export { Haystack } from './model/haystack.js';
 export type { HayKind } from './model/column-cache.js';
+export { emit } from './kernel.js';
+export { sameFocus } from './focus.js';

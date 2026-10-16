@@ -1,0 +1,23 @@
+{
+  "id": "second-click",
+  "suite": "sort-toggle",
+  "description": "A second click sorts descending.",
+  "input": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc"
+      }
+    ],
+    "column": "a",
+    "multi": false
+  },
+  "expected": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "desc"
+      }
+    ]
+  }
+}

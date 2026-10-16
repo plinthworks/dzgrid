@@ -1,0 +1,35 @@
+{
+  "id": "multi-remove",
+  "suite": "sort-toggle",
+  "description": "Shift on a descending column removes it, the others keep their order.",
+  "input": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc"
+      },
+      {
+        "column": "b",
+        "dir": "desc"
+      },
+      {
+        "column": "c",
+        "dir": "asc"
+      }
+    ],
+    "column": "b",
+    "multi": true
+  },
+  "expected": {
+    "sort": [
+      {
+        "column": "a",
+        "dir": "asc"
+      },
+      {
+        "column": "c",
+        "dir": "asc"
+      }
+    ]
+  }
+}

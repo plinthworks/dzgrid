@@ -1,0 +1,37 @@
+{
+  "id": "still-displayed",
+  "suite": "focus-fallback",
+  "description": "Focus stays on its row while the row is displayed, wherever it moved.",
+  "input": {
+    "before": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "after": [
+      "e",
+      "d",
+      "c",
+      "b",
+      "a"
+    ],
+    "focus": {
+      "kind": "cell",
+      "row": "b",
+      "column": "x"
+    },
+    "columns": [
+      "x",
+      "y"
+    ]
+  },
+  "expected": {
+    "focus": {
+      "kind": "cell",
+      "row": "b",
+      "column": "x"
+    }
+  }
+}

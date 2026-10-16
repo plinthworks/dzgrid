@@ -1,0 +1,36 @@
+{
+  "id": "removed-middle",
+  "suite": "focus-fallback",
+  "description": "A removed row gives focus to the row now at its index.",
+  "input": {
+    "before": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "after": [
+      "a",
+      "c",
+      "d",
+      "e"
+    ],
+    "focus": {
+      "kind": "cell",
+      "row": "b",
+      "column": "x"
+    },
+    "columns": [
+      "x",
+      "y"
+    ]
+  },
+  "expected": {
+    "focus": {
+      "kind": "cell",
+      "row": "c",
+      "column": "x"
+    }
+  }
+}
