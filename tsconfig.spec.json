@@ -6,12 +6,28 @@
     "strict": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["vitest/globals", "node"],
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": [
+      "vitest/globals",
+      "node"
+    ],
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "paths": {
-      "@dzgrid/core": ["./packages/core/src/index.ts"]
+      "@dzgrid/core": [
+        "./packages/core/src/index.ts"
+      ]
     }
   },
-  "include": ["packages/**/*.ts", "conformance/**/*.ts", "spikes/**/*.ts", "playground/**/*.ts"],
-  "exclude": ["**/dist/**", "**/node_modules/**"]
+  "include": [
+    "packages/**/*.ts",
+    "conformance/**/*.ts",
+    "playground/**/*.ts"
+  ],
+  "exclude": [
+    "**/dist/**",
+    "**/node_modules/**"
+  ]
 }
