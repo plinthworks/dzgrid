@@ -1,0 +1,25 @@
+{
+  "id": "duplicate-row-id",
+  "suite": "problems",
+  "description": "A second row with one id is refused.",
+  "input": {
+    "op": "replaceAll",
+    "rows": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "a"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "duplicate-row-id",
+        "severity": "error",
+        "path": "rows[1]"
+      }
+    ]
+  }
+}

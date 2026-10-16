@@ -1,0 +1,36 @@
+{
+  "id": "invalid-day",
+  "suite": "problems",
+  "description": "A day filter on 31 February.",
+  "input": {
+    "op": "filter",
+    "columns": [
+      {
+        "id": "born",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "born": "2000-01-01"
+      }
+    ],
+    "filter": {
+      "born": {
+        "type": "day",
+        "op": "equals",
+        "value": "2026-02-31"
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-day",
+        "severity": "error",
+        "path": "filter.born.value"
+      }
+    ]
+  }
+}

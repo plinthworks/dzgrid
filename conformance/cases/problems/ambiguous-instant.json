@@ -1,0 +1,36 @@
+{
+  "id": "ambiguous-instant",
+  "suite": "problems",
+  "description": "A moment without its offset.",
+  "input": {
+    "op": "filter",
+    "columns": [
+      {
+        "id": "created",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "created": "2026-03-05T10:00:00Z"
+      }
+    ],
+    "filter": {
+      "created": {
+        "type": "instant",
+        "op": "before",
+        "at": "2026-03-05T10:00"
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "ambiguous-instant",
+        "severity": "error",
+        "path": "filter.created.at"
+      }
+    ]
+  }
+}

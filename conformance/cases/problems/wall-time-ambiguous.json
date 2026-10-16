@@ -1,0 +1,36 @@
+{
+  "id": "wall-time-ambiguous",
+  "suite": "problems",
+  "description": "Loaded data with a Paris wall time the autumn change repeated.",
+  "input": {
+    "op": "sort",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant",
+        "assumeZone": "Europe/Paris"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "t": "2026-10-25T02:30"
+      }
+    ],
+    "sort": [
+      {
+        "column": "t",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "wall-time-ambiguous",
+        "severity": "warning",
+        "path": "rows[0].t"
+      }
+    ]
+  }
+}

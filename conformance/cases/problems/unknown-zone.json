@@ -1,0 +1,24 @@
+{
+  "id": "unknown-zone",
+  "suite": "problems",
+  "description": "A column that assumes a zone the engine does not know.",
+  "input": {
+    "op": "columns",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant",
+        "assumeZone": "Mars/Olympus_Mons"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unknown-zone",
+        "severity": "error",
+        "path": "columns[0].assumeZone"
+      }
+    ]
+  }
+}

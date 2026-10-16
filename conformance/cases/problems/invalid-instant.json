@@ -1,0 +1,36 @@
+{
+  "id": "invalid-instant",
+  "suite": "problems",
+  "description": "A moment that is no moment.",
+  "input": {
+    "op": "filter",
+    "columns": [
+      {
+        "id": "created",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "created": "2026-03-05T10:00:00Z"
+      }
+    ],
+    "filter": {
+      "created": {
+        "type": "instant",
+        "op": "before",
+        "at": "tomorrow"
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-instant",
+        "severity": "error",
+        "path": "filter.created.at"
+      }
+    ]
+  }
+}

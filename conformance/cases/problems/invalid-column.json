@@ -1,0 +1,22 @@
+{
+  "id": "invalid-column",
+  "suite": "problems",
+  "description": "A column without an id.",
+  "input": {
+    "op": "columns",
+    "columns": [
+      {
+        "type": "number"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-column",
+        "severity": "error",
+        "path": "columns[0]"
+      }
+    ]
+  }
+}

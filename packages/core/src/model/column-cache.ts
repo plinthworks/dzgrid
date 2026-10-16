@@ -20,11 +20,12 @@ export interface ColumnEnv<T> {
 export const THREW: unique symbol = Symbol('dzgrid.threw');
 
 /** The coerced value of a raw cell, or null; `bad` is set when a non-blank value could not be read. */
-function coerceCell<T>(col: ResolvedColumn<T>, raw: unknown, env: ColumnEnv<T>): { v: unknown; bad: string | null } {
-  if (raw === THREW) return { v: null, bad: 'read threw' };
-  if (isBlank(raw)) return { v: null, bad: null };
+function coerceCell<T>(col: ResolvedColumn<T>, raw: unknown, env: ColumnEnv<T>): { v: unknown; bad: string | null; warn: 'wall-time-skipped' | 'wall-time-ambiguous' | null } {
+  if (raw === THREW) return { v: null, bad: 'read threw', warn: null };
+  if (isBlank(raw)) return { v: null, bad: null, warn: null };
   const v = col.codec.coerce(raw, env.ctx);
-  return v === null ? { v: null, bad: typeof raw } : { v, bad: null };
+  if (v === null) return { v: null, bad: typeof raw, warn: null };
+  return { v, bad: null, warn: col.codec.warning ? col.codec.warning(raw, env.ctx) : null };
 }
 
 /** At most this many invalid cells are reported per column; the rest are counted. */
@@ -77,12 +78,15 @@ export class ColumnCache<T> {
     let blanks = 0;
     let invalid = 0;
     for (let i = 0; i < n; i++) {
-      const { v, bad } = coerceCell(col, ColumnCache.raw(col, env, i), env);
+      const { v, bad, warn } = coerceCell(col, ColumnCache.raw(col, env, i), env);
       if (v === null) {
         keys[i] = Number.NaN;
         blanks++;
         if (bad && invalid++ < MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows[${i}].${col.id}`, bad));
-      } else keys[i] = col.codec.sortKey(v, env.ctx) as number;
+      } else {
+        keys[i] = col.codec.sortKey(v, env.ctx) as number;
+        if (warn && invalid++ < MAX_CELL_PROBLEMS) problems.push(problem(warn, 'warning', `rows[${i}].${col.id}`));
+      }
     }
     if (invalid > MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows.${col.id}`, `${invalid - MAX_CELL_PROBLEMS} more`));
     const entry = { col, version: env.source.version, reader: env.reader.version, ctx, keys, blanks, problems };

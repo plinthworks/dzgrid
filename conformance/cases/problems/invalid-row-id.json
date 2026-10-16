@@ -1,0 +1,22 @@
+{
+  "id": "invalid-row-id",
+  "suite": "problems",
+  "description": "An empty id identifies nothing.",
+  "input": {
+    "op": "replaceAll",
+    "rows": [
+      {
+        "id": ""
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-row-id",
+        "severity": "error",
+        "path": "rows[0]"
+      }
+    ]
+  }
+}

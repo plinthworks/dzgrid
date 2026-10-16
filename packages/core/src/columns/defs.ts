@@ -7,6 +7,7 @@ import { enumCodec, type EnumOption } from '../value/codecs/enum.js';
 import { instantCodec } from '../value/codecs/instant.js';
 import { numberCodecWith } from '../value/codecs/number.js';
 import { textCodec } from '../value/codecs/text.js';
+import { isKnownZone } from '../value/zone-day.js';
 
 /** A side of the grid, logically: in right-to-left the start is on the right. Never left or right. */
 export type Side = 'start' | 'end';
@@ -127,6 +128,7 @@ export function resolveColumns<T>(defs: readonly ColumnDef<T, any>[]): {
       return void problems.push(problem('invalid-column', 'error', `${at}.pinned`));
     }
     if (def.type !== undefined && !COLUMN_TYPES.has(def.type)) return void problems.push(problem('invalid-column', 'error', `${at}.type`));
+    if (def.assumeZone !== undefined && !isKnownZone(def.assumeZone)) return void problems.push(problem('unknown-zone', 'error', `${at}.assumeZone`));
     const type = def.type ?? 'text';
     const codec = codecFor(def, type);
     if (typeof codec === 'string') return void problems.push(problem('invalid-column', 'error', at, codec));

@@ -1,0 +1,36 @@
+{
+  "id": "invalid-sort",
+  "suite": "problems",
+  "description": "A direction that is no direction.",
+  "input": {
+    "op": "sort",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "name": "x",
+        "v": 1
+      }
+    ],
+    "sort": [
+      {
+        "column": "v",
+        "dir": "sideways"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-sort",
+        "severity": "error",
+        "path": "sort[0]"
+      }
+    ]
+  }
+}

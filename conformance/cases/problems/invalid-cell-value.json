@@ -1,0 +1,39 @@
+{
+  "id": "invalid-cell-value",
+  "suite": "problems",
+  "description": "A number column holding text, found while sorting.",
+  "input": {
+    "op": "sort",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": "abc"
+      }
+    ],
+    "sort": [
+      {
+        "column": "v",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-cell-value",
+        "severity": "warning",
+        "path": "rows[1].v"
+      }
+    ]
+  }
+}

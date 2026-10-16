@@ -1,0 +1,36 @@
+{
+  "id": "unknown-column",
+  "suite": "problems",
+  "description": "A sort on a column that does not exist.",
+  "input": {
+    "op": "sort",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "name": "x",
+        "v": 1
+      }
+    ],
+    "sort": [
+      {
+        "column": "zz",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unknown-column",
+        "severity": "error",
+        "path": "sort[0]"
+      }
+    ]
+  }
+}

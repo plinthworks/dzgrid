@@ -21,6 +21,8 @@ export interface ValueCodec<V> {
   coerce(raw: unknown, ctx: LocaleCtx): V | null;
   /** Why `coerce` gave null for a non-blank value, as a problem code or detail. */
   why?(raw: unknown, ctx: LocaleCtx): string;
+  /** A warning about a value `coerce` accepted by making a choice (a wall time inside a clock change). */
+  warning?(raw: unknown, ctx: LocaleCtx): 'wall-time-skipped' | 'wall-time-ambiguous' | null;
   /** Typed or pasted text; empty text is REJECTED except for text columns. */
   parse(text: string, ctx: LocaleCtx): V | Rejected;
   format(v: V, ctx: LocaleCtx): string;

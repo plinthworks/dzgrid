@@ -1,0 +1,36 @@
+{
+  "id": "wall-time-skipped",
+  "suite": "problems",
+  "description": "Loaded data with a Paris wall time the spring change skipped: read compatible, with a warning.",
+  "input": {
+    "op": "sort",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant",
+        "assumeZone": "Europe/Paris"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "t": "2026-03-29T02:30"
+      }
+    ],
+    "sort": [
+      {
+        "column": "t",
+        "dir": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "wall-time-skipped",
+        "severity": "warning",
+        "path": "rows[0].t"
+      }
+    ]
+  }
+}

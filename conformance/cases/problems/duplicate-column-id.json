@@ -1,0 +1,25 @@
+{
+  "id": "duplicate-column-id",
+  "suite": "problems",
+  "description": "Two columns with one id.",
+  "input": {
+    "op": "columns",
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "a"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "duplicate-column-id",
+        "severity": "error",
+        "path": "columns[1]"
+      }
+    ]
+  }
+}

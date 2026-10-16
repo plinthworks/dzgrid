@@ -1,0 +1,23 @@
+{
+  "id": "invalid-field-path",
+  "suite": "problems",
+  "description": "A path with an empty segment.",
+  "input": {
+    "op": "columns",
+    "columns": [
+      {
+        "id": "a",
+        "field": "x..y"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-field-path",
+        "severity": "error",
+        "path": "columns[0].field"
+      }
+    ]
+  }
+}

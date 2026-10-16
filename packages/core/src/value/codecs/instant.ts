@@ -29,7 +29,16 @@ const TIME = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
  */
 export function instantCodec(o: { assumeZone?: string; format?: InstantFormatSpec } = {}): ValueCodec<InstantMs> {
   const coerceOpts = o.assumeZone === undefined ? {} : { assumeZone: o.assumeZone };
+  // Only a column that reads wall times in a zone can meet a clock change; offsets never warn.
+  const warning =
+    o.assumeZone === undefined
+      ? undefined
+      : (raw: unknown) => {
+          const r = readInstant(raw, coerceOpts);
+          return r.ok && r.warning ? r.warning : null;
+        };
   return {
+    ...(warning && { warning }),
     kind: 'instant',
     keyKind: 'number',
     coerce: (raw) => {

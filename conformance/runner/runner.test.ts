@@ -30,6 +30,12 @@ describe('conformance', () => {
     }
   });
 
+  it('has one problems case per problem code, named after it', async () => {
+    const { PROBLEM_CODES } = await import('@dzgrid/core');
+    const files = readdirSync(join(CASES, 'problems')).map((f) => f.replace(/\.json$/, '')).sort();
+    expect(files).toEqual([...PROBLEM_CODES].sort());
+  });
+
   it('has no empty suite, and every case has the shape the schema requires', () => {
     for (const suite of suites) {
       const files = readdirSync(join(CASES, suite));

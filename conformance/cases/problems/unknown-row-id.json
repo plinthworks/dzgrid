@@ -1,0 +1,31 @@
+{
+  "id": "unknown-row-id",
+  "suite": "problems",
+  "description": "Updating a row that is not there.",
+  "input": {
+    "op": "tx",
+    "rows": [
+      {
+        "id": "a",
+        "name": "x",
+        "v": 1
+      }
+    ],
+    "tx": {
+      "update": [
+        {
+          "id": "zz"
+        }
+      ]
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unknown-row-id",
+        "severity": "error",
+        "path": "update[0]"
+      }
+    ]
+  }
+}

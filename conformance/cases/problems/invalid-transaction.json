@@ -1,0 +1,32 @@
+{
+  "id": "invalid-transaction",
+  "suite": "problems",
+  "description": "A negative insert position.",
+  "input": {
+    "op": "tx",
+    "rows": [
+      {
+        "id": "a",
+        "name": "x",
+        "v": 1
+      }
+    ],
+    "tx": {
+      "add": [
+        {
+          "id": "x"
+        }
+      ],
+      "addAt": -1
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-transaction",
+        "severity": "error",
+        "path": "addAt"
+      }
+    ]
+  }
+}
