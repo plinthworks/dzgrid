@@ -11,7 +11,8 @@ import { serve, browser, median, percentile } from '../spikes/kit.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const budgets = JSON.parse(readFileSync(`${ROOT}perf/browser-budgets.json`, 'utf8')).budgets;
-const site = await serve(import.meta.url);
+// Minified, as a consumer ships it: never measure unminified code (§5.4).
+const site = await serve(import.meta.url, { minify: true });
 const lines = [];
 let open = null;
 process.on('SIGINT', async () => { await open?.close().catch(() => {}); await site.close(); process.exit(130); });
@@ -69,7 +70,10 @@ try {
     const tx = await pg.evaluate(() => window.p.transaction());
     line('one-row transaction to the next frame', tx.ms, 'ms');
     line('one-row transaction: rows touched', tx.touchedRows, 'rows');
-    line('sort click on 100 000 (numeric, warm) to the next frame', await pg.evaluate(() => window.p.sortClick()), 'ms');
+    const sorts = [];
+    for (let k = 0; k < 5; k++) sorts.push(await pg.evaluate(() => window.p.sortClick()));
+    line('sort click on 100 000 (numeric, warm): sort and events', median(sorts.map((s) => s.model)), 'ms');
+    line('sort click on 100 000 (numeric, warm) to the next frame', median(sorts.map((s) => s.frame)), 'ms');
     line('page errors', errors.length, 'errors');
     // ---- 1 000 create/destroy cycles: heap retained ----
     await pg.evaluate(() => window.p.destroy());
@@ -86,6 +90,10 @@ try {
   {
     const { pg } = await page(b, 1_000_000);
     line('first render of 1 000 000 rows', await pg.evaluate(() => window.p.firstRender()), 'ms');
+    const r = await pg.evaluate(() => window.p.scroll('block', 50, 120));
+    line('1 000 000 rows (scaled), wheel-like scroll: median frame', median(r.deltas.slice(2)), 'ms');
+    line('1 000 000 rows (scaled), wheel-like scroll: p95 frame', percentile(r.deltas.slice(2), 95), 'ms');
+    line('1 000 000 rows (scaled): frames without rows', await pg.evaluate(() => window.p.coverage('block', 2000, 40)), '%');
     await pg.close();
   }
 } finally {

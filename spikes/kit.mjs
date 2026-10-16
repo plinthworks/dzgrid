@@ -31,7 +31,7 @@ const TYPES = {
   '.json': 'application/json',
 };
 
-async function handle(req, res) {
+async function handle(req, res, opts = {}) {
   let path;
   try {
     path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname));
@@ -66,7 +66,7 @@ async function handle(req, res) {
   if (extname(target) === '.ts') {
     // A syntax error is the spike's bug, not a missing file: say so.
     try {
-      const out = await transform(body.toString(), { loader: 'ts', format: 'esm', target: 'es2022', sourcefile: target });
+      const out = await transform(body.toString(), { loader: 'ts', format: 'esm', target: 'es2022', sourcefile: target, minify: opts.minify === true });
       // Imports inside the core end in .js (NodeNext style); serve them from the .ts.
       body = Buffer.from(out.code.replace(/(from\s+['"]\.{1,2}\/[^'"]+)\.js(['"])/g, '$1.ts$2'));
     } catch (err) {
@@ -83,12 +83,13 @@ async function handle(req, res) {
  * Serves the repository root, so a page can reach both its spike folder and
  * the packages. `url(path)` is relative to the calling spike's folder.
  */
-export async function serve(spikeUrl) {
+/** `{ minify: true }` serves the TypeScript minified, as a consumer ships it (budgets, §5.4). */
+export async function serve(spikeUrl, opts = {}) {
   const spikeDir = dirname(fileURLToPath(spikeUrl));
   const server = createServer((req, res) => {
     // One guard around everything: a request this server cannot read must
     // never crash it — a spike may be measuring in another tab.
-    handle(req, res).catch((err) => {
+    handle(req, res, opts).catch((err) => {
       console.error(`[kit] ${req.url}: ${err?.message ?? err}`);
       if (!res.headersSent) res.writeHead(500);
       res.end();

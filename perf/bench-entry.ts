@@ -1,12 +1,22 @@
 import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache } from '../packages/core/src/internal.js';
 import { datasetA, type RowA } from './dataset.js';
+import { msg } from '../packages/dom/src/messages.js';
+import { AR } from '../packages/dom/src/locales/ar.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
 export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly run: (ctx: any) => unknown };
 
 /** Each case returns a value so the work cannot be optimised away. */
 export const CASES: Record<string, Case> = {
+  'msg() plural ar x 10 000 (announcements, labels)': {
+    setup: () => localeCtx({ locale: 'ar-DZ' }),
+    run: (ctx: ReturnType<typeof localeCtx>) => {
+      let n = 0;
+      for (let i = 0; i < 10_000; i++) n += msg(AR, 'announce.rows', { n: i }, ctx).length;
+      return n;
+    },
+  },
   'zoneDayBounds x 10 000 (Paris, cached formatter)': () => {
     let acc = 0;
     const start = dayToEpochDay(parseDay('2000-01-01')!);

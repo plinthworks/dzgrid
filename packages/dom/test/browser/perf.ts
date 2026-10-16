@@ -85,16 +85,19 @@ const p = {
     mo.disconnect();
     return { ms, touchedRows: touched.size };
   },
-  async sortClick(): Promise<number> {
+  async sortClick(): Promise<{ model: number; frame: number }> {
     const head = document.querySelector<HTMLElement>('.dzg-hcell[data-col="n0"]') ?? document.querySelector<HTMLElement>('.dzg-hcell')!;
     // Warm the keys first: a sort is clicked again, not cold.
+    // Each sample is the same click: no sort to ascending (a click cycling to "none" costs nothing).
     grid!.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'n0', dir: 'asc' }] }, 'user');
     grid!.kernel.dispatch({ type: 'sort.set', sort: [] }, 'user');
     await raf();
+    await raf();
     const t0 = performance.now();
     head.click();
+    const model = performance.now() - t0;
     await raf();
-    return performance.now() - t0;
+    return { model, frame: performance.now() - t0 };
   },
   destroy() {
     grid?.destroy();

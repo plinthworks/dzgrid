@@ -20,9 +20,13 @@
     "horizontal scroll 50 px a frame: frames without rows": 1,
     "one-row transaction to the next frame": 20,
     "one-row transaction: rows touched": 1,
-    "sort click on 100 000 (numeric, warm) to the next frame": 60,
+    "sort click on 100 000 (numeric, warm) to the next frame": 57,
     "page errors": 0,
     "1 000 create/destroy cycles: heap retained": 1,
-    "first render of 1 000 000 rows": 1200
+    "first render of 1 000 000 rows": 1200,
+    "1 000 000 rows (scaled), wheel-like scroll: median frame": 17.2,
+    "1 000 000 rows (scaled), wheel-like scroll: p95 frame": 25,
+    "1 000 000 rows (scaled): frames without rows": 1,
+    "sort click on 100 000 (numeric, warm): sort and events": 40
   }
 }

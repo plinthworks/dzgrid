@@ -206,7 +206,44 @@ async function runEngine(name) {
         return { gap: vr.top + v.clientTop + v.clientHeight - r.bottom };
       });
       check(name, '1 M rows: the last row is flush with the bottom', last && Math.abs(last.gap) <= 1, last);
+      // S11 C on the real grid, scaled: Tab out, scroll to the end, Shift+Tab back to the same cell, visible.
+      await page.evaluate(() => { window.t.grid.api.focusCell(window.t.key(500000), 'amount'); });
+      await frames(page, 2);
+      await page.evaluate(() => { window.t.mark = document.activeElement; });
+      await page.focus('#after');
+      await page.evaluate(() => window.t.scrollTo(1e12));
+      await frames(page, 2);
+      await page.keyboard.press('Shift+Tab');
+      await frames(page, 4);
+      const c = await page.evaluate(() => {
+        const a = document.activeElement, v = document.querySelector('.dzg-viewport').getBoundingClientRect(), r = a.getBoundingClientRect();
+        return { same: a === window.t.mark, visible: r.top >= v.top + 30 && r.bottom <= v.bottom + 0.5 };
+      });
+      check(name, '1 M rows: Shift+Tab back from outside lands on the same cell, brought into view', c.same && c.visible, c);
       check(name, 'no page error at 1 M rows', errors.length === 0, errors);
+      await page.close();
+    }
+
+    // ---- a real mouse drag on resize handles, LTR and RTL: centre, start-pinned, end-pinned ----
+    for (const dir of ['ltr', 'rtl']) {
+      const { page } = await load(ctx, `locale=${dir === 'rtl' ? 'ar-DZ' : 'fr-FR'}&dir=${dir}&rows=200`);
+      const out = [];
+      for (const col of ['city', 'name', 'ref']) {
+        const before = await page.evaluate((c) => document.querySelector(`.dzg-hcell[data-col="${c}"]`).getBoundingClientRect().width, col);
+        const h = await page.locator(`.dzg-hcell[data-col="${col}"] .dzg-resize`).boundingBox();
+        // Toward the column's outside: the end in LTR is to the right; the last end-pinned grows the other way.
+        const outward = (dir === 'ltr' ? 1 : -1) * (col === 'ref' ? -1 : 1);
+        await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(h.x + h.width / 2 + outward * 30, h.y + h.height / 2, { steps: 5 });
+        await page.mouse.move(h.x + h.width / 2 + outward * 60, h.y + h.height / 2, { steps: 5 });
+        await page.mouse.up();
+        await frames(page, 3);
+        const after = await page.evaluate((c) => document.querySelector(`.dzg-hcell[data-col="${c}"]`).getBoundingClientRect().width, col);
+        out.push({ col, grew: Math.round(after - before) });
+      }
+      const g = await geometry(page);
+      check(name, `${dir}: a mouse drag of 60 px widens centre, start-pinned and end-pinned columns by 60, still aligned`, out.every((o) => Math.abs(o.grew - 60) <= 1) && g.worst <= 1, { out, g });
       await page.close();
     }
 
