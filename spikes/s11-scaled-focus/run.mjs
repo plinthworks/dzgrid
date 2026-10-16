@@ -24,10 +24,13 @@ async function load(ctx, qs) {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(site.url(`index.html?${qs}`));
   await page.waitForFunction(() => window.ready, null, { timeout: 15000 });
+  H0 = await page.evaluate(() => document.querySelector('.vp').scrollHeight);
   return { page, errors };
 }
 
-const sane = (s) => s.orderOk && s.rowindexOk && s.maxWritten < LIMIT && s.overMaxP === 0;
+// The body's scrollHeight is read once per page: a retained row must never grow it.
+let H0 = null;
+const sane = (s) => s.orderOk && s.rowindexOk && s.maxWritten < LIMIT && s.scrollTopOk && !s.retainedOverlaps && (H0 === null || s.scrollHeight === H0);
 
 async function focusScenarios(name, ctx, cfg) {
   const { page, errors } = await load(ctx, cfg);
@@ -109,6 +112,30 @@ async function focusScenarios(name, ctx, cfg) {
   await page.close();
 }
 
+/**
+ * K — the focused row a few rows to a few viewports away from the window, above and below,
+ * at the top, the middle and near the end: never drawn over the viewport, never growing the
+ * scroll range, focus kept, then brought back by ArrowDown.
+ */
+async function nearScenario(name, ctx, cfg) {
+  const { page } = await load(ctx, cfg);
+  const N = await page.evaluate(() => window.api.N);
+  const bad = [];
+  for (const at of [Math.floor(N / 2), N - 400, 300]) {
+    for (const d of [-200000, -40000, -3000, -140, -100, -30, -8, 8, 30, 100, 140, 3000, 40000, 200000]) {
+      const top = at + d;
+      if (top < 0 || top >= N - 20) continue;
+      await page.evaluate(([at, top]) => { window.api.focusCell(at, 3); window.api.reset(); window.api.scrollToLogical(top * window.api.ROW + 13.37); }, [at, top]);
+      await frames(page);
+      const s = await S(page);
+      if (s.focusInWindow) continue;
+      if (!(s.active === `div ${at}/3` && s.blurs === 0 && sane(s))) bad.push({ at, d, active: s.active, blurs: s.blurs, overlaps: s.retainedOverlaps, h: s.scrollHeight, H0, maxWritten: s.maxWritten });
+    }
+  }
+  await page.close();
+  return bad;
+}
+
 async function keysScenario(name, ctx, cfg) {
   const { page } = await load(ctx, cfg);
   const r = {};
@@ -119,15 +146,24 @@ async function keysScenario(name, ctx, cfg) {
   await frames(page, 2);
   let s = await S(page);
   r.onCell = { native: s.native, active: s.active, logicalTop: s.logicalTop };
-  check(name, cfg, 'G1 keys on a cell: focus moves, no native scroll, visible', s.native === 0 && s.visible && s.active !== 'div 10/3', s);
+  const page0 = await page.evaluate(() => Math.floor(window.api.BODY_VIEW() / window.api.ROW) - 1);
+  const rtl = cfg.includes('dir=rtl');
+  // PageDown, Space (a page), ArrowDown, End (last column): row 10 + 2 pages + 1, column 22.
+  check(name, cfg, 'G1 keys on a cell: focus moves where the keys say, no native scroll, visible', s.native === 0 && s.visible && s.active === `div ${10 + 2 * page0 + 1}/22`, s);
+  await page.evaluate(() => window.api.focusCell(10, 5)); await frames(page);
+  await page.keyboard.press('ArrowRight'); await frames(page);
+  s = await S(page);
+  check(name, cfg, 'G1 ArrowRight moves toward the end in LTR, the start in RTL', s.active === `div 10/${rtl ? 4 : 6}`, s);
   // (2) focus on the viewport itself.
-  await page.evaluate(() => { window.api.scrollToIndex(0); document.querySelector('.vp').focus({ preventScroll: true }); }); await frames(page);
+  await page.evaluate(() => { window.api.focusCell(0, 3); window.api.scrollToIndex(0); document.querySelector('.vp').focus({ preventScroll: true }); }); await frames(page);
   await page.evaluate(() => window.api.reset());
   const before = (await S(page)).logicalTop;
   await page.keyboard.press('PageDown');
-  await frames(page, 6);
+  await frames(page, 40);  // let a native smooth scroll finish
   s = await S(page);
   r.onViewport = { native: s.native, delta: s.logicalTop - before, active: s.active };
+  const page1 = await page.evaluate(() => Math.floor(window.api.BODY_VIEW() / window.api.ROW) - 1);
+  if (cfg.includes('intercept=1')) check(name, cfg, 'G2 PageDown on the viewport, intercepted: focus goes one page from the focus cell, no native scroll', s.native === 0 && s.active === `div ${page1}/3` && s.visible, s);
   observe(name, cfg, 'G2 PageDown with focus on the viewport', r.onViewport);
   // (3) a click on a non-cell area (the header gap, or the empty body) gives focus to the focus cell.
   await page.evaluate(() => window.api.focusCell(20, 3)); await page.focus('#after');
@@ -192,20 +228,23 @@ async function pinnedScenario(name, ctx, cfg) {
 }
 
 async function placementScenario(name, ctx, cfg) {
-  // J2 — rows placed through the re-anchored layer land where they should, all along a million rows.
+  // J2 — rows placed through the re-anchored layer land where they should, at fractional
+  // offsets, for the first, a middle and the last visible row, all along a million rows.
   const { page } = await load(ctx, cfg);
   const out = [];
   const N = await page.evaluate(() => window.api.N);
   for (let k = 0; k <= 10; k++) {
-    const i = Math.min(N - 20, Math.floor((N - 20) * k / 10));
-    await page.evaluate((i) => window.api.scrollToIndex(i), i); await frames(page);
-    out.push(await page.evaluate((i) => {
+    const i = Math.min(N - 40, Math.floor((N - 40) * k / 10));
+    const l = i * 32 + (k * 7.37) % 32;
+    await page.evaluate((l) => window.api.scrollToLogical(l), l); await frames(page);
+    out.push(await page.evaluate((l) => {
       const vp = document.querySelector('.vp'); const v = vp.getBoundingClientRect();
-      const s = window.api.state();
-      const el = document.querySelector(`.layer .row[data-key="${i}"]`); const r = el.getBoundingClientRect();
-      const expectedTop = v.top + 1 + 32 + (i * 32 - s.logicalTop);
-      return { i, off: +(r.top - expectedTop).toFixed(3), layerTop: parseFloat(document.querySelector('.layer').style.insetBlockStart) };
-    }, i));
+      // Expected from the logical offset asked for, not from what the page computed.
+      const rows = [...document.querySelectorAll('.layer .row')].map((el) => ({ i: Number(el.getAttribute('aria-rowindex')) - 2, top: el.getBoundingClientRect().top }));
+      const seen = rows.filter((r) => r.top >= v.top + 33 && r.top < v.bottom - 32);
+      const pick = [seen[0], seen[Math.floor(seen.length / 2)], seen[seen.length - 1]];
+      return { l, worst: Math.max(...pick.map((r) => Math.abs(r.top - (v.top + vp.clientTop + 32 + r.i * 32 - l)))) };
+    }, l));
   }
   await page.close();
   return out;
@@ -217,9 +256,11 @@ async function axScenario(name, ctx, cfg) {
   await page.evaluate(() => { window.api.focusCell(500000, 3); window.api.scrollToIndex(0); }); await frames(page);
   const cdp = await ctx.newCDPSession(page);
   const { nodes } = await cdp.send('Accessibility.getFullAXTree');
-  const cell = nodes.find((n) => n.name?.value === 'r500000 c3');
-  const row = cell && nodes.find((n) => n.childIds?.includes(cell.parentId) || n.nodeId === cell.parentId);
-  const r = { cell: !!cell, cellIgnored: cell?.ignored ?? null, focused: cell?.properties?.find((p) => p.name === 'focused')?.value?.value ?? null, row: row?.role?.value ?? null };
+  const byId = new Map(nodes.map((n) => [n.nodeId, n]));
+  const cell = nodes.find((n) => n.name?.value === 'r500000 c3' && n.role?.value === 'gridcell');
+  let row = cell && byId.get(cell.parentId);
+  while (row && row.role?.value !== 'row') row = byId.get(row.parentId);
+  const r = { cell: !!cell, cellIgnored: cell?.ignored ?? null, focused: cell?.properties?.find((p) => p.name === 'focused')?.value?.value ?? null, row: row?.role?.value ?? null, rowIndex: row?.properties?.find((p) => p.name === 'rowindex')?.value?.value ?? null };
   await page.close();
   return r;
 }
@@ -236,10 +277,17 @@ async function runEngine(name) {
       }
     }
     await focusScenarios(name, ctx, 'rows=1000000&retain=none');
-    await focusScenarios(name, ctx, 'rows=1000000&retain=image&dir=rtl');
-    for (const intercept of ['1', '0']) {
-      const r = await keysScenario(name, ctx, `rows=1000000&intercept=${intercept}`);
-      observe(name, `intercept=${intercept}`, 'G keys', r);
+    await focusScenarios(name, ctx, 'rows=1000000&retain=clamped&contain=content&dir=rtl');
+    for (const retain of ['clamped', 'image']) for (const rows of [1_000_000, 200_000]) {
+      const bad = await nearScenario(name, ctx, `rows=${rows}&retain=${retain}&contain=content`);
+      observe(name, `rows=${rows}&retain=${retain}`, 'K near the window: failures', bad.length ? bad.slice(0, 6) : 'none');
+      if (retain === 'clamped') check(name, `rows=${rows}&retain=clamped`, 'K focused row near the window: never over the viewport, scroll range unchanged, focus kept', bad.length === 0, bad.slice(0, 6));
+    }
+    { const bad = await nearScenario(name, ctx, 'rows=1000000&retain=clamped&contain=content&clip=0');
+      observe(name, 'rows=1000000&retain=clamped&clip=0', 'K without overflow: clip on the body: failures', bad.length ? bad.slice(0, 4) : 'none'); }
+    for (const [intercept, dir] of [['1', 'ltr'], ['1', 'rtl'], ['0', 'ltr']]) {
+      const r = await keysScenario(name, ctx, `rows=1000000&intercept=${intercept}&dir=${dir}`);
+      observe(name, `intercept=${intercept}&dir=${dir}`, 'G keys', r);
     }
     for (const dir of ['ltr', 'rtl']) for (const contain of ['strict', 'content', 'size+layout+style', 'paint', 'none']) {
       const p = await pinnedScenario(name, ctx, `rows=1000000&contain=${contain}&dir=${dir}`);
@@ -251,11 +299,11 @@ async function runEngine(name) {
     }
     const pl = await placementScenario(name, ctx, 'rows=1000000');
     observe(name, 'rows=1000000', 'J2 placement offsets (px)', pl);
-    check(name, 'rows=1000000', 'J2 re-anchored layer: every row within 0.5 px of its place', pl.every((m) => Math.abs(m.off) <= 0.5), pl);
+    check(name, 'rows=1000000', 'J2 re-anchored layer: first, middle and last visible rows within 0.5 px of their place, fractional offsets', pl.every((m) => m.worst <= 0.5), pl);
     if (name === 'chrome') {
       const ax = await axScenario(name, ctx, 'rows=1000000&contain=content');
       observe(name, 'contain=content', 'J3 AX of the retained row', ax);
-      check(name, 'contain=content', 'J3 retained row is in the AX tree, focused, not ignored', ax.cell && !ax.cellIgnored && ax.focused === true, ax);
+      check(name, 'contain=content', 'J3 retained row is in the AX tree, focused, not ignored, inside its row', ax.cell && !ax.cellIgnored && ax.focused === true && ax.row === 'row', ax);
       for (const scroll of ['absolute', 'relative']) {
         const t = await touchScenario(name, ctx, `rows=1000000&scroll=${scroll}`);
         observe(name, `scroll=${scroll}`, 'H touch fling of 600 px (logical delta)', t);

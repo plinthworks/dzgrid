@@ -1,7 +1,7 @@
 {
-  "at": "2026-10-16T20:19:44.516Z",
+  "at": "2026-10-16T20:30:09.398Z",
   "node": "v22.20.0",
-  "passed": 322,
+  "passed": 346,
   "failed": 0,
   "checks": [
     {
@@ -552,68 +552,116 @@
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "A same node focused, no blur, retained while away, sane DOM",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D editor scrolled away: same input, text and caret kept, no blur",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "F reversed: row 0 now last and in view, still focused, sane",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "F reversed back, away: row 0 retained, focused, sane",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "no page error",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&intercept=1",
-      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "cfg": "rows=1000000&retain=clamped",
+      "label": "K focused row near the window: never over the viewport, scroll range unchanged, focus kept",
       "ok": true
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&intercept=0",
-      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "cfg": "rows=200000&retain=clamped",
+      "label": "K focused row near the window: never over the viewport, scroll range unchanged, focus kept",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G2 PageDown on the viewport, intercepted: focus goes one page from the focus cell, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G2 PageDown on the viewport, intercepted: focus goes one page from the focus cell, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
       "ok": true
     },
     {
@@ -643,13 +691,13 @@
     {
       "engine": "chrome",
       "cfg": "rows=1000000",
-      "label": "J2 re-anchored layer: every row within 0.5 px of its place",
+      "label": "J2 re-anchored layer: first, middle and last visible rows within 0.5 px of their place, fractional offsets",
       "ok": true
     },
     {
       "engine": "chrome",
       "cfg": "contain=content",
-      "label": "J3 retained row is in the AX tree, focused, not ignored",
+      "label": "J3 retained row is in the AX tree, focused, not ignored, inside its row",
       "ok": true
     },
     {
@@ -1200,68 +1248,116 @@
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "A same node focused, no blur, retained while away, sane DOM",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D editor scrolled away: same input, text and caret kept, no blur",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "F reversed: row 0 now last and in view, still focused, sane",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "F reversed back, away: row 0 retained, focused, sane",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "no page error",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&intercept=1",
-      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "cfg": "rows=1000000&retain=clamped",
+      "label": "K focused row near the window: never over the viewport, scroll range unchanged, focus kept",
       "ok": true
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&intercept=0",
-      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "cfg": "rows=200000&retain=clamped",
+      "label": "K focused row near the window: never over the viewport, scroll range unchanged, focus kept",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G2 PageDown on the viewport, intercepted: focus goes one page from the focus cell, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G2 PageDown on the viewport, intercepted: focus goes one page from the focus cell, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
       "ok": true
     },
     {
@@ -1291,7 +1387,7 @@
     {
       "engine": "firefox",
       "cfg": "rows=1000000",
-      "label": "J2 re-anchored layer: every row within 0.5 px of its place",
+      "label": "J2 re-anchored layer: first, middle and last visible rows within 0.5 px of their place, fractional offsets",
       "ok": true
     },
     {
@@ -1842,68 +1938,116 @@
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "A same node focused, no blur, retained while away, sane DOM",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "B ArrowDown off screen: next row focused and visible within 2 frames",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "C Shift+Tab back: same cell focused and visible within 3 frames",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D editor scrolled away: same input, text and caret kept, no blur",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D typing off screen: \"Bonj!our\", caret 5, editor visible within 3 frames",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "E api.focusCell(last row) from the top: grid scroll only, visible",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "F reversed: row 0 now last and in view, still focused, sane",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "F reversed back, away: row 0 retained, focused, sane",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "no page error",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&intercept=1",
-      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "cfg": "rows=1000000&retain=clamped",
+      "label": "K focused row near the window: never over the viewport, scroll range unchanged, focus kept",
       "ok": true
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&intercept=0",
-      "label": "G1 keys on a cell: focus moves, no native scroll, visible",
+      "cfg": "rows=200000&retain=clamped",
+      "label": "K focused row near the window: never over the viewport, scroll range unchanged, focus kept",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
+      "label": "G2 PageDown on the viewport, intercepted: focus goes one page from the focus cell, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
+      "label": "G2 PageDown on the viewport, intercepted: focus goes one page from the focus cell, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G1 keys on a cell: focus moves where the keys say, no native scroll, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G1 ArrowRight moves toward the end in LTR, the start in RTL",
       "ok": true
     },
     {
@@ -1933,7 +2077,7 @@
     {
       "engine": "webkit",
       "cfg": "rows=1000000",
-      "label": "J2 re-anchored layer: every row within 0.5 px of its place",
+      "label": "J2 re-anchored layer: first, middle and last visible rows within 0.5 px of their place, fractional offsets",
       "ok": true
     }
   ],
@@ -2249,7 +2393,7 @@
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "B scroll events",
       "value": {
         "native": 0,
@@ -2258,7 +2402,7 @@
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "C scroll events (native jump, then ours)",
       "value": {
         "native": 1,
@@ -2268,33 +2412,165 @@
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D scroll events after typing off screen",
       "value": {
         "native": 1,
         "ours": 2,
-        "cellTop": 569
+        "cellTop": 33
       }
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&intercept=1",
+      "cfg": "rows=1000000&retain=clamped",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=clamped",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=image",
+      "label": "K near the window: failures",
+      "value": [
+        {
+          "at": 500000,
+          "d": -140,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 500000,
+          "d": -100,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 500000,
+          "d": -30,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -140,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -100,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -30,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=200000&retain=image",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&retain=clamped&clip=0",
+      "label": "K without overflow: clip on the body: failures",
+      "value": [
+        {
+          "at": 999600,
+          "d": -200000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4873831,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -40000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 5117976,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -3000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4081957,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -140,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4001876,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        }
+      ]
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
       "label": "G2 PageDown with focus on the viewport",
       "value": {
         "native": 0,
-        "delta": 1352,
-        "active": "div 59/22"
+        "delta": 0,
+        "active": "div 16/3"
       }
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&intercept=1",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
       "label": "G3 click on a header gives focus to",
       "value": "div 20/3"
     },
     {
       "engine": "chrome",
-      "cfg": "intercept=1",
+      "cfg": "intercept=1&dir=ltr",
       "label": "G keys",
       "value": {
         "onCell": {
@@ -2304,31 +2580,31 @@
         },
         "onViewport": {
           "native": 0,
-          "delta": 1352,
-          "active": "div 59/22"
+          "delta": 0,
+          "active": "div 16/3"
         },
         "click": "div 20/3"
       }
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&intercept=0",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
       "label": "G2 PageDown with focus on the viewport",
       "value": {
-        "native": 5,
-        "delta": 3288.4085920200673,
-        "active": "div vp"
+        "native": 0,
+        "delta": 0,
+        "active": "div 16/3"
       }
     },
     {
       "engine": "chrome",
-      "cfg": "rows=1000000&intercept=0",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
       "label": "G3 click on a header gives focus to",
       "value": "div 20/3"
     },
     {
       "engine": "chrome",
-      "cfg": "intercept=0",
+      "cfg": "intercept=1&dir=rtl",
       "label": "G keys",
       "value": {
         "onCell": {
@@ -2337,8 +2613,42 @@
           "logicalTop": 840
         },
         "onViewport": {
-          "native": 5,
-          "delta": 3288.4085920200673,
+          "native": 0,
+          "delta": 0,
+          "active": "div 16/3"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 8,
+        "delta": 4480.556719054106,
+        "active": "div vp"
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "chrome",
+      "cfg": "intercept=0&dir=ltr",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 8,
+          "delta": 4480.556719054106,
           "active": "div vp"
         },
         "click": "div 20/3"
@@ -3266,59 +3576,48 @@
       "label": "J2 placement offsets (px)",
       "value": [
         {
-          "i": 0,
-          "off": 0,
-          "layerTop": 0
+          "l": 0,
+          "worst": 0
         },
         {
-          "i": 99998,
-          "off": 0,
-          "layerTop": 345734
+          "l": 3199879.37,
+          "worst": 0.004999999888241291
         },
         {
-          "i": 199996,
-          "off": 0,
-          "layerTop": 691469
+          "l": 6399758.74,
+          "worst": 0.009999999776482582
         },
         {
-          "i": 299994,
-          "off": 0,
-          "layerTop": 1037200
+          "l": 9599638.11,
+          "worst": 0.015000000596046448
         },
         {
-          "i": 399992,
-          "off": 0,
-          "layerTop": 1382940
+          "l": 12799517.48,
+          "worst": 0.019999999552965164
         },
         {
-          "i": 499990,
-          "off": 0,
-          "layerTop": 1728670
+          "l": 15999364.85,
+          "worst": 0.02500000037252903
         },
         {
-          "i": 599988,
-          "off": 0,
-          "layerTop": 2074410
+          "l": 19199244.22,
+          "worst": 0.030000001192092896
         },
         {
-          "i": 699986,
-          "off": 0,
-          "layerTop": 2420140
+          "l": 22399123.59,
+          "worst": 0.08999999985098839
         },
         {
-          "i": 799984,
-          "off": 0,
-          "layerTop": 2765880
+          "l": 25599002.96,
+          "worst": 0.03999999910593033
         },
         {
-          "i": 899982,
-          "off": 0,
-          "layerTop": 3111610
+          "l": 28798850.33,
+          "worst": 0.07999999821186066
         },
         {
-          "i": 999980,
-          "off": 0,
-          "layerTop": 3457340
+          "l": 31998729.7,
+          "worst": 0.05000000074505806
         }
       ]
     },
@@ -3330,7 +3629,8 @@
         "cell": true,
         "cellIgnored": false,
         "focused": true,
-        "row": "generic"
+        "row": "row",
+        "rowIndex": null
       }
     },
     {
@@ -3338,8 +3638,8 @@
       "cfg": "scroll=absolute",
       "label": "H touch fling of 600 px (logical delta)",
       "value": {
-        "delta": 4800.596484700828,
-        "scrollTopDelta": 601,
+        "delta": 4776.593502277324,
+        "scrollTopDelta": 598,
         "native": 45,
         "ours": 1
       }
@@ -3677,7 +3977,7 @@
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "B scroll events",
       "value": {
         "native": 0,
@@ -3686,7 +3986,7 @@
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "C scroll events (native jump, then ours)",
       "value": {
         "native": 1,
@@ -3696,33 +3996,165 @@
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D scroll events after typing off screen",
       "value": {
         "native": 1,
         "ours": 2,
-        "cellTop": 569.0666961669922
+        "cellTop": 32.93333435058594
       }
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&intercept=1",
+      "cfg": "rows=1000000&retain=clamped",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=clamped",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=image",
+      "label": "K near the window: failures",
+      "value": [
+        {
+          "at": 500000,
+          "d": -140,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 500000,
+          "d": -100,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 500000,
+          "d": -30,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -140,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -100,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -30,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=200000&retain=image",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&retain=clamped&clip=0",
+      "label": "K without overflow: clip on the body: failures",
+      "value": [
+        {
+          "at": 999600,
+          "d": -200000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4873831,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -40000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 5117976,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -3000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4081957,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -140,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4001876,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
       "label": "G2 PageDown with focus on the viewport",
       "value": {
         "native": 0,
-        "delta": 1352,
-        "active": "div 59/22"
+        "delta": 0,
+        "active": "div 16/3"
       }
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&intercept=1",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
       "label": "G3 click on a header gives focus to",
       "value": "div 20/3"
     },
     {
       "engine": "firefox",
-      "cfg": "intercept=1",
+      "cfg": "intercept=1&dir=ltr",
       "label": "G keys",
       "value": {
         "onCell": {
@@ -3732,31 +4164,31 @@
         },
         "onViewport": {
           "native": 0,
-          "delta": 1352,
-          "active": "div 59/22"
+          "delta": 0,
+          "active": "div 16/3"
         },
         "click": "div 20/3"
       }
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&intercept=0",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
       "label": "G2 PageDown with focus on the viewport",
       "value": {
-        "native": 5,
-        "delta": 2808.348943549984,
-        "active": "div vp"
+        "native": 0,
+        "delta": 0,
+        "active": "div 16/3"
       }
     },
     {
       "engine": "firefox",
-      "cfg": "rows=1000000&intercept=0",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
       "label": "G3 click on a header gives focus to",
       "value": "div 20/3"
     },
     {
       "engine": "firefox",
-      "cfg": "intercept=0",
+      "cfg": "intercept=1&dir=rtl",
       "label": "G keys",
       "value": {
         "onCell": {
@@ -3765,8 +4197,42 @@
           "logicalTop": 840
         },
         "onViewport": {
-          "native": 5,
-          "delta": 2808.348943549984,
+          "native": 0,
+          "delta": 0,
+          "active": "div 16/3"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 7,
+        "delta": 4536.563678042282,
+        "active": "div vp"
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "firefox",
+      "cfg": "intercept=0&dir=ltr",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 7,
+          "delta": 4536.563678042282,
           "active": "div vp"
         },
         "click": "div 20/3"
@@ -4694,59 +5160,48 @@
       "label": "J2 placement offsets (px)",
       "value": [
         {
-          "i": 0,
-          "off": 0,
-          "layerTop": 0
+          "l": 0,
+          "worst": 0.0000152587890625
         },
         {
-          "i": 99998,
-          "off": 0,
-          "layerTop": 345734
+          "l": 3199879.37,
+          "worst": 0.003346557728946209
         },
         {
-          "i": 199996,
-          "off": 0,
-          "layerTop": 691469
+          "l": 6399758.74,
+          "worst": 0.006677856668829918
         },
         {
-          "i": 299994,
-          "off": -0.133,
-          "layerTop": 1037200
+          "l": 9599638.11,
+          "worst": 0.023331299424171448
         },
         {
-          "i": 399992,
-          "off": 0.067,
-          "layerTop": 1382940
+          "l": 12799517.48,
+          "worst": 0.08002136275172234
         },
         {
-          "i": 499990,
-          "off": -0.067,
-          "layerTop": 1728670
+          "l": 15999364.85,
+          "worst": 0.08333435095846653
         },
         {
-          "i": 599988,
-          "off": -0.267,
-          "layerTop": 2074410
+          "l": 19199244.22,
+          "worst": 0.020003050565719604
         },
         {
-          "i": 699986,
-          "off": 0,
-          "layerTop": 2420140
+          "l": 22399123.59,
+          "worst": 0.2766687013208866
         },
         {
-          "i": 799984,
-          "off": 0.133,
-          "layerTop": 2765870
+          "l": 25599002.96,
+          "worst": 0.37332824617624283
         },
         {
-          "i": 899982,
-          "off": 0.067,
-          "layerTop": 3111610
+          "l": 28798850.33,
+          "worst": 0.0033282488584518433
         },
         {
-          "i": 999980,
-          "off": -0.067,
-          "layerTop": 3457340
+          "l": 31998729.7,
+          "worst": 0.16666870191693306
         }
       ]
     },
@@ -5061,7 +5516,7 @@
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "B scroll events",
       "value": {
         "native": 0,
@@ -5070,7 +5525,7 @@
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "C scroll events (native jump, then ours)",
       "value": {
         "native": 1,
@@ -5080,33 +5535,165 @@
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&retain=image&dir=rtl",
+      "cfg": "rows=1000000&retain=clamped&contain=content&dir=rtl",
       "label": "D scroll events after typing off screen",
       "value": {
         "native": 1,
         "ours": 2,
-        "cellTop": 569
+        "cellTop": 33
       }
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&intercept=1",
+      "cfg": "rows=1000000&retain=clamped",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=clamped",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=image",
+      "label": "K near the window: failures",
+      "value": [
+        {
+          "at": 500000,
+          "d": -140,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 500000,
+          "d": -100,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 500000,
+          "d": -30,
+          "active": "div 500000/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -140,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -100,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -30,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": true,
+          "h": 4000032,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=200000&retain=image",
+      "label": "K near the window: failures",
+      "value": "none"
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&retain=clamped&clip=0",
+      "label": "K without overflow: clip on the body: failures",
+      "value": [
+        {
+          "at": 999600,
+          "d": -200000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4873831,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -40000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 5117975,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -3000,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4081957,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        },
+        {
+          "at": 999600,
+          "d": -140,
+          "active": "div 999600/3",
+          "blurs": 0,
+          "overlaps": false,
+          "h": 4001875,
+          "H0": 4000032,
+          "maxWritten": 4000000
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
       "label": "G2 PageDown with focus on the viewport",
       "value": {
         "native": 0,
-        "delta": 1352,
-        "active": "div 59/22"
+        "delta": 0,
+        "active": "div 16/3"
       }
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&intercept=1",
+      "cfg": "rows=1000000&intercept=1&dir=ltr",
       "label": "G3 click on a header gives focus to",
       "value": "div 20/3"
     },
     {
       "engine": "webkit",
-      "cfg": "intercept=1",
+      "cfg": "intercept=1&dir=ltr",
       "label": "G keys",
       "value": {
         "onCell": {
@@ -5116,31 +5703,31 @@
         },
         "onViewport": {
           "native": 0,
-          "delta": 1352,
-          "active": "div 59/22"
+          "delta": 0,
+          "active": "div 16/3"
         },
         "click": "div 20/3"
       }
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&intercept=0",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
       "label": "G2 PageDown with focus on the viewport",
       "value": {
-        "native": 3,
-        "delta": 1632.2028047982815,
-        "active": "div vp"
+        "native": 0,
+        "delta": 0,
+        "active": "div 16/3"
       }
     },
     {
       "engine": "webkit",
-      "cfg": "rows=1000000&intercept=0",
+      "cfg": "rows=1000000&intercept=1&dir=rtl",
       "label": "G3 click on a header gives focus to",
       "value": "div 20/3"
     },
     {
       "engine": "webkit",
-      "cfg": "intercept=0",
+      "cfg": "intercept=1&dir=rtl",
       "label": "G keys",
       "value": {
         "onCell": {
@@ -5149,8 +5736,42 @@
           "logicalTop": 840
         },
         "onViewport": {
-          "native": 3,
-          "delta": 1632.2028047982815,
+          "native": 0,
+          "delta": 0,
+          "active": "div 16/3"
+        },
+        "click": "div 20/3"
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G2 PageDown with focus on the viewport",
+      "value": {
+        "native": 8,
+        "delta": 4472.555724912938,
+        "active": "div vp"
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "rows=1000000&intercept=0&dir=ltr",
+      "label": "G3 click on a header gives focus to",
+      "value": "div 20/3"
+    },
+    {
+      "engine": "webkit",
+      "cfg": "intercept=0&dir=ltr",
+      "label": "G keys",
+      "value": {
+        "onCell": {
+          "native": 0,
+          "active": "div 43/22",
+          "logicalTop": 840
+        },
+        "onViewport": {
+          "native": 8,
+          "delta": 4472.555724912938,
           "active": "div vp"
         },
         "click": "div 20/3"
@@ -6078,59 +6699,48 @@
       "label": "J2 placement offsets (px)",
       "value": [
         {
-          "i": 0,
-          "off": 0,
-          "layerTop": 0
+          "l": 0,
+          "worst": 0
         },
         {
-          "i": 99998,
-          "off": 0,
-          "layerTop": 345734
+          "l": 3199879.37,
+          "worst": 0.004999999888241291
         },
         {
-          "i": 199996,
-          "off": 0,
-          "layerTop": 691468
+          "l": 6399758.74,
+          "worst": 0.009999999776482582
         },
         {
-          "i": 299994,
-          "off": 0,
-          "layerTop": 1037202
+          "l": 9599638.11,
+          "worst": 0.015000000596046448
         },
         {
-          "i": 399992,
-          "off": 0,
-          "layerTop": 1382937
+          "l": 12799517.48,
+          "worst": 0.019999999552965164
         },
         {
-          "i": 499990,
-          "off": 0,
-          "layerTop": 1728671
+          "l": 15999364.85,
+          "worst": 0.02500000037252903
         },
         {
-          "i": 599988,
-          "off": 0,
-          "layerTop": 2074405
+          "l": 19199244.22,
+          "worst": 0.030000001192092896
         },
         {
-          "i": 699986,
-          "off": 0,
-          "layerTop": 2420140
+          "l": 22399123.59,
+          "worst": 0.08999999985098839
         },
         {
-          "i": 799984,
-          "off": 0,
-          "layerTop": 2765874
+          "l": 25599002.96,
+          "worst": 0.03999999910593033
         },
         {
-          "i": 899982,
-          "off": 0,
-          "layerTop": 3111608
+          "l": 28798850.33,
+          "worst": 0.07999999821186066
         },
         {
-          "i": 999980,
-          "off": 0,
-          "layerTop": 3457343
+          "l": 31998729.7,
+          "worst": 0.05000000074505806
         }
       ]
     }

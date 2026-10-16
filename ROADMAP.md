@@ -70,10 +70,12 @@ machine, not this one). Details in each `spikes/<id>/README.md`.
 - Real wheel, trackpad and touch scrolling; a mid-range laptop; Safari itself.
 - Before Phase 4: Enter in an editor (stay or move down); an edited row that disappears (commit or cancel).
 
-### Settled before Phase 2 by spike S11 (2026-10-16, 322 checks, three engines)
-- **Retained row in scaled mode**: placed at its physical image
-  (`toPhysical(offset) − layerTop`); a native scroll right after a focus or key
-  event is redone logically. Focus, editor text and caret survive (D4).
+### Settled before Phase 2 by spike S11 (2026-10-16, 346 checks, three engines)
+- **Retained row in scaled mode**: at its true distance from the visible rows
+  (bounded to ±2·REBASE), with `overflow: clip` on the body so it never grows
+  the scroll range; a native scroll right after a focus or key event is redone
+  logically. Focus, editor text and caret survive (D4). The "physical image"
+  placement was rejected after review: near the window it covers visible rows.
 - **Keys** intercepted at the viewport; **touch** mapped relatively (Chrome
   measured: 601 px for 600, fling kept); scrollbar drag absolute (D5).
 - **`contain: strict` breaks sticky pinned columns in Firefox** (its `size`

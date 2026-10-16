@@ -48,6 +48,7 @@ vp.setAttribute('aria-rowcount', String(N + 1));
 vp.setAttribute('aria-colcount', String(COLS));
 vp.tabIndex = -1;
 vp.dataset.contain = q.get('contain') ?? 'strict';
+vp.dataset.clip = q.get('clip') ?? '1';
 const head = document.createElement('div');
 head.className = 'head';
 head.setAttribute('role', 'row');
@@ -297,6 +298,8 @@ render();
   N, mapper: { scaled: mapper.scaled, ratio: mapper.ratio, maxPhysical: mapper.maxPhysical, maxLogical: mapper.maxLogical },
   focusCell: (k: number, c: number) => focusCell(k, c),
   scrollToIndex: (i: number) => scrollToLogical(i * ROW),
+  scrollToLogical: (l: number) => scrollToLogical(l),
+  ROW, BODY_VIEW: () => BODY_VIEW, OVERSCAN,
   scrollToEnd: () => scrollToLogical(mapper.maxLogical),
   startEdit,
   reverse: () => { reversed = !reversed; render(); },
@@ -317,7 +320,17 @@ render();
       orderOk: idx.every((x, i) => i === 0 || x > idx[i - 1]!),
       rowindexOk: rows.every((el) => Number(el.getAttribute('aria-rowindex')) === indexOf(Number(el.dataset.key)) + 2),
       visible, cellTop: r ? r.top - v.top : null,
-      maxWritten, overMaxP: writes.filter((w) => w.top > w.maxP + 0.5).length,
+      maxWritten, scrollHeight: vp.scrollHeight, scrollTopOk: vp.scrollTop <= mapper.maxPhysical + 1,
+      // The retained row must never be drawn over the viewport (it would cover other rows).
+      retainedOverlaps: (() => {
+        const el = mounted.get(focus.key)?.el;
+        const fi = indexOf(focus.key) * ROW;
+        const inWindow = fi + ROW > logicalTop && fi < logicalTop + BODY_VIEW;
+        if (!el || inWindow) return false;
+        const b = el.getBoundingClientRect();
+        return b.bottom > v.top + vp.clientTop + HEAD && b.top < v.top + vp.clientTop + vp.clientHeight;
+      })(),
+      focusInWindow: (() => { const fi = indexOf(focus.key) * ROW; return fi + ROW > logicalTop && fi < logicalTop + BODY_VIEW; })(),
       native: scrolls.filter((s) => s.native).length, ours: scrolls.filter((s) => !s.native).length,
       blurs: events.filter((e) => /^(blur|focusout) /.test(e) && !/#(before|after)/.test(e)).length,
       events: events.slice(-20),
