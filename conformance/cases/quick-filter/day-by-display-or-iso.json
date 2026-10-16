@@ -1,0 +1,40 @@
+{
+  "id": "day-by-display-or-iso",
+  "suite": "quick-filter",
+  "description": "A day is found by its displayed form or its ISO form.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      },
+      {
+        "id": "born",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "a",
+        "city": "b",
+        "born": "2026-03-05"
+      },
+      {
+        "id": "2",
+        "name": "c",
+        "city": "d",
+        "born": "1990-01-01"
+      }
+    ],
+    "quick": "05/03"
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

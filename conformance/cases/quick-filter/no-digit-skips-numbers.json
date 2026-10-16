@@ -1,0 +1,32 @@
+{
+  "id": "no-digit-skips-numbers",
+  "suite": "quick-filter",
+  "description": "A word without digits does not look in number columns.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      },
+      {
+        "id": "amount",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "a",
+        "city": "b",
+        "amount": 1
+      }
+    ],
+    "quick": "e"
+  },
+  "expected": {
+    "ids": []
+  }
+}

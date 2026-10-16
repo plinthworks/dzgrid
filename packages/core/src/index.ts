@@ -67,3 +67,4 @@ export type { InstantRange } from './filter/instant.js';
 export { resolveInstantRange } from './filter/instant.js';
 export type { RowTest, CompiledFilter } from './filter/compile.js';
 export { compileFilter, filterIndices } from './filter/compile.js';
+export { compileQuick, quickWords, canNarrow } from './filter/quick.js';

@@ -1,0 +1,34 @@
+{
+  "id": "accent-fold",
+  "suite": "quick-filter",
+  "description": "Accents and case are ignored.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "Hélène Martin",
+        "city": "Oran"
+      },
+      {
+        "id": "2",
+        "name": "Helen Marten",
+        "city": "Oran"
+      }
+    ],
+    "quick": "helene"
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

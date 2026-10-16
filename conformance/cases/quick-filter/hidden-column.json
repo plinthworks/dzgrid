@@ -1,0 +1,32 @@
+{
+  "id": "hidden-column",
+  "suite": "quick-filter",
+  "description": "Hidden columns are not searched.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      },
+      {
+        "id": "secret",
+        "hidden": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "a",
+        "city": "b",
+        "secret": "needle"
+      }
+    ],
+    "quick": "needle"
+  },
+  "expected": {
+    "ids": []
+  }
+}

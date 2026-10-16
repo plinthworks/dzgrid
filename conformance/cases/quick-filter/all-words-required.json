@@ -1,0 +1,27 @@
+{
+  "id": "all-words-required",
+  "suite": "quick-filter",
+  "description": "Every word must be found.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "Hélène",
+        "city": "Marseille"
+      }
+    ],
+    "quick": "hel xyz"
+  },
+  "expected": {
+    "ids": []
+  }
+}

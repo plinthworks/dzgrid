@@ -1,0 +1,40 @@
+{
+  "id": "digit-in-number-column",
+  "suite": "quick-filter",
+  "description": "A word with a digit searches number columns, by their export text.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      },
+      {
+        "id": "amount",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "a",
+        "city": "b",
+        "amount": 1234.5
+      },
+      {
+        "id": "2",
+        "name": "c",
+        "city": "d",
+        "amount": 99
+      }
+    ],
+    "quick": "1234"
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

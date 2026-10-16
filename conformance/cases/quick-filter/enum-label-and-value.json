@@ -1,0 +1,46 @@
+{
+  "id": "enum-label-and-value",
+  "suite": "quick-filter",
+  "description": "An enum is found by its label and its value.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      },
+      {
+        "id": "s",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "ACT",
+            "label": "Actif"
+          }
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "a",
+        "city": "b",
+        "s": "ACT"
+      },
+      {
+        "id": "2",
+        "name": "c",
+        "city": "d",
+        "s": null
+      }
+    ],
+    "quick": "actif"
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

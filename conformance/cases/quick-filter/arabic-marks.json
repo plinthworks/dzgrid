@@ -1,0 +1,35 @@
+{
+  "id": "arabic-marks",
+  "suite": "quick-filter",
+  "description": "Arabic short vowels are ignored.",
+  "input": {
+    "locale": "ar",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "مُحَمَّد علي",
+        "city": "وهران"
+      },
+      {
+        "id": "2",
+        "name": "محمد",
+        "city": "الجزائر"
+      }
+    ],
+    "quick": "محمد"
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2"
+    ]
+  }
+}

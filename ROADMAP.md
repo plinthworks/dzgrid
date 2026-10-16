@@ -82,7 +82,14 @@ machine, not this one). Details in each `spikes/<id>/README.md`.
 - Native keyboard scrolling (PageDown, Space), touch and momentum in scaled
   mode move `ratio` times too far: only the wheel is intercepted.
 
-## Phase 1 — data core (next)
+## Phase 1 — data core (in progress)
+
+### Measured gaps (to revisit)
+- Quick search, first keystroke, 10 text columns of accented French and
+  Arabic over 100 000 rows: ~0.3 s (K.8's 150 ms holds for ASCII text:
+  97 ms). The cost is folding a million cells once; later keystrokes take
+  ~27 ms. Phase 2 can build the search caches in idle time after a load.
+
 
 First steps, in order (architect review):
 1. `parseInstant(v, { assumeZone })` with a zone resolver and a stated policy

@@ -1,0 +1,29 @@
+{
+  "id": "whitespace-inactive",
+  "suite": "quick-filter",
+  "description": "Spaces only filter nothing.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "a",
+        "city": "b"
+      }
+    ],
+    "quick": "   "
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

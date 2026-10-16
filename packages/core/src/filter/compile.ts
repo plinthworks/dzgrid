@@ -111,13 +111,8 @@ function textTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 't
 
   const exact = f.caseSensitive === true;
   const needle = exact ? f.value.normalize('NFC') : fold(f.value);
-  const folded = exact ? null : env.cache.folded(col, env);
-  const cell = (src: number): string | null => {
-    const t = texts[src]!;
-    if (t === null) return null;
-    if (exact) return t.normalize('NFC');
-    return folded![src] ?? t.toLowerCase();
-  };
+  const searchable = exact ? null : env.cache.searchable(col, env);
+  const cell = exact ? (src: number): string | null => texts[src]?.normalize('NFC') ?? null : (src: number): string | null => searchable![src]!;
   const base = (pred: (s: string) => boolean): RowTest => (src) => {
     const s = cell(src);
     return s !== null && pred(s);

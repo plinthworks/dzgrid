@@ -1,0 +1,34 @@
+{
+  "id": "two-words-across-columns",
+  "suite": "quick-filter",
+  "description": "Each word may be found in a different column, in any order.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "Hélène",
+        "city": "Marseille"
+      },
+      {
+        "id": "2",
+        "name": "Hélène",
+        "city": "Oran"
+      }
+    ],
+    "quick": "mar hel"
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

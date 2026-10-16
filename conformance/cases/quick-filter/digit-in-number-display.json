@@ -1,0 +1,40 @@
+{
+  "id": "digit-in-number-display",
+  "suite": "quick-filter",
+  "description": "…and by their displayed text: 1 234,5 in French.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      },
+      {
+        "id": "amount",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "a",
+        "city": "b",
+        "amount": 1234.5
+      },
+      {
+        "id": "2",
+        "name": "c",
+        "city": "d",
+        "amount": 99
+      }
+    ],
+    "quick": "234,5"
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

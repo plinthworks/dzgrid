@@ -1,0 +1,34 @@
+{
+  "id": "arabic-indic-digits",
+  "suite": "quick-filter",
+  "description": "Arabic-Indic digits find Latin ones.",
+  "input": {
+    "locale": "ar",
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "name": "غرفة 12",
+        "city": ""
+      },
+      {
+        "id": "2",
+        "name": "غرفة 3",
+        "city": ""
+      }
+    ],
+    "quick": "١٢"
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

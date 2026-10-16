@@ -1,5 +1,5 @@
 import { collatorFor, collatorKey, type CollatorSpec } from '../i18n/collate.js';
-import { fold, isAscii } from '../i18n/fold.js';
+import { fold } from '../i18n/fold.js';
 import type { ColumnLookup } from '../columns/model.js';
 import type { ResolvedColumn, ValueReader } from '../columns/defs.js';
 import { problem, type Problem } from '../problems.js';
@@ -46,7 +46,7 @@ const rowOf = (path: string): number => {
 };
 
 export class ColumnCache<T> {
-  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0 };
+  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0, displayBuilds: 0, quickScanned: 0 };
   #lists = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; values: (string | null | undefined)[] }>();
   #keys = new Map<string, KeyEntry<T>>();
   #ranks = new Map<string, RankEntry<T>>();
@@ -137,7 +137,7 @@ export class ColumnCache<T> {
     return entry;
   }
 
-  #list(kind: 'text' | 'fold' | 'export', col: ResolvedColumn<T>, env: ColumnEnv<T>, build: () => (string | null | undefined)[]): (string | null | undefined)[] {
+  #list(kind: 'text' | 'export' | 'display' | 'search', col: ResolvedColumn<T>, env: ColumnEnv<T>, build: () => (string | null | undefined)[]): (string | null | undefined)[] {
     const id = `${kind}|${col.id}`;
     const ctx = `${env.ctx.locale}|${env.ctx.timeZone}`;
     const hit = this.#lists.get(id);
@@ -160,18 +160,35 @@ export class ColumnCache<T> {
     }) as (string | null)[];
   }
 
-  /** Folded text for the non-ASCII cells only; ASCII cells are lowercased on the fly. */
-  folded(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | undefined)[] {
+  /**
+   * Each cell as a search compares it: folded, lowercased — the ASCII ones
+   * too, so a search never lowercases a cell twice. Built on first search.
+   */
+  searchable(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | null)[] {
     const texts = this.texts(col, env);
-    return this.#list('fold', col, env, () => {
+    return this.#list('search', col, env, () => {
       this.stats.foldBuilds++;
-      const out: (string | undefined)[] = new Array(texts.length);
+      const out: (string | null)[] = new Array(texts.length);
       for (let i = 0; i < texts.length; i++) {
         const t = texts[i];
-        if (t != null && !isAscii(t)) out[i] = fold(t);
+        // fold() lowercases ASCII itself, cheaply.
+        out[i] = t == null ? null : fold(t);
       }
       return out;
-    }) as (string | undefined)[];
+    }) as (string | null)[];
+  }
+
+  /** Each cell as displayed in the user's language, folded — what a search reads for numbers and dates. */
+  displays(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | null)[] {
+    return this.#list('display', col, env, () => {
+      this.stats.displayBuilds++;
+      const out: (string | null)[] = new Array(env.source.count);
+      for (let i = 0; i < out.length; i++) {
+        const { v } = coerceCell(col, ColumnCache.raw(col, env, i), env);
+        out[i] = v === null ? null : fold(col.codec.format(v, env.ctx));
+      }
+      return out;
+    }) as (string | null)[];
   }
 
   /** Each cell's stable export text (what value lists match on), or null for a blank. */

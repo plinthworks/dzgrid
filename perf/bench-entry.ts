@@ -1,4 +1,4 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, compileFilter, filterIndices, type SortItem, type FilterModel } from '../packages/core/src/index.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, compileFilter, filterIndices, compileQuick, fold, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { datasetA, type RowA } from './dataset.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
@@ -56,7 +56,51 @@ export const CASES: Record<string, Case> = {
   },
   ...sortCases(),
   ...filterCases(),
+  ...quickCases(),
 };
+
+/** The quick search lines of K.8: ten text columns of dataset A. */
+function quickCases(): Record<string, Case> {
+  const ids = ['t0', 't1', 't2', 't3', 't4', 'a0', 'a1', 'a2', 'a3', 'a4'];
+  const columns = createColumnModel<RowA>(ids.map((id) => ({ id })));
+  const asciiCols = createColumnModel<RowA>(['e0', 'e1', 'id', 'e2'].map((id) => ({ id })));
+  let rows: RowA[] | null = null;
+  const env = (cols = columns) => {
+    rows ??= datasetA();
+    const store = createRowStore<RowA>((r) => r.id);
+    store.replaceAll(rows);
+    return { source: store.snapshot, columns: cols, ctx: localeCtx({ locale: 'fr-FR' }), reader: NO_OVERLAY, cache: new ColumnCache<RowA>() };
+  };
+  const run = (text: string) => (e: ReturnType<typeof env>) => filterIndices(e.source.count, [compileQuick(text, e.columns.visible(), e)])?.length;
+  // Ten ASCII text columns, as K.8 states the budget: dataset A's French folded, plus its ASCII fields.
+  type Ascii = { id: string; c0: string; c1: string; c2: string; c3: string; c4: string; c5: string; c6: string; c7: string; c8: string; c9: string };
+  const asciiTen = createColumnModel<Ascii>(['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9'].map((id) => ({ id })));
+  let asciiRows: Ascii[] | null = null;
+  const asciiEnv = () => {
+    rows ??= datasetA();
+    asciiRows ??= rows.map((r) => ({ id: r.id, c0: fold(r.t0), c1: fold(r.t1), c2: fold(r.t2), c3: fold(r.t3), c4: fold(r.t4), c5: r.e0, c6: r.e1, c7: r.e2 ?? '', c8: r.id, c9: `${fold(r.t0)} ${r.e1}` }));
+    const store = createRowStore<Ascii>((r) => r.id);
+    store.replaceAll(asciiRows);
+    return { source: store.snapshot, columns: asciiTen, ctx: localeCtx({ locale: 'fr-FR' }), reader: NO_OVERLAY, cache: new ColumnCache<Ascii>() };
+  };
+  return {
+    'quick filter 100 000 x 10 text columns (cold, ASCII)': {
+      setup: asciiEnv,
+      run: (e: ReturnType<typeof asciiEnv>) => filterIndices(e.source.count, [compileQuick('ma', e.columns.visible(), e)])?.length,
+    },
+    'quick filter 100 000 x 10 text columns (cold, fr+ar)': { setup: () => env(), run: run('ma') },
+    'quick filter 100 000 x 4 ASCII columns (cold)': { setup: () => env(asciiCols), run: run('onc') },
+    'quick filter narrowing step (warm)': {
+      setup: () => {
+        const e = env();
+        const within = filterIndices(e.source.count, [compileQuick('ma', e.columns.visible(), e)]);
+        return { e, within };
+      },
+      run: ({ e, within }: { e: ReturnType<typeof env>; within: Uint32Array | null }) =>
+        filterIndices(e.source.count, [compileQuick('mar', e.columns.visible(), e)], within)?.length,
+    },
+  };
+}
 
 /** The filter lines of K.8 on dataset A, with the column keys already warm (a filter is retyped, not reloaded). */
 function filterCases(): Record<string, Case> {
