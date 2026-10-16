@@ -7,7 +7,7 @@
     "test:ci": "vitest run --maxWorkers=1",
     "test:watch": "vitest",
     "test:tz": "TZ=Pacific/Auckland vitest run && TZ=America/Los_Angeles vitest run",
-    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
+    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/dom/tsconfig.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
     "build": "node scripts/build.mjs",
     "spike": "node scripts/spikes.mjs",
     "start": "vite",

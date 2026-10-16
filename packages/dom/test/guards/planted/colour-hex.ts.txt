@@ -1,0 +1,2 @@
+// expect: colour
+el.style.setProperty('--dzg-x', '#ff0000');

@@ -1,0 +1,16 @@
+{
+  "name": "@dzgrid/dom",
+  "version": "0.0.0",
+  "description": "DzGrid in the browser: virtualised rows and columns, pinned columns, right to left, keyboard and screen readers. No framework, no dependency.",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@dzgrid/core": "0.0.0"
+  }
+}

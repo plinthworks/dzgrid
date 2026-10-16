@@ -1,0 +1,2 @@
+// expect: physical
+el.className = 'dzg-cell dzg-right-aligned';

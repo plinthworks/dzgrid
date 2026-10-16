@@ -1,0 +1,2 @@
+// expect: literal-text
+el.setAttribute('aria-label', 'Sort ascending');

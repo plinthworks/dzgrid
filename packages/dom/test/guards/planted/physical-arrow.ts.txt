@@ -1,0 +1,2 @@
+// expect: physical
+if (e.key === 'ArrowLeft') move(-1);

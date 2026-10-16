@@ -1,0 +1,2 @@
+// expect: literal-text
+cell.textContent = 'No rows';

@@ -1,0 +1,2 @@
+// expect: literal-text
+doc.createTextNode('Error');

@@ -1,0 +1,11 @@
+// expect: none
+// A comment may say left, right, #fff and innerHTML.
+cell.textContent = value ?? '';
+cell.textContent = String(n);
+el.setAttribute('aria-label', msg(m, 'grid.label', { n: 3 }));
+el.setAttribute('aria-rowindex', String(i + 2));
+el.style.setProperty('inset-inline-start', `${x}px`);
+el.style.setProperty('--dzg-row-h', '32px');
+const CSS = '.dzg-cell { padding-inline: 4px; inset-inline-end: 0 }';
+const key = 'grid.noRows';
+el.className = 'dzg-cell dzg-align-end';

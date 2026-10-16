@@ -1,0 +1,2 @@
+// expect: colour
+el.style.setProperty('border-inline-start-color', v);

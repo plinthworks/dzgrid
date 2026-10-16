@@ -17,7 +17,8 @@ const pkg = (name) => join(root, 'packages', name);
 const read = (file) => JSON.parse(readFileSync(file, 'utf8'));
 const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'inherit' });
 
-const PACKAGES = ['core'];
+// In dependency order: the DOM layer compiles against the core's built declarations.
+const PACKAGES = ['core', 'dom'];
 
 const shared = (name) => ({
   license: read(join(pkg(name), 'package.json')).license,

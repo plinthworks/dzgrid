@@ -1,0 +1,2 @@
+// expect: literal-text
+el.title = cond ? 'Loading' : msg(m, 'grid.loading');

@@ -1,0 +1,2 @@
+// expect: html
+el.innerHTML = value;

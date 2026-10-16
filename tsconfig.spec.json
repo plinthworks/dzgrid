@@ -21,6 +21,9 @@
       ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
+      ],
+      "@dzgrid/dom": [
+        "./packages/dom/src/index.ts"
       ]
     }
   },
