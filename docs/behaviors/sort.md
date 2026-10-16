@@ -10,7 +10,11 @@ Clicks a column header; clicks again; Shift-clicks another header.
 - Numbers sort as numbers, dates as dates.
 - Empty cells gather at the bottom; rows that compare equal keep their original order.
 
+- With the keyboard, Enter on a header sorts it, Shift+Enter adds it to the sort.
+- The header shows the direction, and screen readers hear it (`aria-sort` on the first sorted column, an announcement of the new order).
+
 ## What DzGrid does
+- A column that cannot sort ignores the click and the key.
 - Empty cells are last in **both** directions (D3); `nulls: 'first'` puts them first.
 - Equal values keep the source order in descending too — the sort is stable, never reversed.
 - Arabic: hamza forms, short vowels (harakat) and tatweel compare equal at the base level; Arabic-Indic and Latin digits compare equal (S5).
