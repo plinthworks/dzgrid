@@ -12,7 +12,7 @@ Le propriétaire a accepté toutes les recommandations du §1. Elles priment sur
 |---|---|
 | K.1 Licence | Tout en MIT pour l'instant ; le niveau « Enterprise » vit dans `src/enterprise/`, exposé par sous-chemins d'export, isolé par un test de graphe d'imports. |
 | K.2 Dates | Pas de Temporal dans `core` ni `dom` : `Day` (`YYYY-MM-DD`) et `InstantMs` distincts ; `zoneDayBounds` sur `Intl` ; aucun `Date` dans le cœur ; sélecteur de date par adaptateur, tzslot en option. |
-| K.3 Virtualisation | DOM recyclé, lignes et colonnes, un seul conteneur de défilement ; jamais de canvas ; plafond + pagination si S1 échoue. |
+| K.3 Virtualisation | DOM recyclé, lignes et colonnes, un seul conteneur de défilement ; jamais de canvas. S1 a confirmé : aucun plafond de lignes (voir les ajustements après la Phase 0). |
 | K.4 Données | Lignes du consommateur jamais modifiées ; `getRowId` requis ; transactions `{add, update, remove}` ; modifications en surcouche. |
 | K.5 Moteurs | `client` (P1) → `paged` serveur, total inconnu accepté (P3) → `infinite` et `serverSide` (P7) ; `viewport` hors v1 ; pas de worker en v1. |
 | K.6 Priorité Enterprise | Plages/presse-papiers/remplissage/édition en masse → filtre à valeurs → master/detail → regroupement → arbre → Excel → menus → filtre avancé → pivot ; graphiques hors v1. |
@@ -71,7 +71,7 @@ Ils priment sur les sections citées. Validés par le propriétaire le 2026-10-1
 
 ### Décisions validées par le propriétaire
 
-Aucune pour l'instant. Cette section se remplit, comme dans DzCalendar, à mesure que le propriétaire tranche K.1 à K.14. Ce qu'elle dit prime sur le reste du document.
+Voir le tableau en tête du document (2026-10-16) et les ajustements après la Phase 0 : ils priment sur le reste.
 
 ### Conventions reprises à l'identique de DzCalendar et tzslot
 
@@ -116,7 +116,7 @@ Chaque décision porte ma recommandation. Rien n'est codé tant que K.1 à K.9 n
 ### K.3 Stratégie de virtualisation : DOM recyclé ou canvas
 - **Recommandation** : **DOM recyclé**, lignes **et** colonnes, dans **un seul conteneur de défilement** (§3.6). Un canvas ruinerait l'accessibilité (lecteurs d'écran, sélection de texte native, recherche de page), le RTL et le bidi (arabe mêlé de latin), le thème par variables CSS et les cellules personnalisées. La performance de 10⁵ lignes × 30 colonnes est atteignable en DOM si un cellule visible coûte ~0,01 ms.
 - **Condition de la recommandation** : les spikes S1, S2 et S9 de la Phase 0 doivent le confirmer. Si S1 échoue (un million de lignes n'est pas défilable), on **plafonne** le nombre de lignes défilables et on impose la pagination ou l'infini serveur au-delà ; on ne passe pas au canvas.
-- **Limite connue** : la hauteur maximale d'un élément est bornée par le navigateur (de l'ordre de 17,9 M px sous Firefox, 33,5 M px sous Chrome **[À VÉRIFIER, spike S1]**). Au-delà d'environ 250 000 lignes × 32 px, un `ScrollMapper` met l'échelle (§3.6).
+- **Limite connue** : la hauteur maximale d'un élément est bornée par le navigateur (mesuré en S1 : 17 895 696 px sous Firefox, qui s'effondre à 0 au-delà ; 33 554 428 px sous Chrome et WebKit). Au-delà d'environ 250 000 lignes × 32 px, un `ScrollMapper` met l'échelle (§3.6).
 
 ### K.4 Modèle de données : immuable, transactions
 - **Recommandation** :
@@ -568,6 +568,7 @@ export function sortIndices<T>(nodes: readonly DataNode<T>[], cmp: ReturnType<ty
 ```
 - Le tri trie un **tableau d'indices** (`Uint32Array`) et non les noeuds : pas de copie d'objets.
 - Colonnes numériques et jours : clés dans un `Float64Array`, comparaison directe. Colonnes texte : `Intl.Collator(locale, {numeric, sensitivity})` en cache ; le budget (K.8) admet 250 ms pour 100 000 lignes, car le comparateur est le coût dominant **[À VÉRIFIER spike S5]**.
+  - **Ajusté par S5** : les colonnes texte trient par **clés de rang** (valeurs distinctes classées une fois par le `Collator`, puis tri d'entiers : ~15 ms pour 100 000 lignes aux tris suivants) ; défaut `sensitivity: 'base'`, `numeric: true` ; jamais `localeCompare`. La recherche rapide (`contains`) a besoin de son propre pliage (hamza, harakat, tatweel), le `Collator` ne cherche pas de sous-chaîne.
 - `ValueReader` lit la **surcouche d'édition** avant la valeur source : l'ordre affiché correspond à ce que l'utilisateur voit (mais cf. K.14 : un tri n'est pas réappliqué à chaque édition).
 
 **Modèle de filtre : JSON pur, identique client et serveur.**
@@ -722,15 +723,15 @@ export function visibleWindow(rows: RowLayout, centerCols: PrefixSums, scrollBlo
 /** Hauteur logique > hauteur physique permise : mise à l'échelle du défilement. */
 export interface ScrollMapper { readonly scaled: boolean; readonly physicalHeight: number;
   toLogical(physicalTop: number): number; toPhysical(logicalTop: number): number }
-export function scrollMapper(logicalHeight: number, maxPhysical: number): ScrollMapper;
+export function scrollMapper(logicalHeight: number, maxPhysical: number, viewportBlockSize: number): ScrollMapper;
 ```
-`maxPhysical` vaut 8 000 000 px par défaut (sous les plafonds connus) **[À VÉRIFIER, spike S1]**. Au-delà d'environ 250 000 lignes de 32 px, `scaled` devient vrai : la molette est rendue plus fine par interception (`wheel` + `scrollTop` fractionné). Pour Sehhaty, ce cas ne se produit pas : les journaux d'audit sont paginés.
+`maxPhysical` vaut **4 000 000 px** par défaut (S1 : au-delà de 2²² px, Firefox et Chrome en DPR 3 perdent le demi-pixel). Le mapper projette la **plage de défilement** (logique − hauteur de vue sur physique − hauteur de vue), extrémités exactes, et se reconstruit au redimensionnement. Au-delà d'environ 125 000 lignes de 32 px, `scaled` devient vrai : la molette est interceptée et convertie en logique. Toujours borner avant d'écrire `scrollTop` (WebKit revient à 0 sur une valeur démesurée) ; la grille ignore ses propres écritures. **Ouvert** : clavier natif (PageDown, Espace), toucher et inertie en mode mis à l'échelle bougent `ratio` fois trop ; et voir la rangée retenue en mode mis à l'échelle ci-dessous.
 
 **Structure du DOM : un seul conteneur de défilement.**
 
 ```
-<div class="dzg" role="grid" aria-rowcount aria-colcount aria-multiselectable dir="…" data-dzg-ready>
-  <div class="dzg-viewport" tabindex="-1">                      ← LE seul conteneur qui défile (deux axes)
+<div class="dzg" dir="…" data-dzg-ready>
+  <div class="dzg-viewport" role="grid" aria-rowcount aria-colcount aria-multiselectable tabindex="-1">   ← LE seul conteneur qui défile ; role=grid ici (S4)
     <div class="dzg-header" role="rowgroup">                    ← position: sticky; inset-block-start: 0
       <div role="row" aria-rowindex="1"> …en-têtes de groupes… </div>
       <div role="row" aria-rowindex="2"> …en-têtes de colonnes… </div>
@@ -738,7 +739,7 @@ export function scrollMapper(logicalHeight: number, maxPhysical: number): Scroll
     </div>
     <div class="dzg-pinned-top" role="rowgroup">…</div>         ← sticky sous l'en-tête
     <div class="dzg-body" role="rowgroup" style="block-size: <hauteur>px">
-      <div class="dzg-row" role="row" aria-rowindex="…" aria-selected style="transform: translateY(<y>px)">
+      <div class="dzg-row" role="row" aria-rowindex="…" aria-selected style="inset-block-start: <y>px">   ← relatif à une couche ré-ancrée (S1, S9)
         <div class="dzg-seg dzg-seg--start">  cellules épinglées début  </div>   ← sticky inset-inline-start: 0
         <div class="dzg-seg dzg-seg--center" style="inline-size: <w>px"> cellules virtualisées </div>
         <div class="dzg-seg dzg-seg--end">    cellules épinglées fin    </div>   ← sticky inset-inline-end: 0
@@ -747,8 +748,8 @@ export function scrollMapper(logicalHeight: number, maxPhysical: number): Scroll
     <div class="dzg-pinned-bottom" role="rowgroup">…</div>      ← sticky inset-block-end: 0
     <div class="dzg-overlays" aria-hidden="true">plages, poignée de remplissage, repères de glisser</div>
   </div>
-  <div class="dzg-footer">pagination · barre d'état</div>
-  <div class="dzg-live" aria-live="polite" aria-atomic="true" class="visually-hidden"></div>
+  <div class="dzg-footer">pagination · barre d'état</div>                  ← hors du grid (axe : aria-required-children)
+  <div class="dzg-live visually-hidden" aria-live="polite" aria-atomic="true"></div>   ← hors du grid
 </div>
 ```
 Pourquoi un conteneur unique :
@@ -760,8 +761,8 @@ Pourquoi un conteneur unique :
 1. `scroll` (passif) marque « sale » ; une boucle `requestAnimationFrame` regroupe.
 2. Phase `read` : `scrollTop`, `clientHeight`, `scrollLeft` converti par `ScrollX` (§3.9). Rien d'autre n'est lu.
 3. Phase calcul : `visibleWindow(...)` avec `overscanRows = clamp(4, 4 + vitesse × 0,1 s / hauteurLigne)` pour limiter les zones blanches en défilement rapide.
-4. Phase `write` : rangées sorties de la fenêtre → `pool` ; rangées entrées → prises dans le pool, liées à leur nœud. Comme la fenêtre est contiguë et glisse, on **ajoute en tête ou en queue** : l'ordre du DOM est toujours l'ordre des `aria-rowindex`, sans déplacement des rangées du milieu. Un saut sans recouvrement vide la fenêtre et la reconstruit dans l'ordre (un `DocumentFragment`).
-5. **La rangée qui a le focus ou un éditeur ouvert n'est jamais recyclée** : elle sort de la fenêtre mais reste montée, placée à sa position, jusqu'à la fin de l'édition ou le déplacement du focus (spike S10).
+4. Phase `write` : rangées sorties de la fenêtre → `pool` ; rangées entrées → prises dans le pool, liées à leur nœud. Comme la fenêtre est contiguë et glisse, on **ajoute en tête ou en queue** : l'ordre du DOM est toujours l'ordre des `aria-rowindex`, sans déplacement des rangées du milieu. Un saut sans recouvrement remplace les rangées une à une **autour de la rangée retenue**, sans jamais vider le corps ni reconstruire la fenêtre (S9 : 2,4 à 3,5× plus lent ; S10 : déplacer le nœud focalisé perd le focus).
+5. **Rangée retenue** : contrat en six points dans les ajustements après la Phase 0 (S10) — la rangée de l'arrêt de tabulation reste montée, à sa vraie position (`inset-block-start`), jamais déplacée, détachée ni cachée. **Conflit ouvert, à trancher avant la Phase 2** : en mode mis à l'échelle (> ~125 000 lignes), sa vraie position logique peut dépasser 2²⁴ px et le défilement natif vers un élément focalisé agit en espace physique, contre le mapper. Piste : position physique bornée + `focus({preventScroll: true})` + défilement par la grille ; à prouver par un spike.
 6. `overflow-anchor: none` sur le conteneur : nous seuls gérons la position. Sur transaction qui insère au-dessus de la fenêtre, on corrige `scrollTop` de la variation de hauteur d'une **ligne d'ancrage** (clé + décalage), sans saut visible.
 
 **Colonnes** : seul le segment central est virtualisé (`cols.first..cols.last` + surbalayage de 2). Les segments épinglés sont toujours complets ; au-delà de 6 colonnes épinglées par côté, avertissement dans la console de développement. Les rangées d'en-tête de groupes affichent seulement les cellules de groupe qui coupent la fenêtre.
@@ -770,7 +771,7 @@ Pourquoi un conteneur unique :
 
 **Hauteurs** : `--dzg-row-height` est lue **une fois** en `read` (conversion en px) et relue à chaque changement de densité, de taille de police (`rem`) ou de zoom (observé par `ResizeObserver` + `matchMedia('(resolution)')`). Hauteur automatique : estimation, mesure à l'apparition (une phase `read` groupée), `PrefixSums.set`, et correction du défilement par la ligne d'ancrage. Réservée à ≤ 10 000 lignes sans avertissement (spike S3).
 
-**Positionnement** : `transform: translateY` pour les rangées (composé par le GPU, ne touche pas la mise en page) ; `inset-inline-start` pour les cellules du segment central (logique). **[À VÉRIFIER]** contre `inset-block-start` dans le spike S9.
+**Positionnement** (S9, décision du propriétaire) : `inset-block-start` pour les rangées, relatif à une couche ré-ancrée tous les 2²⁰ px (S1) ; `inset-inline-start` pour les cellules du segment central ; `contain: strict` sur chaque rangée ; pas de `content-visibility`. `translateY` est aussi rapide (écart ≤ 2 %) mais moins précis aux grands décalages.
 
 ### 3.8 Rendu DOM, interactions, clavier
 
@@ -865,9 +866,9 @@ Alternatives au glisser (WCAG 2.5.7) : déplacement de colonne au clavier, redim
 
 **Focus** : roving tabindex. Position de focus = `{rowKey, columnId}` ; si la ligne disparaît (filtre, suppression), le focus se replie sur la ligne affichée la plus proche **à cet instant**. Le focus survit à `update()` et au rafraîchissement.
 
-**Édition** (`dom/editors`) : un éditeur est un `<input>` / `<select>` / combobox rendu **dans** la cellule ; la cellule en édition est marquée `data-dzg-editor`. Valider : `Entrée` (ligne suivante par défaut), `Tab`, perte de focus (option). Annuler : `Échap`. Message d'erreur : `aria-invalid`, `aria-describedby` vers un noeud d'erreur, annonce dans la région live. La cellule d'édition **n'est pas recyclée** (§3.7).
+**Édition** (`dom/editors`) : un éditeur est un `<input>` / `<select>` / combobox rendu **dans** la cellule ; la cellule en édition est marquée `data-dzg-editor`. Valider : `Entrée` (**ouvert** : rester sur la cellule, comme le spike S10, ou descendre ; à trancher par le propriétaire avant la Phase 4), `Tab`, perte de focus (option). Annuler : `Échap`. Message d'erreur : `aria-invalid`, `aria-describedby` vers un noeud d'erreur, annonce dans la région live. La cellule d'édition **n'est pas recyclée** (§3.7).
 
-**Presse-papiers** : copie en `text/plain` (TSV avec citation RFC 4180 : tabulation, retour à la ligne et guillemets) et `text/html` (tableau simple). Collage : lecture de `text/plain` (et `text/html` d'Excel en repli **[À VÉRIFIER, spike S7]**), `tsvToMatrix`, `planPaste` ; une valeur seule collée sur une plage la remplit. Les valeurs sont **brutes** (identifiant, nombre, jour ISO), pas l'affichage localisé, avec lecture selon la locale au collage (chiffres arabes-indic, virgule décimale).
+**Presse-papiers** : copie en `text/plain` (TSV avec citation RFC 4180 : tabulation, retour à la ligne et guillemets) et `text/html` (tableau simple). Collage (S7) : écouteurs sur `document`, routés par `document.activeElement` ; lecture de `text/plain` d'abord, `text/html` (premier `<table>`) seulement si le texte est vide ; TSV : CRLF après chaque ligne, guillemets seulement autour d'une cellule qui contient TAB, CR, LF ou `"` ; `tsvToMatrix`, `planPaste` ; une valeur seule collée sur une plage la remplit. Les valeurs sont **brutes** (identifiant, nombre, jour ISO), pas l'affichage localisé, avec lecture selon la locale au collage (chiffres arabes-indic, virgule décimale).
 
 **Superpositions** (plages, poignée, repères) : dessinées dans `.dzg-overlays` à partir de la **géométrie** (`PrefixSums`), pas de classes sur les cellules : elles ne dépendent donc pas des cellules montées ni du recyclage. En RTL, la poignée de remplissage se place au coin bas du bord de fin logique (en bas à gauche).
 
@@ -898,7 +899,7 @@ export function msg(m: GridMessages, key: MessageKey, params?: Readonly<Record<s
 - **direction** : `direction: 'auto' | 'ltr' | 'rtl'` ; en `auto`, lue sur l'ancêtre `[dir]` le plus proche (ou `documentElement`), avec un `MutationObserver` sur l'attribut `dir` des ancêtres. Un changement à l'exécution **ne recrée pas la grille** (contrairement au plan 0.2.0 D2) : tout est en propriétés logiques, seul le calcul de défilement doit relire la convention du signe.
 - **module `dir.ts`** : seul fichier autorisé à nommer `left`, `right`, `scrollLeft`, `clientX` pour la géométrie. Il fournit `inlineScroll(el, dir)` (distance ≥ 0 depuis le début logique, quelle que soit la convention de signe de `scrollLeft` en RTL), `setInlineScroll`, `logicalX(event, rect, dir)`. Un test de grep interdit `left`, `right`, `marginLeft`, `paddingRight`, `scrollLeft`, `textAlign: 'left'` ailleurs.
 - **CSS** : uniquement `inset-inline-*`, `margin-inline`, `padding-inline`, `text-align: start | end`, `border-inline-*`, `float: inline-start`. Icônes directionnelles (chevrons, flèches de tri de menu) : retournées par `scale: -1 1` sous `:dir(rtl)` ; les icônes sans direction ne le sont pas.
-- **Bidi des cellules** : texte `unicode-bidi: isolate`, `text-align: start` ; colonnes numériques `text-align: end` avec isolation LTR pour les nombres (`unicode-bidi: isolate; direction: ltr` sur la valeur, lecture à gauche en RTL). Identifiants latins dans un texte arabe : isolés par `unicode-bidi: isolate` posé sur la cellule, pas par un `<bdi>` par cellule (coût DOM).
+- **Bidi des cellules** (S2, décision du propriétaire) : colonnes de **texte libre** = cellule flex + `<span>` intérieur en `unicode-bidi: plaintext` (seule forme qui donne l'ordre du premier caractère fort ET un alignement par colonne dans les trois moteurs) ; autres colonnes : texte `text-align: start` ; colonnes numériques `text-align: end` avec isolation LTR pour les nombres (`unicode-bidi: isolate; direction: ltr` sur la valeur, lecture à gauche en RTL). Identifiants latins dans un texte arabe : isolés par `unicode-bidi: isolate` posé sur la cellule, pas par un `<bdi>` par cellule (coût DOM).
 
 **Accessibilité (ARIA grid et treegrid)** :
 
@@ -913,7 +914,7 @@ export function msg(m: GridMessages, key: MessageKey, params?: Readonly<Record<s
 | Détail | rangée `role="row"` à une cellule `aria-colspan` = total |
 | Région live | annonces (voir §3.8) |
 
-Tout défilement virtualisé garde `aria-rowindex` exact : un lecteur d'écran sait où il est même si les rangées voisines ne sont pas montées. **Reste à prouver** : que NVDA, JAWS, VoiceOver et TalkBack annoncent correctement une grille virtualisée, y compris en arabe, et la navigation par commandes de tableau (spike S4). Cibles ≥ 24×24 px (`--dzg-target-min`), focus non masqué (WCAG 2.4.11), indicateurs jamais portés par la couleur seule (1.4.1), `forced-colors` lisible.
+Tout défilement virtualisé garde `aria-rowindex` exact : un lecteur d'écran sait où il est même si les rangées voisines ne sont pas montées. **Structure validée en S4** (axe sans violation dans les trois moteurs, arbre AX de macOS correct à la ligne 5 000) ; **reste à prouver à l'oreille**, par le protocole `docs/a11y-protocol.md` : que NVDA, JAWS, VoiceOver et TalkBack annoncent correctement une grille virtualisée, y compris en arabe, et la navigation par commandes de tableau (spike S4). Cibles ≥ 24×24 px (`--dzg-target-min`), focus non masqué (WCAG 2.4.11), indicateurs jamais portés par la couleur seule (1.4.1), `forced-colors` lisible.
 
 ### 3.10 Édition, sauvegardes, annulation
 
@@ -1361,10 +1362,10 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
 |---|---|---|
 | **Largeur du périmètre** : Community + Enterprise est un chantier de plusieurs produits | Haute | Ordre des phases pensé pour s'arrêter à P4 avec un produit cohérent (lecture, serveur, filtres, édition) ; fiches de comportement avant le code ; Enterprise rare cher (pivot, graphiques) repoussé. |
 | **Accessibilité d'une grille virtualisée** : les lecteurs d'écran n'annoncent pas toujours bien un DOM partiel | Haute | Spike S4 dès la Phase 0 ; `aria-rowindex` exact ; rangée focalisée retenue ; région live ; protocole manuel en arabe. |
-| **RTL : `sticky`, signe de `scrollLeft`, ascenseur** diffèrent selon le navigateur | Haute | Spike S2 ; module `dir.ts` unique ; tests Chrome en RTL ; repli à trois conteneurs prévu. |
+| **RTL : `sticky`, signe de `scrollLeft`, ascenseur** diffèrent selon le navigateur | Haute | Levé par S2 : `sticky` correct dans les trois moteurs, pas de repli ; module `dir.ts` unique ; tests en RTL dans les trois moteurs. |
 | **ICU et `Intl`** : chiffres, grégorien, formats varient entre navigateurs | Moyenne | Étiquettes de langue complètes, parties structurées dans les tests, `calendar:'gregory'` explicite ; relecture arabe humaine. |
 | **Vitesse du `Collator`** pour le tri texte sur 10⁵ lignes | Moyenne | Budget 250 ms ; clés précalculées ; Web Worker en réserve (étapes pures et sérialisables). |
-| **Hauteur maximale d'un élément** : plafond de défilement | Moyenne | `ScrollMapper` ; plafonnement et pagination au-delà ; Sehhaty pagine. |
+| **Hauteur maximale d'un élément** : plafond de défilement | Moyenne | Levé par S1 : `ScrollMapper` à 4 M px, un million de lignes à 60 fps ; reste la rangée retenue en mode mis à l'échelle (§3.7). |
 | **Gabarits Angular dans des cellules virtualisées** : coût de `detectChanges` | Moyenne | Pool de vues ; rendus DOM pour les colonnes denses ; spike S6. |
 | **Fidélité du XLSX maison** | Moyenne | Spike S8 ; tests d'ouverture manuels ; repli sans compression. |
 | **Presse-papiers entre navigateurs** | Moyenne | Spike S7 ; événements `copy`/`paste` plutôt que `navigator.clipboard`. |

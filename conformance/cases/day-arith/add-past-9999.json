@@ -1,0 +1,13 @@
+{
+  "id": "add-past-9999",
+  "suite": "day-arith",
+  "description": "There is no day after 9999-12-31 that a Day can write.",
+  "input": {
+    "op": "add",
+    "day": "9999-12-31",
+    "days": 1
+  },
+  "expected": {
+    "day": null
+  }
+}

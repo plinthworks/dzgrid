@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DzGrid playground</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0; padding-block: 2rem; padding-inline: 1.5rem; }
+    table { border-collapse: collapse; }
+    th, td { padding-block: .35rem; padding-inline: .75rem; border-block-end: 1px solid color-mix(in srgb, currentColor 20%, transparent); text-align: start; }
+    td.num { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <h1>DzGrid</h1>
+  <p>Phase 0 : pas encore de grille. Le cœur est là : les bornes réelles d'un jour dans un fuseau.</p>
+  <table>
+    <thead><tr><th>Fuseau</th><th>Jour</th><th>Début (UTC)</th><th>Fin (UTC)</th><th>Durée</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

@@ -23,7 +23,7 @@ One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.j
 | Suite | Input | Expected |
 |---|---|---|
 | `zone-day-bounds` | `{day, zone}` | `{from, to}` — start inclusive, end exclusive, ISO UTC |
-| `day-arith` | `{op: 'toEpochDay' \| 'parse' \| 'add', …}` | `{epochDay}` or `{day}` (null when refused) |
+| `day-arith` | `{op: 'toEpochDay' \| 'fromEpochDay' \| 'parse' \| 'add', …}` | `{epochDay}` or `{day}` (null when refused or out of range) |
 | `row-key` | `{ids}` | `{accepted[], problems: [code, path][]}` |
 
 Later phases add `sort`, `filter-*`, `server-gate`, `edit-saves`, `paste-plan`, …

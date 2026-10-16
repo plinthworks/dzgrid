@@ -57,7 +57,9 @@ export function detailKey(master: RowKey): RowKey {
 
 /** The key of a row pinned to the top or the bottom. */
 export function pinnedKey(side: 'top' | 'bottom', index: number): RowKey {
-  return `p:${side === 'top' ? 't' : 'b'}:${index}` as RowKey;
+  if (side !== 'top' && side !== 'bottom') throw new RangeError(`not a side: ${String(side)}`);
+  if (!Number.isInteger(index) || index < 0) throw new RangeError(`not a row position: ${index}`);
+  return `p:${side === 'top' ? 't' : 'b'}:${index === 0 ? 0 : index}` as RowKey;
 }
 
 /**
@@ -74,7 +76,10 @@ export function assignKeys(ids: readonly unknown[], path = 'rows'): {
   const seen = new Set<RowKey>();
   const keys: (RowKey | null)[] = [];
   const problems: Problem[] = [];
-  ids.forEach((id, i) => {
+  // A plain loop: forEach skips the holes of a sparse array, and keys would no
+  // longer line up with the rows they belong to.
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
     const key = dataKey(id);
     if (key === null) {
       keys.push(null);
@@ -86,13 +91,14 @@ export function assignKeys(ids: readonly unknown[], path = 'rows'): {
       seen.add(key);
       keys.push(key);
     }
-  });
+  }
   return { keys, problems };
 }
 
 /** The shape of a refused id, never its content beyond the type. */
 function describe(id: unknown): string {
   if (id === null) return 'null';
+  if (id === undefined) return 'undefined';
   if (typeof id === 'number') return String(id);
   if (typeof id === 'string') return 'empty string';
   return typeof id;

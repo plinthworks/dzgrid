@@ -18,6 +18,6 @@ export {
 } from './value/day.js';
 
 export type { InstantMs, InstantReading } from './value/instant.js';
-export { readInstant, parseInstant } from './value/instant.js';
+export { readInstant, parseInstant, MAX_INSTANT } from './value/instant.js';
 
 export { zoneDayBounds, instantToDayIn, offsetAt, isKnownZone } from './value/zone-day.js';

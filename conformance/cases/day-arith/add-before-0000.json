@@ -1,0 +1,13 @@
+{
+  "id": "add-before-0000",
+  "suite": "day-arith",
+  "description": "Nor one before 0000-01-01.",
+  "input": {
+    "op": "add",
+    "day": "0000-01-01",
+    "days": -1
+  },
+  "expected": {
+    "day": null
+  }
+}

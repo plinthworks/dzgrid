@@ -10,7 +10,7 @@ and what the spikes found.
   decisions K.1–K.14 (2026-10-16).
 - Workspace: vitest projects (core and conformance in node), strict tsconfigs
   (core on lib ES2023, no DOM), build script refusing `src/` entry points and
-  runtime dependencies, Vite playground on port 4700.
+  runtime dependencies, Vite config for the playground on port 4700.
 - `@dzgrid/core` seed: `ids` (`RowKey`, `DisplayIndex`, `assignKeys`),
   `problems`, `value/day` (civil arithmetic without `Date`), `value/instant`
   (offset required, `ambiguous-instant` otherwise), `value/zone-day`
@@ -23,6 +23,22 @@ and what the spikes found.
   midnight, Samoa's skipped 2011-12-30, Lord Howe's half hour, Kolkata,
   Algiers, UTC), `day-arith`, `row-key`. 71 tests, green in UTC, Auckland and
   Los Angeles.
+- Phase-end reviews (architect + code) done; their findings fixed, each with
+  a test that failed first: instants beyond ±8.64e15 ms refused (they made
+  every formatter throw later), a missing zone no longer read as the machine
+  zone, sparse id lists keep one slot per row, `addDays`/`epochDayToDay` give
+  null past 0000–9999 instead of throwing, fractional negative instants on the
+  right day, `pinnedKey` validated, milliseconds parsed as digits.
+- `purity.test.ts` rewritten on TypeScript's scanner: catches `Date()`,
+  `const D = Date`, `globalThis.Date`, `self.document`, `import()`, `require`,
+  code hidden after `//` in a string; 23 planted violations, all caught.
+- A property test runs every day of 2010–2030 in 12 zones under `test:tz`.
+- Conformance runner prints milliseconds (a bound half a second off can no
+  longer pass), checks every case against the schema and refuses empty suites.
+- Playground on 4700 (`playground/index.html`); `check:size` (core 2.2 kB gz),
+  `bench` on a minified bundle with `perf/budgets.json`, `check:contrast` stub
+  until the theme; README, CHANGELOG, `docs/a11y-protocol.md`.
+- 93 tests, green in UTC, Auckland and Los Angeles.
 
 ### Spikes
 
@@ -35,7 +51,7 @@ re-run (`npm run spike`) replaces them below when it lands. Details in each
 | S1 | 1M rows, recycled DOM | 60 fps in Chrome, Firefox, WebKit; row 999 999 reachable, 0 px error; height caps 33.5 M px (Chrome, WebKit) and 17.9 M px (Firefox, collapses to 0 above); WebKit wraps a huge `scrollTop` to 0; float precision breaks above 2²² px | No row cap, no pagination imposed, no canvas; `maxPhysical` 4 M px; scroll-range mapper; clamp before writing `scrollTop` |
 | S2 | RTL + sticky pinned, 3 engines | Pinned sides and header/body alignment 0 px off in all three; `scrollLeft` 0 → −max everywhere; `scrollIntoView` needs `scroll-padding`; scrollbar side in Firefox headed only | One scroll container, no fallback; bidi: flex cell + `plaintext` span in free-text columns (owner, 2026-10-16) |
 | S3 | Auto row height | 0 px jump at 10 000 rows in all three; Firefox ≤ 1.5 px at 100 000; 365–508 px without correction | Free up to 10 000 rows, a developer warning above; batched read in rAF |
-| S4 | Screen readers, virtualised grid | axe 0 violations ×3 engines, fr and ar; macOS AX tree reports row 5001 of 10001 with headers; 3 structure fixes | Exact `aria-rowindex` + retained row + polite live region; manual protocol in `spikes/s4-a11y/protocol.md` |
+| S4 | Screen readers, virtualised grid — **structure only; readers pending** | axe 0 violations ×3 engines, fr and ar; macOS AX tree reports row 5001 of 10001 with headers; 3 structure fixes | Exact `aria-rowindex` + retained row + polite live region; manual protocol in `spikes/s4-a11y/protocol.md` |
 | S5 | Intl | Sort 100 000 strings 77–212 ms; Safari defaults `ar-SA` to Umm al-Qura; `zoneDayBounds` identical in 4 engines over 92 040 bounds | Rank keys for text sort; always `calendar` and `numberingSystem` |
 | S6 | Angular templates in cells | ~5 µs per pooled re-bound cell (25 µs at CPU ×4); fresh views 2× | Pooled views, `detectChanges` per view; ≤ ~3 templated columns advised |
 | S7 | Clipboard | Keyboard copy/paste needs no permission ×3; TSV codec 0 failures in 20 000 round trips | `text/plain` first; listeners on `document`; no `execCommand` |
@@ -50,10 +66,36 @@ re-run (`npm run spike`) replaces them below when it lands. Details in each
 - Real wheel, trackpad and touch scrolling; a mid-range laptop; Safari itself.
 - Before Phase 4: Enter in an editor (stay or move down); an edited row that disappears (commit or cancel).
 
+### Open, to settle before Phase 2
+- **Retained row in scaled mode** (architect review): S10 needs the focused
+  row at its true position, S1 forbids lengths above 2²⁴ px and maps the
+  scroll range above ~125 000 rows; never measured together. Spike before
+  Phase 2: clamped physical position + `focus({preventScroll: true})` + the
+  grid's own scroll-to-row.
+- Combinations never measured: `contain: strict` with sticky pinned segments
+  in RTL; auto height with the scaled mapper; the re-anchored layer with
+  `inset-block-start` rows; the retained row with `contain: strict`.
+- Native keyboard scrolling (PageDown, Space), touch and momentum in scaled
+  mode move `ratio` times too far: only the wheel is intercepted.
+
+## Phase 1 — data core (next)
+
+First steps, in order (architect review):
+1. `parseInstant(v, { assumeZone })` with a zone resolver and a stated policy
+   for wall times inside a clock change; `instant-parse` conformance suite;
+   one conformance case per `ProblemCode`.
+2. Behaviour sheets **before** the code: sort, text / number / day / instant
+   filters, quick filter (with its own Arabic folding).
+3. `test/types.test.ts` (a `number` is never accepted as a `DisplayIndex`),
+   then `row/{store,displayed,transaction}`, codecs with the S5 number-reader
+   rules, `columns/*`, `sort/` with rank keys, `filter/*`, `layout/` ported
+   from the S1 and S3 spikes, `model/client`, the conformance suites, and the
+   K.8 lines in `perf/budgets.json`.
+
 ### Exit criteria (ARCHITECTURE.md §6)
 - [x] the ten questions have measured answers (sequential re-run pending)
 - [x] K.1–K.9 decided
 - [x] `npm test` and `npm run typecheck` green
 - [x] `npm run build` produces `dist/`
 - [x] `purity.test.ts` fails on a planted `new Date()`
-- [ ] architect review and code review of the phase, findings fixed
+- [x] architect review and code review of the phase, findings fixed

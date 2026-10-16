@@ -1,0 +1,39 @@
+/**
+ * Runs perf/bench-entry.ts from a MINIFIED bundle in node and compares the
+ * medians with perf/budgets.json. Exits 1 over budget. Never measure the
+ * sources directly: they are not what ships.
+ */
+import { build } from 'esbuild';
+import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { performance } from 'node:perf_hooks';
+
+const root = fileURLToPath(new URL('..', import.meta.url));
+const { runs, budgets } = JSON.parse(readFileSync(join(root, 'perf/budgets.json'), 'utf8'));
+const out = await build({ entryPoints: [join(root, 'perf/bench-entry.ts')], bundle: true, minify: true, format: 'esm', platform: 'node', target: 'es2022', write: false });
+const dir = mkdtempSync(join(tmpdir(), 'dzgrid-bench-'));
+const file = join(dir, 'bench.mjs');
+writeFileSync(file, out.outputFiles[0].contents);
+const { CASES } = await import(pathToFileURL(file).href);
+rmSync(dir, { recursive: true, force: true });
+
+let over = 0;
+for (const [name, fn] of Object.entries(CASES)) {
+  fn(); // warm-up
+  const times = [];
+  for (let i = 0; i < runs; i++) {
+    const t = performance.now();
+    fn();
+    times.push(performance.now() - t);
+  }
+  times.sort((a, b) => a - b);
+  const median = times[Math.floor(times.length / 2)];
+  const budget = budgets[name];
+  const ok = budget === undefined || median <= budget;
+  if (!ok) over++;
+  console.log(`${ok ? 'ok  ' : 'OVER'} ${name}: ${median.toFixed(1)} ms (budget ${budget ?? '—'})`);
+}
+for (const name of Object.keys(budgets)) if (!(name in CASES)) { console.log(`MISSING ${name}`); over++; }
+process.exit(over ? 1 : 0);

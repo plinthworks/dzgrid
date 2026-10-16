@@ -10,7 +10,10 @@
     "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
     "build": "node scripts/build.mjs",
     "spike": "node scripts/spikes.mjs",
-    "start": "vite"
+    "start": "vite",
+    "bench": "node scripts/bench.mjs",
+    "check:size": "node scripts/size.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.8.1",

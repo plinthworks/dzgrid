@@ -64,14 +64,23 @@ export function dayToEpochDay(day: Day): number {
   return civilToEpochDay(Number(day.slice(0, 4)), Number(day.slice(5, 7)), Number(day.slice(8, 10)));
 }
 
-/** The day `n` days after 1970-01-01. Years outside 0000–9999 cannot be written as a `Day`. */
-export function epochDayToDay(n: number): Day {
+/**
+ * The day `n` days after 1970-01-01, or null outside the years 0000–9999,
+ * which a `Day` cannot write. A day count that is not an integer is a
+ * programming error.
+ */
+export function epochDayToDay(n: number): Day | null {
+  if (!Number.isInteger(n)) throw new RangeError(`not a whole number of days: ${n}`);
   const { y, m, d } = epochDayToCivil(n);
-  if (y < 0 || y > 9999) throw new RangeError(`day ${n} is outside the years 0000–9999`);
+  if (y < 0 || y > 9999) return null;
   return `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}` as Day;
 }
 
-export const addDays = (day: Day, n: number): Day => epochDayToDay(dayToEpochDay(day) + n);
+/** `n` days later (or earlier), or null past the ends of the range. */
+export const addDays = (day: Day, n: number): Day | null => {
+  if (!Number.isInteger(n)) throw new RangeError(`not a whole number of days: ${n}`);
+  return epochDayToDay(dayToEpochDay(day) + n);
+};
 
 /** Negative, zero or positive. Days compare as strings, which is why they are written in full. */
 export const compareDays = (a: Day, b: Day): number => (a < b ? -1 : a > b ? 1 : 0);

@@ -1,0 +1,12 @@
+{
+  "id": "from-epoch-day-negative",
+  "suite": "day-arith",
+  "description": "Day -1 is the last day of 1969.",
+  "input": {
+    "op": "fromEpochDay",
+    "epochDay": -1
+  },
+  "expected": {
+    "day": "1969-12-31"
+  }
+}

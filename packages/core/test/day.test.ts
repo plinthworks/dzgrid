@@ -22,7 +22,7 @@ describe('day arithmetic', () => {
   it('round-trips every day across four centuries, leap rules included', () => {
     // 1900 is not a leap year, 2000 is: a 400-year span crosses both rules.
     for (let n = dayToEpochDay(day('1899-12-25')); n < dayToEpochDay(day('2300-01-05')); n += 1) {
-      const d = epochDayToDay(n);
+      const d = epochDayToDay(n)!;
       expect(parseDay(d), d).toBe(d);
       expect(dayToEpochDay(d)).toBe(n);
     }
@@ -36,11 +36,11 @@ describe('day arithmetic', () => {
   });
 
   it('orders days as their strings do', () => {
-    const days = ['2026-03-05', '1999-12-31', '2026-03-04'].map(day) as Day[];
+    const days: Day[] = ['2026-03-05', '1999-12-31', '2026-03-04'].map(day);
     expect(days.sort(compareDays)).toEqual(['1999-12-31', '2026-03-04', '2026-03-05']);
   });
 
-  it('refuses to write a year it cannot', () => {
-    expect(() => epochDayToDay(dayToEpochDay(day('9999-12-31')) + 1)).toThrow(RangeError);
+  it('gives no day for a year it cannot write', () => {
+    expect(epochDayToDay(dayToEpochDay(day('9999-12-31')) + 1)).toBeNull();
   });
 });

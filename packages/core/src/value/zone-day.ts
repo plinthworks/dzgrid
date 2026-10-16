@@ -21,6 +21,8 @@ const formatters = new Map<string, Intl.DateTimeFormat>();
 
 /** The zone's wall-clock reader, built once per zone. Throws RangeError for an unknown zone. */
 function formatterFor(zone: string): Intl.DateTimeFormat {
+  // Intl reads a missing zone as "wherever this runs": never what a caller meant.
+  if (typeof zone !== 'string' || zone === '') throw new RangeError(`not a time zone: ${String(zone)}`);
   let f = formatters.get(zone);
   if (!f) {
     f = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {
@@ -58,7 +60,8 @@ function wallAt(instant: number, zone: string): number {
   let mi = 0;
   let s = 0;
   let bc = false;
-  for (const p of formatterFor(zone).formatToParts(instant)) {
+  // Intl truncates toward zero; a fraction of a millisecond before the epoch belongs to the day before.
+  for (const p of formatterFor(zone).formatToParts(Math.floor(instant))) {
     switch (p.type) {
       case 'year': y = Number(p.value); break;
       case 'month': mo = Number(p.value); break;
@@ -80,8 +83,8 @@ export function offsetAt(instant: number, zone: string): number {
   return wallAt(second, zone) - second;
 }
 
-/** The calendar day an instant falls on, in `zone`. */
-export function instantToDayIn(instant: InstantMs, zone: string): Day {
+/** The calendar day an instant falls on, in `zone`; null in a year a `Day` cannot write. */
+export function instantToDayIn(instant: InstantMs, zone: string): Day | null {
   return epochDayToDay(Math.floor(wallAt(instant, zone) / MS_PER_DAY));
 }
 
@@ -124,6 +127,12 @@ function firstInstantOf(epochDay: number, zone: string): number {
  * Start (inclusive) and end (exclusive) of `day` in `zone`.
  *
  * A day that never happened in that zone gives `from === to`.
+ *
+ * Where clocks go back *across* midnight (00:30 back to 23:30), the previous
+ * day's wall clock comes back after the next day began: an instant in that
+ * repeated half hour lies inside the next day's bounds while
+ * `instantToDayIn` names the previous day. Bounds follow the first time the
+ * wall clock reaches each day. No zone in use does this today.
  */
 export function zoneDayBounds(day: Day, zone: string): { readonly from: InstantMs; readonly to: InstantMs } {
   const n = dayToEpochDay(day);
