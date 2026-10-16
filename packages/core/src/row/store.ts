@@ -1,4 +1,4 @@
-import { canonicalId, dataKey, type RowIdInput, type RowKey } from '../ids.js';
+import { canonicalId, dataKey, idOfDataKey, type RowIdInput, type RowKey } from '../ids.js';
 import { problem, type Problem } from '../problems.js';
 import type { DataNode } from './node.js';
 
@@ -133,9 +133,9 @@ export function createRowStore<T>(getRowId: (row: T) => RowIdInput): RowStore<T>
     get snapshot() { return snap; },
     get lastDelta() { return lastDelta; },
     get(key) {
-      const m = /^d:\d+:/.exec(key);
-      if (!m) return undefined;
-      const i = snap.lookup(key.slice(m[0].length));
+      const id = idOfDataKey(key);
+      if (id === null) return undefined;
+      const i = snap.lookup(id);
       return i < 0 ? undefined : snap.nodeAt(i);
     },
 
@@ -254,7 +254,12 @@ export function createRowStore<T>(getRowId: (row: T) => RowIdInput): RowStore<T>
         ids.push(id);
       }
       for (let k = 0; k < prev.count; k++) if (!map.has(prev.ids[k]!)) keys.removed.push(dataKey(prev.ids[k]!)!);
-      if (sameOrder && rows.length === prev.count && !keys.added.length && !keys.updated.length && !keys.removed.length) return none(problems);
+      if (sameOrder && rows.length === prev.count && !keys.added.length && !keys.removed.length) {
+        if (!keys.updated.length) return none(problems);
+        // Same rows in the same place, some replaced: an update, which caches can patch.
+        const changedSrc = Uint32Array.from(keys.updated, (k) => prev.lookup(idOfDataKey(k)!));
+        return publish(rows, prev.ids, index, { kind: 'update', changedSrc }, keys, problems, prev.count);
+      }
       return publish(rows, ids, map, { kind: 'structural' }, keys, problems, prev.count);
     },
   };

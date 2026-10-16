@@ -69,6 +69,8 @@ export function readNumber(text: string, ctx: LocaleCtx): number | null {
   // Decimal text with an exponent: no float multiplication, so 12.3% is 0.123 exactly.
   const value = Number(`${sign}${int || '0'}${frac ? `.${frac}` : ''}${e ? `e${e}` : ''}`);
   if (!Number.isFinite(value)) return null;
+  // A non-zero number too small to represent is not zero.
+  if (value === 0 && /[1-9]/.test(int + frac)) return null;
   return value === 0 ? 0 : value;
 }
 
@@ -110,7 +112,8 @@ function splitMantissa(s: string, sep: NumberSeparators): { int: string; frac: s
 
   const groups = intPart.split(/[.,\u066C \u00A0\u2007\u2009\u202F'\u2019]/);
   if (groups.length > 1) {
-    if (!/^[0-9]{1,3}$/.test(groups[0]!)) return null;
+    // A leading zero before a group (0,500) is no grouping anyone writes.
+    if (!/^[1-9][0-9]{0,2}$/.test(groups[0]!)) return null;
     for (let i = 1; i < groups.length; i++) if (!/^[0-9]{3}$/.test(groups[i]!)) return null;
   } else if (!/^[0-9]*$/.test(groups[0]!)) return null;
   return { int: groups.join(''), frac };

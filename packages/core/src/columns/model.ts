@@ -68,13 +68,16 @@ export function createColumnModel<T>(initial: readonly ColumnDef<T, any>[], o: {
 
   const recompute = (): void => {
     const pos = new Map(columns.map((c, i) => [c.id, i]));
+    // A position the user asked for wins over the default position it ties with.
     const order = (c: ResolvedColumn<T>): number => user.get(c.id)?.order ?? pos.get(c.id)!;
+    const asked = (c: ResolvedColumn<T>): number => (user.get(c.id)?.order === undefined ? 1 : 0);
     const shown = columns.filter((c) => !(user.get(c.id)?.hidden ?? c.def.hidden ?? false));
     const side = (c: ResolvedColumn<T>): Side | null => {
       const u = user.get(c.id);
-      return u && 'pinned' in u ? (u.pinned ?? null) : (c.def.pinned ?? null);
+      return u && u.pinned !== undefined ? u.pinned : (c.def.pinned ?? null);
     };
-    const seg = (s: Side | null) => shown.filter((c) => side(c) === s).sort((a, b) => order(a) - order(b) || pos.get(a.id)! - pos.get(b.id)!);
+    const seg = (s: Side | null) =>
+      shown.filter((c) => side(c) === s).sort((a, b) => order(a) - order(b) || asked(a) - asked(b) || pos.get(a.id)! - pos.get(b.id)!);
     const start = seg('start');
     const center = seg(null);
     const end = seg('end');
@@ -115,13 +118,14 @@ export function createColumnModel<T>(initial: readonly ColumnDef<T, any>[], o: {
   const signature = (): string =>
     JSON.stringify([layout.start, layout.center, layout.end].map((sl) => sl.columns.map((col, i) => [col.id, sl.widths.sizeAt(i)])));
 
-  const change = (mutate: () => readonly string[], extra: readonly Problem[] = []): ColumnChange => {
+  /** `problems` is read after `mutate`, so a change reports what it found, not what the last one did. */
+  const change = (mutate: () => readonly string[], problems: () => readonly Problem[] = () => []): ColumnChange => {
     const before = signature();
     const changed = mutate();
     recompute();
     const layoutChanged = signature() !== before;
     if (changed.length || layoutChanged) version++;
-    return { changed, layoutChanged, problems: extra };
+    return { changed, layoutChanged, problems: problems() };
   };
 
   return {
@@ -137,22 +141,31 @@ export function createColumnModel<T>(initial: readonly ColumnDef<T, any>[], o: {
         const changed: string[] = [];
         patch.forEach((p, i) => {
           if (!byId.has(p.id)) return void problems.push(problem('unknown-column', 'warning', `state[${i}]`));
-          if (p.width !== undefined && (!Number.isFinite(p.width) || p.width < 0)) {
+          if (p.width !== undefined && !(Number.isFinite(p.width) && p.width >= 0)) {
             return void problems.push(problem('invalid-column', 'error', `state[${i}].width`));
           }
-          user.set(p.id, { ...user.get(p.id), ...p });
+          if (p.order !== undefined && !Number.isFinite(p.order)) return void problems.push(problem('invalid-column', 'error', `state[${i}].order`));
+          if (p.pinned !== undefined && p.pinned !== null && p.pinned !== 'start' && p.pinned !== 'end') {
+            return void problems.push(problem('invalid-column', 'error', `state[${i}].pinned`));
+          }
+          // An undefined key in a patch means "unchanged", not "cleared".
+          const clean = Object.fromEntries(Object.entries(p).filter(([, v]) => v !== undefined)) as ColumnState;
+          user.set(p.id, { ...user.get(p.id), ...clean });
           changed.push(p.id);
         });
         return changed;
-      }, problems);
+      }, () => problems);
     },
     setDefs(defs) {
       return change(() => {
         setColumns(defs);
         return columns.map((col) => col.id);
-      }, defProblems);
+      }, () => defProblems);
     },
     setAvailableInline(px) {
+      if (!(Number.isFinite(px) && px >= 0)) {
+        return { changed: [], layoutChanged: false, problems: [problem('invalid-column', 'error', 'availableInline')] };
+      }
       return change(() => {
         available = px;
         return [];
@@ -187,11 +200,22 @@ function shareFlex(
     const free = cols.filter((c) => !frozen.has(c.id));
     const left = room - [...frozen.values()].reduce((a, b) => a + b, 0);
     const weight = free.reduce((a, c) => a + c.flex, 0);
-    let froze = false;
-    for (const c of free) {
+    // As CSS flexbox does: clamp everyone, then freeze only the side the total
+    // violation leans to — mins if clamping added width, maxes if it removed some.
+    let total = 0;
+    const clamped = free.map((c) => {
       const w = (left * c.flex) / weight;
-      if (w < c.min) { frozen.set(c.id, c.min); froze = true; }
-      else if (w > c.max) { frozen.set(c.id, c.max); froze = true; }
+      const v = Math.min(c.max, Math.max(c.min, w));
+      total += v - w;
+      return { c, w, v };
+    });
+    let froze = false;
+    for (const { c, w, v } of clamped) {
+      if (v === w) continue;
+      if (total === 0 || (total > 0 && v > w) || (total < 0 && v < w)) {
+        frozen.set(c.id, v);
+        froze = true;
+      }
     }
     if (!froze) {
       const exact = cols.map((c) => ({ id: c.id, w: frozen.get(c.id) ?? (left * c.flex) / weight }));

@@ -100,8 +100,20 @@ function build(ctx: LocaleCtx): Formatters {
 }
 
 /** The order the locale writes a day's fields in, read from its own formatting of a sample day. */
+const fieldOrders = new Map<string, readonly ['d' | 'm' | 'y', 'd' | 'm' | 'y', 'd' | 'm' | 'y']>();
+
 export function dayFieldOrder(ctx: LocaleCtx): readonly ['d' | 'm' | 'y', 'd' | 'm' | 'y', 'd' | 'm' | 'y'] {
-  const df = new Intl.DateTimeFormat(intlTag(ctx), { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' });
+  const tag = intlTag(ctx);
+  const hit = fieldOrders.get(tag);
+  if (hit) return hit;
+  const result = computeFieldOrder(tag);
+  if (fieldOrders.size >= 64) fieldOrders.clear();
+  fieldOrders.set(tag, result);
+  return result;
+}
+
+function computeFieldOrder(tag: string): readonly ['d' | 'm' | 'y', 'd' | 'm' | 'y', 'd' | 'm' | 'y'] {
+  const df = new Intl.DateTimeFormat(tag, { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' });
   const order = df
     .formatToParts(dayToEpochDay('2026-03-05' as Day) * MS_PER_DAY)
     .flatMap((p) => (p.type === 'day' ? ['d'] : p.type === 'month' ? ['m'] : p.type === 'year' ? ['y'] : [])) as ('d' | 'm' | 'y')[];

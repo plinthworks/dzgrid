@@ -164,8 +164,16 @@ export function zoneDayBounds(day: Day, zone: string): { readonly from: InstantM
  * An unknown zone is refused (`unknown-zone`): this is reached from data, and
  * guessing the machine's zone instead is the bug the zone runs exist to catch.
  */
-export function resolveWall(wall: number, zone: string, disambiguation: Disambiguation = 'compatible'): WallResolution {
+export function resolveWall(wallMs: number, zone: string, disambiguation: Disambiguation = 'compatible'): WallResolution {
   if (!isKnownZone(zone)) return { ok: false, code: 'unknown-zone' };
+  // Zones change on whole seconds: resolve the second, carry the milliseconds.
+  const wall = Math.floor(wallMs / 1000) * 1000;
+  const ms = wallMs - wall;
+  const r = resolveSecond(wall, zone, disambiguation);
+  return r.ok && ms ? { ...r, value: (r.value + ms) as InstantMs } : r;
+}
+
+function resolveSecond(wall: number, zone: string, disambiguation: Disambiguation): WallResolution {
   // The offsets in force around the wall time, read as if it were an instant:
   // within ±36 h of it, clocks change at most once in every zone in use.
   const before = offsetAt(wall - 36 * HOUR, zone);

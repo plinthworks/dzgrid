@@ -21,10 +21,15 @@ export function enumCodec(options: readonly EnumOption[], o: { sort?: 'label' | 
   options.forEach((opt, i) => {
     labelOf.set(opt.value, opt.label ?? opt.value);
     rank.set(opt.value, i);
-    for (const t of [opt.value, opt.label, ...(opt.aliases ?? [])]) {
-      if (t !== undefined && !byFold.has(fold(t))) byFold.set(fold(t), opt.value);
-    }
   });
+  // Values first, then labels, then aliases: typing a value always finds it,
+  // whatever another option's label or alias folds to.
+  const claim = (t: string | undefined, value: string) => {
+    if (t !== undefined && !byFold.has(fold(t))) byFold.set(fold(t), value);
+  };
+  for (const o2 of options) claim(o2.value, o2.value);
+  for (const o2 of options) claim(o2.label, o2.value);
+  for (const o2 of options) for (const a of o2.aliases ?? []) claim(a, o2.value);
   const label = (v: string): string => labelOf.get(v) ?? v;
   const byOrder = o.sort === 'option-order';
 

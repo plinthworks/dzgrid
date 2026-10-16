@@ -16,6 +16,17 @@ export interface ColumnEnv<T> {
   readonly cache: ColumnCache<T>;
 }
 
+/** What `raw` returns for a cell whose accessor threw. */
+export const THREW: unique symbol = Symbol('dzgrid.threw');
+
+/** The coerced value of a raw cell, or null; `bad` is set when a non-blank value could not be read. */
+function coerceCell<T>(col: ResolvedColumn<T>, raw: unknown, env: ColumnEnv<T>): { v: unknown; bad: string | null } {
+  if (raw === THREW) return { v: null, bad: 'read threw' };
+  if (isBlank(raw)) return { v: null, bad: null };
+  const v = col.codec.coerce(raw, env.ctx);
+  return v === null ? { v: null, bad: typeof raw } : { v, bad: null };
+}
+
 /** At most this many invalid cells are reported per column; the rest are counted. */
 const MAX_CELL_PROBLEMS = 10;
 
@@ -28,6 +39,12 @@ interface RankEntry<T> { col: ResolvedColumn<T>; version: number; reader: number
  * are collated once, then rows sort by an integer). An update that only
  * changes values already present patches the ranks in place.
  */
+/** The source row a cell problem's path names, or −1. */
+const rowOf = (path: string): number => {
+  const m = /^rows\[(\d+)\]/.exec(path);
+  return m ? Number(m[1]) : -1;
+};
+
 export class ColumnCache<T> {
   readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0 };
   #lists = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; values: (string | null | undefined)[] }>();
@@ -35,10 +52,18 @@ export class ColumnCache<T> {
   #ranks = new Map<string, RankEntry<T>>();
   #clock = 0;
 
-  /** The raw value a cell holds, through the edit overlay when there is one. */
+  /**
+   * The raw value a cell holds, through the edit overlay when there is one.
+   * A host accessor that throws gives THREW: the cell is read as blank and
+   * reported, and one bad row never stops a sort.
+   */
   static raw<T>(col: ResolvedColumn<T>, env: ColumnEnv<T>, src: number): unknown {
     const row = env.source.rows[src]!;
-    return env.reader.overlay ? env.reader.value(col, row, env.source.ids[src]!) : col.read(row);
+    try {
+      return env.reader.overlay ? env.reader.value(col, row, env.source.ids[src]!) : col.read(row);
+    } catch {
+      return THREW;
+    }
   }
 
   keys(col: ResolvedColumn<T>, env: ColumnEnv<T>): { keys: Float64Array; blanks: number; problems: readonly Problem[] } {
@@ -52,12 +77,11 @@ export class ColumnCache<T> {
     let blanks = 0;
     let invalid = 0;
     for (let i = 0; i < n; i++) {
-      const raw = ColumnCache.raw(col, env, i);
-      const v = isBlank(raw) ? null : col.codec.coerce(raw, env.ctx);
+      const { v, bad } = coerceCell(col, ColumnCache.raw(col, env, i), env);
       if (v === null) {
         keys[i] = Number.NaN;
         blanks++;
-        if (!isBlank(raw) && invalid++ < MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows[${i}].${col.id}`, typeof raw));
+        if (bad && invalid++ < MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows[${i}].${col.id}`, bad));
       } else keys[i] = col.codec.sortKey(v, env.ctx) as number;
     }
     if (invalid > MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows.${col.id}`, `${invalid - MAX_CELL_PROBLEMS} more`));
@@ -81,11 +105,10 @@ export class ColumnCache<T> {
     let invalid = 0;
     const seen = new Set<string>();
     for (let i = 0; i < n; i++) {
-      const raw = ColumnCache.raw(col, env, i);
-      const v = isBlank(raw) ? null : col.codec.coerce(raw, env.ctx);
+      const { v, bad } = coerceCell(col, ColumnCache.raw(col, env, i), env);
       if (v === null) {
         texts[i] = null;
-        if (!isBlank(raw) && invalid++ < MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows[${i}].${col.id}`, typeof raw));
+        if (bad && invalid++ < MAX_CELL_PROBLEMS) problems.push(problem('invalid-cell-value', 'warning', `rows[${i}].${col.id}`, bad));
         continue;
       }
       const t = String(col.codec.sortKey(v, env.ctx));
@@ -130,8 +153,7 @@ export class ColumnCache<T> {
       this.stats.textBuilds++;
       const out: (string | null)[] = new Array(env.source.count);
       for (let i = 0; i < out.length; i++) {
-        const raw = ColumnCache.raw(col, env, i);
-        const v = isBlank(raw) ? null : col.codec.coerce(raw, env.ctx);
+        const { v } = coerceCell(col, ColumnCache.raw(col, env, i), env);
         out[i] = v === null ? null : col.type === 'enum' ? col.codec.format(v, env.ctx) : String(v);
       }
       return out;
@@ -158,8 +180,7 @@ export class ColumnCache<T> {
       this.stats.exportBuilds++;
       const out: (string | null)[] = new Array(env.source.count);
       for (let i = 0; i < out.length; i++) {
-        const raw = ColumnCache.raw(col, env, i);
-        const v = isBlank(raw) ? null : col.codec.coerce(raw, env.ctx);
+        const { v } = coerceCell(col, ColumnCache.raw(col, env, i), env);
         out[i] = v === null ? null : col.codec.toExport(v);
       }
       return out;
@@ -179,27 +200,37 @@ export class ColumnCache<T> {
     const env: ColumnEnv<T> = { ...base, source: next, cache: this };
     for (const [id, e] of this.#keys) {
       if (e.version !== delta.from) { this.#keys.delete(id); continue; }
+      // Problems are per row: drop the changed rows' reports, then report again what is still bad.
+      const changed = new Set(delta.changedSrc);
+      e.problems = e.problems.filter((p) => !changed.has(rowOf(p.path)));
       for (const src of delta.changedSrc) {
-        const raw = ColumnCache.raw(e.col, env, src);
-        const v = isBlank(raw) ? null : e.col.codec.coerce(raw, env.ctx);
+        const { v, bad } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
         const wasBlank = Number.isNaN(e.keys[src]!);
         e.keys[src] = v === null ? Number.NaN : (e.col.codec.sortKey(v, env.ctx) as number);
         e.blanks += (v === null ? 1 : 0) - (wasBlank ? 1 : 0);
+        if (bad) e.problems.push(problem('invalid-cell-value', 'warning', `rows[${src}].${e.col.id}`, bad));
       }
+      e.problems.sort((a, b) => rowOf(a.path) - rowOf(b.path));
       e.version = next.version;
     }
     for (const [id, e] of this.#ranks) {
       if (e.version !== delta.from) { this.#ranks.delete(id); continue; }
       let ok = true;
+      const changed = new Set(delta.changedSrc);
+      e.problems = e.problems.filter((p) => !changed.has(rowOf(p.path)));
       for (const src of delta.changedSrc) {
-        const raw = ColumnCache.raw(e.col, env, src);
-        const v = isBlank(raw) ? null : e.col.codec.coerce(raw, env.ctx);
+        const { v, bad } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
+        if (bad) e.problems.push(problem('invalid-cell-value', 'warning', `rows[${src}].${e.col.id}`, bad));
         if (v === null) { e.ranks[src] = Number.NaN; continue; }
         const r = e.dict.get(String(e.col.codec.sortKey(v, env.ctx)));
         if (r === undefined) { ok = false; break; }
         e.ranks[src] = r;
       }
-      if (ok) { e.version = next.version; this.stats.rankPatches++; }
+      if (ok) {
+        e.problems.sort((a, b) => rowOf(a.path) - rowOf(b.path));
+        e.version = next.version;
+        this.stats.rankPatches++;
+      }
       else this.#ranks.delete(id);
     }
   }

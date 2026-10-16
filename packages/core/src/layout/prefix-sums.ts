@@ -51,7 +51,7 @@ export class PrefixSums {
   indexAt(offset: number): number {
     const n = this.length;
     if (n === 0) return -1;
-    if (offset <= 0) return 0;
+    if (offset < 0) return 0;
     let pos = 0;
     let rest = offset;
     for (let step = 1 << Math.floor(Math.log2(n)); step > 0; step >>= 1) {

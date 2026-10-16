@@ -67,8 +67,13 @@ export const NO_OVERLAY: ValueReader<never> = {
 };
 
 const FORBIDDEN_SEGMENTS = new Set(['__proto__', 'constructor', 'prototype']);
+const COLUMN_TYPES: ReadonlySet<string> = new Set(['text', 'number', 'day', 'instant', 'boolean', 'enum', 'custom']);
 
-/** A reader for `a.b.c`, or null for an empty path, an empty segment or a prototype key. */
+/**
+ * A reader for `a.b.c`, or null for an empty path, an empty segment or a
+ * prototype key. Own properties only: a row that is a class instance with
+ * getters needs a `value` function instead.
+ */
 export function compilePath(path: string): ((row: unknown) => unknown) | null {
   if (typeof path !== 'string' || path === '') return null;
   const segs = path.split('.');
@@ -116,6 +121,12 @@ export function resolveColumns<T>(defs: readonly ColumnDef<T, any>[]): {
     const at = `columns[${i}]`;
     if (!def || typeof def.id !== 'string' || def.id === '') return void problems.push(problem('invalid-column', 'error', at, 'id'));
     if (seen.has(def.id)) return void problems.push(problem('duplicate-column-id', 'error', at));
+    const badSize = (['width', 'minWidth', 'maxWidth', 'flex'] as const).find((k) => def[k] !== undefined && !(typeof def[k] === 'number' && Number.isFinite(def[k]) && def[k]! >= 0));
+    if (badSize) return void problems.push(problem('invalid-column', 'error', `${at}.${badSize}`));
+    if (def.pinned !== undefined && def.pinned !== null && def.pinned !== 'start' && def.pinned !== 'end') {
+      return void problems.push(problem('invalid-column', 'error', `${at}.pinned`));
+    }
+    if (def.type !== undefined && !COLUMN_TYPES.has(def.type)) return void problems.push(problem('invalid-column', 'error', `${at}.type`));
     const type = def.type ?? 'text';
     const codec = codecFor(def, type);
     if (typeof codec === 'string') return void problems.push(problem('invalid-column', 'error', at, codec));

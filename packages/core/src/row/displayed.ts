@@ -1,4 +1,4 @@
-import type { DisplayIndex, RowKey } from '../ids.js';
+import { idOfDataKey, type DisplayIndex, type RowKey } from '../ids.js';
 import type { DataNode, RowNode } from './node.js';
 import type { RowSnapshot } from './store.js';
 
@@ -35,9 +35,9 @@ export function flatDisplayed<T>(snap: RowSnapshot<T>, order: Uint32Array | null
     sourceOf: (i) => src(i),
     index: (n) => (Number.isInteger(n) && n >= 0 && n < count ? (n as DisplayIndex) : null),
     indexOf(key) {
-      const m = /^d:\d+:/.exec(key);
-      if (!m) return -1;
-      const s = snap.lookup(key.slice(m[0].length));
+      const id = idOfDataKey(key);
+      if (id === null) return -1;
+      const s = snap.lookup(id);
       if (s < 0) return -1;
       if (!order) return s as DisplayIndex;
       if (!back) {
