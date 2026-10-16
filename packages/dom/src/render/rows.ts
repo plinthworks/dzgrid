@@ -62,6 +62,9 @@ export interface Frame<T> {
   readonly epoch: number;
   /** Row header: the identity column. */
   readonly rowHeader: string | null;
+  /** The focused cell: its centre column stays mounted in its row out of the window (D6). */
+  readonly focusRow: RowKey | null;
+  readonly focusCenter: number;
   readonly colIndex: (id: string) => number;
   readonly rowAttrs: (key: RowKey, el: HTMLElement) => void;
 }
@@ -70,6 +73,8 @@ export class RowRenderer<T> {
   readonly #doc: Document;
   readonly #layer: HTMLElement;
   readonly #mounted = new Map<RowKey, RowView>();
+  /** Row element to its key: the DOM never holds a row's id. */
+  readonly #keys = new WeakMap<Element, RowKey>();
   readonly #pool: RowView[] = [];
   /** Every row element made, for tests and the pool's high-water mark. */
   made = 0;
@@ -141,6 +146,7 @@ export class RowRenderer<T> {
         this.#mounted.set(k, v);
       }
       const i = d.indexOf(k) as number;
+      this.#keys.set(v.el, k);
       this.#bind(v, k, d, f);
       // A row far from the window sits at its true distance, bounded (S11): never over the
       // visible rows, never past what the body (which clips) can hold.
@@ -164,39 +170,37 @@ export class RowRenderer<T> {
     }
   }
 
+  /** The centre columns a row mounts: the window, and the focused column in the focused row. */
+  #centerOf(key: RowKey, f: Frame<T>): number[] {
+    const out: number[] = [];
+    if (f.cols) for (let c = f.cols.first; c <= f.cols.last; c++) out.push(c);
+    if (key === f.focusRow && f.focusCenter >= 0 && !(f.cols && f.focusCenter >= f.cols.first && f.focusCenter <= f.cols.last)) {
+      out.push(f.focusCenter);
+      out.sort((a, b) => a - b);
+    }
+    return out;
+  }
+
   #bind(v: RowView, key: RowKey, d: DisplayedRows<T>, f: Frame<T>): void {
     const node = d.nodeAt(d.index(d.indexOf(key) as number)!);
     const data = node.kind === 'data' ? node.data : undefined;
+    const center = this.#centerOf(key, f);
+    const L = f.layout;
     const same = v.key === key && v.data === data && v.epoch === f.epoch;
     v.key = key;
-    if (same && this.#centerMatches(v, f)) return;
+    if (same && this.#matches(v, f, center)) return;
     v.data = data;
     v.epoch = f.epoch;
     setPx(v.el, 'block-size', f.rowHeight);
-    setPx(v.el, 'inline-size', f.layout.totalWidth);
-    setPx(v.segs.start, 'inline-size', f.layout.start.width);
-    setPx(v.segs.center, 'inline-size', f.layout.center.width);
-    setPx(v.segs.end, 'inline-size', f.layout.end.width);
+    setPx(v.el, 'inline-size', L.totalWidth);
+    setPx(v.segs.start, 'inline-size', L.start.width);
+    setPx(v.segs.center, 'inline-size', L.center.width);
+    setPx(v.segs.end, 'inline-size', L.end.width);
+    // Cells that go are taken out first: a focused cell is then never moved past them (a move blurs).
     const wanted = new Set<string>();
-    const place = (seg: HTMLElement, cols: readonly ResolvedColumn<any>[], widths: ColumnLayout['start']['widths'], from: number, to: number, absolute: boolean) => {
-      let cursor: ChildNode | null = seg.firstChild;
-      for (let c = from; c <= to; c++) {
-        const col = cols[c]!;
-        wanted.add(col.id);
-        let cell = v.cells.get(col.id);
-        if (!cell) {
-          cell = this.#reuse(v) ?? this.#makeCell();
-          v.cells.set(col.id, cell);
-        }
-        this.#fillCell(cell, col, data, f, widths.sizeAt(c), absolute ? widths.offsetOf(c) : null);
-        if (cell.el === cursor) cursor = cursor.nextSibling;
-        else seg.insertBefore(cell.el, cursor);
-      }
-    };
-    const L = f.layout;
-    place(v.segs.start, L.start.columns, L.start.widths, 0, L.start.columns.length - 1, false);
-    if (f.cols) place(v.segs.center, L.center.columns, L.center.widths, f.cols.first, f.cols.last, true);
-    place(v.segs.end, L.end.columns, L.end.widths, 0, L.end.columns.length - 1, false);
+    for (const c of L.start.columns) wanted.add(c.id);
+    for (const c of center) wanted.add(L.center.columns[c]!.id);
+    for (const c of L.end.columns) wanted.add(c.id);
     for (const [id, cell] of v.cells) {
       if (wanted.has(id)) continue;
       cell.el.remove();
@@ -204,20 +208,33 @@ export class RowRenderer<T> {
       cell.col = null;
       this.#spare.push(cell);
     }
+    const place = (seg: HTMLElement, cols: readonly ResolvedColumn<any>[], widths: ColumnLayout['start']['widths'], indices: Iterable<number>, absolute: boolean) => {
+      let cursor: ChildNode | null = seg.firstChild;
+      for (const c of indices) {
+        const col = cols[c]!;
+        let cell = v.cells.get(col.id);
+        if (!cell) {
+          cell = this.#spare.pop() ?? this.#makeCell();
+          v.cells.set(col.id, cell);
+        }
+        this.#fillCell(cell, col, data, f, widths.sizeAt(c), absolute ? widths.offsetOf(c) : null);
+        if (cell.el === cursor) cursor = cursor.nextSibling;
+        else seg.insertBefore(cell.el, cursor);
+      }
+    };
+    const range = (n: number) => Array.from({ length: n }, (_, i) => i);
+    place(v.segs.start, L.start.columns, L.start.widths, range(L.start.columns.length), false);
+    place(v.segs.center, L.center.columns, L.center.widths, center, true);
+    place(v.segs.end, L.end.columns, L.end.widths, range(L.end.columns.length), false);
   }
 
   readonly #spare: CellView[] = [];
-  #reuse(_v: RowView): CellView | null {
-    return this.#spare.pop() ?? null;
-  }
 
-  /** True when the row's centre cells are exactly the window's: then nothing needs placing. */
-  #centerMatches(v: RowView, f: Frame<T>): boolean {
+  /** True when the row holds exactly the cells it should: then nothing needs placing. */
+  #matches(v: RowView, f: Frame<T>, center: readonly number[]): boolean {
     const L = f.layout;
-    const n = L.start.columns.length + L.end.columns.length + (f.cols ? f.cols.last - f.cols.first + 1 : 0);
-    if (v.cells.size !== n) return false;
-    if (!f.cols) return true;
-    for (let c = f.cols.first; c <= f.cols.last; c++) if (!v.cells.has(L.center.columns[c]!.id)) return false;
+    if (v.cells.size !== L.start.columns.length + L.end.columns.length + center.length) return false;
+    for (const c of center) if (!v.cells.has(L.center.columns[c]!.id)) return false;
     return true;
   }
 
@@ -247,6 +264,10 @@ export class RowRenderer<T> {
     }
     const text = data === undefined ? '' : cellText(col, data as never, f.ctx);
     if (cell.text.data !== text) cell.text.data = text;
+  }
+
+  keyOf(rowEl: Element): RowKey | undefined {
+    return this.#keys.get(rowEl);
   }
 
   /** The cell element for a row and column, when mounted. */

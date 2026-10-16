@@ -1,7 +1,8 @@
 import {
-  clientRows, createColumnModel, createKernel, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, windowAt,
-  type ClientModel, type ColumnModel, type DisplayedRows, type GridKernel, type LocaleCtx, type RowKey,
+  clientRows, createColumnModel, createKernel, intentFor, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, windowAt,
+  type ClientModel, type ColumnModel, type DisplayedRows, type FocusPos, type GridKernel, type Intent, type KeyOwner, type LocaleCtx, type RowKey,
 } from '@dzgrid/core';
+import { isMac, ownerOf } from './keys/owner.js';
 import { LiveRegion } from './a11y/live-region.js';
 import { isOnScrollbar, watchDirection, wheelInline, type Dir } from './dir.js';
 import { ScrollController } from './interact/scroll.js';
@@ -126,7 +127,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   let available = -1;
   let colIndexOf: { version: number; index: Map<string, number> } = { version: -1, index: new Map() };
   /** A cell to focus once it is mounted (focusCell on a row or column not yet rendered). */
-  let pendingFocus: { row: RowKey; column: string } | null = null;
+  let pendingFocus: { row: RowKey; column: string } | { header: string } | null = null;
 
   let paints = 0;
   function paint(box: ViewportBox): void {
@@ -183,16 +184,20 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     if (colIndexOf.version !== columns.version) colIndexOf = { version: columns.version, index: new Map(visible.map((c, i) => [c.id, i + 1])) };
     const index = colIndexOf.index;
     const colIndex = (id: string) => index.get(id) ?? 0;
-    headerRenderer.render(L, w.cols, h, colIndex, () => {});
+    const focus0 = kernel.focus;
+    const focusCenter = focus0 ? L.center.columns.findIndex((c) => c.id === focus0.column) : -1;
+    headerRenderer.render(L, w.cols, h, colIndex, () => {}, focus0?.kind === 'header' ? focusCenter : -1);
 
     const wanted: number[] = [];
     if (w.rows) for (let i = w.rows.first; i <= w.rows.last; i++) wanted.push(i);
     const frame: Frame<T> = {
       displayed: d, layout: L, cols: w.cols, rowHeight: h, base: w.placement.base, ctx, epoch,
       rowHeader: visible[0]?.id ?? null, colIndex, rowAttrs: () => {},
+      focusRow: focus0?.kind === 'cell' ? focus0.row : null, focusCenter,
     };
     const focus = kernel.focus;
     rowRenderer.render(frame, wanted, focus?.kind === 'cell' ? focus.row : null);
+    rovingStop(d, visible);
     const topIndex = d.count ? Math.min(d.count - 1, Math.floor(scroll.logicalTop / h)) : -1;
     shown = {
       displayed: d,
@@ -202,10 +207,10 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       atEnd: scroll.atEnd,
     };
     if (pendingFocus) {
-      const cell = rowRenderer.cell(pendingFocus.row, pendingFocus.column);
-      if (cell) {
+      const el = 'header' in pendingFocus ? headerRenderer.cell(pendingFocus.header) : rowRenderer.cell(pendingFocus.row, pendingFocus.column);
+      if (el) {
         pendingFocus = null;
-        cell.focus({ preventScroll: true });
+        el.focus({ preventScroll: true });
       }
     }
 
@@ -217,6 +222,23 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       if (overlay.textContent !== text) overlay.textContent = text;
       setPx(overlay, 'inset-block-start', h);
     } else if (overlay.textContent) overlay.textContent = '';
+  }
+
+  /**
+   * One tab stop (roving tabindex): the focused cell or header, or the first
+   * cell (the first header when there are no rows) before anything is focused.
+   */
+  let stop: HTMLElement | null = null;
+  function rovingStop(d: DisplayedRows<T>, visible: readonly { id: string }[]): void {
+    const f = kernel.focus;
+    let target: HTMLElement | null = null;
+    if (f?.kind === 'cell') target = rowRenderer.cell(f.row, f.column);
+    else if (f?.kind === 'header') target = headerRenderer.cell(f.column);
+    else if (visible[0]) target = d.count ? rowRenderer.cell(d.keyAt(d.index(0)!), visible[0].id) : headerRenderer.cell(visible[0].id);
+    if (target === stop) return;
+    if (stop) stop.tabIndex = -1;
+    stop = target;
+    if (stop) stop.tabIndex = 0;
   }
 
   // One paint per frame, whatever asked for it.
@@ -234,10 +256,110 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     scheduler.schedule(job);
   }
 
+  // A native scroll right after a focus move or a grid key is the browser bringing the focused
+  // element into view, physically: above the cap that is the wrong place, so the grid redoes it (S11, D4).
+  const now = () => win?.performance.now() ?? 0;
+  let intentAt = -1e9;
   scope.on(viewport, 'scroll', () => {
-    scroll.onScroll();
+    const moved = scroll.onScroll();
+    const f = kernel.focus;
+    if (moved && f?.kind === 'cell' && scroll.mapper?.scaled && now() - intentAt < 100 && viewport.contains(doc.activeElement)) api.ensureVisible(f.row, f.column);
     schedule();
   }, { passive: true });
+
+  // ---------- keyboard and focus ----------
+  const mac = isMac(win?.navigator);
+  // Whether the grid holds the user's focus: a focused row removed by a filter takes the DOM
+  // focus with it (no focusout says where it went), and the kernel's new focus must receive it.
+  let hasFocus = false;
+  scope.on(viewport, 'focusout', (e: FocusEvent) => {
+    const to = e.relatedTarget as Node | null;
+    if (to && !viewport.contains(to)) hasFocus = false;
+  });
+  scope.on(viewport, 'focusin', (e: FocusEvent) => {
+    hasFocus = true;
+    intentAt = now();
+    const pos = positionOf(e.target as HTMLElement);
+    if (pos) kernel.dispatch({ type: 'focus.set', focus: pos }, 'user');
+  });
+  scope.on(viewport, 'keydown', (e: KeyboardEvent) => {
+    if (e.isComposing || e.keyCode === 229) return;
+    intentAt = now();
+    const owner: KeyOwner = ownerOf(e.target, viewport);
+    const intent = intentFor(e, { dir, owner, mac });
+    if (!intent) return;
+    e.preventDefault();
+    apply(intent, owner);
+  });
+
+  function positionOf(el: HTMLElement): FocusPos | null {
+    const hcell = el.closest<HTMLElement>('.dzg-hcell');
+    if (hcell?.dataset['col']) return { kind: 'header', column: hcell.dataset['col'] };
+    const cell = el.closest<HTMLElement>('.dzg-cell');
+    const row = cell?.closest('.dzg-row');
+    const key = row ? rowRenderer.keyOf(row) : undefined;
+    return cell?.dataset['col'] && key ? { kind: 'cell', row: key, column: cell.dataset['col'] } : null;
+  }
+
+  /** Where the keys start from: the focus, or the first cell. */
+  function current(): FocusPos | null {
+    const f = kernel.focus;
+    if (f) return f;
+    const first = columns.visible()[0];
+    if (!first) return null;
+    const d = rows.displayed;
+    return d.count ? { kind: 'cell', row: d.keyAt(d.index(0)!), column: first.id } : { kind: 'header', column: first.id };
+  }
+
+  function apply(intent: Intent, owner: KeyOwner): void {
+    const from = current();
+    if (!from) return;
+    const d = rows.displayed;
+    const cols = columns.visible();
+    const ci = Math.max(0, cols.findIndex((c) => c.id === from.column));
+    const ri = from.kind === 'cell' ? d.indexOf(from.row) : -1;
+    const lastRow = d.count - 1;
+    const page = Math.max(1, Math.floor(geometry.read().block / rowHeight()) - 1);
+    const colAt = (i: number) => cols[Math.max(0, Math.min(cols.length - 1, i))]!.id;
+    const cell = (r: number, c: number): FocusPos | null => (lastRow < 0 ? { kind: 'header', column: colAt(c) } : { kind: 'cell', row: d.keyAt(d.index(Math.max(0, Math.min(lastRow, r)))!), column: colAt(c) });
+    let to: FocusPos | null = null;
+    switch (intent.kind) {
+      case 'move':
+        if (intent.axis === 'col') to = from.kind === 'header' ? { kind: 'header', column: colAt(ci + intent.delta) } : cell(ri, ci + intent.delta);
+        else if (from.kind === 'header') to = cell(0, ci);
+        else to = ri + intent.delta < 0 ? { kind: 'header', column: colAt(ci) } : cell(ri + intent.delta, ci);
+        break;
+      case 'edge': {
+        const c = intent.axis === 'row' ? ci : intent.to === 'first' ? 0 : cols.length - 1;
+        if (intent.axis === 'col' && from.kind === 'header') to = { kind: 'header', column: colAt(c) };
+        else to = cell(intent.axis === 'col' ? ri : intent.to === 'first' ? 0 : lastRow, c);
+        break;
+      }
+      case 'page':
+        to = from.kind === 'header' ? cell(page - 1, ci) : cell(ri + intent.delta * page, ci);
+        break;
+      case 'toggleSelect':
+        if (from.kind === 'cell' && (settings.selection?.mode ?? 'none') !== 'none') kernel.dispatch({ type: 'selection.toggle', row: from.row }, 'user');
+        return;
+      case 'selectAll':
+        if (settings.selection?.mode === 'multi') kernel.dispatch({ type: 'selection.allDisplayed' }, 'user');
+        return;
+      case 'sort':
+        if (owner === 'header') kernel.dispatch({ type: 'sort.toggle', column: from.column, multi: intent.multi }, 'user');
+        return;
+    }
+    if (to) focusTo(to);
+  }
+
+  function focusTo(to: FocusPos): void {
+    if (to.kind === 'cell') return api.focusCell(to.row, to.column);
+    if (!kernel.dispatch({ type: 'focus.set', focus: to }, 'user').ok) return;
+    scrollInlineTo(to.column);
+    schedule();
+    const el = headerRenderer.cell(to.column);
+    if (el && !queued) el.focus({ preventScroll: true });
+    else pendingFocus = { header: to.column };
+  }
   // Above the cap the wheel is the grid's: the browser would move ratio times too far.
   scope.on(viewport, 'wheel', (e: WheelEvent) => {
     const box = geometry.read();
@@ -255,6 +377,9 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   scope.on(doc, 'pointercancel', () => scroll.pointerUp());
   scope.add(kernel.subscribe((e) => {
     if (e.type === 'modelUpdated' && e.kind === 'rows') anchorNext = true;
+    if (e.type === 'focusChanged' && e.source === 'data' && e.focus && hasFocus && !viewport.contains(doc.activeElement)) {
+      pendingFocus = e.focus.kind === 'cell' ? { row: e.focus.row, column: e.focus.column } : { header: e.focus.column };
+    }
     settings.onEvent?.(e);
     if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized' || e.type === 'columnsChanged') schedule();
   }));
@@ -269,6 +394,24 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   const initialBox = geometry.read();
   columns.setAvailableInline(initialBox.inline);
   schedule();
+
+  /** A centre column comes clear of the pinned segments. */
+  function scrollInlineTo(column: string): void {
+    const box = geometry.read();
+    const L = columns.layout;
+    const c = L.center.columns.findIndex((x) => x.id === column);
+    if (c === -1) return;
+    const view = Math.max(0, box.inline - L.start.width - L.end.width);
+    const start = L.center.widths.offsetOf(c);
+    const end = start + L.center.widths.sizeAt(c);
+    let x = box.scrollInline;
+    if (start < x) x = start;
+    else if (end > x + view) x = end - view;
+    if (x !== box.scrollInline) {
+      geometry.writeScrollInline(x);
+      schedule();
+    }
+  }
 
   const api: GridApi = {
     focusCell(row, column) {
@@ -286,18 +429,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       const i = rows.displayed.indexOf(row);
       if (i === -1) return;
       const box = geometry.read();
-      // Inline: a centre column comes clear of the pinned segments.
-      const L = columns.layout;
-      const c = column === undefined ? -1 : L.center.columns.findIndex((x) => x.id === column);
-      if (c !== -1) {
-        const view = Math.max(0, box.inline - L.start.width - L.end.width);
-        const start = L.center.widths.offsetOf(c);
-        const end = start + L.center.widths.sizeAt(c);
-        let x = box.scrollInline;
-        if (start < x) x = start;
-        else if (end > x + view) x = end - view;
-        if (x !== box.scrollInline) geometry.writeScrollInline(x);
-      }
+      if (column !== undefined) scrollInlineTo(column);
       const h = rowHeight();
       const top = scroll.logicalTop;
       const off = i * h;

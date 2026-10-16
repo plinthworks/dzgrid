@@ -29,18 +29,29 @@ export class HeaderRenderer {
     group.append(this.row);
   }
 
-  render(layout: ColumnLayout, cols: { first: number; last: number } | null, height: number, colIndex: (id: string) => number, decorate: (col: ResolvedColumn<any>, el: HTMLElement) => void): void {
+  render(layout: ColumnLayout, cols: { first: number; last: number } | null, height: number, colIndex: (id: string) => number, decorate: (col: ResolvedColumn<any>, el: HTMLElement) => void, keep = -1): void {
     setPx(this.row, 'block-size', height);
     setPx(this.row, 'inline-size', layout.totalWidth);
     setPx(this.#segs.start, 'inline-size', layout.start.width);
     setPx(this.#segs.center, 'inline-size', layout.center.width);
     setPx(this.#segs.end, 'inline-size', layout.end.width);
-    const wanted = new Set<string>();
-    const place = (seg: HTMLElement, slice: ColumnLayout['start'], from: number, to: number, absolute: boolean) => {
+    // The centre window, and the focused header's column out of it (D6).
+    const center: number[] = [];
+    if (cols) for (let c = cols.first; c <= cols.last; c++) center.push(c);
+    if (keep >= 0 && !center.includes(keep)) {
+      center.push(keep);
+      center.sort((a, b) => a - b);
+    }
+    const wanted = new Set<string>([...layout.start.columns, ...center.map((c) => layout.center.columns[c]!), ...layout.end.columns].map((c) => c.id));
+    for (const [id, el] of this.#cells) {
+      if (wanted.has(id)) continue;
+      el.remove();
+      this.#cells.delete(id);
+    }
+    const place = (seg: HTMLElement, slice: ColumnLayout['start'], indices: readonly number[], absolute: boolean) => {
       let cursor: ChildNode | null = seg.firstChild;
-      for (let c = from; c <= to; c++) {
+      for (const c of indices) {
         const col = slice.columns[c]!;
-        wanted.add(col.id);
         let el = this.#cells.get(col.id);
         if (!el) {
           el = this.#doc.createElement('div');
@@ -66,14 +77,10 @@ export class HeaderRenderer {
         else seg.insertBefore(el, cursor);
       }
     };
-    place(this.#segs.start, layout.start, 0, layout.start.columns.length - 1, false);
-    if (cols) place(this.#segs.center, layout.center, cols.first, cols.last, true);
-    place(this.#segs.end, layout.end, 0, layout.end.columns.length - 1, false);
-    for (const [id, el] of this.#cells) {
-      if (wanted.has(id)) continue;
-      el.remove();
-      this.#cells.delete(id);
-    }
+    const range = (n: number) => Array.from({ length: n }, (_, i) => i);
+    place(this.#segs.start, layout.start, range(layout.start.columns.length), false);
+    place(this.#segs.center, layout.center, center, true);
+    place(this.#segs.end, layout.end, range(layout.end.columns.length), false);
   }
 
   cell(column: string): HTMLElement | null {
