@@ -1,0 +1,12 @@
+{
+  "id": "assumed-zone",
+  "suite": "instant-parse",
+  "description": "Read in Algiers (UTC+01:00 all year).",
+  "input": {
+    "text": "2026-03-05T10:00",
+    "assumeZone": "Africa/Algiers"
+  },
+  "expected": {
+    "instant": "2026-03-05T09:00:00Z"
+  }
+}

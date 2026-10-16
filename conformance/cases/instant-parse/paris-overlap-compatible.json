@@ -1,0 +1,13 @@
+{
+  "id": "paris-overlap-compatible",
+  "suite": "instant-parse",
+  "description": "Paris repeats 02:00–03:00 on 2026-10-25: 02:30 is read as the first one (CEST), with a warning.",
+  "input": {
+    "text": "2026-10-25T02:30",
+    "assumeZone": "Europe/Paris"
+  },
+  "expected": {
+    "instant": "2026-10-25T00:30:00Z",
+    "warning": "wall-time-ambiguous"
+  }
+}

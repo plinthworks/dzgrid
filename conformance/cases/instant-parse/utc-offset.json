@@ -1,0 +1,11 @@
+{
+  "id": "utc-offset",
+  "suite": "instant-parse",
+  "description": "An instant written with Z is that instant.",
+  "input": {
+    "text": "2026-03-05T10:00:00Z"
+  },
+  "expected": {
+    "instant": "2026-03-05T10:00:00Z"
+  }
+}

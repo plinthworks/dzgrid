@@ -1,4 +1,5 @@
 import { civilToEpochDay, daysInMonth } from './day.js';
+import { resolveWall, type Disambiguation } from './zone-day.js';
 
 /**
  * A moment: milliseconds since 1970-01-01T00:00:00Z, the same everywhere.
@@ -21,22 +22,28 @@ const inRange = (ms: number): boolean => Math.abs(ms) <= MAX_INSTANT;
 const ISO = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(?:[.,](\d{1,9}))?)?(Z|[+-]\d{2}:?\d{2})?$/i;
 
 export type InstantReading =
-  | { readonly ok: true; readonly value: InstantMs }
-  | { readonly ok: false; readonly code: 'invalid-instant' | 'ambiguous-instant' };
+  | { readonly ok: true; readonly value: InstantMs; readonly warning?: 'wall-time-skipped' | 'wall-time-ambiguous' }
+  | {
+      readonly ok: false;
+      readonly code: 'invalid-instant' | 'ambiguous-instant' | 'unknown-zone' | 'wall-time-skipped' | 'wall-time-ambiguous';
+    };
+
+export interface InstantOptions {
+  /** The zone an offset-less wall time was written in. Without it, such a time is `ambiguous-instant`. */
+  readonly assumeZone?: string;
+  /** How a wall time inside a clock change is read; see `resolveWall`. Default `compatible`. */
+  readonly disambiguation?: Disambiguation;
+}
 
 /**
  * Reads a moment from a finite epoch-millisecond number or an ISO string with
- * its offset. With `wallToInstant` — a zone's resolver, see `zone-day.ts` — an
- * offset-less string is read in that zone instead of being refused; how a wall
- * time inside a clock change resolves is that resolver's choice.
+ * its offset. With `assumeZone`, an offset-less string is read in that zone
+ * instead of being refused; an offset in the text always wins over it.
  *
  * Refused: hour 24, minute or second 60 (a leap second has no epoch
  * millisecond), offsets of 24 hours or more, and anything outside ±8.64e15 ms.
  */
-export function readInstant(
-  v: unknown,
-  wallToInstant?: (wallMs: number) => InstantMs,
-): InstantReading {
+export function readInstant(v: unknown, o: InstantOptions = {}): InstantReading {
   if (typeof v === 'number') {
     // Beyond the range, every formatter throws later; refused here instead.
     return Number.isFinite(v) && inRange(v) ? { ok: true, value: v as InstantMs } : { ok: false, code: 'invalid-instant' };
@@ -56,8 +63,11 @@ export function readInstant(
 
   const zone = m[8];
   if (zone === undefined) {
-    if (!wallToInstant) return { ok: false, code: 'ambiguous-instant' };
-    return checked(wallToInstant(wall));
+    if (o.assumeZone === undefined) return { ok: false, code: 'ambiguous-instant' };
+    const r = resolveWall(wall, o.assumeZone, o.disambiguation);
+    if (!r.ok) return r;
+    const c = checked(r.value);
+    return c.ok && r.warning ? { ...c, warning: r.warning } : c;
   }
   if (zone.toUpperCase() === 'Z') return checked(wall);
   const sign = zone[0] === '-' ? -1 : 1;
@@ -72,7 +82,7 @@ const checked = (ms: number): InstantReading =>
   Number.isFinite(ms) && inRange(ms) ? { ok: true, value: ms as InstantMs } : { ok: false, code: 'invalid-instant' };
 
 /** The moment, or null — see {@link readInstant} for why. */
-export function parseInstant(v: unknown): InstantMs | null {
-  const r = readInstant(v);
+export function parseInstant(v: unknown, o?: InstantOptions): InstantMs | null {
+  const r = readInstant(v, o);
   return r.ok ? r.value : null;
 }

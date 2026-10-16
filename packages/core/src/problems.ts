@@ -9,7 +9,10 @@ export type ProblemCode =
   | 'duplicate-row-id'
   | 'invalid-day'
   | 'invalid-instant'
-  | 'ambiguous-instant';
+  | 'ambiguous-instant'
+  | 'unknown-zone'
+  | 'wall-time-skipped'
+  | 'wall-time-ambiguous';
 
 export type Severity = 'error' | 'warning';
 

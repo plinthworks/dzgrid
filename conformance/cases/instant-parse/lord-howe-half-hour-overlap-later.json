@@ -1,0 +1,14 @@
+{
+  "id": "lord-howe-half-hour-overlap-later",
+  "suite": "instant-parse",
+  "description": "…and the second time at +10:30.",
+  "input": {
+    "text": "2026-04-05T01:45",
+    "assumeZone": "Australia/Lord_Howe",
+    "disambiguation": "later"
+  },
+  "expected": {
+    "instant": "2026-04-04T15:15:00Z",
+    "warning": "wall-time-ambiguous"
+  }
+}

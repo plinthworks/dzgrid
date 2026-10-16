@@ -1,0 +1,13 @@
+{
+  "id": "apia-skipped-day",
+  "suite": "instant-parse",
+  "description": "Samoa skipped 2011-12-30: noon that day is read 24 hours on, as noon on the 31st at +14:00.",
+  "input": {
+    "text": "2011-12-30T12:00",
+    "assumeZone": "Pacific/Apia"
+  },
+  "expected": {
+    "instant": "2011-12-30T22:00:00Z",
+    "warning": "wall-time-skipped"
+  }
+}

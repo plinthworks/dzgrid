@@ -17,7 +17,8 @@ export {
   compareDays,
 } from './value/day.js';
 
-export type { InstantMs, InstantReading } from './value/instant.js';
+export type { InstantMs, InstantReading, InstantOptions } from './value/instant.js';
 export { readInstant, parseInstant, MAX_INSTANT } from './value/instant.js';
 
-export { zoneDayBounds, instantToDayIn, offsetAt, isKnownZone } from './value/zone-day.js';
+export type { Disambiguation, WallResolution } from './value/zone-day.js';
+export { zoneDayBounds, instantToDayIn, offsetAt, isKnownZone, resolveWall } from './value/zone-day.js';

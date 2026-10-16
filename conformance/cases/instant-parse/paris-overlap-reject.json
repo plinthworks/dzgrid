@@ -1,0 +1,14 @@
+{
+  "id": "paris-overlap-reject",
+  "suite": "instant-parse",
+  "description": "'reject' refuses a wall time that happened twice.",
+  "input": {
+    "text": "2026-10-25T02:30",
+    "assumeZone": "Europe/Paris",
+    "disambiguation": "reject"
+  },
+  "expected": {
+    "instant": null,
+    "code": "wall-time-ambiguous"
+  }
+}

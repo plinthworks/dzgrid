@@ -1,0 +1,13 @@
+{
+  "id": "lord-howe-half-hour-overlap",
+  "suite": "instant-parse",
+  "description": "Lord Howe repeats 01:30–02:00 on 2026-04-05: 01:45 first at +11:00.",
+  "input": {
+    "text": "2026-04-05T01:45",
+    "assumeZone": "Australia/Lord_Howe"
+  },
+  "expected": {
+    "instant": "2026-04-04T14:45:00Z",
+    "warning": "wall-time-ambiguous"
+  }
+}

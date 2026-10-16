@@ -1,0 +1,13 @@
+{
+  "id": "los-angeles-gap",
+  "suite": "instant-parse",
+  "description": "Los Angeles skips 02:00–03:00 on 2026-03-08: 02:30 becomes 03:30 PDT.",
+  "input": {
+    "text": "2026-03-08T02:30",
+    "assumeZone": "America/Los_Angeles"
+  },
+  "expected": {
+    "instant": "2026-03-08T10:30:00Z",
+    "warning": "wall-time-skipped"
+  }
+}

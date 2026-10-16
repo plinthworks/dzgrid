@@ -26,9 +26,8 @@ describe('readInstant', () => {
   });
 
   it('reads it in a zone only when told which', () => {
-    // A fixed +01:00 resolver stands in for a real zone here.
-    const plusOne = (wall: number) => (wall - 3_600_000) as never;
-    expect(readInstant('2026-03-05T11:00', plusOne)).toEqual({ ok: true, value: 1772704800000 });
+    // Etc/GMT-1 is UTC+01:00 (POSIX signs are inverted).
+    expect(readInstant('2026-03-05T11:00', { assumeZone: 'Etc/GMT-1' })).toEqual({ ok: true, value: 1772704800000 });
   });
 
   it('refuses what is not a moment', () => {

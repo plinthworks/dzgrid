@@ -1,0 +1,13 @@
+{
+  "id": "not-an-instant",
+  "suite": "instant-parse",
+  "description": "Text that is no date at all.",
+  "input": {
+    "text": "soon",
+    "assumeZone": "Europe/Paris"
+  },
+  "expected": {
+    "instant": null,
+    "code": "invalid-instant"
+  }
+}

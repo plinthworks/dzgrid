@@ -1,0 +1,11 @@
+{
+  "id": "explicit-offset",
+  "suite": "instant-parse",
+  "description": "An explicit offset is read as written; no zone is needed.",
+  "input": {
+    "text": "2026-03-05T11:00:00+01:00"
+  },
+  "expected": {
+    "instant": "2026-03-05T10:00:00Z"
+  }
+}

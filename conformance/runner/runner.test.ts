@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { addDays, assignKeys, dayToEpochDay, epochDayToDay, parseDay, parseInstant, zoneDayBounds, type Day } from '@dzgrid/core';
+import { addDays, assignKeys, dayToEpochDay, epochDayToDay, parseDay, parseInstant, readInstant, zoneDayBounds, type Day } from '@dzgrid/core';
 
 const CASES = fileURLToPath(new URL('../cases', import.meta.url));
 
@@ -42,6 +42,11 @@ const SUITES: Record<string, (input: any) => unknown> = {
     if (input.op === 'add') return { day: addDays(parseDay(input.day) as Day, input.days) };
     if (input.op === 'fromEpochDay') return { day: epochDayToDay(input.epochDay) };
     throw new Error(`unknown op ${input.op}`);
+  },
+  'instant-parse': ({ text, assumeZone, disambiguation }) => {
+    const r = readInstant(text, assumeZone === undefined ? {} : { assumeZone, ...(disambiguation && { disambiguation }) });
+    if (!r.ok) return { instant: null, code: r.code };
+    return r.warning ? { instant: iso(r.value), warning: r.warning } : { instant: iso(r.value) };
   },
   'row-key': ({ ids }) => {
     const r = assignKeys(ids);

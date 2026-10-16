@@ -1,0 +1,14 @@
+{
+  "id": "paris-overlap-later",
+  "suite": "instant-parse",
+  "description": "'later' reads the repeated 02:30 as the second one (CET).",
+  "input": {
+    "text": "2026-10-25T02:30",
+    "assumeZone": "Europe/Paris",
+    "disambiguation": "later"
+  },
+  "expected": {
+    "instant": "2026-10-25T01:30:00Z",
+    "warning": "wall-time-ambiguous"
+  }
+}

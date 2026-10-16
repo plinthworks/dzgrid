@@ -1,0 +1,14 @@
+{
+  "id": "paris-gap-earlier",
+  "suite": "instant-parse",
+  "description": "'earlier' reads the skipped 02:30 as 01:30 CET.",
+  "input": {
+    "text": "2026-03-29T02:30",
+    "assumeZone": "Europe/Paris",
+    "disambiguation": "earlier"
+  },
+  "expected": {
+    "instant": "2026-03-29T00:30:00Z",
+    "warning": "wall-time-skipped"
+  }
+}

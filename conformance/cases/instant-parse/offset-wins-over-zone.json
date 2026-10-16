@@ -1,0 +1,12 @@
+{
+  "id": "offset-wins-over-zone",
+  "suite": "instant-parse",
+  "description": "An offset in the text wins over the assumed zone.",
+  "input": {
+    "text": "2026-03-05T10:00Z",
+    "assumeZone": "Africa/Algiers"
+  },
+  "expected": {
+    "instant": "2026-03-05T10:00:00Z"
+  }
+}

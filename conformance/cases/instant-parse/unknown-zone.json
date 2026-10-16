@@ -1,0 +1,13 @@
+{
+  "id": "unknown-zone",
+  "suite": "instant-parse",
+  "description": "A zone the engine does not know is refused, not replaced by the machine's.",
+  "input": {
+    "text": "2026-03-05T10:00",
+    "assumeZone": "Mars/Olympus_Mons"
+  },
+  "expected": {
+    "instant": null,
+    "code": "unknown-zone"
+  }
+}

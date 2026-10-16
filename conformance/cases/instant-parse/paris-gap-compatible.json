@@ -1,0 +1,13 @@
+{
+  "id": "paris-gap-compatible",
+  "suite": "instant-parse",
+  "description": "Paris skips 02:00–03:00 on 2026-03-29: 02:30 is read as 03:30 CEST, with a warning.",
+  "input": {
+    "text": "2026-03-29T02:30",
+    "assumeZone": "Europe/Paris"
+  },
+  "expected": {
+    "instant": "2026-03-29T01:30:00Z",
+    "warning": "wall-time-skipped"
+  }
+}
