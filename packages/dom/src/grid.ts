@@ -1,5 +1,5 @@
 import {
-  clientRows, createColumnModel, createKernel, formattersFor, headerSelection, isSelected, intentFor, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, windowAt,
+  clientRows, createColumnModel, createKernel, formattersFor, headerSelection, intentFor, isBlank, isSelected, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, windowAt,
   type ClientModel, type ColumnModel, type DisplayedRows, type FocusPos, type GridKernel, type Intent, type KeyOwner, type LocaleCtx, type RowKey,
 } from '@dzgrid/core';
 import { isMac, ownerOf } from './keys/owner.js';
@@ -198,7 +198,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const focus0 = kernel.focus;
     const focusCenter = focus0 ? L.center.columns.findIndex((c) => c.id === focus0.column) : -1;
     const sort = rows.query.sort;
-    headerRenderer.render(L, w.cols, h, colIndex, (col, el) => decorateHeader(col, el, sort), focus0?.kind === 'header' ? focusCenter : -1, check);
+    headerRenderer.render(L, w.cols, h, colIndex, (col, el) => decorateHeader(col, el, sort), focus0?.kind === 'header' ? focusCenter : -1, check, mode === 'multi');
     if (headerRenderer.checkBox) {
       const state = headerSelection(kernel.selection, d);
       setAttr(headerRenderer.checkBox, 'aria-checked', state === 'all' ? 'true' : state === 'some' ? 'mixed' : 'false');
@@ -331,13 +331,31 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     pendingFocus = null;
     intentAt = now();
     const pos = positionOf(e.target as HTMLElement);
-    if (pos) kernel.dispatch({ type: 'focus.set', focus: pos }, 'user');
+    if (!pos) return;
+    kernel.dispatch({ type: 'focus.set', focus: pos }, 'user');
+    if ((e.target as HTMLElement).closest('.dzg-row .dzg-check') && pos.kind === 'cell') {
+      const cellEl = rowRenderer.cell(pos.row, pos.column);
+      cellEl?.focus({ preventScroll: true });
+    }
   });
   scope.on(viewport, 'keydown', (e: KeyboardEvent) => {
     if (e.isComposing || e.keyCode === 229) return;
     keyboardAt = now();
     if (e.key === 'Escape' && !tooltip.hidden) {
       tip.hide();
+      return;
+    }
+    // The select-all box: a checkbox (Space, Enter), before the first header in reading order.
+    const t = e.target as HTMLElement;
+    if (headerRenderer.checkBox && t === headerRenderer.checkBox) {
+      const step = intentFor(e, { dir, owner: 'header', mac });
+      const first = columns.visible()[0];
+      if (e.key === ' ' || e.key === 'Enter') toggleAll();
+      else if (first && step?.kind === 'move' && step.delta > 0) {
+        const d = rows.displayed;
+        focusTo(step.axis === 'row' && d.count ? { kind: 'cell', row: d.keyAt(d.index(0)!), column: first.id } : { kind: 'header', column: first.id });
+      } else return;
+      e.preventDefault();
       return;
     }
     intentAt = now();
@@ -349,6 +367,13 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   });
 
   function positionOf(el: HTMLElement): FocusPos | null {
+    // A row's selection box stands for its row: focus goes to the row's first cell.
+    const check = el.closest<HTMLElement>('.dzg-row .dzg-check');
+    if (check) {
+      const key = rowRenderer.keyOf(check.closest('.dzg-row')!);
+      const first = columns.visible()[0];
+      return key && first ? { kind: 'cell', row: key, column: first.id } : null;
+    }
     const hcell = el.closest<HTMLElement>('.dzg-hcell');
     if (hcell?.dataset['col']) return { kind: 'header', column: hcell.dataset['col'] };
     const cell = el.closest<HTMLElement>('.dzg-cell');
@@ -381,6 +406,11 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     let to: FocusPos | null = null;
     switch (intent.kind) {
       case 'move':
+        // Back from the first header: the select-all box, when there is one.
+        if (intent.axis === 'col' && from.kind === 'header' && ci === 0 && intent.delta < 0 && headerRenderer.checkBox) {
+          headerRenderer.checkBox.focus({ preventScroll: true });
+          return;
+        }
         if (intent.axis === 'col') to = from.kind === 'header' ? { kind: 'header', column: colAt(ci + intent.delta) } : cell(ri, ci + intent.delta);
         else if (from.kind === 'header') to = cell(0, ci);
         else to = ri + intent.delta < 0 ? { kind: 'header', column: colAt(ci) } : cell(ri + intent.delta, ci);
@@ -521,6 +551,13 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     nextFrame: (fn) => scheduler.schedule({ read: () => 0, write: fn }),
   });
 
+  /** The select-all box, multi mode only: all displayed rows, or none. */
+  function toggleAll(): void {
+    if (settings.selection?.mode !== 'multi') return;
+    const all = headerSelection(kernel.selection, rows.displayed) === 'all';
+    kernel.dispatch(all ? { type: 'selection.clear' } : { type: 'selection.allDisplayed' }, 'user');
+  }
+
   // ---------- tooltips: the host's words only ----------
   function tooltipFor(el: HTMLElement): string | null {
     const hcell = el.closest<HTMLElement>('.dzg-hcell');
@@ -564,13 +601,16 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const t = e.target as HTMLElement;
     if (t.closest('.dzg-resize')) return;
     if (headerRenderer.check && headerRenderer.check.contains(t)) {
-      const all = headerSelection(kernel.selection, rows.displayed) === 'all';
-      kernel.dispatch(all ? { type: 'selection.clear' } : { type: 'selection.allDisplayed' }, 'user');
+      toggleAll();
       return;
     }
     const id = t.closest<HTMLElement>('.dzg-hcell')?.dataset['col'];
     const col = id ? columns.get(id) : undefined;
     if (col?.sortable) kernel.dispatch({ type: 'sort.toggle', column: col.id, multi: e.shiftKey }, 'user');
+  });
+  // Shift+click extends the rows, not the page's text selection.
+  scope.on(body, 'mousedown', (e: MouseEvent) => {
+    if (e.shiftKey && (settings.selection?.mode ?? 'none') === 'multi') e.preventDefault();
   });
   scope.on(body, 'click', (e: MouseEvent) => {
     const mode = settings.selection?.mode ?? 'none';
@@ -582,7 +622,8 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const onBox = !!t.closest('.dzg-check');
     if (!onBox && settings.selection?.click !== true) return;
     const toggle = onBox || (mac ? e.metaKey : e.ctrlKey);
-    if (mode === 'multi' && e.shiftKey) {
+    if (mode === 'multi' && e.shiftKey && kernel.anchor === null) kernel.dispatch({ type: 'selection.only', row: key }, 'user');
+    else if (mode === 'multi' && e.shiftKey) {
       const r = kernel.dispatch({ type: 'selection.range', target: key, additive: toggle }, 'user');
       if (!r.ok && r.reason === 'anchor-not-displayed') live.announce(msg(settings.messages, 'announce.rangeCancelled', {}, ctx));
     } else if (toggle && mode === 'multi') kernel.dispatch({ type: 'selection.toggle', row: key }, 'user');

@@ -32,12 +32,12 @@ export class HeaderRenderer {
     group.append(this.row);
   }
 
-  render(layout: ColumnLayout, cols: { first: number; last: number } | null, height: number, colIndex: (id: string) => number, decorate: (col: ResolvedColumn<any>, el: HTMLElement) => void, keep = -1, check = false): void {
+  render(layout: ColumnLayout, cols: { first: number; last: number } | null, height: number, colIndex: (id: string) => number, decorate: (col: ResolvedColumn<any>, el: HTMLElement) => void, keep = -1, check = false, selectAll = false): void {
     const extra = check ? CHECK_WIDTH : 0;
     setPx(this.row, 'block-size', height);
     setPx(this.row, 'inline-size', layout.totalWidth + extra);
     setPx(this.#segs.start, 'inline-size', layout.start.width + extra);
-    this.#checkCell(check);
+    this.#checkCell(check, selectAll);
     setPx(this.#segs.center, 'inline-size', layout.center.width);
     setPx(this.#segs.end, 'inline-size', layout.end.width);
     // The centre window, and the focused header's column out of it (D6).
@@ -90,7 +90,7 @@ export class HeaderRenderer {
   }
 
   /** The select-all box: a real checkbox for assistive technologies, tri-state (D8). */
-  #checkCell(on: boolean): void {
+  #checkCell(on: boolean, selectAll: boolean): void {
     if (!on) {
       this.check?.remove();
       this.check = this.checkBox = null;
@@ -101,14 +101,20 @@ export class HeaderRenderer {
       cell.className = 'dzg-hcell dzg-check';
       cell.setAttribute('role', 'columnheader');
       cell.setAttribute('aria-colindex', '1');
+      setPx(cell, 'inline-size', CHECK_WIDTH);
+      this.check = cell;
+    }
+    // The select-all box only where all can be selected (multi); the column stays for alignment.
+    if (selectAll && !this.checkBox) {
       const box = this.#doc.createElement('span');
       box.className = 'dzg-box';
       box.setAttribute('role', 'checkbox');
       box.tabIndex = -1;
-      cell.append(box);
-      setPx(cell, 'inline-size', CHECK_WIDTH);
-      this.check = cell;
+      this.check.append(box);
       this.checkBox = box;
+    } else if (!selectAll && this.checkBox) {
+      this.checkBox.remove();
+      this.checkBox = null;
     }
     if (this.#segs.start.firstChild !== this.check) this.#segs.start.prepend(this.check);
   }
