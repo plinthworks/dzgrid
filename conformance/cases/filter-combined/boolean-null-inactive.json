@@ -1,0 +1,41 @@
+{
+  "id": "boolean-null-inactive",
+  "suite": "filter-combined",
+  "description": "No choice means no filter.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "b",
+        "type": "boolean"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "b": true
+      },
+      {
+        "id": "2",
+        "b": false
+      },
+      {
+        "id": "3",
+        "b": null
+      }
+    ],
+    "filter": {
+      "b": {
+        "type": "boolean",
+        "value": null
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2",
+      "3"
+    ]
+  }
+}

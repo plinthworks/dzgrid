@@ -1,0 +1,53 @@
+{
+  "id": "text-contains-folded",
+  "suite": "filter-text",
+  "description": "Case and accents ignored: eri finds Éric, eric and Eric Dupont.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "Éric"
+      },
+      {
+        "id": "2",
+        "n": "eric"
+      },
+      {
+        "id": "3",
+        "n": "Zoé"
+      },
+      {
+        "id": "4",
+        "n": ""
+      },
+      {
+        "id": "5",
+        "n": null
+      },
+      {
+        "id": "6",
+        "n": "Eric Dupont"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "text",
+        "op": "contains",
+        "value": "eri"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2",
+      "6"
+    ]
+  }
+}

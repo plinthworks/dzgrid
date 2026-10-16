@@ -1,0 +1,56 @@
+{
+  "id": "combined-or",
+  "suite": "filter-combined",
+  "description": "Contains x, or starts with y.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "xa"
+      },
+      {
+        "id": "2",
+        "n": "yb"
+      },
+      {
+        "id": "3",
+        "n": "zc"
+      },
+      {
+        "id": "4",
+        "n": "bx"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "combined",
+        "join": "or",
+        "conditions": [
+          {
+            "type": "text",
+            "op": "contains",
+            "value": "x"
+          },
+          {
+            "type": "text",
+            "op": "startsWith",
+            "value": "y"
+          }
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2",
+      "4"
+    ]
+  }
+}

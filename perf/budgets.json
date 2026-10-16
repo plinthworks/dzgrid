@@ -17,7 +17,15 @@
     "text sort 100 000 ar (cold rank keys)": 250,
     "text sort 100 000 fr (warm ranks)": 40,
     "sort two numeric keys 100 000": 120,
-    "sort instant ISO strings 100 000 (cold)": 100
+    "sort instant ISO strings 100 000 (cold)": 100,
+    "text filter contains 100 000 (cold)": 35,
+    "text filter contains 100 000 ar (cold)": 35,
+    "text filter contains 100 000": 10,
+    "text filter contains 100 000 ar": 10,
+    "number filter gt 100 000": 10,
+    "day filter between 100 000": 15,
+    "set filter 100 000": 15,
+    "instant filter onDay 100 000 (warm keys)": 15
   },
   "memory": {
     "store overhead bytes/row (100 000 rows)": 120

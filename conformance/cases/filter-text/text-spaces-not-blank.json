@@ -1,0 +1,32 @@
+{
+  "id": "text-spaces-not-blank",
+  "suite": "filter-text",
+  "description": "A cell of spaces is not blank.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "  "
+      },
+      {
+        "id": "2",
+        "n": "x"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "text",
+        "op": "blank"
+      }
+    }
+  },
+  "expected": {
+    "ids": []
+  }
+}

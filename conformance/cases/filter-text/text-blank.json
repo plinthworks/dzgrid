@@ -1,0 +1,51 @@
+{
+  "id": "text-blank",
+  "suite": "filter-text",
+  "description": "blank is an empty or missing value.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "Éric"
+      },
+      {
+        "id": "2",
+        "n": "eric"
+      },
+      {
+        "id": "3",
+        "n": "Zoé"
+      },
+      {
+        "id": "4",
+        "n": ""
+      },
+      {
+        "id": "5",
+        "n": null
+      },
+      {
+        "id": "6",
+        "n": "Eric Dupont"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "text",
+        "op": "blank"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "4",
+      "5"
+    ]
+  }
+}

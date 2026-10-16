@@ -1,0 +1,46 @@
+{
+  "id": "day-gte",
+  "suite": "filter-day",
+  "description": "On or after a day.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Pacific/Auckland",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "d": "2026-03-04"
+      },
+      {
+        "id": "2",
+        "d": "2026-03-05"
+      },
+      {
+        "id": "3",
+        "d": "2026-03-06"
+      },
+      {
+        "id": "4",
+        "d": null
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "gte",
+        "value": "2026-03-05"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "3"
+    ]
+  }
+}

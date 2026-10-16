@@ -1,0 +1,39 @@
+{
+  "id": "boolean-true",
+  "suite": "filter-combined",
+  "description": "Yes only.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "b",
+        "type": "boolean"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "b": true
+      },
+      {
+        "id": "2",
+        "b": false
+      },
+      {
+        "id": "3",
+        "b": null
+      }
+    ],
+    "filter": {
+      "b": {
+        "type": "boolean",
+        "value": true
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

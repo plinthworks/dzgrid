@@ -1,4 +1,4 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, type SortItem } from '../packages/core/src/index.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, compileFilter, filterIndices, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { datasetA, type RowA } from './dataset.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
@@ -55,7 +55,39 @@ export const CASES: Record<string, Case> = {
     run: (s: ReturnType<typeof createRowStore<RowA>>) => s.apply({ patch: [{ id: 'r500', set: { n0: 1 } }] }).version,
   },
   ...sortCases(),
+  ...filterCases(),
 };
+
+/** The filter lines of K.8 on dataset A, with the column keys already warm (a filter is retyped, not reloaded). */
+function filterCases(): Record<string, Case> {
+  const columns = createColumnModel<RowA>([{ id: 't0' }, { id: 'a0' }, { id: 'n0', type: 'number' }, { id: 'd0', type: 'day' }, { id: 'e1' }, { id: 'i1', type: 'instant' }]);
+  let rows: RowA[] | null = null;
+  const env = () => {
+    rows ??= datasetA();
+    const store = createRowStore<RowA>((r) => r.id);
+    store.replaceAll(rows);
+    return { source: store.snapshot, columns, ctx: localeCtx({ locale: 'fr-FR', timeZone: 'Africa/Algiers' }), reader: NO_OVERLAY, cache: new ColumnCache<RowA>() };
+  };
+  const warm = (m: FilterModel): Case => ({
+    setup: () => {
+      const e = env();
+      filterIndices(e.source.count, [compileFilter(m, e)]);
+      return e;
+    },
+    run: (e: ReturnType<typeof env>) => filterIndices(e.source.count, [compileFilter(m, e)])?.length,
+  });
+  const cold = (m: FilterModel): Case => ({ setup: env, run: (e: ReturnType<typeof env>) => filterIndices(e.source.count, [compileFilter(m, e)])?.length });
+  return {
+    'text filter contains 100 000 (cold)': cold({ t0: { type: 'text', op: 'contains', value: 'ma' } }),
+    'text filter contains 100 000 ar (cold)': cold({ a0: { type: 'text', op: 'contains', value: 'محم' } }),
+    'text filter contains 100 000': warm({ t0: { type: 'text', op: 'contains', value: 'ma' } }),
+    'text filter contains 100 000 ar': warm({ a0: { type: 'text', op: 'contains', value: 'محم' } }),
+    'number filter gt 100 000': warm({ n0: { type: 'number', op: 'gt', value: 500_000 } }),
+    'day filter between 100 000': warm({ d0: { type: 'day', op: 'between', value: '1980-01-01', valueTo: '2000-12-31' } }),
+    'set filter 100 000': warm({ e1: { type: 'set', include: ['cardiology', 'oncology'] } }),
+    'instant filter onDay 100 000 (warm keys)': warm({ i1: { type: 'instant', op: 'onDay', day: '2026-06-15' } }),
+  };
+}
 
 /** The sort lines of K.8, each on dataset A with a fresh cache (cold) or a warmed one. */
 function sortCases(): Record<string, Case> {

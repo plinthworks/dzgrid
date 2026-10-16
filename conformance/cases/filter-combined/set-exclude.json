@@ -1,0 +1,46 @@
+{
+  "id": "set-exclude",
+  "suite": "filter-combined",
+  "description": "Everything but the unticked values, blanks included.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "A"
+      },
+      {
+        "id": "2",
+        "s": "B"
+      },
+      {
+        "id": "3",
+        "s": "C"
+      },
+      {
+        "id": "4",
+        "s": null
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "set",
+        "exclude": [
+          "A"
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "3",
+      "4"
+    ]
+  }
+}

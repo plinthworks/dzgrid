@@ -1,4 +1,5 @@
 import { collatorFor, collatorKey, type CollatorSpec } from '../i18n/collate.js';
+import { fold, isAscii } from '../i18n/fold.js';
 import type { ColumnLookup } from '../columns/model.js';
 import type { ResolvedColumn, ValueReader } from '../columns/defs.js';
 import { problem, type Problem } from '../problems.js';
@@ -28,7 +29,8 @@ interface RankEntry<T> { col: ResolvedColumn<T>; version: number; reader: number
  * changes values already present patches the ranks in place.
  */
 export class ColumnCache<T> {
-  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0 };
+  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0 };
+  #lists = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; values: (string | null | undefined)[] }>();
   #keys = new Map<string, KeyEntry<T>>();
   #ranks = new Map<string, RankEntry<T>>();
   #clock = 0;
@@ -112,6 +114,58 @@ export class ColumnCache<T> {
     return entry;
   }
 
+  #list(kind: 'text' | 'fold' | 'export', col: ResolvedColumn<T>, env: ColumnEnv<T>, build: () => (string | null | undefined)[]): (string | null | undefined)[] {
+    const id = `${kind}|${col.id}`;
+    const ctx = `${env.ctx.locale}|${env.ctx.timeZone}`;
+    const hit = this.#lists.get(id);
+    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return hit.values;
+    const values = build();
+    this.#lists.set(id, { col, version: env.source.version, reader: env.reader.version, ctx, values });
+    return values;
+  }
+
+  /** Each cell as text — the value, or an enum's label — or null for a blank or unreadable cell. */
+  texts(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | null)[] {
+    return this.#list('text', col, env, () => {
+      this.stats.textBuilds++;
+      const out: (string | null)[] = new Array(env.source.count);
+      for (let i = 0; i < out.length; i++) {
+        const raw = ColumnCache.raw(col, env, i);
+        const v = isBlank(raw) ? null : col.codec.coerce(raw, env.ctx);
+        out[i] = v === null ? null : col.type === 'enum' ? col.codec.format(v, env.ctx) : String(v);
+      }
+      return out;
+    }) as (string | null)[];
+  }
+
+  /** Folded text for the non-ASCII cells only; ASCII cells are lowercased on the fly. */
+  folded(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | undefined)[] {
+    const texts = this.texts(col, env);
+    return this.#list('fold', col, env, () => {
+      this.stats.foldBuilds++;
+      const out: (string | undefined)[] = new Array(texts.length);
+      for (let i = 0; i < texts.length; i++) {
+        const t = texts[i];
+        if (t != null && !isAscii(t)) out[i] = fold(t);
+      }
+      return out;
+    }) as (string | undefined)[];
+  }
+
+  /** Each cell's stable export text (what value lists match on), or null for a blank. */
+  exports(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly (string | null)[] {
+    return this.#list('export', col, env, () => {
+      this.stats.exportBuilds++;
+      const out: (string | null)[] = new Array(env.source.count);
+      for (let i = 0; i < out.length; i++) {
+        const raw = ColumnCache.raw(col, env, i);
+        const v = isBlank(raw) ? null : col.codec.coerce(raw, env.ctx);
+        out[i] = v === null ? null : col.codec.toExport(v);
+      }
+      return out;
+    }) as (string | null)[];
+  }
+
   /**
    * Follows the store: an update that only rewrites some rows patches the
    * keys of those rows, and their ranks when the new text already has one;
@@ -120,6 +174,7 @@ export class ColumnCache<T> {
   patch(delta: StoreDelta, next: RowSnapshot<T>, envOf: (source: RowSnapshot<T>) => Omit<ColumnEnv<T>, 'source' | 'cache'>): void {
     if (delta.kind === 'none') return;
     if (delta.kind !== 'update' || !delta.changedSrc) return this.invalidateAll();
+    this.#lists.clear();
     const base = envOf(next);
     const env: ColumnEnv<T> = { ...base, source: next, cache: this };
     for (const [id, e] of this.#keys) {
@@ -152,5 +207,6 @@ export class ColumnCache<T> {
   invalidateAll(): void {
     this.#keys.clear();
     this.#ranks.clear();
+    this.#lists.clear();
   }
 }

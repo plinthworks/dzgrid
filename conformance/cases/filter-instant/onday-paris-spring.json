@@ -1,0 +1,42 @@
+{
+  "id": "onday-paris-spring",
+  "suite": "filter-instant",
+  "description": "Paris's 23-hour day: the 29th ends at 22:00Z.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2026-03-28T23:00:00Z"
+      },
+      {
+        "id": "2",
+        "t": "2026-03-29T21:59:59Z"
+      },
+      {
+        "id": "3",
+        "t": "2026-03-29T22:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2026-03-29"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2"
+    ]
+  }
+}

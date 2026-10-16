@@ -1,0 +1,37 @@
+{
+  "id": "before-strict",
+  "suite": "filter-instant",
+  "description": "Before a moment excludes that moment.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2026-03-05T09:59:59Z"
+      },
+      {
+        "id": "2",
+        "t": "2026-03-05T10:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "before",
+        "at": "2026-03-05T10:00:00Z"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

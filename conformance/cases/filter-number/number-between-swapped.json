@@ -1,0 +1,55 @@
+{
+  "id": "number-between-swapped",
+  "suite": "filter-number",
+  "description": "Bounds given the wrong way round are swapped.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "v": 1
+      },
+      {
+        "id": "2",
+        "v": 5
+      },
+      {
+        "id": "3",
+        "v": 10
+      },
+      {
+        "id": "4",
+        "v": null
+      },
+      {
+        "id": "5",
+        "v": "abc"
+      },
+      {
+        "id": "6",
+        "v": 7.5
+      }
+    ],
+    "filter": {
+      "v": {
+        "type": "number",
+        "op": "between",
+        "value": 10,
+        "valueTo": 5
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "3",
+      "6"
+    ]
+  }
+}

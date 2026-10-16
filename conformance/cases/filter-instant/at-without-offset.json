@@ -1,0 +1,59 @@
+{
+  "id": "at-without-offset",
+  "suite": "filter-instant",
+  "description": "A moment without its offset is refused in the model.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "t": "2026-03-04T22:59:59Z"
+      },
+      {
+        "id": "b",
+        "t": "2026-03-04T23:00:00Z"
+      },
+      {
+        "id": "c",
+        "t": "2026-03-05T22:59:59.999Z"
+      },
+      {
+        "id": "d",
+        "t": "2026-03-05T23:00:00Z"
+      },
+      {
+        "id": "e",
+        "t": "2026-03-05T00:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "before",
+        "at": "2026-03-05T10:00"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "problems": [
+      [
+        "ambiguous-instant",
+        "filter.t.at"
+      ]
+    ]
+  }
+}

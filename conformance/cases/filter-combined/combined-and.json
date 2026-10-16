@@ -1,0 +1,54 @@
+{
+  "id": "combined-and",
+  "suite": "filter-combined",
+  "description": "Contains x and ends with a.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "xa"
+      },
+      {
+        "id": "2",
+        "n": "yb"
+      },
+      {
+        "id": "3",
+        "n": "zc"
+      },
+      {
+        "id": "4",
+        "n": "bx"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "combined",
+        "join": "and",
+        "conditions": [
+          {
+            "type": "text",
+            "op": "contains",
+            "value": "x"
+          },
+          {
+            "type": "text",
+            "op": "endsWith",
+            "value": "a"
+          }
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

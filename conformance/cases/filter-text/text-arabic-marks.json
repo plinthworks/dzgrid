@@ -1,0 +1,52 @@
+{
+  "id": "text-arabic-marks",
+  "suite": "filter-text",
+  "description": "Short vowels ignored: محمد finds مُحَمَّد.",
+  "input": {
+    "locale": "ar",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "أحمد"
+      },
+      {
+        "id": "2",
+        "n": "احمد"
+      },
+      {
+        "id": "3",
+        "n": "مُحَمَّد"
+      },
+      {
+        "id": "4",
+        "n": "محمد"
+      },
+      {
+        "id": "5",
+        "n": "مصطفى"
+      },
+      {
+        "id": "6",
+        "n": "مصطفي"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "text",
+        "op": "equals",
+        "value": "محمد"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "3",
+      "4"
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "set-number-raw",
+  "suite": "filter-combined",
+  "description": "A value list on numbers matches their raw text, not their display.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "v": 1234.5
+      },
+      {
+        "id": "2",
+        "v": 1
+      },
+      {
+        "id": "3",
+        "v": null
+      }
+    ],
+    "filter": {
+      "v": {
+        "type": "set",
+        "include": [
+          "1234.5"
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1"
+    ]
+  }
+}

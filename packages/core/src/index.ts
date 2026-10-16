@@ -32,7 +32,7 @@ export { readNumber, readMachineNumber, separatorsFor } from './value/number.js'
 export type { NumberFormatSpec, InstantFormatSpec, Formatters } from './i18n/format.js';
 export { formattersFor, clearFormatCaches, dayFieldOrder, formatParts } from './i18n/format.js';
 
-export { fold } from './i18n/fold.js';
+export { fold, isAscii } from './i18n/fold.js';
 export type { CollatorSpec } from './i18n/collate.js';
 export { collatorFor, collatorKey } from './i18n/collate.js';
 export type { ValueCodec, ColumnType, Rejected } from './value/codec.js';
@@ -61,3 +61,9 @@ export type { ColumnEnv } from './model/column-cache.js';
 export { ColumnCache } from './model/column-cache.js';
 export type { SortItem } from './sort/compile.js';
 export { sortIndices } from './sort/compile.js';
+
+export type { FilterModel, ColumnFilter, TextOp, NumOp, InstantOp, InstantFilter } from './filter/model.js';
+export type { InstantRange } from './filter/instant.js';
+export { resolveInstantRange } from './filter/instant.js';
+export type { RowTest, CompiledFilter } from './filter/compile.js';
+export { compileFilter, filterIndices } from './filter/compile.js';

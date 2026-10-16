@@ -1,0 +1,51 @@
+{
+  "id": "two-columns-and",
+  "suite": "filter-combined",
+  "description": "Filters on two columns must both hold.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n"
+      },
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "xa",
+        "v": 1
+      },
+      {
+        "id": "2",
+        "n": "xb",
+        "v": 9
+      },
+      {
+        "id": "3",
+        "n": "yc",
+        "v": 9
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "text",
+        "op": "contains",
+        "value": "x"
+      },
+      "v": {
+        "type": "number",
+        "op": "gt",
+        "value": 5
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "2"
+    ]
+  }
+}

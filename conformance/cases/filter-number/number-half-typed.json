@@ -1,0 +1,57 @@
+{
+  "id": "number-half-typed",
+  "suite": "filter-number",
+  "description": "between with one bound is inactive, not empty.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "v": 1
+      },
+      {
+        "id": "2",
+        "v": 5
+      },
+      {
+        "id": "3",
+        "v": 10
+      },
+      {
+        "id": "4",
+        "v": null
+      },
+      {
+        "id": "5",
+        "v": "abc"
+      },
+      {
+        "id": "6",
+        "v": 7.5
+      }
+    ],
+    "filter": {
+      "v": {
+        "type": "number",
+        "op": "between",
+        "value": 5
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ]
+  }
+}

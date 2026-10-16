@@ -1,0 +1,35 @@
+{
+  "id": "onday-apia-skipped",
+  "suite": "filter-instant",
+  "description": "A day that never happened in Samoa holds no moment.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Pacific/Apia",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2011-12-30T09:59:59Z"
+      },
+      {
+        "id": "2",
+        "t": "2011-12-30T10:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2011-12-30"
+      }
+    }
+  },
+  "expected": {
+    "ids": []
+  }
+}
