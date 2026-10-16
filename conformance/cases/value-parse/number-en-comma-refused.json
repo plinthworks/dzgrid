@@ -1,0 +1,13 @@
+{
+  "id": "number-en-comma-refused",
+  "suite": "value-parse",
+  "description": "1,5 in English is neither 15 nor 1.5: refused, never guessed.",
+  "input": {
+    "type": "number",
+    "locale": "en-US",
+    "text": "1,5"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

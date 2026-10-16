@@ -1,0 +1,13 @@
+{
+  "id": "number-minus-sign",
+  "suite": "value-parse",
+  "description": "The typographic minus sign U+2212.",
+  "input": {
+    "type": "number",
+    "locale": "en-US",
+    "text": "−5"
+  },
+  "expected": {
+    "value": -5
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "number-en-group",
+  "suite": "value-parse",
+  "description": "English: comma groups, point decimal.",
+  "input": {
+    "type": "number",
+    "locale": "en-US",
+    "text": "1,234.5"
+  },
+  "expected": {
+    "value": 1234.5
+  }
+}

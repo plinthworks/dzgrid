@@ -1,0 +1,13 @@
+{
+  "id": "number-fr-plain-space",
+  "suite": "value-parse",
+  "description": "French typed with an ordinary space.",
+  "input": {
+    "type": "number",
+    "locale": "fr-FR",
+    "text": "1 234,5"
+  },
+  "expected": {
+    "value": 1234.5
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "number-general",
+  "suite": "format",
+  "description": "0.1 + 0.2 prints as 0.3: fifteen significant digits.",
+  "input": {
+    "kind": "number",
+    "locale": "en-US",
+    "value": 0.30000000000000004
+  },
+  "expected": {
+    "text": "0.3"
+  }
+}

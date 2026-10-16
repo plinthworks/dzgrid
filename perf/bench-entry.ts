@@ -1,4 +1,4 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay } from '../packages/core/src/index.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor } from '../packages/core/src/index.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
 export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly run: (ctx: any) => unknown };
@@ -21,6 +21,18 @@ export const CASES: Record<string, Case> = {
     let n = 0;
     for (let i = 0; i < 100_000; i++) if (readInstant(`2026-03-05T10:${String(i % 60).padStart(2, '0')}:00.${String(i % 1000).padStart(3, '0')}Z`).ok) n++;
     return n;
+  },
+  'readNumber x 100 000 (fr-FR)': () => {
+    const ctx = localeCtx({ locale: 'fr-FR' });
+    let acc = 0;
+    for (let i = 0; i < 100_000; i++) acc += readNumber(`${i % 1000}\u202f${String(i % 1000).padStart(3, '0')},${i % 100}`, ctx) ?? 0;
+    return acc;
+  },
+  'format number x 100 000 (cached Intl, ar-DZ)': () => {
+    const f = formattersFor(localeCtx({ locale: 'ar-DZ' })).number();
+    let len = 0;
+    for (let i = 0; i < 100_000; i++) len += f(i * 1.25).length;
+    return len;
   },
 };
 

@@ -1,0 +1,13 @@
+{
+  "id": "number-negative-zero",
+  "suite": "format",
+  "description": "-0 prints as 0.",
+  "input": {
+    "kind": "number",
+    "locale": "en-US",
+    "value": -0.0
+  },
+  "expected": {
+    "text": "0"
+  }
+}

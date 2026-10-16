@@ -1,0 +1,20 @@
+{
+  "id": "instant-paris-after-change",
+  "suite": "format",
+  "description": "After the spring change Paris is at +02:00.",
+  "input": {
+    "kind": "instant",
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "value": "2026-03-29T01:30:00Z"
+  },
+  "expected": {
+    "parts": [
+      "29",
+      "03",
+      "2026",
+      "03",
+      "30"
+    ]
+  }
+}

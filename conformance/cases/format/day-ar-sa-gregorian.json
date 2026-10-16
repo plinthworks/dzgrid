@@ -1,0 +1,17 @@
+{
+  "id": "day-ar-sa-gregorian",
+  "suite": "format",
+  "description": "ar-SA shows the Gregorian day, not Umm al-Qura.",
+  "input": {
+    "kind": "day",
+    "locale": "ar-SA",
+    "value": "2026-03-05"
+  },
+  "expected": {
+    "parts": [
+      "05",
+      "03",
+      "2026"
+    ]
+  }
+}

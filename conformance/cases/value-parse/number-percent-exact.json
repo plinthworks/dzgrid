@@ -1,0 +1,13 @@
+{
+  "id": "number-percent-exact",
+  "suite": "value-parse",
+  "description": "12.3% is exactly 0.123, without floating-point drift.",
+  "input": {
+    "type": "number",
+    "locale": "en-US",
+    "text": "12.3%"
+  },
+  "expected": {
+    "value": 0.123
+  }
+}

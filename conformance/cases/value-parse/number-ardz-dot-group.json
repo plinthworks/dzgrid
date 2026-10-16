@@ -1,0 +1,13 @@
+{
+  "id": "number-ardz-dot-group",
+  "suite": "value-parse",
+  "description": "ar-DZ groups with a point: 10.000 is ten thousand.",
+  "input": {
+    "type": "number",
+    "locale": "ar-DZ",
+    "text": "10.000"
+  },
+  "expected": {
+    "value": 10000
+  }
+}

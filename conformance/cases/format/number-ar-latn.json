@@ -1,0 +1,13 @@
+{
+  "id": "number-ar-latn",
+  "suite": "format",
+  "description": "Arabic with Latin digits: Latin separators.",
+  "input": {
+    "kind": "number",
+    "locale": "ar",
+    "value": 1234.5
+  },
+  "expected": {
+    "text": "1,234.5"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "number-fr",
+  "suite": "format",
+  "description": "French number: narrow no-break space group.",
+  "input": {
+    "kind": "number",
+    "locale": "fr-FR",
+    "value": 1234.5
+  },
+  "expected": {
+    "text": "1 234,5"
+  }
+}

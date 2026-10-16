@@ -1,0 +1,13 @@
+{
+  "id": "number-both-separators",
+  "suite": "value-parse",
+  "description": "With both signs, the last one is the decimal: 1.234,5 read in English.",
+  "input": {
+    "type": "number",
+    "locale": "en-US",
+    "text": "1.234,5"
+  },
+  "expected": {
+    "value": 1234.5
+  }
+}

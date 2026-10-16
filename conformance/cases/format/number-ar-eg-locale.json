@@ -1,0 +1,14 @@
+{
+  "id": "number-ar-eg-locale",
+  "suite": "format",
+  "description": "Egyptian Arabic with its own digits.",
+  "input": {
+    "kind": "number",
+    "locale": "ar-EG",
+    "numerals": "locale",
+    "value": 1234.5
+  },
+  "expected": {
+    "text": "١٬٢٣٤٫٥"
+  }
+}

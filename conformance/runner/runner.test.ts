@@ -50,7 +50,10 @@ describe('conformance', () => {
         it(`${c.id}: ${c.description}`, () => {
           expect(c.suite).toBe(suite);
           expect(`${c.id}.json`).toBe(file);
-          expect(SUITES[suite]!(c.input)).toEqual(c.expected);
+          const got = SUITES[suite]!(c.input) as Record<string, unknown>;
+          // A format case states either the text or the parts it cares about.
+          const compared = suite === 'format' ? Object.fromEntries(Object.keys(c.expected).map((k) => [k, got[k]])) : got;
+          expect(compared).toEqual(c.expected);
         });
       }
     });

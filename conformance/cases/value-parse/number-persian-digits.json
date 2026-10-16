@@ -1,0 +1,13 @@
+{
+  "id": "number-persian-digits",
+  "suite": "value-parse",
+  "description": "Persian digits are digits too.",
+  "input": {
+    "type": "number",
+    "locale": "ar-DZ",
+    "text": "۱۲۳"
+  },
+  "expected": {
+    "value": 123
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "day-old",
+  "suite": "format",
+  "description": "Before 1583 the day is written in ISO form.",
+  "input": {
+    "kind": "day",
+    "locale": "fr-FR",
+    "value": "1500-01-01"
+  },
+  "expected": {
+    "text": "1500-01-01"
+  }
+}

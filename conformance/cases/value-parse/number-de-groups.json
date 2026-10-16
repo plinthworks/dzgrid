@@ -1,0 +1,13 @@
+{
+  "id": "number-de-groups",
+  "suite": "value-parse",
+  "description": "German: points group, comma decimal.",
+  "input": {
+    "type": "number",
+    "locale": "de-DE",
+    "text": "1.234.567,89"
+  },
+  "expected": {
+    "value": 1234567.89
+  }
+}

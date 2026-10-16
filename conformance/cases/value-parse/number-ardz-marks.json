@@ -1,0 +1,13 @@
+{
+  "id": "number-ardz-marks",
+  "suite": "value-parse",
+  "description": "Algerian Arabic: a direction mark, Arabic-Indic digits, Arabic separators.",
+  "input": {
+    "type": "number",
+    "locale": "ar-DZ",
+    "text": "‏-١٬٢٣٤٫٥"
+  },
+  "expected": {
+    "value": -1234.5
+  }
+}

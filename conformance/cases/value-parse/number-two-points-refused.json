@@ -1,0 +1,13 @@
+{
+  "id": "number-two-points-refused",
+  "suite": "value-parse",
+  "description": "Two decimal points: refused.",
+  "input": {
+    "type": "number",
+    "locale": "en-US",
+    "text": "1.2.3"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

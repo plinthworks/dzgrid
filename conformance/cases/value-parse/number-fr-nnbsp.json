@@ -1,0 +1,13 @@
+{
+  "id": "number-fr-nnbsp",
+  "suite": "value-parse",
+  "description": "French: narrow no-break space groups, comma decimal.",
+  "input": {
+    "type": "number",
+    "locale": "fr-FR",
+    "text": "1 234,5"
+  },
+  "expected": {
+    "value": 1234.5
+  }
+}

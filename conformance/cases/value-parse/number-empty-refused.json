@@ -1,0 +1,13 @@
+{
+  "id": "number-empty-refused",
+  "suite": "value-parse",
+  "description": "Empty text is no number.",
+  "input": {
+    "type": "number",
+    "locale": "fr-FR",
+    "text": "   "
+  },
+  "expected": {
+    "rejected": true
+  }
+}

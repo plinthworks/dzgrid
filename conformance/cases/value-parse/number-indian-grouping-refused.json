@@ -1,0 +1,13 @@
+{
+  "id": "number-indian-grouping-refused",
+  "suite": "value-parse",
+  "description": "Groups of two digits are not a grouping this reader accepts.",
+  "input": {
+    "type": "number",
+    "locale": "en-US",
+    "text": "1,00,000"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

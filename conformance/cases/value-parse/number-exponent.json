@@ -1,0 +1,13 @@
+{
+  "id": "number-exponent",
+  "suite": "value-parse",
+  "description": "An exponent is read.",
+  "input": {
+    "type": "number",
+    "locale": "en-US",
+    "text": "1.5e3"
+  },
+  "expected": {
+    "value": 1500
+  }
+}

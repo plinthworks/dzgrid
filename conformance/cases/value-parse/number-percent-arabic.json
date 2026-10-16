@@ -1,0 +1,13 @@
+{
+  "id": "number-percent-arabic",
+  "suite": "value-parse",
+  "description": "The Arabic percent sign divides by 100.",
+  "input": {
+    "type": "number",
+    "locale": "ar-DZ",
+    "text": "١٢٫٥٪"
+  },
+  "expected": {
+    "value": 0.125
+  }
+}
