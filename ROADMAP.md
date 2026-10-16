@@ -90,7 +90,7 @@ machine, not this one). Details in each `spikes/<id>/README.md`.
 - [x] `purity.test.ts` fails on a planted `new Date()`
 - [x] architect review and code review of the phase, findings fixed
 
-## Phase 1 — data core (closing)
+## Phase 1 — data core (done, 2026-10-17)
 
 ### Done (2026-10-16/17), each step tests first
 1. Offset-less date-times read only in a named zone; `resolveWall` with Temporal's policies, warnings on every choice.
@@ -108,7 +108,11 @@ machine, not this one). Details in each `spikes/<id>/README.md`.
 14. Selection by key, everything-except for select all.
 15. One conformance case per problem code; the public surface frozen; internals in `@dzgrid/core/internal`.
 
-Two mid-phase reviews (code, and a mutation run of 175 mutants) were fixed with tests that failed first.
+Two mid-phase reviews (code, and a mutation run of 175 mutants) and the two
+end-of-phase reviews (architect, code) were fixed with tests that failed
+first. The memory the reviews asked to measure showed the search caches at
+1.8 kB per row; joined haystacks brought it to 452 B per row while
+searching and 107 B at rest.
 
 ### Measured on dataset A (100 000 × 30)
 | Line | K.8 | Measured |
@@ -117,14 +121,17 @@ Two mid-phase reviews (code, and a mutation run of 175 mutants) were fixed with 
 | Numeric sort | ≤ 40 ms | 18 ms |
 | Text sort (cold, fr / ar) | ≤ 250 ms | 162 / 206 ms |
 | Text filter (cold, fr / ar) | ≤ 35 ms | 30 / 33 ms |
-| Memory | ≤ 120 B/row | 55 B/row |
-| Core size | ≤ 28 kB gz | 17 kB gz (budget 18.8 kB) |
+| Memory, store | ≤ 120 B/row | 55 B/row |
+| Memory, model at rest (sort + filters) | ≤ 25 MB | 107 B/row (10.7 MB) |
+| Memory, while searching | — | 452 B/row (45 MB), released when the box is emptied |
+| Core size | ≤ 28 kB gz | 17.8 kB gz (budget 18.8 kB) |
 
 ### Measured gaps (to revisit)
 - Quick search, first keystroke, 10 text columns of accented French and
   Arabic over 100 000 rows: ~0.3 s (K.8's 150 ms holds for ASCII text:
-  97 ms). The cost is folding a million cells once; later keystrokes take
-  ~27 ms. Phase 2 can build the search caches in idle time after a load.
+  149 ms, at the limit). The cost is folding and joining a million cells
+  once; later keystrokes take ~5 ms. Phase 2 can build the search
+  haystacks in idle time after a load.
 - Appending 1 000 rows to 100 000 sorted and filtered rows recomputes
   (24 ms): appends do not patch the caches yet.
 
@@ -136,4 +143,4 @@ Two mid-phase reviews (code, and a mutation run of 175 mutants) were fixed with 
 - [x] `purity.test.ts` green
 - [x] one conformance case per `ProblemCode`
 - [x] `npm test`, `test:ci`, `test:tz`, `typecheck` green
-- [ ] phase-end architect review and code review, findings fixed
+- [x] phase-end architect review and code review, findings fixed (2026-10-17)

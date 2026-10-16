@@ -11,4 +11,4 @@ Boolean column: all, yes, no. Value list: ticks the values to keep, blank includ
 - The index of distinct values with counts (`setValues`) arrives with the filter interface in Phase 3.
 
 ## Tests
-`conformance/cases/filter-set/*`, `conformance/cases/filter-combined/*`.
+`conformance/cases/filter-combined/*` (boolean, value-list and combined cases).

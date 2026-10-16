@@ -13,4 +13,4 @@ Sets widths, pins columns, hides some; the host then sends a new column list.
 - User state is kept by column id.
 
 ## Tests
-`conformance/cases/layout-cols/*`.
+`conformance/cases/columns-layout/*` (widths, pinning, hiding); `conformance/cases/layout-cols/*` is the visible-window maths.

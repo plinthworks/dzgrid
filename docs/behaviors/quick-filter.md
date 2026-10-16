@@ -10,7 +10,7 @@ Types words into one search box above the grid.
 ## What DzGrid does
 - Folding: case, accents, Arabic short vowels, tatweel, alef forms, `ى` read as `ي`, Arabic presentation forms decomposed (`ﻻ` is `لا`); Arabic-Indic and Latin digits are the same digits.
 - `ة` is not folded into `ه`: they are different letters, and the collator agrees (S5).
-- Number and date columns are searched only when the word holds a digit, against their displayed text and their export text.
+- Number and date columns are searched only when the word holds a digit, against their displayed text and their export text. Boolean columns are not searched.
 
 ## Tests
 `conformance/cases/quick-filter/*`.

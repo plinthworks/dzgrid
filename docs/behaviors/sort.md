@@ -14,7 +14,7 @@ Clicks a column header; clicks again; Shift-clicks another header.
 - Empty cells are last in **both** directions (D3); `nulls: 'first'` puts them first.
 - Equal values keep the source order in descending too — the sort is stable, never reversed.
 - Arabic: hamza forms, short vowels (harakat) and tatweel compare equal at the base level; Arabic-Indic and Latin digits compare equal (S5).
-- Instants sort chronologically, never as their text.
+- Instants sort chronologically, never as their text — in a column typed `day` or `instant`. A date held in a `text` column sorts as text.
 - Text columns sort by rank keys (S5): distinct values ranked once with `Intl.Collator`, then an integer sort.
 - Sorting never touches the host's rows.
 
