@@ -24,7 +24,7 @@ export default defineConfig({
       { resolve: { alias }, test: { name: 'conformance', globals: true, environment: 'node', include: ['conformance/runner/**/*.test.ts'] } },
       { resolve: { alias: domAlias }, test: { name: 'dom', globals: true, environment: 'jsdom', include: ['packages/dom/test/**/*.test.ts'] } },
       { test: { name: 'theme', globals: true, environment: 'node', include: ['packages/theme/test/**/*.test.ts'] } },
-      { test: { name: 'tools', globals: true, environment: 'node', include: ['spikes/test/**/*.test.ts'] } },
+      { test: { name: 'tools', globals: true, environment: 'node', include: ['spikes/test/**/*.test.ts', 'scripts/test/**/*.test.ts'] } },
     ],
   },
 });

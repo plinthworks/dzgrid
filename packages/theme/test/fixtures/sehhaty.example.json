@@ -1,0 +1,6 @@
+{
+  "$comment": "The shape of sehhaty.json (to be written by the owner, or transcribed with the owner's go-ahead): one entry per Sehhaty palette, light and dark, each of the nine --tz-* colours. A key left out keeps the theme's value.",
+  "palettes": [
+    { "name": "<palette name>", "light": { "bg": "#…", "bg-raised": "#…", "fg": "#…", "fg-muted": "#…", "border": "#…", "accent": "#…", "accent-fg": "#…", "danger": "#…", "warning": "#…" }, "dark": { } }
+  ]
+}
