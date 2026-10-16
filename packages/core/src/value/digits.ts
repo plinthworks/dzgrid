@@ -7,7 +7,7 @@
  */
 
 /** Direction marks and isolates: LRM, RLM, ALM, BOM, the embeddings and the isolates. */
-const MARKS = /[‎‏؜﻿‪-‮⁦-⁩]/g;
+const MARKS = /[\u200E\u200F\u061C\uFEFF\u202A-\u202E\u2066-\u2069]/g;
 
 export function stripMarks(s: string): string {
   return s.replace(MARKS, '');
@@ -15,7 +15,7 @@ export function stripMarks(s: string): string {
 
 /** Arabic-Indic (U+0660–0669) and extended, Persian (U+06F0–06F9) digits to 0–9. */
 export function normalizeDigits(s: string): string {
-  return s.replace(/[٠-٩۰-۹]/g, (c) => {
+  return s.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, (c) => {
     const code = c.charCodeAt(0);
     return String(code >= 0x06f0 ? code - 0x06f0 : code - 0x0660);
   });

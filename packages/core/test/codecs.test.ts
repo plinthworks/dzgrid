@@ -115,8 +115,11 @@ describe('fold', () => {
     expect(fold('١٢٣')).toBe('123');
   });
 
-  it('keeps letters that differ: ة and ه, ى and ي', () => {
+  it('keeps ة and ه apart, reads ى as ي, decomposes presentation forms', () => {
     expect(fold('ة')).not.toBe(fold('ه'));
-    expect(fold('ى')).not.toBe(fold('ي'));
+    expect(fold('مصطفى')).toBe('مصطفي');
+    expect(fold('ﻻ')).toBe('لا');
+    expect(fold('İ')).toBe('i');
+    expect(fold('Éric')).toBe('eric');
   });
 });

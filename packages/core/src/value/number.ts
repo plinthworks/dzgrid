@@ -43,7 +43,7 @@ export function separatorsFor(ctx: LocaleCtx): NumberSeparators {
   return s;
 }
 
-const SPACE_GROUPS = /[     '’]/;
+const SPACE_GROUPS = /[ \u00A0\u2007\u2009\u202F'\u2019]/;
 
 /** A number from human text, or null when it cannot be read without guessing. */
 export function readNumber(text: string, ctx: LocaleCtx): number | null {
@@ -51,11 +51,11 @@ export function readNumber(text: string, ctx: LocaleCtx): number | null {
   if (!s) return null;
 
   let sign = '';
-  if (s[0] === '-' || s[0] === '−') { sign = '-'; s = s.slice(1); }
+  if (s[0] === '-' || s[0] === '\u2212') { sign = '-'; s = s.slice(1); }
   else if (s[0] === '+') s = s.slice(1);
 
   let percent = false;
-  const pct = /\s*[%٪]$/.exec(s);
+  const pct = /\s*[%\u066A]$/.exec(s);
   if (pct) { percent = true; s = s.slice(0, pct.index); }
 
   let exponent = 0;
@@ -74,12 +74,12 @@ export function readNumber(text: string, ctx: LocaleCtx): number | null {
 
 /** The integer and fraction digits, or null if the separators do not read unambiguously. */
 function splitMantissa(s: string, sep: NumberSeparators): { int: string; frac: string } | null {
-  if (!/^[0-9.,٫٬     '’]+$/.test(s) || !/[0-9]/.test(s)) return null;
+  if (!/^[0-9.,\u066B\u066C \u00A0\u2007\u2009\u202F'\u2019]+$/.test(s) || !/[0-9]/.test(s)) return null;
 
   let decimalAt = -1;
-  const arabicDecimal = s.indexOf('٫');
+  const arabicDecimal = s.indexOf('\u066B');
   if (arabicDecimal >= 0) {
-    if (s.indexOf('٫', arabicDecimal + 1) >= 0) return null;
+    if (s.indexOf('\u066B', arabicDecimal + 1) >= 0) return null;
     decimalAt = arabicDecimal;
   } else {
     const dots = count(s, '.');
@@ -108,7 +108,7 @@ function splitMantissa(s: string, sep: NumberSeparators): { int: string; frac: s
   if (!/^[0-9]*$/.test(frac)) return null;
   if (decimalAt >= 0 && !frac && !intPart) return null;
 
-  const groups = intPart.split(/[.,٬     '’]/);
+  const groups = intPart.split(/[.,\u066C \u00A0\u2007\u2009\u202F'\u2019]/);
   if (groups.length > 1) {
     if (!/^[0-9]{1,3}$/.test(groups[0]!)) return null;
     for (let i = 1; i < groups.length; i++) if (!/^[0-9]{3}$/.test(groups[i]!)) return null;
