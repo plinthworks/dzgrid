@@ -13,7 +13,8 @@
     "start": "vite",
     "bench": "node scripts/bench.mjs",
     "check:size": "node scripts/size.mjs",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "build:theme": "sass --no-source-map --style=expanded packages/theme/dzgrid.scss packages/theme/dzgrid.css"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.8.1",

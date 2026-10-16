@@ -16,6 +16,10 @@
     "@dzgrid/dom/locales/ar": {
       "file": "packages/dom/src/locales/ar.ts",
       "maxGzip": 2000
+    },
+    "@dzgrid/theme": {
+      "file": "packages/theme/dzgrid.css",
+      "maxGzip": 9000
     }
   }
 }

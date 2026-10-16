@@ -1,0 +1,19 @@
+{
+  "name": "@dzgrid/theme",
+  "version": "0.0.0",
+  "description": "An optional stylesheet for DzGrid: tzslot's palette, light and dark, more contrast, forced colours. Plain CSS.",
+  "license": "MIT",
+  "main": "./dzgrid.css",
+  "exports": {
+    ".": "./dzgrid.css",
+    "./dzgrid.css": "./dzgrid.css",
+    "./contrast.css": "./contrast.css",
+    "./contrast-pairs.json": "./contrast-pairs.json",
+    "./dzgrid.scss": "./dzgrid.scss",
+    "./dzgrid": { "sass": "./dzgrid.scss", "default": "./dzgrid.css" },
+    "./tailwind.css": "./tailwind.css"
+  },
+  "files": ["dzgrid.css", "dzgrid.scss", "contrast.css", "contrast-pairs.json", "tailwind.css"],
+  "sideEffects": ["*.css"],
+  "sass": "./dzgrid.scss"
+}

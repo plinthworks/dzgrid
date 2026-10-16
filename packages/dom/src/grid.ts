@@ -181,6 +181,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     });
 
     // ---- grid attributes ----
+    setAttr(root, 'data-density', settings.density ?? 'comfortable');
     setAttr(viewport, 'aria-rowcount', String(d.count + 1));
     setAttr(viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
     const mode = settings.selection?.mode ?? 'none';

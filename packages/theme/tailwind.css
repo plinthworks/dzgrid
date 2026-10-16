@@ -1,0 +1,29 @@
+/**
+ * @dzgrid/theme/tailwind.css — the grid in your Tailwind v4 theme.
+ *
+ *   @import "tailwindcss";
+ *   @import "@dzgrid/theme";
+ *   @import "@dzgrid/theme/tailwind.css";
+ *
+ * Maps the shared palette to Tailwind's: surfaces and text to the zinc scale,
+ * the accent to your --color-primary-600 / -400 when your @theme has them
+ * (Tailwind's blue otherwise), danger and warning to red and amber. The same
+ * mapping as @tzslot/theme/tailwind.css: a page with both themes them alike.
+ */
+:root {
+  --tz-bg: light-dark(var(--color-white), var(--color-zinc-900));
+  --tz-bg-raised: light-dark(var(--color-zinc-100), var(--color-zinc-800));
+  --tz-fg: light-dark(var(--color-zinc-900), var(--color-zinc-100));
+  --tz-fg-muted: light-dark(var(--color-zinc-600), var(--color-zinc-400));
+  --tz-border: light-dark(var(--color-zinc-300), var(--color-zinc-700));
+  --tz-accent: light-dark(var(--color-primary-600, var(--color-blue-600)), var(--color-primary-400, var(--color-blue-400)));
+  --tz-accent-fg: light-dark(var(--color-white), var(--color-zinc-950));
+  --tz-danger: light-dark(var(--color-red-700), var(--color-red-400));
+  --tz-warning: light-dark(var(--color-amber-700), var(--color-amber-400));
+  --dzg-font: var(--font-sans);
+  --dzg-radius: var(--radius-md);
+}
+
+.dark {
+  --tz-color-scheme: dark;
+}

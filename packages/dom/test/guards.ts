@@ -30,6 +30,8 @@ const TEXT_CALLS = new Set(['createTextNode', 'append', 'prepend', 'replaceChild
 const PHYSICAL_PROP = /^(left|right|x)$|[a-z](Left|Right)$|^(client|page|screen|offset|movement|layer|delta|scroll)X$|^pageXOffset$|^cssFloat$/;
 /** Physical CSS in strings: the words, `translateX(`, `translate(` and `translate3d(`. */
 const PHYSICAL_TEXT = /\b(left|right)\b|\btranslate(X|3d)?\(/i;
+/** In SCSS only literal colours count: light-dark() and color-mix() choose between palette colours. */
+const SCSS_COLOUR = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(/i;
 /** Two- and four-value margin, padding and inset shorthands set an inline side by position. */
 const SHORTHAND_PROPS = new Set(['margin', 'padding', 'inset', 'borderWidth', 'borderRadius', 'borderStyle', 'borderColor']);
 const ARROWS = /^Arrow(Left|Right)$/;
@@ -177,7 +179,7 @@ export function checkScss(source: string): Finding[] {
     if (inPalette) {
       depth += (line.match(/\(/g) ?? []).length - (line.match(/\)/g) ?? []).length;
       if (depth <= 0 && /;/.test(line)) inPalette = false;
-    } else if (COLOUR.test(line)) out.push({ rule: 'colour', line: i + 1, why: line.trim() });
+    } else if (SCSS_COLOUR.test(line)) out.push({ rule: 'colour', line: i + 1, why: line.trim() });
     if (/(^|[^-\w])(left|right)\b|-(left|right)\b|\b(text-align|float|clear)\s*:\s*(left|right)/.test(line)) out.push({ rule: 'physical', line: i + 1, why: line.trim() });
   });
   return out;

@@ -1,0 +1,58 @@
+/**
+ * @dzgrid/theme/contrast.css — more contrast, for people who need it, and the
+ * system's colours in forced-colours mode.
+ *
+ *   import '@dzgrid/theme';
+ *   import '@dzgrid/theme/contrast.css';
+ *
+ * Applies on its own when the system asks for more contrast, and with
+ * data-contrast="more" on any element; data-contrast="normal" on the root opts
+ * out. The palette is tzslot's high-contrast one.
+ */
+@media (prefers-contrast: more) {
+  :root:not([data-contrast='normal']) {
+    --tz-bg: light-dark(#ffffff, #000000);
+    --tz-bg-raised: light-dark(#e4e4e7, #27272a);
+    --tz-fg: light-dark(#000000, #ffffff);
+    --tz-fg-muted: light-dark(#27272a, #e4e4e7);
+    --tz-border: light-dark(#000000, #ffffff);
+    --tz-accent: light-dark(#1d3fb8, #ffd400);
+    --tz-accent-fg: light-dark(#ffffff, #000000);
+    --tz-danger: light-dark(#8b0000, #ff8a8a);
+    --tz-warning: light-dark(#6b3a00, #ffd27a);
+  }
+}
+
+[data-contrast='more'] {
+  --tz-bg: light-dark(#ffffff, #000000);
+  --tz-bg-raised: light-dark(#e4e4e7, #27272a);
+  --tz-fg: light-dark(#000000, #ffffff);
+  --tz-fg-muted: light-dark(#27272a, #e4e4e7);
+  --tz-border: light-dark(#000000, #ffffff);
+  --tz-accent: light-dark(#1d3fb8, #ffd400);
+  --tz-accent-fg: light-dark(#ffffff, #000000);
+  --tz-danger: light-dark(#8b0000, #ff8a8a);
+  --tz-warning: light-dark(#6b3a00, #ffd27a);
+}
+
+/* Forced colours: the system decides; the grid only says which role each part plays. */
+@media (forced-colors: active) {
+  .dzg-row[aria-selected='true'],
+  .dzg-row[aria-selected='true'] .dzg-seg-start,
+  .dzg-row[aria-selected='true'] .dzg-seg-end {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  .dzg-cell:focus-visible,
+  .dzg-hcell:focus-visible,
+  .dzg-box:focus-visible {
+    outline-color: Highlight;
+  }
+  .dzg-box {
+    border-color: CanvasText;
+  }
+  .dzg-resize::after {
+    background: CanvasText;
+  }
+}
