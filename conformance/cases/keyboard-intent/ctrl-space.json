@@ -1,0 +1,18 @@
+{
+  "id": "ctrl-space",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+Space is no intent in Phase 2 (column selection is later).",
+  "input": {
+    "key": " ",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "ctrl-pagedown",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+PageDown switches browser tabs: not the grid's.",
+  "input": {
+    "key": "PageDown",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

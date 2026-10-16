@@ -1,0 +1,18 @@
+{
+  "id": "header-ctrl-up",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+ArrowUp on a header goes nowhere: there is no row above.",
+  "input": {
+    "key": "ArrowUp",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

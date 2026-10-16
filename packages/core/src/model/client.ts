@@ -55,8 +55,8 @@ export interface ClientModel<T> extends RowModel<T> {
   readonly problems: readonly Problem[];
   setRows(rows: Iterable<T>, source?: ChangeSource): TransactionResult;
   applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
-  setColumns(columns: ColumnLookup<T>): void;
-  setContext(ctx: LocaleCtx): void;
+  setColumns(columns: ColumnLookup<T>, source?: ChangeSource): void;
+  setContext(ctx: LocaleCtx, source?: ChangeSource): void;
   /** Takes the edit overlay without reordering anything (K.14): rows move only on `reapply()`. */
   setReader(reader: ValueReader<T>): void;
   reapply(): void;
@@ -247,13 +247,13 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     },
     setRows: (rows, source = 'host') => transact(() => store.replaceAll(rows), source),
     applyTransaction: (tx, source = 'host') => transact(() => store.apply(tx), source),
-    setColumns(next) {
+    setColumns(next, source = 'host') {
       columns = next;
-      if (run()) notify('context', 'host');
+      if (run()) notify('context', source);
     },
-    setContext(next) {
+    setContext(next, source = 'host') {
       ctx = next;
-      if (run()) notify('context', 'host');
+      if (run()) notify('context', source);
     },
     // Taken, not applied: what is shown keeps its order until reapply() (K.14).
     setReader(next) {

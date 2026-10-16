@@ -15,6 +15,8 @@ export interface KeyLike {
   readonly metaKey: boolean;
   readonly shiftKey: boolean;
   readonly altKey: boolean;
+  /** The physical key: Ctrl+A still selects all on a layout where that key is another letter. */
+  readonly code?: string;
 }
 
 export interface IntentContext {
@@ -55,7 +57,7 @@ function raw(e: KeyLike, ctx: IntentContext): Intent | null {
 
   if (e.key === 'Enter') return cmd ? null : { kind: 'sort', multi: e.shiftKey };
   if (e.shiftKey) return null;   // ranges come in Phase 4
-  if (cmd && (e.key === 'a' || e.key === 'A')) return { kind: 'selectAll' };
+  if (cmd && (e.key === 'a' || e.key === 'A' || e.code === 'KeyA')) return { kind: 'selectAll' };
   switch (e.key) {
     case 'ArrowDown': return cmd ? { kind: 'edge', axis: 'row', to: 'last' } : { kind: 'move', axis: 'row', delta: 1 };
     case 'ArrowUp': return cmd ? { kind: 'edge', axis: 'row', to: 'first' } : { kind: 'move', axis: 'row', delta: -1 };
@@ -74,6 +76,6 @@ export function intentFor(e: KeyLike, ctx: IntentContext): Intent | null {
   const i = raw(e, ctx);
   if (!i || !INTENT_OWNERS[i.kind].includes(ctx.owner)) return null;
   // A header has no row above it.
-  if (ctx.owner === 'header' && i.kind === 'move' && i.axis === 'row' && i.delta < 0) return null;
+  if (ctx.owner === 'header' && ((i.kind === 'move' && i.axis === 'row' && i.delta < 0) || (i.kind === 'edge' && i.axis === 'row' && i.to === 'first') || (i.kind === 'page' && i.delta < 0))) return null;
   return i;
 }

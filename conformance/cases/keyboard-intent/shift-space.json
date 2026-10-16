@@ -1,0 +1,18 @@
+{
+  "id": "shift-space",
+  "suite": "keyboard-intent",
+  "description": "Shift+Space is no intent in Phase 2 (row ranges are later).",
+  "input": {
+    "key": " ",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": true,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

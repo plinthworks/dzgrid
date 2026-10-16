@@ -2,7 +2,7 @@ import type { ColumnModel, ColumnState } from './columns/model.js';
 import { reconcileFocus, sameFocus, type FocusPos } from './focus.js';
 import type { RowKey } from './ids.js';
 import type { ClientModel, ModelChange } from './model/client.js';
-import { makeQuery, type Query } from './model/query.js';
+import { canonical, makeQuery, type Query } from './model/query.js';
 import type { ChangeSource } from './model/types.js';
 import { problem, type Problem } from './problems.js';
 import type { DisplayedRows } from './row/displayed.js';
@@ -72,12 +72,34 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
   let shown = rows.displayed;
   let destroyed = false;
   const listeners = new Set<(e: GridEvent<T>) => void>();
+  // Events queue: a listener that dispatches while being told does not make
+  // the others hear the new event before the old one. Each event goes to the
+  // listeners subscribed when it is delivered.
+  const queue: GridEvent<T>[] = [];
+  let draining = false;
   const emit = (e: GridEvent<T>): void => {
-    for (const fn of [...listeners]) fn(e);
+    queue.push(e);
+    if (draining) return;
+    draining = true;
+    try {
+      for (let ev = queue.shift(); ev; ev = queue.shift()) {
+        for (const fn of [...listeners]) if (listeners.has(fn)) fn(ev);
+      }
+    } finally {
+      draining = false;
+      queue.length = 0;
+    }
   };
 
+  const sameSelection = (a: SelectionState, b: SelectionState): boolean => {
+    if (a === b) return true;
+    if (a.mode !== b.mode || a.keys.size !== b.keys.size) return false;
+    for (const key of a.keys) if (!b.keys.has(key)) return false;
+    return true;
+  };
+  /** State first, then the event: whoever hears it reads the new state. */
   const setSelection = (s: SelectionState, source: ChangeSource): void => {
-    if (s === selection) return;
+    if (sameSelection(s, selection)) return;
     selection = s;
     emit({ type: 'selectionChanged', source, selection, count: selectionCount(selection, rows.counts.total) });
   };
@@ -86,26 +108,41 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
     focus = f;
     emit({ type: 'focusChanged', source, focus });
   };
-  /** After the rows or the columns moved: what no longer exists lets go. Always source `data`. */
-  const reconcile = (): void => {
-    const exists = (key: RowKey): boolean => rows.row(key) !== undefined;
+  const exists = (key: RowKey): boolean => rows.row(key) !== undefined;
+
+  /**
+   * After the rows or the columns moved: what no longer exists lets go —
+   * before anyone hears `modelUpdated`, so a renderer reads a focus and a
+   * selection that exist. The reconciling events follow, with source `data`.
+   */
+  const onModel = (head: GridEvent<T> | null): void => {
     if (anchor !== null && !exists(anchor)) anchor = null;
-    setSelection(reconcileSelection(selection, exists), 'data');
-    setFocus(reconcileFocus(focus, shown, rows.displayed, columns), 'data');
+    const prevSelection = selection;
+    const prevFocus = focus;
+    selection = reconcileSelection(selection, exists);
+    focus = reconcileFocus(focus, shown, rows.displayed, columns);
     shown = rows.displayed;
+    if (head) emit(head);
+    if (!sameSelection(prevSelection, selection)) emit({ type: 'selectionChanged', source: 'data', selection, count: selectionCount(selection, rows.counts.total) });
+    if (!sameFocus(prevFocus, focus)) emit({ type: 'focusChanged', source: 'data', focus });
   };
 
-  const unsubscribe = rows.subscribe((c) => {
-    emit({ type: 'modelUpdated', source: c.source, displayed: c.displayed, kind: c.kind });
-    reconcile();
-  });
+  const unsubscribe = rows.subscribe((c) => onModel({ type: 'modelUpdated', source: c.source, displayed: c.displayed, kind: c.kind }));
 
   const setQuery = (q: Query, source: ChangeSource): void => {
     const before = rows.query;
     rows.setQuery(q, source);
     if (before.key === rows.query.key) return;
-    if (before.sort !== rows.query.sort && JSON.stringify(before.sort) !== JSON.stringify(rows.query.sort))
-      emit({ type: 'sortChanged', source, sort: rows.query.sort });
+    if (canonical(before.sort) !== canonical(rows.query.sort)) emit({ type: 'sortChanged', source, sort: rows.query.sort });
+  };
+  /** Every sorted column exists and can sort; the first that does not refuses the whole sort. */
+  const checkSort = (sort: readonly SortItem[]): GridCommandResult | null => {
+    for (const item of sort) {
+      const col = columns.get(item.column);
+      if (!col) return refuse('unknown-column', [problem('unknown-column', 'error', 'sort', item.column)]);
+      if (!col.sortable) return refuse('not-sortable', [problem('invalid-sort', 'error', 'sort', item.column)]);
+    }
+    return null;
   };
   const withSort = (sort: readonly SortItem[]): Query => makeQuery({ sort, filter: rows.query.filter, quick: rows.query.quick });
 
@@ -119,17 +156,22 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
         setQuery(withSort(nextSort(rows.query.sort, cmd.column, cmd.multi)), source);
         return OK;
       }
-      case 'sort.set':
+      case 'sort.set': {
+        const bad = checkSort(cmd.sort);
+        if (bad) return bad;
         setQuery(withSort(cmd.sort), source);
         return OK;
+      }
       case 'query.set':
         setQuery(cmd.query, source);
         return OK;
       case 'selection.toggle':
+        if (!exists(cmd.row)) return refuse('unknown-row');
         anchor = cmd.row;
         setSelection(toggle(selection, cmd.row), source);
         return OK;
       case 'selection.only':
+        if (!exists(cmd.row)) return refuse('unknown-row');
         anchor = cmd.row;
         setSelection(selectOnly([cmd.row]), source);
         return OK;
@@ -153,11 +195,13 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
         setSelection(clearSelection(), source);
         return OK;
       case 'selection.set':
-        setSelection(reconcileSelection(cmd.selection, (key) => rows.row(key) !== undefined), source);
-        if (anchor !== null && !isSelected(selection, anchor)) anchor = null;
+        // The anchor stays while its row exists: a host echoing the selection back must not
+        // break the next Shift+click (an unticked row is still where a range starts).
+        setSelection(reconcileSelection(cmd.selection, exists), source);
         return OK;
       case 'column.resize': {
         if (!columns.get(cmd.column)) return refuse('unknown-column', [problem('unknown-column', 'error', 'column', cmd.column)]);
+        if (!Number.isFinite(cmd.width) || cmd.width <= 0) return refuse('invalid-width', [problem('invalid-column', 'error', 'width', String(cmd.width))]);
         const change = columns.apply([{ id: cmd.column, width: cmd.width }], source);
         const width = columns.state().find((s) => s.id === cmd.column)?.width ?? cmd.width;
         if (change.problems.length) emit({ type: 'problems', source, problems: change.problems });
@@ -167,8 +211,11 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
       case 'column.state': {
         const change = columns.apply(cmd.patch, source);
         if (change.problems.length) emit({ type: 'problems', source, problems: change.problems });
-        rows.setColumns(columns);
-        reconcile();
+        const before = rows.displayed;
+        rows.setColumns(columns, source);
+        // Columns can change without the rows changing (a column hidden that no filter reads):
+        // the focus still has to leave a hidden column.
+        if (rows.displayed === before) onModel(null);
         return OK;
       }
       case 'focus.set': {
@@ -213,7 +260,7 @@ export type HeaderSelection = 'none' | 'some' | 'all';
 export function headerSelection<T>(s: SelectionState, d: DisplayedRows<T>): HeaderSelection {
   if (d.count === 0) return 'none';
   let selected = 0;
-  if (s.mode === 'include' && s.keys.size < d.count) {
+  if (s.mode === 'include' && s.keys.size <= d.count) {
     for (const key of s.keys) if (d.indexOf(key) !== -1) selected++;
   } else {
     for (let i = 0; i < d.count; i++) if (isSelected(s, d.keyAt(d.index(i)!))) selected++;

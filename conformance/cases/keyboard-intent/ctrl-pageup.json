@@ -1,0 +1,18 @@
+{
+  "id": "ctrl-pageup",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+PageUp switches browser tabs: not the grid's.",
+  "input": {
+    "key": "PageUp",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "ctrl-shift-a",
+  "suite": "keyboard-intent",
+  "description": "Ctrl+Shift+A is not select all.",
+  "input": {
+    "key": "a",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": true,
+    "meta": false,
+    "shift": true,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

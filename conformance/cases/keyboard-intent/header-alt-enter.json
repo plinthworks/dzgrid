@@ -1,0 +1,18 @@
+{
+  "id": "header-alt-enter",
+  "suite": "keyboard-intent",
+  "description": "Alt+Enter on a header is left to the system.",
+  "input": {
+    "key": "Enter",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": true
+  },
+  "expected": {
+    "intent": null
+  }
+}
