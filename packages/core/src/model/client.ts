@@ -37,6 +37,14 @@ export interface RowModel<T> {
   destroy(): void;
 }
 
+export interface SearchWarmup {
+  /** Builds up to `maxCells` cells; true when done (finished, given up or cancelled). */
+  step(maxCells: number): boolean;
+  /** 0 to 1. */
+  readonly progress: number;
+  cancel(): void;
+}
+
 export interface ClientOptions<T> {
   readonly rows: Iterable<T>;
   readonly getRowId: (row: T) => RowIdInput;
@@ -60,7 +68,14 @@ export interface ClientModel<T> extends RowModel<T> {
   /** Takes the edit overlay without reordering anything (K.14): rows move only on `reapply()`. */
   setReader(reader: ValueReader<T>): void;
   reapply(): void;
+  /**
+   * Prepares the quick search's haystacks a few cells at a time, for idle
+   * time (D13): afterwards the first keystroke builds nothing. Given up when
+   * the rows, the columns, the language or the reader change.
+   */
+  warmSearch(): SearchWarmup;
   readonly diagnostics: {
+    readonly foldBuilds: number;
     readonly filterRuns: number;
     readonly sortRuns: number;
     readonly displayedBuilds: number;
@@ -228,7 +243,45 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     get problems() { return currentProblems(); },
     get counts() { return { total: store.size, filtered: filtered?.order ? filtered.order.length : store.size }; },
     get diagnostics() {
-      return { ...d, keyBuilds: cache.stats.keyBuilds, rankBuilds: cache.stats.rankBuilds, quickScanned: cache.stats.quickScanned, displayBuilds: cache.stats.displayBuilds };
+      return { ...d, keyBuilds: cache.stats.keyBuilds, rankBuilds: cache.stats.rankBuilds, quickScanned: cache.stats.quickScanned, displayBuilds: cache.stats.displayBuilds, foldBuilds: cache.stats.foldBuilds };
+    },
+    warmSearch() {
+      // What a word without digits searches: text and enum columns (enums by label and by value).
+      const start = env();
+      const builders: { step(n: number): boolean; readonly built: number; readonly total: number }[] = [];
+      for (const col of start.columns.visible()) {
+        const textual = col.type === 'text' || col.type === 'enum' || (col.type === 'custom' && col.codec.keyKind === 'text');
+        if (!textual) continue;
+        for (const kind of col.type === 'enum' ? (['search', 'export'] as const) : (['search'] as const)) {
+          const b = cache.haystackBuilder(kind, col, start, env);
+          if (b) builders.push(b);
+        }
+      }
+      const total = builders.reduce((a, b) => a + b.total, 0);
+      let at = 0;
+      let stopped = false;
+      return {
+        get progress() {
+          return total === 0 ? 1 : builders.reduce((a, b) => a + b.built, 0) / total;
+        },
+        step(maxCells) {
+          let budget = maxCells;
+          while (!stopped && at < builders.length && budget > 0) {
+            const b = builders[at]!;
+            const before = b.built;
+            const done = b.step(budget);
+            budget -= Math.max(1, b.built - before);
+            if (!done) return false;
+            // A builder that gave up means the model moved on: the rest would be stale too.
+            if (b.built < b.total) stopped = true;
+            at++;
+          }
+          return stopped || at >= builders.length;
+        },
+        cancel() {
+          stopped = true;
+        },
+      };
     },
     setQuery(q, source = 'api') {
       if (q.key === query.key) return;

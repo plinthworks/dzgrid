@@ -62,7 +62,7 @@ function hayCell<T>(kind: HayKind, col: ResolvedColumn<T>, env: ColumnEnv<T>, sr
 const MAX_PATCHED = 1000;
 
 export class ColumnCache<T> {
-  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0, displayBuilds: 0, quickScanned: 0 };
+  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0, displayBuilds: 0, quickScanned: 0, warmBuilds: 0 };
   #lists = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; values: (string | null | undefined)[] }>();
   #hays = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; hay: Haystack }>();
   #keys = new Map<string, KeyEntry<T>>();
@@ -174,6 +174,44 @@ export class ColumnCache<T> {
    * - `display` — the cell as displayed in the user's language, folded (numbers, dates);
    * - `export` — the cell's export text, lowercased (an enum's value, a number's raw form).
    */
+  /**
+   * The same haystack, built a few cells at a time (D13: in idle time).
+   * `step` returns true when done — built and stored under the same validity
+   * as `haystack`, or abandoned because the rows, the reader or the language
+   * changed since it began (nothing is stored then). Null when already built.
+   */
+  haystackBuilder(kind: HayKind, col: ResolvedColumn<T>, env: ColumnEnv<T>, current: () => ColumnEnv<T>): { step(maxCells: number): boolean; readonly built: number; readonly total: number } | null {
+    const id = `${kind}|${col.id}`;
+    const ctx = listCtx(env);
+    const hit = this.#hays.get(id);
+    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return null;
+    const version = env.source.version;
+    const reader = env.reader.version;
+    const n = env.source.count;
+    const cells: (string | null)[] = new Array(n);
+    let i = 0;
+    let finished = false;
+    return {
+      get built() { return i; },
+      total: n,
+      step: (maxCells) => {
+        if (finished) return true;
+        const now = current();
+        if (now.source.version !== version || now.reader.version !== reader || listCtx(now) !== ctx || now.columns.get(col.id) !== col) {
+          finished = true;
+          return true;
+        }
+        const end = Math.min(n, i + Math.max(1, maxCells));
+        for (; i < end; i++) cells[i] = hayCell(kind, col, env, i);
+        if (i < n) return false;
+        finished = true;
+        this.stats.warmBuilds++;
+        this.#hays.set(id, { col, version, reader, ctx, hay: new Haystack(cells) });
+        return true;
+      },
+    };
+  }
+
   haystack(kind: HayKind, col: ResolvedColumn<T>, env: ColumnEnv<T>): Haystack {
     const id = `${kind}|${col.id}`;
     const ctx = listCtx(env);

@@ -86,6 +86,14 @@ Plan: `docs/phase-2-plan.md`; decisions D1–D14 validated 2026-10-16.
 - [x] steps 6-7 dir.ts, scheduler, scope, layout CSS
 - [x] steps 4-7 reviewed (code, tests): guards widened, plurals by bundle, scheduler errors
 - [x] steps 8-9 grid shell, virtual rows and columns, pinned segments (jsdom); browser checks with step 19
+- [x] step 10 scaled scrolling (logical offset, wheel, relative touch, anchor); step 11 keyboard, focus, retained cell
+- [x] steps 12-13 sort by click, row selection, selection box column; step 14 column resize; step 15 tooltips, announced overlays
+- [x] steps 10-15 reviewed (code, tests), findings fixed with tests that failed first
+- [x] step 16 @dzgrid/theme (1.1 kB gz); step 17 check:contrast (shipped and high-contrast palettes, light and dark: all pass).
+  **Sehhaty's six palettes: reading its sources was refused from this session — owner to provide `packages/theme/test/fixtures/sehhaty.json` (shape in `sehhaty.example.json`) or allow the transcription.**
+- [x] step 18 quick-search warm-up in idle time (`searchWarmup: 'idle'`, off by default, D13). Measured on dataset A, 10 text columns fr+ar:
+  first keystroke after warm-up 14.6 ms (was ~0.3 s), one step of 2 000 cells 0.4 ms, **memory at rest after warm-up 627 B/row
+  (~63 MB): budget for the owner to set (D13)**. Number and date haystacks are now built only for a word with a digit.
 
 ### Settled before Phase 2 by spike S11 (2026-10-16, 346 checks, three engines)
 - **Retained row in scaled mode**: at its true distance from the visible rows

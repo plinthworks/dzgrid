@@ -33,13 +33,16 @@ export function compileQuick<T>(text: string, columns: readonly ResolvedColumn<T
 
   // Per column, the haystacks a word is looked for in: text and enum always,
   // numbers and dates only for a word with a digit.
+  // Number and date haystacks are built only when some word has a digit: a word without
+  // one never looks there, and a first keystroke after a warm-up builds nothing.
+  const digits = words.some((w) => /[0-9]/.test(w));
   const always: Haystack[] = [];
   const withDigits: Haystack[] = [];
   for (const col of columns) {
     if (col.type === 'text' || col.type === 'enum' || (col.type === 'custom' && col.codec.keyKind === 'text')) {
       always.push(env.cache.haystack('search', col, env));
       if (col.type === 'enum') always.push(env.cache.haystack('export', col, env));
-    } else if (col.type === 'number' || col.type === 'day' || col.type === 'instant') {
+    } else if (digits && (col.type === 'number' || col.type === 'day' || col.type === 'instant')) {
       withDigits.push(env.cache.haystack('display', col, env), env.cache.haystack('export', col, env));
     }
   }

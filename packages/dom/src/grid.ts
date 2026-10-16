@@ -16,6 +16,7 @@ import { Scope } from './render/scope.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
 import { Tooltip } from './render/tooltip.js';
+import { idleLoop } from './idle.js';
 
 export interface GridApi {
   focusCell(row: RowKey, column: string): void;
@@ -488,9 +489,29 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     ro.observe(viewport);
     scope.observe(ro);
   }
+  // ---------- quick-search warm-up (D13) ----------
+  let scrolledAt = -1e9;
+  scope.on(viewport, 'scroll', () => { scrolledAt = now(); }, { passive: true });
+  let stopWarm: (() => void) | null = null;
+  function warm(): void {
+    stopWarm?.();
+    stopWarm = null;
+    if (settings.searchWarmup !== 'idle') return;
+    const w = rows.warmSearch();
+    const stop = idleLoop(() => w.step(2000), scope, { win, busy: () => now() - scrolledAt < 200 });
+    stopWarm = () => {
+      w.cancel();
+      stop();
+    };
+  }
+  scope.add(kernel.subscribe((e) => {
+    if (e.type === 'modelUpdated' && (e.kind === 'rows' || e.kind === 'context')) warm();
+  }));
+
   const initialBox = geometry.read();
   columns.setAvailableInline(initialBox.inline);
   schedule();
+  warm();
 
   /**
    * A header's sort state (APG): `aria-sort` on the first sorted column only;
@@ -711,6 +732,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       if (patch.rows) rows.setRows(patch.rows, 'host');
       direction.recheck();
       if ('direction' in patch) applyDir();
+      if ('searchWarmup' in patch && patch.searchWarmup !== prev.searchWarmup) warm();
       if ('overlay' in patch && patch.overlay !== prev.overlay && patch.overlay) {
         live.announce(msg(settings.messages, patch.overlay === 'loading' ? 'announce.loading' : 'announce.error', {}, ctx));
       }

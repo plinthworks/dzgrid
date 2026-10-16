@@ -24,6 +24,12 @@ export interface GridSettings<T> {
   readonly injectStyles?: boolean;
   readonly nonce?: string;
   readonly overscan?: { readonly rows?: number; readonly cols?: number };
+  /**
+   * `idle` prepares the quick search after each load, in idle time, so the
+   * first keystroke is instant — at the cost of holding the search caches
+   * (about 450 bytes a row on dataset A). Off by default (D13).
+   */
+  readonly searchWarmup?: 'idle' | 'off';
 }
 
 export const ROW_HEIGHT = { compact: 28, comfortable: 32, spacious: 40 } as const;

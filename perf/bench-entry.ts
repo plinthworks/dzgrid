@@ -163,6 +163,28 @@ function quickCases(): Record<string, Case> {
     },
     'quick filter 100 000 x 10 text columns (cold, fr+ar)': { setup: () => env(), run: run('ma') },
     'quick filter 100 000 x 4 ASCII columns (cold)': { setup: () => env(asciiCols), run: run('onc') },
+    // D13: the warm-up in idle time, one step, and the keystroke it makes instant.
+    'warm step 2 000 cells (10 text columns fr+ar)': {
+      setup: () => {
+        rows ??= datasetA();
+        const m = clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'fr-FR' }) });
+        return m.warmSearch();
+      },
+      run: (w: { step(n: number): boolean }) => w.step(2000),
+    },
+    'first keystroke after warm-up, 10 text columns fr+ar': {
+      setup: () => {
+        rows ??= datasetA();
+        const m = clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'fr-FR' }) });
+        const w = m.warmSearch();
+        while (!w.step(1e6));
+        return m;
+      },
+      run: (m: ReturnType<typeof clientRows<RowA>>) => {
+        m.setQuery(makeQuery({ quick: 'ma' }));
+        return m.displayed.count;
+      },
+    },
     'quick filter narrowing step (warm)': {
       setup: () => {
         const e = env();
@@ -248,6 +270,17 @@ const heap = (): number => {
 
 /** Bytes measured after collection; see scripts/bench.mjs. */
 export const MEMORY: Record<string, () => number> = {
+  'client model after the quick-search warm-up, bytes/row (100 000 x 10 text)': () => {
+    const rows = datasetA();
+    const columns = createColumnModel<RowA>(['t0', 't1', 't2', 't3', 't4', 'a0', 'a1', 'a2', 'a3', 'a4'].map((id) => ({ id })));
+    const before = heap();
+    const m = clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'fr-FR' }) });
+    const w = m.warmSearch();
+    while (!w.step(1e6));
+    const after = heap();
+    void m.displayed.count;
+    return (after - before) / rows.length;
+  },
   'client model + caches after filters and a digit search, bytes/row (100 000 x 30)': () => {
     const rows = datasetA();
     const columns = createColumnModel<RowA>([

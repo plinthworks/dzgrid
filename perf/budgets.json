@@ -37,7 +37,9 @@
     "PrefixSums build 100 000": 5,
     "PrefixSums 1 000 set + 1 000 indexAt (100 000 rows)": 5,
     "visibleWindow x 10 000 (variable 100 000 rows)": 20,
-    "scrollMapper build x 100 000": 20
+    "scrollMapper build x 100 000": 20,
+    "warm step 2 000 cells (10 text columns fr+ar)": 4,
+    "first keystroke after warm-up, 10 text columns fr+ar": 20
   },
   "memory": {
     "store overhead bytes/row (100 000 rows)": 120,
