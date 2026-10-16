@@ -3,7 +3,7 @@
 The plan is `ARCHITECTURE.md`. This file records what is done, what is next,
 and what the spikes found.
 
-## Phase 0 — scaffolding and spikes (in progress)
+## Phase 0 — scaffolding and spikes (done, 2026-10-16)
 
 ### Done
 - Repository, clean-room rules (`CLEANROOM.md`), architecture with the owner's
@@ -38,13 +38,17 @@ and what the spikes found.
 - Playground on 4700 (`playground/index.html`); `check:size` (core 2.2 kB gz),
   `bench` on a minified bundle with `perf/budgets.json`, `check:contrast` stub
   until the theme; README, CHANGELOG, `docs/a11y-protocol.md`.
-- 93 tests, green in UTC, Auckland and Los Angeles.
+- The spike server survives malformed requests (400), never redirects off
+  host, reports a TypeScript error as 500; tested in a `tools` project.
+- 99 tests, green in UTC, Auckland and Los Angeles.
 
 ### Spikes
 
-Indicative numbers: M4 Max, headless, other spikes running. The sequential
-re-run (`npm run spike`) replaces them below when it lands. Details in each
-`spikes/<id>/README.md`.
+Numbers: M4 Max, headless. The sequential re-run (`npm run spike`, one
+browser at a time, 2026-10-16) passed all eleven spikes and confirmed every
+decision below; its raw numbers are in `spikes/<id>/results/result.json`.
+Still to measure on a mid-range laptop, headed, at 120 Hz (K.8 targets that
+machine, not this one). Details in each `spikes/<id>/README.md`.
 
 | # | Question | Result | Decision |
 |---|---|---|---|
@@ -93,7 +97,7 @@ First steps, in order (architect review):
    K.8 lines in `perf/budgets.json`.
 
 ### Exit criteria (ARCHITECTURE.md §6)
-- [x] the ten questions have measured answers (sequential re-run pending)
+- [x] the ten questions have measured answers (sequential re-run passed)
 - [x] K.1–K.9 decided
 - [x] `npm test` and `npm run typecheck` green
 - [x] `npm run build` produces `dist/`

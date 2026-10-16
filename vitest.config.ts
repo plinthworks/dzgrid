@@ -14,6 +14,7 @@ export default defineConfig({
     projects: [
       { resolve: { alias }, test: { name: 'core', globals: true, environment: 'node', include: ['packages/core/test/**/*.test.ts'] } },
       { resolve: { alias }, test: { name: 'conformance', globals: true, environment: 'node', include: ['conformance/runner/**/*.test.ts'] } },
+      { test: { name: 'tools', globals: true, environment: 'node', include: ['spikes/test/**/*.test.ts'] } },
     ],
   },
 });

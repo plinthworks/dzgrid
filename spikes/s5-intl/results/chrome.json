@@ -1493,8 +1493,8 @@
   ],
   "coldWarm": {
     "coldMs": 0.1,
-    "warmUs": 22.6,
-    "formatToPartsUs": 1.43,
+    "warmUs": 22.1,
+    "formatToPartsUs": 1.38,
     "k": 130000
   },
   "sweep": {
@@ -1508,8 +1508,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 27.5,
-        "totalMs": 211
+        "usPerCall": 26.5,
+        "totalMs": 203
       },
       "Europe/Dublin": {
         "lastTo": 1924992000000,
@@ -1519,8 +1519,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 26.9,
-        "totalMs": 206
+        "usPerCall": 26.3,
+        "totalMs": 202
       },
       "America/Los_Angeles": {
         "lastTo": 1925020800000,
@@ -1530,8 +1530,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 27,
-        "totalMs": 207
+        "usPerCall": 26.2,
+        "totalMs": 201
       },
       "America/Sao_Paulo": {
         "lastTo": 1925002800000,
@@ -1541,8 +1541,8 @@
           "25": 10
         },
         "anomalies": [],
-        "usPerCall": 26.4,
-        "totalMs": 202
+        "usPerCall": 25.7,
+        "totalMs": 197
       },
       "America/Havana": {
         "lastTo": 1925010000000,
@@ -1552,8 +1552,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 27.2,
-        "totalMs": 209
+        "usPerCall": 26.2,
+        "totalMs": 201
       },
       "Pacific/Apia": {
         "lastTo": 1924945200000,
@@ -1570,8 +1570,8 @@
             "from": 1325239200000
           }
         ],
-        "usPerCall": 26.5,
-        "totalMs": 203
+        "usPerCall": 26.2,
+        "totalMs": 201
       },
       "Australia/Lord_Howe": {
         "lastTo": 1924952400000,
@@ -1581,8 +1581,8 @@
           "23.5": 21
         },
         "anomalies": [],
-        "usPerCall": 27,
-        "totalMs": 207
+        "usPerCall": 26.2,
+        "totalMs": 201
       },
       "Asia/Kolkata": {
         "lastTo": 1924972200000,
@@ -1590,8 +1590,8 @@
           "24": 7670
         },
         "anomalies": [],
-        "usPerCall": 25.6,
-        "totalMs": 196
+        "usPerCall": 25.4,
+        "totalMs": 195
       },
       "Africa/Algiers": {
         "lastTo": 1924988400000,
@@ -1599,8 +1599,8 @@
           "24": 7670
         },
         "anomalies": [],
-        "usPerCall": 25.6,
-        "totalMs": 197
+        "usPerCall": 25.3,
+        "totalMs": 194
       },
       "Pacific/Auckland": {
         "lastTo": 1924945200000,
@@ -1610,8 +1610,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 27,
-        "totalMs": 207
+        "usPerCall": 26.5,
+        "totalMs": 203
       },
       "Asia/Tehran": {
         "lastTo": 1924979400000,
@@ -1621,8 +1621,8 @@
           "25": 13
         },
         "anomalies": [],
-        "usPerCall": 26.2,
-        "totalMs": 201
+        "usPerCall": 25.9,
+        "totalMs": 199
       },
       "Pacific/Chatham": {
         "lastTo": 1924942500000,
@@ -1632,8 +1632,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 26.6,
-        "totalMs": 204
+        "usPerCall": 26.3,
+        "totalMs": 202
       }
     }
   },
@@ -1645,11 +1645,11 @@
         "sensitivity": "base",
         "numeric": false,
         "unique": 86013,
-        "ms": 126.7,
+        "ms": 124.8,
         "runs": [
-          126,
-          129,
-          127
+          125,
+          125,
+          125
         ],
         "order": "12e4f385"
       },
@@ -1658,11 +1658,11 @@
         "sensitivity": "base",
         "numeric": true,
         "unique": 86013,
-        "ms": 126.1,
+        "ms": 120.4,
         "runs": [
-          126,
-          128,
-          123
+          122,
+          120,
+          120
         ],
         "order": "ae31a3"
       },
@@ -1671,11 +1671,11 @@
         "sensitivity": "accent",
         "numeric": false,
         "unique": 86013,
-        "ms": 120.5,
+        "ms": 119.3,
         "runs": [
-          122,
-          121,
-          120
+          119,
+          119,
+          119
         ],
         "order": "8b8651"
       },
@@ -1684,11 +1684,11 @@
         "sensitivity": "accent",
         "numeric": true,
         "unique": 86013,
-        "ms": 121.1,
+        "ms": 119.6,
         "runs": [
-          121,
-          122,
-          121
+          120,
+          120,
+          120
         ],
         "order": "a25063cf"
       },
@@ -1697,11 +1697,11 @@
         "sensitivity": "variant",
         "numeric": false,
         "unique": 86013,
-        "ms": 122.1,
+        "ms": 118.4,
         "runs": [
-          123,
-          121,
-          122
+          119,
+          118,
+          118
         ],
         "order": "63f14191"
       },
@@ -1710,11 +1710,11 @@
         "sensitivity": "variant",
         "numeric": true,
         "unique": 86013,
-        "ms": 119.8,
+        "ms": 119.5,
         "runs": [
           120,
-          120,
-          123
+          119,
+          120
         ],
         "order": "71e449cf"
       },
@@ -1723,11 +1723,11 @@
         "sensitivity": "base",
         "numeric": false,
         "unique": 99632,
-        "ms": 172.6,
+        "ms": 177.1,
         "runs": [
-          173,
-          172,
-          174
+          177,
+          177,
+          177
         ],
         "order": "a0945709"
       },
@@ -1736,11 +1736,11 @@
         "sensitivity": "base",
         "numeric": true,
         "unique": 99632,
-        "ms": 175.5,
+        "ms": 165.3,
         "runs": [
-          176,
-          176,
-          174
+          167,
+          165,
+          165
         ],
         "order": "9298d04f"
       },
@@ -1749,11 +1749,11 @@
         "sensitivity": "accent",
         "numeric": false,
         "unique": 99632,
-        "ms": 176.6,
+        "ms": 165.4,
         "runs": [
-          175,
-          177,
-          180
+          166,
+          165,
+          165
         ],
         "order": "8c6bb5c5"
       },
@@ -1762,11 +1762,11 @@
         "sensitivity": "accent",
         "numeric": true,
         "unique": 99632,
-        "ms": 171.4,
+        "ms": 167.4,
         "runs": [
-          170,
-          172,
-          171
+          167,
+          164,
+          170
         ],
         "order": "3a7359e3"
       },
@@ -1775,11 +1775,11 @@
         "sensitivity": "variant",
         "numeric": false,
         "unique": 99632,
-        "ms": 169.1,
+        "ms": 166,
         "runs": [
-          169,
-          170,
-          168
+          168,
+          166,
+          166
         ],
         "order": "6a2d63df"
       },
@@ -1788,20 +1788,20 @@
         "sensitivity": "variant",
         "numeric": true,
         "unique": 99632,
-        "ms": 171.9,
+        "ms": 165.7,
         "runs": [
-          172,
-          171,
-          172
+          166,
+          167,
+          166
         ],
         "order": "e710fbad"
       }
     ],
     "methods": {
       "fr": {
-        "collatorCompareOnStrings": 121.8,
-        "arrowWrapper": 128.8,
-        "indexSortUint32": 129.5,
+        "collatorCompareOnStrings": 119.7,
+        "arrowWrapper": 125.3,
+        "indexSortUint32": 129.4,
         "rankKeysAllUnique": {
           "keysMs": 115,
           "sortMs": 17
@@ -1810,26 +1810,26 @@
           "keysMs": 2,
           "sortMs": 13
         },
-        "directOn1000Distinct": 84.8,
-        "localeCompare": 2580.2,
-        "codeUnitBaseline": 30.2,
+        "directOn1000Distinct": 81.6,
+        "localeCompare": 2552.5,
+        "codeUnitBaseline": 29.8,
         "collatorConstructUs": 2
       },
       "ar": {
-        "collatorCompareOnStrings": 169.5,
-        "arrowWrapper": 177.3,
-        "indexSortUint32": 178.7,
+        "collatorCompareOnStrings": 165.5,
+        "arrowWrapper": 173.5,
+        "indexSortUint32": 176,
         "rankKeysAllUnique": {
-          "keysMs": 193,
+          "keysMs": 187,
           "sortMs": 17
         },
         "rankKeys1000Distinct": {
           "keysMs": 2,
           "sortMs": 13
         },
-        "directOn1000Distinct": 113.4,
-        "localeCompare": 2688.9,
-        "codeUnitBaseline": 22.5,
+        "directOn1000Distinct": 113.1,
+        "localeCompare": 2663.1,
+        "codeUnitBaseline": 21.6,
         "collatorConstructUs": 2
       }
     },

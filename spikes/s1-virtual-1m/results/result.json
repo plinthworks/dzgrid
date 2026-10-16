@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-16T13:56:07.603Z",
+  "at": "2026-10-16T14:01:15.891Z",
   "node": "v22.20.0",
   "rows": 1000000,
   "columns": 30,
@@ -172,13 +172,13 @@
         ]
       },
       "generate": {
-        "ms": 372.7000000476837,
+        "ms": 406.5,
         "rows": 1000000,
         "columns": 30
       },
       "mount": {
-        "syncMs": 6.5,
-        "firstPaintMs": 15,
+        "syncMs": 7.699999809265137,
+        "firstPaintMs": 11,
         "scaled": true,
         "ratio": 8.001583356255157,
         "physicalHeight": 3999968,
@@ -292,7 +292,7 @@
             "frameMedianMs": 16.7,
             "frameP95Ms": 16.7,
             "frameMaxMs": 16.8,
-            "over16_7Pct": 29,
+            "over16_7Pct": 26,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 0.1,
@@ -300,7 +300,7 @@
             "workMaxMs": 0.2,
             "workLayoutMedianMs": 0.3,
             "workLayoutP95Ms": 0.4,
-            "workLayoutMaxMs": 0.6,
+            "workLayoutMaxMs": 0.5,
             "longTasks": 0,
             "longTaskMaxMs": null,
             "perFrame": {
@@ -308,10 +308,10 @@
               "cellWrites": 21.093333333333334
             },
             "chromeMainThread": {
-              "styleMs": 0.083,
-              "layoutMs": 0.154,
-              "scriptMs": 0.1,
-              "taskMs": 1.989
+              "styleMs": 0.082,
+              "layoutMs": 0.159,
+              "scriptMs": 0.096,
+              "taskMs": 1.612
             }
           },
           "reps": [
@@ -320,34 +320,7 @@
               "frameMedianMs": 16.7,
               "frameP95Ms": 16.7,
               "frameMaxMs": 16.8,
-              "over16_7Pct": 29,
-              "droppedPct": 0,
-              "fpsMean": 60,
-              "workMedianMs": 0.1,
-              "workP95Ms": 0.2,
-              "workMaxMs": 0.2,
-              "workLayoutMedianMs": 0.3,
-              "workLayoutP95Ms": 0.4,
-              "workLayoutMaxMs": 0.6,
-              "longTasks": 0,
-              "longTaskMaxMs": null,
-              "perFrame": {
-                "rowBinds": 1.5066666666666666,
-                "cellWrites": 21.093333333333334
-              },
-              "chromeMainThread": {
-                "styleMs": 0.083,
-                "layoutMs": 0.154,
-                "scriptMs": 0.1,
-                "taskMs": 1.989
-              }
-            },
-            {
-              "fpsMedian": 59.9,
-              "frameMedianMs": 16.7,
-              "frameP95Ms": 16.8,
-              "frameMaxMs": 16.8,
-              "over16_7Pct": 24.7,
+              "over16_7Pct": 26,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.1,
@@ -363,10 +336,37 @@
                 "cellWrites": 21.093333333333334
               },
               "chromeMainThread": {
-                "styleMs": 0.085,
-                "layoutMs": 0.162,
-                "scriptMs": 0.1,
-                "taskMs": 1.659
+                "styleMs": 0.082,
+                "layoutMs": 0.159,
+                "scriptMs": 0.096,
+                "taskMs": 1.612
+              }
+            },
+            {
+              "fpsMedian": 59.9,
+              "frameMedianMs": 16.7,
+              "frameP95Ms": 16.8,
+              "frameMaxMs": 16.8,
+              "over16_7Pct": 28.7,
+              "droppedPct": 0,
+              "fpsMean": 60,
+              "workMedianMs": 0.1,
+              "workP95Ms": 0.1,
+              "workMaxMs": 0.2,
+              "workLayoutMedianMs": 0.3,
+              "workLayoutP95Ms": 0.4,
+              "workLayoutMaxMs": 0.5,
+              "longTasks": 0,
+              "longTaskMaxMs": null,
+              "perFrame": {
+                "rowBinds": 1.5066666666666666,
+                "cellWrites": 21.093333333333334
+              },
+              "chromeMainThread": {
+                "styleMs": 0.076,
+                "layoutMs": 0.148,
+                "scriptMs": 0.091,
+                "taskMs": 1.875
               }
             }
           ]
@@ -381,15 +381,15 @@
             "frameMedianMs": 16.7,
             "frameP95Ms": 16.7,
             "frameMaxMs": 16.8,
-            "over16_7Pct": 52,
+            "over16_7Pct": 49.3,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 0.2,
             "workP95Ms": 0.3,
             "workMaxMs": 0.3,
             "workLayoutMedianMs": 1.2,
-            "workLayoutP95Ms": 1.3,
-            "workLayoutMaxMs": 1.5,
+            "workLayoutP95Ms": 1.4,
+            "workLayoutMaxMs": 1.4,
             "longTasks": 0,
             "longTaskMaxMs": null,
             "perFrame": {
@@ -399,8 +399,8 @@
             "chromeMainThread": {
               "styleMs": 0.047,
               "layoutMs": 0.978,
-              "scriptMs": 0.217,
-              "taskMs": 2.69
+              "scriptMs": 0.222,
+              "taskMs": 2.663
             }
           },
           "reps": [
@@ -409,15 +409,15 @@
               "frameMedianMs": 16.7,
               "frameP95Ms": 16.7,
               "frameMaxMs": 16.8,
-              "over16_7Pct": 52,
+              "over16_7Pct": 49.3,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.2,
               "workP95Ms": 0.3,
               "workMaxMs": 0.3,
               "workLayoutMedianMs": 1.2,
-              "workLayoutP95Ms": 1.3,
-              "workLayoutMaxMs": 1.5,
+              "workLayoutP95Ms": 1.4,
+              "workLayoutMaxMs": 1.4,
               "longTasks": 0,
               "longTaskMaxMs": null,
               "perFrame": {
@@ -427,8 +427,8 @@
               "chromeMainThread": {
                 "styleMs": 0.047,
                 "layoutMs": 0.978,
-                "scriptMs": 0.217,
-                "taskMs": 2.69
+                "scriptMs": 0.222,
+                "taskMs": 2.663
               }
             },
             {
@@ -436,15 +436,15 @@
               "frameMedianMs": 16.7,
               "frameP95Ms": 16.8,
               "frameMaxMs": 16.8,
-              "over16_7Pct": 43,
+              "over16_7Pct": 39.3,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.2,
               "workP95Ms": 0.3,
-              "workMaxMs": 0.4,
+              "workMaxMs": 0.5,
               "workLayoutMedianMs": 1.2,
               "workLayoutP95Ms": 1.4,
-              "workLayoutMaxMs": 1.6,
+              "workLayoutMaxMs": 1.7,
               "longTasks": 0,
               "longTaskMaxMs": null,
               "perFrame": {
@@ -453,9 +453,9 @@
               },
               "chromeMainThread": {
                 "styleMs": 0.048,
-                "layoutMs": 0.988,
-                "scriptMs": 0.22,
-                "taskMs": 2.943
+                "layoutMs": 0.986,
+                "scriptMs": 0.227,
+                "taskMs": 2.948
               }
             }
           ]
@@ -468,17 +468,17 @@
           "best": {
             "fpsMedian": 59.9,
             "frameMedianMs": 16.7,
-            "frameP95Ms": 16.8,
+            "frameP95Ms": 16.7,
             "frameMaxMs": 16.8,
-            "over16_7Pct": 46.7,
+            "over16_7Pct": 52.3,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 0.2,
             "workP95Ms": 0.3,
-            "workMaxMs": 0.3,
+            "workMaxMs": 0.4,
             "workLayoutMedianMs": 1.2,
             "workLayoutP95Ms": 1.4,
-            "workLayoutMaxMs": 1.5,
+            "workLayoutMaxMs": 1.6,
             "longTasks": 0,
             "longTaskMaxMs": null,
             "perFrame": {
@@ -486,24 +486,51 @@
               "cellWrites": 507.03333333333336
             },
             "chromeMainThread": {
-              "styleMs": 0.053,
-              "layoutMs": 0.99,
-              "scriptMs": 0.226,
-              "taskMs": 3.021
+              "styleMs": 0.052,
+              "layoutMs": 0.985,
+              "scriptMs": 0.232,
+              "taskMs": 2.981
             }
           },
           "reps": [
             {
               "fpsMedian": 59.9,
               "frameMedianMs": 16.7,
-              "frameP95Ms": 16.8,
+              "frameP95Ms": 16.7,
               "frameMaxMs": 16.8,
-              "over16_7Pct": 46.7,
+              "over16_7Pct": 52.3,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.2,
               "workP95Ms": 0.3,
-              "workMaxMs": 0.3,
+              "workMaxMs": 0.4,
+              "workLayoutMedianMs": 1.2,
+              "workLayoutP95Ms": 1.4,
+              "workLayoutMaxMs": 1.6,
+              "longTasks": 0,
+              "longTaskMaxMs": null,
+              "perFrame": {
+                "rowBinds": 36.21666666666667,
+                "cellWrites": 507.03333333333336
+              },
+              "chromeMainThread": {
+                "styleMs": 0.052,
+                "layoutMs": 0.985,
+                "scriptMs": 0.232,
+                "taskMs": 2.981
+              }
+            },
+            {
+              "fpsMedian": 59.9,
+              "frameMedianMs": 16.7,
+              "frameP95Ms": 16.8,
+              "frameMaxMs": 16.8,
+              "over16_7Pct": 47,
+              "droppedPct": 0,
+              "fpsMean": 60,
+              "workMedianMs": 0.2,
+              "workP95Ms": 0.3,
+              "workMaxMs": 0.4,
               "workLayoutMedianMs": 1.2,
               "workLayoutP95Ms": 1.4,
               "workLayoutMaxMs": 1.5,
@@ -514,37 +541,10 @@
                 "cellWrites": 507.03333333333336
               },
               "chromeMainThread": {
-                "styleMs": 0.053,
-                "layoutMs": 0.99,
-                "scriptMs": 0.226,
-                "taskMs": 3.021
-              }
-            },
-            {
-              "fpsMedian": 59.9,
-              "frameMedianMs": 16.7,
-              "frameP95Ms": 16.8,
-              "frameMaxMs": 16.8,
-              "over16_7Pct": 49.7,
-              "droppedPct": 0,
-              "fpsMean": 60,
-              "workMedianMs": 0.2,
-              "workP95Ms": 0.3,
-              "workMaxMs": 0.4,
-              "workLayoutMedianMs": 1.3,
-              "workLayoutP95Ms": 1.4,
-              "workLayoutMaxMs": 1.7,
-              "longTasks": 0,
-              "longTaskMaxMs": null,
-              "perFrame": {
-                "rowBinds": 36.21666666666667,
-                "cellWrites": 507.03333333333336
-              },
-              "chromeMainThread": {
-                "styleMs": 0.053,
-                "layoutMs": 0.993,
-                "scriptMs": 0.227,
-                "taskMs": 3.095
+                "styleMs": 0.052,
+                "layoutMs": 0.992,
+                "scriptMs": 0.231,
+                "taskMs": 2.999
               }
             }
           ]
@@ -557,9 +557,9 @@
           "best": {
             "fpsMedian": 59.9,
             "frameMedianMs": 16.7,
-            "frameP95Ms": 16.8,
+            "frameP95Ms": 16.7,
             "frameMaxMs": 16.8,
-            "over16_7Pct": 32.7,
+            "over16_7Pct": 34.3,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 0.1,
@@ -575,19 +575,19 @@
               "cellWrites": 27.096666666666668
             },
             "chromeMainThread": {
-              "styleMs": 0.109,
-              "layoutMs": 0.183,
-              "scriptMs": 0.103,
-              "taskMs": 1.727
+              "styleMs": 0.104,
+              "layoutMs": 0.175,
+              "scriptMs": 0.099,
+              "taskMs": 1.656
             }
           },
           "reps": [
             {
               "fpsMedian": 59.9,
               "frameMedianMs": 16.7,
-              "frameP95Ms": 16.8,
+              "frameP95Ms": 16.7,
               "frameMaxMs": 16.8,
-              "over16_7Pct": 32.7,
+              "over16_7Pct": 34.3,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.1,
@@ -603,18 +603,18 @@
                 "cellWrites": 27.096666666666668
               },
               "chromeMainThread": {
-                "styleMs": 0.109,
-                "layoutMs": 0.183,
-                "scriptMs": 0.103,
-                "taskMs": 1.727
+                "styleMs": 0.104,
+                "layoutMs": 0.175,
+                "scriptMs": 0.099,
+                "taskMs": 1.656
               }
             },
             {
               "fpsMedian": 59.9,
               "frameMedianMs": 16.7,
-              "frameP95Ms": 16.8,
+              "frameP95Ms": 16.7,
               "frameMaxMs": 16.8,
-              "over16_7Pct": 25.3,
+              "over16_7Pct": 26,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.1,
@@ -631,9 +631,9 @@
               },
               "chromeMainThread": {
                 "styleMs": 0.114,
-                "layoutMs": 0.183,
+                "layoutMs": 0.184,
                 "scriptMs": 0.097,
-                "taskMs": 1.736
+                "taskMs": 1.854
               }
             }
           ]
@@ -649,7 +649,7 @@
         },
         "withData": {
           "usedMB": 199.6,
-          "totalMB": 200.4,
+          "totalMB": 200.9,
           "domNodes": 17,
           "listeners": 13
         },
@@ -667,10 +667,10 @@
         },
         "keyedShapeWithData": {
           "usedMB": 847.9,
-          "totalMB": 848.7,
+          "totalMB": 849.2,
           "domNodes": 17,
           "listeners": 13,
-          "generateMs": 976
+          "generateMs": 987.5
         }
       },
       "precisionByCap": {
@@ -1160,13 +1160,13 @@
         ]
       },
       "generate": {
-        "ms": 353.8,
+        "ms": 351.02,
         "rows": 1000000,
         "columns": 30
       },
       "mount": {
-        "syncMs": 10.099999999999966,
-        "firstPaintMs": 30.360000000000014,
+        "syncMs": 10,
+        "firstPaintMs": 19.08000000000004,
         "scaled": true,
         "ratio": 8.001583356255157,
         "physicalHeight": 3999968,
@@ -1278,17 +1278,17 @@
           "best": {
             "fpsMedian": 60,
             "frameMedianMs": 16.66,
-            "frameP95Ms": 17.4,
-            "frameMaxMs": 17.7,
-            "over16_7Pct": 14,
+            "frameP95Ms": 17.26,
+            "frameMaxMs": 17.6,
+            "over16_7Pct": 15.3,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 0.12,
             "workP95Ms": 0.16,
-            "workMaxMs": 0.26,
-            "workLayoutMedianMs": 0.48,
-            "workLayoutP95Ms": 0.62,
-            "workLayoutMaxMs": 0.72,
+            "workMaxMs": 0.22,
+            "workLayoutMedianMs": 0.42,
+            "workLayoutP95Ms": 0.52,
+            "workLayoutMaxMs": 0.64,
             "longTasks": "unsupported",
             "longTaskMaxMs": null,
             "perFrame": {
@@ -1301,17 +1301,17 @@
             {
               "fpsMedian": 60,
               "frameMedianMs": 16.66,
-              "frameP95Ms": 17.4,
-              "frameMaxMs": 17.7,
-              "over16_7Pct": 14,
+              "frameP95Ms": 17.26,
+              "frameMaxMs": 17.6,
+              "over16_7Pct": 15.3,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.12,
               "workP95Ms": 0.16,
-              "workMaxMs": 0.26,
-              "workLayoutMedianMs": 0.48,
-              "workLayoutP95Ms": 0.62,
-              "workLayoutMaxMs": 0.72,
+              "workMaxMs": 0.22,
+              "workLayoutMedianMs": 0.42,
+              "workLayoutP95Ms": 0.52,
+              "workLayoutMaxMs": 0.64,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -1323,17 +1323,17 @@
             {
               "fpsMedian": 60,
               "frameMedianMs": 16.66,
-              "frameP95Ms": 17.42,
+              "frameP95Ms": 17.48,
               "frameMaxMs": 17.7,
-              "over16_7Pct": 16,
+              "over16_7Pct": 17.3,
               "droppedPct": 0,
               "fpsMean": 60,
-              "workMedianMs": 0.14,
+              "workMedianMs": 0.12,
               "workP95Ms": 0.16,
-              "workMaxMs": 0.2,
-              "workLayoutMedianMs": 0.44,
-              "workLayoutP95Ms": 0.54,
-              "workLayoutMaxMs": 0.6,
+              "workMaxMs": 0.42,
+              "workLayoutMedianMs": 0.46,
+              "workLayoutP95Ms": 0.58,
+              "workLayoutMaxMs": 1.06,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -1352,17 +1352,17 @@
           "best": {
             "fpsMedian": 60,
             "frameMedianMs": 16.66,
-            "frameP95Ms": 17.22,
+            "frameP95Ms": 17.28,
             "frameMaxMs": 17.6,
-            "over16_7Pct": 12.3,
+            "over16_7Pct": 13.7,
             "droppedPct": 0,
             "fpsMean": 60,
-            "workMedianMs": 0.32,
-            "workP95Ms": 0.38,
-            "workMaxMs": 0.64,
-            "workLayoutMedianMs": 2.42,
-            "workLayoutP95Ms": 2.68,
-            "workLayoutMaxMs": 4.14,
+            "workMedianMs": 0.3,
+            "workP95Ms": 0.34,
+            "workMaxMs": 0.42,
+            "workLayoutMedianMs": 2,
+            "workLayoutP95Ms": 2.18,
+            "workLayoutMaxMs": 2.52,
             "longTasks": "unsupported",
             "longTaskMaxMs": null,
             "perFrame": {
@@ -1375,17 +1375,17 @@
             {
               "fpsMedian": 60,
               "frameMedianMs": 16.66,
-              "frameP95Ms": 17.22,
+              "frameP95Ms": 17.28,
               "frameMaxMs": 17.6,
-              "over16_7Pct": 12.3,
+              "over16_7Pct": 13.7,
               "droppedPct": 0,
               "fpsMean": 60,
-              "workMedianMs": 0.32,
-              "workP95Ms": 0.38,
-              "workMaxMs": 0.64,
-              "workLayoutMedianMs": 2.42,
-              "workLayoutP95Ms": 2.68,
-              "workLayoutMaxMs": 4.14,
+              "workMedianMs": 0.3,
+              "workP95Ms": 0.34,
+              "workMaxMs": 0.42,
+              "workLayoutMedianMs": 2,
+              "workLayoutP95Ms": 2.18,
+              "workLayoutMaxMs": 2.52,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -1397,17 +1397,17 @@
             {
               "fpsMedian": 60,
               "frameMedianMs": 16.66,
-              "frameP95Ms": 17.38,
+              "frameP95Ms": 17.42,
               "frameMaxMs": 17.7,
-              "over16_7Pct": 14.7,
+              "over16_7Pct": 16.3,
               "droppedPct": 0,
               "fpsMean": 60,
-              "workMedianMs": 0.32,
+              "workMedianMs": 0.3,
               "workP95Ms": 0.36,
-              "workMaxMs": 0.44,
-              "workLayoutMedianMs": 2.08,
-              "workLayoutP95Ms": 2.28,
-              "workLayoutMaxMs": 2.46,
+              "workMaxMs": 0.42,
+              "workLayoutMedianMs": 2.4,
+              "workLayoutP95Ms": 2.64,
+              "workLayoutMaxMs": 4.22,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -1426,17 +1426,17 @@
           "best": {
             "fpsMedian": 60,
             "frameMedianMs": 16.66,
-            "frameP95Ms": 17.2,
-            "frameMaxMs": 17.7,
-            "over16_7Pct": 13.7,
+            "frameP95Ms": 17.38,
+            "frameMaxMs": 17.6,
+            "over16_7Pct": 15.7,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 0.32,
-            "workP95Ms": 0.38,
-            "workMaxMs": 0.48,
+            "workP95Ms": 0.4,
+            "workMaxMs": 0.44,
             "workLayoutMedianMs": 2.42,
             "workLayoutP95Ms": 2.78,
-            "workLayoutMaxMs": 5.92,
+            "workLayoutMaxMs": 6.24,
             "longTasks": "unsupported",
             "longTaskMaxMs": null,
             "perFrame": {
@@ -1449,17 +1449,17 @@
             {
               "fpsMedian": 60,
               "frameMedianMs": 16.66,
-              "frameP95Ms": 17.2,
-              "frameMaxMs": 17.7,
-              "over16_7Pct": 13.7,
+              "frameP95Ms": 17.38,
+              "frameMaxMs": 17.6,
+              "over16_7Pct": 15.7,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.32,
-              "workP95Ms": 0.38,
-              "workMaxMs": 0.48,
+              "workP95Ms": 0.4,
+              "workMaxMs": 0.44,
               "workLayoutMedianMs": 2.42,
               "workLayoutP95Ms": 2.78,
-              "workLayoutMaxMs": 5.92,
+              "workLayoutMaxMs": 6.24,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -1471,17 +1471,17 @@
             {
               "fpsMedian": 60,
               "frameMedianMs": 16.66,
-              "frameP95Ms": 17.34,
-              "frameMaxMs": 17.6,
-              "over16_7Pct": 13.3,
+              "frameP95Ms": 17.42,
+              "frameMaxMs": 17.7,
+              "over16_7Pct": 14,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.32,
               "workP95Ms": 0.38,
-              "workMaxMs": 0.48,
-              "workLayoutMedianMs": 2.1,
-              "workLayoutP95Ms": 2.32,
-              "workLayoutMaxMs": 2.52,
+              "workMaxMs": 0.46,
+              "workLayoutMedianMs": 2.06,
+              "workLayoutP95Ms": 2.34,
+              "workLayoutMaxMs": 2.7,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -1500,17 +1500,17 @@
           "best": {
             "fpsMedian": 60,
             "frameMedianMs": 16.66,
-            "frameP95Ms": 17.18,
+            "frameP95Ms": 17.4,
             "frameMaxMs": 17.7,
             "over16_7Pct": 16.7,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 0.16,
-            "workP95Ms": 0.24,
-            "workMaxMs": 0.3,
-            "workLayoutMedianMs": 0.52,
-            "workLayoutP95Ms": 1.12,
-            "workLayoutMaxMs": 1.3,
+            "workP95Ms": 0.26,
+            "workMaxMs": 0.44,
+            "workLayoutMedianMs": 0.56,
+            "workLayoutP95Ms": 1.18,
+            "workLayoutMaxMs": 2.3,
             "longTasks": "unsupported",
             "longTaskMaxMs": null,
             "perFrame": {
@@ -1523,17 +1523,17 @@
             {
               "fpsMedian": 60,
               "frameMedianMs": 16.66,
-              "frameP95Ms": 17.18,
+              "frameP95Ms": 17.4,
               "frameMaxMs": 17.7,
               "over16_7Pct": 16.7,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.16,
-              "workP95Ms": 0.24,
-              "workMaxMs": 0.3,
-              "workLayoutMedianMs": 0.52,
-              "workLayoutP95Ms": 1.12,
-              "workLayoutMaxMs": 1.3,
+              "workP95Ms": 0.26,
+              "workMaxMs": 0.44,
+              "workLayoutMedianMs": 0.56,
+              "workLayoutP95Ms": 1.18,
+              "workLayoutMaxMs": 2.3,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -1545,17 +1545,17 @@
             {
               "fpsMedian": 60,
               "frameMedianMs": 16.66,
-              "frameP95Ms": 17.38,
+              "frameP95Ms": 17.46,
               "frameMaxMs": 17.7,
               "over16_7Pct": 16,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 0.16,
-              "workP95Ms": 0.28,
-              "workMaxMs": 0.5,
-              "workLayoutMedianMs": 0.56,
-              "workLayoutP95Ms": 1.24,
-              "workLayoutMaxMs": 1.46,
+              "workP95Ms": 0.26,
+              "workMaxMs": 0.38,
+              "workLayoutMedianMs": 0.54,
+              "workLayoutP95Ms": 1.14,
+              "workLayoutMaxMs": 1.44,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -2067,8 +2067,8 @@
         "columns": 30
       },
       "mount": {
-        "syncMs": 12,
-        "firstPaintMs": 30,
+        "syncMs": 14,
+        "firstPaintMs": 31,
         "scaled": true,
         "ratio": 8.001583356255157,
         "physicalHeight": 3999968,
@@ -2181,16 +2181,16 @@
             "fpsMedian": 58.8,
             "frameMedianMs": 17,
             "frameP95Ms": 17,
-            "frameMaxMs": 18,
-            "over16_7Pct": 63.7,
-            "droppedPct": 0,
+            "frameMaxMs": 28,
+            "over16_7Pct": 64.7,
+            "droppedPct": 0.3,
             "fpsMean": 60,
             "workMedianMs": 0,
             "workP95Ms": 1,
             "workMaxMs": 1,
             "workLayoutMedianMs": 1,
             "workLayoutP95Ms": 1,
-            "workLayoutMaxMs": 2,
+            "workLayoutMaxMs": 1,
             "longTasks": "unsupported",
             "longTaskMaxMs": null,
             "perFrame": {
@@ -2204,16 +2204,16 @@
               "fpsMedian": 58.8,
               "frameMedianMs": 17,
               "frameP95Ms": 17,
-              "frameMaxMs": 18,
-              "over16_7Pct": 63.7,
-              "droppedPct": 0,
+              "frameMaxMs": 28,
+              "over16_7Pct": 64.7,
+              "droppedPct": 0.3,
               "fpsMean": 60,
               "workMedianMs": 0,
               "workP95Ms": 1,
               "workMaxMs": 1,
               "workLayoutMedianMs": 1,
               "workLayoutP95Ms": 1,
-              "workLayoutMaxMs": 2,
+              "workLayoutMaxMs": 1,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -2227,15 +2227,15 @@
               "frameMedianMs": 17,
               "frameP95Ms": 17,
               "frameMaxMs": 18,
-              "over16_7Pct": 64.7,
+              "over16_7Pct": 64,
               "droppedPct": 0,
               "fpsMean": 60,
-              "workMedianMs": 0,
+              "workMedianMs": 1,
               "workP95Ms": 1,
               "workMaxMs": 1,
               "workLayoutMedianMs": 1,
               "workLayoutP95Ms": 1,
-              "workLayoutMaxMs": 2,
+              "workLayoutMaxMs": 1,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -2255,8 +2255,8 @@
             "fpsMedian": 58.8,
             "frameMedianMs": 17,
             "frameP95Ms": 17,
-            "frameMaxMs": 18,
-            "over16_7Pct": 64.7,
+            "frameMaxMs": 20,
+            "over16_7Pct": 64.3,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 1,
@@ -2264,7 +2264,7 @@
             "workMaxMs": 1,
             "workLayoutMedianMs": 3,
             "workLayoutP95Ms": 3,
-            "workLayoutMaxMs": 3,
+            "workLayoutMaxMs": 14,
             "longTasks": "unsupported",
             "longTaskMaxMs": null,
             "perFrame": {
@@ -2278,8 +2278,8 @@
               "fpsMedian": 58.8,
               "frameMedianMs": 17,
               "frameP95Ms": 17,
-              "frameMaxMs": 18,
-              "over16_7Pct": 64.7,
+              "frameMaxMs": 20,
+              "over16_7Pct": 64.3,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 1,
@@ -2287,7 +2287,7 @@
               "workMaxMs": 1,
               "workLayoutMedianMs": 3,
               "workLayoutP95Ms": 3,
-              "workLayoutMaxMs": 3,
+              "workLayoutMaxMs": 14,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -2299,17 +2299,17 @@
             {
               "fpsMedian": 58.8,
               "frameMedianMs": 17,
-              "frameP95Ms": 18,
-              "frameMaxMs": 29,
-              "over16_7Pct": 63.7,
-              "droppedPct": 0.3,
+              "frameP95Ms": 17,
+              "frameMaxMs": 18,
+              "over16_7Pct": 64.7,
+              "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 1,
               "workP95Ms": 1,
               "workMaxMs": 1,
-              "workLayoutMedianMs": 3,
+              "workLayoutMedianMs": 2,
               "workLayoutP95Ms": 3,
-              "workLayoutMaxMs": 12,
+              "workLayoutMaxMs": 3,
               "longTasks": "unsupported",
               "longTaskMaxMs": null,
               "perFrame": {
@@ -2330,7 +2330,7 @@
             "frameMedianMs": 17,
             "frameP95Ms": 17,
             "frameMaxMs": 18,
-            "over16_7Pct": 64.3,
+            "over16_7Pct": 64,
             "droppedPct": 0,
             "fpsMean": 60,
             "workMedianMs": 1,
@@ -2353,7 +2353,7 @@
               "frameMedianMs": 17,
               "frameP95Ms": 17,
               "frameMaxMs": 18,
-              "over16_7Pct": 64.3,
+              "over16_7Pct": 64,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 1,
@@ -2381,7 +2381,7 @@
               "workMedianMs": 1,
               "workP95Ms": 1,
               "workMaxMs": 1,
-              "workLayoutMedianMs": 3,
+              "workLayoutMedianMs": 2,
               "workLayoutP95Ms": 3,
               "workLayoutMaxMs": 3,
               "longTasks": "unsupported",
@@ -2402,7 +2402,7 @@
           "best": {
             "fpsMedian": 58.8,
             "frameMedianMs": 17,
-            "frameP95Ms": 17,
+            "frameP95Ms": 18,
             "frameMaxMs": 18,
             "over16_7Pct": 63.7,
             "droppedPct": 0,
@@ -2425,7 +2425,7 @@
             {
               "fpsMedian": 58.8,
               "frameMedianMs": 17,
-              "frameP95Ms": 17,
+              "frameP95Ms": 18,
               "frameMaxMs": 18,
               "over16_7Pct": 63.7,
               "droppedPct": 0,
@@ -2447,9 +2447,9 @@
             {
               "fpsMedian": 58.8,
               "frameMedianMs": 17,
-              "frameP95Ms": 17,
+              "frameP95Ms": 18,
               "frameMaxMs": 18,
-              "over16_7Pct": 64.7,
+              "over16_7Pct": 61.7,
               "droppedPct": 0,
               "fpsMean": 60,
               "workMedianMs": 1,

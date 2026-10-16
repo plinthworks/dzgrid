@@ -1493,8 +1493,8 @@
   ],
   "coldWarm": {
     "coldMs": 0.09,
-    "warmUs": 43.1,
-    "formatToPartsUs": 2.81,
+    "warmUs": 42.5,
+    "formatToPartsUs": 2.75,
     "k": 130000
   },
   "sweep": {
@@ -1508,8 +1508,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 49.3,
-        "totalMs": 378
+        "usPerCall": 49.4,
+        "totalMs": 379
       },
       "Europe/Dublin": {
         "lastTo": 1924992000000,
@@ -1519,8 +1519,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 49.1,
-        "totalMs": 377
+        "usPerCall": 48,
+        "totalMs": 368
       },
       "America/Los_Angeles": {
         "lastTo": 1925020800000,
@@ -1530,7 +1530,7 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 48.9,
+        "usPerCall": 48.8,
         "totalMs": 375
       },
       "America/Sao_Paulo": {
@@ -1541,8 +1541,8 @@
           "25": 10
         },
         "anomalies": [],
-        "usPerCall": 48.4,
-        "totalMs": 371
+        "usPerCall": 47.3,
+        "totalMs": 363
       },
       "America/Havana": {
         "lastTo": 1925010000000,
@@ -1552,8 +1552,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 48.9,
-        "totalMs": 375
+        "usPerCall": 48,
+        "totalMs": 368
       },
       "Pacific/Apia": {
         "lastTo": 1924945200000,
@@ -1570,8 +1570,8 @@
             "from": 1325239200000
           }
         ],
-        "usPerCall": 48.6,
-        "totalMs": 373
+        "usPerCall": 47.4,
+        "totalMs": 364
       },
       "Australia/Lord_Howe": {
         "lastTo": 1924952400000,
@@ -1581,8 +1581,8 @@
           "23.5": 21
         },
         "anomalies": [],
-        "usPerCall": 49.5,
-        "totalMs": 380
+        "usPerCall": 47.9,
+        "totalMs": 367
       },
       "Asia/Kolkata": {
         "lastTo": 1924972200000,
@@ -1590,8 +1590,8 @@
           "24": 7670
         },
         "anomalies": [],
-        "usPerCall": 48.3,
-        "totalMs": 370
+        "usPerCall": 46.9,
+        "totalMs": 360
       },
       "Africa/Algiers": {
         "lastTo": 1924988400000,
@@ -1599,8 +1599,8 @@
           "24": 7670
         },
         "anomalies": [],
-        "usPerCall": 47.7,
-        "totalMs": 366
+        "usPerCall": 47,
+        "totalMs": 360
       },
       "Pacific/Auckland": {
         "lastTo": 1924945200000,
@@ -1610,8 +1610,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 48.7,
-        "totalMs": 374
+        "usPerCall": 47.3,
+        "totalMs": 363
       },
       "Asia/Tehran": {
         "lastTo": 1924979400000,
@@ -1621,8 +1621,8 @@
           "25": 13
         },
         "anomalies": [],
-        "usPerCall": 48,
-        "totalMs": 368
+        "usPerCall": 46.6,
+        "totalMs": 358
       },
       "Pacific/Chatham": {
         "lastTo": 1924942500000,
@@ -1632,8 +1632,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 48.7,
-        "totalMs": 374
+        "usPerCall": 47.6,
+        "totalMs": 365
       }
     }
   },
@@ -1645,11 +1645,11 @@
         "sensitivity": "base",
         "numeric": false,
         "unique": 86013,
-        "ms": 128.3,
+        "ms": 119,
         "runs": [
-          129,
-          128,
-          128
+          120,
+          119,
+          119
         ],
         "order": "12e4f385"
       },
@@ -1658,11 +1658,11 @@
         "sensitivity": "base",
         "numeric": true,
         "unique": 86013,
-        "ms": 128.9,
+        "ms": 119.8,
         "runs": [
-          131,
-          129,
-          126
+          120,
+          121,
+          118
         ],
         "order": "ae31a3"
       },
@@ -1671,11 +1671,11 @@
         "sensitivity": "accent",
         "numeric": false,
         "unique": 86013,
-        "ms": 120.4,
+        "ms": 112.9,
         "runs": [
-          120,
-          120,
-          121
+          113,
+          112,
+          115
         ],
         "order": "8b8651"
       },
@@ -1684,11 +1684,11 @@
         "sensitivity": "accent",
         "numeric": true,
         "unique": 86013,
-        "ms": 121.4,
+        "ms": 113.6,
         "runs": [
-          121,
-          121,
-          123
+          113,
+          114,
+          117
         ],
         "order": "a25063cf"
       },
@@ -1697,11 +1697,11 @@
         "sensitivity": "variant",
         "numeric": false,
         "unique": 86013,
-        "ms": 120.5,
+        "ms": 117.4,
         "runs": [
-          122,
-          119,
-          120
+          117,
+          120,
+          115
         ],
         "order": "63f14191"
       },
@@ -1710,11 +1710,11 @@
         "sensitivity": "variant",
         "numeric": true,
         "unique": 86013,
-        "ms": 120.4,
+        "ms": 113.2,
         "runs": [
-          120,
-          120,
-          121
+          114,
+          112,
+          113
         ],
         "order": "71e449cf"
       },
@@ -1723,11 +1723,11 @@
         "sensitivity": "base",
         "numeric": false,
         "unique": 99632,
-        "ms": 158.3,
+        "ms": 146.5,
         "runs": [
-          158,
-          153,
-          160
+          146,
+          149,
+          147
         ],
         "order": "a0945709"
       },
@@ -1736,11 +1736,11 @@
         "sensitivity": "base",
         "numeric": true,
         "unique": 99632,
-        "ms": 154.5,
+        "ms": 147.4,
         "runs": [
-          156,
-          154,
-          155
+          149,
+          147,
+          144
         ],
         "order": "9298d04f"
       },
@@ -1749,11 +1749,11 @@
         "sensitivity": "accent",
         "numeric": false,
         "unique": 99632,
-        "ms": 156.3,
+        "ms": 143.4,
         "runs": [
-          156,
-          157,
-          156
+          142,
+          143,
+          144
         ],
         "order": "8c6bb5c5"
       },
@@ -1762,11 +1762,11 @@
         "sensitivity": "accent",
         "numeric": true,
         "unique": 99632,
-        "ms": 156.5,
+        "ms": 144.8,
         "runs": [
-          152,
-          156,
-          172
+          143,
+          145,
+          145
         ],
         "order": "3a7359e3"
       },
@@ -1775,11 +1775,11 @@
         "sensitivity": "variant",
         "numeric": false,
         "unique": 99632,
-        "ms": 170.7,
+        "ms": 143.5,
         "runs": [
-          159,
-          171,
-          218
+          143,
+          143,
+          144
         ],
         "order": "6a2d63df"
       },
@@ -1788,48 +1788,48 @@
         "sensitivity": "variant",
         "numeric": true,
         "unique": 99632,
-        "ms": 163.7,
+        "ms": 143.3,
         "runs": [
-          170,
-          164,
-          158
+          141,
+          143,
+          144
         ],
         "order": "e710fbad"
       }
     ],
     "methods": {
       "fr": {
-        "collatorCompareOnStrings": 120.6,
-        "arrowWrapper": 128.7,
-        "indexSortUint32": 138.1,
+        "collatorCompareOnStrings": 117.2,
+        "arrowWrapper": 123.1,
+        "indexSortUint32": 125.5,
         "rankKeysAllUnique": {
-          "keysMs": 128,
-          "sortMs": 18
-        },
-        "rankKeys1000Distinct": {
-          "keysMs": 2,
-          "sortMs": 14
-        },
-        "directOn1000Distinct": 83.4,
-        "localeCompare": 3045.9,
-        "codeUnitBaseline": 28.3,
-        "collatorConstructUs": 2
-      },
-      "ar": {
-        "collatorCompareOnStrings": 157.2,
-        "arrowWrapper": 163,
-        "indexSortUint32": 168.4,
-        "rankKeysAllUnique": {
-          "keysMs": 180,
+          "keysMs": 116,
           "sortMs": 17
         },
         "rankKeys1000Distinct": {
           "keysMs": 2,
-          "sortMs": 14
+          "sortMs": 13
         },
-        "directOn1000Distinct": 98.6,
-        "localeCompare": 3147.6,
-        "codeUnitBaseline": 34,
+        "directOn1000Distinct": 79.2,
+        "localeCompare": 2991.7,
+        "codeUnitBaseline": 27.3,
+        "collatorConstructUs": 2
+      },
+      "ar": {
+        "collatorCompareOnStrings": 145.2,
+        "arrowWrapper": 153.2,
+        "indexSortUint32": 157.8,
+        "rankKeysAllUnique": {
+          "keysMs": 167,
+          "sortMs": 17
+        },
+        "rankKeys1000Distinct": {
+          "keysMs": 2,
+          "sortMs": 16
+        },
+        "directOn1000Distinct": 95.4,
+        "localeCompare": 3086.3,
+        "codeUnitBaseline": 32.7,
         "collatorConstructUs": 2
       }
     },

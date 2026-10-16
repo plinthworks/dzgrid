@@ -31,35 +31,68 @@ const TYPES = {
   '.json': 'application/json',
 };
 
+async function handle(req, res) {
+  let path;
+  try {
+    path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname));
+  } catch {
+    return res.writeHead(400).end();
+  }
+  // Control characters have no place in a path, and would end up in a header.
+  if (/[\u0000-\u001f\u007f]/.test(path)) return res.writeHead(400).end();
+
+  const file = join(ROOT, path);
+  if (!file.startsWith(ROOT)) return res.writeHead(404).end();
+
+  let target = file;
+  try {
+    if ((await stat(target)).isDirectory()) target = join(target, 'index.html');
+    await stat(target);
+  } catch {
+    // A .js import that only exists as .ts: same origin, same path, never `//host`.
+    if (path.endsWith('.js') && path.startsWith('/') && !path.startsWith('//')) {
+      try {
+        await stat(join(ROOT, path.replace(/\.js$/, '.ts')));
+        res.writeHead(302, { location: path.replace(/\.js$/, '.ts') });
+        return res.end();
+      } catch {
+        /* fall through to 404 */
+      }
+    }
+    return res.writeHead(404).end();
+  }
+
+  let body = await readFile(target);
+  if (extname(target) === '.ts') {
+    // A syntax error is the spike's bug, not a missing file: say so.
+    try {
+      const out = await transform(body.toString(), { loader: 'ts', format: 'esm', target: 'es2022', sourcefile: target });
+      // Imports inside the core end in .js (NodeNext style); serve them from the .ts.
+      body = Buffer.from(out.code.replace(/(from\s+['"]\.{1,2}\/[^'"]+)\.js(['"])/g, '$1.ts$2'));
+    } catch (err) {
+      console.error(`[kit] cannot compile ${target.slice(ROOT.length)}: ${err.message}`);
+      res.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
+      return res.end(String(err.message));
+    }
+  }
+  res.writeHead(200, { 'content-type': TYPES[extname(target)] ?? 'application/octet-stream', 'cache-control': 'no-store' });
+  res.end(body);
+}
+
 /**
  * Serves the repository root, so a page can reach both its spike folder and
  * the packages. `url(path)` is relative to the calling spike's folder.
  */
 export async function serve(spikeUrl) {
   const spikeDir = dirname(fileURLToPath(spikeUrl));
-  const server = createServer(async (req, res) => {
-    try {
-      const path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname));
-      let file = join(ROOT, path);
-      if (!file.startsWith(ROOT)) throw new Error('outside');
-      if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
-      let body = await readFile(file);
-      if (extname(file) === '.ts') {
-        // Imports inside the core end in .js (NodeNext style); serve them from the .ts.
-        const out = await transform(body.toString(), { loader: 'ts', format: 'esm', target: 'es2022' });
-        body = Buffer.from(out.code.replace(/(from\s+['"]\.{1,2}\/[^'"]+)\.js(['"])/g, '$1.ts$2'));
-      }
-      res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-store' });
-      res.end(body);
-    } catch {
-      // A .js import that only exists as .ts.
-      const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-      if (path.endsWith('.js')) {
-        res.writeHead(302, { location: path.replace(/\.js$/, '.ts') });
-        return res.end();
-      }
-      res.writeHead(404).end();
-    }
+  const server = createServer((req, res) => {
+    // One guard around everything: a request this server cannot read must
+    // never crash it — a spike may be measuring in another tab.
+    handle(req, res).catch((err) => {
+      console.error(`[kit] ${req.url}: ${err?.message ?? err}`);
+      if (!res.headersSent) res.writeHead(500);
+      res.end();
+    });
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;

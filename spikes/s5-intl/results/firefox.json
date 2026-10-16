@@ -1493,7 +1493,7 @@
   ],
   "coldWarm": {
     "coldMs": 0,
-    "warmUs": 18,
+    "warmUs": 17,
     "formatToPartsUs": 1,
     "k": 130000
   },
@@ -1508,8 +1508,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 22.3,
-        "totalMs": 171
+        "usPerCall": 22.2,
+        "totalMs": 170
       },
       "Europe/Dublin": {
         "lastTo": 1924992000000,
@@ -1519,8 +1519,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 22.3,
-        "totalMs": 171
+        "usPerCall": 21.4,
+        "totalMs": 164
       },
       "America/Los_Angeles": {
         "lastTo": 1925020800000,
@@ -1530,8 +1530,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 22.2,
-        "totalMs": 170
+        "usPerCall": 21.8,
+        "totalMs": 167
       },
       "America/Sao_Paulo": {
         "lastTo": 1925002800000,
@@ -1541,8 +1541,8 @@
           "25": 10
         },
         "anomalies": [],
-        "usPerCall": 21.1,
-        "totalMs": 162
+        "usPerCall": 20.6,
+        "totalMs": 158
       },
       "America/Havana": {
         "lastTo": 1925010000000,
@@ -1552,8 +1552,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 22.2,
-        "totalMs": 170
+        "usPerCall": 21.6,
+        "totalMs": 166
       },
       "Pacific/Apia": {
         "lastTo": 1924945200000,
@@ -1570,8 +1570,8 @@
             "from": 1325239200000
           }
         ],
-        "usPerCall": 21.3,
-        "totalMs": 163
+        "usPerCall": 20.3,
+        "totalMs": 156
       },
       "Australia/Lord_Howe": {
         "lastTo": 1924952400000,
@@ -1581,8 +1581,8 @@
           "23.5": 21
         },
         "anomalies": [],
-        "usPerCall": 22.7,
-        "totalMs": 174
+        "usPerCall": 21.6,
+        "totalMs": 166
       },
       "Asia/Kolkata": {
         "lastTo": 1924972200000,
@@ -1590,8 +1590,8 @@
           "24": 7670
         },
         "anomalies": [],
-        "usPerCall": 21.4,
-        "totalMs": 164
+        "usPerCall": 20.2,
+        "totalMs": 155
       },
       "Africa/Algiers": {
         "lastTo": 1924988400000,
@@ -1599,8 +1599,8 @@
           "24": 7670
         },
         "anomalies": [],
-        "usPerCall": 21.5,
-        "totalMs": 165
+        "usPerCall": 20.7,
+        "totalMs": 159
       },
       "Pacific/Auckland": {
         "lastTo": 1924945200000,
@@ -1610,8 +1610,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 23.1,
-        "totalMs": 177
+        "usPerCall": 21.9,
+        "totalMs": 168
       },
       "Asia/Tehran": {
         "lastTo": 1924979400000,
@@ -1621,8 +1621,8 @@
           "25": 13
         },
         "anomalies": [],
-        "usPerCall": 22,
-        "totalMs": 169
+        "usPerCall": 20.6,
+        "totalMs": 158
       },
       "Pacific/Chatham": {
         "lastTo": 1924942500000,
@@ -1632,8 +1632,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 22.4,
-        "totalMs": 172
+        "usPerCall": 22.2,
+        "totalMs": 170
       }
     }
   },
@@ -1645,11 +1645,11 @@
         "sensitivity": "base",
         "numeric": false,
         "unique": 86013,
-        "ms": 107,
+        "ms": 106,
         "runs": [
-          107,
-          104,
-          107
+          103,
+          106,
+          109
         ],
         "order": "12e4f385"
       },
@@ -1658,11 +1658,11 @@
         "sensitivity": "base",
         "numeric": true,
         "unique": 86013,
-        "ms": 104,
+        "ms": 101,
         "runs": [
-          104,
-          104,
-          104
+          100,
+          101,
+          102
         ],
         "order": "ae31a3"
       },
@@ -1671,11 +1671,11 @@
         "sensitivity": "accent",
         "numeric": false,
         "unique": 86013,
-        "ms": 97,
+        "ms": 96,
         "runs": [
-          95,
           97,
-          100
+          95,
+          96
         ],
         "order": "8b8651"
       },
@@ -1684,11 +1684,11 @@
         "sensitivity": "accent",
         "numeric": true,
         "unique": 86013,
-        "ms": 99,
+        "ms": 98,
         "runs": [
-          99,
-          99,
-          97
+          97,
+          98,
+          100
         ],
         "order": "a25063cf"
       },
@@ -1697,11 +1697,11 @@
         "sensitivity": "variant",
         "numeric": false,
         "unique": 86013,
-        "ms": 98,
+        "ms": 97,
         "runs": [
-          96,
-          98,
-          100
+          97,
+          99,
+          97
         ],
         "order": "63f14191"
       },
@@ -1710,11 +1710,11 @@
         "sensitivity": "variant",
         "numeric": true,
         "unique": 86013,
-        "ms": 100,
+        "ms": 97,
         "runs": [
-          104,
-          100,
-          99
+          97,
+          98,
+          97
         ],
         "order": "71e449cf"
       },
@@ -1723,11 +1723,11 @@
         "sensitivity": "base",
         "numeric": false,
         "unique": 99632,
-        "ms": 179,
+        "ms": 203,
         "runs": [
-          179,
-          175,
-          184
+          203,
+          205,
+          202
         ],
         "order": "a0945709"
       },
@@ -1736,11 +1736,11 @@
         "sensitivity": "base",
         "numeric": true,
         "unique": 99632,
-        "ms": 198,
+        "ms": 206,
         "runs": [
-          184,
-          198,
-          205
+          206,
+          203,
+          208
         ],
         "order": "9298d04f"
       },
@@ -1749,11 +1749,11 @@
         "sensitivity": "accent",
         "numeric": false,
         "unique": 99632,
-        "ms": 190,
+        "ms": 187,
         "runs": [
-          202,
-          186,
-          190
+          195,
+          162,
+          187
         ],
         "order": "8c6bb5c5"
       },
@@ -1762,11 +1762,11 @@
         "sensitivity": "accent",
         "numeric": true,
         "unique": 99632,
-        "ms": 187,
+        "ms": 182,
         "runs": [
           182,
-          187,
-          193
+          185,
+          177
         ],
         "order": "3a7359e3"
       },
@@ -1775,11 +1775,11 @@
         "sensitivity": "variant",
         "numeric": false,
         "unique": 99632,
-        "ms": 182,
+        "ms": 183,
         "runs": [
-          185,
+          184,
           182,
-          182
+          183
         ],
         "order": "6a2d63df"
       },
@@ -1788,11 +1788,11 @@
         "sensitivity": "variant",
         "numeric": true,
         "unique": 99632,
-        "ms": 184,
+        "ms": 174,
         "runs": [
-          182,
-          184,
-          192
+          169,
+          174,
+          174
         ],
         "order": "e710fbad"
       }
@@ -1800,37 +1800,37 @@
     "methods": {
       "fr": {
         "collatorCompareOnStrings": 97,
-        "arrowWrapper": 109,
-        "indexSortUint32": 117,
+        "arrowWrapper": 97,
+        "indexSortUint32": 111,
         "rankKeysAllUnique": {
-          "keysMs": 111,
+          "keysMs": 112,
           "sortMs": 18
         },
         "rankKeys1000Distinct": {
-          "keysMs": 5,
-          "sortMs": 13
+          "keysMs": 4,
+          "sortMs": 14
         },
-        "directOn1000Distinct": 65,
-        "localeCompare": 1066,
-        "codeUnitBaseline": 16,
+        "directOn1000Distinct": 66,
+        "localeCompare": 1102,
+        "codeUnitBaseline": 17,
         "collatorConstructUs": 0
       },
       "ar": {
-        "collatorCompareOnStrings": 193,
+        "collatorCompareOnStrings": 185,
         "arrowWrapper": 180,
-        "indexSortUint32": 212,
+        "indexSortUint32": 226,
         "rankKeysAllUnique": {
-          "keysMs": 190,
-          "sortMs": 18
+          "keysMs": 186,
+          "sortMs": 19
         },
         "rankKeys1000Distinct": {
           "keysMs": 4,
           "sortMs": 13
         },
-        "directOn1000Distinct": 85,
-        "localeCompare": 929,
-        "codeUnitBaseline": 13,
-        "collatorConstructUs": 0
+        "directOn1000Distinct": 84,
+        "localeCompare": 926,
+        "codeUnitBaseline": 14,
+        "collatorConstructUs": 1
       }
     },
     "samples": {

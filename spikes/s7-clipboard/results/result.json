@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-16T13:42:16.117Z",
+  "at": "2026-10-16T14:13:10.086Z",
   "node": {
     "roundTrip": {
       "iterations": 20000,
@@ -8,8 +8,8 @@
     "decodeCases": [],
     "large": {
       "bytes": 2726700,
-      "decodeMs": 44,
-      "encodeMs": 20,
+      "decodeMs": 42,
+      "encodeMs": 19,
       "same": true
     }
   },
@@ -1149,7 +1149,7 @@
     "decodeCasesFailed": [],
     "large": {
       "bytes": 2726700,
-      "decodeMs": 18,
+      "decodeMs": 17,
       "same": true
     },
     "granted": {
@@ -1575,7 +1575,7 @@
     "decodeCasesFailed": [],
     "large": {
       "bytes": 2726700,
-      "decodeMs": 18,
+      "decodeMs": 19,
       "same": true
     },
     "granted": {

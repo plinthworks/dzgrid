@@ -1516,8 +1516,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 22.8,
-        "totalMs": 175
+        "usPerCall": 22.7,
+        "totalMs": 174
       },
       "Europe/Dublin": {
         "lastTo": 1924992000000,
@@ -1527,8 +1527,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 22.4,
-        "totalMs": 172
+        "usPerCall": 21.3,
+        "totalMs": 163
       },
       "America/Los_Angeles": {
         "lastTo": 1925020800000,
@@ -1538,8 +1538,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 22.7,
-        "totalMs": 174
+        "usPerCall": 23.1,
+        "totalMs": 177
       },
       "America/Sao_Paulo": {
         "lastTo": 1925002800000,
@@ -1549,8 +1549,8 @@
           "25": 10
         },
         "anomalies": [],
-        "usPerCall": 22.2,
-        "totalMs": 170
+        "usPerCall": 22.9,
+        "totalMs": 176
       },
       "America/Havana": {
         "lastTo": 1925010000000,
@@ -1560,8 +1560,8 @@
           "25": 21
         },
         "anomalies": [],
-        "usPerCall": 23.3,
-        "totalMs": 179
+        "usPerCall": 22.7,
+        "totalMs": 174
       },
       "Pacific/Apia": {
         "lastTo": 1924945200000,
@@ -1578,8 +1578,8 @@
             "from": 1325239200000
           }
         ],
-        "usPerCall": 22,
-        "totalMs": 169
+        "usPerCall": 21.6,
+        "totalMs": 166
       },
       "Australia/Lord_Howe": {
         "lastTo": 1924952400000,
@@ -1589,8 +1589,8 @@
           "23.5": 21
         },
         "anomalies": [],
-        "usPerCall": 23.3,
-        "totalMs": 179
+        "usPerCall": 22.7,
+        "totalMs": 174
       },
       "Asia/Kolkata": {
         "lastTo": 1924972200000,
@@ -1598,8 +1598,8 @@
           "24": 7670
         },
         "anomalies": [],
-        "usPerCall": 21.5,
-        "totalMs": 165
+        "usPerCall": 21.4,
+        "totalMs": 164
       },
       "Africa/Algiers": {
         "lastTo": 1924988400000,
@@ -1607,8 +1607,8 @@
           "24": 7670
         },
         "anomalies": [],
-        "usPerCall": 21.4,
-        "totalMs": 164
+        "usPerCall": 21.5,
+        "totalMs": 165
       },
       "Pacific/Auckland": {
         "lastTo": 1924945200000,
@@ -1629,8 +1629,8 @@
           "25": 13
         },
         "anomalies": [],
-        "usPerCall": 22.2,
-        "totalMs": 170
+        "usPerCall": 22,
+        "totalMs": 169
       },
       "Pacific/Chatham": {
         "lastTo": 1924942500000,
@@ -1653,11 +1653,11 @@
         "sensitivity": "base",
         "numeric": false,
         "unique": 86013,
-        "ms": 100,
+        "ms": 97,
         "runs": [
-          104,
-          97,
-          100
+          100,
+          96,
+          97
         ],
         "order": "12e4f385"
       },
@@ -1666,11 +1666,11 @@
         "sensitivity": "base",
         "numeric": true,
         "unique": 86013,
-        "ms": 96,
+        "ms": 98,
         "runs": [
           97,
-          96,
-          96
+          98,
+          104
         ],
         "order": "ae31a3"
       },
@@ -1679,11 +1679,11 @@
         "sensitivity": "accent",
         "numeric": false,
         "unique": 86013,
-        "ms": 95,
+        "ms": 96,
         "runs": [
-          95,
-          94,
-          96
+          96,
+          96,
+          98
         ],
         "order": "8b8651"
       },
@@ -1692,11 +1692,11 @@
         "sensitivity": "accent",
         "numeric": true,
         "unique": 86013,
-        "ms": 98,
+        "ms": 99,
         "runs": [
           98,
-          101,
-          98
+          102,
+          99
         ],
         "order": "a25063cf"
       },
@@ -1705,11 +1705,11 @@
         "sensitivity": "variant",
         "numeric": false,
         "unique": 86013,
-        "ms": 91,
+        "ms": 85,
         "runs": [
+          85,
           84,
-          96,
-          91
+          87
         ],
         "order": "63f14191"
       },
@@ -1718,11 +1718,11 @@
         "sensitivity": "variant",
         "numeric": true,
         "unique": 86013,
-        "ms": 98,
+        "ms": 99,
         "runs": [
-          96,
+          102,
           98,
-          101
+          99
         ],
         "order": "71e449cf"
       },
@@ -1731,11 +1731,11 @@
         "sensitivity": "base",
         "numeric": false,
         "unique": 99632,
-        "ms": 143,
+        "ms": 147,
         "runs": [
-          142,
-          143,
-          145
+          148,
+          147,
+          146
         ],
         "order": "a0945709"
       },
@@ -1744,10 +1744,10 @@
         "sensitivity": "base",
         "numeric": true,
         "unique": 99632,
-        "ms": 149,
+        "ms": 147,
         "runs": [
-          150,
-          144,
+          138,
+          147,
           149
         ],
         "order": "9298d04f"
@@ -1757,11 +1757,11 @@
         "sensitivity": "accent",
         "numeric": false,
         "unique": 99632,
-        "ms": 145,
+        "ms": 148,
         "runs": [
-          140,
-          150,
-          145
+          148,
+          149,
+          148
         ],
         "order": "8c6bb5c5"
       },
@@ -1770,11 +1770,11 @@
         "sensitivity": "accent",
         "numeric": true,
         "unique": 99632,
-        "ms": 145,
+        "ms": 144,
         "runs": [
-          141,
+          144,
           145,
-          150
+          143
         ],
         "order": "3a7359e3"
       },
@@ -1783,11 +1783,11 @@
         "sensitivity": "variant",
         "numeric": false,
         "unique": 99632,
-        "ms": 142,
+        "ms": 146,
         "runs": [
-          141,
-          144,
-          142
+          146,
+          146,
+          146
         ],
         "order": "6a2d63df"
       },
@@ -1798,47 +1798,47 @@
         "unique": 99632,
         "ms": 142,
         "runs": [
-          146,
           142,
-          139
+          143,
+          141
         ],
         "order": "e710fbad"
       }
     ],
     "methods": {
       "fr": {
-        "collatorCompareOnStrings": 95,
-        "arrowWrapper": 101,
-        "indexSortUint32": 122,
+        "collatorCompareOnStrings": 98,
+        "arrowWrapper": 105,
+        "indexSortUint32": 123,
         "rankKeysAllUnique": {
-          "keysMs": 96,
+          "keysMs": 106,
           "sortMs": 20
         },
         "rankKeys1000Distinct": {
           "keysMs": 2,
           "sortMs": 14
         },
-        "directOn1000Distinct": 63,
-        "localeCompare": 1870,
-        "codeUnitBaseline": 7,
+        "directOn1000Distinct": 64,
+        "localeCompare": 1883,
+        "codeUnitBaseline": 8,
         "collatorConstructUs": 1
       },
       "ar": {
         "collatorCompareOnStrings": 141,
-        "arrowWrapper": 145,
-        "indexSortUint32": 163,
+        "arrowWrapper": 142,
+        "indexSortUint32": 160,
         "rankKeysAllUnique": {
-          "keysMs": 181,
-          "sortMs": 21
+          "keysMs": 168,
+          "sortMs": 20
         },
         "rankKeys1000Distinct": {
-          "keysMs": 3,
+          "keysMs": 2,
           "sortMs": 14
         },
         "directOn1000Distinct": 87,
-        "localeCompare": 2002,
-        "codeUnitBaseline": 5,
-        "collatorConstructUs": 1
+        "localeCompare": 1921,
+        "codeUnitBaseline": 4,
+        "collatorConstructUs": 2
       }
     },
     "samples": {

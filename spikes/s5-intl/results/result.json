@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-16T13:37:00.398Z",
+  "at": "2026-10-16T14:07:31.185Z",
   "node": "v22.20.0",
   "engines": {
     "node": "v22.20.0 icu 77.1 tz 2025b",
@@ -18,7 +18,7 @@
     "perEngine": {
       "node": {
         "Europe/Paris": {
-          "usPerCall": 49.3,
+          "usPerCall": 49.4,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -28,7 +28,7 @@
           "firstAnomalies": []
         },
         "Europe/Dublin": {
-          "usPerCall": 49.1,
+          "usPerCall": 48,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -38,7 +38,7 @@
           "firstAnomalies": []
         },
         "America/Los_Angeles": {
-          "usPerCall": 48.9,
+          "usPerCall": 48.8,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -48,7 +48,7 @@
           "firstAnomalies": []
         },
         "America/Sao_Paulo": {
-          "usPerCall": 48.4,
+          "usPerCall": 47.3,
           "lengths": {
             "23": 9,
             "24": 7651,
@@ -58,7 +58,7 @@
           "firstAnomalies": []
         },
         "America/Havana": {
-          "usPerCall": 48.9,
+          "usPerCall": 48,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -68,7 +68,7 @@
           "firstAnomalies": []
         },
         "Pacific/Apia": {
-          "usPerCall": 48.6,
+          "usPerCall": 47.4,
           "lengths": {
             "0": 1,
             "23": 11,
@@ -85,7 +85,7 @@
           ]
         },
         "Australia/Lord_Howe": {
-          "usPerCall": 49.5,
+          "usPerCall": 47.9,
           "lengths": {
             "24": 7628,
             "24.5": 21,
@@ -95,7 +95,7 @@
           "firstAnomalies": []
         },
         "Asia/Kolkata": {
-          "usPerCall": 48.3,
+          "usPerCall": 46.9,
           "lengths": {
             "24": 7670
           },
@@ -103,7 +103,7 @@
           "firstAnomalies": []
         },
         "Africa/Algiers": {
-          "usPerCall": 47.7,
+          "usPerCall": 47,
           "lengths": {
             "24": 7670
           },
@@ -111,7 +111,7 @@
           "firstAnomalies": []
         },
         "Pacific/Auckland": {
-          "usPerCall": 48.7,
+          "usPerCall": 47.3,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -121,7 +121,7 @@
           "firstAnomalies": []
         },
         "Asia/Tehran": {
-          "usPerCall": 48,
+          "usPerCall": 46.6,
           "lengths": {
             "23": 13,
             "24": 7644,
@@ -131,7 +131,7 @@
           "firstAnomalies": []
         },
         "Pacific/Chatham": {
-          "usPerCall": 48.7,
+          "usPerCall": 47.6,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -143,7 +143,7 @@
       },
       "chrome": {
         "Europe/Paris": {
-          "usPerCall": 27.5,
+          "usPerCall": 26.5,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -153,7 +153,7 @@
           "firstAnomalies": []
         },
         "Europe/Dublin": {
-          "usPerCall": 26.9,
+          "usPerCall": 26.3,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -163,7 +163,7 @@
           "firstAnomalies": []
         },
         "America/Los_Angeles": {
-          "usPerCall": 27,
+          "usPerCall": 26.2,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -173,7 +173,7 @@
           "firstAnomalies": []
         },
         "America/Sao_Paulo": {
-          "usPerCall": 26.4,
+          "usPerCall": 25.7,
           "lengths": {
             "23": 9,
             "24": 7651,
@@ -183,7 +183,7 @@
           "firstAnomalies": []
         },
         "America/Havana": {
-          "usPerCall": 27.2,
+          "usPerCall": 26.2,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -193,7 +193,7 @@
           "firstAnomalies": []
         },
         "Pacific/Apia": {
-          "usPerCall": 26.5,
+          "usPerCall": 26.2,
           "lengths": {
             "0": 1,
             "23": 11,
@@ -210,7 +210,7 @@
           ]
         },
         "Australia/Lord_Howe": {
-          "usPerCall": 27,
+          "usPerCall": 26.2,
           "lengths": {
             "24": 7628,
             "24.5": 21,
@@ -220,7 +220,7 @@
           "firstAnomalies": []
         },
         "Asia/Kolkata": {
-          "usPerCall": 25.6,
+          "usPerCall": 25.4,
           "lengths": {
             "24": 7670
           },
@@ -228,7 +228,7 @@
           "firstAnomalies": []
         },
         "Africa/Algiers": {
-          "usPerCall": 25.6,
+          "usPerCall": 25.3,
           "lengths": {
             "24": 7670
           },
@@ -236,7 +236,7 @@
           "firstAnomalies": []
         },
         "Pacific/Auckland": {
-          "usPerCall": 27,
+          "usPerCall": 26.5,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -246,7 +246,7 @@
           "firstAnomalies": []
         },
         "Asia/Tehran": {
-          "usPerCall": 26.2,
+          "usPerCall": 25.9,
           "lengths": {
             "23": 13,
             "24": 7644,
@@ -256,7 +256,7 @@
           "firstAnomalies": []
         },
         "Pacific/Chatham": {
-          "usPerCall": 26.6,
+          "usPerCall": 26.3,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -268,7 +268,7 @@
       },
       "firefox": {
         "Europe/Paris": {
-          "usPerCall": 22.3,
+          "usPerCall": 22.2,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -278,7 +278,7 @@
           "firstAnomalies": []
         },
         "Europe/Dublin": {
-          "usPerCall": 22.3,
+          "usPerCall": 21.4,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -288,7 +288,7 @@
           "firstAnomalies": []
         },
         "America/Los_Angeles": {
-          "usPerCall": 22.2,
+          "usPerCall": 21.8,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -298,7 +298,7 @@
           "firstAnomalies": []
         },
         "America/Sao_Paulo": {
-          "usPerCall": 21.1,
+          "usPerCall": 20.6,
           "lengths": {
             "23": 9,
             "24": 7651,
@@ -308,7 +308,7 @@
           "firstAnomalies": []
         },
         "America/Havana": {
-          "usPerCall": 22.2,
+          "usPerCall": 21.6,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -318,7 +318,7 @@
           "firstAnomalies": []
         },
         "Pacific/Apia": {
-          "usPerCall": 21.3,
+          "usPerCall": 20.3,
           "lengths": {
             "0": 1,
             "23": 11,
@@ -335,7 +335,7 @@
           ]
         },
         "Australia/Lord_Howe": {
-          "usPerCall": 22.7,
+          "usPerCall": 21.6,
           "lengths": {
             "24": 7628,
             "24.5": 21,
@@ -345,7 +345,7 @@
           "firstAnomalies": []
         },
         "Asia/Kolkata": {
-          "usPerCall": 21.4,
+          "usPerCall": 20.2,
           "lengths": {
             "24": 7670
           },
@@ -353,7 +353,7 @@
           "firstAnomalies": []
         },
         "Africa/Algiers": {
-          "usPerCall": 21.5,
+          "usPerCall": 20.7,
           "lengths": {
             "24": 7670
           },
@@ -361,7 +361,7 @@
           "firstAnomalies": []
         },
         "Pacific/Auckland": {
-          "usPerCall": 23.1,
+          "usPerCall": 21.9,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -371,7 +371,7 @@
           "firstAnomalies": []
         },
         "Asia/Tehran": {
-          "usPerCall": 22,
+          "usPerCall": 20.6,
           "lengths": {
             "23": 13,
             "24": 7644,
@@ -381,7 +381,7 @@
           "firstAnomalies": []
         },
         "Pacific/Chatham": {
-          "usPerCall": 22.4,
+          "usPerCall": 22.2,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -393,26 +393,6 @@
       },
       "webkit": {
         "Europe/Paris": {
-          "usPerCall": 22.8,
-          "lengths": {
-            "23": 21,
-            "24": 7628,
-            "25": 21
-          },
-          "anomalies": 0,
-          "firstAnomalies": []
-        },
-        "Europe/Dublin": {
-          "usPerCall": 22.4,
-          "lengths": {
-            "23": 21,
-            "24": 7628,
-            "25": 21
-          },
-          "anomalies": 0,
-          "firstAnomalies": []
-        },
-        "America/Los_Angeles": {
           "usPerCall": 22.7,
           "lengths": {
             "23": 21,
@@ -422,8 +402,28 @@
           "anomalies": 0,
           "firstAnomalies": []
         },
+        "Europe/Dublin": {
+          "usPerCall": 21.3,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Los_Angeles": {
+          "usPerCall": 23.1,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
         "America/Sao_Paulo": {
-          "usPerCall": 22.2,
+          "usPerCall": 22.9,
           "lengths": {
             "23": 9,
             "24": 7651,
@@ -433,7 +433,7 @@
           "firstAnomalies": []
         },
         "America/Havana": {
-          "usPerCall": 23.3,
+          "usPerCall": 22.7,
           "lengths": {
             "23": 21,
             "24": 7628,
@@ -443,7 +443,7 @@
           "firstAnomalies": []
         },
         "Pacific/Apia": {
-          "usPerCall": 22,
+          "usPerCall": 21.6,
           "lengths": {
             "0": 1,
             "23": 11,
@@ -460,7 +460,7 @@
           ]
         },
         "Australia/Lord_Howe": {
-          "usPerCall": 23.3,
+          "usPerCall": 22.7,
           "lengths": {
             "24": 7628,
             "24.5": 21,
@@ -470,7 +470,7 @@
           "firstAnomalies": []
         },
         "Asia/Kolkata": {
-          "usPerCall": 21.5,
+          "usPerCall": 21.4,
           "lengths": {
             "24": 7670
           },
@@ -478,7 +478,7 @@
           "firstAnomalies": []
         },
         "Africa/Algiers": {
-          "usPerCall": 21.4,
+          "usPerCall": 21.5,
           "lengths": {
             "24": 7670
           },
@@ -496,7 +496,7 @@
           "firstAnomalies": []
         },
         "Asia/Tehran": {
-          "usPerCall": 22.2,
+          "usPerCall": 22,
           "lengths": {
             "23": 13,
             "24": 7644,
@@ -522,19 +522,19 @@
   "coldWarm": {
     "node": {
       "coldMs": 0.09,
-      "warmUs": 43.1,
-      "formatToPartsUs": 2.81,
+      "warmUs": 42.5,
+      "formatToPartsUs": 2.75,
       "k": 130000
     },
     "chrome": {
       "coldMs": 0.1,
-      "warmUs": 22.6,
-      "formatToPartsUs": 1.43,
+      "warmUs": 22.1,
+      "formatToPartsUs": 1.38,
       "k": 130000
     },
     "firefox": {
       "coldMs": 0,
-      "warmUs": 18,
+      "warmUs": 17,
       "formatToPartsUs": 1,
       "k": 130000
     },
@@ -548,76 +548,76 @@
   "collation": {
     "node": {
       "configs": [
-        "fr base: 128.3 ms",
-        "fr base numeric: 128.9 ms",
-        "fr accent: 120.4 ms",
-        "fr accent numeric: 121.4 ms",
-        "fr variant: 120.5 ms",
-        "fr variant numeric: 120.4 ms",
-        "ar base: 158.3 ms",
-        "ar base numeric: 154.5 ms",
-        "ar accent: 156.3 ms",
-        "ar accent numeric: 156.5 ms",
-        "ar variant: 170.7 ms",
-        "ar variant numeric: 163.7 ms"
+        "fr base: 119 ms",
+        "fr base numeric: 119.8 ms",
+        "fr accent: 112.9 ms",
+        "fr accent numeric: 113.6 ms",
+        "fr variant: 117.4 ms",
+        "fr variant numeric: 113.2 ms",
+        "ar base: 146.5 ms",
+        "ar base numeric: 147.4 ms",
+        "ar accent: 143.4 ms",
+        "ar accent numeric: 144.8 ms",
+        "ar variant: 143.5 ms",
+        "ar variant numeric: 143.3 ms"
       ],
       "methods": {
         "fr": {
-          "collatorCompareOnStrings": 120.6,
-          "arrowWrapper": 128.7,
-          "indexSortUint32": 138.1,
+          "collatorCompareOnStrings": 117.2,
+          "arrowWrapper": 123.1,
+          "indexSortUint32": 125.5,
           "rankKeysAllUnique": {
-            "keysMs": 128,
-            "sortMs": 18
-          },
-          "rankKeys1000Distinct": {
-            "keysMs": 2,
-            "sortMs": 14
-          },
-          "directOn1000Distinct": 83.4,
-          "localeCompare": 3045.9,
-          "codeUnitBaseline": 28.3,
-          "collatorConstructUs": 2
-        },
-        "ar": {
-          "collatorCompareOnStrings": 157.2,
-          "arrowWrapper": 163,
-          "indexSortUint32": 168.4,
-          "rankKeysAllUnique": {
-            "keysMs": 180,
+            "keysMs": 116,
             "sortMs": 17
           },
           "rankKeys1000Distinct": {
             "keysMs": 2,
-            "sortMs": 14
+            "sortMs": 13
           },
-          "directOn1000Distinct": 98.6,
-          "localeCompare": 3147.6,
-          "codeUnitBaseline": 34,
+          "directOn1000Distinct": 79.2,
+          "localeCompare": 2991.7,
+          "codeUnitBaseline": 27.3,
+          "collatorConstructUs": 2
+        },
+        "ar": {
+          "collatorCompareOnStrings": 145.2,
+          "arrowWrapper": 153.2,
+          "indexSortUint32": 157.8,
+          "rankKeysAllUnique": {
+            "keysMs": 167,
+            "sortMs": 17
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 2,
+            "sortMs": 16
+          },
+          "directOn1000Distinct": 95.4,
+          "localeCompare": 3086.3,
+          "codeUnitBaseline": 32.7,
           "collatorConstructUs": 2
         }
       }
     },
     "chrome": {
       "configs": [
-        "fr base: 126.7 ms",
-        "fr base numeric: 126.1 ms",
-        "fr accent: 120.5 ms",
-        "fr accent numeric: 121.1 ms",
-        "fr variant: 122.1 ms",
-        "fr variant numeric: 119.8 ms",
-        "ar base: 172.6 ms",
-        "ar base numeric: 175.5 ms",
-        "ar accent: 176.6 ms",
-        "ar accent numeric: 171.4 ms",
-        "ar variant: 169.1 ms",
-        "ar variant numeric: 171.9 ms"
+        "fr base: 124.8 ms",
+        "fr base numeric: 120.4 ms",
+        "fr accent: 119.3 ms",
+        "fr accent numeric: 119.6 ms",
+        "fr variant: 118.4 ms",
+        "fr variant numeric: 119.5 ms",
+        "ar base: 177.1 ms",
+        "ar base numeric: 165.3 ms",
+        "ar accent: 165.4 ms",
+        "ar accent numeric: 167.4 ms",
+        "ar variant: 166 ms",
+        "ar variant numeric: 165.7 ms"
       ],
       "methods": {
         "fr": {
-          "collatorCompareOnStrings": 121.8,
-          "arrowWrapper": 128.8,
-          "indexSortUint32": 129.5,
+          "collatorCompareOnStrings": 119.7,
+          "arrowWrapper": 125.3,
+          "indexSortUint32": 129.4,
           "rankKeysAllUnique": {
             "keysMs": 115,
             "sortMs": 17
@@ -626,131 +626,131 @@
             "keysMs": 2,
             "sortMs": 13
           },
-          "directOn1000Distinct": 84.8,
-          "localeCompare": 2580.2,
-          "codeUnitBaseline": 30.2,
+          "directOn1000Distinct": 81.6,
+          "localeCompare": 2552.5,
+          "codeUnitBaseline": 29.8,
           "collatorConstructUs": 2
         },
         "ar": {
-          "collatorCompareOnStrings": 169.5,
-          "arrowWrapper": 177.3,
-          "indexSortUint32": 178.7,
+          "collatorCompareOnStrings": 165.5,
+          "arrowWrapper": 173.5,
+          "indexSortUint32": 176,
           "rankKeysAllUnique": {
-            "keysMs": 193,
+            "keysMs": 187,
             "sortMs": 17
           },
           "rankKeys1000Distinct": {
             "keysMs": 2,
             "sortMs": 13
           },
-          "directOn1000Distinct": 113.4,
-          "localeCompare": 2688.9,
-          "codeUnitBaseline": 22.5,
+          "directOn1000Distinct": 113.1,
+          "localeCompare": 2663.1,
+          "codeUnitBaseline": 21.6,
           "collatorConstructUs": 2
         }
       }
     },
     "firefox": {
       "configs": [
-        "fr base: 107 ms",
-        "fr base numeric: 104 ms",
-        "fr accent: 97 ms",
-        "fr accent numeric: 99 ms",
-        "fr variant: 98 ms",
-        "fr variant numeric: 100 ms",
-        "ar base: 179 ms",
-        "ar base numeric: 198 ms",
-        "ar accent: 190 ms",
-        "ar accent numeric: 187 ms",
-        "ar variant: 182 ms",
-        "ar variant numeric: 184 ms"
+        "fr base: 106 ms",
+        "fr base numeric: 101 ms",
+        "fr accent: 96 ms",
+        "fr accent numeric: 98 ms",
+        "fr variant: 97 ms",
+        "fr variant numeric: 97 ms",
+        "ar base: 203 ms",
+        "ar base numeric: 206 ms",
+        "ar accent: 187 ms",
+        "ar accent numeric: 182 ms",
+        "ar variant: 183 ms",
+        "ar variant numeric: 174 ms"
       ],
       "methods": {
         "fr": {
           "collatorCompareOnStrings": 97,
-          "arrowWrapper": 109,
-          "indexSortUint32": 117,
+          "arrowWrapper": 97,
+          "indexSortUint32": 111,
           "rankKeysAllUnique": {
-            "keysMs": 111,
+            "keysMs": 112,
             "sortMs": 18
           },
           "rankKeys1000Distinct": {
-            "keysMs": 5,
-            "sortMs": 13
+            "keysMs": 4,
+            "sortMs": 14
           },
-          "directOn1000Distinct": 65,
-          "localeCompare": 1066,
-          "codeUnitBaseline": 16,
+          "directOn1000Distinct": 66,
+          "localeCompare": 1102,
+          "codeUnitBaseline": 17,
           "collatorConstructUs": 0
         },
         "ar": {
-          "collatorCompareOnStrings": 193,
+          "collatorCompareOnStrings": 185,
           "arrowWrapper": 180,
-          "indexSortUint32": 212,
+          "indexSortUint32": 226,
           "rankKeysAllUnique": {
-            "keysMs": 190,
-            "sortMs": 18
+            "keysMs": 186,
+            "sortMs": 19
           },
           "rankKeys1000Distinct": {
             "keysMs": 4,
             "sortMs": 13
           },
-          "directOn1000Distinct": 85,
-          "localeCompare": 929,
-          "codeUnitBaseline": 13,
-          "collatorConstructUs": 0
+          "directOn1000Distinct": 84,
+          "localeCompare": 926,
+          "codeUnitBaseline": 14,
+          "collatorConstructUs": 1
         }
       }
     },
     "webkit": {
       "configs": [
-        "fr base: 100 ms",
-        "fr base numeric: 96 ms",
-        "fr accent: 95 ms",
-        "fr accent numeric: 98 ms",
-        "fr variant: 91 ms",
-        "fr variant numeric: 98 ms",
-        "ar base: 143 ms",
-        "ar base numeric: 149 ms",
-        "ar accent: 145 ms",
-        "ar accent numeric: 145 ms",
-        "ar variant: 142 ms",
+        "fr base: 97 ms",
+        "fr base numeric: 98 ms",
+        "fr accent: 96 ms",
+        "fr accent numeric: 99 ms",
+        "fr variant: 85 ms",
+        "fr variant numeric: 99 ms",
+        "ar base: 147 ms",
+        "ar base numeric: 147 ms",
+        "ar accent: 148 ms",
+        "ar accent numeric: 144 ms",
+        "ar variant: 146 ms",
         "ar variant numeric: 142 ms"
       ],
       "methods": {
         "fr": {
-          "collatorCompareOnStrings": 95,
-          "arrowWrapper": 101,
-          "indexSortUint32": 122,
+          "collatorCompareOnStrings": 98,
+          "arrowWrapper": 105,
+          "indexSortUint32": 123,
           "rankKeysAllUnique": {
-            "keysMs": 96,
+            "keysMs": 106,
             "sortMs": 20
           },
           "rankKeys1000Distinct": {
             "keysMs": 2,
             "sortMs": 14
           },
-          "directOn1000Distinct": 63,
-          "localeCompare": 1870,
-          "codeUnitBaseline": 7,
+          "directOn1000Distinct": 64,
+          "localeCompare": 1883,
+          "codeUnitBaseline": 8,
           "collatorConstructUs": 1
         },
         "ar": {
           "collatorCompareOnStrings": 141,
-          "arrowWrapper": 145,
-          "indexSortUint32": 163,
+          "arrowWrapper": 142,
+          "indexSortUint32": 160,
           "rankKeysAllUnique": {
-            "keysMs": 181,
-            "sortMs": 21
+            "keysMs": 168,
+            "sortMs": 20
           },
           "rankKeys1000Distinct": {
-            "keysMs": 3,
+            "keysMs": 2,
             "sortMs": 14
           },
           "directOn1000Distinct": 87,
-          "localeCompare": 2002,
-          "codeUnitBaseline": 5,
-          "collatorConstructUs": 1
+          "localeCompare": 1921,
+          "codeUnitBaseline": 4,
+          "collatorConstructUs": 2
         }
       }
     }
