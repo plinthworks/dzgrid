@@ -1,0 +1,46 @@
+{
+  "id": "replace-all-reorders",
+  "suite": "transaction",
+  "description": "A full reload follows the new order.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "replaceAll": [
+          {
+            "id": "c",
+            "v": 3
+          },
+          {
+            "id": "a",
+            "v": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "c",
+      "a"
+    ],
+    "values": [
+      3,
+      1
+    ],
+    "problems": []
+  }
+}

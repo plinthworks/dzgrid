@@ -1,0 +1,45 @@
+{
+  "id": "add-existing-refused",
+  "suite": "transaction",
+  "description": "Adding an id already present is refused.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "add": [
+            {
+              "id": "a"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c"
+    ],
+    "problems": [
+      [
+        "duplicate-row-id",
+        "add[0]"
+      ]
+    ]
+  }
+}

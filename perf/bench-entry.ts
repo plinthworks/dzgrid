@@ -1,4 +1,5 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec } from '../packages/core/src/index.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore } from '../packages/core/src/index.js';
+import { datasetA, type RowA } from './dataset.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
 export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly run: (ctx: any) => unknown };
@@ -41,7 +42,34 @@ export const CASES: Record<string, Case> = {
     for (let i = 0; i < 100_000; i++) acc += codec.coerce(`2026-03-05T10:${String(i % 60).padStart(2, '0')}:00Z`, ctx) ?? 0;
     return acc;
   },
+  'load 100 000 x 30 (row store)': {
+    setup: () => datasetA(),
+    run: (rows: RowA[]) => createRowStore<RowA>((r) => r.id).replaceAll(rows).version,
+  },
+  'update 1 row of 100 000': {
+    setup: () => {
+      const s = createRowStore<RowA>((r) => r.id);
+      s.replaceAll(datasetA());
+      return s;
+    },
+    run: (s: ReturnType<typeof createRowStore<RowA>>) => s.apply({ patch: [{ id: 'r500', set: { n0: 1 } }] }).version,
+  },
+};
+
+const heap = (): number => {
+  (globalThis as { gc?: () => void }).gc?.();
+  return process.memoryUsage().heapUsed;
 };
 
 /** Bytes measured after collection; see scripts/bench.mjs. */
-export const MEMORY: Record<string, () => number> = {};
+export const MEMORY: Record<string, () => number> = {
+  'store overhead bytes/row (100 000 rows)': () => {
+    const rows = datasetA();
+    const before = heap();
+    const s = createRowStore<RowA>((r) => r.id);
+    s.replaceAll(rows);
+    const after = heap();
+    void s.size;
+    return (after - before) / rows.length;
+  },
+};

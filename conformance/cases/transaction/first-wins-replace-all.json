@@ -1,0 +1,36 @@
+{
+  "id": "first-wins-replace-all",
+  "suite": "transaction",
+  "description": "Two rows with one id in a full reload: the first stays.",
+  "input": {
+    "rows": [],
+    "ops": [
+      {
+        "replaceAll": [
+          {
+            "id": "a",
+            "v": 1
+          },
+          {
+            "id": "a",
+            "v": 2
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a"
+    ],
+    "values": [
+      1
+    ],
+    "problems": [
+      [
+        "duplicate-row-id",
+        "rows[1]"
+      ]
+    ]
+  }
+}

@@ -52,7 +52,7 @@ describe('conformance', () => {
           expect(`${c.id}.json`).toBe(file);
           const got = SUITES[suite]!(c.input) as Record<string, unknown>;
           // A format case states either the text or the parts it cares about.
-          const compared = suite === 'format' ? Object.fromEntries(Object.keys(c.expected).map((k) => [k, got[k]])) : got;
+          const compared = suite === 'format' || suite === 'transaction' ? Object.fromEntries(Object.keys(c.expected).map((k) => [k, got[k]])) : got;
           expect(compared).toEqual(c.expected);
         });
       }

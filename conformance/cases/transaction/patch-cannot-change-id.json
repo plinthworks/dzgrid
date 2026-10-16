@@ -1,0 +1,48 @@
+{
+  "id": "patch-cannot-change-id",
+  "suite": "transaction",
+  "description": "A patch that would change a row's id is refused.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "c",
+              "set": {
+                "id": "d"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c"
+    ],
+    "problems": [
+      [
+        "invalid-transaction",
+        "patch[0]"
+      ]
+    ]
+  }
+}

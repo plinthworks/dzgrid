@@ -49,3 +49,9 @@ export type { Side, ColumnDef, ResolvedColumn, ValueReader } from './columns/def
 export { NO_OVERLAY, compilePath, resolveColumns } from './columns/defs.js';
 export type { ColumnLookup, ColumnState, ColumnSlice, ColumnLayout, ColumnChange, ColumnModel } from './columns/model.js';
 export { createColumnModel } from './columns/model.js';
+
+export type { RowKind, DataNode, RowNode } from './row/node.js';
+export type { RowTransaction, TransactionResult, RowSnapshot, StoreDelta, RowStore } from './row/store.js';
+export { createRowStore } from './row/store.js';
+export type { DisplayedRows } from './row/displayed.js';
+export { flatDisplayed } from './row/displayed.js';

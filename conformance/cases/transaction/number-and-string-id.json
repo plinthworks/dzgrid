@@ -1,0 +1,26 @@
+{
+  "id": "number-and-string-id",
+  "suite": "transaction",
+  "description": "An id given as a number finds the row whose id is that text.",
+  "input": {
+    "rows": [
+      {
+        "id": "1",
+        "v": 1
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "remove": [
+            1
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [],
+    "problems": []
+  }
+}

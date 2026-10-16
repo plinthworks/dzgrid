@@ -1,0 +1,42 @@
+{
+  "id": "add-at-beyond-clamps",
+  "suite": "transaction",
+  "description": "A position past the end means the end.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "add": [
+            {
+              "id": "x"
+            }
+          ],
+          "addAt": 99
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c",
+      "x"
+    ],
+    "problems": []
+  }
+}

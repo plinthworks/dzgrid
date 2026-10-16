@@ -1,0 +1,49 @@
+{
+  "id": "remove-then-add-moves",
+  "suite": "transaction",
+  "description": "Remove then add in one transaction moves the row to the end.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "remove": [
+            "a"
+          ],
+          "add": [
+            {
+              "id": "a",
+              "v": 9
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "b",
+      "c",
+      "a"
+    ],
+    "values": [
+      2,
+      3,
+      9
+    ],
+    "problems": []
+  }
+}

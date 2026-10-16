@@ -1,5 +1,5 @@
 import { describe, it, expectTypeOf } from 'vitest';
-import type { DisplayIndex, RowKey, Day, InstantMs } from '@dzgrid/core';
+import type { DisplayIndex, RowKey, Day, InstantMs, DisplayedRows } from '@dzgrid/core';
 
 /**
  * Invariants held by the type system. Each `@ts-expect-error` line must stay
@@ -30,5 +30,12 @@ describe('branded types', () => {
     // @ts-expect-error — a number is not an instant without parsing
     const t: InstantMs = 0;
     void t;
+  });
+
+  it('never let a number address a displayed row', () => {
+    const shown = null as unknown as DisplayedRows<unknown>;
+    // @ts-expect-error — nodeAt takes a DisplayIndex, which only index() makes
+    const f = () => shown.nodeAt(3);
+    void f;
   });
 });

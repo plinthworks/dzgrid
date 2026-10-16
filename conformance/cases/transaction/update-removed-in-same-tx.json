@@ -1,0 +1,48 @@
+{
+  "id": "update-removed-in-same-tx",
+  "suite": "transaction",
+  "description": "Removals come first: updating a row removed in the same transaction is unknown.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "remove": [
+            "b"
+          ],
+          "update": [
+            {
+              "id": "b",
+              "v": 0
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "c"
+    ],
+    "problems": [
+      [
+        "unknown-row-id",
+        "update[0]"
+      ]
+    ]
+  }
+}

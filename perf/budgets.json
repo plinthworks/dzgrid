@@ -8,6 +8,11 @@
     "readInstant ISO x 100 000": 120,
     "readNumber x 100 000 (fr-FR)": 120,
     "format number x 100 000 (cached Intl, ar-DZ)": 50,
-    "coerce ISO instants x 100 000": 50
+    "coerce ISO instants x 100 000": 50,
+    "load 100 000 x 30 (row store)": 80,
+    "update 1 row of 100 000": 1
+  },
+  "memory": {
+    "store overhead bytes/row (100 000 rows)": 120
   }
 }

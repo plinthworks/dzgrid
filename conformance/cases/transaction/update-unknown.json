@@ -1,0 +1,55 @@
+{
+  "id": "update-unknown",
+  "suite": "transaction",
+  "description": "Updating an absent row is reported, not added.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "update": [
+            {
+              "id": "zz",
+              "v": 0
+            },
+            {
+              "id": "b",
+              "v": 20
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c"
+    ],
+    "values": [
+      1,
+      20,
+      3
+    ],
+    "problems": [
+      [
+        "unknown-row-id",
+        "update[0]"
+      ]
+    ]
+  }
+}

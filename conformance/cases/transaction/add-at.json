@@ -1,0 +1,42 @@
+{
+  "id": "add-at",
+  "suite": "transaction",
+  "description": "Adding at a position inserts there.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "add": [
+            {
+              "id": "x"
+            }
+          ],
+          "addAt": 1
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "x",
+      "b",
+      "c"
+    ],
+    "problems": []
+  }
+}

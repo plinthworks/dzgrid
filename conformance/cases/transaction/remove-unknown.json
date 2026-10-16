@@ -1,0 +1,43 @@
+{
+  "id": "remove-unknown",
+  "suite": "transaction",
+  "description": "Removing an id that is not there is reported, the others are removed.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "remove": [
+            "b",
+            "zz"
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "c"
+    ],
+    "problems": [
+      [
+        "unknown-row-id",
+        "remove[1]"
+      ]
+    ]
+  }
+}

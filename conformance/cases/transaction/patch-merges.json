@@ -1,0 +1,48 @@
+{
+  "id": "patch-merges",
+  "suite": "transaction",
+  "description": "A patch sets some fields of a row.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "c",
+              "set": {
+                "v": 30
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c"
+    ],
+    "values": [
+      1,
+      2,
+      30
+    ],
+    "problems": []
+  }
+}

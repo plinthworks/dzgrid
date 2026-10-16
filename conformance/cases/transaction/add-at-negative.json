@@ -1,0 +1,48 @@
+{
+  "id": "add-at-negative",
+  "suite": "transaction",
+  "description": "A negative position is refused; the rest of the transaction still applies.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "v": 3
+      }
+    ],
+    "ops": [
+      {
+        "tx": {
+          "add": [
+            {
+              "id": "x"
+            }
+          ],
+          "addAt": -1,
+          "remove": [
+            "a"
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "ids": [
+      "b",
+      "c"
+    ],
+    "problems": [
+      [
+        "invalid-transaction",
+        "addAt"
+      ]
+    ]
+  }
+}
