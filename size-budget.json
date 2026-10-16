@@ -1,25 +1,37 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled. Raised only by a decision written in ROADMAP.md. Core: 17 039 B measured at the Phase 1 close (2026-10-17), budget +10%; raised at Phase 2 step 3 for the kernel (D2: kernel in the core), 19 549 B measured, budget +10%. Profiles from K.8 join as their packages arrive: audit screen <= 85 000, everything but charts <= 150 000.",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Raised only by a decision written in ROADMAP.md. Phase 2 close (2026-10-16): each budget is the measure + 10 %, under §5.2's ceilings (dom 30 kB, locales 2 kB, theme 9 kB). Profiles from K.8: audit screen <= 85 000 (Phase 3), everything but charts <= 150 000; the read-only client grid profile is recorded (31.3 kB).",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
-      "maxGzip": 21500
+      "maxGzip": 22300
     },
     "@dzgrid/dom/locales/en": {
       "file": "packages/dom/src/locales/en.ts",
-      "maxGzip": 2000
+      "maxGzip": 500
     },
     "@dzgrid/dom/locales/fr": {
       "file": "packages/dom/src/locales/fr.ts",
-      "maxGzip": 2000
+      "maxGzip": 620
     },
     "@dzgrid/dom/locales/ar": {
       "file": "packages/dom/src/locales/ar.ts",
-      "maxGzip": 2000
+      "maxGzip": 780
     },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
-      "maxGzip": 9000
+      "maxGzip": 1180
+    },
+    "@dzgrid/dom": {
+      "file": "packages/dom/src/index.ts",
+      "maxGzip": 14000,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal"
+      ]
+    },
+    "profile: read-only client grid (core + dom + fr)": {
+      "file": "perf/profiles/readonly-client.ts",
+      "maxGzip": null
     }
   }
 }
