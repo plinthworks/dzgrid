@@ -38,6 +38,7 @@
   ],
   "exclude": [
     "**/dist/**",
-    "**/node_modules/**"
+    "**/node_modules/**",
+    "packages/dom/test/browser/**"
   ]
 }

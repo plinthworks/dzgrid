@@ -4,21 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DzGrid playground</title>
+  <link rel="stylesheet" href="../packages/theme/dzgrid.css">
+  <link rel="stylesheet" href="../packages/theme/contrast.css">
   <style>
-    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
-    body { margin: 0; padding-block: 2rem; padding-inline: 1.5rem; }
-    table { border-collapse: collapse; }
-    th, td { padding-block: .35rem; padding-inline: .75rem; border-block-end: 1px solid color-mix(in srgb, currentColor 20%, transparent); text-align: start; }
-    td.num { font-variant-numeric: tabular-nums; }
+    body { margin: 0; padding: 1rem; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-block-end: .75rem; }
+    #host { block-size: 70vh; }
+    #host > .dzg { block-size: 100%; }
+    output { color: var(--tz-fg-muted); }
   </style>
 </head>
 <body>
   <h1>DzGrid</h1>
-  <p>Phase 0 : pas encore de grille. Le cœur est là : les bornes réelles d'un jour dans un fuseau.</p>
-  <table>
-    <thead><tr><th>Fuseau</th><th>Jour</th><th>Début (UTC)</th><th>Fin (UTC)</th><th>Durée</th></tr></thead>
-    <tbody id="rows"></tbody>
-  </table>
+  <form class="bar" id="controls">
+    <label>Langue <select name="locale"><option>fr-FR</option><option>en-US</option><option>ar-DZ</option></select></label>
+    <label>Sens <select name="direction"><option value="auto">auto</option><option>ltr</option><option>rtl</option></select></label>
+    <label>Thème <select name="theme"><option value="">système</option><option>light</option><option>dark</option></select></label>
+    <label>Contraste <select name="contrast"><option value="">normal</option><option value="more">renforcé</option></select></label>
+    <label>Densité <select name="density"><option>comfortable</option><option>compact</option><option>spacious</option></select></label>
+    <label>Lignes <select name="rows"><option value="100000">100 000 (jeu A)</option><option value="1000000">1 000 000</option></select></label>
+    <label>Sélection <select name="selection"><option>multi</option><option>single</option><option>none</option></select></label>
+    <label><input type="checkbox" name="box" checked> cases</label>
+    <label><input type="checkbox" name="warm"> recherche préparée</label>
+    <button type="button" data-overlay="loading">Chargement</button>
+    <button type="button" data-overlay="error">Erreur</button>
+    <button type="button" data-overlay="">Aucun</button>
+    <output id="status"></output>
+  </form>
+  <div id="host"></div>
   <script type="module" src="./main.ts"></script>
 </body>
 </html>

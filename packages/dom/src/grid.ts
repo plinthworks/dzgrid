@@ -94,9 +94,15 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   let dir: Dir = 'ltr';
   const applyDir = () => {
     const d = settings.direction ?? 'auto';
-    dir = d === 'auto' ? watched : d;
+    const next = d === 'auto' ? watched : d;
+    if (next === dir && root.getAttribute('dir') === dir) return;
+    // The browser flips the inline scroll when the direction changes: keep it logically.
+    const keep = geometryRef ? geometryRef.read().scrollInline : 0;
+    dir = next;
     setAttr(root, 'dir', dir);
+    if (geometryRef && keep) geometryRef.writeScrollInline(keep);
   };
+  let geometryRef: Geometry | null = null;
   let watched: Dir = 'ltr';
   const direction = watchDirection(host, (d) => {
     watched = d;
@@ -114,6 +120,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   const rows: ClientModel<T> = clientRows<T>({ rows: settings.rows ?? [], getRowId: settings.getRowId, columns, ctx });
   const kernel = createKernel<T>({ rows, columns });
   const geometry = env.geometry ?? domGeometry(viewport, header, () => dir);
+  geometryRef = geometry;
   const scheduler = new FrameScheduler(env.raf ?? win, env.sync === true);
 
   const headerRenderer = new HeaderRenderer(doc, header);
@@ -201,6 +208,10 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const focusCenter = focus0 ? L.center.columns.findIndex((c) => c.id === focus0.column) : -1;
     const sort = rows.query.sort;
     headerRenderer.render(L, w.cols, h, colIndex, (col, el) => decorateHeader(col, el, sort), focus0?.kind === 'header' ? focusCenter : -1, check, mode === 'multi');
+    if (headerRenderer.checkName) {
+      const text = msg(settings.messages, 'selection.column', {}, ctx);
+      if (headerRenderer.checkName.textContent !== text) headerRenderer.checkName.textContent = text;
+    }
     if (headerRenderer.checkBox) {
       const state = headerSelection(kernel.selection, d);
       setAttr(headerRenderer.checkBox, 'aria-checked', state === 'all' ? 'true' : state === 'some' ? 'mixed' : 'false');

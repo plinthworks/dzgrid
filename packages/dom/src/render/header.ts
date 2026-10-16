@@ -14,6 +14,8 @@ export class HeaderRenderer {
   /** The select-all box's header cell, when the grid shows a selection column. */
   check: HTMLElement | null = null;
   checkBox: HTMLElement | null = null;
+  /** The box column's name when there is no select-all box (single mode). */
+  checkName: HTMLElement | null = null;
 
   constructor(doc: Document, group: HTMLElement) {
     this.#doc = doc;
@@ -93,7 +95,7 @@ export class HeaderRenderer {
   #checkCell(on: boolean, selectAll: boolean): void {
     if (!on) {
       this.check?.remove();
-      this.check = this.checkBox = null;
+      this.check = this.checkBox = this.checkName = null;
       return;
     }
     if (!this.check) {
@@ -115,6 +117,15 @@ export class HeaderRenderer {
     } else if (!selectAll && this.checkBox) {
       this.checkBox.remove();
       this.checkBox = null;
+    }
+    // A header needs words, not only a label (axe empty-table-header): read, not shown.
+    if (!selectAll && !this.checkName) {
+      this.checkName = this.#doc.createElement('span');
+      this.checkName.className = 'dzg-sr';
+      this.check.append(this.checkName);
+    } else if (selectAll && this.checkName) {
+      this.checkName.remove();
+      this.checkName = null;
     }
     if (this.#segs.start.firstChild !== this.check) this.#segs.start.prepend(this.check);
   }
