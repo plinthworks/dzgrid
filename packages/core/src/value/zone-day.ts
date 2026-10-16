@@ -120,6 +120,9 @@ function firstInstantOf(epochDay: number, zone: string): number {
   if (best !== null) return best;
 
   // Bisection, to the second, between a moment surely before and one surely after.
+  // No zone in today's tzdata reaches this (the 2010–2030 sweep of 12 zones,
+  // São Paulo and Havana included, all resolve on a candidate); it is kept for
+  // a future rule whose gap neither starts nor ends at a midnight offset.
   let lo = utcMidnight - 30 * HOUR;
   let hi = utcMidnight + 30 * HOUR;
   while (hi - lo > 1000) {

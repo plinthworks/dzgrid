@@ -65,7 +65,7 @@ describe('parseDay, read by characters', () => {
       t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
-    const chars = '0123456789-/ a٥';
+    const chars = '0123456789-/:; a٥';
     for (let i = 0; i < 200_000; i++) {
       let s: string;
       if (next() < 0.7) {
