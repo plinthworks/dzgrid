@@ -80,3 +80,5 @@ export type { WindowView, Window2D } from './layout/window.js';
 export { visibleWindow, overscanRows } from './layout/window.js';
 export type { ScrollAnchor } from './layout/anchor.js';
 export { anchorFor, scrollTopFor } from './layout/anchor.js';
+export type { SelectionState, RangeResult } from './selection/rows.js';
+export { NO_SELECTION, isSelected, selectionCount, selectOnly, selectAll, clearSelection, toggle, selectRange, reconcileSelection } from './selection/rows.js';

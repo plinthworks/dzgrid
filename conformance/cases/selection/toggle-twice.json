@@ -1,0 +1,40 @@
+{
+  "id": "toggle-twice",
+  "suite": "selection",
+  "description": "Toggling a row twice leaves it unselected.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": 1
+      },
+      {
+        "id": "c",
+        "v": 2
+      },
+      {
+        "id": "d",
+        "v": 0
+      }
+    ],
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "a"
+      },
+      {
+        "op": "toggle",
+        "id": "a"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [],
+    "count": 0
+  }
+}

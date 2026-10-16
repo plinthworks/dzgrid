@@ -1,0 +1,48 @@
+{
+  "id": "range-additive",
+  "suite": "selection",
+  "description": "With Ctrl, a range adds to what is selected.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": 1
+      },
+      {
+        "id": "c",
+        "v": 2
+      },
+      {
+        "id": "d",
+        "v": 0
+      }
+    ],
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "d"
+        ]
+      },
+      {
+        "op": "range",
+        "anchor": "a",
+        "target": "b",
+        "additive": true
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "a",
+      "b",
+      "d"
+    ],
+    "count": 3
+  }
+}

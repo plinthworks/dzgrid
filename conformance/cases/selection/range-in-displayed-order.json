@@ -1,0 +1,53 @@
+{
+  "id": "range-in-displayed-order",
+  "suite": "selection",
+  "description": "A Shift range follows the order on screen: sorted, d to c covers d, b and c.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": 1
+      },
+      {
+        "id": "c",
+        "v": 2
+      },
+      {
+        "id": "d",
+        "v": 0
+      }
+    ],
+    "sort": [
+      {
+        "column": "v",
+        "dir": "asc"
+      }
+    ],
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "d"
+        ]
+      },
+      {
+        "op": "range",
+        "anchor": "d",
+        "target": "c"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "b",
+      "c",
+      "d"
+    ],
+    "count": 3
+  }
+}

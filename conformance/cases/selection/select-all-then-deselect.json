@@ -1,0 +1,41 @@
+{
+  "id": "select-all-then-deselect",
+  "suite": "selection",
+  "description": "Select all, then untick one: everything except it.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": 1
+      },
+      {
+        "id": "c",
+        "v": 2
+      },
+      {
+        "id": "d",
+        "v": 0
+      }
+    ],
+    "ops": [
+      {
+        "op": "all"
+      },
+      {
+        "op": "toggle",
+        "id": "b"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [
+      "b"
+    ],
+    "count": 3
+  }
+}

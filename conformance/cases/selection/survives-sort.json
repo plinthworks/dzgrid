@@ -1,0 +1,51 @@
+{
+  "id": "survives-sort",
+  "suite": "selection",
+  "description": "A selection made, then the rows re-sorted: the same rows stay selected.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": 1
+      },
+      {
+        "id": "c",
+        "v": 2
+      },
+      {
+        "id": "d",
+        "v": 0
+      }
+    ],
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "op": "sort",
+        "sort": [
+          {
+            "column": "v",
+            "dir": "desc"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "a",
+      "c"
+    ],
+    "count": 2
+  }
+}

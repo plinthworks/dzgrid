@@ -1,0 +1,50 @@
+{
+  "id": "reconcile-removed",
+  "suite": "selection",
+  "description": "Rows that no longer exist leave the selection.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "v": 3
+      },
+      {
+        "id": "b",
+        "v": 1
+      },
+      {
+        "id": "c",
+        "v": 2
+      },
+      {
+        "id": "d",
+        "v": 0
+      }
+    ],
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "op": "remove",
+        "ids": [
+          "a"
+        ]
+      },
+      {
+        "op": "reconcile"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "b"
+    ],
+    "count": 1
+  }
+}
