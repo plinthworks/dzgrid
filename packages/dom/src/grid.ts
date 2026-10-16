@@ -15,6 +15,7 @@ import { FrameScheduler } from './render/scheduler.js';
 import { Scope } from './render/scope.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
+import { Tooltip } from './render/tooltip.js';
 
 export interface GridApi {
   focusCell(row: RowKey, column: string): void;
@@ -84,6 +85,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   tooltip.setAttribute('role', 'tooltip');
   tooltip.hidden = true;
   const live = new LiveRegion(doc, scope);
+  const tip = new Tooltip(tooltip, scope);
   root.append(viewport, overlay, tooltip, live.el);
   host.append(root);
 
@@ -293,6 +295,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   const now = () => win?.performance.now() ?? 0;
   let intentAt = -1e9;
   scope.on(viewport, 'scroll', () => {
+    tip.hide();
     const moved = scroll.onScroll();
     const f = kernel.focus;
     if (moved && f?.kind === 'cell' && scroll.mapper?.scaled && now() - intentAt < 100 && viewport.contains(doc.activeElement)) api.ensureVisible(f.row, f.column);
@@ -315,7 +318,14 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const from = e.target as Node;
     if (from.isConnected && viewport.contains(from)) hasFocus = false;
   });
+  // A focus that follows a key shows its tooltip at once; one that follows a click does not.
+  let keyboardAt = -1e9;
+  scope.on(viewport, 'pointerdown', () => { keyboardAt = -1e9; });
   scope.on(viewport, 'focusin', (e: FocusEvent) => {
+    const t = e.target as HTMLElement;
+    const text = tooltipFor(t);
+    if (text && now() - keyboardAt < 1000) tip.showFor(t, text, dir, 0);
+    else if (tip.anchor && tip.anchor !== t) tip.hide();
     hasFocus = true;
     // The user's own choice wins over a focus still waiting for its cell.
     pendingFocus = null;
@@ -325,6 +335,11 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   });
   scope.on(viewport, 'keydown', (e: KeyboardEvent) => {
     if (e.isComposing || e.keyCode === 229) return;
+    keyboardAt = now();
+    if (e.key === 'Escape' && !tooltip.hidden) {
+      tip.hide();
+      return;
+    }
     intentAt = now();
     const owner: KeyOwner = ownerOf(e.target, viewport);
     const intent = intentFor(e, { dir, owner, mac });
@@ -506,6 +521,43 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     nextFrame: (fn) => scheduler.schedule({ read: () => 0, write: fn }),
   });
 
+  // ---------- tooltips: the host's words only ----------
+  function tooltipFor(el: HTMLElement): string | null {
+    const hcell = el.closest<HTMLElement>('.dzg-hcell');
+    if (hcell) {
+      const col = hcell.dataset['col'] ? columns.get(hcell.dataset['col']) : undefined;
+      return col?.def.headerTooltip ?? null;
+    }
+    const cell = el.closest<HTMLElement>('.dzg-cell');
+    const row = cell?.closest('.dzg-row');
+    const key = row ? rowRenderer.keyOf(row) : undefined;
+    const col = cell?.dataset['col'] ? columns.get(cell.dataset['col']) : undefined;
+    if (!key || !col?.def.tooltip) return null;
+    const node = rows.row(key);
+    if (!node) return null;
+    let raw: unknown;
+    try {
+      raw = col.read(node.data);
+    } catch {
+      raw = null;
+    }
+    const value = isBlank(raw) ? null : col.codec.coerce(raw, ctx);
+    return col.def.tooltip(value, node.data) ?? null;
+  }
+  const delay = () => settings.tooltips?.delayMs ?? 500;
+  scope.on(viewport, 'pointerover', (e: PointerEvent) => {
+    const t = (e.target as HTMLElement).closest<HTMLElement>('.dzg-hcell, .dzg-cell');
+    if (!t || t === tip.anchor) return;
+    const text = tooltipFor(t);
+    if (text) tip.showFor(t, text, dir, delay());
+    else tip.hideSoon();
+  });
+  scope.on(viewport, 'pointerout', (e: PointerEvent) => {
+    const to = e.relatedTarget as Node | null;
+    if (to && (tooltip.contains(to) || (tip.anchor && tip.anchor.contains(to)))) return;
+    tip.hideSoon();
+  });
+
   // ---------- pointer: sort by header click, row selection ----------
   scope.on(header, 'click', (e: MouseEvent) => {
     if (resizing.consumeClick()) return;
@@ -617,6 +669,9 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       if (patch.rows) rows.setRows(patch.rows, 'host');
       direction.recheck();
       if ('direction' in patch) applyDir();
+      if ('overlay' in patch && patch.overlay !== prev.overlay && patch.overlay) {
+        live.announce(msg(settings.messages, patch.overlay === 'loading' ? 'announce.loading' : 'announce.error', {}, ctx));
+      }
       schedule();
     },
     destroy() {

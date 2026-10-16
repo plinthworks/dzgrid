@@ -156,3 +156,12 @@ export function wheelInline(e: { readonly deltaX: number; readonly deltaMode: nu
   const d = e.deltaX * (e.deltaMode === 1 ? line : e.deltaMode === 2 ? page : 1);
   return dir === 'rtl' ? -d : d;
 }
+
+/**
+ * Where a fixed box goes so that its start edge lines up with `anchor`'s, for
+ * `inset-inline-start` in the box's direction; clamped to the window.
+ */
+export function fixedInlineStart(anchor: DOMRectReadOnly, dir: Dir, windowInline: number, boxInline: number): number {
+  const start = dir === 'ltr' ? anchor.left : windowInline - anchor.right;
+  return Math.max(0, Math.min(start, windowInline - boxInline));
+}

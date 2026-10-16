@@ -37,6 +37,10 @@ export interface ColumnDef<T, V = unknown> {
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';
+  /** Shown over the header, already translated by the host. */
+  readonly headerTooltip?: string;
+  /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */
+  readonly tooltip?: (value: V | null, row: Readonly<T>) => string | null;
 }
 
 export interface ResolvedColumn<T> {
