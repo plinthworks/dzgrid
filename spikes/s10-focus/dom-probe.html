@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>S10 DOM probe</title>
+<style>
+  body { margin: 16px; background: #fff; color: #1a1a1a; font: 14px system-ui, sans-serif; }
+  #sc { block-size: 200px; overflow: auto; position: relative; }
+  #sp { block-size: 20000px; position: relative; }
+  .r { position: absolute; inset-inline-start: 0; block-size: 30px; display: flex; }
+</style></head>
+<body>
+<!-- Primitive checks behind the retained-row contract: what each engine does to a focused node
+     (or a focused input with a caret) when it is moved, detached, or hidden in various ways. -->
+<div id="sc" role="grid" aria-label="probe" aria-rowcount="3" tabindex="-1"><div id="sp" role="rowgroup"></div></div>
+<script type="module">
+  const sp = document.getElementById('sp');
+  const log = [];
+  for (const t of ['blur', 'focusout', 'focus', 'focusin']) document.addEventListener(t, (e) => log.push(t + ' ' + (e.target.id || e.target.tagName)), true);
+  function build(withInput) {
+    sp.replaceChildren();
+    const rows = [0, 1, 2].map((i) => {
+      const r = document.createElement('div'); r.className = 'r'; r.id = 'row' + i; r.setAttribute('role', 'row'); r.setAttribute('aria-rowindex', String(i + 1));
+      r.style.transform = `translateY(${i * 30}px)`;
+      const c = document.createElement('div'); c.id = 'cell' + i; c.setAttribute('role', 'gridcell'); c.tabIndex = -1; c.textContent = 'cell ' + i;
+      r.append(c); sp.append(r); return r;
+    });
+    const target = document.getElementById('cell1');
+    let input = null;
+    if (withInput) { input = document.createElement('input'); input.id = 'ed'; input.value = 'Bonjour'; input.setAttribute('aria-label', 'éditeur'); target.append(input); input.focus(); input.setSelectionRange(4, 4); }
+    else target.focus();
+    log.length = 0;
+    return { rows, target, input };
+  }
+  const state = (input) => ({
+    active: document.activeElement?.id || document.activeElement?.tagName,
+    caret: input ? [input.selectionStart, input.selectionEnd] : null,
+    value: input?.value ?? null,
+    events: log.slice(),
+  });
+  const ops = {
+    insertBefore: ({ rows }) => sp.insertBefore(rows[1], rows[0]),
+    appendChild: ({ rows }) => sp.append(rows[1]),
+    moveBefore: ({ rows }) => (typeof sp.moveBefore === 'function' ? sp.moveBefore(rows[1], rows[0]) : 'unsupported'),
+    removeThenInsert: ({ rows }) => { rows[1].remove(); sp.insertBefore(rows[1], rows[0]); },
+    translateFarAway: ({ rows }) => { rows[1].style.transform = 'translateY(19000px)'; },
+    displayNone: ({ rows }) => { rows[1].style.display = 'none'; },
+    visibilityHidden: ({ rows }) => { rows[1].style.visibility = 'hidden'; },
+    contentVisibilityHidden: ({ rows }) => { rows[1].style.contentVisibility = 'hidden'; },
+    contentVisibilityAuto: ({ rows }) => { rows[1].style.contentVisibility = 'auto'; rows[1].style.transform = 'translateY(19000px)'; },
+    inert: ({ rows }) => { rows[1].inert = true; },
+    ariaHidden: ({ rows }) => { rows[1].setAttribute('aria-hidden', 'true'); },
+    rebindSiblingsAround: ({ rows }) => { rows[0].firstChild.textContent = 'rebound'; sp.insertBefore(rows[2], rows[1]); },
+  };
+  window.probe = async (op, withInput) => {
+    const ctx = build(withInput);
+    const r = ops[op](ctx);
+    await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+    if (withInput) { /* is the editor still usable? */ }
+    return { op, withInput, result: r === 'unsupported' ? 'unsupported' : 'done', ...state(ctx.input), focusable: document.activeElement === (ctx.input ?? ctx.target) };
+  };
+  window.ready = true;
+</script>
+</body>
+</html>

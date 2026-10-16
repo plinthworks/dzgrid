@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>S5 Intl</title>
+<script type="module">
+  import * as core from '/packages/core/src/index.ts';
+  import * as bench from './bench.js';
+  window.run = (cases) => bench.runAll(core, cases);
+  window.ready = true;
+</script>

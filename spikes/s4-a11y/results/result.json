@@ -1,0 +1,2166 @@
+{
+  "at": "2026-10-16T13:41:22.580Z",
+  "node": "v22.20.0",
+  "spike": "S4",
+  "engines": [
+    "chrome",
+    "firefox",
+    "webkit"
+  ],
+  "passed": 219,
+  "failed": 0,
+  "checks": [
+    {
+      "engine": "chrome",
+      "label": "fr: axe: 0 violations on load",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: Tab lands on the roving tab stop (row 2, col 1)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: ArrowRight moves to logical next column (colindex 2)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: aria-rowcount 10001, aria-colcount 6",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: row 5000: focus on r4999, aria-rowindex 5001, colindex 2",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: row 5000: window of ~30 rows mounted (31)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: row 5000: DOM order = aria-rowindex order",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: axe: 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: macOS AX: table rowcount 10001 colcount 6",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: macOS AX: focused cell 5001/2 with column header and row header",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: CDP: focused node is the gridcell of r4999",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: row 9999: focused row retained (still the active element)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: row 9999: retained row first in DOM, then the window, last rowindex 10001",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: axe: 0 violations with a retained row off screen",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: macOS AX: retained row exposed (rowindex 5001) right after the header",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: macOS AX: focused cell still 5001/2 with its headers after scrolling away",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: macOS AX: last row 10001 exposed",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: Blink: retained row not ignored (offscreen flag only)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: CDP: retained row is an exposed row node, focus still inside it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: Ctrl+End: focus on rowindex 10001, colindex 6, nothing retained",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: Tab out, scroll to top, Shift+Tab back: same logical cell (r9999, col 6)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: live region announces the sort",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: aria-sort=ascending on the sorted header, focus stays on it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: macOS AX: sort direction exposed on the header",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: CDP: live region polite + atomic",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: live region announces the filter and rowcount follows",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: treegrid: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: treegrid: Service 50 = rowindex 5002 level 1 51/100 expanded; child level 2 1/99",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: Blink: treegrid level/setsize/posinset/expanded exposed",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: macOS AX: disclosure level and expanded state",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: treegrid: ArrowLeft on a child goes to its parent",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: treegrid: ArrowLeft on an expanded parent collapses it, rowcount 10001 -> 9902, announced",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: treegrid: focused parent retained when scrolled away",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: Blink: retained collapsed parent exposed with level 1, collapsed",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: treegrid: axe 0 violations after collapse + scroll",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: treegrid: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: detail: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: detail: one cell spanning 6 columns, right after its master, master expanded",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: detail: axe 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: Blink: detail cell aria-colspan 6 exposed, master cell expanded",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: detail: Enter on the master closes the detail, rowcount -1",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: detail: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: colvirt: axe 0 violations (colindex with gaps 1,7..11 of 18)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: macOS AX: cell colindex 8 of 18 gets header \"Mesure 2\"",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "fr: paged: page change announced, rowcount = rows of the page + header",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: axe: 0 violations on load",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: Tab lands on the roving tab stop (row 2, col 1)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: ArrowLeft moves to logical next column (colindex 2)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: aria-rowcount 10001, aria-colcount 6",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: row 5000: focus on r4999, aria-rowindex 5001, colindex 2",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: row 5000: window of ~30 rows mounted (31)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: row 5000: DOM order = aria-rowindex order",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: axe: 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: macOS AX: table rowcount 10001 colcount 6",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: macOS AX: focused cell 5001/2 with column header and row header",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: CDP: focused node is the gridcell of r4999",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: row 9999: focused row retained (still the active element)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: row 9999: retained row first in DOM, then the window, last rowindex 10001",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: axe: 0 violations with a retained row off screen",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: macOS AX: retained row exposed (rowindex 5001) right after the header",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: macOS AX: focused cell still 5001/2 with its headers after scrolling away",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: macOS AX: last row 10001 exposed",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: Blink: retained row not ignored (offscreen flag only)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: CDP: retained row is an exposed row node, focus still inside it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: Ctrl+End: focus on rowindex 10001, colindex 6, nothing retained",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: Tab out, scroll to top, Shift+Tab back: same logical cell (r9999, col 6)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: live region announces the sort",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: aria-sort=ascending on the sorted header, focus stays on it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: macOS AX: sort direction exposed on the header",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: CDP: live region polite + atomic",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: live region announces the filter and rowcount follows",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: treegrid: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: treegrid: Service 50 = rowindex 5002 level 1 51/100 expanded; child level 2 1/99",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: Blink: treegrid level/setsize/posinset/expanded exposed",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: macOS AX: disclosure level and expanded state",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: treegrid: ArrowRight on a child goes to its parent",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: treegrid: ArrowRight on an expanded parent collapses it, rowcount 10001 -> 9902, announced",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: treegrid: focused parent retained when scrolled away",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: Blink: retained collapsed parent exposed with level 1, collapsed",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: treegrid: axe 0 violations after collapse + scroll",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: treegrid: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: detail: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: detail: one cell spanning 6 columns, right after its master, master expanded",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: detail: axe 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: Blink: detail cell aria-colspan 6 exposed, master cell expanded",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: detail: Enter on the master closes the detail, rowcount -1",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: detail: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: colvirt: axe 0 violations (colindex with gaps 1,7..11 of 18)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: macOS AX: cell colindex 8 of 18 gets header \"Mesure 2\"",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: paged: page change announced, rowcount = rows of the page + header",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "§3.7 as written (live region + viewport inside role=grid) is flagged by axe",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: axe: 0 violations on load",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: Tab lands on the roving tab stop (row 2, col 1)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: ArrowRight moves to logical next column (colindex 2)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: aria-rowcount 10001, aria-colcount 6",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: row 5000: focus on r4999, aria-rowindex 5001, colindex 2",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: row 5000: window of ~30 rows mounted (31)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: row 5000: DOM order = aria-rowindex order",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: axe: 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: row 9999: focused row retained (still the active element)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: row 9999: retained row first in DOM, then the window, last rowindex 10001",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: axe: 0 violations with a retained row off screen",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: Ctrl+End: focus on rowindex 10001, colindex 6, nothing retained",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: Tab out, scroll to top, Shift+Tab back: same logical cell (r9999, col 6)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: live region announces the sort",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: aria-sort=ascending on the sorted header, focus stays on it",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: live region announces the filter and rowcount follows",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: treegrid: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: treegrid: Service 50 = rowindex 5002 level 1 51/100 expanded; child level 2 1/99",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: treegrid: ArrowLeft on a child goes to its parent",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: treegrid: ArrowLeft on an expanded parent collapses it, rowcount 10001 -> 9902, announced",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: treegrid: focused parent retained when scrolled away",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: treegrid: axe 0 violations after collapse + scroll",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: treegrid: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: detail: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: detail: one cell spanning 6 columns, right after its master, master expanded",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: detail: axe 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: detail: Enter on the master closes the detail, rowcount -1",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: detail: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: colvirt: axe 0 violations (colindex with gaps 1,7..11 of 18)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "fr: paged: page change announced, rowcount = rows of the page + header",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: axe: 0 violations on load",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: Tab lands on the roving tab stop (row 2, col 1)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: ArrowLeft moves to logical next column (colindex 2)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: aria-rowcount 10001, aria-colcount 6",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: row 5000: focus on r4999, aria-rowindex 5001, colindex 2",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: row 5000: window of ~30 rows mounted (31)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: row 5000: DOM order = aria-rowindex order",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: axe: 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: row 9999: focused row retained (still the active element)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: row 9999: retained row first in DOM, then the window, last rowindex 10001",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: axe: 0 violations with a retained row off screen",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: Ctrl+End: focus on rowindex 10001, colindex 6, nothing retained",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: Tab out, scroll to top, Shift+Tab back: same logical cell (r9999, col 6)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: live region announces the sort",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: aria-sort=ascending on the sorted header, focus stays on it",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: live region announces the filter and rowcount follows",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: treegrid: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: treegrid: Service 50 = rowindex 5002 level 1 51/100 expanded; child level 2 1/99",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: treegrid: ArrowRight on a child goes to its parent",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: treegrid: ArrowRight on an expanded parent collapses it, rowcount 10001 -> 9902, announced",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: treegrid: focused parent retained when scrolled away",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: treegrid: axe 0 violations after collapse + scroll",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: treegrid: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: detail: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: detail: one cell spanning 6 columns, right after its master, master expanded",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: detail: axe 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: detail: Enter on the master closes the detail, rowcount -1",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: detail: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: colvirt: axe 0 violations (colindex with gaps 1,7..11 of 18)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "ar: paged: page change announced, rowcount = rows of the page + header",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "§3.7 as written (live region + viewport inside role=grid) is flagged by axe",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: axe: 0 violations on load",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: Tab lands on the roving tab stop (row 2, col 1)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: ArrowRight moves to logical next column (colindex 2)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: aria-rowcount 10001, aria-colcount 6",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: row 5000: focus on r4999, aria-rowindex 5001, colindex 2",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: row 5000: window of ~30 rows mounted (31)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: row 5000: DOM order = aria-rowindex order",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: axe: 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: row 9999: focused row retained (still the active element)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: row 9999: retained row first in DOM, then the window, last rowindex 10001",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: axe: 0 violations with a retained row off screen",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: Ctrl+End: focus on rowindex 10001, colindex 6, nothing retained",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: Tab out, scroll to top, Shift+Tab back: same logical cell (r9999, col 6)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: live region announces the sort",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: aria-sort=ascending on the sorted header, focus stays on it",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: live region announces the filter and rowcount follows",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: treegrid: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: treegrid: Service 50 = rowindex 5002 level 1 51/100 expanded; child level 2 1/99",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: treegrid: ArrowLeft on a child goes to its parent",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: treegrid: ArrowLeft on an expanded parent collapses it, rowcount 10001 -> 9902, announced",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: treegrid: focused parent retained when scrolled away",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: treegrid: axe 0 violations after collapse + scroll",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: treegrid: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: detail: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: detail: one cell spanning 6 columns, right after its master, master expanded",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: detail: axe 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: detail: Enter on the master closes the detail, rowcount -1",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: detail: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: colvirt: axe 0 violations (colindex with gaps 1,7..11 of 18)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "fr: paged: page change announced, rowcount = rows of the page + header",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: axe: 0 violations on load",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: Tab lands on the roving tab stop (row 2, col 1)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: ArrowLeft moves to logical next column (colindex 2)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: aria-rowcount 10001, aria-colcount 6",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: row 5000: focus on r4999, aria-rowindex 5001, colindex 2",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: row 5000: window of ~30 rows mounted (31)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: row 5000: DOM order = aria-rowindex order",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: axe: 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: row 9999: focused row retained (still the active element)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: row 9999: retained row first in DOM, then the window, last rowindex 10001",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: axe: 0 violations with a retained row off screen",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: Ctrl+End: focus on rowindex 10001, colindex 6, nothing retained",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: Tab out, scroll to top, Shift+Tab back: same logical cell (r9999, col 6)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: live region announces the sort",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: aria-sort=ascending on the sorted header, focus stays on it",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: live region announces the filter and rowcount follows",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: treegrid: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: treegrid: Service 50 = rowindex 5002 level 1 51/100 expanded; child level 2 1/99",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: treegrid: ArrowRight on a child goes to its parent",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: treegrid: ArrowRight on an expanded parent collapses it, rowcount 10001 -> 9902, announced",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: treegrid: focused parent retained when scrolled away",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: treegrid: axe 0 violations after collapse + scroll",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: treegrid: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: detail: axe 0 violations",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: detail: one cell spanning 6 columns, right after its master, master expanded",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: detail: axe 0 violations at row 5000",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: detail: Enter on the master closes the detail, rowcount -1",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: detail: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: colvirt: axe 0 violations (colindex with gaps 1,7..11 of 18)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "ar: paged: page change announced, rowcount = rows of the page + header",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "§3.7 as written (live region + viewport inside role=grid) is flagged by axe",
+      "ok": true
+    }
+  ],
+  "observations": [
+    {
+      "engine": "chrome",
+      "label": "fr: detail cell: table geometry span (Blink tableCellColumnSpan, macOS AXColumnIndexRange.len) and its column header",
+      "value": {
+        "blinkTableSpan": 1,
+        "macRange": "{loc: 0, len: 1}",
+        "macColumnHeaders": [
+          "Nom"
+        ]
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "ar: detail cell: table geometry span (Blink tableCellColumnSpan, macOS AXColumnIndexRange.len) and its column header",
+      "value": {
+        "blinkTableSpan": 1,
+        "macRange": "{loc: 0, len: 1}",
+        "macColumnHeaders": [
+          "الاسم"
+        ]
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "Tab from the field before the grid, scroll container WITHOUT tabindex=-1, lands on",
+      "value": "rowheader/1"
+    },
+    {
+      "engine": "firefox",
+      "label": "Tab from the field before the grid, scroll container WITHOUT tabindex=-1, lands on",
+      "value": "grid"
+    },
+    {
+      "engine": "webkit",
+      "label": "Tab from the field before the grid, scroll container WITHOUT tabindex=-1, lands on",
+      "value": "rowheader/1"
+    }
+  ],
+  "evidence": {
+    "chrome": {
+      "fr": {
+        "axeLoad": [],
+        "at5000": {
+          "mounted": 31,
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "Alger"
+          }
+        },
+        "mac5000": {
+          "role": "tableau",
+          "label": "Patients",
+          "rowcount": 10001,
+          "colcount": 6,
+          "focused": {
+            "rowindex": 5001,
+            "colindex": 2,
+            "text": "Alger",
+            "roleDescription": "cellule",
+            "colspan": "{loc: 1, len: 1}",
+            "columnHeaders": [
+              "Ville"
+            ],
+            "rowHeaders": [
+              "Patient 4999"
+            ]
+          },
+          "firstRows": [
+            {
+              "rowindex": 1,
+              "level": null,
+              "expanded": null,
+              "title": "Nom Ville Âge Service Date Note"
+            },
+            {
+              "rowindex": 4992,
+              "level": null,
+              "expanded": null,
+              "title": "Patient 4990 Tlemcen 40 Urgences 2026-11-07"
+            },
+            {
+              "rowindex": 4993,
+              "level": null,
+              "expanded": null,
+              "title": "Patient 4991 Béjaïa 77 Pédiatrie 2026-12-08"
+            }
+          ]
+        },
+        "cdp5000": {
+          "focused": {
+            "role": "gridcell",
+            "name": "Alger",
+            "dom": {
+              "role": "gridcell",
+              "col": "2",
+              "key": "r4999",
+              "rowindex": "5001"
+            }
+          },
+          "target": null,
+          "rowsExposed": 32,
+          "live": {
+            "live": "polite",
+            "atomic": true,
+            "relevant": "additions text"
+          }
+        },
+        "retained": {
+          "mounted": 26,
+          "first": [
+            [
+              "r4999",
+              5001,
+              true
+            ],
+            [
+              "r9975",
+              9977,
+              false
+            ]
+          ],
+          "last": [
+            "r9999",
+            10001,
+            false
+          ],
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "Alger"
+          }
+        },
+        "mac9999": {
+          "rowcount": 10001,
+          "rows": [
+            {
+              "rowindex": 1,
+              "level": null,
+              "expanded": null,
+              "title": "Nom Ville Âge Service Date Note"
+            },
+            {
+              "rowindex": 5001,
+              "level": null,
+              "expanded": null,
+              "title": "Patient 4999 Alger 82 Pédiatrie 2026-08-16"
+            },
+            {
+              "rowindex": 9977,
+              "level": null,
+              "expanded": null,
+              "title": "Patient 9975 Annaba 88 Pédiatrie 2026-04-08"
+            },
+            {
+              "rowindex": 10001,
+              "level": null,
+              "expanded": null,
+              "title": "Patient 9999 Annaba 6 Pédiatrie 2026-04-04"
+            }
+          ],
+          "focused": {
+            "rowindex": 5001,
+            "colindex": 2,
+            "text": "Alger",
+            "roleDescription": "cellule",
+            "colspan": "{loc: 1, len: 1}",
+            "columnHeaders": [
+              "Ville"
+            ],
+            "rowHeaders": [
+              "Patient 4999"
+            ]
+          },
+          "lastCell": {
+            "rowindex": 10001,
+            "colindex": 1,
+            "text": "Patient 9999",
+            "roleDescription": "en-tête de ligne",
+            "colspan": "{loc: 0, len: 1}",
+            "columnHeaders": [
+              "Nom"
+            ],
+            "rowHeaders": []
+          }
+        },
+        "blink9999": {
+          "retainedRow": {
+            "rowindex": 5001,
+            "tableRowIndex": 1,
+            "level": null,
+            "setsize": null,
+            "posinset": null,
+            "expanded": null,
+            "offscreen": true,
+            "ignored": false,
+            "name": "Patient 4999 Alger 82 Pédiatrie 2026-08-16"
+          },
+          "tableRowCount": 27,
+          "lastRow": {
+            "rowindex": 10001,
+            "tableRowIndex": 26,
+            "level": null,
+            "setsize": null,
+            "posinset": null,
+            "expanded": null,
+            "offscreen": false,
+            "ignored": false,
+            "name": "Patient 9999 Annaba 6 Pédiatrie 2026-04-04"
+          }
+        },
+        "cdp9999": {
+          "focused": {
+            "role": "gridcell",
+            "name": "Alger",
+            "dom": {
+              "role": "gridcell",
+              "col": "2",
+              "key": "r4999",
+              "rowindex": "5001"
+            }
+          },
+          "target": {
+            "role": "row",
+            "name": "Patient 4999 Alger 82 Pédiatrie 2026-08-16",
+            "ignored": false
+          },
+          "rowsExposed": 27,
+          "live": {
+            "live": "polite",
+            "atomic": true,
+            "relevant": "additions text"
+          }
+        },
+        "liveSort": "Trié par Ville, ordre croissant. 10 000 lignes.",
+        "macSort": [
+          {
+            "header": "Ville",
+            "dir": "AXAscendingSortDirection"
+          }
+        ],
+        "cdpLive": {
+          "live": "polite",
+          "atomic": true,
+          "relevant": "additions text"
+        },
+        "liveFilter": "Filtre appliqué : 1 667 lignes.",
+        "axeTree": [],
+        "treeAttrs": [
+          [
+            "5002",
+            "1",
+            "100",
+            "51",
+            "true"
+          ],
+          [
+            "5003",
+            "2",
+            "99",
+            "1",
+            null
+          ]
+        ],
+        "blinkTree": {
+          "parent": {
+            "rowindex": 5002,
+            "tableRowIndex": 10,
+            "level": 1,
+            "setsize": 100,
+            "posinset": 51,
+            "expanded": true,
+            "offscreen": false,
+            "ignored": false,
+            "name": "Service 50 Constantine 22 Cardiologie 2026-09-17"
+          },
+          "child": {
+            "rowindex": 5003,
+            "tableRowIndex": 11,
+            "level": 2,
+            "setsize": 99,
+            "posinset": 1,
+            "expanded": null,
+            "offscreen": false,
+            "ignored": false,
+            "name": "Patient 5001 Annaba 59 Radiologie 2026-10-18"
+          },
+          "role": "treeGrid",
+          "rowcount": 10001
+        },
+        "macTree": {
+          "role": "arborescence",
+          "focused": {
+            "rowindex": 5003,
+            "colindex": 1,
+            "text": "Patient 5001",
+            "roleDescription": "en-tête de ligne",
+            "colspan": "{loc: 0, len: 1}",
+            "columnHeaders": [
+              "Nom"
+            ],
+            "rowHeaders": []
+          },
+          "rows": [
+            {
+              "rowindex": 5002,
+              "level": 1,
+              "expanded": true,
+              "title": "Service 50 Constantine 22 Cardiologie 2026-09-17"
+            },
+            {
+              "rowindex": 5003,
+              "level": 2,
+              "expanded": null,
+              "title": "Patient 5001 Annaba 59 Radiologie 2026-10-18"
+            }
+          ]
+        },
+        "liveCollapse": "Service 50 replié.",
+        "blinkTreeRetained": {
+          "rowindex": 5002,
+          "tableRowIndex": 1,
+          "level": 1,
+          "setsize": 100,
+          "posinset": 51,
+          "expanded": false,
+          "offscreen": true,
+          "ignored": false,
+          "name": "Service 50 Constantine 22 Cardiologie 2026-09-17"
+        },
+        "detail": {
+          "rowindex": "5006",
+          "cells": 1,
+          "colspan": "6",
+          "masterExpanded": "true",
+          "masterRow": "5005",
+          "text": "Détail de Patient 5000 : Cardiologie — Constantine, 2026-09-17"
+        },
+        "blinkDetail": {
+          "cell": {
+            "rowindex": 5006,
+            "colindex": 1,
+            "colspan": 1,
+            "ariaColspan": 6,
+            "expanded": null,
+            "name": "Détail de Patient 5000 : Cardiologie — Constantine, 2026-09-17",
+            "role": "gridCell"
+          },
+          "master": {
+            "rowindex": 5005,
+            "colindex": 1,
+            "colspan": 1,
+            "ariaColspan": null,
+            "expanded": true,
+            "name": "Patient 5000",
+            "role": "rowHeader"
+          },
+          "rowcount": 10006
+        },
+        "macDetail": {
+          "rowindex": 5006,
+          "colindex": 1,
+          "text": "Détail de Patient 5000 : Cardiologie — Constantine, 2026-09-17",
+          "roleDescription": "cellule",
+          "colspan": "{loc: 0, len: 1}",
+          "columnHeaders": [
+            "Nom"
+          ],
+          "rowHeaders": []
+        },
+        "macColvirt": {
+          "rowindex": 12,
+          "colindex": 8,
+          "text": "40",
+          "roleDescription": "cellule",
+          "colspan": "{loc: 2, len: 1}",
+          "columnHeaders": [
+            "Mesure 2"
+          ],
+          "rowHeaders": [
+            "Patient 10"
+          ]
+        },
+        "livePage": "Page 3 sur 100, lignes 201 à 300 sur 10 000."
+      },
+      "ar": {
+        "axeLoad": [],
+        "at5000": {
+          "mounted": 31,
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "الجزائر"
+          }
+        },
+        "mac5000": {
+          "role": "tableau",
+          "label": "المرضى",
+          "rowcount": 10001,
+          "colcount": 6,
+          "focused": {
+            "rowindex": 5001,
+            "colindex": 2,
+            "text": "الجزائر",
+            "roleDescription": "cellule",
+            "colspan": "{loc: 1, len: 1}",
+            "columnHeaders": [
+              "المدينة"
+            ],
+            "rowHeaders": [
+              "مريض 4999"
+            ]
+          },
+          "firstRows": [
+            {
+              "rowindex": 1,
+              "level": null,
+              "expanded": null,
+              "title": "الاسم المدينة العمر المصلحة التاريخ ملاحظة"
+            },
+            {
+              "rowindex": 4992,
+              "level": null,
+              "expanded": null,
+              "title": "مريض 4990 تلمسان 40 الاستعجالات 2026-11-07"
+            },
+            {
+              "rowindex": 4993,
+              "level": null,
+              "expanded": null,
+              "title": "مريض 4991 بجاية 77 طب الأطفال 2026-12-08"
+            }
+          ]
+        },
+        "cdp5000": {
+          "focused": {
+            "role": "gridcell",
+            "name": "الجزائر",
+            "dom": {
+              "role": "gridcell",
+              "col": "2",
+              "key": "r4999",
+              "rowindex": "5001"
+            }
+          },
+          "target": null,
+          "rowsExposed": 32,
+          "live": {
+            "live": "polite",
+            "atomic": true,
+            "relevant": "additions text"
+          }
+        },
+        "retained": {
+          "mounted": 26,
+          "first": [
+            [
+              "r4999",
+              5001,
+              true
+            ],
+            [
+              "r9975",
+              9977,
+              false
+            ]
+          ],
+          "last": [
+            "r9999",
+            10001,
+            false
+          ],
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "الجزائر"
+          }
+        },
+        "mac9999": {
+          "rowcount": 10001,
+          "rows": [
+            {
+              "rowindex": 1,
+              "level": null,
+              "expanded": null,
+              "title": "الاسم المدينة العمر المصلحة التاريخ ملاحظة"
+            },
+            {
+              "rowindex": 5001,
+              "level": null,
+              "expanded": null,
+              "title": "مريض 4999 الجزائر 82 طب الأطفال 2026-08-16"
+            },
+            {
+              "rowindex": 9977,
+              "level": null,
+              "expanded": null,
+              "title": "مريض 9975 عنابة 88 طب الأطفال 2026-04-08"
+            },
+            {
+              "rowindex": 10001,
+              "level": null,
+              "expanded": null,
+              "title": "مريض 9999 عنابة 6 طب الأطفال 2026-04-04"
+            }
+          ],
+          "focused": {
+            "rowindex": 5001,
+            "colindex": 2,
+            "text": "الجزائر",
+            "roleDescription": "cellule",
+            "colspan": "{loc: 1, len: 1}",
+            "columnHeaders": [
+              "المدينة"
+            ],
+            "rowHeaders": [
+              "مريض 4999"
+            ]
+          },
+          "lastCell": {
+            "rowindex": 10001,
+            "colindex": 1,
+            "text": "مريض 9999",
+            "roleDescription": "en-tête de ligne",
+            "colspan": "{loc: 0, len: 1}",
+            "columnHeaders": [
+              "الاسم"
+            ],
+            "rowHeaders": []
+          }
+        },
+        "blink9999": {
+          "retainedRow": {
+            "rowindex": 5001,
+            "tableRowIndex": 1,
+            "level": null,
+            "setsize": null,
+            "posinset": null,
+            "expanded": null,
+            "offscreen": true,
+            "ignored": false,
+            "name": "مريض 4999 الجزائر 82 طب الأطفال 2026-08-16"
+          },
+          "tableRowCount": 27,
+          "lastRow": {
+            "rowindex": 10001,
+            "tableRowIndex": 26,
+            "level": null,
+            "setsize": null,
+            "posinset": null,
+            "expanded": null,
+            "offscreen": false,
+            "ignored": false,
+            "name": "مريض 9999 عنابة 6 طب الأطفال 2026-04-04"
+          }
+        },
+        "cdp9999": {
+          "focused": {
+            "role": "gridcell",
+            "name": "الجزائر",
+            "dom": {
+              "role": "gridcell",
+              "col": "2",
+              "key": "r4999",
+              "rowindex": "5001"
+            }
+          },
+          "target": {
+            "role": "row",
+            "name": "مريض 4999 الجزائر 82 طب الأطفال 2026-08-16",
+            "ignored": false
+          },
+          "rowsExposed": 27,
+          "live": {
+            "live": "polite",
+            "atomic": true,
+            "relevant": "additions text"
+          }
+        },
+        "liveSort": "مرتب حسب المدينة، تصاعديًا. 10.000 صف.",
+        "macSort": [
+          {
+            "header": "المدينة",
+            "dir": "AXAscendingSortDirection"
+          }
+        ],
+        "cdpLive": {
+          "live": "polite",
+          "atomic": true,
+          "relevant": "additions text"
+        },
+        "liveFilter": "طُبّق المرشح: 1.667 صفًا.",
+        "axeTree": [],
+        "treeAttrs": [
+          [
+            "5002",
+            "1",
+            "100",
+            "51",
+            "true"
+          ],
+          [
+            "5003",
+            "2",
+            "99",
+            "1",
+            null
+          ]
+        ],
+        "blinkTree": {
+          "parent": {
+            "rowindex": 5002,
+            "tableRowIndex": 10,
+            "level": 1,
+            "setsize": 100,
+            "posinset": 51,
+            "expanded": true,
+            "offscreen": false,
+            "ignored": false,
+            "name": "مصلحة 50 قسنطينة 22 أمراض القلب 2026-09-17"
+          },
+          "child": {
+            "rowindex": 5003,
+            "tableRowIndex": 11,
+            "level": 2,
+            "setsize": 99,
+            "posinset": 1,
+            "expanded": null,
+            "offscreen": false,
+            "ignored": false,
+            "name": "مريض 5001 عنابة 59 الأشعة 2026-10-18"
+          },
+          "role": "treeGrid",
+          "rowcount": 10001
+        },
+        "macTree": {
+          "role": "arborescence",
+          "focused": {
+            "rowindex": 5003,
+            "colindex": 1,
+            "text": "مريض 5001",
+            "roleDescription": "en-tête de ligne",
+            "colspan": "{loc: 0, len: 1}",
+            "columnHeaders": [
+              "الاسم"
+            ],
+            "rowHeaders": []
+          },
+          "rows": [
+            {
+              "rowindex": 5002,
+              "level": 1,
+              "expanded": true,
+              "title": "مصلحة 50 قسنطينة 22 أمراض القلب 2026-09-17"
+            },
+            {
+              "rowindex": 5003,
+              "level": 2,
+              "expanded": null,
+              "title": "مريض 5001 عنابة 59 الأشعة 2026-10-18"
+            }
+          ]
+        },
+        "liveCollapse": "مصلحة 50 مطوي.",
+        "blinkTreeRetained": {
+          "rowindex": 5002,
+          "tableRowIndex": 1,
+          "level": 1,
+          "setsize": 100,
+          "posinset": 51,
+          "expanded": false,
+          "offscreen": true,
+          "ignored": false,
+          "name": "مصلحة 50 قسنطينة 22 أمراض القلب 2026-09-17"
+        },
+        "detail": {
+          "rowindex": "5006",
+          "cells": 1,
+          "colspan": "6",
+          "masterExpanded": "true",
+          "masterRow": "5005",
+          "text": "تفاصيل مريض 5000: أمراض القلب — قسنطينة, 2026-09-17"
+        },
+        "blinkDetail": {
+          "cell": {
+            "rowindex": 5006,
+            "colindex": 1,
+            "colspan": 1,
+            "ariaColspan": 6,
+            "expanded": null,
+            "name": "تفاصيل مريض 5000: أمراض القلب — قسنطينة, 2026-09-17",
+            "role": "gridCell"
+          },
+          "master": {
+            "rowindex": 5005,
+            "colindex": 1,
+            "colspan": 1,
+            "ariaColspan": null,
+            "expanded": true,
+            "name": "مريض 5000",
+            "role": "rowHeader"
+          },
+          "rowcount": 10006
+        },
+        "macDetail": {
+          "rowindex": 5006,
+          "colindex": 1,
+          "text": "تفاصيل مريض 5000: أمراض القلب — قسنطينة, 2026-09-17",
+          "roleDescription": "cellule",
+          "colspan": "{loc: 0, len: 1}",
+          "columnHeaders": [
+            "الاسم"
+          ],
+          "rowHeaders": []
+        },
+        "macColvirt": {
+          "rowindex": 12,
+          "colindex": 8,
+          "text": "40",
+          "roleDescription": "cellule",
+          "colspan": "{loc: 2, len: 1}",
+          "columnHeaders": [
+            "قياس 2"
+          ],
+          "rowHeaders": [
+            "مريض 10"
+          ]
+        },
+        "livePage": "الصفحة 3 من 100، الصفوف 201 إلى 300 من 10.000."
+      },
+      "scrollerWithoutTabindex": "rowheader/1",
+      "axeArchLayout": [
+        {
+          "id": "aria-required-children",
+          "impact": "critical",
+          "nodes": 1,
+          "target": [
+            ".g-wrap"
+          ],
+          "summary": "Fix any of the following:\n  Element has children which are not allowed: div[tabindex], div[aria-atomic]"
+        }
+      ]
+    },
+    "firefox": {
+      "fr": {
+        "axeLoad": [],
+        "at5000": {
+          "mounted": 31,
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "Alger"
+          }
+        },
+        "retained": {
+          "mounted": 26,
+          "first": [
+            [
+              "r4999",
+              5001,
+              true
+            ],
+            [
+              "r9975",
+              9977,
+              false
+            ]
+          ],
+          "last": [
+            "r9999",
+            10001,
+            false
+          ],
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "Alger"
+          }
+        },
+        "liveSort": "Trié par Ville, ordre croissant. 10 000 lignes.",
+        "liveFilter": "Filtre appliqué : 1 667 lignes.",
+        "axeTree": [],
+        "treeAttrs": [
+          [
+            "5002",
+            "1",
+            "100",
+            "51",
+            "true"
+          ],
+          [
+            "5003",
+            "2",
+            "99",
+            "1",
+            null
+          ]
+        ],
+        "liveCollapse": "Service 50 replié.",
+        "detail": {
+          "rowindex": "5006",
+          "cells": 1,
+          "colspan": "6",
+          "masterExpanded": "true",
+          "masterRow": "5005",
+          "text": "Détail de Patient 5000 : Cardiologie — Constantine, 2026-09-17"
+        },
+        "livePage": "Page 3 sur 100, lignes 201 à 300 sur 10 000."
+      },
+      "ar": {
+        "axeLoad": [],
+        "at5000": {
+          "mounted": 31,
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "الجزائر"
+          }
+        },
+        "retained": {
+          "mounted": 26,
+          "first": [
+            [
+              "r4999",
+              5001,
+              true
+            ],
+            [
+              "r9975",
+              9977,
+              false
+            ]
+          ],
+          "last": [
+            "r9999",
+            10001,
+            false
+          ],
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "الجزائر"
+          }
+        },
+        "liveSort": "مرتب حسب المدينة، تصاعديًا. 10.000 صف.",
+        "liveFilter": "طُبّق المرشح: 1.667 صفًا.",
+        "axeTree": [],
+        "treeAttrs": [
+          [
+            "5002",
+            "1",
+            "100",
+            "51",
+            "true"
+          ],
+          [
+            "5003",
+            "2",
+            "99",
+            "1",
+            null
+          ]
+        ],
+        "liveCollapse": "مصلحة 50 مطوي.",
+        "detail": {
+          "rowindex": "5006",
+          "cells": 1,
+          "colspan": "6",
+          "masterExpanded": "true",
+          "masterRow": "5005",
+          "text": "تفاصيل مريض 5000: أمراض القلب — قسنطينة, 2026-09-17"
+        },
+        "livePage": "الصفحة 3 من 100، الصفوف 201 إلى 300 من 10.000."
+      },
+      "scrollerWithoutTabindex": "grid",
+      "axeArchLayout": [
+        {
+          "id": "aria-required-children",
+          "impact": "critical",
+          "nodes": 1,
+          "target": [
+            ".g-wrap"
+          ],
+          "summary": "Fix any of the following:\n  Element has children which are not allowed: div[tabindex], div[aria-atomic]"
+        }
+      ]
+    },
+    "webkit": {
+      "fr": {
+        "axeLoad": [],
+        "at5000": {
+          "mounted": 31,
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "Alger"
+          }
+        },
+        "retained": {
+          "mounted": 26,
+          "first": [
+            [
+              "r4999",
+              5001,
+              true
+            ],
+            [
+              "r9975",
+              9977,
+              false
+            ]
+          ],
+          "last": [
+            "r9999",
+            10001,
+            false
+          ],
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "Alger"
+          }
+        },
+        "liveSort": "Trié par Ville, ordre croissant. 10 000 lignes.",
+        "liveFilter": "Filtre appliqué : 1 667 lignes.",
+        "axeTree": [],
+        "treeAttrs": [
+          [
+            "5002",
+            "1",
+            "100",
+            "51",
+            "true"
+          ],
+          [
+            "5003",
+            "2",
+            "99",
+            "1",
+            null
+          ]
+        ],
+        "liveCollapse": "Service 50 replié.",
+        "detail": {
+          "rowindex": "5006",
+          "cells": 1,
+          "colspan": "6",
+          "masterExpanded": "true",
+          "masterRow": "5005",
+          "text": "Détail de Patient 5000 : Cardiologie — Constantine, 2026-09-17"
+        },
+        "livePage": "Page 3 sur 100, lignes 201 à 300 sur 10 000."
+      },
+      "ar": {
+        "axeLoad": [],
+        "at5000": {
+          "mounted": 31,
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "الجزائر"
+          }
+        },
+        "retained": {
+          "mounted": 26,
+          "first": [
+            [
+              "r4999",
+              5001,
+              true
+            ],
+            [
+              "r9975",
+              9977,
+              false
+            ]
+          ],
+          "last": [
+            "r9999",
+            10001,
+            false
+          ],
+          "active": {
+            "key": "r4999",
+            "rowindex": 5001,
+            "colindex": 2,
+            "role": "gridcell",
+            "text": "الجزائر"
+          }
+        },
+        "liveSort": "مرتب حسب المدينة، تصاعديًا. 10.000 صف.",
+        "liveFilter": "طُبّق المرشح: 1.667 صفًا.",
+        "axeTree": [],
+        "treeAttrs": [
+          [
+            "5002",
+            "1",
+            "100",
+            "51",
+            "true"
+          ],
+          [
+            "5003",
+            "2",
+            "99",
+            "1",
+            null
+          ]
+        ],
+        "liveCollapse": "مصلحة 50 مطوي.",
+        "detail": {
+          "rowindex": "5006",
+          "cells": 1,
+          "colspan": "6",
+          "masterExpanded": "true",
+          "masterRow": "5005",
+          "text": "تفاصيل مريض 5000: أمراض القلب — قسنطينة, 2026-09-17"
+        },
+        "livePage": "الصفحة 3 من 100، الصفوف 201 إلى 300 من 10.000."
+      },
+      "scrollerWithoutTabindex": "rowheader/1",
+      "axeArchLayout": [
+        {
+          "id": "aria-required-children",
+          "impact": "critical",
+          "nodes": 1,
+          "target": [
+            ".g-wrap"
+          ],
+          "summary": "Fix any of the following:\n  Element has children which are not allowed: div[tabindex], div[aria-atomic]"
+        }
+      ]
+    }
+  }
+}

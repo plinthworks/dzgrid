@@ -1,0 +1,4 @@
+node: 20572 ms
+chrome: 18518 ms
+firefox: 15071 ms
+webkit: 14823 ms

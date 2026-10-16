@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>S6 · Angular templates in recycled cells</title>
+<style>
+  html, body { margin: 0; font: 12px/1.2 system-ui, sans-serif; }
+  .vp { position: relative; overflow: auto; inline-size: 1320px; contain: strict; }
+  .rows { position: relative; }
+  .row { position: absolute; inset-inline-start: 0; display: flex; contain: layout style; will-change: transform; }
+  .cell { box-sizing: border-box; overflow: hidden; white-space: nowrap; padding-inline: 4px; display: flex; align-items: center; border-block-end: 1px solid #ddd; }
+  .badge { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 8px; }
+  .badge svg { inline-size: 10px; block-size: 10px; }
+  .badge--ok { background: #dfd; } .badge--warn { background: #ffd; } .badge--bad { background: #fdd; } .badge--info { background: #ddf; }
+  .act { font: inherit; padding: 0 6px; }
+</style>
+</head>
+<body>
+<s6-app></s6-app>
+<script type="module" src="./src/main.ts"></script>
+</body>
+</html>

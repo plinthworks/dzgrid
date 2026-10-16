@@ -3,3 +3,7 @@ dist/
 packed/
 spikes/**/results/*.png
 .DS_Store
+spikes/**/results/*.xlsx
+spikes/**/results/quicklook/
+spikes/**/results/dist/
+spikes/**/build/

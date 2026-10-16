@@ -1,0 +1,116 @@
+<!doctype html><meta charset="utf-8"><title>S7 clipboard</title>
+<style>#grid{width:200px;height:60px;border:1px solid}#grid:focus{outline:2px solid}</style>
+<div id="grid" tabindex="0">grid (not editable)</div>
+<textarea id="ta"></textarea>
+<button id="btn">act</button>
+<script type="module">
+  import * as tsv from './tsv.js';
+  import { parseClipboardHtml } from './html-table.js';
+  window.tsv = tsv;
+  window.parseClipboardHtml = parseClipboardHtml;
+  window.log = [];
+  // What the grid would copy: a 2×2 range with a tab, a newline and a quote inside.
+  window.copyMatrix = [['a\tb', 'line1\nline2'], ['"q"', 'محمد']];
+  const grid = document.getElementById('grid');
+  const onCopyLike = (e) => {
+    const entry = { type: e.type, target: e.target.id || e.target.nodeName, active: document.activeElement?.id || document.activeElement?.nodeName, hasClipboardData: !!e.clipboardData, isTrusted: e.isTrusted };
+    try {
+      e.clipboardData.setData('text/plain', tsv.encodeTsv(window.copyMatrix));
+      e.clipboardData.setData('text/html', '<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>');
+      entry.types = Array.from(e.clipboardData.types);
+      entry.setOk = true;
+      e.preventDefault();
+    } catch (err) { entry.error = String(err); }
+    window.log.push(entry);
+  };
+  const onPaste = (e) => {
+    const entry = { type: e.type, target: e.target.id || e.target.nodeName, active: document.activeElement?.id || document.activeElement?.nodeName, hasClipboardData: !!e.clipboardData, isTrusted: e.isTrusted };
+    try {
+      entry.types = Array.from(e.clipboardData.types);
+      entry.plain = e.clipboardData.getData('text/plain');
+      entry.html = e.clipboardData.getData('text/html');
+      entry.decoded = tsv.decodeTsv(entry.plain);
+      entry.htmlParsed = entry.html ? parseClipboardHtml(entry.html)?.values ?? null : null;
+      e.preventDefault();
+    } catch (err) { entry.error = String(err); }
+    window.log.push(entry);
+  };
+  // Listened on the document, not on the grid: Firefox fires copy/cut/paste at
+  // <body> when the focused element is not editable and nothing is selected.
+  // The handler decides by focus: it acts when the active element is ours.
+  const ours = () => grid.contains(document.activeElement) || document.activeElement?.id === 'ta';
+  const route = (fn) => (e) => (ours() ? fn(e) : window.log.push({ type: e.type, target: 'ignored', active: document.activeElement?.nodeName }));
+  document.addEventListener('copy', route(onCopyLike));
+  document.addEventListener('cut', route(onCopyLike));
+  document.addEventListener('paste', route(onPaste));
+
+  window.withTimeout = (p, ms = 3000) => Promise.race([p, new Promise((r) => setTimeout(() => r({ timeout: true }), ms))]);
+  window.features = () => ({
+    ClipboardEvent: typeof ClipboardEvent,
+    DataTransferCtor: (() => { try { new DataTransfer(); return true; } catch { return false; } })(),
+    syntheticPaste: (() => {
+      try {
+        const dt = new DataTransfer();
+        dt.setData('text/plain', 'x\ty\r\n');
+        dt.setData('text/html', '<table><tr><td>x</td><td>y</td></tr></table>');
+        grid.focus();
+        const before = window.log.length;
+        grid.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        return window.log.slice(before);
+      } catch (e) { return String(e); }
+    })(),
+    navigatorClipboard: !!navigator.clipboard,
+    readText: typeof navigator.clipboard?.readText,
+    writeText: typeof navigator.clipboard?.writeText,
+    read: typeof navigator.clipboard?.read,
+    write: typeof navigator.clipboard?.write,
+    ClipboardItem: typeof ClipboardItem,
+    ClipboardItemSupportsHtml: typeof ClipboardItem?.supports === 'function' ? ClipboardItem.supports('text/html') : 'no supports()',
+    secureContext: isSecureContext,
+  });
+  // Runs `fn` inside a click handler (transient user activation), resolves with its result.
+  window.inGesture = (name) => new Promise((resolve) => {
+    const btn = document.getElementById('btn');
+    const h = async () => {
+      btn.removeEventListener('click', h);
+      resolve(await window.withTimeout(window.actions[name]().then((v) => ({ ok: true, v }), (e) => ({ ok: false, error: String(e.name + ': ' + e.message) }))));
+    };
+    btn.addEventListener('click', h);
+    window.pendingAction = name;
+  });
+  window.actions = {
+    writeText: () => navigator.clipboard.writeText('S7-writeText-marker'),
+    readText: () => navigator.clipboard.readText(),
+    writeHtml: () => navigator.clipboard.write([new ClipboardItem({
+      'text/plain': new Blob(['S7-html-marker\tb\r\n'], { type: 'text/plain' }),
+      'text/html': new Blob(['<table><tr><td>S7-html-marker</td><td>b</td></tr></table>'], { type: 'text/html' }),
+    })]),
+    read: async () => {
+      const items = await navigator.clipboard.read();
+      const out = [];
+      for (const it of items) for (const t of it.types) out.push({ type: t, text: await (await it.getType(t)).text() });
+      return out;
+    },
+    execCopy: async () => { grid.focus(); const before = window.log.length; const r = document.execCommand('copy'); return { returned: r, events: window.log.splice(before) }; },
+    execPaste: async () => { grid.focus(); const before = window.log.length; const r = document.execCommand('paste'); return { returned: r, events: window.log.splice(before) }; },
+  };
+  window.noGesture = async (name) => window.withTimeout(window.actions[name]().then((v) => ({ ok: true, v }), (e) => ({ ok: false, error: String(e.name + ': ' + e.message) })));
+
+  window.parseFixtures = async (names) => {
+    const out = {};
+    for (const n of names) {
+      const html = await (await fetch('./fixtures/' + n)).text();
+      out[n] = parseClipboardHtml(html);
+    }
+    return out;
+  };
+  window.large = () => {
+    const m = Array.from({ length: 10_000 }, (_, i) => Array.from({ length: 30 }, (_, j) => (j === 5 ? `note ${i}\nsuite` : j === 7 ? `"q" ${i}` : `v${i}-${j}`)));
+    const ts = [];
+    let text, back;
+    for (let k = 0; k < 3; k++) { text = tsv.encodeTsv(m); const t0 = performance.now(); back = tsv.decodeTsv(text); ts.push(performance.now() - t0); }
+    ts.sort((a, b) => a - b);
+    return { bytes: text.length, decodeMs: Math.round(ts[1]), same: JSON.stringify(back) === JSON.stringify(m) };
+  };
+  window.ready = true;
+</script>

@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><title>S8 xlsx</title>
+<script type="module">
+  import { offsetAt } from '/packages/core/src/index.ts';
+  import { writeXlsx } from './xlsx.js';
+  import { canDeflate } from './zip.js';
+  import { COLUMNS, makeRows } from './data.js';
+  window.run = async () => {
+    const rows = makeRows();
+    const at = (ms) => offsetAt(ms, 'Africa/Algiers');
+    const out = { canDeflate: canDeflate(), variants: {} };
+    for (const [name, opts] of Object.entries({ sharedDeflate: { strings: 'shared', method: 'deflate' }, sharedStore: { strings: 'shared', method: 'store' }, inlineDeflate: { strings: 'inline', method: 'deflate' } })) {
+      const ts = [];
+      let res;
+      for (let i = 0; i < 3; i++) {
+        const t0 = performance.now();
+        res = await writeXlsx({ sheetName: 'تصدير', columns: COLUMNS, rows, rtl: true, offsetAt: at, ...opts });
+        ts.push(performance.now() - t0);
+      }
+      ts.sort((a, b) => a - b);
+      out.variants[name] = { ms: Math.round(ts[1]), runs: ts.map(Math.round), bytes: res.bytes.length, deflated: res.deflated, problems: res.problems.length };
+      if (name === 'sharedDeflate' || name === 'sharedStore') {
+        let bin = '';
+        for (let i = 0; i < res.bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, res.bytes.subarray(i, i + 0x8000));
+        out.variants[name].base64 = btoa(bin);
+      }
+    }
+    return out;
+  };
+  window.ready = true;
+</script>

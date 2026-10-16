@@ -1,0 +1,241 @@
+{
+  "at": "2026-10-16T13:42:07.524Z",
+  "node": {
+    "sharedDeflate": {
+      "ms": 103,
+      "bytes": 606618,
+      "sheetXmlBytes": 3309095,
+      "deflated": true,
+      "problems": []
+    },
+    "sharedStore": {
+      "ms": 58,
+      "bytes": 3515797,
+      "sheetXmlBytes": 3309095,
+      "deflated": false,
+      "problems": []
+    },
+    "inlineDeflate": {
+      "ms": 104,
+      "bytes": 636975,
+      "sheetXmlBytes": 4331835,
+      "deflated": true,
+      "problems": []
+    },
+    "ltrDeflate": {
+      "ms": 94,
+      "bytes": 606606,
+      "sheetXmlBytes": 3309079,
+      "deflated": true,
+      "problems": []
+    }
+  },
+  "crc32": [
+    true,
+    true,
+    true
+  ],
+  "crc32Check": "cbf43926",
+  "crc32MBperS": 1797,
+  "unzipT": {
+    "sharedDeflate": true,
+    "sharedStore": true,
+    "inlineDeflate": true,
+    "ltrDeflate": true,
+    "sample": true
+  },
+  "xmllint": {
+    "[Content_Types].xml": true,
+    "_rels/.rels": true,
+    "xl/_rels/workbook.xml.rels": true,
+    "xl/sharedStrings.xml": true,
+    "xl/styles.xml": true,
+    "xl/workbook.xml": true,
+    "xl/worksheets/sheet1.xml": true
+  },
+  "readBack": {
+    "sharedDeflate": {
+      "crcOk": true,
+      "methods": {
+        "[Content_Types].xml": 8,
+        "_rels/.rels": 8,
+        "xl/workbook.xml": 8,
+        "xl/_rels/workbook.xml.rels": 8,
+        "xl/styles.xml": 8,
+        "xl/worksheets/sheet1.xml": 8,
+        "xl/sharedStrings.xml": 8
+      },
+      "cellsWrong": 0,
+      "firstBad": []
+    },
+    "inlineDeflate": {
+      "crcOk": true,
+      "methods": {
+        "[Content_Types].xml": 8,
+        "_rels/.rels": 8,
+        "xl/workbook.xml": 8,
+        "xl/_rels/workbook.xml.rels": 8,
+        "xl/styles.xml": 8,
+        "xl/worksheets/sheet1.xml": 8
+      },
+      "cellsWrong": 0,
+      "firstBad": []
+    },
+    "sharedStore": {
+      "crcOk": true,
+      "methods": {
+        "[Content_Types].xml": 0,
+        "_rels/.rels": 0,
+        "xl/workbook.xml": 0,
+        "xl/_rels/workbook.xml.rels": 0,
+        "xl/styles.xml": 0,
+        "xl/worksheets/sheet1.xml": 0,
+        "xl/sharedStrings.xml": 0
+      },
+      "cellsWrong": 0,
+      "firstBad": []
+    }
+  },
+  "browsers": {
+    "chrome": {
+      "version": "155.0.8059.80",
+      "canDeflate": true,
+      "sharedDeflate": {
+        "ms": 72,
+        "runs": [
+          67,
+          72,
+          79
+        ],
+        "bytes": 606618,
+        "deflated": true,
+        "problems": 0,
+        "unzipT": true,
+        "sameContentAsNode": true
+      },
+      "sharedStore": {
+        "ms": 33,
+        "runs": [
+          33,
+          33,
+          33
+        ],
+        "bytes": 3515797,
+        "deflated": false,
+        "problems": 0,
+        "unzipT": true,
+        "identicalToNode": true
+      },
+      "inlineDeflate": {
+        "ms": 79,
+        "runs": [
+          73,
+          79,
+          84
+        ],
+        "bytes": 636975,
+        "deflated": true,
+        "problems": 0
+      }
+    },
+    "firefox": {
+      "version": "157.0",
+      "canDeflate": true,
+      "sharedDeflate": {
+        "ms": 74,
+        "runs": [
+          72,
+          74,
+          82
+        ],
+        "bytes": 614138,
+        "deflated": true,
+        "problems": 0,
+        "unzipT": true,
+        "sameContentAsNode": true
+      },
+      "sharedStore": {
+        "ms": 44,
+        "runs": [
+          43,
+          44,
+          78
+        ],
+        "bytes": 3515797,
+        "deflated": false,
+        "problems": 0,
+        "unzipT": true,
+        "identicalToNode": true
+      },
+      "inlineDeflate": {
+        "ms": 78,
+        "runs": [
+          78,
+          78,
+          81
+        ],
+        "bytes": 634149,
+        "deflated": true,
+        "problems": 0
+      }
+    },
+    "webkit": {
+      "version": "27.2",
+      "canDeflate": true,
+      "sharedDeflate": {
+        "ms": 66,
+        "runs": [
+          61,
+          66,
+          82
+        ],
+        "bytes": 635421,
+        "deflated": true,
+        "problems": 0,
+        "unzipT": true,
+        "sameContentAsNode": true
+      },
+      "sharedStore": {
+        "ms": 29,
+        "runs": [
+          29,
+          29,
+          30
+        ],
+        "bytes": 3515797,
+        "deflated": false,
+        "problems": 0,
+        "unzipT": true,
+        "identicalToNode": true
+      },
+      "inlineDeflate": {
+        "ms": 66,
+        "runs": [
+          64,
+          66,
+          72
+        ],
+        "bytes": 660401,
+        "deflated": true,
+        "problems": 0
+      }
+    }
+  },
+  "apps": {
+    "installed": [
+      "Numbers.app"
+    ],
+    "quickLook": {
+      "ok": true,
+      "html": "quicklook/sample-rtl.xlsx.qlpreview/Preview.html",
+      "compare": {
+        "rows": 13,
+        "mismatches": [],
+        "booleansShownAs": [
+          " "
+        ]
+      }
+    },
+    "soffice": "not installed"
+  }
+}

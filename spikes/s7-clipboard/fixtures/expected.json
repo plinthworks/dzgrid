@@ -1,0 +1,122 @@
+{
+ "excel-win.html": {
+  "values": [
+   [
+    "Nom",
+    "Montant",
+    "Date",
+    "Code"
+   ],
+   [
+    "Dupont",
+    "1,234.50",
+    "3/5/2026",
+    "007"
+   ],
+   [
+    "Ligne 1\nLigne 2",
+    "fusion horizontale",
+    "",
+    "12.5%"
+   ],
+   [
+    "محمد بن علي",
+    "-42",
+    "",
+    ""
+   ],
+   [
+    "",
+    "\"guillemets\" et tab",
+    "",
+    ""
+   ]
+  ],
+  "merges": [
+   {
+    "r": 2,
+    "c": 1,
+    "rows": 1,
+    "cols": 2
+   },
+   {
+    "r": 3,
+    "c": 0,
+    "rows": 2,
+    "cols": 1
+   }
+  ],
+  "meta": {
+   "1,1": {
+    "numFmt": "#,##0.00",
+    "x:num": "1234.5"
+   },
+   "1,2": {
+    "numFmt": "Short Date",
+    "x:num": "46086"
+   },
+   "1,3": {
+    "numFmt": "@"
+   },
+   "2,3": {
+    "numFmt": "0.0%",
+    "x:num": "0.125"
+   },
+   "3,1": {
+    "x:num": ""
+   }
+  }
+ },
+ "sheets.html": {
+  "values": [
+   [
+    "a",
+    "1,234.50",
+    ""
+   ],
+   [
+    "x\ny",
+    "merged",
+    ""
+   ]
+  ],
+  "merges": [
+   {
+    "r": 1,
+    "c": 1,
+    "rows": 1,
+    "cols": 2
+   }
+  ],
+  "meta": {
+   "0,1": {
+    "data-sheets-value": "{\"1\":3,\"3\":1234.5}"
+   }
+  }
+ },
+ "libreoffice.html": {
+  "values": [
+   [
+    "Ville",
+    "Population"
+   ],
+   [
+    "Alger",
+    "3 415 811"
+   ],
+   [
+    "",
+    "50%"
+   ]
+  ],
+  "merges": [],
+  "meta": {
+   "1,1": {
+    "sdval": "3415811"
+   },
+   "2,1": {
+    "sdval": "0.5"
+   }
+  }
+ }
+}

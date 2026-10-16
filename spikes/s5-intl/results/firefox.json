@@ -1,0 +1,1872 @@
+{
+  "info": {
+    "defaultLocale": "en-US",
+    "supportedValuesOf": true,
+    "zonesKnown": 445,
+    "havana2023": "3/12/2023, GMT-04:00"
+  },
+  "numbering": {
+    "ar-DZ": {
+      "defaultNu": "latn",
+      "defaultText": "1.234.567,891",
+      "defaultDateNu": "latn",
+      "defaultDateCalendar": "gregory",
+      "tagLatn": "1.234.567,891",
+      "tagLatnNu": "latn",
+      "optionLatn": "1.234.567,891",
+      "optionLatnNu": "latn",
+      "optionLatnCodePoints": "U+200E U+002D U+0031 U+002E U+0032 U+0033 U+0034 U+002E U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+      "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+    },
+    "ar-SA": {
+      "defaultNu": "arab",
+      "defaultText": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "defaultDateNu": "arab",
+      "defaultDateCalendar": "gregory",
+      "tagLatn": "1,234,567.891",
+      "tagLatnNu": "latn",
+      "optionLatn": "1,234,567.891",
+      "optionLatnNu": "latn",
+      "optionLatnCodePoints": "U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+      "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+    },
+    "ar-EG": {
+      "defaultNu": "arab",
+      "defaultText": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "defaultDateNu": "arab",
+      "defaultDateCalendar": "gregory",
+      "tagLatn": "1,234,567.891",
+      "tagLatnNu": "latn",
+      "optionLatn": "1,234,567.891",
+      "optionLatnNu": "latn",
+      "optionLatnCodePoints": "U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+      "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+    },
+    "ar": {
+      "defaultNu": "latn",
+      "defaultText": "1,234,567.891",
+      "defaultDateNu": "latn",
+      "defaultDateCalendar": "gregory",
+      "tagLatn": "1,234,567.891",
+      "tagLatnNu": "latn",
+      "optionLatn": "1,234,567.891",
+      "optionLatnNu": "latn",
+      "optionLatnCodePoints": "U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+      "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+    },
+    "ar-MA": {
+      "defaultNu": "latn",
+      "defaultText": "1.234.567,891",
+      "defaultDateNu": "latn",
+      "defaultDateCalendar": "gregory",
+      "tagLatn": "1.234.567,891",
+      "tagLatnNu": "latn",
+      "optionLatn": "1.234.567,891",
+      "optionLatnNu": "latn",
+      "optionLatnCodePoints": "U+200E U+002D U+0031 U+002E U+0032 U+0033 U+0034 U+002E U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+      "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+    },
+    "ar-TN": {
+      "defaultNu": "latn",
+      "defaultText": "1.234.567,891",
+      "defaultDateNu": "latn",
+      "defaultDateCalendar": "gregory",
+      "tagLatn": "1.234.567,891",
+      "tagLatnNu": "latn",
+      "optionLatn": "1.234.567,891",
+      "optionLatnNu": "latn",
+      "optionLatnCodePoints": "U+200E U+002D U+0031 U+002E U+0032 U+0033 U+0034 U+002E U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+      "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+    },
+    "fr-DZ": {
+      "defaultNu": "latn",
+      "defaultText": "1 234 567,891",
+      "defaultDateNu": "latn",
+      "defaultDateCalendar": "gregory",
+      "tagLatn": "1 234 567,891",
+      "tagLatnNu": "latn",
+      "optionLatn": "1 234 567,891",
+      "optionLatnNu": "latn",
+      "optionLatnCodePoints": "U+002D U+0031 U+202F U+0032 U+0033 U+0034 U+202F U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+      "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+    },
+    "fr-FR": {
+      "defaultNu": "latn",
+      "defaultText": "1 234 567,891",
+      "defaultDateNu": "latn",
+      "defaultDateCalendar": "gregory",
+      "tagLatn": "1 234 567,891",
+      "tagLatnNu": "latn",
+      "optionLatn": "1 234 567,891",
+      "optionLatnNu": "latn",
+      "optionLatnCodePoints": "U+002D U+0031 U+202F U+0032 U+0033 U+0034 U+202F U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+      "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+      "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+    }
+  },
+  "calendars": {
+    "ar-SA default": {
+      "calendar": "gregory",
+      "numberingSystem": "arab",
+      "hourCycle": "h12",
+      "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+      "parts": [
+        [
+          "day",
+          "٥"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "month",
+          "مارس"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "year",
+          "٢٠٢٦"
+        ],
+        [
+          "literal",
+          " في "
+        ],
+        [
+          "hour",
+          "١"
+        ],
+        [
+          "literal",
+          ":"
+        ],
+        [
+          "minute",
+          "٠٠"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "dayPeriod",
+          "م"
+        ]
+      ]
+    },
+    "ar-SA calendar:gregory": {
+      "calendar": "gregory",
+      "numberingSystem": "arab",
+      "hourCycle": "h12",
+      "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+      "parts": [
+        [
+          "day",
+          "٥"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "month",
+          "مارس"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "year",
+          "٢٠٢٦"
+        ],
+        [
+          "literal",
+          " في "
+        ],
+        [
+          "hour",
+          "١"
+        ],
+        [
+          "literal",
+          ":"
+        ],
+        [
+          "minute",
+          "٠٠"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "dayPeriod",
+          "م"
+        ]
+      ]
+    },
+    "ar-SA-u-ca-gregory": {
+      "calendar": "gregory",
+      "numberingSystem": "arab",
+      "hourCycle": "h12",
+      "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+      "parts": [
+        [
+          "day",
+          "٥"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "month",
+          "مارس"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "year",
+          "٢٠٢٦"
+        ],
+        [
+          "literal",
+          " في "
+        ],
+        [
+          "hour",
+          "١"
+        ],
+        [
+          "literal",
+          ":"
+        ],
+        [
+          "minute",
+          "٠٠"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "dayPeriod",
+          "م"
+        ]
+      ]
+    },
+    "ar-SA gregory+latn": {
+      "calendar": "gregory",
+      "numberingSystem": "latn",
+      "hourCycle": "h12",
+      "text": "5 مارس 2026 في 1:00 م",
+      "parts": [
+        [
+          "day",
+          "5"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "month",
+          "مارس"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "year",
+          "2026"
+        ],
+        [
+          "literal",
+          " في "
+        ],
+        [
+          "hour",
+          "1"
+        ],
+        [
+          "literal",
+          ":"
+        ],
+        [
+          "minute",
+          "00"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "dayPeriod",
+          "م"
+        ]
+      ]
+    },
+    "ar-DZ default": {
+      "calendar": "gregory",
+      "numberingSystem": "latn",
+      "hourCycle": "h12",
+      "text": "5 مارس 2026 في 1:00 م",
+      "parts": [
+        [
+          "day",
+          "5"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "month",
+          "مارس"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "year",
+          "2026"
+        ],
+        [
+          "literal",
+          " في "
+        ],
+        [
+          "hour",
+          "1"
+        ],
+        [
+          "literal",
+          ":"
+        ],
+        [
+          "minute",
+          "00"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "dayPeriod",
+          "م"
+        ]
+      ]
+    },
+    "ar-EG default": {
+      "calendar": "gregory",
+      "numberingSystem": "arab",
+      "hourCycle": "h12",
+      "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+      "parts": [
+        [
+          "day",
+          "٥"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "month",
+          "مارس"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "year",
+          "٢٠٢٦"
+        ],
+        [
+          "literal",
+          " في "
+        ],
+        [
+          "hour",
+          "١"
+        ],
+        [
+          "literal",
+          ":"
+        ],
+        [
+          "minute",
+          "٠٠"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "dayPeriod",
+          "م"
+        ]
+      ]
+    },
+    "fa-IR default": {
+      "calendar": "persian",
+      "numberingSystem": "arabext",
+      "hourCycle": "h23",
+      "text": "۱۴ اسفند ۱۴۰۴ ساعت ۱۳:۰۰",
+      "parts": [
+        [
+          "day",
+          "۱۴"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "month",
+          "اسفند"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "year",
+          "۱۴۰۴"
+        ],
+        [
+          "literal",
+          " ساعت "
+        ],
+        [
+          "hour",
+          "۱۳"
+        ],
+        [
+          "literal",
+          ":"
+        ],
+        [
+          "minute",
+          "۰۰"
+        ]
+      ]
+    },
+    "fa-IR gregory+latn": {
+      "calendar": "gregory",
+      "numberingSystem": "latn",
+      "hourCycle": "h23",
+      "text": "5 مارس 2026 ساعت 13:00",
+      "parts": [
+        [
+          "day",
+          "5"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "month",
+          "مارس"
+        ],
+        [
+          "literal",
+          " "
+        ],
+        [
+          "year",
+          "2026"
+        ],
+        [
+          "literal",
+          " ساعت "
+        ],
+        [
+          "hour",
+          "13"
+        ],
+        [
+          "literal",
+          ":"
+        ],
+        [
+          "minute",
+          "00"
+        ]
+      ]
+    },
+    "zoneSensitivity": {
+      "UTC": "الخميس، 5 مارس 2026 في 11:30 م",
+      "Algiers": "الجمعة، 6 مارس 2026 في 12:30 ص",
+      "LosAngeles": "الخميس، 5 مارس 2026 في 3:30 م"
+    },
+    "monthsGregory": {
+      "ar-SA": [
+        "يناير",
+        "فبراير",
+        "مارس",
+        "أبريل",
+        "مايو",
+        "يونيو",
+        "يوليو",
+        "أغسطس",
+        "سبتمبر",
+        "أكتوبر",
+        "نوفمبر",
+        "ديسمبر"
+      ],
+      "ar-DZ": [
+        "جانفي",
+        "فيفري",
+        "مارس",
+        "أفريل",
+        "ماي",
+        "جوان",
+        "جويلية",
+        "أوت",
+        "سبتمبر",
+        "أكتوبر",
+        "نوفمبر",
+        "ديسمبر"
+      ],
+      "ar-EG": [
+        "يناير",
+        "فبراير",
+        "مارس",
+        "أبريل",
+        "مايو",
+        "يونيو",
+        "يوليو",
+        "أغسطس",
+        "سبتمبر",
+        "أكتوبر",
+        "نوفمبر",
+        "ديسمبر"
+      ],
+      "fr-FR": [
+        "janvier",
+        "février",
+        "mars",
+        "avril",
+        "mai",
+        "juin",
+        "juillet",
+        "août",
+        "septembre",
+        "octobre",
+        "novembre",
+        "décembre"
+      ]
+    }
+  },
+  "parts": {
+    "fr-FR EUR": {
+      "text": "-1 234 567,50 €",
+      "codePoints": "U+002D U+0031 U+202F U+0032 U+0033 U+0034 U+202F U+0035 U+0036 U+0037 U+002C U+0035 U+0030 U+00A0 U+20AC",
+      "nu": "latn",
+      "parts": [
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          " ",
+          "U+202F"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          " ",
+          "U+202F"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "50",
+          "U+0035 U+0030"
+        ],
+        [
+          "literal",
+          " ",
+          "U+00A0"
+        ],
+        [
+          "currency",
+          "€",
+          "U+20AC"
+        ]
+      ]
+    },
+    "fr-FR DZD": {
+      "text": "1 234 567,50 DZD",
+      "codePoints": "U+0031 U+202F U+0032 U+0033 U+0034 U+202F U+0035 U+0036 U+0037 U+002C U+0035 U+0030 U+00A0 U+0044 U+005A U+0044",
+      "nu": "latn",
+      "parts": [
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          " ",
+          "U+202F"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          " ",
+          "U+202F"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "50",
+          "U+0035 U+0030"
+        ],
+        [
+          "literal",
+          " ",
+          "U+00A0"
+        ],
+        [
+          "currency",
+          "DZD",
+          "U+0044 U+005A U+0044"
+        ]
+      ]
+    },
+    "fr-FR percent": {
+      "text": "-12,5 %",
+      "codePoints": "U+002D U+0031 U+0032 U+002C U+0035 U+00A0 U+0025",
+      "nu": "latn",
+      "parts": [
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "12",
+          "U+0031 U+0032"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "5",
+          "U+0035"
+        ],
+        [
+          "literal",
+          " ",
+          "U+00A0"
+        ],
+        [
+          "percentSign",
+          "%",
+          "U+0025"
+        ]
+      ]
+    },
+    "fr-FR decimal": {
+      "text": "1 234 567,891",
+      "codePoints": "U+0031 U+202F U+0032 U+0033 U+0034 U+202F U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+      "nu": "latn",
+      "parts": [
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          " ",
+          "U+202F"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          " ",
+          "U+202F"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "891",
+          "U+0038 U+0039 U+0031"
+        ]
+      ]
+    },
+    "fr-CH decimal": {
+      "text": "1'234'567,891",
+      "codePoints": "U+0031 U+0027 U+0032 U+0033 U+0034 U+0027 U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+      "nu": "latn",
+      "parts": [
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          "'",
+          "U+0027"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          "'",
+          "U+0027"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "891",
+          "U+0038 U+0039 U+0031"
+        ]
+      ]
+    },
+    "ar-DZ DZD latn": {
+      "text": "‏‎-1.234.567,50 د.ج.‏",
+      "codePoints": "U+200F U+200E U+002D U+0031 U+002E U+0032 U+0033 U+0034 U+002E U+0035 U+0036 U+0037 U+002C U+0035 U+0030 U+00A0 U+062F U+002E U+062C U+002E U+200F",
+      "nu": "latn",
+      "parts": [
+        [
+          "literal",
+          "‏‎",
+          "U+200F U+200E"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          ".",
+          "U+002E"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          ".",
+          "U+002E"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "50",
+          "U+0035 U+0030"
+        ],
+        [
+          "literal",
+          " ",
+          "U+00A0"
+        ],
+        [
+          "currency",
+          "د.ج.",
+          "U+062F U+002E U+062C U+002E"
+        ],
+        [
+          "literal",
+          "‏",
+          "U+200F"
+        ]
+      ]
+    },
+    "ar-DZ DZD default": {
+      "text": "‏‎-1.234.567,50 د.ج.‏",
+      "codePoints": "U+200F U+200E U+002D U+0031 U+002E U+0032 U+0033 U+0034 U+002E U+0035 U+0036 U+0037 U+002C U+0035 U+0030 U+00A0 U+062F U+002E U+062C U+002E U+200F",
+      "nu": "latn",
+      "parts": [
+        [
+          "literal",
+          "‏‎",
+          "U+200F U+200E"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          ".",
+          "U+002E"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          ".",
+          "U+002E"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "50",
+          "U+0035 U+0030"
+        ],
+        [
+          "literal",
+          " ",
+          "U+00A0"
+        ],
+        [
+          "currency",
+          "د.ج.",
+          "U+062F U+002E U+062C U+002E"
+        ],
+        [
+          "literal",
+          "‏",
+          "U+200F"
+        ]
+      ]
+    },
+    "ar-DZ percent latn": {
+      "text": "‎-12,5‎%‎",
+      "codePoints": "U+200E U+002D U+0031 U+0032 U+002C U+0035 U+200E U+0025 U+200E",
+      "nu": "latn",
+      "parts": [
+        [
+          "literal",
+          "‎",
+          "U+200E"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "12",
+          "U+0031 U+0032"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "5",
+          "U+0035"
+        ],
+        [
+          "literal",
+          "‎",
+          "U+200E"
+        ],
+        [
+          "percentSign",
+          "%",
+          "U+0025"
+        ],
+        [
+          "literal",
+          "‎",
+          "U+200E"
+        ]
+      ]
+    },
+    "ar-DZ decimal latn": {
+      "text": "‎-1.234.567,891",
+      "codePoints": "U+200E U+002D U+0031 U+002E U+0032 U+0033 U+0034 U+002E U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+      "nu": "latn",
+      "parts": [
+        [
+          "literal",
+          "‎",
+          "U+200E"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          ".",
+          "U+002E"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          ".",
+          "U+002E"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ",",
+          "U+002C"
+        ],
+        [
+          "fraction",
+          "891",
+          "U+0038 U+0039 U+0031"
+        ]
+      ]
+    },
+    "ar-SA SAR default": {
+      "text": "؜-‏١٬٢٣٤٬٥٦٧٫٥٠ ر.س.‏",
+      "codePoints": "U+061C U+002D U+200F U+0661 U+066C U+0662 U+0663 U+0664 U+066C U+0665 U+0666 U+0667 U+066B U+0665 U+0660 U+00A0 U+0631 U+002E U+0633 U+002E U+200F",
+      "nu": "arab",
+      "parts": [
+        [
+          "literal",
+          "؜",
+          "U+061C"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "literal",
+          "‏",
+          "U+200F"
+        ],
+        [
+          "integer",
+          "١",
+          "U+0661"
+        ],
+        [
+          "group",
+          "٬",
+          "U+066C"
+        ],
+        [
+          "integer",
+          "٢٣٤",
+          "U+0662 U+0663 U+0664"
+        ],
+        [
+          "group",
+          "٬",
+          "U+066C"
+        ],
+        [
+          "integer",
+          "٥٦٧",
+          "U+0665 U+0666 U+0667"
+        ],
+        [
+          "decimal",
+          "٫",
+          "U+066B"
+        ],
+        [
+          "fraction",
+          "٥٠",
+          "U+0665 U+0660"
+        ],
+        [
+          "literal",
+          " ",
+          "U+00A0"
+        ],
+        [
+          "currency",
+          "ر.س.",
+          "U+0631 U+002E U+0633 U+002E"
+        ],
+        [
+          "literal",
+          "‏",
+          "U+200F"
+        ]
+      ]
+    },
+    "ar-SA SAR latn": {
+      "text": "‏‎-1,234,567.50 ر.س.‏",
+      "codePoints": "U+200F U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0035 U+0030 U+00A0 U+0631 U+002E U+0633 U+002E U+200F",
+      "nu": "latn",
+      "parts": [
+        [
+          "literal",
+          "‏‎",
+          "U+200F U+200E"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          ",",
+          "U+002C"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          ",",
+          "U+002C"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ".",
+          "U+002E"
+        ],
+        [
+          "fraction",
+          "50",
+          "U+0035 U+0030"
+        ],
+        [
+          "literal",
+          " ",
+          "U+00A0"
+        ],
+        [
+          "currency",
+          "ر.س.",
+          "U+0631 U+002E U+0633 U+002E"
+        ],
+        [
+          "literal",
+          "‏",
+          "U+200F"
+        ]
+      ]
+    },
+    "ar-EG percent default": {
+      "text": "؜-١٢٫٥٪؜",
+      "codePoints": "U+061C U+002D U+0661 U+0662 U+066B U+0665 U+066A U+061C",
+      "nu": "arab",
+      "parts": [
+        [
+          "literal",
+          "؜",
+          "U+061C"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "١٢",
+          "U+0661 U+0662"
+        ],
+        [
+          "decimal",
+          "٫",
+          "U+066B"
+        ],
+        [
+          "fraction",
+          "٥",
+          "U+0665"
+        ],
+        [
+          "percentSign",
+          "٪",
+          "U+066A"
+        ],
+        [
+          "literal",
+          "؜",
+          "U+061C"
+        ]
+      ]
+    },
+    "ar percent latn": {
+      "text": "‎-12.5‎%‎",
+      "codePoints": "U+200E U+002D U+0031 U+0032 U+002E U+0035 U+200E U+0025 U+200E",
+      "nu": "latn",
+      "parts": [
+        [
+          "literal",
+          "‎",
+          "U+200E"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "12",
+          "U+0031 U+0032"
+        ],
+        [
+          "decimal",
+          ".",
+          "U+002E"
+        ],
+        [
+          "fraction",
+          "5",
+          "U+0035"
+        ],
+        [
+          "literal",
+          "‎",
+          "U+200E"
+        ],
+        [
+          "percentSign",
+          "%",
+          "U+0025"
+        ],
+        [
+          "literal",
+          "‎",
+          "U+200E"
+        ]
+      ]
+    },
+    "ar decimal default": {
+      "text": "‎-1,234,567.891",
+      "codePoints": "U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+      "nu": "latn",
+      "parts": [
+        [
+          "literal",
+          "‎",
+          "U+200E"
+        ],
+        [
+          "minusSign",
+          "-",
+          "U+002D"
+        ],
+        [
+          "integer",
+          "1",
+          "U+0031"
+        ],
+        [
+          "group",
+          ",",
+          "U+002C"
+        ],
+        [
+          "integer",
+          "234",
+          "U+0032 U+0033 U+0034"
+        ],
+        [
+          "group",
+          ",",
+          "U+002C"
+        ],
+        [
+          "integer",
+          "567",
+          "U+0035 U+0036 U+0037"
+        ],
+        [
+          "decimal",
+          ".",
+          "U+002E"
+        ],
+        [
+          "fraction",
+          "891",
+          "U+0038 U+0039 U+0031"
+        ]
+      ]
+    }
+  },
+  "conformance": [
+    {
+      "id": "algiers-plain",
+      "ok": true,
+      "got": {
+        "from": 1772665200000,
+        "to": 1772751600000
+      },
+      "expected": {
+        "from": 1772665200000,
+        "to": 1772751600000
+      }
+    },
+    {
+      "id": "apia-day-after",
+      "ok": true,
+      "got": {
+        "from": 1325239200000,
+        "to": 1325325600000
+      },
+      "expected": {
+        "from": 1325239200000,
+        "to": 1325325600000
+      }
+    },
+    {
+      "id": "apia-day-before",
+      "ok": true,
+      "got": {
+        "from": 1325152800000,
+        "to": 1325239200000
+      },
+      "expected": {
+        "from": 1325152800000,
+        "to": 1325239200000
+      }
+    },
+    {
+      "id": "apia-skipped-day",
+      "ok": true,
+      "got": {
+        "from": 1325239200000,
+        "to": 1325239200000
+      },
+      "expected": {
+        "from": 1325239200000,
+        "to": 1325239200000
+      }
+    },
+    {
+      "id": "auckland-spring-forward",
+      "ok": true,
+      "got": {
+        "from": 1790424000000,
+        "to": 1790506800000
+      },
+      "expected": {
+        "from": 1790424000000,
+        "to": 1790506800000
+      }
+    },
+    {
+      "id": "dublin-spring-forward",
+      "ok": true,
+      "got": {
+        "from": 1774742400000,
+        "to": 1774825200000
+      },
+      "expected": {
+        "from": 1774742400000,
+        "to": 1774825200000
+      }
+    },
+    {
+      "id": "havana-no-midnight",
+      "ok": true,
+      "got": {
+        "from": 1678597200000,
+        "to": 1678680000000
+      },
+      "expected": {
+        "from": 1678597200000,
+        "to": 1678680000000
+      }
+    },
+    {
+      "id": "kolkata-half-hour-offset",
+      "ok": true,
+      "got": {
+        "from": 1772649000000,
+        "to": 1772735400000
+      },
+      "expected": {
+        "from": 1772649000000,
+        "to": 1772735400000
+      }
+    },
+    {
+      "id": "lord-howe-half-hour",
+      "ok": true,
+      "got": {
+        "from": 1775307600000,
+        "to": 1775395800000
+      },
+      "expected": {
+        "from": 1775307600000,
+        "to": 1775395800000
+      }
+    },
+    {
+      "id": "los-angeles-spring-forward",
+      "ok": true,
+      "got": {
+        "from": 1772956800000,
+        "to": 1773039600000
+      },
+      "expected": {
+        "from": 1772956800000,
+        "to": 1773039600000
+      }
+    },
+    {
+      "id": "paris-fall-back",
+      "ok": true,
+      "got": {
+        "from": 1792879200000,
+        "to": 1792969200000
+      },
+      "expected": {
+        "from": 1792879200000,
+        "to": 1792969200000
+      }
+    },
+    {
+      "id": "paris-spring-forward",
+      "ok": true,
+      "got": {
+        "from": 1774738800000,
+        "to": 1774821600000
+      },
+      "expected": {
+        "from": 1774738800000,
+        "to": 1774821600000
+      }
+    },
+    {
+      "id": "sao-paulo-no-midnight",
+      "ok": true,
+      "got": {
+        "from": 1541300400000,
+        "to": 1541383200000
+      },
+      "expected": {
+        "from": 1541300400000,
+        "to": 1541383200000
+      }
+    },
+    {
+      "id": "utc",
+      "ok": true,
+      "got": {
+        "from": 1772668800000,
+        "to": 1772755200000
+      },
+      "expected": {
+        "from": 1772668800000,
+        "to": 1772755200000
+      }
+    }
+  ],
+  "coldWarm": {
+    "coldMs": 0,
+    "warmUs": 18,
+    "formatToPartsUs": 1,
+    "k": 130000
+  },
+  "sweep": {
+    "days": 7670,
+    "zones": {
+      "Europe/Paris": {
+        "lastTo": 1924988400000,
+        "lengths": {
+          "23": 21,
+          "24": 7628,
+          "25": 21
+        },
+        "anomalies": [],
+        "usPerCall": 22.3,
+        "totalMs": 171
+      },
+      "Europe/Dublin": {
+        "lastTo": 1924992000000,
+        "lengths": {
+          "23": 21,
+          "24": 7628,
+          "25": 21
+        },
+        "anomalies": [],
+        "usPerCall": 22.3,
+        "totalMs": 171
+      },
+      "America/Los_Angeles": {
+        "lastTo": 1925020800000,
+        "lengths": {
+          "23": 21,
+          "24": 7628,
+          "25": 21
+        },
+        "anomalies": [],
+        "usPerCall": 22.2,
+        "totalMs": 170
+      },
+      "America/Sao_Paulo": {
+        "lastTo": 1925002800000,
+        "lengths": {
+          "23": 9,
+          "24": 7651,
+          "25": 10
+        },
+        "anomalies": [],
+        "usPerCall": 21.1,
+        "totalMs": 162
+      },
+      "America/Havana": {
+        "lastTo": 1925010000000,
+        "lengths": {
+          "23": 21,
+          "24": 7628,
+          "25": 21
+        },
+        "anomalies": [],
+        "usPerCall": 22.2,
+        "totalMs": 170
+      },
+      "Pacific/Apia": {
+        "lastTo": 1924945200000,
+        "lengths": {
+          "0": 1,
+          "23": 11,
+          "24": 7647,
+          "25": 11
+        },
+        "anomalies": [
+          {
+            "day": "2011-12-30",
+            "kind": "skipped",
+            "from": 1325239200000
+          }
+        ],
+        "usPerCall": 21.3,
+        "totalMs": 163
+      },
+      "Australia/Lord_Howe": {
+        "lastTo": 1924952400000,
+        "lengths": {
+          "24": 7628,
+          "24.5": 21,
+          "23.5": 21
+        },
+        "anomalies": [],
+        "usPerCall": 22.7,
+        "totalMs": 174
+      },
+      "Asia/Kolkata": {
+        "lastTo": 1924972200000,
+        "lengths": {
+          "24": 7670
+        },
+        "anomalies": [],
+        "usPerCall": 21.4,
+        "totalMs": 164
+      },
+      "Africa/Algiers": {
+        "lastTo": 1924988400000,
+        "lengths": {
+          "24": 7670
+        },
+        "anomalies": [],
+        "usPerCall": 21.5,
+        "totalMs": 165
+      },
+      "Pacific/Auckland": {
+        "lastTo": 1924945200000,
+        "lengths": {
+          "23": 21,
+          "24": 7628,
+          "25": 21
+        },
+        "anomalies": [],
+        "usPerCall": 23.1,
+        "totalMs": 177
+      },
+      "Asia/Tehran": {
+        "lastTo": 1924979400000,
+        "lengths": {
+          "23": 13,
+          "24": 7644,
+          "25": 13
+        },
+        "anomalies": [],
+        "usPerCall": 22,
+        "totalMs": 169
+      },
+      "Pacific/Chatham": {
+        "lastTo": 1924942500000,
+        "lengths": {
+          "23": 21,
+          "24": 7628,
+          "25": 21
+        },
+        "anomalies": [],
+        "usPerCall": 22.4,
+        "totalMs": 172
+      }
+    }
+  },
+  "collation": {
+    "n": 100000,
+    "configs": [
+      {
+        "locale": "fr",
+        "sensitivity": "base",
+        "numeric": false,
+        "unique": 86013,
+        "ms": 107,
+        "runs": [
+          107,
+          104,
+          107
+        ],
+        "order": "12e4f385"
+      },
+      {
+        "locale": "fr",
+        "sensitivity": "base",
+        "numeric": true,
+        "unique": 86013,
+        "ms": 104,
+        "runs": [
+          104,
+          104,
+          104
+        ],
+        "order": "ae31a3"
+      },
+      {
+        "locale": "fr",
+        "sensitivity": "accent",
+        "numeric": false,
+        "unique": 86013,
+        "ms": 97,
+        "runs": [
+          95,
+          97,
+          100
+        ],
+        "order": "8b8651"
+      },
+      {
+        "locale": "fr",
+        "sensitivity": "accent",
+        "numeric": true,
+        "unique": 86013,
+        "ms": 99,
+        "runs": [
+          99,
+          99,
+          97
+        ],
+        "order": "a25063cf"
+      },
+      {
+        "locale": "fr",
+        "sensitivity": "variant",
+        "numeric": false,
+        "unique": 86013,
+        "ms": 98,
+        "runs": [
+          96,
+          98,
+          100
+        ],
+        "order": "63f14191"
+      },
+      {
+        "locale": "fr",
+        "sensitivity": "variant",
+        "numeric": true,
+        "unique": 86013,
+        "ms": 100,
+        "runs": [
+          104,
+          100,
+          99
+        ],
+        "order": "71e449cf"
+      },
+      {
+        "locale": "ar",
+        "sensitivity": "base",
+        "numeric": false,
+        "unique": 99632,
+        "ms": 179,
+        "runs": [
+          179,
+          175,
+          184
+        ],
+        "order": "a0945709"
+      },
+      {
+        "locale": "ar",
+        "sensitivity": "base",
+        "numeric": true,
+        "unique": 99632,
+        "ms": 198,
+        "runs": [
+          184,
+          198,
+          205
+        ],
+        "order": "9298d04f"
+      },
+      {
+        "locale": "ar",
+        "sensitivity": "accent",
+        "numeric": false,
+        "unique": 99632,
+        "ms": 190,
+        "runs": [
+          202,
+          186,
+          190
+        ],
+        "order": "8c6bb5c5"
+      },
+      {
+        "locale": "ar",
+        "sensitivity": "accent",
+        "numeric": true,
+        "unique": 99632,
+        "ms": 187,
+        "runs": [
+          182,
+          187,
+          193
+        ],
+        "order": "3a7359e3"
+      },
+      {
+        "locale": "ar",
+        "sensitivity": "variant",
+        "numeric": false,
+        "unique": 99632,
+        "ms": 182,
+        "runs": [
+          185,
+          182,
+          182
+        ],
+        "order": "6a2d63df"
+      },
+      {
+        "locale": "ar",
+        "sensitivity": "variant",
+        "numeric": true,
+        "unique": 99632,
+        "ms": 184,
+        "runs": [
+          182,
+          184,
+          192
+        ],
+        "order": "e710fbad"
+      }
+    ],
+    "methods": {
+      "fr": {
+        "collatorCompareOnStrings": 97,
+        "arrowWrapper": 109,
+        "indexSortUint32": 117,
+        "rankKeysAllUnique": {
+          "keysMs": 111,
+          "sortMs": 18
+        },
+        "rankKeys1000Distinct": {
+          "keysMs": 5,
+          "sortMs": 13
+        },
+        "directOn1000Distinct": 65,
+        "localeCompare": 1066,
+        "codeUnitBaseline": 16,
+        "collatorConstructUs": 0
+      },
+      "ar": {
+        "collatorCompareOnStrings": 193,
+        "arrowWrapper": 180,
+        "indexSortUint32": 212,
+        "rankKeysAllUnique": {
+          "keysMs": 190,
+          "sortMs": 18
+        },
+        "rankKeys1000Distinct": {
+          "keysMs": 4,
+          "sortMs": 13
+        },
+        "directOn1000Distinct": 85,
+        "localeCompare": 929,
+        "codeUnitBaseline": 13,
+        "collatorConstructUs": 0
+      }
+    },
+    "samples": {
+      "fr_e_é_base": 0,
+      "fr_e_é_accent": -1,
+      "fr_e_E_accent": 0,
+      "fr_cote_order": "cote,coté,côte,côté",
+      "fr_numeric_2_10": -1,
+      "fr_plain_2_10": 1,
+      "ar_alef_hamza_base": 0,
+      "ar_harakat_base": 0,
+      "ar_harakat_accent": 0,
+      "ar_tatweel_base": 0,
+      "ar_taMarbuta_ha_base": -1,
+      "ar_indic_vs_latin_numeric": 0,
+      "ar_indic_2_10_numeric": -1,
+      "ar_latin_before_arabic": 1,
+      "fr_resolved": {
+        "locale": "fr",
+        "usage": "sort",
+        "sensitivity": "base",
+        "ignorePunctuation": false,
+        "collation": "default",
+        "numeric": true,
+        "caseFirst": "false"
+      },
+      "ar_resolved": {
+        "locale": "ar",
+        "usage": "sort",
+        "sensitivity": "base",
+        "ignorePunctuation": false,
+        "collation": "default",
+        "numeric": true,
+        "caseFirst": "false"
+      }
+    }
+  },
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:157.0) Gecko/20100101 Firefox/157.0"
+}

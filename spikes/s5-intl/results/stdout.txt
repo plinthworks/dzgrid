@@ -1,0 +1,2314 @@
+{
+  "at": "2026-10-16T13:37:00.398Z",
+  "node": "v22.20.0",
+  "engines": {
+    "node": "v22.20.0 icu 77.1 tz 2025b",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+    "firefox": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:157.0) Gecko/20100101 Firefox/157.0",
+    "webkit": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15"
+  },
+  "conformance": {
+    "node": [],
+    "chrome": [],
+    "firefox": [],
+    "webkit": []
+  },
+  "sweep": {
+    "days": 7670,
+    "perEngine": {
+      "node": {
+        "Europe/Paris": {
+          "usPerCall": 49.3,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Europe/Dublin": {
+          "usPerCall": 49.1,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Los_Angeles": {
+          "usPerCall": 48.9,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Sao_Paulo": {
+          "usPerCall": 48.4,
+          "lengths": {
+            "23": 9,
+            "24": 7651,
+            "25": 10
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Havana": {
+          "usPerCall": 48.9,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Apia": {
+          "usPerCall": 48.6,
+          "lengths": {
+            "0": 1,
+            "23": 11,
+            "24": 7647,
+            "25": 11
+          },
+          "anomalies": 1,
+          "firstAnomalies": [
+            {
+              "day": "2011-12-30",
+              "kind": "skipped",
+              "from": 1325239200000
+            }
+          ]
+        },
+        "Australia/Lord_Howe": {
+          "usPerCall": 49.5,
+          "lengths": {
+            "24": 7628,
+            "24.5": 21,
+            "23.5": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Asia/Kolkata": {
+          "usPerCall": 48.3,
+          "lengths": {
+            "24": 7670
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Africa/Algiers": {
+          "usPerCall": 47.7,
+          "lengths": {
+            "24": 7670
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Auckland": {
+          "usPerCall": 48.7,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Asia/Tehran": {
+          "usPerCall": 48,
+          "lengths": {
+            "23": 13,
+            "24": 7644,
+            "25": 13
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Chatham": {
+          "usPerCall": 48.7,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        }
+      },
+      "chrome": {
+        "Europe/Paris": {
+          "usPerCall": 27.5,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Europe/Dublin": {
+          "usPerCall": 26.9,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Los_Angeles": {
+          "usPerCall": 27,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Sao_Paulo": {
+          "usPerCall": 26.4,
+          "lengths": {
+            "23": 9,
+            "24": 7651,
+            "25": 10
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Havana": {
+          "usPerCall": 27.2,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Apia": {
+          "usPerCall": 26.5,
+          "lengths": {
+            "0": 1,
+            "23": 11,
+            "24": 7647,
+            "25": 11
+          },
+          "anomalies": 1,
+          "firstAnomalies": [
+            {
+              "day": "2011-12-30",
+              "kind": "skipped",
+              "from": 1325239200000
+            }
+          ]
+        },
+        "Australia/Lord_Howe": {
+          "usPerCall": 27,
+          "lengths": {
+            "24": 7628,
+            "24.5": 21,
+            "23.5": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Asia/Kolkata": {
+          "usPerCall": 25.6,
+          "lengths": {
+            "24": 7670
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Africa/Algiers": {
+          "usPerCall": 25.6,
+          "lengths": {
+            "24": 7670
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Auckland": {
+          "usPerCall": 27,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Asia/Tehran": {
+          "usPerCall": 26.2,
+          "lengths": {
+            "23": 13,
+            "24": 7644,
+            "25": 13
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Chatham": {
+          "usPerCall": 26.6,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        }
+      },
+      "firefox": {
+        "Europe/Paris": {
+          "usPerCall": 22.3,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Europe/Dublin": {
+          "usPerCall": 22.3,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Los_Angeles": {
+          "usPerCall": 22.2,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Sao_Paulo": {
+          "usPerCall": 21.1,
+          "lengths": {
+            "23": 9,
+            "24": 7651,
+            "25": 10
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Havana": {
+          "usPerCall": 22.2,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Apia": {
+          "usPerCall": 21.3,
+          "lengths": {
+            "0": 1,
+            "23": 11,
+            "24": 7647,
+            "25": 11
+          },
+          "anomalies": 1,
+          "firstAnomalies": [
+            {
+              "day": "2011-12-30",
+              "kind": "skipped",
+              "from": 1325239200000
+            }
+          ]
+        },
+        "Australia/Lord_Howe": {
+          "usPerCall": 22.7,
+          "lengths": {
+            "24": 7628,
+            "24.5": 21,
+            "23.5": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Asia/Kolkata": {
+          "usPerCall": 21.4,
+          "lengths": {
+            "24": 7670
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Africa/Algiers": {
+          "usPerCall": 21.5,
+          "lengths": {
+            "24": 7670
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Auckland": {
+          "usPerCall": 23.1,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Asia/Tehran": {
+          "usPerCall": 22,
+          "lengths": {
+            "23": 13,
+            "24": 7644,
+            "25": 13
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Chatham": {
+          "usPerCall": 22.4,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        }
+      },
+      "webkit": {
+        "Europe/Paris": {
+          "usPerCall": 22.8,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Europe/Dublin": {
+          "usPerCall": 22.4,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Los_Angeles": {
+          "usPerCall": 22.7,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Sao_Paulo": {
+          "usPerCall": 22.2,
+          "lengths": {
+            "23": 9,
+            "24": 7651,
+            "25": 10
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "America/Havana": {
+          "usPerCall": 23.3,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Apia": {
+          "usPerCall": 22,
+          "lengths": {
+            "0": 1,
+            "23": 11,
+            "24": 7647,
+            "25": 11
+          },
+          "anomalies": 1,
+          "firstAnomalies": [
+            {
+              "day": "2011-12-30",
+              "kind": "skipped",
+              "from": 1325239200000
+            }
+          ]
+        },
+        "Australia/Lord_Howe": {
+          "usPerCall": 23.3,
+          "lengths": {
+            "24": 7628,
+            "24.5": 21,
+            "23.5": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Asia/Kolkata": {
+          "usPerCall": 21.5,
+          "lengths": {
+            "24": 7670
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Africa/Algiers": {
+          "usPerCall": 21.4,
+          "lengths": {
+            "24": 7670
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Auckland": {
+          "usPerCall": 22.8,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Asia/Tehran": {
+          "usPerCall": 22.2,
+          "lengths": {
+            "23": 13,
+            "24": 7644,
+            "25": 13
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        },
+        "Pacific/Chatham": {
+          "usPerCall": 22.7,
+          "lengths": {
+            "23": 21,
+            "24": 7628,
+            "25": 21
+          },
+          "anomalies": 0,
+          "firstAnomalies": []
+        }
+      }
+    },
+    "crossEngineDiffs": []
+  },
+  "coldWarm": {
+    "node": {
+      "coldMs": 0.09,
+      "warmUs": 43.1,
+      "formatToPartsUs": 2.81,
+      "k": 130000
+    },
+    "chrome": {
+      "coldMs": 0.1,
+      "warmUs": 22.6,
+      "formatToPartsUs": 1.43,
+      "k": 130000
+    },
+    "firefox": {
+      "coldMs": 0,
+      "warmUs": 18,
+      "formatToPartsUs": 1,
+      "k": 130000
+    },
+    "webkit": {
+      "coldMs": 0,
+      "warmUs": 18,
+      "formatToPartsUs": 1,
+      "k": 130000
+    }
+  },
+  "collation": {
+    "node": {
+      "configs": [
+        "fr base: 128.3 ms",
+        "fr base numeric: 128.9 ms",
+        "fr accent: 120.4 ms",
+        "fr accent numeric: 121.4 ms",
+        "fr variant: 120.5 ms",
+        "fr variant numeric: 120.4 ms",
+        "ar base: 158.3 ms",
+        "ar base numeric: 154.5 ms",
+        "ar accent: 156.3 ms",
+        "ar accent numeric: 156.5 ms",
+        "ar variant: 170.7 ms",
+        "ar variant numeric: 163.7 ms"
+      ],
+      "methods": {
+        "fr": {
+          "collatorCompareOnStrings": 120.6,
+          "arrowWrapper": 128.7,
+          "indexSortUint32": 138.1,
+          "rankKeysAllUnique": {
+            "keysMs": 128,
+            "sortMs": 18
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 2,
+            "sortMs": 14
+          },
+          "directOn1000Distinct": 83.4,
+          "localeCompare": 3045.9,
+          "codeUnitBaseline": 28.3,
+          "collatorConstructUs": 2
+        },
+        "ar": {
+          "collatorCompareOnStrings": 157.2,
+          "arrowWrapper": 163,
+          "indexSortUint32": 168.4,
+          "rankKeysAllUnique": {
+            "keysMs": 180,
+            "sortMs": 17
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 2,
+            "sortMs": 14
+          },
+          "directOn1000Distinct": 98.6,
+          "localeCompare": 3147.6,
+          "codeUnitBaseline": 34,
+          "collatorConstructUs": 2
+        }
+      }
+    },
+    "chrome": {
+      "configs": [
+        "fr base: 126.7 ms",
+        "fr base numeric: 126.1 ms",
+        "fr accent: 120.5 ms",
+        "fr accent numeric: 121.1 ms",
+        "fr variant: 122.1 ms",
+        "fr variant numeric: 119.8 ms",
+        "ar base: 172.6 ms",
+        "ar base numeric: 175.5 ms",
+        "ar accent: 176.6 ms",
+        "ar accent numeric: 171.4 ms",
+        "ar variant: 169.1 ms",
+        "ar variant numeric: 171.9 ms"
+      ],
+      "methods": {
+        "fr": {
+          "collatorCompareOnStrings": 121.8,
+          "arrowWrapper": 128.8,
+          "indexSortUint32": 129.5,
+          "rankKeysAllUnique": {
+            "keysMs": 115,
+            "sortMs": 17
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 2,
+            "sortMs": 13
+          },
+          "directOn1000Distinct": 84.8,
+          "localeCompare": 2580.2,
+          "codeUnitBaseline": 30.2,
+          "collatorConstructUs": 2
+        },
+        "ar": {
+          "collatorCompareOnStrings": 169.5,
+          "arrowWrapper": 177.3,
+          "indexSortUint32": 178.7,
+          "rankKeysAllUnique": {
+            "keysMs": 193,
+            "sortMs": 17
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 2,
+            "sortMs": 13
+          },
+          "directOn1000Distinct": 113.4,
+          "localeCompare": 2688.9,
+          "codeUnitBaseline": 22.5,
+          "collatorConstructUs": 2
+        }
+      }
+    },
+    "firefox": {
+      "configs": [
+        "fr base: 107 ms",
+        "fr base numeric: 104 ms",
+        "fr accent: 97 ms",
+        "fr accent numeric: 99 ms",
+        "fr variant: 98 ms",
+        "fr variant numeric: 100 ms",
+        "ar base: 179 ms",
+        "ar base numeric: 198 ms",
+        "ar accent: 190 ms",
+        "ar accent numeric: 187 ms",
+        "ar variant: 182 ms",
+        "ar variant numeric: 184 ms"
+      ],
+      "methods": {
+        "fr": {
+          "collatorCompareOnStrings": 97,
+          "arrowWrapper": 109,
+          "indexSortUint32": 117,
+          "rankKeysAllUnique": {
+            "keysMs": 111,
+            "sortMs": 18
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 5,
+            "sortMs": 13
+          },
+          "directOn1000Distinct": 65,
+          "localeCompare": 1066,
+          "codeUnitBaseline": 16,
+          "collatorConstructUs": 0
+        },
+        "ar": {
+          "collatorCompareOnStrings": 193,
+          "arrowWrapper": 180,
+          "indexSortUint32": 212,
+          "rankKeysAllUnique": {
+            "keysMs": 190,
+            "sortMs": 18
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 4,
+            "sortMs": 13
+          },
+          "directOn1000Distinct": 85,
+          "localeCompare": 929,
+          "codeUnitBaseline": 13,
+          "collatorConstructUs": 0
+        }
+      }
+    },
+    "webkit": {
+      "configs": [
+        "fr base: 100 ms",
+        "fr base numeric: 96 ms",
+        "fr accent: 95 ms",
+        "fr accent numeric: 98 ms",
+        "fr variant: 91 ms",
+        "fr variant numeric: 98 ms",
+        "ar base: 143 ms",
+        "ar base numeric: 149 ms",
+        "ar accent: 145 ms",
+        "ar accent numeric: 145 ms",
+        "ar variant: 142 ms",
+        "ar variant numeric: 142 ms"
+      ],
+      "methods": {
+        "fr": {
+          "collatorCompareOnStrings": 95,
+          "arrowWrapper": 101,
+          "indexSortUint32": 122,
+          "rankKeysAllUnique": {
+            "keysMs": 96,
+            "sortMs": 20
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 2,
+            "sortMs": 14
+          },
+          "directOn1000Distinct": 63,
+          "localeCompare": 1870,
+          "codeUnitBaseline": 7,
+          "collatorConstructUs": 1
+        },
+        "ar": {
+          "collatorCompareOnStrings": 141,
+          "arrowWrapper": 145,
+          "indexSortUint32": 163,
+          "rankKeysAllUnique": {
+            "keysMs": 181,
+            "sortMs": 21
+          },
+          "rankKeys1000Distinct": {
+            "keysMs": 3,
+            "sortMs": 14
+          },
+          "directOn1000Distinct": 87,
+          "localeCompare": 2002,
+          "codeUnitBaseline": 5,
+          "collatorConstructUs": 1
+        }
+      }
+    }
+  },
+  "collationOrderSameAcrossEngines": "identical",
+  "collationSamplesDiffs": {},
+  "collationSamples": {
+    "fr_e_é_base": 0,
+    "fr_e_é_accent": -1,
+    "fr_e_E_accent": 0,
+    "fr_cote_order": "cote,coté,côte,côté",
+    "fr_numeric_2_10": -1,
+    "fr_plain_2_10": 1,
+    "ar_alef_hamza_base": 0,
+    "ar_harakat_base": 0,
+    "ar_harakat_accent": 0,
+    "ar_tatweel_base": 0,
+    "ar_taMarbuta_ha_base": -1,
+    "ar_indic_vs_latin_numeric": 0,
+    "ar_indic_2_10_numeric": -1,
+    "ar_latin_before_arabic": 1,
+    "fr_resolved": {
+      "locale": "fr",
+      "usage": "sort",
+      "sensitivity": "base",
+      "ignorePunctuation": false,
+      "collation": "default",
+      "numeric": true,
+      "caseFirst": "false"
+    },
+    "ar_resolved": {
+      "locale": "ar",
+      "usage": "sort",
+      "sensitivity": "base",
+      "ignorePunctuation": false,
+      "collation": "default",
+      "numeric": true,
+      "caseFirst": "false"
+    }
+  },
+  "numberingDiffs": {
+    "ar-SA": {
+      "node": {
+        "defaultNu": "arab",
+        "defaultText": "١٬٢٣٤٬٥٦٧٫٨٩١",
+        "defaultDateNu": "arab",
+        "defaultDateCalendar": "gregory",
+        "tagLatn": "1,234,567.891",
+        "tagLatnNu": "latn",
+        "optionLatn": "1,234,567.891",
+        "optionLatnNu": "latn",
+        "optionLatnCodePoints": "U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+        "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+        "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+      },
+      "chrome": {
+        "defaultNu": "arab",
+        "defaultText": "١٬٢٣٤٬٥٦٧٫٨٩١",
+        "defaultDateNu": "arab",
+        "defaultDateCalendar": "gregory",
+        "tagLatn": "1,234,567.891",
+        "tagLatnNu": "latn",
+        "optionLatn": "1,234,567.891",
+        "optionLatnNu": "latn",
+        "optionLatnCodePoints": "U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+        "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+        "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+      },
+      "firefox": {
+        "defaultNu": "arab",
+        "defaultText": "١٬٢٣٤٬٥٦٧٫٨٩١",
+        "defaultDateNu": "arab",
+        "defaultDateCalendar": "gregory",
+        "tagLatn": "1,234,567.891",
+        "tagLatnNu": "latn",
+        "optionLatn": "1,234,567.891",
+        "optionLatnNu": "latn",
+        "optionLatnCodePoints": "U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+        "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+        "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+      },
+      "webkit": {
+        "defaultNu": "arab",
+        "defaultText": "١٬٢٣٤٬٥٦٧٫٨٩١",
+        "defaultDateNu": "arab",
+        "defaultDateCalendar": "islamic-umalqura",
+        "tagLatn": "1,234,567.891",
+        "tagLatnNu": "latn",
+        "optionLatn": "1,234,567.891",
+        "optionLatnNu": "latn",
+        "optionLatnCodePoints": "U+200E U+002D U+0031 U+002C U+0032 U+0033 U+0034 U+002C U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+        "arab": "١٬٢٣٤٬٥٦٧٫٨٩١",
+        "arabCodePoints": "U+061C U+002D U+0661 U+066C U+0662 U+0663 U+0664 U+066B U+0665"
+      }
+    }
+  },
+  "calendarsDiffs": {
+    "ar-SA default": {
+      "node": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "chrome": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "firefox": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "webkit": {
+        "calendar": "islamic-umalqura",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "١٦ رمضان، ١٤٤٧ هـ، ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "١٦"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "رمضان"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "year",
+            "١٤٤٧"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "era",
+            "هـ"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      }
+    },
+    "ar-SA calendar:gregory": {
+      "node": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "chrome": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "firefox": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "webkit": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس، ٢٠٢٦، ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      }
+    },
+    "ar-SA-u-ca-gregory": {
+      "node": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "chrome": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "firefox": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "webkit": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس، ٢٠٢٦، ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      }
+    },
+    "ar-SA gregory+latn": {
+      "node": {
+        "calendar": "gregory",
+        "numberingSystem": "latn",
+        "hourCycle": "h12",
+        "text": "5 مارس 2026 في 1:00 م",
+        "parts": [
+          [
+            "day",
+            "5"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "2026"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "1"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "00"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "chrome": {
+        "calendar": "gregory",
+        "numberingSystem": "latn",
+        "hourCycle": "h12",
+        "text": "5 مارس 2026 في 1:00 م",
+        "parts": [
+          [
+            "day",
+            "5"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "2026"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "1"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "00"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "firefox": {
+        "calendar": "gregory",
+        "numberingSystem": "latn",
+        "hourCycle": "h12",
+        "text": "5 مارس 2026 في 1:00 م",
+        "parts": [
+          [
+            "day",
+            "5"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "2026"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "1"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "00"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "webkit": {
+        "calendar": "gregory",
+        "numberingSystem": "latn",
+        "hourCycle": "h12",
+        "text": "5 مارس، 2026، 1:00 م",
+        "parts": [
+          [
+            "day",
+            "5"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "year",
+            "2026"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "hour",
+            "1"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "00"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      }
+    },
+    "ar-DZ default": {
+      "node": {
+        "calendar": "gregory",
+        "numberingSystem": "latn",
+        "hourCycle": "h12",
+        "text": "5 مارس 2026 في 1:00 م",
+        "parts": [
+          [
+            "day",
+            "5"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "2026"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "1"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "00"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "chrome": {
+        "calendar": "gregory",
+        "numberingSystem": "latn",
+        "hourCycle": "h12",
+        "text": "5 مارس 2026 في 1:00 م",
+        "parts": [
+          [
+            "day",
+            "5"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "2026"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "1"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "00"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "firefox": {
+        "calendar": "gregory",
+        "numberingSystem": "latn",
+        "hourCycle": "h12",
+        "text": "5 مارس 2026 في 1:00 م",
+        "parts": [
+          [
+            "day",
+            "5"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "2026"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "1"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "00"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "webkit": {
+        "calendar": "gregory",
+        "numberingSystem": "latn",
+        "hourCycle": "h12",
+        "text": "5 مارس، 2026، 1:00 م",
+        "parts": [
+          [
+            "day",
+            "5"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "year",
+            "2026"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "hour",
+            "1"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "00"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      }
+    },
+    "ar-EG default": {
+      "node": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "chrome": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "firefox": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس ٢٠٢٦ في ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            " في "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      },
+      "webkit": {
+        "calendar": "gregory",
+        "numberingSystem": "arab",
+        "hourCycle": "h12",
+        "text": "٥ مارس، ٢٠٢٦، ١:٠٠ م",
+        "parts": [
+          [
+            "day",
+            "٥"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "month",
+            "مارس"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "year",
+            "٢٠٢٦"
+          ],
+          [
+            "literal",
+            "، "
+          ],
+          [
+            "hour",
+            "١"
+          ],
+          [
+            "literal",
+            ":"
+          ],
+          [
+            "minute",
+            "٠٠"
+          ],
+          [
+            "literal",
+            " "
+          ],
+          [
+            "dayPeriod",
+            "م"
+          ]
+        ]
+      }
+    },
+    "zoneSensitivity": {
+      "node": {
+        "UTC": "الخميس، 5 مارس 2026 في 11:30 م",
+        "Algiers": "الجمعة، 6 مارس 2026 في 12:30 ص",
+        "LosAngeles": "الخميس، 5 مارس 2026 في 3:30 م"
+      },
+      "chrome": {
+        "UTC": "الخميس، 5 مارس 2026 في 11:30 م",
+        "Algiers": "الجمعة، 6 مارس 2026 في 12:30 ص",
+        "LosAngeles": "الخميس، 5 مارس 2026 في 3:30 م"
+      },
+      "firefox": {
+        "UTC": "الخميس، 5 مارس 2026 في 11:30 م",
+        "Algiers": "الجمعة، 6 مارس 2026 في 12:30 ص",
+        "LosAngeles": "الخميس، 5 مارس 2026 في 3:30 م"
+      },
+      "webkit": {
+        "UTC": "الخميس، 5 مارس، 2026، 11:30 م",
+        "Algiers": "الجمعة، 6 مارس، 2026، 12:30 ص",
+        "LosAngeles": "الخميس، 5 مارس، 2026، 3:30 م"
+      }
+    }
+  },
+  "partsDiffs": {
+    "fr-CH decimal": {
+      "node": {
+        "text": "1 234 567,891",
+        "codePoints": "U+0031 U+202F U+0032 U+0033 U+0034 U+202F U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+        "nu": "latn",
+        "parts": [
+          [
+            "integer",
+            "1",
+            "U+0031"
+          ],
+          [
+            "group",
+            " ",
+            "U+202F"
+          ],
+          [
+            "integer",
+            "234",
+            "U+0032 U+0033 U+0034"
+          ],
+          [
+            "group",
+            " ",
+            "U+202F"
+          ],
+          [
+            "integer",
+            "567",
+            "U+0035 U+0036 U+0037"
+          ],
+          [
+            "decimal",
+            ",",
+            "U+002C"
+          ],
+          [
+            "fraction",
+            "891",
+            "U+0038 U+0039 U+0031"
+          ]
+        ]
+      },
+      "chrome": {
+        "text": "1 234 567,891",
+        "codePoints": "U+0031 U+202F U+0032 U+0033 U+0034 U+202F U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+        "nu": "latn",
+        "parts": [
+          [
+            "integer",
+            "1",
+            "U+0031"
+          ],
+          [
+            "group",
+            " ",
+            "U+202F"
+          ],
+          [
+            "integer",
+            "234",
+            "U+0032 U+0033 U+0034"
+          ],
+          [
+            "group",
+            " ",
+            "U+202F"
+          ],
+          [
+            "integer",
+            "567",
+            "U+0035 U+0036 U+0037"
+          ],
+          [
+            "decimal",
+            ",",
+            "U+002C"
+          ],
+          [
+            "fraction",
+            "891",
+            "U+0038 U+0039 U+0031"
+          ]
+        ]
+      },
+      "firefox": {
+        "text": "1'234'567,891",
+        "codePoints": "U+0031 U+0027 U+0032 U+0033 U+0034 U+0027 U+0035 U+0036 U+0037 U+002C U+0038 U+0039 U+0031",
+        "nu": "latn",
+        "parts": [
+          [
+            "integer",
+            "1",
+            "U+0031"
+          ],
+          [
+            "group",
+            "'",
+            "U+0027"
+          ],
+          [
+            "integer",
+            "234",
+            "U+0032 U+0033 U+0034"
+          ],
+          [
+            "group",
+            "'",
+            "U+0027"
+          ],
+          [
+            "integer",
+            "567",
+            "U+0035 U+0036 U+0037"
+          ],
+          [
+            "decimal",
+            ",",
+            "U+002C"
+          ],
+          [
+            "fraction",
+            "891",
+            "U+0038 U+0039 U+0031"
+          ]
+        ]
+      },
+      "webkit": {
+        "text": "1’234’567.891",
+        "codePoints": "U+0031 U+2019 U+0032 U+0033 U+0034 U+2019 U+0035 U+0036 U+0037 U+002E U+0038 U+0039 U+0031",
+        "nu": "latn",
+        "parts": [
+          [
+            "integer",
+            "1",
+            "U+0031"
+          ],
+          [
+            "group",
+            "’",
+            "U+2019"
+          ],
+          [
+            "integer",
+            "234",
+            "U+0032 U+0033 U+0034"
+          ],
+          [
+            "group",
+            "’",
+            "U+2019"
+          ],
+          [
+            "integer",
+            "567",
+            "U+0035 U+0036 U+0037"
+          ],
+          [
+            "decimal",
+            ".",
+            "U+002E"
+          ],
+          [
+            "fraction",
+            "891",
+            "U+0038 U+0039 U+0031"
+          ]
+        ]
+      }
+    }
+  }
+}

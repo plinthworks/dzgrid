@@ -1,0 +1,5806 @@
+{
+  "at": "2026-10-16T13:45:36.303Z",
+  "node": "v22.20.0",
+  "summary": {
+    "chrome": {
+      "version": "155.0.8059.80",
+      "default": {
+        "ltr": {
+          "convention": "negative",
+          "scrollbar": "overlay(hit:none) 0px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            0,
+            2462
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2462_c2:false",
+            "plain_from1231_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "rtl": {
+          "convention": "negative",
+          "scrollbar": "overlay(hit:none) 0px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            -2462,
+            0
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2462_c2:false",
+            "plain_from1231_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "resize": {
+          "ltr": {
+            "c0": "ok handleOff=-1 hit=true w 120->180->150 misalign=0",
+            "name": "ok handleOff=-1 hit=true w 150->210->180 misalign=0",
+            "status": "ok handleOff=0 hit=true w 110->170->140 misalign=0"
+          },
+          "rtl": {
+            "c0": "ok handleOff=1 hit=true w 120->180->150 misalign=0",
+            "name": "ok handleOff=1 hit=true w 150->210->180 misalign=0",
+            "status": "ok handleOff=0 hit=true w 110->170->140 misalign=0"
+          }
+        },
+        "bidi": {
+          "ltr/isolate/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/isolate/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/plaintext/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/plaintext-block/العيادة 12A": "arabic right-of-latin, hugs right",
+          "ltr/plaintext-block/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/dir-auto/العيادة 12A": "arabic right-of-latin, hugs right",
+          "ltr/dir-auto/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/flex+span-plaintext/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/flex+span-plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/isolate/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/isolate/Ward 3 — الطابق 2": "arabic left-of-latin, hugs right",
+          "rtl/plaintext/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs right",
+          "rtl/plaintext-block/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/plaintext-block/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/dir-auto/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/dir-auto/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/flex+span-plaintext/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/flex+span-plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs right"
+        },
+        "flip": {
+          "before": {
+            "scrollLeft": 300,
+            "scrollX": 300
+          },
+          "afterDirChange": {
+            "scrollLeft": 0,
+            "scrollX": 0
+          },
+          "reapplied": {
+            "scrollX": 300,
+            "misalign": 0
+          }
+        },
+        "launch": "kit headless",
+        "errors": []
+      },
+      "classic": {
+        "ltr": {
+          "convention": "negative",
+          "scrollbar": "right 15px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            0,
+            2477
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2477_c2:false",
+            "plain_from1239_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "rtl": {
+          "convention": "negative",
+          "scrollbar": "left 15px, clientLeft includes it: true",
+          "rawScrollLeftRange": [
+            -2477,
+            0
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2477_c2:false",
+            "plain_from1239_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "launch": "headless, no --hide-scrollbars, OverlayScrollbar off",
+        "errors": []
+      }
+    },
+    "firefox": {
+      "version": "157.0",
+      "default": {
+        "ltr": {
+          "convention": "negative",
+          "scrollbar": "overlay(hit:none) 0px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            0,
+            2462
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2462_c2:false",
+            "plain_from1231_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "rtl": {
+          "convention": "negative",
+          "scrollbar": "overlay(hit:none) 0px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            -2462,
+            0
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2462_c2:false",
+            "plain_from1231_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "resize": {
+          "ltr": {
+            "c0": "ok handleOff=-1 hit=true w 120->180->150 misalign=0",
+            "name": "ok handleOff=-1 hit=true w 150->210->180 misalign=0",
+            "status": "ok handleOff=0 hit=true w 110->170->140 misalign=0"
+          },
+          "rtl": {
+            "c0": "ok handleOff=1 hit=true w 120->180->150 misalign=0",
+            "name": "ok handleOff=1 hit=true w 150->210->180 misalign=0",
+            "status": "ok handleOff=0 hit=true w 110->170->140 misalign=0"
+          }
+        },
+        "bidi": {
+          "ltr/isolate/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/isolate/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/plaintext/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/plaintext-block/العيادة 12A": "arabic right-of-latin, hugs right",
+          "ltr/plaintext-block/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/dir-auto/العيادة 12A": "arabic right-of-latin, hugs right",
+          "ltr/dir-auto/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/flex+span-plaintext/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/flex+span-plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/isolate/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/isolate/Ward 3 — الطابق 2": "arabic left-of-latin, hugs right",
+          "rtl/plaintext/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/plaintext/Ward 3 — الطابق 2": "arabic left-of-latin, hugs right",
+          "rtl/plaintext-block/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/plaintext-block/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/dir-auto/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/dir-auto/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/flex+span-plaintext/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/flex+span-plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs right"
+        },
+        "flip": {
+          "before": {
+            "scrollLeft": 300,
+            "scrollX": 300
+          },
+          "afterDirChange": {
+            "scrollLeft": 0,
+            "scrollX": 0
+          },
+          "reapplied": {
+            "scrollX": 300,
+            "misalign": 0
+          }
+        },
+        "launch": "kit headless",
+        "errors": []
+      }
+    },
+    "webkit": {
+      "version": "27.2",
+      "default": {
+        "ltr": {
+          "convention": "negative",
+          "scrollbar": "overlay(hit:none) 0px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            0,
+            2462
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2462_c2:false",
+            "plain_from1231_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "rtl": {
+          "convention": "negative",
+          "scrollbar": "overlay(hit:left) 0px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            -2462,
+            0
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2462_c2:false",
+            "plain_from1231_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "resize": {
+          "ltr": {
+            "c0": "ok handleOff=-1 hit=true w 120->180->150 misalign=0",
+            "name": "ok handleOff=-1 hit=true w 150->210->180 misalign=0",
+            "status": "ok handleOff=0 hit=true w 110->170->140 misalign=0"
+          },
+          "rtl": {
+            "c0": "ok handleOff=1 hit=true w 120->180->150 misalign=0",
+            "name": "ok handleOff=1 hit=true w 150->210->180 misalign=0",
+            "status": "ok handleOff=0 hit=true w 110->170->140 misalign=0"
+          }
+        },
+        "bidi": {
+          "ltr/isolate/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/isolate/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/plaintext/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/plaintext-block/العيادة 12A": "arabic right-of-latin, hugs right",
+          "ltr/plaintext-block/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/dir-auto/العيادة 12A": "arabic right-of-latin, hugs right",
+          "ltr/dir-auto/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "ltr/flex+span-plaintext/العيادة 12A": "arabic right-of-latin, hugs left",
+          "ltr/flex+span-plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/isolate/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/isolate/Ward 3 — الطابق 2": "arabic left-of-latin, hugs right",
+          "rtl/plaintext/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs right",
+          "rtl/plaintext-block/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/plaintext-block/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/dir-auto/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/dir-auto/Ward 3 — الطابق 2": "arabic right-of-latin, hugs left",
+          "rtl/flex+span-plaintext/العيادة 12A": "arabic right-of-latin, hugs right",
+          "rtl/flex+span-plaintext/Ward 3 — الطابق 2": "arabic right-of-latin, hugs right"
+        },
+        "flip": {
+          "before": {
+            "scrollLeft": 300,
+            "scrollX": 300
+          },
+          "afterDirChange": {
+            "scrollLeft": 0,
+            "scrollX": 0
+          },
+          "reapplied": {
+            "scrollX": 300,
+            "misalign": 0
+          }
+        },
+        "launch": "kit headless",
+        "errors": []
+      },
+      "classic": {
+        "ltr": {
+          "convention": "negative",
+          "scrollbar": "right 14px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            0,
+            2476
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2476_c2:false",
+            "plain_from1238_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "rtl": {
+          "convention": "negative",
+          "scrollbar": "left 14px, clientLeft includes it: false",
+          "rawScrollLeftRange": [
+            -2476,
+            0
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart_px": 0,
+          "pinnedStuckMaxOff_px": 0,
+          "headerBodyMaxMisalign_px": 0,
+          "centreOrderMirroredOk": true,
+          "pinnedPaintOnTopOk": true,
+          "scrollIntoViewPlainOk": [
+            "plain_from0_c14:false",
+            "plain_from2476_c2:false",
+            "plain_from1238_c0:false",
+            "plain_from0_c19:false"
+          ],
+          "scrollIntoViewPaddedOk": true,
+          "ensureVisibleOk": true,
+          "stickyOk": true
+        },
+        "launch": "headless, styled ::-webkit-scrollbar",
+        "errors": []
+      }
+    }
+  },
+  "raw": {
+    "chrome": {
+      "version": "155.0.8059.80",
+      "default": {
+        "launch": "kit headless",
+        "ltr": {
+          "dir": "ltr",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 0,
+            "horizontalScrollbarHeight": 0,
+            "clientLeftMinusBorder": 0,
+            "side": "overlay(hit:none)",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": false,
+            "hitTestRightEdgeIsViewport": false
+          },
+          "maxX": 2462,
+          "rawScrollLeft": {
+            "afterPlusHuge": 2462,
+            "afterMinusHuge": 0,
+            "atZero": 0,
+            "scrollToMinus100": 100,
+            "scrollWidth": 3100,
+            "clientWidth": 638
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": 1
+            },
+            {
+              "x": 37.5,
+              "read": 38,
+              "raw": 38
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": 250
+            },
+            {
+              "x": 1231,
+              "read": 1231,
+              "raw": 1231
+            },
+            {
+              "x": 2461,
+              "read": 2461,
+              "raw": 2461
+            },
+            {
+              "x": 2462,
+              "read": 2462,
+              "raw": 2462
+            },
+            {
+              "x": 2512,
+              "read": 2462,
+              "raw": 2462
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "ltr",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid": {
+              "dir": "ltr",
+              "scrollLeft": 1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax": {
+              "dir": "ltr",
+              "scrollLeft": 2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid_y300": {
+              "dir": "ltr",
+              "scrollLeft": 1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax_y900": {
+              "dir": "ltr",
+              "scrollLeft": 2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 495,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1670,
+              "scrollLeft": 1670,
+              "scrollTop": 1026
+            },
+            "plain_from2462_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 177,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": 468,
+              "scrollTop": 1026
+            },
+            "plain_from1231_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 137,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": 208,
+              "scrollTop": 1026
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 515,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2350,
+              "scrollLeft": 2350,
+              "scrollTop": 1026
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 383,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": 1782,
+              "scrollTop": 1026
+            },
+            "padded_from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1026
+            },
+            "padded_from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 403,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": 2462,
+              "scrollTop": 1026
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 383,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": 1782,
+              "scrollTop": 1026
+            },
+            "from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1026
+            },
+            "from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 403,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": 2462,
+              "scrollTop": 1026
+            }
+          }
+        },
+        "rtl": {
+          "dir": "rtl",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 0,
+            "horizontalScrollbarHeight": 0,
+            "clientLeftMinusBorder": 0,
+            "side": "overlay(hit:none)",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": false,
+            "hitTestRightEdgeIsViewport": false
+          },
+          "maxX": 2462,
+          "rawScrollLeft": {
+            "afterPlusHuge": 0,
+            "afterMinusHuge": -2462,
+            "atZero": 0,
+            "scrollToMinus100": -100,
+            "scrollWidth": 3100,
+            "clientWidth": 638
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": -1
+            },
+            {
+              "x": 37.5,
+              "read": 37,
+              "raw": -37
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": -250
+            },
+            {
+              "x": 1231,
+              "read": 1231,
+              "raw": -1231
+            },
+            {
+              "x": 2461,
+              "read": 2461,
+              "raw": -2461
+            },
+            {
+              "x": 2462,
+              "read": 2462,
+              "raw": -2462
+            },
+            {
+              "x": 2512,
+              "read": 2462,
+              "raw": -2462
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "rtl",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid": {
+              "dir": "rtl",
+              "scrollLeft": -1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax": {
+              "dir": "rtl",
+              "scrollLeft": -2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid_y300": {
+              "dir": "rtl",
+              "scrollLeft": -1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax_y900": {
+              "dir": "rtl",
+              "scrollLeft": -2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 17,
+                "right": 177,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1670,
+              "scrollLeft": -1670,
+              "scrollTop": 1026
+            },
+            "plain_from2462_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 495,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": -468,
+              "scrollTop": 1026
+            },
+            "plain_from1231_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 535,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": -208,
+              "scrollTop": 1026
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 17,
+                "right": 157,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2350,
+              "scrollLeft": -2350,
+              "scrollTop": 1026
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 129,
+                "right": 289,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": -1782,
+              "scrollTop": 1026
+            },
+            "padded_from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1026
+            },
+            "padded_from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 129,
+                "right": 269,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": -2462,
+              "scrollTop": 1026
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 129,
+                "right": 289,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": -1782,
+              "scrollTop": 1026
+            },
+            "from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1026
+            },
+            "from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 129,
+                "right": 269,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": -2462,
+              "scrollTop": 1026
+            }
+          }
+        },
+        "flip": {
+          "before": {
+            "scrollLeft": 300,
+            "scrollX": 300
+          },
+          "afterRaw": {
+            "scrollLeft": 0,
+            "scrollX": 0
+          },
+          "reapplied": {
+            "scrollLeft": -300,
+            "scrollX": 300,
+            "geometry": {
+              "dir": "rtl",
+              "scrollLeft": -300,
+              "scrollX": 300,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          }
+        },
+        "bidi": {
+          "ltr/isolate/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/isolate/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext-block/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "ltr/plaintext-block/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/dir-auto/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "ltr/dir-auto/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/flex+span-plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/flex+span-plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/isolate/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/isolate/Ward 3 — الطابق 2": {
+            "arabicSide": "left-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext-block/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext-block/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/dir-auto/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/dir-auto/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/flex+span-plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/flex+span-plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          }
+        },
+        "resize": {
+          "ltr": {
+            "c0": {
+              "handleOffsetFromExpectedEdge": -1,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 120,
+              "afterWiden": 180,
+              "afterShrinkHalf": 150,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "name": {
+              "handleOffsetFromExpectedEdge": -1,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 150,
+              "afterWiden": 210,
+              "afterShrinkHalf": 180,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "status": {
+              "handleOffsetFromExpectedEdge": 0,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 110,
+              "afterWiden": 170,
+              "afterShrinkHalf": 140,
+              "ok": true,
+              "maxMisalignAfter": 0
+            }
+          },
+          "rtl": {
+            "c0": {
+              "handleOffsetFromExpectedEdge": 1,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 120,
+              "afterWiden": 180,
+              "afterShrinkHalf": 150,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "name": {
+              "handleOffsetFromExpectedEdge": 1,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 150,
+              "afterWiden": 210,
+              "afterShrinkHalf": 180,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "status": {
+              "handleOffsetFromExpectedEdge": 0,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 110,
+              "afterWiden": 170,
+              "afterShrinkHalf": 140,
+              "ok": true,
+              "maxMisalignAfter": 0
+            }
+          }
+        },
+        "errors": []
+      },
+      "classic": {
+        "launch": "headless, no --hide-scrollbars, OverlayScrollbar off",
+        "ltr": {
+          "dir": "ltr",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 15,
+            "horizontalScrollbarHeight": 15,
+            "clientLeftMinusBorder": 0,
+            "side": "right",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": false,
+            "hitTestRightEdgeIsViewport": true
+          },
+          "maxX": 2477,
+          "rawScrollLeft": {
+            "afterPlusHuge": 2477,
+            "afterMinusHuge": 0,
+            "atZero": 0,
+            "scrollToMinus100": 100,
+            "scrollWidth": 3100,
+            "clientWidth": 623
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": 1
+            },
+            {
+              "x": 37.5,
+              "read": 38,
+              "raw": 38
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": 250
+            },
+            {
+              "x": 1238.5,
+              "read": 1239,
+              "raw": 1239
+            },
+            {
+              "x": 2476,
+              "read": 2476,
+              "raw": 2476
+            },
+            {
+              "x": 2477,
+              "read": 2477,
+              "raw": 2477
+            },
+            {
+              "x": 2527,
+              "read": 2477,
+              "raw": 2477
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "ltr",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2477,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 528,
+                "right": 640,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 640,
+                "top": 17,
+                "bottom": 322
+              }
+            },
+            "xMid": {
+              "dir": "ltr",
+              "scrollLeft": 1239,
+              "scrollX": 1239,
+              "maxX": 2477,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 528,
+                "right": 640,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 640,
+                "top": 17,
+                "bottom": 322
+              }
+            },
+            "xMax": {
+              "dir": "ltr",
+              "scrollLeft": 2477,
+              "scrollX": 2477,
+              "maxX": 2477,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 528,
+                "right": 640,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 640,
+                "top": 17,
+                "bottom": 322
+              }
+            },
+            "xMid_y300": {
+              "dir": "ltr",
+              "scrollLeft": 1239,
+              "scrollX": 1239,
+              "maxX": 2477,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 528,
+                "right": 640,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 640,
+                "top": 17,
+                "bottom": 322
+              }
+            },
+            "xMax_y900": {
+              "dir": "ltr",
+              "scrollLeft": 2477,
+              "scrollX": 2477,
+              "maxX": 2477,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 528,
+                "right": 640,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 640,
+                "top": 17,
+                "bottom": 322
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 480,
+                "right": 640,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 1685,
+              "scrollLeft": 1685,
+              "scrollTop": 1041
+            },
+            "plain_from2477_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 177,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": 468,
+              "scrollTop": 1041
+            },
+            "plain_from1239_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 137,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": 208,
+              "scrollTop": 1041
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 500,
+                "right": 640,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 2365,
+              "scrollLeft": 2365,
+              "scrollTop": 1041
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 368,
+                "right": 528,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 1797,
+              "scrollLeft": 1797,
+              "scrollTop": 1041
+            },
+            "padded_from2477_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1041
+            },
+            "padded_from1239_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1041
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 388,
+                "right": 528,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 2477,
+              "scrollLeft": 2477,
+              "scrollTop": 1041
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 368,
+                "right": 528,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 1797,
+              "scrollLeft": 1797,
+              "scrollTop": 1041
+            },
+            "from2477_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1041
+            },
+            "from1239_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1041
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 388,
+                "right": 528,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 225,
+              "hi": 528,
+              "headBottom": 51,
+              "scrollX": 2477,
+              "scrollLeft": 2477,
+              "scrollTop": 1041
+            }
+          }
+        },
+        "rtl": {
+          "dir": "rtl",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 15,
+            "horizontalScrollbarHeight": 15,
+            "clientLeftMinusBorder": 15,
+            "side": "left",
+            "clientLeftIncludesScrollbar": true,
+            "hitTestLeftEdgeIsViewport": true,
+            "hitTestRightEdgeIsViewport": false
+          },
+          "maxX": 2477,
+          "rawScrollLeft": {
+            "afterPlusHuge": 0,
+            "afterMinusHuge": -2477,
+            "atZero": 0,
+            "scrollToMinus100": -100,
+            "scrollWidth": 3100,
+            "clientWidth": 623
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": -1
+            },
+            {
+              "x": 37.5,
+              "read": 37,
+              "raw": -37
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": -250
+            },
+            {
+              "x": 1238.5,
+              "read": 1238,
+              "raw": -1238
+            },
+            {
+              "x": 2476,
+              "read": 2476,
+              "raw": -2476
+            },
+            {
+              "x": 2477,
+              "read": 2477,
+              "raw": -2477
+            },
+            {
+              "x": 2527,
+              "read": 2477,
+              "raw": -2477
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "rtl",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2477,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 32,
+                "right": 144,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 32,
+                "right": 655,
+                "top": 17,
+                "bottom": 322
+              }
+            },
+            "xMid": {
+              "dir": "rtl",
+              "scrollLeft": -1238,
+              "scrollX": 1238,
+              "maxX": 2477,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 32,
+                "right": 144,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 32,
+                "right": 655,
+                "top": 17,
+                "bottom": 322
+              }
+            },
+            "xMax": {
+              "dir": "rtl",
+              "scrollLeft": -2477,
+              "scrollX": 2477,
+              "maxX": 2477,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 32,
+                "right": 144,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 32,
+                "right": 655,
+                "top": 17,
+                "bottom": 322
+              }
+            },
+            "xMid_y300": {
+              "dir": "rtl",
+              "scrollLeft": -1238,
+              "scrollX": 1238,
+              "maxX": 2477,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 32,
+                "right": 144,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 32,
+                "right": 655,
+                "top": 17,
+                "bottom": 322
+              }
+            },
+            "xMax_y900": {
+              "dir": "rtl",
+              "scrollLeft": -2477,
+              "scrollX": 2477,
+              "maxX": 2477,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 32,
+                "right": 144,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 32,
+                "right": 655,
+                "top": 17,
+                "bottom": 322
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 32,
+                "right": 192,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1685,
+              "scrollLeft": -1685,
+              "scrollTop": 1041
+            },
+            "plain_from2477_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 495,
+                "right": 655,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": -468,
+              "scrollTop": 1041
+            },
+            "plain_from1239_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 535,
+                "right": 655,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": -208,
+              "scrollTop": 1041
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 32,
+                "right": 172,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2365,
+              "scrollLeft": -2365,
+              "scrollTop": 1041
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 144,
+                "right": 304,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1797,
+              "scrollLeft": -1797,
+              "scrollTop": 1041
+            },
+            "padded_from2477_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1041
+            },
+            "padded_from1239_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1041
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 144,
+                "right": 284,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2477,
+              "scrollLeft": -2477,
+              "scrollTop": 1041
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 144,
+                "right": 304,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1797,
+              "scrollLeft": -1797,
+              "scrollTop": 1041
+            },
+            "from2477_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1041
+            },
+            "from1239_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1041
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 144,
+                "right": 284,
+                "top": 290,
+                "bottom": 322
+              },
+              "lo": 144,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2477,
+              "scrollLeft": -2477,
+              "scrollTop": 1041
+            }
+          }
+        },
+        "errors": []
+      }
+    },
+    "firefox": {
+      "version": "157.0",
+      "default": {
+        "launch": "kit headless",
+        "ltr": {
+          "dir": "ltr",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 0,
+            "horizontalScrollbarHeight": 0,
+            "clientLeftMinusBorder": 0,
+            "side": "overlay(hit:none)",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": false,
+            "hitTestRightEdgeIsViewport": false
+          },
+          "maxX": 2462,
+          "rawScrollLeft": {
+            "afterPlusHuge": 2462,
+            "afterMinusHuge": 0,
+            "atZero": 0,
+            "scrollToMinus100": 100,
+            "scrollWidth": 3100,
+            "clientWidth": 638
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": 1
+            },
+            {
+              "x": 37.5,
+              "read": 37,
+              "raw": 37
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": 250
+            },
+            {
+              "x": 1231,
+              "read": 1231,
+              "raw": 1231
+            },
+            {
+              "x": 2461,
+              "read": 2461,
+              "raw": 2461
+            },
+            {
+              "x": 2462,
+              "read": 2462,
+              "raw": 2462
+            },
+            {
+              "x": 2512,
+              "read": 2462,
+              "raw": 2462
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "ltr",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid": {
+              "dir": "ltr",
+              "scrollLeft": 1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax": {
+              "dir": "ltr",
+              "scrollLeft": 2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid_y300": {
+              "dir": "ltr",
+              "scrollLeft": 1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax_y900": {
+              "dir": "ltr",
+              "scrollLeft": 2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 495,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1670,
+              "scrollLeft": 1670,
+              "scrollTop": 1026
+            },
+            "plain_from2462_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 177,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": 468,
+              "scrollTop": 1026
+            },
+            "plain_from1231_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 137,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": 208,
+              "scrollTop": 1026
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 515,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2350,
+              "scrollLeft": 2350,
+              "scrollTop": 1026
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 383,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": 1782,
+              "scrollTop": 1026
+            },
+            "padded_from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1026
+            },
+            "padded_from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 403,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": 2462,
+              "scrollTop": 1026
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 383,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": 1782,
+              "scrollTop": 1026
+            },
+            "from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1026
+            },
+            "from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 403,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": 2462,
+              "scrollTop": 1026
+            }
+          }
+        },
+        "rtl": {
+          "dir": "rtl",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 0,
+            "horizontalScrollbarHeight": 0,
+            "clientLeftMinusBorder": 0,
+            "side": "overlay(hit:none)",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": false,
+            "hitTestRightEdgeIsViewport": false
+          },
+          "maxX": 2462,
+          "rawScrollLeft": {
+            "afterPlusHuge": 0,
+            "afterMinusHuge": -2462,
+            "atZero": 0,
+            "scrollToMinus100": -100,
+            "scrollWidth": 3100,
+            "clientWidth": 638
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": -1
+            },
+            {
+              "x": 37.5,
+              "read": 38,
+              "raw": -38
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": -250
+            },
+            {
+              "x": 1231,
+              "read": 1231,
+              "raw": -1231
+            },
+            {
+              "x": 2461,
+              "read": 2461,
+              "raw": -2461
+            },
+            {
+              "x": 2462,
+              "read": 2462,
+              "raw": -2462
+            },
+            {
+              "x": 2512,
+              "read": 2462,
+              "raw": -2462
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "rtl",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid": {
+              "dir": "rtl",
+              "scrollLeft": -1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax": {
+              "dir": "rtl",
+              "scrollLeft": -2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid_y300": {
+              "dir": "rtl",
+              "scrollLeft": -1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax_y900": {
+              "dir": "rtl",
+              "scrollLeft": -2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 17,
+                "right": 177,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1670,
+              "scrollLeft": -1670,
+              "scrollTop": 1026
+            },
+            "plain_from2462_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 495,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": -468,
+              "scrollTop": 1026
+            },
+            "plain_from1231_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 535,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": -208,
+              "scrollTop": 1026
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 17,
+                "right": 157,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2350,
+              "scrollLeft": -2350,
+              "scrollTop": 1026
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 129,
+                "right": 289,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": -1782,
+              "scrollTop": 1026
+            },
+            "padded_from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1026
+            },
+            "padded_from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 129,
+                "right": 269,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": -2462,
+              "scrollTop": 1026
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 129,
+                "right": 289,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": -1782,
+              "scrollTop": 1026
+            },
+            "from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1026
+            },
+            "from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 129,
+                "right": 269,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": -2462,
+              "scrollTop": 1026
+            }
+          }
+        },
+        "flip": {
+          "before": {
+            "scrollLeft": 300,
+            "scrollX": 300
+          },
+          "afterRaw": {
+            "scrollLeft": 0,
+            "scrollX": 0
+          },
+          "reapplied": {
+            "scrollLeft": -300,
+            "scrollX": 300,
+            "geometry": {
+              "dir": "rtl",
+              "scrollLeft": -300,
+              "scrollX": 300,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          }
+        },
+        "bidi": {
+          "ltr/isolate/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/isolate/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext-block/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "ltr/plaintext-block/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/dir-auto/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "ltr/dir-auto/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/flex+span-plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/flex+span-plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/isolate/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/isolate/Ward 3 — الطابق 2": {
+            "arabicSide": "left-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "left-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext-block/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext-block/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/dir-auto/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/dir-auto/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/flex+span-plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/flex+span-plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          }
+        },
+        "resize": {
+          "ltr": {
+            "c0": {
+              "handleOffsetFromExpectedEdge": -1,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 120,
+              "afterWiden": 180,
+              "afterShrinkHalf": 150,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "name": {
+              "handleOffsetFromExpectedEdge": -1,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 150,
+              "afterWiden": 210,
+              "afterShrinkHalf": 180,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "status": {
+              "handleOffsetFromExpectedEdge": 0,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 110,
+              "afterWiden": 170,
+              "afterShrinkHalf": 140,
+              "ok": true,
+              "maxMisalignAfter": 0
+            }
+          },
+          "rtl": {
+            "c0": {
+              "handleOffsetFromExpectedEdge": 1,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 120,
+              "afterWiden": 180,
+              "afterShrinkHalf": 150,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "name": {
+              "handleOffsetFromExpectedEdge": 1,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 150,
+              "afterWiden": 210,
+              "afterShrinkHalf": 180,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "status": {
+              "handleOffsetFromExpectedEdge": 0,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 110,
+              "afterWiden": 170,
+              "afterShrinkHalf": 140,
+              "ok": true,
+              "maxMisalignAfter": 0
+            }
+          }
+        },
+        "errors": []
+      }
+    },
+    "webkit": {
+      "version": "27.2",
+      "default": {
+        "launch": "kit headless",
+        "ltr": {
+          "dir": "ltr",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 0,
+            "horizontalScrollbarHeight": 0,
+            "clientLeftMinusBorder": 0,
+            "side": "overlay(hit:none)",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": false,
+            "hitTestRightEdgeIsViewport": false
+          },
+          "maxX": 2462,
+          "rawScrollLeft": {
+            "afterPlusHuge": 2462,
+            "afterMinusHuge": 0,
+            "atZero": 0,
+            "scrollToMinus100": 100,
+            "scrollWidth": 3100,
+            "clientWidth": 638
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": 1
+            },
+            {
+              "x": 37.5,
+              "read": 37,
+              "raw": 37
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": 250
+            },
+            {
+              "x": 1231,
+              "read": 1231,
+              "raw": 1231
+            },
+            {
+              "x": 2461,
+              "read": 2461,
+              "raw": 2461
+            },
+            {
+              "x": 2462,
+              "read": 2462,
+              "raw": 2462
+            },
+            {
+              "x": 2512,
+              "read": 2462,
+              "raw": 2462
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "ltr",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid": {
+              "dir": "ltr",
+              "scrollLeft": 1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax": {
+              "dir": "ltr",
+              "scrollLeft": 2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid_y300": {
+              "dir": "ltr",
+              "scrollLeft": 1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax_y900": {
+              "dir": "ltr",
+              "scrollLeft": 2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 543,
+                "right": 655,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 495,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1670,
+              "scrollLeft": 1670,
+              "scrollTop": 1026
+            },
+            "plain_from2462_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 177,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": 468,
+              "scrollTop": 1026
+            },
+            "plain_from1231_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 137,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": 208,
+              "scrollTop": 1026
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 515,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2350,
+              "scrollLeft": 2350,
+              "scrollTop": 1026
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 383,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": 1782,
+              "scrollTop": 1026
+            },
+            "padded_from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1026
+            },
+            "padded_from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 403,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": 2462,
+              "scrollTop": 1026
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 383,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": 1782,
+              "scrollTop": 1026
+            },
+            "from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1026
+            },
+            "from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 403,
+                "right": 543,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 225,
+              "hi": 543,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": 2462,
+              "scrollTop": 1026
+            }
+          }
+        },
+        "rtl": {
+          "dir": "rtl",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 0,
+            "horizontalScrollbarHeight": 0,
+            "clientLeftMinusBorder": 0,
+            "side": "overlay(hit:left)",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": true,
+            "hitTestRightEdgeIsViewport": false
+          },
+          "maxX": 2462,
+          "rawScrollLeft": {
+            "afterPlusHuge": 0,
+            "afterMinusHuge": -2462,
+            "atZero": 0,
+            "scrollToMinus100": -100,
+            "scrollWidth": 3100,
+            "clientWidth": 638
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": -1
+            },
+            {
+              "x": 37.5,
+              "read": 37,
+              "raw": -37
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": -250
+            },
+            {
+              "x": 1231,
+              "read": 1231,
+              "raw": -1231
+            },
+            {
+              "x": 2461,
+              "read": 2461,
+              "raw": -2461
+            },
+            {
+              "x": 2462,
+              "read": 2462,
+              "raw": -2462
+            },
+            {
+              "x": 2512,
+              "read": 2462,
+              "raw": -2462
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "rtl",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid": {
+              "dir": "rtl",
+              "scrollLeft": -1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax": {
+              "dir": "rtl",
+              "scrollLeft": -2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMid_y300": {
+              "dir": "rtl",
+              "scrollLeft": -1231,
+              "scrollX": 1231,
+              "maxX": 2462,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            },
+            "xMax_y900": {
+              "dir": "rtl",
+              "scrollLeft": -2462,
+              "scrollX": 2462,
+              "maxX": 2462,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 17,
+                "right": 177,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1670,
+              "scrollLeft": -1670,
+              "scrollTop": 1026
+            },
+            "plain_from2462_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 495,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": -468,
+              "scrollTop": 1026
+            },
+            "plain_from1231_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 535,
+                "right": 655,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": -208,
+              "scrollTop": 1026
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 17,
+                "right": 157,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2350,
+              "scrollLeft": -2350,
+              "scrollTop": 1026
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 129,
+                "right": 289,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": -1782,
+              "scrollTop": 1026
+            },
+            "padded_from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1026
+            },
+            "padded_from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 129,
+                "right": 269,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": -2462,
+              "scrollTop": 1026
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 129,
+                "right": 289,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1782,
+              "scrollLeft": -1782,
+              "scrollTop": 1026
+            },
+            "from2462_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1026
+            },
+            "from1231_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1026
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 129,
+                "right": 269,
+                "top": 305,
+                "bottom": 337
+              },
+              "lo": 129,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2462,
+              "scrollLeft": -2462,
+              "scrollTop": 1026
+            }
+          }
+        },
+        "flip": {
+          "before": {
+            "scrollLeft": 300,
+            "scrollX": 300
+          },
+          "afterRaw": {
+            "scrollLeft": 0,
+            "scrollX": 0
+          },
+          "reapplied": {
+            "scrollLeft": -300,
+            "scrollX": 300,
+            "geometry": {
+              "dir": "rtl",
+              "scrollLeft": -300,
+              "scrollX": 300,
+              "maxX": 2462,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 17,
+                "right": 129,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 655,
+                "top": 17,
+                "bottom": 337
+              }
+            }
+          }
+        },
+        "bidi": {
+          "ltr/isolate/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/isolate/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/plaintext-block/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "ltr/plaintext-block/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/dir-auto/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "ltr/dir-auto/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/flex+span-plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "ltr/flex+span-plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/isolate/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/isolate/Ward 3 — الطابق 2": {
+            "arabicSide": "left-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext-block/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/plaintext-block/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/dir-auto/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/dir-auto/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "left"
+          },
+          "rtl/flex+span-plaintext/العيادة 12A": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          },
+          "rtl/flex+span-plaintext/Ward 3 — الطابق 2": {
+            "arabicSide": "right-of-latin",
+            "hugs": "right"
+          }
+        },
+        "resize": {
+          "ltr": {
+            "c0": {
+              "handleOffsetFromExpectedEdge": -1,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 120,
+              "afterWiden": 180,
+              "afterShrinkHalf": 150,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "name": {
+              "handleOffsetFromExpectedEdge": -1,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 150,
+              "afterWiden": 210,
+              "afterShrinkHalf": 180,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "status": {
+              "handleOffsetFromExpectedEdge": 0,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 110,
+              "afterWiden": 170,
+              "afterShrinkHalf": 140,
+              "ok": true,
+              "maxMisalignAfter": 0
+            }
+          },
+          "rtl": {
+            "c0": {
+              "handleOffsetFromExpectedEdge": 1,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 120,
+              "afterWiden": 180,
+              "afterShrinkHalf": 150,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "name": {
+              "handleOffsetFromExpectedEdge": 1,
+              "handleHitTest": true,
+              "physicalDragToWiden": -60,
+              "w0": 150,
+              "afterWiden": 210,
+              "afterShrinkHalf": 180,
+              "ok": true,
+              "maxMisalignAfter": 0
+            },
+            "status": {
+              "handleOffsetFromExpectedEdge": 0,
+              "handleHitTest": true,
+              "physicalDragToWiden": 60,
+              "w0": 110,
+              "afterWiden": 170,
+              "afterShrinkHalf": 140,
+              "ok": true,
+              "maxMisalignAfter": 0
+            }
+          }
+        },
+        "errors": []
+      },
+      "classic": {
+        "launch": "headless, styled ::-webkit-scrollbar",
+        "ltr": {
+          "dir": "ltr",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 14,
+            "horizontalScrollbarHeight": 14,
+            "clientLeftMinusBorder": 0,
+            "side": "right",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": false,
+            "hitTestRightEdgeIsViewport": true
+          },
+          "maxX": 2476,
+          "rawScrollLeft": {
+            "afterPlusHuge": 2476,
+            "afterMinusHuge": 0,
+            "atZero": 0,
+            "scrollToMinus100": 100,
+            "scrollWidth": 3100,
+            "clientWidth": 624
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": 1
+            },
+            {
+              "x": 37.5,
+              "read": 37,
+              "raw": 37
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": 250
+            },
+            {
+              "x": 1238,
+              "read": 1238,
+              "raw": 1238
+            },
+            {
+              "x": 2475,
+              "read": 2475,
+              "raw": 2475
+            },
+            {
+              "x": 2476,
+              "read": 2476,
+              "raw": 2476
+            },
+            {
+              "x": 2526,
+              "read": 2476,
+              "raw": 2476
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "ltr",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2476,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 529,
+                "right": 641,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 641,
+                "top": 17,
+                "bottom": 323
+              }
+            },
+            "xMid": {
+              "dir": "ltr",
+              "scrollLeft": 1238,
+              "scrollX": 1238,
+              "maxX": 2476,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 529,
+                "right": 641,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 641,
+                "top": 17,
+                "bottom": 323
+              }
+            },
+            "xMax": {
+              "dir": "ltr",
+              "scrollLeft": 2476,
+              "scrollX": 2476,
+              "maxX": 2476,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 529,
+                "right": 641,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 641,
+                "top": 17,
+                "bottom": 323
+              }
+            },
+            "xMid_y300": {
+              "dir": "ltr",
+              "scrollLeft": 1238,
+              "scrollX": 1238,
+              "maxX": 2476,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 529,
+                "right": 641,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 641,
+                "top": 17,
+                "bottom": 323
+              }
+            },
+            "xMax_y900": {
+              "dir": "ltr",
+              "scrollLeft": 2476,
+              "scrollX": 2476,
+              "maxX": 2476,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 17,
+                "right": 225,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 529,
+                "right": 641,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 17,
+                "right": 641,
+                "top": 17,
+                "bottom": 323
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 481,
+                "right": 641,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 1684,
+              "scrollLeft": 1684,
+              "scrollTop": 1040
+            },
+            "plain_from2476_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 177,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": 468,
+              "scrollTop": 1040
+            },
+            "plain_from1238_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 17,
+                "right": 137,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": 208,
+              "scrollTop": 1040
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 501,
+                "right": 641,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 2364,
+              "scrollLeft": 2364,
+              "scrollTop": 1040
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 369,
+                "right": 529,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 1796,
+              "scrollLeft": 1796,
+              "scrollTop": 1040
+            },
+            "padded_from2476_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1040
+            },
+            "padded_from1238_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1040
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 389,
+                "right": 529,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 2476,
+              "scrollLeft": 2476,
+              "scrollTop": 1040
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 369,
+                "right": 529,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 1796,
+              "scrollLeft": 1796,
+              "scrollTop": 1040
+            },
+            "from2476_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 225,
+                "right": 385,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": 260,
+              "scrollTop": 1040
+            },
+            "from1238_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 225,
+                "right": 345,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1040
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 389,
+                "right": 529,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 225,
+              "hi": 529,
+              "headBottom": 51,
+              "scrollX": 2476,
+              "scrollLeft": 2476,
+              "scrollTop": 1040
+            }
+          }
+        },
+        "rtl": {
+          "dir": "rtl",
+          "convention": "negative",
+          "scrollbar": {
+            "verticalScrollbarWidth": 14,
+            "horizontalScrollbarHeight": 14,
+            "clientLeftMinusBorder": 0,
+            "side": "left",
+            "clientLeftIncludesScrollbar": false,
+            "hitTestLeftEdgeIsViewport": true,
+            "hitTestRightEdgeIsViewport": false
+          },
+          "maxX": 2476,
+          "rawScrollLeft": {
+            "afterPlusHuge": 0,
+            "afterMinusHuge": -2476,
+            "atZero": 0,
+            "scrollToMinus100": -100,
+            "scrollWidth": 3100,
+            "clientWidth": 624
+          },
+          "scrollXRoundTrip": [
+            {
+              "x": 0,
+              "read": 0,
+              "raw": 0
+            },
+            {
+              "x": 1,
+              "read": 1,
+              "raw": -1
+            },
+            {
+              "x": 37.5,
+              "read": 37,
+              "raw": -37
+            },
+            {
+              "x": 250,
+              "read": 250,
+              "raw": -250
+            },
+            {
+              "x": 1238,
+              "read": 1238,
+              "raw": -1238
+            },
+            {
+              "x": 2475,
+              "read": 2475,
+              "raw": -2475
+            },
+            {
+              "x": 2476,
+              "read": 2476,
+              "raw": -2476
+            },
+            {
+              "x": 2526,
+              "read": 2476,
+              "raw": -2476
+            }
+          ],
+          "scrollXRoundTripOk": true,
+          "scrollXPutsC5AtStart": 0,
+          "positions": {
+            "x0": {
+              "dir": "rtl",
+              "scrollLeft": 0,
+              "scrollX": 0,
+              "maxX": 2476,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 31,
+                "right": 143,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 31,
+                "right": 655,
+                "top": 17,
+                "bottom": 323
+              }
+            },
+            "xMid": {
+              "dir": "rtl",
+              "scrollLeft": -1238,
+              "scrollX": 1238,
+              "maxX": 2476,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 31,
+                "right": 143,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 31,
+                "right": 655,
+                "top": 17,
+                "bottom": 323
+              }
+            },
+            "xMax": {
+              "dir": "rtl",
+              "scrollLeft": -2476,
+              "scrollX": 2476,
+              "maxX": 2476,
+              "scrollTop": 0,
+              "row": 1,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 83,
+                "bottom": 115
+              },
+              "pinEndRectBody": {
+                "left": 31,
+                "right": 143,
+                "top": 83,
+                "bottom": 115
+              },
+              "clientBox": {
+                "left": 31,
+                "right": 655,
+                "top": 17,
+                "bottom": 323
+              }
+            },
+            "xMid_y300": {
+              "dir": "rtl",
+              "scrollLeft": -1238,
+              "scrollX": 1238,
+              "maxX": 2476,
+              "scrollTop": 300,
+              "row": 10,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 71,
+                "bottom": 103
+              },
+              "pinEndRectBody": {
+                "left": 31,
+                "right": 143,
+                "top": 71,
+                "bottom": 103
+              },
+              "clientBox": {
+                "left": 31,
+                "right": 655,
+                "top": 17,
+                "bottom": 323
+              }
+            },
+            "xMax_y900": {
+              "dir": "rtl",
+              "scrollLeft": -2476,
+              "scrollX": 2476,
+              "maxX": 2476,
+              "scrollTop": 900,
+              "row": 29,
+              "stuck": {
+                "headerStartOff": 0,
+                "bodyStartOff": 0,
+                "headerEndOff": 0,
+                "bodyEndOff": 0
+              },
+              "maxMisalign": 0,
+              "misaligned": [],
+              "centreOrderMirrored": true,
+              "pinnedPaintsOnTop": {
+                "name": true,
+                "status": true,
+                "headerOverBody": true
+              },
+              "pinStartRectBody": {
+                "left": 447,
+                "right": 655,
+                "top": 79,
+                "bottom": 111
+              },
+              "pinEndRectBody": {
+                "left": 31,
+                "right": 143,
+                "top": 79,
+                "bottom": 111
+              },
+              "clientBox": {
+                "left": 31,
+                "right": 655,
+                "top": 17,
+                "bottom": 323
+              }
+            }
+          },
+          "scrollIntoView": {
+            "plain_from0_c14": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 31,
+                "right": 191,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1684,
+              "scrollLeft": -1684,
+              "scrollTop": 1040
+            },
+            "plain_from2476_c2": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 495,
+                "right": 655,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 468,
+              "scrollLeft": -468,
+              "scrollTop": 1040
+            },
+            "plain_from1238_c0": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[name] row=40",
+              "cell": {
+                "left": 535,
+                "right": 655,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 208,
+              "scrollLeft": -208,
+              "scrollTop": 1040
+            },
+            "plain_from0_c19": {
+              "fullyUnobstructed": false,
+              "hitIsCell": false,
+              "hit": "dzg-cell[status] row=40",
+              "cell": {
+                "left": 31,
+                "right": 171,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2364,
+              "scrollLeft": -2364,
+              "scrollTop": 1040
+            },
+            "padded_from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 143,
+                "right": 303,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1796,
+              "scrollLeft": -1796,
+              "scrollTop": 1040
+            },
+            "padded_from2476_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1040
+            },
+            "padded_from1238_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1040
+            },
+            "padded_from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 143,
+                "right": 283,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2476,
+              "scrollLeft": -2476,
+              "scrollTop": 1040
+            }
+          },
+          "ensureVisible": {
+            "from0_c14": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c14] row=40",
+              "cell": {
+                "left": 143,
+                "right": 303,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 1796,
+              "scrollLeft": -1796,
+              "scrollTop": 1040
+            },
+            "from2476_c2": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c2] row=40",
+              "cell": {
+                "left": 287,
+                "right": 447,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 260,
+              "scrollLeft": -260,
+              "scrollTop": 1040
+            },
+            "from1238_c0": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell[c0] row=40",
+              "cell": {
+                "left": 327,
+                "right": 447,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 0,
+              "scrollLeft": 0,
+              "scrollTop": 1040
+            },
+            "from0_c19": {
+              "fullyUnobstructed": true,
+              "hitIsCell": true,
+              "hit": "dzg-cell dzg-cell--num[c19] row=40",
+              "cell": {
+                "left": 143,
+                "right": 283,
+                "top": 291,
+                "bottom": 323
+              },
+              "lo": 143,
+              "hi": 447,
+              "headBottom": 51,
+              "scrollX": 2476,
+              "scrollLeft": -2476,
+              "scrollTop": 1040
+            }
+          }
+        },
+        "errors": []
+      }
+    }
+  }
+}

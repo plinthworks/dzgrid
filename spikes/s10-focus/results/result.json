@@ -1,0 +1,1754 @@
+{
+  "at": "2026-10-16T13:42:07.105Z",
+  "node": "v22.20.0",
+  "spike": "S10",
+  "engines": [
+    "chrome",
+    "firefox",
+    "webkit"
+  ],
+  "passed": 57,
+  "failed": 0,
+  "checks": [
+    {
+      "engine": "chrome",
+      "label": "contract: focused cell survives scroll to 5000, 9999 and back to its place: same node, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: while out of the window the row is retained, DOM order sane",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: editor scrolled out: same input, \"Bonjour\", caret 4, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: typing in the off-screen editor works (\"Bonj!our\", caret 5)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: editor back in view: same input, text and caret intact, one input in the body",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: sort while editing: same input, text, caret; r42 at its new aria-rowindex; DOM order sane; no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: update while editing: editor keeps \"Bonj!our\" and caret, sibling cell updated, no blur",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: Enter: editor closed, value committed, focus on cell r42/note, only the intended blur of the input",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: Escape (editor scrolled out): cancelled, focus on cell r42/note, still retained",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: Tab from retained cell leaves the grid; Shift+Tab returns to r42/note",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: Tab from the field before the grid lands on r42/note",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: Tab out of the editor: focus leaves, blur commits \"Bonj!our+\", editor closed",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: focused row filtered out: focus on the row now at its index (r43/city)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "contract: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "naive: focus is lost when the row is recycled (the bug the contract prevents)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "naive: the editor loses focus when its row is recycled",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "primitive: translating the focused row far away keeps focus (cell and input+caret)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "primitive: moving the siblings around the focused row keeps focus",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "primitive: display:none on the focused row loses focus",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: focused cell survives scroll to 5000, 9999 and back to its place: same node, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: while out of the window the row is retained, DOM order sane",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: editor scrolled out: same input, \"Bonjour\", caret 4, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: typing in the off-screen editor works (\"Bonj!our\", caret 5)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: editor back in view: same input, text and caret intact, one input in the body",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: sort while editing: same input, text, caret; r42 at its new aria-rowindex; DOM order sane; no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: update while editing: editor keeps \"Bonj!our\" and caret, sibling cell updated, no blur",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: Enter: editor closed, value committed, focus on cell r42/note, only the intended blur of the input",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: Escape (editor scrolled out): cancelled, focus on cell r42/note, still retained",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: Tab from retained cell leaves the grid; Shift+Tab returns to r42/note",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: Tab from the field before the grid lands on r42/note",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: Tab out of the editor: focus leaves, blur commits \"Bonj!our+\", editor closed",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: focused row filtered out: focus on the row now at its index (r43/city)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "contract: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "naive: focus is lost when the row is recycled (the bug the contract prevents)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "naive: the editor loses focus when its row is recycled",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "primitive: translating the focused row far away keeps focus (cell and input+caret)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "primitive: moving the siblings around the focused row keeps focus",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "label": "primitive: display:none on the focused row loses focus",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: focused cell survives scroll to 5000, 9999 and back to its place: same node, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: while out of the window the row is retained, DOM order sane",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: editor scrolled out: same input, \"Bonjour\", caret 4, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: typing in the off-screen editor works (\"Bonj!our\", caret 5)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: editor back in view: same input, text and caret intact, one input in the body",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: sort while editing: same input, text, caret; r42 at its new aria-rowindex; DOM order sane; no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: update while editing: editor keeps \"Bonj!our\" and caret, sibling cell updated, no blur",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: Enter: editor closed, value committed, focus on cell r42/note, only the intended blur of the input",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: Escape (editor scrolled out): cancelled, focus on cell r42/note, still retained",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: Tab from retained cell leaves the grid; Shift+Tab returns to r42/note",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: Tab from the field before the grid lands on r42/note",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: Tab out of the editor: focus leaves, blur commits \"Bonj!our+\", editor closed",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: focused row filtered out: focus on the row now at its index (r43/city)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "contract: no page errors",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "naive: focus is lost when the row is recycled (the bug the contract prevents)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "naive: the editor loses focus when its row is recycled",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "primitive: translating the focused row far away keeps focus (cell and input+caret)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "primitive: moving the siblings around the focused row keeps focus",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "label": "primitive: display:none on the focused row loses focus",
+      "ok": true
+    }
+  ],
+  "observations": [
+    {
+      "engine": "chrome",
+      "label": "typing in an off-screen editor: does the engine scroll it into view?",
+      "value": {
+        "scrollTopBefore": 160000,
+        "scrollTopAfter": 1383,
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ]
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "Shift+Tab onto a retained off-screen cell: scrollTop after (engine scrolls it into view?)",
+      "value": {
+        "scrollTopAfterShiftTab": 309809,
+        "retainedAfter": []
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "naive: focused cell recycled — activeElement and events away, and after scrolling back",
+      "value": {
+        "away": {
+          "active": "body",
+          "events": [
+            "blur div r42/city",
+            "focusout div r42/city"
+          ]
+        },
+        "back": {
+          "active": "body",
+          "same": false
+        }
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "naive: editor row recycled — where the input ends up",
+      "value": {
+        "away": {
+          "active": "body",
+          "events": [
+            "blur input r42/note"
+          ],
+          "inputs": []
+        },
+        "back": {
+          "active": "body",
+          "inputs": [],
+          "editor": null
+        }
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "naive: page errors",
+      "value": []
+    },
+    {
+      "engine": "firefox",
+      "label": "typing in an off-screen editor: does the engine scroll it into view?",
+      "value": {
+        "scrollTopBefore": 160000,
+        "scrollTopAfter": 1384,
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ]
+      }
+    },
+    {
+      "engine": "firefox",
+      "label": "Shift+Tab onto a retained off-screen cell: scrollTop after (engine scrolls it into view?)",
+      "value": {
+        "scrollTopAfterShiftTab": 309809,
+        "retainedAfter": []
+      }
+    },
+    {
+      "engine": "firefox",
+      "label": "naive: focused cell recycled — activeElement and events away, and after scrolling back",
+      "value": {
+        "away": {
+          "active": "body",
+          "events": []
+        },
+        "back": {
+          "active": "body",
+          "same": false
+        }
+      }
+    },
+    {
+      "engine": "firefox",
+      "label": "naive: editor row recycled — where the input ends up",
+      "value": {
+        "away": {
+          "active": "body",
+          "events": [],
+          "inputs": [
+            "input r5001/note"
+          ]
+        },
+        "back": {
+          "active": "body",
+          "inputs": [
+            "input r23/note"
+          ],
+          "editor": {
+            "key": "r42",
+            "col": "note"
+          }
+        }
+      }
+    },
+    {
+      "engine": "firefox",
+      "label": "naive: page errors",
+      "value": []
+    },
+    {
+      "engine": "webkit",
+      "label": "typing in an off-screen editor: does the engine scroll it into view?",
+      "value": {
+        "scrollTopBefore": 160000,
+        "scrollTopAfter": 1072,
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ]
+      }
+    },
+    {
+      "engine": "webkit",
+      "label": "Shift+Tab onto a retained off-screen cell: scrollTop after (engine scrolls it into view?)",
+      "value": {
+        "scrollTopAfterShiftTab": 309809,
+        "retainedAfter": []
+      }
+    },
+    {
+      "engine": "webkit",
+      "label": "naive: focused cell recycled — activeElement and events away, and after scrolling back",
+      "value": {
+        "away": {
+          "active": "body",
+          "events": []
+        },
+        "back": {
+          "active": "body",
+          "same": false
+        }
+      }
+    },
+    {
+      "engine": "webkit",
+      "label": "naive: editor row recycled — where the input ends up",
+      "value": {
+        "away": {
+          "active": "body",
+          "events": [],
+          "inputs": [
+            "input r5001/note"
+          ]
+        },
+        "back": {
+          "active": "body",
+          "inputs": [
+            "input r23/note"
+          ],
+          "editor": {
+            "key": "r42",
+            "col": "note"
+          }
+        }
+      }
+    },
+    {
+      "engine": "webkit",
+      "label": "naive: page errors",
+      "value": []
+    }
+  ],
+  "evidence": {
+    "chrome": {
+      "focusScroll": [
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [
+            "r42"
+          ],
+          "scrollTop": 160000,
+          "blurs": 0
+        },
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [
+            "r42"
+          ],
+          "scrollTop": 319393,
+          "blurs": 0
+        },
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [],
+          "scrollTop": 769,
+          "blurs": 0
+        }
+      ],
+      "typeOffscreen": {
+        "scrollTopBefore": 160000,
+        "scrollTopAfter": 1383,
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ]
+      },
+      "editSort": {
+        "rowindexOf42": 9692,
+        "expected": 9692,
+        "retained": [
+          "r42"
+        ],
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ],
+        "blurs": []
+      },
+      "enterClose": {
+        "active": "div r42/note",
+        "events": [
+          "blur input r42/note",
+          "focusout input r42/note",
+          "focus div r42/note",
+          "focusin div r42/note"
+        ],
+        "text42": "Bonj!our"
+      },
+      "tabRetained": {
+        "outTo": "input#after",
+        "back": "div r42/note",
+        "scrollTopAfterShiftTab": 309809,
+        "retained": []
+      },
+      "naiveFocus": {
+        "away": {
+          "active": "body",
+          "events": [
+            "blur div r42/city",
+            "focusout div r42/city"
+          ]
+        },
+        "back": {
+          "active": "body",
+          "same": false
+        }
+      },
+      "naiveEdit": {
+        "away": {
+          "active": "body",
+          "events": [
+            "blur input r42/note"
+          ],
+          "inputs": []
+        },
+        "back": {
+          "active": "body",
+          "inputs": [],
+          "editor": null
+        }
+      },
+      "primitives": {
+        "insertBefore": {
+          "op": "insertBefore",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false,
+          "ax": {
+            "role": "row",
+            "name": "cell 1",
+            "ignored": false
+          }
+        },
+        "insertBefore+input": {
+          "op": "insertBefore",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "appendChild": {
+          "op": "appendChild",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false,
+          "ax": {
+            "role": "row",
+            "name": "cell 1",
+            "ignored": false
+          }
+        },
+        "appendChild+input": {
+          "op": "appendChild",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "moveBefore": {
+          "op": "moveBefore",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true,
+          "ax": {
+            "role": "row",
+            "name": "cell 1",
+            "ignored": false
+          }
+        },
+        "moveBefore+input": {
+          "op": "moveBefore",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "removeThenInsert": {
+          "op": "removeThenInsert",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false,
+          "ax": {
+            "role": "row",
+            "name": "cell 1",
+            "ignored": false
+          }
+        },
+        "removeThenInsert+input": {
+          "op": "removeThenInsert",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "translateFarAway": {
+          "op": "translateFarAway",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true,
+          "ax": {
+            "role": "row",
+            "name": "cell 1",
+            "ignored": false
+          }
+        },
+        "translateFarAway+input": {
+          "op": "translateFarAway",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "rebindSiblingsAround": {
+          "op": "rebindSiblingsAround",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true,
+          "ax": {
+            "role": "row",
+            "name": "cell 1",
+            "ignored": false
+          }
+        },
+        "rebindSiblingsAround+input": {
+          "op": "rebindSiblingsAround",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "displayNone": {
+          "op": "displayNone",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false,
+          "ax": {
+            "missing": true
+          }
+        },
+        "displayNone+input": {
+          "op": "displayNone",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "visibilityHidden": {
+          "op": "visibilityHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false,
+          "ax": {
+            "missing": true
+          }
+        },
+        "visibilityHidden+input": {
+          "op": "visibilityHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "contentVisibilityHidden": {
+          "op": "contentVisibilityHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false,
+          "ax": {
+            "role": "row",
+            "name": "",
+            "ignored": false
+          }
+        },
+        "contentVisibilityHidden+input": {
+          "op": "contentVisibilityHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "contentVisibilityAuto": {
+          "op": "contentVisibilityAuto",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true,
+          "ax": {
+            "role": "row",
+            "name": "cell 1",
+            "ignored": false
+          }
+        },
+        "contentVisibilityAuto+input": {
+          "op": "contentVisibilityAuto",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "inert": {
+          "op": "inert",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false,
+          "ax": {
+            "missing": true
+          }
+        },
+        "inert+input": {
+          "op": "inert",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "ariaHidden": {
+          "op": "ariaHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true,
+          "ax": {
+            "role": "row",
+            "name": "cell 1",
+            "ignored": false
+          }
+        },
+        "ariaHidden+input": {
+          "op": "ariaHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        }
+      }
+    },
+    "firefox": {
+      "focusScroll": [
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [
+            "r42"
+          ],
+          "scrollTop": 160000,
+          "blurs": 0
+        },
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [
+            "r42"
+          ],
+          "scrollTop": 319393,
+          "blurs": 0
+        },
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [],
+          "scrollTop": 769,
+          "blurs": 0
+        }
+      ],
+      "typeOffscreen": {
+        "scrollTopBefore": 160000,
+        "scrollTopAfter": 1384,
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ]
+      },
+      "editSort": {
+        "rowindexOf42": 9692,
+        "expected": 9692,
+        "retained": [
+          "r42"
+        ],
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ],
+        "blurs": []
+      },
+      "enterClose": {
+        "active": "div r42/note",
+        "events": [
+          "blur input r42/note",
+          "focusout input r42/note",
+          "focus div r42/note",
+          "focusin div r42/note"
+        ],
+        "text42": "Bonj!our"
+      },
+      "tabRetained": {
+        "outTo": "input#after",
+        "back": "div r42/note",
+        "scrollTopAfterShiftTab": 309809,
+        "retained": []
+      },
+      "naiveFocus": {
+        "away": {
+          "active": "body",
+          "events": []
+        },
+        "back": {
+          "active": "body",
+          "same": false
+        }
+      },
+      "naiveEdit": {
+        "away": {
+          "active": "body",
+          "events": [],
+          "inputs": [
+            "input r5001/note"
+          ]
+        },
+        "back": {
+          "active": "body",
+          "inputs": [
+            "input r23/note"
+          ],
+          "editor": {
+            "key": "r42",
+            "col": "note"
+          }
+        }
+      },
+      "primitives": {
+        "insertBefore": {
+          "op": "insertBefore",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": false
+        },
+        "insertBefore+input": {
+          "op": "insertBefore",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": false
+        },
+        "appendChild": {
+          "op": "appendChild",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": false
+        },
+        "appendChild+input": {
+          "op": "appendChild",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": false
+        },
+        "moveBefore": {
+          "op": "moveBefore",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "moveBefore+input": {
+          "op": "moveBefore",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "removeThenInsert": {
+          "op": "removeThenInsert",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": false
+        },
+        "removeThenInsert+input": {
+          "op": "removeThenInsert",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": false
+        },
+        "translateFarAway": {
+          "op": "translateFarAway",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "translateFarAway+input": {
+          "op": "translateFarAway",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "rebindSiblingsAround": {
+          "op": "rebindSiblingsAround",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "rebindSiblingsAround+input": {
+          "op": "rebindSiblingsAround",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "displayNone": {
+          "op": "displayNone",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false
+        },
+        "displayNone+input": {
+          "op": "displayNone",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "visibilityHidden": {
+          "op": "visibilityHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false
+        },
+        "visibilityHidden+input": {
+          "op": "visibilityHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "contentVisibilityHidden": {
+          "op": "contentVisibilityHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false
+        },
+        "contentVisibilityHidden+input": {
+          "op": "contentVisibilityHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "contentVisibilityAuto": {
+          "op": "contentVisibilityAuto",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "contentVisibilityAuto+input": {
+          "op": "contentVisibilityAuto",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "inert": {
+          "op": "inert",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false
+        },
+        "inert+input": {
+          "op": "inert",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "ariaHidden": {
+          "op": "ariaHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "ariaHidden+input": {
+          "op": "ariaHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        }
+      }
+    },
+    "webkit": {
+      "focusScroll": [
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [
+            "r42"
+          ],
+          "scrollTop": 160000,
+          "blurs": 0
+        },
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [
+            "r42"
+          ],
+          "scrollTop": 319393,
+          "blurs": 0
+        },
+        {
+          "active": "div r42/city",
+          "same": true,
+          "retained": [],
+          "scrollTop": 769,
+          "blurs": 0
+        }
+      ],
+      "typeOffscreen": {
+        "scrollTopBefore": 160000,
+        "scrollTopAfter": 1072,
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ]
+      },
+      "editSort": {
+        "rowindexOf42": 9692,
+        "expected": 9692,
+        "retained": [
+          "r42"
+        ],
+        "value": "Bonj!our",
+        "caret": [
+          5,
+          5
+        ],
+        "blurs": []
+      },
+      "enterClose": {
+        "active": "div r42/note",
+        "events": [
+          "blur input r42/note",
+          "focusout input r42/note",
+          "focus div r42/note",
+          "focusin div r42/note"
+        ],
+        "text42": "Bonj!our"
+      },
+      "tabRetained": {
+        "outTo": "input#after",
+        "back": "div r42/note",
+        "scrollTopAfterShiftTab": 309809,
+        "retained": []
+      },
+      "naiveFocus": {
+        "away": {
+          "active": "body",
+          "events": []
+        },
+        "back": {
+          "active": "body",
+          "same": false
+        }
+      },
+      "naiveEdit": {
+        "away": {
+          "active": "body",
+          "events": [],
+          "inputs": [
+            "input r5001/note"
+          ]
+        },
+        "back": {
+          "active": "body",
+          "inputs": [
+            "input r23/note"
+          ],
+          "editor": {
+            "key": "r42",
+            "col": "note"
+          }
+        }
+      },
+      "primitives": {
+        "insertBefore": {
+          "op": "insertBefore",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": false
+        },
+        "insertBefore+input": {
+          "op": "insertBefore",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": false
+        },
+        "appendChild": {
+          "op": "appendChild",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": false
+        },
+        "appendChild+input": {
+          "op": "appendChild",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": false
+        },
+        "moveBefore": {
+          "op": "moveBefore",
+          "withInput": false,
+          "result": "unsupported",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "moveBefore+input": {
+          "op": "moveBefore",
+          "withInput": true,
+          "result": "unsupported",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "removeThenInsert": {
+          "op": "removeThenInsert",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": false
+        },
+        "removeThenInsert+input": {
+          "op": "removeThenInsert",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": false
+        },
+        "translateFarAway": {
+          "op": "translateFarAway",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "translateFarAway+input": {
+          "op": "translateFarAway",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "rebindSiblingsAround": {
+          "op": "rebindSiblingsAround",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "rebindSiblingsAround+input": {
+          "op": "rebindSiblingsAround",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "displayNone": {
+          "op": "displayNone",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false
+        },
+        "displayNone+input": {
+          "op": "displayNone",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "visibilityHidden": {
+          "op": "visibilityHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false
+        },
+        "visibilityHidden+input": {
+          "op": "visibilityHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "contentVisibilityHidden": {
+          "op": "contentVisibilityHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false
+        },
+        "contentVisibilityHidden+input": {
+          "op": "contentVisibilityHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "contentVisibilityAuto": {
+          "op": "contentVisibilityAuto",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "contentVisibilityAuto+input": {
+          "op": "contentVisibilityAuto",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        },
+        "inert": {
+          "op": "inert",
+          "withInput": false,
+          "result": "done",
+          "active": "BODY",
+          "caret": null,
+          "value": null,
+          "events": [
+            "blur cell1",
+            "focusout cell1"
+          ],
+          "focusable": false
+        },
+        "inert+input": {
+          "op": "inert",
+          "withInput": true,
+          "result": "done",
+          "active": "BODY",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [
+            "blur ed",
+            "focusout ed"
+          ],
+          "focusable": false
+        },
+        "ariaHidden": {
+          "op": "ariaHidden",
+          "withInput": false,
+          "result": "done",
+          "active": "cell1",
+          "caret": null,
+          "value": null,
+          "events": [],
+          "focusable": true
+        },
+        "ariaHidden+input": {
+          "op": "ariaHidden",
+          "withInput": true,
+          "result": "done",
+          "active": "ed",
+          "caret": [
+            4,
+            4
+          ],
+          "value": "Bonjour",
+          "events": [],
+          "focusable": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1589 @@
+chrome done
+firefox done
+webkit done
+{
+  "at": "2026-10-16T13:42:16.117Z",
+  "node": {
+    "roundTrip": {
+      "iterations": 20000,
+      "failures": []
+    },
+    "decodeCases": [],
+    "large": {
+      "bytes": 2726700,
+      "decodeMs": 44,
+      "encodeMs": 20,
+      "same": true
+    }
+  },
+  "chrome": {
+    "version": "155.0.8059.80",
+    "default": {
+      "label": "default",
+      "features": {
+        "ClipboardEvent": "function",
+        "DataTransferCtor": true,
+        "syntheticPaste": [
+          {
+            "type": "paste",
+            "target": "grid",
+            "active": "grid",
+            "hasClipboardData": true,
+            "isTrusted": false,
+            "types": [
+              "text/plain",
+              "text/html"
+            ],
+            "plain": "x\ty\r\n",
+            "html": "<table><tr><td>x</td><td>y</td></tr></table>",
+            "decoded": [
+              [
+                "x",
+                "y"
+              ]
+            ],
+            "htmlParsed": [
+              [
+                "x",
+                "y"
+              ]
+            ]
+          }
+        ],
+        "navigatorClipboard": true,
+        "readText": "function",
+        "writeText": "function",
+        "read": "function",
+        "write": "function",
+        "ClipboardItem": "function",
+        "ClipboardItemSupportsHtml": true,
+        "secureContext": true
+      },
+      "keyboardCopyOnGrid": [
+        {
+          "type": "copy",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "setOk": true
+        }
+      ],
+      "keyboardPasteOnGrid": [
+        {
+          "type": "paste",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "keyboardPasteOnTextarea": [
+        {
+          "type": "paste",
+          "target": "ta",
+          "active": "ta",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "keyboardCutOnGrid": [
+        {
+          "type": "cut",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "setOk": true
+        }
+      ],
+      "keyboardPasteAfterCut": [
+        {
+          "type": "paste",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "noGesture": {
+        "writeText": {
+          "ok": true
+        },
+        "readText": {
+          "ok": false,
+          "error": "NotAllowedError: Failed to execute 'readText' on 'Clipboard': Read permission denied."
+        }
+      },
+      "gesture": {
+        "execCopy": {
+          "ok": true,
+          "v": {
+            "returned": true,
+            "events": [
+              {
+                "type": "copy",
+                "target": "ta",
+                "active": "grid",
+                "hasClipboardData": true,
+                "isTrusted": true,
+                "types": [
+                  "text/plain",
+                  "text/html"
+                ],
+                "setOk": true
+              }
+            ]
+          }
+        },
+        "execPaste": {
+          "ok": true,
+          "v": {
+            "returned": false,
+            "events": []
+          }
+        },
+        "writeText": {
+          "ok": true
+        },
+        "readText": {
+          "ok": false,
+          "error": "NotAllowedError: Failed to execute 'readText' on 'Clipboard': Read permission denied."
+        },
+        "writeHtml": {
+          "ok": true
+        },
+        "read": {
+          "ok": false,
+          "error": "NotAllowedError: Failed to execute 'read' on 'Clipboard': Read permission denied."
+        }
+      },
+      "pasteAfterWriteText": [
+        {
+          "types": [
+            "text/plain"
+          ],
+          "plain": "S7-writeText-marker"
+        }
+      ],
+      "pasteAfterWriteHtml": [
+        {
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "S7-html-marker\tb\r\n",
+          "html": "<html><head></head><body><table><tbody><tr><td>S7-html-marker</td><td>b</td></tr></tbody></table></body></html>",
+          "htmlParsed": [
+            [
+              "S7-html-marker",
+              "b"
+            ]
+          ]
+        }
+      ]
+    },
+    "fixtures": {
+      "excel-win.html": [],
+      "sheets.html": [],
+      "libreoffice.html": []
+    },
+    "fixturesParsed": {
+      "excel-win.html": {
+        "values": [
+          [
+            "Nom",
+            "Montant",
+            "Date",
+            "Code"
+          ],
+          [
+            "Dupont",
+            "1,234.50",
+            "3/5/2026",
+            "007"
+          ],
+          [
+            "Ligne 1\nLigne 2",
+            "fusion horizontale",
+            "",
+            "12.5%"
+          ],
+          [
+            "محمد بن علي",
+            "-42",
+            "",
+            ""
+          ],
+          [
+            "",
+            "\"guillemets\" et tab",
+            "",
+            ""
+          ]
+        ],
+        "meta": [
+          null,
+          [
+            null,
+            {
+              "numFmt": "#,##0.00",
+              "x:num": "1234.5"
+            },
+            {
+              "numFmt": "Short Date",
+              "x:num": "46086"
+            },
+            {
+              "numFmt": "@"
+            }
+          ],
+          [
+            null,
+            null,
+            null,
+            {
+              "numFmt": "0.0%",
+              "x:num": "0.125"
+            }
+          ],
+          [
+            null,
+            {
+              "x:num": ""
+            }
+          ]
+        ],
+        "merges": [
+          {
+            "r": 2,
+            "c": 1,
+            "rows": 1,
+            "cols": 2
+          },
+          {
+            "r": 3,
+            "c": 0,
+            "rows": 2,
+            "cols": 1
+          }
+        ]
+      },
+      "sheets.html": {
+        "values": [
+          [
+            "a",
+            "1,234.50",
+            ""
+          ],
+          [
+            "x\ny",
+            "merged",
+            ""
+          ]
+        ],
+        "meta": [
+          [
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"a\"}"
+            },
+            {
+              "data-sheets-value": "{\"1\":3,\"3\":1234.5}"
+            }
+          ],
+          [
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"x\\ny\"}"
+            },
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"merged\"}"
+            }
+          ]
+        ],
+        "merges": [
+          {
+            "r": 1,
+            "c": 1,
+            "rows": 1,
+            "cols": 2
+          }
+        ]
+      },
+      "libreoffice.html": {
+        "values": [
+          [
+            "Ville",
+            "Population"
+          ],
+          [
+            "Alger",
+            "3 415 811"
+          ],
+          [
+            "",
+            "50%"
+          ]
+        ],
+        "meta": [
+          null,
+          [
+            null,
+            {
+              "sdval": "3415811"
+            }
+          ],
+          [
+            null,
+            {
+              "sdval": "0.5"
+            }
+          ]
+        ],
+        "merges": []
+      }
+    },
+    "roundTrip": {
+      "iterations": 20000,
+      "failures": []
+    },
+    "decodeCasesFailed": [],
+    "large": {
+      "bytes": 2726700,
+      "decodeMs": 9,
+      "same": true
+    },
+    "granted": {
+      "label": "granted",
+      "features": {
+        "ClipboardEvent": "function",
+        "DataTransferCtor": true,
+        "syntheticPaste": [
+          {
+            "type": "paste",
+            "target": "grid",
+            "active": "grid",
+            "hasClipboardData": true,
+            "isTrusted": false,
+            "types": [
+              "text/plain",
+              "text/html"
+            ],
+            "plain": "x\ty\r\n",
+            "html": "<table><tr><td>x</td><td>y</td></tr></table>",
+            "decoded": [
+              [
+                "x",
+                "y"
+              ]
+            ],
+            "htmlParsed": [
+              [
+                "x",
+                "y"
+              ]
+            ]
+          }
+        ],
+        "navigatorClipboard": true,
+        "readText": "function",
+        "writeText": "function",
+        "read": "function",
+        "write": "function",
+        "ClipboardItem": "function",
+        "ClipboardItemSupportsHtml": true,
+        "secureContext": true
+      },
+      "keyboardCopyOnGrid": [
+        {
+          "type": "copy",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "setOk": true
+        }
+      ],
+      "keyboardPasteOnGrid": [
+        {
+          "type": "paste",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "keyboardPasteOnTextarea": [
+        {
+          "type": "paste",
+          "target": "ta",
+          "active": "ta",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "keyboardCutOnGrid": [
+        {
+          "type": "cut",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "setOk": true
+        }
+      ],
+      "keyboardPasteAfterCut": [
+        {
+          "type": "paste",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "noGesture": {
+        "writeText": {
+          "ok": true
+        },
+        "readText": {
+          "ok": true,
+          "v": "S7-writeText-marker"
+        }
+      },
+      "gesture": {
+        "execCopy": {
+          "ok": true,
+          "v": {
+            "returned": true,
+            "events": [
+              {
+                "type": "copy",
+                "target": "ta",
+                "active": "grid",
+                "hasClipboardData": true,
+                "isTrusted": true,
+                "types": [
+                  "text/plain",
+                  "text/html"
+                ],
+                "setOk": true
+              }
+            ]
+          }
+        },
+        "execPaste": {
+          "ok": true,
+          "v": {
+            "returned": false,
+            "events": []
+          }
+        },
+        "writeText": {
+          "ok": true
+        },
+        "readText": {
+          "ok": true,
+          "v": "S7-writeText-marker"
+        },
+        "writeHtml": {
+          "ok": true
+        },
+        "read": {
+          "ok": true,
+          "v": [
+            {
+              "type": "text/plain",
+              "text": "S7-html-marker\tb\r\n"
+            },
+            {
+              "type": "text/html",
+              "text": "<table><tbody><tr><td>S7-html-marker</td><td>b</td></tr></tbody></table>"
+            }
+          ]
+        }
+      },
+      "pasteAfterWriteText": [
+        {
+          "types": [
+            "text/plain"
+          ],
+          "plain": "S7-writeText-marker"
+        }
+      ],
+      "pasteAfterWriteHtml": [
+        {
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "S7-html-marker\tb\r\n",
+          "html": "<html><head></head><body><table><tbody><tr><td>S7-html-marker</td><td>b</td></tr></tbody></table></body></html>",
+          "htmlParsed": [
+            [
+              "S7-html-marker",
+              "b"
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "firefox": {
+    "version": "157.0",
+    "default": {
+      "label": "default",
+      "features": {
+        "ClipboardEvent": "function",
+        "DataTransferCtor": true,
+        "syntheticPaste": [
+          {
+            "type": "paste",
+            "target": "grid",
+            "active": "grid",
+            "hasClipboardData": true,
+            "isTrusted": false,
+            "types": [],
+            "plain": "",
+            "html": "",
+            "decoded": [
+              [
+                ""
+              ]
+            ],
+            "htmlParsed": null
+          }
+        ],
+        "navigatorClipboard": true,
+        "readText": "function",
+        "writeText": "function",
+        "read": "function",
+        "write": "function",
+        "ClipboardItem": "function",
+        "ClipboardItemSupportsHtml": true,
+        "secureContext": true
+      },
+      "keyboardCopyOnGrid": [
+        {
+          "type": "copy",
+          "target": "BODY",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "setOk": true
+        }
+      ],
+      "keyboardPasteOnGrid": [
+        {
+          "type": "paste",
+          "target": "BODY",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/html",
+            "text/plain"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "keyboardPasteOnTextarea": [
+        {
+          "type": "paste",
+          "target": "ta",
+          "active": "ta",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/html",
+            "text/plain"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "keyboardCutOnGrid": [
+        {
+          "type": "cut",
+          "target": "BODY",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "setOk": true
+        }
+      ],
+      "keyboardPasteAfterCut": [
+        {
+          "type": "paste",
+          "target": "BODY",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/html",
+            "text/plain"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "noGesture": {
+        "writeText": {
+          "ok": true
+        },
+        "readText": {
+          "ok": true,
+          "v": "S7-writeText-marker"
+        }
+      },
+      "gesture": {
+        "execCopy": {
+          "ok": true,
+          "v": {
+            "returned": true,
+            "events": [
+              {
+                "type": "copy",
+                "target": "BODY",
+                "active": "grid",
+                "hasClipboardData": true,
+                "isTrusted": true,
+                "types": [
+                  "text/plain",
+                  "text/html"
+                ],
+                "setOk": true
+              }
+            ]
+          }
+        },
+        "execPaste": {
+          "ok": true,
+          "v": {
+            "returned": true,
+            "events": [
+              {
+                "type": "paste",
+                "target": "BODY",
+                "active": "grid",
+                "hasClipboardData": true,
+                "isTrusted": true,
+                "types": [
+                  "text/html",
+                  "text/plain"
+                ],
+                "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+                "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+                "decoded": [
+                  [
+                    "a\tb",
+                    "line1\nline2"
+                  ],
+                  [
+                    "\"q\"",
+                    "محمد"
+                  ]
+                ],
+                "htmlParsed": [
+                  [
+                    "a b",
+                    "line1\nline2"
+                  ],
+                  [
+                    "\"q\"",
+                    "محمد"
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "writeText": {
+          "ok": true
+        },
+        "readText": {
+          "ok": true,
+          "v": "S7-writeText-marker"
+        },
+        "writeHtml": {
+          "ok": true
+        },
+        "read": {
+          "ok": true,
+          "v": [
+            {
+              "type": "text/html",
+              "text": "<html><head></head><body><table><tbody><tr><td>S7-html-marker</td><td>b</td></tr></tbody></table></body></html>"
+            },
+            {
+              "type": "text/plain",
+              "text": "S7-html-marker\tb\r\n"
+            }
+          ]
+        }
+      },
+      "pasteAfterWriteText": [
+        {
+          "types": [
+            "text/plain"
+          ],
+          "plain": "S7-writeText-marker"
+        }
+      ],
+      "pasteAfterWriteHtml": [
+        {
+          "types": [
+            "text/html",
+            "text/plain"
+          ],
+          "plain": "S7-html-marker\tb\r\n",
+          "html": "<html><head></head><body><table><tbody><tr><td>S7-html-marker</td><td>b</td></tr></tbody></table></body></html>",
+          "htmlParsed": [
+            [
+              "S7-html-marker",
+              "b"
+            ]
+          ]
+        }
+      ]
+    },
+    "fixtures": {
+      "excel-win.html": [],
+      "sheets.html": [],
+      "libreoffice.html": []
+    },
+    "fixturesParsed": {
+      "excel-win.html": {
+        "values": [
+          [
+            "Nom",
+            "Montant",
+            "Date",
+            "Code"
+          ],
+          [
+            "Dupont",
+            "1,234.50",
+            "3/5/2026",
+            "007"
+          ],
+          [
+            "Ligne 1\nLigne 2",
+            "fusion horizontale",
+            "",
+            "12.5%"
+          ],
+          [
+            "محمد بن علي",
+            "-42",
+            "",
+            ""
+          ],
+          [
+            "",
+            "\"guillemets\" et tab",
+            "",
+            ""
+          ]
+        ],
+        "meta": [
+          null,
+          [
+            null,
+            {
+              "numFmt": "#,##0.00",
+              "x:num": "1234.5"
+            },
+            {
+              "numFmt": "Short Date",
+              "x:num": "46086"
+            },
+            {
+              "numFmt": "@"
+            }
+          ],
+          [
+            null,
+            null,
+            null,
+            {
+              "numFmt": "0.0%",
+              "x:num": "0.125"
+            }
+          ],
+          [
+            null,
+            {
+              "x:num": ""
+            }
+          ]
+        ],
+        "merges": [
+          {
+            "r": 2,
+            "c": 1,
+            "rows": 1,
+            "cols": 2
+          },
+          {
+            "r": 3,
+            "c": 0,
+            "rows": 2,
+            "cols": 1
+          }
+        ]
+      },
+      "sheets.html": {
+        "values": [
+          [
+            "a",
+            "1,234.50",
+            ""
+          ],
+          [
+            "x\ny",
+            "merged",
+            ""
+          ]
+        ],
+        "meta": [
+          [
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"a\"}"
+            },
+            {
+              "data-sheets-value": "{\"1\":3,\"3\":1234.5}"
+            }
+          ],
+          [
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"x\\ny\"}"
+            },
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"merged\"}"
+            }
+          ]
+        ],
+        "merges": [
+          {
+            "r": 1,
+            "c": 1,
+            "rows": 1,
+            "cols": 2
+          }
+        ]
+      },
+      "libreoffice.html": {
+        "values": [
+          [
+            "Ville",
+            "Population"
+          ],
+          [
+            "Alger",
+            "3 415 811"
+          ],
+          [
+            "",
+            "50%"
+          ]
+        ],
+        "meta": [
+          null,
+          [
+            null,
+            {
+              "sdval": "3415811"
+            }
+          ],
+          [
+            null,
+            {
+              "sdval": "0.5"
+            }
+          ]
+        ],
+        "merges": []
+      }
+    },
+    "roundTrip": {
+      "iterations": 20000,
+      "failures": []
+    },
+    "decodeCasesFailed": [],
+    "large": {
+      "bytes": 2726700,
+      "decodeMs": 18,
+      "same": true
+    },
+    "granted": {
+      "grantError": "browserContext.grantPermissions: Unknown permission: clipboard-read"
+    }
+  },
+  "webkit": {
+    "version": "27.2",
+    "default": {
+      "label": "default",
+      "features": {
+        "ClipboardEvent": "function",
+        "DataTransferCtor": true,
+        "syntheticPaste": [
+          {
+            "type": "paste",
+            "target": "grid",
+            "active": "grid",
+            "hasClipboardData": true,
+            "isTrusted": false,
+            "types": [
+              "text/plain",
+              "text/html"
+            ],
+            "plain": "x\ty\r\n",
+            "html": "<table><tr><td>x</td><td>y</td></tr></table>",
+            "decoded": [
+              [
+                "x",
+                "y"
+              ]
+            ],
+            "htmlParsed": [
+              [
+                "x",
+                "y"
+              ]
+            ]
+          }
+        ],
+        "navigatorClipboard": true,
+        "readText": "function",
+        "writeText": "function",
+        "read": "function",
+        "write": "function",
+        "ClipboardItem": "function",
+        "ClipboardItemSupportsHtml": true,
+        "secureContext": true
+      },
+      "keyboardCopyOnGrid": [
+        {
+          "type": "copy",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "setOk": true
+        }
+      ],
+      "keyboardPasteOnGrid": [
+        {
+          "type": "paste",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "keyboardPasteOnTextarea": [
+        {
+          "type": "paste",
+          "target": "ta",
+          "active": "ta",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "keyboardCutOnGrid": [
+        {
+          "type": "cut",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "setOk": true
+        }
+      ],
+      "keyboardPasteAfterCut": [
+        {
+          "type": "paste",
+          "target": "grid",
+          "active": "grid",
+          "hasClipboardData": true,
+          "isTrusted": true,
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "\"a\tb\"\t\"line1\nline2\"\r\n\"\"\"q\"\"\"\tمحمد\r\n",
+          "html": "<table><tr><td>a\tb</td><td>line1<br>line2</td></tr><tr><td>&quot;q&quot;</td><td>محمد</td></tr></table>",
+          "decoded": [
+            [
+              "a\tb",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ],
+          "htmlParsed": [
+            [
+              "a b",
+              "line1\nline2"
+            ],
+            [
+              "\"q\"",
+              "محمد"
+            ]
+          ]
+        }
+      ],
+      "noGesture": {
+        "writeText": {
+          "ok": true
+        },
+        "readText": {
+          "ok": false,
+          "error": "NotAllowedError: The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission."
+        }
+      },
+      "gesture": {
+        "execCopy": {
+          "ok": true,
+          "v": {
+            "returned": false,
+            "events": [
+              {
+                "type": "copy",
+                "target": "grid",
+                "active": "grid",
+                "hasClipboardData": true,
+                "isTrusted": true,
+                "types": [
+                  "text/plain",
+                  "text/html"
+                ],
+                "setOk": true
+              }
+            ]
+          }
+        },
+        "execPaste": {
+          "ok": true,
+          "v": {
+            "returned": false,
+            "events": []
+          }
+        },
+        "writeText": {
+          "ok": true
+        },
+        "readText": {
+          "ok": false,
+          "error": "NotAllowedError: The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission."
+        },
+        "writeHtml": {
+          "ok": true
+        },
+        "read": {
+          "ok": false,
+          "error": "NotAllowedError: The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission."
+        }
+      },
+      "pasteAfterWriteText": [
+        {
+          "types": [
+            "text/plain"
+          ],
+          "plain": "S7-writeText-marker"
+        }
+      ],
+      "pasteAfterWriteHtml": [
+        {
+          "types": [
+            "text/plain",
+            "text/html"
+          ],
+          "plain": "S7-html-marker\tb\r\n",
+          "html": "<table style=\"color: rgb(0, 0, 0); font-size: medium; font-style: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;\"><tbody><tr><td>S7-html-marker</td><td>b</td></tr></tbody></table>",
+          "htmlParsed": [
+            [
+              "S7-html-marker",
+              "b"
+            ]
+          ]
+        }
+      ]
+    },
+    "fixtures": {
+      "excel-win.html": [],
+      "sheets.html": [],
+      "libreoffice.html": []
+    },
+    "fixturesParsed": {
+      "excel-win.html": {
+        "values": [
+          [
+            "Nom",
+            "Montant",
+            "Date",
+            "Code"
+          ],
+          [
+            "Dupont",
+            "1,234.50",
+            "3/5/2026",
+            "007"
+          ],
+          [
+            "Ligne 1\nLigne 2",
+            "fusion horizontale",
+            "",
+            "12.5%"
+          ],
+          [
+            "محمد بن علي",
+            "-42",
+            "",
+            ""
+          ],
+          [
+            "",
+            "\"guillemets\" et tab",
+            "",
+            ""
+          ]
+        ],
+        "meta": [
+          null,
+          [
+            null,
+            {
+              "numFmt": "#,##0.00",
+              "x:num": "1234.5"
+            },
+            {
+              "numFmt": "Short Date",
+              "x:num": "46086"
+            },
+            {
+              "numFmt": "@"
+            }
+          ],
+          [
+            null,
+            null,
+            null,
+            {
+              "numFmt": "0.0%",
+              "x:num": "0.125"
+            }
+          ],
+          [
+            null,
+            {
+              "x:num": ""
+            }
+          ]
+        ],
+        "merges": [
+          {
+            "r": 2,
+            "c": 1,
+            "rows": 1,
+            "cols": 2
+          },
+          {
+            "r": 3,
+            "c": 0,
+            "rows": 2,
+            "cols": 1
+          }
+        ]
+      },
+      "sheets.html": {
+        "values": [
+          [
+            "a",
+            "1,234.50",
+            ""
+          ],
+          [
+            "x\ny",
+            "merged",
+            ""
+          ]
+        ],
+        "meta": [
+          [
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"a\"}"
+            },
+            {
+              "data-sheets-value": "{\"1\":3,\"3\":1234.5}"
+            }
+          ],
+          [
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"x\\ny\"}"
+            },
+            {
+              "data-sheets-value": "{\"1\":2,\"2\":\"merged\"}"
+            }
+          ]
+        ],
+        "merges": [
+          {
+            "r": 1,
+            "c": 1,
+            "rows": 1,
+            "cols": 2
+          }
+        ]
+      },
+      "libreoffice.html": {
+        "values": [
+          [
+            "Ville",
+            "Population"
+          ],
+          [
+            "Alger",
+            "3 415 811"
+          ],
+          [
+            "",
+            "50%"
+          ]
+        ],
+        "meta": [
+          null,
+          [
+            null,
+            {
+              "sdval": "3415811"
+            }
+          ],
+          [
+            null,
+            {
+              "sdval": "0.5"
+            }
+          ]
+        ],
+        "merges": []
+      }
+    },
+    "roundTrip": {
+      "iterations": 20000,
+      "failures": []
+    },
+    "decodeCasesFailed": [],
+    "large": {
+      "bytes": 2726700,
+      "decodeMs": 18,
+      "same": true
+    },
+    "granted": {
+      "grantError": "browserContext.newPage: Unknown permission: clipboard-write"
+    }
+  },
+  "systemClipboardTouched": false
+}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<meta charset="utf-8">
+<title>S1 — one million rows</title>
+<style>
+  :root {
+    --dzg-bg: white; --dzg-fg: rgb(20 20 20); --dzg-header-bg: rgb(238 238 238);
+    --dzg-line: rgb(221 221 221); --dzg-row-line: rgb(236 236 236);
+  }
+  html, body { margin: 0; block-size: 100%; background: var(--dzg-bg); color: var(--dzg-fg); }
+  #host { position: fixed; inset: 0; }
+  .dzg-viewport {
+    position: relative; overflow: auto; block-size: 100%; inline-size: 100%;
+    overflow-anchor: none; contain: strict; font: 13px/32px system-ui, sans-serif;
+  }
+  .dzg-header { position: sticky; inset-block-start: 0; z-index: 2; background: var(--dzg-header-bg); }
+  .dzg-body { position: relative; }
+  .dzg-layer { position: absolute; inset-inline-start: 0; inset-block-start: 0; block-size: 0; }
+  .dzg-row {
+    position: absolute; inset-block-start: 0; inset-inline-start: 0; box-sizing: border-box;
+    background: var(--dzg-bg); border-block-end: 1px solid var(--dzg-row-line);
+  }
+  .dzg-cell, .dzg-hcell {
+    position: absolute; inset-block-start: 0; block-size: 100%; box-sizing: border-box;
+    padding-inline: 6px; overflow: hidden; white-space: nowrap;
+    border-inline-end: 1px solid var(--dzg-line);
+  }
+  .dzg-hcell { font-weight: 600; }
+</style>
+<div id="host"></div>
+<script type="module" src="./main.ts"></script>
+</html>

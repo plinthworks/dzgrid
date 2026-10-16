@@ -1,0 +1,1778 @@
+{
+  "at": "2026-10-16T13:44:43.106Z",
+  "node": "v22.20.0",
+  "summary": {
+    "chrome": {
+      "version": "155.0.8059.80",
+      "naive-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 365px p99 345px >0.5px:74/161 anchor 365px blank:0(0px)",
+        "upFromEnd": "max 507px p99 488px >0.5px:81/101 anchor 507px blank:0(0px)",
+        "upToTop": "max 448px p99 366px >0.5px:98/401 anchor 448px blank:0(0px)",
+        "endReached_px": "last row not mounted",
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 576,
+          "median": 0.3,
+          "p95": 0.8,
+          "max": 4.7
+        },
+        "corrections": {
+          "count": 0,
+          "sumPx": 0
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.6,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492237
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "read-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 686,
+          "median": 0.3,
+          "p95": 0.5,
+          "max": 5.1
+        },
+        "corrections": {
+          "count": 375,
+          "sumPx": 24726
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.6,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492237
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "ro-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 1163,
+          "median": 0,
+          "p95": 0.1,
+          "max": 0.3
+        },
+        "corrections": {
+          "count": 372,
+          "sumPx": 24726
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.6,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492237
+        },
+        "roLoopErrors": 4,
+        "errors": []
+      },
+      "read-100k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 686,
+          "median": 0.3,
+          "p95": 0.6,
+          "max": 5
+        },
+        "corrections": {
+          "count": 364,
+          "sumPx": 25773
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.6,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812237
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "ro-100k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 1151,
+          "median": 0,
+          "p95": 0.1,
+          "max": 0.4
+        },
+        "corrections": {
+          "count": 362,
+          "sumPx": 25773
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.6,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812237
+        },
+        "roLoopErrors": 3,
+        "errors": []
+      },
+      "read-100k-inset": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 686,
+          "median": 0.3,
+          "p95": 0.5,
+          "max": 5.1
+        },
+        "corrections": {
+          "count": 364,
+          "sumPx": 25773
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.6,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812237
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      }
+    },
+    "firefox": {
+      "version": "157.0",
+      "naive-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 347px p99 345px >0.5px:70/161 anchor 347px blank:0(0px)",
+        "upFromEnd": "max 507px p99 488px >0.5px:79/101 anchor 507px blank:0(0px)",
+        "upToTop": "max 448px p99 366px >0.5px:97/401 anchor 448px blank:0(0px)",
+        "endReached_px": "last row not mounted",
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 576,
+          "median": 0,
+          "p95": 1,
+          "max": 8
+        },
+        "corrections": {
+          "count": 0,
+          "sumPx": 0
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.7,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492277
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "read-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 686,
+          "median": 0,
+          "p95": 1,
+          "max": 5
+        },
+        "corrections": {
+          "count": 361,
+          "sumPx": 24704
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.7,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492277
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "ro-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 1151,
+          "median": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "corrections": {
+          "count": 361,
+          "sumPx": 24704
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.7,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492277
+        },
+        "roLoopErrors": 5,
+        "errors": []
+      },
+      "read-100k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0.5px p99 0.5px >0.5px:0/161 anchor 0.5px blank:0(0px)",
+        "upFromEnd": "max 1.5px p99 1.5px >0.5px:9/101 anchor 1.5px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 686,
+          "median": 0,
+          "p95": 1,
+          "max": 6
+        },
+        "corrections": {
+          "count": 360,
+          "sumPx": 25685
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.7,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812277
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "ro-100k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0.5px p99 0.25px >0.5px:0/161 anchor 0.5px blank:0(0px)",
+        "upFromEnd": "max 1px p99 1px >0.5px:7/101 anchor 1px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 1152,
+          "median": 0,
+          "p95": 1,
+          "max": 2
+        },
+        "corrections": {
+          "count": 365,
+          "sumPx": 25692
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.7,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812277
+        },
+        "roLoopErrors": 3,
+        "errors": []
+      },
+      "read-100k-inset": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0.27px p99 0.2px >0.5px:0/161 anchor 0.27px blank:18(0.6px)",
+        "upFromEnd": "max 1.2px p99 1.13px >0.5px:8/101 anchor 1.2px blank:67(1.5px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0.07,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 686,
+          "median": 0,
+          "p95": 1,
+          "max": 5
+        },
+        "corrections": {
+          "count": 360,
+          "sumPx": 25685
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 86.7,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812277
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      }
+    },
+    "webkit": {
+      "version": "27.2",
+      "naive-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 367px p99 345px >0.5px:67/161 anchor 367px blank:0(0px)",
+        "upFromEnd": "max 508px p99 405px >0.5px:77/101 anchor 508px blank:0(0px)",
+        "upToTop": "max 488px p99 386px >0.5px:95/401 anchor 488px blank:0(0px)",
+        "endReached_px": "last row not mounted",
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 576,
+          "median": 0,
+          "p95": 1,
+          "max": 9
+        },
+        "corrections": {
+          "count": 0,
+          "sumPx": 0
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 88.1,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492697
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "read-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 690,
+          "median": 0,
+          "p95": 1,
+          "max": 5
+        },
+        "corrections": {
+          "count": 367,
+          "sumPx": 25698
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 88.1,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492697
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "ro-10k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 1158,
+          "median": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "corrections": {
+          "count": 367,
+          "sumPx": 25698
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 88.1,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 492697
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "read-100k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 690,
+          "median": 0,
+          "p95": 1,
+          "max": 6
+        },
+        "corrections": {
+          "count": 366,
+          "sumPx": 26666
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 88.1,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812697
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      },
+      "ro-100k": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 1154,
+          "median": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "corrections": {
+          "count": 365,
+          "sumPx": 26625
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 88.1,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812697
+        },
+        "roLoopErrors": 1,
+        "errors": []
+      },
+      "read-100k-inset": {
+        "downFromTop": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromMiddle": "max 0px p99 0px >0.5px:0/161 anchor 0px blank:0(0px)",
+        "upFromEnd": "max 0px p99 0px >0.5px:0/101 anchor 0px blank:0(0px)",
+        "upToTop": "max 0px p99 0px >0.5px:0/401 anchor 0px blank:0(0px)",
+        "endReached_px": 0,
+        "topReached": {
+          "scrollTop": 0,
+          "row0Offset": 0
+        },
+        "syncMs": {
+          "n": 690,
+          "median": 1,
+          "p95": 1,
+          "max": 5
+        },
+        "corrections": {
+          "count": 366,
+          "sumPx": 26666
+        },
+        "measured": {
+          "rows": 317,
+          "meanHeight": 88.1,
+          "minH": 29,
+          "maxH": 229,
+          "finalTotal": 4812697
+        },
+        "roLoopErrors": 0,
+        "errors": []
+      }
+    }
+  },
+  "raw": {
+    "chrome": {
+      "version": "155.0.8059.80",
+      "runs": [
+        {
+          "count": 10000,
+          "mode": "naive",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 365,
+            "p99Jump": 345,
+            "framesOver0_5px": 74,
+            "maxAnchorJump": 365,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": "last row not mounted",
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 507,
+            "p99Jump": 488,
+            "framesOver0_5px": 81,
+            "maxAnchorJump": 507,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 448,
+            "p99Jump": 366,
+            "framesOver0_5px": 98,
+            "maxAnchorJump": 448,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 576,
+            "median": 0.3,
+            "p95": 0.8,
+            "max": 4.7
+          },
+          "corrections": {
+            "count": 0,
+            "sumPx": 0
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.6,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492237
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 10000,
+          "mode": "read",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 686,
+            "median": 0.3,
+            "p95": 0.5,
+            "max": 5.1
+          },
+          "corrections": {
+            "count": 375,
+            "sumPx": 24726
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.6,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492237
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 10000,
+          "mode": "ro",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 1163,
+            "median": 0,
+            "p95": 0.1,
+            "max": 0.3
+          },
+          "corrections": {
+            "count": 372,
+            "sumPx": 24726
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.6,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492237
+          },
+          "roLoopErrors": 4,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "read",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 686,
+            "median": 0.3,
+            "p95": 0.6,
+            "max": 5
+          },
+          "corrections": {
+            "count": 364,
+            "sumPx": 25773
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.6,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812237
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "ro",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 1151,
+            "median": 0,
+            "p95": 0.1,
+            "max": 0.4
+          },
+          "corrections": {
+            "count": 362,
+            "sumPx": 25773
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.6,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812237
+          },
+          "roLoopErrors": 3,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "read",
+          "place": "inset",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 686,
+            "median": 0.3,
+            "p95": 0.5,
+            "max": 5.1
+          },
+          "corrections": {
+            "count": 364,
+            "sumPx": 25773
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.6,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812237
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        }
+      ]
+    },
+    "firefox": {
+      "version": "157.0",
+      "runs": [
+        {
+          "count": 10000,
+          "mode": "naive",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 347,
+            "p99Jump": 345,
+            "framesOver0_5px": 70,
+            "maxAnchorJump": 347,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": "last row not mounted",
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 507,
+            "p99Jump": 488,
+            "framesOver0_5px": 79,
+            "maxAnchorJump": 507,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 448,
+            "p99Jump": 366,
+            "framesOver0_5px": 97,
+            "maxAnchorJump": 448,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 576,
+            "median": 0,
+            "p95": 1,
+            "max": 8
+          },
+          "corrections": {
+            "count": 0,
+            "sumPx": 0
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.7,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492277
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 10000,
+          "mode": "read",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 686,
+            "median": 0,
+            "p95": 1,
+            "max": 5
+          },
+          "corrections": {
+            "count": 361,
+            "sumPx": 24704
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.7,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492277
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 10000,
+          "mode": "ro",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 1151,
+            "median": 0,
+            "p95": 1,
+            "max": 1
+          },
+          "corrections": {
+            "count": 361,
+            "sumPx": 24704
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.7,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492277
+          },
+          "roLoopErrors": 5,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "read",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0.5,
+            "p99Jump": 0.5,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0.5,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 1.5,
+            "p99Jump": 1.5,
+            "framesOver0_5px": 9,
+            "maxAnchorJump": 1.5,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 686,
+            "median": 0,
+            "p95": 1,
+            "max": 6
+          },
+          "corrections": {
+            "count": 360,
+            "sumPx": 25685
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.7,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812277
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "ro",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0.5,
+            "p99Jump": 0.25,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0.5,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 1,
+            "p99Jump": 1,
+            "framesOver0_5px": 7,
+            "maxAnchorJump": 1,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 1152,
+            "median": 0,
+            "p95": 1,
+            "max": 2
+          },
+          "corrections": {
+            "count": 365,
+            "sumPx": 25692
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.7,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812277
+          },
+          "roLoopErrors": 3,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "read",
+          "place": "inset",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0.27,
+            "p99Jump": 0.2,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0.27,
+            "framesWithBlank": 18,
+            "maxBlankPx": 0.6
+          },
+          "endReached": 0.07,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 1.2,
+            "p99Jump": 1.13,
+            "framesOver0_5px": 8,
+            "maxAnchorJump": 1.2,
+            "framesWithBlank": 67,
+            "maxBlankPx": 1.5
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 686,
+            "median": 0,
+            "p95": 1,
+            "max": 5
+          },
+          "corrections": {
+            "count": 360,
+            "sumPx": 25685
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 86.7,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812277
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        }
+      ]
+    },
+    "webkit": {
+      "version": "27.2",
+      "runs": [
+        {
+          "count": 10000,
+          "mode": "naive",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 367,
+            "p99Jump": 345,
+            "framesOver0_5px": 67,
+            "maxAnchorJump": 367,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": "last row not mounted",
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 508,
+            "p99Jump": 405,
+            "framesOver0_5px": 77,
+            "maxAnchorJump": 508,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 488,
+            "p99Jump": 386,
+            "framesOver0_5px": 95,
+            "maxAnchorJump": 488,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 576,
+            "median": 0,
+            "p95": 1,
+            "max": 9
+          },
+          "corrections": {
+            "count": 0,
+            "sumPx": 0
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 88.1,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492697
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 10000,
+          "mode": "read",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 690,
+            "median": 0,
+            "p95": 1,
+            "max": 5
+          },
+          "corrections": {
+            "count": 367,
+            "sumPx": 25698
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 88.1,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492697
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 10000,
+          "mode": "ro",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 480617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 1158,
+            "median": 0,
+            "p95": 1,
+            "max": 1
+          },
+          "corrections": {
+            "count": 367,
+            "sumPx": 25698
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 88.1,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 492697
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "read",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 690,
+            "median": 0,
+            "p95": 1,
+            "max": 6
+          },
+          "corrections": {
+            "count": 366,
+            "sumPx": 26666
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 88.1,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812697
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "ro",
+          "place": "transform",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 1154,
+            "median": 0,
+            "p95": 1,
+            "max": 1
+          },
+          "corrections": {
+            "count": 365,
+            "sumPx": 26625
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 88.1,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812697
+          },
+          "roLoopErrors": 1,
+          "errors": []
+        },
+        {
+          "count": 100000,
+          "mode": "read",
+          "place": "inset",
+          "estimate": 48,
+          "initialTotal": 4800617,
+          "downFromTop": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upFromMiddle": {
+            "frames": 161,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "endReached": 0,
+          "upFromEnd": {
+            "frames": 101,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "upToTop": {
+            "frames": 401,
+            "maxJump": 0,
+            "p99Jump": 0,
+            "framesOver0_5px": 0,
+            "maxAnchorJump": 0,
+            "framesWithBlank": 0,
+            "maxBlankPx": 0
+          },
+          "topReached": {
+            "scrollTop": 0,
+            "row0Offset": 0
+          },
+          "syncMs": {
+            "n": 690,
+            "median": 1,
+            "p95": 1,
+            "max": 5
+          },
+          "corrections": {
+            "count": 366,
+            "sumPx": 26666
+          },
+          "measured": {
+            "rows": 317,
+            "meanHeight": 88.1,
+            "minH": 29,
+            "maxH": 229,
+            "finalTotal": 4812697
+          },
+          "roLoopErrors": 0,
+          "errors": []
+        }
+      ]
+    }
+  }
+}
