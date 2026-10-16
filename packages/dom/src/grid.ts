@@ -1,5 +1,5 @@
 import {
-  clientRows, createColumnModel, createKernel, formattersFor, headerSelection, intentFor, isBlank, isSelected, localeCtx, MAX_PHYSICAL, scrollMapper, uniformRowLayout, windowAt,
+  clientRows, createColumnModel, createKernel, formattersFor, headerSelection, intentFor, isBlank, isSelected, localeCtx, MAX_PHYSICAL, overscanRows, scrollMapper, uniformRowLayout, windowAt,
   type ClientModel, type ColumnModel, type DisplayedRows, type FocusPos, type GridKernel, type Intent, type KeyOwner, type LocaleCtx, type RowKey,
 } from '@dzgrid/core';
 import { isMac, ownerOf } from './keys/owner.js';
@@ -45,8 +45,8 @@ export interface GridEnv {
   readonly raf?: Pick<Window, 'requestAnimationFrame' | 'cancelAnimationFrame'>;
 }
 
-const OVERSCAN_ROWS = 4;
-const OVERSCAN_COLS = 2;
+const OVERSCAN_ROWS = 2;
+const OVERSCAN_COLS = 1;
 
 /**
  * A grid in `host`. Tree (S4): `.dzg[dir]` holds the scroller with
@@ -133,7 +133,9 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   let shown: { displayed: DisplayedRows<T>; key: RowKey | null; delta: number; atTop: boolean; atEnd: boolean } | null = null;
   let anchorNext = false;
 
+  const now = () => win?.performance.now() ?? 0;
   const rowHeight = () => ROW_HEIGHT[settings.density ?? 'comfortable'];
+  let scrolledAt = -1e9;
 
   let available = -1;
   let colIndexOf: { version: number; index: Map<string, number> } = { version: -1, index: new Map() };
@@ -184,12 +186,14 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const layout = uniformRowLayout(d, h);
     const centerView = Math.max(0, box.inline - L.start.width - extra - L.end.width);
     const w = windowAt(layout, L.center.widths, scroll.logicalTop, scroll.physicalTop, box.scrollInline, { block: box.block, inline: centerView }, {
-      overscanRows: settings.overscan?.rows ?? OVERSCAN_ROWS,
+      // At rest a couple of rows (the body's node budget); more while scrolling fast.
+      overscanRows: settings.overscan?.rows ?? overscanRows(now() - scrolledAt < 150 ? speed : 0, h, { min: OVERSCAN_ROWS, max: 40 }),
       overscanCols: settings.overscan?.cols ?? OVERSCAN_COLS,
     });
 
     // ---- grid attributes ----
     setAttr(root, 'data-density', settings.density ?? 'comfortable');
+    if (root.style.getPropertyValue('--dzg-row-height') !== `${h}px`) root.style.setProperty('--dzg-row-height', `${h}px`);
     setAttr(viewport, 'aria-rowcount', String(d.count + 1));
     setAttr(viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
     const mode = settings.selection?.mode ?? 'none';
@@ -224,7 +228,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       displayed: d, layout: L, cols: w.cols, rowHeight: h, base: w.placement.base, ctx, epoch,
       rowHeader: visible[0]?.id ?? null, colIndex,
       rowAttrs: (key, el) => setAttr(el, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
-      check,
+      check, dir,
       focusRow: focus0?.kind === 'cell' ? focus0.row : null, focusCenter,
     };
     const focus = kernel.focus;
@@ -305,7 +309,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
 
   // A native scroll right after a focus move or a grid key is the browser bringing the focused
   // element into view, physically: above the cap that is the wrong place, so the grid redoes it (S11, D4).
-  const now = () => win?.performance.now() ?? 0;
+  
   let intentAt = -1e9;
   scope.on(viewport, 'scroll', () => {
     tip.hide();
@@ -501,8 +505,24 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     scope.observe(ro);
   }
   // ---------- quick-search warm-up (D13) ----------
-  let scrolledAt = -1e9;
-  scope.on(viewport, 'scroll', () => { scrolledAt = now(); }, { passive: true });
+  // Scroll speed, for the overscan; a paint once scrolling stops trims back to the resting overscan.
+  let speed = 0;
+  let lastTop = 0;
+  let trim: (() => void) | null = null;
+  scope.on(viewport, 'scroll', () => {
+    const t = now();
+    const dt = Math.max(1, t - scrolledAt);
+    // A jump of several views is no gesture: the rows between are never seen, so no overscan for it.
+    const moved = Math.abs(scroll.logicalTop - lastTop);
+    speed = dt > 200 || moved > 3 * geometry.read().block ? 0 : (moved * 1000) / dt;
+    lastTop = scroll.logicalTop;
+    scrolledAt = t;
+    trim?.();
+    trim = scope.timeout(() => {
+      trim = null;
+      schedule();
+    }, 160);
+  }, { passive: true });
   let stopWarm: (() => void) | null = null;
   function warm(): void {
     stopWarm?.();

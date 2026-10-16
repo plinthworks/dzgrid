@@ -1,0 +1,28 @@
+{
+  "$comment": "Chrome, headless, dataset A at 1 280 × 720 (scripts/perf-browser.mjs). Targets from ARCHITECTURE §5.3; set at measured + 10 % at the Phase 2 close where tighter, capped by §5.3.",
+  "budgets": {
+    "first render of A": 120,
+    "body nodes after first render": 1000,
+    "wheel scroll 50 px a frame: median frame": 17.2,
+    "wheel scroll 50 px a frame: p95 frame": 25,
+    "wheel scroll 50 px a frame: script per frame": 6,
+    "wheel scroll 50 px a frame: layouts per frame": 1,
+    "wheel scroll 50 px a frame: frames without rows": 1,
+    "scrollbar drag 2 000 px a frame: median frame": 17.2,
+    "scrollbar drag 2 000 px a frame: p95 frame": 25,
+    "scrollbar drag 2 000 px a frame: script per frame": 6,
+    "scrollbar drag 2 000 px a frame: layouts per frame": 1,
+    "scrollbar drag 2 000 px a frame: frames without rows": 1,
+    "horizontal scroll 50 px a frame: median frame": 17.2,
+    "horizontal scroll 50 px a frame: p95 frame": 25,
+    "horizontal scroll 50 px a frame: script per frame": 6,
+    "horizontal scroll 50 px a frame: layouts per frame": 1,
+    "horizontal scroll 50 px a frame: frames without rows": 1,
+    "one-row transaction to the next frame": 20,
+    "one-row transaction: rows touched": 1,
+    "sort click on 100 000 (numeric, warm) to the next frame": 60,
+    "page errors": 0,
+    "1 000 create/destroy cycles: heap retained": 1,
+    "first render of 1 000 000 rows": 1200
+  }
+}

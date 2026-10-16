@@ -84,27 +84,22 @@ $emit: true !default;
   .dzg-hcell,
   .dzg-cell,
   .dzg-check {
-    display: flex;
-    align-items: center;
     padding-inline: var(--dzg-cell-padding-inline, 0.5rem);
     border-block-end: 1px solid var(--tz-border);
   }
 
-  .dzg-hcell {
+  .dzg-hcell,
+  .dzg-check {
+    display: flex;
+    align-items: center;
     gap: 0.25rem;
   }
 
-  .dzg-cell[data-align='end'] {
-    justify-content: flex-end;
-  }
-
-  .dzg-cell[data-align='center'] {
-    justify-content: center;
-  }
-
-  .dzg-val {
-    overflow: hidden;
-    text-overflow: ellipsis;
+  // A body cell holds its text directly (one node, or one span when the value needs isolating):
+  // a block, centred by its line height, with the layout's ellipsis and text-align.
+  .dzg-cell {
+    display: block;
+    line-height: calc(var(--dzg-row-height, 2rem) - 1px);
   }
 
   // Rows and the pinned segments are opaque: centre cells slide under them.

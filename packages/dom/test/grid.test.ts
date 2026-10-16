@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { dataKey, type ColumnDef, type GridEvent } from '@dzgrid/core';
 import { createGrid, type GridInstance } from '../src/grid.js';
 import type { GridSettings } from '../src/settings.js';
@@ -124,14 +124,19 @@ describe('rows and columns', () => {
     const seen = new Set<HTMLElement>();
     let seed = 7;
     const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    // At rest after each jump: a person's scroll events are a frame apart, and the overscan for a
+    // fast scroll is trimmed once it stops (a clock is advanced past that).
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
     for (let k = 0; k < 50; k++) {
       scroll(Math.floor(rnd() * 1000 * 32));
+      vi.advanceTimersByTime(300);
       const idx = rowIndexes();
       expect(idx.length).toBeGreaterThan(10);
       expect(idx.length).toBeLessThan(40);
       expect(idx).toEqual([...idx].sort((a, b) => a - b));
       for (const r of bodyRows()) seen.add(r);
     }
+    vi.useRealTimers();
     // Every row element ever used fits in one window plus overscan: rows are recycled.
     expect(seen.size).toBeLessThan(80);
   });
@@ -169,12 +174,22 @@ describe('rows and columns', () => {
     expect(vp.querySelector('.dzg-row[aria-rowindex="4"] [data-col="name"]')!.textContent).toBe('Changed');
   });
 
-  it('isolates free text, and numbers left to right', () => {
-    const { host } = make();
-    const row = host.querySelector('.dzg-layer .dzg-row')!;
-    expect(row.querySelector('[data-col="name"] .dzg-free')).not.toBeNull();
-    expect(row.querySelector('[data-col="n"] .dzg-num')).not.toBeNull();
-    expect(row.querySelector('[data-col="n"] .dzg-free')).toBeNull();
+  it('isolates a value only when it mixes directions with the grid (S2, refined)', () => {
+    // LTR grid: Latin names need nothing; an Arabic one gets its own paragraph; numbers read fine.
+    const ltr = make({ rows: [{ id: 'a', name: 'Hélène', n: -12.5, c: 'x' }, { id: 'b', name: 'مريم', n: 3, c: 'x' }] });
+    const cell = (h: HTMLElement, i: number, col: string) => h.querySelector(`.dzg-layer .dzg-row[aria-rowindex="${i + 2}"] [data-col="${col}"]`)!;
+    expect(cell(ltr.host, 0, 'name').querySelector('.dzg-free')).toBeNull();
+    expect(cell(ltr.host, 1, 'name').querySelector('.dzg-free')!.textContent).toBe('مريم');
+    expect(cell(ltr.host, 0, 'n').querySelector('.dzg-num')).toBeNull();
+    // RTL grid: Arabic needs nothing; Latin gets its paragraph; numbers are isolated left to right.
+    const rtl = make({ direction: 'rtl', rows: [{ id: 'a', name: 'Hélène', n: -12.5, c: 'x' }, { id: 'b', name: 'مريم', n: 3, c: 'x' }] });
+    expect(cell(rtl.host, 0, 'name').querySelector('.dzg-free')).not.toBeNull();
+    expect(cell(rtl.host, 1, 'name').querySelector('.dzg-free')).toBeNull();
+    expect(cell(rtl.host, 0, 'n').querySelector('.dzg-num')!.textContent).toBe('-12.5');
+    // The text node is the same whichever way it is wrapped: an update moves it, never rebuilds.
+    const text = cell(ltr.host, 0, 'name').firstChild;
+    ltr.g.update({ rows: [{ id: 'a', name: 'سارة', n: 1, c: 'x' }, { id: 'b', name: 'مريم', n: 3, c: 'x' }] });
+    expect(cell(ltr.host, 0, 'name').querySelector('.dzg-free')!.firstChild).toBe(text);
   });
 
   it('virtualises the centre columns, the header with the same window, cells in aria-colindex order', () => {

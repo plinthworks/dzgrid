@@ -52,27 +52,20 @@
 .dzg-hcell,
 .dzg-cell,
 .dzg-check {
-  display: flex;
-  align-items: center;
   padding-inline: var(--dzg-cell-padding-inline, 0.5rem);
   border-block-end: 1px solid var(--tz-border);
 }
 
-.dzg-hcell {
+.dzg-hcell,
+.dzg-check {
+  display: flex;
+  align-items: center;
   gap: 0.25rem;
 }
 
-.dzg-cell[data-align=end] {
-  justify-content: flex-end;
-}
-
-.dzg-cell[data-align=center] {
-  justify-content: center;
-}
-
-.dzg-val {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.dzg-cell {
+  display: block;
+  line-height: calc(var(--dzg-row-height, 2rem) - 1px);
 }
 
 .dzg-row,

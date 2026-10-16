@@ -153,8 +153,8 @@ describe('selection gaps', () => {
   it('G12 Ctrl+Shift+click adds the range to the selection', () => {
     const k = make({ selection: { mode: 'multi', click: true } }, 20);
     const c = (id: string) => k.rowEl(id).querySelector('[data-col="name"]')!;
-    k.click(c('r2')); k.click(c('r10'), { ctrlKey: true }); k.click(c('r12'), { ctrlKey: true, shiftKey: true });
-    expect([...k.g.kernel.selection.keys].map(String).sort()).toEqual(['r2', 'r10', 'r11', 'r12'].map((x) => String(dataKey(x))).sort());
+    k.click(c('r2')); k.click(c('r6'), { ctrlKey: true }); k.click(c('r8'), { ctrlKey: true, shiftKey: true });
+    expect([...k.g.kernel.selection.keys].map(String).sort()).toEqual(['r2', 'r6', 'r7', 'r8'].map((x) => String(dataKey(x))).sort());
   });
   it('G13 carries no aria-selected in mode none, and drops it when the mode goes to none', () => {
     const k = make({}, 5);

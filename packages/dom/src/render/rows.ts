@@ -1,3 +1,4 @@
+import { isolationFor } from './bidi.js';
 import { isBlank, REBASE, type ColumnLayout, type DisplayedRows, type LocaleCtx, type ResolvedColumn, type RowKey } from '@dzgrid/core';
 
 /**
@@ -7,7 +8,8 @@ import { isBlank, REBASE, type ColumnLayout, type DisplayedRows, type LocaleCtx,
  */
 export interface CellView {
   readonly el: HTMLElement;
-  readonly value: HTMLElement;
+  /** The isolating span, made when a value first needs one; attached only while it does. */
+  value: HTMLElement | null;
   readonly text: Text;
   col: ResolvedColumn<any> | null;
   inlineStart: number;
@@ -42,8 +44,6 @@ export function cellText<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: Local
   return v === null ? '' : col.codec.format(v, ctx);
 }
 
-/** Free text reads in its own direction; numbers left to right inside any text (§3.9, S2). */
-const valueClass = (col: ResolvedColumn<any>): string => (col.type === 'text' ? 'dzg-val dzg-free' : col.type === 'number' ? 'dzg-val dzg-num' : 'dzg-val');
 
 export const setAttr = (el: Element, name: string, value: string | null): void => {
   if (value === null) {
@@ -72,6 +72,8 @@ export interface Frame<T> {
   readonly focusCenter: number;
   /** A selection box column before the start columns (D8): widths and indices shift by it. */
   readonly check: boolean;
+  /** The grid's direction: whether a value needs isolating depends on it. */
+  readonly dir: 'ltr' | 'rtl';
   readonly colIndex: (id: string) => number;
   readonly rowAttrs: (key: RowKey, el: HTMLElement) => void;
 }
@@ -115,11 +117,9 @@ export class RowRenderer<T> {
     const el = this.#doc.createElement('div');
     el.className = 'dzg-cell';
     el.tabIndex = -1;
-    const value = this.#doc.createElement('span');
     const text = this.#doc.createTextNode('');
-    value.append(text);
-    el.append(value);
-    return { el, value, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN };
+    el.append(text);
+    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN };
   }
 
   /**
@@ -277,8 +277,6 @@ export class RowRenderer<T> {
       cell.col = col;
       setAttr(cell.el, 'data-col', col.id);
       setAttr(cell.el, 'data-align', col.def.align ?? (col.type === 'number' ? 'end' : null));
-      const cls = valueClass(col);
-      if (cell.value.className !== cls) cell.value.className = cls;
     }
     // The identity column is the frame's (it moves when columns are hidden or moved).
     setAttr(cell.el, 'role', col.id === f.rowHeader ? 'rowheader' : 'gridcell');
@@ -298,6 +296,18 @@ export class RowRenderer<T> {
     }
     const text = data === undefined ? '' : cellText(col, data as never, f.ctx);
     if (cell.text.data !== text) cell.text.data = text;
+    // Free text in its own direction, numbers left to right — only when the value needs it (S2).
+    const iso = isolationFor(text, col.type, f.dir);
+    if (iso) {
+      if (!cell.value) cell.value = this.#doc.createElement('span');
+      const cls = iso === 'free' ? 'dzg-free' : 'dzg-num';
+      if (cell.value.className !== cls) cell.value.className = cls;
+      if (cell.text.parentNode !== cell.value) cell.value.append(cell.text);
+      if (cell.value.parentNode !== cell.el) cell.el.append(cell.value);
+    } else if (cell.text.parentNode !== cell.el) {
+      cell.el.append(cell.text);
+      cell.value?.remove();
+    }
   }
 
   /** Each mounted row, for attributes that follow state rather than data (selection). */
