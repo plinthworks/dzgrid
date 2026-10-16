@@ -1,4 +1,4 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor } from '../packages/core/src/index.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec } from '../packages/core/src/index.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
 export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly run: (ctx: any) => unknown };
@@ -33,6 +33,13 @@ export const CASES: Record<string, Case> = {
     let len = 0;
     for (let i = 0; i < 100_000; i++) len += f(i * 1.25).length;
     return len;
+  },
+  'coerce ISO instants x 100 000': () => {
+    const codec = instantCodec();
+    const ctx = localeCtx({ locale: 'fr-FR' });
+    let acc = 0;
+    for (let i = 0; i < 100_000; i++) acc += codec.coerce(`2026-03-05T10:${String(i % 60).padStart(2, '0')}:00Z`, ctx) ?? 0;
+    return acc;
   },
 };
 

@@ -1,0 +1,14 @@
+{
+  "id": "instant-overlap-refused",
+  "suite": "value-parse",
+  "description": "A typed time that happened twice is refused too (D8).",
+  "input": {
+    "type": "instant",
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "text": "2026-10-25 02:30"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "day-month-name-refused",
+  "suite": "value-parse",
+  "description": "Month names are refused in Phase 1.",
+  "input": {
+    "type": "day",
+    "locale": "fr-FR",
+    "text": "5 mars 2026"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "boolean-arabic-indic-one",
+  "suite": "value-parse",
+  "description": "An Arabic-Indic one is yes.",
+  "input": {
+    "type": "boolean",
+    "locale": "ar-DZ",
+    "text": "١"
+  },
+  "expected": {
+    "value": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "day-iso-any-locale",
+  "suite": "value-parse",
+  "description": "ISO form is read in every locale.",
+  "input": {
+    "type": "day",
+    "locale": "en-US",
+    "text": "2026-03-05"
+  },
+  "expected": {
+    "value": "2026-03-05"
+  }
+}

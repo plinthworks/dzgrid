@@ -1,0 +1,13 @@
+{
+  "id": "boolean-arabic-no",
+  "suite": "value-parse",
+  "description": "Arabic no.",
+  "input": {
+    "type": "boolean",
+    "locale": "ar-DZ",
+    "text": "لا"
+  },
+  "expected": {
+    "value": false
+  }
+}

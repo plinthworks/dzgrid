@@ -1,0 +1,14 @@
+{
+  "id": "instant-algiers",
+  "suite": "value-parse",
+  "description": "A wall time read in the column's zone, Algiers.",
+  "input": {
+    "type": "instant",
+    "locale": "fr-FR",
+    "timeZone": "Africa/Algiers",
+    "text": "2026-03-05 10:30"
+  },
+  "expected": {
+    "value": "2026-03-05T09:30:00Z"
+  }
+}

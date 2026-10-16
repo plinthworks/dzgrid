@@ -1,0 +1,19 @@
+{
+  "id": "enum-accent-folded",
+  "suite": "value-parse",
+  "description": "Accents do not matter: eteint finds Éteint.",
+  "input": {
+    "type": "enum",
+    "locale": "fr-FR",
+    "text": "eteint",
+    "options": [
+      {
+        "value": "E",
+        "label": "Éteint"
+      }
+    ]
+  },
+  "expected": {
+    "value": "E"
+  }
+}

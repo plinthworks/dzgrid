@@ -1,0 +1,14 @@
+{
+  "id": "instant-12h-refused",
+  "suite": "value-parse",
+  "description": "12-hour times are refused in Phase 1.",
+  "input": {
+    "type": "instant",
+    "locale": "en-US",
+    "timeZone": "UTC",
+    "text": "03/05/2026 10:30 PM"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

@@ -31,3 +31,15 @@ export type { NumberSeparators } from './value/number.js';
 export { readNumber, readMachineNumber, separatorsFor } from './value/number.js';
 export type { NumberFormatSpec, InstantFormatSpec, Formatters } from './i18n/format.js';
 export { formattersFor, clearFormatCaches, dayFieldOrder, formatParts } from './i18n/format.js';
+
+export { fold } from './i18n/fold.js';
+export { collatorFor } from './i18n/collate.js';
+export type { ValueCodec, ColumnType, Rejected } from './value/codec.js';
+export { REJECTED, isBlank } from './value/codec.js';
+export { textCodec } from './value/codecs/text.js';
+export { numberCodec, numberCodecWith } from './value/codecs/number.js';
+export { booleanCodec, booleanCodecWith } from './value/codecs/boolean.js';
+export type { EnumOption } from './value/codecs/enum.js';
+export { enumCodec } from './value/codecs/enum.js';
+export { dayCodec, readDayText } from './value/codecs/day.js';
+export { instantCodec, instantToIso } from './value/codecs/instant.js';

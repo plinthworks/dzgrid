@@ -1,0 +1,13 @@
+{
+  "id": "boolean-oui",
+  "suite": "value-parse",
+  "description": "French yes.",
+  "input": {
+    "type": "boolean",
+    "locale": "fr-FR",
+    "text": " Oui "
+  },
+  "expected": {
+    "value": true
+  }
+}

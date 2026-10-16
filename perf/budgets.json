@@ -7,6 +7,7 @@
     "parseDay x 100 000": 40,
     "readInstant ISO x 100 000": 120,
     "readNumber x 100 000 (fr-FR)": 120,
-    "format number x 100 000 (cached Intl, ar-DZ)": 50
+    "format number x 100 000 (cached Intl, ar-DZ)": 50,
+    "coerce ISO instants x 100 000": 50
   }
 }

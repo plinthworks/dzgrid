@@ -1,0 +1,14 @@
+{
+  "id": "instant-locale-day",
+  "suite": "value-parse",
+  "description": "A day in the locale's order, then a 24-hour time.",
+  "input": {
+    "type": "instant",
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "text": "05/03/2026 10:30"
+  },
+  "expected": {
+    "value": "2026-03-05T09:30:00Z"
+  }
+}

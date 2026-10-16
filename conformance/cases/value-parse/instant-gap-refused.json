@@ -1,0 +1,14 @@
+{
+  "id": "instant-gap-refused",
+  "suite": "value-parse",
+  "description": "A typed time that never happened in Paris is refused (D8).",
+  "input": {
+    "type": "instant",
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "text": "2026-03-29 02:30"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "day-no-swap",
+  "suite": "value-parse",
+  "description": "Month 13 is refused, never swapped with the day.",
+  "input": {
+    "type": "day",
+    "locale": "en-US",
+    "text": "13/01/2026"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

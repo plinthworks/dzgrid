@@ -1,0 +1,19 @@
+{
+  "id": "enum-unknown",
+  "suite": "value-parse",
+  "description": "A value that is no option is refused.",
+  "input": {
+    "type": "enum",
+    "locale": "fr-FR",
+    "text": "x",
+    "options": [
+      {
+        "value": "A",
+        "label": "Actif"
+      }
+    ]
+  },
+  "expected": {
+    "rejected": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "boolean-maybe-refused",
+  "suite": "value-parse",
+  "description": "Anything else is refused.",
+  "input": {
+    "type": "boolean",
+    "locale": "en-US",
+    "text": "maybe"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

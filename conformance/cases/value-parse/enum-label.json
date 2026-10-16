@@ -1,0 +1,26 @@
+{
+  "id": "enum-label",
+  "suite": "value-parse",
+  "description": "A label, in any case.",
+  "input": {
+    "type": "enum",
+    "locale": "fr-FR",
+    "text": "ACTIF",
+    "options": [
+      {
+        "value": "A",
+        "label": "Actif"
+      },
+      {
+        "value": "I",
+        "label": "Inactif",
+        "aliases": [
+          "inactive"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "value": "A"
+  }
+}

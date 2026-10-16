@@ -1,14 +1,18 @@
-import { localeCtx, readNumber, formattersFor, formatParts, parseDay, parseInstant, stripMarks } from '@dzgrid/core';
+import { localeCtx, readNumber, formattersFor, formatParts, parseDay, parseInstant, stripMarks, REJECTED, dayCodec, instantCodec, booleanCodec, enumCodec, instantToIso, type InstantMs } from '@dzgrid/core';
 import type { Suite } from './index.js';
 
 export const format: Record<string, Suite> = {
-  'value-parse': ({ type, locale, text }) => {
-    const ctx = localeCtx({ locale });
+  'value-parse': ({ type, locale, timeZone, text, options }) => {
+    const ctx = localeCtx({ locale, ...(timeZone && { timeZone }) });
     if (type === 'number') {
       const v = readNumber(text, ctx);
       return v === null ? { rejected: true } : { value: v };
     }
-    throw new Error(`unknown type ${type}`);
+    const codec = type === 'day' ? dayCodec : type === 'instant' ? instantCodec() : type === 'boolean' ? booleanCodec : type === 'enum' ? enumCodec(options) : null;
+    if (!codec) throw new Error(`unknown type ${type}`);
+    const v = (codec.parse as (t: string, c: typeof ctx) => unknown)(text, ctx);
+    if (v === REJECTED) return { rejected: true };
+    return { value: type === 'instant' ? instantToIso(v as InstantMs) : v };
   },
   format: ({ kind, locale, numerals, timeZone, value }) => {
     const ctx = localeCtx({ locale, ...(numerals && { numerals }), ...(timeZone && { timeZone }) });

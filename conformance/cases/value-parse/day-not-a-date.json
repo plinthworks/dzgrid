@@ -1,0 +1,13 @@
+{
+  "id": "day-not-a-date",
+  "suite": "value-parse",
+  "description": "31 February does not exist and is not rolled into March.",
+  "input": {
+    "type": "day",
+    "locale": "fr-FR",
+    "text": "31/02/2026"
+  },
+  "expected": {
+    "rejected": true
+  }
+}

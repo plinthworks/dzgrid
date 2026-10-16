@@ -1,0 +1,13 @@
+{
+  "id": "day-two-digit-year",
+  "suite": "value-parse",
+  "description": "Two-digit years are refused: 26 could be 1926 or 2026.",
+  "input": {
+    "type": "day",
+    "locale": "fr-FR",
+    "text": "05/03/26"
+  },
+  "expected": {
+    "rejected": true
+  }
+}
