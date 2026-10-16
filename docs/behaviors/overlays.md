@@ -13,4 +13,4 @@ Opens a grid that is loading, empty, filtered to nothing, or failed.
 - Texts come from the messages bundle, in the grid's language.
 
 ## Tests
-`packages/dom/test/overlays.test.ts`, browser suite `axe`.
+`packages/dom/test/grid.test.ts` (overlay states), `review-p2c.test.ts` (hidden and cleared), `tooltip.test.ts` (announced); `npm run test:browser` (axe with each overlay, the overlay really hides).

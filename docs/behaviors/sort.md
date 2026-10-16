@@ -23,4 +23,4 @@ Clicks a column header; clicks again; Shift-clicks another header.
 - Sorting never touches the host's rows.
 
 ## Tests
-`conformance/cases/sort/*`, `packages/core/test/sort.test.ts`.
+`conformance/cases/sort/*`, `conformance/cases/sort-toggle/*`, `packages/core/test/sort.test.ts`, `packages/dom/test/sort-select.test.ts`.

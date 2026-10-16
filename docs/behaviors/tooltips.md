@@ -14,4 +14,4 @@ Rests the pointer on a header or a cell; or moves focus to it with the keyboard.
 - Placed in logical coordinates: in Arabic it opens toward the start, on the right.
 
 ## Tests
-`packages/dom/test/tooltip.test.ts`, browser suite `tooltip`.
+`packages/dom/test/tooltip.test.ts`. Not yet in a browser: the top layer (`popover`) is Phase 3, so a tooltip inside a transformed ancestor may be clipped today.

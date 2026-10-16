@@ -27,7 +27,7 @@ export interface GridSettings<T> {
   /**
    * `idle` prepares the quick search after each load, in idle time, so the
    * first keystroke is instant — at the cost of holding the search caches
-   * (about 450 bytes a row on dataset A). Off by default (D13).
+   * (627 bytes a row measured on dataset A's ten text columns; budget for the owner, D13). Off by default (D13).
    */
   readonly searchWarmup?: 'idle' | 'off';
 }

@@ -70,7 +70,7 @@ machine, not this one). Details in each `spikes/<id>/README.md`.
 - Real wheel, trackpad and touch scrolling; a mid-range laptop; Safari itself.
 - Before Phase 4: Enter in an editor (stay or move down); an edited row that disappears (commit or cancel).
 
-## Phase 2 — read-only DOM, theme, RTL, accessibility (in progress)
+## Phase 2 — read-only DOM, theme, RTL, accessibility (done, 2026-10-16; four owner items open)
 
 Plan: `docs/phase-2-plan.md`; decisions D1–D14 validated 2026-10-16.
 
@@ -94,6 +94,46 @@ Plan: `docs/phase-2-plan.md`; decisions D1–D14 validated 2026-10-16.
 - [x] step 18 quick-search warm-up in idle time (`searchWarmup: 'idle'`, off by default, D13). Measured on dataset A, 10 text columns fr+ar:
   first keystroke after warm-up 14.6 ms (was ~0.3 s), one step of 2 000 cells 0.4 ms, **memory at rest after warm-up 627 B/row
   (~63 MB): budget for the owner to set (D13)**. Number and date haystacks are now built only for a word with a digit.
+- [x] step 19 browser suite (`npm run test:browser`, 40 checks in Chrome, all pass in Chrome, Firefox and WebKit with `--all`) and the playground (`playground/index.html`, `rtl.html`)
+- [x] step 20 `npm run bench:browser`, minified, headless (indicative), 27 lines in budget:
+
+  | Line (dataset A, 1 280 × 720) | Measured | Budget |
+  |---|---|---|
+  | First render | 38 ms | 120 |
+  | Body nodes | 841 | 1 000 |
+  | Wheel / scrollbar drag / horizontal scroll | 60 fps, p95 17 ms, script 0.3–1.5 ms, 1 layout a frame, no frame without rows | §5.3 |
+  | One-row update | 1 row touched, next frame 17 ms | 1 row, 20 |
+  | Sort click (numeric, warm) | 6 ms sort and events, 17 ms to the frame (first click of a page, cold: 55–63 ms) | 40, 57 |
+  | 1 000 create/destroy | 0.2 MB kept | 1 MB |
+  | 1 M rows | first render 208 ms; scroll 60 fps, no frame without rows | 1 200 ms |
+
+  Node: msg() plural ar × 10 000 7.5 ms. Size: dom 13.2 kB gz (14), core 20.5 kB (22.3), theme 1.07 kB, locales ≤ 0.71 kB, read-only profile 31.3 kB.
+- [x] phase-end architect review and code review, findings fixed with tests that failed first (21 tests; adjustments in ARCHITECTURE.md "Ajustements après la Phase 2")
+
+### Exit criteria (Phase 2)
+- [x] first-render and scroll budgets of dataset A measured in Chrome (minified, headless; K.8 headed on a mid-range laptop is the owner's)
+- [x] screenshots LTR and RTL, light and dark (`packages/dom/test/browser/results/`, for the owner to look at)
+- [x] header and body aligned within 1 px; pinned segments at their edges in RTL (three engines)
+- [x] `aria-rowindex` exact after scrolling; the retained row exposed in the AX tree (a row-by-row AX check is still to write)
+- [x] axe-core with no violation (Chrome)
+- [ ] **contrast on Sehhaty's six palettes, light and dark — blocked: reading Sehhaty's sources was refused from this session; the owner provides `packages/theme/test/fixtures/sehhaty.json` or allows the transcription.** The shipped and high-contrast palettes pass.
+- [x] guards: no hex, no literal text, no left/right, no HTML sink, no invisible character
+- [x] focus kept through `update()`, sorts, scrolling, Shift+Tab, a million rows
+
+### Left to the owner (Phase 2)
+- The Sehhaty palettes (above); the warm-up memory budget (627 B/row, D13); an Arabic reader for `locales/ar.ts`.
+- Product: in a multi-column sort, the announcement names the first column only, also when the user just added another.
+- Screen readers per `docs/a11y-protocol.md` (fr and ar); real touch and momentum in Firefox and Safari; scrollbar drag with classic scrollbars and the RTL scrollbar side; K.8 headed on a mid-range laptop.
+
+### Before Phase 3 (architect review, to do first)
+1. **Kernel and the row model**: the kernel uses `ClientModel` (`query`, `counts`, `row(key)`); a paged model must not wipe the selection of rows on other pages. The kernel owns `Query`; `RowModel` gains counts with an unknown total and a reconcile policy; `selection.allDisplayed` follows the model (include on the client, exclude on the server).
+2. **Split `grid.ts`** (≈ 800 lines in one closure): `keys/router.ts`, `interact/select.ts`, `render/overlay.ts`, `render/viewport.ts`, header decoration in `header.ts`, and a features seam so filters can be a subpath.
+3. **Header rows** as a value (`headerRows`, floating filters) and a row count policy from the model (pages, unknown totals).
+4. **Owners for filter inputs** (`data-dzg-owner`), and header clicks that ignore interactive descendants.
+5. **`update()` as a table per key**, columns through the kernel; unsupported live changes (`getRowId`, selection mode) give a problem.
+6. **Events**: emit `cellClicked` and `firstDataRendered`; a cancellable pattern for `exportRequested`.
+7. **A cell-renderer contract** (create / update / destroy, pooled views) before the Angular wrapper.
+8. The tooltip in the top layer (`popover`); row height following text zoom (WCAG 1.4.4).
 
 ### Settled before Phase 2 by spike S11 (2026-10-16, 346 checks, three engines)
 - **Retained row in scaled mode**: at its true distance from the visible rows

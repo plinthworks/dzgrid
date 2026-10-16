@@ -11,7 +11,7 @@ Uses the grid in Arabic, or in a page whose direction changes.
 ## What DzGrid does
 - Direction is read from the host (`dir`, inherited), or set by the `dir` setting; a change of an ancestor's `dir` is noticed.
 - All CSS is logical (`inset-inline-start`, `padding-inline`…); one module, `dir.ts`, converts the browser's inline scroll position (which differs between engines in right to left) to a logical one.
-- Free-text cells isolate their content (`unicode-bidi: plaintext`); number cells are isolated left to right (S2, §3.9).
+- A value that mixes directions with the grid gets its own bidi paragraph (`unicode-bidi: plaintext`): Arabic in a left-to-right grid, Latin, digits or a final punctuation in a right-to-left one; numbers are isolated left to right in a right-to-left grid (S2, refined in Phase 2: a value that reads correctly as it is gets no extra node).
 
 ## Tests
-`packages/dom/test/dir.test.ts`, guard "no physical sides", browser suite `rtl` (three engines).
+`packages/dom/test/{dir,bidi,review-p2g}.test.ts`, guard "no physical sides"; `npm run test:browser -- --all` (RTL alignment and pinning, direction switched live, three engines).

@@ -11,10 +11,10 @@ Tabs into the grid, moves with the arrows, pages, jumps to the ends, tabs out.
 - Focus survives scrolling away and back, sorting, filtering and a host `update()`; if its row disappears, focus goes to the row now at its place.
 
 ## What DzGrid does
-- One tab stop (roving `tabindex`). The focused row and cell stay in the page while scrolled away (the retained row), at their true position, or at their physical image above ~125 000 rows (S10, S11).
+- One tab stop (roving `tabindex`). The focused row and cell stay in the page while scrolled away (the retained row), at their true position — above ~125 000 rows at their true distance from the visible rows, bounded, the body clipping it (S10, S11).
 - Keys are turned into intents in the core (`intentFor`), which mirrors the inline arrows for right to left; the DOM layer never reads `ArrowLeft` itself.
 - Scroll keys are handled by the grid, also when focus is on the scroll area itself: native key scrolling would move too far above ~125 000 rows (S11).
 - Programmatic focus never scrolls natively (`preventScroll`); the grid scrolls logically. A native scroll right after a focus move is redone logically.
 
 ## Tests
-`conformance/cases/keyboard-intent/*`, `conformance/cases/focus-fallback/*`, `packages/dom/test/keys.test.ts`, browser suite `focus`.
+`conformance/cases/keyboard-intent/*`, `conformance/cases/focus-fallback/*`, `packages/core/test/keys.test.ts`, `packages/dom/test/keyboard.test.ts`, `review-p2*.test.ts`; `npm run test:browser` (focus through updates, Shift+Tab back, a million rows).

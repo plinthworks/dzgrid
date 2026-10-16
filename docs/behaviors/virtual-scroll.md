@@ -10,8 +10,8 @@ Scrolls through thousands or millions of rows.
 - Above about 125 000 rows the scroll range is mapped, not the height (S1), so the end stays exact; there is no row cap.
 - The anchor is the first visible row already measured, or the end when at the bottom (S3).
 - Rows are recycled in DOM order and rebound, never rebuilt, even on a jump (S9); each cell writes only when its value, column or language changed.
-- The focused row stays in the page while scrolled away (the retained row, S10); above ~125 000 rows at its physical image (S11).
+- The focused row stays in the page while scrolled away (the retained row, S10); above ~125 000 rows at its true distance, bounded, and the body clips so it never grows the scroll range (S11).
 - Above ~125 000 rows the wheel and the scroll keys are handled by the grid, and touch moves the list by the distance of the finger (S11).
 
 ## Tests
-`conformance/cases/layout-rows/*`, `packages/core/test/layout.test.ts`, `packages/dom/test/virtual.test.ts`, browser suites `scroll` and `focus`.
+`conformance/cases/layout-rows/*`, `packages/core/test/layout.test.ts`, `packages/dom/test/{grid,scroll}.test.ts`; `npm run test:browser` and `npm run bench:browser` (no frame without rows, 60 fps, a million rows).

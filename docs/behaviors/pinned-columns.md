@@ -16,4 +16,4 @@ Pins columns to the start or the end of the grid, then scrolls sideways.
 - Screen readers get one `aria-colindex` order across the three segments, equal to the DOM order (S4).
 
 ## Tests
-`conformance/cases/columns-layout/*`, `packages/dom/test/pinning.test.ts`, browser suite `pinned` (LTR and RTL, three engines).
+`conformance/cases/columns-layout/*`, `conformance/cases/problems/too-many-pinned.json`, `packages/dom/test/grid.test.ts` (segments); `npm run test:browser -- --all` (pinned edges and header alignment within 1 px, LTR and RTL, three engines).
