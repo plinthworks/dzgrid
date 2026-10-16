@@ -16,7 +16,11 @@ export type ScrollConvention = 'negative' | 'reverse' | 'default';
 
 const conventions = new WeakMap<Document, ScrollConvention>();
 
-/** Read once per document with a 1-px probe. A probe that cannot scroll (no layout) reads as the standard. */
+/**
+ * Read once per document with a 1-px probe. A probe that cannot scroll (no
+ * layout yet: a hidden frame, jsdom) reads as the standard and is asked again
+ * next time.
+ */
 export function scrollConvention(doc: Document): ScrollConvention {
   const known = conventions.get(doc);
   if (known) return known;
@@ -26,9 +30,12 @@ export function scrollConvention(doc: Document): ScrollConvention {
   const inner = doc.createElement('div');
   inner.style.cssText = 'inline-size:4px;block-size:1px';
   probe.append(inner);
-  doc.body.append(probe);
+  const parent = doc.body ?? doc.documentElement;
+  if (!parent) return 'negative';
+  parent.append(probe);
   let conv: ScrollConvention = 'negative';
-  if (probe.scrollWidth > probe.clientWidth) {
+  const measured = probe.scrollWidth > probe.clientWidth;
+  if (measured) {
     if (probe.scrollLeft > 0) conv = 'default';
     else {
       probe.scrollLeft = -1;
@@ -36,7 +43,7 @@ export function scrollConvention(doc: Document): ScrollConvention {
     }
   }
   probe.remove();
-  conventions.set(doc, conv);
+  if (measured) conventions.set(doc, conv);
   return conv;
 }
 
@@ -45,15 +52,15 @@ const maxInline = (el: HTMLElement): number => Math.max(0, el.scrollWidth - el.c
 /** How far the view is from its start edge, 0..max, in either direction. */
 export function inlineScroll(el: HTMLElement, dir: Dir, conv: ScrollConvention): number {
   const raw = el.scrollLeft;
-  if (dir === 'ltr') return raw;
-  if (conv === 'negative') return -raw === 0 ? 0 : -raw;
-  if (conv === 'reverse') return raw;
-  return maxInline(el) - raw;
+  const max = maxInline(el);
+  const x = dir === 'ltr' || conv === 'reverse' ? raw : conv === 'negative' ? -raw : max - raw;
+  // Elastic overscroll and zoom report a little past the ends: a column index must not follow.
+  return x > 0 ? Math.min(max, x) : 0;
 }
 
 export function setInlineScroll(el: HTMLElement, x: number, dir: Dir, conv: ScrollConvention): void {
   const max = maxInline(el);
-  const v = Math.max(0, Math.min(max, Number.isFinite(x) ? x : 0));
+  const v = Number.isNaN(x) ? 0 : Math.max(0, Math.min(max, x));
   el.scrollLeft = dir === 'ltr' || conv === 'reverse' ? v : conv === 'negative' ? -v : max - v;
 }
 
@@ -75,40 +82,71 @@ export function logicalSpan(box: DOMRectReadOnly, ref: DOMRectReadOnly, dir: Dir
 export function isOnScrollbar(e: { readonly clientX: number; readonly clientY: number }, el: HTMLElement): boolean {
   const r = el.getBoundingClientRect();
   const cs = el.ownerDocument.defaultView?.getComputedStyle(el);
-  const borderL = cs ? parseFloat(cs.borderLeftWidth) || 0 : 0;
+  const px = (v: string | undefined) => (v ? parseFloat(v) || 0 : 0);
+  const bl = px(cs?.borderLeftWidth), br = px(cs?.borderRightWidth), bt = px(cs?.borderTopWidth), bb = px(cs?.borderBottomWidth);
+  // A bar is what is left of the box once the content and the borders are taken out.
+  const vBar = el.offsetWidth - el.clientWidth - bl - br;
+  const hBar = el.offsetHeight - el.clientHeight - bt - bb;
+  const innerTop = r.top + el.clientTop;
+  if (hBar > 0.5 && e.clientY >= innerTop + el.clientHeight && e.clientY < r.bottom - bb) return true;
+  if (vBar <= 0.5) return false;
+  const barOnLeft = el.clientLeft > bl + 0.5;
   const innerLeft = r.left + el.clientLeft;
-  const innerRight = innerLeft + el.clientWidth;
-  const innerBottom = r.top + el.clientTop + el.clientHeight;
-  const barOnLeft = el.clientLeft > borderL + 0.5;
-  if (e.clientY >= innerBottom && e.clientY < r.bottom) return true;
-  if (barOnLeft) return e.clientX >= r.left + borderL && e.clientX < innerLeft;
-  return e.clientX >= innerRight && e.clientX < r.right;
+  if (barOnLeft) return e.clientX >= r.left + bl && e.clientX < innerLeft;
+  return e.clientX >= innerLeft + el.clientWidth && e.clientX < r.right - br;
 }
 
 /**
- * The direction `host` resolves to, and a watch on it: a change of `dir` on
- * the host or any ancestor calls `onChange` with the new direction, until the
- * scope is disposed.
+ * The direction `host` resolves to, and a watch on it. The computed
+ * `direction` is the truth when the browser has one (CSS can set it without
+ * an attribute); the nearest `dir` attribute otherwise (jsdom, a detached
+ * host). A `dir` change anywhere in the document, or in the shadow roots
+ * between it and the host, calls `onChange`. `recheck()` reads again after a
+ * move (the grid calls it on `update()` and on resize).
  */
-export function watchDirection(host: HTMLElement, onChange: (d: Dir) => void, scope: Scope): Dir {
+export function watchDirection(host: HTMLElement, onChange: (d: Dir) => void, scope: Scope): { readonly dir: Dir; recheck(): void } {
+  const fromAttr = (): Dir | null => {
+    for (let n: Node | null = host; n; ) {
+      if (n instanceof host.ownerDocument.defaultView!.Element) {
+        const v = n.getAttribute('dir')?.toLowerCase();
+        if (v === 'rtl' || v === 'ltr') return v;
+      }
+      const parent: Node | null = n.parentNode;
+      n = parent && parent.nodeType === 11 ? (parent as ShadowRoot).host : parent;
+    }
+    return null;
+  };
   const read = (): Dir => {
-    const set = host.closest('[dir]')?.getAttribute('dir');
-    if (set === 'rtl' || set === 'ltr') return set;
-    const cs = host.ownerDocument.defaultView?.getComputedStyle(host).direction;
-    return cs === 'rtl' ? 'rtl' : 'ltr';
+    const cs = host.isConnected ? host.ownerDocument.defaultView?.getComputedStyle(host).direction : '';
+    // jsdom computes 'ltr' for everything: an attribute that says otherwise wins there.
+    const attr = fromAttr();
+    if (cs === 'rtl') return 'rtl';
+    if (cs === 'ltr' && attr !== 'rtl') return 'ltr';
+    return attr ?? 'ltr';
   };
   let current = read();
+  const recheck = (): void => {
+    const next = read();
+    if (next !== current) {
+      current = next;
+      onChange(next);
+    }
+  };
   const Observer = host.ownerDocument.defaultView?.MutationObserver;
   if (Observer) {
-    const mo = new Observer(() => {
-      const next = read();
-      if (next !== current) {
-        current = next;
-        onChange(next);
-      }
-    });
-    for (let n: Element | null = host; n; n = n.parentElement) mo.observe(n, { attributes: true, attributeFilter: ['dir'] });
+    const mo = new Observer(recheck);
+    const opts = { attributes: true, attributeFilter: ['dir'], subtree: true };
+    mo.observe(host.ownerDocument.documentElement, opts);
+    for (let root = host.getRootNode(); root.nodeType === 11; root = (root as ShadowRoot).host.getRootNode()) {
+      mo.observe(root, opts);
+      mo.observe((root as ShadowRoot).host, { attributes: true, attributeFilter: ['dir'] });
+    }
     scope.observe(mo);
   }
-  return current;
+  return {
+    get dir() {
+      return current;
+    },
+    recheck,
+  };
 }

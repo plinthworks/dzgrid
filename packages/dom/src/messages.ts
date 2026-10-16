@@ -46,7 +46,7 @@ export interface PluralForms {
 export type MessageValue = string | PluralForms;
 
 export interface GridMessages {
-  /** The language the bundle is written in: plurals follow it when no context is given. */
+  /** The language the bundle is written in: plural forms follow it, numbers follow the context. */
   readonly locale: string;
   readonly text: { readonly [K in MessageKey]: MessageValue };
 }
@@ -74,7 +74,8 @@ export function msg(m: GridMessages, key: MessageKey, params: Readonly<Record<st
   if (typeof value === 'string') text = value;
   else {
     const n = params['n'];
-    const cat = typeof n === 'number' ? (rulesFor(c.locale).select(n) as keyof PluralForms) : 'other';
+    // The sentence is in the bundle's language: so is its grammar. Numbers follow the context.
+    const cat = typeof n === 'number' ? (rulesFor(m.locale).select(n) as keyof PluralForms) : 'other';
     text = value[cat] ?? value.other;
   }
   const number = formattersFor(c).number();

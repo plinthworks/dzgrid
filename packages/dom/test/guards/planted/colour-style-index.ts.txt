@@ -1,0 +1,2 @@
+// expect: colour
+el.style['background-color'] = v;

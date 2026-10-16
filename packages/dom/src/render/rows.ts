@@ -10,8 +10,8 @@ export interface CellView {
   readonly value: HTMLElement;
   readonly text: Text;
   col: ResolvedColumn<any> | null;
-  x: number;
-  w: number;
+  inlineStart: number;
+  inlineSize: number;
 }
 
 export interface RowView {
@@ -107,7 +107,7 @@ export class RowRenderer<T> {
     const text = this.#doc.createTextNode('');
     value.append(text);
     el.append(value);
-    return { el, value, text, col: null, x: Number.NaN, w: Number.NaN };
+    return { el, value, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN };
   }
 
   /**
@@ -231,17 +231,17 @@ export class RowRenderer<T> {
       if (cell.value.className !== cls) cell.value.className = cls;
     }
     setAttr(cell.el, 'aria-colindex', String(f.colIndex(col.id)));
-    if (cell.w !== w) {
-      cell.w = w;
+    if (cell.inlineSize !== w) {
+      cell.inlineSize = w;
       setPx(cell.el, 'inline-size', w);
     }
     if (x === null) {
-      if (!Number.isNaN(cell.x)) {
-        cell.x = Number.NaN;
+      if (!Number.isNaN(cell.inlineStart)) {
+        cell.inlineStart = Number.NaN;
         cell.el.style.removeProperty('inset-inline-start');
       }
-    } else if (cell.x !== x) {
-      cell.x = x;
+    } else if (cell.inlineStart !== x) {
+      cell.inlineStart = x;
       setPx(cell.el, 'inset-inline-start', x);
     }
     const text = data === undefined ? '' : cellText(col, data as never, f.ctx);

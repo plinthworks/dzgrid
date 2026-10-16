@@ -17,7 +17,7 @@ export const FR = {
     'announce.sortCleared': "Tri retiré",
     'announce.rows': { one: "{n} ligne", many: "{n} de lignes", other: "{n} lignes" },
     'announce.selected': { one: "{n} ligne sélectionnée", many: "{n} de lignes sélectionnées", other: "{n} lignes sélectionnées" },
-    'announce.rangeCancelled': "Plage annulée : sa première ligne n\u2019est plus affichée",
+    'announce.rangeCancelled': "Plage annulée\u202F: sa première ligne n\u2019est plus affichée",
     'announce.loading': "Chargement",
     'announce.error': "Échec du chargement",
     'selection.row': "Sélectionner la ligne",

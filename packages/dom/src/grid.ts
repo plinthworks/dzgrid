@@ -47,7 +47,8 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   const win = doc.defaultView;
   const scope = new Scope();
   let settings = initial;
-  if (settings.injectStyles !== false) injectStyles(doc, settings.nonce);
+  const styleRoot = host.getRootNode();
+  if (settings.injectStyles !== false) injectStyles(styleRoot.nodeType === 11 ? (styleRoot as ShadowRoot) : doc, settings.nonce);
 
   // ---------- tree ----------
   const root = doc.createElement('div');
@@ -85,11 +86,12 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     setAttr(root, 'dir', dir);
   };
   let watched: Dir = 'ltr';
-  watched = watchDirection(host, (d) => {
+  const direction = watchDirection(host, (d) => {
     watched = d;
     applyDir();
     schedule();
   }, scope);
+  watched = direction.dir;
   applyDir();
 
   // ---------- model ----------
@@ -178,7 +180,10 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized') schedule();
   }));
   if (win && 'ResizeObserver' in win) {
-    const ro = new win.ResizeObserver(() => schedule());
+    const ro = new win.ResizeObserver(() => {
+      direction.recheck();
+      schedule();
+    });
     ro.observe(viewport);
     scope.observe(ro);
   }
@@ -227,6 +232,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
         rows.setContext(ctx, 'host');
       }
       if (patch.rows) rows.setRows(patch.rows, 'host');
+      direction.recheck();
       if (patch.direction !== undefined) applyDir();
       schedule();
     },

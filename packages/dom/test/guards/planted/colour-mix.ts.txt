@@ -1,0 +1,2 @@
+// expect: colour
+const c = 'color-mix(in srgb, var(--a), white)';

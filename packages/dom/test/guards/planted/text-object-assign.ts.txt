@@ -1,0 +1,2 @@
+// expect: literal-text
+Object.assign(el, { title: 'Sort' });

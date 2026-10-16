@@ -50,3 +50,13 @@ describe('the DOM layer guards', () => {
     });
   });
 });
+
+describe('guard details', () => {
+  it('report the line of a violation', () => {
+    expect(checkSource("// a\nconst x = 1;\ncell.textContent = 'No rows';\n", 'src/grid.ts')).toEqual([expect.objectContaining({ rule: 'literal-text', line: 3 })]);
+  });
+  it('let translated bundles hold combining marks and the words left and right', () => {
+    expect(checkSource("export const AR = { a: 'صَفّ', b: 'Align right' };", 'src/locales/ar.ts')).toEqual([]);
+    expect(checkSource("export const AR = { a: '‏' };", 'src/locales/ar.ts').map((f) => f.rule)).toEqual(['invisible']);
+  });
+});

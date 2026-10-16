@@ -1,0 +1,2 @@
+// expect: physical
+tip.style.setProperty('transform', 'translate(-50%, 0)');

@@ -1,0 +1,2 @@
+// expect: colour
+el.setAttribute('style', 'background: blue');

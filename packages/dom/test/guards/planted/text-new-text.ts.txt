@@ -1,0 +1,2 @@
+// expect: literal-text
+const t = new Text('Loading');

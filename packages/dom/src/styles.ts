@@ -29,15 +29,18 @@ export const LAYOUT_CSS = `
 :where(.dzg-live) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 `;
 
-const injected = new WeakSet<Document>();
-
-/** Once per document; a host with a strict CSP passes its nonce, or sets `injectStyles: false` and loads the theme's CSS. */
-export function injectStyles(doc: Document, nonce?: string): void {
-  if (injected.has(doc)) return;
-  injected.add(doc);
+/**
+ * Once per document or shadow root (a grid in a shadow root is not reached
+ * by the document's styles). Checked in the DOM, so a style removed by a
+ * test or a head swap comes back. A host with a strict CSP passes its nonce,
+ * or sets `injectStyles: false` and loads the theme's CSS itself.
+ */
+export function injectStyles(target: Document | ShadowRoot, nonce?: string): void {
+  if (target.querySelector('style[data-dzgrid]')) return;
+  const doc = 'createElement' in target ? target : target.ownerDocument;
   const style = doc.createElement('style');
   style.setAttribute('data-dzgrid', '');
   if (nonce) style.setAttribute('nonce', nonce);
   style.textContent = LAYOUT_CSS;
-  doc.head.append(style);
+  ('head' in target ? target.head : target).append(style);
 }

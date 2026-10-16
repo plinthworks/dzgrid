@@ -75,7 +75,7 @@ describe('dir', () => {
     document.body.append(outer);
     const scope = new Scope();
     const seen: string[] = [];
-    expect(watchDirection(host, (d) => seen.push(d), scope)).toBe('ltr');
+    expect(watchDirection(host, (d) => seen.push(d), scope).dir).toBe('ltr');
     outer.setAttribute('dir', 'rtl');
     await Promise.resolve();
     await new Promise((r) => setTimeout(r, 0));

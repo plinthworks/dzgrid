@@ -1,0 +1,2 @@
+// expect: html
+frame.srcdoc = s;

@@ -1,0 +1,2 @@
+// expect: html
+range.createContextualFragment(s);

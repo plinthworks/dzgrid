@@ -1,0 +1,2 @@
+// expect: physical
+el.style.transform = `translateX(${x}px)`;
