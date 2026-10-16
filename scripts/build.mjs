@@ -52,6 +52,12 @@ function typescript(name) {
     exports: {
       '.': { types: './index.d.ts', default: './index.js' },
       ...(source.exports?.['./internal'] && { './internal': { types: './internal.d.ts', default: './internal.js' } }),
+      // Subpaths other than the root and internal, as the sources list them: `./locales/fr` → `./locales/fr.js`.
+      ...Object.fromEntries(
+        Object.keys(source.exports ?? {})
+          .filter((k) => k !== '.' && k !== './internal')
+          .map((k) => [k, { types: `${k}.d.ts`, default: `${k}.js` }]),
+      ),
       './package.json': './package.json',
     },
     ...(source.dependencies && { dependencies: source.dependencies }),

@@ -24,6 +24,9 @@
       ],
       "@dzgrid/dom": [
         "./packages/dom/src/index.ts"
+      ],
+      "@dzgrid/dom/locales/*": [
+        "./packages/dom/src/locales/*.ts"
       ]
     }
   },

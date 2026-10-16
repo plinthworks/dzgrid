@@ -4,4 +4,5 @@
  * every file here to: no colour, no visible text that is not a message, no
  * physical side outside dir.ts, no HTML injection, no invisible character.
  */
-export {};
+export { MESSAGE_KEYS, msg } from './messages.js';
+export type { GridMessages, MessageKey, MessageValue, PluralForms } from './messages.js';

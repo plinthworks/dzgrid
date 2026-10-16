@@ -4,6 +4,18 @@
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
       "maxGzip": 21500
+    },
+    "@dzgrid/dom/locales/en": {
+      "file": "packages/dom/src/locales/en.ts",
+      "maxGzip": 2000
+    },
+    "@dzgrid/dom/locales/fr": {
+      "file": "packages/dom/src/locales/fr.ts",
+      "maxGzip": 2000
+    },
+    "@dzgrid/dom/locales/ar": {
+      "file": "packages/dom/src/locales/ar.ts",
+      "maxGzip": 2000
     }
   }
 }

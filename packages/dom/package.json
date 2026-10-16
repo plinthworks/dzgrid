@@ -8,6 +8,18 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./locales/en": {
+      "types": "./src/locales/en.ts",
+      "default": "./src/locales/en.ts"
+    },
+    "./locales/fr": {
+      "types": "./src/locales/fr.ts",
+      "default": "./src/locales/fr.ts"
+    },
+    "./locales/ar": {
+      "types": "./src/locales/ar.ts",
+      "default": "./src/locales/ar.ts"
     }
   },
   "peerDependencies": {
