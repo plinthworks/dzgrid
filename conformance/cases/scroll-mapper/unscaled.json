@@ -1,0 +1,24 @@
+{
+  "id": "unscaled",
+  "suite": "scroll-mapper",
+  "description": "Under the cap, the mapping is the identity, clamped to the scroll range.",
+  "input": {
+    "logical": 10000,
+    "maxPhysical": 4000000,
+    "view": 600,
+    "toLogical": [
+      5000,
+      99999,
+      -3
+    ]
+  },
+  "expected": {
+    "scaled": false,
+    "maxLogical": 9400,
+    "toLogical": [
+      5000,
+      9400,
+      0
+    ]
+  }
+}

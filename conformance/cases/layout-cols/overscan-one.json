@@ -1,0 +1,21 @@
+{
+  "id": "overscan-one",
+  "suite": "layout-cols",
+  "description": "One column of overscan each side.",
+  "input": {
+    "widths": [
+      100,
+      200,
+      50
+    ],
+    "scrollInline": 150,
+    "view": 100,
+    "overscan": 1
+  },
+  "expected": {
+    "cols": [
+      0,
+      2
+    ]
+  }
+}

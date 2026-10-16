@@ -1,0 +1,30 @@
+{
+  "id": "scaled-exact-ends",
+  "suite": "scroll-mapper",
+  "description": "Above the cap the scroll range is scaled and both ends are exact.",
+  "input": {
+    "logical": 32000000,
+    "maxPhysical": 4000000,
+    "view": 700,
+    "toLogical": [
+      3999300,
+      -1,
+      0
+    ],
+    "toPhysical": [
+      31999300
+    ]
+  },
+  "expected": {
+    "scaled": true,
+    "maxLogical": 31999300,
+    "toLogical": [
+      31999300,
+      0,
+      0
+    ],
+    "toPhysical": [
+      3999300
+    ]
+  }
+}

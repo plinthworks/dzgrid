@@ -1,0 +1,15 @@
+{
+  "id": "layer-placement",
+  "suite": "scroll-mapper",
+  "description": "The layer is placed so every length the page holds stays below 2^20.",
+  "input": {
+    "layer": {
+      "logical": 3000000,
+      "physical": 375000
+    }
+  },
+  "expected": {
+    "base": 2097152,
+    "layerTop": -527848
+  }
+}

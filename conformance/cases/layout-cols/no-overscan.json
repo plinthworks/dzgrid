@@ -1,0 +1,21 @@
+{
+  "id": "no-overscan",
+  "suite": "layout-cols",
+  "description": "Scrolled 150 px into widths 100, 200, 50 with a 100 px view: only the second column.",
+  "input": {
+    "widths": [
+      100,
+      200,
+      50
+    ],
+    "scrollInline": 150,
+    "view": 100,
+    "overscan": 0
+  },
+  "expected": {
+    "cols": [
+      1,
+      1
+    ]
+  }
+}

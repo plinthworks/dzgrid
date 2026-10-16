@@ -1,0 +1,36 @@
+{
+  "id": "variable-offsets",
+  "suite": "layout-rows",
+  "description": "Offsets are running totals; a position belongs to the row it falls in.",
+  "input": {
+    "op": "offsets",
+    "kind": "variable",
+    "heights": [
+      10,
+      20,
+      30,
+      40
+    ],
+    "probes": [
+      35,
+      100,
+      -5,
+      0
+    ]
+  },
+  "expected": {
+    "offsets": [
+      0,
+      10,
+      30,
+      60,
+      100
+    ],
+    "indexAt": [
+      2,
+      3,
+      0,
+      0
+    ]
+  }
+}

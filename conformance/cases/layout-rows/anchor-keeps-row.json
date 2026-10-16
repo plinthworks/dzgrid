@@ -1,0 +1,28 @@
+{
+  "id": "anchor-keeps-row",
+  "suite": "layout-rows",
+  "description": "The first visible measured row holds still when a row above grows.",
+  "input": {
+    "op": "anchor",
+    "count": 1000,
+    "estimate": 48,
+    "scrollTop": 4810,
+    "view": 600,
+    "measured": [
+      100,
+      112
+    ],
+    "grow": {
+      "row": 50,
+      "to": 80
+    }
+  },
+  "expected": {
+    "anchor": {
+      "kind": "row",
+      "index": 100,
+      "delta": 10
+    },
+    "scrollTop": 4842
+  }
+}

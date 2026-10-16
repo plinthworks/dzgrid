@@ -1,0 +1,25 @@
+{
+  "id": "anchor-fallback-unmeasured",
+  "suite": "layout-rows",
+  "description": "With nothing measured on screen, the first visible row is the anchor.",
+  "input": {
+    "op": "anchor",
+    "count": 1000,
+    "estimate": 48,
+    "scrollTop": 4810,
+    "view": 600,
+    "measured": [],
+    "grow": {
+      "row": 50,
+      "to": 80
+    }
+  },
+  "expected": {
+    "anchor": {
+      "kind": "row",
+      "index": 100,
+      "delta": 10
+    },
+    "scrollTop": 4842
+  }
+}

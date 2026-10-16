@@ -1,0 +1,20 @@
+{
+  "id": "uniform-window-end",
+  "suite": "layout-rows",
+  "description": "At the end, the window stops at the last row.",
+  "input": {
+    "op": "window",
+    "kind": "uniform",
+    "height": 32,
+    "count": 10,
+    "scrollBlock": 0,
+    "view": 1000,
+    "overscan": 2
+  },
+  "expected": {
+    "rows": [
+      0,
+      9
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "uniform-window-top",
+  "suite": "layout-rows",
+  "description": "At the top, the window starts at row 0.",
+  "input": {
+    "op": "window",
+    "kind": "uniform",
+    "height": 32,
+    "count": 1000,
+    "scrollBlock": 0,
+    "view": 100,
+    "overscan": 2
+  },
+  "expected": {
+    "rows": [
+      0,
+      5
+    ]
+  }
+}

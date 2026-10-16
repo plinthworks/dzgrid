@@ -1,0 +1,28 @@
+{
+  "id": "zero-height-rows",
+  "suite": "layout-rows",
+  "description": "A position shared by empty rows belongs to the last of them.",
+  "input": {
+    "op": "offsets",
+    "kind": "variable",
+    "heights": [
+      10,
+      0,
+      10
+    ],
+    "probes": [
+      10
+    ]
+  },
+  "expected": {
+    "offsets": [
+      0,
+      10,
+      10,
+      20
+    ],
+    "indexAt": [
+      2
+    ]
+  }
+}

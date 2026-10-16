@@ -1,0 +1,20 @@
+{
+  "id": "uniform-window",
+  "suite": "layout-rows",
+  "description": "32 px rows: 3200 px down is row 100, the view ends in row 118; two rows of overscan each side.",
+  "input": {
+    "op": "window",
+    "kind": "uniform",
+    "height": 32,
+    "count": 1000,
+    "scrollBlock": 3200,
+    "view": 600,
+    "overscan": 2
+  },
+  "expected": {
+    "rows": [
+      98,
+      120
+    ]
+  }
+}

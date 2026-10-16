@@ -1,0 +1,20 @@
+{
+  "id": "smaller-than-viewport",
+  "suite": "scroll-mapper",
+  "description": "Content shorter than the view does not scroll.",
+  "input": {
+    "logical": 300,
+    "maxPhysical": 4000000,
+    "view": 600,
+    "toLogical": [
+      100
+    ]
+  },
+  "expected": {
+    "scaled": false,
+    "maxLogical": 0,
+    "toLogical": [
+      0
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "anchor-end",
+  "suite": "layout-rows",
+  "description": "At the bottom, the end is the anchor: the last row stays at the bottom.",
+  "input": {
+    "op": "anchor",
+    "count": 1000,
+    "estimate": 48,
+    "scrollTop": 47400,
+    "view": 600,
+    "measured": [],
+    "grow": {
+      "row": 5,
+      "to": 78
+    }
+  },
+  "expected": {
+    "anchor": {
+      "kind": "end"
+    },
+    "scrollTop": 47430
+  }
+}

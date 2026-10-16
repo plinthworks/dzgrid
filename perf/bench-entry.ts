@@ -1,4 +1,4 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, compileFilter, filterIndices, compileQuick, fold, clientRows, makeQuery, type SortItem, type FilterModel } from '../packages/core/src/index.js';
+import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createRowStore, createColumnModel, ColumnCache, NO_OVERLAY, sortIndices, compileFilter, filterIndices, compileQuick, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { datasetA, type RowA } from './dataset.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
@@ -58,7 +58,42 @@ export const CASES: Record<string, Case> = {
   ...filterCases(),
   ...quickCases(),
   ...modelCases(),
+  ...layoutCases(),
 };
+
+function layoutCases(): Record<string, Case> {
+  const sizes = Float64Array.from({ length: 100_000 }, (_, i) => 24 + (i % 7) * 9);
+  const rows = { count: 100_000, index: (n: number) => (n as never) };
+  return {
+    'PrefixSums build 100 000': () => new PrefixSums(sizes).total,
+    'PrefixSums 1 000 set + 1 000 indexAt (100 000 rows)': {
+      setup: () => new PrefixSums(sizes),
+      run: (ps: PrefixSums) => {
+        let acc = 0;
+        for (let i = 0; i < 1000; i++) {
+          ps.set((i * 97) % 100_000, 30 + (i % 11));
+          acc += ps.indexAt(i * 3000);
+        }
+        return acc;
+      },
+    },
+    'visibleWindow x 10 000 (variable 100 000 rows)': {
+      setup: () => variableRowLayout(rows, 0, sizes),
+      run: (l: ReturnType<typeof variableRowLayout>) => {
+        const m = scrollMapper(l.total, MAX_PHYSICAL, 800);
+        const cols = new PrefixSums(Array.from({ length: 30 }, () => 120));
+        let acc = 0;
+        for (let i = 0; i < 10_000; i++) acc += visibleWindow(l, cols, m, (i * 337) % m.maxPhysical, (i * 13) % 2000, { block: 800, inline: 1200 }, { overscanRows: 4, overscanCols: 2 }).rows!.first;
+        return acc;
+      },
+    },
+    'scrollMapper build x 100 000': () => {
+      let acc = 0;
+      for (let i = 0; i < 100_000; i++) acc += scrollMapper(32_000_000 + i, MAX_PHYSICAL, 700).ratio;
+      return acc;
+    },
+  };
+}
 
 /** The client model's lines on dataset A. */
 function modelCases(): Record<string, Case> {

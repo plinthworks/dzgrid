@@ -1,0 +1,17 @@
+{
+  "id": "empty",
+  "suite": "layout-rows",
+  "description": "No rows, no window.",
+  "input": {
+    "op": "window",
+    "kind": "uniform",
+    "height": 32,
+    "count": 0,
+    "scrollBlock": 0,
+    "view": 600,
+    "overscan": 2
+  },
+  "expected": {
+    "rows": null
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "view-ends-on-boundary",
+  "suite": "layout-cols",
+  "description": "A view ending exactly where a column starts does not include it.",
+  "input": {
+    "widths": [
+      100,
+      100,
+      100
+    ],
+    "scrollInline": 0,
+    "view": 100,
+    "overscan": 0
+  },
+  "expected": {
+    "cols": [
+      0,
+      0
+    ]
+  }
+}
