@@ -1,8 +1,9 @@
 export type { Problem, ProblemCode, Severity } from './problems.js';
-export { problem } from './problems.js';
+export { problem, PROBLEM_CODES } from './problems.js';
+export type { ChangeSource } from './model/types.js';
 
 export type { RowKey, RowIdInput, DisplayIndex } from './ids.js';
-export { dataKey, groupKey, detailKey, pinnedKey, assignKeys } from './ids.js';
+export { canonicalId, dataKey, idOfDataKey, groupKey, detailKey, pinnedKey, assignKeys } from './ids.js';
 
 export type { Day } from './value/day.js';
 export {

@@ -4,15 +4,27 @@
  * never throws; a bad *context* (a zone that does not exist) is a programming
  * error and does.
  */
-export type ProblemCode =
-  | 'invalid-row-id'
-  | 'duplicate-row-id'
-  | 'invalid-day'
-  | 'invalid-instant'
-  | 'ambiguous-instant'
-  | 'unknown-zone'
-  | 'wall-time-skipped'
-  | 'wall-time-ambiguous';
+export const PROBLEM_CODES = [
+  'invalid-row-id',
+  'duplicate-row-id',
+  'unknown-row-id',
+  'invalid-transaction',
+  'invalid-day',
+  'invalid-instant',
+  'ambiguous-instant',
+  'unknown-zone',
+  'wall-time-skipped',
+  'wall-time-ambiguous',
+  'invalid-column',
+  'duplicate-column-id',
+  'invalid-field-path',
+  'unknown-column',
+  'invalid-sort',
+  'invalid-filter',
+  'invalid-cell-value',
+] as const;
+
+export type ProblemCode = (typeof PROBLEM_CODES)[number];
 
 export type Severity = 'error' | 'warning';
 

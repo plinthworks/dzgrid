@@ -28,21 +28,37 @@ export type DisplayIndex = number & { readonly [displayIndexBrand]: true };
 const lengthPrefixed = (s: string): string => `${s.length}:${s}`;
 
 /**
- * The key of a data row, or null when the id cannot identify anything: an
+ * The canonical text of an id, or null when it cannot identify anything: an
  * empty string, a number that is not finite, or anything that is neither.
  *
- * `1` and `'1'` give the same key on purpose. Hosts mix them (a JSON id that
+ * `1` and `'1'` give the same text on purpose. Hosts mix them (a JSON id that
  * is a number in one payload and a string in the next), and treating them as
- * two rows would show one record twice.
+ * two rows would show one record twice. `-0` is `0`.
  */
-export function dataKey(id: unknown): RowKey | null {
-  if (typeof id === 'number') {
-    if (!Number.isFinite(id)) return null;
-    // -0 and 0 are one id.
-    return `d:${lengthPrefixed(String(id === 0 ? 0 : id))}` as RowKey;
-  }
+export function canonicalId(id: unknown): string | null {
+  if (typeof id === 'number') return Number.isFinite(id) ? String(id === 0 ? 0 : id) : null;
   if (typeof id !== 'string' || id === '') return null;
-  return `d:${lengthPrefixed(id)}` as RowKey;
+  return id;
+}
+
+/** The key of a data row, or null when its id identifies nothing (see {@link canonicalId}). */
+export function dataKey(id: unknown): RowKey | null {
+  const c = canonicalId(id);
+  return c === null ? null : (`d:${lengthPrefixed(c)}` as RowKey);
+}
+
+/**
+ * The canonical id inside a data key, or null for any other family or a key
+ * whose length prefix does not match what follows it.
+ */
+export function idOfDataKey(key: RowKey): string | null {
+  if (!key.startsWith('d:')) return null;
+  const colon = key.indexOf(':', 2);
+  if (colon < 0) return null;
+  const digits = key.slice(2, colon);
+  if (!/^(0|[1-9]\d*)$/.test(digits)) return null;
+  const id = key.slice(colon + 1);
+  return id.length === Number(digits) && id !== '' ? id : null;
 }
 
 /** The key of a group row, from the values that lead to it. */

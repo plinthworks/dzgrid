@@ -1,7 +1,10 @@
 import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay } from '../packages/core/src/index.js';
 
+/** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
+export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly run: (ctx: any) => unknown };
+
 /** Each case returns a value so the work cannot be optimised away. */
-export const CASES: Record<string, () => unknown> = {
+export const CASES: Record<string, Case> = {
   'zoneDayBounds x 10 000 (Paris, cached formatter)': () => {
     let acc = 0;
     const start = dayToEpochDay(parseDay('2000-01-01')!);
@@ -20,3 +23,6 @@ export const CASES: Record<string, () => unknown> = {
     return n;
   },
 };
+
+/** Bytes measured after collection; see scripts/bench.mjs. */
+export const MEMORY: Record<string, () => number> = {};

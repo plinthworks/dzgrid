@@ -24,7 +24,8 @@
   "include": [
     "packages/**/*.ts",
     "conformance/**/*.ts",
-    "playground/**/*.ts"
+    "playground/**/*.ts",
+    "perf/**/*.ts"
   ],
   "exclude": [
     "**/dist/**",

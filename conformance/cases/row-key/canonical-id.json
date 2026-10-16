@@ -1,0 +1,37 @@
+{
+  "id": "canonical-id",
+  "suite": "row-key",
+  "description": "1, '1', 1, -0 and 0: two ids, so three duplicates.",
+  "input": {
+    "ids": [
+      1,
+      "1",
+      1,
+      0,
+      0
+    ]
+  },
+  "expected": {
+    "accepted": [
+      true,
+      false,
+      false,
+      true,
+      false
+    ],
+    "problems": [
+      [
+        "duplicate-row-id",
+        "rows[1]"
+      ],
+      [
+        "duplicate-row-id",
+        "rows[2]"
+      ],
+      [
+        "duplicate-row-id",
+        "rows[4]"
+      ]
+    ]
+  }
+}
