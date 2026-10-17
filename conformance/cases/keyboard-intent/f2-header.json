@@ -1,0 +1,18 @@
+{
+  "id": "f2-header",
+  "suite": "keyboard-intent",
+  "description": "F2 on a header means nothing.",
+  "input": {
+    "key": "F2",
+    "dir": "ltr",
+    "owner": "header",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

@@ -64,6 +64,15 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
       case 'selectAll':
         if (g.settings.selection?.mode === 'multi') kernel.dispatch({ type: 'selection.allDisplayed' }, 'user');
         return;
+      case 'enter': {
+        // Into the cell's widget: the part takes the focus, or the cell keeps it.
+        if (from.kind === 'cell') g.rowRenderer.partAt(from.row, from.column)?.focus?.();
+        return;
+      }
+      case 'leave':
+        // Out of a widget, back to its cell.
+        focus.focusTo(from);
+        return;
       case 'sort':
         // Only a column header sorts; a cell of a row a feature added (a filter) does not.
         if (owner === 'header' && from.kind === 'header' && !from.level) kernel.dispatch({ type: 'sort.toggle', column: from.column, multi: intent.multi }, 'user');

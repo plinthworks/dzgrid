@@ -1,0 +1,20 @@
+{
+  "id": "escape-cell-widget",
+  "suite": "keyboard-intent",
+  "description": "Escape in a cell's widget goes back to the cell.",
+  "input": {
+    "key": "Escape",
+    "dir": "ltr",
+    "owner": "cell-widget",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": {
+      "kind": "leave"
+    }
+  }
+}

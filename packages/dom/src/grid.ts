@@ -98,7 +98,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     scheduler: new FrameScheduler(env.raf ?? win, env.sync === true),
     scroll: new ScrollController(geometry),
     headerRenderer: new HeaderRenderer(doc, header),
-    rowRenderer: new RowRenderer<T>(doc, layer),
+    rowRenderer: new RowRenderer<T>(doc, layer, (err) => report(err)),
     mac: isMac(win?.navigator),
     settings: initial, ctx, headerRows: [],
     get dir() { return dir; },

@@ -1,6 +1,6 @@
-import { headerSelection, isSelected, MAX_PHYSICAL, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
+import { headerSelection, isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
-import type { SlotPart } from '../part.js';
+import type { PartBase, SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
 import { decorateHeader } from './header-decor.js';
 import type { ViewportBox } from './measure.js';
@@ -41,6 +41,16 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let messages: unknown = null;
   let messagesRev = 0;
   let lastH = 0;
+  // A part's messages: the host's own `app.*` keys, a missing one told once per bundle.
+  let toldMessages = new Set<string>();
+  const partMsg: PartBase['msg'] = (key, params) => {
+    if (key.startsWith('app.') && !toldMessages.has(key)) {
+      toldMessages.add(key);
+      const problems = messageProblems(key, new Set(Object.keys(g.settings.messages.text)));
+      if (problems.length) emit(kernel, { type: 'problems', source: 'host', problems });
+    }
+    return g.msg(key as never, params);
+  };
   const partFor = (col: ResolvedColumn<any>): SlotPart<'cell'> | null => parts.byColumn.get(col.id) ?? null;
   function resolveParts(): void {
     const registry = g.settings.parts;
@@ -85,6 +95,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     if (settings.messages !== messages) {
       messages = settings.messages;
       messagesRev++;
+      toldMessages = new Set();
     }
     // Direction too: whether a value is isolated depends on it; and which parts draw cells.
     const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}|${parts.rev}|${messagesRev}`;
@@ -169,8 +180,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       rowHeader: visible[0]?.id ?? null, colIndex,
       rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
       check, dir, headerRows, partFor, report: g.report,
-      partBase: { ctx, dir, doc: g.doc, msg: g.msg, announce: (text: string) => g.live.announce(text) },
+      partBase: { ctx, dir, doc: g.doc, msg: partMsg, announce: (text: string) => g.live.announce(text) },
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
+      focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev,
     };
     rowRenderer.render(frame, wanted, focus?.kind === 'cell' ? focus.row : null);
     after.rovingStop(d, visible);

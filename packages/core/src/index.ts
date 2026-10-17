@@ -88,3 +88,4 @@ export type { Operation, Operations, OperationsInput, Placement, ServerQuery } f
 export { liveChangeProblems } from './live-change.js';
 export { filterKindOf, partNameFor } from './columns/parts.js';
 export type { PartColumn, PartSlot } from './columns/parts.js';
+export { messageProblems } from './messages.js';

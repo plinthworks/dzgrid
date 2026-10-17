@@ -26,6 +26,7 @@ export const PROBLEM_CODES = [
   'invalid-operations',
   'unsupported-live-change',
   'unknown-part',
+  'missing-message',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

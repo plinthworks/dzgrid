@@ -1,0 +1,18 @@
+{
+  "id": "shift-enter-cell",
+  "suite": "keyboard-intent",
+  "description": "Shift+Enter on a cell means nothing yet.",
+  "input": {
+    "key": "Enter",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": true,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

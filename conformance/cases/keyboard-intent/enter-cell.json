@@ -1,7 +1,7 @@
 {
   "id": "enter-cell",
   "suite": "keyboard-intent",
-  "description": "Enter on a cell is no intent in Phase 2 (editing is Phase 4).",
+  "description": "Enter on a cell enters its widget (a part's focus()).",
   "input": {
     "key": "Enter",
     "dir": "ltr",
@@ -13,6 +13,8 @@
     "alt": false
   },
   "expected": {
-    "intent": null
+    "intent": {
+      "kind": "enter"
+    }
   }
 }

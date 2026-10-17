@@ -1,5 +1,5 @@
 import type { LocaleCtx, PartSlot, ResolvedColumn, RowKey } from '@dzgrid/core';
-import type { MessageKey } from './messages.js';
+import type { AppMessageKey, MessageKey } from './messages.js';
 
 /**
  * One contract for everything a host may draw in the grid (Phase 3, the
@@ -24,7 +24,8 @@ export interface PartHandle<C> {
 export interface PartBase {
   readonly ctx: LocaleCtx;
   readonly dir: 'ltr' | 'rtl';
-  msg(key: MessageKey, params?: Readonly<Record<string, string | number>>): string;
+  /** The grid's messages, and the host's own `app.*` ones (a missing one shows its key, told once). */
+  msg(key: MessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
   announce(text: string): void;
   readonly doc: Document;
 }
@@ -38,6 +39,8 @@ export interface SlotContext {
     readonly row: Readonly<unknown>;
     readonly key: RowKey;
     readonly column: ResolvedColumn<unknown>;
+    /** The grid's focus is on this cell. */
+    readonly focused: boolean;
   };
 }
 

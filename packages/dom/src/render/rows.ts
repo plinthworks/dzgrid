@@ -20,6 +20,9 @@ export interface CellView {
   handle: PartHandle<SlotContext['cell']> | null;
   /** The row a part failed on: not tried again until the cell shows another row, or this one changed. */
   failed: unknown;
+  /** The context the part last had: `update` only when it changed. */
+  last: SlotContext['cell'] | null;
+  lastRev: number;
 }
 
 export interface RowView {
@@ -28,6 +31,8 @@ export interface RowView {
   key: RowKey | null;
   data: unknown;
   epoch: number;
+  /** The focused column when the focus is in this row: a part is told `focused`. */
+  focusCol: string | null;
   readonly cells: Map<string, CellView>;
   top: number;
   /** The selection box, first in the start segment, when the grid shows one (D8). */
@@ -83,6 +88,10 @@ export interface Frame<T> {
   /** The focused cell: its centre column stays mounted in its row out of the window (D6). */
   readonly focusRow: RowKey | null;
   readonly focusCenter: number;
+  /** The focused cell's column, when the focus is on a cell. */
+  readonly focusColumn: string | null;
+  /** Bumped when what a part's context carries changes beyond its row (messages). */
+  readonly partRev: number;
   /** A selection box column before the start columns (D8): widths and indices shift by it. */
   readonly check: boolean;
   /** The grid's direction: whether a value needs isolating depends on it. */
@@ -92,7 +101,7 @@ export interface Frame<T> {
   /** The cell part a column has, if any. */
   readonly partFor: (col: ResolvedColumn<any>) => SlotPart<'cell'> | null;
   /** What every part gets (language, direction, messages). */
-  readonly partBase: Omit<SlotContext['cell'], 'value' | 'text' | 'row' | 'key' | 'column'>;
+  readonly partBase: Omit<SlotContext['cell'], 'value' | 'text' | 'row' | 'key' | 'column' | 'focused'>;
   /** A part's error: reported, its cell left empty. */
   readonly report: (err: unknown) => void;
   readonly colIndex: (id: string) => number;
@@ -109,7 +118,15 @@ export class RowRenderer<T> {
   /** Every row element made, for tests and the pool's high-water mark. */
   made = 0;
 
-  constructor(doc: Document, layer: HTMLElement) {
+  readonly #report: (err: unknown) => void;
+
+  /** The part drawing a mounted cell, if any (Enter hands it the focus). */
+  partAt(key: RowKey, column: string): PartHandle<SlotContext['cell']> | null {
+    return this.#mounted.get(key)?.cells.get(column)?.handle ?? null;
+  }
+
+  constructor(doc: Document, layer: HTMLElement, report: (err: unknown) => void = () => {}) {
+    this.#report = report;
     this.#doc = doc;
     this.#layer = layer;
   }
@@ -131,7 +148,7 @@ export class RowRenderer<T> {
     };
     const segs = { start: seg('start'), center: seg('center'), end: seg('end') };
     this.made++;
-    return { el, segs, key: null, data: undefined, epoch: -1, cells: new Map(), top: Number.NaN, check: null };
+    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null };
   }
 
   #makeCell(): CellView {
@@ -140,7 +157,7 @@ export class RowRenderer<T> {
     el.tabIndex = -1;
     const text = this.#doc.createTextNode('');
     el.append(text);
-    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN, part: null, handle: null, failed: undefined };
+    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN, part: null, handle: null, failed: undefined, last: null, lastRev: -1 };
   }
 
   /**
@@ -215,8 +232,10 @@ export class RowRenderer<T> {
     const data = node.kind === 'data' ? node.data : undefined;
     const center = this.#centerOf(key, f);
     const L = f.layout;
-    const same = v.key === key && v.data === data && v.epoch === f.epoch;
+    const focusCol = key === f.focusRow ? f.focusColumn : null;
+    const same = v.key === key && v.data === data && v.epoch === f.epoch && v.focusCol === focusCol;
     v.key = key;
+    v.focusCol = focusCol;
     if (same && this.#matches(v, f, center)) return;
     v.data = data;
     v.epoch = f.epoch;
@@ -303,10 +322,12 @@ export class RowRenderer<T> {
     cell.part = null;
     cell.handle = null;
     cell.failed = undefined;
+    cell.last = null;
     try {
       handle?.destroy?.();
-    } catch {
-      /* a part failing to clean up must not cost the grid */
+    } catch (err) {
+      // A part failing to clean up costs nothing more: reported, the cell given back.
+      this.#report(err);
     }
     cell.el.replaceChildren(cell.text);
   }
@@ -340,7 +361,13 @@ export class RowRenderer<T> {
       if (part) {
         // A part that threw on this very row is not tried again at every paint.
         if (!cell.handle && cell.part === part && cell.failed === data) return;
-        const c: SlotContext['cell'] = { ...f.partBase, value, text, row: data as never, key, column: col };
+        const focused = key === f.focusRow && col.id === f.focusColumn;
+        const l = cell.last;
+        // A rebind for the row height, the box column or the column window changes nothing a part sees.
+        if (cell.handle && l && l.key === key && l.row === data && Object.is(l.value, value) && l.text === text && l.column === col && l.focused === focused && l.ctx === f.partBase.ctx && l.dir === f.partBase.dir && cell.lastRev === f.partRev) return;
+        const c: SlotContext['cell'] = { ...f.partBase, value, text, row: data as never, key, column: col, focused };
+        cell.last = c;
+        cell.lastRev = f.partRev;
         try {
           if (!cell.handle) {
             cell.part = part;

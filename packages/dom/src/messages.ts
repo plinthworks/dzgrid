@@ -34,6 +34,8 @@ export const MESSAGE_KEYS = [
 ] as const;
 
 export type MessageKey = (typeof MESSAGE_KEYS)[number];
+/** A host's own message, added to its bundle for its parts. */
+export type AppMessageKey = `app.${string}`;
 
 /** CLDR plural categories; `other` is always there, the rest as the language has them. */
 export interface PluralForms {
@@ -74,9 +76,13 @@ const rulesFor = (locale: string): Intl.PluralRules => {
  * placeholder without a value stays visible, so a missing one is seen in
  * testing rather than read as nothing.
  */
-export function msg(m: GridMessages, key: MessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
-  const value = m.text[key];
-  if (value === undefined) throw new RangeError(`no message ${String(key)}`);
+export function msg(m: GridMessages, key: MessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
+  const value = (m.text as Readonly<Record<string, MessageValue | undefined>>)[key];
+  if (value === undefined) {
+    // A host's key it forgot is shown as itself (and told by the caller); a grid key is a bug.
+    if (key.startsWith('app.')) return key;
+    throw new RangeError(`no message ${String(key)}`);
+  }
   const c = ctx ?? localeCtx({ locale: m.locale });
   let text: string;
   if (typeof value === 'string') text = value;

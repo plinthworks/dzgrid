@@ -1,0 +1,21 @@
+{
+  "id": "missing-message",
+  "suite": "problems",
+  "description": "A part asks for an app message the bundle does not have.",
+  "input": {
+    "op": "message",
+    "key": "app.status",
+    "available": [
+      "app.other"
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "missing-message",
+        "severity": "warning",
+        "path": "messages.text.app.status"
+      }
+    ]
+  }
+}

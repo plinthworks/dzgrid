@@ -32,7 +32,10 @@ export type Intent =
   | { readonly kind: 'page'; readonly delta: -1 | 1 }
   | { readonly kind: 'toggleSelect' }
   | { readonly kind: 'selectAll' }
-  | { readonly kind: 'sort'; readonly multi: boolean };
+  | { readonly kind: 'sort'; readonly multi: boolean }
+  /** Into the cell's widget (a part's `focus()`), and back out to the cell. */
+  | { readonly kind: 'enter' }
+  | { readonly kind: 'leave' };
 
 /** Where each intent may come from; a new intent kind does not compile until it is listed. */
 export const INTENT_OWNERS: { readonly [K in Intent['kind']]: readonly KeyOwner[] } = {
@@ -42,6 +45,8 @@ export const INTENT_OWNERS: { readonly [K in Intent['kind']]: readonly KeyOwner[
   toggleSelect: ['cell'],
   selectAll: ['cell', 'header'],
   sort: ['header'],
+  enter: ['cell'],
+  leave: ['cell-widget'],
 };
 
 const isSpace = (k: string): boolean => k === ' ' || k === 'Spacebar';
@@ -55,7 +60,10 @@ function raw(e: KeyLike, ctx: IntentContext): Intent | null {
   const forward = ctx.dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
   const back = ctx.dir === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
 
-  if (e.key === 'Enter') return cmd ? null : { kind: 'sort', multi: e.shiftKey };
+  if (e.key === 'Escape') return cmd || e.shiftKey ? null : { kind: 'leave' };
+  if (e.key === 'F2') return cmd || e.shiftKey ? null : { kind: 'enter' };
+  // Enter sorts a header and enters a cell's widget; Shift+Enter on a cell means nothing yet.
+  if (e.key === 'Enter') return cmd ? null : ctx.owner === 'cell' ? (e.shiftKey ? null : { kind: 'enter' }) : { kind: 'sort', multi: e.shiftKey };
   if (e.shiftKey) return null;   // ranges come in Phase 4
   if (cmd && (e.key === 'a' || e.key === 'A' || e.code === 'KeyA')) return { kind: 'selectAll' };
   switch (e.key) {
