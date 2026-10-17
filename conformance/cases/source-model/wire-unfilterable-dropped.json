@@ -1,7 +1,7 @@
 {
   "id": "wire-unfilterable-dropped",
   "suite": "source-model",
-  "description": "A filter on a column with filter: false is not sent and asks nothing; it is reported as invalid-filter; the other filters still travel.",
+  "description": "A filter on a column with filter: false is not sent and asks nothing; it is reported as invalid-filter; the other filters still travel. The refused edit alone asks nothing but is told (a status change carrying its problem).",
   "input": {
     "columns": [
       {
@@ -91,6 +91,7 @@
     "aborted": [],
     "changes": [
       "query",
+      "status",
       "query",
       "query"
     ],
