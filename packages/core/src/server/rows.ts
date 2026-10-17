@@ -329,8 +329,14 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     load();
   };
   const rekey = (): void => {
+    const was = canonical(wireProblems.map((p) => [p.code, p.path]));
     const key = keyNow();
-    if (key !== epochKey) restart(key);
+    if (key !== epochKey) return restart(key);
+    // The same request, but a filter refused or fixed: told, without asking the server again.
+    if (canonical(wireProblems.map((p) => [p.code, p.path])) !== was) {
+      told.push(...wireProblems);
+      mark('status');
+    }
   };
 
   const hasNext = (): boolean =>

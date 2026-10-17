@@ -123,3 +123,21 @@ describe('sourceRows sends the wire form', () => {
     expect(f.model.counts).toMatchObject({ total: 2, filtered: 2 });
   });
 });
+
+describe('step 6 review', () => {
+  it('tells a refused filter edit that leaves the request as it was: one change, its problems, no new request', () => {
+    const s = setup([{ id: 'name' }, { id: 'locked', filter: false }]);
+    const changes: { told?: readonly { code: string }[] }[] = [];
+    s.model.subscribe((c) => changes.push(c));
+    const before = s.calls.length;
+    s.model.setQuery(q({ locked: { type: 'text', op: 'contains', value: 'x' } }));
+    expect(s.calls.length).toBe(before);
+    expect(changes.length).toBe(1);
+    expect(changes[0]!.told?.map((p) => p.code)).toEqual(['invalid-filter']);
+    // Fixed again: the problem goes, said once more, still no request.
+    s.model.setQuery(q({}));
+    expect(s.calls.length).toBe(before);
+    expect(changes.length).toBe(2);
+    expect(s.model.problems.some((p) => p.code === 'invalid-filter')).toBe(false);
+  });
+});
