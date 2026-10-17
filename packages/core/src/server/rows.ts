@@ -236,9 +236,10 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     gate.newEpoch();
     index = 0;
     endAt = null;
-    // What the last answer said belongs to the old query: no "no rows", no clamp, from it.
+    // What the last answer said belongs to the old query: no "no rows", no clamp, no warning, from it.
     total = null;
     next = null;
+    answerProblems = [];
     mark('query');
     load();
   };
@@ -315,10 +316,13 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     },
     invalidate(opts) {
       commit(() => {
+        // Asked again: the server may say more now (an end found past an unknown total may have moved).
+        endAt = null;
         if (opts?.purge) {
           // Nothing left to keep: the first-load overlay shows.
           inner.setRows([], 'data');
           shown = null;
+          answerProblems = [];
           mark('query');
         }
         load();

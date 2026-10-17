@@ -136,10 +136,13 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
     return true;
   };
   /** State first, then the event: whoever hears it reads the new state. */
+  // Everything-except over the rows the filters match: their count, not the total's.
+  const countNow = (): number | null => selectionCount(selection, allOf !== null ? rows.counts.filtered : rows.counts.total);
+  /** The count last told: an everything-except selection is told again when a server's answer moves it. */
+  let toldCount: number | null = null;
   const changed = (source: ChangeSource): GridEvent<T> => ({
     type: 'selectionChanged', source, selection,
-    // Everything-except over the rows the filters match: their count, not the total's.
-    count: selectionCount(selection, allOf !== null ? rows.counts.filtered : rows.counts.total),
+    count: (toldCount = countNow()),
     query: selection.mode === 'exclude' && allOf !== null ? query : null,
   });
   const setSelection = (s: SelectionState, source: ChangeSource): void => {
@@ -176,6 +179,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
       if (page) emit({ type: 'pageChanged', source, page });
     }
     if (!sameSelection(prevSelection, selection)) emit(changed('data'));
+    // An everything-except selection's count follows the total: a server's answer may bring it.
+    else if (selection.mode === 'exclude' && countNow() !== toldCount) emit(changed('data'));
     if (!sameFocus(prevFocus, focus)) emit({ type: 'focusChanged', source: 'data', focus });
   };
 
