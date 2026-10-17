@@ -87,7 +87,9 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
       if (e.key === ' ' || e.key === 'Enter') toggleAll();
       else if (first && step?.kind === 'move' && step.delta > 0) {
         const d = rows.displayed;
-        focus.focusTo(step.axis === 'row' && d.count ? { kind: 'cell', row: d.keyAt(d.index(0)!), column: first.id } : { kind: 'header', column: first.id });
+        // Down: the next header row when a feature added one, the first row otherwise.
+        const down: FocusPos = g.headerRows.length ? { kind: 'header', column: first.id, level: 1 } : d.count ? { kind: 'cell', row: d.keyAt(d.index(0)!), column: first.id } : { kind: 'header', column: first.id };
+        focus.focusTo(step.axis === 'row' ? down : { kind: 'header', column: first.id });
       } else return;
       e.preventDefault();
       return;
