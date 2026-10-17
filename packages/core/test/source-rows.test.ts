@@ -386,14 +386,13 @@ describe('an empty page past the end', () => {
     expect(s.kinds()).toEqual(['query', 'page', 'page', 'page']);
   });
 
-  it('keeps stepping back while the pages stay empty', () => {
+  it('keeps stepping back, halfway to the page on screen, while the pages stay empty', () => {
     const s = paged(2);
     answer(s.calls[0]!, ['a', 'b'], { hasNext: true });
     s.model.setPage({ index: 3 });
     answer(s.calls[1]!, []);
     answer(s.calls[2]!, []);
-    answer(s.calls[3]!, []);
-    expect(s.calls.map((c) => c.req.page!.index)).toEqual([0, 3, 2, 1]);
+    expect(s.calls.map((c) => c.req.page!.index)).toEqual([0, 3, 1]);
     expect(s.model.page).toMatchObject({ index: 0, hasNext: false });
     expect(ids(s)).toEqual(['a', 'b']);
   });
@@ -854,5 +853,55 @@ describe('through the kernel', () => {
     const kernel = createKernel<R>({ rows: s.model, columns: s.columns });
     expect(kernel.dispatch({ type: 'page.size', size: 0 }, 'user')).toMatchObject({ ok: false, reason: 'invalid-page' });
     expect(s.calls.length).toBe(1);
+  });
+});
+
+describe('step 5 part 2 review', () => {
+  it('forgets the old query’s total when the query changes: no "no rows" while the new one loads', () => {
+    const s = paged(2);
+    answer(s.calls[0]!, ['a', 'b'], { total: 6 });
+    s.model.setQuery(makeQuery({ filter: { name: { type: 'text', op: 'equals', value: 'zz' } } }));
+    answer(s.calls[1]!, [], { total: 0 });
+    expect(s.model.counts.filtered).toBe(0);
+    s.model.setQuery(makeQuery());
+    expect(s.model.status.phase).toBe('loading');
+    expect(s.model.counts).toMatchObject({ total: null, filtered: null });
+    expect(s.model.page).toMatchObject({ total: null, pageCount: null });
+    // Nor does it clamp the new query's pages to the old one's count.
+    s.model.setPage({ index: 2 });
+    expect(s.model.page!.index).toBe(2);
+  });
+
+  it('keeps the total for a page change within the same query', () => {
+    const s = paged(2);
+    answer(s.calls[0]!, ['a', 'b'], { total: 6 });
+    s.model.setPage({ index: 1 });
+    expect(s.model.page).toMatchObject({ index: 1, total: 6, pageCount: 3 });
+  });
+
+  it('goes back from an empty page far past an unknown end in a few requests, to the page on screen', () => {
+    const s = paged(2);
+    answer(s.calls[0]!, ['a', 'b'], { hasNext: true });
+    s.model.setPage({ index: 1000 });
+    // Every page after the first is empty: halfway back each time (500, 250, …, 1), then page 0 kept.
+    while (s.model.status.phase === 'loading') answer(s.calls.at(-1)!, []);
+    expect(s.calls.length).toBeLessThanOrEqual(12);
+    expect(s.model.page).toMatchObject({ index: 0, hasNext: false });
+    expect(ids(s)).toEqual(['a', 'b']);
+  });
+
+  it('finds an unknown end in a few requests, not one per page', () => {
+    const s = paged(2);
+    // Page 1000 asked before the first page answered: nothing of this query on screen.
+    s.model.setPage({ index: 1000 });
+    for (let i = 1; i < 40 && s.model.status.phase === 'loading'; i++) {
+      const c = s.calls.at(-1)!;
+      const at = c.req.page!.index;
+      if (at > 3) answer(c, []);
+      else answer(c, [`r${at}a`, `r${at}b`], { hasNext: true });
+    }
+    expect(s.model.status.phase).toBe('idle');
+    expect(s.calls.length).toBeLessThan(15);
+    expect(s.model.displayed.count).toBe(2);
   });
 });

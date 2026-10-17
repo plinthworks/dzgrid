@@ -56,3 +56,4 @@ Moves to the next, previous, first or last page; picks another page size; change
 - An answer with neither `total` nor `hasNext` is warned every time, even empty; a `hasNext` that is not a boolean is warned at `response.hasNext` and read as absent.
 - `setSource` takes the new binding's data and `params`; its `paging` and `maxRows` are ignored. A binding not made by `sourceRows` is ignored.
 - Destroy does not change the status: a destroyed model asks and says nothing more.
+- **Step 5 review (2026-10-17):** past an unknown end the grid goes halfway back to the page on screen (known not empty) at each empty answer, not one page at a time: a far page (a restored URL, data that shrank) costs a few requests. The page on screen is kept, not asked again, once nothing is left between. A new query forgets the old one's total and `hasNext`: no "no rows" and no clamp from them while it loads.

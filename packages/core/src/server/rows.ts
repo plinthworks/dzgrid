@@ -209,11 +209,14 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
         }
         // A total that covers the page: the rows are trusted, empty.
       } else {
-        // Past the end of an unknown total: the page before, kept if it is the one shown.
+        // Past the end of an unknown total: halfway back to the page on screen (known not empty),
+        // so a far page costs a few requests, not one per page; the page on screen is kept, not
+        // asked again, once nothing is left between.
         endAt = index * size;
-        index--;
         mark('page');
-        if (shown && shown.key === epochKey && shown.size === size && shown.index === index) return setStatus(IDLE);
+        const known = shown && shown.key === epochKey && shown.size === size && shown.index < index ? shown.index : -1;
+        index = Math.floor((known + index) / 2);
+        if (index === known) return setStatus(IDLE);
         return load();
       }
     }
@@ -233,6 +236,9 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     gate.newEpoch();
     index = 0;
     endAt = null;
+    // What the last answer said belongs to the old query: no "no rows", no clamp, from it.
+    total = null;
+    next = null;
     mark('query');
     load();
   };
