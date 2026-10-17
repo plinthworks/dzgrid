@@ -1,0 +1,22 @@
+{
+  "id": "invalid-operations",
+  "suite": "problems",
+  "description": "Server pages with a client sort: refused, and said where.",
+  "input": {
+    "op": "operations",
+    "operations": {
+      "page": "server",
+      "sort": "client"
+    },
+    "hasSource": true
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-operations",
+        "severity": "error",
+        "path": "operations.sort"
+      }
+    ]
+  }
+}

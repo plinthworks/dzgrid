@@ -1,0 +1,18 @@
+{
+  "id": "rows-default",
+  "suite": "operations",
+  "description": "With rows and nothing said: everything in the browser, one scrolling list.",
+  "input": {
+    "input": null,
+    "hasSource": false
+  },
+  "expected": {
+    "ops": {
+      "filter": "client",
+      "quick": "client",
+      "sort": "client",
+      "page": "off"
+    },
+    "problems": []
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "server-without-source",
+  "suite": "operations",
+  "description": "A server placement with no source: refused, back to the browser.",
+  "input": {
+    "input": {
+      "filter": "server"
+    },
+    "hasSource": false
+  },
+  "expected": {
+    "ops": {
+      "filter": "client",
+      "quick": "client",
+      "sort": "client",
+      "page": "off"
+    },
+    "problems": [
+      {
+        "code": "invalid-operations",
+        "severity": "error",
+        "path": "operations.filter"
+      }
+    ]
+  }
+}

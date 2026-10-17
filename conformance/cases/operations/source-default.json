@@ -1,0 +1,18 @@
+{
+  "id": "source-default",
+  "suite": "operations",
+  "description": "With a source and nothing said: everything on the server.",
+  "input": {
+    "input": null,
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "server"
+    },
+    "problems": []
+  }
+}

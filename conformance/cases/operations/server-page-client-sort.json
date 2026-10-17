@@ -1,0 +1,27 @@
+{
+  "id": "server-page-client-sort",
+  "suite": "operations",
+  "description": "Server pages with a client sort: refused, read as all server, and said.",
+  "input": {
+    "input": {
+      "page": "server",
+      "sort": "client"
+    },
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "server"
+    },
+    "problems": [
+      {
+        "code": "invalid-operations",
+        "severity": "error",
+        "path": "operations.sort"
+      }
+    ]
+  }
+}

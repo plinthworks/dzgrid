@@ -1,0 +1,22 @@
+{
+  "id": "fetched-set-client-sort",
+  "suite": "operations",
+  "description": "The server filters, the browser sorts and pages: sorting and filtering commute.",
+  "input": {
+    "input": {
+      "filter": "server",
+      "sort": "client",
+      "page": "client"
+    },
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "server",
+      "quick": "client",
+      "sort": "client",
+      "page": "client"
+    },
+    "problems": []
+  }
+}

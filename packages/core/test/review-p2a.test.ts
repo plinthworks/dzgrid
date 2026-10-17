@@ -120,7 +120,7 @@ describe('phase 2 kernel review', () => {
       kernel.dispatch({ type: 'query.set', query: odd }, 'user');
       expect([...kernel.selection.keys]).toEqual([k('r2')]);
       expect(kernel.anchor).toBe(k('r2'));
-      expect(events).toEqual(['modelUpdated:user:query']);
+      expect(events).toEqual(['modelUpdated:user:query', 'filterChanged:user']);
     });
 
     it('is deaf to the model once destroyed', () => {

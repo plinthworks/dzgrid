@@ -83,3 +83,5 @@ export type { GridCommand, GridCommandResult, GridEvent, GridKernel, HeaderSelec
 export { reconcileFocus } from './focus.js';
 export type { FocusPos } from './focus.js';
 export { nextSort } from './sort/toggle.js';
+export { resolveOperations, splitQuery } from './model/operations.js';
+export type { Operation, Operations, OperationsInput, Placement, ServerQuery } from './model/operations.js';

@@ -1,0 +1,26 @@
+{
+  "id": "not-a-placement",
+  "suite": "operations",
+  "description": "A placement that is neither client nor server: refused, the default kept.",
+  "input": {
+    "input": {
+      "sort": "database"
+    },
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "server"
+    },
+    "problems": [
+      {
+        "code": "invalid-operations",
+        "severity": "error",
+        "path": "operations.sort"
+      }
+    ]
+  }
+}

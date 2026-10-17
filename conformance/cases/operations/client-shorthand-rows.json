@@ -1,0 +1,18 @@
+{
+  "id": "client-shorthand-rows",
+  "suite": "operations",
+  "description": "\"client\" with rows: one scrolling list.",
+  "input": {
+    "input": "client",
+    "hasSource": false
+  },
+  "expected": {
+    "ops": {
+      "filter": "client",
+      "quick": "client",
+      "sort": "client",
+      "page": "off"
+    },
+    "problems": []
+  }
+}

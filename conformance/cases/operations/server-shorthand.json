@@ -1,0 +1,18 @@
+{
+  "id": "server-shorthand",
+  "suite": "operations",
+  "description": "\"server\" puts all four on the server.",
+  "input": {
+    "input": "server",
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "server"
+    },
+    "problems": []
+  }
+}

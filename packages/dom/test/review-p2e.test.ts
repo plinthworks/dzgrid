@@ -42,7 +42,7 @@ describe('phase 2 steps 12-14 review', () => {
     expect(g.kernel.selection.keys.size).toBe(6);
     key(headBox()!, 'Enter');
     expect(g.kernel.selection.keys.size).toBe(0);
-    expect(g.kernel.rows.query.sort).toEqual([]);
+    expect(g.kernel.query.sort).toEqual([]);
     key(headBox()!, 'ArrowRight');
     expect((document.activeElement as HTMLElement).dataset['col']).toBe('n');
   });

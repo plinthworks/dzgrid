@@ -45,9 +45,9 @@ describe('resize gaps', () => {
     const grip = k.head('n').querySelector('.dzg-resize')!;
     k.pdown(grip, 300); k.pup(grip, 330);
     k.click(k.head('n'));
-    expect(k.g.kernel.rows.query.sort).toEqual([]);
+    expect(k.g.kernel.query.sort).toEqual([]);
     k.click(k.head('n'));
-    expect(k.g.kernel.rows.query.sort).toEqual([{ column: 'n', dir: 'asc' }]);
+    expect(k.g.kernel.query.sort).toEqual([{ column: 'n', dir: 'asc' }]);
   });
   it('G2 puts the width back on pointercancel, finished, at the start width', () => {
     const k = make({}, 3);
@@ -185,7 +185,7 @@ describe('sort label gaps', () => {
     k.click(k.head('name'), { shiftKey: true });
     expect(k.head('n').getAttribute('aria-label')).toBe('Count, Sort 1');
     k.click(k.head('name'), { shiftKey: true }); k.click(k.head('name'), { shiftKey: true });
-    expect(k.g.kernel.rows.query.sort).toEqual([{ column: 'n', dir: 'desc' }]);
+    expect(k.g.kernel.query.sort).toEqual([{ column: 'n', dir: 'desc' }]);
     expect(k.head('n').hasAttribute('aria-label')).toBe(false);
     expect(k.head('n').querySelector('.dzg-sort')!.textContent).toBe('');
     expect(k.head('name').querySelector('.dzg-sort')).toBeNull();

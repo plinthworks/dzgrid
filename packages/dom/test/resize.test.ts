@@ -84,7 +84,7 @@ describe('column resize', () => {
     drag(handle('a')!, 500, 520);
     // The click that ends the drag lands on the header cell itself, not only the handle.
     host.querySelector<HTMLElement>('.dzg-hcell[data-col="a"]')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(g.kernel.rows.query.sort).toEqual([]);
+    expect(g.kernel.query.sort).toEqual([]);
     expect(host.querySelector('.dzg-hcell[data-col="a"]')!.hasAttribute('aria-sort')).toBe(false);
   });
 });

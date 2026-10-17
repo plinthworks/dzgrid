@@ -15,8 +15,8 @@ const PUBLIC = [
   'instantCodec', 'instantToDayIn', 'intentFor', 'instantToIso', 'isAscii', 'isBlank', 'isKnownZone', 'isLeapYear', 'isSelected',
   'layerPlacement', 'localeCtx', 'makeQuery', 'nextSort', 'normalizeDigits', 'numberCodec', 'numberCodecWith', 'offsetAt',
   'overscanRows', 'parseDay', 'parseInstant', 'pinnedKey', 'problem', 'quickWords', 'readDayText', 'readInstant',
-  'readMachineNumber', 'readNumber', 'reconcileFocus', 'reconcileSelection', 'resolveColumns', 'resolveInstantRange', 'resolveWall',
-  'scrollMapper', 'scrollTopFor', 'selectAll', 'selectOnly', 'selectRange', 'selectionCount', 'stripMarks',
+  'readMachineNumber', 'readNumber', 'reconcileFocus', 'reconcileSelection', 'resolveColumns', 'resolveOperations', 'resolveInstantRange', 'resolveWall',
+  'scrollMapper', 'scrollTopFor', 'selectAll', 'selectOnly', 'selectRange', 'selectionCount', 'splitQuery', 'stripMarks',
   'textCodec', 'toggle', 'uniformRowLayout', 'variableRowLayout', 'visibleWindow', 'windowAt', 'zoneDayBounds',
 ];
 

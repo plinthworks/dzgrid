@@ -1,0 +1,23 @@
+{
+  "id": "fetched-set",
+  "suite": "operations",
+  "description": "The server filters and sorts, the browser pages the result (the mixed mode, kept in Phase 3).",
+  "input": {
+    "input": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "client"
+    },
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "client"
+    },
+    "problems": []
+  }
+}

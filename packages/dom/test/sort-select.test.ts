@@ -70,7 +70,7 @@ describe('sort by click', () => {
     head('n').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
     head('name').focus();
     head('name').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true, bubbles: true, cancelable: true }));
-    expect(g.kernel.rows.query.sort).toEqual([{ column: 'n', dir: 'asc' }, { column: 'name', dir: 'asc' }]);
+    expect(g.kernel.query.sort).toEqual([{ column: 'n', dir: 'asc' }, { column: 'name', dir: 'asc' }]);
   });
 
   it('announces the new order and the row count, in French and Arabic', async () => {

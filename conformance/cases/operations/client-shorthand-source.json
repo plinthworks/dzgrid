@@ -1,0 +1,18 @@
+{
+  "id": "client-shorthand-source",
+  "suite": "operations",
+  "description": "\"client\" with a source: the source gives the whole set, the browser pages it.",
+  "input": {
+    "input": "client",
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "client",
+      "quick": "client",
+      "sort": "client",
+      "page": "client"
+    },
+    "problems": []
+  }
+}

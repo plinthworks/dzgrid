@@ -1,0 +1,34 @@
+{
+  "id": "server-page-client-filter",
+  "suite": "operations",
+  "description": "Server pages with client filtering and search: refused for each, read as all server.",
+  "input": {
+    "input": {
+      "page": "server",
+      "filter": "client",
+      "quick": "client",
+      "sort": "server"
+    },
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "server"
+    },
+    "problems": [
+      {
+        "code": "invalid-operations",
+        "severity": "error",
+        "path": "operations.filter"
+      },
+      {
+        "code": "invalid-operations",
+        "severity": "error",
+        "path": "operations.quick"
+      }
+    ]
+  }
+}

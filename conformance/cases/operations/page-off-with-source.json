@@ -1,0 +1,23 @@
+{
+  "id": "page-off-with-source",
+  "suite": "operations",
+  "description": "A source with page off: the whole set in one scrolling list.",
+  "input": {
+    "input": {
+      "page": "off",
+      "filter": "server",
+      "sort": "server",
+      "quick": "server"
+    },
+    "hasSource": true
+  },
+  "expected": {
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "off"
+    },
+    "problems": []
+  }
+}

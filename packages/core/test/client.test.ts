@@ -102,7 +102,7 @@ describe('the client model', () => {
   it('counts the rows that pass', () => {
     const m = make();
     m.setQuery(makeQuery({ quick: 'x' }));
-    expect(m.counts).toEqual({ total: 4, filtered: 2 });
+    expect(m.counts).toEqual({ total: 4, filtered: 2, displayed: 2 });
   });
 
   it('never writes to the rows it was given', () => {

@@ -27,7 +27,8 @@ export interface GridApi {
 }
 
 export interface GridInstance<T> {
-  readonly kernel: GridKernel<T>;
+  /** Typed on the client model until a source arrives (Phase 3, step 5). */
+  readonly kernel: GridKernel<T, ClientModel<T>>;
   readonly api: GridApi;
   update(patch: Partial<GridSettings<T>>): void;
   destroy(): void;
@@ -122,7 +123,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   let ctx = ctxOf(settings);
   const columns: ColumnModel<T> = createColumnModel<T>(settings.columns);
   const rows: ClientModel<T> = clientRows<T>({ rows: settings.rows ?? [], getRowId: settings.getRowId, columns, ctx });
-  const kernel = createKernel<T>({ rows, columns });
+  const kernel = createKernel<T, ClientModel<T>>({ rows, columns });
   const geometry = env.geometry ?? domGeometry(viewport, header, () => dir);
   geometryRef = geometry;
   const scheduler = new FrameScheduler(env.raf ?? win, env.sync === true);
@@ -215,7 +216,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     const colIndex = (id: string) => index.get(id) ?? 0;
     const focus0 = kernel.focus;
     const focusCenter = focus0 ? L.center.columns.findIndex((c) => c.id === focus0.column) : -1;
-    const sort = rows.query.sort;
+    const sort = kernel.query.sort;
     headerRenderer.render(L, w.cols, h, colIndex, (col, el) => decorateHeader(col, el, sort), focus0?.kind === 'header' ? focusCenter : -1, check, mode === 'multi');
     if (headerRenderer.checkName) {
       const text = msg(settings.messages, 'selection.column', {}, ctx);
@@ -561,11 +562,11 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     };
   }
   // Prepared again after a load, a language change, or the search box emptied (which releases it).
-  let quickBefore = rows.query.quick;
+  let quickBefore = kernel.query.quick;
   scope.add(kernel.subscribe((e) => {
     if (e.type !== 'modelUpdated') return;
-    const emptied = quickBefore.trim() !== '' && rows.query.quick.trim() === '';
-    quickBefore = rows.query.quick;
+    const emptied = quickBefore.trim() !== '' && kernel.query.quick.trim() === '';
+    quickBefore = kernel.query.quick;
     if (e.kind === 'rows' || e.kind === 'context' || emptied) warm();
   }));
 

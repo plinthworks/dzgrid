@@ -95,7 +95,7 @@ describe('the grid shell', () => {
     expect(overlay.textContent).toBe(msg(EN, 'grid.noRows'));
     g.update({ rows: rows(10) });
     expect(overlay.hidden).toBe(true);
-    g.kernel.dispatch({ type: 'query.set', query: { ...g.kernel.rows.query, quick: 'zzzz', key: 'q-zzzz' } }, 'user');
+    g.kernel.dispatch({ type: 'query.set', query: { ...g.kernel.query, quick: 'zzzz', key: 'q-zzzz' } }, 'user');
     expect(overlay.textContent).toBe(msg(EN, 'grid.noMatches'));
     g.update({ overlay: 'loading' });
     expect(overlay.textContent).toBe(msg(EN, 'grid.loading'));

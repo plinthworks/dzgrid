@@ -1,0 +1,29 @@
+{
+  "id": "empty-quick-not-sent",
+  "suite": "split-query",
+  "description": "An empty search is not sent.",
+  "input": {
+    "query": {
+      "sort": [],
+      "filter": {},
+      "quick": "  "
+    },
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "server"
+    }
+  },
+  "expected": {
+    "server": {
+      "sort": [],
+      "filter": {}
+    },
+    "client": {
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

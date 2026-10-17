@@ -1,0 +1,48 @@
+{
+  "id": "all-client",
+  "suite": "split-query",
+  "description": "All in the browser: nothing for the server.",
+  "input": {
+    "query": {
+      "sort": [
+        {
+          "column": "n",
+          "dir": "asc"
+        }
+      ],
+      "filter": {
+        "t": {
+          "type": "text",
+          "op": "contains",
+          "value": "a"
+        }
+      },
+      "quick": "x"
+    },
+    "ops": {
+      "filter": "client",
+      "quick": "client",
+      "sort": "client",
+      "page": "off"
+    }
+  },
+  "expected": {
+    "server": {},
+    "client": {
+      "sort": [
+        {
+          "column": "n",
+          "dir": "asc"
+        }
+      ],
+      "filter": {
+        "t": {
+          "type": "text",
+          "op": "contains",
+          "value": "a"
+        }
+      },
+      "quick": "x"
+    }
+  }
+}

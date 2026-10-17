@@ -16,23 +16,50 @@ import { ctxKey, type LocaleCtx } from '../value/locale.js';
 import { ColumnCache, type ColumnEnv } from './column-cache.js';
 import { canonical, EMPTY_QUERY, type Query } from './query.js';
 import type { ChangeSource } from './types.js';
+import type { Operations } from './operations.js';
 
-export type ModelStatus = { readonly phase: 'idle' };
+export type ModelStatus =
+  | { readonly phase: 'idle' }
+  | { readonly phase: 'loading' }
+  | { readonly phase: 'error'; readonly failure: unknown };
+
+/** How many rows: all of them, after the filters, and shown now. A server may not know its total. */
+export interface RowCounts {
+  readonly total: number | null;
+  readonly filtered: number | null;
+  readonly displayed: number;
+}
 
 export interface ModelChange<T> {
   readonly source: ChangeSource;
   readonly displayed: DisplayedRows<T>;
-  readonly kind: 'rows' | 'order' | 'query' | 'context';
+  readonly kind: 'rows' | 'order' | 'query' | 'context' | 'page' | 'status';
   readonly transaction?: TransactionResult;
   readonly problems: readonly Problem[];
 }
 
+/**
+ * What the kernel needs of any row model, the browser's or a server's (Phase 3,
+ * D1): it pushes the query, reads the counts, and asks two policies — what
+ * "select all" means here, and whether a selected key survives a change.
+ */
 export interface RowModel<T> {
-  readonly kind: 'client' | 'paged' | 'infinite' | 'server-side';
+  readonly kind: 'client' | 'source';
+  readonly ops: Operations;
   readonly displayed: DisplayedRows<T>;
   readonly status: ModelStatus;
+  readonly counts: RowCounts;
+  /** `displayed`: the rows shown after the filters (an include set). `query`: everything the query matches, on the server (everything-except). */
+  readonly selectAll: 'displayed' | 'query';
+  /** Whether a selected key survives a change. The browser: its row still exists. A server: always (rows on other pages). */
+  keeps(key: RowKey): boolean;
+  /** A row by its key: any held row in the browser, the current page on a server. */
+  row(key: RowKey): DataNode<T> | undefined;
   setQuery(q: Query, source?: ChangeSource): void;
-  invalidate(o?: { keepScroll?: boolean }): void;
+  setColumns(columns: ColumnLookup<T>, source?: ChangeSource): void;
+  setContext(ctx: LocaleCtx, source?: ChangeSource): void;
+  /** Fetch or compute again (a server's retry). */
+  invalidate(o?: { readonly purge?: boolean }): void;
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
   destroy(): void;
 }
@@ -58,7 +85,7 @@ export interface ClientModel<T> extends RowModel<T> {
   /** A row by its key, whatever the filter. */
   row(key: RowKey): DataNode<T> | undefined;
   readonly query: Query;
-  readonly counts: { readonly total: number; readonly filtered: number };
+  readonly counts: { readonly total: number; readonly filtered: number; readonly displayed: number };
   /** The last load or transaction's problems, then the query's and the cells'. */
   readonly problems: readonly Problem[];
   setRows(rows: Iterable<T>, source?: ChangeSource): TransactionResult;
@@ -237,11 +264,14 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     [STORE]: store,
     kind: 'client',
     status: { phase: 'idle' },
+    ops: { filter: 'client', quick: 'client', sort: 'client', page: 'off' },
+    selectAll: 'displayed',
+    keeps: (key) => store.get(key) !== undefined,
     row: (key) => store.get(key),
     get query() { return query; },
     get displayed() { return displayed; },
     get problems() { return currentProblems(); },
-    get counts() { return { total: store.size, filtered: filtered?.order ? filtered.order.length : store.size }; },
+    get counts() { return { total: store.size, filtered: filtered?.order ? filtered.order.length : store.size, displayed: displayed.count }; },
     get diagnostics() {
       return { ...d, keyBuilds: cache.stats.keyBuilds, rankBuilds: cache.stats.rankBuilds, quickScanned: cache.stats.quickScanned, displayBuilds: cache.stats.displayBuilds, foldBuilds: cache.stats.foldBuilds };
     },

@@ -1,7 +1,8 @@
 import type { ColumnModel, ColumnState } from './columns/model.js';
 import { reconcileFocus, sameFocus, type FocusPos } from './focus.js';
 import type { RowKey } from './ids.js';
-import type { ClientModel, ModelChange } from './model/client.js';
+import type { ModelChange, RowModel } from './model/client.js';
+import type { ColumnFilter, FilterModel } from './filter/model.js';
 import { canonical, makeQuery, type Query } from './model/query.js';
 import type { ChangeSource } from './model/types.js';
 import { problem, type Problem } from './problems.js';
@@ -31,7 +32,14 @@ export type GridCommand =
   | { readonly type: 'selection.set'; readonly selection: SelectionState }
   | { readonly type: 'column.resize'; readonly column: string; readonly width: number; readonly finished: boolean }
   | { readonly type: 'column.state'; readonly patch: readonly ColumnState[] }
-  | { readonly type: 'focus.set'; readonly focus: FocusPos | null };
+  | { readonly type: 'focus.set'; readonly focus: FocusPos | null }
+  | { readonly type: 'filter.set'; readonly filter: FilterModel }
+  | { readonly type: 'filter.column'; readonly column: string; readonly filter: ColumnFilter | null }
+  | { readonly type: 'quick.set'; readonly text: string }
+  /** Select all, as the model means it: the displayed rows, or the whole query on a server. */
+  | { readonly type: 'selection.all' }
+  /** Fetch or compute again (a server's retry). */
+  | { readonly type: 'rows.refresh' };
 
 export type GridCommandResult =
   | { readonly ok: true }
@@ -40,7 +48,10 @@ export type GridCommandResult =
 export type GridEvent<T> =
   | { readonly type: 'modelUpdated'; readonly source: ChangeSource; readonly displayed: DisplayedRows<T>; readonly kind: ModelChange<T>['kind'] }
   | { readonly type: 'sortChanged'; readonly source: ChangeSource; readonly sort: readonly SortItem[] }
-  | { readonly type: 'selectionChanged'; readonly source: ChangeSource; readonly selection: SelectionState; readonly count: number | null }
+  /** `query`: the query an everything-except selection stands for (a host's bulk action sends both); null otherwise. */
+  | { readonly type: 'selectionChanged'; readonly source: ChangeSource; readonly selection: SelectionState; readonly count: number | null; readonly query: Query | null }
+  | { readonly type: 'filterChanged'; readonly source: ChangeSource; readonly filter: FilterModel }
+  | { readonly type: 'quickChanged'; readonly source: ChangeSource; readonly text: string }
   | { readonly type: 'columnResized'; readonly source: ChangeSource; readonly column: string; readonly width: number; readonly finished: boolean }
   | { readonly type: 'columnsChanged'; readonly source: ChangeSource; readonly changed: readonly string[]; readonly layoutChanged: boolean }
   | { readonly type: 'focusChanged'; readonly source: ChangeSource; readonly focus: FocusPos | null }
@@ -48,9 +59,11 @@ export type GridEvent<T> =
   | { readonly type: 'problems'; readonly source: ChangeSource; readonly problems: readonly Problem[] }
   | { readonly type: 'firstDataRendered'; readonly source: 'data' };
 
-export interface GridKernel<T> {
-  readonly rows: ClientModel<T>;
+export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
+  readonly rows: M;
   readonly columns: ColumnModel<T>;
+  /** The query: the kernel's own, pushed to the model (D1). */
+  readonly query: Query;
   readonly selection: SelectionState;
   readonly anchor: RowKey | null;
   readonly focus: FocusPos | null;
@@ -65,9 +78,13 @@ const refuse = (reason: string, problems: readonly Problem[] = []): GridCommandR
 /** For the DOM layer, through `@dzgrid/core/internal`: events the kernel cannot see (clicks, first render). */
 export const EMIT = Symbol('dzgrid.emit');
 
-export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly columns: ColumnModel<T> }): GridKernel<T> {
+export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readonly rows: M; readonly columns: ColumnModel<T>; readonly query?: Query }): GridKernel<T, M> {
   const { rows, columns } = o;
+  let query: Query = o.query ?? makeQuery();
+  if (o.query) rows.setQuery(query, 'host');
   let selection: SelectionState = NO_SELECTION;
+  /** The query an everything-except selection stands for: any other query drops it. */
+  let allOf: string | null = null;
   let anchor: RowKey | null = null;
   let focus: FocusPos | null = null;
   let shown = rows.displayed;
@@ -99,17 +116,24 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
     return true;
   };
   /** State first, then the event: whoever hears it reads the new state. */
+  const changed = (source: ChangeSource): GridEvent<T> => ({
+    type: 'selectionChanged', source, selection,
+    count: selectionCount(selection, rows.counts.total),
+    query: selection.mode === 'exclude' && allOf !== null ? query : null,
+  });
   const setSelection = (s: SelectionState, source: ChangeSource): void => {
     if (sameSelection(s, selection)) return;
     selection = s;
-    emit({ type: 'selectionChanged', source, selection, count: selectionCount(selection, rows.counts.total) });
+    if (selection.mode !== 'exclude') allOf = null;
+    emit(changed(source));
   };
   const setFocus = (f: FocusPos | null, source: ChangeSource): void => {
     if (sameFocus(f, focus)) return;
     focus = f;
     emit({ type: 'focusChanged', source, focus });
   };
-  const exists = (key: RowKey): boolean => rows.row(key) !== undefined;
+  // Which selected keys survive a change is the model's to say: a server keeps rows of other pages.
+  const exists = (key: RowKey): boolean => rows.keeps(key);
 
   /**
    * After the rows or the columns moved: what no longer exists lets go —
@@ -124,7 +148,7 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
     focus = reconcileFocus(focus, shown, rows.displayed, columns);
     shown = rows.displayed;
     if (head) emit(head);
-    if (!sameSelection(prevSelection, selection)) emit({ type: 'selectionChanged', source: 'data', selection, count: selectionCount(selection, rows.counts.total) });
+    if (!sameSelection(prevSelection, selection)) emit(changed('data'));
     if (!sameFocus(prevFocus, focus)) emit({ type: 'focusChanged', source: 'data', focus });
   };
 
@@ -136,10 +160,19 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
   });
 
   const setQuery = (q: Query, source: ChangeSource): void => {
-    const before = rows.query;
+    const before = query;
+    if (before.key === q.key) return;
+    query = q;
+    // "All" meant all the rows of that query: another query does not inherit it.
+    if (selection.mode === 'exclude' && allOf !== null && allOf !== q.key) {
+      selection = clearSelection();
+      allOf = null;
+      emit(changed('data'));
+    }
     rows.setQuery(q, source);
-    if (before.key === rows.query.key) return;
-    if (canonical(before.sort) !== canonical(rows.query.sort)) emit({ type: 'sortChanged', source, sort: rows.query.sort });
+    if (canonical(before.sort) !== canonical(q.sort)) emit({ type: 'sortChanged', source, sort: q.sort });
+    if (canonical(before.filter) !== canonical(q.filter)) emit({ type: 'filterChanged', source, filter: q.filter });
+    if (before.quick !== q.quick) emit({ type: 'quickChanged', source, text: q.quick });
   };
   /** Every sorted column exists and can sort; the first that does not refuses the whole sort. */
   const checkSort = (sort: readonly SortItem[]): GridCommandResult | null => {
@@ -150,7 +183,7 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
     }
     return null;
   };
-  const withSort = (sort: readonly SortItem[]): Query => makeQuery({ sort, filter: rows.query.filter, quick: rows.query.quick });
+  const withSort = (sort: readonly SortItem[]): Query => makeQuery({ sort, filter: query.filter, quick: query.quick });
 
   function dispatch(cmd: GridCommand, source: ChangeSource): GridCommandResult {
     if (destroyed) return refuse('destroyed');
@@ -159,7 +192,7 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
         const col = columns.get(cmd.column);
         if (!col) return refuse('unknown-column', [problem('unknown-column', 'error', 'column', cmd.column)]);
         if (!col.sortable) return refuse('not-sortable', [problem('invalid-sort', 'error', 'column', cmd.column)]);
-        setQuery(withSort(nextSort(rows.query.sort, cmd.column, cmd.multi)), source);
+        setQuery(withSort(nextSort(query.sort, cmd.column, cmd.multi)), source);
         return OK;
       }
       case 'sort.set': {
@@ -188,6 +221,33 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
         setSelection(r.state, source);
         return OK;
       }
+      case 'filter.set':
+        setQuery(makeQuery({ sort: query.sort, filter: cmd.filter, quick: query.quick }), source);
+        return OK;
+      case 'filter.column': {
+        if (!columns.get(cmd.column)) return refuse('unknown-column', [problem('unknown-column', 'error', 'filter', cmd.column)]);
+        const next: Record<string, ColumnFilter> = { ...query.filter };
+        if (cmd.filter === null) delete next[cmd.column];
+        else next[cmd.column] = cmd.filter;
+        setQuery(makeQuery({ sort: query.sort, filter: next, quick: query.quick }), source);
+        return OK;
+      }
+      case 'quick.set':
+        setQuery(makeQuery({ sort: query.sort, filter: query.filter, quick: cmd.text }), source);
+        return OK;
+      case 'rows.refresh':
+        rows.invalidate();
+        return OK;
+      case 'selection.all':
+        if (rows.selectAll === 'query') {
+          // Everything the query matches, never held as keys: everything-except, tied to this query.
+          allOf = query.key;
+          anchor = null;
+          selection = { mode: 'exclude', keys: new Set() };
+          emit(changed(source));
+          return OK;
+        }
+        return dispatch({ type: 'selection.allDisplayed' }, source);
       case 'selection.allDisplayed': {
         // The client's *all* is what the filters show (D8): an include set of those keys.
         const d = rows.displayed;
@@ -243,12 +303,13 @@ export function createKernel<T>(o: { readonly rows: ClientModel<T>; readonly col
     }
   }
 
-  const kernel: GridKernel<T> & { [EMIT]: (e: GridEvent<T>) => void } = {
+  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void } = {
     rows,
     columns,
     get selection() { return selection; },
     get anchor() { return anchor; },
     get focus() { return focus; },
+    get query() { return query; },
     dispatch,
     subscribe(fn) {
       listeners.add(fn);

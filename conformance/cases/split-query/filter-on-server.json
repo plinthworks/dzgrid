@@ -1,0 +1,51 @@
+{
+  "id": "filter-on-server",
+  "suite": "split-query",
+  "description": "The server filters and searches, the browser sorts.",
+  "input": {
+    "query": {
+      "sort": [
+        {
+          "column": "n",
+          "dir": "asc"
+        }
+      ],
+      "filter": {
+        "t": {
+          "type": "text",
+          "op": "contains",
+          "value": "a"
+        }
+      },
+      "quick": "x"
+    },
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "client",
+      "page": "client"
+    }
+  },
+  "expected": {
+    "server": {
+      "filter": {
+        "t": {
+          "type": "text",
+          "op": "contains",
+          "value": "a"
+        }
+      },
+      "quick": "x"
+    },
+    "client": {
+      "sort": [
+        {
+          "column": "n",
+          "dir": "asc"
+        }
+      ],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

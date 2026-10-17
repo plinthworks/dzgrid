@@ -1,0 +1,52 @@
+{
+  "id": "all-server",
+  "suite": "split-query",
+  "description": "All on the server: the browser keeps nothing.",
+  "input": {
+    "query": {
+      "sort": [
+        {
+          "column": "n",
+          "dir": "asc"
+        }
+      ],
+      "filter": {
+        "t": {
+          "type": "text",
+          "op": "contains",
+          "value": "a"
+        }
+      },
+      "quick": "x"
+    },
+    "ops": {
+      "filter": "server",
+      "quick": "server",
+      "sort": "server",
+      "page": "server"
+    }
+  },
+  "expected": {
+    "server": {
+      "sort": [
+        {
+          "column": "n",
+          "dir": "asc"
+        }
+      ],
+      "filter": {
+        "t": {
+          "type": "text",
+          "op": "contains",
+          "value": "a"
+        }
+      },
+      "quick": "x"
+    },
+    "client": {
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}
