@@ -19,6 +19,7 @@ import { RowRenderer, setAttr } from './render/rows.js';
 import { FrameScheduler } from './render/scheduler.js';
 import { Scope } from './render/scope.js';
 import { Tooltip } from './render/tooltip.js';
+import { PopupHost } from './popup.js';
 import { createPainter } from './render/viewport.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
@@ -94,6 +95,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     doc, win, env, scope,
     el: { root, viewport, header, body, layer, overlay, tooltip },
     live, tip: new Tooltip(tooltip, scope),
+    popups: new PopupHost(doc, root, scope, () => dir),
     columns, rows, kernel, geometry,
     scheduler: new FrameScheduler(env.raf ?? win, env.sync === true),
     scroll: new ScrollController(geometry),
@@ -104,10 +106,11 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     get dir() { return dir; },
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false,
-    intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0,
+    intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0, remPx: geometry.read().remPx ?? 16,
     schedule, report,
     now: () => win?.performance.now() ?? 0,
-    rowHeight: () => ROW_HEIGHT[g.settings.density ?? 'comfortable'],
+    // A density's height at 16 px text, scaled with the reader's text size, whole pixels.
+    rowHeight: () => Math.round((ROW_HEIGHT[g.settings.density ?? 'comfortable'] * g.remPx) / 16),
     msg: (key, params = {}) => msg(g.settings.messages, key, params, g.ctx),
   };
 

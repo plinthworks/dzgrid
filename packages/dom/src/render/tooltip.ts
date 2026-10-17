@@ -60,6 +60,14 @@ export class Tooltip {
     if (this.#anchor) setAttr(this.#anchor, 'aria-describedby', null);
     this.#anchor = null;
     this.el.hidden = true;
+    const el = this.el as HTMLElement & { hidePopover?: () => void };
+    if (el.hasAttribute('popover') && typeof el.hidePopover === 'function') {
+      try {
+        el.hidePopover();
+      } catch {
+        /* already hidden */
+      }
+    }
   }
 
   #keep(): void {
@@ -72,6 +80,16 @@ export class Tooltip {
     this.#anchor = anchor;
     if (this.el.textContent !== text) this.el.textContent = text;
     this.el.hidden = false;
+    // The top layer where the browser has it: no host ancestor can clip or trap the tooltip.
+    const el = this.el as HTMLElement & { showPopover?: () => void };
+    if (typeof el.showPopover === 'function') {
+      if (!el.hasAttribute('popover')) el.setAttribute('popover', 'manual');
+      try {
+        el.showPopover();
+      } catch {
+        /* already shown */
+      }
+    }
     setAttr(anchor, 'aria-describedby', this.el.id);
     const win = anchor.ownerDocument.defaultView;
     const r = anchor.getBoundingClientRect();

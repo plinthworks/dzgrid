@@ -9,6 +9,8 @@ export interface ViewportBox {
   readonly scrollTop: number;
   /** From the start edge, whatever the direction. */
   readonly scrollInline: number;
+  /** The root font size: rows follow text zoom (WCAG 1.4.4). 16 when absent. */
+  readonly remPx?: number;
 }
 
 /**
@@ -29,6 +31,7 @@ export function domGeometry(viewport: HTMLElement, header: HTMLElement, dir: () 
       inline: viewport.clientWidth,
       scrollTop: viewport.scrollTop,
       scrollInline: inlineScroll(viewport, dir(), conv()),
+      remPx: parseFloat(viewport.ownerDocument.defaultView?.getComputedStyle(viewport.ownerDocument.documentElement).fontSize ?? '') || 16,
     }),
     writeScrollTop: (px) => { viewport.scrollTop = px; },
     writeScrollInline: (px) => setInlineScroll(viewport, px, dir(), conv()),

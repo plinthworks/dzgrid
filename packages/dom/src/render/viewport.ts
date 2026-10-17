@@ -54,6 +54,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
 
   function paint(box: ViewportBox): void {
     paints++;
+    if (box.remPx && box.remPx !== g.remPx) g.remPx = box.remPx;
     const { settings, ctx, dir } = g;
     // Flexible columns share what the view has: follow it.
     if (box.inline !== available && box.inline > 0) {

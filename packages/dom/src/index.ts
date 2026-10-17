@@ -16,3 +16,5 @@ export { definePart } from './part.js';
 export type { Part, PartBase, PartHandle, SlotContext, SlotPart } from './part.js';
 export type { GridFeature, FeatureHandle } from './features.js';
 export type { HeaderRowSpec } from './render/header.js';
+export { PopupHost } from './popup.js';
+export type { PopupOptions, PopupRef } from './popup.js';

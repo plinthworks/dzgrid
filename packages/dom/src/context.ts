@@ -11,6 +11,7 @@ import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { MessageKey } from './messages.js';
 import type { HeaderRowSpec } from './render/header.js';
+import type { PopupHost } from './popup.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -50,6 +51,8 @@ export interface GridContext<T> {
     readonly tooltip: HTMLElement;
   };
   readonly live: LiveRegion;
+  /** Popups (filters, menus) in the top layer. */
+  readonly popups: PopupHost;
   readonly tip: Tooltip;
   readonly columns: ColumnModel<T>;
   readonly rows: ClientModel<T>;
@@ -78,6 +81,8 @@ export interface GridContext<T> {
   /** When the view last scrolled, and how fast (the overscan follows it). */
   scrolledAt: number;
   speed: number;
+  /** The root font size at the last paint: the row height follows it. */
+  remPx: number;
 
   schedule(): void;
   /** A host callback's error: reported, never swallowed, never stopping the grid. */

@@ -247,6 +247,34 @@ async function runEngine(name) {
       await page.close();
     }
 
+    // ---- text zoom: rows follow the reader's text size; the tooltip in the top layer ----
+    {
+      const { page } = await load(ctx, 'rows=200');
+      const z = await page.evaluate(async () => {
+        document.documentElement.style.fontSize = '32px';
+        window.t.grid.api.refresh();
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const row = document.querySelector('.dzg-layer > .dzg-row');
+        const cells = [...row.querySelectorAll('.dzg-cell')];
+        return { height: row.getBoundingClientRect().height, clipped: cells.filter((c) => c.scrollHeight > c.clientHeight + 1).length };
+      });
+      check(name, 'at 200 % text the rows double and no cell text is clipped', Math.abs(z.height - 64) <= 1 && z.clipped === 0, z);
+      const tip = await page.evaluate(async () => {
+        document.documentElement.style.fontSize = '';
+        // A host card that clips what overflows it, as dialogs and cards do.
+        const host = document.getElementById('host');
+        host.style.overflow = 'hidden';
+        host.style.transform = 'translateZ(0)';
+        const h = document.querySelector('.dzg-hcell[data-col="city"]');
+        h.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 700));
+        const t = document.querySelector('.dzg-tooltip');
+        return { shown: !t.hidden, topLayer: t.matches(':popover-open') };
+      });
+      check(name, 'the tooltip opens in the top layer, out of reach of a clipping, transformed host', tip.shown && tip.topLayer, tip);
+      await page.close();
+    }
+
     // ---- palette switched live, direction switched live keeping the logical inline scroll ----
     {
       const { page } = await load(ctx, 'select=multi');
