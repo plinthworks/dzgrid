@@ -1,0 +1,18 @@
+{
+  "id": "shift-f2-cell",
+  "suite": "keyboard-intent",
+  "description": "Shift+F2 on a cell means nothing yet.",
+  "input": {
+    "key": "F2",
+    "dir": "ltr",
+    "owner": "cell",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": true,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

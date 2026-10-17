@@ -8,7 +8,8 @@ import { EN } from '../src/locales/en.js';
 
 type R = { id: string; n: number; s: string };
 let grids: GridInstance<R>[] = [];
-afterEach(() => { for (const g of grids) g.destroy(); grids = []; document.body.innerHTML = ''; vi.restoreAllMocks(); });
+const hadReport = (window as unknown as { reportError?: unknown }).reportError;
+afterEach(() => { for (const g of grids) g.destroy(); grids = []; document.body.innerHTML = ''; vi.restoreAllMocks(); (window as unknown as { reportError?: unknown }).reportError = hadReport; });
 
 function recorder(focusable = true) {
   const seen: SlotContext['cell'][] = [];

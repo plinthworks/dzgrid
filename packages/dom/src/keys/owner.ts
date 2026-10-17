@@ -19,8 +19,10 @@ export function ownerOf(target: EventTarget | null, viewport: HTMLElement): KeyO
     const owner = marked.dataset['dzgOwner'] ?? '';
     return MARKED.has(owner) ? (owner as KeyOwner) : 'outside';
   }
-  if (el.matches('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) return 'editor';
+  // A control a part drew in a cell, a text field included, is the cell's widget: its keys are its
+  // own, Escape goes back to the cell. The grid's own editor marks itself (Phase 4).
   if (el.closest('.dzg-cell') && el.matches(INTERACTIVE)) return 'cell-widget';
+  if (el.matches('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) return 'editor';
   if (el.closest('.dzg-hcell')) return el.matches(INTERACTIVE) && !el.matches('.dzg-box') ? 'cell-widget' : 'header';
   if (el.closest('.dzg-cell')) return 'cell';
   return 'outside';

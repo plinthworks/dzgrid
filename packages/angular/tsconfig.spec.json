@@ -1,5 +1,15 @@
 {
   "extends": "../../tsconfig.spec.json",
-  "include": ["src/**/*.ts", "test/**/*.ts"],
-  "exclude": ["dist/**", "node_modules/**"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "dist/**",
+    "node_modules/**"
+  ],
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInjectionParameters": true
+  }
 }

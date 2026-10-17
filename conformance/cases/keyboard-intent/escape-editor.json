@@ -1,0 +1,18 @@
+{
+  "id": "escape-editor",
+  "suite": "keyboard-intent",
+  "description": "An editor owns Escape (cancelling an edit is its own).",
+  "input": {
+    "key": "Escape",
+    "dir": "ltr",
+    "owner": "editor",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

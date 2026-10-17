@@ -8,10 +8,10 @@
  * its own folder (its package.json lists its files) and has no build here.
  */
 import { execFileSync } from 'node:child_process';
-import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { entryProblems, manifestProblems } from './manifest.mjs';
+import { entryProblems, manifestProblems, peerProblems, pinPeers } from './manifest.mjs';
 
 // fileURLToPath, not .pathname: a folder with a space would come back as %20.
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -76,7 +76,7 @@ function typescript(name) {
     ...(source.dependencies && { dependencies: source.dependencies }),
     ...(source.peerDependencies && { peerDependencies: source.peerDependencies }),
   };
-  writeFileSync(join(dir, 'dist', 'package.json'), JSON.stringify(manifest, null, 2) + '\n');
+  writeFileSync(join(dir, 'dist', 'package.json'), JSON.stringify(pinPeers(manifest, VERSIONS), null, 2) + '\n');
   extras(name);
 }
 
@@ -97,8 +97,26 @@ function angular() {
   delete manifest.main;
   delete manifest.types;
   Object.assign(manifest, shared(ANGULAR));
-  writeFileSync(file, JSON.stringify(manifest, null, 2) + '\n');
+  writeFileSync(file, JSON.stringify(pinPeers(manifest, VERSIONS), null, 2) + '\n');
   extras(ANGULAR);
+}
+
+/** Each workspace package's version: a published peer names its sibling's. */
+const VERSIONS = Object.fromEntries(
+  readdirSync(join(root, 'packages')).filter((d) => existsSync(join(pkg(d), 'package.json'))).map((d) => {
+    const p = read(join(pkg(d), 'package.json'));
+    return [p.name, p.version];
+  }),
+);
+
+/** The newest modification time under a folder. */
+function newest(dir) {
+  let t = 0;
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, e.name);
+    t = Math.max(t, e.isDirectory() ? newest(p) : statSync(p).mtimeMs);
+  }
+  return t;
 }
 
 const fail = (problems) => {
@@ -112,8 +130,13 @@ const fail = (problems) => {
 const angularOnly = process.argv.includes('--angular');
 const built = angularOnly ? {} : PACKAGES;
 if (angularOnly) {
-  for (const name of Object.keys(PACKAGES)) {
-    if (!existsSync(join(pkg(name), 'dist', 'index.d.ts'))) fail([`packages/${name}/dist is missing: run npm run build first`]);
+  // Against a dist that exists whole and is newer than its sources: never against stale declarations.
+  for (const [name, subpaths] of Object.entries(PACKAGES)) {
+    for (const subpath of subpaths) {
+      const file = join(pkg(name), 'dist', (subpath === '.' ? 'index' : subpath.slice(2)) + '.d.ts');
+      if (!existsSync(file)) fail([`packages/${name}/dist is missing ${subpath}: run npm run build first`]);
+    }
+    if (newest(join(pkg(name), 'src')) > statSync(join(pkg(name), 'dist', 'index.d.ts')).mtimeMs) fail([`packages/${name}/src changed since its dist was built: run npm run build`]);
   }
 }
 
@@ -127,6 +150,7 @@ angular();
 for (const [name, subpaths] of Object.entries(built)) {
   const manifest = read(join(pkg(name), 'dist', 'package.json'));
   fail(manifestProblems(name, manifest));
+  fail(peerProblems(name, manifest, VERSIONS));
   // Each declared entry was emitted, code and declarations.
   for (const subpath of subpaths) {
     const base = subpath === '.' ? 'index' : subpath.slice(2);
@@ -136,6 +160,7 @@ for (const [name, subpaths] of Object.entries(built)) {
   }
 }
 fail(manifestProblems(ANGULAR, read(join(pkg(ANGULAR), 'dist', 'package.json'))));
+fail(peerProblems(ANGULAR, read(join(pkg(ANGULAR), 'dist', 'package.json')), VERSIONS));
 const fesm = join(pkg(ANGULAR), 'dist', 'fesm2022');
 if (!existsSync(fesm) || !readdirSync(fesm).some((f) => f.endsWith('.mjs'))) fail([`packages/${ANGULAR}/dist/fesm2022/*.mjs is missing`]);
 

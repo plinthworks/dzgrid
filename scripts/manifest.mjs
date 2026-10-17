@@ -38,3 +38,26 @@ export function entryProblems(name, declared, sourceExports) {
     ...(unknown.length ? [`build.mjs PACKAGES lists ${unknown.join(', ')} for ${name}, not in its package.json exports`] : []),
   ];
 }
+
+/**
+ * A manifest whose `@dzgrid/*` peers are a caret range on each sibling's
+ * version: the repository writes 0.0.0 or a workspace marker, npm needs the
+ * range a consumer's install can meet.
+ */
+export function pinPeers(manifest, versions) {
+  const peers = manifest.peerDependencies;
+  if (!peers) return manifest;
+  const pinned = Object.fromEntries(Object.entries(peers).map(([dep, range]) => [dep, dep in versions ? `^${versions[dep]}` : range]));
+  return { ...manifest, peerDependencies: pinned };
+}
+
+/** `@dzgrid/*` peers that would not accept the sibling released with them. */
+export function peerProblems(name, manifest, versions) {
+  const problems = [];
+  for (const [dep, range] of Object.entries(manifest.peerDependencies ?? {})) {
+    if (!dep.startsWith('@dzgrid/')) continue;
+    if (!(dep in versions)) problems.push(`packages/${name} peer ${dep} is not a workspace package`);
+    else if (range !== `^${versions[dep]}`) problems.push(`packages/${name} peer ${dep} is ${range}, not ^${versions[dep]}`);
+  }
+  return problems;
+}

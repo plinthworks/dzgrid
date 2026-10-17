@@ -7,3 +7,4 @@ spikes/**/results/*.xlsx
 spikes/**/results/quicklook/
 spikes/**/results/dist/
 spikes/**/build/
+packed.tmp/
