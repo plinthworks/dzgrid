@@ -69,7 +69,9 @@ export type GridEvent<T> =
   | { readonly type: 'problems'; readonly source: ChangeSource; readonly problems: readonly Problem[] }
   | { readonly type: 'firstDataRendered'; readonly source: 'data' }
   /** The page, its size or what it counts changed (a filter sends it back to the first page). */
-  | { readonly type: 'pageChanged'; readonly source: ChangeSource; readonly page: PageState };
+  | { readonly type: 'pageChanged'; readonly source: ChangeSource; readonly page: PageState }
+  /** The latest request failed: the host's error unchanged; the rows shown stay, under the error overlay. */
+  | { readonly type: 'fetchFailed'; readonly source: 'data'; readonly error: unknown; readonly key: string; readonly page: number | null };
 
 export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
   readonly rows: M;
@@ -179,9 +181,10 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
 
   const unsubscribe = rows.subscribe((c) => {
     onModel({ type: 'modelUpdated', source: c.source, displayed: c.displayed, kind: c.kind }, c.source);
-    // Rows the host gave that were refused or bent: told, not only stored on the model.
-    const told = c.transaction?.problems ?? [];
+    // Rows the host gave that were refused or bent, a server's answer bent: told, not only stored.
+    const told = [...(c.transaction?.problems ?? []), ...(c.told ?? [])];
     if (told.length) emit({ type: 'problems', source: c.source, problems: told });
+    if (c.failure) emit({ type: 'fetchFailed', source: 'data', ...c.failure });
   });
 
   const setQuery = (q: Query, source: ChangeSource): void => {

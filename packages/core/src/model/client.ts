@@ -16,7 +16,8 @@ import { ctxKey, type LocaleCtx } from '../value/locale.js';
 import { ColumnCache, type ColumnEnv } from './column-cache.js';
 import { canonical, EMPTY_QUERY, type Query } from './query.js';
 import type { ChangeSource } from './types.js';
-import type { Operations } from './operations.js';
+import type { Operations, OperationsInput } from './operations.js';
+import type { AbortHandle } from '../abort.js';
 import { checkPage, pageCountOf, pageOf, resizeIndex, resolvePageOptions, type PageOptions, type PageState } from './page.js';
 
 export type ModelStatus =
@@ -37,6 +38,10 @@ export interface ModelChange<T> {
   readonly kind: 'rows' | 'order' | 'query' | 'context' | 'page' | 'status';
   readonly transaction?: TransactionResult;
   readonly problems: readonly Problem[];
+  /** Problems to tell once (a server's malformed answer, a fetched set too large): the kernel emits them. */
+  readonly told?: readonly Problem[];
+  /** A request that failed and counts (the latest): the host's error unchanged, the request's key and page. */
+  readonly failure?: { readonly error: unknown; readonly key: string; readonly page: number | null };
 }
 
 /**
@@ -50,9 +55,11 @@ export interface RowModel<T> {
   readonly displayed: DisplayedRows<T>;
   readonly status: ModelStatus;
   readonly counts: RowCounts;
+  /** What the model was given that it refused or bent, and the query's problems. */
+  readonly problems: readonly Problem[];
   /** `displayed`: the rows shown after the filters (an include set). `query`: everything the query matches, on the server (everything-except). */
   readonly selectAll: 'displayed' | 'query';
-  /** Whether a selected key survives a change. The browser: its row still exists. A server: always (rows on other pages). */
+  /** Whether a selected key survives a change. Server pages: always (rows on other pages). A fetched set or the browser: the row is held. */
   keeps(key: RowKey): boolean;
   /** A row by its key: any held row in the browser, the current page on a server. */
   row(key: RowKey): DataNode<T> | undefined;
@@ -63,6 +70,8 @@ export interface RowModel<T> {
   invalidate(o?: { readonly purge?: boolean }): void;
   /** The page shown, when the rows are paged; null otherwise. */
   readonly page: PageState | null;
+  /** Prepares the quick search in idle time, when the search runs in the browser. */
+  warmSearch?(): SearchWarmup;
   /** Another page or size (a size first, then the index read in it); past the end clamps. */
   setPage(p: { readonly index?: number; readonly size?: number }, source?: ChangeSource): void;
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
@@ -420,4 +429,30 @@ function maskOf(order: Uint32Array | null, count: number): Uint8Array | null {
   const mask = new Uint8Array(count);
   for (const s of order) mask[s] = 1;
   return mask;
+}
+
+/**
+ * What a grid gives the model it makes from a binding (`source:
+ * sourceRows(data, …)` from `@dzgrid/core/server`): the base only knows these
+ * types, so a grid on rows in memory carries none of the server code.
+ */
+export interface ModelEnv<T> {
+  readonly getRowId: (row: T) => RowIdInput;
+  readonly columns: ColumnLookup<T>;
+  readonly ctx: LocaleCtx;
+  readonly page?: PageOptions;
+  readonly operations?: OperationsInput;
+  readonly query?: Query;
+  readonly abort?: () => AbortHandle;
+}
+
+/** A model to make once the grid knows its columns and language. */
+export interface SourceBinding<T> {
+  create(env: ModelEnv<T>): SourceHandle<T>;
+}
+
+export interface SourceHandle<T> extends RowModel<T> {
+  readonly kind: 'source';
+  /** Another source, live: a new epoch, the first page, the old rows shown stale until the answer. */
+  setSource(next: SourceBinding<T>, source?: ChangeSource): void;
 }

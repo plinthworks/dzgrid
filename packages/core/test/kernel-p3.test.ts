@@ -33,6 +33,7 @@ function serverLike(m: ClientModel<R>, total: number | null): RowModel<R> & { re
     setColumns: (c, s) => m.setColumns(c, s),
     setContext: (c, s) => m.setContext(c, s),
     page: null,
+    problems: [],
     setPage() {},
     invalidate: () => { refreshed++; },
     subscribe: (fn) => m.subscribe(fn),
@@ -203,5 +204,32 @@ describe('step 0.1-0.3 review (kernel)', () => {
     kernel.dispatch({ type: 'selection.all' }, 'user');
     kernel.dispatch({ type: 'selection.toggle', row: k('r1') }, 'user');
     expect(events.filter((e) => e.type === 'selectionChanged').map((e) => e.type === 'selectionChanged' && e.count)).toEqual([40, 39]);
+  });
+});
+
+describe('what a model tells the kernel (step 5 contract)', () => {
+  function telling() {
+    const { columns, model } = client(4);
+    let push: ((c: Parameters<Parameters<typeof model.subscribe>[0]>[0]) => void) | null = null;
+    const fake = { ...serverLike(model, 4), problems: [], subscribe: (fn: (c: never) => void) => { push = fn as never; return () => {}; } };
+    const kernel = createKernel<R>({ rows: fake, columns });
+    const events: GridEvent<R>[] = [];
+    kernel.subscribe((e) => events.push(e));
+    return { kernel, events, model, push: (c: object) => push!({ source: 'data', displayed: model.displayed, kind: 'status', problems: [], ...c } as never) };
+  }
+
+  it('tells the problems a change carries, after modelUpdated', () => {
+    const { events, push } = telling();
+    push({ told: [{ code: 'fetched-set-large', severity: 'warning', path: 'response.rows' }] });
+    expect(events.map((e) => e.type)).toEqual(['modelUpdated', 'problems']);
+    expect(events[1]).toMatchObject({ source: 'data', problems: [{ code: 'fetched-set-large' }] });
+  });
+
+  it('tells fetchFailed with the host error unchanged, after modelUpdated', () => {
+    const { events, push } = telling();
+    const error = new Error('503');
+    push({ failure: { error, key: 'k1', page: 2 } });
+    expect(events.map((e) => e.type)).toEqual(['modelUpdated', 'fetchFailed']);
+    expect(events[1]).toEqual({ type: 'fetchFailed', source: 'data', error, key: 'k1', page: 2 });
   });
 });

@@ -21,6 +21,7 @@ describe('columns.set over a model that does not recompute for columns (a server
       setColumns: () => {},
       setContext: (c, s) => m.setContext(c, s),
       page: null,
+      problems: [],
       setPage() {},
       invalidate: () => {},
       subscribe: (fn) => m.subscribe(fn),

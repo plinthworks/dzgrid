@@ -63,7 +63,7 @@ export { resolveInstantRange } from './filter/instant.js';
 export { quickWords } from './filter/quick.js';
 export type { Query } from './model/query.js';
 export { makeQuery, EMPTY_QUERY } from './model/query.js';
-export type { ModelStatus, ModelChange, RowModel, ClientOptions, ClientModel } from './model/client.js';
+export type { ModelStatus, ModelChange, RowModel, ClientOptions, ClientModel, ModelEnv, SourceBinding, SourceHandle } from './model/client.js';
 export { clientRows } from './model/client.js';
 export { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZES } from './model/page.js';
 export type { PageOptions, PageState } from './model/page.js';
