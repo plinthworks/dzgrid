@@ -1,0 +1,150 @@
+import { headerSelection, isSelected, MAX_PHYSICAL, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
+import type { GridContext } from '../context.js';
+import { decorateHeader } from './header-decor.js';
+import type { ViewportBox } from './measure.js';
+import { paintOverlay } from './overlay.js';
+import { CHECK_WIDTH, setAttr, setPx, type Frame } from './rows.js';
+
+const OVERSCAN_ROWS = 2;
+const OVERSCAN_COLS = 1;
+
+export interface Painter {
+  paint(box: ViewportBox): void;
+  /** Rows came or went by a transaction: the next paint keeps the view's top row in place (S3). */
+  rowsChanged(): void;
+  readonly paints: number;
+}
+
+/**
+ * The paint: one per frame, reads already done (the box). Mapper and window,
+ * grid attributes, header, rows, then the focus that waited for its cell,
+ * and the overlay.
+ */
+export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: DisplayedRows<T>, visible: readonly { id: string }[]): void }): Painter {
+  const { el, columns, rows, kernel, scroll, headerRenderer, rowRenderer } = g;
+  let epoch = 0;
+  let epochKey = '';
+  let mapperKey = '';
+  let available = -1;
+  let colIndexOf: { version: number; index: Map<string, number> } = { version: -1, index: new Map() };
+  let shown: { displayed: DisplayedRows<T>; key: RowKey | null; delta: number; atTop: boolean; atEnd: boolean } | null = null;
+  let anchorNext = false;
+  let paints = 0;
+
+  function paint(box: ViewportBox): void {
+    paints++;
+    const { settings, ctx, dir } = g;
+    // Flexible columns share what the view has: follow it.
+    if (box.inline !== available && box.inline > 0) {
+      available = box.inline;
+      columns.setAvailableInline(box.inline);
+    }
+    const d = rows.displayed;
+    const h = g.rowHeight();
+    const L = columns.layout;
+    const visible = columns.visible();
+
+    // Everything a cell's text depends on, but the row: when it changes, cells are rechecked.
+    const check = settings.selection?.checkbox === true && (settings.selection.mode ?? 'none') !== 'none';
+    const extra = check ? CHECK_WIDTH : 0;
+    // Direction too: whether a value is isolated depends on it.
+    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}`;
+    if (ek !== epochKey) {
+      epochKey = ek;
+      epoch++;
+    }
+    const mk = `${d.count}|${h}|${box.block}`;
+    if (!scroll.mapper || mk !== mapperKey) {
+      mapperKey = mk;
+      const next = scrollMapper(d.count * h, g.env.maxPhysical ?? MAX_PHYSICAL, box.block);
+      // The body grows first: a scroll written before would be clamped to the old height.
+      setPx(el.body, 'block-size', next.physicalHeight);
+      scroll.setMapper(next);
+    }
+    const mapper = scroll.mapper!;
+    // Rows added or removed by a transaction: the row at the top of the view stays where it was,
+    // the top stays the top and the end stays the end.
+    if (anchorNext && shown && shown.displayed !== d) {
+      if (shown.atTop) scroll.scrollTo(0);
+      else if (shown.atEnd) scroll.scrollTo(mapper.maxLogical);
+      else if (shown.key !== null) {
+        const at = d.indexOf(shown.key);
+        if (at !== -1) scroll.scrollTo(at * h + shown.delta);
+      }
+    }
+    anchorNext = false;
+    const layout = uniformRowLayout(d, h);
+    const centerView = Math.max(0, box.inline - L.start.width - extra - L.end.width);
+    const w = windowAt(layout, L.center.widths, scroll.logicalTop, scroll.physicalTop, box.scrollInline, { block: box.block, inline: centerView }, {
+      // At rest a couple of rows (the body's node budget); more while scrolling fast.
+      overscanRows: settings.overscan?.rows ?? overscanRows(g.now() - g.scrolledAt < 150 ? g.speed : 0, h, { min: OVERSCAN_ROWS, max: 40 }),
+      overscanCols: settings.overscan?.cols ?? OVERSCAN_COLS,
+    });
+
+    // ---- grid attributes ----
+    setAttr(el.root, 'data-density', settings.density ?? 'comfortable');
+    if (el.root.style.getPropertyValue('--dzg-row-height') !== `${h}px`) el.root.style.setProperty('--dzg-row-height', `${h}px`);
+    setAttr(el.viewport, 'aria-rowcount', String(d.count + 1));
+    setAttr(el.viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
+    const mode = settings.selection?.mode ?? 'none';
+    setAttr(el.viewport, 'aria-multiselectable', mode === 'multi' ? 'true' : null);
+    setAttr(el.viewport, 'aria-label', settings.label ?? g.msg('grid.label'));
+    setAttr(el.viewport, 'aria-busy', settings.overlay === 'loading' ? 'true' : null);
+    setPx(el.body, 'block-size', mapper.physicalHeight);
+    setPx(el.body, 'inline-size', L.totalWidth + extra);
+    setPx(el.layer, 'inset-block-start', w.placement.layerTop);
+
+    const ciKey = columns.version * 2 + (check ? 1 : 0);
+    if (colIndexOf.version !== ciKey) colIndexOf = { version: ciKey, index: new Map(visible.map((c, i) => [c.id, i + 1 + (check ? 1 : 0)])) };
+    const index = colIndexOf.index;
+    const colIndex = (id: string) => index.get(id) ?? 0;
+    const focus = kernel.focus;
+    const focusCenter = focus ? L.center.columns.findIndex((c) => c.id === focus.column) : -1;
+    const sort = kernel.query.sort;
+    headerRenderer.render(L, w.cols, h, colIndex, (col, cell) => decorateHeader(g, col, cell, sort), focus?.kind === 'header' ? focusCenter : -1, check, mode === 'multi');
+    if (headerRenderer.checkName) {
+      const text = g.msg('selection.column');
+      if (headerRenderer.checkName.textContent !== text) headerRenderer.checkName.textContent = text;
+    }
+    if (headerRenderer.checkBox) {
+      const state = headerSelection(kernel.selection, d);
+      setAttr(headerRenderer.checkBox, 'aria-checked', state === 'all' ? 'true' : state === 'some' ? 'mixed' : 'false');
+      setAttr(headerRenderer.checkBox, 'aria-label', g.msg('selection.all'));
+    }
+
+    const wanted: number[] = [];
+    if (w.rows) for (let i = w.rows.first; i <= w.rows.last; i++) wanted.push(i);
+    const frame: Frame<T> = {
+      displayed: d, layout: L, cols: w.cols, rowHeight: h, base: w.placement.base, ctx, epoch,
+      rowHeader: visible[0]?.id ?? null, colIndex,
+      rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
+      check, dir,
+      focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
+    };
+    rowRenderer.render(frame, wanted, focus?.kind === 'cell' ? focus.row : null);
+    after.rovingStop(d, visible);
+    const topIndex = d.count ? Math.min(d.count - 1, Math.floor(scroll.logicalTop / h)) : -1;
+    shown = {
+      displayed: d,
+      key: topIndex >= 0 ? d.keyAt(d.index(topIndex)!) : null,
+      delta: topIndex >= 0 ? scroll.logicalTop - topIndex * h : 0,
+      atTop: scroll.atTop,
+      atEnd: scroll.atEnd,
+    };
+    const pending = g.pendingFocus;
+    if (pending) {
+      const target = 'header' in pending ? headerRenderer.cell(pending.header) : rowRenderer.cell(pending.row, pending.column);
+      if (target) {
+        g.pendingFocus = null;
+        target.focus({ preventScroll: true });
+      }
+    }
+    paintOverlay(g, d.count, h);
+  }
+
+  return {
+    paint,
+    rowsChanged: () => { anchorNext = true; },
+    get paints() { return paints; },
+  };
+}
