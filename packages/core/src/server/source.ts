@@ -42,7 +42,11 @@ export interface PageWindow {
   readonly cursor: string | null;
 }
 
-/** One page of rows, or the whole fetched set. With server pages, `total` or `hasNext` says what follows. */
+/**
+ * One page of rows, or the whole fetched set. With server pages, `total` or
+ * `hasNext` says what follows, and by cursor `nextCursor` is how to ask it.
+ * A fetched set is its rows: the other fields are not read.
+ */
 export interface DataResponse<T> {
   readonly rows: readonly T[];
   readonly total?: number;
@@ -52,9 +56,9 @@ export interface DataResponse<T> {
 
 /** Fixed when the model is made: another binding given later brings its data and params only. */
 export interface SourceRowsOptions {
-  /** `offset` by default. */
+  /** `offset` by default. By cursor, only pages reached can be asked (no jump), and a new size starts again at page 0. */
   readonly paging?: 'offset' | 'cursor';
-  /** A fetched set larger than this is warned of. 100 000 by default. */
+  /** A fetched set larger than this is warned of (`fetched-set-large`), and kept. 100 000 by default. */
   readonly maxRows?: number;
   readonly params?: Readonly<Record<string, Json>>;
   /** Taken before the grid's: `() => new AbortController()` fits. */

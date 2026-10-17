@@ -30,8 +30,17 @@ Every refusal is the error problem `invalid-operations` at `operations.<op>` (or
 ## Tests
 - `conformance/cases/operations/*` (defaults, shorthands, the fetched set, every refusal), `conformance/cases/split-query/*`, `conformance/cases/problems/invalid-operations.json`.
 - `packages/core/test/review-p3a.test.ts` (C7 branches, C8 split keys).
-- Planned: `operations` and `source` in `GridSettings` and `UPDATE_POLICY` (`operations` fixed with `unsupported-live-change`), and the fetched set through `sourceRows` (step 5).
+- The fetched set through `sourceRows`: `packages/core/test/source-rows-fetched.test.ts`, `conformance/cases/source-model/client-part-no-request`, `blank-quick-not-sent`, `fetched-set-total-null-when-filtered`, `client-shorthand-fetches-once`, `fetched-set-max-rows` (step 5 part 3).
+- Planned: `operations` and `source` in `GridSettings` and `UPDATE_POLICY` (`operations` fixed with `unsupported-live-change`, step 5 part 4).
 
 ## Decisions (step 1, 2026-10-17)
 - **An invalid setting follows the code, not "all server".** Each refusal above keeps its stated reading: a browser stage under server pages is read as server; a server placement without a `source` is read as the browser (`page` server as `off`); an unknown value keeps that operation's default; a setting that is neither a shorthand nor an object keeps the defaults. `phase-3-plugins.md` B1.2 and B5 decision 1 are corrected to this.
 - **`operations` and `source` become settings at step 5**, with `sourceRows`: `operations` fixed (`unsupported-live-change`), `source` live. Nothing reads them before, so step 0.5 does not carry them.
+
+## Decisions (step 5 part 3, 2026-10-17) — the fetched set
+- The server's part of the query is the epoch: a change there fetches the set again; a change of the browser's part only filters, sorts or pages the rows held, with no request and no loading state.
+- Both parts changed at once: the browser's part applies at once to the rows held (shown stale while the new set loads), the server's when its answer comes; the end state is the same.
+- The server's set is the result of its filter and search: `counts.total` is null while the server filters or searches (it does not know the whole), and `counts.filtered` is what the browser kept of the set.
+- `operations: 'client'` with a source: the request carries only `params` and `zone`; it is sent at creation and again only on a refresh, another zone, other params or another source. A language change asks nothing.
+- The quick search warm-up runs on the rows held when the search is in the browser; when the server searches there is nothing to warm.
+- Select-all in a fetched set takes the rows shown, as keys (the browser's *all*); a host's everything-except selection counts the rows the browser kept, and is told again when an answer moves that count.

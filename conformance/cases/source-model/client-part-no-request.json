@@ -1,0 +1,77 @@
+{
+  "id": "client-part-no-request",
+  "suite": "source-model",
+  "description": "A fetched set (search on the server, the rest in the browser): one request with no page; a sort and a page change run in the browser and ask nothing.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": {
+      "page": "client",
+      "quick": "server"
+    },
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "b",
+          "a",
+          "c"
+        ]
+      },
+      {
+        "op": "query",
+        "sort": [
+          {
+            "column": "name",
+            "dir": "asc"
+          }
+        ]
+      },
+      {
+        "op": "go",
+        "index": 1
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1"
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "query",
+      "page"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "c"
+      ],
+      "page": {
+        "index": 1,
+        "size": 2,
+        "total": 3,
+        "pageCount": 2,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": 3,
+        "filtered": 3,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

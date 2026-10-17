@@ -1,0 +1,161 @@
+{
+  "id": "cursor-size-resets",
+  "suite": "source-model",
+  "description": "By cursor, a new size goes back to page 0 with no cursor (no cursor addresses the old first row; offset paging would land on page 1); the next page waits for its cursor, so hasNext is false while it loads.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "options": {
+      "paging": "cursor"
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "hasNext": true,
+        "nextCursor": "k1"
+      },
+      {
+        "op": "go",
+        "index": 1
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "c",
+          "d"
+        ],
+        "hasNext": true,
+        "nextCursor": "k2"
+      },
+      {
+        "op": "go",
+        "index": 2
+      },
+      {
+        "op": "answer",
+        "call": "c3",
+        "rows": [
+          "e",
+          "f"
+        ],
+        "hasNext": true,
+        "nextCursor": "k3"
+      },
+      {
+        "op": "size",
+        "size": 3
+      },
+      {
+        "op": "answer",
+        "call": "c4",
+        "rows": [
+          "a",
+          "b",
+          "c"
+        ],
+        "hasNext": true,
+        "nextCursor": "m1"
+      },
+      {
+        "op": "go",
+        "index": 1
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 1,
+          "size": 2,
+          "offset": 2,
+          "cursor": "k1"
+        }
+      },
+      {
+        "name": "c3",
+        "page": {
+          "index": 2,
+          "size": 2,
+          "offset": 4,
+          "cursor": "k2"
+        }
+      },
+      {
+        "name": "c4",
+        "page": {
+          "index": 0,
+          "size": 3,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c5",
+        "page": {
+          "index": 1,
+          "size": 3,
+          "offset": 3,
+          "cursor": "m1"
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "page",
+      "page",
+      "page",
+      "page",
+      "page",
+      "page",
+      "page"
+    ],
+    "final": {
+      "status": "loading",
+      "displayed": [
+        "a",
+        "b",
+        "c"
+      ],
+      "page": {
+        "index": 1,
+        "size": 3,
+        "total": null,
+        "pageCount": null,
+        "hasNext": false,
+        "canJump": false
+      },
+      "counts": {
+        "total": null,
+        "filtered": null,
+        "displayed": 3
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

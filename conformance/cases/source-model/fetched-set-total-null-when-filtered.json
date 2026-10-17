@@ -1,0 +1,99 @@
+{
+  "id": "fetched-set-total-null-when-filtered",
+  "suite": "source-model",
+  "description": "Filtered on the server, the fetched set has no total; while the filter loads the old rows can still be paged; the new set lands on page 0.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": {
+      "page": "client",
+      "filter": "server"
+    },
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "op": "query",
+        "filter": {
+          "name": {
+            "type": "text",
+            "op": "contains",
+            "value": "a"
+          }
+        }
+      },
+      {
+        "op": "go",
+        "index": 1
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a",
+          "ab",
+          "ba"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1"
+      },
+      {
+        "name": "c2",
+        "filter": {
+          "name": {
+            "type": "text",
+            "op": "contains",
+            "value": "a"
+          }
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "query",
+      "page",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a",
+        "ab"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 3,
+        "pageCount": 2,
+        "hasNext": true,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 3,
+        "displayed": 2
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

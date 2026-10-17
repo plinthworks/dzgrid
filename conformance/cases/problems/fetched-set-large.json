@@ -1,0 +1,39 @@
+{
+  "id": "fetched-set-large",
+  "suite": "problems",
+  "description": "A fetched set above maxRows: a warning at response.rows; the rows are kept.",
+  "input": {
+    "op": "source",
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": {
+      "page": "off",
+      "filter": "server"
+    },
+    "options": {
+      "maxRows": 1
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "fetched-set-large",
+        "severity": "warning",
+        "path": "response.rows"
+      }
+    ]
+  }
+}

@@ -26,7 +26,10 @@ Moves to the next, previous, first or last page; picks another page size; change
 - **`maxRows`** guards the fetched set (`page` off or client): above 100 000 rows by default, the warning `fetched-set-large`. It does not apply to server pages.
 
 ## Tests
-- `packages/core/test/source-rows.test.ts`, `conformance/cases/source-model/*` (planned, step 5): unknown total, the inferred `hasNext`, the clamp, page 4 at 25 to size 100 lands on page 1, loading keeps the rows, cursor to page 2 and back to 1.
+- `packages/core/test/source-rows.test.ts`, `source-rows-gaps.test.ts`, `conformance/cases/source-model/*` (step 5): unknown total, the inferred `hasNext`, the clamp, page 4 at 25 to size 100 lands on page 1, loading keeps the rows.
+- `packages/core/test/source-rows-cursor.test.ts`, `source-model/cursor-next-back`, `cursor-size-resets` (step 5 part 3): cursor to page 2 and back to 1, the jump that stops at the last page reached, the new size back to page 0.
+- `packages/core/test/source-rows-fetched.test.ts`, `source-model/client-part-no-request`, `blank-quick-not-sent`, `fetched-set-max-rows`, `fetched-set-total-null-when-filtered`, `client-shorthand-fetches-once`, `pagination-ignored-page-off`, `problems/fetched-set-large` (step 5 part 3).
+- `packages/core/test/source-rows-property-strong.test.ts`: server pages by offset, by cursor, and the fetched set paged in the browser; 1 000 seeded orders each, with and without a destroy, empty answers included, every step checked against the sheet.
 - Page stage in `ClientModel`, `aria-rowcount` per page (planned, step 4).
 - `footer.pager` (planned, step 17): next fetches in the click's frame, "last" disabled without a total, latn digits in Arabic, focus kept on "next".
 - The audit screen in both configurations (planned, step 18).
@@ -57,3 +60,16 @@ Moves to the next, previous, first or last page; picks another page size; change
 - `setSource` takes the new binding's data and `params`; its `paging` and `maxRows` are ignored. A binding not made by `sourceRows` is ignored.
 - Destroy does not change the status: a destroyed model asks and says nothing more.
 - **Step 5 review (2026-10-17):** past an unknown end the grid goes halfway back to the page on screen (known not empty) at each empty answer, not one page at a time: a far page (a restored URL, data that shrank) costs a few requests. The page on screen is kept, not asked again, once nothing is left between. A new query forgets the old one's total and `hasNext`: no "no rows" and no clamp from them while it loads.
+
+## Decisions (step 5 part 3, 2026-10-17) — cursors, the fetched set
+- **Cursors** belong to the epoch: page 0 has none, page *i + 1*'s is the one page *i*'s answer gave. A page is asked with its cursor (and its offset, for a server that reads both); the cursor is in the request key.
+- **No jump:** `page.go` past the last page reached stops at it; with a known total, the lower of the two. `hasNext` is true only when the next page's cursor is known, so it is false while the next page loads.
+- **A next page needs its cursor:** when an answer says there is one (by `hasNext`, by its total, or inferred from a full page) without a string `nextCursor`, the warning `invalid-page-response` at `response.nextCursor`, and `hasNext` is read as false. An empty string is a cursor. A cursor given with `hasNext` false is ignored.
+- **An answer says what follows it now:** answering page *i* drops the cursors after *i* (they came from older answers), then keeps the new one. Going back to page 1 and on loses the cursor to page 3 until page 2 answers again.
+- **A new size** starts again at page 0 with no cursor, even with an index: no cursor addresses the old first row (offset paging keeps it). A new query, a new source and a purge also go back to page 0 and forget the cursors; a refresh and a failure keep them.
+- **Past an unknown end by cursor:** the empty page and the pages after it are out of reach (their cursors go); the step back is the one of offset paging.
+- **The fetched set** (`page` off or client) asks once, with no `page`; `total`, `hasNext` and `nextCursor` are not read (and not warned of), nor is the page size. The browser pages it: a page command asks nothing.
+- **Another set starts on page 0:** an answer for another epoch key (another server query, zone, params, source, or after a purge) puts the browser's pages back to page 0; a refresh of the same set keeps the page, clamped if the set shrank. While another set loads, the old rows can still be paged.
+- **Counts of the fetched set** follow the epoch: `total` (when the server neither filters nor searches) and `filtered` are null before the first answer, after a purge, and while a new epoch loads — even a query changed and changed back, whose rows are on screen —, then the set held. A client filter or search alone keeps `total`: the set is everything.
+- **`maxRows`** is checked on every accepted answer of a fetched set: above it, `fetched-set-large` at `response.rows`, the rows kept; at it exactly, nothing. A bad `maxRows` is `invalid-page` at `source.maxRows`, and 100 000 is taken.
+- **`pagination` while paging is off:** paging off wins; the warning `invalid-page` at `pagination`, the setting not read (its own faults not told). `page: 'client'` with a source and no `pagination` pages by 50.

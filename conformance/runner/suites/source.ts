@@ -89,13 +89,13 @@ export function runSource(input: SourceInput) {
     }
   }
   const d = model.displayed;
-  const p = model.page!;
+  const p = model.page;
   return {
     calls: fake.calls.map((c) => {
       const r = c.req;
       return {
         name: c.name,
-        page: r.page,
+        ...(r.page && { page: r.page }),
         ...(r.filter && Object.keys(r.filter).length > 0 && { filter: r.filter }),
         ...(r.quick !== undefined && { quick: r.quick }),
         ...(r.sort && r.sort.length > 0 && { sort: r.sort }),
@@ -107,7 +107,7 @@ export function runSource(input: SourceInput) {
     final: {
       status: model.status.phase,
       displayed: Array.from({ length: d.count }, (_, i) => String(d.nodeAt(d.index(i)!).id)),
-      page: { index: p.index, size: p.size, total: p.total, pageCount: p.pageCount, hasNext: p.hasNext, canJump: p.canJump },
+      page: p && { index: p.index, size: p.size, total: p.total, pageCount: p.pageCount, hasNext: p.hasNext, canJump: p.canJump },
       counts: model.counts,
     },
     problems: shape(model.problems),

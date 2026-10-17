@@ -1,0 +1,85 @@
+{
+  "id": "fetched-set-max-rows",
+  "suite": "source-model",
+  "description": "A fetched set above maxRows is kept whole, with the warning fetched-set-large; the total and hasNext of the answer are ignored.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "client",
+    "options": {
+      "maxRows": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "op": "refresh"
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a",
+          "b",
+          "c"
+        ],
+        "total": 99,
+        "hasNext": true
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1"
+      },
+      {
+        "name": "c2"
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "status",
+      "rows"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a",
+        "b",
+        "c"
+      ],
+      "page": {
+        "index": 0,
+        "size": 50,
+        "total": 3,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": 3,
+        "filtered": 3,
+        "displayed": 3
+      }
+    },
+    "problems": [
+      {
+        "code": "fetched-set-large",
+        "severity": "warning",
+        "path": "response.rows"
+      }
+    ],
+    "failures": []
+  }
+}

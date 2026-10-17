@@ -1,0 +1,90 @@
+{
+  "id": "blank-quick-not-sent",
+  "suite": "source-model",
+  "description": "A blank search is no search: it asks nothing; a search is sent; blanked again, a new epoch asks without it, and the total comes back once it answers.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": {
+      "page": "off",
+      "quick": "server"
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "op": "query",
+        "quick": "   "
+      },
+      {
+        "op": "query",
+        "quick": "a"
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a"
+        ]
+      },
+      {
+        "op": "query",
+        "quick": " "
+      },
+      {
+        "op": "answer",
+        "call": "c3",
+        "rows": [
+          "a",
+          "b"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1"
+      },
+      {
+        "name": "c2",
+        "quick": "a"
+      },
+      {
+        "name": "c3"
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "query",
+      "query",
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a",
+        "b"
+      ],
+      "page": null,
+      "counts": {
+        "total": 2,
+        "filtered": 2,
+        "displayed": 2
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}
