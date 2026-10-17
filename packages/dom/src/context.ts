@@ -10,6 +10,7 @@ import type { Scope } from './render/scope.js';
 import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { MessageKey } from './messages.js';
+import type { HeaderRowSpec } from './render/header.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -26,7 +27,7 @@ export interface GridEnv {
 }
 
 /** A cell or a header to focus once it is mounted. */
-export type PendingFocus = { readonly row: RowKey; readonly column: string } | { readonly header: string };
+export type PendingFocus = { readonly row: RowKey; readonly column: string } | { readonly header: string; readonly level?: number };
 
 /**
  * What the grid's parts share: its elements, its model, its services, and
@@ -61,6 +62,8 @@ export interface GridContext<T> {
   readonly mac: boolean;
 
   settings: GridSettings<T>;
+  /** Header rows the features add under the column headers. */
+  headerRows: readonly HeaderRowSpec[];
   ctx: LocaleCtx;
   dir: Dir;
   pendingFocus: PendingFocus | null;

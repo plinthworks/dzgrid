@@ -102,7 +102,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     headerRenderer: new HeaderRenderer(doc, header),
     rowRenderer: new RowRenderer<T>(doc, layer),
     mac: isMac(win?.navigator),
-    settings: initial, ctx,
+    settings: initial, ctx, headerRows: [],
     get dir() { return dir; },
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false,
@@ -173,6 +173,10 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     scope.observe(ro);
   }
   const warmup = installWarmup(g);
+  // Optional features, set up once; what they add is read at each paint.
+  const handles = (initial.features ?? []).map((f) => f.setup(g as GridContext<unknown>));
+  g.headerRows = handles.flatMap((h) => h.headerRows ?? []);
+  scope.add(() => { for (const h of handles) h.destroy(); });
 
   columns.setAvailableInline(geometry.read().inline);
   schedule();

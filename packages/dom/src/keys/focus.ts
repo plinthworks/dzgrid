@@ -31,7 +31,10 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
       return key && first ? { kind: 'cell', row: key, column: first.id } : null;
     }
     const hcell = target.closest<HTMLElement>('.dzg-hcell');
-    if (hcell?.dataset['col']) return { kind: 'header', column: hcell.dataset['col'] };
+    if (hcell?.dataset['col']) {
+      const level = Number(hcell.dataset['level'] ?? 0);
+      return level ? { kind: 'header', column: hcell.dataset['col'], level } : { kind: 'header', column: hcell.dataset['col'] };
+    }
     const cell = target.closest<HTMLElement>('.dzg-cell');
     const row = cell?.closest('.dzg-row');
     const key = row ? rowRenderer.keyOf(row) : undefined;
@@ -101,9 +104,10 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     if (!kernel.dispatch({ type: 'focus.set', focus: to }, 'user').ok) return;
     scrollInlineTo(to.column);
     g.schedule();
-    const cell = headerRenderer.cell(to.column);
+    const level = to.level ?? 0;
+    const cell = headerRenderer.cell(to.column, level);
     if (cell && !g.queued) cell.focus({ preventScroll: true });
-    else g.pendingFocus = { header: to.column };
+    else g.pendingFocus = level ? { header: to.column, level } : { header: to.column };
   }
 
   /**
@@ -115,7 +119,7 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     const f = kernel.focus;
     let target: HTMLElement | null = null;
     if (f?.kind === 'cell') target = rowRenderer.cell(f.row, f.column);
-    else if (f?.kind === 'header') target = headerRenderer.cell(f.column);
+    else if (f?.kind === 'header') target = headerRenderer.cell(f.column, f.level ?? 0);
     else if (visible[0]) target = d.count ? rowRenderer.cell(d.keyAt(d.index(0)!), visible[0].id) : headerRenderer.cell(visible[0].id);
     // The first cell scrolled out with nothing focused: the first cell in view takes the stop,
     // so Tab still enters the grid (and the keys start from the first cell, `current()`).
@@ -152,11 +156,11 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     if (e.type !== 'focusChanged') return;
     const p = g.pendingFocus;
     if (e.source !== 'data' && p) {
-      const same = e.focus && ('header' in p ? e.focus.kind === 'header' && e.focus.column === p.header : e.focus.kind === 'cell' && e.focus.row === p.row && e.focus.column === p.column);
+      const same = e.focus && ('header' in p ? e.focus.kind === 'header' && e.focus.column === p.header && (e.focus.level ?? 0) === (p.level ?? 0) : e.focus.kind === 'cell' && e.focus.row === p.row && e.focus.column === p.column);
       if (!same) g.pendingFocus = null;
     }
     if (e.source === 'data' && e.focus && g.hasFocus && !el.viewport.contains(g.doc.activeElement)) {
-      g.pendingFocus = e.focus.kind === 'cell' ? { row: e.focus.row, column: e.focus.column } : { header: e.focus.column };
+      g.pendingFocus = e.focus.kind === 'cell' ? { row: e.focus.row, column: e.focus.column } : { header: e.focus.column, level: e.focus.level ?? 0 };
     }
   }));
 

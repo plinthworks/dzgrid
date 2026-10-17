@@ -18,6 +18,8 @@ export function installHeaderClick<T>(g: GridContext<T>, toggleAll: () => void):
     if (resizing.consumeClick()) return;
     const t = e.target as HTMLElement;
     if (t.closest('.dzg-resize')) return;
+    // Cells of the rows the features add (filters) are not column headers: they never sort.
+    if (t.closest('.dzg-hextra')) return;
     if (headerRenderer.check && headerRenderer.check.contains(t)) {
       toggleAll();
       return;

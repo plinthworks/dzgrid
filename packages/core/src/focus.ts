@@ -5,7 +5,8 @@ import type { DisplayedRows } from './row/displayed.js';
 /** Where keyboard focus is, by identity: a row key and a column id, never positions. */
 export type FocusPos =
   | { readonly kind: 'cell'; readonly row: RowKey; readonly column: string }
-  | { readonly kind: 'header'; readonly column: string };
+  /** `level`: which header row, 0 (the column headers) when absent; a floating filter row is 1. */
+  | { readonly kind: 'header'; readonly column: string; readonly level?: number };
 
 /**
  * Focus after the rows or the columns changed. A row no longer displayed
@@ -18,7 +19,7 @@ export function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, 
   const visible = columns.visible();
   if (!visible.length) return null;
   const column = visible.some((c) => c.id === f.column) ? f.column : visible[0]!.id;
-  if (f.kind === 'header') return column === f.column ? f : { kind: 'header', column };
+  if (f.kind === 'header') return column === f.column ? f : f.level ? { kind: 'header', column, level: f.level } : { kind: 'header', column };
   if (after.indexOf(f.row) !== -1) return column === f.column ? f : { kind: 'cell', row: f.row, column };
   if (after.count === 0) return { kind: 'header', column };
   const was = before.indexOf(f.row);
@@ -29,5 +30,6 @@ export function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, 
 export function sameFocus(a: FocusPos | null, b: FocusPos | null): boolean {
   if (a === b) return true;
   if (!a || !b || a.kind !== b.kind || a.column !== b.column) return false;
-  return a.kind === 'header' || a.row === (b as typeof a).row;
+  if (a.kind === 'header') return (a.level ?? 0) === ((b as typeof a).level ?? 0);
+  return a.row === (b as typeof a).row;
 }

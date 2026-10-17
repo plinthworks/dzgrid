@@ -79,6 +79,8 @@ export interface Frame<T> {
   readonly check: boolean;
   /** The grid's direction: whether a value needs isolating depends on it. */
   readonly dir: 'ltr' | 'rtl';
+  /** Header rows above the body: body row i has aria-rowindex headerRows + 1 + i. */
+  readonly headerRows: number;
   readonly colIndex: (id: string) => number;
   readonly rowAttrs: (key: RowKey, el: HTMLElement) => void;
 }
@@ -168,7 +170,7 @@ export class RowRenderer<T> {
         v.top = top;
         setPx(v.el, 'inset-block-start', top);
       }
-      setAttr(v.el, 'aria-rowindex', String(i + 2));
+      setAttr(v.el, 'aria-rowindex', String(f.headerRows + 1 + i));
       f.rowAttrs(k, v.el);
     }
     let cursor: ChildNode | null = this.#layer.firstChild;

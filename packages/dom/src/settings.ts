@@ -1,5 +1,6 @@
 import type { ColumnDef, GridEvent, RowIdInput } from '@dzgrid/core';
 import type { GridMessages } from './messages.js';
+import type { GridFeature } from './features.js';
 
 /** What a host gives `createGrid` (D3: rows, not a row model, for the client case). */
 export interface GridSettings<T> {
@@ -30,6 +31,8 @@ export interface GridSettings<T> {
    * (627 bytes a row measured on dataset A's ten text columns; budget for the owner, D13). Off by default (D13).
    */
   readonly searchWarmup?: 'idle' | 'off';
+  /** Optional features (`filters()`, `pagination()`…), set up once with the grid. */
+  readonly features?: readonly GridFeature[];
 }
 
 export const ROW_HEIGHT = { compact: 28, comfortable: 32, spacious: 40 } as const;

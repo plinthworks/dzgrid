@@ -21,21 +21,31 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     const page = Math.max(1, Math.floor(g.geometry.read().block / g.rowHeight()) - 1);
     const colAt = (i: number) => cols[Math.max(0, Math.min(cols.length - 1, i))]!.id;
     const cell = (r: number, c: number): FocusPos | null => (lastRow < 0 ? { kind: 'header', column: colAt(c) } : { kind: 'cell', row: d.keyAt(d.index(Math.max(0, Math.min(lastRow, r)))!), column: colAt(c) });
+    const header = (column: string, level?: number): FocusPos => (level ? { kind: 'header', column, level } : { kind: 'header', column });
     let to: FocusPos | null = null;
     switch (intent.kind) {
       case 'move':
+        // Down through the header rows, then the body; up from the body to the last header row.
+        if (intent.axis === 'row' && from.kind === 'header' && (from.level ?? 0) < g.headerRows.length) {
+          to = { kind: 'header', column: from.column, level: (from.level ?? 0) + 1 };
+          break;
+        }
+        if (intent.axis === 'row' && from.kind === 'cell' && ri === 0 && intent.delta < 0 && g.headerRows.length) {
+          to = { kind: 'header', column: from.column, level: g.headerRows.length };
+          break;
+        }
         // Back from the first header: the select-all box, when there is one.
         if (intent.axis === 'col' && from.kind === 'header' && ci === 0 && intent.delta < 0 && headerRenderer.checkBox) {
           headerRenderer.checkBox.focus({ preventScroll: true });
           return;
         }
-        if (intent.axis === 'col') to = from.kind === 'header' ? { kind: 'header', column: colAt(ci + intent.delta) } : cell(ri, ci + intent.delta);
+        if (intent.axis === 'col') to = from.kind === 'header' ? header(colAt(ci + intent.delta), from.level) : cell(ri, ci + intent.delta);
         else if (from.kind === 'header') to = cell(0, ci);
         else to = ri + intent.delta < 0 ? { kind: 'header', column: colAt(ci) } : cell(ri + intent.delta, ci);
         break;
       case 'edge': {
         const c = intent.axis === 'row' ? ci : intent.to === 'first' ? 0 : cols.length - 1;
-        if (intent.axis === 'col' && from.kind === 'header') to = { kind: 'header', column: colAt(c) };
+        if (intent.axis === 'col' && from.kind === 'header') to = header(colAt(c), from.level);
         else to = cell(intent.axis === 'col' ? ri : intent.to === 'first' ? 0 : lastRow, c);
         break;
       }
@@ -82,6 +92,13 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     }
     g.intentAt = g.now();
     const owner: KeyOwner = ownerOf(e.target, el.viewport);
+    // Up from a lower header row: the row above (the core's table stops ArrowUp on a header).
+    const at = kernel.focus;
+    if (owner === 'header' && e.key === 'ArrowUp' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && at?.kind === 'header' && (at.level ?? 0) > 0) {
+      e.preventDefault();
+      focus.focusTo(at.level === 1 ? { kind: 'header', column: at.column } : { kind: 'header', column: at.column, level: at.level! - 1 });
+      return;
+    }
     const intent = intentFor(e, { dir: g.dir, owner, mac: g.mac });
     // Space on a header does nothing here, and must not scroll the page either.
     if (!intent && owner === 'header' && (e.key === ' ' || e.key === 'Spacebar')) e.preventDefault();

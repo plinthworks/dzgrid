@@ -84,7 +84,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     // ---- grid attributes ----
     setAttr(el.root, 'data-density', settings.density ?? 'comfortable');
     if (el.root.style.getPropertyValue('--dzg-row-height') !== `${h}px`) el.root.style.setProperty('--dzg-row-height', `${h}px`);
-    setAttr(el.viewport, 'aria-rowcount', String(d.count + 1));
+    // Every header row counts: the column headers and those the features add.
+    const headerRows = 1 + g.headerRows.length;
+    setAttr(el.viewport, 'aria-rowcount', String(d.count + headerRows));
     setAttr(el.viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
     const mode = settings.selection?.mode ?? 'none';
     setAttr(el.viewport, 'aria-multiselectable', mode === 'multi' ? 'true' : null);
@@ -101,7 +103,12 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const focus = kernel.focus;
     const focusCenter = focus ? L.center.columns.findIndex((c) => c.id === focus.column) : -1;
     const sort = kernel.query.sort;
-    headerRenderer.render(L, w.cols, h, colIndex, (col, cell) => decorateHeader(g, col, cell, sort), focus?.kind === 'header' ? focusCenter : -1, check, mode === 'multi');
+    const headerHeight = headerRenderer.render({
+      layout: L, cols: w.cols, height: h, colIndex,
+      decorate: (col, cell) => decorateHeader(g, col, cell, sort),
+      keep: focus?.kind === 'header' ? { center: focusCenter, level: focus.level ?? 0 } : null,
+      check, selectAll: mode === 'multi', extra: g.headerRows,
+    });
     if (headerRenderer.checkName) {
       const text = g.msg('selection.column');
       if (headerRenderer.checkName.textContent !== text) headerRenderer.checkName.textContent = text;
@@ -118,7 +125,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       displayed: d, layout: L, cols: w.cols, rowHeight: h, base: w.placement.base, ctx, epoch,
       rowHeader: visible[0]?.id ?? null, colIndex,
       rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
-      check, dir,
+      check, dir, headerRows,
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
     };
     rowRenderer.render(frame, wanted, focus?.kind === 'cell' ? focus.row : null);
@@ -133,13 +140,13 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     };
     const pending = g.pendingFocus;
     if (pending) {
-      const target = 'header' in pending ? headerRenderer.cell(pending.header) : rowRenderer.cell(pending.row, pending.column);
+      const target = 'header' in pending ? headerRenderer.cell(pending.header, pending.level ?? 0) : rowRenderer.cell(pending.row, pending.column);
       if (target) {
         g.pendingFocus = null;
         target.focus({ preventScroll: true });
       }
     }
-    paintOverlay(g, d.count, h);
+    paintOverlay(g, d.count, headerHeight);
   }
 
   return {
