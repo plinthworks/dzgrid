@@ -156,7 +156,7 @@ describe('thenables that misbehave', () => {
   it('rejects then resolves: the failure counts, the late success is ignored', () => {
     const s = setup({ fake: { reply: (_req, call) => (call.name === 'c1' ? { rows: rowsOf(['a']), total: 1 } : thenable((ok, err) => { err('first'); ok({ rows: rowsOf(['z']), total: 1 }); })) } });
     s.model.invalidate();
-    expect(s.model.status).toEqual({ phase: 'error', failure: 'first' });
+    expect(s.model.status).toMatchObject({ phase: 'error', failure: 'first' });
     expect(ids(s)).toEqual(['a']);
   });
 
@@ -296,5 +296,23 @@ describe('warnings of an answer that no longer counts', () => {
       else s.model.invalidate({ purge: true });
       expect(s.model.problems.some((p) => p.code === 'invalid-page-response'), next).toBe(false);
     }
+  });
+});
+
+describe('step 5 parts 3-4 test analysis', () => {
+  it('remembers the end a total gave, when the next answer says no total', () => {
+    const s = setup({ env: { page: { pageSize: 2 } } });
+    answer(s.calls[0]!, ['a', 'b'], { total: 4 });
+    s.model.setPage({ index: 5 });
+    // Past the end the total knows: page 1 asked again, and it answers without a total.
+    answer(s.calls.at(-1)!, [], { total: 4 });
+    answer(s.calls.at(-1)!, ['c', 'd'], { hasNext: true });
+    expect(s.model.page).toMatchObject({ index: 1, hasNext: false });
+  });
+
+  it('says which request failed, from the start', () => {
+    const s = setup();
+    s.calls[0]!.reject(new Error('down'));
+    expect(s.model.status).toMatchObject({ phase: 'error', key: s.calls[0]!.req.key, page: 0 });
   });
 });

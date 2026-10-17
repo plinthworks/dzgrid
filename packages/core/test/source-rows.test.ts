@@ -561,7 +561,7 @@ describe('failure and retry', () => {
     s.model.setPage({ index: 1 });
     const boom = new Error('boom');
     s.calls[1]!.reject(boom);
-    expect(s.model.status).toEqual({ phase: 'error', failure: boom });
+    expect(s.model.status).toMatchObject({ phase: 'error', failure: boom });
     expect((s.model.status as { failure: unknown }).failure).toBe(boom);
     expect(s.model.page).toMatchObject({ index: 1 });
     expect(ids(s)).toEqual(['a', 'b']);
@@ -594,7 +594,7 @@ describe('failure and retry', () => {
     s.model.invalidate();
     s.calls[1]!.reject('two');
     expect(s.kinds()).toEqual(['status', 'status', 'status']);
-    expect(s.model.status).toEqual({ phase: 'error', failure: 'two' });
+    expect(s.model.status).toMatchObject({ phase: 'error', failure: 'two' });
   });
 
   it('a stale failure is dropped silently', () => {
@@ -612,7 +612,7 @@ describe('failure and retry', () => {
   it('a source that throws has failed, like a rejection', () => {
     const boom = new Error('sync');
     const s = setup({ fake: { reply: () => { throw boom; } } });
-    expect(s.model.status).toEqual({ phase: 'error', failure: boom });
+    expect(s.model.status).toMatchObject({ phase: 'error', failure: boom });
     s.model.invalidate();
     expect(s.kinds()).toEqual(['status']);
     expect(s.changes[0]!.failure).toMatchObject({ error: boom, page: 0 });
@@ -622,7 +622,7 @@ describe('failure and retry', () => {
   it('a thenable whose then throws has failed', () => {
     const boom = new Error('then');
     const s = setup({ fake: { reply: () => ({ then() { throw boom; } }) } });
-    expect(s.model.status).toEqual({ phase: 'error', failure: boom });
+    expect(s.model.status).toMatchObject({ phase: 'error', failure: boom });
   });
 });
 
@@ -719,7 +719,7 @@ describe('malformed answers, double settles, re-entrant sources', () => {
       const s = paged(2);
       s.calls[0]!.resolve(response);
       const p = { code: 'invalid-page-response', severity: 'error', path: 'response' };
-      expect(s.model.status).toEqual({ phase: 'error', failure: p });
+      expect(s.model.status).toMatchObject({ phase: 'error', failure: p });
       expect(s.changes[0]).toMatchObject({ kind: 'status', told: [p], failure: { error: p, page: 0 } });
       expect(s.model.problems).toEqual([p]);
       expect(ids(s)).toEqual([]);

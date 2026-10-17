@@ -83,7 +83,7 @@ function runScenario(seed: number, withDestroy: boolean) {
     // I4: the status follows the last call.
     if (!got) expect(model.status, fail('I4 loading')).toEqual({ phase: 'loading' });
     else if (got.ok) expect(model.status, fail('I4 idle')).toEqual({ phase: 'idle' });
-    else expect(model.status, fail('I4 error')).toEqual({ phase: 'error', failure: got.error });
+    else expect(model.status, fail('I4 error')).toMatchObject({ phase: 'error', failure: got.error });
   }
   // I2: the page reported is the last ask.
   expect({ index: model.page!.index, size: model.page!.size }, fail('I2')).toEqual({ index: last.req.page!.index, size: last.req.page!.size });

@@ -142,7 +142,7 @@ describe('the fetched set: one request for everything the server part matches', 
     s.model.setPage({ index: 1 });
     s.model.invalidate();
     s.last().reject('down');
-    expect(s.model.status).toEqual({ phase: 'error', failure: 'down' });
+    expect(s.model.status).toMatchObject({ phase: 'error', failure: 'down' });
     expect(s.changes.at(-1)!.failure).toEqual({ error: 'down', key: s.calls[0]!.req.key, page: null });
     expect(ids(s)).toEqual(['c']);
     s.model.invalidate();

@@ -179,3 +179,23 @@ describe('step 5 part 4 review', () => {
     expect(host.querySelector('[aria-live]')!.textContent).toContain(EN.text['announce.error']);
   });
 });
+
+describe('step 5 parts 3-4 test analysis (DOM)', () => {
+  it('a first failure is told with its request key', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const told: GridEvent<R>[] = [];
+    const source: DataSource<R> = { fetch: () => { throw new Error('down'); } };
+    const g = createGrid<R>(host, { source: sourceRows(source), operations: 'server', getRowId: (r: R) => r.id, columns: [{ id: 'name' }], messages: EN, onEvent: (e: GridEvent<R>) => told.push(e) } as never, { sync: true });
+    grids.push(g as never);
+    const f = told.find((e) => e.type === 'fetchFailed') as { key: string } | undefined;
+    expect(f?.key).toMatch(/^\{/);
+  });
+
+  it('the same rows given again to a source grid are no change', () => {
+    const rows = [{ id: 'z', name: 'z' }];
+    const t = make({ rows });
+    t.g.update({ rows, locale: 'en-US' } as never);
+    expect(t.events.some((e) => e.type === 'problems' && e.problems.some((p) => p.path === 'settings.rows'))).toBe(false);
+  });
+});

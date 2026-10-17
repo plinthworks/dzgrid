@@ -197,7 +197,8 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   if (rows.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: rows.problems });
   if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
   // A first request that failed before anyone listened (a source that throws at once): told now.
-  if (rows.status.phase === 'error') emit(kernel, { type: 'fetchFailed', source: 'data', error: rows.status.failure, key: '', page: rows.page?.index ?? null });
+  const st = rows.status;
+  if (st.phase === 'error') emit(kernel, { type: 'fetchFailed', source: 'data', error: st.failure, key: st.key ?? '', page: st.page ?? null });
 
   const api: GridApi = {
     focusCell: (row, column) => focus.focusCellAs(row, column, 'api'),

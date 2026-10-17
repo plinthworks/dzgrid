@@ -23,7 +23,8 @@ import { checkPage, pageCountOf, pageOf, resizeIndex, resolvePageOptions, type P
 export type ModelStatus =
   | { readonly phase: 'idle' }
   | { readonly phase: 'loading' }
-  | { readonly phase: 'error'; readonly failure: unknown };
+  /** `key` and `page`: the request that failed, when a server's. */
+  | { readonly phase: 'error'; readonly failure: unknown; readonly key?: string; readonly page?: number | null };
 
 /** How many rows: all of them, after the filters, and shown now. A server may not know its total. */
 export interface RowCounts {

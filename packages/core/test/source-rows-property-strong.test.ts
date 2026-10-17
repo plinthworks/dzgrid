@@ -22,6 +22,8 @@ function oracle(config: Config) {
   const cursorMode = config === 'cursor';
   const o = {
     epoch: 0,
+    /** A refresh asked for fresh rows: the step-back asks the page on screen again. */
+    fresh: false,
     quick: '',
     sort: 0,
     phase: 'loading' as 'loading' | 'idle' | 'error',
@@ -92,6 +94,7 @@ function oracle(config: Config) {
     invalidate(purge: boolean): Step {
       const quiet = o.phase === 'loading';
       o.endAt = null;
+      o.fresh = true;
       if (purge) {
         o.screen = [];
         o.shown = null;
@@ -134,12 +137,13 @@ function oracle(config: Config) {
         const known = o.shown && o.shown.epoch === o.epoch && o.shown.size === o.size && o.shown.index < o.index ? o.shown.index : -1;
         if (cursorMode) o.cursors.length = Math.min(o.cursors.length, o.index);
         o.index = Math.floor((known + o.index) / 2);
-        if (o.index === known) {
+        if (o.index === known && !o.fresh) {
           o.phase = 'idle';
           return { calls: [], changes: 1, stepBack: 'kept' };
         }
         return { calls: [ask()], changes: 1, stepBack: 'fetched' };
       }
+      o.fresh = false;
       o.screen = rows;
       o.shown = { epoch: o.epoch, quick: o.quick, index: o.index, size: o.size };
       o.total = t;
@@ -204,7 +208,7 @@ function runScenario(config: Config, seed: number, withDestroy: boolean) {
     expect(model.page, fail(`${label}: page`)).toEqual(want.page());
     expect(model.counts, fail(`${label}: counts`)).toEqual(want.counts(want.displayed().length));
     const status = want.o.phase === 'error' ? { phase: 'error', failure: want.o.failure } : { phase: want.o.phase };
-    expect(model.status, fail(`${label}: status`)).toEqual(status);
+    expect(model.status, fail(`${label}: status`)).toMatchObject(status);
     expect(model.problems.map((p) => p.path), fail(`${label}: warnings`)).toEqual(want.o.warnings);
   };
   check('start');

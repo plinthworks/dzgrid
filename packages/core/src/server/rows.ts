@@ -150,6 +150,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   let next: boolean | null = null;
   /** No row at or after this offset (an empty page past the end): no next from there, at any size. */
   let endAt: number | null = null;
+  // A refresh asked for fresh rows: the step-back asks the page on screen again rather than keep it.
+  let fresh = false;
   /** By cursor: the cursor of each page reached in the epoch (page 0 has none); only these pages can be asked. */
   let cursors: (string | null)[] = [null];
   /** The page the rows shown answered: null before the first answer, after a purge or a new source. */
@@ -231,7 +233,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   };
 
   const failed = (_t: Ticket, req: DataRequest, error: unknown): void => {
-    setStatus({ phase: 'error', failure: error });
+    setStatus({ phase: 'error', failure: error, key: req.key, page: req.page?.index ?? null });
     failure = { error, key: req.key, page: req.page?.index ?? null };
   };
 
@@ -276,10 +278,11 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
         mark('page');
         const known = shown && shown.key === epochKey && shown.size === size && shown.index < index ? shown.index : -1;
         index = Math.floor((known + index) / 2);
-        if (index === known) return setStatus(IDLE);
+        if (index === known && !fresh) return setStatus(IDLE);
         return load();
       }
     }
+    fresh = false;
     mark(!shown || shown.key !== epochKey ? 'query' : shown.index === index && shown.size === size ? 'rows' : 'page');
     shown = { key: epochKey, index, size };
     total = a.total;
@@ -393,6 +396,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
       commit(() => {
         // Asked again: the server may say more now (an end found past an unknown total may have moved).
         endAt = null;
+        fresh = true;
         if (opts?.purge) {
           // Nothing left to keep: the first-load overlay shows.
           inner.setRows([], 'data');
