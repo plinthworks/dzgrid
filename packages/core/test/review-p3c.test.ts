@@ -20,6 +20,8 @@ describe('columns.set over a model that does not recompute for columns (a server
       setQuery: (q, s) => m.setQuery(q, s),
       setColumns: () => {},
       setContext: (c, s) => m.setContext(c, s),
+      page: null,
+      setPage() {},
       invalidate: () => {},
       subscribe: (fn) => m.subscribe(fn),
       destroy: () => m.destroy(),

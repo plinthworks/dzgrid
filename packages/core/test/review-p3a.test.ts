@@ -16,6 +16,8 @@ function serverLike(m: ClientModel<R>, total: number | null) {
     get counts() { return { total, filtered: total, displayed: m.displayed.count }; },
     selectAll: 'query', keeps: () => true, row: (key) => m.row(key),
     setQuery: (q, src) => { pushed.push(q.key); m.setQuery(q, src); }, setColumns: (c, src) => m.setColumns(c, src), setContext: (c, src) => m.setContext(c, src),
+    page: null,
+    setPage() {},
     invalidate: () => {}, subscribe: (fn) => m.subscribe(fn), destroy: () => m.destroy(), pushed,
   };
   return s;

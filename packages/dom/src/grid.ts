@@ -85,7 +85,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   // ---------- model ----------
   const columns = createColumnModel<T>(initial.columns);
   const ctx = ctxOf(initial);
-  const rows = clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx });
+  const rows = clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...(initial.pagination && { page: initial.pagination }) });
   const kernel = createKernel<T, ClientModel<T>>({ rows, columns });
 
   let dir: Dir = 'ltr';

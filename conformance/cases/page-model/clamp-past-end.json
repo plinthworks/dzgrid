@@ -1,0 +1,78 @@
+{
+  "id": "clamp-past-end",
+  "suite": "page-model",
+  "description": "A page past the end shows the last page.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      },
+      {
+        "id": "e",
+        "v": 6,
+        "n": "x"
+      },
+      {
+        "id": "f",
+        "v": 5,
+        "n": "y"
+      },
+      {
+        "id": "g",
+        "v": 4,
+        "n": "x"
+      }
+    ],
+    "page": {
+      "pageSize": 3
+    },
+    "ops": [
+      {
+        "go": 10
+      }
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "g"
+    ],
+    "page": {
+      "index": 2,
+      "size": 3,
+      "total": 7,
+      "pageCount": 3,
+      "hasNext": false
+    },
+    "counts": {
+      "total": 7,
+      "filtered": 7,
+      "displayed": 1
+    }
+  }
+}

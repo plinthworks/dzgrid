@@ -36,3 +36,13 @@ Moves to the next, previous, first or last page; picks another page size; change
 - **Above `maxRows`** the rows are kept; only the warning `fetched-set-large` is given. Cutting them would make the counts lie.
 - **The kernel holds the page:** commands `page.go {index}` and `page.size {size}`, and the event `pageChanged {source, page: PageState}`, emitted when the index, the size, the total or `hasNext` changes. It replaces the plan's `paginationChanged`. `RowModel` gains `page: PageState | null` and `setPage` (B1.4). Step 4.
 - **Test names:** `packages/core/test/source-rows.test.ts` and `conformance/cases/source-model/*` (step 5); the page stage of `ClientModel` in `packages/core/test/client-page.test.ts` (step 4).
+
+## Decisions (step 4, 2026-10-17) — paging in the browser, same feel as the server
+- `pagination: { pageSize, pageSizes }` pages the client model; set once (`unsupported-live-change` otherwise). Defaults 50 and 25, 50, 100; a bad value is `invalid-page` and the default is taken.
+- A filter, search or sort change goes back to the first page; an equal query, a refresh of the rows or `reapply` keep it. Rows that shrink clamp it to the new last page. A page past the end shows the last page.
+- A new size keeps the page holding the old page's first row: `floor(index × old / new)`.
+- An empty list is one empty page (`pageCount` 1), never "page 1 of 0".
+- Select-all selects the page; the selection survives a page change; a range across pages is refused.
+- `aria-rowcount` counts the page's rows (plus the header rows), `aria-rowindex` restarts on each page; the pager announces the range (step 17).
+- Scroll to the top on a page change, the pager and the announcement belong to `/pagination` (step 17).
+- Tests: `packages/core/test/client-page.test.ts`, `conformance/cases/page-model/*`, `conformance/cases/problems/invalid-page.json`, `packages/dom/test/client-page.test.ts`.

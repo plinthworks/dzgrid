@@ -6,6 +6,7 @@ import type { RowKey } from './ids.js';
 import type { ModelChange, RowModel } from './model/client.js';
 import type { ColumnFilter, FilterModel } from './filter/model.js';
 import { canonical, makeQuery, type Query } from './model/query.js';
+import { checkPage, samePage, type PageState } from './model/page.js';
 import type { ChangeSource } from './model/types.js';
 import { problem, type Problem } from './problems.js';
 import type { DisplayedRows } from './row/displayed.js';
@@ -44,7 +45,10 @@ export type GridCommand =
   | { readonly type: 'rows.refresh' }
   /** New column definitions from the host; what the user set (widths, order) is kept by id. */
   | { readonly type: 'columns.set'; readonly defs: readonly ColumnDef<any, any>[] }
-  | { readonly type: 'context.set'; readonly ctx: LocaleCtx };
+  | { readonly type: 'context.set'; readonly ctx: LocaleCtx }
+  /** Another page (from 0; past the end shows the last), or another page size. */
+  | { readonly type: 'page.go'; readonly index: number }
+  | { readonly type: 'page.size'; readonly size: number };
 
 export type GridCommandResult =
   | { readonly ok: true }
@@ -63,7 +67,9 @@ export type GridEvent<T> =
   | { readonly type: 'cellClicked'; readonly source: 'user'; readonly row: RowNode<T>; readonly column: string }
   | { readonly type: 'rowClicked'; readonly source: 'user'; readonly row: RowNode<T> }
   | { readonly type: 'problems'; readonly source: ChangeSource; readonly problems: readonly Problem[] }
-  | { readonly type: 'firstDataRendered'; readonly source: 'data' };
+  | { readonly type: 'firstDataRendered'; readonly source: 'data' }
+  /** The page, its size or what it counts changed (a filter sends it back to the first page). */
+  | { readonly type: 'pageChanged'; readonly source: ChangeSource; readonly page: PageState };
 
 export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
   readonly rows: M;
@@ -99,6 +105,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
   let anchor: RowKey | null = null;
   let focus: FocusPos | null = null;
   let shown = rows.displayed;
+  let lastPage: PageState | null = rows.page;
   let destroyed = false;
   const listeners = new Set<(e: GridEvent<T>) => void>();
   // Events queue: a listener that dispatches while being told does not make
@@ -152,7 +159,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
    * before anyone hears `modelUpdated`, so a renderer reads a focus and a
    * selection that exist. The reconciling events follow, with source `data`.
    */
-  const onModel = (head: GridEvent<T> | null): void => {
+  const onModel = (head: GridEvent<T> | null, source: ChangeSource = 'data'): void => {
     if (anchor !== null && !exists(anchor)) anchor = null;
     const prevSelection = selection;
     const prevFocus = focus;
@@ -160,12 +167,18 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
     focus = reconcileFocus(focus, shown, rows.displayed, columns);
     shown = rows.displayed;
     if (head) emit(head);
+    // The model holds the page (its index follows the filtered count); the kernel tells it.
+    const page = rows.page;
+    if (!samePage(page, lastPage)) {
+      lastPage = page;
+      if (page) emit({ type: 'pageChanged', source, page });
+    }
     if (!sameSelection(prevSelection, selection)) emit(changed('data'));
     if (!sameFocus(prevFocus, focus)) emit({ type: 'focusChanged', source: 'data', focus });
   };
 
   const unsubscribe = rows.subscribe((c) => {
-    onModel({ type: 'modelUpdated', source: c.source, displayed: c.displayed, kind: c.kind });
+    onModel({ type: 'modelUpdated', source: c.source, displayed: c.displayed, kind: c.kind }, c.source);
     // Rows the host gave that were refused or bent: told, not only stored on the model.
     const told = c.transaction?.problems ?? [];
     if (told.length) emit({ type: 'problems', source: c.source, problems: told });
@@ -259,6 +272,15 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
       case 'context.set':
         rows.setContext(cmd.ctx, source);
         return OK;
+      case 'page.go':
+      case 'page.size': {
+        const p = cmd.type === 'page.go' ? { index: cmd.index } : { size: cmd.size };
+        const problems = checkPage(p);
+        if (problems.length) return refuse('invalid-page', problems);
+        if (!rows.page) return refuse('paging-off');
+        rows.setPage(p, source);
+        return OK;
+      }
       case 'rows.refresh':
         rows.invalidate();
         return OK;

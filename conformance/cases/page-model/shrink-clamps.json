@@ -1,0 +1,87 @@
+{
+  "id": "shrink-clamps",
+  "suite": "page-model",
+  "description": "Rows removed under the last page: the page clamps to the new last one.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      },
+      {
+        "id": "e",
+        "v": 6,
+        "n": "x"
+      },
+      {
+        "id": "f",
+        "v": 5,
+        "n": "y"
+      },
+      {
+        "id": "g",
+        "v": 4,
+        "n": "x"
+      }
+    ],
+    "page": {
+      "pageSize": 3
+    },
+    "ops": [
+      {
+        "go": 2
+      },
+      {
+        "tx": {
+          "remove": [
+            "g"
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "d",
+      "e",
+      "f"
+    ],
+    "page": {
+      "index": 1,
+      "size": 3,
+      "total": 6,
+      "pageCount": 2,
+      "hasNext": false
+    },
+    "counts": {
+      "total": 6,
+      "filtered": 6,
+      "displayed": 3
+    }
+  }
+}

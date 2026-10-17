@@ -436,6 +436,7 @@ export function createGate(abort: () => AbortHandle): RequestGate;
 - **Done when:** the suite is green, the purity test is green (the gate names no `AbortController`), and the `/server` size is recorded.
 
 ### Step 4: the paged model (core)
+> Superseded (2026-10-17): step 4 is a page stage in the client model (`core/src/model/page.ts`, `core/test/client-page.test.ts`, conformance `page-model`); fetching, unknown totals and cursors are step 5's `sourceRows`. See ROADMAP and docs/behaviors/server-pagination.md "Decisions (step 4)".
 - **Files:** `core/src/server/paged.ts`, `core/src/row/displayed.ts` (a page snapshot over a small store: `createRowStore`, then `flatDisplayed`), `conformance/cases/paged-model/*`, `core/test/paged.test.ts`.
 - **API:** as in D3.
 - **Behaviour:**

@@ -17,6 +17,7 @@ import { ColumnCache, type ColumnEnv } from './column-cache.js';
 import { canonical, EMPTY_QUERY, type Query } from './query.js';
 import type { ChangeSource } from './types.js';
 import type { Operations } from './operations.js';
+import { checkPage, pageCountOf, pageOf, resizeIndex, resolvePageOptions, type PageOptions, type PageState } from './page.js';
 
 export type ModelStatus =
   | { readonly phase: 'idle' }
@@ -60,6 +61,10 @@ export interface RowModel<T> {
   setContext(ctx: LocaleCtx, source?: ChangeSource): void;
   /** Fetch or compute again (a server's retry). */
   invalidate(o?: { readonly purge?: boolean }): void;
+  /** The page shown, when the rows are paged; null otherwise. */
+  readonly page: PageState | null;
+  /** Another page or size (a size first, then the index read in it); past the end clamps. */
+  setPage(p: { readonly index?: number; readonly size?: number }, source?: ChangeSource): void;
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
   destroy(): void;
 }
@@ -78,6 +83,8 @@ export interface ClientOptions<T> {
   readonly columns: ColumnLookup<T>;
   readonly ctx: LocaleCtx;
   readonly reader?: ValueReader<T>;
+  /** Paged in the browser: the rows shown are one page of the filtered, sorted ones. Set once. */
+  readonly page?: PageOptions;
 }
 
 export interface ClientModel<T> extends RowModel<T> {
@@ -111,6 +118,8 @@ export interface ClientModel<T> extends RowModel<T> {
     readonly rankBuilds: number;
     readonly quickScanned: number;
     readonly displayBuilds: number;
+    /** Pages cut from the sorted rows: a page change cuts, it never filters or sorts again. */
+    readonly pageCuts: number;
   };
 }
 
@@ -137,7 +146,11 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   const listeners = new Set<(c: ModelChange<T>) => void>();
   let destroyed = false;
   let version = 0;
-  const d = { filterRuns: 0, sortRuns: 0, displayedBuilds: 0, retested: 0 };
+  const d = { filterRuns: 0, sortRuns: 0, displayedBuilds: 0, retested: 0, pageCuts: 0 };
+  const paging = resolvePageOptions(o.page);
+  const pageCfg = paging.config;
+  let pageSize = pageCfg?.size ?? 0;
+  let pageIndex = 0;
 
   /** What a stage's result depends on, besides the rows. */
   interface Inputs { snap: number; colsRef: ColumnLookup<T>; cols: number; ctx: string; reader: number; filter: string; quick: string; quickCols: string }
@@ -183,9 +196,27 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     return true;
   };
 
+  const filteredCount = (): number => (filtered?.order ? filtered.order.length : store.size);
+  /** The displayed rows: all the sorted ones, or the current page of them (the index clamped). */
   const show = (): void => {
     d.displayedBuilds++;
-    displayed = flatDisplayed(store.snapshot, sorted!.order, ++version);
+    const order = sorted!.order;
+    if (!pageCfg) {
+      displayed = flatDisplayed(store.snapshot, order, ++version);
+      return;
+    }
+    d.pageCuts++;
+    const total = filteredCount();
+    pageIndex = Math.min(pageIndex, pageCountOf(total, pageSize) - 1);
+    const start = pageIndex * pageSize;
+    const end = Math.min(total, start + pageSize);
+    let cut: Uint32Array;
+    if (order) cut = order.subarray(start, end);
+    else {
+      cut = new Uint32Array(end - start);
+      for (let i = 0; i < cut.length; i++) cut[i] = start + i;
+    }
+    displayed = flatDisplayed(store.snapshot, cut, ++version);
   };
 
   const notify = (kind: ModelChange<T>['kind'], source: ChangeSource, transaction?: TransactionResult): void => {
@@ -194,7 +225,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     for (const fn of [...listeners]) fn(c);
   };
   let loadProblems: readonly Problem[] = [];
-  const currentProblems = (): readonly Problem[] => [...loadProblems, ...(filtered?.problems ?? []), ...(sorted?.problems ?? [])];
+  const currentProblems = (): readonly Problem[] => [...paging.problems, ...loadProblems, ...(filtered?.problems ?? []), ...(sorted?.problems ?? [])];
 
   /** A sort column's key array for the current generation. */
   const keysOf = (col: NonNullable<ReturnType<ColumnLookup<T>['get']>>): Float64Array => {
@@ -264,12 +295,29 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     [STORE]: store,
     kind: 'client',
     status: { phase: 'idle' },
-    ops: { filter: 'client', quick: 'client', sort: 'client', page: 'off' },
+    ops: { filter: 'client', quick: 'client', sort: 'client', page: pageCfg ? 'client' : 'off' },
     selectAll: 'displayed',
     keeps: (key) => store.get(key) !== undefined,
     row: (key) => store.get(key),
     get query() { return query; },
     get displayed() { return displayed; },
+    get page() { return pageCfg ? pageOf({ size: pageSize, sizes: pageCfg.sizes }, pageIndex, filteredCount()) : null; },
+    setPage(p, source = 'api') {
+      if (!pageCfg || checkPage(p).length) return;
+      let size = pageSize;
+      let index = pageIndex;
+      if (p.size !== undefined && p.size !== size) {
+        index = resizeIndex(index, size, p.size);
+        size = p.size;
+      }
+      if (p.index !== undefined) index = p.index;
+      index = Math.min(index, pageCountOf(filteredCount(), size) - 1);
+      if (size === pageSize && index === pageIndex) return;
+      pageSize = size;
+      pageIndex = index;
+      show();
+      notify('page', source);
+    },
     get problems() { return currentProblems(); },
     get counts() { return { total: store.size, filtered: filtered?.order ? filtered.order.length : store.size, displayed: displayed.count }; },
     get diagnostics() {
@@ -317,8 +365,15 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       if (q.key === query.key) return;
       // The search box emptied: its haystacks are the largest caches; let them go.
       if (query.quick.trim() && !q.quick.trim()) cache.releaseSearch();
+      // Another filter, search or sort shows other rows at each place: back to the first page.
+      const reset = pageCfg !== null && pageIndex !== 0;
       query = q;
+      if (reset) pageIndex = 0;
       if (run()) notify('query', source);
+      else if (reset) {
+        show();
+        notify('query', source);
+      }
     },
     // keepScroll is the DOM's concern; the model has no scroll to keep.
     invalidate() {

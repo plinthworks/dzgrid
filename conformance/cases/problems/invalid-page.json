@@ -1,0 +1,20 @@
+{
+  "id": "invalid-page",
+  "suite": "problems",
+  "description": "A page size below one is refused.",
+  "input": {
+    "op": "page",
+    "page": {
+      "size": 0
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-page",
+        "severity": "error",
+        "path": "page.size"
+      }
+    ]
+  }
+}

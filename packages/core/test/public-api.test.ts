@@ -9,7 +9,7 @@ import * as server from '@dzgrid/core/server';
  * grid's own layers and tests need lives in `@dzgrid/core/internal`.
  */
 const PUBLIC = [
-  'EMPTY_QUERY', 'INTENT_OWNERS', 'MAX_INSTANT', 'MAX_PHYSICAL', 'NO_OVERLAY', 'NO_SELECTION', 'PROBLEM_CODES', 'PrefixSums', 'REBASE', 'REJECTED',
+  'DEFAULT_PAGE_SIZE', 'DEFAULT_PAGE_SIZES', 'EMPTY_QUERY', 'INTENT_OWNERS', 'MAX_INSTANT', 'MAX_PHYSICAL', 'NO_OVERLAY', 'NO_SELECTION', 'PROBLEM_CODES', 'PrefixSums', 'REBASE', 'REJECTED',
   'addDays', 'anchorFor', 'assignKeys', 'booleanCodec', 'booleanCodecWith', 'canonicalId', 'civilToEpochDay',
   'clearSelection', 'clientRows', 'createKernel', 'collatorFor', 'compareDays', 'compilePath', 'createColumnModel', 'dataKey', 'dayCodec', 'dayFieldOrder', 'dayToEpochDay', 'daysInMonth', 'detailKey',
   'enumCodec', 'epochDayToCivil', 'filterKindOf', 'epochDayToDay', 'fold', 'formattersFor', 'groupKey', 'headerSelection', 'liveChangeProblems', 'messageProblems', 'idOfDataKey',
@@ -23,7 +23,7 @@ const PUBLIC = [
 
 const INTERNAL = [
   'ColumnCache', 'Haystack', 'THREW', 'canNarrow', 'canonical', 'clearFormatCaches', 'collatorKey', 'compileFilter', 'compileQuick', 'createRowStore',
-  'ctxKey', 'emit', 'filterIndices', 'flatDisplayed', 'foldSlow', 'formatParts', 'intlTag', 'sameFocus', 'separatorsFor', 'sortIndices', 'storeOf',
+  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'flatDisplayed', 'foldSlow', 'formatParts', 'intlTag', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'sortIndices', 'storeOf',
 ];
 
 /** `@dzgrid/core/server`: what a grid fed by a server needs, never in the base. */

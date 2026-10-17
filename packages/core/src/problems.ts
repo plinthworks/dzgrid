@@ -27,6 +27,7 @@ export const PROBLEM_CODES = [
   'unsupported-live-change',
   'unknown-part',
   'missing-message',
+  'invalid-page',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

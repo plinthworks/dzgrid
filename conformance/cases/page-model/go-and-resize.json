@@ -1,0 +1,90 @@
+{
+  "id": "go-and-resize",
+  "suite": "page-model",
+  "description": "Page 1 of 3, then size 2: the page that holds the old first row.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      },
+      {
+        "id": "e",
+        "v": 6,
+        "n": "x"
+      },
+      {
+        "id": "f",
+        "v": 5,
+        "n": "y"
+      },
+      {
+        "id": "g",
+        "v": 4,
+        "n": "x"
+      }
+    ],
+    "page": {
+      "pageSize": 3
+    },
+    "ops": [
+      {
+        "sort": [
+          {
+            "column": "v",
+            "dir": "desc"
+          }
+        ]
+      },
+      {
+        "go": 1
+      },
+      {
+        "size": 2
+      }
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "g",
+      "a"
+    ],
+    "page": {
+      "index": 1,
+      "size": 2,
+      "total": 7,
+      "pageCount": 4,
+      "hasNext": true
+    },
+    "counts": {
+      "total": 7,
+      "filtered": 7,
+      "displayed": 2
+    }
+  }
+}

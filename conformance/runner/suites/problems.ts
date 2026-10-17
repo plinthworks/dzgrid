@@ -1,3 +1,4 @@
+import { checkPage } from '@dzgrid/core/internal';
 import { liveChangeProblems, messageProblems, partNameFor, resolveOperations, resolveColumns, type Problem } from '@dzgrid/core';
 import { createRowStore, compileFilter, sortIndices } from '@dzgrid/core/internal';
 import { harness } from '../harness.js';
@@ -16,6 +17,8 @@ export const problems: Record<string, Suite> = {
         s.replaceAll(input.rows);
         return { problems: shape(s.apply(input.tx).problems) };
       }
+      case 'page':
+        return { problems: shape(checkPage(input.page)) };
       case 'message':
         return { problems: shape(messageProblems(input.key, new Set(input.available))) };
       case 'part-name':

@@ -34,6 +34,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   searchWarmup: 'live',
   features: 'fixed',
   parts: 'live',
+  pagination: 'fixed',
 };
 
 export const ctxOf = <T>(s: GridSettings<T>): LocaleCtx =>

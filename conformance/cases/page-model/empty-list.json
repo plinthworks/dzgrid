@@ -1,0 +1,82 @@
+{
+  "id": "empty-list",
+  "suite": "page-model",
+  "description": "Nothing matches: one empty page, never page 1 of 0.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      },
+      {
+        "id": "e",
+        "v": 6,
+        "n": "x"
+      },
+      {
+        "id": "f",
+        "v": 5,
+        "n": "y"
+      },
+      {
+        "id": "g",
+        "v": 4,
+        "n": "x"
+      }
+    ],
+    "page": {
+      "pageSize": 3
+    },
+    "ops": [
+      {
+        "filter": {
+          "n": {
+            "type": "text",
+            "op": "equals",
+            "value": "z"
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "displayed": [],
+    "page": {
+      "index": 0,
+      "size": 3,
+      "total": 0,
+      "pageCount": 1,
+      "hasNext": false
+    },
+    "counts": {
+      "total": 7,
+      "filtered": 0,
+      "displayed": 0
+    }
+  }
+}

@@ -1186,7 +1186,7 @@ export type ChangeSource = 'user' | 'host' | 'api' | 'data';
 ```
 Chaque événement porte sa `source`. Les modèles à deux sens (`model()` Angular) ne réagissent qu'à `'user'` : un `host` qui renvoie sa valeur ne boucle pas.
 
-Événements principaux : `modelUpdated`, `sortChanged`, `filterChanged`, `selectionChanged`, `rangeChanged`, `columnResized|Moved|Pinned|Visible`, `rowClicked`, `cellClicked`, `cellDoubleClicked`, `cellContextMenu`, `cellEditStarted|Stopped`, `cellValueChanged` (avec statut de sauvegarde), `saveFailed`, `fetchFailed`, `paginationChanged`, `rowExpanded`, `problems`, `firstDataRendered`, `scroll`.
+Événements principaux : `modelUpdated`, `sortChanged`, `filterChanged`, `selectionChanged`, `rangeChanged`, `columnResized|Moved|Pinned|Visible`, `rowClicked`, `cellClicked`, `cellDoubleClicked`, `cellContextMenu`, `cellEditStarted|Stopped`, `cellValueChanged` (avec statut de sauvegarde), `saveFailed`, `fetchFailed`, `pageChanged` (étape 4 ; ex-`paginationChanged`), `rowExpanded`, `problems`, `firstDataRendered`, `scroll`.
 
 ---
 

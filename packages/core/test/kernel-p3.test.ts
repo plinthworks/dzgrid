@@ -32,6 +32,8 @@ function serverLike(m: ClientModel<R>, total: number | null): RowModel<R> & { re
     setQuery: (q, s) => m.setQuery(q, s),
     setColumns: (c, s) => m.setColumns(c, s),
     setContext: (c, s) => m.setContext(c, s),
+    page: null,
+    setPage() {},
     invalidate: () => { refreshed++; },
     subscribe: (fn) => m.subscribe(fn),
     destroy: () => m.destroy(),

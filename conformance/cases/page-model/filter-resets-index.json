@@ -1,0 +1,88 @@
+{
+  "id": "filter-resets-index",
+  "suite": "page-model",
+  "description": "A filter change goes back to the first page.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      },
+      {
+        "id": "e",
+        "v": 6,
+        "n": "x"
+      },
+      {
+        "id": "f",
+        "v": 5,
+        "n": "y"
+      },
+      {
+        "id": "g",
+        "v": 4,
+        "n": "x"
+      }
+    ],
+    "page": {
+      "pageSize": 2
+    },
+    "ops": [
+      {
+        "go": 2
+      },
+      {
+        "filter": {
+          "n": {
+            "type": "text",
+            "op": "equals",
+            "value": "x"
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "displayed": [
+      "a",
+      "c"
+    ],
+    "page": {
+      "index": 0,
+      "size": 2,
+      "total": 4,
+      "pageCount": 2,
+      "hasNext": true
+    },
+    "counts": {
+      "total": 7,
+      "filtered": 4,
+      "displayed": 2
+    }
+  }
+}
