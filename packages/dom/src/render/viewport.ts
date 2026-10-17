@@ -1,4 +1,5 @@
 import { headerSelection, isSelected, MAX_PHYSICAL, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
+import { emit } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import { decorateHeader } from './header-decor.js';
 import type { ViewportBox } from './measure.js';
@@ -30,6 +31,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let shown: { displayed: DisplayedRows<T>; key: RowKey | null; delta: number; atTop: boolean; atEnd: boolean } | null = null;
   let anchorNext = false;
   let paints = 0;
+  let firstData = false;
 
   function paint(box: ViewportBox): void {
     paints++;
@@ -147,6 +149,11 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       }
     }
     paintOverlay(g, d.count, headerHeight);
+    // Once, the first time rows are on screen (a host waiting to measure or to focus).
+    if (!firstData && d.count > 0) {
+      firstData = true;
+      emit(kernel, { type: 'firstDataRendered', source: 'data' });
+    }
   }
 
   return {

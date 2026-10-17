@@ -1,4 +1,5 @@
 import { headerSelection, isSelected } from '@dzgrid/core';
+import { emit } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 
 /** Row selection by pointer (D8), and the select-all box. */
@@ -17,12 +18,19 @@ export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
     if (e.shiftKey && (g.settings.selection?.mode ?? 'none') === 'multi') e.preventDefault();
   });
   scope.on(el.body, 'click', (e: MouseEvent) => {
-    const mode = g.settings.selection?.mode ?? 'none';
-    if (mode === 'none') return;
     const t = e.target as HTMLElement;
     const row = t.closest('.dzg-row');
     const key = row ? rowRenderer.keyOf(row) : undefined;
     if (!key) return;
+    // Which row and cell, by identity (the host's handlers never see positions).
+    const node = rows.row(key);
+    const column = t.closest<HTMLElement>('.dzg-cell')?.dataset['col'];
+    if (node) {
+      if (column) emit(kernel, { type: 'cellClicked', source: 'user', row: node, column });
+      emit(kernel, { type: 'rowClicked', source: 'user', row: node });
+    }
+    const mode = g.settings.selection?.mode ?? 'none';
+    if (mode === 'none') return;
     const onBox = !!t.closest('.dzg-check');
     if (!onBox && g.settings.selection?.click !== true) return;
     const toggle = onBox || (g.mac ? e.metaKey : e.ctrlKey);

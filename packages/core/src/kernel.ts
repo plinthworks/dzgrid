@@ -61,6 +61,7 @@ export type GridEvent<T> =
   | { readonly type: 'columnsChanged'; readonly source: ChangeSource; readonly changed: readonly string[]; readonly layoutChanged: boolean }
   | { readonly type: 'focusChanged'; readonly source: ChangeSource; readonly focus: FocusPos | null }
   | { readonly type: 'cellClicked'; readonly source: 'user'; readonly row: RowNode<T>; readonly column: string }
+  | { readonly type: 'rowClicked'; readonly source: 'user'; readonly row: RowNode<T> }
   | { readonly type: 'problems'; readonly source: ChangeSource; readonly problems: readonly Problem[] }
   | { readonly type: 'firstDataRendered'; readonly source: 'data' };
 
