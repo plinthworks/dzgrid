@@ -1,4 +1,4 @@
-import { clientRows, createColumnModel, createKernel, type ClientModel, type GridKernel, type RowKey } from '@dzgrid/core';
+import { clientRows, createColumnModel, createKernel, resolveOperations, type ClientModel, type GridKernel, type RowKey, type RowModel } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import { announceSort } from './a11y/announce.js';
 import { LiveRegion } from './a11y/live-region.js';
@@ -34,9 +34,9 @@ export interface GridApi {
   announce(text: string): void;
 }
 
-export interface GridInstance<T> {
-  /** Typed on the client model until a source arrives (Phase 3, step 5). */
-  readonly kernel: GridKernel<T, ClientModel<T>>;
+export interface GridInstance<T, M extends RowModel<T> = ClientModel<T>> {
+  /** On the browser's rows, or on a server's model when the grid was given a `source`. */
+  readonly kernel: GridKernel<T, M>;
   readonly api: GridApi;
   update(patch: Partial<GridSettings<T>>): void;
   destroy(): void;
@@ -55,7 +55,8 @@ function element(doc: Document, className: string, role?: string): HTMLElement {
  * the overlay, the tooltip and the live region. This function only builds
  * and assembles; each behaviour is a module of the shared `GridContext`.
  */
-export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: GridEnv = {}): GridInstance<T> {
+/** `M`: the model the grid's kernel holds — the browser's rows, or `SourceHandle<T>` with a `source`. */
+export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTMLElement, initial: GridSettings<T>, env: GridEnv = {}): GridInstance<T, M> {
   const doc = host.ownerDocument;
   const win = doc.defaultView;
   checkMessages(initial.messages);
@@ -85,8 +86,14 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   // ---------- model ----------
   const columns = createColumnModel<T>(initial.columns);
   const ctx = ctxOf(initial);
-  const rows = clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...(initial.pagination && { page: initial.pagination }) });
-  const kernel = createKernel<T, ClientModel<T>>({ rows, columns });
+  // A server's model from its binding (the base knows only its type), the browser's rows otherwise.
+  const page = initial.pagination && { page: initial.pagination };
+  const rows: RowModel<T> = initial.source
+    ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }) })
+    : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page });
+  const kernel = createKernel<T, RowModel<T>>({ rows, columns });
+  // Operations without a source run in the browser, and are told (a source's model tells its own).
+  const told = initial.source ? [] : resolveOperations(initial.operations, false).problems;
 
   let dir: Dir = 'ltr';
   const geometry = env.geometry ?? domGeometry(viewport, header, () => dir);
@@ -158,6 +165,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   scope.add(kernel.subscribe((e) => {
     if (e.type === 'modelUpdated' && e.kind === 'rows') painter.rowsChanged();
     if (e.type === 'sortChanged' && e.source === 'user') announceSort(g, e.sort);
+    if (e.type === 'fetchFailed') live.announce(g.msg('announce.error'));
     if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized' || e.type === 'columnsChanged') schedule();
     // The host's callback last, and fenced: a bug there must not stop the grid repainting or
     // the other listeners hearing the event. The error is reported, not swallowed.
@@ -187,6 +195,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   // Column definitions refused or bent are told, like the rows' (D14: too-many-pinned).
   if (columns.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: columns.problems });
   if (rows.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: rows.problems });
+  if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
 
   const api: GridApi = {
     focusCell: (row, column) => focus.focusCellAs(row, column, 'api'),
@@ -195,7 +204,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     announce: (text) => live.announce(text),
   };
 
-  const instance: GridInstance<T> & { readonly scope: Scope; readonly paints: number; pooledData(): unknown[]; readonly context: GridContext<T>; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
+  const instance: GridInstance<T, RowModel<T>> & { readonly scope: Scope; readonly paints: number; pooledData(): unknown[]; readonly context: GridContext<T>; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
     kernel,
     api,
     scope,
@@ -223,5 +232,5 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       root.remove();
     },
   };
-  return instance;
+  return instance as never;
 }

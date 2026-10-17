@@ -207,6 +207,13 @@ $emit: true !default;
     background: var(--tz-bg);
   }
 
+  // Rows kept while the next ones load: the muted text colour, not an opacity (it keeps 4.5:1).
+  .dzg[data-stale] .dzg-row,
+  .dzg[data-stale] .dzg-row .dzg-seg-start,
+  .dzg[data-stale] .dzg-row .dzg-seg-end {
+    color: var(--dzg-stale-fg, var(--tz-fg-muted));
+  }
+
   .dzg-tooltip {
     max-inline-size: 20rem;
     padding-block: 0.25rem;

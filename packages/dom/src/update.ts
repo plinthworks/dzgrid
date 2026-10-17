@@ -1,4 +1,4 @@
-import { liveChangeProblems, localeCtx, type LocaleCtx } from '@dzgrid/core';
+import { liveChangeProblems, localeCtx, problem, type ClientModel, type LocaleCtx, type SourceHandle } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import type { GridContext } from './context.js';
 import { checkMessages } from './messages.js';
@@ -35,6 +35,8 @@ export const UPDATE_POLICY: UpdatePolicy = {
   features: 'fixed',
   parts: 'live',
   pagination: 'fixed',
+  source: 'live',
+  operations: 'fixed',
 };
 
 export const ctxOf = <T>(s: GridSettings<T>): LocaleCtx =>
@@ -54,6 +56,10 @@ export interface UpdateHooks {
 export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>>, hooks: UpdateHooks): void {
   const prev = g.settings;
   const refused = liveChangeProblems(UPDATE_POLICY, prev as unknown as Record<string, unknown>, input as Record<string, unknown>);
+  // Rows go to the browser's model, a source to a server's: never the one to the other.
+  const served = g.rows.kind === 'source';
+  if ('rows' in input && served) refused.push(problem('unsupported-live-change', 'error', 'settings.rows'));
+  if ('source' in input && (!served || !input.source)) refused.push(problem('unsupported-live-change', 'error', 'settings.source'));
   const patch: { -readonly [K in keyof GridSettings<T>]?: GridSettings<T>[K] } = { ...input };
   for (const p of refused) delete patch[p.path.slice('settings.'.length) as keyof GridSettings<T>];
   if (refused.length) emit(g.kernel, { type: 'problems', source: 'host', problems: refused });
@@ -75,7 +81,8 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
     const s = g.kernel.selection;
     if (mode === 'none' || (mode === 'single' && (s.mode === 'exclude' || s.keys.size > 1))) g.kernel.dispatch({ type: 'selection.clear' }, 'host');
   }
-  if (patch.rows) g.rows.setRows(patch.rows, 'host');
+  if (patch.rows) (g.rows as ClientModel<T>).setRows(patch.rows, 'host');
+  if (patch.source) (g.rows as SourceHandle<T>).setSource(patch.source, 'host');
   hooks.recheckDir();
   if ('direction' in patch) hooks.applyDir();
   if ('searchWarmup' in patch && patch.searchWarmup !== prev.searchWarmup) hooks.warm();

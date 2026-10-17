@@ -7,6 +7,9 @@
     { "what": "header text", "fg": "--tz-fg", "bg": "--dzg-header-bg", "min": 4.5 },
     { "what": "sort mark", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 4.5 },
     { "what": "overlay text", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "stale rows while the next load", "fg": "--dzg-stale-fg", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "stale rows, selected", "fg": "--dzg-stale-fg", "bg": "--dzg-row-selected-bg", "min": 4.5 },
+    { "what": "stale rows on hover", "fg": "--dzg-stale-fg", "bg": "--dzg-row-hover-bg", "min": 4.5 },
     { "what": "tooltip text", "fg": "--tz-bg", "bg": "--tz-fg", "min": 4.5 },
     { "what": "focus ring on a cell", "fg": "--dzg-focus-ring", "bg": "--tz-bg", "min": 3 },
     { "what": "focus ring on a selected row", "fg": "--dzg-focus-ring", "bg": "--dzg-row-selected-bg", "min": 3 },
@@ -21,6 +24,7 @@
     "--dzg-header-bg": "var(--tz-bg-raised)",
     "--dzg-row-hover-bg": "color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg))",
     "--dzg-row-selected-bg": "color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg))",
-    "--dzg-focus-ring": "var(--tz-accent)"
+    "--dzg-focus-ring": "var(--tz-accent)",
+    "--dzg-stale-fg": "var(--tz-fg-muted)"
   }
 }

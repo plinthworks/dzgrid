@@ -1,4 +1,4 @@
-import type { PageOptions } from '@dzgrid/core';
+import type { OperationsInput, PageOptions, SourceBinding } from '@dzgrid/core';
 import type { ColumnDef, GridEvent, RowIdInput } from '@dzgrid/core';
 import type { GridMessages } from './messages.js';
 import type { GridFeature } from './features.js';
@@ -38,6 +38,10 @@ export interface GridSettings<T> {
    * replaces a default for a type (`'cell.number'`). One registry per grid.
    */
   readonly parts?: Readonly<Record<string, SlotPart>>;
+  /** A server's rows: `sourceRows(data, …)` from `@dzgrid/core/server`. Live: another source asks again. */
+  readonly source?: SourceBinding<T>;
+  /** Where filter, search, sort and page run (`'server'`, `'client'`, or per operation). Set once. */
+  readonly operations?: OperationsInput;
   /** Paged in the browser: one page of the filtered, sorted rows at a time. Set once. */
   readonly pagination?: PageOptions;
   /** Optional features (`filters()`, `pagination()`…), set up once with the grid. */

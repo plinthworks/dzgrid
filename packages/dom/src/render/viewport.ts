@@ -145,7 +145,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const mode = settings.selection?.mode ?? 'none';
     setAttr(el.viewport, 'aria-multiselectable', mode === 'multi' ? 'true' : null);
     setAttr(el.viewport, 'aria-label', settings.label ?? g.msg('grid.label'));
-    setAttr(el.viewport, 'aria-busy', settings.overlay === 'loading' ? 'true' : null);
+    const loading = settings.overlay === 'loading' || rows.status.phase === 'loading';
+    setAttr(el.viewport, 'aria-busy', loading ? 'true' : null);
+    // Rows kept while the next ones load: shown, marked stale.
+    setAttr(el.root, 'data-stale', loading && d.count ? '' : null);
     setPx(el.body, 'block-size', mapper.physicalHeight);
     setPx(el.body, 'inline-size', L.totalWidth + extra);
     setPx(el.layer, 'inset-block-start', w.placement.layerTop);

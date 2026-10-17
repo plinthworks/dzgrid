@@ -8,6 +8,7 @@ export function installWarmup<T>(g: GridContext<T>): { warm(): void } {
     stopWarm?.();
     stopWarm = null;
     if (g.settings.searchWarmup !== 'idle') return;
+    if (!g.rows.warmSearch) return;
     const w = g.rows.warmSearch();
     const stop = idleLoop(() => w.step(2000), g.scope, { win: g.win, busy: () => g.now() - g.scrolledAt < 200 });
     stopWarm = () => {

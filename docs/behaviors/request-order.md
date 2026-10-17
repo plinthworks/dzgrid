@@ -26,7 +26,7 @@ Types a filter quickly, clicks "next" twice, sorts while a page is loading, or w
 - `conformance/cases/server-gate/*.json` (20 cases), `conformance/runner/suites/server.ts`: reversed arrival, two filters close together, a page change during a load, an answer after `destroy`, a stale rejection, an abort reason, a new epoch over the same key, the same key twice, independent channels, a completed request never aborted, precedence of the reasons.
 - `packages/core/test/gate-property.test.ts`: 1 000 seeded orders of 20 begin/answer/new-epoch steps against an oracle of its own, and 1 000 more with a destroy; run for both source configurations at step 18 (planned). `packages/core/test/gate.test.ts`: diagnostics, destroy, re-entrant aborts.
 - `rows.refresh` reaches the model: `packages/core/test/kernel-p3.test.ts`.
-- Error then retry, stale error ignored, `destroy` during a fetch (planned, step 5).
+- Error then retry, stale error ignored, `destroy` during a fetch: `packages/core/test/source-rows*.test.ts`, `conformance/cases/source-model/*`; in the grid (overlay over the rows kept, `aria-busy`, `data-stale`, the announcement): `packages/dom/test/source-grid.test.ts`.
 
 ## Decisions (step 1, 2026-10-17)
 - **The row channel is `rows`** (B1.5); the plan's `page` channel is superseded.

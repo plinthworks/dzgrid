@@ -1,4 +1,4 @@
-import type { ClientModel, ColumnModel, GridKernel, LocaleCtx, RowKey } from '@dzgrid/core';
+import type { ColumnModel, GridKernel, LocaleCtx, RowKey, RowModel } from '@dzgrid/core';
 import type { LiveRegion } from './a11y/live-region.js';
 import type { Dir } from './dir.js';
 import type { ScrollController } from './interact/scroll.js';
@@ -52,8 +52,9 @@ export interface GridContext<T> {
   readonly live: LiveRegion;
   readonly tip: Tooltip;
   readonly columns: ColumnModel<T>;
-  readonly rows: ClientModel<T>;
-  readonly kernel: GridKernel<T, ClientModel<T>>;
+  /** The browser's rows, or a server's (`source`). */
+  readonly rows: RowModel<T>;
+  readonly kernel: GridKernel<T, RowModel<T>>;
   readonly geometry: Geometry;
   readonly scheduler: FrameScheduler;
   readonly scroll: ScrollController;
