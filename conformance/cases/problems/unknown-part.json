@@ -1,0 +1,26 @@
+{
+  "id": "unknown-part",
+  "suite": "problems",
+  "description": "A column names a part nobody registered.",
+  "input": {
+    "op": "part-name",
+    "slot": "cell",
+    "column": {
+      "id": "s",
+      "type": "text",
+      "ui": {
+        "cell": "nope"
+      }
+    },
+    "available": []
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unknown-part",
+        "severity": "error",
+        "path": "columns.s.ui.cell"
+      }
+    ]
+  }
+}

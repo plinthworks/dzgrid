@@ -1,4 +1,5 @@
 import { isolationFor } from './bidi.js';
+import type { PartHandle, SlotContext, SlotPart } from '../part.js';
 import { isBlank, REBASE, type ColumnLayout, type DisplayedRows, type LocaleCtx, type ResolvedColumn, type RowKey } from '@dzgrid/core';
 
 /**
@@ -14,6 +15,9 @@ export interface CellView {
   col: ResolvedColumn<any> | null;
   inlineStart: number;
   inlineSize: number;
+  /** A part drawing this cell, when its column has one (the text node is then detached). */
+  part: SlotPart<'cell'> | null;
+  handle: PartHandle<SlotContext['cell']> | null;
 }
 
 export interface RowView {
@@ -31,23 +35,25 @@ export interface RowView {
 /** Width of the selection box column. */
 export const CHECK_WIDTH = 40;
 
-/** The text of one cell: the codec's display, blank for a blank or unreadable value. */
-export function cellText<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): string {
+/** One cell's value (coerced) and text (the codec's display): blank for a blank or unreadable value. */
+export function cellValue<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): { value: unknown; text: string } {
   let raw: unknown;
   try {
     raw = col.read(row);
   } catch {
-    return '';
+    return { value: null, text: '' };
   }
-  if (isBlank(raw)) return '';
+  if (isBlank(raw)) return { value: null, text: '' };
   // A host codec that throws costs its cell, never the paint.
   try {
     const v = col.codec.coerce(raw, ctx);
-    return v === null ? '' : col.codec.format(v, ctx);
+    return v === null ? { value: null, text: '' } : { value: v, text: col.codec.format(v, ctx) };
   } catch {
-    return '';
+    return { value: null, text: '' };
   }
 }
+
+export const cellText = <T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): string => cellValue(col, row, ctx).text;
 
 
 export const setAttr = (el: Element, name: string, value: string | null): void => {
@@ -81,6 +87,12 @@ export interface Frame<T> {
   readonly dir: 'ltr' | 'rtl';
   /** Header rows above the body: body row i has aria-rowindex headerRows + 1 + i. */
   readonly headerRows: number;
+  /** The cell part a column has, if any. */
+  readonly partFor: (col: ResolvedColumn<any>) => SlotPart<'cell'> | null;
+  /** What every part gets (language, direction, messages). */
+  readonly partBase: Omit<SlotContext['cell'], 'value' | 'text' | 'row' | 'key' | 'column'>;
+  /** A part's error: reported, its cell left empty. */
+  readonly report: (err: unknown) => void;
   readonly colIndex: (id: string) => number;
   readonly rowAttrs: (key: RowKey, el: HTMLElement) => void;
 }
@@ -126,7 +138,7 @@ export class RowRenderer<T> {
     el.tabIndex = -1;
     const text = this.#doc.createTextNode('');
     el.append(text);
-    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN };
+    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN, part: null, handle: null };
   }
 
   /**
@@ -222,6 +234,8 @@ export class RowRenderer<T> {
       if (wanted.has(id)) continue;
       cell.el.remove();
       v.cells.delete(id);
+      // A part never follows its host to another column.
+      this.#unpart(cell);
       cell.col = null;
       this.#spare.push(cell);
     }
@@ -235,7 +249,7 @@ export class RowRenderer<T> {
           cell = this.#spare.pop() ?? this.#makeCell();
           v.cells.set(col.id, cell);
         }
-        this.#fillCell(cell, col, data, f, widths.sizeAt(c), absolute ? widths.offsetOf(c) : null);
+        this.#fillCell(cell, col, data, key, f, widths.sizeAt(c), absolute ? widths.offsetOf(c) : null);
         if (cell.el === cursor) cursor = cursor.nextSibling;
         else seg.insertBefore(cell.el, cursor);
       }
@@ -280,7 +294,21 @@ export class RowRenderer<T> {
     return true;
   }
 
-  #fillCell(cell: CellView, col: ResolvedColumn<any>, data: unknown, f: Frame<T>, w: number, x: number | null): void {
+  /** Destroys a cell's part and gives the cell back its text node. */
+  #unpart(cell: CellView): void {
+    if (!cell.part) return;
+    const handle = cell.handle;
+    cell.part = null;
+    cell.handle = null;
+    try {
+      handle?.destroy?.();
+    } catch {
+      /* a part failing to clean up must not cost the grid */
+    }
+    cell.el.replaceChildren(cell.text);
+  }
+
+  #fillCell(cell: CellView, col: ResolvedColumn<any>, data: unknown, key: RowKey, f: Frame<T>, w: number, x: number | null): void {
     if (cell.col !== col) {
       cell.col = col;
       setAttr(cell.el, 'data-col', col.id);
@@ -302,7 +330,28 @@ export class RowRenderer<T> {
       cell.inlineStart = x;
       setPx(cell.el, 'inset-inline-start', x);
     }
-    const text = data === undefined ? '' : cellText(col, data as never, f.ctx);
+    const { value, text } = data === undefined ? { value: null, text: '' } : cellValue(col, data as never, f.ctx);
+    const part = f.partFor(col);
+    if (part || cell.part) {
+      if (cell.part && (cell.part !== part || cell.col?.id !== col.id)) this.#unpart(cell);
+      if (part) {
+        const c: SlotContext['cell'] = { ...f.partBase, value, text, row: data as never, key, column: col };
+        try {
+          if (!cell.handle) {
+            cell.part = part;
+            cell.el.replaceChildren();
+            cell.handle = part.part.mount(cell.el, c);
+          } else cell.handle.update?.(c);
+        } catch (err) {
+          // A part that throws costs its cell: empty, and the error reported.
+          cell.part = part;
+          cell.handle ??= {};
+          cell.el.replaceChildren();
+          f.report(err);
+        }
+        return;
+      }
+    }
     if (cell.text.data !== text) cell.text.data = text;
     // Free text in its own direction, numbers left to right — only when the value needs it (S2).
     const iso = isolationFor(text, col.type, f.dir);
@@ -337,8 +386,13 @@ export class RowRenderer<T> {
     return this.#mounted.get(key)?.cells.get(column)?.el ?? null;
   }
 
+  /** The grid's end: every part destroyed, every row removed. */
   clear(): void {
-    for (const v of this.#mounted.values()) v.el.remove();
+    for (const v of [...this.#mounted.values(), ...this.#pool]) {
+      for (const cell of v.cells.values()) this.#unpart(cell);
+      v.el.remove();
+    }
+    for (const cell of this.#spare) this.#unpart(cell);
     this.#mounted.clear();
     this.#pool.length = 0;
   }

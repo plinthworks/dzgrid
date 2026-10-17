@@ -33,6 +33,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   overscan: 'live',
   searchWarmup: 'live',
   features: 'fixed',
+  parts: 'live',
 };
 
 export const ctxOf = <T>(s: GridSettings<T>): LocaleCtx =>

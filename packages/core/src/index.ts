@@ -86,3 +86,5 @@ export { nextSort } from './sort/toggle.js';
 export { resolveOperations, splitQuery } from './model/operations.js';
 export type { Operation, Operations, OperationsInput, Placement, ServerQuery } from './model/operations.js';
 export { liveChangeProblems } from './live-change.js';
+export { filterKindOf, partNameFor } from './columns/parts.js';
+export type { PartColumn, PartSlot } from './columns/parts.js';

@@ -1,0 +1,19 @@
+{
+  "id": "fast-path",
+  "suite": "part-name",
+  "description": "No part for its name or type: the built-in fast path (no part).",
+  "input": {
+    "slot": "cell",
+    "column": {
+      "id": "n",
+      "type": "number"
+    },
+    "available": [
+      "cell.text"
+    ]
+  },
+  "expected": {
+    "name": null,
+    "problems": []
+  }
+}

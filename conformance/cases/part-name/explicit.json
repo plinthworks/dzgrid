@@ -1,0 +1,23 @@
+{
+  "id": "explicit",
+  "suite": "part-name",
+  "description": "A column that names its cell part gets it.",
+  "input": {
+    "slot": "cell",
+    "column": {
+      "id": "s",
+      "type": "text",
+      "ui": {
+        "cell": "statusBadge"
+      }
+    },
+    "available": [
+      "statusBadge",
+      "cell.text"
+    ]
+  },
+  "expected": {
+    "name": "statusBadge",
+    "problems": []
+  }
+}

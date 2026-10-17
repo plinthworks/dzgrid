@@ -1,5 +1,6 @@
-import { headerSelection, isSelected, MAX_PHYSICAL, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
+import { headerSelection, isSelected, MAX_PHYSICAL, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
+import type { SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
 import { decorateHeader } from './header-decor.js';
 import type { ViewportBox } from './measure.js';
@@ -32,6 +33,24 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let anchorNext = false;
   let paints = 0;
   let firstData = false;
+  // The cell part of each column: resolved again when the columns or the registry change.
+  let parts: { version: number; registry: unknown; byColumn: Map<string, SlotPart<'cell'> | null>; rev: number } = { version: -1, registry: null, byColumn: new Map(), rev: 0 };
+  const partFor = (col: ResolvedColumn<any>): SlotPart<'cell'> | null => parts.byColumn.get(col.id) ?? null;
+  function resolveParts(): void {
+    const registry = g.settings.parts;
+    if (parts.version === columns.version && parts.registry === registry) return;
+    const cellParts = new Map(Object.entries(registry ?? {}).filter(([, p]) => p.slot === 'cell') as [string, SlotPart<'cell'>][]);
+    const names = new Set(cellParts.keys());
+    const byColumn = new Map<string, SlotPart<'cell'> | null>();
+    const problems = [];
+    for (const col of columns.visible()) {
+      const r = partNameFor('cell', { id: col.id, type: col.type, ...(col.def.ui && { ui: col.def.ui }) }, names);
+      problems.push(...r.problems);
+      byColumn.set(col.id, r.name ? cellParts.get(r.name)! : null);
+    }
+    parts = { version: columns.version, registry, byColumn, rev: parts.rev + 1 };
+    if (problems.length) emit(kernel, { type: 'problems', source: 'host', problems });
+  }
 
   function paint(box: ViewportBox): void {
     paints++;
@@ -49,8 +68,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     // Everything a cell's text depends on, but the row: when it changes, cells are rechecked.
     const check = settings.selection?.checkbox === true && (settings.selection.mode ?? 'none') !== 'none';
     const extra = check ? CHECK_WIDTH : 0;
-    // Direction too: whether a value is isolated depends on it.
-    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}`;
+    resolveParts();
+    // Direction too: whether a value is isolated depends on it; and which parts draw cells.
+    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}|${parts.rev}`;
     if (ek !== epochKey) {
       epochKey = ek;
       epoch++;
@@ -127,7 +147,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       displayed: d, layout: L, cols: w.cols, rowHeight: h, base: w.placement.base, ctx, epoch,
       rowHeader: visible[0]?.id ?? null, colIndex,
       rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
-      check, dir, headerRows,
+      check, dir, headerRows, partFor, report: g.report,
+      partBase: { ctx, dir, doc: g.doc, msg: g.msg, announce: (text: string) => g.live.announce(text) },
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
     };
     rowRenderer.render(frame, wanted, focus?.kind === 'cell' ? focus.row : null);

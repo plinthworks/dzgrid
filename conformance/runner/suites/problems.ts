@@ -1,4 +1,4 @@
-import { liveChangeProblems, resolveOperations, resolveColumns, type Problem } from '@dzgrid/core';
+import { liveChangeProblems, partNameFor, resolveOperations, resolveColumns, type Problem } from '@dzgrid/core';
 import { createRowStore, compileFilter, sortIndices } from '@dzgrid/core/internal';
 import { harness } from '../harness.js';
 import type { Suite } from './index.js';
@@ -16,6 +16,8 @@ export const problems: Record<string, Suite> = {
         s.replaceAll(input.rows);
         return { problems: shape(s.apply(input.tx).problems) };
       }
+      case 'part-name':
+        return { problems: shape(partNameFor(input.slot, input.column, new Set(input.available)).problems) };
       case 'live-change':
         return { problems: shape(liveChangeProblems(input.policy, input.prev, input.patch)) };
       case 'operations':

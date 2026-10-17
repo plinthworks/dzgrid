@@ -25,6 +25,7 @@ export const PROBLEM_CODES = [
   'too-many-pinned',
   'invalid-operations',
   'unsupported-live-change',
+  'unknown-part',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

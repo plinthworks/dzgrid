@@ -37,6 +37,8 @@ export interface ColumnDef<T, V = unknown> {
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';
+  /** Parts by name for this column (a cell renderer, a header, a tooltip): plain names, resolved by the grid's registry. */
+  readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string };
   /** Shown over the header, already translated by the host. */
   readonly headerTooltip?: string;
   /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */

@@ -1,0 +1,28 @@
+{
+  "id": "unknown",
+  "suite": "part-name",
+  "description": "A name nobody registered: said, and the type default or the fast path instead.",
+  "input": {
+    "slot": "cell",
+    "column": {
+      "id": "s",
+      "type": "text",
+      "ui": {
+        "cell": "nope"
+      }
+    },
+    "available": [
+      "cell.text"
+    ]
+  },
+  "expected": {
+    "name": "cell.text",
+    "problems": [
+      {
+        "code": "unknown-part",
+        "severity": "error",
+        "path": "columns.s.ui.cell"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "by-type",
+  "suite": "part-name",
+  "description": "A column that names none gets the part registered for its type.",
+  "input": {
+    "slot": "cell",
+    "column": {
+      "id": "n",
+      "type": "number"
+    },
+    "available": [
+      "cell.number"
+    ]
+  },
+  "expected": {
+    "name": "cell.number",
+    "problems": []
+  }
+}

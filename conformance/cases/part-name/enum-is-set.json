@@ -1,0 +1,20 @@
+{
+  "id": "enum-is-set",
+  "suite": "part-name",
+  "description": "For filters, an enum column\u2019s kind is set.",
+  "input": {
+    "slot": "filter",
+    "column": {
+      "id": "e",
+      "type": "enum"
+    },
+    "available": [
+      "filter.set",
+      "filter.text"
+    ]
+  },
+  "expected": {
+    "name": "filter.set",
+    "problems": []
+  }
+}

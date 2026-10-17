@@ -13,9 +13,10 @@ import { problems } from './problems.js';
 import { keys } from './keys.js';
 import { kernel } from './kernel.js';
 import { operations } from './operations.js';
+import { parts } from './parts.js';
 
 /** A suite turns a case's `input` into what is compared with its `expected`. */
 export type Suite = (input: any) => unknown;
 
 /** Every suite the runner knows, by the name of its folder in `cases/`. */
-export const SUITES: Record<string, Suite> = { ...values, ...rows, ...format, ...columns, ...store, ...sort, ...filter, ...quick, ...model, ...layout, ...selection, ...problems, ...keys, ...kernel, ...operations };
+export const SUITES: Record<string, Suite> = { ...values, ...rows, ...format, ...columns, ...store, ...sort, ...filter, ...quick, ...model, ...layout, ...selection, ...problems, ...keys, ...kernel, ...operations, ...parts };
