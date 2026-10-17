@@ -1,0 +1,114 @@
+{
+  "id": "retry-same-page",
+  "suite": "source-model",
+  "description": "Retry after a failure asks the same page again; its answer replaces the rows of another page: a page change.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 6
+      },
+      {
+        "op": "go",
+        "index": 1
+      },
+      {
+        "op": "fail",
+        "call": "c2",
+        "error": "boom"
+      },
+      {
+        "op": "refresh"
+      },
+      {
+        "op": "answer",
+        "call": "c3",
+        "rows": [
+          "c",
+          "d"
+        ],
+        "total": 6
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 1,
+          "size": 2,
+          "offset": 2,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c3",
+        "page": {
+          "index": 1,
+          "size": 2,
+          "offset": 2,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "page",
+      "status",
+      "status",
+      "page"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "c",
+        "d"
+      ],
+      "page": {
+        "index": 1,
+        "size": 2,
+        "total": 6,
+        "pageCount": 3,
+        "hasNext": true,
+        "canJump": true
+      },
+      "counts": {
+        "total": 6,
+        "filtered": 6,
+        "displayed": 2
+      }
+    },
+    "problems": [],
+    "failures": [
+      {
+        "error": "boom",
+        "page": 1
+      }
+    ]
+  }
+}

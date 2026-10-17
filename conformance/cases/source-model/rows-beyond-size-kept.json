@@ -1,0 +1,74 @@
+{
+  "id": "rows-beyond-size-kept",
+  "suite": "source-model",
+  "description": "Three rows for a page of two are all shown, with a warning.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b",
+          "c"
+        ],
+        "hasNext": true
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a",
+        "b",
+        "c"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": null,
+        "pageCount": null,
+        "hasNext": true,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": null,
+        "displayed": 3
+      }
+    },
+    "problems": [
+      {
+        "code": "invalid-page-response",
+        "severity": "warning",
+        "path": "response.rows"
+      }
+    ],
+    "failures": []
+  }
+}

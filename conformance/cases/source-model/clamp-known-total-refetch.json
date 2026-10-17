@@ -1,0 +1,104 @@
+{
+  "id": "clamp-known-total-refetch",
+  "suite": "source-model",
+  "description": "Page 4 of 10 rows comes back empty with a total of 3: the last page (1) is asked once more.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 10
+      },
+      {
+        "op": "go",
+        "index": 4
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [],
+        "total": 3
+      },
+      {
+        "op": "answer",
+        "call": "c3",
+        "rows": [
+          "c"
+        ],
+        "total": 3
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 4,
+          "size": 2,
+          "offset": 8,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c3",
+        "page": {
+          "index": 1,
+          "size": 2,
+          "offset": 2,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "page",
+      "page",
+      "page"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "c"
+      ],
+      "page": {
+        "index": 1,
+        "size": 2,
+        "total": 3,
+        "pageCount": 2,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": 3,
+        "filtered": 3,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "id": "failure-keeps-asked-page-and-rows",
+  "suite": "source-model",
+  "description": "Page 1 fails: status error, page 1 still asked (for the retry), page 0's rows still shown.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 6
+      },
+      {
+        "op": "go",
+        "index": 1
+      },
+      {
+        "op": "fail",
+        "call": "c2",
+        "error": "boom"
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 1,
+          "size": 2,
+          "offset": 2,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "page",
+      "status"
+    ],
+    "final": {
+      "status": "error",
+      "displayed": [
+        "a",
+        "b"
+      ],
+      "page": {
+        "index": 1,
+        "size": 2,
+        "total": 6,
+        "pageCount": 3,
+        "hasNext": true,
+        "canJump": true
+      },
+      "counts": {
+        "total": 6,
+        "filtered": 6,
+        "displayed": 2
+      }
+    },
+    "problems": [],
+    "failures": [
+      {
+        "error": "boom",
+        "page": 1
+      }
+    ]
+  }
+}

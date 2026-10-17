@@ -1,5 +1,5 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Raised only by a decision written in ROADMAP.md. Phase 2 close (2026-10-16): each budget is the measure + 10 %, under §5.2's ceilings (dom 30 kB, locales 2 kB, theme 9 kB). Profiles from K.8: audit screen <= 85 000 (Phase 3), everything but charts <= 150 000; the read-only client grid profile is recorded (31.3 kB). Phase 3 (decision in ROADMAP, plan §4): the DOM base is expected near 15 kB with the features seam, the popup host and the parts; budget 16.5 kB during the phase, set at the measure + 10 % at its close. /server (the request gate at step 3) grows at steps 4-5 and is set again then. Owner decision (2026-10-17, step 4): core 24 kB and dom 16.8 kB during Phase 3 (paging in the client model went over), each set at the measure + 10 % at the phase's close.",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Raised only by a decision written in ROADMAP.md. Phase 2 close (2026-10-16): each budget is the measure + 10 %, under §5.2's ceilings (dom 30 kB, locales 2 kB, theme 9 kB). Profiles from K.8: audit screen <= 85 000 (Phase 3), everything but charts <= 150 000; the read-only client grid profile is recorded (31.3 kB). Phase 3 (decision in ROADMAP, plan §4): the DOM base is expected near 15 kB with the features seam, the popup host and the parts; budget 16.5 kB during the phase, set at the measure + 10 % at its close. /server (the request gate at step 3) grows at steps 4-5 and is set again then. Owner decision (2026-10-17, step 4): core 24 kB and dom 16.8 kB during Phase 3 (paging in the client model went over), each set at the measure + 10 % at the phase's close. Step 5 part 2 (2026-10-17): /server measured whole (16 081 B gz, budget 17 690), which bundles the client model `sourceRows` builds on; over the base it adds 2 386 B (ROADMAP). /server is measured over the core (what it adds to a grid that already has the core: both bundled, less the core alone), from step 5.",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
@@ -7,7 +7,8 @@
     },
     "@dzgrid/core/server": {
       "file": "packages/core/src/server.ts",
-      "maxGzip": 710
+      "maxGzip": 2630,
+      "over": "@dzgrid/core"
     },
     "@dzgrid/dom/locales/en": {
       "file": "packages/dom/src/locales/en.ts",

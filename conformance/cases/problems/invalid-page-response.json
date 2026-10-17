@@ -1,0 +1,48 @@
+{
+  "id": "invalid-page-response",
+  "suite": "problems",
+  "description": "A bad total is read as none, so hasNext is inferred; rows beyond the page size are kept. Three warnings.",
+  "input": {
+    "op": "source",
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b",
+          "c"
+        ],
+        "total": -1
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-page-response",
+        "severity": "warning",
+        "path": "response.total"
+      },
+      {
+        "code": "invalid-page-response",
+        "severity": "warning",
+        "path": "response.hasNext"
+      },
+      {
+        "code": "invalid-page-response",
+        "severity": "warning",
+        "path": "response.rows"
+      }
+    ]
+  }
+}

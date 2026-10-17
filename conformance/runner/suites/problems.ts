@@ -2,6 +2,7 @@ import { checkPage } from '@dzgrid/core/internal';
 import { liveChangeProblems, messageProblems, partNameFor, resolveOperations, resolveColumns, type Problem } from '@dzgrid/core';
 import { createRowStore, compileFilter, sortIndices } from '@dzgrid/core/internal';
 import { harness } from '../harness.js';
+import { runSource } from './source.js';
 import type { Suite } from './index.js';
 
 type Row = Record<string, unknown> & { id: string };
@@ -33,6 +34,8 @@ export const problems: Record<string, Suite> = {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(compileFilter(input.filter, h.env()).problems) };
       }
+      case 'source':
+        return { problems: runSource(input).problems };
       case 'sort': {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(sortIndices(input.sort, null, h.env()).problems) };

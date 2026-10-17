@@ -1,0 +1,118 @@
+{
+  "id": "reversed-pages",
+  "suite": "source-model",
+  "description": "Page 1 then page 2 asked quickly: page 2 shows, and page 1's late answer never does.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 6
+      },
+      {
+        "op": "go",
+        "index": 1
+      },
+      {
+        "op": "go",
+        "index": 2
+      },
+      {
+        "op": "answer",
+        "call": "c3",
+        "rows": [
+          "e",
+          "f"
+        ],
+        "total": 6
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "c",
+          "d"
+        ],
+        "total": 6
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 1,
+          "size": 2,
+          "offset": 2,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c3",
+        "page": {
+          "index": 2,
+          "size": 2,
+          "offset": 4,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [
+      [
+        "c2",
+        "superseded"
+      ]
+    ],
+    "changes": [
+      "query",
+      "page",
+      "page",
+      "page"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "e",
+        "f"
+      ],
+      "page": {
+        "index": 2,
+        "size": 2,
+        "total": 6,
+        "pageCount": 3,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": 6,
+        "filtered": 6,
+        "displayed": 2
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

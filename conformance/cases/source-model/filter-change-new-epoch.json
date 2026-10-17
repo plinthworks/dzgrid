@@ -1,0 +1,129 @@
+{
+  "id": "filter-change-new-epoch",
+  "suite": "source-model",
+  "description": "A filter while on page 2: a new epoch from page 0 with the filter; page 2's late answer is stale; filtered, the total is unknown.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 6
+      },
+      {
+        "op": "go",
+        "index": 2
+      },
+      {
+        "op": "query",
+        "filter": {
+          "name": {
+            "type": "text",
+            "op": "contains",
+            "value": "x"
+          }
+        }
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "e",
+          "f"
+        ],
+        "total": 6
+      },
+      {
+        "op": "answer",
+        "call": "c3",
+        "rows": [
+          "x"
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 2,
+          "size": 2,
+          "offset": 4,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c3",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "name": {
+            "type": "text",
+            "op": "contains",
+            "value": "x"
+          }
+        }
+      }
+    ],
+    "aborted": [
+      [
+        "c2",
+        "stale-epoch"
+      ]
+    ],
+    "changes": [
+      "query",
+      "page",
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "x"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 1,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 1,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

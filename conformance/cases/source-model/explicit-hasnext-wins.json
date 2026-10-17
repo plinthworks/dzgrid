@@ -1,0 +1,67 @@
+{
+  "id": "explicit-hasnext-wins",
+  "suite": "source-model",
+  "description": "A total of 10 says there is a page after page 0; hasNext false says there is not, and wins.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 10,
+        "hasNext": false
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a",
+        "b"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 10,
+        "pageCount": 5,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": 10,
+        "filtered": 10,
+        "displayed": 2
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

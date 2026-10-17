@@ -27,5 +27,6 @@ One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.j
 | `instant-parse` | `{text, assumeZone?, disambiguation?}` | `{instant}` (ISO UTC) with an optional `warning`, or `{instant: null, code}` |
 | `row-key` | `{ids}` | `{accepted[], problems: [code, path][]}` |
 | `server-gate` | `{steps: (begin \| settle \| reject \| cancel \| newEpoch \| destroy)[]}` | `{outcomes, aborted: [ticket, reason][], diagnostics}` |
+| `source-model` | `{columns, operations, pagination, options?, steps: (query \| go \| size \| refresh \| purge \| swap \| ctx \| destroy \| answer \| fail)[]}`, calls named `c1`, `c2`… | `{calls, aborted: [call, reason][], changes: kind[], final: {status, displayed, page, counts}, problems, failures}` |
 
 Later phases add `sort`, `filter-*`, `server-gate`, `edit-saves`, `paste-plan`, …

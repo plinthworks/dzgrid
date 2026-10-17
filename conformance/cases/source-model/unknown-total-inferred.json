@@ -1,0 +1,92 @@
+{
+  "id": "unknown-total-inferred",
+  "suite": "source-model",
+  "description": "No total and no hasNext: a full page has a next, a short one has not, with a warning each time.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "op": "go",
+        "index": 1
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "c"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 1,
+          "size": 2,
+          "offset": 2,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "page",
+      "page"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "c"
+      ],
+      "page": {
+        "index": 1,
+        "size": 2,
+        "total": null,
+        "pageCount": null,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": null,
+        "displayed": 1
+      }
+    },
+    "problems": [
+      {
+        "code": "invalid-page-response",
+        "severity": "warning",
+        "path": "response.hasNext"
+      }
+    ],
+    "failures": []
+  }
+}

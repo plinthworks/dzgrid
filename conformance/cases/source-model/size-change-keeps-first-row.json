@@ -1,0 +1,106 @@
+{
+  "id": "size-change-keeps-first-row",
+  "suite": "source-model",
+  "description": "Page 4 at 25 rows to 100 lands on page 1, which holds row 100; page 4's answer is never asked for again.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 25
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a"
+        ],
+        "total": 1000
+      },
+      {
+        "op": "go",
+        "index": 4
+      },
+      {
+        "op": "size",
+        "size": 100
+      },
+      {
+        "op": "answer",
+        "call": "c3",
+        "rows": [
+          "b"
+        ],
+        "total": 1000
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 25,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 4,
+          "size": 25,
+          "offset": 100,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c3",
+        "page": {
+          "index": 1,
+          "size": 100,
+          "offset": 100,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [
+      [
+        "c2",
+        "superseded"
+      ]
+    ],
+    "changes": [
+      "query",
+      "page",
+      "page",
+      "page"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "b"
+      ],
+      "page": {
+        "index": 1,
+        "size": 100,
+        "total": 1000,
+        "pageCount": 10,
+        "hasNext": true,
+        "canJump": true
+      },
+      "counts": {
+        "total": 1000,
+        "filtered": 1000,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

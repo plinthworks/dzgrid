@@ -1,0 +1,76 @@
+{
+  "id": "malformed-response",
+  "suite": "source-model",
+  "description": "An answer without rows is refused: status error, the problem as the failure.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "response": {
+          "total": 2
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "status"
+    ],
+    "final": {
+      "status": "error",
+      "displayed": [],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": null,
+        "pageCount": null,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": null,
+        "displayed": 0
+      }
+    },
+    "problems": [
+      {
+        "code": "invalid-page-response",
+        "severity": "error",
+        "path": "response"
+      }
+    ],
+    "failures": [
+      {
+        "error": {
+          "code": "invalid-page-response",
+          "severity": "error",
+          "path": "response"
+        },
+        "page": 0
+      }
+    ]
+  }
+}

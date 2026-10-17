@@ -46,3 +46,13 @@ Moves to the next, previous, first or last page; picks another page size; change
 - `aria-rowcount` counts the page's rows (plus the header rows), `aria-rowindex` restarts on each page; the pager announces the range (step 17).
 - Scroll to the top on a page change, the pager and the announcement belong to `/pagination` (step 17).
 - Tests: `packages/core/test/client-page.test.ts`, `conformance/cases/page-model/*`, `conformance/cases/problems/invalid-page.json`, `packages/dom/test/client-page.test.ts`.
+
+## Decisions (step 5 part 2, 2026-10-17) — the kinds of change, server pages by offset
+- One call, one change, of the largest kind it caused (`query` > `page` > `rows` > `context` > `status`). An answer that arrives inside the call that asked (a synchronous source) is part of that call's change, with its source.
+- `status` only when the phase changes: a refresh while a request already runs says nothing (the newer request replaces it).
+- The kind of an answer compares it with the rows shown: another epoch key (or none shown: first answer, purge, new source) is `query`; the same page at the same size is `rows`; otherwise `page`. A retry of page 1 while page 0 is shown is therefore `page`; a filter changed and changed back, answered for the page shown, is `rows`; an empty page past a total of 0 that lands on the page shown is `rows`.
+- `hasNext`: said by the answer, else from the total at the page asked (so the pager is right at the click), else inferred from a full page. An empty page past the end of an unknown total records the end as a row count: no next from there, at any size, until a new epoch.
+- An empty page inside a known total (`total` covers it) is trusted and shown, never asked again; the last page asked once more only when the total says it is past the end.
+- An answer with neither `total` nor `hasNext` is warned every time, even empty; a `hasNext` that is not a boolean is warned at `response.hasNext` and read as absent.
+- `setSource` takes the new binding's data and `params`; its `paging` and `maxRows` are ignored. A binding not made by `sourceRows` is ignored.
+- Destroy does not change the status: a destroyed model asks and says nothing more.

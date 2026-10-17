@@ -28,6 +28,7 @@ export const PROBLEM_CODES = [
   'unknown-part',
   'missing-message',
   'invalid-page',
+  'invalid-page-response',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];
