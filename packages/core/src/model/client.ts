@@ -369,11 +369,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       const reset = pageCfg !== null && pageIndex !== 0;
       query = q;
       if (reset) pageIndex = 0;
+      // Another key always changes a stage's input, so run() cuts the first page.
       if (run()) notify('query', source);
-      else if (reset) {
-        show();
-        notify('query', source);
-      }
     },
     // keepScroll is the DOM's concern; the model has no scroll to keep.
     invalidate() {
