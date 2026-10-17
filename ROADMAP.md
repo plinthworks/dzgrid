@@ -217,5 +217,6 @@ Plan: `docs/phase-3-plan.md`, refined by `docs/phase-3-plugins.md`; inventory `d
 Owner inputs still owed: the audit-logs screen spec (§1.1 of the plan, needed at step 24), the Sehhaty palettes, the Arabic reader.
 
 - **Size decision (2026-10-17):** `@dzgrid/dom` budget 16.5 kB during Phase 3 (the plan §4 expects ~15 kB for the base with the features seam, popup host and parts; ceiling 30 kB); set at the measure + 10 % at the phase close.
-- [ ] step 0: the eight items (0.1 RowModel contract and operations, 0.2 split grid.ts, 0.3 header rows, 0.4 owners, 0.5 update policy, 0.6 events, 0.7 Part contract, 0.8 popup and text zoom)
+- [x] step 0 (2026-10-17): 0.1 one RowModel contract, the kernel owns the query, `operations` placement and `splitQuery`; 0.2 grid.ts split over a GridContext (221 lines); 0.3 header rows as a value through the features seam; 0.4 key owners (filter inputs, popups, cell widgets); 0.5 `update()` by a policy table, columns and language through the kernel; 0.6 `cellClicked`, `rowClicked`, `firstDataRendered`; 0.7 the Part contract and registry, wired for cells; 0.8 popups in the top layer, rows following text zoom. 905 tests, 42 browser checks.
+  Reviewed (code, tests with a mutation run) for 0.1-0.3; select-all is tied to the filters, not the sort. Deviation from the plan: the selection mode stays live (a narrower mode clears what it cannot hold).
 
