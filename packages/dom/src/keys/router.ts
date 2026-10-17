@@ -20,8 +20,9 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     const lastRow = d.count - 1;
     const page = Math.max(1, Math.floor(g.geometry.read().block / g.rowHeight()) - 1);
     const colAt = (i: number) => cols[Math.max(0, Math.min(cols.length - 1, i))]!.id;
-    const cell = (r: number, c: number): FocusPos | null => (lastRow < 0 ? { kind: 'header', column: colAt(c) } : { kind: 'cell', row: d.keyAt(d.index(Math.max(0, Math.min(lastRow, r)))!), column: colAt(c) });
     const header = (column: string, level?: number): FocusPos => (level ? { kind: 'header', column, level } : { kind: 'header', column });
+    // No rows: a move into the body stays in the header row it comes from.
+    const cell = (r: number, c: number): FocusPos | null => (lastRow < 0 ? header(colAt(c), from.kind === 'header' ? from.level : undefined) : { kind: 'cell', row: d.keyAt(d.index(Math.max(0, Math.min(lastRow, r)))!), column: colAt(c) });
     let to: FocusPos | null = null;
     switch (intent.kind) {
       case 'move':
@@ -35,7 +36,7 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
           break;
         }
         // Back from the first header: the select-all box, when there is one.
-        if (intent.axis === 'col' && from.kind === 'header' && ci === 0 && intent.delta < 0 && headerRenderer.checkBox) {
+        if (intent.axis === 'col' && from.kind === 'header' && !from.level && ci === 0 && intent.delta < 0 && headerRenderer.checkBox) {
           headerRenderer.checkBox.focus({ preventScroll: true });
           return;
         }
@@ -64,7 +65,8 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
         if (g.settings.selection?.mode === 'multi') kernel.dispatch({ type: 'selection.allDisplayed' }, 'user');
         return;
       case 'sort':
-        if (owner === 'header') kernel.dispatch({ type: 'sort.toggle', column: from.column, multi: intent.multi }, 'user');
+        // Only a column header sorts; a cell of a row a feature added (a filter) does not.
+        if (owner === 'header' && from.kind === 'header' && !from.level) kernel.dispatch({ type: 'sort.toggle', column: from.column, multi: intent.multi }, 'user');
         return;
     }
     if (to) focus.focusTo(to);

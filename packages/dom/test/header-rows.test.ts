@@ -80,3 +80,45 @@ describe('header rows as a value', () => {
     expect(host.querySelector<HTMLElement>('.dzg-overlay')!.style.insetBlockStart).toBe('64px');
   });
 });
+
+describe('step 0.1-0.3 review (header rows)', () => {
+  it('does not sort on Enter in a cell of an extra header row', () => {
+    const { g, host, press } = make();
+    host.querySelector<HTMLElement>('.dzg-hrow[aria-rowindex="2"] [data-col="n"]')!.focus();
+    press('Enter');
+    expect(g.kernel.query.sort).toEqual([]);
+  });
+
+  it('stays in the last header row when there are no rows below it', () => {
+    const { g, host, press } = make(0);
+    host.querySelector<HTMLElement>('.dzg-hrow[aria-rowindex="2"] [data-col="n"]')!.focus();
+    for (const key of ['ArrowDown', 'PageDown']) {
+      press(key);
+      expect(g.kernel.focus, key).toEqual({ kind: 'header', column: 'n', level: 1 });
+    }
+  });
+
+  it('shows the column header’s tooltip on the column header only', () => {
+    const box: { -readonly [K in keyof ViewportBox]: ViewportBox[K] } = { block: 320, inline: 600, scrollTop: 0, scrollInline: 0 };
+    const geometry: Geometry = { read: () => ({ ...box }), writeScrollTop: () => {}, writeScrollInline: () => {} };
+    const host = document.createElement('div');
+    document.body.append(host);
+    const g = createGrid<R>(host, { rows: [], getRowId: (r) => r.id, columns: [{ id: 'a', headerTooltip: 'About A' }], messages: EN, features: [extraRow], tooltips: { delayMs: 0 } }, { geometry, sync: true });
+    grids.push(g);
+    const extra = host.querySelector<HTMLElement>('.dzg-hextra[data-col="a"]')!;
+    extra.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+    expect(host.querySelector<HTMLElement>('.dzg-tooltip')!.hidden).toBe(true);
+  });
+
+  it('goes back to the select-all box from the column headers only', () => {
+    const box: { -readonly [K in keyof ViewportBox]: ViewportBox[K] } = { block: 320, inline: 600, scrollTop: 0, scrollInline: 0 };
+    const geometry: Geometry = { read: () => ({ ...box }), writeScrollTop: () => {}, writeScrollInline: () => {} };
+    const host = document.createElement('div');
+    document.body.append(host);
+    const g = createGrid<R>(host, { rows: [{ id: 'x', a: 'a', n: 1 }], getRowId: (r) => r.id, columns: [{ id: 'a' }, { id: 'n', type: 'number' }], messages: EN, features: [extraRow], selection: { mode: 'multi', checkbox: true } }, { geometry, sync: true });
+    grids.push(g);
+    host.querySelector<HTMLElement>('.dzg-hextra[data-col="a"]')!.focus();
+    (document.activeElement as HTMLElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    expect((document.activeElement as HTMLElement).getAttribute('role')).not.toBe('checkbox');
+  });
+});

@@ -6,6 +6,8 @@ export function installTooltips<T>(g: GridContext<T>): void {
   const { el, columns, rows, rowRenderer, scope, tip } = g;
 
   function tooltipFor(target: HTMLElement): string | null {
+    // A row a feature added under the headers is not the column header: its tooltips are the feature's.
+    if (target.closest('.dzg-hextra')) return null;
     const hcell = target.closest<HTMLElement>('.dzg-hcell');
     if (hcell) {
       const col = hcell.dataset['col'] ? columns.get(hcell.dataset['col']) : undefined;

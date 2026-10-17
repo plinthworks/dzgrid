@@ -172,3 +172,34 @@ describe('columns and context through the kernel', () => {
     expect(events.find((e) => e.type === 'modelUpdated')).toMatchObject({ source: 'host', kind: 'context' });
   });
 });
+
+describe('step 0.1-0.3 review (kernel)', () => {
+  it('ties a host’s everything-except selection to the filters, and clears it when they change', () => {
+    const { columns, model } = client();
+    const kernel = createKernel<R>({ rows: serverLike(model, 1000), columns });
+    const events = log<R>(kernel);
+    kernel.dispatch({ type: 'selection.set', selection: { mode: 'exclude', keys: new Set([k('r1')]) } }, 'host');
+    expect(events.find((e) => e.type === 'selectionChanged')).toMatchObject({ query: { key: kernel.query.key } });
+    kernel.dispatch({ type: 'filter.column', column: 't', filter: { type: 'text', op: 'equals', value: 'odd' } }, 'user');
+    expect(kernel.selection.mode).toBe('include');
+  });
+
+  it('keeps "all" through a sort: sorting does not change which rows match', () => {
+    const { columns, model } = client();
+    const kernel = createKernel<R>({ rows: serverLike(model, 1000), columns });
+    kernel.dispatch({ type: 'selection.all' }, 'user');
+    kernel.dispatch({ type: 'sort.toggle', column: 'n', multi: false }, 'user');
+    expect(kernel.selection.mode).toBe('exclude');
+  });
+
+  it('counts an everything-except selection over the rows the filters match, not all of them', () => {
+    const { columns, model } = client();
+    const server = Object.assign(Object.create(serverLike(model, 1000)) as RowModel<R>, {});
+    Object.defineProperty(server, 'counts', { get: () => ({ total: 1000, filtered: 40, displayed: model.displayed.count }) });
+    const kernel = createKernel<R>({ rows: server, columns });
+    const events = log<R>(kernel);
+    kernel.dispatch({ type: 'selection.all' }, 'user');
+    kernel.dispatch({ type: 'selection.toggle', row: k('r1') }, 'user');
+    expect(events.filter((e) => e.type === 'selectionChanged').map((e) => e.type === 'selectionChanged' && e.count)).toEqual([40, 39]);
+  });
+});

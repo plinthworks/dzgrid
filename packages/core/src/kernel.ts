@@ -88,8 +88,13 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
   let query: Query = o.query ?? makeQuery();
   if (o.query) rows.setQuery(query, 'host');
   let selection: SelectionState = NO_SELECTION;
-  /** The query an everything-except selection stands for: any other query drops it. */
+  /**
+   * Which rows an everything-except selection stands for: the filters and the
+   * search at that moment (not the sort, which changes no row's membership).
+   * Other filters drop it: "all" meant all the rows of those.
+   */
   let allOf: string | null = null;
+  const matchKey = (q: Query): string => canonical({ filter: q.filter, quick: q.quick });
   let anchor: RowKey | null = null;
   let focus: FocusPos | null = null;
   let shown = rows.displayed;
@@ -123,7 +128,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
   /** State first, then the event: whoever hears it reads the new state. */
   const changed = (source: ChangeSource): GridEvent<T> => ({
     type: 'selectionChanged', source, selection,
-    count: selectionCount(selection, rows.counts.total),
+    // Everything-except over the rows the filters match: their count, not the total's.
+    count: selectionCount(selection, allOf !== null ? rows.counts.filtered : rows.counts.total),
     query: selection.mode === 'exclude' && allOf !== null ? query : null,
   });
   const setSelection = (s: SelectionState, source: ChangeSource): void => {
@@ -169,7 +175,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
     if (before.key === q.key) return;
     query = q;
     // "All" meant all the rows of that query: another query does not inherit it.
-    if (selection.mode === 'exclude' && allOf !== null && allOf !== q.key) {
+    if (selection.mode === 'exclude' && allOf !== null && allOf !== matchKey(q)) {
       selection = clearSelection();
       allOf = null;
       emit(changed('data'));
@@ -258,7 +264,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
       case 'selection.all':
         if (rows.selectAll === 'query') {
           // Everything the query matches, never held as keys: everything-except, tied to this query.
-          allOf = query.key;
+          allOf = matchKey(query);
           anchor = null;
           selection = { mode: 'exclude', keys: new Set() };
           emit(changed(source));
@@ -278,6 +284,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
         setSelection(clearSelection(), source);
         return OK;
       case 'selection.set':
+        // A host's everything-except is tied to the filters in force, like the user's select-all.
+        if (cmd.selection.mode === 'exclude') allOf = matchKey(query);
         // The anchor stays while its row exists: a host echoing the selection back must not
         // break the next Shift+click (an unticked row is still where a range starts).
         setSelection(reconcileSelection(cmd.selection, exists), source);
