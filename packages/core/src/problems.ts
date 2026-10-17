@@ -24,6 +24,7 @@ export const PROBLEM_CODES = [
   'invalid-cell-value',
   'too-many-pinned',
   'invalid-operations',
+  'unsupported-live-change',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

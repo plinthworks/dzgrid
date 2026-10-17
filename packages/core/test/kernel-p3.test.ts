@@ -142,3 +142,33 @@ describe('the kernel over any row model', () => {
     expect(model.keeps(k('nope'))).toBe(false);
   });
 });
+
+describe('columns and context through the kernel', () => {
+  it('sets new column definitions: columnsChanged with the source, problems told, focus kept', () => {
+    const { columns, model } = client();
+    const kernel = createKernel<R>({ rows: model, columns });
+    kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: k('r1'), column: 't' } }, 'user');
+    const events = log<R>(kernel);
+    kernel.dispatch({ type: 'columns.set', defs: [{ id: 'n', type: 'number' }, { id: 't', header: 'Kind' }, { id: 'n', type: 'number' }] }, 'host');
+    expect(events.find((e) => e.type === 'columnsChanged')).toMatchObject({ source: 'host' });
+    expect(events.find((e) => e.type === 'problems')).toMatchObject({ source: 'host', problems: [expect.objectContaining({ code: 'duplicate-column-id' })] });
+    expect(kernel.focus).toEqual({ kind: 'cell', row: k('r1'), column: 't' });
+    expect(columns.get('t')!.def.header).toBe('Kind');
+  });
+
+  it('moves focus off a column the new definitions drop', () => {
+    const { columns, model } = client();
+    const kernel = createKernel<R>({ rows: model, columns });
+    kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: k('r1'), column: 't' } }, 'user');
+    kernel.dispatch({ type: 'columns.set', defs: [{ id: 'n', type: 'number' }] }, 'host');
+    expect(kernel.focus).toEqual({ kind: 'cell', row: k('r1'), column: 'n' });
+  });
+
+  it('sets the language through the model', () => {
+    const { columns, model } = client();
+    const kernel = createKernel<R>({ rows: model, columns });
+    const events = log<R>(kernel);
+    kernel.dispatch({ type: 'context.set', ctx: localeCtx({ locale: 'fr-FR' }) }, 'host');
+    expect(events.find((e) => e.type === 'modelUpdated')).toMatchObject({ source: 'host', kind: 'context' });
+  });
+});

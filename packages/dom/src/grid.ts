@@ -1,4 +1,4 @@
-import { clientRows, createColumnModel, createKernel, localeCtx, type ClientModel, type GridKernel, type LocaleCtx, type RowKey } from '@dzgrid/core';
+import { clientRows, createColumnModel, createKernel, type ClientModel, type GridKernel, type RowKey } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import { announceSort } from './a11y/announce.js';
 import { LiveRegion } from './a11y/live-region.js';
@@ -23,6 +23,7 @@ import { createPainter } from './render/viewport.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
 import { installWarmup } from './warmup.js';
+import { applyUpdate, ctxOf } from './update.js';
 
 export type { GridEnv } from './context.js';
 
@@ -40,9 +41,6 @@ export interface GridInstance<T> {
   update(patch: Partial<GridSettings<T>>): void;
   destroy(): void;
 }
-
-const ctxOf = <T>(s: GridSettings<T>): LocaleCtx =>
-  localeCtx({ locale: s.locale ?? s.messages.locale, ...(s.timeZone && { timeZone: s.timeZone }), ...(s.numerals && { numerals: s.numerals }) });
 
 function element(doc: Document, className: string, role?: string): HTMLElement {
   const el = doc.createElement('div');
@@ -207,29 +205,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
       },
     },
     update(patch) {
-      const prev = g.settings;
-      const next = { ...prev, ...patch };
-      if (patch.messages) checkMessages(patch.messages);
-      // `in`, not `!== undefined`: clearing a setting goes back to its default. Computed before
-      // anything changes: a locale that does not exist throws and leaves the grid as it was.
-      const contextChanged = 'locale' in patch || 'timeZone' in patch || 'numerals' in patch || (!!patch.messages && patch.messages.locale !== prev.messages.locale && !next.locale);
-      const nextCtx = contextChanged ? ctxOf(next) : g.ctx;
-      g.settings = next;
-      if (patch.columns && patch.columns !== prev.columns) {
-        const change = columns.setDefs(patch.columns);
-        rows.setColumns(columns, 'host');
-        if (change.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: change.problems });
-      }
-      if (contextChanged) {
-        g.ctx = nextCtx;
-        rows.setContext(g.ctx, 'host');
-      }
-      if (patch.rows) rows.setRows(patch.rows, 'host');
-      direction.recheck();
-      if ('direction' in patch) applyDir();
-      if ('searchWarmup' in patch && patch.searchWarmup !== prev.searchWarmup) warmup.warm();
-      if ('overlay' in patch && patch.overlay !== prev.overlay && patch.overlay) live.announce(g.msg(patch.overlay === 'loading' ? 'announce.loading' : 'announce.error'));
-      schedule();
+      applyUpdate(g, patch, { applyDir, recheckDir: () => direction.recheck(), warm: () => warmup.warm() });
     },
     destroy() {
       if (scope.isDisposed) return;

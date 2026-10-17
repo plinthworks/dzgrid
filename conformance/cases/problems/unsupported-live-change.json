@@ -1,0 +1,32 @@
+{
+  "id": "unsupported-live-change",
+  "suite": "problems",
+  "description": "A setting fixed at creation (the row id) changed live: refused, said where, nothing changed.",
+  "input": {
+    "op": "live-change",
+    "policy": {
+      "getRowId": "fixed",
+      "locale": "live",
+      "selection.mode": "fixed"
+    },
+    "prev": {
+      "getRowId": "a",
+      "locale": "fr",
+      "selection.mode": "multi"
+    },
+    "patch": {
+      "getRowId": "b",
+      "locale": "ar",
+      "selection.mode": "multi"
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unsupported-live-change",
+        "severity": "error",
+        "path": "settings.getRowId"
+      }
+    ]
+  }
+}

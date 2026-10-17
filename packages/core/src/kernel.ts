@@ -1,4 +1,6 @@
 import type { ColumnModel, ColumnState } from './columns/model.js';
+import type { ColumnDef } from './columns/defs.js';
+import type { LocaleCtx } from './value/locale.js';
 import { reconcileFocus, sameFocus, type FocusPos } from './focus.js';
 import type { RowKey } from './ids.js';
 import type { ModelChange, RowModel } from './model/client.js';
@@ -39,7 +41,10 @@ export type GridCommand =
   /** Select all, as the model means it: the displayed rows, or the whole query on a server. */
   | { readonly type: 'selection.all' }
   /** Fetch or compute again (a server's retry). */
-  | { readonly type: 'rows.refresh' };
+  | { readonly type: 'rows.refresh' }
+  /** New column definitions from the host; what the user set (widths, order) is kept by id. */
+  | { readonly type: 'columns.set'; readonly defs: readonly ColumnDef<any, any>[] }
+  | { readonly type: 'context.set'; readonly ctx: LocaleCtx };
 
 export type GridCommandResult =
   | { readonly ok: true }
@@ -234,6 +239,18 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
       }
       case 'quick.set':
         setQuery(makeQuery({ sort: query.sort, filter: query.filter, quick: cmd.text }), source);
+        return OK;
+      case 'columns.set': {
+        const change = columns.setDefs(cmd.defs);
+        if (change.problems.length) emit({ type: 'problems', source, problems: change.problems });
+        if (change.changed.length) emit({ type: 'columnsChanged', source, changed: change.changed, layoutChanged: change.layoutChanged });
+        const before = rows.displayed;
+        rows.setColumns(columns, source);
+        if (rows.displayed === before) onModel(null);
+        return OK;
+      }
+      case 'context.set':
+        rows.setContext(cmd.ctx, source);
         return OK;
       case 'rows.refresh':
         rows.invalidate();

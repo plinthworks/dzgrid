@@ -85,3 +85,4 @@ export type { FocusPos } from './focus.js';
 export { nextSort } from './sort/toggle.js';
 export { resolveOperations, splitQuery } from './model/operations.js';
 export type { Operation, Operations, OperationsInput, Placement, ServerQuery } from './model/operations.js';
+export { liveChangeProblems } from './live-change.js';
