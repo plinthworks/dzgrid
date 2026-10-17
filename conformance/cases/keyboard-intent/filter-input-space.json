@@ -1,0 +1,18 @@
+{
+  "id": "filter-input-space",
+  "suite": "keyboard-intent",
+  "description": "A filter input owns Space (a space is typed).",
+  "input": {
+    "key": " ",
+    "dir": "ltr",
+    "owner": "filter-input",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

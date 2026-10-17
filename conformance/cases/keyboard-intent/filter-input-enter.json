@@ -1,0 +1,18 @@
+{
+  "id": "filter-input-enter",
+  "suite": "keyboard-intent",
+  "description": "A filter input owns Enter (no sort).",
+  "input": {
+    "key": "Enter",
+    "dir": "ltr",
+    "owner": "filter-input",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

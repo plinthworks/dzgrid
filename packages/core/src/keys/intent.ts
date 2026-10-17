@@ -7,7 +7,7 @@
  */
 
 /** Who has focus when the key is pressed: only `cell` and `header` are the grid's in Phase 2. */
-export type KeyOwner = 'cell' | 'header' | 'editor' | 'filter-input' | 'popup' | 'outside';
+export type KeyOwner = 'cell' | 'header' | 'editor' | 'filter-input' | 'popup' | 'cell-widget' | 'outside';
 
 export interface KeyLike {
   readonly key: string;

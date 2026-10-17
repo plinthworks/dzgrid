@@ -1,0 +1,18 @@
+{
+  "id": "cell-widget-arrow",
+  "suite": "keyboard-intent",
+  "description": "A widget inside a cell owns its arrows.",
+  "input": {
+    "key": "ArrowDown",
+    "dir": "ltr",
+    "owner": "cell-widget",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}

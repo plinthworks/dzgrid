@@ -1,6 +1,7 @@
 import type { GridContext } from '../context.js';
 import { isLastEnd, widthOf } from '../render/header-decor.js';
 import { attachResize } from './resize.js';
+import { INTERACTIVE } from '../keys/owner.js';
 
 /** Header pointer: resize handles, then a click sorts (Shift adds) or toggles the select-all box. */
 export function installHeaderClick<T>(g: GridContext<T>, toggleAll: () => void): void {
@@ -18,8 +19,12 @@ export function installHeaderClick<T>(g: GridContext<T>, toggleAll: () => void):
     if (resizing.consumeClick()) return;
     const t = e.target as HTMLElement;
     if (t.closest('.dzg-resize')) return;
-    // Cells of the rows the features add (filters) are not column headers: they never sort.
+    // Cells of the rows the features add (filters) are not column headers: they never sort;
+    // nor does a control a part put in a header (a filter button, a menu).
     if (t.closest('.dzg-hextra')) return;
+    const hcell = t.closest('.dzg-hcell');
+    const control = t.closest<HTMLElement>(INTERACTIVE + ', [data-dzg-owner]');
+    if (control && hcell && control !== hcell && hcell.contains(control) && !control.matches('.dzg-box')) return;
     if (headerRenderer.check && headerRenderer.check.contains(t)) {
       toggleAll();
       return;

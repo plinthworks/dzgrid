@@ -1,0 +1,18 @@
+{
+  "id": "cell-widget-space",
+  "suite": "keyboard-intent",
+  "description": "A widget inside a cell (a button) owns Space.",
+  "input": {
+    "key": " ",
+    "dir": "ltr",
+    "owner": "cell-widget",
+    "mac": false,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false
+  },
+  "expected": {
+    "intent": null
+  }
+}
