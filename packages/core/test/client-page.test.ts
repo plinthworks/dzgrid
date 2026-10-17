@@ -117,6 +117,16 @@ describe('client paging, the model', () => {
     expect(model.displayed.nodeAt(model.displayed.index(1)!).data.t).toBe('zz');
   });
 
+  it('finds a row of a short page in a large list, and not one of another page', () => {
+    const { model } = paged(1000, { pageSize: 10 });
+    model.setQuery(makeQuery({ sort: [{ column: 'n', dir: 'desc' }] }));
+    model.setPage({ index: 3 });
+    expect(model.displayed.indexOf(k('r969'))).toBe(0);
+    expect(model.displayed.indexOf(k('r960'))).toBe(9);
+    expect(model.displayed.indexOf(k('r959'))).toBe(-1);
+    expect(model.displayed.indexOf(k('nope'))).toBe(-1);
+  });
+
   it('holds the rows of other pages: they are found and kept, but not displayed', () => {
     const { model } = paged();
     expect(model.row(k('r9'))).toBeDefined();

@@ -25,6 +25,8 @@ export function flatDisplayed<T>(snap: RowSnapshot<T>, order: Uint32Array | null
     return (order ? order[i]! : i) as SourceIndex;
   };
   let back: Int32Array | null = null;
+  // A short cut (a page) finds its rows in a table of its own size, not one of every row.
+  let small: Map<number, number> | null = null;
   const self: DisplayedRows<T> = {
     version,
     count,
@@ -37,6 +39,14 @@ export function flatDisplayed<T>(snap: RowSnapshot<T>, order: Uint32Array | null
       const s = snap.lookup(id);
       if (s < 0) return -1;
       if (!order) return s as number as DisplayIndex;
+      if (order.length * 16 < snap.count) {
+        if (!small) {
+          small = new Map();
+          for (let i = 0; i < order.length; i++) small.set(order[i]!, i);
+        }
+        const at = small.get(s);
+        return at === undefined ? -1 : (at as DisplayIndex);
+      }
       if (!back) {
         back = new Int32Array(snap.count).fill(-1);
         for (let i = 0; i < order.length; i++) back[order[i]!] = i;
