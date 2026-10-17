@@ -101,6 +101,15 @@ describe('parts: keys', () => {
     void host;
   });
 
+  it('leaves Enter to the host on a cell without a part', () => {
+    const { g, press } = make();
+    g.api.focusCell(dataKey('r1')!, 'n');
+    const e = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    document.activeElement!.dispatchEvent(e);
+    expect(e.defaultPrevented).toBe(false);
+    void press;
+  });
+
   it('keeps focus on the cell when the part has nothing to focus', () => {
     const r = recorder(false);
     const { g, press } = make({ parts: { w: r.part } });

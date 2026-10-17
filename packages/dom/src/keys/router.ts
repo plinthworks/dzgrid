@@ -116,6 +116,8 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     // Space on a header does nothing here, and must not scroll the page either.
     if (!intent && owner === 'header' && (e.key === ' ' || e.key === 'Spacebar')) e.preventDefault();
     if (!intent) return;
+    // Enter on a cell is the grid's only when a part there can take the focus; the host's otherwise.
+    if (intent.kind === 'enter' && !(at?.kind === 'cell' && g.rowRenderer.partAt(at.row, at.column)?.focus)) return;
     e.preventDefault();
     apply(intent, owner);
   });
