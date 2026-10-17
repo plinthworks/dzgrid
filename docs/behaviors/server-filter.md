@@ -47,3 +47,8 @@ The epoch key and the request key are made from the wire form, the search, the s
 - `conformance/cases/wire/*` (suite `wire`).
 - In `sourceRows`: `conformance/cases/source-model/{wire-resolved-bounds,wire-zone-refetch,wire-inactive-no-request,wire-unfilterable-dropped}`, `packages/core/test/source-rows-wire.test.ts` (once per epoch, not per page; filter kinds; columns re-read; language and zone).
 - Bench: `toWire 7 filters (2 instant, Algiers)` (`perf/budgets.json`, 0.5 ms).
+
+## Known differences with the browser (step 6 test analysis, 2026-10-18)
+- A bound outside the years 0000-9999 (`after 9999-12-31T23:59:59.999Z`, `onDay 0000-01-01` east of UTC) cannot be written: the filter is refused on the wire (`invalid-instant` at `.resolved`) and the server gets none, while the browser applies it. Such dates do not occur in real data.
+- Text travels as typed. The browser compares a case-sensitive needle in NFC; a server that compares exactly should normalize too (the host's mapping decides, with the server's rules).
+- `at` is part of the request key as given: `0` and `'1970-01-01T00:00:00Z'` are the same moment but two requests; so are `UTC` and `Etc/UTC`.
