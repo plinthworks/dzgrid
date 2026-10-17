@@ -55,7 +55,7 @@ describe('probe', () => {
     expect([...host.querySelectorAll('.dzg-header [role=row]')].map((r) => r.getAttribute('aria-rowindex'))).toEqual(['1', '2', '3']);
     expect(vp.getAttribute('aria-rowcount')).toBe('53');
     expect(host.querySelector('.dzg-layer > .dzg-row')!.getAttribute('aria-rowindex')).toBe('4');
-    g.focusCell?.(dataKey('r0')!, 'n');
+    g.api.focusCell(dataKey('r0')!, 'n');
     host.querySelector<HTMLElement>('.dzg-layer .dzg-row [data-col="n"]')!.focus();
     press('ArrowUp'); expect(g.kernel.focus).toEqual({ kind: 'header', column: 'n', level: 2 }); expect(lvl()).toBe('3');
     press('ArrowUp'); expect(g.kernel.focus).toEqual({ kind: 'header', column: 'n', level: 1 }); expect(lvl()).toBe('2');
