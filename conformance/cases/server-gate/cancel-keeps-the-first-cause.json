@@ -1,0 +1,83 @@
+{
+  "id": "cancel-keeps-the-first-cause",
+  "suite": "server-gate",
+  "description": "A request already superseded keeps that reason when the channel is cancelled afterwards; only the cancelled one is aborted.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p2",
+        "as": "b"
+      },
+      {
+        "op": "cancel",
+        "channel": "rows"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p3",
+        "as": "c"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "c"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      null,
+      {
+        "seq": 3,
+        "epoch": 0
+      },
+      "superseded",
+      "aborted",
+      null
+    ],
+    "aborted": [
+      [
+        "a",
+        "superseded"
+      ],
+      [
+        "b",
+        "aborted"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 3,
+      "accepted": 1,
+      "dropped": {
+        "superseded": 1,
+        "stale-epoch": 0,
+        "aborted": 1,
+        "destroyed": 0
+      }
+    }
+  }
+}

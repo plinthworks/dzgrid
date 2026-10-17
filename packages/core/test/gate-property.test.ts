@@ -24,13 +24,15 @@ function runScenario(seed: number, withDestroy: boolean) {
   });
   // The oracle: the last request on each channel, the epoch now, destroyed or not.
   const last = new Map<string, number>();
+  // Requests cancelled while they were the last of their channel.
+  const cancelled = new Set<number>();
   let epoch = 0;
   let destroyed = false;
   const destroyAt = withDestroy ? Math.floor(rnd() * 20) : -1;
   const verdicts: { a: Asked; got: DropReason | null; want: DropReason | null }[] = [];
   const answer = (a: Asked) => {
     a.answered = true;
-    const want: DropReason | null = destroyed ? 'destroyed' : a.epoch !== epoch ? 'stale-epoch' : last.get(a.channel) !== a.n ? 'superseded' : null;
+    const want: DropReason | null = destroyed ? 'destroyed' : a.epoch !== epoch ? 'stale-epoch' : cancelled.has(a.n) ? 'aborted' : last.get(a.channel) !== a.n ? 'superseded' : null;
     const got = gate.settle(a.ticket);
     a.accepted = got === null;
     verdicts.push({ a, got, want });
@@ -50,8 +52,14 @@ function runScenario(seed: number, withDestroy: boolean) {
       made.ticket = gate.begin(channel, `k${Math.floor(rnd() * 3)}`).ticket;
       asked.push(made);
       last.set(channel, n);
-    } else if (r < 0.9) answer(pick(open));
-    else {
+    } else if (r < 0.85) answer(pick(open));
+    else if (r < 0.9) {
+      // A channel cancelled: its last request, if still waiting in this epoch, is aborted.
+      const channel = pick(CHANNELS);
+      const n = last.get(channel);
+      if (!destroyed && n !== undefined && !asked[n]!.answered && asked[n]!.epoch === epoch && !asked[n]!.aborts.length) cancelled.add(n);
+      gate.cancel(channel);
+    } else {
       gate.newEpoch();
       if (!destroyed) epoch++;
     }
@@ -63,13 +71,16 @@ function runScenario(seed: number, withDestroy: boolean) {
     [rest[i], rest[j]] = [rest[j]!, rest[i]!];
   }
   for (const a of rest) answer(a);
-  return { gate, asked, verdicts, last, epoch, destroyed };
+  return { gate, asked, verdicts, last, epoch, destroyed, cancelled };
 }
 
 describe('the gate, 1 000 seeded orders of requests and answers', () => {
   it('applies only the answer to the last request of the current query, on every channel', () => {
+    let acceptedAll = 0;
+    let droppedAll = 0;
     for (let seed = 1; seed <= 1000; seed++) {
-      const { gate, asked, verdicts, last, epoch } = runScenario(seed, false);
+      const { gate, asked, verdicts, last, epoch, cancelled } = runScenario(seed, false);
+      const cancelledLast = (a: Asked) => cancelled.has(a.n);
       // I1: every verdict is the oracle's.
       for (const v of verdicts) expect(v.got, `seed ${seed}, request ${v.a.n}`).toBe(v.want);
       // I2: per channel, what is accepted only moves forward.
@@ -83,20 +94,25 @@ describe('the gate, 1 000 seeded orders of requests and answers', () => {
         if (n === undefined) continue;
         const final = asked[n]!;
         // (Answered before a later query change, it was rightly applied then: I1 covers it.)
-        if (final.epoch === epoch) expect(final.accepted, `seed ${seed}, channel ${ch}`).toBe(true);
+        if (final.epoch === epoch && !cancelledLast(final)) expect(final.accepted, `seed ${seed}, channel ${ch}`).toBe(true);
       }
-      // I4: every request but the last of its channel and epoch was aborted exactly once; the
-      // last ones and the answered-and-accepted ones never.
+      // I4: no request is aborted twice, an accepted one never, and the abort says the verdict's first cause.
       for (const a of asked) {
         expect(a.aborts.every((r) => REASONS.includes(r as DropReason)), `seed ${seed}`).toBe(true);
         expect(a.aborts.length, `seed ${seed}, request ${a.n}`).toBeLessThanOrEqual(1);
         if (a.accepted) expect(a.aborts, `seed ${seed}, request ${a.n}`).toEqual([]);
+        if (cancelled.has(a.n)) expect(a.aborts, `seed ${seed}, request ${a.n}`).toEqual(['aborted']);
       }
       // I5: the counts add up.
       const d = gate.diagnostics;
       expect(d.begun).toBe(asked.length);
       expect(d.accepted + REASONS.reduce((s, r) => s + d.dropped[r], 0)).toBe(verdicts.length);
+      acceptedAll += d.accepted;
+      droppedAll += verdicts.length - d.accepted;
     }
+    // Not vacuous: thousands of answers each way.
+    expect(acceptedAll).toBeGreaterThan(3000);
+    expect(droppedAll).toBeGreaterThan(3000);
   });
 
   it('drops every answer after a destroy, and makes no request', () => {

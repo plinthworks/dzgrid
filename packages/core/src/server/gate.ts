@@ -45,8 +45,8 @@ export interface RequestGate {
 
 interface Channel {
   seq: number;
-  /** Requests up to this number were cancelled. */
-  cancelled: number;
+  /** The requests cancelled while they were the channel's last: an older one keeps 'superseded'. */
+  readonly cancelled: Set<number>;
   handle: AbortHandle | null;
 }
 
@@ -86,7 +86,7 @@ export function createGate(abort: () => AbortHandle): RequestGate {
     if (t.epoch !== epoch) return 'stale-epoch';
     const ch = channels.get(t.channel);
     if (!ch) return 'superseded';
-    if (t.seq <= ch.cancelled) return 'aborted';
+    if (ch.cancelled.has(t.seq)) return 'aborted';
     return t.seq === ch.seq ? null : 'superseded';
   };
 
@@ -96,7 +96,7 @@ export function createGate(abort: () => AbortHandle): RequestGate {
       const ticket: Ticket = Object.freeze({ seq: ++seq, epoch, channel, key });
       if (destroyed) return { ticket, signal: DEAD };
       let ch = channels.get(channel);
-      if (!ch) channels.set(channel, (ch = { seq: 0, cancelled: 0, handle: null }));
+      if (!ch) channels.set(channel, (ch = { seq: 0, cancelled: new Set(), handle: null }));
       const previous = ch.handle;
       const handle = abort();
       ch.seq = ticket.seq;
@@ -121,7 +121,7 @@ export function createGate(abort: () => AbortHandle): RequestGate {
       if (destroyed || !ch?.handle) return;
       const h = ch.handle;
       ch.handle = null;
-      ch.cancelled = ch.seq;
+      ch.cancelled.add(ch.seq);
       h.abort('aborted');
     },
     newEpoch() {
