@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
+import angular from '@analogjs/vite-plugin-angular';
 
 /**
  * The core runs in `node`, not jsdom: a DOM global reached by accident would
@@ -15,6 +16,11 @@ const domAlias = {
   '@dzgrid/dom/locales': fileURLToPath(new URL('./packages/dom/src/locales', import.meta.url)),
   '@dzgrid/dom': fileURLToPath(new URL('./packages/dom/src/index.ts', import.meta.url)),
 };
+const angularTsconfig = fileURLToPath(new URL('./packages/angular/tsconfig.spec.json', import.meta.url));
+const angularAlias = {
+  ...domAlias,
+  '@dzgrid/angular': fileURLToPath(new URL('./packages/angular/src/index.ts', import.meta.url)),
+};
 
 export default defineConfig({
   test: {
@@ -23,6 +29,18 @@ export default defineConfig({
       { resolve: { alias }, test: { name: 'core', globals: true, environment: 'node', include: ['packages/core/test/**/*.test.ts'] } },
       { resolve: { alias }, test: { name: 'conformance', globals: true, environment: 'node', include: ['conformance/runner/**/*.test.ts'] } },
       { resolve: { alias: domAlias }, test: { name: 'dom', globals: true, environment: 'jsdom', include: ['packages/dom/test/**/*.test.ts'] } },
+      // Components are compiled for the tests, not stubbed (tzslot): a template whose
+      // binding silently fails still passes tsc, so only rendering it catches that.
+      // `jit: false`: under vitest the plugin defaults to JIT, which setup.ts's
+      // @angular/compiler would serve silently; template.test.ts checks for AOT.
+      {
+        plugins: [angular({ jit: false, tsconfig: angularTsconfig })],
+        resolve: { alias: angularAlias },
+        test: {
+          name: 'angular', globals: true, environment: 'jsdom',
+          setupFiles: ['packages/angular/test/setup.ts'], include: ['packages/angular/test/**/*.test.ts'],
+        },
+      },
       { test: { name: 'theme', globals: true, environment: 'node', include: ['packages/theme/test/**/*.test.ts'] } },
       { test: { name: 'tools', globals: true, environment: 'node', include: ['spikes/test/**/*.test.ts', 'scripts/test/**/*.test.ts'] } },
     ],

@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "useDefineForClassFields": false,
+    "paths": {
+      "@dzgrid/core": [
+        "../core/dist/index.d.ts"
+      ],
+      "@dzgrid/core/internal": [
+        "../core/dist/internal.d.ts"
+      ],
+      "@dzgrid/dom": [
+        "../dom/dist/index.d.ts"
+      ],
+      "@dzgrid/dom/*": [
+        "../dom/dist/*.d.ts"
+      ]
+    },
+    "types": []
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "partial",
+    "strictTemplates": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}

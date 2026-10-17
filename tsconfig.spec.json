@@ -4,6 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    "experimentalDecorators": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "types": [
@@ -27,6 +28,9 @@
       ],
       "@dzgrid/dom/locales/*": [
         "./packages/dom/src/locales/*.ts"
+      ],
+      "@dzgrid/angular": [
+        "./packages/angular/src/index.ts"
       ]
     }
   },
