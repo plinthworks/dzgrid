@@ -1,0 +1,59 @@
+{
+  "id": "page-change-during-load",
+  "suite": "server-gate",
+  "description": "Page 1 is asked while page 0 loads: the answer for page 0 is dropped.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "page:0",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "page:1",
+        "as": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      "superseded",
+      null
+    ],
+    "aborted": [
+      [
+        "a",
+        "superseded"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 2,
+      "accepted": 1,
+      "dropped": {
+        "superseded": 1,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

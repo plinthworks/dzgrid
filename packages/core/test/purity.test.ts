@@ -24,6 +24,8 @@ const FORBIDDEN_NAMES = new Set([
   'Date', 'Temporal', 'performance', 'globalThis', 'self', 'window', 'document', 'navigator', 'location',
   'localStorage', 'sessionStorage', 'fetch', 'setTimeout', 'setInterval', 'requestAnimationFrame',
   'queueMicrotask', 'process', 'require', 'crypto', 'Worker', 'eval',
+  // Cancelling is the host's: the core takes a factory (`createGate(() => new AbortController())`).
+  'AbortController', 'AbortSignal',
 ]);
 
 interface Token { readonly kind: ts.SyntaxKind; readonly text: string }
@@ -38,7 +40,7 @@ function tokens(source: string): Token[] {
 }
 
 /** Every reason a source breaks purity, as short labels. Exported for the self-test below. */
-export function violations(source: string, opts: { base: boolean } = { base: true }): string[] {
+export function violations(source: string, opts: { base: boolean; server?: boolean } = { base: true }): string[] {
   const found: string[] = [];
   const t = tokens(source);
   t.forEach((tok, i) => {
@@ -65,6 +67,8 @@ export function violations(source: string, opts: { base: boolean } = { base: tru
       const spec = tok.text.slice(1, -1);
       if (!spec.startsWith('.')) found.push(`package ${spec}`);
       if (opts.base && /(^|\/)enterprise(\/|$)/.test(spec)) found.push('enterprise import');
+      // The base never reaches the server entry: a grid on rows in memory carries none of it.
+      if (!opts.server && /(^|\/)server(\.js|\/|$)/.test(spec)) found.push('server import');
     }
   });
   return found;
@@ -81,7 +85,7 @@ describe('core purity', () => {
   it('names no forbidden global, package or dynamic import', () => {
     const offenders = all.flatMap((f) => {
       const rel = f.slice(SRC.length + 1);
-      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise') });
+      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/') });
       return v.length ? [`${rel}: ${[...new Set(v)].join(', ')}`] : [];
     });
     expect(offenders).toEqual([]);
@@ -114,6 +118,8 @@ describe('the purity check itself', () => {
     'const s = `${Date.now()}`;',
     "const s = 'a // b'; const d = new Date();",
     "const s = '/* nope'; new Date(); const e = '*/';",
+    'new AbortController();',
+    'AbortSignal.timeout(1);',
   ];
   for (const source of planted) {
     it(`catches: ${source}`, () => {
@@ -125,6 +131,13 @@ describe('the purity check itself', () => {
     expect(violations("import { g } from './enterprise/grouping/index.js';")).toEqual(['enterprise import']);
     expect(violations("import { g } from '../enterprise';")).toEqual(['enterprise import']);
     expect(violations("import { g } from './enterprise/grouping/index.js';", { base: false })).toEqual([]);
+  });
+
+  it('catches an import of the server entry from the base, and only from the base', () => {
+    expect(violations("import { createGate } from './server.js';")).toEqual(['server import']);
+    expect(violations("import { createGate } from '../server/gate.js';")).toEqual(['server import']);
+    expect(violations("import type { AbortHandle } from '../abort.js';", { base: true, server: true })).toEqual([]);
+    expect(violations("import { createGate } from './server/gate.js';", { base: true, server: true })).toEqual([]);
   });
 
   it('lets comments, strings and property names mention anything', () => {

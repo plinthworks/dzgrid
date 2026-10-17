@@ -1,0 +1,67 @@
+{
+  "id": "seq-global-epoch-counts",
+  "suite": "server-gate",
+  "description": "Numbers grow across channels and epochs; the epoch counts query changes.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "values:x",
+        "key": "q1",
+        "as": "b"
+      },
+      {
+        "op": "newEpoch"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "c"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      null,
+      {
+        "seq": 3,
+        "epoch": 1
+      }
+    ],
+    "aborted": [
+      [
+        "a",
+        "stale-epoch"
+      ],
+      [
+        "b",
+        "stale-epoch"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 3,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

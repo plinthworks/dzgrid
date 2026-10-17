@@ -1,0 +1,49 @@
+{
+  "id": "abort-reason-superseded",
+  "suite": "server-gate",
+  "description": "A newer request on the channel aborts the previous one as superseded.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p2",
+        "as": "b"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      }
+    ],
+    "aborted": [
+      [
+        "a",
+        "superseded"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 2,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

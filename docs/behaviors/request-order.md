@@ -23,8 +23,8 @@ Types a filter quickly, clicks "next" twice, sorts while a page is loading, or w
 - A change of the browser's part of the query never reaches the gate: no request.
 
 ## Tests
-- `conformance/cases/server-gate/*.json`, `conformance/runner/suites/server.ts` (planned, step 3): reversed arrival, two filters close together, a page change during a load, an answer after `destroy`, a stale rejection, an abort reason, a new epoch over the same key, the same key twice.
-- Property test: 1 000 seeded permutations of 20 begin/answer steps; what is applied is always the answer to the last request (planned, step 3), run for both source configurations (planned, step 18).
+- `conformance/cases/server-gate/*.json` (20 cases), `conformance/runner/suites/server.ts`: reversed arrival, two filters close together, a page change during a load, an answer after `destroy`, a stale rejection, an abort reason, a new epoch over the same key, the same key twice, independent channels, a completed request never aborted, precedence of the reasons.
+- `packages/core/test/gate-property.test.ts`: 1 000 seeded orders of 20 begin/answer/new-epoch steps against an oracle of its own, and 1 000 more with a destroy; run for both source configurations at step 18 (planned). `packages/core/test/gate.test.ts`: diagnostics, destroy, re-entrant aborts.
 - `rows.refresh` reaches the model: `packages/core/test/kernel-p3.test.ts`.
 - Error then retry, stale error ignored, `destroy` during a fetch (planned, step 5).
 
@@ -33,3 +33,4 @@ Types a filter quickly, clicks "next" twice, sorts while a page is loading, or w
 - **The failure is the host's error, unchanged:** `status: { phase: 'error', failure }` keeps `failure: unknown` as in the code. The event `fetchFailed {source: 'data', error, key, page: number | null}` gives the context (the request key, the page asked for, null without server pages). It is added to `GridEvent` at step 5.
 - **No loading overlay over rows:** while a request runs, the rows shown stay, with stale styling and `aria-busy="true"`. The loading overlay shows only when there are no rows to keep (the first load). The plan's "overlay in the same frame" (step 14, browser budget) is superseded: the measure is "next" to `aria-busy` and stale styling.
 - **After an accepted failure** the model keeps the page that was asked (so retry asks for it again) and the rows of the last accepted answer (so focus and selection keep their rows); the error overlay with retry covers them.
+- **For hosts (step 3):** an aborted request's `signal.reason` is the gate's reason as a string (`'superseded'`, `'stale-epoch'`, `'aborted'`, `'destroyed'`), not a native `AbortError`: a `fetch` given that signal rejects with that string. The grid drops those rejections itself; a host must not test `name === 'AbortError'`. `cancel(channel)` is what produces `'aborted'` (a values popup closed).

@@ -26,8 +26,7 @@ const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'in
  * dist/ once built: a subpath is added here on purpose, never by accident.
  */
 const PACKAGES = {
-  // './server' (gate, sourceRows, toWire) joins with phase 3 step 3.
-  core: ['.', './internal'],
+  core: ['.', './internal', './server'],
   dom: ['.', './popup', './locales/en', './locales/fr', './locales/ar'],
 };
 /** Built after the TypeScript packages, against their dist/ declarations. */

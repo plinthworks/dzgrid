@@ -1,0 +1,74 @@
+{
+  "id": "channels-are-independent",
+  "suite": "server-gate",
+  "description": "Rows and a column's values are separate channels: only a request on the same channel supersedes.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "values:city",
+        "key": "q1",
+        "as": "b"
+      },
+      {
+        "op": "begin",
+        "channel": "values:city",
+        "key": "q2",
+        "as": "c"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "c"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      {
+        "seq": 3,
+        "epoch": 0
+      },
+      null,
+      "superseded",
+      null
+    ],
+    "aborted": [
+      [
+        "b",
+        "superseded"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 3,
+      "accepted": 2,
+      "dropped": {
+        "superseded": 1,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

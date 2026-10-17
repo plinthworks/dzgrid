@@ -89,3 +89,4 @@ export { liveChangeProblems } from './live-change.js';
 export { filterKindOf, partNameFor } from './columns/parts.js';
 export type { PartColumn, PartSlot } from './columns/parts.js';
 export { messageProblems } from './messages.js';
+export type { AbortHandle, AbortSignalLike } from './abort.js';

@@ -1,0 +1,39 @@
+{
+  "id": "accepted-rejection",
+  "suite": "server-gate",
+  "description": "The latest request failing is accepted: the model shows the error.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "reject",
+        "ticket": "a"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      null
+    ],
+    "aborted": [],
+    "diagnostics": {
+      "begun": 1,
+      "accepted": 1,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "id": "older-answers-first-still-dropped",
+  "suite": "server-gate",
+  "description": "The older request answers first: it is still dropped, the newer one applies.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p2",
+        "as": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      "superseded",
+      null
+    ],
+    "aborted": [
+      [
+        "a",
+        "superseded"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 2,
+      "accepted": 1,
+      "dropped": {
+        "superseded": 1,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "id": "begin-after-destroy",
+  "suite": "server-gate",
+  "description": "A request begun after destroy (a late debounce) is inert: nothing is fetched, its answer dropped.",
+  "input": {
+    "steps": [
+      {
+        "op": "destroy"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      null,
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      "destroyed"
+    ],
+    "aborted": [],
+    "diagnostics": {
+      "begun": 1,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 1
+      }
+    }
+  }
+}

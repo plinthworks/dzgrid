@@ -1,0 +1,67 @@
+{
+  "id": "new-epoch-drops-every-channel",
+  "suite": "server-gate",
+  "description": "A new epoch makes every channel's request stale, in the order the channels began.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "values:x",
+        "key": "q1",
+        "as": "b"
+      },
+      {
+        "op": "newEpoch"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      null,
+      "stale-epoch",
+      "stale-epoch"
+    ],
+    "aborted": [
+      [
+        "a",
+        "stale-epoch"
+      ],
+      [
+        "b",
+        "stale-epoch"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 2,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 2,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

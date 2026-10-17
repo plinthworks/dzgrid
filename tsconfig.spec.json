@@ -20,6 +20,9 @@
       "@dzgrid/core": [
         "./packages/core/src/index.ts"
       ],
+      "@dzgrid/core/server": [
+        "./packages/core/src/server.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],

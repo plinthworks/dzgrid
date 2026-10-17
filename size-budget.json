@@ -1,9 +1,13 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Raised only by a decision written in ROADMAP.md. Phase 2 close (2026-10-16): each budget is the measure + 10 %, under §5.2's ceilings (dom 30 kB, locales 2 kB, theme 9 kB). Profiles from K.8: audit screen <= 85 000 (Phase 3), everything but charts <= 150 000; the read-only client grid profile is recorded (31.3 kB). Phase 3 (decision in ROADMAP, plan §4): the DOM base is expected near 15 kB with the features seam, the popup host and the parts; budget 16.5 kB during the phase, set at the measure + 10 % at its close.",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Raised only by a decision written in ROADMAP.md. Phase 2 close (2026-10-16): each budget is the measure + 10 %, under §5.2's ceilings (dom 30 kB, locales 2 kB, theme 9 kB). Profiles from K.8: audit screen <= 85 000 (Phase 3), everything but charts <= 150 000; the read-only client grid profile is recorded (31.3 kB). Phase 3 (decision in ROADMAP, plan §4): the DOM base is expected near 15 kB with the features seam, the popup host and the parts; budget 16.5 kB during the phase, set at the measure + 10 % at its close. /server (the request gate at step 3) grows at steps 4-5 and is set again then.",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
       "maxGzip": 22300
+    },
+    "@dzgrid/core/server": {
+      "file": "packages/core/src/server.ts",
+      "maxGzip": 710
     },
     "@dzgrid/dom/locales/en": {
       "file": "packages/dom/src/locales/en.ts",

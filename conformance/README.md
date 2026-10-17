@@ -26,5 +26,6 @@ One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.j
 | `day-arith` | `{op: 'toEpochDay' \| 'fromEpochDay' \| 'parse' \| 'add', …}` | `{epochDay}` or `{day}` (null when refused or out of range) |
 | `instant-parse` | `{text, assumeZone?, disambiguation?}` | `{instant}` (ISO UTC) with an optional `warning`, or `{instant: null, code}` |
 | `row-key` | `{ids}` | `{accepted[], problems: [code, path][]}` |
+| `server-gate` | `{steps: (begin \| settle \| reject \| cancel \| newEpoch \| destroy)[]}` | `{outcomes, aborted: [ticket, reason][], diagnostics}` |
 
 Later phases add `sort`, `filter-*`, `server-gate`, `edit-saves`, `paste-plan`, …

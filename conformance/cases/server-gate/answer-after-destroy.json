@@ -1,0 +1,48 @@
+{
+  "id": "answer-after-destroy",
+  "suite": "server-gate",
+  "description": "An answer that arrives after the grid is destroyed is dropped.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "destroy"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      null,
+      "destroyed"
+    ],
+    "aborted": [
+      [
+        "a",
+        "destroyed"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 1,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 1
+      }
+    }
+  }
+}

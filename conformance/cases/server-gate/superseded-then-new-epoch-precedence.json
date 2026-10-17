@@ -1,0 +1,62 @@
+{
+  "id": "superseded-then-new-epoch-precedence",
+  "suite": "server-gate",
+  "description": "A request superseded and then outlived by a new epoch is told stale-epoch; its abort keeps the first cause.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p2",
+        "as": "b"
+      },
+      {
+        "op": "newEpoch"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      null,
+      "stale-epoch"
+    ],
+    "aborted": [
+      [
+        "a",
+        "superseded"
+      ],
+      [
+        "b",
+        "stale-epoch"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 2,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 1,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "id": "new-epoch-same-key",
+  "suite": "server-gate",
+  "description": "The same key in a new epoch is a new request: the old answer is stale, the key is not compared.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "k",
+        "as": "a"
+      },
+      {
+        "op": "newEpoch"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "k",
+        "as": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      null,
+      {
+        "seq": 2,
+        "epoch": 1
+      },
+      "stale-epoch",
+      null
+    ],
+    "aborted": [
+      [
+        "a",
+        "stale-epoch"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 2,
+      "accepted": 1,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 1,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

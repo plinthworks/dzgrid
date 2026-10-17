@@ -1,0 +1,49 @@
+{
+  "id": "abort-reason-cancel",
+  "suite": "server-gate",
+  "description": "A cancelled request (a values popup closed) is aborted, and its answer dropped.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "cancel",
+        "channel": "rows"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      null,
+      "aborted"
+    ],
+    "aborted": [
+      [
+        "a",
+        "aborted"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 1,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 1,
+        "destroyed": 0
+      }
+    }
+  }
+}

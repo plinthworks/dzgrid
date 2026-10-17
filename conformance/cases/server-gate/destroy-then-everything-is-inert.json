@@ -1,0 +1,61 @@
+{
+  "id": "destroy-then-everything-is-inert",
+  "suite": "server-gate",
+  "description": "After destroy, a new epoch, a cancel and a second destroy do nothing.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "p1",
+        "as": "a"
+      },
+      {
+        "op": "destroy"
+      },
+      {
+        "op": "newEpoch"
+      },
+      {
+        "op": "cancel",
+        "channel": "rows"
+      },
+      {
+        "op": "destroy"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      null,
+      null,
+      null,
+      null,
+      "destroyed"
+    ],
+    "aborted": [
+      [
+        "a",
+        "destroyed"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 1,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 1
+      }
+    }
+  }
+}

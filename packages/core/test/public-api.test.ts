@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as core from '@dzgrid/core';
 import * as internal from '@dzgrid/core/internal';
+import * as server from '@dzgrid/core/server';
 
 /**
  * The public surface, written out by hand: adding an export is a decision,
@@ -25,7 +26,15 @@ const INTERNAL = [
   'ctxKey', 'emit', 'filterIndices', 'flatDisplayed', 'foldSlow', 'formatParts', 'intlTag', 'sameFocus', 'separatorsFor', 'sortIndices', 'storeOf',
 ];
 
+/** `@dzgrid/core/server`: what a grid fed by a server needs, never in the base. */
+const SERVER = ['createGate'];
+
 describe('the public surface', () => {
+  it('keeps the server entry apart', () => {
+    expect(Object.keys(server).sort()).toEqual([...SERVER].sort());
+    for (const name of SERVER) expect(name in core, name).toBe(false);
+  });
+
   it('is exactly the list above', () => {
     expect(Object.keys(core).sort()).toEqual([...PUBLIC].sort());
   });

@@ -1,0 +1,58 @@
+{
+  "id": "two-filters-close-together",
+  "suite": "server-gate",
+  "description": "A filter changes the query (a new epoch) while the first answer is on its way: the first is stale.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "f1",
+        "as": "a"
+      },
+      {
+        "op": "newEpoch"
+      },
+      {
+        "op": "begin",
+        "channel": "rows",
+        "key": "f2",
+        "as": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      null,
+      {
+        "seq": 2,
+        "epoch": 1
+      },
+      "stale-epoch"
+    ],
+    "aborted": [
+      [
+        "a",
+        "stale-epoch"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 2,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 1,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

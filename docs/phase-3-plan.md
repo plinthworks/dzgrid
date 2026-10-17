@@ -409,6 +409,7 @@ Conventions as in Phase 2: `npm test`, `typecheck`, `test:tz` and `test:ci` stay
 - **Fallback:** if Analog with vitest 4 fails, the tests compile with S6's `ngc` + linker + esbuild pipeline. Note it in ROADMAP.
 
 ### Step 3: the request gate (core, invariant 3)
+> Built 2026-10-17 with three additions (`settle`, counted once; `cancel`; `epoch`) and the entry `core/src/server.ts` instead of `server/index.ts`: see ROADMAP and docs/behaviors/request-order.md.
 - **Files:** `core/src/server/gate.ts`, `core/src/server/index.ts`, the subpath export `./server` in `core/package.json`, `conformance/cases/server-gate/*.json`, `conformance/runner/suites/server.ts`.
 - **API:**
 ```ts
