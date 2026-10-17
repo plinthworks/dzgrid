@@ -210,3 +210,11 @@ searching and 107 B at rest.
 - [x] one conformance case per `ProblemCode`
 - [x] `npm test`, `test:ci`, `test:tz`, `typecheck` green
 - [x] phase-end architect review and code review, findings fixed (2026-10-17)
+
+## Phase 3 — server, filters, export, Angular (in progress)
+
+Plan: `docs/phase-3-plan.md`, refined by `docs/phase-3-plugins.md`; inventory `docs/inventory.md`. Decisions validated 2026-10-17.
+Owner inputs still owed: the audit-logs screen spec (§1.1 of the plan, needed at step 24), the Sehhaty palettes, the Arabic reader.
+
+- [ ] step 0: the eight items (0.1 RowModel contract and operations, 0.2 split grid.ts, 0.3 header rows, 0.4 owners, 0.5 update policy, 0.6 events, 0.7 Part contract, 0.8 popup and text zoom)
+
