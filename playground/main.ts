@@ -5,6 +5,9 @@ import { FR } from '@dzgrid/dom/locales/fr';
 import { AR } from '@dzgrid/dom/locales/ar';
 import type { ColumnDef } from '@dzgrid/core';
 import { datasetA, type RowA } from '../perf/dataset.js';
+// The theme, through Vite (a <link> to a file outside the playground folder is not served).
+import '../packages/theme/dzgrid.css';
+import '../packages/theme/contrast.css';
 
 const form = document.getElementById('controls') as HTMLFormElement;
 const host = document.getElementById('host')!;
@@ -66,9 +69,11 @@ const page = () => {
   else delete html.dataset['contrast'];
 };
 page();
+// The rows are made first: the time shown is the grid's, from rows in memory to the first frame.
+const initial = settings();
 const t0 = performance.now();
-const grid: GridInstance<RowA> = createGrid<RowA>(host, settings());
-requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; });
+const grid: GridInstance<RowA> = createGrid<RowA>(host, initial);
+requestAnimationFrame(() => requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; }));
 
 form.addEventListener('change', () => {
   page();
