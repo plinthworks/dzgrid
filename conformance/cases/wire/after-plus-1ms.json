@@ -1,0 +1,36 @@
+{
+  "id": "after-plus-1ms",
+  "suite": "wire",
+  "description": "After a moment starts one millisecond later; the end is open (null).",
+  "input": {
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "after",
+        "at": "2026-03-05T10:00:00Z"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "after",
+        "at": "2026-03-05T10:00:00Z",
+        "resolved": {
+          "from": "2026-03-05T10:00:00.001Z",
+          "to": null
+        },
+        "zone": "Africa/Algiers"
+      }
+    }
+  }
+}

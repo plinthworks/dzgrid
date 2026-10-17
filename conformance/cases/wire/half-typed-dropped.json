@@ -1,0 +1,75 @@
+{
+  "id": "half-typed-dropped",
+  "suite": "wire",
+  "description": "Half-typed filters are dropped with no problem: empty box, one end of a between, no boolean, no list, no day, an all-empty combination.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "s"
+      },
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "b",
+        "type": "boolean"
+      },
+      {
+        "id": "e"
+      },
+      {
+        "id": "t",
+        "type": "instant"
+      },
+      {
+        "id": "c"
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "text",
+        "op": "contains",
+        "value": ""
+      },
+      "n": {
+        "type": "number",
+        "op": "between",
+        "value": 3
+      },
+      "b": {
+        "type": "boolean",
+        "value": null
+      },
+      "e": {
+        "type": "set",
+        "blanks": "include"
+      },
+      "t": {
+        "type": "instant",
+        "op": "betweenDays",
+        "day": "2026-03-05"
+      },
+      "c": {
+        "type": "combined",
+        "join": "or",
+        "conditions": [
+          {
+            "type": "text",
+            "op": "equals"
+          },
+          {
+            "type": "text",
+            "op": "startsWith",
+            "value": ""
+          }
+        ]
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {}
+  }
+}

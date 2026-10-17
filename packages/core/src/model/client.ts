@@ -1,4 +1,5 @@
 import type { ColumnLookup } from '../columns/model.js';
+import type { WireKind } from '../filter/model.js';
 import { NO_OVERLAY, type ValueReader } from '../columns/defs.js';
 import { compileFilter, filterIndices } from '../filter/compile.js';
 import { canNarrow, compileQuick, quickWords } from '../filter/quick.js';
@@ -445,6 +446,8 @@ export interface ModelEnv<T> {
   readonly operations?: OperationsInput;
   readonly query?: Query;
   readonly abort?: () => AbortHandle;
+  /** The custom filter kinds, by name, for a filter sent to a server (wired from the grid at step 8). */
+  readonly filterKinds?: (name: string) => WireKind | undefined;
 }
 
 /** A model to make once the grid knows its columns and language. */

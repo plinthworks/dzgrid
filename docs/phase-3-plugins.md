@@ -111,7 +111,7 @@ export function sourceRows<T>(source: DataSource<T>, o?: {
 }): RowModelFactory<T, SourceModel<T>>;
 ```
 
-- `WireFilterModel` is D3's step-5 form: instants carry their resolved UTC `[from, to)` bounds and the zone.
+- `WireFilterModel` is `toWire(filter, { ctx, columns, kinds? })`'s result (step 6, `docs/behaviors/server-filter.md`): a narrowed union per kind; instants carry their resolved UTC `[from, to)` bounds (`YYYY-MM-DDTHH:mm:ss.sssZ`, three digits of milliseconds) and the zone; days travel as the model; half-typed filters are dropped, refused ones dropped with the browser's problems; a custom kind travels as `{type: 'custom', kind, value}`. The request key is made from this form.
 - Custom kinds go on the wire through their own `wire()` (§B2.6).
 - With `page` client, the response `rows` are the whole fetched set, and `total` and `hasNext` are ignored.
 - **One fetch function serves both modes:** it pages when `req.page` is present and returns everything otherwise. That is why example 3 is a one-setting switch.

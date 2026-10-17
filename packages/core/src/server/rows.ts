@@ -8,7 +8,7 @@ import { problem, type Problem } from '../problems.js';
 import type { TransactionResult } from '../row/store.js';
 import { createGate, type Ticket } from './gate.js';
 import type { DataRequest, DataSource, Json, PageWindow, SourceModel, SourceRows, SourceRowsOptions } from './source.js';
-import { toWire } from './wire.js';
+import { toWire, type WireFilterModel } from './wire.js';
 
 type Kind = ModelChange<unknown>['kind'];
 /** Several things in one call: the change says the largest. */
@@ -140,7 +140,12 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   let current = binding;
   let { data, params } = bound.get(binding)!;
   let ctx = env.ctx;
+  let columns = env.columns;
+  let dataVersion = columns.dataVersion;
   let server: ServerQuery;
+  /** The server's filter as sent, and why some of it is not: computed for a new query, zone or columns, never per page. */
+  let wire: WireFilterModel | undefined;
+  let wireProblems: readonly Problem[] = [];
   let epochKey = '';
   // The page asked, and what the last accepted answer said of what follows.
   let index = 0;
@@ -177,7 +182,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     mark(c.kind);
     if (c.transaction) tx = c.transaction;
   });
-  const problems = (): readonly Problem[] => [...fixed, ...inner.problems, ...answerProblems];
+  const problems = (): readonly Problem[] => [...fixed, ...wireProblems, ...inner.problems, ...answerProblems];
   const commit = (fn: () => void, source: ChangeSource): void => {
     if (destroyed) return;
     depth++;
@@ -207,7 +212,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     setStatus(LOADING);
     const page: PageWindow | undefined = serverPages ? { index, size, offset: index * size, cursor: cursorMode ? cursors[index]! : null } : undefined;
     const parts: { filter?: unknown; quick?: string; sort?: unknown; page?: PageWindow; params: Readonly<Record<string, Json>>; zone: string } = { params, zone: ctx.timeZone };
-    if (server.filter) parts.filter = toWire(server.filter);
+    if (wire) parts.filter = wire;
     if (server.quick !== undefined) parts.quick = server.quick;
     if (server.sort) parts.sort = server.sort;
     if (page) parts.page = page;
@@ -298,9 +303,19 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     setStatus(IDLE);
   };
 
+  /**
+   * The epoch's key: the server's part of the query as sent, the zone and the params. A
+   * half-typed or refused filter edit leaves the wire form, so the key, as it was: no request.
+   */
+  const keyNow = (): string => {
+    const w = server.filter ? toWire(server.filter, { ctx, columns, ...(env.filterKinds && { kinds: env.filterKinds }) }) : undefined;
+    wire = w?.filter;
+    wireProblems = w?.problems ?? [];
+    return canonical({ filter: wire, quick: server.quick, sort: server.sort, zone: ctx.timeZone, params });
+  };
   /** A new epoch: the server's query, the zone, the params or the source changed. */
-  const restart = (): void => {
-    epochKey = `${server.key}|${ctx.timeZone}|${canonical(params)}`;
+  const restart = (key = keyNow()): void => {
+    epochKey = key;
     gate.newEpoch();
     index = 0;
     endAt = null;
@@ -314,12 +329,13 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     load();
   };
   const rekey = (): void => {
-    if (`${server.key}|${ctx.timeZone}|${canonical(params)}` !== epochKey) restart();
+    const key = keyNow();
+    if (key !== epochKey) restart(key);
   };
 
   const hasNext = (): boolean =>
     !(endAt !== null && (index + 1) * size >= endAt) && (next ?? (total !== null && (index + 1) * size < total)) && (!cursorMode || index + 1 < cursors.length);
-  const unfiltered = (): boolean => server.quick === undefined && (!server.filter || Object.keys(server.filter).length === 0);
+  const unfiltered = (): boolean => server.quick === undefined && (!wire || Object.keys(wire).length === 0);
 
   commit(() => {
     const split = splitQuery(env.query ?? EMPTY_QUERY, ops);
@@ -359,8 +375,16 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
         rekey();
       }, source);
     },
-    setColumns(columns, source = 'host') {
-      commit(() => inner.setColumns(columns, source), source);
+    setColumns(next, source = 'host') {
+      commit(() => {
+        inner.setColumns(next, source);
+        // What can be filtered may have changed (a column gone, `filter: false`, another type): the wire form again.
+        if (next !== columns || next.dataVersion !== dataVersion) {
+          columns = next;
+          dataVersion = next.dataVersion;
+          rekey();
+        }
+      }, source);
     },
     setContext(next, source = 'host') {
       commit(() => {

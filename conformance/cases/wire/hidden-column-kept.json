@@ -1,0 +1,48 @@
+{
+  "id": "hidden-column-kept",
+  "suite": "wire",
+  "description": "A hidden column still filters, on the server too; a column with filter: false does not.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "s",
+        "hidden": true
+      },
+      {
+        "id": "x",
+        "filter": false
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "text",
+        "op": "equals",
+        "value": "Ab",
+        "caseSensitive": true
+      },
+      "x": {
+        "type": "text",
+        "op": "contains",
+        "value": "a"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "s": {
+        "type": "text",
+        "op": "equals",
+        "value": "Ab",
+        "caseSensitive": true
+      }
+    },
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.x"
+      ]
+    ]
+  }
+}

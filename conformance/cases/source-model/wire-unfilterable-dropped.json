@@ -1,0 +1,125 @@
+{
+  "id": "wire-unfilterable-dropped",
+  "suite": "source-model",
+  "description": "A filter on a column with filter: false is not sent and asks nothing; it is reported as invalid-filter; the other filters still travel.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "x",
+        "filter": false
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      },
+      {
+        "op": "query",
+        "filter": {
+          "x": {
+            "type": "text",
+            "op": "contains",
+            "value": "a"
+          }
+        }
+      },
+      {
+        "op": "query",
+        "filter": {
+          "x": {
+            "type": "text",
+            "op": "contains",
+            "value": "a"
+          },
+          "name": {
+            "type": "text",
+            "op": "contains",
+            "value": "a"
+          }
+        }
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "name": {
+            "type": "text",
+            "op": "contains",
+            "value": "a"
+          }
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 1,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 1,
+        "displayed": 1
+      }
+    },
+    "problems": [
+      {
+        "code": "invalid-filter",
+        "severity": "error",
+        "path": "filter.x"
+      }
+    ],
+    "failures": []
+  }
+}

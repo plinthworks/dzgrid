@@ -1,0 +1,36 @@
+{
+  "id": "before-day",
+  "suite": "wire",
+  "description": "Before a day ends where that day begins in the zone; the start is open.",
+  "input": {
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "before",
+        "day": "2026-03-05"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "before",
+        "day": "2026-03-05",
+        "resolved": {
+          "from": null,
+          "to": "2026-03-04T23:00:00.000Z"
+        },
+        "zone": "Africa/Algiers"
+      }
+    }
+  }
+}

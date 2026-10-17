@@ -17,9 +17,10 @@ import { parts } from './parts.js';
 import { server } from './server.js';
 import { page } from './page.js';
 import { source } from './source.js';
+import { wire } from './wire.js';
 
 /** A suite turns a case's `input` into what is compared with its `expected`. */
 export type Suite = (input: any) => unknown;
 
 /** Every suite the runner knows, by the name of its folder in `cases/`. */
-export const SUITES: Record<string, Suite> = { ...values, ...rows, ...format, ...columns, ...store, ...sort, ...filter, ...quick, ...model, ...layout, ...selection, ...problems, ...keys, ...kernel, ...operations, ...parts, ...server, ...page, ...source };
+export const SUITES: Record<string, Suite> = { ...values, ...rows, ...format, ...columns, ...store, ...sort, ...filter, ...quick, ...model, ...layout, ...selection, ...problems, ...keys, ...kernel, ...operations, ...parts, ...server, ...page, ...source, ...wire };

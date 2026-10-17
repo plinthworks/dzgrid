@@ -1,0 +1,31 @@
+{
+  "id": "year-out-of-range",
+  "suite": "wire",
+  "description": "After the last millisecond of 9999: the bound falls outside what the wire form can write; invalid-instant, dropped.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "after",
+        "at": "9999-12-31T23:59:59.999Z"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-instant",
+        "filter.t.resolved"
+      ]
+    ]
+  }
+}

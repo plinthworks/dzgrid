@@ -1,0 +1,141 @@
+{
+  "id": "wire-zone-refetch",
+  "suite": "source-model",
+  "description": "Another zone moves a day's bounds: a new epoch, the same filter asked again with the new bounds.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "timeZone": "Africa/Algiers",
+    "steps": [
+      {
+        "op": "query",
+        "filter": {
+          "t": {
+            "type": "instant",
+            "op": "onDay",
+            "day": "2026-03-05"
+          }
+        }
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      },
+      {
+        "op": "ctx",
+        "timeZone": "Asia/Kolkata"
+      },
+      {
+        "op": "answer",
+        "call": "c3",
+        "rows": [
+          "b"
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "t": {
+            "type": "instant",
+            "op": "onDay",
+            "day": "2026-03-05",
+            "resolved": {
+              "from": "2026-03-04T23:00:00.000Z",
+              "to": "2026-03-05T23:00:00.000Z"
+            },
+            "zone": "Africa/Algiers"
+          }
+        }
+      },
+      {
+        "name": "c3",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "t": {
+            "type": "instant",
+            "op": "onDay",
+            "day": "2026-03-05",
+            "resolved": {
+              "from": "2026-03-04T18:30:00.000Z",
+              "to": "2026-03-05T18:30:00.000Z"
+            },
+            "zone": "Asia/Kolkata"
+          }
+        }
+      }
+    ],
+    "aborted": [
+      [
+        "c1",
+        "stale-epoch"
+      ]
+    ],
+    "changes": [
+      "query",
+      "query",
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "b"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 1,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 1,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

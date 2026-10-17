@@ -1,0 +1,36 @@
+{
+  "id": "sao-paulo-no-midnight",
+  "suite": "wire",
+  "description": "4 November 2018 in São Paulo began at 01:00 (midnight never happened) and lasted 23 hours.",
+  "input": {
+    "timeZone": "America/Sao_Paulo",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2018-11-04"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2018-11-04",
+        "resolved": {
+          "from": "2018-11-04T03:00:00.000Z",
+          "to": "2018-11-05T02:00:00.000Z"
+        },
+        "zone": "America/Sao_Paulo"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "unknown-column",
+  "suite": "wire",
+  "description": "A filter on a column that does not exist: unknown-column, dropped.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "filter": {
+      "gone": {
+        "type": "text",
+        "op": "contains",
+        "value": "a"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "unknown-column",
+        "filter.gone"
+      ]
+    ]
+  }
+}

@@ -9,7 +9,7 @@ Picks on, before, after or between, and chooses one or two days.
 ## What DzGrid does
 - A `Day` is never turned into an instant, and no time zone is involved at any point: a birth date is the same day for everyone.
 - A day that does not exist (31 February) is an error in the filter, never rolled into March.
-- The server receives inclusive days `{from, to}`, without a zone.
+- The server receives the model's own fields, cleaned (`docs/behaviors/server-filter.md`): `{type: 'day', op, value, valueTo?}`, civil days without a zone; `between` in order, both ends included.
 
 ## Tests
 `conformance/cases/filter-day/*`.

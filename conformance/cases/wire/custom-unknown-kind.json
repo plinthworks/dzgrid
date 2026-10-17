@@ -1,0 +1,34 @@
+{
+  "id": "custom-unknown-kind",
+  "suite": "wire",
+  "description": "A custom filter whose kind the grid does not know: invalid-filter, dropped.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "between",
+        "state": {
+          "lo": 1,
+          "hi": 5
+        }
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.n"
+      ]
+    ]
+  }
+}

@@ -21,6 +21,7 @@ Types a filter quickly, clicks "next" twice, sorts while a page is loading, or w
 - `destroy` drops every request in flight; their answers are ignored.
 - Debouncing lives in the inputs, not in the core: 300 ms when the operation runs on the server, 150 ms in the browser.
 - A change of the browser's part of the query never reaches the gate: no request.
+- The epoch is the server's part of the query **as sent**: the filter's wire form (`server-filter.md`), the search, the sort, the zone and the params. A filter edit that leaves the wire form unchanged (half-typed, or refused) is not a new epoch.
 
 ## Tests
 - `conformance/cases/server-gate/*.json` (20 cases), `conformance/runner/suites/server.ts`: reversed arrival, two filters close together, a page change during a load, an answer after `destroy`, a stale rejection, an abort reason, a new epoch over the same key, the same key twice, independent channels, a completed request never aborted, precedence of the reasons.

@@ -1,0 +1,111 @@
+{
+  "id": "wire-resolved-bounds",
+  "suite": "source-model",
+  "description": "A day filter on a date-and-time column reaches the server with its resolved UTC bounds and the zone.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "timeZone": "Africa/Algiers",
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 2
+      },
+      {
+        "op": "query",
+        "filter": {
+          "t": {
+            "type": "instant",
+            "op": "onDay",
+            "day": "2026-03-05"
+          }
+        }
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "t": {
+            "type": "instant",
+            "op": "onDay",
+            "day": "2026-03-05",
+            "resolved": {
+              "from": "2026-03-04T23:00:00.000Z",
+              "to": "2026-03-05T23:00:00.000Z"
+            },
+            "zone": "Africa/Algiers"
+          }
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 1,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 1,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

@@ -1,14 +1,12 @@
 import type { AbortHandle, AbortSignalLike } from '../abort.js';
-import type { FilterModel } from '../filter/model.js';
+import type { Json } from '../filter/model.js';
 import type { ModelEnv, SourceBinding, SourceHandle } from '../model/client.js';
 import type { SortItem } from '../sort/compile.js';
 import type { GateDiagnostics } from './gate.js';
+import type { WireFilterModel } from './wire.js';
 
 /** What a request may carry to a server: data that survives JSON. */
-export type Json = null | boolean | number | string | readonly Json[] | { readonly [k: string]: Json };
-
-/** The filters as the server receives them (step 6 turns instants into resolved bounds). */
-export type WireFilterModel = FilterModel;
+export type { Json };
 
 /**
  * The host's side of a server grid: one method that answers a request. It
@@ -20,7 +18,7 @@ export interface DataSource<T> {
 }
 
 export interface DataRequest {
-  /** The server's part of the query, as `splitQuery` places it; an empty search is not sent. */
+  /** The server's part of the query, as `splitQuery` places it; an empty search is not sent. The filter in its wire form (`toWire`). */
   readonly filter?: WireFilterModel;
   readonly quick?: string;
   readonly sort?: readonly SortItem[];

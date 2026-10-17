@@ -1,0 +1,70 @@
+{
+  "id": "between-swapped",
+  "suite": "wire",
+  "description": "Swapped ends: numbers and days put in order, an instant range resolved in order (its fields kept as given).",
+  "input": {
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "number",
+        "op": "between",
+        "value": 9,
+        "valueTo": -2.5
+      },
+      "d": {
+        "type": "day",
+        "op": "between",
+        "value": "2026-03-10",
+        "valueTo": "2026-03-01"
+      },
+      "t": {
+        "type": "instant",
+        "op": "betweenDays",
+        "day": "2026-03-06",
+        "dayTo": "2026-03-05"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "n": {
+        "type": "number",
+        "op": "between",
+        "value": -2.5,
+        "valueTo": 9
+      },
+      "d": {
+        "type": "day",
+        "op": "between",
+        "value": "2026-03-01",
+        "valueTo": "2026-03-10"
+      },
+      "t": {
+        "type": "instant",
+        "op": "betweenDays",
+        "day": "2026-03-06",
+        "dayTo": "2026-03-05",
+        "resolved": {
+          "from": "2026-03-04T23:00:00.000Z",
+          "to": "2026-03-06T23:00:00.000Z"
+        },
+        "zone": "Africa/Algiers"
+      }
+    }
+  }
+}

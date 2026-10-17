@@ -1,0 +1,36 @@
+{
+  "id": "paris-fall-25h",
+  "suite": "wire",
+  "description": "25 October 2026 in Paris lasts 25 hours: the clocks go back.",
+  "input": {
+    "timeZone": "Europe/Paris",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2026-10-25"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2026-10-25",
+        "resolved": {
+          "from": "2026-10-24T22:00:00.000Z",
+          "to": "2026-10-25T23:00:00.000Z"
+        },
+        "zone": "Europe/Paris"
+      }
+    }
+  }
+}

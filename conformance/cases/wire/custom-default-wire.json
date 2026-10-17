@@ -1,0 +1,40 @@
+{
+  "id": "custom-default-wire",
+  "suite": "wire",
+  "description": "A custom kind with no wire function sends its state as the value, under its kind.",
+  "input": {
+    "timeZone": "UTC",
+    "kinds": [
+      "between"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "between",
+        "state": {
+          "lo": 1,
+          "hi": 5
+        }
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "between",
+        "value": {
+          "lo": 1,
+          "hi": 5
+        }
+      }
+    }
+  }
+}

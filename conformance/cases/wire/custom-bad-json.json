@@ -1,0 +1,34 @@
+{
+  "id": "custom-bad-json",
+  "suite": "wire",
+  "description": "A custom kind whose wire form is not JSON (NaN): invalid-filter, dropped.",
+  "input": {
+    "timeZone": "UTC",
+    "kinds": [
+      "bad-json"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "bad-json",
+        "state": 1
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.n"
+      ]
+    ]
+  }
+}

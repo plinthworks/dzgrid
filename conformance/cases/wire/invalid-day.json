@@ -1,0 +1,44 @@
+{
+  "id": "invalid-day",
+  "suite": "wire",
+  "description": "A day that does not exist is refused, in a day filter and in an instant filter's day.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "equals",
+        "value": "2026-02-31"
+      },
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2026-02-30"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-day",
+        "filter.d.value"
+      ],
+      [
+        "invalid-day",
+        "filter.t.day"
+      ]
+    ]
+  }
+}

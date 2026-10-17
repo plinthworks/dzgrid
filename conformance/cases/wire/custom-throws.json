@@ -1,0 +1,48 @@
+{
+  "id": "custom-throws",
+  "suite": "wire",
+  "description": "A custom kind whose wire function throws: invalid-filter, dropped; the other filters still travel.",
+  "input": {
+    "timeZone": "UTC",
+    "kinds": [
+      "throws"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "s"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "throws",
+        "state": 1
+      },
+      "s": {
+        "type": "text",
+        "op": "contains",
+        "value": "é"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "s": {
+        "type": "text",
+        "op": "contains",
+        "value": "é"
+      }
+    },
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.n"
+      ]
+    ]
+  }
+}

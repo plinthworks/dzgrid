@@ -1,5 +1,6 @@
 import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache } from '../packages/core/src/internal.js';
+import { toWire } from '../packages/core/src/server.js';
 import { datasetA, type RowA } from './dataset.js';
 import { msg } from '../packages/dom/src/messages.js';
 import { AR } from '../packages/dom/src/locales/ar.js';
@@ -16,6 +17,23 @@ export const CASES: Record<string, Case> = {
       for (let i = 0; i < 10_000; i++) n += msg(AR, 'announce.rows', { n: i }, ctx).length;
       return n;
     },
+  },
+  // What sourceRows does once per new query, zone or columns (never per page): a cold model each run.
+  'toWire 7 filters (2 instant, Algiers)': {
+    setup: () => ({
+      ctx: localeCtx({ locale: 'fr-FR', timeZone: 'Africa/Algiers' }),
+      columns: createColumnModel<RowA>([{ id: 't0' }, { id: 'n0', type: 'number' }, { id: 'n1', type: 'number' }, { id: 'd0', type: 'day' }, { id: 'i0', type: 'instant' }, { id: 'i1', type: 'instant' }, { id: 'e1' }]),
+      filter: {
+        t0: { type: 'text', op: 'contains', value: 'a' },
+        n0: { type: 'number', op: 'between', value: 9, valueTo: 1 },
+        n1: { type: 'number', op: 'gt', value: 3 },
+        d0: { type: 'day', op: 'between', value: '2026-03-01', valueTo: '2026-03-31' },
+        i0: { type: 'instant', op: 'betweenDays', day: '2026-03-05', dayTo: '2026-03-09' },
+        i1: { type: 'instant', op: 'after', at: '2026-03-05T10:00:00+01:00' },
+        e1: { type: 'set', exclude: ['radiology'] },
+      } as FilterModel,
+    }),
+    run: (c: { ctx: ReturnType<typeof localeCtx>; columns: ReturnType<typeof createColumnModel<RowA>>; filter: FilterModel }) => Object.keys(toWire(c.filter, c).filter).length,
   },
   'zoneDayBounds x 10 000 (Paris, cached formatter)': () => {
     let acc = 0;

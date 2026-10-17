@@ -1,0 +1,31 @@
+{
+  "id": "number-infinity-refused",
+  "suite": "wire",
+  "description": "A number filter takes a finite number: the text \"Infinity\" is refused, at the value.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "number",
+        "op": "gt",
+        "value": "Infinity"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.n.value"
+      ]
+    ]
+  }
+}

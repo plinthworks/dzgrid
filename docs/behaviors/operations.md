@@ -44,3 +44,7 @@ Every refusal is the error problem `invalid-operations` at `operations.<op>` (or
 - `operations: 'client'` with a source: the request carries only `params` and `zone`; it is sent at creation and again only on a refresh, another zone, other params or another source. A language change asks nothing.
 - The quick search warm-up runs on the rows held when the search is in the browser; when the server searches there is nothing to warm.
 - Select-all in a fetched set takes the rows shown, as keys (the browser's *all*); a host's everything-except selection counts the rows the browser kept, and is told again when an answer moves that count.
+
+## Decisions (step 6, 2026-10-17) — the filter on the wire
+- The server's filter is sent in its wire form (`toWire`, `docs/behaviors/server-filter.md`), and the epoch and request keys are made from it, not from the model: a half-typed or refused filter edit changes neither, so it starts no epoch, resets no page and asks nothing. The refused filter is in the model's `problems`.
+- `counts.total` is known when the wire form has no filter (and no search): a filter that is all half-typed or refused does not filter on the server.

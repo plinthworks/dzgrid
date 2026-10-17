@@ -1,0 +1,36 @@
+{
+  "id": "apia-skipped-empty",
+  "suite": "wire",
+  "description": "Samoa skipped 30 December 2011: an empty range, from == to, sent as is.",
+  "input": {
+    "timeZone": "Pacific/Apia",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2011-12-30"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "onDay",
+        "day": "2011-12-30",
+        "resolved": {
+          "from": "2011-12-30T10:00:00.000Z",
+          "to": "2011-12-30T10:00:00.000Z"
+        },
+        "zone": "Pacific/Apia"
+      }
+    }
+  }
+}

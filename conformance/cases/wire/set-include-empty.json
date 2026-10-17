@@ -1,0 +1,30 @@
+{
+  "id": "set-include-empty",
+  "suite": "wire",
+  "description": "A value list with nothing ticked is kept: it keeps no row (blanks only when asked).",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "e"
+      }
+    ],
+    "filter": {
+      "e": {
+        "type": "set",
+        "include": [],
+        "blanks": "include"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "e": {
+        "type": "set",
+        "include": [],
+        "blanks": "include"
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "at-without-offset-ambiguous",
+  "suite": "wire",
+  "description": "A moment written without an offset is never guessed: ambiguous-instant, the filter dropped.",
+  "input": {
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "before",
+        "at": "2026-03-05T10:00"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "ambiguous-instant",
+        "filter.t.at"
+      ]
+    ]
+  }
+}

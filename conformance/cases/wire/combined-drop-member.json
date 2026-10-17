@@ -1,0 +1,47 @@
+{
+  "id": "combined-drop-member",
+  "suite": "wire",
+  "description": "A combination keeps its structure; a half-typed member is dropped; one member left stays combined.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "combined",
+        "join": "and",
+        "conditions": [
+          {
+            "type": "text",
+            "op": "contains",
+            "value": ""
+          },
+          {
+            "type": "text",
+            "op": "startsWith",
+            "value": "Ab"
+          }
+        ]
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "s": {
+        "type": "combined",
+        "join": "and",
+        "conditions": [
+          {
+            "type": "text",
+            "op": "startsWith",
+            "value": "Ab"
+          }
+        ]
+      }
+    }
+  }
+}

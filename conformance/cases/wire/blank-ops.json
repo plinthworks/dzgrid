@@ -1,0 +1,68 @@
+{
+  "id": "blank-ops",
+  "suite": "wire",
+  "description": "Blank and not-blank travel as their type and op alone: a value given with them is not sent.",
+  "input": {
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "s"
+      },
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "text",
+        "op": "blank",
+        "value": "x",
+        "caseSensitive": true
+      },
+      "n": {
+        "type": "number",
+        "op": "notBlank",
+        "value": 3
+      },
+      "d": {
+        "type": "day",
+        "op": "blank"
+      },
+      "t": {
+        "type": "instant",
+        "op": "notBlank",
+        "day": "2026-03-05"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "s": {
+        "type": "text",
+        "op": "blank"
+      },
+      "n": {
+        "type": "number",
+        "op": "notBlank"
+      },
+      "d": {
+        "type": "day",
+        "op": "blank"
+      },
+      "t": {
+        "type": "instant",
+        "op": "notBlank"
+      }
+    }
+  }
+}

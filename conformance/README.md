@@ -28,5 +28,6 @@ One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.j
 | `row-key` | `{ids}` | `{accepted[], problems: [code, path][]}` |
 | `server-gate` | `{steps: (begin \| settle \| reject \| cancel \| newEpoch \| destroy)[]}` | `{outcomes, aborted: [ticket, reason][], diagnostics}` |
 | `source-model` | `{columns, operations, pagination, options?, steps: (query \| go \| size \| refresh \| purge \| swap \| ctx \| destroy \| answer \| fail)[]}`, calls named `c1`, `c2`… | `{calls, aborted: [call, reason][], changes: kind[], final: {status, displayed, page, counts}, problems, failures}` |
+| `wire` | `{locale, timeZone, columns, filter, kinds?}` (`kinds` from the suite's fixture table: `between`, `throws`, `bad-json`) | `{filter, problems?: [code, path][]}`: the filter as the server receives it, through JSON |
 
 Later phases add `sort`, `filter-*`, `server-gate`, `edit-saves`, `paste-plan`, …

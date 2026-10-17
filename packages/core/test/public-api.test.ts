@@ -27,7 +27,7 @@ const INTERNAL = [
 ];
 
 /** `@dzgrid/core/server`: what a grid fed by a server needs, never in the base. */
-const SERVER = ['createGate', 'sourceRows'];
+const SERVER = ['createGate', 'sourceRows', 'toWire'];
 
 describe('the public surface', () => {
   it('keeps the server entry apart', () => {

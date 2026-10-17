@@ -456,6 +456,7 @@ export function createGate(abort: () => AbortHandle): RequestGate;
   - cursor mode passes the right cursor to page 2, then to page 1 back.
 
 ### Step 5: the wire filter model with resolved bounds (core, exit criterion 3)
+*[Superseded: done as Phase 3 step 6 (ROADMAP), signature `toWire(filter, { ctx, columns, kinds? })` and a narrowed `WireFilter` union; day filters travel as the model (`op`, `value`, `valueTo`); see `docs/behaviors/server-filter.md`.]*
 - **Files:** `core/src/server/wire.ts`, `conformance/cases/server-request/*`.
 - **API:**
 ```ts

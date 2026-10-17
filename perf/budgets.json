@@ -3,6 +3,7 @@
   "runs": 7,
   "budgets": {
     "zoneDayBounds x 10 000 (Paris, cached formatter)": 1000,
+    "toWire 7 filters (2 instant, Algiers)": 0.5,
     "assignKeys 100 000 ids": 60,
     "parseDay x 100 000": 20,
     "readInstant ISO x 100 000": 120,

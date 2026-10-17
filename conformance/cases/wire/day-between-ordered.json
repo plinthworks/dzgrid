@@ -1,0 +1,33 @@
+{
+  "id": "day-between-ordered",
+  "suite": "wire",
+  "description": "A day range is civil days with no zone, in order, both ends included: never instants.",
+  "input": {
+    "timeZone": "Pacific/Auckland",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "between",
+        "value": "2026-12-31",
+        "valueTo": "2026-01-01"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "between",
+        "value": "2026-01-01",
+        "valueTo": "2026-12-31"
+      }
+    }
+  }
+}

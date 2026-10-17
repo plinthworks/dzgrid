@@ -1,0 +1,38 @@
+{
+  "id": "at-with-offset",
+  "suite": "wire",
+  "description": "Moments written with their offsets resolve to UTC, milliseconds kept and always written.",
+  "input": {
+    "timeZone": "Asia/Kathmandu",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "between",
+        "at": "2026-03-05T10:00:00+05:45",
+        "atTo": "2026-03-05T12:30:00.250-03:00"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "between",
+        "at": "2026-03-05T10:00:00+05:45",
+        "atTo": "2026-03-05T12:30:00.250-03:00",
+        "resolved": {
+          "from": "2026-03-05T04:15:00.000Z",
+          "to": "2026-03-05T15:30:00.250Z"
+        },
+        "zone": "Asia/Kathmandu"
+      }
+    }
+  }
+}
