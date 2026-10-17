@@ -31,7 +31,7 @@ export const LAYOUT_CSS = `
 :where(.dzg-tooltip) { position: fixed; margin: 0; z-index: 10; }
 :where(.dzg-overlay[hidden], .dzg-tooltip[hidden]) { display: none; }
 :where(.dzg-popup) { position: fixed; margin: 0; z-index: 10; }
-:where(.dzg-popup, .dzg-tooltip)[popover] { position: fixed; inset: auto; margin: 0; overflow: visible; }
+:where(.dzg-popup, .dzg-tooltip)[popover] { position: fixed; inset: auto; margin: 0; overflow: visible; border: 0; padding: 0; background: transparent; color: inherit; }
 :where(.dzg-sr) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 :where(.dzg-live) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 `;

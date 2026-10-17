@@ -11,7 +11,6 @@ import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { MessageKey } from './messages.js';
 import type { HeaderRowSpec } from './render/header.js';
-import type { PopupHost } from './popup.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -51,8 +50,6 @@ export interface GridContext<T> {
     readonly tooltip: HTMLElement;
   };
   readonly live: LiveRegion;
-  /** Popups (filters, menus) in the top layer. */
-  readonly popups: PopupHost;
   readonly tip: Tooltip;
   readonly columns: ColumnModel<T>;
   readonly rows: ClientModel<T>;
@@ -89,5 +86,7 @@ export interface GridContext<T> {
   report(err: unknown): void;
   now(): number;
   rowHeight(): number;
+  /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
+  restoreFocus(): void;
   msg(key: MessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

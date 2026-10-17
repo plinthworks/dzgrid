@@ -1,6 +1,7 @@
 import { fixedInlineStart, type Dir } from './dir.js';
 import { setPx } from './render/rows.js';
 import type { Scope } from './render/scope.js';
+import type { GridContext } from './context.js';
 
 export interface PopupOptions {
   /** Below the anchor (block-end), or beside it toward the end of the line (inline-end). */
@@ -36,13 +37,20 @@ export class PopupHost {
   readonly #doc: Document;
   readonly #root: HTMLElement;
   readonly #dir: () => Dir;
-  readonly #open = new Set<PopupRef>();
+  readonly #open = new Map<PopupRef, HTMLElement>();
+  /** Where focus goes when a popup closes and its anchor is gone (the grid's focused cell). */
+  fallback: () => void = () => {};
 
   constructor(doc: Document, root: HTMLElement, scope: Scope, dir: () => Dir) {
     this.#doc = doc;
     this.#root = root;
     this.#dir = dir;
-    scope.add(() => { for (const p of [...this.#open]) p.close(); });
+    scope.add(() => { for (const p of [...this.#open.keys()]) p.close(); });
+  }
+
+  /** Closes the popups whose anchor left the page (a header recycled, a column hidden). */
+  sweep(): void {
+    for (const [p, anchor] of this.#open) if (!anchor.isConnected) p.close();
   }
 
   open(anchor: HTMLElement, content: HTMLElement, o: PopupOptions): PopupRef {
@@ -86,11 +94,14 @@ export class PopupHost {
         }
         const hadFocus = el.contains(doc.activeElement);
         el.remove();
-        if (hadFocus || o.modal) anchor.focus({ preventScroll: true });
+        if (hadFocus || o.modal || !doc.activeElement || doc.activeElement === doc.body) {
+          if (anchor.isConnected) anchor.focus({ preventScroll: true });
+          else this.fallback();
+        }
         o.onClose?.();
       },
     };
-    this.#open.add(ref);
+    this.#open.set(ref, anchor);
 
     on(el, 'keydown', (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -115,8 +126,9 @@ export class PopupHost {
     });
     if (!o.modal) {
       on(doc, 'pointerdown', (e: PointerEvent) => {
-        const t = e.target as Node | null;
-        if (t && (el.contains(t) || anchor.contains(t))) return;
+        // The path, not the target: inside a shadow root the target is the shadow host.
+        const path = e.composedPath();
+        if (path.includes(el) || path.includes(anchor)) return;
         ref.close();
       }, true);
     }
@@ -145,4 +157,27 @@ export class PopupHost {
       setPx(el, 'inset-inline-start', Math.max(0, Math.min(start, winInline - box.width)));
     }
   }
+}
+
+const hosts = new WeakMap<object, PopupHost>();
+
+/**
+ * The grid's popup host, made by the first feature that needs one (filters,
+ * menus): a grid without them carries none of this. Popups whose anchor
+ * leaves the grid (a header recycled, a column hidden) close, focus back on
+ * the grid's own focus.
+ */
+export function popupsFor(g: GridContext<unknown>): PopupHost {
+  let host = hosts.get(g);
+  if (host) return host;
+  const made = new PopupHost(g.doc, g.el.root, g.scope, () => g.dir);
+  made.fallback = () => g.restoreFocus();
+  const Observer = (g.win as (Window & { MutationObserver?: typeof MutationObserver }) | null)?.MutationObserver;
+  if (Observer) {
+    const mo = new Observer(() => made.sweep());
+    mo.observe(g.el.root, { childList: true, subtree: true });
+    g.scope.add(() => mo.disconnect());
+  }
+  hosts.set(g, made);
+  return made;
 }

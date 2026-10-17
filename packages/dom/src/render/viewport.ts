@@ -35,6 +35,12 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let firstData = false;
   // The cell part of each column: resolved again when the columns or the registry change.
   let parts: { version: number; registry: unknown; byColumn: Map<string, SlotPart<'cell'> | null>; rev: number } = { version: -1, registry: null, byColumn: new Map(), rev: 0 };
+  // Problems already told for this registry: a resize must not tell them again.
+  let told = new Set<string>();
+  // The messages object: a part reading `msg` is rebound when it changes, as cells are.
+  let messages: unknown = null;
+  let messagesRev = 0;
+  let lastH = 0;
   const partFor = (col: ResolvedColumn<any>): SlotPart<'cell'> | null => parts.byColumn.get(col.id) ?? null;
   function resolveParts(): void {
     const registry = g.settings.parts;
@@ -42,10 +48,16 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const cellParts = new Map(Object.entries(registry ?? {}).filter(([, p]) => p.slot === 'cell') as [string, SlotPart<'cell'>][]);
     const names = new Set(cellParts.keys());
     const byColumn = new Map<string, SlotPart<'cell'> | null>();
+    if (parts.registry !== registry) told = new Set();
     const problems = [];
     for (const col of columns.visible()) {
       const r = partNameFor('cell', { id: col.id, type: col.type, ...(col.def.ui && { ui: col.def.ui }) }, names);
-      problems.push(...r.problems);
+      for (const p of r.problems) {
+        const id = `${p.code}|${p.path}`;
+        if (told.has(id)) continue;
+        told.add(id);
+        problems.push(p);
+      }
       byColumn.set(col.id, r.name ? cellParts.get(r.name)! : null);
     }
     parts = { version: columns.version, registry, byColumn, rev: parts.rev + 1 };
@@ -70,8 +82,12 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const check = settings.selection?.checkbox === true && (settings.selection.mode ?? 'none') !== 'none';
     const extra = check ? CHECK_WIDTH : 0;
     resolveParts();
+    if (settings.messages !== messages) {
+      messages = settings.messages;
+      messagesRev++;
+    }
     // Direction too: whether a value is isolated depends on it; and which parts draw cells.
-    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}|${parts.rev}`;
+    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}|${parts.rev}|${messagesRev}`;
     if (ek !== epochKey) {
       epochKey = ek;
       epoch++;
@@ -82,8 +98,12 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       const next = scrollMapper(d.count * h, g.env.maxPhysical ?? MAX_PHYSICAL, box.block);
       // The body grows first: a scroll written before would be clamped to the old height.
       setPx(el.body, 'block-size', next.physicalHeight);
+      // Taller or shorter rows (text zoom): the same row stays at the top, at the same fraction.
+      const keep = lastH > 0 && h !== lastH ? (scroll.logicalTop * h) / lastH : null;
       scroll.setMapper(next);
+      if (keep !== null) scroll.scrollTo(keep);
     }
+    lastH = h;
     const mapper = scroll.mapper!;
     // Rows added or removed by a transaction: the row at the top of the view stays where it was,
     // the top stays the top and the end stays the end.

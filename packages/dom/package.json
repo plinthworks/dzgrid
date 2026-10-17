@@ -9,6 +9,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./popup": {
+      "types": "./src/popup.ts",
+      "default": "./src/popup.ts"
+    },
     "./locales/en": {
       "types": "./src/locales/en.ts",
       "default": "./src/locales/en.ts"

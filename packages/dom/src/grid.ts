@@ -19,7 +19,6 @@ import { RowRenderer, setAttr } from './render/rows.js';
 import { FrameScheduler } from './render/scheduler.js';
 import { Scope } from './render/scope.js';
 import { Tooltip } from './render/tooltip.js';
-import { PopupHost } from './popup.js';
 import { createPainter } from './render/viewport.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
@@ -95,7 +94,6 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     doc, win, env, scope,
     el: { root, viewport, header, body, layer, overlay, tooltip },
     live, tip: new Tooltip(tooltip, scope),
-    popups: new PopupHost(doc, root, scope, () => dir),
     columns, rows, kernel, geometry,
     scheduler: new FrameScheduler(env.raf ?? win, env.sync === true),
     scroll: new ScrollController(geometry),
@@ -107,7 +105,7 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false,
     intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0, remPx: geometry.read().remPx ?? 16,
-    schedule, report,
+    schedule, report, restoreFocus: () => {},
     now: () => win?.performance.now() ?? 0,
     // A density's height at 16 px text, scaled with the reader's text size, whole pixels.
     rowHeight: () => Math.round((ROW_HEIGHT[g.settings.density ?? 'comfortable'] * g.remPx) / 16),
@@ -137,6 +135,10 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
   // ---------- behaviours ----------
   const focus = installFocus(g);
   const painter = createPainter(g, focus);
+  g.restoreFocus = () => {
+    if (g.kernel.focus) focus.focusTo(g.kernel.focus);
+    else viewport.focus({ preventScroll: true });
+  };
   const job = { read: () => geometry.read(), write: (box: ReturnType<typeof geometry.read>) => { g.queued = false; painter.paint(box); } };
   function schedule(): void {
     if (scope.isDisposed || g.queued) return;
@@ -193,12 +195,13 @@ export function createGrid<T>(host: HTMLElement, initial: GridSettings<T>, env: 
     announce: (text) => live.announce(text),
   };
 
-  const instance: GridInstance<T> & { readonly scope: Scope; readonly paints: number; pooledData(): unknown[]; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
+  const instance: GridInstance<T> & { readonly scope: Scope; readonly paints: number; pooledData(): unknown[]; readonly context: GridContext<T>; readonly scroll: { readonly logicalTop: number; readonly mapper: unknown; scrollTo(l: number): void } } = {
     kernel,
     api,
     scope,
     get paints() { return painter.paints; },
     pooledData: () => g.rowRenderer.pooledData(),
+    context: g,
     scroll: {
       get logicalTop() { return g.scroll.logicalTop; },
       get mapper() { return g.scroll.mapper; },

@@ -29,6 +29,14 @@
         "@dzgrid/core/internal"
       ]
     },
+    "@dzgrid/dom/popup": {
+      "file": "packages/dom/src/popup.ts",
+      "maxGzip": 1500,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal"
+      ]
+    },
     "profile: read-only client grid (core + dom + fr)": {
       "file": "perf/profiles/readonly-client.ts",
       "maxGzip": null
