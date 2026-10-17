@@ -92,6 +92,7 @@ The owner also still owes, from Phase 2:
 export interface RowCounts { readonly total: number | null; readonly filtered: number | null; readonly displayed: number }
 export type ModelStatus = { readonly phase: 'idle' } | { readonly phase: 'loading' } | { readonly phase: 'error'; readonly failure: FetchFailure };
 export interface FetchFailure { readonly key: string; readonly page: number; readonly error: unknown }  // the host's error, unchanged
+// [Superseded by phase-3-plugins.md B1.5: `failure` is the host's error itself (unknown); `fetchFailed {error, key, page}` carries the context.]
 export interface ModelChange<T> { readonly source: ChangeSource; readonly displayed: DisplayedRows<T>;
   readonly kind: 'rows' | 'order' | 'query' | 'context' | 'page' | 'status'; readonly transaction?: TransactionResult; readonly problems: readonly Problem[] }
 export interface RowModel<T> {
@@ -119,11 +120,11 @@ export interface RowModelFactory<T, M extends RowModel<T> = RowModel<T>> { reado
 **D2 — Selection on a server model.**
 - **Recommendation:**
   - Include-mode keys survive page, sort and filter changes (invariant 11; `keeps()` is always true).
-  - Select-all on a paged model gives `{ mode: 'exclude', keys: ∅ }`, **bound to the query key at that moment**. Any later query change clears an exclude selection, with source `data` and an announcement, because "all" meant "all rows matching that query".
+  - Select-all on a paged model gives `{ mode: 'exclude', keys: ∅ }`, **bound to the query key at that moment**. Any later query change clears an exclude selection, with source `data` and an announcement, because "all" meant "all rows matching that query". *[Superseded by phase-3-plugins.md B1.6: bound to the filters and the search (later `params` and the zone), not the sort; a sort keeps it.]*
   - `selectionChanged` gains `query: Query | null`, set in exclude mode, so a host bulk action can send `{ exclude, query }` to the server.
-  - `count` is `null` when the total is unknown, which reads as "all rows matching the filters".
+  - `count` is `null` when the total is unknown, which reads as "all rows matching the filters". *[Superseded by phase-3-plugins.md B1.6: `count` = `counts.filtered − excluded`.]*
   - The header box acts on the whole query, not the page. Its tri-state is computed over the page.
-  - The option `selection.selectAll: 'query' | 'page'` exists; the default for paged is `'query'`.
+  - The option `selection.selectAll: 'query' | 'page'` exists; the default for paged is `'query'`. *[Superseded by phase-3-plugins.md B1.6: no such option; a host selects the page with `selection.set`.]*
 - **Reason:** 10⁷ keys are never held in memory, and an exclude set carried over to a different filter would select rows the user never saw.
 
 **D3 — The paged model's API.**
@@ -136,7 +137,7 @@ export interface RowModelFactory<T, M extends RowModel<T> = RowModel<T>> { reado
   - The previous page stays displayed while the next one loads (`status: loading`, `aria-busy`, stale-row styling), so focus and selection keep their rows.
   - A page past the end when the total is known is clamped to the last page and refetched once.
   - **Stale gate:**
-    - one channel, `page`;
+    - one channel, `page`; *[Superseded by phase-3-plugins.md B1.5: the channel is `rows`.]*
     - the latest `seq` in the current epoch wins;
     - superseded requests are aborted;
     - a rejected promise from a stale ticket is dropped silently, and an abort is never an error;
@@ -180,8 +181,8 @@ export function pagedRows<T>(o: PagedOptions<T>): RowModelFactory<T, PagedModel<
     - boolean: all / yes / no;
     - day and instant: operator and date inputs (D6);
     - enum and set: a searchable checkbox list with "blanks" and "select all", virtualised beyond 2 000 values.
-  - **Floating filters** are opt-in per column (`floatingFilter: true`) or grid-wide. They are a second header row: text and number get a live input (debounced 300 ms paged, 150 ms client); the other types get a read-only summary button that opens the popup.
-  - Apply on change. There is no "Apply" button, except the value list in paged mode, where each tick would be a request.
+  - **Floating filters** are opt-in per column (`floatingFilter: true`) or grid-wide. *[Superseded by phase-3-plugins.md B0: `filter.floating` per column, `filters({ floating })` for the grid.]* They are a second header row: text and number get a live input (debounced 300 ms paged, 150 ms client); the other types get a read-only summary button that opens the popup.
+  - Apply on change. There is no "Apply" button, except the value list in paged mode, where each tick would be a request. *[Superseded by phase-3-plugins.md B5.6: the Apply button shows whenever `filter` runs on the server, fetched set included.]*
   - Value-list source, in order:
     1. `enumOptions` (static, translated labels);
     2. client: `setValues()` from the data, with counts, ignoring the column's own filter;
@@ -193,7 +194,7 @@ export function pagedRows<T>(o: PagedOptions<T>): RowModelFactory<T, PagedModel<
 // packages/core/src/columns/defs.ts (additive)
 export type FilterSpec = { readonly ops?: readonly string[]; readonly floating?: boolean; readonly debounceMs?: number;
   readonly values?: 'data' | 'options' | 'host' };
-// ColumnDef: readonly filter?: false | FilterSpec;  readonly floatingFilter?: boolean;
+// ColumnDef: readonly filter?: false | FilterSpec;  readonly floatingFilter?: boolean;   [Superseded by B0: no floatingFilter, FilterSpec.floating]
 // packages/core/src/filter/set-values.ts
 export interface SetValue { readonly value: string /* toExport form */; readonly label: string; readonly count: number | null }
 export function setValues<T>(model: ClientModel<T>, column: string, o?: { search?: string; limit?: number }): { values: readonly SetValue[]; blanks: number; truncated: boolean };
@@ -222,11 +223,11 @@ export const nativeDatePicker: DatePickerAdapter;
   - **Numbers** use the locale's decimal mark when the separator is `;` (`numbers: 'excel'`, the default) and machine form with `numbers: 'raw'`. Excel in French reads `1.5` as text, or as a date.
   - Days are ISO `YYYY-MM-DD`.
   - Instants are written as **wall time in the display zone**, `YYYY-MM-DD HH:mm:ss`, with the zone named in the header (`Date (Africa/Algiers)`). `instants: 'iso'` gives `…Z` instead. This is the same rule as S8.
-  - Enum cells hold the translated label by default; `enums: 'code'` gives the raw code.
+  - Enum cells hold the translated label by default; `enums: 'code'` gives the raw code. These are the "value" rules; `CsvOptions.text: 'display'` writes the displayed text instead (B2.4, step 1 decision).
   - Formula guard: a **text** cell starting with `= + - @ \t \r` gets a `'` prefix. Typed numbers never do.
   - What is exported:
     - client: displayed (filtered and sorted), or selected;
-    - paged: the current page, or the host's `exportAll(req)`, which receives the current `PageRequest` minus page and signal and returns `{ url } | { blob } | void`. 10⁷ rows never go through the client.
+    - paged: the current page, or the host's `exportAll(req)`, which receives the current `PageRequest` minus page and signal and returns `{ url } | { blob } | void`. 10⁷ rows never go through the client. *[Superseded by phase-3-plugins.md B1.3, and `csv-export.md`: `exportAll(req: ExportRequest)`, whose `server` is the `DataRequest` without page and signal; `all` is every row the query matches, `selected` with server pages goes to `exportAll` too.]*
   - **Audit hook:**
     - a settings callback `canExport(req: ExportRequest) => boolean | Promise<boolean>` — false refuses, with an announcement;
     - events `exportRequested`, `exportFinished` and `exportRefused`, which are data only.
@@ -237,7 +238,7 @@ export const nativeDatePicker: DatePickerAdapter;
 // packages/core/src/export/csv.ts (core base, tree-shaken when unused)
 export interface CsvOptions { readonly separator?: ',' | ';' | '\t'; readonly bom?: boolean; readonly header?: boolean;
   readonly sanitizeFormulas?: boolean; readonly numbers?: 'excel' | 'raw'; readonly instants?: 'wall' | 'iso';
-  readonly enums?: 'label' | 'code'; readonly columns?: readonly string[] }
+  readonly enums?: 'label' | 'code'; readonly columns?: readonly string[]; readonly text?: 'value' | 'display' /* step 1 decision */ }
 export function csvSeparatorFor(ctx: LocaleCtx): ',' | ';';
 export function* csvChunks<T>(rows: Iterable<DataNode<T>>, cols: readonly ResolvedColumn<T>[], ctx: LocaleCtx, o?: CsvOptions & { readonly chunkRows?: number }): Generator<string>;
 ```
@@ -342,7 +343,7 @@ Each item is small, its tests are written first, and the existing ~330 tests sta
 
 **0.5 — `update()` as a table per key; columns through the kernel (item 5).**
 - **File:** `dom/src/update.ts`, holding `UPDATE_POLICY: { readonly [K in keyof Required<GridSettings<unknown>>]: 'live' | 'fixed' }`. The type is exhaustive: a new setting without a policy does not compile.
-- `fixed` keys are `getRowId`, `rowModel` and `selection.mode`. Changing one gives the problem `unsupported-live-change` (new code, with a conformance case) and changes nothing.
+- `fixed` keys are `getRowId`, `rowModel` and `selection.mode`. *[Superseded at step 0: `selection` is live (a narrower mode clears); `operations` fixed and `source` live arrive with step 5 of phase-3-plugins.md B4.]* Changing one gives the problem `unsupported-live-change` (new code, with a conformance case) and changes nothing.
 - New kernel commands `columns.set {defs}` and `context.set {ctx}`; `update({ columns })` dispatches `columns.set` with source `host`.
 - **Tests first:**
   - A type test (`@ts-expect-error`) on a policy entry that is missing.
@@ -357,7 +358,7 @@ Each item is small, its tests are written first, and the existing ~330 tests sta
   - A click on the third displayed row after a sort gives `cellClicked` with that row's key (invariant 1).
   - `firstDataRendered` fires exactly once across 3 later updates.
 
-**0.7 — Cell-renderer contract (item 7, D9).**
+**0.7 — Cell-renderer contract (item 7, D9).** *[Superseded by phase-3-plugins.md B2.1: the `Part` contract.]*
 - **Files:** `render/cell-renderer.ts`, `render/rows.ts`.
 - Behaviour:
   - a column with `cells[id]` gets `mount` once per `CellView` for its life (a pool per column);
@@ -372,7 +373,7 @@ Each item is small, its tests are written first, and the existing ~330 tests sta
 
 **0.8 — Tooltip in the top layer; row height follows text zoom (item 8).**
 - **Files:**
-  - `dom/src/popup/popup.ts` (`PopupHost`: `open(anchor, el, { placement: 'block-end' | 'inline-end', modal })`; `popover="manual"` + `showPopover()` when present, else `position: fixed` in `.dzg`; logical placement through `dir.ts`; focus trap and return; Escape closes; owner `popup`);
+  - `dom/src/popup/popup.ts` *[built as its own entry, `@dzgrid/dom/popup`, `popupsFor(g)`; a modal popup stays open on a pointer down outside]* (`PopupHost`: `open(anchor, el, { placement: 'block-end' | 'inline-end', modal })`; `popover="manual"` + `showPopover()` when present, else `position: fixed` in `.dzg`; logical placement through `dir.ts`; focus trap and return; Escape closes; owner `popup`);
   - `render/tooltip.ts` uses the popup host;
   - `render/measure.ts`: `Geometry.read()` also returns `remPx` from a 1 rem probe;
   - row height = `ROW_HEIGHT[density] × remPx / 16`, rounded to a whole pixel.
@@ -438,7 +439,7 @@ export function createGate(abort: () => AbortHandle): RequestGate;
 - **API:** as in D3.
 - **Behaviour:**
   - `setQuery` starts a new epoch, sets page 0 and fetches;
-  - `goTo` and `setPageSize` go through kernel commands `page.go {page}` and `page.size {size}`; `paginationChanged {page, pageSize, total, hasNext}` is a kernel event;
+  - `goTo` and `setPageSize` go through kernel commands `page.go {page}` and `page.size {size}`; `paginationChanged {page, pageSize, total, hasNext}` is a kernel event; *[Superseded by phase-3-plugins.md B1.4: `page.go {index}`, `page.size {size}`, event `pageChanged {page: PageState}`; the model is `sourceRows`, step 5.]*
   - `invalidate()` refetches the same page in a new seq; `{ purge: true }` also clears the selection;
   - responses are validated (`invalid-page-response`; ids through `getRowId`, so `duplicate-row-id` and `invalid-row-id` come from the store);
   - cursor mode keeps `cursors: Map<page, string | null>` per epoch, and `canJump` is false.
@@ -476,7 +477,7 @@ export function toWire<T>(model: FilterModel, cols: ColumnLookup<T>, ctx: Locale
 - **Files:** `kernel.ts`, `conformance/cases/selection-across-pages/*`.
 - **Tests first:**
   - Select r3 on page 0, go to page 2, select r120, come back: both are selected.
-  - Select-all (exclude), untick r7, go to page 5: r7 is unticked and the others ticked; `count` is null for an unknown total and total − 1 for a known one.
+  - Select-all (exclude), untick r7, go to page 5: r7 is unticked and the others ticked; `count` is null for an unknown total and total − 1 for a known one (the server's total is `counts.filtered`).
   - A filter change clears exclude mode (source `data`) but keeps include mode.
   - The header tri-state over the page.
 
@@ -505,7 +506,7 @@ export function toWire<T>(model: FilterModel, cols: ColumnLookup<T>, ctx: Locale
 
 ### Step 9: features seam wired; floating filter row (`@dzgrid/dom/filters`, part 1)
 - **Files:** `dom/src/filters/{index.ts,feature.ts,floating.ts,debounce.ts}`, `dom/package.json` export `./filters`.
-- **API:** `export function filters(o?: { adapter?: DatePickerAdapter; floating?: boolean; debounceMs?: number }): GridFeature`.
+- **API:** `export function filters(o?: { adapter?: DatePickerAdapter; floating?: boolean; debounceMs?: number }): GridFeature`. *[Superseded by phase-3-plugins.md B2.3/B3: the option is `datePicker`.]*
 - **Behaviour:**
   - The floating row is a `HeaderRowSpec`. Text and number inputs carry `data-dzg-owner="filter-input"` and the label `filter.inputLabel {column}`.
   - Enter in a floating cell focuses its input; Escape returns to the cell.
@@ -524,7 +525,7 @@ export function toWire<T>(model: FilterModel, cols: ColumnLookup<T>, ctx: Locale
 - **Behaviour:**
   - The header filter button (≥ 24 px target) and Alt+ArrowDown open a `role="dialog"` popup labelled by the column.
   - Operators come from the column type, restricted by `FilterSpec.ops`; there is an optional second condition with AND/OR, and "Clear".
-  - Focus enters the popup and returns to the header on close.
+  - Focus enters the popup and returns to the header on close. *[Superseded by phase-3-plugins.md B2.6: it returns to the anchor, the filter button or the header cell after Alt+ArrowDown.]*
   - The active mark goes on the header, through a `data-dzg-filtered` class plus text in its accessible name (`filter.active`).
 - **Tests first:**
   - Alt+Down on a header opens the popup and Escape returns focus;
@@ -568,7 +569,7 @@ export function toWire<T>(model: FilterModel, cols: ColumnLookup<T>, ctx: Locale
   - The bar sits in `.dzg-footer`, **outside** `role="grid"`, as `<nav aria-label=…>`.
   - Controls: first / previous / next / last (last disabled when the total is unknown, hidden in cursor mode), a page-size `<select>`, and the range text: `pager.range {from,to,total}`, or `pager.rangeOpen {from,to}` when the total is unknown.
   - The page change is announced (`announce.page`).
-  - From the model status: `status: loading` sets `aria-busy` and the overlay **in the same frame**; `status: error` shows the error overlay with a retry button (`rows.refresh`).
+  - From the model status: `status: loading` sets `aria-busy` and the overlay **in the same frame**; `status: error` shows the error overlay with a retry button (`rows.refresh`). *[Superseded by phase-3-plugins.md B1.5: while loading the rows stay with stale styling and `aria-busy`; the loading overlay only when no rows are held.]*
   - The scroll goes to the top on a page change and stays on a refresh.
 - **Tests first (jsdom, fake fetch):**
   - "next" calls fetch synchronously within the click handler's frame;
@@ -585,7 +586,7 @@ export function toWire<T>(model: FilterModel, cols: ColumnLookup<T>, ctx: Locale
 - **Browser checks, written first:**
   - (a) 1 000 seeded permutations of response order across page and filter gestures: 0 stale responses applied, and the displayed ids always equal those of the last request;
   - (b) axe with the popup open, the floating row, the pager, the error overlay, in fr, ar and RTL;
-  - (c) the loading overlay is present ≤ 100 ms after "next";
+  - (c) the loading overlay is present ≤ 100 ms after "next"; *[Superseded by phase-3-plugins.md B1.5: `aria-busy` and stale styling ≤ 100 ms after "next".]*
   - (d) the palette switched live with the pager shown;
   - (e) screenshots LTR and RTL, light and dark, for the owner.
 
@@ -734,7 +735,7 @@ The audit-screen entry counts the Angular framework as already present in the ap
 | Line | Target |
 |---|---|
 | "next" click to `fetch` called | ≤ 1 frame (≤ 17 ms) |
-| "next" click to `aria-busy` and overlay | ≤ 100 ms (target: same frame) |
+| "next" click to `aria-busy` and overlay *[superseded by B1.5: stale styling, no overlay]* | ≤ 100 ms (target: same frame) |
 | Response to rows painted | ≤ 1 frame, script ≤ 8 ms |
 | Stale responses applied over 1 000 permutations | 0 |
 | Floating filter keystroke handling | ≤ 4 ms; one request per debounce window |

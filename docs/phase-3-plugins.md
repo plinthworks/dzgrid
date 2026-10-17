@@ -61,8 +61,9 @@ The pipeline order is fixed: filter and quick, then sort, then page.
 
 **When the setting is invalid:**
 - `resolveOperations` gives the error problem `invalid-operations` (new code, with a conformance case) at `operations.<op>`.
-- The placement is promoted to server for every stage, which is the only valid reading when `page` is server. The promotion is stated in the problem, never silent.
-- Any `server` placement without a `source` gives the same problem and falls back to client.
+- A client stage under server pages is promoted to server, which is the only valid reading when `page` is server. The promotion is stated in the problem, never silent.
+- Any `server` placement without a `source` gives the same problem and falls back to client (`page: 'server'` to `'off'`).
+- An unknown value keeps that operation's default; a setting that is neither a shorthand nor an object keeps the defaults. (Step 1 decision, 2026-10-17: the code's reading, `operations.md`.)
 
 **Per-column limits:**
 - A column the API cannot sort or filter keeps using the existing flags, `sortable: false` and `filter: false`.
@@ -106,7 +107,7 @@ export interface ValuesRequest { readonly column: string; readonly search: strin
 export function sourceRows<T>(source: DataSource<T>, o?: {
   readonly pageSize?: number; readonly pageSizes?: readonly number[];  // 50, [25, 50, 100]
   readonly paging?: 'offset' | 'cursor';                               // server page only
-  readonly maxRows?: number;     // fetched-set guard, default 100 000 → warning 'fetched-set-large'
+  readonly maxRows?: number;     // fetched-set guard, default 100 000 → warning 'fetched-set-large'; the rows are kept
 }): RowModelFactory<T, SourceModel<T>>;
 ```
 
@@ -172,7 +173,7 @@ displayed = inner.displayed
 - `counts.total` is the length of the fetched set.
 
 **The kernel:**
-- It holds `query` and `page` (D1), and pushes both.
+- It holds `query` and `page` (D1), and pushes both: commands `page.go {index}`, `page.size {size}`, event `pageChanged {page: PageState}` (step 1 decision).
 - It never reads `ops` except to pick the selection rules (§B1.6).
 - `operations` is a **fixed** setting under `UPDATE_POLICY`: changing it live gives `unsupported-live-change`, so the host recreates the grid.
 - `source` is **live**: a new object refetches.
@@ -184,15 +185,16 @@ displayed = inner.displayed
   - the latest seq of the current epoch wins;
   - superseded requests are aborted through `signal`;
   - a stale rejection is dropped silently, and an abort is never an error;
-  - an accepted rejection gives `status: error`, the `fetchFailed` event, and the error overlay with retry (`rows.refresh`);
+  - an accepted rejection gives `status: error` (`failure` = the host's error, unchanged), the `fetchFailed {error, key, page}` event, and the error overlay with retry (`rows.refresh`); the page asked and the last accepted rows are kept under it;
   - `destroy` drops everything in flight.
   - The 1 000-permutation test runs for **both** source configurations.
 - **Unknown total:**
   - If `total` is absent, `hasNext` is required.
   - If both are missing, the model gives the warning `invalid-page-response` and infers `hasNext = rows.length >= size`.
   - The pager shows "51–100 of many" and disables "last".
+  - An empty page past the end steps back to the page before, with `hasNext` false (step 1 decision, `server-pagination.md`).
 - **Cursor:** cursor mode keeps one cursor per page reached in the epoch, so next, previous and back to page 0 work. `canJump` is false, and "last" is hidden.
-- **While loading:** the previous rows stay displayed (`status: loading`, `aria-busy`, stale styling). A page past the end, with a known total, clamps to the last page and refetches once.
+- **While loading:** the previous rows stay displayed (`status: loading`, `aria-busy`, stale styling); no loading overlay over them, only on a first load with no rows. A page past the end, with a known total, clamps to the last page and refetches once.
 - **Debounce:** debouncing stays in the DOM inputs (the core has no timers). The defaults are 300 ms when the operation is on the server and 150 ms on the client.
 
 ### B1.6 Selection rules
@@ -201,9 +203,9 @@ displayed = inner.displayed
 |---|---|---|---|
 | all client | the displayed (filtered) rows, as an include set | keys whose row is gone are dropped (`keeps` = the row exists) | `count` exact |
 | fetched set (`page` off or client) | the displayed rows of the fetched set | a server-part change replaces the set: keys not in the new set are dropped, with source `data` | `count` exact |
-| server page | everything the query matches, as **exclude** mode bound to the query key | include keys survive across pages; exclude mode is cleared on any query change, with an announcement (D2) | `count` is `total − excluded`, or null when the total is unknown; `query` is attached |
+| server page | everything the query matches, as **exclude** mode bound to the filters and the search (later `params` and the zone), not the sort | include keys survive across pages; exclude mode is cleared when the filters or the search change, with an announcement (D2); a sort keeps it | `count` is `counts.filtered − excluded`, or null when unknown; `query` is attached |
 
-The header box's tri-state is always computed over what is displayed (the page, or the list).
+The header box's tri-state is always computed over what is displayed (the page, or the list). A host's exclude selection (`selection.set`) is accepted on any model and tied by the same rule. There is no `selection.selectAll` option (step 1 decision, `server-selection.md`).
 
 ---
 
@@ -216,8 +218,8 @@ The header box's tri-state is always computed over what is displayed (the page, 
 export type Slot = 'cell' | 'header' | 'filter' | 'floating' | 'overlay' | 'tooltip' | 'footer' | 'editor' /* P4 */;
 export interface Part<C> { mount(host: HTMLElement, c: C): PartHandle<C> }
 export interface PartHandle<C> {
-  update(c: C): void;           // same handle, new context (pooled cells, state echo)
-  destroy(): void;              // remove listeners; the grid empties the host after
+  update?(c: C): void;          // same handle, new context (pooled cells, state echo)
+  destroy?(): void;             // remove listeners; the grid empties the host after
   focus?(): boolean;            // grid asks the part to take focus (popup open, Enter on a cell); false = nothing focusable
 }
 export interface SlotPart<S extends Slot = Slot> { readonly slot: S; readonly part: Part<SlotContext[S]> }
@@ -255,9 +257,9 @@ interface FilterSlot {
 **Rules every part follows, enforced by the grid:**
 - **Mount and update:**
   - `mount` is called once per pooled host.
-  - `update` is called only when the context's identity inputs change: the row key, the row data, the epoch, the filter state, or the language or direction.
+  - `update` is called only when the context changed: the row key, the row data, `focused`, the filter state, or what the context carries (language, zone, numerals, direction, messages, the column's definition). A rebind for the row height, the checkbox column or the column window calls nothing.
   - `destroy` is called before reuse elsewhere and on grid `destroy`.
-- **A part that throws** costs only its host: the grid writes empty text and reports the error with `reportError`.
+- **A part that throws** (in `mount`, `update` or `destroy`) costs only its host, for that row: the grid writes empty text and reports the error with `reportError`.
 - **The default text cell is not a part.** It stays on the fast `textContent` path. Registering `cell.text` moves every text column to the part path, on purpose.
 - **Safety:** the grid never writes HTML. A part writes its own DOM, and the existing guards apply to built-in parts (no colour, no literal text, no left or right).
 
@@ -283,7 +285,7 @@ The defaults are registered by features under `<slot>.<type-or-kind>`:
 3. the part a feature registered under that name;
 4. the built-in.
 
-A name that cannot be resolved gives the error problem `unknown-part`. The column then falls back to the default, and a filter with an unknown kind is ignored with `invalid-filter`.
+A name that cannot be resolved among the parts of that slot (a `header` part named in `ui.cell` included) gives the error problem `unknown-part`. The column then falls back to the default, and a filter with an unknown kind is ignored with `invalid-filter`.
 
 **Where parts live:**
 - There is one registry per grid, `settings.parts: Readonly<Record<string, SlotPart>>`.
@@ -307,7 +309,7 @@ readonly format?: (value: V, ctx: LocaleCtx) => string;
 ```
 
 - `format` drives the displayed text, `CellCtx.text`, the tooltip default and the **quick search haystack**.
-- CSV keeps the machine form (`toExport`), unless the option `csv: { text: 'display' }` is set. Owner decision 8.
+- CSV writes values by D7's rules, never `format`, unless `CsvOptions.text: 'display'` is set. Owner decision 8 (step 1 decision, `csv-export.md`).
 - The formatter must be pure: the haystack caches depend on that.
 
 ### B2.5 FilterKind: how a custom filter joins the model and the request
@@ -340,9 +342,9 @@ export interface FilterKind<S extends Json = Json, V = unknown> {
 ### B2.6 Accessibility, RTL, messages
 
 - **Popup filter:**
-  - The popup is `role="dialog"` with `aria-labelledby` pointing at the column header text.
+  - The popup is `role="dialog"`, named by `aria-label` from `filter.popupLabel {column}` (step 1 decision; not `aria-labelledby`).
   - It opens from the header filter button (≥ 24 px) or with Alt+ArrowDown on the header. The `openMenu` intent's owner is `header`.
-  - Focus goes to `part.focus()`, or to the first focusable element. Tab is trapped inside, and Escape closes and returns focus to the button.
+  - Focus goes to `part.focus()`, or to the first focusable element. Tab is trapped inside, a pointer down outside does not close it, and Escape closes and returns focus to the anchor (the button, or the header cell after Alt+ArrowDown).
   - It is placed logically (block-end, inline-start in the reading direction) through `dir.ts` and the top-layer popup host from step 0.8.
 - **Floating row:**
   - It is a header row (step 0.3), with cells that take focus in the grid's roving order.
@@ -351,11 +353,11 @@ export interface FilterKind<S extends Json = Json, V = unknown> {
   - An unreadable number gets `aria-invalid` and no dispatch.
 - **Cell parts with controls (buttons, links):**
   - The cell keeps grid focus. Enter calls `focus()` on the part, and Tab cycles inside it, as in the WAI-ARIA grid pattern for widgets in cells. Escape returns to the cell.
-  - The part's container carries `data-dzg-owner="cell-widget"`.
+  - The owner `cell-widget` is inferred from the control (`keys/owner.ts`); the part's container need not carry `data-dzg-owner`. Enter or F2 calls `focus()`.
 - **Footer:** the page change is announced (`announce.page`), and focus stays on the control that was used.
 - **Messages:**
   - Built-in parts use only `MessageKey`s. The guards forbid literal text.
-  - Host parts may use `app.*` keys, which the host adds to its `messages` bundle. `checkMessages` reports missing `app.*` keys used by registered parts, as a warning.
+  - Host parts may use `app.*` keys, which the host adds to its `messages` bundle. An `app.*` key missing from the bundle gives the key itself and the warning `missing-message`, once per key (step 1 decision: it is found when used, not by `checkMessages`).
   - Bundles stay one per language, within 2 kB gz each.
 
 ### B2.7 The Angular adapter (Phase 3, step 22)
@@ -446,7 +448,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 - What changes:
   - `fetch` now receives `req.page`;
   - the pager shows "of many" when there is no `total`;
-  - select-all switches to exclude mode bound to the query (§B1.6);
+  - select-all switches to exclude mode bound to the filters and the search (§B1.6);
   - CSV "all" goes through `exportAll` (D7).
 - In Angular, `[operations]` is fixed: the host swaps it under `@if`, as D8 already prescribes for `rowModel`.
 
@@ -458,7 +460,8 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 |---|---|
 | `@dzgrid/core` | kernel; `RowModel` contract; `ClientModel` with the page stage; `resolveOperations` and `splitQuery`; `FilterKind` and the custom variant; `setValues`; CSV |
 | `@dzgrid/core/server` | gate; `sourceRows`; `toWire` |
-| `@dzgrid/dom` | `createGrid`; `Part`, `definePart`; registry resolution; popup host; default header, overlay and tooltip parts |
+| `@dzgrid/dom` | `createGrid`; `Part`, `definePart`; registry resolution; default header, overlay and tooltip parts |
+| `@dzgrid/dom/popup` | the popup host (`popupsFor(g)`), imported by the features that open popups |
 | `@dzgrid/dom/filters` | `filters({ datePicker?, floating?, debounceMs? })`: the six `filter.*` parts, `floating.text` and `floating.number`, the summary floating part, `bindQuickSearch`. The value list is loaded lazily inside it (cut 3). |
 | `@dzgrid/dom/pagination` | `pagination()`: `footer.pager`, `footer.count`, `footer.selected` |
 | `@dzgrid/dom/parts` | `cell.badge`, `cell.boolean` (small, optional) |
@@ -565,6 +568,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
    - Each of filter, search, sort and paging is set to "browser" or "server" in one setting, with `'server'` as the default when you give a fetch function.
    - The one rule: **if paging is on the server, everything else must be too.** Otherwise one page would be filtered or sorted alone and the counts would lie.
    - An invalid setting is refused with a clear error and treated as "all server". OK?
+   - *Step 1 (2026-10-17):* the reading is per refusal, as `resolveOperations` does it: "server" only under server pages; a server placement without a source is read as the browser; an unknown value keeps the default (`operations.md`).
 2. **The "fetched set" mode in Phase 3**: the server filters and sorts, and the browser pages a result of up to 100 000 rows, with a warning above that. Keep it in Phase 3, or ship only "all browser" and "all server" now?
 3. **Plug-ins are referenced by name**: you register `statusBadge` once (app-wide in Angular) and columns say `ui: { cell: 'statusBadge' }`. Column definitions stay plain data, which can be saved and shared. There is no second way of passing objects directly. OK?
 4. **Custom filters**: a custom filter is a small pure description (its saved state, how to test a row in the browser, what to send to the server) plus its screen part. A filter with no browser test works only when filtering is on the server. OK?
