@@ -21,7 +21,8 @@ export function installWarmup<T>(g: GridContext<T>): { warm(): void } {
     if (e.type !== 'modelUpdated') return;
     const emptied = quickBefore.trim() !== '' && g.kernel.query.quick.trim() === '';
     quickBefore = g.kernel.query.quick;
-    if (e.kind === 'rows' || e.kind === 'context' || emptied) warm();
+    // A server's rows arrive as a new query or page: prepare their search too (done at once when it runs there).
+    if (e.kind === 'rows' || e.kind === 'context' || emptied || (g.rows.kind === 'source' && (e.kind === 'query' || e.kind === 'page'))) warm();
   }));
   return { warm };
 }

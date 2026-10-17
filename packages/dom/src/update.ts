@@ -58,8 +58,9 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
   const refused = liveChangeProblems(UPDATE_POLICY, prev as unknown as Record<string, unknown>, input as Record<string, unknown>);
   // Rows go to the browser's model, a source to a server's: never the one to the other.
   const served = g.rows.kind === 'source';
-  if ('rows' in input && served) refused.push(problem('unsupported-live-change', 'error', 'settings.rows'));
-  if ('source' in input && (!served || !input.source)) refused.push(problem('unsupported-live-change', 'error', 'settings.source'));
+  // A settings object spread whole leaves them undefined: no change. A source cannot be taken away.
+  if (served && input.rows !== undefined) refused.push(problem('unsupported-live-change', 'error', 'settings.rows'));
+  if ('source' in input && (served ? !input.source : input.source)) refused.push(problem('unsupported-live-change', 'error', 'settings.source'));
   const patch: { -readonly [K in keyof GridSettings<T>]?: GridSettings<T>[K] } = { ...input };
   for (const p of refused) delete patch[p.path.slice('settings.'.length) as keyof GridSettings<T>];
   if (refused.length) emit(g.kernel, { type: 'problems', source: 'host', problems: refused });

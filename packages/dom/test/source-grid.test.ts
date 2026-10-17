@@ -141,3 +141,41 @@ describe('a grid fed by a server', () => {
     expect(told.some((e) => e.type === 'problems' && e.problems.some((p) => p.code === 'invalid-operations'))).toBe(true);
   });
 });
+
+describe('step 5 part 4 review', () => {
+  it('prepares a browser search over the rows a server sent, once they arrive', () => {
+    const t = make({ operations: { filter: 'server', sort: 'server', quick: 'client', page: 'client' }, searchWarmup: 'idle' });
+    const model = t.g.kernel.rows as { warmSearch?: () => unknown };
+    let warmed = 0;
+    const real = model.warmSearch!.bind(model);
+    model.warmSearch = () => { warmed++; return real(); };
+    t.f.answer(['a', 'b'], {});
+    expect(warmed).toBeGreaterThan(0);
+  });
+
+  it('takes a settings object spread whole: rows or source left undefined are not a change', () => {
+    const t = make();
+    t.g.update({ rows: undefined, locale: 'en-US' } as never);
+    const host = document.createElement('div');
+    document.body.append(host);
+    const told: GridEvent<R>[] = [];
+    const plain = createGrid<R>(host, { rows: [], getRowId: (r: R) => r.id, columns: [{ id: 'name' }], messages: EN, onEvent: (e: GridEvent<R>) => told.push(e) }, { sync: true });
+    grids.push(plain as never);
+    plain.update({ source: undefined, locale: 'en-US' } as never);
+    const problems = [...t.events, ...told].filter((e) => e.type === 'problems');
+    expect(problems).toEqual([]);
+  });
+
+  it('tells a failure of the very first request, even a synchronous one', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const told: GridEvent<R>[] = [];
+    const error = new Error('down');
+    const source: DataSource<R> = { fetch: () => { throw error; } };
+    const g = createGrid<R>(host, { source: sourceRows(source), operations: 'server', getRowId: (r: R) => r.id, columns: [{ id: 'name' }], messages: EN, onEvent: (e: GridEvent<R>) => told.push(e) } as never, { sync: true });
+    grids.push(g as never);
+    expect(told.find((e) => e.type === 'fetchFailed')).toMatchObject({ error });
+    await new Promise((r) => setTimeout(r, 200));
+    expect(host.querySelector('[aria-live]')!.textContent).toContain(EN.text['announce.error']);
+  });
+});
