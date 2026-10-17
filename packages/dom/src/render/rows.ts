@@ -18,6 +18,8 @@ export interface CellView {
   /** A part drawing this cell, when its column has one (the text node is then detached). */
   part: SlotPart<'cell'> | null;
   handle: PartHandle<SlotContext['cell']> | null;
+  /** The row a part failed on: not tried again until the cell shows another row, or this one changed. */
+  failed: unknown;
 }
 
 export interface RowView {
@@ -138,7 +140,7 @@ export class RowRenderer<T> {
     el.tabIndex = -1;
     const text = this.#doc.createTextNode('');
     el.append(text);
-    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN, part: null, handle: null };
+    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN, part: null, handle: null, failed: undefined };
   }
 
   /**
@@ -300,6 +302,7 @@ export class RowRenderer<T> {
     const handle = cell.handle;
     cell.part = null;
     cell.handle = null;
+    cell.failed = undefined;
     try {
       handle?.destroy?.();
     } catch {
@@ -333,8 +336,10 @@ export class RowRenderer<T> {
     const { value, text } = data === undefined ? { value: null, text: '' } : cellValue(col, data as never, f.ctx);
     const part = f.partFor(col);
     if (part || cell.part) {
-      if (cell.part && (cell.part !== part || cell.col?.id !== col.id)) this.#unpart(cell);
+      if (cell.part && cell.part !== part) this.#unpart(cell);
       if (part) {
+        // A part that threw on this very row is not tried again at every paint.
+        if (!cell.handle && cell.part === part && cell.failed === data) return;
         const c: SlotContext['cell'] = { ...f.partBase, value, text, row: data as never, key, column: col };
         try {
           if (!cell.handle) {
@@ -343,9 +348,11 @@ export class RowRenderer<T> {
             cell.handle = part.part.mount(cell.el, c);
           } else cell.handle.update?.(c);
         } catch (err) {
-          // A part that throws costs its cell: empty, and the error reported.
+          // A part that throws costs its cell, for this row only: destroyed, the cell empty, the
+          // error reported; the next row (or this one changed) mounts it afresh.
+          this.#unpart(cell);
           cell.part = part;
-          cell.handle ??= {};
+          cell.failed = data;
           cell.el.replaceChildren();
           f.report(err);
         }
