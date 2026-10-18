@@ -30,7 +30,7 @@ En cours : l'étape 9b (fusions). Commit 1 « points d'accroche » fait, relu, t
 - Réponses en français, courtes, sans jargon.
 - Avant chaque étape : un architecte (lecture seule) fait le plan. Après chaque changement : une relecture de code et une analyse des tests (erreurs volontaires dans une copie du dépôt). Les défauts trouvés sont corrigés, tests d'abord.
 - Tests d'abord : un test doit échouer avant la correction.
-- Commits en local seulement : jamais de push. Trailer de chaque commit :
+- Dépôt : https://github.com/plinthworks/dzgrid (remote `origin`, SSH). Le propriétaire a autorisé le push (2026-10-18) : on pousse `main` après des commits vérifiés (suite verte), jamais de travail non commité, jamais de force-push. Trailer de chaque commit :
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` puis `Claude-Session: https://claude.ai/code/session_01SD5iJWfHF82x2mQCxir8Qs`.
 - Ne commiter que si la suite complète passe (`npm run test:ci && npm run typecheck && npm run check:size`).
 - Salle blanche (`CLEANROOM.md`) : jamais le code d'une autre grille. Ne jamais lire `~/Dev/sehhaty` ni `~/Dev/sehhaty-dashboard` : demander au propriétaire.
