@@ -388,6 +388,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
       const split = splitQuery(q, ops);
       return canonical({ wire: split.server.filter && wireOf(split.server.filter).filter, quick: split.server.quick, client: inner.membershipOf(split.client), params });
     },
+    // A fetched set filters and searches its held rows in the browser: which of them match is known.
+    ...(!serverPages && { matches: inner.matches }),
     get scope() { return { params, zone: ctx.timeZone }; },
     row: inner.row,
     get page() {

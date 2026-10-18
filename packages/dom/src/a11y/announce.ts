@@ -15,8 +15,8 @@ export function announceSort<T>(g: GridContext<T>, sort: readonly SortItem[]): v
 
 /**
  * What the user selected (the count, or all matching rows when it is unknown),
- * or what the data took away: "all" cleared, rows dropped. A sentence is said
- * once until it changes.
+ * or what the data took away: "all" cleared, rows dropped. A sentence is not
+ * said twice in a row: unless the live region said something else meanwhile.
  */
 export function selectionAnnouncer<T>(g: GridContext<T>): (e: Extract<GridEvent<T>, { type: 'selectionChanged' }>) => void {
   let said = '';
@@ -30,7 +30,7 @@ export function selectionAnnouncer<T>(g: GridContext<T>): (e: Extract<GridEvent<
       said = '';
       return;
     }
-    if (text === said) return;
+    if (text === said && g.live.said === text) return;
     said = text;
     g.live.announce(text);
   };

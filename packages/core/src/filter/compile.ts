@@ -29,23 +29,30 @@ const INACTIVE = Symbol('inactive');
  * Negations are exact complements (D4): `notX` is `!X`, so blanks, which no
  * comparison matches, are kept by every negation.
  *
+ * `applied`: the filters that apply, the half-typed and the refused left out
+ * (which rows match reads these, as the wire form does for a server).
+ *
  * `kinds`: the custom filter kinds by name. A rule that throws on a row does
  * not keep it, and is said once in `problems` (filled as the rows are tested).
  */
-export function compileFilter<T>(model: FilterModel, env: ColumnEnv<T>, kinds?: Lookup): CompiledFilter {
+export function compileFilter<T>(model: FilterModel, env: ColumnEnv<T>, kinds?: Lookup): CompiledFilter & { readonly applied: FilterModel } {
   const problems: Problem[] = [];
   const tests: RowTest[] = [];
+  const applied: Record<string, ColumnFilter> = {};
   for (const [colId, f] of Object.entries(model ?? {})) {
     const path = `filter.${colId}`;
     const col = env.columns.get(colId);
     if (!col) { problems.push(problem('unknown-column', 'error', path)); continue; }
     if (!col.filterable) { problems.push(problem('invalid-filter', 'error', path)); continue; }
     const t = compileOne(col, f, path, env, problems, 1, kinds);
-    if (t !== null && t !== INACTIVE) tests.push(t);
+    if (t !== null && t !== INACTIVE) {
+      tests.push(t);
+      applied[colId] = t.a ?? f;
+    }
   }
-  if (!tests.length) return { active: false, test: () => true, problems };
+  if (!tests.length) return { active: false, test: () => true, problems, applied };
   const test: RowTest = tests.length === 1 ? tests[0]! : (src) => tests.every((t) => t(src));
-  return { active: true, test, problems };
+  return { active: true, test, problems, applied };
 }
 
 /** The rows that pass every active test, in the order given; null when nothing filters. */
@@ -63,7 +70,8 @@ export function filterIndices(count: number, filters: readonly CompiledFilter[],
   return out.slice(0, n);
 }
 
-type Compiled = RowTest | typeof INACTIVE | null;
+/** A combined filter's test carries the conditions that apply (`a`). */
+type Compiled = (RowTest & { a?: ColumnFilter }) | typeof INACTIVE | null;
 type Lookup = (name: string) => AnyFilterKind | undefined;
 
 function compileOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: ColumnEnv<T>, problems: Problem[], depth: number, kinds?: Lookup): Compiled {
@@ -88,7 +96,9 @@ function compileOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, en
       if (parts.some((p) => p === null)) return null;
       const live = parts.filter((p): p is RowTest => p !== INACTIVE);
       if (!live.length) return INACTIVE;
-      return f.join === 'and' ? (src) => live.every((t) => t(src)) : (src) => live.some((t) => t(src));
+      const t: Compiled = f.join === 'and' ? (src) => live.every((t) => t(src)) : (src) => live.some((t) => t(src));
+      t.a = { ...f, conditions: f.conditions.flatMap((c, i) => (parts[i] === INACTIVE ? [] : [parts[i]!.a ?? c])) };
+      return t;
     }
     case 'custom': return customTest(col, f, path, env, problems, kinds);
     default:

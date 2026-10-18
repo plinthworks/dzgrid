@@ -17,9 +17,12 @@ export class LiveRegion {
   }
 
   #cancel: (() => void) | null = null;
+  /** The last sentence asked for, whoever asked. */
+  said = '';
 
   /** A newer sentence replaces one not yet said: it is never read late, out of order. */
   announce(text: string): void {
+    this.said = text;
     this.#cancel?.();
     this.el.textContent = '';
     this.#cancel = this.#scope.timeout(() => {

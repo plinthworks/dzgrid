@@ -170,8 +170,16 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     return true;
   };
   /** State first, then the event: whoever hears it reads the new state. */
-  // Everything-except over the rows the filters match: their count, not the total's.
-  const countNow = (): number | null => selectionCount(selection, allOf !== null ? rows.counts.filtered : rows.counts.total);
+  // Everything-except over the rows the filters match: their count, not the total's. In the
+  // browser, less the unticked rows that match (one the filters hide takes nothing away);
+  // on server pages, less every unticked key.
+  const countNow = (): number | null => {
+    const n = allOf !== null ? rows.counts.filtered : rows.counts.total;
+    if (allOf === null || n === null || !rows.matches) return selectionCount(selection, n);
+    let c = n;
+    for (const key of selection.keys) if (rows.matches(key)) c--;
+    return c;
+  };
   /** The count last told: an everything-except selection is told again when a server's answer moves it. */
   let toldCount: number | null = null;
   const tied = (): boolean => selection.mode === 'exclude' && allOf !== null;
@@ -362,7 +370,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         rows.invalidate();
         return OK;
       case 'selection.all':
-        if (rows.selectAll === 'query') return selectQuery(source);
+        // An all-pages selection stays one: "all" again ticks the rows unticked, never only the page.
+        if (rows.selectAll === 'query' || tied()) return selectQuery(source);
         return dispatch({ type: 'selection.allDisplayed' }, source);
       case 'selection.allFiltered':
         if (rows.selectAll === 'query') return selectQuery(source);
@@ -439,7 +448,9 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     let state: HeaderSelection;
     // Server pages: the box's click acts on the whole query, so it speaks for it.
     if (selection.mode === 'exclude') state = countNow() === 0 ? 'none' : selection.keys.size === 0 ? 'all' : 'some';
-    else state = selection.keys.size === 0 ? 'none' : n === selection.keys.size ? 'all' : 'some';
+    // Include: as many keys as the query matches is not enough (they may be another query's):
+    // every row shown must be ticked too.
+    else state = selection.keys.size === 0 ? 'none' : n === selection.keys.size && headerSelection(selection, rows.displayed) === 'all' ? 'all' : 'some';
     header = { s: selection, d: rows.displayed, n, state };
     return state;
   };

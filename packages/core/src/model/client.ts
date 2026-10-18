@@ -4,7 +4,7 @@ import type { AnyFilterKind } from '../filter/kind.js';
 import { NO_OVERLAY, type ValueReader } from '../columns/defs.js';
 import { compileFilter, filterIndices } from '../filter/compile.js';
 import { canNarrow, compileQuick, quickWords } from '../filter/quick.js';
-import type { RowIdInput, RowKey } from '../ids.js';
+import { idOfDataKey, type RowIdInput, type RowKey } from '../ids.js';
 import type { DataNode } from '../row/node.js';
 import type { Problem } from '../problems.js';
 import { flatDisplayed, type DisplayedRows } from '../row/displayed.js';
@@ -83,6 +83,8 @@ export interface RowModel<T> {
    * and the columns a search in the browser reads. Never the sort or the page.
    */
   membershipOf(q: Query): string;
+  /** In the browser (and a fetched set): whether a held row passes the filters and the search now. */
+  matches?(key: RowKey): boolean;
   readonly scope: RowScope;
   /** A row by its key: any held row in the browser, the current page on a server. */
   row(key: RowKey): DataNode<T> | undefined;
@@ -191,6 +193,15 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   let filtered: { in: Inputs; words: readonly string[]; order: Uint32Array | null; mask: Uint8Array | null; problems: readonly Problem[] } | null = null;
   let sorted: { in: Inputs; sort: string; input: Uint32Array | null; order: Uint32Array | null; problems: readonly Problem[] } | null = null;
   let displayed: DisplayedRows<T>;
+  /** The filters that apply, as a key, for a filter model under these columns and context. */
+  let applied: { f: unknown; in: Inputs; key: string } | null = null;
+  const appliedKey = (f: Query['filter']): string => {
+    const now = inputs();
+    if (!applied || applied.f !== f || applied.in.colsRef !== now.colsRef || applied.in.cols !== now.cols || applied.in.ctx !== now.ctx) {
+      applied = { f, in: now, key: canonical(compileFilter(f, env(), o.filterKinds).applied) };
+    }
+    return applied.key;
+  };
 
   const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache });
   /** The columns a search reads. */
@@ -216,6 +227,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       d.filterRuns++;
       const e = env();
       const f = compileFilter(query.filter, e, o.filterKinds);
+      applied = { f: query.filter, in: now, key: canonical(f.applied) };
       const words = quickWords(query.quick);
       const q = compileQuick(query.quick, columns.visible(), e);
       // Typing on: when only the search changed and its words narrow the old ones, search the old matches.
@@ -334,11 +346,15 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     ops: { filter: 'client', quick: 'client', sort: 'client', page: pageCfg ? 'client' : 'off' },
     selectAll: 'displayed',
     keeps: (key) => store.get(key) !== undefined,
-    // Which rows match: the search by its words (spaces aside), over the set of columns it reads
-    // (their order and pinning aside).
+    // Which rows match: the filters that apply (a half-typed one is none), the search by its
+    // words (spaces aside), over the set of columns it reads (their order and pinning aside).
     membershipOf: (q) => {
       const words = quickWords(q.quick);
-      return canonical({ filter: q.filter, quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
+      return canonical({ filter: appliedKey(q.filter), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
+    },
+    matches: (key) => {
+      const src = store.snapshot.lookup(idOfDataKey(key) ?? '');
+      return src !== -1 && (!filtered?.mask || filtered.mask[src] === 1);
     },
     get scope() { return { params: NO_PARAMS, zone: ctx.timeZone }; },
     row: (key) => store.get(key),
