@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>S12 AX</title>
+<style>
+  body { font: 13px system-ui, sans-serif; margin: 16px; }
+  .g { display: grid; grid-template-columns: repeat(6, 110px); border: 1px solid #888; }
+  [role=row], [role=rowgroup] { display: contents; }
+  .g div:not([role=row]):not([role=rowgroup]) { border: 1px solid #ddd; padding: 4px; }
+  .sr { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+</style></head>
+<body>
+<!--
+  A grid in the shape the build will produce: role=grid, rowgroups, rows with exact aria-rowindex,
+  spans on the origin cell (aria-rowspan / aria-colspan). What goes in a covered slot is the variable:
+    ?fill=none     nothing (blueprint D)
+    ?fill=hidden   <div role=gridcell aria-hidden=true>
+    ?fill=empty    <div role=gridcell> with no text
+    ?fill=repeat   <div role=gridcell> repeating the value, visually hidden (O10)
+  and in the group header row, for the 2nd..nth column of a group:
+    ?hfill=none | hidden | empty   (same meaning, role=columnheader)
+-->
+<div id="g" class="g" role="grid" aria-label="Spans" aria-rowcount="9" aria-colcount="6"></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const fill = q.get('fill') ?? 'none', hfill = q.get('hfill') ?? 'none';
+  // [rowindex, [[colindex, text, rows, cols, role]]]; a covered slot is ['cov', colindex, text].
+  const header = [
+    [1, [[1, 'Patient', 1, 2, 'columnheader'], ['hcov', 2, 'Patient'], [3, 'Measures', 1, 3, 'columnheader'], ['hcov', 4, 'Measures'], ['hcov', 5, 'Measures']]],
+    [2, [[1, 'Ward'], [2, 'Name'], [3, 'Pulse'], [4, 'Temp'], [5, 'BP'], [6, 'Note']].map((c) => [...c, 1, 1, 'columnheader'])],
+  ];
+  const body = [
+    [3, [[1, 'Ward A', 3, 1], [2, 'Amina', 1, 1, 'rowheader'], [3, '71'], [4, 'Block 2x2', 2, 2], ['cov', 5, 'Block 2x2'], [6, 'n3']]],
+    [4, [['cov', 1, 'Ward A'], [2, 'Bilal', 1, 1, 'rowheader'], [3, '72'], ['cov', 4, 'Block 2x2'], ['cov', 5, 'Block 2x2'], [6, 'n4']]],
+    [5, [['cov', 1, 'Ward A'], [2, 'Chafia', 1, 1, 'rowheader'], [3, '73'], [4, '36.8'], [5, '12/8'], [6, 'n5']]],
+    [6, [[1, 'Ward B'], [2, 'Djamel', 1, 1, 'rowheader'], [3, 'Total over three columns', 1, 3], ['cov', 4, 'Total over three columns'], ['cov', 5, 'Total over three columns'], [6, 'n6']]],
+    [7, [[1, 'Full-width row: transferred', 1, 6]]],
+    // A rowspan whose second row (9) is virtualised away.
+    [8, [[1, 'Ward C', 2, 1], [2, 'Elias', 1, 1, 'rowheader'], [3, '74'], [4, '37.0'], [5, '13/8'], [6, 'n8']]],
+  ];
+  const g = document.getElementById('g');
+  for (const [part, rows] of [['head', header], ['body', body]]) {
+    const rg = document.createElement('div');
+    rg.setAttribute('role', 'rowgroup');
+    for (const [ri, cells] of rows) {
+      const r = document.createElement('div');
+      r.setAttribute('role', 'row');
+      r.setAttribute('aria-rowindex', String(ri));
+      for (const c of cells) {
+        const d = document.createElement('div');
+        if (c[0] === 'cov' || c[0] === 'hcov') {
+          const how = c[0] === 'cov' ? fill : hfill;
+          if (how === 'none') continue;
+          d.setAttribute('role', c[0] === 'cov' ? 'gridcell' : 'columnheader');
+          d.setAttribute('aria-colindex', String(c[1]));
+          d.dataset.placeholder = '';
+          if (how === 'hidden') d.setAttribute('aria-hidden', 'true');
+          if (how === 'repeat') { const s = document.createElement('span'); s.className = 'sr'; s.textContent = c[2]; d.append(s); }
+          // A real box, as a slot filler would be in the grid, but out of the CSS grid's flow here.
+          d.style.cssText = 'position:absolute;inline-size:1px;block-size:1px;overflow:hidden;padding:0;border:0';
+          r.append(d);
+          continue;
+        }
+        const [ci, text, rs = 1, cs = 1, role = 'gridcell'] = c;
+        d.setAttribute('role', role);
+        d.setAttribute('aria-colindex', String(ci));
+        if (rs > 1) d.setAttribute('aria-rowspan', String(rs));
+        if (cs > 1) d.setAttribute('aria-colspan', String(cs));
+        d.style.gridColumn = `${ci} / span ${cs}`;
+        d.style.gridRow = `${ri} / span ${rs}`;
+        d.textContent = text;
+        r.append(d);
+      }
+      rg.append(r);
+    }
+    g.append(rg);
+  }
+  window.ready = true;
+</script>
+</body>
+</html>

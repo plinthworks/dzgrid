@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>S12 spans</title>
+<style>
+  /* Colours are picked to be told apart in a screenshot, not to look good. */
+  :root {
+    --s-bg: #ffffff; --s-fg: #1a1a1a; --s-line: #c8c8c8; --s-head: #e8eaf0;
+    --s-tint: #cfe0ff;   /* selected row */
+    --s-pin: #f0f0f0;    /* pinned plain cell */
+    --s-center: #e2f5e9; /* centre plain cell: if it shows inside a pinned column, something leaked */
+    --s-tall: #ffe08a;   /* a tall cell painted opaque (opaque=1) */
+  }
+  body { margin: 16px; background: var(--s-bg); color: var(--s-fg); font: 13px/1 system-ui, sans-serif; }
+  .vp { inline-size: 800px; block-size: 600px; overflow: auto; position: relative; overflow-anchor: none; }
+  .head { position: sticky; inset-block-start: 0; z-index: 3; display: flex; flex-direction: column; background: var(--s-head); }
+  [data-mode=plan] .head { z-index: 4; }
+  [data-mode=plan][data-z=rank] .head { z-index: 100; } /* above every ranked host segment (≤ window rows) */
+  .hrow { display: flex; block-size: 32px; position: relative; }
+  .body { position: relative; overflow: clip; }
+  .layer { position: absolute; inset-inline-start: 0; }
+  .row { position: absolute; inset-inline-start: 0; display: flex; block-size: 32px; contain: content; background: var(--s-bg); }
+  .row[aria-selected=true] { background: var(--s-tint); }
+  .seg { position: relative; block-size: 100%; }
+  .seg.start { position: sticky; inset-inline-start: 0; z-index: 2; }
+  .seg.end { position: sticky; inset-inline-end: 0; z-index: 2; }
+  /* Every cell placed by the painter (pinned ones too: a covered slot leaves no hole in a flow). */
+  .c, .hc { position: absolute; inset-block-start: 0; box-sizing: border-box; block-size: 32px; padding-inline: 6px; line-height: 31px;
+            border-block-end: 1px solid var(--s-line); border-inline-end: 1px solid var(--s-line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hc { background: var(--s-head); font-weight: 600; }
+  .seg.center > .c { background: var(--s-center); }
+  .seg.start > .c, .seg.end > .c { background: var(--s-pin); }
+  .row[aria-selected=true] > .seg > .c { background: var(--s-tint); }
+  .filler { pointer-events: none; position: absolute; inset-block-start: 0; block-size: 32px; background: var(--s-bg); }
+  .row[aria-selected=true] .filler { background: var(--s-tint); }
+
+  /* ---- base: today's CSS. Backgrounds on rows and pinned segments, every row contain: content. ---- */
+  [data-mode=base] .seg.start, [data-mode=base] .seg.end { background: var(--s-bg); }
+  [data-mode=base] .row[aria-selected=true] .seg.start, [data-mode=base] .row[aria-selected=true] .seg.end { background: var(--s-tint); }
+
+  /* ---- plan (blueprint B): rows hosting spans contain: style only; host segments z 3; header z 4. ---- */
+  [data-mode=plan] .row[data-spans] { contain: style; }
+  [data-mode=plan][data-covered=style] .row[data-covered] { contain: style; }
+  [data-mode=plan] .row[data-spans] > .seg.start, [data-mode=plan] .row[data-spans] > .seg.end { z-index: 3; }
+  [data-pe=cells] .row[data-spans] > .seg, [data-pe=cells] .row[data-covered] > .seg { pointer-events: none; }
+  [data-pe=cells] .row > .seg > * { pointer-events: auto; }
+
+  /* ---- the tall cell ---- */
+  .c.span { overflow: clip; text-overflow: clip; padding: 0; line-height: normal; background: transparent; }
+  [data-cellov=hidden] .c.span { overflow: hidden; }
+  .seg.center > .c.span { z-index: 1; background: transparent; }
+  .seg.start > .c.span, .seg.end > .c.span { background: var(--s-pin); }
+  [data-fill=pinned] .seg.start > .c.span, [data-fill=pinned] .seg.end > .c.span { background: transparent; }
+  [data-opaque="1"] .c.span { background: var(--s-tall) !important; }
+  .lab { box-sizing: border-box; block-size: 32px; line-height: 32px; padding-inline: 6px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #8a1c00; font-weight: 600; }
+  [data-labov=clip] .lab { overflow: clip; }
+  [data-labov=visible] .lab { overflow: visible; }
+  [data-labte=clip] .lab { text-overflow: clip; }
+  .seg.center .lab { color: #00663a; } /* told apart from pinned labels when looking for a leak */
+  [data-label=js] .lab { position: absolute; inset-inline: 0; inset-block-start: 0; }
+  [data-label=sticky] .lab { position: sticky; inset-block-start: 64px; inset-block-end: 0; }
+  .c.full { inset-inline-start: 0; }
+</style></head>
+<body>
+<div id="host"></div>
+<script type="module" src="./page.js"></script>
+</body>
+</html>
