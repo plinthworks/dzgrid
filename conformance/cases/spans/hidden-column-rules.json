@@ -1,0 +1,45 @@
+{
+  "id": "hidden-column-rules",
+  "suite": "spans",
+  "description": "A rule on a hidden column is no rule; a pinned merge column stays in its segment.",
+  "input": {
+    "columns": [
+      {
+        "id": "h",
+        "merge": true,
+        "hidden": true
+      },
+      {
+        "id": "m"
+      },
+      {
+        "id": "p",
+        "merge": true,
+        "pinned": "end"
+      }
+    ],
+    "rows": [
+      [
+        "x",
+        "x",
+        "x"
+      ],
+      [
+        "x",
+        "x",
+        "x"
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 1,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

@@ -16,6 +16,10 @@
     "./server": {
       "types": "./src/server.ts",
       "default": "./src/server.ts"
+    },
+    "./spans": {
+      "types": "./src/spans.ts",
+      "default": "./src/spans.ts"
     }
   }
 }

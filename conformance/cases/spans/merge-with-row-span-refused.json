@@ -1,0 +1,45 @@
+{
+  "id": "merge-with-row-span-refused",
+  "suite": "spans",
+  "description": "merge and rowSpan on one column is refused: that column spans nothing.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "merge": true,
+        "rowSpan": "value"
+      },
+      {
+        "id": "b",
+        "merge": true
+      }
+    ],
+    "rows": [
+      [
+        2,
+        "y"
+      ],
+      [
+        2,
+        "y"
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 1,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": [
+      {
+        "code": "invalid-span",
+        "severity": "error",
+        "path": "columns.a"
+      }
+    ]
+  }
+}

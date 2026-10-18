@@ -1,0 +1,41 @@
+{
+  "id": "clipped-at-end",
+  "suite": "spans",
+  "description": "A rowSpan stops at the last displayed row, said once.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "rowSpan": "value"
+      }
+    ],
+    "rows": [
+      [
+        1
+      ],
+      [
+        5
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 1,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": [
+      {
+        "code": "span-clipped",
+        "severity": "warning",
+        "path": "columns.a"
+      }
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "id": "nested-groups",
+  "suite": "header-bands",
+  "description": "Nested groups: the outer one on the top row.",
+  "input": {
+    "columns": [
+      {
+        "id": "p",
+        "header": "Patient",
+        "children": [
+          {
+            "id": "n",
+            "header": "Name",
+            "children": [
+              {
+                "id": "first"
+              },
+              {
+                "id": "last"
+              }
+            ]
+          },
+          {
+            "id": "age"
+          }
+        ]
+      },
+      {
+        "id": "ward"
+      }
+    ]
+  },
+  "expected": {
+    "depth": 2,
+    "levels": [
+      [
+        {
+          "group": "p",
+          "first": 0,
+          "count": 3,
+          "label": "Patient"
+        }
+      ],
+      [
+        {
+          "group": "n",
+          "first": 0,
+          "count": 2,
+          "label": "Name"
+        }
+      ]
+    ],
+    "problems": []
+  }
+}

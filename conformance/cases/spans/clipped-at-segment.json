@@ -1,0 +1,56 @@
+{
+  "id": "clipped-at-segment",
+  "suite": "spans",
+  "description": "A colSpan stops at the end of its pinned segment, said once.",
+  "input": {
+    "columns": [
+      {
+        "id": "s1",
+        "pinned": "start",
+        "colSpan": "value"
+      },
+      {
+        "id": "s2",
+        "pinned": "start"
+      },
+      {
+        "id": "m"
+      }
+    ],
+    "rows": [
+      [
+        3,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 0,
+        "rows": 1,
+        "cols": 2
+      },
+      {
+        "row": 1,
+        "col": 0,
+        "rows": 1,
+        "cols": 2
+      }
+    ],
+    "problems": [
+      {
+        "code": "span-clipped",
+        "severity": "warning",
+        "path": "columns.s1"
+      }
+    ]
+  }
+}

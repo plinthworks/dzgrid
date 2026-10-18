@@ -1,0 +1,26 @@
+{
+  "id": "missing-feature",
+  "suite": "problems",
+  "description": "A merge rule with no spans feature to carry it out.",
+  "input": {
+    "op": "missing-feature",
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b",
+        "merge": true
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "missing-feature",
+        "severity": "warning",
+        "path": "columns[1].merge"
+      }
+    ]
+  }
+}

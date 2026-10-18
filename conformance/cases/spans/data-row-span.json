@@ -1,0 +1,55 @@
+{
+  "id": "data-row-span",
+  "suite": "spans",
+  "description": "rowSpan from the data: the cell's value says how many rows; covered rows are not asked.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "rowSpan": "value"
+      },
+      {
+        "id": "b"
+      }
+    ],
+    "rows": [
+      [
+        3,
+        0
+      ],
+      [
+        9,
+        0
+      ],
+      [
+        9,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        9,
+        0
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 0,
+        "rows": 3,
+        "cols": 1
+      },
+      {
+        "row": 3,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

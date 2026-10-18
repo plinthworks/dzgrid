@@ -1,0 +1,36 @@
+{
+  "id": "invalid-span",
+  "suite": "problems",
+  "description": "A rowSpan rule answers a number that is not whole: one cell, refused.",
+  "input": {
+    "op": "spans",
+    "columns": [
+      {
+        "id": "a",
+        "rowSpan": "half"
+      }
+    ],
+    "rows": [
+      [
+        1
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-span",
+        "severity": "error",
+        "path": "rows[0].a.rowSpan"
+      },
+      {
+        "code": "invalid-span",
+        "severity": "error",
+        "path": "rows[1].a.rowSpan"
+      }
+    ]
+  }
+}

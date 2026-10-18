@@ -1,0 +1,47 @@
+{
+  "id": "merge-function",
+  "suite": "spans",
+  "description": "A merge function decides (same first letter, case ignored).",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "merge": "same-initial"
+      }
+    ],
+    "rows": [
+      [
+        "Apple"
+      ],
+      [
+        "avocado"
+      ],
+      [
+        "Banana"
+      ],
+      [
+        "berry"
+      ],
+      [
+        "cherry"
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      },
+      {
+        "row": 2,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

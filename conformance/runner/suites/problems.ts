@@ -1,9 +1,11 @@
 import { checkPage } from '@dzgrid/core/internal';
 import { liveChangeProblems, messageProblems, partNameFor, resolveOperations, resolveColumns, type Problem } from '@dzgrid/core';
-import { createRowStore, compileFilter, sortIndices } from '@dzgrid/core/internal';
+import { createRowStore, compileFilter, missingFeatureProblems, sortIndices } from '@dzgrid/core/internal';
 import { harness } from '../harness.js';
 import { kindsOf } from '../kinds.js';
 import { runSource } from './source.js';
+import { columnOf, runBands, runSpans } from './spans.js';
+import { FULL_WIDTH } from '../spans-fixtures.js';
 import type { Suite } from './index.js';
 
 type Row = Record<string, unknown> & { id: string };
@@ -42,6 +44,13 @@ export const problems: Record<string, Suite> = {
         const r = runSource(input) as { lists?: { problems?: unknown[] }[] };
         return { problems: r.lists?.at(-1)?.problems ?? [] };
       }
+      // Span rules (step 9b): the map's problems, the header bands', or rules with no spans feature.
+      case 'spans':
+        return { problems: runSpans(input).problems };
+      case 'bands':
+        return { problems: runBands(input).problems };
+      case 'missing-feature':
+        return { problems: shape(missingFeatureProblems(input.columns.map(columnOf), input.fullWidth ? FULL_WIDTH[input.fullWidth] : undefined)) };
       case 'sort': {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(sortIndices(input.sort, null, h.env()).problems) };

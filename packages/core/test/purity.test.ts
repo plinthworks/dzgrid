@@ -40,7 +40,7 @@ function tokens(source: string): Token[] {
 }
 
 /** Every reason a source breaks purity, as short labels. Exported for the self-test below. */
-export function violations(source: string, opts: { base: boolean; server?: boolean } = { base: true }): string[] {
+export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean } = { base: true }): string[] {
   const found: string[] = [];
   const t = tokens(source);
   t.forEach((tok, i) => {
@@ -69,6 +69,8 @@ export function violations(source: string, opts: { base: boolean; server?: boole
       if (opts.base && /(^|\/)enterprise(\/|$)/.test(spec)) found.push('enterprise import');
       // The base never reaches the server entry: a grid on rows in memory carries none of it.
       if (!opts.server && /(^|\/)server(\.js|\/|$)/.test(spec)) found.push('server import');
+      // Nor the spans entry (step 9b): a grid without span rules carries none of it.
+      if (!opts.spans && /(^|\/)spans(\.js|\/|$)/.test(spec)) found.push('spans import');
     }
   });
   return found;
@@ -85,7 +87,7 @@ describe('core purity', () => {
   it('names no forbidden global, package or dynamic import', () => {
     const offenders = all.flatMap((f) => {
       const rel = f.slice(SRC.length + 1);
-      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/') });
+      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/') });
       return v.length ? [`${rel}: ${[...new Set(v)].join(', ')}`] : [];
     });
     expect(offenders).toEqual([]);
@@ -138,6 +140,14 @@ describe('the purity check itself', () => {
     expect(violations("import { createGate } from '../server/gate.js';")).toEqual(['server import']);
     expect(violations("import type { AbortHandle } from '../abort.js';", { base: true, server: true })).toEqual([]);
     expect(violations("import { createGate } from './server/gate.js';", { base: true, server: true })).toEqual([]);
+  });
+
+  it('catches an import of the spans entry from the base, and only from the spans entry', () => {
+    expect(violations("import { buildSpanMap } from './spans.js';")).toEqual(['spans import']);
+    expect(violations("import { navigate } from '../spans/nav.js';")).toEqual(['spans import']);
+    expect(violations("import { buildSpanMap } from './spans/index.js';", { base: true, server: true })).toEqual(['spans import']);
+    expect(violations("import { runEnds } from './merge.js';", { base: true, spans: true })).toEqual([]);
+    expect(violations("import { navigate } from './spans/nav.js';", { base: true, spans: true })).toEqual([]);
   });
 
   it('lets comments, strings and property names mention anything', () => {

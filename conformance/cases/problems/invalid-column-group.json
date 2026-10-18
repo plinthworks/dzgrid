@@ -1,0 +1,27 @@
+{
+  "id": "invalid-column-group",
+  "suite": "problems",
+  "description": "An empty group is refused.",
+  "input": {
+    "op": "bands",
+    "columns": [
+      {
+        "id": "g",
+        "header": "G",
+        "children": []
+      },
+      {
+        "id": "a"
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-column-group",
+        "severity": "error",
+        "path": "columns[0]"
+      }
+    ]
+  }
+}

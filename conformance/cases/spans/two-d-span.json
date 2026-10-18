@@ -1,0 +1,48 @@
+{
+  "id": "two-d-span",
+  "suite": "spans",
+  "description": "rowSpan and colSpan on one column make a block of two by two.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "rowSpan": "value",
+        "colSpan": "value"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      }
+    ],
+    "rows": [
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        9,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 0,
+        "rows": 2,
+        "cols": 2
+      }
+    ],
+    "problems": []
+  }
+}

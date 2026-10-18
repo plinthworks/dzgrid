@@ -1,0 +1,31 @@
+{
+  "id": "span-clipped",
+  "suite": "problems",
+  "description": "A rowSpan longer than the rows left is cut at the last row.",
+  "input": {
+    "op": "spans",
+    "columns": [
+      {
+        "id": "a",
+        "rowSpan": "value"
+      }
+    ],
+    "rows": [
+      [
+        4
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "span-clipped",
+        "severity": "warning",
+        "path": "columns.a"
+      }
+    ]
+  }
+}

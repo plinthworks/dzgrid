@@ -158,6 +158,21 @@ Le code de l'étape 0, revu et testé, l'emporte sur les plans ; elles priment s
 - **Serveur** : quand le filtre est sur le serveur (pages serveur, lot récupéré filtré côté serveur), toujours `DataSource.values` par le canal `values:<col>`, jamais les lignes tenues ; sans `values`, `available: false`. Requête `{ column, search, limit, filter, quick?, params, zone, key, signal }` : `filter` est la forme envoyée **déjà calculée** moins la colonne (pas de `toWire` de plus). Après **chaque** changement du modèle (pas seulement une nouvelle époque), une liste ouverte redemande si sa requête diffère ou si la sienne en vol a été abandonnée par l'époque ; sinon elle garde sa réponse et met à jour les valeurs cochées absentes. Nouveau code `invalid-values-response` (erreur : pas une liste ; avertissements : entrée sans valeur texte, doublon, compte, libellé, trop d'entrées, `blanks`, `truncated` ; dix au plus puis un résumé). Libellé manquant = la valeur ; une valeur cochée absente est libellée par le codec.
 - **Écarts au plan** : `FilterSlot.values()` (B2.1) devient un handle (une promesse ne s'annule pas et ne garde pas l'ancienne liste) ; B1.3 reçoit `ValuesRequest`/`ValuesResponse`.
 
+#### Décisions de l'étape 9b (2026-10-18 ; fusions de cellules, fiche `docs/behaviors/spans.md`, plan `docs/phase-3-steps/step9b-spans-blueprint.md`, décisions du propriétaire `step9b-decisions.md`)
+
+- **Avancé de la Phase 5 à la Phase 3** (décision du propriétaire, priorité haute) : les quatre genres, valeurs identiques fusionnées (`merge`), fusions décidées par la donnée (`rowSpan`, `colSpan`), en-têtes groupés (`ColumnGroupDef`), lignes pleine largeur (`settings.fullWidth`). Restent en Phase 5 : groupes repliables, lignes épinglées haut / bas.
+- **Deux modules à part** : `@dzgrid/core/spans` (moteur pur, 3 500 o gz par-dessus le cœur) et `@dzgrid/dom/spans` (commit 3, 2 400 o) ; la base n'importe ni l'un ni l'autre (tests d'empaquetage et de pureté, comme `/server`). Une grille sans règle de fusion ne paie rien.
+- **Points d'accroche (commit 1)** : `moveFocus` pur dans `packages/dom/src/keys/move.ts` (le cœur n'avait plus de place) avec un but (`Goal`) qui se vérifie lui-même ; `reconcileFocus(…, owner?)` et `setFocusOwner` (`@dzgrid/core/internal`) ; `RowPlan`/`RowSpans`/`SpanFeature` côté rendu ; niveaux d'en-tête signés (négatifs = rangées de groupes) ; les groupes sont aplatis en feuilles dans `resolveColumns`.
+- **Moteur (commit 2)** : `buildSpanMap({ rows, columns, ctx, fullWidth?, text? }, prev?)` → `SpanMap` (`version`, `none`, `ownerAt`, `coveringAbove`, `inRow`, `fullWidth`, `problems`). Positions = indices d'affichage et indices de colonnes visibles (début, centre, fin) ; jamais la fenêtre ni le défilement. Mémoïsé par le `prev` passé (lignes et leur version, colonnes et leur version, règle pleine largeur, lecteur de texte, langue) : pas d'état caché. Placement dans l'ordre de lecture (ligne par ligne, du début à la fin) : la plus ancienne gagne, une fusion demandée par-dessus revient à une cellule (`span-overlap`) ; une fusion de valeurs ne rencontre jamais de case déjà prise (preuve : une case couverte plus bas l'est aussi à la ligne d'origine). Stockage creux : par colonne, les débuts des fusions qui la couvrent (triés, disjoints), recherche dichotomique.
+- **`merge`** compare le texte d'export stable (`col.codec.toExport`, ou le lecteur `text` fourni par la grille, branché sur `ColumnCache.exports` et la surcouche d'édition) ; un vide ou une valeur illisible ne fusionne jamais, même avec une fonction ; `within` coupe là où une colonne citée change, et **un vide dans une colonne citée coupe aussi** ; une colonne citée peut être masquée, une inconnue est dite (`invalid-span`, détail l'id). Index des suites : `runEnds`, une passe, ≤ 25 ms pour un million de lignes (mesuré 4,5 ms).
+- **`rowSpan` / `colSpan`** : appelés pour chaque ligne de la colonne qui n'est pas couverte (comme un tableau HTML), avec un `SpanCtx` réutilisé ; réponse non entière ou < 1, ou exception → 1 et `invalid-span` (`rows[i].<col>.rowSpan`, détail `not a whole number` / `threw`). `merge` avec `rowSpan`/`colSpan` sur une colonne : refusé, la colonne ne fusionne rien. 100 000 appels ≤ 20 ms (mesuré 7 ms).
+- **Coupures (I3)** : une fusion reste dans son segment épinglé et dans une suite de lignes de données de même niveau ; une ligne pleine largeur, une ligne qui n'est pas de données, un changement de niveau, la fin des lignes affichées (la page) la coupent. Une fusion coupée est dite **une fois par colonne et par raison** (`span-clipped`, `columns.<col>`, détail `rows` / `segment`) tant que la disposition des colonnes ne change pas (le `prev` porte ce qui a été dit).
+- **Ligne pleine largeur** : `ownerAt(r, c)` rend une cellule `{ row: r, col: 0, rows: 1, cols: n }` sur toute la largeur (seul cas qui traverse les segments) ; une règle qui lève : ligne ordinaire, `invalid-span` à `rows[i]`.
+- **Problèmes** : cinq nouveaux codes, `invalid-span` (erreur), `span-overlap`, `span-clipped` (avertissements), `invalid-column-group` (erreur), `missing-feature` (avertissement) ; dix au plus par code et par colonne, puis un résumé (`rows.<col>`, `N more`). `missingFeatureProblems(tree, fullWidth)` dans `@dzgrid/core/internal` (un problème par genre, à sa première place) : la grille l'appellera au commit 3 quand aucune fonctionnalité ne fournit de `spans`.
+- **En-têtes groupés** : `headerBands(tree, layout)` → `{ depth, levels, problems }` ; `levels[0]` est la rangée du haut (niveau −depth) ; un fragment `{ group, first, count, label }` par morceau contigu dans un segment ; libellé répété par fragment (O7), vide sans `header` (jamais deviné) ; profondeur prise sur tout l'arbre valide (le nombre de rangées ne bouge pas quand on masque une colonne). Groupe sans feuille, id dupliqué (d'un groupe **ou d'une colonne**) ou sans id : `invalid-column-group`, chemin dans l'arbre (`columns[1].children[0]`), ses feuilles restent comme hors groupe.
+- **Clavier** : `navigate(map, { rows, cols, page }, from, goal, intent)` → `{ to, goal }` (positions ; `to.row = -1` : au-dessus de la première ligne), `land`, `ownerFocus(map, colonnes)` pour `setFocusOwner`. Sans carte, `navigate` donne exactement ce que donne `moveFocus` pour le corps (test différentiel) ; un mouvement qui finit sur la cellule de départ garde le but (bord, Gauche/Droite dans une ligne pleine largeur). `moveFocus` n'est pas encore branché sur `navigate` : il reste au commit 3 (budget dom de base : 54 o de marge).
+- **Écarts au plan** : l'exemple `merge-follows-sort` du plan était incohérent (`colSpan` sur la 3ᵉ colonne ne peut pas commencer en colonne 0 ; `merge` + `colSpan` sur `ward` est refusé) : recalculé avec `colSpan` sur `name` (2 colonnes) et un ordre d'affichage qui rapproche les deux `A`.
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.
@@ -301,7 +316,8 @@ Légende : **C** = Community, **E** = Enterprise (niveaux d'après la liste publ
 | Redimensionnement au clavier | C | 5 | — | Mode « redimensionner » entré par le menu colonne (§3.8) |
 | Déplacement des colonnes (glisser) | C | 5 | — | Alternative clavier `Alt+Maj+flèche` (WCAG 2.5.7) |
 | Épinglage début / fin | C | 2 | — | `start`/`end`, **jamais** `left`/`right` |
-| Groupes d'en-têtes (multi-niveaux, repliables) | C | 5 | `flattenColumns` (concept) | `aria-colspan` |
+| Groupes d'en-têtes (multi-niveaux) | C | 3 (étape 9b) | `flattenColumns` (concept) | `aria-colspan` ; `headerBands` dans `@dzgrid/core/spans` |
+| Groupes d'en-têtes repliables | C | 5 | — | |
 | Visibilité des colonnes | C | 2 | — | Panneau de colonnes en Phase 5 |
 | Auto-taille (contenu, ajustement à la largeur) | C | 5 | — | Mesure en phase `read`, échantillon déterministe |
 | Types de colonne et défauts (`defaultColDef`, `columnTypes`) | C | 1 | `ColumnConfigBase` (forme) | |
@@ -309,7 +325,8 @@ Légende : **C** = Community, **E** = Enterprise (niveaux d'après la liste publ
 | Types de données (`text`, `number`, `day`, `instant`, `boolean`, `enum`) | C | 1 | `cell-value.ts`, `date-value.ts` (sémantique) | Jour ≠ instant |
 | Colonne de sélection (cases à cocher) | C | 2 | — | Colonne pseudo, épinglée début |
 | Colonne de numéros de ligne | C | 5 | — | |
-| Colonnes calculées / colSpan | C | 5 | `colSpan` (forme) | |
+| colSpan (fusion de colonnes) | C | 3 (étape 9b) | `colSpan` (forme) | `@dzgrid/core/spans` |
+| Colonnes calculées | C | 5 | — | |
 | Tooltips d'en-tête et de cellule | C | 2 | — | Accessibles au clavier |
 | État de colonnes sauvegardé / restauré | C | 5 | — | `GridState` versionné (§3.14) |
 | Rendus de cellule (texte, statut, barre, note, étiquettes, avatar, booléen, tendance, actions) | C | 2 à 5 | `renderers/*` (comportement seul) | Réécrits en DOM pur, tons par classes |
@@ -327,8 +344,8 @@ Légende : **C** = Community, **E** = Enterprise (niveaux d'après la liste publ
 | Transactions asynchrones groupées | E | 7 | — | |
 | Hauteur de ligne fixe / par fonction | C | 2 | — | |
 | Hauteur automatique (contenu) | C | 5 | — | Spike S3 |
-| Fusion de lignes (`rowSpan`) | C | 5 | `rowSpan` (forme) | |
-| Lignes pleine largeur | C | 5 | — | Famille `full-width` dans `RowNode` |
+| Fusion de lignes (`rowSpan`, valeurs identiques `merge`) | C | 3 (étape 9b) | `rowSpan` (forme) | `@dzgrid/core/spans` |
+| Lignes pleine largeur | C | 3 (étape 9b) | — | `settings.fullWidth` ; famille `full-width` dans `RowNode` |
 | Lignes épinglées haut / bas | C | 5 | — | Aussi pour les totaux |
 | Règles de style de ligne et de cellule | C | 2 | `rule-engine.ts` | **Classes**, plus de hex |
 | Glisser-déposer de lignes (réordonner) | C | 8 | — | Alternative clavier |
@@ -1412,6 +1429,7 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
   5. contraste sur les 12 combinaisons palette × thème ; palette commutée à chaud grille affichée ; un passage lecteur d'écran ;
   6. profil de taille ≤ 85 kB gz ; installation depuis les tarballs de `npm run pack:local` dans une **vraie application Angular 21** (`ng build`), comme tzslot ;
   7. la question honnête de la note Sehhaty : l'administrateur trouve-t-il cela mieux que la table précédente ? Mesurée en production avant de généraliser.
+- **Fusions de cellules (étape 9b, avancée de la Phase 5)** : `@dzgrid/core/spans` (carte des fusions, en-têtes groupés, clavier) et `@dzgrid/dom/spans` (corps, lignes pleine largeur, clavier, pointeur, en-têtes groupés) ; critère : fusion correcte sous tri, filtre et page, sans chevauchement (tests de propriétés), sous défilement virtuel (vérifications navigateur S12).
 - **Dépend de** : P2, S5, S6. **C'est la première phase qui rend DzGrid utilisable pour `admin/audit-logs`.** Les annuaires (~11 000 lignes, côté client) sont aussi servis dès cette phase.
 
 ### Phase 4 : édition, plages, presse-papiers, édition en masse
@@ -1420,8 +1438,8 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
 - **Dépend de** : P3 (ou P2 pour un écran client). **Rend possible `pharma/stock`.**
 
 ### Phase 5 : colonnes avancées et confort
-- **Livrables** : déplacement de colonnes (souris, clavier), groupes d'en-têtes, auto-taille, menu de colonne, panneau latéral (colonnes, filtres), `GridState` (sauvegarde et restauration), lignes épinglées haut / bas, fusion de lignes et de colonnes, hauteur automatique, lignes pleine largeur, densité, `preparePrint()`. **Fiches** correspondantes.
-- **Critères de sortie** : mode « redimensionner » au clavier ; état restauré à l'identique en RTL ; hauteur auto sans saut (spike S3) ; fusion correcte sous tri.
+- **Livrables** : déplacement de colonnes (souris, clavier), groupes d'en-têtes repliables, auto-taille, menu de colonne, panneau latéral (colonnes, filtres), `GridState` (sauvegarde et restauration), lignes épinglées haut / bas, hauteur automatique, densité, `preparePrint()`. **Fiches** correspondantes. (Groupes d'en-têtes, fusions de lignes et de colonnes, lignes pleine largeur : avancés à la Phase 3, étape 9b.)
+- **Critères de sortie** : mode « redimensionner » au clavier ; état restauré à l'identique en RTL ; hauteur auto sans saut (spike S3).
 - **Dépend de** : P2 (P4 pour les menus éditables).
 
 ### Phase 6 : regroupement, agrégation, arbre, master/detail

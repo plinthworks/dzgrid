@@ -1,0 +1,44 @@
+{
+  "id": "hidden-leaf-shrinks",
+  "suite": "header-bands",
+  "description": "A hidden leaf shrinks its group, it does not cut it.",
+  "input": {
+    "columns": [
+      {
+        "id": "g",
+        "header": "G",
+        "children": [
+          {
+            "id": "a"
+          },
+          {
+            "id": "b"
+          },
+          {
+            "id": "c"
+          }
+        ]
+      }
+    ],
+    "state": [
+      {
+        "id": "b",
+        "hidden": true
+      }
+    ]
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "g",
+          "first": 0,
+          "count": 2,
+          "label": "G"
+        }
+      ]
+    ],
+    "problems": []
+  }
+}

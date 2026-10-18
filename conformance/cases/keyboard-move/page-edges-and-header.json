@@ -1,0 +1,101 @@
+{
+  "id": "page-edges-and-header",
+  "suite": "keyboard-move",
+  "description": "Page keys move from the goal row; Ctrl+Home goes to the first slot; Up from the first row leaves the body.",
+  "input": {
+    "rows": 10,
+    "cols": 2,
+    "page": 4,
+    "cells": [
+      {
+        "row": 2,
+        "col": 0,
+        "rows": 5,
+        "cols": 1
+      }
+    ],
+    "start": {
+      "row": 4,
+      "col": 1
+    },
+    "keys": [
+      {
+        "kind": "move",
+        "axis": "col",
+        "delta": -1
+      },
+      {
+        "kind": "page",
+        "delta": 1
+      },
+      {
+        "kind": "page",
+        "delta": -1
+      },
+      {
+        "kind": "edge",
+        "axis": "both",
+        "to": "first"
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": -1
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "to": {
+          "row": 2,
+          "col": 0
+        },
+        "goal": {
+          "row": 4,
+          "col": 0
+        }
+      },
+      {
+        "to": {
+          "row": 8,
+          "col": 0
+        },
+        "goal": {
+          "row": 8,
+          "col": 0
+        }
+      },
+      {
+        "to": {
+          "row": 2,
+          "col": 0
+        },
+        "goal": {
+          "row": 4,
+          "col": 0
+        }
+      },
+      {
+        "to": {
+          "row": 0,
+          "col": 0
+        },
+        "goal": {
+          "row": 0,
+          "col": 0
+        }
+      },
+      {
+        "to": {
+          "row": -1,
+          "col": 0
+        },
+        "goal": {
+          "row": -1,
+          "col": 0
+        }
+      }
+    ]
+  }
+}

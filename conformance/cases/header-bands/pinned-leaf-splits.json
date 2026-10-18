@@ -1,0 +1,53 @@
+{
+  "id": "pinned-leaf-splits",
+  "suite": "header-bands",
+  "description": "A leaf pinned to the start splits its group into two fragments, each labelled (O7).",
+  "input": {
+    "columns": [
+      {
+        "id": "g",
+        "header": "G",
+        "children": [
+          {
+            "id": "a"
+          },
+          {
+            "id": "b"
+          },
+          {
+            "id": "c"
+          }
+        ]
+      },
+      {
+        "id": "x"
+      }
+    ],
+    "state": [
+      {
+        "id": "c",
+        "pinned": "start"
+      }
+    ]
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "g",
+          "first": 0,
+          "count": 1,
+          "label": "G"
+        },
+        {
+          "group": "g",
+          "first": 1,
+          "count": 2,
+          "label": "G"
+        }
+      ]
+    ],
+    "problems": []
+  }
+}

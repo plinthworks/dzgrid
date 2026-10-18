@@ -1,0 +1,38 @@
+{
+  "id": "one-group",
+  "suite": "header-bands",
+  "description": "A group over two columns; the column outside it has no group cell.",
+  "input": {
+    "columns": [
+      {
+        "id": "patient",
+        "header": "Patient",
+        "children": [
+          {
+            "id": "name"
+          },
+          {
+            "id": "age"
+          }
+        ]
+      },
+      {
+        "id": "ward"
+      }
+    ]
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "patient",
+          "first": 0,
+          "count": 2,
+          "label": "Patient"
+        }
+      ]
+    ],
+    "problems": []
+  }
+}

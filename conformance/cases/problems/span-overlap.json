@@ -1,0 +1,37 @@
+{
+  "id": "span-overlap",
+  "suite": "problems",
+  "description": "A colSpan asked over a tall cell of the next column drops to one cell.",
+  "input": {
+    "op": "spans",
+    "columns": [
+      {
+        "id": "a",
+        "colSpan": "value"
+      },
+      {
+        "id": "b",
+        "rowSpan": "value"
+      }
+    ],
+    "rows": [
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        1
+      ]
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "span-overlap",
+        "severity": "warning",
+        "path": "rows[1].a"
+      }
+    ]
+  }
+}

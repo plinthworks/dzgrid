@@ -32,6 +32,11 @@ export const PROBLEM_CODES = [
   'invalid-page-response',
   'fetched-set-large',
   'invalid-values-response',
+  'invalid-span',
+  'span-overlap',
+  'span-clipped',
+  'invalid-column-group',
+  'missing-feature',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

@@ -29,5 +29,8 @@ One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.j
 | `server-gate` | `{steps: (begin \| settle \| reject \| cancel \| newEpoch \| destroy)[]}` | `{outcomes, aborted: [ticket, reason][], diagnostics}` |
 | `source-model` | `{columns, operations, pagination, options?, steps: (query \| go \| size \| refresh \| purge \| swap \| ctx \| destroy \| answer \| fail)[]}`, calls named `c1`, `c2`… | `{calls, aborted: [call, reason][], changes: kind[], final: {status, displayed, page, counts}, problems, failures}` |
 | `wire` | `{locale, timeZone, columns, filter, kinds?}` (`kinds` from the suite's fixture table: `between`, `throws`, `bad-json`) | `{filter, problems?: [code, path][]}`: the filter as the server receives it, through JSON |
+| `spans` | `{columns, rows, order?, state?, fullWidth?}` (rules by fixture name from `runner/spans-fixtures.ts`) | `{cells: {row, col, rows, cols}[], fullWidth?: rows[], problems}`: every span, in reading order |
+| `header-bands` | `{columns (a tree of groups), state?}` | `{depth, levels: {group, first, count, label}[][], problems}` |
+| `keyboard-move` | `{rows, cols, page?, cells?, fullWidth?, start, keys: Intent[]}` | `{moves: ({to, goal} \| null)[]}`, each key from where the last one went |
 
 Later phases add `sort`, `filter-*`, `server-gate`, `edit-saves`, `paste-plan`, …

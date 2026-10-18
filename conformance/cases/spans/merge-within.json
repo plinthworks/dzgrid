@@ -1,0 +1,59 @@
+{
+  "id": "merge-within",
+  "suite": "spans",
+  "description": "merge.within cuts a city's run where its region changes.",
+  "input": {
+    "columns": [
+      {
+        "id": "region"
+      },
+      {
+        "id": "city",
+        "merge": {
+          "within": [
+            "region"
+          ]
+        }
+      }
+    ],
+    "rows": [
+      [
+        "N",
+        "Oran"
+      ],
+      [
+        "N",
+        "Oran"
+      ],
+      [
+        "S",
+        "Oran"
+      ],
+      [
+        "S",
+        "Oran"
+      ],
+      [
+        "S",
+        "Blida"
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 1,
+        "rows": 2,
+        "cols": 1
+      },
+      {
+        "row": 2,
+        "col": 1,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

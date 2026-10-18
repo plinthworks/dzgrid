@@ -16,10 +16,10 @@ Mis à jour : 2026-10-18. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 7 — sélection sur plusieurs pages | fait | `2151d99` |
 | 8 — types de filtres personnalisés (`FilterKind`) | fait | `7a081dc` |
 | 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
-| **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : commit 1 (points d'accroche) écrit, à relire ; commits 2 à 4 à faire | — |
+| **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : commit 1 fait et relu (`5eb92f1`) ; commit 2 (moteur) écrit, à relire ; commits 3 et 4 à faire | — |
 | 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 9b (fusions). Commit 1 « points d'accroche » fait, relu, testé (`5eb92f1`). Commit 2 « moteur des fusions » (`@dzgrid/core/spans`, calcul pur) confié à un agent, non commité tant qu'il tourne. Ensuite : commit 3 (côté écran, clavier, clic ; y ajouter le test de la ligne d'ancrage quand le focus est sur un en-tête), commit 4 (en-têtes groupés, vérifications navigateur). Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md`.
+En cours : l'étape 9b (fusions). Commit 1 « points d'accroche » fait, relu, testé (`5eb92f1`). Commit 2 « moteur des fusions » (`@dzgrid/core/spans`, calcul pur) écrit, suite verte, **non commité, à relire** (revue de code et analyse des tests) ; 3 023 o gz par-dessus le cœur (budget 3 500), cœur de base 25 937 o (les cinq codes de problème). `moveFocus` pas encore branché sur `navigate` : au commit 3. Ensuite : commit 3 (côté écran, clavier, clic ; y ajouter le test de la ligne d'ancrage quand le focus est sur un en-tête), commit 4 (en-têtes groupés, vérifications navigateur). Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md`.
 
 ## Les plans détaillés des étapes
 
@@ -47,7 +47,8 @@ En cours : l'étape 9b (fusions). Commit 1 « points d'accroche » fait, relu, t
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 26 000 o gz | 25 906 |
+| `@dzgrid/core` | 26 000 o gz | 25 937 |
+| `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 023 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 344 |
 | `@dzgrid/dom` | 18 000 (fusions) | 17 967 |
 | `@dzgrid/dom/popup` | 1 500 | ~1 390 |

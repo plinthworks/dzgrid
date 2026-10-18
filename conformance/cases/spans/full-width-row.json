@@ -1,0 +1,59 @@
+{
+  "id": "full-width-row",
+  "suite": "spans",
+  "description": "A full-width row is one cell; it cuts the merge runs around it.",
+  "input": {
+    "columns": [
+      {
+        "id": "p",
+        "merge": true
+      },
+      {
+        "id": "q"
+      }
+    ],
+    "rows": [
+      [
+        "x",
+        1
+      ],
+      [
+        "x",
+        2
+      ],
+      [
+        "title",
+        ""
+      ],
+      [
+        "x",
+        3
+      ],
+      [
+        "x",
+        4
+      ]
+    ],
+    "fullWidth": "title-row"
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      },
+      {
+        "row": 3,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "fullWidth": [
+      2
+    ],
+    "problems": []
+  }
+}

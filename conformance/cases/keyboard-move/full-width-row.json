@@ -1,0 +1,112 @@
+{
+  "id": "full-width-row",
+  "suite": "keyboard-move",
+  "description": "In a full-width row, Right and Home stay put and the column is remembered for the next Down.",
+  "input": {
+    "rows": 4,
+    "cols": 3,
+    "fullWidth": [
+      2
+    ],
+    "start": {
+      "row": 1,
+      "col": 2
+    },
+    "keys": [
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": 1
+      },
+      {
+        "kind": "move",
+        "axis": "col",
+        "delta": 1
+      },
+      {
+        "kind": "edge",
+        "axis": "col",
+        "to": "first"
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": 1
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": -1
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": -1
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "to": {
+          "row": 2,
+          "col": 0
+        },
+        "goal": {
+          "row": 2,
+          "col": 2
+        }
+      },
+      {
+        "to": {
+          "row": 2,
+          "col": 0
+        },
+        "goal": {
+          "row": 2,
+          "col": 2
+        }
+      },
+      {
+        "to": {
+          "row": 2,
+          "col": 0
+        },
+        "goal": {
+          "row": 2,
+          "col": 2
+        }
+      },
+      {
+        "to": {
+          "row": 3,
+          "col": 2
+        },
+        "goal": {
+          "row": 3,
+          "col": 2
+        }
+      },
+      {
+        "to": {
+          "row": 2,
+          "col": 0
+        },
+        "goal": {
+          "row": 2,
+          "col": 2
+        }
+      },
+      {
+        "to": {
+          "row": 1,
+          "col": 2
+        },
+        "goal": {
+          "row": 1,
+          "col": 2
+        }
+      }
+    ]
+  }
+}

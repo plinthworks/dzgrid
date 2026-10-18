@@ -1,0 +1,41 @@
+{
+  "id": "merge-blanks-never",
+  "suite": "spans",
+  "description": "Blank cells never merge, not even with each other (O4).",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "merge": true
+      }
+    ],
+    "rows": [
+      [
+        ""
+      ],
+      [
+        ""
+      ],
+      [
+        "A"
+      ],
+      [
+        "A"
+      ],
+      [
+        null
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 2,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

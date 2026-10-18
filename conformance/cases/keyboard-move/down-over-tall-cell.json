@@ -1,0 +1,87 @@
+{
+  "id": "down-over-tall-cell",
+  "suite": "keyboard-move",
+  "description": "Down steps over a tall cell; Up comes back into it, then out above it.",
+  "input": {
+    "rows": 6,
+    "cols": 3,
+    "cells": [
+      {
+        "row": 1,
+        "col": 1,
+        "rows": 3,
+        "cols": 1
+      }
+    ],
+    "start": {
+      "row": 0,
+      "col": 1
+    },
+    "keys": [
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": 1
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": 1
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": -1
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": -1
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "to": {
+          "row": 1,
+          "col": 1
+        },
+        "goal": {
+          "row": 1,
+          "col": 1
+        }
+      },
+      {
+        "to": {
+          "row": 4,
+          "col": 1
+        },
+        "goal": {
+          "row": 4,
+          "col": 1
+        }
+      },
+      {
+        "to": {
+          "row": 1,
+          "col": 1
+        },
+        "goal": {
+          "row": 3,
+          "col": 1
+        }
+      },
+      {
+        "to": {
+          "row": 0,
+          "col": 1
+        },
+        "goal": {
+          "row": 0,
+          "col": 1
+        }
+      }
+    ]
+  }
+}

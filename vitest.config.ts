@@ -9,6 +9,7 @@ import angular from '@analogjs/vite-plugin-angular';
  */
 const alias = {
   '@dzgrid/core/server': fileURLToPath(new URL('./packages/core/src/server.ts', import.meta.url)),
+  '@dzgrid/core/spans': fileURLToPath(new URL('./packages/core/src/spans.ts', import.meta.url)),
   '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
   '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
 };

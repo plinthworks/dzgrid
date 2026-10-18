@@ -23,6 +23,9 @@
       "@dzgrid/core/server": [
         "./packages/core/src/server.ts"
       ],
+      "@dzgrid/core/spans": [
+        "./packages/core/src/spans.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],

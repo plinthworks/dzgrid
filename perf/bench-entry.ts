@@ -1,6 +1,8 @@
 import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
-import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache, filterKindLookup } from '../packages/core/src/internal.js';
+import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache, filterKindLookup, flatDisplayed } from '../packages/core/src/internal.js';
 import { toWire } from '../packages/core/src/server.js';
+import { buildSpanMap } from '../packages/core/src/spans.js';
+import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
 import { msg } from '../packages/dom/src/messages.js';
 import { AR } from '../packages/dom/src/locales/ar.js';
@@ -10,6 +12,30 @@ export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly 
 
 /** Each case returns a value so the work cannot be optimised away. */
 export const CASES: Record<string, Case> = {
+  // Step 9b: the run index of a merging column over its export texts (what ColumnCache.exports holds), runs of 1 to 20 rows.
+  'span merge index 1 000 000 rows (export texts given)': {
+    setup: () => {
+      const t: (string | null)[] = new Array(1_000_000);
+      let v = 0;
+      for (let i = 0; i < t.length; ) {
+        const len = 1 + ((v * 7919) % 20);
+        const s = v % 13 === 0 ? null : `ward-${v}`;
+        for (let j = 0; j < len && i < t.length; j++) t[i++] = s;
+        v++;
+      }
+      return t;
+    },
+    run: (t: (string | null)[]) => runEnds(t.length, (i) => t[i] !== null && t[i] === t[i + 1])[t.length - 1],
+  },
+  // A whole map: nodes, blocks, one merge column read through its codec, placement (cold each run).
+  'span map 100 000 rows, one merge column (cold)': {
+    setup: () => spanSetup(100_000, [{ id: 'w', merge: true }, { id: 'x' }]),
+    run: (input: Parameters<typeof buildSpanMap<SpanRow>>[0]) => buildSpanMap(input).ownerAt(5, 0)?.rows,
+  },
+  '100 000 data-span calls (rowSpan, cold map)': {
+    setup: () => spanSetup(100_000, [{ id: 'w', rowSpan: (c) => (c.index % 50 === 0 ? 3 : 1) }, { id: 'x' }]),
+    run: (input: Parameters<typeof buildSpanMap<SpanRow>>[0]) => buildSpanMap(input).ownerAt(1, 0)?.rows,
+  },
   'msg() plural ar x 10 000 (announcements, labels)': {
     setup: () => localeCtx({ locale: 'ar-DZ' }),
     run: (ctx: ReturnType<typeof localeCtx>) => {
@@ -389,3 +415,18 @@ export const MEMORY: Record<string, () => number> = {
     return (after - before) / rows.length;
   },
 };
+
+type SpanRow = { id: string; w: string; x: number };
+/** Rows for the span benches: runs of 1 to 20 equal wards, as displayed. */
+function spanSetup(n: number, defs: Parameters<typeof createColumnModel<SpanRow>>[0]) {
+  const store = createRowStore<SpanRow>((r) => r.id);
+  const rows: SpanRow[] = new Array(n);
+  let v = 0;
+  for (let i = 0; i < n; ) {
+    const len = 1 + ((v * 7919) % 20);
+    for (let j = 0; j < len && i < n; j++, i++) rows[i] = { id: `r${i}`, w: `ward-${v}`, x: i };
+    v++;
+  }
+  store.replaceAll(rows);
+  return { rows: flatDisplayed(store.snapshot, null, 1), columns: createColumnModel<SpanRow>(defs), ctx: localeCtx({ locale: 'fr-FR' }) };
+}

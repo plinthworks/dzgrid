@@ -1,0 +1,38 @@
+{
+  "id": "merge-export-text",
+  "suite": "spans",
+  "description": "Merging compares the stable text: e and é stay apart, é and é merge, E is apart.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "merge": true
+      }
+    ],
+    "rows": [
+      [
+        "e"
+      ],
+      [
+        "é"
+      ],
+      [
+        "é"
+      ],
+      [
+        "E"
+      ]
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 1,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

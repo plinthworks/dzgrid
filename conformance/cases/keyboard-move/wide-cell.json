@@ -1,0 +1,102 @@
+{
+  "id": "wide-cell",
+  "suite": "keyboard-move",
+  "description": "Down onto a wide cell keeps the column; Right steps over the whole cell and stops at the last column.",
+  "input": {
+    "rows": 3,
+    "cols": 4,
+    "cells": [
+      {
+        "row": 1,
+        "col": 0,
+        "rows": 1,
+        "cols": 3
+      }
+    ],
+    "start": {
+      "row": 0,
+      "col": 2
+    },
+    "keys": [
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": 1
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": 1
+      },
+      {
+        "kind": "move",
+        "axis": "row",
+        "delta": -1
+      },
+      {
+        "kind": "move",
+        "axis": "col",
+        "delta": 1
+      },
+      {
+        "kind": "move",
+        "axis": "col",
+        "delta": 1
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "to": {
+          "row": 1,
+          "col": 0
+        },
+        "goal": {
+          "row": 1,
+          "col": 2
+        }
+      },
+      {
+        "to": {
+          "row": 2,
+          "col": 2
+        },
+        "goal": {
+          "row": 2,
+          "col": 2
+        }
+      },
+      {
+        "to": {
+          "row": 1,
+          "col": 0
+        },
+        "goal": {
+          "row": 1,
+          "col": 2
+        }
+      },
+      {
+        "to": {
+          "row": 1,
+          "col": 3
+        },
+        "goal": {
+          "row": 1,
+          "col": 3
+        }
+      },
+      {
+        "to": {
+          "row": 1,
+          "col": 3
+        },
+        "goal": {
+          "row": 1,
+          "col": 3
+        }
+      }
+    ]
+  }
+}

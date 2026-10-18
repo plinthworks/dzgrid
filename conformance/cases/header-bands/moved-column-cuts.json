@@ -1,0 +1,50 @@
+{
+  "id": "moved-column-cuts",
+  "suite": "header-bands",
+  "description": "A column moved between a group's leaves cuts the group in two.",
+  "input": {
+    "columns": [
+      {
+        "id": "g",
+        "header": "G",
+        "children": [
+          {
+            "id": "a"
+          },
+          {
+            "id": "b"
+          }
+        ]
+      },
+      {
+        "id": "x"
+      }
+    ],
+    "state": [
+      {
+        "id": "x",
+        "order": 0.5
+      }
+    ]
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "g",
+          "first": 0,
+          "count": 1,
+          "label": "G"
+        },
+        {
+          "group": "g",
+          "first": 2,
+          "count": 1,
+          "label": "G"
+        }
+      ]
+    ],
+    "problems": []
+  }
+}
