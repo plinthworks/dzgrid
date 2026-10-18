@@ -15,11 +15,11 @@ Mis à jour : 2026-10-18. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 6 — forme des filtres envoyée au serveur (`toWire`) | fait | `95298f4` |
 | 7 — sélection sur plusieurs pages | fait | `2151d99` |
 | 8 — types de filtres personnalisés (`FilterKind`) | fait | `7a081dc` |
-| 9 — listes de valeurs du filtre à cocher | fait ; relecture et analyse des tests en cours | `8b45b62` |
+| 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
 | **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : en conception (architecte) ; code juste après l'étape 9 | — |
 | 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : les corrections de la relecture et de l'analyse des tests de l'étape 9 (8 points, liste dans le rapport de commit à venir ; tests de l'analyse dans le dossier temporaire `scratchpad/dz11`, à réécrire si perdu). L'essai navigateur des fusions S12 est fait : `spikes/s12-spans/README.md` (188 vérifications, 0 échec ; décisions pour le code). Ensuite : l'étape 9b (fusions) en 4 commits selon `docs/phase-3-steps/step9b-spans-blueprint.md` et `step9b-decisions.md`, en commençant par les points d'accroche (aucun changement visible).
+En cours : l'étape 9b (fusions), commit 1 « points d'accroche » (aucun changement visible), confié à un agent ; non commité tant qu'il tourne. Ensuite : commit 2 (moteur des fusions dans `@dzgrid/core/spans`), commit 3 (côté écran, clavier, clic), commit 4 (en-têtes groupés, vérifications navigateur). Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md`.
 
 ## Les plans détaillés des étapes
 
