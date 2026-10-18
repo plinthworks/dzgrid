@@ -373,12 +373,9 @@ describe('the cache: two levels, invalidation', () => {
     t.cache.distinct(s(), t.e(localeCtx({ locale: 'fr-FR', numerals: 'locale', timeZone: 'Asia/Tokyo' })), {});
     expect(builds()).toBe(8);
 
-    t.cache.distinct(s(), t.e(localeCtx({ locale: 'fr-FR', numerals: 'locale', timeZone: 'Asia/Tokyo' })), { spec: { sensitivity: 'variant' } });
-    expect(builds()).toBe(9);
-
     t.cache.invalidateAll();
-    t.cache.distinct(s(), t.e(localeCtx({ locale: 'fr-FR', numerals: 'locale', timeZone: 'Asia/Tokyo' })), { spec: { sensitivity: 'variant' } });
-    expect(builds()).toBe(10);
+    t.cache.distinct(s(), t.e(localeCtx({ locale: 'fr-FR', numerals: 'locale', timeZone: 'Asia/Tokyo' })), {});
+    expect(builds()).toBe(9);
   });
 
   it('a patch of other rows drops the index even when the version would line up', () => {
@@ -390,12 +387,10 @@ describe('the cache: two levels, invalidation', () => {
     expect(t.cache.distinct(s, t.e(), {}).values.map((v) => v.value)).toEqual(['a', 'z']);
   });
 
-  it('a sensitivity that tells case apart orders by case too', () => {
+  it('collator-equal values in case: ordered by their code units', () => {
     const t = env([{ s: 'b' }, { s: 'B' }, { s: 'a' }]);
     const s = t.columns.get('s')!;
     expect(t.cache.distinct(s, t.e(), {}).values.map((v) => v.value)).toEqual(['a', 'B', 'b']);
-    // variant: b < B in en (lower first), so the collator, not the code units, decides.
-    expect(t.cache.distinct(s, t.e(), { spec: { sensitivity: 'variant' } }).values.map((v) => v.value)).toEqual(['a', 'b', 'B']);
   });
 });
 

@@ -282,10 +282,11 @@ export class ColumnCache<T> {
    * column's sort order (the collator's, ties by code units), labelled by the
    * codec, counted over the rows `others` keeps; values with no row left out,
    * but the `selected` ones a list lacks come first (count 0); the `search`
-   * narrows, `max` cuts. Equal inputs give the same object.
+   * narrows, `max` cuts, but never a `selected` one: those past the cap follow
+   * the cut, in order. Equal inputs give the same object.
    */
-  distinct(col: ResolvedColumn<T>, env: ColumnEnv<T>, o: { readonly spec?: CollatorSpec; readonly search?: string; readonly max?: number; readonly others?: OtherFilters; readonly selected?: readonly string[] | undefined }): ValueList {
-    const ctx = `${listCtx(env)}|${collatorKey(env.ctx, o.spec)}`;
+  distinct(col: ResolvedColumn<T>, env: ColumnEnv<T>, o: { readonly search?: string; readonly max?: number; readonly others?: OtherFilters; readonly selected?: readonly string[] | undefined }): ValueList {
+    const ctx = `${listCtx(env)}|${collatorKey(env.ctx)}`;
     let ix = this.#index.get(col.id);
     if (!ix || ix.col !== col || ix.version !== env.source.version || ix.reader !== env.reader.version || ix.ctx !== ctx) {
       this.stats.indexBuilds++;
@@ -303,7 +304,7 @@ export class ColumnCache<T> {
         of[i] = k;
       }
       // The column's sort order: its keys, or its ranks by the collator; equal ones by their code units.
-      const keys = col.codec.keyKind === 'number' ? this.keys(col, env).keys : this.ranks(col, env, o.spec).ranks;
+      const keys = col.codec.keyKind === 'number' ? this.keys(col, env).keys : this.ranks(col, env).ranks;
       const sorted = entries.map((e, k) => ({ ...e, k })).sort((a, b) => keys[a.r]! - keys[b.r]! || (a.e < b.e ? -1 : a.e > b.e ? 1 : 0));
       const at = new Int32Array(entries.length);
       sorted.forEach((e, k) => (at[e.k] = k));
@@ -333,19 +334,23 @@ export class ColumnCache<T> {
     const n = c.n;
     // The ticked values with no row: only those change the list, never a tick of a value that has rows.
     const missing = tickedMissing(o.selected, (v) => !!n[ids.get(v) ?? -1], (v) => (ids.has(v) ? entries[ids.get(v)!]!.l : labelFor(col, v, env.ctx)), words);
-    const t = JSON.stringify(missing.map((m) => m.value));
+    const t = JSON.stringify(o.selected ?? []);
     const last = c.last;
     if (last && last.s === s && last.x === x && last.t === t) return last.out;
+    const ticked = new Set(o.selected);
     const found: SetValue[] = [];
+    let kept = 0;
     let more = false;
     for (let k = 0; k < entries.length; k++) {
       const e = entries[k]!;
       if (!n[k]) continue;
       // The label and the value folded once, joined by a character no search word holds.
       if (words.length && !words.every((w) => (e.f ??= `${fold(e.l)}\n${fold(e.e)}`).includes(w))) continue;
-      if (found.length === x) {
+      // Past the cap only the ticked values go on, in order: one is never cut (the owner's rule).
+      if (found.length - kept === x) {
         more = true;
-        break;
+        if (!ticked.has(e.e)) continue;
+        kept++;
       }
       found.push({ value: e.e, label: e.l, count: n[k]! });
     }

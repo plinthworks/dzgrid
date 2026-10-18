@@ -52,7 +52,7 @@ describe('the request', () => {
     const s = setup({ operations: { page: 'off', filter: 'server' } });
     s.model.setQuery(q({}, 'abc'));
     s.model.setValues!('city', { max: 5 });
-    expect(req(s)).toEqual({ column: 'city', search: '', limit: 5, filter: {}, params: {}, zone: 'UTC', key: '{"column":"city","filter":{},"limit":5,"params":{},"search":"","zone":"UTC"}' });
+    expect(req(s)).toEqual({ column: 'city', search: '', limit: 5, params: {}, zone: 'UTC', key: '{"column":"city","limit":5,"params":{},"search":"","zone":"UTC"}' });
     const t = setup();
     t.model.setQuery(q({}, '   '));
     t.model.setValues!('city');
@@ -63,7 +63,8 @@ describe('the request', () => {
     const s = setup();
     s.model.setQuery(q({ city: { type: 'text', op: 'contains', value: 'x' }, name: { type: 'text', op: 'contains', value: '' } }));
     s.model.setValues!('city');
-    expect(req(s).filter).toEqual({});
+    // No filter left: none sent (as a rows request).
+    expect('filter' in req(s)).toBe(false);
   });
 
   it('counts the requests', () => {

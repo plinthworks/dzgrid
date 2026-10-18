@@ -177,6 +177,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   /** The open value lists on the server, by column: each one checks its request after every change. */
   const lists = new Map<string, ReturnType<typeof serverValues<T>>>();
   let destroyed = false;
+  /** invalidate() in this commit: the open lists ask again, the data changed. */
+  let reask = false;
   const listeners = new Set<(c: ModelChange<T>) => void>();
 
   // One commit per call: what it changed is gathered, then said once.
@@ -214,7 +216,9 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     failure = undefined;
     if (c) for (const fn of [...listeners]) fn(c);
     // After the model's listeners: a list's own listeners may call the model again.
-    if (!destroyed) for (const h of [...lists.values()]) h.reconcile();
+    const again = reask;
+    reask = false;
+    if (!destroyed) for (const h of [...lists.values()]) h.reconcile(again);
   };
   // A failure always follows a loading (only the last request counts): a phase change is a change.
   const setStatus = (s: ModelStatus): void => {
@@ -421,7 +425,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
         parts: (col) => {
           const filter = { ...wire };
           delete filter[col];
-          return { filter, ...(server.quick !== undefined && { quick: server.quick }), params, zone: ctx.timeZone };
+          // No filter left but this column's: none sent, as a rows request sends none.
+          return { ...(Object.keys(filter).length > 0 && { filter }), ...(server.quick !== undefined && { quick: server.quick }), params, zone: ctx.timeZone };
         },
         ticked: (col) => tickedIn(server.filter ?? {}, col),
         column: (id) => columns.get(id),
@@ -486,6 +491,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
         // Asked again: the server may say more now (an end found past an unknown total may have moved).
         endAt = null;
         fresh = true;
+        reask = true;
         if (opts?.purge) {
           // Nothing left to keep: the first-load overlay shows.
           inner.setRows([], 'data');

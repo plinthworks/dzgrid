@@ -1,7 +1,7 @@
 import type { ResolvedColumn } from '../columns/defs.js';
 import { quickWords } from '../filter/quick.js';
 import { canonical } from '../model/query.js';
-import { capOf, labelFor, tickedMissing, ValuesBox, type SetValue, type ValueList, type ValuesHandle, type ValuesOptions } from '../model/values.js';
+import { capOf, EMPTY_LIST, labelFor, tickedMissing, ValuesBox, type SetValue, type ValueList, type ValuesHandle, type ValuesOptions } from '../model/values.js';
 import { problem, type Problem } from '../problems.js';
 import type { LocaleCtx } from '../value/locale.js';
 import type { RequestGate, Ticket } from './gate.js';
@@ -78,16 +78,18 @@ export interface ValuesHost<T> {
  * epoch dropped the one in flight; otherwise refreshes the ticked values it
  * adds (the column's own filter, the language).
  */
-export function serverValues<T>(host: ValuesHost<T>, column: string, o: ValuesOptions, end: () => void): ValuesHandle & { reconcile(): void; close(): void } {
+export function serverValues<T>(host: ValuesHost<T>, column: string, o: ValuesOptions, end: () => void): ValuesHandle & { reconcile(again?: boolean): void; close(): void } {
   const channel = `values:${column}`;
   const limit = capOf(o.max);
-  let asked: { key: string; ticket: Ticket };
-  /** The last accepted list, as read, and the values it holds. */
+  /** The last request: its key, its ticket, the source asked (another source with equal params is asked again). */
+  let asked: { key: string; ticket?: Ticket; data: DataSource<T> };
+  /** The last accepted list, as read, the values it holds, the search it answered. */
   let raw: ValueList | null = null;
   let has = new Set<string>();
+  let rawQ = '';
   let shown = '';
 
-  /** The list shown: the accepted one, with the ticked values it lacks first. */
+  /** The list shown: the accepted one, with the ticked values it lacks first, under the search it answered (a search still loading cuts nothing). */
   const show = (): void => {
     if (!raw) return;
     const ticked = host.ticked(column);
@@ -96,15 +98,30 @@ export function serverValues<T>(host: ValuesHost<T>, column: string, o: ValuesOp
     if (now === shown && b.result) return;
     shown = now;
     const col = host.column(column);
-    const missing = tickedMissing(ticked, (v) => has.has(v), (v) => (col ? labelFor(col, v, ctx) : v), quickWords(b.q));
+    const missing = tickedMissing(ticked, (v) => has.has(v), (v) => (col ? labelFor(col, v, ctx) : v), quickWords(rawQ));
     b.result = missing.length ? { ...raw, values: [...missing, ...raw.values] } : raw;
   };
 
   const ask = (): void => {
-    const parts = { column, search: b.q, limit, ...host.parts(column) };
+    const data = host.data();
+    if (!data.values) {
+      // A source without lists (setSource): nothing to ask, nothing failed; the UI uses the column's options.
+      host.gate.cancel(channel);
+      asked = { key: '', data };
+      raw = null;
+      b.available = false;
+      b.status = 'idle';
+      b.result = EMPTY_LIST;
+      b.failure = undefined;
+      b.problems = [];
+      return b.ping();
+    }
+    b.available = true;
+    const q = b.q;
+    const parts = { column, search: q, limit, ...host.parts(column) };
     const key = canonical(parts);
     const { ticket, signal } = host.gate.begin(channel, key);
-    asked = { key, ticket };
+    asked = { key, ticket, data };
     host.counted();
     b.status = 'loading';
     let done = false;
@@ -116,6 +133,7 @@ export function serverValues<T>(host: ValuesHost<T>, column: string, o: ValuesOp
       b.problems = r?.problems ?? [];
       if (r?.list) {
         raw = r.list;
+        rawQ = q;
         has = new Set(raw.values.map((x) => x.value));
         shown = '';
         b.status = 'idle';
@@ -128,7 +146,7 @@ export function serverValues<T>(host: ValuesHost<T>, column: string, o: ValuesOp
       b.ping();
     };
     try {
-      const r: unknown = host.data().values!({ ...parts, key, signal } as ValuesRequest);
+      const r: unknown = data.values({ ...parts, key, signal } as ValuesRequest);
       if (isThenable(r)) r.then(settle(true), settle(false));
       else settle(true)(r);
     } catch (error) {
@@ -143,10 +161,12 @@ export function serverValues<T>(host: ValuesHost<T>, column: string, o: ValuesOp
   });
   ask();
   return Object.assign(b, {
-    reconcile(): void {
+    /** `again`: the host said its data changed (invalidate): asked again whatever the key. */
+    reconcile(again = false): void {
       if (b.closed) return;
+      const data = host.data();
       const key = canonical({ column, search: b.q, limit, ...host.parts(column) });
-      if (key !== asked.key || (b.status === 'loading' && host.gate.accepts(asked.ticket) !== null)) return ask();
+      if (!data.values ? b.available : again || data !== asked.data || key !== asked.key || (b.status === 'loading' && host.gate.accepts(asked.ticket!) !== null)) return ask();
       show();
       b.ping();
     },

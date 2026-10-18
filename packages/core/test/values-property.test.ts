@@ -162,6 +162,7 @@ describe('value lists, seeded, against an oracle', () => {
       const sw = words(search);
       const matches = (x: string) => sw.every((w) => fold(labelOf(target, x, c)).includes(w) || fold(x).includes(w));
       const found = [...counts.keys()].filter(matches).sort((a, b) => compare(target, a, b, c));
+      // A ticked value is never cut by the cap: those past it follow the cut, in order (value-list.md).
       const cap = max ?? 2000;
       const extra: SetValue[] = [];
       for (const x of include ?? []) {
@@ -169,7 +170,7 @@ describe('value lists, seeded, against an oracle', () => {
         extra.push({ value: x, label: labelOf(target, x, c), count: 0, selected: true });
       }
       const want = {
-        values: [...extra, ...found.slice(0, cap).map((x) => ({ value: x, label: labelOf(target, x, c), count: counts.get(x)! }))],
+        values: [...extra, ...found.filter((x, i) => i < cap || (include ?? []).includes(x)).map((x) => ({ value: x, label: labelOf(target, x, c), count: counts.get(x)! }))],
         blanks,
         truncated: found.length > cap,
       };

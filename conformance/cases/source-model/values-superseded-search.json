@@ -116,7 +116,6 @@
         "column": "name",
         "search": "",
         "limit": 2000,
-        "filter": {},
         "params": {},
         "zone": "UTC"
       },
@@ -125,7 +124,6 @@
         "column": "name",
         "search": "b",
         "limit": 2000,
-        "filter": {},
         "params": {},
         "zone": "UTC"
       },
@@ -134,7 +132,6 @@
         "column": "name",
         "search": "bo",
         "limit": 2000,
-        "filter": {},
         "params": {},
         "zone": "UTC"
       }

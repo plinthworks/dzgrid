@@ -1,5 +1,5 @@
 import type { ColumnLookup } from '../columns/model.js';
-import type { Json } from '../filter/model.js';
+import type { FilterModel, Json } from '../filter/model.js';
 import type { AnyFilterKind } from '../filter/kind.js';
 import { NO_OVERLAY, type ValueReader } from '../columns/defs.js';
 import { compileFilter, filterIndices } from '../filter/compile.js';
@@ -210,14 +210,16 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   let sorted: { in: Inputs; sort: string; input: Uint32Array | null; order: Uint32Array | null; problems: readonly Problem[] } | null = null;
   let displayed: DisplayedRows<T>;
   /** The filters that apply, as a key, for a filter model under these columns and context. */
-  let applied: { f: unknown; in: Inputs; key: string } | null = null;
-  const appliedKey = (f: Query['filter']): string => {
+  let applied: { f: unknown; in: Inputs; m: FilterModel; key: string } | null = null;
+  const appliedOf = (f: Query['filter']): NonNullable<typeof applied> => {
     const now = inputs();
     if (!applied || applied.f !== f || applied.in.colsRef !== now.colsRef || applied.in.cols !== now.cols || applied.in.ctx !== now.ctx) {
-      applied = { f, in: now, key: canonical(compileFilter(f, env(), o.filterKinds).applied) };
+      const m = compileFilter(f, env(), o.filterKinds).applied;
+      applied = { f, in: now, m, key: canonical(m) };
     }
-    return applied.key;
+    return applied;
   };
+  const appliedKey = (f: Query['filter']): string => appliedOf(f).key;
 
   const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache });
   /** The columns a search reads. */
@@ -243,7 +245,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       d.filterRuns++;
       const e = env();
       const f = compileFilter(query.filter, e, o.filterKinds);
-      applied = { f: query.filter, in: now, key: canonical(f.applied) };
+      applied = { f: query.filter, in: now, m: f.applied, key: canonical(f.applied) };
       const words = quickWords(query.quick);
       const q = compileQuick(query.quick, columns.visible(), e);
       // Typing on: when only the search changed and its words narrow the old ones, search the old matches.
@@ -295,9 +297,12 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   const listOf = (column: string, search: string, max: number | undefined) => {
     const col = columns.get(column);
     if (!col?.filterable) return EMPTY_LIST;
-    // The other filters: every column's but this one's, whole; the search over the columns it reads.
+    // The other filters: every column's but this one's, whole, as they apply (a half-typed one counts
+    // nothing again); the search over the columns it reads.
     const others = { ...query.filter };
+    const counted = { ...appliedOf(query.filter).m };
     delete others[column];
+    delete counted[column];
     const words = quickWords(query.quick);
     return cache.distinct(col, env(), {
       search,
@@ -306,7 +311,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       others: {
         // The columns a search reads are data too: showing or hiding one moves `dataVersion`;
         // another lookup brings other column objects, which rebuild the index and its counts.
-        key: canonical([others, words, columns.dataVersion]),
+        key: canonical([counted, words, columns.dataVersion]),
         test: () => {
           const e = env();
           const f = compileFilter(others, e, o.filterKinds);

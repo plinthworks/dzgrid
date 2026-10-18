@@ -97,6 +97,11 @@ export const tickedMissing = (ticked: readonly string[] | undefined, has: (v: st
   return out;
 };
 
+const sameValue = (a: SetValue, b: SetValue): boolean => a.value === b.value && a.label === b.label && a.count === b.count && !a.selected === !b.selected;
+/** Two lists with the same content: values, labels, counts, `selected`, blanks, `truncated`. */
+export const sameList = (a: ValueList | null, b: ValueList | null): boolean =>
+  a === b || (!!a && !!b && a.blanks === b.blanks && a.truncated === b.truncated && a.values.length === b.values.length && a.values.every((v, i) => sameValue(v, b.values[i]!)));
+
 /**
  * The state behind a handle, shared by the browser's and a server's lists:
  * the owner sets `status`, `result`, `failure`, `problems`, then `ping()`
@@ -109,10 +114,10 @@ export class ValuesBox implements ValuesHandle {
   problems: readonly Problem[] = [];
   closed = false;
   #fns = new Set<() => void>();
-  #seen: [string, ValueList | null] = ['idle', null];
+  #seen: [string, ValueList | null, boolean] = ['idle', null, true];
 
   constructor(
-    readonly available: boolean,
+    public available: boolean,
     /** The search in force, trimmed. */
     public q = '',
     /** Asks again (the search changed, a refresh). */
@@ -144,9 +149,12 @@ export class ValuesBox implements ValuesHandle {
     this.end();
   }
 
+  /** Tells the listeners when the status, `available` or the result's content changed; an equal result keeps the object told. */
   ping(): void {
-    if (this.#seen[0] === this.status && this.#seen[1] === this.result) return;
-    this.#seen = [this.status, this.result];
+    const [st, was, av] = this.#seen;
+    if (this.result !== was && sameList(this.result, was)) this.result = was;
+    if (st === this.status && this.result === was && av === this.available) return;
+    this.#seen = [this.status, this.result, this.available];
     for (const fn of [...this.#fns]) fn();
   }
 }

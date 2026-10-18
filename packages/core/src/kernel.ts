@@ -479,10 +479,12 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     dispatch,
     values(column, vo) {
       const h = rows.setValues ? rows.setValues(column, vo) : closedValues();
-      let told: readonly Problem[] = [];
+      // Told by content, like the rows' problems: the same bad entry answered again is not told again.
+      let told = '';
       const tell = (): void => {
-        if (h.problems !== told && h.problems.length) emit({ type: 'problems', source: 'data', problems: h.problems });
-        told = h.problems;
+        const now = canonical(h.problems.map((p) => [p.code, p.path, p.detail]));
+        if (now !== told && h.problems.length) emit({ type: 'problems', source: 'data', problems: h.problems });
+        told = now;
       };
       tell();
       h.subscribe(tell);

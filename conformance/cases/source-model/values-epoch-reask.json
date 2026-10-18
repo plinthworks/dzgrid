@@ -135,7 +135,6 @@
         "column": "name",
         "search": "",
         "limit": 2000,
-        "filter": {},
         "params": {},
         "zone": "UTC"
       },
