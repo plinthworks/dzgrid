@@ -37,14 +37,14 @@ export interface SpanMap extends SpanLookup {
   fullWidth(row: number): boolean;
   /**
    * What this map has to tell: the refused rules and answers, the overlaps,
-   * and the clipped spans not already told under the same column layout.
+   * and the clipped spans not already told under the same column layout
+   * (which columns show, where, in what order; widths do not count).
    */
   readonly problems: readonly Problem[];
 }
 
 /** The columns a map is built on: what a `ColumnModel` gives. */
 export interface SpanColumns<T> {
-  readonly version: number;
   readonly layout: {
     readonly start: { readonly columns: readonly ResolvedColumn<T>[] };
     readonly center: { readonly columns: readonly ResolvedColumn<T>[] };
@@ -58,12 +58,17 @@ export interface SpanInput<T> {
   readonly rows: DisplayedRows<T>;
   readonly columns: SpanColumns<T>;
   readonly ctx: LocaleCtx;
-  /** `settings.fullWidth`: a row that is one wide cell. */
+  /**
+   * `settings.fullWidth`: a row that is one wide cell. A function is the
+   * rule; `undefined`, `null` or `false`: no full-width row; anything else is
+   * refused (`invalid-span` at `settings.fullWidth`).
+   */
   readonly fullWidth?: ((row: Readonly<T>) => boolean | { readonly part?: string }) | undefined;
   /**
    * A cell's stable export text, null for a blank (an export cache, through
    * the edit overlay). Defaults to the column's codec. Part of the memo key:
-   * a new reader is a new map.
+   * a new reader is a new map. One that throws costs its slot (a blank), told
+   * once per column.
    */
   readonly text?: ((col: ResolvedColumn<T>, row: Readonly<T>, index: number) => string | null) | undefined;
 }
@@ -75,7 +80,8 @@ interface Memo {
   readonly rows: DisplayedRows<unknown>;
   readonly rowsVersion: number;
   readonly columns: SpanColumns<unknown>;
-  readonly columnsVersion: number;
+  /** The visible columns of each segment, in order: new definitions are new objects, so this also tells them (widths do not count). */
+  readonly segs: readonly (readonly unknown[])[];
   readonly fullWidth: unknown;
   readonly text: unknown;
   readonly ctx: string;
@@ -107,9 +113,10 @@ const isObj = (v: unknown): v is Record<string, unknown> => v !== null && typeof
 /**
  * The span map of the displayed rows over the visible columns (step 9b
  * blueprint A). `prev`, the map last built: it is given back when nothing it
- * depends on changed (rows and their version, columns and their version, the
- * full-width rule, the text reader, the language), and it carries which
- * clipped spans were told.
+ * depends on changed (rows and their version; the columns object and the
+ * visible columns of each segment, in order and by identity, so a resize or a
+ * flex reshare keeps the map and new definitions do not; the full-width rule, the text reader, the
+ * language), and it carries which clipped spans were told.
  *
  * Placement is in reading order (row by row, start to end): an earlier span
  * wins, a later one asked over it drops to one cell (`span-overlap`). Spans
@@ -121,11 +128,16 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
   const { rows, columns } = input;
   const ctx = ctxKey(input.ctx);
   const last = prev ? MEMO.get(prev) : undefined;
+  const { start, center, end } = columns.layout;
+  const segs = [start.columns, center.columns, end.columns];
+  const sameLayout =
+    !!last && last.columns === columns &&
+    last.segs.every((s, i) => s.length === segs[i]!.length && s.every((c, j) => c === segs[i]![j]));
   if (
-    last && prev && last.rows === rows && last.rowsVersion === rows.version && last.columns === columns &&
-    last.columnsVersion === columns.version && last.fullWidth === input.fullWidth && last.text === input.text && last.ctx === ctx
+    sameLayout && prev && last!.rows === rows && last!.rowsVersion === rows.version &&
+    last!.fullWidth === input.fullWidth && last!.text === input.text && last!.ctx === ctx
   ) return prev;
-  const told = new Set(last && last.columns === columns && last.columnsVersion === columns.version ? last.told : []);
+  const told = new Set(sameLayout ? last!.told : []);
 
   const problems: Problem[] = [];
   const counts = new Map<string, number>();
@@ -137,7 +149,6 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     if (n <= MAX_TOLD) problems.push(problem(code, code === 'invalid-span' ? 'error' : 'warning', path, detail));
   };
 
-  const { start, center, end } = columns.layout;
   const visible = [...start.columns, ...center.columns, ...end.columns];
   const nCols = visible.length;
   const segEnds = [start.columns.length, start.columns.length + center.columns.length, nCols];
@@ -177,7 +188,9 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     if (rule.merge || rule.rowSpan || rule.colSpan) rules.push(rule);
   });
 
-  const fwRule = typeof input.fullWidth === 'function' ? input.fullWidth : null;
+  const fwIn: unknown = input.fullWidth;
+  const fwRule = typeof fwIn === 'function' ? input.fullWidth! : null;
+  if (!fwRule && fwIn != null && fwIn !== false) say('invalid-span', '', 'settings.fullWidth', 'not a function');
   const none = !rules.length && !fwRule;
   const n = none ? 0 : rows.count;
 
@@ -227,7 +240,16 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     let t = texts.get(col.id);
     if (!t) {
       t = new Array(n);
-      for (let i = 0; i < n; i++) t[i] = read(col, nodes[i]!.data, i);
+      let told = false;
+      for (let i = 0; i < n; i++) {
+        try {
+          t[i] = read(col, nodes[i]!.data, i);
+        } catch {
+          t[i] = null;
+          if (!told) say('invalid-span', col.id, `columns.${col.id}`, 'threw');
+          told = true;
+        }
+      }
       texts.set(col.id, t);
     }
     return t;
@@ -377,7 +399,7 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     fullWidth: (r) => inRange(r, 0) && fw[r] === 1,
     problems,
   };
-  MEMO.set(map, { rows: rows as DisplayedRows<unknown>, rowsVersion: rows.version, columns: columns as SpanColumns<unknown>, columnsVersion: columns.version, fullWidth: input.fullWidth, text: input.text, ctx, told });
+  MEMO.set(map, { rows: rows as DisplayedRows<unknown>, rowsVersion: rows.version, columns: columns as SpanColumns<unknown>, segs, fullWidth: input.fullWidth, text: input.text, ctx, told });
   return map;
 }
 

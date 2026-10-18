@@ -53,7 +53,7 @@ describe('navigate without a map moves as moveFocus does', () => {
   }
 
   it('a span map is what moveFocus takes as its lookup', () => {
-    const map: SpanLookup = buildSpanMap({ rows: { version: 1, count: 0 } as never, columns: { version: 0, layout: { start: { columns: [] }, center: { columns: [] }, end: { columns: [] } }, get: () => undefined }, ctx: { locale: 'en-US' } as never });
+    const map: SpanLookup = buildSpanMap({ rows: { version: 1, count: 0 } as never, columns: { layout: { start: { columns: [] }, center: { columns: [] }, end: { columns: [] } }, get: () => undefined }, ctx: { locale: 'en-US' } as never });
     expect(map.ownerAt(0, 0)).toBeNull();
   });
 });

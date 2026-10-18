@@ -257,7 +257,7 @@ describe('clipping', () => {
     expect(shape(m)).toEqual([{ code: 'span-clipped', severity: 'warning', path: 'columns.a', detail: 'rows' }]);
   });
 
-  it('is said once per column layout: a new order keeps quiet, a column change tells again', () => {
+  it('is said once per column layout: a new order or a resize keeps quiet, a column change tells again', () => {
     const defs = [C('a', { rowSpan: () => 5 }), C('b')];
     const g = spanGrid(defs, [[0, 0], [1, 1], [2, 2]]);
     const m1 = buildSpanMap(g.input);
@@ -266,7 +266,10 @@ describe('clipping', () => {
     const m2 = buildSpanMap(g2.input, m1);
     expect(m2).not.toBe(m1);
     expect(m2.problems).toEqual([]);
+    // A width is not the layout the map depends on: the same map, nothing told again.
     g.columns.apply([{ id: 'b', width: 99 }], 'api');
+    expect(buildSpanMap(g2.input, m2)).toBe(m2);
+    g.columns.apply([{ id: 'b', pinned: 'end' }], 'api');
     const m3 = buildSpanMap(g2.input, m2);
     expect(shape(m3).map((p) => p.code)).toEqual(['span-clipped']);
   });

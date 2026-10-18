@@ -18,6 +18,7 @@ export function missingFeatureProblems<T>(tree: readonly ColumnOrGroup<T>[], ful
       out.push(problem('missing-feature', 'warning', `columns[${i}].${k}`, 'spans'));
     }
   });
-  if (fullWidth !== undefined) out.push(problem('missing-feature', 'warning', 'settings.fullWidth', 'spans'));
+  // `undefined`, `null`, `false`: no full-width rows (as `buildSpanMap` reads it); any other value asked for one.
+  if (fullWidth != null && fullWidth !== false) out.push(problem('missing-feature', 'warning', 'settings.fullWidth', 'spans'));
   return out;
 }

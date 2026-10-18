@@ -44,8 +44,11 @@ export const land = (map: SpanLookup | null, row: number, col: number): Slot => 
  * cell's origin is. Vertical moves keep the goal column, horizontal ones the
  * goal row; Down leaves a tall cell below its last row, Up above its first,
  * Right and Left past its sides; landing in a spanned cell focuses its origin
- * and aims at the slot reached. A move that ends on the cell it starts from
- * (an edge, a full-width row's Left or Right) stays put and keeps the goal.
+ * and aims at the slot reached. An arrow, Home or End that ends on the cell
+ * it starts from (an edge, a full-width row's Left or Right) stays put and
+ * keeps the goal; a page key or a row edge (Ctrl+arrow, Ctrl+Home/End) moves
+ * the goal to the slot reached even inside the cell, so repeated PageDown
+ * walks down a cell taller than a page and then leaves it.
  * Without a map: one slot at a time, as the grid moves today.
  */
 export function navigate(map: SpanLookup | null, s: NavShape, from: Slot, goal: Slot | null, intent: Intent): NavMove | null {
@@ -82,8 +85,9 @@ export function navigate(map: SpanLookup | null, s: NavShape, from: Slot, goal: 
   r = Math.max(0, Math.min(s.rows - 1, r));
   c = Math.max(0, Math.min(s.cols - 1, c));
   const t = ownerOf(map, r, c);
-  if (t.row === o.row && t.col === o.col) return { to: { row: o.row, col: o.col }, goal: g };
-  return { to: { row: t.row, col: t.col }, goal: { row: r, col: c } };
+  // Inside the same cell, a page or a row edge still moves the goal (else PageDown is stuck in a cell taller than a page).
+  const stay = t.row === o.row && t.col === o.col && (intent.kind === 'move' || (intent.kind === 'edge' && intent.axis === 'col'));
+  return { to: { row: t.row, col: t.col }, goal: stay ? g : { row: r, col: c } };
 }
 
 /**
