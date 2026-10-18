@@ -1,0 +1,31 @@
+{
+  "id": "all-untick-page-count",
+  "suite": "selection-across-pages",
+  "description": "Select all, untick r7, go to page 5: the count is the total less one.",
+  "input": {
+    "rows": 120,
+    "pageSize": 20,
+    "ops": [
+      {
+        "op": "all"
+      },
+      {
+        "op": "toggle",
+        "id": "r7"
+      },
+      {
+        "op": "page",
+        "index": 5
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [
+      "r7"
+    ],
+    "count": 119,
+    "reason": null,
+    "header": "some"
+  }
+}

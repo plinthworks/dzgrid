@@ -1,0 +1,26 @@
+{
+  "id": "half-typed-filter-keeps-all",
+  "suite": "selection-across-pages",
+  "description": "A filter still empty asks the server nothing new: select-all is kept.",
+  "input": {
+    "rows": 10,
+    "pageSize": 5,
+    "ops": [
+      {
+        "op": "all"
+      },
+      {
+        "op": "filter",
+        "column": "v",
+        "value": ""
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [],
+    "count": 10,
+    "reason": null,
+    "header": "all"
+  }
+}

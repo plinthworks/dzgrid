@@ -1,0 +1,42 @@
+{
+  "id": "include-kept-across-pages-and-filter",
+  "suite": "selection-across-pages",
+  "description": "r3 on page 0 and r120 on page 2 stay ticked through a filter that hides r120; the box is partly ticked.",
+  "input": {
+    "rows": 120,
+    "pageSize": 50,
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "r3"
+        ]
+      },
+      {
+        "op": "page",
+        "index": 2
+      },
+      {
+        "op": "only-add",
+        "ids": [
+          "r120"
+        ]
+      },
+      {
+        "op": "filter",
+        "column": "v",
+        "value": "odd"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r120",
+      "r3"
+    ],
+    "count": 2,
+    "reason": null,
+    "header": "some"
+  }
+}

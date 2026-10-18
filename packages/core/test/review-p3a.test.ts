@@ -14,7 +14,7 @@ function serverLike(m: ClientModel<R>, total: number | null) {
     kind: 'source', ops: { filter: 'server', quick: 'server', sort: 'server', page: 'server' },
     get displayed() { return m.displayed; }, get status() { return m.status; },
     get counts() { return { total, filtered: total, displayed: m.displayed.count }; },
-    selectAll: 'query', keeps: () => true, row: (key) => m.row(key),
+    selectAll: 'query', keeps: () => true, membershipOf: (q) => m.membershipOf(q), get scope() { return m.scope; }, row: (key) => m.row(key),
     setQuery: (q, src) => { pushed.push(q.key); m.setQuery(q, src); }, setColumns: (c, src) => m.setColumns(c, src), setContext: (c, src) => m.setContext(c, src),
     page: null,
     problems: [],

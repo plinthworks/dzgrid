@@ -17,7 +17,11 @@ export interface GridSettings<T> {
   /** `auto` follows the host's direction, and its changes. */
   readonly direction?: 'auto' | 'ltr' | 'rtl';
   readonly density?: 'compact' | 'comfortable' | 'spacious';
-  readonly selection?: { readonly mode: 'none' | 'single' | 'multi'; readonly checkbox?: boolean; readonly click?: boolean };
+  /**
+   * `keepOnFilter`: false clears the selection when a filter or the search changes (a sort or
+   * a page never does); true by default, rows ticked stay ticked even once hidden.
+   */
+  readonly selection?: { readonly mode: 'none' | 'single' | 'multi'; readonly checkbox?: boolean; readonly click?: boolean; readonly keepOnFilter?: boolean };
   readonly overlay?: 'loading' | 'error' | null;
   /** The grid's accessible name, already translated; the bundle's `grid.label` otherwise. */
   readonly label?: string;

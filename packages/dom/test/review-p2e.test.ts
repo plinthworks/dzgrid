@@ -62,7 +62,8 @@ describe('phase 2 steps 12-14 review', () => {
     await new Promise((r) => setTimeout(r, 80));
     expect([...g.kernel.selection.keys]).toEqual([dataKey('r2')]);
     expect(g.kernel.anchor).toBe(dataKey('r2'));
-    expect(host.querySelector('.dzg-live')!.textContent).toBe('');
+    // Step 7: the selection is said (one row); never the range cancelled.
+    expect(host.querySelector('.dzg-live')!.textContent).toBe('1 row selected');
   });
 
   it('does not let a Shift+click select the page’s text', () => {

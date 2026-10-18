@@ -203,9 +203,10 @@ displayed = inner.displayed
 |---|---|---|---|
 | all client | the displayed (filtered) rows, as an include set | keys whose row is gone are dropped (`keeps` = the row exists) | `count` exact |
 | fetched set (`page` off or client) | the displayed rows of the fetched set | a server-part change replaces the set: keys not in the new set are dropped, with source `data` | `count` exact |
-| server page | everything the query matches, as **exclude** mode bound to the filters and the search (later `params` and the zone), not the sort | include keys survive across pages; exclude mode is cleared when the filters or the search change, with an announcement (D2); a sort keeps it | `count` is `counts.filtered − excluded`, or null when unknown; `query` is attached |
+| server page | everything the query matches, as **exclude** mode bound to `rows.membershipOf(query)` (the filters as sent, the search, `params`, the zone), not the sort | include keys survive across pages; exclude mode is cleared when the membership changes (filters, search, params, zone), with an announcement (D2); a sort keeps it | `count` is `counts.filtered − excluded`, or null when unknown; `query` and `scope` are attached, `reason` says a clearing |
+| `selection.allFiltered` | paged (browser pages, a fetched set paged in the browser): everything-except over every page, bound the same way; server pages: `selection.all`; unpaged: the displayed rows | as the row above | as the row above |
 
-The header box's tri-state is always computed over what is displayed (the page, or the list). A host's exclude selection (`selection.set`) is accepted on any model and tied by the same rule. There is no `selection.selectAll` option (step 1 decision, `server-selection.md`).
+The header box describes what its click acts on (`kernel.headerState`): the whole query on server pages, what is displayed (the page, or the list) elsewhere (step 7). A host's exclude selection (`selection.set`) is accepted on any model and tied by the same rule. There is no `selection.selectAll` option (step 1 decision, `server-selection.md`).
 
 ---
 

@@ -1,0 +1,39 @@
+{
+  "id": "fetched-set-all-filtered",
+  "suite": "selection-across-pages",
+  "description": "allFiltered on a fetched set paged in the browser: everything the filter matches, across its pages.",
+  "input": {
+    "rows": 6,
+    "pageSize": 2,
+    "operations": {
+      "page": "client"
+    },
+    "ops": [
+      {
+        "op": "filter",
+        "column": "v",
+        "value": "odd"
+      },
+      {
+        "op": "allFiltered"
+      },
+      {
+        "op": "toggle",
+        "id": "r3"
+      },
+      {
+        "op": "page",
+        "index": 1
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [
+      "r3"
+    ],
+    "count": 2,
+    "reason": null,
+    "header": "all"
+  }
+}

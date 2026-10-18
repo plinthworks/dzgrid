@@ -1,0 +1,55 @@
+{
+  "id": "all-then-filter-clears-exclude",
+  "suite": "selection-across-pages",
+  "description": "Select all on a server is everything-except, tied to the filters; a sort keeps it, a filter change clears it; the include keys it replaced do not come back.",
+  "input": {
+    "rows": 120,
+    "pageSize": 50,
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "r3"
+        ]
+      },
+      {
+        "op": "page",
+        "index": 2
+      },
+      {
+        "op": "only-add",
+        "ids": [
+          "r120"
+        ]
+      },
+      {
+        "op": "all"
+      },
+      {
+        "op": "toggle",
+        "id": "r7"
+      },
+      {
+        "op": "sort",
+        "sort": [
+          {
+            "column": "v",
+            "dir": "asc"
+          }
+        ]
+      },
+      {
+        "op": "filter",
+        "column": "v",
+        "value": "x"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [],
+    "count": 0,
+    "reason": "scope-changed",
+    "header": "none"
+  }
+}

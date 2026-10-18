@@ -3,7 +3,7 @@ import type { ColumnDef } from './columns/defs.js';
 import type { LocaleCtx } from './value/locale.js';
 import { reconcileFocus, sameFocus, type FocusPos } from './focus.js';
 import type { RowKey } from './ids.js';
-import type { ModelChange, RowModel } from './model/client.js';
+import type { ModelChange, RowModel, RowScope } from './model/client.js';
 import type { ColumnFilter, FilterModel } from './filter/model.js';
 import { canonical, makeQuery, type Query } from './model/query.js';
 import { checkPage, samePage, type PageState } from './model/page.js';
@@ -41,6 +41,14 @@ export type GridCommand =
   | { readonly type: 'quick.set'; readonly text: string }
   /** Select all, as the model means it: the displayed rows, or the whole query on a server. */
   | { readonly type: 'selection.all' }
+  /**
+   * Every row the filters and the search match, on every page: everything-except, tied
+   * to them, when the rows are paged (on server pages, `selection.all`); the displayed
+   * rows otherwise (`selection.allDisplayed`). Nothing matching clears the selection.
+   */
+  | { readonly type: 'selection.allFiltered' }
+  /** Whether a filter or search change keeps an include selection (true by default; the owner's `keepOnFilter`). */
+  | { readonly type: 'selection.keepOnFilter'; readonly keep: boolean }
   /** Fetch or compute again (a server's retry). */
   | { readonly type: 'rows.refresh' }
   /** New column definitions from the host; what the user set (widths, order) is kept by id. */
@@ -57,8 +65,16 @@ export type GridCommandResult =
 export type GridEvent<T> =
   | { readonly type: 'modelUpdated'; readonly source: ChangeSource; readonly displayed: DisplayedRows<T>; readonly kind: ModelChange<T>['kind'] }
   | { readonly type: 'sortChanged'; readonly source: ChangeSource; readonly sort: readonly SortItem[] }
-  /** `query`: the query an everything-except selection stands for (a host's bulk action sends both); null otherwise. */
-  | { readonly type: 'selectionChanged'; readonly source: ChangeSource; readonly selection: SelectionState; readonly count: number | null; readonly query: Query | null }
+  /**
+   * `query` and `scope`: the query, params and zone an everything-except selection stands
+   * for (a host's bulk action sends them with the excluded keys); null otherwise. `reason`:
+   * `scope-changed` when it was cleared because they changed (or, with `keepOnFilter` off, a
+   * filter or the search did), `rows-dropped` when selected rows left the model.
+   */
+  | {
+      readonly type: 'selectionChanged'; readonly source: ChangeSource; readonly selection: SelectionState; readonly count: number | null;
+      readonly query: Query | null; readonly scope: RowScope | null; readonly reason: SelectionReason | null;
+    }
   | { readonly type: 'filterChanged'; readonly source: ChangeSource; readonly filter: FilterModel }
   | { readonly type: 'quickChanged'; readonly source: ChangeSource; readonly text: string }
   | { readonly type: 'columnResized'; readonly source: ChangeSource; readonly column: string; readonly width: number; readonly finished: boolean }
@@ -73,6 +89,13 @@ export type GridEvent<T> =
   /** The latest request failed: the host's error unchanged; the rows shown stay, under the error overlay. */
   | { readonly type: 'fetchFailed'; readonly source: 'data'; readonly error: unknown; readonly key: string; readonly page: number | null };
 
+export type SelectionReason = 'scope-changed' | 'rows-dropped';
+
+/** What an everything-except selection stands for now: the query in force (its sort too), the params and the zone. */
+export interface SelectionScope extends RowScope {
+  readonly query: Query;
+}
+
 export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
   readonly rows: M;
   readonly columns: ColumnModel<T>;
@@ -81,6 +104,10 @@ export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
   readonly selection: SelectionState;
   readonly anchor: RowKey | null;
   readonly focus: FocusPos | null;
+  /** Non-null only for an everything-except selection tied to the query: what a host's bulk action reads. */
+  readonly selectionScope: SelectionScope | null;
+  /** The select-all box: over the displayed rows, or over the whole query on server pages (what its click acts on). */
+  readonly headerState: HeaderSelection;
   dispatch(cmd: GridCommand, source: ChangeSource): GridCommandResult;
   subscribe(fn: (e: GridEvent<T>) => void): () => void;
   destroy(): void;
@@ -92,18 +119,25 @@ const refuse = (reason: string, problems: readonly Problem[] = []): GridCommandR
 /** For the DOM layer, through `@dzgrid/core/internal`: events the kernel cannot see (clicks, first render). */
 export const EMIT = Symbol('dzgrid.emit');
 
-export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readonly rows: M; readonly columns: ColumnModel<T>; readonly query?: Query }): GridKernel<T, M> {
+export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
+  readonly rows: M;
+  readonly columns: ColumnModel<T>;
+  readonly query?: Query;
+  /** False: a filter or search change clears the selection (the owner's `keepOnFilter`). True by default. */
+  readonly keepSelectionOnFilter?: boolean;
+}): GridKernel<T, M> {
   const { rows, columns } = o;
   let query: Query = o.query ?? makeQuery();
   if (o.query) rows.setQuery(query, 'host');
   let selection: SelectionState = NO_SELECTION;
   /**
-   * Which rows an everything-except selection stands for: the filters and the
-   * search at that moment (not the sort, which changes no row's membership).
-   * Other filters drop it: "all" meant all the rows of those.
+   * Which rows an everything-except selection stands for: the model's
+   * membership of the query at that moment (filters, search, params, zone;
+   * not the sort, which changes no row's membership). Another membership
+   * drops it: "all" meant all the rows of that one.
    */
   let allOf: string | null = null;
-  const matchKey = (q: Query): string => canonical({ filter: q.filter, quick: q.quick });
+  let keepOnFilter = o.keepSelectionOnFilter !== false;
   let anchor: RowKey | null = null;
   let focus: FocusPos | null = null;
   let shown = rows.displayed;
@@ -140,11 +174,22 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
   const countNow = (): number | null => selectionCount(selection, allOf !== null ? rows.counts.filtered : rows.counts.total);
   /** The count last told: an everything-except selection is told again when a server's answer moves it. */
   let toldCount: number | null = null;
-  const changed = (source: ChangeSource): GridEvent<T> => ({
+  const tied = (): boolean => selection.mode === 'exclude' && allOf !== null;
+  const changed = (source: ChangeSource, reason: SelectionReason | null = null): GridEvent<T> => ({
     type: 'selectionChanged', source, selection,
     count: (toldCount = countNow()),
-    query: selection.mode === 'exclude' && allOf !== null ? query : null,
+    query: tied() ? query : null,
+    scope: tied() ? rows.scope : null,
+    reason,
   });
+  /** "All" stood for other rows than the query matches now: cleared (state only; the caller tells). */
+  const dropStale = (membership: () => string): boolean => {
+    if (!tied() || allOf === membership()) return false;
+    selection = clearSelection();
+    allOf = null;
+    anchor = null;
+    return true;
+  };
   const setSelection = (s: SelectionState, source: ChangeSource): void => {
     if (sameSelection(s, selection)) return;
     selection = s;
@@ -165,9 +210,11 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
    * selection that exist. The reconciling events follow, with source `data`.
    */
   const onModel = (head: GridEvent<T> | null, source: ChangeSource = 'data'): void => {
-    if (anchor !== null && !exists(anchor)) anchor = null;
     const prevSelection = selection;
     const prevFocus = focus;
+    // The zone, the params or the columns a search reads may have moved what "all" stood for.
+    const stale = dropStale(() => rows.membershipOf(query));
+    if (anchor !== null && !exists(anchor)) anchor = null;
     selection = reconcileSelection(selection, exists);
     focus = reconcileFocus(focus, shown, rows.displayed, columns);
     shown = rows.displayed;
@@ -178,7 +225,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
       lastPage = page;
       if (page) emit({ type: 'pageChanged', source, page });
     }
-    if (!sameSelection(prevSelection, selection)) emit(changed('data'));
+    if (!sameSelection(prevSelection, selection)) emit(changed('data', stale ? 'scope-changed' : selection.mode === 'include' ? 'rows-dropped' : null));
     // An everything-except selection's count follows the total: a server's answer may bring it.
     else if (selection.mode === 'exclude' && countNow() !== toldCount) emit(changed('data'));
     if (!sameFocus(prevFocus, focus)) emit({ type: 'focusChanged', source: 'data', focus });
@@ -196,16 +243,23 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
     const before = query;
     if (before.key === q.key) return;
     query = q;
-    // "All" meant all the rows of that query: another query does not inherit it.
-    if (selection.mode === 'exclude' && allOf !== null && allOf !== matchKey(q)) {
+    const filtered = canonical(before.filter) !== canonical(q.filter);
+    const searched = before.quick !== q.quick;
+    // "All" meant all the rows of that query: another membership does not inherit it.
+    // With keepOnFilter off, any filter or search change clears what was selected.
+    // Told before the model, so whoever hears modelUpdated reads the new selection.
+    let cleared = dropStale(() => rows.membershipOf(q));
+    if (!keepOnFilter && (filtered || searched) && (selection.mode === 'exclude' || selection.keys.size > 0)) {
       selection = clearSelection();
       allOf = null;
-      emit(changed('data'));
+      anchor = null;
+      cleared = true;
     }
+    if (cleared) emit(changed('data', 'scope-changed'));
     rows.setQuery(q, source);
     if (canonical(before.sort) !== canonical(q.sort)) emit({ type: 'sortChanged', source, sort: q.sort });
-    if (canonical(before.filter) !== canonical(q.filter)) emit({ type: 'filterChanged', source, filter: q.filter });
-    if (before.quick !== q.quick) emit({ type: 'quickChanged', source, text: q.quick });
+    if (filtered) emit({ type: 'filterChanged', source, filter: q.filter });
+    if (searched) emit({ type: 'quickChanged', source, text: q.quick });
   };
   /** Every sorted column exists and can sort; the first that does not refuses the whole sort. */
   const checkSort = (sort: readonly SortItem[]): GridCommandResult | null => {
@@ -215,6 +269,14 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
       if (!col.sortable) return refuse('not-sortable', [problem('invalid-sort', 'error', 'sort', item.column)]);
     }
     return null;
+  };
+  /** Everything the query matches, never held as keys: everything-except, tied to its membership. */
+  const selectQuery = (source: ChangeSource): GridCommandResult => {
+    allOf = rows.membershipOf(query);
+    anchor = null;
+    selection = { mode: 'exclude', keys: new Set() };
+    emit(changed(source));
+    return OK;
   };
   const withSort = (sort: readonly SortItem[]): Query => makeQuery({ sort, filter: query.filter, quick: query.quick });
 
@@ -293,15 +355,17 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
         rows.invalidate();
         return OK;
       case 'selection.all':
-        if (rows.selectAll === 'query') {
-          // Everything the query matches, never held as keys: everything-except, tied to this query.
-          allOf = matchKey(query);
-          anchor = null;
-          selection = { mode: 'exclude', keys: new Set() };
-          emit(changed(source));
-          return OK;
-        }
+        if (rows.selectAll === 'query') return selectQuery(source);
         return dispatch({ type: 'selection.allDisplayed' }, source);
+      case 'selection.allFiltered':
+        if (rows.selectAll === 'query') return selectQuery(source);
+        // Unpaged, the rows displayed are all the filtered ones: the include set (D8).
+        if (rows.page === null) return dispatch({ type: 'selection.allDisplayed' }, source);
+        if (rows.counts.filtered === 0) return dispatch({ type: 'selection.clear' }, source);
+        return selectQuery(source);
+      case 'selection.keepOnFilter':
+        keepOnFilter = cmd.keep;
+        return OK;
       case 'selection.allDisplayed': {
         // The client's *all* is what the filters show (D8): an include set of those keys.
         const d = rows.displayed;
@@ -316,7 +380,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
         return OK;
       case 'selection.set':
         // A host's everything-except is tied to the filters in force, like the user's select-all.
-        if (cmd.selection.mode === 'exclude') allOf = matchKey(query);
+        if (cmd.selection.mode === 'exclude') allOf = rows.membershipOf(query);
         // The anchor stays while its row exists: a host echoing the selection back must not
         // break the next Shift+click (an unticked row is still where a range starts).
         setSelection(reconcileSelection(cmd.selection, exists), source);
@@ -359,6 +423,20 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
     }
   }
 
+  // Read on every paint while a box shows it: kept per selection, rows shown and count.
+  let header: { s: SelectionState; d: DisplayedRows<T>; n: number | null; state: HeaderSelection } | null = null;
+  const headerState = (): HeaderSelection => {
+    if (rows.selectAll === 'displayed') return headerSelection(selection, rows.displayed);
+    const n = rows.counts.filtered;
+    if (header && header.s === selection && header.d === rows.displayed && header.n === n) return header.state;
+    let state: HeaderSelection;
+    // Server pages: the box's click acts on the whole query, so it speaks for it.
+    if (selection.mode === 'exclude') state = countNow() === 0 ? 'none' : selection.keys.size === 0 ? 'all' : 'some';
+    else state = selection.keys.size === 0 ? 'none' : n === selection.keys.size ? 'all' : 'some';
+    header = { s: selection, d: rows.displayed, n, state };
+    return state;
+  };
+
   const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void } = {
     rows,
     columns,
@@ -366,6 +444,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: { readon
     get anchor() { return anchor; },
     get focus() { return focus; },
     get query() { return query; },
+    get selectionScope() { return tied() ? { query, ...rows.scope } : null; },
+    get headerState() { return headerState(); },
     dispatch,
     subscribe(fn) {
       listeners.add(fn);

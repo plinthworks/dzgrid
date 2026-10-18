@@ -905,3 +905,84 @@ describe('step 5 part 2 review', () => {
     expect(s.model.displayed.count).toBe(2);
   });
 });
+
+describe('selection across server pages (step 7)', () => {
+  const page = (from: number, n: number) => Array.from({ length: n }, (_, i) => `r${from + i}`);
+  const counted = (kernel: { subscribe(fn: (e: GridEvent<R>) => void): () => void }) => {
+    const told: { count: number | null; reason: string | null }[] = [];
+    kernel.subscribe((e) => { if (e.type === 'selectionChanged') told.push({ count: e.count, reason: e.reason }); });
+    return told;
+  };
+
+  it('keys ticked on pages 0 and 2 are both kept, through pages, a sort and a refresh', () => {
+    const s = paged(50);
+    const kernel = createKernel<R>({ rows: s.model, columns: s.columns });
+    answer(s.calls[0]!, page(1, 50), { total: 120 });
+    kernel.dispatch({ type: 'selection.only', row: k('r3') }, 'user');
+    kernel.dispatch({ type: 'page.go', index: 2 }, 'user');
+    answer(s.last(), page(101, 20), { total: 120 });
+    kernel.dispatch({ type: 'selection.toggle', row: k('r120') }, 'user');
+    kernel.dispatch({ type: 'page.go', index: 0 }, 'user');
+    answer(s.last(), page(1, 50), { total: 120 });
+    kernel.dispatch({ type: 'sort.set', sort: [{ column: 'name', dir: 'desc' }] }, 'user');
+    answer(s.last(), page(71, 50).reverse(), { total: 120 });
+    kernel.dispatch({ type: 'rows.refresh' }, 'user');
+    answer(s.last(), page(71, 50).reverse(), { total: 120 });
+    expect([...kernel.selection.keys].sort()).toEqual([k('r120'), k('r3')].sort());
+    expect(kernel.headerState).toBe('some');
+  });
+
+  it('select all, untick r7, go to page 5: the count is the total less one', () => {
+    const s = paged(20);
+    const kernel = createKernel<R>({ rows: s.model, columns: s.columns });
+    const told = counted(kernel);
+    answer(s.calls[0]!, page(1, 20), { total: 120 });
+    kernel.dispatch({ type: 'selection.all' }, 'user');
+    kernel.dispatch({ type: 'selection.toggle', row: k('r7') }, 'user');
+    kernel.dispatch({ type: 'page.go', index: 5 }, 'user');
+    answer(s.last(), page(101, 20), { total: 120 });
+    expect(told.at(-1)).toEqual({ count: 119, reason: null });
+    expect(kernel.selection).toEqual({ mode: 'exclude', keys: new Set([k('r7')]) });
+    expect(kernel.headerState).toBe('some');
+  });
+
+  it('a total that drops below the unticked rows counts 0, not less', () => {
+    const s = paged(2);
+    const kernel = createKernel<R>({ rows: s.model, columns: s.columns });
+    const told = counted(kernel);
+    answer(s.calls[0]!, ['r1', 'r2'], { total: 3 });
+    kernel.dispatch({ type: 'selection.all' }, 'user');
+    kernel.dispatch({ type: 'selection.toggle', row: k('r1') }, 'user');
+    kernel.dispatch({ type: 'selection.toggle', row: k('r2') }, 'user');
+    kernel.dispatch({ type: 'rows.refresh' }, 'user');
+    answer(s.last(), ['r1'], { total: 1 });
+    expect(told.map((t) => t.count)).toEqual([3, 2, 1, 0]);
+    expect(kernel.selection.keys.size).toBe(2);
+  });
+
+  it('an include selection survives a filter change; everything-except does not', () => {
+    const s = paged(50);
+    const kernel = createKernel<R>({ rows: s.model, columns: s.columns });
+    const told = counted(kernel);
+    answer(s.calls[0]!, page(1, 50), { total: 120 });
+    kernel.dispatch({ type: 'selection.only', row: k('r3') }, 'user');
+    kernel.dispatch({ type: 'quick.set', text: 'r9' }, 'user');
+    answer(s.last(), ['r9'], { total: 1 });
+    expect([...kernel.selection.keys]).toEqual([k('r3')]);
+    kernel.dispatch({ type: 'selection.all' }, 'user');
+    kernel.dispatch({ type: 'quick.set', text: 'r1' }, 'user');
+    expect(kernel.selection).toEqual({ mode: 'include', keys: new Set() });
+    expect(told.at(-1)).toEqual({ count: 0, reason: 'scope-changed' });
+  });
+
+  it('the anchor of a row on another page is kept; a range from it is refused', () => {
+    const s = paged(2);
+    const kernel = createKernel<R>({ rows: s.model, columns: s.columns });
+    answer(s.calls[0]!, ['a', 'b'], { total: 4 });
+    kernel.dispatch({ type: 'selection.only', row: k('a') }, 'user');
+    kernel.dispatch({ type: 'page.go', index: 1 }, 'user');
+    answer(s.last(), ['c', 'd'], { total: 4 });
+    expect(kernel.anchor).toBe(k('a'));
+    expect(kernel.dispatch({ type: 'selection.range', target: k('d'), additive: false }, 'user')).toMatchObject({ ok: false, reason: 'anchor-not-displayed' });
+  });
+});

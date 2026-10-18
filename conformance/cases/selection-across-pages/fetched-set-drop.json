@@ -1,0 +1,48 @@
+{
+  "id": "fetched-set-drop",
+  "suite": "selection-across-pages",
+  "description": "A fetched set refreshed without a selected row drops it, told as rows dropped.",
+  "input": {
+    "rows": 6,
+    "pageSize": 2,
+    "operations": {
+      "page": "client"
+    },
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "r1"
+        ]
+      },
+      {
+        "op": "page",
+        "index": 1
+      },
+      {
+        "op": "only-add",
+        "ids": [
+          "r3"
+        ]
+      },
+      {
+        "op": "serverRemove",
+        "ids": [
+          "r3"
+        ]
+      },
+      {
+        "op": "refresh"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1"
+    ],
+    "count": 1,
+    "reason": "rows-dropped",
+    "header": "none"
+  }
+}

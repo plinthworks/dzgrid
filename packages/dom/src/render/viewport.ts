@@ -1,4 +1,4 @@
-import { headerSelection, isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
+import { isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import type { PartBase, SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
@@ -171,7 +171,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       if (headerRenderer.checkName.textContent !== text) headerRenderer.checkName.textContent = text;
     }
     if (headerRenderer.checkBox) {
-      const state = headerSelection(kernel.selection, d);
+      const state = kernel.headerState;
       setAttr(headerRenderer.checkBox, 'aria-checked', state === 'all' ? 'true' : state === 'some' ? 'mixed' : 'false');
       setAttr(headerRenderer.checkBox, 'aria-label', g.msg('selection.all'));
     }

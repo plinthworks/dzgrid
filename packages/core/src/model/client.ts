@@ -1,5 +1,5 @@
 import type { ColumnLookup } from '../columns/model.js';
-import type { WireKind } from '../filter/model.js';
+import type { Json, WireKind } from '../filter/model.js';
 import { NO_OVERLAY, type ValueReader } from '../columns/defs.js';
 import { compileFilter, filterIndices } from '../filter/compile.js';
 import { canNarrow, compileQuick, quickWords } from '../filter/quick.js';
@@ -46,10 +46,17 @@ export interface ModelChange<T> {
   readonly failure?: { readonly error: unknown; readonly key: string; readonly page: number | null };
 }
 
+/** What a select-all stands on besides the query: a server's params and the display zone. */
+export interface RowScope {
+  readonly params: Readonly<Record<string, Json>>;
+  readonly zone: string;
+}
+
 /**
  * What the kernel needs of any row model, the browser's or a server's (Phase 3,
- * D1): it pushes the query, reads the counts, and asks two policies — what
- * "select all" means here, and whether a selected key survives a change.
+ * D1): it pushes the query, reads the counts, and asks its policies — what
+ * "select all" means here, whether a selected key survives a change, and
+ * which rows a query matches (what an everything-except selection is tied to).
  */
 export interface RowModel<T> {
   readonly kind: 'client' | 'source';
@@ -61,8 +68,21 @@ export interface RowModel<T> {
   readonly problems: readonly Problem[];
   /** `displayed`: the rows shown after the filters (an include set). `query`: everything the query matches, on the server (everything-except). */
   readonly selectAll: 'displayed' | 'query';
-  /** Whether a selected key survives a change. Server pages: always (rows on other pages). A fetched set or the browser: the row is held. */
+  /**
+   * Whether a selected key survives a change. Server pages: always (rows on
+   * other pages, never seen, are not gone). A fetched set or the browser: the
+   * row is held — a fetched set holds the rows of its last accepted answer, so
+   * a new answer drops the keys it no longer has, and a failed one drops none.
+   */
   keeps(key: RowKey): boolean;
+  /**
+   * Which rows `q` matches here, as a key: equal keys, the same rows. It reads
+   * the filters and the search as they are applied (a server's in their wire
+   * form, so a half-typed filter changes nothing), the zone, a server's params,
+   * and the columns a search in the browser reads. Never the sort or the page.
+   */
+  membershipOf(q: Query): string;
+  readonly scope: RowScope;
   /** A row by its key: any held row in the browser, the current page on a server. */
   row(key: RowKey): DataNode<T> | undefined;
   setQuery(q: Query, source?: ChangeSource): void;
@@ -170,6 +190,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   let displayed: DisplayedRows<T>;
 
   const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache });
+  /** The columns a search reads. */
+  const visibleIds = (): string => columns.visible().map((c) => c.id).join(',');
   const inputs = (): Inputs => ({
     snap: store.snapshot.version,
     colsRef: columns,
@@ -179,7 +201,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     reader: reader.version,
     filter: canonical(query.filter),
     quick: query.quick,
-    quickCols: columns.visible().map((c) => c.id).join(','),
+    quickCols: visibleIds(),
   });
   const same = (a: Inputs, b: Inputs, ignore?: 'quick'): boolean =>
     a.snap === b.snap && a.colsRef === b.colsRef && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader && a.filter === b.filter && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick);
@@ -309,6 +331,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     ops: { filter: 'client', quick: 'client', sort: 'client', page: pageCfg ? 'client' : 'off' },
     selectAll: 'displayed',
     keeps: (key) => store.get(key) !== undefined,
+    membershipOf: (q) => canonical({ filter: q.filter, quick: q.quick, zone: ctx.timeZone, cols: q.quick.trim() ? visibleIds() : null }),
+    get scope() { return { params: NO_PARAMS, zone: ctx.timeZone }; },
     row: (key) => store.get(key),
     get query() { return query; },
     get displayed() { return displayed; },
@@ -425,6 +449,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   };
   return model;
 }
+
+const NO_PARAMS: Readonly<Record<string, Json>> = Object.freeze({});
 
 function maskOf(order: Uint32Array | null, count: number): Uint8Array | null {
   if (!order) return null;

@@ -1,0 +1,25 @@
+{
+  "id": "zone-clears-all",
+  "suite": "selection-across-pages",
+  "description": "Another display zone clears select-all: the instant bounds it stood for moved.",
+  "input": {
+    "rows": 10,
+    "pageSize": 5,
+    "ops": [
+      {
+        "op": "all"
+      },
+      {
+        "op": "zone",
+        "zone": "Asia/Riyadh"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [],
+    "count": 0,
+    "reason": "scope-changed",
+    "header": "none"
+  }
+}

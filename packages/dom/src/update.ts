@@ -82,6 +82,8 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
     const s = g.kernel.selection;
     if (mode === 'none' || (mode === 'single' && (s.mode === 'exclude' || s.keys.size > 1))) g.kernel.dispatch({ type: 'selection.clear' }, 'host');
   }
+  const keep = next.selection?.keepOnFilter !== false;
+  if (keep !== (prev.selection?.keepOnFilter !== false)) g.kernel.dispatch({ type: 'selection.keepOnFilter', keep }, 'host');
   if (patch.rows && !served) (g.rows as ClientModel<T>).setRows(patch.rows, 'host');
   if (patch.source) (g.rows as SourceHandle<T>).setSource(patch.source, 'host');
   hooks.recheckDir();

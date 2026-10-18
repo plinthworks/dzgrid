@@ -63,7 +63,7 @@ export { resolveInstantRange } from './filter/instant.js';
 export { quickWords } from './filter/quick.js';
 export type { Query } from './model/query.js';
 export { makeQuery, EMPTY_QUERY } from './model/query.js';
-export type { ModelStatus, ModelChange, RowModel, ClientOptions, ClientModel, ModelEnv, SourceBinding, SourceHandle } from './model/client.js';
+export type { ModelStatus, ModelChange, RowModel, RowScope, ClientOptions, ClientModel, ModelEnv, SourceBinding, SourceHandle } from './model/client.js';
 export { clientRows } from './model/client.js';
 export { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZES } from './model/page.js';
 export type { PageOptions, PageState } from './model/page.js';
@@ -81,7 +81,7 @@ export { NO_SELECTION, isSelected, selectionCount, selectOnly, selectAll, clearS
 export { intentFor, INTENT_OWNERS } from './keys/intent.js';
 export type { Intent, IntentContext, KeyLike, KeyOwner } from './keys/intent.js';
 export { createKernel, headerSelection } from './kernel.js';
-export type { GridCommand, GridCommandResult, GridEvent, GridKernel, HeaderSelection } from './kernel.js';
+export type { GridCommand, GridCommandResult, GridEvent, GridKernel, HeaderSelection, SelectionScope } from './kernel.js';
 export { reconcileFocus } from './focus.js';
 export type { FocusPos } from './focus.js';
 export { nextSort } from './sort/toggle.js';

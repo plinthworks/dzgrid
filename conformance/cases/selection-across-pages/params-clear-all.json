@@ -1,0 +1,42 @@
+{
+  "id": "params-clear-all",
+  "suite": "selection-across-pages",
+  "description": "Another source with other params clears select-all; an include key stays.",
+  "input": {
+    "rows": 10,
+    "pageSize": 5,
+    "params": {
+      "ward": "A"
+    },
+    "ops": [
+      {
+        "op": "all"
+      },
+      {
+        "op": "setParams",
+        "params": {
+          "ward": "B"
+        }
+      },
+      {
+        "op": "toggle",
+        "id": "r2"
+      },
+      {
+        "op": "setParams",
+        "params": {
+          "ward": "C"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r2"
+    ],
+    "count": 1,
+    "reason": null,
+    "header": "some"
+  }
+}

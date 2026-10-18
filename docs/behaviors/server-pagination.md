@@ -45,7 +45,7 @@ Moves to the next, previous, first or last page; picks another page size; change
 - A filter, search or sort change goes back to the first page; an equal query, a refresh of the rows or `reapply` keep it. Rows that shrink clamp it to the new last page. A page past the end shows the last page.
 - A new size keeps the page holding the old page's first row: `floor(index × old / new)`.
 - An empty list is one empty page (`pageCount` 1), never "page 1 of 0".
-- Select-all selects the page; the selection survives a page change; a range across pages is refused.
+- Select-all selects the page; the selection survives a page change; a range across pages is refused. `selection.allFiltered` selects every filtered row on every page (everything-except, see `server-selection.md`).
 - `aria-rowcount` counts the page's rows (plus the header rows), `aria-rowindex` restarts on each page; the pager announces the range (step 17).
 - Scroll to the top on a page change, the pager and the announcement belong to `/pagination` (step 17).
 - Tests: `packages/core/test/client-page.test.ts`, `conformance/cases/page-model/*`, `conformance/cases/problems/invalid-page.json`, `packages/dom/test/client-page.test.ts`.

@@ -6,6 +6,9 @@ import { canonical, EMPTY_QUERY } from '../model/query.js';
 import type { ChangeSource } from '../model/types.js';
 import { problem, type Problem } from '../problems.js';
 import type { TransactionResult } from '../row/store.js';
+import type { ColumnLookup } from '../columns/model.js';
+import type { FilterModel } from '../filter/model.js';
+import type { LocaleCtx } from '../value/locale.js';
 import { createGate, type Ticket } from './gate.js';
 import type { DataRequest, DataSource, Json, PageWindow, SourceModel, SourceRows, SourceRowsOptions } from './source.js';
 import { toWire, type WireFilterModel } from './wire.js';
@@ -163,6 +166,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   let shown: { readonly key: string; readonly index: number; readonly size: number } | null = null;
   /** The fetched set answers the current epoch: a new epoch (even back to the key shown) forgets its counts until then. */
   let answered = false;
+  /** A fetched set purged holds nothing until its next answer: no selected key is dropped meanwhile. */
+  let purged = false;
   let status: ModelStatus = LOADING;
   let answerProblems: readonly Problem[] = [];
   let fetches = 0;
@@ -257,6 +262,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
       }
       shown = { key: epochKey, index: 0, size };
       answered = true;
+      purged = false;
       inner.setRows(rows, 'data');
       return setStatus(IDLE);
     }
@@ -303,12 +309,21 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     setStatus(IDLE);
   };
 
+  /** The last filter put in its wire form, for these columns and zone: the request and membershipOf ask for the same one. */
+  let wired: { readonly f: FilterModel; readonly ctx: LocaleCtx; readonly columns: ColumnLookup<T>; readonly v: number; readonly w: ReturnType<typeof toWire> } | null = null;
+  const wireOf = (f: FilterModel): ReturnType<typeof toWire> => {
+    if (!wired || wired.f !== f || wired.ctx !== ctx || wired.columns !== columns || wired.v !== columns.dataVersion) {
+      wired = { f, ctx, columns, v: columns.dataVersion, w: toWire(f, { ctx, columns, ...(env.filterKinds && { kinds: env.filterKinds }) }) };
+    }
+    return wired.w;
+  };
+
   /**
    * The epoch's key: the server's part of the query as sent, the zone and the params. A
    * half-typed or refused filter edit leaves the wire form, so the key, as it was: no request.
    */
   const keyNow = (): string => {
-    const w = server.filter ? toWire(server.filter, { ctx, columns, ...(env.filterKinds && { kinds: env.filterKinds }) }) : undefined;
+    const w = server.filter ? wireOf(server.filter) : undefined;
     wire = w?.filter;
     wireProblems = w?.problems ?? [];
     return canonical({ filter: wire, quick: server.quick, sort: server.sort, zone: ctx.timeZone, params });
@@ -365,7 +380,13 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
       return { total: unfiltered() ? total : null, filtered: total, displayed: inner.displayed.count };
     },
     selectAll: serverPages ? 'query' : 'displayed',
-    keeps: serverPages ? () => true : inner.keeps,
+    keeps: serverPages ? () => true : (key) => purged || inner.keeps(key),
+    // The server's part as sent, the browser's part as the inner model reads it (with the zone), the params.
+    membershipOf(q) {
+      const split = splitQuery(q, ops);
+      return canonical({ wire: split.server.filter && wireOf(split.server.filter).filter, quick: split.server.quick, client: inner.membershipOf(split.client), params });
+    },
+    get scope() { return { params, zone: ctx.timeZone }; },
     row: inner.row,
     get page() {
       if (!serverPages) return inner.page;
@@ -432,6 +453,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
           inner.setRows([], 'data');
           shown = null;
           answered = false;
+          purged = true;
           answerProblems = [];
           // No cursor survives: by cursor, back to the first page.
           if (cursorMode) {

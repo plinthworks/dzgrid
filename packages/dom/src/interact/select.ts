@@ -1,4 +1,4 @@
-import { headerSelection, isSelected } from '@dzgrid/core';
+import { isSelected } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 
@@ -6,11 +6,10 @@ import type { GridContext } from '../context.js';
 export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
   const { el, kernel, rows, rowRenderer, scope } = g;
 
-  /** The select-all box, multi mode only: all displayed rows, or none. */
+  /** The select-all box, multi mode only: ticked, it clears everything; otherwise it selects all, as the model means it. */
   function toggleAll(): void {
     if (g.settings.selection?.mode !== 'multi') return;
-    const all = headerSelection(kernel.selection, rows.displayed) === 'all';
-    kernel.dispatch(all ? { type: 'selection.clear' } : { type: 'selection.allDisplayed' }, 'user');
+    kernel.dispatch(kernel.headerState === 'all' ? { type: 'selection.clear' } : { type: 'selection.all' }, 'user');
   }
 
   // Shift+click extends the rows, not the page's text selection.

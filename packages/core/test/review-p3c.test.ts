@@ -16,6 +16,8 @@ describe('columns.set over a model that does not recompute for columns (a server
       get counts() { return { total: 1, filtered: 1, displayed: 1 }; },
       selectAll: 'query',
       keeps: () => true,
+      membershipOf: (q) => m.membershipOf(q),
+      get scope() { return m.scope; },
       row: (key) => m.row(key),
       setQuery: (q, s) => m.setQuery(q, s),
       setColumns: () => {},

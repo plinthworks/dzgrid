@@ -421,12 +421,12 @@ describe('through the kernel', () => {
     kernel.dispatch({ type: 'rows.refresh' }, 'user');
     answer(s.last(), ['a', 'b', 'c', 'd', 'e']);
     expect(counts()).toEqual([2, 4]);
-    // Another zone: a new epoch whose count is unknown until it answers.
+    // Another zone (step 7): "all" was tied to the old one, so it is cleared, not recounted.
     kernel.dispatch({ type: 'rows.refresh' }, 'user');
     s.model.setContext(localeCtx({ locale: 'en-US', timeZone: 'Asia/Riyadh' }));
     answer(s.last(), ['a', 'b']);
-    expect(counts()).toEqual([2, 4, null, 1]);
-    expect(kernel.selection.mode).toBe('exclude');
+    expect(counts()).toEqual([2, 4, 0]);
+    expect(kernel.selection.mode).toBe('include');
   });
 
   it('a too large set is told as problems', () => {
@@ -434,5 +434,87 @@ describe('through the kernel', () => {
     const { events } = withKernel(s);
     answer(s.calls[0]!, ['a', 'b']);
     expect(events.filter((e) => e.type === 'problems')).toMatchObject([{ problems: [{ code: 'fetched-set-large' }] }]);
+  });
+});
+
+describe('fetched-set reconciling (step 7)', () => {
+  const withKernel = (s: Setup) => {
+    const kernel = createKernel<R>({ rows: s.model, columns: s.columns });
+    const events: GridEvent<R>[] = [];
+    kernel.subscribe((e) => events.push(e));
+    const told = () => events.filter((e) => e.type === 'selectionChanged') as Extract<GridEvent<R>, { type: 'selectionChanged' }>[];
+    return { kernel, events, told };
+  };
+  /** a, b on page 0 and c on page 1 of a set of four, a and c selected (c is the anchor). */
+  const picked = () => {
+    const s = setup();
+    const t = withKernel(s);
+    answer(s.calls[0]!, ['a', 'b', 'c', 'd']);
+    t.kernel.dispatch({ type: 'selection.toggle', row: k('a') }, 'user');
+    t.kernel.dispatch({ type: 'page.go', index: 1 }, 'user');
+    t.kernel.dispatch({ type: 'selection.toggle', row: k('c') }, 'user');
+    t.events.length = 0;
+    return { s, ...t };
+  };
+
+  it('a refresh that keeps the rows keeps the keys, and tells nothing', () => {
+    const { s, kernel, told } = picked();
+    kernel.dispatch({ type: 'rows.refresh' }, 'user');
+    answer(s.last(), ['d', 'c', 'b', 'a']);
+    expect(kernel.selection).toEqual({ mode: 'include', keys: new Set([k('a'), k('c')]) });
+    expect(told()).toEqual([]);
+    expect(kernel.anchor).toBe(k('c'));
+  });
+
+  it('keys missing from a new epoch’s answer are dropped: source data, reason rows-dropped; the anchor goes with its row', () => {
+    const { s, kernel, told } = picked();
+    kernel.dispatch({ type: 'quick.set', text: 'x' }, 'user');
+    // Until the answer, the old set is held: nothing dropped.
+    expect(kernel.selection.keys.size).toBe(2);
+    expect(told()).toEqual([]);
+    answer(s.last(), ['a', 'd']);
+    expect(kernel.selection).toEqual({ mode: 'include', keys: new Set([k('a')]) });
+    expect(told()).toEqual([expect.objectContaining({ source: 'data', count: 1, reason: 'rows-dropped', query: null })]);
+    expect(kernel.anchor).toBeNull();
+  });
+
+  it('a new epoch whose request fails drops nothing', () => {
+    const { s, kernel, told } = picked();
+    kernel.dispatch({ type: 'quick.set', text: 'x' }, 'user');
+    s.last().reject(new Error('503'));
+    expect(kernel.selection.keys.size).toBe(2);
+    expect(kernel.anchor).toBe(k('c'));
+    expect(told()).toEqual([]);
+  });
+
+  it('a purge drops nothing until the next answer, which drops what it no longer has', () => {
+    const { s, kernel, told } = picked();
+    s.model.invalidate({ purge: true });
+    expect(s.model.displayed.count).toBe(0);
+    expect(kernel.selection.keys.size).toBe(2);
+    expect(told()).toEqual([]);
+    answer(s.last(), ['a', 'b']);
+    expect(kernel.selection).toEqual({ mode: 'include', keys: new Set([k('a')]) });
+    expect(told()).toEqual([expect.objectContaining({ count: 1, reason: 'rows-dropped' })]);
+  });
+
+  it('a browser-side change keeps include keys, even of rows it hides', () => {
+    const s = setup({ operations: { page: 'client', quick: 'server' } });
+    const { kernel } = withKernel(s);
+    answer(s.calls[0]!, ['a', 'b', 'c']);
+    kernel.dispatch({ type: 'selection.toggle', row: k('a') }, 'user');
+    kernel.dispatch({ type: 'filter.column', column: 'name', filter: { type: 'text', op: 'equals', value: 'b' } }, 'user');
+    expect([...kernel.selection.keys]).toEqual([k('a')]);
+    expect(s.calls.length).toBe(1);
+  });
+
+  it('the focus on a row gone takes the row now at its place', () => {
+    const s = setup();
+    const { kernel } = withKernel(s);
+    answer(s.calls[0]!, ['a', 'b', 'c']);
+    kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: k('b'), column: 'name' } }, 'user');
+    kernel.dispatch({ type: 'quick.set', text: 'x' }, 'user');
+    answer(s.last(), ['a', 'c', 'e']);
+    expect(kernel.focus).toEqual({ kind: 'cell', row: k('c'), column: 'name' });
   });
 });

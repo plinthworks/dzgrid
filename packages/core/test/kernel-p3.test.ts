@@ -28,6 +28,8 @@ function serverLike(m: ClientModel<R>, total: number | null): RowModel<R> & { re
     get counts() { return { total, filtered: total, displayed: m.displayed.count }; },
     selectAll: 'query',
     keeps: () => true,
+    membershipOf: (q) => m.membershipOf(q),
+    get scope() { return m.scope; },
     row: (key) => m.row(key),
     setQuery: (q, s) => m.setQuery(q, s),
     setColumns: (c, s) => m.setColumns(c, s),

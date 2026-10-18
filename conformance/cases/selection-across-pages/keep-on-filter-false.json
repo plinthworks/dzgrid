@@ -1,0 +1,46 @@
+{
+  "id": "keep-on-filter-false",
+  "suite": "selection-across-pages",
+  "description": "With keepOnFilter off, a sort and a page keep the ticked rows; a filter clears them.",
+  "input": {
+    "rows": 10,
+    "pageSize": 5,
+    "ops": [
+      {
+        "op": "keepOnFilter",
+        "keep": false
+      },
+      {
+        "op": "only",
+        "ids": [
+          "r2"
+        ]
+      },
+      {
+        "op": "sort",
+        "sort": [
+          {
+            "column": "v",
+            "dir": "desc"
+          }
+        ]
+      },
+      {
+        "op": "page",
+        "index": 1
+      },
+      {
+        "op": "filter",
+        "column": "v",
+        "value": "odd"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [],
+    "count": 0,
+    "reason": "scope-changed",
+    "header": "none"
+  }
+}

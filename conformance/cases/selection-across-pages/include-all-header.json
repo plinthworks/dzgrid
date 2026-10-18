@@ -1,0 +1,39 @@
+{
+  "id": "include-all-header",
+  "suite": "selection-across-pages",
+  "description": "Every row of the query ticked by hand, over two pages: the box is ticked.",
+  "input": {
+    "rows": 3,
+    "pageSize": 2,
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "r1",
+          "r2"
+        ]
+      },
+      {
+        "op": "page",
+        "index": 1
+      },
+      {
+        "op": "only-add",
+        "ids": [
+          "r3"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1",
+      "r2",
+      "r3"
+    ],
+    "count": 3,
+    "reason": null,
+    "header": "all"
+  }
+}

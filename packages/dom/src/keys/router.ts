@@ -62,7 +62,7 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
         return;
       }
       case 'selectAll':
-        if (g.settings.selection?.mode === 'multi') kernel.dispatch({ type: 'selection.allDisplayed' }, 'user');
+        if (g.settings.selection?.mode === 'multi') kernel.dispatch({ type: 'selection.all' }, 'user');
         return;
       case 'enter': {
         // Into the cell's widget: the part takes the focus, or the cell keeps it.

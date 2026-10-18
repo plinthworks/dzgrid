@@ -1,0 +1,25 @@
+{
+  "id": "all-filtered-on-server-is-all",
+  "suite": "selection-across-pages",
+  "description": "allFiltered on server pages is select-all.",
+  "input": {
+    "rows": 10,
+    "pageSize": 5,
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "allFiltered"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [],
+    "count": 10,
+    "reason": null,
+    "header": "all"
+  }
+}

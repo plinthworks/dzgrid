@@ -1,0 +1,25 @@
+{
+  "id": "all-header-ticked",
+  "suite": "selection-across-pages",
+  "description": "Select all on a server: the box is ticked, whatever page is shown.",
+  "input": {
+    "rows": 120,
+    "pageSize": 50,
+    "ops": [
+      {
+        "op": "all"
+      },
+      {
+        "op": "page",
+        "index": 1
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [],
+    "count": 120,
+    "reason": null,
+    "header": "all"
+  }
+}
