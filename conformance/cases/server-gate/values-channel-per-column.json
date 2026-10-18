@@ -1,0 +1,83 @@
+{
+  "id": "values-channel-per-column",
+  "suite": "server-gate",
+  "description": "Each column's value list is its own channel: a new search on one supersedes only that column's request; closing one cancels only it.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "values:city",
+        "key": "q1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "values:name",
+        "key": "q1",
+        "as": "b"
+      },
+      {
+        "op": "begin",
+        "channel": "values:city",
+        "key": "q2",
+        "as": "c"
+      },
+      {
+        "op": "cancel",
+        "channel": "values:name"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "c"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      {
+        "seq": 3,
+        "epoch": 0
+      },
+      null,
+      "superseded",
+      "aborted",
+      null
+    ],
+    "aborted": [
+      [
+        "a",
+        "superseded"
+      ],
+      [
+        "b",
+        "aborted"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 3,
+      "accepted": 1,
+      "dropped": {
+        "superseded": 1,
+        "stale-epoch": 0,
+        "aborted": 1,
+        "destroyed": 0
+      }
+    }
+  }
+}

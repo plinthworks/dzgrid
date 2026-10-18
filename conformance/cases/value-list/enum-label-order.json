@@ -1,0 +1,78 @@
+{
+  "id": "enum-label-order",
+  "suite": "value-list",
+  "description": "An enum sorted by label: Alpha, Mike, a value outside the options under its own text, Zulu.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "a",
+            "label": "Zulu"
+          },
+          {
+            "value": "b",
+            "label": "Alpha"
+          },
+          {
+            "value": "c",
+            "label": "Mike"
+          }
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "e": "b"
+      },
+      {
+        "id": "2",
+        "e": "a"
+      },
+      {
+        "id": "3",
+        "e": "c"
+      },
+      {
+        "id": "4",
+        "e": "x"
+      },
+      {
+        "id": "5",
+        "e": "a"
+      }
+    ],
+    "column": "e"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "b",
+        "label": "Alpha",
+        "count": 1
+      },
+      {
+        "value": "c",
+        "label": "Mike",
+        "count": 1
+      },
+      {
+        "value": "x",
+        "label": "x",
+        "count": 1
+      },
+      {
+        "value": "a",
+        "label": "Zulu",
+        "count": 2
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

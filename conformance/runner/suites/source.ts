@@ -1,4 +1,5 @@
 import { createColumnModel, localeCtx, makeQuery, type ColumnDef, type OperationsInput, type PageOptions, type Problem } from '@dzgrid/core';
+import type { ValuesHandle } from '@dzgrid/core';
 import { sourceRows, type DataSource, type Json, type SourceRowsOptions } from '@dzgrid/core/server';
 import { fakeSource, rowsOf } from '../../../packages/core/test/support/fake-source.js';
 import { kindsOf } from '../kinds.js';
@@ -14,7 +15,13 @@ type Step =
   | { op: 'swap'; params?: Record<string, Json> }
   | { op: 'ctx'; locale?: string; timeZone?: string }
   | { op: 'answer'; call: string; rows?: string[]; total?: unknown; hasNext?: unknown; nextCursor?: unknown; response?: unknown }
-  | { op: 'fail'; call: string; error: unknown };
+  | { op: 'fail'; call: string; error: unknown }
+  /** A value list opened on a column (named `l1`, `l2`… in order), searched, closed; its calls `v1`, `v2`… answered or failed. */
+  | { op: 'values'; column: string; search?: string; max?: number }
+  | { op: 'search'; list: string; text: string }
+  | { op: 'close'; list: string }
+  | { op: 'valuesAnswer'; call: string; response: unknown }
+  | { op: 'valuesFail'; call: string; error: unknown };
 
 export interface SourceInput {
   columns: ColumnDef<Row>[];
@@ -36,7 +43,8 @@ const pick = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(
  * was aborted, the kinds of the changes, and the state at the end.
  */
 export function runSource(input: SourceInput) {
-  const fake = fakeSource();
+  const lists: ValuesHandle[] = [];
+  const fake = fakeSource({ values: input.steps.some((st) => st.op === 'values') });
   const data = fake.source as DataSource<Row>;
   const model = sourceRows<Row>(data, input.options).create({
     getRowId: (r) => r.id,
@@ -53,6 +61,12 @@ export function runSource(input: SourceInput) {
     changes.push(c.kind);
     if (c.failure) failures.push({ error: c.failure.error, page: c.failure.page });
   });
+  const vcall = (name: string) => {
+    const c = fake.valueCalls.find((x) => x.name === name);
+    if (!c) throw new Error(`no call ${name}`);
+    return c;
+  };
+  const list = (name: string) => lists[Number(name.slice(1)) - 1]!;
   const call = (name: string) => {
     const c = fake.calls.find((x) => x.name === name);
     if (!c) throw new Error(`no call ${name}`);
@@ -90,6 +104,21 @@ export function runSource(input: SourceInput) {
       case 'fail':
         call(s.call).reject(s.error);
         break;
+      case 'values':
+        lists.push(model.setValues!(s.column, { ...(s.search !== undefined && { search: s.search }), ...(s.max !== undefined && { max: s.max }) }));
+        break;
+      case 'search':
+        list(s.list).search(s.text);
+        break;
+      case 'close':
+        list(s.list).close();
+        break;
+      case 'valuesAnswer':
+        vcall(s.call).resolve(s.response);
+        break;
+      case 'valuesFail':
+        vcall(s.call).reject(s.error);
+        break;
     }
   }
   const d = model.displayed;
@@ -116,6 +145,14 @@ export function runSource(input: SourceInput) {
     },
     problems: shape(model.problems),
     failures,
+    // Only for a script that opens value lists: the other cases keep their shape.
+    ...(lists.length > 0 && {
+      valueCalls: fake.valueCalls.map((c) => {
+        const { signal, key, ...rest } = c.req;
+        return { name: c.name, ...rest };
+      }),
+      lists: lists.map((h) => ({ status: h.status, result: h.result, ...(h.problems.length > 0 && { problems: shape(h.problems) }) })),
+    }),
   };
 }
 

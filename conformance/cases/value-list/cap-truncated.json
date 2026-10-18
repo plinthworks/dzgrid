@@ -1,0 +1,50 @@
+{
+  "id": "cap-truncated",
+  "suite": "value-list",
+  "description": "More values than max: the first max in order, truncated.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "d"
+      },
+      {
+        "id": "2",
+        "s": "c"
+      },
+      {
+        "id": "3",
+        "s": "b"
+      },
+      {
+        "id": "4",
+        "s": "a"
+      }
+    ],
+    "column": "s",
+    "max": 2
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "a",
+        "label": "a",
+        "count": 1
+      },
+      {
+        "value": "b",
+        "label": "b",
+        "count": 1
+      }
+    ],
+    "blanks": 0,
+    "truncated": true,
+    "available": true
+  }
+}

@@ -1,6 +1,7 @@
 import type { AbortHandle, AbortSignalLike } from '../abort.js';
 import type { Json } from '../filter/model.js';
 import type { ModelEnv, SourceBinding, SourceHandle } from '../model/client.js';
+import type { SetValue } from '../model/values.js';
 import type { SortItem } from '../sort/compile.js';
 import type { GateDiagnostics } from './gate.js';
 import type { WireFilterModel } from './wire.js';
@@ -15,7 +16,36 @@ export type { Json };
  */
 export interface DataSource<T> {
   readonly fetch: (req: DataRequest) => Promise<DataResponse<T>> | PromiseLike<DataResponse<T>> | DataResponse<T>;
+  /**
+   * A column's value list when the filter runs on the server (value-list.md):
+   * the values present in the rows the request's filter keeps, with their
+   * counts if known. Optional: without it the list falls back to the column's
+   * options, never to the rows held.
+   */
+  readonly values?: (req: ValuesRequest) => Promise<ValuesResponse> | PromiseLike<ValuesResponse> | ValuesResponse;
 }
+
+export interface ValuesRequest {
+  readonly column: string;
+  /** Trimmed, as typed: the server folds it by its own rules. */
+  readonly search: string;
+  /** At most this many values (2 000 by default); more are cut, the list marked truncated. */
+  readonly limit: number;
+  /** The server's filter as sent (`toWire`), less this column's own: counts ignore it. */
+  readonly filter?: WireFilterModel;
+  /** Only when the search runs on the server and is not blank. */
+  readonly quick?: string;
+  readonly params: Readonly<Record<string, Json>>;
+  readonly zone: string;
+  /** Canonical: two requests with equal keys ask the same thing. */
+  readonly key: string;
+  readonly signal: AbortSignalLike;
+}
+
+/** The values in the host's order. A count of 0 is not listed; a bare array says nothing of blanks. */
+export type ValuesResponse =
+  | readonly SetValue[]
+  | { readonly values: readonly SetValue[]; readonly blanks?: number | null; readonly truncated?: boolean };
 
 export interface DataRequest {
   /** The server's part of the query, as `splitQuery` places it; an empty search is not sent. The filter in its wire form (`toWire`). */
@@ -64,7 +94,8 @@ export interface SourceRowsOptions {
 }
 
 export interface SourceModel<T> extends SourceHandle<T> {
-  readonly diagnostics: { readonly fetches: number; readonly gate: GateDiagnostics };
+  /** `valueFetches`: the value list requests made. */
+  readonly diagnostics: { readonly fetches: number; readonly valueFetches: number; readonly gate: GateDiagnostics };
 }
 
 /** What `sourceRows` gives: a binding for the `source` setting, whose model also counts its fetches. */

@@ -21,6 +21,8 @@ import type { ChangeSource } from './types.js';
 import type { Operations, OperationsInput } from './operations.js';
 import type { AbortHandle } from '../abort.js';
 import { checkPage, pageCountOf, pageOf, resizeIndex, resolvePageOptions, type PageOptions, type PageState } from './page.js';
+import { problem } from '../problems.js';
+import { closedValues, EMPTY_LIST, tickedIn, ValuesBox, type ValuesHandle, type ValuesOptions } from './values.js';
 
 export type ModelStatus =
   | { readonly phase: 'idle' }
@@ -99,9 +101,19 @@ export interface RowModel<T> {
   warmSearch?(): SearchWarmup;
   /** Another page or size (a size first, then the index read in it); past the end clamps. */
   setPage(p: { readonly index?: number; readonly size?: number }, source?: ChangeSource): void;
+  /**
+   * A column's value list (value-list.md), kept fresh while open: from the
+   * rows held when the filter runs in the browser, from the source's `values`
+   * when it runs on a server. One per column: asking again closes the first.
+   */
+  setValues?(column: string, o?: ValuesOptions): ValuesHandle;
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
   destroy(): void;
 }
+
+/** A list asked for a column that does not exist or cannot be filtered: closed, with its problem. */
+export const refusedValues = (col: { filterable: boolean } | undefined, column: string): ValuesHandle | null =>
+  col?.filterable ? null : closedValues([problem(col ? 'invalid-filter' : 'unknown-column', 'error', `values.${column}`)]);
 
 export interface SearchWarmup {
   /** Builds up to `maxCells` cells; true when done (finished, given up or cancelled). */
@@ -138,6 +150,7 @@ export interface ClientModel<T> extends RowModel<T> {
   /** Takes the edit overlay without reordering anything (K.14): rows move only on `reapply()`. */
   setReader(reader: ValueReader<T>): void;
   reapply(): void;
+  setValues(column: string, o?: ValuesOptions): ValuesHandle;
   /**
    * Prepares the quick search's haystacks a few cells at a time, for idle
    * time (D13): afterwards the first keystroke builds nothing. Given up when
@@ -156,6 +169,9 @@ export interface ClientModel<T> extends RowModel<T> {
     readonly displayBuilds: number;
     /** Pages cut from the sorted rows: a page change cuts, it never filters or sorts again. */
     readonly pageCuts: number;
+    /** Value lists: distinct indexes built, counts made under a set of other filters. */
+    readonly indexBuilds: number;
+    readonly countBuilds: number;
   };
 }
 
@@ -271,6 +287,34 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     if (destroyed) return;
     const c: ModelChange<T> = { source, displayed, kind, problems: currentProblems(), ...(transaction && { transaction }), ...(told && { told }) };
     for (const fn of [...listeners]) fn(c);
+    for (const b of lists.values()) b.run();
+  };
+
+  /** The open value lists, by column: each recomputes after every change, and tells only when its list changed. */
+  const lists = new Map<string, ValuesBox>();
+  const listOf = (column: string, search: string, max: number | undefined) => {
+    const col = columns.get(column);
+    if (!col?.filterable) return EMPTY_LIST;
+    // The other filters: every column's but this one's, whole; the search over the columns it reads.
+    const others = { ...query.filter };
+    delete others[column];
+    const words = quickWords(query.quick);
+    return cache.distinct(col, env(), {
+      search,
+      ...(max !== undefined && { max }),
+      selected: tickedIn(query.filter, column),
+      others: {
+        // The columns a search reads are data too: showing or hiding one moves `dataVersion`;
+        // another lookup brings other column objects, which rebuild the index and its counts.
+        key: canonical([others, words, columns.dataVersion]),
+        test: () => {
+          const e = env();
+          const f = compileFilter(others, e, o.filterKinds);
+          const qt = compileQuick(query.quick, columns.visible(), e);
+          return f.active || qt.active ? (src) => f.test(src) && qt.test(src) : null;
+        },
+      },
+    });
   };
   let loadProblems: readonly Problem[] = [];
   const currentProblems = (): readonly Problem[] => [...paging.problems, ...loadProblems, ...(filtered?.problems ?? []), ...(sorted?.problems ?? [])];
@@ -382,7 +426,20 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     get problems() { return currentProblems(); },
     get counts() { return { total: store.size, filtered: filtered?.order ? filtered.order.length : store.size, displayed: displayed.count }; },
     get diagnostics() {
-      return { ...d, keyBuilds: cache.stats.keyBuilds, rankBuilds: cache.stats.rankBuilds, quickScanned: cache.stats.quickScanned, displayBuilds: cache.stats.displayBuilds, foldBuilds: cache.stats.foldBuilds };
+      const st = cache.stats;
+      return { ...d, keyBuilds: st.keyBuilds, rankBuilds: st.rankBuilds, quickScanned: st.quickScanned, displayBuilds: st.displayBuilds, foldBuilds: st.foldBuilds, indexBuilds: st.indexBuilds, countBuilds: st.countBuilds };
+    },
+    setValues(column, vo = {}) {
+      lists.get(column)?.close();
+      const refused = refusedValues(columns.get(column), column);
+      if (refused) return refused;
+      const b: ValuesBox = new ValuesBox(true, String(vo.search ?? '').trim(), () => {
+        b.result = listOf(column, b.q, vo.max);
+        b.ping();
+      }, () => lists.delete(column));
+      b.run();
+      lists.set(column, b);
+      return b;
     },
     warmSearch() {
       // What a word without digits searches: text and enum columns (enums by label and by value).
@@ -450,6 +507,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     setColumns(next, source = 'host') {
       columns = next;
       if (run()) notify('context', source);
+      else for (const b of lists.values()) b.run();
     },
     setContext(next, source = 'host') {
       ctx = next;
@@ -475,6 +533,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     destroy() {
       destroyed = true;
       listeners.clear();
+      for (const b of [...lists.values()]) b.close();
     },
   };
   return model;

@@ -1,0 +1,43 @@
+{
+  "id": "instant-labels-tokyo",
+  "suite": "value-list",
+  "description": "Moments by time, labelled in the grid zone: 23:30 UTC is 08:30 the next day in Tokyo.",
+  "input": {
+    "locale": "en-US",
+    "timeZone": "Asia/Tokyo",
+    "columns": [
+      {
+        "id": "i",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "i": "2026-03-05T23:30:00Z"
+      },
+      {
+        "id": "2",
+        "i": "2026-03-04T10:00:00Z"
+      }
+    ],
+    "column": "i"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "2026-03-04T10:00:00Z",
+        "label": "03/04/2026, 19:00",
+        "count": 1
+      },
+      {
+        "value": "2026-03-05T23:30:00Z",
+        "label": "03/06/2026, 08:30",
+        "count": 1
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

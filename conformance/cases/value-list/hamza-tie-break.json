@@ -1,0 +1,59 @@
+{
+  "id": "hamza-tie-break",
+  "suite": "value-list",
+  "description": "Arabic: hamza forms collate equal to the bare alef and stay apart by code unit (U+0623, U+0625, U+0627), before ب.",
+  "input": {
+    "locale": "ar",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "احمد"
+      },
+      {
+        "id": "2",
+        "s": "بكر"
+      },
+      {
+        "id": "3",
+        "s": "إحمد"
+      },
+      {
+        "id": "4",
+        "s": "أحمد"
+      }
+    ],
+    "column": "s"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "أحمد",
+        "label": "أحمد",
+        "count": 1
+      },
+      {
+        "value": "إحمد",
+        "label": "إحمد",
+        "count": 1
+      },
+      {
+        "value": "احمد",
+        "label": "احمد",
+        "count": 1
+      },
+      {
+        "value": "بكر",
+        "label": "بكر",
+        "count": 1
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

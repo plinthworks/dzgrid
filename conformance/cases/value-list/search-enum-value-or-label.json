@@ -1,0 +1,61 @@
+{
+  "id": "search-enum-value-or-label",
+  "suite": "value-list",
+  "description": "A search finds an enum by its label or by its value.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "a",
+            "label": "Zulu"
+          },
+          {
+            "value": "b",
+            "label": "Alpha"
+          },
+          {
+            "value": "c",
+            "label": "Mike"
+          }
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "e": "a"
+      },
+      {
+        "id": "2",
+        "e": "b"
+      },
+      {
+        "id": "3",
+        "e": "c"
+      }
+    ],
+    "column": "e",
+    "search": "a"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "b",
+        "label": "Alpha",
+        "count": 1
+      },
+      {
+        "value": "a",
+        "label": "Zulu",
+        "count": 1
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

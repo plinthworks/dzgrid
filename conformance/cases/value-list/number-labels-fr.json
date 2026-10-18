@@ -1,0 +1,51 @@
+{
+  "id": "number-labels-fr",
+  "suite": "value-list",
+  "description": "French numbers: a narrow no-break space groups thousands, a comma for decimals; negative first.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": 1234.5
+      },
+      {
+        "id": "2",
+        "n": -3
+      },
+      {
+        "id": "3",
+        "n": 2
+      }
+    ],
+    "column": "n"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "-3",
+        "label": "-3",
+        "count": 1
+      },
+      {
+        "value": "2",
+        "label": "2",
+        "count": 1
+      },
+      {
+        "value": "1234.5",
+        "label": "1 234,5",
+        "count": 1
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

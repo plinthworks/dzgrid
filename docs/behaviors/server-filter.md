@@ -36,6 +36,9 @@ A filter with an error is dropped from the request and the error stays in the mo
 ### The request key
 The epoch key and the request key are made from the wire form, the search, the sort, the zone and the params. So a half-typed or refused edit leaves the wire form, hence the key, unchanged: **no new epoch, no page reset, no request** (deliberate). A zone change moves `resolved`, hence the key. A language change asks nothing (unless a custom kind's wire form reads the language). A column change that alters what can be filtered (removed, `filter: false`, another type) is re-read and asks again only if the wire form changed.
 
+### Value lists
+A value list's request (`DataSource.values`, `value-list.md`) carries the same wire form without the list's own column (the counts ignore its filter), the zone and the params; the search only when it runs on the server.
+
 ### Out of scope
 - Cells with fractions of a millisecond: the grid's instants are whole milliseconds. A bound given as a fractional number of milliseconds is written rounded up, which keeps the same whole-millisecond rows.
 - Relative dates ("last 7 days") and a clock: Phase 5 (`now` is reserved in the environment).

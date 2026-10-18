@@ -19,12 +19,13 @@ Types a filter quickly, clicks "next" twice, sorts while a page is loading, or w
 - Retry fetches the same query and page again, under a new sequence number.
 - While loading: `status: loading`, `aria-busy="true"`, the previous rows kept with stale styling, so focus and selection keep their rows.
 - `destroy` drops every request in flight; their answers are ignored.
+- A value list's request (`value-list.md`) carries the server's filter without its own column: a new search supersedes it, closing the popup cancels it (`aborted`), a new epoch drops it; an open list whose request is unchanged by a new epoch (its own column's filter applied) keeps its answer and asks nothing. Its answers and failures stay in the list: no `fetchFailed`, no change of the rows.
 - Debouncing lives in the inputs, not in the core: 300 ms when the operation runs on the server, 150 ms in the browser.
 - A change of the browser's part of the query never reaches the gate: no request.
 - The epoch is the server's part of the query **as sent**: the filter's wire form (`server-filter.md`), the search, the sort, the zone and the params. A filter edit that leaves the wire form unchanged (half-typed, or refused) is not a new epoch.
 
 ## Tests
-- `conformance/cases/server-gate/*.json` (20 cases), `conformance/runner/suites/server.ts`: reversed arrival, two filters close together, a page change during a load, an answer after `destroy`, a stale rejection, an abort reason, a new epoch over the same key, the same key twice, independent channels, a completed request never aborted, precedence of the reasons.
+- `conformance/cases/server-gate/*.json` (22 cases, `values-channel-per-column` among them), `conformance/runner/suites/server.ts`: reversed arrival, two filters close together, a page change during a load, an answer after `destroy`, a stale rejection, an abort reason, a new epoch over the same key, the same key twice, independent channels, a completed request never aborted, precedence of the reasons.
 - `packages/core/test/gate-property.test.ts`: 1 000 seeded orders of 20 begin/answer/new-epoch steps against an oracle of its own, and 1 000 more with a destroy; run for both source configurations at step 18 (planned). `packages/core/test/gate.test.ts`: diagnostics, destroy, re-entrant aborts.
 - `rows.refresh` reaches the model: `packages/core/test/kernel-p3.test.ts`.
 - Error then retry, stale error ignored, `destroy` during a fetch: `packages/core/test/source-rows*.test.ts`, `conformance/cases/source-model/*`; in the grid (overlay over the rows kept, `aria-busy`, `data-stale`, the announcement): `packages/dom/test/source-grid.test.ts`.

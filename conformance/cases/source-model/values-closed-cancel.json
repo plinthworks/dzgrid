@@ -1,0 +1,95 @@
+{
+  "id": "values-closed-cancel",
+  "suite": "source-model",
+  "description": "Closing the list cancels its request (aborted); the late failure is dropped, never an error.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [],
+        "total": 0
+      },
+      {
+        "op": "values",
+        "column": "name"
+      },
+      {
+        "op": "close",
+        "list": "l1"
+      },
+      {
+        "op": "valuesFail",
+        "call": "v1",
+        "error": "late"
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [
+      [
+        "v1",
+        "aborted"
+      ]
+    ],
+    "changes": [
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 0,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": 0,
+        "filtered": 0,
+        "displayed": 0
+      }
+    },
+    "problems": [],
+    "failures": [],
+    "valueCalls": [
+      {
+        "name": "v1",
+        "column": "name",
+        "search": "",
+        "limit": 2000,
+        "filter": {},
+        "params": {},
+        "zone": "UTC"
+      }
+    ],
+    "lists": [
+      {
+        "status": "loading",
+        "result": null
+      }
+    ]
+  }
+}

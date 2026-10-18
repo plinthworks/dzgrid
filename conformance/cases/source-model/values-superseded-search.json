@@ -1,0 +1,159 @@
+{
+  "id": "values-superseded-search",
+  "suite": "source-model",
+  "description": "Typing on supersedes the list request before (aborted superseded); its late answer is dropped, the last one shows.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      },
+      {
+        "op": "values",
+        "column": "name"
+      },
+      {
+        "op": "search",
+        "list": "l1",
+        "text": "b"
+      },
+      {
+        "op": "search",
+        "list": "l1",
+        "text": "bo"
+      },
+      {
+        "op": "valuesAnswer",
+        "call": "v3",
+        "response": [
+          {
+            "value": "bob"
+          }
+        ]
+      },
+      {
+        "op": "valuesAnswer",
+        "call": "v2",
+        "response": [
+          {
+            "value": "bill"
+          }
+        ]
+      },
+      {
+        "op": "valuesAnswer",
+        "call": "v1",
+        "response": [
+          {
+            "value": "zed"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      }
+    ],
+    "aborted": [
+      [
+        "v1",
+        "superseded"
+      ],
+      [
+        "v2",
+        "superseded"
+      ]
+    ],
+    "changes": [
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 1,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": 1,
+        "filtered": 1,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": [],
+    "valueCalls": [
+      {
+        "name": "v1",
+        "column": "name",
+        "search": "",
+        "limit": 2000,
+        "filter": {},
+        "params": {},
+        "zone": "UTC"
+      },
+      {
+        "name": "v2",
+        "column": "name",
+        "search": "b",
+        "limit": 2000,
+        "filter": {},
+        "params": {},
+        "zone": "UTC"
+      },
+      {
+        "name": "v3",
+        "column": "name",
+        "search": "bo",
+        "limit": 2000,
+        "filter": {},
+        "params": {},
+        "zone": "UTC"
+      }
+    ],
+    "lists": [
+      {
+        "status": "idle",
+        "result": {
+          "values": [
+            {
+              "value": "bob",
+              "label": "bob",
+              "count": null
+            }
+          ],
+          "blanks": null,
+          "truncated": false
+        }
+      }
+    ]
+  }
+}

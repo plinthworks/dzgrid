@@ -1,0 +1,53 @@
+{
+  "id": "search-folds",
+  "suite": "value-list",
+  "description": "The search is trimmed and folded (case, accents); it narrows the list, never the counts or the blanks.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "été"
+      },
+      {
+        "id": "2",
+        "s": "Ete"
+      },
+      {
+        "id": "3",
+        "s": "zèbre"
+      },
+      {
+        "id": "4"
+      },
+      {
+        "id": "5",
+        "s": "été"
+      }
+    ],
+    "column": "s",
+    "search": "  ÉTÉ "
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "Ete",
+        "label": "Ete",
+        "count": 1
+      },
+      {
+        "value": "été",
+        "label": "été",
+        "count": 2
+      }
+    ],
+    "blanks": 1,
+    "truncated": false,
+    "available": true
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "id": "blanks-unreadable",
+  "suite": "value-list",
+  "description": "Blank and unreadable cells are counted apart, never listed.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": 1
+      },
+      {
+        "id": "2"
+      },
+      {
+        "id": "3",
+        "n": ""
+      },
+      {
+        "id": "4",
+        "n": "abc"
+      },
+      {
+        "id": "5",
+        "n": 1
+      }
+    ],
+    "column": "n"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "1",
+        "label": "1",
+        "count": 2
+      }
+    ],
+    "blanks": 3,
+    "truncated": false,
+    "available": true
+  }
+}

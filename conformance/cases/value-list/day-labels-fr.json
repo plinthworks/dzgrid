@@ -1,0 +1,43 @@
+{
+  "id": "day-labels-fr",
+  "suite": "value-list",
+  "description": "Days by date, written day/month/year in French, with no zone.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Pacific/Kiritimati",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "d": "2026-03-05"
+      },
+      {
+        "id": "2",
+        "d": "2025-12-31"
+      }
+    ],
+    "column": "d"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "2025-12-31",
+        "label": "31/12/2025",
+        "count": 1
+      },
+      {
+        "value": "2026-03-05",
+        "label": "05/03/2026",
+        "count": 1
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

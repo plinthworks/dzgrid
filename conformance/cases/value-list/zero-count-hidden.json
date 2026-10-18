@@ -1,0 +1,58 @@
+{
+  "id": "zero-count-hidden",
+  "suite": "value-list",
+  "description": "A value with no row under the other filters is not offered (the owner's rule); blanks count the rows the other filters keep.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "s"
+      },
+      {
+        "id": "t"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "a",
+        "t": "x"
+      },
+      {
+        "id": "2",
+        "s": "b",
+        "t": "y"
+      },
+      {
+        "id": "3",
+        "t": "y"
+      },
+      {
+        "id": "4",
+        "s": "c",
+        "t": "x"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "set",
+        "include": [
+          "y"
+        ]
+      }
+    },
+    "column": "s"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "b",
+        "label": "b",
+        "count": 1
+      }
+    ],
+    "blanks": 1,
+    "truncated": false,
+    "available": true
+  }
+}

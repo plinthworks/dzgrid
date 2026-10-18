@@ -1,0 +1,47 @@
+{
+  "id": "number-labels-arab-digits",
+  "suite": "value-list",
+  "description": "Numbers by value, labelled with the language's own digits (ar-EG, numerals locale); the value stays the export text.",
+  "input": {
+    "locale": "ar-EG",
+    "numerals": "locale",
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": 1234.5
+      },
+      {
+        "id": "2",
+        "n": 2
+      },
+      {
+        "id": "3",
+        "n": 1234.5
+      }
+    ],
+    "column": "n"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "2",
+        "label": "٢",
+        "count": 1
+      },
+      {
+        "value": "1234.5",
+        "label": "١٬٢٣٤٫٥",
+        "count": 2
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

@@ -8,6 +8,8 @@ import type { SourceIndex } from '../ids.js';
 import type { RowSnapshot, StoreDelta } from '../row/store.js';
 import { isBlank } from '../value/codec.js';
 import type { LocaleCtx } from '../value/locale.js';
+import { quickWords } from '../filter/quick.js';
+import { capOf, labelFor, tickedMissing, type SetValue, type ValueList } from './values.js';
 
 /** What sorting and filtering read: one generation of rows, their columns, the user's language, the edit overlay. */
 export interface ColumnEnv<T> {
@@ -58,11 +60,32 @@ function hayCell<T>(kind: HayKind, col: ResolvedColumn<T>, env: ColumnEnv<T>, sr
   }
 }
 
+/**
+ * A column's distinct values (value-list.md), level 1: each export text once
+ * (`e`), a row holding it (`r`), its label (`l`), in the column's sort order;
+ * `of[i]`, row i's entry (-1 for a blank). Level 2 hangs on it: the counts
+ * under one set of other filters, then the last list cut from them.
+ */
+interface ValueIndex<T> {
+  col: ResolvedColumn<T>; version: number; reader: number; ctx: string;
+  entries: { e: string; r: number; l: string; f?: string }[];
+  ids: Map<string, number>;
+  of: Int32Array;
+  counts?: { key: string; n: Int32Array; blanks: number; last?: { s: string; x: number; t: string; out: ValueList } };
+}
+
+/** What the rows the other filters keep are, as a key and a test (null: every row). Supplied by the model. */
+export interface OtherFilters {
+  readonly key: string;
+  test(): ((src: number) => boolean) | null;
+}
+
 /** Past this many patched rows a haystack is rebuilt rather than patched further. */
 const MAX_PATCHED = 1000;
 
 export class ColumnCache<T> {
-  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0, valueBuilds: 0, displayBuilds: 0, quickScanned: 0, warmBuilds: 0 };
+  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0, valueBuilds: 0, displayBuilds: 0, quickScanned: 0, warmBuilds: 0, indexBuilds: 0, countBuilds: 0 };
+  #index = new Map<string, ValueIndex<T>>();
   #lists = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; values: unknown[] }>();
   #hays = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; hay: Haystack }>();
   #keys = new Map<string, KeyEntry<T>>();
@@ -255,12 +278,90 @@ export class ColumnCache<T> {
   }
 
   /**
+   * A column's value list (value-list.md): its distinct export texts in the
+   * column's sort order (the collator's, ties by code units), labelled by the
+   * codec, counted over the rows `others` keeps; values with no row left out,
+   * but the `selected` ones a list lacks come first (count 0); the `search`
+   * narrows, `max` cuts. Equal inputs give the same object.
+   */
+  distinct(col: ResolvedColumn<T>, env: ColumnEnv<T>, o: { readonly spec?: CollatorSpec; readonly search?: string; readonly max?: number; readonly others?: OtherFilters; readonly selected?: readonly string[] | undefined }): ValueList {
+    const ctx = `${listCtx(env)}|${collatorKey(env.ctx, o.spec)}`;
+    let ix = this.#index.get(col.id);
+    if (!ix || ix.col !== col || ix.version !== env.source.version || ix.reader !== env.reader.version || ix.ctx !== ctx) {
+      this.stats.indexBuilds++;
+      const ex = this.exports(col, env);
+      const ids = new Map<string, number>();
+      const entries: ValueIndex<T>['entries'] = [];
+      const of = new Int32Array(ex.length);
+      for (let i = 0; i < ex.length; i++) {
+        const x = ex[i];
+        let k = x === null ? -1 : ids.get(x!);
+        if (k === undefined) {
+          ids.set(x!, (k = entries.length));
+          entries.push({ e: x!, r: i, l: col.codec.format(coerceCell(col, ColumnCache.raw(col, env, i), env).v, env.ctx) });
+        }
+        of[i] = k;
+      }
+      // The column's sort order: its keys, or its ranks by the collator; equal ones by their code units.
+      const keys = col.codec.keyKind === 'number' ? this.keys(col, env).keys : this.ranks(col, env, o.spec).ranks;
+      const sorted = entries.map((e, k) => ({ ...e, k })).sort((a, b) => keys[a.r]! - keys[b.r]! || (a.e < b.e ? -1 : a.e > b.e ? 1 : 0));
+      const at = new Int32Array(entries.length);
+      sorted.forEach((e, k) => (at[e.k] = k));
+      for (let i = 0; i < of.length; i++) if (of[i]! >= 0) of[i] = at[of[i]!]!;
+      for (const [x, k] of ids) ids.set(x, at[k]!);
+      ix = { col, version: env.source.version, reader: env.reader.version, ctx, entries: sorted, ids, of };
+      this.#index.set(col.id, ix);
+    }
+    const key = o.others?.key ?? '';
+    let c = ix.counts;
+    if (!c || c.key !== key) {
+      this.stats.countBuilds++;
+      const test = o.others?.test() ?? null;
+      const n = new Int32Array(ix.entries.length);
+      let blanks = 0;
+      for (let i = 0; i < ix.of.length; i++) {
+        if (test && !test(i)) continue;
+        if (ix.of[i]! < 0) blanks++;
+        else n[ix.of[i]!]!++;
+      }
+      ix.counts = c = { key, n, blanks };
+    }
+    const s = o.search ?? '';
+    const x = capOf(o.max);
+    const words = quickWords(s);
+    const { entries, ids } = ix;
+    const n = c.n;
+    // The ticked values with no row: only those change the list, never a tick of a value that has rows.
+    const missing = tickedMissing(o.selected, (v) => !!n[ids.get(v) ?? -1], (v) => (ids.has(v) ? entries[ids.get(v)!]!.l : labelFor(col, v, env.ctx)), words);
+    const t = JSON.stringify(missing.map((m) => m.value));
+    const last = c.last;
+    if (last && last.s === s && last.x === x && last.t === t) return last.out;
+    const found: SetValue[] = [];
+    let more = false;
+    for (let k = 0; k < entries.length; k++) {
+      const e = entries[k]!;
+      if (!n[k]) continue;
+      // The label and the value folded once, joined by a character no search word holds.
+      if (words.length && !words.every((w) => (e.f ??= `${fold(e.l)}\n${fold(e.e)}`).includes(w))) continue;
+      if (found.length === x) {
+        more = true;
+        break;
+      }
+      found.push({ value: e.e, label: e.l, count: n[k]! });
+    }
+    const out: ValueList = { values: missing.length ? [...missing, ...found] : found, blanks: c.blanks, truncated: more };
+    c.last = { s, x, t, out };
+    return out;
+  }
+
+  /**
    * Follows the store: an update that only rewrites some rows patches the
    * keys of those rows, and their ranks when the new text already has one;
    * anything else drops the cache.
    */
   patch(delta: StoreDelta, next: RowSnapshot<T>, envOf: (source: RowSnapshot<T>) => Omit<ColumnEnv<T>, 'source' | 'cache'>): void {
     if (delta.kind === 'none') return;
+    this.#index.clear();
     if (delta.kind !== 'update' || !delta.changedSrc) return this.invalidateAll();
     const base = envOf(next);
     const env: ColumnEnv<T> = { ...base, source: next, cache: this };
@@ -334,6 +435,7 @@ export class ColumnCache<T> {
   }
 
   invalidateAll(): void {
+    this.#index.clear();
     this.#keys.clear();
     this.#ranks.clear();
     this.#lists.clear();

@@ -10,7 +10,7 @@ Boolean column: all, yes, no. Value list: ticks the values to keep, blank includ
 - A value list matches on the stable raw text of a value (its export form), never on its translated label, so a filter survives a language change.
 - Two per-column caches, kept apart (step 8):
   - `ColumnCache.values`: each row's value as the codec reads it (null for blank), what a custom kind tests (`filter-custom.md`);
-  - the distinct index the value list shows (step 9): keyed on the export text (what the set filter matches), labelled with the codec's `format`, with blanks counted apart and counts that ignore the column's own filter; a cap decided then. Seam: `distinct(col, env, {collator, search?, max?})` giving `{values, blanks, truncated}`, `RowModel.setValues?`, and for a server `DataSource.values` through a `values:<col>` request.
+  - the distinct index the value list shows (step 9, `value-list.md`): `distinct(col, env, { spec?, search?, max?, others?, selected? })` giving `{ values, blanks, truncated }`, keyed on the export text (what the set filter matches), labelled with the codec's `format`, in the column's sort order; counts over the rows the other filters and the browser's search keep (never the column's own filter), values with no row left out except a ticked one (count 0, `selected: true`), blanks counted apart, capped at 2 000. Built in two levels (the values and their order per column; the counts per set of other filters), dropped with the rows. A server's list comes from `DataSource.values` through the gate channel `values:<col>`.
 
 ## Tests
-`conformance/cases/filter-combined/*` (boolean, value-list and combined cases).
+`conformance/cases/filter-combined/*` (boolean, value-list and combined cases); the lists themselves: `value-list.md`.

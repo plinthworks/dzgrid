@@ -1,5 +1,5 @@
 import type { AbortHandle } from '../abort.js';
-import { clientRows, type ModelChange, type ModelEnv, type ModelStatus, type SearchWarmup, type SourceBinding } from '../model/client.js';
+import { clientRows, refusedValues, type ModelChange, type ModelEnv, type ModelStatus, type SearchWarmup, type SourceBinding } from '../model/client.js';
 import { resolveOperations, splitQuery, type ServerQuery } from '../model/operations.js';
 import { checkPage, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZES, pageCountOf, resizeIndex, resolvePageOptions } from '../model/page.js';
 import { canonical, EMPTY_QUERY } from '../model/query.js';
@@ -12,6 +12,8 @@ import type { LocaleCtx } from '../value/locale.js';
 import { createGate, type Ticket } from './gate.js';
 import type { DataRequest, DataSource, Json, PageWindow, SourceModel, SourceRows, SourceRowsOptions } from './source.js';
 import { toWire, type WireFilterModel } from './wire.js';
+import { serverValues } from './values.js';
+import { closedValues, tickedIn } from '../model/values.js';
 
 type Kind = ModelChange<unknown>['kind'];
 /** Several things in one call: the change says the largest. */
@@ -171,6 +173,9 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   let status: ModelStatus = LOADING;
   let answerProblems: readonly Problem[] = [];
   let fetches = 0;
+  let valueFetches = 0;
+  /** The open value lists on the server, by column: each one checks its request after every change. */
+  const lists = new Map<string, ReturnType<typeof serverValues<T>>>();
   let destroyed = false;
   const listeners = new Set<(c: ModelChange<T>) => void>();
 
@@ -208,6 +213,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     told = [];
     failure = undefined;
     if (c) for (const fn of [...listeners]) fn(c);
+    // After the model's listeners: a list's own listeners may call the model again.
+    if (!destroyed) for (const h of [...lists.values()]) h.reconcile();
   };
   // A failure always follows a loading (only the last request counts): a phase change is a change.
   const setStatus = (s: ModelStatus): void => {
@@ -400,7 +407,30 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
       if (!serverPages) return inner.page;
       return { index, size, sizes, total, pageCount: total === null ? null : pageCountOf(total, size), hasNext: hasNext(), canJump: !cursorMode };
     },
-    get diagnostics() { return { fetches, gate: gate.diagnostics }; },
+    get diagnostics() { return { fetches, valueFetches, gate: gate.diagnostics }; },
+    // In the browser when the filter is: the rows held. On the server: the source's `values`, never the rows held.
+    setValues(column, vo = {}) {
+      if (ops.filter === 'client') return inner.setValues(column, vo);
+      lists.get(column)?.close();
+      const refused = refusedValues(columns.get(column), column);
+      if (refused) return refused;
+      if (!data.values || destroyed) return closedValues();
+      const h = serverValues<T>({
+        gate,
+        data: () => data,
+        parts: (col) => {
+          const filter = { ...wire };
+          delete filter[col];
+          return { filter, ...(server.quick !== undefined && { quick: server.quick }), params, zone: ctx.timeZone };
+        },
+        ticked: (col) => tickedIn(server.filter ?? {}, col),
+        column: (id) => columns.get(id),
+        ctx: () => ctx,
+        counted: () => void valueFetches++,
+      }, column, vo, () => lists.delete(column));
+      lists.set(column, h);
+      return h;
+    },
     warmSearch: () => (ops.quick === 'server' ? DONE : inner.warmSearch()),
     setQuery(q, source = 'api') {
       commit(() => {
@@ -494,6 +524,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
       listeners.clear();
       inner.destroy();
       gate.destroy();
+      for (const h of [...lists.values()]) h.close();
     },
   };
 }

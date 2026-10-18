@@ -1,0 +1,61 @@
+{
+  "id": "invalid-values-response",
+  "suite": "problems",
+  "description": "A value list answer bent: an entry with no text value dropped, a duplicate dropped, a count that is not a whole number read as none. Three warnings.",
+  "input": {
+    "op": "values",
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "values",
+        "column": "name"
+      },
+      {
+        "op": "valuesAnswer",
+        "call": "v1",
+        "response": [
+          {
+            "value": "a"
+          },
+          {
+            "value": 7
+          },
+          {
+            "value": "a"
+          },
+          {
+            "value": "b",
+            "count": -2
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "invalid-values-response",
+        "severity": "warning",
+        "path": "response.values[1]"
+      },
+      {
+        "code": "invalid-values-response",
+        "severity": "warning",
+        "path": "response.values[2]"
+      },
+      {
+        "code": "invalid-values-response",
+        "severity": "warning",
+        "path": "response.values[3].count"
+      }
+    ]
+  }
+}

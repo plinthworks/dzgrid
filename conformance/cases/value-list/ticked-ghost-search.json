@@ -1,0 +1,52 @@
+{
+  "id": "ticked-ghost-search",
+  "suite": "value-list",
+  "description": "A ticked value that no row holds is still offered, first, while a search matches it; a search that does not leaves it out.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "apple"
+      },
+      {
+        "id": "2",
+        "s": "pear"
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "set",
+        "include": [
+          "grape",
+          "pear"
+        ]
+      }
+    },
+    "column": "s",
+    "search": "ap"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "grape",
+        "label": "grape",
+        "count": 0,
+        "selected": true
+      },
+      {
+        "value": "apple",
+        "label": "apple",
+        "count": 1
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

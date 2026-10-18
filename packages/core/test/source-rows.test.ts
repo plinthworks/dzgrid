@@ -41,7 +41,7 @@ describe('construction and the request', () => {
     });
     expect('quick' in req).toBe(false);
     expect(req.signal.aborted).toBe(false);
-    expect(s.model.diagnostics).toEqual({ fetches: 1, gate: { begun: 1, accepted: 0, dropped: { superseded: 0, 'stale-epoch': 0, aborted: 0, destroyed: 0 } } });
+    expect(s.model.diagnostics).toEqual({ fetches: 1, valueFetches: 0, gate: { begun: 1, accepted: 0, dropped: { superseded: 0, 'stale-epoch': 0, aborted: 0, destroyed: 0 } } });
   });
 
   it('is a source model of server pages: select-all means the query, every key is kept', () => {

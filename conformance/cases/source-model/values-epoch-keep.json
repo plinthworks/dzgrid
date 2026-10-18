@@ -1,0 +1,161 @@
+{
+  "id": "values-epoch-keep",
+  "suite": "source-model",
+  "description": "Applying the list's own column filter starts a new epoch for the rows, not for the list: its request would be the same, so it is kept and nothing is asked; the ticked value it lacks joins first.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 2
+      },
+      {
+        "op": "values",
+        "column": "name"
+      },
+      {
+        "op": "valuesAnswer",
+        "call": "v1",
+        "response": [
+          {
+            "value": "a",
+            "count": 1
+          },
+          {
+            "value": "b",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "op": "query",
+        "filter": {
+          "name": {
+            "type": "set",
+            "include": [
+              "a",
+              "zz"
+            ]
+          }
+        }
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "name": {
+            "type": "set",
+            "include": [
+              "a",
+              "zz"
+            ]
+          }
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 1,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 1,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": [],
+    "valueCalls": [
+      {
+        "name": "v1",
+        "column": "name",
+        "search": "",
+        "limit": 2000,
+        "filter": {},
+        "params": {},
+        "zone": "UTC"
+      }
+    ],
+    "lists": [
+      {
+        "status": "idle",
+        "result": {
+          "values": [
+            {
+              "value": "zz",
+              "label": "zz",
+              "count": 0,
+              "selected": true
+            },
+            {
+              "value": "a",
+              "label": "a",
+              "count": 1
+            },
+            {
+              "value": "b",
+              "label": "b",
+              "count": 1
+            }
+          ],
+          "blanks": null,
+          "truncated": false
+        }
+      }
+    ]
+  }
+}

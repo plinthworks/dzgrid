@@ -31,6 +31,7 @@ export const PROBLEM_CODES = [
   'invalid-page',
   'invalid-page-response',
   'fetched-set-large',
+  'invalid-values-response',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

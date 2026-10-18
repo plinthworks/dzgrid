@@ -1,0 +1,176 @@
+{
+  "id": "values-epoch-reask",
+  "suite": "source-model",
+  "description": "Another column filtered: the list asks again with it (the old list shown meanwhile); the request in flight for the epoch before is dropped (stale-epoch).",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "op": "values",
+        "column": "name"
+      },
+      {
+        "op": "query",
+        "filter": {
+          "city": {
+            "type": "set",
+            "include": [
+              "Oran"
+            ]
+          }
+        }
+      },
+      {
+        "op": "valuesAnswer",
+        "call": "v1",
+        "response": [
+          {
+            "value": "old"
+          }
+        ]
+      },
+      {
+        "op": "valuesAnswer",
+        "call": "v2",
+        "response": {
+          "values": [
+            {
+              "value": "a",
+              "count": 2
+            }
+          ],
+          "blanks": 1
+        }
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a",
+          "b"
+        ],
+        "total": 2
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "city": {
+            "type": "set",
+            "include": [
+              "Oran"
+            ]
+          }
+        }
+      }
+    ],
+    "aborted": [
+      [
+        "c1",
+        "stale-epoch"
+      ],
+      [
+        "v1",
+        "stale-epoch"
+      ]
+    ],
+    "changes": [
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a",
+        "b"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 2,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 2,
+        "displayed": 2
+      }
+    },
+    "problems": [],
+    "failures": [],
+    "valueCalls": [
+      {
+        "name": "v1",
+        "column": "name",
+        "search": "",
+        "limit": 2000,
+        "filter": {},
+        "params": {},
+        "zone": "UTC"
+      },
+      {
+        "name": "v2",
+        "column": "name",
+        "search": "",
+        "limit": 2000,
+        "filter": {
+          "city": {
+            "type": "set",
+            "include": [
+              "Oran"
+            ]
+          }
+        },
+        "params": {},
+        "zone": "UTC"
+      }
+    ],
+    "lists": [
+      {
+        "status": "idle",
+        "result": {
+          "values": [
+            {
+              "value": "a",
+              "label": "a",
+              "count": 2
+            }
+          ],
+          "blanks": 1,
+          "truncated": false
+        }
+      }
+    ]
+  }
+}

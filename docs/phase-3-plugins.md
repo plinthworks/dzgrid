@@ -78,8 +78,10 @@ export type Json = null | boolean | number | string | readonly Json[] | { readon
 export interface DataSource<T> {
   /** Called with the server-side parts of the query only. */
   fetch(req: DataRequest): Promise<DataResponse<T>> | DataResponse<T>;
-  /** Distinct values for a value-list filter when `filter` is server. Optional: without it the list uses enumOptions only. */
-  values?(req: ValuesRequest): Promise<readonly SetValue[]> | readonly SetValue[];
+  /** Distinct values for a value-list filter when `filter` is server. Optional: without it the list uses enumOptions only.
+   *  Step 9 amendment: `ValuesRequest { column, search, limit, filter? (wire form minus this column), quick? (server search only), params, zone, key, signal }`,
+   *  answered by `readonly SetValue[] | { values, blanks?, truncated? }` (sync, thenable or Promise), read as `value-list.md` says. */
+  values?(req: ValuesRequest): Promise<ValuesResponse> | PromiseLike<ValuesResponse> | ValuesResponse;
 }
 
 export interface DataRequest {
@@ -250,7 +252,8 @@ interface FilterSlot {
   readonly state: Json | null;                  // this kind's state for the column, or null
   readonly where: Placement;                    // ops.filter: tells the part whether to debounce longer or show Apply
   set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' }): void;   // dispatches filter.column with source 'user'
-  values(o?: { readonly search?: string }): Promise<{ values: readonly SetValue[]; blanks: number | null; truncated: boolean }>;
+  // Step 9 amendment: a handle, not a Promise (a Promise can neither be cancelled nor show the old list while a new one loads):
+  values(o?: { readonly search?: string; readonly max?: number }): ValuesHandle;   // = kernel.values(column, o), value-list.md
   close(): void;
 }
 ```

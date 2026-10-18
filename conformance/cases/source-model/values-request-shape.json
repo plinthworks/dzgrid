@@ -1,0 +1,182 @@
+{
+  "id": "values-request-shape",
+  "suite": "source-model",
+  "description": "A value list on a server: one values request with the wire filter less the list's column, the server search, the limit, the params and the zone; the rows asked nothing more.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "options": {
+      "params": {
+        "tenant": "t1"
+      }
+    },
+    "timeZone": "Africa/Algiers",
+    "steps": [
+      {
+        "op": "query",
+        "filter": {
+          "city": {
+            "type": "set",
+            "include": [
+              "Oran"
+            ]
+          },
+          "name": {
+            "type": "text",
+            "op": "startsWith",
+            "value": "A"
+          }
+        },
+        "quick": "mo"
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      },
+      {
+        "op": "values",
+        "column": "city",
+        "search": " or ",
+        "max": 50
+      },
+      {
+        "op": "valuesAnswer",
+        "call": "v1",
+        "response": [
+          {
+            "value": "Oran",
+            "count": 1
+          },
+          {
+            "value": "Oued",
+            "label": "Oued Smar",
+            "count": 0
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "params": {
+          "tenant": "t1"
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "city": {
+            "type": "set",
+            "include": [
+              "Oran"
+            ]
+          },
+          "name": {
+            "type": "text",
+            "op": "startsWith",
+            "value": "A"
+          }
+        },
+        "quick": "mo",
+        "params": {
+          "tenant": "t1"
+        }
+      }
+    ],
+    "aborted": [
+      [
+        "c1",
+        "stale-epoch"
+      ]
+    ],
+    "changes": [
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 1,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 1,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": [],
+    "valueCalls": [
+      {
+        "name": "v1",
+        "column": "city",
+        "search": "or",
+        "limit": 50,
+        "filter": {
+          "name": {
+            "type": "text",
+            "op": "startsWith",
+            "value": "A"
+          }
+        },
+        "quick": "mo",
+        "params": {
+          "tenant": "t1"
+        },
+        "zone": "Africa/Algiers"
+      }
+    ],
+    "lists": [
+      {
+        "status": "idle",
+        "result": {
+          "values": [
+            {
+              "value": "Oran",
+              "label": "Oran",
+              "count": 1
+            }
+          ],
+          "blanks": null,
+          "truncated": false
+        }
+      }
+    ]
+  }
+}

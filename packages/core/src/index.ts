@@ -66,6 +66,8 @@ export type { Query } from './model/query.js';
 export { makeQuery, EMPTY_QUERY } from './model/query.js';
 export type { ModelStatus, ModelChange, RowModel, RowScope, ClientOptions, ClientModel, ModelEnv, SourceBinding, SourceHandle } from './model/client.js';
 export { clientRows } from './model/client.js';
+export { VALUES_MAX } from './model/values.js';
+export type { SetValue, ValueList, ValuesHandle, ValuesOptions } from './model/values.js';
 export { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZES } from './model/page.js';
 export type { PageOptions, PageState } from './model/page.js';
 export type { ScrollMapper, LayerPlacement } from './layout/scroll-mapper.js';

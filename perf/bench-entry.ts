@@ -85,6 +85,7 @@ export const CASES: Record<string, Case> = {
   },
   ...sortCases(),
   ...filterCases(),
+  ...valueListCases(),
   ...quickCases(),
   ...modelCases(),
   ...layoutCases(),
@@ -256,6 +257,31 @@ function filterCases(): Record<string, Case> {
     'set filter 100 000': warm({ e1: { type: 'set', include: ['cardiology', 'oncology'] } }),
     'instant filter onDay 100 000 (warm keys)': warm({ i1: { type: 'instant', op: 'onDay', day: '2026-06-15' } }),
     'custom kind test 100 000 rows (warm values)': warm({ n0: { type: 'custom', kind: 'range', state: { lo: 100_000, hi: 500_000 } } }),
+  };
+}
+
+/** Value lists (value-list.md): 100 000 rows, 5 000 distinct texts; cold (index, ranks, counts), and warm counts under another filter. */
+function valueListCases(): Record<string, Case> {
+  type R = { id: string; s: string; k: number };
+  const columns = createColumnModel<R>([{ id: 's' }, { id: 'k', type: 'number' }]);
+  const rows: R[] = Array.from({ length: 100_000 }, (_, i) => ({ id: `r${i}`, s: `valeur ${(i * 7919) % 5000} été`, k: i % 7 }));
+  const env = () => {
+    const store = createRowStore<R>((r) => r.id);
+    store.replaceAll(rows);
+    return { source: store.snapshot, columns, ctx: localeCtx({ locale: 'fr-FR' }), reader: NO_OVERLAY, cache: new ColumnCache<R>() };
+  };
+  let n = 0;
+  const others = () => ({ key: `k${n++}`, test: () => (src: number) => src % 3 !== 0 });
+  return {
+    'value list 100 000 rows, 5 000 values (cold)': { setup: env, run: (e: ReturnType<typeof env>) => e.cache.distinct(columns.get('s')!, e, {}).values.length },
+    'value list 100 000 rows, warm index, other filter changed': {
+      setup: () => {
+        const e = env();
+        e.cache.distinct(columns.get('s')!, e, {});
+        return e;
+      },
+      run: (e: ReturnType<typeof env>) => e.cache.distinct(columns.get('s')!, e, { others: others() }).values.length,
+    },
   };
 }
 

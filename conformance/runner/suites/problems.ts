@@ -37,6 +37,11 @@ export const problems: Record<string, Suite> = {
       }
       case 'source':
         return { problems: runSource(input).problems };
+      case 'values': {
+        // A script that opens value lists: the last list's problems.
+        const r = runSource(input) as { lists?: { problems?: unknown[] }[] };
+        return { problems: r.lists?.at(-1)?.problems ?? [] };
+      }
       case 'sort': {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(sortIndices(input.sort, null, h.env()).problems) };

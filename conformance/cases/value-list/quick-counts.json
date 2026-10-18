@@ -1,0 +1,51 @@
+{
+  "id": "quick-counts",
+  "suite": "value-list",
+  "description": "The browser's quick search counts too, over the visible columns.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "s"
+      },
+      {
+        "id": "t"
+      },
+      {
+        "id": "h",
+        "hidden": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "a",
+        "t": "lion"
+      },
+      {
+        "id": "2",
+        "s": "b",
+        "t": "tiger"
+      },
+      {
+        "id": "3",
+        "s": "c",
+        "h": "lion"
+      }
+    ],
+    "quick": "lion",
+    "column": "s"
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "a",
+        "label": "a",
+        "count": 1
+      }
+    ],
+    "blanks": 0,
+    "truncated": false,
+    "available": true
+  }
+}

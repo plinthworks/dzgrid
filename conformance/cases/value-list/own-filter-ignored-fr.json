@@ -1,0 +1,83 @@
+{
+  "id": "own-filter-ignored-fr",
+  "suite": "value-list",
+  "description": "The column's own filter is ignored, the others count; a ticked value with no row under them comes first, count 0, selected. Ete before été: collator-equal, by code units.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "s"
+      },
+      {
+        "id": "t"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "été",
+        "t": "x"
+      },
+      {
+        "id": "2",
+        "s": "Ete",
+        "t": "x"
+      },
+      {
+        "id": "3",
+        "s": "zèbre",
+        "t": "y"
+      },
+      {
+        "id": "4",
+        "s": null,
+        "t": "x"
+      },
+      {
+        "id": "5",
+        "s": "été",
+        "t": "y"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "set",
+        "include": [
+          "x"
+        ]
+      },
+      "s": {
+        "type": "set",
+        "include": [
+          "zèbre"
+        ]
+      }
+    },
+    "column": "s",
+    "search": "",
+    "max": 10
+  },
+  "expected": {
+    "values": [
+      {
+        "value": "zèbre",
+        "label": "zèbre",
+        "count": 0,
+        "selected": true
+      },
+      {
+        "value": "Ete",
+        "label": "Ete",
+        "count": 1
+      },
+      {
+        "value": "été",
+        "label": "été",
+        "count": 1
+      }
+    ],
+    "blanks": 1,
+    "truncated": false,
+    "available": true
+  }
+}

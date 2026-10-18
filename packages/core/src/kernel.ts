@@ -16,6 +16,7 @@ import {
 } from './selection/rows.js';
 import type { SortItem } from './sort/compile.js';
 import { nextSort } from './sort/toggle.js';
+import { closedValues, type ValuesHandle, type ValuesOptions } from './model/values.js';
 
 /**
  * The grid's state outside the DOM: the query (sort), the selection and its
@@ -109,6 +110,12 @@ export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
   /** The select-all box: over the displayed rows, or over the whole query on server pages (what its click acts on). */
   readonly headerState: HeaderSelection;
   dispatch(cmd: GridCommand, source: ChangeSource): GridCommandResult;
+  /**
+   * A column's value list (value-list.md): the model's, or a closed one when
+   * it has none. Not a command: it changes no state. Its new problems are told
+   * once (`problems`, source `data`).
+   */
+  values(column: string, o?: ValuesOptions): ValuesHandle;
   subscribe(fn: (e: GridEvent<T>) => void): () => void;
   destroy(): void;
 }
@@ -470,6 +477,17 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     get selectionScope() { return tied() ? { query, ...rows.scope } : null; },
     get headerState() { return headerState(); },
     dispatch,
+    values(column, vo) {
+      const h = rows.setValues ? rows.setValues(column, vo) : closedValues();
+      let told: readonly Problem[] = [];
+      const tell = (): void => {
+        if (h.problems !== told && h.problems.length) emit({ type: 'problems', source: 'data', problems: h.problems });
+        told = h.problems;
+      };
+      tell();
+      h.subscribe(tell);
+      return h;
+    },
     subscribe(fn) {
       listeners.add(fn);
       return () => listeners.delete(fn);

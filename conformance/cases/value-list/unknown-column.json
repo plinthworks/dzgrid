@@ -1,0 +1,32 @@
+{
+  "id": "unknown-column",
+  "suite": "value-list",
+  "description": "A column that does not exist: nothing to list, not available, a problem at values.<col>.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "a"
+      }
+    ],
+    "column": "nope"
+  },
+  "expected": {
+    "values": [],
+    "blanks": null,
+    "truncated": false,
+    "available": false,
+    "problems": [
+      [
+        "unknown-column",
+        "values.nope"
+      ]
+    ]
+  }
+}
