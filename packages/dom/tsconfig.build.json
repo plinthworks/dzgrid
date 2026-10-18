@@ -10,7 +10,8 @@
     "inlineSources": true,
     "paths": {
       "@dzgrid/core": ["../core/dist/index.d.ts"],
-      "@dzgrid/core/internal": ["../core/dist/internal.d.ts"]
+      "@dzgrid/core/internal": ["../core/dist/internal.d.ts"],
+      "@dzgrid/core/spans": ["../core/dist/spans.d.ts"]
     }
   },
   "include": ["src/**/*.ts"]

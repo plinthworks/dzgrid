@@ -12,7 +12,8 @@
     "types": [],
     "paths": {
       "@dzgrid/core": ["../core/src/index.ts"],
-      "@dzgrid/core/internal": ["../core/src/internal.ts"]
+      "@dzgrid/core/internal": ["../core/src/internal.ts"],
+      "@dzgrid/core/spans": ["../core/src/spans.ts"]
     }
   },
   "include": ["src/**/*.ts"]

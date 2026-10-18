@@ -71,8 +71,8 @@ export interface RowSpans {
   plan(index: number, key: RowKey): RowPlan | null;
 }
 
-/** Width of the selection box column. */
-export const CHECK_WIDTH = 40;
+export { CHECK_WIDTH, setAttr, setPx } from './write.js';
+import { CHECK_WIDTH, setAttr, setPx } from './write.js';
 
 /** One cell's value (coerced) and text (the codec's display): blank for a blank or unreadable value. */
 export function cellValue<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): { value: unknown; text: string } {
@@ -95,17 +95,8 @@ export function cellValue<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: Loca
 export const cellText = <T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): string => cellValue(col, row, ctx).text;
 
 
-export const setAttr = (el: Element, name: string, value: string | null): void => {
-  if (value === null) {
-    if (el.hasAttribute(name)) el.removeAttribute(name);
-  } else if (el.getAttribute(name) !== value) el.setAttribute(name, value);
-};
 export const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 
-export const setPx = (el: HTMLElement, prop: string, v: number): void => {
-  const s = `${v}px`;
-  if (el.style.getPropertyValue(prop) !== s) el.style.setProperty(prop, s);
-};
 
 export interface Frame<T> {
   readonly displayed: DisplayedRows<T>;

@@ -17,10 +17,18 @@ describe('the DOM layer’s shape', () => {
   });
 
   it('keeps the optional features out of the base: only features.ts may know them', () => {
-    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts)\//;
+    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans)\/|from '\.{1,2}\/(?:.*\/)?spans\.js'/;
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts)\//.test(relative(SRC, f)) && relative(SRC, f) !== 'features.ts')
+      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts'].includes(relative(SRC, f)))
       .filter((f) => optional.test(readFileSync(f, 'utf8')))
+      .map((f) => relative(SRC, f));
+    expect(offenders).toEqual([]);
+  });
+
+  it('keeps the core’s span engine out of the base: only the spans entry imports it', () => {
+    const offenders = files(SRC)
+      .filter((f) => !/^spans\//.test(relative(SRC, f)) && relative(SRC, f) !== 'spans.ts')
+      .filter((f) => /from '@dzgrid\/core\/spans'/.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
   });

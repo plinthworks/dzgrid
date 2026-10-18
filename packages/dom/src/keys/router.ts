@@ -1,6 +1,7 @@
 import { intentFor, isSelected, type FocusPos, type Intent, type KeyOwner } from '@dzgrid/core';
 import { sameFocus } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
+import type { MoveFn } from '../features.js';
 import type { FocusControl } from './focus.js';
 import { moveFocus, type Goal } from './move.js';
 import { ownerOf } from './owner.js';
@@ -18,11 +19,13 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
   let set: FocusPos | null = null;
   function move(from: FocusPos, intent: Intent): void {
     if (!sameFocus(kernel.focus, set)) goal = null;
-    const m = moveFocus(g.spans?.map ?? null, {
+    // The spans feature moves over spanned cells, and hands the rest back to `moveFocus`.
+    const step: MoveFn = g.spans?.move ?? moveFocus;
+    const m = step(null, {
       rows: rows.displayed, cols: columns.visible().map((c) => c.id),
       page: Math.max(1, Math.floor(g.geometry.read().block / g.rowHeight()) - 1),
       bands: g.bands.length, extras: g.headerRows.length, checkBox: !!headerRenderer.checkBox,
-    }, from, goal, intent);
+    }, from, goal, intent, moveFocus);
     if (!m) return;
     goal = m.goal;
     if (m.to === 'checkBox') headerRenderer.checkBox!.focus({ preventScroll: true });

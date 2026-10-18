@@ -1,5 +1,5 @@
 import { clientRows, createColumnModel, createKernel, resolveOperations, type ClientModel, type GridKernel, type RowKey, type RowModel } from '@dzgrid/core';
-import { emit, filterKindLookup } from '@dzgrid/core/internal';
+import { emit, filterKindLookup, missingFeatureProblems } from '@dzgrid/core/internal';
 import { announceSort, selectionAnnouncer } from './a11y/announce.js';
 import { LiveRegion } from './a11y/live-region.js';
 import type { GridContext, GridEnv } from './context.js';
@@ -194,6 +194,8 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   g.headerRows = handles.flatMap((h) => h.headerRows ?? []);
   g.bands = handles.flatMap((h) => h.bands ?? []);
   g.spans = handles.find((h) => h.spans)?.spans ?? null;
+  // Span rules with no feature to draw them: told once, ignored.
+  if (!g.spans) told.push(...missingFeatureProblems(initial));
   g.features = handles;
   scope.add(() => { for (const h of handles) h.destroy(); });
 

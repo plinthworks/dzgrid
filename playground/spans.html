@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DzGrid — fusions de cellules</title>
+  <style>
+    body { margin: 0; padding: 1rem; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); max-inline-size: 1200px; }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-block: .5rem .75rem; }
+    .host { block-size: 420px; }
+    .host > .dzg { block-size: 100%; }
+    .short { block-size: 360px; }
+    section { margin-block-end: 2rem; }
+    h2 { font-size: 1.1rem; margin-block: 1.5rem .25rem; }
+    .note { margin-block: .25rem .5rem; color: var(--tz-fg-muted); line-height: 1.45; }
+    .note li { margin-block: .1rem; }
+    output { color: var(--tz-fg-muted); }
+    nav { margin-block-end: .5rem; }
+  </style>
+</head>
+<body>
+  <nav><a href="./index.html">← Retour au bac à sable</a></nav>
+  <h1>Fusions de cellules (rowspan / colspan)</h1>
+  <p class="note">Quatre genres de fusions, comme dans un tableau HTML : valeurs identiques fusionnées, fusions décidées par la donnée, lignes pleine largeur, et bientôt les en-têtes groupés. Les réglages ci-dessous s’appliquent aux trois exemples.</p>
+  <form class="bar" id="controls">
+    <label>Sens <select name="direction"><option value="auto">auto</option><option>ltr</option><option>rtl</option></select></label>
+    <label>Données <select name="lang"><option value="fr">français</option><option value="ar">arabe</option></select></label>
+    <label><input type="checkbox" name="pinned" checked> première colonne épinglée</label>
+    <label><input type="checkbox" name="box"> cases de sélection</label>
+    <label>Densité <select name="density"><option>comfortable</option><option>compact</option><option>spacious</option></select></label>
+    <output id="status"></output>
+  </form>
+
+  <section>
+    <h2>1. Valeurs identiques fusionnées</h2>
+    <ul class="note">
+      <li>5 000 patients rangés par service puis par médecin : le service et le médecin sont écrits une seule fois, sur une cellule haute.</li>
+      <li>Faites défiler une longue fusion (un service fait plus de 800 lignes) : le nom reste visible, il « voyage » en haut ou en bas de la partie visible.</li>
+      <li>Flèches : Bas sur une fusion saute à la ligne d’après ; Haut entre dans la fusion, puis Droite revient à la ligne d’où vous veniez. Page suivante dans une fusion plus haute qu’une page avance pas à pas.</li>
+      <li>Clic sur une fusion : sélectionne la ligne sous le pointeur ; Maj+clic étend jusqu’à elle ; Espace sélectionne la première ligne de la fusion.</li>
+      <li>Changez le tri : les fusions suivent l’ordre affiché (par nom, presque plus rien ne fusionne).</li>
+    </ul>
+    <div class="bar">
+      <label>Tri <select id="sort"><option value="service">par service, puis médecin</option><option value="name">par nom du patient</option><option value="age">par âge</option></select></label>
+    </div>
+    <div class="host" id="merge"></div>
+  </section>
+
+  <section>
+    <h2>2. Fusions décidées par la donnée</h2>
+    <ul class="note">
+      <li>Un planning de consultations : un rendez-vous de deux ou trois heures couvre deux ou trois lignes (rowSpan) ; la ligne du total couvre les trois salles (colSpan).</li>
+      <li>Gauche et Droite sur la ligne du total passent par-dessus les salles couvertes ; Haut et Bas traversent les rendez-vous longs.</li>
+    </ul>
+    <div class="host short" id="data"></div>
+  </section>
+
+  <section>
+    <h2>3. Lignes pleine largeur</h2>
+    <ul class="note">
+      <li>Une ligne de titre par service (« Service : Cardiologie — 42 patients ») entre les lignes de données : une seule cellule sur toute la largeur.</li>
+      <li>Faites défiler de côté : le titre reste lisible au début de la ligne ; la case de sélection reste à sa place.</li>
+      <li>Gauche et Droite ne bougent pas sur un titre ; Haut et Bas le traversent.</li>
+    </ul>
+    <div class="host short" id="full"></div>
+  </section>
+
+  <section>
+    <h2>4. En-têtes groupés : bientôt</h2>
+    <p class="note">Un en-tête au-dessus de plusieurs colonnes (« Patient » au-dessus de Nom, Prénom, Âge) arrive avec l’étape suivante.</p>
+  </section>
+
+  <script type="module" src="./spans.ts"></script>
+</body>
+</html>

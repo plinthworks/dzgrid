@@ -50,7 +50,7 @@ export const problems: Record<string, Suite> = {
       case 'bands':
         return { problems: runBands(input).problems };
       case 'missing-feature':
-        return { problems: shape(missingFeatureProblems(input.columns.map(columnOf), input.fullWidth ? FULL_WIDTH[input.fullWidth] : undefined)) };
+        return { problems: shape(missingFeatureProblems({ columns: input.columns.map(columnOf), fullWidth: input.fullWidth ? FULL_WIDTH[input.fullWidth] : undefined })) };
       case 'sort': {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(sortIndices(input.sort, null, h.env()).problems) };

@@ -99,10 +99,10 @@ describe('gaps found by the mutants', () => {
 
 describe('span rules without the spans feature', () => {
   it('says each kind once, at its first place', () => {
-    const p = missingFeatureProblems<R>(
-      [{ id: 'a' }, { id: 'g', children: [{ id: 'b', merge: true }, { id: 'c', rowSpan: () => 1 }] }, { id: 'd', merge: true, colSpan: () => 2 }],
-      () => false,
-    );
+    const p = missingFeatureProblems<R>({
+      columns: [{ id: 'a' }, { id: 'g', children: [{ id: 'b', merge: true }, { id: 'c', rowSpan: () => 1 }] }, { id: 'd', merge: true, colSpan: () => 2 }],
+      fullWidth: () => false,
+    });
     expect(p).toEqual([
       { code: 'missing-feature', severity: 'warning', path: 'columns', detail: 'groups' },
       { code: 'missing-feature', severity: 'warning', path: 'columns[1].merge', detail: 'spans' },
@@ -113,6 +113,6 @@ describe('span rules without the spans feature', () => {
   });
 
   it('nothing to say without rules', () => {
-    expect(missingFeatureProblems<R>([{ id: 'a' }, null as never], undefined)).toEqual([]);
+    expect(missingFeatureProblems<R>({ columns: [{ id: 'a' }, null as never], fullWidth: undefined })).toEqual([]);
   });
 });

@@ -81,9 +81,12 @@ $emit: true !default;
     background: var(--dzg-header-bg, var(--tz-bg-raised));
   }
 
+  // Border-box: the padding stays inside the width the grid gives (the selection box's cell
+  // is exactly its column, or the cells after it move).
   .dzg-hcell,
   .dzg-cell,
   .dzg-check {
+    box-sizing: border-box;
     padding-inline: var(--dzg-cell-padding-inline, 0.5rem);
     border-block-end: 1px solid var(--tz-border);
   }

@@ -52,6 +52,7 @@
 .dzg-hcell,
 .dzg-cell,
 .dzg-check {
+  box-sizing: border-box;
   padding-inline: var(--dzg-cell-padding-inline, 0.5rem);
   border-block-end: 1px solid var(--tz-border);
 }

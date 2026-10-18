@@ -216,7 +216,7 @@ describe('fix 4: settings.fullWidth, one rule', () => {
       expect([m.fullWidth(0), m.fullWidth(1)]).toEqual([false, false]);
       expect(m.problems).toEqual([]);
       expect(m.none).toBe(true);
-      expect(missingFeatureProblems<Row>([C('a')], off)).toEqual([]);
+      expect(missingFeatureProblems<Row>({ columns: [C('a')], fullWidth: off })).toEqual([]);
     });
   }
   for (const bad of [true, {}, 'yes', 1]) {
@@ -225,13 +225,13 @@ describe('fix 4: settings.fullWidth, one rule', () => {
       expect([m.fullWidth(0), m.fullWidth(1)]).toEqual([false, false]);
       expect(cellsOf(m, 2, 2)).toEqual([]);
       expect(shape(m)).toEqual([{ code: 'invalid-span', severity: 'error', path: 'settings.fullWidth', detail: 'not a function' }]);
-      expect(missingFeatureProblems<Row>([C('a')], bad)).toEqual([{ code: 'missing-feature', severity: 'warning', path: 'settings.fullWidth', detail: 'spans' }]);
+      expect(missingFeatureProblems<Row>({ columns: [C('a')], fullWidth: bad })).toEqual([{ code: 'missing-feature', severity: 'warning', path: 'settings.fullWidth', detail: 'spans' }]);
     });
   }
   it('a function is the rule, and is a missing feature without spans', () => {
     const m = buildSpanMap({ ...g.input, fullWidth: (r) => r.id === 'r1' });
     expect([m.fullWidth(0), m.fullWidth(1)]).toEqual([false, true]);
-    expect(missingFeatureProblems<Row>([C('a')], () => false)).toHaveLength(1);
+    expect(missingFeatureProblems<Row>({ columns: [C('a')], fullWidth: () => false })).toHaveLength(1);
   });
 });
 

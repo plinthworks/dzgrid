@@ -13,6 +13,10 @@
       "types": "./src/popup.ts",
       "default": "./src/popup.ts"
     },
+    "./spans": {
+      "types": "./src/spans.ts",
+      "default": "./src/spans.ts"
+    },
     "./locales/en": {
       "types": "./src/locales/en.ts",
       "default": "./src/locales/en.ts"

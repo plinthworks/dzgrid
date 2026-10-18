@@ -10,6 +10,7 @@ export default defineConfig({
       { find: '@dzgrid/core/spans', replacement: fileURLToPath(new URL('./packages/core/src/spans.ts', import.meta.url)) },
       { find: '@dzgrid/core/internal', replacement: fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)) },
       { find: '@dzgrid/core', replacement: fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)) },
+      { find: '@dzgrid/dom/spans', replacement: fileURLToPath(new URL('./packages/dom/src/spans.ts', import.meta.url)) },
       { find: /^@dzgrid\/dom\/locales\/(.*)$/, replacement: fileURLToPath(new URL('./packages/dom/src/locales/', import.meta.url)) + '$1.ts' },
       { find: '@dzgrid/dom', replacement: fileURLToPath(new URL('./packages/dom/src/index.ts', import.meta.url)) },
     ],
@@ -19,6 +20,7 @@ export default defineConfig({
       input: {
         index: fileURLToPath(new URL('./playground/index.html', import.meta.url)),
         rtl: fileURLToPath(new URL('./playground/rtl.html', import.meta.url)),
+        spans: fileURLToPath(new URL('./playground/spans.html', import.meta.url)),
       },
     },
   },

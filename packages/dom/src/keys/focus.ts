@@ -71,7 +71,8 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
   }
 
   function ensureVisible(row: RowKey, column?: string): void {
-    const i = rows.displayed.indexOf(row);
+    // A cell spanning rows shows the row aimed at (the spans feature knows it), not only its first.
+    const i = rows.displayed.indexOf(g.spans?.at?.(row) ?? row);
     if (i === -1) return;
     const box = g.geometry.read();
     if (column !== undefined) scrollInlineTo(column);

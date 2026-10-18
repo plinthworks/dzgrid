@@ -1,4 +1,5 @@
-// The real grid, from the sources, for scripts/browser.mjs. Query: rows, locale, dir, theme, select, box.
+// The real grid, from the sources, for scripts/browser.mjs. Query: rows, locale, dir, theme, select, box;
+// spans=1 merges the city (runs of 5 000 rows) with the spans feature, pin=1 pins it at the start.
 import { createGrid } from '/packages/dom/src/index.ts';
 import { EN } from '/packages/dom/src/locales/en.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
@@ -21,14 +22,14 @@ const cities = locale.startsWith('ar') ? CITIES_AR : CITIES_FR;
 const rows: Row[] = Array.from({ length: N }, (_, i) => ({
   id: i,
   name: locale.startsWith('ar') ? `مريض ${i}` : `Patient ${i}`,
-  city: cities[i % cities.length]!,
+  city: cities[(q.get('spans') ? Math.floor(i / 5000) : i) % cities.length]!,
   amount: ((i * 7919) % 100000) / 100,
   day: `2026-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
 }));
 
 const columns = [
   { id: 'name', header: messages === AR ? 'الاسم' : 'Nom', pinned: 'start' as const, width: 140 },
-  { id: 'city', header: messages === AR ? 'المدينة' : 'Ville', width: 130, headerTooltip: messages === AR ? 'مدينة الإقامة' : 'Ville de résidence' },
+  { id: 'city', header: messages === AR ? 'المدينة' : 'Ville', width: 130, headerTooltip: messages === AR ? 'مدينة الإقامة' : 'Ville de résidence', ...(q.get('spans') && { merge: true as const }), ...(q.get('pin') && { pinned: 'start' as const }) },
   { id: 'amount', header: messages === AR ? 'المبلغ' : 'Montant', type: 'number' as const, width: 120 },
   { id: 'day', header: messages === AR ? 'اليوم' : 'Jour', type: 'day' as const, width: 120 },
   ...Array.from({ length: 16 }, (_, k) => ({ id: `x${k}`, header: `C${k}`, width: 110, value: (r: Row) => (r.id * (k + 3)) % 997 })),
@@ -40,8 +41,9 @@ const events: string[] = [];
 for (const type of ['blur', 'focusout', 'focusin']) document.addEventListener(type, (e) => events.push(`${type} ${(e.target as HTMLElement).dataset?.['col'] ?? (e.target as HTMLElement).id ?? ''}`), true);
 
 const host = document.getElementById('host')!;
+const features = q.get('spans') ? [(await import('/packages/dom/src/spans.ts')).spans()] : [];
 const grid = createGrid<Row>(host, {
-  rows, getRowId: (r) => r.id, columns, messages, locale,
+  rows, getRowId: (r) => r.id, columns, messages, locale, features,
   selection: { mode, checkbox: q.get('box') === '1', click: true },
 });
 

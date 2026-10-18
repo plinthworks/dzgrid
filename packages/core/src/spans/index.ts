@@ -5,3 +5,5 @@ export { headerBands } from './bands.js';
 export type { BandFragment, HeaderBands } from './bands.js';
 export { land, navigate, ownerFocus } from './nav.js';
 export type { NavMove, NavShape, Slot } from './nav.js';
+export { rowPlanner } from './plan.js';
+export type { RowSpanPlan } from './plan.js';

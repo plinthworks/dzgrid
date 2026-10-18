@@ -5,9 +5,10 @@ import { leaves, type ColumnOrGroup } from './defs.js';
  * Span rules given to a grid without the spans feature (`@dzgrid/dom/spans`):
  * each kind said once, at its first place, as a warning (the grid works, the
  * rules are ignored). Groups (`columns`), `merge` / `rowSpan` / `colSpan`
- * (`columns[i].<rule>`, i over the leaves), `settings.fullWidth`.
+ * (`columns[i].<rule>`, i over the leaves), `settings.fullWidth`. Takes the
+ * grid's settings (`columns`, `fullWidth`).
  */
-export function missingFeatureProblems<T>(tree: readonly ColumnOrGroup<T>[], fullWidth: unknown): Problem[] {
+export function missingFeatureProblems<T>({ columns: tree, fullWidth }: { readonly columns: readonly ColumnOrGroup<T>[]; readonly fullWidth?: unknown }): Problem[] {
   const out: Problem[] = [];
   if (tree.some((d) => d && Array.isArray((d as { children?: unknown }).children))) out.push(problem('missing-feature', 'warning', 'columns', 'groups'));
   const said = new Set<string>();

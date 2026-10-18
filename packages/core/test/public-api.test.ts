@@ -31,7 +31,7 @@ const INTERNAL = [
 const SERVER = ['createGate', 'sourceRows', 'toWire'];
 
 /** `@dzgrid/core/spans` (step 9b): cell spans, never in the base. */
-const SPANS = ['buildSpanMap', 'headerBands', 'land', 'navigate', 'ownerFocus', 'spanAt'];
+const SPANS = ['buildSpanMap', 'headerBands', 'land', 'navigate', 'ownerFocus', 'rowPlanner', 'spanAt'];
 
 describe('the public surface', () => {
   it('keeps the server entry apart', () => {

@@ -56,6 +56,13 @@ const geometry = (page) => page.evaluate(() => {
     const a = h.getBoundingClientRect(), b = cell.getBoundingClientRect();
     worst = Math.max(worst, Math.abs(a.left - b.left), Math.abs(a.right - b.right));
   }
+  // The selection box's cell, when there is one, as wide as its header.
+  const hc = document.querySelector('.dzg-header .dzg-check');
+  const bc = row.querySelector('.dzg-check');
+  if (hc && bc) {
+    const a = hc.getBoundingClientRect(), b = bc.getBoundingClientRect();
+    worst = Math.max(worst, Math.abs(a.left - b.left), Math.abs(a.right - b.right));
+  }
   const inner = { left: v.left + vp.clientLeft, right: v.left + vp.clientLeft + vp.clientWidth };
   const s = row.querySelector('.dzg-seg-start').getBoundingClientRect();
   const e = row.querySelector('.dzg-seg-end').getBoundingClientRect();
@@ -98,8 +105,9 @@ async function runEngine(name) {
     }
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
-    for (const dir of ['ltr', 'rtl']) {
-      const { page } = await load(ctx, `locale=${dir === 'rtl' ? 'ar-DZ' : 'fr-FR'}&dir=${dir}`);
+    // With the selection box too (its cell must be as wide as the column it stands for), and over spans.
+    for (const [dir, more] of [['ltr', ''], ['rtl', ''], ['ltr', '&box=1'], ['rtl', '&box=1&spans=1&pin=1&rows=20000']]) {
+      const { page } = await load(ctx, `locale=${dir === 'rtl' ? 'ar-DZ' : 'fr-FR'}&dir=${dir}${more}`);
       const out = [];
       for (const at of [0, 0.5, 1]) {
         await page.evaluate((at) => {
@@ -110,7 +118,7 @@ async function runEngine(name) {
         await frames(page, 3);
         out.push(await geometry(page));
       }
-      check(name, `${dir}: header and body aligned within 1 px, pinned segments at their edges, at start, middle and end`, out.every((m) => m.worst <= 1 && m.startEdge <= 1 && m.endEdge <= 1), out);
+      check(name, `${dir}${more}: header and body aligned within 1 px, pinned segments at their edges, at start, middle and end`, out.every((m) => m.worst <= 1 && m.startEdge <= 1 && m.endEdge <= 1), out);
       await page.close();
     }
 
@@ -272,6 +280,33 @@ async function runEngine(name) {
         return { shown: !t.hidden, topLayer: t.matches(':popover-open') };
       });
       check(name, 'the tooltip opens in the top layer, out of reach of a clipping, transformed host', tip.shown && tip.topLayer, tip);
+      await page.close();
+    }
+
+    // ---- spans (step 9b, commit 3): a long merge drawn over the view, its label in view, hit over covered places ----
+    for (const pin of ['', '&pin=1']) {
+      const { page, errors } = await load(ctx, `rows=20000&spans=1${pin}`);
+      const res = await page.evaluate(async () => {
+        const vp = document.querySelector('.dzg-viewport');
+        const v = vp.getBoundingClientRect();
+        const top = document.querySelector('.dzg-header').getBoundingClientRect().bottom;
+        const bottom = v.top + vp.clientTop + vp.clientHeight;
+        const out = [];
+        // Inside the first run (rows 0 to 4 999): before its centre, at it, past it.
+        for (const at of [100, 2500, 4890]) {
+          window.t.scrollTo(at * 32);
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          const cell = document.querySelector('.dzg-cell[aria-rowspan][data-col="city"]');
+          if (!cell) { out.push({ at, cell: false }); continue; }
+          const c = cell.getBoundingClientRect();
+          const l = cell.querySelector('.dzg-span-label').getBoundingClientRect();
+          const hit = document.elementFromPoint((c.left + c.right) / 2, (top + bottom) / 2);
+          out.push({ at, covers: c.top <= top + 1 && c.bottom >= bottom - 1, labelIn: l.top >= top - 1 && l.bottom <= bottom + 1, hit: cell.contains(hit), rowspan: cell.getAttribute('aria-rowspan'), drawn: Math.round(c.height) });
+        }
+        return out;
+      });
+      check(name, `spans${pin ? ', pinned' : ''}: a 5 000-row merge covers the view (drawn over the window only), its label stays in view, a covered place hits the tall cell`, res.every((r) => r.covers && r.labelIn && r.hit && r.rowspan === '5000' && r.drawn < 5000), res);
+      check(name, `no page error with spans${pin ? ', pinned' : ''}`, errors.length === 0, errors);
       await page.close();
     }
 

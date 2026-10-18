@@ -19,7 +19,8 @@ export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
   scope.on(el.body, 'click', (e: MouseEvent) => {
     const t = e.target as HTMLElement;
     const row = t.closest('.dzg-row');
-    const key = row ? rowRenderer.keyOf(row) : undefined;
+    // A cell spanning rows: the row under the pointer (the spans feature knows it).
+    const key = g.spans?.at?.(e) ?? (row ? rowRenderer.keyOf(row) : undefined);
     if (!key) return;
     // Which row and cell, by identity (the host's handlers never see positions).
     const node = rows.row(key);

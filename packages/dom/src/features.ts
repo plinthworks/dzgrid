@@ -1,5 +1,6 @@
 import type { GridContext } from './context.js';
-import type { SpanLookup } from './keys/move.js';
+import type { FocusPos, Intent, RowKey } from '@dzgrid/core';
+import type { Goal, Move, MoveShape, SpanLookup } from './keys/move.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { Frame, RowSpans } from './render/rows.js';
 
@@ -27,7 +28,19 @@ export interface FeatureHandle {
   destroy(): void;
 }
 
-/** The spans feature's side of the grid: the rows' plans, and the map the keys move over. */
+/** Where a key moves the focus (`moveFocus`); a feature's version gets the base one for what it leaves to it. */
+export type MoveFn = (map: SpanLookup | null, s: MoveShape, from: FocusPos, goal: Goal | null, intent: Intent, base?: MoveFn) => Move | null;
+
+/** The spans feature's side of the grid: the rows' plans, the map, the keys and the pointer over spanned cells. */
 export interface SpanFeature extends RowSpans {
-  readonly map: SpanLookup | null;
+  /** Where the cells span, for what reads them by position (the grid's own keys do not: the feature's `move` does). */
+  readonly map?: SpanLookup | null;
+  /** Moves over spanned cells (the body's); `base`, the grid's own, for the rest. */
+  readonly move?: MoveFn;
+  /**
+   * The row a cell spanning rows stands for: for a click (the event), the row under the
+   * pointer; for a focus on a cell (its row), the row aimed at, which is brought into view.
+   * Undefined: the cell's own row.
+   */
+  at?(x: MouseEvent | RowKey): RowKey | undefined;
 }
