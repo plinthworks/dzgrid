@@ -15,11 +15,11 @@ Mis à jour : 2026-10-18. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 6 — forme des filtres envoyée au serveur (`toWire`) | fait | `95298f4` |
 | 7 — sélection sur plusieurs pages | fait | `2151d99` |
 | 8 — types de filtres personnalisés (`FilterKind`) | fait | `7a081dc` |
-| **9 — listes de valeurs du filtre à cocher** | **en cours** (un agent l'écrit, non commité) | — |
+| 9 — listes de valeurs du filtre à cocher | fait ; relecture et analyse des tests en cours | `8b45b62` |
 | **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : en conception (architecte) ; code juste après l'étape 9 | — |
 | 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-Si l'étape 9 n'est pas commitée quand vous lisez ceci : regarder `git status` dans ce dépôt. Le plan validé est `docs/phase-3-steps/step9-blueprint.md` et les décisions `docs/phase-3-steps/step9-decisions.md`. Reprendre : vérifier la suite (`npm run test:ci`), la taille, puis relecture et analyse des tests comme ci-dessous.
+En cours : la relecture et l'analyse des tests de l'étape 9 ; l'essai navigateur des fusions (spike S12, `spikes/s12-spans/`, non commité tant qu'il tourne). Ensuite : l'étape 9b (fusions) en 4 commits selon `docs/phase-3-steps/step9b-spans-blueprint.md` et `step9b-decisions.md`, en commençant par les points d'accroche (aucun changement visible).
 
 ## Les plans détaillés des étapes
 
@@ -47,8 +47,8 @@ Si l'étape 9 n'est pas commitée quand vous lisez ceci : regarder `git status` 
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 26 000 o gz | 24 054 |
-| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | ~4 200 |
+| `@dzgrid/core` | 26 000 o gz | 25 635 |
+| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 239 |
 | `@dzgrid/dom` | 18 000 (fusions) | ~17 090 |
 | `@dzgrid/dom/popup` | 1 500 | ~1 390 |
 | langues en / fr / ar | 540 / 660 / 850 | 511 / 623 / 801 |
