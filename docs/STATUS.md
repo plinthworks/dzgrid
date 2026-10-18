@@ -19,7 +19,7 @@ Mis à jour : 2026-10-18. Ce fichier dit où en est la Phase 3, ce qui est en co
 | **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : en conception (architecte) ; code juste après l'étape 9 | — |
 | 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : la relecture et l'analyse des tests de l'étape 9 ; l'essai navigateur des fusions (spike S12, `spikes/s12-spans/`, non commité tant qu'il tourne). Ensuite : l'étape 9b (fusions) en 4 commits selon `docs/phase-3-steps/step9b-spans-blueprint.md` et `step9b-decisions.md`, en commençant par les points d'accroche (aucun changement visible).
+En cours : les corrections de la relecture et de l'analyse des tests de l'étape 9 (8 points, liste dans le rapport de commit à venir ; tests de l'analyse dans le dossier temporaire `scratchpad/dz11`, à réécrire si perdu). L'essai navigateur des fusions S12 est fait : `spikes/s12-spans/README.md` (188 vérifications, 0 échec ; décisions pour le code). Ensuite : l'étape 9b (fusions) en 4 commits selon `docs/phase-3-steps/step9b-spans-blueprint.md` et `step9b-decisions.md`, en commençant par les points d'accroche (aucun changement visible).
 
 ## Les plans détaillés des étapes
 
