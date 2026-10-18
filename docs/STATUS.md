@@ -19,7 +19,7 @@ Mis à jour : 2026-10-18. Ce fichier dit où en est la Phase 3, ce qui est en co
 | **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : commit 1 (points d'accroche) écrit, à relire ; commits 2 à 4 à faire | — |
 | 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 9b (fusions), commit 1 « points d'accroche » (aucun changement visible) écrit, suite verte, **pas encore commité** : à relire (relecture et analyse des tests) puis commiter. Écarts au plan notés dans `docs/phase-3-steps/step9b-spans-blueprint.md` (« Commit 1 fait »). Ensuite : commit 2 (moteur des fusions dans `@dzgrid/core/spans`), commit 3 (côté écran, clavier, clic), commit 4 (en-têtes groupés, vérifications navigateur). Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md`.
+En cours : l'étape 9b (fusions). Commit 1 « points d'accroche » fait, relu, testé (`5eb92f1`). Commit 2 « moteur des fusions » (`@dzgrid/core/spans`, calcul pur) confié à un agent, non commité tant qu'il tourne. Ensuite : commit 3 (côté écran, clavier, clic ; y ajouter le test de la ligne d'ancrage quand le focus est sur un en-tête), commit 4 (en-têtes groupés, vérifications navigateur). Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md`.
 
 ## Les plans détaillés des étapes
 
