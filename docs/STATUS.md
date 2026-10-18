@@ -49,7 +49,7 @@ Si l'étape 9 n'est pas commitée quand vous lisez ceci : regarder `git status` 
 |---|---|---|
 | `@dzgrid/core` | 26 000 o gz | 24 054 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | ~4 200 |
-| `@dzgrid/dom` | 17 500 | ~17 090 |
+| `@dzgrid/dom` | 18 000 (fusions) | ~17 090 |
 | `@dzgrid/dom/popup` | 1 500 | ~1 390 |
 | langues en / fr / ar | 540 / 660 / 850 | 511 / 623 / 801 |
 | thème | 1 180 | ~1 100 |
@@ -66,6 +66,7 @@ Si l'étape 9 n'est pas commitée quand vous lisez ceci : regarder `git status` 
 
 ## Décisions du propriétaire prises pendant la Phase 3 (rappel)
 
+- Étape 9b : texte d'une fusion centré comme Excel, qui « voyage » en haut ou en bas de la partie visible quand la fusion est longue ; clic = la ligne sous le pointeur ; CSV répète la valeur ; modules à part `@dzgrid/core/spans` 3,5 kB et `@dzgrid/dom/spans` 2,4 kB, dom de base 18 kB ; essai navigateur (S12) d'abord ; test au lecteur d'écran à l'oreille par le propriétaire. Détail : `docs/phase-3-steps/step9b-decisions.md`.
 - 2026-10-18, priorité haute : les fusions de cellules, comme `rowspan` / `colspan` d'un tableau HTML, conçues et codées dans la Phase 3 (étape 9b, après la 9), les quatre genres : valeurs identiques fusionnées, fusion décidée par la donnée, en-têtes groupés, lignes pleine largeur. ag-Grid les gère mal : c'est un point où DzGrid doit faire mieux. Avant : prévu en Phase 5.
 
 - Étape 4 : budgets cœur 24 kB, dom 16,8 kB (relevés ensuite).

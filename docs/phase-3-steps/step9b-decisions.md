@@ -1,0 +1,8 @@
+# Step 9b decisions (owner, 2026-10-18)
+
+- O1 text of a tall cell (OWNER): centred like Excel. When the merge is long and the centred label would be out of view, the label "travels" with the scroll: it stays at the top or bottom edge of the cell's visible part, so the user always sees what the merge is. For a short merge (about ten rows) nothing moves: the centred label is visible anyway. One rule covers both: the label is centred in the whole span, clamped into the cell's visible part (top edge when the centre is above the view, bottom edge when it is below). Computed by the painter per frame from the layout (no DOM read); replaces the architect's "start-aligned sticky" proposal. Spike S12 checks the clamped label under the S11 mapping, in LTR and RTL.
+- O2 click on a merged cell: selects the row under the pointer; Space selects the origin row.
+- O5 CSV: the merged value is repeated on every covered row; an option `csv.spans: 'first'` gives the report form.
+- O8 budgets: approved — optional entries `@dzgrid/core/spans` (3 500 B gz, measured over the core) and `@dzgrid/dom/spans` (2 400 B gz); the dom base may rise to 18 000 B gz during Phase 3 for the seams.
+- O9 method: approved — spike S12 first; the screen-reader protocol step is done by ear by the owner (NVDA, JAWS, VoiceOver, TalkBack).
+- Defaults kept (architect): O3 no automatic sort by a merged column (`merge.within` is the tool); O4 blanks never merge; O6 full-width and total rows stay in sort order (pinned top/bottom rows are Phase 5); O7 a group split into labelled fragments when a leaf is pinned or moved; O10 hidden repeat cells only if the protocol shows lost values.
