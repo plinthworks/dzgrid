@@ -16,6 +16,7 @@ Mis à jour : 2026-10-18. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 7 — sélection sur plusieurs pages | fait | `2151d99` |
 | 8 — types de filtres personnalisés (`FilterKind`) | fait | `7a081dc` |
 | **9 — listes de valeurs du filtre à cocher** | **en cours** (un agent l'écrit, non commité) | — |
+| **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : en conception (architecte) ; code juste après l'étape 9 | — |
 | 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
 Si l'étape 9 n'est pas commitée quand vous lisez ceci : regarder `git status` dans ce dépôt. Le plan validé est `docs/phase-3-steps/step9-blueprint.md` et les décisions `docs/phase-3-steps/step9-decisions.md`. Reprendre : vérifier la suite (`npm run test:ci`), la taille, puis relecture et analyse des tests comme ci-dessous.
@@ -64,6 +65,8 @@ Si l'étape 9 n'est pas commitée quand vous lisez ceci : regarder `git status` 
 - Toujours dus : la spécification de l'écran des journaux d'audit (étape 24), les palettes `sehhaty.json`, un relecteur arabe pour `locales/ar.ts` (y compris les annonces de sélection ajoutées à l'étape 7), le budget mémoire de la préparation de recherche, la question de l'annonce du tri multiple.
 
 ## Décisions du propriétaire prises pendant la Phase 3 (rappel)
+
+- 2026-10-18, priorité haute : les fusions de cellules, comme `rowspan` / `colspan` d'un tableau HTML, conçues et codées dans la Phase 3 (étape 9b, après la 9), les quatre genres : valeurs identiques fusionnées, fusion décidée par la donnée, en-têtes groupés, lignes pleine largeur. ag-Grid les gère mal : c'est un point où DzGrid doit faire mieux. Avant : prévu en Phase 5.
 
 - Étape 4 : budgets cœur 24 kB, dom 16,8 kB (relevés ensuite).
 - Étape 5 : dom 17,5 kB.

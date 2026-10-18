@@ -213,6 +213,8 @@ searching and 107 B at rest.
 
 ## Phase 3 — server, filters, export, Angular (in progress)
 
+> Owner decision (2026-10-18), high priority: cell spans like an HTML table's rowspan/colspan — identical values merged, spans decided by the data, grouped headers, full-width rows — are designed and built in Phase 3 as step 9b (after step 9, before the visible filters), moved from Phase 5. ag-Grid handles them badly; DzGrid must not.
+
 Plan: `docs/phase-3-plan.md`, refined by `docs/phase-3-plugins.md`; inventory `docs/inventory.md`. Decisions validated 2026-10-17.
 Owner inputs still owed: the audit-logs screen spec (§1.1 of the plan, needed at step 24), the Sehhaty palettes, the Arabic reader.
 
