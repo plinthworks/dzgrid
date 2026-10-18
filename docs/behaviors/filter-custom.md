@@ -35,3 +35,8 @@ Not now: a kind given by a feature (`GridFeature.kinds`), and a warning at creat
 - `packages/core/test/wire-property.test.ts` (custom ranges: the browser equals an oracle reading the wire value; same problems).
 - `conformance/cases/filter-custom/*`, `conformance/cases/problems/filter-needs-server.json`, `conformance/cases/source-model/{custom-client-needs-server,custom-server-sends-wire}.json`.
 - `packages/dom/test/filter-kinds.test.ts` (both models get the kinds, live change refused, registry problems told at creation).
+
+## Plain data only (step 8 test analysis, 2026-10-18)
+- A filter given to `filter.set` or `filter.column` must be plain data. A cycle, a BigInt, a function, a getter that throws, or a field set to `undefined` inside a custom state: the command is refused (`invalid-filter`, detail `not json`) and the filter in force stays — for built-in filters too.
+- A custom state is copied once when it is taken: the request key and the kind read the same state, even if the host's object changes or a getter answers differently later.
+- `query.set` takes the host's `makeQuery` result as it is: the host built its key.

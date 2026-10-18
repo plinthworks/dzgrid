@@ -328,20 +328,22 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         return OK;
       }
       case 'filter.set': {
+        const next: Record<string, ColumnFilter> = {};
         for (const [col, f] of Object.entries(cmd.filter ?? {})) {
-          const no = notJson(f, `filter.${col}`);
-          if (no) return no;
+          const t = takeFilter(f, `filter.${col}`);
+          if ('refused' in t) return t.refused;
+          next[col] = t.filter;
         }
-        setQuery(makeQuery({ sort: query.sort, filter: cmd.filter, quick: query.quick }), source);
+        setQuery(makeQuery({ sort: query.sort, filter: next, quick: query.quick }), source);
         return OK;
       }
       case 'filter.column': {
         if (!columns.get(cmd.column)) return refuse('unknown-column', [problem('unknown-column', 'error', 'filter', cmd.column)]);
-        const no = cmd.filter && notJson(cmd.filter, `filter.${cmd.column}`);
-        if (no) return no;
+        const t = cmd.filter ? takeFilter(cmd.filter, `filter.${cmd.column}`) : null;
+        if (t && 'refused' in t) return t.refused;
         const next: Record<string, ColumnFilter> = { ...query.filter };
-        if (cmd.filter === null) delete next[cmd.column];
-        else next[cmd.column] = cmd.filter;
+        if (!t) delete next[cmd.column];
+        else next[cmd.column] = t.filter;
         setQuery(makeQuery({ sort: query.sort, filter: next, quick: query.quick }), source);
         return OK;
       }
@@ -497,6 +499,30 @@ function notJson(f: ColumnFilter, path: string, depth = 0): GridCommandResult | 
     }
   }
   return null;
+}
+
+/**
+ * A filter as the grid keeps it: refused when it is not plain data (a cycle, a getter that
+ * throws, a BigInt), and custom states copied once, so the key and the kind read one same state.
+ */
+function takeFilter(f: ColumnFilter, path: string): { readonly filter: ColumnFilter } | { readonly refused: GridCommandResult } {
+  const notData = { refused: refuse('invalid-filter', [problem('invalid-filter', 'error', path, 'not json')]) };
+  try {
+    const no = notJson(f, path);
+    if (no) return { refused: no };
+    const copy = snapshot(f, 0);
+    canonical(copy);
+    return { filter: copy };
+  } catch {
+    return notData;
+  }
+}
+
+function snapshot(f: ColumnFilter, depth: number): ColumnFilter {
+  if (!f || typeof f !== 'object' || depth > 20) return f;
+  if (f.type === 'custom') return { ...f, state: JSON.parse(JSON.stringify(f.state)) };
+  if (f.type === 'combined' && Array.isArray(f.conditions)) return { ...f, conditions: f.conditions.map((c) => snapshot(c, depth + 1)) };
+  return f;
 }
 
 /** Emits an event the DOM saw (a click, the first render). */
