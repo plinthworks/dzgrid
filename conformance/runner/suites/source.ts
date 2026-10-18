@@ -1,6 +1,7 @@
 import { createColumnModel, localeCtx, makeQuery, type ColumnDef, type OperationsInput, type PageOptions, type Problem } from '@dzgrid/core';
 import { sourceRows, type DataSource, type Json, type SourceRowsOptions } from '@dzgrid/core/server';
 import { fakeSource, rowsOf } from '../../../packages/core/test/support/fake-source.js';
+import { kindsOf } from '../kinds.js';
 import type { Suite } from './index.js';
 
 type Row = { id: string; name: string };
@@ -20,6 +21,8 @@ export interface SourceInput {
   operations?: OperationsInput;
   pagination?: PageOptions;
   timeZone?: string;
+  /** Custom filter kinds from the fixture table (`conformance/runner/kinds.ts`). */
+  kinds?: string[];
   options?: SourceRowsOptions;
   steps: Step[];
 }
@@ -42,6 +45,7 @@ export function runSource(input: SourceInput) {
     ...(input.operations && { operations: input.operations }),
     ...(input.pagination && { page: input.pagination }),
     abort: fake.abort,
+    ...(input.kinds && { filterKinds: kindsOf(input.kinds)! }),
   });
   const changes: string[] = [];
   const failures: { error: unknown; page: number | null }[] = [];

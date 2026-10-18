@@ -1,5 +1,5 @@
 import { clientRows, createColumnModel, createKernel, resolveOperations, type ClientModel, type GridKernel, type RowKey, type RowModel } from '@dzgrid/core';
-import { emit } from '@dzgrid/core/internal';
+import { emit, filterKindLookup } from '@dzgrid/core/internal';
 import { announceSort, selectionAnnouncer } from './a11y/announce.js';
 import { LiveRegion } from './a11y/live-region.js';
 import type { GridContext, GridEnv } from './context.js';
@@ -88,12 +88,15 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const ctx = ctxOf(initial);
   // A server's model from its binding (the base knows only its type), the browser's rows otherwise.
   const page = initial.pagination && { page: initial.pagination };
+  const kinds = filterKindLookup(initial.filterKinds);
+  const filterKinds = initial.filterKinds && { filterKinds: kinds.get };
   const rows: RowModel<T> = initial.source
-    ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }) })
-    : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page });
+    ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...filterKinds, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }) })
+    : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page, ...filterKinds });
   const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false });
   // Operations without a source run in the browser, and are told (a source's model tells its own).
-  const told = initial.source ? [] : resolveOperations(initial.operations, false).problems;
+  // The filter kinds refused are told too.
+  const told = [...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems)];
 
   let dir: Dir = 'ltr';
   const geometry = env.geometry ?? domGeometry(viewport, header, () => dir);

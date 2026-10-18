@@ -4,6 +4,7 @@ import type { ResolvedColumn } from '../columns/defs.js';
 import { problem, type Problem } from '../problems.js';
 import { dayToEpochDay, parseDay } from '../value/day.js';
 import { resolveInstantRange } from './instant.js';
+import type { AnyFilterKind } from './kind.js';
 import { INSTANT_OPS, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel } from './model.js';
 
 /** A test on a source row index (D7): no node is built per row. */
@@ -27,8 +28,11 @@ const INACTIVE = Symbol('inactive');
  *
  * Negations are exact complements (D4): `notX` is `!X`, so blanks, which no
  * comparison matches, are kept by every negation.
+ *
+ * `kinds`: the custom filter kinds by name. A rule that throws on a row does
+ * not keep it, and is said once in `problems` (filled as the rows are tested).
  */
-export function compileFilter<T>(model: FilterModel, env: ColumnEnv<T>): CompiledFilter {
+export function compileFilter<T>(model: FilterModel, env: ColumnEnv<T>, kinds?: Lookup): CompiledFilter {
   const problems: Problem[] = [];
   const tests: RowTest[] = [];
   for (const [colId, f] of Object.entries(model ?? {})) {
@@ -36,7 +40,7 @@ export function compileFilter<T>(model: FilterModel, env: ColumnEnv<T>): Compile
     const col = env.columns.get(colId);
     if (!col) { problems.push(problem('unknown-column', 'error', path)); continue; }
     if (!col.filterable) { problems.push(problem('invalid-filter', 'error', path)); continue; }
-    const t = compileOne(col, f, path, env, problems, 1);
+    const t = compileOne(col, f, path, env, problems, 1, kinds);
     if (t !== null && t !== INACTIVE) tests.push(t);
   }
   if (!tests.length) return { active: false, test: () => true, problems };
@@ -60,8 +64,9 @@ export function filterIndices(count: number, filters: readonly CompiledFilter[],
 }
 
 type Compiled = RowTest | typeof INACTIVE | null;
+type Lookup = (name: string) => AnyFilterKind | undefined;
 
-function compileOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: ColumnEnv<T>, problems: Problem[], depth: number): Compiled {
+function compileOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: ColumnEnv<T>, problems: Problem[], depth: number, kinds?: Lookup): Compiled {
   if (!f || typeof f !== 'object') return bad(problems, path);
   switch (f.type) {
     case 'text': return textTest(col, f, path, env, problems);
@@ -79,21 +84,56 @@ function compileOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, en
     case 'set': return setTest(col, f, path, env, problems);
     case 'combined': {
       if (depth >= MAX_DEPTH || (f.join !== 'and' && f.join !== 'or') || !Array.isArray(f.conditions)) return bad(problems, path);
-      const parts = f.conditions.map((c, i) => compileOne(col, c, `${path}.conditions[${i}]`, env, problems, depth + 1));
+      const parts = f.conditions.map((c, i) => compileOne(col, c, `${path}.conditions[${i}]`, env, problems, depth + 1, kinds));
       if (parts.some((p) => p === null)) return null;
       const live = parts.filter((p): p is RowTest => p !== INACTIVE);
       if (!live.length) return INACTIVE;
       return f.join === 'and' ? (src) => live.every((t) => t(src)) : (src) => live.some((t) => t(src));
     }
+    case 'custom': return customTest(col, f, path, env, problems, kinds);
     default:
       return bad(problems, path);
   }
 }
 
-const bad = (problems: Problem[], path: string): null => {
-  problems.push(problem('invalid-filter', 'error', path));
+const bad = (problems: Problem[], path: string, detail?: string): null => {
+  problems.push(problem('invalid-filter', 'error', path, detail));
   return null;
 };
+
+/** The same checks, codes and details as the wire form's (server/wire.ts), then the kind's rule over the column's values. */
+function customTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 'custom' }>, path: string, env: ColumnEnv<T>, problems: Problem[], kinds?: Lookup): Compiled {
+  const kind = typeof f.kind === 'string' ? kinds?.(f.kind) : undefined;
+  if (!kind) return bad(problems, path, 'unknown kind');
+  if (kind.types && !kind.types.includes(col.type)) return bad(problems, path, 'column type');
+  let pred: ReturnType<NonNullable<AnyFilterKind['test']>>;
+  try {
+    const s = kind.read(f.state);
+    if (s === 'invalid') return bad(problems, path, 'invalid state');
+    if (!kind.active(s)) return INACTIVE;
+    if (!kind.test) {
+      problems.push(problem('filter-needs-server', 'error', path, f.kind));
+      return null;
+    }
+    pred = kind.test(s, env.ctx);
+  } catch {
+    return bad(problems, path, 'threw');
+  }
+  const values = env.cache.values(col, env);
+  const rows = env.source.rows;
+  let threw = false;
+  return (src) => {
+    try {
+      return pred(values[src], rows[src]!);
+    } catch {
+      if (!threw) {
+        threw = true;
+        bad(problems, path, 'threw');
+      }
+      return false;
+    }
+  };
+}
 
 /** The negation of a test, when the op names one: `notEqual` of `equals`, `notContains` of `contains`. */
 const negate = (t: RowTest): RowTest => (src) => !t(src);

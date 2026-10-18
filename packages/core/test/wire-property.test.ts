@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createColumnModel, localeCtx, NO_OVERLAY, zoneDayBounds, parseDay, type ColumnDef, type ColumnFilter, type FilterModel } from '@dzgrid/core';
-import { ColumnCache, compileFilter, createRowStore, filterIndices } from '@dzgrid/core/internal';
+import { ColumnCache, compileFilter, createRowStore, filterIndices, filterKindLookup } from '@dzgrid/core/internal';
+import { KINDS } from '../../../conformance/runner/kinds.js';
 import { toWire, type WireFilter } from '@dzgrid/core/server';
 import { mulberry32 } from './support/rng.js';
 
@@ -231,5 +232,44 @@ describe('the wire form is what the browser filters (seeded)', () => {
         expect([fmt.format(from - 1) < day, fmt.format(from), fmt.format(to - 1), fmt.format(to) > day], `${zone} ${day}`).toEqual([true, day, day, true]);
       }
     }
+  });
+  it('custom ranges, half-typed and refused ones too: the browser equals an oracle reading the wire value; same problems', () => {
+    type N = { id: string; n: unknown };
+    const columns = createColumnModel<N>([{ id: 'n', type: 'number' }, { id: 'x', filter: false }]);
+    const kinds = filterKindLookup([KINDS.between!]);
+    const ctx = localeCtx({ locale: 'en-US', timeZone: 'UTC' });
+    const pick = <V>(r: () => number, xs: readonly V[]) => xs[Math.floor(r() * xs.length)]!;
+    const END = [-3, 0, 1, 2.5, 4, 7, null];
+    const state = (r: () => number): unknown => (r() < 0.08 ? pick(r, [{ lo: '1', hi: 2 }, [1, 2], null, { lo: 1 }]) : { lo: pick(r, END), hi: pick(r, END) });
+    const one = (r: () => number, depth = 1): unknown =>
+      r() < 0.2 && depth < 3
+        ? { type: 'combined', join: pick(r, ['and', 'or']), conditions: Array.from({ length: 1 + Math.floor(r() * 2) }, () => one(r, depth + 1)) }
+        : r() < 0.05 ? { type: 'custom', kind: 'nope', state: 1 } : { type: 'custom', kind: 'between', state: state(r) };
+    const keepsRange = (w: WireFilter, cell: unknown): boolean => {
+      if (w.type === 'combined') return w.join === 'and' ? w.conditions.every((c) => keepsRange(c, cell)) : w.conditions.some((c) => keepsRange(c, cell));
+      if (w.type !== 'custom') throw new Error(w.type);
+      const { lo, hi } = w.value as { lo: number; hi: number };
+      return typeof cell === 'number' && cell >= Math.min(lo, hi) && cell <= Math.max(lo, hi);
+    };
+    let live = 0;
+    for (let seed = 1; seed <= 300; seed++) {
+      const r = mulberry32(seed);
+      const data: N[] = Array.from({ length: 25 }, (_, i) => ({ id: String(i), n: pick(r, [-3, -1, 0, 1, 2, 2.5, 3, 4, 7, 8, null, 'x']) }));
+      const store = createRowStore<N>((x) => x.id);
+      store.replaceAll(data);
+      const model = { n: one(r), ...(r() < 0.05 && { x: { type: 'custom', kind: 'between', state: { lo: 1, hi: 2 } } }) } as unknown as FilterModel;
+      const label = `seed ${seed} ${JSON.stringify(model)}`;
+      const compiled = compileFilter(model, { source: store.snapshot, columns, ctx, reader: NO_OVERLAY, cache: new ColumnCache<N>() }, kinds.get);
+      const order = filterIndices(store.snapshot.count, [compiled]);
+      const browser = order ? [...order].map((i) => store.snapshot.ids[i]) : [...store.snapshot.ids];
+      const w = toWire(model, { ctx, columns, kinds: kinds.get });
+      const sent = JSON.parse(JSON.stringify(w.filter)) as Record<string, WireFilter>;
+      const oracle = data.filter((row) => Object.values(sent).every((f) => keepsRange(f, typeof row.n === 'number' ? row.n : null))).map((row) => row.id);
+      expect(browser, label).toEqual(oracle);
+      expect(w.problems.map((p) => [p.code, p.path, p.detail]), label).toEqual(compiled.problems.map((p) => [p.code, p.path, p.detail]));
+      expect(Object.keys(sent).length > 0, label).toBe(compiled.active);
+      if (compiled.active) live++;
+    }
+    expect(live).toBeGreaterThan(150);
   });
 });

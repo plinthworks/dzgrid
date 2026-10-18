@@ -62,8 +62,8 @@ function hayCell<T>(kind: HayKind, col: ResolvedColumn<T>, env: ColumnEnv<T>, sr
 const MAX_PATCHED = 1000;
 
 export class ColumnCache<T> {
-  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0, displayBuilds: 0, quickScanned: 0, warmBuilds: 0 };
-  #lists = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; values: (string | null | undefined)[] }>();
+  readonly stats = { keyBuilds: 0, rankBuilds: 0, rankPatches: 0, textBuilds: 0, foldBuilds: 0, exportBuilds: 0, valueBuilds: 0, displayBuilds: 0, quickScanned: 0, warmBuilds: 0 };
+  #lists = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; values: unknown[] }>();
   #hays = new Map<string, { col: ResolvedColumn<T>; version: number; reader: number; ctx: string; hay: Haystack }>();
   #keys = new Map<string, KeyEntry<T>>();
   #ranks = new Map<string, RankEntry<T>>();
@@ -157,7 +157,7 @@ export class ColumnCache<T> {
     return entry;
   }
 
-  #list(kind: 'export', col: ResolvedColumn<T>, env: ColumnEnv<T>, build: () => (string | null | undefined)[]): (string | null | undefined)[] {
+  #list(kind: 'export' | 'values', col: ResolvedColumn<T>, env: ColumnEnv<T>, build: () => unknown[]): unknown[] {
     const id = `${kind}|${col.id}`;
     const ctx = listCtx(env);
     const hit = this.#lists.get(id);
@@ -241,6 +241,20 @@ export class ColumnCache<T> {
   }
 
   /**
+   * Each cell's value as the column's codec reads it (through the edit
+   * overlay), null for a blank or unreadable one: what a custom filter kind
+   * tests. Built when first asked for, one array per column.
+   */
+  values(col: ResolvedColumn<T>, env: ColumnEnv<T>): readonly unknown[] {
+    return this.#list('values', col, env, () => {
+      this.stats.valueBuilds++;
+      const out: unknown[] = new Array(env.source.count);
+      for (let i = 0; i < out.length; i++) out[i] = coerceCell(col, ColumnCache.raw(col, env, i), env).v;
+      return out;
+    });
+  }
+
+  /**
    * Follows the store: an update that only rewrites some rows patches the
    * keys of those rows, and their ranks when the new text already has one;
    * anything else drops the cache.
@@ -305,7 +319,7 @@ export class ColumnCache<T> {
     }
   }
 
-  /** Text, export, display and search lists: recompute the changed rows only. */
+  /** Export texts and values: recompute the changed rows only. */
   #patchLists(delta: StoreDelta, next: RowSnapshot<T>, envOf: (source: RowSnapshot<T>) => Omit<ColumnEnv<T>, 'source' | 'cache'>): void {
     const env: ColumnEnv<T> = { ...envOf(next), source: next, cache: this };
     for (const [id, e] of this.#lists) {
@@ -313,8 +327,7 @@ export class ColumnCache<T> {
       const kind = id.slice(0, id.indexOf('|'));
       for (const src of delta.changedSrc!) {
         const { v } = coerceCell(e.col, ColumnCache.raw(e.col, env, src), env);
-        void kind;
-        e.values[src] = v === null ? null : e.col.codec.toExport(v);
+        e.values[src] = kind === 'values' || v === null ? v : e.col.codec.toExport(v);
       }
       e.version = next.version;
     }

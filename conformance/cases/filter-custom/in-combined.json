@@ -1,0 +1,70 @@
+{
+  "id": "in-combined",
+  "suite": "filter-custom",
+  "description": "A custom condition joins a combined filter like a built-in one: OR of a custom range and a number condition.",
+  "input": {
+    "locale": "en-US",
+    "kinds": [
+      "between"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": 3
+      },
+      {
+        "id": "c",
+        "n": 5
+      },
+      {
+        "id": "d",
+        "n": null
+      },
+      {
+        "id": "e",
+        "n": 7
+      },
+      {
+        "id": "f",
+        "n": "x"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "combined",
+        "join": "or",
+        "conditions": [
+          {
+            "type": "custom",
+            "kind": "between",
+            "state": {
+              "lo": 1,
+              "hi": 1
+            }
+          },
+          {
+            "type": "number",
+            "op": "equals",
+            "value": 7
+          }
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "e"
+    ]
+  }
+}

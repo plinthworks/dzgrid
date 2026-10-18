@@ -1,5 +1,5 @@
 import type { OperationsInput, PageOptions, SourceBinding } from '@dzgrid/core';
-import type { ColumnDef, GridEvent, RowIdInput } from '@dzgrid/core';
+import type { AnyFilterKind, ColumnDef, GridEvent, RowIdInput } from '@dzgrid/core';
 import type { GridMessages } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { SlotPart } from './part.js';
@@ -48,6 +48,8 @@ export interface GridSettings<T> {
   readonly operations?: OperationsInput;
   /** Paged in the browser: one page of the filtered, sorted rows at a time. Set once. */
   readonly pagination?: PageOptions;
+  /** Custom filter kinds (docs/behaviors/filter-custom.md), for the browser's filter and a server's. Set once. */
+  readonly filterKinds?: readonly AnyFilterKind[];
   /** Optional features (`filters()`, `pagination()`…), set up once with the grid. */
   readonly features?: readonly GridFeature[];
 }

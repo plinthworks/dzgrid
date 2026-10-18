@@ -37,6 +37,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   pagination: 'fixed',
   source: 'live',
   operations: 'fixed',
+  filterKinds: 'fixed',
 };
 
 export const ctxOf = <T>(s: GridSettings<T>): LocaleCtx =>

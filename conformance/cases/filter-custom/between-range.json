@@ -1,0 +1,59 @@
+{
+  "id": "between-range",
+  "suite": "filter-custom",
+  "description": "A custom range keeps the values inside it, both ends in, ends in either order; a blank or unreadable cell is null and kept by nothing.",
+  "input": {
+    "locale": "en-US",
+    "kinds": [
+      "between"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": 3
+      },
+      {
+        "id": "c",
+        "n": 5
+      },
+      {
+        "id": "d",
+        "n": null
+      },
+      {
+        "id": "e",
+        "n": 7
+      },
+      {
+        "id": "f",
+        "n": "x"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "between",
+        "state": {
+          "lo": 5,
+          "hi": 2
+        }
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "b",
+      "c"
+    ]
+  }
+}

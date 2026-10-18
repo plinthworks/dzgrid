@@ -17,6 +17,7 @@ export { createRowStore } from './row/store.js';
 export { sortIndices } from './sort/compile.js';
 export type { RowTest, CompiledFilter } from './filter/compile.js';
 export { compileFilter, filterIndices } from './filter/compile.js';
+export { filterKindLookup } from './filter/kind.js';
 export { compileQuick, canNarrow } from './filter/quick.js';
 export { storeOf } from './model/client.js';
 export { Haystack } from './model/haystack.js';

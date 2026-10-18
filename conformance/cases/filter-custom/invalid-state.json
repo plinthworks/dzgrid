@@ -1,0 +1,69 @@
+{
+  "id": "invalid-state",
+  "suite": "filter-custom",
+  "description": "A state the kind refuses (an end that is not a number): invalid-filter, dropped.",
+  "input": {
+    "locale": "en-US",
+    "kinds": [
+      "between"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": 3
+      },
+      {
+        "id": "c",
+        "n": 5
+      },
+      {
+        "id": "d",
+        "n": null
+      },
+      {
+        "id": "e",
+        "n": 7
+      },
+      {
+        "id": "f",
+        "n": "x"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "between",
+        "state": {
+          "lo": "2",
+          "hi": 5
+        }
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.n"
+      ]
+    ]
+  }
+}

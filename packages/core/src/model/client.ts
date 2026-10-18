@@ -1,5 +1,6 @@
 import type { ColumnLookup } from '../columns/model.js';
-import type { Json, WireKind } from '../filter/model.js';
+import type { Json } from '../filter/model.js';
+import type { AnyFilterKind } from '../filter/kind.js';
 import { NO_OVERLAY, type ValueReader } from '../columns/defs.js';
 import { compileFilter, filterIndices } from '../filter/compile.js';
 import { canNarrow, compileQuick, quickWords } from '../filter/quick.js';
@@ -116,6 +117,8 @@ export interface ClientOptions<T> {
   readonly reader?: ValueReader<T>;
   /** Paged in the browser: the rows shown are one page of the filtered, sorted ones. Set once. */
   readonly page?: PageOptions;
+  /** The custom filter kinds, by name. */
+  readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
 }
 
 export interface ClientModel<T> extends RowModel<T> {
@@ -212,7 +215,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     if (!filtered || !same(filtered.in, now)) {
       d.filterRuns++;
       const e = env();
-      const f = compileFilter(query.filter, e);
+      const f = compileFilter(query.filter, e, o.filterKinds);
       const words = quickWords(query.quick);
       const q = compileQuick(query.quick, columns.visible(), e);
       // Typing on: when only the search changed and its words narrow the old ones, search the old matches.
@@ -252,9 +255,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     displayed = flatDisplayed(store.snapshot, cut, ++version);
   };
 
-  const notify = (kind: ModelChange<T>['kind'], source: ChangeSource, transaction?: TransactionResult): void => {
+  const notify = (kind: ModelChange<T>['kind'], source: ChangeSource, transaction?: TransactionResult, told?: readonly Problem[]): void => {
     if (destroyed) return;
-    const c: ModelChange<T> = { source, displayed, kind, problems: currentProblems(), ...(transaction && { transaction }) };
+    const c: ModelChange<T> = { source, displayed, kind, problems: currentProblems(), ...(transaction && { transaction }), ...(told && { told }) };
     for (const fn of [...listeners]) fn(c);
   };
   let loadProblems: readonly Problem[] = [];
@@ -286,7 +289,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     follow();
     const after = sortCols.map((c) => Array.from(delta.changedSrc!, (src) => keysOf(c)[src]));
     const e = env();
-    const f = compileFilter(query.filter, e);
+    const f = compileFilter(query.filter, e, o.filterKinds);
     const q = compileQuick(query.quick, columns.visible(), e);
     let moved = false;
     for (const src of delta.changedSrc) {
@@ -407,10 +410,14 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       if (query.quick.trim() && !q.quick.trim()) cache.releaseSearch();
       // Another filter, search or sort shows other rows at each place: back to the first page.
       const reset = pageCfg !== null && pageIndex !== 0;
+      const was = said(filtered!.problems);
       query = q;
       if (reset) pageIndex = 0;
       // Another key always changes a stage's input, so run() cuts the first page.
-      if (run()) notify('query', source);
+      if (!run()) return;
+      // A filter refused anew is told once (filter-custom.md).
+      const now = filtered!.problems;
+      notify('query', source, undefined, now.length && said(now) !== was ? now : undefined);
     },
     // keepScroll is the DOM's concern; the model has no scroll to keep.
     invalidate() {
@@ -457,6 +464,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
 
 const NO_PARAMS: Readonly<Record<string, Json>> = Object.freeze({});
 
+/** What a list of problems says: equal lists are told once. */
+const said = (ps: readonly Problem[]): string => canonical(ps.map((p) => [p.code, p.path, p.detail]));
+
 function maskOf(order: Uint32Array | null, count: number): Uint8Array | null {
   if (!order) return null;
   const mask = new Uint8Array(count);
@@ -477,8 +487,8 @@ export interface ModelEnv<T> {
   readonly operations?: OperationsInput;
   readonly query?: Query;
   readonly abort?: () => AbortHandle;
-  /** The custom filter kinds, by name, for a filter sent to a server (wired from the grid at step 8). */
-  readonly filterKinds?: (name: string) => WireKind | undefined;
+  /** The grid's custom filter kinds, by name: for the filter sent to a server and the one run in the browser. */
+  readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
 }
 
 /** A model to make once the grid knows its columns and language. */

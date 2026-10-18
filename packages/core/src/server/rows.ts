@@ -139,7 +139,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   const sizes = pageOptions.config?.sizes ?? DEFAULT_PAGE_SIZES;
 
   const gate = createGate(o.abort ?? env.abort ?? plainAbort);
-  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }) });
+  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }) });
   let current = binding;
   let { data, params } = bound.get(binding)!;
   let ctx = env.ctx;
@@ -186,6 +186,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   inner.subscribe((c) => {
     mark(c.kind);
     if (c.transaction) tx = c.transaction;
+    // A filter the browser part refused: told with the call's change.
+    if (c.told) told.push(...c.told);
   });
   const problems = (): readonly Problem[] => [...fixed, ...wireProblems, ...inner.problems, ...answerProblems];
   const commit = (fn: () => void, source: ChangeSource): void => {

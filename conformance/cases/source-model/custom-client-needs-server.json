@@ -1,0 +1,73 @@
+{
+  "id": "custom-client-needs-server",
+  "suite": "source-model",
+  "description": "A fetched set filtered in the browser: a server-only custom kind cannot run there; filter-needs-server, the filter dropped, nothing asked; the change is told.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": {
+      "page": "off"
+    },
+    "kinds": [
+      "server-only"
+    ],
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "op": "query",
+        "filter": {
+          "name": {
+            "type": "custom",
+            "kind": "server-only",
+            "state": {
+              "q": "a"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1"
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a",
+        "b"
+      ],
+      "page": null,
+      "counts": {
+        "total": 2,
+        "filtered": 2,
+        "displayed": 2
+      }
+    },
+    "problems": [
+      {
+        "code": "filter-needs-server",
+        "severity": "error",
+        "path": "filter.name"
+      }
+    ],
+    "failures": []
+  }
+}

@@ -20,7 +20,7 @@ Per kind (the field names are the model's):
 - **boolean** `{type, value}`; `value: null` is dropped.
 - **set** `{type, include | exclude, blanks?}` as given; `include: []` is kept (it keeps nothing, blanks aside when asked).
 - **combined** `{type, join, conditions}`: the structure kept, depth 3 at most as in the browser; half-typed members dropped; with no member left it is dropped; one bad member drops the whole filter; one member left stays combined.
-- **custom** (a filter kind from a module, step 8): `{type: 'custom', kind, value}`, `value` from the kind's `wire(state, ctx, zone)`, or the state itself. It must be JSON (finite numbers, plain objects, depth 20 at most).
+- **custom** (a filter kind from a module, `filter-custom.md`): `{type: 'custom', kind, value}`, `value` from the kind's `wire(state, ctx, zone)`, or the state itself. It must be JSON (finite numbers, plain objects, depth 20 at most). On the server a kind needs no `test`; in the browser one without it is `filter-needs-server`.
 
 Filters apply whatever the column's visibility: a hidden column's filter travels too.
 

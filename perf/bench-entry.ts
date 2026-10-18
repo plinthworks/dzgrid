@@ -1,5 +1,5 @@
 import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
-import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache } from '../packages/core/src/internal.js';
+import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache, filterKindLookup } from '../packages/core/src/internal.js';
 import { toWire } from '../packages/core/src/server.js';
 import { datasetA, type RowA } from './dataset.js';
 import { msg } from '../packages/dom/src/messages.js';
@@ -235,13 +235,15 @@ function filterCases(): Record<string, Case> {
     store.replaceAll(rows);
     return { source: store.snapshot, columns, ctx: localeCtx({ locale: 'fr-FR', timeZone: 'Africa/Algiers' }), reader: NO_OVERLAY, cache: new ColumnCache<RowA>() };
   };
+  // A custom range (docs/behaviors/filter-custom.md): its rule over the column's values.
+  const kinds = filterKindLookup([{ name: 'range', read: (s) => s, active: () => true, test: (s: { lo: number; hi: number }) => (v: number | null) => v !== null && v >= s.lo && v <= s.hi }]).get;
   const warm = (m: FilterModel): Case => ({
     setup: () => {
       const e = env();
-      filterIndices(e.source.count, [compileFilter(m, e)]);
+      filterIndices(e.source.count, [compileFilter(m, e, kinds)]);
       return e;
     },
-    run: (e: ReturnType<typeof env>) => filterIndices(e.source.count, [compileFilter(m, e)])?.length,
+    run: (e: ReturnType<typeof env>) => filterIndices(e.source.count, [compileFilter(m, e, kinds)])?.length,
   });
   const cold = (m: FilterModel): Case => ({ setup: env, run: (e: ReturnType<typeof env>) => filterIndices(e.source.count, [compileFilter(m, e)])?.length });
   return {
@@ -253,6 +255,7 @@ function filterCases(): Record<string, Case> {
     'day filter between 100 000': warm({ d0: { type: 'day', op: 'between', value: '1980-01-01', valueTo: '2000-12-31' } }),
     'set filter 100 000': warm({ e1: { type: 'set', include: ['cardiology', 'oncology'] } }),
     'instant filter onDay 100 000 (warm keys)': warm({ i1: { type: 'instant', op: 'onDay', day: '2026-06-15' } }),
+    'custom kind test 100 000 rows (warm values)': warm({ n0: { type: 'custom', kind: 'range', state: { lo: 100_000, hi: 500_000 } } }),
   };
 }
 

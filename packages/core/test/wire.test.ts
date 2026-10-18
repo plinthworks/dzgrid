@@ -393,7 +393,7 @@ describe('toWire: custom kinds', () => {
     }
   });
 
-  it('is refused by the browser until filter kinds are wired (step 8)', async () => {
+  it('is refused by the browser when no kind of that name is given (unknown kind)', async () => {
     const { compileFilter } = await import('@dzgrid/core/internal');
     const { createRowStore, ColumnCache } = await import('@dzgrid/core/internal');
     const { NO_OVERLAY } = await import('@dzgrid/core');

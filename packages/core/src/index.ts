@@ -57,7 +57,8 @@ export type { DisplayedRows } from './row/displayed.js';
 
 export type { SortItem } from './sort/compile.js';
 
-export type { FilterModel, ColumnFilter, TextOp, NumOp, InstantOp, InstantFilter } from './filter/model.js';
+export type { FilterModel, ColumnFilter, TextOp, NumOp, InstantOp, InstantFilter, Json } from './filter/model.js';
+export type { FilterKind, AnyFilterKind } from './filter/kind.js';
 export type { InstantRange } from './filter/instant.js';
 export { resolveInstantRange } from './filter/instant.js';
 export { quickWords } from './filter/quick.js';

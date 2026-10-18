@@ -31,7 +31,7 @@ export type ColumnFilter =
   | { readonly type: 'boolean'; readonly value: boolean | null }
   | { readonly type: 'set'; readonly include?: readonly string[]; readonly exclude?: readonly string[]; readonly blanks?: 'include' | 'exclude' }
   | { readonly type: 'combined'; readonly join: 'and' | 'or'; readonly conditions: readonly ColumnFilter[] }
-  /** A filter kind from a module (step 8): its state, read by the kind. Refused by the browser until then. */
+  /** A filter kind from a module (`FilterKind`, docs/behaviors/filter-custom.md): its state, read by the kind. */
   | { readonly type: 'custom'; readonly kind: string; readonly state: Json };
 
 export type InstantFilter = Extract<ColumnFilter, { type: 'instant' }>;
@@ -51,4 +51,18 @@ export interface WireKind {
   active(state: Json): boolean;
   wire?(state: Json, ctx: LocaleCtx, zone: string): Json;
   readonly types?: readonly ColumnType[];
+}
+
+/** JSON as a server reads it back: finite numbers, plain objects and arrays, no hole, depth 20 at most (a cycle never ends). */
+export function isJson(v: unknown, depth = 0): boolean {
+  if (depth > 20) return false;
+  if (v === null || typeof v === 'string' || typeof v === 'boolean') return true;
+  if (typeof v === 'number') return Number.isFinite(v);
+  if (typeof v !== 'object') return false;
+  if (Array.isArray(v)) {
+    for (let i = 0; i < v.length; i++) if (!isJson(v[i], depth + 1)) return false;
+    return true;
+  }
+  const proto = Object.getPrototypeOf(v);
+  return (proto === Object.prototype || proto === null) && Object.values(v).every((x) => isJson(x, depth + 1));
 }

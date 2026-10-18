@@ -1,0 +1,107 @@
+{
+  "id": "custom-server-sends-wire",
+  "suite": "source-model",
+  "description": "Filters on the server: a server-only custom kind needs no browser rule; its state travels as the value, a new epoch asks, no problem.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      }
+    ],
+    "operations": "server",
+    "pagination": {
+      "pageSize": 2
+    },
+    "kinds": [
+      "server-only"
+    ],
+    "steps": [
+      {
+        "op": "answer",
+        "call": "c1",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      },
+      {
+        "op": "query",
+        "filter": {
+          "name": {
+            "type": "custom",
+            "kind": "server-only",
+            "state": {
+              "q": "a"
+            }
+          }
+        }
+      },
+      {
+        "op": "answer",
+        "call": "c2",
+        "rows": [
+          "a"
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      {
+        "name": "c1",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        }
+      },
+      {
+        "name": "c2",
+        "page": {
+          "index": 0,
+          "size": 2,
+          "offset": 0,
+          "cursor": null
+        },
+        "filter": {
+          "name": {
+            "type": "custom",
+            "kind": "server-only",
+            "value": {
+              "q": "a"
+            }
+          }
+        }
+      }
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "query",
+      "query"
+    ],
+    "final": {
+      "status": "idle",
+      "displayed": [
+        "a"
+      ],
+      "page": {
+        "index": 0,
+        "size": 2,
+        "total": 1,
+        "pageCount": 1,
+        "hasNext": false,
+        "canJump": true
+      },
+      "counts": {
+        "total": null,
+        "filtered": 1,
+        "displayed": 1
+      }
+    },
+    "problems": [],
+    "failures": []
+  }
+}

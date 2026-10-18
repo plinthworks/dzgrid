@@ -1,0 +1,69 @@
+{
+  "id": "test-throws-told-once",
+  "suite": "filter-custom",
+  "description": "A rule that throws on some rows: those rows are not kept, the others are; the problem is said once, not once per row.",
+  "input": {
+    "locale": "en-US",
+    "kinds": [
+      "throws-test"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": 3
+      },
+      {
+        "id": "c",
+        "n": 5
+      },
+      {
+        "id": "d",
+        "n": null
+      },
+      {
+        "id": "e",
+        "n": 7
+      },
+      {
+        "id": "f",
+        "n": "x"
+      },
+      {
+        "id": "g",
+        "n": 3
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "throws-test",
+        "state": null
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "c",
+      "d",
+      "e",
+      "f"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.n"
+      ]
+    ]
+  }
+}

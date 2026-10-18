@@ -1,7 +1,7 @@
 import type { ColumnLookup } from '../columns/model.js';
 import type { ResolvedColumn } from '../columns/defs.js';
 import { resolveInstantRange } from '../filter/instant.js';
-import { INSTANT_OPS, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel, type Json, type NumOp, type TextOp, type WireKind } from '../filter/model.js';
+import { INSTANT_OPS, isJson, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel, type Json, type NumOp, type TextOp, type WireKind } from '../filter/model.js';
 import { problem, type Problem } from '../problems.js';
 import { epochDayToDay, parseDay, type Day } from '../value/day.js';
 import type { LocaleCtx } from '../value/locale.js';
@@ -65,20 +65,6 @@ function wireInstant(ms: number): WireInstant | null {
   const rest = n - day * MS_PER_DAY;
   const p = (v: number, w = 2): string => String(v).padStart(w, '0');
   return `${d}T${p(Math.floor(rest / 3_600_000))}:${p(Math.floor(rest / 60_000) % 60)}:${p(Math.floor(rest / 1000) % 60)}.${p(rest % 1000, 3)}Z`;
-}
-
-/** JSON as a server reads it back: finite numbers, plain objects and arrays, no hole, depth 20 at most (a cycle never ends). */
-function isJson(v: unknown, depth = 0): boolean {
-  if (depth > 20) return false;
-  if (v === null || typeof v === 'string' || typeof v === 'boolean') return true;
-  if (typeof v === 'number') return Number.isFinite(v);
-  if (typeof v !== 'object') return false;
-  if (Array.isArray(v)) {
-    for (let i = 0; i < v.length; i++) if (!isJson(v[i], depth + 1)) return false;
-    return true;
-  }
-  const proto = Object.getPrototypeOf(v);
-  return (proto === Object.prototype || proto === null) && Object.values(v).every((x) => isJson(x, depth + 1));
 }
 
 /**

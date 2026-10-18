@@ -21,6 +21,7 @@ export const PROBLEM_CODES = [
   'unknown-column',
   'invalid-sort',
   'invalid-filter',
+  'filter-needs-server',
   'invalid-cell-value',
   'too-many-pinned',
   'invalid-operations',

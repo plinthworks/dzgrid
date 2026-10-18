@@ -4,7 +4,7 @@ import type { LocaleCtx } from './value/locale.js';
 import { reconcileFocus, sameFocus, type FocusPos } from './focus.js';
 import type { RowKey } from './ids.js';
 import type { ModelChange, RowModel, RowScope } from './model/client.js';
-import type { ColumnFilter, FilterModel } from './filter/model.js';
+import { isJson, type ColumnFilter, type FilterModel } from './filter/model.js';
 import { canonical, makeQuery, type Query } from './model/query.js';
 import { checkPage, samePage, type PageState } from './model/page.js';
 import type { ChangeSource } from './model/types.js';
@@ -316,11 +316,18 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         setSelection(r.state, source);
         return OK;
       }
-      case 'filter.set':
+      case 'filter.set': {
+        for (const [col, f] of Object.entries(cmd.filter ?? {})) {
+          const no = notJson(f, `filter.${col}`);
+          if (no) return no;
+        }
         setQuery(makeQuery({ sort: query.sort, filter: cmd.filter, quick: query.quick }), source);
         return OK;
+      }
       case 'filter.column': {
         if (!columns.get(cmd.column)) return refuse('unknown-column', [problem('unknown-column', 'error', 'filter', cmd.column)]);
+        const no = cmd.filter && notJson(cmd.filter, `filter.${cmd.column}`);
+        if (no) return no;
         const next: Record<string, ColumnFilter> = { ...query.filter };
         if (cmd.filter === null) delete next[cmd.column];
         else next[cmd.column] = cmd.filter;
@@ -459,6 +466,22 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     [EMIT]: emit,
   };
   return kernel;
+}
+
+/**
+ * A custom state that is not JSON (a cycle, a BigInt, a function) is refused
+ * before the query key is made from it: the filter in force stays.
+ */
+function notJson(f: ColumnFilter, path: string, depth = 0): GridCommandResult | null {
+  if (!f || typeof f !== 'object' || depth > 3) return null;
+  if (f.type === 'custom' && !isJson(f.state)) return refuse('invalid-filter', [problem('invalid-filter', 'error', path, 'not json')]);
+  if (f.type === 'combined' && Array.isArray(f.conditions)) {
+    for (let i = 0; i < f.conditions.length; i++) {
+      const no = notJson(f.conditions[i]!, `${path}.conditions[${i}]`, depth + 1);
+      if (no) return no;
+    }
+  }
+  return null;
 }
 
 /** Emits an event the DOM saw (a click, the first render). */

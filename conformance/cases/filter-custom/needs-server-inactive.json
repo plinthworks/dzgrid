@@ -1,0 +1,60 @@
+{
+  "id": "needs-server-inactive",
+  "suite": "filter-custom",
+  "description": "A server-only kind with a half-typed state in the browser: nothing filters, nothing is said.",
+  "input": {
+    "locale": "en-US",
+    "kinds": [
+      "server-only"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": 3
+      },
+      {
+        "id": "c",
+        "n": 5
+      },
+      {
+        "id": "d",
+        "n": null
+      },
+      {
+        "id": "e",
+        "n": 7
+      },
+      {
+        "id": "f",
+        "n": "x"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "server-only",
+        "state": null
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f"
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "id": "inactive-all-rows",
+  "suite": "filter-custom",
+  "description": "A half-typed custom state (one end missing) filters nothing and says nothing.",
+  "input": {
+    "locale": "en-US",
+    "kinds": [
+      "between"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": 3
+      },
+      {
+        "id": "c",
+        "n": 5
+      },
+      {
+        "id": "d",
+        "n": null
+      },
+      {
+        "id": "e",
+        "n": 7
+      },
+      {
+        "id": "f",
+        "n": "x"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "between",
+        "state": {
+          "lo": 2,
+          "hi": null
+        }
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f"
+    ]
+  }
+}

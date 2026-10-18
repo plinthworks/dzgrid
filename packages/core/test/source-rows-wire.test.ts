@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createColumnModel, localeCtx, makeQuery, type ColumnDef, type FilterModel } from '@dzgrid/core';
+import { createColumnModel, localeCtx, makeQuery, type AnyFilterKind, type ColumnDef, type FilterModel } from '@dzgrid/core';
 import { sourceRows, type DataSource, type WireKind } from '@dzgrid/core/server';
 import { fakeSource, rowsOf } from './support/fake-source.js';
 
@@ -16,7 +16,8 @@ function setup(defs: ColumnDef<R>[], o: { kinds?: Record<string, WireKind>; zone
     abort: fake.abort,
     operations: o.operations ?? 'server',
     page: { pageSize: 2 },
-    ...(o.kinds && { filterKinds: (name: string) => o.kinds![name] }),
+    // A wire-only kind (no name, no test) is enough for a filter sent to the server.
+    ...(o.kinds && { filterKinds: (name: string) => o.kinds![name] as AnyFilterKind | undefined }),
   });
   return { ...fake, model, columns };
 }

@@ -33,7 +33,8 @@ export interface ColumnDef<T, V = unknown> {
   readonly resizable?: boolean;
   readonly movable?: boolean;
   readonly sortable?: boolean;
-  readonly filter?: false;
+  /** `false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a custom kind's name). */
+  readonly filter?: false | { readonly kind?: string };
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';

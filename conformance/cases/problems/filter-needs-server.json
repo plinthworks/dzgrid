@@ -1,0 +1,41 @@
+{
+  "id": "filter-needs-server",
+  "suite": "problems",
+  "description": "An active custom filter whose kind has no browser rule, run in the browser: an error, the filter dropped; the detail is the kind's name.",
+  "input": {
+    "op": "filter",
+    "kinds": [
+      "server-only"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "server-only",
+        "state": {
+          "near": 3
+        }
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "filter-needs-server",
+        "severity": "error",
+        "path": "filter.n"
+      }
+    ]
+  }
+}

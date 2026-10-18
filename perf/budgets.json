@@ -27,6 +27,7 @@
     "day filter between 100 000": 15,
     "set filter 100 000": 15,
     "instant filter onDay 100 000 (warm keys)": 15,
+    "custom kind test 100 000 rows (warm values)": 15,
     "quick filter 100 000 x 10 text columns (cold, ASCII)": 150,
     "quick filter 100 000 x 10 text columns (cold, fr+ar)": 700,
     "quick filter 100 000 x 4 ASCII columns (cold)": 90,

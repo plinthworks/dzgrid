@@ -1,0 +1,67 @@
+{
+  "id": "unknown-kind",
+  "suite": "filter-custom",
+  "description": "A kind that is not registered: invalid-filter, the filter dropped, every row kept.",
+  "input": {
+    "locale": "en-US",
+    "kinds": [],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": 3
+      },
+      {
+        "id": "c",
+        "n": 5
+      },
+      {
+        "id": "d",
+        "n": null
+      },
+      {
+        "id": "e",
+        "n": 7
+      },
+      {
+        "id": "f",
+        "n": "x"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "custom",
+        "kind": "between",
+        "state": {
+          "lo": 2,
+          "hi": 5
+        }
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.n"
+      ]
+    ]
+  }
+}

@@ -337,7 +337,8 @@ export interface FilterKind<S extends Json = Json, V = unknown> {
   - A slow kind costs only its own column.
   - Built-in kinds keep their specialised compiled tests.
 - **A server-only kind** is a kind with no `test`. It is allowed only when `ops.filter === 'server'`. Otherwise the problem `filter-needs-server` is raised and the filter is ignored.
-- **The query key** includes the state, so the gate, the epochs and the selection rules apply unchanged.
+- **The query key** includes the state, so the gate, the epochs and the selection rules apply unchanged. The kernel refuses a filter command whose custom state is not JSON (`invalid-filter`, detail `not json`) before the key is made.
+- **Step 8 as built** (docs/behaviors/filter-custom.md): `filterKinds` is a fixed grid setting, read once by `filterKindLookup` (bad or duplicate names: `invalid-filter` at `filterKinds[i]`); `compileFilter(model, env, kinds?)` mirrors the wire checks and details; `filter-needs-server` is raised by the browser compile only, so it follows placement with no extra logic; a row whose `test` throws is not kept and the problem is said once; a filter problem new to a query change is told once (`ModelChange.told`). `GridFeature.kinds` is deferred.
 - **The floating summary** for a custom kind with no `floating.<kind>` part is a button labelled `filter.summaryActive {column}`, which opens the popup.
 
 ### B2.6 Accessibility, RTL, messages

@@ -1,0 +1,77 @@
+{
+  "id": "needs-server-in-combined",
+  "suite": "filter-custom",
+  "description": "A server-only kind inside a combined filter, in the browser: filter-needs-server at the condition, the whole filter dropped.",
+  "input": {
+    "locale": "en-US",
+    "kinds": [
+      "server-only"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": 3
+      },
+      {
+        "id": "c",
+        "n": 5
+      },
+      {
+        "id": "d",
+        "n": null
+      },
+      {
+        "id": "e",
+        "n": 7
+      },
+      {
+        "id": "f",
+        "n": "x"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "combined",
+        "join": "and",
+        "conditions": [
+          {
+            "type": "number",
+            "op": "gt",
+            "value": 2
+          },
+          {
+            "type": "custom",
+            "kind": "server-only",
+            "state": 1
+          }
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f"
+    ],
+    "problems": [
+      [
+        "filter-needs-server",
+        "filter.n.conditions[1]"
+      ]
+    ]
+  }
+}
