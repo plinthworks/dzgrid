@@ -100,7 +100,7 @@ export const setAttr = (el: Element, name: string, value: string | null): void =
     if (el.hasAttribute(name)) el.removeAttribute(name);
   } else if (el.getAttribute(name) !== value) el.setAttribute(name, value);
 };
-const range = (n: number) => Array.from({ length: n }, (_, i) => i);
+export const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 
 export const setPx = (el: HTMLElement, prop: string, v: number): void => {
   const s = `${v}px`;
@@ -223,7 +223,8 @@ export class RowRenderer<T> {
       v.data = undefined;
       this.#pool.push(v);
     }
-    const kept = retained.length ? this.#mounted.get(retained[0]!) ?? null : null;
+    // Only the focused row is never moved (S10); anchors are placed like any row.
+    const kept = retained[0] !== undefined && retained[0] === f.focusRow ? this.#mounted.get(retained[0]) ?? null : null;
     for (const k of keys) {
       let v = this.#mounted.get(k);
       if (!v) {
@@ -369,14 +370,15 @@ export class RowRenderer<T> {
     for (const c of center) if (!v.cells.has(L.center.columns[c]!.id)) return false;
     // Every pinned slot not covered has its cell, and nothing else is there.
     const en = L.start.columns.length + L.center.columns.length;
-    for (const [cols, at] of [[L.start.columns, 0], [L.end.columns, en]] as const) {
+    const pinned = (cols: readonly ResolvedColumn<any>[], at: number): boolean => {
       for (let c = 0; c < cols.length; c++) {
         if (plan?.covered.has(at + c)) continue;
         n++;
         if (!v.cells.has(cols[c]!.id)) return false;
       }
-    }
-    return v.cells.size === n;
+      return true;
+    };
+    return pinned(L.start.columns, 0) && pinned(L.end.columns, en) && v.cells.size === n;
   }
 
   /** Destroys a cell's part and gives the cell back its text node. */

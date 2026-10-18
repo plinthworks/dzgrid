@@ -7,7 +7,8 @@ export function paintOverlay<T>(g: GridContext<T>, displayed: number, top: numbe
   // A server's failure covers the rows kept; its loading shows only when there is nothing to keep.
   const phase = g.rows.status.phase;
   const state = g.settings.overlay ?? (phase === 'error' ? phase : phase === 'loading' ? (displayed ? null : phase) : g.rows.counts.total === 0 ? 'noRows' : displayed ? null : 'noMatches');
-  overlay.hidden = state === null;
+  // Written only when it changes: a repaint that changes nothing touches nothing.
+  if (overlay.hidden !== (state === null)) overlay.hidden = state === null;
   if (state === null) {
     if (overlay.textContent) overlay.textContent = '';
     return;

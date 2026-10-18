@@ -1,5 +1,5 @@
 import type { ColumnLayout, ResolvedColumn } from '@dzgrid/core';
-import { CHECK_WIDTH, setAttr, setPx } from './rows.js';
+import { CHECK_WIDTH, setAttr, setPx, range } from './rows.js';
 
 /**
  * A header row beyond the column headers (a floating filter row): the grid
@@ -108,15 +108,7 @@ export class HeaderRenderer {
     group.append(this.#rows[0]!.el);
   }
 
-  /** The main row (the column headers). */
-  get row(): HTMLElement {
-    return this.#rows[0]!.el;
-  }
 
-  /** How many header rows, the group rows and the column headers included. */
-  get count(): number {
-    return this.#bands.length + this.#rows.length;
-  }
 
   /** Paints every header row; returns their total height. */
   render(p: HeaderPaint): number {
@@ -213,7 +205,6 @@ export class HeaderRenderer {
         else seg.insertBefore(el, cursor);
       }
     };
-    const range = (n: number) => Array.from({ length: n }, (_, i) => i);
     place(view.segs.start, layout.start, range(layout.start.columns.length), false);
     place(view.segs.center, layout.center, center, true);
     place(view.segs.end, layout.end, range(layout.end.columns.length), false);

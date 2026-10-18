@@ -199,7 +199,7 @@ export function resolveColumns<T>(tree: readonly ColumnOrGroup<T>[]): {
   });
   // More than six pinned on a side leave little room to scroll the rest: accepted, with a warning (D14).
   for (const side of ['start', 'end'] as const) {
-    const n = defs.filter((d) => d.pinned === side).length;
+    const n = defs.filter((d) => d?.pinned === side).length;
     if (n > 6) problems.push(problem('too-many-pinned', 'warning', 'columns', `${side}:${n}`));
   }
   return { columns, problems };
