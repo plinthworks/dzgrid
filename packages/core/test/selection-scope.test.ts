@@ -449,3 +449,23 @@ describe('fakes of the RowModel', () => {
     expect(c.model.membershipOf(makeQuery())).toBe(c.model.membershipOf(makeQuery({ sort: [{ column: 't', dir: 'asc' }] })));
   });
 });
+
+describe('step 7 review: what membership ignores', () => {
+  it('the order and pinning of the columns a search reads', () => {
+    const c = client(4);
+    const q = makeQuery({ quick: 'odd' });
+    const before = c.model.membershipOf(q);
+    c.columns.apply([{ id: 't', order: 0 }], 'user');
+    expect(c.model.membershipOf(q)).toBe(before);
+    c.columns.apply([{ id: 'n', pinned: 'start' }], 'user');
+    expect(c.model.membershipOf(q)).toBe(before);
+  });
+
+  it('spaces around or between the words of a search', () => {
+    const c = client(4);
+    const m = (quick: string) => c.model.membershipOf(makeQuery({ quick }));
+    expect(m('odd ')).toBe(m('odd'));
+    expect(m('  odd')).toBe(m('odd'));
+    expect(m('  ')).toBe(m(''));
+  });
+});

@@ -215,3 +215,20 @@ describe('selection.keepOnFilter (owner decision)', () => {
     expect([...t.g.kernel.selection.keys]).toEqual([k('a')]);
   });
 });
+
+describe('step 7 review: the announcer', () => {
+  it('says the same selection again after the host changed it in between', async () => {
+    const t = make();
+    t.f.answer(['a', 'b'], { total: 6 });
+    t.tickRow('a');
+    await tick();
+    const first = t.live();
+    expect(first).toBe(EN.text['announce.selected'] && t.live());
+    t.g.kernel.dispatch({ type: 'selection.clear' }, 'api');
+    await tick();
+    t.host.querySelector('.dzg-live')!.textContent = '';
+    t.tickRow('a');
+    await tick();
+    expect(t.live()).toBe(first);
+  });
+});

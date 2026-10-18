@@ -25,7 +25,12 @@ export function selectionAnnouncer<T>(g: GridContext<T>): (e: Extract<GridEvent<
       : e.reason === 'rows-dropped' ? g.msg('announce.selectionReduced', { n: e.count ?? 0 })
       : e.source !== 'user' ? null
       : e.count === null ? g.msg('announce.selectedAll') : g.msg('announce.selected', { n: e.count });
-    if (text === null || text === said) return;
+    // Something else changed the selection meanwhile: the next sentence is news, even the same one.
+    if (text === null) {
+      said = '';
+      return;
+    }
+    if (text === said) return;
     said = text;
     g.live.announce(text);
   };

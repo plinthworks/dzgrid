@@ -331,7 +331,12 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     ops: { filter: 'client', quick: 'client', sort: 'client', page: pageCfg ? 'client' : 'off' },
     selectAll: 'displayed',
     keeps: (key) => store.get(key) !== undefined,
-    membershipOf: (q) => canonical({ filter: q.filter, quick: q.quick, zone: ctx.timeZone, cols: q.quick.trim() ? visibleIds() : null }),
+    // Which rows match: the search by its words (spaces aside), over the set of columns it reads
+    // (their order and pinning aside).
+    membershipOf: (q) => {
+      const words = quickWords(q.quick);
+      return canonical({ filter: q.filter, quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
+    },
     get scope() { return { params: NO_PARAMS, zone: ctx.timeZone }; },
     row: (key) => store.get(key),
     get query() { return query; },
