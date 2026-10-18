@@ -6,3 +6,4 @@
 - O8 budgets: approved — optional entries `@dzgrid/core/spans` (3 500 B gz, measured over the core) and `@dzgrid/dom/spans` (2 400 B gz); the dom base may rise to 18 000 B gz during Phase 3 for the seams.
 - O9 method: approved — spike S12 first; the screen-reader protocol step is done by ear by the owner (NVDA, JAWS, VoiceOver, TalkBack).
 - Defaults kept (architect): O3 no automatic sort by a merged column (`merge.within` is the tool); O4 blanks never merge; O6 full-width and total rows stay in sort order (pinned top/bottom rows are Phase 5); O7 a group split into labelled fragments when a leaf is pinned or moved; O10 hidden repeat cells only if the protocol shows lost values.
+- O8 bis (owner, 2026-10-19): `@dzgrid/dom/spans` budget 3 500 B gz during Phase 3 (the commit-3 review fixes and the grouped headers of commit 4); the dom base stays at 18 000.
