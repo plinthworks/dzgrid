@@ -346,12 +346,16 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     load();
   };
   const rekey = (): void => {
-    const was = canonical(wireProblems.map((p) => [p.code, p.path]));
+    const sig = (): string => canonical(wireProblems.map((p) => [p.code, p.path, p.detail]));
+    const was = sig();
     const key = keyNow();
+    // A filter refused anew (or for another reason) is told, whether the request changed or not.
+    const news = wireProblems.length > 0 && sig() !== was;
+    if (news) told.push(...wireProblems);
     if (key !== epochKey) return restart(key);
     // The same request, but a filter refused or fixed: told, without asking the server again.
-    if (canonical(wireProblems.map((p) => [p.code, p.path])) !== was) {
-      told.push(...wireProblems);
+    if (sig() !== was) {
+      if (!news) told.push(...wireProblems);
       mark('status');
     }
   };

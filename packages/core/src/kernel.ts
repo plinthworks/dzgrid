@@ -280,7 +280,10 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   };
   /** Everything the query matches, never held as keys: everything-except, tied to its membership. */
   const selectQuery = (source: ChangeSource): GridCommandResult => {
-    allOf = rows.membershipOf(query);
+    const tie = rows.membershipOf(query);
+    // Already everything, nothing unticked: no change, nothing told.
+    if (selection.mode === 'exclude' && selection.keys.size === 0 && allOf === tie) return OK;
+    allOf = tie;
     anchor = null;
     selection = { mode: 'exclude', keys: new Set() };
     emit(changed(source));
@@ -484,7 +487,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
  * before the query key is made from it: the filter in force stays.
  */
 function notJson(f: ColumnFilter, path: string, depth = 0): GridCommandResult | null {
-  if (!f || typeof f !== 'object' || depth > 3) return null;
+  // As deep as isJson looks: a cycle nested deeper than the filters compile must not reach the key.
+  if (!f || typeof f !== 'object' || depth > 20) return null;
   if (f.type === 'custom' && !isJson(f.state)) return refuse('invalid-filter', [problem('invalid-filter', 'error', path, 'not json')]);
   if (f.type === 'combined' && Array.isArray(f.conditions)) {
     for (let i = 0; i < f.conditions.length; i++) {

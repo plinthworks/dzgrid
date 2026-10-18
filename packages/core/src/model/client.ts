@@ -321,7 +321,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // Same rows in the same order: only their data changed. Problems follow the patched cells.
     const now = inputs();
     const sortProblems = sortCols.flatMap((c) => (c.codec.keyKind === 'number' ? cache.keys(c, e).problems : cache.ranks(c, e).problems));
-    filtered = { ...filtered, in: now, problems: f.problems };
+    // A rerun of the changed rows only: the problems of the full run stay, those of these rows join.
+    const kept = new Set(filtered.problems.map((p) => said([p])));
+    filtered = { ...filtered, in: now, problems: [...filtered.problems, ...f.problems.filter((p) => !kept.has(said([p])))] };
     sorted = { ...sorted, in: now, problems: sortProblems };
     show();
     notify('rows', source, r);
