@@ -10,7 +10,8 @@ import type { Scope } from './render/scope.js';
 import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { MessageKey } from './messages.js';
-import type { HeaderRowSpec } from './render/header.js';
+import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
+import type { FeatureHandle, SpanFeature } from './features.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -65,6 +66,12 @@ export interface GridContext<T> {
   settings: GridSettings<T>;
   /** Header rows the features add under the column headers. */
   headerRows: readonly HeaderRowSpec[];
+  /** Group header rows above the column headers, top to bottom (the spans feature). */
+  bands: readonly HeaderBandSpec[];
+  /** Cells spanning rows and columns, when the spans feature is on. */
+  spans: SpanFeature | null;
+  /** What the features set up handed back (`afterRows` runs at each paint once the rows are placed). */
+  features: readonly FeatureHandle[];
   ctx: LocaleCtx;
   dir: Dir;
   pendingFocus: PendingFocus | null;

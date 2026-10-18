@@ -14,6 +14,28 @@ export interface HeaderRowSpec {
   readonly height?: number;
 }
 
+/** A header row's three segments. */
+export interface HeaderSegments {
+  readonly start: HTMLElement;
+  readonly center: HTMLElement;
+  readonly end: HTMLElement;
+}
+
+/**
+ * A group row above the column headers (the spans feature): the grid makes
+ * the row, its segments and its place; the feature fills the segments with
+ * its group cells (`.dzg-hcell.dzg-hgroup`, a negative `data-level`).
+ */
+export interface HeaderBandSpec {
+  readonly id: string;
+  /** Fills the row's segments, at each paint. */
+  paint(segs: HeaderSegments, p: HeaderPaint): void;
+  /** The group cell over a column: where the focus goes. */
+  cell(column: string): HTMLElement | null;
+  /** Its height; the row height otherwise. */
+  readonly height?: number;
+}
+
 export interface HeaderPaint {
   readonly layout: ColumnLayout;
   readonly cols: { readonly first: number; readonly last: number } | null;
@@ -25,20 +47,28 @@ export interface HeaderPaint {
   readonly check: boolean;
   readonly selectAll: boolean;
   readonly extra: readonly HeaderRowSpec[];
+  /** Group rows above the column headers, top to bottom. */
+  readonly bands?: readonly HeaderBandSpec[];
 }
 
-/** One header row: three segments, cells by column id. */
+/**
+ * One header row: three segments, cells by column id. Its level is signed:
+ * negative for the group rows above the column headers, 0 for them, positive
+ * for the rows the features add under them.
+ */
 class HeaderRowView {
   readonly el: HTMLElement;
-  readonly segs: { readonly start: HTMLElement; readonly center: HTMLElement; readonly end: HTMLElement };
+  readonly segs: HeaderSegments;
   readonly cells = new Map<string, HTMLElement>();
   check: HTMLElement | null = null;
   readonly level: number;
   readonly spec: HeaderRowSpec | null;
+  readonly band: HeaderBandSpec | null;
 
-  constructor(doc: Document, level: number, spec: HeaderRowSpec | null) {
+  constructor(doc: Document, level: number, spec: HeaderRowSpec | null, band: HeaderBandSpec | null = null) {
     this.level = level;
     this.spec = spec;
+    this.band = band;
     this.el = doc.createElement('div');
     this.el.className = 'dzg-hrow';
     this.el.setAttribute('role', 'row');
@@ -63,6 +93,8 @@ export class HeaderRenderer {
   readonly #doc: Document;
   readonly #group: HTMLElement;
   readonly #rows: HeaderRowView[] = [];
+  /** The group rows, top to bottom (levels -depth to -1). */
+  readonly #bands: HeaderRowView[] = [];
   /** The select-all box's header cell, when the grid shows a selection column. */
   check: HTMLElement | null = null;
   checkBox: HTMLElement | null = null;
@@ -81,17 +113,46 @@ export class HeaderRenderer {
     return this.#rows[0]!.el;
   }
 
-  /** How many header rows, the column headers included. */
+  /** How many header rows, the group rows and the column headers included. */
   get count(): number {
-    return this.#rows.length;
+    return this.#bands.length + this.#rows.length;
   }
 
   /** Paints every header row; returns their total height. */
   render(p: HeaderPaint): number {
     this.#syncRows(p.extra);
+    this.#syncBands(p.bands ?? []);
+    const depth = this.#bands.length;
     let total = 0;
-    for (const view of this.#rows) total += this.#renderRow(view, p);
+    for (const view of this.#bands) total += this.#frame(view, p, depth);
+    for (const view of this.#rows) total += this.#renderRow(view, p, depth);
     return total;
+  }
+
+  #syncBands(bands: readonly HeaderBandSpec[]): void {
+    // Made once: the features (and so their group rows) are set up with the grid.
+    if (bands.length === this.#bands.length) return;
+    bands.forEach((b, i) => {
+      const view = new HeaderRowView(this.#doc, i - bands.length, null, b);
+      this.#bands.push(view);
+      this.#group.insertBefore(view.el, this.#rows[0]!.el);
+    });
+  }
+
+  /** A row's size, its place among the header rows, and its box column; returns its height. */
+  #frame(view: HeaderRowView, p: HeaderPaint, depth: number): number {
+    const { layout } = p;
+    const height = (view.spec ?? view.band)?.height ?? p.height;
+    const extra = p.check ? CHECK_WIDTH : 0;
+    setAttr(view.el, 'aria-rowindex', String(view.level + depth + 1));
+    setPx(view.el, 'block-size', height);
+    setPx(view.el, 'inline-size', layout.totalWidth + extra);
+    setPx(view.segs.start, 'inline-size', layout.start.width + extra);
+    setPx(view.segs.center, 'inline-size', layout.center.width);
+    setPx(view.segs.end, 'inline-size', layout.end.width);
+    this.#checkCell(view, p.check, p.selectAll);
+    view.band?.paint(view.segs, p);
+    return height;
   }
 
   #syncRows(extra: readonly HeaderRowSpec[]): void {
@@ -109,16 +170,9 @@ export class HeaderRenderer {
     }
   }
 
-  #renderRow(view: HeaderRowView, p: HeaderPaint): number {
+  #renderRow(view: HeaderRowView, p: HeaderPaint, depth: number): number {
     const { layout } = p;
-    const height = view.spec?.height ?? p.height;
-    const extra = p.check ? CHECK_WIDTH : 0;
-    setPx(view.el, 'block-size', height);
-    setPx(view.el, 'inline-size', layout.totalWidth + extra);
-    setPx(view.segs.start, 'inline-size', layout.start.width + extra);
-    setPx(view.segs.center, 'inline-size', layout.center.width);
-    setPx(view.segs.end, 'inline-size', layout.end.width);
-    this.#checkCell(view, p.check, p.selectAll);
+    const height = this.#frame(view, p, depth);
     // The centre window, and the focused header's column out of it, in its own row (D6).
     const center: number[] = [];
     if (p.cols) for (let c = p.cols.first; c <= p.cols.last; c++) center.push(c);
@@ -229,6 +283,7 @@ export class HeaderRenderer {
   }
 
   cell(column: string, level = 0): HTMLElement | null {
+    if (level < 0) return this.#bands[this.#bands.length + level]?.band!.cell(column) ?? null;
     return this.#rows[level]?.cells.get(column) ?? null;
   }
 }

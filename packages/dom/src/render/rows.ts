@@ -37,6 +37,38 @@ export interface RowView {
   top: number;
   /** The selection box, first in the start segment, when the grid shows one (D8). */
   check: HTMLElement | null;
+  /** The span plan the row was bound with (null: plain cells). */
+  plan: RowPlan | null;
+}
+
+/** A cell where a span starts: what it covers, and its width (the columns it covers). */
+export interface SpanPlace {
+  readonly rows: number;
+  readonly cols: number;
+  readonly width: number;
+}
+
+/**
+ * How one row's cells are laid out when spans are on (the spans feature makes
+ * it). Columns are counted over the visible ones: start, centre, end.
+ */
+export interface RowPlan {
+  /** Slots covered by a span from another cell: no element there. */
+  readonly covered: ReadonlySet<number>;
+  /** Cells where a span starts. */
+  readonly cells: ReadonlyMap<number, SpanPlace>;
+  /** Centre cells to mount out of the column window (a colspan across its edge). */
+  readonly mount?: readonly number[];
+  /** The row hosts a span cell (`data-spans`: its own stacking). */
+  readonly spans: boolean;
+}
+
+/** The spans feature's side of the paint (`@dzgrid/dom/spans`); the base has none. */
+export interface RowSpans {
+  /** Rows to keep mounted besides the window (the origins of tall cells reaching into it). */
+  anchors?(first: number, last: number): readonly RowKey[];
+  /** A row's plan, by display index; null for plain cells. */
+  plan(index: number, key: RowKey): RowPlan | null;
 }
 
 /** Width of the selection box column. */
@@ -68,6 +100,8 @@ export const setAttr = (el: Element, name: string, value: string | null): void =
     if (el.hasAttribute(name)) el.removeAttribute(name);
   } else if (el.getAttribute(name) !== value) el.setAttribute(name, value);
 };
+const range = (n: number) => Array.from({ length: n }, (_, i) => i);
+
 export const setPx = (el: HTMLElement, prop: string, v: number): void => {
   const s = `${v}px`;
   if (el.style.getPropertyValue(prop) !== s) el.style.setProperty(prop, s);
@@ -78,8 +112,9 @@ export interface Frame<T> {
   readonly layout: ColumnLayout;
   /** Centre columns to mount, by index into `layout.center`. */
   readonly cols: { readonly first: number; readonly last: number } | null;
-  readonly rowHeight: number;
-  readonly base: number;
+  /** Where a displayed row sits in the layer, and its height (from the row layout). */
+  readonly rowTop: (i: number) => number;
+  readonly rowHeight: (i: number) => number;
   readonly ctx: LocaleCtx;
   /** Bumped when columns, widths, language or messages change: cells are rechecked. */
   readonly epoch: number;
@@ -106,6 +141,8 @@ export interface Frame<T> {
   readonly report: (err: unknown) => void;
   readonly colIndex: (id: string) => number;
   readonly rowAttrs: (key: RowKey, el: HTMLElement) => void;
+  /** Span plans, when the spans feature is on. */
+  readonly spans?: RowSpans | null;
 }
 
 export class RowRenderer<T> {
@@ -148,7 +185,7 @@ export class RowRenderer<T> {
     };
     const segs = { start: seg('start'), center: seg('center'), end: seg('end') };
     this.made++;
-    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null };
+    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null, plan: null };
   }
 
   #makeCell(): CellView {
@@ -161,19 +198,21 @@ export class RowRenderer<T> {
   }
 
   /**
-   * Mounts `wanted` (display indices, ascending) plus `retained` (a key kept
-   * mounted wherever it is: the focused row, S10). The retained row is never
-   * moved in the DOM; the others are placed around it, in order.
+   * Mounts `wanted` (display indices, ascending) plus `retained` (keys kept
+   * mounted wherever they are: the focused row first, S10, then the anchors
+   * of tall cells). The focused row is never moved in the DOM; the others are
+   * placed around it, in order.
    */
-  render(f: Frame<T>, wanted: readonly number[], retained: RowKey | null): void {
+  render(f: Frame<T>, wanted: readonly number[], retained: readonly RowKey[]): void {
     const d = f.displayed;
     const keys: RowKey[] = wanted.map((i) => d.keyAt(d.index(i)!));
-    const retainedAt = retained === null ? -1 : d.indexOf(retained);
-    if (retained !== null && retainedAt !== -1 && !keys.includes(retained)) {
+    for (const r of retained) {
+      const ra = d.indexOf(r);
+      if (ra === -1 || keys.includes(r)) continue;
       // In display order, like the rest.
       let at = 0;
-      while (at < keys.length && d.indexOf(keys[at]!) < retainedAt) at++;
-      keys.splice(at, 0, retained);
+      while (at < keys.length && d.indexOf(keys[at]!) < ra) at++;
+      keys.splice(at, 0, r);
     }
     const want = new Set(keys);
     for (const [k, v] of this.#mounted) {
@@ -184,7 +223,7 @@ export class RowRenderer<T> {
       v.data = undefined;
       this.#pool.push(v);
     }
-    const kept = retained !== null ? this.#mounted.get(retained) ?? null : null;
+    const kept = retained.length ? this.#mounted.get(retained[0]!) ?? null : null;
     for (const k of keys) {
       let v = this.#mounted.get(k);
       if (!v) {
@@ -193,10 +232,10 @@ export class RowRenderer<T> {
       }
       const i = d.indexOf(k) as number;
       this.#keys.set(v.el, k);
-      this.#bind(v, k, d, f);
+      this.#bind(v, k, i, d, f);
       // A row far from the window sits at its true distance, bounded (S11): never over the
       // visible rows, never past what the body (which clips) can hold.
-      const top = Math.max(-2 * REBASE, Math.min(2 * REBASE, i * f.rowHeight - f.base));
+      const top = Math.max(-2 * REBASE, Math.min(2 * REBASE, f.rowTop(i)));
       if (v.top !== top) {
         v.top = top;
         setPx(v.el, 'inset-block-start', top);
@@ -216,30 +255,40 @@ export class RowRenderer<T> {
     }
   }
 
-  /** The centre columns a row mounts: the window, and the focused column in the focused row. */
-  #centerOf(key: RowKey, f: Frame<T>): number[] {
+  /**
+   * The centre columns a row mounts, ascending: the window, the focused column
+   * in the focused row, and the cells its plan asks for; never a covered slot.
+   */
+  #centerOf(key: RowKey, f: Frame<T>, plan: RowPlan | null): number[] {
     const out: number[] = [];
     if (f.cols) for (let c = f.cols.first; c <= f.cols.last; c++) out.push(c);
-    if (key === f.focusRow && f.focusCenter >= 0 && !(f.cols && f.focusCenter >= f.cols.first && f.focusCenter <= f.cols.last)) {
-      out.push(f.focusCenter);
-      out.sort((a, b) => a - b);
-    }
-    return out;
+    const n = out.length;
+    const add = (c: number) => {
+      if (c >= 0 && !out.includes(c)) out.push(c);
+    };
+    if (key === f.focusRow) add(f.focusCenter);
+    const s = f.layout.start.columns.length;
+    if (plan) for (const c of plan.mount ?? []) add(c - s);
+    if (out.length > n) out.sort((a, b) => a - b);
+    return plan ? out.filter((c) => !plan.covered.has(s + c)) : out;
   }
 
-  #bind(v: RowView, key: RowKey, d: DisplayedRows<T>, f: Frame<T>): void {
-    const node = d.nodeAt(d.index(d.indexOf(key) as number)!);
+  #bind(v: RowView, key: RowKey, i: number, d: DisplayedRows<T>, f: Frame<T>): void {
+    const node = d.nodeAt(d.index(i)!);
     const data = node.kind === 'data' ? node.data : undefined;
-    const center = this.#centerOf(key, f);
+    const plan = f.spans ? f.spans.plan(i, key) : null;
+    const center = this.#centerOf(key, f, plan);
     const L = f.layout;
     const focusCol = key === f.focusRow ? f.focusColumn : null;
-    const same = v.key === key && v.data === data && v.epoch === f.epoch && v.focusCol === focusCol;
+    const same = v.key === key && v.data === data && v.epoch === f.epoch && v.focusCol === focusCol && v.plan === plan;
     v.key = key;
     v.focusCol = focusCol;
-    if (same && this.#matches(v, f, center)) return;
+    if (same && this.#matches(v, f, center, plan)) return;
     v.data = data;
     v.epoch = f.epoch;
-    setPx(v.el, 'block-size', f.rowHeight);
+    v.plan = plan;
+    setPx(v.el, 'block-size', f.rowHeight(i));
+    if (f.spans) setAttr(v.el, 'data-spans', plan?.spans ? '' : null);
     const extra = f.check ? CHECK_WIDTH : 0;
     setPx(v.el, 'inline-size', L.totalWidth + extra);
     setPx(v.segs.start, 'inline-size', L.start.width + extra);
@@ -247,10 +296,15 @@ export class RowRenderer<T> {
     setPx(v.segs.center, 'inline-size', L.center.width);
     setPx(v.segs.end, 'inline-size', L.end.width);
     // Cells that go are taken out first: a focused cell is then never moved past them (a move blurs).
+    const sn = L.start.columns.length;
+    const en = sn + L.center.columns.length;
+    const open = (at: number) => (c: number) => !plan?.covered.has(at + c);
+    const starts = range(sn).filter(open(0));
+    const ends = range(L.end.columns.length).filter(open(en));
     const wanted = new Set<string>();
-    for (const c of L.start.columns) wanted.add(c.id);
+    for (const c of starts) wanted.add(L.start.columns[c]!.id);
     for (const c of center) wanted.add(L.center.columns[c]!.id);
-    for (const c of L.end.columns) wanted.add(c.id);
+    for (const c of ends) wanted.add(L.end.columns[c]!.id);
     for (const [id, cell] of v.cells) {
       if (wanted.has(id)) continue;
       cell.el.remove();
@@ -260,7 +314,7 @@ export class RowRenderer<T> {
       cell.col = null;
       this.#spare.push(cell);
     }
-    const place = (seg: HTMLElement, cols: readonly ResolvedColumn<any>[], widths: ColumnLayout['start']['widths'], indices: Iterable<number>, absolute: boolean) => {
+    const place = (seg: HTMLElement, cols: readonly ResolvedColumn<any>[], widths: ColumnLayout['start']['widths'], indices: Iterable<number>, absolute: boolean, at: number) => {
       let cursor: ChildNode | null = seg.firstChild;
       if (cursor && cursor === v.check) cursor = cursor.nextSibling;
       for (const c of indices) {
@@ -270,15 +324,16 @@ export class RowRenderer<T> {
           cell = this.#spare.pop() ?? this.#makeCell();
           v.cells.set(col.id, cell);
         }
-        this.#fillCell(cell, col, data, key, f, widths.sizeAt(c), absolute ? widths.offsetOf(c) : null);
+        // With spans on, every cell says whether one starts there (undefined: spans off).
+        const span = f.spans ? plan?.cells.get(at + c) ?? null : undefined;
+        this.#fillCell(cell, col, data, key, f, span?.width ?? widths.sizeAt(c), absolute ? widths.offsetOf(c) : null, span);
         if (cell.el === cursor) cursor = cursor.nextSibling;
         else seg.insertBefore(cell.el, cursor);
       }
     };
-    const range = (n: number) => Array.from({ length: n }, (_, i) => i);
-    place(v.segs.start, L.start.columns, L.start.widths, range(L.start.columns.length), false);
-    place(v.segs.center, L.center.columns, L.center.widths, center, true);
-    place(v.segs.end, L.end.columns, L.end.widths, range(L.end.columns.length), false);
+    place(v.segs.start, L.start.columns, L.start.widths, starts, false, 0);
+    place(v.segs.center, L.center.columns, L.center.widths, center, true, sn);
+    place(v.segs.end, L.end.columns, L.end.widths, ends, false, en);
   }
 
   readonly #spare: CellView[] = [];
@@ -307,12 +362,21 @@ export class RowRenderer<T> {
   }
 
   /** True when the row holds exactly the cells it should: then nothing needs placing. */
-  #matches(v: RowView, f: Frame<T>, center: readonly number[]): boolean {
+  #matches(v: RowView, f: Frame<T>, center: readonly number[], plan: RowPlan | null): boolean {
     const L = f.layout;
     if (!!v.check !== f.check) return false;
-    if (v.cells.size !== L.start.columns.length + L.end.columns.length + center.length) return false;
+    let n = center.length;
     for (const c of center) if (!v.cells.has(L.center.columns[c]!.id)) return false;
-    return true;
+    // Every pinned slot not covered has its cell, and nothing else is there.
+    const en = L.start.columns.length + L.center.columns.length;
+    for (const [cols, at] of [[L.start.columns, 0], [L.end.columns, en]] as const) {
+      for (let c = 0; c < cols.length; c++) {
+        if (plan?.covered.has(at + c)) continue;
+        n++;
+        if (!v.cells.has(cols[c]!.id)) return false;
+      }
+    }
+    return v.cells.size === n;
   }
 
   /** Destroys a cell's part and gives the cell back its text node. */
@@ -332,7 +396,7 @@ export class RowRenderer<T> {
     cell.el.replaceChildren(cell.text);
   }
 
-  #fillCell(cell: CellView, col: ResolvedColumn<any>, data: unknown, key: RowKey, f: Frame<T>, w: number, x: number | null): void {
+  #fillCell(cell: CellView, col: ResolvedColumn<any>, data: unknown, key: RowKey, f: Frame<T>, w: number, x: number | null, span?: SpanPlace | null): void {
     if (cell.col !== col) {
       cell.col = col;
       setAttr(cell.el, 'data-col', col.id);
@@ -353,6 +417,12 @@ export class RowRenderer<T> {
     } else if (cell.inlineStart !== x) {
       cell.inlineStart = x;
       setPx(cell.el, 'inset-inline-start', x);
+    }
+    // Spans on: what this cell covers, said only from two (null removes it).
+    if (span !== undefined) {
+      setAttr(cell.el, 'aria-rowspan', span && span.rows > 1 ? String(span.rows) : null);
+      setAttr(cell.el, 'aria-colspan', span && span.cols > 1 ? String(span.cols) : null);
+      setAttr(cell.el, 'data-span', span ? '' : null);
     }
     const { value, text } = data === undefined ? { value: null, text: '' } : cellValue(col, data as never, f.ctx);
     const part = f.partFor(col);

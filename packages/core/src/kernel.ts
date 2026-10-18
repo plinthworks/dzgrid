@@ -1,7 +1,7 @@
 import type { ColumnModel, ColumnState } from './columns/model.js';
-import type { ColumnDef } from './columns/defs.js';
+import type { ColumnOrGroup } from './columns/defs.js';
 import type { LocaleCtx } from './value/locale.js';
-import { reconcileFocus, sameFocus, type FocusPos } from './focus.js';
+import { reconcileFocus, sameFocus, type FocusOwner, type FocusPos } from './focus.js';
 import type { RowKey } from './ids.js';
 import type { ModelChange, RowModel, RowScope } from './model/client.js';
 import { isJson, type ColumnFilter, type FilterModel } from './filter/model.js';
@@ -53,7 +53,7 @@ export type GridCommand =
   /** Fetch or compute again (a server's retry). */
   | { readonly type: 'rows.refresh' }
   /** New column definitions from the host; what the user set (widths, order) is kept by id. */
-  | { readonly type: 'columns.set'; readonly defs: readonly ColumnDef<any, any>[] }
+  | { readonly type: 'columns.set'; readonly defs: readonly ColumnOrGroup<any>[] }
   | { readonly type: 'context.set'; readonly ctx: LocaleCtx }
   /** Another page (from 0; past the end shows the last), or another page size. */
   | { readonly type: 'page.go'; readonly index: number }
@@ -125,6 +125,8 @@ const refuse = (reason: string, problems: readonly Problem[] = []): GridCommandR
 
 /** For the DOM layer, through `@dzgrid/core/internal`: events the kernel cannot see (clicks, first render). */
 export const EMIT = Symbol('dzgrid.emit');
+/** For the DOM spans feature, through `@dzgrid/core/internal`: where a reconciled cell focus belongs. */
+const OWNER = Symbol('dzgrid.owner');
 
 export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   readonly rows: M;
@@ -147,6 +149,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   let keepOnFilter = o.keepSelectionOnFilter !== false;
   let anchor: RowKey | null = null;
   let focus: FocusPos | null = null;
+  let owner: FocusOwner<T> | undefined;
   let shown = rows.displayed;
   let lastPage: PageState | null = rows.page;
   let destroyed = false;
@@ -231,7 +234,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     const stale = dropStale(() => rows.membershipOf(query));
     if (anchor !== null && !exists(anchor)) anchor = null;
     selection = reconcileSelection(selection, exists);
-    focus = reconcileFocus(focus, shown, rows.displayed, columns);
+    focus = reconcileFocus(focus, shown, rows.displayed, columns, owner);
     shown = rows.displayed;
     if (head) emit(head);
     // The model holds the page (its index follows the filtered count); the kernel tells it.
@@ -467,7 +470,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     return state;
   };
 
-  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void } = {
+  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void } = {
     rows,
     columns,
     get selection() { return selection; },
@@ -500,6 +503,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       listeners.clear();
     },
     [EMIT]: emit,
+    [OWNER]: (fn) => { owner = fn; },
   };
   return kernel;
 }
@@ -547,6 +551,9 @@ function snapshot(f: ColumnFilter, depth: number): ColumnFilter {
 
 /** Emits an event the DOM saw (a click, the first render). */
 export const emit = <T>(k: GridKernel<T>, e: GridEvent<T>): void => (k as unknown as { [EMIT]: (e: GridEvent<T>) => void })[EMIT](e);
+
+/** Sets (or, without `fn`, removes) the kernel's focus owner: the spans feature's. */
+export const setFocusOwner = <T>(k: GridKernel<T>, fn?: FocusOwner<T>): void => (k as unknown as { [OWNER]: (fn?: FocusOwner<T>) => void })[OWNER](fn);
 
 /** The header box over the displayed rows: none, some or all of them selected. */
 export type HeaderSelection = 'none' | 'some' | 'all';

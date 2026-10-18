@@ -1,4 +1,5 @@
 import type { InstantFormatSpec, NumberFormatSpec } from '../i18n/format.js';
+import type { RowKey } from '../ids.js';
 import { problem, type Problem } from '../problems.js';
 import type { ColumnType, ValueCodec } from '../value/codec.js';
 import { booleanCodec } from '../value/codecs/boolean.js';
@@ -44,6 +45,51 @@ export interface ColumnDef<T, V = unknown> {
   readonly headerTooltip?: string;
   /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */
   readonly tooltip?: (value: V | null, row: Readonly<T>) => string | null;
+  /**
+   * Consecutive rows with the same value show one tall cell (docs/behaviors/spans.md).
+   * `true` compares the values' stable text; a function decides; `within` cuts a run
+   * where the listed columns change. Needs the spans feature; the base ignores it.
+   */
+  readonly merge?: true | ((a: SpanCtx<T>, b: SpanCtx<T>) => boolean) | { readonly same?: (a: SpanCtx<T>, b: SpanCtx<T>) => boolean; readonly within?: readonly string[] };
+  /** How many rows this cell covers, from the data (1 when absent). Needs the spans feature. */
+  readonly rowSpan?: (ctx: SpanCtx<T>) => number;
+  /** How many columns this cell covers, from the data (1 when absent). Needs the spans feature. */
+  readonly colSpan?: (ctx: SpanCtx<T>) => number;
+}
+
+/**
+ * What a span rule is told about one cell. One object reused from call to
+ * call: valid during the call only.
+ */
+export interface SpanCtx<T> {
+  readonly row: Readonly<T>;
+  /** The cell's raw value. */
+  readonly value: unknown;
+  readonly key: RowKey;
+  /** The row's position in the displayed rows. */
+  readonly index: number;
+  readonly column: string;
+  /** The rows displayed before and after it (null at the ends). */
+  readonly prev: Readonly<T> | null;
+  readonly next: Readonly<T> | null;
+}
+
+/** Columns under one header (docs/behaviors/spans.md): the base keeps only its leaves. */
+export interface ColumnGroupDef<T> {
+  readonly id: string;
+  /** Already translated by the host. */
+  readonly header?: string;
+  readonly children: readonly ColumnOrGroup<T>[];
+}
+
+export type ColumnOrGroup<T> = ColumnDef<T, any> | ColumnGroupDef<T>;
+
+/**
+ * The columns of a tree of groups, in order: a group (anything with a
+ * `children` array) gives its leaves, and nothing else of it is kept.
+ */
+export function leaves<T>(defs: readonly ColumnOrGroup<T>[]): ColumnDef<T, any>[] {
+  return defs.flatMap((d) => (d && Array.isArray((d as ColumnGroupDef<T>).children) ? leaves((d as ColumnGroupDef<T>).children) : [d as ColumnDef<T, any>]));
 }
 
 export interface ResolvedColumn<T> {
@@ -116,15 +162,17 @@ function codecFor<T>(def: ColumnDef<T, any>, type: ColumnType): ValueCodec<any> 
 /**
  * Checks the host's definitions. A column that cannot work is refused with a
  * problem, the others go on: a duplicate id keeps the first column, a bad path
- * or a missing codec drops the column.
+ * or a missing codec drops the column. Groups give their leaves (`leaves`);
+ * a problem's path counts the leaves.
  */
-export function resolveColumns<T>(defs: readonly ColumnDef<T, any>[]): {
+export function resolveColumns<T>(tree: readonly ColumnOrGroup<T>[]): {
   readonly columns: readonly ResolvedColumn<T>[];
   readonly problems: readonly Problem[];
 } {
   const columns: ResolvedColumn<T>[] = [];
   const problems: Problem[] = [];
   const seen = new Set<string>();
+  const defs = leaves(tree);
   defs.forEach((def, i) => {
     const at = `columns[${i}]`;
     if (!def || typeof def.id !== 'string' || def.id === '') return void problems.push(problem('invalid-column', 'error', at, 'id'));

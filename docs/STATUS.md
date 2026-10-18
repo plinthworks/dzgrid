@@ -16,10 +16,10 @@ Mis à jour : 2026-10-18. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 7 — sélection sur plusieurs pages | fait | `2151d99` |
 | 8 — types de filtres personnalisés (`FilterKind`) | fait | `7a081dc` |
 | 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
-| **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : en conception (architecte) ; code juste après l'étape 9 | — |
+| **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : commit 1 (points d'accroche) écrit, à relire ; commits 2 à 4 à faire | — |
 | 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 9b (fusions), commit 1 « points d'accroche » (aucun changement visible), confié à un agent ; non commité tant qu'il tourne. Ensuite : commit 2 (moteur des fusions dans `@dzgrid/core/spans`), commit 3 (côté écran, clavier, clic), commit 4 (en-têtes groupés, vérifications navigateur). Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md`.
+En cours : l'étape 9b (fusions), commit 1 « points d'accroche » (aucun changement visible) écrit, suite verte, **pas encore commité** : à relire (relecture et analyse des tests) puis commiter. Écarts au plan notés dans `docs/phase-3-steps/step9b-spans-blueprint.md` (« Commit 1 fait »). Ensuite : commit 2 (moteur des fusions dans `@dzgrid/core/spans`), commit 3 (côté écran, clavier, clic), commit 4 (en-têtes groupés, vérifications navigateur). Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md`.
 
 ## Les plans détaillés des étapes
 
@@ -47,9 +47,9 @@ En cours : l'étape 9b (fusions), commit 1 « points d'accroche » (aucun change
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 26 000 o gz | 25 635 |
-| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 239 |
-| `@dzgrid/dom` | 18 000 (fusions) | ~17 090 |
+| `@dzgrid/core` | 26 000 o gz | 25 906 |
+| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 344 |
+| `@dzgrid/dom` | 18 000 (fusions) | 17 967 |
 | `@dzgrid/dom/popup` | 1 500 | ~1 390 |
 | langues en / fr / ar | 540 / 660 / 850 | 511 / 623 / 801 |
 | thème | 1 180 | ~1 100 |

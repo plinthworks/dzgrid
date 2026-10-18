@@ -138,8 +138,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     // ---- grid attributes ----
     setAttr(el.root, 'data-density', settings.density ?? 'comfortable');
     if (el.root.style.getPropertyValue('--dzg-row-height') !== `${h}px`) el.root.style.setProperty('--dzg-row-height', `${h}px`);
-    // Every header row counts: the column headers and those the features add.
-    const headerRows = 1 + g.headerRows.length;
+    // Every header row counts: the group rows, the column headers and those the features add.
+    const headerRows = g.bands.length + 1 + g.headerRows.length;
     setAttr(el.viewport, 'aria-rowcount', String(d.count + headerRows));
     setAttr(el.viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
     const mode = settings.selection?.mode ?? 'none';
@@ -164,7 +164,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       layout: L, cols: w.cols, height: h, colIndex,
       decorate: (col, cell) => decorateHeader(g, col, cell, sort),
       keep: focus?.kind === 'header' ? { center: focusCenter, level: focus.level ?? 0 } : null,
-      check, selectAll: mode === 'multi', extra: g.headerRows,
+      check, selectAll: mode === 'multi', extra: g.headerRows, bands: g.bands,
     });
     if (headerRenderer.checkName) {
       const text = g.msg('selection.column');
@@ -178,8 +178,12 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
 
     const wanted: number[] = [];
     if (w.rows) for (let i = w.rows.first; i <= w.rows.last; i++) wanted.push(i);
+    const base = w.placement.base;
+    const spans = g.spans;
     const frame: Frame<T> = {
-      displayed: d, layout: L, cols: w.cols, rowHeight: h, base: w.placement.base, ctx, epoch,
+      displayed: d, layout: L, cols: w.cols, ctx, epoch, spans,
+      rowTop: (i) => layout.offsetOf(d.index(i)!) - base,
+      rowHeight: (i) => layout.heightOf(d.index(i)!),
       rowHeader: visible[0]?.id ?? null, colIndex,
       rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
       check, dir, headerRows, partFor, report: g.report,
@@ -187,7 +191,11 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
       focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev,
     };
-    rowRenderer.render(frame, wanted, focus?.kind === 'cell' ? focus.row : null);
+    // Kept mounted out of the window: the focused row first (never moved), then the anchors of tall cells.
+    const retained: RowKey[] = focus?.kind === 'cell' ? [focus.row] : [];
+    if (spans?.anchors && w.rows) retained.push(...spans.anchors(w.rows.first, w.rows.last));
+    rowRenderer.render(frame, wanted, retained);
+    for (const h of g.features) h.afterRows?.(frame as Frame<unknown>);
     after.rovingStop(d, visible);
     const topIndex = d.count ? Math.min(d.count - 1, Math.floor(scroll.logicalTop / h)) : -1;
     shown = {

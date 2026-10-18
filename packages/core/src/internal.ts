@@ -22,7 +22,7 @@ export { compileQuick, canNarrow } from './filter/quick.js';
 export { storeOf } from './model/client.js';
 export { Haystack } from './model/haystack.js';
 export type { HayKind } from './model/column-cache.js';
-export { emit } from './kernel.js';
+export { emit, setFocusOwner } from './kernel.js';
 export { sameFocus } from './focus.js';
 export { checkPage, pageOf, resizeIndex, resolvePageOptions, samePage } from './model/page.js';
 export type { PageConfig } from './model/page.js';

@@ -110,7 +110,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     headerRenderer: new HeaderRenderer(doc, header),
     rowRenderer: new RowRenderer<T>(doc, layer, (err) => report(err)),
     mac: isMac(win?.navigator),
-    settings: initial, ctx, headerRows: [],
+    settings: initial, ctx, headerRows: [], bands: [], spans: null, features: [],
     get dir() { return dir; },
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false,
@@ -192,6 +192,9 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   // Optional features, set up once; what they add is read at each paint.
   const handles = (initial.features ?? []).map((f) => f.setup(g as GridContext<unknown>));
   g.headerRows = handles.flatMap((h) => h.headerRows ?? []);
+  g.bands = handles.flatMap((h) => h.bands ?? []);
+  g.spans = handles.find((h) => h.spans)?.spans ?? null;
+  g.features = handles;
   scope.add(() => { for (const h of handles) h.destroy(); });
 
   columns.setAvailableInline(geometry.read().inline);

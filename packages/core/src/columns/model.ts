@@ -1,7 +1,7 @@
 import { PrefixSums } from '../layout/prefix-sums.js';
 import type { ChangeSource } from '../model/types.js';
 import { problem, type Problem } from '../problems.js';
-import { resolveColumns, type ColumnDef, type ResolvedColumn, type Side } from './defs.js';
+import { resolveColumns, type ColumnOrGroup, type ResolvedColumn, type Side } from './defs.js';
 
 export interface ColumnLookup<T> {
   get(id: string): ResolvedColumn<T> | undefined;
@@ -44,7 +44,7 @@ export interface ColumnModel<T> extends ColumnLookup<T> {
   state(): readonly ColumnState[];
   apply(patch: readonly ColumnState[], source: ChangeSource): ColumnChange;
   /** New definitions from the host; what the user set is kept by id. */
-  setDefs(defs: readonly ColumnDef<T, any>[]): ColumnChange;
+  setDefs(defs: readonly ColumnOrGroup<T>[]): ColumnChange;
   /** The width the columns share; drives flexible columns. */
   setAvailableInline(px: number): ColumnChange;
 }
@@ -52,7 +52,7 @@ export interface ColumnModel<T> extends ColumnLookup<T> {
 const DEFAULT_WIDTH = 150;
 const DEFAULT_MIN = 40;
 
-export function createColumnModel<T>(initial: readonly ColumnDef<T, any>[], o: { availableInline?: number } = {}): ColumnModel<T> {
+export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { availableInline?: number } = {}): ColumnModel<T> {
   let columns: readonly ResolvedColumn<T>[] = [];
   let byId = new Map<string, ResolvedColumn<T>>();
   let defProblems: readonly Problem[] = [];
@@ -63,7 +63,7 @@ export function createColumnModel<T>(initial: readonly ColumnDef<T, any>[], o: {
   let layout: ColumnLayout;
   let visibleList: readonly ResolvedColumn<T>[] = [];
 
-  const setColumns = (defs: readonly ColumnDef<T, any>[]): void => {
+  const setColumns = (defs: readonly ColumnOrGroup<T>[]): void => {
     const r = resolveColumns(defs);
     columns = r.columns;
     defProblems = r.problems;

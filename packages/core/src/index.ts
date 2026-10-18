@@ -46,7 +46,7 @@ export { dayCodec, readDayText } from './value/codecs/day.js';
 export { instantCodec, instantToIso } from './value/codecs/instant.js';
 
 export { PrefixSums } from './layout/prefix-sums.js';
-export type { Side, ColumnDef, ResolvedColumn, ValueReader } from './columns/defs.js';
+export type { Side, ColumnDef, ColumnGroupDef, ColumnOrGroup, ResolvedColumn, SpanCtx, ValueReader } from './columns/defs.js';
 export { NO_OVERLAY, compilePath, resolveColumns } from './columns/defs.js';
 export type { ColumnLookup, ColumnState, ColumnSlice, ColumnLayout, ColumnChange, ColumnModel } from './columns/model.js';
 export { createColumnModel } from './columns/model.js';
@@ -86,7 +86,7 @@ export type { Intent, IntentContext, KeyLike, KeyOwner } from './keys/intent.js'
 export { createKernel, headerSelection } from './kernel.js';
 export type { GridCommand, GridCommandResult, GridEvent, GridKernel, HeaderSelection, SelectionScope } from './kernel.js';
 export { reconcileFocus } from './focus.js';
-export type { FocusPos } from './focus.js';
+export type { CellFocus, FocusOwner, FocusPos } from './focus.js';
 export { nextSort } from './sort/toggle.js';
 export { resolveOperations, splitQuery } from './model/operations.js';
 export type { Operation, Operations, OperationsInput, Placement, ServerQuery } from './model/operations.js';

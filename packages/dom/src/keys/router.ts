@@ -1,58 +1,43 @@
 import { intentFor, isSelected, type FocusPos, type Intent, type KeyOwner } from '@dzgrid/core';
+import { sameFocus } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { FocusControl } from './focus.js';
+import { moveFocus, type Goal } from './move.js';
 import { ownerOf } from './owner.js';
 
 /**
  * One keydown on the scroller: who owns the key, what it means (`intentFor`,
- * mirrored in RTL), then a kernel command or a focus move.
+ * mirrored in RTL), then a kernel command or a focus move (`moveFocus`).
  */
 export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggleAll: () => void): void {
   const { el, kernel, rows, columns, headerRenderer, scope } = g;
 
+  // Where the user aims (a spanned cell keeps the row and the column they came from), while the
+  // focus is the one the keys last set; any other focus (a click, a sort, the host) starts afresh.
+  let goal: Goal | null = null;
+  let set: FocusPos | null = null;
+  function move(from: FocusPos, intent: Intent): void {
+    if (!sameFocus(kernel.focus, set)) goal = null;
+    const m = moveFocus(g.spans?.map ?? null, {
+      rows: rows.displayed, cols: columns.visible().map((c) => c.id),
+      page: Math.max(1, Math.floor(g.geometry.read().block / g.rowHeight()) - 1),
+      bands: g.bands.length, extras: g.headerRows.length, checkBox: !!headerRenderer.checkBox,
+    }, from, goal, intent);
+    if (!m) return;
+    goal = m.goal;
+    if (m.to === 'checkBox') headerRenderer.checkBox!.focus({ preventScroll: true });
+    else focus.focusTo(m.to);
+    set = kernel.focus;
+  }
+
   function apply(intent: Intent, owner: KeyOwner): void {
     const from = focus.current();
     if (!from) return;
-    const d = rows.displayed;
-    const cols = columns.visible();
-    const ci = Math.max(0, cols.findIndex((c) => c.id === from.column));
-    const ri = from.kind === 'cell' ? d.indexOf(from.row) : -1;
-    const lastRow = d.count - 1;
-    const page = Math.max(1, Math.floor(g.geometry.read().block / g.rowHeight()) - 1);
-    const colAt = (i: number) => cols[Math.max(0, Math.min(cols.length - 1, i))]!.id;
-    const header = (column: string, level?: number): FocusPos => (level ? { kind: 'header', column, level } : { kind: 'header', column });
-    // No rows: a move into the body stays in the header row it comes from.
-    const cell = (r: number, c: number): FocusPos | null => (lastRow < 0 ? header(colAt(c), from.kind === 'header' ? from.level : undefined) : { kind: 'cell', row: d.keyAt(d.index(Math.max(0, Math.min(lastRow, r)))!), column: colAt(c) });
-    let to: FocusPos | null = null;
     switch (intent.kind) {
       case 'move':
-        // Down through the header rows, then the body; up from the body to the last header row.
-        if (intent.axis === 'row' && from.kind === 'header' && (from.level ?? 0) < g.headerRows.length) {
-          to = { kind: 'header', column: from.column, level: (from.level ?? 0) + 1 };
-          break;
-        }
-        if (intent.axis === 'row' && from.kind === 'cell' && ri === 0 && intent.delta < 0 && g.headerRows.length) {
-          to = { kind: 'header', column: from.column, level: g.headerRows.length };
-          break;
-        }
-        // Back from the first header: the select-all box, when there is one.
-        if (intent.axis === 'col' && from.kind === 'header' && !from.level && ci === 0 && intent.delta < 0 && headerRenderer.checkBox) {
-          headerRenderer.checkBox.focus({ preventScroll: true });
-          return;
-        }
-        if (intent.axis === 'col') to = from.kind === 'header' ? header(colAt(ci + intent.delta), from.level) : cell(ri, ci + intent.delta);
-        else if (from.kind === 'header') to = cell(0, ci);
-        else to = ri + intent.delta < 0 ? { kind: 'header', column: colAt(ci) } : cell(ri + intent.delta, ci);
-        break;
-      case 'edge': {
-        const c = intent.axis === 'row' ? ci : intent.to === 'first' ? 0 : cols.length - 1;
-        if (intent.axis === 'col' && from.kind === 'header') to = header(colAt(c), from.level);
-        else to = cell(intent.axis === 'col' ? ri : intent.to === 'first' ? 0 : lastRow, c);
-        break;
-      }
+      case 'edge':
       case 'page':
-        to = from.kind === 'header' ? cell(page - 1, ci) : cell(ri + intent.delta * page, ci);
-        break;
+        return move(from, intent);
       case 'toggleSelect': {
         const mode = g.settings.selection?.mode ?? 'none';
         if (from.kind !== 'cell' || mode === 'none') return;
@@ -78,7 +63,6 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
         if (owner === 'header' && from.kind === 'header' && !from.level) kernel.dispatch({ type: 'sort.toggle', column: from.column, multi: intent.multi }, 'user');
         return;
     }
-    if (to) focus.focusTo(to);
   }
 
   scope.on(el.viewport, 'keydown', (e: KeyboardEvent) => {
@@ -105,11 +89,12 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     }
     g.intentAt = g.now();
     const owner: KeyOwner = ownerOf(e.target, el.viewport);
-    // Up from a lower header row: the row above (the core's table stops ArrowUp on a header).
+    // Up from a lower header row: the row above, a group row above the column headers too
+    // (the core's table stops ArrowUp on a header).
     const at = kernel.focus;
-    if (owner === 'header' && e.key === 'ArrowUp' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && at?.kind === 'header' && (at.level ?? 0) > 0) {
+    if (owner === 'header' && e.key === 'ArrowUp' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && at?.kind === 'header' && (at.level ?? 0) > -g.bands.length) {
       e.preventDefault();
-      focus.focusTo(at.level === 1 ? { kind: 'header', column: at.column } : { kind: 'header', column: at.column, level: at.level! - 1 });
+      move(at, { kind: 'move', axis: 'row', delta: -1 });
       return;
     }
     const intent = intentFor(e, { dir: g.dir, owner, mac: g.mac });
