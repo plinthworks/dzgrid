@@ -22,9 +22,10 @@ Mis à jour : 2026-10-19 (étape 15 faite, non commitée). Ce fichier dit où en
 | 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
 | 13 — fenêtre de filtre (texte, nombre, oui/non), marque « filtré », Alt+Flèche bas | fait, relu, testé | `f67fc48`, `67782bc` |
 | 14 — filtres de dates sur tzslot (jour, période, avant/après), six raccourcis relatifs, horloge | fait, relu, testé | `df27559`, `85e08c3`, `ae0b40b`, `24acaab` |
-| 16 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
+| 15 — filtre par liste de valeurs (chargé à la demande), menu de démos | fait, relu, testé | `021324e`, `79c40c3` |
+| 16 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-Étape 15 faite (non commitée) : filtre par liste (`docs/behaviors/filter-set.md`), décisions du propriétaire appliquées (tout décocher = `include: []` ; pas de bouton par défaut sur les colonnes à liste, seulement `filter: { kind: 'set' }` ; « Filtre actif » gardé). Bac à sable : menu de démos en haut de la page d'accueil. Suite 3 087 tests, navigateur 257 vérifications. Corrections de la relecture et de l'analyse des tests faites (non commitées) : « Tout sélectionner » suit la liste affichée, pas la case de recherche ; la frappe rapide dans la liste plie les textes comme la recherche (accents, voyelles arabes, formes d'alif) ; Appliquer sans changement n'envoie rien ; liste des options d'une énumération complète ; Flèche bas pendant une saisie IME ; poignée de valeurs fermée si le morceau échoue. Suite 182 fichiers, 3 115 tests. À faire ensuite : commit après relecture du chef, puis l'étape 16. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§11), relecture arabe (dont les 8 textes de la liste).
+En cours : l'étape 16 (recherche rapide `bindQuickSearch`), architecte d'abord. Étape 15 close (`021324e`, corrections `79c40c3`) : suite 3 115 tests, navigateur 257 ; filters 9 160 / 9 300, set 3 778 / 3 800 ; décisions du propriétaire : tout décocher = tableau vide, pas de bouton par défaut sur les colonnes à liste (seulement `filter: { kind: 'set' }`), résumé « Filtre actif ». Étape 26 (animations GSAP) décidée. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§11), relecture arabe, licence GSAP à confirmer.
 
 ## Les plans détaillés des étapes
 
