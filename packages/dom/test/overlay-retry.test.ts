@@ -167,7 +167,8 @@ describe('the retry button', () => {
   });
 
   it('takes pointer events though the overlay lets them through', () => {
-    expect(LAYOUT_CSS).toMatch(/:where\(\.dzg-overlay button\)\s*\{\s*pointer-events:\s*auto;?\s*\}/);
+    // Every element the overlay holds (the button, a part's controls); its own text node lets them through.
+    expect(LAYOUT_CSS).toMatch(/:where\(\.dzg-overlay > \*\)\s*\{\s*pointer-events:\s*auto;?\s*\}/);
   });
 });
 

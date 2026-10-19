@@ -54,8 +54,25 @@ for (const type of ['blur', 'focusout', 'focusin']) document.addEventListener(ty
 
 const host = document.getElementById('host')!;
 const features = q.get('spans') || q.get('groups') ? [(await import('/packages/dom/src/spans.ts')).spans()] : [];
+// `slots=1`: an overlay part with a link and a field (they must take the pointer though the overlay does not).
+let parts: Record<string, unknown> | undefined;
+if (q.get('slots')) {
+  const { slots } = await import('/packages/dom/src/slots.ts');
+  const { definePart } = await import('/packages/dom/src/part.ts');
+  features.push(slots() as never);
+  parts = {
+    overlay: definePart('overlay', {
+      mount(el) {
+        const p = document.createElement('p');
+        p.innerHTML = 'See <a href="#help" class="help">help</a> <input class="ask" aria-label="ask">';
+        el.append(p);
+        return {};
+      },
+    }),
+  };
+}
 const grid = createGrid<Row>(host, {
-  rows, getRowId: (r) => r.id, columns: tree, messages, locale, features,
+  rows, getRowId: (r) => r.id, columns: tree, messages, locale, features, ...(parts && { parts }),
   selection: { mode, checkbox: q.get('box') === '1', click: true },
 });
 

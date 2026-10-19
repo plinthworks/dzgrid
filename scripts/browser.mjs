@@ -153,6 +153,31 @@ async function runEngine(name) {
       }
     }
 
+    // ---- an overlay part's own controls take the pointer (step 11 review): a link and a field ----
+    if (name === 'chrome') {
+      const { page, errors } = await load(ctx, 'locale=fr-FR&rows=200&slots=1');
+      await page.evaluate(() => window.t.grid.update({ overlay: 'error' }));
+      await frames(page);
+      const at = (sel) => page.evaluate((sel) => {
+        const el = document.querySelector(`.dzg-overlay ${sel}`);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2, hit: hit === el || el.contains(hit), pe: getComputedStyle(el).pointerEvents };
+      }, sel);
+      const link = await at('a.help');
+      const field = await at('input.ask');
+      if (link) await page.mouse.click(link.x, link.y);
+      const hash = await page.evaluate(() => location.hash);
+      if (field) await page.mouse.click(field.x, field.y);
+      const typed = await page.evaluate(() => document.activeElement?.classList.contains('ask') ?? false);
+      // The overlay itself still lets the pointer through to the rows around its content.
+      const through = await page.evaluate(() => { const o = document.querySelector('.dzg-overlay'); const r = o.getBoundingClientRect(); const hit = document.elementFromPoint(r.left + 8, r.bottom - 8); return getComputedStyle(o).pointerEvents === 'none' && hit !== o; });
+      check(name, 'overlay part: a link and a field inside it are on top under the pointer, the link followed by a click, the field focused', link?.hit && field?.hit && hash === '#help' && typed && through, { link, field, hash, typed, through });
+      check(name, 'no page error overlay part', errors.length === 0, errors);
+      await page.close();
+    }
+
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.
     // And under grouped headers (step 9b, commit 4): LTR, RTL, pinned, with the box.

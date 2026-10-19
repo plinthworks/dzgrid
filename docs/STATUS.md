@@ -18,10 +18,10 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
 | 9b — fusions de cellules (rowspan / colspan) | fait, relu, testé (4 commits et leurs corrections) | `f4c63f6` |
 | 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | fait, relu, testé | `5aebe99` |
-| 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | écrit, suite verte, navigateur vert ; pas encore commité ni relu | — |
+| 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | commité, relu ; corrections de la relecture écrites, pas encore commitées | `0caedae` |
 | 12 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 11 est écrite (plan `docs/phase-3-steps/step11-slots-blueprint.md`, décisions `step11-decisions.md`) : suite 153 fichiers, 2 561 tests ; navigateur 89 vérifications ; 17 mutants, 16 tués, 1 équivalent. Reste : relecture de code et analyse des tests, puis commit.
+En cours : l'étape 11 est commitée (`0caedae`, plan `docs/phase-3-steps/step11-slots-blueprint.md`, décisions `step11-decisions.md`). Corrections de la relecture et de l'analyse des tests écrites, non commitées : la bulle d'aide se cache quand son ancre quitte la page ou que sa cellule montre une autre ligne (tri, filtre, mise à jour) ou que le registre des parts change (dans la base) ; tout élément posé dans le voile reçoit le pointeur (`.dzg-overlay > *`). Suite 155 fichiers, 2 628 tests ; navigateur 91 vérifications ; dom 18 450, dom/slots 1 279, thème 1 199. Reste : commit.
 
 ## Les plans détaillés des étapes
 
@@ -53,7 +53,7 @@ En cours : l'étape 11 est écrite (plan `docs/phase-3-steps/step11-slots-bluepr
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 564 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 425 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 363 |
-| `@dzgrid/dom` | 18 600 (étape 11) | 18 383 |
+| `@dzgrid/dom` | 18 600 (étape 11) | 18 450 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 473 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 1 279 |
 | `@dzgrid/dom/popup` | 1 500 | ~1 390 |

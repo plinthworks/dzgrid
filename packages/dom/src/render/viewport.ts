@@ -61,7 +61,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const cellParts = new Map(Object.entries(registry ?? {}).filter(([, p]) => p.slot === 'cell') as [string, SlotPart<'cell'>][]);
     const names = new Set(cellParts.keys());
     const byColumn = new Map<string, SlotPart<'cell'> | null>();
-    if (parts.registry !== registry) told = new Set();
+    // A new registry: problems told again; the tooltip hidden, its part may be gone or another
+    // (header and overlay parts follow at this paint; a tooltip mounts afresh at its next show).
+    if (parts.registry !== registry) (told = new Set()), g.tip.hide();
     const problems = [];
     for (const col of columns.visible()) {
       const r = partNameFor('cell', { id: col.id, type: col.type, ...(col.def.ui && { ui: col.def.ui }) }, names);
@@ -199,6 +201,11 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const retained: RowKey[] = focus?.kind === 'cell' ? [focus.row] : [];
     if (spans && w.rows) retained.push(...spans.anchors(w.rows.first, w.rows.last));
     rowRenderer.render(frame, wanted, retained);
+    // A tooltip whose anchor left the page (its column hidden), or whose pooled cell now shows
+    // another row or new data (a sort, a filter, an update): hidden, its text would be stale.
+    const tipAt = g.tip.anchor;
+    const tipRow = tipAt?.closest('.dzg-row');
+    if (tipAt && (!tipAt.isConnected || g.tip.row !== (tipRow ? rows.row(rowRenderer.keyOf(tipRow)!)?.data : null))) g.tip.hide();
     for (const h of g.features) h.afterRows?.(frame as Frame<unknown>);
     after.rovingStop(d, visible);
     const topIndex = d.count ? Math.min(d.count - 1, Math.floor(scroll.logicalTop / h)) : -1;

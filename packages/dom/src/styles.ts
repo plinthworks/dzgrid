@@ -28,7 +28,7 @@ export const LAYOUT_CSS = `
 :where(.dzg-free) { unicode-bidi: plaintext; }
 :where(.dzg-num) { unicode-bidi: isolate; direction: ltr; }
 :where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: 0; display: grid; place-content: center; place-items: center; pointer-events: none; }
-:where(.dzg-overlay button) { pointer-events: auto; }
+:where(.dzg-overlay > *) { pointer-events: auto; }
 :where(.dzg-tooltip) { position: fixed; margin: 0; z-index: 10; }
 :where(.dzg-overlay[hidden], .dzg-tooltip[hidden]) { display: none; }
 :where(.dzg-popup) { position: fixed; margin: 0; z-index: 10; }

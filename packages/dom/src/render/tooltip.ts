@@ -21,6 +21,8 @@ export interface TipFor {
 export class Tooltip {
   readonly el: HTMLElement;
   #anchor: HTMLElement | null = null;
+  /** The row the shown tooltip is about (null: a header's). */
+  row: unknown = null;
   #cancelShow: (() => void) | null = null;
   #cancelHide: (() => void) | null = null;
   readonly #scope: Scope;
@@ -92,6 +94,7 @@ export class Tooltip {
   #show(anchor: HTMLElement, tip: TipFor, dir: Dir): void {
     if (this.#anchor && this.#anchor !== anchor) setAttr(this.#anchor, 'aria-describedby', null);
     this.#anchor = anchor;
+    this.row = tip.row;
     // Drawn before it is measured: its size is the part's.
     if (!this.#fill?.(tip) && this.el.textContent !== tip.text) this.el.textContent = tip.text;
     this.el.hidden = false;
