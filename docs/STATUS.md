@@ -17,10 +17,10 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 8 — types de filtres personnalisés (`FilterKind`) | fait | `7a081dc` |
 | 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
 | 9b — fusions de cellules (rowspan / colspan) | fait, relu, testé (4 commits et leurs corrections) | `f4c63f6` |
-| 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | écrit, suite verte, non commité, à relire | — |
+| 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | fait, relu, testé | `5aebe99` |
 | 11 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 10 (export CSV) est écrite (`@dzgrid/core/csv`, fiche `docs/behaviors/csv-export.md` complétée, plan et décisions dans `docs/phase-3-steps/step10-*`), suite verte, à relire et à commiter ; le bouton d'export, `canExport` et `exportAll` sont l'étape 19. L'étape 9b (fusions) est close (`f4c63f6`) : page d'exemples http://127.0.0.1:4700/spans.html ; fiche `docs/behaviors/spans.md` ; plan `docs/phase-3-steps/step9b-spans-blueprint.md` ; test à l'oreille à faire par le propriétaire : `docs/a11y-protocol.md` §7 (dont Firefox avec NVDA/JAWS sur les en-têtes groupés). Limites connues : sans `spans()`, une en-tête de colonne focalisée déplacée par un épinglage perd le focus (budget de base) ; le nombre de niveaux de groupes est fixé à la création.
+En cours : l'étape 11 (pièces par défaut : en-tête, voile avec « Réessayer », bulle d'aide), architecte d'abord ; la base dom n'a que ~11 o de marge (17 989 / 18 000) : décision de budget du propriétaire attendue avant le code. Étapes 9b (fusions, `f4c63f6`) et 10 (CSV, `5aebe99`) closes.
 
 ## Les plans détaillés des étapes
 
