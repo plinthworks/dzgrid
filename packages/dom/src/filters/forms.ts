@@ -1,3 +1,4 @@
+import type { LocaleCtx } from '@dzgrid/core';
 import type { Part, SlotContext } from '../part.js';
 import { echo, nameOf, numberIn, shown, textField } from './field.js';
 
@@ -14,7 +15,8 @@ interface Body {
   texts(): void;
   focus(): void;
 }
-type Make = (c: () => C, doc: Document, changed: (now: boolean) => void) => Body;
+/** `now` null: the form changed under the user (an operator no longer offered): recorded, nothing sent. `clr`: a null draft removes the filter (Clear, All). */
+type Make = (c: () => C, doc: Document, changed: (now: boolean | null, clr?: boolean) => void) => Body;
 
 let uid = 0;
 const el = <K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = ''): HTMLElementTagNameMap[K] => {
@@ -29,6 +31,10 @@ const labelled = (doc: Document, control: HTMLElement): [HTMLLabelElement, HTMLS
   l.append(s, control);
   return [l, s];
 };
+/** A text written only when it changes: a paint that changes nothing touches nothing. */
+const tx = (e: Node, v: string): void => {
+  if (e.textContent !== v) e.textContent = v;
+};
 
 /**
  * The popup's shell (docs/behaviors/filter-ui.md, step 13): the kind's fields, or the summary
@@ -37,7 +43,9 @@ const labelled = (doc: Document, control: HTMLElement): [HTMLLabelElement, HTMLS
  * and close. On a server (owner decision O3) the fields are a draft: Apply or Enter sends it,
  * closing without drops it. A number that does not read is never sent: marked, said once, and at
  * Apply the focus goes to it, the popup stays. The echo rules are the floating box's (`field.ts`):
- * a filter from elsewhere rewrites clean fields, never ones being edited.
+ * a filter from elsewhere rewrites clean fields, never ones being edited. A draft that cannot
+ * filter yet (between with one bound, an empty value) keeps the filter in force and drops the
+ * pending edit (lead decision L1); only Clear or All remove it.
  */
 function form(make: Make): Part<C> {
   return {
@@ -47,6 +55,8 @@ function form(make: Make): Part<C> {
       const e = echo();
       let draft: F | null = null;
       let showing: boolean | null = null;
+      /** The last change removes: a null draft is applied (Clear, All), not kept (L1). */
+      let none = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
       const live = (): boolean => c.where !== 'server';
       const sum = el(doc, 'p', 'dzg-fsum');
@@ -56,14 +66,18 @@ function form(make: Make): Part<C> {
       clear.type = apply.type = 'button';
       foot.append(clear, apply);
 
-      function changed(now: boolean): void {
+      function changed(now: boolean | null, clr = false): void {
+        if (now === null && !showing) return;
         clearTimeout(timer);
+        none = clr;
         const f = body.read(false);
         if (f !== undefined) draft = f;
-        const send = e.edit(f, c.state, f !== undefined);
+        // An inactive draft sends nothing: the filter in force stays (L1). Clear and All always
+        // write (a pending edit of the floating box's included).
+        const send = ((e.edit(f, c.state, f !== undefined) && f !== null) || clr) && now !== null;
         if (!live()) return;
         // Unreadable: judged once the edit would have applied.
-        if (f === undefined) timer = setTimeout(() => body.read(true), c.debounceMs);
+        if (f === undefined && now !== null) timer = setTimeout(() => body.read(true), c.debounceMs);
         if (send) c.set(f as never, now ? { commit: 'now' } : undefined);
         else c.set(null, { commit: 'cancel' });
       }
@@ -79,9 +93,9 @@ function form(make: Make): Part<C> {
         if (e.stale(c.state, c.ctx)) body.write((draft = c.state as F | null));
         show();
         body.texts();
-        sum.textContent = c.msg('filter.summaryActive');
-        clear.textContent = c.msg('filter.clear', { column: nameOf(c) });
-        apply.textContent = c.msg('filter.apply');
+        tx(sum, c.msg('filter.summaryActive'));
+        tx(clear, c.msg('filter.clear', { column: nameOf(c) }));
+        tx(apply, c.msg('filter.apply'));
       };
       const commit = (): void => {
         clearTimeout(timer);
@@ -89,15 +103,16 @@ function form(make: Make): Part<C> {
           const f = body.read(true);
           // Unreadable: the focus on the first such field; the popup stays.
           if (f === undefined) return host.querySelector<HTMLElement>('[aria-invalid=true]')?.focus();
-          // The filter in force again stores nothing (the kernel keeps an equal filter as it is).
-          c.set(f as never, { commit: 'now' });
+          // The filter in force again stores nothing (the kernel keeps an equal filter as it is);
+          // an inactive draft keeps it (L1).
+          if (f !== null || none) c.set(f as never, { commit: 'now' });
         }
         c.close();
       };
       clear.addEventListener('click', () => {
         body.write((draft = null));
         show();
-        changed(true);
+        changed(true, true);
       });
       apply.addEventListener('click', commit);
       host.addEventListener('keydown', (k) => {
@@ -144,23 +159,31 @@ const conditions = (num: boolean): Make => (get, doc, changed) => {
   const [lo, so] = labelled(doc, op);
   const [la, sa] = labelled(doc, a);
   const [lb, sb] = labelled(doc, b);
+  /** The locale each value was typed or written in: read in it, once (a locale switch since changes nothing). */
+  const at = new Map<HTMLInputElement, LocaleCtx>();
+  const hide = (l: HTMLElement, v: boolean): void => void (l.hidden !== v && (l.hidden = v));
   const vis = (): void => {
-    la.hidden = empty(op.value);
-    lb.hidden = op.value !== 'between';
+    hide(la, empty(op.value));
+    hide(lb, op.value !== 'between');
   };
   op.addEventListener('change', () => (vis(), changed(true)));
   for (const i of [a, b]) {
     i.addEventListener('input', (k) => {
       if ((k as InputEvent).isComposing) return;
       i.removeAttribute('aria-invalid');
+      at.set(i, get().ctx);
       changed(false);
     });
-    i.addEventListener('compositionend', () => changed(false));
+    i.addEventListener('compositionend', () => (at.set(i, get().ctx), changed(false)));
   }
-  const fill = (): void => {
+  /** The options of the column's operators; the one chosen kept when still offered. True: it was not (the first now). */
+  const fill = (): boolean => {
     const list = ops();
-    if ([...op.options].map((o) => o.value).join() === list.join()) return;
+    if ([...op.options].map((o) => o.value).join() === list.join()) return false;
+    const was = op.value;
     op.replaceChildren(...list.map((v) => Object.assign(el(doc, 'option'), { value: v })));
+    op.value = list.includes(was) ? was : list[0]!;
+    return !!was && op.value !== was;
   };
   return {
     els: [lo, la, lb],
@@ -174,6 +197,7 @@ const conditions = (num: boolean): Make => (get, doc, changed) => {
       b.value = s ? shown(g.ctx, s.valueTo) : '';
       a.removeAttribute('aria-invalid');
       b.removeAttribute('aria-invalid');
+      at.set(a, g.ctx).set(b, g.ctx);
       vis();
     },
     read(judge) {
@@ -182,8 +206,9 @@ const conditions = (num: boolean): Make => (get, doc, changed) => {
       if (empty(o)) return { type, op: o };
       if (!num) return a.value ? { type, op: o, value: a.value, ...((c.state as F | null)?.caseSensitive && { caseSensitive: true }) } : null;
       const fields = o === 'between' ? [a, b] : [a];
-      const [x, y] = fields.map((i) => numberIn(i, c.ctx));
-      const bad = fields.filter((i) => numberIn(i, c.ctx) === null);
+      const read = (i: HTMLInputElement) => numberIn(i, at.get(i) ?? c.ctx);
+      const [x, y] = fields.map(read);
+      const bad = fields.filter((i) => read(i) === null);
       if (bad.length) {
         // Said once: a field already marked is not said again.
         if (judge && bad.some((i) => !i.hasAttribute('aria-invalid'))) c.announce(c.msg('filter.invalid', { column: nameOf(c) }));
@@ -195,11 +220,12 @@ const conditions = (num: boolean): Make => (get, doc, changed) => {
     },
     texts() {
       const c = get();
-      fill();
-      so.textContent = c.msg('filter.op');
-      sa.textContent = c.msg('filter.value');
-      sb.textContent = c.msg('filter.valueTo');
-      for (const o of op.options) o.textContent = c.msg(`filter.op.${o.value}` as never);
+      // An operator no longer offered: the first shown, and the draft is what the form says.
+      if (fill()) vis(), changed(null);
+      tx(so, c.msg('filter.op'));
+      tx(sa, c.msg('filter.value'));
+      tx(sb, c.msg('filter.valueTo'));
+      for (const o of op.options) tx(o, c.msg(`filter.op.${o.value}` as never));
     },
     focus() {
       if (empty(op.value)) return op.focus();
@@ -219,7 +245,8 @@ const yesNo: Make = (get, doc, changed) => {
     const r = el(doc, 'input');
     r.type = 'radio';
     r.name = id;
-    r.addEventListener('change', () => changed(true));
+    // All is a choice: it removes the filter.
+    r.addEventListener('change', () => changed(true, true));
     const [l, s] = labelled(doc, r);
     l.append(s);
     spans.push(s);
@@ -236,8 +263,9 @@ const yesNo: Make = (get, doc, changed) => {
     },
     texts() {
       const c = get();
-      group.setAttribute('aria-label', c.msg('filter.popupLabel', { column: nameOf(c) }));
-      ['filter.all', 'filter.yes', 'filter.no'].forEach((k, i) => (spans[i]!.textContent = c.msg(k as never)));
+      const l = c.msg('filter.popupLabel', { column: nameOf(c) });
+      if (group.getAttribute('aria-label') !== l) group.setAttribute('aria-label', l);
+      ['filter.all', 'filter.yes', 'filter.no'].forEach((k, i) => tx(spans[i]!, c.msg(k as never)));
     },
     focus: () => radios.find((r) => r.checked)?.focus(),
   };

@@ -145,10 +145,8 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   // ---------- behaviours ----------
   const focus = installFocus(g);
   const painter = createPainter(g, focus);
-  g.restoreFocus = () => {
-    if (g.kernel.focus) focus.focusTo(g.kernel.focus);
-    else viewport.focus({ preventScroll: true });
-  };
+  // The grid takes the focus back (`hasFocus`: a focus the kernel is about to move, its column hidden, follows).
+  g.restoreFocus = () => void ((g.hasFocus = true), g.kernel.focus ? focus.focusTo(g.kernel.focus) : viewport.focus({ preventScroll: true }));
   const job = { read: () => geometry.read(), write: (box: ReturnType<typeof geometry.read>) => { g.queued = false; painter.paint(box); } };
   function schedule(): void {
     if (scope.isDisposed || g.queued) return;

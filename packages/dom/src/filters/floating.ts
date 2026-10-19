@@ -47,7 +47,7 @@ export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: bo
     if (!m) return;
     const { part, kind } = resolve(col, 'floating');
     m.set(cell, part as Part<FC> | null, {
-      ...commit.edits(col, kind),
+      ...commit.edits(col, kind, cell),
       canOpen: popup.can(col),
       openFilter: () => popup.toggle(col.id, cell.querySelector<HTMLElement>('[aria-haspopup]') ?? cell),
     });

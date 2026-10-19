@@ -224,7 +224,7 @@ describe('the text form', () => {
     expect(s.op()!.value).toBe('startsWith');
   });
 
-  it('stores what is chosen, after the pause; an empty value removes it; blank hides the value and applies at once', () => {
+  it('stores what is chosen, after the pause; an empty value keeps it, Clear removes it (L1); blank hides the value and applies at once', () => {
     vi.useFakeTimers();
     const t = open();
     t.feature.openFilter('name');
@@ -237,6 +237,8 @@ describe('the text form', () => {
     expect(t.ids().every((id) => Number(id.slice(1)) % 3 === 0)).toBe(true);
     t.fill(t.value()!, '');
     vi.advanceTimersByTime(150);
+    expect(t.filter()['name']).toEqual({ type: 'text', op: 'startsWith', value: 'ann' });
+    t.clear()!.click();
     expect(t.filter()).toEqual({});
     t.choose(t.op()!, 'blank');
     expect(t.hidden(t.value())).toBe(true);

@@ -14,13 +14,15 @@ export interface Menu extends Opener {
   /** Opens the column's popup at `anchor` (by default the header button, else the header cell, else the floating cell). */
   open(column: string, anchor?: HTMLElement | null): boolean;
   close(): void;
-  /** The header's button, mark and name (`FeatureHandle.decorateHeader`). */
-  decorate(col: ResolvedColumn<unknown>, cell: HTMLElement): void;
+  /** The header's button and mark; returns its name (`FeatureHandle.decorateHeader`). */
+  decorate(col: ResolvedColumn<unknown>, cell: HTMLElement, label: string | null): string | void;
   /** At each paint: the open popup follows the grid, or closes. */
   paint(f: Frame<unknown>): void;
 }
 
 const name = (col: ResolvedColumn<unknown>): string => col.def.header ?? col.id;
+/** One empty list for every paint: a new one would make the part's context new each time. */
+const NONE: readonly string[] = Object.freeze([]);
 const set = (el: Element, k: string, v: string | null): void => {
   if (v === null) el.removeAttribute(k);
   else if (el.getAttribute(k) !== v) el.setAttribute(k, v);
@@ -33,13 +35,21 @@ const set = (el: Element, k: string, v: string | null): void => {
  * feature's key, not the core's), a floating summary, or `openFilter`. Opening flushes the
  * column's pending edit; closing (Apply, Escape, the button again; never a click outside, O7)
  * applies the pending one in the browser, destroys the part, and puts the focus back on the
- * anchor (the grid's own focus when the anchor left). It closes too when its anchor leaves the
- * page or its column the column window (a focused header kept mounted out of view, D6), the
- * column's part changes or goes, or the direction changes (O9). While open, each
- * paint updates the part's context and places it again.
+ * anchor (the grid's own focus when the anchor left). An anchor that leaves while its cell stays
+ * (the floating summary emptied by All or Clear) gives way to the cell. It closes when its cell
+ * leaves the page or its column the column window, the column's part changes, goes or throws, or
+ * the direction changes (O9). A column out of the window does not open (Alt+ArrowDown on a focused
+ * header kept mounted out of view, D6, is left unhandled). While open, each paint updates the
+ * part's context and places it again; nothing is moved or written as the grid goes.
  */
 export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, on: boolean): Menu {
-  let cur: { readonly column: string; readonly anchor: HTMLElement; readonly ref: PopupRef; readonly m: Mounted<C>; readonly host: HTMLElement; readonly part: Part<C>; readonly dir: string } | null = null;
+  let cur: { readonly column: string; anchor: HTMLElement; readonly cell: HTMLElement; readonly ref: PopupRef; readonly m: Mounted<C>; readonly host: HTMLElement; readonly part: Part<C>; readonly dir: string } | null = null;
+  let frame: Frame<unknown> | null = null;
+  /** The column is in the centre and out of the column window (its header kept mounted only for the focus). */
+  const out = (column: string): boolean => {
+    const at = frame ? frame.layout.center.columns.findIndex((c) => c.id === column) : -1;
+    return at >= 0 && (!frame!.cols || at < frame!.cols.first || at > frame!.cols.last);
+  };
   const can = (col: ResolvedColumn<unknown>): boolean => on && !!resolve(col, 'filter').part;
   const expanded = (el: HTMLElement, v: boolean): void => {
     if (el.hasAttribute('aria-haspopup')) el.setAttribute('aria-expanded', String(v));
@@ -48,7 +58,7 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
   /** The part's context: the shared edits, the column's own operators, and `close`. */
   const draw = (m: Mounted<C>, host: HTMLElement, col: ResolvedColumn<unknown>, part: Part<C>): boolean => {
     const f = col.def.filter;
-    return m.set(host, part, { ...commit.edits(col, resolve(col, 'filter').kind), ops: (f && f.ops) || [], close });
+    return m.set(host, part, { ...commit.edits(col, resolve(col, 'filter').kind, host), ops: (f && f.ops) || NONE, close });
   };
 
   function open(column: string, anchor?: HTMLElement | null): boolean {
@@ -56,7 +66,7 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
     const part = col && can(col) ? (resolve(col, 'filter').part as Part<C>) : null;
     const header = g.headerRenderer.cell(column);
     const at = anchor ?? header?.querySelector<HTMLElement>(':scope > .dzg-fbtn') ?? header ?? g.headerRenderer.cell(column, 1);
-    if (!part || !at?.isConnected || !g.partBase) return false;
+    if (!part || !at?.isConnected || !g.partBase || out(column)) return false;
     close();
     // The floating box's edit first: the popup starts from the filter in force.
     commit.flush(column);
@@ -67,17 +77,17 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
     const ref = popupsFor(g).open(at, host, {
       placement: 'block-end', modal: true, label: g.msg('filter.popupLabel', { column: name(col!) }),
       onClose() {
-        if (cur?.ref === ref) cur = null;
+        if (cur === it) cur = null;
         // Closing applies what is pending in the browser; a grid going applies nothing.
         if (!g.scope.isDisposed) commit.flush(column);
         m.clear();
-        expanded(at, false);
+        expanded(it.anchor, false);
         g.schedule();
       },
     });
     // A field shown or hidden changes its size.
     host.addEventListener('change', () => ref.reposition());
-    cur = { column, anchor: at, ref, m, host, part, dir: g.dir };
+    const it = (cur = { column, anchor: at, cell: at.closest<HTMLElement>('[data-col]') ?? at, ref, m, host, part, dir: g.dir });
     expanded(at, true);
     m.focus();
     g.schedule();
@@ -105,17 +115,17 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
     close,
     can,
     toggle,
-    decorate(col, cell) {
-      const filtered = col.id in g.kernel.query.filter;
+    decorate(col, cell, label) {
+      const filtered = Object.hasOwn(g.kernel.query.filter, col.id);
       const has = can(col);
       let b = cell.querySelector<HTMLButtonElement>(':scope > .dzg-fbtn');
       set(cell, 'data-dzg-filtered', filtered ? '' : null);
-      // The base set the sort's name (or none); the filter's joins it. With a button, the header
-      // keeps its own name: the button's must not join it.
-      const label = cell.getAttribute('aria-label') ?? name(col);
-      set(cell, 'aria-label', filtered ? g.msg('header.withFilter', { header: label }) : has ? label : cell.getAttribute('aria-label'));
       set(cell, 'aria-keyshortcuts', has ? 'Alt+ArrowDown' : null);
-      if (!has) return void b?.remove();
+      // The base's name (the sort's, or none); the filter's joins it. With a button, the header
+      // keeps its own name: the button's must not join it.
+      const own = label ?? name(col);
+      const named = filtered ? g.msg('header.withFilter', { header: own }) : has ? own : undefined;
+      if (!has) return b?.remove(), named;
       if (!b) {
         b = g.doc.createElement('button');
         b.type = 'button';
@@ -126,15 +136,16 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
       }
       set(b, 'aria-label', g.msg('filter.popupLabel', { column: name(col) }));
       set(b, 'aria-expanded', String(cur?.column === col.id));
+      return named;
     },
     paint(f) {
+      frame = f;
       if (!cur) return;
-      const { column, anchor, ref, m, host, part, dir } = cur;
+      const { column, cell, ref, m, host, part, dir } = cur;
       const col = g.columns.get(column);
-      const at = f.layout.center.columns.findIndex((c) => c.id === column);
-      const out = at >= 0 && (!f.cols || at < f.cols.first || at > f.cols.last);
-      if (!col || out || !anchor.isConnected || g.dir !== dir || (can(col) ? resolve(col, 'filter').part : null) !== part) return close();
-      draw(m, host, col, part);
+      // The anchor gone, its cell kept (the floating summary emptied): the popup stays, on the cell.
+      if (!cur.anchor.isConnected && cell.isConnected) ref.move((cur.anchor = cell));
+      if (!col || out(column) || !cell.isConnected || g.dir !== dir || (can(col) ? resolve(col, 'filter').part : null) !== part || !draw(m, host, col, part)) return close();
       set(ref.el, 'aria-label', g.msg('filter.popupLabel', { column: name(col) }));
       ref.reposition();
     },

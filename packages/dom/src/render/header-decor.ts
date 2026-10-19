@@ -20,9 +20,10 @@ export function widthOf<T>(g: GridContext<T>, id: string): number {
 /**
  * A header's sort state (APG): `aria-sort` on the first sorted column only;
  * the direction and, in a multi-column sort, the precedence shown, the
- * precedence also in the header's name. And its resize handle.
+ * precedence also in the header's name (returned: the features may join theirs
+ * before it is written once). And its resize handle.
  */
-export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable: boolean; def: { header?: string; resizable?: boolean } }, el: HTMLElement, sort: readonly SortItem[]): void {
+export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable: boolean; def: { header?: string; resizable?: boolean } }, el: HTMLElement, sort: readonly SortItem[]): string | null {
   el.classList.toggle('dzg-sortable', col.sortable);
   let grip = el.querySelector<HTMLElement>(':scope > .dzg-resize');
   if (col.def.resizable === false) grip?.remove();
@@ -40,8 +41,7 @@ export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable
   let mark = el.querySelector<HTMLElement>(':scope > .dzg-sort');
   if (at === -1) {
     mark?.remove();
-    setAttr(el, 'aria-label', null);
-    return;
+    return null;
   }
   if (!mark) {
     mark = g.doc.createElement('span');
@@ -52,5 +52,5 @@ export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable
   setAttr(mark, 'data-dir', sort[at]!.dir);
   const n = sort.length > 1 ? formattersFor(g.ctx).number()(at + 1) : '';
   if (mark.textContent !== n) mark.textContent = n;
-  setAttr(el, 'aria-label', sort.length > 1 ? g.msg('header.withSort', { header: col.def.header ?? col.id, priority: g.msg('sort.priority', { n: at + 1 }) }) : null);
+  return sort.length > 1 ? g.msg('header.withSort', { header: col.def.header ?? col.id, priority: g.msg('sort.priority', { n: at + 1 }) }) : null;
 }

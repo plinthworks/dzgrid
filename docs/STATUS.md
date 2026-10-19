@@ -20,10 +20,10 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | fait, relu, testé | `5aebe99` |
 | 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | fait, relu, testé | `0caedae`, `599cbdf` |
 | 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
-| 13 — fenêtre de filtre texte, nombre, oui/non ; marque « filtré » ; Alt+Flèche bas (`@dzgrid/dom/filters` partie 2) | écrit, tests verts, non commité : relecture et analyse des tests à faire | — |
+| 13 — fenêtre de filtre texte, nombre, oui/non ; marque « filtré » ; Alt+Flèche bas (`@dzgrid/dom/filters` partie 2) | commité (`f67fc48`) ; corrections de la relecture et de l'analyse des tests écrites, vertes, non commitées | — |
 | 14 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 13 (fenêtre de filtre texte, nombre, oui/non ; marque « filtré » dans l'en-tête ; Alt+Flèche bas), plan `docs/phase-3-steps/step13-popup-blueprint.md`, décisions `step13-decisions.md` (propriétaire, 2026-10-19 : filters 7 000 o mesuré hors popup, textes filtres en 520 / fr 620 / ar 830, thème 1 520 ; Appliquer sur serveur ; un clic dehors ne ferme pas ; ET/OU et « respecter la casse » reportés en Phase 5). **Écrite, non commitée** (2026-10-19) : tests d'abord (`filters-popup.test.ts`, 53 sur 54 en échec avant le code, 58 à la fin), suite 164 fichiers / 2 781 tests, typecheck, tailles, build, navigateur 191 vérifications, contraste : verts ; 30 mutants (4 tués après ajout de tests, 2 équivalents retirés). Reste : relecture de code et analyse des tests, puis commit ; écoute au lecteur d'écran par le propriétaire (protocole a11y §8 et §9). Étape 12 close (`59d796e`, `c1b14ea`). À faire par le propriétaire : l'écoute au lecteur d'écran de la ligne de filtres (protocole a11y §8).
+En cours : l'étape 13 (fenêtre de filtre texte, nombre, oui/non ; marque « filtré » dans l'en-tête ; Alt+Flèche bas), plan `docs/phase-3-steps/step13-popup-blueprint.md`, décisions `step13-decisions.md` (propriétaire, 2026-10-19 : filters 7 000 o mesuré hors popup, textes filtres en 520 / fr 620 / ar 830, thème 1 520 ; Appliquer sur serveur ; un clic dehors ne ferme pas ; ET/OU et « respecter la casse » reportés en Phase 5). **Écrite, non commitée** (2026-10-19) : tests d'abord (`filters-popup.test.ts`, 53 sur 54 en échec avant le code, 58 à la fin), suite 164 fichiers / 2 781 tests, typecheck, tailles, build, navigateur 191 vérifications, contraste : verts ; 30 mutants (4 tués après ajout de tests, 2 équivalents retirés). Commitée (`f67fc48`). Relecture et analyse des tests faites ; corrections écrites (2026-10-19), tests d'abord, **non commitées** : B1 (fenêtre ouverte depuis le résumé flottant : Tout / Effacer la gardent ouverte, ancrée à la cellule), B2 (colonne masquée : le focus suit celui de la grille, jamais `body`), B3 (`filter.ops` changés : l'opérateur choisi reste), B4 (changement de langue entre la frappe et Appliquer : lu une fois, à la frappe), B5 (destruction : aucun focus, aucun envoi), B6 (la case flottante qui laisse place au résumé n'annule plus l'édition en attente de la fenêtre), R1–R4 (pas de réécriture à chaque peinture, partie qui lève à la mise à jour : fermeture, nom d'en-tête écrit une fois, ids `constructor` / `toString`), L1 (décision du chef : un brouillon inactif garde le filtre en vigueur, seul Effacer l'enlève), Alt+Flèche bas sur un en-tête hors fenêtre : rien. Suite 167 fichiers / 2 804 tests. Reste : commit ; écoute au lecteur d'écran par le propriétaire (protocole a11y §8 et §9). Étape 12 close (`59d796e`, `c1b14ea`). À faire par le propriétaire : l'écoute au lecteur d'écran de la ligne de filtres (protocole a11y §8).
 
 ## Les plans détaillés des étapes
 
@@ -55,11 +55,11 @@ En cours : l'étape 13 (fenêtre de filtre texte, nombre, oui/non ; marque « fi
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 564 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 425 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 363 |
-| `@dzgrid/dom` | 18 750 (étape 12) | 18 687 |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`) | 7 000 (étape 13, O1) | 6 146 |
-| `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 473 |
+| `@dzgrid/dom` | 18 750 (étape 12) | 18 702 |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`) | 7 000 (étape 13, O1) | 6 417 |
+| `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 1 238 |
-| `@dzgrid/dom/popup` | 1 500 | 1 387 |
+| `@dzgrid/dom/popup` | 1 500 | 1 428 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
 | textes des filtres en / fr / ar | 520 / 620 / 830 (étape 13) | 421 / 476 / 537 |
 | thème | 1 520 (étape 13) | 1 503 |

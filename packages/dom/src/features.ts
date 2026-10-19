@@ -31,10 +31,13 @@ export interface FeatureHandle {
   /** Header, overlay and tooltip drawn by parts (the slots feature): the first feature giving them wins. */
   readonly slots?: SlotDrivers;
   /**
-   * A column header's cell, at each paint, after the base decorated it (sort, grip, name): what a
-   * feature adds beside the label (the filter button, the filtered mark). Level 0 only.
+   * A column header's cell, at each paint, after the base decorated it (sort, grip): what a
+   * feature adds beside the label (the filter button, the filtered mark). Level 0 only. `label` is
+   * the header's name so far (the sort's, or null: none); a feature returns the name to write
+   * instead (nothing: unchanged), written once after every feature, so a paint that changes
+   * nothing touches it not.
    */
-  decorateHeader?(col: ResolvedColumn<unknown>, cell: HTMLElement): void;
+  decorateHeader?(col: ResolvedColumn<unknown>, cell: HTMLElement, label: string | null): string | void;
   /** Runs at each paint once the rows are placed (what is drawn over them). */
   afterRows?(f: Frame<unknown>): void;
   destroy(): void;
