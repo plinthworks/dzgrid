@@ -25,7 +25,7 @@ Mis à jour : 2026-10-19 (étape 15 faite, non commitée). Ce fichier dit où en
 | 15 — filtre par liste de valeurs (chargé à la demande), menu de démos | fait, relu, testé | `021324e`, `79c40c3` |
 | 16 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-En cours : l'étape 16 (recherche rapide `bindQuickSearch`), architecte d'abord. Étape 15 close (`021324e`, corrections `79c40c3`) : suite 3 115 tests, navigateur 257 ; filters 9 160 / 9 300, set 3 778 / 3 800 ; décisions du propriétaire : tout décocher = tableau vide, pas de bouton par défaut sur les colonnes à liste (seulement `filter: { kind: 'set' }`), résumé « Filtre actif ». Étape 26 (animations GSAP) décidée. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§11), relecture arabe, licence GSAP à confirmer.
+En cours : l'étape 16 (recherche rapide branchée sur le champ de la page, module `@dzgrid/dom/search`), plan `docs/phase-3-steps/step16-search-blueprint.md`, décisions `step16-decisions.md` (propriétaire, 2026-10-19 : champ de la page ; module à part 1 100 o ; base dom 18 900 ; annonce « N lignes » ; surlignage en Phase 5). Implémentation lancée, tests d'abord. Étape 26 (animations GSAP) décidée. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§11), relecture arabe, licence GSAP à confirmer.
 
 ## Les plans détaillés des étapes
 
