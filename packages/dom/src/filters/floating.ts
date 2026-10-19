@@ -65,17 +65,21 @@ export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: bo
     return r;
   }
 
+  // A column gone (removed) takes its edit with it.
   const flush = (column: string): void => {
     const p = pending.get(column);
     if (!p) return;
     pending.delete(column);
     p.cancel();
+    if (!g.columns.get(column)) return;
     const r = g.kernel.dispatch({ type: 'filter.column', column, filter: p.f }, 'user');
     if (!r.ok) emit(g.kernel, { type: 'problems', source: 'user', problems: r.problems });
   };
-  const edit = (column: string, ms: number, f: ColumnFilter | null, now: boolean): void => {
+  const edit = (column: string, ms: number, f: ColumnFilter | null, how: string | undefined): void => {
     pending.get(column)?.cancel();
-    const at = !now && ms > 0 && g.win;
+    pending.delete(column);
+    if (how === 'cancel') return;
+    const at = how !== 'now' && ms > 0 && g.win;
     pending.set(column, { f, cancel: at ? g.scope.timeout(() => flush(column), ms) : () => {} });
     if (!at) flush(column);
   };
@@ -97,7 +101,7 @@ export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: bo
     const ms = pause(col);
     m.set(cell, part, {
       column: col, kind, state, where: g.rows.ops.filter, debounceMs: ms,
-      set: (next, x) => edit(col.id, ms, (custom && next !== null ? { type: 'custom', kind, state: next } : next) as ColumnFilter | null, x?.commit === 'now'),
+      set: (next, x) => edit(col.id, ms, (custom && next !== null ? { type: 'custom', kind, state: next } : next) as ColumnFilter | null, x?.commit),
     });
     // One tab stop for the grid: the cell's controls only while the focus is in them.
     const at = g.doc.activeElement;
@@ -111,7 +115,7 @@ export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: bo
     const t = e.target as HTMLElement;
     const cell = t.closest<HTMLElement>('.dzg-hextra');
     const m = cell && cells.get(cell);
-    if (!m || e.isComposing) return;
+    if (!m) return;
     const column = cell.dataset['col']!;
     if (t === cell) {
       if ((e.key !== 'Enter' && e.key !== 'F2') || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -120,12 +124,11 @@ export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: bo
       tab(cell, 0);
       if (!m.focus()) tab(cell, -1);
     } else if (e.key === 'Escape') {
-      // Back to the cell, the filter kept; never to a host dialog around the grid.
-      e.preventDefault();
+      // Back to the cell, the filter kept; never to a host dialog around the grid. Inside a
+      // composition, it only ends it: kept in the box, nothing applied.
       e.stopPropagation();
-      flush(column);
-      cell.focus();
-    } else if (e.key === 'Enter') flush(column);
+      if (!e.isComposing) e.preventDefault(), flush(column), cell.focus();
+    } else if (e.key === 'Enter' && !e.isComposing) flush(column);
   });
   g.scope.on(g.el.header, 'focusout', (e: FocusEvent) => {
     const t = e.target as HTMLElement;
@@ -147,11 +150,9 @@ export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: bo
         cells.delete(cell);
       }
     },
+    // The pending edits' timers belong to the grid's scope: they go with it.
     destroy() {
-      for (const p of pending.values()) p.cancel();
-      pending.clear();
       for (const m of cells.values()) m.clear();
-      cells.clear();
     },
   };
 }

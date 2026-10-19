@@ -83,9 +83,10 @@ export interface SlotContext {
     /**
      * Stores the column's filter as the user (null removes it; a custom kind's state is wrapped as
      * `{type: 'custom', kind, state}`, and must be null when the kind says it is not active).
-     * `debounced` by default: one pending edit per column, the next replacing it.
+     * `debounced` by default: one pending edit per column, the next replacing it; `cancel` drops
+     * the pending edit and stores nothing (`next` unused).
      */
-    set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' }): void;
+    set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' | 'cancel' }): void;
   };
   /** The tooltip, shown only when the host gave text (`@dzgrid/dom/slots`). */
   tooltip: PartBase & {

@@ -251,7 +251,7 @@ interface FilterSlot {
   readonly column: ResolvedColumn<unknown>; readonly kind: string;
   readonly state: Json | null;                  // this kind's state for the column, or null
   readonly where: Placement;                    // ops.filter: tells the part whether to debounce longer or show Apply
-  set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' }): void;   // dispatches filter.column with source 'user'
+  set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' | 'cancel' }): void;   // dispatches filter.column with source 'user'; 'cancel' drops the pending edit
   // Step 9 amendment: a handle, not a Promise (a Promise can neither be cancelled nor show the old list while a new one loads):
   values(o?: { readonly search?: string; readonly max?: number }): ValuesHandle;   // = kernel.values(column, o), value-list.md
   close(): void;
