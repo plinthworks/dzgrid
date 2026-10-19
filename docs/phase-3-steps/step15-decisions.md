@@ -1,0 +1,9 @@
+# Step 15 decisions (owner and lead, 2026-10-19) — the value-list (set) filter
+
+Plan: `step15-set-blueprint.md` (same folder).
+
+- Q1 (owner, "Oui, tableau vide"): unticking every value stores `include: []`, a valid filter that keeps nothing (the "no matches" overlay shows; Clear restores all). L1 does not apply to it.
+- Q2 (owner, "Non"): enum columns do NOT get a header filter button by default. The set popup (button, Alt+ArrowDown, floating summary button) exists only on a column that asks for it explicitly with `filter: { kind: 'set' }` (any column type). A column whose kind is set only implicitly (an enum column without `filter.kind`) keeps today's behaviour (no popup; a stored set filter shows "Filter active" + Clear in the floating row). No CHANGELOG entry about enum buttons is needed.
+- Q4 (owner, "Non"): the floating summary keeps "Filter active"; no `filter.summarySelected` key.
+- Q3 (owner, "Oui"): the set filter is a lazy chunk (like the date kits). During Phase 3, reset to the measure + 10 % at the close: `@dzgrid/dom/filters` 8 500 → 9 300 B gz; new line "filters: set (lazy)" 3 800 B gz; filter bundles en 850 / fr 980 / ar 1 200; theme 1 660 → 1 800. Core, dom base, popup and date adapters unchanged.
+- Lead: always windowed (one code path, 2 000 values at most); roving focus on a `role=listbox` (`aria-multiselectable`); ticks coalesced at the pause on the client (one dispatch, one announcement), server draft until Apply/Enter; the server search goes to the server after the pause, the client search narrows in the core; the blanks entry hidden at count 0 (unless ticked) and during a search; exclude mode only on a complete, unsearched list; Enter in the search applies and closes, Enter on an option toggles; no Ctrl+A / Shift ranges / per-tick announcement before the by-ear test (a11y §11); 8 new required keys (breaking, CHANGELOG); a host's own values handle on the same column is closed by the popup (documented).

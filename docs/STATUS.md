@@ -24,7 +24,7 @@ Mis à jour : 2026-10-19 (étape 14 partie B, non commitée). Ce fichier dit où
 | 14 — filtres de dates sur tzslot (jour, période, avant/après), six raccourcis relatifs, horloge | fait, relu, testé | `df27559`, `85e08c3`, `ae0b40b`, `24acaab` |
 | 15 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 15 (filtre par liste de valeurs, virtualisé, avec Appliquer sur serveur), architecte d'abord ; le module filtres n'a que 27 o de marge (8 473 / 8 500) : décision de budget du propriétaire attendue. Étape 14 close (`df27559`, `85e08c3`, `ae0b40b`, `24acaab`) : suite 2 996 tests, navigateur 233 ; cœur 26 740, adaptateurs dates 2 320, thème 1 644. Pour le propriétaire : demandes tzslot T1–T11 (`docs/tzslot-requests.md`), écoute lecteur d'écran (§8–§10), relecture arabe.
+En cours : l'étape 15 (filtre par liste de valeurs, chargé à la demande), plan `docs/phase-3-steps/step15-set-blueprint.md`, décisions `step15-decisions.md` (propriétaire, 2026-10-19 : tout décocher = tableau vide ; PAS de bouton par défaut sur les colonnes à liste, seulement avec `filter: { kind: 'set' }` ; résumé « Filtre actif » gardé ; filters 9 300, ligne « set » 3 800, textes 850 / 980 / 1 200, thème 1 800). Implémentation lancée, tests d'abord. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§10), relecture arabe.
 
 ## Les plans détaillés des étapes
 
