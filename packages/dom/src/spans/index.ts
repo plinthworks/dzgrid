@@ -143,6 +143,10 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     ...(bands && { bands: bands.specs }),
     afterRows(f) {
       bands?.stretch(g.rowHeight());
+      // A focused header moved to another segment or made again (a pin, a move, a group cut in
+      // two) lost the DOM focus: the paint gives it back (`pendingFocus`, without scrolling).
+      const h = kernel.focus;
+      if (g.hasFocus && h?.kind === 'header' && !g.el.viewport.contains((root as Document).activeElement)) g.pendingFocus = { header: h.column, level: h.level ?? 0 };
       body.paint(f, win);
       // A hovered row element reused for another row (a scroll, a sort): the pointer is not over that one.
       if (hovered && (hovered.el.parentNode !== g.el.layer || g.rowRenderer.keyOf(hovered.el) !== hovered.key)) hover(null);
