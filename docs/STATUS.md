@@ -19,10 +19,10 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 9b — fusions de cellules (rowspan / colspan) | fait, relu, testé (4 commits et leurs corrections) | `f4c63f6` |
 | 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | fait, relu, testé | `5aebe99` |
 | 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | fait, relu, testé | `0caedae`, `599cbdf` |
-| 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1) | fait, testé (navigateur compris) ; corrections de relecture et d'analyse des tests écrites, non commitées ; écoute au lecteur d'écran à faire (`docs/a11y-protocol.md` §8) | `59d796e` + corrections |
+| 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
 | 13 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 12 est commitée (`59d796e`) ; les corrections de la relecture et de l'analyse des tests (défauts A–D, E/F, 6–8) sont écrites et vertes (suite 163 fichiers, 2 722 tests ; types ; tailles ; construction ; navigateur 143 vérifications), pas encore commitées. Budget `@dzgrid/dom/filters` 3 500 (O5), mesure 3 493 après corrections (3 488 avant). Prochaine : l'étape 13 (fenêtre de filtre). Limite notée : une bulle encore dans son délai d'apparition ne vérifie que la présence de son ancre.
+En cours : l'étape 13 (fenêtre de filtre : `filter.text`, `filter.number`, `filter.boolean`, marque « filtre actif » dans l'en-tête, `openMenu`), architecte d'abord ; le module filtres n'a que 7 o de marge (3 493 / 3 500) : décision de budget du propriétaire attendue avant le code. Étape 12 close (`59d796e`, corrections `c1b14ea`) : suite 2 722 tests, navigateur 143 vérifications. À faire par le propriétaire : l'écoute au lecteur d'écran de la ligne de filtres (protocole a11y §8).
 
 ## Les plans détaillés des étapes
 
