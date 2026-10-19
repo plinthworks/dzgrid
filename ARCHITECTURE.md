@@ -11,7 +11,7 @@ Le propriétaire a accepté toutes les recommandations du §1. Elles priment sur
 | Sujet | Décision |
 |---|---|
 | K.1 Licence | Tout en MIT pour l'instant ; le niveau « Enterprise » vit dans `src/enterprise/`, exposé par sous-chemins d'export, isolé par un test de graphe d'imports. |
-| K.2 Dates | Pas de Temporal dans `core` ni `dom` : `Day` (`YYYY-MM-DD`) et `InstantMs` distincts ; `zoneDayBounds` sur `Intl` ; aucun `Date` dans le cœur ; sélecteur de date par adaptateur, tzslot en option. |
+| K.2 Dates | Pas de Temporal dans `core` ni dans la base de `dom` : `Day` (`YYYY-MM-DD`) et `InstantMs` distincts ; `zoneDayBounds` sur `Intl` ; aucun `Date` dans le cœur. Amendé à l'étape 14 (décisions Q1, Q4) : le contrôle de date des filtres est tzslot, Temporal seulement sous `dom/src/filters/dates/**`, derrière `import()`. |
 | K.3 Virtualisation | DOM recyclé, lignes et colonnes, un seul conteneur de défilement ; jamais de canvas. S1 a confirmé : aucun plafond de lignes (voir les ajustements après la Phase 0). |
 | K.4 Données | Lignes du consommateur jamais modifiées ; `getRowId` requis ; transactions `{add, update, remove}` ; modifications en surcouche. |
 | K.5 Moteurs | `client` (P1) → `paged` serveur, total inconnu accepté (P3) → `infinite` et `serverSide` (P7) ; `viewport` hors v1 ; pas de worker en v1. |
@@ -19,7 +19,7 @@ Le propriétaire a accepté toutes les recommandations du §1. Elles priment sur
 | K.7 Cibles | Chrome/Edge 123, Safari 17.5, Firefox 120 ; Angular ^19 \|\| ^20 \|\| ^21 ; Node ≥ 22. |
 | K.8 Budgets | Profil audit ≤ 85 kB gz ; tout sauf graphiques ≤ 150 kB gz ; 100 000 × 30 : premier rendu ≤ 120 ms, défilement ≥ 58 fps, tri numérique ≤ 40 ms, tri texte ≤ 250 ms, filtre texte ≤ 35 ms, ≤ 25 Mo. |
 | K.9 Nommage | `DzGrid`, scope `@dzgrid` ; palette partagée `--tz-*`, propre à la grille `--dzg-*` / `.dzg-*` ; playground 4700. Le scope npm reste à réserver. |
-| K.10 Dépendances | Aucune dépendance d'exécution dans `core`, `dom`, `theme` ; pas de RxJS. |
+| K.10 Dépendances | Aucune dépendance d'exécution dans `core`, `dom`, `theme` ; pas de RxJS. `@tzslot/dom` et `@tzslot/core` (`>=2.2.0 <3`) : pairs **optionnelles** de `@dzgrid/dom` et `@dzgrid/angular`, pour les filtres de dates (étape 14). |
 | K.11 Excel | Writer XLSX maison, RTL compris, sans SheetJS (P8). |
 | K.12 Compat ag-Grid | Hors v1. |
 | K.13 Graphiques | Hors v1 ; `rangeAsSeries` seulement. |
@@ -221,6 +221,17 @@ Le code de l'étape 0, revu et testé, l'emporte sur les plans ; elles priment s
 - **Marque** : `data-dzg-filtered` et `header.withFilter` après `header.withSort` ; le thème remplit l'entonnoir (forme, pas seulement couleur).
 - **Écarts au plan** : un en-tête qui porte un bouton garde son propre nom en `aria-label` (sinon le nom du bouton s'ajoute à celui de l'en-tête) ; `openFilter` ancre sur le bouton de l'en-tête (Alt+Flèche bas sur la cellule) ; une colonne qui quitte la fenêtre ferme la fenêtre même si la grille garde l'en-tête focalisé monté (D6), focus sur l'ancre ; Maj+Tab depuis un bouton radio revient sur Appliquer (un groupe radio est un seul arrêt, le piège de l'hôte ne le voyait pas) ; le bouton se place après la marque de tri par `order` (jamais déplacé dans le DOM : il peut avoir le focus) et l'étiquette de l'en-tête cède la place avec des points de suspension (CSS du module) ; Appliquer envoie le brouillon sans le comparer au filtre en vigueur (le noyau garde un filtre égal tel quel, mutant équivalent) ; `size.mjs` mesurait déjà juste un module DOM `over` avec ses externes (pas de correction).
 
+#### Décisions de l'étape 14 (2026-10-19 ; filtres de dates sur tzslot, raccourcis relatifs ; fiches `docs/behaviors/{filter-date-picker,filter-relative,filter-day,filter-instant,filter-ui}.md`, plan `docs/phase-3-steps/step14-tzslot-blueprint.md`, décisions `step14-decisions.md`)
+
+- **tzslot est le contrôle de date** (Q1, Q4) : pair facultative (`>=2.2.0 <3`) de `@dzgrid/dom` et `@dzgrid/angular` ; pas de champ natif, pas d'adaptateur ; étape 21 repliée. Temporal seulement sous `filters/dates/**`, derrière `import()` (K.2 amendé, garde de structure).
+- **Découpe** : partie immédiate dans `/filters` (formulaires, chargeur, messages, préchargement, minuit : 8 436 o gz, budget 8 500) ; trois lots paresseux (`date`, `range`, `moment`) mesurés à part (2 288, budget 2 600) ; la part de tzslot relevée sans budget (36,4 / 57,7 / 48,5 kB, les trois 65,0 kB). K.8 : le profil d'audit compte le chargement initial, les lots à côté (revu à l'étape 18).
+- **Modèle** : DzGrid garde le brouillon dans ses types (`Day`, instant UTC à la milliseconde, `{op:'relative', range}`) ; tzslot n'est que la vue. Le cœur décide des lignes et du fil, tzslot de l'affichage ; `tzslot-agreement.test.ts` vérifie l'accord (un écart trouvé : le jour perdu des Samoa, T7).
+- **Zone, jour, langue** : toujours la zone et le jour de la grille (jamais ceux de la machine), `intlTag(ctx)` (grégorien, chiffres de la grille), les mots de tzslot par langue, `filters({ dateMessages })`.
+- **Clavier** : une règle de capture ferme le calendrier au premier Échap (T8) ; Entrée dans un calendrier lui appartient.
+- **CSP** : nous injectons les feuilles de tzslot avec le nonce, sous ses identifiants `data-tzslot`, car ses panneaux les injectent même avec `injectStyles: false` (T2).
+- **Minuit** : la minuterie vit dans `/filters` (`kernel.tick()`), seulement avec un raccourci en vigueur ; `hasRelative` exporté de `@dzgrid/core/internal` (seule ligne touchée dans le cœur).
+- **Écarts au plan** : `DateSettings` porte le `ctx` (le lot calcule la balise de langue : octets) ; nom accessible complété pour tous les boutons nommés de tzslot (T1, T9), `combobox` sur le champ saisi (T10), jours des autres mois non estompés (T11), jour perdu grisé (T7) — trouvés par axe et le balayage ; l'écho du champ date n'est plus coupé (tzslot ne le renvoie pas) ; une période vide ou à l'envers ne filtre pas (L1) ; Réessayer échoue encore dans Chrome (l'échec d'un `import()` est gardé) : le texte dit de recharger la page. Demandes à tzslot : `docs/tzslot-requests.md`.
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.
@@ -275,6 +286,7 @@ Chaque décision porte ma recommandation. Rien n'est codé tant que K.1 à K.9 n
   - Le seul calcul de fuseau nécessaire (« les bornes du jour D dans la zone Z ») est écrit en ~1 kB sur `Intl.DateTimeFormat` avec `timeZone` (`zoneDayBounds`, §3.4), validé par des cas de conformité qui reprennent ceux de DzCalendar (`zone-dayinfo`).
   - **Aucun `Date`** dans le cœur : formatage par `formatToParts(epochMs)` (la technique de DzCalendar B.17).
   - Le sélecteur de date de l'interface est un **adaptateur** (`DatePickerAdapter`). Par défaut : champ texte + `<input type="date">` natif. Un adaptateur optionnel `@dzgrid/dom/tzslot-picker` branche `@tzslot/dom` (peer optionnelle, chargée à la demande) pour qui l'a déjà.
+  - **Amendement de l'étape 14** (décisions du propriétaire Q1 et Q4, 2026-10-19) : il n'y a plus d'adaptateur ni de champ natif. Le contrôle de date des filtres est tzslot 2.2.0 (`createDateField`, `createRangeField`, `createDateTimeField`), pair optionnelle, chargé en trois lots (`date`, `range`, `moment`) à la première ouverture d'un filtre de date. Temporal (celui de tzslot, natif ou son polyfill) n'apparaît que sous `packages/dom/src/filters/dates/**`, derrière `import()` ; ni le cœur, ni la base, ni le reste de `/filters` ne l'importent (garde de structure). Le cœur décide des lignes et du fil, tzslot de ce qui est montré ; `tzslot-agreement.test.ts` vérifie qu'ils s'accordent. Étape 21 (`/tzslot-picker`) repliée dans l'étape 14.
 - **Si autre choix** (dépendre de `@tzslot/core`) : cohérence parfaite avec DzCalendar et un seul Temporal dans la page, au prix de +20 kB gz sur *chaque* écran, y compris ceux sans colonne date.
 
 ### K.3 Stratégie de virtualisation : DOM recyclé ou canvas
@@ -334,7 +346,7 @@ Chiffres complets en §5.2 et §5.3. **Cibles proposées** :
 - **À vérifier** : disponibilité du scope `@dzgrid` sur npm **[À VÉRIFIER]**.
 
 ### K.10 Zéro dépendance d'exécution
-Aucune dépendance dans `core`, `dom`, `theme`. Pas de RxJS (le serveur est une `Promise`, le wrapper Angular fournit `fromObservable`). Le seul extra optionnel est `@tzslot/dom` pour le sélecteur de date (K.2). Recommandation : oui.
+Aucune dépendance dans `core`, `dom`, `theme`. Pas de RxJS (le serveur est une `Promise`, le wrapper Angular fournit `fromObservable`). Le seul extra optionnel est `@tzslot/dom` pour le sélecteur de date (K.2). Recommandation : oui. Étape 14 : `@tzslot/dom` et `@tzslot/core` (`>=2.2.0 <3`) sont des `peerDependencies` marquées optionnelles (`peerDependenciesMeta`) de `@dzgrid/dom` et `@dzgrid/angular`, jamais des `dependencies` ; le dépôt les épingle à 2.2.0 en `devDependencies`. Une application sans filtre de date n'installe rien et ne charge rien.
 
 ### K.11 Export Excel
 - **Recommandation** : écrire nous-mêmes un writer XLSX minimal (zip + `sheet1.xml` + chaînes partagées), avec `CompressionStream('deflate-raw')` quand il existe, sinon stockage sans compression. Support du sens de lecture droite-à-gauche (`rightToLeft="1"` sur la feuille). Pas de dépendance à SheetJS. À livrer en Phase 8.

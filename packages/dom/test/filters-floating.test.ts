@@ -522,7 +522,7 @@ describe('messages', () => {
     const place = (v: unknown): string[] => [...new Set((typeof v === 'string' ? [v] : Object.values(v as object)).flatMap((s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]!)))].sort();
     const keys = Object.keys(EN_FILTERS.text).sort();
     expect(keys).toEqual([...FILTER_KEYS].sort());
-    expect(keys).toHaveLength(28);
+    expect(keys).toHaveLength(41);
     for (const b of [FR_FILTERS, AR_FILTERS]) {
       expect(Object.keys(b.text).sort()).toEqual(keys);
       for (const k of keys) expect(place((b.text as Record<string, unknown>)[k]), `${b.locale} ${k}`).toEqual(place((EN_FILTERS.text as Record<string, unknown>)[k]));

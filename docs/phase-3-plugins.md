@@ -306,7 +306,7 @@ A name that cannot be resolved among the parts of that slot (a `header` part nam
 - **Globally, for one app:** `parts: { 'filter.instant': definePart('filter', myInstantFilter) }`.
 - **Per column:** `ui: { cell: 'statusBadge' }`, or `filter: { kind: 'between' }`.
 - **A new part:** register any name that has no dot (`statusBadge`) and reference it from columns.
-- **The date picker inside the built-in day and instant filters:** D6's `DatePickerAdapter` stays, passed as `filters({ datePicker })`. It is an option of a feature, not a seventh concept.
+- **The date picker inside the built-in day and instant filters:** D6's `DatePickerAdapter` stays, passed as `filters({ datePicker })`. It is an option of a feature, not a seventh concept. *[Step 14: superseded. tzslot is the control (`docs/behaviors/filter-date-picker.md`); a host replaces the whole `filter.day` / `filter.instant` part, and `filters({ loadDates })` (advanced) replaces where the lazy kits come from.]*
 
 ### B2.4 Value formatters (core, pure)
 
@@ -478,7 +478,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | `@dzgrid/dom/pagination` | `pagination()`: `footer.pager`, `footer.count`, `footer.selected` |
 | `@dzgrid/dom/parts` | `cell.badge`, `cell.boolean` (small, optional) |
 | `@dzgrid/dom/export` | `csvExport()` |
-| `@dzgrid/dom/tzslot-picker` | optional date-picker adapter |
+| ~~`@dzgrid/dom/tzslot-picker`~~ | folded into `/filters` at step 14 (tzslot loaded lazily inside it) |
 | `@dzgrid/angular` | `DzGrid`, controller, `provideDzGrid`, `DzgPart`, `componentPart`, `fromObservable` |
 
 - **Feature contract:**
@@ -492,7 +492,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
   ```
   `FeatureContext` and `FeatureHandle` are as in D9, kept internal-facing.
 - **Missing features:** a grid with `page !== 'off'` and no `pagination()` gives `missing-feature` (warning). The same applies to a filterable column with no `filters()`.
-- **Import-graph test:** the base never imports a subpath, and `/filters` never imports `/tzslot-picker`.
+- **Import-graph test:** the base never imports a subpath, and `/filters` never imports `/tzslot-picker`. *[Step 14: `@tzslot/*` is imported only under `filters/dates/**`, the lazy kits.]*
 
 ---
 
@@ -528,14 +528,14 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | 11 | Parts for `header`, `overlay` and `tooltip` slots, in `@dzgrid/dom/slots`; the retry button in the base (decisions `step11-decisions.md`) | dom |
 | 12 | `/filters` part 1: the floating row (`floating.text`, `floating.number`, the summary part) | dom |
 | 13 | `/filters` part 2: popup with `filter.text`, `filter.number`, `filter.boolean`, active mark, Alt+ArrowDown in the feature (no `openMenu`, O2) | dom |
-| 14 | `/filters` part 3: `filter.day` and `filter.instant` with the native picker | dom |
+| 14 | `/filters` part 3: `filter.day` and `filter.instant` on tzslot 2.2.0 (lazy kits, optional peer) and the relative shortcuts; step 21 folded in | core, dom |
 | 15 | `/filters` part 4: `filter.set`, virtualised, with Apply when the filter runs on the server | dom |
 | 16 | `/filters` part 5: `bindQuickSearch` (server `quick` or the client warm-up) | dom |
 | 17 | `/pagination`: `footer.pager`, `footer.count`, `footer.selected`, for client and server paging | dom |
 | 18 | Playground audit screen in **both** configurations of example 3; 1 000 permutations each; axe; screenshots | browser |
 | 19 | `/export`: `csvExport` and `exportAll` | dom |
 | 20 | `/parts`: `cell.badge`, `cell.boolean`; plus worked example 2 as a test fixture | dom |
-| 21 | `/tzslot-picker` (optional) | dom |
+| 21 | ~~`/tzslot-picker` (optional)~~ folded into step 14 | — |
 | 22 | `@dzgrid/angular`: component, controller, providers, `componentPart`, `DzgPart` (S6 pooling) | angular |
 | 23 | The Angular audit example from the tarballs, `ng build` | example |
 | 24 | Sehhaty transposition (`to-query.ts` maps `DataRequest`; needs the owner's §1.1 inputs) | example |
@@ -543,7 +543,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 
 **Cut order if a step overruns.** Each cut goes into ROADMAP with its target phase.
 
-1. `/tzslot-picker`, to P5.
+1. ~~`/tzslot-picker`, to P5.~~ Folded into step 14.
 2. Cursor paging, if the owner's API uses offsets.
 3. Value-list virtualisation above 2 000 values (cap plus "refine your search"), to P5.
 4. The second AND/OR condition in the popup UI (the model keeps `combined`), to P5.
@@ -586,7 +586,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 4. **Custom filters**: a custom filter is a small pure description (its saved state, how to test a row in the browser, what to send to the server) plus its screen part. A filter with no browser test works only when filtering is on the server. OK?
 5. **Floating filter row**: off by default and turned on per column? On the audit screen: text and number as live boxes, dates and lists as a summary button that opens the popup?
 6. **When filters apply**: live as you type (300 ms pause when the server filters), but value lists on the server wait for an "Apply" button so that each tick is not a request. OK?
-7. **Inventory priorities**: confirm the "M" rows for Phase 3, and say what moves to later. My proposals are relative dates, the page-number jump and tool panels to Phase 5, and the advanced expression filter to Phase 8.
+7. **Inventory priorities**: confirm the "M" rows for Phase 3, and say what moves to later. My proposals are relative dates (*step 14: done now, owner Q3*), the page-number jump and tool panels to Phase 5, and the advanced expression filter to Phase 8.
 8. **Value formatter**: it changes what is shown, searched and put in tooltips. CSV keeps the raw value (numbers and dates Excel can compute with) unless you ask for "as displayed". OK?
 
 ### Critical files for implementation

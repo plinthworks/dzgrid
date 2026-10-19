@@ -20,7 +20,8 @@ type Feature = GridFeature & { openFilter(column: string): boolean; closeFilter(
 const COLS: ColumnOrGroup<R>[] = [
   { id: 'name', header: 'Name' },
   { id: 'n', header: 'N', type: 'number' },
-  { id: 'd', header: 'D', type: 'day' },
+  // A value-list column: its popup part comes at step 15 (step 14 gave the day its part).
+  { id: 'd', header: 'D', type: 'enum', enumOptions: [{ value: '2024-01-01', label: 'New year' }] },
   { id: 'b', header: 'B', type: 'boolean', value: (r: R) => r.n % 2 === 0 },
 ];
 
@@ -68,7 +69,7 @@ describe('opening and focus', () => {
       expect(t.header(c).getAttribute('aria-keyshortcuts')).toBe('Alt+ArrowDown');
     }
     expect(t.button('name')!.getAttribute('aria-label')).toBe('Name filter');
-    // A day column: no part yet (step 14), so no button and no shortcut.
+    // A value-list column: no part yet (step 15), so no button and no shortcut.
     expect(t.button('d')).toBeNull();
     expect(t.header('d').hasAttribute('aria-keyshortcuts')).toBe(false);
     // One tab stop in the header still.
@@ -604,7 +605,7 @@ describe('parts and kinds', () => {
 
   it('no part, no button, no key, and a floating summary that is not a button', () => {
     const t = open({ floating: true });
-    t.g.kernel.dispatch({ type: 'filter.column', column: 'd', filter: { type: 'day', op: 'equals', value: '2024-01-01' } }, 'api');
+    t.g.kernel.dispatch({ type: 'filter.column', column: 'd', filter: { type: 'set', include: ['2024-01-01'] } }, 'api');
     expect(t.button('d')).toBeNull();
     expect(t.cell('d').querySelector('.dzg-fsum')!.tagName).toBe('SPAN');
     t.key(t.header('d'), 'ArrowDown', { altKey: true });

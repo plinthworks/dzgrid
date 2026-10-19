@@ -1,0 +1,313 @@
+{
+  "at": "2026-10-19T16:47:57.132Z",
+  "node": "v22.20.0",
+  "date": "2026-10-19T16:47:57.131Z",
+  "checks": [
+    {
+      "engine": "chrome",
+      "label": "date in card: popup in the top layer, panel inside it and on top under the pointer",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "date in card: the panel sits under its trigger, above it, or held at the window's edge (within 12 px), focus inside it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "date in card: Escape closes the panel only (focus back in the popup), a second one the popup",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "date in dialog: popup in the top layer, panel inside it and on top under the pointer",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "date in dialog: the panel sits under its trigger, above it, or held at the window's edge (within 12 px), focus inside it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "date in dialog: Escape closes the panel only (focus back in the popup), a second one the popup",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "date: Tab and Shift+Tab stay inside the open panel",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "range in card: popup in the top layer, panel inside it and on top under the pointer",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "range in card: the panel sits under its trigger, above it, or held at the window's edge (within 12 px), focus inside it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "range in card: Escape closes the panel only (focus back in the popup), a second one the popup",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "range in dialog: popup in the top layer, panel inside it and on top under the pointer",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "range in dialog: the panel sits under its trigger, above it, or held at the window's edge (within 12 px), focus inside it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "range in dialog: Escape closes the panel only (focus back in the popup), a second one the popup",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "range: Tab and Shift+Tab stay inside the open panel",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "moment in card: popup in the top layer, panel inside it and on top under the pointer",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "moment in card: the panel sits under its trigger, above it, or held at the window's edge (within 12 px), focus inside it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "moment in card: Escape closes the panel only (focus back in the popup), a second one the popup",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "moment in dialog: popup in the top layer, panel inside it and on top under the pointer",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "moment in dialog: the panel sits under its trigger, above it, or held at the window's edge (within 12 px), focus inside it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "moment in dialog: Escape closes the panel only (focus back in the popup), a second one the popup",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "moment: Tab and Shift+Tab stay inside the open panel",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "rtl: the panel reads right to left, its right edge on the trigger’s (within 12 px)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "label": "no page error",
+      "ok": true
+    }
+  ],
+  "observations": [
+    {
+      "engine": "chrome",
+      "label": "Temporal",
+      "value": {
+        "usingPolyfill": false
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "date in card: placement",
+      "value": {
+        "panel": {
+          "l": 429,
+          "t": 431,
+          "w": 274,
+          "h": 259
+        },
+        "trigger": {
+          "l": 429,
+          "r": 621,
+          "b": 427,
+          "t": 392
+        }
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "date in dialog: placement",
+      "value": {
+        "panel": {
+          "l": 629,
+          "t": 295,
+          "w": 274,
+          "h": 259
+        },
+        "trigger": {
+          "l": 629,
+          "r": 821,
+          "b": 593,
+          "t": 558
+        }
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "date without the capture rule, Escape with the panel open",
+      "value": {
+        "popupOpen": false,
+        "panelLeft": false
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "range in card: placement",
+      "value": {
+        "panel": {
+          "l": 388,
+          "t": 8,
+          "w": 612,
+          "h": 635
+        },
+        "trigger": {
+          "l": 412,
+          "r": 638,
+          "b": 427,
+          "t": 392
+        }
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "range in dialog: placement",
+      "value": {
+        "panel": {
+          "l": 558,
+          "t": 8,
+          "w": 442,
+          "h": 635
+        },
+        "trigger": {
+          "l": 612,
+          "r": 838,
+          "b": 593,
+          "t": 558
+        }
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "range without the capture rule, Escape with the panel open",
+      "value": {
+        "popupOpen": false,
+        "panelLeft": false
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "moment in card: placement",
+      "value": {
+        "panel": {
+          "l": 406,
+          "t": 39,
+          "w": 274,
+          "h": 349
+        },
+        "trigger": {
+          "l": 406,
+          "r": 644,
+          "b": 427,
+          "t": 392
+        }
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "moment in dialog: placement",
+      "value": {
+        "panel": {
+          "l": 606,
+          "t": 205,
+          "w": 274,
+          "h": 349
+        },
+        "trigger": {
+          "l": 606,
+          "r": 844,
+          "b": 593,
+          "t": 558
+        }
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "moment without the capture rule, Escape with the panel open",
+      "value": {
+        "popupOpen": false,
+        "panelLeft": false
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "ar-DZ latn trigger text",
+      "value": "29‏/03‏/2026‹مارس 2026›السبتالأحدالاثنينالثلاثاءالأربعاءالخميسالجمعة281234567891011121314151617181920212223242526272829303112345678910"
+    },
+    {
+      "engine": "chrome",
+      "label": "trigger text for ar-SA-u-ca-gregory-nu-latn",
+      "value": "29‏/03‏/2026"
+    },
+    {
+      "engine": "chrome",
+      "label": "trigger text for ar-EG-u-ca-gregory-nu-arab",
+      "value": "٢٩‏/٠٣‏/٢٠٢٦"
+    },
+    {
+      "engine": "chrome",
+      "label": "trigger text for ar-SA",
+      "value": "٢٩‏/٠٣‏/٢٠٢٦"
+    },
+    {
+      "engine": "chrome",
+      "label": "styles injected by default (data-tzslot ids)",
+      "value": [
+        "datetime",
+        "timeselect",
+        "dateinput",
+        "time",
+        "range",
+        "rangefield",
+        "calendar",
+        "field"
+      ]
+    },
+    {
+      "engine": "chrome",
+      "label": "aborted chunk then the same import()",
+      "value": {
+        "first": "fail: Failed to fetch dynamically imported module: http://127.0.0.1:61732/spikes/s13-tzslot/chunk.ts",
+        "second": "fail: Failed to fetch dynamically imported module: http://127.0.0.1:61732/spikes/s13-tzslot/chunk.ts",
+        "fetches": 1
+      }
+    },
+    {
+      "engine": "chrome",
+      "label": "the same chunk with a new query",
+      "value": "ok"
+    }
+  ],
+  "passed": 23,
+  "failed": 0
+}

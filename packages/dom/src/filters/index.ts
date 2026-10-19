@@ -1,8 +1,11 @@
+import { dayAt } from '@dzgrid/core';
+import { hasRelative } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { FilterMessageKey } from '../messages.js';
 import { announceFilters } from './announce.js';
 import { committer } from './commit.js';
+import { dateForms, kits, type DateEnv, type DateKit, type DateKitName } from './dates.js';
 import { floatingRow } from './floating.js';
 import { booleanForm, numberForm, textForm } from './forms.js';
 import { numberPart, textPart } from './inputs.js';
@@ -18,6 +21,14 @@ export interface FiltersOptions {
   readonly debounceMs?: number;
   /** The header's filter button and the popup (step 13); `false`: neither. On by default. */
   readonly popup?: boolean;
+  /**
+   * Advanced (step 14): where the date kits come from, instead of DzGrid's own `import()` of its
+   * lazy chunks (tests; a host serving its chunks its own way). A rejected promise shows the
+   * failure and Retry; a module without `adapt` is a failure.
+   */
+  readonly loadDates?: (kit: DateKitName) => Promise<DateKit>;
+  /** tzslot's words for a language beyond English, French and Arabic, or over them: `{ es: {...} }` (its `TzslotMessages`, in part). */
+  readonly dateMessages?: Readonly<Record<string, object>>;
 }
 
 /** The feature, with the popup's handles (owner decision O6: here, not on the grid). */
@@ -27,13 +38,14 @@ export interface FiltersFeature extends GridFeature {
   closeFilter(): void;
 }
 
-const OPS = ['contains', 'notContains', 'equals', 'notEqual', 'startsWith', 'endsWith', 'blank', 'notBlank', 'lt', 'lte', 'gt', 'gte', 'between'] as const;
+const OPS = ['contains', 'notContains', 'equals', 'notEqual', 'startsWith', 'endsWith', 'blank', 'notBlank', 'lt', 'lte', 'gt', 'gte', 'between', 'onDay', 'notOnDay', 'betweenDays', 'before', 'after', 'onOrBefore', 'onOrAfter'] as const;
 
 /** The texts `filters()` needs, from `@dzgrid/dom/locales/<lang>-filters`. */
 export const FILTER_KEYS = [
   'filter.inputLabel', 'filter.summaryActive', 'filter.clear', 'filter.invalid', 'announce.filtered', 'announce.filteredOpen',
   'filter.popupLabel', 'header.withFilter', 'filter.op', 'filter.value', 'filter.valueTo', 'filter.apply',
   ...OPS.map((o) => `filter.op.${o}` as const), 'filter.all', 'filter.yes', 'filter.no',
+  'filter.date', 'filter.dateTime', 'filter.period', 'filter.zone', 'filter.loadingDates', 'filter.loadFailed',
 ] satisfies readonly FilterMessageKey[];
 
 /**
@@ -51,19 +63,23 @@ export const FILTER_KEYS = [
  */
 export function filters(o: FiltersOptions = {}): FiltersFeature {
   let popup: Menu | null = null;
+  const env: DateEnv = { g: null, ...kits(o.loadDates), ...(o.dateMessages && { messages: o.dateMessages }) };
+  const d = dateForms(env);
   return {
     id: 'filters',
     parts: {
       'floating.text': { slot: 'floating', part: textPart }, 'floating.number': { slot: 'floating', part: numberPart }, floating: { slot: 'floating', part: summaryPart },
       'filter.text': { slot: 'filter', part: textForm }, 'filter.number': { slot: 'filter', part: numberForm }, 'filter.boolean': { slot: 'filter', part: booleanForm },
+      'filter.day': { slot: 'filter', part: d.day }, 'filter.instant': { slot: 'filter', part: d.instant },
     },
-    setup: (g) => setup(g, o, (m) => (popup = m)),
+    setup: (g) => setup(g, o, (m) => (popup = m), env),
     openFilter: (column) => !!popup?.open(column),
     closeFilter: () => popup?.close(),
   };
 }
 
-function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => void): FeatureHandle {
+function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => void, env: DateEnv): FeatureHandle {
+  env.g = g;
   const missing = FILTER_KEYS.filter((k) => g.settings.messages.text[k] === undefined);
   if (missing.length) throw new TypeError(`filters: missing ${missing.join(', ')}`);
   const root = g.el.root.getRootNode();
@@ -74,12 +90,23 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   const popup = menu(g, resolve, commit, o.popup !== false);
   keep(popup);
   const row = floatingRow(g, o, resolve, commit, popup);
+  // The date kit fetched ahead: the pointer over a date column's button, the focus on its header.
+  const ahead = (e: Event): void => {
+    const t = e.target as HTMLElement;
+    const col = g.columns.get(t.closest<HTMLElement>('.dzg-hcell')?.dataset['col'] ?? '');
+    const kind = col && popup.can(col) && resolve(col, 'filter').kind;
+    if ((kind === 'day' || kind === 'instant') && (e.type === 'focusin' || t.closest('.dzg-fbtn'))) env.load('date').catch(() => {});
+  };
+  g.scope.on(g.el.header, 'pointerover', ahead);
+  g.scope.on(g.el.header, 'focusin', ahead);
+  const midnight = clockwork(g);
   return {
     headerRows: row ? [row.spec] : [],
     decorateHeader: popup.decorate,
     afterRows(f) {
       row?.sweep();
       popup.paint(f);
+      midnight();
     },
     destroy() {
       quiet();
@@ -87,4 +114,31 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
       row?.destroy();
     },
   };
+}
+
+/**
+ * Midnight while a shortcut is in force (docs/behaviors/filter-relative.md): `kernel.tick()` when
+ * the day ends in the grid's zone (plus 50 ms, at most a timer's 2^31−1 ms), re-armed at each
+ * paint, and at once when the page becomes visible again. No shortcut, no timer.
+ */
+function clockwork(g: GridContext<unknown>): () => void {
+  const clock = g.settings.clock ?? Date.now;
+  let until = 0;
+  let stop = (): void => {};
+  const relative = (): boolean => hasRelative(g.kernel.query.filter);
+  const arm = (): void => {
+    if (!relative()) return stop(), void (until = 0);
+    const d = dayAt(clock(), g.ctx.timeZone);
+    if (!d || d.until === until) return;
+    stop();
+    until = d.until;
+    stop = g.scope.timeout(tick, Math.min(d.until - clock() + 50, 2 ** 31 - 1));
+  };
+  const tick = (): void => {
+    until = 0;
+    g.kernel.tick();
+    arm();
+  };
+  g.scope.on(g.doc, 'visibilitychange', () => g.doc.visibilityState !== 'hidden' && relative() && tick());
+  return arm;
 }

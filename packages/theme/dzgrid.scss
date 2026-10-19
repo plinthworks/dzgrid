@@ -337,6 +337,25 @@ $emit: true !default;
     content: none;
   }
 
+  // The date filters (step 14): tzslot's panel inside a filter popup takes the popup's surface,
+  // so a dark grid opens a dark calendar.
+  .dzg-popup .tz-field__panel {
+    // Another month's days, unfaded: tzslot's 0.35 opacity falls under 4.5:1 (T11).
+    --tz-cal-outside-opacity: 1;
+    border-color: var(--tz-border);
+    color: var(--tz-fg);
+    background: var(--tz-bg);
+  }
+
+  // Forced colours: the chosen day and shortcut keep their mark when the system paints.
+  @media (forced-colors: active) {
+    .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .tz-rangefield__preset--on) {
+      forced-color-adjust: none;
+      color: HighlightText;
+      background: Highlight;
+    }
+  }
+
   // Rows kept while the next ones load: the muted text colour, not an opacity (it keeps 4.5:1).
   .dzg[data-stale] .dzg-row,
   .dzg[data-stale] .dzg-row .dzg-seg-start,

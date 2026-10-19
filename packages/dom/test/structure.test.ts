@@ -42,7 +42,28 @@ describe('the DOM layer’s shape', () => {
     expect(entry.length).toBeGreaterThan(1);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^filters(\/[^:]+)?\.ts: \.\/(filters\/)?[a-z-]+\.js$/.test(s) && !/^filters\/[^:]+\.ts: \.\.\/(mounted|popup)\.js$/.test(s));
+      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^filters(\/[^:]+)?\.ts: \.\/(filters\/)?[a-z-]+\.js$/.test(s) && !/^filters\/[^:]+\.ts: \.\.\/(mounted|popup)\.js$/.test(s) && !/^filters\/dates\/[a-z]+\.ts: @tzslot\/(dom|core)$/.test(s));
+    expect(offenders).toEqual([]);
+  });
+
+  it('keeps tzslot (and its Temporal) in the lazy date kits: @tzslot/* only under filters/dates/ (step 14, K.2 amended)', () => {
+    const tz = /^import [^;]*from '@tzslot\//m;
+    const offenders = files(SRC).filter((f) => tz.test(readFileSync(f, 'utf8')) && !/^filters\/dates\//.test(relative(SRC, f))).map((f) => relative(SRC, f));
+    expect(offenders).toEqual([]);
+    const core = fileURLToPath(new URL('../../core/src', import.meta.url));
+    expect(files(core).filter((f) => /from '@tzslot|\bTemporal\.[A-Z]/.test(readFileSync(f, 'utf8'))).map((f) => relative(core, f))).toEqual([]);
+    // The eager part reaches the kits only through import(): never a static import of ./dates/.
+    const eager = files(SRC).filter((f) => !/^filters\/dates\//.test(relative(SRC, f)));
+    expect(eager.filter((f) => /^import [^;]*from '\.{1,2}\/(?:.*\/)?dates\//m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    expect(readFileSync(join(SRC, 'filters/dates.ts'), 'utf8')).toMatch(/import\('\.\/dates\/date\.js'\)/);
+  });
+
+  it('has the lazy kits import only tzslot, the core and their own folder (a kit never pulls the eager filters in twice)', () => {
+    const kits = files(join(SRC, 'filters/dates'));
+    expect(kits.map((f) => relative(SRC, f)).sort()).toEqual(['filters/dates/date.ts', 'filters/dates/moment.ts', 'filters/dates/range.ts', 'filters/dates/shared.ts']);
+    const offenders = kits
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: (@tzslot\/(dom|core)|@dzgrid\/core(\/internal)?|\.\/shared\.js)$/.test(s));
     expect(offenders).toEqual([]);
   });
 

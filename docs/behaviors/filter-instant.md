@@ -13,5 +13,7 @@ Picks *on this day*, *between days*, *before* or *after* a moment, *between* two
 - The range is half-open, `[from, to)`: 23:59:59.999 is in, midnight of the next day is out.
 - The model carries machine values only; a moment needs its offset. The server receives the resolved bounds in UTC, computed once, so it needs no zone and cannot pick the wrong day: the filter as given plus `resolved: {from, to}` (half-open, `null` for an open end, always `YYYY-MM-DDTHH:mm:ss.sssZ` with three digits of milliseconds) and the `zone` they were computed in (`docs/behaviors/server-filter.md`). A shortcut travels as `betweenDays` with its days and `resolved`, plus `relative` (its name).
 
+- **In the popup** (step 14, `filter-date-picker.md`): tzslot's date field for *on this day*, its period field for *between days* (with the shortcuts) and *between* two moments (`[from, to)`, no shortcuts), its date-and-time field for *before* / *after*; all in the grid's zone, written above the field. A skipped wall time moves to the first moment that exists (tzslot's note); a repeated one takes the first reading, a button the second.
+
 ## Tests
-`conformance/cases/filter-instant/*` (`relative-*` for the shortcuts).
+`conformance/cases/filter-instant/*` (`relative-*` for the shortcuts); the popup: `packages/dom/test/filters-dates.test.ts`; the core against tzslot: `packages/dom/test/tzslot-agreement.test.ts`.

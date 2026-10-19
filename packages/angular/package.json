@@ -8,7 +8,17 @@
     "@angular/core": "^21.0.0",
     "@angular/common": "^21.0.0",
     "@dzgrid/core": "0.0.0",
-    "@dzgrid/dom": "0.0.0"
+    "@dzgrid/dom": "0.0.0",
+    "@tzslot/core": ">=2.2.0 <3",
+    "@tzslot/dom": ">=2.2.0 <3"
+  },
+  "peerDependenciesMeta": {
+    "@tzslot/core": {
+      "optional": true
+    },
+    "@tzslot/dom": {
+      "optional": true
+    }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts"

@@ -6,12 +6,15 @@
  */
 import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
 import { serve, browser } from '../spikes/kit.mjs';
 import { chromeDump } from '../spikes/s4-a11y/ax.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const OUT = `${ROOT}packages/dom/test/browser/results`;
 mkdirSync(OUT, { recursive: true });
+// tzslot for the page's date filters (step 14): bundled once, two entries sharing one core (importmap in index.html).
+await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
 const engines = process.argv.includes('--all') ? ['chrome', 'firefox', 'webkit'] : ['chrome'];
 const site = await serve(import.meta.url);
 const checks = [];
@@ -72,6 +75,246 @@ const geometry = (page) => page.evaluate(() => {
   const endEdge = rtl ? Math.abs(e.left - inner.left) : Math.abs(e.right - inner.right);
   return { worst, startEdge, endEdge };
 });
+
+/** Step 14 part B: the date filters, tzslot's widgets inside the popup (docs/behaviors/filter-date-picker.md). */
+async function dateChecks(name, ctx) {
+  const cases = [
+    ['locale=fr-FR&theme=light&rows=2000&filters=1&popup=1&dates=1', false, 'Filtre Jour', /29 mars 2026/],
+    ['locale=ar-DZ&dir=rtl&theme=dark&rows=2000&filters=1&popup=1&dates=1', true, 'مرشح اليوم', /29.*03.*2026/],
+  ];
+  const S = (page) => page.evaluate(() => {
+    const pop = document.querySelector('.dzg-popup');
+    const panel = document.querySelector('.tz-field__panel');
+    const r = panel?.getBoundingClientRect();
+    const hit = r && document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(24, r.height / 2));
+    const trig = document.querySelector('.dzg-fdate .tz-field__trigger, .dzg-fdate .tz-field__wrap');
+    const tr = trig?.getBoundingClientRect();
+    return {
+      open: !!pop, label: pop?.getAttribute('aria-label'), panel: !!panel, panelIn: !!panel && !!pop?.contains(panel), hit: !!hit && !!panel?.contains(hit),
+      panelRect: r && { l: r.left, r: r.right, t: r.top, b: r.bottom }, trig: tr && { l: tr.left, r: tr.right, t: tr.top, b: tr.bottom },
+      activeInPanel: !!panel?.contains(document.activeElement), activeInPopup: !!pop?.contains(document.activeElement), onButton: document.activeElement?.classList.contains('dzg-fbtn'),
+      panelBg: panel && getComputedStyle(panel).backgroundColor, tzBg: pop && getComputedStyle(pop).backgroundColor, dir: panel?.dir,
+      trigText: document.querySelector('.dzg-fdate .tz-field__text, .dzg-fdate input')?.[document.querySelector('.dzg-fdate input') ? 'value' : 'textContent'] ?? null,
+      status: document.querySelector('.dzg-fdate [role=status]')?.textContent ?? null, alert: document.querySelector('.dzg-fdate [role=alert]')?.textContent ?? null,
+    };
+  });
+  const filter = (page, c) => page.evaluate((c) => window.t.grid.kernel.query.filter[c] ?? null, c);
+  const shown = (page) => page.evaluate(() => window.t.grid.kernel.rows.displayed.count);
+  const ready = (page) => page.waitForSelector('.dzg-popup .dzg-fdate .tz-field', { timeout: 15000 });
+  const openOn = async (page, c) => { await page.click(`.dzg-hcell[role=columnheader][data-col="${c}"] > .dzg-fbtn`); await frames(page); };
+  const openPanel = async (page) => { await page.click('.dzg-popup .dzg-fdate .tz-field__trigger:is(button), .dzg-popup .dzg-fdate .tz-field__icon-button'); await frames(page, 3); };
+  const op = (page, v) => page.selectOption('.dzg-popup select.dzg-fop', v);
+  const set = (page, c, f) => page.evaluate(([c, f]) => window.t.grid.kernel.dispatch({ type: 'filter.column', column: c, filter: f }, 'api'), [c, f]);
+  /** The clock moved to `iso` (the grid's clock: the machine's plus an offset). */
+  const clockAt = (page, iso) => page.evaluate((iso) => { window.t.clock.offset = Date.parse(iso) - Date.now(); }, iso);
+  for (const [qs, rtl, popName, dayText] of cases) {
+    const { page, errors } = await load(ctx, qs);
+    const tag = `dates ${qs}`;
+    // A day column: the popup opens at once, the field arrives; axe with the popup open and with the panel open.
+    await openOn(page, 'day');
+    const s0 = await S(page);
+    await ready(page);
+    let v = await axe(page);
+    check(name, `${tag}: the day popup (${popName}) opens, the field arrives, axe 0`, s0.open && s0.label === popName && v.length === 0, { s0, v });
+    await openPanel(page);
+    const s1 = await S(page);
+    v = await axe(page);
+    check(name, `${tag}: the calendar opens inside the popup, on top under the pointer, focus inside, axe 0`, s1.panelIn && s1.hit && s1.activeInPanel && v.length === 0, { s1, v });
+    check(name, `${tag}: the panel takes the popup's surface (${rtl ? 'dark' : 'light'}), and reads ${rtl ? 'right to left' : 'left to right'}`, s1.panelBg === s1.tzBg && s1.dir === (rtl ? 'rtl' : 'ltr'), s1);
+    const aligned = rtl ? Math.abs(s1.panelRect.r - s1.trig.r) <= 12 : Math.abs(s1.panelRect.l - s1.trig.l) <= 12;
+    check(name, `${tag}: the panel lines up with its trigger's start edge${rtl ? ' (right)' : ''}`, aligned, s1);
+    // Tab and Shift+Tab stay inside the open panel.
+    let left = 0;
+    for (let i = 0; i < 12; i++) { await page.keyboard.press(i % 3 === 2 ? 'Shift+Tab' : 'Tab'); if (!(await S(page)).activeInPanel) left++; }
+    check(name, `${tag}: Tab and Shift+Tab stay inside the open calendar`, left === 0, left);
+    // Escape: the panel, then the popup; focus back on the header's button.
+    await page.keyboard.press('Escape');
+    await frames(page);
+    const e1 = await S(page);
+    await page.keyboard.press('Escape');
+    await frames(page);
+    const e2 = await S(page);
+    check(name, `${tag}: Escape closes the calendar (focus back in the popup), a second Escape the popup (focus on the button)`, !e1.panel && e1.open && e1.activeInPopup && !e2.open && e2.onButton, { e1, e2 });
+    // A day picked from the keyboard: Enter on the day the calendar focuses (today, else the selection).
+    await set(page, 'day', { type: 'day', op: 'equals', value: '2026-03-29' });
+    await openOn(page, 'day');
+    await ready(page);
+    const named = await page.evaluate(() => document.querySelector('.dzg-popup .dzg-fdate .tz-field__trigger').getAttribute('aria-label'));
+    const s2 = await S(page);
+    check(name, `${tag}: the trigger shows the day in the grid's locale (${dayText}) and its name carries it (T1)`, dayText.test(s2.trigText ?? '') && named.includes(s2.trigText), { s2, named });
+    await openPanel(page);
+    await page.keyboard.press(rtl ? 'ArrowLeft' : 'ArrowRight');
+    await page.keyboard.press('Enter');
+    await frames(page);
+    const picked = await filter(page, 'day');
+    const s3 = await S(page);
+    check(name, `${tag}: → then Enter picks the next day: stored at once, the calendar closed, the popup open`, picked?.value === '2026-03-30' && !s3.panel && s3.open, { picked, s3 });
+    // Between and the shortcuts; a shortcut stores the shortcut.
+    await op(page, 'between');
+    await ready(page);
+    await openPanel(page);
+    v = await axe(page);
+    const presets = await page.evaluate(() => [...document.querySelectorAll('.tz-field__panel .tz-rangefield__preset')].map((b) => b.textContent));
+    check(name, `${tag}: between offers the six shortcuts, axe 0 with the period panel open`, presets.length === 6 && v.length === 0, { presets, v });
+    await page.click('.tz-field__panel .tz-rangefield__preset >> nth=2');
+    await frames(page);
+    const rel = await filter(page, 'day');
+    check(name, `${tag}: the third shortcut stores {op: relative, range: last7Days}`, rel?.op === 'relative' && rel.range === 'last7Days', rel);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await frames(page);
+    await set(page, 'day', null);
+    // Midnight: "today" on the instant column moves by itself at midnight in Paris (24 h, then the 25-hour day).
+    await clockAt(page, '2026-10-24T21:59:59.600Z');
+    await set(page, 'at', { type: 'instant', op: 'relative', range: 'today' });
+    await frames(page);
+    const before = await shown(page);
+    await page.waitForTimeout(1000);
+    await frames(page);
+    const after = await shown(page);
+    check(name, `${tag}: midnight in Paris: "today" moves from 24/10 (96 rows, 24 h) to 25/10 (100 rows, 25 h) by itself`, before === 96 && after === 100, { before, after });
+    // The instant column: whole days in Paris, 23 h and 25 h; last 7 days across the change, 169 h.
+    await set(page, 'at', { type: 'instant', op: 'onDay', day: '2026-03-29' });
+    await frames(page);
+    const n29 = await shown(page);
+    await set(page, 'at', { type: 'instant', op: 'onDay', day: '2026-10-25' });
+    await frames(page);
+    const n25 = await shown(page);
+    await clockAt(page, '2026-10-25T12:00:00Z');
+    await set(page, 'at', { type: 'instant', op: 'relative', range: 'last7Days' });
+    await frames(page);
+    const n7 = await shown(page);
+    check(name, `${tag}: on 2026-03-29 92 rows (23 h), on 2026-10-25 100 (25 h), last 7 days to 25/10 676 (169 h)`, n29 === 92 && n25 === 100 && n7 === 676, { n29, n25, n7 });
+    await clockAt(page, '2026-10-19T12:00:00Z');
+    await set(page, 'at', null);
+    // A moment at the gap and at the repeat (fr only: the typed pattern is the locale's).
+    if (!rtl) {
+      await openOn(page, 'at');
+      await ready(page);
+      const zone = await page.evaluate(() => document.querySelector('.dzg-popup .dzg-fzone bdi')?.textContent);
+      await op(page, 'before');
+      await ready(page);
+      await page.focus('.dzg-popup .dzg-fdate input');
+      await page.keyboard.type('29/03/2026 02:30');
+      await frames(page, 3);
+      const note = await page.evaluate(() => document.querySelector('.tz-field__panel')?.textContent.includes('02:30'));
+      v = await axe(page);
+      check(name, `${tag}: a skipped time (Paris 29/03 02:30) shows tzslot's note; the zone line says Europe/Paris; axe 0`, note && zone === 'Europe/Paris' && v.length === 0, { note, zone, v });
+      await page.keyboard.press('Enter');
+      await frames(page);
+      const gap = await filter(page, 'at');
+      check(name, `${tag}: Enter applies the moment moved later, 01:30Z, and closes`, gap?.at === '2026-03-29T01:30:00.000Z' && !(await S(page)).open, gap);
+      await openOn(page, 'at');
+      await ready(page);
+      await page.focus('.dzg-popup .dzg-fdate input');
+      await page.keyboard.press('ControlOrMeta+a');
+      await page.keyboard.type('25/10/2026 02:30');
+      await frames(page, 3);
+      const readings = await page.evaluate(() => [...document.querySelectorAll('.tz-field__panel .tz-datetime__reading')].map((b) => `${b.textContent}:${b.getAttribute('aria-pressed')}`));
+      v = await axe(page);
+      check(name, `${tag}: a repeated time shows two readings, the first pressed; axe 0`, readings.length === 2 && readings[0].endsWith(':true') && v.length === 0, { readings, v });
+      await page.click('.tz-field__panel .tz-datetime__reading >> nth=1');
+      // The open calendar covers the footer: Escape closes it first (the popup stays).
+      await page.keyboard.press('Escape');
+      await page.click('.dzg-popup .dzg-fapply');
+      await frames(page);
+      const second = await filter(page, 'at');
+      check(name, `${tag}: the second reading applies 01:30Z`, second?.at === '2026-10-25T01:30:00.000Z', second);
+      await set(page, 'at', null);
+    }
+    // Forced colours: the chosen day keeps its mark.
+    await page.emulateMedia({ forcedColors: 'active' });
+    await set(page, 'day', { type: 'day', op: 'equals', value: '2026-10-19' });
+    await openOn(page, 'day');
+    await ready(page);
+    await openPanel(page);
+    const fc = await page.evaluate(() => { const d = document.querySelector('.tz-field__panel .tz-cal__day--selected'); return d && { adjust: getComputedStyle(d).forcedColorAdjust, bg: getComputedStyle(d).backgroundColor }; });
+    check(name, `${tag}: forced colours: the chosen day keeps a Highlight background`, fc?.adjust === 'none' && fc.bg !== 'rgba(0, 0, 0, 0)', fc);
+    await page.screenshot({ path: `${OUT}/${name}-dates-${qs.replace(/[&=]/g, '_')}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    await page.emulateMedia({ forcedColors: 'none' });
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    // Near the bottom, in a transformed card: the popup in the top layer, its panel too, seen.
+    await page.evaluate(() => { document.querySelector('main').style.paddingBlockStart = '480px'; const h = document.getElementById('host'); h.style.transform = 'translateZ(0)'; h.style.overflow = 'hidden'; window.scrollTo(0, 0); });
+    await frames(page, 3);
+    await openOn(page, 'day');
+    await ready(page);
+    await openPanel(page);
+    const s4 = await S(page);
+    const layer = await page.evaluate(() => document.querySelector('.dzg-popup').matches(':popover-open'));
+    check(name, `${tag}: in a transformed card near the bottom, the popup is in the top layer and its calendar on top, inside the window`, layer && s4.hit && s4.panelRect.t >= 0 && s4.panelRect.b <= 760, s4);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    check(name, `no page error ${tag}`, errors.length === 0, errors);
+    await page.close();
+  }
+  // Digits: ar-EG with the locale's digits.
+  {
+    const { page, errors } = await load(ctx, 'locale=ar-EG&dir=rtl&rows=200&filters=1&popup=1&dates=1&numerals=locale');
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'filter.column', column: 'day', filter: { type: 'day', op: 'equals', value: '2026-03-29' } }, 'api'));
+    await openOn(page, 'day');
+    await ready(page);
+    const s = await S(page);
+    check(name, 'dates ar-EG numerals=locale: the trigger writes Arabic-Indic digits (٢٠٢٦), Gregorian', /٢٠٢٦/.test(s.trigText ?? ''), s);
+    check(name, 'no page error dates ar-EG', errors.length === 0, errors);
+    await page.close();
+  }
+  // A chunk that arrives late, then one that never does (aborted), then Retry.
+  {
+    const { page, errors } = await load(ctx, 'locale=fr-FR&rows=200&filters=1&popup=1&dates=1');
+    let release;
+    const late = new Promise((r) => (release = r));
+    await page.route('**/filters/dates/range.js', async (route) => { await late; await route.continue(); });
+    let aborts = 0;
+    await page.route('**/filters/dates/moment.js', (route) => (aborts++ === 0 ? route.abort('failed') : route.continue()));
+    await openOn(page, 'day');
+    await ready(page);
+    await op(page, 'between');
+    await frames(page);
+    const loading = await S(page);
+    const busy = await page.evaluate(() => document.querySelector('.dzg-popup .dzg-fdate').getAttribute('aria-busy'));
+    const v = await axe(page);
+    release();
+    await ready(page);
+    const arrived = await S(page);
+    check(name, 'dates: a late chunk shows the loading line (aria-busy, axe 0), then the field', loading.status === 'Chargement du calendrier…' && busy === 'true' && v.length === 0 && arrived.status === null, { loading, busy, v, arrived });
+    await page.keyboard.press('Escape');
+    await openOn(page, 'at');
+    await ready(page);
+    await op(page, 'before');
+    await page.waitForSelector('.dzg-popup .dzg-fdate [role=alert]', { timeout: 10000 });
+    const failed = await S(page);
+    const va = await axe(page);
+    await op(page, 'blank');
+    await frames(page);
+    const blank = await filter(page, 'at');
+    check(name, 'dates: an aborted chunk shows the failure (alert, Retry, axe 0); blank still filters', !!failed.alert && va.length === 0 && blank?.op === 'blank', { failed, va, blank });
+    await op(page, 'after');
+    await page.waitForSelector('.dzg-popup .dzg-fretry', { timeout: 10000 });
+    await page.click('.dzg-popup .dzg-fretry');
+    await page.waitForTimeout(800);
+    const retried = await S(page);
+    const widget = await page.evaluate(() => !!document.querySelector('.dzg-popup .dzg-fdate .tz-field'));
+    // Recorded, not required: Chrome keeps a failed import() (spike S13), so Retry may fail until a reload.
+    console.log(`note ${name}: Retry after an aborted chunk ${widget ? 'loaded the field' : 'failed again (the engine keeps the failed import: reload the page)'}; fetches of the chunk: ${aborts}`);
+    check(name, 'dates: Retry either loads the field or says the failure again (never a blank form)', widget || !!retried.alert, { widget, retried });
+    check(name, 'no page error dates chunks', errors.filter((e) => !/unreachable|Failed to fetch|ERR_FAILED/.test(e)).length === 0, errors);
+    await page.close();
+  }
+  // dates=fail: the failure message from the start, axe 0, Escape closes.
+  {
+    const { page, errors } = await load(ctx, 'locale=ar-DZ&dir=rtl&theme=dark&rows=200&filters=1&popup=1&dates=fail');
+    await openOn(page, 'day');
+    await page.waitForSelector('.dzg-popup .dzg-fdate [role=alert]', { timeout: 10000 });
+    const s = await S(page);
+    const v = await axe(page);
+    await page.keyboard.press('Escape');
+    const closed = !(await S(page)).open;
+    check(name, 'dates=fail (ar, dark): the failure said in Arabic with Retry, axe 0, Escape closes', s.alert?.startsWith('تعذر') && v.length === 0 && closed, { s, v, closed });
+    check(name, 'no page error dates=fail', errors.filter((e) => !/unreachable/.test(e)).length === 0, errors);
+    await page.close();
+  }
+}
 
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
@@ -396,6 +639,9 @@ async function runEngine(name) {
         await page.close();
       }
     }
+
+    // ---- date filters on tzslot (step 14 part B): fr light Europe/Paris, ar right to left dark ----
+    if (name === 'chrome') await dateChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><title>S13 tzslot in the popup</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@tzslot/dom": "/spikes/s13-tzslot/build/dom.js",
+  "@tzslot/core": "/spikes/s13-tzslot/build/core.js"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); }
+  #card { transform: translateX(12px); overflow: hidden; contain: paint; inline-size: 600px; block-size: 200px; border: 1px solid; }
+  #anchor { margin: 20px; }
+</style>
+</head>
+<body>
+<div id="card"><div id="root" class="dzg"><button id="anchor">Filter</button></div></div>
+<dialog id="dlg"><div id="root2" class="dzg"><button id="anchor2">Filter in dialog</button></div></dialog>
+<script type="module" src="./page.ts"></script>
+</body>
+</html>

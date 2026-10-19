@@ -282,3 +282,46 @@ Consigner le résultat dans `docs/behaviors/filter-ui.md` (fin de la fiche) et d
 (28), un focus perdu à la fermeture (30, 31) ou une annonce répétée (30, 33) se corrige avant
 l'étape 14 ; un nom d'en-tête qui contient celui du bouton (27) remet en cause l'`aria-label` posé
 sur l'en-tête.
+
+## 10. Étapes — filtres de dates sur tzslot (étape 14)
+
+Page : le bac à sable avec la fenêtre et les colonnes de dates,
+http://127.0.0.1:4700/?filters=1&popup=1&dates=1 (`npx vite --host 127.0.0.1`), en **français**
+(zone Europe/Paris) puis en **arabe** (« ar-DZ »). Couples A à D, plus VoiceOver sur iOS et TalkBack
+si possible. Durée estimée : 20 min par couple et par langue. Noter ce qui est **dit**, mot pour mot.
+
+36. **Ouvrir un filtre de jour.** Sur l'en-tête « Jour », `Alt+↓` : le nom de la fenêtre « Filtre
+    Jour » (ar : « مرشح اليوم »), puis « Condition », « Le » (ar : « في يوم »). La première fois, une
+    ligne « Chargement du calendrier… » peut être dite (une fois, poliment) ; le focus ne bouge pas
+    quand le calendrier arrive.
+37. **Le déclencheur porte la valeur** (T1). `Tab` jusqu'au champ : attendu « Date, 29 mars 2026,
+    bouton, ouvre un dialogue » (la date choisie dans le nom), « Date, Choisir une date » sans date.
+38. **Le calendrier.** `Entrée` sur le champ : un dialogue nommé « Date » ; le jour sélectionné (ou
+    aujourd'hui) dit avec son mois et son année ; `→` (ar : `←`) passe au jour suivant ; `Entrée`
+    choisit, le calendrier se ferme, le focus revient sur le champ, qui dit la nouvelle date ; dans
+    le navigateur, « Filtré. N lignes » est dit **une fois**.
+39. **Échap à deux niveaux.** Calendrier ouvert, `Échap` : le calendrier se ferme, le focus sur le
+    champ, la fenêtre de filtre reste. `Échap` encore : la fenêtre se ferme, le focus revient sur
+    l'en-tête (ou le bouton), sans fermer un dialogue autour de la grille.
+40. **Tab.** Calendrier ouvert, `Tab` / `Maj+Tab` restent dans le calendrier. Fermé, `Tab` depuis le
+    champ va vers « Effacer le filtre Jour » puis « Appliquer », puis revient sur « Condition ».
+41. **Entre et les raccourcis.** Choisir « Entre » : le champ « Période » ; l'ouvrir : les raccourcis
+    « Aujourd'hui », « Hier », « 7 derniers jours »… (ar : « اليوم »، « أمس »، « آخر 7 أيام »),
+    chacun bouton **bascule** (« enfoncé » pour celui en vigueur). En presser un : la période est dite
+    (la ligne de résumé), le filtre s'applique, une seule annonce.
+42. **Date et heure.** Sur la colonne « Rendez-vous » (zone Europe/Paris), la ligne « Fuseau
+    horaire Europe/Paris » est dite avant le champ (ou en le parcourant). Choisir « Avant », taper
+    `29/03/2026 02:30` : la note « 02:30 n'existe pas ce jour-là… » est dite ; l'heure devient 03:30.
+    Taper `25/10/2026 02:30` : deux boutons « été » (enfoncé) / « hiver » ; presser « hiver ».
+43. **Échec du chargement.** (Le bac à sable `?dates=fail` simule un calendrier introuvable.) Ouvrir
+    un filtre de date : « Le calendrier n'a pas pu être chargé… » dit une fois (alerte), un bouton
+    « Réessayer » ; « Vide » et « Non vide » marchent, `Échap` ferme.
+44. **Sur iOS (VoiceOver) et Android (TalkBack)** : le calendrier dans la fenêtre se parcourt au
+    balayage, le dialogue imbriqué est annoncé, le bouton de retour (geste) ferme le calendrier avant
+    la fenêtre — noter sinon.
+
+Consigner le résultat dans `docs/behaviors/filter-date-picker.md` (fin de la fiche) et dans
+`ROADMAP.md` (ligne de l'étape 14). Règle de décision propre à cette section : un déclencheur sans la
+date (37) se corrige chez tzslot (T1), notre contournement restant jusque-là ; un calendrier sans nom
+ou un dialogue imbriqué que le lecteur ne voit pas (38, 44) bloque l'étape 18 ; une annonce répétée
+(38, 41) se corrige avant l'étape 15.

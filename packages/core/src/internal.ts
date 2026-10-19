@@ -27,3 +27,4 @@ export { sameFocus } from './focus.js';
 export { checkPage, pageOf, resizeIndex, resolvePageOptions, samePage } from './model/page.js';
 export type { PageConfig } from './model/page.js';
 export { missingFeatureProblems } from './columns/span-rules.js';
+export { hasRelative } from './value/relative.js';

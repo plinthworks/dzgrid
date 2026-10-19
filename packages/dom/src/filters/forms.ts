@@ -3,7 +3,8 @@ import type { Part, SlotContext } from '../part.js';
 import { echo, nameOf, numberIn, shown, textField } from './field.js';
 
 type C = SlotContext['filter'];
-type F = { readonly type: string; readonly op?: string; readonly value?: unknown; readonly valueTo?: unknown; readonly caseSensitive?: boolean };
+/** A filter as the forms read and write it (any built-in kind's fields). */
+export type F = { readonly type: string; readonly op?: string; readonly value?: unknown; readonly valueTo?: unknown; readonly caseSensitive?: boolean; readonly [k: string]: unknown };
 
 /** A kind's fields in the popup: what they can show, show, read and focus. */
 interface Body {
@@ -14,25 +15,27 @@ interface Body {
   read(judge: boolean): F | null | undefined;
   texts(): void;
   focus(): void;
+  destroy?(): void;
 }
 /** `now` null: the form changed under the user (an operator no longer offered): recorded, nothing sent. `clr`: a null draft removes the filter (Clear, All). */
-type Make = (c: () => C, doc: Document, changed: (now: boolean | null, clr?: boolean) => void) => Body;
+export type Changed = (now: boolean | null, clr?: boolean) => void;
+type Make = (c: () => C, doc: Document, changed: Changed) => Body;
 
 let uid = 0;
-const el = <K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = ''): HTMLElementTagNameMap[K] => {
+export const el = <K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = ''): HTMLElementTagNameMap[K] => {
   const e = doc.createElement(tag);
   if (cls) e.className = cls;
   return e;
 };
 /** A visible label holding its control (its name), the label's text first. */
-const labelled = (doc: Document, control: HTMLElement): [HTMLLabelElement, HTMLSpanElement] => {
+export const labelled = (doc: Document, control: HTMLElement): [HTMLLabelElement, HTMLSpanElement] => {
   const l = el(doc, 'label');
   const s = el(doc, 'span');
   l.append(s, control);
   return [l, s];
 };
 /** A text written only when it changes: a paint that changes nothing touches nothing. */
-const tx = (e: Node, v: string): void => {
+export const tx = (e: Node, v: string): void => {
   if (e.textContent !== v) e.textContent = v;
 };
 
@@ -47,7 +50,7 @@ const tx = (e: Node, v: string): void => {
  * filter yet (between with one bound, an empty value) keeps the filter in force and drops the
  * pending edit (lead decision L1); only Clear or All remove it.
  */
-function form(make: Make): Part<C> {
+export function form(make: Make): Part<C> {
   return {
     mount(host, first) {
       let c = first;
@@ -117,7 +120,8 @@ function form(make: Make): Part<C> {
       apply.addEventListener('click', commit);
       host.addEventListener('keydown', (k) => {
         const t = k.target as HTMLInputElement;
-        if (k.key === 'Enter' && !k.isComposing && t.tagName !== 'BUTTON') k.preventDefault(), commit();
+        // Enter inside a date panel is the panel's (step 14).
+        if (k.key === 'Enter' && !k.isComposing && t.tagName !== 'BUTTON' && !t.closest('.tz-field__panel')) k.preventDefault(), commit();
         // A radio group is one Tab stop: back from it wraps to the last control.
         else if (k.key === 'Tab' && k.shiftKey && t.type === 'radio') k.preventDefault(), apply.focus();
       });
@@ -128,7 +132,10 @@ function form(make: Make): Part<C> {
           c = n;
           draw();
         },
-        destroy: () => clearTimeout(timer),
+        destroy() {
+          clearTimeout(timer);
+          body.destroy?.();
+        },
         focus() {
           if (showing) body.focus();
           else clear.focus();
@@ -140,33 +147,96 @@ function form(make: Make): Part<C> {
 }
 
 const TEXT = ['contains', 'notContains', 'equals', 'notEqual', 'startsWith', 'endsWith', 'blank', 'notBlank'];
-const NUM = ['equals', 'notEqual', 'lt', 'lte', 'gt', 'gte', 'between', 'blank', 'notBlank'];
-const empty = (op: string): boolean => op === 'blank' || op === 'notBlank';
+export const NUM = ['equals', 'notEqual', 'lt', 'lte', 'gt', 'gte', 'between', 'blank', 'notBlank'];
+export const empty = (op: string): boolean => op === 'blank' || op === 'notBlank';
+export const hide = (l: HTMLElement, v: boolean): void => void (l.hidden !== v && (l.hidden = v));
 
-/** Text and number: an operator (the column's `filter.ops` in its order, else all), a value, a second one for between. */
-const conditions = (num: boolean): Make => (get, doc, changed) => {
-  const all = num ? NUM : TEXT;
-  const type = num ? 'number' : 'text';
-  const ops = (): string[] => {
+/** The fields under a condition's operator: what they show for one, write, read and focus. */
+export interface Values {
+  readonly els: readonly HTMLElement[];
+  /** A stored filter of the kind, its operator offered: can the fields show it? */
+  can(s: F): boolean;
+  /** The operator now chosen (or written). */
+  show(op: string): void;
+  write(s: F | null, op: string): void;
+  /** The draft for a value operator (`read` of `Body`). */
+  read(op: string, judge: boolean): F | null | undefined;
+  texts(): void;
+  /** False: nothing to focus (the operator takes it). */
+  focus(op: string): boolean;
+  destroy?(): void;
+}
+
+/**
+ * A condition form (text, number, day, instant): an operator (the column's `filter.ops` in its
+ * order, else the kind's), labelled `filter.op.<label[op] ?? op>`, and the kind's fields under it.
+ * `opOf`: the operator a stored filter shows under (a date shortcut under between).
+ */
+export interface Spec {
+  readonly type: string;
+  readonly ops: readonly string[];
+  readonly label?: Readonly<Record<string, string>>;
+  readonly opOf?: (s: F) => string;
+  readonly values: (get: () => C, doc: Document, changed: Changed) => Values;
+}
+
+export const conditions = (spec: Spec): Make => (get, doc, changed) => {
+  const { type, ops: all } = spec;
+  const ops = (): readonly string[] => {
     const own = get().ops.filter((o) => all.includes(o));
     return own.length ? own : all;
   };
+  const opOf = (s: F): string => spec.opOf?.(s) ?? s.op!;
   const op = el(doc, 'select', 'dzg-fop');
+  const [lo, so] = labelled(doc, op);
+  const v = spec.values(get, doc, changed);
+  const vis = (): void => v.show(op.value);
+  op.addEventListener('change', () => (vis(), changed(true)));
+  /** The options of the column's operators; the one chosen kept when still offered. True: it was not (the first now). */
+  const fill = (): boolean => {
+    const list = ops();
+    if ([...op.options].map((o) => o.value).join() === list.join()) return false;
+    const was = op.value;
+    op.replaceChildren(...list.map((o) => Object.assign(el(doc, 'option'), { value: o })));
+    op.value = list.includes(was) ? was : list[0]!;
+    return !!was && op.value !== was;
+  };
+  return {
+    els: [lo, ...v.els],
+    edits: (s) => s === null || (s.type === type && ops().includes(opOf(s)) && v.can(s)),
+    write(s) {
+      fill();
+      op.value = s ? opOf(s) : ops()[0]!;
+      v.write(s, op.value);
+      vis();
+    },
+    read: (judge) => (empty(op.value) ? { type, op: op.value } : v.read(op.value, judge)),
+    texts() {
+      const c = get();
+      // An operator no longer offered: the first shown, and the draft is what the form says.
+      if (fill()) vis(), changed(null);
+      tx(so, c.msg('filter.op'));
+      v.texts();
+      for (const o of op.options) tx(o, c.msg(`filter.op.${spec.label?.[o.value] ?? o.value}` as never));
+    },
+    focus() {
+      if (empty(op.value) || !v.focus(op.value)) op.focus();
+    },
+    destroy: () => v.destroy?.(),
+  };
+};
+
+/** Text and number: a value, a second one for between. */
+const boxes = (num: boolean): Spec['values'] => (get, doc, changed) => {
+  const type = num ? 'number' : 'text';
   const a = textField(doc, num);
   const b = textField(doc, num);
   a.classList.add('dzg-fval');
   b.classList.add('dzg-fto');
-  const [lo, so] = labelled(doc, op);
   const [la, sa] = labelled(doc, a);
   const [lb, sb] = labelled(doc, b);
   /** The locale each value was typed or written in: read in it, once (a locale switch since changes nothing). */
   const at = new Map<HTMLInputElement, LocaleCtx>();
-  const hide = (l: HTMLElement, v: boolean): void => void (l.hidden !== v && (l.hidden = v));
-  const vis = (): void => {
-    hide(la, empty(op.value));
-    hide(lb, op.value !== 'between');
-  };
-  op.addEventListener('change', () => (vis(), changed(true)));
   for (const i of [a, b]) {
     i.addEventListener('input', (k) => {
       if ((k as InputEvent).isComposing) return;
@@ -176,34 +246,23 @@ const conditions = (num: boolean): Make => (get, doc, changed) => {
     });
     i.addEventListener('compositionend', () => (at.set(i, get().ctx), changed(false)));
   }
-  /** The options of the column's operators; the one chosen kept when still offered. True: it was not (the first now). */
-  const fill = (): boolean => {
-    const list = ops();
-    if ([...op.options].map((o) => o.value).join() === list.join()) return false;
-    const was = op.value;
-    op.replaceChildren(...list.map((v) => Object.assign(el(doc, 'option'), { value: v })));
-    op.value = list.includes(was) ? was : list[0]!;
-    return !!was && op.value !== was;
-  };
   return {
-    els: [lo, la, lb],
-    edits: (s) => s === null || (s.type === type && ops().includes(s.op!)),
+    els: [la, lb],
+    can: () => true,
+    show(o) {
+      hide(la, empty(o));
+      hide(lb, o !== 'between');
+    },
     write(s) {
-      const list = ops();
       const g = get();
-      fill();
-      op.value = s ? s.op! : list[0]!;
       a.value = s ? (num ? shown(g.ctx, s.value) : ((s.value as string) ?? '')) : '';
       b.value = s ? shown(g.ctx, s.valueTo) : '';
       a.removeAttribute('aria-invalid');
       b.removeAttribute('aria-invalid');
       at.set(a, g.ctx).set(b, g.ctx);
-      vis();
     },
-    read(judge) {
+    read(o, judge) {
       const c = get();
-      const o = op.value;
-      if (empty(o)) return { type, op: o };
       if (!num) return a.value ? { type, op: o, value: a.value, ...((c.state as F | null)?.caseSensitive && { caseSensitive: true }) } : null;
       const fields = o === 'between' ? [a, b] : [a];
       const read = (i: HTMLInputElement) => numberIn(i, at.get(i) ?? c.ctx);
@@ -220,17 +279,13 @@ const conditions = (num: boolean): Make => (get, doc, changed) => {
     },
     texts() {
       const c = get();
-      // An operator no longer offered: the first shown, and the draft is what the form says.
-      if (fill()) vis(), changed(null);
-      tx(so, c.msg('filter.op'));
       tx(sa, c.msg('filter.value'));
       tx(sb, c.msg('filter.valueTo'));
-      for (const o of op.options) tx(o, c.msg(`filter.op.${o.value}` as never));
     },
     focus() {
-      if (empty(op.value)) return op.focus();
       a.focus();
       a.select();
+      return true;
     },
   };
 };
@@ -271,6 +326,6 @@ const yesNo: Make = (get, doc, changed) => {
   };
 };
 
-export const textForm = form(conditions(false));
-export const numberForm = form(conditions(true));
+export const textForm = form(conditions({ type: 'text', ops: TEXT, values: boxes(false) }));
+export const numberForm = form(conditions({ type: 'number', ops: NUM, values: boxes(true) }));
 export const booleanForm = form(yesNo);

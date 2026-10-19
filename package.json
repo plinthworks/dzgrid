@@ -29,6 +29,8 @@
     "@angular/core": "^21.2.25",
     "@angular/platform-browser": "^21.2.25",
     "@types/node": "^22.20.4",
+    "@tzslot/core": "2.2.0",
+    "@tzslot/dom": "2.2.0",
     "axe-core": "^4.14.0",
     "esbuild": "^0.25.10",
     "jsdom": "^29.1.1",

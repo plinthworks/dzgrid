@@ -105,7 +105,8 @@ describe('into and out of the box', () => {
   });
 
   it('Enter on a summary cell focuses Clear; Clear puts the focus back on the cell', () => {
-    const t = make();
+    // Without the popup (step 14 gave day columns one: their summary is then a button opening it).
+    const t = make({ features: [filters({ floating: true, popup: false })] });
     t.g.kernel.dispatch({ type: 'filter.column', column: 'd', filter: { type: 'day', op: 'equals', value: '2024-01-01' } }, 'api');
     t.cell('d').focus();
     t.press('Enter');

@@ -74,6 +74,8 @@ function typescript(name) {
     },
     ...(source.dependencies && { dependencies: source.dependencies }),
     ...(source.peerDependencies && { peerDependencies: source.peerDependencies }),
+    // Optional peers (tzslot for the date filters, step 14) stay optional once published.
+    ...(source.peerDependenciesMeta && { peerDependenciesMeta: source.peerDependenciesMeta }),
   };
   writeFileSync(join(dir, 'dist', 'package.json'), JSON.stringify(pinPeers(manifest, VERSIONS), null, 2) + '\n');
   extras(name);

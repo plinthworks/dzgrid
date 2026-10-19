@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-19 (étape 14 partie A). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-19 (étape 14 partie B, non commitée). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -21,15 +21,15 @@ Mis à jour : 2026-10-19 (étape 14 partie A). Ce fichier dit où en est la Phas
 | 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | fait, relu, testé | `0caedae`, `599cbdf` |
 | 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
 | 13 — fenêtre de filtre (texte, nombre, oui/non), marque « filtré », Alt+Flèche bas | fait, relu, testé | `f67fc48`, `67782bc` |
-| 14 partie A — raccourcis de dates relatifs dans le cœur (`relative`, horloge, `tick()`, forme serveur) | fait, testé, non commité | — |
-| 14 partie B — champs de dates tzslot dans `@dzgrid/dom/filters`, minuterie de minuit | à faire | — |
+| 14 partie A — raccourcis de dates relatifs dans le cœur (`relative`, horloge, `tick()`, forme serveur) | fait, relu, testé | `df27559`, `85e08c3` |
+| 14 partie B — champs de dates tzslot dans `@dzgrid/dom/filters`, minuterie de minuit | fait, testé, non commité (relecture et analyse des tests à faire) | — |
 | 15 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 14 (filtres de dates avec tzslot, raccourcis relatifs « aujourd'hui », « 7 derniers jours »…), plan `docs/phase-3-steps/step14-tzslot-blueprint.md` (remplace les champs du premier plan `step14-dates-blueprint.md`), décisions `step14-decisions.md` (propriétaire, 2026-10-19 : tzslot seule case de date, complément facultatif installé seulement avec des dates, chargé à la première ouverture ; six raccourcis ; cœur 26 900, filters 8 500, adaptateurs dates 2 600, textes 680 / 760 / 850, thème 1 660 ; hors ligne : message + Réessayer). Partie A faite (2026-10-19, non commitée) : le cœur connaît les six raccourcis (`{op:'relative', range}` sur les colonnes jour et date-heure), l'horloge entre en nombre (`now`), `tick()` sur les modèles et `kernel.tick()`, la forme serveur (`between` / `betweenDays` + `relative` + `zone`), le réglage DOM `clock` ; fiche `docs/behaviors/filter-relative.md`. Partie B à faire : les champs tzslot (`packages/dom/src/filters/`), la minuterie de minuit qui appelle `kernel.tick()`. Demandes pour tzslot (T1 nom accessible de la case avec la date, T8 Échap, T3 complément Temporal 23 kB…) dans le plan §6. À faire par le propriétaire : écoute lecteur d'écran (§8, §9), relecture arabe.
+En cours : l'étape 14 (filtres de dates avec tzslot, raccourcis relatifs), plan `docs/phase-3-steps/step14-tzslot-blueprint.md`, décisions `step14-decisions.md`. Partie A faite et commitée (le cœur : `{op:'relative', range}`, l'horloge en nombre, `tick()`). **Partie B faite (2026-10-19, non commitée)** : les fenêtres de filtre des colonnes jour et date-heure (`filter.day`, `filter.instant`) utilisent les champs de tzslot 2.2.0 (`createDateField`, `createRangeField`, `createDateTimeField`), dans la zone, la langue et les chiffres de la grille, avec les six raccourcis sous « Entre » / « Entre les jours ». tzslot est une dépendance pair **facultative** de `@dzgrid/dom` et `@dzgrid/angular` (`>=2.2.0 <3`), chargée en trois lots (`date`, `range`, `moment`) à la première ouverture d'un filtre de date ; message de chargement, échec + « Réessayer » (Chrome garde un `import()` échoué : il faut recharger la page) ; Échap ferme d'abord le calendrier puis la fenêtre ; feuilles de style de tzslot injectées par nous avec le nonce ; minuterie de minuit (`kernel.tick()`) tant qu'un raccourci est en vigueur. Fiche `docs/behaviors/filter-date-picker.md` ; essai `spikes/s13-tzslot` ; demandes pour tzslot (T1 à T11, avec nos contournements) dans `docs/tzslot-requests.md` — à lire par le propriétaire de tzslot. Reste : relecture de code et analyse des tests de la partie B, puis commit ; écoute au lecteur d'écran (`docs/a11y-protocol.md` §8, §9, §10) et relecture arabe par le propriétaire.
 
 ## Les plans détaillés des étapes
 
-`docs/phase-3-steps/` garde les plans validés (architecte + décisions) des étapes 5 à 13 : ce qu'un agent a reçu pour écrire l'étape. Ils servent à comprendre pourquoi le code est ainsi, et à reprendre une étape interrompue.
+`docs/phase-3-steps/` garde les plans validés (architecte + décisions) des étapes 5 à 14 : ce qu'un agent a reçu pour écrire l'étape. Ils servent à comprendre pourquoi le code est ainsi, et à reprendre une étape interrompue.
 
 ## Comment on travaille (règles du propriétaire)
 
@@ -53,18 +53,20 @@ En cours : l'étape 14 (filtres de dates avec tzslot, raccourcis relatifs « auj
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 26 900 o gz (étape 14, raccourcis) | 26 646 |
+| `@dzgrid/core` | 26 900 o gz (étape 14, raccourcis) | 26 740 |
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 620 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
-| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 467 |
+| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 551 |
 | `@dzgrid/dom` | 18 750 (étape 12) | 18 722 |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`) | 8 500 (étape 14) | 6 417 |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot et les lots de dates à part) | 8 500 (étape 14) | 8 436 |
+| adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 288 |
+| lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 1 238 |
 | `@dzgrid/dom/popup` | 1 500 | 1 428 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
-| textes des filtres en / fr / ar | 680 / 760 / 850 (étape 14) | 421 / 476 / 537 |
-| thème | 1 660 (étape 14) | 1 503 |
+| textes des filtres en / fr / ar | 680 / 760 / 850 (étape 14) | 585 / 667 / 756 |
+| thème | 1 660 (étape 14) | 1 626 |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 

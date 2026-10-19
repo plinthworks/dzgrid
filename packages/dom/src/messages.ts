@@ -45,9 +45,12 @@ export type MessageKey = (typeof MESSAGE_KEYS)[number];
 export type FilterMessageKey =
   | 'filter.inputLabel' | 'filter.summaryActive' | 'filter.clear' | 'filter.invalid' | 'announce.filtered' | 'announce.filteredOpen'
   // The popup (step 13): its name, the header's filtered name, the form's labels, each operator, a boolean's choices.
-  | 'filter.popupLabel' | 'header.withFilter' | 'filter.op' | 'filter.value' | 'filter.valueTo' | 'filter.apply' | `filter.op.${FilterOp}` | 'filter.all' | 'filter.yes' | 'filter.no';
-/** The operators the popup names: text's and number's. */
-export type FilterOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank' | 'lt' | 'lte' | 'gt' | 'gte' | 'between';
+  | 'filter.popupLabel' | 'header.withFilter' | 'filter.op' | 'filter.value' | 'filter.valueTo' | 'filter.apply' | `filter.op.${FilterOp}` | 'filter.all' | 'filter.yes' | 'filter.no'
+  // Dates (step 14): the fields' labels, the zone line, loading and failure.
+  | 'filter.date' | 'filter.dateTime' | 'filter.period' | 'filter.zone' | 'filter.loadingDates' | 'filter.loadFailed';
+/** The operators the popup names: text's and number's, and the date ones (step 14). */
+export type FilterOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank' | 'lt' | 'lte' | 'gt' | 'gte' | 'between'
+  | 'onDay' | 'notOnDay' | 'betweenDays' | 'before' | 'after' | 'onOrBefore' | 'onOrAfter';
 /** A filter bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_FILTERS.text }`. */
 export interface FilterMessages {
   readonly locale: string;

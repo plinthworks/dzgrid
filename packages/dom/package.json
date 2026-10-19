@@ -51,6 +51,16 @@
     }
   },
   "peerDependencies": {
-    "@dzgrid/core": "0.0.0"
+    "@dzgrid/core": "0.0.0",
+    "@tzslot/core": ">=2.2.0 <3",
+    "@tzslot/dom": ">=2.2.0 <3"
+  },
+  "peerDependenciesMeta": {
+    "@tzslot/core": {
+      "optional": true
+    },
+    "@tzslot/dom": {
+      "optional": true
+    }
   }
 }

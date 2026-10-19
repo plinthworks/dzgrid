@@ -200,7 +200,7 @@ export interface SetValue { readonly value: string /* toExport form */; readonly
 export function setValues<T>(model: ClientModel<T>, column: string, o?: { search?: string; limit?: number }): { values: readonly SetValue[]; blanks: number; truncated: boolean };
 ```
 
-**D6 — Day and instant inputs (K.2: no Temporal in core or dom).**
+**D6 — Day and instant inputs (K.2: no Temporal in core or dom).** *[Superseded at step 14 (owner decisions Q1, Q4, `docs/phase-3-steps/step14-decisions.md`): no adapter and no native input; tzslot 2.2.0 is the date control of the filters, an optional peer loaded on first use; see `docs/behaviors/filter-date-picker.md`.]*
 - **Recommendation:**
   - `DatePickerAdapter` lives in `@dzgrid/dom/filters`. The default is native `<input type="date">`, plus `<input type="time" step="1">` for instant moments.
   - A typed wall time becomes an instant through `resolveWall(zone, 'reject')` (Phase 1 D8). A time inside a clock change is an input error with its message, never shifted.
@@ -610,7 +610,7 @@ export function csvExport(o?: CsvOptions & { readonly fileName?: (ctx: LocaleCtx
   - the Blob text starts with a BOM and matches step 8's text.
   - Bench: dataset A in the browser, total ≤ 700 ms, longest task ≤ 50 ms (LoAF).
 
-### Step 17: tzslot adapter (`@dzgrid/dom/tzslot-picker`, optional, cut first)
+### Step 17: tzslot adapter (`@dzgrid/dom/tzslot-picker`, optional, cut first) *[Folded into step 14 of phase-3-plugins.md (owner, 2026-10-19): tzslot is the date control, lazily loaded inside `@dzgrid/dom/filters`; there is no `/tzslot-picker` subpath.]*
 - **Files:** `dom/src/tzslot-picker/index.ts`; `@tzslot/dom` as an optional peer (`peerDependenciesMeta`), loaded with `import()` in the DOM layer only.
 - **Tests first:** the adapter maps a `PlainDate` to `Day` and back with `toString()`; it is never imported by the `/filters` base (import-graph test).
 
@@ -777,7 +777,7 @@ The audit-screen entry counts the Angular framework as already present in the ap
 | Shared, memory-constrained machine | Browser scripts are owner-run and sequential; the fake server computes rows from the index. |
 
 **Cut order** (each cut written in `ROADMAP.md` with its target phase):
-1. `@dzgrid/dom/tzslot-picker` (step 17), to Phase 5.
+1. ~~`@dzgrid/dom/tzslot-picker` (step 17), to Phase 5.~~ Folded into step 14 (tzslot is the date control).
 2. Cursor paging, if the owner's API is offset-based.
 3. Value-list virtualisation beyond 2 000 values: cap at 2 000 with search and a "refine your search" message, to Phase 5.
 4. The second condition (AND/OR) in the popup, to Phase 5 (`combined` stays in the model).

@@ -5,7 +5,7 @@
 // column; the host's filter.column / filter.set / query.set; hiding, redefining, changing kind,
 // scrolling a column out; direction and locale; a server answering late or failing; destroy.
 // Seeded: a failure prints its seed and the steps that led there.
-import { describe, it, afterEach, vi } from 'vitest';
+import { describe, it, afterEach, expect, vi } from 'vitest';
 import { localeCtx, makeQuery, readNumber, type ColumnOrGroup, type LocaleCtx } from '@dzgrid/core';
 import { canonical } from '@dzgrid/core/internal';
 import { definePart, type SlotContext } from '../src/part.js';
@@ -357,4 +357,242 @@ describe('a random walk over the filter popup and the floating row', () => {
       cleanup();
     }
   }, 60_000);
+});
+
+// ---- Step 14 part B: the date forms on tzslot, walked ----
+// A day column and an instant column, a relative state, a spy on tzslot's three constructors
+// capturing each widget's options; actions: open, close (Apply, Enter on a typed moment, Escape,
+// closeFilter), the operator, a pick through the captured onChange (real Temporal values), half a
+// period, a cleared moment, a shortcut, the zone switched, the clock stepped (midnight included),
+// the host's filter.set. Invariants: the rows are an oracle's (zoneDayBounds, relativeDays), never
+// an inactive filter stored, a server asked only at Apply/Enter or a midnight, the wire's resolved
+// bounds the oracle's, no echo, the first/last rule, no panel left behind.
+const tz = vi.hoisted(() => ({ last: null as null | { kind: string; o: Record<string, any> } }));
+vi.mock('@tzslot/dom', async (orig) => {
+  const m = await orig<typeof import('@tzslot/dom')>();
+  const wrap = <F extends (h: HTMLElement, o?: any) => any>(kind: string, f: F) => ((h: HTMLElement, o: Record<string, any> = {}) => {
+    const w = f(h, o);
+    const rec = { kind, o: { ...o } };
+    tz.last = rec;
+    const update = w.update.bind(w);
+    w.update = (s: Record<string, unknown>) => (Object.assign(rec.o, s), update(s));
+    const destroy = w.destroy.bind(w);
+    w.destroy = () => (tz.last === rec && (tz.last = null), destroy());
+    return w;
+  }) as unknown as F;
+  return { ...m, createDateField: wrap('date', m.createDateField), createRangeField: wrap('range', m.createRangeField), createDateTimeField: wrap('moment', m.createDateTimeField) };
+});
+
+type DRow = R & { t: string };
+const DZONES = ['Europe/Paris', 'Africa/Algiers', 'America/Sao_Paulo', 'UTC'];
+const DDAYS = ['2026-10-01', '2026-10-05', '2026-10-24', '2026-10-25', '2026-10-26', '2026-10-31', '2026-11-02'];
+const RANGES = ['today', 'yesterday', 'last7Days', 'last30Days', 'thisMonth', 'lastMonth'] as const;
+const DOPS = ['equals', 'notEqual', 'lt', 'lte', 'gt', 'gte', 'between', 'blank', 'notBlank'];
+const IOPS = ['onDay', 'betweenDays', 'before', 'after', 'between', 'blank', 'notBlank'];
+const D_ROWS: DRow[] = Array.from({ length: 48 }, (_, i) => ({ id: `r${i}`, name: `p${i}`, n: i, d: `2026-10-${String(20 + (i % 12)).padStart(2, '0')}`.replace('2026-10-31', '2026-11-01'), t: new Date(Date.UTC(2026, 9, 20) + i * 5 * 3_600_000 + 1_800_000).toISOString() }));
+
+/** What the walks did, summed: a walk that never reaches a widget proves nothing. */
+const did = { opens: 0, widgets: 0, picks: 0, stored: 0, relative: 0, ticks: 0 };
+async function walkDates(seed: number, server: boolean, steps = 45) {
+  const { Temporal } = await import('@tzslot/core');
+  const core = await import('@dzgrid/core');
+  const KITS = { date: await import('../src/filters/dates/date.js'), range: await import('../src/filters/dates/range.js'), moment: await import('../src/filters/dates/moment.js') };
+  const r = rng(seed);
+  const log: string[] = [];
+  let zone = 'Europe/Paris';
+  let now = Date.UTC(2026, 9, 24, 21, 0);
+  const feature = filters({ loadDates: (k) => Promise.resolve(KITS[k]) as never });
+  const t = make({
+    server, columns: [{ id: 'name', header: 'Name' }, { id: 'd', header: 'D', type: 'day' }, { id: 't', header: 'T', type: 'instant' }] as never,
+    rows: D_ROWS, features: [feature], settings: { timeZone: zone, clock: () => now } as never,
+  });
+  if (server) t.f.answer([]);
+  const fail = (msg: string) => { throw new Error(`dates seed ${seed} ${server ? 'server' : 'browser'}: ${msg}\n  ${log.join('\n  ')}`); };
+  const popup = () => t.host.querySelector<HTMLElement>('.dzg-popup');
+  const op = () => popup()?.querySelector<HTMLSelectElement>('select.dzg-fop') ?? null;
+  const model = () => t.g.kernel.query.filter as Record<string, any>;
+  const settle = async () => { for (let i = 0; i < 6; i++) await Promise.resolve(); };
+  const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  let openOn: 'd' | 't' | null = null;
+
+  /** The oracle: does this row pass the column's filter now? */
+  const keeps = (c: 'd' | 't', f: any, row: DRow): boolean => {
+    if (c === 'd') {
+      const v = row.d!;
+      if (f.op === 'blank') return false;
+      if (f.op === 'notBlank') return true;
+      let lo = f.value, hi = f.valueTo;
+      if (f.op === 'relative') {
+        const today = core.dayAt(now, zone)!.day;
+        const d = core.relativeDays(f.range, today)!;
+        lo = d.from; hi = d.to;
+      }
+      if (f.op === 'between' || f.op === 'relative') return v >= (lo < hi ? lo : hi) && v <= (lo < hi ? hi : lo);
+      return { equals: v === lo, notEqual: v !== lo, lt: v < lo, lte: v <= lo, gt: v > lo, gte: v >= lo }[f.op as 'equals'];
+    }
+    const ms = Date.parse(row.t);
+    if (f.op === 'blank') return false;
+    if (f.op === 'notBlank') return true;
+    const span = range(f)!;
+    return (span.from === null || ms >= span.from) && (span.to === null || ms < span.to);
+  };
+  const range = (f: any): { from: number | null; to: number | null } | null => {
+    const b = (d: string) => core.zoneDayBounds(d as never, zone);
+    if (f.op === 'onDay') return { from: b(f.day).from, to: b(f.day).to };
+    if (f.op === 'betweenDays' || f.op === 'relative') {
+      let lo = f.day, hi = f.dayTo;
+      if (f.op === 'relative') ({ from: lo, to: hi } = core.relativeDays(f.range, core.dayAt(now, zone)!.day)!);
+      if (lo > hi) [lo, hi] = [hi, lo];
+      return { from: b(lo).from, to: b(hi).to };
+    }
+    if (f.op === 'before') return { from: null, to: Date.parse(f.at) };
+    if (f.op === 'after') return { from: Date.parse(f.at) + 1, to: null };
+    if (f.op === 'between') { const a = Date.parse(f.at), z = Date.parse(f.atTo); return { from: Math.min(a, z), to: Math.max(a, z) }; }
+    return null;
+  };
+  const active = (c: 'd' | 't', f: any): boolean => {
+    if (f.op === 'blank' || f.op === 'notBlank') return true;
+    if (f.op === 'relative') return (RANGES as readonly string[]).includes(f.range);
+    if (c === 'd') return !!core.parseDay(f.value) && (f.op !== 'between' || !!core.parseDay(f.valueTo));
+    if (f.op === 'onDay') return !!core.parseDay(f.day);
+    if (f.op === 'betweenDays') return !!core.parseDay(f.day) && !!core.parseDay(f.dayTo);
+    if (f.op === 'between') return typeof f.at === 'string' && typeof f.atTo === 'string' && f.at.length === 24 && f.atTo.length === 24;
+    return typeof f.at === 'string' && f.at.length === 24;
+  };
+
+  const check = (what: string) => {
+    log.push(what);
+    const m = model();
+    for (const c of ['d', 't'] as const) if (m[c] && !active(c, m[c])) fail(`${what}: inactive ${c} filter stored ${JSON.stringify(m[c])}`);
+    if (!server) {
+      const want = D_ROWS.filter((row) => (['d', 't'] as const).every((c) => !m[c] || keeps(c, m[c], row))).map((x) => x.id);
+      const got = t.ids();
+      if (want.join() !== got.join()) fail(`${what}: rows ${got.join()} oracle ${want.join()} (model ${JSON.stringify(m)}, now ${new Date(now).toISOString()}, ${zone})`);
+    } else if (t.f.calls.length) {
+      const sent = (t.f.calls.at(-1)!.req as any).query?.filter?.['t'] ?? (t.f.calls.at(-1)!.req as any).filter?.['t'];
+      if (sent?.resolved && m['t']) {
+        const o = range(m['t'])!;
+        const iso = (x: number | null) => (x === null ? null : new Date(x).toISOString());
+        if (sent.zone === zone && (sent.resolved.from !== iso(o.from) || sent.resolved.to !== iso(o.to))) fail(`${what}: wire resolved ${JSON.stringify(sent.resolved)}, oracle ${iso(o.from)}..${iso(o.to)}`);
+      }
+    }
+    const p = popup();
+    if (p) {
+      const items = [...p.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((e) => !e.closest('[hidden]'));
+      if (items.length && (items[0] !== op() && !p.querySelector('.dzg-fsum') || items.at(-1) !== p.querySelector('.dzg-fapply'))) fail(`${what}: first/last ${items[0]?.className} / ${items.at(-1)?.className}`);
+    } else if (document.querySelector('.tz-field__panel, .tz-field')) fail(`${what}: a tzslot widget left behind`);
+  };
+  const step = async (what: string, act: () => unknown, o: { quiet?: boolean } = {}) => {
+    const calls = t.f.calls.length;
+    await act();
+    await settle();
+    if (server && o.quiet && t.f.calls.length !== calls) fail(`${what}: ${t.f.calls.length - calls} request(s) without Apply`);
+    check(what);
+  };
+  const instant = (day: string, hm: number) => Temporal.PlainDate.from(day).toZonedDateTime({ timeZone: tz.last?.o['timeZone'] ?? zone, plainTime: new Temporal.PlainTime(Math.floor(hm / 60), hm % 60) }).toInstant();
+
+  for (let i = 0; i < steps; i++) {
+    const k = r.int(100);
+    if (!popup() && k < 30) {
+      const c = r.pick(['d', 't'] as const);
+      await step(`open ${c}`, () => feature.openFilter(c));
+      openOn = popup() ? c : null;
+      did.opens++;
+      // Opening never stores anything (the echo is muted).
+      continue;
+    }
+    if (popup() && openOn && k < 55) {
+      const c = openOn;
+      const what = r.pick(['op', 'pick', 'pick', 'half', 'clear', 'preset'] as const);
+      await step(`${what} in ${c}`, () => {
+        const s = op();
+        if (what === 'clear') return popup()!.querySelector<HTMLButtonElement>('.dzg-fclr')!.click();
+        if (!s?.isConnected || s.closest('[hidden]')) return;
+        if (what === 'op') {
+          s.value = r.pick(c === 'd' ? DOPS : IOPS);
+          s.dispatchEvent(new Event('change', { bubbles: true }));
+          return;
+        }
+        const w = tz.last;
+        if (!w || !popup()!.contains(document.querySelector('.dzg-fdate .tz-field'))) return;
+        did.widgets++;
+        const was = JSON.stringify(model()[c]);
+        queueMicrotask(() => { if (JSON.stringify(model()[c]) !== was) did.stored++, model()[c]?.op === 'relative' && did.relative++; });
+        did.picks++;
+        const d1 = r.pick(DDAYS), d2 = r.pick(DDAYS);
+        log.push(`  ${w.kind} ${d1} ${d2}`);
+        if (w.kind === 'date') return w.o['onChange']?.(Temporal.PlainDate.from(d1));
+        if (w.kind === 'moment') return w.o['onChange']?.(what === 'half' ? null : instant(d1, r.int(1440)));
+        if (what === 'preset' && w.o['showPresets'] !== false) return w.o['onChange']?.({ start: instant(d1, 0), end: instant(d2, 0) }, { preset: r.pick(RANGES) });
+        const end = what === 'half' ? null : w.o['showTime'] ? instant(d2, r.int(1440)) : instant(d2 < d1 ? d1 : d2, 0).toZonedDateTimeISO(w.o['timeZone']).add({ days: 1 }).startOfDay().toInstant();
+        return w.o['onChange']?.({ start: instant(d1, w.o['showTime'] ? r.int(1440) : 0), end }, { preset: null });
+      }, { quiet: true });
+      continue;
+    }
+    if (popup() && openOn && k < 70) {
+      const how = r.pick(['apply', 'escape', 'closeFilter', 'enter'] as const);
+      const before = model()[openOn];
+      const calls = t.f.calls.length;
+      await step(`${how} on ${openOn}`, () => {
+        if (how === 'apply' || how === 'enter') return popup()!.querySelector<HTMLButtonElement>('.dzg-fapply')!.click();
+        if (how === 'escape') return t.key(popup()!, 'Escape');
+        feature.closeFilter();
+      }, { quiet: how !== 'apply' && how !== 'enter' });
+      if (popup()) fail(`${how}: still open`);
+      if (server && (how === 'escape' || how === 'closeFilter') && JSON.stringify(model()[openOn]) !== JSON.stringify(before)) fail(`${how}: a server draft closed without Apply changed the model`);
+      if (server && t.f.calls.length - calls > 1) fail(`${how}: ${t.f.calls.length - calls} requests`);
+      openOn = null;
+      continue;
+    }
+    if (k < 78) {
+      const ms = r.pick([1, 150, 300, 3_600_000, 2 * 3_600_000, 86_400_000]);
+      const ticks = vi.spyOn(t.g.kernel, 'tick');
+      await step(`clock +${ms}`, () => { now += ms; vi.advanceTimersByTime(ms); }, { quiet: !model()['d'] && !model()['t'] ? true : false });
+      did.ticks += ticks.mock.calls.length;
+      ticks.mockRestore();
+      continue;
+    }
+    if (k < 84) {
+      zone = r.pick(DZONES);
+      await step(`zone ${zone}`, () => t.g.update({ timeZone: zone } as never));
+      continue;
+    }
+    if (k < 92) {
+      const c = r.pick(['d', 't'] as const);
+      const f = c === 'd'
+        ? r.pick([{ type: 'day', op: 'relative', range: r.pick(RANGES) }, { type: 'day', op: 'between', value: r.pick(DDAYS), valueTo: r.pick(DDAYS) }, { type: 'day', op: 'gte', value: r.pick(DDAYS) }, null])
+        : r.pick([{ type: 'instant', op: 'relative', range: r.pick(RANGES) }, { type: 'instant', op: 'onDay', day: r.pick(DDAYS) }, { type: 'instant', op: 'after', at: '2026-10-25T00:30:00.000Z' }, null]);
+      await step(`host ${c} ${JSON.stringify(f)}`, () => t.g.kernel.dispatch({ type: 'filter.column', column: c, filter: f as never }, 'api'));
+      continue;
+    }
+    if (server && t.f.calls.length) await step('answer', () => t.f.answer([]));
+  }
+  t.g.destroy();
+  if (document.querySelector('.tz-field__panel, .tz-field')) fail('a tzslot widget survived destroy');
+}
+
+describe('a random walk over the date forms (step 14 part B)', () => {
+  const N = Math.max(10, Math.floor(SEEDS / 4));
+  it(`in the browser, ${N} seeds`, async () => {
+    for (let s = ONLY || 1; s <= (ONLY || N); s++) {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
+      await walkDates(s, false);
+      cleanup();
+    }
+  }, 120_000);
+  it(`on a server, ${N} seeds`, async () => {
+    for (let s = ONLY || 1; s <= (ONLY || N); s++) {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
+      await walkDates(s, true);
+      cleanup();
+    }
+  }, 120_000);
+  it('reached the widgets: opens, picks that stored a filter, shortcuts, midnights', () => {
+    if (ONLY) return;
+    expect(did.opens).toBeGreaterThan(50);
+    expect(did.widgets).toBeGreaterThan(50);
+    expect(did.stored).toBeGreaterThan(10);
+    expect(did.relative).toBeGreaterThan(2);
+    expect(did.ticks).toBeGreaterThan(2);
+  });
 });
