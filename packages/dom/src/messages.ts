@@ -38,6 +38,16 @@ export const MESSAGE_KEYS = [
 ] as const;
 
 export type MessageKey = (typeof MESSAGE_KEYS)[number];
+/**
+ * The filters' texts (`@dzgrid/dom/filters`), in their own bundles (`locales/<lang>-filters`,
+ * step 12 decision O1): optional here, required by `filters()`.
+ */
+export type FilterMessageKey = 'filter.inputLabel' | 'filter.summaryActive' | 'filter.clear' | 'filter.invalid' | 'announce.filtered' | 'announce.filteredOpen';
+/** A filter bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_FILTERS.text }`. */
+export interface FilterMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in FilterMessageKey]: MessageValue };
+}
 /** A host's own message, added to its bundle for its parts. */
 export type AppMessageKey = `app.${string}`;
 
@@ -55,7 +65,7 @@ export type MessageValue = string | PluralForms;
 export interface GridMessages {
   /** The language the bundle is written in: plural forms follow it, numbers follow the context. */
   readonly locale: string;
-  readonly text: { readonly [K in MessageKey]: MessageValue };
+  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey]?: MessageValue };
 }
 
 /** A bundle missing a key fails at once, naming it — not on some later paint. */
@@ -80,7 +90,7 @@ const rulesFor = (locale: string): Intl.PluralRules => {
  * placeholder without a value stays visible, so a missing one is seen in
  * testing rather than read as nothing.
  */
-export function msg(m: GridMessages, key: MessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
+export function msg(m: GridMessages, key: MessageKey | FilterMessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
   const value = (m.text as Readonly<Record<string, MessageValue | undefined>>)[key];
   if (value === undefined) {
     // A host's key it forgot is shown as itself (and told by the caller); a grid key is a bug.

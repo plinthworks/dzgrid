@@ -197,6 +197,44 @@
   outline-offset: 2px;
 }
 
+.dzg-finput,
+.dzg-fclear {
+  border: 1px solid var(--tz-fg-muted);
+  border-radius: var(--dzg-radius, 0.375rem);
+  color: var(--tz-fg);
+  background: var(--tz-bg);
+  font: inherit;
+  font-weight: 400;
+}
+
+.dzg-finput {
+  padding-inline: 0.25rem;
+}
+
+.dzg-fclear {
+  padding: 0;
+  cursor: pointer;
+}
+
+.dzg-fclear::before {
+  content: "✕";
+}
+
+.dzg-fsum {
+  color: var(--tz-fg-muted);
+  font-weight: 400;
+}
+
+.dzg-finput:focus-visible,
+.dzg-fclear:focus-visible {
+  outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+}
+
+.dzg-finput[aria-invalid=true] {
+  outline: 2px solid var(--tz-danger);
+  border-inline-end-width: 4px;
+}
+
 .dzg[data-stale] .dzg-row,
 .dzg[data-stale] .dzg-row .dzg-seg-start,
 .dzg[data-stale] .dzg-row .dzg-seg-end {

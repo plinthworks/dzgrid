@@ -178,6 +178,97 @@ async function runEngine(name) {
       await page.close();
     }
 
+    // ---- the floating filter row (step 12): fr light, ar right to left dark, with the box, with groups and pins ----
+    if (name === 'chrome') {
+      const cases = [
+        ['locale=fr-FR&theme=light&rows=2000&filters=1&floating=1', 'Filtrer Montant', '1,5', 'Effacer le filtre Montant'],
+        ['locale=ar-DZ&dir=rtl&theme=dark&rows=2000&filters=1&floating=1', 'ترشيح المبلغ', '\u0661\u066B\u0665', 'مسح مرشح المبلغ'],
+        ['locale=fr-FR&rows=2000&filters=1&floating=1&box=1', 'Filtrer Montant', '1.5', 'Effacer le filtre Montant'],
+        ['locale=ar-DZ&dir=rtl&rows=2000&filters=1&floating=1&groups=1&pin=1&box=1', 'ترشيح المبلغ', '1,5', 'مسح مرشح المبلغ'],
+      ];
+      for (const [qs, label, typed, clearName] of cases) {
+        const { page, errors } = await load(ctx, qs);
+        const tag = `floating ${qs}`;
+        // Header rows stacked one under the other (the base's header is a column), as wide as each other.
+        const rows = await page.evaluate(() => [...document.querySelectorAll('.dzg-header > [role=row]')].map((r) => { const b = r.getBoundingClientRect(); return { top: Math.round(b.top), bottom: Math.round(b.bottom), left: Math.round(b.left) }; }));
+        check(name, `${tag}: header rows stacked`, rows.length >= 2 && rows.every((r, i) => i === 0 || (Math.abs(r.top - rows[i - 1].bottom) <= 1 && Math.abs(r.left - rows[0].left) <= 1)), rows);
+        let v = await axe(page);
+        check(name, `${tag}: axe 0 violations, empty`, v.length === 0, v);
+        const box = () => page.evaluate(() => {
+          const i = document.querySelector('.dzg-hextra[data-col="amount"] input');
+          if (!i) return null;
+          const r = i.getBoundingClientRect(), c = i.closest('.dzg-hextra').getBoundingClientRect(), st = getComputedStyle(i);
+          return { label: i.getAttribute('aria-label'), w: r.width, h: r.height, inside: r.top >= c.top - 0.5 && r.bottom <= c.bottom + 0.5, bidi: st.unicodeBidi, align: st.textAlign, invalid: i.getAttribute('aria-invalid'), outline: parseFloat(st.outlineWidth), outlineStyle: st.outlineStyle, value: i.value };
+        });
+        const b0 = await box();
+        check(name, `${tag}: the box named ${label}, at least 24 px, in its cell, its own direction, aligned at the start`, b0 && b0.label === label && b0.w >= 24 && b0.h >= 24 && b0.inside && b0.bidi === 'plaintext' && b0.align === 'start', b0);
+        // One tab stop: Tab from the field before enters the grid once, the next Tab leaves it.
+        await page.focus('#before');
+        await page.keyboard.press('Tab');
+        const inGrid = await page.evaluate(() => !!document.activeElement.closest('[role=grid]'));
+        await page.keyboard.press('Tab');
+        const out = await page.evaluate(() => document.activeElement.id);
+        check(name, `${tag}: one tab stop (Tab enters the grid, the next Tab leaves it)`, inGrid && out === 'after', { inGrid, out });
+        // Enter on the floating cell: into the box; type (Latin digits in ar-DZ write the decimal with a comma); the filter applies after the pause.
+        await page.evaluate(() => document.querySelector('.dzg-hextra[data-col="amount"]').focus());
+        await page.keyboard.press('Enter');
+        const entered = await page.evaluate(() => document.activeElement.matches('.dzg-hextra[data-col="amount"] input'));
+        await page.keyboard.type(typed);
+        await page.waitForTimeout(400);
+        await frames(page);
+        const f1 = await page.evaluate(() => window.t.grid.kernel.query.filter.amount ?? null);
+        check(name, `${tag}: Enter goes into the box; ${typed} filters equals 1.5`, entered && f1?.op === 'equals' && f1?.value === 1.5, { entered, f1 });
+        v = await axe(page);
+        check(name, `${tag}: axe 0 violations, typed`, v.length === 0, v);
+        // A minus first stays put in right to left (the box's own direction), then an unreadable number.
+        await page.keyboard.press('ControlOrMeta+a');
+        await page.keyboard.type('-5');
+        await page.waitForTimeout(400);
+        const f2 = await page.evaluate(() => ({ f: window.t.grid.kernel.query.filter.amount ?? null, v: document.activeElement.value }));
+        await page.keyboard.press('ControlOrMeta+a');
+        await page.keyboard.type('abc');
+        await page.waitForTimeout(400);
+        await frames(page);
+        const bad = await box();
+        check(name, `${tag}: -5 reads as -5; abc is marked invalid with a 2 px outline, the filter kept`, f2.f?.value === -5 && f2.v === '-5' && bad.invalid === 'true' && bad.outline >= 2 && bad.outlineStyle !== 'none', { f2, bad });
+        v = await axe(page);
+        check(name, `${tag}: axe 0 violations, invalid`, v.length === 0, v);
+        await page.screenshot({ path: `${OUT}/${name}-floating-${qs.replace(/[&=]/g, '_')}.png`, clip: { x: 0, y: 0, width: 1000, height: 300 } });
+        // Escape: back to the cell; F2: into the box again; Escape again.
+        await page.keyboard.press('Escape');
+        const onCell = await page.evaluate(() => document.activeElement.matches('.dzg-hextra[data-col="amount"]'));
+        await page.keyboard.press('F2');
+        const again = await page.evaluate(() => document.activeElement.matches('.dzg-hextra[data-col="amount"] input'));
+        await page.keyboard.press('Escape');
+        const sort = await page.evaluate(() => window.t.grid.kernel.query.sort.length);
+        check(name, `${tag}: Escape back to the cell, F2 into the box, no sort`, onCell && again && sort === 0, { onCell, again, sort });
+        // A filter the box cannot edit: the summary and its Clear button.
+        await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'filter.column', column: 'amount', filter: { type: 'number', op: 'between', value: 1, valueTo: 50 } }, 'api'));
+        await frames(page);
+        const sum = await page.evaluate(() => { const c = document.querySelector('.dzg-hextra[data-col="amount"] button'); if (!c) return null; const r = c.getBoundingClientRect(); return { name: c.getAttribute('aria-label'), w: r.width, h: r.height }; });
+        v = await axe(page);
+        check(name, `${tag}: summary with Clear named ${clearName}, at least 24 px, axe 0`, sum && sum.name === clearName && sum.w >= 24 && sum.h >= 24 && v.length === 0, { sum, v });
+        // The overlay sits under every header row; the header stays at the top when the body scrolls.
+        await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'filter.column', column: 'name', filter: { type: 'text', op: 'contains', value: 'zzzz' } }, 'api'));
+        await frames(page);
+        const under = await page.evaluate(() => { const o = document.querySelector('.dzg-overlay').getBoundingClientRect(); const h = document.querySelector('.dzg-header').getBoundingClientRect(); return { o: o.top, h: h.bottom }; });
+        await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'filter.set', filter: {} }, 'api'));
+        await frames(page);
+        const h0 = await page.evaluate(() => document.querySelector('.dzg-header').getBoundingClientRect().top);
+        await page.evaluate(() => window.t.scrollTo(500 * 32));
+        await frames(page, 3);
+        const h1 = await page.evaluate(() => document.querySelector('.dzg-header').getBoundingClientRect().top);
+        check(name, `${tag}: overlay under both header rows; header sticky`, under.o >= under.h - 1 && Math.abs(h0 - h1) <= 1, { under, h0, h1 });
+        // Text zoom: the box still fits its cell, still 24 px.
+        await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+        await frames(page, 4);
+        const z = await box();
+        check(name, `${tag}: at 200 % text the box fits its cell, at least 24 px`, z && z.inside && z.h >= 24, z);
+        check(name, `no page error ${tag}`, errors.length === 0, errors);
+        await page.close();
+      }
+    }
+
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.
     // And under grouped headers (step 9b, commit 4): LTR, RTL, pinned, with the box.

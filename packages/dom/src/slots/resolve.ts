@@ -17,20 +17,20 @@ export function resolver(g: GridContext<unknown>): (slot: ColumnSlot, col: Resol
   let told = new Set<string>();
   const by = {} as Record<ColumnSlot, Map<string, Part<never> | null>>;
   return (slot, col) => {
-    const reg = g.settings.parts;
+    const reg = g.parts();
     if (reg !== registry || g.columns.version !== version) {
       if (reg !== registry) told = new Set();
       registry = reg;
       version = g.columns.version;
       const problems: Problem[] = [];
       for (const s of ['header', 'tooltip'] as const) {
-        const names = new Set(Object.keys(reg ?? {}).filter((n) => reg![n]!.slot === s));
+        const names = new Set(Object.keys(reg).filter((n) => reg[n]!.slot === s));
         by[s] = new Map();
         for (const c of g.columns.visible()) {
           const r = partNameFor(s, { id: c.id, type: c.type, ...(c.def.ui && { ui: c.def.ui }) }, names);
           for (const p of r.problems) if (!told.has(p.path)) told.add(p.path), problems.push(p);
           const name = r.name ?? (names.has(s) ? s : null);
-          by[s].set(c.id, name ? (reg![name]!.part as Part<never>) : null);
+          by[s].set(c.id, name ? (reg[name]!.part as Part<never>) : null);
         }
       }
       if (problems.length) emit(g.kernel, { type: 'problems', source: 'host', problems });

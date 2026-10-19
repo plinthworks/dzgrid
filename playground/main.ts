@@ -1,8 +1,13 @@
-// The playground: dataset A (100 000 × 30) or a million generated rows, every Phase 2 setting live.
+// The playground: dataset A (100 000 × 30) or a million generated rows, every Phase 2 setting live;
+// `?filters=1&floating=1` adds the floating filter row (step 12).
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
 import { AR } from '@dzgrid/dom/locales/ar';
+import { filters } from '@dzgrid/dom/filters';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { AR_FILTERS } from '@dzgrid/dom/locales/ar-filters';
 import type { ColumnDef } from '@dzgrid/core';
 import { datasetA, type RowA } from '../perf/dataset.js';
 // The theme, through Vite (a <link> to a file outside the playground folder is not served).
@@ -19,7 +24,11 @@ for (const [k, v] of params) {
 }
 const val = (name: string) => (form.elements.namedItem(name) as HTMLSelectElement).value;
 const on = (name: string) => (form.elements.namedItem(name) as HTMLInputElement).checked;
-const bundles = { 'fr-FR': FR, 'en-US': EN, 'ar-DZ': AR } as const;
+// `filters=1` adds the filters feature (its texts spread into each bundle); `floating=1` its floating row. Fixed at creation.
+const withFilters = params.get('filters') === '1';
+const floating = params.get('floating') === '1';
+const join = <B extends { text: object }>(b: B, f: { text: object }): B => (withFilters ? { ...b, text: { ...b.text, ...f.text } } : b);
+const bundles = { 'fr-FR': join(FR, FR_FILTERS), 'en-US': join(EN, EN_FILTERS), 'ar-DZ': join(AR, AR_FILTERS) } as const;
 
 const COLUMNS: ColumnDef<RowA, any>[] = [
   { id: 'id', header: 'ID', pinned: 'start', width: 90 },
@@ -72,7 +81,7 @@ page();
 // The rows are made first: the time shown is the grid's, from rows in memory to the first frame.
 const initial = settings();
 const t0 = performance.now();
-const grid: GridInstance<RowA> = createGrid<RowA>(host, initial);
+const grid: GridInstance<RowA> = createGrid<RowA>(host, { ...initial, ...(withFilters && { features: [filters({ floating })] }) });
 requestAnimationFrame(() => requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; }));
 
 form.addEventListener('change', () => {

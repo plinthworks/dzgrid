@@ -5,7 +5,7 @@
  * physical side outside dir.ts, no HTML injection, no invisible character.
  */
 export { MESSAGE_KEYS, msg } from './messages.js';
-export type { GridMessages, MessageKey, MessageValue, PluralForms } from './messages.js';
+export type { FilterMessageKey, FilterMessages, GridMessages, MessageKey, MessageValue, PluralForms } from './messages.js';
 export { createGrid } from './grid.js';
 export type { GridApi, GridInstance } from './grid.js';
 export type { GridEnv } from './context.js';

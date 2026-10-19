@@ -240,7 +240,7 @@ export interface SlotContext {
   header:   PartBase & { readonly column: ResolvedColumn<unknown>; readonly label: string; readonly sort: SortItem | null;
                          readonly sortIndex: number | null; readonly filtered: boolean; toggleSort(multi: boolean): void; openFilter(): void };
   filter:   PartBase & FilterSlot;
-  floating: PartBase & FilterSlot & { openPopup(): void };
+  floating: PartBase & FilterSlot & { openPopup(): void };   // step 12 ships column, kind, state, where, debounceMs, set; openPopup (13), values and close (13, 15)
   overlay:  PartBase & { readonly phase: 'loading' | 'empty' | 'no-match' | 'error'; readonly failure: unknown; retry(): void; clearFilters(): void };
   tooltip:  PartBase & { readonly text: string; readonly value: unknown; readonly row: Readonly<unknown> | null; readonly column: ResolvedColumn<unknown> };
   footer:   PartBase & { readonly counts: RowCounts; readonly page: PageState | null; readonly selected: number | null;
@@ -257,6 +257,8 @@ interface FilterSlot {
   close(): void;
 }
 ```
+
+**Step 12 as built:** `SlotContext.floating` is `PartBase & { column; kind; state; where; debounceMs; set(next, { commit }) }`. Features carry their default parts in `GridFeature.parts` (`filters()` gives `floating.text`, `floating.number` and the bare `floating`, the summary); the grid reads one registry, `g.parts()`: the features' parts (first feature wins per name) under the host's `settings.parts`. `PartHandle.focus()` returns true when it took the focus. A part whose slot needs a missing feature is `missing-feature` with the feature's id as detail (`slots`, `filters`, `pagination`).
 
 **Rules every part follows, enforced by the grid:**
 - **Mount and update:**
@@ -276,7 +278,7 @@ The defaults are registered by features under `<slot>.<type-or-kind>`:
 | cell | (fast path for every type); `cell.badge` and `cell.boolean` ship in `/filters`' sibling `/parts` (see §B3) |
 | header | `header` (sort button, filter button, active mark) |
 | filter | `filter.text`, `filter.number`, `filter.day`, `filter.instant`, `filter.boolean`, `filter.set` |
-| floating | `floating.text`, `floating.number` (live input); `floating.*` fallback = summary button opening the popup |
+| floating | `floating.text`, `floating.number` (live input, step 12); the bare `floating` = the summary ("Filter active" and Clear at step 12, the button opening the popup at step 13) |
 | overlay | `overlay` (all four phases) |
 | tooltip | `tooltip` |
 | footer | `footer.pager`, `footer.count`, `footer.selected` |
@@ -287,6 +289,7 @@ The defaults are registered by features under `<slot>.<type-or-kind>`:
 1. the column's explicit name (`ui.cell`, `ui.header`, `ui.tooltip`, or for filters `filter.kind`);
 2. `settings.parts['<slot>.<type or kind>']`;
 3. the part a feature registered under that name;
+   (step 12: for `floating`, then the bare name `floating`, the host's before the feature's;)
 4. the built-in.
 
 A name that cannot be resolved among the parts of that slot (a `header` part named in `ui.cell` included) gives the error problem `unknown-part`. The column then falls back to the default, and a filter with an unknown kind is ignored with `invalid-filter`.
@@ -470,7 +473,8 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | `@dzgrid/dom` | `createGrid`; `Part`, `definePart`; registry resolution for cells; the built-in header, overlay (with its retry button) and tooltip, and their seams |
 | `@dzgrid/dom/slots` | `slots()`: header, overlay and tooltip parts in place of the built-ins (step 11, decision O1) |
 | `@dzgrid/dom/popup` | the popup host (`popupsFor(g)`), imported by the features that open popups |
-| `@dzgrid/dom/filters` | `filters({ datePicker?, floating?, debounceMs? })`: the six `filter.*` parts, `floating.text` and `floating.number`, the summary floating part, `bindQuickSearch`. The value list is loaded lazily inside it (cut 3). |
+| `@dzgrid/dom/filters` | `filters({ datePicker?, floating?, debounceMs? })`: the six `filter.*` parts, `floating.text` and `floating.number`, the summary floating part, `bindQuickSearch`. The value list is loaded lazily inside it (cut 3). Step 12: the floating row (`filters({ floating, debounceMs })`). |
+| `@dzgrid/dom/locales/{en,fr,ar}-filters` | the filters' texts, apart from the base bundles (step 12, owner decision O1) |
 | `@dzgrid/dom/pagination` | `pagination()`: `footer.pager`, `footer.count`, `footer.selected` |
 | `@dzgrid/dom/parts` | `cell.badge`, `cell.boolean` (small, optional) |
 | `@dzgrid/dom/export` | `csvExport()` |

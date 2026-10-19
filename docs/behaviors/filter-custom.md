@@ -28,6 +28,8 @@ Told: a filter change whose problems differ from those before is told once (the 
 
 The values a kind tests are kept per column (`ColumnCache.values`): built when a custom filter first needs them, reused across sorts and filter edits, patched by an update of some rows, dropped with the cache.
 
+**A kind's floating part** (step 12): `floating.<name>` in `settings.parts`, else the summary. Its context gives the kind's state (null: none) and `set(next)`, which stores `{type: 'custom', kind, state: next}`. A part must send null when the state is not active (`kind.active(state)` false): a stored inactive state still counts as a filter for the kernel (with `selection.keepOnFilter: false` it clears the selection). The built-in boxes never store an empty filter. A kind without `test` while the browser filters gets no floating cell.
+
 Not now: a kind given by a feature (`GridFeature.kinds`), and a warning at creation for a server-only kind under a browser filter (the filter UI hides such a kind, steps 12-13).
 
 ## Tests

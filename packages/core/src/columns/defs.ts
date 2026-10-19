@@ -34,8 +34,13 @@ export interface ColumnDef<T, V = unknown> {
   readonly resizable?: boolean;
   readonly movable?: boolean;
   readonly sortable?: boolean;
-  /** `false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a custom kind's name). */
-  readonly filter?: false | { readonly kind?: string };
+  /**
+   * `false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a
+   * custom kind's name). `floating`: a box in the floating filter row (`@dzgrid/dom/filters`; the
+   * grid's `filters({ floating })` otherwise, `false` keeps this column out). `debounceMs`: the
+   * pause before what is typed there applies (150 in the browser, 300 on a server by default).
+   */
+  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number };
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';

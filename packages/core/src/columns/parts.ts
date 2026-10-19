@@ -9,7 +9,7 @@ export interface PartColumn {
   readonly id: string;
   readonly type: ColumnType;
   readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string };
-  readonly filter?: false | { readonly kind?: string };
+  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number };
 }
 
 /** A filter kind follows the type, an enum's being a value list (`set`). */

@@ -239,6 +239,48 @@ $emit: true !default;
     outline-offset: 2px;
   }
 
+  // The floating filter row (@dzgrid/dom/filters): the box and the Clear button. The layout
+  // (24 px targets, the box's own direction) is injected by the feature; colours here. An
+  // unreadable number: a 2 px outline and a thicker end edge in the danger colour, so it
+  // shows without the colour too.
+  .dzg-finput,
+  .dzg-fclear {
+    border: 1px solid var(--tz-fg-muted);
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: var(--tz-fg);
+    background: var(--tz-bg);
+    font: inherit;
+    font-weight: 400;
+  }
+
+  .dzg-finput {
+    padding-inline: 0.25rem;
+  }
+
+  .dzg-fclear {
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .dzg-fclear::before {
+    content: '\2715';
+  }
+
+  .dzg-fsum {
+    color: var(--tz-fg-muted);
+    font-weight: 400;
+  }
+
+  .dzg-finput:focus-visible,
+  .dzg-fclear:focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+  }
+
+  .dzg-finput[aria-invalid='true'] {
+    outline: 2px solid var(--tz-danger);
+    border-inline-end-width: 4px;
+  }
+
   // Rows kept while the next ones load: the muted text colour, not an opacity (it keeps 4.5:1).
   .dzg[data-stale] .dzg-row,
   .dzg[data-stale] .dzg-row .dzg-seg-start,

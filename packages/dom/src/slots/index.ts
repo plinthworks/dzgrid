@@ -1,7 +1,8 @@
+import { makeQuery } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature, SlotDrivers } from '../features.js';
 import type { Part, SlotContext } from '../part.js';
-import { Mounted } from './mounted.js';
+import { mounted, type Mounted } from '../mounted.js';
 import { resolver } from './resolve.js';
 
 /**
@@ -22,8 +23,8 @@ export function slots(): GridFeature {
 function setup(g: GridContext<unknown>): FeatureHandle {
   const partFor = resolver(g);
   const heads = new Map<string, Mounted<SlotContext['header']>>();
-  const overlay = new Mounted<SlotContext['overlay']>(g);
-  const tip = new Mounted<SlotContext['tooltip']>(g);
+  const overlay = mounted<SlotContext['overlay']>(g);
+  const tip = mounted<SlotContext['tooltip']>(g);
   const send = (cmd: Parameters<typeof g.kernel.dispatch>[0]) => g.kernel.dispatch(cmd, 'user');
   // What the retry button does (render/overlay.ts).
   const retry = (): void => {
@@ -31,10 +32,8 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     g.restoreFocus();
     g.live.announce(g.msg('announce.loading'));
   };
-  const clearFilters = (): void => {
-    send({ type: 'filter.set', filter: {} });
-    send({ type: 'quick.set', text: '' });
-  };
+  // One command, so a server is asked once; the sort is kept.
+  const clearFilters = (): void => void send({ type: 'query.set', query: makeQuery({ sort: g.kernel.query.sort }) });
 
   const drivers: SlotDrivers = {
     header(col, label) {
@@ -42,7 +41,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
       let m = heads.get(col.id);
       if (!m) {
         if (!part) return false;
-        heads.set(col.id, (m = new Mounted(g)));
+        heads.set(col.id, (m = mounted(g)));
       }
       const sort = g.kernel.query.sort;
       const at = sort.findIndex((s) => s.column === col.id);
@@ -56,7 +55,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
         overlay.clear();
         return false;
       }
-      const p = g.settings.parts?.['overlay'];
+      const p = g.parts()['overlay'];
       return overlay.set(g.el.overlay, p?.slot === 'overlay' ? (p.part as Part<SlotContext['overlay']>) : null, {
         phase: state === 'noRows' ? 'empty' : state === 'noMatches' ? 'no-match' : state,
         // A server's failure, under the error overlay only (a host's overlay may have none).

@@ -9,10 +9,10 @@ import type { FrameScheduler } from './render/scheduler.js';
 import type { Scope } from './render/scope.js';
 import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
-import type { MessageKey } from './messages.js';
+import type { FilterMessageKey, MessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
-import type { PartBase } from './part.js';
+import type { PartBase, SlotPart } from './part.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -95,11 +95,13 @@ export interface GridContext<T> {
   remPx: number;
 
   schedule(): void;
+  /** The parts: the features' under the host's `settings.parts`; the same object until that changes. */
+  parts(): Readonly<Record<string, SlotPart>>;
   /** A host callback's error: reported, never swallowed, never stopping the grid. */
   report(err: unknown): void;
   now(): number;
   rowHeight(): number;
   /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
   restoreFocus(): void;
-  msg(key: MessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

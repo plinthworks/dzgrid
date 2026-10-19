@@ -138,8 +138,10 @@ describe('the overlay part', () => {
     expect(o.last().phase).toBe('no-match');
     const spy = vi.spyOn(t.g.kernel, 'dispatch');
     o.last().clearFilters();
-    expect(spy).toHaveBeenCalledWith({ type: 'filter.set', filter: {} }, 'user');
-    expect(spy).toHaveBeenCalledWith({ type: 'quick.set', text: '' }, 'user');
+    // One command (step 12): one setQuery, one request to a server.
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0]![0]).toMatchObject({ type: 'query.set', query: { filter: {}, quick: '', sort: [] } });
+    expect(spy.mock.calls[0]![1]).toBe('user');
     expect(t.g.kernel.query.filter).toEqual({});
     expect(t.g.kernel.query.quick).toBe('');
     // Rows again: the overlay hides and its part is destroyed.

@@ -56,9 +56,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   const paintOverlay = overlayPainter(g);
   const partFor = (col: ResolvedColumn<any>): SlotPart<'cell'> | null => parts.byColumn.get(col.id) ?? null;
   function resolveParts(): void {
-    const registry = g.settings.parts;
+    const registry = g.parts();
     if (parts.version === columns.version && parts.registry === registry) return;
-    const cellParts = new Map(Object.entries(registry ?? {}).filter(([, p]) => p.slot === 'cell') as [string, SlotPart<'cell'>][]);
+    const cellParts = new Map(Object.entries(registry).filter(([, p]) => p.slot === 'cell') as [string, SlotPart<'cell'>][]);
     const names = new Set(cellParts.keys());
     const byColumn = new Map<string, SlotPart<'cell'> | null>();
     // A new registry: problems told again; the tooltip hidden, its part may be gone or another

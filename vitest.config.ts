@@ -18,6 +18,7 @@ const domAlias = {
   ...alias,
   '@dzgrid/dom/spans': fileURLToPath(new URL('./packages/dom/src/spans.ts', import.meta.url)),
   '@dzgrid/dom/slots': fileURLToPath(new URL('./packages/dom/src/slots.ts', import.meta.url)),
+  '@dzgrid/dom/filters': fileURLToPath(new URL('./packages/dom/src/filters.ts', import.meta.url)),
   '@dzgrid/dom/locales': fileURLToPath(new URL('./packages/dom/src/locales', import.meta.url)),
   '@dzgrid/dom': fileURLToPath(new URL('./packages/dom/src/index.ts', import.meta.url)),
 };

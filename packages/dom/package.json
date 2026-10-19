@@ -21,6 +21,10 @@
       "types": "./src/slots.ts",
       "default": "./src/slots.ts"
     },
+    "./filters": {
+      "types": "./src/filters.ts",
+      "default": "./src/filters.ts"
+    },
     "./locales/en": {
       "types": "./src/locales/en.ts",
       "default": "./src/locales/en.ts"
@@ -32,6 +36,18 @@
     "./locales/ar": {
       "types": "./src/locales/ar.ts",
       "default": "./src/locales/ar.ts"
+    },
+    "./locales/en-filters": {
+      "types": "./src/locales/en-filters.ts",
+      "default": "./src/locales/en-filters.ts"
+    },
+    "./locales/fr-filters": {
+      "types": "./src/locales/fr-filters.ts",
+      "default": "./src/locales/fr-filters.ts"
+    },
+    "./locales/ar-filters": {
+      "types": "./src/locales/ar-filters.ts",
+      "default": "./src/locales/ar-filters.ts"
     }
   },
   "peerDependencies": {

@@ -5,6 +5,7 @@ import type { TipFor } from './render/tooltip.js';
 import type { Goal, Move, MoveShape, SpanLookup } from './keys/move.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { Frame, RowSpans } from './render/rows.js';
+import type { SlotPart } from './part.js';
 
 /**
  * The seam where optional features plug in (Phase 3: filters, pagination,
@@ -15,6 +16,8 @@ import type { Frame, RowSpans } from './render/rows.js';
  */
 export interface GridFeature {
   readonly id: string;
+  /** Its default parts, under the host's `settings.parts` (the first feature giving a name wins). */
+  readonly parts?: Readonly<Record<string, SlotPart>>;
   setup(g: GridContext<unknown>): FeatureHandle;
 }
 

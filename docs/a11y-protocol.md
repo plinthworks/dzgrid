@@ -211,3 +211,35 @@ Consigner le résultat dans `docs/behaviors/spans.md` (fin de la fiche) et dans 
 (ligne de l'étape 9b). Règle de décision propre à cette section : une valeur perdue sur les lignes
 couvertes (étape 17) déclenche O10 ; un groupe faux ou manquant (étape 19) se corrige dans les
 rangées de groupes avant toute autre chose.
+
+## 8. Étapes — ligne de filtres sous les en-têtes (étape 12)
+
+Page : le bac à sable avec la ligne de filtres, http://127.0.0.1:4700/?filters=1&floating=1
+(`npx vite --host 127.0.0.1`), en **français** puis en **arabe** (réglage de langue « ar-DZ », la
+grille passe de droite à gauche). Mêmes couples A à D. Durée estimée : 15 min par couple et par
+langue. Noter ce qui est **dit**, mot pour mot si possible.
+
+22. **La ligne trouvée au clavier.** `Tab` dans la grille, sur un en-tête (« Montant »), puis `↓` :
+    attendu une cellule de la 2ᵉ rangée, colonne « Montant », sans « trié » ni nom de groupe en
+    trop ; `↓` : la première ligne ; `↑` `↑` : retour sur l'en-tête. Le lecteur ne doit **pas**
+    dire « lecture seule » sur une cellule qui contient une boîte.
+23. **Entrer et sortir de la boîte.** Sur la cellule « Montant », `Entrée` (puis `F2`) : attendu
+    « Filtrer Montant », zone de saisie (ar : « ترشيح المبلغ »), en mode formulaire ou édition
+    (NVDA, JAWS) sans le forcer. Taper `1,5` (ar : `١٫٥`) : les flèches, `Début`, `Fin` restent dans
+    le texte. Après une courte pause : « Filtré. N lignes » est dit une fois. `Échap` : retour sur
+    la cellule, le filtre reste ; le lecteur sort du mode formulaire.
+24. **Nombre illisible.** Taper `abc` : après la pause, « Montant : nombre non valide » est dit
+    **une fois**, et la boîte est annoncée « non valide » si on y revient ; taper à nouveau efface
+    l'état. Le signe `-` seul, en cours de frappe, ne doit rien faire dire.
+25. **Résumé et Effacer.** Avec un filtre que la boîte ne sait pas modifier (sur « Jour », ou un
+    « entre » posé par l'hôte) : `Entrée` sur la cellule mène au bouton « Effacer le filtre Jour »
+    (ar : « مسح مرشح اليوم ») ; on entend aussi « Filtre actif ». `Entrée` sur le bouton : le filtre
+    part, le focus revient sur la cellule, le nombre de lignes est dit.
+26. **Un seul arrêt de tabulation.** Depuis le champ avant la grille, `Tab` entre dans la grille,
+    `Tab` suivant en sort (sauf voile avec bouton) : aucune boîte de la ligne de filtres n'est un
+    arrêt de tabulation tant qu'on n'y est pas entré par `Entrée` ou `F2`.
+
+Consigner le résultat dans `docs/behaviors/filter-ui.md` (fin de la fiche) et dans `ROADMAP.md`
+(ligne de l'étape 12). Règle de décision propre à cette section : un nom de boîte faux ou absent
+(étape 23) ou une annonce répétée (étapes 23, 24) se corrige avant l'étape 13 ; une boîte dite
+« lecture seule » (étape 22) remet en cause `aria-readonly` sur la grille.

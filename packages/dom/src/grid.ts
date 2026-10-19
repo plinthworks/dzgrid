@@ -19,7 +19,7 @@ import { RowRenderer, setAttr } from './render/rows.js';
 import { FrameScheduler } from './render/scheduler.js';
 import { Scope } from './render/scope.js';
 import { Tooltip } from './render/tooltip.js';
-import { unslotted } from './part.js';
+import { featureParts, unslotted } from './part.js';
 import { createPainter } from './render/viewport.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
@@ -115,7 +115,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false,
     intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0, remPx: geometry.read().remPx ?? 16,
-    schedule, report, restoreFocus: () => {},
+    schedule, report, restoreFocus: () => {}, parts: featureParts(initial.features, () => g.settings.parts),
     now: () => win?.performance.now() ?? 0,
     // A density's height at 16 px text, scaled with the reader's text size, whole pixels.
     rowHeight: () => Math.round((ROW_HEIGHT[g.settings.density ?? 'comfortable'] * g.remPx) / 16),
@@ -195,7 +195,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   g.bands = handles.flatMap((h) => h.bands ?? []);
   g.spans = handles.find((h) => h.spans)?.spans ?? null;
   g.slots = handles.find((h) => h.slots)?.slots ?? null;
-  told.push(...(g.spans ? [] : missingFeatureProblems(initial)), ...(g.slots ? [] : unslotted(initial.parts)));
+  told.push(...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>));
   g.features = handles;
   scope.add(() => { for (const h of handles) h.destroy(); });
 

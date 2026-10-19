@@ -10,7 +10,7 @@
 export const LAYOUT_CSS = `
 :where(.dzg) { position: relative; display: flex; flex-direction: column; min-block-size: 0; min-inline-size: 0; }
 :where(.dzg-viewport) { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain; overflow-anchor: none; outline: none; }
-:where(.dzg-header) { position: sticky; inset-block-start: 0; z-index: 3; display: flex; }
+:where(.dzg-header) { position: sticky; inset-block-start: 0; z-index: 3; display: flex; flex-direction: column; }
 :where(.dzg-body) { position: relative; overflow: clip; }
 :where(.dzg-layer) { position: absolute; inset-inline-start: 0; }
 :where(.dzg-row) { position: absolute; inset-inline-start: 0; display: flex; contain: content; }
