@@ -30,6 +30,11 @@ export interface FeatureHandle {
   readonly spans?: SpanFeature;
   /** Header, overlay and tooltip drawn by parts (the slots feature): the first feature giving them wins. */
   readonly slots?: SlotDrivers;
+  /**
+   * A column header's cell, at each paint, after the base decorated it (sort, grip, name): what a
+   * feature adds beside the label (the filter button, the filtered mark). Level 0 only.
+   */
+  decorateHeader?(col: ResolvedColumn<unknown>, cell: HTMLElement): void;
   /** Runs at each paint once the rows are placed (what is drawn over them). */
   afterRows?(f: Frame<unknown>): void;
   destroy(): void;

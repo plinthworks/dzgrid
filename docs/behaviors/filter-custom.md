@@ -30,6 +30,8 @@ The values a kind tests are kept per column (`ColumnCache.values`): built when a
 
 **A kind's floating part** (step 12): `floating.<name>` in `settings.parts`, else the summary. Its context gives the kind's state (null: none) and `set(next)`, which stores `{type: 'custom', kind, state: next}`. A part must send null when the state is not active (`kind.active(state)` false): a stored inactive state still counts as a filter for the kernel (with `selection.keepOnFilter: false` it clears the selection). The built-in boxes never store an empty filter. A kind without `test` while the browser filters gets no floating cell.
 
+**A kind's popup part** (step 13): `filter.<name>` in `settings.parts`; without one the column has no popup (no header button, Alt+ArrowDown does nothing). Its context is the floating part's (the kind's state unwrapped, `set` wrapping it; a custom filter of another kind on the column reads as null), plus `ops` and `close()`. A kind without a browser rule has no popup while the browser filters, as it has no floating box.
+
 Not now: a kind given by a feature (`GridFeature.kinds`), and a warning at creation for a server-only kind under a browser filter (the filter UI hides such a kind, steps 12-13).
 
 ## Tests

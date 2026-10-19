@@ -351,7 +351,7 @@ export interface FilterKind<S extends Json = Json, V = unknown> {
 
 - **Popup filter:**
   - The popup is `role="dialog"`, named by `aria-label` from `filter.popupLabel {column}` (step 1 decision; not `aria-labelledby`).
-  - It opens from the header filter button (≥ 24 px) or with Alt+ArrowDown on the header. The `openMenu` intent's owner is `header`.
+  - It opens from the header filter button (≥ 24 px) or with Alt+ArrowDown on the header. The `openMenu` intent's owner is `header`. *[Step 13, decision O2: no core intent; the filters feature handles Alt+ArrowDown on a header or floating cell.]*
   - Focus goes to `part.focus()`, or to the first focusable element. Tab is trapped inside, a pointer down outside does not close it, and Escape closes and returns focus to the anchor (the button, or the header cell after Alt+ArrowDown).
   - It is placed logically (block-end, inline-start in the reading direction) through `dir.ts` and the top-layer popup host from step 0.8.
 - **Floating row:**
@@ -527,7 +527,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | 10 | CSV (unchanged) | core |
 | 11 | Parts for `header`, `overlay` and `tooltip` slots, in `@dzgrid/dom/slots`; the retry button in the base (decisions `step11-decisions.md`) | dom |
 | 12 | `/filters` part 1: the floating row (`floating.text`, `floating.number`, the summary part) | dom |
-| 13 | `/filters` part 2: popup with `filter.text`, `filter.number`, `filter.boolean`, active mark, `openMenu` | dom |
+| 13 | `/filters` part 2: popup with `filter.text`, `filter.number`, `filter.boolean`, active mark, Alt+ArrowDown in the feature (no `openMenu`, O2) | dom |
 | 14 | `/filters` part 3: `filter.day` and `filter.instant` with the native picker | dom |
 | 15 | `/filters` part 4: `filter.set`, virtualised, with Apply when the filter runs on the server | dom |
 | 16 | `/filters` part 5: `bindQuickSearch` (server `quick` or the client warm-up) | dom |

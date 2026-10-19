@@ -20,13 +20,14 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | fait, relu, testé | `5aebe99` |
 | 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | fait, relu, testé | `0caedae`, `599cbdf` |
 | 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
-| 13 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
+| 13 — fenêtre de filtre texte, nombre, oui/non ; marque « filtré » ; Alt+Flèche bas (`@dzgrid/dom/filters` partie 2) | écrit, tests verts, non commité : relecture et analyse des tests à faire | — |
+| 14 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 13 (fenêtre de filtre texte, nombre, oui/non ; marque « filtré » dans l'en-tête ; Alt+Flèche bas), plan `docs/phase-3-steps/step13-popup-blueprint.md`, décisions `step13-decisions.md` (propriétaire, 2026-10-19 : filters 7 000 o mesuré hors popup, textes filtres en 520 / fr 620 / ar 830, thème 1 520 ; Appliquer sur serveur ; un clic dehors ne ferme pas ; ET/OU et « respecter la casse » reportés en Phase 5). Implémentation lancée, tests d'abord. Étape 12 close (`59d796e`, `c1b14ea`). À faire par le propriétaire : l'écoute au lecteur d'écran de la ligne de filtres (protocole a11y §8).
+En cours : l'étape 13 (fenêtre de filtre texte, nombre, oui/non ; marque « filtré » dans l'en-tête ; Alt+Flèche bas), plan `docs/phase-3-steps/step13-popup-blueprint.md`, décisions `step13-decisions.md` (propriétaire, 2026-10-19 : filters 7 000 o mesuré hors popup, textes filtres en 520 / fr 620 / ar 830, thème 1 520 ; Appliquer sur serveur ; un clic dehors ne ferme pas ; ET/OU et « respecter la casse » reportés en Phase 5). **Écrite, non commitée** (2026-10-19) : tests d'abord (`filters-popup.test.ts`, 53 sur 54 en échec avant le code, 58 à la fin), suite 164 fichiers / 2 781 tests, typecheck, tailles, build, navigateur 191 vérifications, contraste : verts ; 30 mutants (4 tués après ajout de tests, 2 équivalents retirés). Reste : relecture de code et analyse des tests, puis commit ; écoute au lecteur d'écran par le propriétaire (protocole a11y §8 et §9). Étape 12 close (`59d796e`, `c1b14ea`). À faire par le propriétaire : l'écoute au lecteur d'écran de la ligne de filtres (protocole a11y §8).
 
 ## Les plans détaillés des étapes
 
-`docs/phase-3-steps/` garde les plans validés (architecte + décisions) des étapes 5 à 12 : ce qu'un agent a reçu pour écrire l'étape. Ils servent à comprendre pourquoi le code est ainsi, et à reprendre une étape interrompue.
+`docs/phase-3-steps/` garde les plans validés (architecte + décisions) des étapes 5 à 13 : ce qu'un agent a reçu pour écrire l'étape. Ils servent à comprendre pourquoi le code est ainsi, et à reprendre une étape interrompue.
 
 ## Comment on travaille (règles du propriétaire)
 
@@ -54,14 +55,14 @@ En cours : l'étape 13 (fenêtre de filtre texte, nombre, oui/non ; marque « fi
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 564 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 425 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 363 |
-| `@dzgrid/dom` | 18 750 (étape 12) | 18 669 |
-| `@dzgrid/dom/filters` | 3 500 (O5) | 3 493 |
+| `@dzgrid/dom` | 18 750 (étape 12) | 18 687 |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`) | 7 000 (étape 13, O1) | 6 146 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 473 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 1 238 |
-| `@dzgrid/dom/popup` | 1 500 | ~1 390 |
+| `@dzgrid/dom/popup` | 1 500 | 1 387 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
-| textes des filtres en / fr / ar | 200 / 230 / 290 (étape 12) | 198 / 222 / 275 |
-| thème | 1 400 (étape 12) | 1 288 |
+| textes des filtres en / fr / ar | 520 / 620 / 830 (étape 13) | 421 / 476 / 537 |
+| thème | 1 520 (étape 13) | 1 503 |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 

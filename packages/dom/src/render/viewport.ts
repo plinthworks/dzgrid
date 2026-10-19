@@ -168,7 +168,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     g.partBase = { ctx, dir, doc: g.doc, msg: partMsg, announce };
     const headerHeight = headerRenderer.render({
       layout: L, cols: w.cols, height: h, colIndex,
-      decorate: (col, cell) => decorateHeader(g, col, cell, sort), content: g.slots?.header,
+      decorate: (col, cell) => {
+        decorateHeader(g, col, cell, sort);
+        for (const f of g.features) f.decorateHeader?.(col, cell);
+      }, content: g.slots?.header,
       keep: focus?.kind === 'header' ? { center: focusCenter, level: focus.level ?? 0 } : null,
       check, selectAll: mode === 'multi', extra: g.headerRows, bands: g.bands,
     });

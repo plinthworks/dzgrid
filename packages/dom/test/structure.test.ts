@@ -36,12 +36,21 @@ describe('the DOM layer’s shape', () => {
   });
 
   it('has the filters entry reach the base only through the grid’s context, the types and the shared mounted.ts', () => {
-    // @dzgrid/dom/filters: value imports from the core, the core's internal entry, its own folder and src/mounted.ts.
+    // @dzgrid/dom/filters: value imports from the core, the core's internal entry, its own folder, src/mounted.ts
+    // and src/popup.ts (step 13: the popup host, measured apart, a consumer pays it once).
     const entry = files(SRC).filter((f) => /^filters\//.test(relative(SRC, f)) || relative(SRC, f) === 'filters.ts');
     expect(entry.length).toBeGreaterThan(1);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^filters(\/[^:]+)?\.ts: \.\/(filters\/)?[a-z-]+\.js$/.test(s) && !/^filters\/[^:]+\.ts: \.\.\/mounted\.js$/.test(s));
+      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^filters(\/[^:]+)?\.ts: \.\/(filters\/)?[a-z-]+\.js$/.test(s) && !/^filters\/[^:]+\.ts: \.\.\/(mounted|popup)\.js$/.test(s));
+    expect(offenders).toEqual([]);
+  });
+
+  it('keeps the popup host out of the base: only the entries import it', () => {
+    const offenders = files(SRC)
+      .filter((f) => !/^filters\//.test(relative(SRC, f)) && relative(SRC, f) !== 'popup.ts')
+      .filter((f) => /^import (?!type )[^;]*from '\.{1,2}\/(?:.*\/)?popup\.js'/m.test(readFileSync(f, 'utf8')))
+      .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
   });
 

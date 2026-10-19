@@ -269,6 +269,134 @@ async function runEngine(name) {
       }
     }
 
+    // ---- the filter popup (step 13): fr light, ar right to left dark, with the floating row ----
+    if (name === 'chrome') {
+      const cases = [
+        ['locale=fr-FR&theme=light&rows=2000&filters=1&popup=1', 'Filtre Montant', 'Montant, filtré', '1,5', 'Filtre Payé', false],
+        ['locale=ar-DZ&dir=rtl&theme=dark&rows=2000&filters=1&popup=1', 'مرشح المبلغ', 'المبلغ\u060C مرشح', '\u0661\u066B\u0665', 'مرشح مدفوع', true],
+        ['locale=fr-FR&rows=2000&filters=1&popup=1&floating=1', 'Filtre Montant', 'Montant, filtré', '1,5', 'Filtre Payé', false],
+      ];
+      const rect = (sel) => (page) => page.evaluate((sel) => { const e = document.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, w: r.width, h: r.height }; }, sel);
+      const btn = rect('.dzg-hcell[role=columnheader][data-col="amount"] > .dzg-fbtn');
+      const pop = rect('.dzg-popup');
+      const state = (page) => page.evaluate(() => {
+        const p = document.querySelector('.dzg-popup');
+        const a = document.activeElement;
+        return { open: !!p, label: p?.getAttribute('aria-label') ?? null, inPopup: !!p && p.contains(a), active: a?.className ?? a?.tagName, expanded: document.querySelector('.dzg-hcell[role=columnheader][data-col="amount"] > .dzg-fbtn')?.getAttribute('aria-expanded') };
+      });
+      for (const [qs, popName, markName, typed, boolName, rtl] of cases) {
+        const { page, errors } = await load(ctx, qs);
+        const tag = `popup ${qs}`;
+        // Header layout: sort by the column first (a sort mark), then label, mark, grip and button apart, the button at least 24 px.
+        await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'sort.toggle', column: 'amount', multi: false }, 'user'));
+        await frames(page);
+        const lay = await page.evaluate(() => {
+          const c = document.querySelector('.dzg-hcell[role=columnheader][data-col="amount"]');
+          const r = (sel) => { const e = c.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom }; };
+          const over = (a, b) => a && b && a.l < b.r - 0.5 && b.l < a.r - 0.5;
+          const cb = c.getBoundingClientRect(), cell = { l: cb.left, r: cb.right, t: cb.top, b: cb.bottom }, label = r('.dzg-hlabel'), sort = r('.dzg-sort'), grip = r('.dzg-resize'), button = r('.dzg-fbtn');
+          const rtl = getComputedStyle(c).direction === 'rtl';
+          return { button, sort, order: !!button && !!sort && (rtl ? sort.l >= button.r - 0.5 : sort.r <= button.l + 0.5), inside: button && button.l >= cell.l - 0.5 && button.r <= cell.r + 0.5 && button.t >= cell.t - 0.5 && button.b <= cell.b + 0.5, overlaps: [over(button, grip), over(button, label), over(button, sort)], hit: button && (() => { const e = document.elementFromPoint((button.l + button.r) / 2, (button.t + button.b) / 2); return e?.classList.contains('dzg-fbtn'); })() };
+        });
+        check(name, `${tag}: header button ≥ 24 px inside its cell, clear of label, sort mark and grip, after the sort mark, on top under the pointer`, lay.button && lay.button.r - lay.button.l >= 24 && lay.button.b - lay.button.t >= 24 && lay.inside && lay.order && !lay.overlaps.some(Boolean) && lay.hit, lay);
+        let v = await axe(page);
+        check(name, `${tag}: axe 0 violations, closed`, v.length === 0, v);
+        // Open from the button: named, expanded, focus in the value field, start edges aligned.
+        await page.click('.dzg-hcell[role=columnheader][data-col="amount"] > .dzg-fbtn');
+        await frames(page);
+        const s1 = await state(page);
+        const b1 = await btn(page), p1 = await pop(page);
+        const aligned = rtl ? Math.abs(p1.right - b1.right) <= 1 : Math.abs(p1.left - b1.left) <= 1;
+        check(name, `${tag}: the button opens a dialog named ${popName}, expanded, focus inside, start edge on the button's${rtl ? ' (right)' : ''}, below it`, s1.open && s1.label === popName && s1.inPopup && s1.expanded === 'true' && aligned && p1.top >= b1.bottom - 1, { s1, b1, p1 });
+        const sort0 = await page.evaluate(() => window.t.grid.kernel.query.sort.length);
+        check(name, `${tag}: the button's click did not sort`, sort0 === 1, sort0);
+        v = await axe(page);
+        check(name, `${tag}: axe 0 violations, number popup open`, v.length === 0, v);
+        // Between, typed in the locale; Enter applies and closes, focus back on the button.
+        await page.selectOption('.dzg-popup select.dzg-fop', 'between');
+        await frames(page);
+        v = await axe(page);
+        check(name, `${tag}: axe 0 violations, between`, v.length === 0, v);
+        await page.focus('.dzg-popup input.dzg-fval');
+        await page.keyboard.type(typed);
+        await page.focus('.dzg-popup input.dzg-fto');
+        await page.keyboard.type('50');
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(50);
+        await frames(page);
+        const f1 = await page.evaluate(() => window.t.grid.kernel.query.filter.amount ?? null);
+        const s2 = await state(page);
+        const mark = await page.evaluate(() => { const c = document.querySelector('.dzg-hcell[role=columnheader][data-col="amount"]'); return { filtered: c.hasAttribute('data-dzg-filtered'), label: c.getAttribute('aria-label'), focus: document.activeElement.classList.contains('dzg-fbtn') }; });
+        check(name, `${tag}: ${typed} to 50 between filters, closed, focus on the button, header named "${markName}"`, f1?.op === 'between' && f1.value === 1.5 && f1.valueTo === 50 && !s2.open && mark.filtered && mark.label === markName && mark.focus, { f1, s2, mark });
+        v = await axe(page);
+        check(name, `${tag}: axe 0 violations, filtered mark`, v.length === 0, v);
+        await page.screenshot({ path: `${OUT}/${name}-popup-mark-${qs.replace(/[&=]/g, '_')}.png`, clip: { x: 0, y: 0, width: 1000, height: 200 } });
+        // Unreadable: marked, stays open.
+        await page.keyboard.press('Enter');
+        await frames(page);
+        await page.focus('.dzg-popup input.dzg-fval');
+        await page.keyboard.press('ControlOrMeta+a');
+        await page.keyboard.type('abc');
+        await page.keyboard.press('Enter');
+        await frames(page);
+        const bad = await page.evaluate(() => ({ invalid: document.querySelector('.dzg-popup input.dzg-fval')?.getAttribute('aria-invalid'), open: !!document.querySelector('.dzg-popup'), f: window.t.grid.kernel.query.filter.amount }));
+        check(name, `${tag}: Enter on the button reopens; abc is marked invalid, the popup stays, the filter kept`, bad.invalid === 'true' && bad.open && bad.f?.value === 1.5, bad);
+        v = await axe(page);
+        check(name, `${tag}: axe 0 violations, invalid`, v.length === 0, v);
+        await page.screenshot({ path: `${OUT}/${name}-popup-${qs.replace(/[&=]/g, '_')}.png`, clip: { x: 0, y: 0, width: 1000, height: 400 } });
+        // Tab stays inside; Escape closes, focus back on the button.
+        let inside = true;
+        for (let i = 0; i < 8; i++) {
+          await page.keyboard.press(i % 3 === 2 ? 'Shift+Tab' : 'Tab');
+          inside &&= await page.evaluate(() => !!document.activeElement.closest('.dzg-popup'));
+        }
+        await page.keyboard.press('Escape');
+        const back = await page.evaluate(() => ({ open: !!document.querySelector('.dzg-popup'), focus: document.activeElement.classList.contains('dzg-fbtn') }));
+        check(name, `${tag}: Tab and Shift+Tab stay inside; Escape closes, focus on the button`, inside && !back.open && back.focus, { inside, back });
+        // Alt+ArrowDown on the boolean header: All / Yes / No; Yes applies at once; Escape back to the header cell.
+        await page.evaluate(() => document.querySelector('.dzg-hcell[role=columnheader][data-col="paid"]').focus());
+        await page.keyboard.press('Alt+ArrowDown');
+        await frames(page);
+        const sb = await page.evaluate(() => { const p = document.querySelector('.dzg-popup'); return { label: p?.getAttribute('aria-label'), group: p?.querySelector('[role=radiogroup]')?.getAttribute('aria-label'), radio: document.activeElement.type }; });
+        v = await axe(page);
+        await page.click('.dzg-popup [role=radiogroup] label:nth-child(2)');
+        await frames(page);
+        const fb = await page.evaluate(() => window.t.grid.kernel.query.filter.paid ?? null);
+        await page.keyboard.press('Escape');
+        const onHeader = await page.evaluate(() => document.activeElement.matches('.dzg-hcell[data-col="paid"]'));
+        check(name, `${tag}: Alt+ArrowDown opens ${boolName}, a named radio group, axe 0; Yes filters at once; Escape back to the header`, sb.label === boolName && sb.group === boolName && sb.radio === 'radio' && v.length === 0 && fb?.value === true && onHeader, { sb, v, fb, onHeader });
+        // A text popup, axe.
+        await page.click('.dzg-hcell[role=columnheader][data-col="name"] > .dzg-fbtn');
+        await frames(page);
+        v = await axe(page);
+        check(name, `${tag}: axe 0 violations, text popup`, v.length === 0, v);
+        await page.keyboard.press('Escape');
+        // The anchor scrolls out of the column window: the popup closes, focus back on the grid.
+        await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'filter.set', filter: {} }, 'api'));
+        await frames(page);
+        await page.click('.dzg-hcell[role=columnheader][data-col="x1"] > .dzg-fbtn');
+        await frames(page);
+        const before = await state(page);
+        await page.evaluate(() => { const vp = document.querySelector('.dzg-viewport'); vp.scrollLeft = (getComputedStyle(vp).direction === 'rtl' ? -1 : 1) * (vp.scrollWidth - vp.clientWidth); });
+        await frames(page, 4);
+        const after = await page.evaluate(() => ({ open: !!document.querySelector('.dzg-popup'), inGrid: !!document.activeElement.closest('.dzg') }));
+        check(name, `${tag}: a popup whose column scrolls out closes, focus back on the grid`, before.open && !after.open && after.inGrid, { before, after });
+        await page.evaluate(() => { const vp = document.querySelector('.dzg-viewport'); vp.scrollLeft = 0; });
+        await frames(page, 3);
+        // Near the bottom of the window it opens above; in a transformed, clipping card it is in the top layer, all of it seen.
+        await page.evaluate(() => { document.querySelector('main').style.paddingBlockStart = '560px'; const h = document.getElementById('host'); h.style.transform = 'translateZ(0)'; h.style.overflow = 'hidden'; window.scrollTo(0, 0); });
+        await frames(page, 3);
+        await page.click('.dzg-hcell[role=columnheader][data-col="amount"] > .dzg-fbtn');
+        await frames(page);
+        const b2 = await btn(page), p2 = await pop(page);
+        const top = await page.evaluate(() => { const p = document.querySelector('.dzg-popup'); const r = p.getBoundingClientRect(); const e = document.elementFromPoint(r.left + r.width / 2, r.top + 4); return { layer: p.matches(':popover-open'), seen: p.contains(e) }; });
+        check(name, `${tag}: near the bottom it opens above the button; in a transformed card it is in the top layer and seen`, p2 && b2 && p2.bottom <= b2.top + 1 && top.layer && top.seen, { b2, p2, top });
+        await page.keyboard.press('Escape');
+        check(name, `no page error ${tag}`, errors.length === 0, errors);
+        await page.close();
+      }
+    }
+
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.
     // And under grouped headers (step 9b, commit 4): LTR, RTL, pinned, with the box.

@@ -1,6 +1,7 @@
 // The real grid, from the sources, for scripts/browser.mjs. Query: rows, locale, dir, theme, select, box;
 // spans=1 merges the city (runs of 5 000 rows) with the spans feature, pin=1 pins it at the start;
-// groups=1 puts the columns in groups (two levels) with the spans feature; filters=1&floating=1 the floating filter row.
+// groups=1 puts the columns in groups (two levels) with the spans feature; filters=1&floating=1 the floating filter row;
+// filters=1&popup=1 the header's filter buttons and popup, with a boolean column (step 13).
 import { createGrid } from '/packages/dom/src/index.ts';
 import { EN } from '/packages/dom/src/locales/en.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
@@ -19,7 +20,7 @@ document.documentElement.lang = locale;
 document.documentElement.dir = q.get('dir') ?? (locale.startsWith('ar') ? 'rtl' : 'ltr');
 if (q.get('theme')) document.documentElement.dataset['theme'] = q.get('theme')!;
 
-type Row = { id: number; name: string; city: string; amount: number; day: string };
+type Row = { id: number; name: string; city: string; amount: number; day: string; paid: boolean };
 const CITIES_FR = ['Alger', 'Oran', 'Constantine', 'Annaba', 'Blida', 'Sétif'];
 const CITIES_AR = ['الجزائر', 'وهران', 'قسنطينة', 'عنابة', 'البليدة', 'سطيف'];
 const cities = locale.startsWith('ar') ? CITIES_AR : CITIES_FR;
@@ -29,6 +30,7 @@ const rows: Row[] = Array.from({ length: N }, (_, i) => ({
   name: locale.startsWith('ar') ? `مريض ${i}` : `Patient ${i}`,
   city: cities[(q.get('spans') ? Math.floor(i / 5000) : i) % cities.length]!,
   amount: ((i * 7919) % 100000) / 100,
+  paid: i % 3 === 0,
   day: `2026-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
 }));
 
@@ -37,6 +39,7 @@ const columns = [
   { id: 'city', header: base === AR ? 'المدينة' : 'Ville', width: 130, headerTooltip: base === AR ? 'مدينة الإقامة' : 'Ville de résidence', ...(q.get('spans') && { merge: true as const }), ...(q.get('pin') && { pinned: 'start' as const }) },
   { id: 'amount', header: base === AR ? 'المبلغ' : 'Montant', type: 'number' as const, width: 120 },
   { id: 'day', header: base === AR ? 'اليوم' : 'Jour', type: 'day' as const, width: 120 },
+  ...(q.get('popup') ? [{ id: 'paid', header: base === AR ? 'مدفوع' : 'Payé', type: 'boolean' as const, width: 100 }] : []),
   ...Array.from({ length: 16 }, (_, k) => ({ id: `x${k}`, header: `C${k}`, width: 110, value: (r: Row) => (r.id * (k + 3)) % 997 })),
   { id: 'ref', header: 'Réf', pinned: 'end' as const, width: 90, value: (r: Row) => `R-${r.id}` },
 ];
@@ -75,7 +78,7 @@ if (q.get('slots')) {
     }),
   };
 }
-if (withFilters) features.push((await import('/packages/dom/src/filters.ts')).filters({ floating: q.get('floating') === '1' }) as never);
+if (withFilters) features.push((await import('/packages/dom/src/filters.ts')).filters({ floating: q.get('floating') === '1', popup: q.get('popup') === '1' }) as never);
 const grid = createGrid<Row>(host, {
   rows, getRowId: (r) => r.id, columns: tree, messages, locale, features, ...(parts && { parts }),
   selection: { mode, checkbox: q.get('box') === '1', click: true },

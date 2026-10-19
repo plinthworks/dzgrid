@@ -1,5 +1,5 @@
 // The playground: dataset A (100 000 × 30) or a million generated rows, every Phase 2 setting live;
-// `?filters=1&floating=1` adds the floating filter row (step 12).
+// `?filters=1&floating=1` adds the floating filter row (step 12); `&popup=1` the header's filter buttons and popup (step 13).
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
@@ -27,6 +27,7 @@ const on = (name: string) => (form.elements.namedItem(name) as HTMLInputElement)
 // `filters=1` adds the filters feature (its texts spread into each bundle); `floating=1` its floating row. Fixed at creation.
 const withFilters = params.get('filters') === '1';
 const floating = params.get('floating') === '1';
+const popup = params.get('popup') === '1';
 const join = <B extends { text: object }>(b: B, f: { text: object }): B => (withFilters ? { ...b, text: { ...b.text, ...f.text } } : b);
 const bundles = { 'fr-FR': join(FR, FR_FILTERS), 'en-US': join(EN, EN_FILTERS), 'ar-DZ': join(AR, AR_FILTERS) } as const;
 
@@ -38,7 +39,8 @@ const COLUMNS: ColumnDef<RowA, any>[] = [
   { id: 'd0', header: 'Jour', type: 'day', width: 120 },
   { id: 'i1', header: 'Instant', type: 'instant', width: 180 },
   { id: 'e1', header: 'Service', width: 130 },
-  ...(['t1', 't2', 't3', 'a1', 'a2', 'n1', 'n2', 'n3', 'n4', 'd1', 'd2', 'e0', 'e2', 'b0', 'b1'] as const).map((id) => ({ id, width: 120, ...(id.startsWith('n') ? { type: 'number' as const } : id.startsWith('d') ? { type: 'day' as const } : id.startsWith('b') ? { type: 'boolean' as const } : {}) })),
+  { id: 'b0', header: 'Actif', type: 'boolean', width: 90 },
+  ...(['t1', 't2', 't3', 'a1', 'a2', 'n1', 'n2', 'n3', 'n4', 'd1', 'd2', 'e0', 'e2', 'b1'] as const).map((id) => ({ id, width: 120, ...(id.startsWith('n') ? { type: 'number' as const } : id.startsWith('d') ? { type: 'day' as const } : id.startsWith('b') ? { type: 'boolean' as const } : {}) })),
   { id: 'n7', header: 'Total', type: 'number', pinned: 'end', width: 100 },
 ];
 
@@ -81,7 +83,7 @@ page();
 // The rows are made first: the time shown is the grid's, from rows in memory to the first frame.
 const initial = settings();
 const t0 = performance.now();
-const grid: GridInstance<RowA> = createGrid<RowA>(host, { ...initial, ...(withFilters && { features: [filters({ floating })] }) });
+const grid: GridInstance<RowA> = createGrid<RowA>(host, { ...initial, ...(withFilters && { features: [filters({ floating, popup })] }) });
 requestAnimationFrame(() => requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; }));
 
 form.addEventListener('change', () => {

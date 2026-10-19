@@ -222,8 +222,10 @@ $emit: true !default;
     background: var(--tz-bg);
   }
 
-  // The retry button under the error message: a target of at least 24 px (WCAG 2.5.8).
-  .dzg-overlay button {
+  // The retry button under the error message, and the filter popup's Clear and Apply: a target
+  // of at least 24 px (WCAG 2.5.8).
+  .dzg-overlay button,
+  .dzg-ffoot button {
     min-block-size: 2rem;
     padding-inline: 0.75rem;
     border: 1px solid var(--tz-fg-muted);
@@ -244,6 +246,7 @@ $emit: true !default;
   // unreadable number: a 2 px outline and a thicker end edge in the danger colour, so it
   // shows without the colour too.
   .dzg-finput,
+  .dzg-fop,
   .dzg-fclear {
     border: 1px solid var(--tz-fg-muted);
     border-radius: var(--dzg-radius, 0.375rem);
@@ -272,13 +275,66 @@ $emit: true !default;
   }
 
   .dzg-finput:focus-visible,
-  .dzg-fclear:focus-visible {
+  .dzg-fclear:focus-visible,
+  .dzg-fbtn:focus-visible,
+  .dzg-fpop :focus-visible {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
   }
 
   .dzg-finput[aria-invalid='true'] {
     outline: 2px solid var(--tz-danger);
     border-inline-end-width: 4px;
+  }
+
+  // The filter popup (step 13): a surface over the grid, in the top layer. Its fields take the
+  // floating row's look. Two classes: the layout's reset of a popover (`[popover]`) comes later.
+  .dzg .dzg-popup {
+    padding: 0.5rem;
+    border: 1px solid var(--tz-border);
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: var(--tz-fg);
+    background: var(--tz-bg);
+    box-shadow: 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent);
+  }
+
+  .dzg-fop {
+    padding-inline: 0.25rem;
+  }
+
+  // The header's filter button: a funnel, hollow; filled (and in the accent) when the column is
+  // filtered, so the state shows without the colour.
+  .dzg-fbtn {
+    position: relative;
+    padding: 0;
+    border: 0;
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: var(--tz-fg-muted);
+    background: none;
+    cursor: pointer;
+  }
+
+  .dzg-fbtn::before,
+  .dzg-fbtn::after {
+    content: '';
+    position: absolute;
+    inset-block: 6px 7px;
+    inset-inline: 6px;
+    background: currentColor;
+    clip-path: polygon(0 0, 100% 0, 60% 55%, 60% 100%, 40% 85%, 40% 55%);
+  }
+
+  .dzg-fbtn::after {
+    inset-block: 8px 12px;
+    inset-inline: 9px;
+    background: var(--dzg-header-bg, var(--tz-bg-raised));
+  }
+
+  [data-dzg-filtered] > .dzg-fbtn {
+    color: var(--tz-accent);
+  }
+
+  [data-dzg-filtered] > .dzg-fbtn::after {
+    content: none;
   }
 
   // Rows kept while the next ones load: the muted text colour, not an opacity (it keeps 4.5:1).

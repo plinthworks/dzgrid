@@ -42,7 +42,12 @@ export type MessageKey = (typeof MESSAGE_KEYS)[number];
  * The filters' texts (`@dzgrid/dom/filters`), in their own bundles (`locales/<lang>-filters`,
  * step 12 decision O1): optional here, required by `filters()`.
  */
-export type FilterMessageKey = 'filter.inputLabel' | 'filter.summaryActive' | 'filter.clear' | 'filter.invalid' | 'announce.filtered' | 'announce.filteredOpen';
+export type FilterMessageKey =
+  | 'filter.inputLabel' | 'filter.summaryActive' | 'filter.clear' | 'filter.invalid' | 'announce.filtered' | 'announce.filteredOpen'
+  // The popup (step 13): its name, the header's filtered name, the form's labels, each operator, a boolean's choices.
+  | 'filter.popupLabel' | 'header.withFilter' | 'filter.op' | 'filter.value' | 'filter.valueTo' | 'filter.apply' | `filter.op.${FilterOp}` | 'filter.all' | 'filter.yes' | 'filter.no';
+/** The operators the popup names: text's and number's. */
+export type FilterOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank' | 'lt' | 'lte' | 'gt' | 'gte' | 'between';
 /** A filter bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_FILTERS.text }`. */
 export interface FilterMessages {
   readonly locale: string;

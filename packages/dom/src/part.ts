@@ -87,6 +87,29 @@ export interface SlotContext {
      * the pending edit and stores nothing (`next` unused).
      */
     set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' | 'cancel' }): void;
+    /** The column has a filter popup (step 13): a summary may open it. */
+    readonly canOpen: boolean;
+    /** Opens the column's popup from this cell (anchored to its `aria-haspopup` control, else the cell), or closes it when open. */
+    openFilter(): void;
+  };
+  /**
+   * The column's filter popup (`@dzgrid/dom/filters`, step 13): `filter.<kind>`, no bare fallback.
+   * A part sends null when its draft filters nothing.
+   */
+  filter: PartBase & {
+    readonly column: ResolvedColumn<unknown>;
+    readonly kind: string;
+    /** As the floating cell's: a built-in kind's filter, a custom kind's state, or null. */
+    readonly state: Json | null;
+    /** `server`: the popup keeps a draft and sends it at Apply (owner decision O3); `client`: live. */
+    readonly where: Placement;
+    readonly debounceMs: number;
+    /** The column's `filter.ops`, empty when it gives none (the kind's own list). */
+    readonly ops: readonly string[];
+    /** As the floating cell's, the same pending edit per column (the last write wins). */
+    set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' | 'cancel' }): void;
+    /** Closes the popup, focus back on its anchor (the pending edit applied in the browser). */
+    close(): void;
   };
   /** The tooltip, shown only when the host gave text (`@dzgrid/dom/slots`). */
   tooltip: PartBase & {

@@ -243,3 +243,42 @@ Consigner le résultat dans `docs/behaviors/filter-ui.md` (fin de la fiche) et d
 (ligne de l'étape 12). Règle de décision propre à cette section : un nom de boîte faux ou absent
 (étape 23) ou une annonce répétée (étapes 23, 24) se corrige avant l'étape 13 ; une boîte dite
 « lecture seule » (étape 22) remet en cause `aria-readonly` sur la grille.
+
+## 9. Étapes — fenêtre de filtre (étape 13)
+
+Page : le bac à sable avec la fenêtre et la ligne de filtres,
+http://127.0.0.1:4700/?filters=1&popup=1&floating=1 (`npx vite --host 127.0.0.1`), en **français**
+puis en **arabe** (réglage de langue « ar-DZ »). Mêmes couples A à D. Durée estimée : 15 min par
+couple et par langue. Noter ce qui est **dit**, mot pour mot si possible.
+
+27. **L'en-tête filtré.** Poser un filtre sur « Montant » (par la ligne flottante, `1`), revenir sur
+    l'en-tête : attendu « Montant, filtré » (ar : « المبلغ، مرشح »), avec le tri s'il y en a un
+    (« Montant, Tri 2, filtré » en tri multiple). Sans filtre : « Montant » seul, sans le nom du
+    bouton. Le raccourci (Alt+Flèche bas) peut être dit : le noter.
+28. **Ouvrir au clavier.** Sur l'en-tête « Montant », `Alt+↓` : attendu le nom de la fenêtre
+    « Filtre Montant » (ar : « مرشح المبلغ »), dialogue, puis le champ « Valeur » (son texte
+    sélectionné). Rien d'autre n'est dit à l'ouverture. Sur une cellule du corps, `Alt+↓` ne fait rien.
+29. **Les champs.** `Maj+Tab` : « Condition », liste déroulante, sa valeur (« Égal à ») ; la
+    changer pour « Entre » : un second champ « Jusqu’à » apparaît. `Tab` jusqu’à « Effacer le filtre
+    Montant » puis « Appliquer » ; `Tab` encore : retour sur « Condition » (le focus reste dans la
+    fenêtre).
+30. **Appliquer.** Taper `1,5` (ar : `١٫٥`) dans « Valeur » et `50` dans « Jusqu’à », `Entrée` :
+    la fenêtre se ferme, le focus revient sur l'en-tête (ou sur le bouton si on l'a ouverte à la
+    souris), « Filtré. N lignes » est dit **une fois**. Avec `abc` : « Montant : nombre non valide »
+    une fois, le focus sur le champ, la fenêtre reste ouverte.
+31. **Échap.** Rouvrir, `Échap` : la fenêtre se ferme, le focus revient où elle s'est ouverte, sans
+    fermer un dialogue autour de la grille.
+32. **Le bouton.** À la souris (ou en mode navigation du lecteur), le bouton de l'en-tête est
+    « Filtre Montant », bouton, « réduit » ; ouvert, « développé ».
+33. **Oui / non.** Sur l'en-tête « Actif », `Alt+↓` : un groupe d'options « Filtre Actif » avec
+    « Tous », « Oui », « Non » ; choisir « Oui » : « Filtré. N lignes » une fois.
+34. **Résumé.** Avec un filtre « entre » sur « Montant », la cellule de la ligne flottante : `Entrée`
+    mène au bouton « Filtre actif » (bouton qui ouvre un dialogue), puis « Effacer le filtre Montant ».
+35. **Sur un serveur** (page serveur quand elle existera, ou noter « non testé ») : la saisie
+    n'envoie rien ; `Appliquer` : le nombre est dit une fois la réponse arrivée.
+
+Consigner le résultat dans `docs/behaviors/filter-ui.md` (fin de la fiche) et dans `ROADMAP.md`
+(ligne de l'étape 13). Règle de décision propre à cette section : un nom de fenêtre faux ou absent
+(28), un focus perdu à la fermeture (30, 31) ou une annonce répétée (30, 33) se corrige avant
+l'étape 14 ; un nom d'en-tête qui contient celui du bouton (27) remet en cause l'`aria-label` posé
+sur l'en-tête.

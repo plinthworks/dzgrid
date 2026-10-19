@@ -39,8 +39,9 @@ export interface ColumnDef<T, V = unknown> {
    * custom kind's name). `floating`: a box in the floating filter row (`@dzgrid/dom/filters`; the
    * grid's `filters({ floating })` otherwise, `false` keeps this column out). `debounceMs`: the
    * pause before what is typed there applies (150 in the browser, 300 on a server by default).
+   * `ops`: the operators its popup offers, in this order (the kind's own list when absent).
    */
-  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number };
+  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[] };
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';

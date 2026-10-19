@@ -524,7 +524,7 @@ export function toWire<T>(model: FilterModel, cols: ColumnLookup<T>, ctx: Locale
   - Browser: axe 0 violations with the floating row in fr, ar and RTL [À VÉRIFIER which role the floating cells take: `gridcell` in a header row group, checked by axe].
 
 ### Step 10: filter popup, text / number / boolean (`/filters`, part 2)
-- **Files:** `dom/src/filters/{menu.ts,conditions.ts}`; the intent `openMenu` added to `core/src/keys/intent.ts` with cases.
+- **Files:** `dom/src/filters/{menu.ts,conditions.ts}`; the intent `openMenu` added to `core/src/keys/intent.ts` with cases. *[Amended at step 13 (decision O2): no `openMenu` intent; the filters feature handles Alt+ArrowDown on the header itself; core and conformance unchanged. Files as built: `filters/{resolve,commit,field,menu,forms}.ts`.]*
 - **Behaviour:**
   - The header filter button (≥ 24 px target) and Alt+ArrowDown open a `role="dialog"` popup labelled by the column.
   - Operators come from the column type, restricted by `FilterSpec.ops`; there is an optional second condition with AND/OR, and "Clear".
@@ -536,7 +536,7 @@ export function toWire<T>(model: FilterModel, cols: ColumnLookup<T>, ctx: Locale
   - "between" with one bound is inactive;
   - the client count is announced (`announce.filtered {rows}`);
   - Tab stays inside the popup;
-  - `keyboard-intent` cases: `Alt+ArrowDown` on a header gives `openMenu`, and on a cell gives null in Phase 3.
+  - `keyboard-intent` cases: `Alt+ArrowDown` on a header gives `openMenu`, and on a cell gives null in Phase 3. *[Dropped at step 13 (O2): no core intent.]*
 
 ### Step 11: day and instant filters with the adapter (`/filters`, part 3)
 - **Files:** `dom/src/filters/{dates.ts,native-picker.ts}`.

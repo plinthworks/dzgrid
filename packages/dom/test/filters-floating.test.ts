@@ -2,7 +2,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { textCodec, type FilterKind } from '@dzgrid/core';
 import { definePart, type SlotContext } from '../src/part.js';
-import { filters } from '../src/filters.js';
+import { filters, FILTER_KEYS } from '../src/filters.js';
 import { spans } from '../src/spans.js';
 import { slots } from '../src/slots.js';
 import { EN } from '../src/locales/en.js';
@@ -337,7 +337,8 @@ describe('the summary', () => {
     for (const col of ['name', 'n', 'd']) {
       expect(t.input(col)).toBeNull();
       expect(t.cell(col).textContent).toBe('Filter active');
-      const b = t.cell(col).querySelector('button')!;
+      // The Clear button (step 13: the summary text is itself a button where the column has a popup).
+      const b = t.cell(col).querySelector<HTMLButtonElement>('button.dzg-fclear')!;
       expect(b.getAttribute('aria-label')).toBe(`Clear filter ${col === 'name' ? 'Name' : col.toUpperCase()}`);
       expect(b.tabIndex).toBe(-1);
     }
@@ -348,7 +349,7 @@ describe('the summary', () => {
   it('Clear removes the column’s filter at once and the box comes back', () => {
     const t = make();
     t.g.kernel.dispatch({ type: 'filter.set', filter: { name: { type: 'text', op: 'blank' }, n: { type: 'number', op: 'gt', value: 3 } } }, 'api');
-    t.cell('n').querySelector('button')!.click();
+    t.cell('n').querySelector<HTMLElement>('button.dzg-fclear')!.click();
     expect(t.g.kernel.query.filter).toEqual({ name: { type: 'text', op: 'blank' } });
     expect(t.input('n')).not.toBeNull();
   });
@@ -520,7 +521,8 @@ describe('messages', () => {
   it('every filter bundle has the same keys and placeholders, every plural category its language has', () => {
     const place = (v: unknown): string[] => [...new Set((typeof v === 'string' ? [v] : Object.values(v as object)).flatMap((s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]!)))].sort();
     const keys = Object.keys(EN_FILTERS.text).sort();
-    expect(keys).toEqual(['announce.filtered', 'announce.filteredOpen', 'filter.clear', 'filter.inputLabel', 'filter.invalid', 'filter.summaryActive']);
+    expect(keys).toEqual([...FILTER_KEYS].sort());
+    expect(keys).toHaveLength(28);
     for (const b of [FR_FILTERS, AR_FILTERS]) {
       expect(Object.keys(b.text).sort()).toEqual(keys);
       for (const k of keys) expect(place((b.text as Record<string, unknown>)[k]), `${b.locale} ${k}`).toEqual(place((EN_FILTERS.text as Record<string, unknown>)[k]));
