@@ -37,7 +37,16 @@
     { "what": "date panel text (tzslot's, in a filter popup)", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
     { "what": "date panel chosen day", "fg": "--tz-accent-fg", "bg": "--tz-accent", "min": 4.5 },
     { "what": "date panel notes and outside days", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
-    { "what": "date panel outside day inside a chosen period", "fg": "--tz-fg-muted", "bg": "--tz-range-within-bg", "min": 4.5 }
+    { "what": "date panel outside day inside a chosen period", "fg": "--tz-fg-muted", "bg": "--tz-range-within-bg", "min": 4.5 },
+    { "what": "value list label", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "value list label on hover", "fg": "--tz-fg", "bg": "--dzg-row-hover-bg", "min": 4.5 },
+    { "what": "value list count, and a list kept while the next loads", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "value list count on hover", "fg": "--tz-fg-muted", "bg": "--dzg-row-hover-bg", "min": 4.5 },
+    { "what": "value list box border", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 3 },
+    { "what": "value list ticked box and its check mark", "fg": "--tz-accent-fg", "bg": "--tz-accent", "min": 3 },
+    { "what": "value list ticked box on the popup", "fg": "--tz-accent", "bg": "--tz-bg", "min": 3 },
+    { "what": "focus ring on a value list row", "fg": "--dzg-focus-ring", "bg": "--tz-bg", "min": 3 },
+    { "what": "focus ring on a value list row on hover", "fg": "--dzg-focus-ring", "bg": "--dzg-row-hover-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",

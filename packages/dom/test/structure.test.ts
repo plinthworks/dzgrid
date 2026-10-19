@@ -42,7 +42,7 @@ describe('the DOM layer’s shape', () => {
     expect(entry.length).toBeGreaterThan(1);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^filters(\/[^:]+)?\.ts: \.\/(filters\/)?[a-z-]+\.js$/.test(s) && !/^filters\/[^:]+\.ts: \.\.\/(mounted|popup)\.js$/.test(s) && !/^filters\/dates\/[a-z]+\.ts: @tzslot\/(dom|core)$/.test(s));
+      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^filters(\/[^:]+)?\.ts: \.\/(filters\/)?[a-z-]+\.js$/.test(s) && !/^filters\/[^:]+\.ts: \.\.\/(mounted|popup)\.js$/.test(s) && !/^filters\/dates\/[a-z]+\.ts: @tzslot\/(dom|core)$/.test(s) && !/^filters\/set\/[a-z]+\.ts: \.\.\/dom\.js$/.test(s));
     expect(offenders).toEqual([]);
   });
 
@@ -65,6 +65,23 @@ describe('the DOM layer’s shape', () => {
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
       .filter((s) => !/: (@tzslot\/(dom|core)|@dzgrid\/core(\/internal)?|\.\/shared\.js)$/.test(s));
     expect(offenders).toEqual([]);
+  });
+
+  it('keeps the set filter’s chunk lazy: filters/set/ reached only through import() (step 15)', () => {
+    const eager = files(SRC).filter((f) => !/^filters\/set\//.test(relative(SRC, f)));
+    expect(eager.filter((f) => /^import (?!type )[^;]*from '\.{1,2}\/(?:.*\/)?set\//m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    expect(readFileSync(join(SRC, 'filters/set.ts'), 'utf8')).toMatch(/import\('\.\/set\/index\.js'\)/);
+  });
+
+  it('has the set chunk import only the core, its own folder and the leaf dom.ts (the eager part hands it the loading helper; never forms.ts or the menu)', () => {
+    const chunk = files(join(SRC, 'filters/set'));
+    expect(chunk.map((f) => relative(SRC, f)).sort()).toEqual(['filters/set/draft.ts', 'filters/set/index.ts', 'filters/set/list.ts', 'filters/set/styles.ts']);
+    const offenders = chunk
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: (@dzgrid\/core(\/internal)?|\.\/[a-z]+\.js|\.\.\/dom\.js)$/.test(s));
+    expect(offenders).toEqual([]);
+    // The leaf itself imports nothing at run time.
+    expect(readFileSync(join(SRC, 'filters/dom.ts'), 'utf8')).not.toMatch(/^import (?!type )/m);
   });
 
   it('keeps the popup host out of the base: only the entries import it', () => {

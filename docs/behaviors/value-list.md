@@ -37,4 +37,4 @@ One exception, kept in the core so the UI cannot forget it: a value ticked in th
 - `packages/core/test/source-values.test.ts` (requests, supersede, cancel, epochs, failures, the answer read, destroy).
 - `packages/core/test/values-stateful.test.ts` (one browser handle over seeded steps against an oracle, notifications by content), `values-interleave.test.ts` with `support/values-interleave.ts` (a server's list under seeded interleavings, one source and switching sources), `values-targeted.test.ts`, `values-bugs.test.ts` (the review's findings on step 9).
 - `conformance/cases/value-list/*`, `conformance/cases/source-model/values-*`, `conformance/cases/server-gate/values-channel-per-column.json`, `conformance/cases/problems/invalid-values-response.json`.
-- The popup's list (virtualised, select all shown, blanks, Apply on a server): step 15.
+- The popup's list (step 15, `filter-set.md`): windowed, select all shown, blanks, Apply on a server, the enum fallback when `available` is false; `packages/dom/test/filters-set*.test.ts`.

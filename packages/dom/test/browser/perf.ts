@@ -99,6 +99,46 @@ const p = {
     await raf();
     return { model, frame: performance.now() - t0 };
   },
+  /**
+   * Step 15: the set filter's popup over dataset A with a column of 2 000 values. `first`: the
+   * first open to the next frame (the chunk imported, the value index cold); `script`: a later
+   * open, the synchronous part (mount, list, the first rows drawn); `frame`: that open to the next
+   * frame; `options`: the options drawn.
+   */
+  async setOpen(): Promise<{ first: number; script: number; frame: number; options: number }> {
+    grid?.destroy();
+    const { filters } = await import('/packages/dom/src/filters.ts');
+    const { FR_FILTERS } = await import('/packages/dom/src/locales/fr-filters.ts');
+    const f = filters();
+    const place = { id: 'place', header: 'Commune', width: 160, value: (r: RowA) => `Commune ${Number(r.id.slice(1)) % 2000}`, filter: { kind: 'set' } };
+    grid = createGrid<RowA>(host, { rows, getRowId: (r) => r.id, columns: [columns[0]!, place as never, ...columns.slice(2)], messages: { ...FR, text: { ...FR.text, ...FR_FILTERS.text } }, timeZone: 'Africa/Algiers', features: [f] });
+    await raf();
+    await raf();
+    const shown = () => document.querySelectorAll('.dzg-popup [role=option]').length;
+    let t0 = performance.now();
+    f.openFilter('place');
+    while (!shown()) await raf();
+    await raf();
+    const first = performance.now() - t0;
+    f.closeFilter();
+    await raf();
+    const scripts: number[] = [];
+    const frames: number[] = [];
+    let options = 0;
+    for (let k = 0; k < 7; k++) {
+      t0 = performance.now();
+      f.openFilter('place');
+      scripts.push(performance.now() - t0);
+      options = shown();
+      await raf();
+      frames.push(performance.now() - t0);
+      f.closeFilter();
+      await raf();
+      await raf();
+    }
+    const med = (a: number[]) => a.sort((x, y) => x - y)[a.length >> 1]!;
+    return { first, script: med(scripts), frame: med(frames), options };
+  },
   destroy() {
     grid?.destroy();
     grid = null;

@@ -17,9 +17,10 @@ export type Resolve = (col: ResolvedColumn<unknown>, slot: 'floating' | 'filter'
  * `floating` (the summary) in the floating row; `filter.<kind>` alone in the popup. None when the
  * column says `filter: false`, when the floating row is off for it (`filter.floating`, `filters({ floating })`),
  * or when a custom kind cannot filter where the rows are (no browser rule under the client).
+ * `strict`: a part given only to a column naming its kind (the built-in `filter.set`, step 15).
  * An unknown kind the column names is said once per registry. Cached per columns' version.
  */
-export function resolver(g: GridContext<unknown>, o: { readonly floating?: boolean }): Resolve {
+export function resolver(g: GridContext<unknown>, o: { readonly floating?: boolean }, strict?: object): Resolve {
   const kinds = filterKindLookup(g.settings.filterKinds);
   let reg: unknown = null;
   let version = -1;
@@ -50,7 +51,10 @@ export function resolver(g: GridContext<unknown>, o: { readonly floating?: boole
       ok = !!k && (!!k.test || g.rows.ops.filter !== 'client');
     }
     const name = ok ? (partNameFor(slot, pc, new Set(Object.keys(now).filter((n) => now[n]!.slot === slot))).name ?? (slot === 'floating' && now['floating']?.slot === 'floating' ? 'floating' : null)) : null;
-    by.set(id, (r = { part: name ? now[name]!.part : null, kind }));
+    const part = name ? now[name]!.part : null;
+    // The built-in set list only for a column that asks for it (owner decision Q2): an enum
+    // column, set implicitly, keeps no popup; a host's own `filter.set` still serves it.
+    by.set(id, (r = { part: part === strict && (f && f.kind) !== 'set' ? null : part, kind }));
     return r;
   };
 }

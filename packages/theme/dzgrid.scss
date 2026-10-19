@@ -201,6 +201,7 @@ $emit: true !default;
   }
 
   .dzg-row[aria-selected='true'] .dzg-box,
+  .dzg-fopt[aria-selected='true'] .dzg-box,
   .dzg-box[aria-checked='true'],
   .dzg-box[aria-checked='mixed'] {
     border-color: var(--tz-accent);
@@ -208,6 +209,7 @@ $emit: true !default;
   }
 
   .dzg-row[aria-selected='true'] .dzg-box::before,
+  .dzg-fopt[aria-selected='true'] .dzg-box::before,
   .dzg-box[aria-checked='true']::before {
     content: '\2713';
   }
@@ -335,6 +337,31 @@ $emit: true !default;
 
   [data-dzg-filtered] > .dzg-fbtn::after {
     content: none;
+  }
+
+  // The value list (step 15): a framed list; a row's box is the selection box; the counts, and a
+  // list kept while the next one loads, in the muted colour (4.5:1, not an opacity); the loading or
+  // failure line drawn over the list on the popup's surface; the focus ring inside the row.
+  .dzg-flist {
+    border: 1px solid var(--tz-border);
+    border-radius: var(--dzg-radius, 0.375rem);
+  }
+
+  .dzg-fopt:hover {
+    background: var(--dzg-row-hover-bg, color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg)));
+  }
+
+  .dzg-fcount,
+  .dzg-flist[aria-busy='true'] .dzg-fopt {
+    color: var(--tz-fg-muted);
+  }
+
+  .dzg-flistw > p {
+    background: var(--tz-bg);
+  }
+
+  .dzg-fopt:focus-visible {
+    outline-offset: -2px;
   }
 
   // The date filters (step 14): tzslot's panel inside a filter popup takes the popup's surface,

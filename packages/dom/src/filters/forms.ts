@@ -1,13 +1,16 @@
 import type { LocaleCtx } from '@dzgrid/core';
 import type { Part, SlotContext } from '../part.js';
+import { el, labelled, tx } from './dom.js';
 import { echo, nameOf, numberIn, shown, textField } from './field.js';
+
+export { el, labelled, tx };
 
 type C = SlotContext['filter'];
 /** A filter as the forms read and write it (any built-in kind's fields). */
 export type F = { readonly type: string; readonly op?: string; readonly value?: unknown; readonly valueTo?: unknown; readonly caseSensitive?: boolean; readonly [k: string]: unknown };
 
 /** A kind's fields in the popup: what they can show, show, read and focus. */
-interface Body {
+export interface Body {
   readonly els: readonly HTMLElement[];
   edits(s: F | null): boolean;
   write(s: F | null): void;
@@ -19,26 +22,9 @@ interface Body {
 }
 /** `now` null: the form changed under the user (an operator no longer offered): recorded, nothing sent. `clr`: a null draft removes the filter (Clear, All). */
 export type Changed = (now: boolean | null, clr?: boolean) => void;
-type Make = (c: () => C, doc: Document, changed: Changed) => Body;
+export type Make = (c: () => C, doc: Document, changed: Changed) => Body;
 
 let uid = 0;
-export const el = <K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls = ''): HTMLElementTagNameMap[K] => {
-  const e = doc.createElement(tag);
-  if (cls) e.className = cls;
-  return e;
-};
-/** A visible label holding its control (its name), the label's text first. */
-export const labelled = (doc: Document, control: HTMLElement): [HTMLLabelElement, HTMLSpanElement] => {
-  const l = el(doc, 'label');
-  const s = el(doc, 'span');
-  l.append(s, control);
-  return [l, s];
-};
-/** A text written only when it changes: a paint that changes nothing touches nothing. */
-export const tx = (e: Node, v: string): void => {
-  if (e.textContent !== v) e.textContent = v;
-};
-
 /**
  * The popup's shell (docs/behaviors/filter-ui.md, step 13): the kind's fields, or the summary
  * (`filter.summaryActive`) for a filter they cannot show; a footer with Clear and Apply. In the

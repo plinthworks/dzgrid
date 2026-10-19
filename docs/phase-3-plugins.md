@@ -253,7 +253,7 @@ interface FilterSlot {
   readonly where: Placement;                    // ops.filter: tells the part whether to debounce longer or show Apply
   set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' | 'cancel' }): void;   // dispatches filter.column with source 'user'; 'cancel' drops the pending edit
   // Step 9 amendment: a handle, not a Promise (a Promise can neither be cancelled nor show the old list while a new one loads):
-  values(o?: { readonly search?: string; readonly max?: number }): ValuesHandle;   // = kernel.values(column, o), value-list.md
+  values(o?: { readonly search?: string; readonly max?: number }): ValuesHandle;   // = kernel.values(column, o), value-list.md; shipped at step 15 on `filter` only
   close(): void;
 }
 ```
@@ -277,7 +277,7 @@ The defaults are registered by features under `<slot>.<type-or-kind>`:
 |---|---|
 | cell | (fast path for every type); `cell.badge` and `cell.boolean` ship in `/filters`' sibling `/parts` (see §B3) |
 | header | `header` (sort button, filter button, active mark) |
-| filter | `filter.text`, `filter.number`, `filter.day`, `filter.instant`, `filter.boolean`, `filter.set` |
+| filter | `filter.text`, `filter.number`, `filter.day`, `filter.instant`, `filter.boolean`, `filter.set` (step 15: built in for an explicit `filter.kind: 'set'` only, owner Q2) |
 | floating | `floating.text`, `floating.number` (live input, step 12); the bare `floating` = the summary ("Filter active" and Clear at step 12, the button opening the popup at step 13) |
 | overlay | `overlay` (all four phases) |
 | tooltip | `tooltip` |
@@ -529,7 +529,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | 12 | `/filters` part 1: the floating row (`floating.text`, `floating.number`, the summary part) | dom |
 | 13 | `/filters` part 2: popup with `filter.text`, `filter.number`, `filter.boolean`, active mark, Alt+ArrowDown in the feature (no `openMenu`, O2) | dom |
 | 14 | `/filters` part 3: `filter.day` and `filter.instant` on tzslot 2.2.0 (lazy kits, optional peer) and the relative shortcuts; step 21 folded in | core, dom |
-| 15 | `/filters` part 4: `filter.set`, virtualised, with Apply when the filter runs on the server | dom |
+| 15 | `/filters` part 4: `filter.set`, a lazy chunk, always windowed, with Apply when the filter runs on the server; only for an explicit `filter: { kind: 'set' }` (owner Q2) | dom |
 | 16 | `/filters` part 5: `bindQuickSearch` (server `quick` or the client warm-up) | dom |
 | 17 | `/pagination`: `footer.pager`, `footer.count`, `footer.selected`, for client and server paging | dom |
 | 18 | Playground audit screen in **both** configurations of example 3; 1 000 permutations each; axe; screenshots | browser |
@@ -545,7 +545,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 
 1. ~~`/tzslot-picker`, to P5.~~ Folded into step 14.
 2. Cursor paging, if the owner's API uses offsets.
-3. Value-list virtualisation above 2 000 values (cap plus "refine your search"), to P5.
+3. ~~Value-list virtualisation above 2 000 values, to P5.~~ Moot at step 15: the core caps the list at 2 000 ("refine your search") and the popup is always windowed; the fallback if the lazy chunk passes its budget is a full render with `content-visibility: auto`.
 4. The second AND/OR condition in the popup UI (the model keeps `combined`), to P5.
 5. Editable floating filters beyond text and number (summary only).
 6. `/parts` (badge, boolean): hosts register their own, and the contract is untouched.

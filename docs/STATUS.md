@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-19 (étape 14 partie B, non commitée). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-19 (étape 15 faite, non commitée). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -22,13 +22,14 @@ Mis à jour : 2026-10-19 (étape 14 partie B, non commitée). Ce fichier dit où
 | 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
 | 13 — fenêtre de filtre (texte, nombre, oui/non), marque « filtré », Alt+Flèche bas | fait, relu, testé | `f67fc48`, `67782bc` |
 | 14 — filtres de dates sur tzslot (jour, période, avant/après), six raccourcis relatifs, horloge | fait, relu, testé | `df27559`, `85e08c3`, `ae0b40b`, `24acaab` |
-| 15 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
+| 15 — filtre par liste de valeurs (morceau paresseux), fenêtré, clavier, serveur | fait, relu, testé (non commité) | — |
+| 16 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 15 (filtre par liste de valeurs, chargé à la demande), plan `docs/phase-3-steps/step15-set-blueprint.md`, décisions `step15-decisions.md` (propriétaire, 2026-10-19 : tout décocher = tableau vide ; PAS de bouton par défaut sur les colonnes à liste, seulement avec `filter: { kind: 'set' }` ; résumé « Filtre actif » gardé ; filters 9 300, ligne « set » 3 800, textes 850 / 980 / 1 200, thème 1 800). Implémentation lancée, tests d'abord ; la démo (page d'accueil du playground) gagne un menu de liens vers chaque filtre (demande du propriétaire). Nouvelle demande du propriétaire (2026-10-19) : GSAP pour un effet « premium » dans DzGrid même ; cas d'usage à choisir ensuite ; étude d'architecte lancée (module facultatif `@dzgrid/dom/motion-gsap`, comme DzCalendar). Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§10), relecture arabe.
+Étape 15 faite (non commitée) : filtre par liste (`docs/behaviors/filter-set.md`), décisions du propriétaire appliquées (tout décocher = `include: []` ; pas de bouton par défaut sur les colonnes à liste, seulement `filter: { kind: 'set' }` ; « Filtre actif » gardé). Bac à sable : menu de démos en haut de la page d'accueil. Suite 3 087 tests, navigateur 257 vérifications. À faire ensuite : commit après relecture du chef, puis l'étape 16. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§11), relecture arabe (dont les 8 textes de la liste).
 
 ## Les plans détaillés des étapes
 
-`docs/phase-3-steps/` garde les plans validés (architecte + décisions) des étapes 5 à 14 : ce qu'un agent a reçu pour écrire l'étape. Ils servent à comprendre pourquoi le code est ainsi, et à reprendre une étape interrompue.
+`docs/phase-3-steps/` garde les plans validés (architecte + décisions) des étapes 5 à 15 : ce qu'un agent a reçu pour écrire l'étape. Ils servent à comprendre pourquoi le code est ainsi, et à reprendre une étape interrompue.
 
 ## Comment on travaille (règles du propriétaire)
 
@@ -57,15 +58,16 @@ En cours : l'étape 15 (filtre par liste de valeurs, chargé à la demande), pla
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 551 |
 | `@dzgrid/dom` | 18 750 (étape 12) | 18 722 |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot et les lots de dates à part) | 8 500 (étape 14) | 8 473 |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 114 |
+| liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 762 |
 | adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |
 | lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 1 238 |
 | `@dzgrid/dom/popup` | 1 500 | 1 428 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
-| textes des filtres en / fr / ar | 680 / 760 / 850 (étape 14) | 585 / 667 / 756 |
-| thème | 1 660 (étape 14) | 1 644 |
+| textes des filtres en / fr / ar | 850 / 980 / 1 200 (étape 15) | 707 / 831 / 941 |
+| thème | 1 800 (étape 15) | 1 707 |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 

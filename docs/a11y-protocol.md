@@ -325,3 +325,50 @@ Consigner le résultat dans `docs/behaviors/filter-date-picker.md` (fin de la fi
 date (37) se corrige chez tzslot (T1), notre contournement restant jusque-là ; un calendrier sans nom
 ou un dialogue imbriqué que le lecteur ne voit pas (38, 44) bloque l'étape 18 ; une annonce répétée
 (38, 41) se corrige avant l'étape 15.
+
+## 11. Étapes — filtre par liste de valeurs (étape 15)
+
+Page : le bac à sable avec la fenêtre et une colonne « Commune » à environ 2 000 valeurs,
+http://127.0.0.1:4700/?filters=1&popup=1&sets=1 (`npx vite --host 127.0.0.1`), en **français**
+puis en **arabe** (« ar-DZ », lien « Arabe, droite à gauche » de la page d'accueil). Couples A à D, plus VoiceOver
+sur iOS et TalkBack si possible. Durée estimée : 20 min par couple et par langue. Noter ce qui est
+**dit**, mot pour mot.
+
+45. **Ouvrir.** Sur l'en-tête « Commune », `Alt+↓` : le nom de la fenêtre « Filtre Commune », puis
+    « Rechercher des valeurs, zone de texte ». La première fois, « Chargement… » peut être dit une
+    fois. La colonne « Statut » (liste d'options, sans `filter.kind`) n'a **pas** de bouton.
+46. **La liste.** `Tab` une fois (« Tout sélectionner, case à cocher »), puis `Tab` : « liste,
+    sélection multiple » (ou équivalent), puis la première option : attendu « <nom>, 12 lignes,
+    sélectionné(e) / non sélectionné(e), 1 sur 2 001 » (l'ordre des mots dépend du lecteur).
+47. **Cocher.** `Espace` : « sélectionné » ou « non sélectionné » est dit ; après une courte pause,
+    « Filtré. N lignes » **une fois** (même après plusieurs `Espace` rapides). Aucune annonce par
+    case cochée si le lecteur dit déjà l'état — **noter si un lecteur reste muet** (alors on ajoute
+    une annonce).
+48. **Se déplacer.** `↓`, `↑`, `Début`, `Fin`, `Page suivante` : chaque option est dite avec sa
+    position « k sur 2 001 » ; `Fin` atteint la dernière. Taper « o » puis « r » vite : le focus va à
+    la première valeur commençant par « Or » (accents ignorés : « e » trouve « É »).
+49. **Tout sélectionner.** Après quelques cases : la case « Tout sélectionner » est dite « partiellement
+    cochée » (mixed). La cocher : tout est coché, une seule annonce du filtre.
+50. **Rechercher.** Dans la recherche, taper « bou » : la ligne d'état dit « 37 valeurs » une fois
+    la liste stable (pas à chaque touche) ; la case devient « Tout sélectionner (affichées) ».
+    Liste trop longue : « Les 2 000 premières valeurs. Affinez votre recherche. »
+51. **Vides.** L'option « (Vides) » est dite avec son nombre de lignes ; absente pendant une recherche.
+52. **Mode navigation.** En mode lecture (flèches du lecteur), seules les options dessinées sont
+    lues (environ 25) : limite connue, comme la grille (§2, 6d). Noter ce que dit le lecteur.
+53. **Focus gardé.** Sur une option, faire défiler la liste à la molette loin : revenir avec `↓` :
+    le focus est toujours sur l'option, dite à nouveau correctement.
+54. **Échec du chargement.** (`&setfail=1` simule une liste introuvable.) Ouvrir le filtre
+    « Commune » : « Les valeurs n'ont pas pu être chargées… » dit une fois (alerte), un bouton
+    « Réessayer » ; `Échap` ferme. Sur un serveur (pas de serveur dans le bac à sable : à l'oreille à
+    l'étape 18, écran d'audit) : cocher n'envoie rien ; `Entrée` dans la recherche ou « Appliquer » :
+    une requête, « Filtré. N lignes » une fois ; un échec de la liste se dit de même, et
+    « Réessayer » met le focus dans la recherche.
+55. **Arabe.** Pluriels (« قيمة واحدة », « قيمتان », « 3 قيم »…) dans la ligne d'état et les noms
+    des options ; le nom de l'option (« X، 12 صفا ») lu dans le bon ordre ; les noms arabes de la
+    liste alignés à droite, les latins à gauche de leur ligne (chacun dans son sens).
+
+Consigner le résultat dans `docs/behaviors/filter-set.md` (fin de la fiche) et dans `ROADMAP.md`
+(ligne de l'étape 15). Règle de décision propre à cette section : un lecteur muet au cochage (47)
+ajoute une annonce par case (étape 18) ; une liste que le lecteur ne voit pas comme multi-sélection
+(46) ou une position fausse (48) bloque l'étape 18 ; une annonce répétée (47, 50) se corrige avant
+l'étape 16.

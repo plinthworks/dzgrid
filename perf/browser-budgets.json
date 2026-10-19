@@ -1,5 +1,5 @@
 {
-  "$comment": "Chrome, headless, dataset A at 1 280 × 720 (scripts/perf-browser.mjs). Targets from ARCHITECTURE §5.3; set at measured + 10 % at the Phase 2 close where tighter, capped by §5.3.",
+  "$comment": "Chrome, headless, dataset A at 1 280 × 720 (scripts/perf-browser.mjs). Targets from ARCHITECTURE §5.3; set at measured + 10 % at the Phase 2 close where tighter, capped by §5.3. Step 15 (2026-10-19): the set filter's popup over dataset A with a column of 2 000 values, measured first (headless Chrome: first open 44.4 ms, a later open 7.2 ms of script and 16.9 ms to the next frame, 16 options drawn); budgets about the measure + 35 %, the frame line at the scroll lines' p95.",
   "budgets": {
     "first render of A": 120,
     "body nodes after first render": 1000,
@@ -27,6 +27,11 @@
     "1 000 000 rows (scaled), wheel-like scroll: median frame": 17.2,
     "1 000 000 rows (scaled), wheel-like scroll: p95 frame": 25,
     "1 000 000 rows (scaled): frames without rows": 1,
-    "sort click on 100 000 (numeric, warm): sort and events": 40
+    "sort click on 100 000 (numeric, warm): sort and events": 40,
+    "set filter: first open with 2 000 values (chunk, cold index) to the next frame": 60,
+    "set filter: open with 2 000 values (script)": 10,
+    "set filter: open with 2 000 values to the next frame": 25,
+    "set filter: options drawn": 40,
+    "set filter: page errors": 0
   }
 }

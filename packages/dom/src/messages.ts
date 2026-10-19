@@ -47,7 +47,9 @@ export type FilterMessageKey =
   // The popup (step 13): its name, the header's filtered name, the form's labels, each operator, a boolean's choices.
   | 'filter.popupLabel' | 'header.withFilter' | 'filter.op' | 'filter.value' | 'filter.valueTo' | 'filter.apply' | `filter.op.${FilterOp}` | 'filter.all' | 'filter.yes' | 'filter.no'
   // Dates (step 14): the fields' labels, the zone line, loading and failure.
-  | 'filter.date' | 'filter.dateTime' | 'filter.period' | 'filter.zone' | 'filter.loadingDates' | 'filter.loadFailed';
+  | 'filter.date' | 'filter.dateTime' | 'filter.period' | 'filter.zone' | 'filter.loadingDates' | 'filter.loadFailed'
+  // The value list (step 15): its search, select all (shown), blanks, an option's name, the status line, its failure.
+  | 'filter.set.search' | 'filter.set.all' | 'filter.set.allShown' | 'filter.set.blanks' | 'filter.set.option' | 'filter.set.count' | 'filter.set.truncated' | 'filter.set.failed';
 /** The operators the popup names: text's and number's, and the date ones (step 14). */
 export type FilterOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank' | 'lt' | 'lte' | 'gt' | 'gte' | 'between'
   | 'onDay' | 'notOnDay' | 'betweenDays' | 'before' | 'after' | 'onOrBefore' | 'onOrAfter';

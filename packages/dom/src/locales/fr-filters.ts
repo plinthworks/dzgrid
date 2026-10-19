@@ -45,5 +45,13 @@ export const FR_FILTERS = {
     'filter.zone': "Fuseau horaire",
     'filter.loadingDates': "Chargement du calendrier\u2026",
     'filter.loadFailed': "Le calendrier n\u2019a pas pu être chargé. Réessayez, ou rechargez la page.",
+    'filter.set.search': "Rechercher des valeurs",
+    'filter.set.all': "Tout sélectionner",
+    'filter.set.allShown': "Tout sélectionner (affichées)",
+    'filter.set.blanks': "(Vides)",
+    'filter.set.option': "{label}, {rows}",
+    'filter.set.count': { one: "{n} valeur", many: "{n} de valeurs", other: "{n} valeurs" },
+    'filter.set.truncated': "Les {n} premières valeurs. Affinez votre recherche.",
+    'filter.set.failed': "Les valeurs n\u2019ont pas pu être chargées. Réessayez, ou rechargez la page.",
   },
 } satisfies FilterMessages;

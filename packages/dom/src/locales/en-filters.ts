@@ -45,5 +45,13 @@ export const EN_FILTERS = {
     'filter.zone': "Time zone",
     'filter.loadingDates': "Loading the calendar\u2026",
     'filter.loadFailed': "The calendar could not be loaded. Retry, or reload the page.",
+    'filter.set.search': "Search values",
+    'filter.set.all': "Select all",
+    'filter.set.allShown': "Select all shown",
+    'filter.set.blanks': "(Blanks)",
+    'filter.set.option': "{label}, {rows}",
+    'filter.set.count': { one: "{n} value", other: "{n} values" },
+    'filter.set.truncated': "The first {n} values. Refine your search.",
+    'filter.set.failed': "The values could not be loaded. Retry, or reload the page.",
   },
 } satisfies FilterMessages;

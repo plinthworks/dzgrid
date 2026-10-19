@@ -1,4 +1,4 @@
-import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, PartSlot, Placement, Problem, ResolvedColumn, RowKey, SortItem } from '@dzgrid/core';
+import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, PartSlot, Placement, Problem, ResolvedColumn, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
 import type { AppMessageKey, FilterMessageKey, MessageKey } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { GridSettings } from './settings.js';
@@ -112,6 +112,11 @@ export interface SlotContext {
     set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' | 'cancel' }): void;
     /** Closes the popup, focus back on its anchor (the pending edit applied in the browser). */
     close(): void;
+    /**
+     * The column's value list (step 15): `kernel.values(column, o)` (docs/behaviors/value-list.md).
+     * One handle per column: the part closes it when it goes, and asking again closes the first.
+     */
+    values(o?: ValuesOptions): ValuesHandle;
   };
   /** The tooltip, shown only when the host gave text (`@dzgrid/dom/slots`). */
   tooltip: PartBase & {

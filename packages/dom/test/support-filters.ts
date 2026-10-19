@@ -28,9 +28,10 @@ export const COLUMNS: ColumnOrGroup<R>[] = [
   { id: 'd', header: 'D', type: 'day' },
 ];
 
-export function fakeSource() {
+export function fakeSource(values?: DataSource<R>['values']) {
   const calls: { req: DataRequest; ok(v: unknown): void; err(e: unknown): void }[] = [];
   const source: DataSource<R> = {
+    ...(values && { values }),
     fetch: (req) => ({ then(ok: (v: never) => void, err: (e: unknown) => void) { calls.push({ req, ok: ok as never, err }); } }) as never,
   };
   const answer = (ids: string[], more: object = { total: ids.length }) => calls.at(-1)!.ok({ rows: ids.map((id, n) => ({ id, name: id, n })), ...more });
@@ -46,6 +47,8 @@ export interface Make {
   readonly inline?: number;
   /** The grid inside an open shadow root (its host in the body). */
   readonly shadow?: boolean;
+  /** The server source's `values` (step 15, the set filter's list). */
+  readonly values?: DataSource<R>['values'];
 }
 
 /** A grid with `filters({ floating: true })` by default, synchronous paints, a fake geometry. */
@@ -59,7 +62,7 @@ export function make(o: Make = {}) {
     outer.attachShadow({ mode: 'open' }).append(host);
   } else document.body.append(host);
   const events: GridEvent<R>[] = [];
-  const f = fakeSource();
+  const f = fakeSource(o.values);
   const data = o.server ? { source: sourceRows(f.source), operations: 'server' } : { rows: o.rows ?? ROWS };
   const g = createGrid<R>(host, {
     ...data, getRowId: (r: R) => r.id, columns: o.columns ?? COLUMNS, messages: MESSAGES,

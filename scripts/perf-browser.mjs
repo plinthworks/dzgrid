@@ -37,6 +37,18 @@ async function page(b, n) {
 const b = await browser('chrome');
 open = b;
 try {
+  // ---- step 15: the set filter's popup with 2 000 values (first, so nothing before it warms it) ----
+  {
+    const { pg, errors } = await page(b, 100_000);
+    const r = await pg.evaluate(() => window.p.setOpen());
+    line('set filter: first open with 2 000 values (chunk, cold index) to the next frame', r.first, 'ms');
+    line('set filter: open with 2 000 values (script)', r.script, 'ms');
+    line('set filter: open with 2 000 values to the next frame', r.frame, 'ms');
+    line('set filter: options drawn', r.options, 'options');
+    line('set filter: page errors', errors.length, 'errors');
+    await pg.close();
+  }
+
   // ---- first render of A, and body nodes: five loads ----
   const firsts = [];
   let nodes = 0;

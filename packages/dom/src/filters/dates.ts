@@ -2,6 +2,7 @@ import { parseDay, readInstant, RELATIVE_RANGES, type LocaleCtx, type RelativeRa
 import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import { conditions, el, form, hide, NUM, tx, type F, type Spec } from './forms.js';
+import { notice, once, type Once } from './lazy.js';
 
 type C = SlotContext['filter'];
 
@@ -79,30 +80,9 @@ const KITS: Record<DateKitName, () => Promise<DateKit>> = {
   moment: () => import('./dates/moment.js'),
 };
 
-/**
- * The kits, each imported once (`loadDates` replaces the import): a kit that loaded is kept, so a
- * later popup draws at once; one that failed is forgotten, so Retry imports it again. A module
- * without `adapt` is a failure.
- */
-export function kits(own?: (kit: DateKitName) => Promise<DateKit>): Pick<DateEnv, 'load' | 'done'> {
-  const asked = new Map<DateKitName, Promise<DateKit>>();
-  const done = new Map<DateKitName, DateKit>();
-  return {
-    done: (k) => done.get(k),
-    load(k) {
-      let p = asked.get(k);
-      if (!p) {
-        asked.set(k, (p = new Promise<DateKit>((ok) => ok((own ?? KITS[k])(k))).then((m) => {
-          if (typeof m?.adapt !== 'function') throw new TypeError('filters: no adapt in date kit ' + k);
-          done.set(k, m);
-          return m;
-        })));
-        p.catch(() => asked.delete(k));
-      }
-      return p;
-    },
-  };
-}
+/** The kits, each imported once (`loadDates` replaces the import; `lazy.ts`). A module without `adapt` is a failure. */
+export const kits = (own?: (kit: DateKitName) => Promise<DateKit>): Once<DateKitName, DateKit> =>
+  once((k) => (own ?? KITS[k])(k), (m) => typeof m?.adapt === 'function', 'adapt in date kit ');
 
 const DATE = 'date';
 /** The kit of each operator (the others need none). */
@@ -157,35 +137,16 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
     const { ctx, today } = get();
     return { ctx, label: name(), today, ...(env.messages && { messages: env.messages }) };
   };
-  /** The loading line or the failure (with Retry), one at a time, after the label. */
-  const note = el(doc, 'p');
-  const retry = el(doc, 'button', 'dzg-fretry');
-  retry.type = 'button';
-  // The focus waits on the box while it loads again, and goes to the field when it comes.
-  retry.addEventListener('click', () => (box.focus(), (want = ''), mount()));
-  let said = '';
-  const say = (what: 'load' | 'fail'): void => {
-    said = what;
-    note.className = 'dzg-f' + what;
-    note.setAttribute('role', what === 'load' ? 'status' : 'alert');
-    if (what === 'load') box.setAttribute('aria-busy', 'true');
-    else box.removeAttribute('aria-busy');
-    box.append(note, ...(what === 'fail' ? [retry] : []));
-    words();
-  };
-  const words = (): void => {
-    const c = get();
-    tx(note, c.msg(said === 'load' ? 'filter.loadingDates' : 'filter.loadFailed'));
-    tx(retry, c.msg('grid.retry'));
-  };
+  /** The loading line or the failure (with Retry), one at a time, after the label (`lazy.ts`). The focus waits on the box while it loads again, and goes to the field when it comes. */
+  const n = notice(doc, box, () => (box.focus(), (want = ''), mount()), (w) => get().msg(w === 'load' ? 'filter.loadingDates' : 'filter.loadFailed'), () => get().msg('grid.retry'));
   /** The widget goes; what it held is kept for the next one (an operator changed). */
   const drop = (): void => {
     const p = field?.read();
     if (p) last = p;
     field?.destroy();
     field = null;
+    n.stop();
     while (box.lastChild !== label) box.lastChild!.remove();
-    box.removeAttribute('aria-busy');
   };
   const attach = (k: DateKit): void => {
     const focused = box.contains(doc.activeElement);
@@ -209,7 +170,7 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
   /** Said once: the same widget is not tried again until Retry (or another operator). */
   const fail = (err: unknown): void => {
     g().report(err);
-    say('fail');
+    n.say('fail');
   };
   /** The widget for the operator: none, the one in place, the kit's at once, or after it loads. */
   const mount = (): void => {
@@ -224,7 +185,7 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
     if (!k) return;
     const ready = env.done(k);
     if (ready) return attach(ready);
-    say('load');
+    n.say('load');
     env.load(k).then(
       (m) => !dead && want === w && attach(m),
       (err) => !dead && want === w && fail(err),
@@ -260,7 +221,7 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
       tx(label, name());
       tx(zname, c.msg('filter.zone'));
       tx(zid, c.ctx.timeZone);
-      words();
+      n.words();
       const k = key();
       if (field && k !== seen) (seen = k), field.update();
     },

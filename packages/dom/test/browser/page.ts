@@ -3,7 +3,9 @@
 // groups=1 puts the columns in groups (two levels) with the spans feature; filters=1&floating=1 the floating filter row;
 // filters=1&popup=1 the header's filter buttons and popup, with a boolean column (step 13);
 // dates=1 an instant column around Paris's two clock changes, the grid's zone (`zone`, Europe/Paris by default),
-// `numerals`, and a clock the runner can move (`t.offset`); dates=fail a date kit that never loads (step 14).
+// `numerals`, and a clock the runner can move (`t.offset`); dates=fail a date kit that never loads (step 14);
+// sets=1 a "Commune" column of 2 000 values asking for the value list (`filter.kind: 'set'`) and a
+// "Statut" enum column that does not (no button, owner Q2); setfail=1 a set chunk that never loads (step 15).
 import { createGrid } from '/packages/dom/src/index.ts';
 import { EN } from '/packages/dom/src/locales/en.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
@@ -22,7 +24,10 @@ document.documentElement.lang = locale;
 document.documentElement.dir = q.get('dir') ?? (locale.startsWith('ar') ? 'rtl' : 'ltr');
 if (q.get('theme')) document.documentElement.dataset['theme'] = q.get('theme')!;
 
-type Row = { id: number; name: string; city: string; amount: number; day: string; paid: boolean; at?: string };
+type Row = { id: number; name: string; city: string; amount: number; day: string; paid: boolean; at?: string; commune?: string | null; status?: string };
+const sets = q.get('sets');
+/** 2 000 place names (one row in 97 blank), Arabic ones in an Arabic grid. */
+const communeOf = (i: number) => (i % 97 === 0 ? null : locale.startsWith('ar') ? `بلدية ${i % 2000}` : `${i % 50 ? 'Commune' : 'Écart'} ${String(i % 2000).padStart(4, '0')}`);
 const dates = q.get('dates');
 // Every 15 minutes from 2026-10-18 (even rows) and from 2026-03-27 (odd rows), in UTC.
 const atOf = (i: number) => new Date(Date.UTC(2026, i % 2 ? 2 : 9, i % 2 ? 27 : 18) + Math.floor(i / 2) * 900_000).toISOString();
@@ -38,11 +43,16 @@ const rows: Row[] = Array.from({ length: N }, (_, i) => ({
   paid: i % 3 === 0,
   day: `2026-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
   ...(dates && { at: atOf(i) }),
+  ...(sets && { commune: communeOf(i), status: ['open', 'closed', 'held'][i % 3]! }),
 }));
 
 const columns = [
   { id: 'name', header: base === AR ? 'الاسم' : 'Nom', pinned: 'start' as const, width: 140 },
   { id: 'city', header: base === AR ? 'المدينة' : 'Ville', width: 130, headerTooltip: base === AR ? 'مدينة الإقامة' : 'Ville de résidence', ...(q.get('spans') && { merge: true as const }), ...(q.get('pin') && { pinned: 'start' as const }) },
+  ...(sets ? [
+    { id: 'commune', header: base === AR ? 'البلدية' : 'Commune', width: 150, filter: { kind: 'set' as const } },
+    { id: 'status', header: base === AR ? 'الحالة' : 'Statut', type: 'enum' as const, width: 110, enumOptions: [{ value: 'open', label: base === AR ? 'مفتوح' : 'Ouvert' }, { value: 'closed', label: base === AR ? 'مغلق' : 'Fermé' }, { value: 'held', label: base === AR ? 'معلق' : 'Suspendu' }] },
+  ] : []),
   { id: 'amount', header: base === AR ? 'المبلغ' : 'Montant', type: 'number' as const, width: 120 },
   { id: 'day', header: base === AR ? 'اليوم' : 'Jour', type: 'day' as const, width: 120 },
   ...(dates ? [{ id: 'at', header: base === AR ? 'الموعد' : 'Rendez-vous', type: 'instant' as const, width: 170 }] : []),
@@ -85,7 +95,7 @@ if (q.get('slots')) {
     }),
   };
 }
-const fail = dates === 'fail' && { loadDates: () => Promise.reject(new Error('the date kit is unreachable (dates=fail)')) };
+const fail = { ...(dates === 'fail' && { loadDates: () => Promise.reject(new Error('the date kit is unreachable (dates=fail)')) }), ...(q.get('setfail') && { loadSet: () => Promise.reject(new Error('the set chunk is unreachable (setfail=1)')) }) };
 if (withFilters) features.push((await import('/packages/dom/src/filters.ts')).filters({ floating: q.get('floating') === '1', popup: q.get('popup') === '1', ...fail }) as never);
 // The clock the date shortcuts count from: the machine's, moved by `t.offset` (ms).
 const clock = { offset: 0 };

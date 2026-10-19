@@ -28,13 +28,13 @@ export const FILTERS_CSS =
   ':where(.dzg-fdate){display:grid;gap:2px}' +
   '.dzg-fpop .tz-field,.dzg-fpop .tz-field__trigger{inline-size:100%;min-inline-size:0}';
 
-/** Once per document or shadow root, like the base's; a host with a strict CSP passes its nonce or loads it itself. */
-export function injectFilterStyles(target: Document | ShadowRoot, nonce?: string): void {
-  if (target.querySelector('style[data-dzgrid-filters]')) return;
+/** Once per document or shadow root, like the base's; a host with a strict CSP passes its nonce or loads it itself. `css` and `id`: a lazy chunk's own sheet (step 15). */
+export function injectFilterStyles(target: Document | ShadowRoot, nonce?: string, css = FILTERS_CSS, id = 'data-dzgrid-filters'): void {
+  if (target.querySelector(`style[${id}]`)) return;
   const doc = 'createElement' in target ? target : target.ownerDocument;
   const style = doc.createElement('style');
-  style.setAttribute('data-dzgrid-filters', '');
+  style.setAttribute(id, '');
   if (nonce) style.setAttribute('nonce', nonce);
-  style.textContent = FILTERS_CSS;
+  style.textContent = css;
   ('head' in target ? target.head : target).append(style);
 }

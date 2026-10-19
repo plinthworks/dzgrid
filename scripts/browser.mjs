@@ -316,6 +316,152 @@ async function dateChecks(name, ctx) {
   }
 }
 
+/** Step 15: the value list (docs/behaviors/filter-set.md): 2 000 values, windowed, keys, RTL, forced colours. */
+async function setChecks(name, ctx) {
+  const cases = [
+    ['locale=fr-FR&theme=light&rows=4000&filters=1&popup=1&sets=1', false, 'Filtre Commune'],
+    ['locale=ar-DZ&dir=rtl&theme=dark&rows=4000&filters=1&popup=1&sets=1', true, 'مرشح البلدية'],
+  ];
+  const S = (page) => page.evaluate(() => {
+    const pop = document.querySelector('.dzg-popup');
+    const list = pop?.querySelector('[role=listbox]');
+    const opts = [...(list?.querySelectorAll('[role=option]') ?? [])];
+    const a = document.activeElement;
+    return {
+      open: !!pop, label: pop?.getAttribute('aria-label'), layer: !!pop?.matches(':popover-open'), options: opts.length, nodes: pop?.querySelectorAll('*').length ?? 0,
+      setsize: opts[0]?.getAttribute('aria-setsize'), active: a?.getAttribute('role') === 'option' ? Number(a.getAttribute('aria-posinset')) : null,
+      inPopup: !!pop?.contains(a), status: pop?.querySelector('.dzg-fstatus')?.textContent ?? null,
+      listH: list?.getBoundingClientRect().height, rect: pop && (({ left, right, top, bottom }) => ({ left, right, top, bottom }))(pop.getBoundingClientRect()),
+    };
+  });
+  const openOn = async (page, c) => {
+    const ms = await page.evaluate(async (c) => {
+      const t0 = performance.now();
+      document.querySelector(`.dzg-hcell[role=columnheader][data-col="${c}"] > .dzg-fbtn`).click();
+      while (!document.querySelector('.dzg-popup [role=option]')) await new Promise((r) => requestAnimationFrame(r));
+      await new Promise((r) => requestAnimationFrame(r));
+      return performance.now() - t0;
+    }, c);
+    await frames(page);
+    return ms;
+  };
+  for (const [qs, rtl, popName] of cases) {
+    const { page, errors } = await load(ctx, qs);
+    const tag = `sets ${qs}`;
+    const noButton = await page.evaluate(() => !document.querySelector('.dzg-hcell[data-col="status"] > .dzg-fbtn') && !!document.querySelector('.dzg-hcell[data-col="commune"] > .dzg-fbtn'));
+    check(name, `${tag}: the explicit set column has a filter button, the enum column none (owner Q2)`, noButton);
+    // First open loads the chunk; the second is the one timed.
+    await openOn(page, 'commune');
+    await page.keyboard.press('Escape');
+    const ms = await openOn(page, 'commune');
+    const s0 = await S(page);
+    let v = await axe(page);
+    console.log(`note ${name}: ${tag}: open with ~2 000 values ${ms.toFixed(1)} ms, ${s0.options} options, ${s0.nodes} nodes in the popup`);
+    check(name, `${tag}: the popup (${popName}) opens in the top layer, ≤ 40 options drawn of ${s0.setsize}, axe 0`, s0.open && s0.label === popName && s0.layer && s0.options <= 40 && Number(s0.setsize) >= 1990 && v.length === 0, { s0, v });
+    // The list scrolled half way: axe 0, the options there.
+    await page.evaluate(() => { const l = document.querySelector('.dzg-popup [role=listbox]'); l.scrollTop = l.scrollHeight / 2; });
+    await frames(page);
+    v = await axe(page);
+    const mid = await page.evaluate(() => [...document.querySelectorAll('.dzg-popup [role=option]')].map((o) => Number(o.getAttribute('aria-posinset'))));
+    check(name, `${tag}: scrolled half way, the options there are drawn (posinset ~1 000), axe 0`, mid.some((p) => p > 900 && p < 1100) && mid.length <= 40 && v.length === 0, { mid: mid.slice(0, 5), v });
+    // Keys: into the list, End, then back Home and PageDown to the end.
+    await page.focus('.dzg-popup input.dzg-fsearch');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('End');
+    const atEnd = await S(page);
+    await page.keyboard.press('Home');
+    let pd = 0;
+    for (; pd < 400 && (await S(page)).active < Number(atEnd.setsize); pd++) await page.keyboard.press('PageDown');
+    const walked = await S(page);
+    check(name, `${tag}: End reaches the last option; PageDown walks there too (${pd} presses), the focus kept on an option`, atEnd.active === Number(atEnd.setsize) && walked.active === Number(atEnd.setsize) && walked.inPopup, { atEnd, walked, pd });
+    // The focused option kept while the wheel scrolls far away.
+    await page.keyboard.press('Home');
+    const box = await page.evaluate(() => { const r = document.querySelector('.dzg-popup [role=listbox]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    await page.mouse.move(box.x, box.y);
+    for (let i = 0; i < 10; i++) await page.mouse.wheel(0, 2000);
+    await frames(page, 3);
+    const kept = await page.evaluate(() => ({ role: document.activeElement?.getAttribute('role'), pos: document.activeElement?.getAttribute('aria-posinset'), on: document.activeElement?.isConnected }));
+    await page.keyboard.press('ArrowDown');
+    const next = await S(page);
+    check(name, `${tag}: after a long wheel scroll the focused option is still there and focused; ArrowDown goes to 2`, kept.role === 'option' && kept.pos === '1' && kept.on && next.active === 2, { kept, next });
+    // Row geometry: 1.75rem rows, ≥ 24 px, one under the other; RTL: the box at the inline start (right).
+    const geo = await page.evaluate(() => {
+      const o = [...document.querySelectorAll('.dzg-popup [role=option]')].sort((a, b) => a.getAttribute('aria-posinset') - b.getAttribute('aria-posinset'));
+      const a = o[0].getBoundingClientRect(), b = o[1].getBoundingClientRect();
+      const bx = o[0].querySelector('.dzg-box').getBoundingClientRect(), ct = o[0].querySelector('.dzg-fcount').getBoundingClientRect();
+      return { h: a.height, step: b.top - a.top, boxLeft: bx.left - a.left, boxRight: a.right - bx.right, countLeft: ct.left - a.left, countRight: a.right - ct.right };
+    });
+    const sideOk = rtl ? geo.boxRight < geo.boxLeft && geo.countLeft < geo.countRight : geo.boxLeft < geo.boxRight && geo.countRight < geo.countLeft;
+    check(name, `${tag}: rows ≥ 24 px, placed one under the other; the box at the inline start, the count at the end${rtl ? ' (right to left)' : ''}`, geo.h >= 24 && Math.abs(geo.step - geo.h) < 1 && sideOk, geo);
+    // Forced colours: a ticked option keeps its check mark (a glyph), an unticked one has none.
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.keyboard.press('Home');
+    await page.keyboard.press(' ');
+    const fc = await page.evaluate(() => {
+      const o = [...document.querySelectorAll('.dzg-popup [role=option]')];
+      const mark = (x) => x && getComputedStyle(x.querySelector('.dzg-box'), '::before').content;
+      return { on: mark(o.find((x) => x.getAttribute('aria-selected') === 'true')), off: mark(o.find((x) => x.getAttribute('aria-selected') === 'false')) };
+    });
+    check(name, `${tag}: forced colours: the ticked box shows its check mark, the unticked none`, fc.on === '"✓"' && (fc.off === 'none' || fc.off === 'normal'), fc);
+    await page.screenshot({ path: `${OUT}/${name}-sets-${qs.replace(/[&=]/g, '_')}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    await page.emulateMedia({ forcedColors: 'none' });
+    await page.keyboard.press('Escape');
+    // Twice the root font (the rows are rem): measured again on the next open, still one under the other.
+    await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; });
+    await openOn(page, 'commune');
+    const big = await page.evaluate(() => {
+      const o = [...document.querySelectorAll('.dzg-popup [role=option]')].sort((a, b) => a.getAttribute('aria-posinset') - b.getAttribute('aria-posinset'));
+      const a = o[0].getBoundingClientRect(), b = o[1].getBoundingClientRect();
+      return { h: a.height, step: b.top - a.top };
+    });
+    check(name, `${tag}: at twice the root font the rows grow (≥ 48 px) and do not overlap`, big.h >= 48 && Math.abs(big.step - big.h) < 1, big);
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => { document.documentElement.style.fontSize = ''; });
+    check(name, `no page error ${tag}`, errors.length === 0, errors);
+    await page.close();
+  }
+  // Arabic-Indic digits in the counts (ar-EG, numerals=locale).
+  {
+    const { page, errors } = await load(ctx, 'locale=ar-EG&dir=rtl&rows=4000&filters=1&popup=1&sets=1&numerals=locale');
+    await openOn(page, 'commune');
+    const c = await page.evaluate(() => document.querySelector('.dzg-popup .dzg-fcount')?.getAttribute('data-n'));
+    check(name, 'sets ar-EG numerals=locale: the counts in Arabic-Indic digits', /^[٠-٩]+$/.test(c ?? ''), c);
+    check(name, 'no page error sets ar-EG', errors.length === 0, errors);
+    await page.close();
+  }
+  // A chunk that arrives late, then setfail=1.
+  {
+    const { page, errors } = await load(ctx, 'locale=fr-FR&rows=400&filters=1&popup=1&sets=1');
+    let release;
+    const late = new Promise((r) => (release = r));
+    await page.route('**/filters/set/index.js', async (route) => { await late; await route.continue(); });
+    await page.click('.dzg-hcell[role=columnheader][data-col="commune"] > .dzg-fbtn');
+    await frames(page);
+    const loading = await page.evaluate(() => ({ text: document.querySelector('.dzg-popup .dzg-fset [role=status]')?.textContent, busy: document.querySelector('.dzg-popup .dzg-fset')?.getAttribute('aria-busy') }));
+    const v = await axe(page);
+    release();
+    await page.waitForSelector('.dzg-popup [role=option]', { timeout: 15000 });
+    await frames(page);
+    const s = await S(page);
+    const inWin = s.rect.top >= 0 && s.rect.bottom <= 760 && s.rect.left >= 0 && s.rect.right <= 1000;
+    check(name, 'sets: a late chunk shows the loading line (aria-busy, axe 0), then the list, the popup placed again inside the window', loading.text === 'Chargement…' && loading.busy === 'true' && v.length === 0 && inWin, { loading, v, s });
+    check(name, 'no page error sets late chunk', errors.length === 0, errors);
+    await page.close();
+  }
+  {
+    const { page, errors } = await load(ctx, 'locale=ar-DZ&dir=rtl&theme=dark&rows=400&filters=1&popup=1&sets=1&setfail=1');
+    await page.click('.dzg-hcell[role=columnheader][data-col="commune"] > .dzg-fbtn');
+    await page.waitForSelector('.dzg-popup .dzg-fset [role=alert]', { timeout: 10000 });
+    const alert = await page.evaluate(() => document.querySelector('.dzg-popup [role=alert]')?.textContent);
+    const v = await axe(page);
+    await page.keyboard.press('Escape');
+    const closed = await page.evaluate(() => !document.querySelector('.dzg-popup'));
+    check(name, 'setfail=1 (ar, dark): the failure said in Arabic with Retry, axe 0, Escape closes', alert?.startsWith('تعذر') && v.length === 0 && closed, { alert, v, closed });
+    check(name, 'no page error setfail=1', errors.filter((e) => !/unreachable/.test(e)).length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -642,6 +788,7 @@ async function runEngine(name) {
 
     // ---- date filters on tzslot (step 14 part B): fr light Europe/Paris, ar right to left dark ----
     if (name === 'chrome') await dateChecks(name, ctx);
+    if (name === 'chrome') await setChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

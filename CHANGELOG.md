@@ -12,6 +12,25 @@ architecture, the core's seed (row identities, calendar days apart from
 instants, the bounds of a day in a zone), conformance cases written by hand,
 and ten spikes in three browser engines.
 
+### Changed — breaking (Phase 3, step 15: the value-list filter)
+
+- `filters()` now needs 8 more texts, in the filter bundles `@dzgrid/dom/locales/{en,fr,ar}-filters`:
+  `filter.set.search`, `filter.set.all`, `filter.set.allShown`, `filter.set.blanks`,
+  `filter.set.option`, `filter.set.count`, `filter.set.truncated`, `filter.set.failed` (loading and
+  Retry reuse the base's `grid.loading` and `grid.retry`). A host that spreads the shipped bundles
+  has nothing to do; a host with its own filter texts must add them, or `filters()` throws a
+  `TypeError` naming each missing key when the grid is made.
+
+### Added (step 15)
+
+- The value-list filter in the popup (`@dzgrid/dom/filters`, part `filter.set`): a search box, a
+  status line, select all (shown), blanks, and an always windowed `listbox` of up to 2 000 values
+  with their counts, keyboard and type-ahead; live with a pause in the browser, a draft sent at
+  Apply on a server; the column's `enumOptions` when a source has no `values`. Only for a column
+  that asks for it with `filter: { kind: 'set' }`: enum columns keep their behaviour (no button by
+  default). Loaded on first use (a lazy chunk); option `filters({ loadSet })`.
+- The `filter` part context gains `values(o?)`, the column's `kernel.values` handle.
+
 ### Changed — breaking (Phase 3, step 14: date filters on tzslot)
 
 - `filters()` now needs 13 more texts, in the filter bundles `@dzgrid/dom/locales/{en,fr,ar}-filters`:

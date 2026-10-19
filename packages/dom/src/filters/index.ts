@@ -10,6 +10,7 @@ import { floatingRow } from './floating.js';
 import { booleanForm, numberForm, textForm } from './forms.js';
 import { numberPart, textPart } from './inputs.js';
 import { menu, type Menu } from './menu.js';
+import { setForm, setKit, type SetKit } from './set.js';
 import { resolver } from './resolve.js';
 import { injectFilterStyles } from './styles.js';
 import { summaryPart } from './summary.js';
@@ -29,6 +30,8 @@ export interface FiltersOptions {
   readonly loadDates?: (kit: DateKitName) => Promise<DateKit>;
   /** tzslot's words for a language beyond English, French and Arabic, or over them: `{ es: {...} }` (its `TzslotMessages`, in part). */
   readonly dateMessages?: Readonly<Record<string, object>>;
+  /** Advanced (step 15): where the set filter's chunk comes from, instead of DzGrid's own `import()` (as `loadDates`). */
+  readonly loadSet?: () => Promise<SetKit>;
 }
 
 /** The feature, with the popup's handles (owner decision O6: here, not on the grid). */
@@ -46,6 +49,7 @@ export const FILTER_KEYS = [
   'filter.popupLabel', 'header.withFilter', 'filter.op', 'filter.value', 'filter.valueTo', 'filter.apply',
   ...OPS.map((o) => `filter.op.${o}` as const), 'filter.all', 'filter.yes', 'filter.no',
   'filter.date', 'filter.dateTime', 'filter.period', 'filter.zone', 'filter.loadingDates', 'filter.loadFailed',
+  ...(['search', 'all', 'allShown', 'blanks', 'option', 'count', 'truncated', 'failed'] as const).map((k) => `filter.set.${k}` as const),
 ] satisfies readonly FilterMessageKey[];
 
 /**
@@ -65,37 +69,41 @@ export function filters(o: FiltersOptions = {}): FiltersFeature {
   let popup: Menu | null = null;
   const env: DateEnv = { g: null, ...kits(o.loadDates), ...(o.dateMessages && { messages: o.dateMessages }) };
   const d = dateForms(env);
+  const sets = setKit(o.loadSet);
+  const set = setForm(env, sets);
   return {
     id: 'filters',
     parts: {
       'floating.text': { slot: 'floating', part: textPart }, 'floating.number': { slot: 'floating', part: numberPart }, floating: { slot: 'floating', part: summaryPart },
       'filter.text': { slot: 'filter', part: textForm }, 'filter.number': { slot: 'filter', part: numberForm }, 'filter.boolean': { slot: 'filter', part: booleanForm },
-      'filter.day': { slot: 'filter', part: d.day }, 'filter.instant': { slot: 'filter', part: d.instant },
+      'filter.day': { slot: 'filter', part: d.day }, 'filter.instant': { slot: 'filter', part: d.instant }, 'filter.set': { slot: 'filter', part: set },
     },
-    setup: (g) => setup(g, o, (m) => (popup = m), env),
+    setup: (g) => setup(g, o, (m) => (popup = m), env, set, () => void sets.load('').catch(() => {})),
     openFilter: (column) => !!popup?.open(column),
     closeFilter: () => popup?.close(),
   };
 }
 
-function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => void, env: DateEnv): FeatureHandle {
+function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => void, env: DateEnv, set: object, fetchSet: () => void): FeatureHandle {
   env.g = g;
   const missing = FILTER_KEYS.filter((k) => g.settings.messages.text[k] === undefined);
   if (missing.length) throw new TypeError(`filters: missing ${missing.join(', ')}`);
   const root = g.el.root.getRootNode();
   if (g.settings.injectStyles !== false) injectFilterStyles(root.nodeType === 11 ? (root as ShadowRoot) : g.doc, g.settings.nonce);
   const quiet = announceFilters(g);
-  const resolve = resolver(g, o);
+  const resolve = resolver(g, o, set);
   const commit = committer(g, o);
   const popup = menu(g, resolve, commit, o.popup !== false);
   keep(popup);
   const row = floatingRow(g, o, resolve, commit, popup);
-  // The date kit fetched ahead: the pointer over a date column's button, the focus on its header.
+  // The date kit (or the set chunk) fetched ahead: the pointer over the column's button, the focus on its header.
   const ahead = (e: Event): void => {
     const t = e.target as HTMLElement;
     const col = g.columns.get(t.closest<HTMLElement>('.dzg-hcell')?.dataset['col'] ?? '');
     const kind = col && popup.can(col) && resolve(col, 'filter').kind;
-    if ((kind === 'day' || kind === 'instant') && (e.type === 'focusin' || t.closest('.dzg-fbtn'))) env.load('date').catch(() => {});
+    if (e.type !== 'focusin' && !t.closest('.dzg-fbtn')) return;
+    if (kind === 'day' || kind === 'instant') env.load('date').catch(() => {});
+    else if (kind === 'set') fetchSet();
   };
   g.scope.on(g.el.header, 'pointerover', ahead);
   g.scope.on(g.el.header, 'focusin', ahead);

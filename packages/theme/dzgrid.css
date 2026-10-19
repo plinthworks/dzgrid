@@ -160,6 +160,7 @@
 }
 
 .dzg-row[aria-selected=true] .dzg-box,
+.dzg-fopt[aria-selected=true] .dzg-box,
 .dzg-box[aria-checked=true],
 .dzg-box[aria-checked=mixed] {
   border-color: var(--tz-accent);
@@ -167,6 +168,7 @@
 }
 
 .dzg-row[aria-selected=true] .dzg-box::before,
+.dzg-fopt[aria-selected=true] .dzg-box::before,
 .dzg-box[aria-checked=true]::before {
   content: "✓";
 }
@@ -284,6 +286,28 @@
 
 [data-dzg-filtered] > .dzg-fbtn::after {
   content: none;
+}
+
+.dzg-flist {
+  border: 1px solid var(--tz-border);
+  border-radius: var(--dzg-radius, 0.375rem);
+}
+
+.dzg-fopt:hover {
+  background: var(--dzg-row-hover-bg, color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg)));
+}
+
+.dzg-fcount,
+.dzg-flist[aria-busy=true] .dzg-fopt {
+  color: var(--tz-fg-muted);
+}
+
+.dzg-flistw > p {
+  background: var(--tz-bg);
+}
+
+.dzg-fopt:focus-visible {
+  outline-offset: -2px;
 }
 
 .dzg-popup .tz-field__panel {

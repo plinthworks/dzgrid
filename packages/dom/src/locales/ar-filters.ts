@@ -45,5 +45,13 @@ export const AR_FILTERS = {
     'filter.zone': "المنطقة الزمنية",
     'filter.loadingDates': "جار تحميل التقويم\u2026",
     'filter.loadFailed': "تعذر تحميل التقويم. أعد المحاولة\u060C أو أعد تحميل الصفحة.",
+    'filter.set.search': "البحث في القيم",
+    'filter.set.all': "تحديد الكل",
+    'filter.set.allShown': "تحديد كل المعروض",
+    'filter.set.blanks': "(فارغ)",
+    'filter.set.option': "{label}\u060C {rows}",
+    'filter.set.count': { zero: "{n} قيمة", one: "قيمة واحدة ({n})", two: "قيمتان ({n})", few: "{n} قيم", many: "{n} قيمة", other: "{n} قيمة" },
+    'filter.set.truncated': "أول {n} قيمة. ضيّق البحث.",
+    'filter.set.failed': "تعذر تحميل القيم. أعد المحاولة\u060C أو أعد تحميل الصفحة.",
   },
 } satisfies FilterMessages;
