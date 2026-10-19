@@ -23,7 +23,7 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 13 — fenêtre de filtre (texte, nombre, oui/non), marque « filtré », Alt+Flèche bas | fait, relu, testé | `f67fc48`, `67782bc` |
 | 14 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 14 (filtres de dates : `filter.day` et `filter.instant` avec le sélecteur natif), architecte d'abord. Étape 13 close (`f67fc48`, corrections `67782bc`) : suite 2 804 tests, navigateur 191 ; filters 6 417 / 7 000 (hors popup), popup 1 428, dom 18 702. Décision L1 (chef) : dans la fenêtre, un brouillon incomplet (entre avec une borne, valeur vide) garde le filtre en place jusqu'à Effacer ; la ligne de filtres, elle, efface quand on vide la case. À faire par le propriétaire : l'écoute au lecteur d'écran (protocole a11y §8 et §9) ; relecture des textes arabes des filtres.
+En cours : l'étape 14 (filtres de dates avec tzslot, raccourcis relatifs « aujourd'hui », « 7 derniers jours »…), plan `docs/phase-3-steps/step14-tzslot-blueprint.md` (remplace les champs du premier plan `step14-dates-blueprint.md`), décisions `step14-decisions.md` (propriétaire, 2026-10-19 : tzslot seule case de date, complément facultatif installé seulement avec des dates, chargé à la première ouverture ; six raccourcis ; cœur 26 900, filters 8 500, adaptateurs dates 2 600, textes 680 / 760 / 850, thème 1 660 ; hors ligne : message + Réessayer). Implémentation lancée, tests d'abord. Demandes pour tzslot (T1 nom accessible de la case avec la date, T8 Échap, T3 complément Temporal 23 kB…) dans le plan §6. À faire par le propriétaire : écoute lecteur d'écran (§8, §9), relecture arabe.
 
 ## Les plans détaillés des étapes
 
