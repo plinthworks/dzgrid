@@ -9,6 +9,7 @@ export const AR = {
     'grid.noMatches': "لا توجد صفوف مطابقة للمرشحات",
     'grid.loading': "جار التحميل\u2026",
     'grid.error': "تعذر تحميل البيانات",
+    'grid.retry': "إعادة المحاولة",
     'sort.ascending': "تصاعدي",
     'sort.descending': "تنازلي",
     'sort.none': "غير مرتب",

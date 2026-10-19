@@ -18,13 +18,14 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
 | 9b — fusions de cellules (rowspan / colspan) | fait, relu, testé (4 commits et leurs corrections) | `f4c63f6` |
 | 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | fait, relu, testé | `5aebe99` |
-| 11 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
+| 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | écrit, suite verte, navigateur vert ; pas encore commité ni relu | — |
+| 12 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 11 (en-tête, voile avec « Réessayer », bulle d'aide remplaçables), plan `docs/phase-3-steps/step11-slots-blueprint.md`, décisions `step11-decisions.md` (propriétaire, 2026-10-19 : module à part `@dzgrid/dom/slots` 1 300 o, base dom 18 600, langues en 560 / fr 680 / ar 870, thème 1 280). Implémentation lancée, tests d'abord.
+En cours : l'étape 11 est écrite (plan `docs/phase-3-steps/step11-slots-blueprint.md`, décisions `step11-decisions.md`) : suite 153 fichiers, 2 561 tests ; navigateur 89 vérifications ; 17 mutants, 16 tués, 1 équivalent. Reste : relecture de code et analyse des tests, puis commit.
 
 ## Les plans détaillés des étapes
 
-`docs/phase-3-steps/` garde les plans validés (architecte + décisions) des étapes 5 à 9 : ce qu'un agent a reçu pour écrire l'étape. Ils servent à comprendre pourquoi le code est ainsi, et à reprendre une étape interrompue.
+`docs/phase-3-steps/` garde les plans validés (architecte + décisions) des étapes 5 à 11 : ce qu'un agent a reçu pour écrire l'étape. Ils servent à comprendre pourquoi le code est ainsi, et à reprendre une étape interrompue.
 
 ## Comment on travaille (règles du propriétaire)
 
@@ -52,11 +53,12 @@ En cours : l'étape 11 (en-tête, voile avec « Réessayer », bulle d'aide remp
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 564 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 425 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 363 |
-| `@dzgrid/dom` | 18 000 (fusions) | 17 989 |
+| `@dzgrid/dom` | 18 600 (étape 11) | 18 383 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 473 |
+| `@dzgrid/dom/slots` | 1 300 (étape 11) | 1 279 |
 | `@dzgrid/dom/popup` | 1 500 | ~1 390 |
-| langues en / fr / ar | 540 / 660 / 850 | 511 / 623 / 801 |
-| thème | 1 180 | 1 152 |
+| langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
+| thème | 1 280 (bouton « Réessayer ») | 1 199 |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 

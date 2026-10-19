@@ -107,6 +107,52 @@ async function runEngine(name) {
       }
     }
 
+    // ---- the retry button on the error overlay (step 11), in fr and in ar right to left ----
+    if (name === 'chrome') {
+      for (const [qs, label] of [['locale=fr-FR&rows=200', 'Réessayer'], ['locale=ar-DZ&dir=rtl&rows=200&theme=dark', 'إعادة المحاولة']]) {
+        const { page, errors } = await load(ctx, qs);
+        await page.evaluate(() => {
+          const k = window.t.grid.kernel;
+          window.t.sent = [];
+          const dispatch = k.dispatch.bind(k);
+          k.dispatch = (cmd, source) => { window.t.sent.push(`${cmd.type}:${source}`); return dispatch(cmd, source); };
+          window.t.grid.update({ overlay: 'error' });
+        });
+        await frames(page);
+        const v = await axe(page);
+        const b = await page.evaluate(() => {
+          const btn = document.querySelector('.dzg-overlay button');
+          if (!btn) return null;
+          const r = btn.getBoundingClientRect();
+          const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          return { text: btn.textContent, type: btn.type, inGrid: !!btn.closest('[role=grid]'), w: r.width, h: r.height, hit: hit === btn || btn.contains(hit), dir: getComputedStyle(btn).direction };
+        });
+        check(name, `retry ${qs}: axe 0 violations with the error overlay and its button`, v.length === 0 && b, { v, b });
+        check(name, `retry ${qs}: a native button named ${label}, outside role grid, at least 24 px, on top under the pointer`, b && b.text === label && b.type === 'button' && !b.inGrid && b.w >= 24 && b.h >= 24 && b.hit && b.dir === (qs.includes('rtl') ? 'rtl' : 'ltr'), b);
+        // Tab from the grid's focused cell reaches the button; Enter presses it; the focus comes back to the cell.
+        await page.evaluate(() => window.t.grid.api.focusCell(window.t.key(3), 'city'));
+        await frames(page);
+        await page.keyboard.press('Tab');
+        const onButton = await page.evaluate(() => document.activeElement === document.querySelector('.dzg-overlay button'));
+        check(name, `retry ${qs}: Tab from the grid reaches the button`, onButton, null);
+        await page.keyboard.press('Enter');
+        await frames(page);
+        const after = await page.evaluate(() => ({ sent: window.t.sent, col: document.activeElement?.dataset?.col ?? null, row: document.activeElement?.closest('.dzg-row')?.getAttribute('aria-rowindex') ?? null }));
+        check(name, `retry ${qs}: Enter dispatches rows.refresh as the user and the focus goes back to the cell`, after.sent.includes('rows.refresh:user') && after.col === 'city' && after.row === '5', after);
+        // No trap: Tab leaves the button for what follows it, Shift+Tab goes back into the grid.
+        await page.evaluate(() => document.querySelector('.dzg-overlay button').focus());
+        await page.keyboard.press('Tab');
+        const out = await page.evaluate(() => document.activeElement?.id);
+        await page.evaluate(() => document.querySelector('.dzg-overlay button').focus());
+        await page.keyboard.press('Shift+Tab');
+        const back = await page.evaluate(() => !!document.activeElement?.closest('[role=grid]'));
+        check(name, `retry ${qs}: no focus trap (Tab leaves forward, Shift+Tab back into the grid)`, out === 'after' && back, { out, back });
+        await page.screenshot({ path: `${OUT}/${name}-retry-${qs.replace(/[&=]/g, '_')}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+        check(name, `no page error retry ${qs}`, errors.length === 0, errors);
+        await page.close();
+      }
+    }
+
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.
     // And under grouped headers (step 9b, commit 4): LTR, RTL, pinned, with the box.

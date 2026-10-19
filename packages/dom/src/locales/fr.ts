@@ -9,6 +9,7 @@ export const FR = {
     'grid.noMatches': "Aucune ligne ne correspond aux filtres",
     'grid.loading': "Chargement\u2026",
     'grid.error': "Les données n\u2019ont pas pu être chargées",
+    'grid.retry': "Réessayer",
     'sort.ascending': "ordre croissant",
     'sort.descending': "ordre décroissant",
     'sort.none': "non trié",

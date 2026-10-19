@@ -38,6 +38,9 @@
       "@dzgrid/dom/spans": [
         "./packages/dom/src/spans.ts"
       ],
+      "@dzgrid/dom/slots": [
+        "./packages/dom/src/slots.ts"
+      ],
       "@dzgrid/dom/locales/*": [
         "./packages/dom/src/locales/*.ts"
       ],

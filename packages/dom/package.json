@@ -17,6 +17,10 @@
       "types": "./src/spans.ts",
       "default": "./src/spans.ts"
     },
+    "./slots": {
+      "types": "./src/slots.ts",
+      "default": "./src/slots.ts"
+    },
     "./locales/en": {
       "types": "./src/locales/en.ts",
       "default": "./src/locales/en.ts"

@@ -1,5 +1,7 @@
 import type { GridContext } from './context.js';
-import type { FocusPos, Intent, RowKey } from '@dzgrid/core';
+import type { FocusPos, Intent, ResolvedColumn, RowKey } from '@dzgrid/core';
+import type { OverlayState } from './render/overlay.js';
+import type { TipFor } from './render/tooltip.js';
 import type { Goal, Move, MoveShape, SpanLookup } from './keys/move.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { Frame, RowSpans } from './render/rows.js';
@@ -23,6 +25,8 @@ export interface FeatureHandle {
   readonly bands?: readonly HeaderBandSpec[];
   /** Cells spanning rows and columns (the spans feature): the first feature giving them wins. */
   readonly spans?: SpanFeature;
+  /** Header, overlay and tooltip drawn by parts (the slots feature): the first feature giving them wins. */
+  readonly slots?: SlotDrivers;
   /** Runs at each paint once the rows are placed (what is drawn over them). */
   afterRows?(f: Frame<unknown>): void;
   destroy(): void;
@@ -45,4 +49,17 @@ export interface SpanFeature extends RowSpans {
   at(x: MouseEvent | RowKey): RowKey | undefined;
   /** Rows to keep mounted besides the window (the origins of tall cells reaching into it). */
   anchors(first: number, last: number): readonly RowKey[];
+}
+
+/**
+ * Where a host's parts take over the base's own header label, overlay and tooltip
+ * (`@dzgrid/dom/slots`). Each says whether a part drew it; false, the grid draws its own.
+ */
+export interface SlotDrivers {
+  /** A column header's label (`.dzg-hlabel`), at each paint of its cell. */
+  header(col: ResolvedColumn<unknown>, label: HTMLElement): boolean;
+  /** The overlay's state at each paint; null: hidden (a part there is destroyed). */
+  overlay(state: OverlayState | null): boolean;
+  /** The tooltip being shown; null: hidden (a part there is destroyed). */
+  tooltip(tip: TipFor | null): boolean;
 }

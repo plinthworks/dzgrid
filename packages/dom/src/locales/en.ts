@@ -9,6 +9,7 @@ export const EN = {
     'grid.noMatches': "No rows match the filters",
     'grid.loading': "Loading\u2026",
     'grid.error': "The data could not be loaded",
+    'grid.retry': "Retry",
     'sort.ascending': "ascending",
     'sort.descending': "descending",
     'sort.none': "not sorted",

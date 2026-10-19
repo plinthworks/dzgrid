@@ -176,8 +176,25 @@
 }
 
 .dzg-overlay {
+  gap: 0.5rem;
   color: var(--tz-fg-muted);
   background: var(--tz-bg);
+}
+
+.dzg-overlay button {
+  min-block-size: 2rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--tz-fg-muted);
+  border-radius: var(--dzg-radius, 0.375rem);
+  color: var(--tz-fg);
+  background: var(--dzg-header-bg, var(--tz-bg-raised));
+  font: inherit;
+  cursor: pointer;
+}
+
+.dzg-overlay button:focus-visible {
+  outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+  outline-offset: 2px;
 }
 
 .dzg[data-stale] .dzg-row,

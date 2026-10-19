@@ -1,4 +1,4 @@
-import type { LocaleCtx, PartSlot, ResolvedColumn, RowKey } from '@dzgrid/core';
+import type { LocaleCtx, PartSlot, Problem, ResolvedColumn, RowKey, SortItem } from '@dzgrid/core';
 import type { AppMessageKey, MessageKey } from './messages.js';
 
 /**
@@ -42,6 +42,38 @@ export interface SlotContext {
     /** The grid's focus is on this cell. */
     readonly focused: boolean;
   };
+  /** A column header's label (`@dzgrid/dom/slots`): the grid keeps the role, the sort state, the mark and the grip. */
+  header: PartBase & {
+    readonly column: ResolvedColumn<unknown>;
+    /** The column's `header`, or its id. */
+    readonly label: string;
+    /** This column's place in the sort, or null. */
+    readonly sort: SortItem | null;
+    /** Its precedence in the sort, from 0, or null. */
+    readonly sortIndex: number | null;
+    /** Sorts by this column as the user would (`multi`: adds to the sort, as Shift does). */
+    toggleSort(multi: boolean): void;
+  };
+  /** The overlay (`@dzgrid/dom/slots`). */
+  overlay: PartBase & {
+    readonly phase: 'loading' | 'empty' | 'no-match' | 'error';
+    /** What the server's fetch failed with; null outside an error. */
+    readonly failure: unknown;
+    /** Asks for the rows again, puts the focus back on the grid and says it loads (the retry button's). */
+    retry(): void;
+    /** Empties every column filter and the quick search, as the user. */
+    clearFilters(): void;
+  };
+  /** The tooltip, shown only when the host gave text (`@dzgrid/dom/slots`). */
+  tooltip: PartBase & {
+    /** The host's text (`headerTooltip`, `tooltip(value, row)`). */
+    readonly text: string;
+    /** The cell's value as the column's codec reads it; null for a header. */
+    readonly value: unknown;
+    /** The cell's row; null for a header. */
+    readonly row: Readonly<unknown> | null;
+    readonly column: ResolvedColumn<unknown>;
+  };
 }
 
 export type WiredSlot = keyof SlotContext;
@@ -55,5 +87,9 @@ export interface SlotPart<S extends WiredSlot = WiredSlot> {
 export function definePart<S extends WiredSlot>(slot: S, part: Part<SlotContext[S]>): SlotPart<S> {
   return { slot, part };
 }
+
+/** Header, overlay and tooltip parts given to a grid without `slots()`: told, one warning each. */
+export const unslotted = (parts: Readonly<Record<string, SlotPart>> = {}): Problem[] =>
+  Object.keys(parts).filter((n) => parts[n]!.slot !== 'cell').map((n) => ({ code: 'missing-feature', severity: 'warning', path: `parts.${n}`, detail: 'slots' }));
 
 export type { PartSlot };

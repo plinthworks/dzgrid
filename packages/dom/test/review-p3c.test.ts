@@ -341,7 +341,7 @@ describe('the tooltip in the top layer', () => {
       const anchor = document.createElement('span');
       document.body.append(el, anchor);
       const tip = new Tooltip(el, new Scope());
-      tip.showFor(anchor, 'Hello', 'ltr', 0);
+      tip.showFor(anchor, { text: 'Hello' } as never, 'ltr', 0);
       expect(el.getAttribute('popover')).toBe('manual');
       tip.hide();
       expect(hide).toHaveBeenCalled();

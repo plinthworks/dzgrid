@@ -4,7 +4,7 @@ import type { PartBase, SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
 import { decorateHeader } from './header-decor.js';
 import type { ViewportBox } from './measure.js';
-import { paintOverlay } from './overlay.js';
+import { overlayPainter } from './overlay.js';
 import { CHECK_WIDTH, setAttr, setPx, type Frame } from './rows.js';
 
 const OVERSCAN_ROWS = 2;
@@ -51,6 +51,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     }
     return g.msg(key as never, params);
   };
+  // Stable, so a part's context compares equal from one paint to the next.
+  const announce = (text: string): void => g.live.announce(text);
+  const paintOverlay = overlayPainter(g);
   const partFor = (col: ResolvedColumn<any>): SlotPart<'cell'> | null => parts.byColumn.get(col.id) ?? null;
   function resolveParts(): void {
     const registry = g.settings.parts;
@@ -160,9 +163,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const focus = kernel.focus;
     const focusCenter = focus ? L.center.columns.findIndex((c) => c.id === focus.column) : -1;
     const sort = kernel.query.sort;
+    g.partBase = { ctx, dir, doc: g.doc, msg: partMsg, announce };
     const headerHeight = headerRenderer.render({
       layout: L, cols: w.cols, height: h, colIndex,
-      decorate: (col, cell) => decorateHeader(g, col, cell, sort),
+      decorate: (col, cell) => decorateHeader(g, col, cell, sort), content: g.slots?.header,
       keep: focus?.kind === 'header' ? { center: focusCenter, level: focus.level ?? 0 } : null,
       check, selectAll: mode === 'multi', extra: g.headerRows, bands: g.bands,
     });
@@ -187,7 +191,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       rowHeader: visible[0]?.id ?? null, colIndex,
       rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
       check, dir, headerRows, partFor, report: g.report,
-      partBase: { ctx, dir, doc: g.doc, msg: partMsg, announce: (text: string) => g.live.announce(text) },
+      partBase: g.partBase,
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
       focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev,
     };
@@ -213,7 +217,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
         target.focus({ preventScroll: true });
       }
     }
-    paintOverlay(g, d.count, headerHeight);
+    paintOverlay(d.count, headerHeight);
     // Once, the first time rows are on screen (a host waiting to measure or to focus).
     if (!firstData && d.count > 0) {
       firstData = true;

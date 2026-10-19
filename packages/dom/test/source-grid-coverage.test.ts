@@ -53,7 +53,7 @@ describe('a grid on a server: what the review left untested', () => {
     t.f.fail(new Error('503'));
     expect(t.vp.hasAttribute('aria-busy')).toBe(false);
     expect(t.root.hasAttribute('data-stale')).toBe(false);
-    expect(t.overlay.textContent).toBe(EN.text['grid.error']);
+    expect(t.overlay.textContent).toBe(EN.text['grid.error'] + EN.text['grid.retry']);
     // The retry loads again: busy, rows stale under no overlay.
     t.g.kernel.dispatch({ type: 'rows.refresh' }, 'user');
     expect(t.vp.getAttribute('aria-busy')).toBe('true');
@@ -78,7 +78,7 @@ describe('a grid on a server: what the review left untested', () => {
     const failed = told.filter((e) => e.type === 'fetchFailed');
     expect(failed).toHaveLength(1);
     expect(failed[0]).toMatchObject({ error, page: 0 });
-    expect(host.querySelector('.dzg-overlay')!.textContent).toBe(EN.text['grid.error']);
+    expect(host.querySelector('.dzg-overlay')!.textContent).toBe(EN.text['grid.error'] + EN.text['grid.retry']);
     expect(host.querySelector('.dzg-viewport')!.hasAttribute('aria-busy')).toBe(false);
   });
 

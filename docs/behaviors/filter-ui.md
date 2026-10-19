@@ -23,11 +23,12 @@ Types into a box under a column header; clicks the filter button in a header, or
 - **Keys:** a filter box carries `data-dzg-owner="filter-input"` and owns every key; popup controls carry `popup`. A grid inside a host popup still owns its own keys.
 - **RTL:** the popup's start edge lines up with the anchor's start edge, on the right in Arabic, and it opens above when there is no room below. It carries the grid's `dir`; inputs follow the logical order.
 - **Active mark:** a `data-dzg-filtered` mark on the header plus `filter.active` in its accessible name.
+- **Button and mark are decorations** (step 11, decision O4): the filters feature puts the filter button and the active mark in the header cell beside the sort mark, through a header decoration seam (`FeatureHandle.decorateHeader`, step 13). They are never the content of a `header` part, so a host's header part keeps them.
 - **Announcements:** the client row count after a change (`announce.filtered {rows}`).
 
 ## Tests
 - Now: `packages/dom/test/popup.test.ts`, `packages/dom/test/review-p3c.test.ts` (popup host), `packages/dom/test/owners.test.ts`, `packages/dom/test/header-rows.test.ts`, `conformance/cases/keyboard-intent/filter-input-*.json`.
-- Header filter button and active mark through the `header` part (planned, step 11).
+- Header filter button and active mark as header decorations beside a `header` part (planned, step 13).
 - Floating row: one `filterChanged` after the pause, `1,5` in French, `aria-rowcount` (planned, step 12).
 - Popup text, number, boolean; Alt+ArrowDown and Escape; Tab trapped; announced count; `keyboard-intent` cases for `openMenu` (planned, step 13).
 - Day and instant with the native picker (planned, step 14). Value list (planned, step 15). Axe on the popup and the floating row in fr, ar and RTL (planned, step 18).

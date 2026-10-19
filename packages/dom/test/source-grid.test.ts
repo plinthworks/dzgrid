@@ -74,7 +74,7 @@ describe('a grid fed by a server', () => {
     const error = new Error('503');
     t.f.fail(error);
     expect(t.overlay.hidden).toBe(false);
-    expect(t.overlay.textContent).toBe(EN.text['grid.error']);
+    expect(t.overlay.textContent).toBe(EN.text['grid.error'] + EN.text['grid.retry']);
     expect(t.rowsShown()).toEqual(['a', 'b']);
     expect(t.events.find((e) => e.type === 'fetchFailed')).toMatchObject({ error, page: 1 });
     // The live region empties, then speaks a moment later (so a repeat is heard).

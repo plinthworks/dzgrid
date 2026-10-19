@@ -467,7 +467,8 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | `@dzgrid/core/server` | gate; `sourceRows`; `toWire` |
 | `@dzgrid/core/spans` | the span engine: `buildSpanMap`, `headerBands`, `navigate` (step 9b) |
 | `@dzgrid/core/csv` | the CSV writer: `toCsv`, `csvChunks`, `csvRows`, `csvColumns`, `csvSeparatorFor`; types `CsvOptions`, `CsvInput`, `CsvSummary`, `ExportRequest` (step 10) |
-| `@dzgrid/dom` | `createGrid`; `Part`, `definePart`; registry resolution; default header, overlay and tooltip parts |
+| `@dzgrid/dom` | `createGrid`; `Part`, `definePart`; registry resolution for cells; the built-in header, overlay (with its retry button) and tooltip, and their seams |
+| `@dzgrid/dom/slots` | `slots()`: header, overlay and tooltip parts in place of the built-ins (step 11, decision O1) |
 | `@dzgrid/dom/popup` | the popup host (`popupsFor(g)`), imported by the features that open popups |
 | `@dzgrid/dom/filters` | `filters({ datePicker?, floating?, debounceMs? })`: the six `filter.*` parts, `floating.text` and `floating.number`, the summary floating part, `bindQuickSearch`. The value list is loaded lazily inside it (cut 3). |
 | `@dzgrid/dom/pagination` | `pagination()`: `footer.pager`, `footer.count`, `footer.selected` |
@@ -520,7 +521,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | 8 | `FilterKind`, the custom variant, `ColumnCache.values`, `filter-needs-server` | core |
 | 9 | `setValues` (client) and `DataSource.values` through the gate channel `values:<col>` | core |
 | 10 | CSV (unchanged) | core |
-| 11 | Parts for `header`, `overlay` and `tooltip` slots, as default parts in the base | dom |
+| 11 | Parts for `header`, `overlay` and `tooltip` slots, in `@dzgrid/dom/slots`; the retry button in the base (decisions `step11-decisions.md`) | dom |
 | 12 | `/filters` part 1: the floating row (`floating.text`, `floating.number`, the summary part) | dom |
 | 13 | `/filters` part 2: popup with `filter.text`, `filter.number`, `filter.boolean`, active mark, `openMenu` | dom |
 | 14 | `/filters` part 3: `filter.day` and `filter.instant` with the native picker | dom |

@@ -27,7 +27,7 @@ const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'in
  */
 const PACKAGES = {
   core: ['.', './internal', './server', './spans', './csv'],
-  dom: ['.', './popup', './spans', './locales/en', './locales/fr', './locales/ar'],
+  dom: ['.', './popup', './spans', './slots', './locales/en', './locales/fr', './locales/ar'],
 };
 /** Built after the TypeScript packages, against their dist/ declarations. */
 const ANGULAR = 'angular';

@@ -12,6 +12,7 @@ export default defineConfig({
       { find: '@dzgrid/core/internal', replacement: fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)) },
       { find: '@dzgrid/core', replacement: fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)) },
       { find: '@dzgrid/dom/spans', replacement: fileURLToPath(new URL('./packages/dom/src/spans.ts', import.meta.url)) },
+      { find: '@dzgrid/dom/slots', replacement: fileURLToPath(new URL('./packages/dom/src/slots.ts', import.meta.url)) },
       { find: /^@dzgrid\/dom\/locales\/(.*)$/, replacement: fileURLToPath(new URL('./packages/dom/src/locales/', import.meta.url)) + '$1.ts' },
       { find: '@dzgrid/dom', replacement: fileURLToPath(new URL('./packages/dom/src/index.ts', import.meta.url)) },
     ],

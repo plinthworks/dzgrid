@@ -12,6 +12,7 @@ export const MESSAGE_KEYS = [
   'grid.noMatches',
   'grid.loading',
   'grid.error',
+  'grid.retry',
   'sort.ascending',
   'sort.descending',
   'sort.none',

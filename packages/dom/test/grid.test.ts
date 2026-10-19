@@ -101,7 +101,8 @@ describe('the grid shell', () => {
     expect(overlay.textContent).toBe(msg(EN, 'grid.loading'));
     expect(vp.getAttribute('aria-busy')).toBe('true');
     g.update({ overlay: 'error' });
-    expect(overlay.textContent).toBe(msg(EN, 'grid.error'));
+    // The message, then the retry button (step 11).
+    expect(overlay.textContent).toBe(msg(EN, 'grid.error') + msg(EN, 'grid.retry'));
     expect(vp.hasAttribute('aria-busy')).toBe(false);
   });
 

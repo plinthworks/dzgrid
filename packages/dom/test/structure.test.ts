@@ -17,11 +17,21 @@ describe('the DOM layer’s shape', () => {
   });
 
   it('keeps the optional features out of the base: only features.ts may know them', () => {
-    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans)\/|from '\.{1,2}\/(?:.*\/)?spans\.js'/;
+    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots)\.js'/;
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts'].includes(relative(SRC, f)))
+      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts'].includes(relative(SRC, f)))
       .filter((f) => optional.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
+    expect(offenders).toEqual([]);
+  });
+
+  it('has the slots entry reach the base only through the grid’s context and the types', () => {
+    // The drivers of @dzgrid/dom/slots: value imports from the core, and from their own folder only
+    // (the base's modules come with the grid it is set up on, never bundled twice).
+    const offenders = files(SRC)
+      .filter((f) => /^slots\//.test(relative(SRC, f)) || relative(SRC, f) === 'slots.ts')
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '(\.{1,2}\/[^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/^slots(\/[^:]+)?\.ts: \.\/(slots\/)?[a-z-]+\.js$/.test(s));
     expect(offenders).toEqual([]);
   });
 

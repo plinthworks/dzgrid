@@ -191,6 +191,16 @@ Le code de l'étape 0, revu et testé, l'emporte sur les plans ; elles priment s
 - **Écarts au plan** : `csvRows` prend `Pick<RowModel, 'displayed' | 'allRows'>` et non `ClientModel`, pour accepter un lot récupéré ; le guillemet SYLK porte sur le premier champ du fichier (en-tête, ou première ligne sans en-tête) ; NaN est un vide, l'infini une valeur illisible ; un id de colonne inconnu est sauté et dit par `csvColumns` (`unknown-column`, avertissement, `csv.columns[i]`) ; aucune colonne, aucune ligne.
 - **Mesures** : `csv 100 000 x 30 (toCsv)` 421 ms (budget 1 000).
 
+#### Décisions de l'étape 11 (2026-10-19 ; en-tête, voile et bulle d'aide remplaçables, fiches `docs/behaviors/{overlays,tooltips,parts,filter-ui}.md`, plan `docs/phase-3-steps/step11-slots-blueprint.md`, décisions `step11-decisions.md`)
+
+- **Module à part** `@dzgrid/dom/slots` (`slots()`, 1 279 o gz, budget 1 300) : les pièces `header`, `overlay` et `tooltip` remplacent le texte de la grille ; la base garde ses versions intégrées, sans machinerie de pièces (O1). Le module n'importe aucune valeur de la base (garde) : il passe par le contexte de la grille.
+- **Bouton « Réessayer » dans la base** (O3) : un vrai `button`, clé obligatoire `grid.retry` (O2), voile d'erreur seulement ; `rows.refresh` au nom de l'utilisateur, focus rendu à la grille, « Chargement » annoncé. dom 18 383 o gz (budget 18 600).
+- **Coutures** : `FeatureHandle.slots` (`header(col, label)`, `overlay(state)`, `tooltip(tip)`, chacune dit si une pièce a dessiné), `GridContext.partBase` (`msg` et `announce` stables), `HeaderPaint.content`, `Tooltip` avec un rappel de remplissage.
+- **En-tête** : la pièce dessine le libellé seulement ; la grille garde rôle, `aria-sort`, marque de tri, poignée, clic (O4). Bouton et marque de filtre : décorations (étape 13).
+- **Bulle d'aide** : seulement si l'hôte donne un texte ; montée à l'affichage, détruite au masquage (O5). **Voile** : `phase`, `failure`, `retry()`, `clearFilters()` (O6).
+- **Sans `slots()`** : `missing-feature` (avertissement, `parts.<nom>`, détail `slots`), une fois à la création.
+- **Écarts au plan** : `overlay(state)` lit l'échec lui-même ; la bulle reçoit un `TipFor` au lieu d'un texte ; une pièce d'en-tête qui quitte la fenêtre est détruite par `afterRows` (pas de nouvelle couture) ; `retry` recopié dans le module (base plus petite) ; `GridEnv` réexporté par `index.ts` (grid.ts reste sous 250 lignes).
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.

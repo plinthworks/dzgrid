@@ -19,13 +19,13 @@ import { RowRenderer, setAttr } from './render/rows.js';
 import { FrameScheduler } from './render/scheduler.js';
 import { Scope } from './render/scope.js';
 import { Tooltip } from './render/tooltip.js';
+import { unslotted } from './part.js';
 import { createPainter } from './render/viewport.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
 import { installWarmup } from './warmup.js';
 import { applyUpdate, ctxOf } from './update.js';
 
-export type { GridEnv } from './context.js';
 
 export interface GridApi {
   focusCell(row: RowKey, column: string): void;
@@ -103,14 +103,14 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const g: GridContext<T> = {
     doc, win, env, scope,
     el: { root, viewport, header, body, layer, overlay, tooltip },
-    live, tip: new Tooltip(tooltip, scope),
+    live, tip: new Tooltip(tooltip, scope, (t) => !!g.slots?.tooltip(t)),
     columns, rows, kernel, geometry,
     scheduler: new FrameScheduler(env.raf ?? win, env.sync === true),
     scroll: new ScrollController(geometry),
     headerRenderer: new HeaderRenderer(doc, header),
     rowRenderer: new RowRenderer<T>(doc, layer, (err) => report(err)),
     mac: isMac(win?.navigator),
-    settings: initial, ctx, headerRows: [], bands: [], spans: null, features: [],
+    settings: initial, ctx, headerRows: [], bands: [], spans: null, slots: null, features: [],
     get dir() { return dir; },
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false,
@@ -189,13 +189,13 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     scope.observe(ro);
   }
   const warmup = installWarmup(g);
-  // Optional features, set up once; what they add is read at each paint.
+  // Optional features, set up once, read at each paint; span rules or slot parts without theirs: told once.
   const handles = (initial.features ?? []).map((f) => f.setup(g as GridContext<unknown>));
   g.headerRows = handles.flatMap((h) => h.headerRows ?? []);
   g.bands = handles.flatMap((h) => h.bands ?? []);
   g.spans = handles.find((h) => h.spans)?.spans ?? null;
-  // Span rules with no feature to draw them: told once, ignored.
-  if (!g.spans) told.push(...missingFeatureProblems(initial));
+  g.slots = handles.find((h) => h.slots)?.slots ?? null;
+  told.push(...(g.spans ? [] : missingFeatureProblems(initial)), ...(g.slots ? [] : unslotted(initial.parts)));
   g.features = handles;
   scope.add(() => { for (const h of handles) h.destroy(); });
 

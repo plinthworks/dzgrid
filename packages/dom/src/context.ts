@@ -11,7 +11,8 @@ import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { MessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
-import type { FeatureHandle, SpanFeature } from './features.js';
+import type { FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
+import type { PartBase } from './part.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -70,6 +71,10 @@ export interface GridContext<T> {
   bands: readonly HeaderBandSpec[];
   /** Cells spanning rows and columns, when the spans feature is on. */
   spans: SpanFeature | null;
+  /** Header, overlay and tooltip parts, when the slots feature is on. */
+  slots: SlotDrivers | null;
+  /** What every part gets, as of the last paint (its `msg` and `announce` never change). */
+  partBase?: PartBase;
   /** What the features set up handed back (`afterRows` runs at each paint once the rows are placed). */
   features: readonly FeatureHandle[];
   ctx: LocaleCtx;

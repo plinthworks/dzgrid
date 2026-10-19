@@ -42,6 +42,8 @@ export interface HeaderPaint {
   readonly height: number;
   readonly colIndex: (id: string) => number;
   readonly decorate: (col: ResolvedColumn<any>, el: HTMLElement) => void;
+  /** A part drawing a column header's label (the slots feature): true when it did, the grid's text otherwise. */
+  readonly content?: ((col: ResolvedColumn<any>, label: HTMLElement) => boolean) | undefined;
   /** The focused header cell: its centre column stays mounted in its row out of the window (D6). */
   readonly keep: { readonly center: number; readonly level: number } | null;
   readonly check: boolean;
@@ -195,10 +197,10 @@ export class HeaderRenderer {
         else if (el.style.getPropertyValue('inset-inline-start')) el.style.removeProperty('inset-inline-start');
         if (view.spec) view.spec.update?.(el, col);
         else {
-          // The host's own words (`header`), already translated; the id otherwise.
+          // The host's own words (`header`), already translated; the id otherwise. Or a part's.
           const label = el.firstChild as HTMLElement;
           const text = col.def.header ?? col.id;
-          if (label.textContent !== text) label.textContent = text;
+          if (!p.content?.(col, label) && label.textContent !== text) label.textContent = text;
           p.decorate(col, el);
         }
         if (el === cursor) cursor = cursor.nextSibling;
