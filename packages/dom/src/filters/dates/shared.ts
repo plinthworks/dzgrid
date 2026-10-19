@@ -35,8 +35,8 @@ export const lost = (zone: string) => (d: PlainDate): boolean => {
  */
 export function styles(a: DateAdapter, sheets: readonly (readonly [string, string])[]): void {
   if (!a.inject) return;
-  const root = a.host.getRootNode() as Document | ShadowRoot;
-  const doc = a.host.ownerDocument;
+  const root = a.grid.getRootNode() as Document | ShadowRoot;
+  const doc = a.grid.ownerDocument;
   const at = root.nodeType === 11 ? (root as ShadowRoot) : doc.head;
   for (const [id, css] of sheets) {
     if (at.querySelector(`style[data-tzslot="${id}"]`)) continue;
@@ -77,7 +77,8 @@ export function named(...roots: HTMLElement[]): () => void {
       for (const b of r.querySelectorAll<HTMLElement>('button[aria-label]')) {
         const text = b.textContent!.trim();
         const label = b.getAttribute('aria-label')!;
-        if (/[\p{L}\p{N}]/u.test(text) && !label.includes(text)) b.setAttribute('aria-label', `${label}, ${text}`);
+        // A day cell is named by its date already (its number may be Latin, its name in the locale's digits).
+        if (/[\p{L}\p{N}]/u.test(text) && !b.dataset['date'] && !label.includes(text)) b.setAttribute('aria-label', `${label}, ${text}`);
       }
   };
   const Watch = roots[0]!.ownerDocument.defaultView?.MutationObserver;

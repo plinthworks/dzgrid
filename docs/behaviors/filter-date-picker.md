@@ -65,14 +65,20 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
   end), a moment cleared, or a field not loaded yet keeps the filter in force (lead decision L1).
 - **The echo:** writing a filter into a field never reports it back (the adapters mute tzslot's
   `onChange` around their own writes; the range field reports a shortcut handed to it). A filter from
-  elsewhere rewrites a field not being edited.
+  elsewhere rewrites a field not being edited. A period the user did not touch is read back as the
+  host gave it, not through the widget's instants (Apia's lost 2011-12-30 starts where the 31st
+  does: Apply would have rewritten it). A shortcut written over a period empties the value first,
+  then names the shortcut (tzslot resolves it against today).
 - **Uneditable:** a day outside 0001–9999, a moment that is not a whole minute or before 1900, an
-  operator not offered, a shortcut name not among the six: the summary and Clear.
+  operator not offered, a shortcut name not among the six: the summary and Clear. Such a filter is
+  never written into the hidden fields: no kit is loaded, nothing is reported, for a summary.
 - **Loading** (owner Q7): `<p role="status">` `filter.loadingDates`, `aria-busy` on the field's
   box, no focus moved when the kit arrives (the popup's focus stays on the operator). Closed before
   it arrives: nothing is mounted.
 - **Failure:** `<p role="alert">` `filter.loadFailed` and a Retry button (`grid.retry`); the error is
-  reported (`reportError`). A kit whose module does not export `adapt` is a failure too. Chrome does
+  reported (`reportError`). A kit whose module does not export `adapt` is a failure too, and so is
+  one whose `adapt` (or its first write) throws, loaded now or before: the error reported once, the
+  half-built nodes removed, the alert and Retry (Retry tries the kit again). Chrome does
   not fetch a failed `import()` again (spike S13): the text says to reload the page; a host that
   serves its own chunks passes `filters({ loadDates })`.
 - **Keys:** tzslot closes its panel on Escape from a `document` listener, which our popup's own
@@ -84,19 +90,24 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
   not the popup (O7). Closing the popup destroys the widgets: no panel is left behind.
 - **Names** (label in name, WCAG 2.5.3): tzslot names a date field's trigger by its subject only
   (T1) and its month title by its action (T9): DzGrid adds the text each shows ("Date, 29 Mar 2026",
-  "Choose month, March 2026"), kept up as tzslot repaints. The typed moment is a `combobox` that
+  "Choose month, March 2026"), kept up as tzslot repaints. A day cell (`data-date`) is left as
+  tzslot names it: its name is already its date, and with the locale's digits (ar-EG) its Latin
+  number would be appended as noise ("…٢٦ سبتمبر ٢٠٢٦, 26"). The typed moment is a `combobox` that
   controls the panel's place (T10: tzslot gives a plain text box `aria-expanded`).
 - **A day that never was** (Samoa, 2011-12-30): tzslot 2.2.0 reads its times as repeated, on the
   day before and the day after (T7, found by the agreement sweep); the moment fields grey such a
   day, so it can be neither picked nor typed. *On this day* keeps an empty day (the core's rule).
 - **Another month's days** are not faded inside a DzGrid popup: tzslot's 0.35 opacity falls under
-  4.5:1 (T11).
+  4.5:1 (T11). They take the muted text colour instead (`--tz-fg-muted`, 4.5:1 on the panel and on a
+  period's band), so they still read as another month's; a chosen day keeps its own colours.
 - **The open calendar covers the popup's footer** (it is drawn over the popup, under its trigger):
   Escape, or a pointer down elsewhere, closes it first; then Apply.
 - **CSP:** tzslot injects some of its sheets whatever `injectStyles` says (spike S13 finding 7):
   DzGrid injects tzslot's exported sheets itself before the first widget, once per document or
   shadow root, each as `<style data-tzslot="<id>">` with the grid's `nonce`, so tzslot finds them and
-  adds none. With `injectStyles: false` the host loads them itself, with the same `data-tzslot` ids.
+  adds none. The root is the grid's (`DateAdapter.grid`), not the widget's host: the host is not in
+  the popup yet when a loaded kit draws at once, and a grid in a shadow root would have had them in
+  the document's head, unstyled and without the nonce. With `injectStyles: false` the host loads them itself, with the same `data-tzslot` ids.
 - **Theme:** the panel takes `--tz-bg`, `--tz-fg`, `--tz-border` inside a DzGrid popup (the dark
   theme reaches it); the chosen day stays visible in forced colours (`Highlight`).
 - **The two engines agree:** the core (rows, wire) and tzslot (what is shown) both read the zone
@@ -106,7 +117,9 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
   (T7, Samoa's lost day), recorded there and worked around.
 - **Midnight:** while a shortcut is in force (alone or in a combined filter), the filters feature
   calls `kernel.tick()` at the next midnight in the grid's zone (and when the page becomes visible
-  again), so an open screen moves to the new day (`filter-relative.md`).
+  again), so an open screen moves to the new day (`filter-relative.md`). An open popup follows too:
+  its part's context carries `today` (the grid's day by its clock and zone), new at midnight, so the
+  widget is given the new today and a shortcut is resolved again.
 - **Sizes** (step 14 part B): the eager part in `@dzgrid/dom/filters` (forms, loader, notes,
   prefetch, midnight), the lazy adapters apart (DzGrid's code only, budget 2 600 B gz), tzslot's own
   share of each kit recorded (`size-budget.json`, `without`). Requests to tzslot:
@@ -115,6 +128,8 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
 ## Tests
 - `packages/dom/test/filters-dates.test.ts` (real tzslot under jsdom: loading, prefetch, failure and
   Retry, each operator to the model, the zone, DST, shortcuts, locale tag, keys, CSP, keys parity),
+  `packages/dom/test/filters-dates-gaps.test.ts` (the model per operator through the real widgets'
+  `onChange` against the core, the echo round trip, the lifecycle, the midnight timer),
   `packages/dom/test/tzslot-agreement.test.ts`, the date steps of `filters-popup-walk.test.ts`,
   `structure.test.ts` (tzslot only under `filters/dates/`).
 - Browser: `scripts/browser.mjs` (`filters=1&popup=1&dates=1`, fr light Europe/Paris, ar right to

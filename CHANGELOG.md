@@ -35,6 +35,8 @@ and ten spikes in three browser engines.
   six relative shortcuts (today, yesterday, last 7 days, last 30 days, this month, last month) in the
   whole-day period forms; loading, failure and Retry; the filters feature calls `kernel.tick()` at
   midnight in the grid's zone while a shortcut is in force. Options `filters({ loadDates, dateMessages })`.
+- The `filter` part's context gains `today` (the grid's day by its clock and zone): an open popup
+  follows midnight. A date kit's `DateAdapter` gains `grid` (the grid's root element).
 - The core (part A): `RelativeRange`, `RELATIVE_RANGES`, `relativeDays`, `dayAt`, the `relative`
   operator for day and instant filters, the clock as numbers (`clientRows({ now })`, `ModelEnv.now`,
   `WireEnv.now`), `model.tick()` and `kernel.tick()`; the DOM setting `clock`.

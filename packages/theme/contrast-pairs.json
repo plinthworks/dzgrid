@@ -36,13 +36,15 @@
     { "what": "grid border and cell rule (decorative)", "fg": "--tz-border", "bg": "--tz-bg", "min": 1 },
     { "what": "date panel text (tzslot's, in a filter popup)", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
     { "what": "date panel chosen day", "fg": "--tz-accent-fg", "bg": "--tz-accent", "min": 4.5 },
-    { "what": "date panel notes and outside days", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 }
+    { "what": "date panel notes and outside days", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "date panel outside day inside a chosen period", "fg": "--tz-fg-muted", "bg": "--tz-range-within-bg", "min": 4.5 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
     "--dzg-row-hover-bg": "color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg))",
     "--dzg-row-selected-bg": "color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg))",
     "--dzg-focus-ring": "var(--tz-accent)",
-    "--dzg-stale-fg": "var(--tz-fg-muted)"
+    "--dzg-stale-fg": "var(--tz-fg-muted)",
+    "--tz-range-within-bg": "color-mix(in srgb, var(--tz-accent) 16%, var(--tz-bg))"
   }
 }

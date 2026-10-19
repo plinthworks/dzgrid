@@ -347,6 +347,12 @@ $emit: true !default;
     background: var(--tz-bg);
   }
 
+  // They are told apart by the muted colour instead (4.5:1, in a period's band too); a chosen
+  // day keeps its own.
+  .dzg-popup :is(.tz-cal__day--outside, .tz-range__day--outside):not(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end) {
+    color: var(--tz-fg-muted);
+  }
+
   // Forced colours: the chosen day and shortcut keep their mark when the system paints.
   @media (forced-colors: active) {
     .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .tz-rangefield__preset--on) {

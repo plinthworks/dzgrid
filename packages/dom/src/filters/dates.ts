@@ -1,4 +1,4 @@
-import { instantToDayIn, parseDay, readInstant, RELATIVE_RANGES, type LocaleCtx, type RelativeRange } from '@dzgrid/core';
+import { parseDay, readInstant, RELATIVE_RANGES, type LocaleCtx, type RelativeRange } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import { conditions, el, form, hide, NUM, tx, type F, type Spec } from './forms.js';
@@ -34,6 +34,8 @@ export interface DateSettings {
 /** What a kit's `adapt` is given: where to draw, which field, its settings, and how to say a change. */
 export interface DateAdapter {
   readonly host: HTMLElement;
+  /** The grid's root element: its root node (the document or a shadow root) takes the sheets, as the popup's do (the host is not attached yet). */
+  readonly grid: HTMLElement;
   /** Where the widget's panel goes: inside the popup (its top layer, direction and theme). */
   readonly panel: HTMLElement;
   readonly kind: 'day' | 'instant';
@@ -152,8 +154,8 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
   const kit = (): DateKitName | undefined => KIT[op];
   const name = (): string => get().msg(LABEL[kit() ?? DATE] as never);
   const settings = (): DateSettings => {
-    const { ctx } = get();
-    return { ctx, label: name(), today: instantToDayIn((g().settings.clock ?? Date.now)() as never, ctx.timeZone) ?? '1970-01-01', ...(env.messages && { messages: env.messages }) };
+    const { ctx, today } = get();
+    return { ctx, label: name(), today, ...(env.messages && { messages: env.messages }) };
   };
   /** The loading line or the failure (with Retry), one at a time, after the label. */
   const note = el(doc, 'p');
@@ -191,11 +193,23 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
     const host = el(doc, 'div', 'dzg-fwidget');
     const panel = el(doc, 'div', 'dzg-fpanel');
     box.append(host, panel);
-    const s = g().settings;
-    field = k.adapt({ host, panel, kind, op, settings, changed, inject: s.injectStyles !== false, ...(s.nonce && { nonce: s.nonce }) });
-    field.write(last);
+    const { settings: s, el: { root } } = g();
+    // A kit that throws (adapt, or its first write): reported, its half-built nodes gone, Retry.
+    try {
+      field = k.adapt({ host, panel, grid: root, kind, op, settings, changed, inject: s.injectStyles !== false, ...(s.nonce && { nonce: s.nonce }) });
+      field.write(last);
+    } catch (err) {
+      field = null;
+      drop();
+      return fail(err);
+    }
     seen = key();
     if (focused) field.focus();
+  };
+  /** Said once: the same widget is not tried again until Retry (or another operator). */
+  const fail = (err: unknown): void => {
+    g().report(err);
+    say('fail');
   };
   /** The widget for the operator: none, the one in place, the kit's at once, or after it loads. */
   const mount = (): void => {
@@ -213,12 +227,7 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
     say('load');
     env.load(k).then(
       (m) => !dead && want === w && attach(m),
-      (err) => {
-        if (dead || want !== w) return;
-        g().report(err);
-        want = '';
-        say('fail');
-      },
+      (err) => !dead && want === w && fail(err),
     );
   };
   const key = (): string => {

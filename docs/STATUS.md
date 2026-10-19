@@ -22,10 +22,10 @@ Mis à jour : 2026-10-19 (étape 14 partie B, non commitée). Ce fichier dit où
 | 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
 | 13 — fenêtre de filtre (texte, nombre, oui/non), marque « filtré », Alt+Flèche bas | fait, relu, testé | `f67fc48`, `67782bc` |
 | 14 partie A — raccourcis de dates relatifs dans le cœur (`relative`, horloge, `tick()`, forme serveur) | fait, relu, testé | `df27559`, `85e08c3` |
-| 14 partie B — champs de dates tzslot dans `@dzgrid/dom/filters`, minuterie de minuit | fait, testé, non commité (relecture et analyse des tests à faire) | — |
+| 14 partie B — champs de dates tzslot dans `@dzgrid/dom/filters`, minuterie de minuit | fait, testé, relu ; corrections de la relecture et de l'analyse des tests faites, non commitées | — |
 | 15 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 14 (filtres de dates avec tzslot, raccourcis relatifs), plan `docs/phase-3-steps/step14-tzslot-blueprint.md`, décisions `step14-decisions.md`. Partie A faite et commitée (le cœur : `{op:'relative', range}`, l'horloge en nombre, `tick()`). **Partie B faite (2026-10-19, non commitée)** : les fenêtres de filtre des colonnes jour et date-heure (`filter.day`, `filter.instant`) utilisent les champs de tzslot 2.2.0 (`createDateField`, `createRangeField`, `createDateTimeField`), dans la zone, la langue et les chiffres de la grille, avec les six raccourcis sous « Entre » / « Entre les jours ». tzslot est une dépendance pair **facultative** de `@dzgrid/dom` et `@dzgrid/angular` (`>=2.2.0 <3`), chargée en trois lots (`date`, `range`, `moment`) à la première ouverture d'un filtre de date ; message de chargement, échec + « Réessayer » (Chrome garde un `import()` échoué : il faut recharger la page) ; Échap ferme d'abord le calendrier puis la fenêtre ; feuilles de style de tzslot injectées par nous avec le nonce ; minuterie de minuit (`kernel.tick()`) tant qu'un raccourci est en vigueur. Fiche `docs/behaviors/filter-date-picker.md` ; essai `spikes/s13-tzslot` ; demandes pour tzslot (T1 à T11, avec nos contournements) dans `docs/tzslot-requests.md` — à lire par le propriétaire de tzslot. Reste : relecture de code et analyse des tests de la partie B, puis commit ; écoute au lecteur d'écran (`docs/a11y-protocol.md` §8, §9, §10) et relecture arabe par le propriétaire.
+En cours : l'étape 14 (filtres de dates avec tzslot, raccourcis relatifs), plan `docs/phase-3-steps/step14-tzslot-blueprint.md`, décisions `step14-decisions.md`. Partie A faite et commitée (le cœur : `{op:'relative', range}`, l'horloge en nombre, `tick()`). **Partie B faite (2026-10-19, non commitée)** : les fenêtres de filtre des colonnes jour et date-heure (`filter.day`, `filter.instant`) utilisent les champs de tzslot 2.2.0 (`createDateField`, `createRangeField`, `createDateTimeField`), dans la zone, la langue et les chiffres de la grille, avec les six raccourcis sous « Entre » / « Entre les jours ». tzslot est une dépendance pair **facultative** de `@dzgrid/dom` et `@dzgrid/angular` (`>=2.2.0 <3`), chargée en trois lots (`date`, `range`, `moment`) à la première ouverture d'un filtre de date ; message de chargement, échec + « Réessayer » (Chrome garde un `import()` échoué : il faut recharger la page) ; Échap ferme d'abord le calendrier puis la fenêtre ; feuilles de style de tzslot injectées par nous avec le nonce ; minuterie de minuit (`kernel.tick()`) tant qu'un raccourci est en vigueur. Fiche `docs/behaviors/filter-date-picker.md` ; essai `spikes/s13-tzslot` ; demandes pour tzslot (T1 à T11, avec nos contournements) dans `docs/tzslot-requests.md` — à lire par le propriétaire de tzslot. Relecture et analyse des tests faites, leurs défauts corrigés tests d'abord (2026-10-19 : feuilles de tzslot dans la racine de la grille même en shadow root, noms des cases de jour en chiffres arabes, kit dont `adapt` lève, fenêtre résumé sans chargement, fenêtre ouverte qui suit minuit via `today` dans le contexte, période d'Apia non réécrite, jours des autres mois en couleur atténuée) ; détail dans la ROADMAP. Reste : commit ; écoute au lecteur d'écran (`docs/a11y-protocol.md` §8, §9, §10) et relecture arabe par le propriétaire.
 
 ## Les plans détaillés des étapes
 
@@ -58,15 +58,15 @@ En cours : l'étape 14 (filtres de dates avec tzslot, raccourcis relatifs), plan
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 551 |
 | `@dzgrid/dom` | 18 750 (étape 12) | 18 722 |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot et les lots de dates à part) | 8 500 (étape 14) | 8 436 |
-| adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 288 |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot et les lots de dates à part) | 8 500 (étape 14) | 8 473 |
+| adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |
 | lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 1 238 |
 | `@dzgrid/dom/popup` | 1 500 | 1 428 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
 | textes des filtres en / fr / ar | 680 / 760 / 850 (étape 14) | 585 / 667 / 756 |
-| thème | 1 660 (étape 14) | 1 626 |
+| thème | 1 660 (étape 14) | 1 644 |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 

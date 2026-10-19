@@ -1,4 +1,4 @@
-import type { ResolvedColumn } from '@dzgrid/core';
+import { instantToDayIn, type ResolvedColumn } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import type { Frame } from '../render/rows.js';
@@ -55,10 +55,11 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
     if (el.hasAttribute('aria-haspopup')) el.setAttribute('aria-expanded', String(v));
   };
   const close = (): void => cur?.ref.close();
-  /** The part's context: the shared edits, the column's own operators, and `close`. */
+  /** The part's context: the shared edits, the column's own operators, today, and `close`. */
   const draw = (m: Mounted<C>, host: HTMLElement, col: ResolvedColumn<unknown>, part: Part<C>): boolean => {
     const f = col.def.filter;
-    return m.set(host, part, { ...commit.edits(col, resolve(col, 'filter').kind, host), ops: (f && f.ops) || NONE, close });
+    const today = instantToDayIn((g.settings.clock ?? Date.now)() as never, g.ctx.timeZone) ?? '1970-01-01';
+    return m.set(host, part, { ...commit.edits(col, resolve(col, 'filter').kind, host), ops: (f && f.ops) || NONE, today, close });
   };
 
   function open(column: string, anchor?: HTMLElement | null): boolean {

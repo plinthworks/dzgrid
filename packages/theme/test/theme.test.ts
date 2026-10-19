@@ -47,6 +47,16 @@ describe('@dzgrid/theme', () => {
     expect(missing).toEqual([]);
   });
 
+  it('marks another month’s days in a filter popup by the muted colour, not an opacity under 4.5:1; never a chosen day', () => {
+    const rule = /\.dzg-popup :is\(\.tz-cal__day--outside, \.tz-range__day--outside\):not\(([^)]*)\)\s*\{\s*color: var\(--tz-fg-muted\);/.exec(css);
+    expect(rule).not.toBeNull();
+    for (const c of ['.tz-cal__day--selected', '.tz-range__day--start', '.tz-range__day--end']) expect(rule![1], c).toContain(c);
+    expect(css).toContain('--tz-cal-outside-opacity: 1;');
+    const on = (bg: string) => pairs.pairs.some((p) => p.fg === '--tz-fg-muted' && p.bg === bg && p.min === 4.5);
+    expect(on('--tz-bg')).toBe(true);
+    expect(on('--tz-range-within-bg')).toBe(true);
+  });
+
   it('follows data-theme on any element, like tzslot, and the system otherwise', () => {
     expect(css).toMatch(/\[data-theme=["']?dark["']?\]\s*\{\s*--tz-color-scheme: dark;/);
     expect(css).toMatch(/\.dzg\s*\{[^}]*color-scheme: var\(--tz-color-scheme, light dark\)/);

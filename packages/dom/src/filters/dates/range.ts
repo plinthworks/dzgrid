@@ -74,7 +74,10 @@ export function adapt(a: DateAdapter): DateField {
       cur = p;
       write();
     },
-    read: () => cur && (cur.range ? { range: cur.range } : read(value(cur), null)),
+    // The host's own days or moments, once the widget can hold them: a round trip through the
+    // widget's instants would rewrite a period it was never asked to change (Apia's lost
+    // 2011-12-30 starts where the 31st does).
+    read: () => cur && (cur.range ? { range: cur.range } : read(value(cur), null) && (moments ? { at: cur.at!, atTo: cur.atTo! } : { [from]: cur[from]!, [to]: cur[to]! })),
     update() {
       mute.run(() => w.update(opts()));
       write();

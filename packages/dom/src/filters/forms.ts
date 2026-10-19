@@ -93,7 +93,8 @@ export function form(make: Make): Part<C> {
         foot.before(...((showing = f) ? body.els : [sum]));
       };
       const draw = (): void => {
-        if (e.stale(c.state, c.ctx)) body.write((draft = c.state as F | null));
+        // A filter the fields cannot show is not written to them (no date kit loaded behind a summary).
+        if (e.stale(c.state, c.ctx) && body.edits((draft = c.state as F | null))) body.write(draft);
         show();
         body.texts();
         tx(sum, c.msg('filter.summaryActive'));

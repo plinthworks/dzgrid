@@ -106,6 +106,8 @@ export interface SlotContext {
     readonly debounceMs: number;
     /** The column's `filter.ops`, empty when it gives none (the kind's own list). */
     readonly ops: readonly string[];
+    /** The grid's day by its clock in its zone (`YYYY-MM-DD`): new at midnight, so an open popup follows it (step 14). */
+    readonly today: string;
     /** As the floating cell's, the same pending edit per column (the last write wins). */
     set(next: Json | null, o?: { readonly commit?: 'now' | 'debounced' | 'cancel' }): void;
     /** Closes the popup, focus back on its anchor (the pending edit applied in the browser). */

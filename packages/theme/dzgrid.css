@@ -293,6 +293,10 @@
   background: var(--tz-bg);
 }
 
+.dzg-popup :is(.tz-cal__day--outside, .tz-range__day--outside):not(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end) {
+  color: var(--tz-fg-muted);
+}
+
 @media (forced-colors: active) {
   .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .tz-rangefield__preset--on) {
     forced-color-adjust: none;

@@ -44,6 +44,8 @@ export interface Make {
   readonly settings?: Partial<GridSettings<R>> & Record<string, unknown>;
   readonly server?: boolean;
   readonly inline?: number;
+  /** The grid inside an open shadow root (its host in the body). */
+  readonly shadow?: boolean;
 }
 
 /** A grid with `filters({ floating: true })` by default, synchronous paints, a fake geometry. */
@@ -51,7 +53,11 @@ export function make(o: Make = {}) {
   const box: { -readonly [K in keyof ViewportBox]: ViewportBox[K] } = { block: 400, inline: o.inline ?? 900, scrollTop: 0, scrollInline: 0 };
   const geometry: Geometry = { read: () => ({ ...box }), writeScrollTop: (px) => { box.scrollTop = px; }, writeScrollInline: (px) => { box.scrollInline = px; } };
   const host = document.createElement('div');
-  document.body.append(host);
+  if (o.shadow) {
+    const outer = document.createElement('div');
+    document.body.append(outer);
+    outer.attachShadow({ mode: 'open' }).append(host);
+  } else document.body.append(host);
   const events: GridEvent<R>[] = [];
   const f = fakeSource();
   const data = o.server ? { source: sourceRows(f.source), operations: 'server' } : { rows: o.rows ?? ROWS };

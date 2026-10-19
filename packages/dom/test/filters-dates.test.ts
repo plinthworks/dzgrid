@@ -43,11 +43,12 @@ interface Open {
   readonly loadDates?: (kit: Kit) => Promise<unknown>;
   readonly dateMessages?: Record<string, object>;
   readonly columns?: ColumnOrGroup<Row>[];
+  readonly shadow?: boolean;
 }
 
 function grid(o: Open = {}) {
   const feature = filters({ ...(o.loadDates && { loadDates: o.loadDates as never }), ...(o.dateMessages && { dateMessages: o.dateMessages }) });
-  const t = make({ columns: (o.columns ?? COLS) as never, rows: ROWS, features: [feature], server: o.server, settings: { clock: () => NOW, ...o.settings } as never });
+  const t = make({ columns: (o.columns ?? COLS) as never, rows: ROWS, features: [feature], server: o.server, shadow: o.shadow, settings: { clock: () => NOW, ...o.settings } as never });
   const popup = () => t.host.querySelector<HTMLElement>('.dzg-popup');
   const q = <E extends Element = HTMLElement>(s: string) => popup()?.querySelector<E>(s) ?? null;
   const op = () => q<HTMLSelectElement>('select.dzg-fop')!;
@@ -770,5 +771,90 @@ describe('midnight (the filters feature calls kernel.tick())', () => {
     now = Date.UTC(2026, 9, 20, 0, 0, 0, 60);
     vi.advanceTimersByTime(31 * 60_000);
     expect(t.f.calls.length).toBe(calls + 1);
+  });
+});
+
+describe('the review of step 14 part B', () => {
+  beforeEach(() => document.head.querySelectorAll('style').forEach((s) => s.remove()));
+  const shadowSheets = (t: ReturnType<typeof grid>) => {
+    const root = t.host.getRootNode() as ShadowRoot;
+    expect(root.nodeType).toBe(11);
+    return [...root.querySelectorAll<HTMLStyleElement>('style[data-tzslot]')];
+  };
+
+  it('a grid in a shadow root: tzslot’s sheets go there, with the nonce, once — after a load, a second open, a prefetch', async () => {
+    for (const prefetch of [false, true]) {
+      const t = grid({ shadow: true, settings: { nonce: 'n0nce' } });
+      if (prefetch) {
+        t.host.querySelector<HTMLElement>('.dzg-hcell[data-col="d"]')!.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+        await flush();
+      }
+      for (let i = 0; i < 2; i++) {
+        t.feature.openFilter('d');
+        await t.ready();
+        (t.q<HTMLElement>('.dzg-fdate .tz-field__trigger:is(button)') ?? t.q<HTMLElement>('.dzg-fdate .tz-field__icon-button')!).click();
+        expect(t.popup()!.querySelector('.tz-field__panel'), `${prefetch} ${i}`).not.toBeNull();
+        t.feature.closeFilter();
+      }
+      const sheets = shadowSheets(t);
+      expect(sheets.map((s) => s.dataset['tzslot']).sort(), `prefetch ${prefetch}`).toEqual(['calendar', 'field']);
+      for (const s of sheets) expect(s.getAttribute('nonce'), s.dataset['tzslot']).toBe('n0nce');
+      expect(document.head.querySelectorAll('style[data-tzslot]'), `prefetch ${prefetch}`).toHaveLength(0);
+      cleanup();
+    }
+  });
+
+  it('ar-EG with the locale’s digits: a period panel’s day cells keep their own name, no Latin digit appended', async () => {
+    const t = grid({ settings: { locale: 'ar-EG', numerals: 'locale', messages: AR_MSG } });
+    t.feature.openFilter('d');
+    t.choose('between');
+    await vi.waitFor(() => expect(t.widget()).not.toBeNull());
+    t.openPanel();
+    const cells = [...t.panel()!.querySelectorAll<HTMLElement>('button[data-date]')];
+    expect(cells.length).toBeGreaterThan(27);
+    await flush();
+    for (const c of cells) expect(c.getAttribute('aria-label'), c.dataset['date']).not.toMatch(/, [0-9]+$/);
+    // The trigger and the month title still carry what they show.
+    const title = t.panel()!.querySelector<HTMLElement>('button[aria-label][class*=title]');
+    if (title) expect(title.getAttribute('aria-label')).toContain(title.textContent!.trim());
+  });
+
+  const broken = () => ({ adapt: () => { throw new Error('adapt broke'); } });
+
+  it('a kit whose adapt throws after a lazy load: reported, an alert and Retry, no half-built widget', async () => {
+    const t = grid({ loadDates: () => Promise.resolve(broken()) });
+    const unhandled: unknown[] = [];
+    const on = (e: unknown) => void unhandled.push(e);
+    process.on('unhandledRejection', on);
+    try {
+      t.feature.openFilter('d');
+      await vi.waitFor(() => expect(t.q('.dzg-fdate [role=alert]')).not.toBeNull());
+      await flush();
+      expect(unhandled).toEqual([]);
+    } finally {
+      process.off('unhandledRejection', on);
+    }
+    expect(reported.map(String)).toEqual(['Error: adapt broke']);
+    expect(t.q('.dzg-fretry')).not.toBeNull();
+    expect(t.q('.dzg-fwidget, .dzg-fpanel')).toBeNull();
+    expect(t.box()!.hasAttribute('aria-busy')).toBe(false);
+    // Retry tries again (the kit is kept, adapt throws again): reported again, still a failure.
+    t.q<HTMLButtonElement>('.dzg-fretry')!.click();
+    expect(reported).toHaveLength(2);
+    expect(t.q('.dzg-fretry')).not.toBeNull();
+  });
+
+  it('a kit already loaded whose adapt throws: openFilter does not throw; reported, an alert and Retry', async () => {
+    let n = 0;
+    const real = await realKit('date');
+    const t = grid({ loadDates: () => Promise.resolve({ adapt: (a: never) => (n++ ? broken().adapt() : real.adapt(a)) }) });
+    t.feature.openFilter('d');
+    await t.ready();
+    t.feature.closeFilter();
+    expect(() => t.feature.openFilter('d')).not.toThrow();
+    expect(reported.map(String)).toEqual(['Error: adapt broke']);
+    expect(t.q('.dzg-fdate [role=alert]')!.textContent).toBe(EN_FILTERS.text['filter.loadFailed']);
+    expect(t.q('.dzg-fretry')).not.toBeNull();
+    expect(t.q('.dzg-fwidget, .dzg-fpanel')).toBeNull();
   });
 });
