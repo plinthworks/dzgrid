@@ -1,0 +1,39 @@
+{
+  "id": "enum-code",
+  "suite": "csv",
+  "description": "enums code writes the code.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "e",
+        "header": "État",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "Admis"
+          }
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "e": "in"
+      }
+    ],
+    "options": {
+      "bom": false,
+      "enums": "code"
+    }
+  },
+  "expected": {
+    "text": "État\r\nin\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 1,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

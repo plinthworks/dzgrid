@@ -1,0 +1,41 @@
+{
+  "id": "blanks-and-invalid",
+  "suite": "csv",
+  "description": "Blank and unreadable cells are written empty and counted; one empty field is written as two quotes.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "n": null
+      },
+      {
+        "n": "abc"
+      },
+      {
+        "n": ""
+      },
+      {
+        "n": 3
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "N\r\n\"\"\r\n\"\"\r\n\"\"\r\n3\r\n",
+    "summary": {
+      "rows": 4,
+      "columns": 1,
+      "blank": 2,
+      "invalid": 1
+    }
+  }
+}

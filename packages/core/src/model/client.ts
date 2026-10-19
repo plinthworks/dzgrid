@@ -71,6 +71,8 @@ export interface RowModel<T> {
   readonly problems: readonly Problem[];
   /** `displayed`: the rows shown after the filters (an include set). `query`: everything the query matches, on the server (everything-except). */
   readonly selectAll: 'displayed' | 'query';
+  /** Every row the query matches, on every page, in screen order: what a CSV of `all` writes. None on server pages. */
+  readonly allRows?: DisplayedRows<T> | undefined;
   /**
    * Whether a selected key survives a change. Server pages: always (rows on
    * other pages, never seen, are not gone). A fetched set or the browser: the
@@ -137,6 +139,8 @@ export interface ClientOptions<T> {
 
 export interface ClientModel<T> extends RowModel<T> {
   readonly kind: 'client';
+  /** Every row the query matches, across pages; the displayed rows when not paged. */
+  readonly allRows: DisplayedRows<T>;
   /** A row by its key, whatever the filter. */
   row(key: RowKey): DataNode<T> | undefined;
   readonly query: Query;
@@ -209,6 +213,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   let filtered: { in: Inputs; words: readonly string[]; order: Uint32Array | null; mask: Uint8Array | null; problems: readonly Problem[] } | null = null;
   let sorted: { in: Inputs; sort: string; input: Uint32Array | null; order: Uint32Array | null; problems: readonly Problem[] } | null = null;
   let displayed: DisplayedRows<T>;
+  /** Paged: every sorted row, made when asked, dropped by the next show(). */
+  let all: DisplayedRows<T> | null = null;
   /** The filters that apply, as a key, for a filter model under these columns and context. */
   let applied: { f: unknown; in: Inputs; m: FilterModel; key: string } | null = null;
   const appliedOf = (f: Query['filter']): NonNullable<typeof applied> => {
@@ -266,6 +272,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   /** The displayed rows: all the sorted ones, or the current page of them (the index clamped). */
   const show = (): void => {
     d.displayedBuilds++;
+    all = null;
     const order = sorted!.order;
     if (!pageCfg) {
       displayed = flatDisplayed(store.snapshot, order, ++version);
@@ -411,6 +418,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     row: (key) => store.get(key),
     get query() { return query; },
     get displayed() { return displayed; },
+    get allRows() { return pageCfg ? (all ??= flatDisplayed(store.snapshot, sorted!.order, version)) : displayed; },
     get page() { return pageCfg ? pageOf({ size: pageSize, sizes: pageCfg.sizes }, pageIndex, filteredCount()) : null; },
     setPage(p, source = 'api') {
       if (!pageCfg || checkPage(p).length) return;

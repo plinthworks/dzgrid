@@ -1,0 +1,36 @@
+{
+  "id": "id-first-field",
+  "suite": "csv",
+  "description": "A first field starting with ID is quoted (Excel's SYLK check); elsewhere it is not.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "id",
+        "header": "ID"
+      },
+      {
+        "id": "x",
+        "header": "ID2"
+      }
+    ],
+    "rows": [
+      {
+        "id": "ID7",
+        "x": "y"
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "\"ID\",ID2\r\nID7,y\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

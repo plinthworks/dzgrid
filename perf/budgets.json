@@ -1,5 +1,5 @@
 {
-  "$comment": "Milliseconds, median of the runs, measured on a MINIFIED bundle in node. Phase 1 adds the K.8 lines (load 100 000 x 30, sorts, filters, memory). Step 9b (2026-10-18): span merge index 1M rows <= 25 ms and 100k data-span calls <= 20 ms (blueprint B); a whole cold map over 100k rows with one merge column <= 30 ms (measured 11).",
+  "$comment": "Milliseconds, median of the runs, measured on a MINIFIED bundle in node. Phase 1 adds the K.8 lines (load 100 000 x 30, sorts, filters, memory). Step 9b (2026-10-18): span merge index 1M rows <= 25 ms and 100k data-span calls <= 20 ms (blueprint B); a whole cold map over 100k rows with one merge column <= 30 ms (measured 11). Step 10 (2026-10-19): the whole CSV of dataset A, 100k x 30 in fr-FR/Algiers, <= 1 000 ms (blueprint; measured 421).",
   "runs": 7,
   "budgets": {
     "zoneDayBounds x 10 000 (Paris, cached formatter)": 1000,
@@ -47,7 +47,8 @@
     "msg() plural ar x 10 000 (announcements, labels)": 20,
     "span merge index 1 000 000 rows (export texts given)": 25,
     "100 000 data-span calls (rowSpan, cold map)": 20,
-    "span map 100 000 rows, one merge column (cold)": 30
+    "span map 100 000 rows, one merge column (cold)": 30,
+    "csv 100 000 x 30 (toCsv)": 1000
   },
   "memory": {
     "store overhead bytes/row (100 000 rows)": 120,

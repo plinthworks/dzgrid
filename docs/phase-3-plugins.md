@@ -463,8 +463,10 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 
 | Subpath | Contents |
 |---|---|
-| `@dzgrid/core` | kernel; `RowModel` contract; `ClientModel` with the page stage; `resolveOperations` and `splitQuery`; `FilterKind` and the custom variant; `setValues`; CSV |
+| `@dzgrid/core` | kernel; `RowModel` contract; `ClientModel` with the page stage and `allRows`; `resolveOperations` and `splitQuery`; `FilterKind` and the custom variant; `setValues` |
 | `@dzgrid/core/server` | gate; `sourceRows`; `toWire` |
+| `@dzgrid/core/spans` | the span engine: `buildSpanMap`, `headerBands`, `navigate` (step 9b) |
+| `@dzgrid/core/csv` | the CSV writer: `toCsv`, `csvChunks`, `csvRows`, `csvColumns`, `csvSeparatorFor`; types `CsvOptions`, `CsvInput`, `CsvSummary`, `ExportRequest` (step 10) |
 | `@dzgrid/dom` | `createGrid`; `Part`, `definePart`; registry resolution; default header, overlay and tooltip parts |
 | `@dzgrid/dom/popup` | the popup host (`popupsFor(g)`), imported by the features that open popups |
 | `@dzgrid/dom/filters` | `filters({ datePicker?, floating?, debounceMs? })`: the six `filter.*` parts, `floating.text` and `floating.number`, the summary floating part, `bindQuickSearch`. The value list is loaded lazily inside it (cut 3). |

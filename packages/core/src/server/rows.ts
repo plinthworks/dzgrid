@@ -386,6 +386,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     kind: 'source',
     ops,
     get displayed() { return inner.displayed; },
+    // A fetched set holds every row the query matches; server pages hold one page.
+    get allRows() { return serverPages ? undefined : inner.allRows; },
     get status() { return status; },
     get problems() { return problems(); },
     get counts() {

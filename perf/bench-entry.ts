@@ -2,6 +2,7 @@ import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToE
 import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache, filterKindLookup, flatDisplayed } from '../packages/core/src/internal.js';
 import { toWire } from '../packages/core/src/server.js';
 import { buildSpanMap } from '../packages/core/src/spans.js';
+import { toCsv } from '../packages/core/src/csv.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
 import { msg } from '../packages/dom/src/messages.js';
@@ -115,6 +116,7 @@ export const CASES: Record<string, Case> = {
   ...quickCases(),
   ...modelCases(),
   ...layoutCases(),
+  ...csvCases(),
 };
 
 function layoutCases(): Record<string, Case> {
@@ -147,6 +149,30 @@ function layoutCases(): Record<string, Case> {
       let acc = 0;
       for (let i = 0; i < 100_000; i++) acc += scrollMapper(32_000_000 + i, MAX_PHYSICAL, 700).ratio;
       return acc;
+    },
+  };
+}
+
+/** Step 10: the whole file of dataset A, every column, French in Algiers (wall-time instants, decimal commas). */
+function csvCases(): Record<string, Case> {
+  const opts = (values: string[]) => values.map((value) => ({ value, label: value.toUpperCase() }));
+  const columns = createColumnModel<RowA>([
+    { id: 'id' },
+    ...['t0', 't1', 't2', 't3', 't4', 'a0', 'a1', 'a2', 'a3', 'a4'].map((id) => ({ id })),
+    ...['n0', 'n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7'].map((id) => ({ id, type: 'number' as const })),
+    ...['d0', 'd1', 'd2', 'd3'].map((id) => ({ id, type: 'day' as const })),
+    { id: 'i0', type: 'instant' }, { id: 'i1', type: 'instant' },
+    { id: 'e0', type: 'enum', enumOptions: opts(['pending', 'active', 'suspended', 'closed']) },
+    { id: 'e1', type: 'enum', enumOptions: opts(['cardiology', 'pediatrics', 'radiology', 'oncology', 'dermatology', 'neurology']) },
+    { id: 'e2', type: 'enum', enumOptions: opts(['low', 'medium', 'high']) },
+    { id: 'b0', type: 'boolean' }, { id: 'b1', type: 'boolean' },
+  ]);
+  const ctx = localeCtx({ locale: 'fr-FR', timeZone: 'Africa/Algiers' });
+  let model: ReturnType<typeof clientRows<RowA>> | null = null;
+  return {
+    'csv 100 000 x 30 (toCsv)': {
+      setup: () => (model ??= clientRows<RowA>({ rows: datasetA(), getRowId: (r) => r.id, columns, ctx })),
+      run: (m: ReturnType<typeof clientRows<RowA>>) => toCsv({ rows: m.displayed, columns, ctx }).length,
     },
   };
 }

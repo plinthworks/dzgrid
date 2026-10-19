@@ -1,0 +1,59 @@
+{
+  "id": "day-enum-boolean",
+  "suite": "csv",
+  "description": "Days ISO, enums by label, booleans true/false.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "d",
+        "header": "Jour",
+        "type": "day"
+      },
+      {
+        "id": "e",
+        "header": "État",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "Admis"
+          },
+          {
+            "value": "out",
+            "label": "Sorti"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "header": "OK",
+        "type": "boolean"
+      }
+    ],
+    "rows": [
+      {
+        "d": "2026-03-05",
+        "e": "in",
+        "b": true
+      },
+      {
+        "d": "2026-12-31",
+        "e": "out",
+        "b": false
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Jour;État;OK\r\n2026-03-05;Admis;true\r\n2026-12-31;Sorti;false\r\n",
+    "summary": {
+      "rows": 2,
+      "columns": 3,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "id": "tab-separator",
+  "suite": "csv",
+  "description": "A tab separator keeps the locale's decimal mark and quotes a field holding a tab.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Nom"
+      },
+      {
+        "id": "dose",
+        "header": "Dose",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "name": "a\tb",
+        "dose": 0.5
+      }
+    ],
+    "options": {
+      "bom": false,
+      "separator": "\t"
+    }
+  },
+  "expected": {
+    "text": "Nom\tDose\r\n\"a\tb\"\t0,5\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

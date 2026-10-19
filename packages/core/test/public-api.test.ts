@@ -3,6 +3,7 @@ import * as core from '@dzgrid/core';
 import * as internal from '@dzgrid/core/internal';
 import * as server from '@dzgrid/core/server';
 import * as spans from '@dzgrid/core/spans';
+import * as csv from '@dzgrid/core/csv';
 
 /**
  * The public surface, written out by hand: adding an export is a decision,
@@ -33,7 +34,15 @@ const SERVER = ['createGate', 'sourceRows', 'toWire'];
 /** `@dzgrid/core/spans` (step 9b): cell spans, never in the base. */
 const SPANS = ['buildSpanMap', 'headerBands', 'land', 'navigate', 'ownerFocus', 'rowPlanner', 'spanAt'];
 
+/** `@dzgrid/core/csv` (step 10): the CSV writer, never in the base. */
+const CSV = ['csvChunks', 'csvColumns', 'csvRows', 'csvSeparatorFor', 'toCsv'];
+
 describe('the public surface', () => {
+  it('keeps the csv entry apart', () => {
+    expect(Object.keys(csv).sort()).toEqual([...CSV].sort());
+    for (const name of CSV) expect(name in core || name in internal || name in server || name in spans, name).toBe(false);
+  });
+
   it('keeps the server entry apart', () => {
     expect(Object.keys(server).sort()).toEqual([...SERVER].sort());
     for (const name of SERVER) expect(name in core, name).toBe(false);

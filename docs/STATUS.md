@@ -17,9 +17,10 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 8 — types de filtres personnalisés (`FilterKind`) | fait | `7a081dc` |
 | 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
 | 9b — fusions de cellules (rowspan / colspan) | fait, relu, testé (4 commits et leurs corrections) | `f4c63f6` |
-| 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
+| 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | écrit, suite verte, non commité, à relire | — |
+| 11 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 10 (export CSV), architecte d'abord. L'étape 9b (fusions) est close (`f4c63f6`) : page d'exemples http://127.0.0.1:4700/spans.html ; fiche `docs/behaviors/spans.md` ; plan `docs/phase-3-steps/step9b-spans-blueprint.md` ; test à l'oreille à faire par le propriétaire : `docs/a11y-protocol.md` §7 (dont Firefox avec NVDA/JAWS sur les en-têtes groupés). Limites connues : sans `spans()`, une en-tête de colonne focalisée déplacée par un épinglage perd le focus (budget de base) ; le nombre de niveaux de groupes est fixé à la création.
+En cours : l'étape 10 (export CSV) est écrite (`@dzgrid/core/csv`, fiche `docs/behaviors/csv-export.md` complétée, plan et décisions dans `docs/phase-3-steps/step10-*`), suite verte, à relire et à commiter ; le bouton d'export, `canExport` et `exportAll` sont l'étape 19. L'étape 9b (fusions) est close (`f4c63f6`) : page d'exemples http://127.0.0.1:4700/spans.html ; fiche `docs/behaviors/spans.md` ; plan `docs/phase-3-steps/step9b-spans-blueprint.md` ; test à l'oreille à faire par le propriétaire : `docs/a11y-protocol.md` §7 (dont Firefox avec NVDA/JAWS sur les en-têtes groupés). Limites connues : sans `spans()`, une en-tête de colonne focalisée déplacée par un épinglage perd le focus (budget de base) ; le nombre de niveaux de groupes est fixé à la création.
 
 ## Les plans détaillés des étapes
 
@@ -47,11 +48,12 @@ En cours : l'étape 10 (export CSV), architecte d'abord. L'étape 9b (fusions) e
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 26 000 o gz | 25 950 |
-| `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 421 |
-| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 344 |
+| `@dzgrid/core` | 26 100 o gz (`allRows`) | 25 995 |
+| `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 564 |
+| `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 425 |
+| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 363 |
 | `@dzgrid/dom` | 18 000 (fusions) | 17 989 |
-| `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 174 |
+| `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 473 |
 | `@dzgrid/dom/popup` | 1 500 | ~1 390 |
 | langues en / fr / ar | 540 / 660 / 850 | 511 / 623 / 801 |
 | thème | 1 180 | 1 152 |
@@ -76,4 +78,5 @@ En cours : l'étape 10 (export CSV), architecte d'abord. L'étape 9b (fusions) e
 - Avant l'étape 6 : `/server` 6 kB.
 - Étape 7 : `selection.keepOnFilter` (par défaut on garde la sélection quand le filtre change ; `false` la vide et l'annonce) ; langues 540/660/850.
 - Étape 8 : cœur 26 kB.
+- Étape 10 : `@dzgrid/core/csv` à part (2,5 kB) et cœur 26,1 kB pour `allRows` ; `selected` = les lignes sélectionnées que la requête montre ; option de colonne `csv: 'text'` (`="0123"` pour les valeurs faites de chiffres seulement). Détail : `docs/phase-3-steps/step10-decisions.md`.
 - Étape 9 : la liste à cocher montre les valeurs présentes dans les lignes que donnent les autres filtres (« montrer une option qui ne remonte rien est faux ») ; sans autre filtre, tout ce qui est en base ou chargé ; une valeur déjà cochée reste visible à 0 pour pouvoir la décocher ; au plus 2 000 valeurs, puis « affinez votre recherche ».

@@ -21,9 +21,10 @@ import { source } from './source.js';
 import { wire } from './wire.js';
 import { valueList } from './value-list.js';
 import { spans } from './spans.js';
+import { csv } from './csv.js';
 
 /** A suite turns a case's `input` into what is compared with its `expected`. */
 export type Suite = (input: any) => unknown;
 
 /** Every suite the runner knows, by the name of its folder in `cases/`. */
-export const SUITES: Record<string, Suite> = { ...values, ...rows, ...format, ...columns, ...store, ...sort, ...filter, ...quick, ...model, ...layout, ...selection, ...selectionAcross, ...problems, ...keys, ...kernel, ...operations, ...parts, ...server, ...page, ...source, ...wire, ...valueList, ...spans };
+export const SUITES: Record<string, Suite> = { ...values, ...rows, ...format, ...columns, ...store, ...sort, ...filter, ...quick, ...model, ...layout, ...selection, ...selectionAcross, ...problems, ...keys, ...kernel, ...operations, ...parts, ...server, ...page, ...source, ...wire, ...valueList, ...spans, ...csv };

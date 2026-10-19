@@ -20,6 +20,10 @@
     "./spans": {
       "types": "./src/spans.ts",
       "default": "./src/spans.ts"
+    },
+    "./csv": {
+      "types": "./src/csv.ts",
+      "default": "./src/csv.ts"
     }
   }
 }

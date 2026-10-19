@@ -1,0 +1,34 @@
+{
+  "id": "ar-bom",
+  "suite": "csv",
+  "description": "Arabic: the BOM first, the text unchanged, logical order, ; for ar-DZ with Latin digits.",
+  "input": {
+    "locale": "ar-DZ",
+    "columns": [
+      {
+        "id": "n",
+        "header": "الاسم"
+      },
+      {
+        "id": "w",
+        "header": "المصلحة"
+      }
+    ],
+    "rows": [
+      {
+        "n": "محمد",
+        "w": "\u200fطب"
+      }
+    ],
+    "options": {}
+  },
+  "expected": {
+    "text": "\ufeffالاسم;المصلحة\r\nمحمد;\u200fطب\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

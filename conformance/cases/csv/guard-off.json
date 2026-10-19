@@ -1,0 +1,32 @@
+{
+  "id": "guard-off",
+  "suite": "csv",
+  "description": "sanitizeFormulas false writes formulas as they are.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "t",
+        "header": "T"
+      }
+    ],
+    "rows": [
+      {
+        "t": "=1+1"
+      }
+    ],
+    "options": {
+      "bom": false,
+      "sanitizeFormulas": false
+    }
+  },
+  "expected": {
+    "text": "T\r\n=1+1\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 1,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

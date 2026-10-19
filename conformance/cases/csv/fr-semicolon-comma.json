@@ -1,0 +1,41 @@
+{
+  "id": "fr-semicolon-comma",
+  "suite": "csv",
+  "description": "French: separator ; and the decimal comma, no grouping.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Nom"
+      },
+      {
+        "id": "dose",
+        "header": "Dose",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "name": "Ali",
+        "dose": 1.5
+      },
+      {
+        "name": "a;b",
+        "dose": 1234567.25
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Nom;Dose\r\nAli;1,5\r\n\"a;b\";1234567,25\r\n",
+    "summary": {
+      "rows": 2,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

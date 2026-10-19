@@ -1,0 +1,38 @@
+{
+  "id": "fr-explicit-comma",
+  "suite": "csv",
+  "description": "French with an explicit , separator writes the decimal point.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Nom"
+      },
+      {
+        "id": "dose",
+        "header": "Dose",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "name": "x",
+        "dose": -2.5
+      }
+    ],
+    "options": {
+      "bom": false,
+      "separator": ","
+    }
+  },
+  "expected": {
+    "text": "Nom,Dose\r\nx,-2.5\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

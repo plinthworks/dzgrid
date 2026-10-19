@@ -1,0 +1,38 @@
+{
+  "id": "text-identifier",
+  "suite": "csv",
+  "description": "csv text: a digits-only value is written =\"…\" (leading zeros kept in Excel); other values as usual, guarded.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "nin",
+        "header": "NIN",
+        "csv": "text"
+      }
+    ],
+    "rows": [
+      {
+        "nin": "00123"
+      },
+      {
+        "nin": "=1+1"
+      },
+      {
+        "nin": "A-12"
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "NIN\r\n\"=\"\"00123\"\"\"\r\n'=1+1\r\nA-12\r\n",
+    "summary": {
+      "rows": 3,
+      "columns": 1,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

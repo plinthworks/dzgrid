@@ -1,0 +1,40 @@
+{
+  "id": "quoting",
+  "suite": "csv",
+  "description": "Quotes doubled, CR and LF kept inside quotes, every line ends in CRLF.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "t",
+        "header": "T"
+      },
+      {
+        "id": "u",
+        "header": "U"
+      }
+    ],
+    "rows": [
+      {
+        "t": "say \"hi\"",
+        "u": "l1\r\nl2"
+      },
+      {
+        "t": "a\rb",
+        "u": "c\nd"
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "T,U\r\n\"say \"\"hi\"\"\",\"l1\r\nl2\"\r\n\"a\rb\",\"c\nd\"\r\n",
+    "summary": {
+      "rows": 2,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

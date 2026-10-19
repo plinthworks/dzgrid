@@ -1,0 +1,36 @@
+{
+  "id": "instant-algiers-wall",
+  "suite": "csv",
+  "description": "An instant is wall time in the display zone, milliseconds dropped, the zone in the header.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "at",
+        "header": "Date",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "at": "2026-03-05T22:59:00Z"
+      },
+      {
+        "at": "2026-03-05T23:00:00.999Z"
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Date (Africa/Algiers)\r\n2026-03-05 23:59:00\r\n2026-03-06 00:00:00\r\n",
+    "summary": {
+      "rows": 2,
+      "columns": 1,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

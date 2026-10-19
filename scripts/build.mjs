@@ -26,7 +26,7 @@ const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'in
  * dist/ once built: a subpath is added here on purpose, never by accident.
  */
 const PACKAGES = {
-  core: ['.', './internal', './server', './spans'],
+  core: ['.', './internal', './server', './spans', './csv'],
   dom: ['.', './popup', './spans', './locales/en', './locales/fr', './locales/ar'],
 };
 /** Built after the TypeScript packages, against their dist/ declarations. */

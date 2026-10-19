@@ -1,0 +1,37 @@
+{
+  "id": "en-comma-point",
+  "suite": "csv",
+  "description": "English: separator , and the decimal point; a comma in a field is quoted.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Nom"
+      },
+      {
+        "id": "dose",
+        "header": "Dose",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "name": "Smith, J",
+        "dose": 1.5
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Nom,Dose\r\n\"Smith, J\",1.5\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

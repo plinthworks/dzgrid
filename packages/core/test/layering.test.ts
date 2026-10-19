@@ -17,6 +17,7 @@ async function inputsOf(entry: string): Promise<string[]> {
 }
 const isServer = (f: string) => /(^|\/)src\/server(\.ts$|\/)/.test(f);
 const isSpans = (f: string) => /(^|\/)src\/spans(\.ts$|\/)/.test(f);
+const isCsv = (f: string) => /(^|\/)src\/csv(\.ts$|\/)/.test(f);
 
 describe('layering of the base and the server entry', () => {
   it('the base bundle holds no server module', async () => {
@@ -37,6 +38,18 @@ describe('layering of the base and the server entry', () => {
     const inputs = await inputsOf('spans.ts');
     for (const f of ['src/spans/map.ts', 'src/spans/merge.ts', 'src/spans/nav.ts', 'src/spans/bands.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
     expect(inputs.filter(isServer)).toEqual([]);
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(false);
+  });
+
+  it('no other entry holds a csv module (step 10)', async () => {
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts']) expect((await inputsOf(entry)).filter(isCsv), entry).toEqual([]);
+  });
+
+  it('the csv entry holds its writer, and no server or span module (their types only)', async () => {
+    const inputs = await inputsOf('csv.ts');
+    for (const f of ['src/csv/quote.ts', 'src/csv/writers.ts', 'src/csv/chunks.ts', 'src/csv/rows.ts', 'src/csv/wall.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    expect(inputs.filter(isServer)).toEqual([]);
+    expect(inputs.filter(isSpans)).toEqual([]);
     expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(false);
   });
 
