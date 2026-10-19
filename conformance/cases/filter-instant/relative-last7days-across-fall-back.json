@@ -1,0 +1,50 @@
+{
+  "id": "relative-last7days-across-fall-back",
+  "suite": "filter-instant",
+  "description": "The last 7 days across the autumn change in Paris are 169 hours: 21 October 00:00 (+02) to 28 October 00:00 (+01).",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2026-10-20T21:59:59.999Z"
+      },
+      {
+        "id": "2",
+        "t": "2026-10-20T22:00:00Z"
+      },
+      {
+        "id": "3",
+        "t": "2026-10-27T22:59:59.999Z"
+      },
+      {
+        "id": "4",
+        "t": "2026-10-27T23:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "last7Days"
+      }
+    },
+    "now": "2026-10-27T09:00:00Z"
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "3"
+    ]
+  }
+}

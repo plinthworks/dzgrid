@@ -3,7 +3,7 @@ import type { ColumnEnv } from '../model/column-cache.js';
 import type { ResolvedColumn } from '../columns/defs.js';
 import { problem, type Problem } from '../problems.js';
 import { dayToEpochDay, parseDay } from '../value/day.js';
-import { resolveInstantRange } from './instant.js';
+import { relativeOf, resolveInstantRange } from './instant.js';
 import type { AnyFilterKind } from './kind.js';
 import { INSTANT_OPS, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel } from './model.js';
 
@@ -217,7 +217,14 @@ function dayTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 'da
       return null;
     }
   }
-  return rangeTest(col, f, path, env, problems, (v) => dayToEpochDay(parseDay(v)!));
+  let g: { op: string; value?: unknown; valueTo?: unknown } = f;
+  if (f.op === 'relative') {
+    // A shortcut is between on the days it names now, in the grid's zone (a Day has none).
+    const days = relativeOf(f.range, env.ctx.timeZone, env.now, path, problems);
+    if (!days) return null;
+    g = { op: 'between', value: days.from, valueTo: days.to };
+  }
+  return rangeTest(col, g, path, env, problems, (v) => dayToEpochDay(parseDay(v)!));
 }
 
 function instantTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 'instant' }>, path: string, env: ColumnEnv<T>, problems: Problem[]): Compiled {
@@ -225,7 +232,8 @@ function instantTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type:
   const { keys } = env.cache.keys(col, env);
   if (f.op === 'blank') return (src) => keys[src] !== keys[src];
   if (f.op === 'notBlank') return (src) => keys[src] === keys[src];
-  const r = resolveInstantRange(f, env.ctx.timeZone, path);
+  // The clock is read for a shortcut only.
+  const r = resolveInstantRange(f, env.ctx.timeZone, path, f.op === 'relative' ? env.now : undefined);
   problems.push(...r.problems);
   if (r.problems.length) return null;
   if (!r.range) return INACTIVE;

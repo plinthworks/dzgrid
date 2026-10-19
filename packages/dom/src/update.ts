@@ -38,6 +38,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   source: 'live',
   operations: 'fixed',
   filterKinds: 'fixed',
+  clock: 'fixed',
   fullWidth: 'live',
 };
 

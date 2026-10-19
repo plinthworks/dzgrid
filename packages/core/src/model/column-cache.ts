@@ -18,6 +18,8 @@ export interface ColumnEnv<T> {
   readonly ctx: LocaleCtx;
   readonly reader: ValueReader<T>;
   readonly cache: ColumnCache<T>;
+  /** The clock, milliseconds since 1970 UTC: what a date shortcut counts from (filter-relative.md). Absent: no clock. */
+  readonly now?: number | undefined;
 }
 
 /** What `raw` returns for a cell whose accessor threw. */

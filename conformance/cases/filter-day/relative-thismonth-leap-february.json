@@ -1,0 +1,50 @@
+{
+  "id": "relative-thismonth-leap-february",
+  "suite": "filter-day",
+  "description": "This month is the whole month, the days to come included: 1 to 29 February 2028.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "d": "2028-01-31"
+      },
+      {
+        "id": "2",
+        "d": "2028-02-01"
+      },
+      {
+        "id": "3",
+        "d": "2028-02-29"
+      },
+      {
+        "id": "4",
+        "d": "2028-03-01"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "thisMonth"
+      }
+    },
+    "now": "2028-02-10T00:00:00Z"
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "3"
+    ]
+  }
+}

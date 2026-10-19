@@ -1,0 +1,35 @@
+{
+  "id": "relative-unknown-range",
+  "suite": "wire",
+  "description": "An unknown shortcut is dropped, refused at .range.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "thisWeek"
+      }
+    },
+    "locale": "fr-FR",
+    "now": "2026-10-19T00:00:00Z"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.t.range"
+      ]
+    ]
+  }
+}

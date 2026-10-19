@@ -1,0 +1,38 @@
+{
+  "id": "day-relative-last7days",
+  "suite": "wire",
+  "description": "A day shortcut travels as between, its days resolved in the grid's zone, with its name and the zone.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "last7Days"
+      }
+    },
+    "locale": "fr-FR",
+    "now": "2026-10-19T10:00:00Z"
+  },
+  "expected": {
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "between",
+        "value": "2026-10-13",
+        "valueTo": "2026-10-19",
+        "relative": "last7Days",
+        "zone": "Africa/Algiers"
+      }
+    }
+  }
+}

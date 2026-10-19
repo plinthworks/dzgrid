@@ -1,0 +1,39 @@
+{
+  "id": "relative-yesterday-apia-skipped-empty",
+  "suite": "filter-instant",
+  "description": "Yesterday in Apia on 31 December 2011 is the 30th, which never happened: nothing is kept.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Pacific/Apia",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2011-12-30T09:59:59.999Z"
+      },
+      {
+        "id": "2",
+        "t": "2011-12-30T10:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "yesterday"
+      }
+    },
+    "now": "2011-12-31T00:00:00Z"
+  },
+  "expected": {
+    "ids": []
+  }
+}

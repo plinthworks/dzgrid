@@ -1,0 +1,42 @@
+{
+  "id": "instant-relative-today-paris",
+  "suite": "wire",
+  "description": "An instant shortcut travels as betweenDays with resolved (the 25-hour day) and its name.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "timeZone": "Europe/Paris",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "today"
+      }
+    },
+    "locale": "fr-FR",
+    "now": "2026-10-25T12:00:00Z"
+  },
+  "expected": {
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "betweenDays",
+        "day": "2026-10-25",
+        "dayTo": "2026-10-25",
+        "resolved": {
+          "from": "2026-10-24T22:00:00.000Z",
+          "to": "2026-10-25T23:00:00.000Z"
+        },
+        "zone": "Europe/Paris",
+        "relative": "today"
+      }
+    }
+  }
+}

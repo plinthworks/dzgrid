@@ -1,0 +1,50 @@
+{
+  "id": "relative-today-paris-fall-25h",
+  "suite": "filter-instant",
+  "description": "Today on Paris's autumn change lasts 25 hours: 22:00Z on the 24th to 23:00Z.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2026-10-24T21:59:59.999Z"
+      },
+      {
+        "id": "2",
+        "t": "2026-10-24T22:00:00Z"
+      },
+      {
+        "id": "3",
+        "t": "2026-10-25T22:59:59.999Z"
+      },
+      {
+        "id": "4",
+        "t": "2026-10-25T23:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "today"
+      }
+    },
+    "now": "2026-10-25T12:00:00Z"
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "3"
+    ]
+  }
+}

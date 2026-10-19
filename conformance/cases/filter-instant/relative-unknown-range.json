@@ -1,0 +1,48 @@
+{
+  "id": "relative-unknown-range",
+  "suite": "filter-instant",
+  "description": "A shortcut that is not one of the six is refused at .range, and the filter ignored.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2026-10-19T10:00:00Z"
+      },
+      {
+        "id": "2",
+        "t": "2026-10-20T10:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "lastHour"
+      }
+    },
+    "now": "2026-10-19T00:00:00Z"
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.t.range"
+      ]
+    ]
+  }
+}

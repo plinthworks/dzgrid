@@ -51,6 +51,8 @@ export interface GridSettings<T> {
   readonly pagination?: PageOptions;
   /** Custom filter kinds (docs/behaviors/filter-custom.md), for the browser's filter and a server's. Set once. */
   readonly filterKinds?: readonly AnyFilterKind[];
+  /** The clock (milliseconds since 1970 UTC) date shortcuts count from (filter-relative.md); `Date.now` by default. Set once. */
+  readonly clock?: () => number;
   /**
    * Rows drawn as one cell across the whole width (a title, a note): true, or the
    * part that draws it. Needs the spans feature; the base ignores it.

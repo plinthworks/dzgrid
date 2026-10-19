@@ -1,0 +1,47 @@
+{
+  "id": "relative-no-now-dropped",
+  "suite": "wire",
+  "description": "Without now a shortcut is dropped from the request, with its problem.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "today"
+      },
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "today"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.d"
+      ],
+      [
+        "invalid-filter",
+        "filter.t"
+      ]
+    ]
+  }
+}

@@ -1,8 +1,9 @@
 import { problem, type Problem } from '../problems.js';
 import { parseDay, type Day } from '../value/day.js';
 import { readInstant, type InstantMs } from '../value/instant.js';
+import { dayAt, relativeDays } from '../value/relative.js';
 import { zoneDayBounds } from '../value/zone-day.js';
-import type { InstantFilter } from './model.js';
+import { RELATIVE_RANGES, type InstantFilter, type RelativeRange } from './model.js';
 
 /**
  * The span an instant filter keeps: `[from, to)`, start in, end out, with
@@ -35,12 +36,34 @@ const at = (v: unknown, path: string, problems: Problem[]): InstantMs | null | u
 };
 
 /**
+ * A shortcut's two days (both in), counted from the day `now` falls on in
+ * `zone` (docs/behaviors/filter-relative.md); null with its problem: an
+ * unknown name at `.range`, no clock (or one past the years a Day can write).
+ */
+export function relativeOf(range: unknown, zone: string, now: number | undefined, path: string, problems: Problem[]): { readonly from: Day; readonly to: Day } | null {
+  if (!RELATIVE_RANGES.has(range as RelativeRange)) {
+    problems.push(problem('invalid-filter', 'error', `${path}.range`));
+    return null;
+  }
+  const today = now === undefined ? null : dayAt(now, zone);
+  const days = today && relativeDays(range as RelativeRange, today.day);
+  if (!days) problems.push(problem('invalid-filter', 'error', path, 'no clock'));
+  return days;
+}
+
+/**
  * The range for an instant filter in `zone`, or null when the filter is
  * inactive (half-typed) or wrong (with a problem). `blank` and `notBlank`
- * have no range; the compiled filter handles them.
+ * have no range; the compiled filter handles them. A shortcut (`relative`)
+ * reads `now`, and gives its `days` too.
  */
-export function resolveInstantRange(f: InstantFilter, zone: string, path = 'filter'): { range: InstantRange | null; problems: readonly Problem[] } {
+export function resolveInstantRange(f: InstantFilter, zone: string, path = 'filter', now?: number): { range: InstantRange | null; problems: readonly Problem[]; days?: { readonly from: Day; readonly to: Day } } {
   const problems: Problem[] = [];
+  if (f.op === 'relative') {
+    // A shortcut is betweenDays on the days it names now: the whole days, 23 or 25 hours on a change.
+    const days = relativeOf(f.range, zone, now, path, problems);
+    return days ? { range: { from: zoneDayBounds(days.from, zone).from, to: zoneDayBounds(days.to, zone).to }, problems, days } : { range: null, problems };
+  }
   const d1 = day(f.day, `${path}.day`, problems);
   const d2 = day(f.dayTo, `${path}.dayTo`, problems);
   const a1 = at(f.at, `${path}.at`, problems);

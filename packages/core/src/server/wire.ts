@@ -1,20 +1,22 @@
 import type { ColumnLookup } from '../columns/model.js';
 import type { ResolvedColumn } from '../columns/defs.js';
-import { resolveInstantRange } from '../filter/instant.js';
-import { INSTANT_OPS, isJson, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel, type Json, type NumOp, type TextOp, type WireKind } from '../filter/model.js';
+import { relativeOf, resolveInstantRange } from '../filter/instant.js';
+import { INSTANT_OPS, isJson, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel, type Json, type NumOp, type RelativeRange, type TextOp, type WireKind } from '../filter/model.js';
 import { problem, type Problem } from '../problems.js';
 import { epochDayToDay, parseDay, type Day } from '../value/day.js';
 import type { LocaleCtx } from '../value/locale.js';
 
 export type { WireKind };
 
-/** What `toWire` reads besides the filter. `now` is reserved for relative dates (Phase 5). */
+/** What `toWire` reads besides the filter. */
 export interface WireEnv<T> {
   /** `ctx.timeZone` is the grid's zone: the one instant bounds are resolved in. */
   readonly ctx: LocaleCtx;
   readonly columns: ColumnLookup<T>;
   /** The custom filter kinds, by name. */
   readonly kinds?: (name: string) => WireKind | undefined;
+  /** The clock, milliseconds since 1970 UTC: what a date shortcut is resolved against (filter-relative.md). Absent: a shortcut is refused (`no clock`). */
+  readonly now?: number;
 }
 
 /** The filters as the server receives them: the model, cleaned and made absolute (docs/behaviors/server-filter.md). */
@@ -26,8 +28,11 @@ export type WireInstant = string;
 export type WireFilter =
   | { readonly type: 'text'; readonly op: TextOp; readonly value?: string; readonly caseSensitive?: true }
   | { readonly type: 'number'; readonly op: NumOp; readonly value?: number; readonly valueTo?: number }
-  /** Civil days, no zone; `between` in order, both ends in. */
-  | { readonly type: 'day'; readonly op: NumOp; readonly value?: Day; readonly valueTo?: Day }
+  /**
+   * Civil days, no zone; `between` in order, both ends in. A shortcut travels
+   * as `between` on its days, resolved in `zone`, with its name in `relative`.
+   */
+  | { readonly type: 'day'; readonly op: NumOp; readonly value?: Day; readonly valueTo?: Day; readonly relative?: RelativeRange; readonly zone?: string }
   | { readonly type: 'instant'; readonly op: 'blank' | 'notBlank' }
   | {
       readonly type: 'instant';
@@ -40,6 +45,8 @@ export type WireFilter =
       /** What the server applies: `[from, to)`, null for an open end. */
       readonly resolved: { readonly from: WireInstant | null; readonly to: WireInstant | null };
       readonly zone: string;
+      /** A shortcut: sent as `betweenDays` on the days it names now, its name here (for logs and saved views). */
+      readonly relative?: RelativeRange;
     }
   | { readonly type: 'boolean'; readonly value: boolean }
   | { readonly type: 'set'; readonly include?: readonly string[]; readonly exclude?: readonly string[]; readonly blanks?: 'include' | 'exclude' }
@@ -116,6 +123,10 @@ function wireOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: 
           }
         }
       }
+      if (day && f.op === 'relative') {
+        const days = relativeOf(f.range, env.ctx.timeZone, env.now, path, problems);
+        return days && { type: 'day', op: 'between', value: days.from, valueTo: days.to, relative: f.range!, zone: env.ctx.timeZone };
+      }
       if (!NUM_OPS.has(f.op)) return bad(`${path}.op`);
       if (f.op === 'blank' || f.op === 'notBlank') return { type: f.type, op: f.op } as WireFilter;
       // A day was checked above; a number must be finite.
@@ -133,7 +144,7 @@ function wireOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: 
       if (col.type !== 'instant') return bad();
       if (!INSTANT_OPS.has(f.op)) return bad(`${path}.op`);
       if (f.op === 'blank' || f.op === 'notBlank') return { type: 'instant', op: f.op };
-      const r = resolveInstantRange(f, env.ctx.timeZone, path);
+      const r = resolveInstantRange(f, env.ctx.timeZone, path, env.now);
       problems.push(...r.problems);
       if (r.problems.length) return null;
       if (!r.range) return OFF;
@@ -146,6 +157,7 @@ function wireOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: 
       }
       // The fields the op read: a moment wins over a day for before and after.
       const fields =
+        r.days ? { op: 'betweenDays', day: r.days.from, dayTo: r.days.to, relative: f.range } :
         f.op === 'onDay' ? { day: f.day } :
         f.op === 'betweenDays' ? { day: f.day, dayTo: f.dayTo } :
         f.op === 'between' ? { at: f.at, atTo: f.atTo } :

@@ -15,18 +15,22 @@ export type FilterModel = Readonly<Record<string, ColumnFilter>>;
 export type TextOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank';
 export type NumOp = 'equals' | 'notEqual' | 'lt' | 'lte' | 'gt' | 'gte' | 'between' | 'blank' | 'notBlank';
 export type InstantOp = 'onDay' | 'betweenDays' | 'before' | 'after' | 'between' | 'blank' | 'notBlank';
+/** A date shortcut, tzslot's names (docs/behaviors/filter-relative.md): whole days counted from today in the grid's zone, both ends in. */
+export type RelativeRange = 'today' | 'yesterday' | 'last7Days' | 'last30Days' | 'thisMonth' | 'lastMonth';
 
 export type ColumnFilter =
   | { readonly type: 'text'; readonly op: TextOp; readonly value?: string; readonly caseSensitive?: boolean }
   | { readonly type: 'number'; readonly op: NumOp; readonly value?: number; readonly valueTo?: number }
-  | { readonly type: 'day'; readonly op: NumOp; readonly value?: Day | string; readonly valueTo?: Day | string }
+  /** `relative`: the days of `range`, resolved against the clock (ColumnEnv.now). */
+  | { readonly type: 'day'; readonly op: NumOp | 'relative'; readonly value?: Day | string; readonly valueTo?: Day | string; readonly range?: RelativeRange }
   | {
       readonly type: 'instant';
-      readonly op: InstantOp;
+      readonly op: InstantOp | 'relative';
       readonly day?: Day | string;
       readonly dayTo?: Day | string;
       readonly at?: string;
       readonly atTo?: string;
+      readonly range?: RelativeRange;
     }
   | { readonly type: 'boolean'; readonly value: boolean | null }
   | { readonly type: 'set'; readonly include?: readonly string[]; readonly exclude?: readonly string[]; readonly blanks?: 'include' | 'exclude' }
@@ -38,7 +42,9 @@ export type InstantFilter = Extract<ColumnFilter, { type: 'instant' }>;
 
 export const TEXT_OPS: ReadonlySet<string> = new Set(['contains', 'notContains', 'equals', 'notEqual', 'startsWith', 'endsWith', 'blank', 'notBlank']);
 export const NUM_OPS: ReadonlySet<string> = new Set(['equals', 'notEqual', 'lt', 'lte', 'gt', 'gte', 'between', 'blank', 'notBlank']);
-export const INSTANT_OPS: ReadonlySet<string> = new Set(['onDay', 'betweenDays', 'before', 'after', 'between', 'blank', 'notBlank']);
+export const DAY_OPS: ReadonlySet<string> = new Set([...NUM_OPS, 'relative']);
+export const INSTANT_OPS: ReadonlySet<string> = new Set(['onDay', 'betweenDays', 'before', 'after', 'between', 'blank', 'notBlank', 'relative']);
+export const RELATIVE_RANGES: ReadonlySet<RelativeRange> = new Set(['today', 'yesterday', 'last7Days', 'last30Days', 'thisMonth', 'lastMonth']);
 
 /**
  * What the wire form needs of a custom filter kind (step 8's `FilterKind`

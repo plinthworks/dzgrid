@@ -1,0 +1,47 @@
+{
+  "id": "relative-no-clock",
+  "suite": "filter-instant",
+  "description": "Without a clock a shortcut cannot be counted: refused (detail: no clock), the filter ignored.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2026-10-19T10:00:00Z"
+      },
+      {
+        "id": "2",
+        "t": "2026-10-20T10:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "today"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.t"
+      ]
+    ]
+  }
+}

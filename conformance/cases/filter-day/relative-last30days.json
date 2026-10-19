@@ -1,0 +1,50 @@
+{
+  "id": "relative-last30days",
+  "suite": "filter-day",
+  "description": "The last 30 days: today and the 29 before, 20 September to 19 October.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "d": "2026-09-19"
+      },
+      {
+        "id": "2",
+        "d": "2026-09-20"
+      },
+      {
+        "id": "3",
+        "d": "2026-10-19"
+      },
+      {
+        "id": "4",
+        "d": "2026-10-20"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "last30Days"
+      }
+    },
+    "now": "2026-10-19T00:00:00Z"
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "3"
+    ]
+  }
+}

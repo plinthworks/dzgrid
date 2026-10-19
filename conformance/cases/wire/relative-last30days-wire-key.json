@@ -1,0 +1,42 @@
+{
+  "id": "relative-last30days-wire-key",
+  "suite": "wire",
+  "description": "The last 30 days in Auckland on 1 March 2026 (+13): 31 January to 1 March, the bounds in UTC.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "timeZone": "Pacific/Auckland",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "last30Days"
+      }
+    },
+    "locale": "fr-FR",
+    "now": "2026-03-01T00:30:00Z"
+  },
+  "expected": {
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "betweenDays",
+        "day": "2026-01-31",
+        "dayTo": "2026-03-01",
+        "resolved": {
+          "from": "2026-01-30T11:00:00.000Z",
+          "to": "2026-03-01T11:00:00.000Z"
+        },
+        "zone": "Pacific/Auckland",
+        "relative": "last30Days"
+      }
+    }
+  }
+}

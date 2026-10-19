@@ -9,7 +9,11 @@
     "suite": { "type": "string" },
     "description": { "type": "string" },
     "refs": { "type": "array", "items": { "type": "string" } },
-    "input": {},
+    "input": {
+      "description": "The suite's input. `now` (optional): the clock, ISO UTC (`2026-10-19T10:00:00Z`), for relative date filters (docs/behaviors/filter-relative.md); absent means no clock.",
+      "type": "object",
+      "properties": { "now": { "type": "string", "pattern": "Z$" } }
+    },
     "expected": {}
   }
 }

@@ -15,6 +15,7 @@ export const storeOf = <T>(m: ClientModel<T>): RowStore<T> => (m as unknown as {
 const STORE = Symbol('dzgrid.store');
 import { sortIndices } from '../sort/compile.js';
 import { ctxKey, type LocaleCtx } from '../value/locale.js';
+import { dayAt } from '../value/relative.js';
 import { ColumnCache, type ColumnEnv } from './column-cache.js';
 import { canonical, EMPTY_QUERY, type Query } from './query.js';
 import type { ChangeSource } from './types.js';
@@ -109,6 +110,8 @@ export interface RowModel<T> {
    * when it runs on a server. One per column: asking again closes the first.
    */
   setValues?(column: string, o?: ValuesOptions): ValuesHandle;
+  /** Looks at the clock again: a date shortcut whose days moved (midnight in the grid's zone) filters or asks again, once. */
+  tick?(): void;
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
   destroy(): void;
 }
@@ -135,6 +138,8 @@ export interface ClientOptions<T> {
   readonly page?: PageOptions;
   /** The custom filter kinds, by name. */
   readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
+  /** The clock, milliseconds since 1970 UTC: what a date shortcut counts from (filter-relative.md). Absent: a shortcut is refused. */
+  readonly now?: () => number;
 }
 
 export interface ClientModel<T> extends RowModel<T> {
@@ -161,6 +166,8 @@ export interface ClientModel<T> extends RowModel<T> {
    * the rows, the columns, the language or the reader change.
    */
   warmSearch(): SearchWarmup;
+  /** At midnight in the grid's zone (or whenever): filters again only if a shortcut's day changed, told as a query change. */
+  tick(): void;
   readonly diagnostics: {
     readonly foldBuilds: number;
     readonly filterRuns: number;
@@ -209,7 +216,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   let pageIndex = 0;
 
   /** What a stage's result depends on, besides the rows. */
-  interface Inputs { snap: number; colsRef: ColumnLookup<T>; cols: number; ctx: string; reader: number; filter: string; quick: string; quickCols: string }
+  interface Inputs { snap: number; colsRef: ColumnLookup<T>; cols: number; ctx: string; reader: number; filter: string; quick: string; quickCols: string; day: string }
   let filtered: { in: Inputs; words: readonly string[]; order: Uint32Array | null; mask: Uint8Array | null; problems: readonly Problem[] } | null = null;
   let sorted: { in: Inputs; sort: string; input: Uint32Array | null; order: Uint32Array | null; problems: readonly Problem[] } | null = null;
   let displayed: DisplayedRows<T>;
@@ -227,22 +234,38 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   };
   const appliedKey = (f: Query['filter']): string => appliedOf(f).key;
 
-  const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache });
+  // The clock is read only by a compile that meets a shortcut.
+  const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache, get now() { return o.now?.(); } });
+  /**
+   * Today in the grid's zone when a filter (keyed `key`) holds a shortcut, '' otherwise: the clock is
+   * read then only, and the day kept until it ends, the zone changes or the clock goes back.
+   */
+  let today: { zone: string; at: number; day: string; until: number } | null = null;
+  const dayOf = (key: string): string => {
+    if (!o.now || !key.includes('"relative"')) return '';
+    const t = o.now();
+    if (!today || today.zone !== ctx.timeZone || t < today.at || t >= today.until) {
+      const r = dayAt(t, ctx.timeZone);
+      today = { zone: ctx.timeZone, at: t, day: r?.day ?? '', until: r?.until ?? Infinity };
+    }
+    return today.day;
+  };
   /** The columns a search reads. */
   const visibleIds = (): string => columns.visible().map((c) => c.id).join(',');
-  const inputs = (): Inputs => ({
+  const inputs = (filter = canonical(query.filter)): Inputs => ({
     snap: store.snapshot.version,
     colsRef: columns,
     // Data, not layout: resizing a column must not filter and sort again.
     cols: columns.dataVersion,
     ctx: ctxKey(ctx),
     reader: reader.version,
-    filter: canonical(query.filter),
+    filter,
     quick: query.quick,
     quickCols: visibleIds(),
+    day: dayOf(filter),
   });
   const same = (a: Inputs, b: Inputs, ignore?: 'quick'): boolean =>
-    a.snap === b.snap && a.colsRef === b.colsRef && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader && a.filter === b.filter && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick);
+    a.snap === b.snap && a.colsRef === b.colsRef && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader && a.filter === b.filter && a.day === b.day && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick);
 
   /** Runs the stages whose inputs changed; true when the displayed rows changed. */
   const run = (): boolean => {
@@ -318,7 +341,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       others: {
         // The columns a search reads are data too: showing or hiding one moves `dataVersion`;
         // another lookup brings other column objects, which rebuild the index and its counts.
-        key: canonical([counted, words, columns.dataVersion]),
+        key: canonical([counted, words, columns.dataVersion, dayOf(canonical(query.filter))]),
         test: () => {
           const e = env();
           const f = compileFilter(others, e, o.filterKinds);
@@ -343,7 +366,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     if (r.kind === 'none') return;
     const delta = store.lastDelta;
     const follow = () => cache.patch(delta, store.snapshot, () => ({ columns, ctx, reader }));
-    if (delta.kind !== 'update' || !delta.changedSrc || !filtered || !sorted) {
+    // A new day since the last run (a shortcut, before the tick): everything again.
+    if (delta.kind !== 'update' || !delta.changedSrc || !filtered || !sorted || filtered.in.day !== inputs().day) {
       follow();
       filtered = null;
       sorted = null;
@@ -408,7 +432,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // words (spaces aside), over the set of columns it reads (their order and pinning aside).
     membershipOf: (q) => {
       const words = quickWords(q.quick);
-      return canonical({ filter: appliedKey(q.filter), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
+      return canonical({ filter: appliedKey(q.filter), day: dayOf(canonical(q.filter)), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
     },
     matches: (key) => {
       const src = store.snapshot.lookup(idOfDataKey(key) ?? '');
@@ -507,6 +531,12 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       const now = filtered!.problems;
       notify('query', source, undefined, now.length && said(now) !== was ? now : undefined);
     },
+    tick() {
+      const was = said(filtered!.problems);
+      if (!run()) return;
+      const now = filtered!.problems;
+      notify('query', 'data', undefined, now.length && said(now) !== was ? now : undefined);
+    },
     // keepScroll is the DOM's concern; the model has no scroll to keep.
     invalidate() {
       cache.invalidateAll();
@@ -579,6 +609,8 @@ export interface ModelEnv<T> {
   readonly abort?: () => AbortHandle;
   /** The grid's custom filter kinds, by name: for the filter sent to a server and the one run in the browser. */
   readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
+  /** The clock (milliseconds since 1970 UTC), for date shortcuts: sent resolved, and run in the browser (filter-relative.md). */
+  readonly now?: () => number;
 }
 
 /** A model to make once the grid knows its columns and language. */
@@ -590,4 +622,6 @@ export interface SourceHandle<T> extends RowModel<T> {
   readonly kind: 'source';
   /** Another source, live: a new epoch, the first page, the old rows shown stale until the answer. */
   setSource(next: SourceBinding<T>, source?: ChangeSource): void;
+  /** Looks at the clock again: a shortcut's wire form made again, a request (a new epoch) only if it changed. */
+  tick(): void;
 }

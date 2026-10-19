@@ -141,7 +141,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   const sizes = pageOptions.config?.sizes ?? DEFAULT_PAGE_SIZES;
 
   const gate = createGate(o.abort ?? env.abort ?? plainAbort);
-  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }) });
+  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }), ...(env.now && { now: env.now }) });
   let current = binding;
   let { data, params } = bound.get(binding)!;
   let ctx = env.ctx;
@@ -326,7 +326,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   let wired: { readonly f: FilterModel; readonly ctx: LocaleCtx; readonly columns: ColumnLookup<T>; readonly v: number; readonly w: ReturnType<typeof toWire> } | null = null;
   const wireOf = (f: FilterModel): ReturnType<typeof toWire> => {
     if (!wired || wired.f !== f || wired.ctx !== ctx || wired.columns !== columns || wired.v !== columns.dataVersion) {
-      wired = { f, ctx, columns, v: columns.dataVersion, w: toWire(f, { ctx, columns, ...(env.filterKinds && { kinds: env.filterKinds }) }) };
+      wired = { f, ctx, columns, v: columns.dataVersion, w: toWire(f, { ctx, columns, ...(env.filterKinds && { kinds: env.filterKinds }), ...(env.now && { now: env.now() }) }) };
     }
     return wired.w;
   };
@@ -464,6 +464,14 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
         ctx = next;
         rekey();
       }, source);
+    },
+    // The wire form again, with the clock as it reads now: a request only if a shortcut's days moved.
+    tick() {
+      commit(() => {
+        inner.tick();
+        wired = null;
+        rekey();
+      }, 'data');
     },
     setPage(p, source = 'api') {
       if (!serverPages) return commit(() => inner.setPage(p, source), source);

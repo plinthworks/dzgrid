@@ -116,6 +116,11 @@ export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
    * once (`problems`, source `data`).
    */
   values(column: string, o?: ValuesOptions): ValuesHandle;
+  /**
+   * Looks at the clock again (`RowModel.tick`): at midnight in the grid's zone a date shortcut's days
+   * move (filter-relative.md). `@dzgrid/dom/filters` calls it; a host without that feature calls it itself.
+   */
+  tick(): void;
   subscribe(fn: (e: GridEvent<T>) => void): () => void;
   destroy(): void;
 }
@@ -481,6 +486,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     get selectionScope() { return tied() ? { query, ...rows.scope } : null; },
     get headerState() { return headerState(); },
     dispatch,
+    tick: () => rows.tick?.(),
     values(column, vo) {
       const h = rows.setValues ? rows.setValues(column, vo) : closedValues();
       // Told by content, like the rows' problems: the same bad entry answered again is not told again.

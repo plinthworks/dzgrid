@@ -1,0 +1,50 @@
+{
+  "id": "relative-today-before-algiers-midnight",
+  "suite": "filter-instant",
+  "description": "At 23:59:59.999 in Algiers today is still the 19th.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "t": "2026-10-18T22:59:59.999Z"
+      },
+      {
+        "id": "2",
+        "t": "2026-10-18T23:00:00Z"
+      },
+      {
+        "id": "3",
+        "t": "2026-10-19T22:59:59.999Z"
+      },
+      {
+        "id": "4",
+        "t": "2026-10-19T23:00:00Z"
+      }
+    ],
+    "filter": {
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "today"
+      }
+    },
+    "now": "2026-10-19T22:59:59.999Z"
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "3"
+    ]
+  }
+}
