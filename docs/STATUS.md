@@ -22,10 +22,9 @@ Mis à jour : 2026-10-19 (étape 15 faite, non commitée). Ce fichier dit où en
 | 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
 | 13 — fenêtre de filtre (texte, nombre, oui/non), marque « filtré », Alt+Flèche bas | fait, relu, testé | `f67fc48`, `67782bc` |
 | 14 — filtres de dates sur tzslot (jour, période, avant/après), six raccourcis relatifs, horloge | fait, relu, testé | `df27559`, `85e08c3`, `ae0b40b`, `24acaab` |
-| 15 — filtre par liste de valeurs (morceau paresseux), fenêtré, clavier, serveur | fait, relu, testé (non commité) | — |
 | 16 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-Étape 15 faite (non commitée) : filtre par liste (`docs/behaviors/filter-set.md`), décisions du propriétaire appliquées (tout décocher = `include: []` ; pas de bouton par défaut sur les colonnes à liste, seulement `filter: { kind: 'set' }` ; « Filtre actif » gardé). Bac à sable : menu de démos en haut de la page d'accueil. Suite 3 087 tests, navigateur 257 vérifications. À faire ensuite : commit après relecture du chef, puis l'étape 16. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§11), relecture arabe (dont les 8 textes de la liste).
+Étape 15 faite (non commitée) : filtre par liste (`docs/behaviors/filter-set.md`), décisions du propriétaire appliquées (tout décocher = `include: []` ; pas de bouton par défaut sur les colonnes à liste, seulement `filter: { kind: 'set' }` ; « Filtre actif » gardé). Bac à sable : menu de démos en haut de la page d'accueil. Suite 3 087 tests, navigateur 257 vérifications. Corrections de la relecture et de l'analyse des tests faites (non commitées) : « Tout sélectionner » suit la liste affichée, pas la case de recherche ; la frappe rapide dans la liste plie les textes comme la recherche (accents, voyelles arabes, formes d'alif) ; Appliquer sans changement n'envoie rien ; liste des options d'une énumération complète ; Flèche bas pendant une saisie IME ; poignée de valeurs fermée si le morceau échoue. Suite 182 fichiers, 3 115 tests. À faire ensuite : commit après relecture du chef, puis l'étape 16. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§11), relecture arabe (dont les 8 textes de la liste).
 
 ## Les plans détaillés des étapes
 
@@ -58,8 +57,8 @@ Mis à jour : 2026-10-19 (étape 15 faite, non commitée). Ce fichier dit où en
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 551 |
 | `@dzgrid/dom` | 18 750 (étape 12) | 18 722 |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 114 |
-| liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 762 |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 160 |
+| liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 778 |
 | adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |
 | lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |

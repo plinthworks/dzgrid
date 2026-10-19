@@ -1,3 +1,4 @@
+import { fold } from '@dzgrid/core';
 import { el, tx } from '../dom.js';
 
 /** A row of the list: a value (`v`), or the blanks (`v` null). */
@@ -23,7 +24,6 @@ export interface ListView {
 export interface ListHooks {
   ticked(r: Row): boolean;
   toggle(r: Row): void;
-  locale(): string;
   /** The focused row left and none is left: where the focus goes. */
   empty(): void;
 }
@@ -36,7 +36,8 @@ const OVER = 6;
  * `listbox`, `aria-multiselectable`, its options absolutely placed over a spacer of the full
  * height, only those in view (plus `OVER` each side) in the page; the active option (roving
  * `tabindex`) is never recycled. Keys as WAI-ARIA's listbox: arrows, Home / End, Page keys,
- * Space / Enter tick, type-ahead within 500 ms at base strength.
+ * Space / Enter tick, type-ahead within 500 ms on folded text (the core's `fold`: no case, accents,
+ * Arabic short vowels or tatweel, one alef).
  */
 export function listView(doc: Document, o: ListHooks): ListView {
   const list = el(doc, 'div', 'dzg-flist');
@@ -46,6 +47,8 @@ export function listView(doc: Document, o: ListHooks): ListView {
   space.setAttribute('aria-hidden', 'true');
   list.append(space);
   let rows: readonly Row[] = [];
+  /** The labels folded, once per list, at the first type-ahead. */
+  let keys: string[] | null = null;
   /** Drawn options by row (value or null), and each one's index. */
   let nodes = new Map<string | null, HTMLElement>();
   const at = new Map<HTMLElement, number>();
@@ -140,18 +143,23 @@ export function listView(doc: Document, o: ListHooks): ListView {
     render();
   };
 
-  /** Type-ahead: the next label starting with what was typed in the last 500 ms; one letter again and again cycles. */
+  /**
+   * Type-ahead: the next label starting with what was typed in the last 500 ms, both folded (a
+   * decomposed é, a vowel mark, أ / إ / آ for ا); one letter again and again cycles. Typed text
+   * that folds to nothing (a lone vowel mark) moves nowhere.
+   */
   function find(ch: string): void {
     const now = Date.now();
     if (now - last > 500) buf = '';
     last = now;
     const same = !!buf && [...buf].every((c) => c === ch);
     buf += ch;
-    const q = same ? ch : buf;
-    const n = rows.length;
+    const q = fold(same ? ch : buf);
+    const n = q ? rows.length : 0;
+    keys ??= rows.map((r) => fold(r.label));
     for (let k = 0, from = buf.length === 1 || same ? active + 1 : active; k < n; k++) {
       const i = (from + k) % n;
-      if (!rows[i]!.label.slice(0, q.length).localeCompare(q, o.locale(), { sensitivity: 'base' })) return move(i);
+      if (keys[i]!.startsWith(q)) return move(i);
     }
   }
 
@@ -184,6 +192,7 @@ export function listView(doc: Document, o: ListHooks): ListView {
       const was = rows[active];
       const old = active;
       rows = next;
+      keys = null;
       // The rows' order may have changed: nothing drawn is kept but the focused one.
       for (const [v, x] of nodes) if (!(had && was && v === was.v)) x.remove(), at.delete(x), nodes.delete(v);
       const i = was && !home ? next.findIndex((r) => r.v === was.v) : -1;

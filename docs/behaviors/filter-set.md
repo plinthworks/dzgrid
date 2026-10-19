@@ -64,8 +64,12 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   ticked row, else the first): ArrowDown / ArrowUp (no wrap), Home / End (with or without Ctrl),
   PageDown / PageUp by a view less one row, Space and Enter tick or untick (Enter never applies
   here), a typed letter goes to the next label starting with what was typed in the last 500 ms
-  (compared at base strength in the grid's locale: `e` finds `É`). A click ticks and focuses.
-  In the search box ArrowDown goes to the list, Enter applies and closes (the popup's rule), Escape
+  (both folded as the quick search folds them, whatever the grid's locale: no case, no accents, a
+  decomposed `é` as a composed one, no Arabic short vowels or tatweel, `أ` / `إ` / `آ` as `ا`; then
+  a prefix test: `e` finds `É`, `ec` finds `école`, `مح` finds `مُحمد`, `ا` finds `أحمد` and `آمال`
+  under an English, French or Arabic UI). Typing that folds to nothing (a lone vowel mark) moves
+  nowhere. A click ticks and focuses.
+  In the search box ArrowDown goes to the list (not inside an input method's composition), Enter applies and closes (the popup's rule), Escape
   closes. Up and Down are not mirrored in right-to-left. Ctrl+A and Shift ranges: Phase 5. If the
   focused row leaves the list (a search, a new answer), the focus goes to the nearest row left, or
   the search box when none is left, never to the page.
@@ -73,13 +77,18 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   above 0, or unknown on a server), or when the draft ticks them in an `include` (or unticks them in
   an `exclude`), so they can be undone; hidden during a search. "Select all" without a search
   includes them, shown or not (a hidden row at 0 now: unticking everything is `include: []`); "select all shown" never touches them.
+- **What "a search" means for select all and its label: the list shown, not the box.** On a server
+  the search goes after the pause: a search box just cleared still shows the older searched list
+  until then, so the box stays "Select all shown" and acts on those rows only, never on the
+  blanks it did not show; it becomes "Select all" when the whole list is asked.
 - **The draft** (a pure module): a mode (`include` or `exclude`), a set of values, and whether
   blanks are kept. What it writes: `{type: 'set', include: [...]}` (sorted by code unit), plus
   `blanks: 'include'` when blanks are ticked; or `{type: 'set', exclude: [...]}`, plus
   `blanks: 'exclude'` when they are not. An `exclude` of nothing with blanks kept is no filter
   (null). Unticking everything is `include: []` (owner decision Q1), a filter that keeps nothing,
   not an inactive draft. The mode changes only on a complete list (no search, not truncated, the
-  list available and settled: an older searched list still shown while the whole one loads is not complete): more than half the values ticked turns it into `exclude`, fewer than half into
+  list available and settled: an older searched list still shown while the whole one loads is not complete; without a list
+  from the server, the column's options unsearched are complete: unticking all there is `include: []` too): more than half the values ticked turns it into `exclude`, fewer than half into
   `include`, a tie keeps it. A search or a truncated list never turns a draft into `exclude`; one
   already in `exclude` stays so (unticking a found value adds it to the excluded ones).
 - **What it edits:** no filter, or a set filter with exactly one of `include` / `exclude` (lists of
@@ -87,7 +96,9 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
 - **Apply** (O3): in the browser ticks apply after the pause (`debounceMs`, 150 ms: several ticks,
   a key held or "select all" give one change and one announcement), Apply, Enter and closing apply
   at once; on a server the ticks are a draft until Apply or Enter (one request), and closing drops
-  them. A tick that brings the draft back to the filter in force sends nothing. The list is drawn
+  them. A tick that brings the draft back to the filter in force sends nothing, and so does Apply
+  on a draft equal to it (compared in its canonical form: a host's `include: ['Oran', 'Alger']`
+  reads back as written, not re-sorted into a new request). The list is drawn
   from the draft, never from the stored filter; a filter set from elsewhere rewrites a draft
   nobody is editing.
 - **Search:** in the browser each keystroke narrows the list at once (the core searches the

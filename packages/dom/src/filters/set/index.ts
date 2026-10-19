@@ -22,7 +22,11 @@ export { SET_CSS as css } from './styles.js';
 export function body(get: () => C, doc: Document, changed: Changed, note: typeof notice): Omit<Body, 'edits'> {
   const h = get().values();
   let d: Draft = draftOf(null);
+  /** The search the list shows (asked, on a server after the pause): what select all and its label follow, not the box. */
   let sent = '';
+  /** The filter written (`write`), and its canonical form: a draft equal to it reads as it, so Apply sends nothing. */
+  let src: F | null = null;
+  let canon = 'null';
   let timer: ReturnType<typeof setTimeout> | undefined;
   let said: ReturnType<typeof setTimeout> | undefined;
   let typed = false;
@@ -45,7 +49,6 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   la.className = 'dzg-fallw';
   la.append(sa);
   const wrap = el(doc, 'div', 'dzg-flistw');
-  const q = (): string => search.value.trim();
   const fmt = () => formattersFor(get().ctx).number();
   const list = listView(doc, {
     ticked: (r) => (r.v === null ? d.blanks : ticked(d, r.v)),
@@ -54,7 +57,6 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
       else tick(d, r.v, !ticked(d, r.v));
       edit();
     },
-    locale: () => get().ctx.locale,
     empty: () => search.focus(),
   });
   wrap.append(list.el);
@@ -64,11 +66,15 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   /** The list the handle gives, or the column's options when it has none (searched here). */
   const values = (): readonly SetValue[] => {
     if (h.available) return h.result?.values ?? [];
-    const words = fold(q()).split(/\s+/).filter(Boolean);
+    const words = fold(sent).split(/\s+/).filter(Boolean);
     return (get().column.def.enumOptions ?? []).map((x) => ({ value: x.value, label: x.label ?? x.value, count: null })).filter((x) => words.every((w) => fold(x.label).includes(w)));
   };
-  /** A complete list (the half rule may change the mode): available, settled (an older searched list may still show), unsearched, not truncated. */
-  const complete = (): readonly string[] | null => (h.available && h.status === 'idle' && h.result && !h.result.truncated && !q() && !sent ? h.result.values.map((x) => x.value) : null);
+  /**
+   * A complete list (the half rule may change the mode), unsearched: the column's options when the
+   * handle has no list; else settled (an older searched list may still show) and not truncated.
+   */
+  const complete = (): readonly string[] | null =>
+    sent ? null : !h.available ? values().map((x) => x.value) : h.status === 'idle' && h.result && !h.result.truncated ? h.result.values.map((x) => x.value) : null;
 
   function draw(): void {
     const c = get();
@@ -84,7 +90,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     const marked = d.mode === 'include' ? d.blanks : !d.blanks;
     const any = !h.available || !!r;
     rows = [
-      ...(any && !q() && (blanks !== 0 || marked) ? [row(null, c.msg('filter.set.blanks'), blanks)] : []),
+      ...(any && !sent && (blanks !== 0 || marked) ? [row(null, c.msg('filter.set.blanks'), blanks)] : []),
       ...vs.map((x) => row(x.value, x.label, x.count)),
     ];
     list.set(rows, home);
@@ -117,8 +123,8 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   }
   all.addEventListener('change', () => {
     const on = all.checked;
-    // Without a search, select all takes the blanks too, shown or not (a hidden row at 0 now).
-    if (!q()) d.blanks = on;
+    // Over an unsearched list, select all takes the blanks too, shown or not (a hidden row at 0 now).
+    if (!sent) d.blanks = on;
     for (const r of rows) if (r.v !== null) tick(d, r.v, on);
     edit();
   });
@@ -127,18 +133,18 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     clearTimeout(timer);
     const c = get();
     const go = (): void => {
-      sent = q();
+      sent = search.value.trim();
+      texts();
       if (h.available) h.search(sent);
       else draw();
     };
     if (c.where !== 'server' || !h.available) go();
     else timer = setTimeout(go, c.debounceMs);
-    texts();
   };
   search.addEventListener('input', (e) => !(e as InputEvent).isComposing && ask());
   search.addEventListener('compositionend', ask);
   search.addEventListener('keydown', (e) => {
-    if (e.key !== 'ArrowDown' || e.altKey) return;
+    if (e.key !== 'ArrowDown' || e.altKey || e.isComposing) return;
     e.preventDefault();
     list.focus();
   });
@@ -147,7 +153,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   function texts(): void {
     const c = get();
     tx(ss, c.msg('filter.set.search'));
-    tx(sa, c.msg(q() ? 'filter.set.allShown' : 'filter.set.all'));
+    tx(sa, c.msg(sent ? 'filter.set.allShown' : 'filter.set.all'));
     const name = c.msg('filter.popupLabel', { column: c.column.def.header ?? c.column.id });
     if (list.el.getAttribute('aria-label') !== name) list.el.setAttribute('aria-label', name);
     n.words();
@@ -159,12 +165,17 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     els: [ls, status, la, wrap],
     write(s: F | null) {
       const was = JSON.stringify(filterOf(d));
-      d = draftOf(s as SetFilter | null);
+      d = draftOf((src = s) as SetFilter | null);
+      canon = JSON.stringify(filterOf(d));
       // Another draft starts on its first ticked row; the same one written again (a locale change) keeps the focus.
-      home ||= JSON.stringify(filterOf(d)) !== was;
+      home ||= canon !== was;
       draw();
     },
-    read: () => filterOf(d) as F | null,
+    // The filter in force written in another order (a host's) is read as written: nothing to send.
+    read() {
+      const f = filterOf(d) as F | null;
+      return JSON.stringify(f) === canon ? src : f;
+    },
     texts,
     // Called once the popup shows: the rows are measured there (a chunk drawn before it was shown).
     focus() {
