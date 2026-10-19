@@ -20,7 +20,7 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | fait, relu, testé | `5aebe99` |
 | 11 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 11 (pièces par défaut : en-tête, voile avec « Réessayer », bulle d'aide), architecte d'abord ; la base dom n'a que ~11 o de marge (17 989 / 18 000) : décision de budget du propriétaire attendue avant le code. Étapes 9b (fusions, `f4c63f6`) et 10 (CSV, `5aebe99`) closes.
+En cours : l'étape 11 (en-tête, voile avec « Réessayer », bulle d'aide remplaçables), plan `docs/phase-3-steps/step11-slots-blueprint.md`, décisions `step11-decisions.md` (propriétaire, 2026-10-19 : module à part `@dzgrid/dom/slots` 1 300 o, base dom 18 600, langues en 560 / fr 680 / ar 870, thème 1 280). Implémentation lancée, tests d'abord.
 
 ## Les plans détaillés des étapes
 
