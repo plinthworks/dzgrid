@@ -21,7 +21,7 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | fait, relu, testé | `0caedae`, `599cbdf` |
 | 12 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 12 (interface des filtres, première partie), architecte d'abord. Étape 11 close (`0caedae`, corrections `599cbdf`) : suite 2 628 tests, navigateur 91 vérifications, dom 18 450, dom/slots 1 279. Limite notée : une bulle encore dans son délai d'apparition ne vérifie que la présence de son ancre. À reprendre à l'étape 12 : « effacer les filtres » du voile envoie deux commandes (deux requêtes serveur, la première aussitôt remplacée).
+En cours : l'étape 12 (ligne de filtres sous les en-têtes, `@dzgrid/dom/filters` partie 1), plan `docs/phase-3-steps/step12-floating-blueprint.md`, décisions `step12-decisions.md` (propriétaire, 2026-10-19 : textes des filtres dans des fichiers à part par langue, base dom 18 750, filters 2 900, textes filtres en 200 / fr 230 / ar 290, thème 1 400, ligne fixée à la création). Implémentation lancée, tests d'abord. Étape 11 close (`0caedae`, `599cbdf`). Limite notée : une bulle encore dans son délai d'apparition ne vérifie que la présence de son ancre.
 
 ## Les plans détaillés des étapes
 
