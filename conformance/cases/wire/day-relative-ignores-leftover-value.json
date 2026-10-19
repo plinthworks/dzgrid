@@ -1,0 +1,40 @@
+{
+  "id": "day-relative-ignores-leftover-value",
+  "suite": "wire",
+  "description": "A day shortcut travels as between on its days; a value and valueTo left from another op are not sent, nor refused.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "today",
+        "value": "2026-13-01",
+        "valueTo": "2026-10-01"
+      }
+    },
+    "locale": "fr-FR",
+    "now": "2026-10-19T10:00:00Z"
+  },
+  "expected": {
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "between",
+        "value": "2026-10-19",
+        "valueTo": "2026-10-19",
+        "relative": "today",
+        "zone": "Africa/Algiers"
+      }
+    }
+  }
+}

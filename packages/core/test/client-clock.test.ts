@@ -149,6 +149,49 @@ describe('the client model and the clock', () => {
     expect(s.ids()).toEqual(['a', 'b', 'c', 'd']);
   });
 
+  it('a clock that reads no day (NaN, then past the Date range) is no clock, and the next reading that has one counts (R2: nothing kept)', () => {
+    const s = setup({ now: NaN });
+    s.m.setQuery(makeQuery({ filter: TODAY_T }));
+    expect(s.ids()).toEqual(['a', 'b', 'c', 'd']);
+    expect(s.m.problems.map((p) => [p.code, p.path, p.detail])).toEqual([['invalid-filter', 'filter.t', 'no clock']]);
+    s.clock.t = at('2026-10-19T12:00:00Z');
+    s.m.tick();
+    expect(s.ids()).toEqual(['a', 'b']);
+    expect(s.m.problems).toEqual([]);
+    s.clock.t = 8.64e15 + 1;
+    s.m.tick();
+    expect(s.ids()).toEqual(['a', 'b', 'c', 'd']);
+    // Forward again from before the year 0000 (an hour before it in UTC; Algiers was then 12 min 12 s ahead): the day
+    // is read anew, not kept until a day that never ends.
+    s.clock.t = at('0000-01-01T00:00:00Z') - 3_600_000;
+    s.m.tick();
+    expect(s.m.problems.map((p) => p.detail)).toEqual(['no clock']);
+    s.clock.t = at('2026-10-20T01:00:00Z');
+    s.m.tick();
+    expect(s.ids()).toEqual(['c', 'd']);
+  });
+
+  it('a column named "relative" or a text value "relative" is no shortcut: no clock read at midnight, no change', () => {
+    const columns = createColumnModel<{ id: string; relative: string }>([{ id: 'relative' }]);
+    const clock = { t: at('2026-10-19T12:00:00Z') as number, reads: 0 };
+    const m = clientRows({ rows: [{ id: 'a', relative: 'relative' }], getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'fr-FR', timeZone: 'UTC' }), now: () => (clock.reads++, clock.t) });
+    const changes: unknown[] = [];
+    const q = makeQuery({ filter: { relative: { type: 'text', op: 'equals', value: 'relative' } } });
+    m.setQuery(q);
+    m.subscribe((c) => changes.push(c));
+    const k = m.membershipOf(q);
+    clock.t += 86_400_000;
+    m.tick();
+    expect([changes.length, clock.reads, m.membershipOf(q) === k]).toEqual([0, 0, true]);
+  });
+
+  it('a Day shortcut ignores a value or valueTo left behind (even one that is no day)', () => {
+    const s = setup();
+    s.m.setQuery(makeQuery({ filter: { d: { type: 'day', op: 'relative', range: 'today', value: 'not a day', valueTo: '2026-02-30' } } }));
+    expect(s.ids()).toEqual(['a', 'b']);
+    expect(s.m.problems).toEqual([]);
+  });
+
   it('an unknown shortcut is refused at .range', () => {
     const s = setup();
     s.m.setQuery(makeQuery({ filter: { t: { type: 'instant', op: 'relative', range: 'thisWeek' as never } } }));

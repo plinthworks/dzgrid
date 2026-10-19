@@ -15,7 +15,7 @@ export const storeOf = <T>(m: ClientModel<T>): RowStore<T> => (m as unknown as {
 const STORE = Symbol('dzgrid.store');
 import { sortIndices } from '../sort/compile.js';
 import { ctxKey, type LocaleCtx } from '../value/locale.js';
-import { dayAt } from '../value/relative.js';
+import { dayAt, hasRelative } from '../value/relative.js';
 import { ColumnCache, type ColumnEnv } from './column-cache.js';
 import { canonical, EMPTY_QUERY, type Query } from './query.js';
 import type { ChangeSource } from './types.js';
@@ -237,18 +237,21 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   // The clock is read only by a compile that meets a shortcut.
   const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache, get now() { return o.now?.(); } });
   /**
-   * Today in the grid's zone when a filter (keyed `key`) holds a shortcut, '' otherwise: the clock is
-   * read then only, and the day kept until it ends, the zone changes or the clock goes back.
+   * Today in the grid's zone when a filter holds a shortcut (hasRelative, by the filter's identity),
+   * '' otherwise: the clock is read then only, and the day kept until it ends, the zone changes or the
+   * clock goes back. A clock that reads no day is kept for nothing: the next call reads it again.
    */
   let today: { zone: string; at: number; day: string; until: number } | null = null;
-  const dayOf = (key: string): string => {
-    if (!o.now || !key.includes('"relative"')) return '';
+  let held: { f: unknown; has: boolean } = { f: undefined, has: false };
+  const dayOf = (f: Query['filter']): string => {
+    if (held.f !== f) held = { f, has: hasRelative(f) };
+    if (!o.now || !held.has) return '';
     const t = o.now();
-    if (!today || today.zone !== ctx.timeZone || t < today.at || t >= today.until) {
+    if (!today || today.zone !== ctx.timeZone || !(t >= today.at && t < today.until)) {
       const r = dayAt(t, ctx.timeZone);
-      today = { zone: ctx.timeZone, at: t, day: r?.day ?? '', until: r?.until ?? Infinity };
+      today = r && { zone: ctx.timeZone, at: t, day: r.day, until: r.until };
     }
-    return today.day;
+    return today?.day ?? '';
   };
   /** The columns a search reads. */
   const visibleIds = (): string => columns.visible().map((c) => c.id).join(',');
@@ -262,7 +265,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     filter,
     quick: query.quick,
     quickCols: visibleIds(),
-    day: dayOf(filter),
+    day: dayOf(query.filter),
   });
   const same = (a: Inputs, b: Inputs, ignore?: 'quick'): boolean =>
     a.snap === b.snap && a.colsRef === b.colsRef && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader && a.filter === b.filter && a.day === b.day && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick);
@@ -341,7 +344,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       others: {
         // The columns a search reads are data too: showing or hiding one moves `dataVersion`;
         // another lookup brings other column objects, which rebuild the index and its counts.
-        key: canonical([counted, words, columns.dataVersion, dayOf(canonical(query.filter))]),
+        key: canonical([counted, words, columns.dataVersion, dayOf(query.filter)]),
         test: () => {
           const e = env();
           const f = compileFilter(others, e, o.filterKinds);
@@ -432,7 +435,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // words (spaces aside), over the set of columns it reads (their order and pinning aside).
     membershipOf: (q) => {
       const words = quickWords(q.quick);
-      return canonical({ filter: appliedKey(q.filter), day: dayOf(canonical(q.filter)), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
+      return canonical({ filter: appliedKey(q.filter), day: dayOf(q.filter), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
     },
     matches: (key) => {
       const src = store.snapshot.lookup(idOfDataKey(key) ?? '');

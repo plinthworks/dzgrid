@@ -211,18 +211,19 @@ function rangeTest<T>(
 }
 
 function dayTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 'day' }>, path: string, env: ColumnEnv<T>, problems: Problem[]): Compiled {
-  for (const k of ['value', 'valueTo'] as const) {
-    if (f[k] !== undefined && !parseDay(f[k])) {
-      problems.push(problem('invalid-day', 'error', `${path}.${k}`));
-      return null;
-    }
-  }
   let g: { op: string; value?: unknown; valueTo?: unknown } = f;
   if (f.op === 'relative') {
-    // A shortcut is between on the days it names now, in the grid's zone (a Day has none).
+    // A shortcut is between on the days it names now, in the grid's zone (a Day has none); a value left from another op is not read.
     const days = relativeOf(f.range, env.ctx.timeZone, env.now, path, problems);
     if (!days) return null;
     g = { op: 'between', value: days.from, valueTo: days.to };
+  } else {
+    for (const k of ['value', 'valueTo'] as const) {
+      if (f[k] !== undefined && !parseDay(f[k])) {
+        problems.push(problem('invalid-day', 'error', `${path}.${k}`));
+        return null;
+      }
+    }
   }
   return rangeTest(col, g, path, env, problems, (v) => dayToEpochDay(parseDay(v)!));
 }

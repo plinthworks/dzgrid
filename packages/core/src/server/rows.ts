@@ -9,6 +9,7 @@ import type { TransactionResult } from '../row/store.js';
 import type { ColumnLookup } from '../columns/model.js';
 import type { FilterModel } from '../filter/model.js';
 import type { LocaleCtx } from '../value/locale.js';
+import { dayAt, hasRelative } from '../value/relative.js';
 import { createGate, type Ticket } from './gate.js';
 import type { DataRequest, DataSource, Json, PageWindow, SourceModel, SourceRows, SourceRowsOptions } from './source.js';
 import { toWire, type WireFilterModel } from './wire.js';
@@ -322,11 +323,18 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     setStatus(IDLE);
   };
 
-  /** The last filter put in its wire form, for these columns and zone: the request and membershipOf ask for the same one. */
-  let wired: { readonly f: FilterModel; readonly ctx: LocaleCtx; readonly columns: ColumnLookup<T>; readonly v: number; readonly w: ReturnType<typeof toWire> } | null = null;
+  /**
+   * The last filter put in its wire form, for these columns, zone and — when it holds a shortcut —
+   * today's day there: the request and membershipOf ask for the same one, and after midnight both
+   * send the new day without waiting for tick(), as the client model does.
+   */
+  let wired: { readonly f: FilterModel; readonly ctx: LocaleCtx; readonly columns: ColumnLookup<T>; readonly v: number; readonly has: boolean; readonly day: string; readonly w: ReturnType<typeof toWire> } | null = null;
   const wireOf = (f: FilterModel): ReturnType<typeof toWire> => {
-    if (!wired || wired.f !== f || wired.ctx !== ctx || wired.columns !== columns || wired.v !== columns.dataVersion) {
-      wired = { f, ctx, columns, v: columns.dataVersion, w: toWire(f, { ctx, columns, ...(env.filterKinds && { kinds: env.filterKinds }), ...(env.now && { now: env.now() }) }) };
+    const has = wired && wired.f === f ? wired.has : hasRelative(f);
+    const t = has && env.now ? env.now() : undefined;
+    const day = t === undefined ? '' : dayAt(t, ctx.timeZone)?.day ?? '';
+    if (!wired || wired.f !== f || wired.ctx !== ctx || wired.columns !== columns || wired.v !== columns.dataVersion || wired.day !== day) {
+      wired = { f, ctx, columns, v: columns.dataVersion, has, day, w: toWire(f, { ctx, columns, ...(env.filterKinds && { kinds: env.filterKinds }), ...(t !== undefined && { now: t }) }) };
     }
     return wired.w;
   };

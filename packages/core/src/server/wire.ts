@@ -115,6 +115,11 @@ function wireOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: 
     case 'day': {
       if (col.type !== f.type) return bad();
       const day = f.type === 'day';
+      // A shortcut: its days, a value left from another op neither read nor sent.
+      if (day && f.op === 'relative') {
+        const days = relativeOf(f.range, env.ctx.timeZone, env.now, path, problems);
+        return days && { type: 'day', op: 'between', value: days.from, valueTo: days.to, relative: f.range!, zone: env.ctx.timeZone };
+      }
       if (day) {
         for (const k of ['value', 'valueTo'] as const) {
           if (f[k] !== undefined && !parseDay(f[k])) {
@@ -122,10 +127,6 @@ function wireOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: 
             return null;
           }
         }
-      }
-      if (day && f.op === 'relative') {
-        const days = relativeOf(f.range, env.ctx.timeZone, env.now, path, problems);
-        return days && { type: 'day', op: 'between', value: days.from, valueTo: days.to, relative: f.range!, zone: env.ctx.timeZone };
       }
       if (!NUM_OPS.has(f.op)) return bad(`${path}.op`);
       if (f.op === 'blank' || f.op === 'notBlank') return { type: f.type, op: f.op } as WireFilter;

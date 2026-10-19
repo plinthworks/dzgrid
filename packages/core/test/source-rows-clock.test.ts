@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createColumnModel, createKernel, localeCtx, makeQuery, parseInstant, type FilterModel, type ModelChange, type ModelEnv } from '@dzgrid/core';
-import { sourceRows, type DataSource } from '@dzgrid/core/server';
+import { sourceRows, toWire, type DataSource } from '@dzgrid/core/server';
 import { fakeSource, rowsOf } from './support/fake-source.js';
 
 /** docs/behaviors/filter-relative.md: a server model at midnight. */
@@ -83,6 +83,17 @@ describe('a server model at midnight', () => {
     s.model.setQuery(makeQuery({ filter: TODAY }));
     expect(s.last().req.filter).toEqual({});
     expect(s.model.problems.map((p) => [p.code, p.path, p.detail])).toEqual([['invalid-filter', 'filter.t', 'no clock']]);
+  });
+
+  it('a clock that reads no day is no clock on the wire, never a throw; a Day shortcut sends no leftover value', () => {
+    const cols = createColumnModel<any>([{ id: 'd', type: 'day' }, { id: 't', type: 'instant' }]);
+    const filter: FilterModel = { d: { type: 'day', op: 'relative', range: 'today', value: 'not a day' }, t: { type: 'instant', op: 'relative', range: 'today' } };
+    for (const now of [NaN, Infinity, -Infinity, 8.64e15 + 1]) {
+      const w = toWire(filter, { ctx: ALGIERS, columns: cols, now });
+      expect([w.filter, w.problems.map((p) => [p.code, p.path, p.detail])], String(now)).toEqual([{}, [['invalid-filter', 'filter.d', 'no clock'], ['invalid-filter', 'filter.t', 'no clock']]]);
+    }
+    const w = toWire({ d: filter.d! }, { ctx: ALGIERS, columns: cols, now: at('2026-10-19T12:00:00Z') });
+    expect([w.filter, w.problems]).toEqual([{ d: { type: 'day', op: 'between', value: '2026-10-19', valueTo: '2026-10-19', relative: 'today', zone: 'Africa/Algiers' } }, []]);
   });
 
   it('a fetched set filters its rows in the browser, by the same clock: midnight re-filters, asks nothing', () => {

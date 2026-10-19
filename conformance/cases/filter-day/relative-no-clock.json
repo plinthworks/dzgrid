@@ -1,0 +1,47 @@
+{
+  "id": "relative-no-clock",
+  "suite": "filter-day",
+  "description": "Without a clock a shortcut cannot be counted: refused (detail: no clock), the filter ignored.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "d": "2026-10-19"
+      },
+      {
+        "id": "2",
+        "d": "2026-10-20"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "today"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.d"
+      ]
+    ]
+  }
+}

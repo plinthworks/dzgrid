@@ -10,9 +10,9 @@
     "description": { "type": "string" },
     "refs": { "type": "array", "items": { "type": "string" } },
     "input": {
-      "description": "The suite's input. `now` (optional): the clock, ISO UTC (`2026-10-19T10:00:00Z`), for relative date filters (docs/behaviors/filter-relative.md); absent means no clock.",
+      "description": "The suite's input. `now` (optional): the clock, for relative date filters (docs/behaviors/filter-relative.md): ISO UTC (`2026-10-19T10:00:00Z`), or milliseconds since 1970 UTC (a year past 9999), or \"NaN\", \"Infinity\", \"-Infinity\" (a host clock gone wrong); absent means no clock.",
       "type": "object",
-      "properties": { "now": { "type": "string", "pattern": "Z$" } }
+      "properties": { "now": { "oneOf": [{ "type": "string", "pattern": "Z$" }, { "type": "number" }, { "enum": ["NaN", "Infinity", "-Infinity"] }] } }
     },
     "expected": {}
   }

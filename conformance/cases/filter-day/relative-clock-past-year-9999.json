@@ -1,0 +1,48 @@
+{
+  "id": "relative-clock-past-year-9999",
+  "suite": "filter-day",
+  "description": "A clock in the year 10000 (milliseconds since 1970) reads no day a Day can write: no clock, the filter ignored.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "d": "9999-12-31"
+      },
+      {
+        "id": "2",
+        "d": "2026-10-19"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "today"
+      }
+    },
+    "now": 253402300800000
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.d"
+      ]
+    ]
+  }
+}

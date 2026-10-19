@@ -1,0 +1,48 @@
+{
+  "id": "relative-clock-not-finite",
+  "suite": "wire",
+  "description": "A clock that reads -Infinity is no clock: both shortcuts are dropped from the request with their problem, never a throw.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t",
+        "type": "instant"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "today"
+      },
+      "t": {
+        "type": "instant",
+        "op": "relative",
+        "range": "yesterday"
+      }
+    },
+    "locale": "fr-FR",
+    "now": "-Infinity"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.d"
+      ],
+      [
+        "invalid-filter",
+        "filter.t"
+      ]
+    ]
+  }
+}

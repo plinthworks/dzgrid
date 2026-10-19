@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { dayAt, instantToDayIn, parseDay, parseInstant, relativeDays, RELATIVE_RANGES, zoneDayBounds, type Day, type InstantMs } from '@dzgrid/core';
+import { dayAt, instantToDayIn, parseDay, parseInstant, relativeDays, RELATIVE_RANGES, resolveInstantRange, zoneDayBounds, type Day, type InstantMs } from '@dzgrid/core';
 
 /**
  * docs/behaviors/filter-relative.md. The oracle counts with the test's own
@@ -89,5 +89,27 @@ describe('dayAt', () => {
 
   it('is null in a year a Day cannot write', () => {
     expect(dayAt(at('9999-12-31T23:59:59.999Z') + 1, 'UTC')).toBeNull();
+  });
+
+  it('is null, never a throw, for a clock that is not a number of the Date range (NaN, infinities, past 8.64e15 ms)', () => {
+    for (const t of [NaN, Infinity, -Infinity, 8.64e15 + 1, -8.64e15 - 1, 1e300, Number.MAX_VALUE]) {
+      for (const zone of ['UTC', 'Africa/Algiers', 'Pacific/Kiritimati']) expect(dayAt(t, zone), `${t} ${zone}`).toBeNull();
+    }
+    // The ends of the Date range are years 275760 and -271821: no Day either.
+    expect(dayAt(8.64e15, 'Pacific/Kiritimati')).toBeNull();
+    expect(dayAt(-8.64e15, 'Pacific/Pago_Pago')).toBeNull();
+    // Just before the year 0000 in UTC: none; its first instant: a day.
+    expect(dayAt(at('0000-01-01T00:00:00Z') - 1, 'UTC')).toBeNull();
+    expect(dayAt(at('0000-01-01T00:00:00Z'), 'UTC')?.day).toBe('0000-01-01');
+  });
+
+  it('a shortcut against such a clock is refused as no clock, on an instant range too', () => {
+    for (const t of [NaN, Infinity, -Infinity, 8.64e15 + 1, at('9999-12-31T23:59:59.999Z') + 1]) {
+      const r = resolveInstantRange({ type: 'instant', op: 'relative', range: 'today' }, 'UTC', 'filter', t);
+      expect([r.range, r.problems.map((p) => [p.code, p.path, p.detail])], String(t)).toEqual([null, [['invalid-filter', 'filter', 'no clock']]]);
+    }
+    // Last month from January 0000 would be December of the year -1: none.
+    const r = resolveInstantRange({ type: 'instant', op: 'relative', range: 'lastMonth' }, 'UTC', 'filter', at('0000-01-15T00:00:00Z'));
+    expect(r.problems.map((p) => p.detail)).toEqual(['no clock']);
   });
 });

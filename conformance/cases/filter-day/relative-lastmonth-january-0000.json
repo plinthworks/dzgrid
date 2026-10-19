@@ -1,0 +1,48 @@
+{
+  "id": "relative-lastmonth-january-0000",
+  "suite": "filter-day",
+  "description": "Last month seen from January 0000 would be December of the year -1, which a Day cannot write: no clock, the filter ignored.",
+  "refs": [
+    "docs/behaviors/filter-relative.md"
+  ],
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "d": "0000-01-01"
+      },
+      {
+        "id": "2",
+        "d": "0000-01-15"
+      }
+    ],
+    "filter": {
+      "d": {
+        "type": "day",
+        "op": "relative",
+        "range": "lastMonth"
+      }
+    },
+    "now": "0000-01-15T00:00:00Z"
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.d"
+      ]
+    ]
+  }
+}

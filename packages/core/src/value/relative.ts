@@ -1,6 +1,6 @@
 import { RELATIVE_RANGES, type RelativeRange } from '../filter/model.js';
 import { addDays, daysInMonth, type Day } from './day.js';
-import type { InstantMs } from './instant.js';
+import { MAX_INSTANT, type InstantMs } from './instant.js';
 import { instantToDayIn, zoneDayBounds } from './zone-day.js';
 
 /**
@@ -29,8 +29,23 @@ export function relativeDays(range: RelativeRange, today: Day): { readonly from:
   return from && to ? { from, to } : null;
 }
 
-/** The day `now` falls on in `zone`, and the instant it ends (when a shortcut's days move); null in a year a Day cannot write. */
+/**
+ * The day `now` falls on in `zone`, and the instant it ends (when a shortcut's days move); null in a
+ * year a Day cannot write, and for a clock that is no instant (NaN, infinite, past ±8.64e15 ms), never a throw.
+ */
 export function dayAt(now: number, zone: string): { readonly day: Day; readonly until: number } | null {
+  if (!(Math.abs(now) <= MAX_INSTANT)) return null;
   const day = instantToDayIn(now as InstantMs, zone);
   return day && { day, until: zoneDayBounds(day, zone).to };
+}
+
+/** Whether a filter model holds a shortcut (a day or instant filter with op `relative`, alone or in a combined one): what makes a model read the clock. */
+export function hasRelative(filter: unknown): boolean {
+  const holds = (f: unknown): boolean => {
+    const c = f as { type?: unknown; op?: unknown; conditions?: unknown } | null;
+    if (!c || typeof c !== 'object') return false;
+    if (c.type === 'combined') return Array.isArray(c.conditions) && c.conditions.some(holds);
+    return (c.type === 'day' || c.type === 'instant') && c.op === 'relative';
+  };
+  return !!filter && typeof filter === 'object' && Object.values(filter).some(holds);
 }
