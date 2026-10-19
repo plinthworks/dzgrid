@@ -18,10 +18,10 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
 | 9b — fusions de cellules (rowspan / colspan) | fait, relu, testé (4 commits et leurs corrections) | `f4c63f6` |
 | 10 — export CSV dans le cœur (`@dzgrid/core/csv`, `ClientModel.allRows`) | fait, relu, testé | `5aebe99` |
-| 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | commité, relu ; corrections de la relecture écrites, pas encore commitées | `0caedae` |
+| 11 — en-tête, voile et bulle d'aide remplaçables (`@dzgrid/dom/slots`), bouton « Réessayer » dans la base | fait, relu, testé | `0caedae`, `599cbdf` |
 | 12 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 11 est commitée (`0caedae`, plan `docs/phase-3-steps/step11-slots-blueprint.md`, décisions `step11-decisions.md`). Corrections de la relecture et de l'analyse des tests écrites, non commitées : la bulle d'aide se cache quand son ancre quitte la page ou que sa cellule montre une autre ligne (tri, filtre, mise à jour) ou que le registre des parts change (dans la base) ; tout élément posé dans le voile reçoit le pointeur (`.dzg-overlay > *`). Suite 155 fichiers, 2 628 tests ; navigateur 91 vérifications ; dom 18 450, dom/slots 1 279, thème 1 199. Reste : commit.
+En cours : l'étape 12 (interface des filtres, première partie), architecte d'abord. Étape 11 close (`0caedae`, corrections `599cbdf`) : suite 2 628 tests, navigateur 91 vérifications, dom 18 450, dom/slots 1 279. Limite notée : une bulle encore dans son délai d'apparition ne vérifie que la présence de son ancre. À reprendre à l'étape 12 : « effacer les filtres » du voile envoie deux commandes (deux requêtes serveur, la première aussitôt remplacée).
 
 ## Les plans détaillés des étapes
 
