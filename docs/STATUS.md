@@ -22,7 +22,7 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 12 — ligne de filtres sous les en-têtes (`@dzgrid/dom/filters` partie 1, textes des filtres à part) | fait, relu, testé | `59d796e`, `c1b14ea` |
 | 13 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 13 (fenêtre de filtre : `filter.text`, `filter.number`, `filter.boolean`, marque « filtre actif » dans l'en-tête, `openMenu`), architecte d'abord ; le module filtres n'a que 7 o de marge (3 493 / 3 500) : décision de budget du propriétaire attendue avant le code. Étape 12 close (`59d796e`, corrections `c1b14ea`) : suite 2 722 tests, navigateur 143 vérifications. À faire par le propriétaire : l'écoute au lecteur d'écran de la ligne de filtres (protocole a11y §8).
+En cours : l'étape 13 (fenêtre de filtre texte, nombre, oui/non ; marque « filtré » dans l'en-tête ; Alt+Flèche bas), plan `docs/phase-3-steps/step13-popup-blueprint.md`, décisions `step13-decisions.md` (propriétaire, 2026-10-19 : filters 7 000 o mesuré hors popup, textes filtres en 520 / fr 620 / ar 830, thème 1 520 ; Appliquer sur serveur ; un clic dehors ne ferme pas ; ET/OU et « respecter la casse » reportés en Phase 5). Implémentation lancée, tests d'abord. Étape 12 close (`59d796e`, `c1b14ea`). À faire par le propriétaire : l'écoute au lecteur d'écran de la ligne de filtres (protocole a11y §8).
 
 ## Les plans détaillés des étapes
 
