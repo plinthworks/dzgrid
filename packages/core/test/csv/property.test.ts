@@ -18,7 +18,8 @@ const PIECES = ['"', ',', ';', '\t', '\r', '\n', '\r\n', ' ', NBSP, 'مرحبا'
 const guarded = (s: string): boolean => {
   if (s[0] === '\t' || s[0] === '\r' || s[0] === '\n') return true;
   let i = 0;
-  while (i < s.length && [' ', NBSP, LRM, RLM, ALM].includes(s[i]!)) i++;
+  // Any white space (tabs included), zero-width characters and the invisible direction controls.
+  while (i < s.length && /[\s\u200B\u200E\u200F\u061C\u202A-\u202E\u2066-\u2069]/.test(s[i]!)) i++;
   return '=+-@'.includes(s[i] ?? '_');
 };
 

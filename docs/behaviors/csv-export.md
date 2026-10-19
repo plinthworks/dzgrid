@@ -56,3 +56,9 @@ Presses the host's "Export" button (the grid has none of its own), after filteri
 - **Columns:** the visible ones by default, start-pinned, centre, end-pinned; naming a hidden column writes it; an unknown id is skipped and told (`unknown-column`).
 - **Not in the file:** no `sep=` line (it breaks the BOM in Excel), no choice of line ending, no direction marks added around Arabic text.
 - **Large exports:** the text is made in chunks of about 500 rows, each a string, so the page can yield between them and hand the parts to a Blob. 100 000 rows of 30 columns take well under a second; beyond a few hundred thousand rows, the host's `exportAll` is the way.
+
+## Step 10 review (2026-10-19)
+- The formula guard skips any white space (tabs and no-break spaces included), zero-width characters (U+200B, U+FEFF) and every invisible direction control (U+200E, U+200F, U+061C, the embeddings and overrides U+202A–U+202E, the isolates U+2066–U+2069) before looking for `=`, `+`, `-` or `@`.
+- A typed number skips the guard only when the text written looks like a number (digits of any script, grouping and decimal signs, a sign, an exponent): a custom codec that says `number` but writes text is guarded like any text.
+- The caller passes a span map built for the same rows as `rows` (for scope `all`, built over `allRows`); a map built for another set of rows misplaces merged values. The DOM export feature (step 19) builds it.
+- Wall times rely on a zone's clock changes being more than six hours apart: true for every zone in the engine's data from 1900 to 2040 (the closest are 167 h apart, Brazil 2000), checked by the step 10 test analysis.

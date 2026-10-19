@@ -4,7 +4,7 @@ import type { RowNode } from '../row/node.js';
 import { isBlank } from '../value/codec.js';
 import type { LocaleCtx } from '../value/locale.js';
 import { separatorsFor } from '../value/number.js';
-import { FORMULA } from './quote.js';
+import { FORMULA, NUMERIC } from './quote.js';
 import { wallWriter } from './wall.js';
 
 /** The options a writer reads, resolved once per file. */
@@ -68,6 +68,8 @@ export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: Ro
       return '';
     }
     if (ident && DIGITS.test(s)) return e.quote(`="${s}"`);
-    return number && typeof v === 'number' ? e.quote(s) : field(e, s);
+    // A typed number skips the guard only when what is written looks like a number: a custom
+    // codec claiming `number` but writing text is guarded like any text.
+    return number && typeof v === 'number' && NUMERIC.test(s) ? e.quote(s) : field(e, s);
   };
 }
