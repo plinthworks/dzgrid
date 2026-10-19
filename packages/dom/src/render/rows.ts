@@ -65,8 +65,6 @@ export interface RowPlan {
 
 /** The spans feature's side of the paint (`@dzgrid/dom/spans`); the base has none. */
 export interface RowSpans {
-  /** Rows to keep mounted besides the window (the origins of tall cells reaching into it). */
-  anchors?(first: number, last: number): readonly RowKey[];
   /** A row's plan, by display index; null for plain cells. */
   plan(index: number, key: RowKey): RowPlan | null;
 }

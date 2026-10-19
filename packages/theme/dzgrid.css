@@ -76,9 +76,12 @@
   background: var(--tz-bg);
 }
 
-.dzg-row:hover,
-.dzg-row:hover .dzg-seg-start,
-.dzg-row:hover .dzg-seg-end {
+.dzg-row:hover:where(:not([data-spans])),
+.dzg-row:hover:where(:not([data-spans])) .dzg-seg-start,
+.dzg-row:hover:where(:not([data-spans])) .dzg-seg-end,
+.dzg-row[data-hover],
+.dzg-row[data-hover] .dzg-seg-start,
+.dzg-row[data-hover] .dzg-seg-end {
   background: var(--dzg-row-hover-bg, color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg)));
 }
 

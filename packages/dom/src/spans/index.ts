@@ -59,14 +59,19 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   setFocusOwner(kernel, (f, rows) => ownerFocus(mapFor(rows), columns.visible().map((c) => c.id))(f, rows));
 
   // ---- the keys: body moves over spans; the rest is the grid's ----
-  /** The last move into a cell: the row aimed at, brought into view instead of the cell's first. */
-  let aimed: { readonly focus: FocusPos; readonly row: RowKey } | null = null;
+  /**
+   * The last move into a cell, or click on a tall cell (`click`): the row aimed at, brought
+   * into view instead of the cell's first. A click's row is where the next key starts from
+   * (the grid's own goal is the keys' last one).
+   */
+  let aimed: { readonly focus: FocusPos; readonly row: RowKey; readonly click?: true } | null = null;
   const move: MoveFn = (_, s, from, goal, intent, base) => {
     const m = current();
     const d = s.rows;
     const r = from.kind === 'cell' ? d.indexOf(from.row) : -1;
     const c = s.cols.indexOf(from.column);
     if (r !== -1 && c !== -1) {
+      if (aimed?.click && sameFocus(from, aimed.focus)) goal = { rowKey: aimed.row, colIndex: c };
       const gr = goal?.rowKey != null ? d.indexOf(goal.rowKey) : -1;
       const n = navigate(m, { rows: d.count, cols: s.cols.length, page: s.page }, { row: r, col: c }, gr === -1 ? null : { row: gr, col: goal!.colIndex }, intent);
       // Above the first row is the header's: the grid's own move goes there.
@@ -89,7 +94,12 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     },
     plan: (i) => planFor(current(), i),
     at(x) {
-      if (typeof x !== 'string') return body.rowUnder(x);
+      if (typeof x !== 'string') {
+        // A click: the row under the pointer; on the focused tall cell, the keys start there.
+        const u = body.under(x);
+        if (u && sameFocus(kernel.focus, u.at)) aimed = { focus: u.at, row: u.row, click: true };
+        return u?.row;
+      }
       // A focus on the cell the keys last moved into: the row they aim at.
       return aimed && (aimed.focus as { row: RowKey }).row === x && sameFocus(kernel.focus, aimed.focus) ? aimed.row : undefined;
     },
@@ -104,10 +114,29 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     g.scope.observe(ro);
   }
 
+  // ---- hover: the row under the pointer (a tall cell lives in its first row: :hover would light that one) ----
+  let hovered: { readonly el: HTMLElement; readonly key: RowKey } | null = null;
+  const hover = (el: HTMLElement | null | undefined) => {
+    if (el === hovered?.el) return;
+    hovered?.el.removeAttribute('data-hover');
+    const key = el ? g.rowRenderer.keyOf(el) : undefined;
+    hovered = el && key !== undefined ? { el, key } : null;
+    hovered?.el.setAttribute('data-hover', '');
+  };
+  const track = (e: Event) => {
+    const u = body.under(e as MouseEvent);
+    hover(u ? g.rowRenderer.mounted.get(u.row)?.el : (e.target as Element).closest?.<HTMLElement>('.dzg-row'));
+  };
+  g.scope.on(g.el.body, 'pointerover', track);
+  g.scope.on(g.el.body, 'pointermove', track);
+  g.scope.on(g.el.body, 'pointerleave', () => hover(null));
+
   return {
     spans: feature,
     afterRows(f) {
       body.paint(f, win);
+      // A hovered row element reused for another row (a scroll, a sort): the pointer is not over that one.
+      if (hovered && (hovered.el.parentNode !== g.el.layer || g.rowRenderer.keyOf(hovered.el) !== hovered.key)) hover(null);
     },
     destroy() {
       setFocusOwner(kernel);

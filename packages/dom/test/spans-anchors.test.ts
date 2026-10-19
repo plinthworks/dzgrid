@@ -21,7 +21,7 @@ function make(anchors: readonly RowKey[], focus?: RowKey) {
   const geometry: Geometry = { read: () => ({ ...box }), writeScrollTop: (px) => { box.scrollTop = px; }, writeScrollInline: (px) => { box.scrollInline = px; } };
   const host = document.createElement('div');
   document.body.append(host);
-  const handle: Omit<FeatureHandle, 'destroy'> = { spans: { plan: () => null, anchors: () => anchors } };
+  const handle: Omit<FeatureHandle, 'destroy'> = { spans: { plan: () => null, at: () => undefined, anchors: () => anchors } };
   const feature: GridFeature = { id: 'test.anchors', setup: () => ({ ...handle, destroy() {} }) };
   const g = createGrid<R>(host, { rows: Array.from({ length: 500 }, (_, i) => ({ id: `r${i}`, a: `a${i}` })), getRowId: (r) => r.id, columns: [{ id: 'a' }], messages: EN, features: [feature] }, { geometry, sync: true });
   grids.push(g);

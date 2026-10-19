@@ -18,17 +18,23 @@
  *   rows and pinned segments) shows through, row by row.
  * - A full-width row: the segments step aside, its one cell sticks at the
  *   start, as wide as the view; the selection box stays.
+ * - Every rule names the grid's own rows (`.dzg-row[…]`, cells through their
+ *   segment: `display: contents` changes the boxes, not the tree), so a host
+ *   element carrying `data-full` or `data-spans` changes nothing.
+ * - The hover of a row a tall cell meets is the theme's `[data-hover]` (the
+ *   feature marks the row under the pointer): `:hover` would light the row the
+ *   tall cell lives in.
  */
 export const SPANS_CSS =
   ':where(.dzg-body){isolation:isolate}' +
-  ':where([data-spans]){contain:style}' +
-  ':where([data-spans]>.dzg-seg-start>.dzg-cell,[data-spans]>.dzg-seg-end>.dzg-cell){position:absolute;inset-block:0}' +
+  ':where(.dzg-row[data-spans]){contain:style}' +
+  ':where(.dzg-row[data-spans]>.dzg-seg-start>.dzg-cell,.dzg-row[data-spans]>.dzg-seg-end>.dzg-cell){position:absolute;inset-block:0}' +
   ':where(.dzg-cell[aria-rowspan]){overflow:clip;z-index:1}' +
   ':where(.dzg-cell[aria-rowspan])::before{content:"";display:block;block-size:var(--dzg-span-at)}' +
   ':where(.dzg-span-label){position:sticky;inset-block:var(--dzg-header-h) 0;line-height:var(--dzg-row-height);overflow:hidden;text-overflow:ellipsis;text-align:center}' +
-  ':where([data-full]>.dzg-seg){display:contents}' +
-  ':where([data-full] .dzg-check){position:sticky;inset-inline-start:0;z-index:2}' +
-  ':where([data-full] .dzg-cell){position:sticky;inset-inline-start:var(--dzg-check-w)!important;inline-size:calc(var(--dzg-view-w,100%) - var(--dzg-check-w))!important}';
+  ':where(.dzg-row[data-full]>.dzg-seg){display:contents}' +
+  ':where(.dzg-row[data-full]>.dzg-seg>.dzg-check){position:sticky;inset-inline-start:0;z-index:2}' +
+  ':where(.dzg-row[data-full]>.dzg-seg>.dzg-cell){position:sticky;inset-inline-start:var(--dzg-check-w)!important;inline-size:calc(var(--dzg-view-w,100%) - var(--dzg-check-w))!important}';
 
 /** Once per document or shadow root, like the base's; a host with a strict CSP passes its nonce or loads it itself. */
 export function injectSpanStyles(target: Document | ShadowRoot, nonce?: string): void {

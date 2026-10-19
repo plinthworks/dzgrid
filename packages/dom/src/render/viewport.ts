@@ -193,7 +193,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     };
     // Kept mounted out of the window: the focused row first (never moved), then the anchors of tall cells.
     const retained: RowKey[] = focus?.kind === 'cell' ? [focus.row] : [];
-    if (spans?.anchors && w.rows) retained.push(...spans.anchors(w.rows.first, w.rows.last));
+    if (spans && w.rows) retained.push(...spans.anchors(w.rows.first, w.rows.last));
     rowRenderer.render(frame, wanted, retained);
     for (const h of g.features) h.afterRows?.(frame as Frame<unknown>);
     after.rovingStop(d, visible);

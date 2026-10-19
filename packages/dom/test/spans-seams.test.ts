@@ -107,7 +107,7 @@ describe('a row’s span plan', () => {
   // Row r1: its cell `a` covers two rows and the columns a and n; x is plain.
   const plan: RowPlan = { covered: new Set([1]), cells: new Map([[0, { rows: 2, cols: 2, width: 300 }]]), spans: true };
   const plain: RowPlan = { covered: new Set([0]), cells: new Map(), spans: false };
-  const spans = { map: null, plan: (i: number) => (i === 1 ? plan : i === 2 ? plain : null) };
+  const spans = { map: null, plan: (i: number) => (i === 1 ? plan : i === 2 ? plain : null), at: () => undefined, anchors: () => [] };
 
   it('has no element for a covered slot; the origin says what it covers and takes its width', () => {
     const { host } = make({ spans });
@@ -129,7 +129,7 @@ describe('a row’s span plan', () => {
 
   it('an unchanged repaint writes nothing; a new plan rebinds the row', () => {
     let current: RowPlan | null = plan;
-    const { g, host } = make({ spans: { map: null, plan: (i) => (i === 1 ? current : null) } });
+    const { g, host } = make({ spans: { map: null, plan: (i) => (i === 1 ? current : null), at: () => undefined, anchors: () => [] } });
     const row = host.querySelector('.dzg-layer > .dzg-row[aria-rowindex="3"]')!;
     const mo = new MutationObserver(() => {});
     mo.observe(host.querySelector('.dzg-layer')!, { subtree: true, attributes: true, childList: true, characterData: true });
@@ -146,7 +146,7 @@ describe('a row’s span plan', () => {
 
 describe('anchors and the paint hook', () => {
   it('keeps an anchor row mounted out of the window, in display order', () => {
-    const { host, vp, box } = make({ spans: { map: null, plan: () => null, anchors: () => [k('r3')] } }, { rows: 500 });
+    const { host, vp, box } = make({ spans: { map: null, plan: () => null, at: () => undefined, anchors: () => [k('r3')] } }, { rows: 500 });
     box.scrollTop = 32 * 300;
     vp.dispatchEvent(new Event('scroll'));
     const indexes = [...host.querySelectorAll('.dzg-layer > .dzg-row')].map((r) => Number(r.getAttribute('aria-rowindex')));

@@ -113,3 +113,32 @@ describe('setFocusOwner: the kernel’s hook', () => {
     expect(kernel.focus).toEqual({ kind: 'cell', row: k('r2'), column: 't' });
   });
 });
+
+describe('setFocusOwner on focus.set (step 9b, commit 3 fixes)', () => {
+  it('a focus set on a cell goes through the owner at once; a header focus, or no owner, as asked', () => {
+    const columns = createColumnModel<R>([{ id: 'n', type: 'number' }, { id: 't' }]);
+    const model = clientRows<R>({ rows: rows(4), getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }) });
+    const kernel = createKernel<R>({ rows: model, columns });
+    const seen: FocusPos[] = [];
+    kernel.subscribe((e) => { if (e.type === 'focusChanged' && e.focus) seen.push(e.focus); });
+    let asked = 0;
+    setFocusOwner<R>(kernel, (f, d) => {
+      asked++;
+      expect(d).toBe(model.displayed);
+      return f.column === 't' && f.row !== k('r0') ? { kind: 'cell', row: k('r0'), column: 't' } : f;
+    });
+    expect(kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: k('r2'), column: 't' } }, 'api').ok).toBe(true);
+    expect(kernel.focus).toEqual({ kind: 'cell', row: k('r0'), column: 't' });
+    // One change, straight to the owner: never the covered place first.
+    expect(seen).toEqual([{ kind: 'cell', row: k('r0'), column: 't' }]);
+    kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: k('r2'), column: 'n' } }, 'user');
+    expect(kernel.focus).toEqual({ kind: 'cell', row: k('r2'), column: 'n' });
+    const before = asked;
+    kernel.dispatch({ type: 'focus.set', focus: { kind: 'header', column: 't' } }, 'user');
+    kernel.dispatch({ type: 'focus.set', focus: null }, 'user');
+    expect(asked).toBe(before);
+    setFocusOwner(kernel);
+    kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: k('r2'), column: 't' } }, 'user');
+    expect(kernel.focus).toEqual({ kind: 'cell', row: k('r2'), column: 't' });
+  });
+});

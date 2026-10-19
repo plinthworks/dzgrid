@@ -113,9 +113,15 @@ $emit: true !default;
     background: var(--tz-bg);
   }
 
-  .dzg-row:hover,
-  .dzg-row:hover .dzg-seg-start,
-  .dzg-row:hover .dzg-seg-end {
+  // A row a tall cell meets (spans: `data-spans`) is hovered by the feature (`data-hover`, the
+  // row under the pointer): `:hover` would light the row the tall cell lives in. Same weight
+  // as the selection's rule below (`:where`), so a selected row stays selected under the pointer.
+  .dzg-row:hover:where(:not([data-spans])),
+  .dzg-row:hover:where(:not([data-spans])) .dzg-seg-start,
+  .dzg-row:hover:where(:not([data-spans])) .dzg-seg-end,
+  .dzg-row[data-hover],
+  .dzg-row[data-hover] .dzg-seg-start,
+  .dzg-row[data-hover] .dzg-seg-end {
     background: var(--dzg-row-hover-bg, color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg)));
   }
 

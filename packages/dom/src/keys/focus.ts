@@ -1,4 +1,4 @@
-import type { DisplayedRows, FocusPos, RowKey } from '@dzgrid/core';
+import type { CellFocus, DisplayedRows, FocusPos, RowKey } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import { CHECK_WIDTH } from '../render/rows.js';
 
@@ -72,7 +72,7 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
 
   function ensureVisible(row: RowKey, column?: string): void {
     // A cell spanning rows shows the row aimed at (the spans feature knows it), not only its first.
-    const i = rows.displayed.indexOf(g.spans?.at?.(row) ?? row);
+    const i = rows.displayed.indexOf(g.spans?.at(row) ?? row);
     if (i === -1) return;
     const box = g.geometry.read();
     if (column !== undefined) scrollInlineTo(column);
@@ -91,11 +91,13 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
   function focusCellAs(row: RowKey, column: string, source: 'api' | 'user'): void {
     if (!kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row, column } }, source).ok) return;
     ensureVisible(row, column);
+    // A place a span covers: the kernel focused the cell owning it (shown where asked).
+    const f = kernel.focus as CellFocus;
     // Mounted now, or at the next paint: the grid scrolls, then focuses without scrolling (S10).
-    const cell = rowRenderer.cell(row, column);
+    const cell = rowRenderer.cell(f.row, f.column);
     if (cell && !g.queued) cell.focus({ preventScroll: true });
     else {
-      g.pendingFocus = { row, column };
+      g.pendingFocus = f;
       g.schedule();
     }
   }
@@ -108,7 +110,7 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     const level = to.level ?? 0;
     const cell = headerRenderer.cell(to.column, level);
     if (cell && !g.queued) cell.focus({ preventScroll: true });
-    else g.pendingFocus = level ? { header: to.column, level } : { header: to.column };
+    else g.pendingFocus = { header: to.column, level };
   }
 
   /**
@@ -161,7 +163,7 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
       if (!same) g.pendingFocus = null;
     }
     if (e.source === 'data' && e.focus && g.hasFocus && !el.viewport.contains(g.doc.activeElement)) {
-      g.pendingFocus = e.focus.kind === 'cell' ? { row: e.focus.row, column: e.focus.column } : { header: e.focus.column, level: e.focus.level ?? 0 };
+      g.pendingFocus = e.focus.kind === 'cell' ? e.focus : { header: e.focus.column, level: e.focus.level ?? 0 };
     }
   }));
 

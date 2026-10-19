@@ -1,7 +1,7 @@
-import type { DisplayedRows, RowKey } from '@dzgrid/core';
+import type { CellFocus, DisplayedRows, RowKey } from '@dzgrid/core';
 import type { RowSpanPlan } from '@dzgrid/core/spans';
 import type { GridContext } from '../context.js';
-import type { Frame, RowView } from '../render/rows.js';
+import type { CellView, Frame, RowView } from '../render/rows.js';
 import { CHECK_WIDTH, setAttr, setPx } from '../render/write.js';
 
 /**
@@ -11,23 +11,32 @@ import { CHECK_WIDTH, setAttr, setPx } from '../render/write.js';
  * every write is compared first, so an unchanged repaint writes nothing.
  */
 
-/** A tall cell as last drawn: the rows it is drawn over (the window's part of it), for the pointer. */
+/** A tall cell as last drawn: the cell, and the rows it is drawn over (the window's part of it), for the pointer. */
 interface Drawn {
+  readonly at: CellFocus;
   readonly first: number;
   readonly last: number;
+}
+
+/** The pointer over a tall cell: the cell, and the row under the pointer. */
+export interface Under {
+  readonly at: CellFocus;
+  readonly row: RowKey;
 }
 
 export interface Body {
   /** `win`: the rows of the window (with its margin), as the anchors were asked for. */
   paint(f: Frame<unknown>, win: { readonly first: number; readonly last: number } | null): void;
-  /** The row under the pointer in a tall cell; undefined elsewhere. */
-  rowUnder(e: MouseEvent): RowKey | undefined;
+  /** The pointer over a tall cell: that cell and the row under the pointer; undefined elsewhere. */
+  under(e: MouseEvent): Under | undefined;
 }
 
 export function createBody(g: GridContext<unknown>): Body {
   const { doc, el, rowRenderer } = g;
   const labels = new WeakMap<HTMLElement, HTMLElement>();
   let drawn = new Map<HTMLElement, Drawn>();
+  /** Pinned cells this feature placed (a spanning row's): the renderer does not know of that write. */
+  let placed = new Set<CellView>();
   let frame: Frame<unknown> | null = null;
 
   /** The cell's content into its label (the grid writes the cell's text, or a part, into the cell itself). */
@@ -58,6 +67,7 @@ export function createBody(g: GridContext<unknown>): Body {
     const extra = f.check ? CHECK_WIDTH : 0;
     setPx(root, '--dzg-check-w', extra);
     const now = new Map<HTMLElement, Drawn>();
+    const put = new Set<CellView>();
     const hosts: RowView[] = [];
     const rest: RowView[] = [];
     for (const rowEl of el.layer.children) {
@@ -69,7 +79,10 @@ export function createBody(g: GridContext<unknown>): Body {
       if (p?.spans && !p.full) {
         for (const [id, x, start] of p.pinned) {
           const cell = v.cells.get(id);
-          if (cell) setPx(cell.el, 'inset-inline-start', x + (start ? extra : 0));
+          if (cell) {
+            setPx(cell.el, 'inset-inline-start', x + (start ? extra : 0));
+            put.add(cell);
+          }
         }
       }
       for (const [id, s] of p?.tall ?? []) {
@@ -90,12 +103,16 @@ export function createBody(g: GridContext<unknown>): Body {
         const mid = (f.rowTop(s.row) + f.rowTop(end) + f.rowHeight(end) - lh) / 2;
         setPx(cell, '--dzg-span-at', Math.max(0, Math.min(size - lh, mid - y)));
         wrap(cell);
-        now.set(cell, { first: a, last: b });
+        now.set(cell, { at: { kind: 'cell', row: v.key!, column: id }, first: a, last: b });
       }
       (p?.tall.length ? hosts : rest).push(v);
     }
     for (const cell of drawn.keys()) if (!now.has(cell)) unwrap(cell);
     drawn = now;
+    // A pinned cell back in the flow (its row no longer spans, a full-width row, a spare cell):
+    // its place goes, unless the renderer now owns it (a centre cell, placed by the grid).
+    for (const c of placed) if (!put.has(c) && Number.isNaN(c.inlineStart)) c.el.style.removeProperty('inset-inline-start');
+    placed = put;
     // By rank: an earlier host above the later ones (its tall cell covers them), all under the header.
     const z = (v: RowView, value: string) => {
       for (const seg of [v.segs.start, v.segs.end]) if (seg.style.zIndex !== value) seg.style.zIndex = value;
@@ -104,7 +121,7 @@ export function createBody(g: GridContext<unknown>): Body {
     for (const v of rest) z(v, '');
   }
 
-  function rowUnder(e: MouseEvent): RowKey | undefined {
+  function under(e: MouseEvent): Under | undefined {
     const cell = (e.target as Element | null)?.closest?.<HTMLElement>('.dzg-cell[aria-rowspan]');
     const at = cell ? drawn.get(cell) : undefined;
     const f = frame;
@@ -114,8 +131,8 @@ export function createBody(g: GridContext<unknown>): Body {
     let r = at.first;
     while (r < at.last && f.rowTop(r + 1) <= dy) r++;
     const d: DisplayedRows<unknown> = f.displayed;
-    return d.keyAt(d.index(r)!);
+    return { at: at.at, row: d.keyAt(d.index(r)!) };
   }
 
-  return { paint, rowUnder };
+  return { paint, under };
 }

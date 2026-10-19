@@ -20,7 +20,7 @@ export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
     const t = e.target as HTMLElement;
     const row = t.closest('.dzg-row');
     // A cell spanning rows: the row under the pointer (the spans feature knows it).
-    const key = g.spans?.at?.(e) ?? (row ? rowRenderer.keyOf(row) : undefined);
+    const key = g.spans?.at(e) ?? (row ? rowRenderer.keyOf(row) : undefined);
     if (!key) return;
     // Which row and cell, by identity (the host's handlers never see positions).
     const node = rows.row(key);

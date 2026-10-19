@@ -310,6 +310,35 @@ async function runEngine(name) {
       await page.close();
     }
 
+    // ---- spans (step 9b, commit 3 fixes): the hover lights the row under the pointer, not the tall cell's own ----
+    for (const qs of ['rows=20000&spans=1', 'rows=200']) {
+      const { page, errors } = await load(ctx, qs);
+      const box = await page.evaluate(() => {
+        const r = (i) => document.querySelector(`.dzg-layer > .dzg-row[aria-rowindex="${i + 2}"]`).getBoundingClientRect();
+        // Over the city column (in a spans grid, the tall cell of rows 0 to 4 999), at row 3.
+        const c = document.querySelector('.dzg-layer > .dzg-row[aria-rowindex="2"] [data-col="city"]').getBoundingClientRect();
+        return { x: (c.left + c.right) / 2, y: (r(3).top + r(3).bottom) / 2 };
+      });
+      await page.mouse.move(box.x, box.y);
+      await frames(page);
+      const h = await page.evaluate(() => {
+        const bg = (i) => {
+          const row = document.querySelector(`.dzg-layer > .dzg-row[aria-rowindex="${i + 2}"]`);
+          return [row, row.querySelector('.dzg-seg-start')].map((e) => getComputedStyle(e).backgroundColor).join(' ');
+        };
+        return { origin: bg(0), under: bg(3), other: bg(6) };
+      });
+      const spansGrid = qs.includes('spans');
+      check(name, `${spansGrid ? 'spans' : 'plain grid'}: the pointer over row 3${spansGrid ? ' (a covered place of the tall cell)' : ''} lights that row and its pinned segment${spansGrid ? ', not the row the tall cell lives in' : ''}`,
+        h.under !== h.other && (!spansGrid || h.origin === h.other), h);
+      await page.mouse.move(5, 5);
+      await frames(page);
+      const left = await page.evaluate(() => document.querySelectorAll('.dzg-row[data-hover], .dzg-row:hover').length);
+      check(name, `${spansGrid ? 'spans' : 'plain grid'}: no row stays hovered once the pointer leaves the grid`, left === 0, left);
+      check(name, `no page error hovering ${qs}`, errors.length === 0, errors);
+      await page.close();
+    }
+
     // ---- palette switched live, direction switched live keeping the logical inline scroll ----
     {
       const { page } = await load(ctx, 'select=multi');

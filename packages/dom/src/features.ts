@@ -42,5 +42,7 @@ export interface SpanFeature extends RowSpans {
    * pointer; for a focus on a cell (its row), the row aimed at, which is brought into view.
    * Undefined: the cell's own row.
    */
-  at?(x: MouseEvent | RowKey): RowKey | undefined;
+  at(x: MouseEvent | RowKey): RowKey | undefined;
+  /** Rows to keep mounted besides the window (the origins of tall cells reaching into it). */
+  anchors(first: number, last: number): readonly RowKey[];
 }

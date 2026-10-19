@@ -448,7 +448,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
           if (!columns.visible().some((c) => c.id === f.column)) return refuse('unknown-column', [problem('unknown-column', 'error', 'focus.column', f.column)]);
           if (f.kind === 'cell' && rows.displayed.indexOf(f.row) === -1) return refuse('row-not-displayed');
         }
-        setFocus(f, source);
+        // A cell a span covers (the focus owner, set by the spans feature): the cell owning it, at once.
+        setFocus(f?.kind === 'cell' && owner ? owner(f, rows.displayed) : f, source);
         return OK;
       }
     }
