@@ -7,6 +7,7 @@
 import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { serve, browser } from '../spikes/kit.mjs';
+import { chromeDump } from '../spikes/s4-a11y/ax.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const OUT = `${ROOT}packages/dom/test/browser/results`;
@@ -51,7 +52,8 @@ const geometry = (page) => page.evaluate(() => {
   const row = [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => { const b = r.getBoundingClientRect(); return b.top > v.top + 40 && b.bottom < v.bottom - 20; });
   let worst = 0;
   for (const cell of row.querySelectorAll('[data-col]')) {
-    const h = document.querySelector(`.dzg-header .dzg-hcell[data-col="${cell.dataset.col}"]`);
+    // The column header (a group header names its first column too).
+    const h = document.querySelector(`.dzg-header .dzg-hcell[data-col="${cell.dataset.col}"]:not(.dzg-hgroup)`);
     if (!h) return { missing: cell.dataset.col };
     const a = h.getBoundingClientRect(), b = cell.getBoundingClientRect();
     worst = Math.max(worst, Math.abs(a.left - b.left), Math.abs(a.right - b.right));
@@ -72,7 +74,8 @@ const geometry = (page) => page.evaluate(() => {
 });
 
 async function runEngine(name) {
-  const b = await browser(name);
+  // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
+  const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
   open = b;
   try {
     const ctx = await b.newContext();
@@ -106,7 +109,8 @@ async function runEngine(name) {
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.
-    for (const [dir, more] of [['ltr', ''], ['rtl', ''], ['ltr', '&box=1'], ['rtl', '&box=1&spans=1&pin=1&rows=20000']]) {
+    // And under grouped headers (step 9b, commit 4): LTR, RTL, pinned, with the box.
+    for (const [dir, more] of [['ltr', ''], ['rtl', ''], ['ltr', '&box=1'], ['rtl', '&box=1&spans=1&pin=1&rows=20000'], ['ltr', '&groups=1'], ['rtl', '&groups=1'], ['ltr', '&groups=1&pin=1&box=1'], ['rtl', '&groups=1&pin=1&box=1']]) {
       const { page } = await load(ctx, `locale=${dir === 'rtl' ? 'ar-DZ' : 'fr-FR'}&dir=${dir}${more}`);
       const out = [];
       for (const at of [0, 0.5, 1]) {
@@ -336,6 +340,133 @@ async function runEngine(name) {
       const left = await page.evaluate(() => document.querySelectorAll('.dzg-row[data-hover], .dzg-row:hover').length);
       check(name, `${spansGrid ? 'spans' : 'plain grid'}: no row stays hovered once the pointer leaves the grid`, left === 0, left);
       check(name, `no page error hovering ${qs}`, errors.length === 0, errors);
+      await page.close();
+    }
+
+    // ---- spans (step 9b, commit 4): the tall cell's drawn rect ends where the span ends; focus through scroll and sort ----
+    {
+      const { page, errors } = await load(ctx, 'rows=20000&spans=1&pin=1');
+      const end = await page.evaluate(async () => {
+        // The first run (rows 0 to 4 999) ends in view: the cell's bottom is its last row's bottom.
+        window.t.scrollTo(4985 * 32);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const cell = document.querySelector('.dzg-cell[aria-rowspan="5000"][data-col="city"]');
+        const last = document.querySelector('.dzg-layer > .dzg-row[aria-rowindex="5001"]');
+        const next = document.querySelector('.dzg-layer > .dzg-row[aria-rowindex="5002"] [data-col="city"]');
+        if (!cell || !last || !next) return { cell: !!cell, last: !!last, next: !!next };
+        const c = cell.getBoundingClientRect(), l = last.getBoundingClientRect();
+        const top = document.querySelector('.dzg-header').getBoundingClientRect().bottom;
+        return { bottom: c.bottom - l.bottom, covers: c.top <= top + 1, nextTop: next.getBoundingClientRect().top - l.bottom, span: next.getAttribute('aria-rowspan') };
+      });
+      check(name, 'spans, pinned: a tall cell ending in view ends exactly at its last row (within 1 px), the next run starts under it', end.bottom !== undefined && Math.abs(end.bottom) <= 1 && end.covers && Math.abs(end.nextTop) <= 1 && end.span === '5000', end);
+      // Focus on a tall cell, through a long scroll and a sort: the same element, never blurred.
+      await page.evaluate(() => window.t.grid.api.focusCell(window.t.key(7), 'city'));
+      await frames(page, 2);
+      await page.evaluate(() => { window.t.mark = document.activeElement; window.t.events.length = 0; });
+      await page.evaluate(() => window.t.scrollTo(15000 * 32));
+      await frames(page, 2);
+      await page.evaluate(() => window.t.scrollTo(0));
+      await frames(page, 2);
+      const kept = await page.evaluate(() => ({ same: document.activeElement === window.t.mark, span: window.t.mark.getAttribute('aria-rowspan'), blurs: window.t.events.filter((e) => e.startsWith('blur')).length }));
+      await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'city', dir: 'desc' }] }, 'user'));
+      await frames(page, 3);
+      const sorted = await page.evaluate(() => {
+        const f = window.t.grid.kernel.focus;
+        const el = window.t.grid.context.rowRenderer.cell(f.row, f.column);
+        return { focus: f.column, onIt: document.activeElement === el, blurs: window.t.events.filter((e) => e.startsWith('blur')).length };
+      });
+      check(name, 'spans: the focused tall cell keeps the focus through a long scroll (same element, no blur) and a sort (the focus on its cell)', kept.same && kept.span === '5000' && kept.blurs === 0 && sorted.focus === 'city' && sorted.onIt && sorted.blurs === 0, { kept, sorted });
+      check(name, 'no page error with spans, scroll and sort', errors.length === 0, errors);
+      await page.close();
+    }
+
+    // ---- grouped headers (step 9b, commit 4): group rects, stretched column headers, keys, AX ----
+    for (const qs of ['groups=1', 'groups=1&pin=1&box=1&locale=ar-DZ&dir=rtl', 'groups=1&box=1']) {
+      const { page, errors } = await load(ctx, `rows=2000&${qs}`);
+      const out = [];
+      for (const at of [0, 0.5, 1]) {
+        await page.evaluate((at) => {
+          const vp = document.querySelector('.dzg-viewport');
+          vp.scrollLeft = (getComputedStyle(vp).direction === 'rtl' ? -1 : 1) * (vp.scrollWidth - vp.clientWidth) * at;
+        }, at);
+        await frames(page, 3);
+        out.push(await page.evaluate(() => {
+          const leafRow = [...document.querySelectorAll('.dzg-header > [role=row]')].at(-1);
+          const leaves = [...leafRow.querySelectorAll('.dzg-hcell[data-col]')];
+          const byIndex = new Map(leaves.map((e) => [Number(e.getAttribute('aria-colindex')), e]));
+          // Each group whose columns are all mounted: its left and right are theirs, within 1 px.
+          let groups = 0, worst = 0;
+          for (const gEl of document.querySelectorAll('.dzg-hgroup')) {
+            const i = Number(gEl.getAttribute('aria-colindex')), n = Number(gEl.getAttribute('aria-colspan'));
+            const cols = Array.from({ length: n }, (_, k) => byIndex.get(i + k));
+            if (cols.some((c) => !c)) continue;
+            const r = gEl.getBoundingClientRect();
+            const rs = cols.map((c) => c.getBoundingClientRect());
+            worst = Math.max(worst, Math.abs(r.left - Math.min(...rs.map((x) => x.left))), Math.abs(r.right - Math.max(...rs.map((x) => x.right))));
+            groups++;
+          }
+          // A stretched column header starts at the group row it covers, and is what shows there.
+          const bands = [...document.querySelectorAll('.dzg-header > [role=row]')].slice(0, -1).map((r) => r.getBoundingClientRect());
+          const vp = document.querySelector('.dzg-viewport').getBoundingClientRect();
+          let stretched = 0, badStretch = [];
+          for (const leaf of leaves.filter((e) => e.hasAttribute('data-up'))) {
+            const up = Math.round(parseFloat(leaf.style.getPropertyValue('--dzg-up')) / 32);
+            const r = leaf.getBoundingClientRect();
+            const x = (r.left + r.right) / 2;
+            if (x < vp.left + 2 || x > vp.right - 2) continue;
+            const low = document.elementFromPoint(x, r.bottom - 4)?.closest('.dzg-hcell');
+            if (low !== leaf) continue; // under a pinned segment
+            const high = document.elementFromPoint(x, r.top + 4)?.closest('.dzg-hcell');
+            const want = bands[bands.length - up];
+            if (high !== leaf || Math.abs(r.top - want.top) > 1) badStretch.push({ col: leaf.dataset.col, top: r.top, want: want.top, hit: high?.className });
+            stretched++;
+          }
+          // Every group row holds one cell per column of the column headers' row (the box's included).
+          const counts = [...document.querySelectorAll('.dzg-header > [role=row]')].map((r) => r.querySelectorAll('[aria-colindex]').length);
+          return { groups, worst, stretched, badStretch, counts };
+        }));
+      }
+      check(name, `grouped headers ${qs}: each group cell covers exactly its columns (within 1 px), at start, middle and end`, out.every((o) => o.groups >= 1 && o.worst <= 1) && out.reduce((s, o) => s + o.groups, 0) >= 4, out);
+      check(name, `grouped headers ${qs}: a column header with no group above is stretched over the empty group cells and is what shows there`, out.every((o) => o.badStretch.length === 0) && out.reduce((s, o) => s + o.stretched, 0) >= 3, out);
+      check(name, `grouped headers ${qs}: each group row holds as many headers as the column headers' row`, out.every((o) => new Set(o.counts).size === 1), out.map((o) => o.counts));
+      if (qs === 'groups=1') {
+        // Keys: Up from C1's header into Mesures then Données (real DOM focus), Down back to C1.
+        const keys = await page.evaluate(async () => {
+          const vp = document.querySelector('.dzg-viewport');
+          vp.scrollLeft = 0;
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          document.querySelector('.dzg-hcell[data-col="x1"]:not(.dzg-hgroup)').focus();
+          const seen = [];
+          for (const key of ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown']) {
+            document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+            await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+            seen.push(document.activeElement.textContent);
+          }
+          return seen;
+        });
+        check(name, 'grouped headers: Up from a column header focuses its groups, Down comes back to it', JSON.stringify(keys) === JSON.stringify(['Mesures', 'Données', 'Mesures', 'C1']), keys);
+        const v = await axe(page);
+        check(name, 'grouped headers: axe, 0 violations', v.length === 0, v);
+        if (name === 'chrome') {
+          // Chrome's own trees: groups are column headers with their span; VoiceOver's (macOS) headers of a cell
+          // (scrolled so that C1 to C6 are mounted; a column with no group repeats its own name in the
+          // group rows: shown once here).
+          const blink = await chromeDump(ctx, 'DzGrid browser suite', 'blink');
+          const groups = blink.nodes.filter((n) => n.role === 'columnHeader' && n.attrs.className?.includes('dzg-hgroup')).map((n) => [n.attrs.name, n.attrs.ariaCellColumnIndex, n.attrs.ariaCellColumnSpan]);
+          check(name, 'grouped headers: the accessibility tree exposes group headers as column headers with their column index and span', JSON.stringify(groups.filter((x) => x[0] !== 'Patient')) === JSON.stringify([['Finances', '3', '2'], ['Données', '5', '6'], ['Mesures', '5', '4']]) && groups.filter((x) => x[0] === 'Patient').length === 2, groups);
+          await page.evaluate(async () => {
+            document.querySelector('.dzg-viewport').scrollLeft = 400;
+            await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          });
+          const mac = await chromeDump(ctx, 'DzGrid browser suite', 'mac');
+          const cells = mac.nodes.filter((n) => n.role === 'AXCell' && n.attrs.AXARIARowIndex === '5');
+          const headers = (col) => { const c = cells.find((x) => x.attrs.AXARIAColumnIndex === String(col)); return c ? mac.ref(c.attrs.AXColumnHeaderUIElements).map((h) => h.text).filter((t, k, a) => t && t !== a[k - 1]) : null; };
+          const h = { nom: headers(1), c1: headers(6), c4: headers(9), c6: headers(11) };
+          check(name, 'grouped headers: macOS pairs each cell with its own groups (Patient over Nom, Données and Mesures over C1, Données over C4, none over C6)',
+            JSON.stringify(h) === JSON.stringify({ nom: ['Patient', 'Nom'], c1: ['Données', 'Mesures', 'C1'], c4: ['Données', 'C4'], c6: ['C6'] }), { h, raw: cells.length });
+        }
+      }
+      check(name, `no page error with grouped headers ${qs}`, errors.length === 0, errors);
       await page.close();
     }
 

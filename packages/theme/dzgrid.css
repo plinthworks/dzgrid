@@ -141,6 +141,10 @@
   justify-content: center;
 }
 
+.dzg-hgroup {
+  border-inline-end: 1px solid var(--tz-border);
+}
+
 .dzg-box {
   display: inline-grid;
   place-items: center;

@@ -167,3 +167,47 @@ Si une étape est **perdu** pour un couple : appliquer, dans cet ordre, et refai
 3. pour l'étape 6d (curseur virtuel), documenter la limite : la grille ne peut pas exposer 10 000
    rangées ; recommander la pagination quand le public l'exige.
 Consigner le résultat dans `ROADMAP.md` (ligne S4) et dans `README.md` (Constats).
+
+## 7. Étapes — fusions de cellules et en-têtes groupés (étape 9b)
+
+Page : le bac à sable `playground/spans.html` (`npx vite --host 127.0.0.1`, puis
+http://127.0.0.1:4700/spans.html ; sur un autre appareil, l'adresse du poste). Mêmes couples A à D,
+en **français puis en arabe** (réglage « Données : arabe », la grille passe de droite à gauche).
+Durée estimée : 20 min par couple et par langue. Pour chaque étape, noter ce qui est **dit**, mot
+pour mot si possible : juste, incomplet, faux, ou perdu.
+
+16. **Fusion lue une fois, avec ses coordonnées** (exemple 1). `Tab` jusqu'à la première cellule
+    « Service » : attendu « Cardiologie », ligne 2, colonne 1 (ou 2 avec les cases), et l'étendue
+    si le lecteur la donne (« couvre N lignes »). `→` puis `↓` trois fois dans « Patient » :
+    à chaque ligne, le lecteur dit-il le service de la ligne (en-tête de ligne ou contexte) ou
+    rien ? `←` depuis la 4ᵉ ligne : retour sur la cellule fusionnée, **dite une seule fois**, pas
+    répétée pour chaque ligne qu'elle couvre.
+17. **Commandes de tableau du lecteur** (NVDA `Ctrl+Alt+flèches`, JAWS `Ctrl+Alt+flèches`,
+    VoiceOver `Ctrl+Option+flèches`) dans une colonne fusionnée : sur une ligne couverte, le lecteur
+    trouve-t-il la valeur (la fusion), dit-il « vide », ou saute-t-il ? **Si une paire perd la
+    valeur sur les lignes couvertes, le noter : c'est la condition d'O10 (cellules cachées qui
+    répètent la valeur).**
+18. **Fusion décidée par la donnée et ligne pleine largeur** (exemples 2 et 3). Sur la ligne du
+    total : « Total : 10 rendez-vous », colonne 2, sur 3 colonnes si le lecteur le dit. Sur une
+    ligne de titre : le titre entier est dit, une seule fois ; noter la colonne annoncée (Chrome
+    rattache une cellule pleine largeur à la colonne 1).
+19. **En-têtes groupés annoncés** (exemple 4). `Tab` dans la grille, puis dans le corps, colonne
+    « Pouls » : en entrant dans la colonne, attendu « Clinique, Constantes, Pouls » (ou au moins
+    « Constantes, Pouls »), puis la valeur. Colonne « Nom » : « Patient, Nom ». Colonne
+    « Service » (sans groupe) : « Service », **sans** nom de groupe d'une autre colonne. Noter si
+    un nom est **répété** (« Service, Service ») : les rangées de groupes portent, pour chaque
+    colonne, une en-tête cachée (le nom du groupe, ou celui de la colonne là où il n'y a pas de
+    groupe) parce que VoiceOver associe par position.
+20. **Clavier dans les en-têtes groupés.** Sur l'en-tête « Pouls », `↑` : « Constantes », en-tête
+    de colonne, **couvre 3 colonnes** si le lecteur le dit ; `↑` : « Clinique » ; `↓` `↓` : retour
+    sur « Pouls ». Sur « Clinique », `→` (ar : `←`) : « Séjour » ; `Début` / `Fin` : premier et
+    dernier groupe de la rangée. `Entrée` ou `Espace` sur un groupe : rien n'est trié, rien n'est
+    annoncé.
+21. **Groupe coupé par l'épinglage.** Cocher « première colonne épinglée » (Nom est épinglé) :
+    deux cellules « Patient » ; noter si le lecteur annonce deux fois « Patient » en passant de
+    l'une à l'autre (attendu : oui, ce sont deux morceaux du même groupe, O7).
+
+Consigner le résultat dans `docs/behaviors/spans.md` (fin de la fiche) et dans `ROADMAP.md`
+(ligne de l'étape 9b). Règle de décision propre à cette section : une valeur perdue sur les lignes
+couvertes (étape 17) déclenche O10 ; un groupe faux ou manquant (étape 19) se corrige dans les
+rangées de groupes avant toute autre chose.

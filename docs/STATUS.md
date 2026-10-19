@@ -16,10 +16,10 @@ Mis à jour : 2026-10-19. Ce fichier dit où en est la Phase 3, ce qui est en co
 | 7 — sélection sur plusieurs pages | fait | `2151d99` |
 | 8 — types de filtres personnalisés (`FilterKind`) | fait | `7a081dc` |
 | 9 — listes de valeurs du filtre à cocher | fait, relu, testé | `c6d3b02` |
-| **9b — fusions de cellules (rowspan / colspan)** | **décision du propriétaire, priorité haute** : commit 1 fait et relu (`5eb92f1`) ; commit 2 (moteur) fait et relu (`626b2bf`) ; commit 3 (écran, clavier, clic, page du bac à sable) écrit, à relire ; commit 4 à faire | — |
+| 9b — fusions de cellules (rowspan / colspan) | fait : commits 1 à 3 faits et relus (`5eb92f1`, `626b2bf`, `4742d93` + `94c09c0`) ; commit 4 (en-têtes groupés, vérifications navigateur) écrit, suite verte, **non commité, à relire** | — |
 | 10 à 25 | à faire (liste dans `docs/phase-3-plugins.md` B4) | — |
 
-En cours : l'étape 9b (fusions). Commits 1 et 2 faits et relus (`5eb92f1`, `626b2bf`). Commit 3 « côté écran » (`@dzgrid/dom/spans`, `spans()`) écrit, suite verte, navigateur 48 vérifications, **non commité, à relire** (revue de code et analyse des tests) : cellules hautes et larges sous le défilement virtuel, texte centré qui voyage, lignes pleine largeur, clavier (`navigate`), clic = la ligne sous le pointeur, `missing-feature` sans la fonction ; page du bac à sable `playground/spans.html` (lien « Fusions (rowspan / colspan) » sur l'accueil). Tailles : dom de base 17 999 o gz (budget 18 000, **1 o de reste**), dom/spans 2 381 (2 400), core/spans 3 421 (3 500) : **le commit 4 (en-têtes groupés) ne tiendra pas dans ces budgets, décision du propriétaire avant lui**. Écarts au plan : pas de « fillers » (le thème peint lignes et segments épinglés, la couleur des lignes couvertes reste visible), plans de ligne calculés dans le cœur (`rowPlanner`). Corrigé au passage (thème) : la case de sélection du corps était 16 px plus large que sa colonne (désalignement avec les cases, même sans fusion). Corrections de la relecture du commit 3 (2026-10-19, non commitées, suite verte 135 fichiers / 2 318 tests, navigateur 54) : survol de la ligne sous le pointeur (`data-hover`), CSS de la fonction limitée aux lignes de la grille, touches depuis la ligne cliquée d'une cellule haute, `focusCell` sur une place couverte = la cellule propriétaire tout de suite, `inset-inline-start` resté sur une cellule épinglée réutilisée ; tailles dom 17 991, dom/spans 2 697 (budget 3 500). Ensuite : commit 4 (en-têtes groupés, vérifications navigateur restantes). Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md` ; plan : `docs/phase-3-steps/step9b-spans-blueprint.md` (« Commit 3 done »).
+En cours : fin de l'étape 9b (fusions). Commits 1 à 3 faits et relus. Commit 4 écrit (2026-10-19), suite verte (136 fichiers, 2 350 tests), navigateur 77 vérifications (23 nouvelles), **non commité, à relire** (revue de code et analyse des tests) : en-têtes groupés dans `@dzgrid/dom/spans` (`src/spans/bands.ts`) — rangées de groupes au-dessus des en-têtes, cellules de groupe `columnheader` avec `aria-colindex`/`aria-colspan`, coupées par l'épinglage avec leur nom répété (O7), une en-tête cachée par colonne dans chaque rangée de groupes (VoiceOver associe par position, mesuré), en-tête de colonne étirée vers le haut en CSS là où il n'y a pas de groupe, fenêtre de colonnes, largeurs, RTL ; clavier Haut / Bas / Gauche / Droite / Début / Fin dans les groupes ; exemple « En-têtes groupés » sur `playground/spans.html`. Limite documentée : le nombre de rangées de groupes est fixé à la création de la grille. Budget dom/spans porté à 4 500 o par le propriétaire (O8 ter) : mesure 4 174. Écart : le nom d'un groupe ne colle plus au bord pendant le défilement latéral (budget). Ensuite : relecture du commit 4, puis l'**étape 10 (export CSV)**. Fiche : `docs/behaviors/spans.md` ; essai : `spikes/s12-spans/README.md` ; plan : `docs/phase-3-steps/step9b-spans-blueprint.md` (« Commit 4 done ») ; test à l'oreille : `docs/a11y-protocol.md` §7.
 
 ## Les plans détaillés des étapes
 
@@ -47,14 +47,14 @@ En cours : l'étape 9b (fusions). Commits 1 et 2 faits et relus (`5eb92f1`, `626
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 26 000 o gz | 25 937 |
+| `@dzgrid/core` | 26 000 o gz | 25 950 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 421 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 344 |
-| `@dzgrid/dom` | 18 000 (fusions) | 17 999 |
-| `@dzgrid/dom/spans` | 2 400 | 2 381 |
+| `@dzgrid/dom` | 18 000 (fusions) | 17 989 |
+| `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 174 |
 | `@dzgrid/dom/popup` | 1 500 | ~1 390 |
 | langues en / fr / ar | 540 / 660 / 850 | 511 / 623 / 801 |
-| thème | 1 180 | 1 105 |
+| thème | 1 180 | 1 152 |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 
@@ -68,7 +68,7 @@ En cours : l'étape 9b (fusions). Commits 1 et 2 faits et relus (`5eb92f1`, `626
 
 ## Décisions du propriétaire prises pendant la Phase 3 (rappel)
 
-- Étape 9b : texte d'une fusion centré comme Excel, qui « voyage » en haut ou en bas de la partie visible quand la fusion est longue ; clic = la ligne sous le pointeur ; CSV répète la valeur ; modules à part `@dzgrid/core/spans` 3,5 kB et `@dzgrid/dom/spans` 2,4 kB, dom de base 18 kB ; essai navigateur (S12) d'abord ; test au lecteur d'écran à l'oreille par le propriétaire. Détail : `docs/phase-3-steps/step9b-decisions.md`.
+- Étape 9b : texte d'une fusion centré comme Excel, qui « voyage » en haut ou en bas de la partie visible quand la fusion est longue ; clic = la ligne sous le pointeur ; CSV répète la valeur ; modules à part `@dzgrid/core/spans` 3,5 kB et `@dzgrid/dom/spans` 2,4 kB puis 3,5 kB (O8 bis) puis 4,5 kB (O8 ter, en-têtes groupés avec leur clavier), dom de base 18 kB ; essai navigateur (S12) d'abord ; test au lecteur d'écran à l'oreille par le propriétaire. Détail : `docs/phase-3-steps/step9b-decisions.md`.
 - 2026-10-18, priorité haute : les fusions de cellules, comme `rowspan` / `colspan` d'un tableau HTML, conçues et codées dans la Phase 3 (étape 9b, après la 9), les quatre genres : valeurs identiques fusionnées, fusion décidée par la donnée, en-têtes groupés, lignes pleine largeur. ag-Grid les gère mal : c'est un point où DzGrid doit faire mieux. Avant : prévu en Phase 5.
 
 - Étape 4 : budgets cœur 24 kB, dom 16,8 kB (relevés ensuite).

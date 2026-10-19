@@ -181,6 +181,11 @@ $emit: true !default;
     justify-content: center;
   }
 
+  // A group header (grouped headers, spans): a line at its end, so neighbouring groups read apart.
+  .dzg-hgroup {
+    border-inline-end: 1px solid var(--tz-border);
+  }
+
   .dzg-box {
     display: inline-grid;
     place-items: center;

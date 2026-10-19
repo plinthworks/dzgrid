@@ -4,13 +4,15 @@ import { buildSpanMap, navigate, ownerFocus, rowPlanner, type RowSpanPlan, type 
 import type { GridContext } from '../context.js';
 import { setPx } from '../render/write.js';
 import type { FeatureHandle, GridFeature, MoveFn, SpanFeature } from '../features.js';
+import { createBands } from './bands.js';
 import { createBody } from './body.js';
 import { injectSpanStyles } from './styles.js';
 
 /**
  * `spans()`: cells spanning rows and columns (docs/behaviors/spans.md) — identical
  * values merged (`merge`), spans decided by the data (`rowSpan`, `colSpan`),
- * full-width rows (`settings.fullWidth`). The map comes from the core
+ * full-width rows (`settings.fullWidth`), grouped headers (groups in `columns`,
+ * `./bands.ts`). The map comes from the core
  * (`buildSpanMap`), on the rows as displayed and the visible columns; this
  * feature lays it out under virtual scrolling, moves the keys over it and
  * maps a click on a tall cell to the row under the pointer.
@@ -32,6 +34,8 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   const root = g.el.root.getRootNode();
   if (g.settings.injectStyles !== false) injectSpanStyles(root.nodeType === 11 ? (root as ShadowRoot) : g.doc, g.settings.nonce);
   const body = createBody(g);
+  // Grouped headers: the group rows, when the columns come in groups.
+  const bands = createBands(g);
 
   // ---- the map (the core gives the last one back while nothing it depends on changed) ----
   let map: SpanMap | null = null;
@@ -66,6 +70,9 @@ function setup(g: GridContext<unknown>): FeatureHandle {
    */
   let aimed: { readonly focus: FocusPos; readonly row: RowKey; readonly click?: true } | null = null;
   const move: MoveFn = (_, s, from, goal, intent, base) => {
+    // The group rows' keys, and Up from a column header into them.
+    const b = bands?.move(_, s, from, goal, intent, base);
+    if (b !== undefined) return b;
     const m = current();
     const d = s.rows;
     const r = from.kind === 'cell' ? d.indexOf(from.row) : -1;
@@ -133,7 +140,9 @@ function setup(g: GridContext<unknown>): FeatureHandle {
 
   return {
     spans: feature,
+    ...(bands && { bands: bands.specs }),
     afterRows(f) {
+      bands?.stretch(g.rowHeight());
       body.paint(f, win);
       // A hovered row element reused for another row (a scroll, a sort): the pointer is not over that one.
       if (hovered && (hovered.el.parentNode !== g.el.layer || g.rowRenderer.keyOf(hovered.el) !== hovered.key)) hover(null);

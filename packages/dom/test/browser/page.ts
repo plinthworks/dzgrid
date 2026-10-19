@@ -1,5 +1,6 @@
 // The real grid, from the sources, for scripts/browser.mjs. Query: rows, locale, dir, theme, select, box;
-// spans=1 merges the city (runs of 5 000 rows) with the spans feature, pin=1 pins it at the start.
+// spans=1 merges the city (runs of 5 000 rows) with the spans feature, pin=1 pins it at the start;
+// groups=1 puts the columns in groups (two levels) with the spans feature.
 import { createGrid } from '/packages/dom/src/index.ts';
 import { EN } from '/packages/dom/src/locales/en.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
@@ -36,14 +37,25 @@ const columns = [
   { id: 'ref', header: 'Réf', pinned: 'end' as const, width: 90, value: (r: Row) => `R-${r.id}` },
 ];
 
+// Patient over name and city (the start-pinned name); Finances over amount and day; Données over
+// Mesures (C0 to C3) and C4, C5; the other columns and Réf have no group (their headers stretched up).
+const tree = q.get('groups')
+  ? [
+      { id: 'g-patient', header: 'Patient', children: columns.slice(0, 2) },
+      { id: 'g-fin', header: 'Finances', children: columns.slice(2, 4) },
+      { id: 'g-data', header: 'Données', children: [{ id: 'g-mes', header: 'Mesures', children: columns.slice(4, 8) }, ...columns.slice(8, 10)] },
+      ...columns.slice(10),
+    ]
+  : columns;
+
 const mode = (q.get('select') ?? 'multi') as 'none' | 'single' | 'multi';
 const events: string[] = [];
 for (const type of ['blur', 'focusout', 'focusin']) document.addEventListener(type, (e) => events.push(`${type} ${(e.target as HTMLElement).dataset?.['col'] ?? (e.target as HTMLElement).id ?? ''}`), true);
 
 const host = document.getElementById('host')!;
-const features = q.get('spans') ? [(await import('/packages/dom/src/spans.ts')).spans()] : [];
+const features = q.get('spans') || q.get('groups') ? [(await import('/packages/dom/src/spans.ts')).spans()] : [];
 const grid = createGrid<Row>(host, {
-  rows, getRowId: (r) => r.id, columns, messages, locale, features,
+  rows, getRowId: (r) => r.id, columns: tree, messages, locale, features,
   selection: { mode, checkbox: q.get('box') === '1', click: true },
 });
 

@@ -21,6 +21,14 @@
  * - Every rule names the grid's own rows (`.dzg-row[…]`, cells through their
  *   segment: `display: contents` changes the boxes, not the tree), so a host
  *   element carrying `data-full` or `data-spans` changes nothing.
+ * - Group rows (grouped headers) stack above the column headers (the header
+ *   is a column of rows); a group cell is placed and sized by the feature in
+ *   every segment; beside it, in each other column the column headers
+ *   hold, a hidden header (`.dzg-hslot`, its name repeated, or the column's
+ *   own where no group stands) so that a screen reader pairing by position finds it.
+ *   A column header with empty group
+ *   cells above it (`data-up`, `--dzg-up`) is stretched up over them: it is
+ *   painted after the group rows, so it covers them.
  * - The hover of a row a tall cell meets is the theme's `[data-hover]` (the
  *   feature marks the row under the pointer): `:hover` would light the row the
  *   tall cell lives in.
@@ -34,6 +42,10 @@ export const SPANS_CSS =
   ':where(.dzg-span-label){position:sticky;inset-block:var(--dzg-header-h) 0;line-height:var(--dzg-row-height);overflow:hidden;text-overflow:ellipsis;text-align:center}' +
   ':where(.dzg-row[data-full]>.dzg-seg){display:contents}' +
   ':where(.dzg-row[data-full]>.dzg-seg>.dzg-check){position:sticky;inset-inline-start:0;z-index:2}' +
+  ':where(.dzg-header){flex-direction:column}' +
+  ':where(.dzg-hgroup){position:absolute;inset-block:0}' +
+  ':where(.dzg-hslot){position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)}' +
+  ':where(.dzg-hcell[data-up]){inset-block-start:calc(-1*var(--dzg-up));block-size:calc(var(--dzg-row-height) + var(--dzg-up))}' +
   ':where(.dzg-row[data-full]>.dzg-seg>.dzg-cell){position:sticky;inset-inline-start:var(--dzg-check-w)!important;inline-size:calc(var(--dzg-view-w,100%) - var(--dzg-check-w))!important}';
 
 /** Once per document or shadow root, like the base's; a host with a strict CSP passes its nonce or loads it itself. */

@@ -145,7 +145,8 @@ describe('the feature’s CSS applies to the grid’s rows only', () => {
     document.body.append(outer);
     const { host } = make({ host: outer, rows: rowsOf([1, 1, 1, 1]), settings: { selection: { mode: 'multi', checkbox: true } } });
     const els = [outer, host, ...host.querySelectorAll('*')];
-    const hit = rules.filter((sel) => !sel.startsWith('.dzg-body') && !sel.startsWith('.dzg-cell[aria-rowspan]') && !sel.startsWith('.dzg-span-label'))
+    // The body and the header (a column of rows, for the group rows: commit 4) are the grid's own.
+    const hit = rules.filter((sel) => !sel.startsWith('.dzg-body') && !sel.startsWith('.dzg-header') && !sel.startsWith('.dzg-cell[aria-rowspan]') && !sel.startsWith('.dzg-span-label'))
       .flatMap((sel) => els.filter((e) => e.matches(sel)).map((e) => `${sel} → ${e.className || e.tagName}`));
     expect(hit).toEqual([]);
   });

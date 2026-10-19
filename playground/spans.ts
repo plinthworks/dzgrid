@@ -1,4 +1,4 @@
-// The spans page: merged values, spans decided by the data, full-width rows (step 9b).
+// The spans page: merged values, spans decided by the data, full-width rows, grouped headers (step 9b).
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { spans } from '@dzgrid/dom/spans';
 import { FR } from '@dzgrid/dom/locales/fr';
@@ -24,6 +24,8 @@ const WORDS = {
     rooms: ['Salle A', 'Salle B', 'Salle C'],
     acts: ['Consultation', 'Échographie', 'Bilan', 'Pansement', 'Suivi', 'Vaccination'],
     service: 'Service', doctor: 'Médecin', patient: 'Patient', age: 'Âge', room: 'Chambre', hour: 'Heure',
+    groups: { nom: 'Nom', prenom: 'Prénom', clinique: 'Clinique', constantes: 'Constantes', tension: 'Tension', pouls: 'Pouls', temp: 'Température', diag: 'Diagnostic', sejour: 'Séjour', entree: 'Entrée', sortie: 'Sortie' },
+    diagnoses: ['Hypertension', 'Diabète', 'Pneumonie', 'Fracture', 'Angine', 'Bilan'],
     total: (n: number) => `Total : ${n} rendez-vous`,
     title: (s: string, n: number) => `Service : ${s} — ${n} patients`,
   },
@@ -35,6 +37,8 @@ const WORDS = {
     rooms: ['القاعة أ', 'القاعة ب', 'القاعة ج'],
     acts: ['فحص', 'تصوير بالصدى', 'تحاليل', 'ضماد', 'متابعة', 'تلقيح'],
     service: 'المصلحة', doctor: 'الطبيب', patient: 'المريض', age: 'العمر', room: 'الغرفة', hour: 'الساعة',
+    groups: { nom: 'اللقب', prenom: 'الاسم', clinique: 'السريري', constantes: 'العلامات الحيوية', tension: 'الضغط', pouls: 'النبض', temp: 'الحرارة', diag: 'التشخيص', sejour: 'الإقامة', entree: 'الدخول', sortie: 'الخروج' },
+    diagnoses: ['ارتفاع الضغط', 'السكري', 'التهاب رئوي', 'كسر', 'التهاب الحلق', 'فحص'],
     total: (n: number) => `المجموع: ${n} موعد`,
     title: (s: string, n: number) => `المصلحة: ${s} — ${n} مريض`,
   },
@@ -144,6 +148,48 @@ function groupedColumns(): ColumnOrGroup<Line>[] {
   ];
 }
 
+// ---------- 4. grouped headers ----------
+type Stay = { id: string; nom: string; prenom: string; age: number; tension: string; pouls: number; temp: string; diag: string; entree: string; sortie: string; service: string };
+function stays(): Stay[] {
+  const w = words();
+  const r = rng(23);
+  const day = (d: number) => `2026-${String(1 + Math.floor(d / 28)).padStart(2, '0')}-${String(1 + (d % 28)).padStart(2, '0')}`;
+  return Array.from({ length: 300 }, (_, i) => {
+    const d = Math.floor(r() * 300);
+    return {
+      id: `s${i}`, nom: w.last[Math.floor(r() * w.last.length)]!, prenom: w.first[Math.floor(r() * w.first.length)]!, age: 1 + Math.floor(r() * 90),
+      tension: `${10 + Math.floor(r() * 8)}/${6 + Math.floor(r() * 4)}`, pouls: 55 + Math.floor(r() * 50), temp: (36 + r() * 3).toFixed(1),
+      diag: w.diagnoses[Math.floor(r() * w.diagnoses.length)]!, entree: day(d), sortie: day(Math.min(335, d + 1 + Math.floor(r() * 20))),
+      service: w.services[Math.floor(r() * w.services.length)]!,
+    };
+  });
+}
+function stayColumns(): ColumnOrGroup<Stay>[] {
+  const w = words();
+  const t = w.groups;
+  // Nom pinned (the shared control): the "Patient" group splits in two pieces, each labelled.
+  return [
+    { id: 'g-patient', header: w.patient, children: [
+      { id: 'nom', header: t.nom, width: 150, ...(on('pinned') && { pinned: 'start' as const }) },
+      { id: 'prenom', header: t.prenom, width: 130 },
+      { id: 'age', header: w.age, type: 'number', width: 80 },
+    ] },
+    { id: 'g-clinique', header: t.clinique, children: [
+      { id: 'g-constantes', header: t.constantes, children: [
+        { id: 'tension', header: t.tension, width: 100 },
+        { id: 'pouls', header: t.pouls, type: 'number', width: 90 },
+        { id: 'temp', header: t.temp, width: 120 },
+      ] },
+      { id: 'diag', header: t.diag, width: 170 },
+    ] },
+    { id: 'g-sejour', header: t.sejour, children: [
+      { id: 'entree', header: t.entree, type: 'day', width: 130 },
+      { id: 'sortie', header: t.sortie, type: 'day', width: 130 },
+    ] },
+    { id: 'service', header: w.service, width: 160 },
+  ];
+}
+
 // ---------- the grids ----------
 const grids: GridInstance<any>[] = [];
 function common<T>(): Pick<GridSettings<T>, 'messages' | 'locale' | 'direction' | 'density' | 'selection' | 'features' | 'onEvent' | 'timeZone'> {
@@ -167,7 +213,7 @@ function build(): void {
   for (const g of grids.splice(0)) g.destroy();
   // The notes stay in French, left to right; the grids' hosts take the data's language, and
   // `auto` follows them (Arabic data: right to left).
-  for (const id of ['merge', 'data', 'full']) {
+  for (const id of ['merge', 'data', 'full', 'groups']) {
     const el = document.getElementById(id)!;
     el.lang = arabic() ? 'ar' : 'fr';
     el.dir = arabic() ? 'rtl' : 'ltr';
@@ -176,6 +222,7 @@ function build(): void {
   merge.kernel.dispatch({ type: 'sort.set', sort: SORTS[sortSelect.value]! }, 'api');
   grids.push(merge);
   grids.push(createGrid<Slot>(document.getElementById('data')!, { rows: schedule(), getRowId: (s) => s.id, columns: scheduleColumns(), ...common<Slot>() }));
+  grids.push(createGrid<Stay>(document.getElementById('groups')!, { rows: stays(), getRowId: (s) => s.id, columns: stayColumns(), ...common<Stay>() }));
   grids.push(createGrid<Line>(document.getElementById('full')!, { rows: grouped(), getRowId: (l) => l.id, columns: groupedColumns(), fullWidth: (l) => l.title !== undefined, ...common<Line>() }));
 }
 

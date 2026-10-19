@@ -22,7 +22,7 @@
 <body>
   <nav><a href="./index.html">← Retour au bac à sable</a></nav>
   <h1>Fusions de cellules (rowspan / colspan)</h1>
-  <p class="note">Quatre genres de fusions, comme dans un tableau HTML : valeurs identiques fusionnées, fusions décidées par la donnée, lignes pleine largeur, et bientôt les en-têtes groupés. Les réglages ci-dessous s’appliquent aux trois exemples.</p>
+  <p class="note">Quatre genres de fusions, comme dans un tableau HTML : valeurs identiques fusionnées, fusions décidées par la donnée, lignes pleine largeur et en-têtes groupés. Les réglages ci-dessous s’appliquent aux quatre exemples.</p>
   <form class="bar" id="controls">
     <label>Sens <select name="direction"><option value="auto">auto</option><option>ltr</option><option>rtl</option></select></label>
     <label>Données <select name="lang"><option value="fr">français</option><option value="ar">arabe</option></select></label>
@@ -67,8 +67,15 @@
   </section>
 
   <section>
-    <h2>4. En-têtes groupés : bientôt</h2>
-    <p class="note">Un en-tête au-dessus de plusieurs colonnes (« Patient » au-dessus de Nom, Prénom, Âge) arrive avec l’étape suivante.</p>
+    <h2>4. En-têtes groupés</h2>
+    <ul class="note">
+      <li>« Patient » au-dessus de Nom, Prénom et Âge ; « Clinique » au-dessus de « Constantes » (Tension, Pouls, Température) et du Diagnostic ; « Séjour » au-dessus d’Entrée et Sortie. Le Service n’a pas de groupe : son en-tête monte sur toute la hauteur.</li>
+      <li>Cochez « première colonne épinglée » : Nom est épinglé, le groupe « Patient » se coupe en deux morceaux et chacun garde son nom.</li>
+      <li>Faites défiler de côté : un groupe à moitié sorti de la vue reste dessiné depuis sa première colonne ; élargissez une colonne : son groupe s’élargit avec elle.</li>
+      <li>Clavier : sur l’en-tête Pouls, Haut monte sur « Constantes » puis « Clinique » ; Bas redescend sur Pouls. Sur une ligne de groupes, Gauche et Droite passent d’un groupe à l’autre, Début et Fin vont au premier et au dernier. Un clic ou Entrée sur un groupe ne trie pas.</li>
+      <li>Sens de droite à gauche : les groupes suivent, les flèches aussi.</li>
+    </ul>
+    <div class="host short" id="groups"></div>
   </section>
 
   <script type="module" src="./spans.ts"></script>
