@@ -12,6 +12,22 @@ architecture, the core's seed (row identities, calendar days apart from
 instants, the bounds of a day in a zone), conformance cases written by hand,
 and ten spikes in three browser engines.
 
+### Added (Phase 3, step 16: the quick search box)
+
+- A new optional entry `@dzgrid/dom/search`: `quickSearch()`, a feature that binds the page's own
+  search fields (`search.bind(input, { debounceMs })`, returning the unbind). A pause (150 ms in the
+  browser, 300 ms on a server), the text trimmed, Enter applies, Escape empties, ArrowDown moves into
+  the grid, input methods respected; the grid's search rewrites every bound field; "N rows" said after
+  a pause (the existing `announce.rows`, no new text); the search prepared in idle time on the first
+  focus of a bound field (browser only). Only absent attributes are set on the field, and given back
+  at unbind (`aria-controls`, `dir="auto"`, `autocomplete`, `enterkeyhint`, `spellcheck`); its name
+  stays the host's. No `bindQuickSearch` (the plan's name).
+
+### Changed (step 16)
+
+- The filter boxes (floating row, popup) ignore Enter and Escape inside an input method also when the
+  browser reports it only as key code 229 (Safari).
+
 ### Changed — breaking (Phase 3, step 15: the value-list filter)
 
 - `filters()` now needs 8 more texts, in the filter bundles `@dzgrid/dom/locales/{en,fr,ar}-filters`:

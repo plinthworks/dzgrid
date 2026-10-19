@@ -81,6 +81,14 @@
         "@dzgrid/core/internal"
       ]
     },
+    "@dzgrid/dom/search": {
+      "file": "packages/dom/src/search.ts",
+      "maxGzip": 1100,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal"
+      ]
+    },
     "@dzgrid/dom/filters": {
       "file": "packages/dom/src/filters.ts",
       "maxGzip": 9300,

@@ -115,7 +115,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false,
     intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0, remPx: geometry.read().remPx ?? 16,
-    schedule, report, restoreFocus: () => {}, parts: featureParts(initial.features, () => g.settings.parts),
+    schedule, report, restoreFocus: () => {}, warm: null!, parts: featureParts(initial.features, () => g.settings.parts),
     now: () => win?.performance.now() ?? 0,
     // A density's height at 16 px text, scaled with the reader's text size, whole pixels.
     rowHeight: () => Math.round((ROW_HEIGHT[g.settings.density ?? 'comfortable'] * g.remPx) / 16),
@@ -186,7 +186,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     ro.observe(viewport);
     scope.observe(ro);
   }
-  const warmup = installWarmup(g);
+  g.warm = installWarmup(g);
   // Optional features, set up once, read at each paint; span rules or slot parts without theirs: told once.
   const handles = (initial.features ?? []).map((f) => f.setup(g as GridContext<unknown>));
   g.headerRows = handles.flatMap((h) => h.headerRows ?? []);
@@ -199,7 +199,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
 
   columns.setAvailableInline(geometry.read().inline);
   schedule();
-  warmup.warm();
+  g.warm.warm();
   // Column definitions refused or bent are told, like the rows' (D14: too-many-pinned).
   if (columns.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: columns.problems });
   if (rows.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: rows.problems });
@@ -231,7 +231,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
       },
     },
     update(patch) {
-      applyUpdate(g, patch, { applyDir, recheckDir: () => direction.recheck(), warm: () => warmup.warm() });
+      applyUpdate(g, patch, { applyDir, recheckDir: () => direction.recheck(), warm: () => g.warm.warm() });
     },
     destroy() {
       if (scope.isDisposed) return;

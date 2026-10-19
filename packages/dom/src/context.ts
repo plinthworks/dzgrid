@@ -13,6 +13,7 @@ import type { FilterMessageKey, MessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
 import type { PartBase, SlotPart } from './part.js';
+import type { Warmup } from './warmup.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -75,6 +76,8 @@ export interface GridContext<T> {
   slots: SlotDrivers | null;
   /** What every part gets, as of the last paint (its `msg` and `announce` never change). */
   partBase?: PartBase;
+  /** The quick-search warm-up: a feature sets `want` and calls `warm()` (the search box, step 16). */
+  warm: Warmup;
   /** What the features set up handed back (`afterRows` runs at each paint once the rows are placed). */
   features: readonly FeatureHandle[];
   ctx: LocaleCtx;

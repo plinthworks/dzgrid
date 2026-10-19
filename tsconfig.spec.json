@@ -41,6 +41,9 @@
       "@dzgrid/dom/slots": [
         "./packages/dom/src/slots.ts"
       ],
+      "@dzgrid/dom/search": [
+        "./packages/dom/src/search.ts"
+      ],
       "@dzgrid/dom/filters": [
         "./packages/dom/src/filters.ts"
       ],

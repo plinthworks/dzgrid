@@ -1,5 +1,6 @@
 import { readNumber, type ColumnFilter } from '@dzgrid/core';
 import type { Part, SlotContext } from '../part.js';
+import { composing } from './dom.js';
 import { echo, nameOf, shown, textField } from './field.js';
 import { summaryView, type View } from './summary.js';
 
@@ -62,7 +63,7 @@ function box(num: boolean): Part<FC> {
         i.tabIndex = -1;
         i.addEventListener('input', typed);
         i.addEventListener('compositionend', typed);
-        i.addEventListener('keydown', (k) => !k.isComposing && (k.key === 'Enter' || k.key === 'Escape') && judge());
+        i.addEventListener('keydown', (k) => !composing(k) && (k.key === 'Enter' || k.key === 'Escape') && judge());
         i.addEventListener('blur', judge);
         return i;
       };

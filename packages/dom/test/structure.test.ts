@@ -17,9 +17,9 @@ describe('the DOM layer’s shape', () => {
   });
 
   it('keeps the optional features out of the base: only features.ts may know them', () => {
-    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots)\.js'/;
+    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots|search)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots|search)\.js'/;
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts'].includes(relative(SRC, f)))
+      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'search.ts'].includes(relative(SRC, f)))
       .filter((f) => optional.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
@@ -33,6 +33,19 @@ describe('the DOM layer’s shape', () => {
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '(\.{1,2}\/[^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
       .filter((s) => !/^slots(\/[^:]+)?\.ts: \.\/(slots\/)?[a-z-]+\.js$/.test(s) && !/^slots\/[^:]+\.ts: \.\.\/mounted\.js$/.test(s));
     expect(offenders).toEqual([]);
+  });
+
+  it('has the search entry reach the base only through the grid’s context and the types (step 16)', () => {
+    // @dzgrid/dom/search: value imports from the core, the core's internal entry and its own folder only;
+    // never the filters (an app with only a search box does not load them), never the base's modules.
+    const entry = files(SRC).filter((f) => /^search\//.test(relative(SRC, f)) || relative(SRC, f) === 'search.ts');
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['search.ts', 'search/bind.ts', 'search/index.ts', 'search/said.ts']);
+    const offenders = entry
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^search(\/[^:]+)?\.ts: \.\/(search\/)?[a-z-]+\.js$/.test(s));
+    expect(offenders).toEqual([]);
+    // Nothing of the base imports it, the features seam included.
+    expect(files(SRC).filter((f) => !/^search(\/|\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?search(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
   });
 
   it('has the filters entry reach the base only through the grid’s context, the types and the shared mounted.ts', () => {

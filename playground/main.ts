@@ -4,11 +4,13 @@
 // `&dates=fail` a date kit that never loads (the failure and Retry). With `filters=1` a "Commune" column (about 2 000 values)
 // asks for the value list (`filter: { kind: 'set' }`, step 15) and "Statut" is an enum that does not (no button, owner Q2);
 // `&sets=1` names that demo (the browser checks), `&setfail=1` makes its chunk fail (the failure and Retry).
+// `search=1` puts a labelled search field above the grid, bound with `quickSearch()` (step 16).
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
 import { AR } from '@dzgrid/dom/locales/ar';
 import { filters } from '@dzgrid/dom/filters';
+import { quickSearch } from '@dzgrid/dom/search';
 import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
 import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
 import { AR_FILTERS } from '@dzgrid/dom/locales/ar-filters';
@@ -33,6 +35,7 @@ const withFilters = params.get('filters') === '1';
 const floating = params.get('floating') === '1';
 const popup = params.get('popup') === '1';
 const dates = params.get('dates');
+const withSearch = params.get('search') === '1';
 // The clock the date shortcuts count from: the machine's, moved by the "Horloge" menu (dates=1).
 let offset = 0;
 if (dates) {
@@ -112,8 +115,15 @@ page();
 const initial = settings();
 const t0 = performance.now();
 const fail = { ...(dates === 'fail' && { loadDates: () => Promise.reject(new Error('the date kit is unreachable (dates=fail)')) }), ...(params.get('setfail') === '1' && { loadSet: () => Promise.reject(new Error('the set chunk is unreachable (setfail=1)')) }) };
+// The page's own search field (the grid draws none): labelled by the page, in its language.
+const search = withSearch ? quickSearch() : null;
+if (search) {
+  const label = { 'fr-FR': 'Rechercher dans la grille', 'en-US': 'Search the grid', 'ar-DZ': 'البحث في الجدول' }[val('locale') as 'fr-FR'];
+  host.insertAdjacentHTML('beforebegin', `<p class="bar"><label>${label} <input type="search" id="q"></label></p>`);
+  search.bind(document.getElementById('q') as HTMLInputElement);
+}
 const grid: GridInstance<RowA> = createGrid<RowA>(host, {
-  ...initial, ...(withFilters && { features: [filters({ floating, popup, ...fail })] }), ...(dates && { clock: () => Date.now() + offset }),
+  ...initial, features: [...(withFilters ? [filters({ floating, popup, ...fail })] : []), ...(search ? [search] : [])], ...(dates && { clock: () => Date.now() + offset }),
 });
 requestAnimationFrame(() => requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; }));
 

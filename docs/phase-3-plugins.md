@@ -359,6 +359,7 @@ export interface FilterKind<S extends Json = Json, V = unknown> {
   - Enter or F2 enters the input. Its owner is `filter-input`, so arrows, Home, End and Ctrl+A stay in the input. Escape returns to the cell.
   - Inputs are labelled `filter.inputLabel {column}`.
   - An unreadable number gets `aria-invalid` and no dispatch.
+- **Quick search box** (step 16, `behaviors/quick-search-box.md`): the page's own field, named by the host (an unlabelled field fails axe). The feature sets only what is absent and gives it back at unbind: `aria-controls` (the grid's id, same root only), `dir="auto"`, `autocomplete="off"`, `enterkeyhint="search"`, `spellcheck="false"`. Enter applies (no form submit), Escape empties a field with text (stopped there) and passes on an empty one, ArrowDown moves focus into the grid; Enter and Escape inside a composition (`isComposing` or key code 229) do nothing, in the filter boxes too. After a pause, `announce.rows` (no new key); nothing when the count is unknown.
 - **Cell parts with controls (buttons, links):**
   - The cell keeps grid focus. Enter calls `focus()` on the part, and Tab cycles inside it, as in the WAI-ARIA grid pattern for widgets in cells. Escape returns to the cell.
   - The owner `cell-widget` is inferred from the control (`keys/owner.ts`); the part's container need not carry `data-dzg-owner`. Enter or F2 calls `focus()`.
@@ -473,7 +474,8 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | `@dzgrid/dom` | `createGrid`; `Part`, `definePart`; registry resolution for cells; the built-in header, overlay (with its retry button) and tooltip, and their seams |
 | `@dzgrid/dom/slots` | `slots()`: header, overlay and tooltip parts in place of the built-ins (step 11, decision O1) |
 | `@dzgrid/dom/popup` | the popup host (`popupsFor(g)`), imported by the features that open popups |
-| `@dzgrid/dom/filters` | `filters({ datePicker?, floating?, debounceMs? })`: the six `filter.*` parts, `floating.text` and `floating.number`, the summary floating part, `bindQuickSearch`. The value list is loaded lazily inside it (cut 3). Step 12: the floating row (`filters({ floating, debounceMs })`). |
+| `@dzgrid/dom/filters` | `filters({ datePicker?, floating?, debounceMs? })`: the six `filter.*` parts, `floating.text` and `floating.number`, the summary floating part. The value list is loaded lazily inside it (cut 3). Step 12: the floating row (`filters({ floating, debounceMs })`). |
+| `@dzgrid/dom/search` | `quickSearch()`: a feature that binds the page's own search fields, `search.bind(input, { debounceMs })` (step 16, owner decisions Q1, Q2; it replaces the plan's `bindQuickSearch` in `/filters`) |
 | `@dzgrid/dom/locales/{en,fr,ar}-filters` | the filters' texts, apart from the base bundles (step 12, owner decision O1) |
 | `@dzgrid/dom/pagination` | `pagination()`: `footer.pager`, `footer.count`, `footer.selected` |
 | `@dzgrid/dom/parts` | `cell.badge`, `cell.boolean` (small, optional) |
@@ -530,7 +532,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | 13 | `/filters` part 2: popup with `filter.text`, `filter.number`, `filter.boolean`, active mark, Alt+ArrowDown in the feature (no `openMenu`, O2) | dom |
 | 14 | `/filters` part 3: `filter.day` and `filter.instant` on tzslot 2.2.0 (lazy kits, optional peer) and the relative shortcuts; step 21 folded in | core, dom |
 | 15 | `/filters` part 4: `filter.set`, a lazy chunk, always windowed, with Apply when the filter runs on the server; only for an explicit `filter: { kind: 'set' }` (owner Q2) | dom |
-| 16 | `/filters` part 5: `bindQuickSearch` (server `quick` or the client warm-up) | dom |
+| 16 | `@dzgrid/dom/search`: `quickSearch()` binds the page's search fields (server `quick`, or the client warm-up on first focus); its own entry, not `/filters` (owner Q2); highlighting matches to Phase 5 | dom |
 | 17 | `/pagination`: `footer.pager`, `footer.count`, `footer.selected`, for client and server paging | dom |
 | 18 | Playground audit screen in **both** configurations of example 3; 1 000 permutations each; axe; screenshots | browser |
 | 19 | `/export`: `csvExport` and `exportAll` | dom |

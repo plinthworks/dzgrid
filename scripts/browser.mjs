@@ -462,6 +462,145 @@ async function setChecks(name, ctx) {
   }
 }
 
+/** Step 16: the quick search box, the page's own field bound with quickSearch() (docs/behaviors/quick-search-box.md). */
+async function searchChecks(name, ctx) {
+  const cases = [
+    // [query, its trimmed folded twin to type in upper case or with marks, the city it finds, the count said]
+    ['locale=fr-FR&theme=light&rows=2000&search=1', '  SETIF ', 'Sétif', /^333 lignes$/],
+    ['locale=ar-DZ&dir=rtl&theme=dark&rows=2000&search=1', 'قُسَنْطِينَة', 'قسنطينة', /^(333|٣٣٣) /],
+  ];
+  const S = (page) => page.evaluate(() => {
+    const q = document.getElementById('q');
+    const grid = document.querySelector('[role=grid]');
+    const a = document.activeElement;
+    return {
+      value: q.value, quick: window.t.grid.kernel.query.quick, shown: window.t.grid.kernel.rows.displayed.count,
+      controls: q.getAttribute('aria-controls'), gridId: grid.id, dir: q.getAttribute('dir'), rtl: q.matches(':dir(rtl)'),
+      inBox: a === q, inGrid: grid.contains(a), live: document.querySelector('.dzg-live').textContent,
+      noMatch: !document.querySelector('.dzg-overlay').hidden,
+    };
+  });
+  const expected = (page, city) => page.evaluate((city) => window.t.rows.filter((r) => r.city === city).length, city);
+  for (const [qs, typed, city, said] of cases) {
+    const { page, errors } = await load(ctx, qs);
+    const tag = `search ${qs}`;
+    const s0 = await S(page);
+    let v = await axe(page);
+    check(name, `${tag}: the page's field is bound (aria-controls = the grid's id, dir=auto), axe 0`, s0.controls && s0.controls === s0.gridId && s0.dir === 'auto' && v.length === 0, { s0, v });
+    // Typed (real keys), a pause: the folded rows, the count said once, axe 0.
+    await page.focus('#q');
+    await page.keyboard.type(typed);
+    const early = await S(page);
+    await page.waitForTimeout(400);
+    const s1 = await S(page);
+    const want = await expected(page, city);
+    v = await axe(page);
+    check(name, `${tag}: "${typed.trim()}" finds the ${want} rows of ${city} after the pause (not before), "${s1.live}" said, axe 0`, early.quick === '' && s1.quick === typed.trim() && s1.shown === want && want > 0 && said.test(s1.live) && v.length === 0, { early, s1, want, v });
+    await page.screenshot({ path: `${OUT}/${name}-search-${qs.replace(/[&=]/g, '_')}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    // Escape: emptied, every row, focus kept in the field.
+    await page.keyboard.press('Escape');
+    await frames(page);
+    const s2 = await S(page);
+    check(name, `${tag}: Escape empties the field, shows every row, keeps focus`, s2.value === '' && s2.quick === '' && s2.shown === 2000 && s2.inBox, s2);
+    // Enter applies at once; nothing matching shows the overlay.
+    await page.keyboard.type('zzzz');
+    await page.keyboard.press('Enter');
+    const s3 = await S(page);
+    await page.waitForTimeout(100);
+    const s3b = await S(page);
+    check(name, `${tag}: Enter applies at once (no pause); nothing matching: 0 rows and the overlay`, s3.quick === 'zzzz' && s3.shown === 0 && s3b.noMatch && /^0 /.test(s3b.live), { s3, s3b });
+    // dir=auto: an Arabic query is laid out right to left, a Latin one left to right, whatever the page.
+    await page.fill('#q', 'مريض');
+    const rtl = (await S(page)).rtl;
+    await page.fill('#q', 'Patient');
+    const ltr = !(await S(page)).rtl;
+    check(name, `${tag}: dir=auto follows the text (Arabic right to left, Latin left to right)`, rtl && ltr, { rtl, ltr });
+    // ArrowDown: into the grid.
+    await page.keyboard.press('ArrowDown');
+    await frames(page);
+    const s4 = await S(page);
+    check(name, `${tag}: ArrowDown moves focus into the grid; leaving applied the field's text`, s4.inGrid && s4.quick === 'Patient', s4);
+    // An input method (CDP composition): nothing applies mid-composition; its end applies after the pause.
+    await page.fill('#q', '');
+    await page.keyboard.press('Enter');
+    await page.focus('#q');
+    const cdp = await ctx.newCDPSession(page);
+    await cdp.send('Input.imeSetComposition', { text: 'مَ', selectionStart: 1, selectionEnd: 1 });
+    await page.waitForTimeout(400);
+    const mid = await S(page);
+    await cdp.send('Input.insertText', { text: 'مَرِيض' });
+    await page.waitForTimeout(400);
+    const end = await S(page);
+    await cdp.detach();
+    check(name, `${tag}: inside a composition nothing applies; after it, the composed text after the pause`, mid.quick === '' && end.quick === 'مَرِيض', { mid, end });
+    // Safari's last Enter after the composition's end (key code 229): ignored, in the search box and the floating box.
+    const late = await page.evaluate(() => {
+      const q = document.getElementById('q');
+      q.value = 'Patient 1';
+      q.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      const e = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+      Object.defineProperty(e, 'keyCode', { value: 229 });
+      q.dispatchEvent(e);
+      return { prevented: e.defaultPrevented, quick: window.t.grid.kernel.query.quick };
+    });
+    check(name, `${tag}: Enter reported as key code 229 applies nothing at once`, !late.prevented && late.quick === 'مَرِيض', late);
+    check(name, `no page error ${tag}`, errors.length === 0, errors);
+    await page.close();
+  }
+  // The floating box, the same Safari Enter (key code 229) and Escape: nothing applied, focus kept.
+  {
+    const { page, errors } = await load(ctx, 'locale=fr-FR&rows=2000&filters=1&floating=1&search=1');
+    const r = await page.evaluate(() => {
+      const cell = document.querySelector('.dzg-hextra[data-col="name"]');
+      cell.focus();
+      cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      const i = cell.querySelector('input');
+      i.value = 'Patient 1';
+      i.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      const k = (key) => {
+        const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+        Object.defineProperty(e, 'keyCode', { value: 229 });
+        i.dispatchEvent(e);
+      };
+      k('Enter');
+      k('Escape');
+      return { filter: window.t.grid.kernel.query.filter.name ?? null, focus: document.activeElement === i };
+    });
+    await page.waitForTimeout(400);
+    const after = await page.evaluate(() => window.t.grid.kernel.query.filter.name ?? null);
+    check(name, 'search + floating (fr): the floating box ignores Enter and Escape of key code 229 (applied after its pause, focus kept)', r.filter === null && r.focus && after?.value === 'Patient 1', { r, after });
+    // With filters: one coherent last sentence.
+    await page.focus('#q');
+    await page.keyboard.type('Patient 12');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(200);
+    const live = await page.evaluate(() => ({ live: document.querySelector('.dzg-live').textContent, shown: window.t.grid.kernel.rows.displayed.count }));
+    check(name, 'search + floating (fr): search and filter AND together, the count said last is the rows shown', new RegExp(`^${live.shown} ligne`).test(live.live), live);
+    check(name, 'no page error search + floating', errors.length === 0, errors);
+    await page.close();
+  }
+  // Warm-up: the first focus prepares the search in idle time; the first search then builds nothing (100 000 rows).
+  {
+    const { page, errors } = await load(ctx, 'locale=fr-FR&rows=100000&search=1');
+    const before = await page.evaluate(() => window.t.grid.kernel.rows.diagnostics.foldBuilds);
+    await page.waitForTimeout(1500);
+    const idleAtLoad = await page.evaluate(() => window.t.grid.kernel.rows.diagnostics.foldBuilds);
+    await page.focus('#q');
+    await page.waitForTimeout(3000);
+    const r = await page.evaluate(() => {
+      const d = window.t.grid.kernel.rows.diagnostics;
+      const b = d.foldBuilds;
+      const t0 = performance.now();
+      window.t.grid.kernel.dispatch({ type: 'quick.set', text: 'patient 4242' }, 'user');
+      return { ms: performance.now() - t0, built: d.foldBuilds - b, shown: window.t.grid.kernel.rows.displayed.count };
+    });
+    console.log(`note ${name}: search after the warm-up on 100 000 rows: ${r.ms.toFixed(1)} ms, ${r.shown} rows`);
+    check(name, 'search warm-up: nothing prepared at load; after the first focus the first search builds nothing', idleAtLoad === before && r.built === 0 && r.shown >= 1, { before, idleAtLoad, r });
+    check(name, 'no page error search warm-up', errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -789,6 +928,7 @@ async function runEngine(name) {
     // ---- date filters on tzslot (step 14 part B): fr light Europe/Paris, ar right to left dark ----
     if (name === 'chrome') await dateChecks(name, ctx);
     if (name === 'chrome') await setChecks(name, ctx);
+    if (name === 'chrome') await searchChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

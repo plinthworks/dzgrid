@@ -562,6 +562,7 @@ export function toWire<T>(model: FilterModel, cols: ColumnLookup<T>, ctx: Locale
   - the list matches on export text, so it survives a language change.
 
 ### Step 13: quick search box binding (`/filters`, part 5)
+*[Superseded at step 16 (owner decisions Q1, Q2, `phase-3-steps/step16-decisions.md`): a feature `quickSearch()` in its own entry `@dzgrid/dom/search`, `search.bind(input, { debounceMs })` returning the unbind (a feature gets the grid's texts, scope and focus, which `GridInstance` does not hand out); no `bindQuickSearch`; `searchWarmup` is not turned on: the first focus of a bound field prepares the search (client only). Behaviour: `behaviors/quick-search-box.md`.]*
 - **API:** `export function bindQuickSearch(input: HTMLInputElement, grid: GridInstance<unknown>, o?: { debounceMs?: number }): () => void`.
 - Client grids turn `searchWarmup: 'idle'` on while it is bound (D13); paged grids send `quick`.
 - **Tests first:** debounce; emptying the box releases the caches (existing behaviour); a paged grid's request carries `quick`.
@@ -782,7 +783,7 @@ The audit-screen entry counts the Angular framework as already present in the ap
 3. Value-list virtualisation beyond 2 000 values: cap at 2 000 with search and a "refine your search" message, to Phase 5.
 4. The second condition (AND/OR) in the popup, to Phase 5 (`combined` stays in the model).
 5. Floating filters for non-text types: summaries become plain text, popup only.
-6. `bindQuickSearch`: hosts bind `quickFilter` themselves.
+6. ~~`bindQuickSearch`: hosts bind `quickFilter` themselves.~~ Not cut: built at step 16 as `quickSearch()` (`@dzgrid/dom/search`).
 7. Angular `cellComponent` option (keep `DzgCell` only).
 8. Firefox and WebKit browser runs: Chrome mandatory, the others as an owner one-off.
 

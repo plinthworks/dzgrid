@@ -21,6 +21,10 @@
       "types": "./src/slots.ts",
       "default": "./src/slots.ts"
     },
+    "./search": {
+      "types": "./src/search.ts",
+      "default": "./src/search.ts"
+    },
     "./filters": {
       "types": "./src/filters.ts",
       "default": "./src/filters.ts"

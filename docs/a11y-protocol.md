@@ -372,3 +372,33 @@ Consigner le résultat dans `docs/behaviors/filter-set.md` (fin de la fiche) et 
 ajoute une annonce par case (étape 18) ; une liste que le lecteur ne voit pas comme multi-sélection
 (46) ou une position fausse (48) bloque l'étape 18 ; une annonce répétée (47, 50) se corrige avant
 l'étape 16.
+
+## 12. Étapes — recherche rapide (étape 16)
+
+Page : le bac à sable avec le champ « Rechercher » au-dessus de la grille,
+http://127.0.0.1:4700/?search=1 (`npx vite --host 127.0.0.1`), lien « Recherche rapide » de la page
+d'accueil, en **français** puis en **arabe** (`?search=1&locale=ar-DZ&direction=auto`). Couples A à D.
+Durée estimée : 10 min par couple et par langue. Noter ce qui est **dit**, mot pour mot.
+
+56. **Le champ.** `Tab` jusqu'au champ : son nom « Rechercher dans la grille » et son rôle
+    « zone de recherche » (ou « champ de recherche »).
+57. **Taper.** Taper « bou » vite : rien n'est dit à chaque touche ; après une courte pause,
+    « N lignes » **une fois**.
+58. **Rien trouvé.** Taper « zzz » : « 0 ligne » une fois ; le voile « Aucune ligne ne correspond
+    aux filtres » est visible (et dit s'il est atteint).
+59. **Échap.** Champ rempli : `Échap` le vide, le nombre complet est dit une fois ; le focus reste
+    dans le champ. Champ vide : `Échap` ne fait rien dans la grille.
+60. **Vers la grille.** `↓` : le focus passe dans la grille, la cellule (ou la grille) est dite.
+61. **Arabe.** Avec un clavier arabe et la saisie de voyelles (« مَرِيض »), rien n'est dit pendant la
+    composition ; après la pause, le nombre est dit une fois ; le texte du champ s'écrit de droite à
+    gauche dans une page française (`dir="auto"`).
+62. **Avec les filtres.** (`?search=1&filters=1&floating=1&popup=1`) Une recherche puis un filtre :
+    une seule annonce cohérente à chaque fois ; « Effacer les filtres » du voile vide aussi le champ.
+63. **Serveur lent.** (pas de serveur dans le bac à sable : à l'oreille à l'étape 18, écran d'audit)
+    rien n'est dit avant la réponse ; puis « N lignes » une fois, ou rien si le serveur ne connaît
+    pas le nombre.
+
+Consigner le résultat dans `docs/behaviors/quick-search-box.md` (fin de la fiche) et dans
+`ROADMAP.md` (ligne de l'étape 16). Règle de décision propre à cette section : un nombre dit à chaque
+touche (57) ou pendant une composition (61) se corrige avant l'étape 17 ; un champ dont le rôle n'est
+pas dit (56) se signale à l'hôte (son `type="search"`), pas à la grille.

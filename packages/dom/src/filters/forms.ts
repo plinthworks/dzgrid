@@ -1,6 +1,6 @@
 import type { LocaleCtx } from '@dzgrid/core';
 import type { Part, SlotContext } from '../part.js';
-import { el, labelled, tx } from './dom.js';
+import { composing, el, labelled, tx } from './dom.js';
 import { echo, nameOf, numberIn, shown, textField } from './field.js';
 
 export { el, labelled, tx };
@@ -108,7 +108,7 @@ export function form(make: Make): Part<C> {
       host.addEventListener('keydown', (k) => {
         const t = k.target as HTMLInputElement;
         // Enter inside a date panel is the panel's (step 14).
-        if (k.key === 'Enter' && !k.isComposing && t.tagName !== 'BUTTON' && !t.closest('.tz-field__panel')) k.preventDefault(), commit();
+        if (k.key === 'Enter' && !composing(k) && t.tagName !== 'BUTTON' && !t.closest('.tz-field__panel')) k.preventDefault(), commit();
         // A radio group is one Tab stop: back from it wraps to the last control.
         else if (k.key === 'Tab' && k.shiftKey && t.type === 'radio') k.preventDefault(), apply.focus();
       });

@@ -4,6 +4,7 @@ import type { HeaderRowSpec } from '../render/header.js';
 import type { Part, SlotContext } from '../part.js';
 import { mounted, type Mounted } from '../mounted.js';
 import type { Commit } from './commit.js';
+import { composing } from './dom.js';
 import type { Resolve } from './resolve.js';
 
 type FC = SlotContext['floating'];
@@ -75,8 +76,8 @@ export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: bo
       // Back to the cell, the filter kept; never to a host dialog around the grid. Inside a
       // composition, it only ends it: kept in the box, nothing applied.
       e.stopPropagation();
-      if (!e.isComposing) e.preventDefault(), flush(column), cell.focus();
-    } else if (e.key === 'Enter' && !e.isComposing) flush(column);
+      if (!composing(e)) e.preventDefault(), flush(column), cell.focus();
+    } else if (e.key === 'Enter' && !composing(e)) flush(column);
   });
   g.scope.on(g.el.header, 'focusout', (e: FocusEvent) => {
     const t = e.target as HTMLElement;

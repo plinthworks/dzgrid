@@ -6,6 +6,7 @@
 // `numerals`, and a clock the runner can move (`t.offset`); dates=fail a date kit that never loads (step 14);
 // sets=1 a "Commune" column of 2 000 values asking for the value list (`filter.kind: 'set'`) and a
 // "Statut" enum column that does not (no button, owner Q2); setfail=1 a set chunk that never loads (step 15).
+// search=1 a labelled search field above the grid (`#q`), bound with quickSearch() before the grid is made (step 16).
 import { createGrid } from '/packages/dom/src/index.ts';
 import { EN } from '/packages/dom/src/locales/en.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
@@ -96,6 +97,20 @@ if (q.get('slots')) {
   };
 }
 const fail = { ...(dates === 'fail' && { loadDates: () => Promise.reject(new Error('the date kit is unreachable (dates=fail)')) }), ...(q.get('setfail') && { loadSet: () => Promise.reject(new Error('the set chunk is unreachable (setfail=1)')) }) };
+if (q.get('search')) {
+  const { quickSearch } = await import('/packages/dom/src/search.ts');
+  const search = quickSearch();
+  features.push(search as never);
+  const label = document.createElement('label');
+  label.className = 'mark';
+  label.textContent = base === AR ? 'البحث في الجدول ' : base === FR ? 'Rechercher dans la grille ' : 'Search the grid ';
+  const box = document.createElement('input');
+  box.type = 'search';
+  box.id = 'q';
+  label.append(box);
+  host.before(label);
+  search.bind(box);
+}
 if (withFilters) features.push((await import('/packages/dom/src/filters.ts')).filters({ floating: q.get('floating') === '1', popup: q.get('popup') === '1', ...fail }) as never);
 // The clock the date shortcuts count from: the machine's, moved by `t.offset` (ms).
 const clock = { offset: 0 };
