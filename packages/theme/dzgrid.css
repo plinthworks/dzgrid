@@ -17,6 +17,7 @@
   --tz-accent-fg: light-dark(#ffffff, #0b1220);
   --tz-danger: light-dark(#b91c1c, #f87171);
   --tz-warning: light-dark(#b45309, #fbbf24);
+  --tz-success: light-dark(#15803d, #4ade80);
 }
 
 [data-theme=light] {
@@ -361,6 +362,44 @@
 .dzg[data-stale] .dzg-row .dzg-seg-start,
 .dzg[data-stale] .dzg-row .dzg-seg-end {
   color: var(--dzg-stale-fg, var(--tz-fg-muted));
+}
+
+.dzg-badge,
+.dzg-bool {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+}
+
+.dzg-badge {
+  --t: var(--tz-fg-muted);
+  padding-inline: 0.4em;
+  border: 1px solid var(--t);
+  border-radius: 1em;
+  color: var(--tz-fg);
+  background: color-mix(in srgb, var(--t) 12%, var(--tz-bg));
+  line-height: 1.3;
+}
+
+.dzg-badge[data-tone=info] {
+  --t: var(--tz-accent);
+}
+
+.dzg-badge[data-tone=success] {
+  --t: var(--tz-success);
+}
+
+.dzg-badge[data-tone=warning] {
+  --t: var(--tz-warning);
+}
+
+.dzg-badge[data-tone=danger] {
+  --t: var(--tz-danger);
+}
+
+.dzg-glyph {
+  color: var(--t);
+  font-weight: 700;
 }
 
 .dzg-tooltip {

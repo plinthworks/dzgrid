@@ -6,7 +6,7 @@
 // The source of @dzgrid/theme. dzgrid.css is compiled from this file
 // (`npm run build:theme`) and a test fails when the two drift apart.
 //
-// The palette is tzslot's and DzCalendar's: nine --tz-* colours, each a
+// The palette is tzslot's and DzCalendar's: nine --tz-* colours (and success, step 20), each a
 // (light, dark) pair that becomes light-dark(). A host that themes tzslot
 // themes the grid. Everything the grid derives (header, hover, selection,
 // focus) is a --dzg-* variable read at its point of use with a color-mix()
@@ -26,6 +26,8 @@ $tz-palette: (
   accent-fg: (#ffffff, #0b1220),
   danger: (#b91c1c, #f87171),
   warning: (#b45309, #fbbf24),
+  // Step 20 (owner Q1): the badges' success tone. A tenth colour, beyond tzslot's nine.
+  success: (#15803d, #4ade80),
 ) !default;
 
 $emit: true !default;
@@ -428,6 +430,47 @@ $emit: true !default;
   .dzg[data-stale] .dzg-row .dzg-seg-end {
     color: var(--dzg-stale-fg, var(--tz-fg-muted));
   }
+
+  // The ready cell parts (@dzgrid/dom/parts, step 20): a badge's frame, shape and surface in its
+  // tone (--t), its label in the text colour; yes/no in the text colour. Glyph first, logical gap.
+  .dzg-badge,
+  .dzg-bool {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+  }
+
+  .dzg-badge {
+    --t: var(--tz-fg-muted);
+    padding-inline: 0.4em;
+    border: 1px solid var(--t);
+    border-radius: 1em;
+    color: var(--tz-fg);
+    background: color-mix(in srgb, var(--t) 12%, var(--tz-bg));
+    line-height: 1.3;
+  }
+
+  .dzg-badge[data-tone=info] {
+    --t: var(--tz-accent);
+  }
+
+  .dzg-badge[data-tone=success] {
+    --t: var(--tz-success);
+  }
+
+  .dzg-badge[data-tone=warning] {
+    --t: var(--tz-warning);
+  }
+
+  .dzg-badge[data-tone=danger] {
+    --t: var(--tz-danger);
+  }
+
+  .dzg-glyph {
+    color: var(--t);
+    font-weight: 700;
+  }
+  // end of the cell parts
 
   .dzg-tooltip {
     max-inline-size: 20rem;

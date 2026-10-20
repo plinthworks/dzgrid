@@ -50,6 +50,9 @@
       "@dzgrid/dom/export": [
         "./packages/dom/src/export.ts"
       ],
+      "@dzgrid/dom/parts": [
+        "./packages/dom/src/parts.ts"
+      ],
       "@dzgrid/dom/pagination": [
         "./packages/dom/src/pagination.ts"
       ],

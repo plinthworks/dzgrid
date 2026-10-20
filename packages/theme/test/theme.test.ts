@@ -9,7 +9,7 @@ const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 const scss = readFileSync(here('../dzgrid.scss'), 'utf8');
 const css = readFileSync(here('../dzgrid.css'), 'utf8');
 const pairs = JSON.parse(readFileSync(here('../contrast-pairs.json'), 'utf8')) as { pairs: { fg: string; bg: string; min: number; what: string }[] };
-const TZ = ['bg', 'bg-raised', 'fg', 'fg-muted', 'border', 'accent', 'accent-fg', 'danger', 'warning'];
+const TZ = ['bg', 'bg-raised', 'fg', 'fg-muted', 'border', 'accent', 'accent-fg', 'danger', 'warning', 'success'];
 
 describe('@dzgrid/theme', () => {
   it('is what dzgrid.scss compiles to (no drift)', () => {
@@ -17,7 +17,7 @@ describe('@dzgrid/theme', () => {
     expect(css.trim()).toBe(out.trim());
   });
 
-  it('defines the nine shared --tz-* colours, each as light-dark(), with tzslot’s values', () => {
+  it('defines the nine shared --tz-* colours and success (step 20), each as light-dark(), with tzslot’s values', () => {
     for (const name of TZ) expect(css, name).toMatch(new RegExp(`--tz-${name}: light-dark\\(#[0-9a-f]{6}, #[0-9a-f]{6}\\);`));
     expect(css).toContain('--tz-accent: light-dark(#2563eb, #60a5fa);');
     expect(css).toContain('--tz-bg: light-dark(#ffffff, #18181b);');

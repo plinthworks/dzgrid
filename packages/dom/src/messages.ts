@@ -1,4 +1,5 @@
 import { formattersFor, localeCtx, type LocaleCtx } from '@dzgrid/core';
+import type { PartsMessageKey } from './part-texts.js';
 
 /**
  * Every sentence the grid shows or says, by key (§3.9, D9). The grid never
@@ -99,7 +100,7 @@ export type MessageValue = string | PluralForms;
 export interface GridMessages {
   /** The language the bundle is written in: plural forms follow it, numbers follow the context. */
   readonly locale: string;
-  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey]?: MessageValue };
+  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey]?: MessageValue };
 }
 
 /** A bundle missing a key fails at once, naming it — not on some later paint. */

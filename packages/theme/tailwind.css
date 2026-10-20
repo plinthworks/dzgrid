@@ -7,7 +7,7 @@
  *
  * Maps the shared palette to Tailwind's: surfaces and text to the zinc scale,
  * the accent to your --color-primary-600 / -400 when your @theme has them
- * (Tailwind's blue otherwise), danger and warning to red and amber. The same
+ * (Tailwind's blue otherwise), danger, warning and success to red, amber and green. The same
  * mapping as @tzslot/theme/tailwind.css: a page with both themes them alike.
  */
 :root {
@@ -20,6 +20,7 @@
   --tz-accent-fg: light-dark(var(--color-white), var(--color-zinc-950));
   --tz-danger: light-dark(var(--color-red-700), var(--color-red-400));
   --tz-warning: light-dark(var(--color-amber-700), var(--color-amber-400));
+  --tz-success: light-dark(var(--color-green-700), var(--color-green-400));
   --dzg-font: var(--font-sans);
   --dzg-radius: var(--radius-md);
 }

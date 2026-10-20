@@ -1,6 +1,6 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
- * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks).
+ * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -16,6 +16,8 @@ mkdirSync(OUT, { recursive: true });
 // tzslot for the page's date filters (step 14): bundled once, two entries sharing one core (importmap in index.html).
 await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
 const engines = process.argv.includes('--all') ? ['chrome', 'firefox', 'webkit'] : ['chrome'];
+// `-- --only parts`: one group of checks (step 20's cell parts), for work on it; the full run before a commit.
+const only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
 const site = await serve(import.meta.url);
 const checks = [];
 let open = null;
@@ -693,12 +695,91 @@ async function pagingChecks(name, ctx) {
   }
 }
 
+/** Step 20: the ready cell parts, a badge over every tone and yes/no (docs/behaviors/badge-boolean.md). */
+async function partsChecks(name, ctx) {
+  const cases = [
+    ['locale=fr-FR&theme=light&rows=600&parts=1&box=1', false, ['Terminé', 'À lire', 'En attente', 'En retard', 'Ouvert'], ['Oui', 'Non']],
+    ['locale=ar-DZ&dir=rtl&theme=dark&rows=600&parts=1&box=1', true, ['منتهٍ', 'للقراءة', 'معلّق', 'متأخر', 'مفتوح'], ['نعم', 'لا']],
+  ];
+  const GLYPHS = ['✓', 'i', '!', '✕', null];
+  for (const [qs, rtl, labels, yesNo] of cases) {
+    const { page, errors } = await load(ctx, qs);
+    const tag = `parts ${rtl ? 'ar rtl dark' : 'fr ltr light'}`;
+    // Rows 0 to 5 (aria-rowindex 2 to 7): done, info, held, late, open, blank; seen: yes, no, blank.
+    const cells = await page.evaluate(() => [2, 3, 4, 5, 6, 7].map((r) => {
+      const c = (col) => document.querySelector(`.dzg-row[aria-rowindex="${r}"] [data-col="${col}"]`);
+      const s = c('state'), b = s.querySelector('.dzg-badge'), g = s.querySelector('.dzg-glyph'), l = b?.lastElementChild;
+      const gr = g?.getBoundingClientRect(), lr = l?.getBoundingClientRect();
+      return {
+        tone: b?.dataset.tone ?? null, glyph: g?.textContent ?? null, hidden: g?.getAttribute('aria-hidden') ?? null, label: l?.textContent ?? null, empty: s.childNodes.length === 0,
+        glyphStart: gr && lr ? (getComputedStyle(s).direction === 'rtl' ? gr.left >= lr.right - 1 : gr.right <= lr.left + 1) : null,
+        border: b && getComputedStyle(b).borderInlineStartColor, glyphColour: g && getComputedStyle(g).color, labelColour: l && getComputedStyle(l).color, bg: b && getComputedStyle(b).backgroundColor,
+        seen: c('seen').textContent, seenGlyph: c('seen').querySelector('.dzg-glyph')?.getAttribute('aria-hidden') ?? null,
+      };
+    }));
+    const tones = cells.map((c) => c.tone);
+    check(name, `${tag}: the five tones and a blank, each with its shape, the label after it`, JSON.stringify(tones) === JSON.stringify(['success', 'info', 'warning', 'danger', 'neutral', null]) && cells.slice(0, 5).every((c, i) => c.glyph === GLYPHS[i] && c.label === labels[i] && (c.glyph === null || (c.hidden === 'true' && c.glyphStart))) && cells[5].empty, cells);
+    check(name, `${tag}: the frame and the shape in the tone colour, the label in the text colour, distinct surfaces per tone`, cells.slice(0, 5).every((c) => c.border === (c.glyph ? c.glyphColour : c.border) && c.labelColour !== c.border) && new Set(cells.slice(0, 5).map((c) => c.bg)).size === 5, cells);
+    check(name, `${tag}: yes/no reads ✓ ${yesNo[0]}, ✗ ${yesNo[1]}, blank; its glyph hidden`, cells[0].seen === `✓${yesNo[0]}` && cells[1].seen === `✗${yesNo[1]}` && cells[2].seen === '' && cells[0].seenGlyph === 'true', cells.map((c) => c.seen));
+    // The accessible names: the label only, never the shape or the tone.
+    const snap = async (r, col) => page.locator(`.dzg-row[aria-rowindex="${r}"] [data-col="${col}"]`).ariaSnapshot();
+    const names = { done: await snap(2, 'state'), late: await snap(5, 'state'), yes: await snap(2, 'seen'), no: await snap(3, 'seen') };
+    const clean = (s, word) => s.includes(word) && !/[✓✕✗!]|success|danger|warning/.test(s);
+    check(name, `${tag}: the cells' accessible names carry the label and no shape (${labels[0]}, ${yesNo[0]})`, clean(names.done, labels[0]) && clean(names.late, labels[3]) && clean(names.yes, yesNo[0]) && clean(names.no, yesNo[1]), names);
+    let v = await axe(page);
+    check(name, `${tag}: axe 0 with every tone and yes/no shown`, v.length === 0, v);
+    // Selected and hovered rows.
+    await page.evaluate(() => { for (const i of [0, 3]) window.t.grid.kernel.dispatch({ type: 'selection.toggle', row: window.t.key(i) }, 'user'); });
+    await page.hover('.dzg-row[aria-rowindex="4"] [data-col="state"]');
+    await frames(page);
+    v = await axe(page);
+    const sel = await page.evaluate(() => getComputedStyle(document.querySelector('.dzg-row[aria-rowindex="2"]')).backgroundColor !== getComputedStyle(document.querySelector('.dzg-row[aria-rowindex="3"]')).backgroundColor);
+    check(name, `${tag}: axe 0 with selected and hovered rows over badges`, v.length === 0 && sel, { v, sel });
+    // A badge survives a scroll, the focus kept on its cell.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key(3), 'state'));
+    await frames(page);
+    const before = await page.evaluate(() => { window.t.kept = document.activeElement.querySelector('.dzg-badge'); return { col: document.activeElement.dataset.col, tone: window.t.kept?.dataset.tone }; });
+    await page.evaluate(() => window.t.scrollTo(400 * 32));
+    await frames(page, 3);
+    await page.evaluate(() => window.t.scrollTo(410 * 32));
+    await frames(page, 3);
+    const after = await page.evaluate(() => ({ same: document.activeElement.querySelector('.dzg-badge') === window.t.kept, connected: window.t.kept.isConnected, tone: window.t.kept.dataset.tone, text: window.t.kept.textContent, col: document.activeElement.dataset.col }));
+    check(name, `${tag}: a focused badge survives a scroll, the focus kept on its cell, the same element`, before.col === 'state' && before.tone === 'danger' && after.same && after.connected && after.tone === 'danger' && after.text === `✕${labels[3]}` && after.col === 'state', { before, after });
+    // Scrolled rows rebind: each mounted row shows its own state.
+    const rebound = await page.evaluate((labels) => [...document.querySelectorAll('.dzg-layer > .dzg-row')].filter((r) => r.querySelector('[data-col="state"]')).every((r) => {
+      const i = Number(r.getAttribute('aria-rowindex')) - 2;
+      const text = r.querySelector('[data-col="state"]').textContent;
+      return i % 6 === 5 ? text === '' : text.endsWith(labels[i % 6]);
+    }), labels);
+    check(name, `${tag}: after the scroll every row's badge is its own`, rebound, null);
+    // Forced colours: the frame in the text colour; a screenshot for a person to look at.
+    await page.evaluate(() => window.t.scrollTo(0));
+    await page.addStyleTag({ path: `${ROOT}packages/theme/contrast.css` });
+    await page.emulateMedia({ forcedColors: 'active' });
+    await frames(page, 3);
+    await page.waitForTimeout(200);
+    // Row 0 is selected (the row opts out of the system's colours): its badge takes them all the same.
+    const forced = await page.evaluate(() => [2, 3].map((r) => { const b = document.querySelector(`.dzg-row[aria-rowindex="${r}"] .dzg-badge`); const s = getComputedStyle(b); const g = getComputedStyle(b.querySelector('.dzg-glyph')); return { border: s.borderInlineStartColor, colour: s.color, glyph: b.querySelector('.dzg-glyph').textContent, glyphColour: g.color, bg: s.backgroundColor }; }));
+    await page.screenshot({ path: `${OUT}/${name}-parts-${rtl ? 'ar' : 'fr'}-forced.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    check(name, `${tag}: forced colours: the frame and the shape in the text colour, on the system's surface, in a selected row too`, forced.every((f) => f.border === f.colour && f.glyphColour === f.colour) && forced[0].glyph === '✓' && forced[1].glyph === 'i' && forced[0].bg === forced[1].bg, forced);
+    await page.emulateMedia({ forcedColors: 'none' });
+    await page.waitForTimeout(200);
+    await page.screenshot({ path: `${OUT}/${name}-parts-${rtl ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    check(name, `no page error ${tag}`, errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
   open = b;
   try {
     const ctx = await b.newContext();
+    if (only) {
+      if (only === 'parts' && name === 'chrome') await partsChecks(name, ctx);
+      return;
+    }
 
     // ---- axe, in fr and ar, light and dark, with selection, scrolled, and with each overlay ----
     if (name === 'chrome') {
@@ -1022,6 +1103,7 @@ async function runEngine(name) {
     if (name === 'chrome') await setChecks(name, ctx);
     if (name === 'chrome') await searchChecks(name, ctx);
     if (name === 'chrome') await pagingChecks(name, ctx);
+    if (name === 'chrome') await partsChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

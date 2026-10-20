@@ -16,6 +16,7 @@ export default defineConfig({
       { find: '@dzgrid/dom/search', replacement: fileURLToPath(new URL('./packages/dom/src/search.ts', import.meta.url)) },
       { find: '@dzgrid/dom/filters', replacement: fileURLToPath(new URL('./packages/dom/src/filters.ts', import.meta.url)) },
       { find: '@dzgrid/dom/export', replacement: fileURLToPath(new URL('./packages/dom/src/export.ts', import.meta.url)) },
+      { find: '@dzgrid/dom/parts', replacement: fileURLToPath(new URL('./packages/dom/src/parts.ts', import.meta.url)) },
       { find: '@dzgrid/dom/pagination', replacement: fileURLToPath(new URL('./packages/dom/src/pagination.ts', import.meta.url)) },
       { find: '@dzgrid/dom/internal', replacement: fileURLToPath(new URL('./packages/dom/src/internal.ts', import.meta.url)) },
       { find: /^@dzgrid\/dom\/locales\/(.*)$/, replacement: fileURLToPath(new URL('./packages/dom/src/locales/', import.meta.url)) + '$1.ts' },

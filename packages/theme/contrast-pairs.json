@@ -52,6 +52,27 @@
     { "what": "pager button unavailable", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 4.5 },
     { "what": "pager button and select border", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 3 },
     { "what": "focus ring on a pager button", "fg": "--dzg-focus-ring", "bg": "--dzg-header-bg", "min": 3 }
+,
+    { "what": "badge neutral: frame and shape on the page", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 3 },
+    { "what": "badge neutral: frame and shape on its surface", "fg": "--tz-fg-muted", "bg": "--dzg-badge-neutral-bg", "min": 3 },
+    { "what": "badge neutral: label on its surface", "fg": "--tz-fg", "bg": "--dzg-badge-neutral-bg", "min": 4.5 },
+    { "what": "badge neutral: frame on a selected row", "fg": "--tz-fg-muted", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "badge info: frame and shape on the page", "fg": "--tz-accent", "bg": "--tz-bg", "min": 3 },
+    { "what": "badge info: frame and shape on its surface", "fg": "--tz-accent", "bg": "--dzg-badge-info-bg", "min": 3 },
+    { "what": "badge info: label on its surface", "fg": "--tz-fg", "bg": "--dzg-badge-info-bg", "min": 4.5 },
+    { "what": "badge info: frame on a selected row", "fg": "--tz-accent", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "badge success: frame and shape on the page", "fg": "--tz-success", "bg": "--tz-bg", "min": 3 },
+    { "what": "badge success: frame and shape on its surface", "fg": "--tz-success", "bg": "--dzg-badge-success-bg", "min": 3 },
+    { "what": "badge success: label on its surface", "fg": "--tz-fg", "bg": "--dzg-badge-success-bg", "min": 4.5 },
+    { "what": "badge success: frame on a selected row", "fg": "--tz-success", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "badge warning: frame and shape on the page", "fg": "--tz-warning", "bg": "--tz-bg", "min": 3 },
+    { "what": "badge warning: frame and shape on its surface", "fg": "--tz-warning", "bg": "--dzg-badge-warning-bg", "min": 3 },
+    { "what": "badge warning: label on its surface", "fg": "--tz-fg", "bg": "--dzg-badge-warning-bg", "min": 4.5 },
+    { "what": "badge warning: frame on a selected row", "fg": "--tz-warning", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "badge danger: frame and shape on the page", "fg": "--tz-danger", "bg": "--tz-bg", "min": 3 },
+    { "what": "badge danger: frame and shape on its surface", "fg": "--tz-danger", "bg": "--dzg-badge-danger-bg", "min": 3 },
+    { "what": "badge danger: label on its surface", "fg": "--tz-fg", "bg": "--dzg-badge-danger-bg", "min": 4.5 },
+    { "what": "badge danger: frame on a selected row", "fg": "--tz-danger", "bg": "--dzg-row-selected-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -59,6 +80,11 @@
     "--dzg-row-selected-bg": "color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg))",
     "--dzg-focus-ring": "var(--tz-accent)",
     "--dzg-stale-fg": "var(--tz-fg-muted)",
-    "--tz-range-within-bg": "color-mix(in srgb, var(--tz-accent) 16%, var(--tz-bg))"
+    "--tz-range-within-bg": "color-mix(in srgb, var(--tz-accent) 16%, var(--tz-bg))",
+    "--dzg-badge-neutral-bg": "color-mix(in srgb, var(--tz-fg-muted) 12%, var(--tz-bg))",
+    "--dzg-badge-info-bg": "color-mix(in srgb, var(--tz-accent) 12%, var(--tz-bg))",
+    "--dzg-badge-success-bg": "color-mix(in srgb, var(--tz-success) 12%, var(--tz-bg))",
+    "--dzg-badge-warning-bg": "color-mix(in srgb, var(--tz-warning) 12%, var(--tz-bg))",
+    "--dzg-badge-danger-bg": "color-mix(in srgb, var(--tz-danger) 12%, var(--tz-bg))"
   }
 }

@@ -15,5 +15,6 @@ export { LAYOUT_CSS, injectStyles } from './styles.js';
 export { checkMessages } from './messages.js';
 export { definePart } from './part.js';
 export type { Part, PartBase, PartHandle, SlotContext, SlotPart } from './part.js';
+export type { PartsMessageKey, PartsMessages } from './part-texts.js';
 export type { GridFeature, FeatureHandle } from './features.js';
 export type { HeaderRowSpec } from './render/header.js';

@@ -9,7 +9,7 @@
 // search=1 a labelled search field above the grid (`#q`), bound with quickSearch() before the grid is made (step 16).
 // paging=client pages the rows with the footer (pagination(), step 17), size `size` (50); paging=cursor serves them from
 // a server in memory by cursor without a total (`delay` ms, 0 by default; `t.fetches` counts its requests, `t.failNext`
-// fails the next one); two=1 adds a second grid with the footer, labelled, under the first.
+// fails the next one); parts=1 the ready cell parts (badge and yes/no, step 20); two=1 adds a second grid with the footer, labelled, under the first.
 import { createGrid } from '/packages/dom/src/index.ts';
 import { EN } from '/packages/dom/src/locales/en.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
@@ -25,7 +25,9 @@ const withFilters = !!q.get('filters');
 const filterTexts = withFilters ? (await import(`/packages/dom/src/locales/${locale.slice(0, 2)}-filters.ts`)) : null;
 const paging = q.get('paging');
 const pagingTexts = paging ? (await import(`/packages/dom/src/locales/${locale.slice(0, 2)}-pagination.ts`)) : null;
-const more = [filterTexts, pagingTexts].flatMap((m) => (m ? [(Object.values(m)[0] as { text: object }).text] : []));
+// `parts=1`: the ready cell parts (step 20): a badge column over every tone, a yes/no column, their texts.
+const cellParts = q.get('parts') ? await (await import('./parts.ts')).partsSetup(locale.slice(0, 2) as 'fr') : null;
+const more = [...[filterTexts, pagingTexts].flatMap((m) => (m ? [(Object.values(m)[0] as { text: object }).text] : [])), ...(cellParts ? [cellParts.texts] : [])];
 const messages = more.length ? { ...base, text: Object.assign({}, base.text, ...more) } : base;
 document.documentElement.lang = locale;
 document.documentElement.dir = q.get('dir') ?? (locale.startsWith('ar') ? 'rtl' : 'ltr');
@@ -63,6 +65,7 @@ const columns = [
   { id: 'amount', header: base === AR ? 'المبلغ' : 'Montant', type: 'number' as const, width: 120 },
   { id: 'day', header: base === AR ? 'اليوم' : 'Jour', type: 'day' as const, width: 120 },
   ...(dates ? [{ id: 'at', header: base === AR ? 'الموعد' : 'Rendez-vous', type: 'instant' as const, width: 170 }] : []),
+  ...(cellParts ? cellParts.columns : []),
   ...(q.get('popup') ? [{ id: 'paid', header: base === AR ? 'مدفوع' : 'Payé', type: 'boolean' as const, width: 100 }] : []),
   ...Array.from({ length: 16 }, (_, k) => ({ id: `x${k}`, header: `C${k}`, width: 110, value: (r: Row) => (r.id * (k + 3)) % 997 })),
   { id: 'ref', header: 'Réf', pinned: 'end' as const, width: 90, value: (r: Row) => `R-${r.id}` },
@@ -102,6 +105,7 @@ if (q.get('slots')) {
     }),
   };
 }
+if (cellParts) parts = { ...parts, ...cellParts.parts };
 const fail = { ...(dates === 'fail' && { loadDates: () => Promise.reject(new Error('the date kit is unreachable (dates=fail)')) }), ...(q.get('setfail') && { loadSet: () => Promise.reject(new Error('the set chunk is unreachable (setfail=1)')) }) };
 if (q.get('search')) {
   const { quickSearch } = await import('/packages/dom/src/search.ts');

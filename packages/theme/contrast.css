@@ -20,6 +20,7 @@
     --tz-accent-fg: light-dark(#ffffff, #000000);
     --tz-danger: light-dark(#8b0000, #ff8a8a);
     --tz-warning: light-dark(#6b3a00, #ffd27a);
+    --tz-success: light-dark(#14532d, #86efac);
   }
 }
 
@@ -33,6 +34,7 @@
   --tz-accent-fg: light-dark(#ffffff, #000000);
   --tz-danger: light-dark(#8b0000, #ff8a8a);
   --tz-warning: light-dark(#6b3a00, #ffd27a);
+  --tz-success: light-dark(#14532d, #86efac);
 }
 
 /* Forced colours: the system decides; the grid only says which role each part plays. */
@@ -54,6 +56,12 @@
   }
   .dzg-resize::after {
     background: CanvasText;
+  }
+  /* A badge's frame in the text colour (its tinted surface is gone); its shape stays (step 20). The
+     system's colours in a selected row too, where the row opts out of them. */
+  .dzg-badge {
+    border-color: currentColor;
+    forced-color-adjust: auto;
   }
   /* A pager button that cannot act is aria-disabled, not disabled: the system would not grey it. */
   .dzg-pbtn[aria-disabled='true'] {

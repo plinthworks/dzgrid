@@ -9,6 +9,7 @@
 // `paging=cursor` serve them from a slow server in memory (400 ms), by cursor without a total.
 // `export=1` puts an export button above the grid (`csvExport()`, step 19): every row the query matches,
 // with the page's own label in its language (rtl.html opens it in Arabic, for the owner's Excel check at step 23).
+// `parts=1` draws "Statut" as badges and every yes/no column as "✓ Oui" / "✗ Non" (`@dzgrid/dom/parts`, step 20).
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
@@ -17,6 +18,10 @@ import { filters } from '@dzgrid/dom/filters';
 import { quickSearch } from '@dzgrid/dom/search';
 import { pagination } from '@dzgrid/dom/pagination';
 import { csvExport } from '@dzgrid/dom/export';
+import { badge, cellBoolean } from '@dzgrid/dom/parts';
+import { EN_PARTS } from '@dzgrid/dom/locales/en-parts';
+import { FR_PARTS } from '@dzgrid/dom/locales/fr-parts';
+import { AR_PARTS } from '@dzgrid/dom/locales/ar-parts';
 import { EN_EXPORT } from '@dzgrid/dom/locales/en-export';
 import { FR_EXPORT } from '@dzgrid/dom/locales/fr-export';
 import { AR_EXPORT } from '@dzgrid/dom/locales/ar-export';
@@ -51,6 +56,7 @@ const dates = params.get('dates');
 const withSearch = params.get('search') === '1';
 const paging = params.get('paging') as 'client' | 'offset' | 'cursor' | null;
 const withExport = params.get('export') === '1';
+const withParts = params.get('parts') === '1';
 // The clock the date shortcuts count from: the machine's, moved by the "Horloge" menu (dates=1).
 let offset = 0;
 if (dates) {
@@ -63,18 +69,22 @@ if (dates) {
   move();
   form.addEventListener('change', move);
 }
-const join = <B extends { text: object }>(b: B, f: { text: object }, p: { text: object }, x: { text: object }): B => ({ ...b, text: { ...b.text, ...(withFilters && f.text), ...(paging && p.text), ...(withExport && x.text) } });
-const bundles = { 'fr-FR': join(FR, FR_FILTERS, FR_PAGINATION, FR_EXPORT), 'en-US': join(EN, EN_FILTERS, EN_PAGINATION, EN_EXPORT), 'ar-DZ': join(AR, AR_FILTERS, AR_PAGINATION, AR_EXPORT) } as const;
+const join = <B extends { text: object }>(b: B, f: { text: object }, p: { text: object }, x: { text: object }, c: { text: object }): B => ({ ...b, text: { ...b.text, ...(withFilters && f.text), ...(paging && p.text), ...(withExport && x.text), ...(withParts && c.text) } });
+const bundles = { 'fr-FR': join(FR, FR_FILTERS, FR_PAGINATION, FR_EXPORT, FR_PARTS), 'en-US': join(EN, EN_FILTERS, EN_PAGINATION, EN_EXPORT, EN_PARTS), 'ar-DZ': join(AR, AR_FILTERS, AR_PAGINATION, AR_EXPORT, AR_PARTS) } as const;
 
 // About 2 000 place names (20 × 20 × 5 syllables), every seventh one in Arabic letters; 1 row in 40 blank.
 const SYL = ['Ain', 'Bou', 'Sidi', 'Ouled', 'Beni', 'El', 'Ta', 'Ma', 'Ka', 'Ze', 'Ro', 'Ha', 'Mé', 'Ké', 'Lo', 'Da', 'Sa', 'Fé', 'Ni', 'Ra'];
 const ENDS = ['ra', 'lia', 'mène', 'zir', 'ghar'];
 const AR_SYL = ['عين', 'بو', 'سيدي', 'أولاد', 'بني', 'ال', 'تا', 'ما', 'كا', 'زي', 'رو', 'حا', 'مي', 'كي', 'لو', 'دا', 'سا', 'في', 'ني', 'را'];
 const commune = (i: number): string => (i % 7 ? `${SYL[i % 20]} ${SYL[Math.floor(i / 20) % 20]!.toLowerCase()}${ENDS[Math.floor(i / 400) % 5]}` : `${AR_SYL[i % 20]} ${AR_SYL[Math.floor(i / 20) % 20]}${'ةيرنل'[Math.floor(i / 400) % 5]}`);
-const SET_COLUMNS: ColumnDef<RowA, any>[] = withFilters ? [
-  { id: 'commune', header: 'Commune', width: 160, value: (r: RowA) => (r.n2 % 40 === 0 ? null : commune(r.n0 % 2000)), filter: { kind: 'set' } },
-  { id: 'e0', header: 'Statut', type: 'enum', width: 120, enumOptions: [{ value: 'pending', label: 'En attente' }, { value: 'active', label: 'Actif' }, { value: 'suspended', label: 'Suspendu' }, { value: 'closed', label: 'Clos' }] },
-] : [];
+// "Statut": an enum with the filters (no list button, owner Q2) or the cell parts (a badge per value).
+const STATUS: ColumnDef<RowA, any> = { id: 'e0', header: 'Statut', type: 'enum', width: 130, enumOptions: [{ value: 'pending', label: 'En attente' }, { value: 'active', label: 'Actif' }, { value: 'suspended', label: 'Suspendu' }, { value: 'closed', label: 'Clos' }], ...(withParts && { ui: { cell: 'statusBadge' } }) };
+const SET_COLUMNS: ColumnDef<RowA, any>[] = [
+  ...(withFilters ? [{ id: 'commune', header: 'Commune', width: 160, value: (r: RowA) => (r.n2 % 40 === 0 ? null : commune(r.n0 % 2000)), filter: { kind: 'set' } } as ColumnDef<RowA, any>] : []),
+  ...(withFilters || withParts ? [STATUS] : []),
+];
+// The cell parts (`parts=1`): each status its tone (closed: neutral, no shape), yes/no on every boolean column.
+const PARTS = withParts ? { statusBadge: badge({ tones: { pending: 'warning', active: 'success', suspended: 'danger' } }), 'cell.boolean': cellBoolean } : undefined;
 
 const COLUMNS: ColumnDef<RowA, any>[] = [
   { id: 'id', header: 'ID', pinned: 'start', width: 90 },
@@ -86,7 +96,7 @@ const COLUMNS: ColumnDef<RowA, any>[] = [
   { id: 'i1', header: dates ? 'Rendez-vous' : 'Instant', type: 'instant', width: 180 },
   { id: 'e1', header: 'Service', width: 130 },
   { id: 'b0', header: 'Actif', type: 'boolean', width: 90 },
-  ...(['t1', 't2', 't3', 'a1', 'a2', 'n1', 'n2', 'n3', 'n4', 'd1', 'd2', ...(withFilters ? [] : ['e0'] as const), 'e2', 'b1'] as const).map((id) => ({ id, width: 120, ...(id.startsWith('n') ? { type: 'number' as const } : id.startsWith('d') ? { type: 'day' as const } : id.startsWith('b') ? { type: 'boolean' as const } : {}) })),
+  ...(['t1', 't2', 't3', 'a1', 'a2', 'n1', 'n2', 'n3', 'n4', 'd1', 'd2', ...(withFilters || withParts ? [] : ['e0'] as const), 'e2', 'b1'] as const).map((id) => ({ id, width: 120, ...(id.startsWith('n') ? { type: 'number' as const } : id.startsWith('d') ? { type: 'day' as const } : id.startsWith('b') ? { type: 'boolean' as const } : {}) })),
   { id: 'n7', header: 'Total', type: 'number', pinned: 'end', width: 100 },
 ];
 
@@ -133,6 +143,7 @@ function settings(): GridSettings<RowA> {
     ...(!served && { rows: rowsFor(Number(val('rows'))) }),
     getRowId: (r) => r.id,
     columns: COLUMNS,
+    ...(PARTS && { parts: PARTS }),
     messages: bundles[locale],
     locale,
     timeZone: dates ? val('zone') : 'Africa/Algiers',

@@ -21,6 +21,7 @@ const domAlias = {
   '@dzgrid/dom/search': fileURLToPath(new URL('./packages/dom/src/search.ts', import.meta.url)),
   '@dzgrid/dom/filters': fileURLToPath(new URL('./packages/dom/src/filters.ts', import.meta.url)),
   '@dzgrid/dom/export': fileURLToPath(new URL('./packages/dom/src/export.ts', import.meta.url)),
+  '@dzgrid/dom/parts': fileURLToPath(new URL('./packages/dom/src/parts.ts', import.meta.url)),
   '@dzgrid/dom/pagination': fileURLToPath(new URL('./packages/dom/src/pagination.ts', import.meta.url)),
   '@dzgrid/dom/internal': fileURLToPath(new URL('./packages/dom/src/internal.ts', import.meta.url)),
   '@dzgrid/dom/locales': fileURLToPath(new URL('./packages/dom/src/locales', import.meta.url)),
