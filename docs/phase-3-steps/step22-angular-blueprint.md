@@ -1,0 +1,40 @@
+# Step 22 blueprint: `@dzgrid/angular` (architect, 2026-10-20)
+
+Decisions on top: `step22-decisions.md` (they win).
+
+## 0. Findings
+- packages/angular is a placeholder (`DZGRID_ANGULAR_VERSION`, `DzgProbe`); its ng-packagr partial build (strictTemplates) and the Analog AOT test setup work (`template.test.ts`, `packaging.test.ts`); no `exports`; peers ^21 only. Step 22 removes DzgProbe.
+- `g.partBase = { ctx, dir, doc, msg, announce, context }` rebuilt each paint (viewport.ts:171), spread by every slot (rows.ts:429, mounted.ts:55).
+- `emit` needs column and key (per cell): in the base it would be a per-cell closure or field; dom base ~100 B headroom.
+- `part-shadowed` is not in PROBLEM_CODES (parts.md:32 waits for step 22). GridEvent is a closed union (new variants type-only).
+- `settings.onEvent` via kernel.subscribe, fenced and live (grid.ts:168-181); features are plain objects; `quickSearch().bind`, `csvExport().bind` return an unbind.
+
+## 1. API
+`emit` costs zero in core/dom: `componentPart(slot, Cmp)` and `dzgPart` entries are markers re-bound by `DzGrid` into per-grid SlotParts closing over EnvironmentInjector, ApplicationRef, kernel, an element injector providing the controller, the slot; registry memoised on the merged record identity. The component sees `{ ...c, emit }`; `emit(name, detail?)` → `emit(kernel, event)` (core/internal) with source user: cell → `cellAction { column, key, name, detail }` (owner shape); other slots → `partAction { slot, column | null, name, detail }`. Two type-only GridEvent variants; `onEvent` and `(gridEvent)` receive them.
+`DzGrid<T>` (selector `dz-grid`; directives keep `dzg-`), standalone, OnPush, signal inputs. Required: columns, getRowId, messages. Live: rows, source, locale, timeZone, numerals, direction, density, overlay, label, tooltips, overscan, searchWarmup, selection (incl. canSelect), context, parts. Fixed (update → `unsupported-live-change`): operations, pagination, filterKinds, clock, injectStyles, nonce, getRowId, features. T inferred from `[rows]`. Models: quick (quick.set), filter (filter.set), selection (selection.set) — host writes source host; kernel events update models for user/data only; equality guard stops echo (sort: no sort-set command found, check first). Outputs: gridEvent, cellClicked, rowClicked, cellAction, fetchFailed, problems, gridReady — emitted in `NgZone.run` when a real zone exists. `exportAs: 'dzGrid'`; provides itself on its element injector.
+Controller `DzgController<T>`: signals `ready()`, `kernel()` (null before / on a server); `dispatch`, `focusCell`, `ensureVisible`, `refresh`, `announce`, `openFilter` / `closeFilter`.
+Providers: `provideDzGrid({ messages?, parts?, defaults?: { locale, timeZone, direction, density, numerals } })` (tzslot pattern), tokens DZG_DEFAULTS, DZG_PARTS, DZG_MESSAGES; a tag binding wins. `fromObservable(fn)` → DataSource via firstValueFrom (rxjs optional peer).
+Registry order (low → high): features' parts, `provideDzGrid({ parts })`, `[parts]`, `dzgPart` templates; a host-level name hiding a feature's/provider's part → `part-shadowed` (warning, `parts.<name>`), once per name per grid, from the wrapper.
+```ts
+componentPart<S extends WiredSlot>(slot: S, cmp: Type<DzgPartComponent<S>>): SlotPart<S>
+export type DzgPartContext<S extends WiredSlot> = SlotContext[S] & { emit(name: string, detail?: unknown): void };
+export interface DzgPartComponent<S> { readonly cell: InputSignal<DzgPartContext<S>>; focus?(): boolean }
+export type DzgCell<T = unknown> = DzgPartComponent<'cell'>;
+@Directive({ selector: 'ng-template[dzgPart]' }) class DzgPart<S extends WiredSlot = 'cell'> { dzgPart = input.required<string>(); slot = input<S>('cell' as S); static ngTemplateContextGuard(...) }
+```
+The input is named `cell` for every slot (owner; Q2 alias); the whole slot context arrives (incl. the step 21 header `filter`, toggleSort); no `dzgCell` sugar.
+Directives: `input[dzgSearch]` (input: the QuickSearch feature object; optional `dzgSearchDebounce`; bind in afterNextRender, unbind on destroy); `button[dzgExport]` (CsvExport; optional `dzgExportScope`); bind before the grid exists must be tested (export: wait for gridReady via optional inject(DzGrid) if needed).
+
+## 2. Behaviour
+Pooling (S6): mount = `createComponent({ environmentInjector, elementInjector })`, `setInput('cell', ctx)`, `appRef.attachView(ref.hostView)`, `detectChanges()`, append `ref.location.nativeElement` (no hostElement adoption); templates `createEmbeddedView({ $implicit: ctx })` attached to appRef; update = `{ ...c, emit }` → `setInput` + `detectChanges` on that view only (template: `$implicit` + `view.detectChanges()`); emit created once per mount reading the latest column/key; micro-bench ≈ S6 5 µs per rebind; update outside reactive contexts (effect runs grid.update in untracked, NG0600). Destroy: detachView, ref.destroy()/view.destroy(), host emptied; test nodes removed; throwing part follows the dom rule; mounts = destroys after DzGrid destroy. OnPush recommended; views attached to ApplicationRef. Focus: `instance.focus?.()` else the first tabbable inside; cell-widget owner inferred; components must not stopPropagation Tab/Escape. Host element `style.display = 'contents'` via CSSOM. Zones: create the grid in `runOutsideAngular`, parts mount outside; outside-zone listeners tick via the hybrid scheduler (prove with a zone.js test; fallback wrap emit/outputs in zone.run); zoneless primary; a separate zone.js test file. SSR: `isPlatformBrowser`, no grid, no document on the server; grid created in ngOnInit (required inputs bound); componentPart and provideDzGrid import-safe; a test with PLATFORM_ID 'server'. Update: one computed of settings, `effect(() => untracked(() => grid.update(s)))`; ngOnDestroy → grid.destroy().
+
+## 3. Step 22 vs 23
+22: the whole API, every slot (cell, header with filter, overlay, tooltip, floating, filter, footer), features pass-through, the two directives, part-shadowed, fromObservable, unit/zone/server tests, the build, a small browser fixture. 23: the Angular audit example from tarballs with a real `ng build`, the Arabic column-order check, a zone.js demo, `ng build` smoke on 19 and 22, K.8 with the wrapper, platform-server SSR of the example. Do not cut componentPart.
+
+## 4. Bytes
+emit: 0 in core/dom. Core: `part-shadowed` ~14–16 B + a conformance case (ask only if headroom < 20 B; measure). `@dzgrid/angular` line (fesm2022, @angular/*, @dzgrid/*, @tzslot/*, rxjs external): estimate 4.5–5 kB → ask 5 500. K.8 stays DzGrid + theme; Angular runtime recorded apart (step 23 measures a real ng build). Peers `@angular/core` and `@angular/common` `^19 || ^20 || ^21 || ^22` (tests on 21). Real `exports` in the manifest.
+
+## 5. Files and tests first
+New packages/angular/src: grid.ts, controller.ts, providers.ts, part-bind.ts, component-part.ts, dzg-part.ts, search.ts, export.ts, from-observable.ts; index.ts updated; probe.ts removed. Modified: core kernel.ts (2 GridEvent variants), problems.ts (part-shadowed), packages/angular/package.json, size-budget.json; docs parts.md, ROADMAP, STATUS, CHANGELOG, new docs/behaviors/angular-parts.md (first).
+Tests (first): parts-component (mounts = destroys, cell() in place on rebind, emit → cellAction on (gridEvent)/onEvent/typed output with column and key, pooled count 520 after scrolling, nodes removed, focus and cell-widget, a throwing component empties its cell only); parts-template (slot narrowing, part-shadowed once, registry order); slots-angular (header with c.filter, overlay, tooltip, floating, filter popup, footer as components); inputs (required before binding NG0950, live/fixed, context identity, canSelect with/without rules(), models and echo guard); directives (dzgSearch, dzgExport, before/after grid creation, unbound on destroy); ssr; zone (own file); bench (rebind ≈ 5 µs); packaging extended; the AOT check kept. Analog vitest (jit false) for units; the S6 ngc+linker+esbuild pipeline for the browser fixture only.
+Browser fixture `packages/angular/browser/`: Angular cell, header, overlay, floating, footer parts; Chrome; axe fr and ar RTL; 1 000 scrolls, 0 leaks.
