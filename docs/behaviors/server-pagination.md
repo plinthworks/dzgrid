@@ -32,7 +32,7 @@ Moves to the next, previous, first or last page; picks another page size; change
 - `packages/core/test/source-rows-property-strong.test.ts`: server pages by offset, by cursor, and the fetched set paged in the browser; 1 000 seeded orders each, with and without a destroy, empty answers included, every step checked against the sheet.
 - Page stage in `ClientModel`, `aria-rowcount` per page (planned, step 4).
 - `footer.pager` (step 17, `pagination-footer.md`): `packages/dom/test/pagination.test.ts`, `pagination-walk.test.ts`; next fetches in the click's frame, "last" disabled without a total and absent by cursor, digits in Arabic, focus kept on "next" (browser checks too).
-- The audit screen in both configurations (planned, step 18).
+- The audit screen in both configurations (step 18): `packages/dom/test/audit-permutations.test.ts` (tier 1, jsdom; `npm run test:perm` for the 1 000 seeds), `scripts/audit-browser.mjs` (tier 2, Chrome, `npm run test:audit`), `packages/dom/test/fake-server.test.ts` (the server's pages, total known or not).
 
 ## Decisions (step 1, 2026-10-17)
 - **Unknown total, empty page past the end** (an exact multiple of the page size with an inferred `hasNext`, or a host `page.go` too far): the model goes back to the page before, with `hasNext` false — kept as it is when that is the page shown, fetched once otherwise. An empty page 0 is the empty overlay.
@@ -78,3 +78,6 @@ Moves to the next, previous, first or last page; picks another page size; change
 ## Decisions (step 17, 2026-10-20) — the footer
 - The pager, the count and the selection strip are `@dzgrid/dom/pagination` (`pagination-footer.md`). Unknown total: "51 to 100" and "Page 3", no last button by cursor (owner Q2). The count is words, never a dash.
 - The base does nothing on a page change: scrolling to the top and `announce.page` are the feature's. Paging on without `pagination()` is `missing-feature` (warning, `settings.pagination`).
+
+## Decisions (step 18, 2026-10-20) — found by the audit permutations
+- **A fetched set: a query changed and changed back starts again on page 1.** The browser's pages went back to page 1 only when the answer was for another key than the set shown; a search changed and put back (the user paging the old rows meanwhile) kept the page as a refresh would. Now the first answer of a new epoch, even one back to the key shown, starts on page 1, as server pages do and as "a filter, search or sort change goes back to the first page" says; a refresh or a retry of the same epoch keeps the page. Pages turned while another set loads still page the old rows. Tests: `packages/core/test/source-rows-fetched.test.ts` (« a query changed and changed back starts again on page 0 »), the oracle of `source-rows-property-strong.test.ts`. *To confirm with the owner: it revises the step 5 part 3 reading ("changed and changed back is the same set").*

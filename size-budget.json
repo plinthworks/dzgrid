@@ -221,6 +221,14 @@
     "profile: read-only client grid (core + dom + fr)": {
       "file": "perf/profiles/readonly-client.ts",
       "maxGzip": null
+    },
+    "profile: audit screen (K.8)": {
+      "file": "perf/profiles/audit.ts",
+      "split": true,
+      "css": [
+        "packages/theme/dzgrid.css"
+      ],
+      "maxGzip": 85000
     }
   }
 }

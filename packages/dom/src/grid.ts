@@ -1,6 +1,6 @@
 import { clientRows, createColumnModel, createKernel, resolveOperations, type ClientModel, type GridKernel, type RowKey, type RowModel } from '@dzgrid/core';
 import { emit, filterKindLookup, missingFeatureProblems } from '@dzgrid/core/internal';
-import { announceSort, selectionAnnouncer } from './a11y/announce.js';
+import { sortAnnouncer, selectionAnnouncer } from './a11y/announce.js';
 import { LiveRegion } from './a11y/live-region.js';
 import type { GridContext, GridEnv } from './context.js';
 import { watchDirection, type Dir } from './dir.js';
@@ -164,9 +164,10 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   installKeys(g, focus, select.toggleAll);
   installHeaderClick(g, select.toggleAll);
   const announceSelection = selectionAnnouncer(g);
+  const announceSort = sortAnnouncer(g);
   scope.add(kernel.subscribe((e) => {
     if (e.type === 'modelUpdated' && e.kind === 'rows') painter.rowsChanged();
-    if (e.type === 'sortChanged' && e.source === 'user') announceSort(g, e.sort);
+    announceSort(e);
     if (e.type === 'fetchFailed') live.announce(g.msg('announce.error'));
     if (e.type === 'selectionChanged') announceSelection(e);
     if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized' || e.type === 'columnsChanged') schedule();

@@ -145,3 +145,6 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
 - Browser: `scripts/browser.mjs` (`filters=1&popup=1&sets=1`, fr light, ar right to left dark);
   perf lines "set filter: …" (`scripts/perf-browser.mjs`, `perf/browser-budgets.json`).
 - By ear: `docs/a11y-protocol.md` §11.
+
+## Decisions (step 18, 2026-10-20)
+- **The size stays put from loading to loaded:** the status line keeps one line's height while empty (the first load on a server), so the list no longer moves down 32 px when the values arrive. Checked in Chrome on the audit screen, left to right and right to left, first load and a narrower search (`scripts/audit-browser.mjs`, ≤ 1 px).

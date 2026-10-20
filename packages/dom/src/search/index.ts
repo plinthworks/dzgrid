@@ -48,8 +48,14 @@ export function quickSearch(): QuickSearch {
     },
     setup(g) {
       grids.add(g);
+      // One sentence per action (step 18): a change that moved the filters too (a clear-all) is the
+      // filters feature's to say ("Filtered. N rows"), when the grid has it. The kernel tells the
+      // model's change first, then the filters', then the search's.
+      const told = g.settings.features?.some((f) => f.id === 'filters');
+      let filtered = false;
+      g.scope.add(g.kernel.subscribe((e) => void (e.type === 'modelUpdated' ? (filtered = false) : e.type === 'filterChanged' && (filtered = !!told))));
       // After a user's search, the row count (`announce.rows`, owner decision Q3), once the rows are in; nothing when unknown.
-      g.scope.add(g.kernel.subscribe(settled(g, (e) => e.type === 'quickChanged' && e.source === 'user', () => {
+      g.scope.add(g.kernel.subscribe(settled(g, (e) => e.type === 'quickChanged' && e.source === 'user' && !filtered, () => {
         const n = g.rows.counts.filtered;
         if (n != null) g.live.announce(g.msg('announce.rows', { n }));
       })));

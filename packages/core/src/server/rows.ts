@@ -167,7 +167,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   let cursors: (string | null)[] = [null];
   /** The page the rows shown answered: null before the first answer, after a purge or a new source. */
   let shown: { readonly key: string; readonly index: number; readonly size: number } | null = null;
-  /** The fetched set answers the current epoch: a new epoch (even back to the key shown) forgets its counts until then. */
+  /** The fetched set answers the current epoch: a new epoch (even back to the key shown) forgets its counts until then, and its page (step 18). */
   let answered = false;
   /** A fetched set purged holds nothing until its next answer: no selected key is dropped meanwhile. */
   let purged = false;
@@ -269,11 +269,10 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     if (!a.rows) return failed(t, req, a.problems[0]);
     const rows = a.rows as readonly T[];
     if (!serverPages) {
-      // The set of another epoch: its first page. The same set again (a refresh): the page kept, clamped.
-      if (!shown || shown.key !== epochKey) {
-        mark('query');
-        inner.setPage({ index: 0 }, 'data');
-      }
+      // The set of another epoch: its first page. The same set again: the page kept, clamped, after
+      // a refresh; its first page after a query changed and back (any search change goes to page 1).
+      if (!shown || shown.key !== epochKey) mark('query');
+      if (!shown || shown.key !== epochKey || !answered) inner.setPage({ index: 0 }, 'data');
       shown = { key: epochKey, index: 0, size };
       answered = true;
       purged = false;

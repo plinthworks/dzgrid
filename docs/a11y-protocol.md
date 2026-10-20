@@ -359,10 +359,11 @@ sur iOS et TalkBack si possible. Durée estimée : 20 min par couple et par lang
     le focus est toujours sur l'option, dite à nouveau correctement.
 54. **Échec du chargement.** (`&setfail=1` simule une liste introuvable.) Ouvrir le filtre
     « Commune » : « Les valeurs n'ont pas pu être chargées… » dit une fois (alerte), un bouton
-    « Réessayer » ; `Échap` ferme. Sur un serveur (pas de serveur dans le bac à sable : à l'oreille à
-    l'étape 18, écran d'audit) : cocher n'envoie rien ; `Entrée` dans la recherche ou « Appliquer » :
-    une requête, « Filtré. N lignes » une fois ; un échec de la liste se dit de même, et
-    « Réessayer » met le focus dans la recherche.
+    « Réessayer » ; `Échap` ferme. Sur un serveur (écran d'audit, étape 18 :
+    http://127.0.0.1:4700/audit.html?config=server&latency=1200, colonne « Ressource ») : cocher
+    n'envoie rien ; `Entrée` dans la recherche ou « Appliquer » : une requête, « Filtré. N lignes »
+    une fois ; un échec de la liste (`&fail=30`, ou le bouton « Faire échouer la prochaine requête »)
+    se dit de même, et « Réessayer » met le focus dans la recherche.
 55. **Arabe.** Pluriels (« قيمة واحدة », « قيمتان », « 3 قيم »…) dans la ligne d'état et les noms
     des options ; le nom de l'option (« X، 12 صفا ») lu dans le bon ordre ; les noms arabes de la
     liste alignés à droite, les latins à gauche de leur ligne (chacun dans son sens).
@@ -394,9 +395,9 @@ Durée estimée : 10 min par couple et par langue. Noter ce qui est **dit**, mot
     gauche dans une page française (`dir="auto"`).
 62. **Avec les filtres.** (`?search=1&filters=1&floating=1&popup=1`) Une recherche puis un filtre :
     une seule annonce cohérente à chaque fois ; « Effacer les filtres » du voile vide aussi le champ.
-63. **Serveur lent.** (pas de serveur dans le bac à sable : à l'oreille à l'étape 18, écran d'audit)
-    rien n'est dit avant la réponse ; puis « N lignes » une fois, ou rien si le serveur ne connaît
-    pas le nombre.
+63. **Serveur lent.** (écran d'audit, étape 18 : http://127.0.0.1:4700/audit.html?config=server&latency=1200,
+    total inconnu ; puis « Total : connu ») rien n'est dit avant la réponse ; puis « N lignes » une
+    fois, ou rien si le serveur ne connaît pas le nombre.
 
 Consigner le résultat dans `docs/behaviors/quick-search-box.md` (fin de la fiche) et dans
 `ROADMAP.md` (ligne de l'étape 16). Règle de décision propre à cette section : un nombre dit à chaque
@@ -435,3 +436,40 @@ Consigner le résultat dans `docs/behaviors/pagination-footer.md` (fin de la fic
 `ROADMAP.md` (ligne de l'étape 17). Règle de décision propre à cette section : une phrase dite deux
 fois (66, 68), ou un focus qui part (66, 67, 70), se corrige avant l'étape 18 ; un nom de bouton mal
 traduit se corrige dans les textes (`locales/*-pagination.ts`).
+
+## 14. Étapes — écran d'audit (étape 18)
+
+Page : l'écran d'audit, http://127.0.0.1:4700/audit.html?config=server&latency=1200
+(`npx vite --host 127.0.0.1`, lien « Écran d'audit » du menu Démos), en **français** puis en
+**arabe** (`&lang=ar`), configuration B (tout sur le serveur) puis A (`&config=fetched`). Couples A
+à D. Durée estimée : 15 min par couple et par langue. Noter ce qui est **dit**, mot pour mot.
+
+72. **Taper lentement.** Dans « Rechercher dans le journal », taper « compte » lentement (une touche
+    par seconde) : rien n'est dit pendant la frappe ni pendant le chargement ; après la réponse,
+    « N lignes » **une fois** (rien avec « Total : inconnu » si le nombre n'est pas connu). Le texte
+    tapé n'est jamais modifié par une réponse.
+73. **Suivant sur un serveur lent.** « Page suivante » : les lignes restent, grisées, la grille est
+    dite occupée si le lecteur le dit ; rien d'autre avant la réponse ; puis « Page 2. 51 à 100 »
+    (« Page 2 sur … » avec un total) **une fois** ; le focus reste sur le bouton.
+74. **Erreur.** Bouton « Faire échouer la prochaine requête », puis « Page suivante » : « Échec du
+    chargement » dit une fois (alerte), le bouton « Réessayer » ; l'activer : « Chargement » puis la
+    page dite une fois ; le focus revient dans la grille.
+75. **Liste de valeurs.** Sur « Ressource », `Alt+↓` : la liste se charge (« Chargement… ») puis
+    « 2 000 valeurs » ; cocher deux valeurs n'envoie rien ; « Appliquer » : une requête, « Filtré.
+    N lignes » (ou « Filtré. Nombre inconnu ») **une fois**. Avec un échec de la liste : l'alerte,
+    « Réessayer » met le focus dans la recherche de la liste.
+76. **Clic dehors.** Fenêtre de filtre ouverte, un clic sur une cellule de la grille : la fenêtre se
+    ferme (décision Q4 de l'étape 18) ; ce qui n'était pas appliqué est abandonné (serveur) ; le focus
+    est sur la cellule cliquée, rien d'autre n'est dit. Un clic sur du texte de la page : le focus
+    revient sur le bouton du filtre.
+77. **Tri.** Cliquer « Date et heure » : rien n'est dit avant la réponse ; puis « Trié par Date et
+    heure, croissant. » (avec « N lignes » seulement si le total est connu) **une fois**.
+78. **Arabe.** Mêmes étapes en arabe, de droite à gauche : chiffres, pluriels, noms des boutons ;
+    les noms arabes et latins de « الفاعل » lus chacun dans son sens.
+79. **Palette.** Changer « Palette » pendant la lecture : rien n'est dit, la grille garde le focus et
+    sa position.
+
+Consigner le résultat dans `docs/behaviors/audit-screen.md` (fin de la fiche) et dans `ROADMAP.md`
+(ligne de l'étape 18). Règle de décision propre à cette section : une phrase dite deux fois ou avec
+un nombre faux (72, 73, 75, 77), ou un texte tapé modifié (72), se corrige avant l'étape 19 ; un
+lecteur muet au cochage (75) ajoute une annonce par case (§11, item 47).

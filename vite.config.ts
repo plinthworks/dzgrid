@@ -27,6 +27,7 @@ export default defineConfig({
         index: fileURLToPath(new URL('./playground/index.html', import.meta.url)),
         rtl: fileURLToPath(new URL('./playground/rtl.html', import.meta.url)),
         spans: fileURLToPath(new URL('./playground/spans.html', import.meta.url)),
+        audit: fileURLToPath(new URL('./playground/audit.html', import.meta.url)),
       },
     },
   },

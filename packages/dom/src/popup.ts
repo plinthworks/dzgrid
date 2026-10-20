@@ -6,7 +6,7 @@ import type { GridContext } from './context.js';
 export interface PopupOptions {
   /** Below the anchor (block-end), or beside it toward the end of the line (inline-end). */
   readonly placement: 'block-end' | 'inline-end';
-  /** Focus moves in and stays in until it closes (a filter popup); non-modal popups close on a click outside. */
+  /** Focus moves in and stays in until it closes (a filter popup). Every popup closes on a pointer down outside it (owner Q4, step 18). */
   readonly modal?: boolean;
   readonly label?: string;
   readonly onClose?: () => void;
@@ -33,6 +33,8 @@ const topLayer = (el: HTMLElement): el is HTMLElement & { showPopover(): void; h
  * `overflow` or `contain` (a dialog, a card) can neither clip nor trap them.
  * Fixed in the grid's root otherwise. Placed in logical coordinates; Escape
  * closes and gives focus back to the anchor; a modal popup keeps Tab inside.
+ * A pointer down outside it (not on its anchor) closes it and leaves the focus
+ * where the press puts it: back to the anchor only if it lands nowhere.
  * Its controls own their keys (`data-dzg-owner="popup"`).
  */
 export class PopupHost {
@@ -75,6 +77,7 @@ export class PopupHost {
     if (usesTopLayer) (el as HTMLElement & { showPopover(): void }).showPopover();
 
     let isOpen = true;
+    let outside = false;
     let at = anchor;
     const cleanups: (() => void)[] = [];
     const on = <K extends keyof DocumentEventMap>(target: Document | HTMLElement, type: K, fn: (e: DocumentEventMap[K]) => void, capture = false) => {
@@ -102,10 +105,13 @@ export class PopupHost {
         }
         const hadFocus = el.contains(doc.activeElement);
         el.remove();
-        // A grid going moves no focus (nothing of it may hear a focus event).
-        if (!this.#scope.isDisposed && (hadFocus || o.modal || !doc.activeElement || doc.activeElement === doc.body)) {
-          if (at.isConnected) at.focus({ preventScroll: true });
-          else this.fallback();
+        const back = (): void => (at.isConnected ? at.focus({ preventScroll: true }) : this.fallback());
+        const lost = (): boolean => !doc.activeElement || doc.activeElement === doc.body;
+        // A grid going moves no focus (nothing of it may hear a focus event). Pressed outside: the
+        // press focuses what it lands on, after this; the anchor only if that is nothing.
+        if (!this.#scope.isDisposed) {
+          if (outside) this.#scope.timeout(() => void (lost() && back()), 0);
+          else if (hadFocus || o.modal || lost()) back();
         }
         o.onClose?.();
       },
@@ -133,14 +139,13 @@ export class PopupHost {
         last.focus();
       }
     });
-    if (!o.modal) {
-      on(doc, 'pointerdown', (e: PointerEvent) => {
-        // The path, not the target: inside a shadow root the target is the shadow host.
-        const path = e.composedPath();
-        if (path.includes(el) || path.includes(at)) return;
-        ref.close();
-      }, true);
-    }
+    on(doc, 'pointerdown', (e: PointerEvent) => {
+      // The path, not the target: inside a shadow root the target is the shadow host.
+      const path = e.composedPath();
+      if (path.includes(el) || path.includes(at)) return;
+      outside = true;
+      ref.close();
+    }, true);
     this.#place(anchor, el, o.placement);
     if (o.modal) el.querySelector<HTMLElement>(FOCUSABLE)?.focus({ preventScroll: true });
     return ref;

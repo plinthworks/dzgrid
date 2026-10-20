@@ -101,3 +101,7 @@ the field; empties it with the field's own clear button.
 `packages/dom/test/search.test.ts`, `search-extra.test.ts` (review fixes), `search-walk.test.ts` (seeded, `WALK_SEEDS`, `WALK_SEED`),
 `structure.test.ts` (the base never imports the entry); browser checks in `scripts/browser.mjs`
 (`search=1`, French light and Arabic right to left dark); by ear: `docs/a11y-protocol.md` §12.
+
+## Decisions (step 18, 2026-10-20)
+- **One sentence per action:** when one change moves the filters too (a clear-all), the filters feature says it ("Filtered. N rows") and the search says nothing more. Found by the audit screen's permutations; test `search-extra.test.ts`.
+- **A slow server** (§12 item 63): heard on the audit screen, `/audit.html?config=server&latency=1200` (`docs/a11y-protocol.md` §12, §14).

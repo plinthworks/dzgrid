@@ -253,13 +253,14 @@ function walk(seed: number, server: boolean, steps = 70) {
         } else if (how === 'escape') t.key(popup()!.contains(document.activeElement) ? (document.activeElement as HTMLElement) : popup()!, 'Escape');
         else if (how === 'button') header(col)?.querySelector<HTMLButtonElement>(':scope > .dzg-fbtn')?.click();
         else if (how === 'closeFilter') feature.closeFilter();
-        else document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-      }, { quiet: how !== 'apply' && how !== 'enter' && !(how !== 'outside' && boxLast) });
+        else {
+          // Nothing focusable pressed: the focus goes back to the anchor once the press is over (Q4).
+          document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+          vi.advanceTimersByTime(0);
+        }
+      }, { quiet: how !== 'apply' && how !== 'enter' && !boxLast });
       const sent = t.f.calls.length - calls;
-      if (how === 'outside') {
-        if (!popup()) fail('a pointer down outside closed it');
-        continue;
-      }
+      // A pointer down outside closes it as Escape does (owner Q4, step 18).
       const commits = how === 'apply' || how === 'enter';
       if (commits && want === 'bad') {
         if (!popup()) fail(`${how}: an unreadable number closed it`);

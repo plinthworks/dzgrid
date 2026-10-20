@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DzGrid — écran d'audit</title>
+  <style>
+    body { margin: 0; padding: 1rem; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-block-end: .75rem; }
+    #host { block-size: 70vh; }
+    #host > .dzg { block-size: 100%; }
+    output { color: var(--tz-fg-muted); }
+  </style>
+</head>
+<body>
+  <h1>Écran d'audit</h1>
+  <p class="bar"><a href="./">← Démos</a></p>
+  <form class="bar" id="controls">
+    <label>Configuration <select name="config"><option value="server">B — tout sur le serveur (10⁷ lignes)</option><option value="fetched">A — jeu chargé, pages dans le navigateur (20 000)</option></select></label>
+    <label>Langue <select name="lang"><option>fr</option><option>en</option><option>ar</option></select></label>
+    <label>Sens <select name="direction"><option value="auto">auto</option><option>ltr</option><option>rtl</option></select></label>
+    <label>Thème <select name="theme"><option value="">système</option><option>light</option><option>dark</option></select></label>
+    <label>Densité <select name="density"><option>comfortable</option><option>compact</option><option>spacious</option></select></label>
+    <label>Latence (ms) <input name="latency" type="number" min="0" step="50" value="150" size="5"></label>
+    <label>Gigue (ms) <input name="jitter" type="number" min="0" step="50" value="0" size="5"></label>
+    <label>Échecs (%) <input name="fail" type="number" min="0" max="100" step="1" value="0" size="3"></label>
+    <label>Total <select name="total"><option value="0">inconnu</option><option value="1">connu</option></select></label>
+    <label>Palette <select name="palette"><option value="">par défaut</option><option value="light-dark(#be123c, #fb7185)">framboise</option><option value="light-dark(#047857, #34d399)">émeraude</option></select></label>
+    <button type="button" id="failNext">Faire échouer la prochaine requête</button>
+    <output id="status"></output>
+  </form>
+  <p class="bar"><label id="qlabel" for="q">Rechercher dans le journal</label> <input type="search" id="q"></p>
+  <div id="host"></div>
+  <script type="module" src="./audit.ts"></script>
+</body>
+</html>

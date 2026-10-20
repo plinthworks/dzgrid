@@ -5,6 +5,7 @@
   "scripts": {
     "test": "vitest run",
     "test:ci": "vitest run --maxWorkers=1",
+    "test:perm": "PERMS=1000 vitest run --maxWorkers=1 packages/dom/test/audit-permutations.test.ts",
     "test:watch": "vitest",
     "test:tz": "TZ=Pacific/Auckland vitest run && TZ=America/Los_Angeles vitest run",
     "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/dom/tsconfig.json --noEmit && tsc -p tsconfig.spec.json --noEmit && ngc -p packages/angular/tsconfig.spec.json --noEmit",
@@ -18,6 +19,7 @@
     "check:contrast": "node scripts/check-contrast.mjs",
     "build:theme": "sass --no-source-map --style=expanded packages/theme/dzgrid.scss packages/theme/dzgrid.css",
     "test:browser": "node scripts/browser.mjs",
+    "test:audit": "node scripts/audit-browser.mjs",
     "bench:browser": "node scripts/perf-browser.mjs"
   },
   "devDependencies": {

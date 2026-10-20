@@ -595,9 +595,10 @@ describe('announcements', () => {
     expect(t.live.said).toBe('4 rows');
     t.g.kernel.dispatch({ type: 'query.set', query: makeQuery({ sort: t.g.kernel.query.sort }) }, 'user');
     vi.advanceTimersByTime(100);
-    expect(t.live.said).toBe(`${ROWS.length} rows`);
+    // The filters' sentence alone (step 18: one sentence per action, the search no longer adds its own).
+    expect(t.live.said).toBe(`Filtered. ${ROWS.length} rows`);
     expect(t.box.value).toBe('');
-    expect(t.host.querySelector('.dzg-live')!.textContent).toBe(`${ROWS.length} rows`);
+    expect(t.host.querySelector('.dzg-live')!.textContent).toBe(`Filtered. ${ROWS.length} rows`);
   });
 });
 

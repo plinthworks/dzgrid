@@ -111,8 +111,9 @@ function oracle(config: Config) {
     },
     answer(rows: string[], more: { total?: number; hasNext?: boolean; nextCursor?: string }): Step & { stepBack?: 'kept' | 'fetched' } {
       if (config === 'fetched') {
-        // Another set (by its query, not its epoch: changed and changed back is the same set) starts on page 0.
-        if (!o.shown || o.shown.quick !== o.quick) o.index = 0;
+        // Another set starts on page 0; so does the same set after its query changed and changed back (a
+        // new epoch: any search change goes to the first page, step 18). A refresh keeps the page.
+        if (!o.shown || o.shown.epoch !== o.epoch) o.index = 0;
         o.screen = rows;
         o.shown = { epoch: o.epoch, quick: o.quick, index: 0, size: 0 };
         o.index = Math.min(o.index, pageCount(rows.length, o.size) - 1);

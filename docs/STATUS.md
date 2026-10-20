@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-20 (étape 17 faite, relue, testée ; corrections non commitées ; étape 18 ensuite). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 18 faite et testée, non commitée ; relecture de code et analyse des tests à faire ; étape 17 et ses corrections non commitées non plus). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -25,9 +25,12 @@ Mis à jour : 2026-10-20 (étape 17 faite, relue, testée ; corrections non comm
 | 15 — filtre par liste de valeurs (chargé à la demande), menu de démos | fait, relu, testé | `021324e`, `79c40c3` |
 | 16 — recherche rapide (`@dzgrid/dom/search`) | fait, relu, testé | `85ec8a5` |
 | 17 — pagination (`@dzgrid/dom/pagination`, `@dzgrid/dom/internal`) | fait, relu, testé (corrections non commitées) | `5cd9ca9` + corrections |
-| 18 à 26 | à faire, la 18 ensuite (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
+| 18 — écran d'audit, permutations (deux niveaux), axe, captures, profil K.8, fermeture de la fenêtre de filtre au clic dehors | fait, testé (non commité ; relecture à faire) | — |
+| 19 à 26 | à faire, la 19 ensuite (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-Étape 17 faite, relue, testée (`5cd9ca9` + corrections non commitées) : pied de page `pagination()` (sélection, décompte, pagineur dans un `<nav>`), module commun `@dzgrid/dom/internal`, case d'en-tête limitée à la page affichée dans le navigateur. Corrections de la relecture : un bouton caché du pied l'est vraiment dans un navigateur (règle `[hidden]` après le `display` des boutons) ; plus de « Tout sélectionner (N) » quand toutes les lignes filtrées sont déjà cochées page par page ; l'annonce après réponse (`settled`, partagée par filtres, recherche et pagination) ne parle que pour la requête de sa propre action (un filtre ou un `page.go` de l'hôte qui remplace un changement de page en attente ne fait plus dire la page) ; décision Q4 du propriétaire : sur une sélection « tout » liée, la case d'une page recoche cette page seulement, Ctrl+A recoche tout. 3 296 tests, 301 vérifications navigateur. En cours : étape 18 ensuite. Décidé pour l'étape 22 : cellule Angular `DzgCell<T>` + `cell().emit`. Étape 26 : animations GSAP (+ règle de classe par colonne, accès à la cellule pour GSAP ; Phase 4 : états d'enregistrement animés). Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP.
+Étape 18 faite et testée, non commitée (relecture de code et analyse des tests à faire) : l'écran d'audit (`perf/audit-screen.ts`, `perf/fake-server.ts`, `playground/audit.html`), les permutations en deux niveaux (`perf/permutation.ts` ; jsdom `packages/dom/test/audit-permutations.test.ts`, 1 000 par configuration avec `npm run test:perm` ; Chrome `scripts/audit-browser.mjs`, `npm run test:audit`), axe 0 sur 54 états, taille stable de la liste de valeurs, 12 captures de référence (`docs/screenshots/step18/`), le profil K.8 (66 958 o gz au premier chargement, budget 85 000), et la décision Q4 (la fenêtre de filtre se ferme au clic dehors). Les permutations ont trouvé quatre défauts, corrigés tests d'abord : la phrase du tri dite avant la réponse avec le nombre de l'ancienne page ; deux phrases pour un « Effacer les filtres » (filtres + recherche) ; un jeu chargé (configuration A) qui restait sur sa page quand la recherche revenait à l'ancienne (**à confirmer par le propriétaire** : revient sur une lecture de l'étape 5) ; la liste de valeurs qui descendait de 32 px en se remplissant. Résultats et mesures dans `ROADMAP.md` (ligne de l'étape 18) et `ARCHITECTURE.md` (« Décisions de l'étape 18 »). Écoute : `docs/a11y-protocol.md` §14.
+
+Étape 17 faite, relue, testée (`5cd9ca9` + corrections non commitées) : pied de page `pagination()` (sélection, décompte, pagineur dans un `<nav>`), module commun `@dzgrid/dom/internal`, case d'en-tête limitée à la page affichée dans le navigateur. Corrections de la relecture : un bouton caché du pied l'est vraiment dans un navigateur (règle `[hidden]` après le `display` des boutons) ; plus de « Tout sélectionner (N) » quand toutes les lignes filtrées sont déjà cochées page par page ; l'annonce après réponse (`settled`, partagée par filtres, recherche et pagination) ne parle que pour la requête de sa propre action (un filtre ou un `page.go` de l'hôte qui remplace un changement de page en attente ne fait plus dire la page) ; décision Q4 du propriétaire : sur une sélection « tout » liée, la case d'une page recoche cette page seulement, Ctrl+A recoche tout. 3 296 tests, 301 vérifications navigateur. Décidé pour l'étape 22 : cellule Angular `DzgCell<T>` + `cell().emit`. Étape 26 : animations GSAP (+ règle de classe par colonne, accès à la cellule pour GSAP ; Phase 4 : états d'enregistrement animés). Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§14), relecture arabe, licence GSAP.
 
 ## Les plans détaillés des étapes
 
@@ -40,7 +43,7 @@ Mis à jour : 2026-10-20 (étape 17 faite, relue, testée ; corrections non comm
 - Tests d'abord : un test doit échouer avant la correction.
 - Dépôt : https://github.com/plinthworks/dzgrid (remote `origin`, SSH). Le propriétaire a autorisé le push (2026-10-18) : on pousse `main` après des commits vérifiés (suite verte), jamais de travail non commité, jamais de force-push. Trailer de chaque commit :
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` puis `Claude-Session: https://claude.ai/code/session_01SD5iJWfHF82x2mQCxir8Qs`.
-- Ne commiter que si la suite complète passe (`npm run test:ci && npm run typecheck && npm run check:size`).
+- Ne commiter que si la suite complète passe (`npm run test:ci && npm run test:perm && npm run typecheck && npm run check:size`). `test:perm` (étape 18) : les 1 000 permutations par configuration de l'écran d'audit dans jsdom, environ 107 s sur un processus (mesuré le 2026-10-20, au-dessus de la règle des ~90 s, donc hors de `test:ci`, qui n'en joue que 25 par configuration).
 - Salle blanche (`CLEANROOM.md`) : jamais le code d'une autre grille. Ne jamais lire `~/Dev/sehhaty` ni `~/Dev/sehhaty-dashboard` : demander au propriétaire.
 - Machine partagée avec Sehhaty : pas d'application graphique lancée par un agent ; un seul navigateur à la fois, toujours fermé ; tests sur 2 processus au plus (`npm run test:ci` ou `--maxWorkers=2`).
 - Un budget de taille ne monte que par une décision du propriétaire, écrite dans la ROADMAP et dans `size-budget.json`.
@@ -48,8 +51,8 @@ Mis à jour : 2026-10-20 (étape 17 faite, relue, testée ; corrections non comm
 ## Commandes
 
 - Tests : `npm run test:ci` (un processus) ; types : `npm run typecheck` (inclut `ngc` sur Angular) ; tailles : `npm run check:size` ; construction : `npm run build` ; archives : `npm run pack:local`.
-- Navigateur (une page, fermée à la fin) : `node scripts/browser.mjs` ; performance : `node scripts/perf-browser.mjs`.
-- Bac à sable : `npx vite --host 127.0.0.1` puis http://127.0.0.1:4700/, `/rtl.html` et `/spans.html` (fusions) ; `?search=1` le champ de recherche (étape 16) ; `?paging=client` le pied de pagination, `?paging=cursor` un serveur lent par curseur sans total (étape 17).
+- Navigateur (une page, fermée à la fin) : `node scripts/browser.mjs` ; performance : `node scripts/perf-browser.mjs` ; écran d'audit (étape 18) : `npm run test:audit` (100 + 10 permutations par configuration, axe, taille stable de la liste, `aria-busy` après « suivant », palette, captures), `-- --full` le critère de sortie (1 000 + 30), `-- --update-shots` réécrit les captures de référence `docs/screenshots/step18/` ; `-- --only axe|size|busy|shots|perm|typed` une partie. Les captures des essais vont dans `packages/dom/test/browser/results/` (non suivi par git).
+- Bac à sable : `npx vite --host 127.0.0.1` puis http://127.0.0.1:4700/, `/rtl.html` et `/spans.html` (fusions) ; `?search=1` le champ de recherche (étape 16) ; `?paging=client` le pied de pagination, `?paging=cursor` un serveur lent par curseur sans total (étape 17) ; `/audit.html` l'écran d'audit (étape 18 : `?config=server|fetched`, `lang`, latence, gigue, échecs, total, palette ; lien « Écran d'audit » du menu Démos).
 
 ## Budgets de taille pendant la Phase 3 (décisions du propriétaire)
 
@@ -58,19 +61,21 @@ Mis à jour : 2026-10-20 (étape 17 faite, relue, testée ; corrections non comm
 | `@dzgrid/core` | 26 900 o gz (étape 14, raccourcis) | 26 756 |
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 620 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
-| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 551 |
-| `@dzgrid/dom` | 19 100 (étape 17) | 18 953 |
+| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 559 |
+| `@dzgrid/dom` | 19 100 (étape 17) | 19 052 (étape 18 : la phrase du tri attend la réponse) |
 | `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 149 |
 | `@dzgrid/dom/internal` | 650 (étape 17) | 527 |
 | textes de la pagination en / fr / ar | 560 / 680 / 880 (étape 17) | 328 / 375 / 489 |
-| `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 228 |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 8 919 |
-| liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 779 |
+| `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 298 (étape 18 : une phrase par geste) |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 8 900 |
+| liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 788 (étape 18 : ligne d'état d'une ligne de haut) |
 | adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |
 | lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 994 |
-| `@dzgrid/dom/popup` | 1 500 | 1 428 |
+| `@dzgrid/dom/popup` | 1 500 | 1 460 (étape 18 : fermeture au clic dehors) |
+| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème | 85 000 (K.8, Q1 de l'étape 18) | 66 958 (JS 65 175 en 4 fichiers, CSS 1 783) |
+| à côté, paresseux, sans budget : liste de valeurs / adaptateurs de dates date, range, moment / morceau tzslot partagé | — | 3 666 / 449, 1 107, 682 / 66 486 ; la première fenêtre de date télécharge 66 935 à 67 593 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
 | textes des filtres en / fr / ar | 850 / 980 / 1 200 (étape 15) | 707 / 831 / 941 |
 | thème | 2 050 (étape 17) | 1 783 |

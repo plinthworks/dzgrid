@@ -23,4 +23,7 @@ Clicks a column header; clicks again; Shift-clicks another header.
 - Sorting never touches the host's rows.
 
 ## Tests
-`conformance/cases/sort/*`, `conformance/cases/sort-toggle/*`, `packages/core/test/sort.test.ts`, `packages/dom/test/sort-select.test.ts`.
+`conformance/cases/sort/*`, `conformance/cases/sort-toggle/*`, `packages/core/test/sort.test.ts`, `packages/dom/test/sort-select.test.ts`, `packages/dom/test/step18-findings.test.ts` (the sentence on a server).
+
+## Decisions (step 18, 2026-10-20)
+- **The new order is said with the count of the rows it orders** (all the filtered ones, not the page shown), and on a server once the answer is in; with an unknown count, the order alone. Found by the audit screen's permutations (`request-order.md`).

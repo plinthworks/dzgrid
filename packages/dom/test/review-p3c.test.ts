@@ -253,16 +253,18 @@ describe('the popup host, more', () => {
     expect(ref.open).toBe(true);
   });
 
-  it('keeps a modal popup open on a pointer down outside', () => {
+  it('closes a modal popup on a pointer down outside (owner Q4, step 18), not on its anchor', () => {
     const a = popupHost();
     const c = document.createElement('div');
     c.append(document.createElement('input'));
     const ref = a.popups.open(a.anchor, c, { placement: 'block-end', modal: true, label: 'Filter' });
-    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    a.anchor.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     expect(ref.open).toBe(true);
     expect(ref.el.getAttribute('role')).toBe('dialog');
     expect(ref.el.getAttribute('aria-modal')).toBe('true');
     expect(ref.el.getAttribute('aria-label')).toBe('Filter');
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    expect(ref.open).toBe(false);
   });
 
   it('wraps Shift+Tab from the first control to the last', () => {

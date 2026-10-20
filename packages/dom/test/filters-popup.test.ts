@@ -182,10 +182,15 @@ describe('opening and focus', () => {
     expect(document.activeElement).toBe(t.apply());
   });
 
-  it('a pointer down outside keeps it open; the button again closes it; another opener replaces it', () => {
+  it('a pointer down outside closes it (owner Q4, step 18); the button again closes it; another opener replaces it', () => {
     const t = open();
     t.button('name')!.click();
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    expect(t.popup()).toBeNull();
+    expect(t.button('name')!.getAttribute('aria-expanded')).toBe('false');
+    t.button('name')!.click();
+    // A pointer down on its own button leaves it to the click (which closes it).
+    t.button('name')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     expect(t.popup()).not.toBeNull();
     t.button('name')!.click();
     expect(t.popup()).toBeNull();
@@ -207,6 +212,86 @@ describe('opening and focus', () => {
     expect(e.defaultPrevented).toBe(false);
     expect(t.feature.openFilter('name')).toBe(false);
     expect(t.popup()).toBeNull();
+  });
+});
+
+describe('a pointer down outside (owner decision Q4, step 18; revises step 13 O7)', () => {
+  const down = (el: Element) => el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+
+  it('in the browser: closes, the typed filter kept (the pending edit applied, as Escape)', () => {
+    vi.useFakeTimers();
+    const t = open();
+    t.feature.openFilter('name');
+    t.fill(t.value()!, 'bob1');
+    expect(t.filterEvents()).toHaveLength(0);
+    down(document.body);
+    expect(t.popup()).toBeNull();
+    expect(t.filter()['name']).toEqual({ type: 'text', op: 'contains', value: 'bob1' });
+    expect(t.filterEvents()).toHaveLength(1);
+  });
+
+  it('on a server: closes, the unapplied draft dropped (nothing asked), as Escape', () => {
+    vi.useFakeTimers();
+    const t = open({ server: true });
+    t.f.answer(['a']);
+    const before = t.f.calls.length;
+    t.feature.openFilter('name');
+    t.fill(t.value()!, 'zz');
+    down(document.body);
+    vi.advanceTimersByTime(2000);
+    expect(t.popup()).toBeNull();
+    expect(t.f.calls.length).toBe(before);
+    expect(t.filter()).toEqual({});
+  });
+
+  it('the focus goes where the user clicked: kept there, never stolen back', () => {
+    vi.useFakeTimers();
+    const t = open();
+    const other = document.createElement('input');
+    other.setAttribute('aria-label', 'elsewhere');
+    document.body.append(other);
+    t.button('n')!.click();
+    expect(t.popup()!.contains(document.activeElement)).toBe(true);
+    down(other);
+    // The browser focuses what was pressed after the pointer down.
+    other.focus();
+    vi.advanceTimersByTime(50);
+    expect(t.popup()).toBeNull();
+    expect(document.activeElement).toBe(other);
+  });
+
+  it('a press on nothing focusable: the focus back on the anchor', () => {
+    vi.useFakeTimers();
+    const t = open();
+    t.button('n')!.click();
+    down(document.body);
+    vi.advanceTimersByTime(50);
+    expect(document.activeElement).toBe(t.button('n'));
+  });
+
+  it('a press inside it, or inside a date panel placed in it (tzslot\'s container), keeps it open', () => {
+    const t = open();
+    t.button('name')!.click();
+    down(t.value()!);
+    expect(t.popup()).not.toBeNull();
+    const panel = document.createElement('div');
+    panel.className = 'tz-field__panel';
+    const day = document.createElement('button');
+    panel.append(day);
+    t.popup()!.querySelector('.dzg-fpop')!.append(panel);
+    down(day);
+    expect(t.popup()).not.toBeNull();
+  });
+
+  it('the grid destroyed after a press outside moves no focus later', () => {
+    vi.useFakeTimers();
+    const t = open();
+    t.button('n')!.click();
+    down(document.body);
+    t.g.destroy();
+    const spy = vi.spyOn(HTMLElement.prototype, 'focus');
+    vi.advanceTimersByTime(50);
+    expect(spy).not.toHaveBeenCalled();
   });
 });
 

@@ -283,6 +283,25 @@ describe('counts of the fetched set', () => {
     expect(s.kinds().at(-1)).toBe('rows');
   });
 
+  it('a query changed and changed back starts again on page 0, as any search change (step 18, the audit permutations)', () => {
+    const s = setup();
+    answer(s.calls[0]!, ['a', 'b', 'c', 'd', 'e']);
+    s.model.setPage({ index: 2 });
+    s.model.setQuery(makeQuery({ quick: 'a' }));
+    s.last().reject('down');
+    // The old set paged while the new one failed, then the search put back as it was.
+    s.model.setPage({ index: 1 });
+    s.model.setQuery(makeQuery({ quick: '' }));
+    answer(s.last(), ['a', 'b', 'c', 'd', 'e']);
+    expect(s.model.page).toMatchObject({ index: 0 });
+    expect(ids(s)).toEqual(['a', 'b']);
+    // A refresh still keeps the page.
+    s.model.setPage({ index: 2 });
+    s.model.invalidate();
+    answer(s.last(), ['a', 'b', 'c', 'd', 'e']);
+    expect(s.model.page).toMatchObject({ index: 2 });
+  });
+
   it('a refresh of the same set keeps them; a failure of a new epoch does not bring them back', () => {
     const s = setup();
     answer(s.calls[0]!, ['a', 'b', 'c']);

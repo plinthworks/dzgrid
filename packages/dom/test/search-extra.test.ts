@@ -585,3 +585,47 @@ describe('minor fixes', () => {
     expect(steps).toBeGreaterThan(0);
   });
 });
+
+// ---- Step 18: found by the audit screen's permutations (I3, one sentence per action) ----
+
+describe('one sentence when one action clears the filters and the search (step 18)', () => {
+  it('in the browser: "Filtered. N rows" only, not the search\'s "N rows" too', () => {
+    const t = setup({ withFilters: true });
+    typeIn(t.box, 'ann');
+    vi.advanceTimersByTime(150);
+    t.g.kernel.dispatch({ type: 'filter.column', column: 'n', filter: { type: 'number', op: 'lt', value: 20 } }, 'user');
+    t.announce.mockClear();
+    // The no-match overlay's clearFilters: one query.set keeping the sort.
+    t.g.kernel.dispatch({ type: 'query.set', query: makeQuery({ sort: t.g.kernel.query.sort }) }, 'user');
+    expect(t.announce.mock.calls.map((c) => c[0])).toEqual([`Filtered. ${ROWS.length} rows`]);
+  });
+
+  it('on a server: one sentence, once the answer is in', () => {
+    const t = setup({ withFilters: true, server: true });
+    t.f.answer(['a', 'b'], { total: 2 });
+    typeIn(t.box, 'ann');
+    vi.advanceTimersByTime(300);
+    t.f.answer(['a'], { total: 1 });
+    t.g.kernel.dispatch({ type: 'filter.column', column: 'name', filter: { type: 'text', op: 'contains', value: 'a' } }, 'user');
+    t.f.answer(['a'], { total: 1 });
+    t.announce.mockClear();
+    t.g.kernel.dispatch({ type: 'query.set', query: makeQuery({ sort: t.g.kernel.query.sort }) }, 'user');
+    expect(t.announce).not.toHaveBeenCalled();
+    t.f.answer(['a', 'b', 'c'], { total: 3 });
+    expect(t.announce.mock.calls.map((c) => c[0])).toEqual(['Filtered. 3 rows']);
+  });
+
+  it('the search alone still says its count; without the filters feature, the search says it', () => {
+    const t = setup({ withFilters: true });
+    typeIn(t.box, 'ann');
+    vi.advanceTimersByTime(150);
+    expect(t.announce.mock.calls.map((c) => c[0])).toEqual([`${ANN} rows`]);
+    const u = setup();
+    typeIn(u.box, 'ann');
+    vi.advanceTimersByTime(150);
+    u.g.kernel.dispatch({ type: 'filter.set', filter: { n: { type: 'number', op: 'lt', value: 3 } } }, 'user');
+    u.announce.mockClear();
+    u.g.kernel.dispatch({ type: 'query.set', query: makeQuery({ sort: u.g.kernel.query.sort }) }, 'user');
+    expect(u.announce.mock.calls.map((c) => c[0])).toEqual([`${ROWS.length} rows`]);
+  });
+});

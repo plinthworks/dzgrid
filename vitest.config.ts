@@ -51,7 +51,7 @@ export default defineConfig({
         },
       },
       { test: { name: 'theme', globals: true, environment: 'node', include: ['packages/theme/test/**/*.test.ts'] } },
-      { test: { name: 'tools', globals: true, environment: 'node', include: ['spikes/test/**/*.test.ts', 'scripts/test/**/*.test.ts'] } },
+      { test: { name: 'tools', globals: true, environment: 'node', include: ['spikes/test/**/*.test.ts', 'scripts/test/**/*.test.ts', 'perf/test/**/*.test.ts'] } },
     ],
   },
 });

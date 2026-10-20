@@ -33,8 +33,8 @@ const set = (el: Element, k: string, v: string | null): void => {
  * popup host, holding the column's `filter.<kind>` part. Opened by the header's button (a
  * second click closes it), Alt+ArrowDown on a header or floating cell (owner decision O2: the
  * feature's key, not the core's), a floating summary, or `openFilter`. Opening flushes the
- * column's pending edit; closing (Apply, Escape, the button again; never a click outside, O7)
- * applies the pending one in the browser, destroys the part, and puts the focus back on the
+ * column's pending edit; closing (Apply, Escape, the button again, a pointer down outside: owner
+ * Q4 of step 18, revising O7) applies the pending one in the browser, destroys the part, and puts the focus back on the
  * anchor (the grid's own focus when the anchor left). An anchor that leaves while its cell stays
  * (the floating summary emptied by All or Clear) gives way to the cell. It closes when its cell
  * leaves the page or its column the column window, the column's part changes, goes or throws, or
