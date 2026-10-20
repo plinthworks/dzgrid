@@ -1,0 +1,9 @@
+# Step 19 decisions (owner and lead, 2026-10-20) — export
+
+Plan: `step19-export-blueprint.md` (same folder).
+
+- Q1 (owner, "Oui, obligatoire"): `canExport` is a required option (the type does not compile without it); `canExport: true` allows everything explicitly; a throw or a rejection refuses (fail closed). Sehhaty writes its audit line there before allowing.
+- Q2 (owner, "Oui, l'appli peut le retirer"): the export trace carries an id, the time, the scope, the columns, the query (filters, sort, quick search text, zone), the row count, the size, the file name and the outcome; never a cell value nor a row key (selection only as mode + count). The quick search text is included; the host may strip it in its handler. "Who" is added by the host; for a server export the server writes the authoritative trace.
+- Q3 (owner, "Oui aux deux"): no built-in export button — the host's own button, wired with `bind(button)` (click, aria-busy, prefetch), the export code loaded on the first click or hover; on refusal nothing downloads and the grid announces "Export not allowed" (or the host's translated reason), no dialog.
+- Q4 (owner, "Oui aux deux"): browser exports are capped at 10 000 000 cells (refused beyond, pointing to the server export). Budgets during Phase 3, reset to the measure + 10 % at the close: `@dzgrid/dom/export` 1 200 B gz (eager); "export run (lazy)" 5 100 (with `@dzgrid/core/csv`, over the core); `@dzgrid/dom/locales/{en,fr,ar}-export` 220 / 250 / 380; base, core and csv unchanged.
+- Lead: event names `exportRequested`, `exportRefused`, `exportFinished` (outcome done/failed/cancelled); one feature object per grid; announcements: "started" only after 1 s, the end always; Latin-digit default file name in the display zone, sanitised; an Arabic export button in playground/rtl.html for the owner's Excel check at step 23.
