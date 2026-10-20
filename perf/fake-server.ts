@@ -11,6 +11,7 @@
  * `req.signal` (rejects with its reason) unless told not to, and logs every request.
  */
 import type { DataRequest, DataResponse, DataSource, ValuesRequest, ValuesResponse, WireFilter, WireFilterModel } from '@dzgrid/core/server';
+import { idOfDataKey, type RowKey } from '@dzgrid/core';
 
 export interface AuditRow {
   readonly id: string;
@@ -261,6 +262,40 @@ export interface FakeServer {
   delay(): number;
   /** Live changes (the playground's controls). */
   configure(o: Partial<Pick<FakeServerOptions, 'latency' | 'jitter' | 'failRate' | 'total'>>): void;
+  /**
+   * The server's own CSV export (step 19, `csvExport({ exportAll })`): the whole query's rows (the
+   * request's server part, `queryAll`), only the selected ones for `selected`, the columns asked, raw
+   * values (instants in ISO UTC), BOM and CRLF. Logged as channel `export`; it waits like any request.
+   */
+  exportAll(req: ExportAsk, ctx: { readonly signal: AbortSignal }): Promise<{ blob: Blob; fileName: string }>;
+}
+
+/** What the grid's `exportAll` receives, as far as this server reads it (`ExportRequest`). */
+export interface ExportAsk {
+  readonly scope: 'displayed' | 'all' | 'selected';
+  readonly columns: readonly string[];
+  readonly selection?: { readonly mode: 'include' | 'exclude'; readonly keys: ReadonlySet<RowKey> };
+  readonly server?: { readonly filter?: WireFilterModel; readonly quick?: string; readonly sort?: DataRequest['sort']; readonly key: string };
+}
+
+const csvField = (v: Cell): string => {
+  const s = v === null ? '' : String(v);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+/** The file the server writes for `req` (BOM, a header of column ids, CRLF). */
+export function serverCsv(u: Universe, req: ExportAsk): string {
+  const s = req.server;
+  const q: AuditQuery = { ...(s?.filter && { filter: s.filter }), ...(s?.quick && { quick: s.quick }), ...(s?.sort && { sort: s.sort }) };
+  let rows = queryAll(u, q);
+  const sel = req.selection;
+  if (req.scope === 'selected' && sel) {
+    const ids = new Set([...sel.keys].map((k) => idOfDataKey(k)));
+    rows = rows.filter((r) => ids.has(r.id) === (sel.mode === 'include'));
+  }
+  let out = '\uFEFF' + req.columns.map(csvField).join(',') + '\r\n';
+  for (const r of rows) out += req.columns.map((c) => csvField(cell(r, c))).join(',') + '\r\n';
+  return out;
 }
 
 /** A small seeded generator (LCG), the same on every engine. */
@@ -364,6 +399,10 @@ export function createFakeServer(opts: FakeServerOptions): FakeServer {
     },
     failNext: () => void (failOne = true),
     delay,
+    exportAll: (req, ctx) => start('export', { key: req.server?.key ?? 'export', signal: ctx.signal } as unknown as DataRequest, () => serverCsv(o, req), (e, text) => {
+      e.ids = [];
+      e.total = text.split('\r\n').length - 2;
+    }).then((text) => ({ blob: new Blob([text], { type: 'text/csv;charset=utf-8' }), fileName: 'journal-serveur.csv' })),
     configure(c) {
       o = { ...o, ...c };
     },

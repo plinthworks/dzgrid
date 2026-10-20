@@ -10,6 +10,7 @@ import { createGrid, type GridEnv, type GridInstance, type GridMessages, type Gr
 import { filters, type DateKit, type DateKitName, type FiltersFeature, type SetKit } from '@dzgrid/dom/filters';
 import { quickSearch, type QuickSearch } from '@dzgrid/dom/search';
 import { pagination } from '@dzgrid/dom/pagination';
+import { csvExport, type CsvExport, type CsvExportOptions } from '@dzgrid/dom/export';
 import { sourceRows, type DataSource, type SourceModel } from '@dzgrid/core/server';
 import { booleanCodecWith, type ColumnDef, type GridEvent, type OperationsInput } from '@dzgrid/core';
 import { ACTIONS, type AuditRow } from './fake-server.js';
@@ -88,17 +89,27 @@ export interface AuditOptions {
   readonly loadSet?: () => Promise<SetKit>;
   readonly loadDates?: (kit: DateKitName) => Promise<DateKit>;
   readonly clock?: () => number;
+  /**
+   * The CSV export (step 19): on, with these options over `canExport: true` (the messages must hold
+   * the export texts). `button`: the page's own export button, bound (`all`); B's `all` and
+   * `selected` go to the server's `exportAll` (pass `server.exportAll`).
+   */
+  readonly export?: Partial<CsvExportOptions> & { readonly button?: HTMLElement };
 }
 
 export interface AuditScreen {
   readonly grid: GridInstance<AuditRow, SourceModel<AuditRow>>;
   readonly filters: FiltersFeature;
   readonly search: QuickSearch;
+  /** The export feature, when `export` was given. */
+  readonly exporter: CsvExport | null;
   destroy(): void;
 }
 
 export function mountAudit(o: AuditOptions): AuditScreen {
   const search = quickSearch();
+  const { button, ...xo } = o.export ?? {};
+  const exporter = o.export ? csvExport({ canExport: true, ...xo } as CsvExportOptions) : null;
   const feature = filters({ floating: true, popup: true, ...(o.loadSet && { loadSet: o.loadSet }), ...(o.loadDates && { loadDates: o.loadDates }) });
   const grid = createGrid<AuditRow, SourceModel<AuditRow>>(o.host, {
     source: sourceRows(o.source, { paging: 'offset', maxRows: 100_000 }),
@@ -113,15 +124,17 @@ export function mountAudit(o: AuditOptions): AuditScreen {
     direction: o.direction ?? 'auto',
     density: o.density ?? 'comfortable',
     selection: { mode: 'multi', checkbox: true },
-    features: [feature, search, pagination()],
+    features: [feature, search, pagination(), ...(exporter ? [exporter] : [])],
     ...(o.clock && { clock: o.clock }),
     ...(o.onEvent && { onEvent: o.onEvent }),
   }, o.env);
   const unbind = search.bind(o.search);
+  const unbindExport = button && exporter ? exporter.bind(button, { scope: 'all' }) : null;
   return {
-    grid, filters: feature, search,
+    grid, filters: feature, search, exporter,
     destroy() {
       unbind();
+      unbindExport?.();
       grid.destroy();
     },
   };

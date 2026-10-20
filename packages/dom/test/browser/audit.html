@@ -7,10 +7,25 @@
   "@dzgrid/core/internal": "/packages/core/src/internal.ts",
   "@dzgrid/core/server": "/packages/core/src/server.ts",
   "@dzgrid/dom": "/packages/dom/src/index.ts",
+  "@dzgrid/dom/locales/en": "/packages/dom/src/locales/en.ts",
+  "@dzgrid/dom/locales/fr": "/packages/dom/src/locales/fr.ts",
+  "@dzgrid/dom/locales/ar": "/packages/dom/src/locales/ar.ts",
+  "@dzgrid/dom/locales/en-filters": "/packages/dom/src/locales/en-filters.ts",
+  "@dzgrid/dom/locales/fr-filters": "/packages/dom/src/locales/fr-filters.ts",
+  "@dzgrid/dom/locales/ar-filters": "/packages/dom/src/locales/ar-filters.ts",
+  "@dzgrid/dom/locales/en-pagination": "/packages/dom/src/locales/en-pagination.ts",
+  "@dzgrid/dom/locales/fr-pagination": "/packages/dom/src/locales/fr-pagination.ts",
+  "@dzgrid/dom/locales/ar-pagination": "/packages/dom/src/locales/ar-pagination.ts",
+  "@dzgrid/dom/locales/en-export": "/packages/dom/src/locales/en-export.ts",
+  "@dzgrid/dom/locales/fr-export": "/packages/dom/src/locales/fr-export.ts",
+  "@dzgrid/dom/locales/ar-export": "/packages/dom/src/locales/ar-export.ts",
   "@dzgrid/dom/internal": "/packages/dom/src/internal.ts",
   "@dzgrid/dom/filters": "/packages/dom/src/filters.ts",
   "@dzgrid/dom/search": "/packages/dom/src/search.ts",
   "@dzgrid/dom/pagination": "/packages/dom/src/pagination.ts",
+  "@dzgrid/dom/export": "/packages/dom/src/export.ts",
+  "@dzgrid/core/csv": "/packages/core/src/csv.ts",
+  "@dzgrid/core/spans": "/packages/core/src/spans.ts",
   "@tzslot/dom": "/node_modules/.cache/dzgrid-browser/dom.js",
   "@tzslot/core": "/node_modules/.cache/dzgrid-browser/core.js"
 } }</script>
@@ -25,7 +40,7 @@
 <body>
 <main>
   <h1 id="title">Audit</h1>
-  <p class="bar"><label id="qlabel" for="q">Search</label> <input type="search" id="q"></p>
+  <p class="bar"><label id="qlabel" for="q">Search</label> <input type="search" id="q"> <button type="button" id="export" hidden>Export CSV</button></p>
   <div id="host"></div>
 </main>
 <script type="module" src="./audit.ts"></script>

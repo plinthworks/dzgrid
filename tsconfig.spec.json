@@ -47,6 +47,9 @@
       "@dzgrid/dom/filters": [
         "./packages/dom/src/filters.ts"
       ],
+      "@dzgrid/dom/export": [
+        "./packages/dom/src/export.ts"
+      ],
       "@dzgrid/dom/pagination": [
         "./packages/dom/src/pagination.ts"
       ],

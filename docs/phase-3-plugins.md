@@ -537,7 +537,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | 16 | `@dzgrid/dom/search`: `quickSearch()` binds the page's search fields (server `quick`, or the client warm-up on first focus); its own entry, not `/filters` (owner Q2); highlighting matches to Phase 5 | dom |
 | 17 | `/pagination`: `footer.pager`, `footer.count`, `footer.selected`, for client and server paging | dom |
 | 18 | Playground audit screen in **both** configurations of example 3; 1 000 permutations each; axe; screenshots | browser |
-| 19 | `/export`: `csvExport` and `exportAll` | dom |
+| 19 | `/export`: `csvExport` and `exportAll` — done 2026-10-20: eager part + lazy run chunk, `canExport` required, data-only events, the host's button (`bind`), 10⁷-cell cap; `ROADMAP.md` step 19 | dom |
 | 20 | `/parts`: `cell.badge`, `cell.boolean`; plus worked example 2 as a test fixture | dom |
 | 21 | ~~`/tzslot-picker` (optional)~~ folded into step 14 | — |
 | 22 | `@dzgrid/angular`: component, controller, providers, `componentPart`, `DzgPart` (S6 pooling) | angular |

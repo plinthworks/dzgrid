@@ -60,6 +60,18 @@ export type FilterOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'sta
 export type PaginationMessageKey =
   | 'pager.label' | 'pager.first' | 'pager.prev' | 'pager.next' | 'pager.last' | 'pager.page' | 'pager.pageOpen' | 'pager.size'
   | 'count.range' | 'count.rangeOpen' | 'count.filtered' | 'selected.hidden' | 'selected.selectAll' | 'selected.clear' | 'announce.page' | 'announce.pageOpen';
+/**
+ * The export's texts (`@dzgrid/dom/export`, step 19), in their own bundles (`locales/<lang>-export`):
+ * optional here, required by `csvExport()`.
+ */
+export type ExportMessageKey =
+  | 'export.fileName' | 'announce.exportStarted' | 'announce.exportDone' | 'announce.exportDoneHidden' | 'announce.exportDoneOpen'
+  | 'announce.exportFailed' | 'announce.exportRefused' | 'announce.exportCancelled';
+/** An export bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_EXPORT.text }`. */
+export interface ExportMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in ExportMessageKey]: MessageValue };
+}
 /** A pagination bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_PAGINATION.text }`. */
 export interface PaginationMessages {
   readonly locale: string;
@@ -87,7 +99,7 @@ export type MessageValue = string | PluralForms;
 export interface GridMessages {
   /** The language the bundle is written in: plural forms follow it, numbers follow the context. */
   readonly locale: string;
-  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey | PaginationMessageKey]?: MessageValue };
+  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey]?: MessageValue };
 }
 
 /** A bundle missing a key fails at once, naming it — not on some later paint. */
@@ -112,7 +124,7 @@ const rulesFor = (locale: string): Intl.PluralRules => {
  * placeholder without a value stays visible, so a missing one is seen in
  * testing rather than read as nothing.
  */
-export function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
+export function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
   const value = (m.text as Readonly<Record<string, MessageValue | undefined>>)[key];
   if (value === undefined) {
     // A host's key it forgot is shown as itself (and told by the caller); a grid key is a bug.

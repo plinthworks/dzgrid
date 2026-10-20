@@ -1,5 +1,5 @@
 import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, ModelStatus, PageState, PartSlot, Placement, Problem, ResolvedColumn, RowCounts, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
-import type { AppMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
+import type { AppMessageKey, ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { GridSettings } from './settings.js';
 
@@ -27,7 +27,7 @@ export interface PartBase {
   readonly ctx: LocaleCtx;
   readonly dir: 'ltr' | 'rtl';
   /** The grid's messages, and the host's own `app.*` ones (a missing one shows its key, told once). */
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
   announce(text: string): void;
   readonly doc: Document;
 }

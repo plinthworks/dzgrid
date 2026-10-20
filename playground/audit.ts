@@ -2,7 +2,8 @@
 // `?config=server` (B, 10⁷ rows, offset pages, no total unless `total=1`) or `?config=fetched`
 // (A, 20 000 rows fetched, paged in the browser); `lang` fr/en/ar, `direction`, `theme`,
 // `density`; the server's `latency`, `jitter` (ms) and `fail` (%) live, and a button that fails
-// the next request. A change of configuration or language reloads the page.
+// the next request. A change of configuration or language reloads the page. The "Export" button
+// (step 19) exports every row the query matches: built in the browser in A, the server's file in B.
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
 import { AR } from '@dzgrid/dom/locales/ar';
@@ -12,6 +13,9 @@ import { AR_FILTERS } from '@dzgrid/dom/locales/ar-filters';
 import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
 import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
 import { AR_PAGINATION } from '@dzgrid/dom/locales/ar-pagination';
+import { EN_EXPORT } from '@dzgrid/dom/locales/en-export';
+import { FR_EXPORT } from '@dzgrid/dom/locales/fr-export';
+import { AR_EXPORT } from '@dzgrid/dom/locales/ar-export';
 import { auditWords, joinMessages, mountAudit, type AuditConfig, type AuditLang } from '../perf/audit-screen.js';
 import { createFakeServer } from '../perf/fake-server.js';
 import '../packages/theme/dzgrid.css';
@@ -23,7 +27,7 @@ for (const [k, v] of params) if (field(k)) field(k).value = v;
 const num = (n: string) => Math.max(0, Number(field(n).value) || 0);
 const config = field('config').value as AuditConfig;
 const lang = field('lang').value as AuditLang;
-const BUNDLES = { fr: joinMessages(FR, FR_FILTERS, FR_PAGINATION), en: joinMessages(EN, EN_FILTERS, EN_PAGINATION), ar: joinMessages(AR, AR_FILTERS, AR_PAGINATION) };
+const BUNDLES = { fr: joinMessages(FR, FR_FILTERS, FR_PAGINATION, FR_EXPORT), en: joinMessages(EN, EN_FILTERS, EN_PAGINATION, EN_EXPORT), ar: joinMessages(AR, AR_FILTERS, AR_PAGINATION, AR_EXPORT) };
 
 const server = createFakeServer({
   universe: config === 'fetched' ? 20_000 : 10_000_000, fetched: config === 'fetched', total: field('total').value === '1',
@@ -42,15 +46,18 @@ function page(): void {
   if (accent) html.style.setProperty('--tz-accent', accent);
   else html.style.removeProperty('--tz-accent');
   document.getElementById('qlabel')!.textContent = auditWords(lang).search;
+  document.getElementById('export')!.textContent = { fr: 'Exporter en CSV', en: 'Export CSV', ar: 'تصدير CSV' }[lang];
 }
 page();
 
 const screen = mountAudit({
   host: document.getElementById('host')!, search: q, config, lang, messages: BUNDLES[lang], source: server.source,
   direction: field('direction').value as 'auto', density: field('density').value as 'comfortable',
+  export: { button: document.getElementById('export')!, exportAll: (r, c) => server.exportAll(r, c) },
   onEvent: (e) => {
     if (e.type === 'fetchFailed') status.textContent = `échec : ${String((e.error as Error)?.message ?? e.error)}`;
     else if (e.type === 'modelUpdated') status.textContent = `${server.log.length} requêtes`;
+    else if (e.type === 'exportFinished') status.textContent = `export : ${e.outcome}, ${e.rows ?? '?'} lignes, ${e.bytes ?? '?'} octets`;
   },
 });
 

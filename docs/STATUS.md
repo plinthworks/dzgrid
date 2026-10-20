@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-20 (étape 18 faite : `57c021e` + suites, non commitées ; l'étape 19, l'export, est la suivante). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 19, l'export, faite et vérifiée, non commitée ; la 20 est la suivante). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -26,10 +26,12 @@ Mis à jour : 2026-10-20 (étape 18 faite : `57c021e` + suites, non commitées ;
 | 16 — recherche rapide (`@dzgrid/dom/search`) | fait, relu, testé | `85ec8a5` |
 | 17 — pagination (`@dzgrid/dom/pagination`, `@dzgrid/dom/internal`) | fait, relu, testé (corrections non commitées) | `5cd9ca9` + corrections |
 | 18 — écran d'audit, permutations (deux niveaux), axe, captures, profil K.8, fermeture de la fenêtre de filtre au clic dehors | fait, relu, testé (suites non commitées) | `57c021e` + suites |
-| 19 — export (en cours, la suivante) | à faire | — |
+| 19 — export CSV (`@dzgrid/dom/export` : partie immédiate + morceau paresseux, `canExport` obligatoire, trace sans données, bouton de l'hôte) | fait, testé (non commité) | — |
 | 20 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-**En cours : étape 19, l'export** (plan à faire par l'architecte).
+**En cours : rien ; étape 19 faite, à relire et à commiter** (relecture de code et analyse des tests par le chef de projet). Suivante : étape 20 (`/parts`).
+
+Étape 19 faite (non commitée) : `csvExport({ canExport, exportAll?, fileName?, onProgress?, maxCells?, deliver?, loadRun? })` → `run(scope)`, `cancel()`, `busy`, `prefetch()`, `bind(bouton, { scope })` ; morceau paresseux `export/run/` (requête et sa partie serveur refaite avec `toWire` importé à la demande, attente des lignes, plafond de 10⁷ cellules vérifié avant `canExport`, tranches rendues par un message, `exportAll` url/blob/rien, nom nettoyé, téléchargement) ; événements `exportRequested` / `exportRefused` / `exportFinished` (types seuls dans le cœur, par leur forme) ; textes `locales/{en,fr,ar}-export` qui reprennent `announce.rows`. Tests : 52 + 16 + 3 (permutations avec oracle : 200 graines × client / A / B dans `test:ci`, 1 000 dans `test:perm`), 22 mutants tués sur 22 ; Chrome : téléchargements réels (client, A, B), fr et ar droite à gauche, axe 0 bouton occupé, morceau chargé au survol ou au clic seulement, 100 000 × 30 en ~0,4 s sans image de plus de 50 ms. Bouton d'export sur l'écran d'audit, dans `playground/rtl.html` (arabe, pour l'essai Excel de l'étape 23) et lien « Export CSV » du menu Démos. Où le plan a bougé : le plafond avant `canExport` ; une 8ᵉ clé `announce.exportDoneOpen` (nombre inconnu) ; étape d'échec `rows` ; `message` plutôt que `scheduler.yield()`. Détail : `ROADMAP.md` (ligne de l'étape 19), `ARCHITECTURE.md` (« Décisions de l'étape 19 »).
 
 Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`step18-coverage.test.ts`, graine 217 toujours jouée par `audit-permutations-pinned.test.ts`) ; les permutations signalent une phrase de tri dite hors d'une réponse, avec son propre message ; décision du chef de projet sur Q4 : seul le bouton qui ouvre la fenêtre (bouton de filtre de l'en-tête, ou bouton résumé de la ligne de filtres) compte comme son ancre ; ouverte par Alt+Flèche bas, un clic sur le libellé de tri, la poignée ou la cellule la ferme (`filter-ui.md`) ; repli `1.2em` avant `1lh` dans la liste de valeurs ; un test de structure vérifie que chaque adaptateur de dates passe `container:` à tzslot. Tailles : popup 1 473, filtres 8 929, liste 3 793 ; aucun budget relevé.
 
@@ -49,7 +51,7 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 - Pendant le travail, les agents ne lancent que les tests touchés ; la suite complète (`test:ci`, `test:perm`), Chrome (`test:browser`, `test:audit`) et la compilation tournent une fois, avant le commit (choix du propriétaire, 2026-10-20, pour aller plus vite).
 - Dépôt : https://github.com/plinthworks/dzgrid (remote `origin`, SSH). Le propriétaire a autorisé le push (2026-10-18) : on pousse `main` après des commits vérifiés (suite verte), jamais de travail non commité, jamais de force-push. Trailer de chaque commit :
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` puis `Claude-Session: https://claude.ai/code/session_01SD5iJWfHF82x2mQCxir8Qs`.
-- Ne commiter que si la suite complète passe (`npm run test:ci && npm run test:perm && npm run typecheck && npm run check:size`). `test:perm` (étape 18) : les 1 000 permutations par configuration de l'écran d'audit dans jsdom, environ 107 s sur un processus (mesuré le 2026-10-20, au-dessus de la règle des ~90 s, donc hors de `test:ci`, qui n'en joue que 25 par configuration).
+- Ne commiter que si la suite complète passe (`npm run test:ci && npm run test:perm && npm run typecheck && npm run check:size`). `test:perm` (étape 18, élargi à l'étape 19) : les 1 000 permutations par configuration de l'écran d'audit et les 1 000 graines d'export par configuration (client, A, B) dans jsdom, 187,5 s en tout sur un processus (mesuré le 2026-10-20 ; hors de `test:ci`, qui en joue 25 et 200).
 - Salle blanche (`CLEANROOM.md`) : jamais le code d'une autre grille. Ne jamais lire `~/Dev/sehhaty` ni `~/Dev/sehhaty-dashboard` : demander au propriétaire.
 - Machine partagée avec Sehhaty : pas d'application graphique lancée par un agent ; un seul navigateur à la fois, toujours fermé ; tests sur 2 processus au plus (`npm run test:ci` ou `--maxWorkers=2`).
 - Un budget de taille ne monte que par une décision du propriétaire, écrite dans la ROADMAP et dans `size-budget.json`.
@@ -57,20 +59,23 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 ## Commandes
 
 - Tests : `npm run test:ci` (un processus) ; types : `npm run typecheck` (inclut `ngc` sur Angular) ; tailles : `npm run check:size` ; construction : `npm run build` ; archives : `npm run pack:local`.
-- Navigateur (une page, fermée à la fin) : `node scripts/browser.mjs` ; performance : `node scripts/perf-browser.mjs` ; écran d'audit (étape 18) : `npm run test:audit` (100 + 10 permutations par configuration, axe, taille stable de la liste, `aria-busy` après « suivant », palette, captures), `-- --full` le critère de sortie (1 000 + 30), `-- --update-shots` réécrit les captures de référence `docs/screenshots/step18/` ; `-- --only axe|size|busy|shots|perm|typed` une partie. Les captures des essais vont dans `packages/dom/test/browser/results/` (non suivi par git).
-- Bac à sable : `npx vite --host 127.0.0.1` puis http://127.0.0.1:4700/, `/rtl.html` et `/spans.html` (fusions) ; `?search=1` le champ de recherche (étape 16) ; `?paging=client` le pied de pagination, `?paging=cursor` un serveur lent par curseur sans total (étape 17) ; `/audit.html` l'écran d'audit (étape 18 : `?config=server|fetched`, `lang`, latence, gigue, échecs, total, palette ; lien « Écran d'audit » du menu Démos).
+- Navigateur (une page, fermée à la fin) : `node scripts/browser.mjs` ; performance : `node scripts/perf-browser.mjs` ; écran d'audit (étape 18) : `npm run test:audit` (100 + 10 permutations par configuration, axe, taille stable de la liste, `aria-busy` après « suivant », palette, captures), `-- --full` le critère de sortie (1 000 + 30), `-- --update-shots` réécrit les captures de référence `docs/screenshots/step18/` ; `-- --only axe|size|busy|shots|perm|typed|export` une partie (`export`, étape 19 : téléchargements, fr/ar, axe bouton occupé, morceau paresseux, banc 100 000 × 30). Les captures des essais vont dans `packages/dom/test/browser/results/` (non suivi par git).
+- Bac à sable : `npx vite --host 127.0.0.1` puis http://127.0.0.1:4700/, `/rtl.html` et `/spans.html` (fusions) ; `?search=1` le champ de recherche (étape 16) ; `?paging=client` le pied de pagination, `?paging=cursor` un serveur lent par curseur sans total (étape 17) ; `/audit.html` l'écran d'audit (étape 18 : `?config=server|fetched`, `lang`, latence, gigue, échecs, total, palette ; lien « Écran d'audit » du menu Démos ; bouton « Exporter en CSV », étape 19) ; `?export=1` un bouton d'export au-dessus de la grille (lien « Export CSV » ; `/rtl.html` l'ouvre en arabe).
 
 ## Budgets de taille pendant la Phase 3 (décisions du propriétaire)
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
 | `@dzgrid/core` | 26 900 o gz (étape 14, raccourcis) | 26 756 |
-| `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 620 |
+| `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 628 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 559 |
-| `@dzgrid/dom` | 19 100 (étape 17) | 19 052 (étape 18 : la phrase du tri attend la réponse) |
+| `@dzgrid/dom` | 19 100 (étape 17) | 19 048 (étape 19 : types seuls, code identique ; noms raccourcis autrement) |
 | `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 149 |
 | `@dzgrid/dom/internal` | 650 (étape 17) | 527 |
+| `@dzgrid/dom/export` (immédiat ; le cœur, `internal` et `./run/*` à part) | 1 200 (étape 19) | 1 088 |
+| export, morceau paresseux (`export/run/`, `@dzgrid/core/csv` compris, par-dessus le cœur) | 5 100 (étape 19) | 4 349 |
+| textes de l'export en / fr / ar | 220 / 250 / 380 (étape 19) | 216 / 248 / 296 |
 | textes de la pagination en / fr / ar | 560 / 680 / 880 (étape 17) | 328 / 375 / 489 |
 | `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 298 (étape 18 : une phrase par geste) |
 | `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 8 929 (suites 18 : l'ancre du clic dehors) |
@@ -80,7 +85,7 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 994 |
 | `@dzgrid/dom/popup` | 1 500 | 1 473 (étape 18 : fermeture au clic dehors, `opener`) |
-| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème | 85 000 (K.8, Q1 de l'étape 18) | 66 958 (JS 65 175 en 4 fichiers, CSS 1 783) |
+| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème | 85 000 (K.8, Q1 de l'étape 18) | 69 555 (étape 19 : export immédiat et ses textes ; JS 67 772 en 7 fichiers, CSS 1 783) |
 | à côté, paresseux, sans budget : liste de valeurs / adaptateurs de dates date, range, moment / morceau tzslot partagé | — | 3 666 / 449, 1 107, 682 / 66 486 ; la première fenêtre de date télécharge 66 935 à 67 593 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
 | textes des filtres en / fr / ar | 850 / 980 / 1 200 (étape 15) | 707 / 831 / 941 |
@@ -93,7 +98,7 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 - API serveur (§1.1) : pagination par offset ou par curseur ; total toujours renvoyé (et après filtre ?) ; indication « page suivante » ; taille de page maximale ; requêtes rejouables sans risque.
 - Grammaire des filtres côté API : borne de fin incluse ou exclue ; format des dates ; recherche texte sans accents ; filtres vide / non vide ; encodage des listes ; paramètres inconnus refusés ?
 - Une ligne mise de côté garde le dernier patient affiché tant qu'elle n'est pas réutilisée : acceptable pour des données de santé ?
-- CSV : ordre logique des colonnes pour un lecteur arabe dans Excel (étape 23) ; chaque export doit-il passer `canExport`, et que contient la trace d'export pour le journal d'audit ?
+- CSV : ordre logique des colonnes pour un lecteur arabe dans Excel (étape 23 ; bouton arabe prêt dans `playground/rtl.html`). `canExport` et la trace : tranchés à l'étape 19 (Q1, Q2).
 - Toujours dus : la spécification de l'écran des journaux d'audit (étape 24), les palettes `sehhaty.json`, un relecteur arabe pour `locales/ar.ts` (y compris les annonces de sélection ajoutées à l'étape 7), le budget mémoire de la préparation de recherche, la question de l'annonce du tri multiple.
 
 ## Décisions du propriétaire prises pendant la Phase 3 (rappel)

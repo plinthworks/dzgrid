@@ -45,5 +45,6 @@ describe('the K.8 audit profile', () => {
     expect(profile.get('@dzgrid/dom/locales/ar')?.has('AR')).toBe(true);
     expect(profile.get('@dzgrid/dom/locales/ar-filters')?.has('AR_FILTERS')).toBe(true);
     expect(profile.get('@dzgrid/dom/locales/ar-pagination')?.has('AR_PAGINATION')).toBe(true);
+    expect(profile.get('@dzgrid/dom/locales/ar-export')?.has('AR_EXPORT')).toBe(true);
   });
 });

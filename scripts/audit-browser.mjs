@@ -7,11 +7,15 @@
  * - axe 0 on every state of A and B, in French light and Arabic dark right to left.
  * - The value list's size stable from loading to loaded; aria-busy and stale styling within
  *   100 ms of "next"; the palette switched live with the pager shown.
+ * - The CSV export (step 19, `--only export`): a real download per configuration (client, A, B) —
+ *   its name, EF BB BF, its rows equal to the oracle's; axe 0 with the export button busy; French and
+ *   Arabic right to left (the file name, the sentence said); the run chunk fetched on a hover or a
+ *   click only, never at the first paint; 100 000 × 30 exported, its wall time and long frames recorded.
  * - Screenshots to packages/dom/test/browser/results/ (scratch, not tracked); `--update-shots`
  *   writes the reference set to docs/screenshots/step18/ too.
  * One browser at a time, closed in finally.
  */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { serve, browser } from '../spikes/kit.mjs';
@@ -325,16 +329,93 @@ async function screenshots(ctx) {
   await page.close();
 }
 
+/** The CSV export (step 19): downloads per configuration, axe with the busy button, fr and ar, the lazy chunk, the bench. */
+async function exportChecks(ctx) {
+  const { page, errors } = await load(ctx);
+  const said = () => page.evaluate(() => document.querySelector('.dzg-live')?.textContent ?? '');
+  const download = async () => {
+    const [d] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.click('#export')]);
+    const buf = readFileSync(await d.path());
+    return { name: d.suggestedFilename(), bom: [...buf.subarray(0, 3)], text: buf.toString('utf8') };
+  };
+  for (const config of ['client', 'fetched', 'server']) {
+    for (const seed of [3, 12]) {
+      const { want } = await page.evaluate((o) => window.audit.exportMount(o), { config, seed });
+      const f = await download();
+      const cmp = await page.evaluate(([t, w]) => window.audit.exportCompare(t, w), [f.text, want]);
+      await page.waitForTimeout(120);
+      const sentence = await said();
+      const nameOk = config === 'server' ? f.name === 'journal-serveur.csv' : /^export-\d{4}-\d\d-\d\d-\d{4}\.csv$/.test(f.name);
+      check(`export download, ${config} seed ${seed}: ${f.name}, EF BB BF, ${cmp.got} rows = the oracle's, "${sentence}"`,
+        nameOk && f.bom.join() === '239,187,191' && cmp.ok && sentence.startsWith('Exported'), { name: f.name, bom: f.bom, cmp, sentence });
+    }
+  }
+  // fr and ar (right to left): the file name, the sentence, the separator.
+  for (const [lang, prefix, start, sep] of [['fr', 'export-', 'Exporté. ', ';'], ['ar', 'تصدير-', 'تم التصدير. ', ';']]) {
+    const { want } = await page.evaluate((o) => window.audit.exportMount(o), { config: 'client', seed: 19, lang });
+    const f = await download();
+    const cmp = await page.evaluate(([t, w]) => window.audit.exportCompare(t, w), [f.text, want]);
+    await page.waitForTimeout(120);
+    const sentence = await said();
+    const dir = await page.evaluate(() => document.querySelector('.dzg')?.getAttribute('dir'));
+    const header = f.text.slice(1, f.text.indexOf('\r\n'));
+    check(`export in ${lang} (${dir}): ${f.name}, "${sentence}", header "${header.slice(0, 60)}…"`,
+      f.name.startsWith(prefix) && /-\d{4}-\d\d-\d\d-\d{4}\.csv$/.test(f.name) && sentence.startsWith(start) && cmp.ok && header.includes(sep) && dir === (lang === 'ar' ? 'rtl' : 'ltr'), { name: f.name, sentence, cmp, header, dir });
+  }
+  // axe with the button busy (aria-busy, never disabled), A and B.
+  for (const config of ['fetched', 'server']) {
+    await page.evaluate((o) => window.audit.exportMount(o), { config, seed: 7, never: true });
+    await page.click('#export');
+    await page.waitForSelector('#export[aria-busy=true]', { timeout: 10000 });
+    const v = await axe(page);
+    const disabled = await page.evaluate(() => document.getElementById('export').disabled);
+    await page.evaluate(() => window.audit.xg.exporter.cancel());
+    await page.waitForFunction(() => !document.getElementById('export').hasAttribute('aria-busy'), null, { timeout: 10000 });
+    await page.waitForTimeout(120);
+    const sentence = await said();
+    check(`export button busy (${config}): axe 0, aria-busy, not disabled; cancelled: "${sentence}"`, v.length === 0 && !disabled && sentence === 'Export cancelled', { v, disabled, sentence });
+  }
+  check('no page error in the export checks', errors.length === 0, errors);
+  await page.close();
+
+  // The run chunk: not fetched at the first paint; fetched on a hover; on a click alone too.
+  for (const how of ['hover', 'click']) {
+    const { page: p2, errors: e2 } = await load(ctx);
+    const asked = [];
+    p2.on('request', (r) => { if (/\/export\/run\//.test(r.url())) asked.push(r.url()); });
+    await p2.evaluate((o) => window.audit.exportMount(o), { config: 'client', seed: 2 });
+    await frames(p2, 3);
+    const atPaint = asked.length;
+    if (how === 'hover') await p2.hover('#export');
+    else await p2.dispatchEvent('#export', 'click');
+    await p2.waitForTimeout(500);
+    check(`export chunk lazy: none at the first paint, fetched on a ${how} (${asked.length} request${asked.length === 1 ? '' : 's'})`, atPaint === 0 && asked.length > 0, { atPaint, asked });
+    check(`no page error in the lazy check (${how})`, e2.length === 0, e2);
+    await p2.close();
+  }
+
+  // 100 000 × 30, all, French: the wall time and the longest frames (recorded; plan ≤ 1 s, ≤ 50 ms).
+  const { page: p3, errors: e3 } = await load(ctx);
+  const b = await p3.evaluate(() => window.audit.exportBench(3));
+  timings.exportBench = b;
+  const walls = b.runs?.map((r) => r.wall) ?? [];
+  check(`export bench 100 000 × 30: wall ${walls.join(' / ')} ms, longest animation frame ${b.runs?.map((r) => r.loaf).join(' / ')} ms, longest task ${b.runs?.map((r) => r.longtask).join(' / ')} ms, ${b.bytes} bytes, ${b.lines} lines (recorded)`,
+    !b.error && b.lines === 100000 && b.bom?.join() === '239,187,191', b);
+  check('no page error in the export bench', e3.length === 0, e3);
+  await p3.close();
+}
+
 try {
   const b = (open = await browser('chrome'));
   try {
-    const ctx = await b.newContext({ reducedMotion: 'reduce' });
+    const ctx = await b.newContext({ reducedMotion: 'reduce', acceptDownloads: true });
     if (run('axe')) await axeStates(ctx);
     if (run('size')) await stableSize(ctx);
     if (run('busy')) await busyAndPalette(ctx);
     if (run('shots')) await screenshots(ctx);
     if (run('perm')) await permutations(ctx);
     if (run('typed')) await typedPermutations(ctx);
+    if (run('export')) await exportChecks(ctx);
   } finally {
     await b.close();
     open = null;

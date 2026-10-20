@@ -4,7 +4,7 @@ import type { LocaleCtx } from './value/locale.js';
 import { reconcileFocus, sameFocus, type FocusOwner, type FocusPos } from './focus.js';
 import type { RowKey } from './ids.js';
 import type { ModelChange, RowModel, RowScope } from './model/client.js';
-import { isJson, type ColumnFilter, type FilterModel } from './filter/model.js';
+import { isJson, type ColumnFilter, type FilterModel, type Json } from './filter/model.js';
 import { canonical, makeQuery, type Query } from './model/query.js';
 import { checkPage, samePage, type PageState } from './model/page.js';
 import type { ChangeSource } from './model/types.js';
@@ -88,7 +88,45 @@ export type GridEvent<T> =
   /** The page, its size or what it counts changed (a filter sends it back to the first page). */
   | { readonly type: 'pageChanged'; readonly source: ChangeSource; readonly page: PageState }
   /** The latest request failed: the host's error unchanged; the rows shown stay, under the error overlay. */
-  | { readonly type: 'fetchFailed'; readonly source: 'data'; readonly error: unknown; readonly key: string; readonly page: number | null };
+  | { readonly type: 'fetchFailed'; readonly source: 'data'; readonly error: unknown; readonly key: string; readonly page: number | null }
+  /**
+   * The CSV export (`@dzgrid/dom/export`, step 19, docs/behaviors/csv-export.md): data only, never a
+   * cell value nor a row key. `id` ties a run's events; `at` is ISO UTC.
+   */
+  | ({ readonly type: 'exportRequested' } & ExportTrace & {
+      readonly columns: readonly string[]; readonly query: Query; readonly queryKey: string; readonly server?: ExportServerPart;
+      readonly count: number | null; readonly selection?: { readonly mode: 'include' | 'exclude'; readonly count: number | null }; readonly zone: string; readonly locale: string;
+    })
+  | ({ readonly type: 'exportRefused' } & ExportTrace & { readonly refusal: 'host' | 'too-large' | 'error'; readonly reason?: string })
+  | ({ readonly type: 'exportFinished' } & ExportTrace & {
+      readonly outcome: 'done' | 'failed' | 'cancelled'; readonly via: 'browser' | 'server'; readonly rows: number | null; readonly columns: number;
+      readonly bytes: number | null; readonly fileName: string | null; readonly hidden?: number; readonly durationMs: number; readonly blank?: number; readonly invalid?: number;
+      readonly failure?: { readonly stage: 'load' | 'rows' | 'canExport' | 'exportAll' | 'build' | 'download'; readonly name: string };
+    });
+
+/** What every export event carries: the run, its time, who started it, its scope. */
+export interface ExportTrace {
+  readonly source: ChangeSource;
+  readonly id: string;
+  readonly at: string;
+  readonly scope: ExportScope;
+}
+
+/** What an export writes: the rows shown, every row the query matches, or the selected ones it shows (`CsvScope`). */
+export type ExportScope = 'displayed' | 'selected' | 'all';
+
+/**
+ * What the server is asked for an export: `@dzgrid/core/server`'s `DataRequest` without its page
+ * and signal (the filter in its wire form). Declared here, by shape: the base names no server type.
+ */
+export interface ExportServerPart {
+  readonly filter?: Readonly<Record<string, unknown>>;
+  readonly quick?: string;
+  readonly sort?: readonly SortItem[];
+  readonly params: Readonly<Record<string, Json>>;
+  readonly zone: string;
+  readonly key: string;
+}
 
 export type SelectionReason = 'scope-changed' | 'rows-dropped';
 

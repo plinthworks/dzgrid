@@ -29,6 +29,10 @@
       "types": "./src/pagination.ts",
       "default": "./src/pagination.ts"
     },
+    "./export": {
+      "types": "./src/export.ts",
+      "default": "./src/export.ts"
+    },
     "./internal": {
       "types": "./src/internal.ts",
       "default": "./src/internal.ts"
@@ -72,6 +76,18 @@
     "./locales/ar-pagination": {
       "types": "./src/locales/ar-pagination.ts",
       "default": "./src/locales/ar-pagination.ts"
+    },
+    "./locales/en-export": {
+      "types": "./src/locales/en-export.ts",
+      "default": "./src/locales/en-export.ts"
+    },
+    "./locales/fr-export": {
+      "types": "./src/locales/fr-export.ts",
+      "default": "./src/locales/fr-export.ts"
+    },
+    "./locales/ar-export": {
+      "types": "./src/locales/ar-export.ts",
+      "default": "./src/locales/ar-export.ts"
     }
   },
   "peerDependencies": {

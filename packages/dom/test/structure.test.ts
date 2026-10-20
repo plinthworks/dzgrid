@@ -19,7 +19,7 @@ describe('the DOM layer’s shape', () => {
   it('keeps the optional features out of the base: only features.ts may know them', () => {
     const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots|search)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots|search)\.js'/;
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'search.ts', 'pagination.ts'].includes(relative(SRC, f)))
+      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'search.ts', 'pagination.ts', 'export.ts'].includes(relative(SRC, f)))
       .filter((f) => optional.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
@@ -165,5 +165,31 @@ describe('the DOM layer’s shape', () => {
       .filter((f) => /from '@dzgrid\/core\/spans'/.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
+  });
+
+  it('has the export entry reach the base only through the grid’s context and the types (step 19)', () => {
+    // @dzgrid/dom/export, eager: the core's internal entry and its own folder only; the run chunk only by import().
+    const eager = files(SRC).filter((f) => relative(SRC, f) === 'export.ts' || /^export\/[^/]+\.ts$/.test(relative(SRC, f)));
+    expect(eager.map((f) => relative(SRC, f)).sort()).toEqual(['export.ts', 'export/index.ts']);
+    const offenders = eager
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: @dzgrid\/(core|core\/internal)$/.test(s) && s !== 'export.ts: ./export/index.js');
+    expect(offenders).toEqual([]);
+    expect(readFileSync(join(SRC, 'export/index.ts'), 'utf8')).toMatch(/import\('\.\/run\/index\.js'\)/);
+    // Nothing of the base imports it, the features seam included; nor does another feature.
+    expect(files(SRC).filter((f) => !/^export(\/|\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?export(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+  });
+
+  it('has the export run chunk import the core, the csv entry and its own folder; the server and span engines only through import()', () => {
+    const chunk = files(join(SRC, 'export/run'));
+    expect(chunk.map((f) => relative(SRC, f)).sort()).toEqual(['export/run/download.ts', 'export/run/index.ts', 'export/run/name.ts', 'export/run/request.ts', 'export/run/slice.ts']);
+    const offenders = chunk
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: (@dzgrid\/core(\/internal|\/csv)?|\.\/[a-z]+\.js)$/.test(s));
+    expect(offenders).toEqual([]);
+    const dynamic = chunk.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/import\('([^']+)'\)/g)].map((m) => m[1]));
+    expect(dynamic.sort()).toEqual(['@dzgrid/core/server', '@dzgrid/core/spans']);
+    // The base never reaches the csv entry; only the export chunk does.
+    expect(files(SRC).filter((f) => !/^export\/run\//.test(relative(SRC, f)) && /^import (?!type )[^;]*from '@dzgrid\/core\/csv'/m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
   });
 });

@@ -14,6 +14,8 @@
       "@dzgrid/core": ["../core/src/index.ts"],
       "@dzgrid/core/internal": ["../core/src/internal.ts"],
       "@dzgrid/core/spans": ["../core/src/spans.ts"],
+      "@dzgrid/core/csv": ["../core/src/csv.ts"],
+      "@dzgrid/core/server": ["../core/src/server.ts"],
       "@dzgrid/dom/internal": ["./src/internal.ts"]
     }
   },

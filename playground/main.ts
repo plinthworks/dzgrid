@@ -7,6 +7,8 @@
 // `search=1` puts a labelled search field above the grid, bound with `quickSearch()` (step 16).
 // `paging=client` pages the rows in the browser with the footer (`pagination()`, step 17); `paging=offset` and
 // `paging=cursor` serve them from a slow server in memory (400 ms), by cursor without a total.
+// `export=1` puts an export button above the grid (`csvExport()`, step 19): every row the query matches,
+// with the page's own label in its language (rtl.html opens it in Arabic, for the owner's Excel check at step 23).
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
@@ -14,6 +16,10 @@ import { AR } from '@dzgrid/dom/locales/ar';
 import { filters } from '@dzgrid/dom/filters';
 import { quickSearch } from '@dzgrid/dom/search';
 import { pagination } from '@dzgrid/dom/pagination';
+import { csvExport } from '@dzgrid/dom/export';
+import { EN_EXPORT } from '@dzgrid/dom/locales/en-export';
+import { FR_EXPORT } from '@dzgrid/dom/locales/fr-export';
+import { AR_EXPORT } from '@dzgrid/dom/locales/ar-export';
 import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
 import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
 import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
@@ -44,6 +50,7 @@ const popup = params.get('popup') === '1';
 const dates = params.get('dates');
 const withSearch = params.get('search') === '1';
 const paging = params.get('paging') as 'client' | 'offset' | 'cursor' | null;
+const withExport = params.get('export') === '1';
 // The clock the date shortcuts count from: the machine's, moved by the "Horloge" menu (dates=1).
 let offset = 0;
 if (dates) {
@@ -56,8 +63,8 @@ if (dates) {
   move();
   form.addEventListener('change', move);
 }
-const join = <B extends { text: object }>(b: B, f: { text: object }, p: { text: object }): B => ({ ...b, text: { ...b.text, ...(withFilters && f.text), ...(paging && p.text) } });
-const bundles = { 'fr-FR': join(FR, FR_FILTERS, FR_PAGINATION), 'en-US': join(EN, EN_FILTERS, EN_PAGINATION), 'ar-DZ': join(AR, AR_FILTERS, AR_PAGINATION) } as const;
+const join = <B extends { text: object }>(b: B, f: { text: object }, p: { text: object }, x: { text: object }): B => ({ ...b, text: { ...b.text, ...(withFilters && f.text), ...(paging && p.text), ...(withExport && x.text) } });
+const bundles = { 'fr-FR': join(FR, FR_FILTERS, FR_PAGINATION, FR_EXPORT), 'en-US': join(EN, EN_FILTERS, EN_PAGINATION, EN_EXPORT), 'ar-DZ': join(AR, AR_FILTERS, AR_PAGINATION, AR_EXPORT) } as const;
 
 // About 2 000 place names (20 × 20 × 5 syllables), every seventh one in Arabic letters; 1 row in 40 blank.
 const SYL = ['Ain', 'Bou', 'Sidi', 'Ouled', 'Beni', 'El', 'Ta', 'Ma', 'Ka', 'Ze', 'Ro', 'Ha', 'Mé', 'Ké', 'Lo', 'Da', 'Sa', 'Fé', 'Ni', 'Ra'];
@@ -133,7 +140,10 @@ function settings(): GridSettings<RowA> {
     density: val('density') as 'compact' | 'comfortable' | 'spacious',
     selection: { mode: val('selection') as 'none' | 'single' | 'multi', checkbox: on('box'), click: true },
     searchWarmup: on('warm') ? 'idle' : 'off',
-    onEvent: (e) => { if (e.type === 'selectionChanged') status.textContent = `${e.count ?? '?'} sélectionnées`; },
+    onEvent: (e) => {
+      if (e.type === 'selectionChanged') status.textContent = `${e.count ?? '?'} sélectionnées`;
+      if (e.type === 'exportFinished') status.textContent = `export : ${e.outcome}, ${e.rows ?? '?'} lignes, ${Math.round(e.durationMs)} ms`;
+    },
   };
 }
 
@@ -158,8 +168,15 @@ if (search) {
   host.insertAdjacentHTML('beforebegin', `<p class="bar"><label>${label} <input type="search" id="q"></label></p>`);
   search.bind(document.getElementById('q') as HTMLInputElement);
 }
+// The page's own export button (the grid draws none): `canExport: true` here; a real app asks its rules.
+const exporter = withExport ? csvExport({ canExport: true }) : null;
+if (exporter) {
+  const label = { 'fr-FR': 'Exporter en CSV', 'en-US': 'Export CSV', 'ar-DZ': 'تصدير CSV' }[val('locale') as 'fr-FR'];
+  host.insertAdjacentHTML('beforebegin', `<p class="bar"><button type="button" id="export">${label}</button></p>`);
+  exporter.bind(document.getElementById('export')!, { scope: 'all' });
+}
 const grid: GridInstance<RowA> = createGrid<RowA>(host, {
-  ...initial, features: [...(withFilters ? [filters({ floating, popup, ...fail })] : []), ...(search ? [search] : []), ...(paging ? [pagination()] : [])], ...(dates && { clock: () => Date.now() + offset }),
+  ...initial, features: [...(withFilters ? [filters({ floating, popup, ...fail })] : []), ...(search ? [search] : []), ...(paging ? [pagination()] : []), ...(exporter ? [exporter] : [])], ...(dates && { clock: () => Date.now() + offset }),
   ...(paging && { pagination: { pageSize: 50 } }), ...(served && { source: server(paging), operations: 'server' as const }),
 });
 requestAnimationFrame(() => requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; }));

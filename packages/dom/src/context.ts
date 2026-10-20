@@ -9,7 +9,7 @@ import type { FrameScheduler } from './render/scheduler.js';
 import type { Scope } from './render/scope.js';
 import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
-import type { FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
+import type { ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
 import type { PartBase, SlotPart } from './part.js';
@@ -106,5 +106,5 @@ export interface GridContext<T> {
   rowHeight(): number;
   /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
   restoreFocus(): void;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

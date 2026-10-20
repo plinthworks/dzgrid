@@ -1,11 +1,12 @@
 import type { DisplayIndex } from '../ids.js';
+import type { ExportScope } from '../kernel.js';
 import type { RowModel } from '../model/client.js';
 import type { Query } from '../model/query.js';
 import type { DisplayedRows } from '../row/displayed.js';
 import { isSelected, type SelectionState } from '../selection/rows.js';
 import type { DataRequest } from '../server/source.js';
 
-export type CsvScope = 'displayed' | 'selected' | 'all';
+export type CsvScope = ExportScope;
 
 /** What `canExport` and `exportAll` receive (step 19): the request, never a row. */
 export interface ExportRequest {
