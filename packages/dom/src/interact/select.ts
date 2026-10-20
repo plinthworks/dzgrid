@@ -16,7 +16,8 @@ export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
   function toggleAll(): void {
     if (g.settings.selection?.mode !== 'multi') return;
     const all = kernel.headerState === 'all';
-    if (rows.page && rows.selectAll === 'displayed' && (all || kernel.selectionScope)) {
+    // Under a selection rule (step 21) server pages too: the box acts on the rows shown.
+    if (rows.page && (rows.selectAll === 'displayed' || g.settings.selection?.canSelect) && (all || kernel.selectionScope)) {
       const s = kernel.selection;
       const keys = new Set(s.keys);
       const d = rows.displayed;

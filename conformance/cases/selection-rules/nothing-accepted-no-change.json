@@ -1,0 +1,41 @@
+{
+  "id": "nothing-accepted-no-change",
+  "suite": "selection-rules",
+  "description": "A command whose every added row is refused tells no selectionChanged; the rule's string is the reason.",
+  "input": {
+    "model": "client",
+    "rows": 3,
+    "rule": {
+      "refuse": [
+        "r1",
+        "r2",
+        "r3"
+      ],
+      "reason": "Locked"
+    },
+    "ops": [
+      {
+        "op": "all"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [],
+    "anchor": null,
+    "header": "none",
+    "events": [
+      [
+        "refused",
+        [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "Locked",
+        "rule",
+        "user"
+      ]
+    ]
+  }
+}

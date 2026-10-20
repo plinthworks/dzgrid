@@ -1,5 +1,5 @@
 import { makeQuery } from '@dzgrid/core';
-import { mounted, type Mounted } from '@dzgrid/dom/internal';
+import { cellKeys, mounted, type Mounted } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature, SlotDrivers } from '../features.js';
 import type { Part, SlotContext } from '../part.js';
@@ -34,6 +34,18 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   };
   // One command, so a server is asked once; the sort is kept.
   const clearFilters = (): void => void send({ type: 'query.set', query: makeQuery({ sort: g.kernel.query.sort }) });
+  // The column filter a header part drives (step 21): the filters feature's, when it is there.
+  const seam = () => g.features.find((h) => h.filter)?.filter;
+  // A header holding a control (step 21): one tab stop for the grid (the part's controls only while
+  // the focus is in them), Enter or F2 in (Enter sorts when the part takes no focus), Escape out.
+  const tab = (cell: HTMLElement, i: number): void => {
+    for (const c of cell.querySelectorAll<HTMLElement>('.dzg-hlabel :is(input,button,select,textarea,a[href],[tabindex])')) c.tabIndex = i;
+  };
+  cellKeys(g, '.dzg-hcell:not(.dzg-hextra):not(.dzg-hgroup)', (cell) => {
+    const id = cell.dataset['col']!;
+    const m = heads.get(id);
+    return m?.host && cell.contains(m.host) ? { focus: m.focus, flush: () => seam()?.flush(id) } : null;
+  }, tab, true);
 
   const drivers: SlotDrivers = {
     header(col, label) {
@@ -45,10 +57,15 @@ function setup(g: GridContext<unknown>): FeatureHandle {
       }
       const sort = g.kernel.query.sort;
       const at = sort.findIndex((s) => s.column === col.id);
-      return m.set(label, part, {
+      const drew = m.set(label, part, {
         column: col, label: col.def.header ?? col.id, sort: sort[at] ?? null, sortIndex: at < 0 ? null : at,
         toggleSort: (multi) => void send({ type: 'sort.toggle', column: col.id, multi }),
+        filter: seam()?.edits(col, label) ?? null,
       });
+      const cell = label.closest<HTMLElement>('.dzg-hcell');
+      const now = g.doc.activeElement;
+      if (cell && (now === cell || !cell.contains(now))) tab(cell, -1);
+      return drew;
     },
     overlay(state) {
       if (!state) {
@@ -76,6 +93,8 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     afterRows() {
       for (const [id, m] of heads) {
         if (m.host && g.el.header.contains(m.host)) continue;
+        // Its pending filter edit applied first (step 21).
+        seam()?.flush(id);
         m.clear();
         heads.delete(id);
       }

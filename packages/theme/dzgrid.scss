@@ -216,6 +216,17 @@ $emit: true !default;
     content: '\2713';
   }
 
+  // A row the selection rule refuses now (`@dzgrid/dom/rules`, step 21): its box dashed on the raised
+  // surface, the pointer "not allowed" on its cell. The row itself is unchanged (no aria-disabled, Q2).
+  .dzg-check[data-dzg-refused] {
+    cursor: not-allowed;
+  }
+
+  .dzg-check[data-dzg-refused] .dzg-box {
+    border-style: dashed;
+    background: var(--dzg-refused-bg, var(--tz-bg-raised));
+  }
+
   .dzg-box[aria-checked='mixed']::before {
     content: '\2212';
   }
@@ -421,6 +432,11 @@ $emit: true !default;
       forced-color-adjust: none;
       color: HighlightText;
       background: Highlight;
+    }
+
+    // A refused row's box (step 21): the system's colour for what cannot be used.
+    .dzg-check[data-dzg-refused] .dzg-box {
+      border-color: GrayText;
     }
   }
 

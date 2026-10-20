@@ -4,6 +4,7 @@ import * as internal from '@dzgrid/core/internal';
 import * as server from '@dzgrid/core/server';
 import * as spans from '@dzgrid/core/spans';
 import * as csv from '@dzgrid/core/csv';
+import * as rules from '@dzgrid/core/rules';
 
 /**
  * The public surface, written out by hand: adding an export is a decision,
@@ -25,7 +26,7 @@ const PUBLIC = [
 
 const INTERNAL = [
   'ColumnCache', 'Haystack', 'THREW', 'canNarrow', 'canonical', 'clearFormatCaches', 'collatorKey', 'compileFilter', 'compileQuick', 'createRowStore',
-  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'filterKindLookup', 'flatDisplayed', 'foldSlow', 'formatParts', 'hasRelative', 'intlTag', 'missingFeatureProblems', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'setFocusOwner', 'sortIndices', 'storeOf',
+  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'filterKindLookup', 'flatDisplayed', 'foldSlow', 'formatParts', 'hasRelative', 'intlTag', 'missingFeatureProblems', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'setFocusOwner', 'setSelectionGate', 'sortIndices', 'storeOf',
 ];
 
 /** `@dzgrid/core/server`: what a grid fed by a server needs, never in the base. */
@@ -37,7 +38,15 @@ const SPANS = ['buildSpanMap', 'headerBands', 'land', 'navigate', 'ownerFocus', 
 /** `@dzgrid/core/csv` (step 10): the CSV writer, never in the base. */
 const CSV = ['csvChunks', 'csvColumns', 'csvRows', 'csvSeparatorFor', 'toCsv'];
 
+/** `@dzgrid/core/rules` (step 21): the selection rules' vetting, never in the base. */
+const RULES = ['refusalProblems', 'ruleGate', 'vetSelection'];
+
 describe('the public surface', () => {
+  it('keeps the rules entry apart (step 21)', () => {
+    expect(Object.keys(rules).sort()).toEqual([...RULES].sort());
+    for (const name of RULES) expect(name in core || name in internal || name in server || name in spans || name in csv, name).toBe(false);
+  });
+
   it('keeps the csv entry apart', () => {
     expect(Object.keys(csv).sort()).toEqual([...CSV].sort());
     for (const name of CSV) expect(name in core || name in internal || name in server || name in spans, name).toBe(false);

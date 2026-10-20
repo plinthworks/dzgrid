@@ -37,6 +37,10 @@
       "types": "./src/parts.ts",
       "default": "./src/parts.ts"
     },
+    "./rules": {
+      "types": "./src/rules.ts",
+      "default": "./src/rules.ts"
+    },
     "./internal": {
       "types": "./src/internal.ts",
       "default": "./src/internal.ts"
@@ -104,6 +108,18 @@
     "./locales/ar-parts": {
       "types": "./src/locales/ar-parts.ts",
       "default": "./src/locales/ar-parts.ts"
+    },
+    "./locales/en-rules": {
+      "types": "./src/locales/en-rules.ts",
+      "default": "./src/locales/en-rules.ts"
+    },
+    "./locales/fr-rules": {
+      "types": "./src/locales/fr-rules.ts",
+      "default": "./src/locales/fr-rules.ts"
+    },
+    "./locales/ar-rules": {
+      "types": "./src/locales/ar-rules.ts",
+      "default": "./src/locales/ar-rules.ts"
     }
   },
   "peerDependencies": {

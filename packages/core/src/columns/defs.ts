@@ -50,7 +50,8 @@ export interface ColumnDef<T, V = unknown> {
   /** Shown over the header, already translated by the host. */
   readonly headerTooltip?: string;
   /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */
-  readonly tooltip?: (value: V | null, row: Readonly<T>) => string | null;
+  /** `context`: the grid's `settings.context` (step 21). */
+  readonly tooltip?: (value: V | null, row: Readonly<T>, context: unknown) => string | null;
   /**
    * Consecutive rows with the same value show one tall cell (docs/behaviors/spans.md).
    * `true` compares the values' stable text; a function decides; `within` cuts a run

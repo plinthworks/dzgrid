@@ -473,3 +473,36 @@ Consigner le résultat dans `docs/behaviors/audit-screen.md` (fin de la fiche) e
 (ligne de l'étape 18). Règle de décision propre à cette section : une phrase dite deux fois ou avec
 un nombre faux (72, 73, 75, 77), ou un texte tapé modifié (72), se corrige avant l'étape 19 ; un
 lecteur muet au cochage (75) ajoute une annonce par case (§11, item 47).
+
+## 15. Étapes — règles de sélection, en-tête avec son propre champ de filtre (étape 21)
+
+Page : le bac à sable, lien « Règles de sélection » du menu Démos, http://127.0.0.1:4700/?rules=1
+(`npx vite --host 127.0.0.1`), en **français** puis en **arabe** (`&locale=ar-DZ&direction=auto`).
+La règle de la démo : « si la ligne 4 est cochée, la ligne 8 ne peut pas l'être », et au plus cinq
+lignes. Couples A à D. Durée estimée : 10 min par couple et par langue. Noter ce qui est **dit**, mot
+pour mot (décision Q2 du propriétaire : « à vérifier à l'oreille »).
+
+80. **La case grisée.** Cocher la ligne 4. Aller sur la ligne 8 : la ligne se lit comme les autres,
+    « non sélectionnée » (jamais « indisponible » : pas d'`aria-disabled` sur la ligne). Noter si le
+    lecteur dit quelque chose de la case grisée (il ne devrait rien dire de plus).
+81. **Le refus.** `Espace` sur la ligne 8 : « Non sélectionnable : la ligne 4 est cochée »
+    (la phrase de la règle de la démo, dite telle quelle) ; la ligne reste non sélectionnée ; rien d'autre n'est dit. `Espace` encore :
+    la même phrase, **dite de nouveau**.
+82. **Une plage.** Ligne 3, puis `Maj+Flèche bas` jusqu'à la ligne 9 et `Maj+clic` : « N lignes
+    sélectionnées, 1 non sélectionnable » **une fois** (une seule phrase, pas deux).
+83. **Tout.** `Ctrl+A` (Cmd+A) : les lignes affichées permises seulement, la phrase partielle ; la
+    case d'en-tête se lit « cochée » quand toutes les lignes affichées sont cochées ou refusées.
+84. **Décocher.** `Espace` sur une ligne cochée : toujours permis, « N lignes sélectionnées ».
+85. **L'en-tête avec un champ.** Sur l'en-tête « Nom » (qui porte son propre champ de recherche) :
+    `Tab` depuis l'extérieur n'entre pas dans le champ (un seul arrêt pour la grille) ; `F2` (ou
+    `Entrée`) entre dans le champ, son nom est lu ; taper « an » : après la pause, « Filtré. N lignes »
+    une fois ; `Échap` revient sur l'en-tête, le texte reste ; `Entrée` sur un autre en-tête sans champ
+    trie comme avant.
+86. **Arabe.** Mêmes étapes de droite à gauche : la raison et les nombres lus justes, le curseur du
+    champ d'en-tête avance dans le sens de lecture.
+
+Consigner le résultat dans `docs/behaviors/selection-rules.md` (fin de la fiche) et dans
+`ROADMAP.md` (ligne de l'étape 21). Règle de décision propre à cette section : une ligne refusée lue
+« indisponible » (80), un refus muet ou dit deux fois en une action (81, 82), ou un focus qui sort de
+la grille (85) se corrige avant l'étape 22 ; un lecteur qui ne dit rien avant l'essai sur la case
+grisée est attendu (Q2).

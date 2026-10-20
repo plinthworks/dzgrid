@@ -86,7 +86,7 @@ export { NO_SELECTION, isSelected, selectionCount, selectOnly, selectAll, clearS
 export { intentFor, INTENT_OWNERS } from './keys/intent.js';
 export type { Intent, IntentContext, KeyLike, KeyOwner } from './keys/intent.js';
 export { createKernel, headerSelection } from './kernel.js';
-export type { ExportScope, ExportServerPart, ExportTrace, GridCommand, GridCommandResult, GridEvent, GridKernel, HeaderSelection, SelectionScope } from './kernel.js';
+export type { ExportScope, ExportServerPart, ExportTrace, GridCommand, GridCommandResult, GridEvent, GridKernel, HeaderSelection, SelectionGate, SelectionRefusal, SelectionScope } from './kernel.js';
 export { reconcileFocus } from './focus.js';
 export type { CellFocus, FocusOwner, FocusPos } from './focus.js';
 export { nextSort } from './sort/toggle.js';

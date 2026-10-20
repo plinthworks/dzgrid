@@ -1,0 +1,61 @@
+{
+  "id": "group-rule-additive-range",
+  "suite": "selection-rules",
+  "description": "A group rule over an additive range: rows of another group than the selection's are skipped.",
+  "input": {
+    "model": "client",
+    "rows": 6,
+    "rule": {
+      "groups": {
+        "r1": "A",
+        "r2": "A",
+        "r3": "B",
+        "r4": "B",
+        "r5": "A",
+        "r6": "B"
+      }
+    },
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "range",
+        "target": "r6",
+        "additive": true
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1",
+      "r2",
+      "r5"
+    ],
+    "anchor": "r1",
+    "header": "all",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "changed",
+        3
+      ],
+      [
+        "refused",
+        [
+          "r3",
+          "r4",
+          "r6"
+        ],
+        null,
+        "rule",
+        "user"
+      ]
+    ]
+  }
+}

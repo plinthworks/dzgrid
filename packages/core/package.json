@@ -24,6 +24,10 @@
     "./csv": {
       "types": "./src/csv.ts",
       "default": "./src/csv.ts"
+    },
+    "./rules": {
+      "types": "./src/rules.ts",
+      "default": "./src/rules.ts"
     }
   }
 }

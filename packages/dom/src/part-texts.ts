@@ -11,3 +11,11 @@ export interface PartsMessages {
   readonly locale: string;
   readonly text: { readonly [K in PartsMessageKey]: MessageValue };
 }
+
+/** The selection rules' texts (`@dzgrid/dom/rules`, step 21), in their own bundles (`locales/<lang>-rules`): optional here, required by `rules()`. */
+export type RulesMessageKey = 'rules.refused' | 'rules.refusedReason' | 'rules.partly';
+/** A rules bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_RULES.text }`. */
+export interface RulesMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in RulesMessageKey]: MessageValue };
+}

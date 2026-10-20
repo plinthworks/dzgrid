@@ -37,6 +37,7 @@ export const PROBLEM_CODES = [
   'span-clipped',
   'invalid-column-group',
   'missing-feature',
+  'selection-refused',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

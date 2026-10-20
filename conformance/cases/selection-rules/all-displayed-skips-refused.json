@@ -1,0 +1,60 @@
+{
+  "id": "all-displayed-skips-refused",
+  "suite": "selection-rules",
+  "description": "Select all (the box, Ctrl+A) skips refused rows; the box reads ticked when every row is ticked or refused; asking again is refused again.",
+  "input": {
+    "model": "client",
+    "rows": 6,
+    "rule": {
+      "refuse": [
+        "r2",
+        "r5"
+      ]
+    },
+    "ops": [
+      {
+        "op": "all"
+      },
+      {
+        "op": "all"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1",
+      "r3",
+      "r4",
+      "r6"
+    ],
+    "anchor": null,
+    "header": "all",
+    "events": [
+      [
+        "changed",
+        4
+      ],
+      [
+        "refused",
+        [
+          "r2",
+          "r5"
+        ],
+        null,
+        "rule",
+        "user"
+      ],
+      [
+        "refused",
+        [
+          "r2",
+          "r5"
+        ],
+        null,
+        "rule",
+        "user"
+      ]
+    ]
+  }
+}

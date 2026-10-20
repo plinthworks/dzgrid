@@ -13,6 +13,7 @@
       "@dzgrid/core/internal": ["../core/dist/internal.d.ts"],
       "@dzgrid/core/spans": ["../core/dist/spans.d.ts"],
       "@dzgrid/core/csv": ["../core/dist/csv.d.ts"],
+      "@dzgrid/core/rules": ["../core/dist/rules.d.ts"],
       "@dzgrid/core/server": ["../core/dist/server.d.ts"],
       "@dzgrid/dom/internal": ["./src/internal.ts"]
     }

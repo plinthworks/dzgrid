@@ -1,0 +1,50 @@
+{
+  "id": "toggle-refused",
+  "suite": "selection-rules",
+  "description": "Space or Ctrl+click on a row the rule refuses: nothing changes, selectionRefused names it, the anchor stays.",
+  "input": {
+    "model": "client",
+    "rows": 10,
+    "rule": {
+      "conflicts": [
+        [
+          "r4",
+          "r8"
+        ]
+      ]
+    },
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r4"
+      },
+      {
+        "op": "toggle",
+        "id": "r8"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r4"
+    ],
+    "anchor": "r4",
+    "header": "some",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "refused",
+        [
+          "r8"
+        ],
+        null,
+        "rule",
+        "user"
+      ]
+    ]
+  }
+}

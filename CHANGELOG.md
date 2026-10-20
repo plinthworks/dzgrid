@@ -12,6 +12,35 @@ architecture, the core's seed (row identities, calendar days apart from
 instants, the bounds of a day in a zone), conformance cases written by hand,
 and ten spikes in three browser engines.
 
+### Added (Phase 3, step 21: selection rules, the application's context, header parts driving the filter)
+
+- **Selection rules:** `settings.selection.canSelect(row, selection, context)` (live) returns true,
+  false, or a reason string; with the new optional entry `@dzgrid/dom/rules` (`rules()`) every addition
+  is vetted (click, Space, Shift, Ctrl+A, the header box, the footer, the API); unticking never is.
+  A refused row keeps its state; a command adding nothing changes nothing; a new event
+  `selectionRefused { source, rows, reason, cause }` follows `selectionChanged`. The refusal is said
+  ("Not selectable", the rule's own sentence, "6 rows selected, 2 not selectable"), every time; the
+  refused row's box is greyed (`data-dzg-refused` on `.dzg-check`), no `aria-disabled`. Texts in
+  `@dzgrid/dom/locales/{en,fr,ar}-rules` (`RULES_KEYS`). The pure vetting: `@dzgrid/core/rules`
+  (`vetSelection`). The kernel's gate seam through `@dzgrid/core/internal` (`setSelectionGate`).
+- **The application's context:** `settings.context` (live) reaches every part (`context`), the selection
+  rule, `canExport` / `exportAll` and the tooltip callback; a new identity updates each part once.
+- **Header parts driving the column filter:** with `slots()` and `filters()`, the `header` context gains
+  `filter` (`kind`, `state`, `where`, `debounceMs`, `set`, `canOpen`, `openFilter`), the same pending
+  edit as the floating box and the popup; the header cell's keys follow the floating row's (one tab
+  stop, Enter or F2 in, Escape out, applied on leaving), now shared in `@dzgrid/dom/internal`.
+- A ready header part `header.filterBox` (with `filters()` and `slots()`): the column's name and its
+  floating box in the header itself.
+- A problem code `selection-refused` (a host's `selection.set` refused under a rule).
+
+### Changed (step 21)
+
+- **Fail closed:** `canSelect` without `rules()` is an error problem (`missing-feature`, path
+  `settings.selection.canSelect`, detail `rules`) and the selection mode becomes `none`.
+- Under a rule the header box and Ctrl+A act on the rows shown, server pages included; "Select all
+  N rows" is not offered; an everything-except selection is refused (`needs-rows`).
+- Enter on a column header whose part takes the focus goes into the part instead of sorting.
+
 ### Added (Phase 3, step 17: pagination)
 
 - A new optional entry `@dzgrid/dom/pagination`: `pagination({ footer })`, a footer under the rows

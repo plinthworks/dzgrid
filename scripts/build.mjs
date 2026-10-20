@@ -26,8 +26,8 @@ const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'in
  * dist/ once built: a subpath is added here on purpose, never by accident.
  */
 const PACKAGES = {
-  core: ['.', './internal', './server', './spans', './csv'],
-  dom: ['.', './internal', './popup', './spans', './slots', './search', './pagination', './export', './parts', './filters', './locales/en', './locales/fr', './locales/ar', './locales/en-filters', './locales/fr-filters', './locales/ar-filters', './locales/en-pagination', './locales/fr-pagination', './locales/ar-pagination', './locales/en-export', './locales/fr-export', './locales/ar-export', './locales/en-parts', './locales/fr-parts', './locales/ar-parts'],
+  core: ['.', './internal', './server', './spans', './csv', './rules'],
+  dom: ['.', './internal', './popup', './spans', './slots', './search', './pagination', './export', './parts', './rules', './filters', './locales/en', './locales/fr', './locales/ar', './locales/en-filters', './locales/fr-filters', './locales/ar-filters', './locales/en-pagination', './locales/fr-pagination', './locales/ar-pagination', './locales/en-export', './locales/fr-export', './locales/ar-export', './locales/en-parts', './locales/fr-parts', './locales/ar-parts', './locales/en-rules', './locales/fr-rules', './locales/ar-rules'],
 };
 /** Built after the TypeScript packages, against their dist/ declarations. */
 const ANGULAR = 'angular';

@@ -1,0 +1,42 @@
+{
+  "id": "keep-on-filter-off-clears",
+  "suite": "selection-rules",
+  "description": "keepOnFilter off still clears the selection on a filter change under a rule (clearing is never vetted).",
+  "input": {
+    "model": "client",
+    "rows": 10,
+    "rule": {
+      "max": 5
+    },
+    "ops": [
+      {
+        "op": "keepOnFilter",
+        "keep": false
+      },
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "filter",
+        "value": "odd"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [],
+    "anchor": null,
+    "header": "none",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "changed",
+        0
+      ]
+    ]
+  }
+}

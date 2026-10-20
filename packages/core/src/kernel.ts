@@ -76,6 +76,11 @@ export type GridEvent<T> =
       readonly type: 'selectionChanged'; readonly source: ChangeSource; readonly selection: SelectionState; readonly count: number | null;
       readonly query: Query | null; readonly scope: RowScope | null; readonly reason: SelectionReason | null;
     }
+  /**
+   * After `selectionChanged` (if anything was accepted): rows a selection rule refused (step 21,
+   * docs/behaviors/selection-rules.md). Keys only, never row data.
+   */
+  | ({ readonly type: 'selectionRefused'; readonly source: ChangeSource } & SelectionRefusal)
   | { readonly type: 'filterChanged'; readonly source: ChangeSource; readonly filter: FilterModel }
   | { readonly type: 'quickChanged'; readonly source: ChangeSource; readonly text: string }
   | { readonly type: 'columnResized'; readonly source: ChangeSource; readonly column: string; readonly width: number; readonly finished: boolean }
@@ -130,6 +135,29 @@ export interface ExportServerPart {
 
 export type SelectionReason = 'scope-changed' | 'rows-dropped';
 
+/**
+ * What a selection rule refused (step 21): `rows` in the order asked; `reason`, the rule's first
+ * string (null: none); `cause`: `rule`, `unknown-row` (a key whose row the grid does not hold) or
+ * `needs-rows` (an everything-except selection: no rows to judge).
+ */
+export interface SelectionRefusal {
+  readonly rows: readonly RowKey[];
+  readonly reason: string | null;
+  readonly cause: 'rule' | 'unknown-row' | 'needs-rows';
+}
+
+/**
+ * The selection gate (`@dzgrid/dom/rules` through `@dzgrid/core/internal`, step 21): `vet` sees each
+ * selection a command would make (null: allowed as is); `on` while a rule is in force (the box and
+ * Ctrl+A then act on the rows shown); `skip`, an unselected row refused now (the box counts it as
+ * ticked; a new function when the rule or its context changed).
+ */
+export interface SelectionGate {
+  readonly on: boolean;
+  vet(prev: SelectionState, next: SelectionState): { readonly state: SelectionState; readonly refused: SelectionRefusal | null } | null;
+  readonly skip: (key: RowKey) => boolean;
+}
+
 /** What an everything-except selection stands for now: the query in force (its sort too), the params and the zone. */
 export interface SelectionScope extends RowScope {
   readonly query: Query;
@@ -170,6 +198,8 @@ const refuse = (reason: string, problems: readonly Problem[] = []): GridCommandR
 export const EMIT = Symbol('dzgrid.emit');
 /** For the DOM spans feature, through `@dzgrid/core/internal`: where a reconciled cell focus belongs. */
 const OWNER = Symbol('dzgrid.owner');
+/** For `@dzgrid/dom/rules`, through `@dzgrid/core/internal`: the selection gate. */
+const GATE = Symbol('dzgrid.gate');
 
 export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   readonly rows: M;
@@ -193,6 +223,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   let anchor: RowKey | null = null;
   let focus: FocusPos | null = null;
   let owner: FocusOwner<T> | undefined;
+  let gate: SelectionGate | undefined;
   let shown = rows.displayed;
   let lastPage: PageState | null = rows.page;
   let destroyed = false;
@@ -251,11 +282,17 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     anchor = null;
     return true;
   };
-  const setSelection = (s: SelectionState, source: ChangeSource): void => {
-    if (sameSelection(s, selection)) return;
-    selection = s;
+  /** Through the gate (step 21): the anchor moves to `row` (null: forgotten) only when nothing was refused; `selectionRefused` after. */
+  const setSelection = (s: SelectionState, source: ChangeSource, row?: RowKey | null): void => {
+    const v = gate?.vet(selection, s);
+    if (v) s = v.state;
+    if (row !== undefined && !v?.refused) anchor = row;
+    const same = sameSelection(s, selection);
+    if (!same) selection = s;
+    // An include selection stands for no query (a refused select-all matching leaves it so).
     if (selection.mode !== 'exclude') allOf = null;
-    emit(changed(source));
+    if (!same) emit(changed(source));
+    if (v?.refused) emit({ type: 'selectionRefused', source, ...v.refused });
   };
   const setFocus = (f: FocusPos | null, source: ChangeSource): void => {
     if (sameFocus(f, focus)) return;
@@ -337,9 +374,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     // Already everything, nothing unticked: no change, nothing told.
     if (selection.mode === 'exclude' && selection.keys.size === 0 && allOf === tie) return OK;
     allOf = tie;
-    anchor = null;
-    selection = { mode: 'exclude', keys: new Set() };
-    emit(changed(source));
+    setSelection({ mode: 'exclude', keys: new Set() }, source, null);
     return OK;
   };
   const withSort = (sort: readonly SortItem[]): Query => makeQuery({ sort, filter: query.filter, quick: query.quick });
@@ -365,13 +400,11 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         return OK;
       case 'selection.toggle':
         if (!exists(cmd.row)) return refuse('unknown-row');
-        anchor = cmd.row;
-        setSelection(toggle(selection, cmd.row), source);
+        setSelection(toggle(selection, cmd.row), source, cmd.row);
         return OK;
       case 'selection.only':
         if (!exists(cmd.row)) return refuse('unknown-row');
-        anchor = cmd.row;
-        setSelection(selectOnly([cmd.row]), source);
+        setSelection(selectOnly([cmd.row]), source, cmd.row);
         return OK;
       case 'selection.range': {
         if (anchor === null) return refuse('anchor-not-displayed');
@@ -429,7 +462,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         return OK;
       case 'selection.all':
         // An all-pages selection stays one: "all" again ticks the rows unticked, never only the page.
-        if (rows.selectAll === 'query' || tied()) return selectQuery(source);
+        // Under a rule (step 21, owner Q1) the rows shown, server pages too.
+        if ((rows.selectAll === 'query' && !gate?.on) || tied()) return selectQuery(source);
         return dispatch({ type: 'selection.allDisplayed' }, source);
       case 'selection.allFiltered':
         if (rows.selectAll === 'query') return selectQuery(source);
@@ -500,9 +534,26 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   }
 
   // Read on every paint while a box shows it: kept per selection, rows shown and count.
-  let header: { s: SelectionState; d: DisplayedRows<T>; n: number | null; state: HeaderSelection } | null = null;
+  let header: { s: SelectionState; d: DisplayedRows<T>; n: unknown; state: HeaderSelection } | null = null;
   const headerState = (): HeaderSelection => {
-    if (rows.selectAll === 'displayed') return headerSelection(selection, rows.displayed);
+    const d = rows.displayed;
+    if (rows.selectAll === 'displayed' || gate?.on) {
+      const box = headerSelection(selection, d);
+      if (box !== 'some' || !gate?.on) return box;
+      // Under a rule: ticked when every row shown is ticked or refused (its click then clears).
+      const skip = gate.skip;
+      if (header && header.s === selection && header.d === d && header.n === skip) return header.state;
+      let state: HeaderSelection = 'all';
+      for (let i = 0; i < d.count; i++) {
+        const k = d.keyAt(d.index(i)!);
+        if (!isSelected(selection, k) && !skip(k)) {
+          state = 'some';
+          break;
+        }
+      }
+      header = { s: selection, d, n: skip, state };
+      return state;
+    }
     const n = rows.counts.filtered;
     if (header && header.s === selection && header.d === rows.displayed && header.n === n) return header.state;
     let state: HeaderSelection;
@@ -515,7 +566,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     return state;
   };
 
-  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void } = {
+  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void; [GATE]: (g?: SelectionGate) => void } = {
     rows,
     columns,
     get selection() { return selection; },
@@ -550,6 +601,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     },
     [EMIT]: emit,
     [OWNER]: (fn) => { owner = fn; },
+    [GATE]: (x) => { gate = x; header = null; },
   };
   return kernel;
 }
@@ -600,6 +652,9 @@ export const emit = <T>(k: GridKernel<T>, e: GridEvent<T>): void => (k as unknow
 
 /** Sets (or, without `fn`, removes) the kernel's focus owner: the spans feature's. */
 export const setFocusOwner = <T>(k: GridKernel<T>, fn?: FocusOwner<T>): void => (k as unknown as { [OWNER]: (fn?: FocusOwner<T>) => void })[OWNER](fn);
+
+/** Sets (or, without `gate`, removes) the kernel's selection gate: the rules feature's (step 21). */
+export const setSelectionGate = <T>(k: GridKernel<T>, gate?: SelectionGate): void => (k as unknown as { [GATE]: (g?: SelectionGate) => void })[GATE](gate);
 
 /** The header box over the displayed rows: none, some or all of them selected. */
 export type HeaderSelection = 'none' | 'some' | 'all';

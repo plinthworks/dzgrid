@@ -24,7 +24,7 @@ import { createPainter } from './render/viewport.js';
 import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
 import { installWarmup } from './warmup.js';
-import { applyUpdate, ctxOf } from './update.js';
+import { applyUpdate, closed, ctxOf } from './update.js';
 
 
 export interface GridApi {
@@ -110,7 +110,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     headerRenderer: new HeaderRenderer(doc, header),
     rowRenderer: new RowRenderer<T>(doc, layer, (err) => report(err)),
     mac: isMac(win?.navigator),
-    settings: initial, ctx, headerRows: [], bands: [], spans: null, slots: null, features: [],
+    settings: closed(initial), ctx, headerRows: [], bands: [], spans: null, slots: null, features: [],
     get dir() { return dir; },
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false,

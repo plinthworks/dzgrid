@@ -53,6 +53,15 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(false);
   });
 
+  it('no other entry holds the rules module, and it holds no model (step 21)', async () => {
+    const isRules = (f: string) => /(^|\/)src\/rules(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts']) expect((await inputsOf(entry)).filter(isRules), entry).toEqual([]);
+    const inputs = await inputsOf('rules.ts');
+    expect(inputs.some((f) => f.endsWith('src/rules/vet.ts'))).toBe(true);
+    expect(inputs.filter(isServer)).toEqual([]);
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
+  });
+
   it('the server entry uses the base model and the gate', async () => {
     const inputs = await inputsOf('server.ts');
     expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(true);

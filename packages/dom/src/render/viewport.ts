@@ -40,6 +40,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   // The messages object: a part reading `msg` is rebound when it changes, as cells are.
   let messages: unknown = null;
   let messagesRev = 0;
+  // The application's context: a new one rebinds the cell parts too (step 21), as new messages do.
+  let context: unknown;
   let lastH = 0;
   // A part's messages: the host's own `app.*` keys, a missing one told once per bundle.
   let toldMessages = new Set<string>();
@@ -102,6 +104,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       messagesRev++;
       toldMessages = new Set();
     }
+    if (settings.context !== context) (context = settings.context), messagesRev++;
     // Direction too: whether a value is isolated depends on it; and which parts draw cells.
     const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}|${parts.rev}|${messagesRev}`;
     if (ek !== epochKey) {
@@ -165,7 +168,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const focus = kernel.focus;
     const focusCenter = focus ? L.center.columns.findIndex((c) => c.id === focus.column) : -1;
     const sort = kernel.query.sort;
-    g.partBase = { ctx, dir, doc: g.doc, msg: partMsg, announce };
+    g.partBase = { ctx, dir, doc: g.doc, msg: partMsg, announce, context };
     const headerHeight = headerRenderer.render({
       layout: L, cols: w.cols, height: h, colIndex,
       decorate: (col, cell) => {

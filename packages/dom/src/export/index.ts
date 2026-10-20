@@ -15,6 +15,8 @@ export interface ExportAllContext {
   readonly signal: AbortSignal;
   /** Rows done so far, and the total when known: handed to `onProgress` (`waiting`). */
   progress(done: number, total?: number): void;
+  /** The grid's `settings.context` when the export runs (step 21). */
+  readonly context: unknown;
 }
 /** A file to download (`url`: http, https or blob; `blob`), or nothing: the host did it. */
 export type ExportAllResult = { readonly url: string; readonly fileName?: string } | { readonly blob: Blob; readonly fileName?: string } | void;
@@ -31,7 +33,8 @@ export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {
    * only) and allows with `true`. `false`, `{ ok: false, reason }`, a throw or a rejection refuses.
    * It is the user's comfort, not security: the server checks again.
    */
-  readonly canExport: true | ((r: ExportRequest) => Refusal | Promise<Refusal>);
+  /** `context`: the grid's `settings.context`, read when the export runs (step 21). */
+  readonly canExport: true | ((r: ExportRequest, context: unknown) => Refusal | Promise<Refusal>);
   /** Server pages' `all` and `selected`: the host's export of the whole query. */
   readonly exportAll?: (r: ExportRequest, c: ExportAllContext) => Promise<ExportAllResult>;
   /** The file's name (`.csv` added, cleaned); default `${export.fileName}-YYYY-MM-DD-HHmm.csv` in the display zone. */

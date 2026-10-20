@@ -29,6 +29,9 @@
       "@dzgrid/core/csv": [
         "./packages/core/src/csv.ts"
       ],
+      "@dzgrid/core/rules": [
+        "./packages/core/src/rules.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],
@@ -52,6 +55,9 @@
       ],
       "@dzgrid/dom/parts": [
         "./packages/dom/src/parts.ts"
+      ],
+      "@dzgrid/dom/rules": [
+        "./packages/dom/src/rules.ts"
       ],
       "@dzgrid/dom/pagination": [
         "./packages/dom/src/pagination.ts"

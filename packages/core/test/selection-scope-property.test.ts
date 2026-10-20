@@ -3,6 +3,8 @@ import {
   clientRows, createColumnModel, createKernel, dataKey, localeCtx,
   type ColumnFilter, type GridEvent, type GridKernel, type RowKey, type RowModel,
 } from '@dzgrid/core';
+import { setSelectionGate } from '@dzgrid/core/internal';
+import { vetSelection } from '@dzgrid/core/rules';
 import { sourceRows, type DataSource } from '@dzgrid/core/server';
 import { fakeSource, type Call } from './support/fake-source.js';
 import { mulberry32 } from './support/rng.js';
@@ -31,7 +33,23 @@ import { mulberry32 } from './support/rng.js';
  * The scripts include half-typed filters and blank searches (no filter, no
  * search, in every model) and host updates that move a row in or out of the
  * filters (the browser): the count stays exact (selection-scope-bugs.test.ts).
+ *
+ * With a rule (step 21, docs/behaviors/selection-rules.md): mutual exclusions by the last digit
+ * (0–1, 2–5, 3–4, 6–9, 7–8) and at most four rows. The oracle vets each addition greedily in
+ * screen order with its own copy of the rule; the selection never becomes everything-except
+ * (select all takes the rows shown, select all matching is refused), never holds a conflicting
+ * pair or more than four rows, and the box reads ticked when every row shown is ticked or refused.
  */
+const PAIRS: readonly (readonly [number, number])[] = [[0, 1], [2, 5], [3, 4], [6, 9], [7, 8]];
+const MAX = 4;
+const digit = (id: string) => Number(id.slice(1)) % 10;
+/** The rule, over row ids: the oracle's copy and the grid's (through the keys) share only this. */
+const allowedIds = (id: string, held: Iterable<string>): boolean => {
+  const ids = [...held];
+  if (ids.length >= MAX) return false;
+  const d = digit(id);
+  return !ids.some((o) => PAIRS.some(([a, b]) => (a === d && b === digit(o)) || (b === d && a === digit(o))));
+};
 type R = { id: string; n: number; t: string };
 type Kind = 'client-paged' | 'client' | 'fetched' | 'fetched-qs' | 'server' | 'server-unknown';
 type F = 'none' | 'odd' | 'even' | 'half';
@@ -41,7 +59,7 @@ const filterOf = (f: F): ColumnFilter | null =>
   f === 'none' ? null : f === 'half' ? { type: 'text', op: 'contains', value: '' } : { type: 'text', op: 'equals', value: f };
 type Sel = Extract<GridEvent<R>, { type: 'selectionChanged' }>;
 
-function run(kind: Kind, seed: number, steps = 40) {
+function run(kind: Kind, seed: number, steps = 40, ruled = false) {
   const rnd = mulberry32(seed);
   const int = (n: number) => Math.floor(rnd() * n);
   const pick = <X>(xs: readonly X[]): X => xs[int(xs.length)]!;
@@ -128,6 +146,27 @@ function run(kind: Kind, seed: number, steps = 40) {
     model = bind('A').create({ getRowId: (r) => r.id, columns, ctx: ZONES[0]!, abort: fake.abort, operations, page: { pageSize: 3 } });
   }
   const kernel: GridKernel<R> = createKernel<R>({ rows: model, columns });
+  const keyId = (key: RowKey): string => String(key).replace(/^d:\d+:/, '');
+  const rule = (row: { data: R }, s: { keys: ReadonlySet<RowKey> }) => allowedIds(row.data.id, [...s.keys].map(keyId));
+  if (ruled) {
+    setSelectionGate(kernel, {
+      on: true,
+      vet: (prev, next) => vetSelection(rule, (key) => model.row(key), prev, next),
+      skip: (key) => { const n = model.row(key); return !n || !rule(n, kernel.selection); },
+    });
+  }
+  /** The oracle's vetting: kept ids first, then each added id in order, greedily; nothing accepted, nothing changed. */
+  const vetO = (next: readonly string[]) => {
+    const running = new Set(next.filter((id) => o.keys.has(id)));
+    let took = 0;
+    let refused = 0;
+    for (const id of next) {
+      if (o.keys.has(id)) continue;
+      if (allowedIds(id, running)) { running.add(id); took++; } else refused++;
+    }
+    if (refused && !took) return;
+    o.keys = running;
+  };
   const events: GridEvent<R>[] = [];
   kernel.subscribe((e) => events.push(e));
 
@@ -195,6 +234,20 @@ function run(kind: Kind, seed: number, steps = 40) {
     if (scopeCleared) expect(data.some((e) => e.reason === 'scope-changed'), fail('scope-changed told')).toBe(true);
     if (rowsDropped && !scopeCleared) expect(data.some((e) => e.reason === 'rows-dropped'), fail('rows-dropped told')).toBe(true);
     for (const e of data) if (e.reason === 'scope-changed') expect(scopeCleared, fail('scope-changed only when cleared')).toBe(true);
+    if (ruled) {
+      expect(s.mode, fail('never everything-except under a rule')).toBe('include');
+      const held = [...s.keys].map(idOf);
+      expect(held.length, fail('at most MAX')).toBeLessThanOrEqual(MAX);
+      for (let i = 0; i < held.length; i++) for (let j = i + 1; j < held.length; j++) {
+        expect(PAIRS.some(([a, b]) => (a === digit(held[i]!) && b === digit(held[j]!)) || (b === digit(held[i]!) && a === digit(held[j]!))), fail(`pair ${held[i]} ${held[j]}`)).toBe(false);
+      }
+      // The box over the rows shown: ticked when every row is ticked or refused.
+      const shown = displayedIds();
+      const on = shown.filter((id) => o.keys.has(id)).length;
+      const rest = shown.filter((id) => !o.keys.has(id)).every((id) => !allowedIds(id, o.keys));
+      expect(kernel.headerState, fail('header under a rule')).toBe(on === 0 ? 'none' : on === shown.length || rest ? 'all' : 'some');
+      return;
+    }
     // Elsewhere the header box speaks for the rows shown.
     if (!serverPages) {
       const shown = displayedIds();
@@ -228,6 +281,7 @@ function run(kind: Kind, seed: number, steps = 40) {
         const id = pick(shown);
         where.push(`toggle ${id}`);
         kernel.dispatch({ type: 'selection.toggle', row: k(id) }, 'user');
+        if (ruled && !o.keys.has(id)) { vetO([...o.keys, id]); break; }
         if (o.keys.has(id)) o.keys.delete(id); else o.keys.add(id);
         o.keys = new Set(o.keys);
         break;
@@ -236,6 +290,8 @@ function run(kind: Kind, seed: number, steps = 40) {
         where.push('all');
         const shown = displayedIds();
         kernel.dispatch({ type: 'selection.all' }, 'user');
+        // Under a rule: the rows shown, vetted (owner Q1, server pages too).
+        if (ruled) { vetO(paged ? [...o.keys, ...shown] : shown); break; }
         // An all-pages selection stays one: "all" re-ticks, never shrinks to the page.
         if (serverPages || o.mode === 'exclude') { o.mode = 'exclude'; o.keys = new Set(); o.allMem = membership(); }
         // Pages in the browser (step 17, owner Q1): the page's rows are added to what is ticked.
@@ -246,9 +302,10 @@ function run(kind: Kind, seed: number, steps = 40) {
         where.push('allFiltered');
         const shown = displayedIds();
         kernel.dispatch({ type: 'selection.allFiltered' }, 'user');
-        if (!serverPages && !paged) { o.mode = 'include'; o.keys = new Set(shown); }
+        if (!serverPages && !paged) ruled ? vetO(shown) : ((o.mode = 'include'), (o.keys = new Set(shown)));
         else if (!serverPages && known() && matching().length === 0) clearO();
-        else { o.mode = 'exclude'; o.keys = new Set(); o.allMem = membership(); }
+        // Under a rule everything-except is refused: nothing changes.
+        else if (!ruled) { o.mode = 'exclude'; o.keys = new Set(); o.allMem = membership(); }
         break;
       }
       case 4:
@@ -370,6 +427,15 @@ describe('selection invariants under random scripts (step 7)', () => {
   for (const kind of kinds) {
     it(`${kind}: 80 seeded scripts of 40 steps`, () => {
       for (let seed = 1; seed <= 80; seed++) run(kind, seed * 7919 + kind.length);
+    });
+  }
+});
+
+describe('selection invariants with a selection rule (step 21)', () => {
+  const kinds: Kind[] = ['client-paged', 'client', 'fetched', 'fetched-qs', 'server', 'server-unknown'];
+  for (const kind of kinds) {
+    it(`${kind}: 60 seeded scripts of 40 steps, every addition vetted`, () => {
+      for (let seed = 1; seed <= 60; seed++) run(kind, seed * 104729 + kind.length, 40, true);
     });
   }
 });

@@ -1,0 +1,47 @@
+{
+  "id": "host-include-unknown-row",
+  "suite": "selection-rules",
+  "description": "A host's key of a row the grid does not hold (another server page) is refused: the rule cannot judge it.",
+  "input": {
+    "model": "server",
+    "rows": 12,
+    "pageSize": 5,
+    "rule": {
+      "max": 20
+    },
+    "ops": [
+      {
+        "op": "set",
+        "mode": "include",
+        "ids": [
+          "r2",
+          "r8"
+        ],
+        "source": "host"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r2"
+    ],
+    "anchor": null,
+    "header": "some",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "refused",
+        [
+          "r8"
+        ],
+        null,
+        "unknown-row",
+        "host"
+      ]
+    ]
+  }
+}

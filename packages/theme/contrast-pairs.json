@@ -72,10 +72,13 @@
     { "what": "badge danger: frame and shape on the page", "fg": "--tz-danger", "bg": "--tz-bg", "min": 3 },
     { "what": "badge danger: frame and shape on its surface", "fg": "--tz-danger", "bg": "--dzg-badge-danger-bg", "min": 3 },
     { "what": "badge danger: label on its surface", "fg": "--tz-fg", "bg": "--dzg-badge-danger-bg", "min": 4.5 },
-    { "what": "badge danger: frame on a selected row", "fg": "--tz-danger", "bg": "--dzg-row-selected-bg", "min": 3 }
+    { "what": "badge danger: frame on a selected row", "fg": "--tz-danger", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "refused box border", "fg": "--tz-fg-muted", "bg": "--dzg-refused-bg", "min": 3 },
+    { "what": "refused box border on hover", "fg": "--tz-fg-muted", "bg": "--dzg-row-hover-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
+    "--dzg-refused-bg": "var(--tz-bg-raised)",
     "--dzg-row-hover-bg": "color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg))",
     "--dzg-row-selected-bg": "color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg))",
     "--dzg-focus-ring": "var(--tz-accent)",

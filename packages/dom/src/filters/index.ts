@@ -3,10 +3,12 @@ import { hasRelative } from '@dzgrid/core/internal';
 import { settled } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
+import type { HeaderFilter } from '../part.js';
 import type { FilterMessageKey } from '../messages.js';
 import { committer } from './commit.js';
 import { dateForms, kits, type DateEnv, type DateKit, type DateKitName } from './dates.js';
 import { floatingRow } from './floating.js';
+import { filterBoxPart } from './header-box.js';
 import { booleanForm, numberForm, textForm } from './forms.js';
 import { numberPart, textPart } from './inputs.js';
 import { menu, type Menu } from './menu.js';
@@ -77,6 +79,8 @@ export function filters(o: FiltersOptions = {}): FiltersFeature {
       'floating.text': { slot: 'floating', part: textPart }, 'floating.number': { slot: 'floating', part: numberPart }, floating: { slot: 'floating', part: summaryPart },
       'filter.text': { slot: 'filter', part: textForm }, 'filter.number': { slot: 'filter', part: numberForm }, 'filter.boolean': { slot: 'filter', part: booleanForm },
       'filter.day': { slot: 'filter', part: d.day }, 'filter.instant': { slot: 'filter', part: d.instant }, 'filter.set': { slot: 'filter', part: set },
+      // Step 21: a ready header part with the column's box (needs `slots()`), named per column.
+      'header.filterBox': { slot: 'header', part: filterBoxPart },
     },
     setup: (g) => setup(g, o, (m) => (popup = m), env, set, () => void sets.load('').catch(() => {})),
     openFilter: (column) => !!popup?.open(column),
@@ -113,7 +117,23 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   g.scope.on(g.el.header, 'pointerover', ahead);
   g.scope.on(g.el.header, 'focusin', ahead);
   const midnight = clockwork(g);
+  // A header part's filter (step 21): the shared edits, one object per column while what it holds stays.
+  const heads = new Map<string, { readonly k: readonly unknown[]; readonly f: HeaderFilter }>();
   return {
+    filter: {
+      edits(col, who) {
+        const r = resolve(col, 'filter');
+        if (!r.ok) return null;
+        const e = commit.edits(col, r.kind, who);
+        const k = [r.kind, e.state, e.where, e.debounceMs, popup.can(col), who];
+        const hit = heads.get(col.id);
+        if (hit && k.every((v, i) => v === hit.k[i])) return hit.f;
+        const f: HeaderFilter = { ...e, canOpen: k[4] as boolean, openFilter: () => popup.toggle(col.id, null) };
+        heads.set(col.id, { k, f });
+        return f;
+      },
+      flush: commit.flush,
+    },
     headerRows: row ? [row.spec] : [],
     decorateHeader: popup.decorate,
     afterRows(f) {

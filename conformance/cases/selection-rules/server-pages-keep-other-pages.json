@@ -1,0 +1,49 @@
+{
+  "id": "server-pages-keep-other-pages",
+  "suite": "selection-rules",
+  "description": "On server pages under a rule, select all adds the page to what other pages hold.",
+  "input": {
+    "model": "server",
+    "rows": 12,
+    "pageSize": 5,
+    "rule": {
+      "max": 20
+    },
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "page",
+        "index": 1
+      },
+      {
+        "op": "all"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1",
+      "r6",
+      "r7",
+      "r8",
+      "r9",
+      "r10"
+    ],
+    "anchor": "r1",
+    "header": "all",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "changed",
+        6
+      ]
+    ]
+  }
+}

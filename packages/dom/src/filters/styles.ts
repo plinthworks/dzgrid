@@ -17,6 +17,9 @@ export const FILTERS_CSS =
   ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;margin-inline:auto calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem))}' +
   // Beside a button the label gives way, cut with an ellipsis.
   ':where(.dzg-hcell>.dzg-hlabel){min-inline-size:0;overflow:hidden;text-overflow:ellipsis}' +
+  // Step 21, `header.filterBox`: the name, then the box taking what is left.
+  ':where(.dzg-hlabel:has(>.dzg-hfbox)){display:flex;flex:1;align-items:center;gap:.25rem}' +
+  ':where(.dzg-hfbox){display:flex;flex:1;min-inline-size:0}' +
   // The popup: the fields one under the other, each label above its control; the footer's buttons at the end.
   ':where(.dzg-fpop){display:grid;gap:.5rem;min-inline-size:12rem}' +
   ':where(.dzg-fpop label){display:grid;gap:2px}' +

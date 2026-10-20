@@ -24,6 +24,7 @@ then asks for every row of the query; clears the selection.
   other pages: "12 rows selected (some not shown)". "Clear selection" empties it.
 
 ## What DzGrid does
+- **Under a selection rule** (step 21, `selection-rules.md`, owner Q1): "Select all N rows" is not offered (`selection.canSelectAll` false): a rule judges loaded rows only.
 - **A feature in its own entry** (`@dzgrid/dom/pagination`): `pagination({ footer? })`. The base has no
   footer: the feature appends `div.dzg-footer` as the last child of the grid's root, outside
   `role="grid"` (never counted in `aria-rowcount`). Its texts come in their own bundles

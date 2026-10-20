@@ -1,0 +1,35 @@
+{
+  "id": "host-exclude-refused",
+  "suite": "selection-rules",
+  "description": "A host's everything-except selection is refused under a rule, told with the host as source.",
+  "input": {
+    "model": "client",
+    "rows": 6,
+    "rule": {
+      "max": 20
+    },
+    "ops": [
+      {
+        "op": "set",
+        "mode": "exclude",
+        "ids": [],
+        "source": "host"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [],
+    "anchor": null,
+    "header": "none",
+    "events": [
+      [
+        "refused",
+        [],
+        null,
+        "needs-rows",
+        "host"
+      ]
+    ]
+  }
+}

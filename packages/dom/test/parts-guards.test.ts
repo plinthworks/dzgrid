@@ -52,8 +52,9 @@ describe('@dzgrid/dom/parts', () => {
     expect(b['@dzgrid/dom/locales/fr-parts']).toEqual({ file: 'packages/dom/src/locales/fr-parts.ts', maxGzip: 140 });
     expect(b['@dzgrid/dom/locales/ar-parts']).toEqual({ file: 'packages/dom/src/locales/ar-parts.ts', maxGzip: 160 });
     expect(b['@dzgrid/theme']!.maxGzip).toBe(2050);
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(19100);
-    expect(b['@dzgrid/core']!.maxGzip).toBe(26900);
+    // Raised by the owner at step 21 (selection rules, context): 19 100 → 19 300, 26 900 → 27 100.
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(19300);
+    expect(b['@dzgrid/core']!.maxGzip).toBe(27100);
   });
 
   it('reaches the base through the types only: no value import outside its own folder, no style, no internal module', () => {

@@ -1,0 +1,40 @@
+{
+  "id": "only-asks-with-empty",
+  "suite": "selection-rules",
+  "description": "A plain click replaces the selection: the rule is asked with what the new selection keeps (here nothing).",
+  "input": {
+    "model": "client",
+    "rows": 4,
+    "rule": {
+      "max": 1
+    },
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "only",
+        "id": "r2"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r2"
+    ],
+    "anchor": "r2",
+    "header": "all",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "changed",
+        1
+      ]
+    ]
+  }
+}

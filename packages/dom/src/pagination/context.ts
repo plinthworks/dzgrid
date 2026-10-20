@@ -94,7 +94,7 @@ export function footerContext(g: GridContext<unknown>, act: (cmd: GridCommand) =
       counts: same('c', c),
       status: same('s', status),
       range: d.count && status.phase !== 'loading' ? same('r', { from, to: from + d.count - 1 }) : null,
-      selection: same('x', { count, shown, all, mode, canSelectAll: mode === 'multi' && !all && d.count > 0 && shown === d.count && c.filtered !== null && c.filtered > d.count && matching() < c.filtered }),
+      selection: same('x', { count, shown, all, mode, canSelectAll: mode === 'multi' && !g.settings.selection?.canSelect && !all && d.count > 0 && shown === d.count && c.filtered !== null && c.filtered > d.count && matching() < c.filtered }),
       ...fns,
     };
   };

@@ -1,0 +1,43 @@
+{
+  "id": "all-filtered-needs-rows",
+  "suite": "selection-rules",
+  "description": "Everything-except over pages is refused under a rule (no rows to judge): the selection and the anchor stay.",
+  "input": {
+    "model": "client-paged",
+    "rows": 10,
+    "pageSize": 5,
+    "rule": {
+      "max": 20
+    },
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "allFiltered"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1"
+    ],
+    "anchor": "r1",
+    "header": "some",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "refused",
+        [],
+        null,
+        "needs-rows",
+        "user"
+      ]
+    ]
+  }
+}

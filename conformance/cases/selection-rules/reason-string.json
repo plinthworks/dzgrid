@@ -1,0 +1,51 @@
+{
+  "id": "reason-string",
+  "suite": "selection-rules",
+  "description": "A rule returning a string refuses, and the string is the reason told.",
+  "input": {
+    "model": "client",
+    "rows": 10,
+    "rule": {
+      "conflicts": [
+        [
+          "r4",
+          "r8"
+        ]
+      ],
+      "reason": "Already linked to another row"
+    },
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r8"
+      },
+      {
+        "op": "toggle",
+        "id": "r4"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r8"
+    ],
+    "anchor": "r8",
+    "header": "some",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "refused",
+        [
+          "r4"
+        ],
+        "Already linked to another row",
+        "rule",
+        "user"
+      ]
+    ]
+  }
+}

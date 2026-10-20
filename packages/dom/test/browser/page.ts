@@ -9,7 +9,8 @@
 // search=1 a labelled search field above the grid (`#q`), bound with quickSearch() before the grid is made (step 16).
 // paging=client pages the rows with the footer (pagination(), step 17), size `size` (50); paging=cursor serves them from
 // a server in memory by cursor without a total (`delay` ms, 0 by default; `t.fetches` counts its requests, `t.failNext`
-// fails the next one); parts=1 the ready cell parts (badge and yes/no, step 20); two=1 adds a second grid with the footer, labelled, under the first.
+// fails the next one); parts=1 the ready cell parts (badge and yes/no, step 20); two=1 adds a second grid with the footer, labelled, under the first;
+// rules=1 a selection rule (rows 4 and 8 exclude each other, at most `t.context.max`), and "Nom"'s header with its own search box (step 21).
 import { createGrid } from '/packages/dom/src/index.ts';
 import { EN } from '/packages/dom/src/locales/en.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
@@ -27,7 +28,9 @@ const paging = q.get('paging');
 const pagingTexts = paging ? (await import(`/packages/dom/src/locales/${locale.slice(0, 2)}-pagination.ts`)) : null;
 // `parts=1`: the ready cell parts (step 20): a badge column over every tone, a yes/no column, their texts.
 const cellParts = q.get('parts') ? await (await import('./parts.ts')).partsSetup(locale.slice(0, 2) as 'fr') : null;
-const more = [...[filterTexts, pagingTexts].flatMap((m) => (m ? [(Object.values(m)[0] as { text: object }).text] : [])), ...(cellParts ? [cellParts.texts] : [])];
+// `rules=1`: the selection rule and the header's search box (step 21), their texts and features.
+const ruled = q.get('rules') ? await (await import('./rules.ts')).rulesSetup(locale.slice(0, 2) as 'fr') : null;
+const more = [...[filterTexts, pagingTexts].flatMap((m) => (m ? [(Object.values(m)[0] as { text: object }).text] : [])), ...(cellParts ? [cellParts.texts] : []), ...(ruled ? ruled.texts : [])];
 const messages = more.length ? { ...base, text: Object.assign({}, base.text, ...more) } : base;
 document.documentElement.lang = locale;
 document.documentElement.dir = q.get('dir') ?? (locale.startsWith('ar') ? 'rtl' : 'ltr');
@@ -56,7 +59,7 @@ const rows: Row[] = Array.from({ length: N }, (_, i) => ({
 }));
 
 const columns = [
-  { id: 'name', header: base === AR ? 'الاسم' : 'Nom', pinned: 'start' as const, width: 140 },
+  { id: 'name', header: base === AR ? 'الاسم' : 'Nom', pinned: 'start' as const, width: ruled ? 220 : 140, ...(ruled && { ui: { header: 'nameSearch' } }) },
   { id: 'city', header: base === AR ? 'المدينة' : 'Ville', width: 130, headerTooltip: base === AR ? 'مدينة الإقامة' : 'Ville de résidence', ...(q.get('spans') && { merge: true as const }), ...(q.get('pin') && { pinned: 'start' as const }) },
   ...(sets ? [
     { id: 'commune', header: base === AR ? 'البلدية' : 'Commune', width: 150, filter: { kind: 'set' as const } },
@@ -106,6 +109,8 @@ if (q.get('slots')) {
   };
 }
 if (cellParts) parts = { ...parts, ...cellParts.parts };
+if (ruled) (parts = { ...parts, ...ruled.parts }), features.push(...(ruled.features as never[]));
+const context = { max: 5 };
 const fail = { ...(dates === 'fail' && { loadDates: () => Promise.reject(new Error('the date kit is unreachable (dates=fail)')) }), ...(q.get('setfail') && { loadSet: () => Promise.reject(new Error('the set chunk is unreachable (setfail=1)')) }) };
 if (q.get('search')) {
   const { quickSearch } = await import('/packages/dom/src/search.ts');
@@ -153,7 +158,8 @@ const grid = createGrid<Row>(host, {
   ...data, getRowId: (r) => r.id, columns: tree, messages, locale, features, ...(parts && { parts }),
   ...(dates && { timeZone: q.get('zone') ?? 'Europe/Paris', clock: () => Date.now() + clock.offset }),
   ...(q.get('numerals') && { numerals: q.get('numerals') as 'latn' | 'locale' }),
-  selection: { mode, checkbox: q.get('box') === '1', click: true },
+  selection: { mode, checkbox: q.get('box') === '1', click: true, ...(ruled && { canSelect: ruled.canSelect as never }) },
+  ...(ruled && { context }),
 });
 
 if (q.get('two')) {
@@ -166,7 +172,7 @@ if (q.get('two')) {
 
 (window as any).t = {
   served,
-  grid, N, events, dataKey, rows, clock,
+  grid, N, events, dataKey, rows, clock, context,
   key: (id: number) => dataKey(id)!,
   indexOf: (el: Element) => {
     const row = el.closest('.dzg-row');

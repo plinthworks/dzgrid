@@ -174,6 +174,15 @@
   content: "✓";
 }
 
+.dzg-check[data-dzg-refused] {
+  cursor: not-allowed;
+}
+
+.dzg-check[data-dzg-refused] .dzg-box {
+  border-style: dashed;
+  background: var(--dzg-refused-bg, var(--tz-bg-raised));
+}
+
 .dzg-box[aria-checked=mixed]::before {
   content: "−";
 }
@@ -356,6 +365,9 @@
     forced-color-adjust: none;
     color: HighlightText;
     background: Highlight;
+  }
+  .dzg-check[data-dzg-refused] .dzg-box {
+    border-color: GrayText;
   }
 }
 .dzg[data-stale] .dzg-row,

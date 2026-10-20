@@ -5,7 +5,7 @@ import type { TipFor } from './render/tooltip.js';
 import type { Goal, Move, MoveShape, SpanLookup } from './keys/move.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { Frame, RowSpans } from './render/rows.js';
-import type { SlotPart } from './part.js';
+import type { HeaderFilter, SlotPart } from './part.js';
 
 /**
  * The seam where optional features plug in (Phase 3: filters, pagination,
@@ -38,6 +38,13 @@ export interface FeatureHandle {
    * nothing touches it not.
    */
   decorateHeader?(col: ResolvedColumn<unknown>, cell: HTMLElement, label: string | null): string | void;
+  /**
+   * The column filter's edits for a header part (the filters feature, step 21): `edits` the
+   * column's (null: none; `who`, the part's host, owns its `cancel`), the same object while what it
+   * holds is the same; `flush` applies the column's pending edit. The slots feature reads it; neither
+   * imports the other.
+   */
+  readonly filter?: { edits(col: ResolvedColumn<unknown>, who: object): HeaderFilter | null; flush(column: string): void };
   /** Runs at each paint once the rows are placed (what is drawn over them). */
   afterRows?(f: Frame<unknown>): void;
   destroy(): void;

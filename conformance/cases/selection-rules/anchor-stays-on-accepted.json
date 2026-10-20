@@ -1,0 +1,57 @@
+{
+  "id": "anchor-stays-on-accepted",
+  "suite": "selection-rules",
+  "description": "The anchor moves only to an accepted row: a later Shift range starts where it was.",
+  "input": {
+    "model": "client",
+    "rows": 10,
+    "rule": {
+      "refuse": [
+        "r8"
+      ]
+    },
+    "ops": [
+      {
+        "op": "only",
+        "id": "r2"
+      },
+      {
+        "op": "toggle",
+        "id": "r8"
+      },
+      {
+        "op": "range",
+        "target": "r4"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r2",
+      "r3",
+      "r4"
+    ],
+    "anchor": "r2",
+    "header": "some",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "refused",
+        [
+          "r8"
+        ],
+        null,
+        "rule",
+        "user"
+      ],
+      [
+        "changed",
+        3
+      ]
+    ]
+  }
+}

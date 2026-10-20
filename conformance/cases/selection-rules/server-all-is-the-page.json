@@ -1,0 +1,36 @@
+{
+  "id": "server-all-is-the-page",
+  "suite": "selection-rules",
+  "description": "On server pages under a rule, select all ticks the rows shown (owner Q1), the box speaks for them.",
+  "input": {
+    "model": "server",
+    "rows": 12,
+    "pageSize": 5,
+    "rule": {
+      "max": 20
+    },
+    "ops": [
+      {
+        "op": "all"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "anchor": null,
+    "header": "all",
+    "events": [
+      [
+        "changed",
+        5
+      ]
+    ]
+  }
+}

@@ -10,6 +10,9 @@
 // `export=1` puts an export button above the grid (`csvExport()`, step 19): every row the query matches,
 // with the page's own label in its language (rtl.html opens it in Arabic, for the owner's Excel check at step 23).
 // `parts=1` draws "Statut" as badges and every yes/no column as "✓ Oui" / "✗ Non" (`@dzgrid/dom/parts`, step 20).
+// `rules=1` (step 21): a selection rule ("if row 4 is ticked, row 8 cannot be", and the reverse; at most N rows, N
+// from the "Au plus" menu, handed through `settings.context`), and two headers that drive their column's filter: "Nom"
+// with the page's own search box (a header part written here, as an application would), "Montant" with `header.filterBox`.
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
@@ -19,6 +22,12 @@ import { quickSearch } from '@dzgrid/dom/search';
 import { pagination } from '@dzgrid/dom/pagination';
 import { csvExport } from '@dzgrid/dom/export';
 import { badge, cellBoolean } from '@dzgrid/dom/parts';
+import { rules } from '@dzgrid/dom/rules';
+import { slots } from '@dzgrid/dom/slots';
+import { definePart, type SlotContext, type SlotPart } from '@dzgrid/dom';
+import { EN_RULES } from '@dzgrid/dom/locales/en-rules';
+import { FR_RULES } from '@dzgrid/dom/locales/fr-rules';
+import { AR_RULES } from '@dzgrid/dom/locales/ar-rules';
 import { EN_PARTS } from '@dzgrid/dom/locales/en-parts';
 import { FR_PARTS } from '@dzgrid/dom/locales/fr-parts';
 import { AR_PARTS } from '@dzgrid/dom/locales/ar-parts';
@@ -57,6 +66,11 @@ const withSearch = params.get('search') === '1';
 const paging = params.get('paging') as 'client' | 'offset' | 'cursor' | null;
 const withExport = params.get('export') === '1';
 const withParts = params.get('parts') === '1';
+const withRules = params.get('rules') === '1';
+if (withRules) {
+  form.querySelector('output')!.insertAdjacentHTML('beforebegin', '<label>Au plus <select name="max"><option>5</option><option>3</option><option>10</option></select></label>');
+  if (params.get('max')) (form.elements.namedItem('max') as HTMLSelectElement).value = params.get('max')!;
+}
 // The clock the date shortcuts count from: the machine's, moved by the "Horloge" menu (dates=1).
 let offset = 0;
 if (dates) {
@@ -69,8 +83,45 @@ if (dates) {
   move();
   form.addEventListener('change', move);
 }
-const join = <B extends { text: object }>(b: B, f: { text: object }, p: { text: object }, x: { text: object }, c: { text: object }): B => ({ ...b, text: { ...b.text, ...(withFilters && f.text), ...(paging && p.text), ...(withExport && x.text), ...(withParts && c.text) } });
-const bundles = { 'fr-FR': join(FR, FR_FILTERS, FR_PAGINATION, FR_EXPORT, FR_PARTS), 'en-US': join(EN, EN_FILTERS, EN_PAGINATION, EN_EXPORT, EN_PARTS), 'ar-DZ': join(AR, AR_FILTERS, AR_PAGINATION, AR_EXPORT, AR_PARTS) } as const;
+const join = <B extends { text: object }>(b: B, f: { text: object }, p: { text: object }, x: { text: object }, c: { text: object }, r: { text: object }): B => ({ ...b, text: { ...b.text, ...((withFilters || withRules) && f.text), ...(paging && p.text), ...(withExport && x.text), ...(withParts && c.text), ...(withRules && r.text) } });
+const bundles = { 'fr-FR': join(FR, FR_FILTERS, FR_PAGINATION, FR_EXPORT, FR_PARTS, FR_RULES), 'en-US': join(EN, EN_FILTERS, EN_PAGINATION, EN_EXPORT, EN_PARTS, EN_RULES), 'ar-DZ': join(AR, AR_FILTERS, AR_PAGINATION, AR_EXPORT, AR_PARTS, AR_RULES) } as const;
+
+// The selection rule (`rules=1`): r4 and r8 exclude each other; at most `context.max` rows. Its sentences are the page's.
+const REASONS = {
+  'fr-FR': { pair: (a: string) => `Non sélectionnable : la ligne ${a} est cochée`, max: (n: number) => `Non sélectionnable : ${n} lignes au plus` },
+  'en-US': { pair: (a: string) => `Not selectable: row ${a} is ticked`, max: (n: number) => `Not selectable: ${n} rows at most` },
+  'ar-DZ': { pair: (a: string) => `غير قابل للتحديد: الصف ${a} محدد`, max: (n: number) => `غير قابل للتحديد: ${n} صفوف على الأكثر` },
+};
+const PAIRS: Record<string, string> = { r4: 'r8', r8: 'r4' };
+const rule: NonNullable<NonNullable<GridSettings<RowA>['selection']>['canSelect']> = (row, s, c) => {
+  const words = REASONS[val('locale') as 'fr-FR'];
+  const other = PAIRS[row.data.id];
+  if (other && [...s.keys].some((k) => String(k).endsWith(`:${other}`))) return words.pair(other.slice(1));
+  const max = (c as { max: number }).max;
+  return s.keys.size < max || words.max(max);
+};
+// "Nom"'s header (`rules=1`): its title and the page's own search box, driving the column's filter. Its
+// accessible name is the page's; the header keeps its own. Echo the filter only while the box is not focused.
+const NAME_SEARCH = definePart('header', {
+  mount(host, first) {
+    let c: SlotContext['header'] = first;
+    const title = document.createElement('span');
+    const input = document.createElement('input');
+    input.type = 'search';
+    input.style.cssText = 'flex:1;min-inline-size:0;margin-inline-start:.25rem';
+    host.style.cssText = 'display:flex;flex:1;align-items:center';
+    const word = { 'fr-FR': 'Chercher dans', 'en-US': 'Search', 'ar-DZ': 'البحث في' }[val('locale') as 'fr-FR'];
+    const draw = () => {
+      title.textContent = c.label;
+      input.setAttribute('aria-label', `${word} ${c.label}`);
+      if (document.activeElement !== input) input.value = (c.filter?.state as { value?: string } | null)?.value ?? '';
+    };
+    input.addEventListener('input', () => c.filter?.set(input.value ? { type: 'text', op: 'contains', value: input.value } : null));
+    host.append(title, input);
+    draw();
+    return { update: (n) => void ((c = n), draw()), focus: () => (input.focus(), true) };
+  },
+});
 
 // About 2 000 place names (20 × 20 × 5 syllables), every seventh one in Arabic letters; 1 row in 40 blank.
 const SYL = ['Ain', 'Bou', 'Sidi', 'Ouled', 'Beni', 'El', 'Ta', 'Ma', 'Ka', 'Ze', 'Ro', 'Ha', 'Mé', 'Ké', 'Lo', 'Da', 'Sa', 'Fé', 'Ni', 'Ra'];
@@ -84,14 +135,14 @@ const SET_COLUMNS: ColumnDef<RowA, any>[] = [
   ...(withFilters || withParts ? [STATUS] : []),
 ];
 // The cell parts (`parts=1`): each status its tone (closed: neutral, no shape), yes/no on every boolean column.
-const PARTS = withParts ? { statusBadge: badge({ tones: { pending: 'warning', active: 'success', suspended: 'danger' } }), 'cell.boolean': cellBoolean } : undefined;
+const PARTS: Readonly<Record<string, SlotPart>> | undefined = withParts ? { statusBadge: badge({ tones: { pending: 'warning', active: 'success', suspended: 'danger' } }), 'cell.boolean': cellBoolean } : withRules ? { nameSearch: NAME_SEARCH } : undefined;
 
 const COLUMNS: ColumnDef<RowA, any>[] = [
   { id: 'id', header: 'ID', pinned: 'start', width: 90 },
-  { id: 't0', header: 'Nom', pinned: 'start', width: 160, headerTooltip: 'Texte libre, en français' },
+  { id: 't0', header: 'Nom', pinned: 'start', width: withRules ? 220 : 160, headerTooltip: 'Texte libre, en français', ...(withRules && { ui: { header: 'nameSearch' } }) },
   ...SET_COLUMNS,
   { id: 'a0', header: 'الاسم', width: 160 },
-  { id: 'n0', header: 'Montant', type: 'number', width: 110 },
+  { id: 'n0', header: 'Montant', type: 'number', width: withRules ? 170 : 110, ...(withRules && { ui: { header: 'header.filterBox' } }) },
   { id: 'd0', header: 'Jour', type: 'day', width: 120 },
   { id: 'i1', header: dates ? 'Rendez-vous' : 'Instant', type: 'instant', width: 180 },
   { id: 'e1', header: 'Service', width: 130 },
@@ -149,7 +200,8 @@ function settings(): GridSettings<RowA> {
     timeZone: dates ? val('zone') : 'Africa/Algiers',
     direction: val('direction') as 'auto' | 'ltr' | 'rtl',
     density: val('density') as 'compact' | 'comfortable' | 'spacious',
-    selection: { mode: val('selection') as 'none' | 'single' | 'multi', checkbox: on('box'), click: true },
+    selection: { mode: val('selection') as 'none' | 'single' | 'multi', checkbox: on('box'), click: true, ...(withRules && { canSelect: rule }) },
+    ...(withRules && { context: { max: Number(val('max')) } }),
     searchWarmup: on('warm') ? 'idle' : 'off',
     onEvent: (e) => {
       if (e.type === 'selectionChanged') status.textContent = `${e.count ?? '?'} sélectionnées`;
@@ -187,7 +239,7 @@ if (exporter) {
   exporter.bind(document.getElementById('export')!, { scope: 'all' });
 }
 const grid: GridInstance<RowA> = createGrid<RowA>(host, {
-  ...initial, features: [...(withFilters ? [filters({ floating, popup, ...fail })] : []), ...(search ? [search] : []), ...(paging ? [pagination()] : []), ...(exporter ? [exporter] : [])], ...(dates && { clock: () => Date.now() + offset }),
+  ...initial, features: [...(withRules ? [rules(), slots(), filters({ popup: true })] : []), ...(withFilters ? [filters({ floating, popup, ...fail })] : []), ...(search ? [search] : []), ...(paging ? [pagination()] : []), ...(exporter ? [exporter] : [])], ...(dates && { clock: () => Date.now() + offset }),
   ...(paging && { pagination: { pageSize: 50 } }), ...(served && { source: server(paging), operations: 'server' as const }),
 });
 requestAnimationFrame(() => requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; }));

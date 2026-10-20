@@ -6,6 +6,4 @@
  */
 export { mounted, type Mounted } from './internal/mounted.js';
 export { settled } from './internal/settled.js';
-
-/** Inside an input method: `isComposing`, or Safari's last Enter after the composition ended (key code 229). */
-export const composing = (e: KeyboardEvent): boolean => e.isComposing || e.keyCode === 229;
+export { cellKeys, composing, type CellPart } from './internal/keys.js';

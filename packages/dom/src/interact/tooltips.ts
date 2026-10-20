@@ -26,7 +26,7 @@ export function installTooltips<T>(g: GridContext<T>): void {
     try {
       const raw = col.read(node.data);
       const value = isBlank(raw) ? null : col.codec.coerce(raw, g.ctx);
-      const text = col.def.tooltip(value, node.data);
+      const text = col.def.tooltip(value, node.data, g.settings.context);
       return text ? { text, col, row: node.data, value } : null;
     } catch (err) {
       g.report(err);

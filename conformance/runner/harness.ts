@@ -1,4 +1,4 @@
-import { createColumnModel, localeCtx, NO_OVERLAY, parseInstant, type ColumnDef } from '@dzgrid/core';
+import { createColumnModel, isSelected, localeCtx, NO_OVERLAY, parseInstant, type ColumnDef, type RowKey, type SelectionState } from '@dzgrid/core';
 import { createRowStore, ColumnCache } from '@dzgrid/core/internal';
 
 type Row = Record<string, unknown> & { id: string };
@@ -26,4 +26,31 @@ export function harness(input: { locale: string; timeZone?: string; now?: string
   const cache = new ColumnCache<Row>();
   const now = clockOf(input.now);
   return { store, columns, ctx, cache, env: () => ({ source: store.snapshot, columns, ctx, reader: NO_OVERLAY, cache, ...(now !== undefined && { now }) }) };
+}
+
+/**
+ * A selection rule written as data (step 21, `selection-rules` cases): a row is refused when its id
+ * is in `refuse`; when it conflicts with a row already in the selection (`conflicts`, pairs either
+ * way); when the selection already holds `max` rows (an include set); or when the selection holds a
+ * row of another `groups` value. Refused: `reason` when given (the sentence), false otherwise.
+ */
+export interface RuleSpec {
+  readonly refuse?: readonly string[];
+  readonly conflicts?: readonly (readonly [string, string])[];
+  readonly max?: number;
+  readonly groups?: Readonly<Record<string, string>>;
+  readonly reason?: string;
+}
+
+export function ruleOf(spec: RuleSpec, keyOf: (id: string) => RowKey, idOf: (key: RowKey) => string) {
+  return (row: { readonly data: { readonly id: string } }, s: SelectionState): boolean | string => {
+    const id = row.data.id;
+    const has = (other: string) => isSelected(s, keyOf(other));
+    const no =
+      spec.refuse?.includes(id) ||
+      spec.conflicts?.some(([a, b]) => (a === id && has(b)) || (b === id && has(a))) ||
+      (spec.max !== undefined && s.mode === 'include' && s.keys.size >= spec.max) ||
+      (spec.groups !== undefined && s.mode === 'include' && [...s.keys].some((k) => spec.groups![idOf(k)] !== spec.groups![id]));
+    return no ? spec.reason ?? false : true;
+  };
 }

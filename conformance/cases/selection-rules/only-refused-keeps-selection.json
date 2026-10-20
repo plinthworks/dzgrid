@@ -1,0 +1,47 @@
+{
+  "id": "only-refused-keeps-selection",
+  "suite": "selection-rules",
+  "description": "A plain click on a refused row never empties the selection.",
+  "input": {
+    "model": "client",
+    "rows": 10,
+    "rule": {
+      "refuse": [
+        "r9"
+      ]
+    },
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "only",
+        "id": "r9"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1"
+    ],
+    "anchor": "r1",
+    "header": "some",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "refused",
+        [
+          "r9"
+        ],
+        null,
+        "rule",
+        "user"
+      ]
+    ]
+  }
+}

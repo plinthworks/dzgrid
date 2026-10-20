@@ -1,0 +1,58 @@
+{
+  "id": "tied-retick-vetted",
+  "suite": "selection-rules",
+  "description": "Over an everything-except selection made before the rule, select all re-ticks only the rows the rule allows.",
+  "input": {
+    "model": "client-paged",
+    "rows": 10,
+    "pageSize": 5,
+    "rule": null,
+    "ops": [
+      {
+        "op": "allFiltered"
+      },
+      {
+        "op": "toggle",
+        "id": "r2"
+      },
+      {
+        "op": "rule",
+        "rule": {
+          "refuse": [
+            "r2"
+          ]
+        }
+      },
+      {
+        "op": "all"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [
+      "r2"
+    ],
+    "anchor": "r2",
+    "header": "all",
+    "events": [
+      [
+        "changed",
+        10
+      ],
+      [
+        "changed",
+        9
+      ],
+      [
+        "refused",
+        [
+          "r2"
+        ],
+        null,
+        "rule",
+        "user"
+      ]
+    ]
+  }
+}

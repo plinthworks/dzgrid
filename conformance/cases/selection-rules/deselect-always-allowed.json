@@ -1,0 +1,81 @@
+{
+  "id": "deselect-always-allowed",
+  "suite": "selection-rules",
+  "description": "Unticking is never vetted; a live rule does not re-vet what is selected.",
+  "input": {
+    "model": "client",
+    "rows": 6,
+    "rule": null,
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "toggle",
+        "id": "r2"
+      },
+      {
+        "op": "rule",
+        "rule": {
+          "max": 1
+        }
+      },
+      {
+        "op": "toggle",
+        "id": "r2"
+      },
+      {
+        "op": "toggle",
+        "id": "r3"
+      },
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "toggle",
+        "id": "r3"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r3"
+    ],
+    "anchor": "r3",
+    "header": "all",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "changed",
+        2
+      ],
+      [
+        "changed",
+        1
+      ],
+      [
+        "refused",
+        [
+          "r3"
+        ],
+        null,
+        "rule",
+        "user"
+      ],
+      [
+        "changed",
+        0
+      ],
+      [
+        "changed",
+        1
+      ]
+    ]
+  }
+}

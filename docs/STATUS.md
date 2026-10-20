@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-20 (étape 20, les pièces de cellule `/parts`, faite et testée, non commitée ; relecture et analyse des tests à venir). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 21, règles de sélection, contexte, en-tête qui filtre : faite et testée, non commitée ; relecture et analyse des tests à venir). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -28,9 +28,12 @@ Mis à jour : 2026-10-20 (étape 20, les pièces de cellule `/parts`, faite et t
 | 18 — écran d'audit, permutations (deux niveaux), axe, captures, profil K.8, fermeture de la fenêtre de filtre au clic dehors | fait, relu, testé (suites non commitées) | `57c021e` + suites |
 | 19 — export CSV (`@dzgrid/dom/export` : partie immédiate + morceau paresseux, `canExport` obligatoire, trace sans données, bouton de l'hôte) | fait, relu, testé (corrections non commitées) | `767653e` + corrections |
 | 20 — pièces de cellule prêtes (`@dzgrid/dom/parts` : `badge()`, `cellBoolean`, couleur « succès » du thème), exemple 2 en montage de test | fait, testé (non commité ; relecture à venir) | — |
-| 21 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
+| 21 — règles de sélection (`@dzgrid/core/rules`, `@dzgrid/dom/rules`), contexte de l'application, en-tête qui pilote le filtre | fait, testé (non commité ; relecture à venir) | — |
+| 22 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-**En cours : étape 20 faite, non commitée (relecture de code et analyse des tests à faire, puis commit). Suivante : étape 21.**
+**En cours : étape 21 faite, non commitée (relecture de code et analyse des tests à faire, puis commit). Suivante : étape 22.**
+
+Étape 21 faite (non commitée) : règle `settings.selection.canSelect(ligne, sélection, contexte)` jugée par le cœur (porte `setSelectionGate`, événement `selectionRefused`, code `selection-refused`) et `@dzgrid/core/rules` (`vetSelection`, `ruleGate`) ; fonctionnalité `@dzgrid/dom/rules` (`rules()`, case grisée `data-dzg-refused` sans `aria-disabled`, refus dit à chaque essai, refus de l'hôte en problème) ; fermé par défaut sans `rules()` ; « Tout sélectionner (N) » caché sous une règle ; `settings.context` partout (pièces, règle, export, bulle) ; le contexte `header` reçoit `filter` et le clavier de la ligne de filtres (`cellKeys`, `@dzgrid/dom/internal`) ; pièce prête `header.filterBox` ; textes `locales/{en,fr,ar}-rules` ; démo « Règles de sélection » (`?rules=1&paging=client`). Tests : 93 en échec avant le code (+ 9 ensuite), suite 213 fichiers, 3 643 tests, `test:perm`, types, tailles, contraste, construction verts ; Chrome 345 (24 nouveaux, `-- --only rules`) ; 21 mutants, 21 tués. Pour le propriétaire : écoute §15 de `docs/a11y-protocol.md` (Q2), relecture des textes arabes `ar-rules`. Détail : `ROADMAP.md` (étape 21), `ARCHITECTURE.md` (« Décisions de l'étape 21 »), fiche `docs/behaviors/selection-rules.md`.
 
 Étape 20 faite (non commitée) : `@dzgrid/dom/parts` — `badge({ tones, fallback })` (par nom via `ui.cell` ; cinq tons, forme ✓ ! ✕ i sauf neutre, cachée aux lecteurs d'écran) et `cellBoolean` (`'cell.boolean'` : « ✓ Oui » / « ✗ Non », vide pour rien), `PARTS_KEYS` ; textes `locales/{en,fr,ar}-parts` (`cell.yes`, `cell.no`) ; types `PartsMessageKey` / `PartsMessages` dans `part-texts.ts` (types seuls : la base reste identique octet pour octet). Thème : `--tz-success` (vert), `.dzg-badge` / `.dzg-bool` / `.dzg-glyph`, côtés logiques, 20 paires de contraste passées à 12 % (clair, sombre, contraste renforcé), couleurs forcées (cadre couleur du texte, couleurs système même en ligne sélectionnée). Exemple 2 (filtre « entre deux nombres » à deux curseurs) : `test/fixtures/between-slider.ts`, sans rien changer à la grille. Démo : lien « Pièces de cellule » du menu Démos (`?parts=1`). Tests : `parts-cells` 24, `parts-guards` 8, `example-between` 10, thème `parts` 7 ; suite 205 fichiers, 3 516 tests ; Chrome `test:browser` 321 (dont 20 pièces, `-- --only parts`) ; 16 mutants, 15 tués, 1 équivalent. Détail : `ROADMAP.md` (étape 20), `ARCHITECTURE.md` (« Décisions de l'étape 20 »), fiche `docs/behaviors/badge-boolean.md`.
 
@@ -71,13 +74,16 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 26 900 o gz (étape 14, raccourcis) | 26 756 |
+| `@dzgrid/core` | 27 100 o gz (étape 21, règles) | 26 937 |
+| `@dzgrid/core/rules` (par-dessus le cœur) | 700 (étape 21) | 476 |
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 628 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 559 |
-| `@dzgrid/dom` | 19 100 (étape 17) | 19 048 (étapes 19 et 20 : types seuls, code identique) |
+| `@dzgrid/dom` | 19 300 (étape 21) | 19 200 |
+| `@dzgrid/dom/rules` | 800 (étape 21) | 654 |
+| textes `{en,fr,ar}-rules` | 150 / 170 / 200 (étape 21) | 148 / 166 / 192 |
 | `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 149 |
-| `@dzgrid/dom/internal` | 650 (étape 17) | 527 |
+| `@dzgrid/dom/internal` | 800 (étape 21) | 786 |
 | `@dzgrid/dom/export` (immédiat ; le cœur, `internal` et `./run/*` à part) | 1 200 (étape 19) | 1 200 (corrections : course du chargement, échec sans rejet ; au plafond) |
 | export, morceau paresseux (`export/run/`, `@dzgrid/core/csv` compris, par-dessus le cœur) | 5 100 (étape 19) | 4 569 |
 | textes de l'export en / fr / ar | 220 / 250 / 380 (étape 19) | 216 / 248 / 296 |
@@ -85,18 +91,18 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 | textes des pièces en / fr / ar | 130 / 140 / 160 (étape 20) | 98 / 99 / 108 |
 | textes de la pagination en / fr / ar | 560 / 680 / 880 (étape 17) | 328 / 375 / 489 |
 | `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 298 (étape 18 : une phrase par geste) |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 8 929 (suites 18 : l'ancre du clic dehors) |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 102 (étape 21 : `filter` de l'en-tête, `header.filterBox`) |
 | liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 793 (étape 18 : ligne d'état d'une ligne de haut, repli `1.2em`) |
 | adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |
 | lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
-| `@dzgrid/dom/slots` | 1 300 (étape 11) | 994 |
+| `@dzgrid/dom/slots` | 1 450 (étape 21) | 1 246 |
 | `@dzgrid/dom/popup` | 1 500 | 1 473 (étape 18 : fermeture au clic dehors, `opener`) |
-| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème | 85 000 (K.8, Q1 de l'étape 18) | 69 781 (étape 20 : le thème et ses badges ; JS 67 870 en 7 fichiers, CSS 1 911) |
+| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème | 85 000 (K.8, Q1 de l'étape 18) | 70 532 (étape 21 ; JS 68 574 en 7 fichiers, CSS 1 958) |
 | à côté, paresseux, sans budget : liste de valeurs / adaptateurs de dates date, range, moment / morceau tzslot partagé | — | 3 666 / 449, 1 107, 682 / 66 486 ; la première fenêtre de date télécharge 66 935 à 67 593 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
 | textes des filtres en / fr / ar | 850 / 980 / 1 200 (étape 15) | 707 / 831 / 941 |
-| thème | 2 050 (étape 17) | 1 911 (étape 20 : couleur succès, badges) |
+| thème | 2 050 (étape 17) | 1 958 (étape 21 : case refusée) |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 

@@ -11,6 +11,7 @@ const alias = {
   '@dzgrid/core/server': fileURLToPath(new URL('./packages/core/src/server.ts', import.meta.url)),
   '@dzgrid/core/spans': fileURLToPath(new URL('./packages/core/src/spans.ts', import.meta.url)),
   '@dzgrid/core/csv': fileURLToPath(new URL('./packages/core/src/csv.ts', import.meta.url)),
+  '@dzgrid/core/rules': fileURLToPath(new URL('./packages/core/src/rules.ts', import.meta.url)),
   '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
   '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
 };
@@ -22,6 +23,7 @@ const domAlias = {
   '@dzgrid/dom/filters': fileURLToPath(new URL('./packages/dom/src/filters.ts', import.meta.url)),
   '@dzgrid/dom/export': fileURLToPath(new URL('./packages/dom/src/export.ts', import.meta.url)),
   '@dzgrid/dom/parts': fileURLToPath(new URL('./packages/dom/src/parts.ts', import.meta.url)),
+  '@dzgrid/dom/rules': fileURLToPath(new URL('./packages/dom/src/rules.ts', import.meta.url)),
   '@dzgrid/dom/pagination': fileURLToPath(new URL('./packages/dom/src/pagination.ts', import.meta.url)),
   '@dzgrid/dom/internal': fileURLToPath(new URL('./packages/dom/src/internal.ts', import.meta.url)),
   '@dzgrid/dom/locales': fileURLToPath(new URL('./packages/dom/src/locales', import.meta.url)),

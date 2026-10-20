@@ -14,6 +14,7 @@ import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
 import type { PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
+import type { RulesMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -106,5 +107,5 @@ export interface GridContext<T> {
   rowHeight(): number;
   /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
   restoreFocus(): void;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

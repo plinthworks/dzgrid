@@ -1,0 +1,59 @@
+{
+  "id": "range-skips-in-screen-order",
+  "suite": "selection-rules",
+  "description": "A Shift range asks each added row in screen order against what is accepted so far: 4 then 8 keeps 4.",
+  "input": {
+    "model": "client",
+    "rows": 10,
+    "rule": {
+      "conflicts": [
+        [
+          "r4",
+          "r8"
+        ]
+      ]
+    },
+    "ops": [
+      {
+        "op": "only",
+        "id": "r3"
+      },
+      {
+        "op": "range",
+        "target": "r9"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r3",
+      "r4",
+      "r5",
+      "r6",
+      "r7",
+      "r9"
+    ],
+    "anchor": "r3",
+    "header": "some",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "changed",
+        6
+      ],
+      [
+        "refused",
+        [
+          "r8"
+        ],
+        null,
+        "rule",
+        "user"
+      ]
+    ]
+  }
+}

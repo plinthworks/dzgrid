@@ -97,7 +97,7 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
     return true;
   }
 
-  const toggle = (column: string, anchor: HTMLElement): void => void (cur?.column === column ? close() : open(column, anchor));
+  const toggle = (column: string, anchor: HTMLElement | null): void => void (cur?.column === column ? close() : open(column, anchor));
 
   // Alt+ArrowDown on a header or floating cell itself (not a box inside it, not a group header).
   g.scope.on(g.el.header, 'keydown', (e: KeyboardEvent) => {

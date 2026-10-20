@@ -17,9 +17,9 @@ describe('the DOM layer’s shape', () => {
   });
 
   it('keeps the optional features out of the base: only features.ts may know them', () => {
-    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots|search)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots|search)\.js'/;
+    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots|search|rules)\.js'/;
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'search.ts', 'pagination.ts', 'export.ts', 'parts.ts'].includes(relative(SRC, f)))
+      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'search.ts', 'pagination.ts', 'export.ts', 'parts.ts', 'rules.ts'].includes(relative(SRC, f)))
       .filter((f) => optional.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
@@ -142,7 +142,7 @@ describe('the DOM layer’s shape', () => {
 
   it('has the internal entry import only the core and its own folder (no base module bundled twice)', () => {
     const entry = files(SRC).filter((f) => /^internal(\/|\.ts$)/.test(relative(SRC, f)));
-    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['internal.ts', 'internal/mounted.ts', 'internal/settled.ts']);
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['internal.ts', 'internal/keys.ts', 'internal/mounted.ts', 'internal/settled.ts']);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
       .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^internal(\/[^:]+)?\.ts: \.\/(internal\/)?[a-z-]+\.js$/.test(s));
@@ -157,6 +157,18 @@ describe('the DOM layer’s shape', () => {
       .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^pagination(\/[^:]+)?\.ts: \.\/(pagination\/)?[a-z-]+\.js$/.test(s));
     expect(offenders).toEqual([]);
     expect(files(SRC).filter((f) => !/^pagination(\/|\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?pagination(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+  });
+
+  it('has the rules entry reach the base only through the grid’s context and the types (step 21)', () => {
+    // @dzgrid/dom/rules: value imports from the core, its internal entry, @dzgrid/core/rules and its own folder only.
+    const entry = files(SRC).filter((f) => /^rules(\/|\.ts$)/.test(relative(SRC, f)));
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['rules.ts', 'rules/index.ts']);
+    const offenders = entry
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/rules)$/.test(s) && s !== 'rules.ts: ./rules/index.js');
+    expect(offenders).toEqual([]);
+    // Nothing else imports it, nor the core's rules entry.
+    expect(files(SRC).filter((f) => !/^rules(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?rules(\/|\.js')|@dzgrid\/core\/rules')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
   });
 
   it('keeps the core’s span engine out of the base: only the spans entry imports it', () => {

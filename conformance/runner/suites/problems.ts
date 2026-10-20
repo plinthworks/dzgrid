@@ -1,6 +1,7 @@
 import { checkPage } from '@dzgrid/core/internal';
 import { liveChangeProblems, messageProblems, partNameFor, resolveOperations, resolveColumns, type Problem } from '@dzgrid/core';
 import { createRowStore, compileFilter, missingFeatureProblems, sortIndices } from '@dzgrid/core/internal';
+import { refusalProblems } from '@dzgrid/core/rules';
 import { harness } from '../harness.js';
 import { kindsOf } from '../kinds.js';
 import { runSource } from './source.js';
@@ -51,6 +52,9 @@ export const problems: Record<string, Suite> = {
         return { problems: runBands(input).problems };
       case 'missing-feature':
         return { problems: shape(missingFeatureProblems({ columns: input.columns.map(columnOf), fullWidth: input.fullWidth ? FULL_WIDTH[input.fullWidth] : undefined })) };
+      // A host's selection refused by a rule (step 21): the warning the rules feature tells.
+      case 'selection-refused':
+        return { problems: refusalProblems(input.refusal) };
       case 'sort': {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(sortIndices(input.sort, null, h.env()).problems) };

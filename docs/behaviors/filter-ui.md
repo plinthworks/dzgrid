@@ -40,6 +40,8 @@ Types into a box under a column header; clicks the filter button in a header, or
 - **Texts in their own bundles** (owner decision O1): `@dzgrid/dom/locales/{en,fr,ar}-filters`, spread by the host into its messages (`text: { ...FR.text, ...FR_FILTERS.text }`); the base bundles do not grow. `filters()` throws a `TypeError` naming any missing filter key when the grid is made.
 - **Clear all** (the overlay's `clearFilters()`): one `query.set` keeping the sort, so a server is asked once.
 
+- **A header part driving the filter** (step 21, `parts.md`): with `slots()` and `filters()`, a column's `header` part gets `filter` (the same pending edit as the floating box and the popup), so an application's own control in the header (a search box) filters the column and the floating row becomes optional. Its keys: one tab stop, Enter or F2 enters, Escape flushes and comes back to the header, the focus leaving flushes.
+
 ## Tests
 - Now: `packages/dom/test/popup.test.ts`, `packages/dom/test/review-p3c.test.ts` (popup host), `packages/dom/test/owners.test.ts`, `packages/dom/test/header-rows.test.ts`, `conformance/cases/keyboard-intent/filter-input-*.json`.
 - Popup (step 13): `packages/dom/test/filters-popup.test.ts` (opening, focus, forms, apply in the browser and on a server, parts and kinds, closing, mark and name, the floating row, texts, the decoration seam); `filters-popup-bugs.test.ts` (review and test-analysis fixes: B1–B6, R1–R4, L1, out of the window); `filters-popup-walk.test.ts` (a seeded random walk with the floating row, `WALK_SEEDS`, `WALK_SEED`); `filters-popup-gaps.test.ts`; browser checks in `scripts/browser.mjs` (`filters=1&popup=1`, fr light, ar right to left dark, with the floating row).

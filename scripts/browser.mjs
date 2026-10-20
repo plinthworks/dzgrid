@@ -1,6 +1,6 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
- * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone).
+ * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -770,6 +770,95 @@ async function partsChecks(name, ctx) {
   }
 }
 
+async function rulesChecks(name, ctx) {
+  const cases = [
+    ['locale=fr-FR&theme=light&rows=600&rules=1&box=1', false, 'Non sélectionnable : la ligne 4 est cochée', 'Chercher dans Nom', 'Patient 1'],
+    ['locale=ar-DZ&dir=rtl&theme=dark&rows=600&rules=1&box=1', true, 'غير قابل للتحديد: الصف 4 محدد', 'البحث في الاسم', 'مريض 1'],
+  ];
+  for (const [qs, rtl, reason, searchName, typed] of cases) {
+    const { page, errors } = await load(ctx, qs);
+    const tag = `rules ${rtl ? 'ar rtl dark' : 'fr ltr light'}`;
+    // What the live region says, each time it is filled.
+    await page.evaluate(() => { window.said = []; new MutationObserver(() => { const t = document.querySelector('.dzg-live').textContent; if (t) window.said.push(t); }).observe(document.querySelector('.dzg-live'), { childList: true, characterData: true, subtree: true }); });
+    let v = await axe(page);
+    check(name, `${tag}: axe 0 at load`, v.length === 0, v);
+    const box = (i) => `.dzg-row[aria-rowindex="${i + 2}"] .dzg-check`;
+    await page.click(box(4));
+    await frames(page);
+    const look = await page.evaluate((sel) => {
+      const c = document.querySelector(sel), b = c.querySelector('.dzg-box'), s = getComputedStyle(b);
+      const plain = getComputedStyle(document.querySelector('.dzg-row[aria-rowindex="5"] .dzg-box'));
+      return { refused: c.hasAttribute('data-dzg-refused'), cursor: getComputedStyle(c).cursor, style: s.borderTopStyle, plainStyle: plain.borderTopStyle, bg: s.backgroundColor, plainBg: plain.backgroundColor, disabled: !!document.querySelector('.dzg-row[aria-disabled], [aria-disabled][role=row]'), selected: c.closest('.dzg-row').getAttribute('aria-selected') };
+    }, box(8));
+    check(name, `${tag}: row 4 ticked, row 8's box greyed (dashed, raised surface, not-allowed), no aria-disabled`, look.refused && look.cursor === 'not-allowed' && look.style === 'dashed' && look.plainStyle === 'solid' && look.bg !== look.plainBg && !look.disabled && look.selected === 'false', look);
+    // Space on row 8: the rule's own sentence, said again on a second try.
+    await page.evaluate(() => { window.t.grid.api.focusCell(window.t.key(8), 'name'); window.said.length = 0; });
+    await frames(page);
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(120);
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(120);
+    const said = await page.evaluate(() => ({ said: [...window.said], sel: [...window.t.grid.kernel.selection.keys].map(String) }));
+    check(name, `${tag}: Space on row 8 says "${reason}", twice for two tries; row 8 stays unticked`, said.said.filter((x) => x === reason).length === 2 && said.sel.length === 1, said);
+    v = await axe(page);
+    check(name, `${tag}: axe 0 after a refusal`, v.length === 0, v);
+    // Ctrl+A: the allowed rows up to the maximum; the box then reads ticked (the rest refused).
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.waitForTimeout(120);
+    const all = await page.evaluate(() => ({ n: window.t.grid.kernel.selection.keys.size, box: document.querySelector('.dzg-header [role=checkbox]')?.getAttribute('aria-checked'), last: window.said.at(-1) }));
+    check(name, `${tag}: Ctrl+A ticks five rows, one partial sentence, the header box ticked`, all.n === 5 && all.box === 'true' && /5/.test(all.last ?? ''), all);
+    // A new context repaints the refused look: at most 6 frees the next row.
+    const ctxLook = await page.evaluate(async () => {
+      const before = document.querySelector('.dzg-row[aria-rowindex="12"] .dzg-check').hasAttribute('data-dzg-refused');
+      window.t.grid.update({ context: { max: 6 } });
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return { before, after: document.querySelector('.dzg-row[aria-rowindex="12"] .dzg-check').hasAttribute('data-dzg-refused') };
+    });
+    check(name, `${tag}: a new context repaints the greyed boxes`, ctxLook.before && !ctxLook.after, ctxLook);
+    // Forced colours: the refused box keeps a mark (GrayText, dashed).
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.waitForTimeout(200);
+    const forced = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.color = 'GrayText';
+      document.body.append(probe);
+      const gray = getComputedStyle(probe).color;
+      probe.remove();
+      const b = getComputedStyle(document.querySelector('.dzg-row[aria-rowindex="10"] .dzg-box'));
+      return { border: b.borderTopColor, gray, style: b.borderTopStyle };
+    });
+    await page.screenshot({ path: `${OUT}/${name}-rules-${rtl ? 'ar' : 'fr'}-forced.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    check(name, `${tag}: forced colours: the refused box dashed in GrayText`, forced.border === forced.gray && forced.style === 'dashed', forced);
+    await page.emulateMedia({ forcedColors: 'none' });
+    // The header's own search box: one tab stop, F2 in, typing, the filter after the pause, Escape out.
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'selection.clear' }, 'user'));
+    const tabs = await page.evaluate(() => document.querySelector('.dzg-hcell[data-col="name"] input.hsearch').tabIndex);
+    await page.focus('.dzg-hcell[data-col="name"]');
+    await page.keyboard.press('F2');
+    const inBox = await page.evaluate(() => ({ active: document.activeElement.className, name: document.activeElement.getAttribute('aria-label'), dir: getComputedStyle(document.activeElement).direction }));
+    await page.keyboard.type(typed);
+    const caret = await page.evaluate(() => ({ at: document.activeElement.selectionStart, len: document.activeElement.value.length, quick: window.t.grid.kernel.query.filter.name ?? null }));
+    await page.waitForTimeout(400);
+    const filtered = await page.evaluate(() => ({ f: window.t.grid.kernel.query.filter.name ?? null, shown: window.t.grid.kernel.rows.displayed.count, live: window.said.at(-1) }));
+    v = await axe(page);
+    check(name, `${tag}: the header's box is out of the Tab order, F2 enters it ("${searchName}", ${rtl ? 'rtl' : 'ltr'}), the caret at the end`, tabs === -1 && inBox.active === 'hsearch' && inBox.name === searchName && inBox.dir === (rtl ? 'rtl' : 'ltr') && caret.at === caret.len && caret.quick === null, { tabs, inBox, caret });
+    check(name, `${tag}: typed "${typed}", the column filtered after the pause (111 rows), said, axe 0`, filtered.f?.value === typed && filtered.shown === 111 && /111/.test(filtered.live ?? '') && v.length === 0, { filtered, v });
+    await page.keyboard.press('Escape');
+    const out = await page.evaluate(() => ({ col: document.activeElement.dataset.col, cls: document.activeElement.className, value: document.querySelector('input.hsearch').value, tab: document.querySelector('input.hsearch').tabIndex }));
+    check(name, `${tag}: Escape comes back to the header, the text kept, out of the Tab order again`, out.col === 'name' && /dzg-hcell/.test(out.cls) && out.value === typed && out.tab === -1, out);
+    // Shared with the popup: Alt+ArrowDown opens the column's popup on the typed filter.
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForTimeout(150);
+    const pop = await page.evaluate(() => ({ open: !!document.querySelector('.dzg-fpop'), value: document.querySelector('.dzg-fpop input')?.value ?? null }));
+    v = await axe(page);
+    check(name, `${tag}: the popup opens on the same filter ("${typed}"), axe 0`, pop.open && pop.value === typed && v.length === 0, { pop, v });
+    await page.keyboard.press('Escape');
+    await page.screenshot({ path: `${OUT}/${name}-rules-${rtl ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    check(name, `no page error ${tag}`, errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -778,6 +867,7 @@ async function runEngine(name) {
     const ctx = await b.newContext();
     if (only) {
       if (only === 'parts' && name === 'chrome') await partsChecks(name, ctx);
+      if (only === 'rules' && name === 'chrome') await rulesChecks(name, ctx);
       return;
     }
 
@@ -1104,6 +1194,7 @@ async function runEngine(name) {
     if (name === 'chrome') await searchChecks(name, ctx);
     if (name === 'chrome') await pagingChecks(name, ctx);
     if (name === 'chrome') await partsChecks(name, ctx);
+    if (name === 'chrome') await rulesChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

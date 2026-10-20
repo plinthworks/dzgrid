@@ -25,6 +25,7 @@ Ticks rows on page 1, moves to page 3 and ticks more; ticks the header box ("sel
 - Excluded keys of rows deleted on the server stay: the count may be one too low until the filters change. Not reconciled (no row of another page is ever seen).
 - **After a failed request** on server pages the rows of the query before stay shown (marked stale). "All" selected then is tied to the new query; unticking one of those old rows is allowed and keeps its key among the excluded: the count is null until an answer comes, then may be one too low, as for a deleted row (decided: documented, not refused — the key is harmless to a bulk action that sends the query with its exclusions; refusing would need the kernel to know which answer a row came from).
 - **All in the browser:** see `selection.md`.
+- **Under a selection rule** (step 21, `selection-rules.md`, owner Q1): the header box and Ctrl+A tick the rows of the page shown (an include set; other pages keep their keys), the box speaks for the page, `selection.allFiltered` and a host's exclude set are refused (`needs-rows`: the rule cannot judge rows not loaded), and a host's include keys of rows on other pages are refused (`unknown-row`).
 
 ## Tests
 - `packages/core/test/kernel-p3.test.ts` (keys of other pages kept; exclude tied to the query and cleared; null count; kept through a sort; count over the filtered rows), `packages/core/test/review-p3a.test.ts` (C2–C4: host exclude, unticked row, event order, anchor forgotten).

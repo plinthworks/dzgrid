@@ -1,5 +1,5 @@
 import type { OperationsInput, PageOptions, SourceBinding } from '@dzgrid/core';
-import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput } from '@dzgrid/core';
+import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, RowNode, SelectionState } from '@dzgrid/core';
 import type { GridMessages } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { SlotPart } from './part.js';
@@ -20,9 +20,19 @@ export interface GridSettings<T> {
   readonly density?: 'compact' | 'comfortable' | 'spacious';
   /**
    * `keepOnFilter`: false clears the selection when a filter or the search changes (a sort or
-   * a page never does); true by default, rows ticked stay ticked even once hidden.
+   * a page never does); true by default, rows ticked stay ticked even once hidden. `canSelect`
+   * (step 21, docs/behaviors/selection-rules.md, needs `rules()`): whether a row may join the
+   * selection; true allows, false refuses, a string refuses and is said. Never asked to untick.
    */
-  readonly selection?: { readonly mode: 'none' | 'single' | 'multi'; readonly checkbox?: boolean; readonly click?: boolean; readonly keepOnFilter?: boolean };
+  readonly selection?: {
+    readonly mode: 'none' | 'single' | 'multi'; readonly checkbox?: boolean; readonly click?: boolean; readonly keepOnFilter?: boolean;
+    readonly canSelect?: (row: RowNode<T>, selection: SelectionState, context: unknown) => boolean | string;
+  };
+  /**
+   * The application's own context (step 21): handed to every part (`context`), `canSelect`, the
+   * export's `canExport` and the tooltip callback. Live; a new value is a new identity (pass a new object).
+   */
+  readonly context?: unknown;
   readonly overlay?: 'loading' | 'error' | null;
   /** The grid's accessible name, already translated; the bundle's `grid.label` otherwise. */
   readonly label?: string;

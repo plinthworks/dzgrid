@@ -8,6 +8,8 @@ export const BUILT_IN: ReadonlySet<string> = new Set(['text', 'number', 'day', '
 export interface Resolved {
   readonly part: Part<any> | null;
   readonly kind: string;
+  /** The column can filter here with this slot's switches (part or not): what a header part drives (step 21). */
+  readonly ok: boolean;
 }
 /** The part a column gets in the floating row (`floating`) or its popup (`filter`). */
 export type Resolve = (col: ResolvedColumn<unknown>, slot: 'floating' | 'filter') => Resolved;
@@ -54,7 +56,7 @@ export function resolver(g: GridContext<unknown>, o: { readonly floating?: boole
     const part = name ? now[name]!.part : null;
     // The built-in set list only for a column that asks for it (owner decision Q2): an enum
     // column, set implicitly, keeps no popup; a host's own `filter.set` still serves it.
-    by.set(id, (r = { part: part === strict && (f && f.kind) !== 'set' ? null : part, kind }));
+    by.set(id, (r = { part: part === strict && (f && f.kind) !== 'set' ? null : part, kind, ok }));
     return r;
   };
 }

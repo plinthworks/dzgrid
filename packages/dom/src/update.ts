@@ -40,7 +40,12 @@ export const UPDATE_POLICY: UpdatePolicy = {
   filterKinds: 'fixed',
   clock: 'fixed',
   fullWidth: 'live',
+  context: 'live',
 };
+
+/** A selection rule without `rules()` (step 21): no row is selectable unvetted (fail closed). */
+export const closed = <T>(s: GridSettings<T>): GridSettings<T> =>
+  s.selection?.canSelect && !s.features?.some((f) => f.id === 'rules') ? { ...s, selection: { ...s.selection, mode: 'none' } } : s;
 
 export const ctxOf = <T>(s: GridSettings<T>): LocaleCtx =>
   localeCtx({ locale: s.locale ?? s.messages.locale, ...(s.timeZone && { timeZone: s.timeZone }), ...(s.numerals && { numerals: s.numerals }) });
@@ -67,7 +72,9 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
   const patch: { -readonly [K in keyof GridSettings<T>]?: GridSettings<T>[K] } = { ...input };
   for (const p of refused) delete patch[p.path.slice('settings.'.length) as keyof GridSettings<T>];
   if (refused.length) emit(g.kernel, { type: 'problems', source: 'host', problems: refused });
-  const next: GridSettings<T> = { ...prev, ...patch };
+  const open: GridSettings<T> = { ...prev, ...patch };
+  const next = closed(open);
+  if (next !== open && !prev.selection?.canSelect) emit(g.kernel, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'error', 'settings.selection.canSelect', 'rules')] });
   if (patch.messages) checkMessages(patch.messages);
   // `in`, not `!== undefined`: clearing a setting goes back to its default. Computed before
   // anything changes: a locale that does not exist throws and leaves the grid as it was.

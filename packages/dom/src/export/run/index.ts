@@ -130,7 +130,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
 
     let verdict: unknown;
     try {
-      verdict = o.canExport === true || (await race(o.canExport(request)));
+      verdict = o.canExport === true || (await race(o.canExport(request, g.settings.context)));
     } catch (err) {
       if (err === ABORT) return finish('cancelled');
       g.report(err);
@@ -178,7 +178,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
       if (signal.aborted) return finish('cancelled');
       let res: unknown;
       try {
-        res = await race(o.exportAll(request, { signal, progress: (done, total) => void (over || progress('waiting', done, total ?? request.count)) }));
+        res = await race(o.exportAll(request, { signal, context: g.settings.context, progress: (done, total) => void (over || progress('waiting', done, total ?? request.count)) }));
       } catch (err) {
         return failed(reached, err);
       }

@@ -1,0 +1,19 @@
+{
+  "id": "selection-refused",
+  "suite": "problems",
+  "description": "A host's selection.set that a selection rule refused (step 21): told as a warning at `selection`, the cause as detail, never a row key.",
+  "input": {
+    "op": "selection-refused",
+    "refusal": { "rows": ["d:2:r8"], "reason": null, "cause": "unknown-row" }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "selection-refused",
+        "severity": "warning",
+        "path": "selection",
+        "detail": "unknown-row"
+      }
+    ]
+  }
+}

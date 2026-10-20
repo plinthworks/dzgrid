@@ -31,7 +31,7 @@ type Op =
  * the id, a stable sort on the fields, a page by offset with its
  * total, or the whole set without a page.
  */
-function memoryServer(n: number) {
+export function memoryServer(n: number) {
   let data: Row[] = Array.from({ length: n }, (_, i) => ({ id: `r${i + 1}`, v: (i + 1) % 2 ? 'odd' : 'even' }));
   const reply = (req: DataRequest) => {
     let rows = data.slice();

@@ -1,0 +1,60 @@
+{
+  "id": "host-include-vetted",
+  "suite": "selection-rules",
+  "description": "A host's include set is vetted: kept keys are not asked again, additions in insertion order.",
+  "input": {
+    "model": "client",
+    "rows": 10,
+    "rule": {
+      "max": 3
+    },
+    "ops": [
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "set",
+        "mode": "include",
+        "ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5"
+        ],
+        "source": "host"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1",
+      "r2",
+      "r3"
+    ],
+    "anchor": "r1",
+    "header": "all",
+    "events": [
+      [
+        "changed",
+        1
+      ],
+      [
+        "changed",
+        3
+      ],
+      [
+        "refused",
+        [
+          "r4",
+          "r5"
+        ],
+        null,
+        "rule",
+        "host"
+      ]
+    ]
+  }
+}

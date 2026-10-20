@@ -1,6 +1,6 @@
 import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, ModelStatus, PageState, PartSlot, Placement, Problem, ResolvedColumn, RowCounts, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
 import type { AppMessageKey, ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
-import type { PartsMessageKey } from './part-texts.js';
+import type { PartsMessageKey, RulesMessageKey } from './part-texts.js';
 import type { GridFeature } from './features.js';
 import type { GridSettings } from './settings.js';
 
@@ -28,10 +28,18 @@ export interface PartBase {
   readonly ctx: LocaleCtx;
   readonly dir: 'ltr' | 'rtl';
   /** The grid's messages, and the host's own `app.*` ones (a missing one shows its key, told once). */
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
   announce(text: string): void;
   readonly doc: Document;
+  /** The application's `settings.context` (step 21): its own, beside `ctx`, the grid's language and zone. */
+  readonly context?: unknown;
 }
+
+/**
+ * A column's filter as a header part drives it (step 21, `filters()`): the same pending edit as the
+ * floating box and the popup. One object while what it holds is the same.
+ */
+export type HeaderFilter = Pick<SlotContext['floating'], 'kind' | 'state' | 'where' | 'debounceMs' | 'set' | 'canOpen' | 'openFilter'>;
 
 export interface SlotContext {
   cell: PartBase & {
@@ -56,6 +64,8 @@ export interface SlotContext {
     readonly sortIndex: number | null;
     /** Sorts by this column as the user would (`multi`: adds to the sort, as Shift does). */
     toggleSort(multi: boolean): void;
+    /** The column's filter with `filters()` (step 21); null without it, for `filter: false` or an unknown kind. */
+    readonly filter: HeaderFilter | null;
   };
   /** The overlay (`@dzgrid/dom/slots`). */
   overlay: PartBase & {
@@ -197,10 +207,12 @@ const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t
  */
 export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
   const has = new Set(s.features?.map((f) => f.id));
-  const missing = (path: string, detail?: string): Problem[] => (detail && !has.has(detail) ? [{ code: 'missing-feature', severity: 'warning', path, detail }] : []);
+  const missing = (path: string, detail?: string, severity: Problem['severity'] = 'warning'): Problem[] => (detail && !has.has(detail) ? [{ code: 'missing-feature', severity, path, detail }] : []);
   return [
     ...Object.keys(s.parts ?? {}).flatMap((n) => missing(`parts.${n}`, NEEDS[s.parts![n]!.slot])),
     ...(paged ? missing('settings.pagination', 'pagination') : []),
+    // A selection rule without its feature (step 21): an error, the grid selects nothing (fail closed).
+    ...(s.selection?.canSelect ? missing('settings.selection.canSelect', 'rules', 'error') : []),
     ...leaves(s.columns).flatMap((d, i) => (d?.filter && (d.filter.floating || d.filter.kind) ? missing(`columns[${i}].filter`, 'filters') : [])),
   ];
 }
