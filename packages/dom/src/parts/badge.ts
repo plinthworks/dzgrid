@@ -22,8 +22,8 @@ const GLYPHS: Readonly<Record<string, string>> = { success: '✓', warning: '!',
  */
 export const badge = (o: BadgeOptions = {}): SlotPart<'cell'> =>
   cellPart('dzg-badge', (c) => {
-    if (c.value == null || !c.text) return null;
+    if (c.value == null || !c.text.trim()) return null;
     const k = String(c.value);
-    const t = o.tones && Object.hasOwn(o.tones, k) ? o.tones[k]! : o.fallback ?? 'neutral';
+    const t = (o.tones && Object.hasOwn(o.tones, k) ? o.tones[k] : undefined) ?? o.fallback ?? 'neutral';
     return [c.text, GLYPHS[t] ?? '', t];
   });

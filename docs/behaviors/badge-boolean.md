@@ -31,3 +31,8 @@ Reads a status column ("Done", "Late", "On hold") and a yes/no column, scrolls, 
 
 ## Tests
 `packages/dom/test/parts-cells.test.ts`, `parts-guards.test.ts`, the browser checks of `scripts/browser.mjs` (`parts=1`), the theme's contrast pairs. Worked example 2 (the between filter with two sliders, plugins §B2.8): `packages/dom/test/example-between.test.ts` with its fixture `test/fixtures/between-slider.ts`.
+
+## Step 20 review (2026-10-20)
+- A value whose text is only spaces is a blank: no badge frame is drawn.
+- A tone entry set to `undefined` falls back (`fallback`, then neutral), so a pooled cell never keeps the previous row's tone; only real tones have a glyph.
+- The yes/no drawing changes nothing else: quick search does not search boolean columns, and the CSV writes the codec's own text (`true` / `false`).
