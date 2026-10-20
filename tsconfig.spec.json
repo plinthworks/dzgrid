@@ -59,6 +59,9 @@
       "@dzgrid/dom/rules": [
         "./packages/dom/src/rules.ts"
       ],
+      "@dzgrid/dom/motion-gsap": [
+        "./packages/dom/src/motion-gsap.ts"
+      ],
       "@dzgrid/dom/pagination": [
         "./packages/dom/src/pagination.ts"
       ],

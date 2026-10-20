@@ -41,6 +41,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   clock: 'fixed',
   fullWidth: 'live',
   context: 'live',
+  motion: 'live',
 };
 
 /** A selection rule without `rules()` (step 21): no row is selectable unvetted (fail closed). */

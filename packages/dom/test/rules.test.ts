@@ -314,14 +314,14 @@ describe('the size lines (owner, 2026-10-20, step 21)', () => {
   it('hold the owner’s budgets and leave the others where they were', () => {
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[]; over?: string }> }).entries;
     expect(b['@dzgrid/core']!.maxGzip).toBe(27100);
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(19300);
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(19450); // step 26 (owner Q4)
     expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(800);
     expect(b['@dzgrid/dom/slots']!.maxGzip).toBe(1450);
     expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 700, over: '@dzgrid/core' });
     expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 800, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
     expect([b['@dzgrid/dom/locales/en-rules']!.maxGzip, b['@dzgrid/dom/locales/fr-rules']!.maxGzip, b['@dzgrid/dom/locales/ar-rules']!.maxGzip]).toEqual([150, 170, 200]);
     expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(9300);
-    expect(b['@dzgrid/theme']!.maxGzip).toBe(2050);
+    expect(b['@dzgrid/theme']!.maxGzip).toBe(2350); // step 26 (owner Q4)
     expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3800);
     expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1200);
   });

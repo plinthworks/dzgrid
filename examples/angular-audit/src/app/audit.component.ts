@@ -3,14 +3,15 @@
  * docs/behaviors/angular-example.md): `<dz-grid>` over a server model (`sourceRows` and
  * `fromObservable`, an HTTP-like API over the copied fake server), filters, the quick search
  * (`dzgSearch`), pagination, the CSV export (`dzgExport`), and an Angular cell that `emit`s.
- * French by default, Arabic right to left with `?lang=ar`.
+ * French by default, Arabic right to left with `?lang=ar`. Motion (step 26) is loaded after the
+ * grid is made, outside Angular's zone, so its first load holds none of it (K.8).
  */
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, NgZone, inject, input, viewChild, type AfterViewInit, type DoCheck } from '@angular/core';
 import { Observable } from 'rxjs';
 import { booleanCodecWith, type ColumnDef, type Problem } from '@dzgrid/core';
 import { sourceRows, type DataRequest, type DataResponse, type ValuesRequest, type ValuesResponse } from '@dzgrid/core/server';
-import type { GridMessages } from '@dzgrid/dom';
+import type { FeatureHandle, GridFeature, GridMessages } from '@dzgrid/dom';
 import { filters } from '@dzgrid/dom/filters';
 import { quickSearch } from '@dzgrid/dom/search';
 import { pagination } from '@dzgrid/dom/pagination';
@@ -67,6 +68,28 @@ function call<R>(run: (signal: AbortSignal) => Promise<R>): Observable<R> {
   });
 }
 
+/**
+ * Motion (`@dzgrid/dom/motion-gsap`, docs/behaviors/motion.md) without a byte in the first load: its
+ * entry imported once the grid is made, outside Angular's zone (its GSAP ticker then never runs
+ * change detection); the feature it makes takes over from this one. Its own chunk and GSAP come at
+ * idle after the first rows.
+ */
+function motionLater(zone: NgZone): GridFeature {
+  return {
+    id: 'motion-later',
+    setup(g) {
+      let h: FeatureHandle | null = null;
+      let gone = false;
+      zone.runOutsideAngular(() => import('@dzgrid/dom/motion-gsap').then(({ motion }) => void (gone || (h = motion().setup(g)))));
+      return {
+        beforeRows: () => h?.beforeRows?.(),
+        afterRows: (f) => h?.afterRows?.(f),
+        destroy: () => void ((gone = true), h?.destroy()),
+      };
+    },
+  };
+}
+
 @Component({
   selector: 'audit-root',
   imports: [DzGrid, DzgSearch, DzgExport],
@@ -118,7 +141,7 @@ export class AuditScreen implements DoCheck, AfterViewInit {
   readonly parts = { actor: componentPart('cell', ActorCell) };
   readonly search = quickSearch();
   readonly exporter = csvExport({ canExport: true, exportAll: (req, ctx) => this.server.exportAll(req as unknown as ExportAsk, ctx as { signal: AbortSignal }) });
-  readonly features = [filters({ floating: true, popup: true }), this.search, pagination(), this.exporter];
+  readonly features = [filters({ floating: true, popup: true }), this.search, pagination(), this.exporter, motionLater(inject(NgZone))];
 
   /** A plain field, not a signal: under zone.js only the zone's check shows it (the zone demo). */
   opened = 0;

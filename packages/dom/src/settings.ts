@@ -68,6 +68,8 @@ export interface GridSettings<T> {
    * part that draws it. Needs the spans feature; the base ignores it.
    */
   readonly fullWidth?: (row: Readonly<T>) => boolean | { readonly part?: string };
+  /** False: no motion (`@dzgrid/dom/motion-gsap` stops, `data-motion="off"` on the root for the theme). Live. */
+  readonly motion?: boolean;
   /** Optional features (`filters()`, `pagination()`…), set up once with the grid. */
   readonly features?: readonly GridFeature[];
 }

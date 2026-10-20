@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-20 (étape 23 commitée `84d0663`, corrections de la relecture faites, non commitées ; suivante : étape 26, animations ; l'étape 24 attend la spécification du propriétaire). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 26, animations GSAP, faite, testée, non commitée ; étape 23 et ses corrections commitées `84d0663`, `57ff030` ; l'étape 24 attend la spécification du propriétaire). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -30,10 +30,13 @@ Mis à jour : 2026-10-20 (étape 23 commitée `84d0663`, corrections de la relec
 | 20 — pièces de cellule prêtes (`@dzgrid/dom/parts` : `badge()`, `cellBoolean`, couleur « succès » du thème), exemple 2 en montage de test | fait, testé (non commité ; relecture à venir) | — |
 | 21 — règles de sélection (`@dzgrid/core/rules`, `@dzgrid/dom/rules`), contexte de l'application, en-tête qui pilote le filtre | fait, relu, testé (corrections non commitées) | `6e146a7` + corrections |
 | 22 — `@dzgrid/angular` (`<dz-grid>`, contrôleur, `provideDzGrid`, pièces en composants et gabarits, `emit`, `dzgSearch` / `dzgExport`, `fromObservable`, `part-shadowed`) | fait, relu, testé (corrections non commitées) | `307eb24` + corrections |
-| 23 — exemple Angular complet (`examples/angular-audit` depuis les archives, CSV arabe, zone.js, rendu serveur, octets réels), essais 19 et 22 | fait, relu, testé (corrections non commitées) | `84d0663` + corrections |
-| 24 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
+| 23 — exemple Angular complet (`examples/angular-audit` depuis les archives, CSV arabe, zone.js, rendu serveur, octets réels), essais 19 et 22 | fait, relu, testé | `84d0663`, `57ff030` |
+| 24, 25 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 24 attend la spécification de l'écran des journaux d'audit) | — |
+| 26 — animations avec GSAP (`@dzgrid/dom/motion-gsap` : coquille + morceau paresseux), `ui.cellClass`, crochet de l'hôte (`onCell`/`onRow`) | fait, testé (non commité ; relecture à venir) | — |
 
-**En cours : corrections de l'étape 23 (non commitées). Suivante : étape 26 (animations GSAP) ; l'étape 24 attend la spécification de l'écran des journaux d'audit (propriétaire).**
+**En cours : étape 26 faite, non commitée (relecture de l'architecte et revue de code à faire, puis commit par le propriétaire). Ensuite : l'étape 24 attend la spécification de l'écran des journaux d'audit (propriétaire).**
+
+Étape 26 faite (non commitée ; plan `docs/phase-3-steps/step26-motion-blueprint.md`, décisions `step26-decisions.md`, fiches `docs/behaviors/motion.md` et `cell-class.md`, décisions en français dans ARCHITECTURE « Décisions de l'étape 26 ») : `@dzgrid/dom/motion-gsap` — `motion({ preset, effects: { flip, enter, flash, page, popup }, gsap, onCell, onRow })`, coquille immédiate (`load()`, `loaded`) et morceau `motion-gsap/run/` (guard, reduced, flip, flash, page, open) chargé en temps libre après les premières lignes ; GSAP de l'application ou `import('gsap')` dans le morceau, absent → `missing-feature` (`features.motion`, `gsap`). Base : `FeatureHandle.beforeRows()` (avant la couche et les lignes), `settings.motion` vivant et `data-motion="off"`, `ui.cellClass` dans `rows.ts` (type `CellClassContext` du cœur). Thème : teinte et marque de l'éclat, `Highlight` en couleurs forcées, cinq paires de contraste, transitions sous `:not([data-motion=off])`. Bac à sable : « Animations » (`playground/motion.html`) dans le menu Démos ; navigateur : `packages/dom/test/browser/motion.{html,ts}`, `npm run test:browser -- --only motion` (34 contrôles, fr clair et ar sombre). L'exemple Angular charge l'entrée après la création de la grille, hors de la zone (`motionLater`) ; `gsap` ajouté à ses dépendances (l'exemple n'a pas été reconstruit). Tests d'abord : `cell-class`, `motion-seam`, `motion-gsap`, `motion-missing`, `motion-walk`, `structure`, thème `motion`, `test-zone/motion-zone`, `audit-profile` (18 en échec et 4 fichiers non chargeables avant le code) ; 24 mutants, 23 tués (1 équivalent). Points pour le propriétaire : un `rows` qui ne remplace que quelques lignes est un changement en direct (le modèle le dit comme une transaction) et fait un éclat ; la licence de GSAP à confirmer avant publication ; `missing-feature` au lieu d'un nouveau code `missing-peer`.
 
 Corrections de l'étape 23 (après `84d0663`, non commitées, tests d'abord : 3 `it.fails` retournés dans `scripts/test/size-split-review.test.ts` et `perf/test/example-lib-review.test.ts`) : les octets réels (K.8) lisent le JS initial dans `stats.json` (le script de la page et tous les morceaux atteints par import statique ; Angular n'annonce que 10 morceaux dans la page) — sans stats, la page seule, refusée si elle atteint ce plafond ; `check:size` vérifie la construction livrée avant de mesurer (absente ou périmée : « run npm run build », compté en dépassement, sans plantage ; `measureSplitEntry`, testé) ; gardes de size-split : chaque `alias` listé dans `shipped`, aucun `external` qui prend `@dzgrid/`, chaque fichier livré sous `packages/<p>/dist/` ; `example:smoke` : toute erreur donne « failed » avec sa raison, le dossier est toujours effacé, installation sans `legacy-peer-deps` ; décompte SSR de la classe `dzg` en mot entier ; l'échantillon arabe rend la direction de la grille (`rtl`) et un test montre que ar-EG et en-US donnent `,` (le `;` vient de ar-DZ). Portail complet vert (232 fichiers, 3 795 tests ; `test:perm`, types, construction, tailles) ; `example:bytes` inchangé (82 014 / 38 654 / ≈ 3 327).
 
@@ -94,8 +97,11 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 628 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 559 |
-| `@dzgrid/dom` | 19 300 (étape 21) | 19 200 |
+| `@dzgrid/dom` | 19 450 (étape 26, Q4) | 19 360 (étape 26 : `beforeRows`, `data-motion`, `ui.cellClass`) |
 | `@dzgrid/dom/rules` | 800 (étape 21) | 654 |
+| `@dzgrid/dom/motion-gsap` (coquille immédiate ; le cœur, `internal` et `./run/*` à part) | 800 (étape 26) | 586 |
+| motion, morceau paresseux (`motion-gsap/run/`, par-dessus la coquille, gsap à part) | 3 700 (étape 26) | 2 369 |
+| part de GSAP (`gsap kit: core`, relevée, sans budget) | — | 28 277 (71 989 min) |
 | textes `{en,fr,ar}-rules` | 150 / 170 / 200 (étape 21) | 148 / 166 / 192 |
 | `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 149 |
 | `@dzgrid/dom/internal` | 800 (étape 21) | 786 |
@@ -113,12 +119,13 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
 | `@dzgrid/dom/slots` | 1 450 (étape 21) | 1 246 |
 | `@dzgrid/dom/popup` | 1 500 | 1 473 (étape 18 : fermeture au clic dehors, `opener`) |
-| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème ; depuis l'étape 23 avec les valeurs de `@dzgrid/angular` (fesm2022 livré, Angular et rxjs à part) | 85 000 (K.8, Q1 de l'étape 18) | 75 623 (étape 23 ; JS 73 665 en 7 fichiers, CSS 1 958) |
+| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème ; depuis l'étape 23 avec les valeurs de `@dzgrid/angular` (fesm2022 livré, Angular et rxjs à part) | 85 000 (K.8, Q1 de l'étape 18) | 75 879 (étape 26 ; JS 73 833 en 7 fichiers, CSS 2 046 ; aucune animation dedans, test) |
+| profil écran d'audit + motion (`perf/profiles/audit-motion.ts`, relevé, sans budget) : le profil K.8 plus la coquille ; à côté, paresseux : le morceau motion et GSAP | — | 76 301 ; à côté 2 565 (morceau) et 27 794 (GSAP) |
 | K.8 dans la vraie construction de l'exemple (`npm run example:bytes`, relevé, la garde reste la ligne ci-dessus) : part DzGrid (default − baseline) / Angular et coquille / enveloppe | — (≤ 85 000, au-delà : arrêt) | 82 014 / 38 654 / ≈ 3 327 (étape 23) |
 | à côté, paresseux, sans budget : liste de valeurs / adaptateurs de dates date, range, moment / morceau tzslot partagé | — | 3 666 / 449, 1 107, 682 / 66 486 ; la première fenêtre de date télécharge 66 935 à 67 593 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
 | textes des filtres en / fr / ar | 850 / 980 / 1 200 (étape 15) | 707 / 831 / 941 |
-| thème | 2 050 (étape 17) | 1 958 (étape 21 : case refusée) |
+| thème | 2 350 (étape 26, Q4) | 2 046 (étape 26 : l'éclat, sa marque, les couleurs forcées) |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 

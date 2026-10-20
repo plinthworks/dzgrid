@@ -23,6 +23,8 @@ export interface CellView {
   /** The context the part last had: `update` only when it changed. */
   last: SlotContext['cell'] | null;
   lastRev: number;
+  /** The classes `ui.cellClass` gave it, as given (step 26). */
+  cls: string;
 }
 
 export interface RowView {
@@ -183,7 +185,7 @@ export class RowRenderer<T> {
     el.tabIndex = -1;
     const text = this.#doc.createTextNode('');
     el.append(text);
-    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN, part: null, handle: null, failed: undefined, last: null, lastRev: -1 };
+    return { el, value: null, text, col: null, inlineStart: Number.NaN, inlineSize: Number.NaN, part: null, handle: null, failed: undefined, last: null, lastRev: -1, cls: '' };
   }
 
   /**
@@ -416,6 +418,23 @@ export class RowRenderer<T> {
       setAttr(cell.el, 'data-span', span ? '' : null);
     }
     const { value, text } = data === undefined ? { value: null, text: '' } : cellValue(col, data as never, f.ctx);
+    // The host's classes from the data (step 26, cell-class.md): diffed, never the grid's own (dzg-).
+    const rule = col.def.ui?.cellClass;
+    if (rule || cell.cls) {
+      let next = '';
+      try {
+        if (rule && data !== undefined) next = rule({ value, text, row: data as never, key, column: col.id, context: f.partBase.context }) ?? '';
+      } catch (err) {
+        f.report(err);
+      }
+      if (next !== cell.cls) {
+        const cut = (t: string) => t.split(/\s+/).filter((c) => c && !c.startsWith('dzg-'));
+        const add = cut(next);
+        for (const c of cut(cell.cls)) if (!add.includes(c)) cell.el.classList.remove(c);
+        cell.el.classList.add(...add);
+        cell.cls = next;
+      }
+    }
     const part = f.partFor(col);
     if (part || cell.part) {
       if (cell.part && cell.part !== part) this.#unpart(cell);

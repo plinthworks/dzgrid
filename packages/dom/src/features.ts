@@ -45,6 +45,8 @@ export interface FeatureHandle {
    * imports the other.
    */
   readonly filter?: { edits(col: ResolvedColumn<unknown>, who: object): HeaderFilter | null; flush(column: string): void };
+  /** Runs at each paint before the rows are placed (motion reads the old places, step 26). */
+  beforeRows?(): void;
   /** Runs at each paint once the rows are placed (what is drawn over them). */
   afterRows?(f: Frame<unknown>): void;
   destroy(): void;

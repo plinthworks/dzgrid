@@ -1,6 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
- * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21).
+ * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
+ * `-- --only motion` motion with GSAP, step 26).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -859,6 +860,172 @@ async function rulesChecks(name, ctx) {
   }
 }
 
+/** Step 26: motion with GSAP (docs/behaviors/motion.md), on its own page, against its motion:false twin. */
+async function motionChecks(name, ctx) {
+  const open = async (qs, o = {}) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 760 });
+    if (o.reduce) await page.emulateMedia({ reducedMotion: 'reduce' });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/motion.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    return { page, errors };
+  };
+  // Until every tween and delayed call is over.
+  const settle = (page) => page.waitForFunction(() => window.t.running() === 0, null, { timeout: 5000 }).then(() => frames(page, 2));
+  const sortBy = (page, dir = 'desc') => page.evaluate((dir) => window.t.grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'amount', dir }] }, 'user'), dir);
+  const state = (page) => page.evaluate(() => [...document.querySelectorAll('.dzg-layer > .dzg-row')].map((r) => `${r.getAttribute('aria-rowindex')}:${r.querySelector('[data-col="name"]')?.textContent}`));
+  for (const [qs, rtl] of [['locale=fr-FR&theme=light', false], ['locale=ar-DZ&theme=dark', true]]) {
+    const tag = `motion ${rtl ? 'ar rtl dark' : 'fr ltr light'}`;
+    const { page, errors } = await open(qs);
+    const twin = await open(`${qs}&motion=0`);
+    // A sort: rows glide; no layout read from the change to the end of the tweens (the paint's own reads
+    // aside: the twin makes the same); the focus stays on its cell; the order and aria-rowindex are final at once.
+    for (const p of [page, twin.page]) {
+      await p.evaluate(() => window.t.grid.api.focusCell(window.t.key(3), 'name'));
+      await frames(p, 2);
+    }
+    const before = await page.evaluate(() => ({ focus: document.activeElement?.textContent }));
+    const counts = [];
+    for (const p of [page, twin.page]) {
+      await p.evaluate(() => { window.t.kept = document.activeElement; window.t.reads.rect = 0; window.t.reads.offset = 0; });
+      await sortBy(p);
+      await frames(p, 2);
+      counts.push(await p.evaluate(() => ({ ...window.t.reads, running: window.t.running(), y: [...document.querySelectorAll('.dzg-layer > .dzg-row')].some((r) => (r.style.transform || '').includes('translate')), same: document.activeElement === window.t.kept })));
+    }
+    const mid = await state(page);
+    const midTwin = await state(twin.page);
+    await frames(page, 4);
+    const during = await page.evaluate(() => ({ ...window.t.reads, same: document.activeElement === window.t.kept }));
+    await settle(page);
+    const after = await page.evaluate(() => ({ ...window.t.reads, same: document.activeElement === window.t.kept, left: [...document.querySelectorAll('.dzg-row, .dzg-cell')].filter((e) => e.style.transform || e.style.opacity).length }));
+    const twinReads = await twin.page.evaluate(() => ({ ...window.t.reads }));
+    check(name, `${tag}: a sort glides (y tweens on the rows), its twin does not`, counts[0].running > 0 && counts[0].y && counts[1].running === 0 && !counts[1].y, counts);
+    check(name, `${tag}: no getBoundingClientRect / offsetHeight from the sort to the tweens' end beyond the twin's paint`, after.rect === twinReads.rect && after.offset === twinReads.offset && during.rect === counts[0].rect && during.offset === counts[0].offset, { counts, during, after, twinReads });
+    check(name, `${tag}: activeElement unchanged across the sort glide`, before.focus && counts[0].same && during.same && after.same, { before, counts, during, after });
+    check(name, `${tag}: DOM order and aria-rowindex final at once, equal to the twin's mid-glide`, JSON.stringify(mid) === JSON.stringify(midTwin) && mid.length > 5, { mid: mid.slice(0, 4), midTwin: midTwin.slice(0, 4) });
+    check(name, `${tag}: nothing left inline once the glide ends`, after.left === 0, after);
+    // A live change: the cell flashes (tint, a mark at its start edge); axe 0 mid-flash; the hook ran.
+    const flash = await page.evaluate(async () => {
+      const d = window.t.grid.kernel.rows.displayed;
+      const k = d.keyAt(d.index(2));
+      const row = window.t.grid.kernel.rows.row(k).data;
+      window.t.grid.kernel.rows.applyTransaction({ update: [{ ...row, city: `${row.city}*` }] });
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const c = document.querySelector('.dzg-cell.dzg-flash');
+      if (!c) return null;
+      const s = getComputedStyle(c);
+      return { col: c.dataset.col, mark: s.borderInlineStartWidth, markColour: s.borderInlineStartColor, bg: s.backgroundColor, rtlMark: s.borderRightWidth, ltrMark: s.borderLeftWidth, v: c.style.getPropertyValue('--dzg-flash') };
+    });
+    let v = await axe(page);
+    check(name, `${tag}: a live change flashes its cell, the mark on the start side (${rtl ? 'right' : 'left'})`, flash && flash.col === 'city' && flash.mark === '3px' && (rtl ? flash.rtlMark === '3px' : flash.ltrMark === '3px'), flash);
+    check(name, `${tag}: axe 0 mid-flash`, v.length === 0, v);
+    await settle(page);
+    // The popup opening: GSAP fades its content in; the focus the popup host moved stays.
+    await page.click('.dzg-hcell[data-col="city"] .dzg-fbtn');
+    await frames(page, 1);
+    const pop = await page.evaluate(() => { const p = document.querySelector('.dzg-popup'); const c = p?.firstElementChild; window.t.inPopup = document.activeElement; return p ? { opacity: Number(getComputedStyle(c).opacity), tweens: window.t.gsap.getTweensOf(c).length, popupTransform: p.style.transform, focusIn: p.contains(document.activeElement) } : null; });
+    await page.waitForTimeout(250);
+    const popAfter = await page.evaluate(() => ({ same: document.activeElement === window.t.inPopup, opacity: getComputedStyle(document.querySelector('.dzg-popup').firstElementChild).opacity, left: document.querySelector('.dzg-popup').firstElementChild.style.opacity }));
+    check(name, `${tag}: the filter popup fades in by GSAP (its content; the popup itself untouched), the focus kept inside`, pop && pop.tweens === 1 && pop.opacity < 1 && pop.popupTransform === '' && pop.focusIn && popAfter.same && popAfter.opacity === '1' && popAfter.left === '', { pop, popAfter });
+    await page.keyboard.press('Escape');
+    await frames(page, 2);
+    check(name, `${tag}: the popup closes at once`, await page.evaluate(() => !document.querySelector('.dzg-popup')), null);
+    // The final picture equals the twin's after the same changes.
+    await twin.page.evaluate(async () => {
+      const d = window.t.grid.kernel.rows.displayed;
+      const k = d.keyAt(d.index(2));
+      const row = window.t.grid.kernel.rows.row(k).data;
+      window.t.grid.kernel.rows.applyTransaction({ update: [{ ...row, city: `${row.city}*` }] });
+    });
+    for (const p of [page, twin.page]) {
+      await p.evaluate(() => window.t.grid.api.focusCell(window.t.key(3), 'name'));
+      await p.mouse.move(990, 750);
+      await frames(p, 3);
+    }
+    await settle(page);
+    const shots = [await page.locator('#host').screenshot(), await twin.page.locator('#host').screenshot()];
+    await page.locator('#host').screenshot({ path: `${OUT}/${name}-motion-${rtl ? 'ar' : 'fr'}.png` });
+    check(name, `${tag}: the final screenshot equals the motion:false twin's`, shots[0].equals(shots[1]), { a: shots[0].length, b: shots[1].length });
+    check(name, `no page error ${tag}`, errors.length === 0 && twin.errors.length === 0, [...errors, ...twin.errors]);
+    await page.close();
+    await twin.page.close();
+
+    // The page slide: from the end side for the next page (negative x right to left).
+    const paged = await open(`${qs}&paging=1`);
+    const x = await paged.page.evaluate(async () => {
+      window.t.grid.kernel.dispatch({ type: 'page.go', index: 1 }, 'user');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return Number(window.t.gsap.getProperty(document.querySelector('.dzg-layer'), 'x'));
+    });
+    check(name, `${tag}: the next page slides in from the end side (x ${rtl ? '< 0' : '> 0'})`, rtl ? x < 0 : x > 0, x);
+    await settle(paged.page);
+    check(name, `no page error ${tag}, paged`, paged.errors.length === 0, paged.errors);
+    await paged.page.close();
+  }
+  // Reduced motion (CDP's emulated media): no transform, a still mark held 0.6 s.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=light', { reduce: true });
+    await sortBy(page);
+    await frames(page, 3);
+    const moved = await page.evaluate(() => ({ running: window.t.running(), t: [...document.querySelectorAll('.dzg-row')].filter((r) => r.style.transform).length }));
+    const marks = await page.evaluate(async () => {
+      const d = window.t.grid.kernel.rows.displayed;
+      const k = d.keyAt(d.index(2));
+      const row = window.t.grid.kernel.rows.row(k).data;
+      window.t.grid.kernel.rows.applyTransaction({ update: [{ ...row, city: `${row.city}!` }] });
+      const at = (ms) => new Promise((r) => setTimeout(() => { const c = document.querySelector('.dzg-cell.dzg-flash'); r(c ? { v: c.style.getPropertyValue('--dzg-flash'), transform: c.style.transform } : null); }, ms));
+      return [await at(100), await at(350), await at(400)];
+    });
+    check(name, 'motion reduced: a sort moves nothing (no tween, no transform)', moved.running === 0 && moved.t === 0, moved);
+    check(name, 'motion reduced: a live change keeps a still mark (--dzg-flash 1) about 0.6 s, then none', marks[0]?.v === '1' && marks[1]?.v === '1' && marks[2] === null, marks);
+    check(name, 'no page error, reduced motion', errors.length === 0, errors);
+    await page.close();
+  }
+  // Sorts with about 300 rows mounted: no long animation frame over 50 ms (LoAF); the twin (motion:false)
+  // measured the same way, for comparison. Three sorts each, the worst kept.
+  {
+    const res = [];
+    for (const twin of [false, true]) {
+      const { page, errors } = await open(`locale=fr-FR&theme=light&tall=1${twin ? '&motion=0' : ''}`);
+      res.push(await page.evaluate(async () => {
+        const seen = [];
+        const po = new PerformanceObserver((l) => { for (const e of l.getEntries()) seen.push(e.duration); });
+        po.observe({ type: 'long-animation-frame', buffered: false });
+        const mounted = document.querySelectorAll('.dzg-layer > .dzg-row').length;
+        for (const dir of ['asc', 'desc', 'asc']) {
+          window.t.grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: dir === 'desc' ? 'amount' : 'name', dir }] }, 'user');
+          await new Promise((r) => setTimeout(r, 600));
+        }
+        po.disconnect();
+        return { mounted, max: Math.round(Math.max(0, ...seen)), n: seen.length };
+      }));
+      check(name, `no page error, tall window${twin ? ', twin' : ''}`, errors.length === 0, errors);
+      await page.close();
+    }
+    const [m, t] = res;
+    check(name, `motion: sorts over a ${m.mounted}-row window: the longest animation frame ${m.max} ms, the twin's ${t.max} ms (0: none over 50 ms)`, m.mounted >= 250 && m.max < 50, res);
+  }
+  // A million rows: the sort still glides what it can, and nothing is left.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=light&rows=1000000');
+    const ms = await page.evaluate(async () => {
+      const t0 = performance.now();
+      window.t.grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'amount', dir: 'desc' }] }, 'user');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return performance.now() - t0;
+    });
+    await settle(page);
+    const left = await page.evaluate(() => [...document.querySelectorAll('.dzg-row, .dzg-cell')].filter((e) => e.style.transform || e.style.opacity).length);
+    check(name, `motion: a sort at 1 000 000 rows paints (${Math.round(ms)} ms) and leaves nothing inline`, left === 0, { ms, left });
+    check(name, 'no page error, a million rows', errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -868,6 +1035,7 @@ async function runEngine(name) {
     if (only) {
       if (only === 'parts' && name === 'chrome') await partsChecks(name, ctx);
       if (only === 'rules' && name === 'chrome') await rulesChecks(name, ctx);
+      if (only === 'motion' && name === 'chrome') await motionChecks(name, ctx);
       return;
     }
 
@@ -1195,6 +1363,7 @@ async function runEngine(name) {
     if (name === 'chrome') await pagingChecks(name, ctx);
     if (name === 'chrome') await partsChecks(name, ctx);
     if (name === 'chrome') await rulesChecks(name, ctx);
+    if (name === 'chrome') await motionChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

@@ -438,6 +438,11 @@ $emit: true !default;
     .dzg-check[data-dzg-refused] .dzg-box {
       border-color: GrayText;
     }
+
+    // A value flash's mark (step 26): the system's highlight.
+    .dzg-cell.dzg-flash {
+      border-inline-start-color: Highlight;
+    }
   }
 
   // Rows kept while the next ones load: the muted text colour, not an opacity (it keeps 4.5:1).
@@ -445,6 +450,15 @@ $emit: true !default;
   .dzg[data-stale] .dzg-row .dzg-seg-start,
   .dzg[data-stale] .dzg-row .dzg-seg-end {
     color: var(--dzg-stale-fg, var(--tz-fg-muted));
+  }
+
+  // The value flash (the motion feature, step 26): a tint the motion fades (--dzg-flash 1 → 0)
+  // and a mark at the start edge, not colour alone; held still under reduced motion (no media
+  // query here). The padding gives the mark's width back: the text does not move.
+  .dzg-cell.dzg-flash {
+    border-inline-start: 3px solid color-mix(in srgb, var(--dzg-flash-color, var(--tz-accent)) calc(var(--dzg-flash, 1) * 100%), transparent);
+    padding-inline-start: calc(var(--dzg-cell-padding-inline, 0.5rem) - 3px);
+    background-color: color-mix(in srgb, var(--dzg-flash-color, var(--tz-accent)) calc(var(--dzg-flash, 1) * 18%), transparent);
   }
 
   // The ready cell parts (@dzgrid/dom/parts, step 20): a badge's frame, shape and surface in its
@@ -498,10 +512,11 @@ $emit: true !default;
     font-size: 0.875em;
   }
 
+  // CSS motion only where it is welcome, and not switched off (`settings.motion: false`, step 26).
   @media (prefers-reduced-motion: no-preference) {
-    .dzg-row,
-    .dzg-row .dzg-seg-start,
-    .dzg-row .dzg-seg-end {
+    .dzg:not([data-motion=off]) .dzg-row,
+    .dzg:not([data-motion=off]) .dzg-row .dzg-seg-start,
+    .dzg:not([data-motion=off]) .dzg-row .dzg-seg-end {
       transition: background-color 80ms linear;
     }
   }

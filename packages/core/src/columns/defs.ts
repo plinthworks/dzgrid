@@ -45,8 +45,11 @@ export interface ColumnDef<T, V = unknown> {
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';
-  /** Parts by name for this column (a cell renderer, a header, a tooltip): plain names, resolved by the grid's registry. */
-  readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string };
+  /**
+   * Parts by name for this column (a cell renderer, a header, a tooltip): plain names, resolved by the grid's registry.
+   * `cellClass` (step 26, docs/behaviors/cell-class.md): classes for a body cell from its data, space-separated (null: none).
+   */
+  readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string; readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined };
   /** Shown over the header, already translated by the host. */
   readonly headerTooltip?: string;
   /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */
@@ -64,6 +67,16 @@ export interface ColumnDef<T, V = unknown> {
   readonly colSpan?: (ctx: SpanCtx<T>) => number;
   /** `'text'`: in a CSV file, a digits-only value is written `="0123"` so Excel keeps it as text (csv-export.md). */
   readonly csv?: 'text';
+}
+
+/** What `ui.cellClass` is told about one body cell: its coerced value, displayed text, row, key, column id, `settings.context`. */
+export interface CellClassContext<T, V = unknown> {
+  readonly value: V | null;
+  readonly text: string;
+  readonly row: Readonly<T>;
+  readonly key: RowKey;
+  readonly column: string;
+  readonly context: unknown;
 }
 
 /**

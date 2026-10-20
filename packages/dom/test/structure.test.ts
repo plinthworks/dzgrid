@@ -17,9 +17,9 @@ describe('the DOM layer’s shape', () => {
   });
 
   it('keeps the optional features out of the base: only features.ts may know them', () => {
-    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots|search|rules)\.js'/;
+    const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules|motion-gsap)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots|search|rules|motion-gsap)\.js'/;
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'search.ts', 'pagination.ts', 'export.ts', 'parts.ts', 'rules.ts'].includes(relative(SRC, f)))
+      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules|motion-gsap)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'search.ts', 'pagination.ts', 'export.ts', 'parts.ts', 'rules.ts', 'motion-gsap.ts'].includes(relative(SRC, f)))
       .filter((f) => optional.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
@@ -203,5 +203,36 @@ describe('the DOM layer’s shape', () => {
     expect(dynamic.sort()).toEqual(['@dzgrid/core/server', '@dzgrid/core/spans']);
     // The base never reaches the csv entry; only the export chunk does.
     expect(files(SRC).filter((f) => !/^export\/run\//.test(relative(SRC, f)) && /^import (?!type )[^;]*from '@dzgrid\/core\/csv'/m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+  });
+  it('keeps GSAP in the motion chunk: no file outside motion-gsap/run/ imports it, statically or not (step 26)', () => {
+    const gsap = /(?:^|\n)\s*(?:import|export) (?!type )[^;]*from '(gsap|gsap\/[^']*)'|import\('gsap(\/[^']*)?'\)/;
+    const offenders = files(SRC).filter((f) => !/^motion-gsap\/run\//.test(relative(SRC, f)) && gsap.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f));
+    expect(offenders).toEqual([]);
+    // Nor the core, nor the theme.
+    const core = fileURLToPath(new URL('../../core/src', import.meta.url));
+    expect(files(core).filter((f) => /gsap/i.test(readFileSync(f, 'utf8'))).map((f) => relative(core, f))).toEqual([]);
+    expect(readFileSync(fileURLToPath(new URL('../../theme/dzgrid.scss', import.meta.url)), 'utf8')).not.toMatch(/gsap/i);
+    // The run chunk does reach it (by import(), or the application's own instance).
+    const run = files(join(SRC, 'motion-gsap/run')).map((f) => readFileSync(f, 'utf8')).join('\n');
+    expect(run).toMatch(/import\('gsap'\)/);
+  });
+
+  it('has the motion shell reach the base only through the grid’s context and the types; the run chunk only by import() (step 26)', () => {
+    const shell = files(SRC).filter((f) => relative(SRC, f) === 'motion-gsap.ts' || /^motion-gsap\/[^/]+\.ts$/.test(relative(SRC, f)));
+    expect(shell.map((f) => relative(SRC, f)).sort()).toEqual(['motion-gsap.ts', 'motion-gsap/index.ts']);
+    const offenders = shell
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: @dzgrid\/(core|core\/internal)$/.test(s) && s !== 'motion-gsap.ts: ./motion-gsap/index.js');
+    expect(offenders).toEqual([]);
+    expect(readFileSync(join(SRC, 'motion-gsap/index.ts'), 'utf8')).toMatch(/import\('\.\/run\/index\.js'\)/);
+    // The run chunk: the core, its internal entry and its own folder.
+    const run = files(join(SRC, 'motion-gsap/run'));
+    expect(run.length).toBeGreaterThan(1);
+    const runOff = run
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: (@dzgrid\/core(\/internal)?|\.\/[a-z]+\.js)$/.test(s));
+    expect(runOff).toEqual([]);
+    // Nothing else imports the entry or its chunk, the features seam included.
+    expect(files(SRC).filter((f) => !/^motion-gsap(\/|\.ts$)/.test(relative(SRC, f)) && /motion-gsap/.test(readFileSync(f, 'utf8').replace(/\/\*[^]*?\*\/|^\s*\/\/.*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
   });
 });

@@ -159,6 +159,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     setAttr(el.root, 'data-stale', loading && d.count ? '' : null);
     setPx(el.body, 'block-size', mapper.physicalHeight);
     setPx(el.body, 'inline-size', L.totalWidth + extra);
+    setAttr(el.root, 'data-motion', settings.motion === false ? 'off' : null);
+    // Before anything of the rows moves (the layer included): what a feature reads of the old places.
+    for (const f of g.features) f.beforeRows?.();
     setPx(el.layer, 'inset-block-start', w.placement.layerTop);
 
     const ciKey = columns.version * 2 + (check ? 1 : 0);

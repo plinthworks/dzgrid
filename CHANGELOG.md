@@ -12,6 +12,32 @@ architecture, the core's seed (row identities, calendar days apart from
 instants, the bounds of a day in a zone), conformance cases written by hand,
 and ten spikes in three browser engines.
 
+### Added (Phase 3, step 26: motion with GSAP, `ui.cellClass`, the host hook)
+
+- **`@dzgrid/dom/motion-gsap`**: `motion({ preset, effects, gsap, onCell, onRow })`, a feature. Rows
+  glide after a sort or a filter (y only, from the offsets the grid wrote: no layout read), entering
+  rows fade in, a value a transaction changed flashes (a tint and a mark at the cell's start edge),
+  a page change slides in the reading direction, the filter popup's content and the overlay fade in.
+  Transform and opacity only; exactly `transform,opacity,--dzg-flash` cleared at the end; a pooled
+  row or cell shown for another row has its effects finished first. Reduced motion followed live: no
+  movement, a still mark 0.6 s. An eager shell (`load()`, `loaded`) and a lazy chunk with GSAP,
+  loaded at idle after the first rows. `onCell`/`onRow` hand the element to the application's own
+  GSAP code after the grid's guards (`false`: handled). One `motion()` serves several grids.
+- **`gsap ^3.13.0`**, an optional peer of `@dzgrid/dom` (GSAP's own Standard License, not MIT;
+  DzGrid stays MIT and ships none of it); a root devDependency.
+- **`settings.motion`** (live): `false` stops every effect and sets `data-motion="off"` on the root.
+- **`FeatureHandle.beforeRows()`**: once per paint, before the layer and the rows move.
+- **`columns[].ui.cellClass(ctx)`**: classes for a body cell from its data (`value`, `text`, `row`,
+  `key`, `column`, `context`), part cells too; diffed tokens, `dzg-` ones ignored; a throw is
+  reported and its classes removed. Type `CellClassContext` in `@dzgrid/core`.
+- **Theme**: `.dzg-cell.dzg-flash` (tint `--dzg-flash-color` × `--dzg-flash`, a 3 px start mark,
+  `Highlight` in forced colours), five contrast pairs; CSS transitions only under
+  `prefers-reduced-motion: no-preference` and `:not([data-motion=off])`.
+- Playground « Animations » (`playground/motion.html`), the Angular example loads motion after the
+  grid is made, outside the zone; browser checks `npm run test:browser -- --only motion`.
+- Sizes: `@dzgrid/dom` 19 450, theme 2 350, `@dzgrid/dom/motion-gsap` 800 and its run chunk 3 700
+  (over the shell); `gsap kit: core` and `profile: audit screen + motion` recorded.
+
 ### Added (Phase 3, step 23: the Angular example)
 
 - **`examples/angular-audit`**: the audit screen as an Angular 21 application installed from the

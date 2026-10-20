@@ -74,7 +74,12 @@
     { "what": "badge danger: label on its surface", "fg": "--tz-fg", "bg": "--dzg-badge-danger-bg", "min": 4.5 },
     { "what": "badge danger: frame on a selected row", "fg": "--tz-danger", "bg": "--dzg-row-selected-bg", "min": 3 },
     { "what": "refused box border", "fg": "--tz-fg-muted", "bg": "--dzg-refused-bg", "min": 3 },
-    { "what": "refused box border on hover", "fg": "--tz-fg-muted", "bg": "--dzg-row-hover-bg", "min": 3 }
+    { "what": "refused box border on hover", "fg": "--tz-fg-muted", "bg": "--dzg-row-hover-bg", "min": 3 },
+    { "what": "cell text on a value flash", "fg": "--tz-fg", "bg": "--dzg-flash-bg", "min": 4.5 },
+    { "what": "cell text on a value flash, selected row", "fg": "--tz-fg", "bg": "--dzg-flash-selected-bg", "min": 4.5 },
+    { "what": "cell text on a value flash, row hovered", "fg": "--tz-fg", "bg": "--dzg-flash-hover-bg", "min": 4.5 },
+    { "what": "value flash mark", "fg": "--dzg-flash-color", "bg": "--dzg-flash-bg", "min": 3 },
+    { "what": "value flash mark, selected row", "fg": "--dzg-flash-color", "bg": "--dzg-flash-selected-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -88,6 +93,10 @@
     "--dzg-badge-info-bg": "color-mix(in srgb, var(--tz-accent) 12%, var(--tz-bg))",
     "--dzg-badge-success-bg": "color-mix(in srgb, var(--tz-success) 12%, var(--tz-bg))",
     "--dzg-badge-warning-bg": "color-mix(in srgb, var(--tz-warning) 12%, var(--tz-bg))",
-    "--dzg-badge-danger-bg": "color-mix(in srgb, var(--tz-danger) 12%, var(--tz-bg))"
+    "--dzg-badge-danger-bg": "color-mix(in srgb, var(--tz-danger) 12%, var(--tz-bg))",
+    "--dzg-flash-color": "var(--tz-accent)",
+    "--dzg-flash-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--tz-bg))",
+    "--dzg-flash-selected-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-selected-bg))",
+    "--dzg-flash-hover-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-hover-bg))"
   }
 }

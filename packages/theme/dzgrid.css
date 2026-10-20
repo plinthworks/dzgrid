@@ -369,11 +369,20 @@
   .dzg-check[data-dzg-refused] .dzg-box {
     border-color: GrayText;
   }
+  .dzg-cell.dzg-flash {
+    border-inline-start-color: Highlight;
+  }
 }
 .dzg[data-stale] .dzg-row,
 .dzg[data-stale] .dzg-row .dzg-seg-start,
 .dzg[data-stale] .dzg-row .dzg-seg-end {
   color: var(--dzg-stale-fg, var(--tz-fg-muted));
+}
+
+.dzg-cell.dzg-flash {
+  border-inline-start: 3px solid color-mix(in srgb, var(--dzg-flash-color, var(--tz-accent)) calc(var(--dzg-flash, 1) * 100%), transparent);
+  padding-inline-start: calc(var(--dzg-cell-padding-inline, 0.5rem) - 3px);
+  background-color: color-mix(in srgb, var(--dzg-flash-color, var(--tz-accent)) calc(var(--dzg-flash, 1) * 18%), transparent);
 }
 
 .dzg-badge,
@@ -425,9 +434,9 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .dzg-row,
-  .dzg-row .dzg-seg-start,
-  .dzg-row .dzg-seg-end {
+  .dzg:not([data-motion=off]) .dzg-row,
+  .dzg:not([data-motion=off]) .dzg-row .dzg-seg-start,
+  .dzg:not([data-motion=off]) .dzg-row .dzg-seg-end {
     transition: background-color 80ms linear;
   }
 }

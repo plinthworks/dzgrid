@@ -41,6 +41,10 @@
       "types": "./src/rules.ts",
       "default": "./src/rules.ts"
     },
+    "./motion-gsap": {
+      "types": "./src/motion-gsap.ts",
+      "default": "./src/motion-gsap.ts"
+    },
     "./internal": {
       "types": "./src/internal.ts",
       "default": "./src/internal.ts"
@@ -125,13 +129,17 @@
   "peerDependencies": {
     "@dzgrid/core": "0.0.0",
     "@tzslot/core": ">=2.2.0 <3",
-    "@tzslot/dom": ">=2.2.0 <3"
+    "@tzslot/dom": ">=2.2.0 <3",
+    "gsap": "^3.13.0"
   },
   "peerDependenciesMeta": {
     "@tzslot/core": {
       "optional": true
     },
     "@tzslot/dom": {
+      "optional": true
+    },
+    "gsap": {
       "optional": true
     }
   }

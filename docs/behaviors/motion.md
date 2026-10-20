@@ -1,0 +1,34 @@
+# Motion
+
+## What the user does
+Sorts by a header, types a filter, turns the page, opens a filter popup, or watches a grid whose values the application updates live (prices, beds free, results arriving). Some users have asked their system to reduce motion; some use a screen reader or a high-contrast mode.
+
+## What they observe
+- After a sort or a filter, the rows that stay on screen glide to their new place (at most 300 ms); rows that come into view fade in; rows that leave just vanish. The order, the focus and what a screen reader reads are already the new ones from the first frame.
+- A page change slides the rows a little (24 px, 200 ms) from the side the reading goes to: from the end side for the next page (the left in Arabic), from the start side for the previous one.
+- A value the application changes live is tinted for a moment, with a short bar at the cell's start edge (not colour alone); many values changed at once, or while the user scrolls, are not marked.
+- A filter popup and the grid's overlay (loading, no rows) fade in with a small rise; a popup closes at once.
+- With reduced motion asked: nothing moves, nothing fades; a value changed live keeps a still mark for 0.6 s. In forced colours the mark is drawn in the system's highlight colour.
+- The first paint, a scroll, a reload of all rows, typing fast in a filter: nothing animates.
+
+## What DzGrid does
+- **An optional entry** `@dzgrid/dom/motion-gsap`: `motion({ preset?: 'sober', effects?: { flip?, enter?, flash?, page?, popup? }, gsap?, onCell?, onRow? })`, a grid feature. GSAP is an optional peer the application installs (`gsap ^3.13`); none of it is in `@dzgrid/dom`. The feature's eager part is small; the tweens and GSAP itself are a chunk loaded in idle time after the first rows are painted (or at `load()`); effects before it arrives are skipped (owner Q1). One `motion()` may serve several grids.
+- **Transform and opacity only** (and the `--dzg-flash` variable with the `dzg-flash` class): never a layout property, never `visibility` or `hidden`. A tween ends by removing exactly `transform`, `opacity` and `--dzg-flash`, so the inline sizes and offsets the grid writes stay. No layout read: a row's old place is the offset the grid wrote, taken just before the rows are placed (`beforeRows`).
+- **Rows glide** (`flip`, `enter`) after a sort or a filter (the model's `order` or `query` change): the rows mounted before and after move by the difference of their offsets, y only; entering rows fade in (120 ms, staggered), at most 20 — more, and the window is mostly new: it simply shows (a frame stays short). Skipped: more than 60 rows moving, a row moving more than a screen (that row only), a scroll between the change and the paint, an armed paint less than 150 ms after the previous one (typing).
+- **Pooled rows**: a row or cell element shown again for another row or column has its effect finished and cleared before anything else (the grid recycles its elements).
+- **Value flash** (`flash`): only after a live change of rows (owner Q3): a transaction the application applied (`update`, `add`), or a `rows` update that replaces only a few rows (the model reports both as the same delta); never after a full reload (a reset: more than half the rows new); the same row and column whose displayed text changed; at most 50 cells in a paint (more: none), at most one per cell every 500 ms, none within 150 ms of a scroll. It is not announced.
+- **Page slide** (`page`): the rows' layer, sign from the direction and the page moved; an unknown page fades only; not on the first paint.
+- **Popups and overlay** (`popup`; owner Q2): a popup opening (its content: fade and a 4 px rise; the popup element itself, fixed or in the top layer, is never touched) and the overlay appearing (a fade) are animated by GSAP once the chunk is there (before, they simply appear); the popup host has already placed it and moved the focus; the motion never touches the focus; close is instant.
+- **Switches**: `settings.motion: false` (live) stops every effect, finishes those running, keeps the chunk from loading, and sets `data-motion="off"` on the grid's root (the theme's motion rules honour it). Each effect has its switch in `effects`.
+- **Reduced motion** is followed live (`gsap.matchMedia`, reduce assumed until it answers); a change finishes the effects running.
+- **The host hook**: `onCell(el, c, 'changed')` and `onRow(el, c, 'entered' | 'moved')` hand the element to the application's own GSAP code, after DzGrid's guards (armed, not scrolling, caps, at most 50 calls per paint). `c` carries the key, the row, the column (id), the value and its text (and the previous text), `context` and `reduced`. Returning `false` means handled: the built-in effect is skipped. A hook may animate `el` only (transform, opacity, `--dzg-*`, classes); a pooled element's hook tweens are finished like the grid's (pass the same `gsap` as `motion({ gsap })`). A throw is reported. Under reduced motion only `changed` is called, with `reduced: true`. Reasons `saving`, `saved`, `failed` are reserved for editing (Phase 4).
+- **GSAP missing**: the grid works, without motion, and tells one problem (`missing-feature`, path `features.motion`, detail `gsap`).
+- **Destroyed**: the effects running are finished and cleared, delayed calls killed, the media watch reverted once the last grid goes.
+
+## Where DzGrid differs on purpose
+- Motion is opt-in and never needed to read the grid: the DOM order, `aria-rowindex`, the tab stops and the focus are final before any frame moves.
+- Reduced motion keeps the information of a flash (a still mark), not its movement.
+- GSAP is not MIT: it comes under GSAP's own "Standard License" (Webflow), accepted by the application that installs it. DzGrid itself stays MIT and ships none of it (ARCHITECTURE).
+
+## Tests
+`packages/dom/test/motion-seam.test.ts` (the `beforeRows` seam, `data-motion`), `motion-gsap.test.ts` (real GSAP in jsdom, `matchMedia` stubbed), `motion-missing.test.ts`, `motion-walk.test.ts` (against a `motion: false` twin), `structure.test.ts`, `packages/theme/test/motion.test.ts`, `packages/angular/test-zone/motion-zone.test.ts`, `perf/test/audit-profile.test.ts`; browser checks `npm run test:browser -- --only motion`.

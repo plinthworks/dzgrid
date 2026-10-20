@@ -61,4 +61,16 @@ describe('the K.8 audit profile', () => {
     expect(profile.get('@dzgrid/dom/locales/ar-pagination')?.has('AR_PAGINATION')).toBe(true);
     expect(profile.get('@dzgrid/dom/locales/ar-export')?.has('AR_EXPORT')).toBe(true);
   });
+  it('imports no motion: neither @dzgrid/dom/motion-gsap nor gsap, statically (step 26: K.8 holds; motion is lazy, beside)', () => {
+    const statically = /(?:^|\n)\s*(?:import|export)\s+(?!type\b)[^;]*from\s*'(@dzgrid\/dom\/motion-gsap|gsap(?:\/[^']*)?)'/;
+    for (const f of ['perf/profiles/audit.ts', 'perf/audit-screen.ts', ...tsUnder('examples/angular-audit/src')]) expect(statically.test(read(f)), f).toBe(false);
+    expect([...profile.keys()].filter((s) => /motion|gsap/.test(s))).toEqual([]);
+    // The informational line beside it adds the motion shell to the same profile, nothing else.
+    const withMotion = read('perf/profiles/audit-motion.ts');
+    expect(withMotion).toMatch(/export \* from '\.\/audit\.js';/);
+    expect([...namedValues(withMotion, 'export').entries()].map(([k, v]) => [k, [...v]])).toEqual([['@dzgrid/dom/motion-gsap', ['motion']]]);
+    // The Angular example loads it only by import(), outside the zone.
+    const example = tsUnder('examples/angular-audit/src').map(read).join('\n');
+    expect(example).toMatch(/runOutsideAngular\([^]*?import\('@dzgrid\/dom\/motion-gsap'\)/);
+  });
 });
