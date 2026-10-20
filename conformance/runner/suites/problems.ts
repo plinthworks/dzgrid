@@ -2,6 +2,8 @@ import { checkPage } from '@dzgrid/core/internal';
 import { liveChangeProblems, messageProblems, partNameFor, resolveOperations, resolveColumns, type Problem } from '@dzgrid/core';
 import { createRowStore, compileFilter, missingFeatureProblems, sortIndices } from '@dzgrid/core/internal';
 import { refusalProblems } from '@dzgrid/core/rules';
+// The Angular wrapper's registry rule (step 22): a pure module of that package, no Angular in it.
+import { shadowedParts } from '../../../packages/angular/src/shadow.js';
 import { harness } from '../harness.js';
 import { kindsOf } from '../kinds.js';
 import { runSource } from './source.js';
@@ -55,6 +57,9 @@ export const problems: Record<string, Suite> = {
       // A host's selection refused by a rule (step 21): the warning the rules feature tells.
       case 'selection-refused':
         return { problems: refusalProblems(input.refusal) };
+      // A part name hidden by a later layer of an Angular grid's registry (step 22).
+      case 'part-shadowed':
+        return { problems: shadowedParts(input.layers) };
       case 'sort': {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(sortIndices(input.sort, null, h.env()).problems) };

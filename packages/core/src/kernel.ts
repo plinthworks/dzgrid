@@ -95,6 +95,13 @@ export type GridEvent<T> =
   /** The latest request failed: the host's error unchanged; the rows shown stay, under the error overlay. */
   | { readonly type: 'fetchFailed'; readonly source: 'data'; readonly error: unknown; readonly key: string; readonly page: number | null }
   /**
+   * An Angular part's `emit(name, detail)` (`@dzgrid/angular`, step 22; the wrapper sends them, the
+   * core and the DOM layer never do): a cell's, with the column and the key of the row it shows at
+   * the call; any other slot's, with its column (null for the overlay and the footer).
+   */
+  | { readonly type: 'cellAction'; readonly source: 'user'; readonly column: string; readonly key: RowKey; readonly name: string; readonly detail: unknown }
+  | { readonly type: 'partAction'; readonly source: 'user'; readonly slot: string; readonly column: string | null; readonly name: string; readonly detail: unknown }
+  /**
    * The CSV export (`@dzgrid/dom/export`, step 19, docs/behaviors/csv-export.md): data only, never a
    * cell value nor a row key. `id` ties a run's events; `at` is ISO UTC.
    */

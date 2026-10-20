@@ -38,6 +38,7 @@ export const PROBLEM_CODES = [
   'invalid-column-group',
   'missing-feature',
   'selection-refused',
+  'part-shadowed',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

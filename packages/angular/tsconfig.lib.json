@@ -24,6 +24,9 @@
       ],
       "@dzgrid/dom/*": [
         "../dom/dist/*.d.ts"
+      ],
+      "@dzgrid/core/*": [
+        "../core/dist/*.d.ts"
       ]
     },
     "types": []

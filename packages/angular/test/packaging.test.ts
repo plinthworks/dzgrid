@@ -67,3 +67,34 @@ describe('how the packages reach each other', () => {
     expect(resolve(dirname(from), '../keys/a.js').startsWith(join(packages, 'dom') + sep)).toBe(true);
   });
 });
+
+describe('the Angular package’s manifest and public API (step 22)', () => {
+  const manifest = JSON.parse(readFileSync(join(packages, 'angular', 'package.json'), 'utf8'));
+
+  it('peers on Angular 19 to 22 (owner Q3), the DOM layer and the core; no runtime dependency', () => {
+    const angular = '^19.0.0 || ^20.0.0 || ^21.0.0 || ^22.0.0';
+    expect(manifest.peerDependencies['@angular/core']).toBe(angular);
+    expect(manifest.peerDependencies['@angular/common']).toBe(angular);
+    // tzslot stays an optional peer (the date filters' kits, through @dzgrid/dom/filters); every other peer is required.
+    const required = Object.keys(manifest.peerDependencies).filter((k) => !manifest.peerDependenciesMeta?.[k]?.optional).sort();
+    expect(required).toEqual(['@angular/common', '@angular/core', '@dzgrid/core', '@dzgrid/dom']);
+    expect(manifest.dependencies).toBeUndefined();
+  });
+
+  it('declares real exports', () => {
+    expect(manifest.exports['.']).toEqual({ types: './src/index.ts', default: './src/index.ts' });
+  });
+
+  it('exports what the behaviour sheet names, and the probe is gone', async () => {
+    const api = await import('@dzgrid/angular');
+    expect(Object.keys(api).sort()).toEqual([
+      'DZGRID_ANGULAR_VERSION', 'DZG_DEFAULTS', 'DZG_ENV', 'DZG_MESSAGES', 'DZG_PARTS',
+      'DzGrid', 'DzgController', 'DzgExport', 'DzgPart', 'DzgSearch', 'componentPart', 'fromObservable', 'provideDzGrid',
+    ]);
+  });
+
+  it('keeps every Angular import out of the pure registry helpers (the conformance runner loads them in node)', () => {
+    const text = readFileSync(join(packages, 'angular', 'src', 'shadow.ts'), 'utf8');
+    expect(text).not.toMatch(/@angular\//);
+  });
+});

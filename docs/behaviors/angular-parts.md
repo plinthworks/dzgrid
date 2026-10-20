@@ -1,0 +1,40 @@
+# Angular: the grid as a component, parts as components and templates (`@dzgrid/angular`, step 22)
+
+Plan: `docs/phase-3-steps/step22-angular-blueprint.md`; decisions: `step22-decisions.md` (Q1–Q4, they win).
+
+## What the user does
+Nothing different from the plain grid: they scroll, sort, filter, search, tick rows and press the buttons an application drew in its cells, headers, overlay, floating row and footer. The application is written in Angular.
+
+## What they observe
+- The grid looks and behaves exactly as `createGrid` does (same DOM, same keys, same right to left, same announcements): the wrapper adds no element of its own around it (its host takes no box).
+- A cell drawn by an Angular component or template keeps its state while the list scrolls; a button in it keeps its focus while its row stays retained; nothing flickers.
+- A button the application drew in a cell does what the application says (opens a record, flags a row) for the row it was drawn for, even after the cell was reused for another row.
+- One broken cell component costs that cell only: it is empty, the rest paints.
+- Pressing a search field or an export button the application placed outside the grid drives the grid's quick search or CSV export.
+
+## What DzGrid does
+- **`<dz-grid>`** (standalone, OnPush, signal inputs, `exportAs: 'dzGrid'`). Required: `columns`, `getRowId`; `messages` is required unless `provideDzGrid({ messages })` gave it (a tag binding wins). Live inputs, passed to `update()` only when their identity changed: `rows`, `source`, `columns`, `messages`, `locale`, `timeZone`, `numerals`, `direction`, `density`, `overlay`, `label`, `tooltips`, `overscan`, `searchWarmup`, `selection` (mode, checkbox, `canSelect`), `context`, `fullWidth`, `parts`. Fixed, taken at creation: `getRowId`, `operations`, `pagination`, `filterKinds`, `clock`, `injectStyles`, `nonce`, `features`; a later change is refused by the grid (`unsupported-live-change`, an error problem), as `update()` does. `T` is inferred from `[rows]` (and `[columns]`, `[getRowId]`).
+- **The host element** takes no box: its `display` is `contents`, set through the CSSOM (a strict CSP allows it), so the grid's root sizes against the application's container.
+- **Models** (`[(quick)]`, `[(filter)]`, `[(selected)]`): unset (undefined), the grid owns its state; set, the application's value is written to the grid as the host (`quick.set`, `filter.set`, `selection.set`), and what the user (or the data) changes comes back into the model. A value equal to the grid's state is not written again (no echo loop). The selection's model is `selected` because `selection` is the settings input (mode, checkbox, rule).
+- **Outputs:** `gridEvent` (every event), `cellClicked`, `rowClicked`, `cellAction`, `partAction`, `fetchFailed`, `problems` (each problem batch), `gridReady` (the controller, once the grid exists). They are emitted in Angular's zone when the application has one; never after the component is destroyed.
+- **Controller `DzgController<T>`** (injectable inside the grid: parts, templates, children): signals `ready()` and `kernel()` (null before the grid exists and on a server); `dispatch(command)` (as the API), `focusCell`, `ensureVisible`, `refresh`, `announce`, `openFilter(column)` / `closeFilter()` (through the `filters()` feature given in `features`; false / nothing without it).
+- **`provideDzGrid({ messages?, parts?, defaults? })`**: an application's settings once (`defaults`: `locale`, `timeZone`, `direction`, `density`, `numerals`); a binding on the tag wins. Tokens `DZG_MESSAGES`, `DZG_PARTS`, `DZG_DEFAULTS`.
+- **A part as a component:** `componentPart(slot, Component)` makes a registry entry, like `definePart`. The component receives its slot's whole context in one signal input named **`cell`**, whatever the slot (owner Q2): a `header` component reads `cell().label`, `cell().filter`, `cell().toggleSort`; a `footer` component `cell().page`. The interface `DzgPartComponent<S>` (and `DzgCell` for cells) types it.
+- **A part as a template:** `<ng-template dzgPart="name" slot="header" let-c>…</ng-template>` inside `<dz-grid>` registers the template under `name` for that slot (`cell` by default); `c` is the slot's context (typed by the `slot`), also available as `let-c="cell"`.
+- **`emit`:** every Angular part's context carries `emit(name, detail?)`. In a cell it sends the grid event `cellAction { column, key, name, detail }` (source `user`) for the row and column the cell shows **at the moment of the call** (a reused cell sends its new row's key); in any other slot `partAction { slot, column, name, detail }` (`column` null for the overlay and the footer). Both reach `(gridEvent)`, their own output and the grid's `onEvent` subscribers. Plain DOM parts do not get it (zero bytes in the core and the DOM layer).
+- **Registry order** (the later wins a name): the features' parts, `provideDzGrid({ parts })`, `[parts]`, then the `dzgPart` templates. A name a later layer takes from an earlier one is the warning **`part-shadowed`** at `parts.<name>`, the detail naming the layer hidden (`feature`, `provider`, `parts`), told once per name per grid.
+- **Mounting (S6's pool):** a part mounts once per pooled host: the component is created with the application's environment and the grid's element injector (so it can inject `DzgController` and `DzGrid`), its view attached to the application (signals it reads keep it current), its input set, checked once, its element appended to the host. A rebind of the cell to another row gives the same instance a new `cell` value and checks that view only; a rebind that changes nothing the part sees does not reach it (the grid's rule). A template's view is created once and its context replaced on rebind.
+- **Destroyed with its host:** the view is detached and destroyed, its nodes removed, when the grid destroys the part (the column leaves the window, the registry changes, a throw, the grid's end). Mounts equal destroys once `<dz-grid>` is destroyed.
+- **A component that throws** (in its constructor, its first check or a later one) follows the grid's rule: that cell is empty, the error reported (`reportError`), the component destroyed; not tried again on that row until the row's data changes.
+- **Focus:** the grid's Enter or F2 calls the component's `focus()` when it has one, else focuses the first tabbable element inside it. A control inside owns its keys as a plain part's does (`cell-widget`); a component must not stop Tab or Escape from reaching the grid.
+- **Directives:** `input[dzgSearch]="search"` binds the page's field to a `quickSearch()` feature (`dzgSearchDebounce` optional), `button[dzgExport]="exporter"` binds a button to a `csvExport()` feature (`dzgExportScope` optional). Both bind after the first render, before or after the grid exists, and unbind on destroy.
+- **`fromObservable(fn)`** turns `(request) => Observable<response>` into a `DataSource`: the first value answers; an abort of the request unsubscribes (an HTTP call is cancelled); an error rejects; completing without a value rejects.
+- **Zones:** zoneless first. With zone.js, the grid is created outside Angular's zone (its scroll and pointer listeners run no change detection); parts mount outside it; outputs are emitted inside it.
+- **Server rendering:** on a server the component renders nothing and creates no grid (no `document` touched); `componentPart` and `provideDzGrid` can be imported there.
+
+## Not done here
+- `onEvent` as an input: `(gridEvent)` is the Angular form.
+- A real `ng build`, the Angular audit example, `ng build` smoke on 19 and 22: step 23.
+
+## Tests
+`packages/angular/test/parts-component.test.ts`, `parts-template.test.ts`, `slots-angular.test.ts`, `inputs.test.ts`, `directives.test.ts`, `ssr.test.ts`, `bench.test.ts`, `packaging.test.ts`, `template.test.ts`; zone.js in its own project: `packages/angular/test-zone/zone.test.ts`; the conformance case `conformance/cases/problems/part-shadowed.json`; in Chrome: `packages/angular/browser/` (`node packages/angular/browser/run.mjs`).

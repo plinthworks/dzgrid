@@ -1,0 +1,224 @@
+import {
+  ApplicationRef,
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  EnvironmentInjector,
+  Injector,
+  NgZone,
+  PLATFORM_ID,
+  computed,
+  contentChildren,
+  effect,
+  inject,
+  input,
+  model,
+  output,
+  signal,
+  untracked,
+  type AfterContentInit,
+  type OutputEmitterRef,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import type { ColumnOrGroup, FilterModel, GridEvent, GridKernel, Problem, RowIdInput, RowModel, SelectionState } from '@dzgrid/core';
+import { canonical, emit } from '@dzgrid/core/internal';
+import { createGrid, type GridInstance, type GridMessages, type GridSettings, type SlotPart } from '@dzgrid/dom';
+import { DzgController } from './controller';
+import { DzgPart } from './dzg-part';
+import { MARKS, boundPart, type Bindings } from './part-bind';
+import { DZG_DEFAULTS, DZG_ENV, DZG_MESSAGES, DZG_PARTS } from './providers';
+import { shadowedParts } from './shadow';
+
+type S<T> = GridSettings<T>;
+type Ev<T, K extends GridEvent<T>['type']> = Extract<GridEvent<T>, { type: K }>;
+
+/** The settings read from the inputs, in this order; the defaults' keys fall back to `provideDzGrid`. */
+const KEYS = [
+  'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'overlay', 'label', 'tooltips', 'overscan',
+  'searchWarmup', 'selection', 'context', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
+] as const;
+/** Events with an output of their own name. */
+const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed'];
+
+const sameSelection = (a: SelectionState, b: SelectionState): boolean => a.mode === b.mode && a.keys.size === b.keys.size && [...a.keys].every((k) => b.keys.has(k));
+
+/**
+ * `<dz-grid>`: the grid of `@dzgrid/dom` in an Angular template (docs/behaviors/angular-parts.md).
+ * Inputs map to `createGrid`'s settings (live ones through `update()`, by identity), events to
+ * outputs, parts to components and templates. Zoneless first; with zone.js the grid runs outside
+ * Angular's zone and its outputs inside it. On a server it renders nothing.
+ */
+@Component({
+  selector: 'dz-grid',
+  exportAs: 'dzGrid',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [DzgController],
+  template: '',
+})
+export class DzGrid<T> implements AfterContentInit {
+  readonly rows = input<Iterable<T>>();
+  readonly source = input<S<T>['source']>();
+  readonly columns = input.required<readonly ColumnOrGroup<T>[]>();
+  readonly getRowId = input.required<(row: T) => RowIdInput>();
+  /** Required here or through `provideDzGrid({ messages })`. */
+  readonly messages = input<GridMessages>();
+  readonly locale = input<string>();
+  readonly timeZone = input<string>();
+  readonly numerals = input<S<T>['numerals']>();
+  readonly direction = input<S<T>['direction']>();
+  readonly density = input<S<T>['density']>();
+  readonly overlay = input<S<T>['overlay']>();
+  readonly label = input<string>();
+  readonly tooltips = input<S<T>['tooltips']>();
+  readonly overscan = input<S<T>['overscan']>();
+  readonly searchWarmup = input<S<T>['searchWarmup']>();
+  readonly selection = input<S<T>['selection']>();
+  readonly context = input<unknown>();
+  readonly fullWidth = input<S<T>['fullWidth']>();
+  readonly parts = input<Readonly<Record<string, SlotPart>>>();
+  /** Fixed: taken when the grid is made; a later change is `unsupported-live-change`. */
+  readonly operations = input<S<T>['operations']>();
+  readonly pagination = input<S<T>['pagination']>();
+  readonly filterKinds = input<S<T>['filterKinds']>();
+  readonly clock = input<S<T>['clock']>();
+  readonly injectStyles = input<boolean>();
+  readonly nonce = input<string>();
+  readonly features = input<S<T>['features']>();
+
+  /** Unset, the grid owns them; set, written as the host; the user's changes come back. */
+  readonly quick = model<string>();
+  readonly filter = model<FilterModel>();
+  readonly selected = model<SelectionState>();
+
+  readonly gridEvent = output<GridEvent<T>>();
+  readonly cellClicked = output<Ev<T, 'cellClicked'>>();
+  readonly rowClicked = output<Ev<T, 'rowClicked'>>();
+  readonly cellAction = output<Ev<T, 'cellAction'>>();
+  readonly partAction = output<Ev<T, 'partAction'>>();
+  readonly fetchFailed = output<Ev<T, 'fetchFailed'>>();
+  readonly problems = output<readonly Problem[]>();
+  readonly gridReady = output<DzgController<T>>();
+
+  readonly controller: DzgController<T> = inject(DzgController);
+  private readonly _defaults = inject(DZG_DEFAULTS) as Record<string, unknown>;
+  private readonly _provided = inject(DZG_PARTS);
+  private readonly _messages = inject(DZG_MESSAGES);
+  private readonly _env = inject(DZG_ENV);
+  private readonly _zone = inject(NgZone);
+  private readonly _el: HTMLElement = inject(ElementRef).nativeElement;
+  private readonly _browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly _templates = contentChildren(DzgPart);
+  private readonly _grid = signal<GridInstance<T, RowModel<T>> | null>(null);
+  private readonly _b: Bindings = { env: inject(EnvironmentInjector), app: inject(ApplicationRef), injector: inject(Injector), kernel: () => untracked(this._grid)?.kernel ?? null };
+  /** Each marker or template bound to this grid once: the same part while it stays. */
+  private readonly _bound = new WeakMap<object, SlotPart>();
+  private readonly _told = new Set<string>();
+  private _last: Record<string, unknown> = {};
+  private _gone = false;
+
+  /** The registry: the provider's, `[parts]`, then the templates; Angular entries bound to this grid. */
+  private readonly _registry = computed(() => {
+    const all: Record<string, SlotPart> = {};
+    const put = (n: string, e: SlotPart, key: object = e): void => {
+      const m = MARKS.get(e);
+      let b = m && this._bound.get(key);
+      if (m && (!b || b.slot !== e.slot)) this._bound.set(key, (b = boundPart(this._b, e.slot, m)));
+      all[n] = b ?? e;
+    };
+    for (const r of [this._provided, this.parts() ?? {}]) for (const n in r) put(n, r[n]!);
+    for (const t of this._templates()) {
+      const e = { slot: t.slot(), part: null! } as SlotPart;
+      MARKS.set(e, t.template);
+      put(t.dzgPart(), e, t);
+    }
+    return all;
+  });
+
+  private readonly _settings = computed(() => {
+    const s: Record<string, unknown> = {};
+    for (const k of KEYS) s[k] = this[k]() ?? this._defaults[k];
+    s['messages'] = this.messages() ?? this._messages;
+    s['parts'] = this._registry();
+    return s as unknown as S<T>;
+  });
+
+  constructor() {
+    if (this._browser) this._el.style.display = 'contents';
+    effect(() => {
+      const g = this._grid();
+      if (!g) return;
+      const s = this._settings() as unknown as Record<string, unknown>;
+      untracked(() => {
+        const patch: Record<string, unknown> = {};
+        let any = false;
+        for (const k in s) if (!Object.is(s[k], this._last[k])) (patch[k] = s[k]), (any = true);
+        this._last = s;
+        if (any) this._zone.runOutsideAngular(() => g.update(patch as Partial<S<T>>));
+        this._tell();
+      });
+    });
+    effect(() => this._write(this.controller.kernel(), this.quick(), this.filter(), this.selected()));
+    inject(DestroyRef).onDestroy(() => {
+      this._gone = true;
+      untracked(this._grid)?.destroy();
+      this._grid.set(null);
+      this.controller._attach(null);
+    });
+  }
+
+  /** After the content: the `dzgPart` templates are known, the first paint already uses them. */
+  ngAfterContentInit(): void {
+    if (!this._browser) return;
+    const s = this._settings();
+    if (!s.messages) throw new Error('dz-grid: messages are required ([messages] or provideDzGrid({ messages }))');
+    this._last = s as unknown as Record<string, unknown>;
+    const g = this._zone.runOutsideAngular(() => createGrid<T, RowModel<T>>(this._el, { ...s, onEvent: (e) => this._hear(e) }, this._env));
+    this.controller._attach(g, s.features);
+    this._grid.set(g);
+    untracked(() => this._write(g.kernel, this.quick(), this.filter(), this.selected()));
+    this._tell();
+    this.gridReady.emit(this.controller);
+  }
+
+  /** The host's models written to the grid as the host, unless the grid already holds them (no echo). */
+  private _write(k: GridKernel<T, RowModel<T>> | null, quick?: string, filter?: FilterModel, selected?: SelectionState): void {
+    if (!k) return;
+    untracked(() =>
+      this._zone.runOutsideAngular(() => {
+        if (quick !== undefined && quick !== k.query.quick) k.dispatch({ type: 'quick.set', text: quick }, 'host');
+        if (filter && canonical(filter) !== canonical(k.query.filter)) k.dispatch({ type: 'filter.set', filter }, 'host');
+        if (selected && !sameSelection(selected, k.selection)) k.dispatch({ type: 'selection.set', selection: selected }, 'host');
+      }),
+    );
+  }
+
+  /** `part-shadowed` for the names a later layer took, once per name for this grid. */
+  private _tell(): void {
+    const k = untracked(this._grid)?.kernel;
+    const names = (r?: Readonly<Record<string, unknown>>) => Object.keys(r ?? {});
+    const problems = shadowedParts(
+      [
+        { from: 'feature', names: (this.features() ?? []).flatMap((f) => names(f.parts)) },
+        { from: 'provider', names: names(this._provided) },
+        { from: 'parts', names: names(this.parts()) },
+        { from: 'template', names: this._templates().map((t) => t.dzgPart()) },
+      ],
+      this._told,
+    );
+    if (k && problems.length) emit(k, { type: 'problems', source: 'host', problems });
+  }
+
+  private _hear(e: GridEvent<T>): void {
+    if (this._gone) return;
+    this._zone.run(() => {
+      this.gridEvent.emit(e);
+      if (e.type === 'problems') this.problems.emit(e.problems);
+      else if (OUTS.includes(e.type)) (this[e.type as 'cellClicked'] as OutputEmitterRef<unknown>).emit(e);
+      if (e.source === 'host') return;
+      if (e.type === 'quickChanged') this.quick.set(e.text);
+      if (e.type === 'filterChanged') this.filter.set(e.filter);
+      if (e.type === 'selectionChanged') this.selected.set(e.selection);
+    });
+  }
+}

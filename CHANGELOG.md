@@ -12,6 +12,35 @@ architecture, the core's seed (row identities, calendar days apart from
 instants, the bounds of a day in a zone), conformance cases written by hand,
 and ten spikes in three browser engines.
 
+### Added (Phase 3, step 22: `@dzgrid/angular`)
+
+- **`<dz-grid>`** (standalone, OnPush, signal inputs, `exportAs: 'dzGrid'`): `createGrid`'s settings as
+  inputs (live ones sent to `update()` when their identity changes; `operations`, `pagination`,
+  `filterKinds`, `clock`, `injectStyles`, `nonce`, `getRowId`, `features` fixed), the row type
+  inferred from `[rows]`; models `[(quick)]`, `[(filter)]`, `[(selected)]` (no echo); outputs
+  `gridEvent`, `cellClicked`, `rowClicked`, `cellAction`, `partAction`, `fetchFailed`, `problems`,
+  `gridReady`. Its host takes no box (`display: contents`). Zoneless first; with zone.js the grid runs
+  outside Angular's zone and its outputs inside it. On a server it renders nothing.
+- **Parts in Angular:** `componentPart(slot, Component)` and `<ng-template dzgPart="name" slot="…">`
+  for every slot (cell, header with its filter, overlay, tooltip, floating, filter, footer); the
+  component's one input is `cell` (`DzgPartComponent<S>`, `DzgCell`), the template's context is typed
+  by its slot. Pooled as the spike S6 measured: created once per host, rebound in place.
+- **`emit(name, detail)`** in every Angular part's context: grid events `cellAction { column, key, name,
+  detail }` (the row the cell shows at the call) and `partAction { slot, column, name, detail }` (two
+  type-only variants of `GridEvent`; nothing in the core or the DOM layer sends them).
+- **`DzgController`** (injectable inside the grid): `ready()`, `kernel()`, `dispatch`, `focusCell`,
+  `ensureVisible`, `refresh`, `announce`, `openFilter`, `closeFilter`.
+- **`provideDzGrid({ messages, parts, defaults })`**, tokens `DZG_MESSAGES`, `DZG_PARTS`,
+  `DZG_DEFAULTS`, `DZG_ENV`; directives `input[dzgSearch]` and `button[dzgExport]`; `fromObservable`
+  (a `DataSource` from observables, an abort unsubscribes).
+- A problem code `part-shadowed` (warning): a part name a later layer of an Angular grid's registry
+  takes from an earlier one.
+
+### Changed (step 22)
+
+- `@dzgrid/angular` peers on Angular `^19 || ^20 || ^21 || ^22` (tested on 21) and declares its
+  exports; the placeholder `DzgProbe` is gone.
+
 ### Added (Phase 3, step 21: selection rules, the application's context, header parts driving the filter)
 
 - **Selection rules:** `settings.selection.canSelect(row, selection, context)` (live) returns true,

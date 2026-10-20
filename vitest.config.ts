@@ -54,6 +54,16 @@ export default defineConfig({
           setupFiles: ['packages/angular/test/setup.ts'], include: ['packages/angular/test/**/*.test.ts'],
         },
       },
+      // zone.js in a project of its own (step 22): it patches the globals of the context it loads
+      // in, which the zoneless tests above must never share.
+      {
+        plugins: [angular({ jit: false, tsconfig: angularTsconfig })],
+        resolve: { alias: angularAlias },
+        test: {
+          name: 'angular-zone', globals: true, environment: 'jsdom', isolate: true,
+          setupFiles: ['packages/angular/test-zone/setup.ts'], include: ['packages/angular/test-zone/**/*.test.ts'],
+        },
+      },
       { test: { name: 'theme', globals: true, environment: 'node', include: ['packages/theme/test/**/*.test.ts'] } },
       { test: { name: 'tools', globals: true, environment: 'node', include: ['spikes/test/**/*.test.ts', 'scripts/test/**/*.test.ts', 'perf/test/**/*.test.ts'] } },
     ],

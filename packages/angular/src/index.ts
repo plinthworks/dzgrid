@@ -1,9 +1,15 @@
 /**
- * @dzgrid/angular — placeholder public API (Phase 3 step 2).
- *
- * Only the tooling exists yet: the build, the packaging and the test setup.
- * `DzGrid`, the controller, `provideDzGrid`, `DzgPart`, `componentPart` and
- * `fromObservable` arrive with step 22; until then this entry carries the
- * version and the one component the toolchain test renders.
+ * @dzgrid/angular — DzGrid for Angular (Phase 3 step 22, docs/behaviors/angular-parts.md):
+ * `<dz-grid>`, its controller, parts as components and templates, the search and export
+ * directives, `provideDzGrid` and `fromObservable`.
  */
-export { DZGRID_ANGULAR_VERSION, DzgProbe } from './probe';
+export { DZGRID_ANGULAR_VERSION } from './version';
+export { DzGrid } from './grid';
+export { DzgController } from './controller';
+export { DzgPart } from './dzg-part';
+export { componentPart } from './component-part';
+export { DzgSearch } from './search';
+export { DzgExport } from './export';
+export { fromObservable, type ObservableLike } from './from-observable';
+export { DZG_DEFAULTS, DZG_ENV, DZG_MESSAGES, DZG_PARTS, provideDzGrid, type DzGridConfig, type DzGridDefaults } from './providers';
+export type { DzgCell, DzgPartComponent, DzgPartContext, DzgTemplateContext, WiredSlot } from './part-bind';

@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-20 (étape 21 commitée `6e146a7`, corrections de la relecture et de l'analyse des tests faites, non commitées ; suivante : étape 22, Angular). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 22, Angular, faite et testée, non commitée ; relecture et analyse des tests à venir ; suivante : étape 23). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -29,9 +29,12 @@ Mis à jour : 2026-10-20 (étape 21 commitée `6e146a7`, corrections de la relec
 | 19 — export CSV (`@dzgrid/dom/export` : partie immédiate + morceau paresseux, `canExport` obligatoire, trace sans données, bouton de l'hôte) | fait, relu, testé (corrections non commitées) | `767653e` + corrections |
 | 20 — pièces de cellule prêtes (`@dzgrid/dom/parts` : `badge()`, `cellBoolean`, couleur « succès » du thème), exemple 2 en montage de test | fait, testé (non commité ; relecture à venir) | — |
 | 21 — règles de sélection (`@dzgrid/core/rules`, `@dzgrid/dom/rules`), contexte de l'application, en-tête qui pilote le filtre | fait, relu, testé (corrections non commitées) | `6e146a7` + corrections |
-| 22 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
+| 22 — `@dzgrid/angular` (`<dz-grid>`, contrôleur, `provideDzGrid`, pièces en composants et gabarits, `emit`, `dzgSearch` / `dzgExport`, `fromObservable`, `part-shadowed`) | fait, testé (non commité ; relecture à venir) | — |
+| 23 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-**En cours : étape 22 (Angular : cellule en composant, `componentPart`, `dzgPart`, événements remontés, voir la note du propriétaire dans `ROADMAP.md`) à commencer. Les corrections de l'étape 21 attendent leur commit.**
+**En cours : étape 22 faite (non commitée), en attente de la relecture de code et de l'analyse des tests. Suivante : étape 23 (exemple Angular complet avec un vrai `ng build`, essais sur Angular 19 et 22, rendu serveur).**
+
+Étape 22 faite (non commitée) : `@dzgrid/angular` — `<dz-grid>` (entrées envoyées à `update()` quand leur identité change, réglages figés refusés par la grille, modèles `[(quick)]`, `[(filter)]`, `[(selected)]` sans écho, sorties `gridEvent`, `cellClicked`, `rowClicked`, `cellAction`, `partAction`, `fetchFailed`, `problems`, `gridReady`, hôte en `display: contents`, grille hors de la zone avec zone.js, rien sur un serveur), `DzgController`, `provideDzGrid` (+ `DZG_MESSAGES`, `DZG_PARTS`, `DZG_DEFAULTS`, `DZG_ENV`), `componentPart` et `<ng-template dzgPart>` pour tous les emplacements (entrée `cell`, `emit` → `cellAction` / `partAction`, types seuls dans le cœur), `part-shadowed` (code du cœur + cas de conformité), directives `dzgSearch` / `dzgExport`, `fromObservable`. Fiche `docs/behaviors/angular-parts.md`. Tests d'abord : 49 en échec avant le code ; 70 tests Angular en 10 fichiers (dont zone.js dans son propre projet vitest) ; suite 223 fichiers, 3 727 tests ; `test:perm`, types, tailles, construction verts ; Chrome `test:browser` 345/345 ; montage Angular dans Chrome (`node packages/angular/browser/run.mjs`, après `npm run build`) 22/22 en français et en arabe, axe 0, 1 000 défilements sans nouvelle pièce, montages = destructions ; reliaison 3,6 µs par cellule composant (S6 ≈ 5) ; 20 mutants, 16 tués, 4 équivalents. Bac à sable : liens « Angular » et « Angular (arabe) » du menu Démos (`/angular/`, servi par le serveur de dev une fois le montage construit). Écarts au plan : `ARCHITECTURE.md` (« Décisions de l'étape 22 »).
 
 Corrections de l'étape 21 (après `6e146a7`, non commitées, tests d'abord : `packages/core/test/rules-oracle-walk.test.ts` et `packages/dom/test/step21-audit.test.ts`, 6 `it.fails` retournés, et 8 nouveaux, tous en échec avant) : l'aspect refusé et la case d'en-tête sont relus après tout changement des lignes (le cœur dit `rowsChanged` à la porte : une règle peut lire d'autres lignes) et par ligne quand ses données changent d'objet (une ligne absente est redemandée une fois chargée) ; une règle qui rend `''` refuse sans phrase vide (« Non sélectionnable ») ; tout filtre écrit d'un coup (`query.set`, `filter.set` : « tout effacer ») abandonne les saisies en attente (`onCommand` dans `@dzgrid/core/internal`), un `filter.column` de l'hôte laisse toujours le texte tapé (règle de l'étape 12) ; une saisie remplacée par un autre champ de la colonne, ou abandonnée, est comptée dans `dropped` (contextes `floating`, `filter` et `filter` de l'en-tête) : la case perdante montre le filtre en vigueur, une pièce d'en-tête reçoit un nouvel objet `filter` ; `header.filterBox` suit le renommage de sa colonne. Fiches : `selection-rules.md`, `parts.md`, `filter-ui.md`. Portail complet vert (215 fichiers, 3 662 tests ; `test:perm`, types, tailles, construction), Chrome `--only rules` 24/24. Tailles : cœur 26 975, core/rules 509, dom 19 200, internal 786, filtres 9 236 ; aucun budget relevé.
 
@@ -68,7 +71,8 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 
 ## Commandes
 
-- Tests : `npm run test:ci` (un processus) ; types : `npm run typecheck` (inclut `ngc` sur Angular) ; tailles : `npm run check:size` ; construction : `npm run build` ; archives : `npm run pack:local`.
+- Tests : `npm run test:ci` (un processus) ; types : `npm run typecheck` (inclut `ngc` sur Angular) ; tailles : `npm run check:size` (la ligne Angular mesure `packages/angular/dist` : refusée si absente ou plus vieille que les sources, `npm run build` d'abord) ; construction : `npm run build` ; archives : `npm run pack:local`.
+- Angular dans Chrome (étape 22) : `npm run build` puis `node packages/angular/browser/run.mjs` (construit le montage `packages/angular/browser/build/`, puis vérifie fr et ar, axe, défilements, montages = destructions, reliaison). `node packages/angular/browser/build.mjs` seul construit le montage pour le bac à sable (`/angular/`).
 - Navigateur (une page, fermée à la fin) : `node scripts/browser.mjs` ; performance : `node scripts/perf-browser.mjs` ; écran d'audit (étape 18) : `npm run test:audit` (100 + 10 permutations par configuration, axe, taille stable de la liste, `aria-busy` après « suivant », palette, captures), `-- --full` le critère de sortie (1 000 + 30), `-- --update-shots` réécrit les captures de référence `docs/screenshots/step18/` ; `-- --only axe|size|busy|shots|perm|typed|export` une partie (`export`, étape 19 : téléchargements, fr/ar, axe bouton occupé, morceau paresseux, banc 100 000 × 30). Les captures des essais vont dans `packages/dom/test/browser/results/` (non suivi par git).
 - Bac à sable : `npx vite --host 127.0.0.1` puis http://127.0.0.1:4700/, `/rtl.html` et `/spans.html` (fusions) ; `?search=1` le champ de recherche (étape 16) ; `?paging=client` le pied de pagination, `?paging=cursor` un serveur lent par curseur sans total (étape 17) ; `/audit.html` l'écran d'audit (étape 18 : `?config=server|fetched`, `lang`, latence, gigue, échecs, total, palette ; lien « Écran d'audit » du menu Démos ; bouton « Exporter en CSV », étape 19) ; `?export=1` un bouton d'export au-dessus de la grille (lien « Export CSV » ; `/rtl.html` l'ouvre en arabe).
 
@@ -76,7 +80,8 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 27 100 o gz (étape 21, règles) | 26 975 (corrections de l'étape 21 : `onCommand`, `rowsChanged`) |
+| `@dzgrid/core` | 27 100 o gz (étape 21, règles) | 26 986 (étape 22 : code `part-shadowed`) |
+| `@dzgrid/angular` (sortie fesm2022 de ng-packagr ; Angular, `@dzgrid/*`, tzslot, rxjs à part ; `npm run build` avant `check:size`) | 5 500 (étape 22, Q4) | 5 283 |
 | `@dzgrid/core/rules` (par-dessus le cœur) | 700 (étape 21) | 509 |
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 628 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |

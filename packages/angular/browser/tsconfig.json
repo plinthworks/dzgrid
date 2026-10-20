@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "skipLibCheck": true,
+    "useDefineForClassFields": false,
+    "noEmit": false,
+    "types": [],
+    "outDir": "build/ngc",
+    "rootDir": "src",
+    "declaration": false,
+    "sourceMap": false,
+    "paths": {
+      "@dzgrid/angular": ["../dist/types/dzgrid-angular.d.ts"],
+      "@dzgrid/core": ["../../core/dist/index.d.ts"],
+      "@dzgrid/core/*": ["../../core/dist/*.d.ts"],
+      "@dzgrid/dom": ["../../dom/dist/index.d.ts"],
+      "@dzgrid/dom/*": ["../../dom/dist/*.d.ts"]
+    }
+  },
+  "files": ["src/main.ts"],
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInjectionParameters": true,
+    "compilationMode": "full"
+  }
+}

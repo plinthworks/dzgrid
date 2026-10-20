@@ -1,0 +1,20 @@
+{
+  "id": "part-shadowed",
+  "suite": "problems",
+  "description": "A part name taken again by a later layer of an Angular grid's registry (step 22; features < provideDzGrid < [parts] < dzgPart templates): one warning per name at `parts.<name>`, the detail naming the layer just under the winner; names taken once say nothing.",
+  "input": {
+    "op": "part-shadowed",
+    "layers": [
+      { "from": "feature", "names": ["cell.boolean", "footer.count"] },
+      { "from": "provider", "names": ["status", "footer.count"] },
+      { "from": "parts", "names": ["status"] },
+      { "from": "template", "names": ["status", "mine"] }
+    ]
+  },
+  "expected": {
+    "problems": [
+      { "code": "part-shadowed", "severity": "warning", "path": "parts.footer.count", "detail": "feature" },
+      { "code": "part-shadowed", "severity": "warning", "path": "parts.status", "detail": "parts" }
+    ]
+  }
+}

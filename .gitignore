@@ -9,3 +9,4 @@ spikes/**/results/dist/
 spikes/**/build/
 packed.tmp/
 packages/dom/test/browser/results/
+packages/angular/browser/build/
