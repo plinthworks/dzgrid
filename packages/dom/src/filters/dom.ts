@@ -15,8 +15,6 @@ export const labelled = (doc: Document, control: HTMLElement): [HTMLLabelElement
   l.append(s, control);
   return [l, s];
 };
-/** Inside an input method: `isComposing`, or Safari's last Enter after the composition ended (key code 229). */
-export const composing = (e: KeyboardEvent): boolean => e.isComposing || e.keyCode === 229;
 /** A text written only when it changes: a paint that changes nothing touches nothing. */
 export const tx = (e: Node, v: string): void => {
   if (e.textContent !== v) e.textContent = v;

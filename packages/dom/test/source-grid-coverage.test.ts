@@ -116,7 +116,8 @@ describe('a grid on a server: what the review left untested', () => {
     t.f.answer(['a', 'b'], { total: 6 });
     t.g.update({ ...t.settings, label: 'People' } as never);
     expect(t.f.calls).toHaveLength(1);
-    expect(t.problems()).toEqual([]);
+    // Server pages without pagination() are told once at creation (step 17); nothing else.
+    expect(t.problems().filter((p) => p !== 'settings.pagination')).toEqual([]);
     expect(t.rowsShown()).toEqual(['a', 'b']);
   });
 

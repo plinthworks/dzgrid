@@ -1,7 +1,7 @@
+import { settled } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { GridFeature } from '../features.js';
 import { bindBox, type Off } from './bind.js';
-import { rowsSaid } from './said.js';
 
 export interface QuickSearchOptions {
   /** The pause before a typed search applies (a finite number of 0 or more); default 150 ms in the browser, 300 ms on a server. */
@@ -48,7 +48,11 @@ export function quickSearch(): QuickSearch {
     },
     setup(g) {
       grids.add(g);
-      g.scope.add(g.kernel.subscribe(rowsSaid(g)));
+      // After a user's search, the row count (`announce.rows`, owner decision Q3), once the rows are in; nothing when unknown.
+      g.scope.add(g.kernel.subscribe(settled(g, (e) => e.type === 'quickChanged' && e.source === 'user', () => {
+        const n = g.rows.counts.filtered;
+        if (n != null) g.live.announce(g.msg('announce.rows', { n }));
+      })));
       binds.forEach((attach) => attach(g));
       // Its fields' bindings end with the grid's scope.
       return { destroy: () => void grids.delete(g) };

@@ -6,10 +6,25 @@ import type { GridContext } from '../context.js';
 export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
   const { el, kernel, rows, rowRenderer, scope } = g;
 
-  /** The select-all box, multi mode only: ticked, it clears everything; otherwise it selects all, as the model means it. */
+  /**
+   * The select-all box, multi mode only: ticked, it clears everything; otherwise it selects all, as
+   * the model means it. On pages in the browser (step 17, owner Q1) it acts on the page shown: ticked,
+   * it takes the page's rows out of the selection only (other pages keep theirs).
+   */
   function toggleAll(): void {
     if (g.settings.selection?.mode !== 'multi') return;
-    kernel.dispatch(kernel.headerState === 'all' ? { type: 'selection.clear' } : { type: 'selection.all' }, 'user');
+    const all = kernel.headerState === 'all';
+    if (all && rows.page && rows.selectAll === 'displayed') {
+      const s = kernel.selection;
+      const keys = new Set(s.keys);
+      const d = rows.displayed;
+      for (let i = 0; i < d.count; i++) {
+        const k = d.keyAt(d.index(i)!);
+        if (s.mode === 'include') keys.delete(k);
+        else keys.add(k);
+      }
+      kernel.dispatch({ type: 'selection.set', selection: { mode: s.mode, keys } }, 'user');
+    } else kernel.dispatch(all ? { type: 'selection.clear' } : { type: 'selection.all' }, 'user');
   }
 
   // Shift+click extends the rows, not the page's text selection.

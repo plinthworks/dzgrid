@@ -1,8 +1,8 @@
 import { makeQuery } from '@dzgrid/core';
+import { mounted, type Mounted } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature, SlotDrivers } from '../features.js';
 import type { Part, SlotContext } from '../part.js';
-import { mounted, type Mounted } from '../mounted.js';
 import { resolver } from './resolve.js';
 
 /**

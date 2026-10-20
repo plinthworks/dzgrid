@@ -5,12 +5,19 @@
 // asks for the value list (`filter: { kind: 'set' }`, step 15) and "Statut" is an enum that does not (no button, owner Q2);
 // `&sets=1` names that demo (the browser checks), `&setfail=1` makes its chunk fail (the failure and Retry).
 // `search=1` puts a labelled search field above the grid, bound with `quickSearch()` (step 16).
+// `paging=client` pages the rows in the browser with the footer (`pagination()`, step 17); `paging=offset` and
+// `paging=cursor` serve them from a slow server in memory (400 ms), by cursor without a total.
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
 import { AR } from '@dzgrid/dom/locales/ar';
 import { filters } from '@dzgrid/dom/filters';
 import { quickSearch } from '@dzgrid/dom/search';
+import { pagination } from '@dzgrid/dom/pagination';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+import { AR_PAGINATION } from '@dzgrid/dom/locales/ar-pagination';
 import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
 import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
 import { AR_FILTERS } from '@dzgrid/dom/locales/ar-filters';
@@ -36,6 +43,7 @@ const floating = params.get('floating') === '1';
 const popup = params.get('popup') === '1';
 const dates = params.get('dates');
 const withSearch = params.get('search') === '1';
+const paging = params.get('paging') as 'client' | 'offset' | 'cursor' | null;
 // The clock the date shortcuts count from: the machine's, moved by the "Horloge" menu (dates=1).
 let offset = 0;
 if (dates) {
@@ -48,8 +56,8 @@ if (dates) {
   move();
   form.addEventListener('change', move);
 }
-const join = <B extends { text: object }>(b: B, f: { text: object }): B => (withFilters ? { ...b, text: { ...b.text, ...f.text } } : b);
-const bundles = { 'fr-FR': join(FR, FR_FILTERS), 'en-US': join(EN, EN_FILTERS), 'ar-DZ': join(AR, AR_FILTERS) } as const;
+const join = <B extends { text: object }>(b: B, f: { text: object }, p: { text: object }): B => ({ ...b, text: { ...b.text, ...(withFilters && f.text), ...(paging && p.text) } });
+const bundles = { 'fr-FR': join(FR, FR_FILTERS, FR_PAGINATION), 'en-US': join(EN, EN_FILTERS, EN_PAGINATION), 'ar-DZ': join(AR, AR_FILTERS, AR_PAGINATION) } as const;
 
 // About 2 000 place names (20 × 20 × 5 syllables), every seventh one in Arabic letters; 1 row in 40 blank.
 const SYL = ['Ain', 'Bou', 'Sidi', 'Ouled', 'Beni', 'El', 'Ta', 'Ma', 'Ka', 'Ze', 'Ro', 'Ha', 'Mé', 'Ké', 'Lo', 'Da', 'Sa', 'Fé', 'Ni', 'Ra'];
@@ -84,10 +92,38 @@ function rowsFor(n: number): RowA[] {
   return rows;
 }
 
+/**
+ * A slow server in memory (`paging=offset|cursor`): text filters `contains`, the search over the
+ * text columns, the sort, then one page: by offset with its total, or by cursor with none.
+ */
+function server(by: 'offset' | 'cursor') {
+  const fetch = (req: DataRequest): Promise<DataResponse<RowA>> => new Promise((done) => setTimeout(() => {
+    let rows = rowsFor(Number(val('rows')));
+    for (const [col, f] of Object.entries(req.filter ?? {})) {
+      const v = 'value' in f && typeof f.value === 'string' ? f.value.toLowerCase() : null;
+      if (f.type === 'text' && v) rows = rows.filter((r) => String(r[col as keyof RowA] ?? '').toLowerCase().includes(v));
+    }
+    const q = req.quick?.toLowerCase();
+    if (q) rows = rows.filter((r) => r.t0.toLowerCase().includes(q) || r.a0.includes(q) || r.id.includes(q));
+    for (const s of [...(req.sort ?? [])].reverse()) {
+      const k = s.column as keyof RowA;
+      const sign = s.dir === 'asc' ? 1 : -1;
+      rows = [...rows].sort((a, b) => ((a[k] ?? '') < (b[k] ?? '') ? -sign : (a[k] ?? '') > (b[k] ?? '') ? sign : 0));
+    }
+    const p = req.page!;
+    const at = by === 'cursor' && p.cursor ? Number(p.cursor) : p.offset;
+    const page = rows.slice(at, at + p.size);
+    const more = at + p.size < rows.length;
+    done(by === 'cursor' ? { rows: page, hasNext: more, ...(more && { nextCursor: String(at + p.size) }) } : { rows: page, total: rows.length });
+  }, 400));
+  return sourceRows<RowA>({ fetch }, { paging: by });
+}
+const served = paging === 'offset' || paging === 'cursor';
+
 function settings(): GridSettings<RowA> {
   const locale = val('locale') as keyof typeof bundles;
   return {
-    rows: rowsFor(Number(val('rows'))),
+    ...(!served && { rows: rowsFor(Number(val('rows'))) }),
     getRowId: (r) => r.id,
     columns: COLUMNS,
     messages: bundles[locale],
@@ -123,7 +159,8 @@ if (search) {
   search.bind(document.getElementById('q') as HTMLInputElement);
 }
 const grid: GridInstance<RowA> = createGrid<RowA>(host, {
-  ...initial, features: [...(withFilters ? [filters({ floating, popup, ...fail })] : []), ...(search ? [search] : [])], ...(dates && { clock: () => Date.now() + offset }),
+  ...initial, features: [...(withFilters ? [filters({ floating, popup, ...fail })] : []), ...(search ? [search] : []), ...(paging ? [pagination()] : [])], ...(dates && { clock: () => Date.now() + offset }),
+  ...(paging && { pagination: { pageSize: 50 } }), ...(served && { source: server(paging), operations: 'server' as const }),
 });
 requestAnimationFrame(() => requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; }));
 

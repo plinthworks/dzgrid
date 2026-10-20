@@ -601,6 +601,88 @@ async function searchChecks(name, ctx) {
   }
 }
 
+/** Step 17: the pagination footer (docs/behaviors/pagination-footer.md), French light in the browser, Arabic dark by cursor. */
+async function pagingChecks(name, ctx) {
+  const F = (page) => page.evaluate(() => {
+    const f = document.querySelector('.dzg-footer');
+    const r = (e) => { const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom, w: b.width, h: b.height }; };
+    const btn = (go) => f.querySelector(`[data-go="${go}"]`);
+    const before = (go) => btn(go) && getComputedStyle(btn(go), '::before').rotate;
+    return {
+      first: btn('first') && r(btn('first')), next: r(btn('next')), last: btn('last') && r(btn('last')),
+      rot: { first: before('first'), next: before('next') },
+      targets: [...f.querySelectorAll('button:not([hidden]), select')].filter((e) => e.offsetParent).map((e) => { const b = e.getBoundingClientRect(); return Math.min(b.width, b.height); }),
+      page: f.querySelector('.dzg-ppage').textContent, count: f.querySelector('.dzg-pcount').textContent,
+      lives: document.querySelectorAll('.dzg [aria-live]').length, grids: document.querySelectorAll('.dzg').length,
+      navs: [...document.querySelectorAll('.dzg-footer nav')].map((n) => n.getAttribute('aria-label')),
+      footer: r(f), fScroll: f.scrollWidth - f.clientWidth, docScroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      active: document.activeElement?.dataset?.go ?? document.activeElement?.tagName, live: document.querySelector('.dzg-live').textContent,
+      index: window.t.grid.kernel.rows.page.index, fetches: window.t.served.fetches,
+    };
+  });
+  // [query, rtl, the count's first words]
+  for (const [qs, rtl] of [['locale=fr-FR&theme=light&rows=2000&paging=client&two=1', false], ['locale=ar-DZ&dir=rtl&theme=dark&rows=2000&paging=cursor&delay=300&two=1', true]]) {
+    const { page, errors } = await load(ctx, qs);
+    const tag = `paging ${qs}`;
+    if (rtl) await page.waitForFunction(() => window.t.grid.kernel.rows.status.phase === 'idle');
+    await frames(page);
+    const s0 = await F(page);
+    let v = await axe(page);
+    check(name, `${tag}: axe 0 with two grids; two distinct nav names; one live region per grid`, v.length === 0 && s0.navs.length === 2 && s0.navs[0] !== s0.navs[1] && s0.lives === s0.grids, { v, navs: s0.navs, lives: s0.lives });
+    // First at the inline start: left in French, right in Arabic; the chevrons turned the other way.
+    const startFirst = rtl ? s0.first.l > s0.next.r : s0.first.r < s0.next.l;
+    check(name, `${tag}: first page at the inline start, chevrons mirrored (${s0.rot.first} / ${s0.rot.next})`, startFirst && s0.rot.first === (rtl ? '45deg' : '-45deg') && s0.rot.next === (rtl ? '-135deg' : '135deg'), s0);
+    check(name, `${tag}: targets at least 24 px; ${rtl ? 'no last button by cursor, "' + s0.page + '"' : 'a last button'}`, s0.targets.every((x) => x >= 24) && (rtl ? s0.last === null && !/ من /.test(s0.page) : s0.last !== null), s0);
+    // Digits not reversed: "50" reads 5 then 0 in the reading order of the line, whatever the direction.
+    const digits = await page.evaluate(() => {
+      const t = document.querySelector('.dzg-pcount').firstChild;
+      const i = t.data.indexOf('50');
+      const at = (k) => { const r = document.createRange(); r.setStart(t, k); r.setEnd(t, k + 1); return r.getBoundingClientRect().left; };
+      return i < 0 ? null : { five: at(i), zero: at(i + 1), text: t.data };
+    });
+    check(name, `${tag}: the count "${digits?.text}": digits not reversed`, digits && digits.five < digits.zero, digits);
+    // Next: one click; on the server the request leaves in the click's own task, the page at once, the sentence at the answer.
+    const n = await page.evaluate(() => {
+      const before = window.t.served.fetches;
+      document.querySelector('.dzg-footer [data-go="next"]').click();
+      return { asked: window.t.served.fetches - before, index: window.t.grid.kernel.rows.page.index };
+    });
+    await page.focus('.dzg-footer [data-go="next"]');
+    await page.waitForTimeout(rtl ? 600 : 150);
+    const s1 = await F(page);
+    check(name, `${tag}: next ${rtl ? 'asks in the click\'s frame, ' : ''}moves to page 2, focus stays, "${s1.live}" said`, n.index === 1 && (!rtl || n.asked === 1) && s1.index === 1 && /^(Page 2 sur|الصفحة 2)/.test(s1.live), { n, s1 });
+    await page.screenshot({ path: `${OUT}/${name}-paging-${qs.replace(/[&=]/g, '_')}.png` });
+    // The keyboard: Enter on the focused Next, focus kept on it.
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(rtl ? 600 : 150);
+    const s2 = await F(page);
+    check(name, `${tag}: Enter on Next: page 3, focus kept on Next`, s2.index === 2 && s2.active === 'next', s2);
+    // The overlay stops above the footer; Tab goes grid -> retry -> footer.
+    await page.evaluate(() => window.t.grid.update({ overlay: 'error' }));
+    await frames(page);
+    const ov = await page.evaluate(() => ({ o: document.querySelector('.dzg-overlay').getBoundingClientRect().bottom, f: document.querySelector('.dzg-footer').getBoundingClientRect().top }));
+    await page.evaluate(() => { const d = window.t.grid.kernel.rows.displayed; window.t.grid.api.focusCell(d.keyAt(d.index(0)), 'name'); });
+    await frames(page);
+    await page.keyboard.press('Tab');
+    const t1 = await page.evaluate(() => document.activeElement.closest('.dzg-overlay') ? 'retry' : document.activeElement.className);
+    await page.keyboard.press('Tab');
+    const t2 = await page.evaluate(() => !!document.activeElement.closest('.dzg-footer'));
+    check(name, `${tag}: the overlay stops above the footer; Tab: grid, retry, footer`, ov.o <= ov.f + 0.5 && t1 === 'retry' && t2, { ov, t1, t2 });
+    await page.evaluate(() => window.t.grid.update({ overlay: null }));
+    v = await axe(page);
+    check(name, `${tag}: axe 0 after paging`, v.length === 0, v);
+    // 320 px wide: the strip wraps, nothing scrolls sideways.
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.evaluate(() => { document.getElementById('host').style.inlineSize = '100%'; });
+    await frames(page);
+    const narrow = await F(page);
+    check(name, `${tag}: at 320 px the footer wraps, no sideways scroll`, narrow.fScroll <= 0 && narrow.docScroll <= 0 && narrow.footer.w <= 320, narrow);
+    await page.screenshot({ path: `${OUT}/${name}-paging-320-${qs.replace(/[&=]/g, '_')}.png` });
+    check(name, `no page error ${tag}`, errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -929,6 +1011,7 @@ async function runEngine(name) {
     if (name === 'chrome') await dateChecks(name, ctx);
     if (name === 'chrome') await setChecks(name, ctx);
     if (name === 'chrome') await searchChecks(name, ctx);
+    if (name === 'chrome') await pagingChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

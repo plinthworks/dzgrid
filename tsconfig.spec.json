@@ -47,6 +47,12 @@
       "@dzgrid/dom/filters": [
         "./packages/dom/src/filters.ts"
       ],
+      "@dzgrid/dom/pagination": [
+        "./packages/dom/src/pagination.ts"
+      ],
+      "@dzgrid/dom/internal": [
+        "./packages/dom/src/internal.ts"
+      ],
       "@dzgrid/dom/locales/*": [
         "./packages/dom/src/locales/*.ts"
       ],

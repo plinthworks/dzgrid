@@ -1,6 +1,6 @@
 import { readNumber, type ColumnFilter } from '@dzgrid/core';
 import type { Part, SlotContext } from '../part.js';
-import { composing } from './dom.js';
+import { composing } from '@dzgrid/dom/internal';
 import { echo, nameOf, shown, textField } from './field.js';
 import { summaryView, type View } from './summary.js';
 

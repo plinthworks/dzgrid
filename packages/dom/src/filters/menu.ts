@@ -2,7 +2,7 @@ import { instantToDayIn, type ResolvedColumn } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import type { Frame } from '../render/rows.js';
-import { mounted, type Mounted } from '../mounted.js';
+import { mounted, type Mounted } from '@dzgrid/dom/internal';
 import { popupsFor, type PopupRef } from '../popup.js';
 import type { Commit } from './commit.js';
 import type { Opener } from './floating.js';

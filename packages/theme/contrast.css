@@ -55,4 +55,8 @@
   .dzg-resize::after {
     background: CanvasText;
   }
+  /* A pager button that cannot act is aria-disabled, not disabled: the system would not grey it. */
+  .dzg-pbtn[aria-disabled='true'] {
+    color: GrayText;
+  }
 }

@@ -1,5 +1,5 @@
-import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, PartSlot, Placement, Problem, ResolvedColumn, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
-import type { AppMessageKey, FilterMessageKey, MessageKey } from './messages.js';
+import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, ModelStatus, PageState, PartSlot, Placement, Problem, ResolvedColumn, RowCounts, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
+import type { AppMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { GridSettings } from './settings.js';
 
@@ -27,7 +27,7 @@ export interface PartBase {
   readonly ctx: LocaleCtx;
   readonly dir: 'ltr' | 'rtl';
   /** The grid's messages, and the host's own `app.*` ones (a missing one shows its key, told once). */
-  msg(key: MessageKey | FilterMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
   announce(text: string): void;
   readonly doc: Document;
 }
@@ -128,6 +128,31 @@ export interface SlotContext {
     readonly row: Readonly<unknown> | null;
     readonly column: ResolvedColumn<unknown>;
   };
+  /**
+   * A part of the footer (`@dzgrid/dom/pagination`, step 17): `footer.pager`, `footer.count`,
+   * `footer.selected`, or a host's own listed in `pagination({ footer })`. The functions keep
+   * their identity; they act as the user (`page.go`, `page.size`, `selection.allFiltered`,
+   * `selection.clear`, the focus then back on the grid).
+   */
+  footer: PartBase & {
+    readonly page: PageState;
+    readonly counts: RowCounts;
+    readonly status: ModelStatus;
+    /** The rows shown, from 1; null with no rows or while loading. */
+    readonly range: { readonly from: number; readonly to: number } | null;
+    /**
+     * `count`: the last told (null: every matching row, count unknown); `shown`: selected rows on
+     * the page; `all`: every row of the query (everything-except); `canSelectAll`: "Select all N".
+     */
+    readonly selection: { readonly count: number | null; readonly shown: number; readonly all: boolean; readonly canSelectAll: boolean; readonly mode: 'none' | 'single' | 'multi' };
+    go(index: number): void;
+    /** The page after the one shown at the call, if any (prev: before). */
+    next(): void;
+    prev(): void;
+    setSize(size: number): void;
+    selectAll(): void;
+    clearSelection(): void;
+  };
 }
 
 export type WiredSlot = keyof SlotContext;
@@ -165,15 +190,16 @@ const NEEDS: Partial<Record<PartSlot, string>> = { header: 'slots', overlay: 'sl
 const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));
 
 /**
- * Parts whose slot needs a feature the grid lacks, and columns asking for a filter UI without
- * `filters()` (`columns[i].filter`, i over the leaves): told once, a warning each, the detail
- * naming the feature.
+ * Parts whose slot needs a feature the grid lacks, columns asking for a filter UI without
+ * `filters()` (`columns[i].filter`, i over the leaves), and paged rows without `pagination()`
+ * (`settings.pagination`, step 17): told once, a warning each, the detail naming the feature.
  */
-export function unslotted(s: GridSettings<unknown>): Problem[] {
+export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
   const has = new Set(s.features?.map((f) => f.id));
   const missing = (path: string, detail?: string): Problem[] => (detail && !has.has(detail) ? [{ code: 'missing-feature', severity: 'warning', path, detail }] : []);
   return [
     ...Object.keys(s.parts ?? {}).flatMap((n) => missing(`parts.${n}`, NEEDS[s.parts![n]!.slot])),
+    ...(paged ? missing('settings.pagination', 'pagination') : []),
     ...leaves(s.columns).flatMap((d, i) => (d?.filter && (d.filter.floating || d.filter.kind) ? missing(`columns[${i}].filter`, 'filters') : [])),
   ];
 }

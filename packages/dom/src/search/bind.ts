@@ -1,3 +1,4 @@
+import { composing as ime } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 
 /** A bound field's unbind: listeners off, the waiting edit dropped, our attributes given back (once). */
@@ -70,7 +71,7 @@ export function bindBox(g: G, input: HTMLInputElement, o: { readonly debounceMs?
     focus: () => g.warm.want(),
     keydown(k: KeyboardEvent) {
       // Safari reports the composition's last Enter after its end, as key code 229.
-      if (k.isComposing || k.keyCode === 229) return;
+      if (ime(k)) return;
       // A host's combobox with its list open (or an option active) keeps Enter and ArrowDown.
       const host = input.matches('[aria-expanded=true],[aria-activedescendant]');
       if (k.key === 'Enter') host || (k.preventDefault(), apply());

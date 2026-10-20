@@ -193,7 +193,7 @@ displayed = inner.displayed
 - **Unknown total:**
   - If `total` is absent, `hasNext` is required.
   - If both are missing, the model gives the warning `invalid-page-response` and infers `hasNext = rows.length >= size`.
-  - The pager shows "51–100 of many" and disables "last".
+  - The pager shows "51 to 100" and "Page 3" (step 17, owner Q2), disables "last" by offset and does not draw it by cursor.
   - An empty page past the end steps back to the page before, with `hasNext` false (step 1 decision, `server-pagination.md`).
 - **Cursor:** cursor mode keeps one cursor per page reached in the epoch, so next, previous and back to page 0 work. `canJump` is false, and "last" is hidden.
 - **While loading:** the previous rows stay displayed (`status: loading`, `aria-busy`, stale styling); no loading overlay over them, only on a first load with no rows. A page past the end, with a known total, clamps to the last page and refetches once.
@@ -299,7 +299,7 @@ A name that cannot be resolved among the parts of that slot (a `header` part nam
 - There is **no global mutable registry**: several grids and SSR stay safe. App-wide parts come from one shared object, which Angular supplies through `provideDzGrid({ parts })`.
 - `parts` is a **live** setting: changing it remounts the affected hosts.
 
-**The footer** is a list of names, `footer?: readonly string[]`. The default is `['footer.count', 'footer.pager']` when `page !== 'off'`, and none otherwise. It sits outside `role="grid"`, as `<nav>` plus a status region.
+**The footer** is a list of names, `footer?: readonly string[]`. The default is `['footer.count', 'footer.pager']` when `page !== 'off'`, and none otherwise. It sits outside `role="grid"`, as `<nav>` plus a status region. *[Step 17 as built: `pagination({ footer })`, default `['footer.selected', 'footer.count', 'footer.pager']`; the feature is dormant (`invalid-page`) when the rows are not paged, and paging without it is `missing-feature`. No status region: a second live region would speak twice; the count is plain text and `announce.page` goes through the grid's live region. The pager sits in `<nav aria-label="pager.label">`. Context in `parts.md`; sheet `behaviors/pagination-footer.md`.]*
 
 ### B2.3 Replacing defaults
 
@@ -363,7 +363,7 @@ export interface FilterKind<S extends Json = Json, V = unknown> {
 - **Cell parts with controls (buttons, links):**
   - The cell keeps grid focus. Enter calls `focus()` on the part, and Tab cycles inside it, as in the WAI-ARIA grid pattern for widgets in cells. Escape returns to the cell.
   - The owner `cell-widget` is inferred from the control (`keys/owner.ts`); the part's container need not carry `data-dzg-owner`. Enter or F2 calls `focus()`.
-- **Footer:** the page change is announced (`announce.page`), and focus stays on the control that was used.
+- **Footer:** the page change is announced (`announce.page`), and focus stays on the control that was used. *[Step 17: through the grid's live region, once the rows are settled (at the answer on a server), only for the user's own page change; disabled buttons are `aria-disabled` (focus never drops), no page-number list or jump box (Phase 5); the count reads in words ("51 to 100 of 1 234"), never a dash.]*
 - **Messages:**
   - Built-in parts use only `MessageKey`s. The guards forbid literal text.
   - Host parts may use `app.*` keys, which the host adds to its `messages` bundle. An `app.*` key missing from the bundle gives the key itself and the warning `missing-message`, once per key (step 1 decision: it is found when used, not by `checkMessages`).
@@ -456,7 +456,7 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 - The columns, filters, parts and pager stay the same.
 - What changes:
   - `fetch` now receives `req.page`;
-  - the pager shows "of many" when there is no `total`;
+  - the pager shows "51 to 100" and "Page 3" when there is no `total` (step 17);
   - select-all switches to exclude mode bound to the filters and the search (§B1.6);
   - CSV "all" goes through `exportAll` (D7).
 - In Angular, `[operations]` is fixed: the host swaps it under `@if`, as D8 already prescribes for `rowModel`.
@@ -478,6 +478,8 @@ createGrid(root, { source: audit, operations: 'server', columns, /* … */ });
 | `@dzgrid/dom/search` | `quickSearch()`: a feature that binds the page's own search fields, `search.bind(input, { debounceMs })` (step 16, owner decisions Q1, Q2; it replaces the plan's `bindQuickSearch` in `/filters`) |
 | `@dzgrid/dom/locales/{en,fr,ar}-filters` | the filters' texts, apart from the base bundles (step 12, owner decision O1) |
 | `@dzgrid/dom/pagination` | `pagination()`: `footer.pager`, `footer.count`, `footer.selected` |
+| `@dzgrid/dom/internal` | step 17: what the feature entries share (`mounted`, `settled`, `composing`), never imported by the base; a self-reference of the package, external in each feature's size line |
+| `@dzgrid/dom/locales/{en,fr,ar}-pagination` | the pager's texts (step 17) |
 | `@dzgrid/dom/parts` | `cell.badge`, `cell.boolean` (small, optional) |
 | `@dzgrid/dom/export` | `csvExport()` |
 | ~~`@dzgrid/dom/tzslot-picker`~~ | folded into `/filters` at step 14 (tzslot loaded lazily inside it) |

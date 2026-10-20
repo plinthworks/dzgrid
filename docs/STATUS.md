@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-19 (étape 16 faite, non commitée). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 17 faite, non commitée ; relecture et analyse des tests à faire). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -23,9 +23,11 @@ Mis à jour : 2026-10-19 (étape 16 faite, non commitée). Ce fichier dit où en
 | 13 — fenêtre de filtre (texte, nombre, oui/non), marque « filtré », Alt+Flèche bas | fait, relu, testé | `f67fc48`, `67782bc` |
 | 14 — filtres de dates sur tzslot (jour, période, avant/après), six raccourcis relatifs, horloge | fait, relu, testé | `df27559`, `85e08c3`, `ae0b40b`, `24acaab` |
 | 15 — filtre par liste de valeurs (chargé à la demande), menu de démos | fait, relu, testé | `021324e`, `79c40c3` |
-| 17 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
+| 16 — recherche rapide (`@dzgrid/dom/search`) | fait, relu, testé | `85ec8a5` |
+| 17 — pagination (`@dzgrid/dom/pagination`, `@dzgrid/dom/internal`) | fait, non commité (relecture à faire) | — |
+| 18 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-En cours : l'étape 17 (pagination, module `@dzgrid/dom/pagination` + module commun `@dzgrid/dom/internal`), plan `docs/phase-3-steps/step17-pagination-blueprint.md`, décisions `step17-decisions.md` (propriétaire, 2026-10-20 : la case « tout » ne concerne que la page affichée dans le navigateur ; total inconnu → « 51 à 100 », « Page 3 » ; base 19 100, pagination 3 800, internal 650, textes 560 / 680 / 880, thème 2 050). Implémentation lancée, tests d'abord. Décidé pour l'étape 22 : cellule Angular `DzgCell<T>` + `cell().emit`. Étape 26 : animations GSAP (+ règle de classe par colonne, accès à la cellule pour GSAP ; Phase 4 : états d'enregistrement animés). Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP.
+Étape 17 faite (non commitée) : pied de page `pagination()` (sélection, décompte, pagineur dans un `<nav>`), module commun `@dzgrid/dom/internal` (auto-référence vérifiée sur un `dist/` construit), case d'en-tête limitée à la page affichée dans le navigateur ; 3 274 tests, 300 vérifications navigateur, 26 mutants (24 tués, 2 équivalents). Reste : relecture de code, analyse des tests, puis commit. Question ouverte : sur une sélection « tout » avec des lignes décochées ailleurs, cocher la case d'une page recoche tout (règle de l'étape 7 gardée). Décidé pour l'étape 22 : cellule Angular `DzgCell<T>` + `cell().emit`. Étape 26 : animations GSAP (+ règle de classe par colonne, accès à la cellule pour GSAP ; Phase 4 : états d'enregistrement animés). Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP.
 
 ## Les plans détaillés des étapes
 
@@ -47,28 +49,31 @@ En cours : l'étape 17 (pagination, module `@dzgrid/dom/pagination` + module com
 
 - Tests : `npm run test:ci` (un processus) ; types : `npm run typecheck` (inclut `ngc` sur Angular) ; tailles : `npm run check:size` ; construction : `npm run build` ; archives : `npm run pack:local`.
 - Navigateur (une page, fermée à la fin) : `node scripts/browser.mjs` ; performance : `node scripts/perf-browser.mjs`.
-- Bac à sable : `npx vite --host 127.0.0.1` puis http://127.0.0.1:4700/, `/rtl.html` et `/spans.html` (fusions) ; `?search=1` le champ de recherche (étape 16).
+- Bac à sable : `npx vite --host 127.0.0.1` puis http://127.0.0.1:4700/, `/rtl.html` et `/spans.html` (fusions) ; `?search=1` le champ de recherche (étape 16) ; `?paging=client` le pied de pagination, `?paging=cursor` un serveur lent par curseur sans total (étape 17).
 
 ## Budgets de taille pendant la Phase 3 (décisions du propriétaire)
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 26 900 o gz (étape 14, raccourcis) | 26 740 |
+| `@dzgrid/core` | 26 900 o gz (étape 14, raccourcis) | 26 756 |
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 620 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 551 |
-| `@dzgrid/dom` | 18 900 (étape 16) | 18 801 |
-| `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 251 |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 181 |
+| `@dzgrid/dom` | 19 100 (étape 17) | 18 935 |
+| `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 108 |
+| `@dzgrid/dom/internal` | 650 (étape 17) | 505 |
+| textes de la pagination en / fr / ar | 560 / 680 / 880 (étape 17) | 328 / 375 / 489 |
+| `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 228 |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 8 919 |
 | liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 779 |
 | adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |
 | lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
-| `@dzgrid/dom/slots` | 1 300 (étape 11) | 1 238 |
+| `@dzgrid/dom/slots` | 1 300 (étape 11) | 994 |
 | `@dzgrid/dom/popup` | 1 500 | 1 428 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
 | textes des filtres en / fr / ar | 850 / 980 / 1 200 (étape 15) | 707 / 831 / 941 |
-| thème | 1 800 (étape 15) | 1 707 |
+| thème | 2 050 (étape 17) | 1 783 |
 
 À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
 

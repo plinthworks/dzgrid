@@ -12,6 +12,32 @@ architecture, the core's seed (row identities, calendar days apart from
 instants, the bounds of a day in a zone), conformance cases written by hand,
 and ten spikes in three browser engines.
 
+### Added (Phase 3, step 17: pagination)
+
+- A new optional entry `@dzgrid/dom/pagination`: `pagination({ footer })`, a footer under the rows
+  with three parts of the new `footer` slot: `footer.pager` (first, previous, "Page 3 of 20",
+  next, last, rows per page, in a named `<nav>`; disabled buttons are `aria-disabled`, never
+  `disabled`; no last button by cursor), `footer.count` ("51 to 100 of 1 234", "51 to 100" with an
+  unknown total) and `footer.selected` ("12 rows selected (some not shown)", "Select all N rows",
+  "Clear selection"). The page change is said once the rows are in (`announce.page`), the rows go
+  back to the top, the focus stays on the button. Texts in their own bundles
+  `@dzgrid/dom/locales/{en,fr,ar}-pagination` (16 keys, `PAGINATION_KEYS`); `pagination()` throws
+  naming any missing key. A host's part of the same name replaces each.
+- A new entry `@dzgrid/dom/internal`, shared by the feature entries (slots, filters, search,
+  pagination): what more than one of them needs (`mounted`, `settled`, `composing`). Not a public
+  API; the base never imports it.
+
+### Changed (step 17)
+
+- **The header box and Ctrl+A on browser pages act on the page shown only** (owner decision): ticking
+  adds the page's rows to the selection, unticking a fully ticked page removes only its rows; rows of
+  other pages stay. `selection.all` and `selection.allDisplayed` add the displayed rows to an include
+  selection while the rows are paged (they replaced it before). Server pages are unchanged.
+- Paging on (the `pagination` setting, or a source's pages) without `pagination()` is told:
+  `missing-feature` (warning, `settings.pagination`, detail `pagination`). `pagination()` on rows
+  that are not paged is dormant and told (`invalid-page`, warning, `features.pagination`).
+- The overlay stops above the footer (`inset-block-end: var(--dzg-footer-size, 0px)`).
+
 ### Added (Phase 3, step 16: the quick search box)
 
 - A new optional entry `@dzgrid/dom/search`: `quickSearch()`, a feature that binds the page's own

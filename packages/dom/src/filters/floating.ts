@@ -2,9 +2,8 @@ import type { ColumnDef, ColumnOrGroup, ResolvedColumn } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { HeaderRowSpec } from '../render/header.js';
 import type { Part, SlotContext } from '../part.js';
-import { mounted, type Mounted } from '../mounted.js';
 import type { Commit } from './commit.js';
-import { composing } from './dom.js';
+import { composing, mounted, type Mounted } from '@dzgrid/dom/internal';
 import type { Resolve } from './resolve.js';
 
 type FC = SlotContext['floating'];

@@ -1,0 +1,38 @@
+{
+  "id": "box-union-browser-pages",
+  "suite": "selection-across-pages",
+  "description": "Pages in the browser (step 17, owner Q1): r1 ticked on page 0, select all on page 1 adds that page's rows; r1 stays.",
+  "input": {
+    "rows": 6,
+    "pageSize": 2,
+    "operations": {
+      "page": "client"
+    },
+    "ops": [
+      {
+        "op": "only",
+        "ids": [
+          "r1"
+        ]
+      },
+      {
+        "op": "page",
+        "index": 1
+      },
+      {
+        "op": "all"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "include",
+    "keys": [
+      "r1",
+      "r3",
+      "r4"
+    ],
+    "count": 3,
+    "reason": null,
+    "header": "all"
+  }
+}

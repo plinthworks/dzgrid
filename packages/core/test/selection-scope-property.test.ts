@@ -238,7 +238,8 @@ function run(kind: Kind, seed: number, steps = 40) {
         kernel.dispatch({ type: 'selection.all' }, 'user');
         // An all-pages selection stays one: "all" re-ticks, never shrinks to the page.
         if (serverPages || o.mode === 'exclude') { o.mode = 'exclude'; o.keys = new Set(); o.allMem = membership(); }
-        else { o.mode = 'include'; o.keys = new Set(shown); }
+        // Pages in the browser (step 17, owner Q1): the page's rows are added to what is ticked.
+        else { o.mode = 'include'; o.keys = new Set(paged ? [...o.keys, ...shown] : shown); }
         break;
       }
       case 3: {

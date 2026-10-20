@@ -7,6 +7,9 @@
 // sets=1 a "Commune" column of 2 000 values asking for the value list (`filter.kind: 'set'`) and a
 // "Statut" enum column that does not (no button, owner Q2); setfail=1 a set chunk that never loads (step 15).
 // search=1 a labelled search field above the grid (`#q`), bound with quickSearch() before the grid is made (step 16).
+// paging=client pages the rows with the footer (pagination(), step 17), size `size` (50); paging=cursor serves them from
+// a server in memory by cursor without a total (`delay` ms, 0 by default; `t.fetches` counts its requests, `t.failNext`
+// fails the next one); two=1 adds a second grid with the footer, labelled, under the first.
 import { createGrid } from '/packages/dom/src/index.ts';
 import { EN } from '/packages/dom/src/locales/en.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
@@ -20,7 +23,10 @@ const base = locale.startsWith('ar') ? AR : locale.startsWith('fr') ? FR : EN;
 // `filters=1`: the filters feature, its texts spread into the bundle; `floating=1` its floating row (step 12).
 const withFilters = !!q.get('filters');
 const filterTexts = withFilters ? (await import(`/packages/dom/src/locales/${locale.slice(0, 2)}-filters.ts`)) : null;
-const messages = filterTexts ? { ...base, text: { ...base.text, ...(Object.values(filterTexts)[0] as { text: object }).text } } : base;
+const paging = q.get('paging');
+const pagingTexts = paging ? (await import(`/packages/dom/src/locales/${locale.slice(0, 2)}-pagination.ts`)) : null;
+const more = [filterTexts, pagingTexts].flatMap((m) => (m ? [(Object.values(m)[0] as { text: object }).text] : []));
+const messages = more.length ? { ...base, text: Object.assign({}, base.text, ...more) } : base;
 document.documentElement.lang = locale;
 document.documentElement.dir = q.get('dir') ?? (locale.startsWith('ar') ? 'rtl' : 'ltr');
 if (q.get('theme')) document.documentElement.dataset['theme'] = q.get('theme')!;
@@ -112,16 +118,50 @@ if (q.get('search')) {
   search.bind(box);
 }
 if (withFilters) features.push((await import('/packages/dom/src/filters.ts')).filters({ floating: q.get('floating') === '1', popup: q.get('popup') === '1', ...fail }) as never);
+// Paging (step 17): the footer, and for `cursor` a server in memory that does not say its total.
+const served = { fetches: 0, failNext: false };
+let data: Record<string, unknown> = { rows };
+if (paging) {
+  const { pagination } = await import('/packages/dom/src/pagination.ts');
+  features.push(pagination() as never);
+  data = { rows, pagination: { pageSize: Number(q.get('size') ?? 50) } };
+}
+if (paging === 'cursor') {
+  const { sourceRows } = await import('/packages/core/src/server.ts');
+  const delay = Number(q.get('delay') ?? 0);
+  const fetch = (req: any) => {
+    served.fetches++;
+    const fail = served.failNext;
+    served.failNext = false;
+    return new Promise((done, no) => setTimeout(() => {
+      if (fail) return no(new Error('down (t.failNext)'));
+      const at = req.page.cursor ? Number(req.page.cursor) : 0;
+      const page = rows.slice(at, at + req.page.size);
+      const more = at + req.page.size < rows.length;
+      done({ rows: page, hasNext: more, ...(more && { nextCursor: String(at + req.page.size) }) });
+    }, delay));
+  };
+  data = { source: sourceRows({ fetch } as never, { paging: 'cursor' }), operations: 'server', pagination: { pageSize: Number(q.get('size') ?? 50) } };
+}
 // The clock the date shortcuts count from: the machine's, moved by `t.offset` (ms).
 const clock = { offset: 0 };
 const grid = createGrid<Row>(host, {
-  rows, getRowId: (r) => r.id, columns: tree, messages, locale, features, ...(parts && { parts }),
+  ...data, getRowId: (r) => r.id, columns: tree, messages, locale, features, ...(parts && { parts }),
   ...(dates && { timeZone: q.get('zone') ?? 'Europe/Paris', clock: () => Date.now() + clock.offset }),
   ...(q.get('numerals') && { numerals: q.get('numerals') as 'latn' | 'locale' }),
   selection: { mode, checkbox: q.get('box') === '1', click: true },
 });
 
+if (q.get('two')) {
+  const second = document.createElement('div');
+  second.style.blockSize = '240px';
+  host.after(second);
+  const { pagination } = await import('/packages/dom/src/pagination.ts');
+  createGrid<Row>(second, { rows: rows.slice(0, 200), getRowId: (r) => r.id, columns: columns.slice(0, 3), messages, locale, label: base === AR ? 'المواعيد' : 'Rendez-vous', features: [pagination() as never], pagination: { pageSize: 25 } });
+}
+
 (window as any).t = {
+  served,
   grid, N, events, dataKey, rows, clock,
   key: (id: number) => dataKey(id)!,
   indexOf: (el: Element) => {

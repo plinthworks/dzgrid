@@ -1,10 +1,10 @@
-import type { GridContext } from './context.js';
-import type { Part, PartBase, PartHandle } from './part.js';
+import type { GridContext } from '../context.js';
+import type { Part, PartBase, PartHandle } from '../part.js';
 
 /**
- * One part in one host (a header's label, the overlay, the tooltip, a floating filter cell),
- * shared by the entries that draw parts (`@dzgrid/dom/slots`, `@dzgrid/dom/filters`; each
- * bundles its own copy, the base never imports it): mounted once, updated
+ * One part in one host (a header's label, the overlay, the tooltip, a floating filter cell, a
+ * footer part), shared by the entries that draw parts through `@dzgrid/dom/internal` (one copy
+ * for them all, step 17; the base never imports it): mounted once, updated
  * only when what it sees changed — its context compared value by value, functions aside, and
  * the messages — cleared when it goes. A part that throws is destroyed, its host given back
  * to the grid's own text, the error reported; it is not tried again until what it would see
@@ -21,7 +21,7 @@ export interface Mounted<C extends PartBase> {
   clear(): void;
 }
 
-/** A closure, not a class: its state minifies (each entry bundles its own copy). */
+/** A closure, not a class: its state minifies. */
 export function mounted<C extends PartBase>(g: GridContext<unknown>): Mounted<C> {
   let part: Part<C> | null = null;
   let handle: PartHandle<C> | null = null;

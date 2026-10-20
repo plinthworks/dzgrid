@@ -4,8 +4,8 @@
 Moves to the next, previous, first or last page; picks another page size; changes a filter, the search or the sort while on page 5.
 
 ## What they observe
-- One page of rows at a time, with the range and, when the server knows it, the total: "51–100 of 1 234".
-- When the total is unknown: "51–100 of many"; "next" works while there are more rows, "last" is disabled.
+- One page of rows at a time, with the range and, when the server knows it, the total: "51 to 100 of 1 234" (words, not a dash: right to left reads it the same; step 17).
+- When the total is unknown: "51 to 100" and "Page 3" (no "of …", owner decision Q2 of step 17); "next" works while there are more rows; "last" is disabled by offset and not drawn by cursor.
 - While the next page loads the current rows stay, dimmed, and the grid says it is busy.
 - A filter, search or sort change goes back to the first page.
 - A new page size keeps the first row of the page in view.
@@ -31,7 +31,7 @@ Moves to the next, previous, first or last page; picks another page size; change
 - `packages/core/test/source-rows-fetched.test.ts`, `source-model/client-part-no-request`, `blank-quick-not-sent`, `fetched-set-max-rows`, `fetched-set-total-null-when-filtered`, `client-shorthand-fetches-once`, `pagination-ignored-page-off`, `problems/fetched-set-large` (step 5 part 3).
 - `packages/core/test/source-rows-property-strong.test.ts`: server pages by offset, by cursor, and the fetched set paged in the browser; 1 000 seeded orders each, with and without a destroy, empty answers included, every step checked against the sheet.
 - Page stage in `ClientModel`, `aria-rowcount` per page (planned, step 4).
-- `footer.pager` (planned, step 17): next fetches in the click's frame, "last" disabled without a total, latn digits in Arabic, focus kept on "next".
+- `footer.pager` (step 17, `pagination-footer.md`): `packages/dom/test/pagination.test.ts`, `pagination-walk.test.ts`; next fetches in the click's frame, "last" disabled without a total and absent by cursor, digits in Arabic, focus kept on "next" (browser checks too).
 - The audit screen in both configurations (planned, step 18).
 
 ## Decisions (step 1, 2026-10-17)
@@ -74,3 +74,7 @@ Moves to the next, previous, first or last page; picks another page size; change
 - **`maxRows`** is checked on every accepted answer of a fetched set: above it, `fetched-set-large` at `response.rows`, the rows kept; at it exactly, nothing. A bad `maxRows` is `invalid-page` at `source.maxRows`, and 100 000 is taken.
 - **`pagination` while paging is off:** paging off wins; the warning `invalid-page` at `pagination`, the setting not read (its own faults not told). `page: 'client'` with a source and no `pagination` pages by 50.
 - **Steps 3-4 test analysis (2026-10-17):** after a refresh the step-back asks the page on screen again instead of keeping it (a refresh asks for fresh rows: a row deleted on the server must not stay). A failure says which request failed (`status.key`, `status.page`), from the very first one.
+
+## Decisions (step 17, 2026-10-20) — the footer
+- The pager, the count and the selection strip are `@dzgrid/dom/pagination` (`pagination-footer.md`). Unknown total: "51 to 100" and "Page 3", no last button by cursor (owner Q2). The count is words, never a dash.
+- The base does nothing on a page change: scrolling to the top and `announce.page` are the feature's. Paging on without `pagination()` is `missing-feature` (warning, `settings.pagination`).

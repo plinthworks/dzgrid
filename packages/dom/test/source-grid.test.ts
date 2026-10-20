@@ -162,7 +162,8 @@ describe('step 5 part 4 review', () => {
     const plain = createGrid<R>(host, { rows: [], getRowId: (r: R) => r.id, columns: [{ id: 'name' }], messages: EN, onEvent: (e: GridEvent<R>) => told.push(e) }, { sync: true });
     grids.push(plain as never);
     plain.update({ source: undefined, locale: 'en-US' } as never);
-    const problems = [...t.events, ...told].filter((e) => e.type === 'problems');
+    // Server pages without pagination() are told once at creation (step 17); nothing else.
+    const problems = [...t.events, ...told].flatMap((e) => (e.type === 'problems' ? e.problems : [])).filter((p) => p.path !== 'settings.pagination');
     expect(problems).toEqual([]);
   });
 

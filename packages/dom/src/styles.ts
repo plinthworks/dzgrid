@@ -27,7 +27,7 @@ export const LAYOUT_CSS = `
 :where(.dzg-hrow) { display: flex; }
 :where(.dzg-free) { unicode-bidi: plaintext; }
 :where(.dzg-num) { unicode-bidi: isolate; direction: ltr; }
-:where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: 0; display: grid; place-content: center; place-items: center; pointer-events: none; }
+:where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: var(--dzg-footer-size, 0px); display: grid; place-content: center; place-items: center; pointer-events: none; }
 :where(.dzg-overlay > *) { pointer-events: auto; }
 :where(.dzg-tooltip) { position: fixed; margin: 0; z-index: 10; }
 :where(.dzg-overlay[hidden], .dzg-tooltip[hidden]) { display: none; }

@@ -193,7 +193,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   g.bands = handles.flatMap((h) => h.bands ?? []);
   g.spans = handles.find((h) => h.spans)?.spans ?? null;
   g.slots = handles.find((h) => h.slots)?.slots ?? null;
-  told.push(...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>));
+  told.push(...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>, rows.page));
   g.features = handles;
   scope.add(() => { for (const h of handles) h.destroy(); });
 

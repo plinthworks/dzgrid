@@ -402,3 +402,36 @@ Consigner le résultat dans `docs/behaviors/quick-search-box.md` (fin de la fich
 `ROADMAP.md` (ligne de l'étape 16). Règle de décision propre à cette section : un nombre dit à chaque
 touche (57) ou pendant une composition (61) se corrige avant l'étape 17 ; un champ dont le rôle n'est
 pas dit (56) se signale à l'hôte (son `type="search"`), pas à la grille.
+
+## 13. Étapes — pagination (étape 17)
+
+Page : le bac à sable, lien « Pagination » de la page d'accueil, http://127.0.0.1:4700/?paging=client
+(`npx vite --host 127.0.0.1`), puis le serveur par curseur sans total `?paging=cursor`, en
+**français** puis en **arabe** (`&locale=ar-DZ&direction=auto`). Couples A à D. Durée estimée :
+10 min par couple et par langue. Noter ce qui est **dit**, mot pour mot.
+
+64. **Le repère.** Liste des repères (NVDA `D`, VoiceOver rotor) : « Pagination, Grille de données »,
+    une navigation ; avec deux grilles, deux noms différents.
+65. **Les boutons.** `Tab` dans le pied : « Première page, bouton, indisponible », « Page précédente,
+    indisponible », « Page suivante, bouton », « Dernière page », « Lignes par page, liste ». Le texte
+    « 1 à 50 sur 2 000 » se lit en mode lecture, il n'est pas annoncé de lui-même.
+66. **Suivant.** `Entrée` sur « Page suivante » : une phrase, **une fois** : « Page 2 sur 40. 51 à
+    100 sur 2 000 » ; le focus reste sur « Page suivante » ; la grille revient en haut.
+67. **Indisponible.** Sur la dernière page, « Page suivante » est dit indisponible, ne fait rien et ne
+    dit rien ; le focus ne part pas.
+68. **Taille.** Changer « Lignes par page » à 100 : la nouvelle page dite une fois ; le focus reste sur
+    la liste.
+69. **Serveur lent.** (`?paging=cursor`) rien n'est dit avant la réponse ; puis « Page 3. 101 à 150 »
+    (sans « sur … ») ; pas de bouton « Dernière page ».
+70. **Sélection.** Cocher la case d'en-tête : les lignes de la page seulement ; le pied dit « 50 lignes
+    sélectionnées » puis offre « Sélectionner les 2 000 lignes » ; l'activer : « Toutes les lignes
+    correspondantes sélectionnées », le focus passe sur « Effacer la sélection » ; l'activer : le focus
+    revient dans la grille. Page suivante après avoir coché quelques lignes : « … (certaines non
+    affichées) ».
+71. **Arabe.** Chiffres lus correctement (latins ou arabes selon `numerals`), pluriels justes (« صفان »),
+    flèches dans le sens de lecture, première page à droite.
+
+Consigner le résultat dans `docs/behaviors/pagination-footer.md` (fin de la fiche) et dans
+`ROADMAP.md` (ligne de l'étape 17). Règle de décision propre à cette section : une phrase dite deux
+fois (66, 68), ou un focus qui part (66, 67, 70), se corrige avant l'étape 18 ; un nom de bouton mal
+traduit se corrige dans les textes (`locales/*-pagination.ts`).

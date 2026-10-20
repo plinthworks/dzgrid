@@ -1,6 +1,7 @@
 import type { LocaleCtx } from '@dzgrid/core';
 import type { Part, SlotContext } from '../part.js';
-import { composing, el, labelled, tx } from './dom.js';
+import { composing } from '@dzgrid/dom/internal';
+import { el, labelled, tx } from './dom.js';
 import { echo, nameOf, numberIn, shown, textField } from './field.js';
 
 export { el, labelled, tx };

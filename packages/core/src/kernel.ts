@@ -403,9 +403,10 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         keepOnFilter = cmd.keep;
         return OK;
       case 'selection.allDisplayed': {
-        // The client's *all* is what the filters show (D8): an include set of those keys.
+        // The client's *all* is what the filters show (D8): an include set of those keys. On pages
+        // (step 17, owner Q1) the page's keys are added to what is ticked: other pages keep theirs.
         const d = rows.displayed;
-        const keys: RowKey[] = [];
+        const keys: RowKey[] = rows.page && selection.mode === 'include' ? [...selection.keys] : [];
         for (let i = 0; i < d.count; i++) keys.push(d.keyAt(d.index(i)!));
         setSelection(selectOnly(keys), source);
         return OK;

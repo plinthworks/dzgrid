@@ -1,9 +1,9 @@
 import { dayAt } from '@dzgrid/core';
 import { hasRelative } from '@dzgrid/core/internal';
+import { settled } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { FilterMessageKey } from '../messages.js';
-import { announceFilters } from './announce.js';
 import { committer } from './commit.js';
 import { dateForms, kits, type DateEnv, type DateKit, type DateKitName } from './dates.js';
 import { floatingRow } from './floating.js';
@@ -90,7 +90,12 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   if (missing.length) throw new TypeError(`filters: missing ${missing.join(', ')}`);
   const root = g.el.root.getRootNode();
   if (g.settings.injectStyles !== false) injectFilterStyles(root.nodeType === 11 ? (root as ShadowRoot) : g.doc, g.settings.nonce);
-  const quiet = announceFilters(g);
+  // After a user's filter change, the filtered count (`announce.filtered {rows}`, or `announce.filteredOpen` when
+  // nobody knows it), once the rows are in. Any filter change asks for a paint, which `filterChanged` alone does not.
+  const quiet = g.kernel.subscribe(settled(g, (e) => e.type === 'filterChanged' && (g.schedule(), e.source === 'user'), () => {
+    const n = g.rows.counts.filtered;
+    g.live.announce(n === null ? g.msg('announce.filteredOpen') : g.msg('announce.filtered', { rows: g.msg('announce.rows', { n }) }));
+  }));
   const resolve = resolver(g, o, set);
   const commit = committer(g, o);
   const popup = menu(g, resolve, commit, o.popup !== false);
