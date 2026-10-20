@@ -25,7 +25,7 @@ Mis à jour : 2026-10-19 (étape 16 faite, non commitée). Ce fichier dit où en
 | 15 — filtre par liste de valeurs (chargé à la demande), menu de démos | fait, relu, testé | `021324e`, `79c40c3` |
 | 17 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-En cours : l'étape 16 est écrite et corrigée après relecture et analyse des tests (non commitée) : `quickSearch()` dans `@dzgrid/dom/search` (1 251 o, budget 1 300, décision Q4), base dom 18 801 (18 900) ; 3 215 tests, navigateur 280 ; détail dans la ROADMAP ; reste le commit. Étape 17 ensuite (pagination). Étape 26 (animations GSAP) décidée. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP à confirmer.
+En cours : l'étape 17 (pagination : barre de pages, nombre de lignes, « N sélectionnées »), architecte d'abord. Étape 16 close (`8e01825`, corrections `85ec8a5`) : suite 3 215 tests ; search 1 251 / 1 300, dom 18 801 / 18 900. Décidé pour l'étape 22 : une cellule Angular = un composant qui implémente `DzgCell<T>` (input `cell`), `cell().emit(nom, détail)` → événement `cellAction` (accord du propriétaire 2026-10-20). Étape 26 : animations GSAP. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP.
 
 ## Les plans détaillés des étapes
 
