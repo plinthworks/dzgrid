@@ -25,7 +25,7 @@ Mis à jour : 2026-10-19 (étape 16 faite, non commitée). Ce fichier dit où en
 | 15 — filtre par liste de valeurs (chargé à la demande), menu de démos | fait, relu, testé | `021324e`, `79c40c3` |
 | 17 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-En cours : l'étape 17 (pagination : barre de pages, nombre de lignes, « N sélectionnées »), architecte d'abord. Étape 16 close (`8e01825`, corrections `85ec8a5`) : suite 3 215 tests ; search 1 251 / 1 300, dom 18 801 / 18 900. Décidé pour l'étape 22 : une cellule Angular = un composant qui implémente `DzgCell<T>` (input `cell`), `cell().emit(nom, détail)` → événement `cellAction` (accord du propriétaire 2026-10-20). Étape 26 : animations GSAP. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP.
+En cours : l'étape 17 (pagination, module `@dzgrid/dom/pagination` + module commun `@dzgrid/dom/internal`), plan `docs/phase-3-steps/step17-pagination-blueprint.md`, décisions `step17-decisions.md` (propriétaire, 2026-10-20 : la case « tout » ne concerne que la page affichée dans le navigateur ; total inconnu → « 51 à 100 », « Page 3 » ; base 19 100, pagination 3 800, internal 650, textes 560 / 680 / 880, thème 2 050). Implémentation lancée, tests d'abord. Décidé pour l'étape 22 : cellule Angular `DzgCell<T>` + `cell().emit`. Étape 26 : animations GSAP (+ règle de classe par colonne, accès à la cellule pour GSAP ; Phase 4 : états d'enregistrement animés). Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP.
 
 ## Les plans détaillés des étapes
 
