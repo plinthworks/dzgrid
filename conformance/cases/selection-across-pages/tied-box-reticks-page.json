@@ -1,0 +1,49 @@
+{
+  "id": "tied-box-reticks-page",
+  "suite": "selection-across-pages",
+  "description": "Browser pages (step 17, owner Q4): an all-pages selection with r1 unticked on page 0 and r3 on page 1; the box on page 0 sends the exclusions without page 0's rows: page 0 ticked again, r3 stays unticked, still everything-except.",
+  "input": {
+    "rows": 6,
+    "pageSize": 2,
+    "operations": {
+      "page": "client"
+    },
+    "ops": [
+      {
+        "op": "allFiltered"
+      },
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "page",
+        "index": 1
+      },
+      {
+        "op": "toggle",
+        "id": "r3"
+      },
+      {
+        "op": "page",
+        "index": 0
+      },
+      {
+        "op": "set",
+        "mode": "exclude",
+        "ids": [
+          "r3"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [
+      "r3"
+    ],
+    "count": 5,
+    "reason": null,
+    "header": "all"
+  }
+}

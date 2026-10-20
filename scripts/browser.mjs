@@ -641,6 +641,16 @@ async function pagingChecks(name, ctx) {
       return i < 0 ? null : { five: at(i), zero: at(i + 1), text: t.data };
     });
     check(name, `${tag}: the count "${digits?.text}": digits not reversed`, digits && digits.five < digits.zero, digits);
+    if (!rtl) {
+      // A hidden footer button is really hidden ([hidden] after the buttons' display rule, review R1).
+      const vis = async () => { await frames(page); return page.evaluate(() => { const b = document.querySelector('.dzg-footer [data-act=all]'); return { hidden: b.hidden, shown: b.offsetParent !== null }; }); };
+      await page.evaluate(() => { const d = window.t.grid.kernel.rows.displayed; window.t.grid.kernel.dispatch({ type: 'selection.toggle', row: d.keyAt(d.index(0)) }, 'user'); });
+      const one = await vis();
+      await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'selection.all' }, 'user'));
+      const pageAll = await vis();
+      await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'selection.clear' }, 'user'));
+      check(name, `${tag}: "Select all N rows" hidden (one row ticked), shown once the page is ticked`, one.hidden && !one.shown && !pageAll.hidden && pageAll.shown, { one, pageAll });
+    }
     // Next: one click; on the server the request leaves in the click's own task, the page at once, the sentence at the answer.
     const n = await page.evaluate(() => {
       const before = window.t.served.fetches;

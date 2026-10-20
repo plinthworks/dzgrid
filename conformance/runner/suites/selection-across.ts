@@ -13,6 +13,8 @@ type Op =
   /** Added (Ctrl+click), each toggled. */
   | { op: 'only-add'; ids: string[] }
   | { op: 'toggle'; id: string }
+  /** The selection set as a whole (what the header box sends on browser pages). */
+  | { op: 'set'; mode: 'include' | 'exclude'; ids: string[] }
   | { op: 'all' | 'allFiltered' | 'clear' | 'refresh' }
   /** A text `contains` on `v`; null removes it. */
   | { op: 'filter'; column: string; value: string | null }
@@ -74,6 +76,7 @@ export const selectionAcross: Record<string, Suite> = {
           break;
         case 'only-add': for (const id of o.ids) kernel.dispatch({ type: 'selection.toggle', row: k(id) }, 'user'); break;
         case 'toggle': kernel.dispatch({ type: 'selection.toggle', row: k(o.id) }, 'user'); break;
+        case 'set': kernel.dispatch({ type: 'selection.set', selection: { mode: o.mode, keys: new Set(o.ids.map(k)) } }, 'user'); break;
         case 'all': kernel.dispatch({ type: 'selection.all' }, 'user'); break;
         case 'allFiltered': kernel.dispatch({ type: 'selection.allFiltered' }, 'user'); break;
         case 'clear': kernel.dispatch({ type: 'selection.clear' }, 'user'); break;

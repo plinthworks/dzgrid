@@ -8,8 +8,9 @@ export const PAGINATION_CSS =
   ':where(.dzg-footer){display:flex;flex-wrap:wrap;align-items:center;gap:.25rem 1rem;min-inline-size:0}' +
   ':where(.dzg-footer>*,.dzg-psel,.dzg-psize){display:flex;flex-wrap:wrap;align-items:center;gap:.25rem}' +
   ':where(.dzg-footer>nav){margin-inline-start:auto}' +
-  ':where(.dzg-footer [hidden],.dzg-footer>:has(>[hidden]:only-child)){display:none}' +
   ':where(.dzg-pbtn){display:inline-flex;align-items:center;justify-content:center;gap:1px;min-inline-size:var(--dzg-target-min,24px);min-block-size:var(--dzg-target-min,24px)}' +
+  // After the buttons' display: same zero specificity, the later wins.
+  ':where(.dzg-footer [hidden],.dzg-footer>:has(>[hidden]:only-child)){display:none}' +
   ':where(.dzg-pbtn[data-go])::before{content:"";inline-size:.4em;block-size:.4em;border-block-start:2px solid;border-inline-start:2px solid;rotate:var(--dzg-chevron)}' +
   ':where(.dzg-pbtn:is([data-go=first],[data-go=last]))::after{content:"";block-size:.7em;border-inline-start:2px solid}' +
   ':where(.dzg-pbtn[data-go=first])::after{order:-1}' +

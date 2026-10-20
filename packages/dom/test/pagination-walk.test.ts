@@ -90,7 +90,8 @@ function walk(seed: number, mode: Mode, steps = 40) {
     let shown = 0;
     for (let i = 0; i < d.count; i++) if (isSel(d.keyAt(d.index(i)!))) shown++;
     const all = k.selectionScope !== null;
-    const can = !all && d.count > 0 && shown === d.count && k.rows.counts.filtered !== null && k.rows.counts.filtered > d.count;
+    const can = !all && d.count > 0 && shown === d.count && k.rows.counts.filtered !== null && k.rows.counts.filtered > d.count
+      && [...k.selection.keys].filter((x) => k.rows.matches?.(x) ?? true).length < k.rows.counts.filtered;
     expect(!t.act('all')!.hidden, fail('Select all shown iff its condition')).toBe(lastCount !== 0 && can);
     // Never more page sentences than the user's own page actions.
     expect(pageSaid(), fail('announce.page at most once per action')).toBeLessThanOrEqual(userPageActs);

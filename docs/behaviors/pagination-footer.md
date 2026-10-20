@@ -70,25 +70,37 @@ then asks for every row of the query; clears the selection.
   `selected.hidden` "{selected} (some not shown)"; every matching row with an unknown count,
   `announce.selectedAll`. Buttons: "Clear selection" (`selected.clear`) whenever something is selected;
   "Select all {n} rows" (`selected.selectAll`, plural on n, the filtered count) when the mode is
-  `multi`, the selection is not already every row, every row of the page is ticked, and more rows
-  match than the page shows (count known). It selects every row the filters and the search match, on
+  `multi`, the selection is not already every row (not an all-pages selection, and fewer selected rows
+  match the filters and the search than the filtered count: a selection ticked page by page up to the
+  last matching row offers nothing more), every row of the page is ticked, and more rows match than the
+  page shows (count known). It selects every row the filters and the search match, on
   every page (`selection.allFiltered`: everything-except, tied to the query). After it the focus goes to
   "Clear selection"; after Clear, back to the grid.
 - **The header box on browser pages** (owner decision Q1 of step 17, closing Q2 of step 7): it acts on
   the page shown only. Ticking it adds the page's rows to the selection (rows ticked on other pages
   stay ticked); unticking it, when the page is all ticked, removes the page's rows only. Ctrl+A follows
-  the box. Over an all-pages selection (everything-except) the box ticks every unticked row again, as
-  before (`selection.md`). On server pages nothing changes: the box selects the whole query.
+  the box. Over an all-pages selection (everything-except, tied to the query) a page not all ticked is
+  ticked again by the box, that page only: its rows leave the excluded keys, the rows unticked on other
+  pages stay unticked (owner decision Q4 of step 17); unticking a fully ticked page adds its rows to
+  them. Ctrl+A over it ticks every unticked row again, on every page (`selection.md`). On server pages
+  nothing changes: the box selects the whole query.
 - **Announcements:** after the user's own page change (a pager button, the size), once the rows are
   settled: `announce.page` "Page {page} of {count}. {range}", unknown total `announce.pageOpen`
   "Page {page}. {range}", through the grid's live region. In the browser at once, on a server once the
-  answer is in; a request replaced by a newer one waits for the last answer; nothing on a failure
-  (the grid says the error), nothing for a disabled button, nothing for a host's `page.go`. A filter or
-  search sending the grid back to page 1 keeps its own sentence.
+  answer is in; a request replaced by a newer one of the user's own page change waits for the last
+  answer, and a page past the end the grid asks again (back to the last page) is still said; nothing on
+  a failure (the grid says the error), nothing for a disabled button, nothing for a host's `page.go`.
+  An answer belongs to the action that asked for it: a filter, a search or a host's `page.go` that
+  replaces the user's pending page change takes its answer, and the page sentence is not said for it
+  (the filter or the search says its own, a host's change nothing); a page change that replaces a
+  pending filter or search says the page, not their count (the shared announcer of
+  `@dzgrid/dom/internal`, used by the filters, the search and the pager). A filter or search sending the
+  grid back to page 1 keeps its own sentence.
 - **A page change** scrolls the rows back to the top (`modelUpdated` of kind `page`; a refresh keeps
   the scroll). The grid's cell focus keeps its column and takes the row at the same index (the core).
 - **Layout:** injected CSS without colour (`:where`, logical properties, wraps on a narrow screen,
-  no horizontal scroll at 320 px). The theme gives the colours; disabled buttons in the muted colour
+  no horizontal scroll at 320 px). A hidden footer control is really hidden: the `[hidden]` rule comes
+  after the buttons' `display` (same zero specificity, the later wins). The theme gives the colours; disabled buttons in the muted colour
   with a not-allowed cursor; chevrons drawn in CSS and mirrored right to left.
 - **The overlay stops above the footer:** the feature measures the footer and sets
   `--dzg-footer-size` on the grid's root; the overlay's `inset-block-end` reads it.
@@ -97,6 +109,10 @@ then asks for every row of the query; clears the selection.
 `packages/dom/test/pagination.test.ts` (en, fr, ar: client, offset, cursor, unknown total, texts,
 digits, focus, announcements, the selection strip, the header box, parts, missing feature, dormant,
 overlay variable, structure), `pagination-walk.test.ts` (seeded random walks, `WALK_SEEDS`,
-`WALK_SEED`), `conformance/cases/selection-across-pages/box-union-browser-pages.json`; browser checks in
+`WALK_SEED`), `pagination-oracle.test.ts` (an independent model walked against the footer),
+`pagination-gaps.test.ts` (the review's findings: hidden rule order, "Select all" once every row is
+ticked, the announcer's request ownership, the box in a tied selection),
+`conformance/cases/selection-across-pages/box-union-browser-pages.json`, `tied-box-reticks-page.json`,
+`tied-all-reticks-every-row.json`; browser checks in
 `scripts/browser.mjs` (`paging=client` French light, `paging=cursor` Arabic right to left dark); by
 ear: `docs/a11y-protocol.md` §13.

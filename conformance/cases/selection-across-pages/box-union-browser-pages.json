@@ -1,7 +1,7 @@
 {
   "id": "box-union-browser-pages",
   "suite": "selection-across-pages",
-  "description": "Pages in the browser (step 17, owner Q1): r1 ticked on page 0, select all on page 1 adds that page's rows; r1 stays.",
+  "description": "Pages in the browser (step 17, owner Q1): r1 ticked on page 0, the box (or Ctrl+A) on page 1 over an include selection adds that page's rows; r1 stays.",
   "input": {
     "rows": 6,
     "pageSize": 2,

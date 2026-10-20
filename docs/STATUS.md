@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-20 (étape 17 faite, non commitée ; relecture et analyse des tests à faire). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 17 faite, relue, testée ; corrections non commitées ; étape 18 ensuite). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -24,10 +24,10 @@ Mis à jour : 2026-10-20 (étape 17 faite, non commitée ; relecture et analyse 
 | 14 — filtres de dates sur tzslot (jour, période, avant/après), six raccourcis relatifs, horloge | fait, relu, testé | `df27559`, `85e08c3`, `ae0b40b`, `24acaab` |
 | 15 — filtre par liste de valeurs (chargé à la demande), menu de démos | fait, relu, testé | `021324e`, `79c40c3` |
 | 16 — recherche rapide (`@dzgrid/dom/search`) | fait, relu, testé | `85ec8a5` |
-| 17 — pagination (`@dzgrid/dom/pagination`, `@dzgrid/dom/internal`) | fait, non commité (relecture à faire) | — |
-| 18 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
+| 17 — pagination (`@dzgrid/dom/pagination`, `@dzgrid/dom/internal`) | fait, relu, testé (corrections non commitées) | `5cd9ca9` + corrections |
+| 18 à 26 | à faire, la 18 ensuite (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-Étape 17 faite (non commitée) : pied de page `pagination()` (sélection, décompte, pagineur dans un `<nav>`), module commun `@dzgrid/dom/internal` (auto-référence vérifiée sur un `dist/` construit), case d'en-tête limitée à la page affichée dans le navigateur ; 3 274 tests, 300 vérifications navigateur, 26 mutants (24 tués, 2 équivalents). Reste : relecture de code, analyse des tests, puis commit. Question ouverte : sur une sélection « tout » avec des lignes décochées ailleurs, cocher la case d'une page recoche tout (règle de l'étape 7 gardée). Décidé pour l'étape 22 : cellule Angular `DzgCell<T>` + `cell().emit`. Étape 26 : animations GSAP (+ règle de classe par colonne, accès à la cellule pour GSAP ; Phase 4 : états d'enregistrement animés). Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP.
+Étape 17 faite, relue, testée (`5cd9ca9` + corrections non commitées) : pied de page `pagination()` (sélection, décompte, pagineur dans un `<nav>`), module commun `@dzgrid/dom/internal`, case d'en-tête limitée à la page affichée dans le navigateur. Corrections de la relecture : un bouton caché du pied l'est vraiment dans un navigateur (règle `[hidden]` après le `display` des boutons) ; plus de « Tout sélectionner (N) » quand toutes les lignes filtrées sont déjà cochées page par page ; l'annonce après réponse (`settled`, partagée par filtres, recherche et pagination) ne parle que pour la requête de sa propre action (un filtre ou un `page.go` de l'hôte qui remplace un changement de page en attente ne fait plus dire la page) ; décision Q4 du propriétaire : sur une sélection « tout » liée, la case d'une page recoche cette page seulement, Ctrl+A recoche tout. 3 296 tests, 301 vérifications navigateur. En cours : étape 18 ensuite. Décidé pour l'étape 22 : cellule Angular `DzgCell<T>` + `cell().emit`. Étape 26 : animations GSAP (+ règle de classe par colonne, accès à la cellule pour GSAP ; Phase 4 : états d'enregistrement animés). Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP.
 
 ## Les plans détaillés des étapes
 
@@ -59,9 +59,9 @@ Mis à jour : 2026-10-20 (étape 17 faite, non commitée ; relecture et analyse 
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 620 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 551 |
-| `@dzgrid/dom` | 19 100 (étape 17) | 18 935 |
-| `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 108 |
-| `@dzgrid/dom/internal` | 650 (étape 17) | 505 |
+| `@dzgrid/dom` | 19 100 (étape 17) | 18 953 |
+| `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 149 |
+| `@dzgrid/dom/internal` | 650 (étape 17) | 527 |
 | textes de la pagination en / fr / ar | 560 / 680 / 880 (étape 17) | 328 / 375 / 489 |
 | `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 228 |
 | `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 8 919 |

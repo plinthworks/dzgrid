@@ -1,0 +1,43 @@
+{
+  "id": "tied-all-reticks-every-row",
+  "suite": "selection-across-pages",
+  "description": "Browser pages (step 17, owner Q4): the same all-pages selection, Ctrl+A (selection.all) ticks every row again, on every page.",
+  "input": {
+    "rows": 6,
+    "pageSize": 2,
+    "operations": {
+      "page": "client"
+    },
+    "ops": [
+      {
+        "op": "allFiltered"
+      },
+      {
+        "op": "toggle",
+        "id": "r1"
+      },
+      {
+        "op": "page",
+        "index": 1
+      },
+      {
+        "op": "toggle",
+        "id": "r3"
+      },
+      {
+        "op": "page",
+        "index": 0
+      },
+      {
+        "op": "all"
+      }
+    ]
+  },
+  "expected": {
+    "mode": "exclude",
+    "keys": [],
+    "count": 6,
+    "reason": null,
+    "header": "all"
+  }
+}

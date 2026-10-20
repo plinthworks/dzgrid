@@ -73,6 +73,12 @@ export function footerContext(g: GridContext<unknown>, act: (cmd: GridCommand) =
       g.restoreFocus();
     },
   };
+  /** The selected rows the filters and the search match: "Select all N" only while some are not ticked. */
+  const matching = (): number => {
+    let n = 0;
+    for (const key of k.selection.keys) if (g.rows.matches?.(key) ?? true) n++;
+    return n;
+  };
   return () => {
     const p = page();
     const d = g.rows.displayed;
@@ -88,7 +94,7 @@ export function footerContext(g: GridContext<unknown>, act: (cmd: GridCommand) =
       counts: same('c', c),
       status: same('s', status),
       range: d.count && status.phase !== 'loading' ? same('r', { from, to: from + d.count - 1 }) : null,
-      selection: same('x', { count, shown, all, mode, canSelectAll: mode === 'multi' && !all && d.count > 0 && shown === d.count && c.filtered !== null && c.filtered > d.count }),
+      selection: same('x', { count, shown, all, mode, canSelectAll: mode === 'multi' && !all && d.count > 0 && shown === d.count && c.filtered !== null && c.filtered > d.count && matching() < c.filtered }),
       ...fns,
     };
   };

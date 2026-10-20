@@ -9,18 +9,22 @@ export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
   /**
    * The select-all box, multi mode only: ticked, it clears everything; otherwise it selects all, as
    * the model means it. On pages in the browser (step 17, owner Q1) it acts on the page shown: ticked,
-   * it takes the page's rows out of the selection only (other pages keep theirs).
+   * it takes the page's rows out of the selection only (other pages keep theirs). Over an all-pages
+   * selection (tied everything-except, owner Q4) a page not fully ticked gets its rows ticked again,
+   * that page only: they leave the excluded keys (Ctrl+A ticks every row again, `selection.all`).
    */
   function toggleAll(): void {
     if (g.settings.selection?.mode !== 'multi') return;
     const all = kernel.headerState === 'all';
-    if (all && rows.page && rows.selectAll === 'displayed') {
+    if (rows.page && rows.selectAll === 'displayed' && (all || kernel.selectionScope)) {
       const s = kernel.selection;
       const keys = new Set(s.keys);
       const d = rows.displayed;
+      // Out of an include set, or out of the exclusions (re-ticked); into them (unticked).
+      const out = (s.mode === 'include') === all;
       for (let i = 0; i < d.count; i++) {
         const k = d.keyAt(d.index(i)!);
-        if (s.mode === 'include') keys.delete(k);
+        if (out) keys.delete(k);
         else keys.add(k);
       }
       kernel.dispatch({ type: 'selection.set', selection: { mode: s.mode, keys } }, 'user');
