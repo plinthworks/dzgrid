@@ -50,9 +50,9 @@ describe('size.mjs split mode', () => {
     const m = await measureSplit(entry, ROOT);
     expect(m.problems).toEqual([]);
     expect(m.initial.flatMap((f: { inputs: string[] }) => f.inputs).sort()).toEqual([`${F}/ext-entry.ts`, shippedFile]);
-    // Not listed as shipped: a built file, refused as before.
+    // Not listed as shipped: the alias refused (step 23 review), and a built file, refused as before.
     const n = await measureSplit({ ...entry, shipped: [] }, ROOT);
-    expect(n.problems).toEqual([`${shippedFile}: a built file (dist/), not the source`]);
+    expect(n.problems).toEqual([`alias dzg-shipped -> ${shippedFile}: not listed in shipped`, `${shippedFile}: a built file (dist/), not the source`]);
   });
 
   it('accepts only the shipped files it is given, every other dist/ still refused', () => {

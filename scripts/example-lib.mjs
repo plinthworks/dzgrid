@@ -12,25 +12,30 @@ const local = (href) => href && !/^[a-z]+:|^\/\//i.test(href);
 /**
  * The files a page loads before the first gesture, from its index.html: module scripts, module
  * preloads (the initial chunks), stylesheets. Once each, in page order; other origins and inline
- * styles left out (Angular's inlined critical CSS repeats part of the stylesheet).
+ * styles left out (Angular's inlined critical CSS repeats part of the stylesheet). `entries`: the
+ * module scripts alone; `preloads`: how many distinct modulepreload hints the page has.
  */
 export function initialFiles(html) {
   const scripts = [];
   const styles = [];
+  const entries = [];
+  const hinted = new Set();
   for (const m of html.matchAll(/<(script|link)\b[^>]*>/gi)) {
     const tag = m[0];
     if (m[1].toLowerCase() === 'script') {
       const src = attr(tag, 'src');
       if (local(src) && !scripts.includes(src)) scripts.push(src);
+      if (local(src) && !entries.includes(src)) entries.push(src);
       continue;
     }
     const rel = attr(tag, 'rel')?.toLowerCase();
     const href = attr(tag, 'href');
     if (!local(href)) continue;
+    if (rel === 'modulepreload') hinted.add(href);
     if (rel === 'modulepreload' && !scripts.includes(href)) scripts.push(href);
     if (rel === 'stylesheet' && !styles.includes(href)) styles.push(href);
   }
-  return { scripts, styles };
+  return { scripts, styles, entries, preloads: hinted.size };
 }
 
 const gz = (bytes) => gzipSync(bytes, { level: 9 }).length;
@@ -38,11 +43,42 @@ const gz = (bytes) => gzipSync(bytes, { level: 9 }).length;
 /** A browser build's page: `index.html`, or `index.csr.html` when the build has a server (the page rendered in the browser). */
 export const indexOf = (browser) => join(browser, existsSync(join(browser, 'index.html')) ? 'index.html' : 'index.csr.html');
 
+/** Angular's index generator writes at most this many `modulepreload` hints (@angular/build's index-html-generator). */
+export const PRELOAD_CAP = 10;
+
+/**
+ * The JS a page loads first, from the build's stats (esbuild's metafile, `--stats-json`): the
+ * page's module scripts and every chunk they reach by static imports (as size-split.mjs does),
+ * never a dynamic one. The page's own hints are kept too: the browser downloads them anyway.
+ * Without stats, the page's hints alone, which Angular caps at ten: at the cap, the measure
+ * cannot be sure and throws.
+ */
+export function initialScripts(dir, { scripts, entries, preloads }) {
+  const stats = join(dir, 'stats.json');
+  if (!existsSync(stats)) {
+    if (preloads >= PRELOAD_CAP) throw new Error(`${dir}: ${preloads} modulepreload hints, Angular's cap: initial chunks past it are not on the page; build with --stats-json`);
+    return scripts;
+  }
+  const outputs = JSON.parse(readFileSync(stats, 'utf8')).outputs ?? {};
+  const key = (f) => Object.keys(outputs).find((k) => k === f || k === `browser/${f}`);
+  const rel = (k) => k.replace(/^browser\//, '');
+  const seen = new Set();
+  for (const f of entries) {
+    const k = key(f);
+    if (!k) throw new Error(`${dir}: stats.json has no output for the page's script ${f}: a stale stats file?`);
+    seen.add(k);
+  }
+  for (const k of seen) for (const i of outputs[k]?.imports ?? []) if (i.kind === 'import-statement' && !i.external && !seen.has(i.path)) seen.add(i.path);
+  const all = [...scripts];
+  for (const k of seen) if (!all.includes(rel(k))) all.push(rel(k));
+  return all;
+}
+
 /** One build's first load (`dist/<name>/browser`): each initial file's gzip (level 9), JS and CSS summed. */
 export function measureBuild(dir) {
   const browser = join(dir, 'browser');
-  const { scripts, styles } = initialFiles(readFileSync(indexOf(browser), 'utf8'));
-  const files = [...scripts, ...styles].map((f) => {
+  const page = initialFiles(readFileSync(indexOf(browser), 'utf8'));
+  const files = [...initialScripts(dir, page), ...page.styles].map((f) => {
     const bytes = readFileSync(join(browser, f));
     return { file: f, min: bytes.length, gz: gz(bytes), css: f.endsWith('.css') };
   });

@@ -47,12 +47,27 @@ describe('the Arabic CSV sample (step 23)', () => {
   let bytes: Uint8Array;
   let text: string;
   let fileName: string;
+  let direction: string | null;
   beforeAll(async () => {
-    ({ bytes, fileName } = await arabicSample());
+    ({ bytes, fileName, direction } = await arabicSample());
     text = new TextDecoder('utf-8', { ignoreBOM: true }).decode(bytes);
     if (WRITE) {
       mkdirSync(dirname(OUT), { recursive: true });
       writeFileSync(OUT, bytes);
+    }
+  });
+
+  it('is exported from a grid laid out right to left', () => {
+    expect(direction).toBe('rtl');
+  });
+
+  it('takes `;` from ar-DZ: the same export in ar-EG or en-US separates with `,`', async () => {
+    const header = (b: Uint8Array) => { const t = new TextDecoder('utf-8', { ignoreBOM: true }).decode(b); return t.slice(1, t.indexOf('\r\n')); };
+    expect(header(bytes).split(';')).toHaveLength(8);
+    for (const locale of ['ar-EG', 'en-US']) {
+      const other = header((await arabicSample(locale)).bytes);
+      expect(other).not.toContain(';');
+      expect(other.split(',')).toHaveLength(8);
     }
   });
 

@@ -6,6 +6,8 @@
  * reaches are lazy: measured and printed beside it, never in the initial sum.
  */
 import { build } from 'esbuild';
+import { existsSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 const gz = (bytes) => gzipSync(bytes, { level: 9 }).length;
@@ -29,6 +31,58 @@ export function splitProblems(metafile, shipped = []) {
     }
   }
   return problems;
+}
+
+/** A package's build, the only kind of file `shipped` may name. */
+const SHIPPED = /^packages\/([^/]+)\/dist\//;
+
+/** The newest modification time under a folder. */
+const newest = (dir) => readdirSync(dir, { withFileTypes: true }).reduce((t, e) => Math.max(t, e.isDirectory() ? newest(join(dir, e.name)) : statSync(join(dir, e.name)).mtimeMs), 0);
+
+/**
+ * A built file (`packages/<p>/dist/…`, the Angular package's fesm2022, step 22): measured as it
+ * ships, so it must exist and be newer than its package's sources, or the measure would lie.
+ * Null when it is fresh, or not a package's build at all.
+ */
+export function stale(file, root) {
+  const m = SHIPPED.exec(file ?? '');
+  if (!m) return null;
+  if (!existsSync(root + file)) return `${file} is missing: run npm run build`;
+  return newest(join(root, 'packages', m[1], 'src')) > statSync(root + file).mtimeMs ? `${file} is older than packages/${m[1]}/src: run npm run build` : null;
+}
+
+/** Each `shipped` file must be a package's build (`packages/<p>/dist/`), there and fresh. */
+export function shippedProblems(entry, root) {
+  return (entry.shipped ?? []).map((f) => (SHIPPED.test(f) ? stale(f, root) : `${f}: a shipped file must be a package's build (packages/<p>/dist/)`)).filter(Boolean);
+}
+
+/** Does an esbuild `external` pattern (one `*` wildcard at most) take a DzGrid package out? */
+const dropsDzgrid = (pattern) => {
+  if (pattern.includes('@dzgrid')) return true;
+  const re = new RegExp(`^${pattern.split('*').map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*')}$`);
+  return ['@dzgrid/core', '@dzgrid/dom', '@dzgrid/angular', '@dzgrid/theme'].some((p) => re.test(p));
+};
+
+/**
+ * What the entry's options would hide: an `alias` to a file `shipped` does not list (a stub would
+ * stand in for the package), an `external` pattern that takes a DzGrid package out of the count.
+ */
+export function entryProblems(entry) {
+  const shipped = entry.shipped ?? [];
+  const problems = [];
+  for (const [k, v] of Object.entries(entry.alias ?? {})) if (!shipped.includes(v)) problems.push(`alias ${k} -> ${v}: not listed in shipped`);
+  for (const p of entry.external ?? []) if (dropsDzgrid(p)) problems.push(`external ${p}: matches @dzgrid/, its code would leave the count`);
+  return problems;
+}
+
+/**
+ * A split entry as size.mjs measures it: its shipped files checked first (missing or stale, the
+ * build is not run: `measured: false`, the problems say why), then measureSplit.
+ */
+export async function measureSplitEntry(entry, root) {
+  const problems = shippedProblems(entry, root);
+  if (problems.length) return { measured: false, problems };
+  return { measured: true, ...(await measureSplit(entry, root)) };
 }
 
 /**
@@ -66,5 +120,5 @@ export async function measureSplit(entry, root) {
     const r = await build({ entryPoints: [root + c], bundle: true, minify: true, write: false, logLevel: 'error' });
     css += gz(r.outputFiles[0].contents);
   }
-  return { initial, lazy, css, initialGzip: initial.reduce((s, f) => s + f.gz, 0) + css, problems: splitProblems(out.metafile, entry.shipped ?? []) };
+  return { initial, lazy, css, initialGzip: initial.reduce((s, f) => s + f.gz, 0) + css, problems: [...entryProblems(entry), ...splitProblems(out.metafile, entry.shipped ?? [])] };
 }

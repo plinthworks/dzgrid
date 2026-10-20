@@ -129,7 +129,8 @@ async function ssr() {
     lang,
     host: /<dz-grid\b/.test(html),
     rows: (html.match(/\bdzg-row\b/g) ?? []).length,
-    grids: (html.match(/class="dzg[\s"]/g) ?? []).length,
+    // The grid's own class, `dzg` as a whole word anywhere in the list (not dzg-row, dzg-viewport…).
+    grids: (html.match(/class="[^"]*\bdzg\b(?!-)/g) ?? []).length,
     dir: /<html[^>]*\bdir="([^"]+)"/.exec(html)?.[1] ?? null,
     errors,
     warnings,
@@ -153,7 +154,7 @@ async function bytes() {
   const budget = JSON.parse(readFileSync(join(ROOT, 'size-budget.json'), 'utf8')).entries['profile: audit screen (K.8)'];
   const estimate = await measureSplit(budget, ROOT);
   const row = (name, b) => console.log(`  ${name}: ${b.total} B gz (js ${b.js}, css ${b.css}; ${b.files.length} files)`);
-  console.log('K.8 from the real ng build (Angular 21, production, gzip level 9, initial files of index.html):');
+  console.log('K.8 from the real ng build (Angular 21, production, gzip level 9, initial files: the page and its static imports in stats.json):');
   row('default (DzGrid audit screen)', m.audit);
   row('baseline (same shell, plain table)', m.baseline);
   console.log(`  (1) DzGrid + theme + wrapper, real build: ${m.share} B gz — K.8 ${K8}: ${m.share <= K8 ? 'within' : 'OVER'}; esbuild profile (check:size): ${estimate.initialGzip} B gz (${m.share - estimate.initialGzip >= 0 ? '+' : ''}${m.share - estimate.initialGzip})`);
@@ -254,26 +255,31 @@ function smoke() {
   if (![19, 22].includes(major)) throw new Error('smoke: 19 or 22');
   const dir = join(process.env.DZG_SMOKE_DIR ?? tmpdir(), `dzgrid-smoke-${major}`);
   rmSync(dir, { recursive: true, force: true });
-  mkdirSync(dir, { recursive: true });
-  cpSync(EXAMPLE, dir, { recursive: true, filter: (src) => !/[/\\](node_modules|dist|\.angular|out|package-lock\.json)([/\\]|$)/.test(src.slice(EXAMPLE.length)) });
-  const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
-  for (const deps of [pkg.dependencies, pkg.devDependencies]) {
-    for (const name of Object.keys(deps)) {
-      if (name.startsWith('@angular/')) deps[name] = `^${major}.0.0`;
-      if (deps[name].startsWith('file:')) deps[name] = `file:${join(EXAMPLE, deps[name].slice(5))}`;
-    }
-  }
-  pkg.devDependencies.typescript = { 19: '~5.8.0', 22: '~6.0.0' }[major];
-  if (major === 19) pkg.dependencies['zone.js'] = '~0.15.0';
-  writeFileSync(join(dir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
-  if (major === 19) writeFileSync(join(dir, 'src/app/compat.ts'), COMPAT_19);
+  // From here the folder is ours: whatever happens, the verdict is printed and the folder deleted.
   let verdict = 'not run';
   let why = '';
   try {
+    mkdirSync(dir, { recursive: true });
+    cpSync(EXAMPLE, dir, { recursive: true, filter: (src) => !/[/\\](node_modules|dist|\.angular|out|package-lock\.json)([/\\]|$)/.test(src.slice(EXAMPLE.length)) });
+    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+    for (const deps of [pkg.dependencies, pkg.devDependencies]) {
+      for (const name of Object.keys(deps)) {
+        if (name.startsWith('@angular/')) deps[name] = `^${major}.0.0`;
+        if (deps[name].startsWith('file:')) deps[name] = `file:${join(EXAMPLE, deps[name].slice(5))}`;
+      }
+    }
+    pkg.devDependencies.typescript = { 19: '~5.8.0', 22: '~6.0.0' }[major];
+    if (major === 19) pkg.dependencies['zone.js'] = '~0.15.0';
+    writeFileSync(join(dir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
+    if (major === 19) writeFileSync(join(dir, 'src/app/compat.ts'), COMPAT_19);
+    // The copy resolves peers strictly: a peer range the major does not meet must fail here, not
+    // pass quietly (the example's own .npmrc allows legacy peers; its links setting is kept).
+    const npmrc = join(dir, '.npmrc');
+    if (existsSync(npmrc)) writeFileSync(npmrc, readFileSync(npmrc, 'utf8').split('\n').filter((l) => !/^\s*legacy-peer-deps\s*=/.test(l)).join('\n'));
     const install = sh('npm', ['install', '--no-audit', '--no-fund'], dir, { allowFail: true });
     if (install.status !== 0) {
       verdict = OFFLINE.test(install.out) ? 'not run' : 'failed';
-      why = OFFLINE.test(install.out) ? 'offline: npm install could not reach the registry' : 'npm install failed';
+      why = OFFLINE.test(install.out) ? 'offline: npm install could not reach the registry' : `npm install failed: ${install.out.trim().split('\n').slice(-3).join(' | ')}`;
       return;
     }
     const versions = ['core', 'build'].map((p) => `${p} ${JSON.parse(readFileSync(join(dir, `node_modules/@angular/${p}/package.json`), 'utf8')).version}`).join(', ');
@@ -290,6 +296,10 @@ function smoke() {
     const res = s.status === 0 ? JSON.parse(s.stdout.trim().split('\n').at(-1)) : null;
     verdict = res ? 'passed' : 'failed';
     why = `${versions}; build ${noisy.length ? `with notes: ${noisy.join(' | ')}` : 'clean'}; SSR ${res ? 'host only, no rows, no error, no timer' : `failed: ${(s.stdout + s.stderr).slice(-600)}`}`;
+  } catch (e) {
+    // A real failure (a copy, a write, a parse, a throw): never "not run".
+    verdict = 'failed';
+    why = String(e?.message ?? e);
   } finally {
     console.log(`\nsmoke Angular ${major}: ${verdict}${why ? ` — ${why}` : ''}`);
     if (!flag('keep')) rmSync(dir, { recursive: true, force: true });

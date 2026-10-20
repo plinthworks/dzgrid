@@ -18,8 +18,12 @@ const NOTES = ['تمت المراجعة, "عاجل"', 'قسم 3; الطابق 2'
 
 type SampleRow = AuditRow & { readonly note: string };
 
-/** The file's bytes (BOM included) and the name the grid gave it. */
-export async function arabicSample(): Promise<{ bytes: Uint8Array; fileName: string }> {
+/**
+ * The file's bytes (BOM included), the name the grid gave it, and the direction the grid's root
+ * took in its host (`dir`, null without one). `locale`: `ar-DZ` for the sample; another one
+ * shows that the separator comes from it.
+ */
+export async function arabicSample(locale = 'ar-DZ'): Promise<{ bytes: Uint8Array; fileName: string; direction: string | null }> {
   const rows: SampleRow[] = Array.from({ length: SAMPLE_ROWS }, (_, i) => ({ ...auditRow(i), note: NOTES[i % NOTES.length]! }));
   const columns: ColumnDef<SampleRow, any>[] = [...(auditColumns('fetched', 'ar') as ColumnDef<SampleRow, any>[]), { id: 'note', header: 'ملاحظة', width: 220 }];
   const delivered: { blob?: Blob; fileName: string }[] = [];
@@ -30,13 +34,14 @@ export async function arabicSample(): Promise<{ bytes: Uint8Array; fileName: str
   document.body.append(host);
   const box = { block: 600, inline: 1200, scrollTop: 0, scrollInline: 0 };
   const grid = createGrid<SampleRow>(host, {
-    rows, columns, getRowId: (r) => r.id, messages, locale: 'ar-DZ', timeZone: AUDIT_ZONE, direction: 'rtl', features: [exporter],
+    rows, columns, getRowId: (r) => r.id, messages, locale, timeZone: AUDIT_ZONE, direction: 'rtl', features: [exporter],
   }, { sync: true, geometry: { read: () => ({ ...box }), writeScrollTop: (px) => void (box.scrollTop = px), writeScrollInline: (px) => void (box.scrollInline = px) } });
   try {
     const outcome = await exporter.run('all');
     const got = delivered[0];
     if (outcome !== 'done' || !got?.blob) throw new Error(`the Arabic sample was not exported (${outcome})`);
-    return { bytes: new Uint8Array(await got.blob.arrayBuffer()), fileName: got.fileName };
+    const direction = host.querySelector('.dzg')?.getAttribute('dir') ?? null;
+    return { bytes: new Uint8Array(await got.blob.arrayBuffer()), fileName: got.fileName, direction };
   } finally {
     grid.destroy();
     host.remove();

@@ -1,0 +1,9 @@
+# Step 26 decisions (owner and lead, 2026-10-20) — motion with GSAP, cellClass, the host hook
+
+Plan: `step26-motion-blueprint.md`; earlier decisions `motion-decisions.md`.
+
+- Q1 (owner, "Oui"): GSAP and the motion code load at idle right after the first paint (an eager ~800 B shell + a lazy run chunk + gsap), so K.8 holds; a sort in the very first instants is not animated.
+- Q2 (owner, "Tout en GSAP"): the filter popup opening and the overlay fade-in are animated by GSAP too (not CSS), once the chunk is loaded (before that they appear without animation). The motion feature watches popups and the overlay (a popup-host hook or an observer on the grid root, whichever is smaller and safe); transform/opacity only; focus is moved by the popup host before any tween and never touched by motion; popup close stays instant (lead: an exit animation would delay removal and risk the focus return). The small touches (sort mark, tooltip, floating summary) may stay CSS (lead) unless GSAP is equally cheap.
+- Q3 (owner, "Oui"): the value flash fires only for live changes (transactions: update, add), never for a full reload.
+- Q4 (owner, "Oui"): during Phase 3, reset to the measure + 10 % at the close: dom 19 300 → 19 450 (beforeRows seam, data-motion, ui.cellClass); theme 2 050 → 2 350; `@dzgrid/dom/motion-gsap` shell 800 + `: run (lazy)` 3 700; gsap recorded apart (no budget). If a measure goes over: stop and ask.
+- Earlier owner decisions stand: first set (popup + overlay, rows gliding after sort/filter, value flash, page slide), reduced motion = a still mark 0.6 s for changed values, ui.cellClass in this step, a hook handing cell/row elements to the application's own GSAP code (animate only).

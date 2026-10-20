@@ -25,7 +25,7 @@ describe('the initial files of an Angular build', () => {
       <script src="main-Q9.js" type="module"></script>
       <link rel="modulepreload" href="chunk-ZZ.js">
     </body></html>`;
-    expect(initialFiles(html)).toEqual({ scripts: ['chunk-ZZ.js', 'main-Q9.js'], styles: ['styles-AB12.css'] });
+    expect(initialFiles(html)).toEqual({ scripts: ['chunk-ZZ.js', 'main-Q9.js'], styles: ['styles-AB12.css'], entries: ['main-Q9.js'], preloads: 1 });
   });
 });
 

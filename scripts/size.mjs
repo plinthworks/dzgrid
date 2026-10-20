@@ -3,11 +3,10 @@
  * gzipped — against size-budget.json. Exits 1 over budget.
  */
 import { build } from 'esbuild';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
-import { measureSplit } from './size-split.mjs';
+import { measureSplitEntry, stale } from './size-split.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const budget = JSON.parse(readFileSync(new URL('../size-budget.json', import.meta.url), 'utf8'));
@@ -19,18 +18,6 @@ const bundle = async (opts, external) => {
 };
 
 let over = 0;
-/** The newest modification time under a folder. */
-const newest = (dir) => readdirSync(dir, { withFileTypes: true }).reduce((t, e) => Math.max(t, e.isDirectory() ? newest(join(dir, e.name)) : statSync(join(dir, e.name)).mtimeMs), 0);
-/**
- * A built file (`packages/<p>/dist/…`, the Angular package's fesm2022, step 22): measured as it
- * ships, so it must exist and be newer than its package's sources, or the measure would lie.
- */
-const stale = (file) => {
-  const m = /^packages\/([^/]+)\/dist\//.exec(file ?? '');
-  if (!m) return null;
-  if (!existsSync(root + file)) return `${file} is missing: run npm run build`;
-  return newest(join(root, 'packages', m[1], 'src')) > statSync(root + file).mtimeMs ? `${file} is older than packages/${m[1]}/src: run npm run build` : null;
-};
 /** One file, or several bundled together as one chunk (`files`: each as a namespace, so their exports cannot clash). */
 const input = ({ file, files }) =>
   files ? { stdin: { contents: files.map((f, i) => `export * as m${i} from './${f}';`).join('\n'), resolveDir: root, loader: 'ts' } } : { entryPoints: [root + file] };
@@ -44,9 +31,15 @@ const input = ({ file, files }) =>
 for (const [name, entry] of Object.entries(budget.entries)) {
   const { maxGzip, external = [], over: base, without } = entry;
   if (entry.split) {
-    const m = await measureSplit(entry, root);
-    // A shipped build in the profile (the Angular wrapper, step 23) must be there and fresh.
-    for (const f of entry.shipped ?? []) { const old = stale(f); if (old) m.problems.push(old); }
+    // A shipped build in the profile (the Angular wrapper, step 23) must be there and fresh: checked
+    // before the build, which would fail on a missing one.
+    const m = await measureSplitEntry(entry, root);
+    if (!m.measured) {
+      over++;
+      console.log(`OVER ${name}: not measured`);
+      for (const p of m.problems) console.log(`       problem: ${p}`);
+      continue;
+    }
     const js = m.initialGzip - m.css;
     const ok = (maxGzip === null || m.initialGzip <= maxGzip) && m.problems.length === 0;
     if (!ok) over++;
@@ -55,7 +48,7 @@ for (const [name, entry] of Object.entries(budget.entries)) {
     for (const f of [...m.lazy].sort((a, b) => a.label.localeCompare(b.label))) console.log(`       lazy, beside (no budget): ${f.label}: ${f.min} B min, ${f.gz} B gz${f.label.startsWith('shared') ? '' : `; its first use downloads ${f.firstUse} B gz`}`);
     continue;
   }
-  const old = stale(entry.file);
+  const old = stale(entry.file, root);
   if (old) {
     over++;
     console.log(`OVER ${name}: ${old}`);
