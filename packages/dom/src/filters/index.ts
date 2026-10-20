@@ -1,5 +1,5 @@
 import { dayAt } from '@dzgrid/core';
-import { hasRelative } from '@dzgrid/core/internal';
+import { hasRelative, onCommand } from '@dzgrid/core/internal';
 import { settled } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
@@ -102,6 +102,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   }));
   const resolve = resolver(g, o, set);
   const commit = committer(g, o);
+  onCommand(g.kernel, commit.heard);
   const popup = menu(g, resolve, commit, o.popup !== false);
   keep(popup);
   const row = floatingRow(g, o, resolve, commit, popup);
@@ -125,7 +126,8 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
         const r = resolve(col, 'filter');
         if (!r.ok) return null;
         const e = commit.edits(col, r.kind, who);
-        const k = [r.kind, e.state, e.where, e.debounceMs, popup.can(col), who];
+        // The column too (a rename), and `dropped`: a new object when another write dropped its edit.
+        const k = [r.kind, e.state, e.where, e.debounceMs, popup.can(col), who, col, e.dropped];
         const hit = heads.get(col.id);
         if (hit && k.every((v, i) => v === hit.k[i])) return hit.f;
         const f: HeaderFilter = { ...e, canOpen: k[4] as boolean, openFilter: () => popup.toggle(col.id, null) };
@@ -142,6 +144,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
       midnight();
     },
     destroy() {
+      onCommand(g.kernel);
       quiet();
       popup.close();
       row?.destroy();

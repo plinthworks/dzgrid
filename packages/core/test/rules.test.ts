@@ -57,6 +57,12 @@ describe('vetSelection', () => {
     expect(ids(v.state)).toEqual(['r1']);
   });
 
+  it('takes an empty string as a plain refusal (no reason), the next string kept', () => {
+    const v = vetSelection((row) => (row.data.id === 'r2' ? '' : row.data.id === 'r3' ? 'second' : true), rowOf, NO_SELECTION, inc('r1', 'r2', 'r3'));
+    expect(v.refused).toEqual({ rows: [k('r2'), k('r3')], reason: 'second', cause: 'rule' });
+    expect(vetSelection(() => '', rowOf, NO_SELECTION, inc('r1')).refused).toEqual({ rows: [k('r1')], reason: null, cause: 'rule' });
+  });
+
   it('refuses a key whose row is not held, without asking the rule (cause unknown-row)', () => {
     let asked = 0;
     const v = vetSelection(() => (asked++, true), rowOf, NO_SELECTION, inc('r1', 'x99'));
@@ -168,5 +174,27 @@ describe('ruleGate', () => {
   it('refuses a key whose row is not held', () => {
     const g = make({ rule: () => true, sel: NO_SELECTION, ctx: null });
     expect(g.refused(k('nope'))).toBe(true);
+  });
+
+  it('asks a row again once its data changed (a host patch), not while it stays the same object', () => {
+    let calls = 0;
+    const held = new Map<RowKey, RowNode<R & { ok?: boolean }>>([[k('a'), { key: k('a'), kind: 'data', level: 0, id: 'a', data: { id: 'a', ok: false } } as RowNode<R & { ok?: boolean }>]]);
+    const rule = (row: RowNode<R & { ok?: boolean }>) => (calls++, !!row.data.ok);
+    const g = ruleGate<R & { ok?: boolean }>(() => rule, (key) => held.get(key), () => NO_SELECTION, () => null, () => {});
+    expect(g.refused(k('a'))).toBe(true);
+    expect(g.refused(k('a'))).toBe(true);
+    expect(calls).toBe(1);
+    held.set(k('a'), { ...held.get(k('a'))!, data: { id: 'a', ok: true } });
+    expect(g.refused(k('a'))).toBe(false);
+    expect(calls).toBe(2);
+  });
+
+  it('a row refused because it was not held is asked once it loads', () => {
+    const held = new Map<RowKey, RowNode<R>>();
+    const yes = () => true;
+    const g = ruleGate<R>(() => yes, (key) => held.get(key), () => NO_SELECTION, () => null, () => {});
+    expect(g.refused(k('r1'))).toBe(true);
+    held.set(k('r1'), rows.get(k('r1'))!);
+    expect(g.refused(k('r1'))).toBe(false);
   });
 });

@@ -22,7 +22,7 @@ export interface GridSettings<T> {
    * `keepOnFilter`: false clears the selection when a filter or the search changes (a sort or
    * a page never does); true by default, rows ticked stay ticked even once hidden. `canSelect`
    * (step 21, docs/behaviors/selection-rules.md, needs `rules()`): whether a row may join the
-   * selection; true allows, false refuses, a string refuses and is said. Never asked to untick.
+   * selection; true allows, false refuses, a string refuses and is said ('' refuses unsaid). Never asked to untick; its `selection` keeps changing while one action is vetted (copy it to keep it).
    */
   readonly selection?: {
     readonly mode: 'none' | 'single' | 'multi'; readonly checkbox?: boolean; readonly click?: boolean; readonly keepOnFilter?: boolean;

@@ -150,12 +150,14 @@ export interface SelectionRefusal {
  * The selection gate (`@dzgrid/dom/rules` through `@dzgrid/core/internal`, step 21): `vet` sees each
  * selection a command would make (null: allowed as is); `on` while a rule is in force (the box and
  * Ctrl+A then act on the rows shown); `skip`, an unselected row refused now (the box counts it as
- * ticked; a new function when the rule or its context changed).
+ * ticked; a new function when the rule or its context changed, or after `rowsChanged`, told when
+ * the rows or their data changed, before anyone hears it: a rule may read any row).
  */
 export interface SelectionGate {
   readonly on: boolean;
   vet(prev: SelectionState, next: SelectionState): { readonly state: SelectionState; readonly refused: SelectionRefusal | null } | null;
   readonly skip: (key: RowKey) => boolean;
+  rowsChanged?(): void;
 }
 
 /** What an everything-except selection stands for now: the query in force (its sort too), the params and the zone. */
@@ -200,6 +202,8 @@ export const EMIT = Symbol('dzgrid.emit');
 const OWNER = Symbol('dzgrid.owner');
 /** For `@dzgrid/dom/rules`, through `@dzgrid/core/internal`: the selection gate. */
 const GATE = Symbol('dzgrid.gate');
+/** For `@dzgrid/dom/filters`: told each command the kernel took (a pending filter edit it overrides is dropped). */
+const HEAR = Symbol('dzgrid.hear');
 
 export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   readonly rows: M;
@@ -224,6 +228,9 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   let focus: FocusPos | null = null;
   let owner: FocusOwner<T> | undefined;
   let gate: SelectionGate | undefined;
+  let heard: ((cmd: GridCommand) => void) | undefined;
+  // Read on every paint while a box shows it: kept per selection, rows shown and count.
+  let header: { s: SelectionState; d: DisplayedRows<T>; n: unknown; state: HeaderSelection } | null = null;
   let shown = rows.displayed;
   let lastPage: PageState | null = rows.page;
   let destroyed = false;
@@ -312,6 +319,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     const prevFocus = focus;
     // The zone, the params or the columns a search reads may have moved what "all" stood for.
     const stale = dropStale(() => rows.membershipOf(query));
+    gate?.rowsChanged?.();
     if (anchor !== null && !exists(anchor)) anchor = null;
     selection = reconcileSelection(selection, exists);
     focus = reconcileFocus(focus, shown, rows.displayed, columns, owner);
@@ -533,8 +541,6 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     }
   }
 
-  // Read on every paint while a box shows it: kept per selection, rows shown and count.
-  let header: { s: SelectionState; d: DisplayedRows<T>; n: unknown; state: HeaderSelection } | null = null;
   const headerState = (): HeaderSelection => {
     const d = rows.displayed;
     if (rows.selectAll === 'displayed' || gate?.on) {
@@ -566,7 +572,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     return state;
   };
 
-  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void; [GATE]: (g?: SelectionGate) => void } = {
+  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void; [GATE]: (g?: SelectionGate) => void; [HEAR]: (fn?: (cmd: GridCommand) => void) => void } = {
     rows,
     columns,
     get selection() { return selection; },
@@ -575,7 +581,11 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     get query() { return query; },
     get selectionScope() { return tied() ? { query, ...rows.scope } : null; },
     get headerState() { return headerState(); },
-    dispatch,
+    dispatch(cmd, source) {
+      const r = dispatch(cmd, source);
+      if (r.ok) heard?.(cmd);
+      return r;
+    },
     tick: () => rows.tick?.(),
     values(column, vo) {
       const h = rows.setValues ? rows.setValues(column, vo) : closedValues();
@@ -602,6 +612,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     [EMIT]: emit,
     [OWNER]: (fn) => { owner = fn; },
     [GATE]: (x) => { gate = x; header = null; },
+    [HEAR]: (fn) => { heard = fn; },
   };
   return kernel;
 }
@@ -655,6 +666,9 @@ export const setFocusOwner = <T>(k: GridKernel<T>, fn?: FocusOwner<T>): void => 
 
 /** Sets (or, without `gate`, removes) the kernel's selection gate: the rules feature's (step 21). */
 export const setSelectionGate = <T>(k: GridKernel<T>, gate?: SelectionGate): void => (k as unknown as { [GATE]: (g?: SelectionGate) => void })[GATE](gate);
+
+/** Sets (or, without `fn`, removes) the one listener told each command the kernel took, after it: the filters feature's. */
+export const onCommand = <T>(k: GridKernel<T>, fn?: (cmd: GridCommand) => void): void => (k as unknown as { [HEAR]: (fn?: (cmd: GridCommand) => void) => void })[HEAR](fn);
 
 /** The header box over the displayed rows: none, some or all of them selected. */
 export type HeaderSelection = 'none' | 'some' | 'all';

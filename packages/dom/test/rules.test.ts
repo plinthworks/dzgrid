@@ -57,6 +57,13 @@ describe('a refused row', () => {
     expect(await heard(t)).toBe('Row 4 is ticked');
   });
 
+  it('an empty string from the rule is a plain refusal: "Not selectable", never an empty sentence', async () => {
+    const t = rmake({ rule: refuse(['r1'], '') });
+    t.clickBox('r1');
+    expect(await heard(t)).toBe('Not selectable');
+    expect(t.refusals()).toEqual([{ type: 'selectionRefused', source: 'user', rows: [k('r1')], reason: null, cause: 'rule' }]);
+  });
+
   it('is greyed on its box (data-dzg-refused), never aria-disabled', () => {
     const t = rmake({ rule: refuse(['r3', 'r5']) });
     expect(t.check('r3')!.hasAttribute('data-dzg-refused')).toBe(true);

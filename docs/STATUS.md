@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-20 (étape 21, règles de sélection, contexte, en-tête qui filtre : faite et testée, non commitée ; relecture et analyse des tests à venir). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 21 commitée `6e146a7`, corrections de la relecture et de l'analyse des tests faites, non commitées ; suivante : étape 22, Angular). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -28,10 +28,12 @@ Mis à jour : 2026-10-20 (étape 21, règles de sélection, contexte, en-tête q
 | 18 — écran d'audit, permutations (deux niveaux), axe, captures, profil K.8, fermeture de la fenêtre de filtre au clic dehors | fait, relu, testé (suites non commitées) | `57c021e` + suites |
 | 19 — export CSV (`@dzgrid/dom/export` : partie immédiate + morceau paresseux, `canExport` obligatoire, trace sans données, bouton de l'hôte) | fait, relu, testé (corrections non commitées) | `767653e` + corrections |
 | 20 — pièces de cellule prêtes (`@dzgrid/dom/parts` : `badge()`, `cellBoolean`, couleur « succès » du thème), exemple 2 en montage de test | fait, testé (non commité ; relecture à venir) | — |
-| 21 — règles de sélection (`@dzgrid/core/rules`, `@dzgrid/dom/rules`), contexte de l'application, en-tête qui pilote le filtre | fait, testé (non commité ; relecture à venir) | — |
+| 21 — règles de sélection (`@dzgrid/core/rules`, `@dzgrid/dom/rules`), contexte de l'application, en-tête qui pilote le filtre | fait, relu, testé (corrections non commitées) | `6e146a7` + corrections |
 | 22 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-**En cours : étape 21 faite, non commitée (relecture de code et analyse des tests à faire, puis commit). Suivante : étape 22.**
+**En cours : étape 22 (Angular : cellule en composant, `componentPart`, `dzgPart`, événements remontés, voir la note du propriétaire dans `ROADMAP.md`) à commencer. Les corrections de l'étape 21 attendent leur commit.**
+
+Corrections de l'étape 21 (après `6e146a7`, non commitées, tests d'abord : `packages/core/test/rules-oracle-walk.test.ts` et `packages/dom/test/step21-audit.test.ts`, 6 `it.fails` retournés, et 8 nouveaux, tous en échec avant) : l'aspect refusé et la case d'en-tête sont relus après tout changement des lignes (le cœur dit `rowsChanged` à la porte : une règle peut lire d'autres lignes) et par ligne quand ses données changent d'objet (une ligne absente est redemandée une fois chargée) ; une règle qui rend `''` refuse sans phrase vide (« Non sélectionnable ») ; tout filtre écrit d'un coup (`query.set`, `filter.set` : « tout effacer ») abandonne les saisies en attente (`onCommand` dans `@dzgrid/core/internal`), un `filter.column` de l'hôte laisse toujours le texte tapé (règle de l'étape 12) ; une saisie remplacée par un autre champ de la colonne, ou abandonnée, est comptée dans `dropped` (contextes `floating`, `filter` et `filter` de l'en-tête) : la case perdante montre le filtre en vigueur, une pièce d'en-tête reçoit un nouvel objet `filter` ; `header.filterBox` suit le renommage de sa colonne. Fiches : `selection-rules.md`, `parts.md`, `filter-ui.md`. Portail complet vert (215 fichiers, 3 662 tests ; `test:perm`, types, tailles, construction), Chrome `--only rules` 24/24. Tailles : cœur 26 975, core/rules 509, dom 19 200, internal 786, filtres 9 236 ; aucun budget relevé.
 
 Étape 21 faite (non commitée) : règle `settings.selection.canSelect(ligne, sélection, contexte)` jugée par le cœur (porte `setSelectionGate`, événement `selectionRefused`, code `selection-refused`) et `@dzgrid/core/rules` (`vetSelection`, `ruleGate`) ; fonctionnalité `@dzgrid/dom/rules` (`rules()`, case grisée `data-dzg-refused` sans `aria-disabled`, refus dit à chaque essai, refus de l'hôte en problème) ; fermé par défaut sans `rules()` ; « Tout sélectionner (N) » caché sous une règle ; `settings.context` partout (pièces, règle, export, bulle) ; le contexte `header` reçoit `filter` et le clavier de la ligne de filtres (`cellKeys`, `@dzgrid/dom/internal`) ; pièce prête `header.filterBox` ; textes `locales/{en,fr,ar}-rules` ; démo « Règles de sélection » (`?rules=1&paging=client`). Tests : 93 en échec avant le code (+ 9 ensuite), suite 213 fichiers, 3 643 tests, `test:perm`, types, tailles, contraste, construction verts ; Chrome 345 (24 nouveaux, `-- --only rules`) ; 21 mutants, 21 tués. Pour le propriétaire : écoute §15 de `docs/a11y-protocol.md` (Q2), relecture des textes arabes `ar-rules`. Détail : `ROADMAP.md` (étape 21), `ARCHITECTURE.md` (« Décisions de l'étape 21 »), fiche `docs/behaviors/selection-rules.md`.
 
@@ -74,8 +76,8 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 
 | Entrée | Budget | Mesure récente |
 |---|---|---|
-| `@dzgrid/core` | 27 100 o gz (étape 21, règles) | 26 937 |
-| `@dzgrid/core/rules` (par-dessus le cœur) | 700 (étape 21) | 476 |
+| `@dzgrid/core` | 27 100 o gz (étape 21, règles) | 26 975 (corrections de l'étape 21 : `onCommand`, `rowsChanged`) |
+| `@dzgrid/core/rules` (par-dessus le cœur) | 700 (étape 21) | 509 |
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 628 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 559 |
@@ -91,7 +93,7 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 | textes des pièces en / fr / ar | 130 / 140 / 160 (étape 20) | 98 / 99 / 108 |
 | textes de la pagination en / fr / ar | 560 / 680 / 880 (étape 17) | 328 / 375 / 489 |
 | `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 298 (étape 18 : une phrase par geste) |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 102 (étape 21 : `filter` de l'en-tête, `header.filterBox`) |
+| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 236 (corrections de l'étape 21 : `dropped`, abandon au « tout effacer ») |
 | liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 793 (étape 18 : ligne d'état d'une ligne de haut, repli `1.2em`) |
 | adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |
 | lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |

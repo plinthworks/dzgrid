@@ -6,8 +6,9 @@ import { isSelected, type SelectionState } from '../selection/rows.js';
 
 /**
  * A selection rule (docs/behaviors/selection-rules.md): `true` allows the row; `false` refuses it;
- * a string refuses it and is the sentence said. `selection` is what the row would join: the rows
- * kept, then those accepted before it in the same command. Pure and fast; it may be asked often.
+ * a non-empty string refuses it and is the sentence said ('' refuses without one). `selection` is
+ * what the row would join: the rows kept, then those accepted before it in the same command; it
+ * keeps changing while the command is vetted (copy it to keep it). Pure and fast; it may be asked often.
  */
 export type SelectionRule<T> = (row: RowNode<T>, selection: SelectionState) => boolean | string;
 
@@ -41,7 +42,8 @@ export function vetSelection<T>(rule: SelectionRule<T>, rowOf: (key: RowKey) => 
     } else {
       rows.push(k);
       if (row) cause = 'rule';
-      if (reason === null && typeof v === 'string') reason = v;
+      // An empty string is a plain refusal: nothing to say.
+      if (reason === null && typeof v === 'string' && v) reason = v;
     }
   }
   if (!rows.length) return { state: next, refused: null };
@@ -55,9 +57,10 @@ export const refusalProblems = (r: SelectionRefusal): Problem[] => [problem('sel
  * The kernel's gate over a host's rule (step 21; `@dzgrid/dom/rules` sets it with
  * `setSelectionGate`): `rule()`, the rule in force (none: the gate is off and lets all through),
  * handed `context()` third; a rule that throws refuses the row (fail closed), the error given to
- * `report`. `refused(key)`: an unselected row the rule refuses now, asked once per selection, rule
- * and context (a row not held is refused); `skip` is it, a new function when the rule or the
- * context changed, so the kernel reads its box again.
+ * `report`. `refused(key)`: an unselected row the rule refuses now, asked once per selection, rule,
+ * context and row data (a row not held is refused, and asked once it is); all forgotten when the
+ * kernel tells `rowsChanged` (a rule may read other rows). `skip` is it, a new function when the
+ * rule or the context changed or the rows did, so the kernel reads its box again.
  */
 export function ruleGate<T>(
   rule: () => ((row: RowNode<T>, selection: SelectionState, context: unknown) => boolean | string) | undefined,
@@ -72,21 +75,24 @@ export function ruleGate<T>(
     }
   };
   let seen: unknown[] = [];
-  let said = new Map<RowKey, boolean>();
+  // Per key: the answer and the row data it was asked for (undefined: not held).
+  let said = new Map<RowKey, { d: unknown; v: boolean }>();
   const refused = (key: RowKey): boolean => {
     fresh();
-    let v = said.get(key);
-    if (v === undefined) {
-      const row = rowOf(key);
-      said.set(key, (v = !row || ask(row, selection()) !== true));
-    }
-    return v;
+    const row = rowOf(key);
+    let s = said.get(key);
+    if (!s || s.d !== row?.data) said.set(key, (s = { d: row?.data, v: !row || ask(row, selection()) !== true }));
+    return s.v;
   };
   let skip = (key: RowKey): boolean => refused(key);
+  const forget = (): void => {
+    skip = (key) => refused(key);
+    said = new Map();
+  };
   const fresh = (): void => {
     const now = [rule(), context(), selection()];
     if (now.every((v, i) => v === seen[i])) return;
-    if (now[0] !== seen[0] || now[1] !== seen[1]) skip = (key) => refused(key);
+    if (now[0] !== seen[0] || now[1] !== seen[1]) forget();
     seen = now;
     said = new Map();
   };
@@ -100,5 +106,6 @@ export function ruleGate<T>(
       return skip;
     },
     refused,
+    rowsChanged: forget,
   };
 }

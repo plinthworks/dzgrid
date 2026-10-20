@@ -29,13 +29,14 @@ export function textField(doc: Document, num: boolean): HTMLInputElement {
  * The echo rules of a field that sends what the user types (step 12, the floating box; step 13,
  * the popup): it keeps the form it last sent, canonical, and the locale it last showed. Its own
  * filter coming back leaves the text alone (shown again only in another locale); another one
- * rewrites it, unless an edit of the field's is pending (`dirty`).
+ * rewrites it, unless an edit of the field's is pending (`dirty`). An edit another write dropped
+ * (`dropped` changed) is no longer pending: the field shows the filter in force.
  */
 export interface Echo {
   /** An edit: true when it differs from the filter in force (to be sent). `ok` false: unreadable, nothing pending. */
   edit(f: unknown, state: unknown, ok?: boolean): boolean;
   /** At a draw: true when the field is to show `state` again. */
-  stale(state: unknown, ctx: unknown): boolean;
+  stale(state: unknown, ctx: unknown, dropped: number): boolean;
   /** A new field: nothing sent yet. */
   reset(): void;
 }
@@ -44,9 +45,11 @@ export function echo(): Echo {
   let sent = '';
   let lc: unknown;
   let dirty = false;
+  let lost = 0;
   return {
     edit: (f, state, ok = true) => (dirty = ok && (sent = canonical(f)) !== canonical(state)),
-    stale(state, ctx) {
+    stale(state, ctx, dropped) {
+      if (dropped !== lost) (lost = dropped), (dirty = false);
       const k = canonical(state);
       if (!(k === sent ? ((dirty = false), ctx !== lc) : !dirty)) return false;
       sent = k;

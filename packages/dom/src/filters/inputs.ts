@@ -76,7 +76,7 @@ function box(num: boolean): Part<FC> {
         }
         if (!input) sum = null, host.replaceChildren((input = make())), e.reset();
         // Its own filter back: shown again only in another locale. Another one: unless an edit is pending.
-        if (e.stale(s, c.ctx)) {
+        if (e.stale(s, c.ctx, c.dropped)) {
           input.value = s ? (num ? shown(c.ctx, s.value) : (s.value as string)) : '';
           ok();
         }

@@ -156,6 +156,9 @@ function walk(seed: number, server: boolean, steps = 60) {
       else if (which === 1) t.g.kernel.dispatch({ type: 'filter.column', column: 'name', filter: { type: 'text', op: 'contains', value: r.pick(['bob', 'a', 'zz']) } }, 'api');
       else if (which === 2) t.g.kernel.dispatch({ type: 'filter.column', column: 'n', filter: { type: 'number', op: 'equals', value: r.pick([4, -1.25, 1234.5, 0.5]) } }, 'api');
       else t.g.kernel.dispatch({ type: 'query.set', query: makeQuery({ sort: t.g.kernel.query.sort }) }, 'api');
+      // Every filter written at once (filter.set, query.set: a clear) drops what waits (step 21
+      // review); an unreadable number has nothing waiting (its text stays, judged as before).
+      if (which === 0 || which === 3) for (const c of ['name', 'n'] as const) if (pending[c]?.want !== 'bad') pending[c] = null;
       log.push(`host ${which}`);
       check(`host ${which}`);
     } else if (k < 80) {

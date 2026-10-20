@@ -24,8 +24,8 @@ export const filterBoxPart: Part<HC> = {
       name.textContent = n.label;
       const f = n.filter;
       if (!f) return;
-      // The header's context with its filter's: what a floating cell gets.
-      const fc = { ...n, ...f } as FC;
+      // The header's context with its filter's: what a floating cell gets (the header's column, fresh).
+      const fc = { ...f, ...n } as FC;
       if (h) h.update?.(fc);
       else h = (f.kind === 'text' ? textPart : f.kind === 'number' ? numberPart : summaryPart).mount(box, fc);
     };

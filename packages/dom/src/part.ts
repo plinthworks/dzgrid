@@ -37,9 +37,10 @@ export interface PartBase {
 
 /**
  * A column's filter as a header part drives it (step 21, `filters()`): the same pending edit as the
- * floating box and the popup. One object while what it holds is the same.
+ * floating box and the popup. One object while what it holds is the same: a new one when the
+ * column's filter, its column or `dropped` changed (another write dropped this part's pending edit).
  */
-export type HeaderFilter = Pick<SlotContext['floating'], 'kind' | 'state' | 'where' | 'debounceMs' | 'set' | 'canOpen' | 'openFilter'>;
+export type HeaderFilter = Pick<SlotContext['floating'], 'kind' | 'state' | 'where' | 'debounceMs' | 'dropped' | 'set' | 'canOpen' | 'openFilter'>;
 
 export interface SlotContext {
   cell: PartBase & {
@@ -92,6 +93,12 @@ export interface SlotContext {
     /** The pause before a debounced edit applies: the column's, then `filters({ debounceMs })`, else 150 (browser) or 300 (server). */
     readonly debounceMs: number;
     /**
+     * How many edits this part left pending were dropped by another write (another box or the
+     * popup on the column, a host's filter on it, a clear of all filters): when it changes, the
+     * part's own edit is gone and it shows `state` again.
+     */
+    readonly dropped: number;
+    /**
      * Stores the column's filter as the user (null removes it; a custom kind's state is wrapped as
      * `{type: 'custom', kind, state}`, and must be null when the kind says it is not active).
      * `debounced` by default: one pending edit per column, the next replacing it; `cancel` drops
@@ -115,6 +122,8 @@ export interface SlotContext {
     /** `server`: the popup keeps a draft and sends it at Apply (owner decision O3); `client`: live. */
     readonly where: Placement;
     readonly debounceMs: number;
+    /** As the floating cell's: edits of this popup's that another write dropped. */
+    readonly dropped: number;
     /** The column's `filter.ops`, empty when it gives none (the kind's own list). */
     readonly ops: readonly string[];
     /** The grid's day by its clock in its zone (`YYYY-MM-DD`): new at midnight, so an open popup follows it (step 14). */
