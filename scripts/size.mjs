@@ -45,6 +45,8 @@ for (const [name, entry] of Object.entries(budget.entries)) {
   const { maxGzip, external = [], over: base, without } = entry;
   if (entry.split) {
     const m = await measureSplit(entry, root);
+    // A shipped build in the profile (the Angular wrapper, step 23) must be there and fresh.
+    for (const f of entry.shipped ?? []) { const old = stale(f); if (old) m.problems.push(old); }
     const js = m.initialGzip - m.css;
     const ok = (maxGzip === null || m.initialGzip <= maxGzip) && m.problems.length === 0;
     if (!ok) over++;

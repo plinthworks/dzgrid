@@ -4,11 +4,14 @@
 // line measures less than the screen loads; and only library code (the screen's own glue is the
 // app's, not DzGrid's).
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const read = (f: string) => readFileSync(ROOT + f, 'utf8');
+/** Every .ts file under a folder of the repository (paths from ROOT). */
+const tsUnder = (dir: string): string[] => !existsSync(ROOT + dir) ? [] : readdirSync(ROOT + dir, { withFileTypes: true })
+  .flatMap((e) => (e.isDirectory() ? tsUnder(`${dir}/${e.name}`) : e.name.endsWith('.ts') ? [`${dir}/${e.name}`] : []));
 
 /** `import { a, type B, c as d } from '@dzgrid/x'` (and `export { … } from`): the values only, by specifier. */
 export function namedValues(src: string, verb: 'import' | 'export'): Map<string, Set<string>> {
@@ -36,6 +39,17 @@ describe('the K.8 audit profile', () => {
   it('covers every @dzgrid/* value the screen imports', () => {
     const lib = [...screen].filter(([spec]) => spec.startsWith('@dzgrid/'));
     expect(lib.length).toBeGreaterThan(3);
+    const missing = lib.flatMap(([spec, names]) => [...names].filter((n) => !profile.get(spec)?.has(n)).map((n) => `${n} from ${spec}`));
+    expect(missing).toEqual([]);
+  });
+
+  it('covers every @dzgrid/* value the Angular example imports, the wrapper included (step 23; its fr and en texts stand for ar)', () => {
+    const files = tsUnder('examples/angular-audit/src');
+    expect(files.length).toBeGreaterThan(2);
+    const used = new Map<string, Set<string>>();
+    for (const f of files) for (const [spec, names] of namedValues(read(f), 'import')) used.set(spec, new Set([...(used.get(spec) ?? []), ...names]));
+    const lib = [...used].filter(([spec]) => spec.startsWith('@dzgrid/') && !/^@dzgrid\/dom\/locales\/(fr|en)(-|$)/.test(spec));
+    expect(used.get('@dzgrid/angular')?.has('DzGrid')).toBe(true);
     const missing = lib.flatMap(([spec, names]) => [...names].filter((n) => !profile.get(spec)?.has(n)).map((n) => `${n} from ${spec}`));
     expect(missing).toEqual([]);
   });

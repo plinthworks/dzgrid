@@ -20,7 +20,13 @@
     "build:theme": "sass --no-source-map --style=expanded packages/theme/dzgrid.scss packages/theme/dzgrid.css",
     "test:browser": "node scripts/browser.mjs",
     "test:audit": "node scripts/audit-browser.mjs",
-    "bench:browser": "node scripts/perf-browser.mjs"
+    "bench:browser": "node scripts/perf-browser.mjs",
+    "example:build": "node scripts/example.mjs build",
+    "example:csv": "node scripts/example.mjs csv",
+    "example:ssr": "node scripts/example.mjs ssr && node scripts/example.mjs ssr --lang ar",
+    "example:bytes": "node scripts/example.mjs bytes",
+    "example:browser": "node scripts/example.mjs browser",
+    "example:smoke": "node scripts/example.mjs smoke"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.8.1",

@@ -12,6 +12,26 @@ architecture, the core's seed (row identities, calendar days apart from
 instants, the bounds of a day in a zone), conformance cases written by hand,
 and ten spikes in three browser engines.
 
+### Added (Phase 3, step 23: the Angular example)
+
+- **`examples/angular-audit`**: the audit screen as an Angular 21 application installed from the
+  packed tarballs (not a workspace member): `<dz-grid>` over `sourceRows(fromObservable(…))`, filters,
+  `dzgSearch`, pagination, `dzgExport`, an Angular cell that `emit`s; French, or Arabic right to left
+  (`?lang=ar`). Three builds: zoneless (default), `zone` (zone.js), `baseline` (no DzGrid, for K.8).
+  Server rendering through `renderApplication`: the host only, no rows, no kernel.
+- **`scripts/example.mjs`** and `npm run example:build`, `example:csv`, `example:ssr`,
+  `example:bytes`, `example:browser`, `example:smoke -- 19|22`.
+- **The Arabic CSV sample** for the owner's Excel check (`examples/angular-audit/out/audit-ar.csv`,
+  not tracked), written by the real export.
+- Tests: `perf/test/example-csv.test.ts`, `example-ssr.test.ts`, `example-bytes.test.ts` (the last two
+  skipped without the example's builds).
+
+### Changed (step 23)
+
+- The K.8 profile (`perf/profiles/audit.ts`) names the `@dzgrid/angular` values the example imports,
+  measured from the wrapper's shipped fesm2022 with Angular and rxjs left out (`size-budget.json`:
+  `external`, `alias`, `shipped`); 75 623 B gz (was 70 532), budget 85 000 unchanged.
+
 ### Added (Phase 3, step 22: `@dzgrid/angular`)
 
 - **`<dz-grid>`** (standalone, OnPush, signal inputs, `exportAs: 'dzGrid'`): `createGrid`'s settings as

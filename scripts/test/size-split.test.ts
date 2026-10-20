@@ -43,4 +43,20 @@ describe('size.mjs split mode', () => {
     // A third-party dependency may ship built files (tzslot's temporal-utils).
     expect(splitProblems(meta({ 'out/e.js': { inputs: { 'node_modules/temporal-utils/dist/utils.js': {} } } }))).toEqual([]);
   });
+
+  it('measures a shipped file named by `alias` and listed in `shipped`, its `external` left out (step 23: the Angular wrapper)', async () => {
+    const shippedFile = `${F}/shipped/dist/y.mjs`;
+    const entry = { file: `${F}/ext-entry.ts`, external: ['dzg-ext-framework'], alias: { 'dzg-shipped': shippedFile }, shipped: [shippedFile] };
+    const m = await measureSplit(entry, ROOT);
+    expect(m.problems).toEqual([]);
+    expect(m.initial.flatMap((f: { inputs: string[] }) => f.inputs).sort()).toEqual([`${F}/ext-entry.ts`, shippedFile]);
+    // Not listed as shipped: a built file, refused as before.
+    const n = await measureSplit({ ...entry, shipped: [] }, ROOT);
+    expect(n.problems).toEqual([`${shippedFile}: a built file (dist/), not the source`]);
+  });
+
+  it('accepts only the shipped files it is given, every other dist/ still refused', () => {
+    const meta = { outputs: { 'out/e.js': { inputs: { 'packages/angular/dist/fesm2022/dzgrid-angular.mjs': {}, 'packages/dom/dist/index.js': {} } } } };
+    expect(splitProblems(meta, ['packages/angular/dist/fesm2022/dzgrid-angular.mjs'])).toEqual(['packages/dom/dist/index.js: a built file (dist/), not the source']);
+  });
 });

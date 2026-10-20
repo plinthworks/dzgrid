@@ -25,7 +25,7 @@ Presses the host's "Export" button (the grid has none of its own), after filteri
 ## Tests
 - Hand-written text: guard on `=1+1`, `+33…`, `@SUM(`, not on the number `-5`; doubled quotes; CR and LF quoted; Arabic; `;` and `1,5` in French, `,` and `1.5` in English; an Algiers instant written `2026-03-05 23:59:00`; ISO days; enum label or code; BOM; chunks joined equal the whole — `conformance/cases/csv/*` (15 cases) and `packages/core/test/csv/` (unit, scopes, spans, an RFC 4180 round trip), step 10.
 - `canExport` false gives no Blob, `exportRefused` and an announcement; paged `all` calls `exportAll` and fetches no page; the Blob starts with a BOM and matches step 10's text — step 19, `packages/dom/test/export.test.ts`.
-- Sample Arabic file opened in Excel by the owner (planned, step 23).
+- Sample Arabic file (step 23): `npm run example:csv` writes `examples/angular-audit/out/audit-ar.csv` (not tracked) through the real export, checked by `perf/test/example-csv.test.ts` (BOM, first header first, no direction marks, CRLF, RFC 4180, Latin digits, the first row by hand). To be opened in Excel by the owner.
 
 ## Decisions (step 1, 2026-10-17)
 - **Value, not display, by default:** `CsvOptions.text: 'value' | 'display'`, default `value` — the rules above (numbers for Excel or raw, ISO days, instants in wall time, enum label or code), never `format`. `display` writes the cell's text. This is owner decision 8's "raw value" and D7 together; B2.4's `csv: { text: 'display' }` is this option.
@@ -96,3 +96,7 @@ Presses the host's "Export" button (the grid has none of its own), after filteri
 - **A model already in error** when the export starts (a page that failed before) fails the export at stage `rows`, nothing built: kept on purpose (the rows shown are not the query's).
 - **File name, further:** every invisible format character (`\p{Cf}`: the soft hyphen U+00AD, U+180E, U+206A–U+206F, the tags U+E0000–U+E007F, besides the direction and zero-width ones) is removed, except the Arabic number signs, which show (U+0600–U+0605, U+06DD, U+0890–U+0891, U+08E2). Reserved names also cover `COM¹ COM² COM³ LPT¹ LPT² LPT³ CONIN$ CONOUT$`. The `.csv` strip and the cut to 120 run again until nothing changes: a cut that lands on `.csv` never gives `.csv.csv`, and cleaning a cleaned name gives it back (idempotent).
 - **Tests:** `packages/dom/test/export-gaps.test.ts` (51: the review's repros, 12 of them written as `it.fails` and failing before the fixes, and 14 more that failed before them).
+
+## The Arabic sample (step 23, 2026-10-20; `docs/behaviors/angular-example.md`)
+- **The file:** `examples/angular-audit/out/audit-ar.csv`, written by `npm run example:csv` (not tracked; written again on demand). The audit screen's seven columns in Arabic plus a note column (`ملاحظة`), 120 rows, locale `ar-DZ`, right to left, zone Africa/Algiers: separator `;`, BOM, CRLF, logical order (column A is « التاريخ والوقت (Africa/Algiers) »), Latin digits, no direction marks. Some notes hold a comma and double quotes (written `"تمت المراجعة, ""عاجل"""`), some a semicolon (quoted): each must stay in one cell.
+- **For the owner:** open it in Excel (double-click, not Import), on Windows and on a Mac if possible: columns split, Arabic readable, column A the first logical column, the notes in one cell each. This answers the owner question above on logical order.

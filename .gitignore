@@ -10,3 +10,7 @@ spikes/**/build/
 packed.tmp/
 packages/dom/test/browser/results/
 packages/angular/browser/build/
+examples/angular-audit/out/
+examples/angular-audit/.angular/
+examples/angular-audit/package-lock.json
+!scripts/test/fixtures/split/shipped/dist/

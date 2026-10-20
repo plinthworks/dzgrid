@@ -1,0 +1,45 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": { "analytics": false, "packageManager": "npm" },
+  "newProjectRoot": "projects",
+  "projects": {
+    "audit": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "audit",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/audit",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "server": "src/main.server.ts",
+            "ssr": true,
+            "prerender": false,
+            "polyfills": [],
+            "tsConfig": "tsconfig.json",
+            "styles": ["node_modules/@dzgrid/theme/dzgrid.css", "src/styles.css"]
+          },
+          "configurations": {
+            "production": { "optimization": true, "outputHashing": "all", "extractLicenses": true, "sourceMap": false },
+            "development": { "optimization": false, "extractLicenses": false, "sourceMap": true },
+            "zone": { "outputPath": "dist/zone", "browser": "src/main.zone.ts" },
+            "baseline": { "outputPath": "dist/baseline", "browser": "src/baseline.ts", "styles": ["src/styles.css"] }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": { "buildTarget": "audit:build:production" },
+            "development": { "buildTarget": "audit:build:development" }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    }
+  }
+}

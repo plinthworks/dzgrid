@@ -10,15 +10,19 @@ import { gzipSync } from 'node:zlib';
 
 const gz = (bytes) => gzipSync(bytes, { level: 9 }).length;
 
-/** What would make the measure lie: a built file or a linked package instead of the source, code counted twice. */
-export function splitProblems(metafile) {
+/**
+ * What would make the measure lie: a built file or a linked package instead of the source, code
+ * counted twice. `shipped`: built files measured on purpose, as they ship (the Angular wrapper's
+ * fesm2022, partial-compiled by ng-packagr: its source is not what an application bundles).
+ */
+export function splitProblems(metafile, shipped = []) {
   const problems = [];
   const owner = new Map();
   for (const [out, o] of Object.entries(metafile.outputs)) {
     if (out.endsWith('.map')) continue;
     for (const input of Object.keys(o.inputs)) {
       // Our own packages from their source: a third-party dependency (tzslot's) may ship dist/.
-      if (!input.includes('node_modules/') && /(^|\/)dist\//.test(input)) problems.push(`${input}: a built file (dist/), not the source`);
+      if (!input.includes('node_modules/') && /(^|\/)dist\//.test(input) && !shipped.includes(input)) problems.push(`${input}: a built file (dist/), not the source`);
       else if (input.includes('node_modules/@dzgrid/')) problems.push(`${input}: through node_modules/@dzgrid/, not the workspace source`);
       else if (owner.has(input)) problems.push(`${input}: in two chunks (${owner.get(input)}, ${out})`);
       owner.set(input, out);
@@ -27,10 +31,17 @@ export function splitProblems(metafile) {
   return problems;
 }
 
-/** `entry`: `{ file, css? }`, paths from `root`. Returns the initial files, the lazy ones, the CSS and the initial sum. */
+/**
+ * `entry`: `{ file, css?, external?, alias?, shipped? }`, paths from `root`. `external`: packages the
+ * application has anyway (Angular, rxjs), left out; `alias`: a specifier measured from a given file
+ * (a package's shipped build), which `shipped` must list. Returns the initial files, the lazy
+ * ones, the CSS and the initial sum.
+ */
 export async function measureSplit(entry, root) {
+  const alias = Object.fromEntries(Object.entries(entry.alias ?? {}).map(([k, v]) => [k, root + v]));
   const out = await build({
     entryPoints: [root + entry.file], absWorkingDir: root, outdir: `${root}.size-split`, bundle: true, splitting: true,
+    external: entry.external ?? [], alias,
     format: 'esm', target: 'es2022', minify: true, treeShaking: true, write: false, metafile: true, logLevel: 'error',
   });
   const bytes = new Map(out.outputFiles.map((f) => [f.path.slice(root.length), f.contents]));
@@ -40,12 +51,12 @@ export async function measureSplit(entry, root) {
   const start = js.find((p) => outputs[p].entryPoint === entry.file);
   if (!start) throw new Error(`size-split: no output for ${entry.file}`);
   const seen = new Set([start]);
-  for (const p of seen) for (const i of outputs[p].imports) if (i.kind === 'import-statement' && !seen.has(i.path)) seen.add(i.path);
+  for (const p of seen) for (const i of outputs[p].imports) if (i.kind === 'import-statement' && !i.external && !seen.has(i.path)) seen.add(i.path);
   const initial = [...seen].map(file);
   // A lazy chunk's first use downloads it and what it imports statically, less what the page has.
   const firstUse = (p) => {
     const got = new Set([p]);
-    for (const q of got) for (const i of outputs[q].imports) if (i.kind === 'import-statement' && !seen.has(i.path)) got.add(i.path);
+    for (const q of got) for (const i of outputs[q].imports) if (i.kind === 'import-statement' && !i.external && !seen.has(i.path)) got.add(i.path);
     return [...got].reduce((s, q) => s + gz(bytes.get(q)), 0);
   };
   const lazy = js.filter((p) => !seen.has(p)).map((p) => ({ ...file(p), firstUse: firstUse(p) }))
@@ -55,5 +66,5 @@ export async function measureSplit(entry, root) {
     const r = await build({ entryPoints: [root + c], bundle: true, minify: true, write: false, logLevel: 'error' });
     css += gz(r.outputFiles[0].contents);
   }
-  return { initial, lazy, css, initialGzip: initial.reduce((s, f) => s + f.gz, 0) + css, problems: splitProblems(out.metafile) };
+  return { initial, lazy, css, initialGzip: initial.reduce((s, f) => s + f.gz, 0) + css, problems: splitProblems(out.metafile, entry.shipped ?? []) };
 }
