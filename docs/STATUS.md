@@ -46,6 +46,7 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 - Réponses en français, courtes, sans jargon.
 - Avant chaque étape : un architecte (lecture seule) fait le plan. Après chaque changement : une relecture de code et une analyse des tests (erreurs volontaires dans une copie du dépôt). Les défauts trouvés sont corrigés, tests d'abord.
 - Tests d'abord : un test doit échouer avant la correction.
+- Pendant le travail, les agents ne lancent que les tests touchés ; la suite complète (`test:ci`, `test:perm`), Chrome (`test:browser`, `test:audit`) et la compilation tournent une fois, avant le commit (choix du propriétaire, 2026-10-20, pour aller plus vite).
 - Dépôt : https://github.com/plinthworks/dzgrid (remote `origin`, SSH). Le propriétaire a autorisé le push (2026-10-18) : on pousse `main` après des commits vérifiés (suite verte), jamais de travail non commité, jamais de force-push. Trailer de chaque commit :
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` puis `Claude-Session: https://claude.ai/code/session_01SD5iJWfHF82x2mQCxir8Qs`.
 - Ne commiter que si la suite complète passe (`npm run test:ci && npm run test:perm && npm run typecheck && npm run check:size`). `test:perm` (étape 18) : les 1 000 permutations par configuration de l'écran d'audit dans jsdom, environ 107 s sur un processus (mesuré le 2026-10-20, au-dessus de la règle des ~90 s, donc hors de `test:ci`, qui n'en joue que 25 par configuration).
