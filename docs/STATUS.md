@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-20 (étape 19, l'export, faite et vérifiée, non commitée ; la 20 est la suivante). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-20 (étape 19, l'export, faite, relue et corrigée — `767653e` + corrections non commitées ; la 20 est la suivante). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -26,10 +26,12 @@ Mis à jour : 2026-10-20 (étape 19, l'export, faite et vérifiée, non commité
 | 16 — recherche rapide (`@dzgrid/dom/search`) | fait, relu, testé | `85ec8a5` |
 | 17 — pagination (`@dzgrid/dom/pagination`, `@dzgrid/dom/internal`) | fait, relu, testé (corrections non commitées) | `5cd9ca9` + corrections |
 | 18 — écran d'audit, permutations (deux niveaux), axe, captures, profil K.8, fermeture de la fenêtre de filtre au clic dehors | fait, relu, testé (suites non commitées) | `57c021e` + suites |
-| 19 — export CSV (`@dzgrid/dom/export` : partie immédiate + morceau paresseux, `canExport` obligatoire, trace sans données, bouton de l'hôte) | fait, testé (non commité) | — |
+| 19 — export CSV (`@dzgrid/dom/export` : partie immédiate + morceau paresseux, `canExport` obligatoire, trace sans données, bouton de l'hôte) | fait, relu, testé (corrections non commitées) | `767653e` + corrections |
 | 20 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-**En cours : rien ; étape 19 faite, à relire et à commiter** (relecture de code et analyse des tests par le chef de projet). Suivante : étape 20 (`/parts`).
+**En cours : rien ; corrections de l'étape 19 à commiter. Suivante : étape 20 (`/parts`).**
+
+Corrections de l'étape 19 (après `767653e`, non commitées, tests d'abord : `export-gaps.test.ts`, 51 tests dont 12 `it.fails` retournés et 14 nouveaux, tous en échec avant) : l'annulation est vérifiée avant chaque appel à l'hôte et chaque effet (avant `exportRequested`, `canExport`, `exportAll`, et à l'enregistrement après `onProgress('saving')`) : rien ne se télécharge après une annulation ; le chargement du morceau est mis en course avec l'annulation (plus de `busy` éternel) ; `run()` ne rejette jamais (requête, écouteur de `problems` qui lève, réponse d'`exportAll` qui n'en est pas une : échec avec une étape, annoncé) ; `hidden` compté sur la sélection prise avec la requête (R2) ; `safeFileName` idempotent, tous les `\p{Cf}` retirés sauf les signes numériques arabes, noms réservés `COM¹²³ LPT¹²³ CONIN$ CONOUT$` ; `maxCells` invalide → 10 000 000 ; `failure.name` limité à un identifiant court ; `progress` tardif ignoré ; `{ url: '' }` refusé ; URL d'une autre origine gardée et documentée. Portail complet vert (201 fichiers, 3 467 tests ; `test:perm`, typecheck, tailles, build), Chrome `test:audit --only export` 17/17. Tailles : export 1 200 (budget 1 200, au plafond), morceau 4 569 (5 100).
 
 Étape 19 faite (non commitée) : `csvExport({ canExport, exportAll?, fileName?, onProgress?, maxCells?, deliver?, loadRun? })` → `run(scope)`, `cancel()`, `busy`, `prefetch()`, `bind(bouton, { scope })` ; morceau paresseux `export/run/` (requête et sa partie serveur refaite avec `toWire` importé à la demande, attente des lignes, plafond de 10⁷ cellules vérifié avant `canExport`, tranches rendues par un message, `exportAll` url/blob/rien, nom nettoyé, téléchargement) ; événements `exportRequested` / `exportRefused` / `exportFinished` (types seuls dans le cœur, par leur forme) ; textes `locales/{en,fr,ar}-export` qui reprennent `announce.rows`. Tests : 52 + 16 + 3 (permutations avec oracle : 200 graines × client / A / B dans `test:ci`, 1 000 dans `test:perm`), 22 mutants tués sur 22 ; Chrome : téléchargements réels (client, A, B), fr et ar droite à gauche, axe 0 bouton occupé, morceau chargé au survol ou au clic seulement, 100 000 × 30 en ~0,4 s sans image de plus de 50 ms. Bouton d'export sur l'écran d'audit, dans `playground/rtl.html` (arabe, pour l'essai Excel de l'étape 23) et lien « Export CSV » du menu Démos. Où le plan a bougé : le plafond avant `canExport` ; une 8ᵉ clé `announce.exportDoneOpen` (nombre inconnu) ; étape d'échec `rows` ; `message` plutôt que `scheduler.yield()`. Détail : `ROADMAP.md` (ligne de l'étape 19), `ARCHITECTURE.md` (« Décisions de l'étape 19 »).
 
@@ -73,8 +75,8 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 | `@dzgrid/dom` | 19 100 (étape 17) | 19 048 (étape 19 : types seuls, code identique ; noms raccourcis autrement) |
 | `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 149 |
 | `@dzgrid/dom/internal` | 650 (étape 17) | 527 |
-| `@dzgrid/dom/export` (immédiat ; le cœur, `internal` et `./run/*` à part) | 1 200 (étape 19) | 1 088 |
-| export, morceau paresseux (`export/run/`, `@dzgrid/core/csv` compris, par-dessus le cœur) | 5 100 (étape 19) | 4 349 |
+| `@dzgrid/dom/export` (immédiat ; le cœur, `internal` et `./run/*` à part) | 1 200 (étape 19) | 1 200 (corrections : course du chargement, échec sans rejet ; au plafond) |
+| export, morceau paresseux (`export/run/`, `@dzgrid/core/csv` compris, par-dessus le cœur) | 5 100 (étape 19) | 4 569 |
 | textes de l'export en / fr / ar | 220 / 250 / 380 (étape 19) | 216 / 248 / 296 |
 | textes de la pagination en / fr / ar | 560 / 680 / 880 (étape 17) | 328 / 375 / 489 |
 | `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 298 (étape 18 : une phrase par geste) |
@@ -85,7 +87,7 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 | `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
 | `@dzgrid/dom/slots` | 1 300 (étape 11) | 994 |
 | `@dzgrid/dom/popup` | 1 500 | 1 473 (étape 18 : fermeture au clic dehors, `opener`) |
-| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème | 85 000 (K.8, Q1 de l'étape 18) | 69 555 (étape 19 : export immédiat et ses textes ; JS 67 772 en 7 fichiers, CSS 1 783) |
+| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème | 85 000 (K.8, Q1 de l'étape 18) | 69 652 (étape 19 et ses corrections : export immédiat et ses textes ; JS 67 869 en 7 fichiers, CSS 1 783) |
 | à côté, paresseux, sans budget : liste de valeurs / adaptateurs de dates date, range, moment / morceau tzslot partagé | — | 3 666 / 449, 1 107, 682 / 66 486 ; la première fenêtre de date télécharge 66 935 à 67 593 |
 | langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
 | textes des filtres en / fr / ar | 850 / 980 / 1 200 (étape 15) | 707 / 831 / 941 |

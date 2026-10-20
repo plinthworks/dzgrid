@@ -103,17 +103,27 @@ export function csvExport(o: CsvExportOptions): CsvExport {
     try {
       let m: typeof Chunk;
       try {
-        m = await load();
+        // Raced against the cancel: a chunk that never loads does not keep the export busy.
+        m = await new Promise<typeof Chunk>((ok, ko) => (c.signal.addEventListener('abort', ko), load().then(ok, ko)));
       } catch (err) {
-        // The chunk did not load: told here (what follows is the chunk's to tell), unless the grid is gone.
-        grid.report(err);
+        // Told here (what follows is the chunk's to tell), unless the grid is gone.
+        const cut = c.signal.aborted;
+        const outcome = cut ? 'cancelled' : 'failed';
+        if (!cut) grid.report(err);
         if (grid.scope.isDisposed) return 'cancelled';
-        emit(grid.kernel, {
-          type: 'exportFinished', source, id, at: new Date().toISOString(), scope, outcome: 'failed', via: scope !== 'displayed' && !grid.rows.allRows ? 'server' : 'browser',
-          rows: null, columns: 0, bytes: null, fileName: null, durationMs: Math.round(grid.now() - t0), failure: { stage: 'load', name: (err as Error)?.name ?? 'Error' },
-        });
-        grid.live.announce(grid.msg('announce.exportFailed'));
-        return 'failed';
+        const n = (err as Error)?.name;
+        try {
+          emit(grid.kernel, {
+            type: 'exportFinished', source, id, at: new Date().toISOString(), scope, outcome, via: scope !== 'displayed' && !grid.rows.allRows ? 'server' : 'browser',
+            rows: null, columns: 0, bytes: null, fileName: null, durationMs: Math.round(grid.now() - t0),
+            // The error's name only when it is a short identifier (a class name): never data.
+            ...(!cut && { failure: { stage: 'load', name: typeof n == 'string' && /^[a-z]\w{0,39}$/i.test(n) ? n : 'Error' } }),
+          });
+        } catch (e) {
+          grid.report(e);
+        }
+        grid.live.announce(grid.msg(cut ? 'announce.exportCancelled' : 'announce.exportFailed'));
+        return outcome;
       }
       return await m.run(grid, o, { scope, columns: ro.columns ?? o.columns, source, id, t0, signal: c.signal });
     } finally {
