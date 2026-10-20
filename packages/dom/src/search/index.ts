@@ -10,9 +10,9 @@ export interface QuickSearchOptions {
 
 export interface QuickSearch extends GridFeature {
   /**
-   * Binds a field of the page (its own label, place and style) to the grid's search. Before the
-   * grid is made: waits for it; after it is gone: does nothing. Binding a bound field again
-   * unbinds it first. Returns the unbind.
+   * Binds a field of the page (its own label, place and style) to the grid's search: to every grid
+   * the feature is set up in, now and later (a grid made again after the last one is gone: a
+   * remount). Binding a bound field again unbinds it first. Returns the unbind.
    */
   bind(input: HTMLInputElement, o?: QuickSearchOptions): () => void;
 }
@@ -29,36 +29,29 @@ export interface QuickSearch extends GridFeature {
  * ```
  */
 export function quickSearch(): QuickSearch {
-  let g: GridContext<unknown> | null = null;
-  /** Binds waiting for the grid; null once it is made (then gone). */
-  let waiting: Set<() => void> | null = new Set();
-  const boxes = new Map<HTMLInputElement, Off>();
+  /** The grids it is set up in, still alive. */
+  const grids = new Set<GridContext<unknown>>();
+  /** The fields bound (until their unbind): each binds itself to a grid. */
+  const binds = new Set<(g: GridContext<unknown>) => void>();
 
   return {
     id: 'search',
     bind(input, o) {
-      let off: Off | undefined;
-      const attach = (): void => {
-        off = bindBox(g!, input, o, boxes);
-      };
-      if (g) attach();
-      else waiting?.add(attach);
+      const offs = new Set<Off>();
+      const attach = (g: GridContext<unknown>): void => void bindBox(g, input, o, offs);
+      binds.add(attach);
+      grids.forEach(attach);
       return () => {
-        waiting?.delete(attach);
-        off?.();
+        binds.delete(attach);
+        offs.forEach((off) => off());
       };
     },
-    setup(ctx) {
-      g = ctx;
-      ctx.scope.add(ctx.kernel.subscribe(rowsSaid(ctx)));
-      for (const attach of waiting!) attach();
-      waiting = null;
-      return {
-        destroy() {
-          for (const off of boxes.values()) off();
-          g = null;
-        },
-      };
+    setup(g) {
+      grids.add(g);
+      g.scope.add(g.kernel.subscribe(rowsSaid(g)));
+      binds.forEach((attach) => attach(g));
+      // Its fields' bindings end with the grid's scope.
+      return { destroy: () => void grids.delete(g) };
     },
   };
 }

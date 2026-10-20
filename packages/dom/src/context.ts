@@ -76,7 +76,7 @@ export interface GridContext<T> {
   slots: SlotDrivers | null;
   /** What every part gets, as of the last paint (its `msg` and `announce` never change). */
   partBase?: PartBase;
-  /** The quick-search warm-up: a feature sets `want` and calls `warm()` (the search box, step 16). */
+  /** The quick-search warm-up: a feature holds it and asks for it (the search box, step 16). */
   warm: Warmup;
   /** What the features set up handed back (`afterRows` runs at each paint once the rows are placed). */
   features: readonly FeatureHandle[];

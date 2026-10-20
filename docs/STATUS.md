@@ -23,10 +23,9 @@ Mis à jour : 2026-10-19 (étape 16 faite, non commitée). Ce fichier dit où en
 | 13 — fenêtre de filtre (texte, nombre, oui/non), marque « filtré », Alt+Flèche bas | fait, relu, testé | `f67fc48`, `67782bc` |
 | 14 — filtres de dates sur tzslot (jour, période, avant/après), six raccourcis relatifs, horloge | fait, relu, testé | `df27559`, `85e08c3`, `ae0b40b`, `24acaab` |
 | 15 — filtre par liste de valeurs (chargé à la demande), menu de démos | fait, relu, testé | `021324e`, `79c40c3` |
-| 16 — recherche rapide branchée sur le champ de la page (`@dzgrid/dom/search`) | fait, testé (non commité ; relecture et analyse des tests à faire) | — |
 | 17 à 26 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 26 = animations GSAP, `docs/phase-3-steps/motion-decisions.md`) | — |
 
-En cours : l'étape 16 est écrite (non commitée) : `quickSearch()` dans `@dzgrid/dom/search` (1 093 o, budget 1 100), base dom 18 743 (18 900) ; détail dans la ROADMAP ; restent la relecture de code et l'analyse des tests, puis le commit. Étape 17 ensuite (pagination). Étape 26 (animations GSAP) décidée. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP à confirmer.
+En cours : l'étape 16 est écrite et corrigée après relecture et analyse des tests (non commitée) : `quickSearch()` dans `@dzgrid/dom/search` (1 251 o, budget 1 300, décision Q4), base dom 18 801 (18 900) ; 3 215 tests, navigateur 280 ; détail dans la ROADMAP ; reste le commit. Étape 17 ensuite (pagination). Étape 26 (animations GSAP) décidée. Pour le propriétaire : tzslot T1–T11, écoute lecteur d'écran (§8–§12), relecture arabe, licence GSAP à confirmer.
 
 ## Les plans détaillés des étapes
 
@@ -58,8 +57,8 @@ En cours : l'étape 16 est écrite (non commitée) : `quickSearch()` dans `@dzgr
 | `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 620 |
 | `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
 | `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 551 |
-| `@dzgrid/dom` | 18 900 (étape 16) | 18 743 |
-| `@dzgrid/dom/search` | 1 100 (étape 16) | 1 093 |
+| `@dzgrid/dom` | 18 900 (étape 16) | 18 801 |
+| `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 251 |
 | `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 181 |
 | liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 779 |
 | adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |

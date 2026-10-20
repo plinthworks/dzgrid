@@ -1,9 +1,15 @@
 import type { GridContext } from './context.js';
 import { idleLoop } from './idle.js';
 
-/** The quick-search warm-up: `want`, a feature asking for it (a bound search box took focus, step 16). */
+/** The quick-search warm-up (D13), asked for by a feature (the search box, step 16). */
 export interface Warmup {
-  want: boolean;
+  /**
+   * A bound search box: returns its release (once). The last release ends what `want` asked for and
+   * stops a warm-up under way, unless the grid prepares it anyway (`searchWarmup: 'idle'`).
+   */
+  hold(): () => void;
+  /** A held box took focus: prepares the search, once until the last release (a server's needs nothing). */
+  want(): void;
   warm(): void;
 }
 
@@ -13,17 +19,37 @@ export interface Warmup {
  */
 export function installWarmup<T>(g: GridContext<T>): Warmup {
   let stopWarm: (() => void) | null = null;
-  const w: Warmup = { want: false, warm };
-  function warm(): void {
+  /** The boxes held, and whether one of them asked for it. */
+  let holds = 0;
+  let wanted = false;
+  const stop = (): void => {
     stopWarm?.();
     stopWarm = null;
-    if (g.settings.searchWarmup !== 'idle' && !w.want) return;
+  };
+  const w: Warmup = {
+    hold() {
+      holds++;
+      let held = true;
+      return () => {
+        if (!held) return;
+        held = false;
+        if (!--holds) (wanted = false), g.settings.searchWarmup === 'idle' || stop();
+      };
+    },
+    want() {
+      if (holds && !wanted && g.rows.ops.quick !== 'server') (wanted = true), warm();
+    },
+    warm,
+  };
+  function warm(): void {
+    stop();
+    if (g.settings.searchWarmup !== 'idle' && !wanted) return;
     if (!g.rows.warmSearch) return;
     const s = g.rows.warmSearch();
-    const stop = idleLoop(() => s.step(2000), g.scope, { win: g.win, busy: () => g.now() - g.scrolledAt < 200 });
+    const end = idleLoop(() => s.step(2000), g.scope, { win: g.win, busy: () => g.now() - g.scrolledAt < 200 });
     stopWarm = () => {
       s.cancel();
-      stop();
+      end();
     };
   }
   let quickBefore = g.kernel.query.quick;
