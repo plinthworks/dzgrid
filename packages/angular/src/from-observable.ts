@@ -11,14 +11,16 @@ function first<V>(o: ObservableLike<V>, signal: AbortSignalLike): Promise<V> {
   return new Promise<V>((ok, ko) => {
     let done = false;
     let sub: { unsubscribe(): void } | undefined;
-    const end = (): void => void ((done = true), sub?.unsubscribe());
-    const s = signal as AbortSignalLike & Partial<Pick<EventTarget, 'addEventListener'>>;
+    const s = signal as AbortSignalLike & Partial<Pick<EventTarget, 'addEventListener' | 'removeEventListener'>>;
+    // Settled: no more listening to the request's signal (a long-lived signal keeps no closure).
+    const settle = (): void => void ((done = true), s.removeEventListener?.('abort', abort));
+    const end = (): void => void (settle(), sub?.unsubscribe());
     const abort = (): void => void (done || (end(), ko(s.reason ?? new Error('aborted'))));
     if (s.aborted) return abort();
     sub = o.subscribe({
       next: (v) => void (done || (end(), ok(v))),
-      error: (e) => void (done || ((done = true), ko(e))),
-      complete: () => void (done || ((done = true), ko(new Error('fromObservable: completed without a value')))),
+      error: (e) => void (done || (settle(), ko(e))),
+      complete: () => void (done || (settle(), ko(new Error('fromObservable: completed without a value')))),
     });
     // A value given during subscribe: unsubscribed now that the subscription exists.
     if (done) sub.unsubscribe();

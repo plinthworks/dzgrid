@@ -41,7 +41,11 @@ export interface Bindings {
   kernel(): GridKernel<any, any> | null;
 }
 
-const TABBABLE = 'a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"]),[contenteditable="true"]';
+/** What the focus fallback may take: tabbable, neither disabled nor a hidden input. */
+const TABBABLE = 'a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"]),[contenteditable="true"]'
+  .split(',')
+  .map((q) => `${q}:not(:disabled):not([type=hidden])`)
+  .join();
 
 /**
  * A component or a template as a part of one grid (S6's pool): created once per host, its view

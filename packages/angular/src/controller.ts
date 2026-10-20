@@ -7,23 +7,28 @@ type FilterOpener = GridFeature & { openFilter(column: string): boolean; closeFi
 /**
  * One grid's handle for the application and for its parts: inject it inside `<dz-grid>` (a
  * part component, a template, a child), or take it from `(gridReady)` or `#g="dzGrid"`. Null
- * and false before the grid exists, after it is gone, and on a server.
+ * and false before the grid exists, after it is gone, and on a server; ready and dispatching from
+ * the first paint (a part's init), `focusCell`, `ensureVisible`, `refresh` and `announce` once
+ * that paint is over.
  */
 @Injectable()
 export class DzgController<T = unknown> {
-  readonly #grid = signal<GridInstance<T, RowModel<T>> | null>(null);
+  readonly #kernel = signal<GridKernel<T, RowModel<T>> | null>(null);
+  #grid: GridInstance<T, RowModel<T>> | null = null;
   #features: readonly GridFeature[] = [];
-  readonly ready = computed(() => !!this.#grid());
-  readonly kernel = computed<GridKernel<T, RowModel<T>> | null>(() => this.#grid()?.kernel ?? null);
+  /** True from the grid's first paint on (its parts' init included). */
+  readonly ready = computed(() => !!this.#kernel());
+  readonly kernel = this.#kernel.asReadonly();
 
-  /** @internal `<dz-grid>` sets it. */
-  _attach(g: GridInstance<T, RowModel<T>> | null, features: readonly GridFeature[] = []): void {
-    this.#grid.set(g);
+  /** @internal `<dz-grid>` sets it: the kernel before the first paint, the grid once made. */
+  _attach(k: GridKernel<T, RowModel<T>> | null, g: GridInstance<T, RowModel<T>> | null = null, features: readonly GridFeature[] = []): void {
+    this.#kernel.set(k);
+    this.#grid = g;
     this.#features = features;
   }
 
   #api() {
-    return untracked(this.#grid)?.api;
+    return this.#grid?.api;
   }
 
   /** A command, as the API (`source: 'api'`); refused when there is no grid. */
@@ -51,6 +56,6 @@ export class DzgController<T = unknown> {
     this.#filters()?.closeFilter();
   }
   #filters(): FilterOpener | undefined {
-    return untracked(this.#grid) ? (this.#features.find((f) => f.id === 'filters') as FilterOpener | undefined) : undefined;
+    return this.#grid ? (this.#features.find((f) => f.id === 'filters') as FilterOpener | undefined) : undefined;
   }
 }

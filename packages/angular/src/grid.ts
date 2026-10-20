@@ -23,7 +23,7 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import type { ColumnOrGroup, FilterModel, GridEvent, GridKernel, Problem, RowIdInput, RowModel, SelectionState } from '@dzgrid/core';
 import { canonical, emit } from '@dzgrid/core/internal';
-import { createGrid, type GridInstance, type GridMessages, type GridSettings, type SlotPart } from '@dzgrid/dom';
+import { createGrid, type GridFeature, type GridInstance, type GridMessages, type GridSettings, type SlotPart } from '@dzgrid/dom';
 import { DzgController } from './controller';
 import { DzgPart } from './dzg-part';
 import { MARKS, boundPart, type Bindings } from './part-bind';
@@ -110,7 +110,9 @@ export class DzGrid<T> implements AfterContentInit {
   private readonly _browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly _templates = contentChildren(DzgPart);
   private readonly _grid = signal<GridInstance<T, RowModel<T>> | null>(null);
-  private readonly _b: Bindings = { env: inject(EnvironmentInjector), app: inject(ApplicationRef), injector: inject(Injector), kernel: () => untracked(this._grid)?.kernel ?? null };
+  /** The kernel, from its creation (before the first paint) until the grid is gone. */
+  private _k: GridKernel<T, RowModel<T>> | null = null;
+  private readonly _b: Bindings = { env: inject(EnvironmentInjector), app: inject(ApplicationRef), injector: inject(Injector), kernel: () => this._k };
   /** Each marker or template bound to this grid once: the same part while it stays. */
   private readonly _bound = new WeakMap<object, SlotPart>();
   private readonly _told = new Set<string>();
@@ -138,7 +140,8 @@ export class DzGrid<T> implements AfterContentInit {
   private readonly _settings = computed(() => {
     const s: Record<string, unknown> = {};
     for (const k of KEYS) s[k] = this[k]() ?? this._defaults[k];
-    s['messages'] = this.messages() ?? this._messages;
+    // Unset after creation with no provider: the bundle in force stays (the grid needs one).
+    s['messages'] = this.messages() ?? this._messages ?? this._last['messages'];
     s['parts'] = this._registry();
     return s as unknown as S<T>;
   });
@@ -158,11 +161,12 @@ export class DzGrid<T> implements AfterContentInit {
         this._tell();
       });
     });
-    effect(() => this._write(this.controller.kernel(), this.quick(), this.filter(), this.selected()));
+    effect(() => (this.quick(), this.filter(), this.selected(), this._write(this.controller.kernel())));
     inject(DestroyRef).onDestroy(() => {
       this._gone = true;
       untracked(this._grid)?.destroy();
       this._grid.set(null);
+      this._k = null;
       this.controller._attach(null);
     });
   }
@@ -173,21 +177,33 @@ export class DzGrid<T> implements AfterContentInit {
     const s = this._settings();
     if (!s.messages) throw new Error('dz-grid: messages are required ([messages] or provideDzGrid({ messages }))');
     this._last = s as unknown as Record<string, unknown>;
-    const g = this._zone.runOutsideAngular(() => createGrid<T, RowModel<T>>(this._el, { ...s, onEvent: (e) => this._hear(e) }, this._env));
-    this.controller._attach(g, s.features);
+    // A feature first, set up before the first paint: the parts that paint mounts can emit, and
+    // see the controller ready (its kernel; the API calls wait for createGrid to return).
+    const early: GridFeature = { id: 'dzg-kernel', setup: (c) => (this.controller._attach((this._k = c.kernel as never)), { destroy() {} }) };
+    const g = this._zone.runOutsideAngular(() =>
+      createGrid<T, RowModel<T>>(this._el, { ...s, features: [early, ...(s.features ?? [])], onEvent: (e) => this._hear(e) }, this._env),
+    );
+    this.controller._attach(g.kernel, g, s.features);
     this._grid.set(g);
-    untracked(() => this._write(g.kernel, this.quick(), this.filter(), this.selected()));
+    this._write(g.kernel);
     this._tell();
     this.gridReady.emit(this.controller);
   }
 
-  /** The host's models written to the grid as the host, unless the grid already holds them (no echo). */
-  private _write(k: GridKernel<T, RowModel<T>> | null, quick?: string, filter?: FilterModel, selected?: SelectionState): void {
+  /**
+   * The host's models written to the grid as the host, unless the grid already holds them (no
+   * echo). Each read after the write before it: a filter that clears the selection has set the
+   * model by then, so the selection held before is not written back.
+   */
+  private _write(k: GridKernel<T, RowModel<T>> | null): void {
     if (!k) return;
     untracked(() =>
       this._zone.runOutsideAngular(() => {
+        const quick = this.quick();
         if (quick !== undefined && quick !== k.query.quick) k.dispatch({ type: 'quick.set', text: quick }, 'host');
+        const filter = this.filter();
         if (filter && canonical(filter) !== canonical(k.query.filter)) k.dispatch({ type: 'filter.set', filter }, 'host');
+        const selected = this.selected();
         if (selected && !sameSelection(selected, k.selection)) k.dispatch({ type: 'selection.set', selection: selected }, 'host');
       }),
     );
@@ -195,7 +211,7 @@ export class DzGrid<T> implements AfterContentInit {
 
   /** `part-shadowed` for the names a later layer took, once per name for this grid. */
   private _tell(): void {
-    const k = untracked(this._grid)?.kernel;
+    const k = this._k;
     const names = (r?: Readonly<Record<string, unknown>>) => Object.keys(r ?? {});
     const problems = shadowedParts(
       [
@@ -215,10 +231,15 @@ export class DzGrid<T> implements AfterContentInit {
       this.gridEvent.emit(e);
       if (e.type === 'problems') this.problems.emit(e.problems);
       else if (OUTS.includes(e.type)) (this[e.type as 'cellClicked'] as OutputEmitterRef<unknown>).emit(e);
+      if (e.type === 'selectionChanged') {
+        // A host-caused clear (a narrower [selection] mode, a filter written by the host) too, when the
+        // model holds something else; never an echo of the host's own write.
+        const m = this.selected();
+        if (e.source !== 'host' || (m && !sameSelection(m, e.selection))) this.selected.set(e.selection);
+      }
       if (e.source === 'host') return;
       if (e.type === 'quickChanged') this.quick.set(e.text);
       if (e.type === 'filterChanged') this.filter.set(e.filter);
-      if (e.type === 'selectionChanged') this.selected.set(e.selection);
     });
   }
 }
