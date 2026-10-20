@@ -187,6 +187,8 @@ export async function runPermutation(s: Script, c: RunContext): Promise<RunResul
   /** Inside `release`: what is said then belongs to an answer. A count said outside one: reported at the next check. */
   let answering = false;
   let early: string | null = null;
+  /** A sort sentence ("Sorted by…", "Sort removed") said outside an answer: reported at the next check. */
+  let earlySort: string | null = null;
   /** A: the epoch of the set shown (a run of rows requests with the same key). */
   let shownSet = -1;
   const epochOf = (e: LogEntry): number => {
@@ -206,6 +208,8 @@ export async function runPermutation(s: Script, c: RunContext): Promise<RunResul
     // a count said before the answer is a count of rows that are about to go.
     // A page in A only cuts the set held: its range may say the count, which must be the set's.
     if (!answering && counts(t).length && !(paging && counts(t).every((x) => x === k.rows.counts.filtered))) early ??= t;
+    // I3: both configurations sort on the server (held answers): the order is said with its answer, never at the click.
+    if (!answering && (t.startsWith(T['announce.sortCleared']!) || t.startsWith(T['announce.sorted']!.split('{')[0]!))) earlySort ??= t;
     announce(t);
   };
 
@@ -256,6 +260,7 @@ export async function runPermutation(s: Script, c: RunContext): Promise<RunResul
   function check(where: string): void {
     if (destroyed) return;
     want(early === null, `${where}: a count said before the answer: "${early}"`);
+    want(earlySort === null, `${where}: a sort said before its answer (at the click): "${earlySort}"`);
     // I2: every waiting request but the last of its channel was aborted; the last rows request never.
     const last = new Map<string, LogEntry>();
     for (const e of server.log) last.set(e.channel, e);

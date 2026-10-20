@@ -77,6 +77,8 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
     if (!draw(m, host, col!, part)) return false;
     const ref = popupsFor(g).open(at, host, {
       placement: 'block-end', modal: true, label: g.msg('filter.popupLabel', { column: name(col!) }),
+      // Only the control that toggles it is spared a press (a header cell's label or grip is outside).
+      opener: (a) => (a.matches('[aria-haspopup]') ? a : a.querySelector<HTMLElement>(':scope>.dzg-fbtn,.dzg-hextra [aria-haspopup]')),
       onClose() {
         if (cur === it) cur = null;
         // Closing applies what is pending in the browser; a grid going applies nothing.

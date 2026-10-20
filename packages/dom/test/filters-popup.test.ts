@@ -283,6 +283,50 @@ describe('a pointer down outside (owner decision Q4, step 18; revises step 13 O7
     expect(t.popup()).not.toBeNull();
   });
 
+  it('opened with Alt+ArrowDown: only the header\'s filter button counts as its anchor; a press on the label, the grip or the cell closes it', () => {
+    const t = open({ columns: [{ id: 'n', header: 'N', type: 'number', resizable: true }] });
+    const altDown = () => {
+      t.header('n').focus();
+      t.key(t.header('n'), 'ArrowDown', { altKey: true });
+      expect(t.popup()).not.toBeNull();
+    };
+    for (const sel of [':scope > .dzg-hlabel', ':scope > .dzg-resize', null]) {
+      altDown();
+      const at = sel ? t.header('n').querySelector(sel)! : t.header('n');
+      expect(at).not.toBeNull();
+      down(at);
+      expect(t.popup()).toBeNull();
+      expect(t.button('n')!.getAttribute('aria-expanded')).toBe('false');
+    }
+    // Its filter button: left to the click, which closes it.
+    altDown();
+    down(t.button('n')!);
+    expect(t.popup()).not.toBeNull();
+    t.button('n')!.click();
+    expect(t.popup()).toBeNull();
+  });
+
+  it('opened with Alt+ArrowDown on a floating cell: its summary button counts as the anchor, the rest of the cell does not', () => {
+    const t = open({ floating: true });
+    t.g.kernel.dispatch({ type: 'filter.column', column: 'b', filter: { type: 'boolean', value: true } }, 'api');
+    const altDown = (col: string) => {
+      t.cell(col).focus();
+      t.key(t.cell(col), 'ArrowDown', { altKey: true });
+      expect(t.popup()).not.toBeNull();
+    };
+    altDown('b');
+    const sum = t.cell('b').querySelector<HTMLElement>('button.dzg-fsum')!;
+    expect(sum).not.toBeNull();
+    down(sum);
+    expect(t.popup()).not.toBeNull();
+    down(t.cell('b'));
+    expect(t.popup()).toBeNull();
+    // A box's cell has no such control: a press in its box closes the popup.
+    altDown('n');
+    down(t.input('n')!);
+    expect(t.popup()).toBeNull();
+  });
+
   it('the grid destroyed after a press outside moves no focus later', () => {
     vi.useFakeTimers();
     const t = open();

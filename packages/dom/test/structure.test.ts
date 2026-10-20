@@ -80,6 +80,28 @@ describe('the DOM layer’s shape', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('has every date kit place tzslot’s panel in the popup (`container: a.panel`), so a press in it keeps the popup open (step 18, Q4)', () => {
+    // A kit that forgot it would have the panel in the page's body: a press on a day there is
+    // outside the popup and closes it.
+    const kits = files(join(SRC, 'filters/dates')).filter((f) => !f.endsWith('shared.ts'));
+    expect(kits.length).toBeGreaterThanOrEqual(3);
+    for (const f of kits) {
+      const src = readFileSync(f, 'utf8');
+      const calls = [...src.matchAll(/\bcreate[A-Z]\w*\(\s*a\.host\s*,\s*\{/g)];
+      expect(calls.length, relative(SRC, f)).toBeGreaterThan(0);
+      for (const m of calls) {
+        // The options object, to its matching brace.
+        let depth = 0;
+        let end = m.index! + m[0].length - 1;
+        for (; end < src.length; end++) {
+          if (src[end] === '{') depth++;
+          else if (src[end] === '}' && --depth === 0) break;
+        }
+        expect(src.slice(m.index!, end + 1), relative(SRC, f)).toMatch(/\bcontainer:\s*a\.panel\b/);
+      }
+    }
+  });
+
   it('keeps the set filter’s chunk lazy: filters/set/ reached only through import() (step 15)', () => {
     const eager = files(SRC).filter((f) => !/^filters\/set\//.test(relative(SRC, f)));
     expect(eager.filter((f) => /^import (?!type )[^;]*from '\.{1,2}\/(?:.*\/)?set\//m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);

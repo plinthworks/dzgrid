@@ -9,7 +9,7 @@
  */
 export const SET_CSS =
   ':where(.dzg-fallw){display:flex;align-items:center;gap:.5rem;min-block-size:24px}' +
-  ':where(.dzg-fstatus){min-block-size:1lh}' +
+  ':where(.dzg-fstatus){min-block-size:1.2em;min-block-size:1lh}' +
   ':where(.dzg-flistw){position:relative;block-size:17.5rem;min-inline-size:14rem}' +
   ':where(.dzg-flist){position:relative;block-size:100%;overflow-y:auto}' +
   ':where(.dzg-fopt){position:absolute;inset-inline:0;box-sizing:border-box;display:flex;align-items:center;gap:.5rem;block-size:1.75rem;padding-inline:.25rem}' +

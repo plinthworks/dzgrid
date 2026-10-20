@@ -9,6 +9,8 @@ export interface PopupOptions {
   /** Focus moves in and stays in until it closes (a filter popup). Every popup closes on a pointer down outside it (owner Q4, step 18). */
   readonly modal?: boolean;
   readonly label?: string;
+  /** The control a press on which is left to its click (it toggles the popup), from the anchor; the anchor by default. */
+  readonly opener?: (anchor: HTMLElement) => HTMLElement | null;
   readonly onClose?: () => void;
 }
 
@@ -33,7 +35,7 @@ const topLayer = (el: HTMLElement): el is HTMLElement & { showPopover(): void; h
  * `overflow` or `contain` (a dialog, a card) can neither clip nor trap them.
  * Fixed in the grid's root otherwise. Placed in logical coordinates; Escape
  * closes and gives focus back to the anchor; a modal popup keeps Tab inside.
- * A pointer down outside it (not on its anchor) closes it and leaves the focus
+ * A pointer down outside it (not on its opener) closes it and leaves the focus
  * where the press puts it: back to the anchor only if it lands nowhere.
  * Its controls own their keys (`data-dzg-owner="popup"`).
  */
@@ -142,7 +144,7 @@ export class PopupHost {
     on(doc, 'pointerdown', (e: PointerEvent) => {
       // The path, not the target: inside a shadow root the target is the shadow host.
       const path = e.composedPath();
-      if (path.includes(el) || path.includes(at)) return;
+      if (path.includes(el) || path.includes((o.opener ? o.opener(at) : at) ?? el)) return;
       outside = true;
       ref.close();
     }, true);
