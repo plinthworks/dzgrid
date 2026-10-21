@@ -17,7 +17,7 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **Server data without surprises.** A request gate guarantees that only the answer to the last request of the current query is shown, whatever order answers arrive in. Pages, cursors, unknown totals, retry and errors are part of the model.
 - **Cells spanning rows and columns**, like an HTML table's `rowspan` and `colspan`: merged identical values, spans decided by the data, grouped headers, full-width rows.
 - **Problems are values.** A bad column, filter or server answer is reported as a structured problem — never a silent failure, never a crash.
-- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 75 879 B gzipped (ARCHITECTURE K.8: ≤ 85 000).
+- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 75 879 B gzipped (ARCHITECTURE K.8: ≤ 85 000); in a real Angular 21 build (`ng build`, `npm run example:bytes`), DzGrid's share of the first load is 82 582 B.
 
 ## A first grid
 
@@ -98,6 +98,7 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/theme` | the stylesheet | 2 046 |
 | `@dzgrid/angular` | the Angular wrapper | 5 437 |
 | profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 75 879 |
+| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`) | 82 582 |
 
 Optional peers: `@tzslot/core` and `@tzslot/dom` 2.2 (date filters), `gsap` 3.13 (motion).
 

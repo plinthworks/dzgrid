@@ -268,7 +268,7 @@ Owner inputs still owed: the audit-logs screen spec (§1.1 of the plan, needed a
 | 3 | day and instant filters send `[from, to)` in UTC; "5 March" includes 23:59 | **met** | conformance cases (step 5, `toWire` step 6) |
 | 4 | Arabic read by an Arabic reader (filter open, sort, paging, export opened in Excel) | **not met — renvoyé (owner decision 2026-10-21)** to the Sehhaty track | screenshots `docs/screenshots/step18/`, sample `examples/angular-audit/out/audit-ar.csv` ready |
 | 5 | contrast on the 12 palette × theme combinations; palette switched live; one screen-reader pass | **partial — renvoyé (owner decision 2026-10-21)**: no `sehhaty.json` yet, listening §7–§15 pending | `check:contrast` on tzslot's palette; live switch checked in Chrome (`test:audit`) |
-| 6 | size profile ≤ 85 kB gz; tarballs installed in a real Angular 21 app (`ng build`) | **met** | profile 75 879 (esbuild, K.8 guard 83 500); real build 82 014 ≤ 85 000 (`example:bytes`); Angular 19 and 22 smoke tried (step 23) |
+| 6 | size profile ≤ 85 kB gz; tarballs installed in a real Angular 21 app (`ng build`) | **met** | profile 75 879 (esbuild, K.8 guard 83 500); real build 82 582 ≤ 85 000 (`example:bytes`); Angular 19 and 22 smoke tried (step 23) |
 | 7 | "better than the old table", measured in production | **out of phase — renvoyé (owner decision 2026-10-21)** to the Sehhaty track | — |
 
 ### Reporté (by destination; later-phase targets confirmed when Phase 4 is planned)
@@ -334,7 +334,7 @@ Set by `scripts/rebudget.mjs` from the measures of 2026-10-21 (Apple M4, headles
 | `profile: audit screen (K.8)` | 85 000 | 75 879 | 83 500 |
 | `@dzgrid/angular` | 5 500 | 5 437 | 6 000 (raise) |
 
-**Node times** (ms; median of the three runs; lines of 5 ms and more at max(m × 1.1, m + 0.5) to the half-ms, the others keep their ceiling; the three `setValues` lines at 6 values budgeted, the text and number ones recorded without a budget; memory lines unchanged):
+**Node times** (ms; median of the three runs; lines of 5 ms and more at max(m × 1.1, m + 0.5) to the half-ms, the others keep their ceiling; of the three `setValues` lines only the one at 6 values is budgeted, the text and number ones recorded without a budget; memory lines unchanged):
 
 | Line | Old budget | Median of 3 | New budget |
 |---|---|---|---|

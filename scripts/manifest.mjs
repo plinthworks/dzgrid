@@ -91,8 +91,10 @@ export function mapProblems(name, files, read) {
     (map.sources ?? []).forEach((source, i) => {
       if (typeof map.sourcesContent?.[i] === 'string') return;
       const parts = [];
-      for (const part of (dir + (map.sourceRoot ?? '') + source).split('/')) {
-        if (part === '..') { if (parts.pop() === undefined) parts.push('..'); }
+      // The source map spec joins sourceRoot and a source with '/'; a '..' past the root stays a '..'.
+      const root = map.sourceRoot ? `${map.sourceRoot}/` : ''; // an empty segment is skipped below
+      for (const part of (dir + root + source).split('/')) {
+        if (part === '..') { if (parts.length && parts.at(-1) !== '..') parts.pop(); else parts.push('..'); }
         else if (part !== '.' && part !== '') parts.push(part);
       }
       const target = parts.join('/');

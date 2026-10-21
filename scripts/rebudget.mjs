@@ -4,7 +4,7 @@
  *
  *   node scripts/rebudget.mjs sizes [--from check-size.txt] [--file size-budget.json] [--write]
  *   node scripts/rebudget.mjs node bench1.txt bench2.txt bench3.txt [--file perf/budgets.json] [--write]
- *   node scripts/rebudget.mjs browser bench-browser.txt [--file perf/browser-budgets.json] [--write]
+ *   node scripts/rebudget.mjs browser browser1.txt browser2.txt browser3.txt [--file perf/browser-budgets.json] [--write]
  *
  * Dry by default: prints old / measure / new and changes nothing; `--write` saves the file.
  * - Sizes: measure + 10 %, rounded up to 50 B, never above the plan's ceilings (ARCHITECTURE §5.2,
@@ -12,11 +12,12 @@
  *   `npm run check:size` output (`--from`). Entries without a budget (maxGzip null) are kept.
  * - Node times (`npm run bench`, several runs: the median per line): max(m × 1.1, m + 0.5 ms) rounded
  *   up to the half-ms, for lines of 5 ms and more; the lines under 5 ms keep their ceiling (noise);
- *   memory lines are kept.
- * - Headless-Chrome times (`npm run bench:browser`): ms lines at measure + 35 % to the half-ms,
+ *   memory lines are kept. A budgeted line must be read in every run, or nothing is written.
+ * - Headless-Chrome times (`npm run bench:browser`, several runs: the median per line): ms lines at measure + 35 % to the half-ms,
  *   capped by the plan (§5.3, phase-3-plan §4); sub-ms lines, counts, percentages and megabytes keep
  *   their budget.
- * A measure above its ceiling is refused (exit 1): a budget never hides a breach.
+ * A measure above its ceiling is refused (exit 1), and so is a below-threshold line (Node < 5 ms,
+ * Chrome sub-ms) measured above the budget it keeps: a budget never hides a breach.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -46,7 +47,8 @@ export function ceilingFor(name) {
 /** measure + 10 % rounded up to 50 B, at most `ceiling`; a measure above the ceiling throws. */
 export function sizeBudget(measure, ceiling = null) {
   if (ceiling !== null && measure > ceiling) throw new Error(`measure ${measure} B is above its ceiling ${ceiling} B`);
-  const next = Math.ceil((measure * 1.1) / 50) * 50;
+  // Integer math: measure × 1.1 in floating point overshoots (1500 × 1.1 = 1650.0000000000002 → 1700).
+  const next = Math.ceil((measure * 11) / 500) * 50;
   return ceiling === null ? next : Math.max(measure, Math.min(next, ceiling));
 }
 
@@ -84,7 +86,7 @@ export function rebudgetSizes(budget, measures, { date }) {
 export function parseSizeOutput(text) {
   const out = {};
   for (const line of text.split('\n')) {
-    const m = /^(?:ok {2}|OVER) (.+?): (?:initial (\d+) B gz|\d+ B min, (-?\d+) B gz)/.exec(line);
+    const m = /^(?:ok {2}|OVER) (.+?): (?:initial (\d+) B gz|\d+ B min, (\d+) B gz)/.exec(line);
     if (m) out[m[1]] = Number(m[2] ?? m[3]);
   }
   return out;
@@ -94,9 +96,15 @@ export function parseSizeOutput(text) {
 
 const half = (x) => Math.ceil(x * 2 - 1e-9) / 2;
 
-/** Node: max(m × 1.1, m + 0.5) to the half-ms for lines of 5 ms and more; under 5 ms, the ceiling stays. */
+/**
+ * Node: max(m × 1.1, m + 0.5) to the half-ms for lines of 5 ms and more; under 5 ms, the ceiling
+ * stays, and a measure above it throws.
+ */
 export function nodeTimeBudget(m, old) {
-  if (m < 5) return old;
+  if (m < 5) {
+    if (m > old) throw new Error(`measure ${m} ms is above its kept budget ${old} ms`);
+    return old;
+  }
   return half(Math.max(m * 1.1, m + 0.5));
 }
 
@@ -122,10 +130,15 @@ export const BROWSER_CEILINGS = {
 
 /**
  * Chrome: an ms line at measure + 35 % to the half-ms, at most its plan ceiling. Sub-ms lines keep
- * their ceiling, as in Node (a synchronous call; 0 for "no task over 50 ms"); any other unit too.
+ * their ceiling, as in Node (a synchronous call; 0 for "no task over 50 ms"), and a sub-ms measure
+ * above it throws; any other unit keeps its budget.
  */
 export function browserBudget(name, m, unit, old) {
-  if (unit !== 'ms' || m < 1) return old;
+  if (unit !== 'ms') return old;
+  if (m < 1) {
+    if (m > old) throw new Error(`${name}: measure ${m} ms is above its kept budget ${old} ms`);
+    return old;
+  }
   const ceiling = BROWSER_CEILINGS[name] ?? null;
   if (ceiling !== null && m > ceiling) throw new Error(`${name}: measure ${m} ms is above its ceiling ${ceiling} ms`);
   const next = half(m * 1.35);
@@ -211,6 +224,10 @@ async function main(argv) {
       if (!positional.length) throw new Error(`rebudget ${kind}: give the saved bench output(s)`);
       const doc = JSON.parse(readFileSync(file, 'utf8'));
       const measured = medianOfRuns(positional.map((f) => parseBenchOutput(readFileSync(f, 'utf8'))));
+      // A median of fewer runs than given is not the median asked for: a line one run printed in a
+      // changed format (or not at all) is refused, not budgeted from the runs that remain.
+      const partial = Object.keys(doc.budgets).filter((n) => measured[n] && measured[n].runs !== positional.length);
+      if (partial.length) throw new Error(`budgeted line(s) read in fewer than ${positional.length} runs: ${partial.map((n) => `${n} (${measured[n].runs})`).join(', ')}; nothing written`);
       result = rebudgetTimes(kind, doc, measured, { date });
     } else throw new Error('usage: rebudget.mjs sizes|node|browser [...] [--write]');
   } catch (e) {
