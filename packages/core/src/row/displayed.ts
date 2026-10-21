@@ -15,6 +15,12 @@ export interface DisplayedRows<T> {
   indexOf(key: RowKey): DisplayIndex | -1;
   index(n: number): DisplayIndex | null;
   nextData(i: DisplayIndex, delta: 1 | -1): DataNode<T> | null;
+  /** How many of the rows shown are data rows (the rest: fillers, details). Absent: all of them. */
+  readonly dataCount?: number;
+  /** A tree's: the parent of a row, shown or not; null for a root or a row it does not hold. */
+  parentOf?(key: RowKey): RowKey | null;
+  /** A tree's: the depth of a row shown, 0 for the roots. */
+  levelAt?(i: DisplayIndex): number;
 }
 
 /** A flat list: `order` maps display → source, or null for the source order itself. */

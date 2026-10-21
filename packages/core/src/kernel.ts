@@ -2,7 +2,7 @@ import type { ColumnModel, ColumnState } from './columns/model.js';
 import type { ColumnOrGroup } from './columns/defs.js';
 import type { LocaleCtx } from './value/locale.js';
 import { reconcileFocus, sameFocus, type FocusOwner, type FocusPos } from './focus.js';
-import type { RowKey } from './ids.js';
+import { isDataKey, type RowKey } from './ids.js';
 import type { ModelChange, RowModel, RowScope } from './model/client.js';
 import { isJson, type ColumnFilter, type FilterModel, type Json } from './filter/model.js';
 import { canonical, makeQuery, type Query } from './model/query.js';
@@ -57,7 +57,11 @@ export type GridCommand =
   | { readonly type: 'context.set'; readonly ctx: LocaleCtx }
   /** Another page (from 0; past the end shows the last), or another page size. */
   | { readonly type: 'page.go'; readonly index: number }
-  | { readonly type: 'page.size'; readonly size: number };
+  | { readonly type: 'page.size'; readonly size: number }
+  /** Opens or closes rows of a tree (or masters of details): the expansion, never the query (D1). */
+  | { readonly type: 'rows.expand'; readonly rows: readonly RowKey[]; readonly expanded: boolean }
+  /** Every row with children, or (`depth`) those above it opened, those from it down closed. */
+  | { readonly type: 'rows.expandAll'; readonly expanded: boolean; readonly depth?: number };
 
 export type GridCommandResult =
   | { readonly ok: true }
@@ -90,6 +94,8 @@ export type GridEvent<T> =
   | { readonly type: 'rowClicked'; readonly source: 'user'; readonly row: RowNode<T> }
   | { readonly type: 'problems'; readonly source: ChangeSource; readonly problems: readonly Problem[] }
   | { readonly type: 'firstDataRendered'; readonly source: 'data' }
+  /** Rows opened or closed, keys only: one event per command, after the rows shown changed. */
+  | { readonly type: 'rowExpanded'; readonly source: ChangeSource; readonly rows: readonly RowKey[]; readonly expanded: boolean }
   /** The page, its size or what it counts changed (a filter sends it back to the first page). */
   | { readonly type: 'pageChanged'; readonly source: ChangeSource; readonly page: PageState }
   /** The latest request failed: the host's error unchanged; the rows shown stay, under the error overlay. */
@@ -180,6 +186,8 @@ export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
   readonly selection: SelectionState;
   readonly anchor: RowKey | null;
   readonly focus: FocusPos | null;
+  /** The rows the user opened (a tree's, details'): kept apart from the query, so opening resets no page, selection or request. */
+  readonly expansion: ReadonlySet<RowKey>;
   /** Non-null only for an everything-except selection tied to the query: what a host's bulk action reads. */
   readonly selectionScope: SelectionScope | null;
   /** The select-all box: over the displayed rows, or over the whole query on server pages (what its click acts on). */
@@ -201,6 +209,7 @@ export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
 }
 
 const OK: GridCommandResult = { ok: true };
+const NO_KEYS: ReadonlySet<RowKey> = new Set();
 const refuse = (reason: string, problems: readonly Problem[] = []): GridCommandResult => ({ ok: false, reason, problems });
 
 /** For the DOM layer, through `@dzgrid/core/internal`: events the kernel cannot see (clicks, first render). */
@@ -475,6 +484,33 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       case 'rows.refresh':
         rows.invalidate();
         return OK;
+      case 'rows.expand': {
+        if (!rows.expand || !rows.expansion) return refuse('expansion-off');
+        if (cmd.rows.some((k) => !exists(k) && rows.displayed.indexOf(k) === -1)) return refuse('unknown-row');
+        const changed = rows.expand(cmd.rows, cmd.expanded, source);
+        if (changed.length) emit({ type: 'rowExpanded', source, rows: changed, expanded: cmd.expanded });
+        return OK;
+      }
+      case 'rows.expandAll': {
+        if (!rows.setExpansion || !rows.expandable || !rows.expansion) return refuse('expansion-off');
+        const depth = cmd.depth ?? Infinity;
+        if (depth !== Infinity && !(Number.isInteger(depth) && depth >= 0)) return refuse('invalid-depth');
+        const was = rows.expansion;
+        let next: Set<RowKey>;
+        if (cmd.expanded) next = new Set([...was, ...rows.expandable(depth)]);
+        else if (depth === Infinity) next = new Set();
+        else {
+          // Closed from `depth` down: the levels above keep their state.
+          const above = new Set(rows.expandable(depth));
+          const every = new Set(rows.expandable());
+          next = new Set([...was].filter((k) => above.has(k) || !every.has(k)));
+        }
+        const changed = cmd.expanded ? [...next].filter((k) => !was.has(k)) : [...was].filter((k) => !next.has(k));
+        if (!changed.length) return OK;
+        rows.setExpansion(next, source);
+        emit({ type: 'rowExpanded', source, rows: changed, expanded: cmd.expanded });
+        return OK;
+      }
       case 'selection.all':
         // An all-pages selection stays one: "all" again ticks the rows unticked, never only the page.
         // Under a rule (step 21, owner Q1) the rows shown, server pages too.
@@ -494,7 +530,11 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         // (step 17, owner Q1) the page's keys are added to what is ticked: other pages keep theirs.
         const d = rows.displayed;
         const keys: RowKey[] = rows.page && selection.mode === 'include' ? [...selection.keys] : [];
-        for (let i = 0; i < d.count; i++) keys.push(d.keyAt(d.index(i)!));
+        // Fillers and details are never selected (tree-selection.md).
+        for (let i = 0; i < d.count; i++) {
+          const k = d.keyAt(d.index(i)!);
+          if (isDataKey(k)) keys.push(k);
+        }
         setSelection(selectOnly(keys), source);
         return OK;
       }
@@ -559,7 +599,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       let state: HeaderSelection = 'all';
       for (let i = 0; i < d.count; i++) {
         const k = d.keyAt(d.index(i)!);
-        if (!isSelected(selection, k) && !skip(k)) {
+        if (isDataKey(k) && !isSelected(selection, k) && !skip(k)) {
           state = 'some';
           break;
         }
@@ -585,6 +625,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     get selection() { return selection; },
     get anchor() { return anchor; },
     get focus() { return focus; },
+    get expansion() { return rows.expansion ?? NO_KEYS; },
     get query() { return query; },
     get selectionScope() { return tied() ? { query, ...rows.scope } : null; },
     get headerState() { return headerState(); },
@@ -692,12 +733,17 @@ export function headerSelection<T>(s: SelectionState, d: DisplayedRows<T>): Head
 }
 
 function readHeader<T>(s: SelectionState, d: DisplayedRows<T>): HeaderSelection {
-  if (d.count === 0) return 'none';
+  // Over the data rows shown: fillers and details are never selected.
+  const n = d.dataCount ?? d.count;
+  if (n === 0) return 'none';
   let selected = 0;
   if (s.mode === 'include' && s.keys.size <= d.count) {
-    for (const key of s.keys) if (d.indexOf(key) !== -1) selected++;
+    for (const key of s.keys) if (isDataKey(key) && d.indexOf(key) !== -1) selected++;
   } else {
-    for (let i = 0; i < d.count; i++) if (isSelected(s, d.keyAt(d.index(i)!))) selected++;
+    for (let i = 0; i < d.count; i++) {
+      const k = d.keyAt(d.index(i)!);
+      if (isDataKey(k) && isSelected(s, k)) selected++;
+    }
   }
-  return selected === 0 ? 'none' : selected === d.count ? 'all' : 'some';
+  return selected === 0 ? 'none' : selected === n ? 'all' : 'some';
 }

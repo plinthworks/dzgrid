@@ -97,7 +97,7 @@ describe('relative shortcuts, property over zones and clocks', () => {
       const rows = [from - 1, from, to - 1, to, now].map((ms, k) => ({ id: `t${k}`, t: new Date(ms).toISOString(), d: null as string | null }))
         .concat([addDaysUtc(want.from, -1), want.from, want.to, addDaysUtc(want.to, 1), today].map((d, k) => ({ id: `d${k}`, t: null as unknown as string, d })));
       const m = clientRows<any>({ rows, getRowId: (x) => x.id, columns: cols, ctx, now: () => now });
-      const ids = () => Array.from({ length: m.displayed.count }, (_, j) => String(m.displayed.nodeAt(m.displayed.index(j)!).id));
+      const ids = () => Array.from({ length: m.displayed.count }, (_, j) => String((m.displayed.nodeAt(m.displayed.index(j)!) as { id: unknown }).id));
       m.setQuery(makeQuery({ filter: { t: { type: 'instant', op: 'relative', range } } }));
       const keptT = rows.filter((x) => x.t !== null && Date.parse(x.t) >= from && Date.parse(x.t) < to).map((x) => x.id);
       expect(ids(), `instant rows ${label}`).toEqual(keptT);

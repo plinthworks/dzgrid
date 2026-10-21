@@ -1,0 +1,81 @@
+{
+  "id": "move-row",
+  "suite": "tree",
+  "description": "A new parent id moves the row with its subtree.",
+  "input": {
+    "rows": [
+      {
+        "id": "s1",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "p1",
+        "p": "s1",
+        "n": 2,
+        "t": "bed"
+      },
+      {
+        "id": "p2",
+        "p": "s1",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c1",
+        "p": "p2",
+        "n": 9,
+        "t": "chart"
+      },
+      {
+        "id": "s2",
+        "n": 1,
+        "t": "ward"
+      },
+      {
+        "id": "p3",
+        "p": "s2",
+        "n": 5,
+        "t": "bed"
+      }
+    ],
+    "steps": [
+      {
+        "expandAll": true
+      },
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "p2",
+              "set": {
+                "p": "s2"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "s1 1/2",
+      ". p1 1/1",
+      "s2 2/2",
+      ". p2 1/2",
+      ". . c1 1/1",
+      ". p3 2/2"
+    ],
+    "expansion": [
+      "p2",
+      "s1",
+      "s2"
+    ],
+    "counts": {
+      "total": 6,
+      "filtered": 6,
+      "displayed": 6
+    },
+    "problems": []
+  }
+}

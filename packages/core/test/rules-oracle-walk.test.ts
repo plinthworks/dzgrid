@@ -8,7 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   clientRows, createColumnModel, createKernel, dataKey, localeCtx, isSelected,
-  type ColumnFilter, type GridEvent, type RowKey, type RowModel, type RowNode, type SelectionState,
+  type ColumnFilter, type GridEvent, type RowKey, type RowModel, type DataNode, type SelectionState,
 } from '@dzgrid/core';
 import { setSelectionGate } from '@dzgrid/core/internal';
 import { ruleGate } from '@dzgrid/core/rules';
@@ -54,7 +54,7 @@ function run(kind: Kind, seed: number, steps = 50, patches = false) {
   let ctx: Ctx = { max: 2 + int(4) };
 
   // The grid's rule: one function per kind (a stable identity), reading the row the grid holds.
-  const fns = new Map<RuleKind, (row: RowNode<R>, s: SelectionState, c: unknown) => boolean | string>();
+  const fns = new Map<RuleKind, (row: DataNode<R>, s: SelectionState, c: unknown) => boolean | string>();
   const fnOf = (rk: RuleKind) => {
     let f = fns.get(rk);
     if (!f) {
@@ -262,7 +262,7 @@ describe('the refused look after a host changes row data (step 21 review: the ca
     const cols = createColumnModel<Q>([{ id: 'v' }]);
     const rows = clientRows<Q>({ rows: [{ id: 'a', v: 'ok' }, { id: 'b', v: 'bad' }], getRowId: (r) => r.id, columns: cols, ctx: localeCtx({ locale: 'en-US' }) });
     const kernel = createKernel<Q>({ rows, columns: cols });
-    const rule = (row: RowNode<Q>) => row.data.v !== 'bad';
+    const rule = (row: DataNode<Q>) => row.data.v !== 'bad';
     const gate = ruleGate<Q>(() => rule, (key) => rows.row(key), () => kernel.selection, () => null, () => {});
     setSelectionGate(kernel, gate);
     kernel.dispatch({ type: 'selection.toggle', row: k('a') }, 'user');

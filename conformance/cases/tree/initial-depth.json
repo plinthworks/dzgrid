@@ -1,0 +1,65 @@
+{
+  "id": "initial-depth",
+  "suite": "tree",
+  "description": "tree.initial 1 opens the roots.",
+  "input": {
+    "rows": [
+      {
+        "id": "s1",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "p1",
+        "p": "s1",
+        "n": 2,
+        "t": "bed"
+      },
+      {
+        "id": "p2",
+        "p": "s1",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c1",
+        "p": "p2",
+        "n": 9,
+        "t": "chart"
+      },
+      {
+        "id": "s2",
+        "n": 1,
+        "t": "ward"
+      },
+      {
+        "id": "p3",
+        "p": "s2",
+        "n": 5,
+        "t": "bed"
+      }
+    ],
+    "tree": {
+      "initial": 1
+    }
+  },
+  "expected": {
+    "shown": [
+      "s1 1/2",
+      ". p1 1/2",
+      ". p2 2/2",
+      "s2 2/2",
+      ". p3 1/1"
+    ],
+    "expansion": [
+      "s1",
+      "s2"
+    ],
+    "counts": {
+      "total": 6,
+      "filtered": 6,
+      "displayed": 5
+    },
+    "problems": []
+  }
+}

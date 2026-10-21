@@ -39,6 +39,9 @@ export const PROBLEM_CODES = [
   'missing-feature',
   'selection-refused',
   'part-shadowed',
+  'unsupported-combination',
+  'tree-orphan',
+  'tree-cycle',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

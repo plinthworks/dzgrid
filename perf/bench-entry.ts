@@ -3,6 +3,7 @@ import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick
 import { toWire, createGate } from '../packages/core/src/server.js';
 import { buildSpanMap } from '../packages/core/src/spans.js';
 import { toCsv } from '../packages/core/src/csv.js';
+import { treeShape } from '../packages/core/src/tree.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
 import { msg } from '../packages/dom/src/messages.js';
@@ -13,6 +14,29 @@ export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly 
 
 /** Each case returns a value so the work cannot be optimised away. */
 export const CASES: Record<string, Case> = {
+  // Phase 4 step 3: the tree (parent ids). 100 000 rows, 1 000 roots, each other row under an earlier one.
+  'tree build 100 000 rows (cold: parents, cycles, depths, order, flatten)': {
+    setup: () => ({ snap: treeRows(100_000, 0).snapshot, shape: treeShape<TreeRow>({ parentId: (r) => r.p }) }),
+    run: ({ snap, shape }: TreeCtx) => shape.build({ snap, order: null, matched: null, filterActive: false, expansion: new Set(), layer: null, version: 1 }).count,
+  },
+  'tree expand one parent of 10 000 children (100 000 rows)': {
+    setup: () => {
+      const snap = treeRows(100_000, 10_000).snapshot;
+      const shape = treeShape<TreeRow>({ parentId: (r) => r.p });
+      shape.build({ snap, order: null, matched: null, filterActive: false, expansion: new Set(), layer: null, version: 1 });
+      return { snap, shape };
+    },
+    run: ({ snap, shape }: TreeCtx) => shape.build({ snap, order: null, matched: null, filterActive: false, expansion: new Set([snap.keyAt(0 as never)]), layer: null, version: 2 }).count,
+  },
+  'tree filter 100 000 rows (number filter, ancestors kept and opened)': {
+    setup: () => {
+      const columns = createColumnModel<TreeRow>([{ id: 'n', type: 'number' }]);
+      const m = clientRows<TreeRow>({ rows: treeRows(100_000, 0).snapshot.rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<TreeRow>({ parentId: (r) => r.p }) });
+      m.setQuery(makeQuery({ filter: { n: { type: 'number', op: 'lt', value: 50 } } }));
+      return m;
+    },
+    run: (m: ReturnType<typeof clientRows<TreeRow>>) => (m.setQuery(makeQuery({ filter: { n: { type: 'number', op: 'lt', value: 10 } } })), m.displayed.count),
+  },
   // Step 9b: the run index of a merging column over its export texts (what ColumnCache.exports holds), runs of 1 to 20 rows.
   'span merge index 1 000 000 rows (export texts given)': {
     setup: () => {
@@ -475,4 +499,20 @@ function spanSetup(n: number, defs: Parameters<typeof createColumnModel<SpanRow>
   }
   store.replaceAll(rows);
   return { rows: flatDisplayed(store.snapshot, null, 1), columns: createColumnModel<SpanRow>(defs), ctx: localeCtx({ locale: 'fr-FR' }) };
+}
+
+type TreeRow = { id: string; p?: string; n: number };
+type TreeCtx = { snap: ReturnType<typeof treeRows>['snapshot']; shape: ReturnType<typeof treeShape<TreeRow>> };
+/** 1 000 roots, then each row under an earlier row (a fixed generator); `wide` rows under row 0. */
+function treeRows(n: number, wide: number) {
+  const rows: TreeRow[] = [];
+  let x = 12345;
+  for (let i = 0; i < n; i++) {
+    x = (x * 1103515245 + 12345) >>> 0;
+    const p = i === 0 ? undefined : i <= wide ? 'r0' : i < 1000 ? undefined : `r${x % i}`;
+    rows.push({ id: `r${i}`, ...(p && { p }), n: x % 1000 });
+  }
+  const store = createRowStore<TreeRow>((r) => r.id);
+  store.replaceAll(rows);
+  return store;
 }

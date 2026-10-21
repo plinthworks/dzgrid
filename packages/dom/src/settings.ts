@@ -1,5 +1,5 @@
 import type { OperationsInput, PageOptions, SourceBinding } from '@dzgrid/core';
-import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, RowNode, SelectionState } from '@dzgrid/core';
+import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, DataNode, SelectionState } from '@dzgrid/core';
 import type { GridMessages } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { SlotPart } from './part.js';
@@ -26,7 +26,7 @@ export interface GridSettings<T> {
    */
   readonly selection?: {
     readonly mode: 'none' | 'single' | 'multi'; readonly checkbox?: boolean; readonly click?: boolean; readonly keepOnFilter?: boolean;
-    readonly canSelect?: (row: RowNode<T>, selection: SelectionState, context: unknown) => boolean | string;
+    readonly canSelect?: (row: DataNode<T>, selection: SelectionState, context: unknown) => boolean | string;
   };
   /**
    * The application's own context (step 21): handed to every part (`context`), `canSelect`, the

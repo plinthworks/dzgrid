@@ -1,0 +1,71 @@
+{
+  "id": "filter-subtree",
+  "suite": "tree",
+  "description": "In subtree mode the descendants of a match are kept too, closed until opened; a row opened under the filter is not the user's own.",
+  "input": {
+    "rows": [
+      {
+        "id": "s1",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "p1",
+        "p": "s1",
+        "n": 2,
+        "t": "bed"
+      },
+      {
+        "id": "p2",
+        "p": "s1",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c1",
+        "p": "p2",
+        "n": 9,
+        "t": "chart"
+      },
+      {
+        "id": "s2",
+        "n": 1,
+        "t": "ward"
+      },
+      {
+        "id": "p3",
+        "p": "s2",
+        "n": 5,
+        "t": "bed"
+      }
+    ],
+    "tree": {
+      "filter": "subtree"
+    },
+    "steps": [
+      {
+        "filter": "ward"
+      },
+      {
+        "expand": [
+          "s1"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "s1 1/2",
+      ". p1 1/2 muted",
+      ". p2 2/2 muted",
+      "s2 2/2"
+    ],
+    "expansion": [],
+    "counts": {
+      "total": 6,
+      "filtered": 2,
+      "displayed": 4
+    },
+    "problems": []
+  }
+}

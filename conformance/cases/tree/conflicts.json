@@ -1,0 +1,25 @@
+{
+  "id": "conflicts",
+  "suite": "tree",
+  "description": "Cell spans and details are refused beside a tree.",
+  "input": {
+    "conflicts": {
+      "spans": true,
+      "detail": true
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "spans"
+      },
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "detail"
+      }
+    ]
+  }
+}

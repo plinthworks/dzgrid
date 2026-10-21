@@ -18,7 +18,7 @@ import { closedValues, tickedIn } from '../model/values.js';
 
 type Kind = ModelChange<unknown>['kind'];
 /** Several things in one call: the change says the largest. */
-const RANK: Record<Kind, number> = { status: 1, context: 2, order: 3, rows: 4, page: 5, query: 6 };
+const RANK: Record<Kind, number> = { status: 1, context: 2, expand: 2, order: 3, rows: 4, page: 5, query: 6 };
 const IDLE: ModelStatus = { phase: 'idle' };
 const LOADING: ModelStatus = { phase: 'loading' };
 const DONE: SearchWarmup = { step: () => true, progress: 1, cancel() {} };

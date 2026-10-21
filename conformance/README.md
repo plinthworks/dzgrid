@@ -32,5 +32,6 @@ One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.j
 | `spans` | `{columns, rows, order?, state?, fullWidth?}` (rules by fixture name from `runner/spans-fixtures.ts`) | `{cells: {row, col, rows, cols}[], fullWidth?: rows[], problems}`: every span, in reading order |
 | `header-bands` | `{columns (a tree of groups), state?}` | `{depth, levels: {group, first, count, label}[][], problems}` |
 | `keyboard-move` | `{rows, cols, page?, cells?, fullWidth?, start, keys: Intent[]}` | `{moves: ({to, goal} \| null)[]}`, each key from where the last one went |
+| `tree` | `{rows: {id, p?, n, t?}[], tree?: {filter?, initial?}, page?, steps?: ({expand, expanded?} \| {expandAll, depth?} \| {sort} \| {filter} \| {quick} \| {tx})[]}` or `{conflicts}` | `{shown: ". . id pos/size [muted]"[], expansion: ids[], counts, problems}` (Phase 4 step 3), or `{problems}` |
 
 Later phases add `sort`, `filter-*`, `server-gate`, `edit-saves`, `paste-plan`, …

@@ -122,7 +122,7 @@ describe('a stepping-clock walk', () => {
       const m = clientRows<R>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US', timeZone: w.state.zone }), now: () => w.state.now });
       const changes: ModelChange<R>[] = [];
       m.subscribe((c) => changes.push(c));
-      const ids = () => Array.from({ length: m.displayed.count }, (_, i) => String(m.displayed.nodeAt(m.displayed.index(i)!).id)).sort();
+      const ids = () => Array.from({ length: m.displayed.count }, (_, i) => String((m.displayed.nodeAt(m.displayed.index(i)!) as { id: unknown }).id)).sort();
       let spec: Spec = {};
       let filter = toModel(spec);
       let sort: SortItem[] = [];
@@ -247,7 +247,7 @@ describe('a midnight sweep', () => {
       const spec: Spec = { t: { type: 'instant', op: 'relative', range: 'today' } };
       m.setQuery(makeQuery({ filter: toModel(spec) }));
       server.setQuery(makeQuery({ filter: toModel(spec) }));
-      const ids = () => Array.from({ length: m.displayed.count }, (_, i) => String(m.displayed.nodeAt(m.displayed.index(i)!).id)).sort();
+      const ids = () => Array.from({ length: m.displayed.count }, (_, i) => String((m.displayed.nodeAt(m.displayed.index(i)!) as { id: unknown }).id)).sort();
       let day = first;
       for (let n = 0; n < (zone === 'Pacific/Apia' ? 120 : 366); n++) {
         day = addDaysUtc(day, 1);

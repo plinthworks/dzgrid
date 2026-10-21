@@ -103,7 +103,7 @@ describe('a server model at midnight', () => {
       { id: 'b', name: 'b', t: '2026-10-20T10:00:00Z' },
     ] });
     s.model.setQuery(makeQuery({ filter: TODAY }));
-    const ids = () => Array.from({ length: s.model.displayed.count }, (_, i) => String(s.model.displayed.nodeAt(s.model.displayed.index(i)!).id));
+    const ids = () => Array.from({ length: s.model.displayed.count }, (_, i) => String((s.model.displayed.nodeAt(s.model.displayed.index(i)!) as { id: unknown }).id));
     expect(ids()).toEqual(['a']);
     const n = s.calls.length;
     s.clock.t = at('2026-10-20T00:00:00Z');

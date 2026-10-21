@@ -8,7 +8,7 @@ import { mulberry32 } from './support/rng.js';
 type R = { id: string; n: number; t: string };
 const rows = (n: number) => Array.from({ length: n }, (_, i): R => ({ id: `r${i}`, n: i, t: i % 3 ? 'b' : 'a' }));
 const k = (id: string) => dataKey(id)!;
-const ids = (m: ClientModel<R>) => Array.from({ length: m.displayed.count }, (_, i) => String(m.displayed.nodeAt(m.displayed.index(i)!).id));
+const ids = (m: ClientModel<R>) => Array.from({ length: m.displayed.count }, (_, i) => String((m.displayed.nodeAt(m.displayed.index(i)!) as { id: unknown }).id));
 
 function paged(n = 12, page: PageOptions | null = { pageSize: 5 }) {
   const columns = createColumnModel<R>([{ id: 'n', type: 'number' }, { id: 't' }]);
@@ -114,7 +114,7 @@ describe('client paging, the model', () => {
   it('shows a row of the page updated in place', () => {
     const { model } = paged();
     model.applyTransaction({ patch: [{ id: 'r1', set: { t: 'zz' } }] });
-    expect(model.displayed.nodeAt(model.displayed.index(1)!).data.t).toBe('zz');
+    expect((model.displayed.nodeAt(model.displayed.index(1)!) as { data: any }).data.t).toBe('zz');
   });
 
   it('finds a row of a short page in a large list, and not one of another page', () => {

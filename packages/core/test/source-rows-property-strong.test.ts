@@ -202,7 +202,7 @@ function runScenario(config: Config, seed: number, withDestroy: boolean) {
   const destroyAt = withDestroy ? int(20) : -1;
   const stats = { accepted: 0, dropped: 0, failed: 0, empty: 0, kept: 0, fetchedBack: 0, noCursor: 0, newEpochAnswers: 0 };
   const fail = (why: string) => `${config} seed ${seed}${withDestroy ? ' (destroy)' : ''}: ${why}`;
-  const ids = () => Array.from({ length: model.displayed.count }, (_, i) => String(model.displayed.nodeAt(model.displayed.index(i)!).id));
+  const ids = () => Array.from({ length: model.displayed.count }, (_, i) => String((model.displayed.nodeAt(model.displayed.index(i)!) as { id: unknown }).id));
 
   const check = (label: string) => {
     expect(ids(), fail(`${label}: rows shown`)).toEqual(want.displayed());

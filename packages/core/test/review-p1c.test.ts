@@ -16,7 +16,7 @@ describe('new columns', () => {
     let notified = 0;
     m.subscribe(() => notified++);
     m.setColumns(createColumnModel<Row>([{ id: 'v', type: 'number', value: (r) => -r.v }]));
-    expect(m.displayed.nodeAt(m.displayed.index(0)!).id).toBe('a');
+    expect((m.displayed.nodeAt(m.displayed.index(0)!) as { id: unknown }).id).toBe('a');
     expect(notified).toBe(1);
   });
 });

@@ -3,7 +3,7 @@
 // browser's pages, a server's pages by offset and by cursor, a fetched set paged in the browser).
 // `WALK_SEEDS=200` runs more.
 import { describe, it, expect, afterEach } from 'vitest';
-import { isSelected, type RowNode, type SelectionState } from '@dzgrid/core';
+import { isSelected, type DataNode, type SelectionState } from '@dzgrid/core';
 import { cleanup, held, idOf, k as keyOf, rmake, ROWS, type R } from './support-rules.js';
 import { mulberry32 } from '../../core/test/support/rng.js';
 
@@ -15,7 +15,7 @@ const PAIRS: readonly (readonly [number, number])[] = [[0, 1], [2, 5], [3, 4], [
 const digit = (id: string) => Number(id.slice(1)) % 10;
 const allowed = (id: string, held_: readonly string[], max: number): boolean =>
   held_.length < max && !held_.some((o) => PAIRS.some(([a, b]) => (a === digit(id) && b === digit(o)) || (b === digit(id) && a === digit(o))));
-const rule = (row: RowNode<R>, s: SelectionState, c: unknown) => allowed(row.data.id, [...s.keys].map(idOf), (c as { max: number }).max);
+const rule = (row: DataNode<R>, s: SelectionState, c: unknown) => allowed(row.data.id, [...s.keys].map(idOf), (c as { max: number }).max);
 
 type Mode = 'paged' | 'offset' | 'cursor' | 'fetched';
 

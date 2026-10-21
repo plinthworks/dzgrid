@@ -32,6 +32,9 @@
       "@dzgrid/core/rules": [
         "./packages/core/src/rules.ts"
       ],
+      "@dzgrid/core/tree": [
+        "./packages/core/src/tree.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],

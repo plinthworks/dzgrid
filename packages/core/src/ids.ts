@@ -127,3 +127,6 @@ function describe(id: unknown): string {
   if (typeof id === 'string') return 'empty string';
   return typeof id;
 }
+
+/** Whether a key is a data row's (not a filler's, a detail's or a pinned row's): what selection takes. */
+export const isDataKey = (key: RowKey): boolean => key.startsWith('d:');

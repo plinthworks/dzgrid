@@ -1,0 +1,26 @@
+{
+  "id": "unsupported-combination",
+  "suite": "problems",
+  "description": "Browser pages asked with a tree.",
+  "input": {
+    "op": "tree",
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      }
+    ],
+    "page": {
+      "pageSize": 10
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "pagination"
+      }
+    ]
+  }
+}

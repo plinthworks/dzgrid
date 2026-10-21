@@ -1,0 +1,64 @@
+{
+  "id": "cycle-broken",
+  "suite": "tree",
+  "description": "A cycle is broken at its first row, which becomes a root; rows hanging from it keep their place.",
+  "input": {
+    "rows": [
+      {
+        "id": "r",
+        "n": 0
+      },
+      {
+        "id": "c1",
+        "p": "c2",
+        "n": 1
+      },
+      {
+        "id": "c2",
+        "p": "c3",
+        "n": 2
+      },
+      {
+        "id": "c3",
+        "p": "c1",
+        "n": 3
+      },
+      {
+        "id": "h",
+        "p": "c2",
+        "n": 4
+      }
+    ],
+    "steps": [
+      {
+        "expandAll": true
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "r 1/2",
+      "c1 2/2",
+      ". c3 1/1",
+      ". . c2 1/1",
+      ". . . h 1/1"
+    ],
+    "expansion": [
+      "c1",
+      "c2",
+      "c3"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 5
+    },
+    "problems": [
+      {
+        "code": "tree-cycle",
+        "severity": "warning",
+        "path": "rows[1]"
+      }
+    ]
+  }
+}

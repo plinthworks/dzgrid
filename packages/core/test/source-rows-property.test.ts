@@ -69,14 +69,14 @@ function runScenario(seed: number, withDestroy: boolean) {
     // I3: what is shown came from an answer the oracle accepts.
     const d = model.displayed;
     for (let i = 0; i < d.count; i++) {
-      const id = String(d.nodeAt(d.index(i)!).id);
+      const id = String((d.nodeAt(d.index(i)!) as { id: unknown }).id);
       expect(accepted.has(id.split('-')[0]!), fail(`row ${id} from a superseded call`)).toBe(true);
     }
   }
 
   const last = fake.last();
   const got = outcome.get(last);
-  const shown = Array.from({ length: model.displayed.count }, (_, i) => String(model.displayed.nodeAt(model.displayed.index(i)!).id));
+  const shown = Array.from({ length: model.displayed.count }, (_, i) => String((model.displayed.nodeAt(model.displayed.index(i)!) as { id: unknown }).id));
   if (!destroyed || accepted.has(last.name)) {
     // I1: the last call's rows, when it succeeded and counted.
     if (got?.ok && accepted.has(last.name)) expect(shown, fail('I1')).toEqual(got.rows);

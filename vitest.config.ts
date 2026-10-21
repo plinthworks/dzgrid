@@ -12,6 +12,7 @@ const alias = {
   '@dzgrid/core/spans': fileURLToPath(new URL('./packages/core/src/spans.ts', import.meta.url)),
   '@dzgrid/core/csv': fileURLToPath(new URL('./packages/core/src/csv.ts', import.meta.url)),
   '@dzgrid/core/rules': fileURLToPath(new URL('./packages/core/src/rules.ts', import.meta.url)),
+  '@dzgrid/core/tree': fileURLToPath(new URL('./packages/core/src/tree.ts', import.meta.url)),
   '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
   '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
 };

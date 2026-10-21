@@ -1,0 +1,28 @@
+{
+  "id": "tree-orphan",
+  "suite": "problems",
+  "description": "A row whose parent id names no row goes to the root.",
+  "input": {
+    "op": "tree",
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "p": "nobody",
+        "n": 2
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "tree-orphan",
+        "severity": "warning",
+        "path": "rows[1]"
+      }
+    ]
+  }
+}

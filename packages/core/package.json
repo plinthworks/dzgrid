@@ -28,6 +28,10 @@
     "./rules": {
       "types": "./src/rules.ts",
       "default": "./src/rules.ts"
+    },
+    "./tree": {
+      "types": "./src/tree.ts",
+      "default": "./src/tree.ts"
     }
   }
 }

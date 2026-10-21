@@ -31,7 +31,7 @@ function setup(o: { operations?: OperationsInput; options?: SourceRowsOptions; e
 type Setup = ReturnType<typeof setup>;
 const ids = (s: Setup) => {
   const d = s.model.displayed;
-  return Array.from({ length: d.count }, (_, i) => String(d.nodeAt(d.index(i)!).id));
+  return Array.from({ length: d.count }, (_, i) => String((d.nodeAt(d.index(i)!) as { id: unknown }).id));
 };
 const answer = (call: Call, rows: string[], more: Record<string, unknown> = {}) => call.resolve({ rows: rowsOf(rows), ...more });
 const shape = (s: Setup) => s.model.problems.map((p) => [p.code, p.severity, p.path]);

@@ -15,8 +15,8 @@ export const model: Record<string, Suite> = {
       else m.setQuery(q);
     }
     const d = m.displayed;
-    const displayed = Array.from({ length: d.count }, (_, i) => String(d.nodeAt(d.index(i)!).id));
-    const atIndex = Object.fromEntries((at as number[]).map((i) => [String(i), String(d.nodeAt(d.index(i)!).id)]));
+    const displayed = Array.from({ length: d.count }, (_, i) => String((d.nodeAt(d.index(i)!) as { id: unknown }).id));
+    const atIndex = Object.fromEntries((at as number[]).map((i) => [String(i), String((d.nodeAt(d.index(i)!) as { id: unknown }).id)]));
     const indexOf = Object.fromEntries((of as string[]).map((id) => [id, d.indexOf(dataKey(id)!)]));
     return { displayed, atIndex, indexOf };
   },

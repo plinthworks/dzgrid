@@ -39,11 +39,19 @@ export function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, 
   let to: CellFocus;
   if (after.indexOf(f.row) !== -1) to = column === f.column ? f : { kind: 'cell', row: f.row, column };
   else {
+    // A tree's row hidden by a collapse or a filter: its nearest shown ancestor (tree-keys.md);
+    // else the row now at its old place.
     const was = before.indexOf(f.row);
-    const at = Math.min(was === -1 ? 0 : was, after.count - 1);
-    to = { kind: 'cell', row: after.keyAt(after.index(at)!), column };
+    const row = shownAncestor(f.row, after) ?? after.keyAt(after.index(Math.min(was === -1 ? 0 : was, after.count - 1))!);
+    to = { kind: 'cell', row, column };
   }
   return owner ? owner(to, after) : to;
+}
+
+/** The nearest ancestor of a row that is shown, or null (no tree, a root, a row gone). */
+function shownAncestor<T>(key: RowKey, d: DisplayedRows<T>): RowKey | null {
+  for (let k = d.parentOf?.(key) ?? null; k !== null; k = d.parentOf!(k)) if (d.indexOf(k) !== -1) return k;
+  return null;
 }
 
 export function sameFocus(a: FocusPos | null, b: FocusPos | null): boolean {

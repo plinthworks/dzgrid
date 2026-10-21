@@ -5,6 +5,7 @@ import * as server from '@dzgrid/core/server';
 import * as spans from '@dzgrid/core/spans';
 import * as csv from '@dzgrid/core/csv';
 import * as rules from '@dzgrid/core/rules';
+import * as tree from '@dzgrid/core/tree';
 
 /**
  * The public surface, written out by hand: adding an export is a decision,
@@ -26,7 +27,7 @@ const PUBLIC = [
 
 const INTERNAL = [
   'ColumnCache', 'Haystack', 'THREW', 'canNarrow', 'canonical', 'clearFormatCaches', 'collatorKey', 'compileFilter', 'compileQuick', 'createRowStore',
-  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'filterKindLookup', 'flatDisplayed', 'foldSlow', 'formatParts', 'hasRelative', 'intlTag', 'missingFeatureProblems', 'onCommand', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'setFocusOwner', 'setSelectionGate', 'sortIndices', 'storeOf',
+  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'filterKindLookup', 'flatDisplayed', 'foldSlow', 'formatParts', 'hasRelative', 'intlTag', 'isDataKey', 'missingFeatureProblems', 'onCommand', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'setFocusOwner', 'setSelectionGate', 'sortIndices', 'storeOf',
 ];
 
 /** `@dzgrid/core/server`: what a grid fed by a server needs, never in the base. */
@@ -41,7 +42,15 @@ const CSV = ['csvChunks', 'csvColumns', 'csvRows', 'csvSeparatorFor', 'toCsv'];
 /** `@dzgrid/core/rules` (step 21): the selection rules' vetting, never in the base. */
 const RULES = ['refusalProblems', 'ruleGate', 'vetSelection'];
 
+/** `@dzgrid/core/tree` (Phase 4 step 3): the tree view, never in the base. */
+const TREE = ['treeConflicts', 'treeShape'];
+
 describe('the public surface', () => {
+  it('keeps the tree entry apart (Phase 4 step 3)', () => {
+    expect(Object.keys(tree).sort()).toEqual([...TREE].sort());
+    for (const name of TREE) expect(name in core || name in internal || name in server || name in spans || name in csv || name in rules, name).toBe(false);
+  });
+
   it('keeps the rules entry apart (step 21)', () => {
     expect(Object.keys(rules).sort()).toEqual([...RULES].sort());
     for (const name of RULES) expect(name in core || name in internal || name in server || name in spans || name in csv, name).toBe(false);

@@ -12,6 +12,7 @@ export { foldSlow } from './i18n/fold.js';
 export { canonical } from './model/query.js';
 export type { ColumnEnv } from './model/column-cache.js';
 export type { SourceIndex } from './ids.js';
+export { isDataKey } from './ids.js';
 export type { RowSnapshot, StoreDelta, RowStore } from './row/store.js';
 export { createRowStore } from './row/store.js';
 export { sortIndices } from './sort/compile.js';

@@ -39,7 +39,7 @@ describe('the client model', () => {
     const m = clientRows<Row>({ rows: [{ id: 'a', v: 2 }, { id: 'b', v: 1 }], getRowId: (r) => r.id, columns: cols(), ctx: localeCtx({ locale: 'en-US' }) });
     m.setQuery(makeQuery({ sort: [{ column: 'v', dir: 'asc' }] }));
     m.setColumns(createColumnModel<Row>([{ id: 'v', type: 'number', value: (r) => -r.v }]));
-    expect(m.displayed.nodeAt(m.displayed.index(0)!).id).toBe('a');
+    expect((m.displayed.nodeAt(m.displayed.index(0)!) as { id: unknown }).id).toBe('a');
     const before = m.diagnostics.keyBuilds;
     m.invalidate();
     expect(m.diagnostics.keyBuilds).toBe(before + 1);

@@ -202,7 +202,7 @@ function common<T>(): Pick<GridSettings<T>, 'messages' | 'locale' | 'direction' 
     selection: { mode: 'multi', checkbox: on('box'), click: true },
     features: [spans()],
     onEvent: (e: GridEvent<T>) => {
-      if (e.type === 'cellClicked') status.textContent = `clic : ligne « ${String((e.row.data as { name?: string; hour?: string }).name || (e.row.data as { hour?: string }).hour || e.row.key)} », colonne ${e.column}`;
+      if (e.type === 'cellClicked' && e.row.kind === 'data') status.textContent = `clic : ligne « ${String((e.row.data as { name?: string; hour?: string }).name || (e.row.data as { hour?: string }).hour || e.row.key)} », colonne ${e.column}`;
       if (e.type === 'selectionChanged') status.textContent = `${e.count ?? '?'} ligne(s) sélectionnée(s)`;
       if (e.type === 'problems') console.warn('DzGrid', e.problems);
     },

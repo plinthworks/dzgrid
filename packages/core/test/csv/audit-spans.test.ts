@@ -38,7 +38,7 @@ describe('spans repeat/first vs an ownerAt oracle (300 random grids)', () => {
       const g = grid(defs as never, data);
       const map = buildSpanMap({ rows: g.model.displayed, columns: g.columns, ctx: EN });
       const spanColumns = g.columns.visible().map((c) => c.id);
-      const value = (row: number, id: string) => String((g.model.displayed.nodeAt(row as never).data as Row)[id]);
+      const value = (row: number, id: string) => String(((g.model.displayed.nodeAt(row as never) as { data: any }).data as Row)[id]);
       // the columns written: default, or a shuffled subset that may name the hidden one
       const named = r() < 0.5 ? null : cols.filter(() => r() < 0.8).sort(() => r() - 0.5);
       const outCols = named ?? spanColumns;

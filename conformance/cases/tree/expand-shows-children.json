@@ -1,0 +1,67 @@
+{
+  "id": "expand-shows-children",
+  "suite": "tree",
+  "description": "Opening a parent shows its children right under it.",
+  "input": {
+    "rows": [
+      {
+        "id": "s1",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "p1",
+        "p": "s1",
+        "n": 2,
+        "t": "bed"
+      },
+      {
+        "id": "p2",
+        "p": "s1",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c1",
+        "p": "p2",
+        "n": 9,
+        "t": "chart"
+      },
+      {
+        "id": "s2",
+        "n": 1,
+        "t": "ward"
+      },
+      {
+        "id": "p3",
+        "p": "s2",
+        "n": 5,
+        "t": "bed"
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "s1"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "s1 1/2",
+      ". p1 1/2",
+      ". p2 2/2",
+      "s2 2/2"
+    ],
+    "expansion": [
+      "s1"
+    ],
+    "counts": {
+      "total": 6,
+      "filtered": 6,
+      "displayed": 4
+    },
+    "problems": []
+  }
+}

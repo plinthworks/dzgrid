@@ -1,4 +1,4 @@
-import type { RowKey } from '../ids.js';
+import { isDataKey, type RowKey } from '../ids.js';
 import type { DisplayedRows } from '../row/displayed.js';
 
 /**
@@ -51,7 +51,11 @@ export function selectRange<T>(s: SelectionState, displayed: DisplayedRows<T>, a
   const lo = Math.min(a, b);
   const hi = Math.max(a, b);
   const span: RowKey[] = [];
-  for (let i = lo; i <= hi; i++) span.push(displayed.keyAt(displayed.index(i)!));
+  // Fillers and details between the bounds are never selected (tree-selection.md).
+  for (let i = lo; i <= hi; i++) {
+    const k = displayed.keyAt(displayed.index(i)!);
+    if (isDataKey(k)) span.push(k);
+  }
   if (!o.additive) return { ok: true, state: selectOnly(span) };
   // Adding a range: selected rows join an include set, or leave an exclude set.
   const keys = new Set(s.keys);

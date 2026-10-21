@@ -25,6 +25,11 @@
       "maxGzip": 600,
       "over": "@dzgrid/core"
     },
+    "@dzgrid/core/tree": {
+      "file": "packages/core/src/tree.ts",
+      "maxGzip": 3500,
+      "over": "@dzgrid/core"
+    },
     "@dzgrid/dom/locales/en": {
       "file": "packages/dom/src/locales/en.ts",
       "maxGzip": 600

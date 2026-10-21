@@ -1,0 +1,29 @@
+{
+  "id": "tree-cycle",
+  "suite": "problems",
+  "description": "Two rows each the other's parent: the first becomes a root.",
+  "input": {
+    "op": "tree",
+    "rows": [
+      {
+        "id": "a",
+        "p": "b",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "p": "a",
+        "n": 2
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "tree-cycle",
+        "severity": "warning",
+        "path": "rows[0]"
+      }
+    ]
+  }
+}

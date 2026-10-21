@@ -37,7 +37,7 @@ describe('row layouts', () => {
     const l = variableRowLayout(shown, 20);
     const i = l.indexAt(510);
     expect(shown.index(i)).toBe(25);
-    expect(shown.nodeAt(i).id).toBe('25');
+    expect((shown.nodeAt(i) as { id: unknown }).id).toBe('25');
   });
 
   it('clamp an offset past the end to the last row', () => {

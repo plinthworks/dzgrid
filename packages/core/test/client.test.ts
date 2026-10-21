@@ -17,7 +17,7 @@ const make = (reader?: ValueReader<Row>) =>
     ctx: localeCtx({ locale: 'en-US' }),
     ...(reader && { reader }),
   });
-const shown = (m: ReturnType<typeof make>) => Array.from({ length: m.displayed.count }, (_, i) => m.displayed.nodeAt(m.displayed.index(i)!).id);
+const shown = (m: ReturnType<typeof make>) => Array.from({ length: m.displayed.count }, (_, i) => (m.displayed.nodeAt(m.displayed.index(i)!) as { id: unknown }).id);
 
 describe('the client model', () => {
   it('does not filter again for a sort change', () => {
@@ -48,7 +48,7 @@ describe('the client model', () => {
     m.applyTransaction({ patch: [{ id: 'b', set: { n: 'changed' } }] });
     expect(m.diagnostics.retested - retested).toBe(1);
     expect(m.diagnostics.sortRuns).toBe(sorts);
-    expect(m.displayed.nodeAt(m.displayed.index(1)!).data.n).toBe('changed');
+    expect((m.displayed.nodeAt(m.displayed.index(1)!) as { data: any }).data.n).toBe('changed');
   });
 
   it('moves an updated row when its sort key changes', () => {
@@ -133,6 +133,6 @@ describe('emptying the search box', () => {
     expect(m.counts.filtered).toBe(1);
     m.setQuery(makeQuery({ filter: { n: { type: 'text', op: 'contains', value: 'zo' } } }));
     expect(m.counts.filtered).toBe(1);
-    expect(m.displayed.nodeAt(m.displayed.index(0)!).id).toBe('b');
+    expect((m.displayed.nodeAt(m.displayed.index(0)!) as { id: unknown }).id).toBe('b');
   });
 });

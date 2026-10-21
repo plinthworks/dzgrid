@@ -25,7 +25,7 @@ function setup(o: { now?: number | null; zone?: string } = {}) {
   });
   const changes: ModelChange<R>[] = [];
   m.subscribe((c) => changes.push(c));
-  const ids = () => Array.from({ length: m.displayed.count }, (_, i) => String(m.displayed.nodeAt(m.displayed.index(i)!).id));
+  const ids = () => Array.from({ length: m.displayed.count }, (_, i) => String((m.displayed.nodeAt(m.displayed.index(i)!) as { id: unknown }).id));
   return { m, clock, changes, ids, columns };
 }
 

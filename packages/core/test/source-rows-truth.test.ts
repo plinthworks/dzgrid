@@ -55,7 +55,7 @@ function run(paging: 'offset' | 'cursor', seed: number) {
     }
     throw new Error('never settles');
   };
-  const ids = () => Array.from({ length: model.displayed.count }, (_, i) => String(model.displayed.nodeAt(model.displayed.index(i)!).id));
+  const ids = () => Array.from({ length: model.displayed.count }, (_, i) => String((model.displayed.nodeAt(model.displayed.index(i)!) as { id: unknown }).id));
   const trace: string[] = [];
   const why = (s: string) => `${paging} seed ${seed} n ${n}: ${s} (page ${JSON.stringify(model.page)})\n${trace.join('\n')}`;
 
@@ -140,7 +140,7 @@ describe('found by the truthful server', () => {
       page: { pageSize: 2 },
       operations: 'server',
     });
-    const ids = () => Array.from({ length: model.displayed.count }, (_, i) => String(model.displayed.nodeAt(model.displayed.index(i)!).id));
+    const ids = () => Array.from({ length: model.displayed.count }, (_, i) => String((model.displayed.nodeAt(model.displayed.index(i)!) as { id: unknown }).id));
     return { fake, model, ids };
   };
   // BUG (documented, fails today): a refresh whose page is found empty steps back to the page

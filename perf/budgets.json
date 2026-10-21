@@ -7,6 +7,9 @@
     "client model + caches after filters and a digit search, bytes/row (100 000 x 30)": 600
   },
   "budgets": {
+    "tree build 100 000 rows (cold: parents, cycles, depths, order, flatten)": 40,
+    "tree expand one parent of 10 000 children (100 000 rows)": 30,
+    "tree filter 100 000 rows (number filter, ancestors kept and opened)": 60,
     "zoneDayBounds x 10 000 (Paris, cached formatter)": 360.5,
     "toWire 7 filters (2 instant, Algiers)": 0.5,
     "assignKeys 100 000 ids": 17,

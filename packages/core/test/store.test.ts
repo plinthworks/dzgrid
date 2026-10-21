@@ -105,7 +105,7 @@ describe('displayed rows', () => {
   const shown = flatDisplayed(s.snapshot, Uint32Array.of(1, 2, 0), 1);
 
   it('maps positions to the rows on screen, and back', () => {
-    expect(shown.nodeAt(shown.index(0)!).id).toBe('b');
+    expect((shown.nodeAt(shown.index(0)!) as { id: unknown }).id).toBe('b');
     expect(shown.indexOf(dataKey('a')!)).toBe(2);
     expect(shown.indexOf(dataKey('zz')!)).toBe(-1);
   });

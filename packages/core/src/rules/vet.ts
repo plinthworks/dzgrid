@@ -1,7 +1,7 @@
 import type { RowKey } from '../ids.js';
 import type { SelectionGate, SelectionRefusal } from '../kernel.js';
 import { problem, type Problem } from '../problems.js';
-import type { RowNode } from '../row/node.js';
+import type { DataNode } from '../row/node.js';
 import { isSelected, type SelectionState } from '../selection/rows.js';
 
 /**
@@ -10,7 +10,7 @@ import { isSelected, type SelectionState } from '../selection/rows.js';
  * what the row would join: the rows kept, then those accepted before it in the same command; it
  * keeps changing while the command is vetted (copy it to keep it). Pure and fast; it may be asked often.
  */
-export type SelectionRule<T> = (row: RowNode<T>, selection: SelectionState) => boolean | string;
+export type SelectionRule<T> = (row: DataNode<T>, selection: SelectionState) => boolean | string;
 
 /**
  * What a command may add of `next` (step 21): each added row asked in `next`'s order (screen order
@@ -20,7 +20,7 @@ export type SelectionRule<T> = (row: RowNode<T>, selection: SelectionState) => b
  * rows it ticks again vetted. A command whose every addition is refused changes nothing (`prev`).
  * Unticking is never asked.
  */
-export function vetSelection<T>(rule: SelectionRule<T>, rowOf: (key: RowKey) => RowNode<T> | undefined, prev: SelectionState, next: SelectionState): { readonly state: SelectionState; readonly refused: SelectionRefusal | null } {
+export function vetSelection<T>(rule: SelectionRule<T>, rowOf: (key: RowKey) => DataNode<T> | undefined, prev: SelectionState, next: SelectionState): { readonly state: SelectionState; readonly refused: SelectionRefusal | null } {
   const rows: RowKey[] = [];
   let reason: string | null = null;
   let cause: SelectionRefusal['cause'] = 'unknown-row';
@@ -63,8 +63,8 @@ export const refusalProblems = (r: SelectionRefusal): Problem[] => [problem('sel
  * rule or the context changed or the rows did, so the kernel reads its box again.
  */
 export function ruleGate<T>(
-  rule: () => ((row: RowNode<T>, selection: SelectionState, context: unknown) => boolean | string) | undefined,
-  rowOf: (key: RowKey) => RowNode<T> | undefined, selection: () => SelectionState, context: () => unknown, report: (err: unknown) => void,
+  rule: () => ((row: DataNode<T>, selection: SelectionState, context: unknown) => boolean | string) | undefined,
+  rowOf: (key: RowKey) => DataNode<T> | undefined, selection: () => SelectionState, context: () => unknown, report: (err: unknown) => void,
 ): SelectionGate & { refused(key: RowKey): boolean } {
   const ask: SelectionRule<T> = (row, s) => {
     try {

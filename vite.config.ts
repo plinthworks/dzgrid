@@ -38,6 +38,7 @@ export default defineConfig({
       { find: '@dzgrid/core/spans', replacement: fileURLToPath(new URL('./packages/core/src/spans.ts', import.meta.url)) },
       { find: '@dzgrid/core/csv', replacement: fileURLToPath(new URL('./packages/core/src/csv.ts', import.meta.url)) },
       { find: '@dzgrid/core/rules', replacement: fileURLToPath(new URL('./packages/core/src/rules.ts', import.meta.url)) },
+      { find: '@dzgrid/core/tree', replacement: fileURLToPath(new URL('./packages/core/src/tree.ts', import.meta.url)) },
       { find: '@dzgrid/core/internal', replacement: fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)) },
       { find: '@dzgrid/core', replacement: fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)) },
       { find: '@dzgrid/dom/spans', replacement: fileURLToPath(new URL('./packages/dom/src/spans.ts', import.meta.url)) },

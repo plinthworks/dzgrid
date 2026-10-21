@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { dataKey, isSelected, NO_SELECTION, type RowKey, type RowNode, type SelectionState } from '@dzgrid/core';
+import { dataKey, isSelected, NO_SELECTION, type RowKey, type DataNode, type SelectionState } from '@dzgrid/core';
 import { refusalProblems, ruleGate, vetSelection } from '@dzgrid/core/rules';
 
 /**
@@ -8,7 +8,7 @@ import { refusalProblems, ruleGate, vetSelection } from '@dzgrid/core/rules';
  */
 type R = { id: string };
 const k = (id: string): RowKey => dataKey(id)!;
-const rows = new Map(Array.from({ length: 10 }, (_, i) => [k(`r${i + 1}`), { key: k(`r${i + 1}`), kind: 'data', level: 0, id: `r${i + 1}`, data: { id: `r${i + 1}` } } as RowNode<R>]));
+const rows = new Map(Array.from({ length: 10 }, (_, i) => [k(`r${i + 1}`), { key: k(`r${i + 1}`), kind: 'data', level: 0, id: `r${i + 1}`, data: { id: `r${i + 1}` } } as DataNode<R>]));
 const rowOf = (key: RowKey) => rows.get(key);
 const inc = (...ids: string[]): SelectionState => ({ mode: 'include', keys: new Set(ids.map(k)) });
 const exc = (...ids: string[]): SelectionState => ({ mode: 'exclude', keys: new Set(ids.map(k)) });
@@ -27,7 +27,7 @@ describe('vetSelection', () => {
 
   it('asks only the rows added, in the order of the next selection, against a running selection', () => {
     const seen: [string, string[]][] = [];
-    const rule = (row: RowNode<R>, s: SelectionState) => {
+    const rule = (row: DataNode<R>, s: SelectionState) => {
       seen.push([row.data.id, ids(s)]);
       return row.data.id !== 'r3';
     };
@@ -87,7 +87,7 @@ describe('vetSelection', () => {
 
   it('vets the rows an everything-except selection ticks again; new exclusions (unticks) are free', () => {
     const seen: string[] = [];
-    const rule = (row: RowNode<R>, s: SelectionState) => (seen.push(row.data.id), expect(s.mode).toBe('exclude'), row.data.id !== 'r2');
+    const rule = (row: DataNode<R>, s: SelectionState) => (seen.push(row.data.id), expect(s.mode).toBe('exclude'), row.data.id !== 'r2');
     // r2 and r3 ticked again, r7 unticked.
     const v = vetSelection(rule, rowOf, exc('r2', 'r3'), exc('r7'));
     expect(seen).toEqual(['r2', 'r3']);
@@ -122,7 +122,7 @@ describe('refusalProblems', () => {
 });
 
 describe('ruleGate', () => {
-  type Live = { rule?: (row: RowNode<R>, s: SelectionState, c: unknown) => boolean | string; sel: SelectionState; ctx: unknown };
+  type Live = { rule?: (row: DataNode<R>, s: SelectionState, c: unknown) => boolean | string; sel: SelectionState; ctx: unknown };
   const make = (live: Live, reported: unknown[] = []) => ruleGate<R>(() => live.rule, rowOf, () => live.sel, () => live.ctx, (e) => reported.push(e));
 
   it('is off and lets everything through without a rule', () => {
@@ -178,8 +178,8 @@ describe('ruleGate', () => {
 
   it('asks a row again once its data changed (a host patch), not while it stays the same object', () => {
     let calls = 0;
-    const held = new Map<RowKey, RowNode<R & { ok?: boolean }>>([[k('a'), { key: k('a'), kind: 'data', level: 0, id: 'a', data: { id: 'a', ok: false } } as RowNode<R & { ok?: boolean }>]]);
-    const rule = (row: RowNode<R & { ok?: boolean }>) => (calls++, !!row.data.ok);
+    const held = new Map<RowKey, DataNode<R & { ok?: boolean }>>([[k('a'), { key: k('a'), kind: 'data', level: 0, id: 'a', data: { id: 'a', ok: false } } as DataNode<R & { ok?: boolean }>]]);
+    const rule = (row: DataNode<R & { ok?: boolean }>) => (calls++, !!row.data.ok);
     const g = ruleGate<R & { ok?: boolean }>(() => rule, (key) => held.get(key), () => NO_SELECTION, () => null, () => {});
     expect(g.refused(k('a'))).toBe(true);
     expect(g.refused(k('a'))).toBe(true);
@@ -190,7 +190,7 @@ describe('ruleGate', () => {
   });
 
   it('a row refused because it was not held is asked once it loads', () => {
-    const held = new Map<RowKey, RowNode<R>>();
+    const held = new Map<RowKey, DataNode<R>>();
     const yes = () => true;
     const g = ruleGate<R>(() => yes, (key) => held.get(key), () => NO_SELECTION, () => null, () => {});
     expect(g.refused(k('r1'))).toBe(true);

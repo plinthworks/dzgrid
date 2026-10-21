@@ -2,7 +2,7 @@ import type { ResolvedColumn, SpanCtx } from '../columns/defs.js';
 import type { DisplayIndex, RowKey } from '../ids.js';
 import { problem, type Problem, type ProblemCode } from '../problems.js';
 import type { DisplayedRows } from '../row/displayed.js';
-import type { RowNode } from '../row/node.js';
+import type { DataNode, RowNode } from '../row/node.js';
 import { ctxKey, type LocaleCtx } from '../value/locale.js';
 import { exportText, runEnds } from './merge.js';
 
@@ -196,6 +196,8 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
 
   // Pass 1: the nodes, the full-width rows, and where each run of data rows of one level ends.
   const nodes: RowNode<T>[] = new Array(n);
+  // Spans are refused with trees and details (D9): a row that is not data reads as none.
+  const dataOf = (i: number): T | null => (nodes[i]!.kind === 'data' ? (nodes[i] as DataNode<T>).data : null);
   const fw = new Uint8Array(n);
   const blockEnd = new Uint32Array(n);
   for (let i = 0; i < n; i++) {
@@ -218,18 +220,18 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
   const ctxA = { row: null as unknown, value: undefined as unknown, key: '' as RowKey, index: 0, column: '', prev: null as unknown, next: null as unknown };
   const ctxB = { ...ctxA };
   const fill = (c: typeof ctxA, col: ResolvedColumn<T>, i: number): SpanCtx<T> => {
-    const row = nodes[i]!.data;
+    const row = dataOf(i);
     c.row = row;
     try {
-      c.value = col.read(row);
+      c.value = col.read(row as T);
     } catch {
       c.value = undefined;
     }
     c.key = nodes[i]!.key;
     c.index = i;
     c.column = col.id;
-    c.prev = i > 0 ? nodes[i - 1]!.data : null;
-    c.next = i < n - 1 ? nodes[i + 1]!.data : null;
+    c.prev = i > 0 ? dataOf(i - 1) : null;
+    c.next = i < n - 1 ? dataOf(i + 1) : null;
     return c as SpanCtx<T>;
   };
 
@@ -243,7 +245,7 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
       let told = false;
       for (let i = 0; i < n; i++) {
         try {
-          t[i] = read(col, nodes[i]!.data, i);
+          t[i] = read(col, dataOf(i) as T, i);
         } catch {
           t[i] = null;
           if (!told) say('invalid-span', col.id, `columns.${col.id}`, 'threw');

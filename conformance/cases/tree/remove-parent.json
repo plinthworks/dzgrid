@@ -1,0 +1,85 @@
+{
+  "id": "remove-parent",
+  "suite": "tree",
+  "description": "Removing a parent makes its children roots; its key leaves what is open.",
+  "input": {
+    "rows": [
+      {
+        "id": "s1",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "p1",
+        "p": "s1",
+        "n": 2,
+        "t": "bed"
+      },
+      {
+        "id": "p2",
+        "p": "s1",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c1",
+        "p": "p2",
+        "n": 9,
+        "t": "chart"
+      },
+      {
+        "id": "s2",
+        "n": 1,
+        "t": "ward"
+      },
+      {
+        "id": "p3",
+        "p": "s2",
+        "n": 5,
+        "t": "bed"
+      }
+    ],
+    "steps": [
+      {
+        "expandAll": true
+      },
+      {
+        "tx": {
+          "remove": [
+            "s1"
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "p1 1/3",
+      "p2 2/3",
+      ". c1 1/1",
+      "s2 3/3",
+      ". p3 1/1"
+    ],
+    "expansion": [
+      "p2",
+      "s2"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 5
+    },
+    "problems": [
+      {
+        "code": "tree-orphan",
+        "severity": "warning",
+        "path": "rows[0]"
+      },
+      {
+        "code": "tree-orphan",
+        "severity": "warning",
+        "path": "rows[1]"
+      }
+    ]
+  }
+}

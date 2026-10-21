@@ -1,0 +1,42 @@
+{
+  "id": "orphan-root",
+  "suite": "tree",
+  "description": "A parent id that names no row puts the row at the root.",
+  "input": {
+    "rows": [
+      {
+        "id": "x",
+        "n": 1
+      },
+      {
+        "id": "y",
+        "p": "gone",
+        "n": 2
+      },
+      {
+        "id": "z",
+        "p": "x",
+        "n": 3
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "x 1/2",
+      "y 2/2"
+    ],
+    "expansion": [],
+    "counts": {
+      "total": 3,
+      "filtered": 3,
+      "displayed": 2
+    },
+    "problems": [
+      {
+        "code": "tree-orphan",
+        "severity": "warning",
+        "path": "rows[1]"
+      }
+    ]
+  }
+}

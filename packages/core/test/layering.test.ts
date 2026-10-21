@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 
 /**
  * The base and `@dzgrid/core/server` (step 5, layering): the `source` setting
@@ -67,5 +69,27 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(true);
     expect(inputs.some((f) => f.endsWith('src/server/gate.ts'))).toBe(true);
     expect(inputs.some((f) => f.endsWith('src/server/rows.ts'))).toBe(true);
+  });
+
+  it('no other entry holds a tree module; the tree entry builds on the base model and holds no server, span or csv module (Phase 4 step 3)', async () => {
+    const isTree = (f: string) => /(^|\/)src\/tree(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'rules.ts']) expect((await inputsOf(entry)).filter(isTree), entry).toEqual([]);
+    const inputs = await inputsOf('tree.ts');
+    for (const f of ['src/tree/build.ts', 'src/tree/shape.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    expect(inputs.filter(isServer)).toEqual([]);
+    expect(inputs.filter(isSpans)).toEqual([]);
+    expect(inputs.filter(isCsv)).toEqual([]);
+    // Types only from the model: the tree is handed to it, it does not carry it.
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
+  });
+
+  it('the base, with its tree seams (Phase 4 step 2), fits its budget, minified and gzipped as a consumer ships it', async () => {
+    const out = await build({ entryPoints: [SRC + 'index.ts'], bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' });
+    const gz = gzipSync(out.outputFiles[0]!.contents, { level: 9 }).length;
+    const budget = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core'].maxGzip as number;
+    expect(budget).toBe(29000);
+    expect(gz).toBeLessThanOrEqual(budget);
+    // What the seams cost stays within the plan's estimate (+800–900 B over 26 984): a guard against a seam that grew.
+    expect(gz).toBeLessThan(26984 + 1000);
   });
 });

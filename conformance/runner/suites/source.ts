@@ -139,7 +139,7 @@ export function runSource(input: SourceInput) {
     changes,
     final: {
       status: model.status.phase,
-      displayed: Array.from({ length: d.count }, (_, i) => String(d.nodeAt(d.index(i)!).id)),
+      displayed: Array.from({ length: d.count }, (_, i) => String((d.nodeAt(d.index(i)!) as { id: unknown }).id)),
       page: p && { index: p.index, size: p.size, total: p.total, pageCount: p.pageCount, hasNext: p.hasNext, canJump: p.canJump },
       counts: model.counts,
     },

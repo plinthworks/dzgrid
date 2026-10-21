@@ -4,11 +4,11 @@ import type { AnyFilterKind } from '../filter/kind.js';
 import { NO_OVERLAY, type ValueReader } from '../columns/defs.js';
 import { compileFilter, filterIndices } from '../filter/compile.js';
 import { canNarrow, compileQuick, quickWords } from '../filter/quick.js';
-import { idOfDataKey, type RowIdInput, type RowKey } from '../ids.js';
+import { idOfDataKey, isDataKey, type RowIdInput, type RowKey } from '../ids.js';
 import type { DataNode } from '../row/node.js';
 import type { Problem } from '../problems.js';
 import { flatDisplayed, type DisplayedRows } from '../row/displayed.js';
-import { createRowStore, type RowStore, type RowTransaction, type TransactionResult } from '../row/store.js';
+import { createRowStore, type RowSnapshot, type RowStore, type RowTransaction, type TransactionResult } from '../row/store.js';
 
 /** The store behind a client model — for the grid's own layers, through `@dzgrid/core/internal`. */
 export const storeOf = <T>(m: ClientModel<T>): RowStore<T> => (m as unknown as { [STORE]: RowStore<T> })[STORE];
@@ -41,7 +41,8 @@ export interface RowCounts {
 export interface ModelChange<T> {
   readonly source: ChangeSource;
   readonly displayed: DisplayedRows<T>;
-  readonly kind: 'rows' | 'order' | 'query' | 'context' | 'page' | 'status';
+  /** `expand`: rows opened or closed (a shape's flatten again, nothing filtered or sorted again). */
+  readonly kind: 'rows' | 'order' | 'query' | 'context' | 'page' | 'status' | 'expand';
   readonly transaction?: TransactionResult;
   readonly problems: readonly Problem[];
   /** Problems to tell once (a server's malformed answer, a fetched set too large): the kernel emits them. */
@@ -112,6 +113,16 @@ export interface RowModel<T> {
   setValues?(column: string, o?: ValuesOptions): ValuesHandle;
   /** Looks at the clock again: a date shortcut whose days moved (midnight in the grid's zone) filters or asks again, once. */
   tick?(): void;
+  /** With a shape (a tree, details): the rows the user opened, kept apart from the query (D1). */
+  readonly expansion?: ReadonlySet<RowKey>;
+  /** Whether a row shows open now: under a filter, ancestors of matches open by themselves (tree-filter.md). */
+  isExpanded?(key: RowKey): boolean;
+  /** Replaces the rows opened (and drops the toggles made under a filter): shown again, never filtered or sorted again. */
+  setExpansion?(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
+  /** Opens or closes rows as shown: the user's set, or under a filter a layer of its own, gone when it clears. The rows whose state changed. */
+  expand?(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
+  /** The rows that have children, above a depth (1: the roots only). */
+  expandable?(depth?: number): readonly RowKey[];
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
   destroy(): void;
 }
@@ -128,6 +139,41 @@ export interface SearchWarmup {
   cancel(): void;
 }
 
+/** What a shape is built from, each time the rows shown change. */
+export interface ShapeInput<T> {
+  readonly snap: RowSnapshot<T>;
+  /** Every row sorted for a tree (ancestors keep their place among their siblings), the matches for details; null: the source order. */
+  readonly order: Uint32Array | null;
+  /** 1 for a row the filters and the search match; null when none is active. */
+  readonly matched: Uint8Array | null;
+  readonly filterActive: boolean;
+  /** The rows the user opened. */
+  readonly expansion: ReadonlySet<RowKey>;
+  /** Under a filter, the rows opened or closed meanwhile (over the user's set and the ancestors of matches); null otherwise. */
+  readonly layer: ReadonlyMap<RowKey, boolean> | null;
+  readonly version: number;
+}
+
+/**
+ * How the rows are shown when they are not a flat list (Phase 4, D2): a tree (`@dzgrid/core/tree`)
+ * or details under their masters. Set once, at creation. Opening a row builds again from the same
+ * order and matches, by identity: a shape keeps what did not change.
+ */
+export interface RowShape<T> {
+  readonly kind: 'tree' | 'detail';
+  /** What is open at the first non-empty load: nothing, everything, or the levels above a depth. */
+  readonly initial?: 'none' | 'all' | number;
+  build(input: ShapeInput<T>): DisplayedRows<T>;
+  /** Every row the filters keep, all open: what a CSV of `all` writes. */
+  all?(): DisplayedRows<T>;
+  /** The rows that have children, above `depth`. */
+  parents?(snap: RowSnapshot<T>, depth: number): readonly RowKey[];
+  /** Whether a row is open in the last build. */
+  isOpen?(key: RowKey): boolean;
+  /** What the last build bent (an orphan, a cycle). */
+  readonly problems: readonly Problem[];
+}
+
 export interface ClientOptions<T> {
   readonly rows: Iterable<T>;
   readonly getRowId: (row: T) => RowIdInput;
@@ -140,6 +186,8 @@ export interface ClientOptions<T> {
   readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
   /** The clock, milliseconds since 1970 UTC: what a date shortcut counts from (filter-relative.md). Absent: a shortcut is refused. */
   readonly now?: () => number;
+  /** A tree or details (D2). A tree refuses browser pages (`unsupported-combination`). */
+  readonly shape?: RowShape<T>;
 }
 
 export interface ClientModel<T> extends RowModel<T> {
@@ -168,6 +216,10 @@ export interface ClientModel<T> extends RowModel<T> {
   warmSearch(): SearchWarmup;
   /** At midnight in the grid's zone (or whenever): filters again only if a shortcut's day changed, told as a query change. */
   tick(): void;
+  isExpanded(key: RowKey): boolean;
+  setExpansion(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
+  expand(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
+  expandable(depth?: number): readonly RowKey[];
   readonly diagnostics: {
     readonly foldBuilds: number;
     readonly filterRuns: number;
@@ -210,7 +262,18 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   let destroyed = false;
   let version = 0;
   const d = { filterRuns: 0, sortRuns: 0, displayedBuilds: 0, retested: 0, pageCuts: 0 };
-  const paging = resolvePageOptions(o.page);
+  const shape = o.shape;
+  // A tree is not paged (D2): the tree is shown whole, and told.
+  const pageRefused = shape?.kind === 'tree' && o.page !== undefined;
+  const paging = resolvePageOptions(pageRefused ? undefined : o.page);
+  const shapeProblems: readonly Problem[] = pageRefused ? [problem('unsupported-combination', 'warning', 'pagination', 'tree')] : [];
+  /** The rows the user opened; under a filter, a layer of toggles of its own, tied to that filter. */
+  let open: ReadonlySet<RowKey> = new Set();
+  let layer: Map<RowKey, boolean> | null = null;
+  let layerOf = '';
+  let opened = false;
+  /** The filter stage a shape's rows were last built from. */
+  let shownFrom: unknown = null;
   const pageCfg = paging.config;
   let pageSize = pageCfg?.size ?? 0;
   let pageIndex = 0;
@@ -267,8 +330,10 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     quickCols: visibleIds(),
     day: dayOf(query.filter),
   });
-  const same = (a: Inputs, b: Inputs, ignore?: 'quick'): boolean =>
-    a.snap === b.snap && a.colsRef === b.colsRef && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader && a.filter === b.filter && a.day === b.day && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick);
+  /** `quick`: all but the search; `query`: the data only (a tree's sort, over every row). */
+  const same = (a: Inputs, b: Inputs, ignore?: 'quick' | 'query'): boolean =>
+    a.snap === b.snap && a.colsRef === b.colsRef && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader &&
+    (ignore === 'query' || (a.filter === b.filter && a.day === b.day && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick)));
 
   /** Runs the stages whose inputs changed; true when the displayed rows changed. */
   const run = (): boolean => {
@@ -286,10 +351,17 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       filtered = { in: now, words, order, mask: maskOf(order, store.snapshot.count), problems: f.problems };
     }
     const sortKey = canonical(query.sort);
-    if (sorted && same(sorted.in, now) && sorted.sort === sortKey && sorted.input === filtered.order) return false;
-    d.sortRuns++;
-    const r = query.sort.length ? sortIndices(query.sort, filtered.order, env()) : { order: filtered.order, problems: [] };
-    sorted = { in: now, sort: sortKey, input: filtered.order, order: r.order, problems: r.problems };
+    // A tree sorts every row: an ancestor shown for its matches keeps its place among its siblings,
+    // and another filter sorts nothing again.
+    const tree = shape?.kind === 'tree';
+    const input = tree ? null : filtered.order;
+    if (sorted && same(sorted.in, now, tree ? 'query' : undefined) && sorted.sort === sortKey && sorted.input === input) {
+      if (!shape || shownFrom === filtered) return false;
+    } else {
+      d.sortRuns++;
+      const r = query.sort.length ? sortIndices(query.sort, input, env()) : { order: input, problems: [] };
+      sorted = { in: now, sort: sortKey, input, order: r.order, problems: r.problems };
+    }
     show();
     return true;
   };
@@ -300,6 +372,20 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     d.displayedBuilds++;
     all = null;
     const order = sorted!.order;
+    if (shape) {
+      const f = filtered!;
+      shownFrom = f;
+      // The toggles made under a filter belong to it: another filter, or none, drops them.
+      const of = f.order ? `${f.in.filter}|${f.words.join(' ')}` : '';
+      if (of !== layerOf) (layer = null), (layerOf = of);
+      if (!opened && store.size > 0) {
+        opened = true;
+        const initial = shape.initial;
+        if (initial !== undefined && initial !== 'none') open = new Set(shape.parents?.(store.snapshot, initial === 'all' ? Infinity : initial) ?? []);
+      }
+      displayed = shape.build({ snap: store.snapshot, order, matched: f.mask, filterActive: f.order !== null, expansion: open, layer, version: ++version });
+      return;
+    }
     if (!pageCfg) {
       displayed = flatDisplayed(store.snapshot, order, ++version);
       return;
@@ -318,8 +404,14 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     displayed = flatDisplayed(store.snapshot, cut, ++version);
   };
 
+  /** A shape's problems last told: told again only when they change. */
+  let shapeSaid = '';
   const notify = (kind: ModelChange<T>['kind'], source: ChangeSource, transaction?: TransactionResult, told?: readonly Problem[]): void => {
     if (destroyed) return;
+    const sp = shape?.problems ?? [];
+    const now = said(sp);
+    if (now !== shapeSaid && sp.length) told = [...(told ?? []), ...sp];
+    shapeSaid = now;
     const c: ModelChange<T> = { source, displayed, kind, problems: currentProblems(), ...(transaction && { transaction }), ...(told && { told }) };
     for (const fn of [...listeners]) fn(c);
     for (const b of lists.values()) b.run();
@@ -355,7 +447,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     });
   };
   let loadProblems: readonly Problem[] = [];
-  const currentProblems = (): readonly Problem[] => [...paging.problems, ...loadProblems, ...(filtered?.problems ?? []), ...(sorted?.problems ?? [])];
+  const currentProblems = (): readonly Problem[] => [...shapeProblems, ...paging.problems, ...loadProblems, ...(shape?.problems ?? []), ...(filtered?.problems ?? []), ...(sorted?.problems ?? [])];
 
   /** A sort column's key array for the current generation. */
   const keysOf = (col: NonNullable<ReturnType<ColumnLookup<T>['get']>>): Float64Array => {
@@ -367,6 +459,13 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   const afterTransaction = (r: TransactionResult, source: ChangeSource): void => {
     loadProblems = r.problems;
     if (r.kind === 'none') return;
+    // The keys of removed rows leave what is open (a reload: those whose rows are gone).
+    if (shape) {
+      const gone = r.kind === 'delta' ? new Set(r.removed) : null;
+      const left = (k: RowKey) => (gone ? gone.has(k) : isDataKey(k) && !store.get(k));
+      if ([...open].some(left)) open = new Set([...open].filter((k) => !left(k)));
+      if (layer) for (const k of [...layer.keys()]) if (left(k)) layer.delete(k);
+    }
     const delta = store.lastDelta;
     const follow = () => cache.patch(delta, store.snapshot, () => ({ columns, ctx, reader }));
     // A new day since the last run (a shortcut, before the tick): everything again.
@@ -423,6 +522,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
 
   loadProblems = store.replaceAll(o.rows).problems;
   run();
+  shapeSaid = said(shape?.problems ?? []);
+  const isExpanded = (key: RowKey): boolean => (shape?.isOpen ? shape.isOpen(key) : (layer?.get(key) ?? open.has(key)));
 
   const model: ClientModel<T> & { [STORE]: RowStore<T> } = {
     [STORE]: store,
@@ -445,7 +546,34 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     row: (key) => store.get(key),
     get query() { return query; },
     get displayed() { return displayed; },
-    get allRows() { return pageCfg ? (all ??= flatDisplayed(store.snapshot, sorted!.order, version)) : displayed; },
+    get allRows() { return shape ? (shape.all?.() ?? displayed) : pageCfg ? (all ??= flatDisplayed(store.snapshot, sorted!.order, version)) : displayed; },
+    // Undefined without a shape: the kernel then refuses to expand.
+    get expansion() { return shape ? open : (undefined as never); },
+    isExpanded,
+    setExpansion(set, source = 'api') {
+      if (!shape) return;
+      open = new Set(set);
+      layer = null;
+      show();
+      notify('expand', source);
+    },
+    expand(keys, expanded, source = 'api') {
+      if (!shape) return [];
+      const changed = [...new Set(keys)].filter((k) => isExpanded(k) !== expanded);
+      if (!changed.length) return changed;
+      if (filtered!.order) {
+        layer ??= new Map();
+        for (const k of changed) layer.set(k, expanded);
+      } else {
+        const next = new Set(open);
+        for (const k of changed) expanded ? next.add(k) : next.delete(k);
+        open = next;
+      }
+      show();
+      notify('expand', source);
+      return changed;
+    },
+    expandable: (depth = Infinity) => shape?.parents?.(store.snapshot, depth) ?? [],
     get page() { return pageCfg ? pageOf({ size: pageSize, sizes: pageCfg.sizes }, pageIndex, filteredCount()) : null; },
     setPage(p, source = 'api') {
       if (!pageCfg || checkPage(p).length) return;

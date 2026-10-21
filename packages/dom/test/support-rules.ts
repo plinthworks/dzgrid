@@ -1,6 +1,6 @@
 // Shared fixtures for selection rules (step 21, docs/behaviors/selection-rules.md).
 import { vi } from 'vitest';
-import { dataKey, type GridEvent, type Problem, type RowKey, type RowNode, type SelectionState } from '@dzgrid/core';
+import { dataKey, type GridEvent, type Problem, type RowKey, type DataNode, type SelectionState } from '@dzgrid/core';
 import { sourceRows } from '@dzgrid/core/server';
 import { createGrid, type GridInstance } from '../src/grid.js';
 import type { GridSettings } from '../src/settings.js';
@@ -39,7 +39,7 @@ export const idOf = (key: RowKey): string => String(key).replace(/^d:\d+:/, '');
 /** The ids a selection holds, sorted by number. */
 export const held = (s: SelectionState): string[] => [...s.keys].map(idOf).sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
 
-export type Rule = (row: RowNode<R>, selection: SelectionState, context: unknown) => boolean | string;
+export type Rule = (row: DataNode<R>, selection: SelectionState, context: unknown) => boolean | string;
 /** A rule refusing these ids (the reason when given). */
 export const refuse = (ids: string[], reason?: string): Rule => (row) => (ids.includes(row.data.id) ? reason ?? false : true);
 
