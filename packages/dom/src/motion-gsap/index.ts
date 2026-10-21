@@ -53,10 +53,10 @@ export interface MotionOptions {
   /**
    * A cell whose value a transaction changed, after the grid's guards (at most 50 calls a paint).
    * Animate `el` only (transform, opacity, `--dzg-*`, classes). `false`: handled, the built-in flash
-   * is skipped. Reasons `saving`, `saved`, `failed` are reserved (Phase 4).
+   * is skipped. Either way `el` is followed: its tweens are finished when it shows another row. Reasons `saving`, `saved`, `failed` are reserved (Phase 4).
    */
   readonly onCell?: (el: HTMLElement, c: CellMotion, reason: 'changed') => void | false;
-  /** A row that moved or entered after a sort or a filter (not under reduced motion). */
+  /** A row that moved or entered after a sort or a filter, or that was added live (owner Q5; not under reduced motion). */
   readonly onRow?: (el: HTMLElement, c: RowMotion, reason: 'entered' | 'moved') => void | false;
 }
 
@@ -119,7 +119,8 @@ export function motion(o: MotionOptions = {}): Motion {
           if (asked || !f.displayed.count || g.settings.motion === false) return;
           asked = true;
           const w = g.win as (Window & { requestIdleCallback?: (fn: () => void, o: object) => number }) | null;
-          const go = (): void => void (g.scope.isDisposed || load());
+          // Turned off meanwhile: not loaded, asked again at a paint once on.
+          const go = (): void => void (g.scope.isDisposed || (g.settings.motion === false ? (asked = false) : load()));
           if (w?.requestIdleCallback) w.requestIdleCallback(go, { timeout: 2000 });
           else g.scope.timeout(go, 50);
         },

@@ -24,8 +24,14 @@ export interface Scene {
   readonly reduced: boolean;
   readonly now: number;
   on(k: keyof MotionEffects): boolean;
-  /** A host hook, fenced and counted (at most 50 calls a paint); its answer, undefined when it threw. */
-  hook<A extends unknown[]>(fn: ((...a: A) => void | false) | undefined, ...a: A): void | false;
+  /** The 500 ms cap of the flash, per cell (row key, then column): when each was last marked. */
+  readonly marked: Map<RowKey, Map<string, number>>;
+  /**
+   * A host hook, fenced and counted (at most 50 calls a paint); its answer, undefined when it threw.
+   * Its element is followed by the guard first (while `valid()`), whatever it answers: its own tweens
+   * are finished when the element shows another row.
+   */
+  hook<A extends [HTMLElement, ...unknown[]]>(fn: ((...a: A) => void | false) | undefined, valid: () => boolean, ...a: A): void | false;
   /** Tweens an element from `from` to `to` (immediate render, GSAP's own ticker), followed by the guard. */
   play(el: HTMLElement, valid: () => boolean, from: object, to: object): void;
 }
@@ -68,6 +74,7 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
       // Rows a transaction changed (updated) or brought (added), until the paint.
       const changed = new Set<RowKey>();
       const added = new Set<RowKey>();
+      const marked = new Map<RowKey, Map<string, number>>();
       let snap: { tops: Map<RowKey, number>; texts: Texts; layer: string; page: number | undefined } | null = null;
       const unsubscribe = g.rows.subscribe((c) => {
         const t = c.transaction;
@@ -81,10 +88,11 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
       const scene = (now: number): Scene => {
         let calls = 0;
         return {
-          gsap, g, guard: guarded, o, now, on, reduced: reduced(),
-          hook(fn, ...a) {
+          gsap, g, guard: guarded, o, now, on, marked, reduced: reduced(),
+          hook(fn, valid, ...a) {
             if (!fn || calls >= 50) return;
             calls++;
+            guarded.track(a[0], valid);
             try {
               return fn(...a);
             } catch (err) {
@@ -121,13 +129,15 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
           if (!s) return;
           const now = g.now();
           const sc = scene(now);
+          let flipped = false;
           if (kinds & FLIP) {
             // Typing (paints under 150 ms apart) and a scroll between the change and the paint: no glide.
             const quiet = now - lastAt >= 150 && g.scrolledAt <= armedAt && s.layer === g.el.layer.style.getPropertyValue('inset-block-start');
             lastAt = now;
-            if (quiet && !sc.reduced) flip(sc, f, s.tops);
+            if (quiet && !sc.reduced) flip(sc, f, s.tops), (flipped = true);
           }
-          if (kinds & FLASH && now - g.scrolledAt >= 150) flash(sc, s.texts, changed, added);
+          // The rows a glide brought in (added ones too) faded there, not again.
+          if (kinds & FLASH && now - g.scrolledAt >= 150) flash(sc, f, s.texts, changed, added, !flipped);
           if (kinds & PAGE && !sc.reduced && on('page')) slide(sc, s.page, shownPage);
           changed.clear();
           added.clear();

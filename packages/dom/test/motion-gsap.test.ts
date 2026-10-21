@@ -76,6 +76,19 @@ describe('loading', () => {
     expect(m.loaded).toBe(false);
   });
 
+  it('turned off between the first paint and idle: not loaded; turned on again: loaded', async () => {
+    const m = motion({ gsap });
+    const g = mount({ features: [m] });
+    made.push(g);
+    g.g.update({ motion: false });
+    g.frame();
+    await new Promise((r) => setTimeout(r, 120));
+    expect(m.loaded).toBe(false);
+    g.g.update({ motion: true });
+    g.frame();
+    await vi.waitFor(() => expect(m.loaded).toBe(true));
+  });
+
   it('animates nothing on the first paint, a scroll, or a plain reload', async () => {
     const g = await grid();
     expect(gsap.globalTimeline.getChildren().length).toBe(0);
@@ -213,11 +226,30 @@ describe('the value flash', () => {
     expect(leftovers(g.host)).toEqual([]);
   });
 
-  it('marks an added row’s cells; not a plain reload', async () => {
-    const g = await grid({}, {}, { rows: rowsOf(5) });
+  // Owner Q5: a row added live gets one row effect (a fade, onRow 'entered'), its cells no flash.
+  it('fades an added row once (onRow entered), marks none of its cells', async () => {
+    const rows: string[] = [];
+    const cells: string[] = [];
+    const g = await grid({ onRow: (_e, c, why) => void rows.push(`${String(c.key)}:${why}`), onCell: (_e, c) => void cells.push(String(c.key)) }, {}, { rows: rowsOf(5) });
     g.g.kernel.rows.applyTransaction({ add: [{ id: 'x', n: 99, s: 'new' }] });
     g.frame();
-    expect(g.cell('x', 's')!.classList.contains('dzg-flash')).toBe(true);
+    const el = g.row('x')!;
+    expect(rows).toEqual([expect.stringMatching(/x:entered$/)]);
+    expect(cells).toEqual([]);
+    expect(g.root.querySelectorAll('.dzg-flash').length).toBe(0);
+    expect(gsap.getTweensOf(el).filter((t) => t.progress() < 1)).toHaveLength(1);
+    expect(Number(gsap.getProperty(el, 'opacity'))).toBe(0);
+  });
+
+  it('an added row under reduced motion: no fade, no hook, no mark', async () => {
+    media.reduce = true;
+    const rows: string[] = [];
+    const g = await grid({ onRow: (_e, c) => void rows.push(String(c.key)) }, {}, { rows: rowsOf(5) });
+    g.g.kernel.rows.applyTransaction({ add: [{ id: 'x', n: 99, s: 'new' }] });
+    g.frame();
+    expect(rows).toEqual([]);
+    expect(gsap.getTweensOf(g.row('x')!)).toHaveLength(0);
+    expect(g.root.querySelectorAll('.dzg-flash').length).toBe(0);
   });
 
   it('marks none over 50 cells in one paint (bulk), and none within 150 ms of a scroll', async () => {

@@ -1,5 +1,6 @@
 import type { RowKey } from '@dzgrid/core';
 import type { Frame, RowView } from '../../render/rows.js';
+import type { RowMotion } from '../index.js';
 import { showing } from './guard.js';
 import type { Scene } from './index.js';
 
@@ -27,13 +28,19 @@ export function flip(s: Scene, f: Frame<unknown>, tops: ReadonlyMap<RowKey, numb
   if (moved.length > MAX_MOVED) return;
   // A screen: the rows mounted, at their height (no read).
   const screen = g.rowRenderer.mounted.size * g.rowHeight();
-  const ctx = (k: RowKey) => ({ key: k, row: g.rows.row(k)?.data, index: f.displayed.indexOf(k), context: g.settings.context, reduced: false });
   for (const [k, v, d] of moved) {
-    if (Math.abs(d) > screen || s.hook(o.onRow, v.el, ctx(k), 'moved') === false || !s.on('flip')) continue;
-    s.play(v.el, showing(g, v.el, k), { y: d }, { y: 0, duration: 0.3 });
+    const ok = showing(g, v.el, k);
+    if (Math.abs(d) > screen || s.hook(o.onRow, ok, v.el, rowMotion(s, f, k), 'moved') === false || !s.on('flip')) continue;
+    s.play(v.el, ok, { y: d }, { y: 0, duration: 0.3 });
   }
-  if (entered.length > MAX_ENTERED) return;
-  entered.forEach(([k, v], i) => {
-    if (s.hook(o.onRow, v.el, ctx(k), 'entered') !== false && s.on('enter')) s.play(v.el, showing(g, v.el, k), { opacity: 0 }, { opacity: 1, duration: 0.12, delay: i * 0.015 });
-  });
+  if (entered.length <= MAX_ENTERED) entered.forEach(([k, v], i) => enter(s, f, k, v.el, i));
+}
+
+/** What `onRow` is told of a row. */
+const rowMotion = (s: Scene, f: Frame<unknown>, k: RowKey): RowMotion => ({ key: k, row: s.g.rows.row(k)?.data, index: f.displayed.indexOf(k), context: s.g.settings.context, reduced: false });
+
+/** A row new to the window (the `i`th) fades in, staggered, after `onRow(el, c, 'entered')` (not under reduced motion). */
+export function enter(s: Scene, f: Frame<unknown>, k: RowKey, el: HTMLElement, i = 0): void {
+  const ok = showing(s.g, el, k);
+  if (s.hook(s.o.onRow, ok, el, rowMotion(s, f, k), 'entered') !== false && s.on('enter')) s.play(el, ok, { opacity: 0 }, { opacity: 1, duration: 0.12, delay: i * 0.015 });
 }

@@ -18,7 +18,10 @@ export function opening(g: GridContext<unknown>, guard: Guard, scene: () => Scen
   const mo = new Observer((list) => {
     const s = scene();
     for (const r of list) {
-      for (const n of r.removedNodes) if (!n.isConnected && n.firstChild && guard.has(n.firstChild as HTMLElement)) guard.finish(n.firstChild as HTMLElement);
+      for (const n of r.removedNodes) {
+        const c = (n as Element).firstElementChild as HTMLElement | null | undefined;
+        if (!n.isConnected && c && guard.has(c)) guard.finish(c);
+      }
       if (!s) continue;
       if (r.target === overlay) !overlay.hidden && s.play(overlay, () => !overlay.hidden, { opacity: 0 }, { opacity: 1, duration: 0.14 });
       else

@@ -6,45 +6,58 @@ import type { Gsap } from '../index.js';
 export const CLEAR = 'transform,opacity,--dzg-flash';
 
 export interface Guard {
-  /** An element animated while `valid()` holds (the row, the column it was for). */
+  /**
+   * An element animated (by the grid or a host hook) while `valid()` holds (the row, the column it
+   * was for); followed until it is finished. A new `call` kills the one before; none keeps it.
+   */
   track(el: HTMLElement, valid: () => boolean, call?: { kill(): unknown }): void;
-  /** Its effects finished at once (progress 1, the host's tweens too) and their props cleared. */
+  /** Its effects finished at once (progress 1, the host's tweens too), their props cleared, no longer followed. */
   finish(el: HTMLElement): void;
-  /** Its props cleared, no longer followed (a tween that ended). */
+  /** The grid's own effect on it ended: its mark goes; its props are cleared unless another tween (a host's) still runs. Still followed. */
   release(el: HTMLElement): void;
-  /** Each element whose row or column changed (a pooled one shown again) finished; ended ones forgotten. */
+  /** Each element whose row or column changed (a pooled one shown again) or that left the page: finished. */
   sweep(): void;
   finishAll(): void;
   has(el: HTMLElement): boolean;
 }
 
 /**
- * The pooled-row guard (step 26): the grid recycles its row and cell elements, so an element still
- * moving when it is shown for another row is finished and cleared first, the host hook's own tweens
- * included (they must use the same GSAP).
+ * The pooled-row guard (step 26): the grid recycles its row and cell elements, so an element animated
+ * for a row is finished and cleared when it is shown for another one, every tween on it included (a
+ * host hook's too: it must use the same GSAP). An element stays followed until then (or until it
+ * leaves the page, or the grid goes): the map holds at most the pooled elements, the layer, the
+ * overlay and an open popup's content.
  */
 export function guard(gsap: Gsap): Guard {
   const active = new Map<HTMLElement, { valid: () => boolean; call?: { kill(): unknown } | undefined }>();
-  const release = (el: HTMLElement): void => {
+  const clear = (el: HTMLElement): void => {
     gsap.set(el, { clearProps: CLEAR });
     el.style.removeProperty('--dzg-flash');
-    el.classList.remove('dzg-flash');
-    active.get(el)?.call?.kill();
-    active.delete(el);
   };
   const finish = (el: HTMLElement): void => {
     for (const t of gsap.getTweensOf(el)) t.progress(1);
-    release(el);
+    el.classList.remove('dzg-flash');
+    clear(el);
+    active.get(el)?.call?.kill();
+    active.delete(el);
   };
   return {
-    track: (el, valid, call) => void active.set(el, { valid, call }),
+    track(el, valid, call) {
+      const r = active.get(el);
+      if (call && r?.call !== call) r?.call?.kill();
+      active.set(el, { valid, call: call ?? r?.call });
+    },
     finish,
-    release,
+    release(el) {
+      const r = active.get(el);
+      r?.call?.kill();
+      if (r) r.call = undefined;
+      el.classList.remove('dzg-flash');
+      el.style.removeProperty('--dzg-flash');
+      if (!gsap.getTweensOf(el).some((t) => t.progress() < 1)) clear(el);
+    },
     sweep() {
-      for (const [el, r] of active) {
-        if (!r.valid()) finish(el);
-        else if (!r.call && !gsap.getTweensOf(el).some((t) => t.progress() < 1)) active.delete(el);
-      }
+      for (const [el, r] of active) if (!r.valid()) finish(el);
     },
     finishAll: () => active.forEach((_, el) => finish(el)),
     has: (el) => active.has(el),
