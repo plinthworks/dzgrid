@@ -28,10 +28,10 @@ export interface LazyControl<T> {
   abort: (() => AbortHandle) | null;
   /** A failed parent asks again. */
   retry(parent: RowKey): void;
-  /** Every load forgotten, those running aborted (a new epoch, a grid destroyed). */
-  reset(): void;
-  /** Told after each answer applied: the parent, and whether it loaded. */
-  on(fn: (parent: RowKey, ok: boolean) => void): () => void;
+  /** Every load forgotten, those running aborted (a new epoch, a refresh, a model destroyed); `again`: shown again at once, the open parents ask again (a server's refresh). */
+  reset(again?: boolean): void;
+  /** Told after each answer applied: the parent, whether it loaded, and the request's number (`diagnostics.started` once it began). */
+  on(fn: (parent: RowKey, ok: boolean, request: number) => void): () => void;
   readonly diagnostics: { readonly started: number; readonly answered: number; readonly failed: number; readonly aborted: number; readonly live: number };
 }
 
@@ -61,7 +61,9 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
   let idOf: (row: T) => RowIdInput = () => '';
   let last: TreeRows<T> | null = null;
   let slots: Slot[] = [];
-  const fns = new Set<(parent: RowKey, ok: boolean) => void>();
+  /** Loads forgotten since the last sync: a setRows that shows nothing new must show the rows again. */
+  let forgot = false;
+  const fns = new Set<(parent: RowKey, ok: boolean, request: number) => void>();
   const d = { started: 0, answered: 0, failed: 0, aborted: 0 };
 
   /** A row declared, holding no child whatever the filter, not answered: one to load when open. */
@@ -87,7 +89,7 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
   const start = (key: RowKey): void => {
     const st: State = { s: 0, stop: () => {} };
     states.set(key, st);
-    d.started++;
+    const no = ++d.started;
     const answer = (ok: boolean, v: unknown): void => {
       if (states.get(key) !== st) return;
       const rows = (!ok ? null : Array.isArray(v) ? v : Array.isArray((v as { rows?: unknown } | null)?.rows) ? (v as { rows: T[] }).rows : null) as T[] | null;
@@ -105,13 +107,14 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
       }
       // A failure, no child, or none taken: the loading row goes or turns, nothing else does.
       if (!shown) redraw();
-      for (const fn of [...fns]) fn(key, !!rows);
+      for (const fn of [...fns]) fn(key, !!rows, no);
     };
     st.stop = (ctl.loader ?? fromLoad)(key, model!.row(key)!.data as T, answer);
   };
 
   /** After each change: a load for each loading row without one; the loads whose row went, aborted (a failure forgotten). */
   const sync = (): void => {
+    forgot = false;
     const want = new Set(slots.map((x) => x.parent));
     for (const [key, st] of [...states]) if (st.s < 2 && !want.has(key)) drop(key);
     for (const x of slots) if (!states.has(x.parent)) start(x.parent);
@@ -125,9 +128,11 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
       states.delete(parent);
       redraw();
     },
-    reset() {
+    reset(again) {
       for (const key of [...states.keys()]) drop(key);
       loaded = new Set();
+      forgot = true;
+      if (again) redraw();
     },
     on(fn) {
       fns.add(fn);
@@ -146,18 +151,28 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
       model = m;
       redraw = re;
       m.subscribe(sync);
+      const { setRows, destroy } = m;
+      // Rows that show nothing new (the same objects, a refresh's roots) still forgot the loads: shown again, the open parents ask.
+      m.setRows = (rows, source) => {
+        const r = setRows(rows, source);
+        if (forgot) redraw();
+        return r;
+      };
+      // Destroyed: every load aborted, an answer after it ignored.
+      m.destroy = () => (ctl.reset(), destroy());
     },
     // New rows (setRows): the cache forgotten (what was loaded asks again when open and empty); a load
     // running goes on while its row shows, and stops with it (the next change), as a failure stays.
     load(rows: Iterable<T>, id: (row: T) => RowIdInput) {
       idOf = id;
       loaded = new Set();
-      for (const [key, st] of [...states]) if (st.s === 2) states.delete(key);
+      for (const [key, st] of [...states]) if (st.s === 2) states.delete(key), (forgot = true);
       return inner.load ? inner.load(rows, id) : rows;
     },
     // A refresh: the rows the loads brought go; the open parents then load again.
     refresh() {
-      const ids = [...loaded];
+      // Only those still held: a row the host removed since is not removed again (no unknown-row-id).
+      const ids = [...loaded].filter((id) => model?.row(dataKey(id)!));
       ctl.reset();
       if (ids.length) model?.applyTransaction({ remove: ids }, 'data');
     },

@@ -1,4 +1,5 @@
 import { isSelected, type GridCommand } from '@dzgrid/core';
+import { isDataKey } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { PartBase, SlotContext } from '../part.js';
 
@@ -84,8 +85,17 @@ export function footerContext(g: GridContext<unknown>, act: (cmd: GridCommand) =
     const d = g.rows.displayed;
     const c = g.rows.counts;
     const status = g.rows.status;
+    // Ticked, of the data rows shown; the rows of the page: a tree's roots (its children and loading rows are not paged).
     let shown = 0;
-    for (let i = 0; i < d.count; i++) if (isSelected(k.selection, d.keyAt(d.index(i)!))) shown++;
+    let data = 0;
+    let rows = 0;
+    for (let i = 0; i < d.count; i++) {
+      const at = d.index(i)!;
+      const key = d.keyAt(at);
+      if (isSelected(k.selection, key)) shown++;
+      if (isDataKey(key)) data++;
+      if (!d.levelAt?.(at)) rows++;
+    }
     const all = k.selectionScope !== null;
     const mode = g.settings.selection?.mode ?? 'none';
     const from = p.index * p.size + 1;
@@ -93,8 +103,8 @@ export function footerContext(g: GridContext<unknown>, act: (cmd: GridCommand) =
       page: same('p', p),
       counts: same('c', c),
       status: same('s', status),
-      range: d.count && status.phase !== 'loading' ? same('r', { from, to: from + d.count - 1 }) : null,
-      selection: same('x', { count, shown, all, mode, canSelectAll: mode === 'multi' && !g.settings.selection?.canSelect && !all && d.count > 0 && shown === d.count && c.filtered !== null && c.filtered > d.count && matching() < c.filtered }),
+      range: rows && status.phase !== 'loading' ? same('r', { from, to: from + rows - 1 }) : null,
+      selection: same('x', { count, shown, all, mode, canSelectAll: mode === 'multi' && !g.settings.selection?.canSelect && !all && data > 0 && shown === data && c.filtered !== null && c.filtered > rows && matching() < c.filtered }),
       ...fns,
     };
   };

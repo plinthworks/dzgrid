@@ -412,6 +412,7 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Coutures de la base** : `RowShape.attach` (le modèle, et comment redessiner), `RowShape.refresh` (appelé par `invalidate`), `ModelEnv.shape`, `LoadingNode`. Réponses ajoutées par transaction (`data`) ; le magasin est le cache ; `setRows` l'oublie, un chargement encore montré continue ; `rows.refresh` retire les lignes chargées.
 - **Serveur** : `DataSource.children(req: ChildRequest)`, un canal de la garde par parent (`children:<clé>`), l'époque dans la requête ; une nouvelle époque ferme tout et oublie les chargements. Pages du serveur + arbre : les pages comptent les racines, les enfants viennent entiers (décision de l'étape) ; pages du navigateur + arbre toujours refusées.
 - **Mots** : ceux de la base (`grid.loading`, `grid.error`, `grid.retry`, `announce.loading`, `announce.error`) ; les paquets de l'arbre ne grossissent pas. Tout déplier et `*` ne chargent jamais.
+- **Revue** : seules les actions de l'utilisateur sont annoncées (la réponse d'une requête dont « Chargement » a été dit, par son numéro) ; rafraîchir (client ou serveur), `setRows` et `destroy()` oublient les chargements et redemandent aussitôt les parents ouverts ; CSV et pied de pagination ignorent les lignes de chargement.
 
 ## 0. Provenance, et limites de ce que j'ai lu
 

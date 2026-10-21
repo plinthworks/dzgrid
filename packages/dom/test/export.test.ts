@@ -148,7 +148,10 @@ describe('a browser export', () => {
   it('10 000 000 cells by default', async () => {
     const t = xmake();
     const rows = t.g.kernel.rows;
-    vi.spyOn(rows, 'displayed', 'get').mockReturnValue({ ...rows.displayed, count: 5_000_001 } as never);
+    // Every row a data row (the rows shown are counted by key: a lazy tree's loading rows are not written).
+    const d = rows.displayed;
+    const key = d.keyAt(0 as never);
+    vi.spyOn(rows, 'displayed', 'get').mockReturnValue({ ...d, count: 5_000_001, keyAt: () => key } as never);
     expect(await run(t)).toBe('refused');
     expect(t.exportEvents().at(-1)).toMatchObject({ refusal: 'too-large' });
   });

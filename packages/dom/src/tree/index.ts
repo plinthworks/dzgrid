@@ -80,7 +80,9 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     const i = d ? d.indexOf(one) : -1;
     if (i === -1) return;
     const n = d!.childrenAt(i);
-    g.live.announce(!expanded ? g.msg('tree.collapsed', { name: nameOf(one, d!) }) : n < 0 ? g.msg('announce.loading') : g.msg('tree.expanded', { name: nameOf(one, d!), n }));
+    const name = nameOf(one, d!);
+    // A lazy parent answered empty is a leaf: its name and the base's « No rows », joined by the base's own pair (tree-lazy.md).
+    g.live.announce(!expanded ? g.msg('tree.collapsed', { name }) : n < 0 ? (lz?.said(one), g.msg('announce.loading')) : n ? g.msg('tree.expanded', { name, n }) : g.msg('header.withSort', { header: name, priority: g.msg('grid.noRows') }));
   };
   // Each opening or closing by the user, said once (screen readers do not all say aria-expanded).
   const off = kernel.subscribe((e) => {

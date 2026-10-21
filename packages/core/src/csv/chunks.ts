@@ -139,8 +139,8 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
   for (let k = 0; k < total; k++) {
     const r = at ? at[k]! : k;
     const node = rows.nodeAt(r as DisplayIndex);
-    // A detail panel is never written (csv-export.md).
-    if (node.kind === 'detail') continue;
+    // A detail panel is never written (csv-export.md), nor a lazy parent's loading row (tree-lazy.md).
+    if (node.kind === 'detail' || node.key[0] === 'l') continue;
     written++;
     const lv = levelAt ? levelAt.call(rows, r as DisplayIndex) : 0;
     const pad = indent ? '  '.repeat(lv) : '';

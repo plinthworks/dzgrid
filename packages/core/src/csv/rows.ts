@@ -28,15 +28,16 @@ export interface ExportRequest {
  * (server pages): the host's `exportAll` then.
  */
 export function csvRows<T>(model: Pick<RowModel<T>, 'displayed' | 'allRows'>, scope: CsvScope, selection: SelectionState): { rows: DisplayedRows<T>; at: Uint32Array | null; count: number } | null {
-  if (scope === 'displayed') return { rows: model.displayed, at: null, count: model.displayed.count };
-  const rows = model.allRows;
+  const shown = scope === 'displayed';
+  const rows = shown ? model.displayed : model.allRows;
   if (!rows) return null;
   if (scope === 'all') return { rows, at: null, count: rows.count };
   const at: number[] = [];
-  // A tree's fillers and details are never selected, even under everything-except.
   for (let i = 0; i < rows.count; i++) {
     const k = rows.keyAt(i as DisplayIndex);
-    if (isDataKey(k) && isSelected(selection, k)) at.push(i);
+    // Shown: every row but a lazy tree's loading rows, never written (tree-lazy.md). Selected: a
+    // tree's fillers and details never are, even under everything-except.
+    if (shown ? k[0] !== 'l' : isDataKey(k) && isSelected(selection, k)) at.push(i);
   }
-  return { rows, at: Uint32Array.from(at), count: at.length };
+  return { rows, at: shown ? null : Uint32Array.from(at), count: at.length };
 }

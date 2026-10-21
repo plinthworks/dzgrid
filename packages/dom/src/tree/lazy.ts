@@ -12,6 +12,8 @@ export interface LazyChildren<T> {
 /** The loading and error rows' content, and the end. */
 export interface LazyDom {
   fill(label: HTMLElement, node: LoadingNode): void;
+  /** « Loading » said for `key` (the user opened it): its answer will be said. */
+  said(key: RowKey): void;
   destroy(): void;
 }
 
@@ -40,7 +42,11 @@ export function lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T> {
       const win = doc.defaultView;
       if (win?.AbortController) ctl.abort = () => new win.AbortController();
       if (!ctl.loader && !o.load) tell('tree.lazy', 'missing-feature', 'load');
-      const off = ctl.on((parent, ok) => (ok ? say(parent) : g.live.announce(g.msg('announce.error'))));
+      // Only the user's actions are said (tree-lazy.md): an answer when its « Loading » was — a user's
+      // opening of one row, a user's Retry —, by the request's number: not the API's, nor a refresh's.
+      const asked = new Map<RowKey, number>();
+      const said = (key: RowKey): void => void asked.set(key, ctl.diagnostics.started);
+      const off = ctl.on((parent, ok, no) => asked.get(parent) === no && (asked.delete(parent), ok ? say(parent) : g.live.announce(g.msg('announce.error'))));
       /** The error row of `row`, asked again; false when it is not one. */
       const retry = (row: Element | null | undefined): RowKey | null => {
         const key = row ? rowRenderer.keyOf(row) : undefined;
@@ -49,6 +55,7 @@ export function lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T> {
         const node = i === -1 ? null : d.nodeAt(i);
         if (node?.kind !== 'loading' || !node.failed) return null;
         ctl.retry(node.parent);
+        said(node.parent);
         g.live.announce(g.msg('announce.loading'));
         return key!;
       };
@@ -81,6 +88,7 @@ export function lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T> {
           b.textContent = g.msg('grid.retry');
           l.append(b);
         },
+        said,
         destroy() {
           off();
           ctl.reset();

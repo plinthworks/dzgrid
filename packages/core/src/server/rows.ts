@@ -555,6 +555,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
           }
           mark('query');
         }
+        // A tree: the child requests running aborted, the open parents ask again (tree-lazy.md); what they bring goes with the roots' answer.
+        lazy?.reset(true);
         load();
       }, 'api');
     },

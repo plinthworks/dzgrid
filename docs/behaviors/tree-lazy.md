@@ -26,7 +26,8 @@ Arabic.
 - Closing the row while it loads stops the load: nothing arrives later. Opening it again asks again.
 - Opening a row whose children were loaded before shows them at once: nothing is asked again,
   until the application refreshes the rows or gives new ones.
-- A row whose load answered no children becomes a leaf (no chevron).
+- A row whose load answered no children becomes a leaf (no chevron); the screen reader says its name
+  and « Aucune ligne » (« Service 3, Aucune ligne »).
 - A filter applies to the rows that are loaded. A row not loaded is not asked for its children to
   find matches in them.
 - « Tout déplier » and `*` open the rows whose children are loaded, never the ones not loaded: they
@@ -59,11 +60,21 @@ Arabic.
 - **Cache**: the rows loaded stay in the grid; opening their parent again asks nothing. `setRows`
   (new rows) forgets the cache: an open declared parent left with no child loads again; a load
   running goes on while its loading row still shows (and stops with it, as always); a failure stays
-  until Retry or a close. `rows.refresh` removes the rows the loads brought, forgets every load (the
-  running ones aborted), and the open declared parents load again.
-- **Events**: `rowExpanded` is the user's or the API's action, never the load. The announcement of
-  an opening says « Chargement » when it shows a loading row, then the usual « … développé, n
-  lignes » when the children arrive, or « Échec du chargement ».
+  until Retry or a close. Even when the new rows show nothing new (the very same objects), the open
+  declared parents ask again at once, not at the next unrelated change. `rows.refresh` removes the
+  rows the loads brought that the grid still holds (a row the host removed since is not removed
+  again: no `unknown-row-id`), forgets every load (the running ones aborted), and the open declared
+  parents load again. A model destroyed (`destroy()`) aborts every load; an answer after it is
+  ignored.
+- **Events**: `rowExpanded` is the user's or the API's action, never the load.
+- **Announcements** (lead decision, review of step 7): only the user's actions are said. A user's
+  opening of one row that shows a loading row says « Chargement », then, for that request, the
+  usual « … développé, n lignes » when the children arrive, « Échec du chargement » on a failure, or
+  — no child — the row's name and the base's « Aucune ligne » (`grid.noRows`), joined by the base's
+  own pair `header.withSort` (« {header}, {priority} », the locale's comma; no new key, the tree
+  bundles do not grow). A user's Retry says « Chargement » and then its answer the same way. A
+  parent opened by the API, reopened by the API after a user's opening, or loading again after a
+  refresh or new rows, says neither « Chargement » nor its answer.
 - **Keys**: → opens a declared parent (it has children, unknown in number); ← on the loading or the
   error row goes to its parent; Enter on the error row retries (the button is not a tab stop: the
   grid stays one stop). A click on Retry is taken by the tree (no row click, no selection).
@@ -84,10 +95,16 @@ Arabic.
   zone, the params or the source changed) closes every row (no `rowExpanded`: the user changed the
   query, not the tree) and forgets the loads; the rows loaded go with the roots' answer. A row opened
   between the new epoch and the roots' answer asks in the new epoch. A refresh asks the roots again
-  in the same epoch; their answer replaces the rows, and the rows still open load their children
-  again. A child request is counted in `diagnostics.childFetches`.
+  in the same epoch and, as A's, aborts the child requests running: the open declared parents ask
+  again at once, an answer to an older request is dropped; the roots' answer then replaces the rows
+  (the children loaded go with it) and an open parent left with no child asks again — even when the
+  roots' answer shows nothing new. A child request is counted in `diagnostics.childFetches`.
 - **Server pages and a tree** (decision of step 7): the server's pages count the roots; a parent's
-  children come whole, never paged. Pages in the browser stay refused with a tree
+  children come whole, never paged. The footer's range counts the roots of the page (« 11 à 20 sur
+  30 », whatever the children and loading rows shown), and « Tout sélectionner » is offered once
+  every data row of the page is ticked (a loading row is never selectable).
+- **Export**: a loading or error row is never written to a CSV file, nor counted in the rows the
+  file will hold (the progress total). Pages in the browser stay refused with a tree
   (`unsupported-combination`, D2).
 
 ## Where DzGrid differs on purpose
@@ -103,7 +120,9 @@ Arabic.
 abort on collapse and on hiding, answer, empty answer, failure and retry, cache, setRows, refresh,
 filter, events), `packages/core/test/tree-lazy-server.test.ts` (B: the request, the channel per
 parent, stale answers, epochs, collapse during a request, pages of roots), the permutation test
-`packages/core/test/tree-lazy-permutations.test.ts` (1 000 seeded orderings), conformance
+`packages/core/test/tree-lazy-permutations.test.ts` (1 000 seeded orderings) and its independent
+oracle `tree-lazy-permutations-oracle.test.ts`, the review's `packages/core/test/tree-lazy-gaps.test.ts`
+and `packages/dom/test/tree-lazy-gaps.test.ts`, conformance
 `conformance/cases/tree/lazy-*`, `packages/dom/test/tree-lazy.test.ts` (the rows drawn, Retry by
 click and by Enter, announcements in French and Arabic, the focus through the replacement), browser
 `npm run test:browser -- --only tree`.
