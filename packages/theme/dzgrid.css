@@ -369,6 +369,9 @@
   .dzg-check[data-dzg-refused] .dzg-box {
     border-color: GrayText;
   }
+  .dzg-toggle {
+    color: ButtonText;
+  }
   .dzg-cell.dzg-flash {
     border-inline-start-color: Highlight;
   }
@@ -377,6 +380,16 @@
 .dzg[data-stale] .dzg-row .dzg-seg-start,
 .dzg[data-stale] .dzg-row .dzg-seg-end {
   color: var(--dzg-stale-fg, var(--tz-fg-muted));
+}
+
+.dzg-toggle {
+  color: var(--dzg-toggle-fg, var(--tz-fg-muted));
+}
+
+.dzg-row[data-context-row],
+.dzg-row[data-context-row] .dzg-seg-start,
+.dzg-row[data-context-row] .dzg-seg-end {
+  color: var(--dzg-context-fg, var(--tz-fg-muted));
 }
 
 .dzg-cell.dzg-flash {

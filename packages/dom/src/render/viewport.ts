@@ -12,8 +12,11 @@ const OVERSCAN_COLS = 1;
 
 export interface Painter {
   paint(box: ViewportBox): void;
-  /** Rows came or went by a transaction: the next paint keeps the view's top row in place (S3). */
-  rowsChanged(): void;
+  /**
+   * Rows came or went by a transaction: the next paint keeps the view's top row in place (S3).
+   * `expand` (rows opened or closed): the top row only, even at the end (what opens below it stays below).
+   */
+  rowsChanged(kind?: 'rows' | 'expand'): void;
   readonly paints: number;
 }
 
@@ -30,7 +33,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let available = -1;
   let colIndexOf: { version: number; index: Map<string, number> } = { version: -1, index: new Map() };
   let shown: { displayed: DisplayedRows<T>; key: RowKey | null; delta: number; atTop: boolean; atEnd: boolean } | null = null;
-  let anchorNext = false;
+  let anchorNext: 'rows' | 'expand' | null = null;
   let paints = 0;
   let firstData = false;
   // The cell part of each column: resolved again when the columns or the registry change.
@@ -92,6 +95,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     }
     const d = rows.displayed;
     const h = g.rowHeight();
+    // One row layout per paint (D7): a feature's (variable heights), or every row `h` tall.
+    const layout = g.layoutFor?.(d, h) ?? uniformRowLayout(d, h);
+    g.layout = layout;
+    g.viewBlock = box.block;
     const L = columns.layout;
     const visible = columns.visible();
 
@@ -111,10 +118,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       epochKey = ek;
       epoch++;
     }
-    const mk = `${d.count}|${h}|${box.block}`;
+    const mk = `${layout.total}|${h}|${box.block}`;
     if (!scroll.mapper || mk !== mapperKey) {
       mapperKey = mk;
-      const next = scrollMapper(d.count * h, g.env.maxPhysical ?? MAX_PHYSICAL, box.block);
+      const next = scrollMapper(layout.total, g.env.maxPhysical ?? MAX_PHYSICAL, box.block);
       // The body grows first: a scroll written before would be clamped to the old height.
       setPx(el.body, 'block-size', next.physicalHeight);
       // Taller or shorter rows (text zoom): the same row stays at the top, at the same fraction.
@@ -128,20 +135,22 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     // the top stays the top and the end stays the end.
     if (anchorNext && shown && shown.displayed !== d) {
       if (shown.atTop) scroll.scrollTo(0);
-      else if (shown.atEnd) scroll.scrollTo(mapper.maxLogical);
+      else if (shown.atEnd && anchorNext === 'rows') scroll.scrollTo(mapper.maxLogical);
       else if (shown.key !== null) {
         const at = d.indexOf(shown.key);
-        if (at !== -1) scroll.scrollTo(at * h + shown.delta);
+        if (at !== -1) scroll.scrollTo(layout.offsetOf(at) + shown.delta);
       }
     }
-    anchorNext = false;
-    const layout = uniformRowLayout(d, h);
+    anchorNext = null;
     const centerView = Math.max(0, box.inline - L.start.width - extra - L.end.width);
     const w = windowAt(layout, L.center.widths, scroll.logicalTop, scroll.physicalTop, box.scrollInline, { block: box.block, inline: centerView }, {
       // At rest a couple of rows (the body's node budget); more while scrolling fast.
       overscanRows: settings.overscan?.rows ?? overscanRows(g.now() - g.scrolledAt < 150 ? g.speed : 0, h, { min: OVERSCAN_ROWS, max: 40 }),
       overscanCols: settings.overscan?.cols ?? OVERSCAN_COLS,
     });
+
+    // Before anything of the rows moves (the layer included), and before the attributes count the header rows: what a feature reads of the old places.
+    for (const f of g.features) f.beforeRows?.();
 
     // ---- grid attributes ----
     setAttr(el.root, 'data-density', settings.density ?? 'comfortable');
@@ -160,8 +169,6 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     setPx(el.body, 'block-size', mapper.physicalHeight);
     setPx(el.body, 'inline-size', L.totalWidth + extra);
     setAttr(el.root, 'data-motion', settings.motion === false ? 'off' : null);
-    // Before anything of the rows moves (the layer included): what a feature reads of the old places.
-    for (const f of g.features) f.beforeRows?.();
     setPx(el.layer, 'inset-block-start', w.placement.layerTop);
 
     const ciKey = columns.version * 2 + (check ? 1 : 0);
@@ -218,11 +225,11 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     if (tipAt && (!tipAt.isConnected || g.tip.row !== (tipRow ? rows.row(rowRenderer.keyOf(tipRow)!)?.data : null))) g.tip.hide();
     for (const h of g.features) h.afterRows?.(frame as Frame<unknown>);
     after.rovingStop(d, visible);
-    const topIndex = d.count ? Math.min(d.count - 1, Math.floor(scroll.logicalTop / h)) : -1;
+    const topIndex = d.count ? layout.indexAt(scroll.logicalTop) : null;
     shown = {
       displayed: d,
-      key: topIndex >= 0 ? d.keyAt(d.index(topIndex)!) : null,
-      delta: topIndex >= 0 ? scroll.logicalTop - topIndex * h : 0,
+      key: topIndex !== null ? d.keyAt(topIndex) : null,
+      delta: topIndex !== null ? scroll.logicalTop - layout.offsetOf(topIndex) : 0,
       atTop: scroll.atTop,
       atEnd: scroll.atEnd,
     };
@@ -244,7 +251,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
 
   return {
     paint,
-    rowsChanged: () => { anchorNext = true; },
+    rowsChanged: (kind = 'rows') => { if (anchorNext !== 'rows') anchorNext = kind; },
     get paints() { return paints; },
   };
 }

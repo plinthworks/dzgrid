@@ -1,5 +1,5 @@
 import { formattersFor, localeCtx, type LocaleCtx } from '@dzgrid/core';
-import type { PartsMessageKey, RulesMessageKey } from './part-texts.js';
+import type { PartsMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
 
 /**
  * Every sentence the grid shows or says, by key (§3.9, D9). The grid never
@@ -100,7 +100,7 @@ export type MessageValue = string | PluralForms;
 export interface GridMessages {
   /** The language the bundle is written in: plural forms follow it, numbers follow the context. */
   readonly locale: string;
-  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey]?: MessageValue };
+  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey]?: MessageValue };
 }
 
 /** A bundle missing a key fails at once, naming it — not on some later paint. */
@@ -125,7 +125,7 @@ const rulesFor = (locale: string): Intl.PluralRules => {
  * placeholder without a value stays visible, so a missing one is seen in
  * testing rather than read as nothing.
  */
-export function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
+export function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
   const value = (m.text as Readonly<Record<string, MessageValue | undefined>>)[key];
   if (value === undefined) {
     // A host's key it forgot is shown as itself (and told by the caller); a grid key is a bug.

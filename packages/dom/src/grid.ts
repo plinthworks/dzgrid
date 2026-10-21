@@ -25,7 +25,7 @@ import { ROW_HEIGHT, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
 import { installWarmup } from './warmup.js';
 import { applyUpdate, closed, ctxOf } from './update.js';
-
+import { shapeOf } from './features.js';
 
 export interface GridApi {
   focusCell(row: RowKey, column: string): void;
@@ -92,7 +92,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const shared = { ...(initial.filterKinds && { filterKinds: kinds.get }), now: initial.clock ?? Date.now };
   const rows: RowModel<T> = initial.source
     ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...shared, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }) })
-    : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page, ...shared });
+    : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page, ...shared, ...shapeOf(initial.features) });
   const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false });
   // Operations without a source run in the browser, and are told (a source's model tells its own).
   // The filter kinds refused are told too.
@@ -113,7 +113,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     settings: closed(initial), ctx, headerRows: [], bands: [], spans: null, slots: null, features: [],
     get dir() { return dir; },
     set dir(d) { dir = d; },
-    pendingFocus: null, queued: false, hasFocus: false,
+    pendingFocus: null, queued: false, hasFocus: false, viewBlock: 0,
     intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0, remPx: geometry.read().remPx ?? 16,
     schedule, report, restoreFocus: () => {}, warm: null!, parts: featureParts(initial.features, () => g.settings.parts),
     now: () => win?.performance.now() ?? 0,
@@ -166,7 +166,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const announceSelection = selectionAnnouncer(g);
   const announceSort = sortAnnouncer(g);
   scope.add(kernel.subscribe((e) => {
-    if (e.type === 'modelUpdated' && e.kind === 'rows') painter.rowsChanged();
+    if (e.type === 'modelUpdated' && (e.kind === 'rows' || e.kind === 'expand')) painter.rowsChanged(e.kind);
     announceSort(e);
     if (e.type === 'fetchFailed') live.announce(g.msg('announce.error'));
     if (e.type === 'selectionChanged') announceSelection(e);

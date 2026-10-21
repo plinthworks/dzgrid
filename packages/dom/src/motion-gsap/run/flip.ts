@@ -26,8 +26,8 @@ export function flip(s: Scene, f: Frame<unknown>, tops: ReadonlyMap<RowKey, numb
     else if (was !== v.top) moved.push([k, v, was - v.top]);
   }
   if (moved.length > MAX_MOVED) return;
-  // A screen: the rows mounted, at their height (no read).
-  const screen = g.rowRenderer.mounted.size * g.rowHeight();
+  // A screen: the view's block, as the last paint measured it (no read).
+  const screen = g.viewBlock;
   for (const [k, v, d] of moved) {
     const ok = showing(g, v.el, k);
     if (Math.abs(d) > screen || s.hook(o.onRow, ok, v.el, rowMotion(s, f, k), 'moved') === false || !s.on('flip')) continue;

@@ -100,6 +100,8 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
       move(at, { kind: 'move', axis: 'row', delta: -1 });
       return;
     }
+    // A feature's own meaning of the key first (a tree's arrows on its column, `*`).
+    for (const f of g.features) if (f.keys?.(e, at, owner)) return void e.preventDefault();
     const intent = intentFor(e, { dir: g.dir, owner, mac: g.mac });
     // Space on a header does nothing here, and must not scroll the page either.
     if (!intent && owner === 'header' && (e.key === ' ' || e.key === 'Spacebar')) e.preventDefault();

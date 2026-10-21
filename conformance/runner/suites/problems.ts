@@ -2,6 +2,7 @@ import { checkPage } from '@dzgrid/core/internal';
 import { liveChangeProblems, messageProblems, partNameFor, resolveOperations, resolveColumns, type Problem } from '@dzgrid/core';
 import { createRowStore, compileFilter, missingFeatureProblems, sortIndices } from '@dzgrid/core/internal';
 import { refusalProblems } from '@dzgrid/core/rules';
+import { treeColumnProblems } from '@dzgrid/core/tree';
 // The Angular wrapper's registry rule (step 22): a pure module of that package, no Angular in it.
 import { shadowedParts } from '../../../packages/angular/src/shadow.js';
 import { harness } from '../harness.js';
@@ -65,6 +66,9 @@ export const problems: Record<string, Suite> = {
       // A tree's repairs and what it refuses beside it (Phase 4 step 3).
       case 'tree':
         return { problems: runTree(input).problems };
+      // A tree column the host named, shown but not first (Phase 4 step 4).
+      case 'tree-column':
+        return { problems: shape(treeColumnProblems(input.visible, input.column)) };
       case 'sort': {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(sortIndices(input.sort, null, h.env()).problems) };

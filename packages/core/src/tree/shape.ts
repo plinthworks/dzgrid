@@ -232,3 +232,11 @@ interface View { readonly all: Buckets; readonly F: Filtered; readonly shown: Bu
 export function treeConflicts(o: { readonly spans?: boolean; readonly detail?: boolean; readonly page?: boolean }): Problem[] {
   return (['spans', 'detail', 'page'] as const).filter((f) => o[f]).map((f) => problem('unsupported-combination', 'warning', f === 'page' ? 'pagination' : f, 'tree'));
 }
+
+/**
+ * A tree column the host named that is shown but not first (D6): allowed, told as a warning (screen
+ * readers expect the hierarchy in the first column). `visible`: the visible columns' ids, in order.
+ */
+export function treeColumnProblems(visible: readonly string[], column: string | undefined): Problem[] {
+  return column !== undefined && visible[0] !== column && visible.includes(column) ? [problem('tree-column-not-first', 'warning', 'tree.column', column)] : [];
+}

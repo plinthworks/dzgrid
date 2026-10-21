@@ -42,6 +42,7 @@ export const PROBLEM_CODES = [
   'unsupported-combination',
   'tree-orphan',
   'tree-cycle',
+  'tree-column-not-first',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

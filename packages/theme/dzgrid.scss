@@ -439,6 +439,11 @@ $emit: true !default;
       border-color: GrayText;
     }
 
+    // A tree's toggle (Phase 4 step 4): drawn as the system draws a control's text.
+    .dzg-toggle {
+      color: ButtonText;
+    }
+
     // A value flash's mark (step 26): the system's highlight.
     .dzg-cell.dzg-flash {
       border-inline-start-color: Highlight;
@@ -450,6 +455,19 @@ $emit: true !default;
   .dzg[data-stale] .dzg-row .dzg-seg-start,
   .dzg[data-stale] .dzg-row .dzg-seg-end {
     color: var(--dzg-stale-fg, var(--tz-fg-muted));
+  }
+
+  // A tree (@dzgrid/dom/tree, Phase 4 step 4): the toggle's chevron in the muted colour (3:1 against
+  // the row, hovered or selected too); an ancestor shown only for its matches (`data-context-row`)
+  // in the muted text colour, not an opacity (it keeps 4.5:1), its text the same for a screen reader.
+  .dzg-toggle {
+    color: var(--dzg-toggle-fg, var(--tz-fg-muted));
+  }
+
+  .dzg-row[data-context-row],
+  .dzg-row[data-context-row] .dzg-seg-start,
+  .dzg-row[data-context-row] .dzg-seg-end {
+    color: var(--dzg-context-fg, var(--tz-fg-muted));
   }
 
   // The value flash (the motion feature, step 26): a tint the motion fades (--dzg-flash 1 → 0)

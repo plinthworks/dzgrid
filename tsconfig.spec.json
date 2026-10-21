@@ -62,6 +62,9 @@
       "@dzgrid/dom/rules": [
         "./packages/dom/src/rules.ts"
       ],
+      "@dzgrid/dom/tree": [
+        "./packages/dom/src/tree.ts"
+      ],
       "@dzgrid/dom/motion-gsap": [
         "./packages/dom/src/motion-gsap.ts"
       ],

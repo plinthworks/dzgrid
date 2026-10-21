@@ -1,5 +1,5 @@
 import type { GridContext } from './context.js';
-import type { FocusPos, Intent, ResolvedColumn, RowKey } from '@dzgrid/core';
+import type { FocusPos, Intent, KeyOwner, ResolvedColumn, RowKey, RowShape } from '@dzgrid/core';
 import type { OverlayState } from './render/overlay.js';
 import type { TipFor } from './render/tooltip.js';
 import type { Goal, Move, MoveShape, SpanLookup } from './keys/move.js';
@@ -18,8 +18,19 @@ export interface GridFeature {
   readonly id: string;
   /** Its default parts, under the host's `settings.parts` (the first feature giving a name wins). */
   readonly parts?: Readonly<Record<string, SlotPart>>;
+  /**
+   * How the browser's rows are shown when not as a flat list (a tree, Phase 4 D2): asked once, before
+   * the model is made (a shape is fixed for the grid's life). The first feature giving one wins.
+   */
+  shape?(): RowShape<unknown>;
   setup(g: GridContext<unknown>): FeatureHandle;
 }
+
+/** The model's options a feature's shape adds (none without one). */
+export const shapeOf = (features: readonly GridFeature[] | undefined): { shape?: RowShape<any> } => {
+  const f = features?.find((x) => x.shape);
+  return f ? { shape: f.shape!() } : {};
+};
 
 export interface FeatureHandle {
   /** Header rows under the column headers (a floating filter row). */
@@ -45,6 +56,11 @@ export interface FeatureHandle {
    * imports the other.
    */
   readonly filter?: { edits(col: ResolvedColumn<unknown>, who: object): HeaderFilter | null; flush(column: string): void };
+  /**
+   * A key on the grid, before the grid's own meaning of it (`intentFor`): true when the feature
+   * handled it (the grid then only prevents its default). `at`: the focus; `owner`: who has the key.
+   */
+  keys?(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean;
   /** Runs at each paint before the rows are placed (motion reads the old places, step 26). */
   beforeRows?(): void;
   /** Runs at each paint once the rows are placed (what is drawn over them). */

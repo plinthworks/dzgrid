@@ -41,6 +41,10 @@
       "types": "./src/rules.ts",
       "default": "./src/rules.ts"
     },
+    "./tree": {
+      "types": "./src/tree.ts",
+      "default": "./src/tree.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"
@@ -124,6 +128,18 @@
     "./locales/ar-rules": {
       "types": "./src/locales/ar-rules.ts",
       "default": "./src/locales/ar-rules.ts"
+    },
+    "./locales/en-tree": {
+      "types": "./src/locales/en-tree.ts",
+      "default": "./src/locales/en-tree.ts"
+    },
+    "./locales/fr-tree": {
+      "types": "./src/locales/fr-tree.ts",
+      "default": "./src/locales/fr-tree.ts"
+    },
+    "./locales/ar-tree": {
+      "types": "./src/locales/ar-tree.ts",
+      "default": "./src/locales/ar-tree.ts"
     }
   },
   "peerDependencies": {

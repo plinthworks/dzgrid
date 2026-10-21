@@ -168,6 +168,17 @@ describe('rows glide after a sort or a filter (FLIP)', () => {
     expect(running(r1)).toBe(0);
   });
 
+  it('measures a screen from the view’s block (g.viewBlock, Phase 4 D12), not from the rows mounted', async () => {
+    // r0 goes from row 0 to row 11 (352 px): further than the view (320 px), within the rows mounted
+    // (12 with the overscan, 384 px). It does not glide; its neighbours, one row each, do.
+    const rows = Array.from({ length: 60 }, (_, i): R => ({ id: `r${i}`, n: i === 0 ? 11.5 : i, s: `s${i}` }));
+    const g = await grid({}, {}, { rows });
+    expect(g.host.querySelectorAll('.dzg-row').length * 32).toBeGreaterThan(352);
+    sortN(g);
+    expect(running(g.row('r0'))).toBe(0);
+    expect(running(g.row('r1'))).toBe(1);
+  });
+
   it('skips when the view scrolled between the change and the paint', async () => {
     const g = await grid();
     g.g.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'n', dir: 'asc' }] }, 'user');

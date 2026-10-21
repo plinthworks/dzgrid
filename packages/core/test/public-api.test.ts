@@ -42,8 +42,8 @@ const CSV = ['csvChunks', 'csvColumns', 'csvRows', 'csvSeparatorFor', 'toCsv'];
 /** `@dzgrid/core/rules` (step 21): the selection rules' vetting, never in the base. */
 const RULES = ['refusalProblems', 'ruleGate', 'vetSelection'];
 
-/** `@dzgrid/core/tree` (Phase 4 step 3): the tree view, never in the base. */
-const TREE = ['treeConflicts', 'treeShape'];
+/** `@dzgrid/core/tree` (Phase 4 step 3): the tree view, never in the base; `treeColumnProblems` (step 4). */
+const TREE = ['treeColumnProblems', 'treeConflicts', 'treeShape'];
 
 describe('the public surface', () => {
   it('keeps the tree entry apart (Phase 4 step 3)', () => {

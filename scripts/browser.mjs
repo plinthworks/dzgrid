@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26).
+ * `-- --only motion` motion with GSAP, step 26; `-- --only tree` the tree, Phase 4 step 4).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -1030,6 +1030,175 @@ async function motionChecks(name, ctx) {
   }
 }
 
+/**
+ * The tree (Phase 4 step 4, docs/behaviors/tree-view.md, tree-keys.md, tree-filter.md): French light and
+ * Arabic right to left dark. axe 0 closed, open, filtered, with selected and hovered rows; the toggle a
+ * 24 px target whose chevron points to the inline end; real keys (mirrored in Arabic); what is said; the
+ * focus kept through a collapse on the next frame; forced colours; then a 100 000-row tree opened and scrolled.
+ */
+async function treeChecks(name, ctx) {
+  const open = async (qs) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 760 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/tree.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    await page.evaluate(() => { window.said = []; new MutationObserver(() => { const t = document.querySelector('.dzg-live').textContent; if (t) window.said.push(t); }).observe(document.querySelector('.dzg-live'), { childList: true, characterData: true, subtree: true }); });
+    return { page, errors };
+  };
+  const cases = [
+    { qs: 'locale=fr-FR&theme=light', rtl: false, tag: 'tree fr ltr light', fwd: 'ArrowRight', back: 'ArrowLeft', opened: 'Service 1 développé, 77 lignes', closed: 'Service 1 réduit' },
+    { qs: 'locale=ar-DZ&dir=rtl&theme=dark', rtl: true, tag: 'tree ar rtl dark', fwd: 'ArrowLeft', back: 'ArrowRight', opened: 'تم توسيع Service 1، 77 صفا', closed: 'تم طي Service 1' },
+  ];
+  const rowOf = (id) => `.dzg-layer > .dzg-row[data-tid="${id}"]`;
+  for (const c of cases) {
+    const { page, errors } = await open(c.qs);
+    // Rows by id, for the checks (the DOM holds no id: tagged here from the kernel's keys).
+    const tag = () => page.evaluate(() => {
+      const d = window.t.grid.kernel.rows.displayed;
+      for (const r of document.querySelectorAll('.dzg-layer > .dzg-row')) {
+        const i = Number(r.getAttribute('aria-rowindex')) - 3;
+        r.dataset.tid = i >= 0 && i < d.count ? String(d.keyAt(i)).replace(/^d:\d+:/, '') : '';
+      }
+    });
+    await tag();
+    const s0 = await page.evaluate(() => {
+      const vp = document.querySelector('.dzg-viewport');
+      const row = (i) => document.querySelector(`.dzg-layer > .dzg-row[aria-rowindex="${i}"]`);
+      const a = (r) => r && ['aria-level', 'aria-posinset', 'aria-setsize', 'aria-expanded'].map((x) => r.getAttribute(x));
+      return { role: vp.getAttribute('role'), first: a(row(3)), child: a(row(4)), stops: document.querySelectorAll('.dzg [tabindex="0"]').length };
+    });
+    let v = await axe(page);
+    check(name, `${c.tag}: role treegrid, Service 0 open (level 1, 1 of 100), its first child level 2; one tab stop; axe 0`, s0.role === 'treegrid' && JSON.stringify(s0.first) === '["1","1","100","true"]' && s0.child?.[0] === '2' && s0.stops === 1 && v.length === 0, { s0, v });
+    // The toggle: a 24 px target, its chevron to the inline end when closed, down when open.
+    // Patient 3 of Service 0 has stays (closed); Service 0 is open, at level 1 (its toggle at the cell's start).
+    const tg = await page.evaluate((sel) => {
+      const t = document.querySelector(`${sel} .dzg-toggle`);
+      const open = document.querySelector('.dzg-layer > .dzg-row[data-tid="s0"] .dzg-toggle');
+      const b = t.getBoundingClientRect();
+      const o = open.getBoundingClientRect();
+      const cell = open.closest('.dzg-cell').getBoundingClientRect();
+      const rot = (x) => getComputedStyle(x, '::before').rotate;
+      return { w: b.width, h: b.height, rot: rot(t), openRot: rot(open), startGap: document.documentElement.dir === 'rtl' ? cell.right - o.right : o.left - cell.left, indent: Math.abs(b.left - o.left), hidden: t.getAttribute('aria-hidden'), focusable: t.tabIndex };
+    }, rowOf('s0p3'));
+    check(name, `${c.tag}: the toggle is aria-hidden, not focusable, ≥ 24 × 24 px at the cell's start; chevron ${c.rtl ? '45deg (left)' : '-45deg (right)'} closed, down open`, tg.w >= 24 && tg.h >= 24 && tg.hidden === 'true' && tg.focusable === -1 && tg.rot === (c.rtl ? '45deg' : '-45deg') && tg.openRot === (c.rtl ? '-45deg' : '45deg') && tg.startGap >= 0 && tg.startGap < 16 && Math.abs(tg.indent - 16) < 1, tg);
+    // Real keys on Service 1 (closed), in the tree column.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key('s1'), 'name'));
+    await frames(page);
+    const at = () => page.evaluate(() => { const a = document.activeElement; const r = a.closest('.dzg-row'); const d = window.t.grid.kernel.rows.displayed; return `${r ? String(d.keyAt(Number(r.getAttribute('aria-rowindex')) - 3)).replace(/^d:\d+:/, '') : null}/${a.dataset.col}`; });
+    await page.keyboard.press(c.fwd);
+    await page.waitForTimeout(120);
+    const k1 = { at: await at(), exp: await page.evaluate(() => document.activeElement.closest('.dzg-row').getAttribute('aria-expanded')), said: await page.evaluate(() => window.said.at(-1)) };
+    await page.keyboard.press(c.fwd);
+    await frames(page);
+    const k2 = await at();
+    await page.keyboard.press(c.back);
+    await frames(page);
+    await page.keyboard.press(c.back);
+    await page.waitForTimeout(120);
+    const k3 = { at: await at(), exp: await page.evaluate(() => document.activeElement.closest('.dzg-row').getAttribute('aria-expanded')), said: await page.evaluate(() => window.said.at(-1)) };
+    await page.keyboard.press(c.back);
+    await frames(page);
+    const k4 = await at();
+    check(name, `${c.tag}: ${c.fwd} opens Service 1 ("${c.opened}"), again moves to the next column; ${c.back} back, closes ("${c.closed}"), on a closed root does nothing`,
+      k1.at === 's1/name' && k1.exp === 'true' && k1.said === c.opened && k2 === 's1/city' && k3.at === 's1/name' && k3.exp === 'false' && k3.said === c.closed && k4 === 's1/name', { k1, k2, k3, k4 });
+    // Down into Service 0's children, back to the parent; `*` opens the siblings.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key('s0p2'), 'name'));
+    await frames(page);
+    await page.keyboard.press(c.back);
+    await frames(page);
+    const up = await at();
+    await page.keyboard.press('*');
+    await page.waitForTimeout(120);
+    const star = await page.evaluate(() => ({ open: window.t.grid.kernel.expansion.size, said: window.said.at(-1), at: document.activeElement.dataset.col }));
+    check(name, `${c.tag}: ${c.back} on a leaf goes to its parent, same column; * opens the 99 other services, one sentence`, up === 's0/name' && star.open === 100 && /99/.test(star.said ?? '') && star.at === 'name', { up, star });
+    v = await axe(page);
+    check(name, `${c.tag}: axe 0 with every service open`, v.length === 0, v);
+    // The focus kept: in a child, Service 2 collapsed by the application, the focus on Service 2 on the next frame.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key('s2p5'), 'age'));
+    await frames(page);
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'rows.expand', rows: [window.t.key('s2')], expanded: false }, 'api'));
+    await frames(page, 3);
+    const kept = await at();
+    check(name, `${c.tag}: a collapse by the application hiding the focus puts it on the parent row, same column (not body)`, kept === 's2/age', kept);
+    // Selected and hovered rows, the pointer on a toggle (no selection).
+    await page.evaluate(() => { const g = window.t.grid; g.kernel.dispatch({ type: 'selection.toggle', row: window.t.key('s0') }, 'user'); g.kernel.dispatch({ type: 'selection.toggle', row: window.t.key('s0p1') }, 'user'); window.t.scrollTo(0); });
+    await frames(page);
+    await tag();
+    await page.hover(`${rowOf('s0p3')} .dzg-cell[data-col="city"]`);
+    v = await axe(page);
+    await page.click(`${rowOf('s0p3')} .dzg-toggle`);
+    await frames(page);
+    const clickTg = await page.evaluate(() => ({ exp: window.t.grid.kernel.expansion.has(window.t.key('s0p3')), sel: window.t.grid.kernel.selection.keys.size }));
+    check(name, `${c.tag}: axe 0 with selected and hovered rows; a click on a toggle opens without selecting`, v.length === 0 && clickTg.exp && clickTg.sel === 2, { v, clickTg });
+    await page.screenshot({ path: `${OUT}/${name}-tree-${c.rtl ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    // Filtered: matches and their muted ancestors, setsize of what is shown; axe 0; cleared, the tree as it was.
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'filter.column', column: 'name', filter: { type: 'text', op: 'equals', value: 'Patient 13' } }, 'user'));
+    await page.waitForTimeout(150);
+    await tag();
+    const f = await page.evaluate(() => {
+      const ctxRow = document.querySelector('.dzg-layer > .dzg-row[data-context-row]');
+      const match = document.querySelector('.dzg-layer > .dzg-row:not([data-context-row])');
+      const col = (r) => getComputedStyle(r.querySelector('.dzg-cell[data-col="name"]')).color;
+      return { shown: window.t.grid.kernel.rows.displayed.count, filtered: window.t.grid.kernel.rows.counts.filtered, muted: col(ctxRow), plain: col(match), set: match.getAttribute('aria-setsize'), level: match.getAttribute('aria-level'), said: window.said.at(-1) };
+    });
+    v = await axe(page);
+    check(name, `${c.tag}: filtered on "Patient 13": 100 matches with their services muted (another colour), each 1 of 1 at level 2; axe 0`, f.shown === 200 && f.filtered === 100 && f.muted !== f.plain && f.set === '1' && f.level === '2' && v.length === 0, { f, v });
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'filter.column', column: 'name', filter: null }, 'user'));
+    await page.waitForTimeout(100);
+    const back = await page.evaluate(() => ({ open: window.t.grid.kernel.expansion.size, muted: document.querySelectorAll('[data-context-row]').length }));
+    check(name, `${c.tag}: the filter cleared, the tree as the user had it (99 services and one patient open), nothing muted`, back.open === 100 && back.muted === 0, back);
+    // Forced colours: the chevron in ButtonText.
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.waitForTimeout(200);
+    const forced = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.color = 'ButtonText';
+      document.body.append(probe);
+      const want = getComputedStyle(probe).color;
+      probe.remove();
+      const t = document.querySelector('.dzg-row[aria-expanded] .dzg-toggle');
+      return { want, color: getComputedStyle(t, '::before').borderBottomColor, visible: getComputedStyle(t).visibility };
+    });
+    await page.screenshot({ path: `${OUT}/${name}-tree-${c.rtl ? 'ar' : 'fr'}-forced.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    // No axe here: Chrome's emulated forced colours over a dark page give the page's own heading a failing
+    // pair (an artefact of the emulation, seen outside the grid); the system draws real forced colours itself.
+    check(name, `${c.tag}: forced colours: the chevron drawn in ButtonText`, forced.color === forced.want && forced.visible === 'visible', forced);
+    await page.emulateMedia({ forcedColors: 'none' });
+    check(name, `${c.tag}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+  // ≈ 100 000 rows, everything opened, scrolled to the middle and the end: the rows there say their place.
+  {
+    const { page, errors } = await open('locale=fr-FR&rows=100000');
+    const r = await page.evaluate(async () => {
+      const g = window.t.grid;
+      const t0 = performance.now();
+      g.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'user');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const ms = performance.now() - t0;
+      const d = g.kernel.rows.displayed;
+      const look = () => [...document.querySelectorAll('.dzg-layer > .dzg-row')].map((el) => {
+        const i = Number(el.getAttribute('aria-rowindex')) - 3;
+        return { i, ok: el.getAttribute('aria-level') === String(d.levelAt(i) + 1) && el.getAttribute('aria-posinset') === String(d.posAt(i)) && el.getAttribute('aria-setsize') === String(d.sizeAt(i)) && !!el.querySelector('.dzg-cell[data-col="name"] > .dzg-toggle') };
+      });
+      window.t.scrollTo(window.t.logicalTop() + d.count * 16);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const mid = look();
+      document.querySelector('.dzg-viewport').scrollTop = 1e9;
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const end = look();
+      return { count: d.count, ms, mid: { n: mid.length, bad: mid.filter((x) => !x.ok).length, first: mid[0]?.i }, end: { n: end.length, bad: end.filter((x) => !x.ok).length, last: Math.max(...end.map((x) => x.i)) } };
+    });
+    check(name, `tree 100 000: every row opened (${r.count} shown, ${Math.round(r.ms)} ms to the paint), the middle and the end drawn with their level, place and toggle`, r.count > 99_000 && r.mid.n > 5 && r.mid.bad === 0 && r.mid.first > 40_000 && r.end.bad === 0 && r.end.last === r.count - 1, r);
+    check(name, 'tree 100 000: no page error', errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -1040,6 +1209,7 @@ async function runEngine(name) {
       if (only === 'parts' && name === 'chrome') await partsChecks(name, ctx);
       if (only === 'rules' && name === 'chrome') await rulesChecks(name, ctx);
       if (only === 'motion' && name === 'chrome') await motionChecks(name, ctx);
+      if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx);
       return;
     }
 
@@ -1368,6 +1538,7 @@ async function runEngine(name) {
     if (name === 'chrome') await partsChecks(name, ctx);
     if (name === 'chrome') await rulesChecks(name, ctx);
     if (name === 'chrome') await motionChecks(name, ctx);
+    if (name === 'chrome') await treeChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

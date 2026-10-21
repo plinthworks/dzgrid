@@ -79,7 +79,13 @@
     { "what": "cell text on a value flash, selected row", "fg": "--tz-fg", "bg": "--dzg-flash-selected-bg", "min": 4.5 },
     { "what": "cell text on a value flash, row hovered", "fg": "--tz-fg", "bg": "--dzg-flash-hover-bg", "min": 4.5 },
     { "what": "value flash mark", "fg": "--dzg-flash-color", "bg": "--dzg-flash-bg", "min": 3 },
-    { "what": "value flash mark, selected row", "fg": "--dzg-flash-color", "bg": "--dzg-flash-selected-bg", "min": 3 }
+    { "what": "value flash mark, selected row", "fg": "--dzg-flash-color", "bg": "--dzg-flash-selected-bg", "min": 3 },
+    { "what": "tree toggle", "fg": "--dzg-toggle-fg", "bg": "--tz-bg", "min": 3 },
+    { "what": "tree toggle on hover", "fg": "--dzg-toggle-fg", "bg": "--dzg-row-hover-bg", "min": 3 },
+    { "what": "tree toggle, selected row", "fg": "--dzg-toggle-fg", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "tree ancestor shown for its matches", "fg": "--dzg-context-fg", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "tree ancestor shown for its matches, hovered", "fg": "--dzg-context-fg", "bg": "--dzg-row-hover-bg", "min": 4.5 },
+    { "what": "tree ancestor shown for its matches, selected", "fg": "--dzg-context-fg", "bg": "--dzg-row-selected-bg", "min": 4.5 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -88,6 +94,8 @@
     "--dzg-row-selected-bg": "color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg))",
     "--dzg-focus-ring": "var(--tz-accent)",
     "--dzg-stale-fg": "var(--tz-fg-muted)",
+    "--dzg-toggle-fg": "var(--tz-fg-muted)",
+    "--dzg-context-fg": "var(--tz-fg-muted)",
     "--tz-range-within-bg": "color-mix(in srgb, var(--tz-accent) 16%, var(--tz-bg))",
     "--dzg-badge-neutral-bg": "color-mix(in srgb, var(--tz-fg-muted) 12%, var(--tz-bg))",
     "--dzg-badge-info-bg": "color-mix(in srgb, var(--tz-accent) 12%, var(--tz-bg))",

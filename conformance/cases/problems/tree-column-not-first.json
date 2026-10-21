@@ -1,0 +1,15 @@
+{
+  "id": "tree-column-not-first",
+  "suite": "problems",
+  "description": "The host names a tree column that is shown but not first: allowed, one warning at `tree.column` naming it (screen readers expect the hierarchy first). Not told when it is first, hidden, or not named.",
+  "input": {
+    "op": "tree-column",
+    "visible": ["name", "age", "city"],
+    "column": "age"
+  },
+  "expected": {
+    "problems": [
+      { "code": "tree-column-not-first", "severity": "warning", "path": "tree.column", "detail": "age" }
+    ]
+  }
+}

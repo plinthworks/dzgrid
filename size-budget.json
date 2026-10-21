@@ -102,6 +102,18 @@
       "file": "packages/dom/src/locales/ar-rules.ts",
       "maxGzip": 250
     },
+    "@dzgrid/dom/locales/en-tree": {
+      "file": "packages/dom/src/locales/en-tree.ts",
+      "maxGzip": 200
+    },
+    "@dzgrid/dom/locales/fr-tree": {
+      "file": "packages/dom/src/locales/fr-tree.ts",
+      "maxGzip": 220
+    },
+    "@dzgrid/dom/locales/ar-tree": {
+      "file": "packages/dom/src/locales/ar-tree.ts",
+      "maxGzip": 250
+    },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
       "maxGzip": 2500
@@ -196,6 +208,16 @@
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/tree": {
+      "file": "packages/dom/src/tree.ts",
+      "maxGzip": 2600,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/tree",
         "@dzgrid/dom/internal"
       ]
     },

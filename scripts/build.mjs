@@ -27,7 +27,7 @@ const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'in
  */
 const PACKAGES = {
   core: ['.', './internal', './server', './spans', './csv', './rules', './tree'],
-  dom: ['.', './internal', './popup', './spans', './slots', './search', './pagination', './export', './parts', './rules', './motion-gsap', './filters', './locales/en', './locales/fr', './locales/ar', './locales/en-filters', './locales/fr-filters', './locales/ar-filters', './locales/en-pagination', './locales/fr-pagination', './locales/ar-pagination', './locales/en-export', './locales/fr-export', './locales/ar-export', './locales/en-parts', './locales/fr-parts', './locales/ar-parts', './locales/en-rules', './locales/fr-rules', './locales/ar-rules'],
+  dom: ['.', './internal', './popup', './spans', './slots', './search', './pagination', './export', './parts', './rules', './tree', './motion-gsap', './filters', './locales/en', './locales/fr', './locales/ar', './locales/en-filters', './locales/fr-filters', './locales/ar-filters', './locales/en-pagination', './locales/fr-pagination', './locales/ar-pagination', './locales/en-export', './locales/fr-export', './locales/ar-export', './locales/en-parts', './locales/fr-parts', './locales/ar-parts', './locales/en-rules', './locales/fr-rules', './locales/ar-rules', './locales/en-tree', './locales/fr-tree', './locales/ar-tree'],
 };
 /** Built after the TypeScript packages, against their dist/ declarations. */
 const ANGULAR = 'angular';

@@ -1,4 +1,5 @@
 import type { CellFocus, DisplayedRows, FocusPos, RowKey } from '@dzgrid/core';
+import { sameFocus } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import { CHECK_WIDTH } from '../render/rows.js';
 
@@ -76,9 +77,11 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     if (i === -1) return;
     const box = g.geometry.read();
     if (column !== undefined) scrollInlineTo(column);
-    const h = g.rowHeight();
+    // A feature's row layout (D7) when it gives one; the uniform rows' arithmetic otherwise.
+    const L = g.layoutFor && g.layout;
+    const h = L ? L.heightOf(i) : g.rowHeight();
     const top = g.scroll.logicalTop;
-    const off = i * h;
+    const off = L ? L.offsetOf(i) : i * h;
     let next = top;
     if (off < top) next = off;
     else if (off + h > top + box.block) next = off + h - box.block;
@@ -162,7 +165,10 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
       const same = e.focus && ('header' in p ? e.focus.kind === 'header' && e.focus.column === p.header && (e.focus.level ?? 0) === (p.level ?? 0) : e.focus.kind === 'cell' && e.focus.row === p.row && e.focus.column === p.column);
       if (!same) g.pendingFocus = null;
     }
-    if (e.source === 'data' && e.focus && g.hasFocus && !el.viewport.contains(g.doc.activeElement)) {
+    // Moved by the data (a row hidden or removed): the DOM follows, also when the old cell is still
+    // there until the next paint takes it away (a collapse on the next frame).
+    const a = g.doc.activeElement as HTMLElement | null;
+    if (e.source === 'data' && e.focus && g.hasFocus && (!a || !el.viewport.contains(a) || !sameFocus(positionOf(a), e.focus))) {
       g.pendingFocus = e.focus.kind === 'cell' ? e.focus : { header: e.focus.column, level: e.focus.level ?? 0 };
     }
   }));

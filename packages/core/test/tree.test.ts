@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { clientRows, createColumnModel, createKernel, dataKey, localeCtx, makeQuery, type GridEvent, type Query, type RowKey } from '@dzgrid/core';
-import { treeConflicts, treeShape, type TreeOptions, type TreeRows } from '@dzgrid/core/tree';
+import { treeColumnProblems, treeConflicts, treeShape, type TreeOptions, type TreeRows } from '@dzgrid/core/tree';
 import type { TR } from './support/tree-oracle.js';
 
 /**
@@ -324,6 +324,14 @@ describe('what a tree does not combine with', () => {
       { code: 'unsupported-combination', severity: 'warning', path: 'detail', detail: 'tree' },
     ]);
     expect(treeConflicts({})).toEqual([]);
+  });
+
+  it('a tree column named, shown and not first: one warning; first, hidden or not named: nothing (Phase 4 step 4)', () => {
+    expect(treeColumnProblems(['a', 'b'], 'b')).toEqual([{ code: 'tree-column-not-first', severity: 'warning', path: 'tree.column', detail: 'b' }]);
+    expect(treeColumnProblems(['a', 'b'], 'a')).toEqual([]);
+    expect(treeColumnProblems(['a', 'b'], 'c')).toEqual([]);
+    expect(treeColumnProblems(['a', 'b'], undefined)).toEqual([]);
+    expect(treeColumnProblems([], 'a')).toEqual([]);
   });
 });
 

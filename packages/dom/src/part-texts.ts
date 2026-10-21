@@ -19,3 +19,11 @@ export interface RulesMessages {
   readonly locale: string;
   readonly text: { readonly [K in RulesMessageKey]: MessageValue };
 }
+
+/** The tree's texts (`@dzgrid/dom/tree`, Phase 4 step 4), in their own bundles (`locales/<lang>-tree`): optional here, required by `tree()`. */
+export type TreeMessageKey = 'tree.expanded' | 'tree.collapsed' | 'tree.expandedSome';
+/** A tree bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_TREE.text }`. */
+export interface TreeMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in TreeMessageKey]: MessageValue };
+}
