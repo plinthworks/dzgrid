@@ -12,6 +12,8 @@ export interface Structure {
   readonly parent: Int32Array;
   readonly depth: Uint32Array;
   readonly kids: Uint32Array;
+  /** The deepest level (0: roots only): what a flatten's stack needs. */
+  readonly maxDepth: number;
   readonly problems: readonly Problem[];
 }
 
@@ -31,7 +33,8 @@ export function structure<T>(snap: RowSnapshot<T>, parentId: (row: T) => RowIdIn
     if (raw !== null && raw !== undefined && raw !== '') {
       const id = canonicalId(raw);
       p = id === null ? -1 : snap.lookup(id);
-      if (p < 0) problems.push(problem('tree-orphan', 'warning', `rows[${i}]`));
+      // Told by the row's id, not its place: a removal elsewhere does not make it a new problem.
+      if (p < 0) problems.push(problem('tree-orphan', 'warning', 'parentId', snap.ids[i]));
     }
     parent[i] = p;
   }
@@ -51,13 +54,14 @@ export function structure<T>(snap: RowSnapshot<T>, parentId: (row: T) => RowIdIn
       let first = x;
       for (let m = parent[x]!; m !== x; m = parent[m]!) if (m < first) first = m;
       parent[first] = -1;
-      problems.push(problem('tree-cycle', 'warning', `rows[${first}]`));
+      problems.push(problem('tree-cycle', 'warning', 'parentId', snap.ids[first]));
     }
     while (len) state[path[--len]!] = 2;
   }
   // Depths, by walking up to a row whose depth is known (state reused: 3 = known).
   const depth = new Uint32Array(n);
   const kids = new Uint32Array(n);
+  let maxDepth = 0;
   for (let s = 0; s < n; s++) {
     let len = 0;
     let x = s;
@@ -70,11 +74,12 @@ export function structure<T>(snap: RowSnapshot<T>, parentId: (row: T) => RowIdIn
       const y = path[--len]!;
       depth[y] = ++d;
       state[y] = 3;
+      if (d > maxDepth) maxDepth = d;
     }
     const p = parent[s]!;
     if (p >= 0) kids[p] = kids[p]! + 1;
   }
-  return { n, parent, depth, kids, problems };
+  return { n, parent, depth, kids, maxDepth, problems };
 }
 
 /**

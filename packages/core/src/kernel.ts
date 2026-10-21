@@ -2,7 +2,7 @@ import type { ColumnModel, ColumnState } from './columns/model.js';
 import type { ColumnOrGroup } from './columns/defs.js';
 import type { LocaleCtx } from './value/locale.js';
 import { reconcileFocus, sameFocus, type FocusOwner, type FocusPos } from './focus.js';
-import { isDataKey, type RowKey } from './ids.js';
+import { isDataKey, type DisplayIndex, type RowKey } from './ids.js';
 import type { ModelChange, RowModel, RowScope } from './model/client.js';
 import { isJson, type ColumnFilter, type FilterModel, type Json } from './filter/model.js';
 import { canonical, makeQuery, type Query } from './model/query.js';
@@ -186,7 +186,7 @@ export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
   readonly selection: SelectionState;
   readonly anchor: RowKey | null;
   readonly focus: FocusPos | null;
-  /** The rows the user opened (a tree's, details'): kept apart from the query, so opening resets no page, selection or request. */
+  /** The rows the user opened (a tree's, details'): kept apart from the query, so opening resets no page, selection or request. Live: a toggle changes it in place (copy it to keep a state). */
   readonly expansion: ReadonlySet<RowKey>;
   /** Non-null only for an everything-except selection tied to the query: what a host's bulk action reads. */
   readonly selectionScope: SelectionScope | null;
@@ -492,23 +492,11 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         return OK;
       }
       case 'rows.expandAll': {
-        if (!rows.setExpansion || !rows.expandable || !rows.expansion) return refuse('expansion-off');
+        if (!rows.expandAll || !rows.expansion) return refuse('expansion-off');
         const depth = cmd.depth ?? Infinity;
         if (depth !== Infinity && !(Number.isInteger(depth) && depth >= 0)) return refuse('invalid-depth');
-        const was = rows.expansion;
-        let next: Set<RowKey>;
-        if (cmd.expanded) next = new Set([...was, ...rows.expandable(depth)]);
-        else if (depth === Infinity) next = new Set();
-        else {
-          // Closed from `depth` down: the levels above keep their state.
-          const above = new Set(rows.expandable(depth));
-          const every = new Set(rows.expandable());
-          next = new Set([...was].filter((k) => above.has(k) || !every.has(k)));
-        }
-        const changed = cmd.expanded ? [...next].filter((k) => !was.has(k)) : [...was].filter((k) => !next.has(k));
-        if (!changed.length) return OK;
-        rows.setExpansion(next, source);
-        emit({ type: 'rowExpanded', source, rows: changed, expanded: cmd.expanded });
+        const changed = rows.expandAll(cmd.expanded, depth, source);
+        if (changed.length) emit({ type: 'rowExpanded', source, rows: changed, expanded: cmd.expanded });
         return OK;
       }
       case 'selection.all':
@@ -530,10 +518,10 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         // (step 17, owner Q1) the page's keys are added to what is ticked: other pages keep theirs.
         const d = rows.displayed;
         const keys: RowKey[] = rows.page && selection.mode === 'include' ? [...selection.keys] : [];
-        // Fillers and details are never selected (tree-selection.md).
+        // Fillers, details and a filtered tree's muted ancestors are not taken (tree-selection.md, tree-filter.md).
         for (let i = 0; i < d.count; i++) {
           const k = d.keyAt(d.index(i)!);
-          if (isDataKey(k)) keys.push(k);
+          if (takes(d, i, k)) keys.push(k);
         }
         setSelection(selectOnly(keys), source);
         return OK;
@@ -599,7 +587,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       let state: HeaderSelection = 'all';
       for (let i = 0; i < d.count; i++) {
         const k = d.keyAt(d.index(i)!);
-        if (isDataKey(k) && !isSelected(selection, k) && !skip(k)) {
+        if (takes(d, i, k) && !isSelected(selection, k) && !skip(k)) {
           state = 'some';
           break;
         }
@@ -732,17 +720,23 @@ export function headerSelection<T>(s: SelectionState, d: DisplayedRows<T>): Head
   return state;
 }
 
+/** A row select-all takes: a data row, not a filtered tree's muted ancestor. */
+const takes = <T>(d: DisplayedRows<T>, i: number, k: RowKey): boolean => isDataKey(k) && (!d.matchedAt || d.matchedAt(i as DisplayIndex));
+
 function readHeader<T>(s: SelectionState, d: DisplayedRows<T>): HeaderSelection {
-  // Over the data rows shown: fillers and details are never selected.
+  // Over the rows select-all takes (dataCount): fillers, details and muted ancestors are not counted.
   const n = d.dataCount ?? d.count;
   if (n === 0) return 'none';
   let selected = 0;
   if (s.mode === 'include' && s.keys.size <= d.count) {
-    for (const key of s.keys) if (isDataKey(key) && d.indexOf(key) !== -1) selected++;
+    for (const key of s.keys) {
+      const i = isDataKey(key) ? d.indexOf(key) : -1;
+      if (i !== -1 && takes(d, i, key)) selected++;
+    }
   } else {
     for (let i = 0; i < d.count; i++) {
       const k = d.keyAt(d.index(i)!);
-      if (isDataKey(k) && isSelected(s, k)) selected++;
+      if (takes(d, i, k) && isSelected(s, k)) selected++;
     }
   }
   return selected === 0 ? 'none' : selected === n ? 'all' : 'some';

@@ -3,7 +3,8 @@ import { treeConflicts, treeShape, type TreeRows } from '@dzgrid/core/tree';
 import type { Suite } from './index.js';
 
 type Row = { id: string; p?: string | null; n: number; t?: string };
-const shape = (ps: readonly Problem[]) => ps.map((p) => ({ code: p.code, severity: p.severity, path: p.path }));
+/** A tree problem names its row by id in `detail` (its place shifts on a removal). */
+const shape = (ps: readonly Problem[]) => ps.map((p) => ({ code: p.code, severity: p.severity, path: p.path, ...(p.code.startsWith('tree-') && { detail: p.detail }) }));
 
 /**
  * A tree from parent ids (Phase 4 step 3, docs/behaviors/tree-view.md, tree-filter.md): rows, then

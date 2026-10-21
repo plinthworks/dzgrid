@@ -30,9 +30,15 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
   What is open is a set of row keys (`kernel.expansion`), kept apart from the query: opening a row
   never resets the page, the selection or a server request. Commands `rows.expand { rows, expanded }`
   and `rows.expandAll { expanded, depth? }`; one event `rowExpanded { source, rows, expanded }` per
-  user or API action (keys only, never row data; one event for a bulk change). Keys of rows that
-  are removed leave the set. `tree.initial: 'none' | 'all' | number` applies at the first non-empty
-  load only.
+  user or API action (keys only, never row data; one event for a bulk change), listing the rows
+  whose state changed, nothing when none did. Keys of rows that are removed leave the set (a row
+  removed and added again in one transaction keeps its state). `tree.initial: 'none' | 'all' |
+  number` applies at the first non-empty load only, and only if the host set no expansion before.
+- **A row with no children** (lead decision, review of steps 2–3): opening or closing it is a
+  no-op, without event; `rows.expandAll` passes over it. Its key does not enter the set, so a
+  child added later shows it closed. Under a filter, a row whose children are all hidden counts as
+  one with no children. A shape may later declare children before they load (lazy children,
+  step 7), which makes such a row openable.
 - **Three ways to give the hierarchy** (D3, owner Q1, in this order of work): a parent id column
   (`parentId`), nested arrays (`children`), or a path of labels per row (`path(row)`). A parent id
   that names no row puts the row at the root and reports `tree-orphan`; a cycle puts the rows it

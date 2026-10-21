@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-21 (**Phase 4, étapes 2 et 3 faites, non commitées** : coutures de base du cœur pour les arbres, `@dzgrid/core/tree` en mode parent. Avant : étape 1 commitée `81e07a0` : fiches de comportement, spike S12 — verdict « go, sans plafond » —, budgets de la Phase 4 dans `size-budget.json` et `scripts/rebudget.mjs`. Avant : Phase 3 close côté DzGrid, `89a2a78`, étiquette `v0.1.0` locale non publiée ; plan de la Phase 4 et décisions du propriétaire `30131ce`). Ce fichier dit où en est le travail, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (sections Phase 3 et Phase 4) ; les décisions dans `ARCHITECTURE.md` et `docs/phase-4-steps/decisions.md`.
+Mis à jour : 2026-10-21 (**Phase 4, revue des étapes 2–3 faite, non commitée** (après `49c3787`) : constats de la relecture et de l'analyse des tests corrigés ; avant : étapes 2 et 3 commitées `49c3787` : coutures de base du cœur pour les arbres, `@dzgrid/core/tree` en mode parent. Avant : étape 1 commitée `81e07a0` : fiches de comportement, spike S12 — verdict « go, sans plafond » —, budgets de la Phase 4 dans `size-budget.json` et `scripts/rebudget.mjs`. Avant : Phase 3 close côté DzGrid, `89a2a78`, étiquette `v0.1.0` locale non publiée ; plan de la Phase 4 et décisions du propriétaire `30131ce`). Ce fichier dit où en est le travail, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (sections Phase 3 et Phase 4) ; les décisions dans `ARCHITECTURE.md` et `docs/phase-4-steps/decisions.md`.
 
 ## Où on en est
 
@@ -35,21 +35,29 @@ Mis à jour : 2026-10-21 (**Phase 4, étapes 2 et 3 faites, non commitées** : c
 | 25 — clôture de la Phase 3 (budgets à la mesure, portail final, 0.1.0 préparée, docs) | fait, testé ; étiquette `v0.1.0` (locale, non publiée) ; portail vert, `test:browser` compris après les suites de la clôture (test des dates sous Chrome 156, cartes de déclaration, README du thème, voir « Portail final ») | `89a2a78` |
 | 26 — animations avec GSAP (`@dzgrid/dom/motion-gsap` : coquille + morceau paresseux), `ui.cellClass`, crochet de l'hôte (`onCell`/`onRow`) | fait, relu, testé (corrections non commitées) | `8ee7d5b` + corrections |
 
-**En cours : la Phase 4 (plan `docs/phase-4-plan.md`, décisions `docs/phase-4-steps/decisions.md`, qui priment). Étapes 1 (`81e07a0`), 2 et 3 (non commitées) faites ; suivante : étape 4, les coutures DOM et `@dzgrid/dom/tree`. La Phase 3 est close côté DzGrid le 2026-10-21 ; ce qui demande Sehhaty est dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`).**
+**En cours : la Phase 4 (plan `docs/phase-4-plan.md`, décisions `docs/phase-4-steps/decisions.md`, qui priment). Étapes 1 (`81e07a0`), 2 et 3 (`49c3787`) faites, leur revue faite (non commitée) ; suivante : étape 4, les coutures DOM et `@dzgrid/dom/tree`. La Phase 3 est close côté DzGrid le 2026-10-21 ; ce qui demande Sehhaty est dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`).**
 
 ### Phase 4 — arbre et maître/détail d'abord, puis la ligne de filtres affichable, puis l'édition
 
 | Étape (plan §3) | État | Commit de fin |
 |---|---|---|
 | 1 — fiches, spike S12 (hauteurs variables sous le défilement échelonné), budgets | fait, testé | `81e07a0` |
-| 2 — coutures de base du cœur (nœuds, `parentOf`/`levelAt`, forme, expansion) | fait, testé (non commité) | — |
-| 3 — `@dzgrid/core/tree`, mode parent | fait, testé (non commité) | — |
+| 2 — coutures de base du cœur (nœuds, `parentOf`/`levelAt`, forme, expansion) | fait, relu, testé (corrections non commitées) | `49c3787` + corrections |
+| 3 — `@dzgrid/core/tree`, mode parent | fait, relu, testé (corrections non commitées) | `49c3787` + corrections |
 | 4 à 7 — arbre (DOM, formes imbriquée et chemin, animation et million de lignes, enfants paresseux) | à faire | — |
 | 8 à 11 — maître/détail (cœur, base DOM à hauteurs variables, `@dzgrid/dom/detail`, Angular) | à faire | — |
 | 12 — ligne de filtres affichable en direct | à faire | — |
 | 13 — clôture de la Phase 4 | à faire | — |
 
-Étapes 2 et 3 faites (2026-10-21, non commitées ; détail dans ROADMAP, Phase 4 ; décisions dans ARCHITECTURE « Décisions de la Phase 4, étapes 2–3 ») :
+Revue des étapes 2–3 faite (2026-10-21, non commitée ; détail dans ROADMAP, Phase 4, et ARCHITECTURE « Revue des étapes 2–3 ») :
+- **Tests** : `tree-walk.test.ts` (marche aléatoire au niveau du noyau, 150 graines × 60 pas × 2 modes de filtre, contre un modèle indépendant ; sa garde qui évitait `expandAll` sous un filtre est retirée) et `tree-edges.test.ts` (échelle, transactions, 5 `it.fails` passés en `it`, chacun en échec d'abord ; 5 tests de la revue, dont 3 en échec sur l'ancien code).
+- **Corrigé** : tout sélectionner et la case d'en-tête sous un filtre ne prennent que les correspondances (`DisplayedRows.matchedAt?`, `dataCount`) ; `rows.expandAll` passe par le modèle (`expandAll?`) et, sous un filtre, par la couche, sur les lignes gardées (ensemble de l'utilisateur intact et rendu à l'effacement ; `rowExpanded` = lignes dont l'état affiché change) ; ligne retirée puis remise dans une transaction : état gardé ; `tree.initial` seulement si l'hôte n'a rien posé avant la première charge ; problèmes de l'arbre nommés par id (`path: 'parentId'`, `detail`), relus seulement quand la structure change.
+- **Décisions du lead** : focus sans ancêtre affiché → règle plate (la ligne à l'ancien rang ; `tree-filter.md` corrigée) ; ouvrir une ligne sans enfants (sous un filtre : sans enfant gardé) ne fait rien, sans événement (`tree-view.md`).
+- **Coût d'une bascule** : ensemble changé en place, drapeaux ouverts patchés pour les seules clés basculées, piles à la taille de la profondeur. Banc « tree toggle at 1 000 000 rows with 300 000 open parents » : **103,9 ms → 11,8–12,9 ms** (budget 16).
+- **Tailles** : cœur **28 097 o** (budget 29 000 ; la garde des coutures de `layering.test.ts` suit : 26 984 + 1 150), `@dzgrid/core/tree` **2 024 o** (3 500). CHANGELOG `[Unreleased]` rempli.
+- **Portail** : `test:ci` 250 fichiers, 4 035 tests ; `test:perm` 6 / 6 ; `typecheck`, `check:size` (0 dépassement), `build` verts.
+
+Étapes 2 et 3 faites (2026-10-21, commitées `49c3787` ; détail dans ROADMAP, Phase 4 ; décisions dans ARCHITECTURE « Décisions de la Phase 4, étapes 2–3 ») :
 - **Étape 2, coutures du cœur** : `RowNode` devient l'union données / remplissage / détail (types) ; `DisplayedRows.parentOf?`, `levelAt?`, `dataCount?` ; `ClientOptions.shape` (un seul appel dans `show()`, l'arbre reçoit toutes les lignes triées et le masque des correspondances) ; `ModelChange.kind` `'expand'` ; expansion tenue par le modèle, exposée et commandée par le noyau (`kernel.expansion`, `rows.expand`, `rows.expandAll`, événement `rowExpanded`, clés seules, rien si rien ne change) ; focus caché → plus proche ancêtre affiché ; sélection de tout, case d'en-tête et plages sautent les lignes non données ; clés des lignes retirées élaguées. Tests d'abord (`expansion.test.ts`, 15 sur 17 en échec avant). Cœur **27 969 o** (+985, budget 29 000).
 - **Étape 3, `@dzgrid/core/tree`** : `treeShape({ parentId, filter, initial })`, `treeConflicts`. Orphelin → racine + `tree-orphan` ; cycle cassé à sa première ligne + `tree-cycle` ; filtre qui garde les ancêtres, les ouvre sans toucher l'ensemble de l'utilisateur (couche à part pour ce qu'il ouvre ou ferme pendant le filtre), rendu à l'effacement ; pagination + arbre → `unsupported-combination`. Tests d'abord : `tree.test.ts` (30), propriété 1 000 arbres contre un oracle récursif, conformité `tree/*` (18) + 3 cas `problems`. Taille **1 833 o** par-dessus le cœur (budget 3 500). Banc : construction 100 000 à froid 7,5 ms (cible 40), ouverture de 10 000 enfants 0,1 ms (30), filtre 100 000 0,9 ms (60).
 - **Mutants** : 22, 21 tués d'emblée, le survivant tué par un test ajouté. **Portail** : `test:ci` 248 fichiers, 4 014 tests ; `test:perm` 6 / 6 ; `typecheck`, `check:size` (0 dépassement), `build` verts.

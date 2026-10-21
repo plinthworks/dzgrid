@@ -57,7 +57,8 @@
       {
         "code": "tree-cycle",
         "severity": "warning",
-        "path": "rows[1]"
+        "path": "parentId",
+        "detail": "c1"
       }
     ]
   }

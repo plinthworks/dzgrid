@@ -1,4 +1,4 @@
-import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
+import { dataKey, assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache, filterKindLookup, flatDisplayed } from '../packages/core/src/internal.js';
 import { toWire, createGate } from '../packages/core/src/server.js';
 import { buildSpanMap } from '../packages/core/src/spans.js';
@@ -36,6 +36,12 @@ export const CASES: Record<string, Case> = {
       return m;
     },
     run: (m: ReturnType<typeof clientRows<TreeRow>>) => (m.setQuery(makeQuery({ filter: { n: { type: 'number', op: 'lt', value: 10 } } })), m.displayed.count),
+  },
+  // Review of steps 2-3: one toggle through the client model at 1 000 000 rows, 300 000 parents open
+  // (the model built once; each run opens or closes the same parent, alternately).
+  'tree toggle at 1 000 000 rows with 300 000 open parents': {
+    setup: () => (bigTree ??= toggleTree()),
+    run: (t: ReturnType<typeof toggleTree>) => t.m.expand([t.key], !t.m.isExpanded(t.key)).length + t.m.displayed.count,
   },
   // Step 9b: the run index of a merging column over its export texts (what ColumnCache.exports holds), runs of 1 to 20 rows.
   'span merge index 1 000 000 rows (export texts given)': {
@@ -502,6 +508,15 @@ function spanSetup(n: number, defs: Parameters<typeof createColumnModel<SpanRow>
 }
 
 type TreeRow = { id: string; p?: string; n: number };
+let bigTree: ReturnType<typeof toggleTree> | undefined;
+function toggleTree() {
+  const rows = treeRows(1_000_000, 0).snapshot.rows;
+  const columns = createColumnModel<TreeRow>([{ id: 'n', type: 'number' }]);
+  const m = clientRows<TreeRow>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<TreeRow>({ parentId: (r) => r.p }) });
+  const parents = [...new Set(rows.map((r) => r.p).filter((p) => p !== undefined))].map((p) => dataKey(p)!);
+  m.setExpansion(new Set(parents.slice(0, 300_000)));
+  return { m, key: parents[300_000]! };
+}
 type TreeCtx = { snap: ReturnType<typeof treeRows>['snapshot']; shape: ReturnType<typeof treeShape<TreeRow>> };
 /** 1 000 roots, then each row under an earlier row (a fixed generator); `wide` rows under row 0. */
 function treeRows(n: number, wide: number) {

@@ -48,6 +48,8 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
   let F: Filtered | null = null;
   let V: View | null = null;
   let open: Uint8Array | null = null;
+  /** The open flags of the last build, and what they were resolved from. */
+  let flags: { st: Structure; F: Filtered; anc: Uint8Array | null; a: Uint8Array } | null = null;
   let snapNow: RowSnapshot<T> | null = null;
 
   const structureOf = (snap: RowSnapshot<T>): Structure => {
@@ -66,8 +68,11 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
     const { start, list } = v.shown;
     const at = new Uint32Array(list.length);
     const lv = new Uint32Array(list.length);
-    const node = new Int32Array(n + 1);
-    const cur = new Uint32Array(n + 1);
+    // The stack holds one entry per level open on the way down: sized by the depth, not the rows.
+    const node = new Int32Array(st.maxDepth + 2);
+    const cur = new Uint32Array(st.maxDepth + 2);
+    const mt = f.matched;
+    let mc = 0;
     let m = 0;
     let sp = 1;
     node[0] = n;
@@ -83,6 +88,7 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       const x = list[c]!;
       at[m] = x;
       lv[m++] = sp - 1;
+      if (mt?.[x]) mc++;
       if ((!isOpen || isOpen[x]) && start[x]! < start[x + 1]!) {
         node[sp] = x;
         cur[sp++] = start[x]!;
@@ -100,6 +106,8 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
     return {
       version,
       count: m,
+      // Under a filter, select-all and the header box take the matches only (tree-filter.md).
+      dataCount: mt ? mc : m,
       nodeAt,
       keyAt: (i) => snap.keyAt(check(i) as never),
       index: (i) => (Number.isInteger(i) && i >= 0 && i < m ? (i as DisplayIndex) : null),
@@ -125,7 +133,7 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
         return start[s + 1]! - start[s]!;
       },
       expandedAt: (i) => !isOpen || isOpen[check(i)] === 1,
-      matchedAt: (i) => !f.matched || f.matched[check(i)] === 1,
+      matchedAt: (i) => !mt || mt[check(i)] === 1,
     };
   };
 
@@ -136,15 +144,21 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
     ...(o.initial !== undefined && { initial: o.initial }),
     get diagnostics() { return { ...d }; },
     get problems() { return S?.st.problems ?? []; },
-    parents(snap, depth) {
+    parents(snap, depth, shown) {
       const st = structureOf(snap);
+      // Shown: the rows the filter keeps that show children (what a chevron is drawn on).
+      const b = shown && V?.F.st === st ? V.shown.start : null;
       const out: RowKey[] = [];
-      for (let i = 0; i < st.n; i++) if (st.kids[i]! > 0 && st.depth[i]! < depth) out.push(snap.keyAt(i as never));
+      for (let i = 0; i < st.n; i++) if ((b ? b[i + 1]! > b[i]! : st.kids[i]! > 0) && st.depth[i]! < depth) out.push(snap.keyAt(i as never));
       return out;
     },
     isOpen: (key) => {
       const s = snapNow ? srcOf(snapNow, key) : -1;
       return s >= 0 && open?.[s] === 1;
+    },
+    opens: (key) => {
+      const s = snapNow && V ? srcOf(snapNow, key) : -1;
+      return s >= 0 && V!.shown.start[s + 1]! > V!.shown.start[s]!;
     },
     build(i: ShapeInput<T>): TreeRows<T> {
       const { snap } = i;
@@ -174,18 +188,28 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
         V = { all: O.all, F, shown, pos, size };
       }
       // What is open: the user's rows; under a filter, the ancestors of matches, then the layer.
-      const isOpen = new Uint8Array(st.n);
-      for (const k of i.expansion) {
-        const s = srcOf(snap, k);
-        if (s >= 0) isOpen[s] = 1;
-      }
-      if (i.filterActive && F.anc) for (let s = 0; s < st.n; s++) isOpen[s] = isOpen[s]! | F.anc[s]!;
-      if (i.layer) {
-        for (const [k, on] of i.layer) {
+      // A toggle patches the last flags (copied: an earlier build keeps its own) for its keys only.
+      const anc = i.filterActive ? F.anc : null;
+      const flag = (k: RowKey, s: number): number => (i.layer?.has(k) ? +i.layer.get(k)! : i.expansion.has(k) || anc?.[s] ? 1 : 0);
+      let isOpen: Uint8Array;
+      if (i.changed && flags?.st === st && flags.F === F && flags.anc === anc) {
+        isOpen = flags.a.slice();
+        for (const k of i.changed) {
           const s = srcOf(snap, k);
-          if (s >= 0) isOpen[s] = on ? 1 : 0;
+          if (s >= 0) isOpen[s] = flag(k, s);
+        }
+      } else {
+        isOpen = anc ? anc.slice() : new Uint8Array(st.n);
+        for (const k of i.expansion) {
+          const s = srcOf(snap, k);
+          if (s >= 0) isOpen[s] = 1;
+        }
+        if (i.layer) for (const k of i.layer.keys()) {
+          const s = srcOf(snap, k);
+          if (s >= 0) isOpen[s] = flag(k, s);
         }
       }
+      flags = { st, F, anc, a: isOpen };
       open = isOpen;
       snapNow = snap;
       last = { snap, st, v: V, f: F, version: i.version };

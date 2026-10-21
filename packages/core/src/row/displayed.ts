@@ -15,8 +15,10 @@ export interface DisplayedRows<T> {
   indexOf(key: RowKey): DisplayIndex | -1;
   index(n: number): DisplayIndex | null;
   nextData(i: DisplayIndex, delta: 1 | -1): DataNode<T> | null;
-  /** How many of the rows shown are data rows (the rest: fillers, details). Absent: all of them. */
+  /** How many of the rows shown select-all takes: data rows, less a filtered tree's muted ancestors (the rest: fillers, details). Absent: all of them. */
   readonly dataCount?: number;
+  /** A filtered tree's: false for an ancestor shown only for its matches (drawn muted, not taken by select-all). Absent: every row matches. */
+  matchedAt?(i: DisplayIndex): boolean;
   /** A tree's: the parent of a row, shown or not; null for a root or a row it does not hold. */
   parentOf?(key: RowKey): RowKey | null;
   /** A tree's: the depth of a row shown, 0 for the roots. */

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { clientRows, createColumnModel, createKernel, dataKey, localeCtx, makeQuery } from '@dzgrid/core';
 import { treeShape, type TreeRows } from '@dzgrid/core/tree';
 import { mulberry32 } from './support/rng.js';
-import { oracle, type TR } from './support/tree-oracle.js';
+import { oracle, parentsOf, type TR } from './support/tree-oracle.js';
 
 /**
  * 1 000 seeded random trees (orphans, cycles, self-parents included) × random expansion, sort and
@@ -38,7 +38,9 @@ describe('the tree against a recursive oracle', () => {
       const columns = createColumnModel<TR>([{ id: 'n', type: 'number' }]);
       const model = clientRows<TR>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<TR>({ parentId: (r) => r.p, filter: mode }) });
       const kernel = createKernel<TR>({ rows: model, columns });
-      const open = new Set(rows.filter(() => rnd() < 0.5).map((r) => r.id));
+      // Rows with children only: opening a leaf is a no-op (tree-view.md).
+      const parentIds = new Set(parentsOf(rows).values());
+      const open = new Set(rows.filter(() => rnd() < 0.5).map((r) => r.id).filter((id) => parentIds.has(id)));
       kernel.dispatch({ type: 'rows.expand', rows: [...open].map((id) => dataKey(id)!), expanded: true }, 'user');
       const sort = rnd() < 0.3 ? undefined : rnd() < 0.5 ? ('asc' as const) : ('desc' as const);
       const cut = Math.floor(rnd() * 6);

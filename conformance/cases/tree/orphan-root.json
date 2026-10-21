@@ -35,7 +35,8 @@
       {
         "code": "tree-orphan",
         "severity": "warning",
-        "path": "rows[1]"
+        "path": "parentId",
+        "detail": "y"
       }
     ]
   }

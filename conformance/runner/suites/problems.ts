@@ -13,7 +13,8 @@ import { FULL_WIDTH } from '../spans-fixtures.js';
 import type { Suite } from './index.js';
 
 type Row = Record<string, unknown> & { id: string };
-const shape = (ps: readonly Problem[]) => ps.map((p) => ({ code: p.code, severity: p.severity, path: p.path }));
+/** A tree problem names its row by id in `detail` (its place shifts on a removal). */
+const shape = (ps: readonly Problem[]) => ps.map((p) => ({ code: p.code, severity: p.severity, path: p.path, ...(p.code.startsWith('tree-') && { detail: p.detail }) }));
 
 export const problems: Record<string, Suite> = {
   problems: (input) => {

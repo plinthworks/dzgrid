@@ -17,7 +17,9 @@ tree; opens and closes rows while the filter is on; clears the filter.
 - Opening and closing still work while filtered; clearing the filter brings back the tree exactly
   as the user had opened it before filtering.
 - The focus stays on its row if the row is still shown, else goes to the nearest ancestor shown,
-  else to the first row.
+  else follows the flat grid's rule: the row now at its old place (or the last row).
+- "Expand all" and "collapse all" while filtered change what is shown, as single toggles do, and
+  are forgotten with the filter.
 
 ## What DzGrid does
 - **Matches and their ancestors** (D4, owner Q3): a row is shown when it matches, or when one of
@@ -30,12 +32,17 @@ tree; opens and closes rows while the filter is on; clears the filter.
   list opens every ancestor of a match without changing the user's expansion set; the user may
   open and close rows meanwhile (that is a separate, temporary layer). When the filter clears, the
   user's own expansion set is used again, unchanged. No `rowExpanded` event for the automatic
-  opening; one for each user action.
+  opening; one for each user action. `rows.expandAll` under a filter goes through the same layer,
+  over the rows the filter keeps: it opens (or closes) the parents shown, the user's set is left
+  alone, and `rowExpanded` lists only the rows whose shown state changed (an ancestor the filter
+  already opened is not told again).
 - **Counts**: `counts.filtered` is the number of matching rows; the sentence "Filtered. 12 rows"
   says that number.
 - **ARIA**: `aria-setsize` and `aria-posinset` count the siblings shown under the filter.
 - **Selection**: a filter never selects or unselects rows by itself (`selection.md`); select-all
-  takes the matching rows shown (not the muted ancestors unless they match).
+  takes the matching rows shown (not the muted ancestors unless they match), and the header box
+  counts those only (`DisplayedRows.matchedAt`, `dataCount`): a ticked muted ancestor does not
+  make it "some".
 - **Server trees** (lazy children, step 7): the server decides what matches; the same muting rule
   applies to the ancestors it sends.
 

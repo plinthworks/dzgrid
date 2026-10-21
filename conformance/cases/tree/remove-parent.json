@@ -73,12 +73,14 @@
       {
         "code": "tree-orphan",
         "severity": "warning",
-        "path": "rows[0]"
+        "path": "parentId",
+        "detail": "p1"
       },
       {
         "code": "tree-orphan",
         "severity": "warning",
-        "path": "rows[1]"
+        "path": "parentId",
+        "detail": "p2"
       }
     ]
   }

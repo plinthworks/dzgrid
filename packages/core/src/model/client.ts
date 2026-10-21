@@ -123,6 +123,12 @@ export interface RowModel<T> {
   expand?(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
   /** The rows that have children, above a depth (1: the roots only). */
   expandable?(depth?: number): readonly RowKey[];
+  /**
+   * Opens the rows with children above `depth`, or closes those from `depth` down (all: Infinity).
+   * Under a filter, through its layer, over the rows it keeps: the user's set is left alone. The
+   * rows whose state changed.
+   */
+  expandAll?(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
   destroy(): void;
 }
@@ -151,6 +157,8 @@ export interface ShapeInput<T> {
   readonly expansion: ReadonlySet<RowKey>;
   /** Under a filter, the rows opened or closed meanwhile (over the user's set and the ancestors of matches); null otherwise. */
   readonly layer: ReadonlyMap<RowKey, boolean> | null;
+  /** Set by a toggle: the only keys whose state changed since the last build (nothing else did). */
+  readonly changed?: readonly RowKey[];
   readonly version: number;
 }
 
@@ -166,10 +174,12 @@ export interface RowShape<T> {
   build(input: ShapeInput<T>): DisplayedRows<T>;
   /** Every row the filters keep, all open: what a CSV of `all` writes. */
   all?(): DisplayedRows<T>;
-  /** The rows that have children, above `depth`. */
-  parents?(snap: RowSnapshot<T>, depth: number): readonly RowKey[];
+  /** The rows that have children, above `depth`; `shown`: those showing children in the last build (under a filter, kept ones). */
+  parents?(snap: RowSnapshot<T>, depth: number, shown?: boolean): readonly RowKey[];
   /** Whether a row is open in the last build. */
   isOpen?(key: RowKey): boolean;
+  /** Whether a row shows children when open, in the last build: opening one that does not is a no-op (tree-view.md). */
+  opens?(key: RowKey): boolean;
   /** What the last build bent (an orphan, a cycle). */
   readonly problems: readonly Problem[];
 }
@@ -220,6 +230,7 @@ export interface ClientModel<T> extends RowModel<T> {
   setExpansion(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
   expand(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
   expandable(depth?: number): readonly RowKey[];
+  expandAll(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
   readonly diagnostics: {
     readonly foldBuilds: number;
     readonly filterRuns: number;
@@ -267,11 +278,13 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   const pageRefused = shape?.kind === 'tree' && o.page !== undefined;
   const paging = resolvePageOptions(pageRefused ? undefined : o.page);
   const shapeProblems: readonly Problem[] = pageRefused ? [problem('unsupported-combination', 'warning', 'pagination', 'tree')] : [];
-  /** The rows the user opened; under a filter, a layer of toggles of its own, tied to that filter. */
-  let open: ReadonlySet<RowKey> = new Set();
+  /** The rows the user opened (changed in place by a toggle); under a filter, a layer of toggles of its own, tied to that filter. */
+  let open = new Set<RowKey>();
   let layer: Map<RowKey, boolean> | null = null;
   let layerOf = '';
   let opened = false;
+  /** The host or the user set the expansion: the shape's `initial` no longer applies. */
+  let touched = false;
   /** The filter stage a shape's rows were last built from. */
   let shownFrom: unknown = null;
   const pageCfg = paging.config;
@@ -368,7 +381,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
 
   const filteredCount = (): number => (filtered?.order ? filtered.order.length : store.size);
   /** The displayed rows: all the sorted ones, or the current page of them (the index clamped). */
-  const show = (): void => {
+  const show = (changed?: readonly RowKey[]): void => {
     d.displayedBuilds++;
     all = null;
     const order = sorted!.order;
@@ -381,9 +394,10 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       if (!opened && store.size > 0) {
         opened = true;
         const initial = shape.initial;
-        if (initial !== undefined && initial !== 'none') open = new Set(shape.parents?.(store.snapshot, initial === 'all' ? Infinity : initial) ?? []);
+        // Only when the host set nothing before (tree-view.md).
+        if (!touched && initial !== undefined && initial !== 'none') open = new Set(shape.parents?.(store.snapshot, initial === 'all' ? Infinity : initial) ?? []);
       }
-      displayed = shape.build({ snap: store.snapshot, order, matched: f.mask, filterActive: f.order !== null, expansion: open, layer, version: ++version });
+      displayed = shape.build({ snap: store.snapshot, order, matched: f.mask, filterActive: f.order !== null, expansion: open, layer, version: ++version, ...(changed && { changed }) });
       return;
     }
     if (!pageCfg) {
@@ -406,12 +420,17 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
 
   /** A shape's problems last told: told again only when they change. */
   let shapeSaid = '';
+  let shapeSeen: readonly Problem[] | null = null;
   const notify = (kind: ModelChange<T>['kind'], source: ChangeSource, transaction?: TransactionResult, told?: readonly Problem[]): void => {
     if (destroyed) return;
+    // Tied to the structure: the same list (a toggle, a filter) is not read again.
     const sp = shape?.problems ?? [];
-    const now = said(sp);
-    if (now !== shapeSaid && sp.length) told = [...(told ?? []), ...sp];
-    shapeSaid = now;
+    if (sp !== shapeSeen) {
+      shapeSeen = sp;
+      const now = said(sp);
+      if (now !== shapeSaid && sp.length) told = [...(told ?? []), ...sp];
+      shapeSaid = now;
+    }
     const c: ModelChange<T> = { source, displayed, kind, problems: currentProblems(), ...(transaction && { transaction }), ...(told && { told }) };
     for (const fn of [...listeners]) fn(c);
     for (const b of lists.values()) b.run();
@@ -462,8 +481,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // The keys of removed rows leave what is open (a reload: those whose rows are gone).
     if (shape) {
       const gone = r.kind === 'delta' ? new Set(r.removed) : null;
-      const left = (k: RowKey) => (gone ? gone.has(k) : isDataKey(k) && !store.get(k));
-      if ([...open].some(left)) open = new Set([...open].filter((k) => !left(k)));
+      // Removed and added again in one transaction: kept.
+      const left = (k: RowKey) => (!gone || gone.has(k)) && isDataKey(k) && !store.get(k);
+      for (const k of [...open]) if (left(k)) open.delete(k);
       if (layer) for (const k of [...layer.keys()]) if (left(k)) layer.delete(k);
     }
     const delta = store.lastDelta;
@@ -522,8 +542,31 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
 
   loadProblems = store.replaceAll(o.rows).problems;
   run();
-  shapeSaid = said(shape?.problems ?? []);
+  shapeSeen = shape?.problems ?? null;
+  shapeSaid = said(shapeSeen ?? []);
   const isExpanded = (key: RowKey): boolean => (shape?.isOpen ? shape.isOpen(key) : (layer?.get(key) ?? open.has(key)));
+  function setExpansion(set: ReadonlySet<RowKey>, source: ChangeSource = 'api'): void {
+    if (!shape) return;
+    touched = true;
+    open = new Set(set);
+    layer = null;
+    show();
+    notify('expand', source);
+  }
+  /** Opens or closes rows as shown; a row that shows no children is left alone (tree-view.md). */
+  function expand(keys: readonly RowKey[], expanded: boolean, source: ChangeSource = 'api'): readonly RowKey[] {
+    if (!shape) return [];
+    const changed = [...new Set(keys)].filter((k) => isExpanded(k) !== expanded && (shape.opens?.(k) ?? true));
+    if (!changed.length) return changed;
+    touched = true;
+    if (filtered!.order) {
+      layer ??= new Map();
+      for (const k of changed) layer.set(k, expanded);
+    } else for (const k of changed) expanded ? open.add(k) : open.delete(k);
+    show(changed);
+    notify('expand', source);
+    return changed;
+  }
 
   const model: ClientModel<T> & { [STORE]: RowStore<T> } = {
     [STORE]: store,
@@ -550,30 +593,23 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // Undefined without a shape: the kernel then refuses to expand.
     get expansion() { return shape ? open : (undefined as never); },
     isExpanded,
-    setExpansion(set, source = 'api') {
-      if (!shape) return;
-      open = new Set(set);
-      layer = null;
-      show();
-      notify('expand', source);
-    },
-    expand(keys, expanded, source = 'api') {
-      if (!shape) return [];
-      const changed = [...new Set(keys)].filter((k) => isExpanded(k) !== expanded);
-      if (!changed.length) return changed;
-      if (filtered!.order) {
-        layer ??= new Map();
-        for (const k of changed) layer.set(k, expanded);
-      } else {
-        const next = new Set(open);
-        for (const k of changed) expanded ? next.add(k) : next.delete(k);
-        open = next;
-      }
-      show();
-      notify('expand', source);
-      return changed;
-    },
+    setExpansion,
+    expand,
     expandable: (depth = Infinity) => shape?.parents?.(store.snapshot, depth) ?? [],
+    expandAll(expanded, depth = Infinity, source = 'api') {
+      if (!shape) return [];
+      const parents = (d: number) => shape.parents?.(store.snapshot, d, true) ?? [];
+      // Collapse all, unfiltered: the set emptied (keys of rows without children too).
+      if (!expanded && depth === Infinity && !filtered!.order) {
+        const changed = [...open];
+        if (changed.length) setExpansion(new Set(), source);
+        return changed;
+      }
+      // Otherwise toggles over the rows with children above `depth`, or from `depth` down: under a
+      // filter through its layer, over the rows it keeps (tree-filter.md).
+      const above = new Set(parents(expanded || depth < Infinity ? depth : 0));
+      return expand(expanded ? [...above] : parents(Infinity).filter((k) => !above.has(k)), expanded, source);
+    },
     get page() { return pageCfg ? pageOf({ size: pageSize, sizes: pageCfg.sizes }, pageIndex, filteredCount()) : null; },
     setPage(p, source = 'api') {
       if (!pageCfg || checkPage(p).length) return;

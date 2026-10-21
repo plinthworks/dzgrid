@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet after 0.1.0.
+### Added
+
+- **Tree core (Phase 4, steps 2–3)**: row nodes as a union (`DataNode | GroupNode | DetailNode`), a
+  row shape seam in the client model (`ClientOptions.shape`), expansion held by the model and
+  commanded by the kernel (`kernel.expansion`, `rows.expand`, `rows.expandAll { expanded, depth? }`,
+  event `rowExpanded` with keys only), `ModelChange.kind` `'expand'`.
+- **`@dzgrid/core/tree`**: `treeShape({ parentId, filter, initial })` (parent ids; orphans and
+  cycles become roots with `tree-orphan` / `tree-cycle`, named by row id; a filter keeps the
+  ancestors of matches and opens them without touching the user's set), `treeConflicts`.
+
+### Changed
+
+- **Breaking**: `canSelect` and `SelectionRule` receive a `DataNode`; click events carry a
+  `RowNode` (check `kind === 'data'` before reading `data`).
+- `DisplayedRows` gains optional members: `parentOf`, `levelAt`, `dataCount` (the rows select-all
+  takes), `matchedAt` (false for a filtered tree's muted ancestor).
+- Select-all and the header box skip fillers, details and a filtered tree's muted ancestors.
 
 ## [0.1.0] - unreleased
 

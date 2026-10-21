@@ -118,14 +118,14 @@ describe('repairs: orphans, cycles, duplicates', () => {
   it('puts a row whose parent does not exist at the root, with tree-orphan', () => {
     const { model } = setup({ rows: [{ id: 'x', n: 1 }, { id: 'y', p: 'nobody', n: 2 }, { id: 'z', p: 'x', n: 3 }] });
     expect(view(model)).toEqual(['x 1/2', 'y 2/2']);
-    expect(model.problems).toEqual([{ code: 'tree-orphan', severity: 'warning', path: 'rows[1]' }]);
+    expect(model.problems).toEqual([{ code: 'tree-orphan', severity: 'warning', path: 'parentId', detail: 'y' }]);
   });
 
   it('treats null, undefined and an empty id as a root, silently; a parentId that throws as an orphan', () => {
     const rows = [{ id: 'a', p: null, n: 1 }, { id: 'b', n: 2 }, { id: 'c', p: '', n: 3 }, { id: 'd', p: 'boom', n: 4 }] as R[];
     const { model } = setup({ rows, tree: { parentId: (r) => { if (r.p === 'boom') throw new Error('x'); return r.p; } } });
     expect(view(model)).toEqual(['a 1/4', 'b 2/4', 'c 3/4', 'd 4/4']);
-    expect(model.problems.map((p) => [p.code, p.path])).toEqual([['tree-orphan', 'rows[3]']]);
+    expect(model.problems.map((p) => [p.code, p.detail])).toEqual([['tree-orphan', 'd']]);
   });
 
   it('breaks a cycle at its first row, keeps the rows hanging from it, never hangs', () => {
@@ -133,13 +133,13 @@ describe('repairs: orphans, cycles, duplicates', () => {
     const { kernel, model } = setup({ rows });
     kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'user');
     expect(view(model)).toEqual(['r 1/2', 'c1 2/2', '. c3 1/1', '. . c2 1/1', '. . . h 1/1']);
-    expect(model.problems).toEqual([{ code: 'tree-cycle', severity: 'warning', path: 'rows[1]' }]);
+    expect(model.problems).toEqual([{ code: 'tree-cycle', severity: 'warning', path: 'parentId', detail: 'c1' }]);
   });
 
   it('a row that is its own parent is a cycle of one', () => {
     const { model } = setup({ rows: [{ id: 's', p: 's', n: 1 }, { id: 't', p: 's', n: 2 }] });
     expect(view(model)).toEqual(['s 1/1']);
-    expect(model.problems).toEqual([{ code: 'tree-cycle', severity: 'warning', path: 'rows[0]' }]);
+    expect(model.problems).toEqual([{ code: 'tree-cycle', severity: 'warning', path: 'parentId', detail: 's' }]);
   });
 
   it('a long chain does not overflow anything (10 000 levels)', () => {
@@ -161,10 +161,17 @@ describe('repairs: orphans, cycles, duplicates', () => {
   it('tells a tree problem once, and again only when it changes', () => {
     const { model, events } = setup();
     model.applyTransaction({ remove: ['a'] });
-    const told = () => events.filter((e) => e.type === 'problems').map((e) => e.type === 'problems' && e.problems.map((p) => `${p.code} ${p.path}`));
-    expect(told()).toEqual([['tree-orphan rows[0]', 'tree-orphan rows[1]']]);
+    const told = () => events.filter((e) => e.type === 'problems').map((e) => e.type === 'problems' && e.problems.map((p) => `${p.code} ${p.detail}`));
+    expect(told()).toEqual([['tree-orphan a1', 'tree-orphan a2']]);
     model.applyTransaction({ patch: [{ id: 'b', set: { n: 7 } }] });
     expect(told()).toHaveLength(1);
+  });
+
+  it('a removal elsewhere does not tell the same orphans again (named by id, not by place)', () => {
+    const { model, events } = setup({ rows: [{ id: 'w', n: 1 }, { id: 'y', p: 'nobody', n: 2 }] });
+    model.applyTransaction({ remove: ['w'] });
+    expect(events.filter((e) => e.type === 'problems')).toEqual([]);
+    expect(model.problems).toEqual([{ code: 'tree-orphan', severity: 'warning', path: 'parentId', detail: 'y' }]);
   });
 });
 

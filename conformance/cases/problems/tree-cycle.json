@@ -22,7 +22,8 @@
       {
         "code": "tree-cycle",
         "severity": "warning",
-        "path": "rows[0]"
+        "path": "parentId",
+        "detail": "a"
       }
     ]
   }
