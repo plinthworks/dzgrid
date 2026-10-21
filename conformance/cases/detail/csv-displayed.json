@@ -1,0 +1,80 @@
+{
+  "id": "csv-displayed",
+  "suite": "detail",
+  "description": "A CSV of the rows shown never writes a detail, and its count leaves them out.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "csv": "displayed",
+    "steps": [
+      {
+        "expand": [
+          "a",
+          "e"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "> a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "> e"
+    ],
+    "expansion": [
+      "a",
+      "e"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 7
+    },
+    "heights": [
+      240,
+      240
+    ],
+    "page": null,
+    "problems": [],
+    "csv": {
+      "count": 5,
+      "lines": [
+        "N,T",
+        "3,ward",
+        "1,bed",
+        "2,ward",
+        "5,bed",
+        "4,ward"
+      ]
+    }
+  }
+}

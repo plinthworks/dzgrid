@@ -33,5 +33,6 @@ One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.j
 | `header-bands` | `{columns (a tree of groups), state?}` | `{depth, levels: {group, first, count, label}[][], problems}` |
 | `keyboard-move` | `{rows, cols, page?, cells?, fullWidth?, start, keys: Intent[]}` | `{moves: ({to, goal} \| null)[]}`, each key from where the last one went |
 | `tree` | `{rows: {id, p?, n, t?}[], tree?: {filter?, initial?}, page?, steps?: ({expand, expanded?} \| {expandAll, depth?} \| {sort} \| {filter} \| {quick} \| {tx})[]}` or `{conflicts}` | `{shown: ". . id pos/size [muted]"[], expansion: ids[], counts, problems}` (Phase 4 step 3), or `{problems}` |
+| `detail` | `{rows: {id, n, t?}[], detail?: {height?, initial?}, page?, csv?, steps?: ({expand, expanded?} \| {expandAll} \| {sort} \| {filter} \| {page} \| {select: 'all'} \| {toggle} \| {range} \| {tx})[]}` (`height` a number or `"n*k"`; `>id` a detail's key) or `{conflicts}` | `{shown: ("id" \| "> id")[], expansion, counts, heights, page, problems, refused?, selection?, csv?}` (Phase 4 step 8), or `{problems}` |
 
 Later phases add `sort`, `filter-*`, `server-gate`, `edit-saves`, `paste-plan`, …

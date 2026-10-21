@@ -1,0 +1,67 @@
+{
+  "id": "expand-all-page",
+  "suite": "detail",
+  "description": "Expand-all opens the rows of the page shown.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "page": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "page": 2
+      },
+      {
+        "expandAll": true
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "e",
+      "> e"
+    ],
+    "expansion": [
+      "e"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 2
+    },
+    "heights": [
+      240
+    ],
+    "page": {
+      "index": 2,
+      "pageCount": 3
+    },
+    "problems": []
+  }
+}

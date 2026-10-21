@@ -1,0 +1,52 @@
+{
+  "id": "closed-start",
+  "suite": "detail",
+  "description": "Nothing open: the data rows alone, no height.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "expansion": [],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 5
+    },
+    "heights": [],
+    "page": null,
+    "problems": []
+  }
+}

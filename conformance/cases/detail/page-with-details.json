@@ -1,0 +1,72 @@
+{
+  "id": "page-with-details",
+  "suite": "detail",
+  "description": "Pages count data rows; a detail follows its master on its page.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "page": {
+      "pageSize": 2
+    },
+    "steps": [
+      {
+        "expand": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "page": 1
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "c",
+      "> c",
+      "d"
+    ],
+    "expansion": [
+      "b",
+      "c"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 3
+    },
+    "heights": [
+      240
+    ],
+    "page": {
+      "index": 1,
+      "pageCount": 3
+    },
+    "problems": []
+  }
+}

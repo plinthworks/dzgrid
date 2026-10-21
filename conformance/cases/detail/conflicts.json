@@ -1,0 +1,34 @@
+{
+  "id": "conflicts",
+  "suite": "detail",
+  "description": "Spans and a tree are refused beside details; a nested grid past depth 3 is told.",
+  "input": {
+    "conflicts": {
+      "spans": true,
+      "tree": true,
+      "depth": 4
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "spans",
+        "detail": "detail"
+      },
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "tree",
+        "detail": "detail"
+      },
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "detail.depth",
+        "detail": "4"
+      }
+    ]
+  }
+}

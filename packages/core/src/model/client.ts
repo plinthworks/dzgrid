@@ -148,7 +148,7 @@ export interface SearchWarmup {
 /** What a shape is built from, each time the rows shown change. */
 export interface ShapeInput<T> {
   readonly snap: RowSnapshot<T>;
-  /** Every row sorted for a tree (ancestors keep their place among their siblings), the matches for details; null: the source order. */
+  /** Every row sorted for a tree (ancestors keep their place among their siblings), the matches for details (the page's, when paged); null: the source order. */
   readonly order: Uint32Array | null;
   /** 1 for a row the filters and the search match; null when none is active. */
   readonly matched: Uint8Array | null;
@@ -283,8 +283,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   let version = 0;
   const d = { filterRuns: 0, sortRuns: 0, displayedBuilds: 0, retested: 0, pageCuts: 0 };
   const shape = o.shape;
-  // A tree is not paged (D2): the tree is shown whole, and told.
-  const pageRefused = shape?.kind === 'tree' && o.page !== undefined;
+  const tree = shape?.kind === 'tree';
+  // A tree is not paged (D2): the tree is shown whole, and told. Details are: a page's masters, each with its detail.
+  const pageRefused = tree && o.page !== undefined;
   const paging = resolvePageOptions(pageRefused ? undefined : o.page);
   const shapeProblems: readonly Problem[] = pageRefused ? [problem('unsupported-combination', 'warning', 'pagination', 'tree')] : [];
   /** The rows the user opened (changed in place by a toggle); under a filter, a layer of toggles of its own, tied to that filter. */
@@ -375,7 +376,6 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     const sortKey = canonical(query.sort);
     // A tree sorts every row: an ancestor shown for its matches keeps its place among its siblings,
     // and another filter sorts nothing again.
-    const tree = shape?.kind === 'tree';
     const input = tree ? null : filtered.order;
     if (sorted && same(sorted.in, now, tree ? 'query' : undefined) && sorted.sort === sortKey && sorted.input === input) {
       if (!shape || shownFrom === filtered) return false;
@@ -389,11 +389,23 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   };
 
   const filteredCount = (): number => (filtered?.order ? filtered.order.length : store.size);
-  /** The displayed rows: all the sorted ones, or the current page of them (the index clamped). */
+  /** The displayed rows: all the sorted ones, or the current page of them (the index clamped); a shape's over them. */
   const show = (changed?: readonly RowKey[]): void => {
     d.displayedBuilds++;
     all = null;
-    const order = sorted!.order;
+    let order = sorted!.order;
+    if (pageCfg) {
+      d.pageCuts++;
+      const total = filteredCount();
+      pageIndex = Math.min(pageIndex, pageCountOf(total, pageSize) - 1);
+      const start = pageIndex * pageSize;
+      const end = Math.min(total, start + pageSize);
+      if (order) order = order.subarray(start, end);
+      else {
+        order = new Uint32Array(end - start);
+        for (let i = 0; i < order.length; i++) order[i] = start + i;
+      }
+    }
     if (shape) {
       const f = filtered!;
       shownFrom = f;
@@ -409,22 +421,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       displayed = shape.build({ snap: store.snapshot, order, matched: f.mask, filterActive: f.order !== null, expansion: open, layer, version: ++version, ...(changed && { changed }) });
       return;
     }
-    if (!pageCfg) {
-      displayed = flatDisplayed(store.snapshot, order, ++version);
-      return;
-    }
-    d.pageCuts++;
-    const total = filteredCount();
-    pageIndex = Math.min(pageIndex, pageCountOf(total, pageSize) - 1);
-    const start = pageIndex * pageSize;
-    const end = Math.min(total, start + pageSize);
-    let cut: Uint32Array;
-    if (order) cut = order.subarray(start, end);
-    else {
-      cut = new Uint32Array(end - start);
-      for (let i = 0; i < cut.length; i++) cut[i] = start + i;
-    }
-    displayed = flatDisplayed(store.snapshot, cut, ++version);
+    displayed = flatDisplayed(store.snapshot, order, ++version);
   };
 
   /** A shape's problems last told: told again only when they change. */
@@ -575,7 +572,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     const changed = [...new Set(keys)].filter((k) => isExpanded(k) !== expanded && (shape.opens?.(k) ?? true));
     if (!changed.length) return changed;
     touched = true;
-    if (filtered!.order) {
+    // The filter's layer is a tree's (tree-filter.md); a detail stays open whatever the query (D1).
+    if (tree && filtered!.order) {
       layer ??= new Map();
       for (const k of changed) layer.set(k, expanded);
     } else for (const k of changed) expanded ? open.add(k) : open.delete(k);
@@ -605,7 +603,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     row: (key) => store.get(key),
     get query() { return query; },
     get displayed() { return displayed; },
-    get allRows() { return shape ? (shape.all?.() ?? displayed) : pageCfg ? (all ??= flatDisplayed(store.snapshot, sorted!.order, version)) : displayed; },
+    // A shape without its own (details): the filtered, sorted rows, never a detail.
+    get allRows() { return shape?.all?.() ?? (shape || pageCfg ? (all ??= flatDisplayed(store.snapshot, sorted!.order, version)) : displayed); },
     // Undefined without a shape: the kernel then refuses to expand.
     get expansion() { return shape ? open : (undefined as never); },
     isExpanded,
@@ -615,8 +614,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     expandAll(expanded, depth = Infinity, source = 'api') {
       if (!shape) return [];
       const parents = (d: number) => shape.parents?.(store.snapshot, d, true) ?? [];
-      // Collapse all, unfiltered: the set emptied (keys of rows without children too).
-      if (!expanded && depth === Infinity && !filtered!.order) {
+      // Collapse all, unfiltered (details: always): the set emptied (keys of rows without children too).
+      if (!expanded && depth === Infinity && !(tree && filtered!.order)) {
         const changed = [...open];
         if (changed.length) setExpansion(new Set(), source);
         return changed;

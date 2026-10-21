@@ -1,0 +1,67 @@
+{
+  "id": "detail-key-opens-nothing",
+  "suite": "detail",
+  "description": "A detail's key opens nothing; an unknown data row is refused.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          ">a"
+        ]
+      },
+      {
+        "expand": [
+          "zz"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "expansion": [],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 5
+    },
+    "heights": [],
+    "page": null,
+    "problems": [],
+    "refused": [
+      "expand zz"
+    ]
+  }
+}

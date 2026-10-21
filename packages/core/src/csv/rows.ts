@@ -35,9 +35,10 @@ export function csvRows<T>(model: Pick<RowModel<T>, 'displayed' | 'allRows'>, sc
   const at: number[] = [];
   for (let i = 0; i < rows.count; i++) {
     const k = rows.keyAt(i as DisplayIndex);
-    // Shown: every row but a lazy tree's loading rows, never written (tree-lazy.md). Selected: a
-    // tree's fillers and details never are, even under everything-except.
-    if (shown ? k[0] !== 'l' : isDataKey(k) && isSelected(selection, k)) at.push(i);
+    // Shown: every row but a lazy tree's loading rows (tree-lazy.md) and details (master-detail.md),
+    // never written: keys `d:` and `g:` sort before `l`, `l:` and `x:` after. Selected: a tree's
+    // fillers and details never are, even under everything-except.
+    if (shown ? k < 'l' : isDataKey(k) && isSelected(selection, k)) at.push(i);
   }
   return { rows, at: shown ? null : Uint32Array.from(at), count: at.length };
 }

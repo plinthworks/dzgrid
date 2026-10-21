@@ -1,0 +1,13 @@
+{
+  "id": "depth-three",
+  "suite": "detail",
+  "description": "A nested grid at depth 3 is fine (owner Q5: tested at 2, soft cap 3).",
+  "input": {
+    "conflicts": {
+      "depth": 3
+    }
+  },
+  "expected": {
+    "problems": []
+  }
+}

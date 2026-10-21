@@ -1,0 +1,78 @@
+{
+  "id": "selection-range-over-detail",
+  "suite": "detail",
+  "description": "A range from a to c over b's detail takes a, b and c.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "b"
+        ]
+      },
+      {
+        "toggle": "a"
+      },
+      {
+        "range": "c"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "b",
+      "> b",
+      "c",
+      "d",
+      "e"
+    ],
+    "expansion": [
+      "b"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 6
+    },
+    "heights": [
+      240
+    ],
+    "page": null,
+    "problems": [],
+    "selection": {
+      "ids": [
+        "a",
+        "b",
+        "c"
+      ],
+      "header": "some"
+    }
+  }
+}

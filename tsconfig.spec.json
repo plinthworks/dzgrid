@@ -38,6 +38,9 @@
       "@dzgrid/core/tree-lazy": [
         "./packages/core/src/tree-lazy.ts"
       ],
+      "@dzgrid/core/detail": [
+        "./packages/core/src/detail.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],

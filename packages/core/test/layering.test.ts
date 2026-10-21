@@ -71,6 +71,15 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/server/rows.ts'))).toBe(true);
   });
 
+  it('no other entry holds a detail module; the detail entry builds on the base rows and holds no tree, server, span or csv module, nor the model (Phase 4 step 8)', async () => {
+    const isDetail = (f: string) => /(^|\/)src\/detail(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts']) expect((await inputsOf(entry)).filter(isDetail), entry).toEqual([]);
+    const inputs = await inputsOf('detail.ts');
+    for (const f of ['src/detail/shape.ts', 'src/detail/layout.ts', 'src/row/displayed.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    expect(inputs.filter((f) => isServer(f) || isSpans(f) || isCsv(f) || /(^|\/)src\/tree(\.ts$|-lazy\.ts$|\/)/.test(f))).toEqual([]);
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
+  });
+
   it('no other entry holds a tree module; the tree entry builds on the base model and holds no server, span or csv module (Phase 4 step 3)', async () => {
     const isTree = (f: string) => /(^|\/)src\/tree(\.ts$|\/)/.test(f);
     for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'rules.ts']) expect((await inputsOf(entry)).filter(isTree), entry).toEqual([]);
@@ -93,7 +102,9 @@ describe('layering of the base and the server entry', () => {
     // review of steps 2–3 added (expandAll through the model and the filter's layer, the muted rows
     // left out of select-all, the toggle's patched flags: about +130), plus step 5 (the `tree-shape`
     // code, the nested rows' `load`/`tx` hooks, `rows.expand` on fillers: +35), plus the review of step 5
-    // (`tx` given the store's snapshot, the open set and the layer rekeyed: +52): a guard against a seam that grew.
-    expect(gz).toBeLessThan(26984 + 1245);
+    // (`tx` given the store's snapshot, the open set and the layer rekeyed: +52), plus step 8 (details:
+    // the page cut before the shape, the filter's layer a tree's only, `allRows` flat for a shape
+    // without its own: +6): a guard against a seam that grew.
+    expect(gz).toBeLessThan(26984 + 1250);
   });
 });

@@ -50,6 +50,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   channel per parent, the query epoch in each request; a new epoch closes every row. A server's rows
   can now be a tree: its pages count the roots, a parent's children come whole.
   `SourceModel.diagnostics.childFetches` (lazy trees only).
+- **`@dzgrid/core/detail` (Phase 4, step 8)**: `detailShape({ height, initial, sizes })`, a row
+  shape that puts one detail row (`DetailNode`, key `x:` + the master's key, the master's data)
+  right after each open master, over the filtered, sorted and paged rows; opened and closed by
+  `rows.expand` / `rowExpanded` like a tree row. `height`: a number (default 240), a function of the
+  master's row, or `'auto'` (240 until the DOM measures it, `sizes`). The rows give the details'
+  display indices and heights (`details`, `heights`) for `sparseRowLayout(rows, h, { at, heights })`:
+  a row layout where every row is `h` tall but those few, found by binary search over running sums
+  (O(D) memory, `setHeight` and a batched `setHeights` O(D)). `detailConflicts({ spans, tree,
+  depth })`: spans and a tree are refused beside details, a nested grid deeper than 3 is told
+  (`unsupported-combination`).
 
 ### Changed
 
@@ -58,6 +68,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DisplayedRows` gains optional members: `parentOf`, `levelAt`, `dataCount` (the rows select-all
   takes), `matchedAt` (false for a filtered tree's muted ancestor).
 - Select-all and the header box skip fillers, details and a filtered tree's muted ancestors.
+- Browser pages with a row shape: the page is cut first, then shaped (details follow their masters
+  on their page and are not page rows; a tree still refuses pages). The filter's layer of toggles is
+  a tree's only: a detail opened under a filter stays open when the filter changes, and collapse-all
+  closes every detail. `allRows` of a shape without its own is the filtered, sorted rows (no
+  detail). `csvRows(…, 'displayed').count` leaves details out.
 - `rows.expand` refuses only data keys that do not exist (`unknown-row`); another key the rows do
   not know (a filler) is a no-op, so a hidden filler can be opened by the application.
 - `TreeOptions.parentId` is optional (one of the three shapes).

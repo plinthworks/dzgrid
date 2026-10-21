@@ -4,6 +4,7 @@ import { toWire, createGate } from '../packages/core/src/server.js';
 import { buildSpanMap } from '../packages/core/src/spans.js';
 import { toCsv } from '../packages/core/src/csv.js';
 import { treeShape } from '../packages/core/src/tree.js';
+import { detailShape, sparseRowLayout } from '../packages/core/src/detail.js';
 import { treeProfile, type TreeRow as MRow } from './profiles/tree.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
@@ -72,6 +73,28 @@ export const CASES: Record<string, Case> = {
     run: (m: ReturnType<typeof millionModel>) => (m.setQuery(makeQuery({ filter: { n: { type: 'number', op: 'lt', value: 10 } } })), m.displayed.count),
     // The million let go: the lines after it must not pay for its heap.
     done: () => void (million = millionRows = undefined),
+  },
+  // Phase 4 step 8 (D7, spike S12): the sparse layout of 1 000 000 rows with 2 000 open details of
+  // 240 px (built per paint by the DOM, step 9), then one detail's height set among 20 000 (× 100).
+  'detail layout build 1 000 000 rows, 2 000 details (sparseRowLayout)': {
+    setup: () => sparse(1_000_000, 2_000),
+    run: (x: ReturnType<typeof sparse>) => sparseRowLayout(x.rows, 32, x).total,
+  },
+  'detail setHeight x 100 at 20 000 details (1 000 000 rows)': {
+    setup: () => {
+      const x = sparse(1_000_000, 20_000);
+      return { x, L: sparseRowLayout(x.rows, 32, x) };
+    },
+    run: ({ x, L }: { x: ReturnType<typeof sparse>; L: ReturnType<typeof sparseRowLayout> }) => {
+      for (let k = 0; k < 100; k++) L.setHeight(x.at[(k * 197) % x.at.length]! as never, 100 + k);
+      return L.total;
+    },
+  },
+  // One master opened then closed at 1 000 000 rows sorted, 2 000 open (the model built once).
+  'detail toggle at 1 000 000 rows sorted, 2 000 open (clientRows)': {
+    setup: () => (bigDetail ??= detailModel()),
+    run: (t: ReturnType<typeof detailModel>) => t.m.expand([t.key], !t.m.isExpanded(t.key)).length + t.m.displayed.count,
+    done: () => void (bigDetail = undefined),
   },
   // Step 9b: the run index of a merging column over its export texts (what ColumnCache.exports holds), runs of 1 to 20 rows.
   'span merge index 1 000 000 rows (export texts given)': {
@@ -537,6 +560,21 @@ function spanSetup(n: number, defs: Parameters<typeof createColumnModel<SpanRow>
   return { rows: flatDisplayed(store.snapshot, null, 1), columns: createColumnModel<SpanRow>(defs), ctx: localeCtx({ locale: 'fr-FR' }) };
 }
 
+/** `D` details spread over `n` data rows: their display indices and heights (240 px). */
+function sparse(n: number, D: number) {
+  const count = n + D;
+  const at = Uint32Array.from({ length: D }, (_, j) => Math.floor((j * count) / D));
+  return { rows: { count, index: (i: number) => i as never }, at, heights: new Float64Array(D).fill(240) };
+}
+let bigDetail: ReturnType<typeof detailModel> | undefined;
+function detailModel() {
+  const rows = Array.from({ length: 1_000_000 }, (_, i) => ({ id: `r${i}`, n: (i * 7919) % 1_000_003 }));
+  const columns = createColumnModel<{ id: string; n: number }>([{ id: 'n', type: 'number' }]);
+  const m = clientRows({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: detailShape<{ id: string; n: number }>() });
+  m.setQuery(makeQuery({ sort: [{ column: 'n', dir: 'asc' }] }));
+  m.setExpansion(new Set(Array.from({ length: 2_000 }, (_, j) => dataKey(`r${j * 500}`)!)));
+  return { m, key: dataKey('r777')! };
+}
 type TreeRow = { id: string; p?: string; n: number };
 let millionRows: MRow[] | undefined;
 let million: ReturnType<typeof millionModel> | undefined;

@@ -36,6 +36,10 @@
     "./tree-lazy": {
       "types": "./src/tree-lazy.ts",
       "default": "./src/tree-lazy.ts"
+    },
+    "./detail": {
+      "types": "./src/detail.ts",
+      "default": "./src/detail.ts"
     }
   }
 }

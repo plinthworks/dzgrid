@@ -1,0 +1,71 @@
+{
+  "id": "heights",
+  "suite": "detail",
+  "description": "A height of each master's own (n × 10 px here); a fixed number otherwise.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "detail": {
+      "height": "n*10"
+    },
+    "steps": [
+      {
+        "expand": [
+          "e",
+          "b"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "b",
+      "> b",
+      "c",
+      "d",
+      "e",
+      "> e"
+    ],
+    "expansion": [
+      "b",
+      "e"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 7
+    },
+    "heights": [
+      10,
+      40
+    ],
+    "page": null,
+    "problems": []
+  }
+}

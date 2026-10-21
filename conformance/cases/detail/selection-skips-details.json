@@ -1,0 +1,83 @@
+{
+  "id": "selection-skips-details",
+  "suite": "detail",
+  "description": "Select-all takes the data rows only, the header box says all; a detail is never ticked; a range across one takes data rows.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "select": "all"
+      },
+      {
+        "toggle": ">a"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "> a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 6
+    },
+    "heights": [
+      240
+    ],
+    "page": null,
+    "problems": [],
+    "refused": [
+      ">a"
+    ],
+    "selection": {
+      "ids": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "header": "all"
+    }
+  }
+}

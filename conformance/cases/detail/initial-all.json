@@ -1,0 +1,45 @@
+{
+  "id": "initial-all",
+  "suite": "detail",
+  "description": "initial 'all' opens every row at the first load.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "detail": {
+      "initial": "all"
+    }
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "> a",
+      "b",
+      "> b"
+    ],
+    "expansion": [
+      "a",
+      "b"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 4
+    },
+    "heights": [
+      240,
+      240
+    ],
+    "page": null,
+    "problems": []
+  }
+}

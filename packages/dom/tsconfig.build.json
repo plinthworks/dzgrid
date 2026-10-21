@@ -16,6 +16,7 @@
       "@dzgrid/core/rules": ["../core/dist/rules.d.ts"],
       "@dzgrid/core/tree": ["../core/dist/tree.d.ts"],
       "@dzgrid/core/tree-lazy": ["../core/dist/tree-lazy.d.ts"],
+      "@dzgrid/core/detail": ["../core/dist/detail.d.ts"],
       "@dzgrid/core/server": ["../core/dist/server.d.ts"],
       "@dzgrid/dom/internal": ["./src/internal.ts"]
     }

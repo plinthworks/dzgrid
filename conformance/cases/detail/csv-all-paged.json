@@ -1,0 +1,82 @@
+{
+  "id": "csv-all-paged",
+  "suite": "detail",
+  "description": "A CSV of all rows writes every matching row across pages, never a detail.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "page": {
+      "pageSize": 2
+    },
+    "csv": "all",
+    "steps": [
+      {
+        "expand": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "filter": "ward"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "> a",
+      "c"
+    ],
+    "expansion": [
+      "a",
+      "b"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 3,
+      "displayed": 3
+    },
+    "heights": [
+      240
+    ],
+    "page": {
+      "index": 0,
+      "pageCount": 2
+    },
+    "problems": [],
+    "csv": {
+      "count": 3,
+      "lines": [
+        "N,T",
+        "3,ward",
+        "2,ward",
+        "4,ward"
+      ]
+    }
+  }
+}

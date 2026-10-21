@@ -1,0 +1,71 @@
+{
+  "id": "remove-master",
+  "suite": "detail",
+  "description": "A removed master leaves the expansion and its detail goes.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "a",
+          "c"
+        ]
+      },
+      {
+        "tx": {
+          "remove": [
+            "a"
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b",
+      "c",
+      "> c",
+      "d",
+      "e"
+    ],
+    "expansion": [
+      "c"
+    ],
+    "counts": {
+      "total": 4,
+      "filtered": 4,
+      "displayed": 5
+    },
+    "heights": [
+      240
+    ],
+    "page": null,
+    "problems": []
+  }
+}

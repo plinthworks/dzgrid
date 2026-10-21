@@ -6,6 +6,7 @@ import * as spans from '@dzgrid/core/spans';
 import * as csv from '@dzgrid/core/csv';
 import * as rules from '@dzgrid/core/rules';
 import * as tree from '@dzgrid/core/tree';
+import * as detail from '@dzgrid/core/detail';
 
 /**
  * The public surface, written out by hand: adding an export is a decision,
@@ -45,7 +46,15 @@ const RULES = ['refusalProblems', 'ruleGate', 'vetSelection'];
 /** `@dzgrid/core/tree` (Phase 4 step 3): the tree view, never in the base; `treeColumnProblems` (step 4). */
 const TREE = ['treeColumnProblems', 'treeConflicts', 'treeShape'];
 
+/** `@dzgrid/core/detail` (Phase 4 step 8): master/detail rows and their sparse layout, never in the base. */
+const DETAIL = ['detailConflicts', 'detailShape', 'sparseRowLayout'];
+
 describe('the public surface', () => {
+  it('keeps the detail entry apart (Phase 4 step 8)', () => {
+    expect(Object.keys(detail).sort()).toEqual([...DETAIL].sort());
+    for (const name of DETAIL) expect(name in core || name in internal || name in server || name in spans || name in csv || name in rules || name in tree, name).toBe(false);
+  });
+
   it('keeps the tree entry apart (Phase 4 step 3)', () => {
     expect(Object.keys(tree).sort()).toEqual([...TREE].sort());
     for (const name of TREE) expect(name in core || name in internal || name in server || name in spans || name in csv || name in rules, name).toBe(false);

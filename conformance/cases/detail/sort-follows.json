@@ -1,0 +1,71 @@
+{
+  "id": "sort-follows",
+  "suite": "detail",
+  "description": "A sort moves each master with its detail under it.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "a",
+          "d"
+        ]
+      },
+      {
+        "sort": "asc"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b",
+      "c",
+      "a",
+      "> a",
+      "e",
+      "d",
+      "> d"
+    ],
+    "expansion": [
+      "a",
+      "d"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 7
+    },
+    "heights": [
+      240,
+      240
+    ],
+    "page": null,
+    "problems": []
+  }
+}

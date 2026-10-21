@@ -1,0 +1,78 @@
+{
+  "id": "filter-keeps-open",
+  "suite": "detail",
+  "description": "A filter hides a master and its detail; a detail opened under the filter, and the hidden one, are open again when it goes.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      },
+      {
+        "id": "c",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "d",
+        "n": 5,
+        "t": "bed"
+      },
+      {
+        "id": "e",
+        "n": 4,
+        "t": "ward"
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "filter": "bed"
+      },
+      {
+        "expand": [
+          "d"
+        ]
+      },
+      {
+        "filter": ""
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "> a",
+      "b",
+      "c",
+      "d",
+      "> d",
+      "e"
+    ],
+    "expansion": [
+      "a",
+      "d"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 7
+    },
+    "heights": [
+      240,
+      240
+    ],
+    "page": null,
+    "problems": []
+  }
+}
