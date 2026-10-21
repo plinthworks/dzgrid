@@ -91,5 +91,5 @@ export function mount(settings: Partial<GridSettings<R>> = {}, o: { rows?: R[]; 
 /** The motion props a tween may leave inline: none once finished. */
 export const leftovers = (root: ParentNode): string[] =>
   [...root.querySelectorAll<HTMLElement>('.dzg-row, .dzg-cell, .dzg-layer, .dzg-popup, .dzg-overlay')].flatMap((el) =>
-    ['transform', 'opacity', '--dzg-flash', 'translate'].filter((p) => el.style.getPropertyValue(p) !== '').map((p) => `${el.className}:${p}`).concat(el.classList.contains('dzg-flash') ? [`${el.className}:class`] : []),
+    ['transform', 'opacity', '--dzg-flash', 'translate', 'rotate', 'scale'].filter((p) => el.style.getPropertyValue(p) !== '').map((p) => `${el.className}:${p}`).concat(el.classList.contains('dzg-flash') ? [`${el.className}:class`] : []),
   );
