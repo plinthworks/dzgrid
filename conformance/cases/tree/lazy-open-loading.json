@@ -1,0 +1,55 @@
+{
+  "id": "lazy-open-loading",
+  "suite": "tree",
+  "description": "Opening a parent whose children are not loaded shows one loading row under it, of unknown size, and asks once.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "lazy": {
+      "has": [
+        "a"
+      ]
+    },
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "expand": [
+          "a"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/2",
+      ". (loading) 1/-1",
+      "b 2/2"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 3
+    },
+    "problems": [],
+    "loads": [
+      "ask a"
+    ]
+  }
+}

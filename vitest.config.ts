@@ -13,6 +13,7 @@ const alias = {
   '@dzgrid/core/csv': fileURLToPath(new URL('./packages/core/src/csv.ts', import.meta.url)),
   '@dzgrid/core/rules': fileURLToPath(new URL('./packages/core/src/rules.ts', import.meta.url)),
   '@dzgrid/core/tree': fileURLToPath(new URL('./packages/core/src/tree.ts', import.meta.url)),
+  '@dzgrid/core/tree-lazy': fileURLToPath(new URL('./packages/core/src/tree-lazy.ts', import.meta.url)),
   '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
   '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
 };
@@ -26,6 +27,7 @@ const domAlias = {
   '@dzgrid/dom/parts': fileURLToPath(new URL('./packages/dom/src/parts.ts', import.meta.url)),
   '@dzgrid/dom/rules': fileURLToPath(new URL('./packages/dom/src/rules.ts', import.meta.url)),
   '@dzgrid/dom/tree': fileURLToPath(new URL('./packages/dom/src/tree.ts', import.meta.url)),
+  '@dzgrid/dom/tree-lazy': fileURLToPath(new URL('./packages/dom/src/tree-lazy.ts', import.meta.url)),
   '@dzgrid/dom/motion-gsap': fileURLToPath(new URL('./packages/dom/src/motion-gsap.ts', import.meta.url)),
   '@dzgrid/dom/pagination': fileURLToPath(new URL('./packages/dom/src/pagination.ts', import.meta.url)),
   '@dzgrid/dom/internal': fileURLToPath(new URL('./packages/dom/src/internal.ts', import.meta.url)),

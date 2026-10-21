@@ -2,9 +2,11 @@
 // ids — services, their patients, one patient in ten with three stays — with the tree feature, the floating
 // filter row and a selection box column. Query: locale, dir, theme, rows (≈ 10 000 by default; 100000 for ≈ 100 000).
 // Only « Service 0 » is open at first. `shape=path` (step 5): the services have no row, the rows give paths
-// (`Service s / patient / stay`): the services are filler rows.
+// (`Service s / patient / stay`): the services are filler rows. `lazy=1` (step 7): the services only, their
+// children loaded when one opens, by a loader the checks answer (`t.loads`: `ok()`, `no()`).
 import { createGrid } from '/packages/dom/src/index.ts';
 import { tree } from '/packages/dom/src/tree.ts';
+import { lazyChildren } from '/packages/dom/src/tree-lazy.ts';
 import { filters } from '/packages/dom/src/filters.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
 import { AR } from '/packages/dom/src/locales/ar.ts';
@@ -41,17 +43,23 @@ const given = paths ? rows.filter((r) => r.parent).map((r) => ({ ...r, path: pat
 const key = (id: string) => (paths && /^s\d+$/.test(id) ? groupKey([`Service ${id.slice(1)}`]) : dataKey(id)!);
 const base = ar ? AR : FR;
 const messages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_TREE : FR_TREE).text } };
+const lazy = q.get('lazy') === '1';
+const loads: { id: string; ok(): void; no(): void; signal: AbortSignal }[] = [];
+const loader = lazyChildren<Row>({
+  has: (r) => !r.parent,
+  load: (r, { signal }) => new Promise((ok, no) => loads.push({ id: r.id, ok: () => ok(rows.filter((x) => x.parent === r.id)), no: () => no(new Error('503')), signal: signal as AbortSignal })),
+});
 const grid = createGrid<Row>(document.getElementById('host')!, {
-  rows: given, getRowId: (r) => r.id, messages, locale,
+  rows: lazy ? rows.filter((r) => !r.parent) : given, getRowId: (r) => r.id, messages, locale,
   columns: [
     { id: 'name', header: ar ? 'الاسم' : 'Nom', width: 220, filter: { kind: 'text', floating: true } },
     { id: 'city', header: ar ? 'المدينة' : 'Ville', width: 160, filter: { kind: 'text', floating: true } },
     { id: 'age', header: ar ? 'العمر' : 'Âge', type: 'number', width: 110, filter: { kind: 'number', floating: true } },
     ...Array.from({ length: 6 }, (_, k) => ({ id: `x${k}`, header: `C${k}`, width: 110, value: (r: Row) => (r.name.length * (k + 3)) % 97 })),
   ],
-  features: [tree<Row>(paths ? { path: (r) => r.path! } : { parentId: (r) => r.parent }), filters({ floating: true })],
+  features: [tree<Row>(paths ? { path: (r) => r.path! } : { parentId: (r) => r.parent, ...(lazy && { lazy: loader }) }), filters({ floating: true })],
   selection: { mode: 'multi', checkbox: true, click: true },
 });
-grid.kernel.dispatch({ type: 'rows.expand', rows: [key('s0')], expanded: true }, 'host');
-(window as any).t = { grid, rows, key, scrollTo: (l: number) => (grid as any).scroll.scrollTo(l), logicalTop: () => (grid as any).scroll.logicalTop };
+if (!lazy) grid.kernel.dispatch({ type: 'rows.expand', rows: [key('s0')], expanded: true }, 'host');
+(window as any).t = { grid, rows, key, loads, scrollTo: (l: number) => (grid as any).scroll.scrollTo(l), logicalTop: () => (grid as any).scroll.logicalTop };
 (window as any).ready = true;

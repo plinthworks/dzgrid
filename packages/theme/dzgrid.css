@@ -200,6 +200,7 @@
 .dzg-overlay button,
 .dzg-ffoot button,
 .dzg-pbtn,
+.dzg-retry,
 .dzg-footer select {
   min-block-size: 2rem;
   padding-inline: 0.75rem;
@@ -211,7 +212,8 @@
   cursor: pointer;
 }
 
-.dzg-overlay button:focus-visible {
+.dzg-overlay button:focus-visible,
+.dzg-retry:focus-visible {
   outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
   outline-offset: 2px;
 }
@@ -394,6 +396,16 @@
 .dzg-row[data-context-row] .dzg-seg-start,
 .dzg-row[data-context-row] .dzg-seg-end {
   color: var(--dzg-context-fg, var(--tz-fg-muted));
+}
+
+.dzg-row[data-kind=loading] .dzg-label {
+  color: var(--dzg-context-fg, var(--tz-fg-muted));
+}
+
+.dzg-retry {
+  min-block-size: var(--dzg-target-min, 24px);
+  margin-inline-start: 0.25rem;
+  padding-block: 0;
 }
 
 .dzg-cell.dzg-flash {

@@ -1,5 +1,6 @@
 import { clientRows, createColumnModel, createKernel, dataKey, groupKey, headerSelection, localeCtx, makeQuery, type FilterModel, type Problem, type RowKey, type RowTransaction } from '@dzgrid/core';
 import { treeConflicts, treeShape, type TreeRows } from '@dzgrid/core/tree';
+import { lazyShape } from '@dzgrid/core/tree-lazy';
 import type { Suite } from './index.js';
 
 type Row = { id: string; p?: string | null; n: number; t?: string; c?: Row[]; path?: string[] };
@@ -14,7 +15,7 @@ const SHAPES = {
 /** An id, or a filler's path written `/a/b`. */
 const keyOf = (id: string): RowKey => (id.startsWith('/') ? groupKey(id.slice(1).split('/')) : dataKey(id)!);
 /** A tree problem names its row by id in `detail` (its place shifts on a removal). */
-const shape = (ps: readonly Problem[]) => ps.map((p) => ({ code: p.code, severity: p.severity, path: p.path, ...(p.code.startsWith('tree-') && { detail: p.detail }) }));
+const tell = (ps: readonly Problem[]) => ps.map((p) => ({ code: p.code, severity: p.severity, path: p.path, ...(p.code.startsWith('tree-') && { detail: p.detail }) }));
 
 /**
  * A tree from parent ids (Phase 4 step 3, docs/behaviors/tree-view.md, tree-filter.md): rows, then
@@ -23,9 +24,21 @@ const shape = (ps: readonly Problem[]) => ps.map((p) => ({ code: p.code, severit
  */
 export function runTree(input: any) {
   const columns = createColumnModel<Row>([{ id: 'n', type: 'number' }, { id: 't' }]);
+  const base = treeShape<Row>({ ...SHAPES[(input.shape ?? 'parent') as keyof typeof SHAPES], ...input.tree });
+  // Lazy children (step 7, tree-lazy.md): `lazy.has` the ids declared; each load logged (`ask a`,
+  // `abort a`) and answered by a step (`answer`/`fail`: the latest request for that id, even aborted).
+  const declared = new Set<string>(input.lazy?.has ?? []);
+  const lazy = input.lazy ? lazyShape(base, { has: (r) => declared.has(r.id) }) : null;
+  const shape = lazy ?? base;
+  const loads: string[] = [];
+  const asked = new Map<string, (ok: boolean, v: unknown) => void>();
+  if (lazy) lazy.lazy.loader = (_p, row, answer) => {
+    loads.push(`ask ${row.id}`);
+    asked.set(row.id, answer);
+    return () => void loads.push(`abort ${row.id}`);
+  };
   const model = clientRows<Row>({
-    rows: input.rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }),
-    shape: treeShape<Row>({ ...SHAPES[(input.shape ?? 'parent') as keyof typeof SHAPES], ...input.tree }),
+    rows: input.rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape,
     ...(input.page && { page: input.page }),
   });
   const kernel = createKernel<Row>({ rows: model, columns });
@@ -45,13 +58,18 @@ export function runTree(input: any) {
     if (s.filter !== undefined) (filter = s.filter ? { t: { type: 'text', op: 'equals', value: s.filter } } : {}), query();
     if (s.quick !== undefined) (quick = s.quick), query();
     if (s.tx) model.applyTransaction(s.tx as RowTransaction<Row>);
+    if (s.answer) asked.get(s.answer)?.(true, s.rows);
+    if (s.fail) asked.get(s.fail)?.(false, new Error('failed'));
+    if (s.retry && lazy) lazy.lazy.retry(keyOf(s.retry));
+    if (s.refresh) kernel.dispatch({ type: 'rows.refresh' }, 'user');
+    if (s.setRows) model.setRows(s.setRows);
   }
   const d = model.displayed as TreeRows<Row>;
   const shown = Array.from({ length: d.count }, (_, i) => {
     const at = d.index(i)!;
     const muted = d.matchedAt(at) ? '' : ' muted';
     const node = d.nodeAt(at);
-    const name = node.kind === 'group' ? `[${node.label}]` : String((node as { id: unknown }).id);
+    const name = node.kind === 'group' ? `[${node.label}]` : node.kind === 'loading' ? (node.failed ? '(failed)' : '(loading)') : String((node as { id: unknown }).id);
     return `${'. '.repeat(d.levelAt(at))}${name} ${d.posAt(at)}/${d.sizeAt(at)}${muted}`;
   });
   const idOf = (k: string) => (k.startsWith('d:') ? k.slice(k.indexOf(':', 2) + 1) : k);
@@ -59,9 +77,9 @@ export function runTree(input: any) {
   const selection = kernel.selection.keys.size || kernel.selection.mode === 'exclude'
     ? { mode: kernel.selection.mode, ids: [...kernel.selection.keys].map(idOf).sort(), header: headerSelection(kernel.selection, d), ...(refused.length && { refused }) }
     : undefined;
-  return { shown, expansion, counts: model.counts, problems: shape(model.problems), ...(selection && { selection }) };
+  return { shown, expansion, counts: model.counts, problems: tell(model.problems), ...(selection && { selection }), ...(input.lazy && { loads }) };
 }
 
 export const tree: Record<string, Suite> = {
-  tree: (input) => (input.conflicts ? { problems: shape(treeConflicts(input.conflicts)) } : runTree(input)),
+  tree: (input) => (input.conflicts ? { problems: tell(treeConflicts(input.conflicts)) } : runTree(input)),
 };

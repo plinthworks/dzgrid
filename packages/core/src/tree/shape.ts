@@ -28,8 +28,10 @@ export interface TreeRows<T> extends DisplayedRows<T> {
   posAt(i: DisplayIndex): number;
   /** How many siblings are shown (aria-setsize). */
   sizeAt(i: DisplayIndex): number;
-  /** How many children it shows when open: 0 for a leaf (no aria-expanded). */
+  /** How many children it shows when open: 0 for a leaf (no aria-expanded); -1 for a lazy parent not loaded (tree-lazy.md). */
   childrenAt(i: DisplayIndex): number;
+  /** How many children a row holds, whatever the filter (0 for a row it does not hold). */
+  kidsOf(key: RowKey): number;
   expandedAt(i: DisplayIndex): boolean;
   /** False for an ancestor shown only for its matches (drawn muted). */
   matchedAt(i: DisplayIndex): boolean;
@@ -189,6 +191,7 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
         const s = check(i);
         return start[s + 1]! - start[s]!;
       },
+      kidsOf: (key) => st.kids[srcOf(snap, st, key)] ?? 0,
       expandedAt: (i) => !isOpen || isOpen[check(i)] === 1,
       matchedAt: (i) => !mt || mt[check(i)] === 1,
     };

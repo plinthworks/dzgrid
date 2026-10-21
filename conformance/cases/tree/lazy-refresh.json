@@ -1,0 +1,71 @@
+{
+  "id": "lazy-refresh",
+  "suite": "tree",
+  "description": "A refresh removes the rows the loads brought; the open parent loads again.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "lazy": {
+      "has": [
+        "a"
+      ]
+    },
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "answer": "a",
+        "rows": [
+          {
+            "id": "a1",
+            "p": "a",
+            "n": 5,
+            "t": "bed"
+          },
+          {
+            "id": "a2",
+            "p": "a",
+            "n": 4,
+            "t": "bed"
+          }
+        ]
+      },
+      {
+        "refresh": true
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/2",
+      ". (loading) 1/-1",
+      "b 2/2"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 3
+    },
+    "problems": [],
+    "loads": [
+      "ask a",
+      "ask a"
+    ]
+  }
+}

@@ -37,8 +37,8 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
 - **A row with no children** (lead decision, review of steps 2–3): opening or closing it is a
   no-op, without event; `rows.expandAll` passes over it. Its key does not enter the set, so a
   child added later shows it closed. Under a filter, a row whose children are all hidden counts as
-  one with no children. A shape may later declare children before they load (lazy children,
-  step 7), which makes such a row openable.
+  one with no children. A row declared by `lazyChildren({ has })` whose children are not loaded
+  is openable (step 7, `tree-lazy.md`): it says -1 children (not known) until its load answers.
 - **Three ways to give the hierarchy** (D3, owner Q1, in this order of work): a parent id column
   (`parentId`), nested arrays (`children`), or a path of labels per row (`path(row)`). A parent id
   that names no row puts the row at the root and reports `tree-orphan`; a cycle puts the rows it
@@ -88,13 +88,15 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
 - **Accessibility** (WAI-ARIA 1.2 treegrid): the grid's role is `treegrid`; each row carries
   `aria-level` (1 for the roots), `aria-posinset` and `aria-setsize` among its visible siblings
   (after a filter, the siblings shown; `-1` while a lazy parent's size is unknown), and parents carry
-  `aria-expanded`. Leaves carry no `aria-expanded`. `aria-rowcount` and `aria-rowindex` count the
+  `aria-expanded`. Leaves carry no `aria-expanded`. A lazy parent's loading row says
+  `aria-posinset="1"` and `aria-setsize="-1"`, with `aria-busy` while it loads (`tree-lazy.md`). `aria-rowcount` and `aria-rowindex` count the
   rows shown, as on a flat grid. Opening and closing are also said in the live region:
   "Service 50 expanded, 100 rows", "Service 50 collapsed" (bundles `locales/{en,fr,ar}-tree`),
   because screen readers do not all say a change of `aria-expanded` on a row.
-- **Not with**: cell spans (`unsupported-combination`, D9), browser or server pages
+- **Not with**: cell spans (`unsupported-combination`, D9), browser pages
   (`unsupported-combination`, D2), a master/detail on the same grid (owner Q5). Each gives a
-  problem and the grid shows the tree without the other feature.
+  problem and the grid shows the tree without the other feature. **A server's rows** can be a tree
+  (step 7, `tree-lazy.md`): its pages count the roots, a parent's children come whole.
 - **Theme**: the toggle's chevron and its focus ring meet 3:1 against the row (WCAG 1.4.11),
   forced colours draw it in `ButtonText`, motion follows `motion.md`.
 

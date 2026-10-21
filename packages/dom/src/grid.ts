@@ -89,10 +89,11 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   // A server's model from its binding (the base knows only its type), the browser's rows otherwise.
   const page = initial.pagination && { page: initial.pagination };
   const kinds = filterKindLookup(initial.filterKinds);
-  const shared = { ...(initial.filterKinds && { filterKinds: kinds.get }), now: initial.clock ?? Date.now };
+  // A feature's shape (a tree) goes to either model: a server's rows can be a tree too (tree-lazy.md).
+  const shared = { ...(initial.filterKinds && { filterKinds: kinds.get }), now: initial.clock ?? Date.now, ...shapeOf(initial.features) };
   const rows: RowModel<T> = initial.source
     ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...shared, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }) })
-    : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page, ...shared, ...shapeOf(initial.features) });
+    : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page, ...shared });
   const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false });
   // Operations without a source run in the browser, and are told (a source's model tells its own).
   // The filter kinds refused are told too.

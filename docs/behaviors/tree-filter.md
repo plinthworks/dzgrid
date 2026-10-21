@@ -43,8 +43,10 @@ tree; opens and closes rows while the filter is on; clears the filter.
   takes the matching rows shown (not the muted ancestors unless they match), and the header box
   counts those only (`DisplayedRows.matchedAt`, `dataCount`): a ticked muted ancestor does not
   make it "some".
-- **Server trees** (lazy children, step 7): the server decides what matches; the same muting rule
-  applies to the ancestors it sends.
+- **Server trees** (lazy children, step 7, `tree-lazy.md`): the server decides what matches; the
+  rows it sends are shown as matches (it does not say which are ancestors only), and the browser's
+  part of a filter, when there is one, mutes as above. A row not loaded is never asked for its
+  children to find matches in them.
 
 ## Where DzGrid differs on purpose
 - The muted look is never colour only: the text is dimmed and the row gets no selection mark

@@ -1,0 +1,79 @@
+{
+  "id": "lazy-cached",
+  "suite": "tree",
+  "description": "Children loaded stay: closing and opening again asks nothing.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "lazy": {
+      "has": [
+        "a"
+      ]
+    },
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "answer": "a",
+        "rows": [
+          {
+            "id": "a1",
+            "p": "a",
+            "n": 5,
+            "t": "bed"
+          },
+          {
+            "id": "a2",
+            "p": "a",
+            "n": 4,
+            "t": "bed"
+          }
+        ]
+      },
+      {
+        "expand": [
+          "a"
+        ],
+        "expanded": false
+      },
+      {
+        "expand": [
+          "a"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/2",
+      ". a1 1/2",
+      ". a2 2/2",
+      "b 2/2"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 4,
+      "filtered": 4,
+      "displayed": 4
+    },
+    "problems": [],
+    "loads": [
+      "ask a"
+    ]
+  }
+}

@@ -187,6 +187,10 @@ export interface RowShape<T> {
   tx?(tx: RowTransaction<T>, id: (row: T) => RowIdInput, snap: RowSnapshot<T>): RowTransaction<T>;
   /** After a change: what each open key becomes (a path tree's row taking a filler's place, or the reverse); null: unchanged. */
   rekey?(snap: RowSnapshot<T>): ((key: RowKey) => RowKey) | null;
+  /** Called once by the model it is handed to (lazy children, tree-lazy.md): the model, and how to show its rows again. */
+  attach?(model: ClientModel<T>, redraw: () => void): void;
+  /** Called first by `invalidate` (a refresh): what the shape brought is dropped. */
+  refresh?(): void;
 }
 
 export interface ClientOptions<T> {
@@ -718,6 +722,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     },
     // keepScroll is the DOM's concern; the model has no scroll to keep.
     invalidate() {
+      shape?.refresh?.();
       cache.invalidateAll();
       filtered = null;
       sorted = null;
@@ -758,6 +763,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       for (const b of [...lists.values()]) b.close();
     },
   };
+  shape?.attach?.(model, () => (show(), notify('expand', 'data')));
   return model;
 }
 
@@ -790,6 +796,8 @@ export interface ModelEnv<T> {
   readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
   /** The clock (milliseconds since 1970 UTC), for date shortcuts: sent resolved, and run in the browser (filter-relative.md). */
   readonly now?: () => number;
+  /** A tree (a feature's shape): the rows the server sends are shown as one (tree-lazy.md). */
+  readonly shape?: RowShape<T>;
 }
 
 /** A model to make once the grid knows its columns and language. */

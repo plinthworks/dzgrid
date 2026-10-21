@@ -1,0 +1,71 @@
+{
+  "id": "lazy-collapse-aborts",
+  "suite": "tree",
+  "description": "Closing the parent while it loads aborts the load; its answer arriving later is dropped.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "lazy": {
+      "has": [
+        "a"
+      ]
+    },
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "expand": [
+          "a"
+        ],
+        "expanded": false
+      },
+      {
+        "answer": "a",
+        "rows": [
+          {
+            "id": "a1",
+            "p": "a",
+            "n": 5,
+            "t": "bed"
+          },
+          {
+            "id": "a2",
+            "p": "a",
+            "n": 4,
+            "t": "bed"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/2",
+      "b 2/2"
+    ],
+    "expansion": [],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 2
+    },
+    "problems": [],
+    "loads": [
+      "ask a",
+      "abort a"
+    ]
+  }
+}

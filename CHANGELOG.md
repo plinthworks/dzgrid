@@ -39,6 +39,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   first render, a wheel scroll over the open million, toggles, Ctrl+End); the playground's « Arbre »
   takes `?rows=1000000`; the « Animations » demo has an « Arbre » section.
 
+- **Lazy children (Phase 4, step 7)**: `tree({ parentId, lazy: lazyChildren({ has, load }) })` from
+  the new entry `@dzgrid/dom/tree-lazy` (core: `@dzgrid/core/tree-lazy`, `lazyShape`). A row `has`
+  declares shows a closed toggle; opening it shows a loading row (`LoadingNode`, `kind: 'loading'`,
+  `aria-busy`, `aria-setsize="-1"`), then its children, or an error row with a Retry button (Enter on
+  the row retries). Closing aborts the load (`AbortSignal`); loaded children are kept until
+  `setRows` or a refresh; expand-all and `*` never load. Words from the base bundle; theme:
+  `.dzg-retry`, the loading row's words muted.
+- **Server children**: `sourceRows({ fetch, children })`, `ChildRequest` / `ChildResponse`; one gate
+  channel per parent, the query epoch in each request; a new epoch closes every row. A server's rows
+  can now be a tree: its pages count the roots, a parent's children come whole.
+  `SourceModel.diagnostics.childFetches` (lazy trees only).
+
 ### Changed
 
 - **Breaking**: `canSelect` and `SelectionRule` receive a `DataNode`; click events carry a
@@ -49,6 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `rows.expand` refuses only data keys that do not exist (`unknown-row`); another key the rows do
   not know (a filler) is a no-op, so a hidden filler can be opened by the application.
 - `TreeOptions.parentId` is optional (one of the three shapes).
+- `RowNode` gains `LoadingNode` (narrow by `kind`); `RowShape` gains `attach?` and `refresh?`;
+  `ModelEnv` gains `shape?`; `TreeRows` gains `kidsOf`, and `childrenAt` says -1 for a lazy parent
+  not loaded. `tree()` with a server's rows is no longer refused.
 
 ## [0.1.0] - unreleased
 

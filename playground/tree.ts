@@ -6,7 +6,12 @@
 // no row of their own (filler rows: a label, no values, never selected).
 // `?rows=1000000` (Phase 4 step 6): the million-row tree of perf/profiles/tree.ts (parent ids, ten levels,
 // mixed widths), parent ids only; « Tout déplier » opens the million.
+// `?lazy=client|server` (Phase 4 step 7, docs/behaviors/tree-lazy.md): the services only at first, their
+// patients asked when a service opens — of the host's loader (`load`) or of a fake server (`sourceRows`
+// with `children`) — after 300 to 1 500 ms; « Le serveur échoue » makes every load fail (the error row, Retry).
 import { createGrid } from '@dzgrid/dom';
+import { lazyChildren } from '@dzgrid/dom/tree-lazy';
+import { sourceRows } from '@dzgrid/core/server';
 import { filters } from '@dzgrid/dom/filters';
 import { tree } from '@dzgrid/dom/tree';
 import { FR } from '@dzgrid/dom/locales/fr';
@@ -31,14 +36,18 @@ const field = (name: string) => form.elements.namedItem(name) as HTMLSelectEleme
 field('locale').value = locale;
 field('theme').value = q.get('theme') ?? '';
 field('rows').value = String(total);
-const shape = million ? 'parent' : q.get('shape') === 'nested' ? 'nested' : q.get('shape') === 'path' ? 'path' : 'parent';
+const lazyMode = million ? '' : q.get('lazy') === 'client' ? 'client' : q.get('lazy') === 'server' ? 'server' : '';
+const shape = million || lazyMode ? 'parent' : q.get('shape') === 'nested' ? 'nested' : q.get('shape') === 'path' ? 'path' : 'parent';
 field('shape').value = shape;
+field('lazy').value = lazyMode;
+document.getElementById('failbox')!.hidden = !lazyMode;
 if (q.get('theme')) document.documentElement.dataset['theme'] = q.get('theme')!;
 document.documentElement.lang = locale;
 // The grid follows the page's direction (`direction: 'auto'`).
 document.documentElement.dir = ar ? 'rtl' : 'ltr';
-form.addEventListener('change', () => {
-  const next = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, rows: field('rows').value, shape: field('shape').value });
+form.addEventListener('change', (e) => {
+  if ((e.target as Element).id === 'fail') return;
+  const next = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, rows: field('rows').value, shape: field('shape').value, lazy: field('lazy').value });
   if (field('locale').value === 'ar-DZ') next.set('direction', 'auto');
   location.search = next.toString();
 });
@@ -80,6 +89,20 @@ const top = shape === 'nested' ? given.filter((r) => !r.parent) : given;
 const serviceKey = (s: number) => (shape === 'path' ? groupKey([`${W.service} ${s}`]) : dataKey(million ? `t${s}` : `s${s}`)!);
 const treeOptions = shape === 'nested' ? { children: (r: Row) => r.kids } : shape === 'path' ? { path: (r: Row) => r.path! } : { parentId: (r: Row) => r.parent };
 
+// Lazy mode: the services alone are given; a fake server answers a service's patients after a random delay,
+// or fails while « Le serveur échoue » is ticked. Its children declared by the row (`has`).
+const failing = document.getElementById('fail') as HTMLInputElement;
+const byParent = new Map<string, Row[]>();
+if (lazyMode) for (const r of rows) if (r.parent) byParent.set(r.parent, [...(byParent.get(r.parent) ?? []), r]);
+const later = <X>(make: () => X, signal?: { aborted: boolean }): Promise<X> =>
+  new Promise((ok, no) => setTimeout(() => (signal?.aborted ? no(new Error('aborted')) : failing.checked ? no(new Error('503')) : ok(make())), 300 + Math.random() * 1200));
+const lazy = lazyMode
+  ? lazyChildren<Row>({ has: (r) => byParent.has(r.id), ...(lazyMode === 'client' && { load: (r: Row, { signal }: { signal: { aborted: boolean } }) => later(() => byParent.get(r.id) ?? [], signal) }) })
+  : undefined;
+const source = lazyMode === 'server'
+  ? sourceRows<Row>({ fetch: () => later(() => ({ rows: rows.filter((r) => !r.parent) })), children: (req) => later(() => byParent.get(req.id) ?? [], req.signal) })
+  : undefined;
+
 const columns: ColumnDef<Row, any>[] = [
   { id: 'name', header: W.name, width: 220, filter: { kind: 'text', floating: true } },
   { id: 'kind', header: W.kind, width: 120, value: (r: Row) => W.kinds[r.kind], filter: { kind: 'text', floating: true } },
@@ -90,8 +113,9 @@ const base = ar ? AR : FR;
 const messages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_TREE : FR_TREE).text } };
 const events: GridEvent<Row>[] = [];
 const grid = createGrid<Row>(document.getElementById('host')!, {
-  rows: top, getRowId: (r) => r.id, columns, messages, locale, direction: 'auto',
-  features: [tree<Row>(treeOptions), filters({ floating: true, popup: true })],
+  ...(source ? { source, operations: { filter: 'client', quick: 'client', sort: 'client', page: 'off' } } : { rows: lazyMode ? rows.filter((r) => !r.parent) : top }),
+  getRowId: (r) => r.id, columns, messages, locale, direction: 'auto',
+  features: [tree<Row>({ ...treeOptions, ...(lazy && { lazy }) }), filters({ floating: true, popup: true })],
   selection: { mode: 'multi', checkbox: true },
   onEvent: (e) => {
     if (e.type === 'problems') console.warn(e.problems);
@@ -99,7 +123,7 @@ const grid = createGrid<Row>(document.getElementById('host')!, {
     events.push(e);
   },
 });
-grid.kernel.dispatch({ type: 'rows.expand', rows: [serviceKey(0)], expanded: true }, 'host');
+if (lazyMode !== 'server') grid.kernel.dispatch({ type: 'rows.expand', rows: [serviceKey(0)], expanded: true }, 'host');
 status.textContent = W.shown(grid.kernel.rows.displayed.count);
 document.getElementById('all')!.addEventListener('click', () => grid.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'user'));
 document.getElementById('none')!.addEventListener('click', () => grid.kernel.dispatch({ type: 'rows.expandAll', expanded: false }, 'user'));

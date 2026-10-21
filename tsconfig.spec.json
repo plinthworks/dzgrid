@@ -35,6 +35,9 @@
       "@dzgrid/core/tree": [
         "./packages/core/src/tree.ts"
       ],
+      "@dzgrid/core/tree-lazy": [
+        "./packages/core/src/tree-lazy.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],
@@ -64,6 +67,9 @@
       ],
       "@dzgrid/dom/tree": [
         "./packages/dom/src/tree.ts"
+      ],
+      "@dzgrid/dom/tree-lazy": [
+        "./packages/dom/src/tree-lazy.ts"
       ],
       "@dzgrid/dom/motion-gsap": [
         "./packages/dom/src/motion-gsap.ts"

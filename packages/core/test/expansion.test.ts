@@ -38,7 +38,7 @@ describe('row nodes (types)', () => {
       { key: groupKey(['x']), kind: 'group', level: 0, label: 'x', path: ['x'] },
       { key: detailKey(k('a')), kind: 'detail', level: 1, master: k('a'), data: ROWS[0]! },
     ];
-    const seen = nodes.map((n) => (n.kind === 'data' ? n.data.id : n.kind === 'group' ? n.label : n.master));
+    const seen = nodes.map((n) => (n.kind === 'data' ? n.data.id : n.kind === 'group' ? n.label : n.kind === 'detail' ? n.master : n.parent));
     expect(seen).toEqual(['a', 'x', k('a')]);
   });
 });

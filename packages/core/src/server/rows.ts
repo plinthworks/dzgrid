@@ -11,7 +11,9 @@ import type { FilterModel } from '../filter/model.js';
 import type { LocaleCtx } from '../value/locale.js';
 import { dayAt, hasRelative } from '../value/relative.js';
 import { createGate, type Ticket } from './gate.js';
-import type { DataRequest, DataSource, Json, PageWindow, SourceModel, SourceRows, SourceRowsOptions } from './source.js';
+import { idOfDataKey } from '../ids.js';
+import type { LazyControl } from '../tree/lazy.js';
+import type { ChildRequest, DataRequest, DataSource, Json, PageWindow, SourceModel, SourceRows, SourceRowsOptions } from './source.js';
 import { toWire, type WireFilterModel } from './wire.js';
 import { serverValues } from './values.js';
 import { closedValues, tickedIn } from '../model/values.js';
@@ -142,7 +144,9 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   const sizes = pageOptions.config?.sizes ?? DEFAULT_PAGE_SIZES;
 
   const gate = createGate(o.abort ?? env.abort ?? plainAbort);
-  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }), ...(env.now && { now: env.now }) });
+  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }), ...(env.now && { now: env.now }), ...(env.shape && { shape: env.shape }) });
+  /** A lazy tree's loads (tree-lazy.md, B): its children asked through the gate, one channel per parent. */
+  const lazy = (env.shape as { lazy?: LazyControl<T> } | undefined)?.lazy;
   let current = binding;
   let { data, params } = bound.get(binding)!;
   let ctx = env.ctx;
@@ -175,6 +179,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   let answerProblems: readonly Problem[] = [];
   let fetches = 0;
   let valueFetches = 0;
+  let childFetches = 0;
   /** The open value lists on the server, by column: each one checks its request after every change. */
   const lists = new Map<string, ReturnType<typeof serverValues<T>>>();
   let destroyed = false;
@@ -196,6 +201,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     if (c.transaction) tx = c.transaction;
     // A filter the browser part refused: told with the call's change.
     if (c.told) told.push(...c.told);
+    // A change of its own (a tree's toggle, a child answer): told as the model's.
+    if (!depth) commit(() => {}, c.source);
   });
   const problems = (): readonly Problem[] => [...fixed, ...wireProblems, ...inner.problems, ...answerProblems];
   const commit = (fn: () => void, source: ChangeSource): void => {
@@ -227,14 +234,29 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     status = s;
   };
 
-  const load = (): void => {
-    setStatus(LOADING);
-    const page: PageWindow | undefined = serverPages ? { index, size, offset: index * size, cursor: cursorMode ? cursors[index]! : null } : undefined;
-    const parts: { filter?: unknown; quick?: string; sort?: unknown; page?: PageWindow; params: Readonly<Record<string, Json>>; zone: string } = { params, zone: ctx.timeZone };
+  /** The server's part of the query as sent: a rows request's, and a child request's. */
+  const partsOf = (): { filter?: unknown; quick?: string; sort?: unknown; page?: PageWindow; params: Readonly<Record<string, Json>>; zone: string } => {
+    const parts: ReturnType<typeof partsOf> = { params, zone: ctx.timeZone };
     if (wire) parts.filter = wire;
     if (server.quick !== undefined) parts.quick = server.quick;
     if (server.sort) parts.sort = server.sort;
-    if (page) parts.page = page;
+    return parts;
+  };
+  // A parent's children (B): its own channel; a collapse cancels it, a new epoch aborts it; settled in a later task.
+  if (lazy && data.children) lazy.loader = (parent, row, answer) => {
+    const ch = `children:${parent}`;
+    const parts = { ...partsOf(), parent, id: idOfDataKey(parent)!, epoch: gate.epoch };
+    const { ticket, signal } = gate.begin(ch, canonical(parts));
+    childFetches++;
+    const settle = (ok: boolean) => (v: unknown) => void (gate.settle(ticket) === null && answer(ok, v));
+    new Promise((ok) => ok(data.children!({ ...parts, row, key: ticket.key, signal } as ChildRequest<T>))).then(settle(true), settle(false));
+    return () => gate.cancel(ch);
+  };
+
+  const load = (): void => {
+    setStatus(LOADING);
+    const parts = partsOf();
+    if (serverPages) parts.page = { index, size, offset: index * size, cursor: cursorMode ? cursors[index]! : null };
     const key = canonical(parts);
     const { ticket, signal } = gate.begin('rows', key);
     const req = { ...parts, key, signal } as DataRequest;
@@ -352,6 +374,9 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   const restart = (key = keyNow()): void => {
     epochKey = key;
     gate.newEpoch();
+    // A tree: every row closed, every load forgotten (tree-lazy.md); the rows loaded go with the roots' answer.
+    lazy?.reset();
+    if (inner.expansion?.size) inner.setExpansion(new Set(), 'data');
     index = 0;
     endAt = null;
     cursors = [null];
@@ -420,7 +445,14 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
       if (!serverPages) return inner.page;
       return { index, size, sizes, total, pageCount: total === null ? null : pageCountOf(total, size), hasNext: hasNext(), canJump: !cursorMode };
     },
-    get diagnostics() { return { fetches, valueFetches, gate: gate.diagnostics }; },
+    get diagnostics() { return { fetches, valueFetches, ...(lazy && { childFetches }), gate: gate.diagnostics }; },
+    // A tree (the inner model's shape): its expansion, kept apart from the query; a toggle is told as this model's change.
+    get expansion() { return inner.expansion as never; },
+    isExpanded: inner.isExpanded,
+    setExpansion: inner.setExpansion,
+    expand: inner.expand,
+    expandable: inner.expandable,
+    expandAll: inner.expandAll,
     // In the browser when the filter is: the rows held. On the server: the source's `values`, never the rows held.
     setValues(column, vo = {}) {
       if (ops.filter === 'client') return inner.setValues(column, vo);

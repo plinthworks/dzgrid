@@ -1321,6 +1321,55 @@ async function treeChecks(name, ctx) {
     check(name, `${c.tag}: no page error`, errors.length === 0, errors);
     await page.close();
   }
+  // Lazy children (Phase 4 step 7, tree-lazy.md): the services only; real keys open one, the loading row
+  // (busy, its words, axe 0), a failure (the error row, Retry ≥ 24 px, axe 0), Retry by Enter on the row,
+  // the children; what is said, in French and in Arabic right to left; the focus to the first child.
+  const lazyCases = [
+    { qs: 'lazy=1&locale=fr-FR&theme=light', tag: 'tree lazy fr ltr light', fwd: 'ArrowRight', loading: 'Chargement…', error: 'Les données n’ont pas pu être chargées Réessayer', said: ['Chargement', 'Échec du chargement', 'Chargement', 'Service 1 développé, 77 lignes'] },
+    { qs: 'lazy=1&locale=ar-DZ&dir=rtl&theme=dark', tag: 'tree lazy ar rtl dark', fwd: 'ArrowLeft', loading: 'جار التحميل…', error: 'تعذر تحميل البيانات إعادة المحاولة', said: ['جار التحميل', 'فشل التحميل', 'جار التحميل', 'تم توسيع Service 1، 77 صفا'] },
+  ];
+  for (const c of lazyCases) {
+    const { page, errors } = await open(c.qs);
+    const state = () => page.evaluate(() => {
+      const r = document.querySelector('.dzg-layer > .dzg-row[data-kind="loading"]');
+      const b = r?.querySelector('.dzg-retry')?.getBoundingClientRect();
+      const a = document.activeElement;
+      return { busy: r?.getAttribute('aria-busy') ?? null, level: r?.getAttribute('aria-level'), size: r?.getAttribute('aria-setsize'), text: r?.querySelector('.dzg-label')?.textContent ?? null, retry: b ? { h: b.height, w: b.width } : null, loads: window.t.loads.length, focus: a?.closest('.dzg-row')?.getAttribute('aria-rowindex') ?? null, focusKind: a?.closest('.dzg-row')?.getAttribute('data-kind') ?? null };
+    });
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key('s1'), 'name'));
+    await frames(page);
+    await page.keyboard.press(c.fwd);
+    await frames(page, 2);
+    const loading = await state();
+    let v = await axe(page);
+    check(name, `${c.tag}: → opens a declared service: one request, the loading row (busy, level 2, size -1, « ${c.loading} »); axe 0`, loading.loads === 1 && loading.busy === 'true' && loading.level === '2' && loading.size === '-1' && loading.text === c.loading && v.length === 0, { loading, v });
+    await page.waitForTimeout(120);
+    await page.evaluate(() => window.t.loads[0].no());
+    await frames(page, 2);
+    await page.waitForTimeout(120);
+    const failed = await state();
+    v = await axe(page);
+    check(name, `${c.tag}: a failure: the error row (not busy, its words, Retry ≥ 24 px); axe 0`, failed.busy === null && failed.text === c.error && failed.retry && failed.retry.h >= 24 && failed.retry.w >= 24 && v.length === 0, { failed, v });
+    await page.keyboard.press('ArrowDown');
+    await frames(page);
+    const onError = await state();
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    // The live region says a sentence after a 50 ms beat; a newer one replaces one not yet said.
+    await page.waitForTimeout(120);
+    const again = await state();
+    check(name, `${c.tag}: Enter on the error row retries (a second request, loading again, the focus kept on the row)`, onError.focusKind === 'loading' && again.loads === 2 && again.busy === 'true' && again.focusKind === 'loading', { onError, again });
+    await page.evaluate(() => window.t.loads[1].ok());
+    await frames(page, 3);
+    await page.waitForTimeout(120);
+    const done = await state();
+    const said = await page.evaluate(() => window.said);
+    check(name, `${c.tag}: the children replace the loading row, the focus on the first child; said ${JSON.stringify(c.said)}`, done.busy === null && done.text === null && done.focus === again.focus && JSON.stringify(said.slice(-4)) === JSON.stringify(c.said), { done, said });
+    v = await axe(page);
+    check(name, `${c.tag}: axe 0 with the children; no page error`, v.length === 0 && errors.length === 0, { v, errors });
+    await page.screenshot({ path: `${OUT}/${name}-tree-lazy-${c.qs.includes('ar-DZ') ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    await page.close();
+  }
   // ≈ 100 000 rows, everything opened, scrolled to the middle and the end: the rows there say their place.
   {
     const { page, errors } = await open('locale=fr-FR&rows=100000');

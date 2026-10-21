@@ -1,10 +1,11 @@
-import { intentFor, problem, type DisplayIndex, type FocusPos, type KeyOwner, type Problem, type RowKey } from '@dzgrid/core';
+import { intentFor, type DisplayIndex, type FocusPos, type KeyOwner, type Problem, type RowKey } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
-import { treeColumnProblems, treeConflicts, treeShape, type TreeOptions, type TreeRows } from '@dzgrid/core/tree';
+import { treeColumnProblems, treeConflicts, treeShape, type TreeOptions, type TreeRows, type TreeShape } from '@dzgrid/core/tree';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { TreeMessageKey } from '../part-texts.js';
 import { injectTreeStyles } from './styles.js';
+import type { LazyChildren } from './lazy.js';
 
 /** The texts `tree()` needs, from `@dzgrid/dom/locales/<lang>-tree`. */
 export const TREE_KEYS = ['tree.expanded', 'tree.collapsed', 'tree.expandedSome'] as const satisfies readonly TreeMessageKey[];
@@ -14,6 +15,8 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
   readonly column?: string;
   /** Pixels per level of indent (16 by default). */
   readonly indent?: number;
+  /** Children loaded when their parent opens: `lazyChildren({ has, load })` from `@dzgrid/dom/tree-lazy` (tree-lazy.md). */
+  readonly lazy?: LazyChildren<T>;
 }
 
 /**
@@ -29,13 +32,14 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
  * ```
  */
 export function tree<T>(o: TreeFeatureOptions<T>): GridFeature {
-  return { id: 'tree', shape: () => treeShape(o) as never, setup: (g) => setup(g, o.column, o.indent ?? 16) };
+  let s: TreeShape<T> | undefined;
+  return { id: 'tree', shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column, o.indent ?? 16, o.lazy, s) };
 }
 
 type Rows = TreeRows<unknown>;
 const PAD = 'padding-inline-start';
 
-function setup(g: GridContext<unknown>, column: string | undefined, indent: number): FeatureHandle {
+function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: number, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined): FeatureHandle {
   const missing = TREE_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`tree: missing ${missing.join(', ')}`);
   const { kernel, el, rowRenderer, doc } = g;
@@ -43,10 +47,10 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
   el.viewport.setAttribute('role', 'treegrid');
   // What a tree refuses beside it (D2, D9): told once; the grid shows the tree without it.
   const spans = !!g.settings.features?.some((f) => f.id === 'spans');
-  const told: Problem[] = [...treeConflicts({ spans }), ...(g.rows.kind === 'source' ? [problem('unsupported-combination', 'warning', 'source', 'tree')] : [])];
+  const told: Problem[] = treeConflicts({ spans });
   if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
 
-  /** The rows shown, when they are a tree's (a server's rows are not, yet). */
+  /** The rows shown, when they are a tree's. */
   const tree = (): Rows | null => {
     const d = g.rows.displayed as Partial<Rows>;
     return d.posAt ? (d as Rows) : null;
@@ -70,18 +74,21 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
     }
   };
 
+  /** A row opened or closed, said: its name and the rows it shows; « loading » while a lazy parent loads (tree-lazy.md). */
+  const say = (one: RowKey, expanded = true): void => {
+    const d = tree();
+    const i = d ? d.indexOf(one) : -1;
+    if (i === -1) return;
+    const n = d!.childrenAt(i);
+    g.live.announce(!expanded ? g.msg('tree.collapsed', { name: nameOf(one, d!) }) : n < 0 ? g.msg('announce.loading') : g.msg('tree.expanded', { name: nameOf(one, d!), n }));
+  };
   // Each opening or closing by the user, said once (screen readers do not all say aria-expanded).
   const off = kernel.subscribe((e) => {
-    const d = tree();
-    if (e.type !== 'rowExpanded' || e.source !== 'user' || !d) return;
-    const one = e.rows.length === 1 ? e.rows[0]! : null;
-    if (one === null) {
-      if (e.expanded) g.live.announce(g.msg('tree.expandedSome', { n: e.rows.length }));
-      return;
-    }
-    const i = d.indexOf(one);
-    g.live.announce(e.expanded ? g.msg('tree.expanded', { name: nameOf(one, d), n: i === -1 ? 0 : d.childrenAt(i) }) : g.msg('tree.collapsed', { name: nameOf(one, d) }));
+    if (e.type !== 'rowExpanded' || e.source !== 'user' || !tree()) return;
+    if (e.rows.length === 1) say(e.rows[0]!, e.expanded);
+    else if (e.expanded) g.live.announce(g.msg('tree.expandedSome', { n: e.rows.length }));
   });
+  const lz = lazy?.setup(g, s, say);
 
   // The pointer on a parent's toggle opens or closes it, and nothing else (no selection, no row click).
   g.scope.on(el.viewport, 'click', (e) => {
@@ -140,9 +147,12 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
       for (const [key, v] of rowRenderer.mounted) {
         const i = d ? d.indexOf(key) : -1;
         if (i === -1) continue;
-        const kids = d!.childrenAt(i) > 0;
+        // A lazy parent not loaded has children too (-1: not known yet).
+        const kids = d!.childrenAt(i) !== 0;
         const open = kids && d!.expandedAt(i);
         const level = d!.levelAt(i);
+        const node = d!.nodeAt(i);
+        set(v.el, 'aria-busy', node.kind === 'loading' && !node.failed ? 'true' : null);
         set(v.el, 'aria-level', String(level + 1));
         set(v.el, 'aria-posinset', String(d!.posAt(i)));
         set(v.el, 'aria-setsize', String(d!.sizeAt(i)));
@@ -160,12 +170,12 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
         }
         set(t, 'data-open', open ? '' : null);
         set(t, 'data-leaf', kids ? null : '');
-        // A filler (path trees) has no cells: its label goes in the tree column (tree-view.md).
-        const node = d!.nodeAt(i);
+        // A filler (path trees) or a loading row has no cells: its label goes in the tree column (tree-view.md).
         let l = labelOf(cell);
-        if (node.kind === 'group') {
+        if (node.kind === 'group' || node.kind === 'loading') {
           if (!l) (l = doc.createElement('span')), (l.className = 'dzg-free dzg-label'), t.after(l);
-          if (l.textContent !== node.label) l.textContent = node.label;
+          if (node.kind === 'loading') lz?.fill(l as HTMLElement, node);
+          else if (l.textContent !== node.label) l.textContent = node.label;
         } else l?.remove();
         const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${level * indent}px)`;
         if (cell.style.getPropertyValue(PAD) !== pad) cell.style.setProperty(PAD, pad);
@@ -183,7 +193,7 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
       // The grid's own reading of the key: forward and back are mirrored right to left there (Shift: no move).
       const step = intentFor(e, { dir: g.dir, owner, mac: g.mac });
       if (step?.kind !== 'move' || step.axis !== 'col') return false;
-      const kids = d.childrenAt(i) > 0;
+      const kids = d.childrenAt(i) !== 0;
       const open = kids && d.expandedAt(i);
       // Forward: a closed parent opens; otherwise the column move.
       if (step.delta > 0) return kids && !open && (expand([at.row], true), true);
@@ -195,6 +205,7 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
     },
     destroy() {
       off();
+      lz?.destroy();
       for (const c of decorated) undecorate(c);
       el.viewport.setAttribute('role', 'grid');
     },

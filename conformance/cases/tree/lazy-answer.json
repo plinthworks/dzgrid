@@ -1,0 +1,71 @@
+{
+  "id": "lazy-answer",
+  "suite": "tree",
+  "description": "The children answered take the loading row's place, in the sort order.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "lazy": {
+      "has": [
+        "a"
+      ]
+    },
+    "steps": [
+      {
+        "sort": "asc"
+      },
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "answer": "a",
+        "rows": [
+          {
+            "id": "a1",
+            "p": "a",
+            "n": 5,
+            "t": "bed"
+          },
+          {
+            "id": "a2",
+            "p": "a",
+            "n": 4,
+            "t": "bed"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b 1/2",
+      "a 2/2",
+      ". a2 1/2",
+      ". a1 2/2"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 4,
+      "filtered": 4,
+      "displayed": 4
+    },
+    "problems": [],
+    "loads": [
+      "ask a"
+    ]
+  }
+}

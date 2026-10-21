@@ -1,0 +1,47 @@
+{
+  "id": "lazy-filter-hidden",
+  "suite": "tree",
+  "description": "A declared row the filter hides is not loaded when opened; filters apply to loaded rows only.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "lazy": {
+      "has": [
+        "a"
+      ]
+    },
+    "steps": [
+      {
+        "filter": "bed"
+      },
+      {
+        "expand": [
+          "a"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b 1/1"
+    ],
+    "expansion": [],
+    "counts": {
+      "total": 2,
+      "filtered": 1,
+      "displayed": 1
+    },
+    "problems": [],
+    "loads": []
+  }
+}

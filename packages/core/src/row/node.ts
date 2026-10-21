@@ -30,5 +30,18 @@ export interface DetailNode<T> {
   readonly data: Readonly<T>;
 }
 
-/** A row as shown: a data row, a filler of a tree, or a detail. Narrow by `kind` before reading `data`. */
-export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T>;
+/**
+ * The row under an open parent whose children are being loaded (lazy trees, tree-lazy.md): key
+ * `l:` + the parent's key, the same while loading and after a failure (`failed`: the error row).
+ * Never data: never selected, copied, edited or exported.
+ */
+export interface LoadingNode {
+  readonly key: RowKey;
+  readonly kind: 'loading';
+  readonly level: number;
+  readonly parent: RowKey;
+  readonly failed: boolean;
+}
+
+/** A row as shown: a data row, a filler of a tree, a detail, or a lazy parent's loading row. Narrow by `kind` before reading `data`. */
+export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode;

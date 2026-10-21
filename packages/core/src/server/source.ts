@@ -1,4 +1,5 @@
 import type { AbortHandle, AbortSignalLike } from '../abort.js';
+import type { RowKey } from '../ids.js';
 import type { Json } from '../filter/model.js';
 import type { ModelEnv, SourceBinding, SourceHandle } from '../model/client.js';
 import type { SetValue } from '../model/values.js';
@@ -23,7 +24,32 @@ export interface DataSource<T> {
    * options, never to the rows held.
    */
   readonly values?: (req: ValuesRequest) => Promise<ValuesResponse> | PromiseLike<ValuesResponse> | ValuesResponse;
+  /**
+   * A parent's children, when a lazy tree opens it (tree-lazy.md, B): every child, never paged. A
+   * list or `{ rows }`; a throw or a rejection is a failure (the error row and its Retry).
+   */
+  readonly children?: (req: ChildRequest<T>) => Promise<ChildResponse<T>> | PromiseLike<ChildResponse<T>> | ChildResponse<T>;
 }
+
+/** A parent's children asked (B): the parent, the server's part of the query as sent for rows, the epoch. */
+export interface ChildRequest<T> {
+  readonly parent: RowKey;
+  /** The parent's id, as text. */
+  readonly id: string;
+  readonly row: T;
+  readonly filter?: WireFilterModel;
+  readonly quick?: string;
+  readonly sort?: readonly SortItem[];
+  readonly params: Readonly<Record<string, Json>>;
+  readonly zone: string;
+  /** The query epoch it was asked in: a new filter, search, sort, zone, params or source makes another. */
+  readonly epoch: number;
+  /** Canonical, without the row: two requests with equal keys ask the same thing. */
+  readonly key: string;
+  readonly signal: AbortSignalLike;
+}
+
+export type ChildResponse<T> = readonly T[] | { readonly rows: readonly T[] };
 
 export interface ValuesRequest {
   readonly column: string;
@@ -94,8 +120,8 @@ export interface SourceRowsOptions {
 }
 
 export interface SourceModel<T> extends SourceHandle<T> {
-  /** `valueFetches`: the value list requests made. */
-  readonly diagnostics: { readonly fetches: number; readonly valueFetches: number; readonly gate: GateDiagnostics };
+  /** `valueFetches`: the value list requests made; `childFetches` (a lazy tree only): its children asked. */
+  readonly diagnostics: { readonly fetches: number; readonly valueFetches: number; readonly childFetches?: number; readonly gate: GateDiagnostics };
 }
 
 /** What `sourceRows` gives: a binding for the `source` setting, whose model also counts its fetches. */

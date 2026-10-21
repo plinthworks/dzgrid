@@ -45,6 +45,10 @@
       "types": "./src/tree.ts",
       "default": "./src/tree.ts"
     },
+    "./tree-lazy": {
+      "types": "./src/tree-lazy.ts",
+      "default": "./src/tree-lazy.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"

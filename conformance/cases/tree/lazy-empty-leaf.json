@@ -1,0 +1,53 @@
+{
+  "id": "lazy-empty-leaf",
+  "suite": "tree",
+  "description": "A load answering no child makes the row a leaf.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "lazy": {
+      "has": [
+        "a"
+      ]
+    },
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "answer": "a",
+        "rows": []
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/2",
+      "b 2/2"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 2
+    },
+    "problems": [],
+    "loads": [
+      "ask a"
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "id": "lazy-failed",
+  "suite": "tree",
+  "description": "A failed load: the loading row becomes the error row, nothing asked again by itself.",
+  "input": {
+    "rows": [
+      {
+        "id": "a",
+        "n": 2,
+        "t": "ward"
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "t": "bed"
+      }
+    ],
+    "lazy": {
+      "has": [
+        "a"
+      ]
+    },
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "fail": "a"
+      },
+      {
+        "sort": "desc"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/2",
+      ". (failed) 1/-1",
+      "b 2/2"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 3
+    },
+    "problems": [],
+    "loads": [
+      "ask a"
+    ]
+  }
+}

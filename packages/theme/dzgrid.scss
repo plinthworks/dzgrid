@@ -247,6 +247,7 @@ $emit: true !default;
   .dzg-overlay button,
   .dzg-ffoot button,
   .dzg-pbtn,
+  .dzg-retry,
   .dzg-footer select {
     min-block-size: 2rem;
     padding-inline: 0.75rem;
@@ -258,7 +259,8 @@ $emit: true !default;
     cursor: pointer;
   }
 
-  .dzg-overlay button:focus-visible {
+  .dzg-overlay button:focus-visible,
+  .dzg-retry:focus-visible {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
     outline-offset: 2px;
   }
@@ -473,6 +475,18 @@ $emit: true !default;
   .dzg-row[data-context-row] .dzg-seg-start,
   .dzg-row[data-context-row] .dzg-seg-end {
     color: var(--dzg-context-fg, var(--tz-fg-muted));
+  }
+
+  // A lazy tree's loading and error rows (Phase 4 step 7, tree-lazy.md): their words in the muted
+  // colour, as an ancestor's (4.5:1); Retry takes the retry button's look, inside a row: a 24 px target.
+  .dzg-row[data-kind=loading] .dzg-label {
+    color: var(--dzg-context-fg, var(--tz-fg-muted));
+  }
+
+  .dzg-retry {
+    min-block-size: var(--dzg-target-min, 24px);
+    margin-inline-start: 0.25rem;
+    padding-block: 0;
   }
 
   // The value flash (the motion feature, step 26): a tint the motion fades (--dzg-flash 1 → 0)

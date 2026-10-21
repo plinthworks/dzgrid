@@ -51,7 +51,7 @@ export { NO_OVERLAY, compilePath, resolveColumns } from './columns/defs.js';
 export type { ColumnLookup, ColumnState, ColumnSlice, ColumnLayout, ColumnChange, ColumnModel } from './columns/model.js';
 export { createColumnModel } from './columns/model.js';
 
-export type { RowKind, DataNode, GroupNode, DetailNode, RowNode } from './row/node.js';
+export type { RowKind, DataNode, GroupNode, DetailNode, LoadingNode, RowNode } from './row/node.js';
 export type { RowTransaction, TransactionResult } from './row/store.js';
 export type { DisplayedRows } from './row/displayed.js';
 
