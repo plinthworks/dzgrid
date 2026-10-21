@@ -104,7 +104,8 @@ describe('layering of the base and the server entry', () => {
     // code, the nested rows' `load`/`tx` hooks, `rows.expand` on fillers: +35), plus the review of step 5
     // (`tx` given the store's snapshot, the open set and the layer rekeyed: +52), plus step 8 (details:
     // the page cut before the shape, the filter's layer a tree's only, `allRows` flat for a shape
-    // without its own: +6): a guard against a seam that grew.
-    expect(gz).toBeLessThan(26984 + 1250);
+    // without its own: +6), plus the review of step 8 (a detail's focus, its master gone, at the
+    // master's place: +7): a guard against a seam that grew.
+    expect(gz).toBeLessThan(26984 + 1257);
   });
 });

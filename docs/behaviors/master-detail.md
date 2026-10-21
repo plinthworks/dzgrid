@@ -31,6 +31,16 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   tree (`rows.expand`, `rowExpanded`). Paging works with details (a detail lives on its master's
   page); a tree and a detail on the same grid is refused in Phase 4 (`unsupported-combination`,
   owner Q5).
+- **Expand all** (step 8 review, lead decision): masters are level 0 and the depth counts as a
+  tree's (depth 1 = the roots, here the masters). `rows.expandAll { expanded: true }` with
+  `depth` ≥ 1 or none opens every master shown; with `depth: 0`, nothing. `{ expanded: false,
+  depth: 0 }` (or no depth) closes every detail; with `depth` ≥ 1, none.
+- **The footer** (pagination): its range ("1–10 of 30") and "Select all N" count the page's data
+  rows; a detail is not a row of the page. `aria-rowcount` counts every row shown, details too.
+- **Focus on a detail whose master goes** (step 8 review, lead decision): when the master is
+  removed or filtered out, the focus goes to the row now at the master's place (not one past it,
+  where the detail was), as a tree's row goes to the row now at its own place. Hidden by closing
+  its master, the detail gives the focus to the master.
 - **One cell**: the detail row has one `gridcell` with `aria-colspan` = the number of columns,
   `data-kind="detail"` on the row. The master row carries `aria-expanded`. The cell's accessible
   name comes from the master ("Details of Patient 0").
@@ -40,7 +50,9 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   state kept by the host or by the nested-grid part's memory, below).
 - **Heights** (owner Q4): `detail.height` — a number (default 240), a function of the master row,
   or `'auto'` (measured with a ResizeObserver after a first estimate). A nested grid needs a fixed
-  or function height (an inner virtual grid has no natural height).
+  or function height (an inner virtual grid has no natural height). A height that is not a finite
+  number ≥ 0, or a function that throws, gives 240 for that detail, silently: no problem is told
+  (the `@dzgrid/core/detail` budget has no room for one; step 8 review).
 - **Variable rows** (D7, S12): the grid places rows through one row layout per paint; with
   details, a sparse layout (every row the base height except the open details, found by binary
   search, with sums of their extra heights). It goes through the same scaled scroll mapper as a

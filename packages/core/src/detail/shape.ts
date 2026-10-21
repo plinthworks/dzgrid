@@ -52,10 +52,11 @@ export function detailShape<T>(o: DetailOptions<T> = {}): DetailShape<T> {
     problems: [],
     // A data row (the kernel refuses one it does not hold); a detail's or a filler's key opens nothing.
     opens: (key) => key.startsWith('d:'),
-    // Every row (initial, expandable); `now`: the data rows of the last build (expand-all).
-    parents(snap, _depth, now) {
+    // Every row (initial, expandable), none at depth 0 (masters are level 0, as a tree's roots);
+    // `now`: the data rows of the last build (expand-all).
+    parents(snap, depth, now) {
       const r = now ? shown : flatDisplayed(snap, null, 0);
-      return Array.from({ length: r.count }, (_, i) => r.keyAt(i as DisplayIndex));
+      return Array.from({ length: depth && r.count }, (_, i) => r.keyAt(i as DisplayIndex));
     },
     build({ snap, order, expansion, version }) {
       const d = (shown = flatDisplayed(snap, order, 0));
@@ -66,6 +67,7 @@ export function detailShape<T>(o: DetailOptions<T> = {}): DetailShape<T> {
       const heights = Array.from(ms, (p) => {
         const m = d.nodeAt(p as DisplayIndex) as DataNode<T>;
         let v: unknown = o.sizes?.get(m.key) ?? H;
+        // A function that throws: 240, silently (no problem told: the entry's budget has no room, step 8 review).
         try {
           if (typeof v == 'function') v = v(m.data);
         } catch {}

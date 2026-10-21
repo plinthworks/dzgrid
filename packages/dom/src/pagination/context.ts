@@ -85,7 +85,8 @@ export function footerContext(g: GridContext<unknown>, act: (cmd: GridCommand) =
     const d = g.rows.displayed;
     const c = g.rows.counts;
     const status = g.rows.status;
-    // Ticked, of the data rows shown; the rows of the page: a tree's roots (its children and loading rows are not paged).
+    // Ticked, of the data rows shown; the rows of the page: its data rows, a tree's roots (its
+    // children and loading rows are not paged, nor are the details under open masters).
     let shown = 0;
     let data = 0;
     let rows = 0;
@@ -93,8 +94,7 @@ export function footerContext(g: GridContext<unknown>, act: (cmd: GridCommand) =
       const at = d.index(i)!;
       const key = d.keyAt(at);
       if (isSelected(k.selection, key)) shown++;
-      if (isDataKey(key)) data++;
-      if (!d.levelAt?.(at)) rows++;
+      if (isDataKey(key)) data++, d.levelAt?.(at) || rows++;
     }
     const all = k.selectionScope !== null;
     const mode = g.settings.selection?.mode ?? 'none';

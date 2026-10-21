@@ -25,9 +25,10 @@ export type FocusOwner<T> = (f: CellFocus, rows: DisplayedRows<T>) => FocusPos;
 /**
  * Focus after the rows or the columns changed. A row no longer displayed
  * gives its place to the row now at its old index (the previous one at the
- * end); no rows at all sends focus to the header. A column no longer visible
- * gives way to the first visible column; no columns, no focus. `owner`, when
- * given, moves a cell's focus to the cell owning its place.
+ * end; a detail's, at its master's); no rows at all sends focus to the
+ * header. A column no longer visible gives way to the first visible column;
+ * no columns, no focus. `owner`, when given, moves a cell's focus to the cell
+ * owning its place.
  */
 export function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, after: DisplayedRows<T>, columns: ColumnLookup<T>, owner?: FocusOwner<T>): FocusPos | null {
   if (!f) return null;
@@ -40,9 +41,9 @@ export function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, 
   if (after.indexOf(f.row) !== -1) to = column === f.column ? f : { kind: 'cell', row: f.row, column };
   else {
     // A tree's row hidden by a collapse or a filter: its nearest shown ancestor (tree-keys.md);
-    // else the row now at its old place.
-    const was = before.indexOf(f.row);
-    const row = shownAncestor(f.row, after) ?? after.keyAt(after.index(Math.min(was === -1 ? 0 : was, after.count - 1))!);
+    // else the row now at its old place; a detail's, at its master's (master-detail.md).
+    const was = before.indexOf(f.row) - +f.row.startsWith('x:');
+    const row = shownAncestor(f.row, after) ?? after.keyAt(after.index(Math.max(0, Math.min(was, after.count - 1)))!);
     to = { kind: 'cell', row, column };
   }
   return owner ? owner(to, after) : to;

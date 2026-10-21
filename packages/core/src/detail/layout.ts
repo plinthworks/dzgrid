@@ -37,6 +37,7 @@ const size = (v: number): number => {
  * running sums of their extra heights. Memory O(D), nothing per row; offsetOf, heightOf and
  * indexAt O(log D); setHeight and a batch O(D). `at` is kept, not copied, and trusted (the detail shape makes it: rows of
  * the list, increasing); a height that is not a finite number ≥ 0 is a programming error: RangeError.
+ * `indexAt`, as `RowLayout` says, only when count > 0: with no rows it answers -1 (no row), whatever the offset.
  */
 export function sparseRowLayout(rows: Pick<DisplayedRows<unknown>, 'count' | 'index'>, h: number, x: SparseExtras): SparseLayout {
   const { count } = rows;

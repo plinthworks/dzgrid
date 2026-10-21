@@ -421,6 +421,7 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **`sparseRowLayout`** : chaque ligne `h` sauf D lignes, recherche binaire et sommes cumulées (mémoire O(D), `setHeight` et lot O(D)) ; exact contre un oracle (1 000 graines, 1 M lignes × 2 000 détails). `at` n'est pas vérifié (la forme le fait).
 - **Refus** : `detailConflicts({ spans, tree, depth })` → `unsupported-combination` (fusions, arbre ; profondeur > 3, plafond souple, dite par la grille imbriquée). Pas de nouveau code de problème.
 - **Budget** : 1 000 o tenus (994) en sortant `measure`/`layout` de la forme, le cache des lignes entre bascules et la vérification de `at`.
+- **Revue (décisions du lead)** : `expandAll` sur des détails suit la profondeur d'un arbre (maîtres au niveau 0 ; profondeur 0 n'ouvre rien, ≥ 1 ou aucune ouvre tout ; fermer à 0 ferme tout) ; le focus d'un détail dont le maître disparaît va à la ligne arrivée à la place du maître (core +7 o) ; le pied de page compte les lignes de données de la page, jamais les détails.
 
 ## 0. Provenance, et limites de ce que j'ai lu
 
