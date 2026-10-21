@@ -1,0 +1,1434 @@
+{
+  "at": "2026-10-21T10:41:36.023Z",
+  "node": "v22.20.0",
+  "passed": 102,
+  "failed": 0,
+  "summary": {
+    "chrome": {
+      "variable": {
+        "topErr": 0,
+        "end": [
+          {
+            "how": "api",
+            "bottomErr": 0,
+            "err": 0
+          },
+          {
+            "how": "native",
+            "bottomErr": 0,
+            "err": 0
+          },
+          {
+            "how": "ctrl+end",
+            "bottomErr": 0,
+            "err": 0
+          }
+        ],
+        "placementMaxErr": 0.12345937639474869,
+        "wheel": {
+          "moved": 2000,
+          "sum": 2000,
+          "mode": 0,
+          "renderMedianMs": 0.40000009536743164
+        },
+        "page": {
+          "drifts": [
+            -24,
+            -120
+          ],
+          "reachedDetail": true,
+          "moves": [
+            "d400017 -24",
+            "d400034 -24",
+            "d400051 -24",
+            "d400068 -24",
+            "d400085 -24",
+            "d400102 -24",
+            "d400119 -24",
+            "d400136 -24",
+            "d400153 -24",
+            "d400170 -24",
+            "d400187 -24",
+            "x400200 -120"
+          ],
+          "backTo": "d399985"
+        },
+        "oracle": {
+          "bad": 0,
+          "checked": 765000
+        },
+        "timing": [
+          {
+            "details": 2000,
+            "buildMs": 0,
+            "offsetOfNs": 28,
+            "indexAtNs": 46.5,
+            "setHeightUs": 1.35,
+            "sink": true
+          },
+          {
+            "details": 20000,
+            "buildMs": 0.1,
+            "offsetOfNs": 70,
+            "indexAtNs": 75,
+            "setHeightUs": 25.2,
+            "sink": true
+          },
+          {
+            "details": 200000,
+            "buildMs": 1.6,
+            "offsetOfNs": 99,
+            "indexAtNs": 90,
+            "setHeightUs": 465.5,
+            "sink": true
+          }
+        ],
+        "resize": [
+          {
+            "label": "far above, 240 → 480",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0,
+            "focusDy": 0,
+            "err": 0
+          },
+          {
+            "label": "nearest above, 240 → 120",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0,
+            "focusDy": 0,
+            "err": 0
+          },
+          {
+            "label": "far above, 480 → 777",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0,
+            "focusDy": 0,
+            "err": 0
+          },
+          {
+            "label": "row 0's detail, 240 → 40",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0,
+            "focusDy": 0,
+            "err": 0
+          },
+          {
+            "label": "witness, no anchor",
+            "top0": "d600000",
+            "top1": "d599992",
+            "dy": 240
+          },
+          {
+            "label": "at the end",
+            "bottomErr": 0
+          }
+        ]
+      },
+      "uniform": {
+        "topErr": 0,
+        "end": [
+          {
+            "how": "api",
+            "bottomErr": 0,
+            "err": 0
+          },
+          {
+            "how": "native",
+            "bottomErr": 0,
+            "err": 0
+          },
+          {
+            "how": "ctrl+end",
+            "bottomErr": 0,
+            "err": 0
+          }
+        ],
+        "placementMaxErr": 0.12413307651877403,
+        "wheel": {
+          "moved": 2000,
+          "sum": 2000,
+          "mode": 0,
+          "renderMedianMs": 0.2999999523162842
+        },
+        "page": {
+          "drifts": [
+            -24
+          ],
+          "reachedDetail": false,
+          "moves": [
+            "d400017 -24",
+            "d400034 -24",
+            "d400051 -24",
+            "d400068 -24",
+            "d400085 -24",
+            "d400102 -24",
+            "d400119 -24",
+            "d400136 -24",
+            "d400153 -24",
+            "d400170 -24",
+            "d400187 -24",
+            "d400204 -24"
+          ],
+          "backTo": "d399988"
+        }
+      },
+      "nativeDrift": {
+        "variable": {
+          "ratio": 8.12101118358807,
+          "wheel": {
+            "physical": 500,
+            "logical": 4060.5055917948484,
+            "perPhysical": 8.121011183589697
+          },
+          "pageDown": {
+            "physical": 560,
+            "logical": 4547.766262810677,
+            "pages": 8.006630744384996
+          }
+        },
+        "uniform": {
+          "ratio": 8.000994141168047,
+          "wheel": {
+            "physical": 500,
+            "logical": 4000.497070584446,
+            "perPhysical": 8.000994141168892
+          },
+          "pageDown": {
+            "physical": 560,
+            "logical": 4480.556719055399,
+            "pages": 7.888304082844013
+          }
+        },
+        "ratioVsUniform": 1.015000266254726,
+        "wheelVsUniform": 1.015000266254822,
+        "pageVsUniform": 1.0150002662547362
+      }
+    },
+    "firefox": {
+      "variable": {
+        "topErr": 0,
+        "end": [
+          {
+            "how": "api",
+            "bottomErr": -0.0000152587890625,
+            "err": 0.0000152587890625
+          },
+          {
+            "how": "native",
+            "bottomErr": -0.0000152587890625,
+            "err": 0.0000152587890625
+          },
+          {
+            "how": "ctrl+end",
+            "bottomErr": -0.0000152587890625,
+            "err": 0.0000152587890625
+          }
+        ],
+        "placementMaxErr": 0.4586733728647232,
+        "wheel": {
+          "moved": 2000,
+          "sum": 2000,
+          "mode": 0,
+          "renderMedianMs": 0
+        },
+        "page": {
+          "drifts": [
+            -24,
+            -120
+          ],
+          "reachedDetail": true,
+          "moves": [
+            "d400017 -24",
+            "d400034 -24",
+            "d400051 -24",
+            "d400068 -24",
+            "d400085 -24",
+            "d400102 -24",
+            "d400119 -24",
+            "d400136 -24",
+            "d400153 -24",
+            "d400170 -24",
+            "d400187 -24",
+            "x400200 -120"
+          ],
+          "backTo": "d399985"
+        },
+        "oracle": {
+          "bad": 0,
+          "checked": 765000
+        },
+        "timing": [
+          {
+            "details": 2000,
+            "buildMs": 0,
+            "offsetOfNs": 35,
+            "indexAtNs": 65,
+            "setHeightUs": 1.5,
+            "sink": true
+          },
+          {
+            "details": 20000,
+            "buildMs": 0,
+            "offsetOfNs": 80,
+            "indexAtNs": 85,
+            "setHeightUs": 15.5,
+            "sink": true
+          },
+          {
+            "details": 200000,
+            "buildMs": 2,
+            "offsetOfNs": 110,
+            "indexAtNs": 110,
+            "setHeightUs": 865,
+            "sink": true
+          }
+        ],
+        "resize": [
+          {
+            "label": "far above, 240 → 480",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0.3333282470703125,
+            "focusDy": 0.3333282470703125,
+            "err": 0.3166961669921875
+          },
+          {
+            "label": "nearest above, 240 → 120",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": -0.3333282470703125,
+            "focusDy": -0.3333282470703125,
+            "err": 0.0166778564453125
+          },
+          {
+            "label": "far above, 480 → 777",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0.0666656494140625,
+            "focusDy": 0.0666656494140625,
+            "err": 0.0500030517578125
+          },
+          {
+            "label": "row 0's detail, 240 → 40",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0.1999969482421875,
+            "focusDy": 0.1999969482421875,
+            "err": 0.25
+          },
+          {
+            "label": "witness, no anchor",
+            "top0": "d600000",
+            "top1": "d599992",
+            "dy": 239.99998474121094
+          },
+          {
+            "label": "at the end",
+            "bottomErr": -0.0666656494140625
+          }
+        ]
+      },
+      "uniform": {
+        "topErr": 0,
+        "end": [
+          {
+            "how": "api",
+            "bottomErr": -0.0000152587890625,
+            "err": 0.0000152587890625
+          },
+          {
+            "how": "native",
+            "bottomErr": -0.0000152587890625,
+            "err": 0.0000152587890625
+          },
+          {
+            "how": "ctrl+end",
+            "bottomErr": -0.0000152587890625,
+            "err": 0.0000152587890625
+          }
+        ],
+        "placementMaxErr": 0.46384942531585693,
+        "wheel": {
+          "moved": 2000,
+          "sum": 2000,
+          "mode": 0,
+          "renderMedianMs": 0
+        },
+        "page": {
+          "drifts": [
+            -24
+          ],
+          "reachedDetail": false,
+          "moves": [
+            "d400017 -24",
+            "d400034 -24",
+            "d400051 -24",
+            "d400068 -24",
+            "d400085 -24",
+            "d400102 -24",
+            "d400119 -24",
+            "d400136 -24",
+            "d400153 -24",
+            "d400170 -24",
+            "d400187 -24",
+            "d400204 -24"
+          ],
+          "backTo": "d399988"
+        }
+      },
+      "nativeDrift": {
+        "variable": {
+          "ratio": 8.12101118358807,
+          "wheel": {
+            "physical": 500,
+            "logical": 4060.5055917948484,
+            "perPhysical": 8.121011183589697
+          },
+          "pageDown": {
+            "physical": 568,
+            "logical": 4612.7343522794545,
+            "pages": 8.12101118359059
+          }
+        },
+        "uniform": {
+          "ratio": 8.000994141168047,
+          "wheel": {
+            "physical": 500,
+            "logical": 4000.497070584446,
+            "perPhysical": 8.000994141168892
+          },
+          "pageDown": {
+            "physical": 568,
+            "logical": 4544.564672185108,
+            "pages": 8.000994141170965
+          }
+        },
+        "ratioVsUniform": 1.015000266254726,
+        "wheelVsUniform": 1.015000266254822,
+        "pageVsUniform": 1.0150002662546707
+      }
+    },
+    "webkit": {
+      "variable": {
+        "topErr": 0,
+        "end": [
+          {
+            "how": "api",
+            "bottomErr": 0,
+            "err": 0
+          },
+          {
+            "how": "native",
+            "bottomErr": 0,
+            "err": 0
+          },
+          {
+            "how": "ctrl+end",
+            "bottomErr": 0,
+            "err": 0
+          }
+        ],
+        "placementMaxErr": 0.12345937639474869,
+        "wheel": {
+          "moved": 2000,
+          "sum": 2000,
+          "mode": 0,
+          "renderMedianMs": 0
+        },
+        "page": {
+          "drifts": [
+            -24,
+            -120
+          ],
+          "reachedDetail": true,
+          "moves": [
+            "d400017 -24",
+            "d400034 -24",
+            "d400051 -24",
+            "d400068 -24",
+            "d400085 -24",
+            "d400102 -24",
+            "d400119 -24",
+            "d400136 -24",
+            "d400153 -24",
+            "d400170 -24",
+            "d400187 -24",
+            "x400200 -120"
+          ],
+          "backTo": "d399985"
+        },
+        "oracle": {
+          "bad": 0,
+          "checked": 765000
+        },
+        "timing": [
+          {
+            "details": 2000,
+            "buildMs": 0,
+            "offsetOfNs": 20,
+            "indexAtNs": 60,
+            "setHeightUs": 2,
+            "sink": true
+          },
+          {
+            "details": 20000,
+            "buildMs": 0,
+            "offsetOfNs": 60,
+            "indexAtNs": 90,
+            "setHeightUs": 15,
+            "sink": true
+          },
+          {
+            "details": 200000,
+            "buildMs": 1,
+            "offsetOfNs": 95,
+            "indexAtNs": 100,
+            "setHeightUs": 275,
+            "sink": true
+          }
+        ],
+        "resize": [
+          {
+            "label": "far above, 240 → 480",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0,
+            "focusDy": 0,
+            "err": 0
+          },
+          {
+            "label": "nearest above, 240 → 120",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0,
+            "focusDy": 0,
+            "err": 0
+          },
+          {
+            "label": "far above, 480 → 777",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0,
+            "focusDy": 0,
+            "err": 0
+          },
+          {
+            "label": "row 0's detail, 240 → 40",
+            "top0": "d600000",
+            "top1": "d600000",
+            "dy": 0,
+            "focusDy": 0,
+            "err": 0
+          },
+          {
+            "label": "witness, no anchor",
+            "top0": "d600000",
+            "top1": "d599992",
+            "dy": 240
+          },
+          {
+            "label": "at the end",
+            "bottomErr": 0
+          }
+        ]
+      },
+      "uniform": {
+        "topErr": 0,
+        "end": [
+          {
+            "how": "api",
+            "bottomErr": 0,
+            "err": 0
+          },
+          {
+            "how": "native",
+            "bottomErr": 0,
+            "err": 0
+          },
+          {
+            "how": "ctrl+end",
+            "bottomErr": 0,
+            "err": 0
+          }
+        ],
+        "placementMaxErr": 0.12413307651877403,
+        "wheel": {
+          "moved": 2000,
+          "sum": 2000,
+          "mode": 0,
+          "renderMedianMs": 1
+        },
+        "page": {
+          "drifts": [
+            -24
+          ],
+          "reachedDetail": false,
+          "moves": [
+            "d400017 -24",
+            "d400034 -24",
+            "d400051 -24",
+            "d400068 -24",
+            "d400085 -24",
+            "d400102 -24",
+            "d400119 -24",
+            "d400136 -24",
+            "d400153 -24",
+            "d400170 -24",
+            "d400187 -24",
+            "d400204 -24"
+          ],
+          "backTo": "d399988"
+        }
+      },
+      "nativeDrift": {
+        "variable": {
+          "ratio": 8.12101118358807,
+          "wheel": {
+            "physical": 500,
+            "logical": 4052.3845806121826,
+            "perPhysical": 8.104769161224365
+          },
+          "pageDown": {
+            "physical": 560,
+            "logical": 4539.645251626149,
+            "pages": 7.992333189482657
+          }
+        },
+        "uniform": {
+          "ratio": 8.000994141168047,
+          "wheel": {
+            "physical": 500,
+            "logical": 3992.496076444164,
+            "perPhysical": 7.984992152888328
+          },
+          "pageDown": {
+            "physical": 560,
+            "logical": 4472.555724913254,
+            "pages": 7.874217825551504
+          }
+        },
+        "ratioVsUniform": 1.015000266254726,
+        "wheelVsUniform": 1.015000266254828,
+        "pageVsUniform": 1.0150002662547475
+      }
+    }
+  },
+  "observations": [
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "mapper",
+      "value": {
+        "scaled": true,
+        "ratio": 8.12101118358807,
+        "maxPhysical": 3999432,
+        "maxLogical": 32479432,
+        "logicalHeight": 32480000,
+        "total": 32480000,
+        "count": 1002000
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "mapper",
+      "value": {
+        "scaled": true,
+        "ratio": 8.000994141168047,
+        "maxPhysical": 3999432,
+        "maxLogical": 31999432,
+        "logicalHeight": 32000000,
+        "total": 32000000,
+        "count": 1000000
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000&intercept=0",
+      "label": "native (not intercepted) wheel 5 × 100 and PageDown on the viewport",
+      "value": {
+        "ratio": 8.12101118358807,
+        "wheel": {
+          "physical": 500,
+          "logical": 4060.5055917948484,
+          "perPhysical": 8.121011183589697
+        },
+        "pageDown": {
+          "physical": 560,
+          "logical": 4547.766262810677,
+          "pages": 8.006630744384996
+        },
+        "placementErr": 0.02185460552573204
+      }
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0&intercept=0",
+      "label": "native (not intercepted) wheel 5 × 100 and PageDown on the viewport",
+      "value": {
+        "ratio": 8.000994141168047,
+        "wheel": {
+          "physical": 500,
+          "logical": 4000.497070584446,
+          "perPhysical": 8.000994141168892
+        },
+        "pageDown": {
+          "physical": 560,
+          "logical": 4480.556719055399,
+          "pages": 7.888304082844013
+        },
+        "placementErr": 0.053789639845490456
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "mapper",
+      "value": {
+        "scaled": true,
+        "ratio": 8.12101118358807,
+        "maxPhysical": 3999432,
+        "maxLogical": 32479432,
+        "logicalHeight": 32480000,
+        "total": 32480000,
+        "count": 1002000
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "mapper",
+      "value": {
+        "scaled": true,
+        "ratio": 8.000994141168047,
+        "maxPhysical": 3999432,
+        "maxLogical": 31999432,
+        "logicalHeight": 32000000,
+        "total": 32000000,
+        "count": 1000000
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000&intercept=0",
+      "label": "native (not intercepted) wheel 5 × 100 and PageDown on the viewport",
+      "value": {
+        "ratio": 8.12101118358807,
+        "wheel": {
+          "physical": 500,
+          "logical": 4060.5055917948484,
+          "perPhysical": 8.121011183589697
+        },
+        "pageDown": {
+          "physical": 568,
+          "logical": 4612.7343522794545,
+          "pages": 8.12101118359059
+        },
+        "placementErr": 0.03994712606072426
+      }
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0&intercept=0",
+      "label": "native (not intercepted) wheel 5 × 100 and PageDown on the viewport",
+      "value": {
+        "ratio": 8.000994141168047,
+        "wheel": {
+          "physical": 500,
+          "logical": 4000.497070584446,
+          "perPhysical": 8.000994141168892
+        },
+        "pageDown": {
+          "physical": 568,
+          "logical": 4544.564672185108,
+          "pages": 8.000994141170965
+        },
+        "placementErr": 0.004922879859805107
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "mapper",
+      "value": {
+        "scaled": true,
+        "ratio": 8.12101118358807,
+        "maxPhysical": 3999432,
+        "maxLogical": 32479432,
+        "logicalHeight": 32480000,
+        "total": 32480000,
+        "count": 1002000
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "mapper",
+      "value": {
+        "scaled": true,
+        "ratio": 8.000994141168047,
+        "maxPhysical": 3999432,
+        "maxLogical": 31999432,
+        "logicalHeight": 32000000,
+        "total": 32000000,
+        "count": 1000000
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000&intercept=0",
+      "label": "native (not intercepted) wheel 5 × 100 and PageDown on the viewport",
+      "value": {
+        "ratio": 8.12101118358807,
+        "wheel": {
+          "physical": 500,
+          "logical": 4052.3845806121826,
+          "perPhysical": 8.104769161224365
+        },
+        "pageDown": {
+          "physical": 560,
+          "logical": 4539.645251626149,
+          "pages": 7.992333189482657
+        },
+        "placementErr": 0.02983223833143711
+      }
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0&intercept=0",
+      "label": "native (not intercepted) wheel 5 × 100 and PageDown on the viewport",
+      "value": {
+        "ratio": 8.000994141168047,
+        "wheel": {
+          "physical": 500,
+          "logical": 3992.496076444164,
+          "perPhysical": 7.984992152888328
+        },
+        "pageDown": {
+          "physical": 560,
+          "logical": 4472.555724913254,
+          "pages": 7.874217825551504
+        },
+        "placementErr": 0.05180135741829872
+      }
+    }
+  ],
+  "checks": [
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "top: first row at the body top, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "end (api): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "end (native): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "end (ctrl+end): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "Ctrl+End then ArrowUp: data row 999 999 focused (goal column 3 kept), visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "placement: 300 offsets, every mounted row where the layout says, ≤ 0.5 px",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "wheel 20 × 100: logical move = Σ deltas, rows placed exactly, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "PageDown: each target is the row one body height below",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "PageDown × 12, PageUp × 12: focus moves a page each time, stays visible, grid scroll only",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "layout = brute-force oracle (765000 probes over 51 height sets)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "retained data row: same cell focused through top, end, middle and back, no blur, sane DOM, range unchanged",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "retained, off screen: ArrowDown focuses the next row, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "retained detail row: Down reaches it, kept through top and end, Up returns to the master on column 5, visible",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "resize above (far above, 240 → 480): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "resize above (nearest above, 240 → 120): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "resize above (far above, 480 → 777): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "resize above (row 0's detail, 240 → 40): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000&anchor=0",
+      "label": "witness: without the anchor the top row moves (proves the check sees it)",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "resize above while at the end: still at the end, row 999 999 shown, bottom exact",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "top: first row at the body top, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "end (api): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "end (native): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "end (ctrl+end): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "placement: 300 offsets, every mounted row where the layout says, ≤ 0.5 px",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "wheel 20 × 100: logical move = Σ deltas, rows placed exactly, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "PageDown: each target is the row one body height below",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "PageDown × 12, PageUp × 12: focus moves a page each time, stays visible, grid scroll only",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000&intercept=0",
+      "label": "native scroll: rows still placed exactly after it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=2000&intercept=0",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0&intercept=0",
+      "label": "native scroll: rows still placed exactly after it",
+      "ok": true
+    },
+    {
+      "engine": "chrome",
+      "cfg": "details=0&intercept=0",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "top: first row at the body top, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "end (api): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "end (native): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "end (ctrl+end): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "Ctrl+End then ArrowUp: data row 999 999 focused (goal column 3 kept), visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "placement: 300 offsets, every mounted row where the layout says, ≤ 0.5 px",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "wheel 20 × 100: logical move = Σ deltas, rows placed exactly, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "PageDown: each target is the row one body height below",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "PageDown × 12, PageUp × 12: focus moves a page each time, stays visible, grid scroll only",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "layout = brute-force oracle (765000 probes over 51 height sets)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "retained data row: same cell focused through top, end, middle and back, no blur, sane DOM, range unchanged",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "retained, off screen: ArrowDown focuses the next row, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "retained detail row: Down reaches it, kept through top and end, Up returns to the master on column 5, visible",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "resize above (far above, 240 → 480): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "resize above (nearest above, 240 → 120): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "resize above (far above, 480 → 777): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "resize above (row 0's detail, 240 → 40): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000&anchor=0",
+      "label": "witness: without the anchor the top row moves (proves the check sees it)",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "resize above while at the end: still at the end, row 999 999 shown, bottom exact",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "top: first row at the body top, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "end (api): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "end (native): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "end (ctrl+end): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "placement: 300 offsets, every mounted row where the layout says, ≤ 0.5 px",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "wheel 20 × 100: logical move = Σ deltas, rows placed exactly, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "PageDown: each target is the row one body height below",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "PageDown × 12, PageUp × 12: focus moves a page each time, stays visible, grid scroll only",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000&intercept=0",
+      "label": "native scroll: rows still placed exactly after it",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=2000&intercept=0",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0&intercept=0",
+      "label": "native scroll: rows still placed exactly after it",
+      "ok": true
+    },
+    {
+      "engine": "firefox",
+      "cfg": "details=0&intercept=0",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "top: first row at the body top, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "end (api): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "end (native): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "end (ctrl+end): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "Ctrl+End then ArrowUp: data row 999 999 focused (goal column 3 kept), visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "placement: 300 offsets, every mounted row where the layout says, ≤ 0.5 px",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "wheel 20 × 100: logical move = Σ deltas, rows placed exactly, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "PageDown: each target is the row one body height below",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "PageDown × 12, PageUp × 12: focus moves a page each time, stays visible, grid scroll only",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "layout = brute-force oracle (765000 probes over 51 height sets)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "retained data row: same cell focused through top, end, middle and back, no blur, sane DOM, range unchanged",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "retained, off screen: ArrowDown focuses the next row, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "retained detail row: Down reaches it, kept through top and end, Up returns to the master on column 5, visible",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "resize above (far above, 240 → 480): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "resize above (nearest above, 240 → 120): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "resize above (far above, 480 → 777): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "resize above (row 0's detail, 240 → 40): same top row at the same place, focus kept and still, rows exact",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000&anchor=0",
+      "label": "witness: without the anchor the top row moves (proves the check sees it)",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "resize above while at the end: still at the end, row 999 999 shown, bottom exact",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "top: first row at the body top, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "end (api): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "end (native): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "end (ctrl+end): row 999 999 shown, last row's bottom on the viewport's, offset error 0",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "placement: 300 offsets, every mounted row where the layout says, ≤ 0.5 px",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "wheel 20 × 100: logical move = Σ deltas, rows placed exactly, no native scroll",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "PageDown: each target is the row one body height below",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "PageDown × 12, PageUp × 12: focus moves a page each time, stays visible, grid scroll only",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000&intercept=0",
+      "label": "native scroll: rows still placed exactly after it",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=2000&intercept=0",
+      "label": "no page error",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0&intercept=0",
+      "label": "native scroll: rows still placed exactly after it",
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "cfg": "details=0&intercept=0",
+      "label": "no page error",
+      "ok": true
+    }
+  ]
+}

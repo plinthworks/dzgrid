@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>S12 variable heights</title>
+<style>
+  :root { --s-bg: #fff; --s-fg: #1a1a1a; --s-line: #8a8a8a; --s-head: #eef0f3; --s-focus: #0b57d0; --s-detail: #f6f7f9; }
+  body { margin: 16px; background: var(--s-bg); color: var(--s-fg); font: 13px system-ui, sans-serif; }
+  input.mark { display: block; margin-block: 8px; }
+  .vp { inline-size: 800px; block-size: 600px; overflow: auto; position: relative; border: 1px solid var(--s-line); }
+  .head { display: flex; inline-size: 960px; block-size: 32px; position: sticky; inset-block-start: 0; z-index: 3; background: var(--s-head); }
+  .body { position: relative; inline-size: 960px; overflow: clip; }
+  .layer { position: absolute; inset-inline-start: 0; inline-size: 960px; }
+  .row { position: absolute; inset-inline-start: 0; display: flex; inline-size: 960px; background: var(--s-bg); }
+  .row.detail { background: var(--s-detail); }
+  .c { box-sizing: border-box; inline-size: 120px; padding-inline: 6px; line-height: 31px; border-block-end: 1px solid var(--s-line); white-space: nowrap; overflow: hidden; }
+  .dcell { box-sizing: border-box; inline-size: 100%; padding: 8px; border-block-end: 1px solid var(--s-line); }
+  .c:focus, .dcell:focus { outline: 2px solid var(--s-focus); outline-offset: -2px; }
+</style></head>
+<body>
+<main>
+  <h1>S12</h1>
+  <input class="mark" id="before" aria-label="before">
+  <div id="host"></div>
+  <input class="mark" id="after" aria-label="after">
+</main>
+<script type="module" src="./page.ts"></script>
+</body>
+</html>

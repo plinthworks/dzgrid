@@ -506,3 +506,92 @@ Consigner le résultat dans `docs/behaviors/selection-rules.md` (fin de la fiche
 « indisponible » (80), un refus muet ou dit deux fois en une action (81, 82), ou un focus qui sort de
 la grille (85) se corrige avant l'étape 22 ; un lecteur qui ne dit rien avant l'essai sur la case
 grisée est attendu (Q2).
+
+## 16. Étapes — arborescence de tableau, treegrid (Phase 4, étapes 4 à 7)
+
+Page : le bac à sable, lien « Arbre » du menu Démos (`playground/tree.html`, étape 6 ;
+`npx vite --host 127.0.0.1`), en **français** puis en **arabe** (`&locale=ar-DZ&direction=auto`).
+Données : 100 services (niveau 1), chacun avec ses patients (niveau 2), certains patients avec
+leurs séjours (niveau 3) ; au départ tout est replié sauf « Service 0 ». Couples A à D. Durée
+estimée : 15 min par couple et par langue. Noter ce qui est **dit**, mot pour mot. Fiches :
+`docs/behaviors/tree-view.md`, `tree-keys.md`, `tree-filter.md`, `tree-selection.md`.
+
+Les phrases attendues ci-dessous sont celles des paquets `locales/{fr,ar}-tree` prévus (étape 4) ;
+si le paquet final les a changées, noter la phrase dite et la comparer au paquet. Les mots d'état
+(« développé », « réduit » ; en arabe « موسّع », « مطوي » ou proches) sont ceux du lecteur, pas de
+la grille : noter les siens.
+
+87. **Entrée.** `Tab` dans la grille. Attendu : rôle « arborescence de tableau » / treegrid (en arabe
+    selon le lecteur : « شبكة شجرية » ou « جدول »), le nombre de lignes affichées, puis « Service 0 »,
+    **développé**, **niveau 1**, **1 sur 100**. Noter si le lecteur dit le niveau et la position, ou
+    seulement l'un des deux (VoiceOver ne disait pas « n sur m » au spike S4, §3).
+88. **Descendre d'un niveau.** `↓` : « Patient 1 », **niveau 2**, **1 sur N** (N = patients du
+    service). Un patient sans séjour ne dit ni « développé » ni « réduit ».
+89. **Ouvrir au clavier.** Sur un patient qui a des séjours, colonne de l'arbre : `→` (ar : `←`).
+    Attendu : « développé », puis l'annonce **une fois** — fr « Patient 3 développé, 4 lignes. »,
+    ar « تم توسيع Patient 3، 4 صفوف. » ; le focus reste sur la ligne. `→` (ar : `←`) encore : le focus
+    passe à la colonne suivante (une ligne ouverte ne s'ouvre pas deux fois).
+90. **Fermer et remonter.** Revenir à la colonne de l'arbre, `←` (ar : `→`) : « réduit » et fr
+    « Patient 3 réduit. », ar « تم طي Patient 3. ». `←` (ar : `→`) encore : le focus monte sur
+    « Service 0 », même colonne, niveau 1, développé. Sur un service replié de niveau 1, `←`
+    (ar : `→`) ne dit rien et ne bouge pas.
+91. **Étoile.** Sur « Service 0 », `*` : les services frères s'ouvrent ; une seule phrase (fr « 99 lignes
+    développées. », ar « تم توسيع 99 صفا. » — noter le nombre dit) ; le focus ne bouge pas.
+92. **Le focus caché par une fermeture.** Ouvrir « Service 2 », descendre sur un de ses patients ;
+    « Dans 5 s : replier Service 2 » (bouton de test), revenir dans la grille, attendre. Attendu : le
+    focus est sur « Service 2 » (pas perdu, pas sur `body`), « réduit » dit.
+93. **Filtre.** Champ de filtre « Nom » : taper un nom de patient. Attendu : « Filtré. 1 ligne » (fr)
+    / « تمت التصفية. صف واحد (1) » (ar) — le nombre compte les correspondances, pas les services
+    affichés en grisé. Descendre : le service parent est lu (texte grisé, sans mot particulier),
+    développé, puis le patient, **1 sur 1**. Effacer le filtre : les services reviennent tels que
+    l'utilisateur les avait ouverts.
+94. **Sélection.** `Espace` sur un service : « sélectionné » pour ce service seul ; descendre sur un de
+    ses patients : « non sélectionné » (pas de cascade). `Ctrl+A` : la phrase de sélection donne le
+    nombre des lignes affichées.
+95. **Arabe.** Mêmes étapes de droite à gauche : flèche **gauche** pour ouvrir, **droite** pour
+    fermer et remonter ; le chevron d'une ligne repliée pointe vers la gauche ; les niveaux et
+    positions lus en chiffres latins ou arabes selon le lecteur (noter lesquels).
+
+Consigner le résultat dans `docs/behaviors/tree-view.md` (fin de la fiche) et dans `ROADMAP.md`
+(clôture de la Phase 4, étape 13 ; écoute non bloquante). Règle de décision propre à cette section :
+un niveau ou une position faux (87, 88, 93), une ouverture ou une fermeture muette ou dite deux fois
+(89, 90, 91), ou un focus perdu (92) se corrige avant la clôture de la Phase 4 ; un lecteur qui ne
+dit pas `aria-posinset` (VoiceOver) est noté, sans correction si l'annonce dit l'action.
+
+## 17. Étapes — ligne de détail, maître/détail (Phase 4, étapes 9 à 11)
+
+Page : le bac à sable, lien « Maître/détail » du menu Démos (étape 10), en **français** puis en
+**arabe**. Données : 10 000 patients ; le détail d'un patient est une petite grille de ses visites
+(4 colonnes), hauteur 240 px ; « Patient 0 » ouvert au départ. Couples A à D. Durée estimée :
+15 min par couple et par langue. Fiche : `docs/behaviors/master-detail.md`.
+
+96. **Le maître ouvert.** `Tab` dans la grille, sur « Patient 0 » : la ligne est dite **développée**
+    (`aria-expanded` sur la ligne maître). Noter le mot exact.
+97. **Atteindre le détail.** `↓` : un seul arrêt, nom attendu fr « Détails de Patient 0 », ar
+    « تفاصيل Patient 0 », une cellule qui couvre toutes les colonnes. Noter si l'en-tête d'une
+    colonne est dit avant (le spike S4 montrait Chrome rattachant la cellule à la colonne 1), et
+    quelle position de ligne est dite (elle compte la ligne de détail).
+98. **Gauche, droite, début, fin.** Sur le détail : `←`, `→`, `Début`, `Fin` ne déplacent rien, ne
+    disent rien de nouveau (ou relisent la même cellule).
+99. **Entrer.** `Entrée` (ou `F2`) : le focus passe dans la grille intérieure, sur sa première
+    cellule ; le lecteur annonce la grille intérieure (son nom, fr « Visites de Patient 0 », ar
+    « زيارات Patient 0 », son nombre de lignes). Les flèches parcourent la grille intérieure ; la
+    grille extérieure ne défile pas.
+100. **Trier dedans.** Dans la grille intérieure, trier une colonne : la phrase de tri est celle de la
+     grille intérieure, dite une fois ; rien n'est dit pour la grille extérieure.
+101. **Sortir.** `Échap` : retour sur l'arrêt du détail (« Détails de Patient 0 »). `↓` : la ligne
+     suivante, « Patient 1 », colonne retrouvée (celle d'avant le détail). `Tab` depuis l'intérieur
+     ou l'arrêt : sort de la grille vers le champ « après » (pas de piège, WCAG 2.1.2).
+102. **Fermer.** Sur « Patient 0 », première colonne (celle du chevron) : `←` (ar : `→`) si
+     l'étape 10 garde les touches de l'arbre pour le maître, sinon le bouton de test « replier » : « réduit », la ligne de détail disparaît ; le nombre de lignes diminue de 1. Si le
+     focus était dans le détail, il revient sur « Patient 0 ».
+103. **Retour à un détail déjà ouvert.** Rouvrir « Patient 0 » : `↓`, `Entrée` : la grille
+     intérieure revient triée et défilée comme laissée en 100.
+104. **Arabe.** Mêmes étapes de droite à gauche ; noter la langue de la voix pour le nom du détail
+     (texte arabe, nom du patient en caractères latins).
+
+Consigner le résultat dans `docs/behaviors/master-detail.md` (fin de la fiche) et dans `ROADMAP.md`
+(clôture de la Phase 4). Règle de décision propre à cette section : un détail lu sans nom ou sous le
+nom d'une colonne seule (97), un piège clavier (101), une grille extérieure qui bouge quand on
+travaille dedans (99, 100), ou un focus perdu à la fermeture (102) se corrige avant la clôture de la
+Phase 4 ; une position de ligne qui compte le détail est attendue (le détail est une ligne).

@@ -76,9 +76,9 @@ describe('settings.motion', () => {
 });
 
 describe('the size lines (owner, 2026-10-20, step 26, Q4; reset at the Phase 3 close, step 25)', () => {
-  it('hold the budgets set at the close: dom 21 300, theme 2 300, the motion shell 700 and its run chunk 2 900 over it; gsap and the motion profile recorded; K.8 guard 83 500', () => {
+  it('hold the budgets set at the close: dom 21 300, theme 2 500 (Phase 4, owner Q7), the motion shell 700 and its run chunk 2 900 over it; gsap and the motion profile recorded; K.8 guard 83 500', () => {
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; files?: string[]; maxGzip: number | null; external?: string[]; over?: string; without?: string[] }> }).entries;
-    expect([b['@dzgrid/dom']!.maxGzip, b['@dzgrid/theme']!.maxGzip, b['@dzgrid/core']!.maxGzip]).toEqual([21300, 2300, 28000]);
+    expect([b['@dzgrid/dom']!.maxGzip, b['@dzgrid/theme']!.maxGzip, b['@dzgrid/core']!.maxGzip]).toEqual([21300, 2500, 29000]); // theme and core: Phase 4 budgets (owner Q7, 2026-10-21)
     expect(b['@dzgrid/dom/motion-gsap']).toEqual({ file: 'packages/dom/src/motion-gsap.ts', maxGzip: 700, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
     expect(b['@dzgrid/dom/motion-gsap: run (lazy)']).toEqual({ file: 'packages/dom/src/motion-gsap/run/index.ts', maxGzip: 2900, over: '@dzgrid/dom/motion-gsap', external: ['gsap', 'gsap/*', '@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
     expect(b['gsap kit: core']).toMatchObject({ maxGzip: null, without: ['gsap', 'gsap/*'] });

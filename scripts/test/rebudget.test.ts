@@ -42,8 +42,11 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(() => sizeBudget(28001, 28000)).toThrow(/ceiling/);
   });
 
-  it('the plan ceilings: core 28 000, dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000, K.8 85 000', () => {
-    expect(ceilingFor('@dzgrid/core')).toBe(28000);
+  it('the plan ceilings: core 29 000 (Phase 4, owner Q7), dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000, K.8 85 000', () => {
+    // Phase 4 (docs/phase-4-steps/decisions.md Q7, 2026-10-21): the core's plan ceiling 28 000 → 29 000.
+    expect(ceilingFor('@dzgrid/core')).toBe(29000);
+    expect(sizeBudget(26986, ceilingFor('@dzgrid/core'))).toBe(29000); // 29 684.6 → capped at 29 000
+    expect(() => sizeBudget(29001, ceilingFor('@dzgrid/core'))).toThrow(/ceiling/);
     expect(ceilingFor('@dzgrid/dom')).toBe(30000);
     expect(ceilingFor('@dzgrid/dom/locales/ar')).toBe(2000);
     expect(ceilingFor('@dzgrid/dom/locales/ar-filters')).toBe(2000);
@@ -73,7 +76,7 @@ describe('rebudgetSizes: the size-budget.json document', () => {
 
   it('sets each budgeted entry, raises included (export at its cap → 1 350)', () => {
     const { budget, rows } = rebudgetSizes(doc(), measures, { date: '2026-10-21' });
-    expect(budget.entries['@dzgrid/core'].maxGzip).toBe(28000);
+    expect(budget.entries['@dzgrid/core'].maxGzip).toBe(29000); // 26 986 + 10 % capped at the Phase 4 ceiling
     expect(budget.entries['@dzgrid/dom/export'].maxGzip).toBe(1350);
     expect(budget.entries['profile: audit screen (K.8)'].maxGzip).toBe(83500);
     expect(rows.find((r: { name: string }) => r.name === '@dzgrid/dom/export')).toMatchObject({ old: 1200, measure: 1200, next: 1350 });

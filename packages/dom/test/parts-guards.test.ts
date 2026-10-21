@@ -51,9 +51,9 @@ describe('@dzgrid/dom/parts', () => {
     expect(b['@dzgrid/dom/locales/en-parts']).toEqual({ file: 'packages/dom/src/locales/en-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/dom/locales/fr-parts']).toEqual({ file: 'packages/dom/src/locales/fr-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/dom/locales/ar-parts']).toEqual({ file: 'packages/dom/src/locales/ar-parts.ts', maxGzip: 150 });
-    expect(b['@dzgrid/theme']!.maxGzip).toBe(2300);
+    expect(b['@dzgrid/theme']!.maxGzip).toBe(2500); // Phase 4 budget (owner Q7, 2026-10-21)
     expect(b['@dzgrid/dom']!.maxGzip).toBe(21300);
-    expect(b['@dzgrid/core']!.maxGzip).toBe(28000); // capped by §5.2
+    expect(b['@dzgrid/core']!.maxGzip).toBe(29000); // Phase 4 budget (owner Q7, 2026-10-21; was 28 000, capped by §5.2)
   });
 
   it('reaches the base through the types only: no value import outside its own folder, no style, no internal module', () => {

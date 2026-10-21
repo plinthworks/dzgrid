@@ -26,9 +26,12 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 // ---------------------------------------------------------------- sizes
 
-/** ARCHITECTURE §5.2 and K.8: the ceilings a size budget never goes above (`/filters` 10 kB, Angular 8 kB included). */
+/**
+ * ARCHITECTURE §5.2 and K.8: the ceilings a size budget never goes above (`/filters` 10 kB, Angular 8 kB included).
+ * The core's: 28 000 → 29 000 for Phase 4 (owner decision 2026-10-21, docs/phase-4-steps/decisions.md Q7).
+ */
 const SIZE_CEILINGS = {
-  '@dzgrid/core': 28000,
+  '@dzgrid/core': 29000,
   '@dzgrid/core/server': 6000,
   '@dzgrid/dom': 30000,
   '@dzgrid/dom/filters': 10000,
@@ -53,7 +56,7 @@ export function sizeBudget(measure, ceiling = null) {
 }
 
 const SIZE_COMMENT = (date) =>
-  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Phase 3 close (${date}, owner decisions step25-decisions.md Q2, Q3): each budget is the measure + 10 %, rounded up to 50 B, never above the ceilings of ARCHITECTURE §5.2 (core 28 000, dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000) and K.8 (the audit screen profile, 85 000; its guard here is the measure + 10 %, the 85 000 ceiling guards the real Angular example, npm run example:bytes); set by scripts/rebudget.mjs. A budget is raised only by a decision written in ROADMAP.md, which keeps the history of every earlier one.`;
+  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Phase 3 close (${date}, owner decisions step25-decisions.md Q2, Q3): each budget is the measure + 10 %, rounded up to 50 B, never above the ceilings of ARCHITECTURE §5.2 (core 29 000 since Phase 4, dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000) and K.8 (the audit screen profile, 85 000; its guard here is the measure + 10 %, the 85 000 ceiling guards the real Angular example, npm run example:bytes); set by scripts/rebudget.mjs. A budget is raised only by a decision written in ROADMAP.md, which keeps the history of every earlier one.`;
 
 /**
  * A new size-budget.json from `measures` (name → gz bytes). Returns the new document (the given one
