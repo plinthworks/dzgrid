@@ -1,0 +1,80 @@
+{
+  "id": "nested-transaction",
+  "suite": "tree",
+  "description": "Nested children: an update listing a new child, with that child added, puts it under the row; an added row with children brings them.",
+  "input": {
+    "shape": "children",
+    "rows": [
+      {
+        "id": "a",
+        "n": 1,
+        "c": [
+          {
+            "id": "a1",
+            "n": 2
+          }
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "tx": {
+          "update": [
+            {
+              "id": "a",
+              "n": 1,
+              "c": [
+                {
+                  "id": "a1",
+                  "n": 2
+                },
+                {
+                  "id": "a2",
+                  "n": 4
+                }
+              ]
+            }
+          ],
+          "add": [
+            {
+              "id": "a2",
+              "n": 4
+            },
+            {
+              "id": "b",
+              "n": 0,
+              "c": [
+                {
+                  "id": "b1",
+                  "n": 5
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "expandAll": true
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/2",
+      ". a1 1/2",
+      ". a2 2/2",
+      "b 2/2",
+      ". b1 1/1"
+    ],
+    "expansion": [
+      "a",
+      "b"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 5
+    },
+    "problems": []
+  }
+}

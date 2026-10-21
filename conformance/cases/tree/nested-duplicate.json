@@ -1,0 +1,50 @@
+{
+  "id": "nested-duplicate",
+  "suite": "tree",
+  "description": "Nested children: an id used twice across levels keeps the first row (duplicate-row-id).",
+  "input": {
+    "shape": "children",
+    "rows": [
+      {
+        "id": "a",
+        "n": 1,
+        "c": [
+          {
+            "id": "a",
+            "n": 2
+          },
+          {
+            "id": "c",
+            "n": 3
+          }
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "expandAll": true
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/1",
+      ". c 1/1"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 2
+    },
+    "problems": [
+      {
+        "code": "duplicate-row-id",
+        "severity": "error",
+        "path": "rows[1]"
+      }
+    ]
+  }
+}

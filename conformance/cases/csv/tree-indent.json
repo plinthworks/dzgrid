@@ -1,0 +1,62 @@
+{
+  "id": "tree-indent",
+  "suite": "csv",
+  "description": "csv.tree indent: two spaces per level before the tree column's text, before the guard and the quotes.",
+  "input": {
+    "locale": "en-US",
+    "tree": true,
+    "scope": "all",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Name"
+      },
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "d",
+        "name": "Docs",
+        "n": 7,
+        "path": [
+          "docs"
+        ]
+      },
+      {
+        "id": "x",
+        "name": "=1+1",
+        "n": 1,
+        "path": [
+          "docs",
+          "x"
+        ]
+      },
+      {
+        "id": "y",
+        "name": "a,b",
+        "path": [
+          "docs",
+          "sub",
+          "y"
+        ]
+      }
+    ],
+    "options": {
+      "bom": false,
+      "tree": "indent"
+    }
+  },
+  "expected": {
+    "text": "Name,N\r\nDocs,7\r\n'  =1+1,1\r\n  sub,\r\n\"    a,b\",\r\n",
+    "summary": {
+      "rows": 4,
+      "columns": 2,
+      "blank": 1,
+      "invalid": 0
+    }
+  }
+}

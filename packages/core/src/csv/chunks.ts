@@ -8,7 +8,7 @@ import type { SpanCell, SpanMap } from '../spans/map.js';
 import type { LocaleCtx } from '../value/locale.js';
 import { separatorsFor } from '../value/number.js';
 import { quoter } from './quote.js';
-import { headerOf, writerFor, type WriterEnv } from './writers.js';
+import { field, headerOf, writerFor, type WriterEnv } from './writers.js';
 
 /** How the file is written (docs/behaviors/csv-export.md); every option has a default. */
 export interface CsvOptions {
@@ -33,6 +33,15 @@ export interface CsvOptions {
   readonly columns?: readonly string[];
   /** Rows per chunk; default 500. */
   readonly chunkRows?: number;
+  /**
+   * A tree's depth (csv-export.md): `level` (default) a first column, 1 for the roots; `indent` two
+   * spaces per level before the tree column's text; `none` flat rows. Only when the rows are a tree's.
+   */
+  readonly tree?: 'none' | 'level' | 'indent';
+  /** The level column's header; default `Level`. */
+  readonly levelHeader?: string;
+  /** The column that carries the indent and a filler's label; default the first written. */
+  readonly treeColumn?: string;
 }
 
 /** What the file is written from: pure data, no grid. */
@@ -97,7 +106,7 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
   };
   const cols = csvColumns(i.columns, o.columns).columns;
   const n = cols.length;
-  const writers = new Map<string, (node: RowNode<T>) => string>();
+  const writers = new Map<string, (node: RowNode<T>, pad?: string) => string>();
   const writer = (col: ResolvedColumn<T>) => {
     let w = writers.get(col.id);
     if (!w) writers.set(col.id, (w = writerFor(col, e)));
@@ -118,11 +127,22 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
     sylk = false;
     return (n === 1 && fields[0] === '' ? '""' : fields.join(sep)) + '\r\n';
   };
+  const levelAt = o.tree === 'none' ? undefined : rows.levelAt;
+  const indent = o.tree === 'indent';
+  const treeAt = !rows.levelAt ? -1 : o.treeColumn === undefined ? 0 : cols.findIndex((c) => c.id === o.treeColumn);
+  /** A tree's level column first (`level`): its header, or the row's level from 1. */
+  const lead = (fields: string[], v: string): string[] => (levelAt && !indent && fields.unshift(v), fields);
   let out = o.bom === false ? '' : BOM;
-  if (n && o.header !== false) out += line(cols.map((c) => headerOf(c, e)));
+  if (n && o.header !== false) out += line(lead(cols.map((c) => headerOf(c, e)), field(e, o.levelHeader ?? 'Level')));
+  let written = 0;
   for (let k = 0; k < total; k++) {
     const r = at ? at[k]! : k;
     const node = rows.nodeAt(r as DisplayIndex);
+    // A detail panel is never written (csv-export.md).
+    if (node.kind === 'detail') continue;
+    written++;
+    const lv = levelAt ? levelAt.call(rows, r as DisplayIndex) : 0;
+    const pad = indent ? '  '.repeat(lv) : '';
     let over: SpanCell[] | null = null;
     if (map && !map.fullWidth(r)) {
       for (const s of map.inRow(r, 0, ids.length - 1)) {
@@ -132,6 +152,8 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
       }
     }
     const fields = cols.map((col, j) => {
+      // A filler: its label in the tree column, every other field empty.
+      if (j === treeAt) return node.kind === 'group' ? field(e, pad + node.label) : writer(col)(node, pad);
       const s = over?.[place[j]!];
       if (!s) return writer(col)(node);
       if (s.row === r && s.col === place[j]) return writer(col)(node);
@@ -139,14 +161,14 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
       const origin = i.columns.get(ids[s.col]!);
       return origin ? writer(origin)(rows.nodeAt(s.row as DisplayIndex)) : '';
     });
-    out += line(fields);
-    if ((k + 1) % size === 0) {
+    out += line(lead(fields, String(lv + 1)));
+    if (written % size === 0) {
       yield out;
       out = '';
     }
   }
   if (out) yield out;
-  return { rows: total, columns: n, ...counts };
+  return { rows: written, columns: n, ...counts };
 }
 
 /** The whole file as one string: the chunks joined. Above a few hundred thousand rows, use the chunks. */

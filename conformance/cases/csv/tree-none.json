@@ -1,0 +1,45 @@
+{
+  "id": "tree-none",
+  "suite": "csv",
+  "description": "csv.tree none: flat rows in tree order, fillers still their label only.",
+  "input": {
+    "locale": "fr-FR",
+    "tree": true,
+    "scope": "all",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Nom"
+      },
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "f1",
+        "name": "a.pdf",
+        "n": 5.5,
+        "path": [
+          "docs",
+          "f1"
+        ]
+      }
+    ],
+    "options": {
+      "bom": false,
+      "tree": "none"
+    }
+  },
+  "expected": {
+    "text": "Nom;N\r\ndocs;\r\na.pdf;5,5\r\n",
+    "summary": {
+      "rows": 2,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

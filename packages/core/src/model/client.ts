@@ -182,6 +182,9 @@ export interface RowShape<T> {
   opens?(key: RowKey): boolean;
   /** What the last build bent (an orphan, a cycle). */
   readonly problems: readonly Problem[];
+  /** Nested rows made flat before the store (a tree's `children`): a load, then each transaction. */
+  load?(rows: Iterable<T>, id: (row: T) => RowIdInput): Iterable<T>;
+  tx?(tx: RowTransaction<T>, id: (row: T) => RowIdInput): RowTransaction<T>;
 }
 
 export interface ClientOptions<T> {
@@ -540,7 +543,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     return r;
   };
 
-  loadProblems = store.replaceAll(o.rows).problems;
+  /** Rows as the store takes them: a shape's nested rows made flat first. */
+  const flat = (rows: Iterable<T>): Iterable<T> => shape?.load?.(rows, o.getRowId) ?? rows;
+  loadProblems = store.replaceAll(flat(o.rows)).problems;
   run();
   shapeSeen = shape?.problems ?? null;
   shapeSaid = said(shapeSeen ?? []);
@@ -712,8 +717,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       run();
       notify('rows', 'api');
     },
-    setRows: (rows, source = 'host') => transact(() => store.replaceAll(rows), source),
-    applyTransaction: (tx, source = 'host') => transact(() => store.apply(tx), source),
+    setRows: (rows, source = 'host') => transact(() => store.replaceAll(flat(rows)), source),
+    applyTransaction: (tx, source = 'host') => transact(() => store.apply(shape?.tx?.(tx, o.getRowId) ?? tx), source),
     setColumns(next, source = 'host') {
       columns = next;
       if (run()) notify('context', source);

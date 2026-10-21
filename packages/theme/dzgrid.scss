@@ -202,6 +202,11 @@ $emit: true !default;
     line-height: 1;
   }
 
+  // A row that cannot be selected (a tree's filler): its box cell stays, the box is not drawn.
+  .dzg-box[hidden] {
+    display: none;
+  }
+
   .dzg-row[aria-selected='true'] .dzg-box,
   .dzg-fopt[aria-selected='true'] .dzg-box,
   .dzg-box[aria-checked='true'],

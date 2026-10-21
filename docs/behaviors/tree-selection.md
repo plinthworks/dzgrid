@@ -25,6 +25,9 @@ row, Ctrl+A, ticks the header box; closes a parent whose children are selected.
   taken by Ctrl+A (the rule is "what you see").
 - **Ranges** skip filler and detail rows: a Shift range from a leaf of one parent to a leaf of
   another takes the data rows shown between them, parents included.
+- **Fillers on screen** (step 5): a click, Shift+click or Ctrl+click on a filler only moves the focus
+  (no selection, no range, no `rowClicked`); Space there does nothing; its row has no `aria-selected`
+  and its box cell stays empty (the columns line up).
 - **Hidden selected rows**: collapsing keeps them selected; the footer's count and
   `selection.count` include them; the export of `selected` writes them (`csv-export.md`).
 - **Rules** (`selection-rules.md`) apply to tree rows as to any row.

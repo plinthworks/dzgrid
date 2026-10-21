@@ -160,6 +160,10 @@
   line-height: 1;
 }
 
+.dzg-box[hidden] {
+  display: none;
+}
+
 .dzg-row[aria-selected=true] .dzg-box,
 .dzg-fopt[aria-selected=true] .dzg-box,
 .dzg-box[aria-checked=true],

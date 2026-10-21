@@ -1,5 +1,5 @@
 import { isSelected } from '@dzgrid/core';
-import { emit } from '@dzgrid/core/internal';
+import { emit, isDataKey } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 
 /** Row selection by pointer (D8), and the select-all box. */
@@ -41,7 +41,8 @@ export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
     const row = t.closest('.dzg-row');
     // A cell spanning rows: the row under the pointer (the spans feature knows it).
     const key = g.spans?.at(e) ?? (row ? rowRenderer.keyOf(row) : undefined);
-    if (!key) return;
+    // A filler (or a detail) is not a row of data: a click only moves the focus (tree-selection.md).
+    if (!key || !isDataKey(key)) return;
     // Which row and cell, by identity (the host's handlers never see positions).
     const node = rows.row(key);
     const column = t.closest<HTMLElement>('.dzg-cell')?.dataset['col'];

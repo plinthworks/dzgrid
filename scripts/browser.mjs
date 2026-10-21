@@ -1195,6 +1195,57 @@ async function treeChecks(name, ctx) {
     check(name, `${c.tag}: no page error`, errors.length === 0, errors);
     await page.close();
   }
+  // Path trees (step 5, tree-view.md, tree-selection.md): the services are filler rows — a label in the
+  // tree column, no values, no box, no aria-selected, attributes like any parent; Ctrl+A and the header box
+  // take the data rows only; a filler opens by its toggle and is said by its label; axe 0, fr and ar RTL.
+  for (const c of [
+    { qs: 'shape=path&locale=fr-FR&theme=light', tag: 'tree path fr ltr light', rtl: false, opened: 'Service 1 développé, 77 lignes' },
+    { qs: 'shape=path&locale=ar-DZ&dir=rtl&theme=dark', tag: 'tree path ar rtl dark', rtl: true, opened: 'تم توسيع Service 1، 77 صفا' },
+  ]) {
+    const { page, errors } = await open(c.qs);
+    const f = await page.evaluate(() => {
+      const row = document.querySelector('.dzg-layer > .dzg-row[aria-rowindex="3"]');
+      const name = row.querySelector('.dzg-cell[data-col="name"]');
+      const label = name.querySelector('.dzg-label');
+      const box = row.querySelector('.dzg-check .dzg-box');
+      const city = row.querySelector('.dzg-cell[data-col="city"]');
+      const child = document.querySelector('.dzg-layer > .dzg-row[aria-rowindex="4"]');
+      return {
+        kind: row.getAttribute('data-kind'), attrs: ['aria-level', 'aria-posinset', 'aria-setsize', 'aria-expanded'].map((x) => row.getAttribute(x)),
+        label: label?.textContent, bidi: label && getComputedStyle(label).unicodeBidi, city: city?.textContent, selected: row.hasAttribute('aria-selected'),
+        box: box ? getComputedStyle(box).display : 'none', childBox: getComputedStyle(child.querySelector('.dzg-check .dzg-box')).display, childLevel: child.getAttribute('aria-level'),
+      };
+    });
+    let v = await axe(page);
+    check(name, `${c.tag}: Service 0 a filler row (data-kind group, label isolated, other cells empty, no box, no aria-selected; level 1, 1 of 100, open), its rows at level 2 with a box; axe 0`,
+      f.kind === 'group' && JSON.stringify(f.attrs) === '["1","1","100","true"]' && f.label === 'Service 0' && f.bidi === 'plaintext' && f.city === '' && !f.selected && f.box === 'none' && f.childBox !== 'none' && f.childLevel === '2' && v.length === 0, { f, v });
+    // Ctrl+A from a data cell: the data rows shown, not the fillers; the header box says all.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.grid.kernel.rows.displayed.keyAt(1), 'name'));
+    await frames(page);
+    await page.keyboard.press('ControlOrMeta+a');
+    await frames(page);
+    const sel = await page.evaluate(() => {
+      const g = window.t.grid;
+      const d = g.kernel.rows.displayed;
+      let data = 0;
+      for (let i = 0; i < d.count; i++) if (d.nodeAt(i).kind === 'data') data++;
+      return { size: g.kernel.selection.keys.size, data, fillers: [...g.kernel.selection.keys].filter((k) => !k.startsWith('d:')).length, header: g.kernel.headerState, ariaFiller: document.querySelector('.dzg-row[data-kind="group"]').hasAttribute('aria-selected') };
+    });
+    v = await axe(page);
+    check(name, `${c.tag}: Ctrl+A takes the ${sel.data} data rows shown, no filler, the header box all; axe 0 with rows selected`, sel.size === sel.data && sel.fillers === 0 && sel.header === 'all' && !sel.ariaFiller && v.length === 0, { sel, v });
+    // The pointer on Service 1's toggle opens it; said by its label.
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'selection.clear' }, 'user'));
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key('s1'), 'city'));
+    await frames(page);
+    const toggle = await page.evaluateHandle(() => [...document.querySelectorAll('.dzg-row[data-kind="group"]')].find((r) => r.querySelector('.dzg-label')?.textContent === 'Service 1').querySelector('.dzg-toggle'));
+    await toggle.asElement().click();
+    await page.waitForTimeout(120);
+    const op = await page.evaluate(() => ({ said: window.said.at(-1), exp: [...document.querySelectorAll('.dzg-row[data-kind="group"]')].find((r) => r.querySelector('.dzg-label')?.textContent === 'Service 1').getAttribute('aria-expanded'), selected: window.t.grid.kernel.selection.keys.size }));
+    check(name, `${c.tag}: the toggle of a filler opens it, said « ${c.opened} »; nothing selected`, op.said === c.opened && op.exp === 'true' && op.selected === 0, op);
+    await page.screenshot({ path: `${OUT}/${name}-tree-path-${c.rtl ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    check(name, `${c.tag}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
   // ≈ 100 000 rows, everything opened, scrolled to the middle and the end: the rows there say their place.
   {
     const { page, errors } = await open('locale=fr-FR&rows=100000');

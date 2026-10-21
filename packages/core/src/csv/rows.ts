@@ -1,4 +1,4 @@
-import type { DisplayIndex } from '../ids.js';
+import { isDataKey, type DisplayIndex } from '../ids.js';
 import type { ExportScope } from '../kernel.js';
 import type { RowModel } from '../model/client.js';
 import type { Query } from '../model/query.js';
@@ -33,6 +33,10 @@ export function csvRows<T>(model: Pick<RowModel<T>, 'displayed' | 'allRows'>, sc
   if (!rows) return null;
   if (scope === 'all') return { rows, at: null, count: rows.count };
   const at: number[] = [];
-  for (let i = 0; i < rows.count; i++) if (isSelected(selection, rows.keyAt(i as DisplayIndex))) at.push(i);
+  // A tree's fillers and details are never selected, even under everything-except.
+  for (let i = 0; i < rows.count; i++) {
+    const k = rows.keyAt(i as DisplayIndex);
+    if (isDataKey(k) && isSelected(selection, k)) at.push(i);
+  }
   return { rows, at: Uint32Array.from(at), count: at.length };
 }

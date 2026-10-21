@@ -1,0 +1,60 @@
+{
+  "id": "tree-selected",
+  "suite": "csv",
+  "description": "A tree's file (selected): the selected rows in tree order, hidden ones included, never a filler even under everything-except.",
+  "input": {
+    "locale": "en-US",
+    "tree": true,
+    "scope": "selected",
+    "select": {
+      "mode": "exclude",
+      "ids": [
+        "g"
+      ]
+    },
+    "columns": [
+      {
+        "id": "name",
+        "header": "Name"
+      }
+    ],
+    "rows": [
+      {
+        "id": "f1",
+        "name": "a.pdf",
+        "path": [
+          "docs",
+          "2024",
+          "f1"
+        ]
+      },
+      {
+        "id": "d",
+        "name": "Docs",
+        "path": [
+          "docs"
+        ]
+      },
+      {
+        "id": "g",
+        "name": "c.png",
+        "path": [
+          "img",
+          "g"
+        ]
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Name\r\n1,Docs\r\n3,a.pdf\r\n",
+    "summary": {
+      "rows": 2,
+      "columns": 1,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

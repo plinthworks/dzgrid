@@ -45,6 +45,24 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
   makes unreachable at the root and reports `tree-cycle` (never a hang: the walk is iterative).
   With nested arrays, row ids must be unique across the whole tree (`duplicate-row-id`). With
   paths, a missing level becomes a filler row whose key is made from the path (`groupKey`).
+  Exactly one of `parentId`, `children`, `path` (step 5): none or several give `tree-shape` (error;
+  with none every row is a root, with several the first of that order is used).
+- **Nested rows** (step 5): made flat before the grid holds them, each row then its children (the
+  reading order of the data); a row refused for its id (invalid, or a second copy) is not walked, so
+  its children are not added. Each row's parent is kept by id. Transactions: an added row brings its
+  children under it, and is a root unless its id had a parent before (a row removed and added back
+  returns under it); an update or a patch keeps the parent; an update's children are taken as its
+  children, so `{ update: [parentWithChild], add: [child] }` adds a child under an existing row;
+  removing a row leaves its children at the root (`tree-orphan`), as with parent ids. A problem's
+  `rows[i]` counts the rows made flat. A new `setRows` starts the parents again.
+- **Path rows** (step 5): a level no row has is a filler (label: the last segment; level: its depth);
+  a row whose path is a filler's takes its place. Two rows with one path are siblings, the first the
+  parent of longer paths; an empty or unreadable path makes a root. Segments compare as text.
+  **A filler stands among its siblings where the first of its nearest rows underneath stands** in the
+  order shown (the sort's, else the rows' own): a folder sits where its first content would. Not by
+  its label: the label is text and the tree column may be a number or a date. Under a filter a filler
+  never matches: it is kept (muted) above a shown row, and never counted. A filler can be opened by
+  the application even while hidden; its key stays in the open set.
 - **Sorting** (D2): one sort over the rows, then children grouped under their parent in that
   order (stable): each level is sorted, and a sort costs what it costs on a flat list.
 - **Opening and closing** splice the rows below the parent in or out of the displayed list; they

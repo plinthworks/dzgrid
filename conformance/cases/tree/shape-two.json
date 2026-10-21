@@ -1,0 +1,53 @@
+{
+  "id": "shape-two",
+  "suite": "tree",
+  "description": "Two shapes given: tree-shape names them; the first of parentId, children, path is used.",
+  "input": {
+    "shape": "both",
+    "rows": [
+      {
+        "id": "a",
+        "n": 1,
+        "path": [
+          "z",
+          "a"
+        ]
+      },
+      {
+        "id": "b",
+        "p": "a",
+        "n": 2,
+        "path": [
+          "b"
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "expandAll": true
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/1",
+      ". b 1/1"
+    ],
+    "expansion": [
+      "a"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 2
+    },
+    "problems": [
+      {
+        "code": "tree-shape",
+        "severity": "error",
+        "path": "tree",
+        "detail": "parentId,path"
+      }
+    ]
+  }
+}

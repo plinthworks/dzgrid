@@ -1,0 +1,57 @@
+{
+  "id": "tree-displayed",
+  "suite": "csv",
+  "description": "A tree's file (displayed): the rows shown only; a closed parent's rows are left out.",
+  "input": {
+    "locale": "en-US",
+    "tree": true,
+    "scope": "displayed",
+    "expand": [
+      "d"
+    ],
+    "columns": [
+      {
+        "id": "name",
+        "header": "Name"
+      }
+    ],
+    "rows": [
+      {
+        "id": "f1",
+        "name": "a.pdf",
+        "path": [
+          "docs",
+          "2024",
+          "f1"
+        ]
+      },
+      {
+        "id": "d",
+        "name": "Docs",
+        "path": [
+          "docs"
+        ]
+      },
+      {
+        "id": "g",
+        "name": "c.png",
+        "path": [
+          "img",
+          "g"
+        ]
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Name\r\n1,Docs\r\n2,2024\r\n1,img\r\n",
+    "summary": {
+      "rows": 3,
+      "columns": 1,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

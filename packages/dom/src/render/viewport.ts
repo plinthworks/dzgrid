@@ -1,5 +1,5 @@
 import { isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
-import { emit, shownAncestor } from '@dzgrid/core/internal';
+import { emit, isDataKey, shownAncestor } from '@dzgrid/core/internal';
 import type { PartBase, SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
 import { decorateHeader } from './header-decor.js';
@@ -216,7 +216,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       rowTop: (i) => layout.offsetOf(d.index(i)!) - base,
       rowHeight: (i) => layout.heightOf(d.index(i)!),
       rowHeader: visible[0]?.id ?? null, colIndex,
-      rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
+      rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' || !isDataKey(key) ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
       check, dir, headerRows, partFor, report: g.report,
       partBase: g.partBase,
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,

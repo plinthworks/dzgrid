@@ -53,8 +53,11 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
   };
   const treeColumn = (): string | undefined => column ?? g.columns.visible()[0]?.id;
   const expand = (rows: readonly RowKey[], expanded: boolean): void => void kernel.dispatch({ type: 'rows.expand', rows, expanded }, 'user');
-  /** The row's label in the tree column, as its cell shows it (that column hidden: the first one shown). */
-  const nameOf = (key: RowKey): string => {
+  /** The row's label in the tree column, as its cell shows it (that column hidden: the first one shown); a filler's own. */
+  const nameOf = (key: RowKey, d: Rows): string => {
+    const i = d.indexOf(key);
+    const node = i === -1 ? null : d.nodeAt(i);
+    if (node?.kind === 'group') return node.label;
     const shown = g.columns.visible();
     const col = shown.find((c) => c.id === treeColumn()) ?? shown[0];
     const data = g.rows.row(key)?.data;
@@ -77,7 +80,7 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
       return;
     }
     const i = d.indexOf(one);
-    g.live.announce(e.expanded ? g.msg('tree.expanded', { name: nameOf(one), n: i === -1 ? 0 : d.childrenAt(i) }) : g.msg('tree.collapsed', { name: nameOf(one) }));
+    g.live.announce(e.expanded ? g.msg('tree.expanded', { name: nameOf(one, d), n: i === -1 ? 0 : d.childrenAt(i) }) : g.msg('tree.collapsed', { name: nameOf(one, d) }));
   });
 
   // The pointer on a parent's toggle opens or closes it, and nothing else (no selection, no row click).
@@ -114,7 +117,13 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
   const undecorate = (cell: HTMLElement): void => {
     const t = cell.firstElementChild;
     if (t?.classList.contains('dzg-toggle')) t.remove();
+    labelOf(cell)?.remove();
     cell.style.removeProperty(PAD);
+  };
+  /** A filler's label, after the toggle: isolated in its own direction, like free text. */
+  const labelOf = (cell: HTMLElement): Element | null => {
+    const l = cell.firstElementChild?.nextElementSibling;
+    return l?.classList.contains('dzg-label') ? l : null;
   };
 
   return {
@@ -153,6 +162,13 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
         }
         set(t, 'data-open', open ? '' : null);
         set(t, 'data-leaf', kids ? null : '');
+        // A filler (path trees) has no cells: its label goes in the tree column (tree-view.md).
+        const node = d!.nodeAt(i);
+        let l = labelOf(cell);
+        if (node.kind === 'group') {
+          if (!l) (l = doc.createElement('span')), (l.className = 'dzg-free dzg-label'), t.after(l);
+          if (l.textContent !== node.label) l.textContent = node.label;
+        } else l?.remove();
         const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${level * indent}px)`;
         if (cell.style.getPropertyValue(PAD) !== pad) cell.style.setProperty(PAD, pad);
       }

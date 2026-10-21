@@ -1,0 +1,38 @@
+{
+  "id": "tree-arabic-indent",
+  "suite": "csv",
+  "description": "Arabic indent: spaces only, no direction marks, the BOM first.",
+  "input": {
+    "locale": "ar-DZ",
+    "tree": true,
+    "scope": "all",
+    "columns": [
+      {
+        "id": "name",
+        "header": "الاسم"
+      }
+    ],
+    "rows": [
+      {
+        "id": "x",
+        "name": "تقرير",
+        "path": [
+          "ملفات",
+          "x"
+        ]
+      }
+    ],
+    "options": {
+      "tree": "indent"
+    }
+  },
+  "expected": {
+    "text": "﻿الاسم\r\nملفات\r\n  تقرير\r\n",
+    "summary": {
+      "rows": 2,
+      "columns": 1,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

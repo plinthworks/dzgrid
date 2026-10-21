@@ -1,0 +1,67 @@
+{
+  "id": "nested-flatten",
+  "suite": "tree",
+  "description": "Nested children: every level becomes rows, each under its parent; counts over every level.",
+  "input": {
+    "shape": "children",
+    "rows": [
+      {
+        "id": "a",
+        "n": 3,
+        "c": [
+          {
+            "id": "a1",
+            "n": 2
+          },
+          {
+            "id": "a2",
+            "n": 1,
+            "c": [
+              {
+                "id": "a21",
+                "n": 9
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "n": 1,
+        "c": [
+          {
+            "id": "b1",
+            "n": 5
+          }
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "a",
+          "a2"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/2",
+      ". a1 1/2",
+      ". a2 2/2",
+      ". . a21 1/1",
+      "b 2/2"
+    ],
+    "expansion": [
+      "a",
+      "a2"
+    ],
+    "counts": {
+      "total": 6,
+      "filtered": 6,
+      "displayed": 5
+    },
+    "problems": []
+  }
+}

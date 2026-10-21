@@ -268,6 +268,8 @@ export class RowRenderer<T> {
   #bind(v: RowView, key: RowKey, i: number, d: DisplayedRows<T>, f: Frame<T>): void {
     const node = d.nodeAt(d.index(i)!);
     const data = node.kind === 'data' ? node.data : undefined;
+    // Not a data row (a tree's filler, a detail): marked, never selected (tree-selection.md).
+    setAttr(v.el, 'data-kind', data ? null : node.kind);
     const plan = f.spans ? f.spans.plan(i, key) : null;
     const center = this.#centerOf(key, f, plan);
     const L = f.layout;
@@ -284,7 +286,7 @@ export class RowRenderer<T> {
     const extra = f.check ? CHECK_WIDTH : 0;
     setPx(v.el, 'inline-size', L.totalWidth + extra);
     setPx(v.segs.start, 'inline-size', L.start.width + extra);
-    this.#checkCell(v, f.check);
+    this.#checkCell(v, f.check, !!data);
     setPx(v.segs.center, 'inline-size', L.center.width);
     setPx(v.segs.end, 'inline-size', L.end.width);
     // Cells that go are taken out first: a focused cell is then never moved past them (a move blurs).
@@ -331,7 +333,7 @@ export class RowRenderer<T> {
   readonly #spare: CellView[] = [];
 
   /** The row's selection box: a cell for the column count, its box decorative (the row's aria-selected is the truth). */
-  #checkCell(v: RowView, on: boolean): void {
+  #checkCell(v: RowView, on: boolean, box?: boolean): void {
     if (!on) {
       v.check?.remove();
       v.check = null;
@@ -351,6 +353,8 @@ export class RowRenderer<T> {
       v.check = el;
     }
     if (v.segs.start.firstChild !== v.check) v.segs.start.prepend(v.check);
+    // A row that cannot be selected keeps the cell (the columns line up), not its box.
+    (v.check.firstChild as HTMLElement).hidden = !box;
   }
 
   /** True when the row holds exactly the cells it should: then nothing needs placing. */
@@ -435,7 +439,8 @@ export class RowRenderer<T> {
         cell.cls = next;
       }
     }
-    const part = f.partFor(col);
+    // A part expects a row: none on a filler or a detail (their cells stay empty).
+    const part = data === undefined ? null : f.partFor(col);
     if (part || cell.part) {
       if (cell.part && cell.part !== part) this.#unpart(cell);
       if (part) {

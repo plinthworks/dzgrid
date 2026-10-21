@@ -1,0 +1,59 @@
+{
+  "id": "selection-hidden-kept",
+  "suite": "tree",
+  "description": "Collapsing keeps the selection of the rows it hides (nested children).",
+  "input": {
+    "shape": "children",
+    "rows": [
+      {
+        "id": "a",
+        "n": 1,
+        "c": [
+          {
+            "id": "a1",
+            "n": 2
+          },
+          {
+            "id": "a2",
+            "n": 3
+          }
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "toggle": "a2"
+      },
+      {
+        "expand": [
+          "a"
+        ],
+        "expanded": false
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a 1/1"
+    ],
+    "expansion": [],
+    "counts": {
+      "total": 3,
+      "filtered": 3,
+      "displayed": 1
+    },
+    "problems": [],
+    "selection": {
+      "mode": "include",
+      "ids": [
+        "a2"
+      ],
+      "header": "none"
+    }
+  }
+}

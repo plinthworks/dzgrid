@@ -16,6 +16,11 @@ export interface OracleInput {
   readonly open: ReadonlySet<string>;
   /** Under a filter: toggles made meanwhile. */
   readonly layer?: ReadonlyMap<string, boolean>;
+  /**
+   * Path trees (step 5): ids that stand for a level with no row (fillers). A filler never matches and
+   * has no value to sort by: it stands where the first of its nearest rows underneath stands.
+   */
+  readonly fillers?: ReadonlySet<string>;
 }
 
 export interface OracleRow { id: string; level: number; pos: number; size: number }
@@ -50,9 +55,13 @@ export function parentsOf(rows: readonly TR[]): Map<string, string | null> {
 
 export function oracle(i: OracleInput): OracleRow[] {
   const parent = parentsOf(i.rows);
-  const ordered = i.rows.map((r, at) => ({ r, at }));
+  const filler = (id: string) => i.fillers?.has(id) ?? false;
+  const ordered = i.rows.map((r, at) => ({ r, at })).filter((o) => !filler(o.r.id));
   if (i.sort) ordered.sort((a, b) => (i.sort === 'asc' ? a.r.n - b.r.n : b.r.n - a.r.n) || a.at - b.at);
-  const childrenOf = (id: string | null) => ordered.filter((o) => parent.get(o.r.id) === id).map((o) => o.r.id);
+  const place = new Map(ordered.map((o, k) => [o.r.id, k]));
+  // A filler's place: the smallest of its children's (a filler child's own, recursively).
+  const rank = (id: string): number => place.get(id) ?? Math.min(...i.rows.filter((r) => parent.get(r.id) === id).map((r) => rank(r.id)));
+  const childrenOf = (id: string | null) => i.rows.filter((r) => parent.get(r.id) === id).map((r) => r.id).sort((a, b) => rank(a) - rank(b));
   const filtering = i.matches !== undefined;
   const matchBelow = (id: string): boolean => childrenOf(id).some((c) => i.matches!.has(c) || matchBelow(c));
   const ancestorMatched = (id: string): boolean => {

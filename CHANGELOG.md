@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`@dzgrid/core/tree`**: `treeShape({ parentId, filter, initial })` (parent ids; orphans and
   cycles become roots with `tree-orphan` / `tree-cycle`, named by row id; a filter keeps the
   ancestors of matches and opens them without touching the user's set), `treeConflicts`.
+- **Tree shapes (Phase 4, step 5)**: `treeShape` / `tree()` take exactly one of `parentId`,
+  `children: (row) => T[] | undefined` (nested rows made flat, ids unique over every level, parents
+  kept by id through transactions) or `path: (row) => string[]` (a missing level becomes a filler
+  row: `GroupNode` keyed `groupKey(path)`, its label in the tree column, never selected, counted or
+  given to a cell part; it stands where its first nearest row underneath stands). None or several:
+  new problem code `tree-shape`. `RowShape.load?` / `tx?` (the client model makes nested rows flat).
+- **CSV of a tree**: `csv.tree: 'none' | 'level' | 'indent'` (default `'level'`, a first column
+  `levelHeader`, default `Level`), `treeColumn`; fillers written as their label only; detail rows
+  never written; `selected` never writes a filler.
+- **DOM**: a row that is not a data row carries `data-kind` (`group`), no `aria-selected`, no box;
+  a click on it only moves the focus. Theme: `.dzg-box[hidden]` not drawn. Playground « Arbre »:
+  a shape switch (parent / nested / path).
 
 ### Changed
 
@@ -24,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DisplayedRows` gains optional members: `parentOf`, `levelAt`, `dataCount` (the rows select-all
   takes), `matchedAt` (false for a filtered tree's muted ancestor).
 - Select-all and the header box skip fillers, details and a filtered tree's muted ancestors.
+- `rows.expand` refuses only data keys that do not exist (`unknown-row`); another key the rows do
+  not know (a filler) is a no-op, so a hidden filler can be opened by the application.
+- `TreeOptions.parentId` is optional (one of the three shapes).
 
 ## [0.1.0] - unreleased
 

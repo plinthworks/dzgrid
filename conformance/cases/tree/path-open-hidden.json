@@ -1,0 +1,55 @@
+{
+  "id": "path-open-hidden",
+  "suite": "tree",
+  "description": "Paths: a filler opened while its parent is closed shows open once the parent opens.",
+  "input": {
+    "shape": "path",
+    "rows": [
+      {
+        "id": "f1",
+        "n": 5,
+        "path": [
+          "docs",
+          "2024",
+          "f1"
+        ]
+      },
+      {
+        "id": "d",
+        "n": 7,
+        "path": [
+          "docs"
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "expand": [
+          "/docs/2024"
+        ]
+      },
+      {
+        "expand": [
+          "d"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "d 1/1",
+      ". [2024] 1/1",
+      ". . f1 1/1"
+    ],
+    "expansion": [
+      "d",
+      "g:4:docs4:2024"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 3
+    },
+    "problems": []
+  }
+}

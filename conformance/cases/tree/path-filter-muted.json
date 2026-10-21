@@ -1,0 +1,66 @@
+{
+  "id": "path-filter-muted",
+  "suite": "tree",
+  "description": "Paths filtered: a filler never matches; it is kept, muted, above a shown row, and never counted.",
+  "input": {
+    "shape": "path",
+    "rows": [
+      {
+        "id": "f1",
+        "n": 5,
+        "t": "x",
+        "path": [
+          "docs",
+          "2024",
+          "f1"
+        ]
+      },
+      {
+        "id": "f2",
+        "n": 1,
+        "path": [
+          "docs",
+          "2025",
+          "f2"
+        ]
+      },
+      {
+        "id": "d",
+        "n": 7,
+        "path": [
+          "docs"
+        ]
+      },
+      {
+        "id": "g",
+        "n": 2,
+        "t": "x",
+        "path": [
+          "img",
+          "g"
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "filter": "x"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "d 1/2 muted",
+      ". [2024] 1/1 muted",
+      ". . f1 1/1",
+      "[img] 2/2 muted",
+      ". g 1/1"
+    ],
+    "expansion": [],
+    "counts": {
+      "total": 4,
+      "filtered": 2,
+      "displayed": 5
+    },
+    "problems": []
+  }
+}

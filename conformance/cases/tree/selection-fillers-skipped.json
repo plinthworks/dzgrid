@@ -1,0 +1,90 @@
+{
+  "id": "selection-fillers-skipped",
+  "suite": "tree",
+  "description": "Select all takes the data rows shown, never a filler; toggling a filler is refused; the header box says all.",
+  "input": {
+    "shape": "path",
+    "rows": [
+      {
+        "id": "f1",
+        "n": 5,
+        "path": [
+          "docs",
+          "2024",
+          "f1"
+        ]
+      },
+      {
+        "id": "f2",
+        "n": 1,
+        "path": [
+          "docs",
+          "2025",
+          "f2"
+        ]
+      },
+      {
+        "id": "d",
+        "n": 7,
+        "path": [
+          "docs"
+        ]
+      },
+      {
+        "id": "g",
+        "n": 2,
+        "path": [
+          "img",
+          "g"
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "expandAll": true
+      },
+      {
+        "select": "all"
+      },
+      {
+        "toggle": "/img"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "d 1/2",
+      ". [2024] 1/2",
+      ". . f1 1/1",
+      ". [2025] 2/2",
+      ". . f2 1/1",
+      "[img] 2/2",
+      ". g 1/1"
+    ],
+    "expansion": [
+      "d",
+      "g:3:img",
+      "g:4:docs4:2024",
+      "g:4:docs4:2025"
+    ],
+    "counts": {
+      "total": 4,
+      "filtered": 4,
+      "displayed": 7
+    },
+    "problems": [],
+    "selection": {
+      "mode": "include",
+      "ids": [
+        "d",
+        "f1",
+        "f2",
+        "g"
+      ],
+      "header": "all",
+      "refused": [
+        "/img"
+      ]
+    }
+  }
+}

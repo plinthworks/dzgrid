@@ -486,7 +486,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         return OK;
       case 'rows.expand': {
         if (!rows.expand || !rows.expansion) return refuse('expansion-off');
-        if (cmd.rows.some((k) => !exists(k) && rows.displayed.indexOf(k) === -1)) return refuse('unknown-row');
+        // A data row that does not exist is refused; another key (a filler) the rows do not know is a no-op.
+        if (cmd.rows.some((k) => isDataKey(k) && !exists(k))) return refuse('unknown-row');
         const changed = rows.expand(cmd.rows, cmd.expanded, source);
         if (changed.length) emit({ type: 'rowExpanded', source, rows: changed, expanded: cmd.expanded });
         return OK;

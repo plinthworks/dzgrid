@@ -1,14 +1,19 @@
-import { idOfDataKey, type DisplayIndex, type RowIdInput, type RowKey } from '../ids.js';
+import { canonicalId, idOfDataKey, type DisplayIndex, type RowIdInput, type RowKey } from '../ids.js';
 import type { RowShape, ShapeInput } from '../model/client.js';
 import { problem, type Problem } from '../problems.js';
-import type { DataNode } from '../row/node.js';
+import type { RowNode } from '../row/node.js';
 import type { DisplayedRows } from '../row/displayed.js';
 import type { RowSnapshot } from '../row/store.js';
-import { buckets, structure, visibility, type Buckets, type Structure } from './build.js';
+import { buckets, pathStructure, structure, visibility, withFillers, type Buckets, type Structure } from './build.js';
 
+/** Exactly one of `parentId`, `children`, `path` (D3, owner Q1); none or several: `tree-shape`. */
 export interface TreeOptions<T> {
   /** The id of a row's parent; null, undefined or '' for a root. */
-  readonly parentId: (row: T) => RowIdInput | null | undefined;
+  readonly parentId?: (row: T) => RowIdInput | null | undefined;
+  /** A row's children (nested data): every level becomes rows of the grid, ids unique over all of them. */
+  readonly children?: (row: T) => readonly T[] | undefined;
+  /** A row's path of labels, root first: a level no row has becomes a filler row (a label, never data). */
+  readonly path?: (row: T) => readonly string[];
   /** What a filter keeps: matches and their ancestors (default), or their whole subtrees too (tree-filter.md). */
   readonly filter?: 'ancestors' | 'subtree';
   /** What is open at the first non-empty load: nothing (default), everything, or the levels above a depth (1: the roots). */
@@ -43,8 +48,12 @@ export interface TreeShape<T> extends RowShape<T> {
  */
 export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
   const d = { builds: 0, orders: 0, filters: 0, flattens: 0 };
-  let S: { snap: RowSnapshot<T>; st: Structure } | null = null;
-  let O: { st: Structure; order: Uint32Array | null; all: Buckets } | null = null;
+  const given = (['parentId', 'children', 'path'] as const).filter((m) => o[m]);
+  const told = given.length === 1 ? [] : [problem('tree-shape', 'error', 'tree', given.join(',') || 'none')];
+  /** Nested rows: each row's parent id, by id, from the walks (a load, a transaction's rows). */
+  let index = new Map<string, string>();
+  let S: { snap: RowSnapshot<T>; st: Structure; ps: readonly Problem[] } | null = null;
+  let O: { st: Structure; order: Uint32Array | null; ord: Uint32Array | null; all: Buckets } | null = null;
   let F: Filtered | null = null;
   let V: View | null = null;
   let open: Uint8Array | null = null;
@@ -55,16 +64,49 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
   const structureOf = (snap: RowSnapshot<T>): Structure => {
     if (S?.snap !== snap) {
       d.builds++;
-      S = { snap, st: structure(snap, o.parentId) };
+      const m = given[0];
+      const st = m === 'path' ? pathStructure(snap, o.path!) : structure(snap, (r, id) => (m === 'children' ? index.get(id) : m && o.parentId!(r)));
+      S = { snap, st, ps: told.length ? [...told, ...st.problems] : st.problems };
     }
     return S.st;
   };
-  const srcOf = (snap: RowSnapshot<T>, key: RowKey): number => snap.lookup(idOfDataKey(key) ?? '');
+  /** A row's node by its key: a data row's source index, a filler's node; -1 when unknown. */
+  const srcOf = (snap: RowSnapshot<T>, st: Structure, key: RowKey): number => {
+    const s = snap.lookup(idOfDataKey(key) ?? '');
+    return s < 0 ? (st.at?.get(key) ?? -1) : s;
+  };
+  const keyOf = (snap: RowSnapshot<T>, st: Structure, x: number): RowKey => (x < st.rows ? snap.keyAt(x as never) : st.keys![x - st.rows]!);
+  /**
+   * Nested rows made flat: each row then its children, depth first, iteratively. A row's parent is
+   * indexed by the first row with its id in the walk (a later copy is the store's duplicate); an object
+   * met twice is walked once (one that holds itself cannot hang the grid).
+   */
+  const walk = (top: Iterable<T>, id: (row: T) => RowIdInput, keep: boolean): T[] => {
+    const out: T[] = [];
+    const seen = new Set<unknown>();
+    const stack: [T, string | null][] = [...top].reverse().map((r) => [r, null]);
+    while (stack.length) {
+      const [r, p] = stack.pop()!;
+      if (seen.has(r)) continue;
+      seen.add(r);
+      if (keep) out.push(r);
+      const me = canonicalId(id(r));
+      if (me === null || seen.has(me)) continue;
+      seen.add(me);
+      if (p !== null) index.set(me, p);
+      let kids: unknown;
+      try {
+        kids = o.children!(r);
+      } catch {}
+      if (Array.isArray(kids)) for (let c = kids.length; c--; ) stack.push([kids[c], me]);
+    }
+    return out;
+  };
 
   /** The rows shown, from the roots down through what `isOpen` opens. */
   const flatten = (snap: RowSnapshot<T>, st: Structure, v: View, f: Filtered, isOpen: Uint8Array | null, version: number): TreeRows<T> => {
     d.flattens++;
-    const { n, parent } = st;
+    const { n, rows, parent } = st;
     const { start, list } = v.shown;
     const at = new Uint32Array(list.length);
     const lv = new Uint32Array(list.length);
@@ -73,6 +115,7 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
     const cur = new Uint32Array(st.maxDepth + 2);
     const mt = f.matched;
     let mc = 0;
+    let fills = 0;
     let m = 0;
     let sp = 1;
     node[0] = n;
@@ -89,6 +132,7 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       at[m] = x;
       lv[m++] = sp - 1;
       if (mt?.[x]) mc++;
+      if (x >= rows) fills++;
       if ((!isOpen || isOpen[x]) && start[x]! < start[x + 1]!) {
         node[sp] = x;
         cur[sp++] = start[x]!;
@@ -99,20 +143,22 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       if (!Number.isInteger(i) || i < 0 || i >= m) throw new RangeError(`no displayed row ${i}`);
       return at[i]!;
     };
-    const nodeAt = (i: number): DataNode<T> => {
+    const nodeAt = (i: number): RowNode<T> => {
       const s = check(i);
-      return { key: snap.keyAt(s as never), kind: 'data', level: lv[i]!, id: snap.ids[s]!, data: snap.rows[s]! };
+      if (s < rows) return { key: snap.keyAt(s as never), kind: 'data', level: lv[i]!, id: snap.ids[s]!, data: snap.rows[s]! };
+      const path = st.paths![s - rows]!;
+      return { key: st.keys![s - rows]!, kind: 'group', level: lv[i]!, label: path[path.length - 1]!, path };
     };
     return {
       version,
       count: m,
-      // Under a filter, select-all and the header box take the matches only (tree-filter.md).
-      dataCount: mt ? mc : m,
+      // Under a filter, select-all and the header box take the matches only (tree-filter.md); never a filler.
+      dataCount: mt ? mc : m - fills,
       nodeAt,
-      keyAt: (i) => snap.keyAt(check(i) as never),
+      keyAt: (i) => keyOf(snap, st, check(i)),
       index: (i) => (Number.isInteger(i) && i >= 0 && i < m ? (i as DisplayIndex) : null),
       indexOf(key) {
-        const s = srcOf(snap, key);
+        const s = srcOf(snap, st, key);
         if (s < 0) return -1;
         if (!back) {
           back = new Int32Array(n).fill(-1);
@@ -120,10 +166,10 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
         }
         return back[s]! as DisplayIndex | -1;
       },
-      nextData: (i, delta) => (i + delta >= 0 && i + delta < m ? nodeAt(i + delta) : null),
+      nextData: (i, delta) => (i + delta >= 0 && i + delta < m ? (nodeAt(i + delta) as never) : null),
       parentOf(key) {
-        const s = srcOf(snap, key);
-        return s < 0 || parent[s]! < 0 ? null : snap.keyAt(parent[s]! as never);
+        const s = srcOf(snap, st, key);
+        return s < 0 || parent[s]! < 0 ? null : keyOf(snap, st, parent[s]!);
       },
       levelAt: (i) => (check(i), lv[i]!),
       posAt: (i) => v.pos[check(i)]!,
@@ -143,21 +189,25 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
     kind: 'tree',
     ...(o.initial !== undefined && { initial: o.initial }),
     get diagnostics() { return { ...d }; },
-    get problems() { return S?.st.problems ?? []; },
+    get problems() { return S?.ps ?? told; },
+    ...(given[0] === 'children' && {
+      load: (rows: Iterable<T>, id: (row: T) => RowIdInput) => ((index = new Map()), walk(rows, id, true)),
+      tx: (tx, id) => (walk(tx.update ?? [], id, false), tx.add ? { ...tx, add: walk(tx.add, id, true) } : tx),
+    }),
     parents(snap, depth, shown) {
       const st = structureOf(snap);
       // Shown: the rows the filter keeps that show children (what a chevron is drawn on).
       const b = shown && V?.F.st === st ? V.shown.start : null;
       const out: RowKey[] = [];
-      for (let i = 0; i < st.n; i++) if ((b ? b[i + 1]! > b[i]! : st.kids[i]! > 0) && st.depth[i]! < depth) out.push(snap.keyAt(i as never));
+      for (let i = 0; i < st.n; i++) if ((b ? b[i + 1]! > b[i]! : st.kids[i]! > 0) && st.depth[i]! < depth) out.push(keyOf(snap, st, i));
       return out;
     },
     isOpen: (key) => {
-      const s = snapNow ? srcOf(snapNow, key) : -1;
+      const s = snapNow ? srcOf(snapNow, S!.st, key) : -1;
       return s >= 0 && open?.[s] === 1;
     },
     opens: (key) => {
-      const s = snapNow && V ? srcOf(snapNow, key) : -1;
+      const s = snapNow && V ? srcOf(snapNow, S!.st, key) : -1;
       return s >= 0 && V!.shown.start[s + 1]! > V!.shown.start[s]!;
     },
     build(i: ShapeInput<T>): TreeRows<T> {
@@ -165,7 +215,8 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       const st = structureOf(snap);
       if (O?.st !== st || O.order !== i.order) {
         d.orders++;
-        O = { st, order: i.order, all: buckets(st, i.order, null) };
+        const ord = withFillers(st, i.order);
+        O = { st, order: i.order, ord, all: buckets(st, ord, null) };
       }
       if (F?.st !== st || F.matched !== i.matched) {
         d.filters++;
@@ -173,7 +224,7 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
         F = { st, matched: i.matched, anc: vis?.anc ?? null, keep: vis?.keep ?? null };
       }
       if (V?.all !== O.all || V.F !== F) {
-        const shown = F.keep ? buckets(st, i.order, F.keep) : O.all;
+        const shown = F.keep ? buckets(st, O.ord, F.keep) : O.all;
         const pos = new Int32Array(st.n);
         const size = new Int32Array(st.n);
         for (let b = 0; b <= st.n; b++) {
@@ -195,17 +246,17 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       if (i.changed && flags?.st === st && flags.F === F && flags.anc === anc) {
         isOpen = flags.a.slice();
         for (const k of i.changed) {
-          const s = srcOf(snap, k);
+          const s = srcOf(snap, st, k);
           if (s >= 0) isOpen[s] = flag(k, s);
         }
       } else {
         isOpen = anc ? anc.slice() : new Uint8Array(st.n);
         for (const k of i.expansion) {
-          const s = srcOf(snap, k);
+          const s = srcOf(snap, st, k);
           if (s >= 0) isOpen[s] = 1;
         }
         if (i.layer) for (const k of i.layer.keys()) {
-          const s = srcOf(snap, k);
+          const s = srcOf(snap, st, k);
           if (s >= 0) isOpen[s] = flag(k, s);
         }
       }

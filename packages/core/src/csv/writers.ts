@@ -37,7 +37,7 @@ export const headerOf = <T>(col: ResolvedColumn<T>, e: WriterEnv<T>): string =>
  * field (counted), then the text, `="…"` for a digits-only identifier, the
  * guard (never on a typed number), the quotes.
  */
-export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: RowNode<T>) => string {
+export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: RowNode<T>, pad?: string) => string {
   const { ctx, reader, counts } = e;
   const c = col.codec;
   const number = c.kind === 'number';
@@ -49,7 +49,8 @@ export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: Ro
   } else if (col.type === 'instant' && !e.iso) text = wallWriter(ctx.timeZone);
   else if (col.type === 'enum' && !e.codes) text = (v) => c.format(v, ctx);
   const ident = col.def.csv === 'text';
-  return (node) => {
+  // `pad`: a tree's indent, before the guard and the quotes (csv-export.md).
+  return (node, pad = '') => {
     let s: string | null;
     let v: unknown;
     // A filler or a detail has no cells to write (csv-export.md).
@@ -69,7 +70,8 @@ export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: Ro
       counts.invalid++;
       return '';
     }
-    if (ident && DIGITS.test(s)) return e.quote(`="${s}"`);
+    if (ident && !pad && DIGITS.test(s)) return e.quote(`="${s}"`);
+    s = pad + s;
     // A typed number skips the guard only when what is written looks like a number: a custom
     // codec claiming `number` but writing text is guarded like any text.
     return number && typeof v === 'number' && NUMERIC.test(s) ? e.quote(s) : field(e, s);

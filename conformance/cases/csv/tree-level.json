@@ -1,0 +1,62 @@
+{
+  "id": "tree-level",
+  "suite": "csv",
+  "description": "A tree's file (all): rows in tree order, closed parents' rows included, a Level column (1 for the roots); a filler writes its label only.",
+  "input": {
+    "locale": "en-US",
+    "tree": true,
+    "scope": "all",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Name"
+      },
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "f1",
+        "name": "a.pdf",
+        "n": 5,
+        "path": [
+          "docs",
+          "2024",
+          "f1"
+        ]
+      },
+      {
+        "id": "d",
+        "name": "Docs",
+        "n": 7,
+        "path": [
+          "docs"
+        ]
+      },
+      {
+        "id": "g",
+        "name": "c.png",
+        "n": 2,
+        "path": [
+          "img",
+          "g"
+        ]
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Name,N\r\n1,Docs,7\r\n2,2024,\r\n3,a.pdf,5\r\n1,img,\r\n2,c.png,2\r\n",
+    "summary": {
+      "rows": 5,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

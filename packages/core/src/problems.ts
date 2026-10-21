@@ -43,6 +43,7 @@ export const PROBLEM_CODES = [
   'tree-orphan',
   'tree-cycle',
   'tree-column-not-first',
+  'tree-shape',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

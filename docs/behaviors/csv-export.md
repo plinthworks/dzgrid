@@ -107,7 +107,8 @@ Presses the host's "Export" button (the grid has none of its own), after filteri
 - **What DzGrid does:**
   - `all` comes from `allRows` in tree order (filtered and sorted per level, collapsed descendants included); `displayed` is the rows shown (closed parents' children left out); `selected` the selected rows in tree order, hidden ones included (collapsing keeps a selection, `tree-selection.md`).
   - `csv.tree: 'none' | 'level' | 'indent'`, default `'level'`: `level` adds a first column "Level" (1 for the roots, Latin digits); `indent` prefixes the tree column's text with two spaces per level (spaces only: they never trigger the formula guard, which skips leading spaces anyway); `none` writes flat rows.
-  - Filler rows (missing path levels) are written with their label in the tree column and every other field empty.
+  - Filler rows (missing path levels) are written with their label in the tree column and every other field empty (the level column filled).
+  - Built at step 5: roots get no indent (two spaces per level below them); the level column's header is `levelHeader` (default `Level`); the tree column is `treeColumn` (default the first column written); the indent comes before the formula guard and the quotes, and an identifier column (`csv: 'text'`) indented is written as text; `selected` never writes a filler, even under everything-except. Arabic: spaces only, no direction marks.
   - Under a filter in `ancestors` mode, the muted ancestors are written (the file keeps each match in its place), as the screen shows.
   - Detail rows are never exported, in any scope; a nested grid exports itself through its own feature.
   - Server trees (lazy children) go through the host's `exportAll`, as server pages do: the browser does not hold the unopened children.

@@ -1,0 +1,30 @@
+{
+  "id": "tree-shape",
+  "suite": "problems",
+  "description": "A tree given no shape (none of parentId, children, path) is told; every row is a root.",
+  "input": {
+    "op": "tree",
+    "shape": "none",
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "p": "a",
+        "n": 2
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "tree-shape",
+        "severity": "error",
+        "path": "tree",
+        "detail": "none"
+      }
+    ]
+  }
+}
