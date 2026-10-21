@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26; `-- --only tree` the tree, Phase 4 step 4).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -969,6 +969,81 @@ async function motionChecks(name, ctx) {
     await settle(paged.page);
     check(name, `no page error ${tag}, paged`, paged.errors.length === 0, paged.errors);
     await paged.page.close();
+  }
+  // A tree (Phase 4 step 6): a parent opened by the key, then closed: the rows below glide (y), the children
+  // fade; the focus stays on its cell; order, aria-rowindex and aria-expanded final at once (the twin's); no
+  // layout read beyond the twin's paint; the chevron turns by CSS in the focused row only; nothing left after.
+  for (const [qs, rtl] of [['locale=fr-FR&theme=light', false], ['locale=ar-DZ&theme=dark', true]]) {
+    const tag = `motion tree ${rtl ? 'ar rtl dark' : 'fr ltr light'}`;
+    const a = await open(`tree=1&${qs}`);
+    const b = await open(`tree=1&${qs}&motion=0`);
+    const fwd = rtl ? 'ArrowLeft' : 'ArrowRight';
+    const back = rtl ? 'ArrowRight' : 'ArrowLeft';
+    const toggled = async (key) => {
+      const out = [];
+      for (const p of [a.page, b.page]) {
+        await p.evaluate(() => { window.t.grid.api.focusCell(window.t.key(11), 'name'); });
+        await frames(p, 2);
+        await p.evaluate(() => { window.t.kept = document.activeElement; window.t.reads.rect = 0; window.t.reads.offset = 0; });
+        await p.keyboard.press(key);
+        await frames(p, 2);
+        out.push(await p.evaluate(() => ({
+          running: window.t.running(), reads: { ...window.t.reads }, same: document.activeElement === window.t.kept,
+          y: [...document.querySelectorAll('.dzg-layer > .dzg-row')].filter((r) => (r.style.transform || '').includes('translate')).length,
+          faded: [...document.querySelectorAll('.dzg-layer > .dzg-row')].filter((r) => r.style.opacity && Number(r.style.opacity) < 1).length,
+          rows: [...document.querySelectorAll('.dzg-layer > .dzg-row')].map((r) => `${r.getAttribute('aria-rowindex')}:${r.getAttribute('aria-expanded')}:${r.querySelector('[data-col="name"]')?.textContent}`),
+          turn: getComputedStyle(document.activeElement.closest('.dzg-row').querySelector('.dzg-toggle'), '::before').transitionProperty,
+          still: [...document.querySelectorAll('.dzg-layer > .dzg-row:not(:focus-within) .dzg-toggle')].map((t) => getComputedStyle(t, '::before').transitionDuration).filter((d) => d !== '0s').length,
+        })));
+      }
+      await settle(a.page);
+      const after = await a.page.evaluate(() => ({ reads: { ...window.t.reads }, same: document.activeElement === window.t.kept, left: [...document.querySelectorAll('.dzg-row, .dzg-cell')].filter((e) => e.style.transform || e.style.opacity).length }));
+      return { m: out[0], twin: out[1], after };
+    };
+    const o = await toggled(fwd);
+    check(name, `${tag}: ${fwd} opens a parent: the rows below glide (${o.m.y}), the children fade (${o.m.faded}); the twin moves nothing`, o.m.running > 0 && o.m.y > 0 && o.m.faded > 0 && o.twin.running === 0 && o.twin.y === 0, o);
+    check(name, `${tag}: opening: focus kept, DOM order / aria-rowindex / aria-expanded equal to the twin's mid-glide, no layout read beyond the twin's, nothing left after`,
+      o.m.same && o.after.same && JSON.stringify(o.m.rows) === JSON.stringify(o.twin.rows) && o.m.rows.some((r) => r.includes(':true:')) && o.after.reads.rect === o.twin.reads.rect && o.after.reads.offset === o.twin.reads.offset && o.after.left === 0, o);
+    check(name, `${tag}: the chevron turns by CSS in the focused row only (rotate), not in the twin (motion off)`, o.m.turn === 'rotate' && o.m.still === 0 && o.twin.turn !== 'rotate', { m: o.m.turn, still: o.m.still, twin: o.twin.turn });
+    const c = await toggled(back);
+    check(name, `${tag}: ${back} closes it: the rows below glide up (${c.m.y}), nothing fades; focus and order final at once, nothing left after`,
+      c.m.running > 0 && c.m.y > 0 && c.m.faded === 0 && c.m.same && c.after.same && JSON.stringify(c.m.rows) === JSON.stringify(c.twin.rows) && c.after.left === 0, c);
+    for (const p of [a.page, b.page]) { await p.mouse.move(990, 750); await frames(p, 3); }
+    await settle(a.page);
+    const shots = [await a.page.locator('#host').screenshot(), await b.page.locator('#host').screenshot()];
+    check(name, `${tag}: the final screenshot equals the motion:false twin's`, shots[0].equals(shots[1]), { a: shots[0].length, b: shots[1].length });
+    check(name, `no page error ${tag}`, a.errors.length === 0 && b.errors.length === 0, [...a.errors, ...b.errors]);
+    await a.page.close();
+    await b.page.close();
+  }
+  // A tree over about 300 mounted rows (364 parents, nothing open): opening and closing parents, no long animation frame over 50 ms; and
+  // under reduced motion a toggle moves nothing.
+  {
+    const { page, errors } = await open('tree=1&rows=4000&locale=fr-FR&theme=light&tall=1');
+    const r = await page.evaluate(async () => {
+      const seen = [];
+      const po = new PerformanceObserver((l) => { for (const e of l.getEntries()) seen.push(e.duration); });
+      po.observe({ type: 'long-animation-frame', buffered: false });
+      // At the top more than 60 rows would move (no glide); near the window's end fewer (they glide).
+      for (const [id, open] of [[0, true], [2860, true], [2860, false], [2750, true], [0, false]]) {
+        window.t.grid.kernel.dispatch({ type: 'rows.expand', rows: [window.t.key(id)], expanded: open }, 'user');
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      po.disconnect();
+      return { mounted: document.querySelectorAll('.dzg-layer > .dzg-row').length, max: Math.round(Math.max(0, ...seen)) };
+    });
+    check(name, `motion tree: toggles over a ${r.mounted}-row window: the longest animation frame ${r.max} ms (under 50)`, r.mounted >= 150 && r.max < 50, r);
+    check(name, 'no page error, tree tall window', errors.length === 0, errors);
+    await page.close();
+    const red = await open('tree=1&locale=fr-FR&theme=light', { reduce: true });
+    const moved = await red.page.evaluate(async () => {
+      window.t.grid.kernel.dispatch({ type: 'rows.expand', rows: [window.t.key(0)], expanded: true }, 'user');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return { running: window.t.running(), t: [...document.querySelectorAll('.dzg-row')].filter((r) => r.style.transform || r.style.opacity).length, turn: getComputedStyle(document.querySelector('.dzg-toggle'), '::before').transitionDuration };
+    });
+    check(name, 'motion tree reduced: a toggle moves nothing, fades nothing, the chevron does not turn', moved.running === 0 && moved.t === 0 && moved.turn === '0s', moved);
+    check(name, 'no page error, tree reduced motion', red.errors.length === 0, red.errors);
+    await red.page.close();
   }
   // Reduced motion (CDP's emulated media): no transform, a still mark held 0.6 s.
   {

@@ -456,6 +456,10 @@
   .dzg:not([data-motion=off]) .dzg-row .dzg-seg-end {
     transition: background-color 80ms linear;
   }
+  .dzg:not([data-motion=off]) .dzg-row:hover .dzg-toggle::before,
+  .dzg:not([data-motion=off]) .dzg-row:focus-within .dzg-toggle::before {
+    transition: rotate 120ms ease-out;
+  }
 }
 @media print {
   .dzg-resize,

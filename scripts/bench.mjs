@@ -5,7 +5,7 @@
  *
  * A case is either a function, or `{ setup, run }`: `setup` runs before each
  * timed run, untimed (a cold cache, a fresh store), and its result is passed
- * to `run`. `MEMORY` cases return bytes; gc is exposed so heap readings are
+ * to `run`; `done`, when given, runs once after them, untimed (memory let go). `MEMORY` cases return bytes; gc is exposed so heap readings are
  * taken after collection.
  */
 import { build } from 'esbuild';
@@ -35,7 +35,7 @@ const wanted = (name) => !only.length || only.some((o) => name.toLowerCase().inc
 let over = 0;
 for (const [name, c] of Object.entries(CASES)) {
   if (!wanted(name)) continue;
-  const { setup, run } = typeof c === 'function' ? { setup: undefined, run: c } : c;
+  const { setup, run, done } = typeof c === 'function' ? { setup: undefined, run: c, done: undefined } : c;
   run(setup?.()); // warm-up
   const times = [];
   for (let i = 0; i < runs; i++) {
@@ -44,6 +44,7 @@ for (const [name, c] of Object.entries(CASES)) {
     run(ctx);
     times.push(performance.now() - t);
   }
+  if (done) (done(), globalThis.gc());
   times.sort((a, b) => a - b);
   const median = times[Math.floor(times.length / 2)];
   const budget = budgets[name];

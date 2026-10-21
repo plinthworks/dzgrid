@@ -20,6 +20,8 @@ export interface MotionEffects {
   readonly page?: boolean;
   /** A popup opening and the overlay appearing fade in (owner Q2). */
   readonly popup?: boolean;
+  /** A tree's rows opened or closed: the rows below glide, the children shown fade in (Phase 4 step 6). */
+  readonly expand?: boolean;
 }
 
 /** What `onCell` is told: the cell's row and column (id), its value and text, the text before. */
@@ -56,7 +58,7 @@ export interface MotionOptions {
    * is skipped. Either way `el` is followed: its tweens are finished when it shows another row. Reasons `saving`, `saved`, `failed` are reserved (Phase 4).
    */
   readonly onCell?: (el: HTMLElement, c: CellMotion, reason: 'changed') => void | false;
-  /** A row that moved or entered after a sort or a filter, or that was added live (owner Q5; not under reduced motion). */
+  /** A row that moved or entered after a sort, a filter or a tree's toggle, or that was added live (owner Q5; not under reduced motion). */
   readonly onRow?: (el: HTMLElement, c: RowMotion, reason: 'entered' | 'moved') => void | false;
 }
 

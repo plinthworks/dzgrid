@@ -28,6 +28,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **DOM**: a row that is not a data row carries `data-kind` (`group`), no `aria-selected`, no box;
   a click on it only moves the focus. Theme: `.dzg-box[hidden]` not drawn. Playground « Arbre »:
   a shape switch (parent / nested / path).
+- **Tree motion (Phase 4, step 6)**: `motion({ effects: { expand } })` (default on). Opening a tree
+  row: the rows below glide down, the children shown fade in (at most 20); closing: the rows below
+  glide up, nothing on the hidden rows. Skipped beyond 60 moving rows, for a row moving more than a
+  screen, after a scroll between the change and the paint, under reduced motion and with
+  `motion: false`. `onRow` is told `'moved'` / `'entered'` for a toggle too. Theme: the toggle's
+  chevron turns (CSS, 120 ms) in a hovered or focused row, only where motion is welcome.
+- **The million-row tree**: a seeded parent-id tree of ten levels (`perf/profiles/tree.ts`), bench
+  lines in Node (build, expand all, filter) and Chrome (`npm run bench:browser -- --only tree`:
+  first render, a wheel scroll over the open million, toggles, Ctrl+End); the playground's « Arbre »
+  takes `?rows=1000000`; the « Animations » demo has an « Arbre » section.
 
 ### Changed
 

@@ -4,13 +4,14 @@ import { toWire, createGate } from '../packages/core/src/server.js';
 import { buildSpanMap } from '../packages/core/src/spans.js';
 import { toCsv } from '../packages/core/src/csv.js';
 import { treeShape } from '../packages/core/src/tree.js';
+import { treeProfile, type TreeRow as MRow } from './profiles/tree.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
 import { msg } from '../packages/dom/src/messages.js';
 import { AR } from '../packages/dom/src/locales/ar.js';
 
-/** A timed case: a function, or an untimed `setup` whose result is passed to `run`. */
-export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly run: (ctx: any) => unknown };
+/** A timed case: a function, or an untimed `setup` whose result is passed to `run`; `done` after its runs, untimed. */
+export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly run: (ctx: any) => unknown; readonly done?: () => void };
 
 /** Each case returns a value so the work cannot be optimised away. */
 export const CASES: Record<string, Case> = {
@@ -42,6 +43,35 @@ export const CASES: Record<string, Case> = {
   'tree toggle at 1 000 000 rows with 300 000 open parents': {
     setup: () => (bigTree ??= toggleTree()),
     run: (t: ReturnType<typeof toggleTree>) => t.m.expand([t.key], !t.m.isExpanded(t.key)).length + t.m.displayed.count,
+    // Step 6: let go after its runs (it held a million rows through every line after it).
+    done: () => void (bigTree = undefined),
+  },
+  // Step 6: the million-row tree (perf/profiles/tree.ts: parent ids, ten levels, mixed widths). Build: the
+  // client model made cold from the rows (store, parents, depths, order, flatten of the roots).
+  'tree build 1 000 000 rows (cold: clientRows with the tree shape, ten levels)': {
+    setup: () => (millionRows ??= treeProfile()),
+    run: (rows: MRow[]) => millionModel(rows).displayed.count,
+  },
+  // Everything opened from everything closed (the model built once, closed again untimed).
+  'tree expand-all 1 000 000 rows (from all closed)': {
+    setup: () => {
+      const m = (million ??= millionModel((millionRows ??= treeProfile())));
+      m.setQuery(makeQuery({}));
+      m.expandAll(false);
+      return m;
+    },
+    run: (m: ReturnType<typeof millionModel>) => m.expandAll(true).length + m.displayed.count,
+  },
+  // A number filter over the million (its ancestors kept and opened), from another filter.
+  'tree filter 1 000 000 rows (number filter, ancestors kept and opened)': {
+    setup: () => {
+      const m = (million ??= millionModel((millionRows ??= treeProfile())));
+      m.setQuery(makeQuery({ filter: { n: { type: 'number', op: 'lt', value: 50 } } }));
+      return m;
+    },
+    run: (m: ReturnType<typeof millionModel>) => (m.setQuery(makeQuery({ filter: { n: { type: 'number', op: 'lt', value: 10 } } })), m.displayed.count),
+    // The million let go: the lines after it must not pay for its heap.
+    done: () => void (million = millionRows = undefined),
   },
   // Step 9b: the run index of a merging column over its export texts (what ColumnCache.exports holds), runs of 1 to 20 rows.
   'span merge index 1 000 000 rows (export texts given)': {
@@ -508,6 +538,13 @@ function spanSetup(n: number, defs: Parameters<typeof createColumnModel<SpanRow>
 }
 
 type TreeRow = { id: string; p?: string; n: number };
+let millionRows: MRow[] | undefined;
+let million: ReturnType<typeof millionModel> | undefined;
+/** The client model of the million-row tree, nothing open. */
+function millionModel(rows: MRow[]) {
+  const columns = createColumnModel<MRow>([{ id: 'n', type: 'number' }]);
+  return clientRows<MRow>({ rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<MRow>({ parentId: (r) => r.parent }) });
+}
 let bigTree: ReturnType<typeof toggleTree> | undefined;
 function toggleTree() {
   const rows = treeRows(1_000_000, 0).snapshot.rows;

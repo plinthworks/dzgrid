@@ -53,6 +53,7 @@ export async function start(o: MotionOptions): Promise<Engine | null> {
 const FLIP = 1;
 const FLASH = 2;
 const PAGE = 4;
+const EXPAND = 8;
 
 function engine(gsap: Gsap, o: MotionOptions): Engine {
   const attached = new Set<Guard>();
@@ -75,10 +76,10 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
       const changed = new Set<RowKey>();
       const added = new Set<RowKey>();
       const marked = new Map<RowKey, Map<string, number>>();
-      let snap: { tops: Map<RowKey, number>; texts: Texts; layer: string; page: number | undefined } | null = null;
+      let snap: { tops: Map<RowKey, number>; texts: Texts; layer: string; page: number | undefined; count: number } | null = null;
       const unsubscribe = g.rows.subscribe((c) => {
         const t = c.transaction;
-        const kind = c.kind === 'order' || c.kind === 'query' ? FLIP : c.kind === 'page' ? PAGE : t?.kind === 'delta' ? FLASH : 0;
+        const kind = c.kind === 'order' || c.kind === 'query' ? FLIP : c.kind === 'expand' ? EXPAND : c.kind === 'page' ? PAGE : t?.kind === 'delta' ? FLASH : 0;
         if (!kind) return;
         if (t) for (const k of t.updated) changed.add(k);
         if (t) for (const k of t.added) added.add(k), changed.add(k);
@@ -111,9 +112,9 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
         // wrote (no layout read), the cells' texts of the rows changed, the page.
         beforeRows() {
           if (!armed || !live() || g.rows.displayed === lastShown) return void ((armed = 0), changed.clear(), added.clear());
-          snap = { tops: new Map(), texts: new Map(), layer: g.el.layer.style.getPropertyValue('inset-block-start'), page: shownPage };
+          snap = { tops: new Map(), texts: new Map(), layer: g.el.layer.style.getPropertyValue('inset-block-start'), page: shownPage, count: (lastShown as { count: number }).count };
           for (const [k, v] of g.rowRenderer.mounted) {
-            if (armed & FLIP) snap.tops.set(k, v.top + (guarded.has(v.el) ? Number(gsap.getProperty(v.el, 'y')) || 0 : 0));
+            if (armed & (FLIP | EXPAND)) snap.tops.set(k, v.top + (guarded.has(v.el) ? Number(gsap.getProperty(v.el, 'y')) || 0 : 0));
             if (armed & FLASH && changed.has(k)) snap.texts.set(k, new Map([...v.cells].map(([c, cell]) => [c, cell.el.textContent ?? ''])));
           }
         },
@@ -130,12 +131,14 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
           const now = g.now();
           const sc = scene(now);
           let flipped = false;
+          // A scroll between the change and the paint (the layer moved: an anchor too): no glide.
+          const still = g.scrolledAt <= armedAt && s.layer === g.el.layer.style.getPropertyValue('inset-block-start') && !sc.reduced;
           if (kinds & FLIP) {
-            // Typing (paints under 150 ms apart) and a scroll between the change and the paint: no glide.
-            const quiet = now - lastAt >= 150 && g.scrolledAt <= armedAt && s.layer === g.el.layer.style.getPropertyValue('inset-block-start');
+            // Typing: paints under 150 ms apart.
+            const quiet = now - lastAt >= 150 && still;
             lastAt = now;
-            if (quiet && !sc.reduced) flip(sc, f, s.tops), (flipped = true);
-          }
+            if (quiet) flip(sc, f, s.tops), (flipped = true);
+          } else if (kinds & EXPAND && still) flip(sc, f, s.tops, f.displayed.count < s.count), (flipped = true);
           // The rows a glide brought in (added ones too) faded there, not again.
           if (kinds & FLASH && now - g.scrolledAt >= 150) flash(sc, f, s.texts, changed, added, !flipped);
           if (kinds & PAGE && !sc.reduced && on('page')) slide(sc, s.page, shownPage);

@@ -1,9 +1,13 @@
 // The « Animations » page (step 26, docs/behaviors/motion.md): `@dzgrid/dom/motion-gsap` over a small
 // market-like table — sort, filters (row and popup), pages, a live ticker whose changes flash, a
 // `ui.cellClass` rule ("Variation") and an application `onCell` hook ("Cours"). `?lang=ar` right to left.
+// « Arbre » (Phase 4 step 6): a small tree on the same `motion()`: rows glide as a parent opens or closes.
 import { createGrid } from '@dzgrid/dom';
 import { filters } from '@dzgrid/dom/filters';
 import { pagination } from '@dzgrid/dom/pagination';
+import { tree } from '@dzgrid/dom/tree';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+import { AR_TREE } from '@dzgrid/dom/locales/ar-tree';
 import { motion } from '@dzgrid/dom/motion-gsap';
 import { FR } from '@dzgrid/dom/locales/fr';
 import { AR } from '@dzgrid/dom/locales/ar';
@@ -27,7 +31,7 @@ document.documentElement.lang = lang;
 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
 form.addEventListener('change', (e) => {
   const name = (e.target as HTMLInputElement).name;
-  if (name === 'motion') return grid.update({ motion: (e.target as HTMLInputElement).checked });
+  if (name === 'motion') return [grid, sectors].forEach((g) => g.update({ motion: (e.target as HTMLInputElement).checked }));
   const q = new URLSearchParams({ lang: (form.elements.namedItem('lang') as HTMLSelectElement).value, theme: (form.elements.namedItem('theme') as HTMLSelectElement).value });
   location.search = q.toString();
 });
@@ -87,4 +91,22 @@ button.addEventListener('click', () => {
   if (timer) (clearInterval(timer), (timer = 0));
   else timer = window.setInterval(tick, 700);
   button.textContent = timer ? W.stop : W.start;
+});
+
+// « Arbre »: the sectors, their companies, a few desks under some companies; the same motion() serves both grids.
+type Node = { id: string; parent: string | null; name: string; volume: number };
+const nodes: Node[] = [];
+W.sectors.forEach((sector, s) => {
+  nodes.push({ id: `s${s}`, parent: null, name: sector, volume: 0 });
+  rows.filter((r) => r.id % 5 === s).slice(0, 8).forEach((r, k) => {
+    nodes.push({ id: `c${r.id}`, parent: `s${s}`, name: r.name, volume: r.volume });
+    if (k % 3 === 0) for (let d = 1; d <= 3; d++) nodes.push({ id: `c${r.id}d${d}`, parent: `c${r.id}`, name: `${lang === 'ar' ? 'مكتب' : 'Bureau'} ${d}`, volume: (r.volume * d) % 997 });
+  });
+});
+if (lang === 'ar') (document.getElementById('tree-title')!.textContent = 'شجرة'), (document.getElementById('tree-note')!.textContent = 'افتح صفا (السهم أو ← في عمود الاسم): تنزلق الصفوف تحته وتظهر الفروع تدريجيا؛ أغلقه (→): تصعد الصفوف تحته.');
+const sectors = createGrid<Node>(document.getElementById('tree')!, {
+  rows: nodes, getRowId: (r) => r.id, locale: lang === 'ar' ? 'ar-DZ' : 'fr-FR',
+  messages: { ...base, text: { ...base.text, ...(lang === 'ar' ? AR_TREE : FR_TREE).text } },
+  columns: [{ id: 'name', header: W.name, width: 240 }, { id: 'volume', header: W.volume, type: 'number', width: 120 }],
+  features: [moving, tree<Node>({ parentId: (r) => r.parent })],
 });

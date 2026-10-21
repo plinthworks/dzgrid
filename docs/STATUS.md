@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-21 (**Phase 4, étape 5 commitée `3ce75cc`, sa revue faite, non commitée** ; avant : **étape 4 commitée `5fd4d0d`, sa revue faite, non commitée** : coutures DOM et `@dzgrid/dom/tree` ; avant : revue des étapes 2–3, commitée `a9c91e6` ; avant : étapes 2 et 3 commitées `49c3787` : coutures de base du cœur pour les arbres, `@dzgrid/core/tree` en mode parent. Avant : étape 1 commitée `81e07a0` : fiches de comportement, spike S12 — verdict « go, sans plafond » —, budgets de la Phase 4 dans `size-budget.json` et `scripts/rebudget.mjs`. Avant : Phase 3 close côté DzGrid, `89a2a78`, étiquette `v0.1.0` locale non publiée ; plan de la Phase 4 et décisions du propriétaire `30131ce`). Ce fichier dit où en est le travail, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (sections Phase 3 et Phase 4) ; les décisions dans `ARCHITECTURE.md` et `docs/phase-4-steps/decisions.md`.
+Mis à jour : 2026-10-21 (**Phase 4, étape 6 faite, non commitée** : animation de l'arbre et arbre d'un million de lignes ; avant : **étape 5 commitée `3ce75cc`, sa revue `bc01afa`** ; avant : **étape 4 commitée `5fd4d0d`, sa revue faite, non commitée** : coutures DOM et `@dzgrid/dom/tree` ; avant : revue des étapes 2–3, commitée `a9c91e6` ; avant : étapes 2 et 3 commitées `49c3787` : coutures de base du cœur pour les arbres, `@dzgrid/core/tree` en mode parent. Avant : étape 1 commitée `81e07a0` : fiches de comportement, spike S12 — verdict « go, sans plafond » —, budgets de la Phase 4 dans `size-budget.json` et `scripts/rebudget.mjs`. Avant : Phase 3 close côté DzGrid, `89a2a78`, étiquette `v0.1.0` locale non publiée ; plan de la Phase 4 et décisions du propriétaire `30131ce`). Ce fichier dit où en est le travail, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (sections Phase 3 et Phase 4) ; les décisions dans `ARCHITECTURE.md` et `docs/phase-4-steps/decisions.md`.
 
 ## Où on en est
 
@@ -35,7 +35,7 @@ Mis à jour : 2026-10-21 (**Phase 4, étape 5 commitée `3ce75cc`, sa revue fait
 | 25 — clôture de la Phase 3 (budgets à la mesure, portail final, 0.1.0 préparée, docs) | fait, testé ; étiquette `v0.1.0` (locale, non publiée) ; portail vert, `test:browser` compris après les suites de la clôture (test des dates sous Chrome 156, cartes de déclaration, README du thème, voir « Portail final ») | `89a2a78` |
 | 26 — animations avec GSAP (`@dzgrid/dom/motion-gsap` : coquille + morceau paresseux), `ui.cellClass`, crochet de l'hôte (`onCell`/`onRow`) | fait, relu, testé (corrections non commitées) | `8ee7d5b` + corrections |
 
-**En cours : la Phase 4 (plan `docs/phase-4-plan.md`, décisions `docs/phase-4-steps/decisions.md`, qui priment). Étapes 1 (`81e07a0`), 2 et 3 (`49c3787`, revue `a9c91e6`) faites ; étape 4 (coutures DOM, `@dzgrid/dom/tree`) commitée `5fd4d0d`, corrections de sa revue non commitées  ; étape 5 (formes imbriquée et chemin, CSV d’un arbre) commitée `3ce75cc`, sa revue faite, non commitée ; suivante : l’étape 6. La Phase 3 est close côté DzGrid le 2026-10-21 ; ce qui demande Sehhaty est dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`).**
+**En cours : la Phase 4 (plan `docs/phase-4-plan.md`, décisions `docs/phase-4-steps/decisions.md`, qui priment). Étapes 1 (`81e07a0`), 2 et 3 (`49c3787`, revue `a9c91e6`) faites ; étape 4 (coutures DOM, `@dzgrid/dom/tree`) commitée `5fd4d0d`, corrections de sa revue non commitées  ; étape 5 (formes imbriquée et chemin, CSV d’un arbre) commitée `3ce75cc`, revue `bc01afa` ; étape 6 (animation de l'arbre, million de lignes) faite, non commitée ; suivante : l’étape 7. La Phase 3 est close côté DzGrid le 2026-10-21 ; ce qui demande Sehhaty est dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`).**
 
 ### Phase 4 — arbre et maître/détail d'abord, puis la ligne de filtres affichable, puis l'édition
 
@@ -46,7 +46,8 @@ Mis à jour : 2026-10-21 (**Phase 4, étape 5 commitée `3ce75cc`, sa revue fait
 | 3 — `@dzgrid/core/tree`, mode parent | fait, relu, testé (corrections non commitées) | `49c3787` + corrections |
 | 4 — coutures DOM et `@dzgrid/dom/tree` | fait, relu, testé (corrections non commitées) | `5fd4d0d` + corrections |
 | 5 — formes imbriquée et chemin, lignes de remplissage, sélection, CSV d'un arbre | fait, testé (non commité ; revue à venir) | — |
-| 6 à 7 — arbre (animation et million de lignes, enfants paresseux) | à faire | — |
+| 6 — animation de l'arbre (ouvrir, fermer), arbre d'un million de lignes | fait, testé (non commité ; revue à venir) | — |
+| 7 — enfants paresseux (client et serveur) | à faire | — |
 | 8 à 11 — maître/détail (cœur, base DOM à hauteurs variables, `@dzgrid/dom/detail`, Angular) | à faire | — |
 | 12 — ligne de filtres affichable en direct | à faire | — |
 | 13 — clôture de la Phase 4 | à faire | — |
@@ -56,7 +57,15 @@ Mis à jour : 2026-10-21 (**Phase 4, étape 5 commitée `3ce75cc`, sa revue fait
 - **Tests** : `core/test/tree-shapes.test.ts`, `core/test/csv/tree.test.ts`, `dom/test/tree-shapes.test.ts` (vus en échec d'abord), test de propriété sur les trois formes, 19 cas de conformité. Mutants : 22, 20 tués, 1 équivalent, 1 tué par un test ajouté.
 - **Tailles** : core 28 143 (29 000), core/tree 2 915 (3 500), core/csv 1 842 (1 850), dom 19 705 (21 300), dom/tree 2 412 (2 600). Portail vert (258 fichiers, 4 234 tests) ; navigateur `--only tree` 34 / 34.
 - **Revue de l'étape 5 faite** (2026-10-21, sur `3ce75cc`, non commitée ; détail dans ROADMAP et `step05-plan.md` « Review ») : libellé de remplissage retiré par sa classe ; parcours imbriqué sûr (id qui lève, enfant nul, copie d'un id tenu : refusés, non parcourus) ; clés de chemin faites à la demande (5 000 segments : 2,3 s → 3 ms) ; décisions du lead 6a–6c et CSV 7 appliquées. Tailles : core 28 195, core/tree 3 361, core/csv 1 841, dom/tree 2 405. Portail vert (260 fichiers, 4 249 tests) ; navigateur `--only tree` 34 / 34.
-- **Suivante** : commit de la revue, puis étape 6 (animation, arbre d'un million de lignes).
+- **Revue commitée** `bc01afa`.
+
+Étape 6 faite (2026-10-21, non commitée ; plan et résultats `docs/phase-4-steps/step06-plan.md`, détail dans ROADMAP ; ARCHITECTURE « Décisions de la Phase 4, étape 6 ») :
+- **Animation** : `effects.expand` (défaut vrai) dans `@dzgrid/dom/motion-gsap` ; à l'ouverture les lignes du dessous glissent, les enfants apparaissent en fondu (20 au plus) ; à la fermeture les lignes du dessous remontent (écart à D12 « fermeture instantanée », voulu par l'appel de l'étape), rien sur les lignes cachées ; sauts : plus de 60 lignes, plus d'un écran, défilement entre-temps, mouvement réduit (rien, pas de marque), `motion: false`. Chevron qui tourne en CSS (thème), seulement dans la ligne survolée ou focalisée.
+- **Million de lignes** : `perf/profiles/tree.ts` (parents, dix niveaux, largeurs mêlées), `playground/tree.html?rows=1000000`, page de banc `packages/dom/test/browser/perf-tree.html`, `npm run bench:browser -- --only tree`. Node : construction 375,6 ms (cible 1 s), tout déplier 193 ms, filtre 66 ms, bascule 13 ms. Chrome : 1er rendu 285 ms, défilement 2 s à la molette sans image longue (médiane 16,7 ms), bascule 17 ms jusqu'à l'image (8 ms de modèle), Ctrl+Fin atteint la ligne 999 999. Cibles tenues.
+- **Tests** : `motion-expand.test.ts` (14, 9 en échec d'abord), thème +1 ; 13 mutants tués ; portail vert (261 fichiers, 4 264 tests) ; navigateur `--only motion` 50 / 50, `--only tree` 34 / 34.
+- **Tailles** : run 2 705 (2 900), coquille 593 (700), thème 2 139 (2 500) ; dom, dom/tree, core inchangés.
+- **À savoir** : 17 lignes froides anciennes du banc Node dépassent leur budget sur cette machine, déjà au commit `bc01afa` (même liste) : ni touchées ni relevées ; à voir à la clôture.
+- **Suivante** : revue de l'étape 6, puis étape 7 (enfants paresseux).
 
 Revue de l'étape 4 faite (2026-10-21, non commitée ; détail dans ROADMAP, Phase 4 ; ARCHITECTURE « Revue de l'étape 4 ») :
 - **Tests** : `tree-walk.test.ts` (marche aléatoire DOM, 48 essais ; ses contournements de B1/B2 retirés) et `tree-walk-bugs.test.ts` (B1, B2 passés de `it.fails` à `it`, 6 tests ajoutés ; chacun vu en échec d'abord).

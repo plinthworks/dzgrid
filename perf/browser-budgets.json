@@ -1,5 +1,5 @@
 {
-  "$comment": "Chrome, headless, dataset A at 1 280 × 720 (scripts/perf-browser.mjs). Phase 3 close (2026-10-21, owner decision step25-decisions.md Q2): each ms line is the median of three runs + 35 % rounded up to the half-ms, never above the targets of ARCHITECTURE §5.3 and phase-3-plan §4 (17.2 ms a frame is 58 fps); sub-ms lines (and 0 for no task over 50 ms), counts, percentages and megabytes keep their budget. Set by scripts/rebudget.mjs; history in ROADMAP.md.",
+  "$comment": "Chrome, headless, dataset A at 1 280 × 720 (scripts/perf-browser.mjs). Phase 3 close (2026-10-21, owner decision step25-decisions.md Q2): each ms line is the median of three runs + 35 % rounded up to the half-ms, never above the targets of ARCHITECTURE §5.3 and phase-3-plan §4 (17.2 ms a frame is 58 fps); sub-ms lines (and 0 for no task over 50 ms), counts, percentages and megabytes keep their budget. Set by scripts/rebudget.mjs; history in ROADMAP.md. Phase 4 step 6 (2026-10-21): the tree lines (the million-row tree of perf/profiles/tree.ts, packages/dom/test/browser/perf-tree.html; `-- --only tree` runs them alone) set by the same rule from three runs; no older line changed.",
   "budgets": {
     "first render of A": 52,
     "body nodes after first render": 1000,
@@ -39,6 +39,18 @@
     "server and CSV: page errors": 0,
     "<dz-grid> first render of A": 50.5,
     "<dz-grid> 1 000 create/destroy cycles: heap retained": 1,
-    "<dz-grid>: page errors": 0
+    "<dz-grid>: page errors": 0,
+    "tree 1 000 000: first render (build and paint)": 385.5,
+    "tree 1 000 000: expand all to the next frame": 216.5,
+    "tree 1 000 000: rows shown once all open": 1000000,
+    "tree 1 000 000 open, 2 s wheel scroll: longest animation frame": 50,
+    "tree 1 000 000 open, 2 s wheel scroll: median frame": 17.2,
+    "tree 1 000 000 open, 2 s wheel scroll: p95 frame": 25,
+    "tree 1 000 000 open: a toggle near the top to the next frame (median of 6)": 23,
+    "tree 1 000 000 open: a toggle near the top, model and events (median of 6)": 11,
+    "tree 1 000 000 open: Ctrl+End reaches the last row (aria-rowindex − header = rows shown)": 0,
+    "tree 1 000 000 open: a toggle near the end to the next frame (median of 6)": 23,
+    "tree 1 000 000 open: a toggle near the end, model and events (median of 6)": 11.5,
+    "tree: page errors": 0
   }
 }

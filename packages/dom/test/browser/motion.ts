@@ -2,12 +2,14 @@
 // Query: rows (2 000), locale (fr-FR), dir, theme; motion=0 the motion:false twin (same feature, `settings.motion:
 // false`); paging=1 pages of 20 with the footer; tall=1 a 9 600 px host (about 300 rows mounted). The grid has the
 // filter popup (header buttons), a cellClass rule on "Montant" (negative values) and an onCell hook on it.
+// tree=1 (Phase 4 step 6): the rows as a tree (one row in eleven a parent of the ten after it), nothing open.
 import { createGrid } from '/packages/dom/src/index.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
 import { AR } from '/packages/dom/src/locales/ar.ts';
 import { filters } from '/packages/dom/src/filters.ts';
 import { pagination } from '/packages/dom/src/pagination.ts';
 import { motion } from '/packages/dom/src/motion-gsap.ts';
+import { tree } from '/packages/dom/src/tree.ts';
 import { gsap } from 'gsap';
 import { dataKey } from '@dzgrid/core';
 
@@ -16,7 +18,7 @@ const N = Number(q.get('rows') ?? 2000);
 const locale = q.get('locale') ?? 'fr-FR';
 const ar = locale.startsWith('ar');
 const lang = ar ? 'ar' : 'fr';
-const texts = await Promise.all([import(`/packages/dom/src/locales/${lang}-filters.ts`), import(`/packages/dom/src/locales/${lang}-pagination.ts`)]);
+const texts = await Promise.all([import(`/packages/dom/src/locales/${lang}-filters.ts`), import(`/packages/dom/src/locales/${lang}-pagination.ts`), import(`/packages/dom/src/locales/${lang}-tree.ts`)]);
 const base = ar ? AR : FR;
 const messages = { ...base, text: Object.assign({}, base.text, ...texts.map((m) => (Object.values(m)[0] as { text: object }).text)) };
 document.documentElement.lang = locale;
@@ -45,7 +47,7 @@ const grid = createGrid<Row>(host, {
     { id: 'amount', header: ar ? 'المبلغ' : 'Montant', type: 'number', width: 130, ui: { cellClass: (c) => ((c.value as number) < 0 ? 'neg' : null) } },
     { id: 'city', header: ar ? 'المدينة' : 'Ville', width: 140, filter: { kind: 'text' } },
   ],
-  features: [m, filters({ popup: true }), ...(q.get('paging') ? [pagination()] : [])],
+  features: [m, filters({ popup: true }), ...(q.get('paging') ? [pagination()] : []), ...(q.get('tree') ? [tree<Row>({ parentId: (r) => (r.id % 11 ? r.id - (r.id % 11) : null) })] : [])],
   ...(q.get('paging') && { pagination: { pageSize: 20 } }),
   selection: { mode: 'multi', click: true },
 });

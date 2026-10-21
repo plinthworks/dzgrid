@@ -72,3 +72,12 @@ describe('CSS motion only where it is welcome', () => {
     }
   });
 });
+
+describe('the tree toggle (Phase 4 step 6)', () => {
+  it('turns its chevron by CSS only, where motion is welcome and on, in a hovered or focused row (a pooled toggle never spins while scrolling)', () => {
+    const block = css.split('@media (prefers-reduced-motion: no-preference)').slice(1).map((b) => b.slice(0, b.indexOf('\n}\n'))).join('');
+    expect(block).toMatch(/\.dzg:not\(\[data-motion=off\]\) \.dzg-row:hover \.dzg-toggle::before,\s*\.dzg:not\(\[data-motion=off\]\) \.dzg-row:focus-within \.dzg-toggle::before \{\s*transition: rotate 120ms ease-out;\s*\}/);
+    // Nowhere else.
+    expect(css.match(/transition: rotate/g)?.length).toBe(1);
+  });
+});

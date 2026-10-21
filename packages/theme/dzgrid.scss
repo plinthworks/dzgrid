@@ -542,6 +542,12 @@ $emit: true !default;
     .dzg:not([data-motion=off]) .dzg-row .dzg-seg-end {
       transition: background-color 80ms linear;
     }
+    // A tree's chevron turns as its row opens or closes (Phase 4 step 6): only in the row the pointer or
+    // the focus is on, so a pooled toggle shown for another row while scrolling does not spin.
+    .dzg:not([data-motion=off]) .dzg-row:hover .dzg-toggle::before,
+    .dzg:not([data-motion=off]) .dzg-row:focus-within .dzg-toggle::before {
+      transition: rotate 120ms ease-out;
+    }
   }
 
   @media print {

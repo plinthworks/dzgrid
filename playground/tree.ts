@@ -4,6 +4,8 @@
 // listening protocol uses. `?locale=ar-DZ&direction=auto`: Arabic, right to left. Only « Service 0 » is open at first.
 // `?shape=nested|path` (Phase 4 step 5): the same tree as nested lists, or as paths where the services have
 // no row of their own (filler rows: a label, no values, never selected).
+// `?rows=1000000` (Phase 4 step 6): the million-row tree of perf/profiles/tree.ts (parent ids, ten levels,
+// mixed widths), parent ids only; « Tout déplier » opens the million.
 import { createGrid } from '@dzgrid/dom';
 import { filters } from '@dzgrid/dom/filters';
 import { tree } from '@dzgrid/dom/tree';
@@ -15,18 +17,21 @@ import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
 import { AR_TREE } from '@dzgrid/dom/locales/ar-tree';
 import { dataKey, groupKey, type ColumnDef, type GridEvent } from '@dzgrid/core';
 import '../packages/theme/dzgrid.css';
+import { treeProfile } from '../perf/profiles/tree.js';
 
 const form = document.getElementById('controls') as HTMLFormElement;
 const status = document.getElementById('status')!;
 const q = new URLSearchParams(location.search);
 const locale = q.get('locale') === 'ar-DZ' ? 'ar-DZ' : 'fr-FR';
 const ar = locale === 'ar-DZ';
-const total = Number(q.get('rows') ?? 10_000) >= 100_000 ? 100_000 : 10_000;
+const asked = Number(q.get('rows') ?? 10_000);
+const million = asked >= 1_000_000;
+const total = million ? 1_000_000 : asked >= 100_000 ? 100_000 : 10_000;
 const field = (name: string) => form.elements.namedItem(name) as HTMLSelectElement;
 field('locale').value = locale;
 field('theme').value = q.get('theme') ?? '';
 field('rows').value = String(total);
-const shape = q.get('shape') === 'nested' ? 'nested' : q.get('shape') === 'path' ? 'path' : 'parent';
+const shape = million ? 'parent' : q.get('shape') === 'nested' ? 'nested' : q.get('shape') === 'path' ? 'path' : 'parent';
 field('shape').value = shape;
 if (q.get('theme')) document.documentElement.dataset['theme'] = q.get('theme')!;
 document.documentElement.lang = locale;
@@ -49,8 +54,10 @@ document.getElementById('later')!.textContent = W.later;
 // The names stay Latin in both languages (the listening protocol's sentences name « Service 0 », « Patient 3 »).
 type Row = { id: string; parent: string | null; name: string; kind: number; city: string; age: number | null; kids?: Row[]; path?: string[] };
 const rows: Row[] = [];
-const per = Math.round(total / 100 / 1.1);
-for (let s = 0; s < 100; s++) {
+const per = million ? 0 : Math.round(total / 100 / 1.1);
+// The million: the bench's own rows, their level as the type (0 root, 1, then 2 for every level below).
+if (million) for (const r of treeProfile()) rows.push({ id: r.id, parent: r.parent, name: r.name, kind: Math.min(r.level, 2), city: W.cities[r.n % 6]!, age: (r.n % 90) + 1 });
+for (let s = 0; s < (million ? 0 : 100); s++) {
   rows.push({ id: `s${s}`, parent: null, name: `${W.service} ${s}`, kind: 0, city: W.cities[s % 6]!, age: null });
   for (let p = 1; p <= per; p++) {
     const id = `s${s}p${p}`;
@@ -61,7 +68,7 @@ for (let s = 0; s < 100; s++) {
 }
 
 // The same rows in the shape asked: nested lists (each row its children), or paths without the services.
-const byId = new Map(rows.map((r) => [r.id, r]));
+const byId = new Map(shape === 'path' ? rows.map((r) => [r.id, r]) : []);
 const pathOf = (r: Row): string[] => (r.parent ? [...pathOf(byId.get(r.parent)!), r.id] : [r.name]);
 const given: Row[] =
   shape === 'nested' ? rows.map((r) => ({ ...r, kids: [] as Row[] })) : shape === 'path' ? rows.filter((r) => r.parent).map((r) => ({ ...r, path: pathOf(r) })) : rows;
@@ -70,7 +77,7 @@ if (shape === 'nested') {
   for (const r of given) if (r.parent) node.get(r.parent)!.kids!.push(r);
 }
 const top = shape === 'nested' ? given.filter((r) => !r.parent) : given;
-const serviceKey = (s: number) => (shape === 'path' ? groupKey([`${W.service} ${s}`]) : dataKey(`s${s}`)!);
+const serviceKey = (s: number) => (shape === 'path' ? groupKey([`${W.service} ${s}`]) : dataKey(million ? `t${s}` : `s${s}`)!);
 const treeOptions = shape === 'nested' ? { children: (r: Row) => r.kids } : shape === 'path' ? { path: (r: Row) => r.path! } : { parentId: (r: Row) => r.parent };
 
 const columns: ColumnDef<Row, any>[] = [
