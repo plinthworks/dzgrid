@@ -166,9 +166,12 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
       if (!same) g.pendingFocus = null;
     }
     // Moved by the data (a row hidden or removed): the DOM follows, also when the old cell is still
-    // there until the next paint takes it away (a collapse on the next frame).
-    const a = g.doc.activeElement as HTMLElement | null;
-    if (e.source === 'data' && e.focus && g.hasFocus && (!a || !el.viewport.contains(a) || !sameFocus(positionOf(a), e.focus))) {
+    // there until the next paint takes it away (a collapse on the next frame). Only from a grid
+    // position, or from a focus really lost (the body): never from an outside input (`hasFocus` may
+    // be stale) nor from the grid's own controls that are no position (the select-all box).
+    const a = (el.root.getRootNode() as Document | ShadowRoot).activeElement as HTMLElement | null;
+    const at = a && el.viewport.contains(a) ? positionOf(a) : undefined;
+    if (e.source === 'data' && e.focus && g.hasFocus && (at === undefined ? (g.doc.activeElement ?? g.doc.body) === g.doc.body : at !== null && !sameFocus(at, e.focus))) {
       g.pendingFocus = e.focus.kind === 'cell' ? e.focus : { header: e.focus.column, level: e.focus.level ?? 0 };
     }
   }));

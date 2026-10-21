@@ -1124,6 +1124,30 @@ async function treeChecks(name, ctx) {
     await frames(page, 3);
     const kept = await at();
     check(name, `${c.tag}: a collapse by the application hiding the focus puts it on the parent row, same column (not body)`, kept === 's2/age', kept);
+    // Review of step 4 (B1, B2): pinning the focused column keeps the focus on its cell; an outside
+    // input then keeps it through a collapse by the application.
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'column.state', patch: [{ id: 'age', pinned: 'end' }] }, 'api'));
+    await frames(page, 3);
+    const pinned = await at();
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'column.state', patch: [{ id: 'age', pinned: null }] }, 'api'));
+    await frames(page, 3);
+    const unpinned = await at();
+    const out = await page.evaluate(async () => {
+      const g = window.t.grid;
+      const two = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      g.kernel.dispatch({ type: 'rows.expand', rows: [window.t.key('s2')], expanded: true }, 'api');
+      g.api.focusCell(window.t.key('s2p5'), 'age');
+      await two();
+      const input = document.createElement('input');
+      document.body.append(input);
+      input.focus();
+      g.kernel.dispatch({ type: 'rows.expand', rows: [window.t.key('s2')], expanded: false }, 'api');
+      await two();
+      const kept = document.activeElement === input && String(g.kernel.focus.row).endsWith(':s2');
+      input.remove();
+      return kept;
+    });
+    check(name, `${c.tag}: pinning and unpinning the focused column keep the focus on its cell; an outside input keeps it through a collapse`, pinned === 's2/age' && unpinned === 's2/age' && out, { pinned, unpinned, out });
     // Selected and hovered rows, the pointer on a toggle (no selection).
     await page.evaluate(() => { const g = window.t.grid; g.kernel.dispatch({ type: 'selection.toggle', row: window.t.key('s0') }, 'user'); g.kernel.dispatch({ type: 'selection.toggle', row: window.t.key('s0p1') }, 'user'); window.t.scrollTo(0); });
     await frames(page);

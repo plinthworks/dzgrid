@@ -49,7 +49,7 @@ export function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, 
 }
 
 /** The nearest ancestor of a row that is shown, or null (no tree, a root, a row gone). */
-function shownAncestor<T>(key: RowKey, d: DisplayedRows<T>): RowKey | null {
+export function shownAncestor<T>(key: RowKey, d: DisplayedRows<T>): RowKey | null {
   for (let k = d.parentOf?.(key) ?? null; k !== null; k = d.parentOf!(k)) if (d.indexOf(k) !== -1) return k;
   return null;
 }

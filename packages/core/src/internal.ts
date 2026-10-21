@@ -24,7 +24,7 @@ export { storeOf } from './model/client.js';
 export { Haystack } from './model/haystack.js';
 export type { HayKind } from './model/column-cache.js';
 export { emit, onCommand, setFocusOwner, setSelectionGate } from './kernel.js';
-export { sameFocus } from './focus.js';
+export { sameFocus, shownAncestor } from './focus.js';
 export { checkPage, pageOf, resizeIndex, resolvePageOptions, samePage } from './model/page.js';
 export type { PageConfig } from './model/page.js';
 export { missingFeatureProblems } from './columns/span-rules.js';

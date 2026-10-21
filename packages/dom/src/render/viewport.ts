@@ -1,5 +1,5 @@
 import { isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
-import { emit } from '@dzgrid/core/internal';
+import { emit, shownAncestor } from '@dzgrid/core/internal';
 import type { PartBase, SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
 import { decorateHeader } from './header-decor.js';
@@ -86,6 +86,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
 
   function paint(box: ViewportBox): void {
     paints++;
+    const root = el.root.getRootNode() as Document | ShadowRoot;
+    const held = el.viewport.contains(root.activeElement);
     if (box.remPx && box.remPx !== g.remPx) g.remPx = box.remPx;
     const { settings, ctx, dir } = g;
     // Flexible columns share what the view has: follow it.
@@ -139,6 +141,12 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       else if (shown.key !== null) {
         const at = d.indexOf(shown.key);
         if (at !== -1) scroll.scrollTo(layout.offsetOf(at) + shown.delta);
+        // Hidden by a closing above the view: its nearest shown ancestor at the top (tree-view.md).
+        else if (anchorNext === 'expand') {
+          const up = shownAncestor(shown.key, d);
+          const ui = up === null ? -1 : d.indexOf(up);
+          if (ui !== -1) scroll.scrollTo(layout.offsetOf(ui));
+        }
       }
     }
     anchorNext = null;
@@ -233,6 +241,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       atTop: scroll.atTop,
       atEnd: scroll.atEnd,
     };
+    // The focused cell or header moved to another pinned segment (a move blurs, unseen): given back.
+    if (held && focus && !g.pendingFocus && !el.viewport.contains(root.activeElement)) g.pendingFocus = focus.kind === 'cell' ? focus : { header: focus.column, level: focus.level ?? 0 };
     const pending = g.pendingFocus;
     if (pending) {
       const target = 'header' in pending ? headerRenderer.cell(pending.header, pending.level ?? 0) : rowRenderer.cell(pending.row, pending.column);

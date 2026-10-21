@@ -49,7 +49,9 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
   order (stable): each level is sorted, and a sort costs what it costs on a flat list.
 - **Opening and closing** splice the rows below the parent in or out of the displayed list; they
   never sort or filter again. A collapse that hides the focused row moves the focus to the nearest
-  shown ancestor (`tree-keys.md`).
+  shown ancestor (`tree-keys.md`). The row at the top of the view stays there; when a closing (by
+  the application or the user) hides it, its nearest shown ancestor goes to the top of the view
+  (lead decision, review of step 4), not the raw scroll offset.
 - **The tree column**: the first visible column, or `tree.column`. Its cells get an inline-start
   padding of `level × indent` (logical property: it mirrors in Arabic by itself) and a decorative
   toggle (`<span class="dzg-toggle" aria-hidden="true">`), with a hit area of at least 24 × 24 px

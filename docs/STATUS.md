@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-21 (**Phase 4, étape 4 faite, non commitée** : coutures DOM et `@dzgrid/dom/tree` ; avant : revue des étapes 2–3, commitée `a9c91e6` ; avant : étapes 2 et 3 commitées `49c3787` : coutures de base du cœur pour les arbres, `@dzgrid/core/tree` en mode parent. Avant : étape 1 commitée `81e07a0` : fiches de comportement, spike S12 — verdict « go, sans plafond » —, budgets de la Phase 4 dans `size-budget.json` et `scripts/rebudget.mjs`. Avant : Phase 3 close côté DzGrid, `89a2a78`, étiquette `v0.1.0` locale non publiée ; plan de la Phase 4 et décisions du propriétaire `30131ce`). Ce fichier dit où en est le travail, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (sections Phase 3 et Phase 4) ; les décisions dans `ARCHITECTURE.md` et `docs/phase-4-steps/decisions.md`.
+Mis à jour : 2026-10-21 (**Phase 4, étape 4 commitée `5fd4d0d`, sa revue faite, non commitée** : coutures DOM et `@dzgrid/dom/tree` ; avant : revue des étapes 2–3, commitée `a9c91e6` ; avant : étapes 2 et 3 commitées `49c3787` : coutures de base du cœur pour les arbres, `@dzgrid/core/tree` en mode parent. Avant : étape 1 commitée `81e07a0` : fiches de comportement, spike S12 — verdict « go, sans plafond » —, budgets de la Phase 4 dans `size-budget.json` et `scripts/rebudget.mjs`. Avant : Phase 3 close côté DzGrid, `89a2a78`, étiquette `v0.1.0` locale non publiée ; plan de la Phase 4 et décisions du propriétaire `30131ce`). Ce fichier dit où en est le travail, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (sections Phase 3 et Phase 4) ; les décisions dans `ARCHITECTURE.md` et `docs/phase-4-steps/decisions.md`.
 
 ## Où on en est
 
@@ -35,7 +35,7 @@ Mis à jour : 2026-10-21 (**Phase 4, étape 4 faite, non commitée** : coutures 
 | 25 — clôture de la Phase 3 (budgets à la mesure, portail final, 0.1.0 préparée, docs) | fait, testé ; étiquette `v0.1.0` (locale, non publiée) ; portail vert, `test:browser` compris après les suites de la clôture (test des dates sous Chrome 156, cartes de déclaration, README du thème, voir « Portail final ») | `89a2a78` |
 | 26 — animations avec GSAP (`@dzgrid/dom/motion-gsap` : coquille + morceau paresseux), `ui.cellClass`, crochet de l'hôte (`onCell`/`onRow`) | fait, relu, testé (corrections non commitées) | `8ee7d5b` + corrections |
 
-**En cours : la Phase 4 (plan `docs/phase-4-plan.md`, décisions `docs/phase-4-steps/decisions.md`, qui priment). Étapes 1 (`81e07a0`), 2 et 3 (`49c3787`, revue `a9c91e6`) faites ; étape 4 (coutures DOM, `@dzgrid/dom/tree`) faite, non commitée ; suivante : étape 5, formes imbriquée et chemin, sélection, CSV. La Phase 3 est close côté DzGrid le 2026-10-21 ; ce qui demande Sehhaty est dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`).**
+**En cours : la Phase 4 (plan `docs/phase-4-plan.md`, décisions `docs/phase-4-steps/decisions.md`, qui priment). Étapes 1 (`81e07a0`), 2 et 3 (`49c3787`, revue `a9c91e6`) faites ; étape 4 (coutures DOM, `@dzgrid/dom/tree`) commitée `5fd4d0d`, corrections de sa revue non commitées ; suivante : étape 5, formes imbriquée et chemin, sélection, CSV. La Phase 3 est close côté DzGrid le 2026-10-21 ; ce qui demande Sehhaty est dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`).**
 
 ### Phase 4 — arbre et maître/détail d'abord, puis la ligne de filtres affichable, puis l'édition
 
@@ -44,11 +44,16 @@ Mis à jour : 2026-10-21 (**Phase 4, étape 4 faite, non commitée** : coutures 
 | 1 — fiches, spike S12 (hauteurs variables sous le défilement échelonné), budgets | fait, testé | `81e07a0` |
 | 2 — coutures de base du cœur (nœuds, `parentOf`/`levelAt`, forme, expansion) | fait, relu, testé (corrections non commitées) | `49c3787` + corrections |
 | 3 — `@dzgrid/core/tree`, mode parent | fait, relu, testé (corrections non commitées) | `49c3787` + corrections |
-| 4 — coutures DOM et `@dzgrid/dom/tree` | fait, testé (non commité ; relecture à venir) | — |
+| 4 — coutures DOM et `@dzgrid/dom/tree` | fait, relu, testé (corrections non commitées) | `5fd4d0d` + corrections |
 | 5 à 7 — arbre (formes imbriquée et chemin, animation et million de lignes, enfants paresseux) | à faire | — |
 | 8 à 11 — maître/détail (cœur, base DOM à hauteurs variables, `@dzgrid/dom/detail`, Angular) | à faire | — |
 | 12 — ligne de filtres affichable en direct | à faire | — |
 | 13 — clôture de la Phase 4 | à faire | — |
+
+Revue de l'étape 4 faite (2026-10-21, non commitée ; détail dans ROADMAP, Phase 4 ; ARCHITECTURE « Revue de l'étape 4 ») :
+- **Tests** : `tree-walk.test.ts` (marche aléatoire DOM, 48 essais ; ses contournements de B1/B2 retirés) et `tree-walk-bugs.test.ts` (B1, B2 passés de `it.fails` à `it`, 6 tests ajoutés ; chacun vu en échec d'abord).
+- **Corrigé** : le focus suit les données seulement depuis une position de la grille ou un focus vraiment perdu (le `body`) — plus de vol depuis la case « tout sélectionner » ni depuis un champ extérieur (`hasFocus` périmé, B1) ; épingler/désépingler la colonne focalisée garde le focus (B2, grille plate aussi) ; un repli qui cache la ligne du haut met son ancêtre affiché en haut (décision du lead, `tree-view.md`) ; annonce avec la première colonne visible quand la colonne de l'arbre est masquée.
+- **Tailles** : dom 19 647 (21 300), `@dzgrid/dom/tree` 2 270 (2 600). grid.ts inchangé. Navigateur : `--only tree` 26 / 26 (1 contrôle ajouté), `--only rules` 24 / 24.
 
 Étape 4 faite (2026-10-21, non commitée ; détail dans ROADMAP, Phase 4 ; décisions dans ARCHITECTURE « Décisions de la Phase 4, étape 4 ») :
 - **Coutures de la base** : `GridFeature.shape?()` (la forme donnée au modèle à la création), `FeatureHandle.keys?` avant `intentFor`, `g.layoutFor?`/`g.layout` (une disposition par peinture ; molette et Page suivante à l'étape 9), `g.viewBlock` (l'écran du glissé), ancrage `'expand'` sur la ligne du haut (même en fin de liste), focus suivi dans le DOM quand les données le déplacent (il se perdait sur une image asynchrone). grid.ts : 248 lignes (net zéro). Tests existants verts sans retouche.

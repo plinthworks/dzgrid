@@ -53,9 +53,10 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
   };
   const treeColumn = (): string | undefined => column ?? g.columns.visible()[0]?.id;
   const expand = (rows: readonly RowKey[], expanded: boolean): void => void kernel.dispatch({ type: 'rows.expand', rows, expanded }, 'user');
-  /** The row's label in the tree column, as its cell shows it. */
+  /** The row's label in the tree column, as its cell shows it (that column hidden: the first one shown). */
   const nameOf = (key: RowKey): string => {
-    const col = g.columns.visible().find((c) => c.id === treeColumn());
+    const shown = g.columns.visible();
+    const col = shown.find((c) => c.id === treeColumn()) ?? shown[0];
     const data = g.rows.row(key)?.data;
     if (!col || data === undefined) return '';
     try {
