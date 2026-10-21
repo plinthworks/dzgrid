@@ -75,14 +75,14 @@ describe('settings.motion', () => {
   });
 });
 
-describe('the size lines (owner, 2026-10-20, step 26, Q4)', () => {
-  it('hold the owner’s budgets: dom 19 450, theme 2 350, the motion shell 800 and its run chunk 3 700 over it; gsap and the motion profile recorded', () => {
+describe('the size lines (owner, 2026-10-20, step 26, Q4; reset at the Phase 3 close, step 25)', () => {
+  it('hold the budgets set at the close: dom 21 300, theme 2 300, the motion shell 700 and its run chunk 2 900 over it; gsap and the motion profile recorded; K.8 guard 83 500', () => {
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; files?: string[]; maxGzip: number | null; external?: string[]; over?: string; without?: string[] }> }).entries;
-    expect([b['@dzgrid/dom']!.maxGzip, b['@dzgrid/theme']!.maxGzip, b['@dzgrid/core']!.maxGzip]).toEqual([19450, 2350, 27100]);
-    expect(b['@dzgrid/dom/motion-gsap']).toEqual({ file: 'packages/dom/src/motion-gsap.ts', maxGzip: 800, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
-    expect(b['@dzgrid/dom/motion-gsap: run (lazy)']).toEqual({ file: 'packages/dom/src/motion-gsap/run/index.ts', maxGzip: 3700, over: '@dzgrid/dom/motion-gsap', external: ['gsap', 'gsap/*', '@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
+    expect([b['@dzgrid/dom']!.maxGzip, b['@dzgrid/theme']!.maxGzip, b['@dzgrid/core']!.maxGzip]).toEqual([21300, 2300, 28000]);
+    expect(b['@dzgrid/dom/motion-gsap']).toEqual({ file: 'packages/dom/src/motion-gsap.ts', maxGzip: 700, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
+    expect(b['@dzgrid/dom/motion-gsap: run (lazy)']).toEqual({ file: 'packages/dom/src/motion-gsap/run/index.ts', maxGzip: 2900, over: '@dzgrid/dom/motion-gsap', external: ['gsap', 'gsap/*', '@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
     expect(b['gsap kit: core']).toMatchObject({ maxGzip: null, without: ['gsap', 'gsap/*'] });
     expect(b['profile: audit screen + motion']).toMatchObject({ file: 'perf/profiles/audit-motion.ts', maxGzip: null, split: true });
-    expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(85000);
+    expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(83500); // owner Q3: the measure + 10 %; 85 000 guards example:bytes
   });
 });

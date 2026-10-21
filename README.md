@@ -5,9 +5,9 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **A pure core** (`@dzgrid/core`): rows, columns, sorting, filtering, quick search, selection, paging, the keyboard model — no DOM, no dependency, the same results in Node and in the browser.
 - **A DOM layer** (`@dzgrid/dom`): virtual scrolling over a million rows, pinned columns, keyboard navigation following the WAI-ARIA grid pattern, tooltips, popups in the browser's top layer, rows that follow the reader's text zoom.
 - **A theme** (`@dzgrid/theme`): CSS custom properties, light and dark, every text and part checked for contrast.
-- **Angular** (`@dzgrid/angular`): in progress.
+- **Angular** (`@dzgrid/angular`): `<dz-grid>` with signals, zoneless first, cells and other parts as Angular components or templates; Angular 19 to 22.
 
-> **Status: in development, not published to npm yet.** Phases 0 to 2 are done (core, read-only DOM, theme, right to left, accessibility). Phase 3 (server data, filters, export, cell spans, Angular) is in progress — see [`docs/STATUS.md`](docs/STATUS.md). The API may still change.
+> **Status: 0.1.0 prepared, not published to npm yet.** Phases 0 to 3 are done on the DzGrid side (core, read-only DOM, theme, right to left, accessibility; server data, filters, search, paging, CSV export, cell spans, selection rules, motion, Angular), closed on 2026-10-21. Next: the Sehhaty integration track ([`docs/sehhaty-track.md`](docs/sehhaty-track.md): the audit-logs screen, palettes, Arabic and screen-reader reviews) and Phase 4 (tree view, master/detail) — see [`docs/STATUS.md`](docs/STATUS.md). The API may still change.
 
 ## What it cares about
 
@@ -15,9 +15,9 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **Languages.** Sorting and searching follow the language (Arabic hamza forms, short vowels and tatweel, Arabic-Indic digits). English, French and Arabic messages ship, with their plural rules.
 - **Time zones.** Days and instants are different types. A filter on "5 March" is resolved in the grid's zone, half-open, to the millisecond — also when it is sent to a server.
 - **Server data without surprises.** A request gate guarantees that only the answer to the last request of the current query is shown, whatever order answers arrive in. Pages, cursors, unknown totals, retry and errors are part of the model.
-- **Cells spanning rows and columns**, like an HTML table's `rowspan` and `colspan`: merged identical values, spans decided by the data, grouped headers, full-width rows (in progress).
+- **Cells spanning rows and columns**, like an HTML table's `rowspan` and `colspan`: merged identical values, spans decided by the data, grouped headers, full-width rows.
 - **Problems are values.** A bad column, filter or server answer is reported as a structured problem — never a silent failure, never a crash.
-- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load (`@dzgrid/core/server`, `@dzgrid/core/spans` and `@dzgrid/dom/popup` are separate entries).
+- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 75 879 B gzipped (ARCHITECTURE K.8: ≤ 85 000).
 
 ## A first grid
 
@@ -71,19 +71,55 @@ createGrid<Patient>(host, {
 - [`conformance/`](conformance/) — the core's behaviour as JSON cases, so any implementation can be checked against the same expectations.
 - [`CLEANROOM.md`](CLEANROOM.md) — DzGrid takes *behaviour* from public documentation and standards, never code from other grids.
 
+## Entries and sizes
+
+Minified and gzipped, each entry bundled as a consumer ships it, the packages it builds on left out (`npm run check:size`, measured at the Phase 3 close, 2026-10-21).
+
+| Entry | What it holds | Size (B gz) |
+|---|---|---|
+| `@dzgrid/core` | rows, columns, codecs, sort, filters, quick search, selection, client model, paging | 26 984 |
+| `@dzgrid/core/server` | request gate, `sourceRows`, `toWire` (over the core) | 5 598 |
+| `@dzgrid/core/csv` | `toCsv`, chunks, scopes (over the core) | 1 641 |
+| `@dzgrid/core/spans` | the span map (over the core) | 3 423 |
+| `@dzgrid/core/rules` | selection rules (over the core) | 512 |
+| `@dzgrid/dom` | the grid in the browser | 19 360 |
+| `@dzgrid/dom/filters` | floating row and filter popup (over `@dzgrid/dom/popup`, 1 473) | 9 235 |
+| `@dzgrid/dom/filters`, lazy | the value list / the three date adapters (tzslot apart) | 3 793 / 2 320 |
+| `@dzgrid/dom/search` | binds the host's search input | 1 298 |
+| `@dzgrid/dom/pagination` | footer and pager | 3 157 |
+| `@dzgrid/dom/export` | `csvExport`, eager / its lazy run (with the CSV core) | 1 200 / 4 581 |
+| `@dzgrid/dom/spans` | spans in the DOM | 4 455 |
+| `@dzgrid/dom/slots` | header, overlay and tooltip slots | 1 246 |
+| `@dzgrid/dom/parts` | `badge()`, `cellBoolean` | 595 |
+| `@dzgrid/dom/rules` | selection rules in the DOM | 654 |
+| `@dzgrid/dom/motion-gsap` | `motion()`, eager / its lazy run (GSAP apart) | 593 / 2 591 |
+| `@dzgrid/dom/internal` | shared by the features | 786 |
+| `@dzgrid/dom/locales/{en,fr,ar}` | the grid's messages | 519 / 636 / 825 |
+| `@dzgrid/theme` | the stylesheet | 2 046 |
+| `@dzgrid/angular` | the Angular wrapper | 5 437 |
+| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 75 879 |
+
+Optional peers: `@tzslot/core` and `@tzslot/dom` 2.2 (date filters), `gsap` 3.13 (motion).
+
 ## Developing
 
 ```bash
 npm install            # legacy-peer-deps is set in .npmrc
-npm test               # core, conformance, DOM (jsdom), theme and tools
+npm test               # core, conformance, DOM (jsdom), Angular, theme and tools
 npm run test:ci        # the same on one worker
+npm run test:perm      # 1 000 permutations of the audit screen and of the export, per configuration
 npm run test:tz        # again in Auckland and Los Angeles
 npm run typecheck      # TypeScript, and the Angular templates with ngc
 npm run build          # every package into its dist/
-npm run pack:local     # the tarballs, in packed/
+npm run pack:local     # the four tarballs, in packed/
 npm run check:size     # minified + gzipped, against size-budget.json
-npm run bench          # against perf/budgets.json
+npm run check:contrast # every colour pair of the theme
+npm run bench          # Node, against perf/budgets.json
+npm run bench:browser  # headless Chrome, against perf/browser-budgets.json
 npm run test:browser   # the grid in headless Chrome
+npm run test:audit     # the audit screen in Chrome (-- --full: 1 000 permutations)
+npm run example:build  # the Angular 21 example from the tarballs (then example:bytes, example:csv,
+                       # example:ssr, example:browser; example:smoke -- 19|22 by hand)
 npm start              # playground on http://127.0.0.1:4700 (and /rtl.html)
 ```
 

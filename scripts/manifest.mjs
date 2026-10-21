@@ -61,3 +61,43 @@ export function peerProblems(name, manifest, versions) {
   }
   return problems;
 }
+
+/** The repository every shipped manifest names, with the package's folder (npm links the source). */
+export const REPOSITORY = 'git+https://github.com/plinthworks/dzgrid.git';
+
+/** A manifest without `repository`, or with another folder than `packages/<name>`. */
+export function repositoryProblems(name, manifest) {
+  const r = manifest.repository;
+  if (!r || typeof r !== 'object' || !r.url) return [`packages/${name} has no repository`];
+  const problems = [];
+  if (r.url !== REPOSITORY) problems.push(`packages/${name} repository.url is ${r.url}, not ${REPOSITORY}`);
+  if (r.directory !== `packages/${name}`) problems.push(`packages/${name} repository.directory is ${r.directory}, not packages/${name}`);
+  return problems;
+}
+
+/**
+ * Source maps in a built dist/ that point at a file npm will not receive: a
+ * source neither shipped beside the map nor inlined in its `sourcesContent`
+ * (a `.d.ts.map` naming ../src/*.ts, for one). `files` lists every path
+ * under dist/, relative and with forward slashes; `read` returns one's text.
+ */
+export function mapProblems(name, files, read) {
+  const shipped = new Set(files);
+  const problems = [];
+  for (const file of files.filter((f) => f.endsWith('.map'))) {
+    let map;
+    try { map = JSON.parse(read(file)); } catch { problems.push(`packages/${name}/dist/${file} is not JSON`); continue; }
+    const dir = file.includes('/') ? file.slice(0, file.lastIndexOf('/') + 1) : '';
+    (map.sources ?? []).forEach((source, i) => {
+      if (typeof map.sourcesContent?.[i] === 'string') return;
+      const parts = [];
+      for (const part of (dir + (map.sourceRoot ?? '') + source).split('/')) {
+        if (part === '..') { if (parts.pop() === undefined) parts.push('..'); }
+        else if (part !== '.' && part !== '') parts.push(part);
+      }
+      const target = parts.join('/');
+      if (!shipped.has(target)) problems.push(`packages/${name}/dist/${file} points at ${source}, which is not shipped`);
+    });
+  }
+  return problems;
+}

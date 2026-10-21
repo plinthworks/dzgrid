@@ -21,7 +21,7 @@
       "@dzgrid/dom/*": ["../../dom/dist/*.d.ts"]
     }
   },
-  "files": ["src/main.ts"],
+  "files": ["src/main.ts", "dataset.d.ts"],
   "angularCompilerOptions": {
     "strictTemplates": true,
     "strictInjectionParameters": true,

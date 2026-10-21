@@ -1,9 +1,9 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Raised only by a decision written in ROADMAP.md. Phase 2 close (2026-10-16): each budget is the measure + 10 %, under §5.2's ceilings (dom 30 kB, locales 2 kB, theme 9 kB). Profiles from K.8: audit screen <= 85 000 (Phase 3), everything but charts <= 150 000; the read-only client grid profile is recorded (31.3 kB). Phase 3 (decision in ROADMAP, plan §4): the DOM base is expected near 15 kB with the features seam, the popup host and the parts; budget 16.5 kB during the phase, set at the measure + 10 % at its close. /server (the request gate at step 3) grows at steps 4-5 and is set again then. Owner decision (2026-10-17, step 4): core 24 kB and dom 16.8 kB during Phase 3 (paging in the client model went over), each set at the measure + 10 % at the phase's close. Step 5 part 2 (2026-10-17): /server measured whole (16 081 B gz, budget 17 690), which bundles the client model `sourceRows` builds on; over the base it adds 2 386 B (ROADMAP). /server is measured over the core (what it adds to a grid that already has the core: both bundled, less the core alone), from step 5. Step 5 part 3 (2026-10-17): cursors and the fetched set, 2 726 B over the core, budget 3 000 (measure + 10 %). Owner decision (2026-10-17, step 5 review): dom 17.5 kB during Phase 3 (the grid on a server went over 16.8; step 11 adds default parts to the base), reset to the measure + 10 % at the close. Owner decision (2026-10-17, before step 6): /server 6 kB during Phase 3 (the plan's ceiling for it), reset to the measure + 10 % at the close. Step 6 (2026-10-17): toWire, 4 159 B gz over the core (was 2 743), under the 6 kB. Step 7 (2026-10-18): three announcement keys in every bundle (selectedAll, selectionCleared, selectionReduced) took the locales over their Phase 2 budgets (en 511, fr 623, ar 801 B gz): en 540, fr 660, ar 850 until the owner confirms (ROADMAP step 7). Owner decision (2026-10-18, step 7): locales en 540, fr 660, ar 850 B during Phase 3 (the selection announcements), reset to the measure + 10 % at the close. Owner decision (2026-10-18, step 8 test analysis): core 26 kB during Phase 3 (24 054 measured; step 9's value lists and step 10's CSV to come), reset to the measure + 10 % at the close. Owner decision (2026-10-18, step 9b): dom base 18 kB during Phase 3 (the span seams); new optional entries @dzgrid/core/spans 3.5 kB (over the core) and @dzgrid/dom/spans 2.4 kB when they are created. Step 9 (2026-10-18): value lists, core 25 635 B gz (budget 26 000), /server 5 239 B over the core (6 000). Step 9b commit 2 (2026-10-18): @dzgrid/core/spans created, 3 500 B gz over the core (owner decision O8). Step 9b commit 3 (2026-10-18): @dzgrid/dom/spans created, 2 400 B gz (owner decision O8), measured with the core, its internal entry and @dzgrid/core/spans external. Owner decision (2026-10-19, step 9b): @dzgrid/dom/spans 3.5 kB during Phase 3 (review fixes and grouped headers), reset to the measure + 10 % at the close. Owner decision (2026-10-19, step 9b commit 4): @dzgrid/dom/spans 4.5 kB during Phase 3 (grouped headers: 4 029 measured), reset to the measure + 10 % at the close. Owner decision (2026-10-19, step 10): core 26.1 kB (ClientModel.allRows) and @dzgrid/core/csv 2.5 kB over the core during Phase 3, reset to the measure + 10 % at the close. Owner decision (2026-10-19, step 11): dom 18.6 kB, @dzgrid/dom/slots 1.3 kB, locales en 560 / fr 680 / ar 870 (grid.retry), theme 1 280 (retry button), during Phase 3, reset to the measure + 10 % at the close. Owner decision (2026-10-19, step 12): dom 18.75 kB, @dzgrid/dom/filters 2.9 kB, filter bundles en 200 / fr 230 / ar 290, theme 1 400, during Phase 3, reset to the measure + 10 % at the close. Owner decision (2026-10-19, step 12 measure): @dzgrid/dom/filters 2.9 → 3.5 kB during Phase 3. Owner decision (2026-10-19, step 13): @dzgrid/dom/filters 7 kB over @dzgrid/dom/popup, filter bundles en 520 / fr 620 / ar 830, theme 1 520, during Phase 3, reset to the measure + 10 % at the close. Owner decisions (2026-10-19, step 14): core 26.9 kB (relative date shortcuts), @dzgrid/dom/filters 8.5 kB (eager, tzslot external), a new entry for the lazy date adapters 2.6 kB (DzGrid code only), filter bundles en 680 / fr 760 / ar 850, theme 1 660, during Phase 3, reset to the measure + 10 % at the close; tzslot's kits recorded apart. Step 14 part B (2026-10-19): @dzgrid/dom/filters is measured with tzslot and its lazy chunks external (./dates/*); the lazy date adapters are their own line (the three kits' DzGrid code, bundled together, tzslot external), budget 2 600 (owner Q6); tzslot's own share of each kit is recorded (`without`: the kit bundled with tzslot, less bundled without it), no budget. Owner decisions (2026-10-19, step 15): @dzgrid/dom/filters 9.3 kB, a new lazy line for the set filter 3.8 kB, filter bundles en 850 / fr 980 / ar 1 200, theme 1 800, during Phase 3, reset to the measure + 10 % at the close. Step 15 (2026-10-19): @dzgrid/dom/filters is measured with the set chunk external too (./set/*); the lazy set chunk is its own line (filters/set/index.ts with what it bundles: the draft, the list, its CSS, the leaf helpers; the core external), budget 3 800 (owner Q3). Owner decisions (2026-10-19, step 16): @dzgrid/dom 18.9 kB (search warm-up seam), a new entry @dzgrid/dom/search 1.1 kB, during Phase 3, reset to the measure + 10 % at the close. Owner decision (2026-10-20, step 16 review): @dzgrid/dom/search 1.1 → 1.3 kB during Phase 3 (the review fixes: attributes, several grids, remount, host combobox, Escape input event). Owner decisions (2026-10-20, step 17): @dzgrid/dom 19.1 kB, new @dzgrid/dom/pagination 3.8 kB and @dzgrid/dom/internal 650 B, pagination bundles en 560 / fr 680 / ar 880, theme 2 050, during Phase 3, reset to the measure + 10 % at the close. Step 17 (2026-10-20): @dzgrid/dom/internal is a self-reference of the package (Node, esbuild and Vite resolve it through the exports to one module), shared by slots, filters, search and pagination: external in every feature line, measured alone in its own. Owner decisions (2026-10-20, step 19, Q4): a new entry @dzgrid/dom/export 1.2 kB (eager, the core, its internal entry, @dzgrid/dom/internal and its lazy chunk ./run/* external), its lazy run chunk 5.1 kB (export/run/index.ts with @dzgrid/core/csv bundled, measured over the core; @dzgrid/core/server and @dzgrid/core/spans external: it imports them only with a source or the spans feature, which load them already), export bundles en 220 / fr 250 / ar 380; base, core and csv unchanged; during Phase 3, reset to the measure + 10 % at the close. Owner decisions (2026-10-20, step 20, Q3): a new entry @dzgrid/dom/parts 600 B (the badge and yes/no cell parts; the core, its internal entry and @dzgrid/dom/internal external, none of which it imports), parts bundles en 130 / fr 140 / ar 160; theme stays 2 050 (the success colour and the badge rules); base and core unchanged (types only); during Phase 3, reset to the measure + 10 % at the close. Owner decisions (2026-10-20, step 21, Q4): core 27 100 (the selection gate seam, `selectionRefused`), dom 19 300 (the application's context, fail closed without the rules feature), @dzgrid/dom/internal 800 (the header cell key model shared by the floating row and the header parts), @dzgrid/dom/slots 1 450 (the header part's filter and keys); new entries @dzgrid/core/rules 700 (over the core) and @dzgrid/dom/rules 800 (the core, its internal entry and @dzgrid/dom/internal external), rules bundles en 150 / fr 170 / ar 200; during Phase 3, reset to the measure + 10 % at the close. Owner decision (2026-10-20, step 22, Q4): a new line @dzgrid/angular 5 500 B gz, measured on ng-packagr's fesm2022 output (run npm run build first; size.mjs refuses a missing or stale one), @angular/*, @dzgrid/*, @tzslot/* and rxjs external; core gains the part-shadowed code (within its budget), dom nothing; during Phase 3, reset to the measure + 10 % at the close. Owner decisions (2026-10-20, step 26, Q4): @dzgrid/dom 19 450 (the beforeRows seam, data-motion, ui.cellClass), theme 2 350 (the value flash's tint and mark, forced colours, the motion gate); a new entry @dzgrid/dom/motion-gsap 800 B (the eager shell: options, the loader; the core, its internal entry, @dzgrid/dom/internal and its lazy chunk ./run/* external) and its lazy run chunk 3 700 B (motion-gsap/run/index.ts measured over the shell; gsap, the core, its internal entry and @dzgrid/dom/internal external; ./run/* external too, so the shell alone is what is subtracted); GSAP's own share recorded apart (`gsap kit: core`, the chunk bundled with gsap less without it, no budget); an informational line `profile: audit screen + motion` (the K.8 profile plus the shell, no budget; the K.8 profile itself imports no motion); core and angular unchanged; during Phase 3, reset to the measure + 10 % at the close.",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Phase 3 close (2026-10-21, owner decisions step25-decisions.md Q2, Q3): each budget is the measure + 10 %, rounded up to 50 B, never above the ceilings of ARCHITECTURE §5.2 (core 28 000, dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000) and K.8 (the audit screen profile, 85 000; its guard here is the measure + 10 %, the 85 000 ceiling guards the real Angular example, npm run example:bytes); set by scripts/rebudget.mjs. A budget is raised only by a decision written in ROADMAP.md, which keeps the history of every earlier one.",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
-      "maxGzip": 27100
+      "maxGzip": 28000
     },
     "@dzgrid/core/server": {
       "file": "packages/core/src/server.ts",
@@ -12,98 +12,98 @@
     },
     "@dzgrid/core/spans": {
       "file": "packages/core/src/spans.ts",
-      "maxGzip": 3500,
+      "maxGzip": 3800,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/csv": {
       "file": "packages/core/src/csv.ts",
-      "maxGzip": 2500,
+      "maxGzip": 1850,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/rules": {
       "file": "packages/core/src/rules.ts",
-      "maxGzip": 700,
+      "maxGzip": 600,
       "over": "@dzgrid/core"
     },
     "@dzgrid/dom/locales/en": {
       "file": "packages/dom/src/locales/en.ts",
-      "maxGzip": 560
+      "maxGzip": 600
     },
     "@dzgrid/dom/locales/fr": {
       "file": "packages/dom/src/locales/fr.ts",
-      "maxGzip": 680
+      "maxGzip": 700
     },
     "@dzgrid/dom/locales/ar": {
       "file": "packages/dom/src/locales/ar.ts",
-      "maxGzip": 870
+      "maxGzip": 950
     },
     "@dzgrid/dom/locales/en-filters": {
       "file": "packages/dom/src/locales/en-filters.ts",
-      "maxGzip": 850
+      "maxGzip": 800
     },
     "@dzgrid/dom/locales/fr-filters": {
       "file": "packages/dom/src/locales/fr-filters.ts",
-      "maxGzip": 980
+      "maxGzip": 950
     },
     "@dzgrid/dom/locales/ar-filters": {
       "file": "packages/dom/src/locales/ar-filters.ts",
-      "maxGzip": 1200
+      "maxGzip": 1050
     },
     "@dzgrid/dom/locales/en-pagination": {
       "file": "packages/dom/src/locales/en-pagination.ts",
-      "maxGzip": 560
+      "maxGzip": 400
     },
     "@dzgrid/dom/locales/fr-pagination": {
       "file": "packages/dom/src/locales/fr-pagination.ts",
-      "maxGzip": 680
+      "maxGzip": 450
     },
     "@dzgrid/dom/locales/ar-pagination": {
       "file": "packages/dom/src/locales/ar-pagination.ts",
-      "maxGzip": 880
+      "maxGzip": 550
     },
     "@dzgrid/dom/locales/en-export": {
       "file": "packages/dom/src/locales/en-export.ts",
-      "maxGzip": 220
+      "maxGzip": 250
     },
     "@dzgrid/dom/locales/fr-export": {
       "file": "packages/dom/src/locales/fr-export.ts",
-      "maxGzip": 250
+      "maxGzip": 300
     },
     "@dzgrid/dom/locales/ar-export": {
       "file": "packages/dom/src/locales/ar-export.ts",
-      "maxGzip": 380
+      "maxGzip": 350
     },
     "@dzgrid/dom/locales/en-parts": {
       "file": "packages/dom/src/locales/en-parts.ts",
-      "maxGzip": 130
+      "maxGzip": 150
     },
     "@dzgrid/dom/locales/fr-parts": {
       "file": "packages/dom/src/locales/fr-parts.ts",
-      "maxGzip": 140
+      "maxGzip": 150
     },
     "@dzgrid/dom/locales/ar-parts": {
       "file": "packages/dom/src/locales/ar-parts.ts",
-      "maxGzip": 160
+      "maxGzip": 150
     },
     "@dzgrid/dom/locales/en-rules": {
       "file": "packages/dom/src/locales/en-rules.ts",
-      "maxGzip": 150
+      "maxGzip": 200
     },
     "@dzgrid/dom/locales/fr-rules": {
       "file": "packages/dom/src/locales/fr-rules.ts",
-      "maxGzip": 170
+      "maxGzip": 200
     },
     "@dzgrid/dom/locales/ar-rules": {
       "file": "packages/dom/src/locales/ar-rules.ts",
-      "maxGzip": 200
+      "maxGzip": 250
     },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
-      "maxGzip": 2350
+      "maxGzip": 2300
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 19450,
+      "maxGzip": 21300,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -111,7 +111,7 @@
     },
     "@dzgrid/dom/popup": {
       "file": "packages/dom/src/popup.ts",
-      "maxGzip": 1500,
+      "maxGzip": 1650,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -120,7 +120,7 @@
     },
     "@dzgrid/dom/spans": {
       "file": "packages/dom/src/spans.ts",
-      "maxGzip": 4500,
+      "maxGzip": 4950,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -130,7 +130,7 @@
     },
     "@dzgrid/dom/slots": {
       "file": "packages/dom/src/slots.ts",
-      "maxGzip": 1450,
+      "maxGzip": 1400,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -139,7 +139,7 @@
     },
     "@dzgrid/dom/search": {
       "file": "packages/dom/src/search.ts",
-      "maxGzip": 1300,
+      "maxGzip": 1450,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -148,7 +148,7 @@
     },
     "@dzgrid/dom/pagination": {
       "file": "packages/dom/src/pagination.ts",
-      "maxGzip": 3800,
+      "maxGzip": 3500,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -157,7 +157,7 @@
     },
     "@dzgrid/dom/export": {
       "file": "packages/dom/src/export.ts",
-      "maxGzip": 1200,
+      "maxGzip": 1350,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -167,7 +167,7 @@
     },
     "@dzgrid/dom/export: run (lazy)": {
       "file": "packages/dom/src/export/run/index.ts",
-      "maxGzip": 5100,
+      "maxGzip": 5050,
       "over": "@dzgrid/core",
       "external": [
         "@dzgrid/core/internal",
@@ -178,7 +178,7 @@
     },
     "@dzgrid/dom/parts": {
       "file": "packages/dom/src/parts.ts",
-      "maxGzip": 600,
+      "maxGzip": 700,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -187,7 +187,7 @@
     },
     "@dzgrid/dom/rules": {
       "file": "packages/dom/src/rules.ts",
-      "maxGzip": 800,
+      "maxGzip": 750,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -196,7 +196,7 @@
     },
     "@dzgrid/dom/motion-gsap": {
       "file": "packages/dom/src/motion-gsap.ts",
-      "maxGzip": 800,
+      "maxGzip": 700,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -206,7 +206,7 @@
     },
     "@dzgrid/dom/motion-gsap: run (lazy)": {
       "file": "packages/dom/src/motion-gsap/run/index.ts",
-      "maxGzip": 3700,
+      "maxGzip": 2900,
       "over": "@dzgrid/dom/motion-gsap",
       "external": [
         "gsap",
@@ -234,7 +234,7 @@
     },
     "@dzgrid/dom/internal": {
       "file": "packages/dom/src/internal.ts",
-      "maxGzip": 800,
+      "maxGzip": 900,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -242,7 +242,7 @@
     },
     "@dzgrid/dom/filters": {
       "file": "packages/dom/src/filters.ts",
-      "maxGzip": 9300,
+      "maxGzip": 10000,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -257,7 +257,7 @@
       "files": [
         "packages/dom/src/filters/set/index.ts"
       ],
-      "maxGzip": 3800,
+      "maxGzip": 4200,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -346,7 +346,7 @@
       "css": [
         "packages/theme/dzgrid.css"
       ],
-      "maxGzip": 85000,
+      "maxGzip": 83500,
       "external": [
         "@angular/*",
         "rxjs",
@@ -380,7 +380,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 5500,
+      "maxGzip": 6000,
       "external": [
         "@angular/*",
         "@dzgrid/*",

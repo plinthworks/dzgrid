@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-21 (étape 26 commitée `8ee7d5b`, corrections de la relecture faites, non commitées ; ensuite la clôture, étape 25 ; l'étape 24 attend la spécification du propriétaire). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
+Mis à jour : 2026-10-21 (**Phase 3 close côté DzGrid** : étape 25 faite, non commitée — commit et étiquette `v0.1.0` par le chef de projet ; l'étape 24 passe à la piste « Intégration Sehhaty », `docs/sehhaty-track.md` ; ensuite, la préparation de la Phase 4). Ce fichier dit où en est la Phase 3, ce qui est en cours, comment on travaille, et ce qui attend le propriétaire. Le détail de chaque étape faite est dans `ROADMAP.md` (section Phase 3) ; les décisions dans `ARCHITECTURE.md` (« Décisions de la Phase 3 », puis « Décisions de l'étape N »).
 
 ## Où on en est
 
@@ -31,10 +31,43 @@ Mis à jour : 2026-10-21 (étape 26 commitée `8ee7d5b`, corrections de la relec
 | 21 — règles de sélection (`@dzgrid/core/rules`, `@dzgrid/dom/rules`), contexte de l'application, en-tête qui pilote le filtre | fait, relu, testé (corrections non commitées) | `6e146a7` + corrections |
 | 22 — `@dzgrid/angular` (`<dz-grid>`, contrôleur, `provideDzGrid`, pièces en composants et gabarits, `emit`, `dzgSearch` / `dzgExport`, `fromObservable`, `part-shadowed`) | fait, relu, testé (corrections non commitées) | `307eb24` + corrections |
 | 23 — exemple Angular complet (`examples/angular-audit` depuis les archives, CSV arabe, zone.js, rendu serveur, octets réels), essais 19 et 22 | fait, relu, testé | `84d0663`, `57ff030` |
-| 24, 25 | à faire (liste dans `docs/phase-3-plugins.md` B4 ; 24 attend la spécification de l'écran des journaux d'audit) | — |
+| 24 — transposition de l'écran `admin/audit-logs` | **renvoyée à la piste « Intégration Sehhaty »** (`docs/sehhaty-track.md`, décision du propriétaire du 2026-10-21) : attend la spécification | — |
+| 25 — clôture de la Phase 3 (budgets à la mesure, portail final, 0.1.0 préparée, docs) | fait, testé (non commité) ; portail vert, `test:browser` compris après les suites de la clôture (test des dates sous Chrome 156, cartes de déclaration, README du thème, voir « Portail final ») | — |
 | 26 — animations avec GSAP (`@dzgrid/dom/motion-gsap` : coquille + morceau paresseux), `ui.cellClass`, crochet de l'hôte (`onCell`/`onRow`) | fait, relu, testé (corrections non commitées) | `8ee7d5b` + corrections |
 
-**En cours : corrections de l'étape 26 faites, non commitées (commit par le propriétaire). Ensuite : la clôture de la Phase 3, étape 25 (budgets, relecture). L'étape 24 attend la spécification de l'écran des journaux d'audit (propriétaire).**
+**En cours : la préparation de la Phase 4 (arbre, maître/détail ; plan par l'architecte, à valider par le propriétaire). La Phase 3 est close côté DzGrid le 2026-10-21 ; ce qui demande Sehhaty est dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`).**
+
+Étape 25 faite (clôture ; plan `docs/phase-3-steps/step25-close-blueprint.md`, décisions `step25-decisions.md`) : `scripts/rebudget.mjs` (tests d'abord, `scripts/test/rebudget.test.ts`, 24 tests, le fichier en échec avant le script, puis deux règles ajoutées tests d'abord : lignes Chrome sous la ms gardées, plafonds `/filters` et Angular du §5.2 ; à blanc par défaut, `--write` pour enregistrer ; `scripts/size.mjs` exporte `measureEntries`) ; chaque budget posé depuis la mesure (tableau ci-dessous, et ROADMAP « Final budgets ») ; lignes de mesure ajoutées : Node `gate begin/accepts x 100 000`, `setValues 100 000 x 1 column` (6 valeurs, budget ; textes et nombres relevés), Chrome « suivant » jusqu'à `fetch`, CSV de A dans le navigateur, `<dz-grid>` premier rendu de A et 1 000 créations / destructions (page `?a=1` du montage Angular) ; `npm run bench:browser` réparé (sa page n'avait pas `@dzgrid/dom/internal` depuis l'étape 17) ; 0.1.0 préparée (quatre paquets, pairs `@dzgrid` alignés, champ `repository` vérifié par `build.mjs`, `scripts/test/release.test.ts`), non publiée ; docs : ROADMAP (critères, « Reporté », numérotation, budgets), ARCHITECTURE (index des décisions des étapes, « Ajustements après la Phase 3 », noms du §6), README, CHANGELOG `[0.1.0] - unreleased`, `docs/sehhaty-track.md`. Les tests qui épinglaient les budgets « pendant la Phase 3 » (`rules`, `motion-seam`, `parts-guards`) suivent les budgets de la clôture.
+
+### Portail final de la Phase 3 (2026-10-21, machine M4, un navigateur sans fenêtre à la fois)
+
+| Commande | Résultat |
+|---|---|
+| `npm run build` | vert (core, dom, angular ; `repository` vérifié) |
+| `npm run check:size` | 49 lignes, 0 dépassement (42 budgétées) ; profil K.8 75 879 (garde 83 500) |
+| `npm run bench` ×3 puis une vérification | médianes dans ROADMAP ; vérification sous les nouveaux budgets : 0 dépassement |
+| `npm run bench:browser` ×3 puis une vérification | 40 lignes ; vérification : 0 dépassement |
+| `npm run test:ci` | 243 fichiers, 3 917 tests après les suites (vitest `--maxWorkers=2`, 125 s ; 3 912 avant : +5 tests de cartes dans `release.test.ts`) |
+| `npm run test:perm` | 2 fichiers, 6 tests (1 000 permutations par configuration), 180 s |
+| `npm run typecheck` | vert |
+| `npm run test:tz` (2 processus) | Auckland et Los Angeles : 243 fichiers, 3 912 tests chacun |
+| `npm run check:contrast` | 156 paires, 0 sous leur minimum (palette de tzslot ; pas de `sehhaty.json`) |
+| `npm run test:browser` | **vert** : 379 / 379 (suites des clôtures, 2026-10-21). Le contrôle « un morceau abandonné montre Retry » est corrigé côté test : chaque requête de `moment.js` échoue jusqu'au clic sur « Réessayer », puis la route est retirée et le champ doit apparaître (Chrome 156 refait la requête d'un `import()` qui a échoué ; 2 requêtes ratées avant le clic). Le produit n'a pas changé (`filters/lazy.ts` oublie un échec). Les contrôles des valeurs et de l'audit simulent l'échec par le chargeur ou le serveur : ils ne dépendaient pas de ce comportement |
+| `npm run test:audit -- --full` | 42 / 42 ; 1 000 permutations A (82 s) et B (39 s), 30 + 30 avec saisie, export 100 000 × 30 en 407 / 403 / 404 ms sans tâche longue |
+| `node packages/angular/browser/run.mjs` | 22 / 22 ; reliaison 3,64 µs par cellule composant |
+| `npm run example:build` | default, zone, baseline sans avertissement (après le passage de l'exemple aux archives 0.1.0) |
+| `npm run example:bytes` | part DzGrid **82 582** ≤ 85 000 ; Angular et coquille 38 654 ; enveloppe ≈ 3 329 |
+| `npm run example:csv` | `out/audit-ar.csv`, 13 450 o, BOM |
+| `npm run example:ssr` | fr et ar : hôte seul, 0 ligne, aucun minuteur |
+| `npm run example:browser` | 4 / 4 (fr, ar ; sans zone, zone.js) |
+| `npm run pack:local` | quatre archives 0.1.0 : core 309 912 o (231 fichiers), dom 398 741 o (375), angular 31 486 o (6), theme 10 004 o (8, avec `README.md`). Ni sources de test, ni bac à sable, ni captures. Plus de `.d.ts.map` (`declarationMap: false` dans `tsconfig.build.json` de core et dom). Les cartes du JS portent leurs sources (`inlineSources`). `build.mjs` refuse une carte qui pointe vers un fichier absent (`mapProblems`, testé dans `scripts/test/release.test.ts`) ; contrôle refait sur les archives dépaquetées : 0 problème |
+
+### Ce qui attend le propriétaire
+
+- Commit de l'étape 25 et étiquette locale `v0.1.0` (chef de projet) ; publication sur npm plus tard, sur sa parole seulement (licence de GSAP confirmée, portée `@dzgrid` réservée, `@tzslot` 2.2.0 publié).
+- Les relèvements nés de la règle (recherche rapide 10 colonnes ASCII 162 > cible « à vérifier » 150 du §5.3 ; transaction 23,5 ; première ouverture du filtre à valeurs 75 ; son script 11,5) et les lignes Node à froid dont le budget est proche du bruit (filtre texte à froid 34 ms pour des mesures de 30,2 / 30,6 / 35,7 ; remesuré 30,7 / 30,3 / 30,0 : le pire passage reste sous 34, budget gardé ; la règle « pire passage » donnerait 39,5, voir ROADMAP « Final budgets »).
+- La piste « Intégration Sehhaty » (`docs/sehhaty-track.md`) : la spécification de l'étape 24, `sehhaty.json`, le relecteur arabe, Excel, l'écoute §7–§15, les réponses de l'API, le critère 7.
+- La Phase 4 : arbre et maître/détail d'abord ; question du 2026-10-21 : afficher / cacher la ligne de filtres en direct.
 
 Corrections de l'étape 26 (après `8ee7d5b`, non commitées, tests d'abord : `motion-gaps.test.ts` et `motion-walk-time.test.ts` sur le temps de GSAP, 7 `it.fails` retournés, tous en échec avant ; plus 4 tests dans `motion-gaps` et `motion-gsap`) : l'élément donné à un crochet de l'hôte est suivi par la garde avant l'appel, quelle que soit sa réponse et même effet intégré coupé (ses tweens finis quand l'élément montre une autre ligne, ou à la destruction) ; la garde garde un élément jusqu'à sa reliaison, sa sortie de la page ou la fin de la grille (la fin d'un tween intégré n'ôte que sa marque, et ses propriétés si aucun autre tween ne tourne), puis finit tous ses tweens et efface `transform,opacity,--dzg-flash` (valeurs finales laissées par l'hôte comprises) ; mouvement réduit : une deuxième marque fixe tue l'appel différé de la première et dure ses 0,6 s ; la limite de 500 ms est par cellule (clé de ligne et colonne, table par grille vidée au-delà de 500 ms), plus par élément recyclé ; décision Q5 : une ligne ajoutée en direct a un seul effet de ligne (le fondu `enter`, `onRow 'entered'`, 20 au plus, aucun en mouvement réduit, pas deux fois si un glissement du même dessin l'a fait), aucune de ses cellules ne clignote ; le chargement en temps libre relit `settings.motion` (coupé entre-temps : pas chargé, redemandé une fois rallumé) ; le contenu d'un popup retiré trouvé par `firstElementChild`. Observation non corrigée : l'« écran » du glissement est le nombre de lignes montées × hauteur (marge comprise, ~90 lignes après un défilement rapide) ; la hauteur de la vue serait une lecture de mise en page que l'effet évite, aucun dessin ne la porte, et la limite de 60 lignes borne l'écart. Portail complet vert (241 fichiers, 3 881 tests ; `test:perm`, types, construction, tailles), Chrome `--only motion` 34/34. Tailles : dom 19 360 (19 450), coquille 593 (800), morceau 2 591 (3 700).
 
@@ -87,51 +120,42 @@ Suites de l'étape 18 (après `57c021e`, non commitées) : tests de l'analyse (`
 - Angular dans Chrome (étape 22) : `npm run build` puis `node packages/angular/browser/run.mjs` (construit le montage `packages/angular/browser/build/`, puis vérifie fr et ar, axe, défilements, montages = destructions, reliaison). `node packages/angular/browser/build.mjs` seul construit le montage pour le bac à sable (`/angular/`).
 - Navigateur (une page, fermée à la fin) : `node scripts/browser.mjs` ; performance : `node scripts/perf-browser.mjs` ; écran d'audit (étape 18) : `npm run test:audit` (100 + 10 permutations par configuration, axe, taille stable de la liste, `aria-busy` après « suivant », palette, captures), `-- --full` le critère de sortie (1 000 + 30), `-- --update-shots` réécrit les captures de référence `docs/screenshots/step18/` ; `-- --only axe|size|busy|shots|perm|typed|export` une partie (`export`, étape 19 : téléchargements, fr/ar, axe bouton occupé, morceau paresseux, banc 100 000 × 30). Les captures des essais vont dans `packages/dom/test/browser/results/` (non suivi par git).
 - Exemple Angular (étape 23, dossier `examples/angular-audit`, hors espaces de travail) : `npm run example:build` (archives, installation, `ng build` default, zone, baseline ; `-- --no-pack` sans refaire les archives), puis `npx ng serve` dans le dossier ; `npm run example:csv` (CSV arabe dans `out/`), `example:ssr`, `example:bytes`, `example:browser` (Chrome sans fenêtre), `example:smoke -- 19|22` à la main avec le réseau (`DZG_SMOKE_DIR` = dossier jetable ; Angular 22 demande Node ≥ 22.22.3). Les tests `perf/test/example-{ssr,bytes}.test.ts` sont sautés sans la construction.
+- Performance (étape 25) : `npm run bench` (Node, `perf/budgets.json`) et `npm run bench:browser` (Chrome sans fenêtre, `perf/browser-budgets.json` ; construit aussi le montage Angular, `npm run build` d'abord). Budgets depuis une mesure : `node scripts/rebudget.mjs sizes [--from sortie-de-check-size.txt]`, `node scripts/rebudget.mjs node bench1.txt bench2.txt bench3.txt` (la médiane), `node scripts/rebudget.mjs browser sortie.txt…` ; à blanc par défaut, `--write` enregistre (seulement sur décision du propriétaire).
 - Bac à sable : `npx vite --host 127.0.0.1` puis http://127.0.0.1:4700/, `/rtl.html` et `/spans.html` (fusions) ; `?search=1` le champ de recherche (étape 16) ; `?paging=client` le pied de pagination, `?paging=cursor` un serveur lent par curseur sans total (étape 17) ; `/audit.html` l'écran d'audit (étape 18 : `?config=server|fetched`, `lang`, latence, gigue, échecs, total, palette ; lien « Écran d'audit » du menu Démos ; bouton « Exporter en CSV », étape 19) ; `?export=1` un bouton d'export au-dessus de la grille (lien « Export CSV » ; `/rtl.html` l'ouvre en arabe).
 
-## Budgets de taille pendant la Phase 3 (décisions du propriétaire)
+## Budgets à la clôture de la Phase 3 (2026-10-21, décisions du propriétaire Q2 et Q3 de l'étape 25)
 
-| Entrée | Budget | Mesure récente |
-|---|---|---|
-| `@dzgrid/core` | 27 100 o gz (étape 21, règles) | 26 986 (étape 22 : code `part-shadowed`) |
-| `@dzgrid/angular` (sortie fesm2022 de ng-packagr ; Angular, `@dzgrid/*`, tzslot, rxjs à part ; `npm run build` avant `check:size`) | 5 500 (étape 22, Q4) | 5 437 (corrections de l'étape 22) |
-| `@dzgrid/core/rules` (par-dessus le cœur) | 700 (étape 21) | 509 |
-| `@dzgrid/core/csv` (par-dessus le cœur) | 2 500 | 1 628 |
-| `@dzgrid/core/spans` (par-dessus le cœur) | 3 500 | 3 422 |
-| `@dzgrid/core/server` (mesuré par-dessus le cœur) | 6 000 | 5 559 |
-| `@dzgrid/dom` | 19 450 (étape 26, Q4) | 19 360 (étape 26 : `beforeRows`, `data-motion`, `ui.cellClass`) |
-| `@dzgrid/dom/rules` | 800 (étape 21) | 654 |
-| `@dzgrid/dom/motion-gsap` (coquille immédiate ; le cœur, `internal` et `./run/*` à part) | 800 (étape 26) | 593 (corrections de l'étape 26) |
-| motion, morceau paresseux (`motion-gsap/run/`, par-dessus la coquille, gsap à part) | 3 700 (étape 26) | 2 591 (corrections de l'étape 26) |
-| part de GSAP (`gsap kit: core`, relevée, sans budget) | — | 28 277 (71 989 min) |
-| textes `{en,fr,ar}-rules` | 150 / 170 / 200 (étape 21) | 148 / 166 / 192 |
-| `@dzgrid/dom/pagination` | 3 800 (étape 17) | 3 149 |
-| `@dzgrid/dom/internal` | 800 (étape 21) | 786 |
-| `@dzgrid/dom/export` (immédiat ; le cœur, `internal` et `./run/*` à part) | 1 200 (étape 19) | 1 200 (corrections : course du chargement, échec sans rejet ; au plafond) |
-| export, morceau paresseux (`export/run/`, `@dzgrid/core/csv` compris, par-dessus le cœur) | 5 100 (étape 19) | 4 569 |
-| textes de l'export en / fr / ar | 220 / 250 / 380 (étape 19) | 216 / 248 / 296 |
-| `@dzgrid/dom/parts` | 600 (étape 20) | 583 |
-| textes des pièces en / fr / ar | 130 / 140 / 160 (étape 20) | 98 / 99 / 108 |
-| textes de la pagination en / fr / ar | 560 / 680 / 880 (étape 17) | 328 / 375 / 489 |
-| `@dzgrid/dom/search` | 1 300 (étape 16, Q4) | 1 298 (étape 18 : une phrase par geste) |
-| `@dzgrid/dom/filters` (mesuré par-dessus `@dzgrid/dom/popup`, tzslot, les lots de dates et la liste à part) | 9 300 (étape 15) | 9 236 (corrections de l'étape 21 : `dropped`, abandon au « tout effacer ») |
-| liste de valeurs (paresseuse, `filters/set/`) | 3 800 (étape 15) | 3 793 (étape 18 : ligne d'état d'une ligne de haut, repli `1.2em`) |
-| adaptateurs de dates (paresseux, code DzGrid seul, tzslot à part) | 2 600 (étape 14) | 2 320 |
-| lots tzslot (part de tzslot, relevée, sans budget) : date / range / moment / les trois | — | 36 394 / 57 719 / 48 461 / 65 034 |
-| `@dzgrid/dom/spans` | 4 500 (O8 ter) | 4 455 |
-| `@dzgrid/dom/slots` | 1 450 (étape 21) | 1 246 |
-| `@dzgrid/dom/popup` | 1 500 | 1 473 (étape 18 : fermeture au clic dehors, `opener`) |
-| **profil écran d'audit (K.8)**, premier chargement : `perf/profiles/audit.ts` découpé comme une appli (esbuild, tzslot inclus), le point d'entrée et ses morceaux statiques + le thème ; depuis l'étape 23 avec les valeurs de `@dzgrid/angular` (fesm2022 livré, Angular et rxjs à part) | 85 000 (K.8, Q1 de l'étape 18) | 75 879 (étape 26 ; JS 73 833 en 7 fichiers, CSS 2 046 ; aucune animation dedans, test) |
-| profil écran d'audit + motion (`perf/profiles/audit-motion.ts`, relevé, sans budget) : le profil K.8 plus la coquille ; à côté, paresseux : le morceau motion et GSAP | — | 76 301 ; à côté 2 565 (morceau) et 27 794 (GSAP) |
-| K.8 dans la vraie construction de l'exemple (`npm run example:bytes`, relevé, la garde reste la ligne ci-dessus) : part DzGrid (default − baseline) / Angular et coquille / enveloppe | — (≤ 85 000, au-delà : arrêt) | 82 014 / 38 654 / ≈ 3 327 (étape 23) |
-| à côté, paresseux, sans budget : liste de valeurs / adaptateurs de dates date, range, moment / morceau tzslot partagé | — | 3 666 / 449, 1 107, 682 / 66 486 ; la première fenêtre de date télécharge 66 935 à 67 593 |
-| langues en / fr / ar | 560 / 680 / 870 (`grid.retry`) | 519 / 636 / 825 |
-| textes des filtres en / fr / ar | 850 / 980 / 1 200 (étape 15) | 707 / 831 / 941 |
-| thème | 2 350 (étape 26, Q4) | 2 046 (étape 26 : l'éclat, sa marque, les couleurs forcées) |
+Règle : **budget = mesure + 10 %**. Tailles arrondies aux 50 o supérieurs, jamais au-dessus des plafonds du §5.2 (cœur 28 000, dom 30 000, textes 2 000, thème 9 000, `/server` 6 000, `/filters` 10 000, Angular 8 000) ; garde du profil K.8 dans `check:size` = 83 500 (le plafond 85 000 garde la vraie construction, `npm run example:bytes`). Temps Node : max(m × 1,1 ; m + 0,5 ms) au demi-ms pour les lignes de 5 ms et plus, les autres gardent leur plafond. Chrome sans fenêtre : mesure + 35 % au demi-ms, sous les cibles du §5.3 ; lignes sous la ms, comptes et Mo gardés. Posés par `node scripts/rebudget.mjs sizes|node|browser … --write` (à blanc sans `--write`). Tableaux complets (ancien / mesure / nouveau) : ROADMAP, Phase 3, « Final budgets ». Un budget ne monte ensuite que par une décision écrite du propriétaire (la Phase 4 en demandera à sa première étape).
 
-À la clôture de la Phase 3, chaque budget revient à la mesure + 10 %.
+| Entrée | Ancien | Mesure | Nouveau |
+|---|---|---|---|
+| `@dzgrid/core` | 27 100 | 26 984 | 28 000 (plafond) |
+| `@dzgrid/core/server` | 6 000 | 5 598 | 6 000 (plafond) |
+| `@dzgrid/core/spans` / `csv` / `rules` | 3 500 / 2 500 / 700 | 3 423 / 1 641 / 512 | 3 800 / 1 850 / 600 |
+| `@dzgrid/dom` | 19 450 | 19 360 | 21 300 |
+| `@dzgrid/dom/filters` (par-dessus popup) | 9 300 | 9 235 | 10 000 (plafond) |
+| liste de valeurs / adaptateurs de dates (paresseux) | 3 800 / 2 600 | 3 793 / 2 320 | 4 200 / 2 600 |
+| `@dzgrid/dom/popup` / `slots` / `search` / `internal` | 1 500 / 1 450 / 1 300 / 800 | 1 473 / 1 246 / 1 298 / 786 | 1 650 / 1 400 / 1 450 / 900 |
+| `@dzgrid/dom/pagination` / `parts` / `rules` / `spans` | 3 800 / 600 / 800 / 4 500 | 3 157 / 595 / 654 / 4 455 | 3 500 / 700 / 750 / 4 950 |
+| `@dzgrid/dom/export` / son morceau | 1 200 / 5 100 | 1 200 / 4 581 | 1 350 / 5 050 |
+| `@dzgrid/dom/motion-gsap` / son morceau | 800 / 3 700 | 593 / 2 591 | 700 / 2 900 |
+| langues en / fr / ar | 560 / 680 / 870 | 519 / 636 / 825 | 600 / 700 / 950 |
+| textes filtres en / fr / ar | 850 / 980 / 1 200 | 707 / 831 / 941 | 800 / 950 / 1 050 |
+| textes pagination en / fr / ar | 560 / 680 / 880 | 328 / 375 / 489 | 400 / 450 / 550 |
+| textes export en / fr / ar | 220 / 250 / 380 | 216 / 248 / 296 | 250 / 300 / 350 |
+| textes pièces en / fr / ar | 130 / 140 / 160 | 98 / 99 / 108 | 150 / 150 / 150 |
+| textes règles en / fr / ar | 150 / 170 / 200 | 148 / 166 / 192 | 200 / 200 / 250 |
+| thème | 2 350 | 2 046 | 2 300 |
+| `@dzgrid/angular` | 5 500 | 5 437 (5 439 en 0.1.0) | 6 000 |
+| **profil écran d'audit (K.8)** | 85 000 | 75 879 | **83 500** (Q3) |
+| relevés sans budget : profil lecture seule / + motion / GSAP / tzslot (trois lots) | — | 44 555 / 76 308 / 28 266 / 65 036 | — |
+
+Les petites entrées (< 300 o) gagnent 10 à 50 % à l'arrondi (bruit de gzip). Temps : voir ROADMAP (52 lignes Node, 40 lignes Chrome) ; relèvements à noter : recherche rapide 10 colonnes ASCII à froid 150 → 162 (mesure 147, au-dessus de la cible « à vérifier » de 150 du §5.3), transaction d'une ligne jusqu'à l'image suivante 20 → 23,5, filtre à valeurs première ouverture 60 → 75 (mesures 66,1 / 46,4 / 55,3), son script 10 → 11,5.
 
 ## Questions en attente du propriétaire de Sehhaty
+
+Depuis la clôture (2026-10-21), elles vivent dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`, avec ce que l'étape 24 attend) ; rappel :
+
 
 - API serveur (§1.1) : pagination par offset ou par curseur ; total toujours renvoyé (et après filtre ?) ; indication « page suivante » ; taille de page maximale ; requêtes rejouables sans risque.
 - Grammaire des filtres côté API : borne de fin incluse ou exclue ; format des dates ; recherche texte sans accents ; filtres vide / non vide ; encodage des listes ; paramètres inconnus refusés ?

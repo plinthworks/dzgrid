@@ -268,8 +268,12 @@ async function dateChecks(name, ctx) {
     let release;
     const late = new Promise((r) => (release = r));
     await page.route('**/filters/dates/range.js', async (route) => { await late; await route.continue(); });
+    // Every fetch of the chunk fails until Retry is clicked: current Chrome re-fetches a failed
+    // import() (older engines kept the failure, spike S13), so a one-shot abort would let the next
+    // operator load the field and Retry would never show.
     let aborts = 0;
-    await page.route('**/filters/dates/moment.js', (route) => (aborts++ === 0 ? route.abort('failed') : route.continue()));
+    const abortMoment = (route) => { aborts++; return route.abort('failed'); };
+    await page.route('**/filters/dates/moment.js', abortMoment);
     await openOn(page, 'day');
     await ready(page);
     await op(page, 'between');
@@ -294,13 +298,13 @@ async function dateChecks(name, ctx) {
     check(name, 'dates: an aborted chunk shows the failure (alert, Retry, axe 0); blank still filters', !!failed.alert && va.length === 0 && blank?.op === 'blank', { failed, va, blank });
     await op(page, 'after');
     await page.waitForSelector('.dzg-popup .dzg-fretry', { timeout: 10000 });
+    const failedFetches = aborts;
+    await page.unroute('**/filters/dates/moment.js', abortMoment);
     await page.click('.dzg-popup .dzg-fretry');
-    await page.waitForTimeout(800);
+    const widget = await page.waitForSelector('.dzg-popup .dzg-fdate .tz-field', { timeout: 10000 }).then(() => true, () => false);
     const retried = await S(page);
-    const widget = await page.evaluate(() => !!document.querySelector('.dzg-popup .dzg-fdate .tz-field'));
-    // Recorded, not required: Chrome keeps a failed import() (spike S13), so Retry may fail until a reload.
-    console.log(`note ${name}: Retry after an aborted chunk ${widget ? 'loaded the field' : 'failed again (the engine keeps the failed import: reload the page)'}; fetches of the chunk: ${aborts}`);
-    check(name, 'dates: Retry either loads the field or says the failure again (never a blank form)', widget || !!retried.alert, { widget, retried });
+    console.log(`note ${name}: failed fetches of the chunk before Retry: ${failedFetches}`);
+    check(name, 'dates: once the network is back, Retry re-imports the chunk and shows the field (no alert)', widget && !retried.alert, { widget, retried, failedFetches });
     check(name, 'no page error dates chunks', errors.filter((e) => !/unreachable|Failed to fetch|ERR_FAILED/.test(e)).length === 0, errors);
     await page.close();
   }

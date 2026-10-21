@@ -1,11 +1,13 @@
 /**
  * The fixture's harness: `window.fx` for run.mjs. `?lang=ar` Arabic right to left; `?bench=1`
- * synchronous paints (DZG_ENV), for the rebind measure.
+ * synchronous paints (DZG_ENV), for the rebind measure; `?a=1` dataset A alone (a.ts), for
+ * scripts/perf-browser.mjs (step 25: `<dz-grid>` first render, 1 000 create/destroy cycles).
  */
 import { provideZonelessChangeDetection, type ApplicationRef } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { DZG_ENV } from '@dzgrid/angular';
 import { AR_MODE, App, stats } from './app';
+import { AppA } from './a';
 
 declare global {
   interface Window {
@@ -24,7 +26,40 @@ if (AR_MODE) {
   document.documentElement.dir = 'rtl';
 }
 
+/** Dataset A alone: the time from showing `<dz-grid>` (rows in memory) to the second frame, and cycles. */
+async function mainA(): Promise<void> {
+  const appRef: ApplicationRef = await bootstrapApplication(AppA, { providers: [provideZonelessChangeDetection()] });
+  const app = appRef.components[0]!.instance as AppA;
+  await frame();
+  window.fx = {
+    async firstRender() {
+      app.rows.set(app.all);
+      const t0 = performance.now();
+      app.shown.set(true);
+      appRef.tick();
+      await frame();
+      await frame();
+      return performance.now() - t0;
+    },
+    bodyRows: () => document.querySelectorAll('.dzg-layer .dzg-row').length,
+    /** `n` times: `<dz-grid>` created on 200 rows, then destroyed, each with its change detection. */
+    async cycles(n: number) {
+      app.rows.set(app.small);
+      for (let i = 0; i < n; i++) {
+        app.shown.set(true);
+        appRef.tick();
+        app.shown.set(false);
+        appRef.tick();
+      }
+      await frame();
+      return document.querySelectorAll('.dzg').length;
+    },
+  };
+  window.fxReady = true;
+}
+
 async function main(): Promise<void> {
+  if (params.get('a') === '1') return mainA();
   const appRef: ApplicationRef = await bootstrapApplication(App, {
     providers: [provideZonelessChangeDetection(), ...(bench ? [{ provide: DZG_ENV, useValue: { sync: true } }] : [])],
   });

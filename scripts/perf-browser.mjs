@@ -7,10 +7,17 @@
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
 import { serve, browser, median, percentile } from '../spikes/kit.mjs';
+import { buildFixture } from '../packages/angular/browser/build.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const budgets = JSON.parse(readFileSync(`${ROOT}perf/browser-budgets.json`, 'utf8')).budgets;
+// Step 25 lines: the audit screen's server (C) and the CSV of A load tzslot through audit.html's
+// importmap (bundled once, as test:audit does); `<dz-grid>` runs on the Angular fixture's `?a=1`
+// page, built here (AOT, minified; `npm run build` first).
+await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
+await buildFixture();
 // Minified, as a consumer ships it: never measure unminified code (§5.4).
 const site = await serve(import.meta.url, { minify: true });
 const lines = [];
@@ -95,6 +102,89 @@ try {
     await cdp.send('HeapProfiler.collectGarbage');
     const h1 = (await cdp.send('Runtime.getHeapUsage')).usedSize;
     line('1 000 create/destroy cycles: heap retained', (h1 - h0) / 1024 / 1024, 'MB');
+    await pg.close();
+  }
+
+  // ---- step 25 (phase-3-plan §4): "next" to fetch on the server (C: 10⁷ rows, total unknown) ----
+  {
+    const pg = await b.newPage({ viewport: { width: 1300, height: 760 } });
+    const errors = [];
+    pg.on('pageerror', (e) => errors.push(e.message));
+    await pg.goto(site.root('packages/dom/test/browser/audit.html'));
+    await pg.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await pg.evaluate(() => window.audit.mount({ config: 'server', lang: 'fr' }));
+    const settle = () => pg.evaluate(async () => {
+      for (let k = 0; k < 5; k++) {
+        const s = window.audit.server;
+        for (const e of s.pending()) s.release(e.seq);
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+    });
+    await settle();
+    const nexts = [];
+    for (let k = 0; k < 9; k++) {
+      // The fake server logs a request when the grid calls its `fetch`: the click to that call.
+      nexts.push(await pg.evaluate(async () => {
+        const log = window.audit.server.log;
+        let at = null;
+        const push = log.push;
+        log.push = function (...a) { at ??= performance.now(); return push.apply(this, a); };
+        const t0 = performance.now();
+        document.querySelector('.dzg-footer button[data-go="next"]').click();
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        delete log.push;
+        return at === null ? Infinity : at - t0;
+      }));
+      await settle();
+    }
+    line('"next" click to fetch called (server, C)', median(nexts), 'ms');
+    // ---- the CSV of A in the browser (100 000 × 30, all, French; the audit page's bench) ----
+    const csv = await pg.evaluate(() => window.audit.exportBench(3));
+    if (csv.error) errors.push(`export bench: ${csv.error}`);
+    line('CSV export of A in the browser: wall', median(csv.runs?.map((r) => r.wall) ?? [Infinity]), 'ms');
+    line('CSV export of A in the browser: longest task', Math.max(...(csv.runs?.map((r) => r.longtask) ?? [Infinity])), 'ms');
+    line('CSV export of A in the browser: longest animation frame', Math.max(...(csv.runs?.map((r) => r.loaf) ?? [Infinity])), 'ms');
+    line('server and CSV: page errors', errors.length, 'errors');
+    await pg.close();
+  }
+
+  // ---- step 25: <dz-grid> (the Angular fixture's ?a=1 page, AOT, minified) on dataset A ----
+  {
+    const ng = async () => {
+      // 1 300 × 1 030: the fixture's host is 70 % of the height, about the 720 px of the plan.
+      const pg = await b.newPage({ viewport: { width: 1300, height: 1030 } });
+      const errors = [];
+      pg.on('pageerror', (e) => errors.push(e.message));
+      pg.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+      await pg.goto(site.root('packages/angular/browser/build/index.html?a=1'));
+      await pg.waitForFunction(() => window.fxReady || window.fxError, null, { timeout: 30000 });
+      const boot = await pg.evaluate(() => window.fxError);
+      if (boot) throw new Error(boot);
+      return { pg, errors };
+    };
+    const firsts = [];
+    const errors = [];
+    for (let k = 0; k < 5; k++) {
+      const { pg, errors: e } = await ng();
+      firsts.push(await pg.evaluate(() => window.fx.firstRender()));
+      if ((await pg.evaluate(() => window.fx.bodyRows())) === 0) e.push('no row drawn');
+      errors.push(...e);
+      await pg.close();
+    }
+    line('<dz-grid> first render of A', median(firsts), 'ms');
+    const { pg, errors: e } = await ng();
+    const cdp = await pg.context().newCDPSession(pg);
+    await pg.evaluate(() => window.fx.cycles(20));
+    await cdp.send('HeapProfiler.collectGarbage');
+    const h0 = (await cdp.send('Runtime.getHeapUsage')).usedSize;
+    const left = await pg.evaluate(() => window.fx.cycles(1000));
+    await cdp.send('HeapProfiler.collectGarbage');
+    const h1 = (await cdp.send('Runtime.getHeapUsage')).usedSize;
+    if (left !== 0) e.push(`${left} grids left after the cycles`);
+    line('<dz-grid> 1 000 create/destroy cycles: heap retained', (h1 - h0) / 1024 / 1024, 'MB');
+    errors.push(...e);
+    line('<dz-grid>: page errors', errors.length, 'errors');
+    if (errors.length) console.log(`       ${JSON.stringify(errors).slice(0, 600)}`);
     await pg.close();
   }
 

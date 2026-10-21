@@ -1,6 +1,6 @@
 import { assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache, filterKindLookup, flatDisplayed } from '../packages/core/src/internal.js';
-import { toWire } from '../packages/core/src/server.js';
+import { toWire, createGate } from '../packages/core/src/server.js';
 import { buildSpanMap } from '../packages/core/src/spans.js';
 import { toCsv } from '../packages/core/src/csv.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
@@ -43,6 +43,19 @@ export const CASES: Record<string, Case> = {
       let n = 0;
       for (let i = 0; i < 10_000; i++) n += msg(AR, 'announce.rows', { n: i }, ctx).length;
       return n;
+    },
+  },
+  // Step 25 (phase-3-plan §4): the request gate's hot path, a new request on one channel that
+  // supersedes the last (an abort each), and the question asked of each answer.
+  'gate begin/accepts x 100 000': {
+    setup: () => createGate(() => {
+      const signal = { aborted: false, reason: undefined as unknown };
+      return { signal, abort: (r?: unknown) => void Object.assign(signal, { aborted: true, reason: r }) };
+    }),
+    run: (g: ReturnType<typeof createGate>) => {
+      let ok = 0;
+      for (let i = 0; i < 100_000; i++) if (g.accepts(g.begin('rows', `k${i & 7}`).ticket) === null) ok++;
+      return ok;
     },
   },
   // What sourceRows does once per new query, zone or columns (never per page): a cold model each run.
@@ -192,6 +205,13 @@ function modelCases(): Record<string, Case> {
   };
   let tick = 0;
   return {
+    // Step 25 (phase-3-plan §4, §5.3 "index of a value filter over A, one column ≤ 30 ms"): the list
+    // (distinct values, ranks, counts) on a cold model, for the column a value filter is made for, a
+    // category (6 values). Recorded beside it, no budget: a French text column of ~100 000 distinct
+    // values (capped at 2 000 shown) and a number column, where the cold ranks dominate.
+    'setValues 100 000 x 1 column (cold, 6 values)': { setup: model, run: (m: ReturnType<typeof model>) => m.setValues('e1').result?.values.length },
+    'setValues 100 000 x 1 column (cold, ~100 000 French texts)': { setup: model, run: (m: ReturnType<typeof model>) => m.setValues('t0').result?.values.length },
+    'setValues 100 000 x 1 column (cold, numbers)': { setup: model, run: (m: ReturnType<typeof model>) => m.setValues('n0').result?.values.length },
     'load 100 000 x 30 (clientRows)': { setup: () => (rows ??= datasetA()), run: (r: RowA[]) => clientRows<RowA>({ rows: r, getRowId: (x) => x.id, columns, ctx: localeCtx({ locale: 'fr-FR' }) }).displayed.count },
     'setQuery sort change on 100 000 (numeric, warm keys)': {
       setup: () => {

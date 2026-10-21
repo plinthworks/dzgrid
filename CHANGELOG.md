@@ -7,10 +7,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing published yet. Phase 0 laid the ground: clean-room rules, the
-architecture, the core's seed (row identities, calendar days apart from
-instants, the bounds of a day in a zone), conformance cases written by hand,
-and ten spikes in three browser engines.
+Nothing yet after 0.1.0.
+
+## [0.1.0] - unreleased
+
+Prepared at the Phase 3 close (2026-10-21), **not published**: the four packages `@dzgrid/core`,
+`@dzgrid/dom`, `@dzgrid/angular` and `@dzgrid/theme` at 0.1.0, their `@dzgrid/*` peers on `^0.1.0`.
+Published later on the owner's word only, after the GSAP licence is confirmed, the `@dzgrid` scope
+reserved on npm and `@tzslot/core` / `@tzslot/dom` 2.2.0 published (GitHub Actions over OIDC with
+provenance, `--tag next` first; never by an agent). The date is written on publication.
+
+### Added (Phases 0 to 3, by area)
+
+- **Groundwork (Phase 0)**: clean-room rules (`CLEANROOM.md`), the architecture and the owner's
+  decisions K.1–K.14, conformance cases written by hand (`conformance/`), ten spikes in three
+  browser engines (a million rows, right to left with pinned columns, auto height, screen readers,
+  `Intl`, Angular cells, clipboard, XLSX, composition, focus), then S11 (before Phase 2) and S12
+  (spans, Phase 3).
+- **`@dzgrid/core` (Phase 1)**: typed row identities (`RowKey`, `DisplayIndex`), calendar days kept
+  apart from instants (`day`, `instant`, `zoneDayBounds` on `Intl`, no `Date`), value codecs and
+  parsing (`fr-FR`, `ar-DZ` digits), columns, the client row model (`clientRows`: sort, filters —
+  text, number, day, instant, set, custom `FilterKind` — quick search by language, transactions,
+  selection, paging in the browser, value lists), layout (prefix sums, scroll mapper), problems as
+  values, messages with plural rules; no DOM, no dependency.
+- **Server data (`@dzgrid/core/server`, Phase 3)**: the request gate (`createGate`: only the last
+  request of the current query is applied), `sourceRows` (pages by offset or cursor, unknown totals,
+  the fetched set, retry, values from the server), `toWire` (the filter as the server receives it,
+  instant ranges half-open in UTC), selection across pages.
+- **CSV (`@dzgrid/core/csv`)**: `toCsv`, `csvChunks`, `csvRows`, `csvColumns`, BOM, separator by
+  language, formula guard, `csv: 'text'` columns.
+- **Cell spans (`@dzgrid/core/spans`, `@dzgrid/dom/spans`)**: merged identical values, spans decided
+  by the data, grouped headers, full-width rows, under sort, filter, paging and virtual scrolling.
+- **Selection rules (`@dzgrid/core/rules`, `@dzgrid/dom/rules`)**: `canSelect`, refusals said and
+  shown, the application's `context` everywhere.
+- **`@dzgrid/dom` (Phase 2, then Phase 3)**: virtual rows and columns (a million rows), pinned
+  columns, right to left, keyboard after the WAI-ARIA grid pattern, row selection, tooltips,
+  overlays, live announcements, popups in the top layer, rows that follow text zoom; the features
+  seam, parts and slots (`@dzgrid/dom/slots`, `@dzgrid/dom/parts`: `badge()`, `cellBoolean`),
+  `ui.cellClass`, `settings.motion`.
+- **Filters UI (`@dzgrid/dom/filters`)**: the floating row, the filter popup (text, number, yes/no),
+  date filters on tzslot (an optional peer, loaded on first use) with six relative shortcuts, the
+  value-list filter (a lazy chunk).
+- **Search, paging, export, motion**: `@dzgrid/dom/search` (binds the host's input),
+  `@dzgrid/dom/pagination` (footer, pager, unknown totals), `@dzgrid/dom/export` (`csvExport`,
+  `canExport` required, a lazy run chunk, the server's own export), `@dzgrid/dom/motion-gsap`
+  (`motion()`, GSAP an optional peer).
+- **Messages**: `en`, `fr`, `ar` bundles per feature (`locales/{en,fr,ar}[-filters|-pagination|-export|-parts|-rules]`).
+- **`@dzgrid/theme`**: CSS custom properties on tzslot's palette, light and dark, more contrast,
+  forced colours, every pair checked (`npm run check:contrast`), Sass and Tailwind entries.
+- **`@dzgrid/angular`**: `<dz-grid>` (signals, zoneless first, zone.js supported, nothing on a
+  server), `DzgController`, `provideDzGrid`, parts as components or templates with `emit`,
+  `dzgSearch`, `dzgExport`, `fromObservable`; Angular 19 to 22.
+- **Tooling**: `npm run check:size` (every entry against `size-budget.json`, the K.8 audit-screen
+  profile), `npm run bench` and `bench:browser` (Node and headless-Chrome budgets),
+  `npm run test:perm` (1 000 permutations), `npm run test:audit`, the Angular example
+  (`npm run example:*`), `scripts/rebudget.mjs` (budgets set from a measure, step 25).
+
+### Changed (Phase 3 close, step 25)
+
+- Every budget set again from the measure (owner decision 2026-10-21): sizes the measure + 10 %
+  rounded up to 50 B under ARCHITECTURE §5.2's ceilings (the K.8 profile guard 83 500, the real
+  example still held to 85 000); Node times max(m × 1.1, m + 0.5 ms) for lines of 5 ms and more;
+  headless-Chrome times the measure + 35 %. Final numbers in ROADMAP.md (Phase 3).
+- New bench lines: `gate begin/accepts x 100 000`, `setValues 100 000 x 1 column` (Node); `"next"`
+  click to fetch, the CSV of A in the browser, `<dz-grid>` first render of A and 1 000
+  create/destroy cycles (Chrome). `npm run bench:browser` runs again (its page lacked
+  `@dzgrid/dom/internal` since step 17).
+
+### Phase 0 to 2 in brief
+
+Phase 0 laid the ground: clean-room rules, the architecture, the core's seed (row identities,
+calendar days apart from instants, the bounds of a day in a zone), conformance cases written by
+hand, and ten spikes in three browser engines. Phases 1 and 2 built the data core and the read-only
+DOM layer with its theme (ROADMAP.md). The sections below detail Phase 3 step by step.
 
 ### Added (Phase 3, step 26: motion with GSAP, `ui.cellClass`, the host hook)
 

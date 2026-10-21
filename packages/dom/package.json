@@ -1,6 +1,6 @@
 {
   "name": "@dzgrid/dom",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "DzGrid in the browser: virtualised rows and columns, pinned columns, right to left, keyboard and screen readers. No framework, no dependency.",
   "type": "module",
   "license": "MIT",
@@ -127,7 +127,7 @@
     }
   },
   "peerDependencies": {
-    "@dzgrid/core": "0.0.0",
+    "@dzgrid/core": "0.1.0",
     "@tzslot/core": ">=2.2.0 <3",
     "@tzslot/dom": ">=2.2.0 <3",
     "gsap": "^3.13.0"

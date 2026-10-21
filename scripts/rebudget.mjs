@@ -1,0 +1,233 @@
+/**
+ * The Phase 3 close (step 25): every budget set again from a measure, by the owner's rule
+ * (docs/phase-3-steps/step25-decisions.md, Q2 and Q3).
+ *
+ *   node scripts/rebudget.mjs sizes [--from check-size.txt] [--file size-budget.json] [--write]
+ *   node scripts/rebudget.mjs node bench1.txt bench2.txt bench3.txt [--file perf/budgets.json] [--write]
+ *   node scripts/rebudget.mjs browser bench-browser.txt [--file perf/browser-budgets.json] [--write]
+ *
+ * Dry by default: prints old / measure / new and changes nothing; `--write` saves the file.
+ * - Sizes: measure + 10 %, rounded up to 50 B, never above the plan's ceilings (ARCHITECTURE §5.2,
+ *   K.8), never below the measure. Measured by size.mjs's own `measureEntries`, or read from a saved
+ *   `npm run check:size` output (`--from`). Entries without a budget (maxGzip null) are kept.
+ * - Node times (`npm run bench`, several runs: the median per line): max(m × 1.1, m + 0.5 ms) rounded
+ *   up to the half-ms, for lines of 5 ms and more; the lines under 5 ms keep their ceiling (noise);
+ *   memory lines are kept.
+ * - Headless-Chrome times (`npm run bench:browser`): ms lines at measure + 35 % to the half-ms,
+ *   capped by the plan (§5.3, phase-3-plan §4); sub-ms lines, counts, percentages and megabytes keep
+ *   their budget.
+ * A measure above its ceiling is refused (exit 1): a budget never hides a breach.
+ */
+import { readFileSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
+
+// ---------------------------------------------------------------- sizes
+
+/** ARCHITECTURE §5.2 and K.8: the ceilings a size budget never goes above (`/filters` 10 kB, Angular 8 kB included). */
+const SIZE_CEILINGS = {
+  '@dzgrid/core': 28000,
+  '@dzgrid/core/server': 6000,
+  '@dzgrid/dom': 30000,
+  '@dzgrid/dom/filters': 10000,
+  '@dzgrid/theme': 9000,
+  '@dzgrid/angular': 8000,
+  'profile: audit screen (K.8)': 85000,
+};
+
+/** The plan's ceiling for an entry, or null. Every message bundle (locales/*) is ≤ 2 kB. */
+export function ceilingFor(name) {
+  if (name in SIZE_CEILINGS) return SIZE_CEILINGS[name];
+  if (name.startsWith('@dzgrid/dom/locales/')) return 2000;
+  return null;
+}
+
+/** measure + 10 % rounded up to 50 B, at most `ceiling`; a measure above the ceiling throws. */
+export function sizeBudget(measure, ceiling = null) {
+  if (ceiling !== null && measure > ceiling) throw new Error(`measure ${measure} B is above its ceiling ${ceiling} B`);
+  const next = Math.ceil((measure * 1.1) / 50) * 50;
+  return ceiling === null ? next : Math.max(measure, Math.min(next, ceiling));
+}
+
+const SIZE_COMMENT = (date) =>
+  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Phase 3 close (${date}, owner decisions step25-decisions.md Q2, Q3): each budget is the measure + 10 %, rounded up to 50 B, never above the ceilings of ARCHITECTURE §5.2 (core 28 000, dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000) and K.8 (the audit screen profile, 85 000; its guard here is the measure + 10 %, the 85 000 ceiling guards the real Angular example, npm run example:bytes); set by scripts/rebudget.mjs. A budget is raised only by a decision written in ROADMAP.md, which keeps the history of every earlier one.`;
+
+/**
+ * A new size-budget.json from `measures` (name → gz bytes). Returns the new document (the given one
+ * untouched), the rows old / measure / new, and the budgeted entries without a measure (kept).
+ */
+export function rebudgetSizes(budget, measures, { date }) {
+  const rows = [];
+  const missing = [];
+  const entries = {};
+  for (const [name, entry] of Object.entries(budget.entries)) {
+    if (entry.maxGzip === null || entry.maxGzip === undefined) {
+      entries[name] = structuredClone(entry);
+      continue;
+    }
+    const m = measures[name];
+    if (typeof m !== 'number') {
+      missing.push(name);
+      entries[name] = structuredClone(entry);
+      continue;
+    }
+    const next = sizeBudget(m, ceilingFor(name));
+    rows.push({ name, old: entry.maxGzip, measure: m, next });
+    entries[name] = { ...structuredClone(entry), maxGzip: next };
+  }
+  const { $comment, entries: _, ...rest } = budget;
+  return { budget: { ...('$comment' in budget ? { $comment: SIZE_COMMENT(date) } : {}), ...structuredClone(rest), entries }, rows, missing };
+}
+
+/** check:size's output → name → measured gz bytes (the initial load for a split entry). */
+export function parseSizeOutput(text) {
+  const out = {};
+  for (const line of text.split('\n')) {
+    const m = /^(?:ok {2}|OVER) (.+?): (?:initial (\d+) B gz|\d+ B min, (-?\d+) B gz)/.exec(line);
+    if (m) out[m[1]] = Number(m[2] ?? m[3]);
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- times
+
+const half = (x) => Math.ceil(x * 2 - 1e-9) / 2;
+
+/** Node: max(m × 1.1, m + 0.5) to the half-ms for lines of 5 ms and more; under 5 ms, the ceiling stays. */
+export function nodeTimeBudget(m, old) {
+  if (m < 5) return old;
+  return half(Math.max(m * 1.1, m + 0.5));
+}
+
+/**
+ * The plan's targets for the headless-Chrome lines (ARCHITECTURE §5.3, phase-3-plan §4): a budget
+ * never goes above them. 17.2 ms is 58 fps.
+ */
+export const BROWSER_CEILINGS = {
+  'first render of A': 120,
+  'first render of 1 000 000 rows': 1200,
+  'sort click on 100 000 (numeric, warm): sort and events': 40,
+  'set filter: open with 2 000 values to the next frame': 50,
+  '"next" click to fetch called (server, C)': 17,
+  'CSV export of A in the browser: wall': 700,
+  'CSV export of A in the browser: longest task': 50,
+  '<dz-grid> first render of A': 130,
+  ...Object.fromEntries(['wheel scroll 50 px a frame', 'scrollbar drag 2 000 px a frame', 'horizontal scroll 50 px a frame', '1 000 000 rows (scaled), wheel-like scroll'].flatMap((s) => [
+    [`${s}: median frame`, 17.2],
+    [`${s}: p95 frame`, 25],
+    ...(s.startsWith('1 000 000') ? [] : [[`${s}: script per frame`, 6]]),
+  ])),
+};
+
+/**
+ * Chrome: an ms line at measure + 35 % to the half-ms, at most its plan ceiling. Sub-ms lines keep
+ * their ceiling, as in Node (a synchronous call; 0 for "no task over 50 ms"); any other unit too.
+ */
+export function browserBudget(name, m, unit, old) {
+  if (unit !== 'ms' || m < 1) return old;
+  const ceiling = BROWSER_CEILINGS[name] ?? null;
+  if (ceiling !== null && m > ceiling) throw new Error(`${name}: measure ${m} ms is above its ceiling ${ceiling} ms`);
+  const next = half(m * 1.35);
+  return ceiling === null ? next : Math.max(m, Math.min(next, ceiling));
+}
+
+/** bench / bench:browser output → name → { value, unit } ('' for a line without a unit, as memory lines). */
+export function parseBenchOutput(text) {
+  const out = {};
+  for (const line of text.split('\n')) {
+    const m = /^(?:ok {2}|OVER) (.+): (-?[\d.]+)(?: (\S+))? \(budget [^)]*\)$/.exec(line);
+    if (m) out[m[1]] = { value: Number(m[2]), unit: m[3] ?? '' };
+  }
+  return out;
+}
+
+/** Several parsed runs → the median per line (the middle value; the lower middle for an even count). */
+export function medianOfRuns(runs) {
+  const names = new Set(runs.flatMap((r) => Object.keys(r)));
+  const out = {};
+  for (const name of names) {
+    const seen = runs.map((r) => r[name]).filter(Boolean);
+    const values = seen.map((s) => s.value).sort((a, b) => a - b);
+    out[name] = { value: values[Math.floor((values.length - 1) / 2)], unit: seen[0].unit, runs: values.length };
+  }
+  return out;
+}
+
+const TIME_COMMENT = {
+  node: (date) =>
+    `Milliseconds, median of the runs, measured on a MINIFIED bundle in node (scripts/bench.mjs). Phase 3 close (${date}, owner decision step25-decisions.md Q2): each line of 5 ms and more is max(m × 1.1, m + 0.5 ms) rounded up to the half-ms, m the median of three npm run bench; the lines under 5 ms keep their ceiling (noise); memory lines kept. Set by scripts/rebudget.mjs; history and earlier decisions in ROADMAP.md.`,
+  browser: (date) =>
+    `Chrome, headless, dataset A at 1 280 × 720 (scripts/perf-browser.mjs). Phase 3 close (${date}, owner decision step25-decisions.md Q2): each ms line is the median of three runs + 35 % rounded up to the half-ms, never above the targets of ARCHITECTURE §5.3 and phase-3-plan §4 (17.2 ms a frame is 58 fps); sub-ms lines (and 0 for no task over 50 ms), counts, percentages and megabytes keep their budget. Set by scripts/rebudget.mjs; history in ROADMAP.md.`,
+};
+
+/** A new perf/budgets.json ('node') or perf/browser-budgets.json ('browser') from the measured lines. */
+export function rebudgetTimes(kind, doc, measured, { date }) {
+  const rows = [];
+  const missing = [];
+  const budgets = {};
+  for (const [name, old] of Object.entries(doc.budgets)) {
+    const m = measured[name];
+    if (!m) {
+      missing.push(name);
+      budgets[name] = old;
+      continue;
+    }
+    const next = kind === 'node' ? nodeTimeBudget(m.value, old) : browserBudget(name, m.value, m.unit, old);
+    rows.push({ name, old, measure: m.value, unit: m.unit, next });
+    budgets[name] = next;
+  }
+  const { $comment, budgets: _, ...rest } = doc;
+  return { budget: { ...('$comment' in doc ? { $comment: TIME_COMMENT[kind](date) } : {}), ...structuredClone(rest), budgets }, rows, missing };
+}
+
+// ---------------------------------------------------------------- the command
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+async function main(argv) {
+  const [kind, ...rest] = argv;
+  const flag = (n) => rest.includes(n);
+  const opt = (n) => (rest.includes(n) ? rest[rest.indexOf(n) + 1] : null);
+  const positional = rest.filter((a, i) => !a.startsWith('--') && !['--from', '--file', '--date'].includes(rest[i - 1]));
+  const write = flag('--write');
+  const date = opt('--date') ?? today();
+  let result;
+  let file;
+  try {
+    if (kind === 'sizes') {
+      file = opt('--file') ?? `${ROOT}size-budget.json`;
+      const budget = JSON.parse(readFileSync(file, 'utf8'));
+      let measures;
+      if (opt('--from')) measures = parseSizeOutput(readFileSync(opt('--from'), 'utf8'));
+      else {
+        const { measureEntries } = await import('./size.mjs');
+        measures = {};
+        for await (const r of measureEntries(budget)) if (r.gz !== null) measures[r.name] = r.gz;
+      }
+      result = rebudgetSizes(budget, measures, { date });
+    } else if (kind === 'node' || kind === 'browser') {
+      file = opt('--file') ?? `${ROOT}perf/${kind === 'node' ? 'budgets' : 'browser-budgets'}.json`;
+      if (!positional.length) throw new Error(`rebudget ${kind}: give the saved bench output(s)`);
+      const doc = JSON.parse(readFileSync(file, 'utf8'));
+      const measured = medianOfRuns(positional.map((f) => parseBenchOutput(readFileSync(f, 'utf8'))));
+      result = rebudgetTimes(kind, doc, measured, { date });
+    } else throw new Error('usage: rebudget.mjs sizes|node|browser [...] [--write]');
+  } catch (e) {
+    console.error(`rebudget: ${e.message}`);
+    return 1;
+  }
+  for (const r of result.rows) console.log(`${r.next > r.old ? 'raise' : r.next < r.old ? 'lower' : 'same '} ${r.name}: ${r.old} → measure ${r.measure}${r.unit ? ` ${r.unit}` : ''} → ${r.next}`);
+  for (const n of result.missing) console.log(`kept  ${n}: no measure`);
+  if (result.missing.length) {
+    console.error(`rebudget: ${result.missing.length} budgeted line(s) without a measure: nothing written`);
+    return 1;
+  }
+  if (write) {
+    writeFileSync(file, `${JSON.stringify(result.budget, null, 2)}\n`);
+    console.log(`written: ${file}`);
+  } else console.log(`dry run: nothing written (--write saves ${file})`);
+  return 0;
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) process.exit(await main(process.argv.slice(2)));

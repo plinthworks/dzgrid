@@ -61,7 +61,7 @@ function installed(dir) {
 
 function build() {
   if (!flag('no-pack')) sh('npm', ['run', 'pack:local'], ROOT);
-  // Same version (0.0.0) every time: npm would keep the old copy. Removed, then installed again.
+  // The same version on every pack (0.1.0 until a release): npm would keep the old copy. Removed, then installed again.
   rmSync(join(EXAMPLE, 'node_modules/@dzgrid'), { recursive: true, force: true });
   sh('npm', ['install', '--prefer-offline', '--no-audit', '--no-fund'], EXAMPLE);
   const bad = installed(EXAMPLE);

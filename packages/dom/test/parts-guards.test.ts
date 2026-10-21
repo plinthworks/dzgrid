@@ -45,16 +45,15 @@ describe('@dzgrid/dom/parts', () => {
     expect(paths['@dzgrid/dom/parts']).toEqual(['./packages/dom/src/parts.ts']);
   });
 
-  it('has its size lines with the owner’s budgets, and leaves the others where they were', () => {
+  it('has its size lines, at the budgets set at the Phase 3 close (step 25: measure + 10 %, rounded up to 50 B)', () => {
     const b = (JSON.parse(read('size-budget.json')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[] }> }).entries;
-    expect(b['@dzgrid/dom/parts']).toEqual({ file: 'packages/dom/src/parts.ts', maxGzip: 600, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
-    expect(b['@dzgrid/dom/locales/en-parts']).toEqual({ file: 'packages/dom/src/locales/en-parts.ts', maxGzip: 130 });
-    expect(b['@dzgrid/dom/locales/fr-parts']).toEqual({ file: 'packages/dom/src/locales/fr-parts.ts', maxGzip: 140 });
-    expect(b['@dzgrid/dom/locales/ar-parts']).toEqual({ file: 'packages/dom/src/locales/ar-parts.ts', maxGzip: 160 });
-    expect(b['@dzgrid/theme']!.maxGzip).toBe(2350); // step 26 (owner Q4)
-    // Raised by the owner at step 21 (selection rules, context): 19 100 → 19 300, 26 900 → 27 100.
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(19450); // step 26 (owner Q4)
-    expect(b['@dzgrid/core']!.maxGzip).toBe(27100);
+    expect(b['@dzgrid/dom/parts']).toEqual({ file: 'packages/dom/src/parts.ts', maxGzip: 700, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
+    expect(b['@dzgrid/dom/locales/en-parts']).toEqual({ file: 'packages/dom/src/locales/en-parts.ts', maxGzip: 150 });
+    expect(b['@dzgrid/dom/locales/fr-parts']).toEqual({ file: 'packages/dom/src/locales/fr-parts.ts', maxGzip: 150 });
+    expect(b['@dzgrid/dom/locales/ar-parts']).toEqual({ file: 'packages/dom/src/locales/ar-parts.ts', maxGzip: 150 });
+    expect(b['@dzgrid/theme']!.maxGzip).toBe(2300);
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(21300);
+    expect(b['@dzgrid/core']!.maxGzip).toBe(28000); // capped by §5.2
   });
 
   it('reaches the base through the types only: no value import outside its own folder, no style, no internal module', () => {

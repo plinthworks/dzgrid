@@ -11,7 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { entryProblems, manifestProblems, peerProblems, pinPeers } from './manifest.mjs';
+import { entryProblems, manifestProblems, mapProblems, peerProblems, pinPeers, REPOSITORY, repositoryProblems } from './manifest.mjs';
 
 // fileURLToPath, not .pathname: a folder with a space would come back as %20.
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -35,6 +35,9 @@ const ANGULAR = 'angular';
 const shared = (name) => ({
   license: read(join(pkg(name), 'package.json')).license,
   keywords: ['data-grid', 'datagrid', 'table', 'spreadsheet', 'virtual-scroll', 'rtl', 'a11y'],
+  repository: { type: 'git', url: REPOSITORY, directory: `packages/${name}` },
+  homepage: 'https://github.com/plinthworks/dzgrid#readme',
+  bugs: { url: 'https://github.com/plinthworks/dzgrid/issues' },
 });
 
 function extras(name) {
@@ -151,6 +154,7 @@ angular();
 for (const [name, subpaths] of Object.entries(built)) {
   const manifest = read(join(pkg(name), 'dist', 'package.json'));
   fail(manifestProblems(name, manifest));
+  fail(repositoryProblems(name, manifest));
   fail(peerProblems(name, manifest, VERSIONS));
   // Each declared entry was emitted, code and declarations.
   for (const subpath of subpaths) {
@@ -161,9 +165,19 @@ for (const [name, subpaths] of Object.entries(built)) {
   }
 }
 fail(manifestProblems(ANGULAR, read(join(pkg(ANGULAR), 'dist', 'package.json'))));
+fail(repositoryProblems(ANGULAR, read(join(pkg(ANGULAR), 'dist', 'package.json'))));
+// The theme ships from its own folder (pack:local): its manifest is the source one.
+fail(repositoryProblems('theme', read(join(pkg('theme'), 'package.json'))));
 fail(peerProblems(ANGULAR, read(join(pkg(ANGULAR), 'dist', 'package.json')), VERSIONS));
 const fesm = join(pkg(ANGULAR), 'dist', 'fesm2022');
 if (!existsSync(fesm) || !readdirSync(fesm).some((f) => f.endsWith('.mjs'))) fail([`packages/${ANGULAR}/dist/fesm2022/*.mjs is missing`]);
+
+// No shipped source map points at a file left behind (declaration maps naming ../src/*.ts).
+const tree = (dir, at = '') => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? tree(join(dir, e.name), `${at}${e.name}/`) : [`${at}${e.name}`]));
+for (const name of [...Object.keys(built), ANGULAR]) {
+  const dist = join(pkg(name), 'dist');
+  fail(mapProblems(name, tree(dist), (f) => readFileSync(join(dist, f), 'utf8')));
+}
 
 const names = [...Object.keys(built), ANGULAR];
 console.log(`\nBuilt: packages/{${names.join(',')}}/dist`);

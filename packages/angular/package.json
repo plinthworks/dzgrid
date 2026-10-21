@@ -1,14 +1,14 @@
 {
   "name": "@dzgrid/angular",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "DzGrid for Angular: signals, standalone components, no design system.",
   "type": "module",
   "license": "MIT",
   "peerDependencies": {
     "@angular/core": "^19.0.0 || ^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/common": "^19.0.0 || ^20.0.0 || ^21.0.0 || ^22.0.0",
-    "@dzgrid/core": "0.0.0",
-    "@dzgrid/dom": "0.0.0",
+    "@dzgrid/core": "0.1.0",
+    "@dzgrid/dom": "0.1.0",
     "@tzslot/core": ">=2.2.0 <3",
     "@tzslot/dom": ">=2.2.0 <3"
   },

@@ -78,9 +78,10 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
 - **Failure:** `<p role="alert">` `filter.loadFailed` and a Retry button (`grid.retry`); the error is
   reported (`reportError`). A kit whose module does not export `adapt` is a failure too, and so is
   one whose `adapt` (or its first write) throws, loaded now or before: the error reported once, the
-  half-built nodes removed, the alert and Retry (Retry tries the kit again). Chrome does
-  not fetch a failed `import()` again (spike S13): the text says to reload the page; a host that
-  serves its own chunks passes `filters({ loadDates })`.
+  half-built nodes removed, the alert and Retry (Retry tries the kit again). Current Chrome
+  (156) fetches a failed `import()` again, so Retry loads the kit once the network is back; older
+  engines may keep the failure (Chrome 155, spike S13), so the text still says to reload the page;
+  a host that serves its own chunks passes `filters({ loadDates })`.
 - **Keys:** tzslot closes its panel on Escape from a `document` listener, which our popup's own
   Escape would pre-empt: a capture listener on the field's box closes an open panel and stops the
   event, so the first Escape closes the calendar (focus back on its trigger), the second the popup

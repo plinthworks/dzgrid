@@ -36,9 +36,11 @@ again inside a modal `<dialog>`. Each of the three fields (`createDateField`, `c
    extensions: Sunday for ar-SA, Saturday for ar-DZ, Monday for fr-FR.
 6. **An aborted chunk is not fetched again by the same `import()`** (Chrome 155): the first fails
    ("Failed to fetch dynamically imported module"), the second fails at once with no request; the
-   same URL with a new query loads. So Retry re-imports, and in Chrome it fails again until the page
-   is reloaded: the failure text says "reload the page"; a host that bundles tzslot its own way passes
-   `filters({ loadDates })` and can bust its URLs itself.
+   same URL with a new query loads. So Retry re-imports, and in Chrome 155 it failed again until the
+   page was reloaded. **Update (Chrome 156):** current Chrome fetches a failed `import()` again, so
+   Retry loads the kit once the network is back (the browser check asserts it); older engines may
+   still keep the failure, so the failure text keeps "reload the page"; a host that bundles tzslot
+   its own way passes `filters({ loadDates })` and can bust its URLs itself.
 7. **`injectStyles: false` does not stop every sheet** (jsdom and Chrome): `panel.js:190` injects
    `field` into every opened panel, `datetime-field.js:630-632` `datetime`, `calendar`, `time`, and
    `range-field.js:1729-1734` six sheets, unconditionally. `ensureStyles` skips an id already present

@@ -310,19 +310,19 @@ describe('single mode', () => {
   });
 });
 
-describe('the size lines (owner, 2026-10-20, step 21)', () => {
-  it('hold the owner’s budgets and leave the others where they were', () => {
+describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close, step 25)', () => {
+  it('hold the budgets set at the close (measure + 10 %, rounded up to 50 B, owner Q2)', () => {
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[]; over?: string }> }).entries;
-    expect(b['@dzgrid/core']!.maxGzip).toBe(27100);
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(19450); // step 26 (owner Q4)
-    expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(800);
-    expect(b['@dzgrid/dom/slots']!.maxGzip).toBe(1450);
-    expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 700, over: '@dzgrid/core' });
-    expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 800, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
-    expect([b['@dzgrid/dom/locales/en-rules']!.maxGzip, b['@dzgrid/dom/locales/fr-rules']!.maxGzip, b['@dzgrid/dom/locales/ar-rules']!.maxGzip]).toEqual([150, 170, 200]);
-    expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(9300);
-    expect(b['@dzgrid/theme']!.maxGzip).toBe(2350); // step 26 (owner Q4)
-    expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3800);
-    expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1200);
+    expect(b['@dzgrid/core']!.maxGzip).toBe(28000); // capped by §5.2
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(21300);
+    expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(900);
+    expect(b['@dzgrid/dom/slots']!.maxGzip).toBe(1400);
+    expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 600, over: '@dzgrid/core' });
+    expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 750, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
+    expect([b['@dzgrid/dom/locales/en-rules']!.maxGzip, b['@dzgrid/dom/locales/fr-rules']!.maxGzip, b['@dzgrid/dom/locales/ar-rules']!.maxGzip]).toEqual([200, 200, 250]);
+    expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(10000); // capped by §5.2 (/filters 10 kB)
+    expect(b['@dzgrid/theme']!.maxGzip).toBe(2300);
+    expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3500);
+    expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1350); // a raise: it was at its cap
   });
 });

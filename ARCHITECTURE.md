@@ -332,6 +332,47 @@ Le code de l'étape 0, revu et testé, l'emporte sur les plans ; elles priment s
 - **Minuit** : la minuterie vit dans `/filters` (`kernel.tick()`), seulement avec un raccourci en vigueur ; `hasRelative` exporté de `@dzgrid/core/internal` (seule ligne touchée dans le cœur).
 - **Écarts au plan** : `DateSettings` porte le `ctx` (le lot calcule la balise de langue : octets) ; nom accessible complété pour tous les boutons nommés de tzslot (T1, T9), `combobox` sur le champ saisi (T10), jours des autres mois non estompés (T11), jour perdu grisé (T7) — trouvés par axe et le balayage ; l'écho du champ date n'est plus coupé (tzslot ne le renvoie pas) ; une période vide ou à l'envers ne filtre pas (L1) ; Réessayer échoue encore dans Chrome (l'échec d'un `import()` est gardé) : le texte dit de recharger la page. Demandes à tzslot : `docs/tzslot-requests.md`.
 
+### Index des décisions des étapes de la Phase 3
+
+Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'architecte et les réponses du propriétaire sont dans `docs/phase-3-steps/`, les décisions consignées ici sous « Décisions de l'étape N » ; le détail de ce qui a été fait dans `ROADMAP.md`, Phase 3). Numérotation : celle de `docs/phase-3-plugins.md` B4 et de `docs/STATUS.md` ; les étapes 21 (Sehhaty) et 22 (clôture) du premier plan `docs/phase-3-plan.md` sont devenues 24 et 25.
+
+| Étape | Sujet | Décisions ici | Plan et réponses (`docs/phase-3-steps/`) |
+|---|---|---|---|
+| 0 | les huit chantiers | « Décisions de la Phase 3 » | `docs/phase-3-plugins.md` |
+| 1 | fiches et questions ouvertes | « Décisions de l'étape 1 » | — |
+| 2–4 | outillage Angular, garde des requêtes, pagination dans le navigateur | « Décisions de l'étape 1 », ROADMAP | — |
+| 5 | `sourceRows` | ROADMAP (étape 5, quatre parties) | `step5-blueprint.md` |
+| 6 | `toWire` | « Décisions de l'étape 1 » (point « Étape 6 ») | `step6-blueprint.md` |
+| 7 | sélection sur plusieurs pages | « Décisions de l'étape 7 » | `step7-blueprint.md`, `step7-owner.md` |
+| 8 | types de filtres personnalisés | « Décisions de l'étape 8 » | `step8-blueprint.md` |
+| 9 | listes de valeurs | « Décisions de l'étape 9 » | `step9-blueprint.md`, `step9-decisions.md` |
+| 9b | fusions de cellules | « Décisions de l'étape 9b » | `step9b-spans-blueprint.md`, `step9b-decisions.md` |
+| 10 | CSV dans le cœur | « Décisions de l'étape 10 » | `step10-csv-blueprint.md`, `step10-decisions.md` |
+| 11 | emplacements remplaçables | « Décisions de l'étape 11 » | `step11-slots-blueprint.md`, `step11-decisions.md` |
+| 12 | ligne de filtres | « Décisions de l'étape 12 » | `step12-floating-blueprint.md`, `step12-decisions.md` |
+| 13 | fenêtre de filtre | « Décisions de l'étape 13 » | `step13-popup-blueprint.md`, `step13-decisions.md` |
+| 14 | filtres de dates sur tzslot | « Décisions de l'étape 14 » | `step14-dates-blueprint.md`, `step14-tzslot-blueprint.md`, `step14-decisions.md` |
+| 15 | filtre par liste de valeurs | « Décisions de l'étape 15 » | `step15-set-blueprint.md`, `step15-decisions.md` |
+| 16 | recherche rapide | « Décisions de l'étape 16 » | `step16-search-blueprint.md`, `step16-decisions.md` |
+| 17 | pagination | « Décisions de l'étape 17 » | `step17-pagination-blueprint.md`, `step17-decisions.md` |
+| 18 | écran d'audit, permutations, K.8 | « Décisions de l'étape 18 » | `step18-audit-blueprint.md`, `step18-decisions.md` |
+| 19 | export CSV | « Décisions de l'étape 19 » | `step19-export-blueprint.md`, `step19-decisions.md` |
+| 20 | pièces de cellule prêtes | « Décisions de l'étape 20 » | `step20-parts-blueprint.md`, `step20-decisions.md` |
+| 21 | règles de sélection | « Décisions de l'étape 21 » | `step21-rules-blueprint.md`, `step21-decisions.md` |
+| 22 | `@dzgrid/angular` | « Décisions de l'étape 22 » | `step22-angular-blueprint.md`, `step22-decisions.md` |
+| 23 | l'exemple Angular | « Décisions de l'étape 23 » | `step23-example-blueprint.md`, `step23-decisions.md` |
+| 24 | transposition Sehhaty | renvoyée à la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`) | — |
+| 25 | clôture | « Ajustements après la Phase 3 » ci-dessous | `step25-close-blueprint.md`, `step25-decisions.md` |
+| 26 | animations GSAP, `ui.cellClass` | « Décisions de l'étape 26 » | `step26-motion-blueprint.md`, `step26-decisions.md`, `motion-study.md`, `motion-decisions.md` |
+
+### Ajustements après la Phase 3 (clôture côté DzGrid le 2026-10-21, étape 25 ; décisions du propriétaire `docs/phase-3-steps/step25-decisions.md`)
+- **Clôture sans l'étape 24** (Q1) : la Phase 3 est close côté DzGrid ; les critères de sortie 1 (partie Sehhaty), 4, 5 et 7 sont renvoyés, par décision du propriétaire du 2026-10-21, à la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`), dont l'étape 24 est le premier élément. Ensuite la Phase 4 (arbre, maître/détail, décision du 2026-10-20), avant l'édition.
+- **Entrées** : au lieu des cinq lignes du plan §4, une entrée par fonction (`@dzgrid/core/{server,csv,spans,rules}` mesurées par-dessus le cœur ; `@dzgrid/dom/{popup,slots,filters,search,pagination,export,parts,rules,spans,motion-gsap,internal}`), des morceaux paresseux mesurés à part (liste de valeurs, adaptateurs de dates, exécution de l'export, exécution des animations) et la part de tzslot et de GSAP relevée sans budget. `tzslot-picker` n'existe pas : les adaptateurs de dates sont dans `@dzgrid/dom/filters` (étape 14). Le profil K.8 est `perf/profiles/audit.ts`, compté au premier chargement (étape 18), avec le fesm2022 livré de `@dzgrid/angular` (étape 23).
+- **Budgets** (Q2, Q3) : chaque taille = la mesure + 10 %, arrondie aux 50 o supérieurs, jamais au-dessus des plafonds du §5.2 (cœur 28 000, dom 30 000, textes 2 000, thème 9 000, `/server` 6 000, `/filters` 10 000, Angular 8 000) ; le garde du profil K.8 dans `check:size` = la mesure + 10 % (83 500), le plafond 85 000 garde la vraie construction (`npm run example:bytes`). Temps Node = max(m × 1,1 ; m + 0,5 ms) au demi-ms pour les lignes de 5 ms et plus, les autres gardent leur plafond ; Chrome sans fenêtre = la mesure + 35 % au demi-ms sous les cibles du §5.3 (17,2 ms par image = 58 i/s), lignes sous la ms gardées. Posés par `scripts/rebudget.mjs` (testé, à blanc par défaut). La règle vaut dans les deux sens : `@dzgrid/dom/export` monte de 1 200 à 1 350 (il était à son plafond), le cœur à 28 000 (plafond du §5.2). Tableau complet : ROADMAP, Phase 3.
+- **Lignes de mesure ajoutées** (plan §4) : Node `gate begin/accepts x 100 000` (5,6 ms) et `setValues 100 000 x 1 column (cold, 6 values)` (11,5 ms, sous les 30 ms du §5.3) ; à côté, sans budget, la même liste sur une colonne de ~100 000 textes français distincts (≈ 196 ms) et sur des nombres (≈ 102 ms) : le classement à froid domine, la liste à cocher n'est pas faite pour ces colonnes. Chrome : « suivant » jusqu'à l'appel de `fetch` sur le serveur simulé à 10⁷ lignes (0,1 ms, synchrone), CSV de A dans le navigateur (406 ms, aucune tâche de plus de 50 ms), `<dz-grid>` premier rendu de A (37 ms, page `?a=1` du montage Angular) et 1 000 créations / destructions (0,4 Mo retenus). `npm run bench:browser` ne tournait plus depuis l'étape 17 (`@dzgrid/dom/internal` absent de la carte d'import de sa page) : réparé.
+- **Non mesuré, reporté** (lignes du plan §4) : réponse jusqu'aux lignes peintes, frappe dans le filtre flottant, défilement d'une liste de 20 000 valeurs, `<dz-grid>` avec 3 colonnes à gabarit en glissement d'ascenseur (et ×4 de CPU), mémoire du modèle paginé (≤ 2 pages), CSV en morceaux (`csv one chunk`), `paged settle`. Le §5.4 prévoyait `perf/baseline.json` à +25 % : remplacé par les budgets de `perf/*.json`. À reprendre à la première étape de la Phase 4 (chaque relèvement par une décision écrite).
+- **Écarts de plan déjà consignés** : B1.5 (style périmé et `aria-busy` au lieu d'une superposition de chargement), la fenêtre de filtre fermée au clic dehors (étape 18, Q4), la ligne de filtres optionnelle, l'exemple Angular hors du bac à sable (étape 23).
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.
@@ -1579,8 +1620,8 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
 - **Critères de sortie** : budgets premier rendu et défilement du jeu A **mesurés en Chrome** ; capture en LTR et RTL, clair et sombre ; alignement en-tête / corps ≤ 1 px ; ascenseur et épinglage corrects en RTL ; `aria-rowindex` exact après défilement (CDP) ; axe-core sans violation ; contraste ≥ 4,5:1 sur les six palettes de Sehhaty × clair / sombre ; garde-fous « aucun hex », « aucune chaîne en dur », « aucun `left`/`right` » verts ; focus conservé à travers `update()`.
 - **Dépend de** : P1, S1, S2, S4, S9, S10.
 
-### Phase 3 : serveur paginé, filtres, export CSV, Angular — **première phase utilisable pour `admin/audit-logs`**
-- **Livrables** : `core/server/{gate,paged}`, `core/export/csv`, filtres et UI (`dom/filters` : menu de colonne minimal pour le filtre, filtres flottants, filtre à valeurs, filtre jour et instant avec l'adaptateur de sélecteur de date, recherche rapide), pagination (taille, suivant sans total), annonces live, `exportAll` ; **`@dzgrid/angular`** (`<dz-grid>`, contrôleur, fournisseurs, `fromObservable`, gabarits de cellule) ; `playground/index.html` (écran d'audit simulé à 10⁷ lignes) ; adaptateur optionnel `tzslot-picker`. **Fiches** : pagination serveur (total inconnu), filtres, ordre des requêtes, export CSV.
+### Phase 3 : serveur paginé, filtres, export CSV, Angular — **première phase utilisable pour `admin/audit-logs`** (close côté DzGrid le 2026-10-21 ; critères 1 en partie, 4, 5 et 7 renvoyés à la piste « Intégration Sehhaty », voir « Ajustements après la Phase 3 »)
+- **Livrables** (noms réels à la clôture, 2026-10-21) : `@dzgrid/core/server` (`createGate`, `sourceRows`, `toWire`), `@dzgrid/core/csv`, filtres et UI (`@dzgrid/dom/filters` : bouton de filtre de l'en-tête, filtres flottants, filtre à valeurs, filtres jour et instant sur tzslot — adaptateurs chargés à la demande, pas d'entrée `tzslot-picker` —, puis `@dzgrid/dom/search` pour la recherche rapide), pagination (`@dzgrid/dom/pagination` : taille, suivant sans total), annonces live, `exportAll` (`@dzgrid/dom/export`) ; **`@dzgrid/angular`** (`<dz-grid>`, contrôleur, fournisseurs, `fromObservable`, gabarits de cellule) ; `playground/audit.html` (écran d'audit simulé à 10⁷ lignes). **Fiches** : pagination serveur (total inconnu), filtres, ordre des requêtes, export CSV.
 - **Critères de sortie (écran `admin/audit-logs`)** :
   1. sept colonnes et sept filtres serveur de l'écran actuel transposés ; tri ; pagination serveur avec **total inconnu** ; export CSV (BOM, séparateur, anti-injection) et rappel d'export serveur ;
   2. **suite `server-gate` verte** et un test navigateur qui permute 1 000 fois les réponses : aucune réponse périmée n'est appliquée ;

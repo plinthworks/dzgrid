@@ -211,7 +211,7 @@ searching and 107 B at rest.
 - [x] `npm test`, `test:ci`, `test:tz`, `typecheck` green
 - [x] phase-end architect review and code review, findings fixed (2026-10-17)
 
-## Phase 3 — server, filters, export, Angular (in progress)
+## Phase 3 — server, filters, export, Angular (closed on the DzGrid side, 2026-10-21)
 
 > Owner decision (2026-10-18), high priority: cell spans like an HTML table's rowspan/colspan — identical values merged, spans decided by the data, grouped headers, full-width rows — are designed and built in Phase 3 as step 9b (after step 9, before the visible filters), moved from Phase 5. ag-Grid handles them badly; DzGrid must not.
 
@@ -251,9 +251,185 @@ Owner inputs still owed: the audit-logs screen spec (§1.1 of the plan, needed a
 - [x] step 21 (2026-10-20, not committed): selection rules, the application's context, header parts driving the column filter (plan `docs/phase-3-steps/step21-rules-blueprint.md`, decisions `step21-decisions.md`). **Owner budget decision (2026-10-20, Q4):** core 27 100, dom 19 300, `@dzgrid/dom/internal` 800, `@dzgrid/dom/slots` 1 450, new `@dzgrid/core/rules` 700 (over the core), new `@dzgrid/dom/rules` 800, rules bundles en 150 / fr 170 / ar 200, during Phase 3, reset to the measure + 10 % at the close (also in `size-budget.json`'s `$comment`). Built: the kernel's selection gate (`setSelectionGate` in `@dzgrid/core/internal`, event `selectionRefused`, problem code `selection-refused`; under a rule select all takes the rows shown, server pages too, the box counts refused rows as ticked); `@dzgrid/core/rules` (`vetSelection`, `ruleGate`, `refusalProblems`); `@dzgrid/dom/rules` (`rules()`, `RULES_KEYS`, the refused look `data-dzg-refused` on `.dzg-check`, never `aria-disabled`, sentences said every time, a host's refusal as a problem); fail closed (`canSelect` without `rules()`: error `missing-feature`, mode none); `settings.context` (live) in every part (`PartBase.context`), the rule, `canExport` / `exportAll`, the tooltip callback; the header context's `filter` (the filters feature hands `FeatureHandle.filter`, slots reads it, one object per column while it holds the same); the header cell key model (`cellKeys` in `@dzgrid/dom/internal`, shared with the floating row, its tests unchanged); the optional ready part `header.filterBox` (filters stays at 9 102 / 9 300); the footer's "Select all N" hidden under a rule; theme refused look (dashed, raised surface, not-allowed, GrayText in forced colours, 2 contrast pairs); texts `locales/{en,fr,ar}-rules`; demo « Règles de sélection » (`?rules=1&paging=client`). Tests first, seen failing before the code: 93 (core and conformance 43 — rules 11, kernel gate 6, property 6, conformance 19, API and layering 2 — and DOM 50 — rules 23, walk 4, context 7, header filter 16; a few guards of unchanged behaviour passed), then 6 for `ruleGate` and 3 for `header.filterBox`; suite 213 files, 3 643 tests, `test:perm` green; 21 mutants, 21 killed; Chrome 345 checks (24 new, `-- --only rules`, fr light and ar dark RTL, axe 0). Sizes: core 26 937, core/rules 476, dom 19 200, internal 786, slots 1 246, rules 654, texts 148 / 166 / 192, filters 9 102, theme 1 958, K.8 70 532. Where the plan moved: the rule's string is said as given (`rules.refusedReason` = `{reason}`), shorter texts to fit the bundles; the focus-out and paint tab stop of the key model take the caller's `tab` helper (internal budget); the gate's cache lives in `@dzgrid/core/rules` (`ruleGate`) so the DOM feature fits. Committed `6e146a7`. Review and test-analysis corrections (2026-10-20, not committed; tests first: the analysis's `rules-oracle-walk.test.ts` and `step21-audit.test.ts`, their 6 `it.fails` turned to `it`, each failing before, plus 8 new failing first): the refused look and the header box are read again after any change of the rows (the kernel tells the gate `rowsChanged`, a new optional `SelectionGate` member: a rule may read other rows) and per row when its data is another object (a row not held is asked once it loads); a rule's `''` is a plain refusal (reason null, "Not selectable"); every filter written at once (`query.set`, `filter.set`: clear all) drops the pending filter edits (`onCommand` in `@dzgrid/core/internal`, the one listener told each command the kernel took), while a host's `filter.column` still leaves typed text alone (step 12's rule, `filters-floating`, B6); an edit replaced by another writer on the column, or dropped by a clear, is counted in the writer's `dropped` (new on the `floating`, `filter` and header `filter` contexts) and a paint asked, so the losing box shows the filter in force (the echo's `dirty` cleared) and a header part gets a new `filter` object; the header filter object is keyed on the column too and `header.filterBox` merges the header's context last (a renamed column renames its box); docs: `selection-rules.md` (invalidators, `''`, the running selection to copy, an everything-except selection never re-vetted, rows a transaction adds joining it unvetted), `parts.md` (`dropped`, the filter object's identity), `filter-ui.md` (echo). `filters-walk.test.ts`'s oracle follows the clear rule; the M15 Tab-order test of a header part with no `focus()` kept. Suite 215 files, 3 662 tests, `test:perm`, types, sizes, build green; Chrome `--only rules` 24/24. Sizes: core 26 975 (27 100), core/rules 509 (700), dom 19 200 (19 300), internal 786 (800), filters 9 236 (9 300).
 - [x] step 22 (2026-10-20): `@dzgrid/angular` (plan `docs/phase-3-steps/step22-angular-blueprint.md`, decisions `step22-decisions.md`). Owner decisions (2026-10-20): emit in the wrapper only; input `cell` for every slot; Angular 19–22; @dzgrid/angular 5 500 B gz, during Phase 3, reset to the measure + 10 % at the close. Done: `<dz-grid>` (inputs live by identity, fixed ones refused by the grid, models `quick` / `filter` / `selected` without echo, outputs, `display: contents`, zoneless first, outside the zone with zone.js, nothing on a server, created in `ngAfterContentInit`), `DzgController`, `provideDzGrid` and its tokens (+ `DZG_ENV`), `componentPart` and `dzgPart` for every slot (one input `cell`, S6's pool, `emit` → type-only `cellAction` / `partAction`), `part-shadowed` (core code + conformance case, the rule in the wrapper's pure `shadow.ts`), `dzgSearch` / `dzgExport`, `fromObservable` (no rxjs import); behaviour sheet `docs/behaviors/angular-parts.md`. Tests first: 49 failing before the code (11 files), then 70 Angular tests (10 files, zone.js in its own vitest project) and the conformance case; suite 223 files, 3 727 tests, `test:perm`, typecheck (ngc strictTemplates), sizes, build (ng-packagr) green; Chrome `test:browser` 345/345; Angular fixture `packages/angular/browser/` (S6 ngc + linker + esbuild, `node packages/angular/browser/run.mjs`) 22/22 in fr and ar RTL, axe 0, 1 000 scrolls then 500 with no new part, mounts = destroys after the grid; rebind 3.6 µs per component cell in Chrome (S6 ≈ 5), ≈ 1 µs in jsdom. 20 mutants, 16 killed, 4 equivalent. Sizes: `@dzgrid/angular` 5 283 B gz (5 500), core 26 986 (27 100), dom 19 200 unchanged. Playground: « Angular » and « Angular (arabe) » in the Démos menu (`/angular/`, served by the dev server once the fixture is built). Committed (`307eb24`). Review and test-analysis fixes (2026-10-20, tests first, not committed): (1) the kernel is reachable before the first paint (a wrapper feature set up first hands it over): a part's emit during that paint is heard, `DzgController.ready()` is true in a part's init (the API's view calls act once the paint is over); (2) the focus fallback skips disabled controls and hidden inputs, false when nothing can take it; (3) `fromObservable` removes its abort listener once settled; (4) the `selected` model follows the grid after a host-caused clear (narrower `[selection]` mode, a `[(filter)]` write), never echoing the host's own write; the models are read after each write, so a filter that clears the selection no longer writes the old selection back; (5) a `dzgPart` whose `slot` changes is rebound (tested: partAction, no stale cellAction); (6) `[messages]` unset after creation with no provider keeps the bundle in force (no null to `update()`); (7) M12: a name given twice in one layer (two templates, two features) is `part-shadowed` too, detail that layer, once per name (conformance case extended); (8) `angular-parts.md`: under zone.js, part template handlers run outside the zone, use signals. Tests: `lifecycle-walk.test.ts`, `review-gaps.test.ts` (its `it.fails` flipped), `corrections.test.ts` (11, all failing before but the slot test), `test-zone/zone-later.test.ts`; suite 227 files, 3 764 tests; `test:perm`, typecheck, build, sizes green; Angular in Chrome 22/22. Sizes: `@dzgrid/angular` 5 437 B gz (5 500), core 26 986 and dom 19 200 unchanged.
 - [x] step 23 (2026-10-20): the Angular example from the tarballs, the Arabic CSV sample, the zone.js demo, SSR, bytes (plan `docs/phase-3-steps/step23-example-blueprint.md`, decisions `step23-decisions.md`). Owner decisions (2026-10-20): the example launched apart (not in the playground menu); Angular 21 fully, 19 and 22 as a manual smoke. Done (not committed): `examples/angular-audit` (its own dependencies, the four packed tarballs installed as copies, `@angular/build:application` on Angular 21: `default` zoneless, `zone`, `baseline` without DzGrid, all three without a warning under `strictTemplates`); `scripts/example.mjs` (`build`, `csv`, `ssr`, `bytes`, `browser`, `smoke`) and root scripts `example:*`; behaviour sheet `docs/behaviors/angular-example.md`. Server render (`renderApplication`, fr and ar): the host only, no row, no kernel, no error, no open timer. Headless Chrome: the client builds show the grid in fr and ar (rtl); an `emit` from a pooled cell updates the host's counter without `detectChanges`, inside the zone under zone.js; checks per scroll step 1 (zone) and 0 (zoneless). Arabic CSV sample (the real export): BOM, logical order, no direction marks, CRLF, RFC 4180, Latin digits — `examples/angular-audit/out/audit-ar.csv`, for the owner's Excel check. K.8 from the real build: DzGrid share 82 014 B gz (≤ 85 000; esbuild profile 75 623, now with the wrapper), Angular runtime and shell 38 654, wrapper ≈ 3 327. Smoke: Angular 19.2.25 passed, Angular 22.2.3 passed (with Node 24.21: its CLI refuses Node 22.20). Deviations: `@angular/ssr` and `@angular/router` in the example (the builder's server output needs them), `index.csr.html`, `legacy-peer-deps` in the example. Tests: `perf/test/example-{csv,ssr,bytes}.test.ts`, the K.8 guard extended to the example's imports, `scripts/test/size-split.test.ts` (shipped files, externals). Committed `84d0663`. Review corrections (2026-10-20, not committed; tests first: 3 `it.fails` flipped in `scripts/test/size-split-review.test.ts` and `perf/test/example-lib-review.test.ts`, each failing before): the real-build K.8 reads the initial JS from `stats.json` (the page's module script and every chunk reached by static imports, as size-split does; the page's hints kept), since Angular hints at most 10 chunks; without stats, the page alone, and a page at the cap is refused (a stale stats file too); `check:size` checks a split entry's shipped build before measuring (`measureSplitEntry`: missing or stale → "run npm run build", counted over, no crash; tested on a temporary tree, removing the check fails two tests); size-split guards: every `alias` target listed in `shipped`, no `external` pattern matching `@dzgrid/`, every shipped path under `packages/<p>/dist/`; `example:smoke` reports any thrown error as "failed" with its reason, deletes its folder whatever happens, and installs the copy with strict peers (`legacy-peer-deps` removed from its `.npmrc`); the SSR grid count matches the `dzg` class as a whole word (`/class="[^"]*\bdzg\b(?!-)/`); the Arabic sample returns the grid's direction (asserted `rtl`) and a test shows ar-EG and en-US separate with `,`, so `;` comes from ar-DZ. Full gate green (232 files, 3 795 tests; test:perm, typecheck, build, sizes); example:bytes unchanged (82 014 / 38 654 / ≈ 3 327).
-- [ ] owner decision (2026-10-20): tree view and master/detail move from Phase 6 to a Phase 4 right after Phase 3 (before editing and the rest); designs in ARCHITECTURE §2.6 and §3.13 (`buildTree`, path or parent, `role=treegrid`; detail rows as `DetailNode`).
+- [x] owner decision (2026-10-20), **target: Phase 4**, planned after the Phase 3 close: tree view and master/detail move from Phase 6 to a Phase 4 right after Phase 3 (before editing and the rest); designs in ARCHITECTURE §2.6 and §3.13 (`buildTree`, path or parent, `role=treegrid`; detail rows as `DetailNode`).
+- [x] step 25 (2026-10-21): the Phase 3 close (plan `docs/phase-3-steps/step25-close-blueprint.md`, decisions `step25-decisions.md`). Owner decisions (2026-10-21): Q1 close without step 24, a "Sehhaty integration" track opens (`docs/sehhaty-track.md`), exit criteria 1 (Sehhaty part), 4, 5 and 7 renvoyés; Q2 sizes and Node times at the measure + 10 % (sizes up to 50 B, Node to the half-ms, lines under 5 ms keep their ceiling), headless-Chrome times at the measure + 35 %; Q3 the K.8 guard at the measure + 10 % (83 500), 85 000 kept for the real example; Q4 no npm publication, 0.1.0 prepared (four packages, CHANGELOG; the tag `v0.1.0` by the lead after the commit). Done: `scripts/rebudget.mjs` (tests first, `scripts/test/rebudget.test.ts`, dry by default; `scripts/size.mjs` exports `measureEntries`), new bench lines (Node: gate, setValues; Chrome: "next" to fetch, the CSV of A, `<dz-grid>` first render and 1 000 cycles on the Angular fixture's `?a=1` page), `bench:browser` repaired (its page lacked `@dzgrid/dom/internal` since step 17), every budget set from the measure (tables below), the final gate (numbers in `docs/STATUS.md`), docs (ARCHITECTURE index of the step decisions and "Ajustements après la Phase 3", README, CHANGELOG 0.1.0).
+
 - note for step 22 (owner, 2026-10-20): an Angular cell is a standalone component class implementing a typed interface (`DzgCell<T>`: a signal input `cell` with value, text, row, key, column, focused, ctx, dir), registered with `componentPart('cell', MyCell)` or a `dzgPart` template; it must be able to send events up to the grid (proposed: `cell().emit(name, detail)` → a grid event `cellAction {column, key, name, detail}` on the `(gridEvent)` output and `onEvent`) and receive data (the input updated in place when the pooled cell is rebound). The owner approved this shape (2026-10-20, « oui »). The architect of step 22 designs the details; core/dom need the `emit` in the part context (all slots).
 - [x] step 26 (2026-10-20, `8ee7d5b` + corrections): motion with GSAP, `ui.cellClass`, the host hook (plan `docs/phase-3-steps/step26-motion-blueprint.md`, decisions `step26-decisions.md` and `motion-decisions.md`; sheets `docs/behaviors/motion.md`, `cell-class.md`). `@dzgrid/dom/motion-gsap`: `motion({ preset, effects: { flip, enter, flash, page, popup }, gsap, onCell, onRow })`, an eager shell (`load()`, `loaded`) and a lazy run chunk loaded at idle after the first rows (Q1); rows glide after sort/filter from the offsets the grid wrote (no layout read; skipped over 60 moved rows, a row over a screen, a scroll between change and paint, typing under 150 ms), entering rows fade (at most 20: more and the window simply shows, measured LoAF), value flash on live changes only (Q3; ≤ 50 cells a paint, one per cell per 500 ms, none within 150 ms of a scroll), page slide in the reading direction, popup content and overlay fade in by GSAP (Q2; close instant; focus never touched), reduced motion live (a still mark 0.6 s), pooled-row guard (the host hook's tweens too), exactly `transform,opacity,--dzg-flash` cleared. Base: `FeatureHandle.beforeRows`, `settings.motion` + `data-motion="off"`, `ui.cellClass` in rows.ts; theme: the flash tint and start mark, forced colours, five contrast pairs, transitions gated. `gsap ^3.13.0` optional peer of `@dzgrid/dom`, root devDependency (GSAP Standard License, not MIT; ask GSAP before publishing: ARCHITECTURE). Owner budgets (Q4): dom 19 450 (measured 19 360), theme 2 350 (2 046), `@dzgrid/dom/motion-gsap` 800 (586), its run chunk 3 700 over the shell (2 369); recorded: `gsap kit: core` 28 277 B gz, `profile: audit screen + motion` 76 301 (K.8 profile 75 879 / 85 000, no motion in it). Playground « Animations », the Angular example loads motion after the grid is made, outside the zone. Tests first (18 failing and 4 files unloadable before the code); 24 mutants, 23 killed (1 equivalent: a reset carries no keys); `test:browser -- --only motion` 34 checks. Committed `8ee7d5b`. Corrections (2026-10-21, after the review and test analysis; tests first: `motion-gaps.test.ts` and `motion-walk-time.test.ts` on GSAP time, 7 expected-fail repros turned into plain tests, all failing before): a host hook's element is followed by the guard before the hook runs, whatever it answers and whether the built-in effect is on (its own tweens are finished when the element shows another row, or on destroy); the guard keeps an element until it is rebound, leaves the page or the grid goes (a built-in tween ending only takes its mark and, when no other tween runs, its props; a longer host tween stays followed), and finishes every tween of a rebound element and clears `transform,opacity,--dzg-flash` (end values a host left inline included); reduced motion: a second still mark kills the first delayed call and lasts its 0.6 s; the 500 ms cap is per cell (row key and column, a per-grid map pruned to 500 ms), not per pooled element; owner Q5: a row added live gets one row effect (the `enter` fade with `onRow 'entered'`, at most 20, none under reduced motion, not twice when a glide in the same paint faded it), its cells no flash; the idle load re-checks `settings.motion` (off meanwhile: not loaded, asked again once on); a removed popup's content found by `firstElementChild`. Side observation, not changed: flip's "screen" is the mounted rows × row height (with overscan, ~90 rows after a fast scroll); the viewport's height is a layout read the effect avoids and no paint carries it, and the 60-row cap bounds it. Full gate green (241 files, 3 881 tests; test:perm, types, build, sizes), `test:browser -- --only motion` 34/34. Sizes: dom 19 360 (19 450), shell 593 (800), run 2 591 (3 700).
   - owner requests (2026-10-20): (a) the value-change flash stays at step 26; (b) give applications the cell's element to style and animate it: a per-column class rule (`ui.cellClass(ctx)`, like a CSS class chosen from the value: background, font…) for plain styling, and in `motion-gsap` a hook handing the cell (and row) elements to the application's own GSAP code on chosen moments (value changed, row entered, save states) — the grid keeps owning the cell's content, the hook may only animate (transform, opacity, colours via classes or CSS variables); (c) Phase 4 editing: the save states already designed (`pending`, `saving`, `saved`, `failed`, classes `dzg-cell--saving|saved|failed`, ARCHITECTURE) get a moving border while waiting for the server (CSS by default, GSAP with motion-gsap, off under reduced motion), a short success mark, and on failure a non-colour mark plus retry.
 - [x] step 2 (2026-10-17): Angular and packaging tooling. `@dzgrid/angular` scaffold (placeholder API: a version and `DzgProbe`, used only by the toolchain test); ng-packagr 21.2 in partial mode with `strictTemplates`, `dist/fesm2022/dzgrid-angular.mjs`; `npm run build:angular`, `npm run pack:local` (core, dom, angular from `dist/`, theme from its folder). `build.mjs` declares each package's subpaths (checked against the exports and the emitted files; `core/server` joins at step 3) and refuses a manifest pointing at `src/` or with a runtime dependency (tslib allowed for Angular only). Analog's Vite plugin works with vitest 4, no fallback needed, but only with `jit: false`: under vitest it defaults to JIT, which the test setup's `@angular/compiler` serves without a word — a test checks the component was compiled ahead of time.
 
+### Exit criteria (Phase 3, ARCHITECTURE §6)
+
+| # | Criterion | State | Evidence |
+|---|---|---|---|
+| 1 | seven columns and filters, sort, server paging with an unknown total, CSV (BOM, separator, guard), server export callback | **met on the simulated server; the Sehhaty transposition renvoyée (owner decision 2026-10-21)** to the Sehhaty track (step 24) | audit screen (step 18), `sourceRows`, `toWire`, `@dzgrid/dom/export` with `exportAll` |
+| 2 | `server-gate` green; 1 000 browser permutations, 0 stale | **met** | conformance suite in `test:ci`; `test:perm` (jsdom, 1 000 per configuration); `test:audit -- --full` (Chrome, 1 000 + 30 per configuration), re-run at the close |
+| 3 | day and instant filters send `[from, to)` in UTC; "5 March" includes 23:59 | **met** | conformance cases (step 5, `toWire` step 6) |
+| 4 | Arabic read by an Arabic reader (filter open, sort, paging, export opened in Excel) | **not met — renvoyé (owner decision 2026-10-21)** to the Sehhaty track | screenshots `docs/screenshots/step18/`, sample `examples/angular-audit/out/audit-ar.csv` ready |
+| 5 | contrast on the 12 palette × theme combinations; palette switched live; one screen-reader pass | **partial — renvoyé (owner decision 2026-10-21)**: no `sehhaty.json` yet, listening §7–§15 pending | `check:contrast` on tzslot's palette; live switch checked in Chrome (`test:audit`) |
+| 6 | size profile ≤ 85 kB gz; tarballs installed in a real Angular 21 app (`ng build`) | **met** | profile 75 879 (esbuild, K.8 guard 83 500); real build 82 014 ≤ 85 000 (`example:bytes`); Angular 19 and 22 smoke tried (step 23) |
+| 7 | "better than the old table", measured in production | **out of phase — renvoyé (owner decision 2026-10-21)** to the Sehhaty track | — |
+
+### Reporté (by destination; later-phase targets confirmed when Phase 4 is planned)
+
+- **Sehhaty track** (`docs/sehhaty-track.md`): step 24 (the audit-logs spec, `audit-columns.ts`, `to-query.ts` and its tests); `sehhaty.json` palettes; the Arabic reviewer (`locales/ar*`, the step 7 announcements, `ar-rules`); the Excel check of the Arabic CSV; screen-reader listening `docs/a11y-protocol.md` §7–§15; the API answers (offset or cursor, total, end bound); the pooled-row question for health data; the search warm-up memory budget and the multi-sort announcement; criterion 7; the test inside Sehhaty.
+- **Phase 4 (owner)**: tree view and master/detail, before editing; then editing: the Enter rule in an editor, an edited row that disappears under a filter, animated save states (step 26's hook); **a live show/hide of the floating filter row** (owner question 2026-10-21; fixed at creation since step 12); the browser bench lines the plan's §4 listed and not added (response to painted rows, floating-filter keystroke, a 20 000-value list scroll, `<dz-grid>` with 3 templated columns under a scrollbar drag and ×4 CPU, the paged model's memory, CSV one chunk, paged settle).
+- **tzslot**: requests T1–T11 (`docs/tzslot-requests.md`).
+- **Later phases (to confirm)**: value lists beyond 2 000 values; the AND/OR second condition; header filter extras; the context for filter tests and sort; the flip measured against the screen; `thisWeek` presets; Hijri; highlighting matches; XLSX; Firefox and WebKit manual runs; `ng build` on Angular 20.
+- **Release**: 0.1.0 prepared, not published; published on the owner's word after the GSAP licence confirmation, the `@dzgrid` scope reserved on npm and `@tzslot` 2.2.0 published (GitHub Actions OIDC with provenance, `--tag next` first, `--access public`; never by an agent).
+
+### Step numbering
+
+`docs/phase-3-plan.md` numbered the Sehhaty transposition 21 and the close 22. `docs/phase-3-plugins.md` B4, `docs/STATUS.md` and this file use the plug-in numbering: 21 selection rules, 22 `@dzgrid/angular`, 23 the Angular example, **24 the Sehhaty transposition** (plan's 21), **25 the close** (plan's 22), 26 motion (added 2026-10-20). Step 9b (spans) was inserted after 9.
+
+### Final budgets (Phase 3 close, 2026-10-21)
+
+Set by `scripts/rebudget.mjs` from the measures of 2026-10-21 (Apple M4, headless Chrome; `check:size` once, `npm run bench` ×3 and `npm run bench:browser` ×3, the median per line). Earlier budget decisions: the steps above and the git history of `size-budget.json` (its `$comment` before step 25).
+
+**Sizes** (B gz; measure + 10 % up to 50 B, ceilings §5.2 and K.8):
+
+| Entry | Old budget | Measure | New budget |
+|---|---|---|---|
+| `@dzgrid/core` | 27 100 | 26 984 | 28 000 (raise) |
+| `@dzgrid/core/server` | 6 000 | 5 598 | 6 000 |
+| `@dzgrid/core/spans` | 3 500 | 3 423 | 3 800 (raise) |
+| `@dzgrid/core/csv` | 2 500 | 1 641 | 1 850 |
+| `@dzgrid/core/rules` | 700 | 512 | 600 |
+| `@dzgrid/dom/locales/en` | 560 | 519 | 600 (raise) |
+| `@dzgrid/dom/locales/fr` | 680 | 636 | 700 (raise) |
+| `@dzgrid/dom/locales/ar` | 870 | 825 | 950 (raise) |
+| `@dzgrid/dom/locales/en-filters` | 850 | 707 | 800 |
+| `@dzgrid/dom/locales/fr-filters` | 980 | 831 | 950 |
+| `@dzgrid/dom/locales/ar-filters` | 1 200 | 941 | 1 050 |
+| `@dzgrid/dom/locales/en-pagination` | 560 | 328 | 400 |
+| `@dzgrid/dom/locales/fr-pagination` | 680 | 375 | 450 |
+| `@dzgrid/dom/locales/ar-pagination` | 880 | 489 | 550 |
+| `@dzgrid/dom/locales/en-export` | 220 | 216 | 250 (raise) |
+| `@dzgrid/dom/locales/fr-export` | 250 | 248 | 300 (raise) |
+| `@dzgrid/dom/locales/ar-export` | 380 | 296 | 350 |
+| `@dzgrid/dom/locales/en-parts` | 130 | 98 | 150 (raise) |
+| `@dzgrid/dom/locales/fr-parts` | 140 | 99 | 150 (raise) |
+| `@dzgrid/dom/locales/ar-parts` | 160 | 108 | 150 |
+| `@dzgrid/dom/locales/en-rules` | 150 | 148 | 200 (raise) |
+| `@dzgrid/dom/locales/fr-rules` | 170 | 166 | 200 (raise) |
+| `@dzgrid/dom/locales/ar-rules` | 200 | 192 | 250 (raise) |
+| `@dzgrid/theme` | 2 350 | 2 046 | 2 300 |
+| `@dzgrid/dom` | 19 450 | 19 360 | 21 300 (raise) |
+| `@dzgrid/dom/popup` | 1 500 | 1 473 | 1 650 (raise) |
+| `@dzgrid/dom/spans` | 4 500 | 4 455 | 4 950 (raise) |
+| `@dzgrid/dom/slots` | 1 450 | 1 246 | 1 400 |
+| `@dzgrid/dom/search` | 1 300 | 1 298 | 1 450 (raise) |
+| `@dzgrid/dom/pagination` | 3 800 | 3 157 | 3 500 |
+| `@dzgrid/dom/export` | 1 200 | 1 200 | 1 350 (raise) |
+| `@dzgrid/dom/export: run (lazy)` | 5 100 | 4 581 | 5 050 |
+| `@dzgrid/dom/parts` | 600 | 595 | 700 (raise) |
+| `@dzgrid/dom/rules` | 800 | 654 | 750 |
+| `@dzgrid/dom/motion-gsap` | 800 | 593 | 700 |
+| `@dzgrid/dom/motion-gsap: run (lazy)` | 3 700 | 2 591 | 2 900 |
+| `@dzgrid/dom/internal` | 800 | 786 | 900 (raise) |
+| `@dzgrid/dom/filters` | 9 300 | 9 235 | 10 000 (raise) |
+| `@dzgrid/dom/filters: set (lazy)` | 3 800 | 3 793 | 4 200 (raise) |
+| `@dzgrid/dom/filters: date adapters (lazy)` | 2 600 | 2 320 | 2 600 |
+| `profile: audit screen (K.8)` | 85 000 | 75 879 | 83 500 |
+| `@dzgrid/angular` | 5 500 | 5 437 | 6 000 (raise) |
+
+**Node times** (ms; median of the three runs; lines of 5 ms and more at max(m × 1.1, m + 0.5) to the half-ms, the others keep their ceiling; the three `setValues` lines at 6 values budgeted, the text and number ones recorded without a budget; memory lines unchanged):
+
+| Line | Old budget | Median of 3 | New budget |
+|---|---|---|---|
+| zoneDayBounds x 10 000 (Paris, cached formatter) | 1 000 | 327,7 | 360,5 |
+| toWire 7 filters (2 instant, Algiers) | 0,5 | 0,1 | 0,5 |
+| assignKeys 100 000 ids | 60 | 15,2 | 17 |
+| parseDay x 100 000 | 20 | 4,5 | 20 |
+| readInstant ISO x 100 000 | 120 | 27,5 | 30,5 |
+| readNumber x 100 000 (fr-FR) | 120 | 84,1 | 93 |
+| format number x 100 000 (cached Intl, ar-DZ) | 50 | 25 | 27,5 |
+| coerce ISO instants x 100 000 | 50 | 23,9 | 26,5 |
+| load 100 000 x 30 (row store) | 80 | 20,5 | 23 |
+| update 1 row of 100 000 | 1 | 0,2 | 1 |
+| numeric sort 100 000 (cold keys + sort) | 40 | 22,4 | 25 |
+| day sort 100 000 (string days, cold) | 40 | 26 | 29 |
+| text sort 100 000 fr (cold rank keys) | 250 | 155,1 | 171 |
+| text sort 100 000 ar (cold rank keys) | 250 | 202,9 | 223,5 |
+| text sort 100 000 fr (warm ranks) | 40 | 16,8 | 18,5 |
+| sort two numeric keys 100 000 | 120 | 27,7 | 30,5 |
+| sort instant ISO strings 100 000 (cold) | 100 | 45,3 | 50 |
+| text filter contains 100 000 (cold) | 35 | 30,6 | 34 |
+| text filter contains 100 000 ar (cold) | 35 | 26,8 | 29,5 |
+| text filter contains 100 000 | 10 | 1,9 | 10 |
+| text filter contains 100 000 ar | 10 | 0,4 | 10 |
+| number filter gt 100 000 | 10 | 0,9 | 10 |
+| day filter between 100 000 | 15 | 1 | 15 |
+| set filter 100 000 | 15 | 1,2 | 15 |
+| instant filter onDay 100 000 (warm keys) | 15 | 0,8 | 15 |
+| custom kind test 100 000 rows (warm values) | 15 | 0,9 | 15 |
+| value list 100 000 rows, 5 000 values (cold) | 60 | 22 | 24,5 |
+| value list 100 000 rows, warm index, other filter changed | 8 | 0,3 | 8 |
+| quick filter 100 000 x 10 text columns (cold, ASCII) | 150 | 147 | 162 (raise) |
+| quick filter 100 000 x 10 text columns (cold, fr+ar) | 700 | 299,2 | 329,5 |
+| quick filter 100 000 x 4 ASCII columns (cold) | 90 | 46,6 | 51,5 |
+| quick filter narrowing step (warm) | 20 | 4,6 | 20 |
+| load 100 000 x 30 (clientRows) | 80 | 16,8 | 18,5 |
+| setQuery sort change on 100 000 (numeric, warm keys) | 25 | 17,5 | 19,5 |
+| transaction update 1 row on 100 000 (sorted and filtered) | 1 | 0,3 | 1 |
+| transaction append 1 000 rows on 100 000 | 50 | 27 | 30 |
+| PrefixSums build 100 000 | 5 | 0,7 | 5 |
+| PrefixSums 1 000 set + 1 000 indexAt (100 000 rows) | 5 | 0,9 | 5 |
+| visibleWindow x 10 000 (variable 100 000 rows) | 20 | 4,1 | 20 |
+| scrollMapper build x 100 000 | 20 | 0,7 | 20 |
+| warm step 2 000 cells (10 text columns fr+ar) | 4 | 0,4 | 4 |
+| first keystroke after warm-up, 10 text columns fr+ar | 20 | 14 | 15,5 |
+| msg() plural ar x 10 000 (announcements, labels) | 20 | 7,3 | 8,5 |
+| span merge index 1 000 000 rows (export texts given) | 25 | 4,7 | 25 |
+| 100 000 data-span calls (rowSpan, cold map) | 20 | 7,7 | 8,5 |
+| span map 100 000 rows, one merge column (cold) | 30 | 13,5 | 15 |
+| csv 100 000 x 30 (toCsv) | 1 000 | 462,8 | 509,5 |
+| gate begin/accepts x 100 000 | — (new) | 5,6 | 6,5 |
+| setValues 100 000 x 1 column (cold, 6 values) | — (new) | 11,5 | 13 |
+
+The cold text filter line (34 ms from runs of 30,2 / 30,6 / 35,7 ms) was measured again after the close (2026-10-21, three runs: 30,7 / 30,3 / 30,0 ms). The follow-up's rule was: if the worst run is over the budget, set that line alone from its worst run instead of its median. The worst run, 30,7 ms, is under 34, so the budget stays at 34. The 35,7 ms run was once on a loaded machine. If the line goes over again, the same rule on the worst run gives 39,5 ms (max(35,7 × 1,1 ; 35,7 + 0,5), to the half-ms), and that needs a written decision.
+
+**Headless-Chrome lines** (median of three runs; ms lines at the measure + 35 % to the half-ms, never above §5.3 and phase-3-plan §4; sub-ms lines, counts and megabytes kept):
+
+| Line | Old budget | Median of 3 | New budget |
+|---|---|---|---|
+| first render of A | 120 | 38,5 ms | 52 |
+| body nodes after first render | 1 000 | 841 nodes | 1 000 |
+| wheel scroll 50 px a frame: median frame | 17,2 | 16,7 ms | 17,2 |
+| wheel scroll 50 px a frame: p95 frame | 25 | 18,2 ms | 25 |
+| wheel scroll 50 px a frame: script per frame | 6 | 0,3 ms | 6 |
+| wheel scroll 50 px a frame: layouts per frame | 1 | 1 layouts | 1 |
+| wheel scroll 50 px a frame: frames without rows | 1 | 0 % | 1 |
+| scrollbar drag 2 000 px a frame: median frame | 17,2 | 16,7 ms | 17,2 |
+| scrollbar drag 2 000 px a frame: p95 frame | 25 | 18,2 ms | 25 |
+| scrollbar drag 2 000 px a frame: script per frame | 6 | 1,5 ms | 2,5 |
+| scrollbar drag 2 000 px a frame: layouts per frame | 1 | 1 layouts | 1 |
+| scrollbar drag 2 000 px a frame: frames without rows | 1 | 0 % | 1 |
+| horizontal scroll 50 px a frame: median frame | 17,2 | 16,7 ms | 17,2 |
+| horizontal scroll 50 px a frame: p95 frame | 25 | 18,1 ms | 24,5 |
+| horizontal scroll 50 px a frame: script per frame | 6 | 0,4 ms | 6 |
+| horizontal scroll 50 px a frame: layouts per frame | 1 | 0,6 layouts | 1 |
+| horizontal scroll 50 px a frame: frames without rows | 1 | 0 % | 1 |
+| one-row transaction to the next frame | 20 | 17,1 ms | 23,5 (raise) |
+| one-row transaction: rows touched | 1 | 1 rows | 1 |
+| sort click on 100 000 (numeric, warm) to the next frame | 57 | 16,8 ms | 23 |
+| page errors | 0 | 0 errors | 0 |
+| 1 000 create/destroy cycles: heap retained | 1 | 0,3 MB | 1 |
+| first render of 1 000 000 rows | 1 200 | 207,1 ms | 280 |
+| 1 000 000 rows (scaled), wheel-like scroll: median frame | 17,2 | 16,7 ms | 17,2 |
+| 1 000 000 rows (scaled), wheel-like scroll: p95 frame | 25 | 16,8 ms | 23 |
+| 1 000 000 rows (scaled): frames without rows | 1 | 0 % | 1 |
+| sort click on 100 000 (numeric, warm): sort and events | 40 | 6,1 ms | 8,5 |
+| set filter: first open with 2 000 values (chunk, cold index) to the next frame | 60 | 55,3 ms | 75 (raise) |
+| set filter: open with 2 000 values (script) | 10 | 8,2 ms | 11,5 (raise) |
+| set filter: open with 2 000 values to the next frame | 25 | 17 ms | 23 |
+| set filter: options drawn | 40 | 16 options | 40 |
+| set filter: page errors | 0 | 0 errors | 0 |
+| "next" click to fetch called (server, C) | — (new) | 0,1 ms | 17 |
+| CSV export of A in the browser: wall | — (new) | 406 ms | 548,5 |
+| CSV export of A in the browser: longest task | — (new) | 0 ms | 50 |
+| server and CSV: page errors | — (new) | 0 errors | 0 |
+| `<dz-grid>` first render of A | — (new) | 37,2 ms | 50,5 |
+| `<dz-grid>` 1 000 create/destroy cycles: heap retained | — (new) | 0,4 MB | 1 |
+| `<dz-grid>`: page errors | — (new) | 0 errors | 0 |

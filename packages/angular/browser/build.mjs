@@ -45,7 +45,7 @@ export async function buildFixture() {
     target: 'es2022',
     legalComments: 'none',
     absWorkingDir: root,
-    alias: { '@dzgrid/angular': fesm },
+    alias: { '@dzgrid/angular': fesm, 'dzgrid-perf-dataset': `${root}perf/dataset.ts` },
     define: { ngDevMode: 'false', ngJitMode: 'false', ngI18nClosureMode: 'false', ngServerMode: 'false' },
     logLevel: 'warning',
     plugins: [linker],
