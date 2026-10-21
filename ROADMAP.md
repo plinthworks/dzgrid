@@ -433,3 +433,13 @@ The cold text filter line (34 ms from runs of 30,2 / 30,6 / 35,7 ms) was measure
 | `<dz-grid>` first render of A | — (new) | 37,2 ms | 50,5 |
 | `<dz-grid>` 1 000 create/destroy cycles: heap retained | — (new) | 0,4 MB | 1 |
 | `<dz-grid>`: page errors | — (new) | 0 errors | 0 |
+
+
+## Phase 4 — tree view and master/detail first (started 2026-10-21)
+Plan `docs/phase-4-plan.md`, decisions `docs/phase-4-steps/decisions.md` (owner 2026-10-21: three tree shapes, independent selection, filter keeps matches and ancestors, lazy children client and server, detail 240 px, nesting 2 tested / cap 3, budgets core 29 000, theme 2 500, new tree/detail entries, live floating-row toggle).
+- [ ] step 1: sheets, spike S12 (variable heights with scaled scrolling), budgets in size-budget.json.
+- [ ] step 2: core base seams. - [ ] step 3: core/tree parent mode. - [ ] step 4: dom tree. - [ ] step 5: nested and path shapes, selection, CSV. - [ ] step 6: motion and the million-row tree. - [ ] step 7: lazy children (client and server).
+- [ ] step 8: core/detail. - [ ] step 9: dom base variable rows. - [ ] step 10: dom/detail. - [ ] step 11: Angular.
+- [ ] step 12: live floating-row toggle.
+- [ ] Part D: editing (planned after step 12).
+- [ ] step 13: Phase 4 close (Parts A–C).
