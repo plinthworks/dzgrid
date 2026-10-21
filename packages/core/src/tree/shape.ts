@@ -59,7 +59,6 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
   let open: Uint8Array | null = null;
   /** The open flags of the last build, and what they were resolved from. */
   let flags: { st: Structure; F: Filtered; anc: Uint8Array | null; a: Uint8Array } | null = null;
-  let snapNow: RowSnapshot<T> | null = null;
 
   const structureOf = (snap: RowSnapshot<T>): Structure => {
     if (S?.snap !== snap) {
@@ -73,15 +72,27 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
   /** A row's node by its key: a data row's source index, a filler's node; -1 when unknown. */
   const srcOf = (snap: RowSnapshot<T>, st: Structure, key: RowKey): number => {
     const s = snap.lookup(idOfDataKey(key) ?? '');
-    return s < 0 ? (st.at?.get(key) ?? -1) : s;
+    if (s >= 0 || !st.at) return s;
+    const x = st.at(key);
+    // A group key names a filler only: a row standing at its path has its own key.
+    return x < st.rows ? -1 : x;
   };
-  const keyOf = (snap: RowSnapshot<T>, st: Structure, x: number): RowKey => (x < st.rows ? snap.keyAt(x as never) : st.keys![x - st.rows]!);
+  const keyOf = (snap: RowSnapshot<T>, st: Structure, x: number): RowKey => (x < st.rows ? snap.keyAt(x as never) : st.keyOf!(x));
+  /** A row's id as the store reads it; none for what is not an object or whose getRowId throws. */
+  const idOf = (r: unknown, id: (row: T) => RowIdInput): string | null => {
+    try {
+      return r !== null && typeof r === 'object' ? canonicalId(id(r as T)) : null;
+    } catch {
+      return null;
+    }
+  };
   /**
-   * Nested rows made flat: each row then its children, depth first, iteratively. A row's parent is
-   * indexed by the first row with its id in the walk (a later copy is the store's duplicate); an object
-   * met twice is walked once (one that holds itself cannot hang the grid).
+   * Nested rows made flat: each row then its children, depth first, iteratively. A row the store
+   * refuses (no id, a second copy, `held`: an id it holds) is kept for the store to tell, and not
+   * walked: its children are not brought, its parent not indexed. An object met twice is walked once
+   * (one that holds itself cannot hang the grid). `ids`: the ids taken.
    */
-  const walk = (top: Iterable<T>, id: (row: T) => RowIdInput, keep: boolean): T[] => {
+  const walk = (top: Iterable<T>, id: (row: T) => RowIdInput, keep: boolean, held?: (id: string) => boolean, ids = new Set<string>()): T[] => {
     const out: T[] = [];
     const seen = new Set<unknown>();
     const stack: [T, string | null][] = [...top].reverse().map((r) => [r, null]);
@@ -90,9 +101,9 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       if (seen.has(r)) continue;
       seen.add(r);
       if (keep) out.push(r);
-      const me = canonicalId(id(r));
-      if (me === null || seen.has(me)) continue;
-      seen.add(me);
+      const me = idOf(r, id);
+      if (me === null || ids.has(me) || held?.(me)) continue;
+      ids.add(me);
       if (p !== null) index.set(me, p);
       let kids: unknown;
       try {
@@ -146,8 +157,8 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
     const nodeAt = (i: number): RowNode<T> => {
       const s = check(i);
       if (s < rows) return { key: snap.keyAt(s as never), kind: 'data', level: lv[i]!, id: snap.ids[s]!, data: snap.rows[s]! };
-      const path = st.paths![s - rows]!;
-      return { key: st.keys![s - rows]!, kind: 'group', level: lv[i]!, label: path[path.length - 1]!, path };
+      const path = st.pathOf!(s);
+      return { key: st.keyOf!(s), kind: 'group', level: lv[i]!, label: path[path.length - 1]!, path };
     };
     return {
       version,
@@ -192,7 +203,23 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
     get problems() { return S?.ps ?? told; },
     ...(given[0] === 'children' && {
       load: (rows: Iterable<T>, id: (row: T) => RowIdInput) => ((index = new Map()), walk(rows, id, true)),
-      tx: (tx, id) => (walk(tx.update ?? [], id, false), tx.add ? { ...tx, add: walk(tx.add, id, true) } : tx),
+      tx(tx, id, snap) {
+        // A removed row forgets its parent (lead decision 6a), unless it is added back in this transaction.
+        const gone = new Map<string, string | undefined>();
+        for (const x of tx.remove ?? []) {
+          const c = canonicalId(x);
+          if (c !== null && snap.lookup(c) >= 0) gone.set(c, index.get(c)), index.delete(c);
+        }
+        const live = (c: string) => snap.lookup(c) >= 0 && !gone.has(c);
+        // An update's children are indexed under it (added to, never taken from); a refused update's are not.
+        walk((tx.update ?? []).filter((r) => { const c = idOf(r, id); return c !== null && live(c); }), id, false);
+        // Adds refused as a whole (no valid place): nothing walked.
+        if (!tx.add || (tx.addAt !== undefined && !(Number.isInteger(tx.addAt) && tx.addAt >= 0))) return tx;
+        const ids = new Set<string>();
+        const add = walk(tx.add, id, true, live, ids);
+        for (const [c, p] of gone) if (ids.has(c) && p !== undefined && !index.has(c)) index.set(c, p);
+        return { ...tx, add };
+      },
     }),
     parents(snap, depth, shown) {
       const st = structureOf(snap);
@@ -203,13 +230,28 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       return out;
     },
     isOpen: (key) => {
-      const s = snapNow ? srcOf(snapNow, S!.st, key) : -1;
+      const s = last ? srcOf(last.snap, last.st, key) : -1;
       return s >= 0 && open?.[s] === 1;
     },
     opens: (key) => {
-      const s = snapNow && V ? srcOf(snapNow, S!.st, key) : -1;
-      return s >= 0 && V!.shown.start[s + 1]! > V!.shown.start[s]!;
+      const s = last ? srcOf(last.snap, last.st, key) : -1;
+      return s >= 0 && last!.v.shown.start[s + 1]! > last!.v.shown.start[s]!;
     },
+    ...(given[0] === 'path' && {
+      // A row taking a filler's place, or a filler a row's: the key passes to what stands there now (lead decision 6c).
+      rekey(snap: RowSnapshot<T>) {
+        const was = last;
+        if (!was || was.snap === snap) return null;
+        const st = structureOf(snap);
+        return (k: RowKey): RowKey => {
+          const x = srcOf(was.snap, was.st, k);
+          if (x < 0 || srcOf(snap, st, k) >= 0) return k;
+          const p = was.st.keyOf!(x);
+          const y = st.at!(p);
+          return y >= 0 && x < was.st.rows !== y < st.rows && was.st.at!(p) === x ? keyOf(snap, st, y) : k;
+        };
+      },
+    }),
     build(i: ShapeInput<T>): TreeRows<T> {
       const { snap } = i;
       const st = structureOf(snap);
@@ -262,7 +304,6 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       }
       flags = { st, F, anc, a: isOpen };
       open = isOpen;
-      snapNow = snap;
       last = { snap, st, v: V, f: F, version: i.version };
       return flatten(snap, st, V, F, isOpen, i.version);
     },

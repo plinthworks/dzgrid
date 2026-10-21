@@ -184,7 +184,9 @@ export interface RowShape<T> {
   readonly problems: readonly Problem[];
   /** Nested rows made flat before the store (a tree's `children`): a load, then each transaction. */
   load?(rows: Iterable<T>, id: (row: T) => RowIdInput): Iterable<T>;
-  tx?(tx: RowTransaction<T>, id: (row: T) => RowIdInput): RowTransaction<T>;
+  tx?(tx: RowTransaction<T>, id: (row: T) => RowIdInput, snap: RowSnapshot<T>): RowTransaction<T>;
+  /** After a change: what each open key becomes (a path tree's row taking a filler's place, or the reverse); null: unchanged. */
+  rekey?(snap: RowSnapshot<T>): ((key: RowKey) => RowKey) | null;
 }
 
 export interface ClientOptions<T> {
@@ -483,6 +485,11 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     if (r.kind === 'none') return;
     // The keys of removed rows leave what is open (a reload: those whose rows are gone).
     if (shape) {
+      const re = shape.rekey?.(store.snapshot);
+      if (re) {
+        open = new Set([...open].map(re));
+        if (layer) layer = new Map([...layer].map(([k, v]) => [re(k), v]));
+      }
       const gone = r.kind === 'delta' ? new Set(r.removed) : null;
       // Removed and added again in one transaction: kept.
       const left = (k: RowKey) => (!gone || gone.has(k)) && isDataKey(k) && !store.get(k);
@@ -718,7 +725,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       notify('rows', 'api');
     },
     setRows: (rows, source = 'host') => transact(() => store.replaceAll(flat(rows)), source),
-    applyTransaction: (tx, source = 'host') => transact(() => store.apply(shape?.tx?.(tx, o.getRowId) ?? tx), source),
+    applyTransaction: (tx, source = 'host') => transact(() => store.apply(shape?.tx?.(tx, o.getRowId, store.snapshot) ?? tx), source),
     setColumns(next, source = 'host') {
       columns = next;
       if (run()) notify('context', source);

@@ -104,6 +104,20 @@ describe('filler rows on screen', () => {
     }
   });
 
+  it('a filler cell leaving the tree column keeps no label (column moved, destroyed)', () => {
+    const t = make();
+    expect(t.cellOf(A)!.querySelector('.dzg-label')).not.toBeNull();
+    // The tree column moves to N: the old Name cell of the filler is given back plain.
+    t.g.update({ columns: [COLUMNS.find((c) => c.id === 'n')!, ...COLUMNS.filter((c) => c.id !== 'n')] });
+    expect(t.cellOf(A)!.querySelector('.dzg-label')).toBeNull();
+    expect(t.cellOf(A)!.querySelector('.dzg-toggle')).toBeNull();
+    expect(t.cellOf(A, 'n')!.querySelector('.dzg-label')?.textContent).toBe('Service A');
+    // The tree feature taken down with the grid: no label left in a cell it decorated.
+    const kept = t.cellOf(A, 'n')!;
+    t.g.destroy();
+    expect(kept.querySelector('.dzg-label')).toBeNull();
+  });
+
   it('no cell part is mounted on a filler (a part expects a row)', () => {
     const seen: unknown[] = [];
     const part: SlotPart<'cell'> = { slot: 'cell', part: { mount: (el, c) => (seen.push(c.row), el.append('[part]'), {}) } };

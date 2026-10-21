@@ -82,3 +82,32 @@ behaviour from the sheets and WAI-ARIA 1.2 only.
 3. DOM: `tree-shapes.test.ts` (filler row, label, attributes, clicks/Space/Ctrl+A/box), browser checks
    for the path shape (fr, ar RTL, axe).
 4. Sizes, gate, mutants, docs.
+
+## Review and test analysis (2026-10-21, on `3ce75cc`)
+Tests first, each seen failing: `packages/core/test/tree-shapes-walk.test.ts` (the kernel random walk
+over nested and path rows, 120 seeds × 60 steps × 2 shapes × 2 filter modes, against an independent
+model), `tree-shapes-bugs.test.ts` (4, flipped from `it.fails`), 7 added in `tree-shapes.test.ts`, 1 in
+`packages/dom/test/tree-shapes.test.ts`.
+- **DOM**: `undecorate` removed the toggle before looking for the label by its place after it, so a
+  filler cell leaving the tree column (column moved, recycled, destroy) kept its label: the label is
+  now found by its class (`:scope > .dzg-label`) and removed first.
+- **Nested walk**: a `getRowId` that throws, or a null / non-object child, threw out of
+  `createGrid` / `setRows` / `applyTransaction`: now a row with no id, passed on for the store to tell
+  (`invalid-row-id`), not walked. A second copy of an id the grid holds (`duplicate-row-id`) brought its
+  children and wrote the parent index: `RowShape.tx` now gets the store's snapshot, and the walk treats
+  an id held (and not removed by the transaction) like a second copy; a refused update (unknown id)
+  indexes nothing; adds refused as a whole (`addAt` invalid) are not walked.
+- **Path build**: filler paths were built with `unshift` per filler (O(depth³): 2.3 s for one row with a
+  5 000-segment path). Now each node keeps its trie node; keys are made when asked, each from its
+  parent's (cached), paths when asked; a group key is resolved by reading its segments down the trie
+  (checked against the key made back, so a malformed key names nothing). Same row: 3 ms.
+- **Lead decisions**: (a) a removed id forgets its parent at the removal; added back in the same
+  transaction it keeps it, later it is a root unless an update listed it since; (b) an update's
+  children list is additive; (c) paths: a key whose node is gone passes to the node of the other kind
+  now at its path (`RowShape.rekey`, applied by the client to the open set and the filter's layer
+  before removed keys leave): a row taking a filler's place keeps its open state, and a filler taking
+  a row's place the row's. Before, the reverse held only for a filler key left in the set; a row opened
+  by its own key and then removed gave a closed filler. Written in `tree-view.md`.
+- **CSV**: a `treeColumn` not among the written columns falls back to the first written (fillers keep
+  their label, rows their indent); with `indent`, a blank or unreadable tree cell is written as its
+  indent. Written in `csv-export.md`.

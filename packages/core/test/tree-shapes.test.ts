@@ -112,6 +112,26 @@ describe('nested rows (children)', () => {
     expect(view(model)).toEqual(['a 1/2', 'b 2/2']);
     expect(model.counts.total).toBe(2);
   });
+
+  it('a getRowId that throws, a null or a non-object child: refused (invalid-row-id), its children not walked, nothing thrown', () => {
+    const id = (r: N) => { if (r.id === 'bad') throw new Error('no id'); return r.id; };
+    const columns = createColumnModel<N>([{ id: 'n', type: 'number' }]);
+    const rows: N[] = [{ id: 'a', n: 1, kids: [null as never, 7 as never, { id: 'bad', n: 2, kids: [{ id: 'under', n: 3 }] }, { id: 'a1', n: 4 }] }];
+    const model = clientRows<N>({ rows, getRowId: id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<N>({ children: (r) => r.kids }) });
+    const kernel = createKernel<N>({ rows: model, columns });
+    openAll(kernel);
+    expect(view(model)).toEqual(['a 1/1', '. a1 1/1']);
+    expect(model.problems.filter((p) => p.code === 'invalid-row-id').length).toBe(3);
+    expect(model.row(k('under'))).toBeUndefined();
+    // The same through setRows and a transaction (an update too): told, never thrown.
+    expect(() => model.setRows(rows)).not.toThrow();
+    expect(model.counts.total).toBe(2);
+    const r = model.applyTransaction({ add: [{ id: 'c', n: 5, kids: [undefined as never, { id: 'bad', n: 6, kids: [{ id: 'deep', n: 7 }] }] }], update: [{ id: 'bad', n: 0, kids: [{ id: 'a1', n: 4 }] }] });
+    expect(r.problems.map((p) => p.code)).toEqual(['invalid-row-id', 'invalid-row-id', 'invalid-row-id']);
+    expect(model.row(k('deep'))).toBeUndefined();
+    expect(tree(model).parentOf(k('a1'))).toBe(k('a'));
+    expect(tree(model).parentOf(k('c'))).toBeNull();
+  });
 });
 
 describe('transactions on nested rows (parents from the walk’s index)', () => {
@@ -132,7 +152,7 @@ describe('transactions on nested rows (parents from the walk’s index)', () => 
     expect(model.row(k('a21'))?.data.n).toBe(4);
   });
 
-  it('patch keeps the parent; remove makes the children orphans (root, tree-orphan); added back, they hang under it again', () => {
+  it('patch keeps the parent; remove makes the children orphans (root, tree-orphan); added back later, a root, its children under it again', () => {
     const { model, kernel } = nested();
     model.applyTransaction({ patch: [{ id: 'a1', set: { n: 8 } }] });
     expect(tree(model).parentOf(k('a1'))).toBe(k('a'));
@@ -143,7 +163,40 @@ describe('transactions on nested rows (parents from the walk’s index)', () => 
     model.applyTransaction({ add: [{ id: 'a2', n: 1 }] });
     openAll(kernel);
     expect(tree(model).parentOf(k('a21'))).toBe(k('a2'));
+    // Its own parent was forgotten at its removal: added back later, a root (lead decision 6a).
+    expect(tree(model).parentOf(k('a2'))).toBeNull();
+  });
+
+  it('removed and added back in one transaction: its parent kept; an update listing it places a later add', () => {
+    const { model } = nested();
+    model.applyTransaction({ remove: ['a2'], add: [{ id: 'a2', n: 1 }] });
     expect(tree(model).parentOf(k('a2'))).toBe(k('a'));
+    expect(tree(model).parentOf(k('a21'))).toBe(k('a2'));
+    // Removed, then named by an update's children before its add: it comes back there.
+    model.applyTransaction({ remove: ['a2'] });
+    model.applyTransaction({ update: [{ id: 'b', n: 1, kids: [{ id: 'a2', n: 1 }] }] });
+    model.applyTransaction({ add: [{ id: 'a2', n: 1 }] });
+    expect(tree(model).parentOf(k('a2'))).toBe(k('b'));
+    // Removed and added back in one transaction under another added row: the new parent.
+    model.applyTransaction({ remove: ['a1'], add: [{ id: 'c', n: 0, kids: [{ id: 'a1', n: 2 }] }] });
+    expect(tree(model).parentOf(k('a1'))).toBe(k('c'));
+  });
+
+  it("an update's children list is additive: a former child not listed stays where it is", () => {
+    const { model } = nested();
+    model.applyTransaction({ update: [{ id: 'a', n: 3, kids: [{ id: 'b1', n: 5 }] }] });
+    expect(tree(model).parentOf(k('b1'))).toBe(k('a'));
+    expect(tree(model).parentOf(k('a1'))).toBe(k('a'));
+    expect(tree(model).parentOf(k('a2'))).toBe(k('a'));
+    // An update without children keeps them all.
+    model.applyTransaction({ update: [{ id: 'a', n: 3 }] });
+    expect(tree(model).parentOf(k('b1'))).toBe(k('a'));
+  });
+
+  it('a refused update (an id the rows do not hold) does not place its children', () => {
+    const { model } = nested();
+    model.applyTransaction({ update: [{ id: 'nope', n: 0, kids: [{ id: 'b1', n: 5 }] }] });
+    expect(tree(model).parentOf(k('b1'))).toBe(k('b'));
   });
 
   it('setRows builds the index again', () => {
@@ -253,6 +306,48 @@ describe('path trees and filler rows', () => {
     // f1 (source 0) now comes first under [img], which takes its place: before d.
     expect(view(model)).toEqual(['[img] 1/2', '. f1 1/2', '. g 2/2', 'd 2/2', '. [2025] 1/1', '. . f2 1/1']);
     expect(tree(model).indexOf(groupKey(['docs', '2024']))).toBe(-1);
+  });
+
+  it('a row taking a filler\'s place keeps its open state; a filler taking a row\'s place keeps the row\'s (lead decision 6c)', () => {
+    const { model, kernel } = paths();
+    const f = groupKey(['docs', '2024']);
+    kernel.dispatch({ type: 'rows.expand', rows: [k('d'), f], expanded: true }, 'user');
+    expect(view(model)).toEqual(['d 1/2', '. [2024] 1/2', '. . f1 1/1', '. [2025] 2/2', '[img] 2/2']);
+    // A row claims docs/2024: it stands there open, under its own key (a data row: at its own place, last).
+    model.applyTransaction({ add: [{ id: 'y', n: 0, path: ['docs', '2024'] }] });
+    expect(view(model)).toEqual(['d 1/2', '. [2025] 1/2', '. y 2/2', '. . f1 1/1', '[img] 2/2']);
+    expect(model.isExpanded(k('y'))).toBe(true);
+    expect([...kernel.expansion].sort()).toEqual([k('d'), k('y')].sort());
+    // Closed, it stays closed through a sort.
+    kernel.dispatch({ type: 'rows.expand', rows: [k('y')], expanded: false }, 'user');
+    kernel.dispatch({ type: 'query.set', query: sortN('asc') }, 'user');
+    expect(model.isExpanded(k('y'))).toBe(false);
+    kernel.dispatch({ type: 'query.set', query: makeQuery({}) }, 'user');
+    kernel.dispatch({ type: 'rows.expand', rows: [k('y')], expanded: true }, 'user');
+    // The reverse: the row removed, the filler comes back open; removed while closed, closed.
+    model.applyTransaction({ remove: ['y'] });
+    expect(view(model)).toEqual(['d 1/2', '. [2024] 1/2', '. . f1 1/1', '. [2025] 2/2', '[img] 2/2']);
+    expect([...kernel.expansion].sort()).toEqual([k('d'), f].sort());
+    model.applyTransaction({ add: [{ id: 'y', n: 0, path: ['docs', '2024'] }] });
+    kernel.dispatch({ type: 'rows.expand', rows: [k('y')], expanded: false }, 'user');
+    model.applyTransaction({ remove: ['y'] });
+    expect(model.isExpanded(f)).toBe(false);
+    // The open row d removed: docs becomes a filler, open.
+    model.applyTransaction({ remove: ['d'] });
+    expect(model.isExpanded(groupKey(['docs']))).toBe(true);
+    expect(view(model)).toEqual(['[docs] 1/2', '. [2024] 1/2', '. [2025] 2/2', '[img] 2/2']);
+  });
+
+  it('one row with a 5 000-segment path: built fast (filler keys from their parent\'s, paths when asked)', () => {
+    const path = Array.from({ length: 5000 }, (_, i) => `s${i}`);
+    const t0 = performance.now();
+    const { model, kernel } = paths([{ id: 'deep', n: 1, path }]);
+    expect(performance.now() - t0).toBeLessThan(200);
+    expect(model.displayed.count).toBe(1);
+    const top = tree(model).nodeAt(tree(model).index(0)!);
+    expect(top).toMatchObject({ kind: 'group', key: groupKey(['s0']), label: 's0', path: ['s0'] });
+    kernel.dispatch({ type: 'rows.expand', rows: [groupKey(path.slice(0, 3))], expanded: true }, 'user');
+    expect(model.isExpanded(groupKey(path.slice(0, 3)))).toBe(true);
   });
 
   it('initial "all" opens the fillers too', () => {

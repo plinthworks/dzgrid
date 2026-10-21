@@ -59,7 +59,8 @@ export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: Ro
       const raw = reader.overlay ? reader.value(col, node.data, idOfDataKey(node.key) ?? '') : col.read(node.data);
       if (isBlank(raw) || c.isEmpty(raw)) {
         counts.blank++;
-        return '';
+        // A blank tree cell keeps its row's indent (csv-export.md).
+        return pad;
       }
       v = c.coerce(raw, ctx);
       s = v === null ? null : text(v);
@@ -68,7 +69,7 @@ export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: Ro
     }
     if (s === null) {
       counts.invalid++;
-      return '';
+      return pad;
     }
     if (ident && !pad && DIGITS.test(s)) return e.quote(`="${s}"`);
     s = pad + s;

@@ -115,16 +115,14 @@ function setup(g: GridContext<unknown>, column: string | undefined, indent: numb
     else if (x.getAttribute(name) !== v) x.setAttribute(name, v);
   };
   const undecorate = (cell: HTMLElement): void => {
+    // The label first: found by its class, not by its place after the toggle.
+    labelOf(cell)?.remove();
     const t = cell.firstElementChild;
     if (t?.classList.contains('dzg-toggle')) t.remove();
-    labelOf(cell)?.remove();
     cell.style.removeProperty(PAD);
   };
   /** A filler's label, after the toggle: isolated in its own direction, like free text. */
-  const labelOf = (cell: HTMLElement): Element | null => {
-    const l = cell.firstElementChild?.nextElementSibling;
-    return l?.classList.contains('dzg-label') ? l : null;
-  };
+  const labelOf = (cell: HTMLElement): Element | null => cell.querySelector(':scope > .dzg-label');
 
   return {
     // Spans are off beside a tree (D9): the grid paints without them.

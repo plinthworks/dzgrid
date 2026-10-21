@@ -92,7 +92,8 @@ describe('layering of the base and the server entry', () => {
     // What the seams cost stays within the plan's estimate (+800–900 B over 26 984), plus what the
     // review of steps 2–3 added (expandAll through the model and the filter's layer, the muted rows
     // left out of select-all, the toggle's patched flags: about +130), plus step 5 (the `tree-shape`
-    // code, the nested rows' `load`/`tx` hooks, `rows.expand` on fillers: +35): a guard against a seam that grew.
-    expect(gz).toBeLessThan(26984 + 1185);
+    // code, the nested rows' `load`/`tx` hooks, `rows.expand` on fillers: +35), plus the review of step 5
+    // (`tx` given the store's snapshot, the open set and the layer rekeyed: +52): a guard against a seam that grew.
+    expect(gz).toBeLessThan(26984 + 1245);
   });
 });

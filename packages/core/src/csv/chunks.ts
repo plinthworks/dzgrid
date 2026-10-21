@@ -40,7 +40,7 @@ export interface CsvOptions {
   readonly tree?: 'none' | 'level' | 'indent';
   /** The level column's header; default `Level`. */
   readonly levelHeader?: string;
-  /** The column that carries the indent and a filler's label; default the first written. */
+  /** The column that carries the indent and a filler's label; absent or not written: the first written. */
   readonly treeColumn?: string;
 }
 
@@ -129,7 +129,8 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
   };
   const levelAt = o.tree === 'none' ? undefined : rows.levelAt;
   const indent = o.tree === 'indent';
-  const treeAt = !rows.levelAt ? -1 : o.treeColumn === undefined ? 0 : cols.findIndex((c) => c.id === o.treeColumn);
+  // The tree column: the one named, else (absent, or not written) the first written.
+  const treeAt = rows.levelAt ? Math.max(0, cols.findIndex((c) => c.id === o.treeColumn)) : -1;
   /** A tree's level column first (`level`): its header, or the row's level from 1. */
   const lead = (fields: string[], v: string): string[] => (levelAt && !indent && fields.unshift(v), fields);
   let out = o.bom === false ? '' : BOM;

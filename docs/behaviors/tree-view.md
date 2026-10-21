@@ -48,13 +48,18 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
   Exactly one of `parentId`, `children`, `path` (step 5): none or several give `tree-shape` (error;
   with none every row is a root, with several the first of that order is used).
 - **Nested rows** (step 5): made flat before the grid holds them, each row then its children (the
-  reading order of the data); a row refused for its id (invalid, or a second copy) is not walked, so
-  its children are not added. Each row's parent is kept by id. Transactions: an added row brings its
-  children under it, and is a root unless its id had a parent before (a row removed and added back
-  returns under it); an update or a patch keeps the parent; an update's children are taken as its
-  children, so `{ update: [parentWithChild], add: [child] }` adds a child under an existing row;
-  removing a row leaves its children at the root (`tree-orphan`), as with parent ids. A problem's
-  `rows[i]` counts the rows made flat. A new `setRows` starts the parents again.
+  reading order of the data); a row refused for its id (invalid: not an object, or a `getRowId` that
+  throws; or a second copy, in the data or of a row the grid holds) is passed on for the grid to tell
+  (`invalid-row-id`, `duplicate-row-id`) and not walked: its children are not added and it places no
+  row. Each row's parent is kept by id. Transactions: an added row brings its children under it, and
+  is a root unless an earlier update listed it among its children; removing a row forgets its own
+  parent (review of step 5, lead decision): added back in the same transaction it keeps that parent,
+  added back later it is a root (unless an update has listed it since). An update or a patch keeps
+  the parent; an update's children list is added to its children, never taken from (a former child
+  not listed stays where it is), so `{ update: [parentWithChild], add: [child] }` adds a child under
+  an existing row; an update the grid refuses places nothing. Removing a row leaves its children at
+  the root (`tree-orphan`), as with parent ids, until it comes back. A problem's `rows[i]` counts the
+  rows made flat. A new `setRows` starts the parents again.
 - **Path rows** (step 5): a level no row has is a filler (label: the last segment; level: its depth);
   a row whose path is a filler's takes its place. Two rows with one path are siblings, the first the
   parent of longer paths; an empty or unreadable path makes a root. Segments compare as text.
@@ -62,7 +67,11 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
   order shown (the sort's, else the rows' own): a folder sits where its first content would. Not by
   its label: the label is text and the tree column may be a number or a date. Under a filter a filler
   never matches: it is kept (muted) above a shown row, and never counted. A filler can be opened by
-  the application even while hidden; its key stays in the open set.
+  the application even while hidden; its key stays in the open set. **A row taking a filler's place
+  keeps the filler's open state, and a filler taking a row's place the row's** (review of step 5,
+  lead decision): when a change leaves a key's row or filler gone and the other kind now stands at its
+  path, the key in the open set becomes that one's (a closed one stays closed); a row that only moves
+  keeps its own state.
 - **Sorting** (D2): one sort over the rows, then children grouped under their parent in that
   order (stable): each level is sorted, and a sort costs what it costs on a flat list.
 - **Opening and closing** splice the rows below the parent in or out of the displayed list; they

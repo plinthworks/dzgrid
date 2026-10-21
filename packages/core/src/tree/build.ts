@@ -1,4 +1,4 @@
-import { canonicalId, groupKey, type RowIdInput, type RowKey } from '../ids.js';
+import { canonicalId, type RowIdInput, type RowKey } from '../ids.js';
 import { problem, type Problem } from '../problems.js';
 import type { RowSnapshot } from '../row/store.js';
 
@@ -19,10 +19,13 @@ export interface Structure {
   /** The deepest level (0: roots only): what a flatten's stack needs. */
   readonly maxDepth: number;
   readonly problems: readonly Problem[];
-  /** A path tree's fillers, by node - rows: their path and key; and the node of each filler key. */
-  readonly paths?: readonly (readonly string[])[];
-  readonly keys?: readonly RowKey[];
-  readonly at?: ReadonlyMap<RowKey, number>;
+  /**
+   * A path tree: the node standing at a group key's path (a row or a filler; -1: none), and a node's
+   * place as a group key and a path, made when asked (a filler's key from its parent's, once).
+   */
+  readonly at?: (key: RowKey) => number;
+  readonly keyOf?: (x: number) => RowKey;
+  readonly pathOf?: (x: number) => readonly string[];
 }
 
 /** Parent mode (and nested rows, through their index): each row's parent by its id. */
@@ -53,7 +56,7 @@ export function structure<T>(snap: RowSnapshot<T>, parentId: (row: T, id: string
 /**
  * A path tree (D3): each row's path walked from the root through one map per level, keyed by the
  * segment (O(n·depth), no joined strings). A level no row claims is a filler, numbered after the
- * rows, keyed `groupKey(path)`; a row whose path equals a filler's takes its place. Two rows with one
+ * rows, keyed `groupKey(path)` when asked; a row whose path equals a filler's takes its place. Two rows with one
  * path: siblings, the first the parent of deeper paths. An empty or unreadable path: a root.
  */
 export function pathStructure<T>(snap: RowSnapshot<T>, path: (row: T) => readonly string[]): Structure {
@@ -87,21 +90,46 @@ export function pathStructure<T>(snap: RowSnapshot<T>, path: (row: T) => readonl
   let f = n;
   for (let t = 0; t < T; t++) node[t] = row[t]! >= 0 ? row[t]! : f++;
   const parent = new Int32Array(f);
-  const paths: string[][] = [];
-  const keys: RowKey[] = [];
-  const at = new Map<RowKey, number>();
+  // Each node's trie node (a row with an empty path has its own, outside the maps).
+  const trie = new Int32Array(f);
   for (let t = 0; t < T; t++) {
     parent[node[t]!] = up[t]! < 0 ? -1 : node[up[t]!]!;
-    if (row[t]! < 0) {
-      const p: string[] = [];
-      for (let x = t; x >= 0; x = up[x]!) p.unshift(seg[x]!);
-      const key = groupKey(p);
-      paths.push(p);
-      keys.push(key);
-      at.set(key, node[t]!);
-    }
+    trie[node[t]!] = t;
   }
-  return { ...finish(n, parent, [], snap.ids), paths, keys, at };
+  // Keys by trie node: each one its parent's and its own segment (groupKey's form), cached.
+  const kc: string[] = [];
+  const keyOf = (x: number): RowKey => {
+    const stack: number[] = [];
+    let t = trie[x]!;
+    for (; t >= 0 && kc[t] === undefined; t = up[t]!) stack.push(t);
+    let k = t < 0 ? 'g:' : kc[t]!;
+    while (stack.length) {
+      const u = stack.pop()!;
+      kc[u] = k += `${seg[u]!.length}:${seg[u]}`;
+    }
+    return k as RowKey;
+  };
+  const pathOf = (x: number): string[] => {
+    const p: string[] = [];
+    for (let t = trie[x]!; t >= 0; t = up[t]!) p.push(seg[t]!);
+    return p.reverse();
+  };
+  const at = (key: RowKey): number => {
+    if (!key.startsWith('g:')) return -1;
+    let m: Map<string, number> | undefined = top;
+    let t = -1;
+    for (let i = 2; i < key.length; ) {
+      const c = key.indexOf(':', i);
+      const len = +key.slice(i, c);
+      if (c < 0 || !(len >= 0) || !m) return -1;
+      t = m.get(key.slice(c + 1, (i = c + 1 + len))) ?? -1;
+      if (t < 0) return -1;
+      m = next[t];
+    }
+    // The key as made from that path, or it names nothing ('g:01:a' is not 'g:1:a').
+    return t >= 0 && keyOf(node[t]!) === key ? node[t]! : -1;
+  };
+  return { ...finish(n, parent, [], snap.ids), at, keyOf, pathOf };
 }
 
 /** Cycles broken, depths and children counted, over `parent` (rows first, then fillers). */
