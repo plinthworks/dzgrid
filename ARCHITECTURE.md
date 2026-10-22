@@ -439,6 +439,7 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Ligne entière** : `MoveShape.whole` ; sur un détail, Gauche/Droite/Début/Fin ne bougent pas ; le focus d'un détail est un focus de cellule sur la colonne visée (gardée en le traversant).
 - **Ligne de détail** : pas de cellules ni de case, une `gridcell` `.dzg-dcell` (`aria-colspan` = colonnes visibles + case, nommée d'après l'en-tête de ligne du maître), `RowView.slot`, collée au début de la vue, aussi large que la vue sans dépasser les colonnes. Emplacement de pièce `'detail'` (type) ; la base détruit la pièce quand la ligne sort de la fenêtre, change de clé ou que la grille finit ; Entrée/F2 appellent son `focus()`, Échap revient à la cellule.
 - **Budget** : base DOM 19 765 → 20 488 (21 300), thème 2 234 → 2 238 ; les autres inchangés.
+- **Revue de l'étape 9** : une page avance toujours d'au moins une ligne ; le routeur ignore les touches d'une grille imbriquée (racine `.dzg` la plus proche) ou déjà traitées ; la redisposition se voit aussi au décalage de la ligne du haut ; `layoutFor(d, h, was)` garde les hauteurs mesurées quand la hauteur de ligne change ; `ensureVisible` montre le haut d'une ligne plus haute que la vue, et Gauche/Droite/Début/Fin ramènent un détail sorti de la vue (base DOM 20 618).
 
 ## 0. Provenance, et limites de ce que j'ai lu
 

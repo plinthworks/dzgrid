@@ -99,8 +99,12 @@ export interface GridContext<T> {
   remPx: number;
   /** The view's block size at the last paint (what a screen of rows is, measured). */
   viewBlock: number;
-  /** Where the rows sit when a feature gives their heights (D7); the uniform layout otherwise. */
-  layoutFor?: (d: DisplayedRows<T>, h: number) => RowLayout;
+  /**
+   * Where the rows sit when a feature gives their heights (D7); the uniform layout otherwise. `was`: the
+   * same rows' layout at another row height (density, text zoom), whose heights the feature set (a measure)
+   * it carries over.
+   */
+  layoutFor?: (d: DisplayedRows<T>, h: number, was?: RowLayout) => RowLayout;
   /** The row layout of the rows shown (`rowLayout`): made for the last paint, or since. */
   layout?: RowLayout;
   /** What `layout` was made for: the rows, the row height, the feature's `layoutFor`. */

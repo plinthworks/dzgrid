@@ -29,11 +29,16 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     const m = step(null, {
       rows: d, cols: columns.visible().map((c) => c.id), page,
       bands: g.bands.length, extras: g.headerRows.length, checkBox: !!headerRenderer.checkBox,
-      // A detail is one stop (D8); over rows of their own heights a page is a distance (D7).
+      // A detail is one stop (D8); over rows of their own heights a page is a distance (D7), and at
+      // least one row (a row taller than a page is left, never landed on again).
       whole: (i) => d.nodeAt(d.index(i)!).kind === 'detail',
-      ...(!L.uniform && { rowAt: (r: number, n: number) => L.indexAt((r < 0 ? -h : L.offsetOf(r as never)) + n * page * h) }),
+      ...(!L.uniform && { rowAt: (r: number, n: number) => {
+        const at = L.indexAt((r < 0 ? -h : L.offsetOf(r as never)) + n * page * h);
+        return r < 0 ? at : n > 0 ? Math.max(at, r + 1) : Math.min(at, r - 1);
+      } }),
     }, from, goal, intent, moveFocus);
-    if (!m) return;
+    // A column key on a whole row keeps the focus there, brought back into view as a move would.
+    if (!m) return void (from.kind === 'cell' && 'axis' in intent && intent.axis === 'col' && focus.ensureVisible(from.row));
     goal = m.goal;
     if (m.to === 'checkBox') headerRenderer.checkBox!.focus({ preventScroll: true });
     else focus.focusTo(m.to);
@@ -76,7 +81,8 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
   }
 
   scope.on(el.viewport, 'keydown', (e: KeyboardEvent) => {
-    if (e.isComposing || e.keyCode === 229) return;
+    // A grid nested in this one (in a detail) has its own keys: a key from it, or one already taken, is not ours.
+    if (e.isComposing || e.keyCode === 229 || e.defaultPrevented || (e.target as Element).closest('.dzg') !== el.root) return;
     g.keyboardAt = g.now();
     if (e.key === 'Escape' && !g.el.tooltip.hidden) {
       g.tip.hide();

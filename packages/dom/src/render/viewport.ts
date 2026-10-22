@@ -22,8 +22,8 @@ export interface Painter {
 
 /**
  * The row layout of the rows shown now (D7): the last one made while the rows, the row height and the
- * feature's `layoutFor` are the same (heights a feature set on it live until the next build), else a new
- * one, a feature's or every row `h` tall, kept in `g.layout`. The paint, `ensureVisible` and the page
+ * feature's `layoutFor` are the same (heights a feature set on it live until the next build, and across a
+ * new row height through `layoutFor`'s `was`), else a new one, a feature's or every row `h` tall, kept in `g.layout`. The paint, `ensureVisible` and the page
  * keys read it: never a layout of rows already gone.
  */
 export function rowLayout<T>(g: GridContext<T>): RowLayout {
@@ -32,7 +32,8 @@ export function rowLayout<T>(g: GridContext<T>): RowLayout {
   const by = g.layoutFor;
   const l = g.laid;
   if (!g.layout || !l || l[0] !== d || l[1] !== h || l[2] !== by) {
-    g.layout = by?.(d, h) ?? uniformRowLayout(d, h);
+    // Only the row height changed: the heights set on the old layout go to the feature (a measure kept).
+    g.layout = by?.(d, h, l?.[0] === d && l[2] === by ? g.layout : undefined) ?? uniformRowLayout(d, h);
     g.laid = [d, h, by];
   }
   return g.layout;
@@ -50,7 +51,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let mapperKey = '';
   let available = -1;
   let colIndexOf: { version: number; index: Map<string, number> } = { version: -1, index: new Map() };
-  let shown: { displayed: DisplayedRows<T>; key: RowKey | null; delta: number; atTop: boolean; atEnd: boolean; h: number; total: number; layout: RowLayout } | null = null;
+  let shown: { displayed: DisplayedRows<T>; key: RowKey | null; index: number; offset: number; delta: number; atTop: boolean; atEnd: boolean; h: number; total: number; layout: RowLayout } | null = null;
   let anchorNext: 'rows' | 'expand' | null = null;
   let paints = 0;
   let firstData = false;
@@ -155,9 +156,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     lastH = h;
     const mapper = scroll.mapper!;
     // Rows added or removed by a transaction: the row at the top of the view stays where it was,
-    // the top stays the top and the end stays the end. The same rows laid out again with another
-    // total (a height set on the layout, D7) are anchored as rows are.
-    const relaid = !!shown && shown.displayed === d && shown.h === h && shown.total !== layout.total;
+    // the top stays the top and the end stays the end. The same rows laid out again (a height set on
+    // the layout, D7: another total, or the top row moved by heights above it, the total kept by others
+    // below) are anchored as rows are.
+    const relaid = !!shown && shown.displayed === d && shown.h === h && (shown.total !== layout.total || (shown.index >= 0 && layout.offsetOf(shown.index as never) !== shown.offset));
     if (relaid) anchorNext ??= 'rows';
     if (anchorNext && shown && (shown.displayed !== d || relaid)) {
       if (shown.atTop) scroll.scrollTo(0);
@@ -263,6 +265,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     shown = {
       displayed: d,
       key: topIndex !== null ? d.keyAt(topIndex) : null,
+      index: topIndex ?? -1,
+      offset: topIndex !== null ? layout.offsetOf(topIndex) : 0,
       delta: topIndex !== null ? scroll.logicalTop - layout.offsetOf(topIndex) : 0,
       atTop: scroll.atTop,
       atEnd: scroll.atEnd,

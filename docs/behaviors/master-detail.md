@@ -61,14 +61,24 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   million uniform rows: S12 measured the ends exact (0 px), every row placed within 0.46 px,
   row 999 999 reachable, with 2 000 details of 240 px over 1 000 000 rows in Chrome, Firefox and
   WebKit. A height change above the viewport keeps the top row where it is (anchor: the row at the
-  top and the distance into it, re-applied after the change); at the end of the list, the view
-  stays at the end.
+  top and the distance into it, re-applied after the change), also when other heights below make
+  the total the same (step 9 review); at the end of the list, the view stays at the end. A
+  measured height survives a change of the row height (density, text zoom): the base hands the
+  old layout to the feature, which carries the heights set on it (step 9 review).
 - **Keys** (D8): the detail row is a whole-row stop (`MoveShape.whole`): Up/Down reach it; the
-  goal column is remembered across it; Left/Right/Home/End stay. Enter or F2 calls the part's
+  goal column is remembered across it; Left/Right/Home/End stay, and bring the detail back into view
+  when it was scrolled away, as any other move does (lead decision, step 9 review). Enter or F2 calls the part's
   `focus()`; Escape inside returns to the stop (the content container is a `cell-widget` owner, so
   the outer router ignores keys from inside, Escape included once the inner part has handled it).
   Tab from the stop leaves the grid, as from any cell (one tab stop). PageUp and PageDown move by a
-  page's distance (a 240 px detail is not one row of a page); the wheel moves pixels, as always.
+  page's distance (a 240 px detail is not one row of a page), and always at least one row: from a
+  detail taller than a page, PageDown goes to the row after it; the wheel moves pixels, as always.
+- **Scrolled into view** (lead decision, step 9 review): a row taller than the view (a tall detail)
+  is shown from its top, its name and the panel's start visible (under a tree's pinned rows, as
+  any row), from above as from below; a shorter row is brought just into view, as before.
+- **Nested grids and keys** (step 9 review): the outer grid takes no key whose target belongs to
+  another grid (the nearest `.dzg` root is not its own) nor a key already handled
+  (`defaultPrevented`): a key in an inner grid never moves the outer one or leaves the panel.
 - **Not data**: a detail row is never selected, copied, pasted, edited or exported; it sends no
   `rowClicked` or `cellClicked`; Ctrl+A and ranges skip it.
 - **Nested grids**: a ready part creates an inner grid per open master, with an LRU of

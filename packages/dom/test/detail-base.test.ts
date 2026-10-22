@@ -43,9 +43,10 @@ function detailFeature(o: DetailOptions<T> = {}, part?: SlotPart<'detail'>): Gri
     id: 'detail',
     shape: () => detailShape<T>(o) as unknown as RowShape<unknown>,
     setup(g: GridContext<unknown>) {
-      g.layoutFor = (d, h) => {
+      // A new row height over the same rows: the heights set on the old layout (measures) carried over.
+      g.layoutFor = (d, h, was) => {
         const r = d as unknown as DetailRows<unknown>;
-        return sparseRowLayout(d, h, { at: r.details, heights: r.heights });
+        return sparseRowLayout(d, h, { at: r.details, heights: was ? Array.from(r.details, (i) => was.heightOf(i as never)) : r.heights });
       };
       return {
         afterRows() {
