@@ -102,8 +102,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `emit` → `partAction { slot: 'detail' }`; `<dz-grid [dzgNested]="cell()">` for a grid inside a panel
   (Escape back to the panel's cell, one level; `detail.depth` past three levels).
 
+- **The floating filter row shown and hidden live (Phase 4 step 12)**: `filters().floating` with
+  `get()`, `set(on)` and `bind(button)` (the host's button as a toggle: `aria-pressed`,
+  `aria-controls`, the bundle's name on a button without words of its own; returns the unbind; before
+  or after the grid). Hiding keeps the filters (the header's mark shows them), applies text still
+  waiting for its pause and moves a focus in the row to the column's header; showing restores each
+  field from the filters in force without an event. The user's toggle is said (« Ligne de filtres
+  masquée / affichée »). New texts `filter.floatingToggle`, `announce.floatingHidden`,
+  `announce.floatingShown` in `locales/{en,fr,ar}-filters`. Playground: a « Ligne de filtres » button
+  on the filters demos and the tree demo. Angular: `<dz-grid [floatingFilters]>` (one-way, live; a
+  user's toggle is never overwritten until the value changes).
+
 ### Changed
 
+- `filters()` now requires three more texts (`filter.floatingToggle`, `announce.floatingHidden`,
+  `announce.floatingShown`): a host with its own filter bundle must add them, or `filters()` throws a
+  TypeError naming them. The floating row is no longer fixed when the grid is made.
 - `npm run example:build` installs the tarballs just packed: the example's lock entries for the
   `@dzgrid` packs are dropped first (their pinned integrity made npm reinstall its cached old copy).
 

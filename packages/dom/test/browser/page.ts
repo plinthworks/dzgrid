@@ -126,7 +126,20 @@ if (q.get('search')) {
   host.before(label);
   search.bind(box);
 }
-if (withFilters) features.push((await import('/packages/dom/src/filters.ts')).filters({ floating: q.get('floating') === '1', popup: q.get('popup') === '1', ...fail }) as never);
+const filtering = withFilters ? (await import('/packages/dom/src/filters.ts')).filters({ floating: q.get('floating') === '1', popup: q.get('popup') === '1', ...fail }) : null;
+if (filtering) features.push(filtering as never);
+// `toggle=1`: a "Filter row" button with its own words, `toggle=icon` one without (the bundle names it), bound to the
+// floating row (Phase 4 step 12).
+if (filtering && q.get('toggle')) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.id = 'floating';
+  if (q.get('toggle') === 'icon') b.innerHTML = '<svg width="16" height="16" aria-hidden="true" focusable="false"><path d="M1 2h14L9 9v5l-2 1V9z" fill="currentColor"/></svg>';
+  else b.textContent = base === AR ? 'صف المرشحات' : base === FR ? 'Ligne de filtres' : 'Filter row';
+  b.style.minInlineSize = b.style.minBlockSize = '24px';
+  host.before(b);
+  filtering.floating.bind(b);
+}
 // Paging (step 17): the footer, and for `cursor` a server in memory that does not say its total.
 const served = { fetches: 0, failNext: false };
 let data: Record<string, unknown> = { rows };
@@ -171,7 +184,7 @@ if (q.get('two')) {
 }
 
 (window as any).t = {
-  served,
+  served, filters: filtering,
   grid, N, events, dataKey, rows, clock, context,
   key: (id: number) => dataKey(id)!,
   indexOf: (el: Element) => {

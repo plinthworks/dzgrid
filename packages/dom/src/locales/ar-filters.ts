@@ -53,5 +53,8 @@ export const AR_FILTERS = {
     'filter.set.count': { zero: "{n} قيمة", one: "قيمة واحدة ({n})", two: "قيمتان ({n})", few: "{n} قيم", many: "{n} قيمة", other: "{n} قيمة" },
     'filter.set.truncated': "أول {n} قيمة. ضيّق البحث.",
     'filter.set.failed': "تعذر تحميل القيم. أعد المحاولة\u060C أو أعد تحميل الصفحة.",
+    'filter.floatingToggle': "صف المرشحات",
+    'announce.floatingHidden': "تم إخفاء صف المرشحات",
+    'announce.floatingShown': "تم إظهار صف المرشحات",
   },
 } satisfies FilterMessages;

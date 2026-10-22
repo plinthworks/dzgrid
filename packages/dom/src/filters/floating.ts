@@ -1,4 +1,4 @@
-import type { ColumnDef, ColumnOrGroup, ResolvedColumn } from '@dzgrid/core';
+import type { ChangeSource, ResolvedColumn } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { HeaderRowSpec } from '../render/header.js';
 import type { Part, SlotContext } from '../part.js';
@@ -10,11 +10,12 @@ type FC = SlotContext['floating'];
 
 /** What a floating cell may hold that takes the focus: out of the Tab order until Enter or F2. */
 const CONTROLS = 'input,button,select,textarea,a[href],[tabindex]';
-const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));
 
 export interface FloatingRow {
   readonly spec: HeaderRowSpec;
   sweep(): void;
+  /** Before the row is hidden: the grid's focus on it moved to its column's header. */
+  leave(source: ChangeSource): void;
   destroy(): void;
 }
 
@@ -26,17 +27,15 @@ export interface Opener {
 }
 
 /**
- * The floating row (docs/behaviors/filter-ui.md, step 12): fixed when the grid is made (owner
- * decision O3), there when `filters({ floating: true })` or a column, hidden ones included, asks
- * for it; null otherwise. Each cell's part is resolved from the registry (`resolve.ts`: `floating.<kind>`,
+ * The floating row (docs/behaviors/filter-ui.md, step 12; shown and hidden live since Phase 4 step 12,
+ * floating-toggle.md: the feature puts its spec in `g.headerRows` or takes it out). Each cell's part is resolved from the registry (`resolve.ts`: `floating.<kind>`,
  * then the bare `floating`), mounted with its cell and swept when the cell leaves the column window.
  * The pause is the feature's (`commit.ts`): one pending edit per column, applied by its timer, Enter,
  * Escape, the focus leaving the cell or the cell leaving the window; dropped with the grid. Enter
  * or F2 on a cell goes into its part, Escape inside comes back to the cell. A summary opens the
  * column's popup when it has one (step 13), anchored to the cell's `aria-haspopup` control.
  */
-export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: boolean }, resolve: Resolve, commit: Commit, popup: Opener): FloatingRow | null {
-  if (o.floating !== true && !leaves(g.settings.columns).some((d) => d?.filter && d.filter.floating === true)) return null;
+export function floatingRow(g: GridContext<unknown>, resolve: Resolve, commit: Commit, popup: Opener): FloatingRow {
   const cells = new Map<HTMLElement, Mounted<FC>>();
   const flush = commit.flush;
   const tab = (cell: HTMLElement, i: number): void => {
@@ -75,6 +74,12 @@ export function floatingRow(g: GridContext<unknown>, o: { readonly floating?: bo
         m.clear();
         cells.delete(cell);
       }
+    },
+    // Its pending edits are applied by the sweep of the paint that takes its cells away; a DOM focus in it is
+    // given back by that paint to the grid's focus (the focused node gone), which goes to the column's header here.
+    leave(source) {
+      const f = g.kernel.focus;
+      if (f?.kind === 'header' && f.level! > 0) g.kernel.dispatch({ type: 'focus.set', focus: { kind: 'header', column: f.column } }, source);
     },
     // The pending edits' timers belong to the grid's scope: they go with it.
     destroy() {

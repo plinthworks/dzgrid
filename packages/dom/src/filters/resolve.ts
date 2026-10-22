@@ -1,4 +1,4 @@
-import { filterKindOf, partNameFor, problem, type PartColumn, type ResolvedColumn } from '@dzgrid/core';
+import { filterKindOf, partNameFor, problem, type ColumnDef, type ColumnOrGroup, type PartColumn, type ResolvedColumn } from '@dzgrid/core';
 import { emit, filterKindLookup } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { Part } from '../part.js';
@@ -11,13 +11,18 @@ export interface Resolved {
   /** The column can filter here with this slot's switches (part or not): what a header part drives (step 21). */
   readonly ok: boolean;
 }
+const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));
+/** A column, hidden ones included, asks for a floating field (`filter.floating: true`). */
+export const asked = (g: GridContext<unknown>): boolean => leaves(g.settings.columns).some((d) => d?.filter && d.filter.floating === true);
+
 /** The part a column gets in the floating row (`floating`) or its popup (`filter`). */
 export type Resolve = (col: ResolvedColumn<unknown>, slot: 'floating' | 'filter') => Resolved;
 
 /**
  * Which part draws a column's filter, from the registry: `floating.<kind>` then the bare
  * `floating` (the summary) in the floating row; `filter.<kind>` alone in the popup. None when the
- * column says `filter: false`, when the floating row is off for it (`filter.floating`, `filters({ floating })`),
+ * column says `filter: false`, when the floating row is off for it (`filter.floating`, `filters({ floating })`;
+ * with neither on any column, every column: the row shown by its toggle, Phase 4 step 12),
  * or when a custom kind cannot filter where the rows are (no browser rule under the client).
  * `strict`: a part given only to a column naming its kind (the built-in `filter.set`, step 15).
  * An unknown kind the column names is said once per registry. Cached per columns' version.
@@ -28,6 +33,7 @@ export function resolver(g: GridContext<unknown>, o: { readonly floating?: boole
   let version = -1;
   let by = new Map<string, Resolved>();
   let told = new Set<string>();
+  let all = false;
   return (col, slot) => {
     const now = g.parts();
     if (reg !== now || version !== g.columns.version) {
@@ -35,6 +41,7 @@ export function resolver(g: GridContext<unknown>, o: { readonly floating?: boole
       reg = now;
       version = g.columns.version;
       by = new Map();
+      all = o.floating === true || !asked(g);
     }
     const id = slot + col.id;
     let r = by.get(id);
@@ -43,7 +50,7 @@ export function resolver(g: GridContext<unknown>, o: { readonly floating?: boole
     const pc: PartColumn = { id: col.id, type: col.type, ...(f && { filter: f }) };
     const kind = filterKindOf(pc);
     // The popup's own switch (`filters({ popup })`) is the menu's.
-    let ok = f !== false && (slot === 'filter' || (f?.floating ?? o.floating === true));
+    let ok = f !== false && (slot === 'filter' || (f?.floating ?? all));
     if (ok && !BUILT_IN.has(kind)) {
       const k = kinds.get(kind);
       const path = `columns.${col.id}.filter.kind`;

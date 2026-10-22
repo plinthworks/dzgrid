@@ -461,6 +461,15 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Budget** : angular 5 965 (6 000). Exemple Angular réel : 86 044 > 85 000 (85 555 avant l'étape, l'installation de l'exemple était périmée depuis l'étape 23, corrigée) : décision du propriétaire.
 - **Revue** : clés de l'hôte en attente jusqu'à l'arrivée de leurs lignes (abandonnées sous une ligne fermée par l'utilisateur), modèle gardé sous un filtre d'arbre, événements de la création dits après le premier rendu (NG0100) ; budget angular 6 200 (Q15), mesuré 6 176.
 
+### Décisions de la Phase 4, étape 12 (2026-10-22 ; ligne de filtres affichable en direct ; plan `docs/phase-4-steps/step12-plan.md`, fiche `docs/behaviors/floating-toggle.md`, décision Q8)
+- **API** : `filters().floating` — `get()`, `set(on)`, `bind(bouton)` (rend le détacheur) ; utilisable avant la grille (un `set` d'avant est l'état de départ) ; l'état appartient à l'objet de la fonction (dernière grille montée, comme `openFilter`).
+- **Base inchangée** : le rendu des en-têtes garde déjà les rangées par identité de spec ; la fonction met sa spec dans `g.headerRows` ou l'en retire, une peinture recompte `aria-rowcount` et tous les `aria-rowindex`, une seconde relit la hauteur de la vue.
+- **Masquer** : le focus de la grille sur la ligne passe à l'en-tête de la même colonne (source `user` ou `api`) ; la peinture rend le focus du DOM et son balayage applique les saisies en attente. Les filtres restent ; la marque « filtré » de l'en-tête le dit. Une fenêtre ouverte depuis la ligne se ferme avec elle.
+- **Montrer** : parties neuves depuis les filtres en vigueur, aucun événement, aucune phrase. Sans colonne qui la demande, chaque colonne filtrable a son champ.
+- **Bouton** : `aria-pressed`, `aria-controls`, nom du paquet (`filter.floatingToggle`) seulement s'il n'a pas de mots à lui (WCAG 2.5.3) ; phrases « Ligne de filtres masquée / affichée » pour l'utilisateur seulement.
+- **Angular** : `[floatingFilters]`, entrée à sens unique, en direct, sans écho (l'état revient par `filters().floating.get()`) ; 6 236 o, budget relevé à 6 250 (Q16).
+- **Tailles** : `/filters` 9 728 (10 000), textes 745 / 876 / 997, dom 20 648, angular 6 236 (6 250).
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.

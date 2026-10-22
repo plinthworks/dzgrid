@@ -57,7 +57,8 @@ for (const [k, v] of params) {
 }
 const val = (name: string) => (form.elements.namedItem(name) as HTMLSelectElement).value;
 const on = (name: string) => (form.elements.namedItem(name) as HTMLInputElement).checked;
-// `filters=1` adds the filters feature (its texts spread into each bundle); `floating=1` its floating row. Fixed at creation.
+// `filters=1` adds the filters feature (its texts spread into each bundle); `floating=1` starts with its floating row
+// shown (the "Ligne de filtres" button above the grid shows or hides it live, Phase 4 step 12).
 const withFilters = params.get('filters') === '1';
 const floating = params.get('floating') === '1';
 const popup = params.get('popup') === '1';
@@ -238,8 +239,15 @@ if (exporter) {
   host.insertAdjacentHTML('beforebegin', `<p class="bar"><button type="button" id="export">${label}</button></p>`);
   exporter.bind(document.getElementById('export')!, { scope: 'all' });
 }
+// The page's own "Filter row" button (Phase 4 step 12): shows or hides the floating row live, pressed while shown.
+const filtering = withFilters ? filters({ floating, popup, ...fail }) : null;
+if (filtering) {
+  const label = { 'fr-FR': 'Ligne de filtres', 'en-US': 'Filter row', 'ar-DZ': 'صف المرشحات' }[val('locale') as 'fr-FR'];
+  host.insertAdjacentHTML('beforebegin', `<p class="bar"><button type="button" id="floating">${label}</button></p>`);
+  filtering.floating.bind(document.getElementById('floating')!);
+}
 const grid: GridInstance<RowA> = createGrid<RowA>(host, {
-  ...initial, features: [...(withRules ? [rules(), slots(), filters({ popup: true })] : []), ...(withFilters ? [filters({ floating, popup, ...fail })] : []), ...(search ? [search] : []), ...(paging ? [pagination()] : []), ...(exporter ? [exporter] : [])], ...(dates && { clock: () => Date.now() + offset }),
+  ...initial, features: [...(withRules ? [rules(), slots(), filters({ popup: true })] : []), ...(filtering ? [filtering] : []), ...(search ? [search] : []), ...(paging ? [pagination()] : []), ...(exporter ? [exporter] : [])], ...(dates && { clock: () => Date.now() + offset }),
   ...(paging && { pagination: { pageSize: 50 } }), ...(served && { source: server(paging), operations: 'server' as const }),
 });
 requestAnimationFrame(() => requestAnimationFrame(() => { status.textContent = `premier rendu ${Math.round(performance.now() - t0)} ms`; }));
@@ -253,3 +261,4 @@ form.addEventListener('click', (e) => {
   if (b) grid.update({ overlay: (b.dataset['overlay'] || null) as 'loading' | 'error' | null });
 });
 (window as unknown as { grid: unknown }).grid = grid;
+(window as unknown as { filtering: unknown }).filtering = filtering;

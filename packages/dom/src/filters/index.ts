@@ -16,9 +16,11 @@ import { setForm, setKit, type SetKit } from './set.js';
 import { resolver } from './resolve.js';
 import { injectFilterStyles } from './styles.js';
 import { summaryPart } from './summary.js';
+import { toggle, type FloatingToggle, type Toggle } from './toggle.js';
+import { asked } from './resolve.js';
 
 export interface FiltersOptions {
-  /** A floating row under the headers, for every filterable column (a column's `filter.floating` wins). Fixed. */
+  /** A floating row under the headers, for every filterable column (a column's `filter.floating` wins); shown or hidden live by `floating`. */
   readonly floating?: boolean;
   /** The pause before a typed filter applies; 150 ms in the browser, 300 on a server by default. */
   readonly debounceMs?: number;
@@ -41,6 +43,8 @@ export interface FiltersFeature extends GridFeature {
   /** Opens the column's popup: false when it has no `filter.<kind>` part, its header is not mounted, or its kind cannot filter here. */
   openFilter(column: string): boolean;
   closeFilter(): void;
+  /** The floating row shown or hidden live (Phase 4 step 12): `get`, `set(on)`, `bind(button)`. */
+  readonly floating: FloatingToggle;
 }
 
 const OPS = ['contains', 'notContains', 'equals', 'notEqual', 'startsWith', 'endsWith', 'blank', 'notBlank', 'lt', 'lte', 'gt', 'gte', 'between', 'onDay', 'notOnDay', 'betweenDays', 'before', 'after', 'onOrBefore', 'onOrAfter'] as const;
@@ -52,6 +56,7 @@ export const FILTER_KEYS = [
   ...OPS.map((o) => `filter.op.${o}` as const), 'filter.all', 'filter.yes', 'filter.no',
   'filter.date', 'filter.dateTime', 'filter.period', 'filter.zone', 'filter.loadingDates', 'filter.loadFailed',
   ...(['search', 'all', 'allShown', 'blanks', 'option', 'count', 'truncated', 'failed'] as const).map((k) => `filter.set.${k}` as const),
+  'filter.floatingToggle', 'announce.floatingHidden', 'announce.floatingShown',
 ] satisfies readonly FilterMessageKey[];
 
 /**
@@ -73,6 +78,7 @@ export function filters(o: FiltersOptions = {}): FiltersFeature {
   const d = dateForms(env);
   const sets = setKit(o.loadSet);
   const set = setForm(env, sets);
+  const shown = toggle(o.floating === true);
   return {
     id: 'filters',
     parts: {
@@ -82,13 +88,14 @@ export function filters(o: FiltersOptions = {}): FiltersFeature {
       // Step 21: a ready header part with the column's box (needs `slots()`), named per column.
       'header.filterBox': { slot: 'header', part: filterBoxPart },
     },
-    setup: (g) => setup(g, o, (m) => (popup = m), env, set, () => void sets.load('').catch(() => {})),
+    setup: (g) => setup(g, o, (m) => (popup = m), env, set, () => void sets.load('').catch(() => {}), shown),
     openFilter: (column) => !!popup?.open(column),
     closeFilter: () => popup?.close(),
+    floating: shown.api,
   };
 }
 
-function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => void, env: DateEnv, set: object, fetchSet: () => void): FeatureHandle {
+function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => void, env: DateEnv, set: object, fetchSet: () => void, shown: Toggle): FeatureHandle {
   env.g = g;
   const missing = FILTER_KEYS.filter((k) => g.settings.messages.text[k] === undefined);
   if (missing.length) throw new TypeError(`filters: missing ${missing.join(', ')}`);
@@ -105,7 +112,17 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   onCommand(g.kernel, commit.heard);
   const popup = menu(g, resolve, commit, o.popup !== false);
   keep(popup);
-  const row = floatingRow(g, o, resolve, commit, popup);
+  const row = floatingRow(g, resolve, commit, popup);
+  // Shown or hidden live (floating-toggle.md): the row's spec in the header rows or not; a hide moves the grid's
+  // focus off the row first. The paint reads the view's height before the header changes: one more reads it after.
+  let again = false;
+  shown.attach(g, o.floating === true || asked(g), (on, source) => {
+    if (!on) row.leave(source);
+    g.headerRows = on ? [...g.headerRows, row.spec] : g.headerRows.filter((r) => r !== row.spec);
+    again = true;
+    g.schedule();
+    if (source === 'user') g.live.announce(g.msg(on ? 'announce.floatingShown' : 'announce.floatingHidden'));
+  });
   // The date kit (or the set chunk) fetched ahead: the pointer over the column's button, the focus on its header.
   const ahead = (e: Event): void => {
     const t = e.target as HTMLElement;
@@ -136,18 +153,22 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
       },
       flush: commit.flush,
     },
-    headerRows: row ? [row.spec] : [],
+    headerRows: shown.api.get() ? [row.spec] : [],
     decorateHeader: popup.decorate,
     afterRows(f) {
-      row?.sweep();
+      row.sweep();
       popup.paint(f);
       midnight();
+      shown.paint();
+      if (again) (again = false), g.schedule();
+
     },
     destroy() {
       onCommand(g.kernel);
       quiet();
       popup.close();
-      row?.destroy();
+      row.destroy();
+      shown.detach(g);
     },
   };
 }

@@ -53,5 +53,8 @@ export const EN_FILTERS = {
     'filter.set.count': { one: "{n} value", other: "{n} values" },
     'filter.set.truncated': "The first {n} values. Refine your search.",
     'filter.set.failed': "The values could not be loaded. Retry, or reload the page.",
+    'filter.floatingToggle': "Filter row",
+    'announce.floatingHidden': "Filter row hidden",
+    'announce.floatingShown': "Filter row shown",
   },
 } satisfies FilterMessages;

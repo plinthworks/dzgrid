@@ -53,5 +53,8 @@ export const FR_FILTERS = {
     'filter.set.count': { one: "{n} valeur", many: "{n} de valeurs", other: "{n} valeurs" },
     'filter.set.truncated': "Les {n} premières valeurs. Affinez votre recherche.",
     'filter.set.failed': "Les valeurs n\u2019ont pas pu être chargées. Réessayez, ou rechargez la page.",
+    'filter.floatingToggle': "Ligne de filtres",
+    'announce.floatingHidden': "Ligne de filtres masquée",
+    'announce.floatingShown': "Ligne de filtres affichée",
   },
 } satisfies FilterMessages;

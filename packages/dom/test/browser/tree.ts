@@ -52,6 +52,7 @@ const loader = lazyChildren<Row>({
   has: (r) => !r.parent,
   load: (r, { signal }) => new Promise((ok, no) => loads.push({ id: r.id, ok: () => ok(rows.filter((x) => x.parent === r.id)), no: () => no(new Error('503')), signal: signal as AbortSignal })),
 });
+const filtering = filters({ floating: true });
 const grid = createGrid<Row>(document.getElementById('host')!, {
   rows: lazy ? rows.filter((r) => !r.parent) : given, getRowId: (r) => r.id, messages, locale,
   columns: [
@@ -60,9 +61,9 @@ const grid = createGrid<Row>(document.getElementById('host')!, {
     { id: 'age', header: ar ? 'العمر' : 'Âge', type: 'number', width: 110, filter: { kind: 'number', floating: true } },
     ...Array.from({ length: 6 }, (_, k) => ({ id: `x${k}`, header: `C${k}`, width: 110, value: (r: Row) => (r.name.length * (k + 3)) % 97, ...(pin && k === 5 && { pinned: 'end' as const }) })),
   ],
-  features: [tree<Row>({ ...(paths ? { path: (r: Row) => r.path! } : { parentId: (r: Row) => r.parent, ...(lazy && { lazy: loader }) }), ...sticky }), filters({ floating: true })],
+  features: [tree<Row>({ ...(paths ? { path: (r: Row) => r.path! } : { parentId: (r: Row) => r.parent, ...(lazy && { lazy: loader }) }), ...sticky }), filtering],
   selection: { mode: 'multi', checkbox: true, click: true },
 });
 if (!lazy) grid.kernel.dispatch({ type: 'rows.expand', rows: [key('s0')], expanded: true }, 'host');
-(window as any).t = { grid, rows, key, loads, scrollTo: (l: number) => (grid as any).scroll.scrollTo(l), logicalTop: () => (grid as any).scroll.logicalTop, rowH: () => (grid as any).context.rowHeight() };
+(window as any).t = { grid, filters: filtering, rows, key, loads, scrollTo: (l: number) => (grid as any).scroll.scrollTo(l), logicalTop: () => (grid as any).scroll.logicalTop, rowH: () => (grid as any).context.rowHeight() };
 (window as any).ready = true;

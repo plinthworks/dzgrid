@@ -115,10 +115,14 @@ const columns: ColumnDef<Row, any>[] = [
 const base = ar ? AR : FR;
 const messages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_TREE : FR_TREE).text } };
 const events: GridEvent<Row>[] = [];
+// The page's "Filter row" button (Phase 4 step 12): the floating row shown or hidden live, the pinned parents under it.
+const filtering = filters({ floating: true, popup: true });
+document.getElementById('later')!.insertAdjacentHTML('afterend', ` <button type="button" id="floating">${ar ? 'صف المرشحات' : 'Ligne de filtres'}</button>`);
+filtering.floating.bind(document.getElementById('floating')!);
 const grid = createGrid<Row>(document.getElementById('host')!, {
   ...(source ? { source, operations: { filter: 'client', quick: 'client', sort: 'client', page: 'off' } } : { rows: lazyMode ? rows.filter((r) => !r.parent) : top }),
   getRowId: (r) => r.id, columns, messages, locale, direction: 'auto',
-  features: [tree<Row>({ ...treeOptions, sticky, ...(lazy && { lazy }) }), filters({ floating: true, popup: true })],
+  features: [tree<Row>({ ...treeOptions, sticky, ...(lazy && { lazy }) }), filtering],
   selection: { mode: 'multi', checkbox: true },
   onEvent: (e) => {
     if (e.type === 'problems') console.warn(e.problems);

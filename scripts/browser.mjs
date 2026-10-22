@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -1843,6 +1843,136 @@ async function detailFeatureChecks(name, ctx) {
   }
 }
 
+/**
+ * The floating row shown and hidden live (Phase 4 step 12, floating-toggle.md): French light and Arabic right to
+ * left dark, a bound button (with its words, then an icon one named by the bundle), pinned columns, groups and the
+ * box column. Both states: axe 0, header and body rowindex in order, aria-rowcount, the body right under the header
+ * with no gap, header and body cells aligned, rows down to the view's bottom; a pending edit applied at the hide, the
+ * focus in the row moved to the column's header; shown again, the box holds the filter, nothing emitted; the user's
+ * toggle said. Then the tree page: the pinned parents stay under the header rows, aligned, through both states.
+ */
+async function floatingToggleChecks(name, ctx) {
+  const cases = [
+    { qs: 'locale=fr-FR&theme=light&rows=2000&filters=1&floating=1&popup=1&toggle=icon&pin=1&box=1', typed: '1', btn: 'Ligne de filtres', hid: 'Ligne de filtres masquée', shown: 'Ligne de filtres affichée', mark: 'Nom, filtré', tag: 'floating toggle fr icon' },
+    { qs: 'locale=ar-DZ&dir=rtl&theme=dark&rows=2000&filters=1&floating=1&popup=1&toggle=1&groups=1&pin=1&box=1', typed: '1', btn: 'صف المرشحات', hid: 'تم إخفاء صف المرشحات', shown: 'تم إظهار صف المرشحات', mark: 'الاسم، مرشح', tag: 'floating toggle ar rtl groups' },
+  ];
+  const state = (page) => page.evaluate(() => {
+    const vp = document.querySelector('.dzg-viewport');
+    const hrows = [...document.querySelectorAll('.dzg-header > [role=row]')];
+    const body = [...document.querySelectorAll('.dzg-layer > .dzg-row')].sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+    const v = vp.getBoundingClientRect();
+    const hb = hrows.at(-1).getBoundingClientRect().bottom;
+    const first = body.find((r) => r.getBoundingClientRect().bottom > hb + 1);
+    const idx = body.map((r) => Number(r.getAttribute('aria-rowindex')));
+    const d = window.t.grid.kernel.rows.displayed;
+    const b = document.getElementById('floating');
+    const nameHead = document.querySelector('.dzg-hcell[data-col="name"]:not(.dzg-hextra):not(.dzg-hgroup)');
+    return {
+      headers: hrows.map((r) => r.getAttribute('aria-rowindex')), count: vp.getAttribute('aria-rowcount'), n: d.count,
+      firstIndex: idx.length ? Math.min(...idx) : null, consecutive: idx.every((x, i) => i === 0 || x === idx[i - 1] + 1),
+      gap: first ? Math.round((first.getBoundingClientRect().top - hb) * 10) / 10 : null, top: vp.scrollTop,
+      // The rows reach the view's bottom (the window computed with the header's new height).
+      filled: body.length ? Math.max(...body.map((r) => r.getBoundingClientRect().bottom)) >= v.top + vp.clientHeight - 1 : false,
+      pressed: b?.getAttribute('aria-pressed'), bname: b?.getAttribute('aria-label') ?? b?.textContent, controls: b && document.getElementById(b.getAttribute('aria-controls'))?.getAttribute('role'),
+      bw: b?.getBoundingClientRect().width, bh: b?.getBoundingClientRect().height,
+      extra: !!document.querySelector('.dzg-hextra'), mark: nameHead?.getAttribute('aria-label'), filtered: nameHead?.hasAttribute('data-dzg-filtered'),
+      active: document.activeElement?.matches('.dzg-hextra, .dzg-hextra *') ? 'row' : document.activeElement?.matches('.dzg-hcell') ? `header ${document.activeElement.dataset.col}` : document.activeElement?.id || document.activeElement?.tagName,
+      focus: JSON.stringify(window.t.grid.kernel.focus), filter: window.t.grid.kernel.query.filter.name ?? null,
+      value: document.querySelector('.dzg-hextra[data-col="name"] input')?.value ?? null,
+    };
+  });
+  for (const c of cases) {
+    const { page, errors } = await load(ctx, c.qs);
+    await page.evaluate(() => {
+      window.said = []; window.fc = 0;
+      new MutationObserver(() => { const t = document.querySelector('.dzg-live').textContent; if (t) window.said.push(t); }).observe(document.querySelector('.dzg-live'), { childList: true, characterData: true, subtree: true });
+      window.t.grid.kernel.subscribe((e) => { if (e.type === 'filterChanged') window.fc++; });
+    });
+    const s0 = await state(page);
+    let v = await axe(page);
+    const n0 = String(s0.n + s0.headers.length);
+    check(name, `${c.tag}: shown: button pressed, named ${c.btn}, controls the grid, ≥ 24 px; rowindex in order; axe 0`,
+      s0.pressed === 'true' && s0.bname === c.btn && s0.controls === 'grid' && s0.bw >= 24 && s0.bh >= 24 && s0.count === n0 && s0.firstIndex === s0.headers.length + 1 && s0.consecutive && Math.abs(s0.gap) < 1 && v.length === 0, { s0, v });
+    // Typed and still waiting, the focus in the box: hidden (the API, the focus where it is).
+    await page.evaluate(() => document.querySelector('.dzg-hextra[data-col="name"]').focus());
+    await page.keyboard.press('Enter');
+    await page.keyboard.type(c.typed);
+    await page.evaluate(() => window.t.filters.floating.set(false));
+    await frames(page, 3);
+    const s1 = await state(page);
+    const g1 = await geometry(page);
+    v = await axe(page);
+    check(name, `${c.tag}: hidden: the pending "1" applied, the focus on Nom's header, one header row less (rowcount ${s1.count}, first row ${s1.firstIndex}), the body right under it (${s1.gap} px), aligned (${g1.worst?.toFixed?.(2)} px), rows to the bottom, marked "${c.mark}", axe 0`,
+      s1.filter?.op === 'contains' && s1.filter?.value === '1' && s1.active === 'header name' && s1.focus === '{"kind":"header","column":"name"}' && !s1.extra && s1.headers.length === s0.headers.length - 1 && s1.headers.every((x, i) => x === String(i + 1)) &&
+      s1.count === String(s1.n + s1.headers.length) && s1.firstIndex === s1.headers.length + 1 && s1.consecutive && Math.abs(s1.gap) < 1 && g1.worst < 0.5 && g1.startEdge < 0.5 && g1.endEdge < 0.5 && s1.filled && s1.mark === c.mark && s1.filtered && s1.pressed === 'false' && v.length === 0, { s1, g1, v });
+    await page.screenshot({ path: `${OUT}/${name}-floating-hidden-${c.qs.includes('ar-DZ') ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 300 } });
+    // Scrolled to the end while hidden: the last row reachable, rows to the bottom.
+    await page.evaluate(() => window.t.scrollTo(1e9));
+    await frames(page, 3);
+    const end = await page.evaluate(() => { const vp = document.querySelector('.dzg-viewport'); const last = [...document.querySelectorAll('.dzg-layer > .dzg-row')].map((r) => Number(r.getAttribute('aria-rowindex'))); return { max: Math.max(...last), count: Number(vp.getAttribute('aria-rowcount')) }; });
+    await page.evaluate(() => window.t.scrollTo(0));
+    await frames(page, 3);
+    // The user's toggle: the button, said; shown again with "1" in the box, nothing emitted.
+    const fc = await page.evaluate(() => window.fc);
+    await page.click('#floating');
+    await frames(page, 3);
+    // The live region speaks after a 50 ms beat.
+    await page.waitForTimeout(150);
+    const s2 = await state(page);
+    const g2 = await geometry(page);
+    const said2 = await page.evaluate(() => window.said.at(-1));
+    v = await axe(page);
+    check(name, `${c.tag}: the button shows it again: said "${c.shown}", pressed, the box holds ${s2.value}, no filter event, counts back, aligned (${g2.worst?.toFixed?.(2)} px), axe 0; the last row (${end.max}) reachable while hidden`,
+      said2 === c.shown && s2.pressed === 'true' && s2.value === c.typed && (await page.evaluate(() => window.fc)) === fc && s2.headers.length === s0.headers.length && s2.count === String(s2.n + s2.headers.length) && s2.firstIndex === s0.firstIndex && s2.consecutive && Math.abs(s2.gap) < 1 && g2.worst < 0.5 && s2.filled && v.length === 0 && end.max === end.count, { s2, fc, said2, v, end, g2 });
+    await page.click('#floating');
+    await frames(page, 3);
+    await page.waitForTimeout(150);
+    const s3 = await state(page);
+    const said3 = await page.evaluate(() => window.said.at(-1));
+    check(name, `${c.tag}: pressed again: hidden, said "${c.hid}", the focus stays on the button`, said3 === c.hid && s3.pressed === 'false' && !s3.extra && s3.active === 'floating', { s3, said3 });
+    check(name, `no page error ${c.tag}`, errors.length === 0, errors);
+    await page.close();
+  }
+  // The tree page: the pinned parents under the header rows, aligned, in both states (fr and ar RTL, pinned columns).
+  for (const c of [{ qs: 'pin=1&locale=fr-FR&theme=light', tag: 'floating toggle tree fr' }, { qs: 'pin=1&locale=ar-DZ&dir=rtl&theme=dark', tag: 'floating toggle tree ar rtl' }]) {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 760 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.goto(site.root(`packages/dom/test/browser/tree.html?${c.qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'rows.expand', rows: [window.t.key('s0p3')], expanded: true }, 'host'));
+    await frames(page);
+    const h = await page.evaluate(() => window.t.rowH());
+    await page.evaluate((h) => window.t.scrollTo(4 * h + 5), h);
+    await frames(page, 3);
+    const look = () => page.evaluate(() => {
+      const copies = [...document.querySelectorAll('.dzg-sticky > .dzg-row')];
+      const rows = [...document.querySelectorAll('.dzg-header > .dzg-hrow')];
+      const hb = rows.at(-1).getBoundingClientRect().bottom;
+      let worst = 0;
+      for (const r of copies) for (const cell of r.querySelectorAll('[data-col]')) {
+        const a = document.querySelector(`.dzg-header .dzg-hrow .dzg-hcell[data-col="${cell.dataset.col}"]`).getBoundingClientRect(), b = cell.getBoundingClientRect();
+        worst = Math.max(worst, Math.abs(a.left - b.left), Math.abs(a.right - b.right));
+      }
+      const idx = [...document.querySelectorAll('.dzg-layer > .dzg-row')].map((r) => Number(r.getAttribute('aria-rowindex')));
+      return { n: copies.length, top: copies[0] ? Math.round((copies[0].getBoundingClientRect().top - hb) * 10) / 10 : null, worst, headers: rows.length, first: Math.min(...idx), count: document.querySelector('.dzg-viewport').getAttribute('aria-rowcount'), shown: window.t.grid.kernel.rows.displayed.count };
+    });
+    const a = await look();
+    await page.evaluate(() => window.t.filters.floating.set(false));
+    await frames(page, 3);
+    const b = await look();
+    let v = await axe(page);
+    await page.evaluate(() => window.t.filters.floating.set(true));
+    await frames(page, 3);
+    const d = await look();
+    v = [...v, ...(await axe(page))];
+    check(name, `${c.tag}: pinned parents right under the header rows (${a.top} / ${b.top} / ${d.top} px), aligned (${Math.max(a.worst, b.worst, d.worst).toFixed(2)} px) shown, hidden, shown; rowindex follows; axe 0`,
+      a.n === 2 && b.n === 2 && d.n === 2 && [a, b, d].every((x) => Math.abs(x.top) < 0.5 && x.worst < 0.5 && x.first >= x.headers + 1 && x.count === String(x.shown + x.headers)) && b.headers === a.headers - 1 && d.headers === a.headers && errors.length === 0 && v.length === 0, { a, b, d, v, errors });
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -1855,6 +1985,7 @@ async function runEngine(name) {
       if (only === 'motion' && name === 'chrome') await motionChecks(name, ctx);
       if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx);
       if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
+      if (only === 'filters' && name === 'chrome') await floatingToggleChecks(name, ctx);
       return;
     }
 
@@ -2046,6 +2177,8 @@ async function runEngine(name) {
         await page.close();
       }
     }
+
+    if (name === 'chrome') await floatingToggleChecks(name, ctx);
 
     // ---- the filter popup (step 13): fr light, ar right to left dark, with the floating row ----
     if (name === 'chrome') {

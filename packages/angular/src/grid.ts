@@ -96,6 +96,12 @@ export class DzGrid<T> implements AfterContentInit {
   readonly injectStyles = input<boolean>();
   readonly nonce = input<string>();
   readonly features = input<S<T>['features']>();
+  /**
+   * The floating filter row shown or hidden live (`filters().floating`, Phase 4 step 12): unset, the feature's
+   * own state; each new value set, never written back over a user's toggle made since (no echo). One-way: the
+   * state comes back through `filters().floating.get()`.
+   */
+  readonly floatingFilters = input<boolean>();
 
   /** Unset, the grid owns them; set, written as the host; the user's changes come back. */
   readonly quick = model<string>();
@@ -184,6 +190,10 @@ export class DzGrid<T> implements AfterContentInit {
       });
     });
     effect(() => (this.quick(), this.filter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
+    effect(() => {
+      const on = this.floatingFilters();
+      if (on !== undefined) for (const f of (this.features() ?? this._defaults['features'] ?? []) as { floating?: { set(on: boolean): void } }[]) f.floating?.set(on);
+    });
     // After the first render (never on a server): the grid's events heard so far; with no model, what
     // it opened by itself at creation (a tree's `initial`) comes back.
     afterNextRender(() => {

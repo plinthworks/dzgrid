@@ -50,3 +50,9 @@ Nothing different from the plain grid: they scroll, sort, filter, search, tick r
 
 ## Tests
 `packages/angular/test/parts-component.test.ts`, `parts-template.test.ts`, `expanded.test.ts`, `detail-parts.test.ts`, `detail-nested.test.ts` (step 11), `expanded-ready.test.ts`, `expanded-walk.test.ts`, `expanded-lazy.test.ts`, `expanded-path.test.ts`, `detail-walk.test.ts` (its review), `slots-angular.test.ts`, `inputs.test.ts`, `directives.test.ts`, `ssr.test.ts`, `bench.test.ts`, `packaging.test.ts`, `template.test.ts`; `lifecycle-walk.test.ts`, `review-gaps.test.ts`, `corrections.test.ts` (the review of step 22); zone.js in its own project: `packages/angular/test-zone/zone.test.ts`, `zone-later.test.ts`, `tree-zone.test.ts` (step 11); the conformance case `conformance/cases/problems/part-shadowed.json`; in Chrome: `packages/angular/browser/` (`node packages/angular/browser/run.mjs`).
+
+## The floating filter row (Phase 4 step 12)
+`[floatingFilters]` (boolean, live, one-way): shows or hides the floating filter row of the `filters()` feature
+given in `[features]` (`filters().floating.set`). Unset, the feature decides; a new value only is written, never
+over the user's toggle (a button bound with `filters().floating.bind`) made since. No output: a host wanting the
+state reads `filters().floating.get()`. Without `filters()` among the features: ignored. Sheet: `floating-toggle.md`.

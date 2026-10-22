@@ -50,7 +50,9 @@ export type FilterMessageKey =
   // Dates (step 14): the fields' labels, the zone line, loading and failure.
   | 'filter.date' | 'filter.dateTime' | 'filter.period' | 'filter.zone' | 'filter.loadingDates' | 'filter.loadFailed'
   // The value list (step 15): its search, select all (shown), blanks, an option's name, the status line, its failure.
-  | 'filter.set.search' | 'filter.set.all' | 'filter.set.allShown' | 'filter.set.blanks' | 'filter.set.option' | 'filter.set.count' | 'filter.set.truncated' | 'filter.set.failed';
+  | 'filter.set.search' | 'filter.set.all' | 'filter.set.allShown' | 'filter.set.blanks' | 'filter.set.option' | 'filter.set.count' | 'filter.set.truncated' | 'filter.set.failed'
+  // The live floating row (Phase 4 step 12): a bound button's name, the user's toggle said.
+  | 'filter.floatingToggle' | 'announce.floatingHidden' | 'announce.floatingShown';
 /** The operators the popup names: text's and number's, and the date ones (step 14). */
 export type FilterOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank' | 'lt' | 'lte' | 'gt' | 'gte' | 'between'
   | 'onDay' | 'notOnDay' | 'betweenDays' | 'before' | 'after' | 'onOrBefore' | 'onOrAfter';

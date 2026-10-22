@@ -611,3 +611,33 @@ Consigner le résultat dans `docs/behaviors/master-detail.md` (fin de la fiche) 
 nom d'une colonne seule (97), un piège clavier (101), une grille extérieure qui bouge quand on
 travaille dedans (99, 100), ou un focus perdu à la fermeture (102) se corrige avant la clôture de la
 Phase 4 ; une position de ligne qui compte le détail est attendue (le détail est une ligne).
+
+## 18. Étapes — ligne de filtres affichable en direct (Phase 4, étape 12)
+
+Page : le bac à sable avec la ligne de filtres et son bouton, http://127.0.0.1:4700/?filters=1&floating=1&popup=1
+(lien « Filtres (ligne + fenêtre) et pages » du menu Démos), en **français** puis en **arabe**. Le bouton
+« Ligne de filtres » (ar « صف المرشحات ») est au-dessus de la grille. Couples A à D. Durée estimée : 10 min par
+couple et par langue. Fiche : `docs/behaviors/floating-toggle.md`.
+
+105. **Le bouton.** `Tab` jusqu'au bouton : nom « Ligne de filtres », état **enfoncé** (`aria-pressed`, la ligne
+     est montrée au départ). Noter le mot exact de l'état.
+106. **Masquer.** `Espace` sur le bouton : annonce fr « Ligne de filtres masquée », ar « تم إخفاء صف المرشحات »
+     (dite une fois, en plus du nouvel état « non enfoncé » que le lecteur dit lui-même : noter si les deux
+     se suivent sans se couper). Le focus reste sur le bouton.
+107. **Le filtre reste.** Avant 106, taper `1` dans la case « Nom » de la ligne de filtres puis masquer **sans
+     attendre** : le filtre s'applique (« Filtré. N lignes » peut être dit), et l'en-tête « Nom » est lu
+     « Nom, filtré » (ar « الاسم، مرشح ») une fois la ligne masquée.
+108. **Le focus dans la ligne.** Dans la console du navigateur :
+     `setTimeout(() => filtering.floating.set(false), 8000)`, puis revenir dans la grille, entrer dans la case
+     « Montant » de la ligne de filtres (`↓` depuis l'en-tête, `Entrée`) et attendre : la ligne se masque, le
+     focus va sur l'en-tête « Montant », qui est dit ; aucune phrase « Ligne de filtres masquée » (le masquage
+     vient de l'application, pas de l'utilisateur).
+109. **Montrer.** `Espace` sur le bouton : annonce fr « Ligne de filtres affichée », ar « تم إظهار صف المرشحات » ;
+     aucune phrase « Filtré » de plus. `Tab` dans la grille, `↓` depuis un en-tête : la case du même filtre,
+     qui contient `1`.
+110. **Compte des lignes.** Ligne masquée puis montrée : la position de ligne dite sur une cellule du corps
+     change d'un (la rangée de filtres compte comme une ligne d'en-tête).
+
+Consigner le résultat dans `docs/behaviors/floating-toggle.md` (fin de la fiche) et dans `ROADMAP.md` (clôture de
+la Phase 4). Règle de décision : une annonce manquante ou dite deux fois (106, 109), un filtre perdu au masquage
+(107) ou un focus perdu (108) se corrige avant la clôture de la Phase 4.
