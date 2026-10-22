@@ -95,8 +95,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `locales/{en,fr,ar}-detail`. `SlotContext['detail']` gains `depth?` and `leave?()`. Theme: the panel's
   surface (`--dzg-detail-bg`), rules and padding, forced colours. Playground « Maître/détail ».
   Base: a column header's tooltip is no longer shown for a nested grid's header of the same id.
+- **Angular, trees and master/detail (Phase 4 step 11)**: `<dz-grid [(expanded)]>` (the rows open,
+  `ReadonlySet<RowKey>`, written as the host, the user's and the data's changes back, no echo) and
+  `(rowExpanded)`; `tree()`, `lazyChildren()` and `detail()` through `[features]`; detail panels as
+  `componentPart('detail', C)` or `<ng-template dzgPart slot="detail">` named by `detail({ part })`, their
+  `emit` → `partAction { slot: 'detail' }`; `<dz-grid [dzgNested]="cell()">` for a grid inside a panel
+  (Escape back to the panel's cell, one level; `detail.depth` past three levels).
 
 ### Changed
+
+- `npm run example:build` installs the tarballs just packed: the example's lock entries for the
+  `@dzgrid` packs are dropped first (their pinned integrity made npm reinstall its cached old copy).
 
 - **Breaking**: `canSelect` and `SelectionRule` receive a `DataNode`; click events carry a
   `RowNode` (check `kind === 'data'` before reading `data`).

@@ -453,6 +453,13 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Budget** : `@dzgrid/dom/detail` 3 457 (3 500) ; textes 133 / 146 / 159 (200 / 220 / 250) ; base DOM 20 629 et thème 2 268 (2 500) dans leurs budgets ; aucun budget relevé.
 - **Revue de `7b1b4cd`** (Q13) : une grille imbriquée est mise à jour en place (nouvelle ligne maître, langue ; refaite seulement si un réglage fixe change, `UPDATE_POLICY` exporté), sa mémoire garde la cellule focalisée, la ligne du haut + décalage et les lignes ouvertes ; budget `dom/detail` 3 900.
 
+### Décisions de la Phase 4, étape 11 (2026-10-22 ; Angular, arbre et maître/détail ; plan `docs/phase-4-steps/step11-plan.md`, fiche `docs/behaviors/angular-parts.md`)
+- **`[(expanded)]`** : l'ensemble des lignes ouvertes ; écrit par l'hôte (fermer puis ouvrir, `rows.expand`, source `host`), clés de lignes absentes sautées puis réécrites au changement de données ; revient en copie après l'utilisateur, l'API ou les données ; jamais l'écho de l'hôte. Sortie `(rowExpanded)`.
+- **Panneaux** : `componentPart('detail', C)` ou gabarit `slot="detail"`, nommés dans `detail({ part })` ; contexte complet, `emit` → `partAction { slot: 'detail', column: null }`. Rien à ajouter dans l'enveloppe pour l'emplacement lui-même.
+- **Grille dans un panneau** : `<dz-grid [dzgNested]="cell()">`, une entrée de `<dz-grid>` (une directive dépassait le budget de 44 o) ; Échap non pris → cellule du panneau, un niveau ; `detail.depth` au-delà de 3 ; Entrée par le repli de focus des pièces ; pas de mémoire par maître.
+- **Copies épinglées** : texte seul, aucune pièce Angular (testé).
+- **Budget** : angular 5 965 (6 000). Exemple Angular réel : 86 044 > 85 000 (85 555 avant l'étape, l'installation de l'exemple était périmée depuis l'étape 23, corrigée) : décision du propriétaire.
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.

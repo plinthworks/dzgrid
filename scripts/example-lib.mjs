@@ -114,3 +114,13 @@ export function measureExample(example) {
   const baseline = measureBuild(join(example, 'dist/baseline'));
   return { audit, baseline, share: audit.total - baseline.total, wrapper: wrapperShare(join(example, 'dist/audit'), audit.files) };
 }
+
+/**
+ * The example's lockfile without the `@dzgrid` packs (Phase 4 step 11): they keep version 0.1.0 on every
+ * pack, and a lock entry pins the old tarball's integrity, so npm served its cached copy of the previous
+ * pack. Without the entries npm reads the tarballs just packed; every other entry is kept.
+ */
+export function forgetLocalPacks(lock) {
+  const packages = Object.fromEntries(Object.entries(lock.packages ?? {}).filter(([k]) => !k.startsWith('node_modules/@dzgrid/')));
+  return { ...lock, packages };
+}

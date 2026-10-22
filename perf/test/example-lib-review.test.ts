@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { gzipSync } from 'node:zlib';
 // @ts-expect-error a plain .mjs script
-import { measureBuild, measureExample, wrapperShare } from '../../scripts/example-lib.mjs';
+import { forgetLocalPacks, measureBuild, measureExample, wrapperShare } from '../../scripts/example-lib.mjs';
 
 const gz = (s: string) => gzipSync(Buffer.from(s), { level: 9 }).length;
 /** Pseudo-random text so gzip cannot fold it away. */
@@ -85,5 +85,25 @@ describe('measureExample (A - B), on a fake tree', () => {
       outputs: { 'main-F.js': { inputs: {}, imports: [{ path: 'chunk-s.js', kind: 'import-statement' }, { path: 'chunk-d.js', kind: 'dynamic-import' }] }, 'chunk-s.js': { inputs: {}, imports: [] } },
     });
     expect(measureBuild(dir).files.map((f: { file: string }) => f.file)).toEqual(['main-F.js', 'chunk-s.js']);
+  });
+});
+
+// Phase 4 step 11: `example:build` installed the previous wrapper. The tarballs keep version 0.1.0 and the
+// example's (gitignored) lockfile pins their old integrity, so npm served its cached copy of the old pack.
+describe('forgetLocalPacks: the example installs the tarballs just packed', () => {
+  it('drops the lock entries of the @dzgrid packs, keeps everything else', () => {
+    const lock = {
+      name: 'x',
+      packages: {
+        '': { dependencies: { '@dzgrid/angular': 'file:../../packed/dzgrid-angular-0.1.0.tgz', '@angular/core': '^21' } },
+        'node_modules/@dzgrid/angular': { version: '0.1.0', resolved: 'file:../../packed/dzgrid-angular-0.1.0.tgz', integrity: 'sha512-OLD' },
+        'node_modules/@dzgrid/core': { version: '0.1.0', resolved: 'file:../../packed/dzgrid-core-0.1.0.tgz', integrity: 'sha512-OLD2' },
+        'node_modules/@angular/core': { version: '21.2.0', resolved: 'https://registry.npmjs.org/x.tgz', integrity: 'sha512-NG' },
+      },
+    };
+    const out = forgetLocalPacks(lock);
+    expect(Object.keys(out.packages)).toEqual(['', 'node_modules/@angular/core']);
+    expect(out.packages['node_modules/@angular/core']).toEqual(lock.packages['node_modules/@angular/core']);
+    expect(out.packages[''].dependencies['@dzgrid/angular']).toBe('file:../../packed/dzgrid-angular-0.1.0.tgz');
   });
 });

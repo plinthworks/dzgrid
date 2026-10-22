@@ -21,9 +21,10 @@ import {
   type OutputEmitterRef,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import type { ColumnOrGroup, FilterModel, GridEvent, GridKernel, Problem, RowIdInput, RowModel, SelectionState } from '@dzgrid/core';
-import { canonical, emit } from '@dzgrid/core/internal';
-import { createGrid, type GridFeature, type GridInstance, type GridMessages, type GridSettings, type SlotPart } from '@dzgrid/dom';
+import type { ColumnOrGroup, FilterModel, GridEvent, GridKernel, Problem, RowIdInput, RowKey, RowModel, SelectionState } from '@dzgrid/core';
+import { canonical, emit, isDataKey } from '@dzgrid/core/internal';
+import { detailConflicts } from '@dzgrid/core/detail';
+import { createGrid, type GridFeature, type GridInstance, type GridMessages, type GridSettings, type SlotContext, type SlotPart } from '@dzgrid/dom';
 import { DzgController } from './controller';
 import { DzgPart } from './dzg-part';
 import { MARKS, boundPart, type Bindings } from './part-bind';
@@ -39,9 +40,10 @@ const KEYS = [
   'searchWarmup', 'selection', 'context', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
 ] as const;
 /** Events with an output of their own name. */
-const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed'];
+const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded'];
 
-const sameSelection = (a: SelectionState, b: SelectionState): boolean => a.mode === b.mode && a.keys.size === b.keys.size && [...a.keys].every((k) => b.keys.has(k));
+const sameSet = (a: ReadonlySet<unknown>, b: ReadonlySet<unknown>): boolean => a.size === b.size && [...a].every((k) => b.has(k));
+const sameSelection = (a: SelectionState, b: SelectionState): boolean => a.mode === b.mode && sameSet(a.keys, b.keys);
 
 /**
  * `<dz-grid>`: the grid of `@dzgrid/dom` in an Angular template (docs/behaviors/angular-parts.md).
@@ -77,6 +79,12 @@ export class DzGrid<T> implements AfterContentInit {
   readonly context = input<unknown>();
   readonly fullWidth = input<S<T>['fullWidth']>();
   readonly parts = input<Readonly<Record<string, SlotPart>>>();
+  /**
+   * In a detail panel's component or template, the panel's context (`[dzgNested]="cell()"`, read when
+   * the grid is made): Escape this grid leaves unused goes back to the panel's cell, one level only (not
+   * while composing, nor when it only hid this grid's tooltip); past three levels, `detail.depth` told.
+   */
+  readonly dzgNested = input<SlotContext['detail']>();
   /** Fixed: taken when the grid is made; a later change is `unsupported-live-change`. */
   readonly operations = input<S<T>['operations']>();
   readonly pagination = input<S<T>['pagination']>();
@@ -90,6 +98,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly quick = model<string>();
   readonly filter = model<FilterModel>();
   readonly selected = model<SelectionState>();
+  /** The rows open (a tree's parents, details' masters): the host's set written, the user's and the data's changes back. */
+  readonly expanded = model<ReadonlySet<RowKey>>();
 
   readonly gridEvent = output<GridEvent<T>>();
   readonly cellClicked = output<Ev<T, 'cellClicked'>>();
@@ -97,6 +107,7 @@ export class DzGrid<T> implements AfterContentInit {
   readonly cellAction = output<Ev<T, 'cellAction'>>();
   readonly partAction = output<Ev<T, 'partAction'>>();
   readonly fetchFailed = output<Ev<T, 'fetchFailed'>>();
+  readonly rowExpanded = output<Ev<T, 'rowExpanded'>>();
   readonly problems = output<readonly Problem[]>();
   readonly gridReady = output<DzgController<T>>();
 
@@ -161,7 +172,7 @@ export class DzGrid<T> implements AfterContentInit {
         this._tell();
       });
     });
-    effect(() => (this.quick(), this.filter(), this.selected(), this._write(this.controller.kernel())));
+    effect(() => (this.quick(), this.filter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
     inject(DestroyRef).onDestroy(() => {
       this._gone = true;
       untracked(this._grid)?.destroy();
@@ -183,9 +194,12 @@ export class DzGrid<T> implements AfterContentInit {
     const g = this._zone.runOutsideAngular(() =>
       createGrid<T, RowModel<T>>(this._el, { ...s, features: [early, ...(s.features ?? [])], onEvent: (e) => this._hear(e) }, this._env),
     );
+    if (this.dzgNested()) this._nest(g.kernel);
     this.controller._attach(g.kernel, g, s.features);
     this._grid.set(g);
     this._write(g.kernel);
+    // No model: what the grid opened by itself at creation (a tree's `initial`) comes back.
+    if (!this.expanded()) this._open(g.kernel);
     this._tell();
     this.gridReady.emit(this.controller);
   }
@@ -205,8 +219,46 @@ export class DzGrid<T> implements AfterContentInit {
         if (filter && canonical(filter) !== canonical(k.query.filter)) k.dispatch({ type: 'filter.set', filter }, 'host');
         const selected = this.selected();
         if (selected && !sameSelection(selected, k.selection)) k.dispatch({ type: 'selection.set', selection: selected }, 'host');
+        this._shut(k);
       }),
     );
+  }
+
+  /**
+   * The `expanded` model written: what the grid holds open and the set does not, closed; then what it
+   * adds, opened, but for rows the grid does not hold (refused, they would stop the rest; a data change
+   * writes again). An equal set has nothing to close or open: nothing is written (the echo guard). Read
+   * untracked (from `_write`, or an event).
+   */
+  private _shut(k: GridKernel<T, RowModel<T>>): void {
+    const open = this.expanded();
+    const now = k.expansion;
+    if (!open) return;
+    const shut = [...now].filter((x) => !open.has(x));
+    const add = [...open].filter((x) => !now.has(x) && !(isDataKey(x) && !k.rows.keeps(x)));
+    if (shut.length) k.dispatch({ type: 'rows.expand', rows: shut, expanded: false }, 'host');
+    if (add.length) k.dispatch({ type: 'rows.expand', rows: add, expanded: true }, 'host');
+  }
+
+  /** Inside a detail panel (`dzgNested`): the depth told, Escape back to the panel; on the host element, outside the zone. */
+  private _nest(k: GridKernel<T, RowModel<T>>): void {
+    const el = this._el;
+    const told = detailConflicts({ depth: this.dzgNested()!.depth });
+    if (told.length) emit(k, { type: 'problems', source: 'host', problems: told });
+    // The tooltip's state before the grid's own keydown (which hides it, and leaves the key unused).
+    let tip = false;
+    this._zone.runOutsideAngular(() => {
+      el.addEventListener('keydown', () => void (tip = el.querySelector<HTMLElement>(':scope > .dzg > .dzg-tooltip')?.hidden === false), true);
+      el.addEventListener('keydown', (e) => {
+        // On this grid's own cells (a grid deeper inside took its own Escape first).
+        if (e.key === 'Escape' && !e.defaultPrevented && !e.isComposing && !tip && (e.target as Element).closest('.dzg')?.parentElement === el) e.preventDefault(), this.dzgNested()?.leave?.();
+      });
+    });
+  }
+
+  /** The `expanded` model follows the grid's open rows (a copy: the grid changes its own in place). */
+  private _open(k: GridKernel<T, RowModel<T>>): void {
+    if (!sameSet(this.expanded() ?? new Set(), k.expansion)) this.expanded.set(new Set(k.expansion));
   }
 
   /** `part-shadowed` for the names a later layer took, once per name for this grid. */
@@ -237,7 +289,12 @@ export class DzGrid<T> implements AfterContentInit {
         const m = this.selected();
         if (e.source !== 'host' || (m && !sameSelection(m, e.selection))) this.selected.set(e.selection);
       }
+      // Rows opened or closed by anyone but the host; a data change (rows arrived or gone, a tree's
+      // `initial`): the model written again first (rows it names that just arrived), then followed.
+      const k = this._k;
+      if (k && e.type === 'modelUpdated' && e.kind === 'rows') this._zone.runOutsideAngular(() => this._shut(k)), this._open(k);
       if (e.source === 'host') return;
+      if (k && e.type === 'rowExpanded') this._open(k);
       if (e.type === 'quickChanged') this.quick.set(e.text);
       if (e.type === 'filterChanged') this.filter.set(e.filter);
     });

@@ -6,8 +6,10 @@
 import { provideZonelessChangeDetection, type ApplicationRef } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { DZG_ENV } from '@dzgrid/angular';
+import { dataKey } from '@dzgrid/core';
 import { AR_MODE, App, stats } from './app';
 import { AppA } from './a';
+import { DetailApp, TreeApp, treeStats } from './tree';
 
 declare global {
   interface Window {
@@ -58,8 +60,69 @@ async function mainA(): Promise<void> {
   window.fxReady = true;
 }
 
+/** `?page=tree` and `?page=detail` (Phase 4 step 11). */
+async function mainTree(page: string): Promise<void> {
+  const appRef: ApplicationRef = await bootstrapApplication(page === 'tree' ? TreeApp : DetailApp, { providers: [provideZonelessChangeDetection()] });
+  const app = appRef.components[0]!.instance as TreeApp | DetailApp;
+  await frame();
+  await frame();
+  const outer = () => document.querySelector<HTMLElement>('dzg-fixture .host > dz-grid > .dzg')!;
+  const viewport = () => outer().querySelector<HTMLElement>(':scope > .dzg-viewport')!;
+  const settle = async () => (await frame(), await frame());
+  window.fx = {
+    treeStats,
+    state: () => ({
+      dir: outer()?.getAttribute('dir'),
+      role: viewport()?.getAttribute('role'),
+      open: document.querySelector('.fx-open')?.textContent,
+      roots: document.querySelectorAll('.dzg').length,
+      cells: document.querySelectorAll('.dzg-layer fx-tcell').length,
+      stickyRows: document.querySelectorAll('.dzg-sticky > .dzg-row').length,
+      stickyParts: document.querySelectorAll('.dzg-sticky fx-tcell').length,
+      panels: document.querySelectorAll('fx-visits').length,
+    }),
+    async toggleFirst() {
+      outer().querySelector<HTMLElement>('.dzg-layer .dzg-row[aria-rowindex="2"] .dzg-toggle')!.click();
+      appRef.tick();
+      await settle();
+      return document.querySelector('.fx-open')?.textContent;
+    },
+    async scrollTo(top: number) {
+      viewport().scrollTop = top;
+      await settle();
+    },
+    async scroll(n: number) {
+      const vp = viewport();
+      let seed = 11;
+      const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      for (let i = 0; i < n; i++) {
+        vp.scrollTop = Math.floor(rand() * (vp.scrollHeight - vp.clientHeight));
+        await frame();
+      }
+      vp.scrollTop = 0;
+      await settle();
+      return { ...treeStats, live: document.querySelectorAll('fx-tcell').length, panelsLive: document.querySelectorAll('fx-visits').length, roots: document.querySelectorAll('.dzg').length };
+    },
+    async openAll(n: number) {
+      app.open.set(new Set(Array.from({ length: n }, (_, i) => dataKey(page === 'tree' ? `s${i}` : `m${i}`)!)));
+      appRef.tick();
+      await settle();
+      return document.querySelectorAll('fx-visits').length;
+    },
+    async destroyGrid() {
+      app.shown.set(false);
+      appRef.tick();
+      await settle();
+      return { ...treeStats, live: document.querySelectorAll('fx-tcell, fx-visits').length, roots: document.querySelectorAll('.dzg').length };
+    },
+  };
+  window.fxReady = true;
+}
+
 async function main(): Promise<void> {
   if (params.get('a') === '1') return mainA();
+  const page = params.get('page');
+  if (page === 'tree' || page === 'detail') return mainTree(page);
   const appRef: ApplicationRef = await bootstrapApplication(App, {
     providers: [provideZonelessChangeDetection(), ...(bench ? [{ provide: DZG_ENV, useValue: { sync: true } }] : [])],
   });

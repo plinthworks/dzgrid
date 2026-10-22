@@ -11,6 +11,8 @@ import { serve, browser } from '../../../spikes/kit.mjs';
 import { buildFixture } from './build.mjs';
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
+/** `--only tree`: the tree and detail pages alone (Phase 4 step 11). */
+const only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
 const checks = [];
 const check = (label, ok, detail) => {
   checks.push({ label, ok: !!ok });
@@ -43,7 +45,7 @@ async function axe(page) {
 }
 
 try {
-  for (const lang of ['fr', 'ar']) {
+  for (const lang of only === 'tree' ? [] : ['fr', 'ar']) {
     const { page, errors } = await open(lang === 'ar' ? 'lang=ar' : '');
     const seen = await page.evaluate(() => ({
       dir: document.querySelector('.dzg')?.getAttribute('dir'),
@@ -85,12 +87,71 @@ try {
     check(`${lang}: no error in the page`, errors.length === 0, errors);
     await page.close();
   }
+  // Phase 4 step 11: a tree and master/detail panels with a nested <dz-grid>, French and Arabic.
+  for (const lang of ['fr', 'ar']) {
+    const q = lang === 'ar' ? '&lang=ar' : '';
+    {
+      const { page, errors } = await open(`page=tree${q}`);
+      const s0 = await page.evaluate(() => window.fx.state());
+      check(`${lang} tree: a treegrid, ${lang === 'ar' ? 'rtl' : 'ltr'}, Angular cells drawn`, s0.role === 'treegrid' && s0.dir === (lang === 'ar' ? 'rtl' : 'ltr') && s0.cells > 5 && s0.open === '2', s0);
+      const a = await axe(page);
+      check(`${lang} tree: axe, no violation`, a.length === 0, a);
+      const closed = await page.evaluate(() => window.fx.toggleFirst());
+      const reopened = await page.evaluate(() => window.fx.toggleFirst());
+      check(`${lang} tree: a click on a toggle comes back into [(expanded)] (2 → 1 → 2)`, closed === '1' && reopened === '2', { closed, reopened });
+      const h = await page.evaluate(() => document.querySelector('.dzg-layer .dzg-row').getBoundingClientRect().height);
+      await page.evaluate((top) => window.fx.scrollTo(top), Math.round(h * 4.5));
+      const s1 = await page.evaluate(() => ({ ...window.fx.state(), text: document.querySelector('.dzg-sticky > .dzg-row')?.textContent ?? '' }));
+      check(`${lang} tree: pinned parents drawn, text only (no Angular part in them)`, s1.stickyRows >= 1 && s1.stickyParts === 0 && /0/.test(s1.text), s1);
+      const sc = await page.evaluate(() => window.fx.scroll(300));
+      const sc2 = await page.evaluate(() => window.fx.scroll(200));
+      // Pooled rows keep their parts while detached (parts.md): alive ≥ in the page, and the pool stops growing.
+      check(`${lang} tree: 300 scrolls then 200: alive = made − destroyed ≥ in the page, the pool stops growing`, sc.made - sc.gone >= sc.live && sc.live > 0 && sc2.made - sc2.gone <= sc.made - sc.gone, { sc, sc2 });
+      const gone = await page.evaluate(() => window.fx.destroyGrid());
+      check(`${lang} tree: grid destroyed, mounts = destroys, nothing left`, gone.made === gone.gone && gone.live === 0 && gone.roots === 0, gone);
+      check(`${lang} tree: no error in the page`, errors.length === 0, errors);
+      await page.close();
+    }
+    {
+      const { page, errors } = await open(`page=detail${q}`);
+      const s0 = await page.evaluate(() => window.fx.state());
+      check(`${lang} detail: master m0 open, its panel a component holding a nested grid`, s0.roots === 2 && s0.panels === 1 && s0.dir === (lang === 'ar' ? 'rtl' : 'ltr'), s0);
+      const a = await axe(page);
+      check(`${lang} detail: axe with a panel open, no violation`, a.length === 0, a);
+      await page.click('fx-visits .fx-vb');
+      const acts = await page.evaluate(() => window.fx.treeStats.actions);
+      check(`${lang} detail: the panel's emit reaches (partAction) with the master`, acts.length === 1 && /^d:.*m0$/.test(acts[0]), acts);
+      await page.click('.dzg-dbody .dzg-layer .dzg-row[aria-rowindex="2"] .dzg-cell');
+      await page.keyboard.press('ArrowDown');
+      await frames(page, 2);
+      const inner = await page.evaluate(() => ({ inInner: !!document.activeElement?.closest('.dzg-dbody'), row: document.activeElement?.closest('.dzg-row')?.getAttribute('aria-rowindex') }));
+      check(`${lang} detail: keys move inside the nested grid`, inner.inInner && inner.row === '3', inner);
+      await page.keyboard.press('Escape');
+      await frames(page, 2);
+      const out = await page.evaluate(() => ({ dcell: !!document.activeElement?.classList.contains('dzg-dcell'), inInner: !!document.activeElement?.closest('.dzg-dbody') }));
+      check(`${lang} detail: Escape from the nested grid goes back to the panel's cell`, out.dcell && !out.inInner, out);
+      await page.keyboard.press('Enter');
+      await frames(page, 2);
+      const back = await page.evaluate(() => ({ inInner: !!document.activeElement?.closest('.dzg-dbody'), row: document.activeElement?.closest('.dzg-row')?.getAttribute('aria-rowindex') }));
+      check(`${lang} detail: Enter goes back into the nested grid, where it was left`, back.inInner && back.row === '3', back);
+      const n = await page.evaluate(() => window.fx.openAll(200));
+      const sc = await page.evaluate(() => window.fx.scroll(200));
+      check(`${lang} detail: 200 masters open, 200 scrolls: panels alive = made − destroyed (none pooled), one grid each`, n >= 1 && sc.panels - sc.panelsGone === sc.panelsLive && sc.roots === sc.panelsLive + 1, { n, sc });
+      const gone = await page.evaluate(() => window.fx.destroyGrid());
+      check(`${lang} detail: grid destroyed, panels made = destroyed, no grid left`, gone.panels === gone.panelsGone && gone.live === 0 && gone.roots === 0, gone);
+      check(`${lang} detail: no error in the page`, errors.length === 0, errors);
+      await page.close();
+    }
+  }
+  if (only === 'tree') throw Object.assign(new Error('only'), { only: true });
   const { page, errors } = await open('bench=1');
   const r = await page.evaluate(() => window.fx.bench(200, 40));
   console.log(`rebind in Chrome: ${r.usPerCell.toFixed(2)} µs per Angular cell (jump of 40 rows ${r.onMs.toFixed(2)} ms with ${r.templatedCells} component cells, ${r.offMs.toFixed(2)} ms as text; S6 ≈ 5 µs)`);
   check('bench: a pooled component rebind costs about S6’s (< 15 µs)', r.usPerCell > 0 && r.usPerCell < 15, r);
   check('bench: no error in the page', errors.length === 0, errors);
   await page.close();
+} catch (e) {
+  if (!e.only) throw e;
 } finally {
   await b.close();
   await site.close();

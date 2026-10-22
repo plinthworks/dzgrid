@@ -18,12 +18,12 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { indexOf, measureExample } from './example-lib.mjs';
+import { forgetLocalPacks, indexOf, measureExample } from './example-lib.mjs';
 import { measureSplit } from './size-split.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const EXAMPLE = join(ROOT, 'examples/angular-audit');
-const K8 = 85_000;
+const K8 = 87_000; // owner decision 2026-10-22 (docs/phase-4-steps/decisions.md Q14), was 85 000
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const option = (name, fallback) => {
@@ -63,6 +63,9 @@ function build() {
   if (!flag('no-pack')) sh('npm', ['run', 'pack:local'], ROOT);
   // The same version on every pack (0.1.0 until a release): npm would keep the old copy. Removed, then installed again.
   rmSync(join(EXAMPLE, 'node_modules/@dzgrid'), { recursive: true, force: true });
+  // Their lock entries too: the old tarball's integrity made npm reinstall its cached copy (step 11).
+  const lockFile = join(EXAMPLE, 'package-lock.json');
+  if (existsSync(lockFile)) writeFileSync(lockFile, JSON.stringify(forgetLocalPacks(JSON.parse(readFileSync(lockFile, 'utf8'))), null, 2) + '\n');
   sh('npm', ['install', '--prefer-offline', '--no-audit', '--no-fund'], EXAMPLE);
   const bad = installed(EXAMPLE);
   if (bad.length) throw new Error(bad.join('; '));
@@ -161,7 +164,7 @@ async function bytes() {
   console.log(`  (2) Angular runtime and the shell (baseline): ${m.baseline.total} B gz`);
   console.log(`  (3) @dzgrid/angular in the initial JS: ${m.wrapper.min} B min, ~${m.wrapper.gz} B gz (estimated from the build stats)`);
   if (m.share > K8) {
-    console.log('STOP: the DzGrid share of the real build is over 85 000 B: ask the owner.');
+    console.log('STOP: the DzGrid share of the real build is over 87 000 B: ask the owner.');
     process.exitCode = 1;
   }
 }

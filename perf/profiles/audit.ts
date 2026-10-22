@@ -1,7 +1,7 @@
 // The audit screen's profile (K.8, step 18, owner Q1): every library value perf/audit-screen.ts
 // imports, plus one language (Arabic, the largest, with its filter and pager texts). Measured by
 // scripts/size.mjs in split mode: the initial load (this and its static chunks, plus the theme)
-// against 85 000 B gz; the lazy chunks (the value list, the date kits with tzslot) printed beside.
+// against 87 000 B gz (owner Q14, 2026-10-22; was 85 000); the lazy chunks (the value list, the date kits with tzslot) printed beside.
 // Its guard: perf/test/audit-profile.test.ts. CSV export joined at step 19 (its eager part and texts;
 // the run chunk is lazy, printed beside). Angular joined at step 23: the values the Angular example
 // (examples/angular-audit) imports from @dzgrid/angular, measured from the wrapper's shipped
