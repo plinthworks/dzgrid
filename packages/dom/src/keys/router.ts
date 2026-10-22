@@ -5,6 +5,7 @@ import type { MoveFn } from '../features.js';
 import type { FocusControl } from './focus.js';
 import { moveFocus, type Goal } from './move.js';
 import { ownerOf } from './owner.js';
+import { rowLayout } from '../render/viewport.js';
 
 /**
  * One keydown on the scroller: who owns the key, what it means (`intentFor`,
@@ -21,10 +22,16 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     if (!sameFocus(kernel.focus, set)) goal = null;
     // The spans feature moves over spanned cells, and hands the rest back to `moveFocus`.
     const step: MoveFn = g.spans?.move ?? moveFocus;
+    const d = rows.displayed;
+    const h = g.rowHeight();
+    const page = Math.max(1, Math.floor(g.geometry.read().block / h) - 1);
+    const L = rowLayout(g);
     const m = step(null, {
-      rows: rows.displayed, cols: columns.visible().map((c) => c.id),
-      page: Math.max(1, Math.floor(g.geometry.read().block / g.rowHeight()) - 1),
+      rows: d, cols: columns.visible().map((c) => c.id), page,
       bands: g.bands.length, extras: g.headerRows.length, checkBox: !!headerRenderer.checkBox,
+      // A detail is one stop (D8); over rows of their own heights a page is a distance (D7).
+      whole: (i) => d.nodeAt(d.index(i)!).kind === 'detail',
+      ...(!L.uniform && { rowAt: (r: number, n: number) => L.indexAt((r < 0 ? -h : L.offsetOf(r as never)) + n * page * h) }),
     }, from, goal, intent, moveFocus);
     if (!m) return;
     goal = m.goal;

@@ -2,6 +2,7 @@ import type { CellFocus, DisplayedRows, FocusPos, RowKey } from '@dzgrid/core';
 import { sameFocus } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import { CHECK_WIDTH } from '../render/rows.js';
+import { rowLayout } from '../render/viewport.js';
 
 export interface FocusControl<T> {
   focusCellAs(row: RowKey, column: string, source: 'api' | 'user'): void;
@@ -24,6 +25,15 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
   const { el, kernel, rows, columns, rowRenderer, headerRenderer, scope } = g;
 
   function positionOf(target: HTMLElement): FocusPos | null {
+    // In one of our detail cells (D8; a nested grid's are not ours): the detail, at the focus's column
+    // when it is already there, else the first.
+    for (let dc = target.closest('.dzg-dcell'); dc; dc = dc.parentElement!.closest('.dzg-dcell')) {
+      const key = rowRenderer.keyOf(dc.parentElement!);
+      if (!key) continue;
+      const f = kernel.focus;
+      const column = f?.kind === 'cell' && f.row === key ? f.column : columns.visible()[0]?.id;
+      return column ? { kind: 'cell', row: key, column } : null;
+    }
     // A row's selection box stands for its row: focus goes to the row's first cell.
     const check = target.closest<HTMLElement>('.dzg-row .dzg-check');
     if (check) {
@@ -77,11 +87,11 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     if (i === -1) return;
     const box = g.geometry.read();
     if (column !== undefined) scrollInlineTo(column);
-    // A feature's row layout (D7) when it gives one; the uniform rows' arithmetic otherwise.
-    const L = g.layoutFor && g.layout;
-    const h = L ? L.heightOf(i) : g.rowHeight();
+    // The layout of the rows shown now (D7), even before their paint.
+    const L = rowLayout(g);
+    const h = L.heightOf(i);
     const top = g.scroll.logicalTop;
-    const off = L ? L.offsetOf(i) : i * h;
+    const off = L.offsetOf(i);
     let next = top;
     // Under rows drawn over the body's top (a tree's pinned parents, WCAG 2.4.11): just below its own.
     if (off < top + (g.inset ?? 0)) next = off - (g.insetFor?.(i) ?? 0);

@@ -93,6 +93,7 @@
 }
 
 .dzg-cell:focus-visible,
+.dzg-dcell:focus-visible,
 .dzg-hcell:focus-visible,
 .dzg-check:focus-visible,
 .dzg-box:focus-visible {

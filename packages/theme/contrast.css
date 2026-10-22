@@ -47,6 +47,7 @@
     forced-color-adjust: none;
   }
   .dzg-cell:focus-visible,
+  .dzg-dcell:focus-visible,
   .dzg-hcell:focus-visible,
   .dzg-box:focus-visible {
     outline-color: Highlight;

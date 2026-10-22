@@ -173,6 +173,19 @@ export interface SlotContext {
     selectAll(): void;
     clearSelection(): void;
   };
+  /**
+   * A master's detail panel (`@dzgrid/dom/detail`, Phase 4 step 10), mounted in the detail row's one cell
+   * (`RowView.slot`); the base destroys it when the row leaves the window or the grid ends.
+   */
+  detail: PartBase & {
+    /** The master's row. */
+    readonly row: Readonly<unknown>;
+    /** The detail row's key (`x:` + the master's). */
+    readonly key: RowKey;
+    readonly master: RowKey;
+    /** The panel's height in px, as the row layout places it. */
+    readonly height: number;
+  };
 }
 
 export type WiredSlot = keyof SlotContext;
@@ -206,7 +219,7 @@ export function featureParts(features: readonly GridFeature[] = [], own: () => R
 }
 
 /** The feature each slot needs; the cell is the base's. */
-const NEEDS: Partial<Record<PartSlot, string>> = { header: 'slots', overlay: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', footer: 'pagination' };
+const NEEDS: Partial<Record<PartSlot, string>> = { header: 'slots', overlay: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', footer: 'pagination', detail: 'detail' };
 const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));
 
 /**

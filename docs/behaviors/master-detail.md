@@ -43,7 +43,9 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   its master, the detail gives the focus to the master.
 - **One cell**: the detail row has one `gridcell` with `aria-colspan` = the number of columns,
   `data-kind="detail"` on the row. The master row carries `aria-expanded`. The cell's accessible
-  name comes from the master ("Details of Patient 0").
+  name comes from the master ("Details of Patient 0"; step 9's base names it after the master's row
+  header, "Patient 0", and step 10 adds the words with its messages). The cell is as wide as the
+  view (never wider than the columns) and stays at the view's start under a horizontal scroll.
 - **Content**: a part slot `'detail'` (`parts.md`; Angular through `dzgPart`/`componentPart`),
   given the master row, its key, the context, the direction, the messages, `announce`, and the
   height. Mounted at first opening, destroyed when closed or when the row leaves the window (its
@@ -65,7 +67,8 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   goal column is remembered across it; Left/Right/Home/End stay. Enter or F2 calls the part's
   `focus()`; Escape inside returns to the stop (the content container is a `cell-widget` owner, so
   the outer router ignores keys from inside, Escape included once the inner part has handled it).
-  Tab from the stop leaves the grid, as from any cell (one tab stop).
+  Tab from the stop leaves the grid, as from any cell (one tab stop). PageUp and PageDown move by a
+  page's distance (a 240 px detail is not one row of a page); the wheel moves pixels, as always.
 - **Not data**: a detail row is never selected, copied, pasted, edited or exported; it sends no
   `rowClicked` or `cellClicked`; Ctrl+A and ranges skip it.
 - **Nested grids**: a ready part creates an inner grid per open master, with an LRU of

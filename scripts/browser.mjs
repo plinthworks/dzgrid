@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -1503,6 +1503,177 @@ async function treeChecks(name, ctx) {
   }
 }
 
+/**
+ * Detail rows (Phase 4 step 9, step09-plan.md; S12's numbers): 1 000 000 rows and 2 000 open details of
+ * 240 px, French left to right light and Arabic right to left dark. Row 999 999 reachable by Ctrl+End,
+ * 0 px offset error at both ends, every mounted row where the layout says, the wheel and PageDown exact,
+ * the focus kept on a retained detail row, a detail height change above the view keeping the top row,
+ * the detail cell at the view's start under a horizontal scroll, axe 0 with a detail row in view and focused.
+ */
+async function detailChecks(name, ctx) {
+  const cases = [
+    { qs: 'locale=fr-FR&theme=light', tag: 'detail fr ltr light', rtl: false },
+    { qs: 'locale=ar-DZ&dir=rtl&theme=dark', tag: 'detail ar rtl dark', rtl: true },
+  ];
+  for (const c of cases) {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 760 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/detail.html?${c.qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 60000 });
+    await frames(page, 3);
+    // Where the rows really are against the layout, and the ends.
+    const look = () => page.evaluate(() => {
+      const { ctx } = window.t;
+      const vp = document.querySelector('.dzg-viewport');
+      const v = vp.getBoundingClientRect();
+      const hb = document.querySelector('.dzg-header').getBoundingClientRect().bottom;
+      const d = ctx.rows.displayed;
+      const L = ctx.layout;
+      const top = ctx.scroll.logicalTop;
+      let worst = 0;
+      let n = 0;
+      for (const r of document.querySelectorAll('.dzg-layer > .dzg-row')) {
+        const i = Number(r.getAttribute('aria-rowindex')) - 2;
+        const b = r.getBoundingClientRect();
+        if (b.bottom < hb || b.top > v.bottom) continue;
+        n++;
+        worst = Math.max(worst, Math.abs(b.top - (hb + L.offsetOf(i) - top)), Math.abs(b.height - L.heightOf(i)));
+      }
+      const first = document.querySelector('.dzg-layer > .dzg-row[aria-rowindex="2"]');
+      const last = document.querySelector(`.dzg-layer > .dzg-row[aria-rowindex="${d.count + 1}"]`);
+      const inner = v.top + vp.clientTop + vp.clientHeight;
+      return { count: d.count, total: L.total, n, worst, top, firstErr: first ? first.getBoundingClientRect().top - hb : null, lastErr: last ? last.getBoundingClientRect().bottom - inner : null };
+    });
+    const at0 = await look();
+    const cell0 = await page.evaluate(() => {
+      const r = document.querySelector('.dzg-layer > .dzg-row[data-kind="detail"]');
+      const dc = r.querySelector('.dzg-dcell');
+      return { kids: r.querySelectorAll('.dzg-cell').length, role: dc.getAttribute('role'), span: dc.getAttribute('aria-colspan'), label: dc.getAttribute('aria-label'), h: r.getBoundingClientRect().height, rowcount: document.querySelector('.dzg-viewport').getAttribute('aria-rowcount') };
+    });
+    let v = await axe(page);
+    check(name, `${c.tag}: 1 002 000 rows (1 000 000 + 2 000 details), the top at 0 px, every row in view where the layout says (< 0.5 px), a detail row one gridcell over 8 columns named after its master, 240 px; axe 0`,
+      at0.count === 1_002_000 && at0.firstErr === 0 && at0.n > 5 && at0.worst < 0.5 && cell0.kids === 0 && cell0.role === 'gridcell' && cell0.span === '8' && cell0.label === (c.rtl ? 'مريض 0' : 'Patient 0') && cell0.h === 240 && cell0.rowcount === '1002001' && v.length === 0, { at0, cell0, v });
+    // Keys: Down onto the detail of row 0 (one stop), Left stays, Down to row 1, the column kept.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key(0), 'c2'));
+    await frames(page);
+    const where = () => page.evaluate(() => {
+      const a = document.activeElement;
+      const r = a.closest('.dzg-row');
+      return { i: r ? Number(r.getAttribute('aria-rowindex')) - 2 : null, detail: a.classList.contains('dzg-dcell'), col: a.dataset.col ?? null, focus: window.t.grid.kernel.focus };
+    });
+    await page.keyboard.press('ArrowDown');
+    await frames(page);
+    const k1 = await where();
+    await page.keyboard.press(c.rtl ? 'ArrowLeft' : 'ArrowRight');
+    await page.keyboard.press('Home');
+    await frames(page);
+    const k2 = await where();
+    v = await axe(page);
+    await page.keyboard.press('ArrowDown');
+    await frames(page);
+    const k3 = await where();
+    check(name, `${c.tag}: Down reaches the detail as one stop, ${c.rtl ? 'Left' : 'Right'} and Home stay, Down goes on to row 1 in the same column; axe 0 with the detail focused`,
+      k1.i === 1 && k1.detail && k2.i === 1 && k2.detail && k2.focus.column === 'c2' && k3.i === 2 && k3.col === 'c2' && v.length === 0, { k1, k2, k3, v });
+    // Ctrl+End: the last row, the detail of row 999 999, the bottom at 0 px; Up: row 999 999 itself.
+    await page.keyboard.press('ControlOrMeta+End');
+    await frames(page, 3);
+    const end = { at: await where(), ...(await look()) };
+    await page.keyboard.press('ArrowUp');
+    await frames(page);
+    const up = await page.evaluate(() => { const a = document.activeElement; return { i: Number(a.closest('.dzg-row').getAttribute('aria-rowindex')) - 2, key: String(window.t.grid.kernel.focus.row), col: a.dataset.col }; });
+    check(name, `${c.tag}: Ctrl+End reaches the last row (the detail of row 999 999), its bottom at 0 px, rows placed (< 0.5 px); Up focuses row 999 999`,
+      end.at.i === 1_001_999 && end.at.detail && end.lastErr === 0 && end.worst < 0.5 && up.i === 1_001_998 && up.key === String(await page.evaluate(() => window.t.key(999_999))) && up.col === 'c5', { end, up });
+    // The wheel, intercepted above the cap: exact logical moves, rows placed.
+    await page.evaluate(() => window.t.scrollTo(window.t.ctx.layout.total / 2));
+    await frames(page, 2);
+    const box = await page.locator('.dzg-viewport').boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    const w0 = await page.evaluate(() => window.t.logicalTop());
+    for (let k = 0; k < 20; k++) { await page.mouse.wheel(0, 100); await frames(page, 1); }
+    await frames(page, 2);
+    const w1 = { top: await page.evaluate(() => window.t.logicalTop()), scaled: await page.evaluate(() => window.t.ctx.scroll.mapper.scaled), ...(await look()) };
+    check(name, `${c.tag}: 20 wheel steps of 100 px move exactly 2 000 logical px (scaled), rows placed (< 0.5 px)`, w1.scaled && w1.top - w0 === 2000 && w1.worst < 0.5 && w1.n > 5, { w0, w1 });
+    // PageDown from a row above a detail: the row a page (in px) below, brought into view.
+    const pd = await page.evaluate(async () => {
+      const { ctx, grid, masters, key } = window.t;
+      const d = ctx.rows.displayed;
+      const m = masters[1000];
+      const at = d.indexOf(key(m - 3));
+      grid.api.focusCell(key(m - 3), 'n');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return { at };
+    });
+    await page.keyboard.press('PageDown');
+    await frames(page, 2);
+    const pd2 = await page.evaluate((from) => {
+      const { ctx } = window.t;
+      const L = ctx.layout;
+      const h = ctx.rowHeight();
+      const page = Math.max(1, Math.floor(ctx.viewBlock / h) - 1);
+      const want = L.indexAt(L.offsetOf(from) + page * h);
+      const a = document.activeElement;
+      const r = a.closest('.dzg-row');
+      const b = r.getBoundingClientRect();
+      const vp = document.querySelector('.dzg-viewport').getBoundingClientRect();
+      const hb = document.querySelector('.dzg-header').getBoundingClientRect().bottom;
+      return { want, byCount: from + page, got: Number(r.getAttribute('aria-rowindex')) - 2, inView: b.top >= hb - 0.5 && b.bottom <= vp.bottom + 0.5 };
+    }, pd.at);
+    check(name, `${c.tag}: PageDown lands on the row a page below by distance (over a 240 px detail), in view`, pd2.want === pd2.got && pd2.inView && pd2.got !== pd2.byCount, { pd, pd2 });
+    // The focus on a retained detail row through the end and the top, then back.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.x(window.t.masters[700]), 'n'));
+    await frames(page, 2);
+    const held = await page.evaluate(async () => {
+      const el = document.activeElement;
+      const go = async (l) => { window.t.scrollTo(l); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return document.activeElement === el && el.isConnected; };
+      const a = await go(1e12);
+      const b = await go(0);
+      window.t.grid.api.ensureVisible(window.t.x(window.t.masters[700]));
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return { detail: el.classList.contains('dzg-dcell'), a, b, c: document.activeElement === el };
+    });
+    check(name, `${c.tag}: the focus on a detail row is kept, the same element, through the end and the top`, held.detail && held.a && held.b && held.c, held);
+    // A detail above the view grows: the top row stays, on screen too.
+    const grow = await page.evaluate(async () => {
+      const { ctx, masters, x } = window.t;
+      window.t.scrollTo(ctx.layout.offsetOf(ctx.rows.displayed.indexOf(x(masters[1500]))) + 5000);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const d = ctx.rows.displayed;
+      const topKey = () => d.keyAt(ctx.layout.indexAt(ctx.scroll.logicalTop));
+      const screen = (k) => document.querySelector(`.dzg-layer > .dzg-row[aria-rowindex="${d.indexOf(k) + 2}"]`).getBoundingClientRect().top;
+      const k0 = topKey();
+      const y0 = screen(k0);
+      const before = [];
+      for (const [h, m] of [[480, 1499], [120, 1500], [777, 1200], [40, 0]]) {
+        ctx.layout.setHeights([[d.indexOf(x(masters[m])), h]]);
+        ctx.schedule();
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        before.push({ same: topKey() === k0, dy: screen(k0) - y0 });
+      }
+      return before;
+    });
+    check(name, `${c.tag}: four detail height changes above the view (240 → 480, 120, 777, 40) keep the top row, 0 px on screen`, grow.every((g) => g.same && Math.abs(g.dy) <= 0.5), grow);
+    // Horizontal scroll: the detail cell stays at the view's inline start.
+    const hz = await page.evaluate(async () => {
+      const vp = document.querySelector('.dzg-viewport');
+      window.t.scrollTo(0);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      vp.scrollLeft = document.documentElement.dir === 'rtl' ? -200 : 200;
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const dc = document.querySelector('.dzg-dcell').getBoundingClientRect();
+      const v = vp.getBoundingClientRect();
+      const left = v.left + vp.clientLeft;
+      const right = left + vp.clientWidth;
+      return { moved: Math.abs(vp.scrollLeft), off: document.documentElement.dir === 'rtl' ? right - dc.right : dc.left - left, w: dc.width, view: vp.clientWidth };
+    });
+    check(name, `${c.tag}: under a horizontal scroll the detail cell stays at the view's start, as wide as the view`, hz.moved > 100 && Math.abs(hz.off) < 0.5 && Math.abs(hz.w - hz.view) < 0.5, hz);
+    check(name, `${c.tag}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -1514,6 +1685,7 @@ async function runEngine(name) {
       if (only === 'rules' && name === 'chrome') await rulesChecks(name, ctx);
       if (only === 'motion' && name === 'chrome') await motionChecks(name, ctx);
       if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx);
+      if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx);
       return;
     }
 
@@ -1843,6 +2015,7 @@ async function runEngine(name) {
     if (name === 'chrome') await rulesChecks(name, ctx);
     if (name === 'chrome') await motionChecks(name, ctx);
     if (name === 'chrome') await treeChecks(name, ctx);
+    if (name === 'chrome') await detailChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

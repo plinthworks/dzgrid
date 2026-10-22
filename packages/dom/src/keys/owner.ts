@@ -2,7 +2,7 @@ import type { KeyOwner } from '@dzgrid/core';
 
 const MARKED = new Set<string>(['filter-input', 'popup', 'cell-widget', 'editor']);
 /** What a person interacts with on its own: inside a cell or a header, it owns its keys. */
-export const INTERACTIVE = 'button, a[href], input, textarea, select, [contenteditable=""], [contenteditable="true"], [tabindex]:not(.dzg-cell):not(.dzg-hcell):not(.dzg-check)';
+export const INTERACTIVE = 'button, a[href], input, textarea, select, [contenteditable=""], [contenteditable="true"], [tabindex]:not(.dzg-cell):not(.dzg-hcell):not(.dzg-check):not(.dzg-dcell)';
 
 /**
  * Who a key belongs to, from where it was pressed. A part marks its own
@@ -21,10 +21,11 @@ export function ownerOf(target: EventTarget | null, viewport: HTMLElement): KeyO
   }
   // A control a part drew in a cell, a text field included, is the cell's widget: its keys are its
   // own, Escape goes back to the cell. The grid's own editor marks itself (Phase 4).
-  if (el.closest('.dzg-cell') && el.matches(INTERACTIVE)) return 'cell-widget';
+  // A detail row's one cell (D8) is a cell; what its content draws, its widget.
+  if (el.closest('.dzg-cell, .dzg-dcell') && el.matches(INTERACTIVE)) return 'cell-widget';
   if (el.matches('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) return 'editor';
   if (el.closest('.dzg-hcell')) return el.matches(INTERACTIVE) && !el.matches('.dzg-box') ? 'cell-widget' : 'header';
-  if (el.closest('.dzg-cell')) return 'cell';
+  if (el.closest('.dzg-cell, .dzg-dcell')) return 'cell';
   return 'outside';
 }
 

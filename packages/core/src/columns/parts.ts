@@ -2,7 +2,7 @@ import { problem, type Problem } from '../problems.js';
 import type { ColumnType } from '../value/codec.js';
 
 /** Where a part shows (Phase 3, the plug-in design B2). */
-export type PartSlot = 'cell' | 'header' | 'filter' | 'floating' | 'overlay' | 'tooltip' | 'footer';
+export type PartSlot = 'cell' | 'header' | 'filter' | 'floating' | 'overlay' | 'tooltip' | 'footer' | 'detail';
 
 /** What naming needs of a column: plain data, so definitions can be saved and shared. */
 export interface PartColumn {

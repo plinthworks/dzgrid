@@ -25,6 +25,8 @@ export const LAYOUT_CSS = `
 :where(.dzg-cell[data-align=end]) { text-align: end; }
 :where(.dzg-cell[data-align=center]) { text-align: center; }
 :where(.dzg-hrow) { display: flex; }
+:where(.dzg-row[data-kind=detail] > .dzg-seg) { display: none; }
+:where(.dzg-dcell) { position: sticky; inset-inline-start: 0; box-sizing: border-box; overflow: hidden; }
 :where(.dzg-free) { unicode-bidi: plaintext; }
 :where(.dzg-num) { unicode-bidi: isolate; direction: ltr; }
 :where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: var(--dzg-footer-size, 0px); display: grid; place-content: center; place-items: center; pointer-events: none; }

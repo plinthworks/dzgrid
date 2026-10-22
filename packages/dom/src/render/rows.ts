@@ -1,6 +1,6 @@
 import { isolationFor } from './bidi.js';
 import type { PartHandle, SlotContext, SlotPart } from '../part.js';
-import { isBlank, REBASE, type ColumnLayout, type DisplayedRows, type LocaleCtx, type ResolvedColumn, type RowKey } from '@dzgrid/core';
+import { isBlank, REBASE, type ColumnLayout, type DetailNode, type DisplayedRows, type LocaleCtx, type ResolvedColumn, type RowKey } from '@dzgrid/core';
 
 /**
  * Body rows: recycled in DOM order, rebound, never rebuilt (S9, D7). Every
@@ -41,6 +41,10 @@ export interface RowView {
   check: HTMLElement | null;
   /** The span plan the row was bound with (null: plain cells). */
   plan: RowPlan | null;
+  /** A detail row's one cell (D8), where its part mounts; null on any other row. */
+  slot: HTMLElement | null;
+  /** The part mounted in `slot` (`@dzgrid/dom/detail`): destroyed by the base when the row goes. */
+  part: PartHandle<SlotContext['detail']> | null;
 }
 
 /** A cell where a span starts: what it covers, and its width (the columns it covers). */
@@ -134,6 +138,8 @@ export interface Frame<T> {
   readonly rowAttrs: (key: RowKey, el: HTMLElement) => void;
   /** Span plans, when the spans feature is on. */
   readonly spans?: RowSpans | null;
+  /** The view's inline size: a detail row's cell is as wide (never wider than the columns). */
+  readonly view?: number;
 }
 
 export class RowRenderer<T> {
@@ -148,9 +154,10 @@ export class RowRenderer<T> {
 
   readonly #report: (err: unknown) => void;
 
-  /** The part drawing a mounted cell, if any (Enter hands it the focus). */
-  partAt(key: RowKey, column: string): PartHandle<SlotContext['cell']> | null {
-    return this.#mounted.get(key)?.cells.get(column)?.handle ?? null;
+  /** The part drawing a mounted cell, or a detail row's part, if any (Enter hands it the focus). */
+  partAt(key: RowKey, column: string): PartHandle<SlotContext['cell']> | PartHandle<SlotContext['detail']> | null {
+    const v = this.#mounted.get(key);
+    return (v?.slot ? v.part : v?.cells.get(column)?.handle) ?? null;
   }
 
   constructor(doc: Document, layer: HTMLElement, report: (err: unknown) => void = () => {}) {
@@ -181,7 +188,7 @@ export class RowRenderer<T> {
     };
     const segs = { start: seg('start'), center: seg('center'), end: seg('end') };
     this.made++;
-    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null, plan: null };
+    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null, plan: null, slot: null, part: null };
   }
 
   #makeCell(): CellView {
@@ -215,6 +222,8 @@ export class RowRenderer<T> {
       if (want.has(k)) continue;
       v.el.remove();
       this.#mounted.delete(k);
+      // A detail's part goes with its row (D8: destroyed when it leaves the window).
+      this.#unslot(v);
       v.key = null;
       v.data = undefined;
       this.#pool.push(v);
@@ -275,6 +284,8 @@ export class RowRenderer<T> {
     const data = node.kind === 'data' ? node.data : undefined;
     // Not a data row (a tree's filler, a detail): marked, never selected (tree-selection.md).
     setAttr(v.el, 'data-kind', data ? null : node.kind);
+    if (node.kind === 'detail') return this.#whole(v, key, node, i, f);
+    if (v.slot) this.#unslot(v);
     const plan = f.spans ? f.spans.plan(i, key) : null;
     const center = this.#centerOf(key, f, plan);
     const L = f.layout;
@@ -336,6 +347,63 @@ export class RowRenderer<T> {
   }
 
   readonly #spare: CellView[] = [];
+
+  /**
+   * A detail row (D8): no cells, no box, one gridcell over every column, named after the master's row
+   * header, as wide as the view (sticky at the inline start, base CSS). Its height is written at every
+   * render: a height set on the layout changes no epoch.
+   */
+  #whole(v: RowView, key: RowKey, node: DetailNode<unknown>, i: number, f: Frame<T>): void {
+    const L = f.layout;
+    const width = L.totalWidth + (f.check ? CHECK_WIDTH : 0);
+    setPx(v.el, 'block-size', f.rowHeight(i));
+    setPx(v.el, 'inline-size', width);
+    // Another master's detail: its part is not this one's.
+    if (v.key !== key) this.#unslot(v);
+    v.key = key;
+    v.focusCol = null;
+    v.plan = null;
+    for (const cell of v.cells.values()) {
+      cell.el.remove();
+      this.#unpart(cell);
+      cell.col = null;
+      this.#spare.push(cell);
+    }
+    v.cells.clear();
+    this.#checkCell(v, false);
+    let s = v.slot;
+    if (!s) {
+      s = this.#doc.createElement('div');
+      s.className = 'dzg-dcell';
+      s.setAttribute('role', 'gridcell');
+      s.setAttribute('aria-colindex', '1');
+      s.tabIndex = -1;
+      v.el.append(s);
+      v.slot = s;
+    }
+    setPx(s, 'inline-size', Math.min(f.view ?? width, width));
+    setAttr(s, 'aria-colspan', String(L.start.columns.length + L.center.columns.length + L.end.columns.length + (f.check ? 1 : 0)));
+    // A new key comes from the pool or another detail: its data differs (a pooled row holds none).
+    if (v.data !== node.data || v.epoch !== f.epoch) {
+      v.data = node.data;
+      v.epoch = f.epoch;
+      const col = [...L.start.columns, ...L.center.columns, ...L.end.columns].find((c) => c.id === f.rowHeader);
+      setAttr(s, 'aria-label', col ? cellText(col, node.data, f.ctx) : null);
+    }
+  }
+
+  /** A detail row's part destroyed (an error reported), its cell removed. */
+  #unslot(v: RowView): void {
+    const p = v.part;
+    v.part = null;
+    try {
+      p?.destroy?.();
+    } catch (err) {
+      this.#report(err);
+    }
+    v.slot?.remove();
+    v.slot = null;
+  }
 
   /** The row's selection box: a cell for the column count, its box decorative (the row's aria-selected is the truth). */
   #checkCell(v: RowView, on: boolean, box?: boolean): void {
@@ -505,14 +573,16 @@ export class RowRenderer<T> {
     return this.#keys.get(rowEl);
   }
 
-  /** The cell element for a row and column, when mounted. */
+  /** The cell element for a row and column, when mounted (a detail row's one cell, whatever the column). */
   cell(key: RowKey, column: string): HTMLElement | null {
-    return this.#mounted.get(key)?.cells.get(column)?.el ?? null;
+    const v = this.#mounted.get(key);
+    return v?.slot ?? v?.cells.get(column)?.el ?? null;
   }
 
   /** The grid's end: every part destroyed, every row removed. */
   clear(): void {
     for (const v of [...this.#mounted.values(), ...this.#pool]) {
+      this.#unslot(v);
       for (const cell of v.cells.values()) this.#unpart(cell);
       v.el.remove();
     }

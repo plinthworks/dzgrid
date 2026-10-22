@@ -101,8 +101,10 @@ export interface GridContext<T> {
   viewBlock: number;
   /** Where the rows sit when a feature gives their heights (D7); the uniform layout otherwise. */
   layoutFor?: (d: DisplayedRows<T>, h: number) => RowLayout;
-  /** The row layout of the last paint. */
+  /** The row layout of the rows shown (`rowLayout`): made for the last paint, or since. */
   layout?: RowLayout;
+  /** What `layout` was made for: the rows, the row height, the feature's `layoutFor`. */
+  laid?: readonly [DisplayedRows<T>, number, unknown];
   /** Rows drawn over the top of the body at the last paint (a tree's pinned parents): their height. */
   inset?: number;
   /** The room a row needs above it to be seen whole (its pinned parents); none when unset. */

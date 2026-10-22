@@ -68,6 +68,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   does nothing. Base seams: `RowRenderer.spawn(layer)`, `GridContext.inset` / `insetFor` — a row
   brought into view by the focus is placed under its own pinned parents (WCAG 2.4.11). Theme: the
   copies in the rows' weight, a 2 px line under the stack (forced colours too); not printed.
+- **Variable row heights and the detail row in the DOM base (Phase 4 step 9)**: one row layout per
+  set of rows shown (`g.layoutFor` from a feature, kept while the rows and the row height are the
+  same), read by the paint, `ensureVisible` and the page keys; a height change on the same rows
+  keeps the top row (the end stays the end); over variable rows PageUp/PageDown move by a distance.
+  A `DetailNode` row is drawn as one cell, `.dzg-dcell` (`role="gridcell"`, `aria-colspan` over every
+  column and the box, named after the master's row header), `RowView.slot`, as wide as the view and
+  kept at its start under a horizontal scroll; `data-kind="detail"`. It is one focus stop
+  (`MoveShape.whole`): Up/Down reach it, Left/Right/Home/End stay, the column is kept across it;
+  Enter/F2 call its part's `focus()`, Escape from inside comes back. New part slot `'detail'`
+  (`SlotContext['detail']`; core `PartSlot` gains `'detail'`; a `'detail'` part without the detail
+  feature is told `missing-feature`); the base destroys the part when its row leaves the window.
+  Theme: the focus ring on the detail cell (forced colours too). The feature itself is step 10.
 
 ### Changed
 

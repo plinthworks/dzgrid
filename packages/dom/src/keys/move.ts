@@ -30,6 +30,13 @@ export interface MoveShape {
   readonly extras: number;
   /** A select-all box stands before the first column header. */
   readonly checkBox: boolean;
+  /** A row that is one stop (a detail, D8): the column keys do not move on it. */
+  readonly whole?: (row: number) => boolean;
+  /**
+   * The row `n` pages from row `r` (−1: from the header), when rows are not all one height (D7): a page
+   * is a distance. Without it, `page` rows.
+   */
+  readonly rowAt?: (r: number, n: number) => number;
 }
 
 /**
@@ -59,6 +66,8 @@ export function moveFocus(map: SpanLookup | null, s: MoveShape, from: FocusPos, 
   if (!cols.length) return null;
   const ci = Math.max(0, cols.indexOf(from.column));
   const ri = from.kind === 'cell' ? d.indexOf(from.row) : -1;
+  // On a whole row the column keys stay (the key is still the grid's).
+  if ('axis' in intent && intent.axis === 'col' && ri !== -1 && s.whole?.(ri)) return null;
   // The goal, while the cell focused still owns its slot (a header's is the header itself).
   let gr = ri;
   let gc = ci;
@@ -99,9 +108,12 @@ export function moveFocus(map: SpanLookup | null, s: MoveShape, from: FocusPos, 
       else to = cell(intent.axis === 'col' ? gr : intent.to === 'first' ? 0 : lastRow, c);
       break;
     }
-    case 'page':
-      to = from.kind === 'header' ? cell(s.page - 1, gc) : cell(ri + intent.delta * s.page, gc);
+    case 'page': {
+      // From the header (ri −1): a page down from above the first row.
+      const n = from.kind === 'header' ? 1 : intent.delta;
+      to = cell(s.rowAt ? s.rowAt(ri, n) : ri + n * s.page, gc);
       break;
+    }
     default:
       return null;
   }

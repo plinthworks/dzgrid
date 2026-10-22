@@ -1,4 +1,4 @@
-import { isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey } from '@dzgrid/core';
+import { isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey, type RowLayout } from '@dzgrid/core';
 import { emit, isDataKey, shownAncestor } from '@dzgrid/core/internal';
 import type { PartBase, SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
@@ -21,6 +21,24 @@ export interface Painter {
 }
 
 /**
+ * The row layout of the rows shown now (D7): the last one made while the rows, the row height and the
+ * feature's `layoutFor` are the same (heights a feature set on it live until the next build), else a new
+ * one, a feature's or every row `h` tall, kept in `g.layout`. The paint, `ensureVisible` and the page
+ * keys read it: never a layout of rows already gone.
+ */
+export function rowLayout<T>(g: GridContext<T>): RowLayout {
+  const d = g.rows.displayed;
+  const h = g.rowHeight();
+  const by = g.layoutFor;
+  const l = g.laid;
+  if (!g.layout || !l || l[0] !== d || l[1] !== h || l[2] !== by) {
+    g.layout = by?.(d, h) ?? uniformRowLayout(d, h);
+    g.laid = [d, h, by];
+  }
+  return g.layout;
+}
+
+/**
  * The paint: one per frame, reads already done (the box). Mapper and window,
  * grid attributes, header, rows, then the focus that waited for its cell,
  * and the overlay.
@@ -32,7 +50,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let mapperKey = '';
   let available = -1;
   let colIndexOf: { version: number; index: Map<string, number> } = { version: -1, index: new Map() };
-  let shown: { displayed: DisplayedRows<T>; key: RowKey | null; delta: number; atTop: boolean; atEnd: boolean } | null = null;
+  let shown: { displayed: DisplayedRows<T>; key: RowKey | null; delta: number; atTop: boolean; atEnd: boolean; h: number; total: number; layout: RowLayout } | null = null;
   let anchorNext: 'rows' | 'expand' | null = null;
   let paints = 0;
   let firstData = false;
@@ -97,9 +115,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     }
     const d = rows.displayed;
     const h = g.rowHeight();
-    // One row layout per paint (D7): a feature's (variable heights), or every row `h` tall.
-    const layout = g.layoutFor?.(d, h) ?? uniformRowLayout(d, h);
-    g.layout = layout;
+    // One row layout for these rows (D7): a feature's (variable heights), or every row `h` tall.
+    const layout = rowLayout(g);
     g.viewBlock = box.block;
     const L = columns.layout;
     const visible = columns.visible();
@@ -126,21 +143,29 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       const next = scrollMapper(layout.total, g.env.maxPhysical ?? MAX_PHYSICAL, box.block);
       // The body grows first: a scroll written before would be clamped to the old height.
       setPx(el.body, 'block-size', next.physicalHeight);
-      // Taller or shorter rows (text zoom): the same row stays at the top, at the same fraction.
-      const keep = lastH > 0 && h !== lastH ? (scroll.logicalTop * h) / lastH : null;
+      // Taller or shorter rows (text zoom): the same row stays at the top, at the same fraction (rows of
+      // their own heights: found in the last paint's layout, the same row by its index).
+      const was = shown?.layout;
+      const top = scroll.logicalTop;
+      const at = was && !was.uniform && layout.count ? Math.min(was.indexAt(top), layout.count - 1) : -1;
+      const keep = lastH > 0 && h !== lastH ? (at < 0 ? (top * h) / lastH : layout.offsetOf(at as never) + ((top - was!.offsetOf(at as never)) * layout.heightOf(at as never)) / (was!.heightOf(at as never) || 1)) : null;
       scroll.setMapper(next);
       if (keep !== null) scroll.scrollTo(keep);
     }
     lastH = h;
     const mapper = scroll.mapper!;
     // Rows added or removed by a transaction: the row at the top of the view stays where it was,
-    // the top stays the top and the end stays the end.
-    if (anchorNext && shown && shown.displayed !== d) {
+    // the top stays the top and the end stays the end. The same rows laid out again with another
+    // total (a height set on the layout, D7) are anchored as rows are.
+    const relaid = !!shown && shown.displayed === d && shown.h === h && shown.total !== layout.total;
+    if (relaid) anchorNext ??= 'rows';
+    if (anchorNext && shown && (shown.displayed !== d || relaid)) {
       if (shown.atTop) scroll.scrollTo(0);
       else if (shown.atEnd && anchorNext === 'rows') scroll.scrollTo(mapper.maxLogical);
       else if (shown.key !== null) {
         const at = d.indexOf(shown.key);
-        if (at !== -1) scroll.scrollTo(layout.offsetOf(at) + shown.delta);
+        // The distance into it, at most its new height (a top detail that shrank).
+        if (at !== -1) scroll.scrollTo(layout.offsetOf(at) + Math.min(shown.delta, layout.heightOf(at)));
         // Hidden by a closing above the view: its nearest shown ancestor at the top, just under its own
         // pinned ancestors (tree-view.md, WCAG 2.4.11), as a scroll into view puts it.
         else if (anchorNext === 'expand') {
@@ -221,7 +246,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       check, dir, headerRows, partFor, report: g.report,
       partBase: g.partBase,
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
-      focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev,
+      focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev, view: box.inline,
     };
     // Kept mounted out of the window: the focused row first (never moved), then the anchors of tall cells.
     const retained: RowKey[] = focus?.kind === 'cell' ? [focus.row] : [];
@@ -241,6 +266,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       delta: topIndex !== null ? scroll.logicalTop - layout.offsetOf(topIndex) : 0,
       atTop: scroll.atTop,
       atEnd: scroll.atEnd,
+      h,
+      total: layout.total,
+      layout,
     };
     // The focused cell or header moved to another pinned segment (a move blurs, unseen): given back.
     if (held && focus && !g.pendingFocus && !el.viewport.contains(root.activeElement)) g.pendingFocus = focus.kind === 'cell' ? focus : { header: focus.column, level: focus.level ?? 0 };
