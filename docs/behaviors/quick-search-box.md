@@ -94,7 +94,7 @@ the field; empties it with the field's own clear button.
   `aria-labelledby`), `aria-describedby`, `aria-live`, `aria-busy`, `id`, classes or styles. The
   field's accessible name is the host's job: an unlabelled field fails axe. `<input type="search">`
   gives the `searchbox` role.
-- **Not yet:** the words found are not highlighted in the cells (Phase 5: it needs a map from the
+- **Not yet:** the words found are not highlighted in the cells (Phase 6: it needs a map from the
   folded text back to the shown text).
 
 ## Tests

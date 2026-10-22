@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Prepared at the Phase 4 close (2026-10-22), **not published**: the four packages at 0.2.0, their
 `@dzgrid/*` peers on `^0.2.0`. Phase 4 Parts A–C: the tree view, master/detail, sticky parent rows
-and the floating filter row shown and hidden live (Part D, editing, comes next). New entries:
+and the floating filter row shown and hidden live (Part D, editing, comes next — now Phase 5). New entries:
 `@dzgrid/core/{tree,tree-lazy,detail}`, `@dzgrid/dom/{tree,tree-lazy,detail}`,
 `@dzgrid/dom/locales/{en,fr,ar}-{tree,detail}`. Published on the owner's word only, under the same
 conditions as 0.1.0.

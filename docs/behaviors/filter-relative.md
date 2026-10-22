@@ -21,7 +21,7 @@ Six names, the ones tzslot uses (`PresetName`), with tzslot's meaning (`presetRa
 | `thisMonth` | the 1st of today's month | its last day |
 | `lastMonth` | the 1st of the month before | its last day |
 
-No *this week* (the first day of the week varies) and no shortcut shorter than a day: Phase 5.
+No *this week* (the first day of the week varies) and no shortcut shorter than a day: Phase 6.
 
 ### Model
 - Day column: `{ type: 'day', op: 'relative', range }`. Instant column: `{ type: 'instant', op: 'relative', range }`. Other fields are not read: a `value` / `valueTo` (or `day`, `at`…) left from another op is neither checked nor sent, even one that is no day.

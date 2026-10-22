@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-22, **Phase 4 close techniquement** (parties A–C : arbre, maître/détail, parents épinglés, ligne de filtres affichable). **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). Prochain travail : planifier la **partie D, l'édition**.
+Mis à jour : 2026-10-22, **Phase 5 (édition) : étape 1 en cours** (fiches, écoute §19, docs ; aucun code). Phase 4 close techniquement ; **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). L'édition s'appelle désormais **Phase 5** (décision Q2 ; phases suivantes +1 ; 0.3.0 à la fin).
 
 L'ancien contenu de ce fichier (les paragraphes « Étape N faite » des Phases 3 et 4, revues et portails) est gardé mot pour mot dans `docs/phase-4-steps/status-log.md` ; le détail de chaque étape est aussi dans `ROADMAP.md`.
 
@@ -65,9 +65,11 @@ Aucun banc lancé (Q17d).
 - **Palettes** `sehhaty.json` et la **spécification de l'étape 24** (écran `admin/audit-logs`), piste `docs/sehhaty-track.md`.
 - **Mesure des vitesses sur machine calme** (Q17d, reportée) : 17 lignes Node à froid au-dessus de leur budget depuis `bc01afa`, « toggle near the end » 11,6 / 11,5 dans Chrome ; ensuite la règle Q17c (corriger au-delà de +25 % ou sur le chemin courant — tri, filtre, défilement ; relèvement écrit entre +10 et +25 %).
 
-## Ensuite : la partie D (l'édition)
+## En cours : Phase 5, l'édition (ancienne « partie D »)
 
-Planification d'abord (un architecte, plan validé par le propriétaire, fiches avant le code). Entrées (`step13-plan.md` « After the close ») : ARCHITECTURE §3.10 et K.14 ; Entrée dans un éditeur (`edit.enterMoves`) ; une ligne éditée qui disparaît (les lignes ne bougent qu'à `reapply()`) ; états de sauvegarde animés (crochet `onCell`, GSAP) ; contexte pour les filtres et le tri (changement d'API du cœur, budget) ; éditions qui changent un parent ou un chemin ; non éditables : détails, lignes de remplissage, lignes de chargement (+ le test reporté du critère 5) ; un éditeur dans la colonne de l'arbre face à Gauche/Droite ; collage et sélection avec des lignes qui ne sont pas des données ; grilles imbriquées éditées chacune pour elle ; `/editors` ≤ 8 kB ; marges : dom ~650 o, cœur ~760 o, exemple réel ~3 kB (Q17a) ; écoute §19.
+- **Plan** `docs/phase-5-plan.md` (aligné sur les décisions, note « Owner decisions applied ») ; **décisions du propriétaire** `docs/phase-5-steps/decisions.md` Q1–Q19 (elles priment ; Q9 variante du propriétaire : bord rouge clignotant ~0,5 s à chaque refus ; Q10 modifiée : bord animé pendant l'enregistrement ; Q16 tous les budgets accordés).
+- **Étape 1 (en cours, non commitée)** : plan `docs/phase-5-steps/step01-plan.md` ; fiches écrites `docs/behaviors/{editing,editors,edit-save,edit-validation,edit-reapply,edit-undo,edit-angular}.md` ; `docs/a11y-protocol.md` §19 (points 111–124) ; ARCHITECTURE §6 et ROADMAP renumérotés. Reste : faire relire (architecte + relecture), puis **poser au propriétaire les points ouverts O1–O11** (`step01-plan.md`), reporter ses réponses dans `decisions.md`, commit.
+- **Étape suivante : 2, coutures du cœur** (`editable`, `setReader`/`reapply`, `orderStale`, contexte de l'application pour filtres et tri) — tests d'abord ; `size-budget.json` reçoit les accords Q16 avec l'étape qui construit chaque entrée.
 
 ## Commandes
 
@@ -100,4 +102,4 @@ Budgets depuis une mesure : `node scripts/rebudget.mjs sizes` (à blanc ; `--wri
 - **Budgets** : une taille ou un temps ne monte que par une décision écrite du propriétaire (`size-budget.json`, ROADMAP, `decisions.md`).
 - **Publication** : jamais `npm publish` sans la parole du propriétaire. Push : `main` après des commits vérifiés, jamais de force-push. Trailer de chaque commit :
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` puis `Claude-Session: https://claude.ai/code/session_01SD5iJWfHF82x2mQCxir8Qs`.
-- Tenir ce fichier et `docs/phase-4-steps/` à jour après chaque étape (pour une session perdue).
+- Tenir ce fichier et `docs/phase-5-steps/` à jour après chaque étape (pour une session perdue).

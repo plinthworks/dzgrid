@@ -51,7 +51,7 @@ then asks for every row of the query; clears the selection.
 - **The pager:** native buttons, each at least the target size (24 px): first, previous, the page text,
   next, last; then a native `<select>` labelled "Rows per page" with the model's sizes (the current
   size added when the host's list lacks it; hidden with fewer than two), its digits in the grid's
-  numerals. No list of page numbers and no "go to page" box (Phase 5).
+  numerals. No list of page numbers and no "go to page" box (Phase 6).
   - A button that cannot act has `aria-disabled="true"`, never `disabled`: the focus never falls to the
     page's body; its click does nothing and asks nothing. First and previous on the first page; next
     when there is no next page (`hasNext`); last when on the last page.

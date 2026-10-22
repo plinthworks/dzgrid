@@ -70,7 +70,7 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   under an English, French or Arabic UI). Typing that folds to nothing (a lone vowel mark) moves
   nowhere. A click ticks and focuses.
   In the search box ArrowDown goes to the list (not inside an input method's composition), Enter applies and closes (the popup's rule), Escape
-  closes. Up and Down are not mirrored in right-to-left. Ctrl+A and Shift ranges: Phase 5. If the
+  closes. Up and Down are not mirrored in right-to-left. Ctrl+A and Shift ranges: Phase 6. If the
   focused row leaves the list (a search, a new answer), the focus goes to the nearest row left, or
   the search box when none is left, never to the page.
 - **Blanks:** the first row, `filter.set.blanks`, when the list says some rows are blank (a count

@@ -43,7 +43,7 @@ left-to-right page and in an Arabic (right-to-left) one.
   too.
 - **Modifiers**: with Ctrl, Alt, Meta or Shift held, the tree claims nothing (Shift+arrows stay
   range moves, Alt+Down opens a filter popup in a header).
-- **Editing (Part D)**: in an editor, the arrows belong to the editor; the tree claims nothing.
+- **Editing (Phase 5, formerly Part D)**: in an editor, the arrows belong to the editor; the tree claims nothing. On a tree-column cell (no editor open), the tree's keys win: `*` opens the siblings and never starts an edit there (F2, Enter or a double click do; any other printable character still starts one). `editing.md` 6.
 
 ## Where DzGrid differs on purpose
 - Left/Right in the tree column are not column moves when they can open, close or go to the

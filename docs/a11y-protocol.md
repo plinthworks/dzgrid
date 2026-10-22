@@ -648,3 +648,77 @@ couple et par langue. Fiche : `docs/behaviors/floating-toggle.md`.
 Consigner le résultat dans `docs/behaviors/floating-toggle.md` (fin de la fiche) et dans `ROADMAP.md` (clôture de
 la Phase 4). Règle de décision : une annonce manquante ou dite deux fois (106, 109), un filtre perdu au masquage
 (107) ou un focus perdu (108) se corrige avant la clôture de la Phase 4.
+
+## 19. Étapes — édition (Phase 5, partie A)
+
+Page : le bac à sable, démo « Stock » inventée (Q19 ; `playground/stock.html`, construite aux étapes 5 à 7),
+en **français** puis en **arabe** (`&locale=ar-DZ&direction=auto`). Données : 200 produits ; colonnes « Produit »
+(texte, en-tête de ligne, lecture seule), « Stock » (nombre, obligatoire, au moins 0, modifiable), « Péremption »
+(date, modifiable), « Statut » (liste : Disponible, Rupture, Retiré), « Actif » (oui/non) ; liste triée par
+« Stock » et filtrée « Stock > 0 ». Le faux serveur d'enregistrement répond en 1,5 s ; le bouton « Refuser le
+prochain » fait refuser l'enregistrement suivant (raison : « stock verrouillé ») ; le bouton « Supprimer la ligne
+dans 5 s » retire la ligne focalisée. Couples A à D. Durée estimée : 20 min par couple et par langue. Noter ce qui
+est **dit**, mot pour mot. Fiches : `docs/behaviors/editing.md`, `editors.md`, `edit-save.md`,
+`edit-validation.md`, `edit-reapply.md`, `edit-undo.md`.
+
+Les phrases attendues sont celles des paquets `locales/{fr,ar}-edit` prévus ; si le paquet final les a changées,
+noter la phrase dite et la comparer au paquet.
+
+111. **Lecture seule.** `Tab` dans la grille, colonne « Produit » : la cellule est dite **lecture seule** (ar :
+     le mot du lecteur, « للقراءة فقط » ou proche) ; `→` (ar : `←`) sur « Stock » : rien de tel. `F2` sur
+     « Produit » : rien ne s'ouvre, rien n'est dit.
+112. **Ouvrir.** Sur « Stock », `F2` : un champ d'édition, nom « Stock, Paracétamol » (en-tête de colonne puis de
+     ligne ; noter l'ordre dit), valeur lue. `Échap` : retour sur la cellule, valeur inchangée, rien dit de plus.
+113. **Taper pour remplacer.** Sur « Stock », taper `7` : le champ s'ouvre avec « 7 » seul. `Entrée` : fr
+     « Enregistrement en cours » (ar « جارٍ الحفظ »), dit **une fois** ; le focus descend d'une ligne. Pendant
+     1,5 s une ligne court autour de la cellule (vue) : **rien n'est dit** pour elle ; à la fin, ni « enregistré »
+     ni autre phrase (la coche et l'éclat se voient). Noter toute phrase en trop.
+114. **Refus local.** Sur « Stock », taper `abc`, `Entrée` : le bord clignote en rouge ~0,5 s (vue), le champ
+     reste ouvert avec « abc » ; dit **une fois** fr « Stock : valeur refusée, nombre attendu », ar
+     « Stock: قيمة مرفوضة، المطلوب رقم » ; le champ est dit **invalide** et sa description (le message) lue au
+     retour sur le champ. `Entrée` encore : animation et phrase **encore une fois**. `Échap` : valeur d'avant,
+     rien dit.
+115. **Obligatoire.** Sur « Stock », `Suppr` : refus, fr « Stock : valeur refusée, valeur obligatoire », ar
+     « Stock: قيمة مرفوضة، القيمة مطلوبة » ; aucun champ ne s'ouvre ; la valeur reste.
+116. **Quitter avec une valeur fausse.** Taper `-3` dans « Stock », puis cliquer une autre cellule : fr « Stock :
+     valeur refusée, modification annulée », ar « Stock: قيمة مرفوضة، أُلغي التعديل » ; le focus est sur la
+     cellule cliquée (jamais ramené en arrière).
+117. **Refus du serveur.** « Refuser le prochain », puis taper `12` dans « Stock », `Entrée` : « Enregistrement en
+     cours », puis après 1,5 s, une fois, fr « Stock : non enregistré, stock verrouillé. Valeur précédente
+     rétablie. », ar « Stock: لم يُحفظ، stock verrouillé. أُعيدت القيمة السابقة. » (raison de l'hôte, ici en
+     français dans les deux langues). Revenir sur la cellule : l'ancienne valeur, puis sa description fr « Non
+     enregistré : stock verrouillé », ar « لم يُحفظ: stock verrouillé ». `F2` : le champ propose « 12 ».
+118. **Ordre à remettre.** Mettre « Stock » à `0` sur une ligne (le filtre est « Stock > 0 ») : la ligne reste,
+     grisée (vue) ; après la phrase d'enregistrement, **une fois** fr « Ordre de la liste à mettre à jour : la
+     marque de l'en-tête remet en ordre », ar « ترتيب القائمة بحاجة إلى تحديث: علامة العنوان تعيد الترتيب ».
+     Une deuxième modification ne le redit pas. Sur l'en-tête « Stock » : fr « Stock, …, à remettre en ordre »,
+     ar « Stock، بحاجة إلى إعادة الترتيب » (noter l'ordre des mots de tri et de filtre). Descendre sur la ligne
+     grisée : sa description fr « Ne correspond plus au filtre », ar « لم يعد مطابقًا للمرشح ». Sur l'en-tête,
+     `F2` (entrer dans ses contrôles) puis `Entrée` sur la marque : fr « Remis en ordre, N lignes », ar
+     « أُعيد الترتيب، N … » ; la ligne grisée part ; le focus n'est jamais perdu. (`Entrée` sur l'en-tête,
+     elle, trie, ce qui remet aussi en ordre.)
+119. **Annuler.** Hors champ, `Ctrl+Z` (Mac `Cmd+Z`) : fr « Annulé : Stock », ar « تم التراجع: Stock », puis
+     « Enregistrement en cours » ; le focus va sur la cellule annulée. `Ctrl+Y` : fr « Rétabli : Stock », ar
+     « تمت الإعادة: Stock ». Dans un champ ouvert, `Ctrl+Z` défait la frappe, la grille ne dit rien.
+     Tout annuler puis `Ctrl+Z` : fr « Rien à annuler », ar « لا شيء للتراجع عنه ».
+120. **Date.** Sur « Péremption », `F2`, `Alt+↓` : « Chargement du calendrier » peut être dit, puis le calendrier
+     (dit par tzslot) ; choisir un jour : retour dans le champ, la date écrite ; `Échap` deux fois depuis le
+     calendrier : le premier ferme le calendrier, le second annule. Taper `31/02/2026`, `Entrée` : fr
+     « Péremption : valeur refusée, date attendue (JJ/MM/AAAA) », ar « Péremption: قيمة مرفوضة، المطلوب تاريخ (…) ».
+121. **Liste.** Sur « Statut », `Entrée` : une liste, l'option courante dite ; taper `r` : « Rupture », `r`
+     encore : « Retiré » ; `Entrée` : choisie, enregistrée, focus en bas. En arabe, mêmes étapes avec les
+     libellés arabes de la démo.
+122. **Oui/non.** Sur « Actif », `Espace` : la valeur dite change (oui ↔ non), « Enregistrement en cours » ; la
+     ligne n'est **pas** sélectionnée. Sur « Produit », `Espace` : la ligne est sélectionnée (comme avant).
+123. **Ligne supprimée pendant la frappe.** « Supprimer la ligne dans 5 s », ouvrir « Stock » de cette ligne,
+     taper `9` sans valider, attendre : une fois fr « Ligne supprimée, modification annulée », ar « حُذف الصف،
+     أُلغي التعديل » ; le focus sur la ligne voisine, jamais sur `body`.
+124. **Arabe.** Mêmes étapes de droite à gauche : `Tab` dans un champ va vers la gauche ; les chiffres
+     arabes-indiens tapés dans « Stock » (`١٢`) sont acceptés ; le curseur dans un nombre va comme dans un
+     champ de gauche à droite. Noter la langue de la voix pour les noms de colonnes.
+
+Consigner le résultat dans `docs/behaviors/editing.md` (fin de la fiche) et dans `ROADMAP.md` (clôture de la
+partie A de la Phase 5). Règle de décision propre à cette section : une phrase de refus manquante ou dite deux
+fois (114–117), une bordure animée dite (113), un focus perdu ou ramené de force (116, 118, 123), une touche
+d'un champ qui agit sur la grille (119) ou un « lecture seule » manquant (111) se corrige avant la clôture de la
+partie A ; l'ordre « colonne, ligne » du nom d'un champ est noté, sans correction s'il est dit en entier.

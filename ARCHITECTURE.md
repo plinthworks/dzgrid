@@ -14,13 +14,13 @@ Le propriétaire a accepté toutes les recommandations du §1. Elles priment sur
 | K.2 Dates | Pas de Temporal dans `core` ni dans la base de `dom` : `Day` (`YYYY-MM-DD`) et `InstantMs` distincts ; `zoneDayBounds` sur `Intl` ; aucun `Date` dans le cœur. Amendé à l'étape 14 (décisions Q1, Q4) : le contrôle de date des filtres est tzslot, Temporal seulement sous `dom/src/filters/dates/**`, derrière `import()`. |
 | K.3 Virtualisation | DOM recyclé, lignes et colonnes, un seul conteneur de défilement ; jamais de canvas. S1 a confirmé : aucun plafond de lignes (voir les ajustements après la Phase 0). |
 | K.4 Données | Lignes du consommateur jamais modifiées ; `getRowId` requis ; transactions `{add, update, remove}` ; modifications en surcouche. |
-| K.5 Moteurs | `client` (P1) → `paged` serveur, total inconnu accepté (P3) → `infinite` et `serverSide` (P7) ; `viewport` hors v1 ; pas de worker en v1. |
+| K.5 Moteurs | `client` (P1) → `paged` serveur, total inconnu accepté (P3) → `infinite` et `serverSide` (P8) ; `viewport` hors v1 ; pas de worker en v1. |
 | K.6 Priorité Enterprise | Plages/presse-papiers/remplissage/édition en masse → filtre à valeurs → master/detail → regroupement → arbre → Excel → menus → filtre avancé → pivot ; graphiques hors v1. |
 | K.7 Cibles | Chrome/Edge 123, Safari 17.5, Firefox 120 ; Angular ^19 \|\| ^20 \|\| ^21 ; Node ≥ 22. |
 | K.8 Budgets | Profil audit ≤ 85 kB gz ; tout sauf graphiques ≤ 150 kB gz ; 100 000 × 30 : premier rendu ≤ 120 ms, défilement ≥ 58 fps, tri numérique ≤ 40 ms, tri texte ≤ 250 ms, filtre texte ≤ 35 ms, ≤ 25 Mo. |
 | K.9 Nommage | `DzGrid`, scope `@dzgrid` ; palette partagée `--tz-*`, propre à la grille `--dzg-*` / `.dzg-*` ; playground 4700. Le scope npm reste à réserver. |
 | K.10 Dépendances | Aucune dépendance d'exécution dans `core`, `dom`, `theme` ; pas de RxJS. `@tzslot/dom` et `@tzslot/core` (`>=2.2.0 <3`) : pairs **optionnelles** de `@dzgrid/dom` et `@dzgrid/angular`, pour les filtres de dates (étape 14). `gsap` (`^3.13.0`) : pair **optionnel** de `@dzgrid/dom` pour `@dzgrid/dom/motion-gsap` (étape 26 ; licence de GSAP, pas MIT : voir « Décisions de l'étape 26 »). |
-| K.11 Excel | Writer XLSX maison, RTL compris, sans SheetJS (P8). |
+| K.11 Excel | Writer XLSX maison, RTL compris, sans SheetJS (P9). |
 | K.12 Compat ag-Grid | Hors v1. |
 | K.13 Graphiques | Hors v1 ; `rangeAsSeries` seulement. |
 | K.14 Après édition | La ligne ne bouge pas tant qu'aucun tri/filtre n'est relancé (`reapplyAfterEdit: false`), avec indicateur discret. |
@@ -114,7 +114,7 @@ Ils priment sur les sections citées.
 - **Six notions publiques** : où se fait chaque opération (`operations` : filtre, recherche, tri, page, chacun `client` ou `server`) ; une source de données (`DataSource.fetch`, une fois) ; une pièce (`Part` : monter, mettre à jour, détruire) pour chaque emplacement (cellule, en-tête, filtre, filtre flottant, superposition, bulle, pied) ; des pièces par nom (`filter.day`, `floating.text`…, remplaçables globalement, par colonne, ou ajoutées) ; un genre de filtre (`FilterKind` : état sérialisable, test client, forme serveur) ; des modules par sous-chemin (`/filters`, `/pagination`, `/export`).
 - **Une règle de combinaison** : pagination serveur ⇒ tout le reste serveur ; un réglage invalide donne `invalid-operations` et est lu « tout serveur ». **Mode mixte gardé en Phase 3** (le serveur filtre et trie, le navigateur pagine jusqu'à 100 000 lignes, avertissement au-delà).
 - Pièces appelées par leur nom, colonnes en simples données ; un filtre sans test client exige le filtrage serveur ; filtres flottants désactivés par défaut, activés par colonne ; application pendant la frappe (300 ms côté serveur), bouton « Appliquer » pour les listes côté serveur ; formatage d'affichage pour ce qui est vu, cherché et en bulle, CSV en valeur brute sauf demande.
-- Priorités : dates relatives, saut de page et panneaux latéraux en Phase 5 ; constructeur de règles ET/OU en Phase 8.
+- Priorités : dates relatives, saut de page et panneaux latéraux en Phase 6 ; constructeur de règles ET/OU en Phase 9 (numéros après Q2 de la Phase 5).
 - Restent valables du premier plan : D2 (sélection à travers les pages, « tout » lié à la requête), D4 (filtres hors colonne : colonne cachée ou `params`), D6 (dates natives, tzslot optionnel), D7 (CSV pour Excel, `canExport`), D8 (Angular : autonome, signaux, `ngOnInit`).
 
 #### Décisions de l'étape 1 (2026-10-17 ; fiches `docs/behaviors/{operations,server-pagination,request-order,server-selection,filter-ui,parts,csv-export}.md`)
@@ -522,6 +522,7 @@ Décisions du propriétaire (`decisions.md`) :
 - **Temps** (Q17d) : les budgets de temps Node et Chrome ne sont pas remis à cette clôture ; les lignes au-dessus (17 lignes Node à froid depuis `bc01afa`, « toggle near the end » 11,6 / 11,5 dans Chrome) attendent une mesure sur machine calme, puis la règle Q17c (corriger au-delà de +25 % ou sur le chemin courant ; relèvement écrit entre +10 et +25 %).
 - **Critères reportés** : critère 5, « détail non éditable, non collable » → partie D (l'édition n'existe pas encore) ; critère 6, lignes de banc uniformes → avec la mesure Q17d ; écoute des lecteurs d'écran §16–§18 → le propriétaire (non bloquante, jamais dite « validée » avant).
 - **Version** : 0.2.0 préparée, non publiée (0.1.0 ne l'a jamais été) ; publication sur la parole du propriétaire seulement.
+- **Numérotation (décision Q2 de la Phase 5, 2026-10-22)** : l'édition devient la **Phase 5** (0.3.0 à sa fin) ; les phases suivantes avancent d'un numéro (colonnes avancées 6, regroupement 7, défilement infini et serveur 8, Excel et menus 9, pivot 10, durcissement 11), voir §6. Dans les entrées écrites avant le 2026-10-22, « Phase 4, partie D » se lit « Phase 5 », et « Phase N » pour N ≥ 5 se lit « Phase N+1 ».
 
 ## 0. Provenance, et limites de ce que j'ai lu
 
@@ -598,7 +599,7 @@ Chaque décision porte ma recommandation. Rien n'est codé tant que K.1 à K.9 n
 - **Recommandation** : quatre moteurs derrière une même interface `RowModel`, dans cet ordre de construction :
   1. `client` (Phase 1) : tri, filtre, regroupement en mémoire ; sert aussi les annuaires de ~11 000 lignes.
   2. `paged` serveur (Phase 3) : **premier besoin de Sehhaty** (journaux d'audit 10⁵ à 10⁷ lignes). Le total peut être **inconnu** (compter 10⁷ lignes coûte cher) : la barre de pagination fonctionne avec `hasNext`.
-  3. `infinite` (blocs paginés, défilement) puis `serverSide` (groupes et feuilles paresseux) en Phase 7.
+  3. `infinite` (blocs paginés, défilement) puis `serverSide` (groupes et feuilles paresseux) en Phase 8.
   4. `viewport` (le serveur pousse la fenêtre visible) : **hors v1**, à la demande.
 - Pas de Web Worker en v1 (le pipeline est synchrone). Il reste « worker-ready » : étapes pures, entrées et sorties sérialisables.
 
@@ -669,7 +670,7 @@ Légende : **C** = Community, **E** = Enterprise (niveaux d'après la liste publ
 | Épinglage début / fin | C | 2 | — | `start`/`end`, **jamais** `left`/`right` |
 | Groupes d'en-têtes (multi-niveaux) | C | 3 (étape 9b) | `flattenColumns` (concept) | `aria-colspan` ; `headerBands` dans `@dzgrid/core/spans` |
 | Groupes d'en-têtes repliables | C | 5 | — | |
-| Visibilité des colonnes | C | 2 | — | Panneau de colonnes en Phase 5 |
+| Visibilité des colonnes | C | 2 | — | Panneau de colonnes en Phase 6 |
 | Auto-taille (contenu, ajustement à la largeur) | C | 5 | — | Mesure en phase `read`, échantillon déterministe |
 | Types de colonne et défauts (`defaultColDef`, `columnTypes`) | C | 1 | `ColumnConfigBase` (forme) | |
 | `valueGetter`, `valueFormatter`, `valueParser`, `valueSetter` | C | 1 | `cell-value.ts` | Codecs §3.4 |
@@ -700,7 +701,7 @@ Légende : **C** = Community, **E** = Enterprise (niveaux d'après la liste publ
 | Lignes épinglées haut / bas | C | 5 | — | Aussi pour les totaux |
 | Règles de style de ligne et de cellule | C | 2 | `rule-engine.ts` | **Classes**, plus de hex |
 | Glisser-déposer de lignes (réordonner) | C | 8 | — | Alternative clavier |
-| Surbrillance des changements de valeur (flash) | E | 3 (étape 26, avancée de la Phase 8 par le propriétaire) | — | `prefers-reduced-motion` : marque fixe 0,6 s ; `@dzgrid/dom/motion-gsap` |
+| Surbrillance des changements de valeur (flash) | E | 3 (étape 26, avancée de la Phase 9 par le propriétaire) | — | `prefers-reduced-motion` : marque fixe 0,6 s ; `@dzgrid/dom/motion-gsap` |
 | Superpositions : chargement, aucune ligne, erreur | C | 2 | — | Messages i18n |
 | Défilement programmatique (`ensureVisible`) | C | 2 | — | Par identité de ligne |
 | Impression (mise en page sans virtualisation) | C | 10 | — | `preparePrint()` comme DzCalendar |
@@ -1780,49 +1781,51 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
   5. contraste sur les 12 combinaisons palette × thème ; palette commutée à chaud grille affichée ; un passage lecteur d'écran ;
   6. profil de taille ≤ 85 kB gz ; installation depuis les tarballs de `npm run pack:local` dans une **vraie application Angular 21** (`ng build`), comme tzslot ;
   7. la question honnête de la note Sehhaty : l'administrateur trouve-t-il cela mieux que la table précédente ? Mesurée en production avant de généraliser.
-- **Fusions de cellules (étape 9b, avancée de la Phase 5)** : `@dzgrid/core/spans` (carte des fusions, en-têtes groupés, clavier) et `@dzgrid/dom/spans` (corps, lignes pleine largeur, clavier, pointeur, en-têtes groupés) ; critère : fusion correcte sous tri, filtre et page, sans chevauchement (tests de propriétés), sous défilement virtuel (vérifications navigateur S12).
+- **Fusions de cellules (étape 9b, avancée de la Phase 6)** : `@dzgrid/core/spans` (carte des fusions, en-têtes groupés, clavier) et `@dzgrid/dom/spans` (corps, lignes pleine largeur, clavier, pointeur, en-têtes groupés) ; critère : fusion correcte sous tri, filtre et page, sans chevauchement (tests de propriétés), sous défilement virtuel (vérifications navigateur S12).
 - **Dépend de** : P2, S5, S6. **C'est la première phase qui rend DzGrid utilisable pour `admin/audit-logs`.** Les annuaires (~11 000 lignes, côté client) sont aussi servis dès cette phase.
 
-### Phase 4 : arbre, maître/détail, ligne de filtres affichable (parties A–C, close techniquement le 2026-10-22), puis édition (partie D)
+### Phase 4 : arbre, maître/détail, ligne de filtres affichable (parties A–C, close techniquement le 2026-10-22)
 - **Fait (parties A–C)** : `@dzgrid/core/{tree,tree-lazy,detail}`, `@dzgrid/dom/{tree,tree-lazy,detail}`, textes `locales/<langue>-{tree,detail}`, parents épinglés, hauteurs variables dans la base, grilles imbriquées, ligne de filtres affichable en direct, Angular (`[(expanded)]`, panneaux de détail, `[dzgNested]`, `[floatingFilters]`). Plan `docs/phase-4-plan.md`, décisions `docs/phase-4-steps/decisions.md`, écarts dans « Ajustements après la Phase 4 ».
-- **Partie D, l'édition** (ce qui suit, planifié à part ; ajouts de la Phase 4 : détails, lignes de remplissage et de chargement non éditables, éditeur dans la colonne de l'arbre, grilles imbriquées éditées chacune pour elle) :
+
+### Phase 5 : édition (l'ancienne « Phase 4, partie D » ; décision Q2 du 2026-10-22, version 0.3.0 à la fin)
+- **Plan** `docs/phase-5-plan.md`, décisions du propriétaire `docs/phase-5-steps/decisions.md` (elles priment). Partie A : édition de cellule (éditeurs, validation, sauvegardes, K.14, annuler / rétablir) ; partie B : plages, presse-papiers, poignée, édition en masse. Ajouts de la Phase 4 : détails, lignes de remplissage et de chargement non éditables, éditeur dans la colonne de l'arbre, grilles imbriquées éditées chacune pour elle.
 - **Livrables** : `core/{edit/*,range/*,clipboard,undo}`, `dom/{editors,range,clipboard}` (éditeurs, validation accessible, sélection de plage, poignée de remplissage, copier / coller / couper, `Ctrl+D`/`Ctrl+R`, annuler / rétablir, états visuels de sauvegarde, édition en masse sur la sélection), suites `edit-saves`, `paste-plan`, `fill-plan`, `clipboard-tsv`. **Fiches** : édition, plages, remplissage, collage, annulation, sauvegardes concurrentes.
 - **Critères de sortie** : tous les bugs 1 à 5 sont couverts par un test qui **échouait avant** (on rejoue les scénarios de a6c97f5) ; pharmacie (jeu B) : 3 000 lignes, édition en masse ≤ 30 ms, **une seule requête** ; collage de 1 000 cellules ≤ 40 ms ; `Ctrl+V`/`Ctrl+Z`/`Échap` dans un éditeur n'agissent pas sur la grille ; rollback ne touche jamais la source ; plage et poignée corrects en RTL ; clavier de plage complet.
 - **Dépend de** : P3 (ou P2 pour un écran client). **Rend possible `pharma/stock`.**
 
-### Phase 5 : colonnes avancées et confort
+### Phase 6 : colonnes avancées et confort
 - **Livrables** : déplacement de colonnes (souris, clavier), groupes d'en-têtes repliables, auto-taille, menu de colonne, panneau latéral (colonnes, filtres), `GridState` (sauvegarde et restauration), lignes épinglées haut / bas, hauteur automatique, densité, `preparePrint()`. **Fiches** correspondantes. (Groupes d'en-têtes, fusions de lignes et de colonnes, lignes pleine largeur : avancés à la Phase 3, étape 9b.)
 - **Critères de sortie** : mode « redimensionner » au clavier ; état restauré à l'identique en RTL ; hauteur auto sans saut (spike S3).
-- **Dépend de** : P2 (P4 pour les menus éditables).
+- **Dépend de** : P2 (P5 pour les menus éditables).
 
-### Phase 6 : regroupement, agrégation
+### Phase 7 : regroupement, agrégation
 - **Livrables** : `core/grouping`, `dom/groups` : regroupement multi-niveaux, pieds et total général, zone de glisser des colonnes de groupe, suites `group-agg`. (L'arbre et le maître/détail sont faits en Phase 4 ; un groupe réutilise ses coutures : `GroupNode`, expansion par le noyau, forme de lignes, `treegrid`.)
 - **Critères de sortie** : regroupement 2 colonnes + 3 agrégations sur A ≤ 150 ms ; expansion d'un groupe de 10 000 ≤ 30 ms ; `ArrowRight`/`ArrowLeft` inversés en RTL pour déplier ; `aria-level`/`aria-expanded` corrects ; **rend possible `admin-lab-facilities`** et les historiques regroupés.
 - **Dépend de** : P2, S4, les coutures d'arbre de la Phase 4.
 
-### Phase 7 : défilement infini, modèle côté serveur
+### Phase 8 : défilement infini, modèle côté serveur
 - **Livrables** : `core/server/{infinite,server-side}`, cache de blocs, lignes de chargement, groupes paresseux, transactions asynchrones groupées.
 - **Critères de sortie** : `server-gate` étendue aux blocs ; 10⁷ lignes défilables sans plus de N blocs en mémoire ; changement de tri ou de filtre purge les blocs ; accessibilité de lignes « chargement ».
-- **Dépend de** : P3, P6.
+- **Dépend de** : P3, P7.
 
-### Phase 8 : export Excel, menus, barre d'état, filtre avancé, glisser de lignes
+### Phase 9 : export Excel, menus, barre d'état, filtre avancé, glisser de lignes
 - **Livrables** : `core/xlsx`, `core/advanced-filter`, `dom/{menus,statusbar,advanced-filter}` : menu contextuel, barre d'état (totaux, agrégat de plage), recherche dans la grille, filtre multiple, glisser-déposer de lignes avec alternative clavier, surbrillance des changements.
 - **Critères de sortie** : XLSX ouvert sans réparation dans Excel (clair et RTL, chaînes arabes) ; menu contextuel au clavier ; `prefers-reduced-motion` respecté.
-- **Dépend de** : P4, P5, S7, S8.
+- **Dépend de** : P5, P6, S7, S8.
 
-### Phase 9 : pivot
+### Phase 10 : pivot
 - **Livrables** : `core/pivot`, colonnes secondaires générées, mode pivot UI. Éventuellement `rangeAsSeries` pour un graphique d'hôte.
 - **Critères de sortie** : cas `pivot` ; budget de 150 ms pour 100 000 lignes, deux clés de pivot.
-- **Dépend de** : P6.
+- **Dépend de** : P7.
 
-### Phase 10 : durcissement et écosystème
+### Phase 11 : durcissement et écosystème
 - **Livrables** : passes de performance (profil 4× plus lent), accessibilité (ACR WCAG 2.2 AA en brouillon, protocole lecteurs d'écran complet), impression, documentation, `llms.txt`, wrapper de plus (React, Vue ou Web Component), benchmark public, `CHANGELOG`.
 - **Dépend de** : toutes.
 
-**Dépendances en un coup d'œil** : `P0 → P1 → P2 → P3 → P4 → P8` ; `P2 → P5` ; `P2 → P6 → P7` ; `P3 → P7` ; `P6 → P9` ; `P4,P5 → P8`.
+**Dépendances en un coup d'œil** : `P0 → P1 → P2 → P3 → P4 → P5 → P9` ; `P2 → P6` ; `P2 → P7 → P8` ; `P3 → P8` ; `P7 → P10` ; `P5,P6 → P9`.
 
 **Première phase utilisable pour `admin/audit-logs` : la Phase 3.**
-`pharma/stock` : Phase 4, partie D (édition). `admin-lab-facilities` : Phase 6 (regroupement). L'écran `dmp-doctor-patients` (données patient) : en dernier, après P4, avec relecture de sécurité.
+`pharma/stock` : Phase 5 (édition). `admin-lab-facilities` : Phase 7 (regroupement). L'écran `dmp-doctor-patients` (données patient) : en dernier, après P5, avec relecture de sécurité.
 
 ---
 
