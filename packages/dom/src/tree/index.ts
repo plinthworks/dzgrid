@@ -109,8 +109,13 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
   }, { capture: true });
 
   // Pinned parents (tree-sticky.md): a layer under the header rows, drawn by a second renderer; 0 makes none.
-  const n = Math.floor(sticky);
-  sticky = n !== n ? 3 : Math.max(0, n);
+  /** A shown row's parent (display index), -1 for a root. */
+  const up = (d: Rows, i: number): number => {
+    const p = d.parentOf(d.keyAt(i as DisplayIndex));
+    return p === null ? -1 : d.indexOf(p);
+  };
+  // A number (not NaN: not equal to itself; not null or a string: not equal to their number), else the default.
+  sticky = sticky === +sticky ? Math.max(0, Math.floor(sticky)) : 3;
   let last: unknown[] = [];
   let layer: HTMLElement | null = null;
   const stack = sticky ? rowRenderer.spawn((layer = doc.createElement('div'))) : null;
@@ -118,11 +123,13 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     layer.className = 'dzg-sticky';
     layer.setAttribute('aria-hidden', 'true');
     el.header.append(layer);
-    // The room a row needs above it: its own copies (WCAG 2.4.11), as many as fit.
+    // The room a row needs above it: its own copies (WCAG 2.4.11), as many as fit, each its row's height.
     g.insetFor = (i) => {
       const d = tree();
-      const h = g.rowHeight();
-      return d ? Math.min(sticky, Math.floor(g.viewBlock / 2 / h), d.levelAt(i as DisplayIndex)) * h : 0;
+      let y = 0;
+      // Called after a paint (a row above the view's top, or the paint's anchoring): the layout is there.
+      for (let c = d ? Math.min(sticky, Math.floor(g.viewBlock / 2 / g.rowHeight()), d.levelAt(i as DisplayIndex)) : 0; c-- > 0; ) y += g.layout!.heightOf((i = up(d!, i)) as DisplayIndex);
+      return y;
     };
     // Never the DOM focus inside (no default on the pointer going down).
     const no = (e: Event): void => e.preventDefault();
@@ -188,10 +195,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
       const now = new Set<HTMLElement>();
       if (stack) {
         // The pinned parents (tree-sticky.md): worked out at each paint, redrawn only when they change.
-        const r = d ? stickyStack({ top: g.scroll.logicalTop, n: sticky, viewBlock: g.viewBlock, h: g.rowHeight(), count: d.count, layout: g.layout!, levelAt: (i) => d.levelAt(i as DisplayIndex), ancestorOf: (i) => {
-          const p = d.parentOf(d.keyAt(i as DisplayIndex));
-          return p === null ? -1 : d.indexOf(p);
-        } }) : { at: [] as number[], y: [] as number[], height: 0 };
+        const r = d ? stickyStack({ top: g.scroll.logicalTop, n: sticky, viewBlock: g.viewBlock, h: g.rowHeight(), count: d.count, layout: g.layout!, levelAt: (i) => d.levelAt(i as DisplayIndex), ancestorOf: (i) => up(d, i) }) : { at: [] as number[], y: [] as number[], height: 0 };
         g.inset = r.height;
         const sig = [d, f.epoch, f.cols?.first, f.cols?.last, kernel.selection, ...r.at, ...r.y];
         if (sig.length !== last.length || sig.some((x, j) => x !== last[j])) {

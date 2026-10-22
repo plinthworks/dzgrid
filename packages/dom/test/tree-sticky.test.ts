@@ -2,10 +2,10 @@
 // the layer and its copies, what they carry and do not, the pointer on them, the focus kept clear of them.
 // jsdom has no layout: places are read from the inline styles the grid writes. Expectations by hand.
 import { describe, it, expect, afterEach } from 'vitest';
-import type { GridEvent } from '@dzgrid/core';
+import { variableRowLayout, type GridEvent } from '@dzgrid/core';
 import { definePart, type SlotContext } from '../src/part.js';
 import type { GridFeature } from '../src/features.js';
-import { cleanup, click, k, tmake, type T, type TMake } from './support-tree.js';
+import { cleanup, click, idOf, k, tmake, type T, type TMake } from './support-tree.js';
 
 afterEach(cleanup);
 
@@ -123,6 +123,8 @@ describe('the layer and its copies', () => {
     expect(at(2.7)).toEqual(['Level 3', 'Level 4']);
     expect(at(-2)).toEqual([]);
     expect(at(Number.NaN)).toEqual(['Level 2', 'Level 3', 'Level 4']);
+    // Not a number at all (a host's JSON): the default, never off.
+    for (const x of [null, '2', {}]) expect(at(x as never)).toEqual(['Level 2', 'Level 3', 'Level 4']);
     // Unbounded: never more than half the view (320 / 2 / 32 = 5).
     expect(at(Infinity)).toEqual(['Level 0', 'Level 1', 'Level 2', 'Level 3', 'Level 4']);
     const d = make({ rows: line() });
@@ -201,7 +203,7 @@ describe('the layer and its copies', () => {
 describe('the pointer on a copy', () => {
   const userExpanded = (events: GridEvent<T>[]) => events.filter((e) => e.type === 'rowExpanded' && e.source === 'user');
 
-  it('its chevron closes the parent: once, said once, nothing selected, the focus not moved; the parent kept at the top', () => {
+  it('its chevron closes the parent: once, said once, nothing selected, the focus not moved; the parent just under its own pinned ancestors', () => {
     const t = make({ settings: { selection: { mode: 'multi', checkbox: true, click: true } } });
     t.focus('S0.0.3', 'n');
     t.scroll(2 * 32 + 5);
@@ -213,9 +215,11 @@ describe('the pointer on a copy', () => {
     expect(t.g.kernel.expansion.has(k('S0.0'))).toBe(false);
     // Its visits gone, the focus went to the parent as any collapse does (the data's move), not the pointer's.
     expect(document.activeElement === before || t.where() === 'S0.0/n').toBe(true);
-    // The visits under the view's top are gone: Patient 0.0, their nearest shown ancestor, at the top.
-    expect(t.top()).toBe(32);
-    expect(t.copies().map((c) => c[0])).toEqual(['Service 0']);
+    // The visits under the view's top are gone: Patient 0.0, their nearest shown ancestor, just under
+    // Service 0's copy (WCAG 2.4.11): the view at 0, not at its own place 32 under the copy.
+    expect(t.top()).toBe(0);
+    // Service 0 itself at the top: nothing pinned.
+    expect(t.copies()).toEqual([]);
   });
 
   it('elsewhere it focuses the real row, same column, and scrolls it just under its own ancestors; no selection, no row click', () => {
@@ -305,5 +309,31 @@ describe('the focus kept clear of the copies (WCAG 2.4.11)', () => {
     t.g.api.ensureVisible(k('S0.2.1'));
     // Visit 0.2.1: index 1 + 2 × 5 + 2 = 13, two ancestors.
     expect(t.top()).toBe(13 * 32 - 64);
+  });
+
+  it('a closing by the API that hides the top row: its parent comes just under its own ancestors', () => {
+    const t = make();
+    // Visit 0.2.1 (index 13) at the top; Patient 0.2 (index 11) pinned with Service 0.
+    t.scroll(13 * 32);
+    t.expand(['S0.2'], false);
+    // Patient 0.2 at 11 × 32, one ancestor above it: one row of room, not under Service 0's copy.
+    expect(t.top()).toBe(11 * 32 - 32);
+  });
+
+  it('the room is the ancestors’ own heights when a feature makes rows of different heights', () => {
+    // Services 50 px tall, the others 32 (step 9's variable heights).
+    const tall: GridFeature = {
+      id: 'tall',
+      setup(g) {
+        g.layoutFor = (d, h) => variableRowLayout(d, h, Float64Array.from({ length: d.count }, (_, i) => (/^S\d$/.test(idOf(d.keyAt(i as never))!) ? 50 : h)));
+        return { destroy() {} };
+      },
+    };
+    const t = make({ features: [tall] });
+    t.scroll(400);
+    // Visit 0.0.1 (index 3), level 2: Patient 0.0 (32) and Service 0 (50) over it.
+    expect(t.ctx.insetFor!(3)).toBe(82);
+    expect(t.ctx.insetFor!(1)).toBe(50);
+    expect(t.ctx.insetFor!(0)).toBe(0);
   });
 });

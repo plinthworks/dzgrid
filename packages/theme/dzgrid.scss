@@ -452,7 +452,7 @@ $emit: true !default;
     }
 
     // A tree's pinned parents (tree-sticky.md): the line under them in the system's text colour.
-    .dzg-sticky > .dzg-row:last-child .dzg-cell {
+    .dzg-sticky > .dzg-row .dzg-cell {
       border-block-end-color: CanvasText;
     }
 
@@ -483,12 +483,13 @@ $emit: true !default;
   }
 
   // A tree's pinned parents (Phase 4, tree-sticky.md): copies of rows living in the header, in the rows'
-  // weight; a thicker line under the last one marks where the pinned rows end and the body scrolls.
+  // weight; a thicker line marks where the pinned rows end and the body scrolls. Under every copy: the
+  // innermost one pushed up behind its parent's, the lowest drawn still carries it (review of 206121e).
   .dzg-sticky {
     font-weight: 400;
   }
 
-  .dzg-sticky > .dzg-row:last-child .dzg-cell {
+  .dzg-sticky > .dzg-row .dzg-cell {
     border-block-end: 2px solid var(--tz-border);
   }
 

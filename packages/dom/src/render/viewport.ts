@@ -141,11 +141,12 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       else if (shown.key !== null) {
         const at = d.indexOf(shown.key);
         if (at !== -1) scroll.scrollTo(layout.offsetOf(at) + shown.delta);
-        // Hidden by a closing above the view: its nearest shown ancestor at the top (tree-view.md).
+        // Hidden by a closing above the view: its nearest shown ancestor at the top, just under its own
+        // pinned ancestors (tree-view.md, WCAG 2.4.11), as a scroll into view puts it.
         else if (anchorNext === 'expand') {
           const up = shownAncestor(shown.key, d);
           const ui = up === null ? -1 : d.indexOf(up);
-          if (ui !== -1) scroll.scrollTo(layout.offsetOf(ui));
+          if (ui !== -1) scroll.scrollTo(Math.max(0, layout.offsetOf(ui) - (g.insetFor?.(ui) ?? 0)));
         }
       }
     }

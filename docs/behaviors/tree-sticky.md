@@ -25,7 +25,8 @@ the pinned parents cover.
   pinned ancestors, and the keyboard focus lands on the cell clicked, in that row (owner Q11c). It
   does not select the row, whatever the selection settings, and it fires no row click.
 - A click on a copy's chevron closes that parent (said once, as any closing by the user); the view
-  keeps the parent's place at the top, the rows below it move up. The copy's selection box does
+  puts the parent just under its own pinned ancestors (never under their copies, WCAG 2.4.11), the
+  rows below it move up. Any closing that hides the row at the top does the same (Left, the API). The copy's selection box does
   nothing.
 - A row the keyboard moves onto is never left under the copies: the view scrolls so that it sits
   just under its own ancestors' copies.

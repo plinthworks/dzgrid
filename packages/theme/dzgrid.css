@@ -378,7 +378,7 @@
   .dzg-toggle {
     color: ButtonText;
   }
-  .dzg-sticky > .dzg-row:last-child .dzg-cell {
+  .dzg-sticky > .dzg-row .dzg-cell {
     border-block-end-color: CanvasText;
   }
   .dzg-cell.dzg-flash {
@@ -405,7 +405,7 @@
   font-weight: 400;
 }
 
-.dzg-sticky > .dzg-row:last-child .dzg-cell {
+.dzg-sticky > .dzg-row .dzg-cell {
   border-block-end: 2px solid var(--tz-border);
 }
 

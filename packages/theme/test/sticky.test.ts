@@ -15,12 +15,15 @@ describe('sticky parent rows: theme', () => {
     expect(body(/\.dzg-sticky\s*\{([^}]*)\}/)).toMatch(/font-weight:\s*(400|normal)/);
   });
 
-  it('a line under the stack: the last copy’s cells, thicker, in the border colour; forced colours keep it', () => {
-    const rules = [...css.matchAll(/\.dzg-sticky > \.dzg-row:last-child \.dzg-cell[^{]*\{([^}]*)\}/g)].map((m) => m[1]!);
+  it('a line under the stack: every copy’s cells, thicker, in the border colour; forced colours keep it', () => {
+    // On every copy, not the last only: the innermost one pushed up behind its parent's (review of 206121e)
+    // left the stack without its line; now the lowest copy drawn always carries one.
+    const rules = [...css.matchAll(/\.dzg-sticky > \.dzg-row \.dzg-cell[^{]*\{([^}]*)\}/g)].map((m) => m[1]!);
     expect(rules.some((r) => /border-block-end:\s*2px solid var\(--tz-border\)/.test(r))).toBe(true);
+    expect(css).not.toMatch(/\.dzg-sticky > \.dzg-row:last-child/);
     const forced = /@media \(forced-colors: active\)\s*\{([\s\S]*?)\n\}/g;
     const blocks = [...css.matchAll(forced)].map((m) => m[1]!).join('\n');
-    expect(blocks).toMatch(/\.dzg-sticky > \.dzg-row:last-child \.dzg-cell[^{]*\{[^}]*border-block-end-color:\s*CanvasText/);
+    expect(blocks).toMatch(/\.dzg-sticky > \.dzg-row \.dzg-cell[^{]*\{[^}]*border-block-end-color:\s*CanvasText/);
   });
 
   it('the layer (the feature’s layout): no height, under the header rows, not printed', () => {

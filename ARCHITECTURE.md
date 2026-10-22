@@ -430,6 +430,7 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Pointeur** (Q11c) : chevron = fermer ; case = rien ; ailleurs = focus sur la vraie ligne, défilée sous ses propres copies, sans sélection.
 - **Coutures de la base** : `GridContext.inset` / `insetFor`, lus par `ensureVisible` (WCAG 2.4.11) ; aucune dans le cœur.
 - **Budget** : `@dzgrid/dom/tree` 2 600 → 3 700 pour la Phase 4 (Q11a).
+- **Revue de `206121e`** : une fermeture qui cache la ligne du haut place le parent juste sous ses propres ancêtres épinglés (`offsetOf − insetFor`), `insetFor` somme les hauteurs de la disposition, un `sticky` non numérique vaut 3, le trait du thème est sous chaque copie.
 
 ## 0. Provenance, et limites de ce que j'ai lu
 
