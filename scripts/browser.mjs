@@ -986,7 +986,13 @@ async function motionChecks(name, ctx) {
         await frames(p, 2);
         await p.evaluate(() => { window.t.kept = document.activeElement; window.t.reads.rect = 0; window.t.reads.offset = 0; });
         await p.keyboard.press(key);
-        await frames(p, 2);
+        // Step 13: wait on the state, not a fixed two frames (one miss under load): the focused row's aria-expanded
+        // turned, and on the motion page the glide started (a tween running, a row translated). At most 4 s, polled
+        // each frame; the poll reads attributes and inline styles only (no layout read counted).
+        const glides = p === a.page;
+        await p.waitForFunction(({ want, glides }) => document.activeElement?.closest('.dzg-row')?.getAttribute('aria-expanded') === want
+          && (!glides || (window.t.running() > 0 && [...document.querySelectorAll('.dzg-layer > .dzg-row')].some((r) => (r.style.transform || '').includes('translate')))),
+        { want: key === fwd ? 'true' : 'false', glides }, { timeout: 4000, polling: 'raf' }).catch(() => {});
         out.push(await p.evaluate(() => ({
           running: window.t.running(), reads: { ...window.t.reads }, same: document.activeElement === window.t.kept,
           y: [...document.querySelectorAll('.dzg-layer > .dzg-row')].filter((r) => (r.style.transform || '').includes('translate')).length,

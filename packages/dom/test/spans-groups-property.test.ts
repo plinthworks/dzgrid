@@ -5,6 +5,7 @@ import type { Geometry, ViewportBox } from '../src/render/measure.js';
 import type { GridContext } from '../src/context.js';
 import { spans } from '../src/spans.js';
 import { EN } from '../src/locales/en.js';
+import { SLOW_TEST_MS } from './support/slow.js';
 
 /**
  * Property checks of the group rows (coverage review of step 9b, commit 4):
@@ -315,7 +316,7 @@ describe('group rows: property checks over random trees', () => {
       }
       m.g.destroy();
     }
-  });
+  }, SLOW_TEST_MS); // 160 trees (alone about 4 s)
 
   it('Down after Ups comes back to the column the keys came up from, at any depth, pinned or not', () => {
     for (const seed of SEEDS) {

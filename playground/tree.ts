@@ -93,14 +93,15 @@ const serviceKey = (s: number) => (shape === 'path' ? groupKey([`${W.service} ${
 const treeOptions = shape === 'nested' ? { children: (r: Row) => r.kids } : shape === 'path' ? { path: (r: Row) => r.path! } : { parentId: (r: Row) => r.parent };
 
 // Lazy mode: the services alone are given; a fake server answers a service's patients after a random delay,
-// or fails while « Le serveur échoue » is ticked. Its children declared by the row (`has`).
+// or fails while « Le serveur échoue » is ticked. Its children declared by the row (`has`); « Patient 2 » of
+// each service is declared too and answers no child (a11y-protocol §16, step 95c: « Patient 2, aucune ligne »).
 const failing = document.getElementById('fail') as HTMLInputElement;
 const byParent = new Map<string, Row[]>();
 if (lazyMode) for (const r of rows) if (r.parent) byParent.set(r.parent, [...(byParent.get(r.parent) ?? []), r]);
 const later = <X>(make: () => X, signal?: { aborted: boolean }): Promise<X> =>
   new Promise((ok, no) => setTimeout(() => (signal?.aborted ? no(new Error('aborted')) : failing.checked ? no(new Error('503')) : ok(make())), 300 + Math.random() * 1200));
 const lazy = lazyMode
-  ? lazyChildren<Row>({ has: (r) => byParent.has(r.id), ...(lazyMode === 'client' && { load: (r: Row, { signal }: { signal: { aborted: boolean } }) => later(() => byParent.get(r.id) ?? [], signal) }) })
+  ? lazyChildren<Row>({ has: (r) => byParent.has(r.id) || /^s\d+p2$/.test(r.id), ...(lazyMode === 'client' && { load: (r: Row, { signal }: { signal: { aborted: boolean } }) => later(() => byParent.get(r.id) ?? [], signal) }) })
   : undefined;
 const source = lazyMode === 'server'
   ? sourceRows<Row>({ fetch: () => later(() => ({ rows: rows.filter((r) => !r.parent) })), children: (req) => later(() => byParent.get(req.id) ?? [], req.signal) })

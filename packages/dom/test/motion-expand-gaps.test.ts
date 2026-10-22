@@ -7,6 +7,7 @@ import { motion, type MotionOptions, type RowMotion } from '../src/motion-gsap.j
 import type { GridSettings } from '../src/settings.js';
 import { changeMedia, clock, leftovers, media, mount, stubMedia, type R } from './support-motion.js';
 import { cleanup, idOf, k, tmake, wide, type T } from './support-tree.js';
+import { SLOW_TEST_MS } from './support/slow.js';
 
 beforeEach(() => {
   media.reduce = false;
@@ -182,7 +183,7 @@ describe('the caps at their edges', () => {
     }
     expect(seen.has(60) || seen.has(59)).toBe(true);
     expect([...seen].some((n) => n > 60)).toBe(true);
-  });
+  }, SLOW_TEST_MS); // 26 grids (alone about 4 s; it lost the 5 s default under load at step 9)
 
   it('closing: the rows rising in at the bottom count toward the 60 (moved + risen > 60: nothing glides)', async () => {
     // 50 rows below S0 move up; about 20 come in at the bottom and rise with them: over 60 in all.

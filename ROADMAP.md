@@ -530,3 +530,76 @@ Plan `docs/phase-4-plan.md`, decisions `docs/phase-4-steps/decisions.md` (owner 
   - Review and test-analysis fixes (2026-10-22, not committed; review of `dcec156`; `step12-plan.md` « Review and test analysis »): a late `compositionend` / `input` on a gone box ignored; `bind` twice keeps one listener and its first record, only the newest unbind acts, once; unbind gives back the host's own `aria-pressed` / `aria-controls`; shown again at its own place (features' order); a hide moves only a focus on the floating row's level; Angular `[floatingFilters]` reads `features()` untracked (+ a `provideDzGrid` defaults test); walk oracle strengthened (independent state, sentences counted, focus after hide, value check never skipped). Tests: 6 `it.fails` flipped (each failed first), +5. Sizes: `/filters` 9 876 (10 000), angular 6 238 (6 250), real Angular example **86 988** (87 000; a focus follow for rows below was removed by the lead: 87 016 with it). Gate: `test:ci` 303 files, 4 837 tests; `test:perm` 6 / 6; `typecheck`, `check:size`, `build` green; Chrome `--only filters` 12 / 12; Angular fixture 54 / 54.
 - [ ] Part D: editing (planned after step 12).
 - [ ] step 13: Phase 4 close (Parts A–C).
+
+### Final budgets (Phase 4)
+
+Phase 4 close, step 13 (2026-10-22, owner decisions `docs/phase-4-steps/decisions.md` Q17). Set by `scripts/rebudget.mjs sizes` from one `npm run check:size` of 2026-10-22 (Apple M4), after the step-13 code (`tree.empty`), dry run read line by line, then `--write`.
+
+**Sizes** (B gz): the measure + 10 %, rounded up to 50 B, never above the owner's grants (Q17b: core 29 000, dom 21 300, angular 6 250, dom/tree 3 700, dom/detail 3 900, `/filters` 10 000, theme 2 500, core/detail 1 000, core/tree 3 500, core/tree-lazy 1 500, dom/tree-lazy 1 000; core/csv « up to 2 000 », Q7) nor the plan's ceilings (ARCHITECTURE §5.2: `/server` 6 000, each text bundle 2 000); the K.8 profile guard stays 83 500 (Q17a). « grant »: the budget is the grant or the plan's ceiling, the rule would give more.
+
+| Entry | Old budget | Measure | New budget |
+|---|---|---|---|
+| `@dzgrid/core` | 29 000 | 28 240 | 29 000 — grant |
+| `@dzgrid/core/server` | 6 000 | 5 925 | 6 000 — grant |
+| `@dzgrid/core/spans` | 3 800 | 3 458 | 3 850 (raise) |
+| `@dzgrid/core/csv` | 1 850 | 1 847 | 2 000 (raise) — grant |
+| `@dzgrid/core/rules` | 600 | 492 | 550 (lower) |
+| `@dzgrid/core/tree` | 3 500 | 3 371 | 3 500 — grant |
+| `@dzgrid/core/tree-lazy` | 1 500 | 1 444 | 1 500 — grant |
+| `@dzgrid/core/detail` | 1 000 | 994 | 1 000 — grant |
+| `@dzgrid/dom/locales/en` | 600 | 519 | 600 |
+| `@dzgrid/dom/locales/fr` | 700 | 636 | 700 |
+| `@dzgrid/dom/locales/ar` | 950 | 825 | 950 |
+| `@dzgrid/dom/locales/en-filters` | 800 | 745 | 850 (raise) |
+| `@dzgrid/dom/locales/fr-filters` | 950 | 876 | 1 000 (raise) |
+| `@dzgrid/dom/locales/ar-filters` | 1 050 | 997 | 1 100 (raise) |
+| `@dzgrid/dom/locales/en-pagination` | 400 | 328 | 400 |
+| `@dzgrid/dom/locales/fr-pagination` | 450 | 375 | 450 |
+| `@dzgrid/dom/locales/ar-pagination` | 550 | 489 | 550 |
+| `@dzgrid/dom/locales/en-export` | 250 | 216 | 250 |
+| `@dzgrid/dom/locales/fr-export` | 300 | 248 | 300 |
+| `@dzgrid/dom/locales/ar-export` | 350 | 296 | 350 |
+| `@dzgrid/dom/locales/en-parts` | 150 | 98 | 150 |
+| `@dzgrid/dom/locales/fr-parts` | 150 | 99 | 150 |
+| `@dzgrid/dom/locales/ar-parts` | 150 | 108 | 150 |
+| `@dzgrid/dom/locales/en-rules` | 200 | 148 | 200 |
+| `@dzgrid/dom/locales/fr-rules` | 200 | 166 | 200 |
+| `@dzgrid/dom/locales/ar-rules` | 250 | 192 | 250 |
+| `@dzgrid/dom/locales/en-tree` | 200 | 162 | 200 |
+| `@dzgrid/dom/locales/fr-tree` | 220 | 197 | 250 (raise) |
+| `@dzgrid/dom/locales/ar-tree` | 250 | 266 | 300 (raise) |
+| `@dzgrid/dom/locales/en-detail` | 150 | 133 | 150 |
+| `@dzgrid/dom/locales/fr-detail` | 200 | 146 | 200 |
+| `@dzgrid/dom/locales/ar-detail` | 200 | 159 | 200 |
+| `@dzgrid/theme` | 2 500 | 2 268 | 2 500 |
+| `@dzgrid/dom` | 21 300 | 20 648 | 21 300 — grant |
+| `@dzgrid/dom/popup` | 1 650 | 1 472 | 1 650 |
+| `@dzgrid/dom/spans` | 4 950 | 4 455 | 4 950 |
+| `@dzgrid/dom/slots` | 1 400 | 1 246 | 1 400 |
+| `@dzgrid/dom/search` | 1 450 | 1 298 | 1 450 |
+| `@dzgrid/dom/pagination` | 3 500 | 3 211 | 3 550 (raise) |
+| `@dzgrid/dom/export` | 1 350 | 1 200 | 1 350 |
+| `@dzgrid/dom/export: run (lazy)` | 5 050 | 4 784 | 5 300 (raise) |
+| `@dzgrid/dom/parts` | 700 | 595 | 700 |
+| `@dzgrid/dom/rules` | 750 | 654 | 750 |
+| `@dzgrid/dom/tree` | 3 700 | 3 664 | 3 700 — grant |
+| `@dzgrid/dom/tree-lazy` | 1 000 | 938 | 1 000 — grant |
+| `@dzgrid/dom/detail` | 3 900 | 3 815 | 3 900 — grant |
+| `@dzgrid/dom/motion-gsap` | 700 | 593 | 700 |
+| `@dzgrid/dom/motion-gsap: run (lazy)` | 2 900 | 2 854 | 3 150 (raise) |
+| `@dzgrid/dom/internal` | 900 | 786 | 900 |
+| `@dzgrid/dom/filters` | 10 000 | 9 876 | 10 000 — grant |
+| `@dzgrid/dom/filters: set (lazy)` | 4 200 | 3 793 | 4 200 |
+| `@dzgrid/dom/filters: date adapters (lazy)` | 2 600 | 2 320 | 2 600 |
+| `profile: audit screen (K.8)` | 83 500 | 80 286 | 83 500 — grant |
+| `@dzgrid/angular` | 6 250 | 6 238 | 6 250 — grant |
+
+The real Angular example (`npm run example:bytes`, the DzGrid share of the production build): ceiling 87 000 → **90 000** (Q17a; measured 86 988 when decided, `scripts/example.mjs` `K8`, `perf/test/example-bytes.test.ts`). Margins left under a grant: angular 12 B, dom/tree 36 B, core/detail 6 B, core/tree-lazy 56 B, dom/tree-lazy 62 B, dom/detail 85 B, `/filters` 124 B (Part D must find its bytes or ask).
+
+**Time budgets: not reset (Q17d, owner: « Laisse la mesure pour le moment »).** Pending until the owner gives a quiet machine; then Q17c applies (a real regression over +25 % or on the common path — sort, filter, scroll — is fixed; 10–25 % elsewhere is a written raise with its reason):
+- Node bench (`npm run bench`): 17 older cold lines over their budget on this machine, the same list since `bc01afa` (also over with the committed bench entry: machine drift suspected; their names to be taken from the quiet run).
+- Chrome bench `--only tree`: « toggle near the end, model and events » 11.6 ms over 11.5 (model only; noise suspected).
+
+**History** (the `size-budget.json` `$comment` before this reset, kept word for word):
+
+> Owner decision 2026-10-22 (docs/phase-4-steps/decisions.md Q12): locales en/fr/ar-detail 150 / 200 / 200. Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Phase 3 close (2026-10-21, owner decisions step25-decisions.md Q2, Q3): each budget is the measure + 10 %, rounded up to 50 B, never above the ceilings of ARCHITECTURE §5.2 (core 28 000, dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000) and K.8 (the audit screen profile, 85 000; its guard here is the measure + 10 %, the 85 000 ceiling guards the real Angular example, npm run example:bytes); set by scripts/rebudget.mjs. A budget is raised only by a decision written in ROADMAP.md, which keeps the history of every earlier one. Phase 4 (owner decision 2026-10-21, docs/phase-4-steps/decisions.md Q7): budgets during Phase 4 are core 29 000 (its plan ceiling 28 000 → 29 000, scripts/rebudget.mjs) and theme 2 500; others held (dom 21 300, /filters 10 000, angular 6 000, core/csv up to 2 000, K.8 guard 83 500); new entries, added with their source files by steps 2–4 and 8–10 (check:size cannot measure a file that does not exist yet): @dzgrid/core/tree 3 500 over @dzgrid/core, @dzgrid/core/detail 1 000 over @dzgrid/core, @dzgrid/dom/tree 2 600, @dzgrid/dom/detail 3 500, @dzgrid/dom/locales/en-tree 200, fr-tree 220, ar-tree 250. Every budget is reset to the measure + 10 % at the Phase 4 close (step 13). Phase 4 step 7 (docs/phase-4-steps/step07-plan.md): lazy children did not fit @dzgrid/core/tree (139 B left) nor @dzgrid/dom/tree (195 B left); two new opt-in entries, each the measure + 10 % rounded up to 50 B, owner-confirmed (docs/phase-4-steps/decisions.md Q9): @dzgrid/core/tree-lazy 1 500 over @dzgrid/core (measured 1 348), @dzgrid/dom/tree-lazy 1 000 (measured 877). No existing budget raised. Phase 4 step 8 (docs/phase-4-steps/step08-plan.md): @dzgrid/core/detail added with its file, at its planned budget 1 000 (measured 994 after cuts; first measure 1 452). Phase 4, sticky parent rows (docs/phase-4-steps/sticky-blueprint.md, owner decision decisions.md Q11a, 2026-10-21): @dzgrid/dom/tree 2 600 → 3 700 for Phase 4 (the sticky copies are on by default, so they live in the tree entry; measured 3 660 with them, 2 511 before), reset to the measure + 10 % at the Phase 4 close like every budget. No other budget raised (dom 19 758 of 21 300, theme 2 242 of 2 500, core unchanged). Phase 4 step 10 (docs/phase-4-steps/step10-plan.md): @dzgrid/dom/detail added with its files at its planned budget 3 500 (measured 3 413; external @dzgrid/dom, by the package's own name for nestedGrid, besides the core, core/internal, core/detail and dom/internal); @dzgrid/dom/locales/{en,fr,ar}-detail at the tree bundles' 200 / 220 / 250 (measured 133 / 146 / 159). No other budget raised (dom 20 627, theme 2 268). Phase 4 step 10 review (owner decision docs/phase-4-steps/decisions.md Q13): @dzgrid/dom/detail 3 500 → 3 900 (nested grids updated in place, their state kept by top row, open rows and focused cell: measured 3 787 before the low review items). Phase 4 step 11 review (owner decision docs/phase-4-steps/decisions.md Q15): @dzgrid/angular 6 000 -> 6 200 (the expanded model's pending keys, the tree filter's layer and the NG0100 deferral: measured 6 176; 5 965 before). Phase 4 step 12 (owner decision docs/phase-4-steps/decisions.md Q16): @dzgrid/angular 6 200 -> 6 250 for the one-way [floatingFilters] input (measured 6 236 with it).

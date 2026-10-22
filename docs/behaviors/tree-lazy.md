@@ -27,7 +27,7 @@ Arabic.
 - Opening a row whose children were loaded before shows them at once: nothing is asked again,
   until the application refreshes the rows or gives new ones.
 - A row whose load answered no children becomes a leaf (no chevron); the screen reader says its name
-  and « Aucune ligne » (« Service 3, Aucune ligne »).
+  and « aucune ligne » (« Service 3, aucune ligne »).
 - A filter applies to the rows that are loaded. A row not loaded is not asked for its children to
   find matches in them.
 - « Tout déplier » and `*` open the rows whose children are loaded, never the ones not loaded: they
@@ -70,9 +70,10 @@ Arabic.
 - **Announcements** (lead decision, review of step 7): only the user's actions are said. A user's
   opening of one row that shows a loading row says « Chargement », then, for that request, the
   usual « … développé, n lignes » when the children arrive, « Échec du chargement » on a failure, or
-  — no child — the row's name and the base's « Aucune ligne » (`grid.noRows`), joined by the base's
-  own pair `header.withSort` (« {header}, {priority} », the locale's comma; no new key, the tree
-  bundles do not grow). A user's Retry says « Chargement » and then its answer the same way. A
+  — no child — the tree bundle's own sentence `tree.empty` (fr « {name}, aucune ligne », en
+  « {name}, no rows »; step 13: it no longer joins the base's `grid.noRows` with `header.withSort`, a
+  pair a translator could not read as one sentence; the key is in `locales/<lang>-tree`, 0 B in the
+  base). A user's Retry says « Chargement » and then its answer the same way. A
   parent opened by the API, reopened by the API after a user's opening, or loading again after a
   refresh or new rows, says neither « Chargement » nor its answer.
 - **Keys**: → opens a declared parent (it has children, unknown in number); ← on the loading or the

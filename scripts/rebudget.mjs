@@ -7,8 +7,9 @@
  *   node scripts/rebudget.mjs browser browser1.txt browser2.txt browser3.txt [--file perf/browser-budgets.json] [--write]
  *
  * Dry by default: prints old / measure / new and changes nothing; `--write` saves the file.
- * - Sizes: measure + 10 %, rounded up to 50 B, never above the plan's ceilings (ARCHITECTURE §5.2,
- *   K.8), never below the measure. Measured by size.mjs's own `measureEntries`, or read from a saved
+ * - Sizes: measure + 10 %, rounded up to 50 B, never above the owner's grants (Phase 4 close,
+ *   docs/phase-4-steps/decisions.md Q17b) or the plan's ceilings (ARCHITECTURE §5.2, K.8), never below
+ *   the measure. Measured by size.mjs's own `measureEntries`, or read from a saved
  *   `npm run check:size` output (`--from`). Entries without a budget (maxGzip null) are kept.
  * - Node times (`npm run bench`, several runs: the median per line): max(m × 1.1, m + 0.5 ms) rounded
  *   up to the half-ms, for lines of 5 ms and more; the lines under 5 ms keep their ceiling (noise);
@@ -27,17 +28,26 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 // ---------------------------------------------------------------- sizes
 
 /**
- * ARCHITECTURE §5.2 and K.8: the ceilings a size budget never goes above (`/filters` 10 kB, Angular 8 kB included).
- * The core's: 28 000 → 29 000 for Phase 4 (owner decision 2026-10-21, docs/phase-4-steps/decisions.md Q7).
+ * The ceilings a size budget never goes above. Phase 4 close (owner decision 2026-10-22,
+ * docs/phase-4-steps/decisions.md Q17b): the owner's grants for the entries he named; the plan's ceilings
+ * (ARCHITECTURE §5.2) for the others. K.8 (Q17a): the audit profile's guard stays 83 500; the real Angular
+ * example's 90 000 is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
  */
 const SIZE_CEILINGS = {
   '@dzgrid/core': 29000,
   '@dzgrid/core/server': 6000,
-  '@dzgrid/dom': 30000,
+  '@dzgrid/core/csv': 2000, // Q7: « core/csv up to 2 000 »
+  '@dzgrid/core/tree': 3500,
+  '@dzgrid/core/tree-lazy': 1500,
+  '@dzgrid/core/detail': 1000,
+  '@dzgrid/dom': 21300,
   '@dzgrid/dom/filters': 10000,
-  '@dzgrid/theme': 9000,
-  '@dzgrid/angular': 8000,
-  'profile: audit screen (K.8)': 85000,
+  '@dzgrid/dom/tree': 3700,
+  '@dzgrid/dom/tree-lazy': 1000,
+  '@dzgrid/dom/detail': 3900,
+  '@dzgrid/theme': 2500,
+  '@dzgrid/angular': 6250,
+  'profile: audit screen (K.8)': 83500,
 };
 
 /** The plan's ceiling for an entry, or null. Every message bundle (locales/*) is ≤ 2 kB. */
@@ -56,7 +66,7 @@ export function sizeBudget(measure, ceiling = null) {
 }
 
 const SIZE_COMMENT = (date) =>
-  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Phase 3 close (${date}, owner decisions step25-decisions.md Q2, Q3): each budget is the measure + 10 %, rounded up to 50 B, never above the ceilings of ARCHITECTURE §5.2 (core 29 000 since Phase 4, dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000) and K.8 (the audit screen profile, 85 000; its guard here is the measure + 10 %, the 85 000 ceiling guards the real Angular example, npm run example:bytes); set by scripts/rebudget.mjs. A budget is raised only by a decision written in ROADMAP.md, which keeps the history of every earlier one.`;
+  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on ${date}: each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-4-steps/decisions.md Q17) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 4) ».`;
 
 /**
  * A new size-budget.json from `measures` (name → gz bytes). Returns the new document (the given one

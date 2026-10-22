@@ -185,7 +185,7 @@ describe('what is said', () => {
     expect(ar.said()).toEqual(['تم توسيع Service 1، صف واحد (1)']);
   });
 
-  it('every bundle has the three texts; tree() refuses a bundle without them', () => {
+  it('every bundle has the four texts; tree() refuses a bundle without them', () => {
     for (const b of [EN_TREE, FR_TREE, AR_TREE]) expect(Object.keys(b.text).sort()).toEqual([...TREE_KEYS].sort());
     expect(() => tmake({ settings: { messages: { locale: 'en', text: { ...BUNDLES.en.text, 'tree.collapsed': undefined } } as never } })).toThrow(/tree\.collapsed/);
   });

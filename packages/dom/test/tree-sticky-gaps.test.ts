@@ -8,6 +8,7 @@ import type { TreeRows } from '@dzgrid/core/tree';
 import { lazyChildren } from '../src/tree-lazy.js';
 import { cleanup, click, idOf, k, tmake, type T, type TMake } from './support-tree.js';
 import { stickyOracle } from './support-sticky.js';
+import { SLOW_TEST_MS } from './support/slow.js';
 
 afterEach(cleanup);
 
@@ -215,7 +216,7 @@ describe('the focus never under the stack, after any key', () => {
         }
         cleanup();
       }
-    });
+    }, SLOW_TEST_MS); // 30 grids (alone about 3–3.7 s)
   }
 
   it('a narrow view with a short block (cap 1): Up, PageUp onto rows under the copy', () => {
@@ -308,7 +309,7 @@ describe('a walk mixing everything', () => {
         }
         cleanup();
       }
-    });
+    }, SLOW_TEST_MS); // 15 grids walked (alone 2–3.2 s)
   }
 });
 

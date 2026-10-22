@@ -98,14 +98,9 @@ describe('layering of the base and the server entry', () => {
     const budget = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core'].maxGzip as number;
     expect(budget).toBe(29000);
     expect(gz).toBeLessThanOrEqual(budget);
-    // What the seams cost stays within the plan's estimate (+800–900 B over 26 984), plus what the
-    // review of steps 2–3 added (expandAll through the model and the filter's layer, the muted rows
-    // left out of select-all, the toggle's patched flags: about +130), plus step 5 (the `tree-shape`
-    // code, the nested rows' `load`/`tx` hooks, `rows.expand` on fillers: +35), plus the review of step 5
-    // (`tx` given the store's snapshot, the open set and the layer rekeyed: +52), plus step 8 (details:
-    // the page cut before the shape, the filter's layer a tree's only, `allRows` flat for a shape
-    // without its own: +6), plus the review of step 8 (a detail's focus, its master gone, at the
-    // master's place: +7): a guard against a seam that grew.
-    expect(gz).toBeLessThan(26984 + 1257);
+    // The seams' guard, rebased at the Phase 4 close (step 13, 2026-10-22): Phase 4 took the base from
+    // 26 984 to 28 240 (the tree and detail seams and their reviews, each step's bytes in ROADMAP « Phase 4 »).
+    // Any growth past it is a step's, named here with its bytes; the budget (29 000, owner Q17b) is the cap.
+    expect(gz).toBeLessThanOrEqual(28240);
   });
 });

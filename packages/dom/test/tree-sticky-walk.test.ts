@@ -6,6 +6,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import type { TreeRows } from '@dzgrid/core/tree';
 import { cleanup, click, idOf, k, tmake, type T } from './support-tree.js';
 import { stickyOracle } from './support-sticky.js';
+import { WALK_TEST_MS } from './support/slow.js';
 
 afterEach(cleanup);
 
@@ -126,7 +127,7 @@ describe('sticky parent rows: a walk', () => {
         walk(seed * 31 + (sticky ?? 7), lang, sticky, 60);
         cleanup();
       }
-    });
+    }, WALK_TEST_MS); // 40 grids walked (alone 3–4.5 s each; the file about 19 s, under the 30 s that would move seeds to test:perm)
   }
 
   it('a copy clicked while scrolled deep: the real row focused, under its ancestors only', () => {

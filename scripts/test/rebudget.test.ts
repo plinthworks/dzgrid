@@ -42,23 +42,41 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(() => sizeBudget(28001, 28000)).toThrow(/ceiling/);
   });
 
-  it('the plan ceilings: core 29 000 (Phase 4, owner Q7), dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000, K.8 85 000', () => {
-    // Phase 4 (docs/phase-4-steps/decisions.md Q7, 2026-10-21): the core's plan ceiling 28 000 → 29 000.
-    expect(ceilingFor('@dzgrid/core')).toBe(29000);
-    expect(sizeBudget(26986, ceilingFor('@dzgrid/core'))).toBe(29000); // 29 684.6 → capped at 29 000
-    expect(() => sizeBudget(29001, ceilingFor('@dzgrid/core'))).toThrow(/ceiling/);
-    expect(ceilingFor('@dzgrid/dom')).toBe(30000);
-    expect(ceilingFor('@dzgrid/dom/locales/ar')).toBe(2000);
-    expect(ceilingFor('@dzgrid/dom/locales/ar-filters')).toBe(2000);
-    expect(ceilingFor('@dzgrid/theme')).toBe(9000);
+  it('the plan ceilings at the Phase 4 close: the owner\'s grants (decisions.md Q17b), the other entries their plan ceilings', () => {
+    // Q17b (owner, 2026-10-22): the measure + 10 %, never above what the owner granted.
+    const grants: Record<string, number> = {
+      '@dzgrid/core': 29000, '@dzgrid/dom': 21300, '@dzgrid/angular': 6250, '@dzgrid/dom/tree': 3700, '@dzgrid/dom/detail': 3900,
+      '@dzgrid/dom/filters': 10000, '@dzgrid/theme': 2500, '@dzgrid/core/detail': 1000, '@dzgrid/core/tree': 3500,
+      '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
+      // Q7 (2026-10-21): « core/csv up to 2 000 », a grant the close keeps (1 847 + 10 % would be 2 050).
+      '@dzgrid/core/csv': 2000,
+    };
+    for (const [name, grant] of Object.entries(grants)) {
+      expect(ceilingFor(name), name).toBe(grant);
+      // Far under its grant, an entry still gets its 10 %; near it, the grant; over it, refused.
+      expect(sizeBudget(Math.floor(grant * 0.95), ceilingFor(name)), name).toBe(grant);
+      expect(sizeBudget(grant, ceilingFor(name)), name).toBe(grant);
+      expect(() => sizeBudget(grant + 1, ceilingFor(name)), name).toThrow(/ceiling/);
+    }
+    // Today's measures (step 13 plan) would have raised these to the measure + 10 %: the grants hold them.
+    expect(sizeBudget(20700, ceilingFor('@dzgrid/dom'))).toBe(21300); // 22 770 → 21 300
+    expect(sizeBudget(6236, ceilingFor('@dzgrid/angular'))).toBe(6250); // 6 859.6 → 6 250
+    expect(sizeBudget(3688, ceilingFor('@dzgrid/dom/tree'))).toBe(3700);
+    expect(sizeBudget(1348, ceilingFor('@dzgrid/core/tree-lazy'))).toBe(1500);
+    expect(sizeBudget(877, ceilingFor('@dzgrid/dom/tree-lazy'))).toBe(1000); // 964.7 → 1 000, not 1 050
+    // The other entries keep their plan ceilings; the small text bundles follow the rule (≤ 2 kB).
     expect(ceilingFor('@dzgrid/core/server')).toBe(6000);
-    expect(ceilingFor('profile: audit screen (K.8)')).toBe(85000);
-    // §5.2 also caps /filters at 10 kB and the Angular package at 8 kB.
-    expect(ceilingFor('@dzgrid/dom/filters')).toBe(10000);
-    expect(sizeBudget(9235, ceilingFor('@dzgrid/dom/filters'))).toBe(10000); // 10 158.5 → capped
-    expect(ceilingFor('@dzgrid/angular')).toBe(8000);
+    expect(ceilingFor('@dzgrid/dom/locales/ar')).toBe(2000);
+    expect(ceilingFor('@dzgrid/dom/locales/fr-tree')).toBe(2000);
+    expect(sizeBudget(146, ceilingFor('@dzgrid/dom/locales/fr-tree'))).toBe(200);
     expect(ceilingFor('@dzgrid/dom/filters: set (lazy)')).toBeNull();
     expect(ceilingFor('@dzgrid/dom/export')).toBeNull();
+  });
+
+  it('the K.8 profile guard: 83 500 (Q17a; the real example\'s 90 000 is guarded by example:bytes, not here)', () => {
+    expect(ceilingFor('profile: audit screen (K.8)')).toBe(83500);
+    expect(sizeBudget(79000, ceilingFor('profile: audit screen (K.8)'))).toBe(83500); // 86 900 → 83 500
+    expect(() => sizeBudget(83501, ceilingFor('profile: audit screen (K.8)'))).toThrow(/ceiling/);
   });
 });
 
@@ -96,13 +114,18 @@ describe('rebudgetSizes: the size-budget.json document', () => {
     expect(budget.entries['@dzgrid/core'].maxGzip).toBe(27100);
   });
 
-  it('keeps a $comment, shortened to the rule, the date and a pointer to ROADMAP', () => {
-    const { budget } = rebudgetSizes(doc(), measures, { date: '2026-10-21' });
+  it('keeps a $comment, shortened to the rule, the date and a pointer to ROADMAP and decisions.md', () => {
+    const { budget } = rebudgetSizes(doc(), measures, { date: '2026-10-22' });
     expect(typeof budget.$comment).toBe('string');
     expect(budget.$comment.length).toBeLessThan(doc().$comment.length);
+    // Step 13: the history lives in ROADMAP « Final budgets (Phase 4) »; the comment stays short.
+    expect(budget.$comment.length).toBeLessThan(600);
     expect(budget.$comment).toMatch(/10 %/);
-    expect(budget.$comment).toMatch(/2026-10-21/);
+    expect(budget.$comment).toMatch(/2026-10-22/);
     expect(budget.$comment).toMatch(/ROADMAP/);
+    expect(budget.$comment).toMatch(/Final budgets \(Phase 4\)/);
+    expect(budget.$comment).toMatch(/decisions\.md Q17/);
+    expect(budget.$comment).not.toMatch(/Phase 3 close/);
   });
 
   it('does not change the document it is given', () => {

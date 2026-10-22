@@ -5,6 +5,7 @@ export const EN_TREE = {
   locale: 'en',
   text: {
     'tree.expanded': { one: "{name} expanded, {n} row", other: "{name} expanded, {n} rows" },
+    'tree.empty': "{name}, no rows",
     'tree.collapsed': "{name} collapsed",
     'tree.expandedSome': { one: "{n} row expanded", other: "{n} rows expanded" },
   },

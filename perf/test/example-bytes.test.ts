@@ -30,11 +30,11 @@ describe('the initial files of an Angular build', () => {
 });
 
 describe.skipIf(!built)('K.8 from the real ng build', () => {
-  it('the DzGrid share (default less baseline: initial JS and global CSS, gzip 9) stays within 87 000 (owner decision 2026-10-22, decisions.md Q14)', () => {
+  it('the DzGrid share (default less baseline: initial JS and global CSS, gzip 9) stays within 90 000 (owner decision 2026-10-22, decisions.md Q17a; Q14 87 000)', () => {
     const m = measureExample(EXAMPLE);
     expect(m.audit.files.length).toBeGreaterThan(0);
     expect(m.baseline.total).toBeGreaterThan(20_000);
-    expect(m.share).toBeLessThanOrEqual(87_000);
+    expect(m.share).toBeLessThanOrEqual(90_000);
     // DzGrid loads with the page: a share far below the esbuild profile would mean it did not.
     expect(m.share).toBeGreaterThan(40_000);
     expect(m.wrapper.min).toBeGreaterThan(0);

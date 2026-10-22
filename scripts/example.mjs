@@ -23,7 +23,7 @@ import { measureSplit } from './size-split.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const EXAMPLE = join(ROOT, 'examples/angular-audit');
-const K8 = 87_000; // owner decision 2026-10-22 (docs/phase-4-steps/decisions.md Q14), was 85 000
+const K8 = 90_000; // owner decision 2026-10-22 (docs/phase-4-steps/decisions.md Q17a; Q14 87 000, before it 85 000)
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const option = (name, fallback) => {
@@ -164,7 +164,7 @@ async function bytes() {
   console.log(`  (2) Angular runtime and the shell (baseline): ${m.baseline.total} B gz`);
   console.log(`  (3) @dzgrid/angular in the initial JS: ${m.wrapper.min} B min, ~${m.wrapper.gz} B gz (estimated from the build stats)`);
   if (m.share > K8) {
-    console.log('STOP: the DzGrid share of the real build is over 87 000 B: ask the owner.');
+    console.log('STOP: the DzGrid share of the real build is over 90 000 B: ask the owner.');
     process.exitCode = 1;
   }
 }

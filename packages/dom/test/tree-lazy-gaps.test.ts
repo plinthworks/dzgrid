@@ -4,6 +4,7 @@ import { sourceRows } from '@dzgrid/core/server';
 import { lazyChildren } from '../src/tree-lazy.js';
 import { pagination } from '../src/pagination.js';
 import { EN_PAGINATION } from '../src/locales/en-pagination.js';
+import { AR_TREE } from '../src/locales/ar-tree.js';
 import { BUNDLES, cleanup, click, k, tmake, type T } from './support-tree.js';
 
 /**
@@ -178,28 +179,39 @@ describe('the end, and what is said', () => {
   });
 
   // Was a debatable bug (lead decision, tree-lazy.md): an answer of no child makes a leaf (no
-  // aria-expanded), yet the grid said « Service 1 expanded, 0 rows ». It says the row's name and the
-  // base « No rows » now, joined by the base's own « {header}, {priority} » (no new key).
-  it('an empty answer does not say « expanded, 0 rows » for a row that became a leaf: its name, « No rows »', async () => {
+  // aria-expanded), yet the grid said « Service 1 expanded, 0 rows ». It says the row's name and
+  // « no rows », from the tree bundle's own `tree.empty` (step 13: no longer the base's
+  // `header.withSort` + `grid.noRows`, a pair whose meaning a translator could not see).
+  it('an empty answer does not say « expanded, 0 rows » for a row that became a leaf: its name, « no rows »', async () => {
     const t = lazyGrid();
     t.expand(['S1'], true, 'user');
     t.loads[0]!.resolve([]);
     await flush();
     expect(t.said().some((s) => /expanded, 0 rows/.test(s))).toBe(false);
-    expect(t.said()).toEqual(['Loading', 'Service 1, No rows']);
+    expect(t.said()).toEqual(['Loading', 'Service 1, no rows']);
   });
 
-  it('an empty answer in French and Arabic: the base words, the locale\'s comma', async () => {
+  it('an empty answer in French and Arabic: the tree bundle\'s own sentence', async () => {
     const fr = lazyGrid({ lang: 'fr' });
     fr.expand(['S1'], true, 'user');
     fr.loads[0]!.resolve([]);
     await flush();
-    expect(fr.said().at(-1)).toBe('Service 1, Aucune ligne');
+    expect(fr.said().at(-1)).toBe('Service 1, aucune ligne');
     const ar = lazyGrid({ lang: 'ar' });
     ar.expand(['S1'], true, 'user');
     ar.loads[0]!.resolve([]);
     await flush();
-    expect(ar.said().at(-1)).toBe(`Service 1${String.fromCodePoint(0x60c)} ${String.fromCodePoint(0x644, 0x627, 0x20, 0x62a, 0x648, 0x62c, 0x62f, 0x20, 0x635, 0x641, 0x648, 0x641)}`);
+    expect(ar.said().at(-1)).toBe(AR_TREE.text['tree.empty'].replace('{name}', 'Service 1'));
+    expect(ar.said().at(-1)).toMatch(/^Service 1\u060c /);
+  });
+
+  it('the empty answer\'s sentence comes from `tree.empty` alone, not from `header.withSort` or `grid.noRows`', async () => {
+    const text = { ...BUNDLES.en.text, 'tree.empty': 'EMPTY<{name}>', 'header.withSort': 'WS<{header}|{priority}>', 'grid.noRows': 'NR' };
+    const t = lazyGrid({ settings: { messages: { locale: 'en', text } as never } });
+    t.expand(['S1'], true, 'user');
+    t.loads[0]!.resolve([]);
+    await flush();
+    expect(t.said()).toEqual(['Loading', 'EMPTY<Service 1>']);
   });
 
   // Was a debatable bug (lead decision, tree-lazy.md: only the user's actions are said): openings by

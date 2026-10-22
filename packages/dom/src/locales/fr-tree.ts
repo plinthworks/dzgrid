@@ -5,6 +5,7 @@ export const FR_TREE = {
   locale: 'fr',
   text: {
     'tree.expanded': { one: "{name} développé, {n} ligne", many: "{name} développé, {n} de lignes", other: "{name} développé, {n} lignes" },
+    'tree.empty': "{name}, aucune ligne",
     'tree.collapsed': "{name} réduit",
     'tree.expandedSome': { one: "{n} ligne développée", many: "{n} de lignes développées", other: "{n} lignes développées" },
   },

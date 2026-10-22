@@ -10,7 +10,7 @@ import type { LazyChildren } from './lazy.js';
 import { stickyStack } from './sticky.js';
 
 /** The texts `tree()` needs, from `@dzgrid/dom/locales/<lang>-tree`. */
-export const TREE_KEYS = ['tree.expanded', 'tree.collapsed', 'tree.expandedSome'] as const satisfies readonly TreeMessageKey[];
+export const TREE_KEYS = ['tree.expanded', 'tree.collapsed', 'tree.expandedSome', 'tree.empty'] as const satisfies readonly TreeMessageKey[];
 
 export interface TreeFeatureOptions<T> extends TreeOptions<T> {
   /** The column that shows the hierarchy: the first visible one by default (screen readers expect it first). */
@@ -85,8 +85,8 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     if (i === -1) return;
     const n = d!.childrenAt(i);
     const name = nameOf(one, d!);
-    // A lazy parent answered empty is a leaf: its name and the base's « No rows », joined by the base's own pair (tree-lazy.md).
-    g.live.announce(!expanded ? g.msg('tree.collapsed', { name }) : n < 0 ? (lz?.said(one), g.msg('announce.loading')) : n ? g.msg('tree.expanded', { name, n }) : g.msg('header.withSort', { header: name, priority: g.msg('grid.noRows') }));
+    // A lazy parent answered empty is a leaf: its name and « no rows », the tree bundle's own `tree.empty` (tree-lazy.md).
+    g.live.announce(!expanded ? g.msg('tree.collapsed', { name }) : n < 0 ? (lz?.said(one), g.msg('announce.loading')) : n ? g.msg('tree.expanded', { name, n }) : g.msg('tree.empty', { name }));
   };
   // Each opening or closing by the user, said once (screen readers do not all say aria-expanded).
   const off = kernel.subscribe((e) => {

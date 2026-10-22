@@ -560,11 +560,18 @@ la grille : noter les siens.
     était sous les copies : elle est dite normalement et reste visible (la grille fait défiler). Un clic
     sur une copie (souris) : le lecteur dit la vraie ligne focalisée, sans « sélectionné ». Noter tout
     mot dit en trop. Arabe : idem.
+95c. **Enfants à la demande, réponse vide.** Page `playground/tree.html?lazy=client` (fiche
+    `docs/behaviors/tree-lazy.md`). Ouvrir « Service 0 » et attendre ses patients ; sur « Patient 2 »
+    (déclaré parent, le faux serveur ne rend aucun enfant), `→` (ar : `←`). Attendu : « Chargement »,
+    puis **une fois** fr « Patient 2, aucune ligne », ar « Patient 2، لا توجد صفوف » (la clé `tree.empty` du paquet
+    `locales/<lang>-tree`, étape 13) ; jamais « développé, 0 ligne ». La ligne devient une feuille : ni
+    « développé » ni « réduit » ensuite, plus de chevron. Noter la phrase exacte et si le lecteur coupe
+    « Chargement ».
 
 Consigner le résultat dans `docs/behaviors/tree-view.md` (fin de la fiche) et dans `ROADMAP.md`
 (clôture de la Phase 4, étape 13 ; écoute non bloquante). Règle de décision propre à cette section :
 un niveau ou une position faux (87, 88, 93), une ouverture ou une fermeture muette ou dite deux fois
-(89, 90, 91), un focus perdu (92) ou une copie épinglée dite ou atteinte (95b) se corrige avant la clôture de la Phase 4 ; un lecteur qui ne
+(89, 90, 91, 95c), un focus perdu (92) ou une copie épinglée dite ou atteinte (95b) se corrige avant la clôture de la Phase 4 ; un lecteur qui ne
 dit pas `aria-posinset` (VoiceOver) est noté, sans correction si l'annonce dit l'action.
 
 ## 17. Étapes — ligne de détail, maître/détail (Phase 4, étapes 9 à 11)

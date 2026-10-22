@@ -5,6 +5,7 @@ export const AR_TREE = {
   locale: 'ar',
   text: {
     'tree.expanded': { one: "تم توسيع {name}، صف واحد ({n})", two: "تم توسيع {name}، صفان ({n})", few: "تم توسيع {name}، {n} صفوف", many: "تم توسيع {name}، {n} صفا", other: "تم توسيع {name}، {n} صف" },
+    'tree.empty': "{name}، لا توجد صفوف",
     'tree.collapsed': "تم طي {name}",
     'tree.expandedSome': { one: "تم توسيع صف واحد ({n})", two: "تم توسيع صفين ({n})", few: "تم توسيع {n} صفوف", many: "تم توسيع {n} صفا", other: "تم توسيع {n} صف" },
   },
