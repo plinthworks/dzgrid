@@ -1,8 +1,8 @@
-import type { Query, RowKey } from '@dzgrid/core';
+import type { DisplayIndex, FocusPos, Query, RowKey } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import { detailConflicts } from '@dzgrid/core/detail';
 // The base by the package's own name (external in this entry's size line): never bundled twice.
-import { createGrid } from '@dzgrid/dom';
+import { createGrid, UPDATE_POLICY } from '@dzgrid/dom';
 import type { GridContext, GridEnv } from '../context.js';
 import type { GridInstance } from '../grid.js';
 import type { SlotContext, SlotPart } from '../part.js';
@@ -14,7 +14,7 @@ export type NestedContext = SlotContext['detail'];
 export interface NestedGridOptions<C> {
   /** The grid for a master: its rows, columns, messages, label (« Visits of … »), its own features. */
   readonly settings: (c: NestedContext) => GridSettings<C>;
-  /** How many masters' grids are remembered (sort, filters, quick search, scroll), the least recently used forgotten first: 20. */
+  /** How many masters' grids are remembered (sort, filters, quick search, open rows, focused cell, scroll), the least recently used forgotten first: 20. */
   readonly keep?: number;
   /** Called with each grid made, once it is mounted (a host wiring its own toolbar or events). */
   readonly onGrid?: (grid: GridInstance<C, any>, c: NestedContext) => void;
@@ -24,38 +24,54 @@ export interface NestedGridOptions<C> {
 
 /**
  * `nestedGrid(options)`: a ready `'detail'` part that makes a grid in each panel (master-detail.md): its
- * own keys, scroll and focus; Enter or F2 on the panel focuses it (its focus, else its first cell); Escape
- * it leaves goes back to the panel's cell, one level only. Each master's sort, filters and scroll are
- * remembered when its panel goes (closed, scrolled away) and given back when it comes again, for the last
- * `keep` masters. Past 3 levels, the grid made tells `unsupported-combination` (`detail.depth`, owner Q5).
+ * own keys, scroll and focus; Enter or F2 on the panel focuses it (its focus, else the first row in view);
+ * Escape it leaves goes back to the panel's cell, one level only. Each master's sort, filters, open rows,
+ * focused cell and scroll (its top row and the offset into it) are remembered when its panel goes (closed,
+ * scrolled away) and given back when it comes again, for the last `keep` masters. A new master row or
+ * language updates the grid in place (`grid.update`); only a change of a fixed setting makes it again. Past 3 levels, the grid made tells `unsupported-combination` (`detail.depth`, owner Q5).
  * A nested grid needs a fixed or function height (it has no natural height of its own).
  */
 export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
-  const memory = new Map<RowKey, { query: Query; top: number }>();
+  const memory = new Map<RowKey, Kept>();
   return {
     slot: 'detail',
     part: {
       mount(host, c) {
         let grid: GridInstance<C, any>;
         let ctx: GridContext<C>;
+        let s: GridSettings<C>;
+        /** What was remembered, until the restore job has run (a save before it keeps it). */
+        let was: Kept | undefined;
         /** What this master's grid is left as, for its next panel (the least recently used forgotten first). */
         const save = (): void => {
+          const t = ctx.scroll.logicalTop;
+          const d = grid.kernel.rows.displayed;
+          const i = d.count && ctx.layout ? ctx.layout.indexAt(t) : undefined;
           memory.delete(c.master);
-          memory.set(c.master, { query: grid.kernel.query, top: ctx.scroll.logicalTop });
+          memory.set(c.master, was ?? { query: grid.kernel.query, top: t, at: i === undefined ? i : d.keyAt(i), off: i === undefined ? 0 : t - ctx.layout!.offsetOf(i), open: [...grid.kernel.expansion], focus: grid.kernel.focus });
           for (const k of memory.keys()) if (memory.size > (o.keep ?? 20)) memory.delete(k);
         };
         const make = (): void => {
-          grid = createGrid<C>(host, o.settings(c), o.env?.(c));
+          grid = createGrid<C>(host, s, o.env?.(c));
           ctx = (grid as unknown as { context: GridContext<C> }).context;
           // A host callback that throws after the grid is made: the grid goes too (the part's mount failed).
           try {
             const told = detailConflicts({ depth: c.depth! });
             if (told.length) emit(grid.kernel, { type: 'problems', source: 'host', problems: told });
-            const was = memory.get(c.master);
-            if (was) {
-              grid.kernel.dispatch({ type: 'query.set', query: was.query }, 'api');
-              // After the grid's first paint (the same frame's next job): its rows are there to scroll to.
-              ctx.scheduler.schedule({ read() {}, write() { ctx.scroll.scrollTo(was.top); ctx.schedule(); } });
+            const w = (was = memory.get(c.master));
+            if (w) {
+              const k = grid.kernel;
+              k.dispatch({ type: 'query.set', query: w.query }, 'api');
+              if (w.open.length) k.dispatch({ type: 'rows.expand', rows: w.open, expanded: true }, 'api');
+              if (w.focus) k.dispatch({ type: 'focus.set', focus: w.focus }, 'api');
+              // After the grid's first paint (the same frame's next job): its rows are there to scroll to; the
+              // top row where it was (rows open above it or gone move the pixels), else the pixels.
+              ctx.scheduler.schedule({ read() {}, write() {
+                const i = w.at === undefined ? -1 : k.rows.displayed.indexOf(w.at);
+                ctx.scroll.scrollTo(i < 0 ? w.top : ctx.layout!.offsetOf(i as DisplayIndex) + w.off);
+                was = undefined;
+                ctx.schedule();
+              } });
             }
             o.onGrid?.(grid, c);
           } catch (err) {
@@ -63,6 +79,21 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
             throw err;
           }
         };
+        const focus = (): boolean => {
+          const f = grid.kernel.focus;
+          const d = grid.kernel.rows.displayed;
+          const first = ctx.columns.visible()[0];
+          const L = ctx.layout;
+          const t = ctx.scroll.logicalTop;
+          // The first row whose top is in view (never a scroll away from where the grid was left).
+          let i = L && d.count ? L.indexAt(t) : d.index(0);
+          if (L && i !== null && L.offsetOf(i) < t) i = d.index(i + 1) ?? i;
+          if (f?.kind === 'cell') grid.api.focusCell(f.row, f.column);
+          else if (i !== null && first) grid.api.focusCell(d.keyAt(i), first.id);
+          else return false;
+          return true;
+        };
+        s = o.settings(c);
         make();
         // Escape this grid did not take (on a cell): back to the panel's cell, once (a grid deeper in it took its
         // own). Not while a composition is cancelled, nor when it only hid this grid's tooltip.
@@ -75,22 +106,27 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
         host.addEventListener('keydown', peek, true);
         host.addEventListener('keydown', esc);
         return {
-          // Another master row (new data) or language: the grid made again from the host's settings, its state kept.
+          // Another master row (new data) or language: the host's settings again, given to the grid in place
+          // (its focus, scroll and state untouched); a fixed setting changed: the grid made again, its state
+          // and the focus inside it kept.
           update(n) {
-            const again = n.row !== c.row || n.ctx !== c.ctx;
-            if (again) save(), grid.destroy();
+            if (n.row === c.row && n.ctx === c.ctx) return void (c = n);
             c = n;
-            if (again) make();
+            const was = s;
+            s = o.settings(n);
+            const patch: Record<string, unknown> = {};
+            for (const key in { ...was, ...s }) {
+              const v = s[key as keyof GridSettings<C>];
+              if (UPDATE_POLICY[key as keyof GridSettings<C>] === 'live' && v !== was[key as keyof GridSettings<C>]) patch[key] = v;
+            }
+            if (fixed(s) === fixed(was)) return grid.update(patch);
+            const inside = host.contains(host.ownerDocument.activeElement);
+            save();
+            grid.destroy();
+            make();
+            if (inside) focus();
           },
-          focus() {
-            const f = grid.kernel.focus;
-            const d = grid.kernel.rows.displayed;
-            const first = ctx.columns.visible()[0];
-            if (f?.kind === 'cell') grid.api.focusCell(f.row, f.column);
-            else if (d.count && first) grid.api.focusCell(d.keyAt(d.index(0)!), first.id);
-            else return false;
-            return true;
-          },
+          focus,
           destroy() {
             save();
             host.removeEventListener('keydown', peek, true);
@@ -102,3 +138,21 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
     },
   };
 }
+
+/** A master's grid as it was left: its query, open rows, focused cell, top row and the offset into it (the pixels if gone). */
+interface Kept {
+  readonly query: Query;
+  readonly top: number;
+  readonly at: RowKey | undefined;
+  readonly off: number;
+  readonly open: RowKey[];
+  readonly focus: FocusPos | null;
+}
+
+/**
+ * A grid's fixed settings as text, functions by their source: a host writing `getRowId: (r) => r.id` or
+ * `features: [tree()]` inline in its `settings` makes new ones at each call, and that is not a new grid.
+ * (The live keys, rows among them, are left out at every level: a nested option of the same name too.)
+ */
+const fixed = (s: object): string | undefined =>
+  JSON.stringify(s, (k, v) => (UPDATE_POLICY[k as keyof GridSettings<unknown>] === 'live' ? undefined : typeof v === 'function' ? '' + v : v));

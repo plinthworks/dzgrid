@@ -87,12 +87,20 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
 - **Nested grids and keys** (step 9 review): the outer grid takes no key whose target belongs to
   another grid (the nearest `.dzg` root is not its own) nor a key already handled
   (`defaultPrevented`): a key in an inner grid never moves the outer one or leaves the panel.
+- **Events**: when the focus lands on a panel, the outer grid's `focusChanged` carries the detail
+  row's key (`x:` + the master's key), not a data row the host can look up (`rows.row` has none);
+  the master's key is that key without its `x:` (step 10 review).
 - **Not data**: a detail row is never selected, copied, pasted, edited or exported; it sends no
   `rowClicked` or `cellClicked`; Ctrl+A and ranges skip it.
 - **Nested grids** (step 10, `nestedGrid`): a ready part creates an inner grid per shown panel, with
-  an LRU of `{ query, scrollTop }` per master (default 20, `keep`) saved when the panel goes (closed or
-  scrolled away) and given back when it comes again. Enter or F2 on the panel focuses the inner grid
-  (its focus, else its first cell); Escape the inner grid leaves (on a cell) goes back to the panel's
+  an LRU per master (default 20, `keep`) of its query, its open rows, its focused cell and its scroll
+  (the top row's key and the offset into it, the pixels if that row is gone), saved when the panel goes
+  (closed or scrolled away) and given back when it comes again. A new master row (a live feed) or a
+  new language gives the host's settings again to the same grid (`grid.update`, its live settings):
+  the focus, scroll and state inside it are untouched; only a changed fixed setting (`getRowId`,
+  `features`…, functions compared by their source) makes the grid again, its state and the focus in
+  it given back (step 10 review, owner Q13). Enter or F2 on the panel focuses the inner grid (its focus
+  or the cell remembered, else the first row whose top is in view: never a scroll away); Escape the inner grid leaves (on a cell) goes back to the panel's
   cell, one level only: from a grid two levels down, Escape reaches the middle grid's panel, a second
   Escape the outer one. Nesting is tested at 2 levels, a soft cap of 3: the grid made at depth 4 tells
   `unsupported-combination` (`detail.depth`) and works (owner Q5).

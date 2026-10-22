@@ -393,6 +393,15 @@ describe('detail(): heights', () => {
     expect(t.heightOf('R1')).toBe(88);
   });
 
+  it('\'auto\': a master removed forgets its measure (the sizes map pruned; a row added again with its id is measured anew)', () => {
+    const t = make({ ro: true, open: ['R1'], detail: { height: 'auto' } });
+    ours().fire([[t.body('R1')!, 77]]);
+    t.g.kernel.rows.applyTransaction({ remove: ['R1'] });
+    t.g.kernel.rows.applyTransaction({ add: [ROWS(2)[1]!] });
+    t.expand(['R1']);
+    expect(t.heightOf('R1')).toBe(240);
+  });
+
   it('a height set on the layout (not measured by the feature) survives a new row height: was carried over', () => {
     const t = make({ open: ['R1'] });
     (t.ctx.layout as SparseLayout).setHeights([[t.d().indexOf(x('R1')) as never, 333]]);

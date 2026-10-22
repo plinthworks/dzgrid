@@ -79,8 +79,10 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
   const mx = (key: RowKey): RowKey => key.slice(2) as RowKey;
 
   // The rows' places (D7): a measure wins over the shape's height; a new row height carries the old layout's (step 9 review).
+  // Masters no longer in the rows (a transaction, new rows) forget their measure: a row added again is measured anew.
   g.layoutFor = (d, h, was) => {
     const r = d as DetailRows<unknown>;
+    for (const k of sizes.keys()) if (!g.rows.row(k)) sizes.delete(k);
     return r.details ? sparseRowLayout(d, h, { at: r.details, heights: Array.from(r.details, (i, j) => (was ? was.heightOf(i as DisplayIndex) : sizes.get(mx(d.keyAt(i as DisplayIndex))) ?? r.heights[j]!)) }) : uniformRowLayout(d, h);
   };
 

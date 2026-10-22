@@ -256,21 +256,19 @@ describe('nestedGrid(): the review of step 10', () => {
     expect(t.rootOf(t.active())).toBe(t.ctx.el.root);
   });
 
-  it('a new master row (new data): the grid made again from the settings, its sort kept', () => {
+  it('a new master row (new data): the same grid, updated in place from the settings, its sort kept', () => {
     const t = make();
     t.expand(['P1']);
     const a = t.innerOf('P1');
     a.grid.kernel.dispatch({ type: 'sort.toggle', column: 'n', multi: false }, 'user');
     t.g.kernel.rows.applyTransaction({ update: [{ id: 'P1', name: 'Patient One' }] });
-    const b = t.innerOf('P1');
-    expect(b).not.toBe(a);
-    expect(a.alive()).toBe(false);
-    expect((b.c.row as P).name).toBe('Patient One');
-    expect(innerCtx(b).el.viewport.getAttribute('aria-label')).toBe('Visits of Patient One');
-    expect(b.grid.kernel.query.sort).toEqual([{ column: 'n', dir: 'asc' }]);
+    expect(t.innerOf('P1')).toBe(a);
+    expect(a.alive()).toBe(true);
+    expect(innerCtx(a).el.viewport.getAttribute('aria-label')).toBe('Visits of Patient One');
+    expect(a.grid.kernel.query.sort).toEqual([{ column: 'n', dir: 'asc' }]);
     // A paint that changes nothing for it: the same grid.
     t.g.api.refresh();
-    expect(t.innerOf('P1')).toBe(b);
+    expect(t.innerOf('P1')).toBe(a);
   });
 
   it('the outer grid shows no tooltip of its own for an inner grid’s header (same column id)', () => {
@@ -395,6 +393,12 @@ describe('nestedGrid(): the wheel', () => {
     vp.scrollTop = 0;
     expect(wheel(target, -100).defaultPrevented).toBe(true);
     expect(t.ctx.scroll.logicalTop).toBe(top);
+    // Shift + wheel (Firefox gives it as deltaY): sideways, the panel's, at the inner edge too.
+    vp.scrollTop = 1400;
+    const shifted = new WheelEvent('wheel', { deltaY: 100, shiftKey: true, bubbles: true, cancelable: true });
+    target.dispatchEvent(shifted);
+    expect([shifted.defaultPrevented, t.ctx.scroll.logicalTop]).toEqual([false, top]);
+    vp.scrollTop = 0;
     // A wheel something inside already took (an inner grid above its own cap): never the outer grid's too.
     // Sideways (Shift + wheel): always the panel's, the outer grid not moved.
     vp.style.overflowX = 'auto';

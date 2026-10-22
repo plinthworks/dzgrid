@@ -124,5 +124,23 @@ wheel (Shift + wheel, a swipe) is always the panel's (its cell is as wide as the
 strengthened: the cleanup test checks `disconnect` and the chevrons taken off; the « no depth problem »
 test proves the inner grids' events are captured.
 
+### Review and test analysis of `7b1b4cd` (2026-10-22, owner decision Q13)
+Analysis tests added: `detail-dom-walk.test.ts` (random walks two levels deep, `'auto'` batches),
+`detail-dom-gaps.test.ts`, `detail-bugs.test.ts` (4 `it.fails`, flipped with their fixes). Fixed, each with a
+test seen failing first: (1–2) a new master row (a live feed) or language no longer remakes the inner grid:
+`update` gets the host's `settings(c)` again and gives the live keys that changed to `grid.update` in place
+(focus, scroll, state untouched); a changed fixed setting (by `UPDATE_POLICY`, now exported by `@dzgrid/dom`;
+compared as JSON, functions by their source, so inline `getRowId` or `features` are not a change) makes it
+again, its state and an inner focus given back; this replaces review decision (4) above; (3) the LRU keeps
+the inner focused cell: Enter goes to it, else to the first row whose top is in view (never scrolls);
+(4) the LRU keeps the top row's key and the offset into it (the pixels if gone) and the inner open rows;
+restore order query → open rows → focus → scroll after the first paint. Low items: a save before the
+restore job ran keeps what was remembered (`was`); `sizes` pruned of masters no longer in the rows (in
+`layoutFor`); `sideways()` true with Shift (Firefox gives Shift+wheel as `deltaY`); `master-detail.md`
+says `focusChanged` carries the `x:` key on a panel. The 6 tests asserting the old remaking rewritten to
+« same grid, updated in place » (the walk tracks the last context given to `settings`, and now checks the
+restored pixels and open rows always, and the focus kept across a master update): seen failing on the
+old `nestedGrid`. Budget `@dzgrid/dom/detail` 3 500 → 3 900 (owner Q13): measured **3 815** (3 900).
+
 ## Done (2026-10-22, not committed)
 Tests first: `detail.test.ts` (24), `detail-nested.test.ts` (15), `detail-ssr.test.ts` (2): the first 35 all failing on a stub entry; the others added after the mutants and the review, each failing on its mutant. Mutants 28 by hand, all killed (4 survivors of the first 21 led to 4 tests, 1 of the review's to a stronger test). Review (read-only reviewer, before the gate): Escape while composing or hiding the inner tooltip stays inside; a throwing `onGrid` destroys its grid; **base** `interact/tooltips.ts`: no outer header tooltip for a nested grid's header (+11 B); `update` with a new master row or language makes the inner grid again (state kept); a sideways wheel stays in the panel (`sideways()` in `dir.ts`). Browser `--only detail` (Chrome, fr ltr light, ar rtl dark): 32 / 32 (14 new): axe 0 open, focused, inside the inner grid and closed; the name « Détails de Patient 0 » / « تفاصيل Patient 0 » computed from the group; keys in and out; wheel inner first then outer (scaled and the browser's chaining at 10 000 rows); 1 000 000 masters with 200 grids, 21 steps end to end, rows < 0.5 px, the last at 0 px, inner grids alive = panels = mounts − destroys; `'auto'` free content measured, a line added grows the row, no observer loop. Sizes: `@dzgrid/dom/detail` **3 413** (3 500); bundles en/fr/ar-detail **133 / 146 / 159** (lines at 200 / 220 / 250, measure + 10 % would be 150 / 200 / 200); dom base 20 618 → **20 627** (21 300); theme 2 238 → **2 268** (2 500); core/detail 994. Gate: `test:ci` 287 files, 4 641 tests; `test:perm` 6 / 6; `typecheck`, `check:size`, `build`, `check:contrast` green (a first run found the base guard: `deltaX`/`scrollLeft` outside `dir.ts`, fixed).

@@ -451,6 +451,7 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Molette** : la grille intérieure d'abord, l'extérieure à son bord. Le chaînage du navigateur est rendu à une grille imbriquée (`overscroll-behavior: auto`, la base met `contain`) ; au-dessus du plafond, le panneau arrête la molette tant que l'intérieur peut défiler.
 - **Revue** : Échap d'une composition ou qui ne fait que cacher la bulle de la grille intérieure n'en sort pas ; une grille dont le rappel de l'hôte échoue est détruite ; la bulle d'en-tête de la grille extérieure ignore les en-têtes d'une grille imbriquée (base, +11 o) ; nouvelle ligne maître ou langue → grille refaite, état gardé ; molette de côté toujours gardée par le panneau (`sideways` de `dir.ts`).
 - **Budget** : `@dzgrid/dom/detail` 3 457 (3 500) ; textes 133 / 146 / 159 (200 / 220 / 250) ; base DOM 20 629 et thème 2 268 (2 500) dans leurs budgets ; aucun budget relevé.
+- **Revue de `7b1b4cd`** (Q13) : une grille imbriquée est mise à jour en place (nouvelle ligne maître, langue ; refaite seulement si un réglage fixe change, `UPDATE_POLICY` exporté), sa mémoire garde la cellule focalisée, la ligne du haut + décalage et les lignes ouvertes ; budget `dom/detail` 3 900.
 
 ## 0. Provenance, et limites de ce que j'ai lu
 

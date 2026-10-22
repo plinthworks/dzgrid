@@ -157,8 +157,11 @@ export function wheelInline(e: { readonly deltaX: number; readonly deltaMode: nu
   return dir === 'rtl' ? -d : d;
 }
 
-/** A wheel mostly sideways (Shift + wheel, a trackpad's swipe): a detail panel keeps it (step 10 review). */
-export const sideways = (e: { readonly deltaX: number; readonly deltaY: number }): boolean => Math.abs(e.deltaX) > Math.abs(e.deltaY);
+/**
+ * A wheel sideways (Shift + wheel, which Firefox gives as `deltaY`; a trackpad's swipe, mostly `deltaX`): a
+ * detail panel keeps it (step 10 review).
+ */
+export const sideways = (e: { readonly deltaX: number; readonly deltaY: number; readonly shiftKey: boolean }): boolean => e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
 
 /**
  * Where a fixed box goes so that its start edge lines up with `anchor`'s, for
