@@ -71,6 +71,7 @@ export const FILTER_KEYS = [
  * createGrid(host, { messages: { ...FR, text: { ...FR.text, ...FR_FILTERS.text } }, features: [filters({ floating: true })], … });
  * ```
  * `openFilter` and `closeFilter` act on the last grid the feature was set up on.
+ * One `filters()` object acts on the last grid set up: its `floating` toggle too (as `openFilter`).
  */
 export function filters(o: FiltersOptions = {}): FiltersFeature {
   let popup: Menu | null = null;
@@ -117,8 +118,10 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   // focus off the row first. The paint reads the view's height before the header changes: one more reads it after.
   let again = false;
   shown.attach(g, o.floating === true || asked(g), (on, source) => {
-    if (!on) row.leave(source);
-    g.headerRows = on ? [...g.headerRows, row.spec] : g.headerRows.filter((r) => r !== row.spec);
+    // Shown at its own place, in the features' order (only this row comes and goes; the others' are fixed).
+    const rows = g.features.flatMap((h) => (h === handle ? (on ? [row.spec] : []) : h.headerRows ?? []));
+    if (!on) row.leave(g.headerRows.indexOf(row.spec) + 1, source);
+    g.headerRows = rows;
     again = true;
     g.schedule();
     if (source === 'user') g.live.announce(g.msg(on ? 'announce.floatingShown' : 'announce.floatingHidden'));
@@ -137,7 +140,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   const midnight = clockwork(g);
   // A header part's filter (step 21): the shared edits, one object per column while what it holds stays.
   const heads = new Map<string, { readonly k: readonly unknown[]; readonly f: HeaderFilter }>();
-  return {
+  const handle: FeatureHandle = {
     filter: {
       edits(col, who) {
         const r = resolve(col, 'filter');
@@ -161,7 +164,6 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
       midnight();
       shown.paint();
       if (again) (again = false), g.schedule();
-
     },
     destroy() {
       onCommand(g.kernel);
@@ -171,6 +173,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
       shown.detach(g);
     },
   };
+  return handle;
 }
 
 /**

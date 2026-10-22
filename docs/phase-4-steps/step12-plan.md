@@ -107,3 +107,33 @@ axe 0, focus moved, rowindex, pinned columns and tree layer aligned (top of the 
 - Sizes: `/filters` 9 728 (+487; the plan said +150–250: `bind`'s marks, `aria-controls` id, unbind, the
   language follow), bundles 745 / 876 / 997, dom 20 648, angular 6 236 (6 250, Q16), K.8 profile 80 102.
 - After Q16: `test:ci` 301 files / 4 803 tests green; Angular fixture 54 / 54; real Angular example 86 848 B gz (87 000).
+
+## Review and test analysis (2026-10-22, not committed; review of `dcec156`)
+- Tests first: `packages/dom/test/floating-toggle-gaps.test.ts` (5 `it.fails` flipped, each seen failing) and
+  `packages/angular/test/floating-filters-gaps.test.ts` (1 flipped, seen failing).
+- (1) `inputs.ts` `typed`: an event on a box that is no longer the cell's box (a late `compositionend` or `input`
+  after the row hid, or a box since replaced) is ignored; it threw on `input!`.
+- (2) `bind` on a bound button: one listener, the first bind's record kept (whether the name is ours, the host's
+  own values); each bind has its key, only the newest unbind acts, and once (an old unbind is a no-op).
+- (3) Unbind gives back the host's own `aria-pressed` / `aria-controls` (read at the first bind), removes them only
+  when the button had none.
+- (4) Shown again at its own place: `g.headerRows` rebuilt in the features' order (only this row comes and goes;
+  the other features' rows are fixed at setup), not appended at the end.
+- (5) `leave(level, source)` at a hide: only a focus on the floating row's own level goes to its column's header;
+  a focus on another feature's row is left alone. (A follow of a row below it was tried, then removed by the lead:
+  no feature adds a row below today, and it cost the example its last bytes.)
+- (6) Angular: the `[floatingFilters]` effect reads `features()` and the `_defaults` fallback `untracked`: a new
+  `[features]` array no longer writes the input over the user's toggle. Test added for `provideDzGrid({ defaults:
+  { features } })`.
+- Walk oracle: an independent `expectOn` flipped by each click or set (checked against `get()`), the toggle
+  sentences counted against the clicks, after each hide `kernel.focus` not on level 1, the value check on show
+  never skipped (the field must exist); a step now focuses a floating cell so a hide has a focus to move (a mutant
+  with `leave()` emptied fails at seed 1).
+- Added: host's `aria-pressed` restored, bind twice / old unbind / idempotent unbind, a focus on the floating row
+  under another feature's row; `filters()` JSDoc: one object
+  acts on the last grid set up (as `openFilter`).
+- Gate: `test:ci` 303 files, 4 837 tests green (the example-bytes test once red on the earlier 87 016 build, green
+  on the rebuild); `test:perm` 6 / 6; `typecheck` (a test cast: `DzGridDefaults` does not type `features`, the grid
+  reads it), `check:size`, `build` green; Chrome `--only filters` 12 / 12; Angular fixture 54 / 54. Sizes:
+  `/filters` 9 728 → 9 876 (10 000), angular 6 236 → 6 238 (6 250), dom 20 648, K.8 profile 80 286; real Angular
+  example 86 988 (87 000; 87 016 with the removed focus follow, 86 848 before the review).

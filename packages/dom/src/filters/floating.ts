@@ -14,8 +14,8 @@ const CONTROLS = 'input,button,select,textarea,a[href],[tabindex]';
 export interface FloatingRow {
   readonly spec: HeaderRowSpec;
   sweep(): void;
-  /** Before the row is hidden: the grid's focus on it moved to its column's header. */
-  leave(source: ChangeSource): void;
+  /** Before the row (at header level `level`) is hidden: a grid focus on that level goes to its column's header; others stay. */
+  leave(level: number, source: ChangeSource): void;
   destroy(): void;
 }
 
@@ -77,9 +77,9 @@ export function floatingRow(g: GridContext<unknown>, resolve: Resolve, commit: C
     },
     // Its pending edits are applied by the sweep of the paint that takes its cells away; a DOM focus in it is
     // given back by that paint to the grid's focus (the focused node gone), which goes to the column's header here.
-    leave(source) {
+    leave(level, source) {
       const f = g.kernel.focus;
-      if (f?.kind === 'header' && f.level! > 0) g.kernel.dispatch({ type: 'focus.set', focus: { kind: 'header', column: f.column } }, source);
+      if (level && f?.kind === 'header' && f.level === level) g.kernel.dispatch({ type: 'focus.set', focus: { kind: 'header', column: f.column } }, source);
     },
     // The pending edits' timers belong to the grid's scope: they go with it.
     destroy() {

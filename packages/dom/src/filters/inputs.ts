@@ -47,9 +47,11 @@ function box(num: boolean): Part<FC> {
         }
       };
       const typed = (ev: Event): void => {
-        if ((ev as InputEvent).isComposing) return;
+        // A late event on a box already gone (a compositionend after the row hid, or a box since replaced): nothing.
+        const i = ev.target as HTMLInputElement;
+        if ((ev as InputEvent).isComposing || i !== input) return;
         ok();
-        const v = input!.value;
+        const v = i.value;
         const n = num && v.trim() ? readNumber(v, c.ctx) : undefined;
         const f: Filter | null = n != null ? { type: 'number', op: 'equals', value: n } : !num && v ? { type: 'text', op: 'contains', value: v, ...((c.state as Filter | null)?.caseSensitive && { caseSensitive: true }) } : null;
         if (n === null) (bad = 1), (timer = setTimeout(judge, c.debounceMs));

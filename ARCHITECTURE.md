@@ -469,6 +469,7 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Bouton** : `aria-pressed`, `aria-controls`, nom du paquet (`filter.floatingToggle`) seulement s'il n'a pas de mots à lui (WCAG 2.5.3) ; phrases « Ligne de filtres masquée / affichée » pour l'utilisateur seulement.
 - **Angular** : `[floatingFilters]`, entrée à sens unique, en direct, sans écho (l'état revient par `filters().floating.get()`) ; 6 236 o, budget relevé à 6 250 (Q16).
 - **Tailles** : `/filters` 9 728 (10 000), textes 745 / 876 / 997, dom 20 648, angular 6 236 (6 250).
+- **Revue** (non commitée) : `bind` idempotent (un écouteur, seul le dernier détacheur agit) et valeurs `aria-*` de l'hôte rendues ; la ligne revient à sa place (ordre des fonctions) ; masquer ne bouge qu'un focus sur son niveau ; boîte disparue sourde aux saisies tardives ; `[floatingFilters]` lit `features()` sans le suivre ; `/filters` 9 876, exemple Angular 86 988.
 
 ## 0. Provenance, et limites de ce que j'ai lu
 

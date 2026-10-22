@@ -192,7 +192,8 @@ export class DzGrid<T> implements AfterContentInit {
     effect(() => (this.quick(), this.filter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
     effect(() => {
       const on = this.floatingFilters();
-      if (on !== undefined) for (const f of (this.features() ?? this._defaults['features'] ?? []) as { floating?: { set(on: boolean): void } }[]) f.floating?.set(on);
+      // Only the input's own changes write (a new [features] array must not echo it over the user's toggle).
+      if (on !== undefined) for (const f of untracked(() => this.features() ?? this._defaults['features'] ?? []) as { floating?: { set(on: boolean): void } }[]) f.floating?.set(on);
     });
     // After the first render (never on a server): the grid's events heard so far; with no model, what
     // it opened by itself at creation (a tree's `initial`) comes back.

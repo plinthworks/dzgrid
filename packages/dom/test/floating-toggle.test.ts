@@ -428,15 +428,22 @@ describe('a walk', () => {
       vi.useFakeTimers();
       const r = rng(seed);
       const pick = <X>(a: readonly X[]): X => a[Math.floor(r() * a.length)]!;
-      const f = filters({ floating: r() < 0.5 });
+      // An independent model of the state: flipped by each click or set, never read back from the toggle.
+      let expectOn = r() < 0.5;
+      const f = filters({ floating: expectOn });
       const t = make({ features: [f] });
       const b = button();
       f.floating.bind(b);
+      const said = vi.spyOn(t.live, 'announce');
+      const toggles = () => said.mock.calls.filter(([s]) => s === 'Filter row hidden' || s === 'Filter row shown').map(([s]) => s);
+      const clicks: string[] = [];
       // What the user typed last per column: what the query holds once the row hides.
       const typed = new Map<string, string>();
       const check = (step: string) => {
-        const on = f.floating.get();
+        const on = expectOn;
         const ctx = `seed ${seed} ${step}`;
+        expect(f.floating.get(), ctx).toBe(on);
+        expect(toggles(), ctx).toEqual(clicks);
         expect(t.hrows(), ctx).toHaveLength(on ? 2 : 1);
         expect(b.getAttribute('aria-pressed'), ctx).toBe(String(on));
         expect(t.vp.getAttribute('aria-rowcount'), ctx).toBe(String(t.g.kernel.rows.displayed.count + (on ? 2 : 1)));
@@ -457,13 +464,21 @@ describe('a walk', () => {
         let step = '';
         if (x < 0.2) {
           step = 'toggle';
-          if (r() < 0.5) b.click();
+          expectOn = !expectOn;
+          if (r() < 0.5) b.click(), clicks.push(on ? 'Filter row hidden' : 'Filter row shown');
           else f.floating.set(!on);
           if (on) {
             for (const [col, s] of typed) expect(t.g.kernel.query.filter[col], `seed ${seed} step ${i} ${col}`).toEqual(want(col, s));
             const a = document.activeElement as HTMLElement | null;
             expect(a?.closest('.dzg-hextra') ?? null).toBeNull();
-          } else for (const [col, s] of typed) if (t.input(col)) expect(t.input(col)!.value, `seed ${seed} step ${i} show ${col}`).toBe(s);
+            // The grid's focus is not left on the row that is gone (level 1, the only extra row).
+            const k = t.g.kernel.focus;
+            expect(k?.kind === 'header' ? k.level ?? 0 : 0, `seed ${seed} step ${i} focus`).toBeLessThan(1);
+          } else
+            for (const [col, s] of typed) {
+              expect(t.input(col), `seed ${seed} step ${i} show ${col}`).not.toBeNull();
+              expect(t.input(col)!.value, `seed ${seed} step ${i} show ${col}`).toBe(s);
+            }
         } else if (x < 0.5 && on) {
           const col = pick(['name', 'n']);
           step = `type ${col}`;
@@ -495,7 +510,9 @@ describe('a walk', () => {
           t.vp.dispatchEvent(new Event('scroll'));
         } else {
           step = 'focus header';
-          head(t, pick(['name', 'n', 'd'])).focus();
+          // On the floating row too, so a hide has a focus there to move.
+          if (on && r() < 0.5) t.cell(pick(['name', 'n', 'd'])).focus();
+          else head(t, pick(['name', 'n', 'd'])).focus();
         }
         // A host's filter while hidden replaces what was typed.
         if (!f.floating.get() && r() < 0.05) {
