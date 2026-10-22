@@ -27,3 +27,11 @@ export interface TreeMessages {
   readonly locale: string;
   readonly text: { readonly [K in TreeMessageKey]: MessageValue };
 }
+
+/** The detail panels' texts (`@dzgrid/dom/detail`, Phase 4 step 10), in their own bundles (`locales/<lang>-detail`): optional here, required by `detail()`. */
+export type DetailMessageKey = 'detail.label' | 'detail.expanded' | 'detail.collapsed';
+/** A detail bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_DETAIL.text }`. */
+export interface DetailMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in DetailMessageKey]: MessageValue };
+}

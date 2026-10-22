@@ -382,6 +382,9 @@
   .dzg-sticky > .dzg-row .dzg-cell {
     border-block-end-color: CanvasText;
   }
+  .dzg-dcell {
+    border-color: CanvasText;
+  }
   .dzg-cell.dzg-flash {
     border-inline-start-color: Highlight;
   }
@@ -408,6 +411,17 @@
 
 .dzg-sticky > .dzg-row .dzg-cell {
   border-block-end: 2px solid var(--tz-border);
+}
+
+.dzg-dcell {
+  box-sizing: border-box;
+  background: var(--dzg-detail-bg, var(--tz-bg-raised));
+  border-block-end: 1px solid var(--tz-border);
+  border-inline-start: 3px solid var(--tz-border);
+}
+
+.dzg-dbody {
+  padding: 0.5rem;
 }
 
 .dzg-row[data-kind=loading] .dzg-label {

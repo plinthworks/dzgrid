@@ -574,10 +574,14 @@ Page : le bac à sable, lien « Maître/détail » du menu Démos (étape 10), e
 (4 colonnes), hauteur 240 px ; « Patient 0 » ouvert au départ. Couples A à D. Durée estimée :
 15 min par couple et par langue. Fiche : `docs/behaviors/master-detail.md`.
 
-96. **Le maître ouvert.** `Tab` dans la grille, sur « Patient 0 » : la ligne est dite **développée**
-    (`aria-expanded` sur la ligne maître). Noter le mot exact.
+96. **Le maître ouvert.** `Tab` dans la grille, sur « Patient 0 », colonne « Nom » (celle du chevron) :
+    la cellule est dite **développée** (`aria-expanded` sur la cellule du chevron, pas sur la ligne :
+    une ligne de `grid` ne peut pas le porter, étape 10). Noter le mot exact, et ce qui est dit dans une
+    autre colonne de la même ligne (rien sur l'état : attendu).
 97. **Atteindre le détail.** `↓` : un seul arrêt, nom attendu fr « Détails de Patient 0 », ar
-    « تفاصيل Patient 0 », une cellule qui couvre toutes les colonnes. Noter si l'en-tête d'une
+    « تفاصيل Patient 0 » (`detail.label` ; le nom vient d'un groupe ainsi nommé dans la cellule : noter
+    si « groupe » est dit en plus, et si le contenu de la grille intérieure est lu — il ne devrait pas),
+    une cellule qui couvre toutes les colonnes. Noter si l'en-tête d'une
     colonne est dit avant (le spike S4 montrait Chrome rattachant la cellule à la colonne 1), et
     quelle position de ligne est dite (elle compte la ligne de détail).
 98. **Gauche, droite, début, fin.** Sur le détail : `←`, `→`, `Début`, `Fin` ne déplacent rien, ne
@@ -591,9 +595,12 @@ Page : le bac à sable, lien « Maître/détail » du menu Démos (étape 10), e
 101. **Sortir.** `Échap` : retour sur l'arrêt du détail (« Détails de Patient 0 »). `↓` : la ligne
      suivante, « Patient 1 », colonne retrouvée (celle d'avant le détail). `Tab` depuis l'intérieur
      ou l'arrêt : sort de la grille vers le champ « après » (pas de piège, WCAG 2.1.2).
-102. **Fermer.** Sur « Patient 0 », première colonne (celle du chevron) : `←` (ar : `→`) si
-     l'étape 10 garde les touches de l'arbre pour le maître, sinon le bouton de test « replier » : « réduit », la ligne de détail disparaît ; le nombre de lignes diminue de 1. Si le
-     focus était dans le détail, il revient sur « Patient 0 ».
+102. **Fermer.** Sur « Patient 0 », colonne « Nom » (celle du chevron ; l'étape 10 garde les touches de
+     l'arbre pour le maître) : `←` (ar : `→`) : annonce fr « Patient 0 réduit », ar « تم طي Patient 0 »
+     (`detail.collapsed`), la ligne de détail disparaît ; le nombre de lignes diminue de 1. Si le
+     focus était dans le détail, il revient sur « Patient 0 ». `→` (ar : `←`) rouvre : fr « Patient 0
+     développé », ar « تم توسيع Patient 0 » (`detail.expanded`) ; un second `→` passe à la colonne
+     suivante.
 103. **Retour à un détail déjà ouvert.** Rouvrir « Patient 0 » : `↓`, `Entrée` : la grille
      intérieure revient triée et défilée comme laissée en 100.
 104. **Arabe.** Mêmes étapes de droite à gauche ; noter la langue de la voix pour le nom du détail

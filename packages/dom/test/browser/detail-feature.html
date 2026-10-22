@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: master/detail</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/core/detail": "/packages/core/src/detail.ts",
+  "@dzgrid/dom": "/packages/dom/src/index.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts",
+  "@tzslot/dom": "/node_modules/.cache/dzgrid-browser/dom.js",
+  "@tzslot/core": "/node_modules/.cache/dzgrid-browser/core.js"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); }
+  #host { inline-size: 820px; block-size: 600px; }
+  #host > .dzg { block-size: 100%; }
+  .free p { margin: 0 0 .5rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DzGrid</h1>
+  <div id="host"></div>
+</main>
+<script type="module" src="./detail-feature.ts"></script>
+</body>
+</html>

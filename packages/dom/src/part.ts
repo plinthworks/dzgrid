@@ -1,6 +1,6 @@
 import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, ModelStatus, PageState, PartSlot, Placement, Problem, ResolvedColumn, RowCounts, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
 import type { AppMessageKey, ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
-import type { PartsMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
+import type { PartsMessageKey, DetailMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
 import type { GridFeature } from './features.js';
 import type { GridSettings } from './settings.js';
 
@@ -28,7 +28,7 @@ export interface PartBase {
   readonly ctx: LocaleCtx;
   readonly dir: 'ltr' | 'rtl';
   /** The grid's messages, and the host's own `app.*` ones (a missing one shows its key, told once). */
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
   announce(text: string): void;
   readonly doc: Document;
   /** The application's `settings.context` (step 21): its own, beside `ctx`, the grid's language and zone. */
@@ -185,6 +185,10 @@ export interface SlotContext {
     readonly master: RowKey;
     /** The panel's height in px, as the row layout places it. */
     readonly height: number;
+    /** The depth a grid made in this panel has: this grid's + 1 (1: a grid on the page). Past 3, a problem (owner Q5). Given by `detail()`. */
+    readonly depth?: number;
+    /** Puts the focus back on this panel's cell, as Escape from a control inside does (a nested grid's Escape). Given by `detail()`. */
+    leave?(): void;
   };
 }
 

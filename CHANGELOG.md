@@ -80,6 +80,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`SlotContext['detail']`; core `PartSlot` gains `'detail'`; a `'detail'` part without the detail
   feature is told `missing-feature`); the base destroys the part when its row leaves the window.
   Theme: the focus ring on the detail cell (forced colours too). The feature itself is step 10.
+- **`@dzgrid/dom/detail` (Phase 4 step 10)**: `detail({ part, height?, initial?, column?, nested? })`
+  hands the detail rows to the grid and places them; a chevron in the masters' first column (click;
+  forward opens, back closes, mirrored in RTL; `aria-expanded` on that cell), the user's openings said
+  (`detail.expanded` / `detail.collapsed`); the part mounted in each panel when it is first shown and
+  destroyed when it goes (context: the master row and keys, the height, `depth`, `leave()`); a part by
+  name from `settings.parts`; the panel named « Details of {name} » (`detail.label`, through a named
+  group); `height: 'auto'` measured by one `ResizeObserver`, a frame's changes in one `setHeights`, kept
+  after a close and across a new row height; spans and a tree beside it told
+  (`unsupported-combination`). `nestedGrid({ settings, keep?, onGrid? })`: a grid in each panel, its own
+  keys, scroll and focus; Enter/F2 in, Escape out one level; each master's sort, filters and scroll
+  remembered (LRU, 20); past 3 levels `unsupported-combination` (`detail.depth`); the wheel goes to the
+  inner grid first, to the outer grid at its edge (also above the scroll cap). Bundles
+  `locales/{en,fr,ar}-detail`. `SlotContext['detail']` gains `depth?` and `leave?()`. Theme: the panel's
+  surface (`--dzg-detail-bg`), rules and padding, forced colours. Playground « Maître/détail ».
+  Base: a column header's tooltip is no longer shown for a nested grid's header of the same id.
 
 ### Changed
 

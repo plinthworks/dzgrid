@@ -41,10 +41,18 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   removed or filtered out, the focus goes to the row now at the master's place (not one past it,
   where the detail was), as a tree's row goes to the row now at its own place. Hidden by closing
   its master, the detail gives the focus to the master.
+- **Opening** (step 10): a decorative chevron in the masters' first column (or `detail({ column })`),
+  24 px; a click opens or closes, nothing else (no selection, no row click). Keys on that column, as a
+  tree's: forward (Right; Left in Arabic) on a closed master opens, back on an open one closes,
+  otherwise the column move. The user's opening or closing is said: « Patient 0 développé » /
+  « Patient 0 réduit » (the host's, never).
 - **One cell**: the detail row has one `gridcell` with `aria-colspan` = the number of columns,
-  `data-kind="detail"` on the row. The master row carries `aria-expanded`. The cell's accessible
-  name comes from the master ("Details of Patient 0"; step 9's base names it after the master's row
-  header, "Patient 0", and step 10 adds the words with its messages). The cell is as wide as the
+  `data-kind="detail"` on the row. `aria-expanded` is on the master's **chevron cell**, not on the row:
+  ARIA lets a `gridcell` carry it, a `grid`'s row may not (axe `aria-conditional-attr`; only a
+  treegrid's rows may). The cell's accessible name is « Détails de Patient 0 » (`detail.label`): its
+  content box is a `group` with that name, and the cell takes its name from its content (an
+  `aria-label` on the cell itself would not hold an inner grid's visible text, WCAG 2.5.3; step 9's
+  base named the cell after the master's row header, step 10 replaces it). The cell is as wide as the
   view (never wider than the columns) and stays at the view's start under a horizontal scroll.
 - **Content**: a part slot `'detail'` (`parts.md`; Angular through `dzgPart`/`componentPart`),
   given the master row, its key, the context, the direction, the messages, `announce`, and the
@@ -81,10 +89,22 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   (`defaultPrevented`): a key in an inner grid never moves the outer one or leaves the panel.
 - **Not data**: a detail row is never selected, copied, pasted, edited or exported; it sends no
   `rowClicked` or `cellClicked`; Ctrl+A and ranges skip it.
-- **Nested grids**: a ready part creates an inner grid per open master, with an LRU of
-  `{ query, scrollTop }` per master (default 20) to restore it; the wheel at the inner grid's top
-  or bottom chains to the outer grid; nesting is tested at 2 levels, a soft cap of 3 (a problem
-  beyond, owner Q5).
+- **Nested grids** (step 10, `nestedGrid`): a ready part creates an inner grid per shown panel, with
+  an LRU of `{ query, scrollTop }` per master (default 20, `keep`) saved when the panel goes (closed or
+  scrolled away) and given back when it comes again. Enter or F2 on the panel focuses the inner grid
+  (its focus, else its first cell); Escape the inner grid leaves (on a cell) goes back to the panel's
+  cell, one level only: from a grid two levels down, Escape reaches the middle grid's panel, a second
+  Escape the outer one. Nesting is tested at 2 levels, a soft cap of 3: the grid made at depth 4 tells
+  `unsupported-combination` (`detail.depth`) and works (owner Q5).
+- **The wheel over an inner grid**: the inner grid first; at its top or bottom, a new wheel gesture
+  goes on to the outer grid, never to the page. The browser's own chaining (an inner scroller at its
+  edge hands a new gesture to the one around it) does this; a grid's viewport normally stops it
+  (`overscroll-behavior: contain`, so a grid never scrolls the page), and a nested grid's is set back
+  to chain. Over a million masters the outer grid moves the wheel itself; a panel stops the wheel
+  while what is inside can still scroll that way (or took it), so the order is the same.
+- **`'auto'` heights** (step 10): measured with one `ResizeObserver` (every panel changed in a frame
+  sent to the layout at once, one paint); 240 px until measured; a measure is kept after a close (a
+  reopened panel starts at it) and across a new row height; the rows above stay where they are.
 - **Not with**: spans (D9), a tree on the same grid (Q5): `unsupported-combination`.
 
 ## Where DzGrid differs on purpose

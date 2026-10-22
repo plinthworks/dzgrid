@@ -28,6 +28,7 @@ const domAlias = {
   '@dzgrid/dom/parts': fileURLToPath(new URL('./packages/dom/src/parts.ts', import.meta.url)),
   '@dzgrid/dom/rules': fileURLToPath(new URL('./packages/dom/src/rules.ts', import.meta.url)),
   '@dzgrid/dom/tree': fileURLToPath(new URL('./packages/dom/src/tree.ts', import.meta.url)),
+  '@dzgrid/dom/detail': fileURLToPath(new URL('./packages/dom/src/detail.ts', import.meta.url)),
   '@dzgrid/dom/tree-lazy': fileURLToPath(new URL('./packages/dom/src/tree-lazy.ts', import.meta.url)),
   '@dzgrid/dom/motion-gsap': fileURLToPath(new URL('./packages/dom/src/motion-gsap.ts', import.meta.url)),
   '@dzgrid/dom/pagination': fileURLToPath(new URL('./packages/dom/src/pagination.ts', import.meta.url)),

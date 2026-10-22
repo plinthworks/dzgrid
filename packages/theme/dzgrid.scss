@@ -457,6 +457,11 @@ $emit: true !default;
       border-block-end-color: CanvasText;
     }
 
+    // A detail panel (Phase 4 step 10): its edges in the system's text colour, the panel apart from the rows.
+    .dzg-dcell {
+      border-color: CanvasText;
+    }
+
     // A value flash's mark (step 26): the system's highlight.
     .dzg-cell.dzg-flash {
       border-inline-start-color: Highlight;
@@ -492,6 +497,20 @@ $emit: true !default;
 
   .dzg-sticky > .dzg-row .dzg-cell {
     border-block-end: 2px solid var(--tz-border);
+  }
+
+  // A detail panel (@dzgrid/dom/detail, Phase 4 step 10, master-detail.md): a raised surface under its
+  // master, a rule at its inline start and below it; the text and the focus ring keep their contrast
+  // on it (contrast-pairs.json); the content box padded so a nested grid's border stays visible.
+  .dzg-dcell {
+    box-sizing: border-box;
+    background: var(--dzg-detail-bg, var(--tz-bg-raised));
+    border-block-end: 1px solid var(--tz-border);
+    border-inline-start: 3px solid var(--tz-border);
+  }
+
+  .dzg-dbody {
+    padding: 0.5rem;
   }
 
   // A lazy tree's loading and error rows (Phase 4 step 7, tree-lazy.md): their words in the muted

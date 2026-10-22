@@ -7,8 +7,9 @@ export function installTooltips<T>(g: GridContext<T>): void {
   const { el, columns, rows, rowRenderer, scope, tip } = g;
 
   function tooltipFor(target: HTMLElement): TipFor | null {
-    // A row a feature added under the headers, a group header: not the column header (its tooltips are the feature's).
-    if (target.closest('.dzg-hextra, .dzg-hgroup')) return null;
+    // A row a feature added under the headers, a group header: not the column header (its tooltips are the
+    // feature's); a grid in a detail panel: its own (step 10 review).
+    if (target.closest('.dzg') !== el.root || target.closest('.dzg-hextra, .dzg-hgroup')) return null;
     const hcell = target.closest<HTMLElement>('.dzg-hcell');
     if (hcell) {
       const col = hcell.dataset['col'] ? columns.get(hcell.dataset['col']) : undefined;

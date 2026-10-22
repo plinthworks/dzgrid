@@ -49,6 +49,10 @@
       "types": "./src/tree-lazy.ts",
       "default": "./src/tree-lazy.ts"
     },
+    "./detail": {
+      "types": "./src/detail.ts",
+      "default": "./src/detail.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"
@@ -144,6 +148,18 @@
     "./locales/ar-tree": {
       "types": "./src/locales/ar-tree.ts",
       "default": "./src/locales/ar-tree.ts"
+    },
+    "./locales/en-detail": {
+      "types": "./src/locales/en-detail.ts",
+      "default": "./src/locales/en-detail.ts"
+    },
+    "./locales/fr-detail": {
+      "types": "./src/locales/fr-detail.ts",
+      "default": "./src/locales/fr-detail.ts"
+    },
+    "./locales/ar-detail": {
+      "types": "./src/locales/ar-detail.ts",
+      "default": "./src/locales/ar-detail.ts"
     }
   },
   "peerDependencies": {

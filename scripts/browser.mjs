@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -1674,6 +1674,175 @@ async function detailChecks(name, ctx) {
   }
 }
 
+/**
+ * `@dzgrid/dom/detail` (Phase 4 step 10, step10-plan.md): 1 000 000 masters, 200 open, each panel a grid of
+ * visits (`nestedGrid`), French left to right light and Arabic right to left dark. axe 0 with a panel open,
+ * focused, its inner grid focused, and closed; the panel's name; the nested grid's keys (Enter in, arrows
+ * inside only, Escape out once, Down on); the wheel: inner first, outer at the inner edge (scaled: the
+ * feature's; 10 000 rows: the browser's own chaining); end to end with the inner grids balanced; 'auto'
+ * heights measured (free content), a line added grows the row, no ResizeObserver loop.
+ */
+async function detailFeatureChecks(name, ctx) {
+  const cases = [
+    { qs: 'locale=fr-FR&theme=light', tag: 'detail() fr ltr light', rtl: false, label: 'Détails de Patient 0', closed: 'Patient 0 réduit' },
+    { qs: 'locale=ar-DZ&dir=rtl&theme=dark', tag: 'detail() ar rtl dark', rtl: true, label: 'تفاصيل Patient 0', closed: 'تم طي Patient 0' },
+  ];
+  const open = async (qs) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 760 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/detail-feature.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 60000 });
+    await frames(page, 3);
+    return { page, errors };
+  };
+  const where = (page) => page.evaluate(() => {
+    const a = document.activeElement;
+    const outer = document.querySelector('#host > .dzg');
+    const inner = a.closest('.dzg') !== outer;
+    const r = a.closest('.dzg-row');
+    return { inner, dcell: a.classList.contains('dzg-dcell'), label: a.querySelector(':scope > .dzg-dbody')?.getAttribute('aria-label') ?? null, row: r ? Number(r.getAttribute('aria-rowindex')) - 2 : null, col: a.dataset.col ?? null, top: window.t.logicalTop(), focus: window.t.grid.kernel.focus };
+  });
+  for (const c of cases) {
+    const { page, errors } = await open(c.qs);
+    // Open at load: the panel of row 0 holds its inner grid; names; axe.
+    const at0 = await page.evaluate(() => {
+      const r = document.querySelector('.dzg-layer > .dzg-row[data-kind="detail"]');
+      const dc = r.querySelector(':scope > .dzg-dcell');
+      const inner = dc.querySelector('.dzg-dbody > .dzg .dzg-viewport');
+      const master = document.querySelector('.dzg-layer > .dzg-row[aria-rowindex="2"] .dzg-cell[data-col="name"]');
+      return { count: window.t.ctx.rows.displayed.count, own: dc.getAttribute('aria-label'), label: dc.querySelector('.dzg-dbody[role="group"]').getAttribute('aria-label'), inner: inner?.getAttribute('aria-label'), h: r.getBoundingClientRect().height, expanded: master.getAttribute('aria-expanded'), rowExpanded: master.closest('.dzg-row').hasAttribute('aria-expanded'), toggle: !!master.querySelector('.dzg-toggle[aria-hidden="true"][data-open]') };
+    });
+    // The cell's computed name (Playwright's accname): its content's group, « Détails de Patient 0 » alone.
+    at0.named = await page.getByRole('gridcell', { name: c.label, exact: true }).count();
+    let v = await axe(page);
+    check(name, `${c.tag}: 1 000 200 rows, the panel of Patient 0 named « ${c.label} » (from its content's group), a grid of visits inside, 240 px; aria-expanded on the chevron cell, not the row; axe 0 open`,
+      at0.count === 1_000_200 && at0.label === c.label && at0.own === null && at0.named === 1 && /Patient 0$/.test(at0.inner ?? '') && at0.h === 240 && at0.expanded === 'true' && !at0.rowExpanded && at0.toggle && v.length === 0, { at0, v });
+    // Keys: Down to the panel, Enter into the inner grid, arrows inside only, Escape out once, Down on.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key(0), 'n'));
+    await frames(page, 2);
+    await page.keyboard.press('ArrowDown');
+    await frames(page, 2);
+    const k1 = await where(page);
+    const v1 = await axe(page);
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const k2 = await where(page);
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press(c.rtl ? 'ArrowLeft' : 'ArrowRight');
+    await frames(page, 2);
+    const k3 = await where(page);
+    const inner3 = await page.evaluate(() => [...window.t.count.grids][0]?.kernel.focus ?? null);
+    const v3 = await axe(page);
+    await page.keyboard.press('Escape');
+    await frames(page, 2);
+    const k4 = await where(page);
+    await page.keyboard.press('ArrowDown');
+    await frames(page, 2);
+    const k5 = await where(page);
+    check(name, `${c.tag}: Down reaches the panel (one stop, its name), Enter goes into the inner grid, arrows move it only (the outer focus and scroll stay), Escape back to the panel, Down to Patient 1 in the same column; axe 0 focused and inside`,
+      k1.dcell && k1.label === c.label && !k1.inner && k2.inner && k3.inner && k3.top === k1.top && k3.focus.row === k1.focus.row && inner3?.row?.endsWith('0-2') && inner3?.column === 'n' && k4.dcell && !k4.inner && k5.row === 2 && k5.col === 'n' && v1.length === 0 && v3.length === 0,
+      { k1, k2, k3, inner3, k4, k5, v1, v3 });
+    // Closed by the user (back on the chevron column): said, the row gone, axe 0 closed; reopened.
+    await page.evaluate(() => window.t.grid.api.focusCell(window.t.key(0), 'name'));
+    await frames(page, 2);
+    await page.keyboard.press(c.rtl ? 'ArrowRight' : 'ArrowLeft');
+    await frames(page, 4);
+    const shut = await page.evaluate(() => ({ open: window.t.grid.kernel.expansion.has(window.t.key(0)), said: window.t.ctx.live.said, count: window.t.ctx.rows.displayed.count, cell: document.querySelector('.dzg-layer > .dzg-row[aria-rowindex="2"] .dzg-cell[data-col="name"]').getAttribute('aria-expanded') }));
+    v = await axe(page);
+    await page.keyboard.press(c.rtl ? 'ArrowLeft' : 'ArrowRight');
+    await frames(page, 2);
+    check(name, `${c.tag}: back on the chevron column closes Patient 0, said « ${c.closed} », 1 000 199 rows; axe 0 closed`,
+      !shut.open && shut.said === c.closed && shut.count === 1_000_199 && shut.cell === 'false' && v.length === 0, { shut, v });
+    // The wheel over the inner grid (the outer one is scaled): the inner scrolls first, the outer at its edge.
+    const wheelAt = async (deltaY) => {
+      const b = await page.locator('.dzg-dbody .dzg-viewport').first().boundingBox();
+      await page.mouse.move(b.x + b.width / 2, b.y + b.height * 0.7);
+      await page.mouse.wheel(0, deltaY);
+      await frames(page, 3);
+      return page.evaluate(() => ({ inner: document.querySelector('.dzg-dbody .dzg-viewport').scrollTop, outer: window.t.logicalTop(), scaled: window.t.ctx.scroll.mapper.scaled }));
+    };
+    await page.evaluate(() => window.t.scrollTo(0));
+    await frames(page, 3);
+    const w0 = await page.evaluate(() => window.t.logicalTop());
+    const w1 = await wheelAt(100);
+    await page.evaluate(() => { const vp = document.querySelector('.dzg-dbody .dzg-viewport'); vp.scrollTop = vp.scrollHeight; });
+    await frames(page, 3);
+    const w2 = await wheelAt(100);
+    check(name, `${c.tag}: the wheel over the inner grid scrolls it first (the outer grid, scaled, stays), at its bottom the outer grid takes it (+100 px)`,
+      w1.scaled && w1.inner > 0 && w1.outer === w0 && w2.outer === w0 + 100, { w0, w1, w2 });
+    // End to end over a million masters with 200 panels: rows placed, the last at 0 px, the inner grids balanced.
+    const sweep = await page.evaluate(async () => {
+      const { ctx, count } = window.t;
+      const next = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const out = [];
+      for (let s = 0; s <= 20; s++) {
+        window.t.scrollTo(s === 20 ? 1e12 : (ctx.layout.total * s) / 20);
+        await next();
+        const hb = document.querySelector('.dzg-header').getBoundingClientRect().bottom;
+        const vp = document.querySelector('.dzg-viewport').getBoundingClientRect();
+        let worst = 0;
+        for (const r of document.querySelectorAll('#host > .dzg > .dzg-viewport > .dzg-body > .dzg-layer > .dzg-row')) {
+          const i = Number(r.getAttribute('aria-rowindex')) - 2;
+          const b = r.getBoundingClientRect();
+          if (b.bottom < hb || b.top > vp.bottom) continue;
+          worst = Math.max(worst, Math.abs(b.top - (hb + ctx.layout.offsetOf(i) - ctx.scroll.logicalTop)));
+        }
+        out.push({ worst, alive: count.grids.size, panels: document.querySelectorAll('#host .dzg-dbody > .dzg').length, balance: count.mounts - count.destroys });
+      }
+      const d = ctx.rows.displayed;
+      const last = document.querySelector(`.dzg-layer > .dzg-row[aria-rowindex="${d.count + 1}"]`);
+      const v = document.querySelector('.dzg-viewport');
+      const inner = v.getBoundingClientRect().top + v.clientTop + v.clientHeight;
+      return { out, lastErr: last ? last.getBoundingClientRect().bottom - inner : null, lastKind: last?.dataset.kind ?? null };
+    });
+    check(name, `${c.tag}: scrolled end to end in 21 steps, rows placed (< 0.5 px), the last row (the panel of Patient 999 999) at 0 px, inner grids alive = panels shown = mounts − destroys`,
+      sweep.out.every((s) => s.worst < 0.5 && s.alive === s.panels && s.balance === s.alive) && sweep.lastErr === 0 && sweep.lastKind === 'detail', sweep);
+    check(name, `${c.tag}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+  // The browser's own chaining (outer not scaled, 10 000 rows): at the inner bottom a new wheel gesture scrolls the page's grid.
+  {
+    const { page, errors } = await open('locale=fr-FR&rows=10000');
+    const b = await page.locator('.dzg-dbody .dzg-viewport').first().boundingBox();
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height * 0.7);
+    await page.mouse.wheel(0, 100);
+    await frames(page, 4);
+    const n1 = await page.evaluate(() => ({ inner: document.querySelector('.dzg-dbody .dzg-viewport').scrollTop, outer: document.querySelector('#host > .dzg > .dzg-viewport').scrollTop, scaled: window.t.ctx.scroll.mapper.scaled }));
+    await page.evaluate(() => { const vp = document.querySelector('.dzg-dbody .dzg-viewport'); vp.scrollTop = vp.scrollHeight; });
+    await frames(page, 4);
+    await page.waitForTimeout(400);
+    await page.mouse.wheel(0, 100);
+    await frames(page, 6);
+    await page.waitForTimeout(300);
+    const n2 = await page.evaluate(() => ({ inner: document.querySelector('.dzg-dbody .dzg-viewport').scrollTop, outer: document.querySelector('#host > .dzg > .dzg-viewport').scrollTop }));
+    check(name, `detail() fr, 10 000 rows (not scaled): the browser's own chaining, inner first, then at its bottom a new wheel scrolls the outer grid`,
+      !n1.scaled && n1.inner > 0 && n1.outer === 0 && n2.outer > 0 && errors.length === 0, { n1, n2, errors });
+    await page.close();
+  }
+  // 'auto' heights (free content): the row as tall as its content box; a line added grows it; the rows above stay; no observer loop.
+  {
+    const { page, errors } = await open('locale=fr-FR&rows=1000&content=free');
+    const look = () => page.evaluate(() => {
+      const { ctx, x } = window.t;
+      const d = ctx.rows.displayed;
+      const row = (k) => document.querySelector(`.dzg-layer > .dzg-row[aria-rowindex="${d.indexOf(k) + 2}"]`);
+      const r1 = row(x(1));
+      return { row: r1.getBoundingClientRect().height, box: r1.querySelector('.dzg-dbody').getBoundingClientRect().height, layout: ctx.layout.heightOf(d.indexOf(x(1))), top0: row(window.t.key(0)).getBoundingClientRect().top, next: row(window.t.key(2)).getBoundingClientRect().top - r1.getBoundingClientRect().bottom };
+    });
+    const a = await look();
+    await page.evaluate(() => { const d = window.t.ctx.rows.displayed; document.querySelector(`.dzg-layer > .dzg-row[aria-rowindex="${d.indexOf(window.t.x(1)) + 2}"] .free button`).click(); });
+    await frames(page, 4);
+    const b2 = await look();
+    check(name, `detail() fr 'auto': a panel as tall as its content (${a.box} px, measured, not 240), a line added grows it (${b2.box} px), the next row follows (0 px gap), the rows above stay, no observer loop`,
+      Math.abs(a.row - a.box) < 0.5 && a.box !== 240 && b2.box > a.box && Math.abs(b2.row - b2.box) < 0.5 && b2.layout === b2.row && Math.abs(b2.next) < 0.5 && b2.top0 === a.top0 && errors.length === 0, { a, b2, errors });
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -1685,7 +1854,7 @@ async function runEngine(name) {
       if (only === 'rules' && name === 'chrome') await rulesChecks(name, ctx);
       if (only === 'motion' && name === 'chrome') await motionChecks(name, ctx);
       if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx);
-      if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx);
+      if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
       return;
     }
 
@@ -2015,7 +2184,7 @@ async function runEngine(name) {
     if (name === 'chrome') await rulesChecks(name, ctx);
     if (name === 'chrome') await motionChecks(name, ctx);
     if (name === 'chrome') await treeChecks(name, ctx);
-    if (name === 'chrome') await detailChecks(name, ctx);
+    if (name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.
