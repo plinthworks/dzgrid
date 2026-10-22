@@ -60,6 +60,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (O(D) memory, `setHeight` and a batched `setHeights` O(D)). `detailConflicts({ spans, tree,
   depth })`: spans and a tree are refused beside details, a nested grid deeper than 3 is told
   (`unsupported-combination`).
+- **Sticky parent rows** (`@dzgrid/dom/tree`, `docs/behaviors/tree-sticky.md`): while children
+  scroll, their ancestors stay pinned under the header, outermost first, pushed up when their
+  subtree ends. `tree({ sticky })`: how many (the nearest), `0` none, `3` by default, never more
+  than half the view. Copies show text only, carry no row semantics (`aria-hidden` layer), are never
+  focused; a click goes to the real row (focus, scroll, no selection), the chevron closes it, the box
+  does nothing. Base seams: `RowRenderer.spawn(layer)`, `GridContext.inset` / `insetFor` — a row
+  brought into view by the focus is placed under its own pinned parents (WCAG 2.4.11). Theme: the
+  copies in the rows' weight, a 2 px line under the stack (forced colours too); not printed.
 
 ### Changed
 

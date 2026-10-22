@@ -451,6 +451,11 @@ $emit: true !default;
       color: ButtonText;
     }
 
+    // A tree's pinned parents (tree-sticky.md): the line under them in the system's text colour.
+    .dzg-sticky > .dzg-row:last-child .dzg-cell {
+      border-block-end-color: CanvasText;
+    }
+
     // A value flash's mark (step 26): the system's highlight.
     .dzg-cell.dzg-flash {
       border-inline-start-color: Highlight;
@@ -475,6 +480,16 @@ $emit: true !default;
   .dzg-row[data-context-row] .dzg-seg-start,
   .dzg-row[data-context-row] .dzg-seg-end {
     color: var(--dzg-context-fg, var(--tz-fg-muted));
+  }
+
+  // A tree's pinned parents (Phase 4, tree-sticky.md): copies of rows living in the header, in the rows'
+  // weight; a thicker line under the last one marks where the pinned rows end and the body scrolls.
+  .dzg-sticky {
+    font-weight: 400;
+  }
+
+  .dzg-sticky > .dzg-row:last-child .dzg-cell {
+    border-block-end: 2px solid var(--tz-border);
   }
 
   // A lazy tree's loading and error rows (Phase 4 step 7, tree-lazy.md): their words in the muted

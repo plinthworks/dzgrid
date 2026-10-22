@@ -378,6 +378,9 @@
   .dzg-toggle {
     color: ButtonText;
   }
+  .dzg-sticky > .dzg-row:last-child .dzg-cell {
+    border-block-end-color: CanvasText;
+  }
   .dzg-cell.dzg-flash {
     border-inline-start-color: Highlight;
   }
@@ -396,6 +399,14 @@
 .dzg-row[data-context-row] .dzg-seg-start,
 .dzg-row[data-context-row] .dzg-seg-end {
   color: var(--dzg-context-fg, var(--tz-fg-muted));
+}
+
+.dzg-sticky {
+  font-weight: 400;
+}
+
+.dzg-sticky > .dzg-row:last-child .dzg-cell {
+  border-block-end: 2px solid var(--tz-border);
 }
 
 .dzg-row[data-kind=loading] .dzg-label {

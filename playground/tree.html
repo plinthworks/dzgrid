@@ -17,13 +17,14 @@
 <body>
   <nav><a href="./index.html">← Démos</a></nav>
   <h1 id="title">Arbre</h1>
-  <p class="note" id="note">Des services, leurs patients, et les séjours de certains patients (lignes reliées par l’identifiant du parent). Le chevron ouvre et ferme une ligne ; au clavier, dans la colonne « Nom » : → ouvre, ← ferme ou remonte au parent, * ouvre les frères (en arabe, les flèches sont inversées). Un filtre garde les lignes qui correspondent et leurs ancêtres (grisés) ; l’effacer rend l’arbre tel qu’il était. Un tri ordonne les enfants de chaque parent entre eux.</p>
+  <p class="note" id="note">Des services, leurs patients, et les séjours de certains patients (lignes reliées par l’identifiant du parent). Le chevron ouvre et ferme une ligne ; au clavier, dans la colonne « Nom » : → ouvre, ← ferme ou remonte au parent, * ouvre les frères (en arabe, les flèches sont inversées). Un filtre garde les lignes qui correspondent et leurs ancêtres (grisés) ; l’effacer rend l’arbre tel qu’il était. Un tri ordonne les enfants de chaque parent entre eux. En descendant dans les enfants, leurs parents restent épinglés sous l’en-tête (« Parents épinglés ») ; un clic sur l’un ramène à la vraie ligne, son chevron la ferme.</p>
   <form class="bar" id="controls">
     <label>Langue <select name="locale"><option value="fr-FR">français</option><option value="ar-DZ">arabe (droite à gauche)</option></select></label>
     <label>Thème <select name="theme"><option value="">système</option><option>light</option><option>dark</option></select></label>
     <label>Lignes <select name="rows"><option value="10000">≈ 10 000</option><option value="100000">≈ 100 000</option><option value="1000000">1 000 000 (dix niveaux)</option></select></label>
     <label>Forme <select name="shape"><option value="parent">identifiant du parent</option><option value="nested">listes imbriquées</option><option value="path">chemins (services sans ligne)</option></select></label>
     <label>Chargement <select name="lazy"><option value="">tout en mémoire</option><option value="client">enfants à la demande (chargeur de l’hôte)</option><option value="server">enfants à la demande (serveur)</option></select></label>
+    <label>Parents épinglés <select name="sticky"><option value="3">3 (par défaut)</option><option value="1">1 (le parent direct)</option><option value="0">0 (aucun)</option></select></label>
     <label id="failbox" hidden><input type="checkbox" id="fail"> <span id="faillabel">Le serveur échoue</span></label>
     <button type="button" id="all">Tout déplier</button>
     <button type="button" id="none">Tout replier</button>

@@ -4,6 +4,7 @@
 // Only « Service 0 » is open at first. `shape=path` (step 5): the services have no row, the rows give paths
 // (`Service s / patient / stay`): the services are filler rows. `lazy=1` (step 7): the services only, their
 // children loaded when one opens, by a loader the checks answer (`t.loads`: `ok()`, `no()`).
+// `pin=1` (sticky parent rows, tree-sticky.md): « Nom » pinned at the start, C5 at the end; `sticky=n` the copies asked.
 import { createGrid } from '/packages/dom/src/index.ts';
 import { tree } from '/packages/dom/src/tree.ts';
 import { lazyChildren } from '/packages/dom/src/tree-lazy.ts';
@@ -44,6 +45,8 @@ const key = (id: string) => (paths && /^s\d+$/.test(id) ? groupKey([`Service ${i
 const base = ar ? AR : FR;
 const messages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_TREE : FR_TREE).text } };
 const lazy = q.get('lazy') === '1';
+const pin = q.get('pin') === '1';
+const sticky = q.get('sticky') === null ? {} : { sticky: Number(q.get('sticky')) };
 const loads: { id: string; ok(): void; no(): void; signal: AbortSignal }[] = [];
 const loader = lazyChildren<Row>({
   has: (r) => !r.parent,
@@ -52,14 +55,14 @@ const loader = lazyChildren<Row>({
 const grid = createGrid<Row>(document.getElementById('host')!, {
   rows: lazy ? rows.filter((r) => !r.parent) : given, getRowId: (r) => r.id, messages, locale,
   columns: [
-    { id: 'name', header: ar ? 'الاسم' : 'Nom', width: 220, filter: { kind: 'text', floating: true } },
+    { id: 'name', header: ar ? 'الاسم' : 'Nom', width: 220, filter: { kind: 'text', floating: true }, ...(pin && { pinned: 'start' as const }) },
     { id: 'city', header: ar ? 'المدينة' : 'Ville', width: 160, filter: { kind: 'text', floating: true } },
     { id: 'age', header: ar ? 'العمر' : 'Âge', type: 'number', width: 110, filter: { kind: 'number', floating: true } },
-    ...Array.from({ length: 6 }, (_, k) => ({ id: `x${k}`, header: `C${k}`, width: 110, value: (r: Row) => (r.name.length * (k + 3)) % 97 })),
+    ...Array.from({ length: 6 }, (_, k) => ({ id: `x${k}`, header: `C${k}`, width: 110, value: (r: Row) => (r.name.length * (k + 3)) % 97, ...(pin && k === 5 && { pinned: 'end' as const }) })),
   ],
-  features: [tree<Row>(paths ? { path: (r) => r.path! } : { parentId: (r) => r.parent, ...(lazy && { lazy: loader }) }), filters({ floating: true })],
+  features: [tree<Row>({ ...(paths ? { path: (r: Row) => r.path! } : { parentId: (r: Row) => r.parent, ...(lazy && { lazy: loader }) }), ...sticky }), filters({ floating: true })],
   selection: { mode: 'multi', checkbox: true, click: true },
 });
 if (!lazy) grid.kernel.dispatch({ type: 'rows.expand', rows: [key('s0')], expanded: true }, 'host');
-(window as any).t = { grid, rows, key, loads, scrollTo: (l: number) => (grid as any).scroll.scrollTo(l), logicalTop: () => (grid as any).scroll.logicalTop };
+(window as any).t = { grid, rows, key, loads, scrollTo: (l: number) => (grid as any).scroll.scrollTo(l), logicalTop: () => (grid as any).scroll.logicalTop, rowH: () => (grid as any).context.rowHeight() };
 (window as any).ready = true;

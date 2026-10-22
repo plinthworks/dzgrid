@@ -172,12 +172,13 @@ describe('the DOM layer’s shape', () => {
   });
 
   it('has the tree entry reach the base only through the grid’s context and the types (Phase 4 step 4)', () => {
-    // @dzgrid/dom/tree: value imports from the core, its internal entry, @dzgrid/core/tree and its own folder only.
+    // @dzgrid/dom/tree: value imports from the core, its internal entry, @dzgrid/core/tree and its own folder only
+    // (the sticky parent rows' pure stack, tree/sticky.ts, imports nothing).
     const entry = files(SRC).filter((f) => /^tree(\/|\.ts$)/.test(relative(SRC, f)));
-    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['tree.ts', 'tree/index.ts', 'tree/lazy.ts', 'tree/styles.ts']);
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['tree.ts', 'tree/index.ts', 'tree/lazy.ts', 'tree/sticky.ts', 'tree/styles.ts']);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/tree)$/.test(s) && s !== 'tree.ts: ./tree/index.js' && s !== 'tree/index.ts: ./styles.js' && s !== 'tree/lazy.ts: @dzgrid/core/tree-lazy');
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/tree)$/.test(s) && s !== 'tree.ts: ./tree/index.js' && s !== 'tree/index.ts: ./styles.js' && s !== 'tree/index.ts: ./sticky.js' && s !== 'tree/lazy.ts: @dzgrid/core/tree-lazy');
     expect(offenders).toEqual([]);
     // Nothing else imports it, nor the core's tree entry: a flat grid carries none of it (the lazy entry, step 7, only its own file).
     expect(files(SRC).filter((f) => !/^tree(\/|\.ts$)/.test(relative(SRC, f)) && relative(SRC, f) !== 'tree-lazy.ts' && /from '(\.{1,2}\/(?:.*\/)?tree(\/|\.js')|@dzgrid\/core\/tree')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);

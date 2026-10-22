@@ -551,11 +551,20 @@ la grille : noter les siens.
 95. **Arabe.** Mêmes étapes de droite à gauche : flèche **gauche** pour ouvrir, **droite** pour
     fermer et remonter ; le chevron d'une ligne repliée pointe vers la gauche ; les niveaux et
     positions lus en chiffres latins ou arabes selon le lecteur (noter lesquels).
+95b. **Parents épinglés (silencieux).** « Tout déplier », puis descendre au clavier (`↓` maintenu, puis
+    `Page suiv.`) loin dans les patients d'un service : à l'écran, le service et le patient restent
+    épinglés sous l'en-tête (fiche `docs/behaviors/tree-sticky.md`). Attendu : le lecteur **ne dit
+    rien** de ces copies — ni en défilant, ni en arrivant sur une ligne qu'elles couvraient ; chaque
+    ligne n'est dite qu'une fois, avec son niveau et sa position ; la navigation du lecteur (VoiceOver
+    `VO+↑`, NVDA mode navigation `↑`) ne s'arrête jamais sur une copie. `↑` jusqu'à une ligne qui
+    était sous les copies : elle est dite normalement et reste visible (la grille fait défiler). Un clic
+    sur une copie (souris) : le lecteur dit la vraie ligne focalisée, sans « sélectionné ». Noter tout
+    mot dit en trop. Arabe : idem.
 
 Consigner le résultat dans `docs/behaviors/tree-view.md` (fin de la fiche) et dans `ROADMAP.md`
 (clôture de la Phase 4, étape 13 ; écoute non bloquante). Règle de décision propre à cette section :
 un niveau ou une position faux (87, 88, 93), une ouverture ou une fermeture muette ou dite deux fois
-(89, 90, 91), ou un focus perdu (92) se corrige avant la clôture de la Phase 4 ; un lecteur qui ne
+(89, 90, 91), un focus perdu (92) ou une copie épinglée dite ou atteinte (95b) se corrige avant la clôture de la Phase 4 ; un lecteur qui ne
 dit pas `aria-posinset` (VoiceOver) est noté, sans correction si l'annonce dit l'action.
 
 ## 17. Étapes — ligne de détail, maître/détail (Phase 4, étapes 9 à 11)

@@ -1370,6 +1370,111 @@ async function treeChecks(name, ctx) {
     await page.screenshot({ path: `${OUT}/${name}-tree-lazy-${c.qs.includes('ar-DZ') ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
     await page.close();
   }
+  // Sticky parent rows (tree-sticky.md, sticky-blueprint.md): « Nom » pinned at the start, C5 at the end,
+  // French and Arabic right to left. Copies under the header line up with it to the pixel, through a
+  // horizontal scroll; axe 0; the push (screenshot); a click on a copy focuses the real row clear of the
+  // copies, without selecting; its chevron closes; forced colours; print hides them.
+  for (const c of [
+    { qs: 'pin=1&locale=fr-FR&theme=light', tag: 'tree sticky fr ltr light', rtl: false, closed: 'Patient 3 réduit' },
+    { qs: 'pin=1&locale=ar-DZ&dir=rtl&theme=dark', tag: 'tree sticky ar rtl dark', rtl: true, closed: 'تم طي Patient 3' },
+  ]) {
+    const { page, errors } = await open(c.qs);
+    // Service 0 open (index 0), Patient 3 (index 3) opened: its stays at 4, 5, 6; scrolled into the first stay (Patient 4, at 7, is three rows below the stack's edge).
+    await page.evaluate(() => { window.t.grid.kernel.dispatch({ type: 'rows.expand', rows: [window.t.key('s0p3')], expanded: true }, 'host'); });
+    await frames(page);
+    const h = await page.evaluate(() => window.t.rowH());
+    await page.evaluate((h) => window.t.scrollTo(4 * h + 5), h);
+    await frames(page, 3);
+    const look = () => page.evaluate(() => {
+      const copies = [...document.querySelectorAll('.dzg-sticky > .dzg-row')];
+      const header = document.querySelector('.dzg-header');
+      const rows = [...header.querySelectorAll(':scope > .dzg-hrow')];
+      const hb = rows.at(-1).getBoundingClientRect().bottom;
+      let worst = 0;
+      for (const r of copies) for (const cell of r.querySelectorAll('[data-col]')) {
+        const hc = document.querySelector(`.dzg-header .dzg-hrow .dzg-hcell[data-col="${cell.dataset.col}"]`);
+        if (!hc) return { missing: cell.dataset.col };
+        const a = hc.getBoundingClientRect(), b = cell.getBoundingClientRect();
+        worst = Math.max(worst, Math.abs(a.left - b.left), Math.abs(a.right - b.right));
+      }
+      const hcheck = document.querySelector('.dzg-header .dzg-check'), ccheck = copies[0]?.querySelector('.dzg-check');
+      if (hcheck && ccheck) { const a = hcheck.getBoundingClientRect(), b = ccheck.getBoundingClientRect(); worst = Math.max(worst, Math.abs(a.left - b.left), Math.abs(a.right - b.right)); }
+      const tops = copies.map((r) => r.getBoundingClientRect().top - hb);
+      const mid = copies[0] && (() => { const b = copies[0].querySelector('[data-col="x2"]')?.getBoundingClientRect() ?? copies[0].getBoundingClientRect(); return document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2)?.closest('.dzg-sticky') !== null; })();
+      return { names: copies.map((r) => r.querySelector('[data-col="name"]')?.textContent), worst, tops, onTop: mid, hidden: document.querySelector('.dzg-sticky')?.getAttribute('aria-hidden'), headerH: header.offsetHeight, rowindex: copies.some((r) => r.hasAttribute('aria-rowindex') || r.hasAttribute('aria-level')) };
+    });
+    const s0 = await look();
+    let v = await axe(page);
+    check(name, `${c.tag}: Service 0 and Patient 3 pinned under the header (aria-hidden, no row attributes), aligned with the headers (${s0.worst?.toFixed?.(2)} px), on top of the body; axe 0`,
+      JSON.stringify(s0.names) === '["Service 0","Patient 3"]' && s0.worst < 0.5 && Math.abs(s0.tops[0]) < 0.5 && Math.abs(s0.tops[1] - h) < 0.5 && s0.onTop && s0.hidden === 'true' && !s0.rowindex && v.length === 0, { s0, v });
+    // A horizontal scroll: the copies' centre cells follow the headers, the pinned ones stay.
+    await page.evaluate(() => { const vp = document.querySelector('.dzg-viewport'); vp.scrollLeft = document.documentElement.dir === 'rtl' ? -300 : 300; });
+    await frames(page, 3);
+    const s1 = await look();
+    const pinned = await page.evaluate(() => {
+      const r = document.querySelector('.dzg-sticky > .dzg-row');
+      const hs = document.querySelector('.dzg-header .dzg-hrow .dzg-seg-start').getBoundingClientRect(), cs = r.querySelector('.dzg-seg-start').getBoundingClientRect();
+      const he = document.querySelector('.dzg-header .dzg-hrow .dzg-seg-end').getBoundingClientRect(), ce = r.querySelector('.dzg-seg-end').getBoundingClientRect();
+      return Math.max(Math.abs(hs.left - cs.left), Math.abs(he.left - ce.left));
+    });
+    check(name, `${c.tag}: scrolled 300 px across: copies still aligned (${s1.worst?.toFixed?.(2)} px), pinned segments with the header's (${pinned.toFixed(2)} px); the header's height unchanged`, s1.worst < 0.5 && pinned < 0.5 && s1.headerH === s0.headerH, { s1, pinned });
+    await page.evaluate(() => { document.querySelector('.dzg-viewport').scrollLeft = 0; });
+    // The push: Patient 3's last stay (6) near the top, Patient 4 (7) under its copy: the copy slides up.
+    await page.evaluate((h) => window.t.scrollTo(5 * h + h / 2), h);
+    await frames(page, 3);
+    const push = await look();
+    await page.screenshot({ path: `${OUT}/${name}-tree-sticky-push-${c.rtl ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 400 } });
+    check(name, `${c.tag}: the push: Patient 3's copy slid up by half a row (${push.tops?.[1]?.toFixed?.(1)} px) as Patient 4 comes`, JSON.stringify(push.names) === '["Service 0","Patient 3"]' && Math.abs(push.tops[1] - h / 2) < 1, push);
+    // A click on Patient 3's copy (city): the real row focused, under Service 0's copy, nothing selected.
+    await page.evaluate((h) => window.t.scrollTo(4 * h + 5), h);
+    await frames(page, 3);
+    const box = await page.evaluate(() => {
+      const r = [...document.querySelectorAll('.dzg-sticky > .dzg-row')][1];
+      const cell = r?.querySelector('[data-col="city"]');
+      if (!cell) return { missing: true, cols: r ? [...r.querySelectorAll('[data-col]')].map((x) => x.dataset.col) : null, scrollLeft: document.querySelector('.dzg-viewport').scrollLeft, body: [...document.querySelector('.dzg-layer > .dzg-row').querySelectorAll('[data-col]')].map((x) => x.dataset.col) };
+      const b = cell.getBoundingClientRect();
+      return { x: b.left + b.width / 2, y: b.top + b.height / 2 };
+    });
+    if (box.missing) console.log(`       sticky: no city cell in the copy ${JSON.stringify(box)}`);
+    await page.mouse.click(box.x, box.y);
+    await frames(page, 3);
+    const clicked = await page.evaluate(() => {
+      const a = document.activeElement;
+      const copies = [...document.querySelectorAll('.dzg-sticky > .dzg-row')];
+      const bottom = Math.max([...document.querySelectorAll('.dzg-header > .dzg-hrow')].at(-1).getBoundingClientRect().bottom, ...copies.map((r) => r.getBoundingClientRect().bottom));
+      return { inLayer: !!a.closest('.dzg-layer'), col: a.dataset.col, row: String(window.t.grid.kernel.focus?.row), clear: a.getBoundingClientRect().top - bottom, sel: window.t.grid.kernel.selection.keys.size, inSticky: !!a.closest('.dzg-sticky') };
+    });
+    check(name, `${c.tag}: a click on a copy focuses the real row (city), clear of the copies (${clicked.clear.toFixed(1)} px), nothing selected`, clicked.inLayer && !clicked.inSticky && clicked.col === 'city' && clicked.row.endsWith(':s0p3') && clicked.clear > -0.5 && clicked.sel === 0, clicked);
+    // Its chevron closes it, said once.
+    await page.evaluate((h) => window.t.scrollTo(4 * h + 5), h);
+    await frames(page, 3);
+    const tg = await page.evaluate(() => { const b = [...document.querySelectorAll('.dzg-sticky > .dzg-row')][1].querySelector('.dzg-toggle').getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2, w: b.width, h: b.height }; });
+    await page.mouse.click(tg.x, tg.y);
+    await page.waitForTimeout(150);
+    const shut = await page.evaluate(() => ({ open: window.t.grid.kernel.expansion.has(window.t.key('s0p3')), said: window.said.at(-1), sel: window.t.grid.kernel.selection.keys.size }));
+    check(name, `${c.tag}: the copy's chevron (${tg.w}×${tg.h} px) closes Patient 3, « ${c.closed} », nothing selected`, !shut.open && shut.said === c.closed && shut.sel === 0 && tg.w >= 24 && tg.h >= 24, { shut, tg });
+    // Forced colours (the line under the stack, the chevron) and print (no copies).
+    await page.evaluate(() => { window.t.grid.kernel.dispatch({ type: 'rows.expand', rows: [window.t.key('s0p3')], expanded: true }, 'host'); });
+    await page.evaluate((h) => window.t.scrollTo(4 * h + 5), h);
+    await frames(page, 3);
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.waitForTimeout(200);
+    const forced = await page.evaluate(() => {
+      const probe = (c) => { const p = document.createElement('span'); p.style.color = c; document.body.append(p); const v = getComputedStyle(p).color; p.remove(); return v; };
+      const last = [...document.querySelectorAll('.dzg-sticky > .dzg-row')].at(-1);
+      const cell = last.querySelector('.dzg-cell');
+      return { line: getComputedStyle(cell).borderBlockEndColor, width: getComputedStyle(cell).borderBlockEndWidth, canvasText: probe('CanvasText'), chevron: getComputedStyle(last.querySelector('.dzg-toggle'), '::before').borderBottomColor, buttonText: probe('ButtonText') };
+    });
+    await page.screenshot({ path: `${OUT}/${name}-tree-sticky-forced-${c.rtl ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 400 } });
+    await page.emulateMedia({ forcedColors: 'none' });
+    check(name, `${c.tag}: forced colours: a 2 px line under the stack in CanvasText, the chevron in ButtonText`, forced.line === forced.canvasText && forced.width === '2px' && forced.chevron === forced.buttonText, forced);
+    await page.emulateMedia({ media: 'print' });
+    const printed = await page.evaluate(() => getComputedStyle(document.querySelector('.dzg-sticky')).display);
+    await page.emulateMedia({ media: 'screen' });
+    check(name, `${c.tag}: print: the copies are not printed`, printed === 'none', printed);
+    check(name, `${c.tag}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
   // ≈ 100 000 rows, everything opened, scrolled to the middle and the end: the rows there say their place.
   {
     const { page, errors } = await open('locale=fr-FR&rows=100000');

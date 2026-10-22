@@ -5,13 +5,14 @@ import { tree } from '/packages/dom/src/tree.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
 import { FR_TREE } from '/packages/dom/src/locales/fr-tree.ts';
 import { treeProfile, type TreeRow } from '/perf/profiles/tree.ts';
+import { stickyStack } from '/packages/dom/src/tree/sticky.ts';
 
 const host = document.getElementById('host')!;
 const raf = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
 const messages = { ...FR, text: { ...FR.text, ...FR_TREE.text } };
 let rows: TreeRow[] = [];
 let grid: GridInstance<TreeRow> | null = null;
-let watch: { loaf: number[]; frames: number[]; stop: boolean; t0: number; detail: unknown[] } | null = null;
+let watch: { loaf: number[]; frames: number[]; stop: boolean; t0: number; detail: unknown[]; pinned: number } | null = null;
 
 /** A parent shown among the rows mounted in the view's upper half (by aria-rowindex), with its index. */
 function parentInView(): { key: string; index: number } | null {
@@ -52,7 +53,7 @@ const p = {
   },
   /** Long animation frames and frame times from now to `stop()` (the runner wheels meanwhile). */
   start() {
-    const w = (watch = { loaf: [] as number[], frames: [] as number[], stop: false, t0: performance.now(), detail: [] as unknown[] });
+    const w = (watch = { loaf: [] as number[], frames: [] as number[], stop: false, t0: performance.now(), detail: [] as unknown[], pinned: 0 });
     const po = new PerformanceObserver((l) => {
       // A frame that began before the watch (the expand-all's) is not the scroll's.
       for (const e of (l.getEntries() as any[]).filter((x) => x.startTime >= w.t0)) {
@@ -65,6 +66,8 @@ const p = {
     const tick = () => {
       const now = performance.now();
       w.frames.push(now - last);
+      // Frames where parents were pinned (sticky parent rows, on by default): the scroll did meet them.
+      if (document.querySelector('.dzg-sticky > .dzg-row')) w.pinned++;
       last = now;
       if (!w.stop) requestAnimationFrame(tick);
       else po.disconnect();
@@ -76,7 +79,7 @@ const p = {
     await raf();
     await raf();
     const vp = document.querySelector<HTMLElement>('.dzg-viewport')!;
-    return { loaf: watch!.loaf, frames: watch!.frames.slice(2), top: vp.scrollTop, logical: (grid as any).scroll?.logicalTop, detail: watch!.detail };
+    return { loaf: watch!.loaf, frames: watch!.frames.slice(2), top: vp.scrollTop, logical: (grid as any).scroll?.logicalTop, detail: watch!.detail, pinned: watch!.pinned / Math.max(1, watch!.frames.length) };
   },
   /** A parent in the view closed then opened again, each to the next frame (and its model's part, `script`); `n` pairs. */
   async toggles(n: number): Promise<{ ms: number[]; script: number[]; index: number }> {
@@ -95,6 +98,20 @@ const p = {
       }
     }
     return { ms, script, index: at.index };
+  },
+  /** The pinned parents worked out (the grid's own function, its rows and layout) at `n` scroll tops: mean ms. */
+  stackCost(n: number): number {
+    const g = (grid as any).context;
+    const d = grid!.kernel.rows.displayed as any;
+    const L = g.layout;
+    const input = { top: 0, n: 3, viewBlock: g.viewBlock, h: g.rowHeight(), count: d.count, layout: L, levelAt: (i: number) => d.levelAt(i), ancestorOf: (i: number) => { const p = d.parentOf(d.keyAt(i)); return p === null ? -1 : d.indexOf(p); } };
+    let seed = 7;
+    const t0 = performance.now();
+    for (let k = 0; k < n; k++) {
+      seed = (seed * 1103515245 + 12345) >>> 0;
+      stickyStack({ ...input, top: (seed / 4294967296) * L.total });
+    }
+    return (performance.now() - t0) / n;
   },
   /** The focus on the first row's name cell (the runner then presses Ctrl+End). */
   async focusFirst() {

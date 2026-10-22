@@ -423,6 +423,14 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Budget** : 1 000 o tenus (994) en sortant `measure`/`layout` de la forme, le cache des lignes entre bascules et la vérification de `at`.
 - **Revue (décisions du lead)** : `expandAll` sur des détails suit la profondeur d'un arbre (maîtres au niveau 0 ; profondeur 0 n'ouvre rien, ≥ 1 ou aucune ouvre tout ; fermer à 0 ferme tout) ; le focus d'un détail dont le maître disparaît va à la ligne arrivée à la place du maître (core +7 o) ; le pied de page compte les lignes de données de la page, jamais les détails.
 
+### Décisions de la Phase 4, parents épinglés (2026-10-22 ; décisions Q10–Q11, plan `docs/phase-4-steps/sticky-blueprint.md`, fiche `docs/behaviors/tree-sticky.md`)
+- **Option** `tree({ sticky })` : 0 aucun (ni couche ni calcul), n les n plus proches, 3 par défaut ; jamais plus que la moitié de la vue.
+- **Calcul pur** `stickyStack` (`dom/src/tree/sticky.ts`) : la pile grandit depuis la ligne à son bord bas ; chaque copie est poussée vers le haut par la fin de son sous-arbre ; décalages de la disposition de la peinture (prêt pour l'étape 9), différences logiques seulement.
+- **Copies** : une couche `aria-hidden` dans l'en-tête (hauteur nulle, sous ses rangées), un second moteur de lignes (`rowRenderer.spawn`) ; texte seul (Q11b), sans attributs de ligne, jamais focalisées ; rien n'est écrit quand rien ne change.
+- **Pointeur** (Q11c) : chevron = fermer ; case = rien ; ailleurs = focus sur la vraie ligne, défilée sous ses propres copies, sans sélection.
+- **Coutures de la base** : `GridContext.inset` / `insetFor`, lus par `ensureVisible` (WCAG 2.4.11) ; aucune dans le cœur.
+- **Budget** : `@dzgrid/dom/tree` 2 600 → 3 700 pour la Phase 4 (Q11a).
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.

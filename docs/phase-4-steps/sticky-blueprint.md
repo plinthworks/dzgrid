@@ -32,3 +32,6 @@ dom/tree +~1 000 → owner budget 3 700 (Q11a); dom base +~90 (21 300 held, meas
 3. Walk (deep tree scroll, collapse from a copy, sort/filter/update while scrolling).
 4. Browser --only tree fr and ar RTL with pinned columns and horizontal scroll: alignment 0 px, axe, push screenshot, forced colours, print, 1M profile.
 5. a11y-protocol §16: copies are silent.
+
+## Results (2026-10-22, not committed)
+Done as designed, with these deviations: no `endScanMax` parameter (the scan is bounded by the rows between the top and the stack's edge, proved and checked against the oracle); `stickyStack` takes `h` (the cap) and returns `height` and `rounds`; the rounds are not capped at 4 but end by depth (≤ n + 2 on uniform rows, tested); `mousedown` prevented as well as `pointerdown` (only it stops the focus); an outer copy is stacked above an inner one (`z-index`), the layer under the header rows (`z-index: -1`); the 2 px line skips the selection box's cell. The `structure.test.ts` guard lists `tree/sticky.ts`. Sizes, gate, browser, bench: `docs/STATUS.md`.

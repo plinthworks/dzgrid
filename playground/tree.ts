@@ -9,6 +9,7 @@
 // `?lazy=client|server` (Phase 4 step 7, docs/behaviors/tree-lazy.md): the services only at first, their
 // patients asked when a service opens — of the host's loader (`load`) or of a fake server (`sourceRows`
 // with `children`) — after 300 to 1 500 ms; « Le serveur échoue » makes every load fail (the error row, Retry).
+// `?sticky=0|1|3` (Phase 4, docs/behaviors/tree-sticky.md): how many parents stay pinned under the header (3 by default).
 import { createGrid } from '@dzgrid/dom';
 import { lazyChildren } from '@dzgrid/dom/tree-lazy';
 import { sourceRows } from '@dzgrid/core/server';
@@ -40,6 +41,8 @@ const lazyMode = million ? '' : q.get('lazy') === 'client' ? 'client' : q.get('l
 const shape = million || lazyMode ? 'parent' : q.get('shape') === 'nested' ? 'nested' : q.get('shape') === 'path' ? 'path' : 'parent';
 field('shape').value = shape;
 field('lazy').value = lazyMode;
+const sticky = ['0', '1'].includes(q.get('sticky') ?? '') ? Number(q.get('sticky')) : 3;
+field('sticky').value = String(sticky);
 document.getElementById('failbox')!.hidden = !lazyMode;
 if (q.get('theme')) document.documentElement.dataset['theme'] = q.get('theme')!;
 document.documentElement.lang = locale;
@@ -47,7 +50,7 @@ document.documentElement.lang = locale;
 document.documentElement.dir = ar ? 'rtl' : 'ltr';
 form.addEventListener('change', (e) => {
   if ((e.target as Element).id === 'fail') return;
-  const next = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, rows: field('rows').value, shape: field('shape').value, lazy: field('lazy').value });
+  const next = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, rows: field('rows').value, shape: field('shape').value, lazy: field('lazy').value, sticky: field('sticky').value });
   if (field('locale').value === 'ar-DZ') next.set('direction', 'auto');
   location.search = next.toString();
 });
@@ -115,7 +118,7 @@ const events: GridEvent<Row>[] = [];
 const grid = createGrid<Row>(document.getElementById('host')!, {
   ...(source ? { source, operations: { filter: 'client', quick: 'client', sort: 'client', page: 'off' } } : { rows: lazyMode ? rows.filter((r) => !r.parent) : top }),
   getRowId: (r) => r.id, columns, messages, locale, direction: 'auto',
-  features: [tree<Row>({ ...treeOptions, ...(lazy && { lazy }) }), filters({ floating: true, popup: true })],
+  features: [tree<Row>({ ...treeOptions, sticky, ...(lazy && { lazy }) }), filters({ floating: true, popup: true })],
   selection: { mode: 'multi', checkbox: true },
   onEvent: (e) => {
     if (e.type === 'problems') console.warn(e.problems);

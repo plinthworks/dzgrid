@@ -83,7 +83,8 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     const top = g.scroll.logicalTop;
     const off = L ? L.offsetOf(i) : i * h;
     let next = top;
-    if (off < top) next = off;
+    // Under rows drawn over the body's top (a tree's pinned parents, WCAG 2.4.11): just below its own.
+    if (off < top + (g.inset ?? 0)) next = off - (g.insetFor?.(i) ?? 0);
     else if (off + h > top + box.block) next = off + h - box.block;
     if (next !== top) {
       g.scroll.scrollTo(next);

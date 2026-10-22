@@ -103,6 +103,10 @@ export interface GridContext<T> {
   layoutFor?: (d: DisplayedRows<T>, h: number) => RowLayout;
   /** The row layout of the last paint. */
   layout?: RowLayout;
+  /** Rows drawn over the top of the body at the last paint (a tree's pinned parents): their height. */
+  inset?: number;
+  /** The room a row needs above it to be seen whole (its pinned parents); none when unset. */
+  insetFor?: (i: number) => number;
 
   schedule(): void;
   /** The parts: the features' under the host's `settings.parts`; the same object until that changes. */

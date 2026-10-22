@@ -159,6 +159,11 @@ export class RowRenderer<T> {
     this.#layer = layer;
   }
 
+  /** Another renderer of the same grid into `layer` (its own rows and pool): a tree's pinned parents. */
+  spawn(layer: HTMLElement): RowRenderer<T> {
+    return new RowRenderer<T>(this.#doc, layer, this.#report);
+  }
+
   get mounted(): ReadonlyMap<RowKey, RowView> {
     return this.#mounted;
   }

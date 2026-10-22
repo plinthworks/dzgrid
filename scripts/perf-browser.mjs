@@ -4,7 +4,7 @@
  * at 1 280 × 720; medians of 5 page loads. Budgets in perf/browser-budgets.json;
  * exits 1 when a line is over. Headless on a fast machine, the numbers are
  * indicative: K.8's figures are owed on a mid-range laptop, headed.
- * `-- --only tree`: the million-row tree alone (Phase 4 step 6); it runs last in a full run.
+ * `-- --only tree`: the million-row tree alone (Phase 4 step 6, with its pinned parents); it runs last in a full run.
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -233,6 +233,9 @@ try {
     line('tree 1 000 000 open, 2 s wheel scroll: longest animation frame', Math.max(0, ...sc.loaf), 'ms');
     line('tree 1 000 000 open, 2 s wheel scroll: median frame', median(sc.frames), 'ms');
     line('tree 1 000 000 open, 2 s wheel scroll: p95 frame', percentile(sc.frames, 95), 'ms');
+    // Sticky parent rows (tree-sticky.md), on by default: met during the scroll, worked out within 0.2 ms.
+    line('tree 1 000 000 open, 2 s wheel scroll: frames with pinned parents', Math.round(sc.pinned * 100), '%', 'higher');
+    line('tree 1 000 000 open: pinned parents worked out (mean of 10 000 scroll tops)', await pg.evaluate(() => window.p.stackCost(10_000)), 'ms');
     // A parent near the top closed and opened again (three times each), to the next frame.
     await pg.evaluate(() => { document.querySelector('.dzg-viewport').scrollTop = 0; });
     await pg.waitForTimeout(100);

@@ -3,9 +3,11 @@ import { emit } from '@dzgrid/core/internal';
 import { treeColumnProblems, treeConflicts, treeShape, type TreeOptions, type TreeRows, type TreeShape } from '@dzgrid/core/tree';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
+import type { Frame, RowView } from '../render/rows.js';
 import type { TreeMessageKey } from '../part-texts.js';
 import { injectTreeStyles } from './styles.js';
 import type { LazyChildren } from './lazy.js';
+import { stickyStack } from './sticky.js';
 
 /** The texts `tree()` needs, from `@dzgrid/dom/locales/<lang>-tree`. */
 export const TREE_KEYS = ['tree.expanded', 'tree.collapsed', 'tree.expandedSome'] as const satisfies readonly TreeMessageKey[];
@@ -17,6 +19,8 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
   readonly indent?: number;
   /** Children loaded when their parent opens: `lazyChildren({ has, load })` from `@dzgrid/dom/tree-lazy` (tree-lazy.md). */
   readonly lazy?: LazyChildren<T>;
+  /** Parents kept pinned under the header while their children scroll, the nearest first (tree-sticky.md): 0 none, 3 by default. */
+  readonly sticky?: number;
 }
 
 /**
@@ -33,13 +37,13 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
  */
 export function tree<T>(o: TreeFeatureOptions<T>): GridFeature {
   let s: TreeShape<T> | undefined;
-  return { id: 'tree', shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column, o.indent ?? 16, o.lazy, s) };
+  return { id: 'tree', shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column, o.indent ?? 16, o.lazy, s, o.sticky) };
 }
 
 type Rows = TreeRows<unknown>;
 const PAD = 'padding-inline-start';
 
-function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: number, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined): FeatureHandle {
+function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: number, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined, sticky = 3): FeatureHandle {
   const missing = TREE_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`tree: missing ${missing.join(', ')}`);
   const { kernel, el, rowRenderer, doc } = g;
@@ -104,6 +108,42 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     expand([key!], !d!.expandedAt(i));
   }, { capture: true });
 
+  // Pinned parents (tree-sticky.md): a layer under the header rows, drawn by a second renderer; 0 makes none.
+  const n = Math.floor(sticky);
+  sticky = n !== n ? 3 : Math.max(0, n);
+  let last: unknown[] = [];
+  let layer: HTMLElement | null = null;
+  const stack = sticky ? rowRenderer.spawn((layer = doc.createElement('div'))) : null;
+  if (layer) {
+    layer.className = 'dzg-sticky';
+    layer.setAttribute('aria-hidden', 'true');
+    el.header.append(layer);
+    // The room a row needs above it: its own copies (WCAG 2.4.11), as many as fit.
+    g.insetFor = (i) => {
+      const d = tree();
+      const h = g.rowHeight();
+      return d ? Math.min(sticky, Math.floor(g.viewBlock / 2 / h), d.levelAt(i as DisplayIndex)) * h : 0;
+    };
+    // Never the DOM focus inside (no default on the pointer going down).
+    const no = (e: Event): void => e.preventDefault();
+    g.scope.on(layer, 'pointerdown', no);
+    g.scope.on(layer, 'mousedown', no);
+    // A copy goes to its real row (owner Q11c): its toggle opens or closes it; its box is inert; elsewhere the
+    // real row is focused (the cell clicked, the tree column otherwise) and brought into view, never selected.
+    g.scope.on(layer, 'click', (e) => {
+      e.stopPropagation();
+      const t = e.target as Element;
+      const row = t.closest('.dzg-row');
+      const key = row ? stack!.keyOf(row) : undefined;
+      const d = tree();
+      const i = key && d ? d.indexOf(key) : -1;
+      if (i === -1 || t.closest('.dzg-check')) return;
+      if (t.closest('.dzg-toggle')) return expand([key!], !d!.expandedAt(i));
+      const c = t.closest<HTMLElement>('.dzg-cell')?.dataset['col'] ?? treeColumn();
+      if (c && kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: key!, column: c } }, 'user').ok) g.restoreFocus();
+    }, { capture: true });
+  }
+
   /** `*`: every closed sibling with children opens (tree-keys.md). */
   function siblings(d: Rows, i: DisplayIndex): void {
     const level = d.levelAt(i);
@@ -138,7 +178,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     beforeRows() {
       if (spans) (g.spans = null), (g.bands = []);
     },
-    afterRows() {
+    afterRows(f: Frame<unknown>) {
       const d = tree();
       const col = treeColumn();
       // A tree column that is not first: allowed, told once each time it becomes so.
@@ -146,22 +186,40 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
       if (notFirst.length && !warned) emit(kernel, { type: 'problems', source: 'host', problems: notFirst });
       warned = notFirst.length > 0;
       const now = new Set<HTMLElement>();
-      for (const [key, v] of rowRenderer.mounted) {
+      if (stack) {
+        // The pinned parents (tree-sticky.md): worked out at each paint, redrawn only when they change.
+        const r = d ? stickyStack({ top: g.scroll.logicalTop, n: sticky, viewBlock: g.viewBlock, h: g.rowHeight(), count: d.count, layout: g.layout!, levelAt: (i) => d.levelAt(i as DisplayIndex), ancestorOf: (i) => {
+          const p = d.parentOf(d.keyAt(i as DisplayIndex));
+          return p === null ? -1 : d.indexOf(p);
+        } }) : { at: [] as number[], y: [] as number[], height: 0 };
+        g.inset = r.height;
+        const sig = [d, f.epoch, f.cols?.first, f.cols?.last, kernel.selection, ...r.at, ...r.y];
+        if (sig.length !== last.length || sig.some((x, j) => x !== last[j])) {
+          last = sig;
+          // Text only (owner Q11b), no focus, no spans; no row semantics but the selected look.
+          stack.render({ ...f, rowTop: (i) => r.y[r.at.indexOf(i)]!, partFor: () => null, spans: null, focusRow: null, focusCenter: -1, focusColumn: null, rowAttrs: (key, row) => (f.rowAttrs(key, row), row.removeAttribute('aria-rowindex')) }, r.at, []);
+          r.at.forEach((i, j) => (stack.mounted.get(d!.keyAt(i as DisplayIndex))!.el.style.zIndex = String(r.at.length - j)));
+        }
+        if (el.header.lastChild !== layer) el.header.append(layer!);
+      }
+      const decorate = (key: RowKey, v: RowView, copy?: boolean): void => {
         const i = d ? d.indexOf(key) : -1;
-        if (i === -1) continue;
+        if (i === -1) return;
         // A lazy parent not loaded has children too (-1: not known yet).
         const kids = d!.childrenAt(i) !== 0;
         const open = kids && d!.expandedAt(i);
         const level = d!.levelAt(i);
         const node = d!.nodeAt(i);
-        set(v.el, 'aria-busy', node.kind === 'loading' && !node.failed ? 'true' : null);
-        set(v.el, 'aria-level', String(level + 1));
-        set(v.el, 'aria-posinset', String(d!.posAt(i)));
-        set(v.el, 'aria-setsize', String(d!.sizeAt(i)));
-        set(v.el, 'aria-expanded', kids ? String(open) : null);
+        if (!copy) {
+          set(v.el, 'aria-busy', node.kind === 'loading' && !node.failed ? 'true' : null);
+          set(v.el, 'aria-level', String(level + 1));
+          set(v.el, 'aria-posinset', String(d!.posAt(i)));
+          set(v.el, 'aria-setsize', String(d!.sizeAt(i)));
+          set(v.el, 'aria-expanded', kids ? String(open) : null);
+        }
         set(v.el, 'data-context-row', d!.matchedAt(i) ? null : '');
         const cell = col === undefined ? undefined : v.cells.get(col)?.el;
-        if (!cell) continue;
+        if (!cell) return;
         now.add(cell);
         let t = cell.firstElementChild;
         if (!t?.classList.contains('dzg-toggle')) {
@@ -181,7 +239,9 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
         } else l?.remove();
         const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${level * indent}px)`;
         if (cell.style.getPropertyValue(PAD) !== pad) cell.style.setProperty(PAD, pad);
-      }
+      };
+      for (const [key, v] of rowRenderer.mounted) decorate(key, v);
+      if (stack) for (const [key, v] of stack.mounted) decorate(key, v, true);
       // Cells no longer the tree's (another column, a recycled cell): given back plain.
       for (const c of decorated) if (!now.has(c)) undecorate(c);
       decorated = now;
@@ -208,6 +268,10 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     destroy() {
       off();
       lz?.destroy();
+      stack?.clear();
+      layer?.remove();
+      g.inset = 0;
+      delete g.insetFor;
       for (const c of decorated) undecorate(c);
       el.viewport.setAttribute('role', 'grid');
     },
