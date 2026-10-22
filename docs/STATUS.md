@@ -52,7 +52,7 @@ Mis à jour : 2026-10-22 (**Phase 4, étape 10 commitée `7b1b4cd`, corrections 
 | parents épinglés (Q10–Q11, avant l'étape 9) | fait, testé (non commité ; revue à venir) | — |
 | 9 — base DOM : hauteurs variables, ligne de détail (une cellule, un arrêt) | fait, testé (non commité ; revue à venir) | — |
 | 10 — `@dzgrid/dom/detail` (fonction, `nestedGrid`, textes, thème, démo) | fait, relu, testé (non commité) | — |
-| 11 — Angular (`[(expanded)]`, `(rowExpanded)`, panneaux de détail en composants et gabarits, `<dz-grid [dzgNested]>`) | fait, testé (non commité) ; exemple Angular 86 044 ≤ 87 000 (propriétaire, Q14) | — |
+| 11 — Angular (`[(expanded)]`, `(rowExpanded)`, panneaux de détail en composants et gabarits, `<dz-grid [dzgNested]>`) | fait, relu, testé (corrections non commitées) ; exemple Angular 86 044 ≤ 87 000 (propriétaire, Q14) | — |
 | 12 — ligne de filtres affichable en direct | à faire | — |
 | 13 — clôture de la Phase 4 | à faire | — |
 
@@ -62,6 +62,14 @@ Mis à jour : 2026-10-22 (**Phase 4, étape 10 commitée `7b1b4cd`, corrections 
 - **Tailles** : angular **5 965** (6 000 ; mesure avant 5 439) ; profil K.8 79 413 (garde 83 500).
 - **Portail** : construction, `test:ci` 294 fichiers / 4 705 tests (le test des octets de l'exemple passe sous le plafond relevé à 87 000, Q14), `test:perm` 6/6, types, tailles (0 dépassement) ; Chrome `node packages/angular/browser/run.mjs` 54/54 (dont 32 nouveaux, `--only tree`) ; 18 mutants, 17 tués, 1 équivalent ; relecture : rien de grave.
 - **Exemple Angular réel (K.8 ≤ 85 000) : AU-DESSUS.** `example:build` installait l'ancienne archive (même version 0.1.0, intégrité figée dans le `package-lock.json` ignoré de l'exemple, copie du cache npm) : les 82 582 notés depuis l'étape 23 ne contenaient aucune étape de la Phase 4. Corrigé (`forgetLocalPacks` dans `scripts/example-lib.mjs`, test d'abord). Mesure vraie : **85 555** avant l'étape 11 (cœur, dom et thème de la Phase 4), **86 044** avec (+489, enveloppe ≈ 3 762). **Décision du propriétaire (2026-10-22, Q14)** : plafond relevé à 87 000.
+
+Revue de l'étape 11 (2026-10-22, non commitée ; revue de `d9439c4` ; détail dans ROADMAP et `step11-plan.md` « Review and test analysis ») :
+- **NG0100** : les événements entendus pendant la création de la grille (retour de `initial`, `(rowExpanded)` de l'ensemble donné à la création) sont dits après le premier rendu.
+- **Filtre d'arbre** : une écriture de l'hôte sous un filtre n'est plus écrasée par l'ensemble d'avant le filtre (changement de données, bascule de l'utilisateur) ; filtre effacé, la grille montre l'ensemble de l'hôte.
+- **Clés en attente** (décision du chef) : une clé dont la ligne n'est pas encore là s'ouvre à son arrivée (plusieurs lots, enfants paresseux niveau par niveau), jusqu'à la prochaine écriture de l'hôte ; pas rendue dans le modèle avant ; abandonnée sous une ligne fermée par l'utilisateur depuis. Règle de la liaison double d'Angular écrite dans la fiche.
+- **Fenêtre de lignes dans jsdom** : pas un bogue de la base ; c'est le surbalayage du défilement rapide (événements de défilement synthétiques à quelques ms d'écart).
+- **Budget** : angular 6 000 → 6 200 (propriétaire, Q15), mesuré **6 176** ; exemple Angular réel **86 245** (87 000) ; profil K.8 79 604.
+- **Portail** : `test:ci` 299 fichiers, 4 769 tests ; `test:perm` 6/6 ; types, tailles, construction verts ; Chrome `--only tree` 32/32.
 
 Étape 10 faite (2026-10-22, non commitée ; plan, décisions, revue et résultats `docs/phase-4-steps/step10-plan.md` ; détail dans ROADMAP ; ARCHITECTURE « Décisions de la Phase 4, étape 10 ») :
 - **API** : `detail({ part, height?, initial?, column?, nested? })`, `nestedGrid({ settings, keep?, onGrid? })`, textes `locales/{en,fr,ar}-detail` (« Détails de {name} », « {name} développé », « {name} réduit »).

@@ -5,6 +5,7 @@ import {
   DestroyRef,
   ElementRef,
   EnvironmentInjector,
+  afterNextRender,
   Injector,
   NgZone,
   PLATFORM_ID,
@@ -21,7 +22,7 @@ import {
   type OutputEmitterRef,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import type { ColumnOrGroup, FilterModel, GridEvent, GridKernel, Problem, RowIdInput, RowKey, RowModel, SelectionState } from '@dzgrid/core';
+import type { ColumnOrGroup, FilterModel, Query, GridEvent, GridKernel, Problem, RowIdInput, RowKey, RowModel, SelectionState } from '@dzgrid/core';
 import { canonical, emit, isDataKey } from '@dzgrid/core/internal';
 import { detailConflicts } from '@dzgrid/core/detail';
 import { createGrid, type GridFeature, type GridInstance, type GridMessages, type GridSettings, type SlotContext, type SlotPart } from '@dzgrid/dom';
@@ -42,6 +43,8 @@ const KEYS = [
 /** Events with an output of their own name. */
 const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded'];
 
+/** What `membershipOf` reads of a query with no filter and no search. */
+const NONE = { filter: {}, quick: '' } as Query;
 const sameSet = (a: ReadonlySet<unknown>, b: ReadonlySet<unknown>): boolean => a.size === b.size && [...a].every((k) => b.has(k));
 const sameSelection = (a: SelectionState, b: SelectionState): boolean => a.mode === b.mode && sameSet(a.keys, b.keys);
 
@@ -129,6 +132,14 @@ export class DzGrid<T> implements AfterContentInit {
   private readonly _told = new Set<string>();
   private _last: Record<string, unknown> = {};
   private _gone = false;
+  /** The events of the grid's making, told after the first render: written during the host's check, NG0100. */
+  private _early: GridEvent<T>[] | null = [];
+  /** The model's last set, the host's or the grid's copy: another one is a host write. */
+  private _seen?: ReadonlySet<RowKey>;
+  /** Keys the host named whose rows the grid did not hold: they open when their rows arrive, until its next write. */
+  private _pend = new Set<RowKey>();
+  /** Rows closed by the user or the API since the host's write: a pending key below one is dropped. */
+  private _closed = new Set<RowKey>();
 
   /** The registry: the provider's, `[parts]`, then the templates; Angular entries bound to this grid. */
   private readonly _registry = computed(() => {
@@ -173,6 +184,14 @@ export class DzGrid<T> implements AfterContentInit {
       });
     });
     effect(() => (this.quick(), this.filter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
+    // After the first render (never on a server): the grid's events heard so far; with no model, what
+    // it opened by itself at creation (a tree's `initial`) comes back.
+    afterNextRender(() => {
+      const early = this._early!;
+      this._early = null;
+      for (const e of early) this._hear(e);
+      if (this._k && !this.expanded()) this._open(this._k);
+    });
     inject(DestroyRef).onDestroy(() => {
       this._gone = true;
       untracked(this._grid)?.destroy();
@@ -198,8 +217,6 @@ export class DzGrid<T> implements AfterContentInit {
     this.controller._attach(g.kernel, g, s.features);
     this._grid.set(g);
     this._write(g.kernel);
-    // No model: what the grid opened by itself at creation (a tree's `initial`) comes back.
-    if (!this.expanded()) this._open(g.kernel);
     this._tell();
     this.gridReady.emit(this.controller);
   }
@@ -226,18 +243,21 @@ export class DzGrid<T> implements AfterContentInit {
 
   /**
    * The `expanded` model written: what the grid holds open and the set does not, closed; then what it
-   * adds, opened, but for rows the grid does not hold (refused, they would stop the rest; a data change
-   * writes again). An equal set has nothing to close or open: nothing is written (the echo guard). Read
-   * untracked (from `_write`, or an event).
+   * adds and the pending keys, opened, but for rows the grid does not hold (refused, they would stop the
+   * rest: pending, a data change writes again) and those below a row closed since the host's write. An
+   * equal set has nothing to close or open: nothing is written (the echo guard). Read untracked (from
+   * `_write`, or an event).
    */
   private _shut(k: GridKernel<T, RowModel<T>>): void {
     const open = this.expanded();
     const now = k.expansion;
     if (!open) return;
-    const shut = [...now].filter((x) => !open.has(x));
-    const add = [...open].filter((x) => !now.has(x) && !(isDataKey(x) && !k.rows.keeps(x)));
-    if (shut.length) k.dispatch({ type: 'rows.expand', rows: shut, expanded: false }, 'host');
-    if (add.length) k.dispatch({ type: 'rows.expand', rows: add, expanded: true }, 'host');
+    // A host write: each key pending until the grid holds its row.
+    if (open !== this._seen) (this._seen = open), (this._pend = new Set(open)), this._closed.clear();
+    // A pending key whose row the grid holds: applied, unless a row above it was closed since the write.
+    const up = (x: RowKey | null | undefined): boolean => !!x && (this._closed.has(x) || up(k.rows.displayed.parentOf?.(x)));
+    const add = [...open, ...this._pend].filter((x) => (!isDataKey(x) || k.rows.keeps(x)) && (!this._pend.delete(x) || !up(x)) && !now.has(x));
+    for (const [rows, expanded] of [[[...now].filter((x) => !open.has(x)), false], [add, true]] as const) if (rows.length) k.dispatch({ type: 'rows.expand', rows, expanded }, 'host');
   }
 
   /** Inside a detail panel (`dzgNested`): the depth told, Escape back to the panel; on the host element, outside the zone. */
@@ -256,9 +276,15 @@ export class DzGrid<T> implements AfterContentInit {
     });
   }
 
-  /** The `expanded` model follows the grid's open rows (a copy: the grid changes its own in place). */
+  /**
+   * The `expanded` model follows the grid's open rows (a copy: the grid changes its own in place); not
+   * under a tree's filter, whose layer takes every toggle, the host's too (tree-filter.md): the model
+   * stays the set outside it, written again when the query changes.
+   */
   private _open(k: GridKernel<T, RowModel<T>>): void {
-    if (!sameSet(this.expanded() ?? new Set(), k.expansion)) this.expanded.set(new Set(k.expansion));
+    const r = k.rows;
+    if (!(r.displayed.levelAt && r.membershipOf(k.query) !== r.membershipOf(NONE)) && !sameSet(this.expanded() ?? new Set(), k.expansion))
+      this.expanded.set((this._seen = new Set(k.expansion)));
   }
 
   /** `part-shadowed` for the names a later layer took, once per name for this grid. */
@@ -279,6 +305,7 @@ export class DzGrid<T> implements AfterContentInit {
 
   private _hear(e: GridEvent<T>): void {
     if (this._gone) return;
+    if (this._early) return void this._early.push(e);
     this._zone.run(() => {
       this.gridEvent.emit(e);
       if (e.type === 'problems') this.problems.emit(e.problems);
@@ -291,10 +318,14 @@ export class DzGrid<T> implements AfterContentInit {
       }
       // Rows opened or closed by anyone but the host; a data change (rows arrived or gone, a tree's
       // `initial`): the model written again first (rows it names that just arrived), then followed.
+      // A query, an order, a page: written again too (a filter's layer gone, the host's set held there).
       const k = this._k;
-      if (k && e.type === 'modelUpdated' && e.kind === 'rows') this._zone.runOutsideAngular(() => this._shut(k)), this._open(k);
+      if (k && e.type === 'modelUpdated' && e.kind !== 'expand') this._zone.runOutsideAngular(() => this._shut(k)), this._open(k);
       if (e.source === 'host') return;
-      if (k && e.type === 'rowExpanded') this._open(k);
+      if (k && e.type === 'rowExpanded') {
+        if (!e.expanded) for (const x of e.rows) this._closed.add(x);
+        this._open(k);
+      }
       if (e.type === 'quickChanged') this.quick.set(e.text);
       if (e.type === 'filterChanged') this.filter.set(e.filter);
     });

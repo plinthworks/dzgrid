@@ -113,3 +113,38 @@ audit profile does not use the new code); the real example ≤ 85 000.
   in `perf/test/example-lib-review.test.ts`, failing first). True measure: **85 555** with the step-10 wrapper
   (Phase 4's core, dom and theme: +2 973 over the recorded 82 582), **86 044** with step 11 (+489; wrapper
   ≈ 3 762 gz). Owner decision needed (the ceiling, or what leaves the example's initial load).
+
+## Review and test analysis (2026-10-22, not committed; review of `d9439c4`)
+- **NG0100 at creation** (review): the grid is made during the host's change detection, so `[(expanded)]` on a
+  plain field with a tree that opens rows at load (`initial`), or `(rowExpanded)` writing a field for the set
+  given at creation, changed what the host's template had already read. Fixed: the events heard while the grid
+  is made are queued and told after the first render (`afterNextRender`, registered in the constructor; never
+  on a server), the `initial` write-back too; `gridReady` still emitted at creation.
+  Test `expanded-ready.test.ts` (2, dev mode, both failing first).
+- **A host write under a tree filter** (analysis bugs 1–2): it went to the filter's layer, and the next data
+  change or user toggle copied the pre-filter set back into the model. Now the model never follows the grid
+  while a tree is filtered (`levelAt` on the rows shown, `membershipOf(query)` ≠ that of no filter and no
+  search); every `modelUpdated` but `expand` writes the model again, so the filter cleared shows the host's set.
+  Tests: the two `it.fails` of `expanded-walk.test.ts` flipped, the filter walk now runs seeds 21–30 with host
+  writes under the filter (21, 24, 27, 29, 30 failed first).
+- **Pending keys** (analysis bug 3, lead decision, sheet `angular-parts.md`): a key the host names whose row the
+  grid does not hold stays pending until its row arrives (any number of batches, lazy children level by level)
+  or the host writes a new set; not reported in the model until it applies; a pending key arriving under a row
+  the user or the API closed since the write is dropped (`parentOf` up the tree). Tests: the two `it.fails`
+  (second batch, lazy deep link `{a, a1, a11}`) flipped; +4 (a new set replaces the pending keys; a row closed,
+  removed and added again stays closed; nothing reported before it applies; closing `a` or `a1` before its
+  children load, with gated loads — the ancestor check removed, both fail); the no-filter walk's oracle
+  rewritten for pending keys (11 of 16 seeds failed on the old code). The Angular two-way rule (a user toggle
+  before change detection replaces a host write) written in the sheet.
+- **The jsdom window swing** (analysis 5): not a DOM base bug. The swing is the base's fast-scroll overscan
+  (`interact/scrolling.ts`: speed = distance / time between scroll events; `overscanRows` up to 40 each side
+  while the last scroll is under 150 ms old, a trim paint at 160 ms). jsdom's synthetic scroll events come
+  milliseconds apart, so a walk's scroll of up to three views reads as a fling (hundreds of thousands of px/s):
+  the next paint draws 51–93 rows, until a scroll event at the same place (speed 0) or 150 ms of wall time —
+  hence the alternation on renames. Reproduced deterministically (200 flat rows: a jump of 800 px then a rename
+  93 rows, a scroll event in place then a rename 17, 250 ms later 17). In Chrome the same code runs on real
+  scroll events, and the trim paint follows each gesture.
+- **Typecheck**: the analysis tests called `applyTransaction` on `RowModel` (`expanded-walk`, `detail-nested`):
+  typed as `ClientModel`.
+- **Budget** (owner decision Q15): `@dzgrid/angular` 6 000 → 6 200; measured **6 176** (5 965 before: the
+  deferral ≈ 42 B, the filter and pending keys ≈ 169 B).

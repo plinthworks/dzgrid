@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal, type OnDestroy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { dataKey, detailKey, type ColumnOrGroup, type GridKernel, type Problem, type RowKey } from '@dzgrid/core';
+import { dataKey, detailKey, type ClientModel, type ColumnOrGroup, type GridKernel, type Problem, type RowKey } from '@dzgrid/core';
 import type { Geometry, GridFeature, SlotPart } from '@dzgrid/dom';
 import { detail } from '@dzgrid/dom/detail';
 import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
@@ -291,5 +291,61 @@ describe('[dzgNested]: a grid inside a detail component', () => {
     expect(e.defaultPrevented).toBe(true);
     expect(document.activeElement!.closest('.dzg')).toBe(inner);
     expect(document.activeElement!.classList.contains('dzg-cell')).toBe(true);
+  });
+});
+
+describe('[dzgNested]: inner grids live and die with their panels (coverage review)', () => {
+  /** Inner kernels still answering commands (a destroyed kernel refuses with 'destroyed'). */
+  const kernels = new Set<GridKernel<M>>();
+  const alive = () => [...kernels].filter((x) => x.dispatch({ type: 'selection.keepOnFilter', keep: true }, 'api').ok).length;
+  const collect = () => {
+    for (const c of seen.controllers) {
+      const x = c.kernel();
+      if (x) kernels.add(x as GridKernel<M>);
+    }
+  };
+
+  it('collapse, scrolling out of the window, a search hiding the master, the master removed: inner grids destroyed each time', () => {
+    kernels.clear();
+    const env = { block: 600, inline: 900, scrollTop: 0, scrollInline: 0 };
+    const geometry: Geometry = { read: () => ({ ...env }), writeScrollTop: (px) => void (env.scrollTop = px), writeScrollInline: (px) => void (env.scrollInline = px) };
+    TestBed.configureTestingModule({ providers: [{ provide: DZG_ENV, useValue: { geometry, sync: true } }] });
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const grid = fixture.debugElement.query(By.directive(DzGrid)).componentInstance as DzGrid<M>;
+    const outer = grid.controller.kernel()! as GridKernel<M, ClientModel<M>>;
+    const inner = () => el.querySelectorAll('t-visits').length;
+    const check = (what: string) => {
+      fixture.detectChanges();
+      collect();
+      expect(seen.grids - seen.gone, what).toBe(inner());
+      expect(alive(), what).toBe(inner());
+      expect(el.querySelectorAll('.dzg').length, what).toBe(1 + inner());
+    };
+    check('start');
+    fixture.componentInstance.open.set(new Set(['m0', 'm1', 'm2', 'm3', 'm20'].map(k)));
+    check('host opens five');
+    expect(inner()).toBeGreaterThan(1);
+    env.scrollTop = 20 * 32 + 4 * 200;
+    el.querySelector('.dzg-viewport')!.dispatchEvent(new Event('scroll'));
+    check('scrolled to m20');
+    env.scrollTop = 0;
+    el.querySelector('.dzg-viewport')!.dispatchEvent(new Event('scroll'));
+    check('scrolled back');
+    outer.dispatch({ type: 'quick.set', text: 'm 2' }, 'api');
+    check('search keeps m2 and m20');
+    outer.dispatch({ type: 'quick.set', text: '' }, 'api');
+    check('search cleared');
+    outer.rows.applyTransaction!({ remove: ['m1'] });
+    check('m1 removed');
+    expect([...el.querySelectorAll('t-visits')].some((x) => x.closest('.dzg-row') && x.textContent!.includes('m1.v'))).toBe(false);
+    fixture.componentInstance.open.set(new Set());
+    check('all closed');
+    fixture.componentInstance.open.set(new Set([k('m0')]));
+    check('m0 again');
+    fixture.destroy();
+    expect(seen.gone).toBe(seen.grids);
+    expect(alive()).toBe(0);
   });
 });

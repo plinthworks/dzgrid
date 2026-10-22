@@ -459,6 +459,7 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Grille dans un panneau** : `<dz-grid [dzgNested]="cell()">`, une entrée de `<dz-grid>` (une directive dépassait le budget de 44 o) ; Échap non pris → cellule du panneau, un niveau ; `detail.depth` au-delà de 3 ; Entrée par le repli de focus des pièces ; pas de mémoire par maître.
 - **Copies épinglées** : texte seul, aucune pièce Angular (testé).
 - **Budget** : angular 5 965 (6 000). Exemple Angular réel : 86 044 > 85 000 (85 555 avant l'étape, l'installation de l'exemple était périmée depuis l'étape 23, corrigée) : décision du propriétaire.
+- **Revue** : clés de l'hôte en attente jusqu'à l'arrivée de leurs lignes (abandonnées sous une ligne fermée par l'utilisateur), modèle gardé sous un filtre d'arbre, événements de la création dits après le premier rendu (NG0100) ; budget angular 6 200 (Q15), mesuré 6 176.
 
 ## 0. Provenance, et limites de ce que j'ai lu
 
