@@ -130,7 +130,7 @@ Sources: [ag components](https://www.ag-grid.com/javascript-data-grid/components
 | Safe by default (text, never HTML) | No injection | ~ | ✓ | ✓ | ~ | ~ | ✓ | ✓ | have | M |
 | Custom header component | Own header layout or icon | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | P3 (slot), default kept | C |
 | Header groups (multi-level) | Spanning headers | ✓ | € | ✓ | ✓ | ✓ | ✓ | ✓ | P5 | C |
-| Group row and full-width row renderers | Group labels, detail rows | € | € | ~ | ✓ | – | ✓ | ✓ | P6 | W |
+| Group row and full-width row renderers | Group labels, detail rows | € | € | ~ | ✓ | – | ✓ | ✓ | P4 (detail rows, done), P6 (group rows) | W |
 | Loading placeholder cells (block models) | Grey bars while a block loads | ✓ | ✓ | ~ | – | – | – | ✓ | P7 | W |
 | Custom tooltip | Rich hover or focus content | ✓ | ✓ | ~ | ✓ | ✓ | ✓ | ✓ | have (text), P3 slot | C |
 | Overlays: loading, no rows, no match, error | A centred message | ✓ | ✓ | ~ | ✓ | ~ | ✓ | ✓ | have (built-in), P3 slot | M |

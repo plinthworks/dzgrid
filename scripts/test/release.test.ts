@@ -1,6 +1,7 @@
 // @vitest-environment node
-// Step 25 (the Phase 3 close, owner Q4): 0.1.0 prepared, not published. The four packages carry one
-// version, their @dzgrid peers follow it, and every manifest that ships says where its source is.
+// Step 25 (the Phase 3 close, owner Q4): 0.1.0 prepared, never published. Phase 4 step 13: 0.2.0 prepared,
+// not published. The four packages carry one version, their @dzgrid peers follow it, and every manifest
+// that ships says where its source is.
 import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -11,21 +12,31 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const pkg = (name: string) => JSON.parse(readFileSync(`${ROOT}packages/${name}/package.json`, 'utf8'));
 const NAMES = ['core', 'dom', 'angular', 'theme'];
 
-describe('0.1.0, the four packages', () => {
-  it('share one version, 0.1.0', () => {
-    expect(NAMES.map((n) => pkg(n).version)).toEqual(['0.1.0', '0.1.0', '0.1.0', '0.1.0']);
+describe('0.2.0, the four packages', () => {
+  it('share one version, 0.2.0', () => {
+    expect(NAMES.map((n) => pkg(n).version)).toEqual(['0.2.0', '0.2.0', '0.2.0', '0.2.0']);
   });
 
-  it('name their @dzgrid peers at that version (build.mjs pins them to ^0.1.0)', () => {
+  it('name their @dzgrid peers at that version (build.mjs pins them to ^0.2.0)', () => {
     for (const n of NAMES) {
       for (const [dep, range] of Object.entries((pkg(n).peerDependencies ?? {}) as Record<string, string>)) {
-        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('0.1.0');
+        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('0.2.0');
       }
     }
   });
 
   it('the Angular package states its own version', () => {
-    expect(readFileSync(`${ROOT}packages/angular/src/version.ts`, 'utf8')).toContain("DZGRID_ANGULAR_VERSION = '0.1.0'");
+    expect(readFileSync(`${ROOT}packages/angular/src/version.ts`, 'utf8')).toContain("DZGRID_ANGULAR_VERSION = '0.2.0'");
+  });
+
+  it('export the Phase 4 subpaths (tree, lazy children, master/detail and their texts)', () => {
+    const core = Object.keys(pkg('core').exports);
+    const dom = Object.keys(pkg('dom').exports);
+    for (const k of ['./tree', './tree-lazy', './detail']) {
+      expect(core, `core ${k}`).toContain(k);
+      expect(dom, `dom ${k}`).toContain(k);
+    }
+    for (const lang of ['en', 'fr', 'ar']) for (const part of ['tree', 'detail']) expect(dom).toContain(`./locales/${lang}-${part}`);
   });
 
   it('keep gsap and tzslot optional peers', () => {

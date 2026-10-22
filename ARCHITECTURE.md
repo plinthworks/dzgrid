@@ -471,6 +471,58 @@ Où trouver, pour chaque étape, ce qui a été tranché (le plan validé de l'a
 - **Tailles** : `/filters` 9 728 (10 000), textes 745 / 876 / 997, dom 20 648, angular 6 236 (6 250).
 - **Revue** (non commitée) : `bind` idempotent (un écouteur, seul le dernier détacheur agit) et valeurs `aria-*` de l'hôte rendues ; la ligne revient à sa place (ordre des fonctions) ; masquer ne bouge qu'un focus sur son niveau ; boîte disparue sourde aux saisies tardives ; `[floatingFilters]` lit `features()` sans le suivre ; `/filters` 9 876, exemple Angular 86 988.
 
+### Index des décisions de la Phase 4 (parties A–C, close techniquement le 2026-10-22)
+
+Où trouver ce qui a été tranché. Les décisions du propriétaire sont dans `docs/phase-4-steps/decisions.md` (elles priment), le plan dans `docs/phase-4-plan.md`, le plan validé de chaque étape dans `docs/phase-4-steps/`, le détail de ce qui a été fait (tests, mutants, tailles, portails) dans `ROADMAP.md`, Phase 4.
+
+| Étape | Sujet | Décisions ici | Plan (`docs/phase-4-steps/`) | Commits |
+|---|---|---|---|---|
+| 1 | fiches, spike S12 (hauteurs variables), budgets | ROADMAP, Q7 | `docs/phase-4-plan.md` | `81e07a0` |
+| 2–3 | coutures du cœur, `@dzgrid/core/tree` (mode parent) | « Décisions de la Phase 4, étapes 2–3 » | `docs/phase-4-plan.md` D1–D3 | `49c3787`, `a9c91e6` |
+| 4 | coutures DOM, `@dzgrid/dom/tree` | « …, étape 4 » | `docs/phase-4-plan.md` D6 | `5fd4d0d`, `6bfb50c` |
+| 5 | formes imbriquée et chemin, lignes de remplissage, CSV d'un arbre | « …, étape 5 » | `step05-plan.md` | `3ce75cc`, `bc01afa` |
+| 6 | animation de l'arbre, arbre d'un million de lignes | « …, étape 6 » | `step06-plan.md` | `7334f8d`, `9ab4234` |
+| 7 | enfants paresseux (hôte et serveur) | « …, étape 7 » | `step07-plan.md` | `1b23ee0`, `3bb7de7` |
+| 8 | `@dzgrid/core/detail` | « …, étape 8 » | `step08-plan.md` | `05795fd`, `a06131e` |
+| parents épinglés | `tree({ sticky })` | « …, parents épinglés » | `sticky-blueprint.md` | `206121e`, `1a6d18f` |
+| 9 | base DOM : hauteurs variables, ligne de détail | « …, étape 9 » | `step09-plan.md` | `f4c77b7`, `b20130e` |
+| 10 | `@dzgrid/dom/detail`, grilles imbriquées | « …, étape 10 » | `step10-plan.md` | `7b1b4cd`, `497f14b`, `6233ee5` |
+| 11 | Angular : arbre et maître/détail | « …, étape 11 » | `step11-plan.md` | `d9439c4`, `6422626` |
+| 12 | ligne de filtres affichable en direct | « …, étape 12 » | `step12-plan.md` | `dcec156`, `ef530ae` |
+| 13 | clôture | « Ajustements après la Phase 4 » ci-dessous | `step13-plan.md` | `936b27a` + clôture |
+
+Décisions du propriétaire (`decisions.md`) :
+
+| Q | Sujet | Réponse courte |
+|---|---|---|
+| Q1 | formes des données d'arbre | les trois : `parentId`, `children`, `path` (niveaux manquants = lignes de remplissage) |
+| Q2 | sélection dans un arbre | indépendante ; cascade plus tard, arbres clients complets seulement |
+| Q3 | filtre d'arbre | les correspondances et leurs ancêtres (atténués) ; dossiers ouverts pendant le filtre, état rendu après |
+| Q4 | hauteur du détail | 240 px par défaut ; nombre, fonction ou `'auto'` (grille imbriquée : fixe ou fonction) |
+| Q5 | grilles imbriquées | testées sur 2 niveaux, plafond souple 3 ; arbre et détail pas sur la même grille en Phase 4 |
+| Q6 | enfants paresseux | les deux : chargeur de l'hôte (A) et serveur par la garde (B) |
+| Q7 | budgets de la phase | cœur 29 000, thème 2 500, nouvelles entrées ; remise à la mesure + 10 % à la clôture |
+| Q8 | ligne de filtres | bascule en direct (`filters().floating`, `[floatingFilters]`) ; filtres gardés quand elle est cachée |
+| Q9 | entrées des enfants paresseux | `@dzgrid/core/tree-lazy` 1 500, `@dzgrid/dom/tree-lazy` 1 000 |
+| Q10 | parents épinglés | `tree({ sticky: 0 \| 1 \| n })`, 3 par défaut, avant l'étape 9 |
+| Q11 | parents épinglés (plan) | `dom/tree` 3 700 ; copies en texte seul ; clic = focus sur la vraie ligne |
+| Q12 | textes du détail | 150 / 200 / 200 |
+| Q13 | `dom/detail` | 3 500 → 3 900 pour les corrections des grilles imbriquées |
+| Q14 | exemple Angular réel | plafond 85 000 → 87 000 (bogue d'installation qui cachait la croissance) |
+| Q15 | `@dzgrid/angular` | 6 000 → 6 200 pour les corrections de `[(expanded)]` |
+| Q16 | `@dzgrid/angular` | 6 200 → 6 250 pour `[floatingFilters]` |
+| Q17 | clôture | (a) exemple réel 90 000, garde K.8 83 500 ; (b) budgets = mesure + 10 % plafonnée aux accords ; (c) règle des vitesses ; (d) mesure des vitesses reportée |
+
+### Ajustements après la Phase 4 (clôture technique le 2026-10-22, étape 13 ; décisions Q17)
+- **Ordre des phases** : le §6 ci-dessous prévoyait l'édition en Phase 4 et l'arbre et le maître/détail en Phase 6. Par décision du propriétaire (2026-10-20, puis le plan `docs/phase-4-plan.md`), la Phase 4 a fait d'abord l'arbre et le maître/détail (parties A et B), puis la ligne de filtres affichable (partie C) ; l'édition devient sa partie D, planifiée à part. La Phase 6 garde le regroupement et l'agrégation (le pivot reste en Phase 9).
+- **Ajouts hors plan** : les parents épinglés (Q10–Q11, entre les étapes 8 et 9) ; une phrase propre pour un parent sans enfant (`tree.empty`, « {name}, aucune ligne », étape 13), au lieu de coller `header.withSort` et `grid.noRows`.
+- **Entrées** : le plan prévoyait `/tree` et `/detail` ; les enfants paresseux ont leurs deux entrées (`@dzgrid/core/tree-lazy`, `@dzgrid/dom/tree-lazy`, Q9) ; les textes de l'arbre et du détail sont des paquets à part (`locales/<langue>-tree`, `-detail`), 0 o dans les paquets de base.
+- **Écarts de conception** : pas de `shape.layout()` ni de `measure()` dans le cœur (les hauteurs viennent des lignes, `'auto'` est mesuré par le DOM ; étape 8) ; `aria-expanded` d'un maître sur la cellule du chevron (axe le refuse sur une ligne de `grid`) et nom du panneau par un `group` intérieur (étape 10) ; `dzgNested` est une entrée de `<dz-grid>`, pas une directive (étape 11, taille) ; PageUp/PageDown avancent d'une distance sur des lignes de hauteurs variables (étape 9).
+- **Tailles** (Q17b, `size-budget.json`, ROADMAP « Final budgets (Phase 4) ») : chaque budget = la mesure + 10 %, arrondie aux 50 o, jamais au-dessus des accords (cœur 29 000, dom 21 300, angular 6 250, `dom/tree` 3 700, `dom/detail` 3 900, `/filters` 10 000, thème 2 500, `core/detail` 1 000, `tree-lazy` 1 500 / 1 000). Plus que le plan : `dom/tree` (parents épinglés), `dom/detail` (Q13), angular (Q15, Q16), `/filters` (+487 au lieu de +150–250). Exemple Angular réel : plafond 85 000 → 87 000 (Q14) → 90 000 (Q17a), garde du profil K.8 dans `check:size` gardée à 83 500.
+- **Temps** (Q17d) : les budgets de temps Node et Chrome ne sont pas remis à cette clôture ; les lignes au-dessus (17 lignes Node à froid depuis `bc01afa`, « toggle near the end » 11,6 / 11,5 dans Chrome) attendent une mesure sur machine calme, puis la règle Q17c (corriger au-delà de +25 % ou sur le chemin courant ; relèvement écrit entre +10 et +25 %).
+- **Critères reportés** : critère 5, « détail non éditable, non collable » → partie D (l'édition n'existe pas encore) ; critère 6, lignes de banc uniformes → avec la mesure Q17d ; écoute des lecteurs d'écran §16–§18 → le propriétaire (non bloquante, jamais dite « validée » avant).
+- **Version** : 0.2.0 préparée, non publiée (0.1.0 ne l'a jamais été) ; publication sur la parole du propriétaire seulement.
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.
@@ -710,9 +762,9 @@ Légende : **C** = Community, **E** = Enterprise (niveaux d'après la liste publ
 | Lignes de pied de groupe et total général | E | 6 | — | |
 | Zone de glisser-déposer des colonnes de groupe | E | 6 | — | |
 | Pivot | E | 9 | — | Colonnes secondaires générées |
-| Données arborescentes (chemin ou parent) | E | 6 | `TreeConfig` (concept), `tree-cell-renderer` (comportement seul) | `role="treegrid"` |
-| Master/detail (grille imbriquée) | E | 6 | `MasterDetailConfig` (concept) | Lignes de détail = nœuds `kind:'detail'` |
-| État du détail conservé quand on s'éloigne | E | 6 | — | LRU d'états par `RowKey` maître |
+| Données arborescentes (chemin ou parent) | E | 4 (fait) | `TreeConfig` (concept), `tree-cell-renderer` (comportement seul) | `role="treegrid"` |
+| Master/detail (grille imbriquée) | E | 4 (fait) | `MasterDetailConfig` (concept) | Lignes de détail = nœuds `kind:'detail'` |
+| État du détail conservé quand on s'éloigne | E | 4 (fait) | — | LRU d'états par `RowKey` maître |
 
 ### 2.7 Export
 
@@ -1632,17 +1684,17 @@ Règles : valeurs en chaînes ISO ou nombres ; `refs` cite le rapport public de 
 
 | Contenu | Budget |
 |---|---|
-| `@dzgrid/core` base (client, tri, filtres, sélection, colonnes, édition, CSV, formats) | ≤ 28 kB |
-| Sous-chemins du cœur : `/grouping` 5, `/tree` 2, `/pivot` 6, `/server` 6, `/range` 6, `/advanced-filter` 5, `/xlsx` 6 | ≤ 36 kB en tout |
-| `@dzgrid/dom` base (grille, en-têtes, épinglage, redimensionnement, clavier, pagination, superpositions) | ≤ 30 kB |
-| Sous-chemins du DOM : `/editors` 8, `/filters` 10, `/menus+sidebar+statusbar` 9, `/detail+tree` 5 | ≤ 32 kB en tout |
+| `@dzgrid/core` base (client, tri, filtres, sélection, colonnes, expansion, formats ; édition à venir) | ≤ 29 kB (Q7 ; mesuré 28 240 o à la clôture de la Phase 4) |
+| Sous-chemins du cœur : `/server` 6, `/csv` 2, `/spans` 3,85, `/rules` 0,55, `/tree` 3,5, `/tree-lazy` 1,5, `/detail` 1 (faits) ; `/grouping` 5, `/pivot` 6, `/range` 6, `/advanced-filter` 5, `/xlsx` 6 (à venir) | ≤ 36 kB en tout |
+| `@dzgrid/dom` base (grille, en-têtes, épinglage, redimensionnement, clavier, superpositions, hauteurs variables) | ≤ 30 kB (budget 21,3 kB ; mesuré 20 648 o) |
+| Sous-chemins du DOM : `/filters` 10, `/tree` 3,7, `/tree-lazy` 1, `/detail` 3,9 (faits ; le plan disait `/detail+tree` 5, les parents épinglés et les grilles imbriquées l'ont dépassé) ; `/editors` 8, `/menus+sidebar+statusbar` 9 (à venir) | ≤ 32 kB en tout |
 | `@dzgrid/theme` (CSS) | ≤ 9 kB |
-| `@dzgrid/angular` | ≤ 8 kB |
+| `@dzgrid/angular` | ≤ 8 kB (budget 6,25 kB, Q16 ; mesuré 6 238 o) |
 | Dictionnaire de messages (par langue) | ≤ 2 kB |
-| **Profil « écran d'audit »** (cœur base + `/server` + DOM base + filtres + thème + Angular + une langue) | **≤ 85 kB** |
+| **Profil « écran d'audit »** (cœur base + `/server` + DOM base + filtres + thème + Angular + une langue) | **≤ 85 kB** (garde de `check:size` 83 500 ; mesuré 80 286 o). Vraie construction Angular (`npm run example:bytes`) : plafond 90 000 (Q17a) |
 | **Tout, sans graphiques** | **≤ 150 kB** |
 
-`scripts/size.mjs` mesure chaque sous-chemin et échoue au-delà de +5 %. Chaque paquet est `sideEffects: false`. L'ordre de grandeur de comparaison (≈ 330 kB gz pour ag-Grid) vient de la note de cadrage Sehhaty, non de nous.
+`scripts/size.mjs` mesure chaque sous-chemin et échoue au-delà de son budget (`size-budget.json`, remis à la mesure + 10 % à chaque clôture de phase, jamais au-dessus des accords du propriétaire ; tableau complet dans ROADMAP « Final budgets (Phase 4) »). Chaque paquet est `sideEffects: false`. L'ordre de grandeur de comparaison (≈ 330 kB gz pour ag-Grid) vient de la note de cadrage Sehhaty, non de nous.
 
 ### 5.3 Budgets de temps (Chrome récent, ordinateur portable de milieu de gamme, bundle **minifié**)
 
@@ -1686,7 +1738,7 @@ Règles : valeurs en chaînes ISO ou nombres ; `refs` cite le rapport public de 
 
 ## 6. Phases
 
-Ordre : fondations de données → rendu en lecture seule → **serveur paginé et filtres (premier écran utilisable)** → édition → colonnes avancées → regroupement et détail → serveur avancé → export et menus → pivot → durcissement.
+Ordre : fondations de données → rendu en lecture seule → **serveur paginé et filtres (premier écran utilisable)** → arbre et maître/détail, puis édition (Phase 4, réordonnée le 2026-10-20) → colonnes avancées → regroupement → serveur avancé → export et menus → pivot → durcissement.
 
 **Chaque phase se termine par** : une revue d'architecte contre ce document, une revue de code, les constats corrigés avant de déclarer la phase terminée, `ROADMAP.md` à jour, et les écarts consignés en tête de ce document. Les **fiches `docs/behaviors/*.md`** de la phase sont écrites **avant** le code, dans nos mots (CLEANROOM).
 
@@ -1731,7 +1783,9 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
 - **Fusions de cellules (étape 9b, avancée de la Phase 5)** : `@dzgrid/core/spans` (carte des fusions, en-têtes groupés, clavier) et `@dzgrid/dom/spans` (corps, lignes pleine largeur, clavier, pointeur, en-têtes groupés) ; critère : fusion correcte sous tri, filtre et page, sans chevauchement (tests de propriétés), sous défilement virtuel (vérifications navigateur S12).
 - **Dépend de** : P2, S5, S6. **C'est la première phase qui rend DzGrid utilisable pour `admin/audit-logs`.** Les annuaires (~11 000 lignes, côté client) sont aussi servis dès cette phase.
 
-### Phase 4 : édition, plages, presse-papiers, édition en masse
+### Phase 4 : arbre, maître/détail, ligne de filtres affichable (parties A–C, close techniquement le 2026-10-22), puis édition (partie D)
+- **Fait (parties A–C)** : `@dzgrid/core/{tree,tree-lazy,detail}`, `@dzgrid/dom/{tree,tree-lazy,detail}`, textes `locales/<langue>-{tree,detail}`, parents épinglés, hauteurs variables dans la base, grilles imbriquées, ligne de filtres affichable en direct, Angular (`[(expanded)]`, panneaux de détail, `[dzgNested]`, `[floatingFilters]`). Plan `docs/phase-4-plan.md`, décisions `docs/phase-4-steps/decisions.md`, écarts dans « Ajustements après la Phase 4 ».
+- **Partie D, l'édition** (ce qui suit, planifié à part ; ajouts de la Phase 4 : détails, lignes de remplissage et de chargement non éditables, éditeur dans la colonne de l'arbre, grilles imbriquées éditées chacune pour elle) :
 - **Livrables** : `core/{edit/*,range/*,clipboard,undo}`, `dom/{editors,range,clipboard}` (éditeurs, validation accessible, sélection de plage, poignée de remplissage, copier / coller / couper, `Ctrl+D`/`Ctrl+R`, annuler / rétablir, états visuels de sauvegarde, édition en masse sur la sélection), suites `edit-saves`, `paste-plan`, `fill-plan`, `clipboard-tsv`. **Fiches** : édition, plages, remplissage, collage, annulation, sauvegardes concurrentes.
 - **Critères de sortie** : tous les bugs 1 à 5 sont couverts par un test qui **échouait avant** (on rejoue les scénarios de a6c97f5) ; pharmacie (jeu B) : 3 000 lignes, édition en masse ≤ 30 ms, **une seule requête** ; collage de 1 000 cellules ≤ 40 ms ; `Ctrl+V`/`Ctrl+Z`/`Échap` dans un éditeur n'agissent pas sur la grille ; rollback ne touche jamais la source ; plage et poignée corrects en RTL ; clavier de plage complet.
 - **Dépend de** : P3 (ou P2 pour un écran client). **Rend possible `pharma/stock`.**
@@ -1741,10 +1795,10 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
 - **Critères de sortie** : mode « redimensionner » au clavier ; état restauré à l'identique en RTL ; hauteur auto sans saut (spike S3).
 - **Dépend de** : P2 (P4 pour les menus éditables).
 
-### Phase 6 : regroupement, agrégation, arbre, master/detail
-- **Livrables** : `core/{grouping,tree}`, `dom/{detail,tree,groups}` : regroupement multi-niveaux, pieds et total général, zone de glisser des colonnes de groupe, arbre (`treegrid`), master/detail avec grille imbriquée et état conservé, suites `group-agg`, `tree`.
-- **Critères de sortie** : regroupement 2 colonnes + 3 agrégations sur A ≤ 150 ms ; expansion d'un groupe de 10 000 ≤ 30 ms ; `ArrowRight`/`ArrowLeft` inversés en RTL pour déplier ; détail non éditable et non collable (types) ; `aria-level`/`aria-expanded` corrects ; **rend possible `admin-lab-facilities`** et les historiques regroupés.
-- **Dépend de** : P2, S4.
+### Phase 6 : regroupement, agrégation
+- **Livrables** : `core/grouping`, `dom/groups` : regroupement multi-niveaux, pieds et total général, zone de glisser des colonnes de groupe, suites `group-agg`. (L'arbre et le maître/détail sont faits en Phase 4 ; un groupe réutilise ses coutures : `GroupNode`, expansion par le noyau, forme de lignes, `treegrid`.)
+- **Critères de sortie** : regroupement 2 colonnes + 3 agrégations sur A ≤ 150 ms ; expansion d'un groupe de 10 000 ≤ 30 ms ; `ArrowRight`/`ArrowLeft` inversés en RTL pour déplier ; `aria-level`/`aria-expanded` corrects ; **rend possible `admin-lab-facilities`** et les historiques regroupés.
+- **Dépend de** : P2, S4, les coutures d'arbre de la Phase 4.
 
 ### Phase 7 : défilement infini, modèle côté serveur
 - **Livrables** : `core/server/{infinite,server-side}`, cache de blocs, lignes de chargement, groupes paresseux, transactions asynchrones groupées.
@@ -1768,7 +1822,7 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
 **Dépendances en un coup d'œil** : `P0 → P1 → P2 → P3 → P4 → P8` ; `P2 → P5` ; `P2 → P6 → P7` ; `P3 → P7` ; `P6 → P9` ; `P4,P5 → P8`.
 
 **Première phase utilisable pour `admin/audit-logs` : la Phase 3.**
-`pharma/stock` : Phase 4. `admin-lab-facilities` : Phase 6. L'écran `dmp-doctor-patients` (données patient) : en dernier, après P4, avec relecture de sécurité.
+`pharma/stock` : Phase 4, partie D (édition). `admin-lab-facilities` : Phase 6 (regroupement). L'écran `dmp-doctor-patients` (données patient) : en dernier, après P4, avec relecture de sécurité.
 
 ---
 

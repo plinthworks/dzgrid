@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+## [0.2.0] - unreleased
+
+Prepared at the Phase 4 close (2026-10-22), **not published**: the four packages at 0.2.0, their
+`@dzgrid/*` peers on `^0.2.0`. Phase 4 Parts A–C: the tree view, master/detail, sticky parent rows
+and the floating filter row shown and hidden live (Part D, editing, comes next). New entries:
+`@dzgrid/core/{tree,tree-lazy,detail}`, `@dzgrid/dom/{tree,tree-lazy,detail}`,
+`@dzgrid/dom/locales/{en,fr,ar}-{tree,detail}`. Published on the owner's word only, under the same
+conditions as 0.1.0.
+
+### Added — core (`@dzgrid/core`)
 
 - **Tree core (Phase 4, steps 2–3)**: row nodes as a union (`DataNode | GroupNode | DetailNode`), a
   row shape seam in the client model (`ClientOptions.shape`), expansion held by the model and
@@ -25,27 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CSV of a tree**: `csv.tree: 'none' | 'level' | 'indent'` (default `'level'`, a first column
   `levelHeader`, default `Level`), `treeColumn`; fillers written as their label only; detail rows
   never written; `selected` never writes a filler.
-- **DOM**: a row that is not a data row carries `data-kind` (`group`), no `aria-selected`, no box;
-  a click on it only moves the focus. Theme: `.dzg-box[hidden]` not drawn. Playground « Arbre »:
-  a shape switch (parent / nested / path).
-- **Tree motion (Phase 4, step 6)**: `motion({ effects: { expand } })` (default on). Opening a tree
-  row: the rows below glide down, the children shown fade in (at most 20); closing: the rows below
-  glide up, nothing on the hidden rows. Skipped beyond 60 moving rows, for a row moving more than a
-  screen, after a scroll between the change and the paint, under reduced motion and with
-  `motion: false`. `onRow` is told `'moved'` / `'entered'` for a toggle too. Theme: the toggle's
-  chevron turns (CSS, 120 ms) in a hovered or focused row, only where motion is welcome.
-- **The million-row tree**: a seeded parent-id tree of ten levels (`perf/profiles/tree.ts`), bench
-  lines in Node (build, expand all, filter) and Chrome (`npm run bench:browser -- --only tree`:
-  first render, a wheel scroll over the open million, toggles, Ctrl+End); the playground's « Arbre »
-  takes `?rows=1000000`; the « Animations » demo has an « Arbre » section.
-
-- **Lazy children (Phase 4, step 7)**: `tree({ parentId, lazy: lazyChildren({ has, load }) })` from
-  the new entry `@dzgrid/dom/tree-lazy` (core: `@dzgrid/core/tree-lazy`, `lazyShape`). A row `has`
-  declares shows a closed toggle; opening it shows a loading row (`LoadingNode`, `kind: 'loading'`,
-  `aria-busy`, `aria-setsize="-1"`), then its children, or an error row with a Retry button (Enter on
-  the row retries). Closing aborts the load (`AbortSignal`); loaded children are kept until
-  `setRows` or a refresh; expand-all and `*` never load. Words from the base bundle; theme:
-  `.dzg-retry`, the loading row's words muted.
 - **Server children**: `sourceRows({ fetch, children })`, `ChildRequest` / `ChildResponse`; one gate
   channel per parent, the query epoch in each request; a new epoch closes every row. A server's rows
   can now be a tree: its pages count the roots, a parent's children come whole.
@@ -60,6 +48,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (O(D) memory, `setHeight` and a batched `setHeights` O(D)). `detailConflicts({ spans, tree,
   depth })`: spans and a tree are refused beside details, a nested grid deeper than 3 is told
   (`unsupported-combination`).
+
+### Added — DOM (`@dzgrid/dom`)
+
+- **`@dzgrid/dom/tree` (Phase 4, step 4)**: `tree({ parentId, column?, indent?, initial?, filter? })`,
+  `TREE_KEYS`; role `treegrid`; rows carry `aria-level`, `aria-posinset`, `aria-setsize`,
+  `aria-expanded`, `data-context-row` (a filtered tree's muted ancestor); the tree cell (an indent per
+  level, a decorative 24 px toggle, the chevron mirrored in RTL); keys per `docs/behaviors/tree-keys.md`
+  (forward opens, back closes or goes to the parent, `*` opens the siblings, all mirrored in RTL); the
+  user's toggles said (`tree.expanded`, `tree.collapsed`, `tree.expandedSome`); a parent with no child
+  left said by its own `tree.empty` (« {name}, aucune ligne »). New problem code
+  `tree-column-not-first`. Bundles `locales/{en,fr,ar}-tree`. Base seams for features:
+  `GridFeature.shape?()`, `FeatureHandle.keys?(e, at, owner)`, `g.layoutFor` / `g.layout`,
+  `g.viewBlock`; a toggle anchors the top row.
+- **DOM**: a row that is not a data row carries `data-kind` (`group`), no `aria-selected`, no box;
+  a click on it only moves the focus. Theme: `.dzg-box[hidden]` not drawn. Playground « Arbre »:
+  a shape switch (parent / nested / path).
+- **Tree motion (Phase 4, step 6)**: `motion({ effects: { expand } })` (default on). Opening a tree
+  row: the rows below glide down, the children shown fade in (at most 20); closing: the rows below
+  glide up, nothing on the hidden rows. Skipped beyond 60 moving rows, for a row moving more than a
+  screen, after a scroll between the change and the paint, under reduced motion and with
+  `motion: false`. `onRow` is told `'moved'` / `'entered'` for a toggle too. Theme: the toggle's
+  chevron turns (CSS, 120 ms) in a hovered or focused row, only where motion is welcome.
+- **Lazy children (Phase 4, step 7)**: `tree({ parentId, lazy: lazyChildren({ has, load }) })` from
+  the new entry `@dzgrid/dom/tree-lazy` (core: `@dzgrid/core/tree-lazy`, `lazyShape`). A row `has`
+  declares shows a closed toggle; opening it shows a loading row (`LoadingNode`, `kind: 'loading'`,
+  `aria-busy`, `aria-setsize="-1"`), then its children, or an error row with a Retry button (Enter on
+  the row retries). Closing aborts the load (`AbortSignal`); loaded children are kept until
+  `setRows` or a refresh; expand-all and `*` never load. Words from the base bundle; theme:
+  `.dzg-retry`, the loading row's words muted.
 - **Sticky parent rows** (`@dzgrid/dom/tree`, `docs/behaviors/tree-sticky.md`): while children
   scroll, their ancestors stay pinned under the header, outermost first, pushed up when their
   subtree ends. `tree({ sticky })`: how many (the nearest), `0` none, `3` by default, never more
@@ -95,13 +112,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `locales/{en,fr,ar}-detail`. `SlotContext['detail']` gains `depth?` and `leave?()`. Theme: the panel's
   surface (`--dzg-detail-bg`), rules and padding, forced colours. Playground « Maître/détail ».
   Base: a column header's tooltip is no longer shown for a nested grid's header of the same id.
-- **Angular, trees and master/detail (Phase 4 step 11)**: `<dz-grid [(expanded)]>` (the rows open,
-  `ReadonlySet<RowKey>`, written as the host, the user's and the data's changes back, no echo) and
-  `(rowExpanded)`; `tree()`, `lazyChildren()` and `detail()` through `[features]`; detail panels as
-  `componentPart('detail', C)` or `<ng-template dzgPart slot="detail">` named by `detail({ part })`, their
-  `emit` → `partAction { slot: 'detail' }`; `<dz-grid [dzgNested]="cell()">` for a grid inside a panel
-  (Escape back to the panel's cell, one level; `detail.depth` past three levels).
-
 - **The floating filter row shown and hidden live (Phase 4 step 12)**: `filters().floating` with
   `get()`, `set(on)` and `bind(button)` (the host's button as a toggle: `aria-pressed`,
   `aria-controls`, the bundle's name on a button without words of its own; returns the unbind; before
@@ -113,16 +123,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   on the filters demos and the tree demo. Angular: `<dz-grid [floatingFilters]>` (one-way, live; a
   user's toggle is never overwritten until the value changes).
 
+### Added — Angular (`@dzgrid/angular`)
+
+- **Angular, trees and master/detail (Phase 4 step 11)**: `<dz-grid [(expanded)]>` (the rows open,
+  `ReadonlySet<RowKey>`, written as the host, the user's and the data's changes back, no echo) and
+  `(rowExpanded)`; `tree()`, `lazyChildren()` and `detail()` through `[features]`; detail panels as
+  `componentPart('detail', C)` or `<ng-template dzgPart slot="detail">` named by `detail({ part })`, their
+  `emit` → `partAction { slot: 'detail' }`; `<dz-grid [dzgNested]="cell()">` for a grid inside a panel
+  (Escape back to the panel's cell, one level; `detail.depth` past three levels).
+
+### Added — theme, measures and tooling
+
+- **Theme**: the tree's toggle and chevron (`--dzg-toggle-fg`, turning in 120 ms where motion is
+  welcome), the muted ancestor (`--dzg-context-fg`), the sticky parents' line, the detail panel
+  (`--dzg-detail-bg`, rules, padding) and its focus ring, `.dzg-retry`, the loading row; forced
+  colours for each; 176 contrast pairs checked (156 at 0.1.0).
+- **The million-row tree**: a seeded parent-id tree of ten levels (`perf/profiles/tree.ts`), bench
+  lines in Node (build, expand all, filter) and Chrome (`npm run bench:browser -- --only tree`:
+  first render, a wheel scroll over the open million, toggles, Ctrl+End); the playground's « Arbre »
+  takes `?rows=1000000`; the « Animations » demo has an « Arbre » section.
+- **Tooling (Phase 4 close, step 13)**: budgets reset by `scripts/rebudget.mjs` to the measure
+  + 10 %, never above the owner's grants (decision Q17); the real Angular example's ceiling 90 000 B
+  gz; `packages/dom/test/support/slow.ts` (`SLOW_TEST_MS`, `WALK_TEST_MS`) for tests that loop on
+  purpose (never a skip); the release tests check every file a tarball's exports name.
+
 ### Changed
 
-- `filters()` now requires three more texts (`filter.floatingToggle`, `announce.floatingHidden`,
-  `announce.floatingShown`): a host with its own filter bundle must add them, or `filters()` throws a
-  TypeError naming them. The floating row is no longer fixed when the grid is made.
+- **Breaking — `RowNode` is a union** (`DataNode | GroupNode | DetailNode | LoadingNode`): narrow
+  by `kind` before reading `data`; click events carry a `RowNode`. `DisplayedRows.nodeAt` may give a
+  filler, a detail or a loading row.
+- **Breaking — `ModelChange.kind` gains `'expand'`**: a `switch` over model changes that claimed to
+  be exhaustive must handle it (a toggle re-flattens only: no sort, filter or request).
+- **Breaking — variable row heights**: the DOM base no longer assumes `index × rowHeight`. A feature
+  may give the row layout through `g.layoutFor(d, h, was)` (`was`: the previous layout, to keep
+  measured heights); the paint, `ensureVisible`, the wheel and the page keys read `g.layout`.
+  Uniform rows behave as before.
+- **Breaking — `canSelect` and `SelectionRule` receive a `DataNode`** (not a `RowNode`).
+- **Breaking — `filters()` needs three more texts** (`filter.floatingToggle`,
+  `announce.floatingHidden`, `announce.floatingShown`) and **`tree()` needs `tree.empty`**: a host
+  with its own bundle must add them, or the feature throws a TypeError naming the missing keys. The
+  floating row is no longer fixed when the grid is made.
 - `npm run example:build` installs the tarballs just packed: the example's lock entries for the
   `@dzgrid` packs are dropped first (their pinned integrity made npm reinstall its cached old copy).
-
-- **Breaking**: `canSelect` and `SelectionRule` receive a `DataNode`; click events carry a
-  `RowNode` (check `kind === 'data'` before reading `data`).
 - `DisplayedRows` gains optional members: `parentOf`, `levelAt`, `dataCount` (the rows select-all
   takes), `matchedAt` (false for a filtered tree's muted ancestor).
 - Select-all and the header box skip fillers, details and a filtered tree's muted ancestors.
@@ -140,7 +182,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - unreleased
 
-Prepared at the Phase 3 close (2026-10-21), **not published**: the four packages `@dzgrid/core`,
+Prepared at the Phase 3 close (2026-10-21) and tagged `v0.1.0` locally, **never published** (0.2.0
+follows it; no 0.1.0 exists on npm): the four packages `@dzgrid/core`,
 `@dzgrid/dom`, `@dzgrid/angular` and `@dzgrid/theme` at 0.1.0, their `@dzgrid/*` peers on `^0.1.0`.
 Published later on the owner's word only, after the GSAP licence is confirmed, the `@dzgrid` scope
 reserved on npm and `@tzslot/core` / `@tzslot/dom` 2.2.0 published (GitHub Actions over OIDC with

@@ -13,13 +13,13 @@ const pkg = (name: string) => JSON.parse(readFileSync(`${ROOT}packages/${name}/p
 const NAMES = ['core', 'dom', 'angular', 'theme'];
 const VERSIONS = Object.fromEntries(NAMES.map((n) => [pkg(n).name, pkg(n).version]));
 
-describe('0.1.0 as npm would receive it', () => {
-  it('each manifest, once pinned as build.mjs does, has its @dzgrid peers on ^0.1.0', () => {
+describe('0.2.0 as npm would receive it', () => {
+  it('each manifest, once pinned as build.mjs does, has its @dzgrid peers on ^0.2.0', () => {
     for (const n of NAMES) {
       const pinned = pinPeers(pkg(n), VERSIONS);
       expect(peerProblems(n, pinned, VERSIONS), n).toEqual([]);
       for (const [dep, range] of Object.entries((pinned.peerDependencies ?? {}) as Record<string, string>)) {
-        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('^0.1.0');
+        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('^0.2.0');
       }
     }
   });
@@ -36,18 +36,23 @@ describe('0.1.0 as npm would receive it', () => {
     expect(theme.sideEffects).toEqual(['*.css']);
   });
 
-  // After `npm run pack:local`: the tarballs carry no test source, sandbox or capture, and each
+  // After `npm run pack:local`: the tarballs carry no test source, sandbox, capture or measure result, and each
   // non-theme package declares no side effects.
   const packed = `${ROOT}packed`;
-  it.skipIf(!existsSync(packed))('the packed tarballs: no test sources, sideEffects as declared, version 0.1.0', () => {
+  it.skipIf(!existsSync(packed))('the packed tarballs: no test sources, sideEffects as declared, version 0.2.0, every exported file present', () => {
     const tgz = readdirSync(packed).filter((f) => f.endsWith('.tgz'));
-    expect(tgz.sort()).toEqual(['dzgrid-angular-0.1.0.tgz', 'dzgrid-core-0.1.0.tgz', 'dzgrid-dom-0.1.0.tgz', 'dzgrid-theme-0.1.0.tgz']);
+    expect(tgz.sort()).toEqual(['dzgrid-angular-0.2.0.tgz', 'dzgrid-core-0.2.0.tgz', 'dzgrid-dom-0.2.0.tgz', 'dzgrid-theme-0.2.0.tgz']);
     for (const t of tgz) {
       const list = execFileSync('tar', ['-tzf', `${packed}/${t}`], { encoding: 'utf8' }).split('\n').filter(Boolean);
-      expect(list.filter((f) => /(^|\/)(test|tests|__tests__|fixtures|playground|screenshots)\/|\.(test|spec)\.|\.d\.ts\.map$/.test(f)), t).toEqual([]);
+      expect(list.filter((f) => /(^|\/)(test|tests|__tests__|fixtures|playground|screenshots|results)\/|\.(test|spec)\.|\.d\.ts\.map$/.test(f)), t).toEqual([]);
       expect(list.filter((f) => f.endsWith('.ts') && !f.endsWith('.d.ts')), t).toEqual([]);
       const m = JSON.parse(execFileSync('tar', ['-xOzf', `${packed}/${t}`, 'package/package.json'], { encoding: 'utf8' }));
-      expect(m.version, t).toBe('0.1.0');
+      expect(m.version, t).toBe('0.2.0');
+      // Every file the manifest's exports name is in the tarball (a subpath that ships missing fails on import).
+      const named = new Set<string>();
+      const walk = (v: unknown): void => { if (typeof v === 'string') named.add(v.replace(/^\.\//, '')); else if (v && typeof v === 'object') Object.values(v).forEach(walk); };
+      walk(m.exports);
+      expect([...named].filter((f) => !list.includes(`package/${f}`)), t).toEqual([]);
       expect(m.sideEffects, t).toEqual(t.includes('theme') ? ['*.css'] : false);
     }
   });

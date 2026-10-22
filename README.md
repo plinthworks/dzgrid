@@ -3,11 +3,11 @@
 A data grid written from scratch in TypeScript, for applications where right-to-left text, Arabic, time zones and screen readers are not an afterthought.
 
 - **A pure core** (`@dzgrid/core`): rows, columns, sorting, filtering, quick search, selection, paging, the keyboard model — no DOM, no dependency, the same results in Node and in the browser.
-- **A DOM layer** (`@dzgrid/dom`): virtual scrolling over a million rows, pinned columns, keyboard navigation following the WAI-ARIA grid pattern, tooltips, popups in the browser's top layer, rows that follow the reader's text zoom.
+- **A DOM layer** (`@dzgrid/dom`): virtual scrolling over a million rows, pinned columns, keyboard navigation following the WAI-ARIA grid pattern, tooltips, popups in the browser's top layer, rows that follow the reader's text zoom; a tree (WAI-ARIA treegrid) and master/detail rows with nested grids, each its own entry.
 - **A theme** (`@dzgrid/theme`): CSS custom properties, light and dark, every text and part checked for contrast.
 - **Angular** (`@dzgrid/angular`): `<dz-grid>` with signals, zoneless first, cells and other parts as Angular components or templates; Angular 19 to 22.
 
-> **Status: 0.1.0 prepared, not published to npm yet.** Phases 0 to 3 are done on the DzGrid side (core, read-only DOM, theme, right to left, accessibility; server data, filters, search, paging, CSV export, cell spans, selection rules, motion, Angular), closed on 2026-10-21. Next: the Sehhaty integration track ([`docs/sehhaty-track.md`](docs/sehhaty-track.md): the audit-logs screen, palettes, Arabic and screen-reader reviews) and Phase 4 (tree view, master/detail) — see [`docs/STATUS.md`](docs/STATUS.md). The API may still change.
+> **Status: Phase 4 — tree, master/detail, sticky parents, floating toggle; 0.2.0 prepared, unpublished.** Phases 0 to 3 are done on the DzGrid side (core, read-only DOM, theme, right to left, accessibility; server data, filters, search, paging, CSV export, cell spans, selection rules, motion, Angular), closed on 2026-10-21. Phase 4 Parts A–C are technically closed on 2026-10-22: tree view (parent ids, nested rows or paths, lazy children from the host or the server, sticky parent rows), master/detail with nested grids, the floating filter row shown and hidden live, all in Angular too. Nothing is on npm yet (0.1.0 was never published). Next: Part D, editing; the Sehhaty integration track ([`docs/sehhaty-track.md`](docs/sehhaty-track.md)) runs beside it — see [`docs/STATUS.md`](docs/STATUS.md). The API may still change.
 
 ## What it cares about
 
@@ -17,7 +17,7 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **Server data without surprises.** A request gate guarantees that only the answer to the last request of the current query is shown, whatever order answers arrive in. Pages, cursors, unknown totals, retry and errors are part of the model.
 - **Cells spanning rows and columns**, like an HTML table's `rowspan` and `colspan`: merged identical values, spans decided by the data, grouped headers, full-width rows.
 - **Problems are values.** A bad column, filter or server answer is reported as a structured problem — never a silent failure, never a crash.
-- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 75 879 B gzipped (ARCHITECTURE K.8: ≤ 85 000); in a real Angular 21 build (`ng build`, `npm run example:bytes`), DzGrid's share of the first load is 82 582 B.
+- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 80 286 B gzipped (guard 83 500); in a real Angular 21 build (`ng build`, `npm run example:bytes`), DzGrid's share of the first load is 86 988 B (ceiling 90 000, owner decision of 2026-10-22).
 
 ## A first grid
 
@@ -73,32 +73,40 @@ createGrid<Patient>(host, {
 
 ## Entries and sizes
 
-Minified and gzipped, each entry bundled as a consumer ships it, the packages it builds on left out (`npm run check:size`, measured at the Phase 3 close, 2026-10-21).
+Minified and gzipped, each entry bundled as a consumer ships it, the packages it builds on left out (`npm run check:size`, measured at the Phase 4 close, 2026-10-22).
 
 | Entry | What it holds | Size (B gz) |
 |---|---|---|
-| `@dzgrid/core` | rows, columns, codecs, sort, filters, quick search, selection, client model, paging | 26 984 |
-| `@dzgrid/core/server` | request gate, `sourceRows`, `toWire` (over the core) | 5 598 |
-| `@dzgrid/core/csv` | `toCsv`, chunks, scopes (over the core) | 1 641 |
-| `@dzgrid/core/spans` | the span map (over the core) | 3 423 |
-| `@dzgrid/core/rules` | selection rules (over the core) | 512 |
-| `@dzgrid/dom` | the grid in the browser | 19 360 |
-| `@dzgrid/dom/filters` | floating row and filter popup (over `@dzgrid/dom/popup`, 1 473) | 9 235 |
+| `@dzgrid/core` | rows, columns, codecs, sort, filters, quick search, selection, client model, paging, expansion | 28 240 |
+| `@dzgrid/core/server` | request gate, `sourceRows` (with server children), `toWire` (over the core) | 5 925 |
+| `@dzgrid/core/csv` | `toCsv`, chunks, scopes, trees (over the core) | 1 847 |
+| `@dzgrid/core/spans` | the span map (over the core) | 3 458 |
+| `@dzgrid/core/rules` | selection rules (over the core) | 492 |
+| `@dzgrid/core/tree` | `treeShape`: parent ids, nested rows, paths (over the core) | 3 371 |
+| `@dzgrid/core/tree-lazy` | `lazyShape`: children loaded on demand (over the tree) | 1 444 |
+| `@dzgrid/core/detail` | `detailShape`, `sparseRowLayout` (over the core) | 994 |
+| `@dzgrid/dom` | the grid in the browser | 20 648 |
+| `@dzgrid/dom/tree` | the tree on screen, sticky parents | 3 664 |
+| `@dzgrid/dom/tree-lazy` | `lazyChildren` on screen | 938 |
+| `@dzgrid/dom/detail` | detail panels, `nestedGrid` | 3 815 |
+| `@dzgrid/dom/filters` | floating row (shown and hidden live) and filter popup (over `@dzgrid/dom/popup`, 1 472) | 9 876 |
 | `@dzgrid/dom/filters`, lazy | the value list / the three date adapters (tzslot apart) | 3 793 / 2 320 |
 | `@dzgrid/dom/search` | binds the host's search input | 1 298 |
-| `@dzgrid/dom/pagination` | footer and pager | 3 157 |
-| `@dzgrid/dom/export` | `csvExport`, eager / its lazy run (with the CSV core) | 1 200 / 4 581 |
+| `@dzgrid/dom/pagination` | footer and pager | 3 211 |
+| `@dzgrid/dom/export` | `csvExport`, eager / its lazy run (with the CSV core) | 1 200 / 4 784 |
 | `@dzgrid/dom/spans` | spans in the DOM | 4 455 |
 | `@dzgrid/dom/slots` | header, overlay and tooltip slots | 1 246 |
 | `@dzgrid/dom/parts` | `badge()`, `cellBoolean` | 595 |
 | `@dzgrid/dom/rules` | selection rules in the DOM | 654 |
-| `@dzgrid/dom/motion-gsap` | `motion()`, eager / its lazy run (GSAP apart) | 593 / 2 591 |
+| `@dzgrid/dom/motion-gsap` | `motion()`, eager / its lazy run (GSAP apart) | 593 / 2 854 |
 | `@dzgrid/dom/internal` | shared by the features | 786 |
 | `@dzgrid/dom/locales/{en,fr,ar}` | the grid's messages | 519 / 636 / 825 |
-| `@dzgrid/theme` | the stylesheet | 2 046 |
-| `@dzgrid/angular` | the Angular wrapper | 5 437 |
-| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 75 879 |
-| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`) | 82 582 |
+| `@dzgrid/dom/locales/{en,fr,ar}-tree` | the tree's messages | 162 / 197 / 266 |
+| `@dzgrid/dom/locales/{en,fr,ar}-detail` | the detail panels' messages | 133 / 146 / 159 |
+| `@dzgrid/theme` | the stylesheet | 2 268 |
+| `@dzgrid/angular` | the Angular wrapper | 6 238 |
+| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 80 286 |
+| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`) | 86 988 |
 
 Optional peers: `@tzslot/core` and `@tzslot/dom` 2.2 (date filters), `gsap` 3.13 (motion).
 

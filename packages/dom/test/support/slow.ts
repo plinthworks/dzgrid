@@ -7,5 +7,5 @@
 /** A test that builds tens of grids in a loop (alone: about 4 s). */
 export const SLOW_TEST_MS = 20_000;
 
-/** A seeded walk: thousands of steps on a tree, each checked against its sheet (alone: 5–10 s). */
+/** A seeded walk: thousands of steps on a tree, each checked against its sheet (alone: 3–4.5 s). */
 export const WALK_TEST_MS = 60_000;

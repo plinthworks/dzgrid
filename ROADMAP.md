@@ -435,7 +435,10 @@ The cold text filter line (34 ms from runs of 30,2 / 30,6 / 35,7 ms) was measure
 | `<dz-grid>`: page errors | — (new) | 0 errors | 0 |
 
 
-## Phase 4 — tree view and master/detail first (started 2026-10-21)
+## Phase 4 — close techniquement, 2026-10-22
+
+Tree view and master/detail first (started 2026-10-21), then the floating-row toggle (Parts A–C, closed by step 13); Part D, editing, is planned next. 0.2.0 prepared, not published.
+
 Plan `docs/phase-4-plan.md`, decisions `docs/phase-4-steps/decisions.md` (owner 2026-10-21: three tree shapes, independent selection, filter keeps matches and ancestors, lazy children client and server, detail 240 px, nesting 2 tested / cap 3, budgets core 29 000, theme 2 500, new tree/detail entries, live floating-row toggle).
 - [x] step 1 (2026-10-21, not committed): sheets, spike S12 (variable heights with scaled scrolling), budgets in size-budget.json.
   - Sheets (`docs/behaviors/`, our words, from WAI-ARIA 1.2 / APG treegrid / WCAG 2.2 and public documentation): new `tree-view.md`, `tree-keys.md`, `tree-filter.md`, `tree-selection.md`, `master-detail.md`, `floating-toggle.md`; extended `selection.md` (trees and details), `csv-export.md` (tree export, `csv.tree`), `motion.md` (`'expand'`); `docs/a11y-protocol.md` §16 treegrid (items 87–95) and §17 detail (items 96–104), phrases in French and Arabic.
@@ -528,8 +531,36 @@ Plan `docs/phase-4-plan.md`, decisions `docs/phase-4-steps/decisions.md` (owner 
   - Tests first: `packages/dom/test/floating-toggle.test.ts` (28 failing of 28 before the code; 30 now: the view's height and the focus's source added for two mutants), `filters-floating` key count 49 → 52. Mutants 18: 16 killed (2 of them after a new test each), 2 survivors showed redundant code (an explicit flush, an explicit focus restore: the paint already does both), removed. Browser `--only filters` (new group, also in the full run): 12 / 12.
   - Sizes: `/filters` 9 241 → 9 728 (10 000; more than the plan's +150–250: the bound buttons' marks and unbind); filter bundles en 745 / fr 876 / ar 997 (800 / 950 / 1 050); dom 20 648 unchanged; angular 6 176 → **6 236** (6 250, Q16); theme 2 268 unchanged; K.8 profile 80 102 (83 500). Real Angular example 86 848 (ceiling 87 000; 86 245 before). Gate after Q16: `test:ci` 301 files, 4 803 tests green; Angular fixture 54 / 54.
   - Review and test-analysis fixes (2026-10-22, not committed; review of `dcec156`; `step12-plan.md` « Review and test analysis »): a late `compositionend` / `input` on a gone box ignored; `bind` twice keeps one listener and its first record, only the newest unbind acts, once; unbind gives back the host's own `aria-pressed` / `aria-controls`; shown again at its own place (features' order); a hide moves only a focus on the floating row's level; Angular `[floatingFilters]` reads `features()` untracked (+ a `provideDzGrid` defaults test); walk oracle strengthened (independent state, sentences counted, focus after hide, value check never skipped). Tests: 6 `it.fails` flipped (each failed first), +5. Sizes: `/filters` 9 876 (10 000), angular 6 238 (6 250), real Angular example **86 988** (87 000; a focus follow for rows below was removed by the lead: 87 016 with it). Gate: `test:ci` 303 files, 4 837 tests; `test:perm` 6 / 6; `typecheck`, `check:size`, `build` green; Chrome `--only filters` 12 / 12; Angular fixture 54 / 54.
-- [ ] Part D: editing (planned after step 12).
-- [ ] step 13: Phase 4 close (Parts A–C).
+- [x] step 13 (2026-10-22): Phase 4 close (Parts A–C). Plan, decisions and results: `docs/phase-4-steps/step13-plan.md` (owner decisions Q17).
+  - Part 1 (`936b27a`): « no rows » by its own key `tree.empty`; slow tests made safe (`SLOW_TEST_MS`, `WALK_TEST_MS`, the browser « motion tree » check waiting on state); size budgets reset by `scripts/rebudget.mjs` (« Final budgets (Phase 4) » below). Speed measurement postponed (Q17d).
+  - 0.2.0 (tests first: `scripts/test/release.test.ts` and `release-review.test.ts`, 5 failing before): the four packages at 0.2.0, the `@dzgrid/*` peers exact `0.2.0` in the sources and `^0.2.0` once built (dom's `@dzgrid/core` pin too), `DZGRID_ANGULAR_VERSION` 0.2.0, the example on the `-0.2.0.tgz` tarballs. The Phase 4 subpaths (core `tree`, `tree-lazy`, `detail`; dom `tree`, `tree-lazy`, `detail`, `locales/{en,fr,ar}-{tree,detail}`) were already in the sources' exports and `scripts/build.mjs` `PACKAGES` (a new test now pins them); the floating toggle is a method of `filters()`, no subpath. The packed-tarball test also refuses a `results/` folder and checks every file the exports name. `npm run pack:local`: core 369 700 B (255 files), dom 465 671 B (426), angular 38 082 B (6), theme 11 568 B (8); no tests, playground, screenshots or results, no `.d.ts.map`, 0 map problems.
+  - Final gate (2026-10-22, one command at a time, one headless Chrome at a time; the machine at a load average of ~60 from other projects): `build` green; `test:ci` 303 files, 4 840 tests, 1 timeout under load (`core/test/clock-walk.test.ts` 5.3 s against vitest's 5 s; green in both `test:tz` runs), rerun once: 303 files, 4 840 tests, all green (354 s); `test:perm` 6 / 6 (210 s); `typecheck` green; `test:tz` 2 × 4 840 green; `check:size` 0 over (core 28 240, dom 20 648, angular 6 238, K.8 profile 80 286); `check:contrast` 176 pairs, 0 below; `test:browser` 499 / 499; `test:audit -- --full` 42 / 42; Angular in Chrome 54 / 54; `example:build` (default, zone, baseline from the 0.2.0 tarballs); `example:bytes` **86 988** (≤ 90 000); `example:csv` 13 450 B with BOM; `example:ssr` fr and ar; `example:browser` 4 / 4. No bench (Q17d).
+  - Docs: README (status, entries with sizes), CHANGELOG `[0.2.0] - unreleased` by area with the breaking changes, ARCHITECTURE (« Index des décisions de la Phase 4 », « Ajustements après la Phase 4 », §2.6, §5.2, §6: Phase 4 reordered, Phase 6 grouping and aggregation only), this section, `docs/STATUS.md` rewritten (old text in `docs/phase-4-steps/status-log.md`), `docs/phase-4-plan.md` §5 « fermé le 2026-10-22 ».
+- [ ] Part D: editing (planned after the Phase 4 close; inputs in `step13-plan.md` « After the close »).
+
+### Exit criteria (Phase 4, Parts A–C; `docs/phase-4-plan.md` §5)
+
+| # | Criterion | Result |
+|---|---|---|
+| 1 | behaviour sheets before code | met (`docs/behaviors/tree-*.md`, `master-detail.md`, `floating-toggle.md`, a11y-protocol §16–§18) |
+| 2 | tree on 100k rows within targets; 1M-row tree at frame rate, row 999 999 reachable | met (Node 7.5 / 0.1 / 0.9 ms; Chrome 1M median 16.7 ms) |
+| 3 | filter keeps ancestors, property test 1 000 seeds | met |
+| 4 | keys mirrored in RTL, focus never lost, ARIA right through filter and sort, role treegrid, axe fr/ar light/dark | met (forced colours checked by ButtonText; axe not applicable there) |
+| 5 | detail not selectable / exported, nested grid with its own keys and scroll, LRU restore, Enter in / Escape out, 2 000 open details exact | met; « not editable / pasteable » carried to Part D (editing does not exist yet) |
+| 6 | uniform paint unchanged | tests met (existing tests green without edits); bench lines pending (Q17d) |
+| 7 | floating toggle tested | met |
+| 8 | spans / paging combinations give a problem and a defined behaviour | met |
+| 9 | lazy children, 1 000 permutations, 0 stale | met |
+| 10 | budgets by written decision, final gate green, docs updated, owner listening §16–§18 scheduled | met (budgets Q17; gate and docs at step 13); listening: the owner's, non-blocking |
+| 11 | CHANGELOG 0.2.0 prepared, unpublished | met |
+
+### Reporté (Phase 4)
+
+- **Criterion 5, « detail not editable / pasteable »** → Part D: the test lands with editing (the details, fillers and loading rows refused by the editors and the paste plan).
+- **Time budgets** → pending until the owner gives a quiet machine (Q17d: « Laisse la mesure pour le moment »): 17 older cold Node lines over budget since `bc01afa`, Chrome « toggle near the end, model and events » 11.6 / 11.5; then Q17c (fix real regressions over +25 % or on the common path — sort, filter, scroll; a written raise with its reason for 10–25 % elsewhere).
+- **Screen-reader listening** §16–§18 (`docs/a11y-protocol.md`) → the owner, non-blocking; never called « validated » before it is done.
+- **Arabic review** of `ar-tree`, `ar-detail`, `ar-filters`; **Excel** check of the Arabic CSV → the owner (Sehhaty track).
+- **Tree and detail on one grid**, cascade selection (Q2), `GridState` persistence of the open rows → later phases.
 
 ### Final budgets (Phase 4)
 

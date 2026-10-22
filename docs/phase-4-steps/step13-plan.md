@@ -89,3 +89,13 @@ Files over 10 s (full suite, `--maxWorkers=2`, summed test times): `tzslot-agree
 | `@dzgrid/angular` | 6 250 | 6 238 | 6 250 — grant |
 
 Gate (2026-10-22, one command at a time): `test:ci` 303 files, 4 839 tests; `test:perm` 2 files green; `typecheck`, `check:size` (0 over), `build`, `check:contrast` (176 pairs, 0 below) green. Browser `--only motion` 3 × 50 / 50. No bench (Q17d). Next: item 3 (final review of this diff), then 5–9.
+
+## Done: items 6, 7, 8 (2026-10-22, not committed)
+
+**0. Cosmetic.** `packages/dom/test/support/slow.ts`: `WALK_TEST_MS` comment « alone: 3–4.5 s » (the measures), not 5–10 s.
+
+**6. Version 0.2.0.** Tests first (`scripts/test/release.test.ts`, `release-review.test.ts`: 5 failing before — versions, peers, Angular's version, pinned peers, the packed tarballs). Then `packages/{core,dom,angular,theme}/package.json` 0.2.0, the sources' `@dzgrid/*` peers exact `0.2.0` (dom's `@dzgrid/core` too; `^0.2.0` once built by `pinPeers`), `DZGRID_ANGULAR_VERSION` 0.2.0, the example's four `file:` tarballs `-0.2.0.tgz`. The new subpaths were already in the sources' exports and `build.mjs` `PACKAGES`; a test now pins them. The floating toggle is a method of `filters()`: no subpath. The tarball test also refuses a `results/` folder and checks that every file the shipped `exports` name is in the tarball. `pack:local`: core 369 700 B (255 files), dom 465 671 B (426), angular 38 082 B (6), theme 11 568 B (8); 0 map problems; no `.d.ts.map`.
+
+**7. Final gate** (one command at a time, one headless Chrome at a time; load average ~60 from other projects during `test:ci`): `build` green; `test:ci` 4 840 tests, 1 timeout under load (`core/test/clock-walk.test.ts`, 5.3 s against 5 s; watched since item 2), rerun once: 4 840 green; `test:perm` 6 / 6; `typecheck`; `test:tz` 2 × 4 840; `check:size` 0 over; `check:contrast` 176 pairs; `test:browser` 499 / 499; `test:audit -- --full` 42 / 42; Angular in Chrome 54 / 54; `example:build` (0.2.0 tarballs, installed as copies); `example:bytes` 86 988 (≤ 90 000); `example:csv`; `example:ssr` fr / ar; `example:browser` 4 / 4. No bench (Q17d).
+
+**8. Docs.** README, CHANGELOG `[0.2.0] - unreleased`, ARCHITECTURE (index and adjustments of Phase 4, §2.6, §5.2, §6), ROADMAP (« Phase 4 — close techniquement, 2026-10-22 », step 13, exit criteria, « Reporté (Phase 4) »), `docs/STATUS.md` rewritten (the old text in `status-log.md`), `phase-4-plan.md` §5 closed, `CLAUDE.md` pointer, `docs/inventory.md` (detail rows P4). Next: item 9 (commit, local tag, push) by the lead.
