@@ -7,6 +7,7 @@ import { treeColumnProblems } from '@dzgrid/core/tree';
 import { shadowedParts } from '../../../packages/angular/src/shadow.js';
 import { harness } from '../harness.js';
 import { runTree } from './tree.js';
+import { runEditable } from './edit-order.js';
 import { kindsOf } from '../kinds.js';
 import { runSource } from './source.js';
 import { columnOf, runBands, runSpans } from './spans.js';
@@ -69,6 +70,9 @@ export const problems: Record<string, Suite> = {
       // A tree column the host named, shown but not first (Phase 4 step 4).
       case 'tree-column':
         return { problems: shape(treeColumnProblems(input.visible, input.column)) };
+      // A tree's structure column marked editable (Phase 5 step 2, editing.md 2).
+      case 'edit-structure':
+        return { problems: runEditable(input).problems };
       case 'sort': {
         const h = harness({ locale: 'en-US', ...input });
         return { problems: shape(sortIndices(input.sort, null, h.env()).problems) };

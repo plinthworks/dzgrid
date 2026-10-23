@@ -1,0 +1,85 @@
+{
+  "id": "tx-move-reapplies",
+  "suite": "edit-order",
+  "description": "Sorted by v, d edited to 99: a host update that moves a row puts everything in order, the edited row too (owner S2-O1).",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      },
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "b",
+              "set": {
+                "v": 10
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "c",
+      "a",
+      "b",
+      "d"
+    ],
+    "stale": [
+      true,
+      false
+    ],
+    "changes": [
+      [
+        "rows",
+        "host"
+      ]
+    ]
+  }
+}

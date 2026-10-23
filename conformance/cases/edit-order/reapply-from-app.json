@@ -1,0 +1,76 @@
+{
+  "id": "reapply-from-app",
+  "suite": "edit-order",
+  "description": "A reapply asked by the application keeps its source: api, never user.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      },
+      {
+        "reapply": "api"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b",
+      "c",
+      "a",
+      "d"
+    ],
+    "stale": [
+      true,
+      false
+    ],
+    "changes": [
+      [
+        "order",
+        "api"
+      ]
+    ]
+  }
+}

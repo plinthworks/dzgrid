@@ -1,0 +1,68 @@
+{
+  "id": "narrowing-search-finds-edited",
+  "suite": "edit-order",
+  "description": "Searching x, b edited to xy: typing on to xy narrows the words, but the search runs over every row again, and finds b.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "quick": "x"
+    },
+    "steps": [
+      {
+        "edit": [
+          "b",
+          "n",
+          "xy"
+        ]
+      },
+      {
+        "quick": "xy"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b"
+    ],
+    "stale": [
+      true,
+      false
+    ],
+    "changes": [
+      [
+        "query",
+        "user"
+      ]
+    ]
+  }
+}

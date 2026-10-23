@@ -1,0 +1,85 @@
+{
+  "id": "tx-other-row-keeps",
+  "suite": "edit-order",
+  "description": "Sorted by v, d edited to 99: a host update of another row that moves nothing keeps the order and its staleness.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      },
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "a",
+              "set": {
+                "n": "z"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "d",
+      "b",
+      "c",
+      "a"
+    ],
+    "stale": [
+      true,
+      true
+    ],
+    "changes": [
+      [
+        "rows",
+        "host"
+      ]
+    ]
+  }
+}

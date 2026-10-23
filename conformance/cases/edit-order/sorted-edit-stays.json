@@ -1,0 +1,67 @@
+{
+  "id": "sorted-edit-stays",
+  "suite": "edit-order",
+  "description": "Sorted by v: an edit that would move the row leaves it in place, and the order is out of date (K.14).",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "d",
+      "b",
+      "c",
+      "a"
+    ],
+    "stale": [
+      true
+    ],
+    "changes": []
+  }
+}

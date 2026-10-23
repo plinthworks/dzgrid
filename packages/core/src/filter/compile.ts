@@ -125,7 +125,7 @@ function customTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 
       problems.push(problem('filter-needs-server', 'error', path, f.kind));
       return null;
     }
-    pred = kind.test(s, env.ctx);
+    pred = kind.test(s, env.ctx, env.app);
   } catch {
     return bad(problems, path, 'threw');
   }

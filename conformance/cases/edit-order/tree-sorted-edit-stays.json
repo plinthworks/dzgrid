@@ -1,0 +1,84 @@
+{
+  "id": "tree-sorted-edit-stays",
+  "suite": "edit-order",
+  "description": "A tree sorted by v, all open: an edit of a child stays among its siblings until the reapply.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r",
+        "p": null,
+        "v": 5,
+        "n": "r"
+      },
+      {
+        "id": "x",
+        "p": "r",
+        "v": 1,
+        "n": "x"
+      },
+      {
+        "id": "y",
+        "p": "r",
+        "v": 2,
+        "n": "y"
+      },
+      {
+        "id": "s",
+        "p": null,
+        "v": 1,
+        "n": "s"
+      }
+    ],
+    "shape": "tree",
+    "tree": {
+      "initial": "all"
+    },
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "x",
+          "v",
+          9
+        ]
+      },
+      {
+        "reapply": "user"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "s",
+      "r",
+      "y",
+      "x"
+    ],
+    "stale": [
+      true,
+      false
+    ],
+    "changes": [
+      [
+        "order",
+        "user"
+      ]
+    ]
+  }
+}

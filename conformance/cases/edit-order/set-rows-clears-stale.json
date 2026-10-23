@@ -1,0 +1,97 @@
+{
+  "id": "set-rows-clears-stale",
+  "suite": "edit-order",
+  "description": "Sorted by v, d edited to 99: the host gives the same rows again: a load puts everything in order, the edit too.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      },
+      {
+        "load": [
+          {
+            "id": "a",
+            "v": 3,
+            "n": "x"
+          },
+          {
+            "id": "b",
+            "v": 1,
+            "n": "y"
+          },
+          {
+            "id": "c",
+            "v": 2,
+            "n": "x"
+          },
+          {
+            "id": "d",
+            "v": 0,
+            "n": "y"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b",
+      "c",
+      "a",
+      "d"
+    ],
+    "stale": [
+      true,
+      false
+    ],
+    "changes": [
+      [
+        "rows",
+        "host"
+      ]
+    ]
+  }
+}

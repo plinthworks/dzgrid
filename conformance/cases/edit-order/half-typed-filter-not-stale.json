@@ -1,0 +1,68 @@
+{
+  "id": "half-typed-filter-not-stale",
+  "suite": "edit-order",
+  "description": "A filter on n with an empty box is no filter: an edit of n leaves the order up to date.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "filter": {
+        "n": {
+          "type": "text",
+          "op": "contains",
+          "value": ""
+        }
+      }
+    },
+    "steps": [
+      {
+        "edit": [
+          "a",
+          "n",
+          "q"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "b",
+      "c",
+      "d"
+    ],
+    "stale": [
+      false
+    ],
+    "changes": []
+  }
+}

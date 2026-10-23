@@ -17,6 +17,8 @@ export interface WireEnv<T> {
   readonly kinds?: (name: string) => WireKind | undefined;
   /** The clock, milliseconds since 1970 UTC: what a date shortcut is resolved against (filter-relative.md). Absent: a shortcut is refused (`no clock`). */
   readonly now?: number;
+  /** The grid's `settings.context`, for a kind's `wire` (Phase 5, Q12). */
+  readonly app?: unknown;
 }
 
 /** The filters as the server receives them: the model, cleaned and made absolute (docs/behaviors/server-filter.md). */
@@ -192,7 +194,7 @@ function wireOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: 
         const s = kind.read(f.state);
         if (s === 'invalid') return bad(path, 'invalid state');
         if (!kind.active(s)) return OFF;
-        const value = kind.wire ? kind.wire(s, env.ctx, env.ctx.timeZone) : s;
+        const value = kind.wire ? kind.wire(s, env.ctx, env.ctx.timeZone, env.app) : s;
         return isJson(value) ? { type: 'custom', kind: f.kind, value } : bad(path, 'not json');
       } catch {
         return bad(path, 'threw');

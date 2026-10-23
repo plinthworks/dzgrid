@@ -1,0 +1,47 @@
+{
+  "id": "edit-structure",
+  "suite": "problems",
+  "description": "A column that feeds a tree's structure (here the parent id) is marked editable: it stays read-only this phase (Q13), with one warning at `columns.<id>.editable`.",
+  "input": {
+    "op": "edit-structure",
+    "columns": [
+      {
+        "id": "p",
+        "editable": true
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "p": null,
+        "n": "x"
+      }
+    ],
+    "shape": "tree",
+    "steps": [
+      {
+        "lock": [
+          "p"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "p"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "edit-structure",
+        "severity": "warning",
+        "path": "columns.p.editable"
+      }
+    ]
+  }
+}

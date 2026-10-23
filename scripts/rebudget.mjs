@@ -35,11 +35,11 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  */
 const SIZE_CEILINGS = {
   '@dzgrid/core': 29000,
-  '@dzgrid/core/server': 6000,
+  '@dzgrid/core/server': 6100, // Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order)
   '@dzgrid/core/csv': 2000, // Q7: « core/csv up to 2 000 »
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
-  '@dzgrid/core/detail': 1000,
+  '@dzgrid/core/detail': 1050, // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
   '@dzgrid/dom': 21300,
   '@dzgrid/dom/filters': 10000,
   '@dzgrid/dom/tree': 3700,

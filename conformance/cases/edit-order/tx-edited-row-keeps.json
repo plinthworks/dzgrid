@@ -1,0 +1,85 @@
+{
+  "id": "tx-edited-row-keeps",
+  "suite": "edit-order",
+  "description": "Filtered v >= 1, b edited out of the filter: a host update of b's other column moves nothing (b failed with the edit before it too): the order and its staleness are kept.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "filter": {
+        "v": {
+          "type": "number",
+          "op": "gte",
+          "value": 1
+        }
+      }
+    },
+    "steps": [
+      {
+        "edit": [
+          "b",
+          "v",
+          0
+        ]
+      },
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "b",
+              "set": {
+                "n": "z"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "b",
+      "c"
+    ],
+    "stale": [
+      true,
+      true
+    ],
+    "changes": [
+      [
+        "rows",
+        "host"
+      ]
+    ]
+  }
+}

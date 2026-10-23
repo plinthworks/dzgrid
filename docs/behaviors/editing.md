@@ -29,8 +29,10 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
    `editable(row, context)` true). Detail rows, filler rows of a path tree, loading rows: never, whatever
    the column says (`editableAt` in the core; Phase 4 criterion 5 carried here).
 2. In a tree, the columns that feed the structure (parent id, path) are read-only in this phase (Q13).
-   `tree({ structure: ['parentId'] })` names them; in path mode the tree column is one by default. Such a
-   column marked editable gives one warning `edit-structure` (path `columns.<id>.editable`) and stays
+   `tree({ structure: ['parentId'] })` names them; in path mode the tree column is one by default (the
+   core seam, `lockColumns`, is step 2's; the `tree({ structure })` option in `@dzgrid/dom/tree` is step 8's,
+   owner S2-O4). Such a column marked editable gives one warning `edit-structure` (path
+   `columns.<id>.editable`; told once when a column becomes locked and editable, again only after it stopped being either) and stays
    read-only.
 3. A grid with no editable column keeps `aria-readonly="true"` on the grid, as today. As soon as one
    column is editable, the grid loses it and each cell that is not editable (by its column, its row or

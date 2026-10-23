@@ -46,7 +46,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     // Q17b (owner, 2026-10-22): the measure + 10 %, never above what the owner granted.
     const grants: Record<string, number> = {
       '@dzgrid/core': 29000, '@dzgrid/dom': 21300, '@dzgrid/angular': 6250, '@dzgrid/dom/tree': 3700, '@dzgrid/dom/detail': 3900,
-      '@dzgrid/dom/filters': 10000, '@dzgrid/theme': 2500, '@dzgrid/core/detail': 1000, '@dzgrid/core/tree': 3500,
+      '@dzgrid/dom/filters': 10000, '@dzgrid/theme': 2500, '@dzgrid/core/tree': 3500,
       '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
       // Q7 (2026-10-21): « core/csv up to 2 000 », a grant the close keeps (1 847 + 10 % would be 2 050).
       '@dzgrid/core/csv': 2000,
@@ -65,7 +65,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(sizeBudget(1348, ceilingFor('@dzgrid/core/tree-lazy'))).toBe(1500);
     expect(sizeBudget(877, ceilingFor('@dzgrid/dom/tree-lazy'))).toBe(1000); // 964.7 → 1 000, not 1 050
     // The other entries keep their plan ceilings; the small text bundles follow the rule (≤ 2 kB).
-    expect(ceilingFor('@dzgrid/core/server')).toBe(6000);
+    expect(ceilingFor('@dzgrid/core/server')).toBe(6100); // Phase 5 S2-O4: 6 000 → 6 100
+    expect(ceilingFor('@dzgrid/core/detail')).toBe(1050); // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core)
     expect(ceilingFor('@dzgrid/dom/locales/ar')).toBe(2000);
     expect(ceilingFor('@dzgrid/dom/locales/fr-tree')).toBe(2000);
     expect(sizeBudget(146, ceilingFor('@dzgrid/dom/locales/fr-tree'))).toBe(200);

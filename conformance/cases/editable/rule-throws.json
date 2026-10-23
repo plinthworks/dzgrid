@@ -1,0 +1,66 @@
+{
+  "id": "rule-throws",
+  "suite": "editable",
+  "description": "A rule that throws: not editable, and one warning for that column however often it is asked.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": {
+          "rule": "throws"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "steps": [
+      {
+        "ask": [
+          "a",
+          "v"
+        ]
+      },
+      {
+        "ask": [
+          "b",
+          "v"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "answers": [
+      false,
+      false
+    ],
+    "problems": [
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns.v.editable",
+        "detail": "threw"
+      }
+    ]
+  }
+}

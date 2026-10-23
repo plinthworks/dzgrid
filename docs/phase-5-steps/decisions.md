@@ -31,3 +31,11 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 
 - **O1 (owner):** a value refused by a local check when the user clicks away (the editor cannot stay open): the typed text is dropped, the border blinks red ~0.5 s, the previous value returns, one sentence is announced (« modification abandonnée : nombre attendu »); nothing to undo. Enter and Tab keep the editor open as in Q9.
 - **O2–O11 (lead decisions, written in the sheets):** O2 a failed save is retried by reopening the cell, which offers the refused text; a refused change leaves nothing to undo. O3 « saved » is not spoken. O4 only rows failing the filter are muted. O5 the reapply mark goes on every sorted/filtered header. O6 keyboard reapply through that header button only. O7 the app names the tree's parent/path columns with `tree({ structure })`. O8 Space toggles a yes/no cell instead of selecting the row. O9 a server page change while editing counts as "hidden" (the value is saved). O10 undo moves focus to the changed cell. O11 the server's refusal reason comes from `error.reason`. Also: a network failure is treated like a server refusal; Backspace clears like Delete.
+
+## Step 2 (owner, 2026-10-22)
+
+- **S2-O1:** a host update that moves rows while the order is stale reapplies everything, edited rows included.
+- **S2-O2:** on a server-sorted/filtered column the stale mark is shown; reapply sends one request.
+- **S2-O3:** the app context reaches filter kinds, `editable` and `validate` only; sorting (via `value(row, context)`) later. This narrows Q12.
+- **S2-O4:** `@dzgrid/core/server` 6 000 → 6 100 (grant). The `tree({ structure })` wiring in `dom/tree` moves to step 8 with its own budget request; the core seam stays in step 2.
+- **S2-O5 (2026-10-23):** `@dzgrid/core/detail` 1 000 → 1 050. Its code is unchanged (2 181 B min); its gzip delta over the grown core moved to 1 002. Ceiling in `scripts/rebudget.mjs` and `size-budget.json`.

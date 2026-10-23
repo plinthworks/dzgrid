@@ -1,0 +1,76 @@
+{
+  "id": "reapply-moves-once",
+  "suite": "edit-order",
+  "description": "A reapply by the user puts the edited row in its place: one change, of kind order, with the user's source; the order is no longer out of date.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      },
+      {
+        "reapply": "user"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b",
+      "c",
+      "a",
+      "d"
+    ],
+    "stale": [
+      true,
+      false
+    ],
+    "changes": [
+      [
+        "order",
+        "user"
+      ]
+    ]
+  }
+}

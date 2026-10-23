@@ -1,0 +1,78 @@
+{
+  "id": "tx-edited-row-keeps-search",
+  "suite": "edit-order",
+  "description": "Searching x, a edited to zz: a host update of a's number moves nothing: the order and its staleness are kept.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "quick": "x"
+    },
+    "steps": [
+      {
+        "edit": [
+          "a",
+          "n",
+          "zz"
+        ]
+      },
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "a",
+              "set": {
+                "v": 7
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "c"
+    ],
+    "stale": [
+      true,
+      true
+    ],
+    "changes": [
+      [
+        "rows",
+        "host"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "id": "detail-master-sorted-page-stays",
+  "suite": "edit-order",
+  "description": "Details, pages of 2, sorted by v: d's detail open, d edited to 99 stays on the page with its detail; the reapply shows the new first page.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "shape": "detail",
+    "page": {
+      "pageSize": 2
+    },
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "expand": [
+          "d"
+        ]
+      },
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      },
+      {
+        "reapply": "user"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b",
+      "c"
+    ],
+    "stale": [
+      false,
+      true,
+      false
+    ],
+    "changes": [
+      [
+        "expand",
+        "user"
+      ],
+      [
+        "order",
+        "user"
+      ]
+    ]
+  }
+}

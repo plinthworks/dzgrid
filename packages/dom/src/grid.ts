@@ -95,8 +95,8 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...shared, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }) })
     : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page, ...shared });
   const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false });
-  // Operations without a source run in the browser, and are told (a source's model tells its own).
-  // The filter kinds refused are told too.
+  if (initial.context !== undefined) kernel.dispatch({ type: 'context.app', value: initial.context }, 'host'); // editable rules, custom kinds (Q12)
+  // Operations without a source run in the browser, and are told (a source's model tells its own); the filter kinds refused too.
   const told = [...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems)];
 
   let dir: Dir = 'ltr';

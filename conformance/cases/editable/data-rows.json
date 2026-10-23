@@ -1,0 +1,85 @@
+{
+  "id": "data-rows",
+  "suite": "editable",
+  "description": "A data row in a column that says yes: editable. A column that says nothing or false, a column or a row the grid does not know: not.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n"
+      },
+      {
+        "id": "m",
+        "editable": false
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "steps": [
+      {
+        "ask": [
+          "a",
+          "v"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "n"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "m"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "zz"
+        ]
+      },
+      {
+        "ask": [
+          "zz",
+          "v"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "answers": [
+      true,
+      false,
+      false,
+      false,
+      false
+    ],
+    "problems": []
+  }
+}

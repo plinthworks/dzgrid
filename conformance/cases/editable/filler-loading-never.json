@@ -1,0 +1,60 @@
+{
+  "id": "filler-loading-never",
+  "suite": "editable",
+  "description": "A path tree's filler row and a loading row are never editable, whatever the column says.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "n": "x",
+        "path": [
+          "f",
+          "a"
+        ]
+      }
+    ],
+    "shape": "path",
+    "tree": {
+      "initial": "all"
+    },
+    "steps": [
+      {
+        "ask": [
+          "/f",
+          "v"
+        ]
+      },
+      {
+        "ask": [
+          "~a",
+          "v"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "v"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "answers": [
+      false,
+      false,
+      true
+    ],
+    "problems": []
+  }
+}

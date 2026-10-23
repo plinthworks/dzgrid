@@ -7,7 +7,7 @@
     },
     "@dzgrid/core/server": {
       "file": "packages/core/src/server.ts",
-      "maxGzip": 6000,
+      "maxGzip": 6100,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/spans": {
@@ -37,7 +37,7 @@
     },
     "@dzgrid/core/detail": {
       "file": "packages/core/src/detail.ts",
-      "maxGzip": 1000,
+      "maxGzip": 1050,
       "over": "@dzgrid/core"
     },
     "@dzgrid/dom/locales/en": {

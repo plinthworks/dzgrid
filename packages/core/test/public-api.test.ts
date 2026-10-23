@@ -14,6 +14,7 @@ import * as detail from '@dzgrid/core/detail';
  * grid's own layers and tests need lives in `@dzgrid/core/internal`.
  */
 const PUBLIC = [
+  'editableAt',
   'DEFAULT_PAGE_SIZE', 'DEFAULT_PAGE_SIZES', 'EMPTY_QUERY', 'INTENT_OWNERS', 'MAX_INSTANT', 'MAX_PHYSICAL', 'NO_OVERLAY', 'NO_SELECTION', 'PROBLEM_CODES', 'PrefixSums', 'REBASE', 'REJECTED', 'RELATIVE_RANGES',
   'addDays', 'anchorFor', 'assignKeys', 'booleanCodec', 'booleanCodecWith', 'canonicalId', 'civilToEpochDay',
   'clearSelection', 'clientRows', 'createKernel', 'collatorFor', 'compareDays', 'compilePath', 'createColumnModel', 'dataKey', 'dayAt', 'dayCodec', 'dayFieldOrder', 'dayToEpochDay', 'daysInMonth', 'detailKey',
@@ -28,7 +29,7 @@ const PUBLIC = [
 
 const INTERNAL = [
   'ColumnCache', 'Haystack', 'THREW', 'canNarrow', 'canonical', 'clearFormatCaches', 'collatorKey', 'compileFilter', 'compileQuick', 'createRowStore',
-  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'filterKindLookup', 'flatDisplayed', 'foldSlow', 'formatParts', 'hasRelative', 'intlTag', 'isDataKey', 'missingFeatureProblems', 'onCommand', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'setFocusOwner', 'setSelectionGate', 'shownAncestor', 'sortIndices', 'storeOf',
+  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'filterKindLookup', 'flatDisplayed', 'foldSlow', 'formatParts', 'hasRelative', 'intlTag', 'isDataKey', 'lockColumns', 'missingFeatureProblems', 'onCommand', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'setFocusOwner', 'setSelectionGate', 'shownAncestor', 'sortIndices', 'storeOf',
 ];
 
 /** `@dzgrid/core/server`: what a grid fed by a server needs, never in the base. */

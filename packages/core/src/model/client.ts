@@ -129,6 +129,17 @@ export interface RowModel<T> {
    * rows whose state changed.
    */
   expandAll?(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
+  /**
+   * Takes the edit overlay (K.14): nothing moves. `changed`: the columns the edit touched (absent:
+   * all); one an active sort, applied filter or search reads makes the order stale.
+   */
+  setReader?(reader: ValueReader<T>, changed?: readonly string[]): void;
+  /** Filters and sorts again, with the edits: told as an `order` change (a server's sort or filter, asked again). */
+  reapply?(source?: ChangeSource): void;
+  /** An edit changed a value an active sort, applied filter or search reads, since the last full run. */
+  readonly orderStale?: boolean;
+  /** The grid's `settings.context`, for the custom filter kinds (Q12): a new one filters again only under one. */
+  setApp?(context: unknown, source?: ChangeSource): void;
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
   destroy(): void;
 }
@@ -207,6 +218,8 @@ export interface ClientOptions<T> {
   readonly now?: () => number;
   /** A tree or details (D2). A tree refuses browser pages (`unsupported-combination`). */
   readonly shape?: RowShape<T>;
+  /** The application's context at creation (Q12): what the custom filter kinds are told until `setApp`. */
+  readonly app?: unknown;
 }
 
 export interface ClientModel<T> extends RowModel<T> {
@@ -224,8 +237,10 @@ export interface ClientModel<T> extends RowModel<T> {
   setColumns(columns: ColumnLookup<T>, source?: ChangeSource): void;
   setContext(ctx: LocaleCtx, source?: ChangeSource): void;
   /** Takes the edit overlay without reordering anything (K.14): rows move only on `reapply()`. */
-  setReader(reader: ValueReader<T>): void;
-  reapply(): void;
+  setReader(reader: ValueReader<T>, changed?: readonly string[]): void;
+  reapply(source?: ChangeSource): void;
+  readonly orderStale: boolean;
+  setApp(context: unknown, source?: ChangeSource): void;
   setValues(column: string, o?: ValuesOptions): ValuesHandle;
   /**
    * Prepares the quick search's haystacks a few cells at a time, for idle
@@ -302,7 +317,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   let pageIndex = 0;
 
   /** What a stage's result depends on, besides the rows. */
-  interface Inputs { snap: number; colsRef: ColumnLookup<T>; cols: number; ctx: string; reader: number; filter: string; quick: string; quickCols: string; day: string }
+  interface Inputs { snap: number; colsRef: ColumnLookup<T>; cols: number; ctx: string; reader: number; filter: string; quick: string; quickCols: string; day: string; app: number }
   let filtered: { in: Inputs; words: readonly string[]; order: Uint32Array | null; mask: Uint8Array | null; problems: readonly Problem[] } | null = null;
   let sorted: { in: Inputs; sort: string; input: Uint32Array | null; order: Uint32Array | null; problems: readonly Problem[] } | null = null;
   let displayed: DisplayedRows<T>;
@@ -320,8 +335,25 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   };
   const appliedKey = (f: Query['filter']): string => appliedOf(f).key;
 
+  /** The application's context (Q12) and its version: read by a custom filter only. */
+  let app = o.app;
+  let appV = 0;
+  /** The context's version when a filter holds a custom kind (its `test` reads the context), 0 otherwise: a false positive only filters again. */
+  const appOf = (filter: string): number => (filter.includes('"type":"custom"') ? appV : 0);
+  /** An edit touched what the order was made from (K.14): the next run is a whole one, with the edits. */
+  let stale = false;
+  const full = (): void => {
+    filtered = sorted = null;
+    stale = false;
+  };
+  /** Whether `changed` (absent: any column) holds a column the sort, the applied filters or the search read. */
+  const touches = (changed?: readonly string[]): boolean => {
+    const read = [...query.sort.map((s) => s.column), ...Object.keys(appliedOf(query.filter).m), ...(quickWords(query.quick).length ? columns.visible().map((c) => c.id) : [])];
+    return changed ? changed.some((c) => read.includes(c)) : read.length > 0;
+  };
+
   // The clock is read only by a compile that meets a shortcut.
-  const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache, get now() { return o.now?.(); } });
+  const env = (): ColumnEnv<T> => ({ source: store.snapshot, columns, ctx, reader, cache, app, get now() { return o.now?.(); } });
   /**
    * Today in the grid's zone when a filter holds a shortcut (hasRelative, by the filter's identity),
    * '' otherwise: the clock is read then only, and the day kept until it ends, the zone changes or the
@@ -352,15 +384,19 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     quick: query.quick,
     quickCols: visibleIds(),
     day: dayOf(query.filter),
+    app: appOf(filter),
   });
   /** `quick`: all but the search; `query`: the data only (a tree's sort, over every row). */
   const same = (a: Inputs, b: Inputs, ignore?: 'quick' | 'query'): boolean =>
     a.snap === b.snap && a.colsRef === b.colsRef && a.cols === b.cols && a.ctx === b.ctx && a.reader === b.reader &&
-    (ignore === 'query' || (a.filter === b.filter && a.day === b.day && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick)));
+    (ignore === 'query' || (a.filter === b.filter && a.day === b.day && a.app === b.app && a.quickCols === b.quickCols && (ignore === 'quick' || a.quick === b.quick)));
 
   /** Runs the stages whose inputs changed; true when the displayed rows changed. */
   const run = (): boolean => {
     const now = inputs();
+    const sortKey = canonical(query.sort);
+    // Stale: anything that runs again runs whole, with the edits, never searching the old matches (K.14).
+    if (stale && sorted && (!same(filtered!.in, now) || sorted.sort !== sortKey)) full();
     if (!filtered || !same(filtered.in, now)) {
       d.filterRuns++;
       const e = env();
@@ -373,7 +409,6 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       const order = filterIndices(store.snapshot.count, [f, q], within);
       filtered = { in: now, words, order, mask: maskOf(order, store.snapshot.count), problems: f.problems };
     }
-    const sortKey = canonical(query.sort);
     // A tree sorts every row: an ancestor shown for its matches keeps its place among its siblings,
     // and another filter sorts nothing again.
     const input = tree ? null : filtered.order;
@@ -461,7 +496,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       others: {
         // The columns a search reads are data too: showing or hiding one moves `dataVersion`;
         // another lookup brings other column objects, which rebuild the index and its counts.
-        key: canonical([counted, words, columns.dataVersion, dayOf(query.filter)]),
+        key: canonical([counted, words, columns.dataVersion, dayOf(query.filter), appOf(canonical(counted))]),
         test: () => {
           const e = env();
           const f = compileFilter(others, e, o.filterKinds);
@@ -502,8 +537,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // A new day since the last run (a shortcut, before the tick): everything again.
     if (delta.kind !== 'update' || !delta.changedSrc || !filtered || !sorted || filtered.in.day !== inputs().day) {
       follow();
-      filtered = null;
-      sorted = null;
+      full();
       run();
       return notify('rows', source, r);
     }
@@ -511,23 +545,25 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     const sortCols = query.sort.map((s) => columns.get(s.column)).filter((c) => c !== undefined);
     const oldSnap = { ...env(), source: storeBefore };
     const before = sortCols.map((c) => Array.from(delta.changedSrc!, (src) => (c.codec.keyKind === 'number' ? cache.keys(c, oldSnap).keys : cache.ranks(c, oldSnap).ranks)[src]));
+    // Stale, the mask is older than the edits: whether a row passed is read again, with them, on the old rows.
+    const mask = filtered.mask;
+    const oldF = stale && compileFilter(query.filter, oldSnap, o.filterKinds);
+    const oldQ = stale && compileQuick(query.quick, columns.visible(), oldSnap);
+    const passed = Array.from(delta.changedSrc!, (src) => (oldF && oldQ ? oldF.test(src) && oldQ.test(src) : !mask || mask[src] === 1));
     follow();
     const after = sortCols.map((c) => Array.from(delta.changedSrc!, (src) => keysOf(c)[src]));
     const e = env();
     const f = compileFilter(query.filter, e, o.filterKinds);
     const q = compileQuick(query.quick, columns.visible(), e);
     let moved = false;
-    for (const src of delta.changedSrc) {
+    delta.changedSrc!.forEach((src, i) => {
       d.retested++;
-      const was = filtered.mask ? filtered.mask[src] === 1 : true;
-      if (f.test(src) && q.test(src)) {
-        if (!was) moved = true;
-      } else if (was) moved = true;
-    }
+      if ((f.test(src) && q.test(src)) !== passed[i]) moved = true;
+    });
     const keysMoved = before.some((ks, i) => ks.some((k, j) => !Object.is(k, after[i]![j])));
+    // Rows move: everything is put in order, the edited rows too (S2-O1).
     if (moved || keysMoved) {
-      filtered = null;
-      sorted = null;
+      full();
       run();
       return notify('rows', source, r);
     }
@@ -593,7 +629,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // words (spaces aside), over the set of columns it reads (their order and pinning aside).
     membershipOf: (q) => {
       const words = quickWords(q.quick);
-      return canonical({ filter: appliedKey(q.filter), day: dayOf(q.filter), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
+      const filter = appliedKey(q.filter);
+      return canonical({ filter, app: appOf(filter), day: dayOf(q.filter), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
     },
     matches: (key) => {
       const src = store.snapshot.lookup(idOfDataKey(key) ?? '');
@@ -723,8 +760,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     invalidate() {
       shape?.refresh?.();
       cache.invalidateAll();
-      filtered = null;
-      sorted = null;
+      full();
       run();
       notify('rows', 'api');
     },
@@ -740,17 +776,25 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       if (run()) notify('context', source);
     },
     // Taken, not applied: what is shown keeps its order until reapply() (K.14).
-    setReader(next) {
+    setReader(next, changed) {
+      // A version that did not move changed no value: nothing goes stale.
+      if (next.version !== filtered!.in.reader) stale ||= touches(changed);
       reader = next;
       // The stages count as up to date for this reader: nothing reruns because of it alone.
-      if (filtered) filtered = { ...filtered, in: { ...filtered.in, reader: next.version } };
-      if (sorted) sorted = { ...sorted, in: { ...sorted.in, reader: next.version } };
+      filtered = { ...filtered!, in: { ...filtered!.in, reader: next.version } };
+      sorted = { ...sorted!, in: { ...sorted!.in, reader: next.version } };
     },
-    reapply() {
-      filtered = null;
-      sorted = null;
+    reapply(source = 'api') {
+      full();
       run();
-      notify('order', 'user');
+      notify('order', source);
+    },
+    get orderStale() { return stale; },
+    setApp(next, source = 'api') {
+      if (next === app) return;
+      app = next;
+      appV++;
+      if (run()) notify('context', source);
     },
     subscribe(fn) {
       listeners.add(fn);
@@ -797,6 +841,8 @@ export interface ModelEnv<T> {
   readonly now?: () => number;
   /** A tree (a feature's shape): the rows the server sends are shown as one (tree-lazy.md). */
   readonly shape?: RowShape<T>;
+  /** The application's context at creation: the first request's custom filters are wired with it. */
+  readonly app?: unknown;
 }
 
 /** A model to make once the grid knows its columns and language. */

@@ -1,0 +1,66 @@
+{
+  "id": "detail-never",
+  "suite": "editable",
+  "description": "A master's detail row is never editable, whatever its column says; its master is.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "shape": "detail",
+    "steps": [
+      {
+        "expand": [
+          "a"
+        ]
+      },
+      {
+        "ask": [
+          ">a",
+          "v"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "v"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "answers": [
+      false,
+      true
+    ],
+    "problems": []
+  }
+}

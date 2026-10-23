@@ -1,0 +1,73 @@
+{
+  "id": "bad-values",
+  "suite": "editable",
+  "description": "`editable` neither a boolean nor a function, `validate` not a function: a warning each, the column kept, not editable.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": "yes"
+      },
+      {
+        "id": "n",
+        "editable": true,
+        "validate": 5
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "steps": [
+      {
+        "ask": [
+          "a",
+          "v"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "n"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "answers": [
+      false,
+      true
+    ],
+    "problems": [
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns[0].editable"
+      },
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns[1].validate"
+      }
+    ]
+  }
+}

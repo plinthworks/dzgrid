@@ -1,0 +1,102 @@
+{
+  "id": "rule-with-context",
+  "suite": "editable",
+  "description": "A rule reads the row and the application's context: only `true` means yes (a truthy `'yes'` does not).",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": {
+          "rule": "context-allows"
+        }
+      },
+      {
+        "id": "n",
+        "editable": {
+          "rule": "says-yes"
+        }
+      },
+      {
+        "id": "o",
+        "editable": {
+          "rule": "row-ok"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "n": "x",
+        "o": 1,
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "n": "y",
+        "o": 2
+      }
+    ],
+    "steps": [
+      {
+        "ask": [
+          "a",
+          "v"
+        ]
+      },
+      {
+        "app": {
+          "allow": true
+        }
+      },
+      {
+        "ask": [
+          "a",
+          "v"
+        ]
+      },
+      {
+        "app": {
+          "allow": false
+        }
+      },
+      {
+        "ask": [
+          "a",
+          "v"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "n"
+        ]
+      },
+      {
+        "ask": [
+          "a",
+          "o"
+        ]
+      },
+      {
+        "ask": [
+          "b",
+          "o"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "answers": [
+      false,
+      true,
+      false,
+      false,
+      true,
+      false
+    ],
+    "problems": []
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "id": "detail-master-edit-before-reapply",
+  "suite": "edit-order",
+  "description": "Details, pages of 2, sorted by v: d's detail open, d edited to 99: the page and the detail stay as they were.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "shape": "detail",
+    "page": {
+      "pageSize": 2
+    },
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "expand": [
+          "d"
+        ]
+      },
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "d",
+      "> d",
+      "b"
+    ],
+    "stale": [
+      false,
+      true
+    ],
+    "changes": [
+      [
+        "expand",
+        "user"
+      ]
+    ]
+  }
+}

@@ -67,7 +67,17 @@ export interface ColumnDef<T, V = unknown> {
   readonly colSpan?: (ctx: SpanCtx<T>) => number;
   /** `'text'`: in a CSV file, a digits-only value is written `="0123"` so Excel keeps it as text (csv-export.md). */
   readonly csv?: 'text';
+  /**
+   * Whether a data row's cell can be edited (editing.md 1): `true`, or a rule told the row and the
+   * grid's `settings.context`; only `true` means yes. Never a detail, filler or loading row.
+   */
+  readonly editable?: EditableRule<T>;
+  /** A refusal code (`validation.<code>` in the DOM's messages) or null: run by the edit controller (Phase 5 step 3). */
+  readonly validate?: (value: V | null, row: Readonly<T>, context: unknown) => string | null | undefined;
 }
+
+/** A column's `editable`: yes, no, or a rule over the row and the application's context. */
+export type EditableRule<T> = boolean | ((row: Readonly<T>, context: unknown) => boolean);
 
 /** What `ui.cellClass` is told about one body cell: its coerced value, displayed text, row, key, column id, `settings.context`. */
 export interface CellClassContext<T, V = unknown> {
@@ -216,6 +226,9 @@ export function resolveColumns<T>(tree: readonly ColumnOrGroup<T>[]): {
       if (!path) return void problems.push(problem('invalid-field-path', 'error', `${at}.field`));
       read = path as (row: Readonly<T>) => unknown;
     }
+    // A wrong `editable` or `validate`: told, the column kept, read-only (editableAt wants `true`).
+    if (def.editable !== undefined && typeof def.editable !== 'boolean' && typeof def.editable !== 'function') problems.push(problem('invalid-column', 'warning', `${at}.editable`));
+    if (def.validate !== undefined && typeof def.validate !== 'function') problems.push(problem('invalid-column', 'warning', `${at}.validate`));
     seen.add(def.id);
     columns.push({ id: def.id, def, type, codec, read, sortable: def.sortable !== false, filterable: def.filter !== false });
   });

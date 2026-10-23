@@ -18,10 +18,13 @@ export interface FilterKind<S extends Json = Json, V = unknown> {
   read(state: unknown): S | 'invalid';
   /** False for a half-typed state: no filter, no problem. */
   active(s: S): boolean;
-  /** The browser's rule: per row, the cell's value and the host's row. A kind without one runs on a server only. */
-  test?(s: S, ctx: LocaleCtx): (value: V | null, row: Readonly<unknown>) => boolean;
-  /** What the server receives; the state itself when absent. */
-  wire?(s: S, ctx: LocaleCtx, zone: string): Json;
+  /**
+   * The browser's rule: per row, the cell's value and the host's row. A kind without one runs on a
+   * server only. `context`: the grid's `settings.context` (Phase 5, Q12): a new one runs it again.
+   */
+  test?(s: S, ctx: LocaleCtx, context?: unknown): (value: V | null, row: Readonly<unknown>) => boolean;
+  /** What the server receives; the state itself when absent. `context` as for `test`: a changed wire asks again. */
+  wire?(s: S, ctx: LocaleCtx, zone: string, context?: unknown): Json;
 }
 
 export type AnyFilterKind = FilterKind<any, any>;

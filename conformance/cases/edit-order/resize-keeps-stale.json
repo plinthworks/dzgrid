@@ -1,0 +1,83 @@
+{
+  "id": "resize-keeps-stale",
+  "suite": "edit-order",
+  "description": "A column resized, by the user or as a state from the host, changes no data: nothing runs again, the edited row stays, the order stays out of date.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "v",
+          99
+        ]
+      },
+      {
+        "resize": [
+          "v",
+          200
+        ]
+      },
+      {
+        "state": [
+          {
+            "id": "v",
+            "width": 150
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "d",
+      "b",
+      "c",
+      "a"
+    ],
+    "stale": [
+      true,
+      true,
+      true
+    ],
+    "changes": []
+  }
+}

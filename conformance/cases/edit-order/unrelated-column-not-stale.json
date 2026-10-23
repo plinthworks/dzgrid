@@ -1,0 +1,67 @@
+{
+  "id": "unrelated-column-not-stale",
+  "suite": "edit-order",
+  "description": "Sorted by v: an edit of n, which neither the sort nor a filter nor a search reads, leaves the order up to date.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "n",
+          "q"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "d",
+      "b",
+      "c",
+      "a"
+    ],
+    "stale": [
+      false
+    ],
+    "changes": []
+  }
+}

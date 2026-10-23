@@ -55,7 +55,7 @@ export const RELATIVE_RANGES: ReadonlySet<RelativeRange> = new Set(['today', 'ye
 export interface WireKind {
   read(state: Json): Json | 'invalid';
   active(state: Json): boolean;
-  wire?(state: Json, ctx: LocaleCtx, zone: string): Json;
+  wire?(state: Json, ctx: LocaleCtx, zone: string, context?: unknown): Json;
   readonly types?: readonly ColumnType[];
 }
 

@@ -20,6 +20,8 @@ export interface ColumnEnv<T> {
   readonly cache: ColumnCache<T>;
   /** The clock, milliseconds since 1970 UTC: what a date shortcut counts from (filter-relative.md). Absent: no clock. */
   readonly now?: number | undefined;
+  /** The grid's `settings.context`: what a custom filter kind's `test` is told (Phase 5, Q12). */
+  readonly app?: unknown;
 }
 
 /** What `raw` returns for a cell whose accessor threw. */

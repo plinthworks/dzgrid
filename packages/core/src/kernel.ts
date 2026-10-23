@@ -1,5 +1,6 @@
 import type { ColumnModel, ColumnState } from './columns/model.js';
-import type { ColumnOrGroup } from './columns/defs.js';
+import { NO_OVERLAY, type ColumnOrGroup, type ValueReader } from './columns/defs.js';
+import { editableAt } from './columns/editable.js';
 import type { LocaleCtx } from './value/locale.js';
 import { reconcileFocus, sameFocus, type FocusOwner, type FocusPos } from './focus.js';
 import { isDataKey, type DisplayIndex, type RowKey } from './ids.js';
@@ -61,7 +62,17 @@ export type GridCommand =
   /** Opens or closes rows of a tree (or masters of details): the expansion, never the query (D1). */
   | { readonly type: 'rows.expand'; readonly rows: readonly RowKey[]; readonly expanded: boolean }
   /** Every row with children, or (`depth`) those above it opened, those from it down closed. */
-  | { readonly type: 'rows.expandAll'; readonly expanded: boolean; readonly depth?: number };
+  | { readonly type: 'rows.expandAll'; readonly expanded: boolean; readonly depth?: number }
+  /**
+   * The edit overlay (Phase 5, K.14): what the rows read from now on, nothing moved. `columns`: the
+   * columns the edit touched (absent: all). Refused `invalid-reader` (no `value` function, a version
+   * that is not a finite number). A model that takes none (no shipped model) reads no edit.
+   */
+  | { readonly type: 'edits.reader'; readonly reader: ValueReader<any>; readonly columns?: readonly string[] }
+  /** Filters and sorts again, with the edits (edit-reapply.md 6): `reapply-off` on a model without it. */
+  | { readonly type: 'rows.reapply' }
+  /** The application's context (`settings.context`): told to `editable` rules and the custom filter kinds (Q12). */
+  | { readonly type: 'context.app'; readonly value: unknown };
 
 export type GridCommandResult =
   | { readonly ok: true }
@@ -100,6 +111,8 @@ export type GridEvent<T> =
   | { readonly type: 'pageChanged'; readonly source: ChangeSource; readonly page: PageState }
   /** The latest request failed: the host's error unchanged; the rows shown stay, under the error overlay. */
   | { readonly type: 'fetchFailed'; readonly source: 'data'; readonly error: unknown; readonly key: string; readonly page: number | null }
+  /** The order shown is out of date after an edit (true), or back in order (false): on each flip only (edit-reapply.md 10). */
+  | { readonly type: 'orderStale'; readonly source: ChangeSource; readonly stale: boolean }
   /**
    * An Angular part's `emit(name, detail)` (`@dzgrid/angular`, step 22; the wrapper sends them, the
    * core and the DOM layer never do): a cell's, with the column and the key of the row it shows at
@@ -199,6 +212,17 @@ export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
    * once (`problems`, source `data`).
    */
   values(column: string, o?: ValuesOptions): ValuesHandle;
+  /** The edit overlay the rows read: `NO_OVERLAY` until `edits.reader`. */
+  readonly reader: ValueReader<T>;
+  /** The application's context, as `context.app` last gave it. */
+  readonly app: unknown;
+  /** An edit made the order shown out of date (the model's `orderStale`; false without one). */
+  readonly orderStale: boolean;
+  /**
+   * Whether a cell can be edited (`editableAt`): a data row the rows hold, the column saying yes with
+   * this context, not a tree's structure column. A rule that throws says no, told once per column.
+   */
+  editable(key: RowKey, column: string): boolean;
   /**
    * Looks at the clock again (`RowModel.tick`): at midnight in the grid's zone a date shortcut's days
    * move (filter-relative.md). `@dzgrid/dom/filters` calls it; a host without that feature calls it itself.
@@ -220,6 +244,8 @@ const OWNER = Symbol('dzgrid.owner');
 const GATE = Symbol('dzgrid.gate');
 /** For `@dzgrid/dom/filters`: told each command the kernel took (a pending filter edit it overrides is dropped). */
 const HEAR = Symbol('dzgrid.hear');
+/** For a tree feature, through `@dzgrid/core/internal`: the columns that feed its structure, read-only (Q13). */
+const LOCK = Symbol('dzgrid.lock');
 
 export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   readonly rows: M;
@@ -245,6 +271,12 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   let owner: FocusOwner<T> | undefined;
   let gate: SelectionGate | undefined;
   let heard: ((cmd: GridCommand) => void) | undefined;
+  let reader: ValueReader<T> = NO_OVERLAY;
+  let app: unknown;
+  let stale = false;
+  let locked: ReadonlySet<string> = NO_KEYS as ReadonlySet<string>;
+  /** The columns whose rule threw: told once each. */
+  const threw = new Set<string>();
   // Read on every paint while a box shows it: kept per selection, rows shown and count.
   let header: { s: SelectionState; d: DisplayedRows<T>; n: unknown; state: HeaderSelection } | null = null;
   let shown = rows.displayed;
@@ -353,8 +385,29 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     if (!sameFocus(prevFocus, focus)) emit({ type: 'focusChanged', source: 'data', focus });
   };
 
+  /** Told on a flip only, after the rows it speaks of. */
+  const syncStale = (source: ChangeSource): void => {
+    if (!!rows.orderStale === stale) return;
+    stale = !stale;
+    emit({ type: 'orderStale', source, stale });
+  };
+  /**
+   * A structure column marked editable stays read-only (Q13): told when it becomes locked and editable,
+   * once while it stays so; again only after it stopped being either.
+   */
+  let lockTold = new Set<string>();
+  const checkLocks = (source: ChangeSource): void => {
+    const told = lockTold;
+    lockTold = new Set();
+    for (const id of locked) if (columns.get(id)?.def.editable) {
+      lockTold.add(id);
+      if (!told.has(id)) emit({ type: 'problems', source, problems: [problem('edit-structure', 'warning', `columns.${id}.editable`)] });
+    }
+  };
+
   const unsubscribe = rows.subscribe((c) => {
     onModel({ type: 'modelUpdated', source: c.source, displayed: c.displayed, kind: c.kind }, c.source);
+    syncStale(c.source);
     // Rows the host gave that were refused or bent, a server's answer bent: told, not only stored.
     const told = [...(c.transaction?.problems ?? []), ...(c.told ?? [])];
     if (told.length) emit({ type: 'problems', source: c.source, problems: told });
@@ -463,6 +516,9 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       case 'columns.set': {
         const change = columns.setDefs(cmd.defs);
         if (change.problems.length) emit({ type: 'problems', source, problems: change.problems });
+        checkLocks(source);
+        // New rules: one that throws is told again.
+        threw.clear();
         if (change.changed.length) emit({ type: 'columnsChanged', source, changed: change.changed, layoutChanged: change.layoutChanged });
         const before = rows.displayed;
         rows.setColumns(columns, source);
@@ -471,6 +527,23 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       }
       case 'context.set':
         rows.setContext(cmd.ctx, source);
+        return OK;
+      case 'edits.reader': {
+        const r = cmd.reader;
+        if (typeof r?.value !== 'function' || !Number.isFinite(r.version)) return refuse('invalid-reader');
+        reader = r;
+        rows.setReader?.(r, cmd.columns);
+        syncStale(source);
+        return OK;
+      }
+      case 'rows.reapply':
+        if (!rows.reapply) return refuse('reapply-off');
+        // Told as an `order` change: the subscription tells the flip.
+        rows.reapply(source);
+        return OK;
+      case 'context.app':
+        app = cmd.value;
+        rows.setApp?.(app, source);
         return OK;
       case 'page.go':
       case 'page.size': {
@@ -608,7 +681,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     return state;
   };
 
-  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void; [GATE]: (g?: SelectionGate) => void; [HEAR]: (fn?: (cmd: GridCommand) => void) => void } = {
+  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void; [GATE]: (g?: SelectionGate) => void; [HEAR]: (fn?: (cmd: GridCommand) => void) => void; [LOCK]: (ids: readonly string[]) => void } = {
     rows,
     columns,
     get selection() { return selection; },
@@ -618,6 +691,9 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     get query() { return query; },
     get selectionScope() { return tied() ? { query, ...rows.scope } : null; },
     get headerState() { return headerState(); },
+    get reader() { return reader; },
+    get app() { return app; },
+    get orderStale() { return stale; },
     dispatch(cmd, source) {
       const r = dispatch(cmd, source);
       if (r.ok) heard?.(cmd);
@@ -641,6 +717,11 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       listeners.add(fn);
       return () => listeners.delete(fn);
     },
+    editable: (key, column) => editableAt(rows.row(key), columns.get(column), app, locked, (id) => {
+      if (threw.has(id)) return;
+      threw.add(id);
+      emit({ type: 'problems', source: 'data', problems: [problem('invalid-column', 'warning', `columns.${id}.editable`, 'threw')] });
+    }),
     destroy() {
       destroyed = true;
       unsubscribe();
@@ -650,6 +731,10 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     [OWNER]: (fn) => { owner = fn; },
     [GATE]: (x) => { gate = x; header = null; },
     [HEAR]: (fn) => { heard = fn; },
+    [LOCK]: (ids) => {
+      locked = new Set(ids);
+      checkLocks('host');
+    },
   };
   return kernel;
 }
@@ -703,6 +788,9 @@ export const setFocusOwner = <T>(k: GridKernel<T>, fn?: FocusOwner<T>): void => 
 
 /** Sets (or, without `gate`, removes) the kernel's selection gate: the rules feature's (step 21). */
 export const setSelectionGate = <T>(k: GridKernel<T>, gate?: SelectionGate): void => (k as unknown as { [GATE]: (g?: SelectionGate) => void })[GATE](gate);
+
+/** Names the columns that feed a tree's structure (Q13, O7): read-only, a warning for each one marked editable. The same set again: nothing. */
+export const lockColumns = <T>(k: GridKernel<T>, ids: readonly string[]): void => (k as unknown as { [LOCK]: (ids: readonly string[]) => void })[LOCK](ids);
 
 /** Sets (or, without `fn`, removes) the one listener told each command the kernel took, after it: the filters feature's. */
 export const onCommand = <T>(k: GridKernel<T>, fn?: (cmd: GridCommand) => void): void => (k as unknown as { [HEAR]: (fn?: (cmd: GridCommand) => void) => void })[HEAR](fn);

@@ -100,7 +100,16 @@ describe('layering of the base and the server entry', () => {
     expect(gz).toBeLessThanOrEqual(budget);
     // The seams' guard, rebased at the Phase 4 close (step 13, 2026-10-22): Phase 4 took the base from
     // 26 984 to 28 240 (the tree and detail seams and their reviews, each step's bytes in ROADMAP « Phase 4 »).
-    // Any growth past it is a step's, named here with its bytes; the budget (29 000, owner Q17b) is the cap.
-    expect(gz).toBeLessThanOrEqual(28240);
+    // Any growth past it is a step's, named here with its bytes; the budget (29 000, owner Q16/Q17b) is the cap.
+    // Phase 5 step 2 (2026-10-22): +659 (editable and editableAt, the edit-structure warning, edits.reader /
+    // rows.reapply / orderStale, the stale-order rule, the app context Q12) → 28 899; its review fixes +27
+    // (the host update of an edited row re-read with the edits, the edit-structure told once, the threw
+    // reset, the creation context; reader-off dropped) → 28 926, the measure.
+    expect(gz).toBeLessThanOrEqual(28926);
+  });
+
+  it('the base holds no edit module: the edit controller is its own entry (Phase 5 step 3)', async () => {
+    const isEdit = (f: string) => /(^|\/)src\/edit(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts']) expect((await inputsOf(entry)).filter(isEdit), entry).toEqual([]);
   });
 });

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Toward 0.3.0 (Phase 5, editing; not released).
+
+### Added
+- `ColumnDef.editable` (`true`, or a rule `(row, context)`: only `true` means yes) and
+  `ColumnDef.validate(value, row, context)` (run from Phase 5 step 3); a value of another type is a
+  warning `invalid-column` at `columns[i].editable` / `.validate`, the column kept and read-only.
+  Type `EditableRule`.
+- `editableAt(node, column, context, locked?)`: data rows only (never a detail, filler or loading row).
+- Kernel: commands `edits.reader` (refused `invalid-reader`), `rows.reapply` (`reapply-off`),
+  `context.app`; event `orderStale { stale }` on each flip; `kernel.reader`, `kernel.app`,
+  `kernel.orderStale`, `kernel.editable(key, column)` (a rule that throws says no, one warning
+  `invalid-column` detail `threw` per column). New problem code `edit-structure` (a tree's structure
+  column marked editable; `lockColumns` in `@dzgrid/core/internal`).
+- `ClientOptions.app` / `ModelEnv.app`: the context at creation.
+- `RowModel.setReader?(reader, changed?)`, `reapply?(source?)`, `orderStale?`, `setApp?(context, source?)`;
+  on the client model and `sourceRows` (a server-run sort, filter or search marked stale, asked again once
+  on reapply).
+- Custom filter kinds: `test(state, ctx, context?)` and `wire(state, ctx, zone, context?)` receive the
+  grid's `settings.context`; a new context runs only the custom filters again (a changed wire: one
+  request). `settings.context` reaches the kernel at creation and on each change of identity.
+
+### Changed
+- `ClientModel.reapply()` is told with the source given, `api` by default (it was always `user`).
+- While the order is stale after an edit, any rerun (a sort, a filter, the search typed on, the
+  language, the columns) is a whole one with the edits; a host update that moves rows puts everything
+  in order, the edited rows too.
+- `@dzgrid/core/server` budget 6 000 → 6 100 B gz (owner decision S2-O4).
+
 ## [0.2.0] - unreleased
 
 Prepared at the Phase 4 close (2026-10-22), **not published**: the four packages at 0.2.0, their

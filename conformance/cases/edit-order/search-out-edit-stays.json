@@ -1,0 +1,60 @@
+{
+  "id": "search-out-edit-stays",
+  "suite": "edit-order",
+  "description": "Searching x: an edit that drops the word from a row keeps it shown; the search reads every visible column, so the order is out of date.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "quick": "x"
+    },
+    "steps": [
+      {
+        "edit": [
+          "a",
+          "n",
+          "zz"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "c"
+    ],
+    "stale": [
+      true
+    ],
+    "changes": []
+  }
+}

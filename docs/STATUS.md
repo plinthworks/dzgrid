@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-22, **Phase 5 (édition) : étape 1 en cours** (fiches, écoute §19, docs ; aucun code). Phase 4 close techniquement ; **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). L'édition s'appelle désormais **Phase 5** (décision Q2 ; phases suivantes +1 ; 0.3.0 à la fin).
+Mis à jour : 2026-10-22, **Phase 5 (édition) : étape 2 faite, non commitée** (coutures du cœur ; étape 1 commitée `4880616`). Phase 4 close techniquement ; **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). L'édition s'appelle désormais **Phase 5** (décision Q2 ; phases suivantes +1 ; 0.3.0 à la fin).
 
 L'ancien contenu de ce fichier (les paragraphes « Étape N faite » des Phases 3 et 4, revues et portails) est gardé mot pour mot dans `docs/phase-4-steps/status-log.md` ; le détail de chaque étape est aussi dans `ROADMAP.md`.
 
@@ -68,8 +68,9 @@ Aucun banc lancé (Q17d).
 ## En cours : Phase 5, l'édition (ancienne « partie D »)
 
 - **Plan** `docs/phase-5-plan.md` (aligné sur les décisions, note « Owner decisions applied ») ; **décisions du propriétaire** `docs/phase-5-steps/decisions.md` Q1–Q19 (elles priment ; Q9 variante du propriétaire : bord rouge clignotant ~0,5 s à chaque refus ; Q10 modifiée : bord animé pendant l'enregistrement ; Q16 tous les budgets accordés).
-- **Étape 1 (en cours, non commitée)** : plan `docs/phase-5-steps/step01-plan.md` ; fiches écrites `docs/behaviors/{editing,editors,edit-save,edit-validation,edit-reapply,edit-undo,edit-angular}.md` ; `docs/a11y-protocol.md` §19 (points 111–124) ; ARCHITECTURE §6 et ROADMAP renumérotés. Reste : faire relire (architecte + relecture), puis **poser au propriétaire les points ouverts O1–O11** (`step01-plan.md`), reporter ses réponses dans `decisions.md`, commit.
-- **Étape suivante : 2, coutures du cœur** (`editable`, `setReader`/`reapply`, `orderStale`, contexte de l'application pour filtres et tri) — tests d'abord ; `size-budget.json` reçoit les accords Q16 avec l'étape qui construit chaque entrée.
+- **Étape 1 (faite, commit `4880616`)** : fiches `docs/behaviors/{editing,editors,edit-save,edit-validation,edit-reapply,edit-undo,edit-angular}.md`, `docs/a11y-protocol.md` §19, réponses O1–O11 dans `decisions.md`.
+- **Étape 2 (faite, non commitée)** : coutures du cœur, plan `docs/phase-5-steps/step02-plan.md` (section « Done » : tests rouges d'abord, écarts), décisions du propriétaire S2-O1…O4 dans `decisions.md`. Ajouté : `ColumnDef.editable` / `validate`, `editableAt`, code `edit-structure` (`lockColumns`), commandes `edits.reader` / `rows.reapply` / `context.app`, événement `orderStale`, `kernel.reader` / `app` / `orderStale` / `editable()`, la règle « ordre périmé » du modèle client et de `sourceRows`, le contexte de l'application pour les filtres personnalisés (`test`, `wire`). Tailles : cœur 28 899 (29 000), `/server` 6 057 (6 100, accord S2-O4), `core/detail` 998 (1 000, au bruit de gzip près). Relecture et analyse des tests faites, corrections appliquées (R1–R6, risque serveur, trous de tests ; section « Review » du plan). Cœur 28 926. **À trancher par le propriétaire** : `core/detail` 1 002 / 1 000, dépassement dû au seul bruit de gzip (son code n'a pas changé). Puis commit par le chef de projet.
+- **Étape suivante : 3, le contrôleur d'édition** (`@dzgrid/core/edit` : tampon, lecteur, enregistrements, annuler) — tests d'abord. Le câblage `tree({ structure })` de `dom/tree` est à l'étape 8 (S2-O4), avec sa demande de budget.
 
 ## Commandes
 

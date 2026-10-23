@@ -44,6 +44,7 @@ export const PROBLEM_CODES = [
   'tree-cycle',
   'tree-column-not-first',
   'tree-shape',
+  'edit-structure',
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

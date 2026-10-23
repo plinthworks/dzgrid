@@ -38,7 +38,19 @@ a patient in a list sorted by name); goes on working; then puts the list back in
    row is still shown, else goes to the nearest row (the existing fallback); when the focus was in the
    body, its cell is scrolled clear of pinned columns, sticky header rows and sticky parents (WCAG
    2.4.11, `editing.md` 26); when it was on the mark, it stays on the header cell.
-7. A new sort or filter by the user, or a reload, reapplies as a side effect (the mark goes).
+7. A new sort or filter by the user, or a reload, reapplies as a side effect (the mark goes). So does any
+   rerun while the order is stale (a search typed on, a language or zone change, a column shown): it runs
+   whole, with the edits; a column resized runs nothing and keeps the mark. A host update that moves rows
+   (a sort key or a filter result changed) puts everything in order, the edited rows too (owner S2-O1);
+   one that moves nothing keeps the order and the mark — an update of an edited row included: whether it
+   passed is read with the edits on both sides. The host giving its rows again (a load) or a refresh puts
+   everything in order.
+7a. Server grids (owner S2-O2): a fetched set puts edits in order in the browser (no request). On server
+   pages, an edit of a column the server sorts, filters or searches marks the order stale too; the reapply
+   asks the server for the current page again (one request, the same key). Any answer (another page, a
+   new query, a refresh, the reapply's) clears the mark: it comes in the server's order; a failed request
+   keeps it. The flip is told at the answer, with source `data`; the reapply itself is an `order` change
+   with the command's source.
 8. The header reads « {name}, à remettre en ordre » while the mark is on (`header.withStale`, after
    `header.withSort` and `header.withFilter`).
 9. Nested grids: each grid its own `orderStale` and marks.
@@ -74,8 +86,10 @@ same.
 - The reapply by the app is not announced.
 
 ## Tests (to be written with the code)
-Step 2: conformance `edit-order/*` (an edit on the sorted column keeps the order until `rows.reapply`; a
-filtered-out edit stays displayed; `orderStale` on/off; reapply notifies once). Step 7: muted rows (sign, description), the
+Step 2 (done): conformance `edit-order/*` (an edit on the sorted column keeps the order until
+`rows.reapply`; a filtered-out edit stays displayed; `orderStale` on/off; reapply notifies once; resize,
+search typed on, host updates, a tree, details), `core/test/edit-seams.test.ts` (events, refusals),
+`core/test/source-rows-edit.test.ts` (7a). Step 7: muted rows (sign, description), the
 mark on the right headers, keys on the mark (Enter on the header sorts, F2 enters the mark), the focused
 cell clear of sticky parts after reapply, focus after reapply, one sentence only, selection kept;
 browser: axe with the mark, ar RTL. Manual: §19.

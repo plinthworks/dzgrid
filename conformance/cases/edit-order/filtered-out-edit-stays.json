@@ -1,0 +1,67 @@
+{
+  "id": "filtered-out-edit-stays",
+  "suite": "edit-order",
+  "description": "Filtered v >= 1: an edit that no longer passes stays shown until a reapply.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "filter": {
+        "v": {
+          "type": "number",
+          "op": "gte",
+          "value": 1
+        }
+      }
+    },
+    "steps": [
+      {
+        "edit": [
+          "b",
+          "v",
+          0
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "b",
+      "c"
+    ],
+    "stale": [
+      true
+    ],
+    "changes": []
+  }
+}

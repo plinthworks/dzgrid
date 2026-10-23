@@ -1,0 +1,62 @@
+{
+  "id": "blank-search-not-stale",
+  "suite": "edit-order",
+  "description": "A search of spaces only is no search: an edit of n leaves the order up to date.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "quick": "   "
+    },
+    "steps": [
+      {
+        "edit": [
+          "a",
+          "n",
+          "q"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "a",
+      "b",
+      "c",
+      "d"
+    ],
+    "stale": [
+      false
+    ],
+    "changes": []
+  }
+}

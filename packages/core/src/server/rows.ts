@@ -144,7 +144,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   const sizes = pageOptions.config?.sizes ?? DEFAULT_PAGE_SIZES;
 
   const gate = createGate(o.abort ?? env.abort ?? plainAbort);
-  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }), ...(env.now && { now: env.now }), ...(env.shape && { shape: env.shape }) });
+  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }), ...(env.now && { now: env.now }), ...(env.shape && { shape: env.shape }), app: env.app });
   /** A lazy tree's loads (tree-lazy.md, B): its children asked through the gate, one channel per parent. */
   const lazy = (env.shape as { lazy?: LazyControl<T> } | undefined)?.lazy;
   let current = binding;
@@ -185,6 +185,10 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   let destroyed = false;
   /** invalidate() in this commit: the open lists ask again, the data changed. */
   let reask = false;
+  /** The application's context (Q12): what a kind's `wire` is told. */
+  let app = env.app;
+  /** An edit touched what the server sorts, filters or searches (S2-O2): cleared by the next request. */
+  let serverStale = false;
   const listeners = new Set<(c: ModelChange<T>) => void>();
 
   // One commit per call: what it changed is gathered, then said once.
@@ -289,6 +293,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     answerProblems = a.problems;
     told.push(...a.problems);
     if (!a.rows) return failed(t, req, a.problems[0]);
+    // An answer comes in the server's order; a failure keeps the mark.
+    serverStale = false;
     const rows = a.rows as readonly T[];
     if (!serverPages) {
       // The set of another epoch: its first page. The same set again: the page kept, clamped, after
@@ -349,13 +355,13 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
    * today's day there: the request and membershipOf ask for the same one, and after midnight both
    * send the new day without waiting for tick(), as the client model does.
    */
-  let wired: { readonly f: FilterModel; readonly ctx: LocaleCtx; readonly columns: ColumnLookup<T>; readonly v: number; readonly has: boolean; readonly day: string; readonly w: ReturnType<typeof toWire> } | null = null;
+  let wired: { readonly f: FilterModel; readonly ctx: LocaleCtx; readonly columns: ColumnLookup<T>; readonly v: number; readonly has: boolean; readonly day: string; readonly a: unknown; readonly w: ReturnType<typeof toWire> } | null = null;
   const wireOf = (f: FilterModel): ReturnType<typeof toWire> => {
     const has = wired && wired.f === f ? wired.has : hasRelative(f);
     const t = has && env.now ? env.now() : undefined;
     const day = t === undefined ? '' : dayAt(t, ctx.timeZone)?.day ?? '';
-    if (!wired || wired.f !== f || wired.ctx !== ctx || wired.columns !== columns || wired.v !== columns.dataVersion || wired.day !== day) {
-      wired = { f, ctx, columns, v: columns.dataVersion, has, day, w: toWire(f, { ctx, columns, ...(env.filterKinds && { kinds: env.filterKinds }), ...(t !== undefined && { now: t }) }) };
+    if (!wired || wired.f !== f || wired.ctx !== ctx || wired.columns !== columns || wired.v !== columns.dataVersion || wired.day !== day || wired.a !== app) {
+      wired = { f, ctx, columns, v: columns.dataVersion, has, day, a: app, w: toWire(f, { ctx, columns, app, ...(env.filterKinds && { kinds: env.filterKinds }), ...(t !== undefined && { now: t }) }) };
     }
     return wired.w;
   };
@@ -406,6 +412,16 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   const hasNext = (): boolean =>
     !(endAt !== null && (index + 1) * size >= endAt) && (next ?? (total !== null && (index + 1) * size < total)) && (!cursorMode || index + 1 < cursors.length);
   const unfiltered = (): boolean => server.quick === undefined && (!wire || Object.keys(wire).length === 0);
+  /** Asks the current page again (a refresh, a reapply of the server's order). */
+  const again = (): void => {
+    // Asked again: the server may say more now (an end found past an unknown total may have moved).
+    endAt = null;
+    fresh = true;
+    reask = true;
+    // A tree: the child requests running aborted, the open parents ask again (tree-lazy.md); what they bring goes with the roots' answer.
+    lazy?.reset(true);
+    load();
+  };
 
   commit(() => {
     const split = splitQuery(env.query ?? EMPTY_QUERY, ops);
@@ -537,10 +553,6 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     },
     invalidate(opts) {
       commit(() => {
-        // Asked again: the server may say more now (an end found past an unknown total may have moved).
-        endAt = null;
-        fresh = true;
-        reask = true;
         if (opts?.purge) {
           // Nothing left to keep: the first-load overlay shows.
           inner.setRows([], 'data');
@@ -555,10 +567,28 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
           }
           mark('query');
         }
-        // A tree: the child requests running aborted, the open parents ask again (tree-lazy.md); what they bring goes with the roots' answer.
-        lazy?.reset(true);
-        load();
+        again();
       }, 'api');
+    },
+    // Edits (Phase 5): the browser's part puts them in order; the server's is marked, and asked again on reapply.
+    setReader(r, changed) {
+      inner.setReader(r, changed);
+      const read = [...(server.sort ?? []).map((s) => s.column), ...Object.keys(wire ?? {}), ...(server.quick?.trim() ? columns.visible().map((c) => c.id) : [])];
+      serverStale ||= changed ? changed.some((c) => read.includes(c)) : read.length > 0;
+    },
+    reapply(source = 'api') {
+      commit(() => {
+        inner.reapply(source);
+        if (serverStale) again();
+      }, source);
+    },
+    get orderStale() { return inner.orderStale || serverStale; },
+    setApp(next, source = 'api') {
+      commit(() => {
+        inner.setApp(next, source);
+        app = next;
+        rekey();
+      }, source);
     },
     // Page options, paging and maxRows stay the first binding's: the new one brings its data and params.
     setSource(nextBinding, source = 'api') {

@@ -1,0 +1,80 @@
+{
+  "id": "new-sort-reapplies",
+  "suite": "edit-order",
+  "description": "Filtered v <= 2, d edited out of the filter: a new sort runs everything again with the edit, so d leaves too, and the order is up to date.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 2,
+        "n": "x"
+      },
+      {
+        "id": "d",
+        "v": 0,
+        "n": "y"
+      }
+    ],
+    "query": {
+      "filter": {
+        "v": {
+          "type": "number",
+          "op": "lte",
+          "value": 2
+        }
+      }
+    },
+    "steps": [
+      {
+        "edit": [
+          "d",
+          "v",
+          5
+        ]
+      },
+      {
+        "sort": [
+          {
+            "column": "v",
+            "dir": "asc"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "b",
+      "c"
+    ],
+    "stale": [
+      true,
+      false
+    ],
+    "changes": [
+      [
+        "query",
+        "user"
+      ]
+    ]
+  }
+}
