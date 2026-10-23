@@ -144,3 +144,6 @@ contrast with each framework's defaults: `test/fixtures/{tailwind4,tailwind3,boo
 French and Arabic: its ten colours, no horizontal overflow, the focus ring; forced colours for both; the
 right-to-left checks in Firefox and WebKit with `--all`; then each framework setup built by the real tool,
 `scripts/frameworks.mjs`).
+
+## Phase 5 step 4: `edit.css`
+`@dzgrid/theme/edit.css` (and `edit.unlayered.css`, source `edit.scss`), loaded after the theme by the applications that edit (owner S4-O2): the save marks, the running border, the refusal blink, the muted row and the reapply button, in `dzgrid.theme`. Reserved colours `--dzg-saving-color`, `--dzg-saved-color` (new, `--tz-success` by default), `--dzg-refused-color`; a showcase theme or a bridge colours them through the palette.

@@ -187,6 +187,20 @@ describe('the DOM layer’s shape', () => {
     expect([...readFileSync(join(SRC, 'tree-lazy.ts'), 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1])).toEqual(['./tree/lazy.js']);
   });
 
+  it('has the edit entry reach the base only through the grid’s context, the types and the shared writes (Phase 5 step 4)', () => {
+    // @dzgrid/dom/edit: value imports from the core, its internal entry, @dzgrid/core/edit, its own folder and the
+    // guarded writes (render/write.ts, no import of its own: an entry using it pulls nothing else in).
+    const entry = files(SRC).filter((f) => /^edit(\/|\.ts$)/.test(relative(SRC, f)));
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['edit.ts', 'edit/index.ts', 'edit/marks.ts', 'edit/stale.ts']);
+    const offenders = entry
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/edit)$/.test(s) && !/^edit(\/[^:]+)?\.ts: \.\/(edit\/)?[a-z-]+\.js$/.test(s) && !/^edit\/[a-z]+\.ts: \.\.\/render\/write\.js$/.test(s));
+    expect(offenders).toEqual([]);
+    expect(readFileSync(join(SRC, 'render/write.ts'), 'utf8')).not.toMatch(/^import /m);
+    // Nothing else imports it, nor the core's edit controller: a grid that does not edit carries none of it.
+    expect(files(SRC).filter((f) => !/^edit(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?edit(\/|\.js')|@dzgrid\/core\/edit')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+  });
+
   it('keeps the core’s span engine out of the base: only the spans entry imports it', () => {
     const offenders = files(SRC)
       .filter((f) => !/^spans\//.test(relative(SRC, f)) && relative(SRC, f) !== 'spans.ts')

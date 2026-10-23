@@ -33,3 +33,6 @@ Sorts by a header, types a filter, turns the page, opens a filter popup, or watc
 
 ## Tests
 `packages/dom/test/motion-seam.test.ts` (the `beforeRows` seam, `data-motion`), `motion-gsap.test.ts` (real GSAP in jsdom, `matchMedia` stubbed), `motion-missing.test.ts`, `motion-walk.test.ts` and `motion-walk-time.test.ts` (against a `motion: false` twin, the second on GSAP time), `motion-gaps.test.ts` (mid-tween, the step 26 corrections), `structure.test.ts`, `packages/theme/test/motion.test.ts`, `packages/angular/test-zone/motion-zone.test.ts`, `perf/test/audit-profile.test.ts`; browser checks `npm run test:browser -- --only motion`. Trees and details: `packages/dom/test/motion-expand.test.ts` (step 6), `packages/theme/test/motion.test.ts` (the chevron), browser `--only motion` extended with a tree's toggles (step 6) and details (step 10).
+
+## Phase 5 step 4
+The reasons `saving`, `saved`, `failed` stay reserved: the running border and the refusal blink are CSS (`@dzgrid/theme/edit.css`); the saved flash through `motion()` comes at step 7.

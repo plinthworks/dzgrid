@@ -33,3 +33,10 @@ export const setPx = (el: HTMLElement, prop: string, v: number): void => {
   const s = `${v}px`;
   if (el.style.getPropertyValue(prop) !== s) el.style.setProperty(prop, s);
 };
+
+/** Adds or removes one id in an element's `aria-describedby`, the others kept (the tooltip, the edit marks, Phase 5 step 4). */
+export const describe = (el: Element, id: string, on: boolean): void => {
+  const t = (el.getAttribute('aria-describedby') ?? '').split(' ').filter((x) => x && x !== id);
+  if (on) t.push(id);
+  setAttr(el, 'aria-describedby', t.join(' ') || null);
+};

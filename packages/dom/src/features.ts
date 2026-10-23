@@ -32,7 +32,15 @@ export const shapeOf = (features: readonly GridFeature[] | undefined): { shape?:
   return f ? { shape: f.shape!() } : {};
 };
 
+/** The edit seam (Phase 5 step 4, `@dzgrid/dom/edit`): what a data cell shows. The first feature giving one wins. */
+export interface EditSeam {
+  /** The value a cell shows (the edit overlay, or a refused value held for its 0.5 s), asked instead of `col.read`; called unbound. */
+  read(col: ResolvedColumn<unknown>, row: unknown, key: RowKey): unknown;
+}
+
 export interface FeatureHandle {
+  /** The edit seam (`@dzgrid/dom/edit`): the paint reads the cells through it. */
+  readonly edit?: EditSeam;
   /** Header rows under the column headers (a floating filter row). */
   readonly headerRows?: readonly HeaderRowSpec[];
   /** Group header rows above the column headers, top to bottom (the spans feature). */

@@ -6,6 +6,7 @@ import type { GridSettings } from '../settings.js';
 import { decorateHeader } from './header-decor.js';
 import type { ViewportBox } from './measure.js';
 import { overlayPainter } from './overlay.js';
+import { editorHost } from './editor.js';
 import { CHECK_WIDTH, setAttr, setPx, type Frame } from './rows.js';
 
 const OVERSCAN_ROWS = 2;
@@ -80,6 +81,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   // Stable, so a part's context compares equal from one paint to the next.
   const announce = (text: string): void => g.live.announce(text);
   const paintOverlay = overlayPainter(g);
+  const host = editorHost(g as GridContext<unknown>);
+  g.scope.add(host.destroy);
+
   const partFor = (col: ResolvedColumn<any>): SlotPart<'cell'> | null => parts.byColumn.get(col.id) ?? null;
   function resolveParts(): void {
     const registry = g.parts();
@@ -251,6 +255,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     if (w.rows) for (let i = w.rows.first; i <= w.rows.last; i++) wanted.push(i);
     const base = w.placement.base;
     const spans = g.spans;
+    // Some visible column editable (a locked one too: its cells say read-only): the cells say which are not (editing.md 3).
+    const any = visible.some((c) => c.def.editable);
+    setAttr(el.viewport, 'aria-readonly', any ? null : 'true');
     const frame: Frame<T> = {
       displayed: d, layout: L, cols: w.cols, ctx, epoch, spans,
       rowTop: (i) => layout.offsetOf(d.index(i)!) - base,
@@ -261,11 +268,13 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       partBase: g.partBase,
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
       focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev, view: box.inline, rowClass,
+      read: g.edit?.read, ro: any ? (key, c) => !kernel.editable(key, c) : null, active: g.editor,
     };
     // Kept mounted out of the window: the focused row first (never moved), then the anchors of tall cells.
     const retained: RowKey[] = focus?.kind === 'cell' ? [focus.row] : [];
     if (spans && w.rows) retained.push(...spans.anchors(w.rows.first, w.rows.last));
     rowRenderer.render(frame, wanted, retained);
+    host.paint();
     // A tooltip whose anchor left the page (its column hidden), or whose pooled cell now shows
     // another row or new data (a sort, a filter, an update): hidden, its text would be stale.
     const tipAt = g.tip.anchor;

@@ -1,6 +1,7 @@
 import type { ResolvedColumn } from '@dzgrid/core';
 import { fixedInlineStart, type Dir } from '../dir.js';
-import { setAttr, setPx } from './rows.js';
+import { setPx } from './rows.js';
+import { describe } from './write.js';
 import type { Scope } from './scope.js';
 
 let ids = 0;
@@ -71,7 +72,7 @@ export class Tooltip {
     this.#cancelShow?.();
     this.#cancelShow = null;
     this.#keep();
-    if (this.#anchor) setAttr(this.#anchor, 'aria-describedby', null);
+    if (this.#anchor) describe(this.#anchor, this.el.id, false);
     this.#anchor = null;
     this.el.hidden = true;
     // A hidden tooltip keeps no part, and so no row.
@@ -92,7 +93,7 @@ export class Tooltip {
   }
 
   #show(anchor: HTMLElement, tip: TipFor, dir: Dir): void {
-    if (this.#anchor && this.#anchor !== anchor) setAttr(this.#anchor, 'aria-describedby', null);
+    if (this.#anchor && this.#anchor !== anchor) describe(this.#anchor, this.el.id, false);
     this.#anchor = anchor;
     this.row = tip.row;
     // Drawn before it is measured: its size is the part's.
@@ -108,7 +109,7 @@ export class Tooltip {
         /* already shown */
       }
     }
-    setAttr(anchor, 'aria-describedby', this.el.id);
+    describe(anchor, this.el.id, true);
     const win = anchor.ownerDocument.defaultView;
     const r = anchor.getBoundingClientRect();
     const box = this.el.getBoundingClientRect();

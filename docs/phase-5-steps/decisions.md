@@ -68,3 +68,10 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S3-O3:** A — simple rules in the column: `edit: { required, min, max, pattern, options }`; messages can quote the limit (« au moins 5 »).
 - Lead: move the `validate` shape check from the base into `core/edit` (base −17 B) as the plan proposes.
 - **S3-O4 (2026-10-23):** `@dzgrid/core/edit` 3 000 → 3 100 (measured 3 045 with the global refusal system).
+
+## Step 4 (owner, 2026-10-23) — plan `step04-plan.md`
+
+- **S4-O1:** a new entry `@dzgrid/dom/edit` (wires createEdits to the grid: marks, timers, stale rows, header mark, announcements), taken out of the 8 000 B granted to `/editors` (the two together stay ≤ 8 000; split set at the measure).
+- **S4-O2:** the mark styles go in a separate `edit.css` of `@dzgrid/theme` (the base theme does not grow). Its budget is taken from the unused part of the theme grants (base kept ≤ 2 500 of the 2 900/3 050 granted); the measured size is reported to the owner before a ceiling is fixed.
+- **S4-O3:** no muted rows on server-paged grids; the header mark is enough.
+- **S4-O4 (2026-10-23):** `-edit` text bundles en/fr/ar 350/400/450 → 560/630/810 (measure + 10 %); `edit.css` ceiling 1 350 (measured 1 231); `/editors` stays at 4 350 (8 000 minus `@dzgrid/dom/edit` 3 650) — measured at step 5 and asked again if the editors need more; dom base entry 21 300 → 21 700 (inside the 21 980 grant).

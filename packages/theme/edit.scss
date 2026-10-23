@@ -1,0 +1,245 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/edit.css — the marks of editing (Phase 5 step 4, owner S4-O2): loaded by the
+// applications that edit, after the theme; the base theme does not grow. Compiled to edit.css (layered)
+// and edit.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when they drift.
+//
+// What @dzgrid/dom/edit writes on the cells at each paint (edit-save.md 6–13, edit-validation.md 2–2b,
+// edit-reapply.md 3–4): a dot (pending), a running border (saving; still after 5 s, under reduced motion,
+// with `data-motion="off"` or `savingBorder: false`), a check (saved, 1.5 s), a red border blinking twice
+// in 0.5 s (refused), a « ! » in a circle (failed); a muted row with a hollow funnel; the header's reapply
+// button. Shapes, never colour alone; the reserved colours (--dzg-saving-color, --dzg-saved-color,
+// --dzg-refused-color) read with the palette's as fallbacks. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+$saving: var(--dzg-saving-color, var(--tz-accent));
+$saved: var(--dzg-saved-color, var(--tz-success));
+$refused: var(--dzg-refused-color, var(--tz-danger));
+$opaque: linear-gradient(currentColor 0 0);
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+// The running border's angle: registered, so it animates (without @property: a still arc, then the hold).
+@property --dzg-turn {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes dzg-turn {
+  to {
+    --dzg-turn: 360deg;
+  }
+}
+
+// After the four turns (4.8 s, WCAG 2.2.2): the still dashed border, until the state changes.
+@keyframes dzg-hold {
+  to {
+    background: none;
+    border-style: dashed;
+    border-color: $saving;
+  }
+}
+
+// Two flashes in 0.5 s (edit-validation.md 2); a and b alike, so a new refusal restarts it without a reflow.
+@each $ab in a, b {
+  @keyframes dzg-blink-#{$ab} {
+    0%,
+    50% {
+      opacity: 1;
+    }
+
+    25%,
+    75% {
+      opacity: 0;
+    }
+  }
+}
+
+@include layer {
+  // A pinned cell is the containing block of its signs (a centre cell is placed already).
+  :is(.dzg-seg-start, .dzg-seg-end) > :is(.dzg-cell--pending, .dzg-cell--saving, .dzg-cell--saved, .dzg-cell--refused, .dzg-cell--failed),
+  .dzg-row[data-dzg-stale] :is(.dzg-seg-start, .dzg-seg-end) > .dzg-cell[data-dzg-stale] {
+    position: relative;
+  }
+
+  // The marks at the inline end: the text keeps its room.
+  :is(.dzg-cell--pending, .dzg-cell--saved, .dzg-cell--failed) {
+    padding-inline-end: 1.5em;
+  }
+
+  :is(.dzg-cell--pending, .dzg-cell--saved, .dzg-cell--failed)::after {
+    content: '';
+    position: absolute;
+    inset-block-start: calc(50% - 5px);
+    inset-inline-end: 4px;
+    inline-size: 10px;
+    block-size: 10px;
+    background: currentColor;
+    pointer-events: none;
+  }
+
+  .dzg-cell--pending::after {
+    color: $saving;
+    clip-path: circle(3px);
+  }
+
+  .dzg-cell--saved::after {
+    color: $saved;
+    clip-path: polygon(0 55%, 15% 40%, 38% 62%, 85% 12%, 100% 27%, 38% 92%);
+  }
+
+  .dzg-cell--failed::after {
+    color: $refused;
+    clip-path: path(evenodd, "M5 0a5 5 0 1 1 0 10a5 5 0 1 1 0-10zM4.2 2h1.6v4h-1.6zM4.2 7h1.6v1.6h-1.6z");
+  }
+
+  // The borders over the cell: the running one, the refused one.
+  :is(.dzg-cell--saving, .dzg-cell--refused)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border: 2px solid transparent;
+    pointer-events: none;
+  }
+
+  // A line running round the border (Q10 amended): a conic arc in the border's ring only (the mask).
+  .dzg-cell--saving::before {
+    background: conic-gradient(from var(--dzg-turn), $saving 0 25%, transparent 0) border-box;
+    mask: $opaque padding-box exclude, $opaque border-box;
+    animation: dzg-turn 1.2s linear 4, dzg-hold 0.01s 4.8s forwards;
+  }
+
+  // By the cell's own direction (an LTR grid in an RTL page turns clockwise).
+  .dzg-cell--saving:dir(rtl)::before {
+    animation-direction: reverse, normal;
+  }
+
+  .dzg-cell--still::before,
+  .dzg[data-motion=off] .dzg-cell--saving::before {
+    animation: none;
+    background: none;
+    border-style: dashed;
+    border-color: $saving;
+  }
+
+  .dzg-cell--refused::before {
+    border-color: $refused;
+  }
+
+  .dzg-cell--blink-a::before {
+    animation: dzg-blink-a 0.5s step-end;
+  }
+
+  .dzg-cell--blink-b::before {
+    animation: dzg-blink-b 0.5s step-end;
+  }
+
+  .dzg[data-motion=off] :is(.dzg-cell--blink-a, .dzg-cell--blink-b)::before {
+    animation: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dzg-cell--saving::before {
+      animation: none;
+      background: none;
+      border-style: dashed;
+      border-color: $saving;
+    }
+
+    :is(.dzg-cell--blink-a, .dzg-cell--blink-b)::before {
+      animation: none;
+    }
+  }
+
+  // A row that no longer passes the filters (edit-reapply.md 3): the context colour, and a hollow funnel
+  // at the start of its row header, a shape (also in forced colours).
+  .dzg-row[data-dzg-stale],
+  .dzg-row[data-dzg-stale] .dzg-seg-start,
+  .dzg-row[data-dzg-stale] .dzg-seg-end {
+    color: var(--dzg-context-fg, var(--tz-fg-muted));
+  }
+
+  // The sign's cell: the row header, else the row's first mounted cell (the entry marks it).
+  .dzg-row[data-dzg-stale] .dzg-cell[data-dzg-stale] {
+    padding-inline-start: 1.5em;
+  }
+
+  .dzg-row[data-dzg-stale] .dzg-cell[data-dzg-stale]:not(.dzg-cell--saving, .dzg-cell--refused)::before {
+    content: '';
+    position: absolute;
+    inset-block-start: calc(50% - 5px);
+    inset-inline-start: 4px;
+    inline-size: 10px;
+    block-size: 10px;
+    background: currentColor;
+    clip-path: path(evenodd, "M0 0H10L6 5.5V10L4 8.5V5.5ZM2.2 1.2L5 4.4L7.8 1.2Z");
+    pointer-events: none;
+  }
+
+  // The header's reapply button (edit-reapply.md 4): circular arrows, a 24 × 24 target.
+  .dzg-reapply {
+    position: relative;
+    inline-size: 24px;
+    block-size: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: var(--tz-fg-muted);
+    background: none;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  .dzg-reapply::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: currentColor;
+    clip-path: path(evenodd, "M8 1.5a6.5 6.5 0 1 0 6.5 6.5h-2a4.5 4.5 0 1 1-4.5-4.5v2.5l3.5-3.5L8 -1z");
+  }
+
+  .dzg-reapply:hover {
+    color: var(--tz-fg);
+  }
+
+  .dzg-reapply:focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: -2px;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-cell--saving::before {
+      background: none;
+      border: 2px dashed Highlight;
+      animation: none;
+    }
+
+    .dzg-cell--refused::before {
+      border: 2px solid CanvasText;
+    }
+
+    // Each sign in its own rule: one unsupported selector never drops the others.
+    @each $sign in '.dzg-cell--pending::after', '.dzg-cell--saved::after', '.dzg-cell--failed::after',
+      '.dzg-row[data-dzg-stale] .dzg-cell[data-dzg-stale]:not(.dzg-cell--saving, .dzg-cell--refused)::before', '.dzg-reapply::before' {
+      #{$sign} {
+        forced-color-adjust: none;
+        background: CanvasText;
+      }
+    }
+  }
+}

@@ -11,10 +11,10 @@ import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
-import type { FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
+import type { EditSeam, FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
 import type { PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
+import type { DetailMessageKey, EditMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -128,5 +128,17 @@ export interface GridContext<T> {
   reveal(i: number, block: number): boolean;
   /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
   restoreFocus(): void;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  /** The edit seam (`@dzgrid/dom/edit`), the first feature's that gives one: found once, at setup. */
+  edit?: EditSeam | undefined;
+  /** The editor open in a cell (Phase 5 step 4, retained-row contract 5): the paint leaves that cell's value, part and classes. */
+  editor?: { readonly key: RowKey; readonly column: string; readonly cell: HTMLElement; readonly field: HTMLElement; readonly lost: () => void } | null;
+  /**
+   * The editor host (`render/editor.ts`; for `@dzgrid/dom/editors` to take at step 5). `openEditor` puts `field`
+   * (marked `data-dzg-owner="editor"`) in the mounted cell, over its text, false when the cell is not mounted; a
+   * cell that leaves the page calls `lost` once (the grid destroyed too). `closeEditor` focuses the cell, then
+   * removes the field (contract 6).
+   */
+  openEditor?(key: RowKey, column: string, field: HTMLElement, lost: () => void): boolean;
+  closeEditor?(): void;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

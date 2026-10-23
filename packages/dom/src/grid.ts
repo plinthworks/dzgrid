@@ -67,7 +67,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   // ---------- tree ----------
   const root = element(doc, 'dzg');
   const viewport = element(doc, 'dzg-viewport', 'grid');
-  // Phase 2 shows rows; nothing is editable yet, and screen readers should not offer to.
+  // Read-only until a column is editable (the paint says which, editing.md 3).
   viewport.setAttribute('aria-readonly', 'true');
   viewport.tabIndex = -1;
   const header = element(doc, 'dzg-header', 'rowgroup');
@@ -171,7 +171,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     announceSort(e);
     if (e.type === 'fetchFailed') live.announce(g.msg('announce.error'));
     if (e.type === 'selectionChanged') announceSelection(e);
-    if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized' || e.type === 'columnsChanged') schedule();
+    if (e.type === 'modelUpdated' || e.type === 'focusChanged' || e.type === 'selectionChanged' || e.type === 'columnResized' || e.type === 'columnsChanged' || e.type === 'orderStale') schedule();
     // The host's callback last, and fenced: a bug there must not stop the grid repainting or
     // the other listeners hearing the event. The error is reported, not swallowed.
     try {
@@ -196,7 +196,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   g.spans = handles.find((h) => h.spans)?.spans ?? null;
   g.slots = handles.find((h) => h.slots)?.slots ?? null;
   told.push(...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>, rows.page));
-  g.features = handles;
+  g.edit = (g.features = handles).find((h) => h.edit)?.edit; // the edit seam, found once
   scope.add(() => { for (const h of handles) h.destroy(); });
 
   columns.setAvailableInline(geometry.read().inline);

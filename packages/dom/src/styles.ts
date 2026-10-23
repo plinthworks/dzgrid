@@ -21,7 +21,8 @@ export const LAYOUT_CSS = `@layer dzgrid.layout {
 :where(.dzg-seg) { display: flex; position: relative; }
 :where(.dzg-seg-start) { position: sticky; inset-inline-start: 0; z-index: 2; }
 :where(.dzg-seg-end) { position: sticky; inset-inline-end: 0; z-index: 2; }
-:where(.dzg-hcell) { position: relative; }
+:where(.dzg-hcell, .dzg-cell[data-dzg-editing]) { position: relative; }
+:where([data-dzg-editing] > [data-dzg-owner=editor]) { position: absolute; inset: 0; box-sizing: border-box; }
 :where(.dzg-seg-center > .dzg-cell, .dzg-seg-center > .dzg-hcell) { position: absolute; inset-block: 0; }
 :where(.dzg-resize) { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: var(--dzg-target-min, 24px); max-inline-size: 50%; cursor: col-resize; touch-action: none; z-index: 1; }
 :where(.dzg-resize-start) { inset-inline-end: auto; inset-inline-start: 0; }

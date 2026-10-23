@@ -62,3 +62,6 @@ Nothing different: they scroll, sort and filter a grid whose cells hold a badge,
 
 ## Owner questions
 - A pooled row, detached from the document, keeps its part with the last context (row object included), as plain cells keep their last text. Is that acceptable under Sehhaty's health-data policy, or must the grid clear what pooled rows hold (an `update` with an empty context, a cost on every scroll)? Until answered, the code stays as it is.
+
+## Phase 5 step 4
+A part-drawn cell with an editor open in it is not updated while the editor is open (retained-row contract 5); it is updated once the editor closes.

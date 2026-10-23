@@ -53,6 +53,10 @@
       "types": "./src/detail.ts",
       "default": "./src/detail.ts"
     },
+    "./edit": {
+      "types": "./src/edit.ts",
+      "default": "./src/edit.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"
@@ -160,6 +164,18 @@
     "./locales/ar-detail": {
       "types": "./src/locales/ar-detail.ts",
       "default": "./src/locales/ar-detail.ts"
+    },
+    "./locales/en-edit": {
+      "types": "./src/locales/en-edit.ts",
+      "default": "./src/locales/en-edit.ts"
+    },
+    "./locales/fr-edit": {
+      "types": "./src/locales/fr-edit.ts",
+      "default": "./src/locales/fr-edit.ts"
+    },
+    "./locales/ar-edit": {
+      "types": "./src/locales/ar-edit.ts",
+      "default": "./src/locales/ar-edit.ts"
     }
   },
   "peerDependencies": {

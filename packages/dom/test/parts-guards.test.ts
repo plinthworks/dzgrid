@@ -52,7 +52,7 @@ describe('@dzgrid/dom/parts', () => {
     expect(b['@dzgrid/dom/locales/fr-parts']).toEqual({ file: 'packages/dom/src/locales/fr-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/dom/locales/ar-parts']).toEqual({ file: 'packages/dom/src/locales/ar-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/theme']!.maxGzip).toBe(2500); // the owner's grant, Phase 4 close (Q17b)
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(21300);
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(21700); // Phase 5 step 4: the measure 21 656 + a margin (grant 21 980)
     expect(b['@dzgrid/core']!.maxGzip).toBe(29000); // the owner's grant, Phase 4 close (Q17b)
   });
 

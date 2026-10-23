@@ -39,6 +39,14 @@ describe('0.2.0, the four packages', () => {
     for (const lang of ['en', 'fr', 'ar']) for (const part of ['tree', 'detail']) expect(dom).toContain(`./locales/${lang}-${part}`);
   });
 
+  it('export the Phase 5 step 4 subpaths (@dzgrid/dom/edit, its texts, the theme\'s edit.css)', () => {
+    const dom = Object.keys(pkg('dom').exports);
+    expect(dom).toContain('./edit');
+    for (const lang of ['en', 'fr', 'ar']) expect(dom).toContain(`./locales/${lang}-edit`);
+    expect(Object.keys(pkg('core').exports)).toContain('./edit');
+    expect(JSON.parse(readFileSync(`${ROOT}packages/theme/package.json`, 'utf8')).exports['./edit.css']).toBe('./edit.css');
+  });
+
   it('keep gsap and tzslot optional peers', () => {
     const dom = pkg('dom');
     expect(dom.peerDependenciesMeta).toEqual({ '@tzslot/core': { optional: true }, '@tzslot/dom': { optional: true }, gsap: { optional: true } });

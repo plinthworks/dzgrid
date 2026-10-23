@@ -32,3 +32,6 @@ contract (space-separated names, diffed, `dzg-` tokens ignored, a throw reported
 
 ## Tests
 `packages/dom/test/cell-class.test.ts`, `packages/dom/test/class-hooks.test.ts`, `packages/angular/test/class-hooks.test.ts`; the documented examples on real framework builds: `npm run test:browser -- --only themes` (`frameworkChecks`).
+
+## Phase 5 step 4
+The `dzg-cell--*` classes (`pending`, `saving`, `still`, `saved`, `refused`, `blink-a`, `blink-b`, `failed`) belong to `@dzgrid/dom/edit`; a `cellClass` rule never sets them (the `dzg-` prefix is ignored, as before).

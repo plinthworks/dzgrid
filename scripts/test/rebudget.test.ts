@@ -77,6 +77,21 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(ceilingFor('@dzgrid/dom/export')).toBeNull();
   });
 
+  it('Phase 5 step 4 (owner S4-O1, Q16): @dzgrid/dom/edit and /editors share 8 000; the -edit texts 560 / 630 / 810 (S4-O4); the DOM base under 21 980', () => {
+    // dom/edit: its measure + 10 % (3 311 → 3 650 at the step), /editors the rest of the 8 000.
+    expect(ceilingFor('@dzgrid/dom/edit')).toBe(3650);
+    expect(ceilingFor('@dzgrid/dom/editors')).toBe(4350);
+    expect(ceilingFor('@dzgrid/dom/edit')! + ceilingFor('@dzgrid/dom/editors')!).toBe(8000);
+    // Owner S4-O4 (2026-10-23): the texts 560 / 630 / 810 (measure + 10 %), edit.css 1 350, the dom entry 21 700.
+    expect(ceilingFor('@dzgrid/dom/locales/en-edit')).toBe(560);
+    expect(ceilingFor('@dzgrid/dom/locales/fr-edit')).toBe(630);
+    expect(ceilingFor('@dzgrid/dom/locales/ar-edit')).toBe(810);
+    expect(ceilingFor('@dzgrid/theme/edit.css')).toBe(1350);
+    expect(ceilingFor('@dzgrid/dom')).toBe(21980);
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
+    expect(['@dzgrid/dom/locales/en-edit', '@dzgrid/dom/locales/fr-edit', '@dzgrid/dom/locales/ar-edit', '@dzgrid/theme/edit.css', '@dzgrid/dom', '@dzgrid/dom/edit'].map((n) => e[n]!.maxGzip)).toEqual([560, 630, 810, 1350, 21700, 3650]);
+  });
+
   it('the showcase themes\' grants (owner T7, 2026-10-23): each theme 650, the theme base up to 3 050, the DOM base 21 980', () => {
     expect(ceilingFor('@dzgrid/theme/midnight.css')).toBe(650);
     expect(ceilingFor('@dzgrid/theme/clinic.css')).toBe(650);

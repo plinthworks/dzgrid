@@ -151,3 +151,8 @@ context)`). Step 4: `aria-readonly` per cell, retained-row rules 5–6. Step 5: 
 the table, RTL Tab order, IME 229, nested grid ignored, owner `editor`), bugs 1 and 4 of ngx-sheetgrid
 `a6c97f5` replayed, the edit walk. Step 8: tree column Left/Right in ar, `edit-structure`, details
 refused (criterion 5). Manual: `docs/a11y-protocol.md` §19.
+
+## Built at step 4 (2026-10-23)
+- 3: the paint writes `aria-readonly`: on the grid while no visible column is editable (a locked one counts as editable, its cells say read-only); otherwise on each cell `kernel.editable` refuses, and always on a detail's cell, a filler's or loading row's cells and the box cell.
+- 17–18: `GridContext.openEditor(key, column, field, lost)` puts the field (marked `data-dzg-owner="editor"`) over the cell's text; while open the cell keeps its text, part and classes (a host update changes the row's other cells); `closeEditor()` focuses the cell, then removes the field. A cell that leaves the page (row gone, column hidden, grid destroyed) calls `lost` once; the focus follows the grid's usual fallback.
+- Review of step 4: the editor host is a base module of its own (`render/editor.ts`, optional `openEditor` / `closeEditor` on the context) until `@dzgrid/dom/editors` takes it at step 5.

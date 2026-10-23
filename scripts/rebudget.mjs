@@ -46,6 +46,16 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/tree': 3700,
   '@dzgrid/dom/tree-lazy': 1000,
   '@dzgrid/dom/detail': 3900,
+  // Phase 5 Q16: /editors 8 000; owner S4-O1 (2026-10-23): @dzgrid/dom/edit taken out of it, the two together ≤ 8 000.
+  // Split at the step-4 measure: dom/edit 3 311 + 10 % → 3 650, /editors the rest.
+  '@dzgrid/dom/edit': 3650,
+  '@dzgrid/dom/editors': 4350,
+  // Phase 5 Q16: the editing texts 350 / 400 / 450; owner S4-O4 (2026-10-23): 560 / 630 / 810 (the step-4 measure + 10 %).
+  '@dzgrid/dom/locales/en-edit': 560,
+  '@dzgrid/dom/locales/fr-edit': 630,
+  '@dzgrid/dom/locales/ar-edit': 810,
+  // Owner S4-O4: edit.css 1 350 (measured 1 231 at step 4), taken from the theme grants' unused part (S4-O2).
+  '@dzgrid/theme/edit.css': 1350,
   '@dzgrid/theme': 3050, // T7: inside Q16's 2 900, up to 3 050 if needed
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7

@@ -314,7 +314,7 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
   it('hold the budgets set at the close (measure + 10 %, rounded up to 50 B, owner Q2)', () => {
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[]; over?: string }> }).entries;
     expect(b['@dzgrid/core']!.maxGzip).toBe(29000); // the owner's grant, Phase 4 close (Q17b)
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(21300);
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(21700); // Phase 5 step 4: the measure 21 656 + a margin (grant 21 980)
     expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(900);
     expect(b['@dzgrid/dom/slots']!.maxGzip).toBe(1400);
     expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 550, over: '@dzgrid/core' }); // Phase 4 close: 492 + 10 %

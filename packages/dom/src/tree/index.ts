@@ -197,7 +197,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
         // The pinned parents (tree-sticky.md): worked out at each paint, redrawn only when they change.
         const r = d ? stickyStack({ top: g.scroll.logicalTop, n: sticky, viewBlock: g.viewBlock, h: g.rowHeight(), count: d.count, layout: g.layout!, levelAt: (i) => d.levelAt(i as DisplayIndex), ancestorOf: (i) => up(d, i) }) : { at: [] as number[], y: [] as number[], height: 0 };
         g.inset = r.height;
-        const sig = [d, f.epoch, f.cols?.first, f.cols?.last, kernel.selection, ...r.at, ...r.y];
+        const sig = [d, f.epoch, f.cols?.first, f.cols?.last, kernel.selection, stack.rev, ...r.at, ...r.y];
         if (sig.length !== last.length || sig.some((x, j) => x !== last[j])) {
           last = sig;
           // Text only (owner Q11b), no focus, no spans; no row semantics but the selected look.

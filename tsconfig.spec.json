@@ -77,6 +77,9 @@
       "@dzgrid/dom/detail": [
         "./packages/dom/src/detail.ts"
       ],
+      "@dzgrid/dom/edit": [
+        "./packages/dom/src/edit.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

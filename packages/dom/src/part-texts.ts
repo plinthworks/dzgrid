@@ -28,6 +28,18 @@ export interface TreeMessages {
   readonly text: { readonly [K in TreeMessageKey]: MessageValue };
 }
 
+/** The editing texts (`@dzgrid/dom/edit`, Phase 5 step 4), in their own bundles (`locales/<lang>-edit`): optional here, required by `edit()`. */
+export type EditMessageKey =
+  | 'edit.saving' | 'edit.saveRefused' | 'edit.reasonUnknown' | 'edit.failedMark' | 'edit.stale' | 'edit.rowStale' | 'edit.reapply' | 'edit.reapplied' | 'header.withStale'
+  | `validation.${ValidationCode}`;
+/** The refusal codes a value check or a server gives (edit-validation.md 1; a host may add its own `validation.<code>`). */
+export type ValidationCode = 'parse' | 'day' | 'invalid-instant' | 'wall-time-skipped' | 'wall-time-ambiguous' | 'required' | 'min' | 'max' | 'pattern' | 'options' | 'invalid';
+/** An editing bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_EDIT.text }`. */
+export interface EditMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in EditMessageKey]: MessageValue };
+}
+
 /** The detail panels' texts (`@dzgrid/dom/detail`, Phase 4 step 10), in their own bundles (`locales/<lang>-detail`): optional here, required by `detail()`. */
 export type DetailMessageKey = 'detail.label' | 'detail.expanded' | 'detail.collapsed';
 /** A detail bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_DETAIL.text }`. */

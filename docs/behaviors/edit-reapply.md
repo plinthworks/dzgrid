@@ -93,3 +93,9 @@ search typed on, host updates, a tree, details), `core/test/edit-seams.test.ts` 
 mark on the right headers, keys on the mark (Enter on the header sorts, F2 enters the mark), the focused
 cell clear of sticky parts after reapply, focus after reapply, one sentence only, selection kept;
 browser: axe with the mark, ar RTL. Manual: §19.
+
+## Built at step 4 (2026-10-23)
+- 3: muted rows are worked out by `@dzgrid/dom/edit` over the rows holding an edit, with the edits, once per reader, rows, query and state version; not on server pages (owner S4-O3).
+- 4–5: the mark is `<button class="dzg-reapply">`, appended last in the header cell; F2 on the header focuses it (tab stop while inside), Escape goes back to the header cell. With a `slots()` header part, F2 goes to the part first; the mark is then reached by Tab from the part.
+- The stale sentence is joined after the save's (« … . … ») when both fall in the same task.
+- Review of step 4: when the row header is not mounted (its column scrolled out), the sign and the description go to the row's first mounted cell (`data-dzg-stale` on that cell).

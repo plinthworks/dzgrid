@@ -1,6 +1,7 @@
 import { isolationFor } from './bidi.js';
 import type { PartHandle, SlotContext, SlotPart } from '../part.js';
 import { isBlank, REBASE, type ColumnLayout, type DetailNode, type DisplayedRows, type LocaleCtx, type ResolvedColumn, type RowKey } from '@dzgrid/core';
+import type { EditSeam } from '../features.js';
 
 /**
  * Body rows: recycled in DOM order, rebound, never rebuilt (S9, D7). Every
@@ -80,11 +81,14 @@ export interface RowSpans {
 export { CHECK_WIDTH, setAttr, setPx } from './write.js';
 import { CHECK_WIDTH, setAttr, setPx, swapClasses } from './write.js';
 
-/** One cell's value (coerced) and text (the codec's display): blank for a blank or unreadable value. */
-export function cellValue<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): { value: unknown; text: string } {
+/**
+ * One cell's value (coerced) and text (the codec's display): blank for a blank or unreadable value. `read`:
+ * the edit seam (the overlay, Phase 5 step 4), asked instead of the column for the row `key`.
+ */
+export function cellValue<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx, read?: EditSeam['read'] | null, key?: RowKey): { value: unknown; text: string } {
   let raw: unknown;
   try {
-    raw = col.read(row);
+    raw = read ? read(col as ResolvedColumn<unknown>, row, key!) : col.read(row);
   } catch {
     return { value: null, text: '' };
   }
@@ -144,6 +148,12 @@ export interface Frame<T> {
   readonly rowClass?: ((c: { row: any; key: RowKey; context: unknown }) => string | null | undefined) | undefined;
   /** The view's inline size: a detail row's cell is as wide (never wider than the columns). */
   readonly view?: number;
+  /** The edit seam's reader (a feature's `edit`), else null: the column's own. */
+  readonly read?: EditSeam['read'] | null | undefined;
+  /** Some visible column is editable: whether a data cell cannot be edited (`aria-readonly`); null: none is. */
+  readonly ro?: ((key: RowKey, column: string) => boolean) | null;
+  /** The cell an editor is open in (retained-row contract 5): its value, part and classes are left alone. */
+  readonly active?: { readonly key: RowKey; readonly column: string } | null | undefined;
 }
 
 export class RowRenderer<T> {
@@ -153,8 +163,12 @@ export class RowRenderer<T> {
   /** Row element to its key: the DOM never holds a row's id. */
   readonly #keys = new WeakMap<Element, RowKey>();
   readonly #pool: RowView[] = [];
+  /** The renderers spawned from this one (a tree's pinned parents): a touch reaches them. */
+  readonly #spawned: RowRenderer<T>[] = [];
   /** Every row element made, for tests and the pool's high-water mark. */
   made = 0;
+  /** Bumped by `touch` of a mounted row: a renderer that redraws on a signature (the pinned parents) redraws. */
+  rev = 0;
 
   readonly #report: (err: unknown) => void;
 
@@ -172,7 +186,21 @@ export class RowRenderer<T> {
 
   /** Another renderer of the same grid into `layer` (its own rows and pool): a tree's pinned parents. */
   spawn(layer: HTMLElement): RowRenderer<T> {
-    return new RowRenderer<T>(this.#doc, layer, this.#report);
+    const r = new RowRenderer<T>(this.#doc, layer, this.#report);
+    this.#spawned.push(r);
+    return r;
+  }
+
+  /**
+   * These rows bind again at the next paint (an edit shown: no event, the same data), here and in the spawned
+   * renderers; `rev` moves only when a touched row is mounted here (a pinned stack redraws for its own rows).
+   */
+  touch(keys: Iterable<RowKey>): void {
+    for (const k of keys) {
+      const v = this.#mounted.get(k);
+      if (v) (v.epoch = -1), this.rev++;
+      for (const r of this.#spawned) r.touch([k]);
+    }
   }
 
   get mounted(): ReadonlyMap<RowKey, RowView> {
@@ -308,6 +336,8 @@ export class RowRenderer<T> {
     setPx(v.el, 'inline-size', L.totalWidth + extra);
     setPx(v.segs.start, 'inline-size', L.start.width + extra);
     this.#checkCell(v, f.check, !!data);
+    // The box is not a value to edit: read-only once the grid edits.
+    if (v.check) setAttr(v.check, 'aria-readonly', f.ro ? 'true' : null);
     setPx(v.segs.center, 'inline-size', L.center.width);
     setPx(v.segs.end, 'inline-size', L.end.width);
     // Cells that go are taken out first: a focused cell is then never moved past them (a move blurs).
@@ -389,6 +419,7 @@ export class RowRenderer<T> {
     }
     setPx(s, 'inline-size', Math.min(f.view ?? width, width));
     setAttr(s, 'aria-colspan', String(L.start.columns.length + L.center.columns.length + L.end.columns.length + (f.check ? 1 : 0)));
+    setAttr(s, 'aria-readonly', f.ro ? 'true' : null);
     // A new key comes from the pool or another detail: its data differs (a pooled row holds none).
     if (v.data !== node.data || v.epoch !== f.epoch) {
       v.data = node.data;
@@ -513,7 +544,11 @@ export class RowRenderer<T> {
       setAttr(cell.el, 'aria-colspan', span && span.cols > 1 ? String(span.cols) : null);
       setAttr(cell.el, 'data-span', span ? '' : null);
     }
-    const { value, text } = data === undefined ? { value: null, text: '' } : cellValue(col, data as never, f.ctx);
+    // Some column editable: a cell that cannot be edited says so (editing.md 3; a filler's, a loading row's too).
+    setAttr(cell.el, 'aria-readonly', f.ro && (data === undefined || f.ro(key, col.id)) ? 'true' : null);
+    // The cell an editor is open in keeps what it shows (retained-row contract 5).
+    if (f.active && f.active.key === key && f.active.column === col.id) return;
+    const { value, text } = data === undefined ? { value: null, text: '' } : cellValue(col, data as never, f.ctx, f.read, key);
     // The host's classes from the data (step 26, cell-class.md): diffed, never the grid's own (dzg-).
     const rule = col.def.ui?.cellClass;
     if (rule || cell.cls) {

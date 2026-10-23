@@ -140,3 +140,11 @@ the answer; reduced motion and `data-motion="off"` still border; `savingBorder: 
 answers (17); row hidden vs removed (19–20); the 5 s hold (9b, fake timers and the computed
 animation); the description while saving and no `aria-busy`; the tooltip placed clear of the field; browser: light, dark, forced colours, RTL direction of the
 border, contrast pairs, 50 saving cells while scrolling, no layout read. Manual: §19.
+
+## Built at step 4 (2026-10-23)
+- 6–13: the marks are written by `@dzgrid/dom/edit` at each paint on the mounted cells (not by the base), from `state()` and the DOM's clocks; a pooled cell loses them at the paint that shows it elsewhere.
+- 13: during the 0.5 s the cell shows the refused value (the core rolled back already), then the last saved value; a commit or undo on the cell ends the hold at once.
+- 9b: the 5 s is a class (`dzg-cell--still`, a timer from the send) and, in CSS, four 1.2 s turns then a held still border.
+- 16: a code without a text falls to `validation.invalid`; `{min}` / `{max}` come from the column's `edit` rule, formatted by its codec; `{pattern}` of `validation.day` waits for step 5.
+- The reason's tooltip on hover, the saved flash and `onCell(…, 'saved')`: step 7.
+- Review of step 4: the refusal sentences are queued in the assertive region by gesture (two refused gestures in one task: both said); « Saving » once per gesture and once per task; clocks in one queue per duration; forced colours: the refusal a solid CanvasText border; the ring turns by the cell's own direction (`:dir(rtl)`).

@@ -28,6 +28,25 @@ Toward 0.3.0 (Phase 5, editing; not released).
   `wall-time-ambiguous`, `options`, `invalid`, `required`, `min`, `max`, `pattern`, `read-only`, or
   `validate`'s own. Kernel events `cellEdited`, `editStates`, `saveFailed`, `undoChanged` (sent by the
   controller only); type `SaveOrigin`. Without an `abort` factory `save` gets a signal that never aborts. Budget 3 100 B gz over the core (owner S3-O4).
+- `@dzgrid/dom/edit` (Phase 5 step 4; owner S4-O1): `edit({ save?, savingBorder? })`, editing wired to the
+  grid: the controller of `@dzgrid/core/edit` on the grid's rows; the cells read through it; save marks
+  written at each paint on the mounted cells (`dzg-cell--pending | saving | still | saved | refused |
+  blink-a | blink-b | failed`), with the DOM's clocks (saved 1.5 s; refusal 0.5 s showing the refused value,
+  blinking at most once a second; saving border still after 5 s); descriptions (`edit.saving`,
+  `edit.failedMark`); rows that no longer pass the filters muted (`data-dzg-stale`, not on server pages,
+  S4-O3); a reapply button on sorted or filtered headers (F2 reaches it, Enter on the header still sorts);
+  sentences (`edit.saving` once per gesture, `edit.saveRefused` assertive, `edit.stale` once,
+  `edit.reapplied`). `feature.api(grid)`: `commit`, `undo`, `redo`, `canUndo`, `canRedo`, `state`,
+  `reapply`, `setSave`, `refuse`. Texts `@dzgrid/dom/locales/{en,fr,ar}-edit` (types `EditMessages`,
+  `EditMessageKey`, `ValidationCode`).
+- `@dzgrid/dom` seams for editing: `FeatureHandle.edit` (`EditSeam.read`, what a cell shows),
+  `RowRenderer.touch(keys)`, `GridContext.openEditor` / `closeEditor` / `editor` (retained-row contract 5–6;
+  `lost` when the cell leaves), `aria-readonly` per cell as soon as a visible column is editable (the grid
+  keeps it otherwise), the tooltip's `aria-describedby` by token; the grid repaints on `orderStale`.
+- `@dzgrid/theme/edit.css` (+ `edit.unlayered.css`, source `edit.scss`; owner S4-O2): the marks, the
+  running border (CSS, `@property --dzg-turn`, reversed right to left), the refusal blink, the muted row's
+  funnel, the reapply button, reduced motion, `data-motion="off"` and forced colours. New reserved colour
+  `--dzg-saved-color` (falls back to `--tz-success`); 10 contrast pairs.
 - `editableAt(node, column, context, locked?)`: data rows only (never a detail, filler or loading row).
 - Kernel: commands `edits.reader` (refused `invalid-reader`), `rows.reapply` (`reapply-off`),
   `context.app`; event `orderStale { stale }` on each flip; `kernel.reader`, `kernel.app`,

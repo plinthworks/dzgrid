@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -2623,6 +2623,204 @@ async function demosChecks(name, ctx) {
   }
 }
 
+/**
+ * The edit marks (Phase 5 step 4, docs/phase-5-steps/step04-plan.md « Browser »; `-- --only edit-marks`): a stock
+ * list with `@dzgrid/dom/edit` and `@dzgrid/theme/edit.css`, a save the checks hold. French light Clinic, Arabic
+ * right to left dark Midnight, the base theme light and dark: axe 0 with every mark shown (pending, saving, saved,
+ * refused, failed, a muted row, the reapply mark focused); forced colours; the ring's direction and the marks'
+ * side in RTL; reduced motion and motion off stand still; the blink rate; the border still after 5 s; 50 saving
+ * cells while scrolling (no layout read in the paint's marks, no long task); the mark's target; the marks'
+ * contrast on their rows.
+ */
+async function editMarksChecks(name, ctx) {
+  const PAGES = [
+    ['edit fr light clinic', 'locale=fr-FR&theme=light&skin=clinic', false],
+    ['edit ar rtl dark midnight', 'locale=ar-DZ&theme=dark&skin=midnight', true],
+    ['edit en light base', 'locale=en-GB&theme=light', false],
+    ['edit en dark base', 'locale=en-GB&theme=dark', false],
+  ];
+  const open = async (qs, o = {}) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 760 });
+    if (o.reduce) await page.emulateMedia({ reducedMotion: 'reduce' });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/edit-marks.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    return { page, errors };
+  };
+  /** Every mark on screen: m0 pending (its second gesture behind the first), m1 saving, m2 saved, m3 failed, m4 refused (kept by
+   * refusals every 300 ms), m5 muted (stock 0 under « stock > 0 »), the reapply mark focused by F2. */
+  const showAll = (page) => page.evaluate(async () => {
+    const { grid, api, saves, key } = window.t;
+    grid.kernel.dispatch({ type: 'filter.column', column: 'stock', filter: { type: 'number', op: 'gt', value: 0 } }, 'user');
+    const put = (id, text, column = 'stock') => api.commit([{ key: key(id), column, input: { text } }]);
+    put('m0', '50'); put('m0', '51'); put('m2', '7'); put('m3', '8'); put('m5', '0');
+    saves[1].ok(); saves[2].no({ code: 'min' });
+    saves[3].ok();
+    await new Promise((r) => setTimeout(r, 650));
+    window.keep = setInterval(() => api.refuse(key('m4'), 'stock'), 300);
+    api.refuse(key('m4'), 'stock');
+    put('m1', '60');
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const cls = (id) => [...document.querySelector(`[data-col="stock"]`) ? [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => grid.context.rowRenderer.keyOf(r) === key(id))?.querySelector('[data-col="stock"]')?.classList ?? [] : []].filter((c) => c.startsWith('dzg-cell--')).join(' ');
+    return { m0: cls('m0'), m1: cls('m1'), m2: cls('m2'), m3: cls('m3'), m4: cls('m4'), muted: document.querySelectorAll('.dzg-row[data-dzg-stale]').length };
+  });
+  const cell = (id, col = 'stock') => `[...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => window.t.grid.context.rowRenderer.keyOf(r) === window.t.key('${id}'))?.querySelector('[data-col="${col}"]')`;
+  for (const [tag, qs, rtl] of PAGES) {
+    const o = await open(qs);
+    const { page } = o;
+    const shown = await showAll(page);
+    check(name, `${tag}: every mark shown (pending, saving, saved, failed, refused, a muted row)`, /pending/.test(shown.m0) && /saving/.test(shown.m1) && /saved/.test(shown.m2) && /failed/.test(shown.m3) && /refused/.test(shown.m4) && shown.muted === 1, shown);
+    const head = await page.evaluate(() => { const h = document.querySelector('.dzg-hcell[data-col="stock"]'); h.focus(); return !!h.querySelector('.dzg-reapply'); });
+    await page.keyboard.press('F2');
+    const mark = await page.evaluate(() => { const b = document.activeElement; const r = b.getBoundingClientRect(); const h = b.closest('.dzg-hcell').getBoundingClientRect(); return { cls: b.className, w: r.width, h: r.height, end: getComputedStyle(document.documentElement).direction === 'rtl' ? r.left - h.left < h.width / 2 : r.right - h.left > h.width / 2 }; });
+    check(name, `${tag}: F2 on the filtered header focuses its reapply mark, at the header's end, a 24 × 24 target`, head && mark.cls === 'dzg-reapply' && mark.w >= 24 && mark.h >= 24 && mark.end, mark);
+    let v = await axe(page);
+    check(name, `${tag}: axe 0 with every mark shown and the reapply mark focused`, v.length === 0, v);
+    await page.screenshot({ path: `${OUT}/${name}-${tag.replace(/ /g, '-')}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    // The marks' contrast on their rows (3:1): the dot, the check, the sign, the funnel, the button.
+    const c = await page.evaluate(() => {
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = 1;
+      const c2 = cv.getContext('2d', { willReadFrequently: true });
+      const rgb = (css) => { c2.clearRect(0, 0, 1, 1); c2.fillStyle = '#000'; c2.fillStyle = css; c2.fillRect(0, 0, 1, 1); return [...c2.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+      const lin = (x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; };
+      const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+      const ratio = (a, b) => { const [x, y] = [lum(rgb(a)), lum(rgb(b))].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+      const bgOf = (el) => { for (let e = el; e; e = e.parentElement) { const b = getComputedStyle(e).backgroundColor; if (b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') return b; } return getComputedStyle(document.body).backgroundColor; };
+      const out = {};
+      const cells = [...document.querySelectorAll('.dzg-layer [data-col="stock"]')];
+      for (const k of ['pending', 'saved', 'failed']) { const el = cells.find((x) => x.classList.contains(`dzg-cell--${k}`)); out[k] = el ? ratio(getComputedStyle(el, '::after').backgroundColor, bgOf(el)) : 0; }
+      const head = document.querySelector('.dzg-row[data-dzg-stale] .dzg-cell[data-dzg-stale]');
+      out.funnel = head ? ratio(getComputedStyle(head, '::before').backgroundColor, bgOf(head)) : 0;
+      const b = document.querySelector('.dzg-reapply');
+      out.button = b ? ratio(getComputedStyle(b, '::before').backgroundColor, bgOf(b)) : 0;
+      return out;
+    });
+    check(name, `${tag}: the marks' contrast on their rows ≥ 3:1 (dot, check, sign, funnel, button)`, Object.values(c).every((x) => x >= 3), c);
+    // Forced colours: the ring dashed Highlight, the refusal Mark, the signs CanvasText, shapes kept.
+    await page.emulateMedia({ forcedColors: 'active' });
+    await frames(page, 2);
+    const fc = await page.evaluate((sel) => {
+      const probe = document.createElement('i');
+      document.body.append(probe);
+      const sys = (k) => ((probe.style.color = k), getComputedStyle(probe).color);
+      const s0 = eval(sel.m0); const s3 = eval(sel.m3); const s4 = eval(sel.m4);
+      const r = getComputedStyle(s0, '::before'); const f = getComputedStyle(s3, '::after'); const x = getComputedStyle(s4, '::before');
+      const out = { ring: r.borderBlockStartStyle, ringColour: r.borderBlockStartColor === sys('Highlight'), ringAnim: r.animationName, sign: f.backgroundColor === sys('CanvasText'), shape: f.clipPath !== 'none', refused: x.borderBlockStartColor === sys('CanvasText') && x.borderBlockStartStyle === 'solid' };
+      probe.remove();
+      return out;
+    }, { m0: cell('m1'), m3: cell('m3'), m4: cell('m4') });
+    await page.screenshot({ path: `${OUT}/${name}-${tag.replace(/ /g, '-')}-forced.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    check(name, `${tag}: forced colours: the ring a still dashed Highlight border, the refusal a solid CanvasText border, the signs CanvasText shapes`, fc.ring === 'dashed' && fc.ringColour && fc.ringAnim === 'none' && fc.sign && fc.shape && fc.refused, fc);
+    await page.emulateMedia({ forcedColors: 'none' });
+    if (rtl) {
+      const side = await page.evaluate((sel) => { const s0 = eval(sel.m0); const s3 = eval(sel.m3); const r = getComputedStyle(s0, '::before'); const a = s3.getBoundingClientRect(); const m = getComputedStyle(s3, '::after'); return { dir: r.animationDirection, left: parseFloat(m.left), right: parseFloat(m.right), w: a.width }; }, { m0: cell('m1'), m3: cell('m3') });
+      check(name, `${tag}: right to left: the ring turns the other way; the sign at the inline end (left)`, side.dir === 'reverse, normal' && side.left < side.right, side);
+    }
+    await page.evaluate(() => clearInterval(window.keep));
+    check(name, `${tag}: no page error`, o.errors.length === 0, o.errors);
+    await page.close();
+  }
+
+  // Reduced motion and motion off: no animation on a ring or a refusal, the still borders drawn.
+  for (const [how, qs, o] of [['reduced motion', 'locale=fr-FR&theme=light', { reduce: true }], ['motion off', 'locale=fr-FR&theme=light', {}]]) {
+    const { page, errors } = await open(qs, o);
+    const r = await page.evaluate(async (off) => {
+      const { grid, api, key } = window.t;
+      if (off) grid.update({ motion: false });
+      api.commit([{ key: key('m0'), column: 'stock', input: { text: '50' } }]);
+      api.refuse(key('m1'), 'stock');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const at = (id) => [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => grid.context.rowRenderer.keyOf(r) === key(id)).querySelector('[data-col="stock"]');
+      const anims = document.getAnimations().filter((a) => a.effect?.pseudoElement && [at('m0'), at('m1')].includes(a.effect.target)).length;
+      return { anims, ring: getComputedStyle(at('m0'), '::before').borderBlockStartStyle, refused: getComputedStyle(at('m1'), '::before').borderBlockStartStyle };
+    }, how === 'motion off');
+    check(name, `edit ${how}: no animation on the ring or the refusal; the ring dashed, the refusal a still red border`, r.anims === 0 && r.ring === 'dashed' && r.refused === 'solid', r);
+    check(name, `edit ${how}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+
+  // The blink rate (WCAG 2.3.1): 10 refusals in 2 s on one cell, sampled every frame: never two blinks at once,
+  // a new blink only 1 s after the last began; ≤ 3 flashes (2 per blink) in any second.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=light');
+    const r = await page.evaluate(() => new Promise((done) => {
+      const { grid, api, key } = window.t;
+      const at = () => [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => grid.context.rowRenderer.keyOf(r) === key('m1')).querySelector('[data-col="stock"]');
+      const starts = [];
+      let both = 0;
+      let n = 0;
+      const t0 = performance.now();
+      const fire = setInterval(() => { api.refuse(key('m1'), 'stock'); if (++n === 10) clearInterval(fire); }, 200);
+      api.refuse(key('m1'), 'stock');
+      const sample = () => {
+        const run = document.getAnimations().filter((a) => a.effect?.target === at() && /^dzg-blink/.test(a.animationName) && a.playState === 'running');
+        if (run.length > 1) both++;
+        for (const a of run) { if (a.startTime === null) continue; const s = Math.round(a.startTime); if (!starts.some((x) => Math.abs(x - s) < 20)) starts.push(s); }
+        if (performance.now() - t0 < 2600) requestAnimationFrame(sample);
+        else done({ starts: starts.map((s) => s - starts[0]), both });
+      };
+      requestAnimationFrame(sample);
+    }));
+    let worst = 0;
+    const flashes = r.starts.flatMap((s) => [s, s + 250]);
+    for (const w of flashes) worst = Math.max(worst, flashes.filter((f) => f >= w && f < w + 1000).length);
+    const gaps = r.starts.slice(1).map((s, i) => s - r.starts[i]);
+    check(name, `edit blink rate: 10 refusals in 2 s: ${r.starts.length} blinks, never two at once, each ≥ 1 s after the last, ≤ 3 flashes in any second (worst ${worst})`, r.starts.length >= 2 && r.both === 0 && gaps.every((g) => g >= 980) && worst <= 3, { r, gaps, worst });
+    check(name, 'edit blink rate: no page error', errors.length === 0, errors);
+    await page.close();
+  }
+
+  // The running border stands still after 5 s (WCAG 2.2.2): a held save, 5.1 s later no running animation, dashed.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=light');
+    const r = await page.evaluate(async () => {
+      const { grid, api, key } = window.t;
+      api.commit([{ key: key('m0'), column: 'stock', input: { text: '50' } }]);
+      const at = () => [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => grid.context.rowRenderer.keyOf(r) === key('m0')).querySelector('[data-col="stock"]');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const early = document.getAnimations().filter((a) => a.effect?.target === at() && a.playState === 'running').map((a) => a.animationName);
+      await new Promise((r) => setTimeout(r, 5100));
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const late = document.getAnimations().filter((a) => a.effect?.target === at() && a.playState === 'running').map((a) => a.animationName);
+      return { early, late, style: getComputedStyle(at(), '::before').borderBlockStartStyle, still: at().classList.contains('dzg-cell--still') };
+    });
+    check(name, `edit saving border: turning at first (${r.early.join(', ')}), still after 5 s: no running animation, a dashed border`, r.early.includes('dzg-turn') && r.late.length === 0 && r.style === 'dashed' && r.still, r);
+    check(name, 'edit saving border: no page error', errors.length === 0, errors);
+    await page.close();
+  }
+
+  // 50 saving cells while scrolling: the marks' paint reads no layout, no long task.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=light');
+    const r = await page.evaluate(async () => {
+      const { grid, api, key } = window.t;
+      const long = [];
+      new PerformanceObserver((l) => long.push(...l.getEntries().map((e) => e.duration))).observe({ type: 'longtask', buffered: false });
+      api.commit(Array.from({ length: 50 }, (_, i) => ({ key: key(`m${i}`), column: 'stock', input: { text: String(500 + i) } })));
+      const h = grid.context.features.find((f) => f.edit);
+      let reads = 0;
+      let inPaint = false;
+      const count = (proto, k) => { const d = Object.getOwnPropertyDescriptor(proto, k); Object.defineProperty(proto, k, { ...d, ...(d.get ? { get() { if (inPaint) reads++; return d.get.call(this); } } : { value(...a) { if (inPaint) reads++; return d.value.apply(this, a); } }) }); };
+      count(Element.prototype, 'getBoundingClientRect');
+      for (const k of ['offsetTop', 'offsetLeft', 'offsetWidth', 'offsetHeight']) count(HTMLElement.prototype, k);
+      const after = h.afterRows;
+      h.afterRows = (f) => { inPaint = true; try { after(f); } finally { inPaint = false; } };
+      const vp = document.querySelector('.dzg-viewport');
+      for (let i = 0; i < 60; i++) { vp.scrollTop = (i % 30) * 40; await new Promise((r) => requestAnimationFrame(r)); }
+      const saving = document.querySelectorAll('.dzg-cell--saving').length;
+      return { reads, long, saving };
+    });
+    check(name, `edit: 50 saving cells while scrolling: no layout read in the marks' paint, no long task (${r.saving} saving on screen)`, r.reads === 0 && r.long.length === 0 && r.saving > 5, r);
+    check(name, 'edit scrolling: no page error', errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -2640,6 +2838,7 @@ async function runEngine(name) {
       if (only === 'bridges' && name === 'chrome') await frameworkChecks(name, ctx);
       if (only === 'dates' && name === 'chrome') await dateChecks(name, ctx);
       if (only === 'demos') await demosChecks(name, ctx);
+      if (only === 'edit-marks' && name === 'chrome') await editMarksChecks(name, ctx);
       return;
     }
 
@@ -2974,6 +3173,7 @@ async function runEngine(name) {
     if (name === 'chrome') await treeChecks(name, ctx);
     if (name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
     await demosChecks(name, ctx);
+    if (name === 'chrome') await editMarksChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

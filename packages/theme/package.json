@@ -21,9 +21,12 @@
     "./clinic.css": "./clinic.css",
     "./contrast.scss": "./contrast.scss",
     "./tailwind3.css": "./tailwind3.css",
-    "./bootstrap.css": "./bootstrap.css"
+    "./bootstrap.css": "./bootstrap.css",
+    "./edit.css": "./edit.css",
+    "./edit.unlayered.css": "./edit.unlayered.css",
+    "./edit.scss": "./edit.scss"
   },
-  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css"],
+  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css", "edit.css", "edit.unlayered.css", "edit.scss"],
   "sideEffects": ["*.css"],
   "sass": "./dzgrid.scss"
 }

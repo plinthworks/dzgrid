@@ -1,0 +1,186 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@property --dzg-turn {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes dzg-turn {
+  to {
+    --dzg-turn: 360deg;
+  }
+}
+@keyframes dzg-hold {
+  to {
+    background: none;
+    border-style: dashed;
+    border-color: var(--dzg-saving-color, var(--tz-accent));
+  }
+}
+@keyframes dzg-blink-a {
+  0%, 50% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0;
+  }
+}
+@keyframes dzg-blink-b {
+  0%, 50% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0;
+  }
+}
+@layer dzgrid.theme {
+  :is(.dzg-seg-start, .dzg-seg-end) > :is(.dzg-cell--pending, .dzg-cell--saving, .dzg-cell--saved, .dzg-cell--refused, .dzg-cell--failed),
+  .dzg-row[data-dzg-stale] :is(.dzg-seg-start, .dzg-seg-end) > .dzg-cell[data-dzg-stale] {
+    position: relative;
+  }
+  :is(.dzg-cell--pending, .dzg-cell--saved, .dzg-cell--failed) {
+    padding-inline-end: 1.5em;
+  }
+  :is(.dzg-cell--pending, .dzg-cell--saved, .dzg-cell--failed)::after {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(50% - 5px);
+    inset-inline-end: 4px;
+    inline-size: 10px;
+    block-size: 10px;
+    background: currentColor;
+    pointer-events: none;
+  }
+  .dzg-cell--pending::after {
+    color: var(--dzg-saving-color, var(--tz-accent));
+    clip-path: circle(3px);
+  }
+  .dzg-cell--saved::after {
+    color: var(--dzg-saved-color, var(--tz-success));
+    clip-path: polygon(0 55%, 15% 40%, 38% 62%, 85% 12%, 100% 27%, 38% 92%);
+  }
+  .dzg-cell--failed::after {
+    color: var(--dzg-refused-color, var(--tz-danger));
+    clip-path: path(evenodd, "M5 0a5 5 0 1 1 0 10a5 5 0 1 1 0-10zM4.2 2h1.6v4h-1.6zM4.2 7h1.6v1.6h-1.6z");
+  }
+  :is(.dzg-cell--saving, .dzg-cell--refused)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border: 2px solid transparent;
+    pointer-events: none;
+  }
+  .dzg-cell--saving::before {
+    background: conic-gradient(from var(--dzg-turn), var(--dzg-saving-color, var(--tz-accent)) 0 25%, transparent 0) border-box;
+    mask: linear-gradient(currentColor 0 0) padding-box exclude, linear-gradient(currentColor 0 0) border-box;
+    animation: dzg-turn 1.2s linear 4, dzg-hold 0.01s 4.8s forwards;
+  }
+  .dzg-cell--saving:dir(rtl)::before {
+    animation-direction: reverse, normal;
+  }
+  .dzg-cell--still::before,
+  .dzg[data-motion=off] .dzg-cell--saving::before {
+    animation: none;
+    background: none;
+    border-style: dashed;
+    border-color: var(--dzg-saving-color, var(--tz-accent));
+  }
+  .dzg-cell--refused::before {
+    border-color: var(--dzg-refused-color, var(--tz-danger));
+  }
+  .dzg-cell--blink-a::before {
+    animation: dzg-blink-a 0.5s step-end;
+  }
+  .dzg-cell--blink-b::before {
+    animation: dzg-blink-b 0.5s step-end;
+  }
+  .dzg[data-motion=off] :is(.dzg-cell--blink-a, .dzg-cell--blink-b)::before {
+    animation: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dzg-cell--saving::before {
+      animation: none;
+      background: none;
+      border-style: dashed;
+      border-color: var(--dzg-saving-color, var(--tz-accent));
+    }
+    :is(.dzg-cell--blink-a, .dzg-cell--blink-b)::before {
+      animation: none;
+    }
+  }
+  .dzg-row[data-dzg-stale],
+  .dzg-row[data-dzg-stale] .dzg-seg-start,
+  .dzg-row[data-dzg-stale] .dzg-seg-end {
+    color: var(--dzg-context-fg, var(--tz-fg-muted));
+  }
+  .dzg-row[data-dzg-stale] .dzg-cell[data-dzg-stale] {
+    padding-inline-start: 1.5em;
+  }
+  .dzg-row[data-dzg-stale] .dzg-cell[data-dzg-stale]:not(.dzg-cell--saving, .dzg-cell--refused)::before {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(50% - 5px);
+    inset-inline-start: 4px;
+    inline-size: 10px;
+    block-size: 10px;
+    background: currentColor;
+    clip-path: path(evenodd, "M0 0H10L6 5.5V10L4 8.5V5.5ZM2.2 1.2L5 4.4L7.8 1.2Z");
+    pointer-events: none;
+  }
+  .dzg-reapply {
+    position: relative;
+    inline-size: 24px;
+    block-size: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: var(--tz-fg-muted);
+    background: none;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+  .dzg-reapply::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    background: currentColor;
+    clip-path: path(evenodd, "M8 1.5a6.5 6.5 0 1 0 6.5 6.5h-2a4.5 4.5 0 1 1-4.5-4.5v2.5l3.5-3.5L8 -1z");
+  }
+  .dzg-reapply:hover {
+    color: var(--tz-fg);
+  }
+  .dzg-reapply:focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: -2px;
+  }
+  @media (forced-colors: active) {
+    .dzg-cell--saving::before {
+      background: none;
+      border: 2px dashed Highlight;
+      animation: none;
+    }
+    .dzg-cell--refused::before {
+      border: 2px solid CanvasText;
+    }
+    .dzg-cell--pending::after {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .dzg-cell--saved::after {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .dzg-cell--failed::after {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .dzg-row[data-dzg-stale] .dzg-cell[data-dzg-stale]:not(.dzg-cell--saving, .dzg-cell--refused)::before {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .dzg-reapply::before {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+  }
+}

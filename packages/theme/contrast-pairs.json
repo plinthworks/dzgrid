@@ -96,7 +96,17 @@
     { "what": "saving border, selected row", "fg": "--dzg-saving-color", "bg": "--dzg-row-selected-bg", "min": 3 },
     { "what": "refusal blink (Phase 5, Q9; reserved, drawn at its step)", "fg": "--dzg-refused-color", "bg": "--tz-bg", "min": 3 },
     { "what": "refusal blink, row hovered", "fg": "--dzg-refused-color", "bg": "--dzg-row-hover-bg", "min": 3 },
-    { "what": "refusal blink, selected row", "fg": "--dzg-refused-color", "bg": "--dzg-row-selected-bg", "min": 3 }
+    { "what": "refusal blink, selected row", "fg": "--dzg-refused-color", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "saved check (Phase 5 step 4, edit.css)", "fg": "--dzg-saved-color", "bg": "--tz-bg", "min": 3 },
+    { "what": "saved check, row hovered", "fg": "--dzg-saved-color", "bg": "--dzg-row-hover-bg", "min": 3 },
+    { "what": "saved check, selected row", "fg": "--dzg-saved-color", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "pending dot and running border share the saving colour (the pairs above)", "fg": "--dzg-saving-color", "bg": "--tz-bg", "min": 3 },
+    { "what": "failed sign shares the refused colour (the pairs above)", "fg": "--dzg-refused-color", "bg": "--tz-bg", "min": 3 },
+    { "what": "muted row's funnel sign", "fg": "--dzg-context-fg", "bg": "--tz-bg", "min": 3 },
+    { "what": "muted row's funnel sign, hovered", "fg": "--dzg-context-fg", "bg": "--dzg-row-hover-bg", "min": 3 },
+    { "what": "muted row's funnel sign, selected", "fg": "--dzg-context-fg", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "reapply button on the header", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 3 },
+    { "what": "focus ring on the reapply button", "fg": "--dzg-focus-ring", "bg": "--dzg-header-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -119,6 +129,7 @@
     "--dzg-flash-selected-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-selected-bg))",
     "--dzg-flash-hover-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-hover-bg))",
     "--dzg-saving-color": "var(--tz-accent)",
-    "--dzg-refused-color": "var(--tz-danger)"
+    "--dzg-refused-color": "var(--tz-danger)",
+    "--dzg-saved-color": "var(--tz-success)"
   }
 }
