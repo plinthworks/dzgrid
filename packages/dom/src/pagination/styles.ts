@@ -5,6 +5,8 @@
  * are drawn with logical borders, turned the other way right to left.
  */
 export const PAGINATION_CSS =
+  // In the cascade layer dzgrid.layout, as the base's (owner T1, docs/behaviors/theming.md).
+  '@layer dzgrid.layout{' +
   ':where(.dzg-footer){display:flex;flex-wrap:wrap;align-items:center;gap:.25rem 1rem;min-inline-size:0}' +
   ':where(.dzg-footer>*,.dzg-psel,.dzg-psize){display:flex;flex-wrap:wrap;align-items:center;gap:.25rem}' +
   ':where(.dzg-footer>nav){margin-inline-start:auto}' +
@@ -17,7 +19,8 @@ export const PAGINATION_CSS =
   ':where(.dzg-pbtn:is([data-go=first],[data-go=prev])){--dzg-chevron:-45deg}' +
   ':where(.dzg-pbtn:is([data-go=next],[data-go=last])){--dzg-chevron:135deg}' +
   ':where([dir=rtl] .dzg-pbtn:is([data-go=first],[data-go=prev])){--dzg-chevron:45deg}' +
-  ':where([dir=rtl] .dzg-pbtn:is([data-go=next],[data-go=last])){--dzg-chevron:-135deg}';
+  ':where([dir=rtl] .dzg-pbtn:is([data-go=next],[data-go=last])){--dzg-chevron:-135deg}' +
+  '}';
 
 /** Once per document or shadow root; a host with a strict CSP passes its nonce or loads it itself. */
 export function injectPaginationStyles(target: Document | ShadowRoot, nonce?: string): void {

@@ -34,6 +34,8 @@
  *   tall cell lives in.
  */
 export const SPANS_CSS =
+  // In the cascade layer dzgrid.layout, as the base's (owner T1, docs/behaviors/theming.md).
+  '@layer dzgrid.layout{' +
   ':where(.dzg-body){isolation:isolate}' +
   ':where(.dzg-row[data-spans]){contain:style}' +
   ':where(.dzg-row[data-spans]>.dzg-seg-start>.dzg-cell,.dzg-row[data-spans]>.dzg-seg-end>.dzg-cell){position:absolute;inset-block:0}' +
@@ -45,6 +47,9 @@ export const SPANS_CSS =
   ':where(.dzg-hgroup){position:absolute;inset-block:0}' +
   ':where(.dzg-hslot){position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)}' +
   ':where(.dzg-hcell[data-up]){inset-block-start:calc(-1*var(--dzg-up));block-size:calc(var(--dzg-row-height) + var(--dzg-up))}' +
+  '}' +
+  // Outside the layer, on purpose: an !important inside a layer would beat every unlayered !important, so
+  // an app could no longer override it (review of the showcase themes, R5).
   ':where(.dzg-row[data-full]>.dzg-seg>.dzg-cell){position:sticky;inset-inline-start:var(--dzg-check-w)!important;inline-size:calc(var(--dzg-view-w,100%) - var(--dzg-check-w))!important}';
 
 /** Once per document or shadow root, like the base's; a host with a strict CSP passes its nonce or loads it itself. */

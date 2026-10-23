@@ -1,11 +1,11 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer and the showcase themes, docs/behaviors/theming.md; `-- --only dates` the date filters).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { serve, browser } from '../spikes/kit.mjs';
@@ -124,6 +124,20 @@ async function dateChecks(name, ctx) {
     v = await axe(page);
     check(name, `${tag}: the calendar opens inside the popup, on top under the pointer, focus inside, axe 0`, s1.panelIn && s1.hit && s1.activeInPanel && v.length === 0, { s1, v });
     check(name, `${tag}: the panel takes the popup's surface (${rtl ? 'dark' : 'light'}), and reads ${rtl ? 'right to left' : 'left to right'}`, s1.panelBg === s1.tzBg && s1.dir === (rtl ? 'rtl' : 'ltr'), s1);
+    // Review of the showcase themes (R1): another month's days in the muted colour, over tzslot's own
+    // unlayered `color: inherit` (the theme's rule stays outside its layer for that).
+    const outside = await page.evaluate(() => {
+      const d = document.querySelector('.dzg-popup :is(.tz-cal__day--outside, .tz-range__day--outside):not(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end)');
+      const pop = document.querySelector('.dzg-popup');
+      if (!d || !pop) return null;
+      const ref = document.createElement('span');
+      ref.style.color = 'var(--tz-fg-muted)';
+      pop.append(ref);
+      const want = getComputedStyle(ref).color;
+      ref.remove();
+      return { got: getComputedStyle(d).color, want, fg: getComputedStyle(pop).color };
+    });
+    check(name, `${tag}: another month's days in the muted colour (${outside?.got}), not the text colour`, outside && outside.got === outside.want && outside.got !== outside.fg, outside);
     const aligned = rtl ? Math.abs(s1.panelRect.r - s1.trig.r) <= 12 : Math.abs(s1.panelRect.l - s1.trig.l) <= 12;
     check(name, `${tag}: the panel lines up with its trigger's start edge${rtl ? ' (right)' : ''}`, aligned, s1);
     // Tab and Shift+Tab stay inside the open panel.
@@ -1979,6 +1993,175 @@ async function floatingToggleChecks(name, ctx) {
   }
 }
 
+/**
+ * The showcase themes (docs/behaviors/theming.md, themes-plan §7 steps 2–4), on themes.html: the cascade
+ * layer (the app's classes win, the popup keeps its look, a shadow root is styled), Midnight and Clinic
+ * on the page and on an area, light and dark, French and Arabic (no letter spacing, the bar at the
+ * inline start), more contrast over them, forced colours; axe 0 outside forced colours. The full per-theme suite
+ * (Firefox, WebKit, overflow, focus) is step 7's.
+ */
+async function themeChecks(name, ctx) {
+  const FIX = Object.fromEntries(['midnight', 'clinic'].map((n) => [n, JSON.parse(readFileSync(`${ROOT}packages/theme/test/fixtures/${n}.json`, 'utf8')).palettes[0]]));
+  const rgb = (hex) => `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`;
+  const open = async (qs, setup) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 1100 });
+    if (setup) await setup(page);
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/themes.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    return { page, errors };
+  };
+  /** Per grid: a body row's surface, the header row's tracking, a badge's corners, the frame's radius. */
+  const look = (page) => page.evaluate(() => [...document.querySelectorAll('#host > .dzg, #area > .dzg'), ...(document.querySelector('#shadow')?.shadowRoot?.querySelectorAll('.dzg') ?? [])].map((el) => {
+    const row = [...el.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => r.getAttribute('aria-selected') !== 'true');
+    const hrow = el.querySelector('.dzg-hrow');
+    const badge = el.querySelector('.dzg-badge');
+    return { bg: getComputedStyle(row).backgroundColor, tracking: getComputedStyle(hrow).letterSpacing, pill: badge && getComputedStyle(badge).borderStartStartRadius, radius: getComputedStyle(el).borderStartStartRadius, nowrap: getComputedStyle(el.querySelector('.dzg-cell')).whiteSpace };
+  }));
+  /** Selects row 0 of the page's grid; the bar (::before of its start segment): width, sides, colour. */
+  const bar = (page) => page.evaluate(async () => {
+    const g = window.t.grids[0];
+    g.kernel.dispatch({ type: 'selection.toggle', row: window.t.key(0) }, 'user');
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const seg = document.querySelector('#host .dzg-row[aria-selected=true] > .dzg-seg-start');
+    if (!seg) return null;
+    const b = getComputedStyle(seg, '::before');
+    return { width: b.width, left: b.left, right: b.right, bg: b.backgroundColor, content: b.content };
+  });
+
+  // ---- step 2: the layer. The app's classes win (unlayered at zero specificity, and in a later layer); the
+  // popup keeps the theme's look over the layout's popover reset; a grid in a shadow root takes the theme
+  // (and Midnight) adopted there; the layout still reaches the cells.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=dark&shadow=1');
+    const app = await page.evaluate(() => {
+      const hot = document.querySelector('#host .dzg-cell.app-hot');
+      const other = [...document.querySelectorAll('#host .dzg-cell[data-col=name]')].find((c) => !c.classList.contains('app-hot'));
+      const s = (c) => ({ pad: getComputedStyle(c).paddingInlineStart, rule: getComputedStyle(c).borderBlockEndColor });
+      return { hot: hot && s(hot), other: other && s(other) };
+    });
+    check(name, `themes: the app's classes beat the layered grid without !important (unlayered :where(), and a later layer): padding ${app.hot?.pad} vs the theme's ${app.other?.pad}, rule ${app.hot?.rule}`,
+      app.hot?.pad === '3px' && app.other?.pad === '8px' && app.hot?.rule === 'rgb(4, 5, 6)' && app.other?.rule !== 'rgb(4, 5, 6)', app);
+    await page.click('#host .dzg-fbtn');
+    await frames(page, 2);
+    const pop = await page.evaluate(() => {
+      const p = document.querySelector('.dzg-popup:popover-open') ?? document.querySelector('.dzg-popup');
+      if (!p) return null;
+      const s = getComputedStyle(p);
+      return { pad: s.paddingTop, border: s.borderTopWidth, bg: s.backgroundColor, radius: s.borderStartStartRadius };
+    });
+    check(name, `themes: the filter popup keeps the theme's look over the layout's popover reset (padding ${pop?.pad}, border ${pop?.border}, surface ${pop?.bg})`,
+      pop && pop.pad === '8px' && pop.border === '1px' && pop.bg === 'rgb(24, 24, 27)', pop);
+    await page.keyboard.press('Escape');
+    const l = await look(page);
+    const shadow = l[1];
+    check(name, `themes: a grid in a shadow root is styled by the theme and Midnight adopted there (surface ${shadow?.bg}, corners ${shadow?.radius}, layout injected)`,
+      shadow && shadow.bg === rgb(FIX.midnight.dark.bg) && shadow.radius === '12px' && shadow.nowrap === 'nowrap' && l[0].nowrap === 'nowrap', l);
+    const v = await axe(page);
+    check(name, 'themes: layer page, axe 0, no page error', v.length === 0 && errors.length === 0, { v, errors });
+    await page.close();
+  }
+
+  // ---- steps 3–4: each theme on the page, the other on an area; light and dark; French and Arabic.
+  for (const skin of ['midnight', 'clinic']) {
+    const other = skin === 'midnight' ? 'clinic' : 'midnight';
+    for (const scheme of ['light', 'dark']) for (const locale of ['fr-FR', 'ar-DZ']) {
+      const qs = `locale=${locale}&theme=${scheme}&skin=${skin}&area=${other}`;
+      const { page, errors } = await open(qs);
+      const l = await look(page);
+      const b = await bar(page);
+      const rtl = locale.startsWith('ar');
+      const tracking = l[0].tracking;
+      const wantTracking = skin === 'midnight' && !rtl ? 0.26 : 0;
+      const ok = l[0].bg === rgb(FIX[skin][scheme].bg) && l[1].bg === rgb(FIX[other][scheme].bg) && l.every((x) => x.pill === '999px')
+        && Math.abs((parseFloat(tracking) || 0) - wantTracking) < 0.01
+        && b && b.width === (skin === 'midnight' ? '2px' : '0px') && (rtl ? b.right === '0px' && b.left !== '0px' : b.left === '0px' && b.right !== '0px')
+        && (skin === 'clinic' || b.bg === rgb(FIX.midnight[scheme].accent));
+      check(name, `themes ${qs}: page ${l[0].bg}, area ${l[1].bg}, pills ${l[0].pill}, header tracking ${tracking}, bar ${b?.width} at the inline start (${rtl ? 'right' : 'left'})`, ok, { l, b });
+      const v = await axe(page);
+      check(name, `themes ${qs}: axe 0 (contrast included) with a row selected, no page error`, v.length === 0 && errors.length === 0, { v, errors });
+      await page.screenshot({ path: `${OUT}/${name}-themes-${skin}-${scheme}-${locale}.png`, clip: { x: 0, y: 0, width: 1000, height: 720 } });
+      await page.close();
+    }
+  }
+
+  // ---- R4: an Arabic grid in a French page: no header tracking (by its direction, :dir(rtl)).
+  {
+    const { page, errors } = await open('locale=ar-DZ&pagelang=fr&theme=light&skin=midnight');
+    const t = await page.evaluate(() => ({ lang: document.documentElement.lang, dir: document.querySelector('#host .dzg').getAttribute('dir'), tracking: getComputedStyle(document.querySelector('#host .dzg-hrow')).letterSpacing }));
+    check(name, `themes: an Arabic grid in a lang="fr" page under Midnight, header tracking ${t.tracking}`, t.lang === 'fr' && t.dir === 'rtl' && (parseFloat(t.tracking) || 0) === 0 && errors.length === 0, { t, errors });
+    await page.close();
+  }
+
+  // ---- R2: a shadow root holding an app's Tailwind-4-like stack (a `base` reset of padding and borders):
+  // with its order line first (a <style> before the grid mounts, or injectStyles false and the sheets adopted
+  // in order), the theme beats the reset; without (naive), the grid's injected <style> makes dzgrid the
+  // lowest layer and the reset wins — what theming.md warns of.
+  for (const mode of ['order', 'adopt', 'naive']) {
+    const { page, errors } = await open(`locale=fr-FR&theme=light&shadowbase=${mode}`);
+    const r = await page.evaluate(() => {
+      const root = document.querySelector('#shadow2').shadowRoot;
+      const cell = [...root.querySelectorAll('.dzg-cell[data-col=city]')][1];
+      const el = root.querySelector('.dzg');
+      return cell && { pad: getComputedStyle(cell).paddingInlineStart, frame: getComputedStyle(el).borderTopWidth, layout: getComputedStyle(root.querySelector('.dzg-row')).position, styles: root.querySelectorAll('style').length };
+    });
+    const ok = mode === 'naive' ? r && r.pad === '0px' && r.frame === '0px' : r && r.pad === '8px' && r.frame === '1px' && r.layout === 'absolute';
+    check(name, `themes: shadow root with a base reset, ${mode}: cell padding ${r?.pad}, frame ${r?.frame}${mode === 'naive' ? ' (the reset wins: the documented pitfall)' : ' (the theme wins)'}`, ok && errors.length === 0, { r, errors });
+    await page.close();
+  }
+
+  // ---- R3: more contrast asked by the system reaches a themed area inside a shadow root.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=dark&shadow=1&contrast=more', (p) => p.emulateMedia({ contrast: 'more' }));
+    const bg = await page.evaluate(() => getComputedStyle(document.querySelector('#shadow').shadowRoot.querySelector('.dzg-layer > .dzg-row')).backgroundColor);
+    check(name, `themes: prefers-contrast more reaches Midnight's area inside a shadow root (${bg})`, bg === 'rgb(0, 0, 0)' && errors.length === 0, { bg, errors });
+    await page.close();
+  }
+
+  // ---- more contrast wins over a showcase theme, on the page and in an area.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=dark&skin=midnight&area=clinic&contrast=more');
+    const l = await look(page);
+    check(name, `themes: more contrast wins over Midnight on the page and Clinic in an area (${l.map((x) => x.bg).join(', ')})`, l.length === 2 && l.every((x) => x.bg === 'rgb(0, 0, 0)') && errors.length === 0, { l, errors });
+    await page.close();
+  }
+
+  // ---- forced colours: the system paints; Midnight's bar stays, in Highlight; axe 0, French and Arabic.
+  for (const locale of ['fr-FR', 'ar-DZ']) {
+    const { page, errors } = await open(`locale=${locale}&theme=dark&skin=midnight&area=clinic`, (p) => p.emulateMedia({ forcedColors: 'active' }));
+    const b = await bar(page);
+    const hl = await page.evaluate(() => { const d = document.createElement('div'); d.style.color = 'Highlight'; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; });
+    // No axe here: under emulated forced colours it mixes forced text with unforced surfaces (the page's
+    // own heading fails); the existing forced-colours checks read the system's colours instead.
+    check(name, `themes: forced colours ${locale}, Midnight's bar ${b?.width} at the inline start in Highlight (${b?.bg} / ${hl})`, b && b.width === '2px' && b.bg === hl && (locale.startsWith('ar') ? b.right === '0px' : b.left === '0px') && errors.length === 0, { b, hl, errors });
+    await page.screenshot({ path: `${OUT}/${name}-themes-forced-${locale}.png`, clip: { x: 0, y: 0, width: 1000, height: 720 } });
+    await page.close();
+  }
+  // With contrast.css too: its selected row is Highlight, the bar HighlightText (review of part 1).
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=dark&skin=midnight&contrast=more', (p) => p.emulateMedia({ forcedColors: 'active' }));
+    const b = await bar(page);
+    await page.waitForTimeout(300); // the row's 80 ms background transition
+    const sys = await page.evaluate(() => {
+      const d = document.createElement('div');
+      document.body.append(d);
+      d.style.color = 'HighlightText';
+      const fg = getComputedStyle(d).color;
+      d.style.color = 'Highlight';
+      const hl = getComputedStyle(d).color;
+      d.remove();
+      const seg = document.querySelector('#host .dzg-row[aria-selected=true] > .dzg-seg-start');
+      return { fg, hl, seg: seg && getComputedStyle(seg).backgroundColor };
+    });
+    check(name, `themes: forced colours with more contrast, Midnight's bar ${b?.bg} (HighlightText) on the Highlight row ${sys.seg}`, b && b.width === '2px' && b.bg === sys.fg && sys.seg === sys.hl && b.bg !== sys.seg && errors.length === 0, { b, sys, errors });
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -1992,6 +2175,8 @@ async function runEngine(name) {
       if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx);
       if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
       if (only === 'filters' && name === 'chrome') await floatingToggleChecks(name, ctx);
+      if (only === 'themes' && name === 'chrome') await themeChecks(name, ctx);
+      if (only === 'dates' && name === 'chrome') await dateChecks(name, ctx);
       return;
     }
 
@@ -2320,6 +2505,7 @@ async function runEngine(name) {
     if (name === 'chrome') await searchChecks(name, ctx);
     if (name === 'chrome') await pagingChecks(name, ctx);
     if (name === 'chrome') await partsChecks(name, ctx);
+    if (name === 'chrome') await themeChecks(name, ctx);
     if (name === 'chrome') await rulesChecks(name, ctx);
     if (name === 'chrome') await motionChecks(name, ctx);
     if (name === 'chrome') await treeChecks(name, ctx);

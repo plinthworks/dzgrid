@@ -7,11 +7,14 @@
  * 2.5.8), pointing to the inline end when closed and down when open; the theme colours both alike.
  */
 export const DETAIL_CSS =
+  // In the cascade layer dzgrid.layout, as the base's (owner T1, docs/behaviors/theming.md).
+  '@layer dzgrid.layout{' +
   ':where(.dzg-dbody){box-sizing:border-box;block-size:100%;overflow:auto}:where(.dzg-dbody[data-auto]){block-size:auto;overflow:visible}:where(.dzg-dbody>.dzg){box-sizing:border-box;block-size:100%}:where(.dzg-dbody>.dzg>.dzg-viewport){overscroll-behavior:auto}' +
   ':where(.dzg-toggle){display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;inline-size:var(--dzg-target-min,24px);block-size:var(--dzg-target-min,24px);margin-inline-end:.125rem;cursor:pointer}' +
   ':where(.dzg-toggle)::before{content:"";inline-size:.4em;block-size:.4em;border-block-end:2px solid;border-inline-end:2px solid;rotate:var(--dzg-chevron)}' +
   ':where(.dzg-toggle){--dzg-chevron:-45deg}:where(.dzg-toggle[data-open]){--dzg-chevron:45deg}' +
-  ':where([dir=rtl] .dzg-toggle){--dzg-chevron:45deg}:where([dir=rtl] .dzg-toggle[data-open]){--dzg-chevron:-45deg}';
+  ':where([dir=rtl] .dzg-toggle){--dzg-chevron:45deg}:where([dir=rtl] .dzg-toggle[data-open]){--dzg-chevron:-45deg}' +
+  '}';
 
 /** Once per document or shadow root; a host with a strict CSP passes its nonce or loads it itself. */
 export function injectDetailStyles(target: Document | ShadowRoot, nonce?: string): void {

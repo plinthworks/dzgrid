@@ -39,7 +39,8 @@ describe('@dzgrid/theme', () => {
     const used = new Set<string>();
     // The colour properties; the outermost var() of each value (a fallback inside is the derived default).
     for (const m of css.matchAll(/(?:^|[;{\s])(color|background(?:-color)?|outline(?:-color)?|border(?:-(?:block|inline)(?:-start|-end)?)?(?:-color)?)\s*:\s*([^;]+);/gm)) {
-      const v = /var\((--(?:dzg|tz)-[a-z-]+)/.exec(m[2]!);
+      // A rule's width (--dzg-line, showcase themes step 2) is not a colour: the colour after it is.
+      const v = /var\((--(?:dzg|tz)-[a-z-]+)/.exec(m[2]!.replace(/var\(--dzg-line, 1px\)/g, ''));
       if (v) used.add(v[1]!);
     }
     const listed = new Set(pairs.pairs.flatMap((p) => [p.fg, p.bg]));

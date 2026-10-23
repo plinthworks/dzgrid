@@ -40,12 +40,14 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
   '@dzgrid/core/detail': 1050, // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
-  '@dzgrid/dom': 21300,
+  '@dzgrid/dom': 21980, // showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10000,
   '@dzgrid/dom/tree': 3700,
   '@dzgrid/dom/tree-lazy': 1000,
   '@dzgrid/dom/detail': 3900,
-  '@dzgrid/theme': 2500,
+  '@dzgrid/theme': 3050, // T7: inside Q16's 2 900, up to 3 050 if needed
+  '@dzgrid/theme/midnight.css': 650, // T7
+  '@dzgrid/theme/clinic.css': 650, // T7
   '@dzgrid/angular': 6250,
   'profile: audit screen (K.8)': 83500,
 };

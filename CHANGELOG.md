@@ -28,7 +28,28 @@ Toward 0.3.0 (Phase 5, editing; not released).
   grid's `settings.context`; a new context runs only the custom filters again (a changed wire: one
   request). `settings.context` reaches the kernel at creation and on each change of identity.
 
+- Theme (showcase themes, part 1; `docs/behaviors/theming.md`): two showcase themes,
+  `@dzgrid/theme/midnight.css` (dark elegant, with a light twin) and `@dzgrid/theme/clinic.css` (light
+  medical, with a dark twin), applied to the page on import or to one area with
+  `data-dzg-skin="midnight|clinic"`; every colour given by hand, light and dark, contrast-checked.
+  Unlayered copies `@dzgrid/theme/dzgrid.unlayered.css` and `contrast.unlayered.css` for apps whose
+  reset is unlayered (Tailwind 3, Bootstrap). New knobs read at their point of use: `--dzg-line` (rule
+  width), `--dzg-pill-radius` (badge corners), `--dzg-header-size`, `--dzg-header-tracking` (no
+  spacing in Arabic), `--dzg-select-bar` (a selected row's bar at its inline start, `Highlight` in
+  forced colours); `--dzg-saving-color` and `--dzg-refused-color` reserved for the save states (contrast
+  pairs checked now). `check:contrast` reads `oklch()` and checks both showcase themes by default.
+
 ### Changed
+- The grid's CSS sits in the cascade layer `dzgrid` (owner T1): `dzgrid.css` in `dzgrid.theme`,
+  `contrast.css` in `dzgrid.contrast`, `tailwind.css` in `dzgrid.bridge`, each file opening with
+  `@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;`; the layout
+  `@dzgrid/dom` injects (and the exported `LAYOUT_CSS`), and each feature's, in `dzgrid.layout`. An
+  application's classes now win over the grid's look without `!important`, whatever their specificity.
+  The two rules restyling tzslot's date panel stay unlayered (tzslot's sheets are). More contrast also
+  applies inside a `[data-dzg-skin]` area. `npm run build:theme` builds the four CSS files from
+  `dzgrid.scss` and the new `contrast.scss`.
+- Budget ceilings (owner T7): `@dzgrid/theme` up to 3 050, `@dzgrid/dom` up to 21 980; new entries
+  `@dzgrid/theme/midnight.css` and `clinic.css` at 650 B gz each.
 - `ClientModel.reapply()` is told with the source given, `api` by default (it was always `user`).
 - While the order is stale after an edit, any rerun (a sort, a filter, the search typed on, the
   language, the columns) is a whole one with the edits; a host update that moves rows puts everything

@@ -1,0 +1,20 @@
+{
+  "$comment": "Clinic (showcase themes, step 4; themes-plan §6): written by hand from the plan's table, never from the CSS. clinic.css must equal it (skins.test.ts); npm run check:contrast -- --palette packages/theme/test/fixtures/clinic.json checks it.",
+  "palettes": [
+    {
+      "name": "clinic",
+      "light": { "bg": "#ffffff", "bg-raised": "#f1f8f9", "fg": "#102a33", "fg-muted": "#4a6570", "border": "#d3e5e9", "accent": "#0a6f84", "accent-fg": "#ffffff", "danger": "#b3261e", "warning": "#8a5300", "success": "#1a7442" },
+      "dark": { "bg": "#0d1b20", "bg-raised": "#13262d", "fg": "#e2f0f3", "fg-muted": "#9bb6be", "border": "#29424a", "accent": "#4cc7d8", "accent-fg": "#05222a", "danger": "#ff8f85", "warning": "#efc062", "success": "#6ad49a" },
+      "shape": {
+        "--dzg-font": "400 0.875rem/1.5 system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", \"Noto Sans Arabic\", Tahoma, sans-serif",
+        "--dzg-radius": "0.5rem",
+        "--dzg-pill-radius": "999px",
+        "--dzg-line": "1px",
+        "--dzg-cell-padding-inline": "0.875rem",
+        "--dzg-header-size": "1em",
+        "--dzg-header-tracking": "normal",
+        "--dzg-select-bar": "0px"
+      }
+    }
+  ]
+}

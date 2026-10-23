@@ -1,0 +1,111 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// The source of contrast.css and contrast.unlayered.css (`npm run build:theme`); a test fails when
+// they drift apart. Showcase themes, step 2 (owner T1): the rules sit in `@layer dzgrid.contrast`, the
+// last of the grid's layers, so more contrast wins over a showcase theme and a bridge. `$layered: false`
+// gives the unlayered copy, for apps on dzgrid.unlayered.css: the same rules outside the layer, but the
+// palette, which stays in it (it must still come after a layered showcase theme).
+// ─────────────────────────────────────────────────────────────────────────────
+
+@use 'sass:list';
+
+$layered: true !default;
+
+// tzslot's high-contrast palette, light and dark.
+$tz-palette: (
+  bg: (#ffffff, #000000),
+  bg-raised: (#e4e4e7, #27272a),
+  fg: (#000000, #ffffff),
+  fg-muted: (#27272a, #e4e4e7),
+  border: (#000000, #ffffff),
+  accent: (#1d3fb8, #ffd400),
+  accent-fg: (#ffffff, #000000),
+  danger: (#8b0000, #ff8a8a),
+  warning: (#6b3a00, #ffd27a),
+  success: (#14532d, #86efac),
+);
+
+@mixin palette {
+  @each $name, $pair in $tz-palette {
+    --tz-#{$name}: light-dark(#{list.nth($pair, 1)}, #{list.nth($pair, 2)});
+  }
+}
+
+/**
+ * @dzgrid/theme/contrast.css — more contrast, for people who need it, and the
+ * system's colours in forced-colours mode.
+ *
+ *   import '@dzgrid/theme';
+ *   import '@dzgrid/theme/contrast.css';
+ *
+ * Applies on its own when the system asks for more contrast, and with
+ * data-contrast="more" on any element; data-contrast="normal" on the root opts
+ * out. The palette is tzslot's high-contrast one. In the cascade layer
+ * dzgrid.contrast, after a showcase theme (docs/behaviors/theming.md).
+ */
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+
+@layer dzgrid.contrast {
+  @media (prefers-contrast: more) {
+    // A showcase theme's area (`data-dzg-skin`) declares its own palette: more contrast names it too.
+    // An area inside a shadow root is no descendant of :root for a selector: named on its own, unless the
+    // page opted out (review of part 1, R3).
+    :root:not([data-contrast='normal']),
+    [data-dzg-skin]:not(:root[data-contrast='normal'] *) {
+      @include palette;
+    }
+  }
+
+  [data-contrast='more'],
+  [data-contrast='more'] [data-dzg-skin] {
+    @include palette;
+  }
+}
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.contrast {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@include layer {
+  /* Forced colours: the system decides; the grid only says which role each part plays. */
+  @media (forced-colors: active) {
+    .dzg-row[aria-selected='true'],
+    .dzg-row[aria-selected='true'] .dzg-seg-start,
+    .dzg-row[aria-selected='true'] .dzg-seg-end {
+      background: Highlight;
+      color: HighlightText;
+      forced-color-adjust: none;
+    }
+    .dzg-cell:focus-visible,
+    .dzg-dcell:focus-visible,
+    .dzg-hcell:focus-visible,
+    .dzg-box:focus-visible {
+      outline-color: Highlight;
+    }
+    .dzg-box {
+      border-color: CanvasText;
+    }
+    .dzg-resize::after {
+      background: CanvasText;
+    }
+    /* A badge's frame in the text colour (its tinted surface is gone); its shape stays (step 20). The
+       system's colours in a selected row too, where the row opts out of them. */
+    .dzg-badge {
+      border-color: currentColor;
+      forced-color-adjust: auto;
+    }
+    /* A showcase theme's bar on a selected row: the row is Highlight here, so the bar takes HighlightText. */
+    .dzg-row[aria-selected='true'] > .dzg-seg-start::before {
+      background: HighlightText;
+    }
+    /* A pager button that cannot act is aria-disabled, not disabled: the system would not grey it. */
+    .dzg-pbtn[aria-disabled='true'] {
+      color: GrayText;
+    }
+  }
+}

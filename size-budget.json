@@ -140,6 +140,14 @@
       "file": "packages/theme/dzgrid.css",
       "maxGzip": 2500
     },
+    "@dzgrid/theme/midnight.css": {
+      "file": "packages/theme/midnight.css",
+      "maxGzip": 650
+    },
+    "@dzgrid/theme/clinic.css": {
+      "file": "packages/theme/clinic.css",
+      "maxGzip": 650
+    },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
       "maxGzip": 21300,

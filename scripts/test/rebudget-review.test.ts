@@ -94,7 +94,7 @@ describe('the ceilings name lines and entries that exist', () => {
 
   it('every named size ceiling is an entry of size-budget.json, and no budget sits above its ceiling', () => {
     const entries = JSON.parse(readFileSync(join(ROOT, 'size-budget.json'), 'utf8')).entries as Record<string, { maxGzip: number | null }>;
-    for (const name of ['@dzgrid/core', '@dzgrid/core/server', '@dzgrid/dom', '@dzgrid/dom/filters', '@dzgrid/theme', '@dzgrid/angular', 'profile: audit screen (K.8)']) expect(entries[name], name).toBeDefined();
+    for (const name of ['@dzgrid/core', '@dzgrid/core/server', '@dzgrid/dom', '@dzgrid/dom/filters', '@dzgrid/theme', '@dzgrid/theme/midnight.css', '@dzgrid/theme/clinic.css', '@dzgrid/angular', 'profile: audit screen (K.8)']) expect(entries[name], name).toBeDefined();
     for (const [name, e] of Object.entries(entries)) {
       const c = ceilingFor(name);
       if (c !== null && e.maxGzip !== null) expect(e.maxGzip, name).toBeLessThanOrEqual(c);

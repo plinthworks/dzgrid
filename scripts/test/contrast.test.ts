@@ -6,7 +6,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // @ts-expect-error a plain .mjs script
-import { contrast, parseColor, resolveColor, paletteFromCss, check } from '../check-contrast.mjs';
+import { contrast, parseColor, resolveColor, paletteFromCss, check, skinFromCss } from '../check-contrast.mjs';
+import { readFileSync, mkdirSync, copyFileSync } from 'node:fs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 
@@ -49,5 +50,77 @@ describe('check-contrast', () => {
 
   it('passes contrast.css’s palette, light and dark', () => {
     expect(() => execFileSync('node', [join(root, 'scripts/check-contrast.mjs'), '--palette', join(root, 'packages/theme/test/fixtures/high-contrast.json')], { stdio: 'pipe' })).not.toThrow();
+  });
+  // Showcase themes, step 2 (themes-plan §3.2): Tailwind 4's default colours are written in oklch().
+  // Expectations worked by hand (CSS Color 4, §9 OKLab): white and black at L 1 and 0; L 0.5 with no
+  // chroma is l = m = s = 0.5³ = 0.125 in linear sRGB → 1.055 × 0.125^(1/2.4) − 0.055 = 0.3887 → 99.1;
+  // sRGB red is oklch(62.8% 0.2577 29.23), blue oklch(45.2% 0.313 264.05) (the spec's own examples).
+  it('reads oklch(), in numbers or percentages, with alpha, clipped to sRGB', () => {
+    const near = (c: number[], want: number[], tol: number) => c.slice(0, 3).every((x, i) => Math.abs(x - want[i]!) <= tol);
+    expect(near(parseColor('oklch(1 0 0)'), [255, 255, 255], 0.5)).toBe(true);
+    expect(near(parseColor('oklch(0 0 0)'), [0, 0, 0], 0.5)).toBe(true);
+    expect(near(parseColor('oklch(50% 0 0)'), [99.1, 99.1, 99.1], 0.3)).toBe(true);
+    expect(near(parseColor('oklch(62.8% 0.2577 29.23)'), [255, 0, 0], 1.5)).toBe(true);
+    expect(near(parseColor('oklch(0.452 0.313 264.05)'), [0, 0, 255], 1.5)).toBe(true);
+    expect(parseColor('oklch(1 0 0 / 50%)')[3]).toBeCloseTo(0.5, 5);
+    expect(parseColor('oklch(0.5 0 0 / 0.25)')[3]).toBeCloseTo(0.25, 5);
+    // Far outside sRGB: each channel clipped to 0..255.
+    for (const x of parseColor('oklch(0.9 0.4 140)').slice(0, 3)) expect(x >= 0 && x <= 255).toBe(true);
+    // And inside the resolver, as a Tailwind 4 variable would reach it.
+    expect(near(resolveColor('var(--w)', { '--w': 'oklch(100% 0 0)' }, 'light'), [255, 255, 255], 0.5)).toBe(true);
+  });
+
+  // Showcase themes, steps 3 and 4: the default run checks the base palette and both showcase themes,
+  // read from their own CSS (so the shipped file is what is checked, not a copy).
+  it('checks Midnight and Clinic, light and dark, as shipped, by default', () => {
+    const out = execFileSync('node', [join(root, 'scripts/check-contrast.mjs')], { encoding: 'utf8' });
+    for (const line of ['tzslot default, light', 'tzslot default, dark', 'midnight, light', 'midnight, dark', 'clinic, light', 'clinic, dark'])
+      expect(out, line).toMatch(new RegExp(`^ok {3}${line}: \\d+ pairs`, 'm'));
+    expect(out).toMatch(/check-contrast: \d+ pairs, 0 below their minimum/);
+  });
+  // Review of part 1 (R6, T-1, T-2).
+  it('R6: a number needs a digit (« . » is refused), and a ratio that is not a number fails its pair', () => {
+    expect(() => parseColor('rgb(. . .)')).toThrow(/cannot read/);
+    expect(() => parseColor('oklch(. 0 0)')).toThrow(/cannot read/);
+    const r = check({ '--a': '#000000', '--b': '#ffffff' }, { pairs: [{ what: 'x', fg: '--a', bg: '--b', min: 4.5 }], derived: {} }, 'light');
+    expect(r.failures).toEqual([]);
+    const nan = check({ '--a': `rgb(${'9'.repeat(400)} 0 0)`, '--b': '#ffffff' }, { pairs: [{ what: 'nan', fg: '--a', bg: '--b', min: 4.5 }], derived: {} }, 'light');
+    expect(nan.failures.map((f: { what: string }) => f.what)).toEqual(['nan']);
+  });
+
+  it('T-2: oklch() chroma in %, hue in deg, none; a near-black channel; turn and rad refused', () => {
+    const near = (c: number[], want: number[], tol: number) => c.slice(0, 3).every((x, i) => Math.abs(x - want[i]!) <= tol);
+    // 64.425% of 0.4 is the chroma 0.2577 of sRGB red.
+    expect(near(parseColor('oklch(62.8% 64.425% 29.23deg)'), [255, 0, 0], 1.5)).toBe(true);
+    for (const c of ['oklch(0.5 none 120)', 'oklch(none 0.1 none)', 'oklch(0.5 0.1 none)']) for (const x of parseColor(c)) expect(Number.isFinite(x), c).toBe(true);
+    expect(near(parseColor('oklch(0.5 none 120)'), [99.1, 99.1, 99.1], 0.3)).toBe(true);
+    // L 0.05, no chroma: 0.05³ = 0.000125 linear → 12.92 × 0.000125 × 255 = 0.41 (the linear segment).
+    expect(near(parseColor('oklch(0.05 0 0)'), [0.41, 0.41, 0.41], 0.3)).toBe(true);
+    expect(() => parseColor('oklch(0.5 0.1 0.25turn)')).toThrow(/cannot read/);
+    expect(() => parseColor('oklch(0.5 0.1 1rad)')).toThrow(/cannot read/);
+  });
+
+  it('T-1: skinFromCss reads the ten colours of each showcase theme, light and dark', () => {
+    const TEN = ['bg', 'bg-raised', 'fg', 'fg-muted', 'border', 'accent', 'accent-fg', 'danger', 'warning', 'success'];
+    for (const n of ['midnight', 'clinic']) {
+      const sk = skinFromCss(readFileSync(join(root, `packages/theme/${n}.css`), 'utf8'));
+      expect(sk.name).toBe(n);
+      for (const scheme of ['light', 'dark']) expect(Object.keys(sk[scheme]).sort(), `${n} ${scheme}`).toEqual([...TEN].sort());
+      for (const k of TEN) expect(sk.light[k]).toMatch(/^light-dark\(#[0-9a-f]{6}, #[0-9a-f]{6}\)$/);
+    }
+  });
+
+  it('T-1: a planted low-contrast showcase theme fails the default run', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'skin-'));
+    mkdirSync(join(dir, 'scripts'));
+    mkdirSync(join(dir, 'packages/theme'), { recursive: true });
+    copyFileSync(join(root, 'scripts/check-contrast.mjs'), join(dir, 'scripts/check-contrast.mjs'));
+    for (const f of ['dzgrid.css', 'contrast-pairs.json', 'clinic.css']) copyFileSync(join(root, `packages/theme/${f}`), join(dir, `packages/theme/${f}`));
+    writeFileSync(join(dir, 'packages/theme/midnight.css'), readFileSync(join(root, 'packages/theme/midnight.css'), 'utf8').replace('--tz-fg: light-dark(#0b1424, #e6ecf7);', '--tz-fg: light-dark(#cccccc, #e6ecf7);'));
+    let code = 0;
+    let err = '';
+    try { execFileSync('node', [join(dir, 'scripts/check-contrast.mjs')], { stdio: 'pipe' }); } catch (e) { code = (e as { status: number }).status; err = String((e as { stderr: Buffer }).stderr); }
+    expect(code).toBe(1);
+    expect(err).toMatch(/FAIL midnight light: cell text/);
   });
 });

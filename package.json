@@ -17,7 +17,7 @@
     "bench": "node scripts/bench.mjs",
     "check:size": "node scripts/size.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "build:theme": "sass --no-source-map --style=expanded packages/theme/dzgrid.scss packages/theme/dzgrid.css",
+    "build:theme": "node scripts/build-theme.mjs",
     "test:browser": "node scripts/browser.mjs",
     "test:audit": "node scripts/audit-browser.mjs",
     "bench:browser": "node scripts/perf-browser.mjs",

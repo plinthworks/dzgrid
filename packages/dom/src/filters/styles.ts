@@ -7,6 +7,8 @@
  * with an ellipsis. Step 13: the header's filter button and the popup's form.
  */
 export const FILTERS_CSS =
+  // In the cascade layer dzgrid.layout, as the base's (owner T1, docs/behaviors/theming.md).
+  '@layer dzgrid.layout{' +
   ':where(.dzg-hextra){display:flex;align-items:center}' +
   ':where(.dzg-finput){flex:1;min-inline-size:0;block-size:24px;unicode-bidi:plaintext;text-align:start}' +
   ':where(.dzg-finput[aria-invalid=true]){outline:2px solid}' +
@@ -29,6 +31,9 @@ export const FILTERS_CSS =
   ':where(.dzg-fpop [hidden]){display:none}' +
   // Step 14: a date field (tzslot's) under its label, as wide as the form.
   ':where(.dzg-fdate){display:grid;gap:2px}' +
+  '}' +
+  // Outside the layer, on purpose: tzslot's sheets are unlayered (its trigger's min-width), so a layered
+  // rule would lose to them and the field would overflow the popup (review of the showcase themes).
   '.dzg-fpop .tz-field,.dzg-fpop .tz-field__trigger{inline-size:100%;min-inline-size:0}';
 
 /** Once per document or shadow root, like the base's; a host with a strict CSP passes its nonce or loads it itself. `css` and `id`: a lazy chunk's own sheet (step 15). */

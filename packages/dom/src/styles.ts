@@ -6,8 +6,12 @@
  * Rows take `contain: content`, never `strict`: size containment drops the
  * sticky pinned segments in Firefox (S11). The body clips, so a row kept
  * mounted far from view never grows the scroll range (S11).
+ *
+ * In the cascade layer `dzgrid.layout`, the first of the grid's (showcase themes, owner T1,
+ * docs/behaviors/theming.md): the theme, a showcase theme and the application's own classes come
+ * after it. The exported string carries the wrapper, for an app that loads it itself.
  */
-export const LAYOUT_CSS = `
+export const LAYOUT_CSS = `@layer dzgrid.layout {
 :where(.dzg) { position: relative; display: flex; flex-direction: column; min-block-size: 0; min-inline-size: 0; }
 :where(.dzg-viewport) { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain; overflow-anchor: none; outline: none; }
 :where(.dzg-header) { position: sticky; inset-block-start: 0; z-index: 3; display: flex; flex-direction: column; }
@@ -37,6 +41,7 @@ export const LAYOUT_CSS = `
 :where(.dzg-popup, .dzg-tooltip)[popover] { position: fixed; inset: auto; margin: 0; overflow: visible; border: 0; padding: 0; background: transparent; color: inherit; }
 :where(.dzg-sr) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 :where(.dzg-live) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
 `;
 
 /**

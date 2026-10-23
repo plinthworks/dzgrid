@@ -1,6 +1,6 @@
 // `@dzgrid/dom/motion-gsap` (step 26; docs/behaviors/motion.md): real GSAP in jsdom, matchMedia
 // stubbed, frames run by hand (the paint follows the model's events, as in a browser).
-import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, afterAll, beforeEach, vi } from 'vitest';
 import { gsap } from 'gsap';
 import { dataKey, idOfDataKey, type RowKey } from '@dzgrid/core';
 import { motion, type Motion } from '../src/motion-gsap.js';
@@ -13,14 +13,35 @@ beforeEach(() => {
   media.reduce = false;
   clock.now = 1000;
   stubMedia();
+  // GSAP's ticker on the real clock would advance by a whole setup's gap (see « the harness » below):
+  // every gap over 1 ms advances it by nothing, so a tween moves only when a test moves it.
+  gsap.ticker.lagSmoothing(1, 0);
 });
 afterEach(() => {
   for (const m of made) m.g.destroy();
   made = [];
   document.body.innerHTML = '';
   gsap.globalTimeline.clear();
+  gsap.ticker.lagSmoothing(500, 33);
   vi.restoreAllMocks();
   delete (window as { reportError?: unknown }).reportError;
+});
+
+// T-6 (review of part 1): GSAP's lag smoothing is global; the file must leave it as GSAP's default
+// (500 ms, 33 ms): a 100 ms gap then advances a tween by about 100 ms, not by nothing.
+afterAll(async () => {
+  const el = document.createElement('div');
+  document.body.append(el);
+  const t = gsap.to(el, { opacity: 0, duration: 1 });
+  await new Promise((r) => setTimeout(r, 30));
+  const from = t.progress();
+  const until = Date.now() + 100;
+  while (Date.now() < until) { /* a gap */ }
+  await new Promise((r) => setTimeout(r, 30));
+  const moved = t.progress() - from;
+  t.kill();
+  el.remove();
+  if (!(moved > 0.05)) throw new Error(`GSAP's lag smoothing not restored: a 100 ms gap moved a 1 s tween by ${moved}`);
 });
 
 const running = (el: Element | null): number => (el ? gsap.getTweensOf(el).filter((t) => t.progress() < 1).length : 0);
@@ -46,6 +67,25 @@ const update = (g: Made, rows: R[]) => {
   g.g.kernel.rows.applyTransaction({ update: rows });
   g.frame();
 };
+
+// The harness owns time (clock.now, frames by hand). GSAP's own ticker runs on the real clock: a long
+// synchronous setup (a grid mounted, its chunk loaded: 0.1–0.5 s in jsdom) used to reach the first tween
+// as one tick of that whole gap (GSAP smooths only gaps over 500 ms), finishing a 0.14 s fade before the
+// test could see it. Which side of 500 ms a setup fell on decided the popup test (showcase themes: jsdom
+// no longer resolving the layered layout made mounting faster, 0.45 s). Pinned here.
+describe('the harness: GSAP’s clock never jumps over a setup', () => {
+  it('a 0.14 s tween started after 300 ms of blocking work still runs after the next tick', async () => {
+    const el = document.createElement('div');
+    document.body.append(el);
+    await new Promise((r) => setTimeout(r, 30));
+    const until = Date.now() + 300;
+    while (Date.now() < until) { /* a long synchronous setup */ }
+    const t = gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.14 });
+    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(t.progress()).toBeLessThan(1);
+  });
+});
 
 describe('loading', () => {
   it('animates nothing before its chunk is loaded (the first instants: owner Q1)', () => {

@@ -1,0 +1,37 @@
+/**
+ * @dzgrid/theme/clinic.css — Clinic: light and calm for care settings (white, a teal-blue accent,
+ * airy cells, round pills), with its dark twin.
+ *
+ *   import '@dzgrid/theme';
+ *   import '@dzgrid/theme/clinic.css';     // every grid of the page
+ *
+ * Or on one area only: data-dzg-skin="clinic" on any container. Light or dark follows the system or
+ * data-theme, as the base does. Its demos use density: 'spacious' (the row height is a setting, not
+ * CSS). Every colour is given by hand and checked for contrast (npm run check:contrast); in the
+ * cascade layer dzgrid.skin (docs/behaviors/theming.md).
+ */
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+
+@layer dzgrid.skin {
+  :root,
+  [data-dzg-skin="clinic"] {
+    --tz-bg: light-dark(#ffffff, #0d1b20);
+    --tz-bg-raised: light-dark(#f1f8f9, #13262d);
+    --tz-fg: light-dark(#102a33, #e2f0f3);
+    --tz-fg-muted: light-dark(#4a6570, #9bb6be);
+    --tz-border: light-dark(#d3e5e9, #29424a);
+    --tz-accent: light-dark(#0a6f84, #4cc7d8);
+    --tz-accent-fg: light-dark(#ffffff, #05222a);
+    --tz-danger: light-dark(#b3261e, #ff8f85);
+    --tz-warning: light-dark(#8a5300, #efc062);
+    --tz-success: light-dark(#1a7442, #6ad49a);
+    --dzg-font: 400 0.875rem/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Arabic", Tahoma, sans-serif;
+    --dzg-radius: 0.5rem;
+    --dzg-pill-radius: 999px;
+    --dzg-line: 1px;
+    --dzg-cell-padding-inline: 0.875rem;
+    --dzg-header-size: 1em;
+    --dzg-header-tracking: normal;
+    --dzg-select-bar: 0px;
+  }
+}

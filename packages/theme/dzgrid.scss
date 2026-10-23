@@ -32,6 +32,23 @@ $tz-palette: (
 
 $emit: true !default;
 
+// Showcase themes, step 2 (owner T1, docs/behaviors/theming.md): every rule in `@layer dzgrid.theme`, so
+// an application's classes win without !important. `$layered: false` compiles the unlayered copy
+// (dzgrid.unlayered.css) for apps whose reset is unlayered (Tailwind 3's preflight, Bootstrap's Reboot):
+// the same rules outside the layer, but the palette, which stays in it so a showcase theme or a bridge
+// (layered) still replaces it in order.
+$layered: true !default;
+
+@mixin layer($name) {
+  @if $layered {
+    @layer dzgrid.#{$name} {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
 @function value($colour) {
   @if meta.type-of($colour) == 'list' and list.length($colour) == 2 {
     @return light-dark(list.nth($colour, 1), list.nth($colour, 2));
@@ -53,11 +70,17 @@ $emit: true !default;
    *
    * Generated from dzgrid.scss. Optional: the grid's layout CSS is injected by
    * @dzgrid/dom; this file sets colours, spacing and interaction states only.
+   * Every rule sits in the cascade layer dzgrid (docs/behaviors/theming.md).
    */
-  :root {
-    @include palette($tz-palette);
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+
+  @layer dzgrid.theme {
+    :root {
+      @include palette($tz-palette);
+    }
   }
 
+  @include layer(theme) {
   [data-theme='light'] { --tz-color-scheme: light; }
   [data-theme='dark'] { --tz-color-scheme: dark; }
 
@@ -66,7 +89,7 @@ $emit: true !default;
     color: var(--tz-fg);
     background: var(--tz-bg);
     font: var(--dzg-font, var(--tz-font, inherit));
-    border: 1px solid var(--tz-border);
+    border: var(--dzg-line, 1px) solid var(--tz-border);
     border-radius: var(--dzg-radius, 0.375rem);
     overflow: hidden;
   }
@@ -75,6 +98,20 @@ $emit: true !default;
     color: var(--tz-fg);
     background: var(--dzg-header-bg, var(--tz-bg-raised));
     font-weight: 600;
+  }
+
+  // A showcase theme's header type (Midnight, docs/behaviors/theming.md): size and tracking on the header
+  // rows, not on the tree's pinned parents the header also holds; never a letter spacing in a joined
+  // script (it breaks the joining of letters).
+  .dzg-hrow {
+    font-size: var(--dzg-header-size, 1em);
+    letter-spacing: var(--dzg-header-tracking, normal);
+  }
+
+  // In Arabic by its language, and in any right-to-left grid by its direction (Persian, Urdu; an Arabic
+  // grid in a page of another language: review of part 1, R4). :is() forgives a browser without :dir().
+  .dzg-hrow:is(:lang(ar), :dir(rtl)) {
+    letter-spacing: 0;
   }
 
   .dzg-hrow .dzg-seg-start,
@@ -90,7 +127,7 @@ $emit: true !default;
   .dzg-check {
     box-sizing: border-box;
     padding-inline: var(--dzg-cell-padding-inline, 0.5rem);
-    border-block-end: 1px solid var(--tz-border);
+    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
   }
 
   .dzg-hcell,
@@ -104,7 +141,7 @@ $emit: true !default;
   // a block, centred by its line height, with the layout's ellipsis and text-align.
   .dzg-cell {
     display: block;
-    line-height: calc(var(--dzg-row-height, 2rem) - 1px);
+    line-height: calc(var(--dzg-row-height, 2rem) - var(--dzg-line, 1px));
   }
 
   // Rows and the pinned segments are opaque: centre cells slide under them.
@@ -131,6 +168,19 @@ $emit: true !default;
   .dzg-row[aria-selected='true'] .dzg-seg-start,
   .dzg-row[aria-selected='true'] .dzg-seg-end {
     background: var(--dzg-row-selected-bg, color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg)));
+  }
+
+  // A selected row's bar at its inline start (a showcase theme sets --dzg-select-bar, Midnight 2px; 0 by
+  // default): on the start segment, sticky at the view's start edge, so it stays in view as the row
+  // scrolls sideways; left in French, right in Arabic. Beside the ticked box, never alone.
+  .dzg-row[aria-selected='true'] > .dzg-seg-start::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 1;
+    inline-size: var(--dzg-select-bar, 0);
+    background: var(--tz-accent);
   }
 
   .dzg-cell:focus-visible,
@@ -186,7 +236,7 @@ $emit: true !default;
 
   // A group header (grouped headers, spans): a line at its end, so neighbouring groups read apart.
   .dzg-hgroup {
-    border-inline-end: 1px solid var(--tz-border);
+    border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);
   }
 
   .dzg-box {
@@ -273,7 +323,7 @@ $emit: true !default;
   .dzg-footer {
     padding-block: 0.25rem;
     padding-inline: 0.5rem;
-    border-block-start: 1px solid var(--tz-border);
+    border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
     color: var(--tz-fg-muted);
     background: var(--dzg-header-bg, var(--tz-bg-raised));
   }
@@ -346,7 +396,7 @@ $emit: true !default;
   // floating row's look. Two classes: the layout's reset of a popover (`[popover]`) comes later.
   .dzg .dzg-popup {
     padding: 0.5rem;
-    border: 1px solid var(--tz-border);
+    border: var(--dzg-line, 1px) solid var(--tz-border);
     border-radius: var(--dzg-radius, 0.375rem);
     color: var(--tz-fg);
     background: var(--tz-bg);
@@ -397,7 +447,7 @@ $emit: true !default;
   // list kept while the next one loads, in the muted colour (4.5:1, not an opacity); the loading or
   // failure line drawn over the list on the popup's surface; the focus ring inside the row.
   .dzg-flist {
-    border: 1px solid var(--tz-border);
+    border: var(--dzg-line, 1px) solid var(--tz-border);
     border-radius: var(--dzg-radius, 0.375rem);
   }
 
@@ -418,30 +468,8 @@ $emit: true !default;
     outline-offset: -2px;
   }
 
-  // The date filters (step 14): tzslot's panel inside a filter popup takes the popup's surface,
-  // so a dark grid opens a dark calendar.
-  .dzg-popup .tz-field__panel {
-    // Another month's days, unfaded: tzslot's 0.35 opacity falls under 4.5:1 (T11).
-    --tz-cal-outside-opacity: 1;
-    border-color: var(--tz-border);
-    color: var(--tz-fg);
-    background: var(--tz-bg);
-  }
-
-  // They are told apart by the muted colour instead (4.5:1, in a period's band too); a chosen
-  // day keeps its own.
-  .dzg-popup :is(.tz-cal__day--outside, .tz-range__day--outside):not(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end) {
-    color: var(--tz-fg-muted);
-  }
-
-  // Forced colours: the chosen day and shortcut keep their mark when the system paints.
+  // Forced colours: the grid's own marks in the system's colours (tzslot's chosen day: at the end, unlayered).
   @media (forced-colors: active) {
-    .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .tz-rangefield__preset--on) {
-      forced-color-adjust: none;
-      color: HighlightText;
-      background: Highlight;
-    }
-
     // A refused row's box (step 21): the system's colour for what cannot be used.
     .dzg-check[data-dzg-refused] .dzg-box {
       border-color: GrayText;
@@ -465,6 +493,11 @@ $emit: true !default;
     // A value flash's mark (step 26): the system's highlight.
     .dzg-cell.dzg-flash {
       border-inline-start-color: Highlight;
+    }
+
+    // A selected row's bar (a showcase theme's): the system's highlight.
+    .dzg-row[aria-selected='true'] > .dzg-seg-start::before {
+      background: Highlight;
     }
   }
 
@@ -505,7 +538,7 @@ $emit: true !default;
   .dzg-dcell {
     box-sizing: border-box;
     background: var(--dzg-detail-bg, var(--tz-bg-raised));
-    border-block-end: 1px solid var(--tz-border);
+    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
     border-inline-start: 3px solid var(--tz-border);
   }
 
@@ -547,7 +580,7 @@ $emit: true !default;
     --t: var(--tz-fg-muted);
     padding-inline: 0.4em;
     border: 1px solid var(--t);
-    border-radius: 1em;
+    border-radius: var(--dzg-pill-radius, 1em);
     color: var(--tz-fg);
     background: color-mix(in srgb, var(--t) 12%, var(--tz-bg));
     line-height: 1.3;
@@ -604,6 +637,36 @@ $emit: true !default;
     .dzg-resize,
     .dzg-tooltip {
       display: none;
+    }
+  }
+  }
+
+  // tzslot's sheets (the date filters' panel, step 14) are tzslot's own and unlayered: the three rules that
+  // restyle its panel stay outside the layer beside them, or they would lose (docs/behaviors/theming.md).
+
+  // Another month's days in a filter popup are told apart by the muted colour (4.5:1, in a period's band
+  // too) instead of tzslot's opacity (unfaded below); tzslot sets `color: inherit` on its days (review of
+  // part 1, R1). A chosen day keeps its own.
+  .dzg-popup :is(.tz-cal__day--outside, .tz-range__day--outside):not(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end) {
+    color: var(--tz-fg-muted);
+  }
+
+  // The date filters: tzslot's panel inside a filter popup takes the popup's surface, so a dark grid
+  // opens a dark calendar.
+  .dzg-popup .tz-field__panel {
+    // Another month's days, unfaded: tzslot's 0.35 opacity falls under 4.5:1 (T11).
+    --tz-cal-outside-opacity: 1;
+    border-color: var(--tz-border);
+    color: var(--tz-fg);
+    background: var(--tz-bg);
+  }
+
+  // Forced colours: the chosen day and shortcut keep their mark when the system paints.
+  @media (forced-colors: active) {
+    .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .tz-rangefield__preset--on) {
+      forced-color-adjust: none;
+      color: HighlightText;
+      background: Highlight;
     }
   }
 }

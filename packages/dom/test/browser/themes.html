@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: themes</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/core/spans": "/packages/core/src/spans.ts",
+  "@dzgrid/core/rules": "/packages/core/src/rules.ts",
+  "@dzgrid/core/tree": "/packages/core/src/tree.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts",
+  "@tzslot/dom": "/node_modules/.cache/dzgrid-browser/dom.js",
+  "@tzslot/core": "/node_modules/.cache/dzgrid-browser/core.js"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<!-- themes.ts adds the showcase theme, the area's theme and contrast.css here (query), then the app's <style> follows. -->
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); }
+  #host, #area, #shadow, #shadow2 { inline-size: 820px; block-size: 300px; margin-block: 8px; }
+  #host > .dzg, #area > .dzg { block-size: 100%; }
+  /* The application's own CSS (showcase themes step 2, docs/behaviors/theming.md): an unlayered class of
+     zero specificity, and one in a layer the app names after dzgrid; both must beat the grid's rules. */
+  :where(.app-hot) { padding-inline: 3px; }
+  @layer dzgrid, app;
+  @layer app { :where(.app-late) { border-block-end-color: rgb(4, 5, 6); } }
+  input.mark, label.mark { display: block; margin-block: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DzGrid</h1>
+  <input class="mark" id="before" aria-label="before">
+  <div id="host"></div>
+  <div id="area"></div>
+  <div id="shadow"></div>
+  <div id="shadow2"></div>
+  <input class="mark" id="after" aria-label="after">
+</main>
+<script type="module" src="./themes.ts"></script>
+</body>
+</html>

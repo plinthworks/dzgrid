@@ -8,6 +8,8 @@
  * its check mark a glyph (kept in forced colours).
  */
 export const SET_CSS =
+  // In the cascade layer dzgrid.layout, as the base's (owner T1, docs/behaviors/theming.md).
+  '@layer dzgrid.layout{' +
   ':where(.dzg-fallw){display:flex;align-items:center;gap:.5rem;min-block-size:24px}' +
   ':where(.dzg-fstatus){min-block-size:1.2em;min-block-size:1lh}' +
   ':where(.dzg-flistw){position:relative;block-size:17.5rem;min-inline-size:14rem}' +
@@ -19,4 +21,5 @@ export const SET_CSS =
   ':where(.dzg-fopt>.dzg-box){flex:none;display:inline-grid;place-items:center;inline-size:1rem;block-size:1rem;box-sizing:border-box;border:1px solid;line-height:1}' +
   ':where(.dzg-fopt[aria-selected=true]>.dzg-box):before{content:"\\2713"}' +
   ':where(.dzg-flistw>p){position:absolute;inset-block-start:0;inset-inline:0;margin:.5rem}' +
-  ':where(.dzg-flistw>.dzg-fretry){position:absolute;inset-block-end:.5rem;inset-inline-start:.5rem}';
+  ':where(.dzg-flistw>.dzg-fretry){position:absolute;inset-block-end:.5rem;inset-inline-start:.5rem}' +
+  '}';

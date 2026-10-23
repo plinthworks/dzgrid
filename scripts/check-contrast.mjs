@@ -3,7 +3,7 @@
  * against its minimum — 4.5:1 for text, 3:1 for parts — for each palette, in
  * light and in dark.
  *
- *   npm run check:contrast                                   # the shipped palette
+ *   npm run check:contrast                                   # the shipped palette and showcase themes
  *   npm run check:contrast -- --palette palettes.json        # each palette in a file
  *
  * A palette file: { "palettes": [ { "name": "…", "light": { "accent": "#…", … },
@@ -12,14 +12,20 @@
  *
  * Colours are resolved the way the browser would for these rules: var() with
  * fallbacks, light-dark() by scheme, color-mix(in srgb, a p%, b), alpha
- * composited on the surface.
+ * composited on the surface; hex, rgb() and oklch() read.
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const NAMED = { white: [255, 255, 255, 1], black: [0, 0, 0, 1], transparent: [0, 0, 0, 0] };
 
-/** [r, g, b, a] from #rgb, #rrggbb, #rrggbbaa, rgb()/rgba() or a few names. */
+// A number has at least one digit (« . » alone is not one: review of part 1, R6).
+const N = String.raw`(?:\d+(?:\.\d*)?|\.\d+)`;
+const RGB = new RegExp(String.raw`^rgba?\(\s*(${N})[\s,]+(${N})[\s,]+(${N})(?:[\s,/]+(${N}%?))?\s*\)$`);
+// Hue in degrees only (a bare number or deg); turn, rad and grad are refused, not misread.
+const OKLCH = new RegExp(String.raw`^oklch\(\s*(${N}%?|none)\s+(${N}%?|none)\s+(${N}(?:deg)?|none)\s*(?:\/\s*(${N}%?)\s*)?\)$`);
+
+/** [r, g, b, a] from #rgb, #rrggbb, #rrggbbaa, rgb()/rgba(), oklch() or a few names. */
 export function parseColor(text) {
   const s = text.trim().toLowerCase();
   if (NAMED[s]) return [...NAMED[s]];
@@ -30,12 +36,38 @@ export function parseColor(text) {
     const n = (i) => parseInt(h.slice(i, i + 2), 16);
     return [n(0), n(2), n(4), h.length === 8 ? n(6) / 255 : 1];
   }
-  m = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:[\s,/]+([\d.]+%?))?\s*\)$/.exec(s);
+  m = RGB.exec(s);
   if (m) {
     const a = m[4] === undefined ? 1 : m[4].endsWith('%') ? parseFloat(m[4]) / 100 : parseFloat(m[4]);
     return [Number(m[1]), Number(m[2]), Number(m[3]), a];
   }
+  m = OKLCH.exec(s);
+  if (m) {
+    const num = (x, scale) => (x === 'none' ? 0 : x.endsWith('%') ? (parseFloat(x) / 100) * scale : parseFloat(x));
+    const a = m[4] === undefined ? 1 : num(m[4], 1);
+    return [...oklchToRgb(num(m[1], 1), num(m[2], 0.4), num(m[3], 1)), a];
+  }
   throw new Error(`cannot read colour "${text}"`);
+}
+
+/**
+ * oklch() to sRGB 0..255, clipped (CSS Color 4, §9 « OKLab and OKLCH », its published matrices):
+ * Tailwind 4 writes its default colours this way (showcase themes, step 2).
+ */
+function oklchToRgb(L, C, H) {
+  const h = (H * Math.PI) / 180;
+  const a = C * Math.cos(h);
+  const b = C * Math.sin(h);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const lin = [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+  const gamma = (x) => (x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055);
+  return lin.map((x) => Math.min(1, Math.max(0, gamma(x))) * 255);
 }
 
 /** Splits a function's arguments at top-level commas. */
@@ -118,6 +150,19 @@ export function paletteFromCss(css) {
   return vars;
 }
 
+/**
+ * A showcase theme's colours (`packages/theme/<name>.css`, showcase themes steps 3–4): its block on
+ * `:root, [data-dzg-skin="<name>"]`, the --tz-* ones as a palette `{ name, light, dark }` whose values
+ * stay light-dark() pairs (resolved per scheme).
+ */
+export function skinFromCss(css) {
+  const block = /\[data-dzg-skin="?([a-z-]+)"?\]\s*\{([^}]*)\}/.exec(css);
+  if (!block) return null;
+  const vars = {};
+  for (const m of block[2].matchAll(/--tz-([a-z0-9-]+)\s*:\s*([^;]+);/g)) vars[m[1]] = m[2].trim();
+  return { name: block[1], light: vars, dark: vars };
+}
+
 /** Every pair under `vars` in `scheme`: the ratios and the failures. */
 export function check(vars, spec, scheme) {
   const all = { ...spec.derived, ...vars };
@@ -126,7 +171,8 @@ export function check(vars, spec, scheme) {
     const fg = resolveColor(`var(${p.fg})`, all, scheme);
     return { ...p, ratio: contrast(fg, bg) };
   });
-  return { results, failures: results.filter((r) => r.ratio + 1e-9 < r.min) };
+  // A ratio that is not a finite number (a colour read wrongly) is a failure, never a pass (R6).
+  return { results, failures: results.filter((r) => !Number.isFinite(r.ratio) || r.ratio + 1e-9 < r.min) };
 }
 
 function main(argv) {
@@ -135,7 +181,9 @@ function main(argv) {
   const spec = JSON.parse(readFileSync(`${root}packages/theme/contrast-pairs.json`, 'utf8'));
   const base = paletteFromCss(css);
   const at = argv.indexOf('--palette');
-  const palettes = at === -1 ? [{ name: 'tzslot default', light: {}, dark: {} }] : JSON.parse(readFileSync(argv[at + 1], 'utf8')).palettes;
+  // By default: the base palette and each showcase theme as shipped, read from its own CSS.
+  const skins = ['midnight', 'clinic'].filter((n) => existsSync(`${root}packages/theme/${n}.css`)).map((n) => skinFromCss(readFileSync(`${root}packages/theme/${n}.css`, 'utf8')));
+  const palettes = at === -1 ? [{ name: 'tzslot default', light: {}, dark: {} }, ...skins] : JSON.parse(readFileSync(argv[at + 1], 'utf8')).palettes;
   let failed = 0;
   let checked = 0;
   for (const pal of palettes) {
@@ -156,4 +204,7 @@ function main(argv) {
   process.exit(failed ? 1 : 0);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main(process.argv.slice(2));
+// Compared as real paths: run through a symbolic link (macOS's /tmp, /var), it must still run (it used to
+// exit 0 silently: found by the planted-theme test, review of part 1).
+const real = (f) => { try { return realpathSync(f); } catch { return f; } };
+if (process.argv[1] && real(fileURLToPath(import.meta.url)) === real(process.argv[1])) main(process.argv.slice(2));

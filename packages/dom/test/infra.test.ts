@@ -69,8 +69,9 @@ describe('layout styles', () => {
     expect(LAYOUT_CSS).toMatch(/\.dzg-body\)\s*\{[^}]*overflow: clip/);
     expect(LAYOUT_CSS).toMatch(/\.dzg-seg-start\)\s*\{[^}]*position: sticky;[^}]*inset-inline-start: 0/);
     expect(LAYOUT_CSS).toMatch(/\.dzg-seg-end\)\s*\{[^}]*position: sticky;[^}]*inset-inline-end: 0/);
-    // Every rule has zero specificity, so a host's stylesheet always wins.
-    for (const sel of LAYOUT_CSS.match(/[^{}]+(?=\{)/g)!) expect(sel.trim()).toMatch(/^:where\(/);
+    // Every rule has zero specificity, so a host's stylesheet always wins (inside the layer's wrapper,
+    // showcase themes step 2: packages/dom/test/layer.test.ts).
+    for (const sel of LAYOUT_CSS.match(/[^{}]+(?=\{)/g)!) if (!sel.trim().startsWith('@layer')) expect(sel.trim()).toMatch(/^:where\(/);
   });
   it('are injected once per document, with a nonce when given', () => {
     const doc = document.implementation.createHTMLDocument('x');

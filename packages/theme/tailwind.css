@@ -9,7 +9,11 @@
  * the accent to your --color-primary-600 / -400 when your @theme has them
  * (Tailwind's blue otherwise), danger, warning and success to red, amber and green. The same
  * mapping as @tzslot/theme/tailwind.css: a page with both themes them alike.
+ * In the cascade layer dzgrid.bridge, after a showcase theme (docs/behaviors/theming.md).
  */
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+
+@layer dzgrid.bridge {
 :root {
   --tz-bg: light-dark(var(--color-white), var(--color-zinc-900));
   --tz-bg-raised: light-dark(var(--color-zinc-100), var(--color-zinc-800));
@@ -27,4 +31,5 @@
 
 .dark {
   --tz-color-scheme: dark;
+}
 }

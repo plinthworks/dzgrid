@@ -32,6 +32,7 @@
     { "what": "check box border", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 3 },
     { "what": "check mark", "fg": "--tz-accent-fg", "bg": "--tz-accent", "min": 3 },
     { "what": "ticked box on a selected row", "fg": "--tz-accent", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "selected row's bar at its start (a showcase theme's --dzg-select-bar)", "fg": "--tz-accent", "bg": "--dzg-row-selected-bg", "min": 3 },
     { "what": "resize grip, hover", "fg": "--tz-accent", "bg": "--dzg-header-bg", "min": 3 },
     { "what": "grid border and cell rule (decorative)", "fg": "--tz-border", "bg": "--tz-bg", "min": 1 },
     { "what": "date panel text (tzslot's, in a filter popup)", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
@@ -89,7 +90,13 @@
     { "what": "detail panel text", "fg": "--tz-fg", "bg": "--dzg-detail-bg", "min": 4.5 },
     { "what": "detail panel muted text", "fg": "--tz-fg-muted", "bg": "--dzg-detail-bg", "min": 4.5 },
     { "what": "focus ring on a detail panel", "fg": "--dzg-focus-ring", "bg": "--dzg-detail-bg", "min": 3 },
-    { "what": "detail panel rule (decorative)", "fg": "--tz-border", "bg": "--dzg-detail-bg", "min": 1 }
+    { "what": "detail panel rule (decorative)", "fg": "--tz-border", "bg": "--dzg-detail-bg", "min": 1 },
+    { "what": "saving border (Phase 5, Q10; reserved, drawn at its step)", "fg": "--dzg-saving-color", "bg": "--tz-bg", "min": 3 },
+    { "what": "saving border, row hovered", "fg": "--dzg-saving-color", "bg": "--dzg-row-hover-bg", "min": 3 },
+    { "what": "saving border, selected row", "fg": "--dzg-saving-color", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "refusal blink (Phase 5, Q9; reserved, drawn at its step)", "fg": "--dzg-refused-color", "bg": "--tz-bg", "min": 3 },
+    { "what": "refusal blink, row hovered", "fg": "--dzg-refused-color", "bg": "--dzg-row-hover-bg", "min": 3 },
+    { "what": "refusal blink, selected row", "fg": "--dzg-refused-color", "bg": "--dzg-row-selected-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -110,6 +117,8 @@
     "--dzg-flash-color": "var(--tz-accent)",
     "--dzg-flash-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--tz-bg))",
     "--dzg-flash-selected-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-selected-bg))",
-    "--dzg-flash-hover-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-hover-bg))"
+    "--dzg-flash-hover-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-hover-bg))",
+    "--dzg-saving-color": "var(--tz-accent)",
+    "--dzg-refused-color": "var(--tz-danger)"
   }
 }

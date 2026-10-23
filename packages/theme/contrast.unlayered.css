@@ -1,0 +1,80 @@
+@charset "UTF-8";
+/**
+ * @dzgrid/theme/contrast.css — more contrast, for people who need it, and the
+ * system's colours in forced-colours mode.
+ *
+ *   import '@dzgrid/theme';
+ *   import '@dzgrid/theme/contrast.css';
+ *
+ * Applies on its own when the system asks for more contrast, and with
+ * data-contrast="more" on any element; data-contrast="normal" on the root opts
+ * out. The palette is tzslot's high-contrast one. In the cascade layer
+ * dzgrid.contrast, after a showcase theme (docs/behaviors/theming.md).
+ */
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.contrast {
+  @media (prefers-contrast: more) {
+    :root:not([data-contrast=normal]),
+    [data-dzg-skin]:not(:root[data-contrast=normal] *) {
+      --tz-bg: light-dark(#ffffff, #000000);
+      --tz-bg-raised: light-dark(#e4e4e7, #27272a);
+      --tz-fg: light-dark(#000000, #ffffff);
+      --tz-fg-muted: light-dark(#27272a, #e4e4e7);
+      --tz-border: light-dark(#000000, #ffffff);
+      --tz-accent: light-dark(#1d3fb8, #ffd400);
+      --tz-accent-fg: light-dark(#ffffff, #000000);
+      --tz-danger: light-dark(#8b0000, #ff8a8a);
+      --tz-warning: light-dark(#6b3a00, #ffd27a);
+      --tz-success: light-dark(#14532d, #86efac);
+    }
+  }
+  [data-contrast=more],
+  [data-contrast=more] [data-dzg-skin] {
+    --tz-bg: light-dark(#ffffff, #000000);
+    --tz-bg-raised: light-dark(#e4e4e7, #27272a);
+    --tz-fg: light-dark(#000000, #ffffff);
+    --tz-fg-muted: light-dark(#27272a, #e4e4e7);
+    --tz-border: light-dark(#000000, #ffffff);
+    --tz-accent: light-dark(#1d3fb8, #ffd400);
+    --tz-accent-fg: light-dark(#ffffff, #000000);
+    --tz-danger: light-dark(#8b0000, #ff8a8a);
+    --tz-warning: light-dark(#6b3a00, #ffd27a);
+    --tz-success: light-dark(#14532d, #86efac);
+  }
+}
+/* Forced colours: the system decides; the grid only says which role each part plays. */
+@media (forced-colors: active) {
+  .dzg-row[aria-selected=true],
+  .dzg-row[aria-selected=true] .dzg-seg-start,
+  .dzg-row[aria-selected=true] .dzg-seg-end {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  .dzg-cell:focus-visible,
+  .dzg-dcell:focus-visible,
+  .dzg-hcell:focus-visible,
+  .dzg-box:focus-visible {
+    outline-color: Highlight;
+  }
+  .dzg-box {
+    border-color: CanvasText;
+  }
+  .dzg-resize::after {
+    background: CanvasText;
+  }
+  /* A badge's frame in the text colour (its tinted surface is gone); its shape stays (step 20). The
+     system's colours in a selected row too, where the row opts out of them. */
+  .dzg-badge {
+    border-color: currentColor;
+    forced-color-adjust: auto;
+  }
+  /* A showcase theme's bar on a selected row: the row is Highlight here, so the bar takes HighlightText. */
+  .dzg-row[aria-selected=true] > .dzg-seg-start::before {
+    background: HighlightText;
+  }
+  /* A pager button that cannot act is aria-disabled, not disabled: the system would not grey it. */
+  .dzg-pbtn[aria-disabled=true] {
+    color: GrayText;
+  }
+}

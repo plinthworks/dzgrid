@@ -14,9 +14,14 @@
     "./contrast-pairs.json": "./contrast-pairs.json",
     "./dzgrid.scss": "./dzgrid.scss",
     "./dzgrid": { "sass": "./dzgrid.scss", "default": "./dzgrid.css" },
-    "./tailwind.css": "./tailwind.css"
+    "./tailwind.css": "./tailwind.css",
+    "./dzgrid.unlayered.css": "./dzgrid.unlayered.css",
+    "./contrast.unlayered.css": "./contrast.unlayered.css",
+    "./midnight.css": "./midnight.css",
+    "./clinic.css": "./clinic.css",
+    "./contrast.scss": "./contrast.scss"
   },
-  "files": ["dzgrid.css", "dzgrid.scss", "contrast.css", "contrast-pairs.json", "tailwind.css"],
+  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "midnight.css", "clinic.css"],
   "sideEffects": ["*.css"],
   "sass": "./dzgrid.scss"
 }

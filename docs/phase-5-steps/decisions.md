@@ -39,3 +39,13 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S2-O3:** the app context reaches filter kinds, `editable` and `validate` only; sorting (via `value(row, context)`) later. This narrows Q12.
 - **S2-O4:** `@dzgrid/core/server` 6 000 → 6 100 (grant). The `tree({ structure })` wiring in `dom/tree` moves to step 8 with its own budget request; the core seam stays in step 2.
 - **S2-O5 (2026-10-23):** `@dzgrid/core/detail` 1 000 → 1 050. Its code is unchanged (2 181 B min); its gzip delta over the grown core moved to 1 002. Ceiling in `scripts/rebudget.mjs` and `size-budget.json`.
+
+## Showcase themes (owner, 2026-10-23) — plan `themes-plan.md`
+
+- **T1:** the grid's CSS in `@layer dzgrid` by default, plus an unlayered copy for apps whose reset (Tailwind 3 preflight, Bootstrap Reboot) would beat it.
+- **T2:** NOT the recommendation: a theme gives all its colours by hand (no secondary colours computed from the four main ones). The bridges still map every colour.
+- **T3:** the Tailwind 3 bridge is a CSS file using `theme()`.
+- **T4:** Tailwind 4, Tailwind 3 and Bootstrap become root devDependencies, to RUN tests only — never shipped, their source never read (clean room).
+- **T5:** `rowClass`, `headerClass` and a class per pill tone, now.
+- **T6:** names `midnight` and `clinic`; applied on import, or on one area with `data-dzg-skin`.
+- **T7 sizes (grants):** `midnight.css` 650, `clinic.css` 650, each bridge 500 (Tailwind 4, Tailwind 3, Bootstrap); theme base inside 2 900, up to 3 050 if needed; dom base 21 800 → 21 980 (class hooks ~120 + layer wrapper ~30). Reset to measure + 10 % at the close, never above.
