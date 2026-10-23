@@ -2,6 +2,7 @@ import { isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedCo
 import { emit, isDataKey, shownAncestor } from '@dzgrid/core/internal';
 import type { PartBase, SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
+import type { GridSettings } from '../settings.js';
 import { decorateHeader } from './header-decor.js';
 import type { ViewportBox } from './measure.js';
 import { overlayPainter } from './overlay.js';
@@ -64,6 +65,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let messagesRev = 0;
   // The application's context: a new one rebinds the cell parts too (step 21), as new messages do.
   let context: unknown;
+  let rowClass: GridSettings<any>['rowClass'];
   let lastH = 0;
   // A part's messages: the host's own `app.*` keys, a missing one told once per bundle.
   let toldMessages = new Set<string>();
@@ -132,6 +134,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       toldMessages = new Set();
     }
     if (settings.context !== context) (context = settings.context), messagesRev++;
+    // A new row rule binds every row again (its classes are asked on a bind only).
+    if (settings.rowClass !== rowClass) (rowClass = settings.rowClass), messagesRev++;
     // Direction too: whether a value is isolated depends on it; and which parts draw cells.
     const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}|${parts.rev}|${messagesRev}`;
     if (ek !== epochKey) {
@@ -248,7 +252,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       check, dir, headerRows, partFor, report: g.report,
       partBase: g.partBase,
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
-      focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev, view: box.inline,
+      focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev, view: box.inline, rowClass,
     };
     // Kept mounted out of the window: the focused row first (never moved), then the anchors of tall cells.
     const retained: RowKey[] = focus?.kind === 'cell' ? [focus.row] : [];

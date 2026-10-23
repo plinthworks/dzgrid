@@ -148,6 +148,18 @@
       "file": "packages/theme/clinic.css",
       "maxGzip": 650
     },
+    "@dzgrid/theme/tailwind.css": {
+      "file": "packages/theme/tailwind.css",
+      "maxGzip": 500
+    },
+    "@dzgrid/theme/tailwind3.css": {
+      "file": "packages/theme/tailwind3.css",
+      "maxGzip": 500
+    },
+    "@dzgrid/theme/bootstrap.css": {
+      "file": "packages/theme/bootstrap.css",
+      "maxGzip": 500
+    },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
       "maxGzip": 21300,
@@ -459,7 +471,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 6250,
+      "maxGzip": 6300,
       "external": [
         "@angular/*",
         "@dzgrid/*",

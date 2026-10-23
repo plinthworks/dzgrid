@@ -1,0 +1,22 @@
+{
+  "$comment": "The class examples of docs/theme-in-3-lines.md, per framework: a negative amount (ui.cellClass), a highlighted row (rowClass; it sets --tz-bg, so the pinned parts follow), a status pill per tone (badge({ classes })), a header (ui.headerClass). packages/dom/test/browser/frameworks.ts runs them on the real builds (axe 0 included); docs.test.ts checks the docs quote them and classes.html lists the Tailwind ones.",
+  "tailwind4": {
+    "negative": "text-red-700 dark:text-red-400",
+    "row": "[--tz-bg:var(--color-amber-50)] dark:[--tz-bg:var(--color-amber-950)]",
+    "pills": { "danger": "bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-100", "success": "bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100" },
+    "header": "uppercase tracking-wide"
+  },
+  "tailwind3": {
+    "negative": "text-red-700 dark:text-red-400",
+    "row": "[--tz-bg:theme(colors.amber.50)] dark:[--tz-bg:theme(colors.amber.950)]",
+    "pills": { "danger": "bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-100", "success": "bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100" },
+    "header": "uppercase tracking-wide"
+  },
+  "bootstrap": {
+    "negative": "text-danger-emphasis",
+    "row": "row-flagged",
+    "css": ".row-flagged { --tz-bg: var(--bs-warning-bg-subtle); }",
+    "pills": { "danger": "bg-danger-subtle text-danger-emphasis", "success": "bg-success-subtle text-success-emphasis" },
+    "header": "text-uppercase"
+  }
+}

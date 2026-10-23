@@ -7,8 +7,13 @@ documents only — CSS Cascading and Inheritance Level 5 (https://www.w3.org/TR/
 (https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark), MDN `forced-colors`
 (https://developer.mozilla.org/en-US/docs/Web/CSS/@media/forced-colors), CSS Color 4 for `oklch()`
 (https://www.w3.org/TR/css-color-4/#ok-lab), WCAG 2.2 success criteria 1.4.3 and 1.4.11
-(https://www.w3.org/TR/WCAG22/). Tailwind and Bootstrap pages are read for the bridges (a later part).
-No grid library's or CSS framework's source is read, `node_modules` included.
+(https://www.w3.org/TR/WCAG22/). For the bridges (step 5), the frameworks' public pages only:
+https://tailwindcss.com/docs/theme, https://tailwindcss.com/docs/colors, https://tailwindcss.com/docs/dark-mode,
+https://v3.tailwindcss.com/docs/functions-and-directives, https://v3.tailwindcss.com/docs/customizing-colors,
+https://v3.tailwindcss.com/docs/dark-mode, https://getbootstrap.com/docs/5.3/customize/css-variables/ and
+https://getbootstrap.com/docs/5.3/customize/color-modes/ (fetched 2026-10-23; Bootstrap's names and values
+checked there that day). No grid library's or CSS framework's source is read, `node_modules` included: the
+frameworks (Tailwind CSS 4.3.3 and 3.4.19, Bootstrap 5.3.8, root devDependencies, owner T4) are only run.
 
 ## What the person does
 - An application developer imports the theme, and maybe one of the two showcase themes, and changes a
@@ -41,7 +46,11 @@ No grid library's or CSS framework's source is read, `node_modules` included.
   Each theme file opens with the same order statement:
   `@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;`
   so, inside the grid: the injected layout < the base theme < a showcase theme < a framework bridge < more
-  contrast. The layout `@dzgrid/dom` injects (the base's and each feature's: tree, detail, filters, value
+  contrast. The bridge wins over a showcase theme (owner T9): an application using a bridge sees its
+  framework's colours; to show Midnight or Clinic, it does not load a bridge. (An area under
+  `data-dzg-skin` declares the theme on itself, and a bridge declared on `:root` only reaches it by
+  inheritance: the area keeps its theme. Bootstrap's bridge is also declared on every `[data-bs-theme]`
+  element: an element carrying both shows Bootstrap's colours.) The layout `@dzgrid/dom` injects (the base's and each feature's: tree, detail, filters, value
   list, pagination, spans) is wrapped in `@layer dzgrid.layout { … }`, in the `<style>` it injects (with or
   without a nonce, in the document or a shadow root) and in the exported `LAYOUT_CSS` an application with
   `injectStyles: false` loads itself. Its `:where()` stays: zero specificity inside the layer too.
@@ -96,6 +105,29 @@ No grid library's or CSS framework's source is read, `node_modules` included.
 - **More contrast** (`contrast.css`, layer `dzgrid.contrast`) declares its palette on the root and on every
   `[data-dzg-skin]` area (in a shadow root too, unless the page opted out), so it wins in a themed area too.
 
+- **Bridges** (step 5, T3, T4): `tailwind.css` (Tailwind CSS 4), `tailwind3.css` (Tailwind CSS 3) and
+  `bootstrap.css` (Bootstrap 5.3), each one block in `dzgrid.bridge` mapping the ten colours, `--dzg-font`
+  (a full `font` shorthand: weight, `0.875rem` and a line height, then the framework's sans family) and
+  `--dzg-radius` to the framework's public variables, and following its dark mode. Tailwind 4: its
+  `--color-*` variables in `light-dark()` pairs, the accent on the app's `--color-primary-600 / -400` when
+  its theme has them, `.dark` for a class-based dark mode; with a class-based dark mode the application adds
+  `:root:not(.dark) { --tz-color-scheme: light; }`, or under a dark system and no `.dark` the grid would
+  follow the system and turn dark on a light page (review of part 2). Tailwind 3 has no colour variables: `theme()`,
+  so the file must go through Tailwind's build. Bootstrap: its `--bs-*` variables, declared on
+  `:root, [data-bs-theme]` (Bootstrap's colour mode can be set on any element: the names are resolved there
+  again: a `data-bs-theme="light"` container inside a `"dark"` root draws its grid light, and the reverse,
+  as Bootstrap's own components do), `--tz-color-scheme` from `data-bs-theme`; the accent is the link's hover colour (Bootstrap's
+  primary one shade deeper; the primary itself falls under 3:1 for a mark on a selected row). Each bridge
+  passes every contrast pair with the framework's default colours, light and dark.
+- **What the real builds showed** (browser suite, step 5): Tailwind 4 emits the theme variables a bridge
+  reads when the bridge is imported through Tailwind (in the CSS Tailwind builds); linked beside Tailwind's
+  output, every colour is lost (the setup pages say so). Without the application's order line, `dzgrid`
+  lands after Tailwind's `utilities` and the grid beats them. Tailwind 3 keeps native `@layer` blocks and
+  resolves `theme()` inside `light-dark()`. Bootstrap bundled `layer(bootstrap)` or left unlayered (with the
+  unlayered copy) both keep the grid's rules and let Bootstrap's `!important` utilities win.
+- **Class hooks** (step 6, T5): `ui.cellClass`, `settings.rowClass`, `ui.headerClass`, `badge({ classes })`
+  (`cell-class.md`, `badge-boolean.md`); their framework examples in `docs/theme-in-3-lines.md`.
+
 ## Where DzGrid differs on purpose
 - Themes as **variables plus a few rules in a layer**, not a set of classes to put on the grid: the grid's
   look follows the page (`data-theme`, an area's attribute) and the application's classes always win.
@@ -104,7 +136,11 @@ No grid library's or CSS framework's source is read, `node_modules` included.
 
 ## Tests
 `packages/theme/test/layer.test.ts` (the layer, the copies, the tokens), `packages/theme/test/skins.test.ts`
-(Midnight and Clinic), `packages/dom/test/layer.test.ts` (the injected layout), `scripts/test/contrast.test.ts`
+(Midnight and Clinic), `packages/theme/test/bridges.test.ts` (the bridges' mappings, scopes, dark mode,
+contrast with each framework's defaults: `test/fixtures/{tailwind4,tailwind3,bootstrap}-defaults.json`),
+`packages/theme/test/docs.test.ts` (the setup page quotes what the browser builds), `packages/dom/test/layer.test.ts` (the injected layout), `scripts/test/contrast.test.ts`
 (`oklch()`, the skins checked), `scripts/test/rebudget.test.ts` (the T7 ceilings), `npm run test:browser --
 --only themes` (layer order, popup, an application class on a cell, a shadow root, each theme light and dark,
-French and Arabic, forced colours).
+French and Arabic: its ten colours, no horizontal overflow, the focus ring; forced colours for both; the
+right-to-left checks in Firefox and WebKit with `--all`; then each framework setup built by the real tool,
+`scripts/frameworks.mjs`).

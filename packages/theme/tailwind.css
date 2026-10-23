@@ -1,35 +1,38 @@
 /**
- * @dzgrid/theme/tailwind.css — the grid in your Tailwind v4 theme.
+ * @dzgrid/theme/tailwind.css — the grid in your Tailwind CSS 4 theme. In the CSS file Tailwind builds:
  *
+ *   @layer theme, base, dzgrid, components, utilities;
  *   @import "tailwindcss";
  *   @import "@dzgrid/theme";
  *   @import "@dzgrid/theme/tailwind.css";
  *
- * Maps the shared palette to Tailwind's: surfaces and text to the zinc scale,
- * the accent to your --color-primary-600 / -400 when your @theme has them
- * (Tailwind's blue otherwise), danger, warning and success to red, amber and green. The same
- * mapping as @tzslot/theme/tailwind.css: a page with both themes them alike.
- * In the cascade layer dzgrid.bridge, after a showcase theme (docs/behaviors/theming.md).
+ * Imported there, through Tailwind, so it emits the colours read here (it emits only the variables
+ * used); a <link> or a JS import beside Tailwind's CSS would find some missing. Surfaces and text on
+ * the zinc scale, the accent on your --color-primary-600 / -400 (Tailwind's blue otherwise), danger,
+ * warning and success on red, amber and green; your --font-sans and --radius-md. Light and dark follow
+ * the system, or a .dark class (then also :root:not(.dark) { --tz-color-scheme: light; } in your CSS).
+ * In the layer dzgrid.bridge, after the showcase themes: with a bridge, the grid wears your colours
+ * (docs/behaviors/theming.md, docs/theme-in-3-lines.md).
  */
 @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
 
 @layer dzgrid.bridge {
-:root {
-  --tz-bg: light-dark(var(--color-white), var(--color-zinc-900));
-  --tz-bg-raised: light-dark(var(--color-zinc-100), var(--color-zinc-800));
-  --tz-fg: light-dark(var(--color-zinc-900), var(--color-zinc-100));
-  --tz-fg-muted: light-dark(var(--color-zinc-600), var(--color-zinc-400));
-  --tz-border: light-dark(var(--color-zinc-300), var(--color-zinc-700));
-  --tz-accent: light-dark(var(--color-primary-600, var(--color-blue-600)), var(--color-primary-400, var(--color-blue-400)));
-  --tz-accent-fg: light-dark(var(--color-white), var(--color-zinc-950));
-  --tz-danger: light-dark(var(--color-red-700), var(--color-red-400));
-  --tz-warning: light-dark(var(--color-amber-700), var(--color-amber-400));
-  --tz-success: light-dark(var(--color-green-700), var(--color-green-400));
-  --dzg-font: var(--font-sans);
-  --dzg-radius: var(--radius-md);
-}
+  :root {
+    --tz-bg: light-dark(var(--color-white), var(--color-zinc-900));
+    --tz-bg-raised: light-dark(var(--color-zinc-100), var(--color-zinc-800));
+    --tz-fg: light-dark(var(--color-zinc-900), var(--color-zinc-100));
+    --tz-fg-muted: light-dark(var(--color-zinc-600), var(--color-zinc-400));
+    --tz-border: light-dark(var(--color-zinc-300), var(--color-zinc-700));
+    --tz-accent: light-dark(var(--color-primary-600, var(--color-blue-600)), var(--color-primary-400, var(--color-blue-400)));
+    --tz-accent-fg: light-dark(var(--color-white), var(--color-zinc-950));
+    --tz-danger: light-dark(var(--color-red-700), var(--color-red-400));
+    --tz-warning: light-dark(var(--color-amber-700), var(--color-amber-400));
+    --tz-success: light-dark(var(--color-green-700), var(--color-green-400));
+    --dzg-font: 400 0.875rem/1.45 var(--font-sans);
+    --dzg-radius: var(--radius-md);
+  }
 
-.dark {
-  --tz-color-scheme: dark;
-}
+  .dark {
+    --tz-color-scheme: dark;
+  }
 }

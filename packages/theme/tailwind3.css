@@ -1,0 +1,39 @@
+/**
+ * @dzgrid/theme/tailwind3.css — the grid in your Tailwind CSS 3 theme, through theme() (Tailwind 3 has
+ * no colour variables): Tailwind's build must process it. In the CSS file Tailwind builds:
+ *
+ *   @import "tailwindcss/base";
+ *   @import "@dzgrid/theme/dzgrid.unlayered.css";
+ *   @import "@dzgrid/theme/tailwind3.css";
+ *   @import "tailwindcss/components";
+ *   @import "tailwindcss/utilities";
+ *
+ * The unlayered copy, after the preflight (unlayered too) and before the utilities, so both keep their
+ * place. Surfaces and text on the zinc scale, the accent on blue (set --tz-accent after it for your
+ * own), danger, warning and success on red, amber and green; your fontFamily.sans and borderRadius.md.
+ * Light and dark follow the system (darkMode 'media'), or a .dark class ('class' or 'selector'; then also
+ * :root:not(.dark) { --tz-color-scheme: light; } after it). In the
+ * layer dzgrid.bridge (docs/behaviors/theming.md, docs/theme-in-3-lines.md).
+ */
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+
+@layer dzgrid.bridge {
+  :root {
+    --tz-bg: light-dark(theme('colors.white'), theme('colors.zinc.900'));
+    --tz-bg-raised: light-dark(theme('colors.zinc.100'), theme('colors.zinc.800'));
+    --tz-fg: light-dark(theme('colors.zinc.900'), theme('colors.zinc.100'));
+    --tz-fg-muted: light-dark(theme('colors.zinc.600'), theme('colors.zinc.400'));
+    --tz-border: light-dark(theme('colors.zinc.300'), theme('colors.zinc.700'));
+    --tz-accent: light-dark(theme('colors.blue.600'), theme('colors.blue.400'));
+    --tz-accent-fg: light-dark(theme('colors.white'), theme('colors.zinc.950'));
+    --tz-danger: light-dark(theme('colors.red.700'), theme('colors.red.400'));
+    --tz-warning: light-dark(theme('colors.amber.700'), theme('colors.amber.400'));
+    --tz-success: light-dark(theme('colors.green.700'), theme('colors.green.400'));
+    --dzg-font: 400 0.875rem/1.45 theme('fontFamily.sans');
+    --dzg-radius: theme('borderRadius.md');
+  }
+
+  .dark {
+    --tz-color-scheme: dark;
+  }
+}

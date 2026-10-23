@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: framework bridges</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
+} }</script>
+<!-- frameworks.ts links the setup's real build (node_modules/.cache/dzgrid-frameworks/<fw>.css) here. -->
+<style>
+  body { margin: 16px; }
+  #host, #area { inline-size: 820px; block-size: 260px; margin-block: 8px; }
+  #host > .dzg, #area > .dzg { block-size: 100%; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DzGrid</h1>
+  <div id="host"></div>
+  <div id="area"></div>
+</main>
+<script type="module" src="./frameworks.ts"></script>
+</body>
+</html>

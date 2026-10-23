@@ -13,8 +13,22 @@ The cells the application's rule names carry its class (its stylesheet colours o
 - **A rule that throws**: the error is reported (`reportError`), the cell's rule classes are removed; the grid goes on.
 - **Never a layout write**: the rule's classes change nothing the grid writes inline (sizes, offsets).
 
+## The other hooks (showcase themes step 6, owner T5)
+Where a framework's utilities (Tailwind, Bootstrap; `docs/theme-in-3-lines.md`) meet the grid, the same
+contract (space-separated names, diffed, `dzg-` tokens ignored, a throw reported and its classes cleared):
+- **`settings.rowClass(ctx)`**, `ctx` `{ row, key, context }`: classes for a data row (the `.dzg-row`
+  element), asked when the row is bound again (another row, new data, new columns, language, context, or a
+  new rule given by `update`), never on a paint that changes nothing for it. None on a tree's filler or a
+  detail row. Live. The row's pinned parts paint their own surface: to colour a whole row, a class sets
+  `--tz-bg` on it (Tailwind `[--tz-bg:var(--color-amber-50)]`), and the pinned parts and the hover tint
+  follow. Keep the same function from one update to the next: a new one (an inline arrow in a
+  re-rendered template) binds every row again. Angular: `<dz-grid [rowClass]>` (owner T8).
+- **`columns[].ui.headerClass`**: a fixed string for the column's header cell (the main header row; not a
+  group cell, not a feature's extra row). Follows a new `columns`.
+- **`badge({ classes })`**: a class per tone (`badge-boolean.md`).
+
 ## Where DzGrid differs on purpose
 - One function returning class names, rather than a map of class to predicate: the same thing, smaller, and the application keeps its own logic.
 
 ## Tests
-`packages/dom/test/cell-class.test.ts`.
+`packages/dom/test/cell-class.test.ts`, `packages/dom/test/class-hooks.test.ts`, `packages/angular/test/class-hooks.test.ts`; the documented examples on real framework builds: `npm run test:browser -- --only themes` (`frameworkChecks`).

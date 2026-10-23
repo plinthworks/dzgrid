@@ -32,6 +32,24 @@ container styles only that area, so both can stand side by side (the last file i
 page). Light and dark follow the system or `data-theme`, as below. Every colour is given by hand and
 checked for contrast; more contrast (below) still wins over them.
 
+## Tailwind CSS and Bootstrap
+
+A bridge maps the grid's colours, font and corners to your framework's variables, dark mode included.
+Tailwind CSS 4, in the CSS file Tailwind builds:
+
+```css
+@layer theme, base, dzgrid, components, utilities;
+@import "tailwindcss";
+@import "@dzgrid/theme";
+@import "@dzgrid/theme/tailwind.css";
+```
+
+Tailwind CSS 3: `@dzgrid/theme/tailwind3.css` (through Tailwind's build, with the unlayered copy).
+Bootstrap 5.3: `@dzgrid/theme/bootstrap.css` (follows `data-bs-theme`). A bridge wins over a showcase
+theme: with a bridge, the grid wears your framework's colours; to show Midnight or Clinic, load no bridge. Each setup, and the classes the
+grid takes (`cellClass`, `rowClass`, `headerClass`, `badge({ classes })`), in
+[`docs/theme-in-3-lines.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/theme-in-3-lines.md).
+
 ## Cascade layer
 
 The theme's rules sit in the cascade layer `dzgrid` (each file opens with
@@ -73,9 +91,8 @@ at its start, 0 by default).
 ## Light and dark
 
 By default the grid follows the system (`color-scheme: light dark`). To force one, set
-`data-theme="light"` or `data-theme="dark"` on the root or on any ancestor of the grid. With
-Tailwind v4, `@import "@dzgrid/theme/tailwind.css"` after the theme maps the palette to Tailwind's
-colours and follows a `.dark` class.
+`data-theme="light"` or `data-theme="dark"` on the root or on any ancestor of the grid. The bridges
+follow Tailwind's `.dark` class and Bootstrap's `data-bs-theme`.
 
 ## More contrast and forced colours
 

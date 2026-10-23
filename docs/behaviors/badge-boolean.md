@@ -16,6 +16,10 @@ Reads a status column ("Done", "Late", "On hold") and a yes/no column, scrolls, 
 
 ## What DzGrid does
 - **`badge({ tones?, fallback? })`** returns a cell part the host registers by name: `parts: { statusBadge: badge({ tones: { done: 'success', late: 'danger' } }) }`, used through `ui.cell: 'statusBadge'`. One `badge()` per mapping: several columns may share it or each have their own.
+- **`classes`** (showcase themes step 6, owner T5): the host's classes per tone, put beside `dzg-badge`
+  (`badge({ tones, classes: { danger: 'bg-red-50 text-red-900' } })`): a framework's utilities restyle a pill
+  by its tone (the fallback tone's class for a value the map does not name); the tone's `data-tone` and
+  shape stay, a tone `classes` does not name keeps the badge's own class only, and `dzg-` names are ignored. The theme's look is in the cascade layer `dzgrid`, so these classes win without `!important`.
 - **The label is the cell's `text`**, what the grid would show (an enum's label; an unknown value shows the value). **The tone is `tones[String(value)]`**, else `fallback` (default `neutral`). A null or blank value leaves the cell empty.
 - **`cellBoolean`** is a cell part registered as `'cell.boolean'`: every boolean column takes it (the type's default name, `parts.md`). True: `✓` and `msg('cell.yes')`; false: `✗` and `msg('cell.no')`; null: empty. The codec's own text (`true` / `false`) is not used: it is not translated.
 - **Their DOM:** `<span class="dzg-badge" data-tone="success"><span class="dzg-glyph" aria-hidden="true">✓</span><span dir="auto">Done</span></span>` (no glyph span for neutral); a yes/no cell: `<span class="dzg-bool"><span class="dzg-glyph" aria-hidden="true">✓</span><span dir="auto">Yes</span></span>` (one drawing for both). Nothing focusable: the cell keeps the grid's keys.
@@ -26,11 +30,11 @@ Reads a status column ("Done", "Late", "On hold") and a yes/no column, scrolls, 
 - **Theme:** a tenth palette colour `--tz-success` (green, light `#15803d`, dark `#4ade80`). Tone colours: neutral `--tz-fg-muted`, info `--tz-accent`, success, warning and danger their palette colours. The frame is the tone colour; the surface the tone mixed at 12 % into `--tz-bg`; the label `--tz-fg`; the shape the tone colour. Contrast checked per tone (`contrast-pairs.json`): the tone on the page and on the badge surface at 3:1, the label on the badge surface at 4.5:1, the tone on a selected row at 3:1.
 
 ## Not done here
-- A class per cell from the host (`ui.cellClass`): step 26 (owner Q3). Until then a host styles through a part.
+- A class per cell from the host: `ui.cellClass`, done at step 26 (owner Q3); a class per tone: `classes`, showcase themes step 6.
 - `filter.yes` / `filter.no` stay the filters'.
 
 ## Tests
-`packages/dom/test/parts-cells.test.ts`, `parts-guards.test.ts`, the browser checks of `scripts/browser.mjs` (`parts=1`), the theme's contrast pairs. Worked example 2 (the between filter with two sliders, plugins §B2.8): `packages/dom/test/example-between.test.ts` with its fixture `test/fixtures/between-slider.ts`.
+`packages/dom/test/parts-cells.test.ts`, `parts-guards.test.ts`, `class-hooks.test.ts` (`classes`), the browser checks of `scripts/browser.mjs` (`parts=1`), the theme's contrast pairs. Worked example 2 (the between filter with two sliders, plugins §B2.8): `packages/dom/test/example-between.test.ts` with its fixture `test/fixtures/between-slider.ts`.
 
 ## Step 20 review (2026-10-20)
 - A value whose text is only spaces is a blank: no badge frame is drawn.

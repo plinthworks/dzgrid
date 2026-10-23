@@ -1,0 +1,23 @@
+{
+  "$comment": "Tailwind CSS 3's default theme values the bridge tailwind3.css reads through theme(), transcribed by hand from https://v3.tailwindcss.com/docs/customizing-colors and https://v3.tailwindcss.com/docs/border-radius (2026-10-23), never from Tailwind's files. bridges.test.ts checks the bridge's contrast with them; the browser suite (--only themes) checks a real Tailwind 3.4.19 build gives these colours.",
+  "theme": {
+    "colors.white": "#fff",
+    "colors.zinc.100": "#f4f4f5",
+    "colors.zinc.300": "#d4d4d8",
+    "colors.zinc.400": "#a1a1aa",
+    "colors.zinc.600": "#52525b",
+    "colors.zinc.700": "#3f3f46",
+    "colors.zinc.800": "#27272a",
+    "colors.zinc.900": "#18181b",
+    "colors.zinc.950": "#09090b",
+    "colors.blue.400": "#60a5fa",
+    "colors.blue.600": "#2563eb",
+    "colors.red.400": "#f87171",
+    "colors.red.700": "#b91c1c",
+    "colors.amber.400": "#fbbf24",
+    "colors.amber.700": "#b45309",
+    "colors.green.400": "#4ade80",
+    "colors.green.700": "#15803d",
+    "borderRadius.md": "0.375rem"
+  }
+}

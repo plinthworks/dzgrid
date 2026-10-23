@@ -46,6 +46,10 @@ import { datasetA, type RowA } from '../perf/dataset.js';
 // The theme, through Vite (a <link> to a file outside the playground folder is not served).
 import '../packages/theme/dzgrid.css';
 import '../packages/theme/contrast.css';
+// The showcase themes (`?skin=midnight|clinic`), as text: one at a time in the page's own <style> (each
+// file themes the whole page once loaded, so they are not both imported).
+import MIDNIGHT from '../packages/theme/midnight.css?inline';
+import CLINIC from '../packages/theme/clinic.css?inline';
 
 const form = document.getElementById('controls') as HTMLFormElement;
 const host = document.getElementById('host')!;
@@ -219,6 +223,9 @@ const page = () => {
   else delete html.dataset['theme'];
   if (val('contrast')) html.dataset['contrast'] = val('contrast');
   else delete html.dataset['contrast'];
+  const skin = document.getElementById('skin') ?? document.head.appendChild(Object.assign(document.createElement('style'), { id: 'skin' }));
+  const css = { midnight: MIDNIGHT, clinic: CLINIC }[val('skin')] ?? '';
+  if (skin.textContent !== css) skin.textContent = css;
 };
 page();
 // The rows are made first: the time shown is the grid's, from rows in memory to the first frame.

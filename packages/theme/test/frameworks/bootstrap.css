@@ -1,0 +1,4 @@
+@layer bootstrap, dzgrid;
+@import "bootstrap/dist/css/bootstrap.css" layer(bootstrap);
+@import "@dzgrid/theme";
+@import "@dzgrid/theme/bootstrap.css";

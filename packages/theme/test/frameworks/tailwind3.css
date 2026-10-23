@@ -1,0 +1,5 @@
+@import "tailwindcss/base";
+@import "@dzgrid/theme/dzgrid.unlayered.css";
+@import "@dzgrid/theme/tailwind3.css";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";

@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer and the showcase themes, docs/behaviors/theming.md; `-- --only dates` the date filters).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -10,6 +10,8 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { serve, browser } from '../spikes/kit.mjs';
 import { chromeDump } from '../spikes/s4-a11y/ax.mjs';
+import { buildFrameworks } from './frameworks.mjs';
+import { resolveColor } from './check-contrast.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const OUT = `${ROOT}packages/dom/test/browser/results`;
@@ -2001,6 +2003,9 @@ async function floatingToggleChecks(name, ctx) {
  * (Firefox, WebKit, overflow, focus) is step 7's.
  */
 async function themeChecks(name, ctx) {
+  // Firefox and WebKit (`--all`): the right-to-left checks of each theme only (themes-plan §7 step 7).
+  const lite = name !== 'chrome';
+  const TZ = ['bg', 'bg-raised', 'fg', 'fg-muted', 'border', 'accent', 'accent-fg', 'danger', 'warning', 'success'];
   const FIX = Object.fromEntries(['midnight', 'clinic'].map((n) => [n, JSON.parse(readFileSync(`${ROOT}packages/theme/test/fixtures/${n}.json`, 'utf8')).palettes[0]]));
   const rgb = (hex) => `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`;
   const open = async (qs, setup) => {
@@ -2036,7 +2041,7 @@ async function themeChecks(name, ctx) {
   // ---- step 2: the layer. The app's classes win (unlayered at zero specificity, and in a later layer); the
   // popup keeps the theme's look over the layout's popover reset; a grid in a shadow root takes the theme
   // (and Midnight) adopted there; the layout still reaches the cells.
-  {
+  if (!lite) {
     const { page, errors } = await open('locale=fr-FR&theme=dark&shadow=1');
     const app = await page.evaluate(() => {
       const hot = document.querySelector('#host .dzg-cell.app-hot');
@@ -2069,10 +2074,23 @@ async function themeChecks(name, ctx) {
   // ---- steps 3–4: each theme on the page, the other on an area; light and dark; French and Arabic.
   for (const skin of ['midnight', 'clinic']) {
     const other = skin === 'midnight' ? 'clinic' : 'midnight';
-    for (const scheme of ['light', 'dark']) for (const locale of ['fr-FR', 'ar-DZ']) {
+    for (const scheme of ['light', 'dark']) for (const locale of lite ? ['ar-DZ'] : ['fr-FR', 'ar-DZ']) {
       const qs = `locale=${locale}&theme=${scheme}&skin=${skin}&area=${other}`;
       const { page, errors } = await open(qs);
       const l = await look(page);
+      // Step 7: every colour of each grid is its theme's (the hand-written fixture); the page never scrolls
+      // sideways; the focus ring, reached by Tab, is drawn in the accent.
+      const m = await page.evaluate((TZ) => {
+        const probe = (root, k) => { const s = document.createElement('span'); s.style.color = `var(--tz-${k})`; root.append(s); const c = getComputedStyle(s).color; s.remove(); return c; };
+        const grids = [...document.querySelectorAll('#host > .dzg, #area > .dzg')];
+        return { tokens: grids.map((g) => Object.fromEntries(TZ.map((k) => [k, probe(g, k)]))), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      }, TZ);
+      const off = [skin, other].flatMap((sk, i) => TZ.filter((k) => m.tokens[i]?.[k] !== rgb(FIX[sk][scheme][k])).map((k) => `${i ? 'area' : 'page'} ${k}`));
+      await page.focus('#before');
+      await page.keyboard.press('Tab');
+      const ring = await page.evaluate(() => { const a = document.activeElement; const s = getComputedStyle(a); return { inGrid: !!a.closest('#host'), style: s.outlineStyle, width: s.outlineWidth, color: s.outlineColor }; });
+      check(name, `themes ${qs}: the ten colours of the page's grid and the area's are their themes' (fixtures)${off.length ? `, off: ${off.join(', ')}` : ''}; no horizontal overflow (${m.overflow}); Tab shows the ring (${ring.style} ${ring.width}) in the accent`,
+        off.length === 0 && m.overflow <= 0 && ring.inGrid && ring.style === 'solid' && ring.width === '2px' && ring.color === rgb(FIX[skin][scheme].accent), { off, m: m.overflow, ring });
       const b = await bar(page);
       const rtl = locale.startsWith('ar');
       const tracking = l[0].tracking;
@@ -2082,13 +2100,14 @@ async function themeChecks(name, ctx) {
         && b && b.width === (skin === 'midnight' ? '2px' : '0px') && (rtl ? b.right === '0px' && b.left !== '0px' : b.left === '0px' && b.right !== '0px')
         && (skin === 'clinic' || b.bg === rgb(FIX.midnight[scheme].accent));
       check(name, `themes ${qs}: page ${l[0].bg}, area ${l[1].bg}, pills ${l[0].pill}, header tracking ${tracking}, bar ${b?.width} at the inline start (${rtl ? 'right' : 'left'})`, ok, { l, b });
-      const v = await axe(page);
-      check(name, `themes ${qs}: axe 0 (contrast included) with a row selected, no page error`, v.length === 0 && errors.length === 0, { v, errors });
+      const v = lite ? [] : await axe(page);
+      check(name, `themes ${qs}: ${lite ? '' : 'axe 0 (contrast included) with a row selected, '}no page error`, v.length === 0 && errors.length === 0, { v, errors });
       await page.screenshot({ path: `${OUT}/${name}-themes-${skin}-${scheme}-${locale}.png`, clip: { x: 0, y: 0, width: 1000, height: 720 } });
       await page.close();
     }
   }
 
+  if (lite) return;
   // ---- R4: an Arabic grid in a French page: no header tracking (by its direction, :dir(rtl)).
   {
     const { page, errors } = await open('locale=ar-DZ&pagelang=fr&theme=light&skin=midnight');
@@ -2130,15 +2149,28 @@ async function themeChecks(name, ctx) {
     await page.close();
   }
 
-  // ---- forced colours: the system paints; Midnight's bar stays, in Highlight; axe 0, French and Arabic.
-  for (const locale of ['fr-FR', 'ar-DZ']) {
-    const { page, errors } = await open(`locale=${locale}&theme=dark&skin=midnight&area=clinic`, (p) => p.emulateMedia({ forcedColors: 'active' }));
+  // ---- forced colours: the system paints; Midnight's bar stays, in Highlight; French and Arabic; each theme
+  // on the page (step 7: Clinic too, the other on an area). The selected row keeps its ticked box.
+  for (const skin of ['midnight', 'clinic']) for (const locale of ['fr-FR', 'ar-DZ']) {
+    const other = skin === 'midnight' ? 'clinic' : 'midnight';
+    const { page, errors } = await open(`locale=${locale}&theme=dark&skin=${skin}&area=${other}`, (p) => p.emulateMedia({ forcedColors: 'active' }));
     const b = await bar(page);
-    const hl = await page.evaluate(() => { const d = document.createElement('div'); d.style.color = 'Highlight'; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; });
+    const sys = await page.evaluate(() => {
+      const d = document.createElement('div');
+      document.body.append(d);
+      const read = (c) => ((d.style.color = c), getComputedStyle(d).color);
+      const out = { hl: read('Highlight'), canvas: read('Canvas'), text: read('CanvasText') };
+      d.remove();
+      const row = [...document.querySelectorAll('#host .dzg-layer > .dzg-row')].find((r) => r.getAttribute('aria-selected') !== 'true');
+      const cell = row.querySelector('.dzg-cell');
+      return { ...out, bg: getComputedStyle(row).backgroundColor, fg: getComputedStyle(cell).color, ticked: (() => { const box = document.querySelector('#host .dzg-row[aria-selected=true] .dzg-box'); return !!box && !['none', 'normal'].includes(getComputedStyle(box, '::before').content); })() };
+    });
     // No axe here: under emulated forced colours it mixes forced text with unforced surfaces (the page's
     // own heading fails); the existing forced-colours checks read the system's colours instead.
-    check(name, `themes: forced colours ${locale}, Midnight's bar ${b?.width} at the inline start in Highlight (${b?.bg} / ${hl})`, b && b.width === '2px' && b.bg === hl && (locale.startsWith('ar') ? b.right === '0px' : b.left === '0px') && errors.length === 0, { b, hl, errors });
-    await page.screenshot({ path: `${OUT}/${name}-themes-forced-${locale}.png`, clip: { x: 0, y: 0, width: 1000, height: 720 } });
+    const barOk = skin === 'clinic' ? b && b.width === '0px' : b && b.width === '2px' && b.bg === sys.hl && (locale.startsWith('ar') ? b.right === '0px' : b.left === '0px');
+    check(name, `themes: forced colours, ${skin} ${locale}: rows in the system's Canvas and CanvasText (${sys.bg} / ${sys.fg}), the selected row's box ticked; bar ${b?.width}${skin === 'midnight' ? ` at the inline start in Highlight (${b?.bg})` : ''}`,
+      barOk && sys.bg === sys.canvas && sys.fg === sys.text && sys.ticked && errors.length === 0, { b, sys, errors });
+    await page.screenshot({ path: `${OUT}/${name}-themes-forced-${skin}-${locale}.png`, clip: { x: 0, y: 0, width: 1000, height: 720 } });
     await page.close();
   }
   // With contrast.css too: its selected row is Highlight, the bar HighlightText (review of part 1).
@@ -2160,6 +2192,174 @@ async function themeChecks(name, ctx) {
     check(name, `themes: forced colours with more contrast, Midnight's bar ${b?.bg} (HighlightText) on the Highlight row ${sys.seg}`, b && b.width === '2px' && b.bg === sys.fg && sys.seg === sys.hl && b.bg !== sys.seg && errors.length === 0, { b, sys, errors });
     await page.close();
   }
+  await frameworkChecks(name, ctx);
+}
+
+/**
+ * The framework bridges on real builds (showcase themes step 5, owner T4; docs/theme-in-3-lines.md): each
+ * setup of packages/theme/test/frameworks/ built by the real tool (scripts/frameworks.mjs), then in Chrome:
+ * the ten colours the grid draws equal the framework's documented defaults (fixtures/*-defaults.json, as
+ * sRGB bytes), light and dark (the system, Tailwind's .dark, Bootstrap's data-bs-theme on the root or an
+ * area), the font and the corners follow, the framework's reset leaves the grid's rules, the app's utility
+ * class on a cell wins; the pitfalls the docs name are pinned (no order line; the bridge beside Tailwind's
+ * build); a showcase theme imported wins over a bridge.
+ */
+async function frameworkChecks(name, ctx) {
+  await buildFrameworks(ROOT);
+  const fx = (f) => JSON.parse(readFileSync(`${ROOT}packages/theme/test/fixtures/${f}`, 'utf8'));
+  const TW4 = fx('tailwind4-defaults.json').vars;
+  const TW3 = fx('tailwind3-defaults.json').theme;
+  const BS = fx('bootstrap-defaults.json');
+  const TZ = ['bg', 'bg-raised', 'fg', 'fg-muted', 'border', 'accent', 'accent-fg', 'danger', 'warning', 'success'];
+  /** The bridge's own declarations (its first rule), read from the file. */
+  const mapOf = (file) => {
+    const css = readFileSync(`${ROOT}packages/theme/${file}`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const body = /\{\s*:root[^{]*\{([^}]*)\}/.exec(css)[1];
+    return Object.fromEntries([...body.matchAll(/--tz-([a-z-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+  };
+  const MAPS = { tailwind4: mapOf('tailwind.css'), tailwind3: mapOf('tailwind3.css'), bootstrap: mapOf('bootstrap.css') };
+  const family = (fw) => (fw.startsWith('tailwind4') ? 'tailwind4' : fw.startsWith('bootstrap') ? 'bootstrap' : 'tailwind3');
+  /** sRGB bytes of a token by the fixtures (the framework's documented values), in a scheme. */
+  const expected = (fw, k, scheme) => {
+    const f = family(fw);
+    const expr = MAPS[f][k].replace(/theme\('([^']+)'\)/g, (_, p) => TW3[p]);
+    const vars = f === 'bootstrap' ? { ...BS.light, ...(scheme === 'dark' ? BS.dark : {}) } : TW4;
+    const c = resolveColor(expr, vars, scheme);
+    return [...c.slice(0, 3).map(Math.round), Math.round(c[3] * 255)];
+  };
+  const near = (a, b) => a && b && a.every((x, i) => Math.abs(x - b[i]) <= 2);
+  const open = async (qs, scheme) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 760 });
+    await page.emulateMedia({ colorScheme: scheme ?? 'light' });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/frameworks.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    return { page, errors };
+  };
+  /** Per grid i: every token's bytes, the row's surface, the font, the corners, the frame, a cell's padding with and without the app's class. */
+  const read = (page, i = 0) => page.evaluate(({ i, TZ }) => {
+    const root = document.querySelectorAll('#host > .dzg, #area > .dzg')[i];
+    const s = getComputedStyle(root);
+    const row = [...root.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => r.getAttribute('aria-selected') !== 'true');
+    const hot = root.querySelector('.dzg-cell.px-1');
+    const other = [...root.querySelectorAll('.dzg-cell[data-col=name]')].find((c) => !c.classList.contains('px-1'));
+    return {
+      tokens: Object.fromEntries(TZ.map((k) => [k, window.t.probe(i, `var(--tz-${k})`)])),
+      row: window.t.bytes(getComputedStyle(row).backgroundColor),
+      size: s.fontSize, family: s.fontFamily.split(',')[0].trim(), radius: s.borderStartStartRadius, frame: s.borderTopWidth,
+      rule: getComputedStyle(other).borderBlockEndWidth, hot: hot && getComputedStyle(hot).paddingInlineStart, pad: getComputedStyle(other).paddingInlineStart,
+    };
+  }, { i, TZ });
+  /** The examples of docs/theme-in-3-lines.md (examples.json) on grid 0: each class wins where it is put. */
+  const examples = (page) => page.evaluate(() => {
+    const { ex, classed, bytes } = window.t;
+    const root = document.querySelector('#host > .dzg');
+    const same = (a, b) => a.every((x, i) => Math.abs(x - b[i]) <= 1);
+    const neg = [...root.querySelectorAll('.dzg-cell[data-col=amount]')].find((c) => c.className.includes(ex.negative.split(' ')[0]));
+    const pos = [...root.querySelectorAll('.dzg-cell[data-col=amount]')].find((c) => c !== neg && !c.className.includes(ex.negative.split(' ')[0]));
+    const want = classed(0, ex.negative).color;
+    const flagged = root.querySelector('.dzg-layer > .dzg-row[aria-rowindex="3"]');
+    const plain = root.querySelector('.dzg-layer > .dzg-row[aria-rowindex="2"]');
+    const rowBg = bytes(getComputedStyle(flagged).backgroundColor);
+    const segBg = bytes(getComputedStyle(flagged.querySelector('.dzg-seg-start')).backgroundColor);
+    const plainBg = bytes(getComputedStyle(plain).backgroundColor);
+    const rowWant = classed(0, ex.row).tz;
+    const danger = root.querySelector('.dzg-badge[data-tone=danger]');
+    const success = root.querySelector('.dzg-badge[data-tone=success]');
+    const pill = danger && bytes(getComputedStyle(danger).backgroundColor);
+    const pillWant = classed(0, ex.pills.danger).bg;
+    const head = getComputedStyle(root.querySelector('.dzg-hcell[data-col=city]')).textTransform;
+    const r = {
+      neg: neg && bytes(getComputedStyle(neg).color), want, pos: pos && bytes(getComputedStyle(pos).color),
+      rowBg, segBg, plainBg, rowWant, pill, pillWant, success: success && bytes(getComputedStyle(success).backgroundColor), head,
+    };
+    r.ok = !!neg && same(r.neg, want) && !same(r.pos, want) && same(rowBg, segBg) && same(rowBg, rowWant) && !same(rowBg, plainBg)
+      && !!pill && same(pill, pillWant) && !same(pill, r.success) && head === 'uppercase';
+    return r;
+  });
+  const tokensOk = (fw, r, scheme) => TZ.filter((k) => !near(r.tokens[k], expected(fw, k, scheme)));
+  // The first family of each framework's default sans stack, as the pinned versions build it.
+  const FAMILY = { tailwind4: '-apple-system', tailwind3: 'ui-sans-serif', bootstrap: 'system-ui' };
+
+  for (const fw of ['tailwind4', 'tailwind3', 'bootstrap', 'bootstrap-unlayered']) {
+    for (const scheme of ['light', 'dark']) {
+      // Tailwind: the system's scheme (darkMode 'media'); Bootstrap: data-bs-theme on the root.
+      const bs = fw.startsWith('bootstrap');
+      const qs = `fw=${fw}${bs ? `&bs=${scheme}` : ''}`;
+      const { page, errors } = await open(qs, bs ? 'light' : scheme);
+      const r = await read(page);
+      const off = tokensOk(fw, r, scheme);
+      check(name, `bridges ${qs} (${scheme}): the ten colours are the framework's documented ones${off.length ? `, off: ${off.join(' ')}` : ''}; the row's surface too`,
+        off.length === 0 && near(r.row, expected(fw, 'bg', scheme)), { off: Object.fromEntries(off.map((k) => [k, [r.tokens[k], expected(fw, k, scheme)]])), row: r.row });
+      check(name, `bridges ${qs} (${scheme}): font ${r.size} ${r.family}, corners ${r.radius}; frame ${r.frame} and cell rule ${r.rule} kept over the framework's reset; the app's px-1 wins (${r.hot} vs ${r.pad})`,
+        r.size === '14px' && r.family === FAMILY[family(fw)] && r.radius === '6px' && r.frame === '1px' && r.rule === '1px' && r.hot === '4px' && r.pad === '8px', r);
+      const e = await examples(page);
+      check(name, `bridges ${qs} (${scheme}): the documented examples hold: a negative amount in the class's colour, a highlighted row (pinned part too), a danger pill, an uppercase header`, e.ok, e);
+      const v = await axe(page);
+      check(name, `bridges ${qs} (${scheme}): axe 0 (contrast included, the examples shown), no page error`, v.length === 0 && errors.length === 0, { v, errors });
+      await page.screenshot({ path: `${OUT}/${name}-bridge-${fw}-${scheme}.png`, clip: { x: 0, y: 0, width: 1000, height: 600 } });
+      await page.close();
+    }
+  }
+
+  // Tailwind's .dark class (Tailwind 4: @custom-variant dark; Tailwind 3: darkMode 'class') under a light system; Arabic, right to left.
+  {
+    const { page, errors } = await open('fw=tailwind4-class&dark=class&locale=ar-DZ', 'light');
+    const r = await read(page);
+    const off = tokensOk('tailwind4', r, 'dark');
+    const v = await axe(page);
+    check(name, `bridges tailwind4 with its dark variant on .dark (@custom-variant), .dark under a light system, Arabic: dark colours${off.length ? `, off: ${off.join(' ')}` : ''}, the app's px-1 wins (${r.hot}); axe 0`, off.length === 0 && r.hot === '4px' && v.length === 0 && errors.length === 0, { off, r, v, errors });
+    await page.close();
+  }
+  // Bootstrap's colour mode on an area, nested in the root's (review 2): that grid takes the area's mode, the
+  // page's grid the root's; light inside dark and dark inside light.
+  for (const fw of ['bootstrap', 'bootstrap-unlayered']) for (const [root, area] of [['light', 'dark'], ['dark', 'light']]) {
+    const { page, errors } = await open(`fw=${fw}&bs=${root}&area=${area}`, 'light');
+    const a = await read(page, 0);
+    const b = await read(page, 1);
+    const off = [...tokensOk(fw, a, root), ...tokensOk(fw, b, area).map((k) => `area ${k}`)];
+    const v = await axe(page);
+    check(name, `bridges ${fw}: data-bs-theme="${area}" on an area inside a "${root}" root: each grid in its own mode${off.length ? `, off: ${off.join(' ')}` : ''}; axe 0`, off.length === 0 && v.length === 0 && errors.length === 0, { off, v, errors });
+    await page.screenshot({ path: `${OUT}/${name}-bridge-${fw}-${root}-area-${area}.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    await page.close();
+  }
+  // Tailwind's class mode under a dark system, no .dark on the root (review 1): the grid stays light, as the page.
+  {
+    const { page, errors } = await open('fw=tailwind4-class', 'dark');
+    const r = await read(page);
+    const off = tokensOk('tailwind4', r, 'light');
+    const e = await examples(page);
+    const v = await axe(page);
+    check(name, `bridges tailwind4 class mode, dark system, no .dark: the grid stays light${off.length ? `, off: ${off.join(' ')}` : ''}; examples hold; axe 0`, off.length === 0 && e.ok && v.length === 0 && errors.length === 0, { off, e, v, errors });
+    await page.close();
+  }
+  // The bridge wins over a showcase theme imported for the page (owner T9: dzgrid.bridge after dzgrid.skin).
+  for (const skin of ['midnight', 'clinic']) {
+    const { page, errors } = await open(`fw=tailwind4&skin=${skin}`, 'dark');
+    const r = await read(page);
+    const off = tokensOk('tailwind4', r, 'dark');
+    check(name, `bridges tailwind4 + ${skin}.css for the page: the framework's colours win over the showcase theme (T9)${off.length ? `, off: ${off.join(' ')}` : ''}`, off.length === 0 && errors.length === 0, { off, errors });
+    await page.close();
+  }
+  // The pitfalls the docs name. Without the order line, dzgrid lands after Tailwind's utilities: the
+  // grid beats px-1. The bridge linked beside Tailwind's build: the colours Tailwind did not emit are missing.
+  {
+    const { page, errors } = await open('fw=tailwind4-noorder', 'light');
+    const r = await read(page);
+    check(name, `bridges tailwind4 without the order line: the grid beats the app's px-1 (${r.hot}; the documented pitfall)`, r.hot === '8px' && errors.length === 0, { r, errors });
+    await page.close();
+  }
+  {
+    const { page, errors } = await open('fw=tailwind4-bare&raw=1', 'light');
+    const r = await read(page);
+    const off = tokensOk('tailwind4', r, 'light');
+    check(name, `bridges tailwind.css linked beside Tailwind's build: colours Tailwind did not emit are lost (${off.join(' ')}; the documented pitfall)`, off.length > 0 && errors.length === 0, { off, errors });
+    await page.close();
+  }
 }
 
 async function runEngine(name) {
@@ -2175,7 +2375,8 @@ async function runEngine(name) {
       if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx);
       if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
       if (only === 'filters' && name === 'chrome') await floatingToggleChecks(name, ctx);
-      if (only === 'themes' && name === 'chrome') await themeChecks(name, ctx);
+      if (only === 'themes') await themeChecks(name, ctx);
+      if (only === 'bridges' && name === 'chrome') await frameworkChecks(name, ctx);
       if (only === 'dates' && name === 'chrome') await dateChecks(name, ctx);
       return;
     }
@@ -2505,7 +2706,7 @@ async function runEngine(name) {
     if (name === 'chrome') await searchChecks(name, ctx);
     if (name === 'chrome') await pagingChecks(name, ctx);
     if (name === 'chrome') await partsChecks(name, ctx);
-    if (name === 'chrome') await themeChecks(name, ctx);
+    await themeChecks(name, ctx);
     if (name === 'chrome') await rulesChecks(name, ctx);
     if (name === 'chrome') await motionChecks(name, ctx);
     if (name === 'chrome') await treeChecks(name, ctx);

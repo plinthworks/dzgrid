@@ -1,5 +1,6 @@
 import type { ColumnLayout, ResolvedColumn } from '@dzgrid/core';
 import { CHECK_WIDTH, setAttr, setPx, range } from './rows.js';
+import { swapClasses } from './write.js';
 
 /**
  * A header row beyond the column headers (a floating filter row): the grid
@@ -202,6 +203,8 @@ export class HeaderRenderer {
           const text = col.def.header ?? col.id;
           if (!p.content?.(col, label) && label.textContent !== text) label.textContent = text;
           p.decorate(col, el);
+          // The host's classes for this column's header (showcase themes step 6).
+          this.#cls.set(el, swapClasses(el, this.#cls.get(el) ?? '', col.def.ui?.headerClass ?? ''));
         }
         if (el === cursor) cursor = cursor.nextSibling;
         else seg.insertBefore(el, cursor);
@@ -212,6 +215,9 @@ export class HeaderRenderer {
     place(view.segs.end, layout.end, range(layout.end.columns.length), false);
     return height;
   }
+
+  /** The classes `ui.headerClass` gave each header cell, as given. */
+  readonly #cls = new WeakMap<HTMLElement, string>();
 
   #makeCell(view: HeaderRowView, col: ResolvedColumn<any>): HTMLElement {
     const el = this.#doc.createElement('div');

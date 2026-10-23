@@ -1,0 +1,26 @@
+{
+  "$comment": "Bootstrap 5.3's CSS variables the bridge bootstrap.css reads, transcribed by hand from https://getbootstrap.com/docs/5.3/customize/css-variables/ (« :root, [data-bs-theme=light] » and « [data-bs-theme=dark] », fetched 2026-10-23), never from Bootstrap's files. dark lists what [data-bs-theme=dark] redefines; the rest is inherited from light. bridges.test.ts checks the bridge's contrast with them; the browser suite (--only themes) checks Bootstrap 5.3.8's CSS gives these colours.",
+  "light": {
+    "--bs-body-bg": "#fff",
+    "--bs-body-color": "#212529",
+    "--bs-secondary-color": "rgba(33, 37, 41, 0.75)",
+    "--bs-tertiary-bg": "#f8f9fa",
+    "--bs-border-color": "#dee2e6",
+    "--bs-link-hover-color": "#0a58ca",
+    "--bs-danger-text-emphasis": "#58151c",
+    "--bs-warning-text-emphasis": "#664d03",
+    "--bs-success-text-emphasis": "#0a3622",
+    "--bs-border-radius": "0.375rem"
+  },
+  "dark": {
+    "--bs-body-bg": "#212529",
+    "--bs-body-color": "#dee2e6",
+    "--bs-secondary-color": "rgba(222, 226, 230, 0.75)",
+    "--bs-tertiary-bg": "#2b3035",
+    "--bs-border-color": "#495057",
+    "--bs-link-hover-color": "#8bb9fe",
+    "--bs-danger-text-emphasis": "#ea868f",
+    "--bs-warning-text-emphasis": "#ffda6a",
+    "--bs-success-text-emphasis": "#75b798"
+  }
+}

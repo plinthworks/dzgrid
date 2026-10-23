@@ -13,6 +13,22 @@ export const setAttr = (el: Element, name: string, value: string | null): void =
   } else if (el.getAttribute(name) !== value) el.setAttribute(name, value);
 };
 
+/**
+ * The host's classes on one of the grid's elements (cell-class.md): `next` replaces `was` token by token,
+ * the grid's own (`dzg-`) and any other class left alone. Returns `next`, the new `was`.
+ */
+/** The host's class names in a string: split on any space, the grid's own (`dzg-`) left out. */
+export const hostNames = (t: string): string[] => t.split(/\s+/).filter((c) => c && !c.startsWith('dzg-'));
+
+export const swapClasses = (el: Element, was: string, next: string): string => {
+  if (next !== was) {
+    const add = hostNames(next);
+    for (const c of hostNames(was)) if (!add.includes(c)) el.classList.remove(c);
+    el.classList.add(...add);
+  }
+  return next;
+};
+
 export const setPx = (el: HTMLElement, prop: string, v: number): void => {
   const s = `${v}px`;
   if (el.style.getPropertyValue(prop) !== s) el.style.setProperty(prop, s);

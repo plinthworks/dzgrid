@@ -46,7 +46,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     // Q17b (owner, 2026-10-22): the measure + 10 %, never above what the owner granted. The DOM and theme
     // bases since the showcase themes' grants (T7, 2026-10-23): 21 980 and 3 050.
     const grants: Record<string, number> = {
-      '@dzgrid/core': 29000, '@dzgrid/dom': 21980, '@dzgrid/angular': 6250, '@dzgrid/dom/tree': 3700, '@dzgrid/dom/detail': 3900,
+      '@dzgrid/core': 29000, '@dzgrid/dom': 21980, '@dzgrid/angular': 6300, '@dzgrid/dom/tree': 3700, '@dzgrid/dom/detail': 3900,
       '@dzgrid/dom/filters': 10000, '@dzgrid/theme': 3050, '@dzgrid/core/tree': 3500,
       '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
       // Q7 (2026-10-21): « core/csv up to 2 000 », a grant the close keeps (1 847 + 10 % would be 2 050).
@@ -61,7 +61,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     }
     // Today's measures (step 13 plan) would have raised these to the measure + 10 %: the grants hold them.
     expect(sizeBudget(20700, ceilingFor('@dzgrid/dom'))).toBe(21980); // 22 770 → 21 980 (the T7 grant since 2026-10-23; 21 300 at the Phase 4 close)
-    expect(sizeBudget(6236, ceilingFor('@dzgrid/angular'))).toBe(6250); // 6 859.6 → 6 250
+    expect(sizeBudget(6236, ceilingFor('@dzgrid/angular'))).toBe(6300); // 6 859.6 → 6 300 (owner T8; 6 250 before)
     expect(sizeBudget(3688, ceilingFor('@dzgrid/dom/tree'))).toBe(3700);
     expect(sizeBudget(1348, ceilingFor('@dzgrid/core/tree-lazy'))).toBe(1500);
     expect(sizeBudget(877, ceilingFor('@dzgrid/dom/tree-lazy'))).toBe(1000); // 964.7 → 1 000, not 1 050
@@ -80,6 +80,10 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(ceilingFor('@dzgrid/theme/clinic.css')).toBe(650);
     expect(ceilingFor('@dzgrid/theme')).toBe(3050);
     expect(ceilingFor('@dzgrid/dom')).toBe(21980);
+    // T8: the Angular wrapper 6 250 → 6 300 for its [rowClass] input (the editing grant stays apart).
+    expect(ceilingFor('@dzgrid/angular')).toBe(6300);
+    // Each framework bridge 500 (step 5).
+    for (const b of ['tailwind.css', 'tailwind3.css', 'bootstrap.css']) expect(ceilingFor(`@dzgrid/theme/${b}`)).toBe(500);
     // A theme far under its grant gets its 10 %; near it, the grant; over it, refused.
     expect(sizeBudget(500, ceilingFor('@dzgrid/theme/midnight.css'))).toBe(550);
     expect(sizeBudget(600, ceilingFor('@dzgrid/theme/clinic.css'))).toBe(650);

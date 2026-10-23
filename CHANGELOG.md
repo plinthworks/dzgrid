@@ -38,18 +38,33 @@ Toward 0.3.0 (Phase 5, editing; not released).
   spacing in Arabic), `--dzg-select-bar` (a selected row's bar at its inline start, `Highlight` in
   forced colours); `--dzg-saving-color` and `--dzg-refused-color` reserved for the save states (contrast
   pairs checked now). `check:contrast` reads `oklch()` and checks both showcase themes by default.
+- Theme (showcase themes, part 2; `docs/theme-in-3-lines.md`): bridges `@dzgrid/theme/tailwind3.css`
+  (Tailwind CSS 3, through `theme()`) and `@dzgrid/theme/bootstrap.css` (Bootstrap 5.3's `--bs-*`
+  variables, following `data-bs-theme` on the root or any element), beside the revised `tailwind.css`
+  (Tailwind CSS 4); each maps the ten colours, the font and the corners and passes every contrast pair
+  with the framework's default colours, light and dark.
+- `settings.rowClass({ row, key, context })`: classes for a data row from its data (live; Angular
+  `[rowClass]`, owner T8: `@dzgrid/angular` budget 6 250 → 6 300); `columns[].ui.headerClass`: classes for a column's header cell; `badge({ classes })`: a
+  class per tone. Type `RowClassContext`. Same rules as `ui.cellClass` (diffed, `dzg-` ignored).
 
 ### Changed
 - The grid's CSS sits in the cascade layer `dzgrid` (owner T1): `dzgrid.css` in `dzgrid.theme`,
   `contrast.css` in `dzgrid.contrast`, `tailwind.css` in `dzgrid.bridge`, each file opening with
-  `@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;`; the layout
+  `@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;` (a bridge after
+  a showcase theme, owner T9: an app using a bridge sees its framework's colours); the layout
   `@dzgrid/dom` injects (and the exported `LAYOUT_CSS`), and each feature's, in `dzgrid.layout`. An
   application's classes now win over the grid's look without `!important`, whatever their specificity.
   The two rules restyling tzslot's date panel stay unlayered (tzslot's sheets are). More contrast also
   applies inside a `[data-dzg-skin]` area. `npm run build:theme` builds the four CSS files from
   `dzgrid.scss` and the new `contrast.scss`.
 - Budget ceilings (owner T7): `@dzgrid/theme` up to 3 050, `@dzgrid/dom` up to 21 980; new entries
-  `@dzgrid/theme/midnight.css` and `clinic.css` at 650 B gz each.
+  `@dzgrid/theme/midnight.css` and `clinic.css` at 650 B gz each, `tailwind.css`, `tailwind3.css` and
+  `bootstrap.css` at 500 each.
+- `@dzgrid/theme/tailwind.css`: `--dzg-font` is now a valid `font` shorthand (`400 0.875rem/1.45
+  var(--font-sans)`; a family list alone was dropped by the browser, the grid inherited the page's font).
+  It must be imported in the CSS Tailwind builds (Tailwind emits only the variables it sees used).
+- Development: Tailwind CSS 4.3.3 (with `@tailwindcss/cli`), Tailwind CSS 3.4.19 (as `tailwindcss3`) and
+  Bootstrap 5.3.8 are root devDependencies, only run by the browser suite; never shipped.
 - `ClientModel.reapply()` is told with the source given, `api` by default (it was always `user`).
 - While the order is stale after an edit, any rerun (a sort, a filter, the search typed on, the
   language, the columns) is a whole one with the edits; a host update that moves rows puts everything

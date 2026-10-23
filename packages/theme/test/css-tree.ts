@@ -65,7 +65,7 @@ export function sheet(css: string): Sheet {
   return out;
 }
 
-/** The order statement every theme file opens with (themes-plan §2, T1). */
+/** The order statement every theme file opens with (themes-plan §2, T1); the bridge after the skin (owner T9: an app using a bridge sees its framework's colours). */
 export const ORDER = '@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast';
 
 /** A rule as text, without its layers: what an unlayered copy must hold the same. */

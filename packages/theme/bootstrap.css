@@ -1,0 +1,45 @@
+/**
+ * @dzgrid/theme/bootstrap.css — the grid in your Bootstrap 5.3 colours. Bootstrap's CSS is unlayered:
+ * put it in a layer before the grid's,
+ *
+ *   @layer bootstrap, dzgrid;
+ *   @import "bootstrap/dist/css/bootstrap.css" layer(bootstrap);
+ *   @import "@dzgrid/theme";
+ *   @import "@dzgrid/theme/bootstrap.css";
+ *
+ * or keep it unlayered and import @dzgrid/theme/dzgrid.unlayered.css after it instead of @dzgrid/theme
+ * (Angular's "styles" array). Reads Bootstrap's own variables, so your Sass or CSS changes to them
+ * follow: the body's surface and text, the tertiary surface, the secondary text, the border colour,
+ * the link's hover colour as the accent (the primary one shade deeper: 3:1 for marks on a selected
+ * row), the text-emphasis colours for danger, warning and success, the body's font and the corners.
+ * Light and dark follow data-bs-theme, on the root or on any element. In the layer dzgrid.bridge
+ * (docs/behaviors/theming.md, docs/theme-in-3-lines.md).
+ */
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+
+@layer dzgrid.bridge {
+  :root,
+  [data-bs-theme] {
+    --tz-bg: var(--bs-body-bg);
+    --tz-bg-raised: var(--bs-tertiary-bg);
+    --tz-fg: var(--bs-body-color);
+    --tz-fg-muted: var(--bs-secondary-color);
+    --tz-border: var(--bs-border-color);
+    --tz-accent: var(--bs-link-hover-color);
+    --tz-accent-fg: var(--bs-body-bg);
+    --tz-danger: var(--bs-danger-text-emphasis);
+    --tz-warning: var(--bs-warning-text-emphasis);
+    --tz-success: var(--bs-success-text-emphasis);
+    --dzg-font: 400 0.875rem/1.5 var(--bs-body-font-family);
+    --dzg-radius: var(--bs-border-radius);
+  }
+
+  :root,
+  [data-bs-theme=light] {
+    --tz-color-scheme: light;
+  }
+
+  [data-bs-theme=dark] {
+    --tz-color-scheme: dark;
+  }
+}

@@ -9,6 +9,8 @@ export interface BadgeOptions {
   readonly tones?: Readonly<Record<string, Tone>>;
   /** The tone of a value the map does not name; default `neutral`. */
   readonly fallback?: Tone;
+  /** The host's classes per tone (showcase themes step 6), beside `dzg-badge`: `{ danger: 'bg-red-100 text-red-800' }`. */
+  readonly classes?: Readonly<Partial<Record<Tone, string>>>;
 }
 
 /** The shape beside the colour: colour is never the only sign. Neutral has none. */
@@ -25,5 +27,5 @@ export const badge = (o: BadgeOptions = {}): SlotPart<'cell'> =>
     if (c.value == null || !c.text.trim()) return null;
     const k = String(c.value);
     const t = (o.tones && Object.hasOwn(o.tones, k) ? o.tones[k] : undefined) ?? o.fallback ?? 'neutral';
-    return [c.text, GLYPHS[t] ?? '', t];
+    return [c.text, GLYPHS[t] ?? '', t, o.classes?.[t]];
   });

@@ -1,7 +1,7 @@
 {
   "name": "@dzgrid/theme",
   "version": "0.2.0",
-  "description": "An optional stylesheet for DzGrid: tzslot's palette, light and dark, more contrast, forced colours. Plain CSS.",
+  "description": "An optional stylesheet for DzGrid: tzslot's palette, light and dark, more contrast, forced colours; two showcase themes; bridges to Tailwind CSS 3 and 4 and Bootstrap 5.3. Plain CSS.",
   "license": "MIT",
   "repository": { "type": "git", "url": "git+https://github.com/plinthworks/dzgrid.git", "directory": "packages/theme" },
   "homepage": "https://github.com/plinthworks/dzgrid#readme",
@@ -19,9 +19,11 @@
     "./contrast.unlayered.css": "./contrast.unlayered.css",
     "./midnight.css": "./midnight.css",
     "./clinic.css": "./clinic.css",
-    "./contrast.scss": "./contrast.scss"
+    "./contrast.scss": "./contrast.scss",
+    "./tailwind3.css": "./tailwind3.css",
+    "./bootstrap.css": "./bootstrap.css"
   },
-  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "midnight.css", "clinic.css"],
+  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css"],
   "sideEffects": ["*.css"],
   "sass": "./dzgrid.scss"
 }

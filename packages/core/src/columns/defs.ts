@@ -48,8 +48,9 @@ export interface ColumnDef<T, V = unknown> {
   /**
    * Parts by name for this column (a cell renderer, a header, a tooltip): plain names, resolved by the grid's registry.
    * `cellClass` (step 26, docs/behaviors/cell-class.md): classes for a body cell from its data, space-separated (null: none).
+   * `headerClass` (showcase themes step 6): classes for the column's header cell, space-separated.
    */
-  readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string; readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined };
+  readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string; readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined; readonly headerClass?: string };
   /** Shown over the header, already translated by the host. */
   readonly headerTooltip?: string;
   /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */

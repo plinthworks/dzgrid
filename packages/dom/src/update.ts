@@ -41,6 +41,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   clock: 'fixed',
   fullWidth: 'live',
   context: 'live',
+  rowClass: 'live',
   motion: 'live',
 };
 

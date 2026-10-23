@@ -438,3 +438,108 @@ touches a jsdom test only). No orphan worker or browser left; port 4700 untouche
 - Gate: `test:ci` 4 969/4 969; `test:perm` 6/6; typecheck, build green; `check:size` 0 over (theme 2 427,
   Midnight 446, Clinic 454, dom 20 695, spans 4 466, K.8 81 401); contrast 570 pairs, 0 under;
   browser `--only themes` 29/29, `--only dates` 44/44. Not committed.
+
+## Done — part 2, steps 5–7 (2026-10-23, not committed)
+
+**Dependencies (T4)**, root devDependencies, pinned exact, each published more than two weeks before
+(`npm view <pkg> time`): `tailwindcss` 4.3.3 and `@tailwindcss/cli` 4.3.3 (2026-07-16), `tailwindcss3` =
+`npm:tailwindcss@3.4.19` (2025-12-10; npm links its CLI as `tailwind`, Tailwind 4's as `tailwindcss`),
+`bootstrap` 5.3.8 (2025-08-26). One `npm install`. Only run (their CLIs through `node_modules/.bin`, esbuild
+bundling Bootstrap's CSS); no file of theirs read: what was read is our build output, as test data.
+Bootstrap's names and default values checked on getbootstrap.com/docs/5.3/customize/css-variables/ (up today).
+
+**Step 5 — the bridges.** Red first: `packages/theme/test/bridges.test.ts` 19 of 22 failed (`tailwind3.css`,
+`bootstrap.css` absent, their exports and 500 B budgets; the order statement; Tailwind 4's `--dzg-font` not a
+`font` shorthand); the three that passed pinned the existing Tailwind 4 mapping (its contrast, its `.dark`,
+no physical side). The new order also failed `layer.test.ts` ×5 and `skins.test.ts` ×2, and the ceilings
+`rebudget.test.ts` ×1. Fixtures written by hand from the public pages: `test/fixtures/{tailwind4,tailwind3,
+bootstrap}-defaults.json`. Then:
+- **Order** `dzgrid.layout, dzgrid.theme, dzgrid.bridge, dzgrid.skin, dzgrid.contrast` in every file (the note
+  above: a page-wide showcase theme lost to a bridge on `:root`; lead decision, for the owner to confirm).
+- `tailwind.css`: `--dzg-font: 400 0.875rem/1.45 var(--font-sans)`; comment says to import it through Tailwind.
+  `tailwind3.css` (`theme()`, `.dark`), `bootstrap.css` (`:root, [data-bs-theme]`; accent
+  `--bs-link-hover-color`: Bootstrap's primary `#0d6efd` gave 2.98:1 for the flash mark on a selected row;
+  danger/warning/success the `*-text-emphasis` colours: the plain ones failed 7 badge pairs).
+- **Real builds** (`scripts/frameworks.mjs`, the setups in `packages/theme/test/frameworks/`, page
+  `packages/dom/test/browser/frameworks.html`, `frameworkChecks` in `scripts/browser.mjs`, `-- --only bridges`
+  alone). Found: Tailwind 4 emits the variables the bridge reads when the bridge is imported through it (the
+  plan's "latent bug" does not happen there), and loses every colour when linked beside its output (pinned as a
+  pitfall); without the order line the grid beats utilities (pinned); Tailwind 3 keeps native `@layer` and
+  resolves `theme()` inside `light-dark()`, but an `@import` after `@tailwind base` is dropped silently, so its
+  setup imports `tailwindcss/base` etc.; Tailwind 4.3.3's default sans stack starts with `-apple-system` (my
+  expectation said `ui-sans-serif`: test fixed); a `.dark` class needs Tailwind 4's `@custom-variant dark` for
+  the app's own `dark:` classes (setup `tailwind4-class.css`). The ten colours compared as sRGB bytes against
+  the hand fixtures (our `oklch()` reader agrees with Chrome within 2/255). Shown to discriminate: with the old
+  order and the old Tailwind font, 4 checks fail (font 16px; both showcase themes lose to the bridge).
+
+**Step 6 — class hooks and docs.** Red first: `packages/dom/test/class-hooks.test.ts` 7 of 9 failed (the two
+that passed pin what must not change: inline layout, a badge without `classes`); `packages/theme/test/docs.test.ts`
+failed (page absent), then its README test (1). Then `settings.rowClass({ row, key, context })` (rows.ts:
+`#rowClass` on every bind, cleared on a detail or filler; a new rule bumps the rebind epoch like `context`),
+`ui.headerClass` (header.ts, main header row), `badge({ classes })` (draw.ts sets `className` from the tone),
+one shared `swapClasses` (write.ts, used by `cellClass` too); `UPDATE_POLICY.rowClass: 'live'`; type
+`RowClassContext`. Docs: `docs/theme-in-3-lines.md` (French title, one section per setup, the class examples
+of `frameworks/examples.json`, run on the real builds with axe 0), theme README, sheets `theming.md`,
+`cell-class.md`, `badge-boolean.md`. Playground: « Thème vitrine » (`?skin=midnight|clinic`, `?inline` imports).
+- **Angular `[rowClass]`: written test first (failed, then passed), then taken out**: +41 B gz on
+  `@dzgrid/angular` (6 238 → 6 279; budget and ceiling 6 250, no T7 grant). Owner rule « over: stop and
+  report ». Its test is in `packages/angular/test/class-hooks.test.ts`, `describe.skip`; the input is two
+  lines (`'rowClass'` in `KEYS`, `readonly rowClass = input<S<T>['rowClass']>();`). Docs say it waits.
+
+**Step 7 — the browser suite `--only themes`.** Widened: each theme × light/dark × fr/ar: the ten colours of
+the page's grid and of the area's equal their fixtures, no horizontal overflow, Tab shows a 2 px ring in the
+accent; forced colours for both themes (rows in `Canvas` / `CanvasText`, the selected row's tick, Midnight's
+bar in `Highlight` at the inline start); Firefox and WebKit run the Arabic checks with `--all`. My first run
+failed 4 forced-colour checks on a wrong selector of mine (the tick is the box's `::before`, not
+`aria-checked`): test fixed. Chrome 78/78; `--all` 102/102.
+Step 7's new checks shown to discriminate: a Clinic border colour off by one and the focus ring removed fail 8.
+
+**Gate (once, at the end, 2026-10-23).** `build` green. `typecheck` green. `test:ci` 314 files, 5 013 passed,
+1 skipped (the parked Angular `[rowClass]` test). `test:perm` 6/6. `check:size` 0 over: theme 2 427 (2 500),
+Midnight 446, Clinic 453, `tailwind.css` 324, `tailwind3.css` 325, `bootstrap.css` 293 (500 each), dom 20 833
+(21 300; +138 for the hooks), parts 632 (700), angular 6 238 (6 250), K.8 81 539 (83 500). `check:contrast` 570
+pairs, 0 under (the bridges' pairs are checked by `bridges.test.ts`). `test:browser` (full, Chrome) 579/579;
+`--only themes --all` 102/102. Angular fixture 54/54. No orphan worker or browser; port 4700 untouched (the
+running Vite served the playground's new switch). Not committed. Review and test analysis: not run by this
+agent (owner rule: after each change).
+
+## Owner answers T8–T9, review and test analysis of part 2 (2026-10-23, not committed)
+
+Owner (decisions.md): **T8** Angular `[rowClass]` back, `@dzgrid/angular` 6 250 → 6 300 (size-budget.json and
+the ceiling in rebudget.mjs; the editing grant apart). **T9** the bridge wins over a showcase theme: the order
+is back to `layout, theme, skin, bridge, contrast` everywhere (part 2's change reverted); the docs say an app
+using a bridge sees its framework's colours and, to show Midnight or Clinic, loads no bridge. (An area under
+`data-dzg-skin` still shows its theme beside a `:root` bridge: the bridge reaches it only by inheritance.)
+
+Tests first, each failing on the code before:
+- T8: `rebudget.test.ts` (ceiling 6 300, and the two Phase 4 expectations it moves); the Angular test
+  un-skipped (failed without the input).
+- T9: `css-tree.ts` ORDER, `bridges.test.ts` (bridge after skin): 13 node tests failed (every file's order
+  statement, the copies, skins ×2, bridges ×4); browser « tailwind4 + midnight/clinic: the framework's colours
+  win » failed ×2.
+- Review 1 (class-mode dark): browser « class mode, dark system, no `.dark`: the grid stays light » failed (all
+  ten colours dark). Fix in the application's class-mode setup (`tailwind4-class.css`, the docs for Tailwind 3,
+  the bridges' comments): `:root:not(.dark) { --tz-color-scheme: light; }`. Not in the bridge itself: it would
+  force light on every `darkMode: 'media'` app.
+- Review 2 (nested `data-bs-theme`): documented (theming.md, theme-in-3-lines.md); pinned by browser checks
+  light-in-dark and dark-in-light, both setups (passed at once: behaviour already right).
+- Review 3: `badge({ classes })` keeps `dzg-` names out (and splits on any space): `class-hooks.test.ts` failed.
+- Review 4: « keep the same function » in `settings.ts`, the Angular input, `cell-class.md`, the setup page.
+- Test gaps (pinned behaviour that already held; each shown to bite by a mutant): M08/M09 a pooled row reused
+  as a detail row loses its classes, the rule never asked without a row (mutant: no clearing in `#whole`);
+  M16 the fallback tone's class; M17 tab/newline (mutant: `split(' ')`); M21 each setup quoted under its own
+  heading (docs.test.ts; the pitfall list now comes from `scripts/frameworks.mjs`); M22
+  `scripts/test/frameworks.test.ts` (SETUPS = the .css files, PITFALLS among them, each read from
+  `inputOf(root, name)`; failed first: neither was exported); M23 `packages/theme/test/playground.test.ts`
+  (mutant: names swapped).
+- Sizes: `check:size` measures minified output, comments stripped (esbuild), like every entry:
+  `tailwind.css` 325, `tailwind3.css` 325, `bootstrap.css` 293 B gz (500). The raw files gzipped with their
+  comments are 782 / 773 / 735 (the reviewer's ~755): not what the budget counts.
+- The parts guard (no literal in `parts/`, no import outside it) refused a `'dzg-'` literal in draw.ts: the
+  part takes the prefix from its own class name; `write.ts` gains `hostNames` for `swapClasses`.
+
+**Gate (once, at the end, 2026-10-23).** `build`, `typecheck` green. `test:ci` 316 files, 5 023/5 023.
+`test:perm` 6/6. `check:size` 0 over: angular 6 279 (6 300), dom 20 840 (21 300), parts 689 (700), theme 2 427,
+bridges 325 / 325 / 293 (500), K.8 81 576. `check:contrast` 570 pairs, 0 under. `test:browser` 582/582;
+`--only themes --all` 105/105; Angular fixture 54/54. No orphan of ours (a headless shell running belongs to
+Sehhaty's Playwright, left alone); port 4700 untouched. Not committed.

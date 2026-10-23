@@ -38,7 +38,7 @@ type Ev<T, K extends GridEvent<T>['type']> = Extract<GridEvent<T>, { type: K }>;
 /** The settings read from the inputs, in this order; the defaults' keys fall back to `provideDzGrid`. */
 const KEYS = [
   'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'overlay', 'label', 'tooltips', 'overscan',
-  'searchWarmup', 'selection', 'context', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
+  'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
 ] as const;
 /** Events with an output of their own name. */
 const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded'];
@@ -80,6 +80,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly searchWarmup = input<S<T>['searchWarmup']>();
   readonly selection = input<S<T>['selection']>();
   readonly context = input<unknown>();
+  /** A data row's classes from its data (showcase themes step 6, cell-class.md); live. Keep the same function: a new one rebinds every row. */
+  readonly rowClass = input<S<T>['rowClass']>();
   readonly fullWidth = input<S<T>['fullWidth']>();
   readonly parts = input<Readonly<Record<string, SlotPart>>>();
   /**

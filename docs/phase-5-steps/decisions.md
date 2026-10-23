@@ -49,3 +49,5 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **T5:** `rowClass`, `headerClass` and a class per pill tone, now.
 - **T6:** names `midnight` and `clinic`; applied on import, or on one area with `data-dzg-skin`.
 - **T7 sizes (grants):** `midnight.css` 650, `clinic.css` 650, each bridge 500 (Tailwind 4, Tailwind 3, Bootstrap); theme base inside 2 900, up to 3 050 if needed; dom base 21 800 → 21 980 (class hooks ~120 + layer wrapper ~30). Reset to measure + 10 % at the close, never above.
+- **T8 (2026-10-23):** Angular `[rowClass]` added; `@dzgrid/angular` 6 250 → 6 300 (a separate grant; the 6 900 editing grant stays for editing, so the Phase 5 ceiling becomes 6 950).
+- **T9 (2026-10-23):** the owner chose that the BRIDGE wins over a showcase skin: layer order stays layout < theme < skin < bridge < contrast (the part 2 change to bridge < skin is reverted). An app using a bridge sees its framework's colours; to show midnight/clinic it does not load a bridge (document this).

@@ -1,5 +1,5 @@
 import type { OperationsInput, PageOptions, SourceBinding } from '@dzgrid/core';
-import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, DataNode, SelectionState } from '@dzgrid/core';
+import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, DataNode, RowKey, SelectionState } from '@dzgrid/core';
 import type { GridMessages } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { SlotPart } from './part.js';
@@ -33,6 +33,12 @@ export interface GridSettings<T> {
    * export's `canExport` and the tooltip callback. Live; a new value is a new identity (pass a new object).
    */
   readonly context?: unknown;
+  /**
+   * Classes for a data row from its data (showcase themes step 6, cell-class.md): space-separated, null for
+   * none; asked when the row is bound again (another row, new data, columns, language, context or rule). Live.
+   * Keep the same function from one update to the next: a new one (an inline arrow) binds every row again.
+   */
+  readonly rowClass?: (c: RowClassContext<T>) => string | null | undefined;
   readonly overlay?: 'loading' | 'error' | null;
   /** The grid's accessible name, already translated; the bundle's `grid.label` otherwise. */
   readonly label?: string;
@@ -72,6 +78,13 @@ export interface GridSettings<T> {
   readonly motion?: boolean;
   /** Optional features (`filters()`, `pagination()`…), set up once with the grid. */
   readonly features?: readonly GridFeature[];
+}
+
+/** What `rowClass` is told about one data row: the row, its key, `settings.context`. */
+export interface RowClassContext<T> {
+  readonly row: Readonly<T>;
+  readonly key: RowKey;
+  readonly context: unknown;
 }
 
 export const ROW_HEIGHT = { compact: 28, comfortable: 32, spacious: 40 } as const;

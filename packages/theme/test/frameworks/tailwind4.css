@@ -1,0 +1,4 @@
+@layer theme, base, dzgrid, components, utilities;
+@import "tailwindcss";
+@import "@dzgrid/theme";
+@import "@dzgrid/theme/tailwind.css";

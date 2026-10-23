@@ -45,6 +45,8 @@ export interface RowView {
   slot: HTMLElement | null;
   /** The part mounted in `slot` (`@dzgrid/dom/detail`): destroyed by the base when the row goes. */
   part: PartHandle<SlotContext['detail']> | null;
+  /** The classes `rowClass` gave it, as given (showcase themes step 6). */
+  cls: string;
 }
 
 /** A cell where a span starts: what it covers, and its width (the columns it covers). */
@@ -76,7 +78,7 @@ export interface RowSpans {
 }
 
 export { CHECK_WIDTH, setAttr, setPx } from './write.js';
-import { CHECK_WIDTH, setAttr, setPx } from './write.js';
+import { CHECK_WIDTH, setAttr, setPx, swapClasses } from './write.js';
 
 /** One cell's value (coerced) and text (the codec's display): blank for a blank or unreadable value. */
 export function cellValue<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): { value: unknown; text: string } {
@@ -138,6 +140,8 @@ export interface Frame<T> {
   readonly rowAttrs: (key: RowKey, el: HTMLElement) => void;
   /** Span plans, when the spans feature is on. */
   readonly spans?: RowSpans | null;
+  /** The host's classes for a data row (`settings.rowClass`). */
+  readonly rowClass?: ((c: { row: any; key: RowKey; context: unknown }) => string | null | undefined) | undefined;
   /** The view's inline size: a detail row's cell is as wide (never wider than the columns). */
   readonly view?: number;
 }
@@ -188,7 +192,7 @@ export class RowRenderer<T> {
     };
     const segs = { start: seg('start'), center: seg('center'), end: seg('end') };
     this.made++;
-    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null, plan: null, slot: null, part: null };
+    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null, plan: null, slot: null, part: null, cls: '' };
   }
 
   #makeCell(): CellView {
@@ -297,6 +301,7 @@ export class RowRenderer<T> {
     v.data = data;
     v.epoch = f.epoch;
     v.plan = plan;
+    this.#rowClass(v, key, data, f);
     setPx(v.el, 'block-size', f.rowHeight(i));
     if (f.spans) setAttr(v.el, 'data-spans', plan?.spans ? '' : null);
     const extra = f.check ? CHECK_WIDTH : 0;
@@ -363,6 +368,7 @@ export class RowRenderer<T> {
     v.key = key;
     v.focusCol = null;
     v.plan = null;
+    this.#rowClass(v, key, undefined, f);
     for (const cell of v.cells.values()) {
       cell.el.remove();
       this.#unpart(cell);
@@ -390,6 +396,19 @@ export class RowRenderer<T> {
       const col = [...L.start.columns, ...L.center.columns, ...L.end.columns].find((c) => c.id === f.rowHeader);
       setAttr(s, 'aria-label', col ? cellText(col, node.data, f.ctx) : null);
     }
+  }
+
+  /** The host's classes for a data row from its data (none on a filler or a detail); a rule that throws is reported, its classes cleared. */
+  #rowClass(v: RowView, key: RowKey, data: unknown, f: Frame<T>): void {
+    let next = '';
+    if (f.rowClass && data !== undefined) {
+      try {
+        next = f.rowClass({ row: data, key, context: f.partBase.context }) ?? '';
+      } catch (err) {
+        f.report(err);
+      }
+    }
+    v.cls = swapClasses(v.el, v.cls, next);
   }
 
   /** A detail row's part destroyed (an error reported), its cell removed. */
@@ -504,13 +523,7 @@ export class RowRenderer<T> {
       } catch (err) {
         f.report(err);
       }
-      if (next !== cell.cls) {
-        const cut = (t: string) => t.split(/\s+/).filter((c) => c && !c.startsWith('dzg-'));
-        const add = cut(next);
-        for (const c of cut(cell.cls)) if (!add.includes(c)) cell.el.classList.remove(c);
-        cell.el.classList.add(...add);
-        cell.cls = next;
-      }
+      cell.cls = swapClasses(cell.el, cell.cls, next);
     }
     // A part expects a row: none on a filler or a detail (their cells stay empty).
     const part = data === undefined ? null : f.partFor(col);
