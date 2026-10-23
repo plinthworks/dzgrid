@@ -13,3 +13,7 @@ Order, after step 2 is committed and before step 3:
 - **bridges** as tiny optional files: Tailwind 4 (map its `--color-*` / `@theme` variables), Tailwind 3 (a preset/plugin), Bootstrap 5.3 (map its `--bs-*` variables) — the grid then follows the app's colours, dark mode and font with no extra work;
 - utility classes usable where the grid takes classes (`ui.cellClass`, parts, header classes), and documented examples for each framework;
 - one page in the docs: "theme in 3 lines" per framework.
+
+## Documentation website (owner, 2026-10-23)
+
+4. **Docs website** — moved by the owner (2026-10-23): AFTER Phase 5 Part A (step 9), not before step 3; editing resumes right after the demos. Plan: Astro Starlight in `website/`, modelled on the owner's DzCalendar site (Astro 7.3.8 + @astrojs/starlight 0.42.6; FR/EN, offline search, dark mode, code tabs, GitHub Pages deployment). DzCalendar may be read (owner's own project). Languages: FR + EN now, Arabic later (when the Arabic reviewer is available). Live grids in the pages (the demos), not only screenshots. Content: everything in 0.2.0 plus the themes; each later step adds its pages. **Deployment ready but NOT published until the owner says yes** (GitHub Pages is public).

@@ -28,7 +28,7 @@ class CtxCell {
   selector: 't-host',
   imports: [DzGrid],
   template: `<dz-grid #g="dzGrid" [rows]="rows()" [columns]="columns" [getRowId]="id" [messages]="messages()" [locale]="locale()" [direction]="direction()"
-    [density]="density()" [context]="context()" [parts]="parts" [features]="features" [selection]="selection()" [pagination]="paging()" [label]="label()"
+    [density]="density()" [rowHeight]="rowHeight()" [context]="context()" [parts]="parts" [features]="features" [selection]="selection()" [pagination]="paging()" [label]="label()"
     [(quick)]="quick" [(filter)]="filter" [(selected)]="selected"
     (gridEvent)="all.push($event)" (cellClicked)="clicks.push($event)" (rowClicked)="rowClicks.push($event)" (problems)="problems.push($event)"
     (gridReady)="ready.push($event)" />`,
@@ -41,6 +41,7 @@ class Host {
   readonly locale = signal<string | undefined>(undefined);
   readonly direction = signal<'auto' | 'ltr' | 'rtl' | undefined>(undefined);
   readonly density = signal<'compact' | 'comfortable' | 'spacious' | undefined>(undefined);
+  readonly rowHeight = signal<number | undefined>(undefined);
   readonly context = signal<unknown>(undefined);
   readonly label = signal<string | undefined>(undefined);
   readonly selection = signal<{ mode: 'none' | 'single' | 'multi'; checkbox?: boolean; click?: boolean; canSelect?: (r: { data: R }) => boolean | string } | undefined>({ mode: 'multi' });
@@ -143,6 +144,30 @@ describe('live and fixed inputs', () => {
     expect(t.kernel().rows.displayed.count).toBe(7);
     expect(t.el.querySelector('.dzg-viewport')!.getAttribute('aria-label')).toBe('Patients');
     expect(t.el.querySelector('.dzg')!.getAttribute('dir')).toBe('rtl');
+  });
+
+  it('rowHeight reaches the grid, live, over the density; cleared, the density comes back (owner D1, D3)', () => {
+    const t = mount();
+    const h = () => (t.el.querySelector('.dzg') as HTMLElement).style.getPropertyValue('--dzg-row-height');
+    t.host.density.set('compact');
+    t.host.rowHeight.set(52);
+    t.run();
+    expect(h()).toBe('52px');
+    t.host.rowHeight.set(60);
+    t.run();
+    expect(h()).toBe('60px');
+    t.host.rowHeight.set(undefined);
+    t.run();
+    expect(h()).toBe('28px');
+  });
+
+  it('rowHeight from provideDzGrid’s defaults; a binding on the tag wins', () => {
+    const t = mount({ providers: [provideDzGrid({ defaults: { rowHeight: 48 } })] });
+    const h = () => (t.el.querySelector('.dzg') as HTMLElement).style.getPropertyValue('--dzg-row-height');
+    expect(h()).toBe('48px');
+    t.host.rowHeight.set(56);
+    t.run();
+    expect(h()).toBe('56px');
   });
 
   it('an unchanged input is not sent again: no second rows change', () => {

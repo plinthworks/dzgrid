@@ -1,0 +1,53 @@
+/* The showcase demos' own drawings (docs/phase-5-steps/demos-plan.md): the HR cells (avatar, name and
+   title, department pill, flag, contact links) and the orders' sub-order rows. Sizes in rem (WCAG 1.4.4). Unlayered, so they win over
+   the grid's layered CSS; colours from --tz-* or the demo's own light-dark() pairs (each checked at
+   4.5:1 by `npm run test:browser -- --only demos`); logical sides only. */
+
+/* ---- HR: the employee cell, two lines beside a disc ---- */
+.hr-emp { display: inline-flex; align-items: center; gap: .5rem; vertical-align: middle; line-height: 1.2; max-inline-size: calc(100% - 2rem); }
+.hr-avatar {
+  flex: none; display: inline-grid; place-items: center; inline-size: 1.75rem; block-size: 1.75rem; border-radius: 50%;
+  font-size: .6875rem; font-weight: 600; letter-spacing: 0; background: var(--hr-bg); color: var(--hr-fg);
+}
+.hr-who { display: flex; flex-direction: column; min-inline-size: 0; }
+.hr-name, .hr-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hr-name { font-size: .8125rem; }
+.hr-title { font-size: .71875rem; color: var(--tz-fg-muted); }
+.hr-lead .hr-name { font-weight: 600; }
+
+/* Six neutral hues (owner D2): no status meaning; the same six for the discs. */
+:is(.hr-avatar[data-tone="0"], .hr-dep[data-dep="0"]) { --hr-bg: light-dark(oklch(93% .04 250), oklch(36% .07 250)); --hr-fg: light-dark(oklch(36% .1 250), oklch(94% .03 250)); }
+:is(.hr-avatar[data-tone="1"], .hr-dep[data-dep="1"]) { --hr-bg: light-dark(oklch(93% .045 160), oklch(36% .06 160)); --hr-fg: light-dark(oklch(36% .08 160), oklch(94% .03 160)); }
+:is(.hr-avatar[data-tone="2"], .hr-dep[data-dep="2"]) { --hr-bg: light-dark(oklch(94% .05 85), oklch(38% .06 85)); --hr-fg: light-dark(oklch(38% .08 85), oklch(95% .03 85)); }
+:is(.hr-avatar[data-tone="3"], .hr-dep[data-dep="3"]) { --hr-bg: light-dark(oklch(93% .04 20), oklch(37% .07 20)); --hr-fg: light-dark(oklch(38% .11 20), oklch(94% .03 20)); }
+:is(.hr-avatar[data-tone="4"], .hr-dep[data-dep="4"]) { --hr-bg: light-dark(oklch(93% .04 300), oklch(36% .07 300)); --hr-fg: light-dark(oklch(37% .1 300), oklch(94% .03 300)); }
+:is(.hr-avatar[data-tone="5"], .hr-dep[data-dep="5"]) { --hr-bg: light-dark(oklch(93% .04 205), oklch(36% .06 205)); --hr-fg: light-dark(oklch(36% .08 205), oklch(94% .03 205)); }
+
+.hr-dep {
+  display: inline-block; vertical-align: middle; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis;
+  padding-inline: .55rem; border-radius: var(--dzg-pill-radius, 999px); font-size: .75rem; line-height: 1.7;
+  background: var(--hr-bg); color: var(--hr-fg);
+}
+
+/* ---- HR: country, contact ---- */
+.hr-country { display: inline-flex; align-items: center; gap: .45rem; vertical-align: middle; line-height: 1.2; max-inline-size: 100%; }
+.demo-flag { flex: none; inline-size: 1.3125rem; block-size: .875rem; border-radius: 2px; color: var(--tz-fg); }
+.hr-link svg { inline-size: 1rem; block-size: 1rem; }
+.hr-contact { display: inline-flex; gap: .25rem; vertical-align: middle; line-height: 1; }
+.hr-link {
+  display: inline-grid; place-items: center; inline-size: 1.75rem; block-size: 1.75rem; box-sizing: border-box;
+  border: 1px solid var(--tz-border); border-radius: 6px; color: var(--tz-accent); background: var(--tz-bg);
+}
+.hr-link:hover { background: color-mix(in oklab, var(--tz-accent) 12%, var(--tz-bg)); }
+.hr-link:focus-visible { outline: 2px solid var(--tz-accent); outline-offset: 1px; }
+
+@media (forced-colors: active) {
+  .hr-avatar, .hr-dep { border: 1px solid CanvasText; }
+  .hr-link { color: LinkText; border-color: LinkText; }
+}
+
+/* ---- Orders (owner D4): sub-orders are child rows of the same grid; the app's own variable gives them a
+   slightly different background (`rowClass` marks them `orders-child`), hover keeping the theme's look ---- */
+.demo-orders { --orders-child-bg: color-mix(in oklab, var(--tz-accent) 8%, var(--tz-bg)); }
+.orders-child:where(:not(:hover)),
+.orders-child:where(:not(:hover)) :is(.dzg-seg-start, .dzg-seg-end) { background: var(--orders-child-bg); }

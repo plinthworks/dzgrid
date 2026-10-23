@@ -21,10 +21,10 @@ import { Scope } from './render/scope.js';
 import { Tooltip } from './render/tooltip.js';
 import { featureParts, unslotted } from './part.js';
 import { createPainter } from './render/viewport.js';
-import { ROW_HEIGHT, type GridSettings } from './settings.js';
+import { ROW_HEIGHT, rowPx, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
 import { installWarmup } from './warmup.js';
-import { applyUpdate, closed, ctxOf } from './update.js';
+import { applyUpdate, closed, ctxOf, rowHeightProblems } from './update.js';
 import { shapeOf } from './features.js';
 
 export interface GridApi {
@@ -97,10 +97,10 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false });
   if (initial.context !== undefined) kernel.dispatch({ type: 'context.app', value: initial.context }, 'host'); // editable rules, custom kinds (Q12)
   // Operations without a source run in the browser, and are told (a source's model tells its own); the filter kinds refused too.
-  const told = [...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems)];
+  const told = [...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems), ...rowHeightProblems(initial.rowHeight)];
 
   let dir: Dir = 'ltr';
-  const geometry = env.geometry ?? domGeometry(viewport, header, () => dir);
+  const geometry = env.geometry ?? domGeometry(viewport, header, () => dir, live.el);
   const g: GridContext<T> = {
     doc, win, env, scope,
     el: { root, viewport, header, body, layer, overlay, tooltip },
@@ -116,10 +116,10 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false, viewBlock: 0,
     intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0, remPx: geometry.read().remPx ?? 16,
-    schedule, report, restoreFocus: () => {}, warm: null!, parts: featureParts(initial.features, () => g.settings.parts),
+    schedule, report, restoreFocus: () => {}, warm: null!, reveal: null!, parts: featureParts(initial.features, () => g.settings.parts),
     now: () => win?.performance.now() ?? 0,
-    // A density's height at 16 px text, scaled with the reader's text size, whole pixels.
-    rowHeight: () => Math.round((ROW_HEIGHT[g.settings.density ?? 'comfortable'] * g.remPx) / 16),
+    // `rowHeight` or the density's, at 16 px text, scaled with the default text size, whole px, ≥ 24 (WCAG 2.5.8).
+    rowHeight: () => Math.max(24, Math.round(((rowPx(g.settings.rowHeight) ?? ROW_HEIGHT[g.settings.density ?? 'comfortable']) * g.remPx) / 16)),
     msg: (key, params = {}) => msg(g.settings.messages, key, params, g.ctx),
   };
 

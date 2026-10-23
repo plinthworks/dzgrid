@@ -46,6 +46,15 @@ Toward 0.3.0 (Phase 5, editing; not released).
 - `settings.rowClass({ row, key, context })`: classes for a data row from its data (live; Angular
   `[rowClass]`, owner T8: `@dzgrid/angular` budget 6 250 → 6 300); `columns[].ui.headerClass`: classes for a column's header cell; `badge({ classes })`: a
   class per tone. Type `RowClassContext`. Same rules as `ui.cellClass` (diffed, `dzg-` ignored).
+- `settings.rowHeight` (owner D1, `docs/behaviors/virtual-scroll.md` « Row height »): the row height in px
+  at 16 px text, over the density's; from 24 to 1 000, grown with the reader's default text size, header
+  rows following; live. Anything else is a warning `invalid-setting` at `settings.rowHeight` (new problem
+  code; the same value again is not told again) and the density's height is used; `null` is no value.
+  Angular `[rowHeight]` and a `provideDzGrid` default (owner D3: `@dzgrid/angular` budget 6 300 → 6 350).
+- Playground: two showcase demos, « Commandes et sous-commandes » (`orders.html`, owner D4: sub-orders as
+  child rows of the same grid under one header, on a background the app sets with `--orders-child-bg`) and « Ressources humaines »
+  (`hr.html`: an org tree with pinned managers, 52 px two-line rows, department pills, flags, contact
+  links), each in French light Clinic and Arabic dark Midnight; checked by `npm run test:browser -- --only demos`.
 
 ### Changed
 - The grid's CSS sits in the cascade layer `dzgrid` (owner T1): `dzgrid.css` in `dzgrid.theme`,
@@ -65,6 +74,10 @@ Toward 0.3.0 (Phase 5, editing; not released).
   It must be imported in the CSS Tailwind builds (Tailwind emits only the variables it sees used).
 - Development: Tailwind CSS 4.3.3 (with `@tailwindcss/cli`), Tailwind CSS 3.4.19 (as `tailwindcss3`) and
   Bootstrap 5.3.8 are root devDependencies, only run by the browser suite; never shipped.
+- Row heights follow the browser's default text size (`font-size: medium`, read off the live region), no
+  longer the page's root font size; never under 24 px.
+- A live change of the row height (density, `rowHeight`) keeps the focused row in view when it was in
+  view (WCAG 2.4.11), under a tree's pinned parents; the row at the top of the view still keeps its place.
 - `ClientModel.reapply()` is told with the source given, `api` by default (it was always `user`).
 - While the order is stale after an edit, any rerun (a sort, a filter, the search typed on, the
   language, the columns) is a whole one with the edits; a host update that moves rows puts everything

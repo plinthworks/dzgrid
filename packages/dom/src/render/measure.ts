@@ -9,7 +9,7 @@ export interface ViewportBox {
   readonly scrollTop: number;
   /** From the start edge, whatever the direction. */
   readonly scrollInline: number;
-  /** The root font size: rows follow text zoom (WCAG 1.4.4). 16 when absent. */
+  /** The browser's default text size (`font-size: medium`, never the page's root size): rows follow the reader's text size (WCAG 1.4.4). 16 when absent. */
   readonly remPx?: number;
 }
 
@@ -23,15 +23,17 @@ export interface Geometry {
   writeScrollInline(px: number): void;
 }
 
-export function domGeometry(viewport: HTMLElement, header: HTMLElement, dir: () => Dir): Geometry {
+/** `probe` (the grid's live region) is set to `font-size: medium`: the browser's default text size is read off it, never the page's root size (an app's 62.5 %). */
+export function domGeometry(viewport: HTMLElement, header: HTMLElement, dir: () => Dir, probe: Element = viewport): Geometry {
   const conv = () => scrollConvention(viewport.ownerDocument);
+  if (probe !== viewport) (probe as HTMLElement).style.fontSize = 'medium';
   return {
     read: () => ({
       block: Math.max(0, viewport.clientHeight - header.offsetHeight),
       inline: viewport.clientWidth,
       scrollTop: viewport.scrollTop,
       scrollInline: inlineScroll(viewport, dir(), conv()),
-      remPx: parseFloat(viewport.ownerDocument.defaultView?.getComputedStyle(viewport.ownerDocument.documentElement).fontSize ?? '') || 16,
+      remPx: parseFloat(viewport.ownerDocument.defaultView?.getComputedStyle(probe).fontSize ?? '') || 16,
     }),
     writeScrollTop: (px) => { viewport.scrollTop = px; },
     writeScrollInline: (px) => setInlineScroll(viewport, px, dir(), conv()),

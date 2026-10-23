@@ -37,7 +37,7 @@ type Ev<T, K extends GridEvent<T>['type']> = Extract<GridEvent<T>, { type: K }>;
 
 /** The settings read from the inputs, in this order; the defaults' keys fall back to `provideDzGrid`. */
 const KEYS = [
-  'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'overlay', 'label', 'tooltips', 'overscan',
+  'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'rowHeight', 'overlay', 'label', 'tooltips', 'overscan',
   'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
 ] as const;
 /** Events with an output of their own name. */
@@ -73,6 +73,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly numerals = input<S<T>['numerals']>();
   readonly direction = input<S<T>['direction']>();
   readonly density = input<S<T>['density']>();
+  /** Row height in px over the density's (owner D1, D3, virtual-scroll.md « Row height »); live. */
+  readonly rowHeight = input<number>();
   readonly overlay = input<S<T>['overlay']>();
   readonly label = input<string>();
   readonly tooltips = input<S<T>['tooltips']>();

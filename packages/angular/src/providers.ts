@@ -2,7 +2,7 @@ import { InjectionToken, type Provider } from '@angular/core';
 import type { GridEnv, GridMessages, GridSettings, SlotPart } from '@dzgrid/dom';
 
 /** What an application settles once for its grids; a binding on `<dz-grid>` wins. */
-export type DzGridDefaults = Pick<GridSettings<unknown>, 'locale' | 'timeZone' | 'direction' | 'density' | 'numerals'>;
+export type DzGridDefaults = Pick<GridSettings<unknown>, 'locale' | 'timeZone' | 'direction' | 'density' | 'rowHeight' | 'numerals'>;
 
 export interface DzGridConfig {
   /** The grid's words, for every `<dz-grid>` that binds none. */

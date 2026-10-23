@@ -51,7 +51,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/tailwind.css': 500, // T7: each framework bridge
   '@dzgrid/theme/tailwind3.css': 500, // T7
   '@dzgrid/theme/bootstrap.css': 500, // T7
-  '@dzgrid/angular': 6300, // owner T8 (2026-10-23): +50 for the [rowClass] input; the editing grant stays apart
+  '@dzgrid/angular': 6350, // owner T8 (2026-10-23): +50 for [rowClass]; owner D3 (2026-10-23): +50 for [rowHeight]; the editing grant stays apart
   'profile: audit screen (K.8)': 83500,
 };
 

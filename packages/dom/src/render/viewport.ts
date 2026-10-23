@@ -1,4 +1,4 @@
-import { isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey, type RowLayout } from '@dzgrid/core';
+import { type DisplayIndex, isSelected, MAX_PHYSICAL, messageProblems, partNameFor, type ResolvedColumn, overscanRows, scrollMapper, uniformRowLayout, windowAt, type DisplayedRows, type RowKey, type RowLayout } from '@dzgrid/core';
 import { emit, isDataKey, shownAncestor } from '@dzgrid/core/internal';
 import type { PartBase, SlotPart } from '../part.js';
 import type { GridContext } from '../context.js';
@@ -155,7 +155,15 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       const at = was && !was.uniform && layout.count ? Math.min(was.indexAt(top), layout.count - 1) : -1;
       const keep = lastH > 0 && h !== lastH ? (at < 0 ? (top * h) / lastH : layout.offsetOf(at as never) + ((top - was!.offsetOf(at as never)) * layout.heightOf(at as never)) / (was!.heightOf(at as never) || 1)) : null;
       scroll.setMapper(next);
-      if (keep !== null) scroll.scrollTo(keep);
+      if (keep !== null) {
+        scroll.scrollTo(keep);
+        // The focused row, in view before, stays in view (WCAG 2.4.11): under its pinned parents, its end inside.
+        // The same rows only (a row height changed alone).
+        const f = kernel.focus;
+        const i = (f?.kind === 'cell' && shown?.displayed === d ? d.indexOf(f.row) : -1) as DisplayIndex;
+        const o = i < 0 ? 0 : was!.offsetOf(i);
+        if (i >= 0 && o + was!.heightOf(i) > top && o < top + box.block) g.reveal(i, box.block);
+      }
     }
     lastH = h;
     const mapper = scroll.mapper!;

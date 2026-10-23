@@ -1,4 +1,4 @@
-import type { CellFocus, DisplayedRows, FocusPos, RowKey } from '@dzgrid/core';
+import type { CellFocus, DisplayIndex, DisplayedRows, FocusPos, RowKey } from '@dzgrid/core';
 import { sameFocus } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import { CHECK_WIDTH } from '../render/rows.js';
@@ -85,24 +85,23 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     // A cell spanning rows shows the row aimed at (the spans feature knows it), not only its first.
     const i = rows.displayed.indexOf(g.spans?.at(row) ?? row);
     if (i === -1) return;
-    const box = g.geometry.read();
     if (column !== undefined) scrollInlineTo(column);
+    if (g.reveal(i, g.geometry.read().block)) g.schedule();
+  }
+
+  g.reveal = (i, block) => {
     // The layout of the rows shown now (D7), even before their paint.
     const L = rowLayout(g);
-    const h = L.heightOf(i);
+    const h = L.heightOf(i as DisplayIndex);
     const top = g.scroll.logicalTop;
-    const off = L.offsetOf(i);
-    let next = top;
+    const off = L.offsetOf(i as DisplayIndex);
+    const room = g.insetFor?.(i) ?? 0;
     // Under rows drawn over the body's top (a tree's pinned parents, WCAG 2.4.11): just below its own.
     // A row taller than the view shows its top (a detail's name and its panel's start).
-    const start = off - (g.insetFor?.(i) ?? 0);
-    if (off < top + (g.inset ?? 0)) next = start;
-    else if (off + h > top + box.block) next = Math.min(start, off + h - box.block);
-    if (next !== top) {
-      g.scroll.scrollTo(next);
-      g.schedule();
-    }
-  }
+    const next = off < top + Math.max(g.inset ?? 0, room) ? off - room : off + h > top + block ? Math.min(off - room, off + h - block) : top;
+    if (next !== top) g.scroll.scrollTo(next);
+    return next !== top;
+  };
 
   function focusCellAs(row: RowKey, column: string, source: 'api' | 'user'): void {
     if (!kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row, column } }, source).ok) return;

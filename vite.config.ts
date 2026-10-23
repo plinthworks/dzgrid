@@ -70,6 +70,8 @@ export default defineConfig({
         motion: fileURLToPath(new URL('./playground/motion.html', import.meta.url)),
         tree: fileURLToPath(new URL('./playground/tree.html', import.meta.url)),
         detail: fileURLToPath(new URL('./playground/detail.html', import.meta.url)),
+        orders: fileURLToPath(new URL('./playground/orders.html', import.meta.url)),
+        hr: fileURLToPath(new URL('./playground/hr.html', import.meta.url)),
       },
     },
   },

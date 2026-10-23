@@ -1,8 +1,11 @@
-import { liveChangeProblems, localeCtx, problem, type ClientModel, type LocaleCtx, type SourceHandle } from '@dzgrid/core';
+import { liveChangeProblems, localeCtx, problem, type ClientModel, type LocaleCtx, type Problem, type SourceHandle } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import type { GridContext } from './context.js';
 import { checkMessages } from './messages.js';
-import type { GridSettings } from './settings.js';
+import { rowPx, type GridSettings } from './settings.js';
+
+/** A `rowHeight` the grid does not take, told (null and undefined are no value). */
+export const rowHeightProblems = (v: unknown): Problem[] => (v == null || rowPx(v) ? [] : [problem('invalid-setting', 'warning', 'settings.rowHeight', String(v))]);
 
 /**
  * Which settings change live and which a grid takes only at creation. The
@@ -23,6 +26,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   numerals: 'live',
   direction: 'live',
   density: 'live',
+  rowHeight: 'live',
   selection: 'live',
   overlay: 'live',
   label: 'live',
@@ -73,6 +77,9 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
   if ('source' in input && (served ? !input.source : input.source)) refused.push(problem('unsupported-live-change', 'error', 'settings.source'));
   const patch: { -readonly [K in keyof GridSettings<T>]?: GridSettings<T>[K] } = { ...input };
   for (const p of refused) delete patch[p.path.slice('settings.'.length) as keyof GridSettings<T>];
+  // A row height the grid does not take is told, kept, and the density's used (not refused: its path stays).
+  // `Object.is`: the same value again (NaN included) is not told again.
+  if ('rowHeight' in patch && !Object.is(patch.rowHeight, prev.rowHeight)) refused.push(...rowHeightProblems(patch.rowHeight));
   if (refused.length) emit(g.kernel, { type: 'problems', source: 'host', problems: refused });
   const open: GridSettings<T> = { ...prev, ...patch };
   const next = closed(open);

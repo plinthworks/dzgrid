@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DzGrid</title>
+  <style>
+    body { margin: 0; padding: 1rem; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); max-inline-size: 1260px; }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-block: .5rem .75rem; }
+    #host { block-size: 70vh; }
+    #host > .dzg { block-size: 100%; }
+    .note { margin-block: .25rem .5rem; color: var(--tz-fg-muted); line-height: 1.45; max-inline-size: 90ch; }
+    a { color: var(--tz-accent); }
+  </style>
+</head>
+<body data-demo="hr">
+  <nav><a href="./index.html">← Démos</a></nav>
+  <h1 id="title"></h1>
+  <p class="note" id="note"></p>
+  <form class="bar" id="controls">
+    <label>Langue <select name="locale"><option value="fr-FR">français</option><option value="ar-DZ">arabe (droite à gauche)</option></select></label>
+    <label>Thème <select name="theme"><option value="">système</option><option>light</option><option>dark</option></select></label>
+    <label>Thème vitrine <select name="skin"><option value="none">aucun</option><option>midnight</option><option>clinic</option></select></label>
+  </form>
+  <main><div id="host"></div></main>
+  <script type="module" src="./demos/page.ts"></script>
+</body>
+</html>

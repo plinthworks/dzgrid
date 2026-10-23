@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: demos</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/core/tree": "/packages/core/src/tree.ts",
+  "@dzgrid/core/detail": "/packages/core/src/detail.ts",
+  "@dzgrid/dom": "/packages/dom/src/index.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts",
+  "@dzgrid/dom/tree": "/packages/dom/src/tree.ts",
+  "@dzgrid/dom/detail": "/packages/dom/src/detail.ts",
+  "@dzgrid/dom/filters": "/packages/dom/src/filters.ts",
+  "@dzgrid/dom/parts": "/packages/dom/src/parts.ts",
+  "@dzgrid/dom/locales/fr": "/packages/dom/src/locales/fr.ts",
+  "@dzgrid/dom/locales/ar": "/packages/dom/src/locales/ar.ts",
+  "@dzgrid/dom/locales/fr-tree": "/packages/dom/src/locales/fr-tree.ts",
+  "@dzgrid/dom/locales/ar-tree": "/packages/dom/src/locales/ar-tree.ts",
+  "@dzgrid/dom/locales/fr-detail": "/packages/dom/src/locales/fr-detail.ts",
+  "@dzgrid/dom/locales/ar-detail": "/packages/dom/src/locales/ar-detail.ts",
+  "@dzgrid/dom/locales/fr-filters": "/packages/dom/src/locales/fr-filters.ts",
+  "@dzgrid/dom/locales/ar-filters": "/packages/dom/src/locales/ar-filters.ts",
+  "@tzslot/dom": "/node_modules/.cache/dzgrid-browser/dom.js",
+  "@tzslot/core": "/node_modules/.cache/dzgrid-browser/core.js"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<!-- demos.ts adds the showcase theme (query `skin`) after the theme, then demos.css. -->
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); }
+  #host { inline-size: 1240px; block-size: 640px; }
+  #host > .dzg { block-size: 100%; }
+  input.mark { display: block; margin-block: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DzGrid</h1>
+  <input class="mark" id="before" aria-label="before">
+  <div id="host"></div>
+  <input class="mark" id="after" aria-label="after">
+</main>
+<script type="module" src="./demos.ts"></script>
+</body>
+</html>

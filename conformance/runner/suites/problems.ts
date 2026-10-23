@@ -5,6 +5,8 @@ import { refusalProblems } from '@dzgrid/core/rules';
 import { treeColumnProblems } from '@dzgrid/core/tree';
 // The Angular wrapper's registry rule (step 22): a pure module of that package, no Angular in it.
 import { shadowedParts } from '../../../packages/angular/src/shadow.js';
+// The DOM's row height rule (owner D1, virtual-scroll.md « Row height »): a pure function of its settings module.
+import { rowHeightProblems } from '../../../packages/dom/src/update.js';
 import { harness } from '../harness.js';
 import { runTree } from './tree.js';
 import { runEditable } from './edit-order.js';
@@ -64,6 +66,9 @@ export const problems: Record<string, Suite> = {
       // A part name hidden by a later layer of an Angular grid's registry (step 22).
       case 'part-shadowed':
         return { problems: shadowedParts(input.layers) };
+      // Each `rowHeight` given to a grid in turn (owner D1): what is not a number from 24 to 1 000 is told.
+      case 'invalid-setting':
+        return { problems: (input.rowHeights as unknown[]).flatMap((v) => rowHeightProblems(v)) };
       // A tree's repairs and what it refuses beside it (Phase 4 step 3).
       case 'tree':
         return { problems: runTree(input).problems };

@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -2362,6 +2362,267 @@ async function frameworkChecks(name, ctx) {
   }
 }
 
+/**
+ * The showcase demos (docs/phase-5-steps/demos-plan.md §4; `-- --only demos`): the playground's own modules on
+ * packages/dom/test/browser/demos.html, fr light Clinic and ar dark Midnight. axe; the orders' sub-orders as
+ * child rows under one header, on the app's background variable (owner D4), kept under their order by a sort
+ * and a filter; the HR grid's keys
+ * into the contact links and out, its pinned parents, right to left, 52 px rows (`rowHeight`, owner D1)
+ * holding their two lines; the demo's pills at 4.5:1 (owner D2); no page error, no problem, no request
+ * elsewhere; the same rows on every load. Firefox and WebKit (`--all`): the right-to-left checks only.
+ */
+async function demosChecks(name, ctx) {
+  const lite = name !== 'chrome';
+  const PAGES = [['fr', 'locale=fr-FR&theme=light&skin=clinic'], ['ar', 'locale=ar-DZ&theme=dark&skin=midnight']];
+  const open = async (qs) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1300, height: 900 });
+    const errors = [];
+    const elsewhere = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    page.on('request', (r) => { if (!r.url().startsWith(site.root('')) && !r.url().startsWith('data:')) elsewhere.push(r.url()); });
+    await page.goto(site.root(`packages/dom/test/browser/demos.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    return { page, errors, elsewhere };
+  };
+  const clean = async (tag, o) => {
+    const problems = await o.page.evaluate(() => window.t.problems.length);
+    check(name, `${tag}: no page error, no problems event, no request but the page's own files`, o.errors.length === 0 && problems === 0 && o.elsewhere.length === 0, { errors: o.errors, problems, elsewhere: o.elsewhere });
+  };
+  /** Text over background of the demo's drawings (pills, discs), resolved by a canvas, as WCAG's ratio: the lowest. */
+  const contrast = (page, sel) => page.evaluate((sel) => {
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = 1;
+    const c2 = cv.getContext('2d', { willReadFrequently: true });
+    const rgb = (css) => { c2.clearRect(0, 0, 1, 1); c2.fillStyle = '#000'; c2.fillStyle = css; c2.fillRect(0, 0, 1, 1); return [...c2.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+    const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+    const lum = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    let worst = { ratio: 99 };
+    for (const el of document.querySelectorAll(sel)) {
+      const s = getComputedStyle(el);
+      let p = el;
+      while (p && getComputedStyle(p).backgroundColor.replace(/\s/g, '').match(/rgba\(.*,0\)$|transparent/)) p = p.parentElement;
+      const bgc = p ? getComputedStyle(p).backgroundColor : 'rgb(255, 255, 255)';
+      const [a, b] = [lum(rgb(s.color)), lum(rgb(bgc))].sort((x, y) => y - x);
+      const ratio = (a + 0.05) / (b + 0.05);
+      if (ratio < worst.ratio) worst = { ratio: Math.round(ratio * 100) / 100, text: el.textContent, fg: s.color, bg: bgc };
+    }
+    return worst;
+  }, sel);
+
+  // ---- orders (owner D4): sub-orders as child rows of the same grid, one header, the app's background ----
+  for (const [lang, qs] of PAGES) {
+    if (lite && lang !== 'ar') continue;
+    const ar = lang === 'ar';
+    const tag = `demos orders ${lang}`;
+    const o = await open(`demo=orders&${qs}`);
+    const { page } = o;
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'rows.expand', rows: ['O-0001', 'O-0002'].map(window.t.key), expanded: true }, 'user'));
+    await frames(page, 3);
+    const tree = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll('#host .dzg-layer > .dzg-row')].sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+      const ref = (r) => r.querySelector('.dzg-cell[data-col=ref]')?.textContent?.trim();
+      const shown = rows.slice(0, 14).map((r) => ({ ref: ref(r), level: r.getAttribute('aria-level'), child: r.classList.contains('orders-child') }));
+      return {
+        shown, headers: document.querySelectorAll('#host .dzg-header').length, hrows: document.querySelectorAll('#host .dzg-header .dzg-hrow').length,
+        panels: document.querySelectorAll('#host .dzg-dbody, #host .dzg-dcell').length, grids: document.querySelectorAll('#host .dzg').length,
+      };
+    });
+    const kids = (p) => tree.shown.filter((r) => r.ref?.startsWith(`${p}-`));
+    const under = tree.shown[0]?.ref === 'O-0001' && kids('O-0001').length > 0 && tree.shown.slice(1, 1 + kids('O-0001').length).every((r) => r.ref.startsWith('O-0001-') && r.level === '2' && r.child) && !tree.shown[0].child;
+    check(name, `${tag}: sub-orders right under their order (level 2, marked by rowClass), in one grid with one header row, no panel`, under && tree.headers === 1 && tree.hrows === 1 && tree.panels === 0 && tree.grids === 1, tree);
+    // The background: the app's variable on the child rows (and their pinned segments), not on the orders.
+    const bg = () => page.evaluate(() => {
+      const row = (child) => [...document.querySelectorAll('#host .dzg-layer > .dzg-row')].find((r) => r.classList.contains('orders-child') === child && !r.matches(':hover'));
+      return { order: getComputedStyle(row(false)).backgroundColor, child: getComputedStyle(row(true)).backgroundColor };
+    });
+    const b0 = await bg();
+    await page.evaluate(() => document.getElementById('host').style.setProperty('--orders-child-bg', 'rgb(1, 2, 3)'));
+    // The theme eases a row's background: read once it has settled.
+    await page.waitForTimeout(700);
+    const b1 = await bg();
+    await page.evaluate(() => document.getElementById('host').style.removeProperty('--orders-child-bg'));
+    await page.waitForTimeout(700);
+    check(name, `${tag}: a sub-order's background differs from an order's (${b0.child} / ${b0.order}) and follows --orders-child-bg`, b0.child !== b0.order && b1.child === 'rgb(1, 2, 3)' && b1.order === b0.order, { b0, b1 });
+    const c = await contrast(page, '#host .orders-child .dzg-cell[data-col=client], #host .orders-child .dzg-cell[data-col=amount]');
+    check(name, `${tag}: sub-order text on its background at least 4.5:1 (lowest ${c.ratio}:1)`, c.ratio >= 4.5, c);
+    // Right to left (and left to right): the tree column at the start edge, a sub-order's text indented from it.
+    const edge = await page.evaluate(() => {
+      const rtl = document.documentElement.dir === 'rtl';
+      const vp = document.querySelector('#host .dzg-viewport').getBoundingClientRect();
+      const h = document.querySelector('#host .dzg-hcell[data-col=ref]').getBoundingClientRect();
+      const textStart = (child) => {
+        const cell = [...document.querySelectorAll('#host .dzg-layer > .dzg-row')].find((r) => r.classList.contains('orders-child') === child).querySelector('.dzg-cell[data-col=ref]');
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        const rs = [...range.getClientRects()].filter((x) => x.width > 0);
+        return rtl ? vp.right - Math.max(...rs.map((x) => x.right)) : Math.min(...rs.map((x) => x.left)) - vp.left;
+      };
+      return { start: Math.round(rtl ? vp.right - h.right : h.left - vp.left), order: Math.round(textStart(false)), child: Math.round(textStart(true)) };
+    });
+    check(name, `${tag}: the « ${ar ? 'الطلب' : 'Commande'} » column at the ${ar ? 'right' : 'left'} edge, a sub-order indented from it (${edge.order} → ${edge.child} px)`, Math.abs(edge.start) <= 1 && edge.child > edge.order, edge);
+    if (!lite) {
+      // A sort and a filter keep each sub-order under its order.
+      const kept = await page.evaluate(async () => {
+        const g = window.t.grid;
+        g.kernel.dispatch({ type: 'sort.toggle', column: 'amount', multi: false }, 'user');
+        g.kernel.dispatch({ type: 'filter.column', column: 'qty', filter: { type: 'number', op: 'gt', value: 5 } }, 'user');
+        g.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'user');
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const d = g.kernel.rows.displayed;
+        let order = null;
+        let bad = 0;
+        let children = 0;
+        let last = -1;
+        for (let i = 0; i < d.count; i++) {
+          const x = d.nodeAt(i).data;
+          if (!x.parent) order = x;
+          else {
+            children++;
+            if (x.parent !== order?.id) bad++;
+          }
+          if (x.parent && last >= 0 && x.amount < last && d.nodeAt(i - 1).data.parent === x.parent) bad++;
+          last = x.parent ? x.amount : -1;
+        }
+        return { bad, children, count: d.count };
+      });
+      check(name, `${tag}: sorted by amount and filtered, every sub-order stays under its own order, sorted among its siblings (${kept.children} sub-orders)`, kept.bad === 0 && kept.children > 100, kept);
+      await page.evaluate(() => { const g = window.t.grid; g.kernel.dispatch({ type: 'sort.set', sort: [] }, 'user'); g.kernel.dispatch({ type: 'filter.set', filter: {} }, 'user'); });
+      await frames(page, 2);
+      const v = await axe(page);
+      check(name, `${tag}: axe 0 with orders open`, v.length === 0, v);
+      const sample = (p) => p.evaluate(() => { const d = window.t.grid.kernel.rows.displayed; return Array.from({ length: 20 }, (_, i) => { const x = d.nodeAt(i).data; return `${x.id}|${x.qty}|${x.amount}|${x.day}`; }).join(); });
+      const again = await open(`demo=orders&${qs}`);
+      const third = await open(`demo=orders&${qs}`);
+      const a = await sample(again.page);
+      const b = await sample(third.page);
+      check(name, `${tag}: two loads, the same first 20 orders and figures`, a === b && a.length > 100, { a: a.slice(0, 120), b: b.slice(0, 120) });
+      await again.page.close();
+      await third.page.close();
+      await page.screenshot({ path: `${OUT}/demos-orders-${lang}.png` });
+    }
+    await clean(tag, o);
+    await page.close();
+  }
+
+  // ---- HR ----
+  for (const [lang, qs] of PAGES) {
+    if (lite && lang !== 'ar') continue;
+    const ar = lang === 'ar';
+    const tag = `demos hr ${lang}`;
+    const o = await open(`demo=hr&${qs}`);
+    const { page } = o;
+    // 52 px rows (`rowHeight`), their two lines inside.
+    const rows = await page.evaluate(() => {
+      const hs = [...document.querySelectorAll('#host .dzg-layer > .dzg-row')].map((r) => Math.round(r.getBoundingClientRect().height));
+      const clipped = [...document.querySelectorAll('#host .hr-emp')].filter((e) => { const b = e.getBoundingClientRect(); const c = e.closest('.dzg-cell').getBoundingClientRect(); return b.top < c.top - 0.5 || b.bottom > c.bottom + 0.5; }).length;
+      return { hs: [...new Set(hs)], clipped, var: document.querySelector('#host > .dzg').style.getPropertyValue('--dzg-row-height') };
+    });
+    check(name, `${tag}: rows are 52 px (rowHeight), the disc, name and title inside them`, rows.hs.length === 1 && rows.hs[0] === 52 && rows.clipped === 0 && rows.var === '52px', rows);
+    if (!lite) {
+      // An app's root font size (62.5 %): the rows keep the browser's default size (review R3), the text inside them.
+      const small = await open(`demo=hr&${qs}&rootfont=62.5%25`);
+      const r = await small.page.evaluate(() => ({ root: getComputedStyle(document.documentElement).fontSize, hs: [...new Set([...document.querySelectorAll('#host .dzg-layer > .dzg-row')].map((x) => Math.round(x.getBoundingClientRect().height)))] }));
+      check(name, `${tag}: with html { font-size: 62.5% } (${r.root}) rows stay 52 px`, r.root === '10px' && r.hs.length === 1 && r.hs[0] === 52, r);
+      await small.page.close();
+    }
+    // Right to left: the pinned column at the right edge, flags not mirrored, amounts and dates in ar-DZ, no tracking.
+    const rtl = await page.evaluate(() => {
+      const vp = document.querySelector('#host .dzg-viewport').getBoundingClientRect();
+      const h = document.querySelector('#host .dzg-hcell[data-col=name]').getBoundingClientRect();
+      const fr = document.querySelector('#host svg.demo-flag[data-country=FR]');
+      const rects = fr ? [...fr.querySelectorAll('rect')].slice(0, 3).map((r) => r.getBoundingClientRect().left) : [];
+      const sal = document.querySelector('#host .dzg-cell[data-col=salary]');
+      const day = document.querySelector('#host .dzg-cell[data-col=hired]');
+      const key = sal.closest('.dzg-row');
+      const p = window.t.demo.rows.find((x) => x.name === key.querySelector('.hr-name').textContent);
+      const want = new Intl.NumberFormat(document.documentElement.lang, { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 }).format(p.salary);
+      const strip = (s) => s.replace(/[‎‏⁦-⁩؜]/g, '').replace(/\s/g, ' ');
+      return {
+        start: Math.round(document.documentElement.dir === 'rtl' ? vp.right - h.right : h.left - vp.left), transform: fr && getComputedStyle(fr).transform,
+        flag: rects.length === 3 && rects[0] < rects[1] && rects[1] < rects[2], salary: strip(sal.textContent), want: strip(want), latin: /^[^٠-٩۰-۹]*$/.test(sal.textContent + day.textContent),
+        day: day.textContent, tracking: getComputedStyle(document.querySelector('#host .dzg-hrow')).letterSpacing,
+      };
+    });
+    check(name, `${tag}: the pinned « Employé » column at the ${ar ? 'right' : 'left'} edge; flags never mirrored (FR blue, white, red from the left)`, Math.abs(rtl.start) <= 1 && rtl.flag && rtl.transform === 'none', rtl);
+    check(name, `${tag}: salary in the ${ar ? 'ar-DZ' : 'fr-FR'} currency form (${rtl.salary}), Latin digits; header tracking ${ar ? '0' : 'as the theme'}`, rtl.salary === rtl.want && rtl.latin && (!ar || rtl.tracking === 'normal' || rtl.tracking === '0px'), rtl);
+    const pills = await contrast(page, '#host .hr-dep, #host .hr-avatar');
+    check(name, `${tag}: department pills and discs at least 4.5:1 (lowest ${pills.ratio}:1)`, pills.ratio >= 4.5, pills);
+    // Sticky parents: everyone open, a staff row at the top: its head, manager and lead pinned, in the pinned column too.
+    const sticky = await page.evaluate(async () => {
+      const g = window.t.grid;
+      g.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'user');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const people = window.t.demo.rows;
+      const by = new Map(people.map((p) => [p.id, p]));
+      const d = g.kernel.rows.displayed;
+      // The 4th child of a lead, deep in the list.
+      const staff = people.filter((p) => p.level === 4)[200];
+      const i = d.indexOf(window.t.key(staff.id));
+      const vp = document.querySelector('#host .dzg-viewport');
+      vp.scrollTop = i * 52;
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r))));
+      const want = [];
+      for (let p = by.get(staff.manager); p && want.length < 3; p = p.manager ? by.get(p.manager) : null) want.unshift(p.name);
+      const copies = [...document.querySelectorAll('#host .dzg-sticky > .dzg-row')];
+      const header = document.querySelector('#host .dzg-header').getBoundingClientRect();
+      const seen = copies.map((c) => { const r = c.getBoundingClientRect(); const cell = c.querySelector('.dzg-seg-start .dzg-cell[data-col=name]'); return { text: cell?.textContent?.trim() ?? null, top: Math.round(r.top - header.bottom), h: Math.round(r.height), pinned: !!cell }; });
+      return { i, staff: staff.name, want, seen };
+    });
+    check(name, `${tag}: a staff row at the top: its 3 nearest managers pinned under the header, outermost first, in the pinned column, 52 px each`,
+      sticky.seen.length === 3 && sticky.seen.every((s, j) => s.pinned && s.h === 52 && s.text === sticky.want[j]), sticky);
+    if (!lite) {
+      // Keys: a staff row's « Employé » cell, → ×6 to « Contact », Enter onto « Écrire à … », → (← in Arabic) to « Appeler … », Escape back, Tab out.
+      await page.evaluate(() => { const g = window.t.grid; g.kernel.dispatch({ type: 'rows.expandAll', expanded: false }, 'user'); g.kernel.dispatch({ type: 'rows.expand', rows: ['E001', 'E002', 'E003', 'E004'].map(window.t.key), expanded: true }, 'user'); });
+      await frames(page, 2);
+      const leaf = await page.evaluate(() => {
+        const g = window.t.grid;
+        const d = g.kernel.rows.displayed;
+        const p = window.t.demo.rows.find((x) => x.manager === 'E004');
+        const k = window.t.key(p.id);
+        g.api.focusCell(k, 'name');
+        return p.name;
+      });
+      await frames(page, 2);
+      const fwd = ar ? 'ArrowLeft' : 'ArrowRight';
+      for (let n = 0; n < 6; n++) await page.keyboard.press(fwd);
+      await frames(page);
+      const at = () => page.evaluate(() => { const a = document.activeElement; return { col: a.closest('.dzg-cell')?.dataset.col ?? null, cell: a.classList.contains('dzg-cell'), label: a.getAttribute('aria-label'), tag: a.tagName, inGrid: !!a.closest('#host') }; });
+      const a0 = await at();
+      await page.keyboard.press('Enter');
+      const a1 = await at();
+      await page.keyboard.press(fwd);
+      const a2 = await at();
+      let v = await axe(page);
+      check(name, `${tag}: axe 0 with the focus on a contact link`, v.length === 0, v);
+      // A tooltip shown meanwhile (axe takes time) takes the first Escape (WCAG 1.4.13); the next one leaves the link.
+      const tipShown = await page.evaluate(() => !document.querySelector('#host .dzg-tooltip')?.hidden);
+      await page.keyboard.press('Escape');
+      if (tipShown) await page.keyboard.press('Escape');
+      const a3 = await at();
+      await page.keyboard.press('Enter');
+      await page.keyboard.press('Tab');
+      const a4 = await at();
+      const W = ar ? ['مراسلة ', 'الاتصال بـ '] : ['Écrire à ', 'Appeler '];
+      check(name, `${tag}: from « Employé », ${fwd} ×6 reaches « Contact »; Enter: « ${W[0]}${leaf} »; ${fwd}: « ${W[1]}${leaf} »; Escape: the cell; Tab leaves the grid`,
+        a0.col === 'contact' && a0.cell && a1.tag === 'A' && a1.label === `${W[0]}${leaf}` && a2.tag === 'A' && a2.label === `${W[1]}${leaf}` && a3.cell && a3.col === 'contact' && !a4.inGrid, { a0, a1, a2, a3, a4 });
+      v = await axe(page);
+      check(name, `${tag}: axe 0 with the tree open`, v.length === 0, v);
+      const one = await page.evaluate(() => { const d = window.t.grid.kernel.rows.displayed; return Array.from({ length: 20 }, (_, i) => { const p = d.nodeAt(i).data; return `${p.id}|${p.name}|${p.salary}|${p.hired}|${p.country}|${p.status}`; }).join(); });
+      const again = await open(`demo=hr&${qs}`);
+      await again.page.evaluate(() => { const g = window.t.grid; g.kernel.dispatch({ type: 'rows.expandAll', expanded: false }, 'user'); g.kernel.dispatch({ type: 'rows.expand', rows: ['E001', 'E002', 'E003', 'E004'].map(window.t.key), expanded: true }, 'user'); });
+      const two = await again.page.evaluate(() => { const d = window.t.grid.kernel.rows.displayed; return Array.from({ length: 20 }, (_, i) => { const p = d.nodeAt(i).data; return `${p.id}|${p.name}|${p.salary}|${p.hired}|${p.country}|${p.status}`; }).join(); });
+      check(name, `${tag}: two loads, the same first 20 people and figures`, one === two && one.length > 100, { one: one.slice(0, 160), two: two.slice(0, 160) });
+      await again.page.close();
+      await page.screenshot({ path: `${OUT}/demos-hr-${lang}.png` });
+    }
+    await clean(tag, o);
+    await page.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -2378,6 +2639,7 @@ async function runEngine(name) {
       if (only === 'themes') await themeChecks(name, ctx);
       if (only === 'bridges' && name === 'chrome') await frameworkChecks(name, ctx);
       if (only === 'dates' && name === 'chrome') await dateChecks(name, ctx);
+      if (only === 'demos') await demosChecks(name, ctx);
       return;
     }
 
@@ -2711,6 +2973,7 @@ async function runEngine(name) {
     if (name === 'chrome') await motionChecks(name, ctx);
     if (name === 'chrome') await treeChecks(name, ctx);
     if (name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
+    await demosChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.
@@ -2867,15 +3130,26 @@ async function runEngine(name) {
     // ---- text zoom: rows follow the reader's text size; the tooltip in the top layer ----
     {
       const { page } = await load(ctx, 'rows=200');
-      const z = await page.evaluate(async () => {
-        document.documentElement.style.fontSize = '32px';
+      // The reader's text size is the browser's default size (`medium`, review R3): in Chrome set through the
+      // DevTools protocol (Settings › Font size); a page's own root size does not change the rows.
+      const rootOnly = await page.evaluate(async () => {
+        document.documentElement.style.fontSize = '10px';
+        window.t.grid.api.refresh();
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const h = document.querySelector('.dzg-layer > .dzg-row').getBoundingClientRect().height;
+        document.documentElement.style.fontSize = '';
+        return h;
+      });
+      check(name, `a page's root font size (10 px) leaves the rows at 32 px (${rootOnly})`, Math.abs(rootOnly - 32) <= 1, rootOnly);
+      if (name === 'chrome') await (await ctx.newCDPSession(page)).send('Page.setFontSizes', { fontSizes: { standard: 32 } });
+      const z = name !== 'chrome' ? null : await page.evaluate(async () => {
         window.t.grid.api.refresh();
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
         const row = document.querySelector('.dzg-layer > .dzg-row');
         const cells = [...row.querySelectorAll('.dzg-cell')];
         return { height: row.getBoundingClientRect().height, clipped: cells.filter((c) => c.scrollHeight > c.clientHeight + 1).length };
       });
-      check(name, 'at 200 % text the rows double and no cell text is clipped', Math.abs(z.height - 64) <= 1 && z.clipped === 0, z);
+      if (z) check(name, 'at 200 % text (the browser’s default size) the rows double and no cell text is clipped', Math.abs(z.height - 64) <= 1 && z.clipped === 0, z);
       const tip = await page.evaluate(async () => {
         document.documentElement.style.fontSize = '';
         // A host card that clips what overflows it, as dialogs and cards do.

@@ -19,6 +19,12 @@ export interface GridSettings<T> {
   readonly direction?: 'auto' | 'ltr' | 'rtl';
   readonly density?: 'compact' | 'comfortable' | 'spacious';
   /**
+   * The row height in px at 16 px text, over the density's (owner D1, virtual-scroll.md « Row height »):
+   * from 24 to 1 000, grown with the reader's text size; header rows follow. Anything else is told
+   * (`invalid-setting`, a warning) and the density's height is used. Live.
+   */
+  readonly rowHeight?: number;
+  /**
    * `keepOnFilter`: false clears the selection when a filter or the search changes (a sort or
    * a page never does); true by default, rows ticked stay ticked even once hidden. `canSelect`
    * (step 21, docs/behaviors/selection-rules.md, needs `rules()`): whether a row may join the
@@ -88,3 +94,6 @@ export interface RowClassContext<T> {
 }
 
 export const ROW_HEIGHT = { compact: 28, comfortable: 32, spacious: 40 } as const;
+
+/** `rowHeight` when the grid takes it (a number from 24, WCAG 2.5.8's target size, to 1 000), else undefined. */
+export const rowPx = (v: unknown): number | undefined => (typeof v == 'number' && v >= 24 && v <= 1e3 ? v : undefined);

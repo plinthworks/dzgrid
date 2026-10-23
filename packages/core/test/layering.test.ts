@@ -104,8 +104,9 @@ describe('layering of the base and the server entry', () => {
     // Phase 5 step 2 (2026-10-22): +659 (editable and editableAt, the edit-structure warning, edits.reader /
     // rows.reapply / orderStale, the stale-order rule, the app context Q12) → 28 899; its review fixes +27
     // (the host update of an edited row re-read with the edits, the edit-structure told once, the threw
-    // reset, the creation context; reader-off dropped) → 28 926, the measure.
-    expect(gz).toBeLessThanOrEqual(28926);
+    // reset, the creation context; reader-off dropped) → 28 926. Showcase demos (owner D1, 2026-10-23): +6, the
+    // problem code `invalid-setting` for `rowHeight` → 28 932, the measure.
+    expect(gz).toBeLessThanOrEqual(28932);
   });
 
   it('the base holds no edit module: the edit controller is its own entry (Phase 5 step 3)', async () => {

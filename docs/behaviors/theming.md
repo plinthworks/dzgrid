@@ -97,7 +97,7 @@ frameworks (Tailwind CSS 4.3.3 and 3.4.19, Bootstrap 5.3.8, root devDependencies
   selected row also carries a 2 px bar in the accent at its inline start (in `Highlight` under forced colours;
   `HighlightText` with `contrast.css`, whose selected row is `Highlight`).
 - **Clinic**: white, teal-blue accent, airy; radius `.5rem`, pills fully round, cell padding `.875rem`. The
-  row height is a setting (`density: 'spacious'` in its demos), not CSS: it feeds the virtualisation.
+  row height is a setting (`density: 'spacious'`, or `rowHeight` in px: virtual-scroll.md « Row height »), not CSS: it feeds the virtualisation.
 - **Contrast**: every pair of `contrast-pairs.json` (text 4.5:1, parts 3:1) holds for each theme, light and
   dark — pills, focus ring, selected row, the saving border, the refusal colour included. `npm run
   check:contrast` checks the base palette and both showcase themes as shipped (read from their CSS); a

@@ -224,9 +224,21 @@ function walk(seed: number, o: { n: number; steps: number; rtl?: boolean; pinned
       const den = pick(['compact', 'comfortable', 'spacious'] as const);
       const key = t.topKey();
       const at = { top: t.ctx.scroll.atTop, end: t.ctx.scroll.atEnd };
+      // The focused row, when in view, stays in view (row-height blueprint, WCAG 2.4.11): the top row is kept
+      // unless keeping it would push the focused row out, and then the focused row sits at the view's edge.
+      const f = t.g.kernel.focus;
+      const fi = f?.kind === 'cell' ? t.d().indexOf(f.row) : -1;
+      const box = (L: { offsetOf(i: never): number; heightOf(i: never): number }) => ({ y: L.offsetOf(fi as never) - t.top(), end: L.offsetOf(fi as never) + L.heightOf(fi as never) - t.top() });
+      const fb = fi >= 0 ? box(t.ctx.layout!) : null;
+      // Whole in view before (a row taller than the view: any part of it).
+      const seen = !!fb && (fb.end - fb.y > t.box.block ? fb.end > 0 && fb.y < t.box.block : fb.y >= -1e-6 && fb.end <= t.box.block + 1e-6);
       step += ` density ${den}`;
       t.g.update({ density: den });
-      if (!at.top && !at.end && t.top() < t.ctx.scroll.mapper!.maxLogical) expect(t.topKey(), `${step}: top row kept`).toBe(key);
+      const fa = seen ? box(t.ctx.layout!) : null;
+      if (fa) expect(fa.y >= -1e-6 && fa.end <= t.box.block + 1e-6 || fa.end - fa.y > t.box.block, `${step}: focused row in view (${fa.y}, ${fa.end})`).toBe(true);
+      if (!at.top && !at.end && t.top() < t.ctx.scroll.mapper!.maxLogical && t.topKey() !== key) {
+        expect(fa && (Math.abs(fa.y) < 1e-6 || Math.abs(fa.end - t.box.block) < 1e-6), `${step}: top row kept, or moved only to keep the focused row in view`).toBe(true);
+      }
     } else if (r < 0.40 && o.heavy) {
       step += ' sort';
       t.g.kernel.dispatch({ type: 'sort.set', sort: rand() < 0.3 ? [] : [{ column: 'n', dir: pick(['asc', 'desc'] as const) }] }, 'user');

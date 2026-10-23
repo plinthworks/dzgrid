@@ -95,7 +95,7 @@ export interface GridContext<T> {
   /** When the view last scrolled, and how fast (the overscan follows it). */
   scrolledAt: number;
   speed: number;
-  /** The root font size at the last paint: the row height follows it. */
+  /** The browser's default text size at the last paint (`font-size: medium`): the row height follows it. */
   remPx: number;
   /** The view's block size at the last paint (what a screen of rows is, measured). */
   viewBlock: number;
@@ -121,6 +121,11 @@ export interface GridContext<T> {
   report(err: unknown): void;
   now(): number;
   rowHeight(): number;
+  /**
+   * Scrolls (logically, no paint asked) so display row `i` is seen whole in a view `block` high, under the
+   * pinned parents (WCAG 2.4.11): the stack drawn, or the room its own need, whichever is more. True when it moved.
+   */
+  reveal(i: number, block: number): boolean;
   /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
   restoreFocus(): void;
   msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey, params?: Readonly<Record<string, string | number>>): string;
