@@ -1,0 +1,85 @@
+{
+  "id": "sorted-column",
+  "suite": "edit-saves",
+  "description": "An edit on a sorted column marks the order stale and moves nothing; reapply sorts with it.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "c",
+            "v",
+            0
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "reapply": true
+      }
+    ],
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "events": [
+      "reader",
+      "stale"
+    ]
+  },
+  "expected": {
+    "events": [
+      "reader v user",
+      "stale true user",
+      "stale false user"
+    ],
+    "shown": [
+      "c",
+      "a",
+      "b"
+    ],
+    "intact": true
+  }
+}

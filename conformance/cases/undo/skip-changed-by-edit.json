@@ -1,0 +1,94 @@
+{
+  "id": "skip-changed-by-edit",
+  "suite": "undo",
+  "description": "A cell changed since by an edit that left no undo entry is skipped.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            6
+          ]
+        ],
+        "origin": "undo"
+      },
+      {
+        "undo": true
+      }
+    ],
+    "save": "none",
+    "watch": [
+      "a.v"
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "generation": 2,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "cells": [],
+        "skipped": 1
+      }
+    ],
+    "final": [
+      "a.v=6 saved"
+    ],
+    "canUndo": false,
+    "canRedo": true
+  }
+}

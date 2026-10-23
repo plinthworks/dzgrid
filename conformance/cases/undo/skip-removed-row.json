@@ -1,0 +1,102 @@
+{
+  "id": "skip-removed-row",
+  "suite": "undo",
+  "description": "A removed row is skipped; a batch all skipped still moves to redo.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "tx": {
+          "remove": [
+            "a"
+          ]
+        }
+      },
+      {
+        "undo": true
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "cells": [],
+        "skipped": 1
+      }
+    ],
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ],
+    "canUndo": false,
+    "canRedo": true
+  }
+}

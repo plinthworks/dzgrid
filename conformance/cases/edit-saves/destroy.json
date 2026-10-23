@@ -1,0 +1,117 @@
+{
+  "id": "destroy",
+  "suite": "edit-saves",
+  "description": "Destroy drops what was pending or saving (counted) and ignores late answers.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            6
+          ],
+          [
+            "b",
+            "v",
+            7
+          ]
+        ]
+      },
+      {
+        "destroy": true
+      },
+      {
+        "fail": 1
+      }
+    ],
+    "events": [
+      "failed",
+      "states"
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "generation": 2,
+        "staged": 2,
+        "refused": []
+      },
+      3
+    ],
+    "events": [
+      "states a.v user",
+      "states a.v,b.v user"
+    ],
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ]
+  }
+}

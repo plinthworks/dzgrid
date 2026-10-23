@@ -1,0 +1,105 @@
+{
+  "id": "validate",
+  "suite": "edit-input",
+  "description": "validate returns a code, or nothing: an empty string and a non-string are no refusal.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number",
+        "validate": {
+          "fn": "negative"
+        }
+      },
+      {
+        "id": "n",
+        "editable": true,
+        "validate": {
+          "fn": "empty-string"
+        }
+      },
+      {
+        "id": "w",
+        "editable": true,
+        "validate": {
+          "fn": "not-string"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "-3"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "3"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "k"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "w",
+          {
+            "text": "k"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "code": "negative"
+      },
+      {
+        "value": 3
+      },
+      {
+        "value": "k"
+      },
+      {
+        "value": "k"
+      }
+    ],
+    "problems": []
+  }
+}

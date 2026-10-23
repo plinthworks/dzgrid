@@ -1,0 +1,84 @@
+{
+  "id": "never-moves",
+  "suite": "undo",
+  "description": "Undo never moves a row: the order stays until reapply.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "c",
+            "v",
+            0
+          ]
+        ]
+      },
+      {
+        "reapply": true
+      },
+      {
+        "undo": true
+      }
+    ],
+    "save": "none",
+    "query": {
+      "sort": [
+        {
+          "column": "v",
+          "dir": "asc"
+        }
+      ]
+    },
+    "events": [
+      "stale"
+    ]
+  },
+  "expected": {
+    "shown": [
+      "c",
+      "a",
+      "b"
+    ],
+    "events": [
+      "stale true user",
+      "stale false user",
+      "stale true user"
+    ]
+  }
+}

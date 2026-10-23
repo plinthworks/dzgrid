@@ -60,3 +60,11 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **D4 (2026-10-23):** in the orders demo the owner does not want the detail's header: sub-orders are shown as child rows in the SAME grid (tree shape, `parentId`), same columns, no repeated header, with a slightly different background the app controls (a CSS variable set by the demo, applied through `rowClass`). No library change. Sort/filter apply to the whole grid. The nested-grid "same columns" version is replaced by this one (the Phase 4 master/detail demos stay).
 - **D3 (2026-10-23):** Angular `[rowHeight]` put back; `@dzgrid/angular` 6 300 → 6 350 (budget and rebudget ceiling).
 - **D4 (2026-10-23):** the orders demo has no detail header: sub-orders are child rows of the same grid (tree shape, `parentId`), same columns, a slightly different background the app sets through a CSS variable (`--orders-child-bg`) applied by `rowClass`. No library change. It replaces the nested-grid « same columns » version (the Phase 4 master/detail demos stay).
+
+## Step 3 (owner, 2026-10-23) — plan `step03-plan.md`
+
+- **S3-O1:** A — validators are synchronous only; checks that need the server happen at save (a server refusal blinks and returns to the previous value, Q9).
+- **S3-O2:** the owner asked for "a global system" that follows the app's API shape: the app's `save` decides. One request per cell → each cell gets its own answer. One request for a batch → a thrown/rejected error refuses the whole batch (all cells blink and return), OR the answer names cells (e.g. `error.cells` / a per-cell result) → only those are refused, the others kept. ~120 B in `core/edit` (inside its 3 000).
+- **S3-O3:** A — simple rules in the column: `edit: { required, min, max, pattern, options }`; messages can quote the limit (« au moins 5 »).
+- Lead: move the `validate` shape check from the base into `core/edit` (base −17 B) as the plan proposes.
+- **S3-O4 (2026-10-23):** `@dzgrid/core/edit` 3 000 → 3 100 (measured 3 045 with the global refusal system).

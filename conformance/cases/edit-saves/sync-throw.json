@@ -1,0 +1,91 @@
+{
+  "id": "sync-throw",
+  "suite": "edit-saves",
+  "description": "A save that throws at once is a refusal, settled like a rejected promise.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      }
+    ],
+    "watch": [
+      "a.v"
+    ],
+    "save": "throw",
+    "events": [
+      "failed"
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=1 failed"
+      ]
+    ],
+    "events": [
+      "failed a.v 5 \"sync\" null data"
+    ]
+  }
+}

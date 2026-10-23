@@ -1,0 +1,135 @@
+{
+  "id": "server-page-change",
+  "suite": "edit-saves",
+  "description": "A server page change while a change waits: the row is only off the page; the change is kept and sent (with the row it was made on).",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "model": "source",
+    "watch": [
+      "c.v"
+    ],
+    "steps": [
+      {
+        "answer": {
+          "call": "c1",
+          "rows": [
+            {
+              "id": "a",
+              "v": 1,
+              "w": 10,
+              "n": "x"
+            },
+            {
+              "id": "b",
+              "v": 2,
+              "w": 20,
+              "n": "y"
+            }
+          ],
+          "total": 3
+        }
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "page": 1
+      },
+      {
+        "answer": {
+          "call": "c2",
+          "rows": [
+            {
+              "id": "c",
+              "v": 3,
+              "w": 30,
+              "n": "z"
+            }
+          ],
+          "total": 3
+        }
+      },
+      {
+        "ok": 1
+      },
+      {
+        "ok": 2
+      }
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 2,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            6,
+            5
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            false
+          ]
+        ]
+      }
+    ],
+    "dirty": false,
+    "calls": [
+      "c1",
+      "c2"
+    ]
+  }
+}

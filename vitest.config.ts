@@ -15,6 +15,7 @@ const alias = {
   '@dzgrid/core/tree': fileURLToPath(new URL('./packages/core/src/tree.ts', import.meta.url)),
   '@dzgrid/core/tree-lazy': fileURLToPath(new URL('./packages/core/src/tree-lazy.ts', import.meta.url)),
   '@dzgrid/core/detail': fileURLToPath(new URL('./packages/core/src/detail.ts', import.meta.url)),
+  '@dzgrid/core/edit': fileURLToPath(new URL('./packages/core/src/edit.ts', import.meta.url)),
   '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
   '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
 };

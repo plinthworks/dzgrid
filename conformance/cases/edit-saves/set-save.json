@@ -1,0 +1,113 @@
+{
+  "id": "set-save",
+  "suite": "edit-saves",
+  "description": "A new save function: the requests in flight keep theirs; the next ones use it (none: saved at once).",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "setSave": "none"
+      },
+      {
+        "commit": [
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      }
+    ],
+    "watch": [
+      "a.v",
+      "b.v"
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=5 saving",
+        "b.v=2 -"
+      ],
+      [
+        "a.v=5 saving",
+        "b.v=2 -"
+      ],
+      [
+        "a.v=5 saving",
+        "b.v=6 saved"
+      ],
+      [
+        "a.v=5 saved",
+        "b.v=6 saved"
+      ]
+    ]
+  }
+}

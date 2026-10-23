@@ -1,0 +1,95 @@
+{
+  "id": "partial-refusal-unmatched",
+  "suite": "edit-saves",
+  "description": "Cells named that are not in the request refuse the whole batch.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ],
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "fail": 1,
+        "error": {
+          "reason": "batch",
+          "cells": [
+            {
+              "key": "d:2:zz",
+              "column": "v"
+            }
+          ]
+        }
+      }
+    ],
+    "watch": [
+      "a.v",
+      "b.v"
+    ],
+    "events": [
+      "failed"
+    ]
+  },
+  "expected": {
+    "after": [
+      [
+        "a.v=5 saving",
+        "b.v=6 saving"
+      ],
+      [
+        "a.v=1 failed",
+        "b.v=2 failed"
+      ]
+    ],
+    "events": [
+      "failed a.v 5 \"batch\" null data",
+      "failed b.v 6 \"batch\" null data"
+    ],
+    "canUndo": false
+  }
+}

@@ -105,12 +105,32 @@ describe('layering of the base and the server entry', () => {
     // rows.reapply / orderStale, the stale-order rule, the app context Q12) → 28 899; its review fixes +27
     // (the host update of an edited row re-read with the edits, the edit-structure told once, the threw
     // reset, the creation context; reader-off dropped) → 28 926. Showcase demos (owner D1, 2026-10-23): +6, the
-    // problem code `invalid-setting` for `rowHeight` → 28 932, the measure.
-    expect(gz).toBeLessThanOrEqual(28932);
+    // problem code `invalid-setting` for `rowHeight` → 28 932. Phase 5 step 3 (2026-10-23): −16, the `validate`
+    // shape check moved to `@dzgrid/core/edit` (the base gains only types: `EditChecks`, four events,
+    // `SaveOrigin`) → 28 916, the measure.
+    expect(gz).toBeLessThanOrEqual(28916);
   });
 
   it('the base holds no edit module: the edit controller is its own entry (Phase 5 step 3)', async () => {
     const isEdit = (f: string) => /(^|\/)src\/edit(\.ts$|\/)/.test(f);
     for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts']) expect((await inputsOf(entry)).filter(isEdit), entry).toEqual([]);
+  });
+
+  it('the edit entry holds its modules and no server, span, csv, tree or detail module (Phase 5 step 3)', async () => {
+    const inputs = await inputsOf('edit.ts');
+    for (const f of ['src/edit/input.ts', 'src/edit/controller.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    expect(inputs.filter((f) => isServer(f) || isSpans(f) || isCsv(f) || /(^|\/)src\/(tree|detail)(\.ts$|-lazy\.ts$|\/)/.test(f))).toEqual([]);
+    // The rows' model is the kernel's: the controller is handed one, it carries none.
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(false);
+  });
+
+  it('the edit entry fits its grant over the base (owner Q16 3 000, S3-O4 3 100 B gz), measured as check:size measures it', async () => {
+    const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
+    const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
+    const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './edit.ts';", resolveDir: SRC, loader: 'ts' } });
+    const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
+    const entry = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core/edit'];
+    expect(entry).toMatchObject({ file: 'packages/core/src/edit.ts', maxGzip: 3100, over: '@dzgrid/core' });
+    expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
   });
 });

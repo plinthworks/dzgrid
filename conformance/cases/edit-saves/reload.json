@@ -1,0 +1,114 @@
+{
+  "id": "reload",
+  "suite": "edit-saves",
+  "description": "A reload replaces every row: saved cells show the new rows; a row left out takes its saved mark with it.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "ok": 2
+      },
+      {
+        "load": [
+          {
+            "id": "a",
+            "v": 1,
+            "w": 10,
+            "n": "x"
+          },
+          {
+            "id": "c",
+            "v": 3,
+            "w": 30,
+            "n": "z"
+          }
+        ]
+      }
+    ],
+    "watch": [
+      "a.v",
+      "c.v"
+    ]
+  },
+  "expected": {
+    "after": [
+      [
+        "a.v=5 saving",
+        "c.v=3 -"
+      ],
+      [
+        "a.v=5 saving",
+        "c.v=3 -"
+      ],
+      [
+        "a.v=5 saved",
+        "c.v=3 -"
+      ],
+      [
+        "a.v=5 saved",
+        "c.v=3 -"
+      ],
+      [
+        "a.v=1 -",
+        "c.v=3 -"
+      ]
+    ],
+    "intact": true
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "partial-refusal-reason-fallback",
+  "suite": "edit-saves",
+  "description": "A named cell without its own reason takes the error's.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ],
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "fail": 1,
+        "error": {
+          "reason": "batch",
+          "code": "c1",
+          "cells": [
+            {
+              "key": "d:1:a",
+              "column": "v"
+            }
+          ]
+        }
+      }
+    ],
+    "watch": [
+      "a.v",
+      "b.v"
+    ],
+    "events": [
+      "failed"
+    ]
+  },
+  "expected": {
+    "after": [
+      [
+        "a.v=5 saving",
+        "b.v=6 saving"
+      ],
+      [
+        "a.v=1 failed",
+        "b.v=6 saved"
+      ]
+    ],
+    "events": [
+      "failed a.v 5 \"batch\" \"c1\" data"
+    ]
+  }
+}

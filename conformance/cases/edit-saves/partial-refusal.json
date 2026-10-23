@@ -1,0 +1,103 @@
+{
+  "id": "partial-refusal",
+  "suite": "edit-saves",
+  "description": "A batch refused by naming cells (owner S3-O2): only those go back and are told, each with its own reason; the others are saved.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ],
+          [
+            "b",
+            "v",
+            6
+          ],
+          [
+            "c",
+            "v",
+            7
+          ]
+        ]
+      },
+      {
+        "fail": 1,
+        "error": {
+          "reason": "batch",
+          "cells": [
+            {
+              "key": "d:1:b",
+              "column": "v",
+              "reason": "locked"
+            }
+          ]
+        }
+      }
+    ],
+    "watch": [
+      "a.v",
+      "b.v",
+      "c.v"
+    ],
+    "events": [
+      "failed"
+    ]
+  },
+  "expected": {
+    "after": [
+      [
+        "a.v=5 saving",
+        "b.v=6 saving",
+        "c.v=7 saving"
+      ],
+      [
+        "a.v=5 saved",
+        "b.v=2 failed",
+        "c.v=7 saved"
+      ]
+    ],
+    "events": [
+      "failed b.v 6 \"locked\" null data"
+    ],
+    "canUndo": true
+  }
+}

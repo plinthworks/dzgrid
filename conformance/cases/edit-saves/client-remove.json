@@ -1,0 +1,155 @@
+{
+  "id": "client-remove",
+  "suite": "edit-saves",
+  "description": "A row removed by the host: its waiting changes leave their gesture (the rest goes), its save in flight is ignored on screen but its refusal still told.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            6
+          ],
+          [
+            "c",
+            "v",
+            8
+          ]
+        ]
+      },
+      {
+        "tx": {
+          "remove": [
+            "a"
+          ]
+        }
+      },
+      {
+        "fail": 1
+      },
+      {
+        "ok": 2
+      }
+    ],
+    "watch": [
+      "a.v",
+      "c.v"
+    ],
+    "events": [
+      "failed"
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 2,
+        "origin": "edit",
+        "changes": [
+          [
+            "c",
+            "v",
+            8,
+            3
+          ]
+        ],
+        "rows": [
+          [
+            "c",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=5 saving",
+        "c.v=3 -"
+      ],
+      [
+        "a.v=6 pending",
+        "c.v=8 pending"
+      ],
+      [
+        "a.v=gone -",
+        "c.v=8 saving"
+      ],
+      [
+        "a.v=gone -",
+        "c.v=8 saving"
+      ],
+      [
+        "a.v=gone -",
+        "c.v=8 saved"
+      ]
+    ],
+    "events": [
+      "failed a.v 5 null null data"
+    ],
+    "dirty": false,
+    "intact": true
+  }
+}

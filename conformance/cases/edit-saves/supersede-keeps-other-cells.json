@@ -1,0 +1,174 @@
+{
+  "id": "supersede-keeps-other-cells",
+  "suite": "edit-saves",
+  "description": "A newer gesture takes only its own cells from the waiting one; the older keeps its others and goes when free.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            6
+          ],
+          [
+            "b",
+            "v",
+            7
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "b",
+            "v",
+            8
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "ok": 3
+      },
+      {
+        "ok": 2
+      }
+    ],
+    "watch": [
+      "a.v",
+      "b.v"
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 3,
+        "origin": "edit",
+        "changes": [
+          [
+            "b",
+            "v",
+            8,
+            7
+          ]
+        ],
+        "rows": [
+          [
+            "b",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 2,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            6,
+            5
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=5 saving",
+        "b.v=2 -"
+      ],
+      [
+        "a.v=6 pending",
+        "b.v=7 pending"
+      ],
+      [
+        "a.v=6 pending",
+        "b.v=8 saving"
+      ],
+      [
+        "a.v=6 saving",
+        "b.v=8 saving"
+      ],
+      [
+        "a.v=6 saving",
+        "b.v=8 saved"
+      ],
+      [
+        "a.v=6 saved",
+        "b.v=8 saved"
+      ]
+    ]
+  }
+}

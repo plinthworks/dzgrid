@@ -1,0 +1,135 @@
+{
+  "id": "options-function",
+  "suite": "edit-input",
+  "description": "Options from a function of the row and the app's context; the current value passes though not listed; a new context changes the list.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "n",
+        "editable": true,
+        "edit": {
+          "options": {
+            "fn": "context-options"
+          }
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "app": {
+      "options": [
+        {
+          "value": "x"
+        },
+        {
+          "value": "y"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "x"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "z"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "q"
+          }
+        ]
+      },
+      {
+        "check": [
+          "b",
+          "n",
+          {
+            "text": "q"
+          }
+        ]
+      },
+      {
+        "app": {
+          "options": [
+            {
+              "value": "z"
+            }
+          ]
+        }
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "z"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "x"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": "x"
+      },
+      {
+        "code": "options"
+      },
+      {
+        "value": "q"
+      },
+      {
+        "code": "options"
+      },
+      {
+        "value": "z"
+      },
+      {
+        "code": "options"
+      }
+    ],
+    "problems": []
+  }
+}

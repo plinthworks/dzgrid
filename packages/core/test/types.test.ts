@@ -1,5 +1,6 @@
 import { describe, it, expectTypeOf } from 'vitest';
-import type { DisplayIndex, RowKey, Day, InstantMs, DisplayedRows, ColumnDef, EditableRule, FilterKind, LocaleCtx, Json } from '@dzgrid/core';
+import type { DisplayIndex, RowKey, Day, InstantMs, DisplayedRows, ColumnDef, EditableRule, EditChecks, FilterKind, GridEvent, LocaleCtx, Json, SaveOrigin } from '@dzgrid/core';
+import type { CellInput, SaveRequest } from '@dzgrid/core/edit';
 
 /**
  * Invariants held by the type system. Each `@ts-expect-error` line must stay
@@ -66,5 +67,41 @@ describe('the edit seams (Phase 5 step 2)', () => {
     void withContext;
     expectTypeOf<Parameters<NonNullable<FilterKind['test']>>[2]>().toEqualTypeOf<unknown>();
     expectTypeOf<Parameters<NonNullable<FilterKind['wire']>>[3]>().toEqualTypeOf<unknown>();
+  });
+});
+
+describe('the edit controller (Phase 5 step 3)', () => {
+  type Row = { id: string; stock: number; due: Day };
+  it('a column\'s edit rules: min and max typed by the column\'s value, options a list or a function of the row and the context', () => {
+    const stock: ColumnDef<Row, number> = { id: 'stock', edit: { required: true, min: 0, max: 100, pattern: /^\\d+$/ } };
+    const due: ColumnDef<Row, Day> = { id: 'due', edit: { min: null as unknown as Day } };
+    const status: ColumnDef<Row, string> = { id: 's', edit: { options: (row, context) => (row.stock > 0 && context ? [{ value: 'in' }] : []) } };
+    void stock;
+    void due;
+    void status;
+    // @ts-expect-error — a number column's min is a number
+    const bad: ColumnDef<Row, number> = { id: 'stock', edit: { min: 'five' } };
+    void bad;
+    // @ts-expect-error — a day column's min is a Day, not any string
+    const badDay: EditChecks<Row, Day> = { min: '2026-01-01' };
+    void badDay;
+  });
+
+  it('an input is typed text or a value, never both shapes mixed with anything else', () => {
+    expectTypeOf<{ text: string }>().toMatchTypeOf<CellInput>();
+    expectTypeOf<{ value: unknown }>().toMatchTypeOf<CellInput>();
+    // @ts-expect-error — neither text nor value
+    const none: CellInput = { raw: 1 };
+    void none;
+  });
+
+  it('the edit events and the save request carry their origin', () => {
+    expectTypeOf<SaveOrigin>().toEqualTypeOf<'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk'>();
+    expectTypeOf<Extract<GridEvent<Row>, { type: 'cellEdited' }>['origin']>().toEqualTypeOf<SaveOrigin>();
+    expectTypeOf<Extract<GridEvent<Row>, { type: 'saveFailed' }>['source']>().toEqualTypeOf<'data'>();
+    expectTypeOf<Extract<GridEvent<Row>, { type: 'saveFailed' }>['reason']>().toEqualTypeOf<string | null>();
+    expectTypeOf<Extract<GridEvent<Row>, { type: 'undoChanged' }>['canUndo']>().toEqualTypeOf<boolean>();
+    expectTypeOf<Extract<GridEvent<Row>, { type: 'editStates' }>['cells']>().toEqualTypeOf<readonly { readonly key: RowKey; readonly column: string }[]>();
+    expectTypeOf<SaveRequest<Row>['changes'][number]['row']>().toEqualTypeOf<Readonly<Row>>();
   });
 });

@@ -1,0 +1,76 @@
+{
+  "id": "unchanged-blank",
+  "suite": "edit-saves",
+  "description": "Empty is empty: a cell without a value given empty text is unchanged.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      },
+      {
+        "id": "d",
+        "w": 0
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "d",
+            "v",
+            {
+              "text": ""
+            }
+          ],
+          [
+            "d",
+            "n",
+            null
+          ]
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": null,
+        "staged": 0,
+        "refused": []
+      }
+    ],
+    "requests": [],
+    "events": []
+  }
+}

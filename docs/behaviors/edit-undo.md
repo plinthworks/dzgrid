@@ -30,8 +30,10 @@ cell that changed back.
    refusal; the stack entry has already moved to the redo list.
 8. The focus moves to the first cell of the undone gesture, scrolled fully clear of pinned columns,
    sticky header rows and sticky parents (WCAG 2.4.11, `editing.md` 26); no field opens.
-9. The stack is cleared when `getRowId` or the row model changes; on a full reload, entries whose rows are
-   gone are skipped when reached.
+9. The stack is cleared when `getRowId` or the row model changes (one edit controller per kernel: a new
+   model or `getRowId` is a new kernel, and the DOM destroys the old controller, its undo with it); on a
+   full reload, entries whose rows are gone are skipped when reached. A cell is also skipped when it is
+   no longer editable, or when the value to give back is now refused by the column's checks.
 10. Nothing to undo / redo: nothing changes, said with `edit.nothingToUndo` / `edit.nothingToRedo`.
 11. Nested grids: one stack per grid; Ctrl+Z in an inner grid undoes the inner grid only.
 12. API: `edit.undo()`, `edit.redo()`, `edit.canUndo`, `edit.canRedo` (and an event `undoChanged`

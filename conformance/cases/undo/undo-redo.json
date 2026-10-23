@@ -1,0 +1,206 @@
+{
+  "id": "undo-redo",
+  "suite": "undo",
+  "description": "Undo saves the values shown before (origin undo, one request); redo saves them again.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ],
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "undo": true
+      },
+      {
+        "ok": 2
+      },
+      {
+        "redo": true
+      },
+      {
+        "ok": 3
+      }
+    ],
+    "watch": [
+      "a.v",
+      "b.v"
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 2,
+        "refused": []
+      },
+      {
+        "cells": [
+          [
+            "a",
+            "v"
+          ],
+          [
+            "b",
+            "v"
+          ]
+        ],
+        "skipped": 0
+      },
+      {
+        "cells": [
+          [
+            "a",
+            "v"
+          ],
+          [
+            "b",
+            "v"
+          ]
+        ],
+        "skipped": 0
+      }
+    ],
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ],
+          [
+            "b",
+            "v",
+            6,
+            2
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ],
+          [
+            "b",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 2,
+        "origin": "undo",
+        "changes": [
+          [
+            "a",
+            "v",
+            1,
+            5
+          ],
+          [
+            "b",
+            "v",
+            2,
+            6
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ],
+          [
+            "b",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 3,
+        "origin": "redo",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ],
+          [
+            "b",
+            "v",
+            6,
+            2
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ],
+          [
+            "b",
+            true
+          ]
+        ]
+      }
+    ],
+    "final": [
+      "a.v=5 saved",
+      "b.v=6 saved"
+    ],
+    "canUndo": true,
+    "canRedo": false,
+    "intact": true
+  }
+}

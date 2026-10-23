@@ -114,6 +114,20 @@ export type GridEvent<T> =
   /** The order shown is out of date after an edit (true), or back in order (false): on each flip only (edit-reapply.md 10). */
   | { readonly type: 'orderStale'; readonly source: ChangeSource; readonly stale: boolean }
   /**
+   * `@dzgrid/core/edit` (Phase 5 step 3; the base never sends these): a cell's new value shown, one per
+   * staged cell of a gesture (`previous`: the value shown before it).
+   */
+  | { readonly type: 'cellEdited'; readonly source: ChangeSource; readonly key: RowKey; readonly column: string; readonly value: unknown; readonly previous: unknown; readonly origin: SaveOrigin }
+  /**
+   * A cell's save refused (edit-save.md 13–16): the host's `error` unchanged; `reason` its non-empty
+   * string `reason`, `code` its string `code` (null otherwise). Never in a `Problem`.
+   */
+  | { readonly type: 'saveFailed'; readonly source: 'data'; readonly key: RowKey; readonly column: string; readonly value: unknown; readonly error: unknown; readonly reason: string | null; readonly code: string | null }
+  /** Cells whose save state changed (pending, saving, saved, failed, dropped): what the DOM repaints. */
+  | { readonly type: 'editStates'; readonly source: ChangeSource; readonly cells: readonly { readonly key: RowKey; readonly column: string }[] }
+  /** Undo or redo became possible or impossible: on each flip only (edit-undo.md 12). */
+  | { readonly type: 'undoChanged'; readonly source: ChangeSource; readonly canUndo: boolean; readonly canRedo: boolean }
+  /**
    * An Angular part's `emit(name, detail)` (`@dzgrid/angular`, step 22; the wrapper sends them, the
    * core and the DOM layer never do): a cell's, with the column and the key of the row it shows at
    * the call; any other slot's, with its column (null for the overlay and the footer).
@@ -160,6 +174,9 @@ export interface ExportServerPart {
 }
 
 export type SelectionReason = 'scope-changed' | 'rows-dropped';
+
+/** What made an edit (Phase 5): typed or picked, an undo, a redo; Part B's paste, fill and bulk edit. */
+export type SaveOrigin = 'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk';
 
 /**
  * What a selection rule refused (step 21): `rows` in the order asked; `reason`, the rule's first

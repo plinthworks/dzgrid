@@ -1,0 +1,197 @@
+{
+  "id": "bad-config",
+  "suite": "edit-input",
+  "description": "Bad rules are told once as warnings at creation and ignored; a column set again tells only what newly went wrong.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number",
+        "edit": {
+          "min": "abc",
+          "max": 5
+        }
+      },
+      {
+        "id": "n",
+        "editable": true,
+        "edit": {
+          "pattern": "("
+        }
+      },
+      {
+        "id": "s",
+        "editable": true,
+        "edit": {
+          "options": 5
+        }
+      },
+      {
+        "id": "w",
+        "editable": true,
+        "edit": {
+          "pattern": 7
+        },
+        "validate": 5
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "-3"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "6"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "("
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "s",
+          {
+            "text": "anything"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "w",
+          {
+            "text": "k"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "id": "v",
+            "editable": true,
+            "type": "number",
+            "edit": {
+              "min": "abc",
+              "max": "zz"
+            }
+          },
+          {
+            "id": "n",
+            "editable": true,
+            "edit": {
+              "pattern": "("
+            }
+          },
+          {
+            "id": "s",
+            "editable": true
+          },
+          {
+            "id": "w",
+            "editable": true
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "99"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": -3
+      },
+      {
+        "code": "max"
+      },
+      {
+        "value": "("
+      },
+      {
+        "value": "anything"
+      },
+      {
+        "value": "k"
+      },
+      {
+        "value": 99
+      }
+    ],
+    "problems": [
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns.v.edit.min"
+      },
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns.n.edit.pattern"
+      },
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns.s.edit.options"
+      },
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns.w.edit.pattern"
+      },
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns.w.validate"
+      },
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns.v.edit.max"
+      }
+    ]
+  }
+}

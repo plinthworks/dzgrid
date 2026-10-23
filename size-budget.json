@@ -40,6 +40,11 @@
       "maxGzip": 1050,
       "over": "@dzgrid/core"
     },
+    "@dzgrid/core/edit": {
+      "file": "packages/core/src/edit.ts",
+      "maxGzip": 3100,
+      "over": "@dzgrid/core"
+    },
     "@dzgrid/dom/locales/en": {
       "file": "packages/dom/src/locales/en.ts",
       "maxGzip": 600

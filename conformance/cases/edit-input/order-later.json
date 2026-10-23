@@ -1,0 +1,127 @@
+{
+  "id": "order-later",
+  "suite": "edit-input",
+  "description": "After min and max comes pattern, then options, then validate: the first failing wins.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number",
+        "edit": {
+          "max": 10
+        },
+        "validate": {
+          "fn": "negative"
+        }
+      },
+      {
+        "id": "n",
+        "editable": true,
+        "edit": {
+          "pattern": "[a-z]+",
+          "options": [
+            {
+              "value": "abc"
+            },
+            {
+              "value": "X"
+            }
+          ]
+        },
+        "validate": {
+          "fn": "context-says"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "app": {
+      "code": "blocked"
+    },
+    "steps": [
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "11"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "-1"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "X"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "xyz"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "abc"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "code": "max"
+      },
+      {
+        "code": "negative"
+      },
+      {
+        "code": "pattern"
+      },
+      {
+        "code": "options"
+      },
+      {
+        "code": "blocked"
+      }
+    ],
+    "problems": []
+  }
+}

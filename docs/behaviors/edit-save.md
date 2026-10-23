@@ -30,9 +30,19 @@ cannot be reached; sometimes the row is reloaded or removed while they type.
    (`onSource`: a transaction or a server answer carrying the row).
 4. Per cell, saves go in order (a queue); a newer gesture on the same cell waits for the older one.
    Generations are never reused; an old success arriving after a newer failure never shows its value.
-5. A rejected promise is a **refusal** (the server said no, or could not be reached; the same for the
-   user). Rollback goes to the cell's **last saved** value, never to the value before the gesture if a
-   later save already succeeded, never to the source rows.
+5. A rejected promise (or a `save` that throws) is a **refusal** (the server said no, or could not be
+   reached; the same for the user). Rollback goes to the cell's **last saved** value, never to the value
+   before the gesture if a later save already succeeded, never to the source rows.
+5b. **The app's save decides how much is refused** (owner S3-O2, step 3). A request per cell: each cell
+   gets its own answer. A request for several cells (a gesture of many cells; Part B's paste, fill,
+   bulk edit): a refusal refuses them all (each blinks and goes back), unless the error names cells,
+   `error.cells = [{ key, column, reason?, code? }]` — then only the named cells of the request are
+   refused (each with its own reason and code, else the error's) and the others are saved. `key` is
+   the grid's row key (`req.changes[].key`) or the host's own row id (the `getRowId` value). Named cells none of
+   which are in the request refuse the whole request (a failure never passes silently). A resolved
+   value always means saved.
+5c. Validators are synchronous only (owner S3-O1): a check that needs the server is the server's
+   refusal at save time (5, 13).
 
 **States** (one per cell, written by the base from the overlay at each paint, so a pooled or scrolled
 cell always shows the right one)
@@ -67,9 +77,11 @@ cell always shows the right one)
 15. **Retry**: F2 or Enter on a failed cell opens the field holding the **refused** text (not the last
     saved one); Escape there gives up and keeps the last saved value. The refused gesture leaves no undo
     entry (nothing changed).
-16. A host reason: if the rejection's error has a string `reason`, it is shown and said (the host's text,
-    already translated); else the generic reason `edit.reasonUnknown`. A reason is never put in a
-    `Problem` (rows may be health records).
+16. A host reason: if the rejection's error has a non-empty string `reason`, it is shown and said (the
+    host's text, already translated); else, if it has a string `code`, the message `validation.<code>`
+    (the same texts as a local refusal, so a server rule can say « at least 5 »); else the generic
+    reason `edit.reasonUnknown`. `saveFailed` carries both (`reason`, `code`, null when absent) and the
+    error unchanged. A reason is never put in a `Problem` (rows may be health records).
 
 **Server-paged grids** (Q18)
 17. Editing works as on a client grid; the value stays shown from the overlay until the next server

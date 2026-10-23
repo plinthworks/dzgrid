@@ -1,0 +1,96 @@
+{
+  "id": "client-remove-saved-answer",
+  "suite": "edit-saves",
+  "description": "A row removed while its save is in flight, added back before the answer: the answer never shows.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "tx": {
+          "remove": [
+            "a"
+          ]
+        }
+      },
+      {
+        "tx": {
+          "add": [
+            {
+              "id": "a",
+              "v": 1,
+              "w": 10,
+              "n": "x"
+            }
+          ]
+        }
+      },
+      {
+        "ok": 1
+      }
+    ],
+    "watch": [
+      "a.v"
+    ]
+  },
+  "expected": {
+    "after": [
+      [
+        "a.v=5 saving"
+      ],
+      [
+        "a.v=gone -"
+      ],
+      [
+        "a.v=1 -"
+      ],
+      [
+        "a.v=1 -"
+      ]
+    ],
+    "dirty": false
+  }
+}

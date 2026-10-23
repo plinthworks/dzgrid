@@ -1,0 +1,104 @@
+{
+  "id": "text-empty",
+  "suite": "edit-input",
+  "description": "Empty text is the empty value (null) for any type; a text column keeps spaces as typed, a number column reads spaces as empty.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "n",
+        "editable": true
+      },
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": ""
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "   "
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": ""
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "  "
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": " x "
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": null
+      },
+      {
+        "value": "   "
+      },
+      {
+        "value": null
+      },
+      {
+        "value": null
+      },
+      {
+        "value": " x "
+      }
+    ],
+    "problems": []
+  }
+}

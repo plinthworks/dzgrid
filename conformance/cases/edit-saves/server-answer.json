@@ -1,0 +1,138 @@
+{
+  "id": "server-answer",
+  "suite": "edit-saves",
+  "description": "A server page answer drops the saved cells (its rows show) and keeps the cells still saving.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "model": "source",
+    "watch": [
+      "a.v",
+      "b.v"
+    ],
+    "steps": [
+      {
+        "answer": {
+          "call": "c1",
+          "rows": [
+            {
+              "id": "a",
+              "v": 1,
+              "w": 10,
+              "n": "x"
+            },
+            {
+              "id": "b",
+              "v": 2,
+              "w": 20,
+              "n": "y"
+            }
+          ],
+          "total": 3
+        }
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "sort": [
+          {
+            "column": "n",
+            "dir": "asc"
+          }
+        ]
+      },
+      {
+        "answer": {
+          "call": "c2",
+          "rows": [
+            {
+              "id": "a",
+              "v": 5,
+              "w": 10,
+              "n": "x"
+            },
+            {
+              "id": "b",
+              "v": 2,
+              "w": 20,
+              "n": "y"
+            }
+          ],
+          "total": 3
+        }
+      },
+      {
+        "ok": 2
+      }
+    ]
+  },
+  "expected": {
+    "after": [
+      [
+        "a.v=1 -",
+        "b.v=2 -"
+      ],
+      [
+        "a.v=5 saving",
+        "b.v=2 -"
+      ],
+      [
+        "a.v=5 saving",
+        "b.v=6 saving"
+      ],
+      [
+        "a.v=5 saved",
+        "b.v=6 saving"
+      ],
+      [
+        "a.v=5 saved",
+        "b.v=6 saving"
+      ],
+      [
+        "a.v=5 -",
+        "b.v=6 saving"
+      ],
+      [
+        "a.v=5 -",
+        "b.v=6 saved"
+      ]
+    ],
+    "calls": [
+      "c1",
+      "c2"
+    ]
+  }
+}

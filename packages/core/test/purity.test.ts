@@ -40,7 +40,7 @@ function tokens(source: string): Token[] {
 }
 
 /** Every reason a source breaks purity, as short labels. Exported for the self-test below. */
-export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean } = { base: true }): string[] {
+export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean } = { base: true }): string[] {
   const found: string[] = [];
   const t = tokens(source);
   t.forEach((tok, i) => {
@@ -74,6 +74,8 @@ export function violations(source: string, opts: { base: boolean; server?: boole
       if (!opts.spans && !opts.csv && /(^|\/)spans(\.js|\/|$)/.test(spec)) found.push('spans import');
       // Nor the csv entry (step 10): a grid that exports nothing carries none of it.
       if (!opts.csv && /(^|\/)csv(\.js|\/|$)/.test(spec)) found.push('csv import');
+      // Nor the edit entry (Phase 5 step 3): a read-only grid carries none of it.
+      if (!opts.edit && /(^|\/)edit(\.js|\/|$)/.test(spec)) found.push('edit import');
     }
   });
   return found;
@@ -90,7 +92,7 @@ describe('core purity', () => {
   it('names no forbidden global, package or dynamic import', () => {
     const offenders = all.flatMap((f) => {
       const rel = f.slice(SRC.length + 1);
-      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/') });
+      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/') });
       return v.length ? [`${rel}: ${[...new Set(v)].join(', ')}`] : [];
     });
     expect(offenders).toEqual([]);
@@ -158,6 +160,15 @@ describe('the purity check itself', () => {
     expect(violations("import { buildSpanMap } from './spans/index.js';", { base: true, server: true })).toEqual(['spans import']);
     expect(violations("import { runEnds } from './merge.js';", { base: true, spans: true })).toEqual([]);
     expect(violations("import { navigate } from './spans/nav.js';", { base: true, spans: true })).toEqual([]);
+  });
+
+  it('catches an import of the edit entry from the base, and only from the edit entry (Phase 5 step 3)', () => {
+    expect(violations("import { createEdits } from './edit.js';")).toEqual(['edit import']);
+    expect(violations("import { parseInput } from '../edit/input.js';", { base: true, server: true, spans: true, csv: true })).toEqual(['edit import']);
+    expect(violations("import { parseInput } from './input.js';", { base: true, edit: true })).toEqual([]);
+    expect(violations("import { parseInput } from './edit/input.js';", { base: true, edit: true })).toEqual([]);
+    // A module that only has `edit` in its name is no edit entry.
+    expect(violations("import { editableAt } from './columns/editable.js';")).toEqual([]);
   });
 
   it('lets comments, strings and property names mention anything', () => {

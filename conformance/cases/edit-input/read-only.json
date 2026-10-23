@@ -1,0 +1,132 @@
+{
+  "id": "read-only",
+  "suite": "edit-input",
+  "description": "A cell that cannot be edited is refused read-only: a column not editable, a rule saying no, a detail row, an unknown row, a tree's locked column.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number"
+      },
+      {
+        "id": "n"
+      },
+      {
+        "id": "w",
+        "editable": {
+          "fn": "row-ok"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "k"
+          }
+        ]
+      },
+      {
+        "check": [
+          "b",
+          "w",
+          {
+            "text": "k"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "w",
+          {
+            "text": "k"
+          }
+        ]
+      },
+      {
+        "check": [
+          ">a",
+          "v",
+          {
+            "text": "1"
+          }
+        ]
+      },
+      {
+        "check": [
+          "zz",
+          "v",
+          {
+            "text": "1"
+          }
+        ]
+      },
+      {
+        "lock": [
+          "v"
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "1"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "code": "read-only"
+      },
+      {
+        "code": "read-only"
+      },
+      {
+        "value": "k"
+      },
+      {
+        "code": "read-only"
+      },
+      {
+        "code": "read-only"
+      },
+      {
+        "code": "read-only"
+      }
+    ],
+    "problems": [
+      {
+        "code": "edit-structure",
+        "severity": "warning",
+        "path": "columns.v.editable"
+      }
+    ]
+  }
+}

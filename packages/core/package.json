@@ -40,6 +40,10 @@
     "./detail": {
       "types": "./src/detail.ts",
       "default": "./src/detail.ts"
+    },
+    "./edit": {
+      "types": "./src/edit.ts",
+      "default": "./src/edit.ts"
     }
   }
 }

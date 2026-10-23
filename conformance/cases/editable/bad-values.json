@@ -62,11 +62,6 @@
         "code": "invalid-column",
         "severity": "warning",
         "path": "columns[0].editable"
-      },
-      {
-        "code": "invalid-column",
-        "severity": "warning",
-        "path": "columns[1].validate"
       }
     ]
   }

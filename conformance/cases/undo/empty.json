@@ -1,0 +1,59 @@
+{
+  "id": "empty",
+  "suite": "undo",
+  "description": "Nothing to undo or redo: null, nothing told.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "undo": true
+      },
+      {
+        "redo": true
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      null,
+      null
+    ],
+    "events": [],
+    "requests": []
+  }
+}

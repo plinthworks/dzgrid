@@ -11,9 +11,23 @@ Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
 - `ColumnDef.editable` (`true`, or a rule `(row, context)`: only `true` means yes) and
-  `ColumnDef.validate(value, row, context)` (run from Phase 5 step 3); a value of another type is a
-  warning `invalid-column` at `columns[i].editable` / `.validate`, the column kept and read-only.
-  Type `EditableRule`.
+  `ColumnDef.validate(value, row, context)` (run by `@dzgrid/core/edit`); an `editable` of another type
+  is a warning `invalid-column` at `columns[i].editable`, the column kept and read-only (a `validate`
+  that is not a function is told by `@dzgrid/core/edit`, at `columns.<id>.validate`). Type `EditableRule`.
+- `@dzgrid/core/edit` (Phase 5 step 3; docs/behaviors/edit-save.md, edit-validation.md, edit-undo.md):
+  `createEdits(kernel, { ctx, save?, abort? })`, the edit controller of one grid: an overlay the rows
+  read (`reader`, installed with `edits.reader`; the host's rows are never written), `check`, `commit`
+  (one gesture: one generation, one request; refused cells returned, unchanged cells dropped), `state`
+  (`pending`, `saving`, `saved`, `failed` with the refused value, reason and code), `dirty`, `undo` /
+  `redo` (100 gestures; a cell changed since, no longer editable or gone is skipped and counted),
+  `canUndo` / `canRedo`, `setSave`, `destroy`. Saves one at a time per cell, the newest waiting change
+  replacing an older one; a refusal goes back to the last saved value, else the source; the app's
+  `save` may refuse only some cells of a request by naming them (`error.cells`). Pure `parseInput` and
+  `checkValue`. Column rules `ColumnDef.edit: { required, min, max, pattern, options, maxLength?,
+  editor? }` (type `EditChecks`); refusal codes `parse`, `day`, `invalid-instant`, `wall-time-skipped`,
+  `wall-time-ambiguous`, `options`, `invalid`, `required`, `min`, `max`, `pattern`, `read-only`, or
+  `validate`'s own. Kernel events `cellEdited`, `editStates`, `saveFailed`, `undoChanged` (sent by the
+  controller only); type `SaveOrigin`. Without an `abort` factory `save` gets a signal that never aborts. Budget 3 100 B gz over the core (owner S3-O4).
 - `editableAt(node, column, context, locked?)`: data rows only (never a detail, filler or loading row).
 - Kernel: commands `edits.reader` (refused `invalid-reader`), `rows.reapply` (`reapply-off`),
   `context.app`; event `orderStale { stale }` on each flip; `kernel.reader`, `kernel.app`,

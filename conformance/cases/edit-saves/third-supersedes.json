@@ -1,0 +1,155 @@
+{
+  "id": "third-supersedes",
+  "suite": "edit-saves",
+  "description": "A third edit replaces the waiting second: one request with the third; generations still count every gesture.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            7
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "ok": 3
+      }
+    ],
+    "watch": [
+      "a.v"
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "generation": 2,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "generation": 3,
+        "staged": 1,
+        "refused": []
+      }
+    ],
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 3,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            7,
+            6
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=5 saving"
+      ],
+      [
+        "a.v=6 pending"
+      ],
+      [
+        "a.v=7 pending"
+      ],
+      [
+        "a.v=7 saving"
+      ],
+      [
+        "a.v=7 saved"
+      ]
+    ]
+  }
+}

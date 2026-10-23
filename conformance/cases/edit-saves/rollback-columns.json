@@ -1,0 +1,71 @@
+{
+  "id": "rollback-columns",
+  "suite": "edit-saves",
+  "description": "A rollback tells the reader with the refused cells' columns only (source data), then the states, then the refusal; the undo entry goes.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "w",
+            15
+          ]
+        ],
+        "source": "api"
+      },
+      {
+        "fail": 1
+      }
+    ]
+  },
+  "expected": {
+    "events": [
+      "reader w api",
+      "edited a.w 15<-10 edit api",
+      "states a.w api",
+      "undo true false api",
+      "reader w data",
+      "states a.w data",
+      "failed a.w 15 null null data",
+      "undo false false data"
+    ],
+    "canUndo": false
+  }
+}

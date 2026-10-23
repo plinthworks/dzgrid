@@ -1,0 +1,74 @@
+{
+  "id": "no-save",
+  "suite": "edit-saves",
+  "description": "Without a save function a kept value is saved at once, no request.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      }
+    ],
+    "watch": [
+      "a.v"
+    ],
+    "save": "none"
+  },
+  "expected": {
+    "requests": [],
+    "after": [
+      [
+        "a.v=5 saved"
+      ]
+    ],
+    "events": [
+      "reader v user",
+      "edited a.v 5<-1 edit user",
+      "states a.v user",
+      "undo true false user"
+    ],
+    "intact": true,
+    "dirty": false
+  }
+}

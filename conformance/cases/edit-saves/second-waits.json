@@ -1,0 +1,127 @@
+{
+  "id": "second-waits",
+  "suite": "edit-saves",
+  "description": "A second edit of a cell waits for the first save, then goes with the shown value as previous.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "ok": 2
+      }
+    ],
+    "watch": [
+      "a.v"
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 2,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            6,
+            5
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=5 saving"
+      ],
+      [
+        "a.v=6 pending"
+      ],
+      [
+        "a.v=6 saving"
+      ],
+      [
+        "a.v=6 saved"
+      ]
+    ],
+    "dirty": false
+  }
+}

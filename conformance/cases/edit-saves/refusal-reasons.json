@@ -1,0 +1,131 @@
+{
+  "id": "refusal-reasons",
+  "suite": "edit-saves",
+  "description": "A refusal's reason and code: from the error when they are (non-empty) strings, else null; any value can be the error.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "c",
+            "v",
+            7
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "w",
+            8
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "b",
+            "w",
+            9
+          ]
+        ]
+      },
+      {
+        "fail": 1,
+        "error": {
+          "reason": "Stock épuisé",
+          "code": "stock"
+        }
+      },
+      {
+        "fail": 2,
+        "error": {
+          "reason": "",
+          "code": 5
+        }
+      },
+      {
+        "fail": 3,
+        "error": "oops"
+      },
+      {
+        "fail": 4,
+        "error": null
+      },
+      {
+        "fail": 5,
+        "error": {
+          "code": "x"
+        }
+      }
+    ],
+    "events": [
+      "failed"
+    ]
+  },
+  "expected": {
+    "events": [
+      "failed a.v 5 \"Stock épuisé\" \"stock\" data",
+      "failed b.v 6 null null data",
+      "failed c.v 7 null null data",
+      "failed a.w 8 null null data",
+      "failed b.w 9 null \"x\" data"
+    ],
+    "dirty": false
+  }
+}

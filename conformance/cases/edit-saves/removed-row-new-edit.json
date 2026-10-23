@@ -1,0 +1,152 @@
+{
+  "id": "removed-row-new-edit",
+  "suite": "edit-saves",
+  "description": "A row removed while its save flies, added back and edited again: the old answer never lands (a later refusal goes back to the source, not to the old value).",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "tx": {
+          "remove": [
+            "a"
+          ]
+        }
+      },
+      {
+        "tx": {
+          "add": [
+            {
+              "id": "a",
+              "v": 1,
+              "w": 10,
+              "n": "x"
+            }
+          ]
+        }
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            7
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "fail": 2
+      }
+    ],
+    "watch": [
+      "a.v"
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 2,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            7,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=5 saving"
+      ],
+      [
+        "a.v=gone -"
+      ],
+      [
+        "a.v=1 -"
+      ],
+      [
+        "a.v=7 pending"
+      ],
+      [
+        "a.v=7 saving"
+      ],
+      [
+        "a.v=1 failed"
+      ]
+    ],
+    "dirty": false
+  }
+}

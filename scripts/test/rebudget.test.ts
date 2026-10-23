@@ -68,6 +68,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     // The other entries keep their plan ceilings; the small text bundles follow the rule (≤ 2 kB).
     expect(ceilingFor('@dzgrid/core/server')).toBe(6100); // Phase 5 S2-O4: 6 000 → 6 100
     expect(ceilingFor('@dzgrid/core/detail')).toBe(1050); // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core)
+    expect(ceilingFor('@dzgrid/core/edit')).toBe(3100); // Phase 5 Q16 3 000, owner S3-O4 (2026-10-23) → 3 100
+    expect(() => sizeBudget(3101, ceilingFor('@dzgrid/core/edit'))).toThrow(/ceiling/);
     expect(ceilingFor('@dzgrid/dom/locales/ar')).toBe(2000);
     expect(ceilingFor('@dzgrid/dom/locales/fr-tree')).toBe(2000);
     expect(sizeBudget(146, ceilingFor('@dzgrid/dom/locales/fr-tree'))).toBe(200);

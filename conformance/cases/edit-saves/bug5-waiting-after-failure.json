@@ -1,0 +1,144 @@
+{
+  "id": "bug5-waiting-after-failure",
+  "suite": "edit-saves",
+  "description": "The first save refused while a second waits: the waiting value stays shown and goes; refused too, the source comes back (nothing was saved).",
+  "refs": [
+    "a6c97f5 bug 5"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "fail": 1
+      },
+      {
+        "fail": 2
+      }
+    ],
+    "watch": [
+      "a.v"
+    ]
+  },
+  "expected": {
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            5,
+            1
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      },
+      {
+        "generation": 2,
+        "origin": "edit",
+        "changes": [
+          [
+            "a",
+            "v",
+            6,
+            5
+          ]
+        ],
+        "rows": [
+          [
+            "a",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=5 saving"
+      ],
+      [
+        "a.v=6 pending"
+      ],
+      [
+        "a.v=6 saving"
+      ],
+      [
+        "a.v=1 failed"
+      ]
+    ],
+    "events": [
+      "reader v user",
+      "edited a.v 5<-1 edit user",
+      "states a.v user",
+      "undo true false user",
+      "reader v user",
+      "edited a.v 6<-5 edit user",
+      "states a.v user",
+      "states a.v data",
+      "failed a.v 5 null null data",
+      "reader v data",
+      "states a.v data",
+      "failed a.v 6 null null data",
+      "undo false false data"
+    ]
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "id": "refused-inputs",
+  "suite": "edit-saves",
+  "description": "Refused inputs are skipped and returned; the rest of the gesture is staged.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            {
+              "text": "abc"
+            }
+          ],
+          [
+            "b",
+            "v",
+            8
+          ],
+          [
+            "zz",
+            "v",
+            1
+          ]
+        ]
+      }
+    ],
+    "watch": [
+      "a.v",
+      "b.v"
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 1,
+        "refused": [
+          [
+            "a",
+            "v",
+            "parse"
+          ],
+          [
+            "zz",
+            "v",
+            "read-only"
+          ]
+        ]
+      }
+    ],
+    "requests": [
+      {
+        "generation": 1,
+        "origin": "edit",
+        "changes": [
+          [
+            "b",
+            "v",
+            8,
+            2
+          ]
+        ],
+        "rows": [
+          [
+            "b",
+            true
+          ]
+        ]
+      }
+    ],
+    "after": [
+      [
+        "a.v=1 -",
+        "b.v=8 saving"
+      ]
+    ]
+  }
+}

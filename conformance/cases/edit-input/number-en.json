@@ -1,0 +1,76 @@
+{
+  "id": "number-en",
+  "suite": "edit-input",
+  "description": "English: a dot is the decimal sign; 1,5 is not a number there (parse).",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "1.5"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "1,5"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "abc"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": 1.5
+      },
+      {
+        "code": "parse"
+      },
+      {
+        "code": "parse"
+      }
+    ],
+    "problems": []
+  }
+}

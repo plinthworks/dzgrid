@@ -73,8 +73,32 @@ export interface ColumnDef<T, V = unknown> {
    * grid's `settings.context`; only `true` means yes. Never a detail, filler or loading row.
    */
   readonly editable?: EditableRule<T>;
-  /** A refusal code (`validation.<code>` in the DOM's messages) or null: run by the edit controller (Phase 5 step 3). */
+  /**
+   * A refusal code (`validation.<code>` in the DOM's messages) or null: run by `@dzgrid/core/edit`
+   * after the column's `edit` checks (edit-validation.md 1). Synchronous only (owner S3-O1).
+   */
   readonly validate?: (value: V | null, row: Readonly<T>, context: unknown) => string | null | undefined;
+  /** The simple checks of a kept value (owner S3-O3), run by `@dzgrid/core/edit`; the base reads none of it. */
+  readonly edit?: EditChecks<T, V>;
+}
+
+/**
+ * A column's edit rules (edit-validation.md 1, owner S3-O3), checked in this order after the codec:
+ * `required` (an empty value), `min` / `max` (compared by the column's codec: a number, a `Day`, an
+ * instant), `pattern` (string values, the whole value; `g`, `y` and `m` dropped, `i`, `u`, `s` kept;
+ * developer config: a regex that backtracks badly is the app's to avoid), `options` (a list,
+ * or one told the row and the app's context; the cell's current value always passes). `maxLength` and
+ * `editor` are the DOM's (steps 5–6). A bad rule is a warning `invalid-column` at
+ * `columns.<id>.edit.<key>`, and that rule is ignored.
+ */
+export interface EditChecks<T, V = unknown> {
+  readonly required?: boolean;
+  readonly min?: V;
+  readonly max?: V;
+  readonly pattern?: string | RegExp;
+  readonly options?: readonly EnumOption[] | ((row: Readonly<T>, context: unknown) => readonly EnumOption[]);
+  readonly maxLength?: number;
+  readonly editor?: string;
 }
 
 /** A column's `editable`: yes, no, or a rule over the row and the application's context. */
@@ -227,9 +251,9 @@ export function resolveColumns<T>(tree: readonly ColumnOrGroup<T>[]): {
       if (!path) return void problems.push(problem('invalid-field-path', 'error', `${at}.field`));
       read = path as (row: Readonly<T>) => unknown;
     }
-    // A wrong `editable` or `validate`: told, the column kept, read-only (editableAt wants `true`).
+    // A wrong `editable`: told, the column kept, read-only (editableAt wants `true`). A wrong `validate` is
+    // told by `@dzgrid/core/edit`, which runs it (Phase 5 step 3).
     if (def.editable !== undefined && typeof def.editable !== 'boolean' && typeof def.editable !== 'function') problems.push(problem('invalid-column', 'warning', `${at}.editable`));
-    if (def.validate !== undefined && typeof def.validate !== 'function') problems.push(problem('invalid-column', 'warning', `${at}.validate`));
     seen.add(def.id);
     columns.push({ id: def.id, def, type, codec, read, sortable: def.sortable !== false, filterable: def.filter !== false });
   });

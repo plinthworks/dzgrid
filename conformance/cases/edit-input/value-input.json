@@ -1,0 +1,105 @@
+{
+  "id": "value-input",
+  "suite": "edit-input",
+  "description": "A value given (not typed) is read by the codec: blank is null, one it cannot read is invalid.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "editable": true,
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "v",
+          ""
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          null
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          "abc"
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          "7"
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "d",
+          "nope"
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "d",
+          "2026-02-03"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": null
+      },
+      {
+        "value": null
+      },
+      {
+        "code": "invalid"
+      },
+      {
+        "value": 7
+      },
+      {
+        "code": "invalid"
+      },
+      {
+        "value": "2026-02-03"
+      }
+    ],
+    "problems": []
+  }
+}

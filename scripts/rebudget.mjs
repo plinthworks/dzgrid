@@ -40,6 +40,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
   '@dzgrid/core/detail': 1050, // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
+  '@dzgrid/core/edit': 3100, // Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/dom': 21980, // showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10000,
   '@dzgrid/dom/tree': 3700,

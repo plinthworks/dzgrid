@@ -1,0 +1,104 @@
+{
+  "id": "enum",
+  "suite": "edit-input",
+  "description": "A list column: a label typed gives its value, an unknown one is refused (options); a value picked outside the list passes only when it is the cell's current value.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "s",
+        "editable": true,
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "a",
+            "label": "Alpha"
+          },
+          {
+            "value": "b",
+            "label": "Beta"
+          }
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "s",
+          {
+            "text": "beta"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "s",
+          {
+            "text": "zeta"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "s",
+          "a"
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "s",
+          "z"
+        ]
+      },
+      {
+        "check": [
+          "b",
+          "s",
+          "z"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": "b"
+      },
+      {
+        "code": "options"
+      },
+      {
+        "value": "a"
+      },
+      {
+        "value": "z"
+      },
+      {
+        "code": "options"
+      }
+    ],
+    "problems": []
+  }
+}

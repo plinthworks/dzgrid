@@ -1,0 +1,101 @@
+{
+  "id": "host-update-saving",
+  "suite": "edit-saves",
+  "description": "The host replacing a row while its save is in flight: the edit stays shown, then saved over the new row, until the next replace.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "tx": {
+          "update": [
+            {
+              "id": "a",
+              "v": 9,
+              "w": 10,
+              "n": "x"
+            }
+          ]
+        }
+      },
+      {
+        "ok": 1
+      },
+      {
+        "tx": {
+          "update": [
+            {
+              "id": "a",
+              "v": 4,
+              "w": 10,
+              "n": "x"
+            }
+          ]
+        }
+      }
+    ],
+    "watch": [
+      "a.v"
+    ]
+  },
+  "expected": {
+    "after": [
+      [
+        "a.v=5 saving"
+      ],
+      [
+        "a.v=5 saving"
+      ],
+      [
+        "a.v=5 saved"
+      ],
+      [
+        "a.v=4 -"
+      ]
+    ],
+    "intact": true
+  }
+}

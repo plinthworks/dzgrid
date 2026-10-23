@@ -1,0 +1,124 @@
+{
+  "id": "pattern",
+  "suite": "edit-input",
+  "description": "A pattern matches the whole value; a g flag does not make the second check differ; a string pattern too.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "n",
+        "editable": true,
+        "edit": {
+          "pattern": {
+            "regex": "[A-Z]{3}",
+            "flags": "g"
+          }
+        }
+      },
+      {
+        "id": "w",
+        "editable": true,
+        "edit": {
+          "pattern": "a|ab"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "ABC"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "ABC"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "ABCD"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "n",
+          {
+            "text": "xABC"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "w",
+          {
+            "text": "ab"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "w",
+          {
+            "text": "abc"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": "ABC"
+      },
+      {
+        "value": "ABC"
+      },
+      {
+        "code": "pattern"
+      },
+      {
+        "code": "pattern"
+      },
+      {
+        "value": "ab"
+      },
+      {
+        "code": "pattern"
+      }
+    ],
+    "problems": []
+  }
+}

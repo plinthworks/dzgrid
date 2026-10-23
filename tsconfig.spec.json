@@ -41,6 +41,9 @@
       "@dzgrid/core/detail": [
         "./packages/core/src/detail.ts"
       ],
+      "@dzgrid/core/edit": [
+        "./packages/core/src/edit.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],

@@ -1,0 +1,91 @@
+{
+  "id": "unchanged",
+  "suite": "edit-saves",
+  "description": "A value the cell already shows is dropped: no request, no event, no undo (a raw text the codec reads as the same number too).",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      },
+      {
+        "id": "d",
+        "v": "7",
+        "w": 0,
+        "n": ""
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            1
+          ],
+          [
+            "a",
+            "n",
+            {
+              "text": "x"
+            }
+          ],
+          [
+            "b",
+            "v",
+            {
+              "text": "2"
+            }
+          ],
+          [
+            "d",
+            "v",
+            7
+          ]
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": null,
+        "staged": 0,
+        "refused": []
+      }
+    ],
+    "requests": [],
+    "events": [],
+    "canUndo": false
+  }
+}

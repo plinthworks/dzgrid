@@ -1,0 +1,52 @@
+{
+  "id": "number-ar",
+  "suite": "edit-input",
+  "description": "Arabic: Arabic-Indic digits and the Arabic decimal sign are read.",
+  "input": {
+    "locale": "ar-EG",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "١٢٫٥"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": 12.5
+      }
+    ],
+    "problems": []
+  }
+}

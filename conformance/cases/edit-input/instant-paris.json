@@ -1,0 +1,101 @@
+{
+  "id": "instant-paris",
+  "suite": "edit-input",
+  "description": "Paris: a wall time the clock skips or repeats gets its own code, ISO or in the locale order; nonsense is invalid-instant; a real time is read in the zone.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "columns": [
+      {
+        "id": "t",
+        "editable": true,
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "t",
+          {
+            "text": "2026-03-29 02:30"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "t",
+          {
+            "text": "29/03/2026 02:30"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "t",
+          {
+            "text": "2026-10-25 02:30"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "t",
+          {
+            "text": "x"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "t",
+          {
+            "text": "25/10/2026 14:00"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "code": "wall-time-skipped"
+      },
+      {
+        "code": "wall-time-skipped"
+      },
+      {
+        "code": "wall-time-ambiguous"
+      },
+      {
+        "code": "invalid-instant"
+      },
+      {
+        "value": "2026-10-25T13:00:00Z"
+      }
+    ],
+    "problems": []
+  }
+}

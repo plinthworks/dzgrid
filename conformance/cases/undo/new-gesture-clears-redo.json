@@ -1,0 +1,78 @@
+{
+  "id": "new-gesture-clears-redo",
+  "suite": "undo",
+  "description": "A new gesture empties the redo list.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "undo": true
+      },
+      {
+        "commit": [
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      }
+    ],
+    "save": "none",
+    "events": [
+      "undo"
+    ]
+  },
+  "expected": {
+    "events": [
+      "undo true false user",
+      "undo false true user",
+      "undo true false user"
+    ],
+    "canRedo": false
+  }
+}

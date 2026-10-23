@@ -1,0 +1,74 @@
+{
+  "id": "validate-throws",
+  "suite": "edit-input",
+  "description": "A validate that throws refuses (invalid), told once for the column however often it runs.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number",
+        "validate": {
+          "fn": "throws"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "1"
+          }
+        ]
+      },
+      {
+        "check": [
+          "b",
+          "v",
+          {
+            "text": "2"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "code": "invalid"
+      },
+      {
+        "code": "invalid"
+      }
+    ],
+    "problems": [
+      {
+        "code": "invalid-column",
+        "severity": "warning",
+        "path": "columns.v.validate",
+        "detail": "threw"
+      }
+    ]
+  }
+}

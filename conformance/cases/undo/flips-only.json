@@ -1,0 +1,88 @@
+{
+  "id": "flips-only",
+  "suite": "undo",
+  "description": "undoChanged is told on each flip only.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "commit": [
+          [
+            "b",
+            "v",
+            6
+          ]
+        ]
+      },
+      {
+        "undo": true
+      },
+      {
+        "undo": true
+      },
+      {
+        "redo": true
+      },
+      {
+        "redo": true
+      }
+    ],
+    "save": "none",
+    "events": [
+      "undo"
+    ]
+  },
+  "expected": {
+    "events": [
+      "undo true false user",
+      "undo true true user",
+      "undo false true user",
+      "undo true true user",
+      "undo true false user"
+    ]
+  }
+}

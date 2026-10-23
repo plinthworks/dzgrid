@@ -1,0 +1,102 @@
+{
+  "id": "order",
+  "suite": "edit-input",
+  "description": "The codec first, then required, then min; the first failing check wins.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "v",
+        "editable": true,
+        "type": "number",
+        "edit": {
+          "required": true,
+          "min": 5
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "x"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": ""
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          null
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "3"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "v",
+          {
+            "text": "9"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "code": "parse"
+      },
+      {
+        "code": "required"
+      },
+      {
+        "code": "required"
+      },
+      {
+        "code": "min"
+      },
+      {
+        "value": 9
+      }
+    ],
+    "problems": []
+  }
+}

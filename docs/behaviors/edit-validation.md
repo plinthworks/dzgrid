@@ -23,10 +23,23 @@ under the minimum; presses Enter.
    type: `number` → `parse`; `day` → `day`; `instant` → the instant reading's own code
    (`packages/core/src/value/instant.ts`: `invalid-instant`, `wall-time-skipped`,
    `wall-time-ambiguous`; `ambiguous-instant` and `unknown-zone` cannot come from a field, which always
-   reads in the grid's zone); a list → `options`. An emptied field is not a parse refusal: it is the
-   column's empty value (`null`), checked by `required`. Then the column's checks in order: `required`, `min`, `max`,
-   `pattern`, `options` (a list column), then `validate(value, row, context)` returning a code or null.
-   The first failing code wins.
+   reads in the grid's zone); a list → `options`; `boolean` and `custom` → `invalid`. A value given
+   rather than typed (a list pick, a toggle, an undo) the codec cannot read is `invalid` too. An emptied
+   field is not a parse refusal: it is the column's empty value (`null`), checked by `required`; a field
+   of spaces is empty too, except in a text column, where spaces are a value someone typed (as
+   `filter-text.md`), so `required` passes. Then the column's checks, written in the column (owner
+   S3-O3): `edit: { required, min, max, pattern, options }`, in that order — `min` / `max` compared by
+   the codec (a number, a day, an instant), `pattern` on string values and over the whole value (a RegExp's `g`, `y` and `m`
+   flags dropped, `i`, `u` and `s` kept; a pattern is the developer's configuration: one that backtracks
+   badly is the app's responsibility, the DOM caps the length typed), `options` a list or a function `(row, context)` (one that throws refuses `invalid`, told once like
+   `validate`'s; a list column checks against
+   its `enumOptions` when it has no `options`; the cell's current value always passes, editors.md 17) —
+   then `validate(value, row, context)` returning a code or null (synchronous only, owner S3-O1; an
+   empty string is no code; one that throws refuses `invalid` and is told once per column as a
+   warning). The first failing code wins. A cell that cannot be edited answers `read-only` (the DOM
+   never asks). A bad rule (`min` the codec cannot read, a `pattern` that does not compile, `options`
+   neither a list nor a function, `validate` not a function) is a warning `invalid-column` at
+   `columns.<id>.edit.<rule>` (`columns.<id>.validate`), told once while it stays wrong, and ignored.
 2. **Every refusal shows the refusal animation**: class `dzg-cell--refused` on the cell for 500 ms, the
    border red and blinking twice inside those 500 ms, then back to normal. Reduced motion or
    `data-motion="off"`: the red border, still, for 500 ms. CSS in the theme.

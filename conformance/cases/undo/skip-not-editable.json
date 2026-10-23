@@ -1,0 +1,69 @@
+{
+  "id": "skip-not-editable",
+  "suite": "undo",
+  "description": "A cell no longer editable is skipped.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": {
+          "fn": "row-ok"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "ok": true
+      }
+    ],
+    "save": "none",
+    "watch": [
+      "a.v"
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "tx": {
+          "update": [
+            {
+              "id": "a",
+              "v": 5,
+              "ok": false
+            }
+          ]
+        }
+      },
+      {
+        "undo": true
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "cells": [],
+        "skipped": 1
+      }
+    ],
+    "final": [
+      "a.v=5 -"
+    ],
+    "requests": []
+  }
+}

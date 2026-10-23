@@ -1,0 +1,56 @@
+{
+  "id": "refused-undo-input",
+  "suite": "undo",
+  "description": "An undo whose value the checks now refuse counts it as skipped.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true,
+        "edit": {
+          "required": true
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a"
+      }
+    ],
+    "save": "none",
+    "watch": [
+      "a.v"
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "undo": true
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "cells": [],
+        "skipped": 1
+      }
+    ],
+    "final": [
+      "a.v=5 saved"
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "id": "refused-undo-stays",
+  "suite": "undo",
+  "description": "A refused undo keeps the batch where it moved (redo); redoing it then skips the cell, its value having gone back.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "ok": 1
+      },
+      {
+        "undo": true
+      },
+      {
+        "fail": 2
+      },
+      {
+        "redo": true
+      }
+    ],
+    "watch": [
+      "a.v"
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "generation": 1,
+        "staged": 1,
+        "refused": []
+      },
+      {
+        "cells": [
+          [
+            "a",
+            "v"
+          ]
+        ],
+        "skipped": 0
+      },
+      {
+        "cells": [],
+        "skipped": 1
+      }
+    ],
+    "after": [
+      [
+        "a.v=5 saving"
+      ],
+      [
+        "a.v=5 saved"
+      ],
+      [
+        "a.v=1 saving"
+      ],
+      [
+        "a.v=5 failed"
+      ],
+      [
+        "a.v=5 failed"
+      ]
+    ],
+    "canUndo": true,
+    "canRedo": false
+  }
+}

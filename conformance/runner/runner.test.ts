@@ -53,12 +53,14 @@ describe('conformance', () => {
     describe(suite, () => {
       for (const file of readdirSync(join(CASES, suite))) {
         const c: Case = JSON.parse(readFileSync(join(CASES, suite, file), 'utf8'));
-        it(`${c.id}: ${c.description}`, () => {
+        it(`${c.id}: ${c.description}`, async () => {
           expect(c.suite).toBe(suite);
           expect(`${c.id}.json`).toBe(file);
-          const got = SUITES[suite]!(c.input) as Record<string, unknown>;
-          // A format case states either the text or the parts it cares about.
-          const compared = suite === 'format' || suite === 'transaction' ? Object.fromEntries(Object.keys(c.expected).map((k) => [k, got[k]])) : got;
+          // A suite may answer later (the edit saves settle in microtasks).
+          const got = (await SUITES[suite]!(c.input)) as Record<string, unknown>;
+          // A format case states either the text or the parts it cares about; so does a save or undo script.
+          const partial = suite === 'format' || suite === 'transaction' || suite === 'edit-saves' || suite === 'undo';
+          const compared = partial ? Object.fromEntries(Object.keys(c.expected).map((k) => [k, got[k]])) : got;
           expect(compared).toEqual(c.expected);
         });
       }

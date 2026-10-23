@@ -1,0 +1,65 @@
+{
+  "id": "instant-offset-auckland",
+  "suite": "edit-input",
+  "description": "An ISO text with its offset is the same moment whatever the zone (Pacific/Auckland).",
+  "input": {
+    "locale": "en-US",
+    "timeZone": "Pacific/Auckland",
+    "columns": [
+      {
+        "id": "t",
+        "editable": true,
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "t",
+          {
+            "text": "2026-01-05T10:00:00+01:00"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "t",
+          {
+            "text": "2026-07-05T10:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": "2026-01-05T09:00:00Z"
+      },
+      {
+        "value": "2026-07-05T10:00:00Z"
+      }
+    ],
+    "problems": []
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "id": "day-fr",
+  "suite": "edit-input",
+  "description": "French days: a day that does not exist and a two-digit year are refused (day); a real one is read.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "d",
+        "editable": true,
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "d",
+          {
+            "text": "31/02/2026"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "d",
+          {
+            "text": "1/2/26"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "d",
+          {
+            "text": "15/03/2026"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "code": "day"
+      },
+      {
+        "code": "day"
+      },
+      {
+        "value": "2026-03-15"
+      }
+    ],
+    "problems": []
+  }
+}

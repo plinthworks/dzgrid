@@ -1,0 +1,74 @@
+{
+  "id": "boolean-fr",
+  "suite": "edit-input",
+  "description": "Yes/no in French; any other word is invalid.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "ok",
+        "editable": true,
+        "type": "boolean"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 3,
+        "n": "q",
+        "s": "z",
+        "d": "2026-05-01",
+        "ok": true
+      },
+      {
+        "id": "b",
+        "v": 1,
+        "n": "y",
+        "s": "a",
+        "d": null,
+        "ok": false
+      }
+    ],
+    "steps": [
+      {
+        "check": [
+          "a",
+          "ok",
+          {
+            "text": "non"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "ok",
+          {
+            "text": "peut-être"
+          }
+        ]
+      },
+      {
+        "check": [
+          "a",
+          "ok",
+          true
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "results": [
+      {
+        "value": false
+      },
+      {
+        "code": "invalid"
+      },
+      {
+        "value": true
+      }
+    ],
+    "problems": []
+  }
+}

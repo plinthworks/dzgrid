@@ -1,0 +1,73 @@
+{
+  "id": "undo-source",
+  "suite": "undo",
+  "description": "Undo and redo tell the source they are given.",
+  "input": {
+    "columns": [
+      {
+        "id": "v",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "w",
+        "type": "number",
+        "editable": true
+      },
+      {
+        "id": "n",
+        "editable": true
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "v": 1,
+        "w": 10,
+        "n": "x"
+      },
+      {
+        "id": "b",
+        "v": 2,
+        "w": 20,
+        "n": "y"
+      },
+      {
+        "id": "c",
+        "v": 3,
+        "w": 30,
+        "n": "z"
+      }
+    ],
+    "steps": [
+      {
+        "commit": [
+          [
+            "a",
+            "v",
+            5
+          ]
+        ]
+      },
+      {
+        "undo": "api"
+      }
+    ],
+    "save": "none",
+    "events": [
+      "reader",
+      "edited",
+      "undo"
+    ]
+  },
+  "expected": {
+    "events": [
+      "reader v user",
+      "edited a.v 5<-1 edit user",
+      "undo true false user",
+      "reader v api",
+      "edited a.v 1<-5 undo api",
+      "undo false true api"
+    ]
+  }
+}
