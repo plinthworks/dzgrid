@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6; `-- --only edit-saves` the saves end to end, step 7).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -2707,7 +2707,8 @@ async function editMarksChecks(name, ctx) {
       return out;
     });
     check(name, `${tag}: the marks' contrast on their rows ≥ 3:1 (dot, check, sign, funnel, button)`, Object.values(c).every((x) => x >= 3), c);
-    // Forced colours: the ring dashed Highlight, the refusal Mark, the signs CanvasText, shapes kept.
+    // Forced colours: the ring dashed Highlight, the refusal Mark, the signs CanvasText, shapes kept (Chrome: the emulation).
+    if (name === 'chrome') {
     await page.emulateMedia({ forcedColors: 'active' });
     await frames(page, 2);
     const fc = await page.evaluate((sel) => {
@@ -2723,6 +2724,7 @@ async function editMarksChecks(name, ctx) {
     await page.screenshot({ path: `${OUT}/${name}-${tag.replace(/ /g, '-')}-forced.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
     check(name, `${tag}: forced colours: the ring a still dashed Highlight border, the refusal a solid CanvasText border, the signs CanvasText shapes`, fc.ring === 'dashed' && fc.ringColour && fc.ringAnim === 'none' && fc.sign && fc.shape && fc.refused, fc);
     await page.emulateMedia({ forcedColors: 'none' });
+    }
     if (rtl) {
       const side = await page.evaluate((sel) => { const s0 = eval(sel.m0); const s3 = eval(sel.m3); const r = getComputedStyle(s0, '::before'); const a = s3.getBoundingClientRect(); const m = getComputedStyle(s3, '::after'); return { dir: r.animationDirection, left: parseFloat(m.left), right: parseFloat(m.right), w: a.width }; }, { m0: cell('m1'), m3: cell('m3') });
       check(name, `${tag}: right to left: the ring turns the other way; the sign at the inline end (left)`, side.dir === 'reverse, normal' && side.left < side.right, side);
@@ -2800,8 +2802,8 @@ async function editMarksChecks(name, ctx) {
     await page.close();
   }
 
-  // 50 saving cells while scrolling: the marks' paint reads no layout, no long task.
-  {
+  // 50 saving cells while scrolling: the marks' paint reads no layout, no long task (Chrome: long tasks are its API).
+  if (name === 'chrome') {
     const { page, errors } = await open('locale=fr-FR&theme=light');
     const r = await page.evaluate(async () => {
       const { grid, api, key } = window.t;
@@ -3427,7 +3429,380 @@ async function playgroundEditChecks(name, ctx) {
     await page.waitForTimeout(800);
     const l3 = await log();
     check(name, `playground orders-edit (${tag}): Statut opens the list (combobox, listbox shown); Down then Enter keeps it`, !!combo?.combo && combo.active && listShown && !st.list && !st.field && (ar ? /الحالة/ : /Statut/).test(l3.join(' ')), { combo, listShown, st, l3 });
+    // Step 7 (owner S7-O6) on the same page, real mouse and keyboard.
+    // Enter stays (Q3 revised): the focus on the cell kept.
+    await dbl('O-0007', 'qty');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('12');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const stayed = await page.evaluate(() => { const c = document.activeElement; return c?.dataset?.col === 'qty' && c.closest('.dzg-row')?.querySelector('[data-col="ref"]')?.textContent; });
+    // The saved flash (motion on).
+    const flashed = await page.evaluate(() => new Promise((done) => { const t0 = performance.now(); const f = () => { const c = [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => r.querySelector('[data-col="ref"]')?.textContent === 'O-0007')?.querySelector('[data-col="qty"]'); if (c?.classList.contains('dzg-flash')) return done(true); if (performance.now() - t0 < 1500) requestAnimationFrame(f); else done(false); }; requestAnimationFrame(f); }));
+    check(name, `playground orders-edit (${tag}): Enter stays on the cell (default); saved: the flash shows (Animations on)`, stayed === 'O-0007' && flashed, { stayed, flashed });
+    // The refusal's reason on hover (Qté 17 above was refused on O-0003).
+    const q3 = await cell('O-0003', 'qty');
+    await page.mouse.move(q3.x, q3.y + 120);
+    await page.waitForTimeout(250);
+    await page.mouse.move(q3.x, q3.y);
+    await page.waitForTimeout(800);
+    const why = await page.evaluate(() => { const t = document.querySelector('.dzg-tooltip'); return t.hidden ? null : t.textContent; });
+    check(name, `playground orders-edit (${tag}): hovering the refused cell shows the server's reason`, !!why && why.includes(ar ? 'رفضه خادم العرض' : 'refusé par le serveur de démonstration'), why);
+    // Retry by reopening: F2 offers « 17 ».
+    await page.mouse.click(q3.x, q3.y);
+    await page.keyboard.press('F2');
+    await frames(page, 2);
+    const offered = (await field())?.value;
+    await page.keyboard.press('Escape');
+    check(name, `playground orders-edit (${tag}): F2 on the refused cell offers the refused « 17 »`, offered === '17', offered);
+    // Animations off: no flash.
+    await page.click('#live label:nth-of-type(1) input');
+    await dbl('O-0008', 'qty');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('13');
+    await page.keyboard.press('Enter');
+    const noFlash = await page.evaluate(() => new Promise((done) => { let seen = false; const t0 = performance.now(); const f = () => { if (document.querySelector('.dzg-flash')) seen = true; if (performance.now() - t0 < 1200) requestAnimationFrame(f); else done(!seen); }; requestAnimationFrame(f); }));
+    check(name, `playground orders-edit (${tag}): « Animations » off: saved without a flash`, noFlash, noFlash);
+    // The network cut: « serveur injoignable ».
+    await page.click('#live label:nth-of-type(2) input');
+    await dbl('O-0009', 'qty');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('14');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(1000);
+    const cut = await page.evaluate(() => document.querySelector('.dzg-live[aria-live="assertive"]')?.textContent ?? '');
+    await page.click('#live label:nth-of-type(2) input');
+    check(name, `playground orders-edit (${tag}): « ${ar ? 'الخادم غير متاح' : 'Serveur injoignable'} » on: the save fails, « ${ar ? 'تعذّر الوصول إلى الخادم' : 'serveur injoignable'} » said`, cut.includes(ar ? 'تعذّر الوصول إلى الخادم' : 'serveur injoignable'), cut);
+    // A row removed while edited: the 3 s button, a double click in its row, typing: the field gone, said.
+    const r10 = await cell('O-0010', 'client');
+    await page.mouse.click(r10.x, r10.y);
+    await page.click('#live button:nth-of-type(1)');
+    await dbl('O-0010', 'client');
+    await page.keyboard.type(' X');
+    await page.waitForTimeout(3300);
+    const after = await page.evaluate(() => ({ field: !!document.querySelector('.dzg-field'), said: document.querySelector('.dzg-live[aria-live="assertive"]')?.textContent ?? '', onCell: !!document.activeElement?.closest('.dzg-cell'), row: [...document.querySelectorAll('.dzg-layer [data-col="ref"]')].some((c) => c.textContent === 'O-0010') }));
+    const log5 = await log();
+    check(name, `playground orders-edit (${tag}): « ${ar ? 'حذف هذا الطلب' : 'Supprimer cette commande'} dans 3 s » while typing: the row and the field gone, « ${ar ? 'حُذف الصف' : 'Ligne supprimée'} » said, the focus on a cell, nothing sent`, !after.field && !after.row && after.onCell && after.said.includes(ar ? 'حُذف الصف' : 'Ligne supprimée') && !log5.some((l) => /O-0010|X»|X »/.test(l) && (ar ? /أُرسل/ : /envoyé/).test(l)) && log5.some((l) => l === (ar ? 'حُذف الصف، أُلغي التعديل' : 'Ligne supprimée, modification annulée')), { after, log5 });
     check(name, `playground orders-edit (${tag}): no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+  // The paged mode (?paged=1): a page asked while a field is open sends the typed value at once.
+  {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.goto(`${base}/orders-edit.html?locale=fr-FR&theme=light&skin=clinic&paged=1`);
+    await page.waitForSelector('.dzg-layer > .dzg-row .dzg-cell[data-col="client"]', { timeout: 30000 });
+    await page.waitForTimeout(500);
+    const c = await page.evaluate(() => { const el = document.querySelector('.dzg-layer > .dzg-row [data-col="qty"]'); const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, ref: el.closest('.dzg-row').querySelector('[data-col="ref"]').textContent }; });
+    await page.click('#live button:nth-of-type(2)');
+    await page.mouse.dblclick(c.x, c.y);
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('21');
+    await page.waitForTimeout(3200);
+    const sent = await page.evaluate(() => ({ log: [...document.querySelectorAll('#log li')].map((l) => l.textContent), field: !!document.querySelector('.dzg-field'), page: window.demo.grid.kernel.rows.page.index }));
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => window.demo.grid.kernel.dispatch({ type: 'page.go', index: 0 }, 'api'));
+    await page.waitForTimeout(700);
+    const back = await page.evaluate((ref) => [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => r.querySelector('[data-col="ref"]')?.textContent === ref)?.querySelector('[data-col="qty"]')?.textContent, c.ref);
+    check(name, 'playground orders-edit (paged): « Page suivante dans 3 s » while typing: « 21 » sent at once, the field closed, page 2; back on page 1 the server kept 21', sent.log.some((l) => /21/.test(l) && /envoyé/.test(l)) && !sent.field && sent.page === 1 && back === '21', { sent, back });
+    check(name, 'playground orders-edit (paged): no page error', errors.length === 0, errors);
+    await page.close();
+  }
+  // Enter: « descend » (?enter=down) moves one row down.
+  {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(`${base}/orders-edit.html?locale=ar-DZ&theme=dark&skin=midnight&enter=down`);
+    await page.waitForSelector('.dzg-layer > .dzg-row .dzg-cell[data-col="client"]', { timeout: 30000 });
+    await frames(page, 3);
+    const c = await page.evaluate(() => { const el = document.querySelectorAll('.dzg-layer > .dzg-row')[1].querySelector('[data-col="qty"]'); const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, idx: el.closest('.dzg-row').getAttribute('aria-rowindex') }; });
+    await page.mouse.dblclick(c.x, c.y);
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('5');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const now = await page.evaluate(() => ({ idx: document.activeElement?.closest('.dzg-row')?.getAttribute('aria-rowindex'), label: document.querySelector('#enter-label')?.textContent, sel: document.querySelector('select[name=enter]').value }));
+    check(name, 'playground orders-edit (ar, « Enter : ينزل »): Enter moves one row down; the selector in Arabic', Number(now.idx) === Number(c.idx) + 1 && now.label === 'Enter' && now.sel === 'down', { c, now });
+    await page.close();
+  }
+}
+
+/**
+ * The saves end to end (Phase 5 step 7, docs/phase-5-steps/step07-plan.md « Browser »; `-- --only edit-saves`): a
+ * stock list with `edit()`, `editors()` and `motion()`, a save the checks hold and answer. Chrome, French light
+ * Clinic and Arabic right to left dark Midnight, real mouse and keyboard: the ring running while held and stopped at
+ * the answer; the saved check and the flash fading (none without motion); a refusal: the blink, the value back, the
+ * reason on hover after 500 ms and at once on a keyboard focus, clear of the cell, read once in the accessibility
+ * tree, axe 0; retry by F2 with the refused text; the reapply mark pressed: rows glide, the focus on its header, the
+ * sentence; a row removed while edited: the field gone, said, the focus on a cell, nothing sent; a server page
+ * changed while open: sent at once; a network cut: « serveur injoignable »; reduced motion: the saved mark still;
+ * forced colours; 50 saving cells while scrolling: no layout read in the marks' and the motion's paint, no long task.
+ * WebKit (`--engine webkit`): the tooltip in the top layer.
+ */
+async function editSavesChecks(name, ctx) {
+  const open = async (qs, o = {}) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1000, height: 760 });
+    if (o.reduce) await page.emulateMedia({ reducedMotion: 'reduce' });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/edit-saves.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    return { page, errors };
+  };
+  const centre = (page, id, col = 'stock') => page.evaluate(([id, col]) => { const r = window.t.cell(id, col).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, top: r.top, bottom: r.bottom, left: r.left, right: r.right }; }, [id, col]);
+  const cls = (page, id, col = 'stock') => page.evaluate(([id, col]) => window.t.cell(id, col)?.className ?? null, [id, col]);
+  const text = (page, id, col = 'stock') => page.evaluate(([id, col]) => window.t.cell(id, col)?.textContent ?? null, [id, col]);
+  const loud = (page) => page.evaluate(() => document.querySelector('.dzg-live[aria-live="assertive"]').textContent);
+  const polite = (page) => page.evaluate(() => window.said ?? []);
+  const listen = (page) => page.evaluate(() => { window.said = []; const el = [...document.querySelectorAll('.dzg-live')].find((x) => x.getAttribute('aria-live') !== 'assertive'); new MutationObserver(() => { if (el.textContent) window.said.push(el.textContent); }).observe(el, { childList: true, characterData: true, subtree: true }); });
+  /** Double click on a cell, select all, type, Enter. */
+  const typeIn = async (page, id, value, col = 'stock') => {
+    const c = await centre(page, id, col);
+    await page.mouse.dblclick(c.x, c.y);
+    await frames(page, 2);
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type(value);
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+  };
+  /** On the focused, saving cell (owner, step 7): the focus ring and the saving border both seen, apart in colour and place. */
+  const ringAndBorder = (page, id) => page.evaluate((id) => {
+    const c = window.t.cell(id, 'stock');
+    const cs = getComputedStyle(c);
+    const b = getComputedStyle(c, '::before');
+    const rgb = (t) => (t.match(/rgba?\(([^)]+)\)/)?.[1] ?? '').split(',').map((x) => parseFloat(x));
+    const hue = ([r, g, bl]) => { const x = Math.max(r, g, bl), n = Math.min(r, g, bl), d = x - n; if (d < 1) return null; const h = x === r ? ((g - bl) / d) % 6 : x === g ? (bl - r) / d + 2 : (r - g) / d + 4; return (h * 60 + 360) % 360; };
+    const ring = rgb(cs.outlineColor);
+    // The running arc's colour (the conic gradient), or the still border's.
+    const border = b.backgroundImage !== 'none' ? rgb(b.backgroundImage) : rgb(b.borderBlockStartColor);
+    const [h1, h2] = [hue(ring), hue(border)];
+    const gap = h1 === null || h2 === null ? 180 : Math.min(Math.abs(h1 - h2), 360 - Math.abs(h1 - h2));
+    const cr = c.getBoundingClientRect();
+    return { focused: document.activeElement === c, ringStyle: cs.outlineStyle, ringWidth: parseFloat(cs.outlineWidth), offset: parseFloat(cs.outlineOffset), inset: parseFloat(b.insetBlockStart), borderStyle: b.borderBlockStartStyle, running: document.getAnimations().some((a) => a.effect?.target === c && a.effect.pseudoElement === '::before' && a.playState === 'running'), ring, border, gap, h: cr.height };
+  }, id);
+  const apart = (r) => r.focused && r.ringStyle === 'solid' && r.ringWidth >= 2 && r.inset >= r.ringWidth - (r.offset < 0 ? -r.offset : 0) + 1 && r.gap >= 60;
+  if (name === 'webkit') {
+    // The tooltip of a failed cell in the top layer (a popover), seen whole.
+    const { page, errors } = await open('locale=fr-FR&theme=light&skin=clinic');
+    await typeIn(page, 'm2', '17');
+    await page.evaluate(() => window.t.saves[0].no({ reason: 'verrouillé' }));
+    await page.waitForTimeout(700);
+    const c = await centre(page, 'm2');
+    // The pointer is still on the cell from the double click: away, then back.
+    await page.mouse.move(c.x, c.y + 200);
+    await page.waitForTimeout(250);
+    await page.mouse.move(c.x, c.y);
+    await page.waitForTimeout(700);
+    const tip = await page.evaluate(() => { const t = document.querySelector('.dzg-tooltip'); const r = t.getBoundingClientRect(); return { shown: !t.hidden, text: t.textContent, top: t.matches(':popover-open'), seen: t.contains(document.elementFromPoint(r.left + 4, r.top + 4)) }; });
+    check(name, 'edit saves (webkit): the refusal\'s reason on hover, in the top layer, seen', tip.shown && /verrouillé/.test(tip.text) && tip.top && tip.seen, tip);
+    check(name, 'edit saves (webkit): no page error', errors.length === 0, errors);
+    await page.close();
+    return;
+  }
+  for (const [tag, qs, ar] of [['fr', 'locale=fr-FR&theme=light&skin=clinic', false], ['ar', 'locale=ar-DZ&theme=dark&skin=midnight', true]]) {
+    const { page, errors } = await open(qs);
+    await listen(page);
+    // 1. The ring runs while the save is held; stopped at the frame after the answer.
+    await typeIn(page, 'm1', '42');
+    // Enter stays (owner Q3 revised): the focus ring and the running border on one cell, both seen, apart.
+    const rb = await ringAndBorder(page, 'm1');
+    check(name, `edit saves ${tag}: a focused, saving cell: the focus ring (solid ${rb.ringWidth}px) and the running border inside it (${rb.inset}px in), hues ${Math.round(rb.gap)}° apart`, apart(rb) && rb.running, rb);
+    const ring = () => page.evaluate(() => document.getAnimations().filter((a) => a.effect?.target === window.t.cell('m1', 'stock') && a.effect.pseudoElement === '::before' && a.playState === 'running').length);
+    const r1 = await ring();
+    // 2. Saved: the check 1.5 s; the flash's --dzg-flash fading 1 → 0 in ~0.6 s.
+    const samples = await page.evaluate(() => new Promise((done) => {
+      window.t.saves[0].ok();
+      const out = [];
+      const t0 = performance.now();
+      const f = () => { const c = window.t.cell('m1', 'stock'); out.push([Math.round(performance.now() - t0), c.classList.contains('dzg-flash'), parseFloat(getComputedStyle(c).getPropertyValue('--dzg-flash') || 'NaN'), c.classList.contains('dzg-cell--saved')]); if (performance.now() - t0 < 900) requestAnimationFrame(f); else done(out); };
+      requestAnimationFrame(f);
+    }));
+    const r2 = await ring();
+    const flashing = samples.filter((s) => s[1]);
+    const falls = flashing.length > 3 && flashing[0][2] > 0.6 && flashing.slice(1).every((s, i) => s[2] <= flashing[i][2] + 1e-6) && samples.at(-1)[1] === false && samples.at(-1)[3];
+    check(name, `edit saves ${tag}: the ring runs while held (${r1}), stops at the answer (${r2}); saved: the check, the flash fading 1 → 0 in ~0.6 s`, r1 > 0 && r2 === 0 && falls, { r1, r2, samples: samples.filter((_, i) => i % 6 === 0) });
+    const hooks = await page.evaluate(() => window.t.hooks.filter((h) => h.includes('m1')).map((h) => h.split(':').pop()));
+    check(name, `edit saves ${tag}: onCell told saving then saved`, hooks.join() === 'saving,saved', hooks);
+    // 3. A refusal: the blink, the value back, the sign; the reason on hover after 500 ms, clear of the cell.
+    const before = await text(page, 'm2');
+    await typeIn(page, 'm2', '17');
+    await page.evaluate((why) => window.t.saves[1].no({ reason: why }), ar ? 'مقفل' : 'verrouillé');
+    await page.waitForTimeout(80);
+    const during = await cls(page, 'm2');
+    // Review 5: on the focused, refused cell the focus ring and the red border inside it, both seen, apart.
+    const rr = await ringAndBorder(page, 'm2');
+    check(name, `edit saves ${tag}: a focused, refused cell: the focus ring and the refusal border inside it (${rr.inset}px in), hues ${Math.round(rr.gap)}° apart`, apart(rr), rr);
+    await page.waitForTimeout(600);
+    const after = { cls: await cls(page, 'm2'), text: await text(page, 'm2') };
+    check(name, `edit saves ${tag}: refused: the blink, then the last value (${before}) and the failed sign`, /dzg-cell--refused/.test(during) && /dzg-cell--failed/.test(after.cls) && after.text === before, { during, after, before });
+    const c2 = await centre(page, 'm2');
+    // The pointer is still on the cell from the double click: away, then back.
+    await page.mouse.move(c2.x, c2.y + 200);
+    await page.waitForTimeout(250);
+    await page.mouse.move(c2.x, c2.y);
+    await page.waitForTimeout(300);
+    const early = await page.evaluate(() => !document.querySelector('.dzg-tooltip').hidden);
+    await page.waitForTimeout(400);
+    const tip = await page.evaluate(() => { const t = document.querySelector('.dzg-tooltip'); const r = t.getBoundingClientRect(); return { shown: !t.hidden, text: t.textContent, top: r.top, bottom: r.bottom, left: r.left, right: r.right }; });
+    const clear = tip.top >= c2.bottom || tip.bottom <= c2.top;
+    const side = ar ? Math.abs(tip.right - c2.right) < 2 : Math.abs(tip.left - c2.left) < 2;
+    check(name, `edit saves ${tag}: hover: nothing at 300 ms, the reason at 700 ms, clear of the cell, at its inline start`, !early && tip.shown && tip.text.includes(ar ? 'مقفل' : 'verrouillé') && clear && side, { early, tip, c2 });
+    let v = await axe(page);
+    check(name, `edit saves ${tag}: axe 0 with the reason's tooltip shown`, v.length === 0, v);
+    // The accessibility tree: the reason once in the cell's description.
+    const cdp = await ctx.newCDPSession(page);
+    await page.mouse.move(5, 5);
+    await page.waitForTimeout(250);
+    await page.evaluate(() => { const g = window.t.grid; g.api.focusCell(window.t.key('m3'), 'stock'); });
+    await page.keyboard.press('ArrowUp');
+    await frames(page, 2);
+    const tipNow = await page.evaluate(() => { const t = document.querySelector('.dzg-tooltip'); return t.hidden ? null : t.textContent; });
+    const { result } = await cdp.send('Runtime.evaluate', { expression: 'document.activeElement' });
+    const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { objectId: result.objectId, fetchRelatives: false });
+    const desc = nodes[0]?.description?.value ?? '';
+    const reason = ar ? 'مقفل' : 'verrouillé';
+    check(name, `edit saves ${tag}: keyboard focus: the tooltip at once; the reason read once (the description)`, tipNow?.includes(reason) && desc.split(reason).length === 2, { tipNow, desc });
+    await cdp.detach();
+    // 4. Retry: F2 offers the refused text; 18 Enter → saved.
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('F2');
+    await frames(page, 2);
+    const offered = await page.evaluate(() => document.querySelector('.dzg-field')?.value);
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('18');
+    await page.keyboard.press('Enter');
+    await page.evaluate(() => window.t.saves[2].ok());
+    await page.waitForTimeout(100);
+    const retried = { cls: await cls(page, 'm2'), text: await text(page, 'm2') };
+    check(name, `edit saves ${tag}: retry: F2 holds « 17 »; « 18 » Enter → saved`, offered === '17' && /dzg-cell--saved/.test(retried.cls) && retried.text === '18', { offered, retried });
+    // 5. Reapply: sort by Stock, edit one, press the mark: rows glide, the focus on the header, the sentence.
+    const head = await page.evaluate(() => { const r = document.querySelector('.dzg-hcell[data-col="stock"] .dzg-hlabel').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    await page.mouse.click(head.x, head.y);
+    await frames(page, 3);
+    await page.waitForTimeout(400);
+    const firstId = await page.evaluate(() => { const d = window.t.grid.kernel.rows.displayed; return d.nodeAt(0).data.id; });
+    await typeIn(page, firstId, '119');
+    await page.evaluate(() => window.t.saves.at(-1).ok());
+    await page.waitForTimeout(700);
+    const mark = await page.evaluate((ar) => { const b = document.querySelector('.dzg-hcell[data-col="stock"] .dzg-reapply'); if (!b) return null; const r = b.getBoundingClientRect(); const h = b.closest('.dzg-hcell').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, end: ar ? r.left - h.left < h.width / 2 : r.right - h.left > h.width / 2 }; }, ar);
+    await page.evaluate(() => (window.said = []));
+    let glided = false;
+    if (mark) {
+      await page.mouse.click(mark.x, mark.y);
+      glided = await page.evaluate(() => new Promise((done) => { let seen = false; let n = 0; const f = () => { if ([...document.querySelectorAll('.dzg-layer > .dzg-row')].some((r) => /matrix|translate/.test(getComputedStyle(r).transform) && getComputedStyle(r).transform !== 'none')) seen = true; if (++n < 20) requestAnimationFrame(f); else done(seen); }; requestAnimationFrame(f); }));
+    }
+    await page.waitForTimeout(400);
+    const after5 = await page.evaluate(() => ({ onHead: document.activeElement?.matches('.dzg-hcell[data-col="stock"]'), mark: !!document.querySelector('.dzg-reapply') }));
+    const said5 = await polite(page);
+    check(name, `edit saves ${tag}: the reapply mark (at the header's inline end) pressed: rows glide, the focus on the header, « ${ar ? 'أُعيد الترتيب' : 'Remis en ordre'} » said`, !!mark && mark.end && glided && after5.onHead && !after5.mark && said5.some((s) => s.includes(ar ? 'أُعيد الترتيب' : 'Remis en ordre')), { mark, glided, after5, said5 });
+    // 6. A row removed while edited: the field gone, said, the focus on a cell, nothing sent.
+    const sent6 = await page.evaluate(() => window.t.saves.length);
+    const c6 = await centre(page, await page.evaluate(() => window.t.grid.kernel.rows.displayed.nodeAt(4).data.id));
+    await page.mouse.dblclick(c6.x, c6.y);
+    await frames(page, 2);
+    await page.keyboard.type('5');
+    const gone = await page.evaluate(() => window.t.grid.kernel.focus.row);
+    await page.evaluate((k) => window.t.remove(String(k).replace(/^d:\d+:/, '')), gone);
+    await page.waitForTimeout(300);
+    const after6 = await page.evaluate(() => ({ field: !!document.querySelector('.dzg-field'), cell: !!document.activeElement?.closest('.dzg-row .dzg-cell'), sent: window.t.saves.length }));
+    const l6 = await loud(page);
+    check(name, `edit saves ${tag}: a row removed while edited: the field gone, « ${ar ? 'حُذف الصف' : 'Ligne supprimée'} » said, the focus on a cell, nothing sent`, !after6.field && after6.cell && after6.sent === sent6 && l6.includes(ar ? 'حُذف الصف' : 'Ligne supprimée'), { after6, sent6, l6 });
+    // 8. A network cut: « serveur injoignable » said and in the tooltip.
+    await typeIn(page, await page.evaluate(() => window.t.grid.kernel.rows.displayed.nodeAt(6).data.id), '33');
+    const id8 = await page.evaluate(() => String(window.t.grid.kernel.focus.row).replace(/^d:\d+:/, ''));
+    await page.evaluate(() => window.t.saves.at(-1).no(new TypeError('Failed to fetch')));
+    await page.waitForTimeout(700);
+    const l8 = await loud(page);
+    const c8 = await centre(page, id8);
+    await page.mouse.move(c8.x, c8.y + 200);
+    await page.waitForTimeout(250);
+    await page.mouse.move(c8.x, c8.y);
+    await page.waitForTimeout(700);
+    const t8 = await page.evaluate(() => { const t = document.querySelector('.dzg-tooltip'); return t.hidden ? '' : t.textContent; });
+    const net = ar ? 'تعذّر الوصول إلى الخادم' : 'serveur injoignable';
+    check(name, `edit saves ${tag}: a network cut: « ${net} » said and in the tooltip`, l8.includes(net) && t8.includes(net), { l8, t8 });
+    // 10. Forced colours: the failed sign and the tooltip still seen.
+    await page.emulateMedia({ forcedColors: 'active' });
+    await frames(page, 2);
+    const fc = await page.evaluate((id) => { const c = window.t.cell(id, 'stock'); const s = getComputedStyle(c, '::after'); const t = document.querySelector('.dzg-tooltip'); const ts = getComputedStyle(t); return { sign: s.backgroundColor !== 'rgba(0, 0, 0, 0)' && s.clipPath !== 'none', tip: !t.hidden && ts.color !== ts.backgroundColor }; }, id8);
+    check(name, `edit saves ${tag}: forced colours: the failed sign and the tooltip seen`, fc.sign && fc.tip, fc);
+    await page.emulateMedia({ forcedColors: 'none' });
+    v = await axe(page);
+    check(name, `edit saves ${tag}: axe 0 at the end (marks, tooltip)`, v.length === 0, v);
+    check(name, `edit saves ${tag}: no page error`, errors.length === 0, errors);
+    await page.screenshot({ path: `${OUT}/edit-saves-${tag}.png` });
+    await page.close();
+  }
+
+  // Without motion: the check, no flash. Reduced motion: the saved mark still 0.6 s, nothing moving.
+  for (const [how, qs, o] of [['without motion()', 'locale=fr-FR&theme=light&motion=0', {}], ['reduced motion', 'locale=fr-FR&theme=light', { reduce: true }]]) {
+    const { page, errors } = await open(qs, o);
+    await typeIn(page, 'm1', '42');
+    if (how === 'reduced motion') {
+      const rb = await ringAndBorder(page, 'm1');
+      check(name, `edit saves reduced motion: a focused, saving cell: the focus ring and the still dashed border inside it, apart (${Math.round(rb.gap)}°), nothing running`, apart(rb) && rb.borderStyle === 'dashed' && !rb.running, rb);
+    }
+    const s = await page.evaluate(() => new Promise((done) => {
+      window.t.saves[0].ok();
+      const out = [];
+      const t0 = performance.now();
+      const f = () => { const c = window.t.cell('m1', 'stock'); out.push([Math.round(performance.now() - t0), c.classList.contains('dzg-flash'), getComputedStyle(c).getPropertyValue('--dzg-flash').trim(), c.classList.contains('dzg-cell--saved'), document.getAnimations().filter((a) => a.effect?.target === c && a.playState === 'running').length]); if (performance.now() - t0 < 900) requestAnimationFrame(f); else done(out); };
+      requestAnimationFrame(f);
+    }));
+    const ok = how === 'without motion()'
+      ? s.every((x) => !x[1]) && s.some((x) => x[3])
+      : s.filter((x) => x[0] > 100 && x[0] < 500).every((x) => x[1] && x[2] === '1' && x[4] === 0) && s.at(-1)[1] === false && s.at(-1)[3];
+    check(name, `edit saves ${how}: ${how === 'without motion()' ? 'the check, no flash' : 'the saved mark still (--dzg-flash 1) for 0.6 s, no animation, then gone'}`, ok, s.filter((_, i) => i % 6 === 0));
+    check(name, `edit saves ${how}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+
+  // 7. A server page changed while open: the typed value sent at once, before the answer; the server's value after.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=light&paged=1');
+    const c = await centre(page, 'm3');
+    await page.mouse.dblclick(c.x, c.y);
+    await frames(page, 2);
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('77');
+    const r = await page.evaluate(() => { const s0 = window.t.saves.length; window.t.grid.kernel.dispatch({ type: 'page.go', index: 1 }, 'api'); return { sent: window.t.saves.length - s0, value: window.t.saves.at(-1)?.req.changes[0].value, field: !!document.querySelector('.dzg-field') }; });
+    await page.evaluate(() => window.t.saves.at(-1).ok());
+    await page.waitForTimeout(100);
+    await page.evaluate(() => window.t.grid.kernel.dispatch({ type: 'page.go', index: 0 }, 'api'));
+    await page.waitForTimeout(200);
+    const back = await text(page, 'm3');
+    check(name, `edit saves paged: a page changed while open: « 77 » sent at once, the field closed; back on the page the server's value (${back})`, r.sent === 1 && r.value === 77 && !r.field && back !== null, { r, back });
+    check(name, 'edit saves paged: no page error', errors.length === 0, errors);
+    await page.close();
+  }
+
+  // 11. 50 saving cells while scrolling: no layout read in the marks' and the motion's paint, no long task.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=light');
+    const r = await page.evaluate(async () => {
+      const { grid, api, key } = window.t;
+      const long = [];
+      new PerformanceObserver((l) => long.push(...l.getEntries().map((e) => e.duration))).observe({ type: 'longtask', buffered: false });
+      api.commit(Array.from({ length: 50 }, (_, i) => ({ key: key(`m${i}`), column: 'stock', input: { text: String(500 + i) } })));
+      const reads = { edit: 0, motion: 0 };
+      const stacks = [];
+      let inPaint = null;
+      const count = (proto, k) => { const d = Object.getOwnPropertyDescriptor(proto, k); const hit = () => { if (inPaint) { reads[inPaint]++; if (stacks.length < 2) stacks.push(`${k} ${new Error().stack.split('\n').slice(2, 6).join(' < ')}`); } }; Object.defineProperty(proto, k, { ...d, ...(d.get ? { get() { hit(); return d.get.call(this); } } : { value(...a) { hit(); return d.value.apply(this, a); } }) }); };
+      count(Element.prototype, 'getBoundingClientRect');
+      for (const k of ['offsetTop', 'offsetLeft', 'offsetWidth', 'offsetHeight', 'offsetParent']) count(HTMLElement.prototype, k);
+      // The edit feature's handle and the motion's (the features' order: edit, editors, motion).
+      for (const [n, h] of [['edit', grid.context.features[0]], ['motion', grid.context.features[2]]]) { const after = h.afterRows; h.afterRows = (f) => { inPaint = n; try { after(f); } finally { inPaint = null; } }; }
+      const vp = document.querySelector('.dzg-viewport');
+      for (let i = 0; i < 60; i++) { vp.scrollTop = (i % 30) * 40; if (i === 30) window.t.saves[0].ok(); await new Promise((r) => requestAnimationFrame(r)); }
+      return { reads, stacks, long, saved: document.querySelectorAll('.dzg-cell--saved').length };
+    });
+    check(name, `edit saves: 50 saving cells while scrolling, then saved: no layout read in the marks' and the motion's paint, no long task`, r.reads.edit === 0 && r.reads.motion === 0 && r.long.length === 0, r);
+    check(name, 'edit saves scrolling: no page error', errors.length === 0, errors);
     await page.close();
   }
 }
@@ -3449,7 +3824,9 @@ async function runEngine(name) {
       if (only === 'bridges' && name === 'chrome') await frameworkChecks(name, ctx);
       if (only === 'dates' && name === 'chrome') await dateChecks(name, ctx);
       if (only === 'demos') await demosChecks(name, ctx);
-      if (only === 'edit-marks' && name === 'chrome') await editMarksChecks(name, ctx);
+      // Step 7: the marks in Firefox and WebKit too (`--engine firefox|webkit`: the ring, mask, :dir(rtl), blink, still).
+      if (only === 'edit-marks') await editMarksChecks(name, ctx);
+      if (only === 'edit-saves' && name !== 'firefox') await editSavesChecks(name, ctx);
       if (only === 'editors') await editorsChecks(name, ctx), name !== 'firefox' && (await editorsKindsChecks(name, ctx));
       if (only === 'playground' && name === 'chrome') await playgroundEditChecks(name, ctx);
       return;
@@ -3787,6 +4164,7 @@ async function runEngine(name) {
     if (name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
     await demosChecks(name, ctx);
     if (name === 'chrome') await editMarksChecks(name, ctx);
+    if (name === 'chrome') await editSavesChecks(name, ctx);
     await editorsChecks(name, ctx);
     if (name !== 'firefox') await editorsKindsChecks(name, ctx);
     if (name === 'chrome') await playgroundEditChecks(name, ctx);

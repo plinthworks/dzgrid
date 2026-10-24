@@ -20,9 +20,9 @@ const COLS: ColumnDef<Row, any>[] = [
   { id: 'who', header: 'Qui', width: 120, editable: true, edit: { options: WHO } },
   { id: 'n30', header: 'N', width: 120, editable: true, edit: { options: N30 } },
 ];
-const grid = (o: { cols?: ColumnDef<Row, any>[]; st?: string | null; lang?: 'fr' | 'ar'; settings?: object; bare?: boolean } = {}) => {
+const grid = (o: { cols?: ColumnDef<Row, any>[]; st?: string | null; lang?: 'fr' | 'ar'; settings?: object; bare?: boolean; down?: boolean } = {}) => {
   // The list comes in its own entry (owner S6-O7): `editors({ list: listEditor })`.
-  const t = ed({ lang: o.lang ?? 'fr', columns: (o.cols ?? COLS) as never, ...(!o.bare && { options: { list: listEditor } }), rows: rowsOf(30).map((r) => ({ ...r, st: o.st === undefined ? 'pending' : o.st, who: null, n30: 'o5' })) as never, ...(o.settings && { settings: o.settings as never }) });
+  const t = ed({ lang: o.lang ?? 'fr', columns: (o.cols ?? COLS) as never, ...(!o.bare && { options: { list: listEditor, ...(o.down && { enterMoves: 'down' as const }) } }), rows: rowsOf(30).map((r) => ({ ...r, st: o.st === undefined ? 'pending' : o.st, who: null, n30: 'o5' })) as never, ...(o.settings && { settings: o.settings as never }) });
   let clock = 1000;
   (t.ctx as { now: () => number }).now = () => clock;
   const wait = (ms: number) => void (clock += ms);
@@ -251,8 +251,17 @@ describe('keys (16)', () => {
     expect(t.active()).toBe('Partiel');
   });
 
-  it('Enter picks the active option, keeps it and goes down; Escape gives up', () => {
+  it('analyser 4 (Q3 revised): by default a pick by Enter keeps the focus on its cell', () => {
     const t = grid();
+    t.open();
+    t.press('ArrowDown');
+    t.press('Enter');
+    expect(t.saved()).toEqual([['st', 'due']]);
+    expect(t.focusAt()).toBe('r1/st');
+  });
+
+  it("Enter picks the active option, keeps it and goes down (enterMoves: 'down'); Escape gives up", () => {
+    const t = grid({ down: true });
     t.open();
     t.press('ArrowDown');
     t.press('Enter');

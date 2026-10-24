@@ -80,7 +80,11 @@ describe('the size lines (owner, 2026-10-20, step 26, Q4; reset at the Phase 3 c
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; files?: string[]; maxGzip: number | null; external?: string[]; over?: string; without?: string[] }> }).entries;
     expect([b['@dzgrid/dom']!.maxGzip, b['@dzgrid/theme']!.maxGzip, b['@dzgrid/core']!.maxGzip]).toEqual([21700, 2500, 29000]); // the owner's grants, Phase 4 close (decisions.md Q17b); dom 21 300 → 21 700 at Phase 5 step 4 (grant 21 980)
     expect(b['@dzgrid/dom/motion-gsap']).toEqual({ file: 'packages/dom/src/motion-gsap.ts', maxGzip: 700, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
-    expect(b['@dzgrid/dom/motion-gsap: run (lazy)']).toEqual({ file: 'packages/dom/src/motion-gsap/run/index.ts', maxGzip: 3150, over: '@dzgrid/dom/motion-gsap', external: ['gsap', 'gsap/*', '@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
+    // Phase 5 step 7 (Q16, written grant 3 500): the saves' reasons and the saved flash; the line follows the measure, under 3 500.
+    const run = b['@dzgrid/dom/motion-gsap: run (lazy)']!;
+    expect({ ...run, maxGzip: 0 }).toEqual({ file: 'packages/dom/src/motion-gsap/run/index.ts', maxGzip: 0, over: '@dzgrid/dom/motion-gsap', external: ['gsap', 'gsap/*', '@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal', './run/*'] });
+    expect(run.maxGzip).toBeGreaterThan(3150);
+    expect(run.maxGzip).toBeLessThanOrEqual(3500);
     expect(b['gsap kit: core']).toMatchObject({ maxGzip: null, without: ['gsap', 'gsap/*'] });
     expect(b['profile: audit screen + motion']).toMatchObject({ file: 'perf/profiles/audit-motion.ts', maxGzip: null, split: true });
     expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(83500); // owner Q17a: the guard stays 83 500; 90 000 guards example:bytes

@@ -7,6 +7,7 @@ export const FR_EDIT = {
     'edit.saving': "Enregistrement en cours",
     'edit.saveRefused': "{column}\u202F: non enregistré, {reason}. Valeur précédente rétablie.",
     'edit.reasonUnknown': "refusé par le serveur",
+    'edit.reasonNetwork': "serveur injoignable",
     'edit.failedMark': "Non enregistré\u202F: {reason}",
     'edit.stale': "Ordre périmé\u202F: remettre en ordre depuis l\u2019en-tête",
     'edit.rowStale': "Ne correspond plus au filtre",

@@ -15,7 +15,8 @@ const spec = JSON.parse(read('contrast-pairs.json')) as { derived: Record<string
 /** tzslot's sheets are unlayered (tzslot's own): the theme's two rules restyling its panel stay beside them. */
 const TZSLOT = (r: Rule) => r.selector.startsWith('.dzg-popup ') && r.selector.includes('.tz-');
 /** A palette block: only --tz-* colours, each a light-dark() pair. */
-const PALETTE = (r: Rule) => r.body.split(';').map((d) => d.trim()).filter(Boolean).every((d) => /^--tz-[a-z-]+: light-dark\(/.test(d));
+// A palette block: tzslot's colours, and (more contrast, step 7) the saving border's own.
+const PALETTE = (r: Rule) => r.body.split(';').map((d) => d.trim()).filter(Boolean).every((d) => /^--(tz-[a-z-]+|dzg-saving-color): light-dark\(/.test(d));
 
 describe('every theme file opens with the order statement and keeps its rules in its layer', () => {
   for (const [file, layer] of [['dzgrid.css', 'dzgrid.theme'], ['contrast.css', 'dzgrid.contrast'], ['tailwind.css', 'dzgrid.bridge']] as const) {
@@ -100,7 +101,8 @@ describe('the new tokens (themes-plan §1)', () => {
   });
 
   it('--dzg-saving-color and --dzg-refused-color are reserved with their defaults and checked on every row surface (Q9, Q10)', () => {
-    expect(spec.derived['--dzg-saving-color']).toBe('var(--tz-accent)');
+    // Owner, step 7: the warning, apart from the focus ring's accent.
+    expect(spec.derived['--dzg-saving-color']).toBe('var(--tz-warning)');
     expect(spec.derived['--dzg-refused-color']).toBe('var(--tz-danger)');
     for (const fg of ['--dzg-saving-color', '--dzg-refused-color'])
       for (const bg of ['--tz-bg', '--dzg-row-hover-bg', '--dzg-row-selected-bg'])

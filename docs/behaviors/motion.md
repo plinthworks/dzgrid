@@ -21,7 +21,7 @@ Sorts by a header, types a filter, turns the page, opens a filter popup, or watc
 - **Popups and overlay** (`popup`; owner Q2): a popup opening (its content: fade and a 4 px rise; the popup element itself, fixed or in the top layer, is never touched) and the overlay appearing (a fade) are animated by GSAP once the chunk is there (before, they simply appear); the popup host has already placed it and moved the focus; the motion never touches the focus; close is instant.
 - **Switches**: `settings.motion: false` (live) stops every effect, finishes those running, keeps the chunk from loading, and sets `data-motion="off"` on the grid's root (the theme's motion rules honour it). Each effect has its switch in `effects`.
 - **Reduced motion** is followed live (`gsap.matchMedia`, reduce assumed until it answers); a change finishes the effects running.
-- **The host hook**: `onCell(el, c, 'changed')` and `onRow(el, c, 'entered' | 'moved')` hand the element to the application's own GSAP code, after DzGrid's guards (armed, not scrolling, caps, at most 50 calls per paint). `c` carries the key, the row, the column (id), the value and its text (and the previous text), `context` and `reduced`. Returning `false` means handled: the built-in effect is skipped. A hook may animate `el` only (transform, opacity, `--dzg-*`, classes); a pooled element's hook tweens are finished like the grid's (pass the same `gsap` as `motion({ gsap })`). A throw is reported. Under reduced motion only `changed` is called, with `reduced: true`. Reasons `saving`, `saved`, `failed` are reserved for editing (Phase 4).
+- **The host hook**: `onCell(el, c, 'changed')` and `onRow(el, c, 'entered' | 'moved')` hand the element to the application's own GSAP code, after DzGrid's guards (armed, not scrolling, caps, at most 50 calls per paint). `c` carries the key, the row, the column (id), the value and its text (and the previous text), `context` and `reduced`. Returning `false` means handled: the built-in effect is skipped. A hook may animate `el` only (transform, opacity, `--dzg-*`, classes); a pooled element's hook tweens are finished like the grid's (pass the same `gsap` as `motion({ gsap })`). A throw is reported. Under reduced motion only `changed` (and the saves' reasons, below) are called, with `reduced: true`. Reasons `saving`, `saved`, `failed`: the saves (Phase 5 step 7, below).
 - **GSAP missing**: the grid works, without motion, and tells one problem (`missing-feature`, path `features.motion`, detail `gsap`).
 - **Destroyed**: the effects running are finished and cleared, delayed calls killed, the media watch reverted once the last grid goes.
 
@@ -36,3 +36,20 @@ Sorts by a header, types a filter, turns the page, opens a filter popup, or watc
 
 ## Phase 5 step 4
 The reasons `saving`, `saved`, `failed` stay reserved: the running border and the refusal blink are CSS (`@dzgrid/theme/edit.css`); the saved flash through `motion()` comes at step 7.
+
+## Phase 5 step 7: the saves (built 2026-10-24; D9, Q10 B, owner S7-O5)
+- With `@dzgrid/dom/edit`, `onCell(el, c, reason)` is also told `saving` (once per gesture and cell, when the
+  request leaves), `saved` and `failed` (when the refusal comes), for mounted cells only, at the paint that follows;
+  `pending` tells nothing. The cap: more than 50 such cells in one paint (a bulk save) tell none; the 50 hook calls a
+  paint are shared with `changed`. A new reason first finishes what the previous one started (a host's long `saving`
+  tween included); a pooled cell is finished as before.
+- `c.value` / `c.text`: what the cell shows (for `failed`, the refused value during its 0.5 s); `c.previousText`:
+  for `failed` the last saved text (what comes back), else the row's own value as the column writes it.
+- Built in: `saved` only, the live flash (`dzg-flash`, `--dzg-flash` 1 → 0 in 0.6 s) under `effects.flash`, one per
+  cell per 500 ms (shared with the live flash: a cell changed live and saved at once flashes once), none within
+  150 ms of a scroll (the hook is still told), `false` from the hook skips it. Reduced motion: the still mark 0.6 s,
+  the hooks told `reduced: true`. `motion: false`: nothing, what runs finished. Without `motion()`: the marks alone.
+- The run chunk reaches the edits only through the grid's edit seam (`g.edit.api.state`, `g.edit.read`): it never
+  imports `@dzgrid/dom/edit` (a structure test).
+- Found in Chrome (step 7): clearing a finished tween's props asked GSAP to parse the transform, which reads the
+  element's offset parent (a layout read per cell). The guard now clears only what a tween left inline.

@@ -53,7 +53,8 @@ describe('edit.css', () => {
     const marks = decl(/dzg-cell--(pending|saved|failed)\)?::after/);
     expect(marks).toMatch(/inset-inline-end:/);
     expect(marks).toMatch(/clip-path:/);
-    expect(decl(/dzg-cell--pending::after/)).toMatch(/var\(--dzg-saving-color, var\(--tz-accent\)\)/);
+    // The saving colour falls back to the warning (owner, step 7: never the focus ring's accent).
+    expect(decl(/dzg-cell--pending::after/)).toMatch(/var\(--dzg-saving-color, var\(--tz-warning\)\)/);
     expect(decl(/dzg-cell--saved::after/)).toMatch(/var\(--dzg-saved-color, var\(--tz-success\)\)/);
     expect(decl(/dzg-cell--failed::after/)).toMatch(/var\(--dzg-refused-color, var\(--tz-danger\)\)/);
     expect(decl(/\.dzg-cell--pending,|:is\(\.dzg-cell--pending/)).toMatch(/padding-inline-end:/);
@@ -62,7 +63,7 @@ describe('edit.css', () => {
   it('the running border: one custom property animated, 1.2 s a turn, four turns (4.8 s ≤ 5 s), then held still', () => {
     const ring = decl(/^\.dzg-cell--saving::before$/);
     expect(ring).toMatch(/conic-gradient\(from var\(--dzg-turn\)/);
-    expect(ring).toMatch(/var\(--dzg-saving-color, var\(--tz-accent\)\)/);
+    expect(ring).toMatch(/var\(--dzg-saving-color, var\(--tz-warning\)\)/);
     expect(ring).toMatch(/animation: dzg-turn 1\.2s linear 4, dzg-hold 0\.01s 4\.8s forwards/);
     expect(keyframes('dzg-turn').replace(/\s+/g, ' ')).toMatch(/^\s*to \{ --dzg-turn: 360deg; \}\s*$/);
     expect(keyframes('dzg-hold')).toMatch(/border-style: dashed/);
@@ -247,4 +248,44 @@ describe('edit.css: dates, the list, the calendar dialog (Phase 5 step 6, owner 
       expect(spec.pairs.some((p) => p.what.startsWith(what) && p.fg === fg && p.bg === bg && p.min === min), what).toBe(true);
     }
   });
+
+  it('step 7: the marks over the saved flash tint (the check, the failed sign, the ring: 3:1) and the reason\'s tooltip (4.5) in every theme', () => {
+    const has = (fg: string, bg: string, min: number) => spec.pairs.some((p) => p.fg === fg && p.bg === bg && p.min >= min);
+    for (const bg of ['--dzg-flash-bg', '--dzg-flash-selected-bg', '--dzg-flash-hover-bg']) {
+      expect(has('--dzg-saved-color', bg, 3), `saved check on ${bg}`).toBe(true);
+      expect(has('--dzg-refused-color', bg, 3), `failed sign on ${bg}`).toBe(true);
+      expect(has('--dzg-saving-color', bg, 3), `saving ring on ${bg}`).toBe(true);
+    }
+    expect(has('--tz-bg', '--tz-fg', 4.5)).toBe(true);
+  });
+
+  it('owner, step 7 (Enter stays): the saving border is not the focus ring — its own colour (the palette\'s warning, not the accent), inside the ring, apart in hue in every theme', () => {
+    const ring = decl(/^\.dzg-cell--saving::before$/);
+    expect(ring).toMatch(/var\(--dzg-saving-color, var\(--tz-warning\)\)/);
+    expect(ring).not.toMatch(/--tz-accent/);
+    // Inside the 2 px focus ring (outline-offset -2px) with 1 px between: the ring stays whole (WCAG 2.4.7, 2.4.11);
+    // on the rule it shares with the refusal border (review 5).
+    expect(decl(/^:is\(\.dzg-cell--saving, \.dzg-cell--refused\)::before$/)).toMatch(/inset: 3px/);
+    for (const d of [decl(/\.dzg\[data-motion=off\] \.dzg-cell--saving::before/), decl(/\.dzg-cell--saving::before/, media('prefers-reduced-motion: reduce')), keyframes('dzg-hold')]) expect(d).toMatch(/var\(--dzg-saving-color, var\(--tz-warning\)\)/);
+    expect(decl(/dzg-cell--pending::after/)).toMatch(/var\(--dzg-saving-color, var\(--tz-warning\)\)/);
+    expect(css).not.toMatch(/--dzg-saving-color, var\(--tz-accent\)/);
+    expect(spec.derived['--dzg-saving-color']).toBe('var(--tz-warning)');
+    const apart = spec.pairs.find((p) => p.fg === '--dzg-saving-color' && p.bg === '--dzg-focus-ring') as { hue?: number } | undefined;
+    expect(apart?.hue).toBeGreaterThanOrEqual(60);
+  });
+
+  it('owner, step 7: more contrast (contrast.css, tzslot\'s palette: a yellow accent and a yellow warning in the dark) gives the saving border its own colour, checked with the palette', () => {
+    const more = read('contrast.css');
+    expect(more).toMatch(/--dzg-saving-color: light-dark\(#6b3a00, #7ce8ff\)/);
+    const fx = JSON.parse(read('test/fixtures/high-contrast.json')) as { palettes: { light: Record<string, string>; dark: Record<string, string> }[] };
+    expect([fx.palettes[0]!.light['--dzg-saving-color'], fx.palettes[0]!.dark['--dzg-saving-color']]).toEqual(['#6b3a00', '#7ce8ff']);
+  });
+
+  it('review 5: the refusal border sits inside the focus ring too (3 px in, with the saving border); in forced colours the dashed saving border is CanvasText on a selected (Highlight) row', () => {
+    expect(decl(/^:is\(\.dzg-cell--saving, \.dzg-cell--refused\)::before$/)).toMatch(/inset: 3px/);
+    expect(decl(/^\.dzg-cell--saving::before$/)).not.toMatch(/inset:/);
+    const sel = decl(/\.dzg-row\[aria-selected=["']?true["']?\] \.dzg-cell--saving::before/, media('forced-colors: active'));
+    expect(sel).toMatch(/border-color: CanvasText/);
+  });
 });
+

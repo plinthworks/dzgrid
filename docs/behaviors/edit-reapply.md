@@ -94,6 +94,14 @@ mark on the right headers, keys on the mark (Enter on the header sorts, F2 enter
 cell clear of sticky parts after reapply, focus after reapply, one sentence only, selection kept;
 browser: axe with the mark, ar RTL. Manual: §19.
 
+## Built at step 7 (2026-10-24)
+- 6: after `api.reapply()` with the focus on a cell of the grid, that cell is scrolled into view as a focus move
+  would (clear of the pinned columns and sticky parents); the focus itself stays where it is (the cell, or an open
+  field, which keeps its text). The focused row is retained, so an open field never loses its cell to a reapply.
+- 7a: on a server grid the mark's press asks the page again (one request, the same key) and « Remis en ordre, {n} »
+  is said at the answer that puts the order back, with that answer's count; after a failed request nothing is said
+  (the mark stays), and a later answer says nothing of the old press. The app's reapply is never said.
+
 ## Built at step 4 (2026-10-23)
 - 3: muted rows are worked out by `@dzgrid/dom/edit` over the rows holding an edit, with the edits, once per reader, rows, query and state version; not on server pages (owner S4-O3).
 - 4–5: the mark is `<button class="dzg-reapply">`, appended last in the header cell; F2 on the header focuses it (tab stop while inside), Escape goes back to the header cell. With a `slots()` header part, F2 goes to the part first; the mark is then reached by Tab from the part.

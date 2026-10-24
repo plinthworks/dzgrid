@@ -21,21 +21,29 @@ export function installTooltips<T>(g: GridContext<T>): void {
     const row = cell?.closest('.dzg-row');
     const key = row ? rowRenderer.keyOf(row) : undefined;
     const col = cell?.dataset['col'] ? columns.get(cell.dataset['col']) : undefined;
-    if (!key || typeof col?.def.tooltip !== 'function') return null;
-    const node = rows.row(key);
-    if (!node) return null;
+    const node = key && col ? rows.row(key) : undefined;
+    // A failed save's reason first (S7-O4): read once, through the mark's description.
+    const own = node && g.edit?.tip?.(key!, col!.id);
+    if (own) return { text: own, col: col!, row: node!.data, value: null, said: true };
+    if (!node || typeof col!.def.tooltip !== 'function') return null;
     // A host function that throws shows no tooltip; the error is reported.
     try {
-      const raw = col.read(node.data);
-      const value = isBlank(raw) ? null : col.codec.coerce(raw, g.ctx);
-      const text = col.def.tooltip(value, node.data, g.settings.context);
-      return text ? { text, col, row: node.data, value } : null;
+      // What the cell shows (an edit's value, step 7), not the row's.
+      const raw = g.edit ? g.edit.read(col as never, node.data, key!) : col!.read(node.data);
+      const value = isBlank(raw) ? null : col!.codec.coerce(raw, g.ctx);
+      const text = col!.def.tooltip!(value, node.data, g.settings.context);
+      return text ? { text, col: col!, row: node.data, value } : null;
     } catch (err) {
       g.report(err);
       return null;
     }
   }
 
+  g.retip = (a) => {
+    const found = tooltipFor(a);
+    if (found) tip.showFor(a, found, g.dir, 0);
+    else tip.hide();
+  };
   // A focus that follows a key shows its tooltip at once; one that follows a click does not.
   scope.on(el.viewport, 'pointerdown', () => { g.keyboardAt = -1e9; });
   scope.on(el.viewport, 'focusin', (e: FocusEvent) => {

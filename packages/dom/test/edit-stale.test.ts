@@ -282,4 +282,18 @@ describe('review and test gaps (step 4 review)', () => {
     expect(document.activeElement).toBe(t.mark('q'));
     expect(t.mark('q')!.getAttribute('aria-label')).toBe('إعادة الترتيب');
   });
+
+describe('analyser 5 (step 7)', () => {
+  it('a press on the mark, then later the application\'s reapply: « Back in order » said once, for the press only', async () => {
+    const t = mk();
+    t.g.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'q', dir: 'asc' }] }, 'api');
+    t.put('r1', 'q', '500');
+    t.mark('q')!.click();
+    await t.settle();
+    t.put('r2', 'q', '600');
+    t.api.reapply();
+    await t.settle();
+    expect(t.said().filter((x) => /Back in order/.test(String(x)))).toHaveLength(1);
+  });
+});
 });

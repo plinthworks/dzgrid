@@ -126,6 +126,10 @@ export interface GridContext<T> {
    * pinned parents (WCAG 2.4.11): the stack drawn, or the room its own need, whichever is more. True when it moved.
    */
   reveal(i: number, block: number): boolean;
+  /** Scrolls a row (and a column) into view as a focus move would, clear of the pinned columns and rows; the focus untouched (`api.ensureVisible`). */
+  ensureVisible(row: RowKey, column?: string): void;
+  /** A shown tooltip asked again for its anchor (its cell's own text changed: a failed save, step 7); none: hidden. */
+  retip(anchor: HTMLElement): void;
   /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
   restoreFocus(): void;
   /** The edit seam (`@dzgrid/dom/edit`), the first feature's that gives one: found once, at setup. */

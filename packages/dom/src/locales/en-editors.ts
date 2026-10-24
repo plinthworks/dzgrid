@@ -16,5 +16,7 @@ export const EN_EDITORS = {
     'edit.calendarLoading': "Loading calendar",
     'edit.calendarFailed': "Calendar could not load",
     'edit.optionNotInList': "{label} (not in the list)",
+    'edit.rowRemoved': "Row removed, change cancelled",
+    'edit.pageDropped': "{column}: change not sent, the page changed",
   },
 } satisfies EditorsMessages;

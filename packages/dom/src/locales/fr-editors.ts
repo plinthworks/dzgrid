@@ -16,5 +16,7 @@ export const FR_EDITORS = {
     'edit.calendarLoading': "Chargement du calendrier",
     'edit.calendarFailed': "Le calendrier n\u2019a pas pu se charger",
     'edit.optionNotInList': "{label} (hors liste)",
+    'edit.rowRemoved': "Ligne supprimée, modification annulée",
+    'edit.pageDropped': "{column}\u202F: modification non envoyée, la page a changé",
   },
 } satisfies EditorsMessages;

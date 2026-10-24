@@ -64,7 +64,7 @@ the application made itself.
     it (folded as the quick search folds: case, diacritics, Arabic tashkil); the same letter again cycles
     through the options starting with it. A printable key opening the editor is the prefix's first
     letter.
-15. Enter picks the active option and keeps it (moves per `enterMoves`); Tab picks and moves; Escape
+15. Enter picks the active option and keeps it (stays, or moves down with `enterMoves: 'down'`; Q3 revised); Tab picks and moves; Escape
     closes and gives up; a click on an option picks and keeps.
 16. Options: `edit.options: [{ value, label? }]` or a function of the row and context; labels from the
     column's value labels when not given. Up to 500 options (more: the searchable list, later).
@@ -173,7 +173,7 @@ dark: axe 0 with each editor open.
 - 12–17: the combobox in the cell keeps the focus, the listbox in a popup under the cell (`aria-activedescendant`);
   options ≥ 24 px (44 px under a coarse pointer); Up/Down, Home/End, PageUp/PageDown clamped; letters within 500 ms a
   folded prefix (case, accents, tashkil, alef forms), the same letter again cycles, Backspace shortens it; Space picks
-  and keeps without moving (a letter during a prefix); Enter keeps and moves, Tab keeps and goes on, Escape gives up;
+  and keeps without moving (a letter during a prefix); Enter keeps (and moves with `enterMoves: 'down'`), Tab keeps and goes on, Escape gives up;
   a press on an option keeps (the focus stays). A blur keeps the active option (unmoved, it is the cell's own value:
   nothing saved). An options function is called at the opening with the row and `settings.context`; one that throws
   is reported and opens nothing. Refused: the list closes, the combobox stays invalid under the bubble; Down shows it.

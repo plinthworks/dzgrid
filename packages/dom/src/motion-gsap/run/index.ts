@@ -3,12 +3,13 @@ import type { GridContext } from '../../context.js';
 import type { FeatureHandle } from '../../features.js';
 import type { Frame } from '../../render/rows.js';
 import type { Gsap, MotionEffects, MotionOptions } from '../index.js';
-import { flash, type Texts } from './flash.js';
+import { flash, forget, type Texts } from './flash.js';
 import { flip } from './flip.js';
 import { guard, type Guard } from './guard.js';
 import { opening } from './open.js';
 import { slide } from './page.js';
 import { reducedMotion } from './reduced.js';
+import { saves } from './saves.js';
 
 /** The chunk's side of `motion()`: one per `motion()`, any number of grids. */
 export interface Engine {
@@ -118,6 +119,8 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
         };
       };
       const stopOpen = opening(g, guarded, () => (live() && !reduced() && on('popup') ? scene(g.now()) : null));
+      // The saves' reasons (Phase 5 step 7): heard apart from the rows' changes, told at every paint that follows one.
+      const sv = saves(g);
       return {
         // Reads only when armed by a change of the rows, never on a scroll's paint: offsets the grid
         // wrote (no layout read), the cells' texts of the rows changed, the page.
@@ -140,10 +143,28 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
           const how = dirs % 3 || 3;
           snap = null;
           armed = dirs = 0;
-          if (!live()) return guarded.finishAll();
-          if (!s) return;
+          if (!live()) return sv.paint(null), guarded.finishAll();
+          if (!s && !sv.told()) return;
           const now = g.now();
-          const sc = scene(now, s.ys);
+          // One scene for the paint: the live flash and the saves share its 50 hook calls and the 500 ms marks.
+          const sc = scene(now, s?.ys);
+          forget(marked, now);
+          if (s) changes(sc, s, kinds, how, f, now);
+          sv.paint(sc);
+        },
+        destroy() {
+          unsubscribe();
+          unlisten();
+          sv.destroy();
+          stopOpen();
+          guarded.finishAll();
+          attached.delete(guarded);
+          // The last grid gone: the media watch too (made again by the next one).
+          if (!attached.size) reduced.revert();
+        },
+      };
+      /** What the rows' changes since the last paint animate: the glides, the live flash, the page slide. */
+      function changes(sc: Scene, s: NonNullable<typeof snap>, kinds: number, how: number, f: Frame<unknown>, now: number): void {
           let flipped = false;
           // A scroll between the change and the paint (the layer moved: an anchor too): no glide.
           const still = g.scrolledAt <= armedAt && s.layer === g.el.layer.style.getPropertyValue('inset-block-start') && !sc.reduced;
@@ -159,17 +180,7 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
           if (kinds & PAGE && !sc.reduced && on('page')) slide(sc, s.page, shownPage);
           changed.clear();
           added.clear();
-        },
-        destroy() {
-          unsubscribe();
-          unlisten();
-          stopOpen();
-          guarded.finishAll();
-          attached.delete(guarded);
-          // The last grid gone: the media watch too (made again by the next one).
-          if (!attached.size) reduced.revert();
-        },
-      };
+      }
     },
   };
 }

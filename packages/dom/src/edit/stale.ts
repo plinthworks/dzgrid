@@ -23,12 +23,15 @@ export function stale(g: GridContext<unknown>, m: Marks) {
   let rows = new Set<HTMLElement>();
   let heads = new Map<HTMLElement, string>();
 
+  /** A press on the mark, said when the order is put back: at once in the browser, at a server's answer (S2-O2), never after a failure. */
+  let asked = false;
   const off = kernel.subscribe((e) => {
     if (e.type === 'cellEdited') edited.add(e.column);
+    else if (e.type === 'fetchFailed') asked = false;
     else if (e.type === 'orderStale') {
       // The event comes on a flip only: said once from false to true, after the save's sentence.
       if (e.stale) m.say(g.msg('edit.stale'), true);
-      else edited.clear();
+      else edited.clear(), asked && m.say(g.msg('edit.reapplied', { n: g.rows.displayed.count })), (asked = false);
     }
   });
 
@@ -43,7 +46,7 @@ export function stale(g: GridContext<unknown>, m: Marks) {
       const f = compileFilter(kernel.query.filter, env, kinds);
       const q = compileQuick(kernel.query.quick, g.columns.visible(), env);
       muted = new Set();
-      for (const k of m.keys()) {
+      for (const { k } of m.cells.values()) {
         const src = s.lookup(idOfDataKey(k) ?? '');
         if (src !== -1 && !(f.test(src) && q.test(src))) muted.add(k);
       }
@@ -56,8 +59,8 @@ export function stale(g: GridContext<unknown>, m: Marks) {
     const b = (e.target as Element).closest?.('.dzg-reapply');
     if (!b) return;
     b.closest<HTMLElement>('.dzg-hcell')!.focus();
+    asked = true;
     kernel.dispatch({ type: 'rows.reapply' }, 'user');
-    m.say(g.msg('edit.reapplied', { n: g.rows.displayed.count }));
   });
   // Out of the Tab order again once the focus leaves it.
   g.scope.on(el.header, 'focusout', (e) => {
@@ -102,7 +105,7 @@ export function stale(g: GridContext<unknown>, m: Marks) {
           if (!set.has(key)) return;
           r.add(v.el);
           // The row header, else the row's first mounted cell (its column scrolled out: review 5, WCAG 1.4.1).
-          const c = (f.rowHeader ? v.cells.get(f.rowHeader)?.el : undefined) ?? v.el.querySelector<HTMLElement>('.dzg-cell');
+          const c = v.cells.get(f.rowHeader!)?.el ?? v.el.querySelector<HTMLElement>('.dzg-cell');
           if (c) h.set(c, id);
         });
       // The row and the cell carrying the sign: `data-dzg-stale` (the theme draws the sign on that cell).

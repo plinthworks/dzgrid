@@ -275,7 +275,11 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     // another row or new data (a sort, a filter, an update): hidden, its text would be stale.
     const tipAt = g.tip.anchor;
     const tipRow = tipAt?.closest('.dzg-row');
-    if (tipAt && (!tipAt.isConnected || g.tip.row !== (tipRow ? rows.row(rowRenderer.keyOf(tipRow)!)?.data : null))) g.tip.hide();
+    // A failed save's reason once the cell is no longer failed (saved, undone, its source changed: step 7) too.
+    const tipKey = tipRow && rowRenderer.keyOf(tipRow);
+    if (tipAt && (!tipAt.isConnected || g.tip.row !== (tipKey ? rows.row(tipKey)?.data : null))) g.tip.hide();
+    // A cell that became failed, or stopped being (step 7, review 1): its tooltip asked again (the reason or the column's).
+    else if (tipKey && !!g.edit?.tip?.(tipKey, tipAt!.dataset['col']!) !== g.tip.said) g.retip(tipAt!);
     for (const h of g.features) h.afterRows?.(frame as Frame<unknown>);
     after.rovingStop(d, visible);
     const topIndex = d.count ? layout.indexAt(scroll.logicalTop) : null;

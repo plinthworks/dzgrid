@@ -1,4 +1,5 @@
-import { isBlank, type RowKey } from '@dzgrid/core';
+import { isBlank, type ResolvedColumn, type RowKey } from '@dzgrid/core';
+import type { GridContext } from '../../context.js';
 import type { Frame } from '../../render/rows.js';
 import { enter } from './flip.js';
 import { showing } from './guard.js';
@@ -22,12 +23,7 @@ const MAX_ADDED = 20;
  * cells unmarked. Not announced.
  */
 export function flash(s: Scene, f: Frame<unknown>, texts: Texts, changed: ReadonlySet<RowKey>, added: ReadonlySet<RowKey>, fade: boolean): void {
-  const { g, gsap, o, guard, now, reduced, marked } = s;
-  // Marks older than the cap are forgotten: the map holds the last 500 ms only.
-  for (const [k, m] of marked) {
-    for (const [c, t] of m) if (now - t >= EVERY_MS) m.delete(c);
-    if (!m.size) marked.delete(k);
-  }
+  const { g, o, reduced } = s;
   const rows = [...added].filter((k) => g.rowRenderer.mounted.has(k));
   if (fade && !reduced && rows.length <= MAX_ADDED) rows.forEach((k, i) => enter(s, f, k, g.rowRenderer.mounted.get(k)!.el, i));
   const cells: [RowKey, string, HTMLElement, string, string][] = [];
@@ -43,24 +39,47 @@ export function flash(s: Scene, f: Frame<unknown>, texts: Texts, changed: Readon
   }
   if (cells.length > MAX_CELLS) return;
   for (const [k, c, el, text, was] of cells) {
-    const m = marked.get(k) ?? new Map<string, number>();
-    if (m.has(c)) continue;
-    marked.set(k, m.set(c, now));
+    if (!fresh(s, k, c)) continue;
     const row = g.rows.row(k)?.data;
     const col = g.columns.get(c);
-    let value: unknown = null;
-    try {
-      const raw = col && row !== undefined ? col.read(row) : null;
-      value = isBlank(raw) ? null : col!.codec.coerce(raw, g.ctx);
-    } catch {
-      /* an unreadable value: null, as its cell shows blank */
-    }
+    const [value] = valueOf(g, col, col && row !== undefined ? col.read(row) : null);
     const ok = showing(g, el, k, c);
-    if (s.hook(o.onCell, ok, el, { key: k, column: c, value, text, previousText: was, row, context: g.settings.context, reduced }, 'changed') === false || !s.on('flash')) continue;
-    el.classList.add('dzg-flash');
-    if (reduced) {
-      el.style.setProperty('--dzg-flash', '1');
-      guard.track(el, ok, gsap.delayedCall(0.6, () => guard.release(el)));
-    } else s.play(el, ok, { '--dzg-flash': 1 }, { '--dzg-flash': 0, duration: 0.6 });
+    if (s.hook(o.onCell, ok, el, { key: k, column: c, value, text, previousText: was, row, context: g.settings.context, reduced }, 'changed') !== false && s.on('flash')) tint(s, el, ok);
   }
+}
+
+/** A raw value as its column reads it (null: blank or unreadable, as its cell shows blank) and formats it (''). */
+export function valueOf(g: GridContext<unknown>, col: ResolvedColumn<unknown> | undefined, raw: unknown): [unknown, string] {
+  try {
+    const v = isBlank(raw) ? null : col!.codec.coerce(raw, g.ctx);
+    return [v, v === null ? '' : col!.codec.format(v as never, g.ctx)];
+  } catch {
+    return [null, ''];
+  }
+}
+
+/** Marks older than the cap forgotten (once a paint): the map holds the last 500 ms only. */
+export function forget(marked: Map<RowKey, Map<string, number>>, now: number): void {
+  for (const [k, m] of marked) {
+    for (const [c, t] of m) if (now - t >= EVERY_MS) m.delete(c);
+    if (!m.size) marked.delete(k);
+  }
+}
+
+/** Whether a cell may be marked now (the live flash and the saved one share it): not marked in the last 500 ms (by row key and column, never element: they are pooled); then recorded. */
+export function fresh(s: Scene, k: RowKey, c: string): boolean {
+  const m = s.marked.get(k) ?? new Map<string, number>();
+  if (m.has(c)) return false;
+  s.marked.set(k, m.set(c, s.now));
+  return true;
+}
+
+/** The built-in flash on a cell: `dzg-flash`, `--dzg-flash` 1 → 0 in 0.6 s; reduced motion: the mark still 0.6 s. */
+export function tint(s: Scene, el: HTMLElement, ok: () => boolean): void {
+  const { gsap, guard } = s;
+  el.classList.add('dzg-flash');
+  if (s.reduced) {
+    el.style.setProperty('--dzg-flash', '1');
+    guard.track(el, ok, gsap.delayedCall(0.6, () => guard.release(el)));
+  } else s.play(el, ok, { '--dzg-flash': 1 }, { '--dzg-flash': 0, duration: 0.6 });
 }

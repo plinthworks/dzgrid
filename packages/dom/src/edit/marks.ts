@@ -4,7 +4,7 @@ import type { GridContext } from '../context.js';
 import type { EditSeam } from '../features.js';
 import type { EditMessageKey } from '../part-texts.js';
 import type { Frame } from '../render/rows.js';
-import { describe } from '../render/write.js';
+import { describe, setAttr } from '../render/write.js';
 
 /** A refusal shown on a cell for 0.5 s (edit-validation.md 2): the refused value held (server) or not (local); its blink, if any. */
 interface Hold { readonly v: unknown; readonly has: boolean; readonly ab: string; readonly off: () => void }
@@ -21,6 +21,8 @@ interface Mark {
   lock?: (() => void) | undefined;
   /** The last blink's keyframes, a or b: the next uses the other, so the animation restarts without a reflow. */
   ab: string;
+  /** The last refusal looked like a network cut (S7-O2). */
+  net?: boolean;
 }
 
 let ids = 0;
@@ -36,10 +38,10 @@ export interface Marks {
   refuse(key: RowKey, column: string, v?: unknown, has?: boolean): void;
   /** One sentence in the assertive region, each emptied first (a refusal). */
   alert(text: string): void;
-  /** A refusal's reason (edit-save.md 16): the host's text, else its code's, else the generic one. */
-  reason(column: string, why: string | null, code: string | null): string;
-  /** The rows holding an edit (only they can newly fail a filter). */
-  keys(): RowKey[];
+  /** A refusal's reason (edit-save.md 16): the host's text, else its code's, else a network cut's (S7-O2), else the generic one. */
+  reason(column: string, code: string | null, why?: string | null, net?: boolean): string;
+  /** The cells holding a mark or a state, by `key\ncolumn` (their rows: the only ones that can newly fail a filter). */
+  readonly cells: ReadonlyMap<string, { readonly k: RowKey }>;
   /** Bumped when a cell's state changes: what `keys` gives may have changed. */
   readonly rev: number;
   paint(f: Frame<unknown>): void;
@@ -135,8 +137,8 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
   };
   const loud = doc.createElement('div');
   loud.className = 'dzg-live';
-  loud.setAttribute('aria-live', 'assertive');
-  loud.setAttribute('aria-atomic', 'true');
+  setAttr(loud, 'aria-live', 'assertive');
+  setAttr(loud, 'aria-atomic', 'true');
   el.root.append(loud);
   // One refusal sentence after the other, each emptied first so the same sentence twice is read twice.
   const loudQ: string[] = [];
@@ -153,9 +155,9 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
   };
 
   /** A refusal's reason (edit-save.md 16): the host's text, else its code's, else the generic one. */
-  const reason = (column: string, why: string | null, code: string | null): string => {
+  const reason = (column: string, code: string | null, why?: string | null, net?: boolean): string => {
     if (why) return why;
-    if (!code) return msg('edit.reasonUnknown');
+    if (!code || code === 'network') return msg(code || net ? 'edit.reasonNetwork' : 'edit.reasonUnknown');
     const col = g.columns.get(column);
     const fmt = (v: unknown): string => {
       try {
@@ -166,7 +168,7 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
       }
     };
     const key = `validation.${code}` as EditMessageKey;
-    const r = (col?.def as { edit?: { min?: unknown; max?: unknown } } | undefined)?.edit;
+    const r = col?.def.edit as { min?: unknown; max?: unknown } | undefined;
     return msg(g.settings.messages.text[key] === undefined ? 'validation.invalid' : key, { min: fmt(r?.min), max: fmt(r?.max) });
   };
 
@@ -182,8 +184,8 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
   };
 
   // The gestures said (review 3: a gesture that waited behind another still says « Saving »), and refused (review 2).
+  // One set: a gesture's « Saving » by its generation, its refusal by the generation negated.
   const said = new Set<number>();
-  const told = new Set<number>();
   let rev = 0;
   const off = kernel.subscribe((e) => {
     if (e.type === 'editStates') {
@@ -191,32 +193,48 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
       for (const { key, column } of e.cells) {
         const x = at(key, column);
         const s = ctl.state(key, column);
+        const st = s?.status;
         // Any new state ends what showed before: the hold, the check, the border.
-        if (s?.status !== 'failed') x.hold?.off(), (x.hold = undefined);
+        if (st !== 'failed') x.hold?.off(), (x.hold = undefined);
         x.saved?.();
-        x.saved = s?.status === 'saved' ? later(1500, key, () => (x.saved = undefined)) : undefined;
-        if (s?.status !== 'saving') x.send?.off(), (x.send = undefined);
-        else if (x.send?.g !== s.generation) {
+        x.saved = st === 'saved' ? later(1500, key, () => (x.saved = undefined)) : undefined;
+        if (st !== 'saving') x.send?.off(), (x.send = undefined);
+        else if (x.send?.g !== s!.generation) {
           x.send?.off();
-          const n = { g: s.generation, still: false, off: later(5000, key, () => (n.still = true)) };
+          const n = { g: s!.generation, still: false, off: later(5000, key, () => (n.still = true)) };
           x.send = n;
           // Once per gesture, not per cell.
-          if (!said.has(s.generation)) said.add(s.generation), say(msg('edit.saving'));
+          if (!said.has(n.g)) said.add(n.g), say(msg('edit.saving'));
         }
       }
       show(e.cells.map((c) => c.key));
     } else if (e.type === 'saveFailed') {
       // The core rolled back already: the refused value stays shown for the 0.5 s (Q9), then the last saved.
       const s = ctl.state(e.key, e.column);
-      if (s?.status === 'failed') refuse(e.key, e.column, e.value, true);
+      // A row the browser's rows no longer have: the host hears it (saveFailed), not the user (edit-save.md 21). A
+      // server page's row only left the page (O9): said.
+      if (g.rows.kind === 'client' && !g.rows.row(e.key)) return;
+      // A cut (O11 note, S7-O2; review 2): what the browsers' fetch throws (a TypeError saying fetch, network or « load
+      // failed »), a TimeoutError or a NetworkError, or the grid's window offline; an app's own TypeError is not one.
+      // The host's reason and code win; its code `network` says it outright.
+      const x = e.error as Error | null;
+      const net = (x?.name === 'TypeError' && /fetch|network|load failed/i.test(x.message)) || /^(Timeout|Network)Error$/.test(x?.name as string) || (g.win as Window).navigator.onLine === false;
       // One sentence per refused gesture (its generation; a cell no longer failed counts alone): the first cell's column.
-      if (s?.status !== 'failed' || !told.has(s.generation)) {
-        if (s?.status === 'failed') told.add(s.generation);
-        shout(msg('edit.saveRefused', { column: g.columns.get(e.column)?.def.header ?? e.column, reason: reason(e.column, e.reason, e.code) }));
+      if (s?.status === 'failed') {
+        at(e.key, e.column).net = net;
+        refuse(e.key, e.column, e.value, true);
+        if (said.has(-s.generation)) return;
+        said.add(-s.generation);
       }
+      shout(msg('edit.saveRefused', { column: g.columns.get(e.column)?.def.header ?? e.column, reason: reason(e.column, e.code, e.reason, net) }));
     }
   });
 
+  /** A failed cell's words (its description and its tooltip); null: not failed. */
+  const failed = (k: RowKey, c: string): string | null => {
+    const s = ctl.state(k, c);
+    return s?.status === 'failed' ? msg('edit.failedMark', { reason: reason(c, s.code, s.reason, cells.get(ck(k, c))?.net) }) : null;
+  };
   /** What a cell shows: its classes (without the prefix) and its description. */
   const want = (x: Mark | undefined): [string, string | null] => {
     if (!x) return ['', null];
@@ -224,7 +242,7 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
     const s = ctl.state(x.k, x.c);
     const st = s?.status;
     if (st === 'saving') return [!border || x.send?.still ? 'saving still' : 'saving', desc(msg('edit.saving'))];
-    if (st === 'failed') return ['failed', desc(msg('edit.failedMark', { reason: reason(x.c, s!.reason, s!.code) }))];
+    if (st === 'failed') return ['failed', desc(failed(x.k, x.c)!)];
     return [st === 'pending' ? 'pending' : x.saved ? 'saved' : '', null];
   };
   const drawn = new Map<HTMLElement, { t: string; d: string | null }>();
@@ -248,13 +266,14 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
         const h = cells.size ? cells.get(ck(key, col.id))?.hold : undefined;
         return h?.has ? h.v : ctl.reader.value(col as never, row as never, idOfDataKey(key) ?? '');
       },
+      tip: failed,
     },
     say,
     desc,
     refuse,
     alert: shout,
     reason,
-    keys: () => [...cells.values()].map((x) => x.k),
+    cells,
     get rev() { return rev; },
     paint() {
       used.clear();

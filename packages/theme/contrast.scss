@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 @use 'sass:list';
+@use 'sass:string';
 
 $layered: true !default;
 
@@ -22,11 +23,18 @@ $tz-palette: (
   danger: (#8b0000, #ff8a8a),
   warning: (#6b3a00, #ffd27a),
   success: (#14532d, #86efac),
+  // Not tzslot's: the saving border's own colour (owner, step 7). This palette's accent and warning are both
+  // yellow in the dark, so the border and the focus ring would meet in one colour on a focused cell; a cyan there.
+  '--dzg-saving-color': (#6b3a00, #7ce8ff),
 );
 
 @mixin palette {
   @each $name, $pair in $tz-palette {
-    --tz-#{$name}: light-dark(#{list.nth($pair, 1)}, #{list.nth($pair, 2)});
+    @if string.index($name, '--') == 1 {
+      #{$name}: light-dark(#{list.nth($pair, 1)}, #{list.nth($pair, 2)});
+    } @else {
+      --tz-#{$name}: light-dark(#{list.nth($pair, 1)}, #{list.nth($pair, 2)});
+    }
   }
 }
 

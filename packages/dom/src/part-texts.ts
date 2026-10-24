@@ -30,7 +30,7 @@ export interface TreeMessages {
 
 /** The editing texts (`@dzgrid/dom/edit`, Phase 5 step 4), in their own bundles (`locales/<lang>-edit`): optional here, required by `edit()`. */
 export type EditMessageKey =
-  | 'edit.saving' | 'edit.saveRefused' | 'edit.reasonUnknown' | 'edit.failedMark' | 'edit.stale' | 'edit.rowStale' | 'edit.reapply' | 'edit.reapplied' | 'header.withStale'
+  | 'edit.saving' | 'edit.saveRefused' | 'edit.reasonUnknown' | 'edit.reasonNetwork' | 'edit.failedMark' | 'edit.stale' | 'edit.rowStale' | 'edit.reapply' | 'edit.reapplied' | 'header.withStale'
   | `validation.${Exclude<ValidationCode, ParseCode>}`;
 /** The refusal codes a value check or a server gives (edit-validation.md 1; a host may add its own `validation.<code>`). */
 export type ValidationCode = ParseCode | 'required' | 'min' | 'max' | 'pattern' | 'options' | 'invalid';
@@ -43,7 +43,7 @@ export interface EditMessages {
 }
 
 /** The editors' texts (`@dzgrid/dom/editors`, Phase 5 step 5), in their own bundles (`locales/<lang>-editors`): optional here, required by `editors()`. */
-export type EditorsMessageKey = 'edit.refused' | 'edit.refusedDropped' | 'editors.fieldName' | 'edit.calendar' | 'edit.calendarLoading' | 'edit.calendarFailed' | 'edit.optionNotInList' | `validation.${ParseCode}`;
+export type EditorsMessageKey = 'edit.refused' | 'edit.refusedDropped' | 'editors.fieldName' | 'edit.calendar' | 'edit.calendarLoading' | 'edit.calendarFailed' | 'edit.optionNotInList' | 'edit.rowRemoved' | 'edit.pageDropped' | `validation.${ParseCode}`;
 /** An editors bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text }`. */
 export interface EditorsMessages {
   readonly locale: string;

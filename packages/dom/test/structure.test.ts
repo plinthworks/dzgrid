@@ -244,6 +244,12 @@ describe('the DOM layer’s shape', () => {
     expect(files(SRC).filter((f) => /^editors(\/|\.ts$)/.test(relative(SRC, f)) && /from '[^']*filters[^']*'/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
   });
 
+  it('has the motion run chunk reach the edits only through the grid\'s edit seam (Phase 5 step 7): no import of edit/ or editors/, types included', () => {
+    const run = files(join(SRC, 'motion-gsap'));
+    expect(run.map((f) => relative(SRC, f))).toContain('motion-gsap/run/saves.ts');
+    expect(run.filter((f) => /from '[^']*(\/edit|\/editors|core\/edit)[^']*'/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+  });
+
   it('has the list in its own entry, @dzgrid/dom/editors-list (owner S6-O7): the core, the popup host and the pure helpers; the editors never import it', () => {
     const entry = files(SRC).filter((f) => /^editors-list(\/|\.ts$)/.test(relative(SRC, f)));
     expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['editors-list.ts', 'editors-list/index.ts']);

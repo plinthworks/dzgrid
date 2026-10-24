@@ -38,8 +38,8 @@ const press = (t: ReturnType<typeof ed>, key: string, init: KeyboardEventInit = 
 };
 
 describe('R1: keys typed while the open waits for the paint', () => {
-  it('« 4 », « 2 », Enter: « 42 » kept, the field closed, down one row', () => {
-    const t = deferred();
+  it("« 4 », « 2 », Enter: « 42 » kept, the field closed, down one row (enterMoves: 'down')", () => {
+    const t = deferred({ options: { enterMoves: 'down' } });
     below(t);
     press(t, '4');
     press(t, '2');

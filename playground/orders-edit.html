@@ -27,7 +27,12 @@
     <label>Langue <select name="locale"><option value="fr-FR">français</option><option value="ar-DZ">arabe (droite à gauche)</option></select></label>
     <label>Thème <select name="theme"><option value="">système</option><option>light</option><option>dark</option></select></label>
     <label>Thème vitrine <select name="skin"><option value="none">aucun</option><option>midnight</option><option>clinic</option></select></label>
+    <!-- Step 7: Enter's move (owner Q3 revised: stays by default) and the server-paged mode; their words set by page.ts (fr / ar). -->
+    <label><span id="enter-label">Entrée</span> <select name="enter"><option value="stay">reste</option><option value="down">descend</option></select></label>
+    <label><span id="paged-label">Données</span> <select name="paged"><option value="">dans le navigateur</option><option value="1">serveur paginé</option></select></label>
   </form>
+  <!-- Live switches (no reload): animations, the network cut, a row removed in 3 s, the next page in 3 s. -->
+  <div class="bar" id="live"></div>
   <main>
     <div id="host"></div>
     <section class="log" aria-labelledby="log-title">

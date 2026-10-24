@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: saves</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/core/edit": "/packages/core/src/edit.ts",
+  "@dzgrid/core/server": "/packages/core/src/server.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts",
+  "@tzslot/dom": "/node_modules/.cache/dzgrid-browser/dom.js",
+  "@tzslot/core": "/node_modules/.cache/dzgrid-browser/core.js",
+  "gsap": "/node_modules/gsap/index.js"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<!-- edit-saves.ts adds the showcase theme (skin=midnight|clinic) and edit.css here. -->
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); }
+  #host { inline-size: 820px; block-size: 480px; }
+  #host > .dzg { block-size: 100%; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DzGrid</h1>
+  <div id="host"></div>
+  <button id="outside">outside</button>
+</main>
+<script type="module" src="./edit-saves.ts"></script>
+</body>
+</html>

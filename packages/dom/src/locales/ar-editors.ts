@@ -16,5 +16,7 @@ export const AR_EDITORS = {
     'edit.calendarLoading': "جارٍ تحميل التقويم",
     'edit.calendarFailed': "تعذّر تحميل التقويم",
     'edit.optionNotInList': "{label} (خارج القائمة)",
+    'edit.rowRemoved': "حُذف الصف، أُلغي التعديل",
+    'edit.pageDropped': "{column}: لم يُرسل التعديل، تغيّرت الصفحة",
   },
 } satisfies EditorsMessages;

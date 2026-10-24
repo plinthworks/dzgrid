@@ -7,6 +7,7 @@ export const EN_EDIT = {
     'edit.saving': "Saving",
     'edit.saveRefused': "{column}: not saved, {reason}. Previous value restored.",
     'edit.reasonUnknown': "refused by the server",
+    'edit.reasonNetwork': "server unreachable",
     'edit.failedMark': "Not saved: {reason}",
     'edit.stale': "Order out of date: reapply from the header",
     'edit.rowStale': "No longer matches the filter",

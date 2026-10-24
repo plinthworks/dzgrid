@@ -670,7 +670,7 @@ noter la phrase dite et la comparer au paquet.
 112. **Ouvrir.** Sur « Stock », `F2` : un champ d'édition, nom « Stock, Paracétamol » (en-tête de colonne puis de
      ligne ; noter l'ordre dit), valeur lue. `Échap` : retour sur la cellule, valeur inchangée, rien dit de plus.
 113. **Taper pour remplacer.** Sur « Stock », taper `7` : le champ s'ouvre avec « 7 » seul. `Entrée` : fr
-     « Enregistrement en cours » (ar « جارٍ الحفظ »), dit **une fois** ; le focus descend d'une ligne. Pendant
+     « Enregistrement en cours » (ar « جارٍ الحفظ »), dit **une fois** ; le focus reste sur la cellule (défaut depuis la révision Q3 ; avec `enterMoves: 'down'` il descend d'une ligne). Pendant
      1,5 s une ligne court autour de la cellule (vue) : **rien n'est dit** pour elle ; à la fin, ni « enregistré »
      ni autre phrase (la coche et l'éclat se voient). Noter toute phrase en trop.
 114. **Refus local.** Sur « Stock », taper `abc`, `Entrée` : le bord clignote en rouge ~0,5 s (vue), le champ
@@ -706,7 +706,7 @@ noter la phrase dite et la comparer au paquet.
      calendrier : le premier ferme le calendrier, le second annule. Taper `31/02/2026`, `Entrée` : fr
      « Péremption : valeur refusée, date attendue (JJ/MM/AAAA) », ar « Péremption: قيمة مرفوضة، المطلوب تاريخ (…) ».
 121. **Liste.** Sur « Statut », `Entrée` : une liste, l'option courante dite ; taper `r` : « Rupture », `r`
-     encore : « Retiré » ; `Entrée` : choisie, enregistrée, focus en bas. En arabe, mêmes étapes avec les
+     encore : « Retiré » ; `Entrée` : choisie, enregistrée, le focus reste sur la cellule (défaut, révision Q3 ; en bas avec `enterMoves: 'down'`). En arabe, mêmes étapes avec les
      libellés arabes de la démo.
 122. **Oui/non.** Sur « Actif », `Espace` : la valeur dite change (oui ↔ non), « Enregistrement en cours » ; la
      ligne n'est **pas** sélectionnée. Sur « Produit », `Espace` : la ligne est sélectionnée (comme avant).

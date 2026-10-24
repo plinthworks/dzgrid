@@ -43,4 +43,11 @@ describe('the -edit bundles', () => {
   it('French puts the narrow space before a colon', () => {
     for (const key of ['edit.saveRefused', 'edit.failedMark', 'edit.stale'] as const) expect(FR_EDIT.text[key]).toContain(' :');
   });
+
+  it('a network failure has its own reason (owner S7-O2): « server unreachable », not the server\'s refusal', () => {
+    expect(EDIT_KEYS as readonly string[]).toContain('edit.reasonNetwork');
+    expect([EN_EDIT, FR_EDIT, AR_EDIT].map((b) => b.text['edit.reasonNetwork'])).toEqual(['server unreachable', 'serveur injoignable', 'تعذّر الوصول إلى الخادم']);
+    // The generic one stays the server's « no ».
+    expect(FR_EDIT.text['edit.reasonUnknown']).toBe('refusé par le serveur');
+  });
 });

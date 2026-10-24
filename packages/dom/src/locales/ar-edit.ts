@@ -7,6 +7,7 @@ export const AR_EDIT = {
     'edit.saving': "جارٍ الحفظ",
     'edit.saveRefused': "{column}: لم يُحفظ، {reason}. أُعيدت القيمة السابقة.",
     'edit.reasonUnknown': "رفضه الخادم",
+    'edit.reasonNetwork': "تعذّر الوصول إلى الخادم",
     'edit.failedMark': "لم يُحفظ: {reason}",
     'edit.stale': "الترتيب قديم: أعد الترتيب من العنوان",
     'edit.rowStale': "لم يعد مطابقًا للمرشح",

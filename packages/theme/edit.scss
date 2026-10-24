@@ -14,7 +14,9 @@
 
 $layered: true !default;
 
-$saving: var(--dzg-saving-color, var(--tz-accent));
+// The saving colour is the palette's warning, never the accent (owner, step 7): with Enter staying on the cell the
+// focus ring (the accent) and the running border meet on one cell, and must read as two things.
+$saving: var(--dzg-saving-color, var(--tz-warning));
 $saved: var(--dzg-saved-color, var(--tz-success));
 $refused: var(--dzg-refused-color, var(--tz-danger));
 $opaque: linear-gradient(currentColor 0 0);
@@ -108,11 +110,12 @@ $opaque: linear-gradient(currentColor 0 0);
     clip-path: path(evenodd, "M5 0a5 5 0 1 1 0 10a5 5 0 1 1 0-10zM4.2 2h1.6v4h-1.6zM4.2 7h1.6v1.6h-1.6z");
   }
 
-  // The borders over the cell: the running one, the refused one.
+  // The borders over the cell: the running one, the refused one. Inside the 2 px focus ring (outline-offset -2px),
+  // 1 px apart: another shape than the ring, the ring whole (WCAG 2.4.7, 2.4.11; owner, step 7, review 5).
   :is(.dzg-cell--saving, .dzg-cell--refused)::before {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: 3px;
     box-sizing: border-box;
     border: 2px solid transparent;
     pointer-events: none;
@@ -479,6 +482,11 @@ $opaque: linear-gradient(currentColor 0 0);
 
     .dzg-cell--refused::before {
       border: 2px solid CanvasText;
+    }
+
+    // A selected row is Highlight: the dashed border in the text's colour there (review 5).
+    .dzg-row[aria-selected='true'] .dzg-cell--saving::before {
+      border-color: CanvasText;
     }
 
     // Each sign in its own rule: one unsupported selector never drops the others.

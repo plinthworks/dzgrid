@@ -16,11 +16,11 @@ import { editorHost } from './host.js';
 export const EDITORS_KEYS = [
   'edit.refused', 'edit.refusedDropped', 'editors.fieldName',
   'validation.parse', 'validation.day', 'validation.invalid-instant', 'validation.wall-time-skipped', 'validation.wall-time-ambiguous',
-  'edit.calendar', 'edit.calendarLoading', 'edit.calendarFailed', 'edit.optionNotInList',
+  'edit.calendar', 'edit.calendarLoading', 'edit.calendarFailed', 'edit.optionNotInList', 'edit.rowRemoved', 'edit.pageDropped',
 ] as const satisfies readonly EditorsMessageKey[];
 
 export interface EditorsOptions {
-  /** Q3: after Enter / Shift+Enter, the cell below / above (`'down'`, default) or the same cell (`'stay'`). */
+  /** Q3 (revised by the owner, step 7): after Enter / Shift+Enter, the same cell (`'stay'`, default) or the cell below / above (`'down'`). */
   readonly enterMoves?: 'down' | 'stay';
   /** D5: Tab opens the next editable cell (`'cell'`, default) or leaves the grid (`'grid'`). */
   readonly tab?: 'cell' | 'grid';
@@ -67,8 +67,8 @@ export interface EdEnv {
 type Kind = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'list' | Part<SlotContext['editor']>;
 type Start = SlotContext['editor']['start'];
 type Via = 'enter' | 'tab' | 'escape' | 'blur' | 'lost';
-/** The editor open: its cell, its column, what it is, the nodes a part owns. */
-interface Open { readonly k: RowKey; readonly c: string; readonly col: ResolvedColumn<unknown>; readonly e: Ed; readonly own: Set<Node> }
+/** The editor open: its cell, its column, what it is, the nodes a part owns, the server page and query it opened on. */
+interface Open { readonly k: RowKey; readonly c: string; readonly col: ResolvedColumn<unknown>; readonly e: Ed; readonly own: Set<Node>; readonly at: unknown }
 
 const BUILT = ['text', 'number', 'day', 'instant', 'boolean', 'list'];
 /** More options than this: a text field read by the codec (the searchable list is later; editors.md 16). */
@@ -123,6 +123,8 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
   const msg = (key: EditorsMessageKey, p: Readonly<Record<string, string>>): string => g.msg(key, p);
   const env: EdEnv = { g, o, msg, cal };
   const head = (col: ResolvedColumn<unknown>): string => col.def.header ?? col.id;
+  /** A server grid's page and query now (a browser's: none). */
+  const at = (): unknown => g.rows.kind === 'source' && `${g.rows.page?.index}/${g.rows.page?.size}/${JSON.stringify(kernel.query)}`;
   const H = editorHost(g);
   const B = bubble(g);
   let cur: Open | null = null;
@@ -206,30 +208,29 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
   const done = (s: Open, move: boolean, input = s.e.input()): boolean => {
     if (cur !== s || !keep(s, input)) return false;
     close(s, true, true, 'enter');
-    if (move && o.enterMoves !== 'stay') g.step!({ kind: 'move', axis: 'row', delta: 1 });
+    if (move && o.enterMoves === 'down') g.step!({ kind: 'move', axis: 'row', delta: 1 });
     return true;
   };
 
-  const lost = (): void => {
-    const s = cur;
-    if (!s) return;
-    cur = null;
-    B.hide();
-    s.e.drop();
-    // Hidden (a column hidden, a page changed): kept (D8, O9); removed: dropped (the edits refuse a row they
-    // no longer have). No sentence here (step 7).
-    stopped(s, !commit(s, s.e.input()), 'lost');
+  /**
+   * Kept as a blur keeps it (Q5, rule 7), then closed (`focus`: the cell focused first); refused: O1 — the text
+   * dropped, the last value back, said — or, the row removed (D8, Q8: a host removal, a reload without it), said once.
+   */
+  const leave = (s: Open, focus: boolean, via: Via): void => {
+    const code = commit(s, s.e.input());
+    close(s, focus, !code, via);
+    // Gone with another page or query of a server grid whose answer came at once (a synchronous source): its text
+    // could not leave (review 3: said so, never « removed »; the documented limit of S7-O3).
+    if (code) code === 'read-only' && !g.rows.row(s.k) ? api().alert(at() !== s.at ? msg('edit.pageDropped', { column: head(s.col) }) : msg('edit.rowRemoved', {})) : refused(s.k, s.c, msg('edit.refusedDropped', { column: head(s.col) }));
   };
-  /** A blur (Q5, rule 7), one task later: the focus still in the editor, its popup or a node its part owns is none. */
-  const blur = (s: Open): void =>
-    void scope.timeout(() => {
-      const a = (s.e.root.getRootNode() as Document).activeElement;
-      if (cur !== s || s.e.root.contains(a) || s.e.inside?.(a) || [...s.own].some((n) => n.contains(a))) return;
-      const code = commit(s, s.e.input());
-      close(s, false, !code, 'blur');
-      // O1: the text dropped, the last value back; the refusal shown and said; nothing to undo.
-      if (code) refused(s.k, s.c, msg('edit.refusedDropped', { column: head(s.col) }));
-    }, 0);
+  /** The focus in the editor, its popup or a node its part owns. */
+  const within = (s: Open, a = (s.e.root.getRootNode() as Document).activeElement): boolean => s.e.root.contains(a) || !!s.e.inside?.(a) || [...s.own].some((n) => n.contains(a));
+  // Its cell gone from the page (a column hidden, a filter, a parent closed: kept, D8, O9; a row removed: said).
+  const lost = (): void => void (cur && leave(cur, false, 'lost'));
+  /** A blur (Q5, rule 7), one task later: the focus still in the editor is none. */
+  const blur = (s: Open): void => void scope.timeout(() => cur === s && !within(s) && leave(s, false, 'blur'), 0);
+  // A server page or query asked while open (O9, S7-O3): kept and sent now, while the row is still held.
+  const unhear = g.rows.kind === 'source' ? g.rows.subscribe((c) => void (cur && (c.kind === 'page' || c.kind === 'query') && leave(cur, within(cur), 'lost'))) : null;
 
   /** A yes/no cell toggled in place (editors.md 10–11, O8): `null → true → false → true`, one save, the new text said. */
   const toggle = (k: RowKey, c: string): boolean => {
@@ -266,7 +267,9 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     if (cur || !node || !kd || kd === 'boolean' || !kernel.editable(k, c) || broken.get(id) === node.data) return false;
     const w = wait;
     wait = null;
-    const v = g.edit!.read(col!, node.data, k);
+    // A failed save reopens with the refused value (O2, edit-save.md 15), else what the cell shows.
+    const st = api().state(k, c);
+    const v = st?.status === 'failed' ? st.refused : g.edit!.read(col!, node.data, k);
     // Not mounted yet: the key taken, the editor at the paint with what was typed meanwhile (review R1).
     if (!g.rowRenderer.cell(k, c)) return (wait = w?.k === k && w.c === c ? { ...w, t: w.t + (ch ?? '') } : { k, c, s: start, t: ch ?? textOf(col!, v) }), true;
     // The row header's value as its column shows it (not its cell's text: a part may draw it otherwise, review R6).
@@ -291,7 +294,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     }
     const own = new Set<Node>();
     // Set before any of the editor's own callbacks can run (they need the open editor).
-    const s = { k, c, col: col!, own } as Open & { e: Ed };
+    const s = { k, c, col: col!, own, at: at() } as Open & { e: Ed };
     let handle: EditorHandle | null = null;
     if (typeof kd === 'object') {
       const host = doc.createElement('div');
@@ -373,7 +376,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     if (key === 'Enter') {
       if (keep(s)) {
         close(s, true, true, 'enter');
-        if (o.enterMoves !== 'stay') g.step!({ kind: 'move', axis: 'row', delta: back ? -1 : 1 });
+        if (o.enterMoves === 'down') g.step!({ kind: 'move', axis: 'row', delta: back ? -1 : 1 });
       }
       return true;
     }
@@ -509,6 +512,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
       }));
     },
     destroy() {
+      unhear?.();
       cur?.e.drop();
       cur = null;
       H.destroy();

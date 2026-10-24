@@ -48,22 +48,26 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/detail': 3900,
   // Phase 5 Q16: /editors 8 000; owner S4-O1 (2026-10-23): @dzgrid/dom/edit taken out of it, the two together ≤ 8 000.
   // Split at the step-4 measure: dom/edit 3 311 + 10 % → 3 650, /editors the rest.
-  '@dzgrid/dom/edit': 3650,
+  '@dzgrid/dom/edit': 3750, // owner S7-O1 (2026-10-24): 3 650 → 3 750 (saves end to end: tooltip, network reason, server reapply)
   // Owner S6-O1 (2026-10-24): /editors 4 350 → 6 500 (dates, yes/no, list, the app's editors; DOM editing ~10 150, a
   // new grant over Q16's 8 000), measured over @dzgrid/dom/popup. S6-O5/O6: the lazy calendar 1 500 (inside Q16 d's
   // 2 600), @dzgrid/dom/internal at its measure + 50 up to 1 250 (the filters' loader moved in, not copied).
-  '@dzgrid/dom/editors': 6500,
+  '@dzgrid/dom/editors': 6650, // owner S7-O1 (2026-10-24): 6 500 → 6 650 (retry, a row gone while edited)
   '@dzgrid/dom/editors: calendar (lazy)': 1500,
   '@dzgrid/dom/internal': 1250,
   // Owner S6-O7 (2026-10-24): the list in its own entry, over the popup: its measure (1 254) + 10 %.
   '@dzgrid/dom/editors-list': 1400,
+  // Phase 5 Q16 (written grant): the motion run chunk up to 3 500 (step 7: the saves' reasons, the saved flash).
+  '@dzgrid/dom/motion-gsap: run (lazy)': 3500,
   // Phase 5 Q16: the editing texts 350 / 400 / 450; owner S4-O4 (2026-10-23): 560 / 630 / 810 (the step-4 measure + 10 %).
   '@dzgrid/dom/locales/en-edit': 560,
   '@dzgrid/dom/locales/fr-edit': 630,
   '@dzgrid/dom/locales/ar-edit': 810,
   // Owner S4-O4: edit.css 1 350 (measured 1 231 at step 4), taken from the theme grants' unused part (S4-O2);
   // owner S5-O2 (2026-10-23): 1 700 with the field and the bubble of step 5; owner S6-O6 (2026-10-24): 2 100 (dates, list).
-  '@dzgrid/theme/edit.css': 2100,
+  // Owner S7-O1 (2026-10-24): a reserve up to 2 200, used for the owner's step-7 request (the saving border inside
+  // the focus ring, measured 2 101).
+  '@dzgrid/theme/edit.css': 2200,
   // Owner S5-O3 (2026-10-23): the editors' texts (the 5 parse codes moved there from -edit), room for step 6.
   '@dzgrid/dom/locales/en-editors': 450,
   '@dzgrid/dom/locales/fr-editors': 500,

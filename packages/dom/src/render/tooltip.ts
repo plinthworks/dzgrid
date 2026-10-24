@@ -12,6 +12,8 @@ export interface TipFor {
   readonly col: ResolvedColumn<any>;
   readonly row: Readonly<unknown> | null;
   readonly value: unknown;
+  /** Already the cell's description (a failed save's mark, step 7): the tooltip adds no `aria-describedby`. */
+  readonly said?: boolean;
 }
 
 /**
@@ -24,6 +26,8 @@ export class Tooltip {
   #anchor: HTMLElement | null = null;
   /** The row the shown tooltip is about (null: a header's). */
   row: unknown = null;
+  /** The shown tooltip is the cell's own (a failed save's reason, step 7): hidden at the paint where it no longer is. */
+  said = false;
   #cancelShow: (() => void) | null = null;
   #cancelHide: (() => void) | null = null;
   readonly #scope: Scope;
@@ -96,6 +100,7 @@ export class Tooltip {
     if (this.#anchor && this.#anchor !== anchor) describe(this.#anchor, this.el.id, false);
     this.#anchor = anchor;
     this.row = tip.row;
+    this.said = !!tip.said;
     // Drawn before it is measured: its size is the part's.
     if (!this.#fill?.(tip) && this.el.textContent !== tip.text) this.el.textContent = tip.text;
     this.el.hidden = false;
@@ -109,7 +114,8 @@ export class Tooltip {
         /* already shown */
       }
     }
-    describe(anchor, this.el.id, true);
+    // A failed save's reason is the cell's description already: not twice (a column tooltip shown before goes).
+    describe(anchor, this.el.id, !tip.said);
     const win = anchor.ownerDocument.defaultView;
     const r = anchor.getBoundingClientRect();
     const box = this.el.getBoundingClientRect();

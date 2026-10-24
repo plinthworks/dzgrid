@@ -116,7 +116,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     set dir(d) { dir = d; },
     pendingFocus: null, queued: false, hasFocus: false, viewBlock: 0,
     intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0, remPx: geometry.read().remPx ?? 16,
-    schedule, report, restoreFocus: () => {}, warm: null!, reveal: null!, parts: featureParts(initial.features, () => g.settings.parts),
+    schedule, report, restoreFocus: () => {}, warm: null!, reveal: null!, ensureVisible: null!, retip: null!, parts: featureParts(initial.features, () => g.settings.parts),
     now: () => win?.performance.now() ?? 0,
     // `rowHeight` or the density's, at 16 px text, scaled with the default text size, whole px, ≥ 24 (WCAG 2.5.8).
     rowHeight: () => Math.max(24, Math.round(((rowPx(g.settings.rowHeight) ?? ROW_HEIGHT[g.settings.density ?? 'comfortable']) * g.remPx) / 16)),

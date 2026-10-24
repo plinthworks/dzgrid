@@ -1,7 +1,7 @@
 # Editing a cell
 
 Sources: the public documentation of grids and spreadsheets that edit in place (what a user sees: a
-field appears in the cell, Enter keeps the value and goes down, Escape gives the old one back), WAI-ARIA
+field appears in the cell, Enter keeps the value (and, in a spreadsheet, goes down), Escape gives the old one back), WAI-ARIA
 1.2 grid (`aria-readonly` on a `gridcell`), the APG grid pattern (« editing » keys: Enter or F2 into a
 cell's field, Escape back to the cell), WCAG 2.2 (2.1.1, 2.1.2, 2.4.3, 4.1.2). Phase 5 plan D4, D5, D11,
 D12, D13; owner decisions Q3, Q4, Q5, Q13. Saving: `edit-save.md`; refusals: `edit-validation.md`; the
@@ -72,10 +72,11 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
     zoom delay; pinch kept).
 
 **Ending**
-12. **Enter** keeps the value (one save) and, with `edit.enterMoves: 'down'` (default), moves the focus
-    to the same column one row down — any row kind, as the Down arrow; on the last row it stays.
-    `'stay'` keeps the focus on the cell. Nothing opens on the new cell.
-13. **Shift+Enter** keeps the value and moves one row up (`'stay'`: stays).
+12. **Enter** keeps the value (one save) and the focus stays on the cell (`enterMoves: 'stay'`, the default
+    since the owner's Q3 revision, step 7). With `enterMoves: 'down'` (the spreadsheet habit) it moves the focus
+    to the same column one row down — any row kind, as the Down arrow; on the last row it stays. Nothing opens
+    on the cell reached.
+13. **Shift+Enter** keeps the value; it stays (default), or moves one row up with `'down'`.
 14. **Tab** keeps the value and, with `edit.tab: 'cell'` (default), opens the next editable cell in
     reading order (a yes/no cell has no editor and is stepped over): the next editable column of the row, then the first editable cell of the next data
     row (details, fillers, loading rows stepped over). **Shift+Tab** the same backwards. At the last
@@ -131,7 +132,7 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
 | editable cell | Delete, Backspace | clear (one save) |
 | editable cell | double click | open, text kept |
 | read-only cell | any of the above | nothing (Enter enters a part as before) |
-| field | Enter / Shift+Enter | keep, move down / up (`enterMoves: 'stay'`: stay) |
+| field | Enter / Shift+Enter | keep, stay on the cell (default); `enterMoves: 'down'`: move down / up |
 | field | Tab / Shift+Tab | keep, open next / previous editable cell (`tab: 'grid'`: leave the grid) |
 | field | Escape | give up, focus on the cell |
 | field | arrows, Home, End, Ctrl+Z/V/C/X/A | the field's own |

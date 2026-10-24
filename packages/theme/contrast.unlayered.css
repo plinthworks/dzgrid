@@ -26,6 +26,7 @@
       --tz-danger: light-dark(#8b0000, #ff8a8a);
       --tz-warning: light-dark(#6b3a00, #ffd27a);
       --tz-success: light-dark(#14532d, #86efac);
+      --dzg-saving-color: light-dark(#6b3a00, #7ce8ff);
     }
   }
   [data-contrast=more],
@@ -40,6 +41,7 @@
     --tz-danger: light-dark(#8b0000, #ff8a8a);
     --tz-warning: light-dark(#6b3a00, #ffd27a);
     --tz-success: light-dark(#14532d, #86efac);
+    --dzg-saving-color: light-dark(#6b3a00, #7ce8ff);
   }
 }
 /* Forced colours: the system decides; the grid only says which role each part plays. */

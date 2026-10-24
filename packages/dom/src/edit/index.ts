@@ -7,7 +7,7 @@ import { stale } from './stale.js';
 
 /** The texts `edit()` needs, from `@dzgrid/dom/locales/<lang>-edit`. */
 export const EDIT_KEYS = [
-  'edit.saving', 'edit.saveRefused', 'edit.reasonUnknown', 'edit.failedMark', 'edit.stale', 'edit.rowStale', 'edit.reapply', 'edit.reapplied', 'header.withStale',
+  'edit.saving', 'edit.saveRefused', 'edit.reasonUnknown', 'edit.reasonNetwork', 'edit.failedMark', 'edit.stale', 'edit.rowStale', 'edit.reapply', 'edit.reapplied', 'header.withStale',
   'validation.required', 'validation.min', 'validation.max', 'validation.pattern', 'validation.options', 'validation.invalid',
 ] as const satisfies readonly EditMessageKey[];
 
@@ -76,16 +76,22 @@ export function edit<T = unknown>(o: EditFeatureOptions<T> = {}): EditFeature<T>
         get canUndo() { return ctl.canUndo; },
         get canRedo() { return ctl.canRedo; },
         state: ctl.state,
-        reapply: () => void kernel.dispatch({ type: 'rows.reapply' }, 'api'),
+        reapply() {
+          kernel.dispatch({ type: 'rows.reapply' }, 'api');
+          // The focus on a cell (edit-reapply.md 6): scrolled into view, clear of the pinned columns and sticky parents,
+          // as a focus move would; the focus itself (the cell, or an open field) stays where it is.
+          const f = kernel.focus;
+          if (g.hasFocus && f?.kind === 'cell') g.ensureVisible(f.row, f.column);
+        },
         setSave: ctl.setSave,
         refuse: (key, column) => m.refuse(key, column),
         alert: m.alert,
-        reason: (column, code) => m.reason(column, null, code),
+        reason: m.reason,
       };
       apis.set(kernel, api);
       return {
         // The editors (`@dzgrid/dom/editors`) find the grid's edits here.
-        edit: { read: m.seam.read, api },
+        edit: { ...m.seam, api },
         decorateHeader: s.decorateHeader,
         keys: s.keys,
         afterRows(f) {

@@ -24,7 +24,11 @@ export interface MotionEffects {
   readonly expand?: boolean;
 }
 
-/** What `onCell` is told: the cell's row and column (id), its value and text, the text before. */
+/**
+ * What `onCell` is told: the cell's row and column (id), its value and text, the text before. For the saves (Phase 5
+ * step 7): `saving` the value sent; `saved` the value saved; `failed` the value refused (shown during its 0.5 s), and
+ * `previousText` the last saved text (what comes back); for `saving` and `saved`, the text before that paint.
+ */
 export interface CellMotion {
   readonly key: RowKey;
   readonly column: string;
@@ -53,11 +57,13 @@ export interface MotionOptions {
   /** The application's GSAP; else the chunk imports the package itself. */
   readonly gsap?: Gsap;
   /**
-   * A cell whose value a transaction changed, after the grid's guards (at most 50 calls a paint).
-   * Animate `el` only (transform, opacity, `--dzg-*`, classes). `false`: handled, the built-in flash
-   * is skipped. Either way `el` is followed: its tweens are finished when it shows another row. Reasons `saving`, `saved`, `failed` are reserved (Phase 4).
+   * A cell whose value a transaction changed (`changed`), or whose save started (`saving`, once per gesture),
+   * succeeded (`saved`) or was refused (`failed`), with `@dzgrid/dom/edit` (Phase 5 step 7); after the grid's guards
+   * (at most 50 cells, and 50 calls a paint for all reasons; under reduced motion too, `c.reduced` true). Animate
+   * `el` only (transform, opacity, `--dzg-*`, classes). `false`: handled, the built-in flash (`changed`, `saved`)
+   * is skipped. Either way `el` is followed: its tweens are finished when it shows another row or its next reason.
    */
-  readonly onCell?: (el: HTMLElement, c: CellMotion, reason: 'changed') => void | false;
+  readonly onCell?: (el: HTMLElement, c: CellMotion, reason: 'changed' | 'saving' | 'saved' | 'failed') => void | false;
   /** A row that moved or entered after a sort, a filter or a tree's toggle, or that was added live (owner Q5; not under reduced motion). */
   readonly onRow?: (el: HTMLElement, c: RowMotion, reason: 'entered' | 'moved') => void | false;
 }

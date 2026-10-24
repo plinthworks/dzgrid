@@ -40,8 +40,8 @@ const COLS: ColumnDef<Row, any>[] = [
   { id: 'c', header: 'Couleur', width: 120, editable: true, edit: { editor: 'colour', pattern: '#[0-9a-f]{6}' } },
   { id: 'd', header: 'Jour', type: 'day', width: 120, editable: true },
 ];
-const grid = (p: ReturnType<typeof colour>, o: { cols?: ColumnDef<Row, any>[]; name?: string } = {}) => {
-  const t = ed({ lang: 'fr', columns: (o.cols ?? COLS) as never, rows: rowsOf(10).map((r) => ({ ...r, c: '#ff0000', d: '2026-03-29' })) as never, settings: { parts: { [o.name ?? 'colour']: p.part }, context: { app: 1 }, locale: 'fr-FR', timeZone: 'UTC' } as never });
+const grid = (p: ReturnType<typeof colour>, o: { cols?: ColumnDef<Row, any>[]; name?: string; down?: boolean } = {}) => {
+  const t = ed({ ...(o.down && { options: { enterMoves: 'down' as const } }), lang: 'fr', columns: (o.cols ?? COLS) as never, rows: rowsOf(10).map((r) => ({ ...r, c: '#ff0000', d: '2026-03-29' })) as never, settings: { parts: { [o.name ?? 'colour']: p.part }, context: { app: 1 }, locale: 'fr-FR', timeZone: 'UTC' } as never });
   const saved = () => t.of('cellEdited').map((e) => [e.column, e.value]);
   const host = () => t.host.querySelector<HTMLElement>('.dzg-editor');
   return { ...t, saved, host };
@@ -74,10 +74,10 @@ describe('the application’s editor', () => {
     expect(document.activeElement).toBe(t.host());
   });
 
-  it('keep(input): through the column’s checks and the save, closed, moves as Enter; refused: stays open, the bubble, one sentence', () => {
+  it("keep(input): through the column’s checks and the save, closed, moves as Enter (enterMoves: 'down'); refused: stays open, the bubble, one sentence", () => {
     layout();
     const p = colour();
-    const t = grid(p);
+    const t = grid(p, { down: true });
     t.at('r2', 'c');
     t.key('F2');
     expect(p.ctx().keep({ text: 'red' })).toBe(false);
@@ -108,9 +108,9 @@ describe('the application’s editor', () => {
     expect(t.focusAt()).toBe('r2/c');
   });
 
-  it('Enter, Tab, Escape reaching its root not prevented: read() kept and moved / kept and next / given up', () => {
+  it("Enter, Tab, Escape reaching its root not prevented: read() kept and moved (enterMoves: 'down') / kept and next / given up", () => {
     const p = colour();
-    const t = grid(p);
+    const t = grid(p, { down: true });
     t.at('r2', 'c');
     t.key('F2');
     p.input()!.value = '#0000ff';
@@ -231,5 +231,14 @@ describe('the application’s editor', () => {
     t.key('Escape', {}, p.input()!);
     expect(p.log).toEqual(['mount true', 'destroy true']);
     expect(t.cell('r2', 'c')!.querySelector('.dzg-editor, input')).toBeNull();
+  });
+
+  it("analyser 4 (Q3 revised): by default the app's keep(input) leaves the focus on its cell", () => {
+    const p = colour();
+    const t = grid(p);
+    t.at('r2', 'c');
+    t.key('F2');
+    expect(p.ctx().keep({ text: '#00ff00' })).toBe(true);
+    expect(t.focusAt()).toBe('r2/c');
   });
 });

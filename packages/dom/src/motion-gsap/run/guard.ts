@@ -31,7 +31,9 @@ export interface Guard {
 export function guard(gsap: Gsap): Guard {
   const active = new Map<HTMLElement, { valid: () => boolean; call?: { kill(): unknown } | undefined }>();
   const clear = (el: HTMLElement): void => {
-    gsap.set(el, { clearProps: CLEAR });
+    // Only what a tween left inline (GSAP parses a transform it clears, reading the element's offset parent: a
+    // layout read, step 7 in Chrome).
+    if (/transform|opacity|translate|rotate|scale/.test(el.style.cssText)) gsap.set(el, { clearProps: CLEAR });
     el.style.removeProperty('--dzg-flash');
   };
   const finish = (el: HTMLElement): void => {

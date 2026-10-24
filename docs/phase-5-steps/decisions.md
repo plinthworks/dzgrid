@@ -92,3 +92,13 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S6-O4:** the calendar is downloaded on its button only (typing a date downloads nothing); the editors sheet is updated.
 - **S6-O5 + S6-O6:** date-and-time calendar with tzslot's hour/minute menus; `edit.css` 1 700 → 2 100; the tzslot loader moved (not copied) into `@dzgrid/dom/internal` (ceiling measure + 50, up to 1 250); new lazy calendar chunk 1 500 (inside the 2 600 of Q16 d).
 - **S6-O7 (2026-10-24):** `/editors` measured 7 158 / 6 500: the list moves to its own entry `@dzgrid/dom/editors-list` (ceiling at the measure + 10 %, ~1 650), loaded only when a column has a list; `/editors` stays ≤ 6 500.
+
+## Step 7 (owner, 2026-10-24) — plan `step07-plan.md`
+
+- **S7-O1:** `@dzgrid/dom/edit` 3 650 → 3 750; `/editors` 6 500 → 6 650; `edit.css` reserve up to 2 200 only if Firefox/WebKit need a fix. Re-measure the `-edit` texts first (step 5 moved five texts out).
+- **S7-O2:** a network failure says « serveur injoignable » (its own sentence), not « refusé par le serveur ».
+- **S7-O3:** on a page/query change of a server grid, the typed text is kept and sent when the change is announced, while the row is still held (the recommended option, no `core/edit` change).
+- **S7-O4:** on a failed cell, the refusal reason replaces the column's own tooltip while the error stays.
+- **S7-O5 / S7-O6 (lead, recommendations kept):** under reduced motion `onCell` is still called with `reduced: true`; the same `orders-edit` demo is extended (paged mode included).
+- **Q3 revised (owner, 2026-10-24):** the DEFAULT of `enterMoves` becomes 'stay': Enter saves and the focus stays on the cell; 'down' (Excel-like, Shift+Enter up) is the option. Sheets, docs and tests updated in step 7.
+- **Saving border vs focus ring (owner feedback, 2026-10-24):** with Enter staying on the cell, the running border must be clearly distinct from the focus ring: its own colour (applied: the palette's warning, `--tz-warning`; contrast.css a cyan in the dark, where its accent and warning are both yellow), a different shape (applied: 3 px inside the 2 px focus ring), the ring kept visible; a browser check (fr light Clinic, ar dark Midnight, reduced motion) and `check:contrast` hue pairs (≥ 60°). It stays in `edit.css`, which used the S7-O1 reserve: 2 101 / 2 200.

@@ -188,7 +188,11 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   /** The application's context (Q12): what a kind's `wire` is told. */
   let app = env.app;
   /** An edit touched what the server sorts, filters or searches (S2-O2): cleared by the next request. */
-  let serverStale = false;
+  /**
+   * Marked: the gate's requests begun by then (tickets' `seq` count them too; an answer to one of them was computed without that edit, step 7 review 4:
+   * it keeps the mark); -1: not marked.
+   */
+  let staleAt = -1;
   const listeners = new Set<(c: ModelChange<T>) => void>();
 
   // One commit per call: what it changed is gathered, then said once.
@@ -293,8 +297,8 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     answerProblems = a.problems;
     told.push(...a.problems);
     if (!a.rows) return failed(t, req, a.problems[0]);
-    // An answer comes in the server's order; a failure keeps the mark.
-    serverStale = false;
+    // An answer comes in the server's order (asked after the edit: one asked before knew nothing of it); a failure keeps the mark.
+    if (t.seq > staleAt) staleAt = -1;
     const rows = a.rows as readonly T[];
     if (!serverPages) {
       // The set of another epoch: its first page. The same set again: the page kept, clamped, after
@@ -574,15 +578,15 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     setReader(r, changed) {
       inner.setReader(r, changed);
       const read = [...(server.sort ?? []).map((s) => s.column), ...Object.keys(wire ?? {}), ...(server.quick?.trim() ? columns.visible().map((c) => c.id) : [])];
-      serverStale ||= changed ? changed.some((c) => read.includes(c)) : read.length > 0;
+      if (changed ? changed.some((c) => read.includes(c)) : read.length > 0) staleAt = gate.diagnostics.begun;
     },
     reapply(source = 'api') {
       commit(() => {
         inner.reapply(source);
-        if (serverStale) again();
+        if (staleAt >= 0) again();
       }, source);
     },
-    get orderStale() { return inner.orderStale || serverStale; },
+    get orderStale() { return inner.orderStale || staleAt >= 0; },
     setApp(next, source = 'api') {
       commit(() => {
         inner.setApp(next, source);

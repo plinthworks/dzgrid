@@ -33,6 +33,18 @@ describe('check-contrast', () => {
     expect(vars['--tz-bg']).toBe('light-dark(#ffffff, #18181b)');
   });
 
+  it('a pair may ask for a hue apart (`hue`: degrees, owner step 7: the saving border distinct from the focus ring at any luminance)', () => {
+    const spec = (hue: number) => ({ pairs: [{ what: 'apart', fg: '--a', bg: '--b', min: 1, hue }], derived: {} });
+    // Amber against blue: far apart; two blues: not.
+    expect(check({ '--a': '#b45309', '--b': '#2563eb' }, spec(60), 'light').failures).toEqual([]);
+    expect(check({ '--a': '#1d4ed8', '--b': '#2563eb' }, spec(60), 'light').failures.map((f: { what: string }) => f.what)).toEqual(['apart']);
+    // The difference goes the short way round the circle (350° and 10°: 20° apart).
+    expect(check({ '--a': '#e6194b', '--b': '#e64119' }, spec(30), 'light').failures).toHaveLength(1);
+    // Analyser 11: a grey against a colour counts as 180° apart (no hue to confuse); two greys, 0.
+    expect(check({ '--a': '#808080', '--b': '#2563eb' }, spec(170), 'light').failures).toEqual([]);
+    expect(check({ '--a': '#808080', '--b': '#404040' }, spec(1), 'light').failures).toHaveLength(1);
+  });
+
   it('fails a planted pair below its minimum', () => {
     const result = check({ '--tz-fg': '#999999', '--tz-bg': '#ffffff' }, { pairs: [{ what: 'x', fg: '--tz-fg', bg: '--tz-bg', min: 4.5 }], derived: {} }, 'light');
     expect(result.failures.map((f: { what: string }) => f.what)).toEqual(['x']);
@@ -46,6 +58,16 @@ describe('check-contrast', () => {
     let code = 0;
     try { execFileSync('node', [join(root, 'scripts/check-contrast.mjs'), '--palette', bad], { stdio: 'pipe' }); } catch (e) { code = (e as { status: number }).status; }
     expect(code).toBe(1);
+  });
+
+  it('a palette entry starting with -- names a variable as it is (the grid\'s own, step 7); the others are tzslot\'s --tz-*', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'dzg-pal-'));
+    const file = join(dir, 'p.json');
+    // The saving colour equal to the page's background: refused, so the entry was read as --dzg-saving-color.
+    writeFileSync(file, JSON.stringify({ palettes: [{ name: 'own', light: { '--dzg-saving-color': '#ffffff' }, dark: {} }] }));
+    let out = '';
+    try { execFileSync('node', [join(root, 'scripts/check-contrast.mjs'), '--palette', file], { stdio: 'pipe' }); } catch (e) { out = String((e as { stderr: Buffer }).stderr); }
+    expect(out).toMatch(/FAIL own light: saving border[^\n]*\(--dzg-saving-color on --tz-bg\)/);
   });
 
   it('passes contrast.css’s palette, light and dark', () => {

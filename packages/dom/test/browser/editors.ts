@@ -71,7 +71,8 @@ const grid = createGrid<Row>(document.getElementById('host')!, {
   ],
   ...(q.get('zone') ? { timeZone: q.get('zone') } : kinds ? { timeZone: 'Europe/Paris' } : {}),
   // The real `import()` by default (the lazy checks watch its requests); calfail=1: a loader failing once.
-  features: [editing, editors({ list: listEditor, ...(q.get('calfail') === '1' && { loadCalendar: loadCalendar as never }) })],
+  // Enter: these checks were written for 'down' (named since the owner's Q3 revision made 'stay' the default; ?enter=stay).
+  features: [editing, editors({ list: listEditor, enterMoves: q.get('enter') === 'stay' ? 'stay' : 'down', ...(q.get('calfail') === '1' && { loadCalendar: loadCalendar as never }) })],
   onEvent: (e) => events.push(e as never),
 } as never);
 const api = editing.api(grid)!;

@@ -89,6 +89,7 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     if (g.reveal(i, g.geometry.read().block)) g.schedule();
   }
 
+  g.ensureVisible = ensureVisible;
   g.reveal = (i, block) => {
     // The layout of the rows shown now (D7), even before their paint.
     const L = rowLayout(g);

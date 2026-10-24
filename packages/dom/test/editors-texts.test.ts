@@ -14,11 +14,13 @@ import { AR_EDIT } from '../src/locales/ar-edit.js';
 const BUNDLES = { en: EN_EDITORS, fr: FR_EDITORS, ar: AR_EDITORS } as const;
 const holes = (v: unknown): string[] => [...new Set([...JSON.stringify(v).matchAll(/\{(\w+)\}/g)].map((m) => m[1]!))].sort();
 const STEP6 = ['edit.calendar', 'edit.calendarLoading', 'edit.calendarFailed', 'edit.optionNotInList'];
+// Step 7 (D8): the editors say a row removed while it was edited (the sheet's -edit table moved here: they say it).
+const STEP7 = ['edit.rowRemoved', 'edit.pageDropped'];
 const PARSE = ['validation.parse', 'validation.day', 'validation.invalid-instant', 'validation.wall-time-skipped', 'validation.wall-time-ambiguous'];
 
 describe('the -editors bundles', () => {
   it('have exactly the keys editors() needs: two sentences, the field name, the five reading codes, the calendar and the list (step 6)', () => {
-    expect([...EDITORS_KEYS].sort()).toEqual(['edit.refused', 'edit.refusedDropped', 'editors.fieldName', ...PARSE, ...STEP6].sort());
+    expect([...EDITORS_KEYS].sort()).toEqual(['edit.refused', 'edit.refusedDropped', 'editors.fieldName', ...PARSE, ...STEP6, ...STEP7].sort());
     for (const b of Object.values(BUNDLES)) expect(Object.keys(b.text).sort()).toEqual([...EDITORS_KEYS].sort());
   });
 
@@ -52,5 +54,15 @@ describe('the -editors bundles', () => {
     expect([EN_EDITORS, FR_EDITORS, AR_EDITORS].map((b) => b.text['edit.calendarFailed'])).toEqual(['Calendar could not load', 'Le calendrier n\u2019a pas pu se charger', 'تعذّر تحميل التقويم']);
     expect([EN_EDITORS, FR_EDITORS, AR_EDITORS].map((b) => b.text['edit.optionNotInList'])).toEqual(['{label} (not in the list)', '{label} (hors liste)', '{label} (خارج القائمة)']);
     expect(EDITORS_KEYS as readonly string[]).not.toContain('grid.retry');
+  });
+
+  it('a row removed while edited (edit-save.md 20, step 7): the sheet\'s wording, in -editors (not -edit)', () => {
+    expect([EN_EDITORS, FR_EDITORS, AR_EDITORS].map((b) => b.text['edit.rowRemoved'])).toEqual(['Row removed, change cancelled', 'Ligne supprimée, modification annulée', 'حُذف الصف، أُلغي التعديل']);
+    expect(EDIT_KEYS as readonly string[]).not.toContain('edit.rowRemoved');
+    for (const b of [EN_EDIT, FR_EDIT, AR_EDIT]) expect(Object.keys(b.text)).not.toContain('edit.rowRemoved');
+  });
+
+  it('review 3: a text that could not be sent because the page changed (a source answering at once): its own sentence', () => {
+    expect([EN_EDITORS, FR_EDITORS, AR_EDITORS].map((b) => b.text['edit.pageDropped'])).toEqual(['{column}: change not sent, the page changed', '{column}\u202F: modification non envoyée, la page a changé', '{column}: لم يُرسل التعديل، تغيّرت الصفحة']);
   });
 });

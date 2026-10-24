@@ -191,7 +191,7 @@
     },
     "@dzgrid/theme/edit.css": {
       "file": "packages/theme/edit.css",
-      "maxGzip": 2100
+      "maxGzip": 2200
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
@@ -320,7 +320,7 @@
     },
     "@dzgrid/dom/edit": {
       "file": "packages/dom/src/edit.ts",
-      "maxGzip": 3650,
+      "maxGzip": 3750,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -330,7 +330,7 @@
     },
     "@dzgrid/dom/editors": {
       "file": "packages/dom/src/editors.ts",
-      "maxGzip": 6500,
+      "maxGzip": 6650,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -374,7 +374,7 @@
     },
     "@dzgrid/dom/motion-gsap: run (lazy)": {
       "file": "packages/dom/src/motion-gsap/run/index.ts",
-      "maxGzip": 3150,
+      "maxGzip": 3500,
       "over": "@dzgrid/dom/motion-gsap",
       "external": [
         "gsap",

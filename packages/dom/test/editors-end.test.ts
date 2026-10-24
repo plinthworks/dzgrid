@@ -17,8 +17,8 @@ const open = (t: ReturnType<typeof ed>, id: string, col: string, text?: string) 
 };
 
 describe('Enter and Shift+Enter (Q3)', () => {
-  it('Enter keeps the value and goes down, the field closed; Shift+Enter keeps and goes up', () => {
-    const t = ed();
+  it("enterMoves: 'down' (named since Q3 revised): Enter keeps the value and goes down, the field closed; Shift+Enter keeps and goes up", () => {
+    const t = ed({ options: { enterMoves: 'down' } });
     open(t, 'r5', 'n', '50');
     t.key('Enter');
     expect(t.field()).toBeNull();
@@ -30,6 +30,19 @@ describe('Enter and Shift+Enter (Q3)', () => {
     expect(t.value('r6')).toBe('60');
     expect(t.focusAt()).toBe('r5/n');
     expect(t.of('cellEdited').map((e) => e.value)).toEqual([50, 60]);
+  });
+
+  it('Q3 revised (owner, step 7): by default Enter and Shift+Enter keep the value and the focus stays on the cell', () => {
+    const t = ed();
+    open(t, 'r5', 'n', '50');
+    t.key('Enter');
+    expect(t.field()).toBeNull();
+    expect(t.value('r5')).toBe('50');
+    expect(t.focusAt()).toBe('r5/n');
+    expect(document.activeElement).toBe(t.cell('r5', 'n'));
+    open(t, 'r5', 'n', '51');
+    t.key('Enter', { shiftKey: true });
+    expect(t.focusAt()).toBe('r5/n');
   });
 
   it('enterMoves: stay keeps the focus on the cell, either way', () => {
@@ -53,8 +66,8 @@ describe('Enter and Shift+Enter (Q3)', () => {
     expect(t.focusAt()).toBe('r3/n');
   });
 
-  it('nothing opens on the cell reached; unchanged text: no save, the move still made', () => {
-    const t = ed();
+  it("enterMoves: 'down': nothing opens on the cell reached; unchanged text: no save, the move still made", () => {
+    const t = ed({ options: { enterMoves: 'down' } });
     open(t, 'r5', 'n');
     t.key('Enter');
     expect(t.field()).toBeNull();
@@ -62,7 +75,7 @@ describe('Enter and Shift+Enter (Q3)', () => {
     expect(t.focusAt()).toBe('r6/n');
   });
 
-  it('Enter onto a detail row moves as the Down arrow (the detail is one stop)', async () => {
+  it("enterMoves: 'down': Enter onto a detail row moves as the Down arrow (the detail is one stop)", async () => {
     const { detail } = await import('../src/detail.js');
     const { EN_DETAIL } = await import('../src/locales/en-detail.js');
     const msgs = join(EN, EDIT.en, EDITORS.en, EN_DETAIL);
@@ -73,7 +86,7 @@ describe('Enter and Shift+Enter (Q3)', () => {
     a.key('ArrowDown');
     const byArrow = JSON.stringify(a.g.kernel.focus);
     cleanup();
-    const b = ed({ settings: { messages: msgs }, features: (e, x) => [det(), e, x] });
+    const b = ed({ settings: { messages: msgs }, features: (e, x) => [det(), e, x], options: { enterMoves: 'down' } });
     b.g.kernel.dispatch({ type: 'rows.expand', rows: [k('r1')], expanded: true }, 'api');
     open(b, 'r1', 'n', '9');
     b.key('Enter');

@@ -74,6 +74,23 @@ describe('a fetched set', () => {
 });
 
 describe('server pages, sorted on the server', () => {
+  it('Phase 5 step 7 review 4: an edit landing while a request is in flight (a page asked before the save): that answer does not clear the mark (it was computed without the edit); the next request\'s does', () => {
+    const s = setup(SERVER);
+    s.kernel.dispatch({ type: 'sort.set', sort: asc }, 'user');
+    s.calls.at(-1)!.resolve({ rows: rowsOf(['a', 'b', 'c']), total: 25 });
+    const asked = s.calls.length;
+    s.kernel.dispatch({ type: 'page.go', index: 1 }, 'api');
+    expect(s.calls.length).toBe(asked + 1);
+    // The page request left; then the edit (the typed text kept at the page change, step 7).
+    s.edit('a', 'zz');
+    expect(s.kernel.orderStale).toBe(true);
+    answerLast(s, ['d', 'e']);
+    expect(s.kernel.orderStale).toBe(true);
+    s.kernel.dispatch({ type: 'rows.reapply' }, 'user');
+    answerLast(s, ['d', 'e']);
+    expect(s.kernel.orderStale).toBe(false);
+  });
+
   it('an edit of the sorted column marks the order stale; the reapply asks once more, the same request', () => {
     const s = setup({ page: 'server', sort: 'server', filter: 'server', quick: 'server' });
     s.kernel.dispatch({ type: 'sort.set', sort: asc }, 'user');

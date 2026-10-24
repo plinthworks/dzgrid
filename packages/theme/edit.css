@@ -13,7 +13,7 @@
   to {
     background: none;
     border-style: dashed;
-    border-color: var(--dzg-saving-color, var(--tz-accent));
+    border-color: var(--dzg-saving-color, var(--tz-warning));
   }
 }
 @keyframes dzg-blink-a {
@@ -51,7 +51,7 @@
     pointer-events: none;
   }
   .dzg-cell--pending::after {
-    color: var(--dzg-saving-color, var(--tz-accent));
+    color: var(--dzg-saving-color, var(--tz-warning));
     clip-path: circle(3px);
   }
   .dzg-cell--saved::after {
@@ -65,13 +65,13 @@
   :is(.dzg-cell--saving, .dzg-cell--refused)::before {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: 3px;
     box-sizing: border-box;
     border: 2px solid transparent;
     pointer-events: none;
   }
   .dzg-cell--saving::before {
-    background: conic-gradient(from var(--dzg-turn), var(--dzg-saving-color, var(--tz-accent)) 0 25%, transparent 0) border-box;
+    background: conic-gradient(from var(--dzg-turn), var(--dzg-saving-color, var(--tz-warning)) 0 25%, transparent 0) border-box;
     mask: linear-gradient(currentColor 0 0) padding-box exclude, linear-gradient(currentColor 0 0) border-box;
     animation: dzg-turn 1.2s linear 4, dzg-hold 0.01s 4.8s forwards;
   }
@@ -83,7 +83,7 @@
     animation: none;
     background: none;
     border-style: dashed;
-    border-color: var(--dzg-saving-color, var(--tz-accent));
+    border-color: var(--dzg-saving-color, var(--tz-warning));
   }
   .dzg-cell--refused::before {
     border-color: var(--dzg-refused-color, var(--tz-danger));
@@ -102,7 +102,7 @@
       animation: none;
       background: none;
       border-style: dashed;
-      border-color: var(--dzg-saving-color, var(--tz-accent));
+      border-color: var(--dzg-saving-color, var(--tz-warning));
     }
     :is(.dzg-cell--blink-a, .dzg-cell--blink-b)::before {
       animation: none;
@@ -366,6 +366,9 @@
     }
     .dzg-cell--refused::before {
       border: 2px solid CanvasText;
+    }
+    .dzg-row[aria-selected=true] .dzg-cell--saving::before {
+      border-color: CanvasText;
     }
     .dzg-cell--pending::after {
       forced-color-adjust: none;

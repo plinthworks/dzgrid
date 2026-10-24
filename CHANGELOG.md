@@ -9,7 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Toward 0.3.0 (Phase 5, editing; not released).
 
+### Changed
+
+- `editors({ enterMoves })` (owner, Q3 revised, Phase 5 step 7): the default is now `'stay'` — Enter and
+  Shift+Enter keep the value and the focus stays on the cell; `'down'` (down / up, as a spreadsheet) is the option.
+
 ### Added
+
+- Phase 5 step 7, saves in the DOM end to end (docs/behaviors/edit-save.md « Built at step 7 »): a failed cell
+  reopens with the refused value (F2, Enter, a double click); a row removed while edited is said once
+  (`edit.rowRemoved`, now in `locales/<lang>-editors`), a hidden one is kept and saved; on server pages a page or a
+  query asked while a field is open sends the typed text at once; the failed reason in a tooltip on hover and on
+  focus (it replaces the column's own); a network cut says « serveur injoignable » (`edit.reasonNetwork`, a new
+  required key of `locales/<lang>-edit`); on a server grid « remis en ordre » is said at the answer, never after a
+  failure; `api.reapply()` scrolls the focused cell into view. `motion()`: `onCell` reasons `saving`, `saved`,
+  `failed` and the saved flash. Base: `EditSeam.tip`, `TipFor.said`, the column tooltip reads the shown value.
+  Theme: the saving border uses `--tz-warning` (not the focus ring's accent) and runs inside the focus ring;
+  `contrast.css` gives it its own colour; `check:contrast` pairs may require a hue gap (`hue`).
 - `@dzgrid/dom/editors` part 2 (Phase 5 step 6; editors.md 6–19): day and instant fields (opening text in the locale's
   order and the grid's digits, the written-value rule, `role="combobox"`), a tzslot calendar in a modal dialog loaded
   on its button only (Alt+ArrowDown; the hour/minute menus of the clock-change days; loading line, Retry;

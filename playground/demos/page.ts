@@ -25,8 +25,11 @@ const field = (name: string) => form.elements.namedItem(name) as HTMLSelectEleme
 field('locale').value = locale;
 field('theme').value = theme;
 field('skin').value = skin;
+// The editing page's own selectors (step 7): Enter's move and the paged mode, kept in the query.
+const extra = ['enter', 'paged'].filter((n) => form.elements.namedItem(n));
+for (const n of extra) field(n).value = q.get(n) ?? field(n).value;
 form.addEventListener('change', () => {
-  location.search = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, skin: field('skin').value }).toString();
+  location.search = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, skin: field('skin').value, ...Object.fromEntries(extra.map((n) => [n, field(n).value])) }).toString();
 });
 document.documentElement.lang = locale;
 document.documentElement.dir = ar ? 'rtl' : 'ltr';
@@ -48,26 +51,37 @@ const TEXT = {
 const EDIT_TEXT = {
   fr: ['Commandes : modifier les cellules', [
     'Double-cliquez sur une cellule, ou tapez directement, pour la modifier (sauf « Commande », grisée).',
-    'Entrée garde et descend, Tab passe à la cellule suivante, Échap annule.',
+    'Entrée garde (le focus reste, ou descend : sélecteur « Entrée » ci-dessus), Tab passe à la cellule suivante, Échap annule.',
     'Date : Alt+↓ ou le bouton ouvre le calendrier. Statut : une liste, tapez les premières lettres. Urgent : Espace bascule Oui / Non.',
-    'Le serveur simulé refuse les valeurs qui finissent par 7 : la cellule clignote et reprend sa valeur.',
+    'Le serveur simulé refuse les valeurs qui finissent par 7 : la cellule clignote et reprend sa valeur ; survolez-la (ou atteignez-la au clavier) pour lire la raison, F2 la rouvre avec la valeur refusée pour réessayer.',
+    'Enregistré : une coche, et un bref éclat (case « Animations »). « Serveur injoignable » : chaque enregistrement échoue et la grille le dit.',
+    'Choisissez une cellule, « Supprimer cette commande dans 3 s », puis double-cliquez dans sa ligne et tapez : la ligne disparaît, la modification est annulée et dite.',
+    'Données « serveur paginé » : la valeur tapée est envoyée dès que la page change (« Page suivante dans 3 s »).',
     'La grille annonce elle-même chaque refus au lecteur d’écran ; le journal ci-dessous ne fait que les montrer.',
-  ], 'Derniers événements'],
+  ], 'Derniers événements', ['Entrée', 'reste', 'descend', 'Données', 'dans le navigateur', 'serveur paginé']],
   ar: ['الطلبات: تعديل الخلايا', [
     'انقر نقرًا مزدوجًا على خلية، أو اكتب مباشرة، لتعديلها (ما عدا «الطلب»، الرمادية).',
-    'Enter يحفظ وينزل، وTab ينتقل إلى الخلية التالية، وEscape يلغي.',
+    'Enter يحفظ (يبقى التركيز أو ينزل: محدِّد «Enter» أعلاه)، وTab ينتقل إلى الخلية التالية، وEscape يلغي.',
     'التاريخ: Alt+↓ أو الزر يفتح التقويم. الحالة: قائمة، اكتب الحروف الأولى. عاجل: المسافة تبدّل نعم / لا.',
-    'الخادم الوهمي يرفض القيم التي تنتهي بـ 7: تومض الخلية وتعود إلى قيمتها.',
+    'الخادم الوهمي يرفض القيم التي تنتهي بـ 7: تومض الخلية وتعود إلى قيمتها؛ مرّر المؤشر فوقها (أو اصل إليها بلوحة المفاتيح) لقراءة السبب، وF2 يعيد فتحها بالقيمة المرفوضة للمحاولة مجددًا.',
+    'حُفظ: علامة صح وومضة قصيرة (خانة «الحركة»). «الخادم غير متاح»: يفشل كل حفظ ويعلن الجدول ذلك.',
+    'اختر خلية، ثم «حذف هذا الطلب بعد 3 ث»، ثم انقر مرتين في صفه واكتب: يختفي الصف ويُلغى التعديل ويُعلن ذلك.',
+    'البيانات «خادم بصفحات»: تُرسل القيمة المكتوبة فور تغيّر الصفحة («الصفحة التالية بعد 3 ث»).',
     'الجدول نفسه يعلن كل رفض لقارئ الشاشة؛ السجل أدناه يعرضها فقط.',
-  ], 'آخر الأحداث'],
+  ], 'آخر الأحداث', ['Enter', 'يبقى', 'ينزل', 'البيانات', 'في المتصفح', 'خادم بصفحات']],
 } as const;
 const [title, note] = editing ? [EDIT_TEXT[ar ? 'ar' : 'fr'][0], ''] : TEXT[which][ar ? 'ar' : 'fr'];
 document.title = `DzGrid — ${title}`;
 document.getElementById('title')!.textContent = title;
 if (editing) {
-  const [, steps, logTitle] = EDIT_TEXT[ar ? 'ar' : 'fr'];
+  const [, steps, logTitle, sel] = EDIT_TEXT[ar ? 'ar' : 'fr'];
   document.getElementById('steps')!.replaceChildren(...steps.map((t) => Object.assign(document.createElement('li'), { textContent: t })));
   document.getElementById('log-title')!.textContent = logTitle;
+  // The selectors' words in the page's language (« Entrée : reste / descend »).
+  document.getElementById('enter-label')!.textContent = sel[0];
+  [field('enter').options[0]!.text, field('enter').options[1]!.text] = [sel[1], sel[2]];
+  document.getElementById('paged-label')!.textContent = sel[3];
+  [field('paged').options[0]!.text, field('paged').options[1]!.text] = [sel[4], sel[5]];
 } else document.getElementById('note')!.textContent = note;
 
 const host = document.getElementById('host')!;
@@ -75,7 +89,7 @@ const onEvent = (e: { type: string; problems?: readonly { code: string; path: st
   if (e.type === 'problems') for (const p of e.problems!) console.warn('dzgrid', p.code, p.path, p.detail ?? '');
 };
 const demo = editing
-  ? mountOrdersEdit(host, document.getElementById('log')!, { locale, onEvent: onEvent as never })
+  ? mountOrdersEdit(host, document.getElementById('log')!, { locale, onEvent: onEvent as never, paged: q.get('paged') === '1', enter: q.get('enter') === 'down' ? 'down' : 'stay', bar: document.getElementById('live')! })
   : which === 'hr' ? mountHr(host, { locale, onEvent }) : mountOrders(host, { locale, onEvent });
 if (which === 'orders') host.classList.add('demo-orders');
 (window as unknown as { demo: unknown }).demo = demo;

@@ -47,7 +47,8 @@ describe('the value flash in the theme', () => {
   it('passes them with the shipped palette and the more-contrast one, light and dark', () => {
     const base = paletteFromCss(css);
     const flash = { ...spec, pairs: spec.pairs.filter((p) => p.bg.startsWith('--dzg-flash')) };
-    expect(flash.pairs.length).toBe(5);
+    // 5 of the flash itself, 9 of the edit marks over it (Phase 5 step 7).
+    expect(flash.pairs.length).toBe(14);
     for (const scheme of ['light', 'dark'] as const) {
       expect(check(base, flash, scheme).failures.map((f: { what: string }) => f.what), scheme).toEqual([]);
       const vars = { ...base, ...Object.fromEntries(Object.entries(high.palettes[0]![scheme]).map(([k, v]) => [`--tz-${k}`, v])) };

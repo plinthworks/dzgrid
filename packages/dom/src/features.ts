@@ -38,6 +38,8 @@ export interface EditSeam {
   read(col: ResolvedColumn<unknown>, row: unknown, key: RowKey): unknown;
   /** The grid's edits (`EditApi` of `@dzgrid/dom/edit`), for the editors (`@dzgrid/dom/editors`, step 5) to reach; typed there. */
   readonly api?: unknown;
+  /** A cell's own tooltip while it needs one (a failed save's reason, step 7), over the column's; null: the column's. */
+  tip?(key: RowKey, column: string): string | null;
 }
 
 export interface FeatureHandle {

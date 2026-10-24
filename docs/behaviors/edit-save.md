@@ -115,8 +115,10 @@ cell always shows the right one)
 | `edit.saving` | Saving | Enregistrement en cours | جارٍ الحفظ |
 | `edit.saveRefused` | {column}: not saved, {reason}. Previous value restored. | {column} : non enregistré, {reason}. Valeur précédente rétablie. | {column}: لم يُحفظ، {reason}. أُعيدت القيمة السابقة. |
 | `edit.reasonUnknown` (generic reason) | refused by the server | refusé par le serveur | رفضه الخادم |
+| `edit.reasonNetwork` (a network cut, S7-O2) | server unreachable | serveur injoignable | تعذّر الوصول إلى الخادم |
 | `edit.failedMark` (tooltip, description) | Not saved: {reason} | Non enregistré : {reason} | لم يُحفظ: {reason} |
-| `edit.rowRemoved` | Row removed, change cancelled | Ligne supprimée, modification annulée | حُذف الصف، أُلغي التعديل |
+| `edit.rowRemoved` (in `locales/<lang>-editors`: the editors say it, step 7) | Row removed, change cancelled | Ligne supprimée, modification annulée | حُذف الصف، أُلغي التعديل |
+| `edit.pageDropped` (`-editors`, step 7 review 3: a synchronous source's page or query took the row before its text could leave) | {column}: change not sent, the page changed | {column} : modification non envoyée, la page a changé | {column}: لم يُرسل التعديل، تغيّرت الصفحة |
 
 ## Right to left
 Marks (pending dot, check, error sign) at the inline end; the running border turns the other way; the
@@ -148,3 +150,43 @@ border, contrast pairs, 50 saving cells while scrolling, no layout read. Manual:
 - 16: a code without a text falls to `validation.invalid`; `{min}` / `{max}` come from the column's `edit` rule, formatted by its codec; `{pattern}` of `validation.day` waits for step 5.
 - The reason's tooltip on hover, the saved flash and `onCell(…, 'saved')`: step 7.
 - Review of step 4: the refusal sentences are queued in the assertive region by gesture (two refused gestures in one task: both said); « Saving » once per gesture and once per task; clocks in one queue per duration; forced colours: the refusal a solid CanvasText border; the ring turns by the cell's own direction (`:dir(rtl)`).
+
+## Built at step 7 (2026-10-24; owner S7-O1…O6, Q3 revised, the saving border's colour)
+- 8: the running border has its own colour, the palette's warning (`--dzg-saving-color`, default
+  `var(--tz-warning)`), never the accent of the focus ring, and it runs **inside** the 2 px focus ring (3 px in), so
+  on a focused cell (Enter stays, Q3 revised) the ring and the border are two shapes in two hues (≥ 60° apart,
+  checked by `check:contrast` in every theme; contrast.css gives it a cyan in the dark, where its accent and warning
+  are both yellow). Still border (reduced motion, `data-motion="off"`, after 5 s): dashed, inside the ring too.
+- 11: with `motion()`, the saved flash and `onCell(…, 'saving' | 'saved' | 'failed')` (motion.md).
+- 13: hovering a failed cell (after `tooltips.delayMs`, 500) or reaching it by the keyboard (at once) shows
+  `edit.failedMark {reason}`; it replaces the column's own tooltip while the error stays (S7-O4); never on an open
+  field; read once (the mark's description; the tooltip adds no `aria-describedby`); hidden at the paint where the
+  cell is no longer failed (saved, undone, a new value kept during the 0.5 s, its source changed). Escape dismisses
+  it first (WCAG 1.4.13), a second Escape gives an open field up. The column's tooltip reads the cell's shown value
+  (the edit), no longer the row's (found at step 7).
+- 15: F2, Enter, a double click on a failed cell open the field with the refused value (text, number, day,
+  instant, list option, the application's editor's `value`/`text`); a printable key replaces; Escape keeps the mark.
+- 16 / S7-O2: no `reason`, no `code`, and the error looks like a cut (a `TypeError` — what `fetch` throws when it
+  cannot connect —, a `TimeoutError`, a `NetworkError`, or the browser offline): `edit.reasonNetwork`. An app's own
+  `TypeError` reads « injoignable » too; a `reason` or a `code` always wins.
+- 19–21: hidden (a filter or quick search by the app, a parent closed, a column hidden): kept and saved, nothing
+  said. Removed (a host removal, a reload or a server answer without it): dropped, `edit.rowRemoved` said once
+  (assertive), the focus on the nearest row, whether the paint (lost) or the blur's task sees it first. Server
+  pages (S7-O3): a page or a query asked while a field is open keeps and sends the typed text at once, the row
+  still held (a refusal: O1); a refresh of the same page keeps the field open. A source answering synchronously
+  answers inside the command: the row is gone when told, so it counts as removed (documented; S7-O3 C not taken).
+  A removed row's failed save reaches the host (`saveFailed`) unsaid; a server row only off the page is said.
+
+## Review of step 7 (2026-10-24)
+- 13: a cell already showing the column's tooltip (reached by the keyboard, Enter staying) that is then refused shows
+  the reason at that paint (the tooltip is asked again whenever the cell becomes or stops being failed); the cell is
+  described once (the column tooltip's id goes).
+- 16 / S7-O2, narrowed: « serveur injoignable » only for a `TypeError` whose message says fetch, network or « load
+  failed » (Chrome « Failed to fetch », Firefox « NetworkError when attempting to fetch resource », Safari « Load
+  failed »), a `TimeoutError` or `NetworkError` (by name), the app's own `code: 'network'`, or the grid's window
+  offline. An app's own `TypeError` (« Cannot read properties of undefined ») is the generic refusal.
+- 19–21 / S7-O3: with a source that answers synchronously, a page or a query takes the row before its text can
+  leave: `edit.pageDropped` is said (never « Row removed »). A page asked before a save lands: that page's answer
+  keeps the reapply mark (the server computed it without the edit); the next request's answer clears it.
+- 8 / 13: the refusal border sits 3 px inside the focus ring, as the saving border; in forced colours the dashed
+  saving border is CanvasText on a selected (Highlight) row.

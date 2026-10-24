@@ -163,16 +163,32 @@ export function skinFromCss(css) {
   return { name: block[1], light: vars, dark: vars };
 }
 
-/** Every pair under `vars` in `scheme`: the ratios and the failures. */
+/** A colour's hue in degrees (HSL), or null for a grey. */
+export function hueOf([r, g, b]) {
+  const [x, n] = [Math.max(r, g, b), Math.min(r, g, b)];
+  const d = x - n;
+  if (d < 1) return null;
+  const h = x === r ? ((g - b) / d) % 6 : x === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (h * 60 + 360) % 360;
+}
+/** How far apart two colours' hues are, the short way round (180 for a grey against a colour). */
+const hueGap = (a, b) => {
+  const [x, y] = [hueOf(a), hueOf(b)];
+  if (x === null || y === null) return x === y ? 0 : 180;
+  const d = Math.abs(x - y) % 360;
+  return Math.min(d, 360 - d);
+};
+
+/** Every pair under `vars` in `scheme`: the ratios and the failures; a pair with `hue` also needs its hues that far apart (step 7). */
 export function check(vars, spec, scheme) {
   const all = { ...spec.derived, ...vars };
   const results = spec.pairs.map((p) => {
     const bg = resolveColor(`var(${p.bg})`, all, scheme);
     const fg = resolveColor(`var(${p.fg})`, all, scheme);
-    return { ...p, ratio: contrast(fg, bg) };
+    return { ...p, ratio: contrast(fg, bg), ...(p.hue !== undefined && { gap: hueGap(fg, bg) }) };
   });
   // A ratio that is not a finite number (a colour read wrongly) is a failure, never a pass (R6).
-  return { results, failures: results.filter((r) => !Number.isFinite(r.ratio) || r.ratio + 1e-9 < r.min) };
+  return { results, failures: results.filter((r) => !Number.isFinite(r.ratio) || r.ratio + 1e-9 < r.min || (r.hue !== undefined && !(r.gap >= r.hue))) };
 }
 
 function main(argv) {
@@ -189,7 +205,8 @@ function main(argv) {
   for (const pal of palettes) {
     for (const scheme of ['light', 'dark']) {
       const vars = { ...base };
-      for (const [k, v] of Object.entries(pal[scheme] ?? {})) vars[`--tz-${k}`] = v;
+      // tzslot's names, or a variable named in full (`--dzg-*`, a palette's own: step 7).
+      for (const [k, v] of Object.entries(pal[scheme] ?? {})) vars[k.startsWith('--') ? k : `--tz-${k}`] = v;
       const { results, failures } = check(vars, spec, scheme);
       checked += results.length;
       for (const f of failures) {
