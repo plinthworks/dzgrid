@@ -6,7 +6,6 @@ import type { GridSettings } from '../settings.js';
 import { decorateHeader } from './header-decor.js';
 import type { ViewportBox } from './measure.js';
 import { overlayPainter } from './overlay.js';
-import { editorHost } from './editor.js';
 import { CHECK_WIDTH, setAttr, setPx, type Frame } from './rows.js';
 
 const OVERSCAN_ROWS = 2;
@@ -81,8 +80,6 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   // Stable, so a part's context compares equal from one paint to the next.
   const announce = (text: string): void => g.live.announce(text);
   const paintOverlay = overlayPainter(g);
-  const host = editorHost(g as GridContext<unknown>);
-  g.scope.add(host.destroy);
 
   const partFor = (col: ResolvedColumn<any>): SlotPart<'cell'> | null => parts.byColumn.get(col.id) ?? null;
   function resolveParts(): void {
@@ -274,7 +271,6 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const retained: RowKey[] = focus?.kind === 'cell' ? [focus.row] : [];
     if (spans && w.rows) retained.push(...spans.anchors(w.rows.first, w.rows.last));
     rowRenderer.render(frame, wanted, retained);
-    host.paint();
     // A tooltip whose anchor left the page (its column hidden), or whose pooled cell now shows
     // another row or new data (a sort, a filter, an update): hidden, its text would be stale.
     const tipAt = g.tip.anchor;

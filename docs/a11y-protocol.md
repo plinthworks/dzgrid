@@ -717,6 +717,21 @@ noter la phrase dite et la comparer au paquet.
      arabes-indiens tapés dans « Stock » (`١٢`) sont acceptés ; le curseur dans un nombre va comme dans un
      champ de gauche à droite. Noter la langue de la voix pour les noms de colonnes.
 
+124a. **Méthode de saisie (étape 5 ; à la main, CDP ne pilote pas celle du système).** Page
+     `orders-edit.html` (bac à sable, 127.0.0.1:4700), colonne « Client » d'une sous-commande. macOS, clavier
+     **Japonais – Romaji** : sur la cellule, taper `kana`, `Espace`, `Entrée` : le champ s'ouvre vide, « かな »
+     y arrive en entier (aucun premier caractère perdu), l'`Entrée` de la composition ne garde rien ; une seconde
+     `Entrée` garde. **Pinyin – Simplifié** : `zhongwen` → « 中文 », même règle. Clavier **français** : touche
+     morte `^` puis `e` → « ê » dans le champ. Un premier caractère perdu se note (risque de l'étape 5 ; repli :
+     un champ caché par grille, question au propriétaire).
+     **Bloquant** pour la clôture de la partie A (revue de l'étape 5) : sans méthode du système active sur une
+     cellule (elle n'est pas un champ), la première lettre romaji peut arriver brute (« kかな ») ; le repli est un
+     risque de l'étape 6.
+124b. **Téléphone et tablette (étape 5, S5-O4).** iOS Safari et Android Chrome : une tape sur une cellule
+     modifiable la sélectionne seulement ; deux tapes rapides ouvrent le champ **et** le clavier ; un refus
+     (`abc` dans « Qté ») montre la bulle sous la cellule (au-dessus si pas de place), jamais sous le clavier ni
+     sur le champ ; le lecteur (VoiceOver, TalkBack) dit le nom du champ, puis la phrase du refus.
+
 Consigner le résultat dans `docs/behaviors/editing.md` (fin de la fiche) et dans `ROADMAP.md` (clôture de la
 partie A de la Phase 5). Règle de décision propre à cette section : une phrase de refus manquante ou dite deux
 fois (114–117), une bordure animée dite (113), un focus perdu ou ramené de force (116, 118, 123), une touche

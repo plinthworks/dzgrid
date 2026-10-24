@@ -115,3 +115,20 @@ Step 5: text and number (Arabic-Indic digits, `1,5` refused in en, caret in ar).
 twice, top layer in a transformed card, no `/filters` import; boolean; list (type-ahead with diacritics
 and Arabic, cycling, 500 cap, a value not in the list); custom part contract. Browser fr light / ar RTL
 dark: axe 0 with each editor open.
+
+## Built at step 5 (2026-10-23, `@dzgrid/dom/editors`)
+- 1: `text` → text field, `number` → number field; `edit.editor: 'text' | 'number'` forces one (a custom-typed
+  column read by its codec through a text field); any other name: a warning `unknown-part` at
+  `columns.<id>.edit.editor`, told once per column and name, and no field (the `editor.<name>` part is step 6).
+  `day`, `instant`, `boolean`, enum and custom columns open no field at this step.
+- 2: one `<input class="dzg-field">` per open editor, built at the opening, dropped at the close;
+  `autocomplete="off"`, `enterkeyhint="done"`, `maxLength` = `edit.maxLength` or **1 000** (owner S5-O5; a
+  longer value from the data opens whole and can only shrink).
+- 3: `dir="auto"`, opened with the value shown (the edit overlay), `null` → empty; spaces kept.
+- 4: `dir="ltr"`, `inputmode="decimal"`, `spellcheck="false"`, `text-align: end` (edit.css). **Opening text**:
+  the shortest text that reads back the same number (`0.1 + 0.2` opens « 0,30000000000000004 » in French),
+  the locale's decimal sign, the grid's numerals (Arabic-Indic with `numerals: 'locale'` in `ar-EG`), **no
+  group separators, no format scaling** (a percent column opens 0,15, not 15 %); exponent forms (`1e+21`) open
+  as they are (the codec reads them back: kept unchanged, nothing is saved).
+- Review (2026-10-24): `edit.maxLength` — a whole number ≥ 1 is the cap (above 2^31 − 1: clamped); **0 or
+  Infinity: no cap**; absent: 1 000; any other value (negative, fractional, NaN): 1 000.

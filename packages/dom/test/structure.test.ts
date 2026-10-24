@@ -127,10 +127,10 @@ describe('the DOM layer’s shape', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('keeps @dzgrid/dom/internal for the feature entries (step 17): slots, filters, search and pagination import it, by name; the base never', () => {
+  it('keeps @dzgrid/dom/internal for the feature entries (step 17): slots, filters, search, pagination and the editors (Phase 5 step 5) import it, by name; the base never', () => {
     const named = /^import (?!type )[^;]*from '@dzgrid\/dom\/internal'/m;
     const users = files(SRC).filter((f) => named.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f).split('/')[0]!.replace(/\.ts$/, ''));
-    expect([...new Set(users)].sort()).toEqual(['filters', 'pagination', 'search', 'slots']);
+    expect([...new Set(users)].sort()).toEqual(['editors', 'filters', 'pagination', 'search', 'slots']);
     // Never by a relative path (a second copy in each bundle), never from the base.
     const relative_ = files(SRC).filter((f) => !/^internal(\/|\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?internal(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f));
     expect(relative_).toEqual([]);
@@ -197,8 +197,23 @@ describe('the DOM layer’s shape', () => {
       .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/edit)$/.test(s) && !/^edit(\/[^:]+)?\.ts: \.\/(edit\/)?[a-z-]+\.js$/.test(s) && !/^edit\/[a-z]+\.ts: \.\.\/render\/write\.js$/.test(s));
     expect(offenders).toEqual([]);
     expect(readFileSync(join(SRC, 'render/write.ts'), 'utf8')).not.toMatch(/^import /m);
-    // Nothing else imports it, nor the core's edit controller: a grid that does not edit carries none of it.
-    expect(files(SRC).filter((f) => !/^edit(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?edit(\/|\.js')|@dzgrid\/core\/edit')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    // Nothing else imports it (its types aside: the editors name `EditApi`), nor the core's edit controller: a grid that does not edit carries none of it.
+    expect(files(SRC).filter((f) => !/^edit(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?edit(\/|\.js')|@dzgrid\/core\/edit')/.test(readFileSync(f, 'utf8').replace(/^import type .*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
+  });
+
+  it('has the editors entry reach the base only through the grid’s context, the types and a few pure helpers (Phase 5 step 5)', () => {
+    // @dzgrid/dom/editors: the core, its internal entry, the dom's internal entry, its own folder, the guarded writes and
+    // the direction helpers (no import of their own besides types); never @dzgrid/dom/edit's code (the grid hands its API).
+    const entry = files(SRC).filter((f) => /^editors(\/|\.ts$)/.test(relative(SRC, f)));
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['editors.ts', 'editors/bubble.ts', 'editors/host.ts', 'editors/index.ts']);
+    const offenders = entry
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^editors(\/[^:]+)?\.ts: \.\/(editors\/)?[a-z-]+\.js$/.test(s) && !/^editors\/[a-z]+\.ts: \.\.\/(render\/write|dir)\.js$/.test(s));
+    expect(offenders).toEqual([]);
+    expect(readFileSync(join(SRC, 'dir.ts'), 'utf8').match(/^import (?!type ).*$/gm) ?? []).toEqual([]);
+    // Nothing imports it: a grid that does not edit (or edits only by its API) carries none of it; the base's host is gone.
+    expect(files(SRC).filter((f) => !/^editors(\/|\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?editors(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    expect(files(SRC).map((f) => relative(SRC, f))).not.toContain('render/editor.ts');
   });
 
   it('keeps the core’s span engine out of the base: only the spans entry imports it', () => {

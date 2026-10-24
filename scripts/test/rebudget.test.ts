@@ -86,10 +86,24 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(ceilingFor('@dzgrid/dom/locales/en-edit')).toBe(560);
     expect(ceilingFor('@dzgrid/dom/locales/fr-edit')).toBe(630);
     expect(ceilingFor('@dzgrid/dom/locales/ar-edit')).toBe(810);
-    expect(ceilingFor('@dzgrid/theme/edit.css')).toBe(1350);
+    expect(ceilingFor('@dzgrid/theme/edit.css')).toBe(1700); // S5-O2 (step 5): 1 350 → 1 700
     expect(ceilingFor('@dzgrid/dom')).toBe(21980);
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
-    expect(['@dzgrid/dom/locales/en-edit', '@dzgrid/dom/locales/fr-edit', '@dzgrid/dom/locales/ar-edit', '@dzgrid/theme/edit.css', '@dzgrid/dom', '@dzgrid/dom/edit'].map((n) => e[n]!.maxGzip)).toEqual([560, 630, 810, 1350, 21700, 3650]);
+    expect(['@dzgrid/dom/locales/en-edit', '@dzgrid/dom/locales/fr-edit', '@dzgrid/dom/locales/ar-edit', '@dzgrid/theme/edit.css', '@dzgrid/dom', '@dzgrid/dom/edit'].map((n) => e[n]!.maxGzip)).toEqual([560, 630, 810, 1700, 21700, 3650]);
+  });
+
+  it('Phase 5 step 5 (owner S5-O1…O3): /editors 4 350, edit.css 1 700, the -editors texts 450 / 500 / 620; core/edit and dom/edit unchanged', () => {
+    expect(ceilingFor('@dzgrid/dom/editors')).toBe(4350);
+    expect(ceilingFor('@dzgrid/theme/edit.css')).toBe(1700);
+    expect(ceilingFor('@dzgrid/dom/locales/en-editors')).toBe(450);
+    expect(ceilingFor('@dzgrid/dom/locales/fr-editors')).toBe(500);
+    expect(ceilingFor('@dzgrid/dom/locales/ar-editors')).toBe(620);
+    expect(ceilingFor('@dzgrid/core/edit')).toBe(3100);
+    expect(ceilingFor('@dzgrid/dom/edit')).toBe(3650);
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null; external?: string[] }> }).entries;
+    expect(['@dzgrid/dom/editors', '@dzgrid/theme/edit.css', '@dzgrid/dom/locales/en-editors', '@dzgrid/dom/locales/fr-editors', '@dzgrid/dom/locales/ar-editors'].map((n) => e[n]?.maxGzip)).toEqual([4350, 1700, 450, 500, 620]);
+    // The editors reach the edit controller through the grid: @dzgrid/dom/edit and the core's edit are never bundled in.
+    expect(e['@dzgrid/dom/editors']!.external).toEqual(expect.arrayContaining(['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/edit', '@dzgrid/dom/internal']));
   });
 
   it('the showcase themes\' grants (owner T7, 2026-10-23): each theme 650, the theme base up to 3 050, the DOM base 21 980', () => {

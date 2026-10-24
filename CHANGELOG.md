@@ -10,6 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
+- `@dzgrid/dom/editors` (Phase 5 step 5; docs/behaviors/editing.md, editors.md, edit-validation.md):
+  `editors({ enterMoves?: 'down' | 'stay', tab?: 'cell' | 'grid' })`, with `edit()`. Text and number fields
+  over a cell (`.dzg-field`, named « column, row », `maxLength` 1 000 or `edit.maxLength`, numbers opened as
+  typed: the locale's decimal sign and digits, no groups); opened by F2, Enter (after a part that takes the
+  focus), a printable character (AltGr; Option on a Mac), an input method (opened empty, the composition lands
+  in it), a double click or a double tap; kept by Enter / Shift+Enter (down / up as the arrows), Tab / Shift+Tab
+  (the next editable cell in reading order, or `tab: 'grid'` leaves), a blur (one task later); Escape gives
+  up; Delete and Backspace clear. A refused value keeps the field open: `aria-invalid`, a bubble below or above
+  the cell (`.dzg-bubble`, top layer, never over the field), the cell's refusal, one assertive sentence; a blur
+  drops it (O1). Events `editingStarted { key, column, start }`, `editingStopped { key, column, kept, via }`.
+  Texts `@dzgrid/dom/locales/{en,fr,ar}-editors` (types `EditorsMessages`, `EditorsMessageKey`;
+  `EDITORS_KEYS`). Missing `edit()`: one `missing-feature` warning, nothing taken. Budget 4 350 B gz.
+- `@dzgrid/theme/edit.css`: the field (the cell's font and padding, opaque in the row's colour, a 2 px inset
+  ring, numbers at the end, a dashed refused outline) and the bubble (a « ! » sign at its inline start); forced
+  colours. Ceiling 1 350 → 1 700 (owner S5-O2).
 - `ColumnDef.editable` (`true`, or a rule `(row, context)`: only `true` means yes) and
   `ColumnDef.validate(value, row, context)` (run by `@dzgrid/core/edit`); an `editable` of another type
   is a warning `invalid-column` at `columns[i].editable`, the column kept and read-only (a `validate`
@@ -90,6 +105,12 @@ Toward 0.3.0 (Phase 5, editing; not released).
   links), each in French light Clinic and Arabic dark Midnight; checked by `npm run test:browser -- --only demos`.
 
 ### Changed
+- The five reading codes' texts (`validation.parse`, `day`, `invalid-instant`, `wall-time-skipped`,
+  `wall-time-ambiguous`) moved from `locales/*-edit` to `locales/*-editors`; `EDIT_KEYS` no longer asks for them
+  (a server's reading code without them reads `validation.invalid`). `EditApi` gains `alert(text)` and
+  `reason(column, code)`; `EditSeam.api` hands it to the editors.
+- The editor host left the DOM base (`GridContext.openEditor` / `closeEditor` removed; `@dzgrid/dom/editors`
+  holds it); the base gains `GridContext.step(intent)`; the tooltip is not shown on a cell being edited.
 - The grid's CSS sits in the cascade layer `dzgrid` (owner T1): `dzgrid.css` in `dzgrid.theme`,
   `contrast.css` in `dzgrid.contrast`, `tailwind.css` in `dzgrid.bridge`, each file opening with
   `@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;` (a bridge after

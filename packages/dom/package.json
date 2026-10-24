@@ -57,6 +57,10 @@
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"
     },
+    "./editors": {
+      "types": "./src/editors.ts",
+      "default": "./src/editors.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"
@@ -176,6 +180,18 @@
     "./locales/ar-edit": {
       "types": "./src/locales/ar-edit.ts",
       "default": "./src/locales/ar-edit.ts"
+    },
+    "./locales/en-editors": {
+      "types": "./src/locales/en-editors.ts",
+      "default": "./src/locales/en-editors.ts"
+    },
+    "./locales/fr-editors": {
+      "types": "./src/locales/fr-editors.ts",
+      "default": "./src/locales/fr-editors.ts"
+    },
+    "./locales/ar-editors": {
+      "types": "./src/locales/ar-editors.ts",
+      "default": "./src/locales/ar-editors.ts"
     }
   },
   "peerDependencies": {

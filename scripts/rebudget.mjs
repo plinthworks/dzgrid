@@ -54,8 +54,13 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/en-edit': 560,
   '@dzgrid/dom/locales/fr-edit': 630,
   '@dzgrid/dom/locales/ar-edit': 810,
-  // Owner S4-O4: edit.css 1 350 (measured 1 231 at step 4), taken from the theme grants' unused part (S4-O2).
-  '@dzgrid/theme/edit.css': 1350,
+  // Owner S4-O4: edit.css 1 350 (measured 1 231 at step 4), taken from the theme grants' unused part (S4-O2);
+  // owner S5-O2 (2026-10-23): 1 700 with the field and the bubble of step 5.
+  '@dzgrid/theme/edit.css': 1700,
+  // Owner S5-O3 (2026-10-23): the editors' texts (the 5 parse codes moved there from -edit), room for step 6.
+  '@dzgrid/dom/locales/en-editors': 450,
+  '@dzgrid/dom/locales/fr-editors': 500,
+  '@dzgrid/dom/locales/ar-editors': 620,
   '@dzgrid/theme': 3050, // T7: inside Q16's 2 900, up to 3 050 if needed
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7

@@ -8,7 +8,6 @@ import { stale } from './stale.js';
 /** The texts `edit()` needs, from `@dzgrid/dom/locales/<lang>-edit`. */
 export const EDIT_KEYS = [
   'edit.saving', 'edit.saveRefused', 'edit.reasonUnknown', 'edit.failedMark', 'edit.stale', 'edit.rowStale', 'edit.reapply', 'edit.reapplied', 'header.withStale',
-  'validation.parse', 'validation.day', 'validation.invalid-instant', 'validation.wall-time-skipped', 'validation.wall-time-ambiguous',
   'validation.required', 'validation.min', 'validation.max', 'validation.pattern', 'validation.options', 'validation.invalid',
 ] as const satisfies readonly EditMessageKey[];
 
@@ -32,6 +31,10 @@ export interface EditApi<T> {
   setSave(save?: SaveHandler<T>): void;
   /** The 0.5 s refusal on a cell (a local check, step 5; the limiter applied). */
   refuse(key: RowKey, column: string): void;
+  /** One sentence in the assertive region, emptied first (the editors' refusals, step 5). */
+  alert(text: string): void;
+  /** A refusal code's text for a column (`validation.<code>`, `{min}` / `{max}` by its format; else `validation.invalid`). */
+  reason(column: string, code: string): string;
 }
 
 export interface EditFeature<T> extends GridFeature {
@@ -66,7 +69,7 @@ export function edit<T = unknown>(o: EditFeatureOptions<T> = {}): EditFeature<T>
       const ctl = createEdits(kernel as GridKernel<T>, { ctx: () => g.ctx, ...(o.save && { save: o.save }), ...(win?.AbortController && { abort: () => new win.AbortController() }) });
       const m = marks(g, ctl, o.savingBorder !== false);
       const s = stale(g, m);
-      apis.set(kernel, {
+      const api: EditApi<T> = {
         commit: ctl.commit,
         undo: () => ctl.undo(),
         redo: () => ctl.redo(),
@@ -76,9 +79,13 @@ export function edit<T = unknown>(o: EditFeatureOptions<T> = {}): EditFeature<T>
         reapply: () => void kernel.dispatch({ type: 'rows.reapply' }, 'api'),
         setSave: ctl.setSave,
         refuse: (key, column) => m.refuse(key, column),
-      });
+        alert: m.alert,
+        reason: (column, code) => m.reason(column, null, code),
+      };
+      apis.set(kernel, api);
       return {
-        edit: m.seam,
+        // The editors (`@dzgrid/dom/editors`) find the grid's edits here.
+        edit: { read: m.seam.read, api },
         decorateHeader: s.decorateHeader,
         keys: s.keys,
         afterRows(f) {

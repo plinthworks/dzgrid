@@ -34,6 +34,10 @@ export interface Marks {
   desc(text: string): string;
   /** The 0.5 s refusal on a cell (limiter applied); `v` held as the cell's value while it lasts when `has`. */
   refuse(key: RowKey, column: string, v?: unknown, has?: boolean): void;
+  /** One sentence in the assertive region, each emptied first (a refusal). */
+  alert(text: string): void;
+  /** A refusal's reason (edit-save.md 16): the host's text, else its code's, else the generic one. */
+  reason(column: string, why: string | null, code: string | null): string;
   /** The rows holding an edit (only they can newly fail a filter). */
   keys(): RowKey[];
   /** Bumped when a cell's state changes: what `keys` gives may have changed. */
@@ -248,6 +252,8 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
     say,
     desc,
     refuse,
+    alert: shout,
+    reason,
     keys: () => [...cells.values()].map((x) => x.k),
     get rev() { return rev; },
     paint() {

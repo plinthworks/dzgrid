@@ -113,3 +113,21 @@ Step 3: validators' codes (conformance). Step 5: each code's sentence, `aria-inv
 `aria-describedby`, animation class added and removed after 500 ms (fake timers), restarted not stacked and no blink within 1 s (2b), the bubble's place clear of the field, reduced motion still
 border, Escape, Tab, blur dropped, Delete on required; browser: axe 0 with the bubble open in fr light / ar
 RTL dark / forced colours; Arabic-Indic digits accepted, `1,5` in en refused. Manual: §19.
+
+## Built at step 5 (2026-10-23, `@dzgrid/dom/editors`)
+- 3: the bubble is one `<div class="dzg-bubble">` per grid beside the tooltip (outside the grid role), in the
+  top layer where the browser has it (`popover="manual"`), its text the reason, a « ! » sign drawn by the theme.
+  Placed from the **cell's** box: below (bottom + 4 px), above when there is no room below, at the cell's inline
+  start (mirrored right to left); placed again at each paint while shown (rects read only then); hidden while
+  the cell is out of the view (the field stays, contract 5) and shown again when it comes back. The field gets
+  `aria-invalid="true"` and `aria-describedby` = the bubble.
+- 5: the sentence goes through `edit()`'s assertive region (`EditApi.alert`, emptied first); the reason is
+  `EditApi.reason(column, code)` (`{min}` / `{max}` by the column's format, `validation.invalid` for a code
+  without a text — also a server's reading code when the editors' texts are not loaded).
+- 7–9 as written; 8 (O1): the refusal shown on the cell through `EditApi.refuse` (limiter applied), nothing to undo.
+- Texts: `edit.refused`, `edit.refusedDropped` and the five reading codes (`validation.parse`, `day`,
+  `invalid-instant`, `wall-time-skipped`, `wall-time-ambiguous`) live in `locales/{en,fr,ar}-editors` (owner
+  S5-O3); the other `validation.*` stay in `-edit` (a server answers them too).
+- Review (2026-10-24): while shown, the bubble is placed again when the page scrolls (any scroller), the window
+  resizes, or the visual viewport changes (a phone's keyboard, a pinch); a press on it keeps the focus and the text in
+  the field (no blur, no O1).

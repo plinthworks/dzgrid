@@ -80,6 +80,9 @@
       "@dzgrid/dom/edit": [
         "./packages/dom/src/edit.ts"
       ],
+      "@dzgrid/dom/editors": [
+        "./packages/dom/src/editors.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

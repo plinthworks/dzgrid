@@ -137,3 +137,65 @@ describe('edit.css', () => {
     expect(spec.pairs.some((p) => p.what.startsWith('reapply button') && p.fg === '--tz-fg-muted' && p.bg === '--dzg-header-bg' && p.min === 3)).toBe(true);
   });
 });
+
+describe('edit.css: the field and the bubble (Phase 5 step 5, owner S5-O2)', () => {
+  it('the field: the cell’s font and padding, its colours, no border, a 2 px inset focus ring; numbers at the end', () => {
+    const f = decl(/^\.dzg-field$/);
+    expect(f).toMatch(/font: inherit/);
+    expect(f).toMatch(/color: var\(--tz-fg\)/);
+    // Opaque (the cell's text stays under it), the row's colour: hovered and selected rows too.
+    expect(f).toMatch(/background: var\(--tz-bg\)/);
+    expect(decl(/\[aria-selected='?true'?\] \.dzg-field/)).toMatch(/background: var\(--dzg-row-selected-bg/);
+    expect(decl(/\[data-hover\] \.dzg-field/)).toMatch(/background: var\(--dzg-row-hover-bg/);
+    expect(f).toMatch(/border: 0/);
+    expect(f).toMatch(/padding-inline: var\(--dzg-cell-padding-inline, 0\.5rem\)/);
+    expect(f).not.toMatch(/padding-left|padding-right/);
+    const ring = decl(/^\.dzg-field:focus(-visible)?$/);
+    expect(ring).toMatch(/outline: 2px solid var\(--dzg-focus-ring, var\(--tz-accent\)\)/);
+    expect(ring).toMatch(/outline-offset: -2px/);
+    expect(decl(/\.dzg-field\[inputmode=decimal\]/)).toMatch(/text-align: end/);
+  });
+
+  it('refused: a steady dashed outline in the refused colour (a shape, not colour alone), never animated', () => {
+    const bad = decl(/^\.dzg-field\[aria-invalid=true\]$/);
+    expect(bad).toMatch(/outline: 2px dashed var\(--dzg-refused-color, var\(--tz-danger\)\)/);
+    expect(bad).not.toMatch(/animation/);
+  });
+
+  it('the bubble: the page’s surface and text, a refused border, a measure of 40ch, a « ! » sign at its inline start', () => {
+    const b = decl(/^\.dzg-bubble$/);
+    expect(b).toMatch(/background: var\(--tz-bg\)/);
+    expect(b).toMatch(/color: var\(--tz-fg\)/);
+    expect(b).toMatch(/border: 1px solid var\(--dzg-refused-color, var\(--tz-danger\)\)/);
+    expect(b).toMatch(/max-inline-size: 40ch/);
+    expect(b).toMatch(/padding-inline-start:/);
+    const sign = decl(/^\.dzg-bubble::before$/);
+    expect(sign).toMatch(/inset-inline-start:/);
+    expect(sign).toMatch(/clip-path:/);
+    expect(sign).toMatch(/var\(--dzg-refused-color, var\(--tz-danger\)\)/);
+  });
+
+  it('forced colours: the field Field/FieldText with a Highlight ring, the refusal a dashed CanvasText outline, the bubble Canvas with a border and its sign', () => {
+    const f = media('forced-colors: active');
+    expect(decl(/^\.dzg-field$/, f)).toMatch(/background: Field/);
+    expect(decl(/^\.dzg-field$/, f)).toMatch(/color: FieldText/);
+    expect(decl(/^\.dzg-field:focus(-visible)?$/, f)).toMatch(/outline-color: Highlight|outline: 2px solid Highlight/);
+    expect(decl(/^\.dzg-field\[aria-invalid=true\]$/, f)).toMatch(/outline: 2px dashed CanvasText/);
+    expect(decl(/^\.dzg-bubble$/, f)).toMatch(/border: 1px solid CanvasText/);
+    expect(decl(/^\.dzg-bubble$/, f)).toMatch(/background: Canvas/);
+    const sign = decl(/^\.dzg-bubble::before$/, f);
+    expect(sign).toMatch(/background: CanvasText/);
+    expect(sign).toMatch(/forced-color-adjust: none/);
+  });
+
+  it('their contrast pairs: field text on the cell, hovered and selected rows (4.5), the ring (3), the bubble text (4.5), its sign and border (3)', () => {
+    const has = (fg: string, bg: string, min: number) => spec.pairs.some((p) => p.fg === fg && p.bg === bg && p.min >= min);
+    for (const bg of ['--tz-bg', '--dzg-row-hover-bg', '--dzg-row-selected-bg']) {
+      expect(has('--tz-fg', bg, 4.5), `field text on ${bg}`).toBe(true);
+      expect(has('--dzg-focus-ring', bg, 3), `ring on ${bg}`).toBe(true);
+      expect(has('--dzg-refused-color', bg, 3), `refused outline on ${bg}`).toBe(true);
+    }
+    expect(spec.pairs.some((p) => p.what.startsWith('bubble text') && p.fg === '--tz-fg' && p.bg === '--tz-bg' && p.min === 4.5)).toBe(true);
+    expect(spec.pairs.some((p) => p.what.startsWith('bubble sign') && p.fg === '--dzg-refused-color' && p.bg === '--tz-bg' && p.min === 3)).toBe(true);
+  });
+});

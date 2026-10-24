@@ -45,6 +45,11 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     set = kernel.focus;
   }
 
+  g.step = (i) => {
+    const from = focus.current();
+    if (from) move(from, i);
+  };
+
   function apply(intent: Intent, owner: KeyOwner): void {
     const from = focus.current();
     if (!from) return;

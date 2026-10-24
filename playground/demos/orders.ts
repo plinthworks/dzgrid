@@ -12,6 +12,13 @@ import { AR } from '@dzgrid/dom/locales/ar';
 import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
 import { AR_TREE } from '@dzgrid/dom/locales/ar-tree';
 import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { edit } from '@dzgrid/dom/edit';
+// No `@dzgrid/dom/editors` alias in vite.config.ts yet (adding one restarts the running server): the source, by path.
+import { editors } from '../../packages/dom/src/editors.js';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { AR_EDIT } from '@dzgrid/dom/locales/ar-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { AR_EDITORS } from '@dzgrid/dom/locales/ar-editors';
 import { AR_FILTERS } from '@dzgrid/dom/locales/ar-filters';
 import type { ColumnDef, GridEvent } from '@dzgrid/core';
 import { seeded } from './seed.js';
@@ -64,27 +71,44 @@ export interface OrdersDemo {
   readonly columns: readonly ColumnDef<Line, any>[];
 }
 
-export function mountOrders(host: HTMLElement, o: { locale: string; onEvent?: (e: GridEvent<Line>) => void }): OrdersDemo {
+/**
+ * The demo's save (Phase 5 step 5): answers after 0.6 s, as a server would; refuses every value ending in 7 (so the
+ * owner can make it refuse on purpose), with a reason of its own.
+ */
+function fakeSave(ar: boolean) {
+  return (req: { changes: readonly { value: unknown }[] }, signal: { readonly aborted: boolean; addEventListener?(type: 'abort', fn: () => void): void }) =>
+    new Promise<void>((ok, no) => {
+      // The grid gone (or the request given up): the answer never comes, as a real request aborted.
+      if (signal.aborted) return no(new Error('aborted'));
+      const t = setTimeout(() => (req.changes.some((c) => /7$/.test(String(c.value ?? ''))) ? no({ reason: ar ? 'رفضه خادم العرض' : 'refusé par le serveur de démonstration' }) : ok()), 600);
+      signal.addEventListener?.('abort', () => (clearTimeout(t), no(new Error('aborted'))));
+    });
+}
+
+export function mountOrders(host: HTMLElement, o: { locale: string; onEvent?: (e: GridEvent<Line>) => void; editing?: boolean }): OrdersDemo {
   const ar = o.locale.startsWith('ar');
   const W = ar ? WORDS.ar : WORDS.fr;
   const base = ar ? AR : FR;
-  const messages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_TREE : FR_TREE).text } };
+  const messages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_TREE : FR_TREE).text, ...(o.editing && { ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, 'validation.integer': ar ? 'المطلوب عدد صحيح' : 'nombre entier attendu' }) } };
+  // Editing: the sub-orders' client, quantity and amount (an order's figures are its sub-orders' sums).
+  const sub = (r: Line) => r.parent !== null;
+  const ed = o.editing ? { editable: sub } : {};
   const rows = orders();
   /** The one column array: orders and sub-orders alike. */
   const columns: ColumnDef<Line, any>[] = [
     { id: 'ref', header: W.ref, width: 190 },
-    { id: 'client', header: W.client, width: 210 },
+    { id: 'client', header: W.client, width: 210, ...ed, ...(o.editing && { edit: { required: true, maxLength: 60 } }) },
     { id: 'day', header: W.day, type: 'day', width: 130 },
     { id: 'status', header: W.status, type: 'enum', width: 150, enumOptions: STATUSES.map((value) => ({ value, label: W.statuses[value] })), ui: { cell: 'status' } },
-    { id: 'qty', header: W.qty, type: 'number', width: 110 },
-    { id: 'amount', header: W.amount, type: 'number', width: 150, numberFormat: { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 } },
+    { id: 'qty', header: W.qty, type: 'number', width: 110, ...ed, ...(o.editing && { edit: { required: true, min: 1 }, validate: (v: number | null) => (v !== null && !Number.isInteger(v) ? 'integer' : null) }) },
+    { id: 'amount', header: W.amount, type: 'number', width: 150, ...ed, ...(o.editing && { edit: { min: 0 } }), numberFormat: { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 } },
   ];
   const grid = createGrid<Line>(host, {
     rows, getRowId: (r) => r.id, columns, messages, locale: o.locale, direction: 'auto', label: W.title,
     parts: { status: badge({ tones: { pending: 'warning', ready: 'info', shipped: 'neutral', delivered: 'success', cancelled: 'danger' } }) },
     // The app's mark on a sub-order; its colour is the app's variable (demos.css).
     rowClass: (c) => (c.row.parent ? 'orders-child' : null),
-    features: [tree<Line>({ parentId: (r) => r.parent, sticky: 1 }), filters({ popup: true })],
+    features: [tree<Line>({ parentId: (r) => r.parent, sticky: 1 }), filters({ popup: true }), ...(o.editing ? [edit<Line>({ save: fakeSave(ar) }), editors()] : [])],
     ...(o.onEvent && { onEvent: o.onEvent }),
   });
   return { grid, rows, columns };

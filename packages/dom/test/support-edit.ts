@@ -40,6 +40,8 @@ export interface EMake {
   readonly settings?: Partial<GridSettings<R>>;
   readonly block?: number;
   readonly host?: HTMLElement;
+  /** Frames of the test's own (paints wait for them) instead of synchronous paints. */
+  readonly raf?: Pick<Window, 'requestAnimationFrame' | 'cancelAnimationFrame'>;
 }
 
 /** A grid with synchronous paints and a fake geometry; `cell(id, col)` finds a mounted cell by its row id. */
@@ -50,7 +52,7 @@ export function emake(o: EMake = {}) {
   const events: GridEvent<R>[] = [];
   const g = createGrid<R>(host, {
     rows: o.rows ?? rowsOf(200), getRowId: (r) => r.id, columns: o.columns ?? COLUMNS, messages: EN, onEvent: (e) => events.push(e), ...o.settings,
-  }, { geometry, sync: true });
+  }, { geometry, ...(o.raf ? { raf: o.raf } : { sync: true }) });
   grids.push(g);
   const ctx = (g as unknown as { context: GridContext<R> }).context;
   const vp = host.querySelector<HTMLElement>('.dzg-viewport')!;

@@ -5,10 +5,15 @@ import '../../packages/theme/dzgrid.css';
 import MIDNIGHT from '../../packages/theme/midnight.css?inline';
 import CLINIC from '../../packages/theme/clinic.css?inline';
 import './demos.css';
+// The editing marks, the field and the bubble (used by orders-edit.html only; unused rules elsewhere).
+import '../../packages/theme/edit.css';
 import { mountOrders } from './orders.js';
 import { mountHr } from './hr.js';
 
-const which = document.body.dataset['demo'] === 'hr' ? 'hr' : 'orders';
+const page = document.body.dataset['demo'];
+const which = page === 'hr' ? 'hr' : 'orders';
+// `orders-edit.html` (Phase 5 step 5): the same orders, editable, with a simulated save that sometimes refuses.
+const editing = page === 'orders-edit';
 const q = new URLSearchParams(location.search);
 const locale = q.get('locale') === 'ar-DZ' ? 'ar-DZ' : 'fr-FR';
 const ar = locale === 'ar-DZ';
@@ -38,7 +43,11 @@ const TEXT = {
     ar: ['الموارد البشرية (الهيكل التنظيمي)', 'الهيكل التنظيمي لمستشفى (أشخاص من الخيال): يبقى أقرب ثلاثة مسؤولين مثبّتين تحت الترويسة. في عمود «الاتصال»: Enter ينتقل إلى الرابط الأول، والأسهم بين الرابطين، وEscape يعود إلى الخلية.'],
   },
 } as const;
-const [title, note] = TEXT[which][ar ? 'ar' : 'fr'];
+const EDIT_TEXT = {
+  fr: ['Commandes : modifier les cellules', 'Client, Qté et Montant se modifient (pas les sous-totaux d’une commande : seules les sous-commandes). Ouvrir : F2, Entrée, taper un caractère, double clic (ou deux tapes sur un téléphone). Garder : Entrée (descend), Tab (cellule suivante), un clic ailleurs ; Échap abandonne ; Suppr vide. Le serveur est simulé (0,6 s) : il refuse toute valeur qui finit par 7. Qté : un nombre entier d’au moins 1 ; Montant : au moins 0 ; un texte ou « 1.5 » est refusé sur place, avec une bulle.'],
+  ar: ['الطلبات: تعديل الخلايا', 'يمكن تعديل العميل والكمية والمبلغ في الطلبات الفرعية. فتح: F2 أو Enter أو كتابة حرف أو نقر مزدوج. الحفظ: Enter أو Tab أو النقر في مكان آخر؛ Escape للإلغاء. الخادم وهمي: يرفض كل قيمة تنتهي بـ 7.'],
+} as const;
+const [title, note] = editing ? EDIT_TEXT[ar ? 'ar' : 'fr'] : TEXT[which][ar ? 'ar' : 'fr'];
 document.title = `DzGrid — ${title}`;
 document.getElementById('title')!.textContent = title;
 document.getElementById('note')!.textContent = note;
@@ -47,6 +56,6 @@ const host = document.getElementById('host')!;
 const onEvent = (e: { type: string; problems?: readonly { code: string; path: string; detail?: string }[] }): void => {
   if (e.type === 'problems') for (const p of e.problems!) console.warn('dzgrid', p.code, p.path, p.detail ?? '');
 };
-const demo = which === 'hr' ? mountHr(host, { locale, onEvent }) : mountOrders(host, { locale, onEvent });
+const demo = which === 'hr' ? mountHr(host, { locale, onEvent }) : mountOrders(host, { locale, onEvent, editing });
 if (which === 'orders') host.classList.add('demo-orders');
 (window as unknown as { demo: unknown }).demo = demo;

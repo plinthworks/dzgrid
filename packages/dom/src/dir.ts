@@ -171,3 +171,9 @@ export function fixedInlineStart(anchor: DOMRectReadOnly, dir: Dir, windowInline
   const start = dir === 'ltr' ? anchor.left : windowInline - anchor.right;
   return Math.max(0, Math.min(start, windowInline - boxInline));
 }
+
+/** Two boxes apart along the inline axis, in either direction (the editors' bubble hides with a cell scrolled away). */
+export const inlineApart = (a: DOMRectReadOnly, b: DOMRectReadOnly): boolean => a.right <= b.left || a.left >= b.right;
+
+/** How far apart two pointer events are, whatever the direction (a double tap's 10 px). */
+export const pointerGap = (a: { readonly clientX: number; readonly clientY: number }, b: { readonly clientX: number; readonly clientY: number }): number => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);

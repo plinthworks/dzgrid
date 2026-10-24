@@ -47,13 +47,17 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
    (`editors.md` 10, 12), elsewhere it opens the field with the text, caret at the end. **F2** on an
    editable cell always edits (never the part); on a read-only cell it keeps calling the part's
    `focus()` (`parts.md`).
-6. A **printable character** (no Ctrl, Cmd or Alt; AltGr characters count) opens the field holding only
+6. A **printable character** (no Ctrl, Cmd or Alt; AltGr characters count, and on a Mac Option characters
+   count: a French Mac keyboard needs Option for `[ ] { } | ~`) opens the field holding only
    that character, caret after it. Arabic letters and Arabic-Indic digits count. **Space is not one**:
    it selects the row, except on an editable yes/no cell where it toggles (`editors.md` 10). In a
    tree's column the tree's keys win: `*` opens the siblings (`tree-keys.md`) and never starts an edit
    there (F2, Enter and a double click do; other printable characters still start one).
-7. An input method composition (`isComposing`, key code 229) starting on a cell opens the field and the
-   composed text lands in it; no character is lost (checked in Chrome through CDP at step 5).
+7. An input method composition (`isComposing`, key code 229, or the key `Process` or `Dead`) starting on a
+   cell opens the field **empty** and focuses it at once, the key left to the input method (not prevented), so
+   the composed text lands in the field whole; inside the field nothing starts or keeps while composing. Checked
+   in Chrome through CDP (`Input.imeSetComposition`); the system's own input methods (Japanese, Pinyin, French
+   dead keys) are a manual check (`a11y-protocol.md` 124a).
 8. A **double click** opens the field with the text, caret at the end (at the click point where the
    browser gives it).
 9. **Delete** or **Backspace** clears the cell without opening a field: one save of the column's empty
@@ -61,6 +65,10 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
 10. On a cell that is not editable, 4–9 do nothing (no sound, no sentence; the reader already said
     « lecture seule »). Enter keeps its read-only meaning (enter a part).
 11. A single click never opens a field.
+11b. **Touch** (owner S5-O4): two taps on the same cell within 400 ms and 10 px open the field (start `tap`),
+    focused inside the second tap's handler so the soft keyboard shows; one tap only focuses; the browser's
+    double click that may follow opens nothing more. The body takes `touch-action: manipulation` (no double-tap
+    zoom delay; pinch kept).
 
 **Ending**
 12. **Enter** keeps the value (one save) and, with `edit.enterMoves: 'down'` (default), moves the focus
@@ -91,14 +99,18 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
     the caret, never open or close the row (the tree's keys ignore the `editor` owner).
 22. **Nested grids**: a field in an inner grid is the inner grid's; the outer grid takes none of its keys.
     Each grid edits for itself.
-23. The field's accessible name is the column's header and the row's header (`aria-labelledby` on both
-    cells); its value is the text.
+23. The field's accessible name is the column's header and the row's header: `aria-label` =
+    `editors.fieldName` (« Stock, Paracétamol 8 »; Arabic « المخزون، … »), from the column's header text and
+    the row header cell's text (the header cells carry no id, so a name rather than `aria-labelledby`; a
+    language change while open names it again at the next opening). Its value is the text.
 
 **Events**
 24. `cellEdited { key, column, value, previous, origin }` after each kept value (one per cell), origin
     `edit` (typed, toggled, picked or cleared by Delete) | `undo` | `redo` (Part B: `paste`, `fill`,
     `bulk`). No event for Escape.
-25. `editingStarted { key, column }` and `editingStopped { key, column, kept: boolean }`.
+25. `editingStarted { key, column, start }` (`f2`, `enter`, `key`, `dblclick`, `tap`, `tab`) and
+    `editingStopped { key, column, kept: boolean, via }` (`enter`, `tab`, `escape`, `blur`, `lost`), once each
+    per field, sent by `@dzgrid/dom/editors`.
 
 **Focus never hidden**
 26. **Never hidden** (WCAG 2.4.11): a field that opens, or a cell reached by Enter, Shift+Enter, Tab or
@@ -156,3 +168,23 @@ refused (criterion 5). Manual: `docs/a11y-protocol.md` §19.
 - 3: the paint writes `aria-readonly`: on the grid while no visible column is editable (a locked one counts as editable, its cells say read-only); otherwise on each cell `kernel.editable` refuses, and always on a detail's cell, a filler's or loading row's cells and the box cell.
 - 17–18: `GridContext.openEditor(key, column, field, lost)` puts the field (marked `data-dzg-owner="editor"`) over the cell's text; while open the cell keeps its text, part and classes (a host update changes the row's other cells); `closeEditor()` focuses the cell, then removes the field. A cell that leaves the page (row gone, column hidden, grid destroyed) calls `lost` once; the focus follows the grid's usual fallback.
 - Review of step 4: the editor host is a base module of its own (`render/editor.ts`, optional `openEditor` / `closeEditor` on the context) until `@dzgrid/dom/editors` takes it at step 5.
+
+## Built at step 5 (2026-10-23, `@dzgrid/dom/editors`)
+- `editors({ enterMoves?, tab? })` with `edit()`: the host moved out of the base (`editors/host.ts`, same contract;
+  the base keeps `g.editor` for rule 5 and gains `g.step(intent)`, the router's own move, for Enter).
+- 4–9 as written; text and number fields only at this step (a `day`, `instant`, `boolean`, enum or custom column
+  opens no field yet; Delete still clears it). Printable characters and input methods are heard by a listener
+  that runs after the router and every feature's keys: a key someone took (Space's selection, the tree's `*`)
+  never starts an edit, whatever the feature order.
+- 12–17: Enter moves exactly as the Down arrow (`g.step`); Tab searches the visible columns that are editable
+  and have a field, then the displayed rows (`kernel.editable` steps over details, fillers, loading rows); a
+  cell not mounted yet is focused, revealed and opened at the paint that mounts it. `tab: 'grid'`: kept, closed
+  on the cell, the browser's Tab goes on from the cell. A blur is decided one task later (the window losing
+  focus leaves the field the active element: it stays open).
+- Lost (row gone, column hidden): row still there → the text kept, else dropped; no sentence (step 7, D8). The
+  grid destroyed: dropped, nothing saved.
+- Mobile: 11b.
+- Review (2026-10-24): keys typed while an open waits for its paint are the field's: characters append (after the
+  cell's text when F2 or Tab asked for the field), Backspace shortens, Enter and Tab are kept and run once the field
+  is open (so « 4 », « 2 », Enter keeps 42), F2 and Delete change nothing, Escape gives it up. The field's row name is
+  the row header's value as its column shows it (not the cell's drawn text).

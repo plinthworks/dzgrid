@@ -125,6 +125,10 @@ export type GridEvent<T> =
   | { readonly type: 'saveFailed'; readonly source: 'data'; readonly key: RowKey; readonly column: string; readonly value: unknown; readonly error: unknown; readonly reason: string | null; readonly code: string | null }
   /** Cells whose save state changed (pending, saving, saved, failed, dropped): what the DOM repaints. */
   | { readonly type: 'editStates'; readonly source: ChangeSource; readonly cells: readonly { readonly key: RowKey; readonly column: string }[] }
+  /** `@dzgrid/dom/editors` (Phase 5 step 5; the core never sends these): a field opened on a cell, and by what. */
+  | { readonly type: 'editingStarted'; readonly source: 'user'; readonly key: RowKey; readonly column: string; readonly start: 'f2' | 'enter' | 'key' | 'dblclick' | 'tap' | 'tab' }
+  /** The field closed: `kept` its text kept (saved or unchanged), and how (`lost`: the cell left the page). */
+  | { readonly type: 'editingStopped'; readonly source: 'user'; readonly key: RowKey; readonly column: string; readonly kept: boolean; readonly via: 'enter' | 'tab' | 'escape' | 'blur' | 'lost' }
   /** Undo or redo became possible or impossible: on each flip only (edit-undo.md 12). */
   | { readonly type: 'undoChanged'; readonly source: ChangeSource; readonly canUndo: boolean; readonly canRedo: boolean }
   /**

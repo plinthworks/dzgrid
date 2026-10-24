@@ -165,8 +165,9 @@ if (paging === 'cursor') {
   };
   data = { source: sourceRows({ fetch } as never, { paging: 'cursor' }), operations: 'server', pagination: { pageSize: Number(q.get('size') ?? 50) } };
 }
-// The clock the date shortcuts count from: the machine's, moved by `t.offset` (ms).
-const clock = { offset: 0 };
+// The clock the date shortcuts count from: the machine's, moved by `t.offset` (ms); `clock=<ISO>` starts it there, so
+// a run never depends on the day it is run (the « midnight in Paris » check failed on the real 24 October).
+const clock = { offset: q.get('clock') ? Date.parse(q.get('clock')!) - Date.now() : 0 };
 const grid = createGrid<Row>(host, {
   ...data, getRowId: (r) => r.id, columns: tree, messages, locale, features, ...(parts && { parts }),
   ...(dates && { timeZone: q.get('zone') ?? 'Europe/Paris', clock: () => Date.now() + clock.offset }),

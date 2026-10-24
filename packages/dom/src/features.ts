@@ -36,6 +36,8 @@ export const shapeOf = (features: readonly GridFeature[] | undefined): { shape?:
 export interface EditSeam {
   /** The value a cell shows (the edit overlay, or a refused value held for its 0.5 s), asked instead of `col.read`; called unbound. */
   read(col: ResolvedColumn<unknown>, row: unknown, key: RowKey): unknown;
+  /** The grid's edits (`EditApi` of `@dzgrid/dom/edit`), for the editors (`@dzgrid/dom/editors`, step 5) to reach; typed there. */
+  readonly api?: unknown;
 }
 
 export interface FeatureHandle {

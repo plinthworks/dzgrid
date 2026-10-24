@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 step 5).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -18,7 +18,8 @@ const OUT = `${ROOT}packages/dom/test/browser/results`;
 mkdirSync(OUT, { recursive: true });
 // tzslot for the page's date filters (step 14): bundled once, two entries sharing one core (importmap in index.html).
 await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
-const engines = process.argv.includes('--all') ? ['chrome', 'firefox', 'webkit'] : ['chrome'];
+// `-- --engine webkit`: one engine alone (with `--only`, a group's checks in that engine).
+const engines = process.argv.includes('--all') ? ['chrome', 'firefox', 'webkit'] : process.argv.includes('--engine') ? [process.argv[process.argv.indexOf('--engine') + 1]] : ['chrome'];
 // `-- --only parts`: one group of checks (step 20's cell parts), for work on it; the full run before a commit.
 const only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
 const site = await serve(import.meta.url);
@@ -112,8 +113,10 @@ async function dateChecks(name, ctx) {
   const set = (page, c, f) => page.evaluate(([c, f]) => window.t.grid.kernel.dispatch({ type: 'filter.column', column: c, filter: f }, 'api'), [c, f]);
   /** The clock moved to `iso` (the grid's clock: the machine's plus an offset). */
   const clockAt = (page, iso) => page.evaluate((iso) => { window.t.clock.offset = Date.parse(iso) - Date.now(); }, iso);
+  // A fixed start for the grid's clock (`DATES_CLOCK` to try another: today, a clock-change day, an ordinary day).
+  const start = process.env.DATES_CLOCK ?? '2026-06-10T10:00:00Z';
   for (const [qs, rtl, popName, dayText] of cases) {
-    const { page, errors } = await load(ctx, qs);
+    const { page, errors } = await load(ctx, `${qs}&clock=${start}`);
     const tag = `dates ${qs}`;
     // A day column: the popup opens at once, the field arrives; axe with the popup open and with the panel open.
     await openOn(page, 'day');
@@ -183,6 +186,9 @@ async function dateChecks(name, ctx) {
     await page.keyboard.press('Escape');
     await frames(page);
     await set(page, 'day', null);
+    // The day filter's shortcut gone and painted before the clock moves: its midnight timer is dropped, so the next
+    // one is set from the moved clock, whatever day the run started on.
+    await frames(page);
     // Midnight: "today" on the instant column moves by itself at midnight in Paris (24 h, then the 25-hour day).
     await clockAt(page, '2026-10-24T21:59:59.600Z');
     await set(page, 'at', { type: 'instant', op: 'relative', range: 'today' });
@@ -2821,6 +2827,292 @@ async function editMarksChecks(name, ctx) {
   }
 }
 
+/**
+ * The editors (Phase 5 step 5, docs/phase-5-steps/step05-plan.md « Browser »; `-- --only editors`): a stock list
+ * with `@dzgrid/dom/edit` and `@dzgrid/dom/editors`, the medicine column pinned. Chrome: French light Clinic and
+ * Arabic right to left dark Midnight — real keys (F2, typing Latin and Arabic, Enter, Shift+Enter, Tab leftwards
+ * in Arabic, Escape, Delete), the field's focus ring and never under the pinned column, a refusal (bubble below
+ * or above, never over the field, at 320 px and at 200 % zoom), axe 0 with the field and with the bubble, the
+ * field's accessible name, invalid state and description, forced colours, an input method (CDP
+ * `Input.imeSetComposition`), 100 000 rows edited 50 times down without a long task; a double tap in mobile
+ * emulation. WebKit (`--all`): the bubble in the top layer and the double tap.
+ */
+async function editorsChecks(name, ctx) {
+  const open = async (qs, o = {}) => {
+    const c = o.ctx ?? ctx;
+    const page = await c.newPage();
+    if (!o.ctx) await page.setViewportSize(o.size ?? { width: 1000, height: 760 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(site.root(`packages/dom/test/browser/editors.html?${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    return { page, errors };
+  };
+  const cellSel = (id, col) => `[...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => window.t.grid.context.rowRenderer.keyOf(r) === window.t.key('${id}'))?.querySelector('[data-col="${col}"]')`;
+  const focusCell = (page, id, col) => page.evaluate(([id, col]) => { const { grid, key } = window.t; grid.api.focusCell(key(id), col); }, [id, col]).then(() => frames(page, 2));
+  const state = (page) => page.evaluate(() => {
+    const f = document.querySelector('.dzg-field');
+    const fo = window.t.grid.kernel.focus;
+    const at = fo?.kind === 'cell' ? `${String(fo.row).replace(/^d:\d+:/, '')}/${fo.column}` : null;
+    const r = f?.getBoundingClientRect();
+    return { open: !!f, value: f?.value ?? null, active: document.activeElement === f, at, rect: r && { left: r.left, right: r.right, top: r.top, bottom: r.bottom }, caret: f?.selectionStart ?? null, outline: f ? getComputedStyle(f).outlineWidth : null };
+  });
+  const text = (page, id, col) => page.evaluate((s) => eval(s)?.textContent, cellSel(id, col));
+  // A key with its text through CDP (Input.dispatchKeyEvent), as a keyboard sends it: Arabic letters included.
+  const keyText = async (page, ch) => {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', key: ch, text: ch, unmodifiedText: ch });
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: ch });
+    await cdp.detach();
+  };
+
+  if (name !== 'chrome') {
+    // WebKit (spike rule): the bubble in the top layer, and a double tap.
+    if (name !== 'webkit') return;
+    const { page } = await open('locale=fr-FR&theme=light&skin=clinic');
+    await focusCell(page, 'm3', 'stock');
+    await page.keyboard.press('F2');
+    await page.keyboard.type('abc');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const b = await page.evaluate(() => { const b = document.querySelector('.dzg-bubble'); const f = document.querySelector('.dzg-field'); const r = b.getBoundingClientRect(), q = f.getBoundingClientRect(); let top = false; try { top = b.matches(':popover-open'); } catch {} return { top, shown: !b.hidden && r.height > 0, clear: r.top >= q.bottom || r.bottom <= q.top }; });
+    check(name, 'editors: the bubble shown in the top layer, clear of the field', b.shown && b.top && b.clear, b);
+    await page.close();
+    const mctx = await ctx.browser().newContext({ hasTouch: true, viewport: { width: 390, height: 700 } });
+    const t = await open('locale=fr-FR', { ctx: mctx });
+    const box = await t.page.evaluate((s) => { const r = eval(s).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, cellSel('m2', 'stock'));
+    await t.page.touchscreen.tap(box.x, box.y);
+    await t.page.waitForTimeout(80);
+    await t.page.touchscreen.tap(box.x, box.y);
+    await frames(t.page, 2);
+    const tapped = await state(t.page);
+    check(name, 'editors: a double tap opens the field', tapped.open && tapped.active, tapped);
+    await mctx.close();
+    return;
+  }
+
+  for (const [tag, qs, rtl] of [['editors fr light clinic', 'locale=fr-FR&theme=light&skin=clinic', false], ['editors ar rtl dark midnight', 'locale=ar-EG&theme=dark&skin=midnight&numerals=locale', true]]) {
+    const { page, errors } = await open(qs);
+    // F2: open with the text, caret at the end, the ring visible; Enter keeps and goes down.
+    await focusCell(page, 'm2', 'stock');
+    await page.keyboard.press('F2');
+    let st = await state(page);
+    check(name, `${tag}: F2 opens the field with the cell's text, caret at its end, focused, a 2 px ring`, st.open && st.active && st.caret === st.value.length && st.outline === '2px', st);
+    let v = await axe(page);
+    check(name, `${tag}: axe 0 with the field open`, v.length === 0, v);
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('12');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    st = await state(page);
+    const shown = await text(page, 'm2', 'stock');
+    check(name, `${tag}: typed 12, Enter: kept (digits ${rtl ? 'Arabic-Indic' : 'Latin'}) and down one row, the field closed`, !st.open && st.at === 'm3/stock' && shown === (rtl ? '١٢' : '12'), { st, shown });
+    await page.keyboard.press('F2');
+    await page.keyboard.press('End');
+    await page.keyboard.type('0');
+    await page.keyboard.press('Shift+Enter');
+    await frames(page, 2);
+    st = await state(page);
+    check(name, `${tag}: Shift+Enter keeps and goes up`, !st.open && st.at === 'm2/stock', st);
+    // Typing a character (Latin; Arabic letters and ٣ in Arabic) opens with it alone.
+    await focusCell(page, 'm4', 'shelf');
+    await keyText(page, rtl ? 'ب' : 'x');
+    st = await state(page);
+    check(name, `${tag}: a ${rtl ? 'letter ب' : 'letter x'} typed on a cell opens the field holding it alone`, st.open && st.value === (rtl ? 'ب' : 'x') && st.caret === 1, st);
+    await page.keyboard.press('Escape');
+    await focusCell(page, 'm4', 'stock');
+    await keyText(page, rtl ? '٣' : '3');
+    st = await state(page);
+    check(name, `${tag}: a digit (${rtl ? '٣' : '3'}) opens the number field with it`, st.open && st.value === (rtl ? '٣' : '3'), st);
+    // Tab: the next editable cell in reading order (leftwards in Arabic).
+    const before = st.rect;
+    await page.keyboard.press('Tab');
+    await frames(page, 2);
+    st = await state(page);
+    check(name, `${tag}: Tab keeps and opens the next editable cell, ${rtl ? 'to the left' : 'to the right'}`, st.open && st.at === 'm4/price' && (rtl ? st.rect.right <= before.left + 1 : st.rect.left >= before.right - 1), { before, st });
+    await page.keyboard.press('Escape');
+    st = await state(page);
+    const esc = await page.evaluate(() => document.activeElement.classList.contains('dzg-cell'));
+    check(name, `${tag}: Escape closes, the focus on the cell`, !st.open && esc && st.at === 'm4/price', st);
+    await page.keyboard.press('Delete');
+    await frames(page, 2);
+    check(name, `${tag}: Delete clears the cell, no field`, (await text(page, 'm4', 'price')) === '' && !(await state(page)).open);
+    // Never under the pinned column (2.4.11): scrolled sideways, Tab from the last column to the next row's first editable.
+    await focusCell(page, 'm6', 'note');
+    await page.keyboard.press('F2');
+    await page.keyboard.press('Tab');
+    await frames(page, 3);
+    const clear = await page.evaluate(() => { const f = document.querySelector('.dzg-field').getBoundingClientRect(); const pin = document.querySelector('.dzg-layer .dzg-seg-start').getBoundingClientRect(); const v = document.querySelector('.dzg-viewport').getBoundingClientRect(); const rtl = getComputedStyle(document.querySelector('.dzg')).direction === 'rtl'; return { overlap: rtl ? f.right > pin.left + 1 : f.left < pin.right - 1, inView: f.top >= v.top && f.bottom <= v.bottom }; });
+    st = await state(page);
+    check(name, `${tag}: Tab to the next row's first editable cell: the field clear of the pinned column, in view`, st.at === 'm7/stock' && !clear.overlap && clear.inView, { st, clear });
+    await page.keyboard.press('Escape');
+    // A refusal: the bubble below the cell (above near the bottom), never over the field; the name, invalid, description.
+    await focusCell(page, 'm8', 'stock');
+    await page.keyboard.press('F2');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('-4');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const bub = () => page.evaluate(() => { const b = document.querySelector('.dzg-bubble'); const f = document.querySelector('.dzg-field'); const c = f.closest('.dzg-cell').getBoundingClientRect(); const r = b.getBoundingClientRect(), q = f.getBoundingClientRect(); return { shown: !b.hidden && r.height > 0, below: r.top >= c.bottom, above: r.bottom <= c.top, clear: r.top >= q.bottom || r.bottom <= q.top, start: getComputedStyle(b).direction === 'rtl' ? Math.abs(r.right - c.right) <= 1 || r.right >= innerWidth - 1 : Math.abs(r.left - c.left) <= 1, invalid: f.getAttribute('aria-invalid'), text: b.textContent }; });
+    let bb = await bub();
+    check(name, `${tag}: refused (-4 under min 0): the field kept, invalid, the bubble below the cell at its inline start, clear of the field`, bb.shown && bb.below && bb.clear && bb.start && bb.invalid === 'true', bb);
+    v = await axe(page);
+    check(name, `${tag}: axe 0 with the field refused and the bubble`, v.length === 0, v);
+    // Review R2: the page scrolled with the bubble shown: placed again, still clear of the field; the cell scrolled out
+    // of the grid's view: hidden, back when it returns. R4: a press on the bubble keeps the field and its text.
+    const scrolled = await page.evaluate(async () => {
+      document.body.style.paddingBlockEnd = '1600px';
+      scrollTo(0, 150);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const b = document.querySelector('.dzg-bubble').getBoundingClientRect(), q = document.querySelector('.dzg-field').getBoundingClientRect();
+      const out = { shown: !document.querySelector('.dzg-bubble').hidden, clear: b.top >= q.bottom || b.bottom <= q.top, below: b.top >= q.bottom - 1 && b.top - q.bottom < 12 };
+      scrollTo(0, 0);
+      document.body.style.paddingBlockEnd = '';
+      return out;
+    });
+    check(name, `${tag}: the page scrolled with the bubble shown: placed again, below the field, clear of it`, scrolled.shown && scrolled.clear && scrolled.below, scrolled);
+    const away = await page.evaluate(async () => {
+      const vp = document.querySelector('.dzg-viewport');
+      const b = document.querySelector('.dzg-bubble');
+      const raf = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      vp.scrollTop = 4000;
+      await raf();
+      const gone = b.hidden;
+      vp.scrollTop = 0;
+      await raf();
+      return { gone, back: !b.hidden, field: !!document.querySelector('.dzg-field') };
+    });
+    check(name, `${tag}: the cell scrolled out of the grid's view: the bubble hidden, the field kept; back in view: shown`, away.gone && away.back && away.field, away);
+    const bx = await page.evaluate(() => { const r = document.querySelector('.dzg-bubble').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    await page.mouse.click(bx.x, bx.y);
+    await page.waitForTimeout(30);
+    const kept = await page.evaluate(() => { const f = document.querySelector('.dzg-field'); return { open: !!f, value: f?.value, active: document.activeElement === f }; });
+    check(name, `${tag}: a click on the bubble keeps the field, its text and the focus (no O1)`, kept.open && kept.value === '-4' && kept.active, kept);
+    const ax = await (async () => {
+      const cdp = await page.context().newCDPSession(page);
+      const { root } = await cdp.send('DOM.getDocument', { depth: 0 });
+      const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.dzg-field' });
+      const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false });
+      await cdp.detach();
+      const n = nodes[0];
+      return { role: n.role?.value, name: n.name?.value, description: n.description?.value, invalid: n.properties?.find((p) => p.name === 'invalid')?.value?.value };
+    })();
+    const wantName = rtl ? 'المخزون، باراسيتامول 8' : 'Stock, Paracétamol 8';
+    check(name, `${tag}: the field's accessible name « ${wantName} », invalid, described by the bubble`, ax.name === wantName && ax.invalid && ax.invalid !== 'false' && ax.description === bb.text, ax);
+    await page.screenshot({ path: `${OUT}/${name}-${tag.replace(/ /g, '-')}-refused.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
+    // Forced colours: the ring, the dashed outline, the bubble's border and sign.
+    await page.emulateMedia({ forcedColors: 'active' });
+    await frames(page, 2);
+    const fc = await page.evaluate(() => { const f = document.querySelector('.dzg-field'); const b = document.querySelector('.dzg-bubble'); const s = getComputedStyle(f); const t = getComputedStyle(b); const sign = getComputedStyle(b, '::before'); return { outline: s.outlineStyle, ow: s.outlineWidth, border: t.borderTopStyle, bw: t.borderTopWidth, sign: sign.clipPath !== 'none' && sign.backgroundColor !== 'rgba(0, 0, 0, 0)' }; });
+    check(name, `${tag}: forced colours: the refused field's dashed outline, the bubble's border and its sign`, fc.outline === 'dashed' && fc.ow === '2px' && fc.border === 'solid' && fc.sign, fc);
+    // In forced colours the system draws the colours: axe's colour contrast does not apply (the rest does).
+    v = (await axe(page)).filter((x) => !x.startsWith('color-contrast:'));
+    check(name, `${tag}: axe 0 in forced colours with the bubble (colour contrast aside: the system's)`, v.length === 0, v);
+    await page.emulateMedia({ forcedColors: 'none' });
+    // The window's blur keeps the field; a click elsewhere drops the refused text (O1).
+    await page.evaluate(() => document.querySelector('#after').focus());
+    await page.waitForTimeout(30);
+    st = await state(page);
+    check(name, `${tag}: a click away from a refused field: the text dropped, the value back (O1)`, !st.open && (await text(page, 'm8', 'stock')) !== '-4' && !(await page.evaluate(() => !document.querySelector('.dzg-bubble').hidden)), st);
+    // The last visible row: the bubble above.
+    const lastId = await page.evaluate(() => { const v = document.querySelector('.dzg-viewport').getBoundingClientRect(); const rows = [...document.querySelectorAll('.dzg-layer > .dzg-row')].filter((r) => r.getBoundingClientRect().bottom <= v.bottom); rows.sort((a, b) => b.getBoundingClientRect().top - a.getBoundingClientRect().top); return String(window.t.grid.context.rowRenderer.keyOf(rows[0])).replace(/^d:\d+:/, ''); });
+    await page.evaluate(() => { document.querySelector('#host').style.marginBlockStart = `${innerHeight - 520}px`; });
+    await frames(page, 2);
+    await focusCell(page, lastId, 'stock');
+    await page.keyboard.press('F2');
+    await page.keyboard.type('x');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    bb = await bub();
+    check(name, `${tag}: refused on the last visible row near the window's bottom: the bubble above, clear of the field`, bb.shown && bb.above && bb.clear, { lastId, bb });
+    await page.keyboard.press('Escape');
+    check(name, `${tag}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+
+  // 320 px wide and 200 % zoom (a 500 × 380 CSS viewport): the bubble never over the field.
+  for (const [tag, size] of [['320 px', { width: 320, height: 640 }], ['200 % zoom', { width: 500, height: 380 }]]) {
+    const { page } = await open('locale=fr-FR&theme=light', { size });
+    await focusCell(page, 'm2', 'stock');
+    await page.keyboard.press('F2');
+    await page.keyboard.type('x');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const r = await page.evaluate(() => { const b = document.querySelector('.dzg-bubble').getBoundingClientRect(); const q = document.querySelector('.dzg-field').getBoundingClientRect(); return { clear: b.top >= q.bottom || b.bottom <= q.top, inside: b.left >= 0 && b.right <= innerWidth + 1 }; });
+    check(name, `editors ${tag}: the bubble clear of the field, inside the window`, r.clear && r.inside, r);
+    await page.close();
+  }
+
+  // An input method (CDP; the OS path stays the owner's manual check, a11y-protocol §19): the key the IME sends
+  // first (229) opens the field empty on the cell; the composition lands in it whole; Enter while composing keeps nothing.
+  {
+    const { page } = await open('locale=fr-FR&theme=light');
+    await focusCell(page, 'm5', 'shelf');
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Process', code: 'KeyK', windowsVirtualKeyCode: 229, nativeVirtualKeyCode: 229 });
+    let st = await state(page);
+    const opened = st.open && st.value === '' && st.active;
+    await cdp.send('Input.imeSetComposition', { text: 'かな', selectionStart: 2, selectionEnd: 2 });
+    st = await state(page);
+    const composingShown = st.value === 'かな';
+    await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 229, nativeVirtualKeyCode: 229 });
+    const stillOpen = (await state(page)).open;
+    await cdp.send('Input.insertText', { text: 'かな' });
+    st = await state(page);
+    check(name, 'editors: an input method on a cell: the field opens empty, the composition lands whole, a composing Enter keeps nothing', opened && composingShown && stillOpen && st.open && st.value === 'かな', { opened, composingShown, stillOpen, st });
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    check(name, 'editors: then Enter keeps « かな »', (await text(page, 'm5', 'shelf')) === 'かな');
+    // Chinese the same way.
+    await focusCell(page, 'm6', 'shelf');
+    await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Process', code: 'KeyZ', windowsVirtualKeyCode: 229, nativeVirtualKeyCode: 229 });
+    await cdp.send('Input.imeSetComposition', { text: 'zhong', selectionStart: 5, selectionEnd: 5 });
+    await cdp.send('Input.insertText', { text: '中文' });
+    st = await state(page);
+    check(name, 'editors: Chinese through an input method lands whole (中文)', st.open && st.value === '中文', st);
+    await cdp.detach();
+    await page.close();
+  }
+
+  // 100 000 rows: 50 edits going down by Enter, while it scrolls: no long task, the field never in a pooled row.
+  {
+    const { page } = await open('locale=fr-FR&theme=light&rows=100000');
+    await page.evaluate(() => { window.long = 0; new PerformanceObserver((l) => { window.long += l.getEntries().length; }).observe({ type: 'longtask', buffered: false }); });
+    await focusCell(page, 'm40000', 'stock');
+    let pooled = 0;
+    for (let i = 0; i < 50; i++) {
+      await page.keyboard.press('F2');
+      await page.keyboard.type('7');
+      await frames(page, 1);
+      pooled += await page.evaluate(() => { const f = document.querySelector('.dzg-field'); const e = window.t.grid.context.editor; return f && e && f.closest('.dzg-row') === window.t.grid.context.rowRenderer.cell(e.key, e.column)?.closest('.dzg-row') ? 0 : 1; });
+      await page.keyboard.press('Enter');
+    }
+    await frames(page, 3);
+    const r = await page.evaluate(() => ({ long: window.long, at: window.t.grid.kernel.focus.row }));
+    check(name, 'editors: 100 000 rows, 50 edits down by Enter: no long task, the field always in its own row', r.long === 0 && pooled === 0 && String(r.at).endsWith('m40050'), { ...r, pooled });
+    await page.close();
+  }
+
+  // A double tap in mobile emulation opens the field; a single tap does not.
+  {
+    const mctx = await ctx.browser().newContext({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 700 }, deviceScaleFactor: 2 });
+    const { page } = await open('locale=fr-FR', { ctx: mctx });
+    const box = await page.evaluate((s) => { const r = eval(s).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, cellSel('m2', 'stock'));
+    await page.touchscreen.tap(box.x, box.y);
+    await page.waitForTimeout(500);
+    const one = (await state(page)).open;
+    await page.touchscreen.tap(box.x, box.y);
+    await page.waitForTimeout(80);
+    await page.touchscreen.tap(box.x, box.y);
+    await frames(page, 2);
+    const st = await state(page);
+    check(name, 'editors (mobile emulation): one tap only focuses; a double tap opens the field, focused', !one && st.open && st.active && st.at === 'm2/stock', { one, st });
+    await mctx.close();
+  }
+}
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -2839,6 +3131,7 @@ async function runEngine(name) {
       if (only === 'dates' && name === 'chrome') await dateChecks(name, ctx);
       if (only === 'demos') await demosChecks(name, ctx);
       if (only === 'edit-marks' && name === 'chrome') await editMarksChecks(name, ctx);
+      if (only === 'editors') await editorsChecks(name, ctx);
       return;
     }
 
@@ -3174,6 +3467,7 @@ async function runEngine(name) {
     if (name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
     await demosChecks(name, ctx);
     if (name === 'chrome') await editMarksChecks(name, ctx);
+    await editorsChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

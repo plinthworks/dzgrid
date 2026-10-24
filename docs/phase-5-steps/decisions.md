@@ -75,3 +75,11 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S4-O2:** the mark styles go in a separate `edit.css` of `@dzgrid/theme` (the base theme does not grow). Its budget is taken from the unused part of the theme grants (base kept ≤ 2 500 of the 2 900/3 050 granted); the measured size is reported to the owner before a ceiling is fixed.
 - **S4-O3:** no muted rows on server-paged grids; the header mark is enough.
 - **S4-O4 (2026-10-23):** `-edit` text bundles en/fr/ar 350/400/450 → 560/630/810 (measure + 10 %); `edit.css` ceiling 1 350 (measured 1 231); `/editors` stays at 4 350 (8 000 minus `@dzgrid/dom/edit` 3 650) — measured at step 5 and asked again if the editors need more; dom base entry 21 300 → 21 700 (inside the 21 980 grant).
+
+## Step 5 (owner, 2026-10-23) — plan `step05-plan.md`
+
+- **S5-O1:** `/editors` stays 4 350 for step 5 (owner's earlier word: measure, ask again at step 6).
+- **S5-O2:** field and bubble styles in `edit.css`; ceiling 1 350 → 1 700.
+- **S5-O3:** new `-editors` text bundles en/fr/ar 450 / 500 / 620 (the 5 parse codes move there from `-edit`).
+- **S5-O4:** on touch, a double tap opens the editor; a single tap selects.
+- **S5-O5:** default input length cap 1 000 characters (the app can change it).

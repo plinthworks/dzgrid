@@ -1,4 +1,4 @@
-import type { ColumnModel, DisplayedRows, GridKernel, LocaleCtx, RowKey, RowLayout, RowModel } from '@dzgrid/core';
+import type { ColumnModel, DisplayedRows, GridKernel, Intent, LocaleCtx, RowKey, RowLayout, RowModel } from '@dzgrid/core';
 import type { LiveRegion } from './a11y/live-region.js';
 import type { Dir } from './dir.js';
 import type { ScrollController } from './interact/scroll.js';
@@ -14,7 +14,7 @@ import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
 import type { PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, EditMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
+import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -130,15 +130,12 @@ export interface GridContext<T> {
   restoreFocus(): void;
   /** The edit seam (`@dzgrid/dom/edit`), the first feature's that gives one: found once, at setup. */
   edit?: EditSeam | undefined;
-  /** The editor open in a cell (Phase 5 step 4, retained-row contract 5): the paint leaves that cell's value, part and classes. */
-  editor?: { readonly key: RowKey; readonly column: string; readonly cell: HTMLElement; readonly field: HTMLElement; readonly lost: () => void } | null;
   /**
-   * The editor host (`render/editor.ts`; for `@dzgrid/dom/editors` to take at step 5). `openEditor` puts `field`
-   * (marked `data-dzg-owner="editor"`) in the mounted cell, over its text, false when the cell is not mounted; a
-   * cell that leaves the page calls `lost` once (the grid destroyed too). `closeEditor` focuses the cell, then
-   * removes the field (contract 6).
+   * The editor open in a cell (retained-row contract 5): the paint leaves that cell's value, part and classes.
+   * Its host is `@dzgrid/dom/editors` (Phase 5 step 5).
    */
-  openEditor?(key: RowKey, column: string, field: HTMLElement, lost: () => void): boolean;
-  closeEditor?(): void;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  editor?: { readonly key: RowKey; readonly column: string; readonly cell: HTMLElement; readonly field: HTMLElement } | null;
+  /** Moves the focus as the grid's own keys would (the router's move: spans, details, the last row stays); the editors' Enter. */
+  step?(intent: Intent): void;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }
