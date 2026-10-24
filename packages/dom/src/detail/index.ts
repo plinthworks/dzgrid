@@ -49,6 +49,9 @@ export function detail<T>(o: DetailFeatureOptions<T>): GridFeature {
   };
 }
 
+/** A `nestedGrid` part's own: its kept grids let go (all, or those whose master `keep` no longer finds). */
+type Drops = { drop?(keep?: (master: RowKey) => boolean): void };
+
 /** A panel: its content box, the master it shows, its part's handle and last context. */
 interface Panel {
   readonly key: RowKey;
@@ -164,6 +167,8 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
 
   /** The panels shown, by their detail cell (a new cell for a row shown again or another master). */
   const panels = new Map<HTMLElement, Panel>();
+  /** The part last used (its kept grids let go with this grid). */
+  let pt: SlotPart | undefined;
   let decorated = new Set<HTMLElement>();
   const set = (x: Element, name: string, v: string | null): void => {
     if (v === null) x.removeAttribute(name);
@@ -184,7 +189,9 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
       const d = f.displayed;
       const L = g.layout!;
       const c0 = col();
-      const part = typeof o.part === 'string' ? g.parts()[o.part] : o.part;
+      const part = (pt = typeof o.part === 'string' ? g.parts()[o.part] : o.part);
+      // A nested grid kept alive for a master no longer in the rows: let go (review 2).
+      (part?.part as Drops | undefined)?.drop?.((m) => !!g.rows.row(m));
       const now = new Set<HTMLElement>();
       const shown = new Set<HTMLElement>();
       for (const [key, v] of rowRenderer.mounted) {
@@ -261,6 +268,8 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
     },
     destroy() {
       off();
+      // The kept nested grids go with this one (review 2).
+      (pt?.part as Drops | undefined)?.drop?.();
       ro?.disconnect();
       boxes.clear();
       for (const c of decorated) undecorate(c);

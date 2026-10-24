@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6; `-- --only edit-saves` the saves end to end, step 7).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6; `-- --only edit-saves` the saves end to end, step 7; `-- --only edit-undo` undo and redo, the tree's field, step 8 — `tree`, `detail` and `playground` gain step 8's checks).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -12,6 +12,7 @@ import { serve, browser } from '../spikes/kit.mjs';
 import { chromeDump } from '../spikes/s4-a11y/ax.mjs';
 import { buildFrameworks } from './frameworks.mjs';
 import { resolveColor } from './check-contrast.mjs';
+import { editUndoChecks, editTreeChecks, editDetailChecks, playgroundUndoChecks } from './browser-undo.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const OUT = `${ROOT}packages/dom/test/browser/results`;
@@ -3807,6 +3808,9 @@ async function editSavesChecks(name, ctx) {
   }
 }
 
+/** What the step-8 checks (scripts/browser-undo.mjs) are given. */
+const H = { check, frames, site, axe, OUT };
+
 async function runEngine(name) {
   // Chrome's own accessibility trees (chrome://accessibility) need it on from the start.
   const b = await browser(name, name === 'chrome' ? { args: ['--force-renderer-accessibility'] } : {});
@@ -3817,8 +3821,8 @@ async function runEngine(name) {
       if (only === 'parts' && name === 'chrome') await partsChecks(name, ctx);
       if (only === 'rules' && name === 'chrome') await rulesChecks(name, ctx);
       if (only === 'motion' && name === 'chrome') await motionChecks(name, ctx);
-      if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx);
-      if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx);
+      if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx), await editTreeChecks(name, ctx, H);
+      if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx), await editDetailChecks(name, ctx, H);
       if (only === 'filters' && name === 'chrome') await floatingToggleChecks(name, ctx);
       if (only === 'themes') await themeChecks(name, ctx);
       if (only === 'bridges' && name === 'chrome') await frameworkChecks(name, ctx);
@@ -3828,7 +3832,8 @@ async function runEngine(name) {
       if (only === 'edit-marks') await editMarksChecks(name, ctx);
       if (only === 'edit-saves' && name !== 'firefox') await editSavesChecks(name, ctx);
       if (only === 'editors') await editorsChecks(name, ctx), name !== 'firefox' && (await editorsKindsChecks(name, ctx));
-      if (only === 'playground' && name === 'chrome') await playgroundEditChecks(name, ctx);
+      if (only === 'playground' && name === 'chrome') await playgroundEditChecks(name, ctx), await playgroundUndoChecks(name, ctx, H);
+      if (only === 'edit-undo') await editUndoChecks(name, ctx, H);
       return;
     }
 
@@ -4168,6 +4173,10 @@ async function runEngine(name) {
     await editorsChecks(name, ctx);
     if (name !== 'firefox') await editorsKindsChecks(name, ctx);
     if (name === 'chrome') await playgroundEditChecks(name, ctx);
+    // Step 8: undo and redo (all engines; Firefox and WebKit the keys and the tree field right to left), the tree's
+    // field, editing beside details, the real pages' Undo / Redo, tree and visits.
+    await editUndoChecks(name, ctx, H);
+    if (name === 'chrome') await editTreeChecks(name, ctx, H), await editDetailChecks(name, ctx, H), await playgroundUndoChecks(name, ctx, H);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

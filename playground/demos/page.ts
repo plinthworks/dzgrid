@@ -26,7 +26,7 @@ field('locale').value = locale;
 field('theme').value = theme;
 field('skin').value = skin;
 // The editing page's own selectors (step 7): Enter's move and the paged mode, kept in the query.
-const extra = ['enter', 'paged'].filter((n) => form.elements.namedItem(n));
+const extra = ['enter', 'paged', 'tree'].filter((n) => form.elements.namedItem(n));
 for (const n of extra) field(n).value = q.get(n) ?? field(n).value;
 form.addEventListener('change', () => {
   location.search = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, skin: field('skin').value, ...Object.fromEntries(extra.map((n) => [n, field(n).value])) }).toString();
@@ -57,8 +57,10 @@ const EDIT_TEXT = {
     'Enregistré : une coche, et un bref éclat (case « Animations »). « Serveur injoignable » : chaque enregistrement échoue et la grille le dit.',
     'Choisissez une cellule, « Supprimer cette commande dans 3 s », puis double-cliquez dans sa ligne et tapez : la ligne disparaît, la modification est annulée et dite.',
     'Données « serveur paginé » : la valeur tapée est envoyée dès que la page change (« Page suivante dans 3 s »).',
+    'Annuler : Ctrl+Z (⌘Z sur Mac) ; rétablir : Ctrl+Y ou Ctrl+Maj+Z (⌘⇧Z), ou les boutons « Annuler » / « Rétablir » : la valeur revient, est enregistrée de nouveau, et le focus va sur la cellule.',
+    'Forme « arbre » : les sous-commandes sous leur commande, Qté et Montant modifiables aux deux niveaux ; « Commande mère » est la structure de l\u2019arbre, non modifiable.',
     'La grille annonce elle-même chaque refus au lecteur d’écran ; le journal ci-dessous ne fait que les montrer.',
-  ], 'Derniers événements', ['Entrée', 'reste', 'descend', 'Données', 'dans le navigateur', 'serveur paginé']],
+  ], 'Derniers événements', ['Entrée', 'reste', 'descend', 'Données', 'dans le navigateur', 'serveur paginé', 'Forme', 'liste', 'arbre']],
   ar: ['الطلبات: تعديل الخلايا', [
     'انقر نقرًا مزدوجًا على خلية، أو اكتب مباشرة، لتعديلها (ما عدا «الطلب»، الرمادية).',
     'Enter يحفظ (يبقى التركيز أو ينزل: محدِّد «Enter» أعلاه)، وTab ينتقل إلى الخلية التالية، وEscape يلغي.',
@@ -67,8 +69,10 @@ const EDIT_TEXT = {
     'حُفظ: علامة صح وومضة قصيرة (خانة «الحركة»). «الخادم غير متاح»: يفشل كل حفظ ويعلن الجدول ذلك.',
     'اختر خلية، ثم «حذف هذا الطلب بعد 3 ث»، ثم انقر مرتين في صفه واكتب: يختفي الصف ويُلغى التعديل ويُعلن ذلك.',
     'البيانات «خادم بصفحات»: تُرسل القيمة المكتوبة فور تغيّر الصفحة («الصفحة التالية بعد 3 ث»).',
+    'التراجع: Ctrl+Z (⌘Z على Mac)؛ الإعادة: Ctrl+Y أو Ctrl+Shift+Z (⌘⇧Z)، أو زرّا «تراجع» و«إعادة»: تعود القيمة وتُحفظ من جديد وينتقل التركيز إلى الخلية.',
+    'الشكل «شجرة»: الطلبات الفرعية تحت طلبها، والكمية والمبلغ قابلان للتعديل في المستويين؛ «الطلب الأصلي» بنية الشجرة، غير قابل للتعديل.',
     'الجدول نفسه يعلن كل رفض لقارئ الشاشة؛ السجل أدناه يعرضها فقط.',
-  ], 'آخر الأحداث', ['Enter', 'يبقى', 'ينزل', 'البيانات', 'في المتصفح', 'خادم بصفحات']],
+  ], 'آخر الأحداث', ['Enter', 'يبقى', 'ينزل', 'البيانات', 'في المتصفح', 'خادم بصفحات', 'الشكل', 'قائمة', 'شجرة']],
 } as const;
 const [title, note] = editing ? [EDIT_TEXT[ar ? 'ar' : 'fr'][0], ''] : TEXT[which][ar ? 'ar' : 'fr'];
 document.title = `DzGrid — ${title}`;
@@ -82,6 +86,8 @@ if (editing) {
   [field('enter').options[0]!.text, field('enter').options[1]!.text] = [sel[1], sel[2]];
   document.getElementById('paged-label')!.textContent = sel[3];
   [field('paged').options[0]!.text, field('paged').options[1]!.text] = [sel[4], sel[5]];
+  document.getElementById('tree-label')!.textContent = sel[6];
+  [field('tree').options[0]!.text, field('tree').options[1]!.text] = [sel[7], sel[8]];
 } else document.getElementById('note')!.textContent = note;
 
 const host = document.getElementById('host')!;
@@ -89,7 +95,7 @@ const onEvent = (e: { type: string; problems?: readonly { code: string; path: st
   if (e.type === 'problems') for (const p of e.problems!) console.warn('dzgrid', p.code, p.path, p.detail ?? '');
 };
 const demo = editing
-  ? mountOrdersEdit(host, document.getElementById('log')!, { locale, onEvent: onEvent as never, paged: q.get('paged') === '1', enter: q.get('enter') === 'down' ? 'down' : 'stay', bar: document.getElementById('live')! })
+  ? mountOrdersEdit(host, document.getElementById('log')!, { locale, onEvent: onEvent as never, paged: q.get('paged') === '1', enter: q.get('enter') === 'down' ? 'down' : 'stay', tree: q.get('tree') === '1', bar: document.getElementById('live')! })
   : which === 'hr' ? mountHr(host, { locale, onEvent }) : mountOrders(host, { locale, onEvent });
 if (which === 'orders') host.classList.add('demo-orders');
 (window as unknown as { demo: unknown }).demo = demo;

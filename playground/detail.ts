@@ -1,7 +1,8 @@
 // The « Maître/détail » page (Phase 4 step 10, docs/behaviors/master-detail.md, docs/a11y-protocol.md §17):
 // 10 000 patients (`?rows=1000000`: a million), each opening a 240 px panel with the grid of their visits
 // (`nestedGrid`, 4 columns, its own sort, keys and scroll, remembered for the last 20 patients); « Patient 0 »
-// open at first. `?content=free`: a panel of free text whose height is measured (`height: 'auto'`), with a
+// open at first; its visits editable (Motif, Montant: their own grid's edits, saves and undo; Phase 5 step 8, owner
+// S8-O5), « Enregistrement lent (5 s) » to close a panel while it saves (S8-O3: nothing lost). `?content=free`: a panel of free text whose height is measured (`height: 'auto'`), with a
 // button that adds a note (the panel grows, the rows above do not move). `?locale=ar-DZ`: Arabic, right to left.
 import { createGrid } from '@dzgrid/dom';
 import { definePart } from '@dzgrid/dom';
@@ -11,7 +12,15 @@ import { AR } from '@dzgrid/dom/locales/ar';
 import { FR_DETAIL } from '@dzgrid/dom/locales/fr-detail';
 import { AR_DETAIL } from '@dzgrid/dom/locales/ar-detail';
 import { dataKey, type ColumnDef, type GridEvent } from '@dzgrid/core';
+import { edit } from '@dzgrid/dom/edit';
+// No `@dzgrid/dom/editors` alias in vite.config.ts (editing it restarts the running server): the sources, by path.
+import { editors } from '../packages/dom/src/editors.js';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { AR_EDIT } from '@dzgrid/dom/locales/ar-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { AR_EDITORS } from '@dzgrid/dom/locales/ar-editors';
 import '../packages/theme/dzgrid.css';
+import '../packages/theme/edit.css';
 
 const form = document.getElementById('controls') as HTMLFormElement;
 const status = document.getElementById('status')!;
@@ -44,13 +53,27 @@ type Patient = { id: number; name: string; city: string; age: number; visits: nu
 type Visit = { id: string; date: string; service: string; reason: string; fee: number };
 const patients: Patient[] = new Array(total);
 for (let i = 0; i < total; i++) patients[i] = { id: i, name: `Patient ${i}`, city: W.cities[i % 6]!, age: ((i * 37) % 90) + 1, visits: 3 + (i % 40) };
-const visitsOf = (p: Patient): Visit[] => Array.from({ length: p.visits }, (_, v) => ({
+const visitsOf = (p: Patient): Visit[] => Array.from({ length: p.visits }, (_, v) => ({ ...visitAt(p, v), ...kept.get(`${p.id}-${v}`) }) as Visit);
+const visitAt = (p: Patient, v: number): Visit => ({
   id: `${p.id}-${v}`, date: `2026-${String((v % 12) + 1).padStart(2, '0')}-${String(((p.id + v * 3) % 28) + 1).padStart(2, '0')}`,
   service: W.services[(p.id + v) % 4]!, reason: W.reasons[(p.id * 3 + v) % 4]!, fee: 1000 + ((p.id * 13 + v * 7) % 40) * 250,
-}));
+});
 
 const base = ar ? AR : FR;
 const messages = { ...base, text: { ...base.text, ...(ar ? AR_DETAIL : FR_DETAIL).text } };
+const visitMessages = { ...base, text: { ...messages.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text } };
+const slow = document.getElementById('slow') as HTMLInputElement;
+if (ar) document.getElementById('slow-label')!.textContent = 'حفظ بطيء (5 ث)';
+/** What the simulated server kept, by visit id: a panel opened again shows it. */
+const kept = new Map<string, Record<string, unknown>>();
+/** A simulated save: 0.6 s, or 5 s with « Enregistrement lent »; it keeps what it saves. */
+const save = (req: { changes: readonly { key: unknown; column: string; value: unknown }[] }) => new Promise<void>((ok) => setTimeout(() => {
+  for (const c of req.changes) {
+    const id = String(c.key).replace(/^d:\d+:/, '');
+    kept.set(id, { ...kept.get(id), [c.column]: c.value });
+  }
+  ok();
+}, slow.checked ? 5000 : 600));
 const columns: ColumnDef<Patient, any>[] = [
   // As wide as the visits' grid and the panel's padding: a panel is never wider than its grid's columns.
   { id: 'name', header: W.name, width: 240 },
@@ -61,13 +84,13 @@ const columns: ColumnDef<Patient, any>[] = [
 const visitColumns: ColumnDef<Visit, any>[] = [
   { id: 'date', header: W.date, type: 'day', width: 140 },
   { id: 'service', header: W.service, width: 190 },
-  { id: 'reason', header: W.reason, width: 150 },
-  { id: 'fee', header: W.fee, type: 'number', width: 120 },
+  { id: 'reason', header: W.reason, width: 150, editable: true, edit: { required: true, maxLength: 40 } },
+  { id: 'fee', header: W.fee, type: 'number', width: 120, editable: true, edit: { min: 0 } },
 ];
 
 /** The panel's grid of visits: its own grid, remembered for the last 20 patients. */
 const visits = nestedGrid<Visit>({
-  settings: (c) => ({ rows: visitsOf(c.row as Patient), getRowId: (r) => r.id, columns: visitColumns, messages, locale, direction: 'auto', label: W.of((c.row as Patient).name) }),
+  settings: (c) => ({ rows: visitsOf(c.row as Patient), getRowId: (r) => r.id, columns: visitColumns, messages: visitMessages, locale, direction: 'auto', label: W.of((c.row as Patient).name), features: [edit<Visit>({ save }), editors()] }),
 });
 
 /** Free content: notes of the patient's own length, and a button adding one (the panel grows, measured). */

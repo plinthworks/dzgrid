@@ -5,7 +5,7 @@
   "scripts": {
     "test": "vitest run",
     "test:ci": "vitest run --maxWorkers=1",
-    "test:perm": "PERMS=1000 vitest run --maxWorkers=1 packages/dom/test/audit-permutations.test.ts packages/dom/test/export-permutations.test.ts packages/dom/test/edit-saves-walk.test.ts packages/dom/test/edit-permutations.test.ts",
+    "test:perm": "PERMS=1000 vitest run --maxWorkers=1 packages/dom/test/audit-permutations.test.ts packages/dom/test/export-permutations.test.ts packages/dom/test/edit-saves-walk.test.ts packages/dom/test/edit-permutations.test.ts packages/dom/test/edit-undo-walk.test.ts",
     "test:watch": "vitest",
     "test:tz": "TZ=Pacific/Auckland vitest run && TZ=America/Los_Angeles vitest run",
     "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/dom/tsconfig.json --noEmit && tsc -p tsconfig.spec.json --noEmit && ngc -p packages/angular/tsconfig.spec.json --noEmit",

@@ -40,6 +40,8 @@ export interface EditSeam {
   readonly api?: unknown;
   /** A cell's own tooltip while it needs one (a failed save's reason, step 7), over the column's; null: the column's. */
   tip?(key: RowKey, column: string): string | null;
+  /** 2: something waits to be sent or is being saved; 1: a cell was refused; 0: neither (a nested grid is kept alive meanwhile, step 8, owner S8-O3). */
+  busy?(): number;
 }
 
 export interface FeatureHandle {

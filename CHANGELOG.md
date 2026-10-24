@@ -16,6 +16,22 @@ Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
 
+- Phase 5 step 8, undo and redo in the DOM, trees, details and nested grids (docs/behaviors/edit-undo.md,
+  editing.md « Built at step 8 », master-detail.md): Ctrl/Cmd+Z, Ctrl+Y, Ctrl/Cmd+Shift+Z (and Cmd+Y) on a cell or a
+  header, matched on `key` first (AZERTY) and on `code` when the key is not a Latin letter (an Arabic layout); the
+  focus to the first cell given back, revealed clear of pinned columns, sticky header rows and sticky parents; a
+  cell not shown is given back where it is; one sentence (eight new required keys of `locales/<lang>-edit`:
+  `edit.undone`, `edit.undoneMany`, `edit.redone`, `edit.redoneMany`, `edit.undoSkipped`, `edit.redoSkipped`,
+  `edit.nothingToUndo`, `edit.nothingToRedo`). `tree({ structure })`: the columns that feed the tree read-only (a path
+  tree's own column by default). The tree column's field starts after the indent and the chevron (`edit.css`,
+  `--dzg-tree-pad`); the edited name is the one said. A nested grid whose panel goes while it saves stays alive off
+  the page until the answer and comes back as it was (`EditSeam.busy`).
+
+### Changed
+
+- `api.undo()` / `api.redo()` of `@dzgrid/dom/edit` now do what the keys do: the focus moves to the cell given back
+  (into the grid), it is revealed, and the sentence is said; the gesture's source is `api`.
+
 - Phase 5 step 7, saves in the DOM end to end (docs/behaviors/edit-save.md « Built at step 7 »): a failed cell
   reopens with the refused value (F2, Enter, a double click); a row removed while edited is said once
   (`edit.rowRemoved`, now in `locales/<lang>-editors`), a hidden one is kept and saved; on server pages a page or a

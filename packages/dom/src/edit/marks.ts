@@ -41,7 +41,7 @@ export interface Marks {
   /** A refusal's reason (edit-save.md 16): the host's text, else its code's, else a network cut's (S7-O2), else the generic one. */
   reason(column: string, code: string | null, why?: string | null, net?: boolean): string;
   /** The cells holding a mark or a state, by `key\ncolumn` (their rows: the only ones that can newly fail a filter). */
-  readonly cells: ReadonlyMap<string, { readonly k: RowKey }>;
+  readonly cells: ReadonlyMap<string, { readonly k: RowKey; readonly c: string }>;
   /** Bumped when a cell's state changes: what `keys` gives may have changed. */
   readonly rev: number;
   paint(f: Frame<unknown>): void;

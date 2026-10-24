@@ -31,6 +31,7 @@ export interface TreeMessages {
 /** The editing texts (`@dzgrid/dom/edit`, Phase 5 step 4), in their own bundles (`locales/<lang>-edit`): optional here, required by `edit()`. */
 export type EditMessageKey =
   | 'edit.saving' | 'edit.saveRefused' | 'edit.reasonUnknown' | 'edit.reasonNetwork' | 'edit.failedMark' | 'edit.stale' | 'edit.rowStale' | 'edit.reapply' | 'edit.reapplied' | 'header.withStale'
+  | 'edit.undone' | 'edit.undoneMany' | 'edit.redone' | 'edit.redoneMany' | 'edit.undoSkipped' | 'edit.redoSkipped' | 'edit.nothingToUndo' | 'edit.nothingToRedo'
   | `validation.${Exclude<ValidationCode, ParseCode>}`;
 /** The refusal codes a value check or a server gives (edit-validation.md 1; a host may add its own `validation.<code>`). */
 export type ValidationCode = ParseCode | 'required' | 'min' | 'max' | 'pattern' | 'options' | 'invalid';

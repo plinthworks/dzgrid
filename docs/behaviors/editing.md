@@ -190,3 +190,18 @@ refused (criterion 5). Manual: `docs/a11y-protocol.md` §19.
   cell's text when F2 or Tab asked for the field), Backspace shortens, Enter and Tab are kept and run once the field
   is open (so « 4 », « 2 », Enter keeps 42), F2 and Delete change nothing, Escape gives it up. The field's row name is
   the row header's value as its column shows it (not the cell's drawn text).
+
+## Built at step 8 (2026-10-24)
+- 2: `tree({ structure })` in `@dzgrid/dom/tree`: the columns named read-only (`lockColumns`); default: a path tree's
+  own column (its labels are the path), followed when it changes (locked again before the paint, so its cells say
+  read-only in the same paint); `parentId` / `children`: none; `structure: []` frees a path tree's column. A locked
+  column marked editable: `edit-structure` once.
+- 21: the tree writes the cell's indent into `--dzg-tree-pad`; `edit.css` starts the field after it and the 24 px
+  chevron (`--dzg-tree-at`), the chevron seen and clickable while editing (a click: the blur keeps the text, then the
+  row toggles). The field's sides are its own direction's (`dir="auto"`): a field whose direction is not its cell's
+  (a Latin name in an Arabic grid) takes the room at its other end (`:dir()`). The same rule serves a master's
+  chevron (details). Left and Right in the field move the caret; `*` there is typed.
+- 1: details, fillers and loading rows: F2, characters, double click, double tap, Delete, Backspace, Space, paste and
+  `api.commit` (`read-only`) pinned (`edit-detail.test.ts`, `edit-tree.test.ts`); Enter still enters a panel's grid.
+- 22: nested grids edit for themselves (`edit-nested.test.ts`); a panel that goes while its grid saves keeps that
+  grid alive (master-detail.md, owner S8-O3).

@@ -5,7 +5,7 @@ import { detailConflicts } from '@dzgrid/core/detail';
 import { createGrid, UPDATE_POLICY } from '@dzgrid/dom';
 import type { GridContext, GridEnv } from '../context.js';
 import type { GridInstance } from '../grid.js';
-import type { SlotContext, SlotPart } from '../part.js';
+import type { PartHandle, SlotContext, SlotPart } from '../part.js';
 import type { GridSettings } from '../settings.js';
 
 /** What a nested grid's settings are made from: the panel's context (the master row, its key, the depth). */
@@ -33,9 +33,20 @@ export interface NestedGridOptions<C> {
  */
 export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
   const memory = new Map<RowKey, Kept>();
+  /** Grids whose panel went while they were saving (owner S8-O3), off the page until their answer (a refusal: until shown or let go), by master. */
+  const alive = new Map<RowKey, Alive<C>>();
   return {
     slot: 'detail',
     part: {
+      /**
+       * The kept grids let go (review 2): every one when the grid around is destroyed (`keep` absent), else those
+       * whose master row `keep` no longer finds. A grid kept for a refusal only stays until then, or until its panel
+       * comes back and shows it.
+       */
+      drop(keep?: (master: RowKey) => boolean): void {
+        // Still saving: its master gone, it goes once the answer is in (`gone`); only refused: now.
+        for (const [m, a] of alive) if (!keep?.(m)) (a.gone = 1), (keep && a.busy() > 1) || (alive.delete(m), a.off(), a.grid.destroy());
+      },
       mount(host, c) {
         let grid: GridInstance<C, any>;
         let ctx: GridContext<C>;
@@ -93,8 +104,18 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
           else return false;
           return true;
         };
-        s = o.settings(c);
-        make();
+        // A grid kept alive for this master (its panel went while it saved): given back, on the page again, as it is.
+        const kept = alive.get(c.master);
+        const now = c;
+        if (kept) {
+          alive.delete(c.master);
+          kept.off();
+          ({ grid, ctx, s, c } = kept);
+          host.append(ctx.el.root);
+        } else {
+          s = o.settings(c);
+          make();
+        }
         // Escape this grid did not take (on a cell): back to the panel's cell, once (a grid deeper in it took its
         // own). Not while a composition is cancelled, nor when it only hid this grid's tooltip.
         // The tooltip's state before the grid's own keydown (which hides it, and leaves the key unhandled).
@@ -105,7 +126,7 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
         };
         host.addEventListener('keydown', peek, true);
         host.addEventListener('keydown', esc);
-        return {
+        const h: PartHandle<NestedContext> = {
           // Another master row (new data) or language: the host's settings again, given to the grid in place
           // (its focus, scroll and state untouched); a fixed setting changed: the grid made again, its state
           // and the focus inside it kept.
@@ -131,12 +152,37 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
             save();
             host.removeEventListener('keydown', peek, true);
             host.removeEventListener('keydown', esc);
-            grid.destroy();
+            // An open field leaves as a blur keeps it (Q5): its text sent while its row is held.
+            ctx.editor?.field.dispatchEvent(new FocusEvent('focusout'));
+            // 2: a field open or something to send; 1: a refusal to show (kept until shown or let go); 0: idle.
+            const busy = (): number => (ctx.editor ? 2 : ctx.edit?.busy?.() ?? 0);
+            if (!busy()) return grid.destroy();
+            // Saving (S8-O3): off the page, alive until nothing is left to send or to hear, then gone.
+            const a: Alive<C> = { grid, ctx, s, c, busy, off: () => {} };
+            // Off the page with its panel (the base removes the box); its listener sees it through.
+            alive.set(c.master, a);
+            // Judged once the events of a change are all told (a refusal's `saveFailed` comes after its states).
+            a.off = grid.kernel.subscribe(() => queueMicrotask(() => void (alive.get(a.c.master) === a && busy() < (a.gone ? 2 : 1) && (alive.delete(a.c.master), a.off(), grid.destroy()))));
           },
         };
+        // Given back: the master's row and context now.
+        if (kept) h.update!(now);
+        return h;
       },
-    },
+    } as SlotPart<'detail'>['part'],
   };
+}
+
+/** A grid kept alive off the page (S8-O3): what its mount held, and its listener's end. */
+interface Alive<C> {
+  readonly grid: GridInstance<C, any>;
+  readonly ctx: GridContext<C>;
+  readonly s: GridSettings<C>;
+  readonly c: NestedContext;
+  readonly busy: () => number;
+  /** Its master row is gone: let go as soon as nothing is in flight. */
+  gone?: number;
+  off: () => void;
 }
 
 /** A master's grid as it was left: its query, open rows, focused cell, top row and the offset into it (the pixels if gone). */

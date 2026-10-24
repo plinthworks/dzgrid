@@ -9,6 +9,10 @@
 // while it is edited), « Serveur injoignable » (a network cut: the save fails with a TypeError, as `fetch` does), a
 // server-paged mode (`?paged=1`: a simulated server, 20 rows a page, « Page suivante dans 3 s »), and Enter's move
 // (`?enter=stay|down`, owner Q3 revised: stay by default).
+// Phase 5 step 8 (owner S8-O5): « Annuler » / « Rétablir » buttons (enabled by `undoChanged`, `api.undo()` /
+// `api.redo()`: the focus goes to the cell given back, the grid says it), the log's « Annulé : … » / « Rétabli : … »;
+// `?tree=1`: the sub-orders as child rows (the D4 shape, `parentId`), Qté and Montant editable on both levels, the
+// « Commande mère » column read-only as the tree's structure (`tree({ structure })`, its tooltip says it).
 import { createGrid, type GridInstance } from '@dzgrid/dom';
 import { badge } from '@dzgrid/dom/parts';
 import { FR } from '@dzgrid/dom/locales/fr';
@@ -19,6 +23,9 @@ import { editors } from '../../packages/dom/src/editors.js';
 import { listEditor } from '../../packages/dom/src/editors-list.js';
 import { motion } from '@dzgrid/dom/motion-gsap';
 import { pagination } from '@dzgrid/dom/pagination';
+import { tree } from '@dzgrid/dom/tree';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+import { AR_TREE } from '@dzgrid/dom/locales/ar-tree';
 import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
 import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
 import { AR_PAGINATION } from '@dzgrid/dom/locales/ar-pagination';
@@ -31,6 +38,7 @@ import { orders, type Status } from './orders.js';
 
 interface Order {
   readonly id: string;
+  readonly parent?: string | null;
   readonly ref: string;
   readonly client: string;
   readonly day: string;
@@ -46,12 +54,14 @@ const W = {
     yes: 'Oui', no: 'Non', locked: 'Non modifiable', integer: 'nombre entier attendu', server: 'refusé par le serveur de démonstration',
     statuses: { pending: 'En attente', ready: 'Préparée', shipped: 'Expédiée', delivered: 'Livrée', cancelled: 'Annulée' },
     sent: '{col} : « {v} » envoyé…', saved: '{col} : enregistré', refused: '{col} refusé : {why}', local: 'Refus sur place : {why}', nothing: 'Rien encore.',
-    motion: 'Animations', offline: 'Serveur injoignable', remove: 'Supprimer cette commande dans 3 s', removed: 'Commande {ref} supprimée', next: 'Page suivante dans 3 s', pick: 'Choisissez d\u2019abord une cellule.' },
+    motion: 'Animations', offline: 'Serveur injoignable', remove: 'Supprimer cette commande dans 3 s', removed: 'Commande {ref} supprimée', next: 'Page suivante dans 3 s', pick: 'Choisissez d\u2019abord une cellule.',
+    undo: 'Annuler', redo: 'Rétablir', undone: 'Annulé : {col}', redone: 'Rétabli : {col}', parent: 'Commande mère', structure: 'Structure de l\u2019arbre : non modifiable' },
   ar: { title: 'الطلبات', ref: 'الطلب', client: 'العميل', day: 'التاريخ', status: 'الحالة', qty: 'الكمية', amount: 'المبلغ', urgent: 'عاجل',
     yes: 'نعم', no: 'لا', locked: 'غير قابل للتعديل', integer: 'المطلوب عدد صحيح', server: 'رفضه خادم العرض',
     statuses: { pending: 'قيد الانتظار', ready: 'جاهزة', shipped: 'مُرسلة', delivered: 'مُسلّمة', cancelled: 'ملغاة' },
     sent: '{col}: «{v}» أُرسل…', saved: '{col}: حُفظ', refused: '{col} مرفوض: {why}', local: 'رفض فوري: {why}', nothing: 'لا شيء بعد.',
-    motion: 'الحركة', offline: 'الخادم غير متاح', remove: 'حذف هذا الطلب بعد 3 ث', removed: 'حُذف الطلب {ref}', next: 'الصفحة التالية بعد 3 ث', pick: 'اختر خلية أولاً.' },
+    motion: 'الحركة', offline: 'الخادم غير متاح', remove: 'حذف هذا الطلب بعد 3 ث', removed: 'حُذف الطلب {ref}', next: 'الصفحة التالية بعد 3 ث', pick: 'اختر خلية أولاً.',
+    undo: 'تراجع', redo: 'إعادة', undone: 'تراجع: {col}', redone: 'إعادة: {col}', parent: 'الطلب الأصلي', structure: 'بنية الشجرة: غير قابلة للتعديل' },
 } as const;
 
 /**
@@ -73,16 +83,20 @@ export interface OrdersEditDemo {
   readonly log: string[];
 }
 
-export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { locale: string; onEvent?: (e: GridEvent<Order>) => void; paged?: boolean; enter?: 'stay' | 'down'; bar?: HTMLElement }): OrdersEditDemo {
+export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { locale: string; onEvent?: (e: GridEvent<Order>) => void; paged?: boolean; enter?: 'stay' | 'down'; bar?: HTMLElement; tree?: boolean }): OrdersEditDemo {
   const ar = o.locale.startsWith('ar');
   const w = ar ? W.ar : W.fr;
   const base = ar ? AR : FR;
-  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, 'validation.integer': w.integer } };
-  // The orders of the tree demo, without their sub-orders: one flat list; « Urgent » added.
-  const rows: Order[] = orders().filter((l) => l.parent === null).map((l, i) => ({ id: l.id, ref: l.ref, client: l.client, day: l.day, status: l.status, qty: l.qty, amount: l.amount, urgent: i % 5 === 0 }));
+  // A tree (`?tree=1`) on the browser's rows only.
+  const asTree = !!o.tree && !o.paged;
+  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, 'validation.integer': w.integer } };
+  // The orders of the tree demo, without their sub-orders: one flat list; « Urgent » added. `?tree=1`: with them, as child rows.
+  const rows: Order[] = orders().filter((l) => asTree || l.parent === null).map((l, i) => ({ id: l.id, ...(asTree && { parent: l.parent }), ref: l.ref, client: l.client, day: l.day, status: l.status, qty: l.qty, amount: l.amount, urgent: i % 5 === 0 }));
   const columns: ColumnDef<Order, any>[] = [
     // Read-only, and seen so: muted, a lock (demos.css), the tooltip says it.
     { id: 'ref', header: w.ref, width: 150, headerTooltip: w.locked, tooltip: () => w.locked, ui: { cellClass: () => 'demo-locked', headerClass: 'demo-locked' } },
+    // The tree's structure (`?tree=1`): marked editable, locked by `tree({ structure })` — read-only, its tooltip says why.
+    ...(asTree ? [{ id: 'parent', header: w.parent, width: 140, editable: true, value: (r: Order) => r.parent ?? '', headerTooltip: w.structure, tooltip: () => w.structure, ui: { cellClass: () => 'demo-locked', headerClass: 'demo-locked' } }] : []),
     { id: 'client', header: w.client, width: 210, editable: true, edit: { required: true, maxLength: 60 } },
     { id: 'day', header: w.day, type: 'day', width: 140, editable: true },
     { id: 'status', header: w.status, type: 'enum', width: 160, editable: true, enumOptions: STATUSES.map((value) => ({ value, label: w.statuses[value] })), ui: { cell: 'status' } },
@@ -115,17 +129,24 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
     }, 300));
   /** The cells whose save we are waiting for, to say « saved » once. */
   const waiting = new Set<string>();
+  /** The Undo / Redo buttons (made with the bar), enabled by `undoChanged`. */
+  const undoB: HTMLButtonElement[] = [];
+  const sync = (u: boolean, r: boolean): void => undoB.forEach((b, i) => b.setAttribute('aria-disabled', String(!(i ? r : u))));
   const id = (k: RowKey, c: string): string => `${k}\n${c}`;
   let grid!: GridInstance<Order>;
   grid = createGrid<Order>(host, {
     ...(o.paged ? { source: sourceRows<Order>({ fetch: fetchPage }), operations: 'server', pagination: { pageSize: 20 } } : { rows }),
     getRowId: (r: Order) => r.id, columns, messages, locale: o.locale, direction: 'auto', label: w.title,
     parts: { status: badge({ tones: { pending: 'warning', ready: 'info', shipped: 'neutral', delivered: 'success', cancelled: 'danger' } }) },
-    features: [editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), motion(), ...(o.paged ? [pagination()] : [])],
+    ...(asTree && { rowClass: (c: { row: Order }) => (c.row.parent ? 'orders-child' : null) }),
+    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), motion(), ...(o.paged ? [pagination()] : [])],
     onEvent(e: GridEvent<Order>) {
       o.onEvent?.(e);
+      if (e.type === 'undoChanged') sync(e.canUndo, e.canRedo);
       if (e.type === 'cellEdited') {
         waiting.add(id(e.key, e.column));
+        // An undo or a redo (the buttons or the keys): said as such.
+        if (e.origin === 'undo' || e.origin === 'redo') return say(fill(e.origin === 'undo' ? w.undone : w.redone, { col: head(e.column) }));
         // The value as the column shows it (the grid's internal context: a demo's shortcut, not an API).
         const g = (grid as unknown as { context: { columns: { get(id: string): ResolvedColumn<Order> | undefined }; ctx: LocaleCtx } }).context;
         const c = g.columns.get(e.column);
@@ -172,6 +193,13 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
       const f = grid.kernel.focus;
       return f?.kind === 'cell' ? grid.kernel.rows.row(f.row)?.data : undefined;
     };
+    // Undo / Redo (owner S8-O5): as Ctrl+Z / Ctrl+Y; aria-disabled (still focusable) while there is nothing.
+    for (const [label, back] of [[w.undo, true], [w.redo, false]] as const) {
+      const b = button(label, () => void (b.getAttribute('aria-disabled') !== 'true' && (back ? api.undo() : api.redo())));
+      b.dataset['undo'] = back ? 'undo' : 'redo';
+      undoB.push(b);
+    }
+    sync(false, false);
     o.bar.replaceChildren(
       check(w.motion, true, (v) => grid.update({ motion: v })),
       check(w.offline, false, (v) => void (offline = v)),
@@ -186,7 +214,10 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
         }, 3000);
       }),
       ...(o.paged ? [button(w.next, () => void setTimeout(() => grid.kernel.dispatch({ type: 'page.go', index: (grid.kernel.rows.page?.index ?? 0) + 1 }, 'api'), 3000))] : []),
+      // Last, in a group of their own (the page's other controls keep their places).
+      Object.assign(document.createElement('span'), { className: 'undo' }),
     );
+    o.bar.lastElementChild!.append(...undoB);
   }
   return { grid, log };
 }

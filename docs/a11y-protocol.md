@@ -701,6 +701,8 @@ noter la phrase dite et la comparer au paquet.
      « Enregistrement en cours » ; le focus va sur la cellule annulée. `Ctrl+Y` : fr « Rétabli : Stock », ar
      « تمت الإعادة: Stock ». Dans un champ ouvert, `Ctrl+Z` défait la frappe, la grille ne dit rien.
      Tout annuler puis `Ctrl+Z` : fr « Rien à annuler », ar « لا شيء للتراجع عنه ».
+     (Étape 8, S8-O6 : la phrase d'annulation et « Enregistrement en cours » sont dites dans la même annonce,
+     « Annulé : Stock. Enregistrement en cours » ; à écouter : la phrase entière, une seule fois.)
 120. **Date.** Sur « Péremption », `F2`, `Alt+↓` : « Chargement du calendrier » peut être dit, puis le calendrier
      (dit par tzslot) ; choisir un jour : retour dans le champ, la date écrite ; `Échap` deux fois depuis le
      calendrier : le premier ferme le calendrier, le second annule. Taper `31/02/2026`, `Entrée` : fr
@@ -742,6 +744,16 @@ noter la phrase dite et la comparer au paquet.
      suivante ; `Entrée` garde, la phrase « enregistré » n’est pas dite (O3).
 124e. **Oui / non (étape 6).** « Urgent » : `Espace` bascule, le lecteur dit « Oui » ou « Non » (poliment) ; la
      ligne n’est pas sélectionnée ; une cellule en lecture seule sélectionne la ligne comme avant.
+124f. **Annuler, étape 8 (`orders-edit.html`, fr puis `?locale=ar-DZ`).** Clavier AZERTY : `Ctrl+Z` (la touche Z)
+     annule, `Ctrl+W` ne fait rien ; clavier arabe : `Ctrl+ظ` annule, `Ctrl+غ` rétablit. Les boutons « Annuler » /
+     « Rétablir » (ar « تراجع » / « إعادة ») : grisés (`aria-disabled`) sans rien à annuler ; pressés, le focus va sur
+     la cellule et la phrase est dite. Annuler une sous-commande dont la commande est fermée (`?tree=1`) : la phrase
+     est dite, le focus reste sur la cellule d'où l'on a appuyé.
+124g. **Arbre et détail (étape 8).** `orders-edit.html?tree=1` : dans le champ de la colonne « Commande », `←` / `→`
+     déplacent le curseur, la ligne ne s'ouvre ni ne se ferme ; « Commande mère » est dite « lecture seule ».
+     `detail.html` : modifier un « Montant » dans les visites d'un patient, `Ctrl+Z` dans cette grille annule la visite
+     seulement ; « Enregistrement lent », fermer le patient pendant l'enregistrement puis le rouvrir : la cellule dit
+     encore « Enregistrement en cours », puis la valeur est gardée ; rien n'est dit sur un panneau fermé.
 
 Consigner le résultat dans `docs/behaviors/editing.md` (fin de la fiche) et dans `ROADMAP.md` (clôture de la
 partie A de la Phase 5). Règle de décision propre à cette section : une phrase de refus manquante ou dite deux

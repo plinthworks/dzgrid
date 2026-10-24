@@ -1,5 +1,5 @@
 import { intentFor, type DisplayIndex, type FocusPos, type KeyOwner, type Problem, type RowKey } from '@dzgrid/core';
-import { emit } from '@dzgrid/core/internal';
+import { emit, lockColumns } from '@dzgrid/core/internal';
 import { treeColumnProblems, treeConflicts, treeShape, type TreeOptions, type TreeRows, type TreeShape } from '@dzgrid/core/tree';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
@@ -21,6 +21,12 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
   readonly lazy?: LazyChildren<T>;
   /** Parents kept pinned under the header while their children scroll, the nearest first (tree-sticky.md): 0 none, 3 by default. */
   readonly sticky?: number;
+  /**
+   * The columns that feed the tree, read-only this phase (owner Q13, O7; the core's `edit-structure` told once
+   * for one marked editable). Default: a path tree's own column (its labels are the path), none for `parentId`
+   * or `children`; given, it replaces the default (`[]` frees a path tree's column).
+   */
+  readonly structure?: readonly string[];
 }
 
 /**
@@ -37,13 +43,16 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
  */
 export function tree<T>(o: TreeFeatureOptions<T>): GridFeature {
   let s: TreeShape<T> | undefined;
-  return { id: 'tree', shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column, o.indent ?? 16, o.lazy, s, o.sticky) };
+  return { id: 'tree', shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column, o.indent ?? 16, o.lazy, s, o.sticky, o.structure ?? (o.path && !o.parentId && !o.children ? null : [])) };
 }
 
 type Rows = TreeRows<unknown>;
 const PAD = 'padding-inline-start';
+/** The cell's indent, read by the field's place (after the chevron, TREE_CSS). */
+const VAR = '--dzg-tree-pad';
 
-function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: number, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined, sticky = 3): FeatureHandle {
+/** `lock`: the structure columns; null: the tree column's, followed (a path tree). */
+function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: number, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined, sticky = 3, lock: readonly string[] | null = []): FeatureHandle {
   const missing = TREE_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`tree: missing ${missing.join(', ')}`);
   const { kernel, el, rowRenderer, doc } = g;
@@ -60,6 +69,13 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     return d.posAt ? (d as Rows) : null;
   };
   const treeColumn = (): string | undefined => column ?? g.columns.visible()[0]?.id;
+  // The structure read-only (Q13): given, once; a path tree's own column, again when it changes (at a paint).
+  let locked = '';
+  const relock = (): void => {
+    const ids = lock ?? [treeColumn()!];
+    if (locked !== (locked = `${ids}`)) lockColumns(kernel, ids);
+  };
+  relock();
   const expand = (rows: readonly RowKey[], expanded: boolean): void => void kernel.dispatch({ type: 'rows.expand', rows, expanded }, 'user');
   /** The row's label in the tree column, as its cell shows it (that column hidden: the first one shown); a filler's own. */
   const nameOf = (key: RowKey, d: Rows): string => {
@@ -71,7 +87,8 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     const data = g.rows.row(key)?.data;
     if (!col || data === undefined) return '';
     try {
-      const v = col.codec.coerce(col.read(data), g.ctx);
+      // As the cell shows it: through the edits (the edited name is the one said).
+      const v = col.codec.coerce(g.edit ? g.edit.read(col, data, key) : col.read(data), g.ctx);
       return v === null ? '' : col.codec.format(v, g.ctx);
     } catch {
       return '';
@@ -176,6 +193,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     const t = cell.firstElementChild;
     if (t?.classList.contains('dzg-toggle')) t.remove();
     cell.style.removeProperty(PAD);
+    cell.style.removeProperty(VAR);
   };
   /** A filler's label, after the toggle: isolated in its own direction, like free text. */
   const labelOf = (cell: HTMLElement): Element | null => cell.querySelector(':scope > .dzg-label');
@@ -184,6 +202,8 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     // Spans are off beside a tree (D9): the grid paints without them.
     beforeRows() {
       if (spans) (g.spans = null), (g.bands = []);
+      // Before the cells are written: a path tree's new tree column read-only in this paint.
+      relock();
     },
     afterRows(f: Frame<unknown>) {
       const d = tree();
@@ -242,7 +262,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
           else if (l.textContent !== node.label) l.textContent = node.label;
         } else l?.remove();
         const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${level * indent}px)`;
-        if (cell.style.getPropertyValue(PAD) !== pad) cell.style.setProperty(PAD, pad);
+        if (cell.style.getPropertyValue(PAD) !== pad) cell.style.setProperty(PAD, pad), cell.style.setProperty(VAR, pad);
       };
       for (const [key, v] of rowRenderer.mounted) decorate(key, v);
       if (stack) for (const [key, v] of stack.mounted) decorate(key, v, true);

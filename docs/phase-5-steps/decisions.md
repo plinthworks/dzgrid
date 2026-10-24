@@ -102,3 +102,18 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S7-O5 / S7-O6 (lead, recommendations kept):** under reduced motion `onCell` is still called with `reduced: true`; the same `orders-edit` demo is extended (paged mode included).
 - **Q3 revised (owner, 2026-10-24):** the DEFAULT of `enterMoves` becomes 'stay': Enter saves and the focus stays on the cell; 'down' (Excel-like, Shift+Enter up) is the option. Sheets, docs and tests updated in step 7.
 - **Saving border vs focus ring (owner feedback, 2026-10-24):** with Enter staying on the cell, the running border must be clearly distinct from the focus ring: its own colour (applied: the palette's warning, `--tz-warning`; contrast.css a cyan in the dark, where its accent and warning are both yellow), a different shape (applied: 3 px inside the 2 px focus ring), the ring kept visible; a browser check (fr light Clinic, ar dark Midnight, reduced motion) and `check:contrast` hue pairs (≥ 60°). It stays in `edit.css`, which used the S7-O1 reserve: 2 101 / 2 200.
+
+## Step 8 (owner, 2026-10-24) — plan `step08-plan.md`
+
+- **S8-O1:** `@dzgrid/dom/edit` 3 750 → 4 000; `@dzgrid/dom/tree` 3 700 → 3 800; `ar-edit` 810 → 900 only if the measure needs it.
+- **S8-O2 (lead, recommendation kept):** `api.undo()` / `api.redo()` behave like the keys (focus, reveal, sentence).
+- **S8-O3:** a nested grid whose panel closes while a save is in flight stays alive until the answer; nothing is lost. `@dzgrid/dom/detail` 3 900 → 4 000.
+- **S8-O4:** undoing a change whose cell is hidden (parent closed, row filtered out): the value is restored and said; focus does not move; nothing is expanded.
+- **S8-O5 (lead, recommendation kept):** demos — an editable tree (`orders-edit?tree=1`) and editable visits in `detail.html`; Undo/Redo buttons in orders-edit.
+- **S8-O6 (owner, 2026-10-24):** `@dzgrid/dom/edit` 4 000 → 4 150 (measured 4 085). After Ctrl+Z the undo sentence is joined with the saving one (« Annulé : Client …, enregistrement en cours »), as built. Lead: Ctrl+Z while an editor waits for its paint is left to the browser (no change in `/editors`).
+
+## Order after Part A (owner, 2026-10-24)
+
+- Step 9 (Angular + Part A gate) → Part B (steps 10–13: ranges, clipboard, fill handle, bulk edit, 0.3.0) → the docs website.
+- Part B starts with the invented orders demo; the owner's real `pharma/stock` sheet (Q19) is integrated when it arrives (no longer a prerequisite).
+- **S8-O7 (owner, 2026-10-24):** `@dzgrid/dom/detail` 4 000 → 4 150 (measured 4 092): nothing lost in a closed nested grid (kept alive while saving or refused, released when its master row leaves or at the outer destroy).

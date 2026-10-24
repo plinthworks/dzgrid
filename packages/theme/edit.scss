@@ -254,6 +254,20 @@ $opaque: linear-gradient(currentColor 0 0);
     outline-offset: -2px;
   }
 
+  // A field in a cell with a chevron (a tree's column, a master's) starts after it, the chevron seen and clickable
+  // (Phase 5 step 8): the tree's indent (`--dzg-tree-pad`, written by the tree) or the cell's padding, the 24 px target.
+  // Its sides are its own direction's (a text field is dir=auto): a field whose direction is not its cell's (a Latin
+  // name in an Arabic grid) takes the room at its other end.
+  .dzg-toggle ~ [data-dzg-owner] {
+    --dzg-tree-at: calc(var(--dzg-tree-pad, var(--dzg-cell-padding-inline, 0.5rem)) + var(--dzg-target-min, 24px));
+    inset-inline-start: var(--dzg-tree-at);
+  }
+
+  :dir(rtl) > .dzg-toggle ~ :dir(ltr),
+  :dir(ltr) > .dzg-toggle ~ :dir(rtl) {
+    inset-inline: 0 var(--dzg-tree-at);
+  }
+
   .dzg-field[inputmode=decimal] {
     text-align: end;
   }

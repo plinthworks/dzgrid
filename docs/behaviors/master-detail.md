@@ -113,6 +113,19 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
 - **`'auto'` heights** (step 10): measured with one `ResizeObserver` (every panel changed in a frame
   sent to the layout at once, one paint); 240 px until measured; a measure is kept after a close (a
   reopened panel starts at it) and across a new row height; the rows above stay where they are.
+- **Editing in panels** (Phase 5 step 8, D11, D13): a panel's cell never edits (F2, characters, double click,
+  double tap, Delete, Backspace, Space, a paste, `api.commit` → `read-only`); Enter still goes into its grid.
+  A nested grid with its own `edit()` and `editors()` edits for itself: its own controller (one `edit()` object
+  shared by every master still gives each grid its own), undo stack, keys, field, bubble and sentences;
+  Ctrl/Cmd+Z in it undoes its own, on the panel's cell the outer grid's. Escape: the field closed (the inner
+  cell), then the panel's cell, then the outer grid's own. Editing the master row never makes its panel's grid
+  again (its stack and marks stay).
+- **A panel that goes while its grid saves** (owner S8-O3): closed, scrolled away or its master row removed while
+  the grid has an open field or a save waiting or in flight — the field leaves as a blur keeps it (its text sent
+  while the row is held; refused there: O1, nothing sent), and the grid is taken off the page, alive, until
+  nothing is left to send or hear; then it is destroyed as before (its state already remembered). If the panel
+  comes back first, the same grid is put back, as it is (its marks, its undo stack; never a second controller on
+  the same rows). Its undo stack goes with the grid. Nothing is said on a panel that is gone. A save refused meanwhile is heard by the application (`saveFailed`) and keeps the grid until its panel comes back and shows the refusal; such a grid is let go when its master row leaves the rows (one still saving: once answered) and, every kept grid, when the grid around is destroyed (review of step 8).
 - **Not with**: spans (D9), a tree on the same grid (Q5): `unsupported-combination`.
 
 ## Where DzGrid differs on purpose

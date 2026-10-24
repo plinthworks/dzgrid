@@ -43,12 +43,12 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/edit': 3100, // Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/dom': 21980, // showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10000,
-  '@dzgrid/dom/tree': 3700,
+  '@dzgrid/dom/tree': 3800, // owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said)
   '@dzgrid/dom/tree-lazy': 1000,
-  '@dzgrid/dom/detail': 3900,
+  '@dzgrid/dom/detail': 4150, // owner S8-O3 (2026-10-24): 3 900 → 4 000 (a nested grid kept alive while it saves); S8-O7: → 4 150 (kept while refused, let go with its master or the grid around)
   // Phase 5 Q16: /editors 8 000; owner S4-O1 (2026-10-23): @dzgrid/dom/edit taken out of it, the two together ≤ 8 000.
   // Split at the step-4 measure: dom/edit 3 311 + 10 % → 3 650, /editors the rest.
-  '@dzgrid/dom/edit': 3750, // owner S7-O1 (2026-10-24): 3 650 → 3 750 (saves end to end: tooltip, network reason, server reapply)
+  '@dzgrid/dom/edit': 4150, // owner S7-O1 (2026-10-24): 3 650 → 3 750 (saves end to end: tooltip, network reason, server reapply); S8-O1: → 4 000 (undo keys, focus, sentences); S8-O6: → 4 150 (measured 4 085)
   // Owner S6-O1 (2026-10-24): /editors 4 350 → 6 500 (dates, yes/no, list, the app's editors; DOM editing ~10 150, a
   // new grant over Q16's 8 000), measured over @dzgrid/dom/popup. S6-O5/O6: the lazy calendar 1 500 (inside Q16 d's
   // 2 600), @dzgrid/dom/internal at its measure + 50 up to 1 250 (the filters' loader moved in, not copied).
@@ -62,7 +62,7 @@ const SIZE_CEILINGS = {
   // Phase 5 Q16: the editing texts 350 / 400 / 450; owner S4-O4 (2026-10-23): 560 / 630 / 810 (the step-4 measure + 10 %).
   '@dzgrid/dom/locales/en-edit': 560,
   '@dzgrid/dom/locales/fr-edit': 630,
-  '@dzgrid/dom/locales/ar-edit': 810,
+  '@dzgrid/dom/locales/ar-edit': 900, // owner S8-O1 (2026-10-24): 810 → 900 only if the measure needs it (the undo sentences' five plural forms: 895)
   // Owner S4-O4: edit.css 1 350 (measured 1 231 at step 4), taken from the theme grants' unused part (S4-O2);
   // owner S5-O2 (2026-10-23): 1 700 with the field and the bubble of step 5; owner S6-O6 (2026-10-24): 2 100 (dates, list).
   // Owner S7-O1 (2026-10-24): a reserve up to 2 200, used for the owner's step-7 request (the saving border inside

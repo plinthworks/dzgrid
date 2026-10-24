@@ -1,4 +1,4 @@
-import type { GridKernel, RowKey } from '@dzgrid/core';
+import type { ChangeSource, GridKernel, RowKey } from '@dzgrid/core';
 import { createEdits, type EditController, type SaveHandler, type UndoResult } from '@dzgrid/core/edit';
 import type { GridFeature } from '../features.js';
 import type { EditMessageKey } from '../part-texts.js';
@@ -8,6 +8,8 @@ import { stale } from './stale.js';
 /** The texts `edit()` needs, from `@dzgrid/dom/locales/<lang>-edit`. */
 export const EDIT_KEYS = [
   'edit.saving', 'edit.saveRefused', 'edit.reasonUnknown', 'edit.reasonNetwork', 'edit.failedMark', 'edit.stale', 'edit.rowStale', 'edit.reapply', 'edit.reapplied', 'header.withStale',
+  // Undo's four, then redo's (`run` reads them by their place).
+  'edit.undone', 'edit.undoneMany', 'edit.undoSkipped', 'edit.nothingToUndo', 'edit.redone', 'edit.redoneMany', 'edit.redoSkipped', 'edit.nothingToRedo',
   'validation.required', 'validation.min', 'validation.max', 'validation.pattern', 'validation.options', 'validation.invalid',
 ] as const satisfies readonly EditMessageKey[];
 
@@ -21,7 +23,9 @@ export interface EditFeatureOptions<T> {
 /** A grid's edits, for the application (and the editors of step 5). */
 export interface EditApi<T> {
   readonly commit: EditController<T>['commit'];
+  /** As Ctrl+Z (owner S8-O2): one gesture back, the focus to its first cell when shown (revealed), one sentence. */
   undo(): UndoResult | null;
+  /** As Ctrl+Y. */
   redo(): UndoResult | null;
   readonly canUndo: boolean;
   readonly canRedo: boolean;
@@ -69,10 +73,25 @@ export function edit<T = unknown>(o: EditFeatureOptions<T> = {}): EditFeature<T>
       const ctl = createEdits(kernel as GridKernel<T>, { ctx: () => g.ctx, ...(o.save && { save: o.save }), ...(win?.AbortController && { abort: () => new win.AbortController() }) });
       const m = marks(g, ctl, o.savingBorder !== false);
       const s = stale(g, m);
+      /** Undo and redo (edit-undo.md 2–13; owner S8-O2, S8-O4): the keys and the API one path, one sentence, the focus. */
+      const run = (back: boolean, source: ChangeSource): UndoResult | null => {
+        const r = back ? ctl.undo(source) : ctl.redo(source);
+        const n = r?.cells.length;
+        const c = r?.cells[0];
+        // Undone or redone, …Many, …Skipped, nothing to: EDIT_KEYS 10–13 for an undo, 14–17 for a redo.
+        const [one, many, skip, none] = EDIT_KEYS.slice(back ? 10 : 14);
+        // Two sentences, a full stop between them (review 3); all skipped: the second alone.
+        m.say(!r ? g.msg(none!) : `${n === 1 ? g.msg(one!, { column: g.columns.get(c!.column)?.def.header ?? c!.column }) : n ? g.msg(many!, { n }) : ''}. ${r.skipped ? g.msg(skip!, { n: r.skipped }) : ''}`.replace(/^\. |\. $/, ''));
+        // Shown (its row displayed, its column visible): focused and revealed; otherwise the focus stays (S8-O4). A field
+        // open (an app's `api.undo()` while the user types) keeps the focus: the undo never closes it.
+        if (c && !g.editor && kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: c.key, column: c.column } }, source).ok) g.restoreFocus();
+        return r;
+      };
       const api: EditApi<T> = {
         commit: ctl.commit,
-        undo: () => ctl.undo(),
-        redo: () => ctl.redo(),
+        // As the keys (owner S8-O2): the focus to the cell given back, revealed, the sentence; the source the API's.
+        undo: () => run(true, 'api'),
+        redo: () => run(false, 'api'),
         get canUndo() { return ctl.canUndo; },
         get canRedo() { return ctl.canRedo; },
         state: ctl.state,
@@ -91,9 +110,19 @@ export function edit<T = unknown>(o: EditFeatureOptions<T> = {}): EditFeature<T>
       apis.set(kernel, api);
       return {
         // The editors (`@dzgrid/dom/editors`) find the grid's edits here.
-        edit: { ...m.seam, api },
+        edit: { ...m.seam, api, busy: () => (ctl.dirty ? 2 : +[...m.cells.values()].some((x) => m.seam.tip!(x.k, x.c))) },
         decorateHeader: s.decorateHeader,
-        keys: s.keys,
+        keys(e, at, owner) {
+          // The letter: `key`'s when it is a Latin one, else the physical key's (`code` KeyZ, KeyY); with Shift:
+          // z → undo, z with Shift or y → redo (`zfalse`, `ztrue`, `yfalse`), y with Shift nothing.
+          const k = (/^[a-z]$/i.test(e.key) ? e.key : e.code.slice(3)).toLowerCase() + e.shiftKey;
+          if (s.keys(e, at, owner)) return true;
+          // Ctrl, or Cmd on a Mac, alone (never Alt: AltGr is Ctrl+Alt on Windows, AltGraph without Ctrl elsewhere); a cell's or a header's own, the focused cell mounted
+          // (not an editor waiting for its paint, typed ahead).
+          if (e.ctrlKey === e.metaKey || e.metaKey !== g.mac || e.altKey || (owner !== 'cell' && owner !== 'header') || (at?.kind === 'cell' && !g.rowRenderer.cell(at.row, at.column)) || !/^(z|yf)/.test(k)) return false;
+          run(k === 'zfalse', 'user');
+          return true;
+        },
         afterRows(f) {
           m.paint(f);
           s.paint(f);

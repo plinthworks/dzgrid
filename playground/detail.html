@@ -19,12 +19,14 @@
 <body>
   <nav><a href="./index.html">← Démos</a></nav>
   <h1 id="title">Maître/détail</h1>
-  <p class="note" id="note">Des patients ; sous un patient ouvert, la grille de ses visites. Le chevron (colonne « Nom ») ouvre et ferme ; au clavier, dans cette colonne : → ouvre, ← ferme (inversé en arabe). ↓ depuis le patient atteint le détail (un seul arrêt) ; Entrée ou F2 entre dans la grille des visites ; Échap revient sur le détail. Une grille de visites rouverte revient triée, filtrée et défilée comme laissée (les 20 derniers patients). « Contenu libre » : un texte de hauteur variable, mesuré (hauteur auto).</p>
+  <p class="note" id="note">Des patients ; sous un patient ouvert, la grille de ses visites. Le chevron (colonne « Nom ») ouvre et ferme ; au clavier, dans cette colonne : → ouvre, ← ferme (inversé en arabe). ↓ depuis le patient atteint le détail (un seul arrêt) ; Entrée ou F2 entre dans la grille des visites ; Échap revient sur le détail. Une grille de visites rouverte revient triée, filtrée et défilée comme laissée (les 20 derniers patients). « Contenu libre » : un texte de hauteur variable, mesuré (hauteur auto). Dans une grille de visites, « Motif » et « Montant » se modifient (double clic, F2 ou une touche), chacune avec son propre Ctrl+Z ; avec « Enregistrement lent », fermez le patient pendant l’enregistrement : rien n’est perdu, la grille rouverte montre l’enregistrement en cours.</p>
   <form class="bar" id="controls">
     <label>Langue <select name="locale"><option value="fr-FR">français</option><option value="ar-DZ">arabe (droite à gauche)</option></select></label>
     <label>Thème <select name="theme"><option value="">système</option><option>light</option><option>dark</option></select></label>
     <label>Patients <select name="rows"><option value="10000">10 000</option><option value="1000000">1 000 000</option></select></label>
     <label>Détail <select name="content"><option value="grid">grille des visites (240 px)</option><option value="free">contenu libre (hauteur auto)</option></select></label>
+    <!-- Step 8 (owner S8-O5): the visits are editable in their own grid (Motif, Montant); a slow save to try closing the panel while it saves. -->
+    <label><input type="checkbox" id="slow"> <span id="slow-label">Enregistrement lent (5 s)</span></label>
     <button type="button" id="none">Tout replier</button>
     <output id="status"></output>
   </form>

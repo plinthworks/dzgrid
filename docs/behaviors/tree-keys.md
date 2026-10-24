@@ -43,7 +43,7 @@ left-to-right page and in an Arabic (right-to-left) one.
   too.
 - **Modifiers**: with Ctrl, Alt, Meta or Shift held, the tree claims nothing (Shift+arrows stay
   range moves, Alt+Down opens a filter popup in a header).
-- **Editing (Phase 5, formerly Part D)**: in an editor, the arrows belong to the editor; the tree claims nothing. On a tree-column cell (no editor open), the tree's keys win: `*` opens the siblings and never starts an edit there (F2, Enter or a double click do; any other printable character still starts one). `editing.md` 6.
+- **Editing (Phase 5, formerly Part D)**: in an editor, the arrows belong to the editor; the tree claims nothing. On a tree-column cell (no editor open), the tree's keys win: `*` opens the siblings and never starts an edit there (F2, Enter or a double click do; any other printable character still starts one). `editing.md` 6. Built and pinned at Phase 5 step 8 (`edit-tree.test.ts`, browser `--only tree`): in the tree column's field Left and Right move the caret in both directions (the row never opens or closes) and `*` is typed; on another editable column `*` starts an edit; the chevron clicked while editing keeps the text, then toggles; the announcement says the edited name (« Patient One collapsed »). An undo onto a row under a closed parent gives the value back where it is: the focus stays, nothing opens (owner S8-O4).
 
 ## Where DzGrid differs on purpose
 - Left/Right in the tree column are not column moves when they can open, close or go to the
