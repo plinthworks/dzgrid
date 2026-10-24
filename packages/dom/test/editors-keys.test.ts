@@ -189,21 +189,22 @@ describe('the tree column’s `*` (tree-keys.md): never a start, whatever the fe
   });
 });
 
-describe('field types not known at step 5', () => {
+describe('day and yes/no columns (step 5 opened nothing there; step 6: a date field, a toggle)', () => {
   const cols: ColumnDef<R, any>[] = [
     { id: 'name', header: 'Name', width: 120 },
     { id: 'day', header: 'Day', type: 'day', width: 100, editable: true, value: () => '2026-01-02' },
     { id: 'ok', header: 'OK', type: 'boolean', width: 60, editable: true, value: (r: R) => r.n % 2 === 0 },
   ];
-  it('day and boolean: no field on F2, Enter, a character or a double click; Delete still clears', () => {
+  it('a day: F2 opens its date field; a yes/no cell: no field on F2 or a character; Delete still clears', () => {
     const t = ed({ columns: cols });
-    const c = t.at('r2', 'day');
+    t.at('r2', 'day');
     t.key('F2');
-    t.key('Enter');
-    t.key('3');
-    c.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
-    expect(t.field()).toBeNull();
+    expect(t.field()!.closest('.dzg-datebox')).not.toBeNull();
+    t.key('Escape', {}, t.field()!);
     t.at('r2', 'ok');
+    t.key('F2');
+    t.key('3');
+    expect(t.field()).toBeNull();
     t.key('Delete');
     expect(t.of('cellEdited').map((e) => [e.column, e.value])).toEqual([['ok', null]]);
   });
@@ -227,10 +228,13 @@ describe('inside the field', () => {
     t.at('r2', 'name');
     t.key('F2');
     const f = t.field()!;
-    for (const [key, init] of [['a', {}], ['*', {}], ['/', {}], [' ', {}], ['ArrowDown', {}], ['ArrowRight', {}], ['Home', {}], ['PageDown', {}], ['a', { ctrlKey: true }], ['z', { ctrlKey: true }]] as const) {
+    for (const [key, init] of [['a', {}], ['*', {}], ['/', {}], [' ', {}], ['ArrowDown', {}], ['ArrowRight', {}], ['a', { ctrlKey: true }], ['z', { ctrlKey: true }]] as const) {
       const ev = t.key(key, init, f);
       expect(ev.defaultPrevented, key).toBe(false);
     }
+    // Home, End, PageUp, PageDown: the field's too, but their default is prevented (in Chrome on a Mac it scrolls
+    // the grid away from the field, step 6): the caret moves by the field's rule (editors-caret.test.ts).
+    for (const key of ['Home', 'PageDown']) t.key(key, {}, f);
     expect(t.field()).toBe(f);
     expect(t.focusAt()).toBe('r2/name');
     expect(isSelected(t.g.kernel.selection, k('r2'))).toBe(false);

@@ -31,6 +31,7 @@ const domAlias = {
   '@dzgrid/dom/tree': fileURLToPath(new URL('./packages/dom/src/tree.ts', import.meta.url)),
   '@dzgrid/dom/detail': fileURLToPath(new URL('./packages/dom/src/detail.ts', import.meta.url)),
   '@dzgrid/dom/edit': fileURLToPath(new URL('./packages/dom/src/edit.ts', import.meta.url)),
+  '@dzgrid/dom/editors-list': fileURLToPath(new URL('./packages/dom/src/editors-list.ts', import.meta.url)),
   '@dzgrid/dom/editors': fileURLToPath(new URL('./packages/dom/src/editors.ts', import.meta.url)),
   '@dzgrid/dom/tree-lazy': fileURLToPath(new URL('./packages/dom/src/tree-lazy.ts', import.meta.url)),
   '@dzgrid/dom/motion-gsap': fileURLToPath(new URL('./packages/dom/src/motion-gsap.ts', import.meta.url)),

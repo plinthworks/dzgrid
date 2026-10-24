@@ -174,6 +174,32 @@ export interface SlotContext {
     clearSelection(): void;
   };
   /**
+   * The application's editor of a cell (`@dzgrid/dom/editors`, Phase 5 step 6; editors.md 18–19): registered as a
+   * part of slot `editor`, named by the column's `edit.editor`, or `editor.<type>` replacing that type's built-in.
+   * Mounted in a host put in the cell (`data-dzg-owner="editor"`); its `focus()` takes the focus (false: the host).
+   * Enter, Tab and Escape reaching the host not prevented: `read()` kept and moved, kept and next, given up.
+   */
+  editor: PartBase & {
+    /** The cell's value as the column's codec reads it; null when blank. */
+    readonly value: unknown;
+    /** The text the grid shows for it. */
+    readonly text: string;
+    readonly row: Readonly<unknown>;
+    readonly key: RowKey;
+    readonly column: ResolvedColumn<unknown>;
+    /** What opened it; `char`, the character typed when a key did. */
+    readonly start: 'f2' | 'enter' | 'key' | 'dblclick' | 'tap' | 'tab';
+    readonly char?: string;
+    /** Through the column's checks and the save: true, closed and moved as Enter; false, refused (the bubble and the sentence), still open. */
+    keep(input: CellInput): boolean;
+    /** Gives the edit up (as Escape). */
+    cancel(): void;
+    /** The part's own refusal: `validation.<code>` (or the app's `app.*`), the bubble, the blink, one sentence; still open. */
+    refuse(code: string): void;
+    /** A node of the part's outside the cell (its own popup) counts as inside: focus there is no blur. Returns its disposer. */
+    own(el: HTMLElement): () => void;
+  };
+  /**
    * A master's detail panel (`@dzgrid/dom/detail`, Phase 4 step 10), mounted in the detail row's one cell
    * (`RowView.slot`); the base destroys it when the row leaves the window or the grid ends.
    */
@@ -192,6 +218,13 @@ export interface SlotContext {
   };
 }
 
+/** What an editor keeps: text typed (read by the column's codec) or a value picked. */
+export type CellInput = { readonly text: string } | { readonly value: unknown };
+/** An editor part's handle (slot `editor`): `read()`, what Enter, Tab and a blur keep (none: nothing kept). */
+export interface EditorHandle extends PartHandle<SlotContext['editor']> {
+  read?(): CellInput | undefined;
+}
+
 export type WiredSlot = keyof SlotContext;
 
 /** A part for a slot, registered by name in `settings.parts`. */
@@ -200,8 +233,8 @@ export interface SlotPart<S extends WiredSlot = WiredSlot> {
   readonly part: Part<SlotContext[S]>;
 }
 
-export function definePart<S extends WiredSlot>(slot: S, part: Part<SlotContext[S]>): SlotPart<S> {
-  return { slot, part };
+export function definePart<S extends WiredSlot>(slot: S, part: S extends 'editor' ? { mount(host: HTMLElement, c: SlotContext['editor']): EditorHandle } : Part<SlotContext[S]>): SlotPart<S> {
+  return { slot, part: part as Part<SlotContext[S]> };
 }
 
 type Registry = Readonly<Record<string, SlotPart>>;
@@ -223,7 +256,7 @@ export function featureParts(features: readonly GridFeature[] = [], own: () => R
 }
 
 /** The feature each slot needs; the cell is the base's. */
-const NEEDS: Partial<Record<PartSlot, string>> = { header: 'slots', overlay: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', footer: 'pagination', detail: 'detail' };
+const NEEDS: Partial<Record<WiredSlot, string>> = { header: 'slots', overlay: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', footer: 'pagination', detail: 'detail', editor: 'editors' };
 const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));
 
 /**
@@ -235,7 +268,7 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
   const has = new Set(s.features?.map((f) => f.id));
   const missing = (path: string, detail?: string, severity: Problem['severity'] = 'warning'): Problem[] => (detail && !has.has(detail) ? [{ code: 'missing-feature', severity, path, detail }] : []);
   return [
-    ...Object.keys(s.parts ?? {}).flatMap((n) => missing(`parts.${n}`, NEEDS[s.parts![n]!.slot])),
+    ...Object.keys(s.parts ?? {}).flatMap((n) => missing(`parts.${n}`, NEEDS[s.parts![n]!.slot as WiredSlot])),
     ...(paged ? missing('settings.pagination', 'pagination') : []),
     // A selection rule without its feature (step 21): an error, the grid selects nothing (fail closed).
     ...(s.selection?.canSelect ? missing('settings.selection.canSelect', 'rules', 'error') : []),

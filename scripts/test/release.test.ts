@@ -47,6 +47,11 @@ describe('0.2.0, the four packages', () => {
     expect(JSON.parse(readFileSync(`${ROOT}packages/theme/package.json`, 'utf8')).exports['./edit.css']).toBe('./edit.css');
   });
 
+  it('export the Phase 5 step 6 subpath @dzgrid/dom/editors-list (owner S6-O7), built like the others', () => {
+    expect(Object.keys(pkg('dom').exports)).toContain('./editors-list');
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/editors-list'/);
+  });
+
   it('keep gsap and tzslot optional peers', () => {
     const dom = pkg('dom');
     expect(dom.peerDependenciesMeta).toEqual({ '@tzslot/core': { optional: true }, '@tzslot/dom': { optional: true }, gsap: { optional: true } });

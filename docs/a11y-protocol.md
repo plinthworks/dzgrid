@@ -732,6 +732,17 @@ noter la phrase dite et la comparer au paquet.
      (`abc` dans « Qté ») montre la bulle sous la cellule (au-dessus si pas de place), jamais sous le clavier ni
      sur le champ ; le lecteur (VoiceOver, TalkBack) dit le nom du champ, puis la phrase du refus.
 
+124c. **Calendrier (étape 6).** Page `orders-edit.html` (fr, puis `?locale=ar-DZ`), « Date » : F2 puis `Alt+↓`
+     (ou le bouton) : le lecteur dit le dialogue « Ouvrir le calendrier », puis le jour sélectionné ; les flèches
+     disent les jours (inversées en arabe) ; `Entrée` écrit la date, le focus revient au champ, qui est dit
+     « liste déroulante » avec sa valeur ; `Échap` deux fois : le calendrier, puis la modification. Si le
+     morceau ne se charge pas (réseau coupé) : « Le calendrier n’a pas pu se charger » dit une fois, « Réessayer ».
+124d. **Liste (étape 6).** « Statut » : F2 : « Statut, O-0002, liste déroulante, En attente » ; `↓` dit chaque
+     option ; taper `l` va à « Livrée » ; en arabe une lettre (« م ») va à l’option et répétée passe à la
+     suivante ; `Entrée` garde, la phrase « enregistré » n’est pas dite (O3).
+124e. **Oui / non (étape 6).** « Urgent » : `Espace` bascule, le lecteur dit « Oui » ou « Non » (poliment) ; la
+     ligne n’est pas sélectionnée ; une cellule en lecture seule sélectionne la ligne comme avant.
+
 Consigner le résultat dans `docs/behaviors/editing.md` (fin de la fiche) et dans `ROADMAP.md` (clôture de la
 partie A de la Phase 5). Règle de décision propre à cette section : une phrase de refus manquante ou dite deux
 fois (114–117), une bordure animée dite (113), un focus perdu ou ramené de force (116, 118, 123), une touche

@@ -83,3 +83,12 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S5-O3:** new `-editors` text bundles en/fr/ar 450 / 500 / 620 (the 5 parse codes move there from `-edit`).
 - **S5-O4:** on touch, a double tap opens the editor; a single tap selects.
 - **S5-O5:** default input length cap 1 000 characters (the app can change it).
+
+## Step 6 (owner, 2026-10-24) — plan `step06-plan.md`
+
+- **S6-O1:** `/editors` 4 350 → 6 500 (DOM editing ~10 150 vs the 8 000 of Q16: a new grant).
+- **S6-O2:** our own list (APG combobox, folded Arabic type-ahead), not the native `<select>`.
+- **S6-O3 (lead, recommendation kept):** focus stays on the cell; no hidden proxy input; manual check 124a decides (blocking for the Part A close); EditContext only after a spike.
+- **S6-O4:** the calendar is downloaded on its button only (typing a date downloads nothing); the editors sheet is updated.
+- **S6-O5 + S6-O6:** date-and-time calendar with tzslot's hour/minute menus; `edit.css` 1 700 → 2 100; the tzslot loader moved (not copied) into `@dzgrid/dom/internal` (ceiling measure + 50, up to 1 250); new lazy calendar chunk 1 500 (inside the 2 600 of Q16 d).
+- **S6-O7 (2026-10-24):** `/editors` measured 7 158 / 6 500: the list moves to its own entry `@dzgrid/dom/editors-list` (ceiling at the measure + 10 %, ~1 650), loaded only when a column has a list; `/editors` stays ≤ 6 500.

@@ -3,7 +3,7 @@ import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import { el } from './dom.js';
 import { form, type Body, type Changed, type F } from './forms.js';
-import { notice, once, type Once } from './lazy.js';
+import { notice, once, type Once } from '@dzgrid/dom/internal';
 import { injectFilterStyles } from './styles.js';
 
 type C = SlotContext['filter'];

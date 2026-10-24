@@ -132,3 +132,68 @@ dark: axe 0 with each editor open.
   as they are (the codec reads them back: kept unchanged, nothing is saved).
 - Review (2026-10-24): `edit.maxLength` — a whole number ≥ 1 is the cap (above 2^31 − 1: clamped); **0 or
   Infinity: no cap**; absent: 1 000; any other value (negative, fractional, NaN): 1 000.
+
+## Built at step 6 (2026-10-24, `@dzgrid/dom/editors` part 2, `@dzgrid/dom/editors-list`)
+- 1 (choice, in this order): `edit.editor` a built-in name (`text`, `number`, `day`, `instant`, `boolean`, `list`); another
+  name → the part of slot `editor` of that name (none: `unknown-part`, no editor); else a part `editor.<type>`
+  replaces that type's built-in; else `edit.options` given, or an `enum` column → the list; else by type.
+  `edit.editor: 'list'` without options: `invalid-column` at `columns.<id>.edit.editor`, a text field. More than 500
+  options: `invalid-column` at `columns.<id>.edit.options` (detail `500`), a text field read by the codec.
+- **The list is its own entry** (owner S6-O7): `editors({ list: listEditor })` with `listEditor` from
+  `@dzgrid/dom/editors-list`; without it a list column opens a text field read by its codec (an enum's labels and
+  aliases read) and one warning `missing-feature` at `columns.<id>.edit`, detail `@dzgrid/dom/editors-list`.
+- 6: the opening text is written by the editors, not the column's display format: a day as numbers in
+  `dayFieldOrder`, two-digit day and month, four-digit year, the locale's separator (its bidi marks dropped), the
+  grid's digits; an instant that day in the grid's zone, then `HH:mm` (24 h), `:ss` only when not 0. The example in
+  the placeholder and in `validation.day {pattern}` is today written so. **Written-value rule**: Enter, Tab or a blur
+  with the text the grid wrote (at the opening or by a pick) unchanged keep that value (an untouched second reading
+  of a repeated hour is not refused; a reading picked is kept as picked); any typed change goes through the codec.
+- 7 (**the calendar on its button**, owner S6-O4): the calendar is downloaded only when the button is hovered or
+  pressed, or at the first open (button or Alt+ArrowDown); typing a date, opening the field or focusing it never
+  downloads tzslot (replaces « focusing the field prefetches it »). One chunk (`editors/dates/calendar.js`), imported
+  once; a failure is forgotten so Retry imports again. The field is an ARIA 1.2 combobox opening a dialog
+  (`role="combobox"`, `aria-haspopup="dialog"`, `aria-expanded`, `aria-controls`, `aria-keyshortcuts`): a text box
+  may not carry `aria-expanded` (axe, Chrome). `editors({ calendar: false })`: no button, typing only, nothing loaded.
+- 7–8: the dialog is modal (`PopupHost`), under the field (above when no room), never over it; focus on the day
+  selected or today; while loading `role=status` « Chargement du calendrier » and `aria-busy`, focus on the dialog's
+  box; failed: `role=alert` and Retry (`grid.retry`), the error reported. A day picked writes the field and closes;
+  an instant: the day moves the focus to tzslot's hour menu, each menu change writes the field, Enter on a menu
+  closes. Escape in the dialog closes it only (focus back in the field, caret at the end); a second Escape gives the
+  edit up. A press outside closes the dialog, the field's blur rule then keeps (Q5).
+- 9 (changed): without tzslot the import fails like an offline chunk — the alert and Retry; no `missing-feature`
+  (a missing package cannot be told from a failed network without importing). The app turns the button off with
+  `calendar: false`.
+- Instants: tzslot's hour and minute menus (`readingStyle: 'named'`, 24 h, the grid's zone): the hour a clock skips
+  is not offered, the repeated hour twice by its offsets (owner S6-O5); a day that never was (Samoa 2011-12-30) is
+  disabled. **Days** are zone-free calendar days: no day is disabled there (a deviation from the plan's wording).
+- 10–11: Space and Enter toggle an editable yes/no cell (Enter goes first to a part whose `focus()` takes it), a double
+  click or a double tap toggles once (the browser's double click after a double tap is not a second toggle), Delete
+  clears; one save each, origin `edit`, no `editingStarted`; the new text said politely; refused: the blink and the
+  sentence. A yes/no cell is skipped by Tab (it opens no editor).
+- 12–17: the combobox in the cell keeps the focus, the listbox in a popup under the cell (`aria-activedescendant`);
+  options ≥ 24 px (44 px under a coarse pointer); Up/Down, Home/End, PageUp/PageDown clamped; letters within 500 ms a
+  folded prefix (case, accents, tashkil, alef forms), the same letter again cycles, Backspace shortens it; Space picks
+  and keeps without moving (a letter during a prefix); Enter keeps and moves, Tab keeps and goes on, Escape gives up;
+  a press on an option keeps (the focus stays). A blur keeps the active option (unmoved, it is the cell's own value:
+  nothing saved). An options function is called at the opening with the row and `settings.context`; one that throws
+  is reported and opens nothing. Refused: the list closes, the combobox stays invalid under the bubble; Down shows it.
+- 18–19 (the app's editor): a part of slot `editor` gets `{ value, text, row, key, column, start, char?, keep(input),
+  cancel(), refuse(code), own(el) }` and the base; its handle may give `read()`, what Enter, Tab and a blur keep (none:
+  nothing kept). `keep(input)` keeps what it is given and moves as Enter; refused, it stays open under the bubble.
+  Keys the part prevents are its own. A part that throws at mount is reported, the cell focused, not tried again on
+  that cell until its row's data changes. `destroy()` runs before its host is emptied.
+- Field keys (found on the playground): Home, End, PageUp, PageDown in an open field are the field's — Home and End
+  move the caret (Shift extends the selection), the pages do nothing — and the grid never scrolls under it. Chrome
+  on macOS scrolls the nearest scroller on Home/End instead of moving the caret: the grid ran to its last row and the
+  edit was kept out of sight.
+
+## Review of step 6 (2026-10-24)
+- The list: an empty options list moves nothing; options (or an options function) that give no list: refused
+  « invalid » (the blink, the sentence), nothing opens, one warning `invalid-column` at `columns.<id>.edit.options`
+  per column. **`aria-selected` follows the active option** (APG select-only combobox); the check mark follows it.
+- Field keys: Shift+Home and Shift+End keep the selection's anchor (the end it started from).
+- Instants: seconds are floored, never rounded — 23:59:59.5 opens as 23:59:59 (never « 24:00 »), 12:05:00.600 as 12:05;
+  an untouched text keeps the stored value, milliseconds included (nothing saved).
+- Yes/no: a held Space or Enter (key repeat) toggles once and selects nothing.
+- The app's editor: a `mount` that gives no handle is a broken part (reported, the cell focused, not tried again on that
+  cell until its data changes); `cancel()` and `refuse()` after the editor closed do nothing.

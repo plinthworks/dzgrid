@@ -13,11 +13,12 @@ import { AR_EDIT } from '../src/locales/ar-edit.js';
 
 const BUNDLES = { en: EN_EDITORS, fr: FR_EDITORS, ar: AR_EDITORS } as const;
 const holes = (v: unknown): string[] => [...new Set([...JSON.stringify(v).matchAll(/\{(\w+)\}/g)].map((m) => m[1]!))].sort();
+const STEP6 = ['edit.calendar', 'edit.calendarLoading', 'edit.calendarFailed', 'edit.optionNotInList'];
 const PARSE = ['validation.parse', 'validation.day', 'validation.invalid-instant', 'validation.wall-time-skipped', 'validation.wall-time-ambiguous'];
 
 describe('the -editors bundles', () => {
-  it('have exactly the keys editors() needs: two sentences, the field name, the five reading codes', () => {
-    expect([...EDITORS_KEYS].sort()).toEqual(['edit.refused', 'edit.refusedDropped', 'editors.fieldName', ...PARSE].sort());
+  it('have exactly the keys editors() needs: two sentences, the field name, the five reading codes, the calendar and the list (step 6)', () => {
+    expect([...EDITORS_KEYS].sort()).toEqual(['edit.refused', 'edit.refusedDropped', 'editors.fieldName', ...PARSE, ...STEP6].sort());
     for (const b of Object.values(BUNDLES)) expect(Object.keys(b.text).sort()).toEqual([...EDITORS_KEYS].sort());
   });
 
@@ -43,5 +44,13 @@ describe('the -editors bundles', () => {
     expect(FR_EDITORS.text['edit.refusedDropped']).toBe('{column} : valeur refusée, modification annulée');
     expect(AR_EDITORS.text['editors.fieldName']).toBe('{column}، {row}');
     expect(FR_EDITORS.text['validation.parse']).toBe('nombre attendu');
+  });
+
+  it('the calendar and list wording (editors.md « Texts »; Retry is the base\'s grid.retry)', () => {
+    expect([EN_EDITORS, FR_EDITORS, AR_EDITORS].map((b) => b.text['edit.calendar'])).toEqual(['Open calendar', 'Ouvrir le calendrier', 'فتح التقويم']);
+    expect([EN_EDITORS, FR_EDITORS, AR_EDITORS].map((b) => b.text['edit.calendarLoading'])).toEqual(['Loading calendar', 'Chargement du calendrier', 'جارٍ تحميل التقويم']);
+    expect([EN_EDITORS, FR_EDITORS, AR_EDITORS].map((b) => b.text['edit.calendarFailed'])).toEqual(['Calendar could not load', 'Le calendrier n\u2019a pas pu se charger', 'تعذّر تحميل التقويم']);
+    expect([EN_EDITORS, FR_EDITORS, AR_EDITORS].map((b) => b.text['edit.optionNotInList'])).toEqual(['{label} (not in the list)', '{label} (hors liste)', '{label} (خارج القائمة)']);
+    expect(EDITORS_KEYS as readonly string[]).not.toContain('grid.retry');
   });
 });

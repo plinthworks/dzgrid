@@ -61,6 +61,10 @@
       "types": "./src/editors.ts",
       "default": "./src/editors.ts"
     },
+    "./editors-list": {
+      "types": "./src/editors-list.ts",
+      "default": "./src/editors-list.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"

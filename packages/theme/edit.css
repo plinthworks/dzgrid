@@ -163,11 +163,13 @@
     background: var(--tz-bg);
     min-inline-size: 0;
   }
-  .dzg-row:hover:where(:not([data-spans])) .dzg-field,
-  .dzg-row[data-hover] .dzg-field {
+  .dzg-row:hover:where(:not([data-spans])) :is(.dzg-field, .dzg-datebox),
+  .dzg-row[data-hover] .dzg-field,
+  .dzg-row[data-hover] .dzg-datebox {
     background: var(--dzg-row-hover-bg, color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg)));
   }
-  .dzg-row[aria-selected=true] .dzg-field {
+  .dzg-row[aria-selected=true] .dzg-field,
+  .dzg-row[aria-selected=true] .dzg-datebox {
     background: var(--dzg-row-selected-bg, color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg)));
   }
   .dzg-field:focus {
@@ -205,6 +207,117 @@
     background: var(--dzg-refused-color, var(--tz-danger));
     clip-path: path(evenodd, "M6 0a6 6 0 1 1 0 12a6 6 0 1 1 0-12zM5 2.5h2v4.5h-2zM5 8.2h2v2h-2z");
   }
+  .dzg-datebox {
+    background: var(--tz-bg);
+  }
+  .dzg-calbtn {
+    position: relative;
+    flex: none;
+    inline-size: 24px;
+    block-size: 24px;
+    margin-inline-end: 0.125rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: var(--tz-fg-muted);
+    background: none;
+    cursor: pointer;
+  }
+  .dzg-calbtn::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    background: currentColor;
+    clip-path: path(evenodd, "M3 0h2v1h4V0h2v1h3v13H0V1h3zM1.5 4.5v8h11v-8z");
+  }
+  .dzg-calbtn:hover {
+    color: var(--tz-fg);
+  }
+  .dzg-combo {
+    display: flex;
+    align-items: center;
+    padding-inline-end: 1.5em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: default;
+  }
+  .dzg-combo::after {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(50% - 4px);
+    inset-inline-end: 0.5rem;
+    inline-size: 10px;
+    block-size: 6px;
+    background: currentColor;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    pointer-events: none;
+  }
+  .dzg-listbox {
+    min-inline-size: 10rem;
+    max-inline-size: 30rem;
+    margin: -0.25rem;
+  }
+  .dzg-opt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-block-size: 24px;
+    padding-block: 0.125rem;
+    padding-inline: 0.5rem 1.75rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+  }
+  @media (pointer: coarse) {
+    .dzg-opt {
+      min-block-size: 44px;
+    }
+  }
+  .dzg-opt:hover {
+    background: var(--dzg-row-hover-bg, color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg)));
+  }
+  .dzg-opt--active {
+    background: var(--dzg-row-selected-bg, color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg)));
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: -2px;
+  }
+  .dzg-opt[aria-selected=true]::after {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(50% - 5px);
+    inset-inline-end: 0.5rem;
+    inline-size: 10px;
+    block-size: 10px;
+    background: currentColor;
+    clip-path: polygon(0 55%, 15% 40%, 38% 62%, 85% 12%, 100% 27%, 38% 92%);
+  }
+  .dzg-opt--out {
+    color: var(--tz-fg-muted);
+    font-style: italic;
+  }
+  .dzg-cal {
+    --tz-cal-outside-opacity: 1;
+    min-inline-size: 16rem;
+  }
+  .dzg-cal:focus {
+    outline: none;
+  }
+  .dzg-cal:focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: 2px;
+  }
+  .dzg-cal .dzg-fretry {
+    min-block-size: 24px;
+    margin-block-start: 0.25rem;
+    padding-inline: 0.75rem;
+    border: var(--dzg-line, 1px) solid var(--tz-border);
+    border-radius: var(--dzg-radius, 0.375rem);
+    font: inherit;
+    color: var(--tz-fg);
+    background: var(--tz-bg-raised);
+    cursor: pointer;
+  }
   @media (forced-colors: active) {
     .dzg-field {
       color: FieldText;
@@ -215,6 +328,27 @@
     }
     .dzg-field[aria-invalid=true] {
       outline: 2px dashed CanvasText;
+    }
+    .dzg-opt--active {
+      forced-color-adjust: none;
+      color: HighlightText;
+      background: Highlight;
+      outline: 2px solid CanvasText;
+    }
+    .dzg-calbtn::before {
+      forced-color-adjust: none;
+      background: ButtonText;
+    }
+    .dzg-combo::after {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .dzg-opt[aria-selected=true]::after {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .dzg-opt--active[aria-selected=true]::after {
+      background: HighlightText;
     }
     .dzg-bubble {
       border: 1px solid CanvasText;

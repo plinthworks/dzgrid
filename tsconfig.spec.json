@@ -80,6 +80,9 @@
       "@dzgrid/dom/edit": [
         "./packages/dom/src/edit.ts"
       ],
+      "@dzgrid/dom/editors-list": [
+        "./packages/dom/src/editors-list.ts"
+      ],
       "@dzgrid/dom/editors": [
         "./packages/dom/src/editors.ts"
       ],

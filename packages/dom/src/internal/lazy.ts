@@ -1,5 +1,3 @@
-import { el, tx } from './dom.js';
-
 /** A loader: each module fetched once; `done` gives one that came, at once. */
 export interface Once<K, M> {
   load(k: K): Promise<M>;
@@ -7,11 +5,12 @@ export interface Once<K, M> {
 }
 
 /**
- * The filters' lazy chunks (step 14's date kits, step 15's set list), each imported once: a
- * module that loaded is kept, so a later popup draws at once; one that failed is forgotten, so
- * Retry imports it again. A module `ok` refuses is a failure (`filters: no <what><k>`).
+ * The lazy chunks of the features (the filters' date kits, step 14, and set list, step 15; the editors'
+ * calendar, Phase 5 step 6), each imported once: a module that loaded is kept, so a later popup draws at
+ * once; one that failed is forgotten, so Retry imports it again. A module `ok` refuses is a failure
+ * (`<who>: no <what><k>`). Moved here from `filters/lazy.ts` at Phase 5 step 6 (owner S6-O6: shared, not copied).
  */
-export function once<K, M>(get: (k: K) => Promise<M>, ok: (m: M) => unknown, what: string): Once<K, M> {
+export function once<K, M>(get: (k: K) => Promise<M>, ok: (m: M) => unknown, what: string, who = 'filters'): Once<K, M> {
   const asked = new Map<K, Promise<M>>();
   const done = new Map<K, M>();
   return {
@@ -20,7 +19,7 @@ export function once<K, M>(get: (k: K) => Promise<M>, ok: (m: M) => unknown, wha
       let p = asked.get(k);
       if (!p) {
         asked.set(k, (p = new Promise<M>((res) => res(get(k))).then((m) => {
-          if (!ok(m)) throw new TypeError(`filters: no ${what}${k}`);
+          if (!ok(m)) throw new TypeError(`${who}: no ${what}${k}`);
           done.set(k, m);
           return m;
         })));
@@ -45,11 +44,14 @@ export interface Notice {
  * Retry button when it failed; `text` gives the line for each, `retry` the button's.
  */
 export function notice(doc: Document, box: HTMLElement, again: () => void, text: (what: string) => string, retry: () => string, busy: HTMLElement = box): Notice {
-  const note = el(doc, 'p');
-  const b = el(doc, 'button', 'dzg-fretry');
+  const note = doc.createElement('p');
+  const b = doc.createElement('button');
+  b.className = 'dzg-fretry';
   b.type = 'button';
   b.addEventListener('click', again);
   let said = '';
+  // A text written only when it changes: a paint that changes nothing touches nothing.
+  const tx = (e: Node, v: string): void => void (e.textContent !== v && (e.textContent = v));
   const words = (): void => {
     if (said) tx(note, text(said));
     tx(b, retry());

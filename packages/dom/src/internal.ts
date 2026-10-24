@@ -7,3 +7,4 @@
 export { mounted, type Mounted } from './internal/mounted.js';
 export { settled } from './internal/settled.js';
 export { cellKeys, composing, type CellPart } from './internal/keys.js';
+export { once, notice, type Once, type Notice } from './internal/lazy.js';

@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 step 5).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -3111,6 +3111,325 @@ async function editorsChecks(name, ctx) {
     check(name, 'editors (mobile emulation): one tap only focuses; a double tap opens the field, focused', !one && st.open && st.active && st.at === 'm2/stock', { one, st });
     await mctx.close();
   }
+  // Home, End, PageUp, PageDown in an open field (step 6, found on the playground): Chrome on a Mac scrolls the grid on
+  // Home/End instead of moving the caret, PageUp/PageDown scroll it everywhere; the field takes them, the view stays.
+  {
+    const { page, errors } = await open('locale=fr-FR&theme=light&skin=clinic&rows=200');
+    await focusCell(page, 'm3', 'note');
+    await page.keyboard.press('F2');
+    await page.keyboard.type('abc');
+    const keys = [];
+    for (const k of ['Home', 'End', 'PageDown', 'PageUp', 'End']) {
+      await page.keyboard.press(k);
+      await page.waitForTimeout(250);
+      keys.push(await page.evaluate(() => [document.querySelector('.dzg-viewport').scrollTop, document.querySelector('.dzg-field')?.selectionStart]));
+    }
+    await page.keyboard.press('Enter');
+    await frames(page, 3);
+    const after = await page.evaluate((s) => ({ top: document.querySelector('.dzg-viewport').scrollTop, text: eval(s)?.textContent }), cellSel('m3', 'note'));
+    check(name, 'editors: Home, End, PageUp, PageDown in a field move the caret only, the grid never scrolls; Enter keeps in view',
+      keys.every(([top]) => top === 0) && keys.map((x) => x[1]).join() === '0,3,3,3,3' && after.top === 0 && after.text === 'abc', { keys, after });
+    check(name, 'editors: no page error (field keys)', errors.length === 0, errors);
+    await page.close();
+  }
+}
+
+/**
+ * The step-6 editors on the test page (`editors.html?kinds=1`; step06-plan « Browser »; `-- --only editors`): the
+ * calendar lazy (no request before the first open, one then, none after; a failing chunk shows the alert and Retry
+ * loads it), its dialog in the top layer never over the field, its keys (mirrored in Arabic), Escape twice; an
+ * instant's hour menu on the clock-change days of Paris (02 twice, 02 absent) and the winter reading kept; the list
+ * (combobox, listbox in the top layer, Arabic type-ahead cycling); the yes/no toggle by Space (the row not selected);
+ * axe 0 with each open, also in forced colours; 320 px.
+ */
+async function editorsKindsChecks(name, ctx) {
+  const open = async (qs, size = { width: 1400, height: 800 }) => {
+    const page = await ctx.newPage();
+    await page.setViewportSize(size);
+    const errors = [];
+    const asked = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error' && !/offline \(calfail/.test(m.text())) errors.push(m.text()); });
+    page.on('request', (r) => { if (/editors\/dates\/calendar|dzgrid-browser\/(dom|core)\.js/.test(r.url())) asked.push(r.url().replace(/^.*\/(packages|node_modules)/, '$1')); });
+    await page.goto(site.root(`packages/dom/test/browser/editors.html?kinds=1&${qs}`));
+    await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    await frames(page, 3);
+    return { page, errors, asked };
+  };
+  const focusCell = (page, id, col) => page.evaluate(([id, col]) => window.t.grid.api.focusCell(window.t.key(id), col), [id, col]).then(() => frames(page, 2));
+  const keyText = async (page, ch) => {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', key: ch, text: ch, unmodifiedText: ch });
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: ch });
+    await cdp.detach();
+  };
+  const rects = (page) => page.evaluate(() => {
+    const f = document.querySelector('.dzg-field');
+    const p = document.querySelector('.dzg-popup');
+    const r = (e) => e && (({ top, bottom, left, right }) => ({ top, bottom, left, right }))(e.getBoundingClientRect());
+    let top = false;
+    try { top = !!p?.matches(':popover-open'); } catch {}
+    return { field: r(f), pop: r(p), top, w: innerWidth, h: innerHeight };
+  });
+  const clear = (x) => !!x.pop && !!x.field && (x.pop.top >= x.field.bottom - 0.5 || x.pop.bottom <= x.field.top + 0.5) && x.pop.left >= -0.5 && x.pop.right <= x.w + 0.5;
+  const saved = (page) => page.evaluate(() => window.t.events.filter((e) => e.type === 'cellEdited').map((e) => [e.column, e.value]));
+  if (name === 'webkit') {
+    // WebKit (spike rule): the calendar's dialog and the list in the top layer, clear of the field.
+    const { page } = await open('locale=fr-FR&theme=light&skin=clinic');
+    await focusCell(page, 'm2', 'exp');
+    await page.keyboard.press('F2');
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForSelector('.dzg-popup[role=dialog] .tz-cal', { timeout: 15000 });
+    const a = await rects(page);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await focusCell(page, 'm4', 'status');
+    await page.keyboard.press('F2');
+    await frames(page, 2);
+    const b = await rects(page);
+    check(name, 'editors kinds (WebKit): the calendar and the list in the top layer, clear of the field', a.top && b.top && clear(a) && clear(b), { a, b });
+    await page.close();
+    return;
+  }
+
+  for (const [tag, qs, rtl] of [['fr light clinic', 'locale=fr-FR&theme=light&skin=clinic', false], ['ar rtl dark midnight', 'locale=ar-DZ&theme=dark&skin=midnight', true]]) {
+    const { page, errors, asked } = await open(qs);
+    // Lazy: typing a date downloads nothing; the first open one chunk (and tzslot); the second none.
+    await focusCell(page, 'm2', 'exp');
+    await page.keyboard.press('F2');
+    await page.keyboard.type('1');
+    await page.keyboard.press('Backspace');
+    const before = asked.length;
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForSelector('.dzg-popup[role=dialog] .tz-cal', { timeout: 15000 });
+    await frames(page, 2);
+    const first = asked.length;
+    let r = await rects(page);
+    const day0 = await page.evaluate(() => document.activeElement?.dataset?.date ?? null);
+    let v = await axe(page);
+    check(name, `editors kinds ${tag}: no calendar request before the first open, then the chunk (and tzslot) once; the dialog in the top layer, clear of the field, focus on a day; axe 0`,
+      before === 0 && first >= 1 && asked.filter((u) => /calendar\.js$/.test(u)).length === 1 && r.top && clear(r) && day0 === '2026-03-15' && v.length === 0, { before, asked, r, day0, v });
+    // Arrows (mirrored in Arabic), Enter picks: the field written, the dialog closed, focus back in the field.
+    await page.keyboard.press('ArrowRight');
+    const day1 = await page.evaluate(() => document.activeElement?.dataset?.date ?? null);
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const picked = await page.evaluate(() => ({ dialog: !!document.querySelector('.dzg-popup[role=dialog]'), value: document.querySelector('.dzg-field')?.value, active: document.activeElement === document.querySelector('.dzg-field') }));
+    check(name, `editors kinds ${tag}: ArrowRight moves to the ${rtl ? 'previous' : 'next'} day (tzslot's mirroring), Enter picks it: written, closed, the field focused`,
+      day1 === (rtl ? '2026-03-14' : '2026-03-16') && !picked.dialog && picked.active && /1[46]/.test(picked.value ?? ''), { day1, picked });
+    // Escape twice: the calendar, then the edit; nothing saved.
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForSelector('.dzg-popup[role=dialog] .tz-cal');
+    await page.keyboard.press('Escape');
+    const esc1 = await page.evaluate(() => ({ dialog: !!document.querySelector('.dzg-popup[role=dialog]'), field: !!document.querySelector('.dzg-field'), active: document.activeElement === document.querySelector('.dzg-field') }));
+    await page.keyboard.press('Escape');
+    const esc2 = await page.evaluate(() => !!document.querySelector('.dzg-field'));
+    const s0 = await saved(page);
+    check(name, `editors kinds ${tag}: Escape closes the calendar only (the field stays, focused), a second Escape the edit; nothing saved; the chunk not fetched again`,
+      !esc1.dialog && esc1.field && esc1.active && !esc2 && s0.length === 0 && asked.filter((u) => /calendar\.js$/.test(u)).length === 1, { esc1, esc2, s0, asked });
+    // An instant on 25/10/2026 in Paris: 02 twice in the hour menu; the winter reading picked and kept.
+    await focusCell(page, 'm1', 'recv');
+    await page.keyboard.press('F2');
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForSelector('.dzg-popup[role=dialog] select');
+    const hours = await page.evaluate(() => [...document.querySelectorAll('.dzg-popup select[data-part=hour] option')].map((o) => o.value).filter((x) => x.startsWith('2|')));
+    await page.selectOption('.dzg-popup select[data-part=hour]', '2|+01:00');
+    await page.focus('.dzg-popup select[data-part=hour]');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const text = await page.evaluate(() => document.querySelector('.dzg-field')?.value);
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const s1 = await saved(page);
+    check(name, `editors kinds ${tag}: Paris 25/10/2026 offers 02 twice; the winter reading picked is saved as 01:30 UTC`,
+      hours.join() === '2|+02:00,2|+01:00' && /02:30/.test(text ?? '') && s1.at(-1)?.[0] === 'recv' && s1.at(-1)?.[1] === Date.UTC(2026, 9, 25, 1, 30), { hours, text, s1 });
+    // 29/03/2026: the hour the clocks skip is not offered.
+    await focusCell(page, 'm2', 'recv');
+    await page.keyboard.press('F2');
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForSelector('.dzg-popup[role=dialog] select');
+    v = await axe(page);
+    const gap = await page.evaluate(() => [...document.querySelectorAll('.dzg-popup select[data-part=hour] option')].map((o) => o.value).filter((x) => x.startsWith('2|')));
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    check(name, `editors kinds ${tag}: Paris 29/03/2026 offers no 02 (skipped); axe 0 with the instant's calendar open`, gap.length === 0 && v.length === 0, { gap, v });
+    // The list: the combobox in the cell, the listbox in the top layer under it; type-ahead; Enter keeps.
+    await focusCell(page, 'm4', 'status');
+    await page.keyboard.press('F2');
+    await frames(page, 2);
+    r = await rects(page);
+    const lst = await page.evaluate(() => { const c = document.querySelector('.dzg-combo'); return { role: c?.getAttribute('role'), active: document.activeElement === c, n: document.querySelectorAll('.dzg-popup [role=option]').length, sel: document.getElementById(c?.getAttribute('aria-activedescendant'))?.textContent }; });
+    v = await axe(page);
+    check(name, `editors kinds ${tag}: the list: a focused combobox, four options in the top layer, clear of the cell; axe 0`, lst.role === 'combobox' && lst.active && lst.n === 4 && r.top && clear(r) && v.length === 0, { lst, r, v });
+    const act = () => page.evaluate(() => document.getElementById(document.querySelector('.dzg-combo')?.getAttribute('aria-activedescendant'))?.textContent ?? null);
+    const seq = [];
+    const letter = rtl ? 'م' : 'é';
+    for (let i = 0; i < 3; i++) { await keyText(page, letter); seq.push(await act()); await page.waitForTimeout(60); }
+    const want = rtl ? ['منخفض', 'مطلوب', 'متوفر'] : ['Épuisé', 'Épuisé', 'Épuisé'];
+    // A fourth press: in Arabic the cycle comes round to منخفض (the third was the cell's own value: nothing to save).
+    if (rtl) await keyText(page, letter);
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const s2 = await saved(page);
+    check(name, `editors kinds ${tag}: type-ahead by real keys (« ${letter} » ×3: ${rtl ? 'cycles through the three م options' : 'folded é finds Épuisé, the only one'}), Enter keeps it`,
+      JSON.stringify(seq) === JSON.stringify(want) && s2.at(-1)?.[0] === 'status' && s2.at(-1)?.[1] === (rtl ? 'low' : 'out'), { seq, want, s2 });
+    // Forced colours: the list open, axe 0 (contrast is the system's).
+    await focusCell(page, 'm5', 'status');
+    await page.keyboard.press('F2');
+    await page.emulateMedia({ forcedColors: 'active' });
+    await frames(page, 2);
+    const vf = (await axe(page)).filter((x) => !x.startsWith('color-contrast'));
+    await page.emulateMedia({ forcedColors: 'none' });
+    await page.keyboard.press('Escape');
+    check(name, `editors kinds ${tag}: forced colours with the list open: axe 0 (contrast aside)`, vf.length === 0, vf);
+    // Yes/no: Space toggles, the row is not selected.
+    await focusCell(page, 'm3', 'ok');
+    const ok0 = await page.evaluate(() => window.t.grid.context.rowRenderer.cell(window.t.key('m3'), 'ok')?.textContent);
+    await page.keyboard.press(' ');
+    await frames(page, 2);
+    const ok1 = await page.evaluate(() => ({ text: window.t.grid.context.rowRenderer.cell(window.t.key('m3'), 'ok')?.textContent, sel: document.querySelector('.dzg-row[aria-selected=true]') !== null }));
+    v = await axe(page);
+    check(name, `editors kinds ${tag}: Space toggles a yes/no cell, the row not selected; axe 0 after it`, ok0 !== ok1.text && !ok1.sel && v.length === 0, { ok0, ok1, v });
+    check(name, `editors kinds ${tag}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+
+  // A real press on the calendar button (review m07): the focus stays in the field while the mouse is down (mousedown
+  // prevented), the click opens the dialog.
+  {
+    const { page } = await open('locale=fr-FR');
+    await focusCell(page, 'm2', 'exp');
+    await page.keyboard.press('F2');
+    const b = await page.evaluate(() => { const r = document.querySelector('.dzg-calbtn').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    await page.mouse.move(b.x, b.y);
+    await page.mouse.down();
+    const held = await page.evaluate(() => document.activeElement === document.querySelector('.dzg-field'));
+    await page.mouse.up();
+    await page.waitForSelector('.dzg-popup[role=dialog] .tz-cal', { timeout: 15000 });
+    check(name, 'editors kinds: a real press on the calendar button keeps the focus in the field, the click opens the dialog', held, { held });
+    await page.close();
+  }
+  // A failing chunk: the alert and Retry, axe 0; Retry loads it, the focus stays in the dialog.
+  {
+    const { page, errors } = await open('locale=fr-FR&calfail=1');
+    await focusCell(page, 'm2', 'exp');
+    await page.keyboard.press('F2');
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForSelector('.dzg-popup[role=dialog] [role=alert]');
+    const v = await axe(page);
+    const alert = await page.evaluate(() => document.querySelector('.dzg-popup [role=alert]')?.textContent);
+    await page.click('.dzg-popup .dzg-fretry');
+    await page.waitForSelector('.dzg-popup[role=dialog] .tz-cal', { timeout: 15000 });
+    const inside = await page.evaluate(() => document.querySelector('.dzg-popup').contains(document.activeElement));
+    check(name, 'editors kinds: a failing calendar chunk shows the alert and Retry (axe 0); Retry loads it, the focus in the dialog', alert === 'Le calendrier n’a pas pu se charger' && v.length === 0 && inside, { alert, v, inside });
+    // The page's loader fails once on purpose: the grid reports it (reportError), nothing else.
+    check(name, 'editors kinds: no page error (calendar failure) but the reported offline one', errors.filter((e) => !/offline \(calfail=1\)/.test(e)).length === 0, errors);
+    await page.close();
+  }
+  // 320 px: the calendar and the list inside the window, clear of the field.
+  {
+    const { page } = await open('locale=fr-FR', { width: 320, height: 640 });
+    await focusCell(page, 'm2', 'exp');
+    await page.keyboard.press('F2');
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForSelector('.dzg-popup[role=dialog] .tz-cal', { timeout: 15000 });
+    await frames(page, 2);
+    const a = await rects(page);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await focusCell(page, 'm4', 'status');
+    await page.keyboard.press('F2');
+    await frames(page, 2);
+    const b = await rects(page);
+    check(name, 'editors kinds: at 320 px the calendar and the list stay inside the window, clear of the field', clear(a) && clear(b), { a, b });
+    await page.close();
+  }
+}
+
+/**
+ * The editing demo as the owner uses it (Phase 5 step 6, owner feedback « ça ne fonctionne pas »; `-- --only
+ * playground`): the REAL playground page `orders-edit.html` served by the running vite (127.0.0.1:4700, or
+ * DZG_PLAYGROUND), never this suite's own server. Real mouse double clicks and real typing, in French and in Arabic:
+ * a visible Client cell opens, a typed change is saved (saving mark, then the value and « saved » in the log); a
+ * quantity ending in 7 is refused by the simulated server and returns; « Commande » opens nothing; Urgent toggles;
+ * Statut opens its list, a letter picks, Enter saves. No page error.
+ */
+async function playgroundEditChecks(name, ctx) {
+  const base = process.env.DZG_PLAYGROUND ?? 'http://127.0.0.1:4700';
+  for (const [tag, qs, ar] of [['fr', 'locale=fr-FR&theme=light&skin=clinic', false], ['ar', 'locale=ar-DZ&theme=dark&skin=midnight', true]]) {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(`${base}/orders-edit.html?${qs}`);
+    await page.waitForSelector('.dzg-layer > .dzg-row .dzg-cell[data-col="client"]', { timeout: 30000 });
+    await frames(page, 3);
+    const cell = (ref, col) => page.evaluate(([ref, col]) => {
+      const c = [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => r.querySelector('[data-col="ref"]')?.textContent === ref)?.querySelector(`[data-col="${col}"]`);
+      if (!c) return null;
+      const r = c.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, text: c.textContent, cls: c.className, ro: c.getAttribute('aria-readonly') };
+    }, [ref, col]);
+    const dbl = async (ref, col) => {
+      const c = await cell(ref, col);
+      await page.mouse.dblclick(c.x, c.y);
+      await frames(page, 2);
+    };
+    const field = () => page.evaluate(() => { const f = document.querySelector('.dzg-field'); return f ? { value: f.value ?? f.textContent, active: document.activeElement === f || f.contains(document.activeElement), combo: f.getAttribute('role') === 'combobox' } : null; });
+    const log = () => page.evaluate(() => [...document.querySelectorAll('#log li')].map((l) => l.textContent));
+    // Client: a real double click on a visible cell, typing, Enter: the saving mark, then the value and « saved ».
+    const before = await cell('O-0002', 'client');
+    await dbl('O-0002', 'client');
+    const opened = await field();
+    await page.keyboard.press('End');
+    await page.keyboard.type(' Nord');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const saving = await cell('O-0002', 'client');
+    await page.waitForTimeout(1000);
+    const saved = await cell('O-0002', 'client');
+    const l1 = await log();
+    check(name, `playground orders-edit (${tag}): a real double click on a visible Client cell opens the field; Enter saves it (saving mark, then the value and « saved » in the log)`,
+      before.ro !== 'true' && !!opened?.active && opened.value === before.text && /dzg-cell--(saving|pending)/.test(saving.cls) && saved.text === `${before.text} Nord` && (ar ? /حُفظ/ : /enregistré/).test(l1[0] ?? ''), { before, opened, saving, saved, l1 });
+    // Qté ending in 7: the simulated server refuses, the cell returns to its value, the log says why.
+    const q0 = await cell('O-0003', 'qty');
+    await dbl('O-0003', 'qty');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('17');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(150);
+    const qMid = await cell('O-0003', 'qty');
+    await page.waitForTimeout(1000);
+    const q1 = await cell('O-0003', 'qty');
+    const l2 = await log();
+    check(name, `playground orders-edit (${tag}): Qté 17 is refused by the simulated server: the cell marks the refusal and returns to ${q0.text}; the log says it`,
+      qMid.text === '17' && q1.text === q0.text && /dzg-cell--(refused|failed)/.test(q1.cls) && (ar ? /مرفوض/ : /refusé/).test(l2[0] ?? ''), { q0, qMid, q1, l2 });
+    // Commande: read-only, seen so; a double click opens nothing.
+    const ref = await cell('O-0004', 'ref');
+    await dbl('O-0004', 'ref');
+    const none = await field();
+    check(name, `playground orders-edit (${tag}): « Commande » is read-only (aria-readonly, muted class) and a double click there opens nothing`, ref.ro === 'true' && /demo-locked/.test(ref.cls) && none === null, { ref, none });
+    // Urgent: a double click toggles once.
+    const u0 = await cell('O-0005', 'urgent');
+    await dbl('O-0005', 'urgent');
+    await page.waitForTimeout(50);
+    const u1 = await cell('O-0005', 'urgent');
+    check(name, `playground orders-edit (${tag}): a double click on Urgent toggles it once`, u0.text !== u1.text && (await field()) === null, { u0, u1 });
+    // Statut: the list opens, a letter picks, Enter saves.
+    await dbl('O-0006', 'status');
+    const combo = await field();
+    const listShown = await page.evaluate(() => !!document.querySelector('.dzg-popup [role=listbox]'));
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const st = await page.evaluate(() => ({ list: !!document.querySelector('.dzg-popup [role=listbox]'), field: !!document.querySelector('.dzg-field') }));
+    await page.waitForTimeout(800);
+    const l3 = await log();
+    check(name, `playground orders-edit (${tag}): Statut opens the list (combobox, listbox shown); Down then Enter keeps it`, !!combo?.combo && combo.active && listShown && !st.list && !st.field && (ar ? /الحالة/ : /Statut/).test(l3.join(' ')), { combo, listShown, st, l3 });
+    check(name, `playground orders-edit (${tag}): no page error`, errors.length === 0, errors);
+    await page.close();
+  }
 }
 
 async function runEngine(name) {
@@ -3131,7 +3450,8 @@ async function runEngine(name) {
       if (only === 'dates' && name === 'chrome') await dateChecks(name, ctx);
       if (only === 'demos') await demosChecks(name, ctx);
       if (only === 'edit-marks' && name === 'chrome') await editMarksChecks(name, ctx);
-      if (only === 'editors') await editorsChecks(name, ctx);
+      if (only === 'editors') await editorsChecks(name, ctx), name !== 'firefox' && (await editorsKindsChecks(name, ctx));
+      if (only === 'playground' && name === 'chrome') await playgroundEditChecks(name, ctx);
       return;
     }
 
@@ -3468,6 +3788,8 @@ async function runEngine(name) {
     await demosChecks(name, ctx);
     if (name === 'chrome') await editMarksChecks(name, ctx);
     await editorsChecks(name, ctx);
+    if (name !== 'firefox') await editorsKindsChecks(name, ctx);
+    if (name === 'chrome') await playgroundEditChecks(name, ctx);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

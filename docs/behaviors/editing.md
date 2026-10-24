@@ -53,7 +53,8 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
    it selects the row, except on an editable yes/no cell where it toggles (`editors.md` 10). In a
    tree's column the tree's keys win: `*` opens the siblings (`tree-keys.md`) and never starts an edit
    there (F2, Enter and a double click do; other printable characters still start one).
-7. An input method composition (`isComposing`, key code 229, or the key `Process` or `Dead`) starting on a
+7. (Owner S6-O3, step 6: the focus stays on the cell, no hidden input; with an input method, press Enter or F2
+   first — the manual check 124a decides, blocking for the Part A close.) An input method composition (`isComposing`, key code 229, or the key `Process` or `Dead`) starting on a
    cell opens the field **empty** and focuses it at once, the key left to the input method (not prevented), so
    the composed text lands in the field whole; inside the field nothing starts or keeps while composing. Checked
    in Chrome through CDP (`Input.imeSetComposition`); the system's own input methods (Japanese, Pinyin, French
@@ -76,7 +77,7 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
     `'stay'` keeps the focus on the cell. Nothing opens on the new cell.
 13. **Shift+Enter** keeps the value and moves one row up (`'stay'`: stays).
 14. **Tab** keeps the value and, with `edit.tab: 'cell'` (default), opens the next editable cell in
-    reading order: the next editable column of the row, then the first editable cell of the next data
+    reading order (a yes/no cell has no editor and is stepped over): the next editable column of the row, then the first editable cell of the next data
     row (details, fillers, loading rows stepped over). **Shift+Tab** the same backwards. At the last
     (first) editable cell of the grid: the field closes, the focus stays on the cell. `edit.tab: 'grid'`:
     Tab keeps the value, closes, and leaves the grid as from any cell (one tab stop).

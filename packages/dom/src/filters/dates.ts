@@ -2,7 +2,7 @@ import { parseDay, readInstant, RELATIVE_RANGES, type LocaleCtx, type RelativeRa
 import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import { conditions, el, form, hide, NUM, tx, type F, type Spec } from './forms.js';
-import { notice, once, type Once } from './lazy.js';
+import { notice, once, type Once } from '@dzgrid/dom/internal';
 
 type C = SlotContext['filter'];
 

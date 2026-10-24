@@ -12,5 +12,9 @@ export const EN_EDITORS = {
     'validation.invalid-instant': "date and time expected",
     'validation.wall-time-skipped': "this time does not exist that day (clock change)",
     'validation.wall-time-ambiguous': "this time occurs twice that day",
+    'edit.calendar': "Open calendar",
+    'edit.calendarLoading': "Loading calendar",
+    'edit.calendarFailed': "Calendar could not load",
+    'edit.optionNotInList': "{label} (not in the list)",
   },
 } satisfies EditorsMessages;

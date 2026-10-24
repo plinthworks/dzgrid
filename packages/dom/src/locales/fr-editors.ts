@@ -12,5 +12,9 @@ export const FR_EDITORS = {
     'validation.invalid-instant': "date et heure attendues",
     'validation.wall-time-skipped': "cette heure n\u2019existe pas ce jour-là (changement d\u2019heure)",
     'validation.wall-time-ambiguous': "cette heure existe deux fois ce jour-là",
+    'edit.calendar': "Ouvrir le calendrier",
+    'edit.calendarLoading': "Chargement du calendrier",
+    'edit.calendarFailed': "Le calendrier n\u2019a pas pu se charger",
+    'edit.optionNotInList': "{label} (hors liste)",
   },
 } satisfies EditorsMessages;

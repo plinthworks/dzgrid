@@ -2,7 +2,7 @@ import { fold, formattersFor, type SetValue } from '@dzgrid/core';
 import type { SlotContext } from '../../part.js';
 import { el, labelled, tx } from '../dom.js';
 import type { Body, Changed, F } from '../forms.js';
-import type { notice } from '../lazy.js';
+import type { notice } from '@dzgrid/dom/internal';
 import { draftOf, filterOf, settle, tick, ticked, type Draft, type SetFilter } from './draft.js';
 import { listView, type Row } from './list.js';
 

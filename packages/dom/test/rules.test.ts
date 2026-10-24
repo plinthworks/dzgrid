@@ -315,7 +315,8 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[]; over?: string }> }).entries;
     expect(b['@dzgrid/core']!.maxGzip).toBe(29000); // the owner's grant, Phase 4 close (Q17b)
     expect(b['@dzgrid/dom']!.maxGzip).toBe(21700); // Phase 5 step 4: the measure 21 656 + a margin (grant 21 980)
-    expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(900);
+    // Owner S6-O6 (Phase 5 step 6): the filters' loader moved in, its measure + 50 (1 184 → 1 234), ceiling 1 250.
+    expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(1234);
     expect(b['@dzgrid/dom/slots']!.maxGzip).toBe(1400);
     expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 550, over: '@dzgrid/core' }); // Phase 4 close: 492 + 10 %
     expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 750, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });

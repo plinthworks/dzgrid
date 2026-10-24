@@ -65,3 +65,9 @@ Nothing different: they scroll, sort and filter a grid whose cells hold a badge,
 
 ## Phase 5 step 4
 A part-drawn cell with an editor open in it is not updated while the editor is open (retained-row contract 5); it is updated once the editor closes.
+
+## Phase 5 step 6
+New slot `editor` (`@dzgrid/dom/editors`, editors.md 18–19): `definePart('editor', { mount(host, c) { … return {
+focus, read, destroy }; } })`, named by a column's `edit.editor`, or `editor.<type>` replacing that type's built-in
+editor. Registered without `editors()`: `missing-feature` (detail `editors`). The context and handle are in `SlotContext['editor']`
+and `EditorHandle`; Angular templates for it come at step 9.

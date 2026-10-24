@@ -43,7 +43,7 @@ export interface EditMessages {
 }
 
 /** The editors' texts (`@dzgrid/dom/editors`, Phase 5 step 5), in their own bundles (`locales/<lang>-editors`): optional here, required by `editors()`. */
-export type EditorsMessageKey = 'edit.refused' | 'edit.refusedDropped' | 'editors.fieldName' | `validation.${ParseCode}`;
+export type EditorsMessageKey = 'edit.refused' | 'edit.refusedDropped' | 'editors.fieldName' | 'edit.calendar' | 'edit.calendarLoading' | 'edit.calendarFailed' | 'edit.optionNotInList' | `validation.${ParseCode}`;
 /** An editors bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text }`. */
 export interface EditorsMessages {
   readonly locale: string;

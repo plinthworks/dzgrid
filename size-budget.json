@@ -191,7 +191,7 @@
     },
     "@dzgrid/theme/edit.css": {
       "file": "packages/theme/edit.css",
-      "maxGzip": 1700
+      "maxGzip": 2100
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
@@ -330,11 +330,35 @@
     },
     "@dzgrid/dom/editors": {
       "file": "packages/dom/src/editors.ts",
-      "maxGzip": 4350,
+      "maxGzip": 6500,
+      "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/core/edit",
+        "@dzgrid/dom/internal",
+        "./dates/*"
+      ]
+    },
+    "@dzgrid/dom/editors: calendar (lazy)": {
+      "files": [
+        "packages/dom/src/editors/dates/calendar.ts"
+      ],
+      "maxGzip": 1500,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal",
+        "@tzslot/*"
+      ]
+    },
+    "@dzgrid/dom/editors-list": {
+      "file": "packages/dom/src/editors-list.ts",
+      "maxGzip": 1400,
+      "over": "@dzgrid/dom/popup",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
         "@dzgrid/dom/internal"
       ]
     },
@@ -378,7 +402,7 @@
     },
     "@dzgrid/dom/internal": {
       "file": "packages/dom/src/internal.ts",
-      "maxGzip": 900,
+      "maxGzip": 1234,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"

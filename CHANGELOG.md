@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
+- `@dzgrid/dom/editors` part 2 (Phase 5 step 6; editors.md 6–19): day and instant fields (opening text in the locale's
+  order and the grid's digits, the written-value rule, `role="combobox"`), a tzslot calendar in a modal dialog loaded
+  on its button only (Alt+ArrowDown; the hour/minute menus of the clock-change days; loading line, Retry;
+  `editors({ calendar, loadCalendar, dateMessages })`); yes/no cells toggled by Space, Enter, a double click or tap;
+  the list editor in its own entry **`@dzgrid/dom/editors-list`** (`editors({ list: listEditor })`: an APG combobox,
+  folded type-ahead with Arabic, a value not in the list, 500 options at most); the application's editor, a part of
+  the new slot **`editor`** (`keep`, `cancel`, `refuse`, `own`; `EditorHandle.read`); four texts (`edit.calendar`,
+  `edit.calendarLoading`, `edit.calendarFailed`, `edit.optionNotInList`); `edit.css` rules for them.
+- `@dzgrid/dom/internal` exports the lazy loader (`once`, `notice`), moved from the filters (not copied).
+
 - `@dzgrid/dom/editors` (Phase 5 step 5; docs/behaviors/editing.md, editors.md, edit-validation.md):
   `editors({ enterMoves?: 'down' | 'stay', tab?: 'cell' | 'grid' })`, with `edit()`. Text and number fields
   over a cell (`.dzg-field`, named « column, row », `maxLength` 1 000 or `edit.maxLength`, numbers opened as
@@ -137,6 +147,11 @@ Toward 0.3.0 (Phase 5, editing; not released).
   language, the columns) is a whole one with the edits; a host update that moves rows puts everything
   in order, the edited rows too.
 - `@dzgrid/core/server` budget 6 000 → 6 100 B gz (owner decision S2-O4).
+
+### Fixed
+- An open field took Home, End, PageUp and PageDown only by the browser's default: in Chrome on macOS Home/End
+  scrolled the grid instead of moving the caret (End ran to the last row, the edit kept out of sight); the field now
+  moves the caret itself and the grid never scrolls under it.
 
 ## [0.2.0] - unreleased
 

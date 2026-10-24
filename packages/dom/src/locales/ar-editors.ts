@@ -12,5 +12,9 @@ export const AR_EDITORS = {
     'validation.invalid-instant': "المطلوب تاريخ ووقت",
     'validation.wall-time-skipped': "هذا الوقت غير موجود في ذلك اليوم (تغيير الساعة)",
     'validation.wall-time-ambiguous': "هذا الوقت يتكرر مرتين في ذلك اليوم",
+    'edit.calendar': "فتح التقويم",
+    'edit.calendarLoading': "جارٍ تحميل التقويم",
+    'edit.calendarFailed': "تعذّر تحميل التقويم",
+    'edit.optionNotInList': "{label} (خارج القائمة)",
   },
 } satisfies EditorsMessages;

@@ -51,3 +51,13 @@
 .demo-orders { --orders-child-bg: color-mix(in oklab, var(--tz-accent) 8%, var(--tz-bg)); }
 .orders-child:where(:not(:hover)),
 .orders-child:where(:not(:hover)) :is(.dzg-seg-start, .dzg-seg-end) { background: var(--orders-child-bg); }
+
+/* ---- Orders, editing (orders-edit.html, step 6): « Commande » visibly read-only — muted, a lock at the inline end ---- */
+.dzg-cell.demo-locked, .dzg-hcell.demo-locked { color: var(--tz-fg-muted); }
+.dzg-cell.demo-locked { padding-inline-end: 1.5rem; }
+.dzg-cell.demo-locked::after {
+  content: ''; position: absolute; inset-block-start: calc(50% - .4375rem); inset-inline-end: .375rem; inline-size: .75rem; block-size: .875rem;
+  background: currentColor; pointer-events: none;
+  clip-path: path(evenodd, "M3 6V4a3 3 0 0 1 6 0v2h1.5v8h-9V6zM4.5 6h3V4a1.5 1.5 0 0 0-3 0z");
+}
+@media (forced-colors: active) { .dzg-cell.demo-locked::after { forced-color-adjust: none; background: CanvasText; } }

@@ -199,3 +199,52 @@ describe('edit.css: the field and the bubble (Phase 5 step 5, owner S5-O2)', () 
     expect(spec.pairs.some((p) => p.what.startsWith('bubble sign') && p.fg === '--dzg-refused-color' && p.bg === '--tz-bg' && p.min === 3)).toBe(true);
   });
 });
+
+describe('edit.css: dates, the list, the calendar dialog (Phase 5 step 6, owner S6-O6)', () => {
+  it('the calendar button: a 24 × 24 target at the field’s inline end, a drawn shape, muted then the text colour on hover', () => {
+    const b = decl(/^\.dzg-calbtn$/);
+    expect(b).toMatch(/inline-size: 24px/);
+    expect(b).toMatch(/block-size: 24px/);
+    expect(b).toMatch(/color: var\(--tz-fg-muted\)/);
+    expect(decl(/^\.dzg-calbtn::before$/)).toMatch(/clip-path:/);
+    expect(decl(/^\.dzg-calbtn:hover$/)).toMatch(/color: var\(--tz-fg\)/);
+    // The date box takes the row's colour as the field does.
+    expect(decl(/^\.dzg-datebox$/)).toMatch(/background: var\(--tz-bg\)/);
+  });
+
+  it('the combobox: a field with a chevron at its inline end, the text cut with an ellipsis', () => {
+    expect(decl(/^\.dzg-combo$/)).toMatch(/text-overflow: ellipsis/);
+    expect(decl(/^\.dzg-combo::after$/)).toMatch(/inset-inline-end:/);
+    expect(decl(/^\.dzg-combo::after$/)).toMatch(/clip-path:|border-/);
+  });
+
+  it('the options: at least 24 px (44 px under a coarse pointer, WCAG 2.5.8), the active one shaded and outlined, the chosen one marked by a shape, the one not in the list muted', () => {
+    expect(decl(/^\.dzg-opt$/)).toMatch(/min-block-size: 24px/);
+    expect(decl(/^\.dzg-opt$/, media('pointer: coarse'))).toMatch(/min-block-size: 44px/);
+    expect(decl(/^\.dzg-opt--active$/)).toMatch(/background: var\(--dzg-row-selected-bg/);
+    expect(decl(/^\.dzg-opt--active$/)).toMatch(/outline:/);
+    expect(decl(/^\.dzg-opt\[aria-selected=["']?true["']?\]::after$/)).toMatch(/clip-path:/);
+    expect(decl(/^\.dzg-opt--out$/)).toMatch(/color: var\(--tz-fg-muted\)/);
+    expect(decl(/^\.dzg-listbox$/)).toMatch(/min-inline-size:/);
+  });
+
+  it('the calendar dialog: its box takes a focus ring while it loads; the Retry button styled', () => {
+    expect(decl(/^\.dzg-cal:focus-visible$/)).toMatch(/outline: 2px solid/);
+    // Another month's days unfaded (tzslot's 0.35 opacity falls under 4.5:1, T11), as in the filters' panel.
+    expect(decl(/^\.dzg-cal$/)).toMatch(/--tz-cal-outside-opacity: 1/);
+    expect(decl(/^\.dzg-cal \.dzg-fretry$/)).toMatch(/min-block-size: 24px/);
+  });
+
+  it('forced colours: the active option Highlight, the shapes in the system’s colours', () => {
+    const f = media('forced-colors: active');
+    expect(decl(/^\.dzg-opt--active$/, f)).toMatch(/Highlight/);
+    expect(decl(/^\.dzg-calbtn::before$/, f)).toMatch(/ButtonText/);
+    expect(decl(/^\.dzg-combo::after$/, f)).toMatch(/CanvasText/);
+  });
+
+  it('their contrast pairs: options on the popup, the active one, the one not in the list, the button', () => {
+    for (const [what, fg, bg, min] of [['option text', '--tz-fg', '--tz-bg', 4.5], ['active option text', '--tz-fg', '--dzg-row-selected-bg', 4.5], ['option not in the list', '--tz-fg-muted', '--tz-bg', 4.5], ['calendar button', '--tz-fg-muted', '--tz-bg', 3]] as const) {
+      expect(spec.pairs.some((p) => p.what.startsWith(what) && p.fg === fg && p.bg === bg && p.min === min), what).toBe(true);
+    }
+  });
+});

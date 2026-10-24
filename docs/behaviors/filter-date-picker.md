@@ -137,3 +137,9 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
   left dark); spike `spikes/s13-tzslot` (the panel in the top-layer popup, Escape, Tab, locale tag,
   an aborted chunk).
 - By ear: `docs/a11y-protocol.md` §10.
+
+## Phase 5 step 6 (2026-10-24)
+The loader (`once`, `notice`) moved, unchanged, from `filters/lazy.ts` into `@dzgrid/dom/internal` (one copy for the
+filters and the editors' calendar), and the lazy helpers (`base`, `styles`, `named`, `lost`, `muter`) from
+`filters/dates/shared.ts` to `src/dates/shared.ts` (the kits' file re-exports them). Nothing a user sees changed;
+every date-filter test runs unchanged.
