@@ -351,3 +351,64 @@ export async function playgroundClipboardChecks(name, ctx, h) {
   }
   await c.close();
 }
+
+/**
+ * `playgroundFocusChecks` (Chrome; owner « je ne trouve aucun exemple pour la sélection »): the REAL playground
+ * `orders-edit.html?focus=range` on 127.0.0.1:4700 (or DZG_PLAYGROUND), fr and ar: the selection title and its
+ * bullets at the top (the editing steps gone), the menu's two entries, the plain page's hint link; Shift+ArrowDown
+ * makes a block (aria-selected cells); Ctrl+C there, Ctrl+V on another cell changes its values.
+ */
+export async function playgroundFocusChecks(name, ctx, h) {
+  const { check, frames } = h;
+  const base = process.env.DZG_PLAYGROUND ?? 'http://127.0.0.1:4700';
+  const c = await ctx.browser().newContext();
+  await c.grantPermissions(['clipboard-read', 'clipboard-write']);
+  {
+    const page = await c.newPage();
+    await page.goto(`${base}/index.html`);
+    const links = await page.evaluate(() => [...document.querySelectorAll('nav a')].filter((a) => /focus=range/.test(a.getAttribute('href'))).map((a) => [a.getAttribute('href'), a.textContent]));
+    check(name, 'playground menu: two entries open orders-edit.html?focus=range (fr, and ar dark)', links.length === 2 && links.every(([u]) => u.startsWith('./orders-edit.html')) && /Sélection de cellules et copier-coller/.test(links[0][1]) && /locale=ar-DZ/.test(links[1][0]), links);
+    await page.goto(`${base}/orders-edit.html?locale=fr-FR&theme=light&skin=clinic`);
+    await page.waitForSelector('#steps li', { timeout: 30000 });
+    const hint = await page.evaluate(() => { const a = document.querySelector('#hint a'); const s = document.getElementById('steps'); return a ? { href: a.getAttribute('href'), text: document.getElementById('hint').textContent, above: !!(a.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING), steps: s.children.length } : null; });
+    check(name, 'playground orders-edit (plain): « Astuce : sélection de blocs et copier-coller » links to ?focus=range above the editing steps', !!hint && /focus=range/.test(hint.href) && /Astuce/.test(hint.text) && hint.above && hint.steps >= 8, hint);
+    await page.close();
+  }
+  for (const [tag, qs, ar] of [['fr', 'locale=fr-FR&theme=light&skin=clinic', false], ['ar', 'locale=ar-DZ&theme=dark&skin=midnight', true]]) {
+    const page = await c.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(`${base}/orders-edit.html?${qs}&focus=range`);
+    await page.waitForSelector('.dzg-layer > .dzg-row .dzg-cell[data-col="qty"]', { timeout: 30000 });
+    await frames(page, 3);
+    const top = await page.evaluate(() => ({ title: document.getElementById('title').textContent, bullets: [...document.querySelectorAll('#steps li')].map((l) => l.textContent), gridTop: document.getElementById('host').getBoundingClientRect().top }));
+    const words = ar ? [/Shift\+/, /Ctrl\+C/, /Ctrl\+Z/, /١٢٣٤/] : [/Maj\+/, /Ctrl\+C/, /Ctrl\+Z/, /1 234,50 €/];
+    check(name, `playground orders-edit?focus=range (${tag}): the selection title and 4–5 bullets at the top (keys, copy/paste, one Ctrl+Z, the Montant paste to try)`,
+      (ar ? /تحديد/ : /Sélection/).test(top.title) && top.bullets.length >= 4 && top.bullets.length <= 5 && words.every((w) => top.bullets.some((b) => w.test(b))) && top.gridTop < 400, top);
+    const at = (ref, col) => page.evaluate(([ref, col]) => {
+      const e = [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => r.querySelector('[data-col="ref"]')?.textContent === ref)?.querySelector(`[data-col="${col}"]`);
+      if (!e) return null;
+      const r = e.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, text: e.textContent, sel: e.getAttribute('aria-selected') };
+    }, [ref, col]);
+    const click = async (ref, col) => { const p = await at(ref, col); await page.mouse.click(p.x, p.y); await frames(page, 2); };
+    const press = async (k) => { await page.keyboard.press(k); await frames(page, 2); };
+    const mod = 'ControlOrMeta';
+    await click('O-0003', 'qty');
+    await press('Shift+ArrowDown');
+    const block = [await at('O-0003', 'qty'), await at('O-0004', 'qty')];
+    check(name, `playground orders-edit?focus=range (${tag}): Shift+ArrowDown makes a block of two (aria-selected cells)`, block.every((b) => b?.sel === 'true'), block);
+    await press(`${mod}+c`);
+    const before = [await at('O-0005', 'qty'), await at('O-0006', 'qty')].map((b) => b.text);
+    await click('O-0005', 'qty');
+    await press(`${mod}+v`);
+    await page.waitForTimeout(1200);
+    const after = [await at('O-0005', 'qty'), await at('O-0006', 'qty')].map((b) => b.text);
+    check(name, `playground orders-edit?focus=range (${tag}): Ctrl+C, then Ctrl+V on another cell writes the block there`, after[0] === block[0].text && after[1] === block[1].text && after.join() !== before.join(), { block, before, after });
+    check(name, `playground orders-edit?focus=range (${tag}): no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+  await c.close();
+}

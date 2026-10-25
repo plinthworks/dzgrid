@@ -12,6 +12,7 @@
     #host > .dzg { block-size: 100%; }
     .note { margin-block: .25rem .5rem; color: var(--tz-fg-muted); line-height: 1.45; max-inline-size: 90ch; }
     a { color: var(--tz-accent); }
+    .hint { margin-inline-start: 1.5rem; color: var(--tz-fg-muted); }
     .steps { margin-block: .25rem .75rem; padding-inline-start: 1.25rem; line-height: 1.5; max-inline-size: 80ch; }
     .log { margin-block-start: .75rem; }
     .log h2 { font-size: 1rem; margin-block: 0 .25rem; }
@@ -20,7 +21,8 @@
   </style>
 </head>
 <body data-demo="orders-edit">
-  <nav><a href="./index.html">← Démos</a></nav>
+  <!-- #hint: the way to the selection demo (?focus=range), on the nav line so the grid does not move (the checks click rows in a 900 px window); its words set by page.ts. -->
+  <nav><a href="./index.html">← Démos</a> <span class="hint" id="hint"></span></nav>
   <h1 id="title"></h1>
   <ul class="steps" id="steps"></ul>
   <form class="bar" id="controls">

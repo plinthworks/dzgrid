@@ -21,6 +21,9 @@ const q = new URLSearchParams(location.search);
 const locale = q.get('locale') === 'ar-DZ' ? 'ar-DZ' : 'fr-FR';
 const ar = locale === 'ar-DZ';
 const theme = q.get('theme') ?? 'light';
+// `orders-edit.html?focus=range` (owner « je ne trouve aucun exemple pour la sélection »): the selection and clipboard
+// bullets in place of the editing steps.
+const focus = page === 'orders-edit' && q.get('focus') === 'range';
 const skin = q.get('skin') ?? 'clinic';
 const form = document.getElementById('controls') as HTMLFormElement;
 const field = (name: string) => form.elements.namedItem(name) as HTMLSelectElement;
@@ -31,7 +34,7 @@ field('skin').value = skin;
 const extra = ['enter', 'paged', 'tree'].filter((n) => form.elements.namedItem(n));
 for (const n of extra) field(n).value = q.get(n) ?? field(n).value;
 form.addEventListener('change', () => {
-  location.search = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, skin: field('skin').value, ...Object.fromEntries(extra.map((n) => [n, field(n).value])) }).toString();
+  location.search = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, skin: field('skin').value, ...Object.fromEntries(extra.map((n) => [n, field(n).value])), ...(focus ? { focus: 'range' } : {}) }).toString();
 });
 document.documentElement.lang = locale;
 document.documentElement.dir = ar ? 'rtl' : 'ltr';
@@ -54,6 +57,24 @@ const RANGE_TEXT = {
   fr: 'Bloc de cellules : Maj+flèches depuis une cellule, ou glissez à la souris (la vue défile près des bords), Maj+clic étend, Ctrl+A (⌘A) tout, Maj+Espace la ligne ; Échap l’efface. Un tri, un filtre ou une recherche l’efface aussi, et le dit (?range=0 l’éteint).',
   ar: 'كتلة خلايا: Shift+الأسهم من خلية، أو اسحب بالفأرة (يتمرّر العرض قرب الحواف)، Shift+نقرة توسّعها، Ctrl+A (⌘A) الكل، Shift+المسافة الصف؛ Escape يلغيها. الفرز أو التصفية أو البحث يلغيها أيضًا ويعلن ذلك (?range=0 يوقفها).',
 } as const;
+// `?focus=range`: a title and four bullets on blocks of cells and the clipboard (steps 11a, 11b).
+const FOCUS_TEXT = {
+  fr: ['Sélection de cellules et copier-coller (comme Excel)', [
+    'Sélectionner un bloc : cliquez sur une cellule, puis Maj+flèches, ou glissez à la souris. Maj+clic étend le bloc, Ctrl+A (⌘A) sélectionne tout, Échap l’efface.',
+    'Copier-coller : Ctrl+C puis Ctrl+V (⌘C / ⌘V sur Mac). Un bloc copié depuis Excel ou Google Sheets se colle aussi. Ctrl+X coupe (les cellules sont vidées tout de suite), Suppr vide le bloc.',
+    'Un collage = un seul enregistrement et un seul Ctrl+Z (⌘Z) pour tout annuler. Une valeur refusée (qui finit par 7) est sautée et comptée dans le message.',
+    'Essayez : copiez « 1 234,50 € » (depuis ce texte) et collez-le dans une cellule « Montant ».',
+  ]],
+  ar: ['تحديد الخلايا والنسخ واللصق (مثل Excel)', [
+    'تحديد كتلة: انقر على خلية، ثم Shift+الأسهم، أو اسحب بالفأرة. Shift+نقرة توسّعها، Ctrl+A (⌘A) الكل، Escape يلغيها.',
+    'النسخ واللصق: Ctrl+C ثم Ctrl+V (⌘C / ⌘V على Mac). الكتلة المنسوخة من Excel أو Google Sheets تُلصق أيضًا. Ctrl+X يقص (تُفرَّغ الخلايا فورًا)، وDelete يمسح الكتلة.',
+    'لصقة واحدة = حفظ واحد وCtrl+Z واحد (⌘Z) لإلغاء الكل. القيمة المرفوضة (التي تنتهي بـ 7) تُتخطّى وتُحسب في الرسالة.',
+    'جرّب: انسخ «١٢٣٤» (من هذا النص) والصقه في خلية «المبلغ».',
+  ]],
+} as const;
+// Without `?focus=range`: one line at the top to the selection demo.
+const HINT_TEXT = { fr: 'Astuce : sélection de blocs et copier-coller → ', ar: 'نصيحة: تحديد كتلة خلايا والنسخ واللصق ← ' } as const;
+const HINT_LINK = { fr: 'voir l’exemple', ar: 'انظر المثال' } as const;
 const EDIT_TEXT = {
   fr: ['Commandes : modifier les cellules', [
     'Double-cliquez sur une cellule, ou tapez directement, pour la modifier (sauf « Commande », grisée).',
@@ -80,14 +101,23 @@ const EDIT_TEXT = {
     'الجدول نفسه يعلن كل رفض لقارئ الشاشة؛ السجل أدناه يعرضها فقط.',
   ], 'آخر الأحداث', ['Enter', 'يبقى', 'ينزل', 'البيانات', 'في المتصفح', 'خادم بصفحات', 'الشكل', 'قائمة', 'شجرة']],
 } as const;
-const [title, note] = editing ? [EDIT_TEXT[ar ? 'ar' : 'fr'][0], ''] : TEXT[which][ar ? 'ar' : 'fr'];
+const [title, note] = editing ? [(focus ? FOCUS_TEXT : EDIT_TEXT)[ar ? 'ar' : 'fr'][0], ''] : TEXT[which][ar ? 'ar' : 'fr'];
 document.title = `DzGrid — ${title}`;
 document.getElementById('title')!.textContent = title;
 if (editing) {
-  const [, steps, logTitle, sel] = EDIT_TEXT[ar ? 'ar' : 'fr'];
+  const lang = ar ? 'ar' : 'fr';
+  const [, editSteps, logTitle, sel] = EDIT_TEXT[lang];
+  const steps = focus ? FOCUS_TEXT[lang][1] : editSteps;
   document.getElementById('steps')!.replaceChildren(...steps.map((t) => Object.assign(document.createElement('li'), { textContent: t })));
-  // Blocks of cells (step 11a): said under the grid, so the rows the checks click stay in a 900 px window.
-  document.querySelector('main')!.append(Object.assign(document.createElement('p'), { className: 'note', textContent: RANGE_TEXT[ar ? 'ar' : 'fr'] }));
+  const hint = document.getElementById('hint')!;
+  if (focus) hint.remove();
+  else {
+    const to = new URLSearchParams(q);
+    to.set('focus', 'range');
+    hint.replaceChildren(HINT_TEXT[lang], Object.assign(document.createElement('a'), { href: `?${to}`, textContent: HINT_LINK[lang] }));
+    // Blocks of cells (step 11a): said under the grid, so the rows the checks click stay in a 900 px window.
+    document.querySelector('main')!.append(Object.assign(document.createElement('p'), { className: 'note', textContent: RANGE_TEXT[lang] }));
+  }
   document.getElementById('log-title')!.textContent = logTitle;
   // The selectors' words in the page's language (« Entrée : reste / descend »).
   document.getElementById('enter-label')!.textContent = sel[0];

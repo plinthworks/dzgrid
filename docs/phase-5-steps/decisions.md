@@ -162,3 +162,11 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 
 - After Phase 5 (step 13, 0.3.0 prepared): **Phase 6** (column menu, column chooser, group drop zone, column moving, GridState, pinned rows…) comes BEFORE the docs website. Docs website after Phase 6.
 - **Order confirmed (owner, 2026-10-25):** Phase 5 close → Phase 6 → docs website → Phase 7 (grouping) → 8 (server infinite/blocks) → 9 (xlsx, menus, status bar, advanced filter, row drag) → 10 (pivot) → 11 (hardening, ecosystem). `dmp-doctor-patients` last, after a security review.
+
+## Step 12 (owner, 2026-10-25) — plan `step12-plan.md`
+
+- **S12-Q1/Q4:** the fill handle in its own entry `@dzgrid/dom/fill` 1 600; texts `-fill` en/fr/ar 250/300/380; `fill.css` 300.
+- **WCAG 2.5.7:** a single-pointer, no-drag way to fill is built NOW (e.g. a « Recopier vers le bas / la droite » control), ~150 B.
+- **S12-Q3:** no handle for touch (finger) only; mouse and pen drag it; on touch, Ctrl+D/R or the no-drag control.
+- **S12-Q6:** Ctrl+D on a one-row block copies the row above (as Excel); Ctrl+R the column to the left (mirrored in RTL).
+- **S12-Q2/Q5/Q7 (lead, recommendations kept):** keyboard fill mode Ctrl+Shift+Enter then arrows; Ctrl+Enter when the field's own cell refuses: one save, the field stays open; the dataset B bench is indicative only (Q17d).
