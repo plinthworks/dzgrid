@@ -170,6 +170,18 @@
       "file": "packages/dom/src/locales/ar-editors.ts",
       "maxGzip": 620
     },
+    "@dzgrid/dom/locales/en-range": {
+      "file": "packages/dom/src/locales/en-range.ts",
+      "maxGzip": 350
+    },
+    "@dzgrid/dom/locales/fr-range": {
+      "file": "packages/dom/src/locales/fr-range.ts",
+      "maxGzip": 400
+    },
+    "@dzgrid/dom/locales/ar-range": {
+      "file": "packages/dom/src/locales/ar-range.ts",
+      "maxGzip": 500
+    },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
       "maxGzip": 2500
@@ -197,6 +209,10 @@
     "@dzgrid/theme/edit.css": {
       "file": "packages/theme/edit.css",
       "maxGzip": 2200
+    },
+    "@dzgrid/theme/range.css": {
+      "file": "packages/theme/range.css",
+      "maxGzip": 500
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
@@ -364,6 +380,17 @@
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/range": {
+      "file": "packages/dom/src/range.ts",
+      "maxGzip": 4500,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/range",
         "@dzgrid/dom/internal"
       ]
     },

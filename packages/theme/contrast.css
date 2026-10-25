@@ -27,6 +27,7 @@
       --tz-warning: light-dark(#6b3a00, #ffd27a);
       --tz-success: light-dark(#14532d, #86efac);
       --dzg-saving-color: light-dark(#6b3a00, #7ce8ff);
+      --dzg-range-edge: light-dark(#14532d, #ffffff);
     }
   }
   [data-contrast=more],
@@ -42,6 +43,7 @@
     --tz-warning: light-dark(#6b3a00, #ffd27a);
     --tz-success: light-dark(#14532d, #86efac);
     --dzg-saving-color: light-dark(#6b3a00, #7ce8ff);
+    --dzg-range-edge: light-dark(#14532d, #ffffff);
   }
 }
 @layer dzgrid.contrast {

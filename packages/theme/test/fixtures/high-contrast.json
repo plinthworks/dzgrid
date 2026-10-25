@@ -14,7 +14,8 @@
         "danger": "#8b0000",
         "warning": "#6b3a00",
         "success": "#14532d",
-        "--dzg-saving-color": "#6b3a00"
+        "--dzg-saving-color": "#6b3a00",
+        "--dzg-range-edge": "#14532d"
       },
       "dark": {
         "bg": "#000000",
@@ -27,7 +28,8 @@
         "danger": "#ff8a8a",
         "warning": "#ffd27a",
         "success": "#86efac",
-        "--dzg-saving-color": "#7ce8ff"
+        "--dzg-saving-color": "#7ce8ff",
+        "--dzg-range-edge": "#ffffff"
       }
     }
   ]

@@ -26,6 +26,8 @@ $tz-palette: (
   // Not tzslot's: the saving border's own colour (owner, step 7). This palette's accent and warning are both
   // yellow in the dark, so the border and the focus ring would meet in one colour on a focused cell; a cyan there.
   '--dzg-saving-color': (#6b3a00, #7ce8ff),
+  // The block's edge (Phase 5 step 11a): its success is too near the cyan saving border in the dark; white there.
+  '--dzg-range-edge': (#14532d, #ffffff),
 );
 
 @mixin palette {

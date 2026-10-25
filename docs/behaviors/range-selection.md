@@ -106,4 +106,30 @@ a filter input or a nested grid's cells they are not the grid's (`editing.md` 19
 Step 10 (core): `conformance/cases/range-box/*` (R1–R2: corners in any order, a corner off the display or a
 hidden column → null, details, fillers and loading rows counted for nothing, a muted ancestor counted, pinned
 columns in reading order), `packages/core/test/paste-plan-property.test.ts` (no non-data row ever named).
-Step 11a (DOM): `range-keys`, `range-pointer`, `range-paint`, `range-clear`; browser `--only range`.
+Step 11a (DOM): `range-keys`, `range-pointer`, `range-paint`, `range-clear`, `range-a11y`, `range-api`, `range-seams`,
+`range-layering`, `range-texts`, the random walk `range-walk` against a hand-written oracle; theme `range.test.ts`;
+browser `--only range` (Chrome; Firefox and WebKit right to left).
+
+## As built at step 11a (2026-10-25)
+- The tint and edges: `@dzgrid/theme/range.css` — the tint `--dzg-range-bg` (the selected row's by default), the edge
+  `--dzg-range-edge` (the palette's success by default, a hue 60° away from the focus ring and the saving border;
+  Clinic and the more-contrast palette give their own), drawn by an inset `box-shadow`; forced colours: `Highlight` with
+  `HighlightText`, the edges in `HighlightText` (a `Highlight` edge would not show on the tint).
+- « The focus follows » is a flag: set by Shift+keys, Shift+click and a drag; cleared by Ctrl+A, Shift+Space and the
+  API. A Shift+arrow while it is clear starts a new block from the focused cell (owner S11-Q2).
+- A press without Shift drops the block at once, said once (10): a click on one of its own cells too.
+- The sort, filter or search sentence (owner S11-Q4) is « Sélection effacée : l'ordre a changé »; every other drop says
+  « Sélection effacée ».
+- New rows from the host (`setRows`) are a transaction for the block: kept while both corners are shown (the core tells
+  both alike).
+- A refused `set()` of the API tells `unknown-row-id` (a corner's row not shown) or `unknown-column` (a column not
+  visible), path `range`.
+- The drag is the mouse's only: a pen, like a finger, scrolls the view (a pen drag would scroll and select at once;
+  Windows Ink sends `pointerType: 'pen'`, so a pen user selects by Shift+tap or the keys). A drag cancelled
+  (`pointercancel`, the window's blur, a capture lost without a release) gives back the block from before it — none
+  after a plain press — with no focus move, no sentence; only a release swallows the click of its own task.
+- Under a CSS scale or zoom on an ancestor the pointer is divided by the scale (the viewport's client box over its
+  layout box).
+- During a drag the view scrolls near the body's edges (a band of a row height, at least 24 px; over the header and the
+  tree's pinned parents too), at most a row height a frame; a point over the pinned parents is the row under them.
+

@@ -57,6 +57,20 @@ describe('0.2.0, the four packages', () => {
     expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/edit', '\.\/range'\]/);
   });
 
+  it('export the Phase 5 step 11a subpaths (@dzgrid/dom/range, its texts, the theme\'s range.css), built like the others', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./range']).toEqual({ types: './src/range.ts', default: './src/range.ts' });
+    for (const lang of ['en', 'fr', 'ar']) expect(dom[`./locales/${lang}-range`], lang).toEqual({ types: `./src/locales/${lang}-range.ts`, default: `./src/locales/${lang}-range.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/editors-list', '\.\/range'/);
+    for (const lang of ['en', 'fr', 'ar']) expect(build).toContain(`'./locales/${lang}-range'`);
+    const theme = JSON.parse(readFileSync(`${ROOT}packages/theme/package.json`, 'utf8'));
+    for (const f of ['range.css', 'range.unlayered.css', 'range.scss']) {
+      expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
+      expect(theme.files, f).toContain(f);
+    }
+  });
+
   it('keep gsap and tzslot optional peers', () => {
     const dom = pkg('dom');
     expect(dom.peerDependenciesMeta).toEqual({ '@tzslot/core': { optional: true }, '@tzslot/dom': { optional: true }, gsap: { optional: true } });

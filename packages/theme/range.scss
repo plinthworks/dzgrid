@@ -1,0 +1,79 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/range.css — the block of cells (Phase 5 step 11a): loaded by the applications that select blocks
+// (`@dzgrid/dom/range`), after the theme; the base theme does not grow. Compiled to range.css (layered) and
+// range.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when they drift.
+//
+// What @dzgrid/dom/range writes on the block's mounted cells at each paint (range-selection.md 11): the tint
+// (`dzg-cell--range`) and the logical edges (`--rs`, `--re`, `--rt`, `--rb`: start, end, top, bottom). The edges are
+// one inset box-shadow list over four widths: no pseudo-element (the edit marks own both), no layout change, the
+// focus ring (outline) and the saving border stay on top. Right to left flips the inline offsets by the cell's own
+// direction. Nothing moves: no transition, no animation (reduced motion has nothing to reduce). No colour literal,
+// no physical side (guards); the tint and the edge are read through their own variables, the palette's as fallbacks.
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+// The tint is the selected row's (the text keeps its 4.5:1 on it); the edge the palette's success, a hue apart from
+// the focus ring (the accent) and the saving border (the warning): `check:contrast` holds both.
+$tint: var(--dzg-range-bg, var(--dzg-row-selected-bg, color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg))));
+$edge: var(--dzg-range-edge, var(--tz-success));
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-cell--range {
+    --dzg-rs: 0px;
+    --dzg-re: 0px;
+    --dzg-rt: 0px;
+    --dzg-rb: 0px;
+    background: $tint;
+    box-shadow: inset var(--dzg-rs) 0 0 0 $edge, inset calc(-1 * var(--dzg-re)) 0 0 0 $edge, inset 0 var(--dzg-rt) 0 0 $edge, inset 0 calc(-1 * var(--dzg-rb)) 0 0 $edge;
+  }
+
+  @each $e in rs, re, rt, rb {
+    .dzg-cell--range.dzg-cell--#{$e} {
+      --dzg-#{$e}: 2px;
+    }
+  }
+
+  // Right to left the start edge is the other side: the inline offsets change sign.
+  .dzg-cell--range:dir(rtl) {
+    box-shadow: inset calc(-1 * var(--dzg-rs)) 0 0 0 $edge, inset var(--dzg-re) 0 0 0 $edge, inset 0 var(--dzg-rt) 0 0 $edge, inset 0 calc(-1 * var(--dzg-rb)) 0 0 $edge;
+  }
+
+  // While the pointer drags a block, no text is selected on the way.
+  [data-dzg-ranging] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  // Forced colours: the system's selection colours, kept (a box-shadow would be dropped otherwise), the edges in the
+  // selection's text colour so they show on its background.
+  @media (forced-colors: active) {
+    .dzg-cell--range {
+      forced-color-adjust: none;
+      --dzg-range-edge: HighlightText;
+      background: Highlight;
+      color: HighlightText;
+    }
+
+    // What the cell holds keeps the system's colours (badges, links, the edit marks): the adjust put back (review 6).
+    .dzg-cell--range > *,
+    .dzg-cell--range::before,
+    .dzg-cell--range::after {
+      forced-color-adjust: auto;
+    }
+  }
+}

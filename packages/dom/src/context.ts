@@ -14,7 +14,7 @@ import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
 import type { PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
+import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -139,7 +139,12 @@ export interface GridContext<T> {
    * Its host is `@dzgrid/dom/editors` (Phase 5 step 5).
    */
   editor?: { readonly key: RowKey; readonly column: string; readonly cell: HTMLElement; readonly field: HTMLElement } | null;
+  /**
+   * A feature selects blocks of cells (`@dzgrid/dom/range`, Phase 5 step 11a): the grid says `aria-multiselectable`
+   * whatever the row selection, and a Shift+click on a cell is the feature's (rows are ticked by their box, owner QB1).
+   */
+  multi?: boolean;
   /** Moves the focus as the grid's own keys would (the router's move: spans, details, the last row stays); the editors' Enter. */
   step?(intent: Intent): void;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

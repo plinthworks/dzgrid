@@ -22,6 +22,10 @@ import { edit } from '@dzgrid/dom/edit';
 import { editors } from '../../packages/dom/src/editors.js';
 import { listEditor } from '../../packages/dom/src/editors-list.js';
 import { motion } from '@dzgrid/dom/motion-gsap';
+// Phase 5 step 11a: blocks of cells (`?range=0` turns them off).
+import { range } from '@dzgrid/dom/range';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { AR_RANGE } from '@dzgrid/dom/locales/ar-range';
 import { pagination } from '@dzgrid/dom/pagination';
 import { tree } from '@dzgrid/dom/tree';
 import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
@@ -89,7 +93,7 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
   const base = ar ? AR : FR;
   // A tree (`?tree=1`) on the browser's rows only.
   const asTree = !!o.tree && !o.paged;
-  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, 'validation.integer': w.integer } };
+  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_RANGE : FR_RANGE).text, 'validation.integer': w.integer } };
   // The orders of the tree demo, without their sub-orders: one flat list; « Urgent » added. `?tree=1`: with them, as child rows.
   const rows: Order[] = orders().filter((l) => asTree || l.parent === null).map((l, i) => ({ id: l.id, ...(asTree && { parent: l.parent }), ref: l.ref, client: l.client, day: l.day, status: l.status, qty: l.qty, amount: l.amount, urgent: i % 5 === 0 }));
   const columns: ColumnDef<Order, any>[] = [
@@ -139,7 +143,7 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
     getRowId: (r: Order) => r.id, columns, messages, locale: o.locale, direction: 'auto', label: w.title,
     parts: { status: badge({ tones: { pending: 'warning', ready: 'info', shipped: 'neutral', delivered: 'success', cancelled: 'danger' } }) },
     ...(asTree && { rowClass: (c: { row: Order }) => (c.row.parent ? 'orders-child' : null) }),
-    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), motion(), ...(o.paged ? [pagination()] : [])],
+    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...(new URLSearchParams(location.search).get('range') === '0' ? [] : [range()]), motion(), ...(o.paged ? [pagination()] : [])],
     onEvent(e: GridEvent<Order>) {
       o.onEvent?.(e);
       if (e.type === 'undoChanged') sync(e.canUndo, e.canRedo);

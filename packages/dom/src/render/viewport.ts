@@ -209,7 +209,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     setAttr(el.viewport, 'aria-rowcount', String(d.count + headerRows));
     setAttr(el.viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
     const mode = settings.selection?.mode ?? 'none';
-    setAttr(el.viewport, 'aria-multiselectable', mode === 'multi' ? 'true' : null);
+    // Blocks of cells (`@dzgrid/dom/range`, `g.multi`) are a multiple selection whatever the rows' mode.
+    setAttr(el.viewport, 'aria-multiselectable', mode === 'multi' || g.multi ? 'true' : null);
     setAttr(el.viewport, 'aria-label', settings.label ?? g.msg('grid.label'));
     const loading = settings.overlay === 'loading' || rows.status.phase === 'loading';
     setAttr(el.viewport, 'aria-busy', loading ? 'true' : null);

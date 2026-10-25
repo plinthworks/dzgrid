@@ -122,13 +122,15 @@ describe('check-contrast', () => {
     expect(() => parseColor('oklch(0.5 0.1 1rad)')).toThrow(/cannot read/);
   });
 
-  it('T-1: skinFromCss reads the ten colours of each showcase theme, light and dark', () => {
+  it('T-1: skinFromCss reads the ten colours of each showcase theme, light and dark, and the grid\'s own colours it gives', () => {
     const TEN = ['bg', 'bg-raised', 'fg', 'fg-muted', 'border', 'accent', 'accent-fg', 'danger', 'warning', 'success'];
     for (const n of ['midnight', 'clinic']) {
       const sk = skinFromCss(readFileSync(join(root, `packages/theme/${n}.css`), 'utf8'));
       expect(sk.name).toBe(n);
-      for (const scheme of ['light', 'dark']) expect(Object.keys(sk[scheme]).sort(), `${n} ${scheme}`).toEqual([...TEN].sort());
-      for (const k of TEN) expect(sk.light[k]).toMatch(/^light-dark\(#[0-9a-f]{6}, #[0-9a-f]{6}\)$/);
+      // A colour of the grid's own a theme gives (`--dzg-*`, a pair of hex values): Clinic's block edge (Phase 5 step 11a).
+      const own = n === 'clinic' ? ['--dzg-range-edge'] : [];
+      for (const scheme of ['light', 'dark']) expect(Object.keys(sk[scheme]).sort(), `${n} ${scheme}`).toEqual([...TEN, ...own].sort());
+      for (const k of [...TEN, ...own]) expect(sk.light[k]).toMatch(/^light-dark\(#[0-9a-f]{6}, #[0-9a-f]{6}\)$/);
     }
   });
 

@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6; `-- --only edit-saves` the saves end to end, step 7; `-- --only edit-undo` undo and redo, the tree's field, step 8 — `tree`, `detail` and `playground` gain step 8's checks).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6; `-- --only edit-saves` the saves end to end, step 7; `-- --only edit-undo` undo and redo, the tree's field, step 8; `-- --only range` blocks of cells, step 11a — `tree`, `detail` and `playground` gain step 8's checks).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -13,6 +13,7 @@ import { chromeDump } from '../spikes/s4-a11y/ax.mjs';
 import { buildFrameworks } from './frameworks.mjs';
 import { resolveColor } from './check-contrast.mjs';
 import { editUndoChecks, editTreeChecks, editDetailChecks, playgroundUndoChecks } from './browser-undo.mjs';
+import { rangeChecks, playgroundRangeChecks } from './browser-range.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const OUT = `${ROOT}packages/dom/test/browser/results`;
@@ -3834,6 +3835,8 @@ async function runEngine(name) {
       if (only === 'editors') await editorsChecks(name, ctx), name !== 'firefox' && (await editorsKindsChecks(name, ctx));
       if (only === 'playground' && name === 'chrome') await playgroundEditChecks(name, ctx), await playgroundUndoChecks(name, ctx, H);
       if (only === 'edit-undo') await editUndoChecks(name, ctx, H);
+      // Step 11a: blocks of cells (Firefox and WebKit by `--engine`: the keys right to left and the drag), then the real playground page.
+      if (only === 'range') await rangeChecks(name, ctx, H), name === 'chrome' && (await playgroundRangeChecks(name, ctx, H));
       return;
     }
 
@@ -4177,6 +4180,9 @@ async function runEngine(name) {
     // field, editing beside details, the real pages' Undo / Redo, tree and visits.
     await editUndoChecks(name, ctx, H);
     if (name === 'chrome') await editTreeChecks(name, ctx, H), await editDetailChecks(name, ctx, H), await playgroundUndoChecks(name, ctx, H);
+    // Step 11a: blocks of cells, and the real playground page with a block.
+    await rangeChecks(name, ctx, H);
+    if (name === 'chrome') await playgroundRangeChecks(name, ctx, H);
 
     // ---- alignment and pinning, LTR and RTL, at three inline positions ----
     // With the selection box too (its cell must be as wide as the column it stands for), and over spans.

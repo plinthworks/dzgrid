@@ -58,3 +58,11 @@ export interface DetailMessages {
   readonly locale: string;
   readonly text: { readonly [K in DetailMessageKey]: MessageValue };
 }
+
+/** The block's texts (`@dzgrid/dom/range`, Phase 5 step 11a), in their own bundles (`locales/<lang>-range`): optional here, required by `range()`. */
+export type RangeMessageKey = 'range.rows' | 'range.cols' | 'range.size' | 'range.cleared' | 'range.reordered';
+/** A range bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_RANGE.text }`. */
+export interface RangeMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in RangeMessageKey]: MessageValue };
+}

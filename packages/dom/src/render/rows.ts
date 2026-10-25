@@ -207,6 +207,11 @@ export class RowRenderer<T> {
     return this.#mounted;
   }
 
+  /** The renderers spawned from this one (a tree's pinned parents): what a feature decorates on them (a block's tint). */
+  get spawned(): readonly RowRenderer<T>[] {
+    return this.#spawned;
+  }
+
   #makeRow(): RowView {
     const el = this.#doc.createElement('div');
     el.className = 'dzg-row';

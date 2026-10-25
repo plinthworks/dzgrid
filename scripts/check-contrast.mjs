@@ -160,6 +160,8 @@ export function skinFromCss(css) {
   if (!block) return null;
   const vars = {};
   for (const m of block[2].matchAll(/--tz-([a-z0-9-]+)\s*:\s*([^;]+);/g)) vars[m[1]] = m[2].trim();
+  // The grid's own colours a theme gives by hand (Clinic's block edge, Phase 5 step 11a), by their full name.
+  for (const m of block[2].matchAll(/(--dzg-[a-z0-9-]+)\s*:\s*(light-dark\(#[0-9a-f]{6}, #[0-9a-f]{6}\));/g)) vars[m[1]] = m[2];
   return { name: block[1], light: vars, dark: vars };
 }
 

@@ -3,6 +3,7 @@
  *   dzgrid.scss   → dzgrid.css (layered) and dzgrid.unlayered.css ($layered: false)
  *   contrast.scss → contrast.css (layered) and contrast.unlayered.css ($layered: false)
  *   edit.scss     → edit.css (layered) and edit.unlayered.css ($layered: false), Phase 5 step 4 (owner S4-O2)
+ *   range.scss    → range.css (layered) and range.unlayered.css ($layered: false), Phase 5 step 11a
  * The tests compile the same way and fail when a file drifts from its source.
  */
 import { writeFileSync } from 'node:fs';
@@ -15,7 +16,7 @@ const out = (source, file) => {
   writeFileSync(`${dir}${file}`, `${css}\n`);
   console.log(`build:theme: ${file}`);
 };
-for (const name of ['dzgrid', 'contrast', 'edit']) {
+for (const name of ['dzgrid', 'contrast', 'edit', 'range']) {
   out(`@use "${name}";`, `${name}.css`);
   out(`@use "${name}" with ($layered: false);`, `${name}.unlayered.css`);
 }

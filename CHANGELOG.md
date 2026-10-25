@@ -16,6 +16,21 @@ Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
 
+- Phase 5 step 11a: **`@dzgrid/dom/range`**, selecting a block of cells (docs/behaviors/range-selection.md; owner QB1,
+  QB2, QB7, S11-Q1–Q6). `range({ drag })`: Shift+arrows, Shift+Home/End, Ctrl+Shift+arrows and edges, Shift+PageUp/Down
+  (the grid's own moves, mirrored right to left; never into the header), Ctrl+A / Cmd+A (every cell shown, by the
+  physical key), Shift+Space (the row), Escape; a press and a drag of the mouse or a pen (the focus to the moving corner
+  at the release), Shift+click and Shift+drag, the view scrolling near the edges (logical, scaled scrolling included),
+  the click after a drag swallowed. The tint and the logical edges `dzg-cell--range`, `--rs`, `--re`, `--rt`, `--rb` on
+  the mounted cells at each paint (pinned segments, spans by their origin, details and fillers never, the tree's pinned
+  parents tinted without `aria-selected`, the editor's cell left alone); `aria-selected="true"` on the block's data
+  cells only; the size said after a 400 ms pause; the block dropped, said once, by a sort, filter or search (« the
+  order changed »), a page, a column hidden, moved or pinned, rows that lose a corner, a plain move or press. API
+  `get / set / clear / box`, event `rangeChanged`. Texts `locales/{en,fr,ar}-range`; theme
+  **`@dzgrid/theme/range.css`** (inset box-shadow edges, `--dzg-range-bg`, `--dzg-range-edge`; forced colours). Base:
+  `GridContext.multi` (`aria-multiselectable`; Shift+click on a cell left to the block), `RowRenderer.spawned`.
+  The drag is the mouse's (a pen scrolls, like a finger); a cancelled drag gives back the block from before it.
+  Sizes: `dom/range` 2 949 B gz over the DOM base (budget 4 500), base 21 566.
 - Phase 5 step 10, Part B begins: blocks of cells, the clipboard and the fill handle, the pure half (sheets
   docs/behaviors/range-selection.md, clipboard.md with its table of Excel cases, fill.md; a11y protocol §20; owner
   decisions QB1–QB10). New entry **`@dzgrid/core/range`** (2 897 B gz over the core, grant 4 000; review: real currency codes only, bidi marks, a leading BOM, the `'=x` guard, midnight days, bulk clears): `rangeBox`,

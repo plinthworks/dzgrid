@@ -53,7 +53,8 @@ export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
     const mode = g.settings.selection?.mode ?? 'none';
     if (mode === 'none') return;
     const onBox = !!t.closest('.dzg-check');
-    if (!onBox && g.settings.selection?.click !== true) return;
+    // With blocks of cells (`g.multi`), Shift+click on a cell is the block's: rows are ticked by their box (owner QB1).
+    if (!onBox && (g.settings.selection?.click !== true || (g.multi && e.shiftKey))) return;
     const toggle = onBox || (g.mac ? e.metaKey : e.ctrlKey);
     if (mode === 'multi' && e.shiftKey && kernel.anchor === null) kernel.dispatch({ type: 'selection.only', row: key }, 'user');
     else if (mode === 'multi' && e.shiftKey) {

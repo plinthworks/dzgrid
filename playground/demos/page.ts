@@ -7,6 +7,8 @@ import CLINIC from '../../packages/theme/clinic.css?inline';
 import './demos.css';
 // The editing marks, the field and the bubble (used by orders-edit.html only; unused rules elsewhere).
 import '../../packages/theme/edit.css';
+// The block of cells (Phase 5 step 11a; orders-edit.html, `?range=0` turns it off).
+import '../../packages/theme/range.css';
 import { mountOrders } from './orders.js';
 import { mountHr } from './hr.js';
 import { mountOrdersEdit } from './orders-edit.js';
@@ -48,6 +50,10 @@ const TEXT = {
   },
 } as const;
 // The editing demo (owner feedback, step 6): a title, four short bullets, the event log's heading.
+const RANGE_TEXT = {
+  fr: 'Bloc de cellules : Maj+flèches depuis une cellule, ou glissez à la souris (la vue défile près des bords), Maj+clic étend, Ctrl+A (⌘A) tout, Maj+Espace la ligne ; Échap l’efface. Un tri, un filtre ou une recherche l’efface aussi, et le dit (?range=0 l’éteint).',
+  ar: 'كتلة خلايا: Shift+الأسهم من خلية، أو اسحب بالفأرة (يتمرّر العرض قرب الحواف)، Shift+نقرة توسّعها، Ctrl+A (⌘A) الكل، Shift+المسافة الصف؛ Escape يلغيها. الفرز أو التصفية أو البحث يلغيها أيضًا ويعلن ذلك (?range=0 يوقفها).',
+} as const;
 const EDIT_TEXT = {
   fr: ['Commandes : modifier les cellules', [
     'Double-cliquez sur une cellule, ou tapez directement, pour la modifier (sauf « Commande », grisée).',
@@ -80,6 +86,8 @@ document.getElementById('title')!.textContent = title;
 if (editing) {
   const [, steps, logTitle, sel] = EDIT_TEXT[ar ? 'ar' : 'fr'];
   document.getElementById('steps')!.replaceChildren(...steps.map((t) => Object.assign(document.createElement('li'), { textContent: t })));
+  // Blocks of cells (step 11a): said under the grid, so the rows the checks click stay in a 900 px window.
+  document.querySelector('main')!.append(Object.assign(document.createElement('p'), { className: 'note', textContent: RANGE_TEXT[ar ? 'ar' : 'fr'] }));
   document.getElementById('log-title')!.textContent = logTitle;
   // The selectors' words in the page's language (« Entrée : reste / descend »).
   document.getElementById('enter-label')!.textContent = sel[0];

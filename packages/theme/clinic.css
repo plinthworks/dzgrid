@@ -25,6 +25,8 @@
     --tz-danger: light-dark(#b3261e, #ff8f85);
     --tz-warning: light-dark(#8a5300, #efc062);
     --tz-success: light-dark(#1a7442, #6ad49a);
+    /* The block's edge (step 11a): its success is too near its teal accent (a hue 60° away, check:contrast). */
+    --dzg-range-edge: light-dark(#6b3fb8, #c9adff);
     --dzg-font: 400 0.875rem/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Arabic", Tahoma, sans-serif;
     --dzg-radius: 0.5rem;
     --dzg-pill-radius: 999px;

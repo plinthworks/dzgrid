@@ -134,7 +134,16 @@
     { "what": "calendar button (shape on the field)", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 3 },
     { "what": "calendar button, row hovered", "fg": "--tz-fg-muted", "bg": "--dzg-row-hover-bg", "min": 3 },
     { "what": "calendar button, selected row", "fg": "--tz-fg-muted", "bg": "--dzg-row-selected-bg", "min": 3 },
-    { "what": "calendar Retry button", "fg": "--tz-fg", "bg": "--tz-bg-raised", "min": 4.5 }
+    { "what": "calendar Retry button", "fg": "--tz-fg", "bg": "--tz-bg-raised", "min": 4.5 },
+    { "what": "text in a block of cells (Phase 5 step 11a, range.css: the tint)", "fg": "--tz-fg", "bg": "--dzg-range-bg", "min": 4.5 },
+    { "what": "muted text in a block of cells", "fg": "--tz-fg-muted", "bg": "--dzg-range-bg", "min": 4.5 },
+    { "what": "a block's edge on its tint", "fg": "--dzg-range-edge", "bg": "--dzg-range-bg", "min": 3 },
+    { "what": "a block's edge on the background next to it", "fg": "--dzg-range-edge", "bg": "--tz-bg", "min": 3 },
+    { "what": "a block's edge next to a selected row", "fg": "--dzg-range-edge", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "focus ring on a cell of a block", "fg": "--dzg-focus-ring", "bg": "--dzg-range-bg", "min": 3 },
+    { "what": "saving border on a cell of a block", "fg": "--dzg-saving-color", "bg": "--dzg-range-bg", "min": 3 },
+    { "what": "a block's edge apart from the focus ring (step 11a): a hue 60° away at least; the shape differs too (inset lines, the ring outside)", "fg": "--dzg-range-edge", "bg": "--dzg-focus-ring", "min": 1, "hue": 60 },
+    { "what": "a block's edge apart from the saving border: a hue 60° away at least", "fg": "--dzg-range-edge", "bg": "--dzg-saving-color", "min": 1, "hue": 60 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -158,6 +167,8 @@
     "--dzg-flash-hover-bg": "color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-hover-bg))",
     "--dzg-saving-color": "var(--tz-warning)",
     "--dzg-refused-color": "var(--tz-danger)",
-    "--dzg-saved-color": "var(--tz-success)"
+    "--dzg-saved-color": "var(--tz-success)",
+    "--dzg-range-bg": "var(--dzg-row-selected-bg)",
+    "--dzg-range-edge": "var(--tz-success)"
   }
 }

@@ -139,3 +139,13 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **QB9 + QB10:** copied numbers follow the locale (decimal comma in fr, point in en, as the CSV); a pasted « 1 234,50 € » / « DZD » in a number column has the currency removed and is read as 1234.5.
 - **Budgets:** `core/range` 4 000, `dom/range` 4 500 (Q16); new `-range` texts en/fr/ar 350/400/500; `range.css` 500; `/editors` 6 720 (QB5); dom base ~+20 B for `aria-multiselectable` inside the 21 980 grant.
 - **QB10 confirmed (owner, 2026-10-25):** 3-letter codes are stripped too. Lead precision after the review: only REAL currency codes (ISO 4217, `Intl.supportedValuesOf('currency')`) plus the local forms `DA`, `د.ج`, `دج`, `ج.م`; never any 3 capitals (`SKU 100` stays refused). Bidi marks are ignored around the symbol; a sign before a leading symbol is kept (`-$1,234.50` → −1234.5); accounting parentheses stay refused.
+
+## Step 11a (owner, 2026-10-25) — plan `step11a-plan.md`
+
+- **S11-Q1:** during a mouse drag the focus moves to the moving corner when the button is released (not on every cell).
+- **S11-Q2:** after Ctrl+A or Shift+Space the focus stays where it is.
+- **S11-Q3:** a tree's pinned parent copies show the block tint (~15 B in the base).
+- **S11-Q4:** a sort/filter that drops the block has its own sentence (« Sélection effacée : l'ordre a changé »), one more text.
+- Lead: `vite.config.ts` is not edited (it would restart the owner's 4700 server); the playground imports the range entry by path.
+- **S11-Q5 (owner, 2026-10-25):** 11a accepted at 2 846 B gz in `dom/range` (4 500); per QB8 the fill handle (step 12) goes to its own entry; the clipboard (11b) stays in `dom/range`.
+- **S11-Q6 (owner, 2026-10-25):** the `@dzgrid/core/range` (and needed `@dzgrid/dom/range`) aliases may be added to `vite.config.ts`; vite on 4700 reloads itself (never stopped or killed by an agent).
