@@ -385,13 +385,26 @@
     },
     "@dzgrid/dom/range": {
       "file": "packages/dom/src/range.ts",
-      "maxGzip": 4500,
+      "maxGzip": 4800,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/core/range",
-        "@dzgrid/dom/internal"
+        "@dzgrid/dom/internal",
+        "./html/*"
+      ]
+    },
+    "@dzgrid/dom/range: html (lazy)": {
+      "file": "packages/dom/src/range/html/index.ts",
+      "maxGzip": 600,
+      "over": "@dzgrid/dom/range",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/range",
+        "@dzgrid/dom/internal",
+        "./html/*"
       ]
     },
     "@dzgrid/dom/motion-gsap": {

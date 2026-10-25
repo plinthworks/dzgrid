@@ -75,7 +75,10 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/ar-editors': 620,
   // Phase 5 Q16 (Part B): @dzgrid/dom/range 4 500 over the DOM base (selection 11a, clipboard 11b, fill 12; QB8: the fill
   // handle to its own entry if the three go over); the -range texts 350 / 400 / 500 and range.css 500 (Part B budgets, 2026-10-25).
-  '@dzgrid/dom/range': 4500,
+  '@dzgrid/dom/range': 4800, // owner S11b-Q3 (2026-10-25): at most 4 800 with the clipboard (step 11b, measured 4 765)
+  // Owner S11b-Q5 (2026-10-25): the pasted-HTML reader a chunk loaded on demand, its line the measure + 10 % (422 → 500;
+  // the step-11b review moved the long-text count there: 517 → 600).
+  '@dzgrid/dom/range: html (lazy)': 600,
   '@dzgrid/dom/locales/en-range': 350,
   '@dzgrid/dom/locales/fr-range': 400,
   '@dzgrid/dom/locales/ar-range': 500,

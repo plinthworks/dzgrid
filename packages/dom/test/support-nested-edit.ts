@@ -14,10 +14,12 @@ import { EN } from '../src/locales/en.js';
 import { EN_DETAIL } from '../src/locales/en-detail.js';
 import { EN_EDIT } from '../src/locales/en-edit.js';
 import { EN_EDITORS } from '../src/locales/en-editors.js';
+import { EN_RANGE } from '../src/locales/en-range.js';
+import { range, type RangeOptions } from '../src/range.js';
 
 export type O = { id: string; name: string; qty: number };
 export type L = { id: string; item: string; qty: number };
-export const MSG = { locale: 'en', text: { ...EN.text, ...EN_DETAIL.text, ...EN_EDIT.text, ...EN_EDITORS.text } };
+export const MSG = { locale: 'en', text: { ...EN.text, ...EN_DETAIL.text, ...EN_EDIT.text, ...EN_EDITORS.text, ...EN_RANGE.text } };
 export const k = (id: string): RowKey => dataKey(id)!;
 export const x = (id: string): RowKey => detailKey(k(id));
 const OCOLS: ColumnDef<O, any>[] = [
@@ -45,8 +47,8 @@ export function cleanup(): void {
   vi.restoreAllMocks();
 }
 
-/** `shared`: one `edit()` object for every inner grid (each still its own controller); `deep`: lots under each line. */
-export function nest(o: { shared?: boolean; deep?: boolean; keep?: number } = {}) {
+/** `shared`: one `edit()` object for every inner grid (each still its own controller); `deep`: lots under each line; `range`: blocks and the clipboard on the outer grid (step 11b), `rangeOpts` its options. */
+export function nest(o: { shared?: boolean; deep?: boolean; keep?: number; range?: boolean; rangeOpts?: RangeOptions } = {}) {
   const saves: { outer: Held[]; inner: Held[]; lots: Held[] } = { outer: [], inner: [], lots: [] };
   const held = (into: Held[]) => (req: SaveRequest<unknown>) => new Promise<void>((ok, no) => void into.push({ req, ok: () => ok(), no }));
   const made: Inner[] = [];
@@ -87,9 +89,10 @@ export function nest(o: { shared?: boolean; deep?: boolean; keep?: number } = {}
   const host = document.body.appendChild(document.createElement('div'));
   const events: GridEvent<O>[] = [];
   const outerEdit = edit<O>({ save: held(saves.outer) as never });
+  const blocks = range(o.rangeOpts);
   const g = createGrid<O>(host, {
     rows: Array.from({ length: 30 }, (_, i) => ({ id: `O${i}`, name: `Order ${i}`, qty: i })), getRowId: (r) => r.id, columns: OCOLS, messages: MSG, label: 'Orders',
-    onEvent: (e) => events.push(e), features: [outerEdit, editors(), detail<O>({ part: lines, height: 240 })],
+    onEvent: (e) => events.push(e), features: [outerEdit, editors(), detail<O>({ part: lines, height: 240 }), ...(o.range ? [blocks] : [])],
   }, { geometry, sync: true });
   grids.push(g);
   const ctx = (g as unknown as { context: GridContext<O> }).context;
@@ -106,7 +109,7 @@ export function nest(o: { shared?: boolean; deep?: boolean; keep?: number } = {}
   const cellOf = (c: GridContext<any>, key: RowKey, col: string) => c.rowRenderer.cell(key, col);
   const field = (root: ParentNode = host) => root.querySelector<HTMLInputElement>('.dzg-field');
   const scroll = (top: number) => { box.scrollTop = top; ctx.el.viewport.dispatchEvent(new Event('scroll')); };
-  return { g, ctx, api, host, box, events, made, saves, innerOf, ictx, active, key, expand, cellOf, field, scroll, editsOf };
+  return { g, ctx, api, host, box, events, made, saves, innerOf, ictx, active, key, expand, cellOf, field, scroll, editsOf, blocks };
 }
 
 export const settle = async () => {

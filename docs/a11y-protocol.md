@@ -779,21 +779,24 @@ Durée estimée : 20 min par couple et par langue.
      cochée (QB1 : les lignes se cochent par leur case).
 128. **Effacer le bloc.** `Échap` : fr « Sélection effacée », ar « أُلغي التحديد » (ou proche), une fois ; le
      focus reste sur la cellule. Une flèche sans `Maj` fait de même sans phrase de plus.
-129. **Copier.** Un bloc de 3 × 2, `Ctrl+C` : fr « 6 cellules copiées », ar « نُسخت 6 خلايا » ; coller dans le
+129. **Copier.** Un bloc de 3 × 2, `Ctrl+C` : fr « Cellules copiées : 6 », ar « النسخ: 6 » (étape 11b, S11b-Q4) ; coller dans le
      tableur : six cellules, les nombres reconnus comme nombres (virgule décimale en français), les dates
      comme dates. Dans un champ ouvert, `Ctrl+C` copie le texte du champ, la grille ne dit rien.
 130. **Coller, avec un refus.** Copier dans le tableur trois cellules dont une « abc » vers « Qté » ;
-     `Ctrl+V` sur la grille : une phrase **une seule fois**, fr « 3 cellules collées ; 1 refusée », ar
-     équivalente ; la cellule refusée **clignote** (vue) ; « Enregistrement en cours » une fois, pas une par
-     cellule. Coller hors de la grille (sur la dernière ligne un bloc de 3 lignes) : « … ; 2 hors de la
-     grille ».
+     `Ctrl+V` sur la grille : une phrase **une seule fois**, fr « Cellules collées : 2 ; refusées : 1.
+     Enregistrement en cours », ar « اللصق: 2؛ مرفوضة: 1. … » ; la cellule refusée **clignote** (vue) ;
+     « Enregistrement en cours » une fois, dans la même phrase, pas une par cellule. Coller hors de la grille
+     (sur la dernière ligne un bloc de 3 lignes) : « … ; hors de la grille : 2 ». Un collage trop grand :
+     « Collage trop grand : au plus 100 000 cellules ; rien n’est collé ». **Couper** (`Ctrl+X`, S11b-Q1) :
+     « Cellules coupées : n », les cellules vidées tout de suite, un `Ctrl+Z` rend tout.
 131. **Annuler un collage.** `Ctrl+Z` : fr « Annulé : 3 cellules » (ou la phrase du paquet `-edit` pour
      plusieurs cellules), une fois ; toutes les cellules collées reprennent leur valeur ; le focus va sur la
      première.
 132. **Recopier vers le bas.** Un bloc de 3 lignes sur « Qté », `Ctrl+D` (Mac `Cmd+D`) : la première valeur
      recopiée dans les deux autres, une phrase une fois ; le navigateur n'ouvre pas son dialogue de favori.
 133. **Supprimer un bloc.** `Suppr` sur un bloc dont une colonne est en lecture seule : les cellules
-     modifiables vidées, une phrase avec le compte « en lecture seule » ; un `Ctrl+Z` rend tout.
+     modifiables vidées, une phrase avec le compte, fr « Cellules effacées : 4 ; en lecture seule : 2 »,
+     ar « المسح: 4؛ للقراءة فقط: 2 » ; un `Ctrl+Z` rend tout.
 134. **En arabe.** Mêmes étapes de droite à gauche : `Maj+←` étend vers la **fin** logique (la gauche à
      l'écran), `Ctrl+R` recopie vers la gauche ; la poignée de recopie est en bas à gauche (vue) ; la copie
      collée dans le tableur garde l'ordre logique (la première colonne de la grille en colonne A).

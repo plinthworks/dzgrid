@@ -60,7 +60,10 @@ export interface DetailMessages {
 }
 
 /** The block's texts (`@dzgrid/dom/range`, Phase 5 step 11a), in their own bundles (`locales/<lang>-range`): optional here, required by `range()`. */
-export type RangeMessageKey = 'range.rows' | 'range.cols' | 'range.size' | 'range.cleared' | 'range.reordered';
+export type RangeMessageKey =
+  | 'range.rows' | 'range.cols' | 'range.size' | 'range.cleared' | 'range.reordered'
+  // The clipboard (step 11b): a label and its count each, no plural forms (owner S11b-Q4); the parts after the first carry their separator.
+  | 'range.copied' | 'range.cut' | 'range.pasted' | 'range.erased' | 'range.refused' | 'range.readOnly' | 'range.tooLong' | 'range.outside' | 'range.tooBig' | 'range.noCopy';
 /** A range bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_RANGE.text }`. */
 export interface RangeMessages {
   readonly locale: string;

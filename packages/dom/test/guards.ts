@@ -12,7 +12,8 @@ import ts from 'typescript';
  * - `physical`: no left or right outside `dir.ts`, no `ArrowLeft`/`ArrowRight`
  *   outside `keys/`: right to left is the same code (§3.9);
  * - `html`: no `innerHTML`, `outerHTML`, `insertAdjacentHTML`,
- *   `document.write`: cells hold user data (§7.1);
+ *   `document.write`: cells hold user data (§7.1); `parseFromString` only in
+ *   the pasted-HTML reader, `range/html/index.ts` (an inert document, step 11b);
  * - `invisible`: no invisible or bidi-control character typed raw, no raw
  *   combining mark outside comments (written as escapes).
  */
@@ -84,6 +85,8 @@ export function checkSource(source: string, file: string): Finding[] {
   const isKeys = /(^|\/)keys\//.test(file);
   // Translations may hold any letter or mark, and say left or right in their language.
   const isLocale = /(^|\/)locales\//.test(file);
+  // The pasted-HTML reader (Phase 5 step 11b, owner S11b-Q5) parses in an inert document: `parseFromString` there only.
+  const isInert = /(^|\/)range\/html\/index\.ts$/.test(file);
 
   const physicalName = (n: ts.Node, name: string) => {
     if (!isDir && PHYSICAL_PROP.test(name)) add('physical', n, name);
@@ -102,7 +105,7 @@ export function checkSource(source: string, file: string): Finding[] {
     // Property names only: a local `left` in a binary search is no side.
     if (ts.isPropertyAccessExpression(n)) {
       physicalName(n.name, n.name.text);
-      if (HTML.has(n.name.text)) add('html', n.name, n.name.text);
+      if (HTML.has(n.name.text) && !(isInert && n.name.text === 'parseFromString')) add('html', n.name, n.name.text);
       if ((n.name.text === 'write' || n.name.text === 'writeln') && /^(document|doc|ownerDocument)$/.test(propName(n.expression) ?? (ts.isIdentifier(n.expression) ? n.expression.text : ''))) add('html', n.name, 'document.write');
     }
     if (ts.isBindingElement(n) && ts.isObjectBindingPattern(n.parent)) {

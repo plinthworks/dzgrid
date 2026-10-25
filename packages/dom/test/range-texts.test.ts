@@ -39,3 +39,29 @@ describe('range texts', () => {
     expect(EN_RANGE.text['range.reordered']).toBe('Selection cleared: the order changed');
   });
 });
+
+// Step 11b (owner S11b-Q4: a label and its count, no plural forms; clipboard.md « As built at step 11b »).
+describe('range texts: the clipboard', () => {
+  const say = (lang: keyof typeof BUNDLES, main: string, parts: Record<string, number>) => {
+    const [base, b] = BUNDLES[lang];
+    const m = { locale: b.locale, text: { ...base.text, ...b.text } };
+    return [msg(m, main as never, { n: parts['n']! }), ...Object.entries(parts).filter(([k, v]) => k !== 'n' && v).map(([k, v]) => msg(m, `range.${k}` as never, { n: v }))].join('');
+  };
+  it('the paste sentence in each language, joined, zero counts left out', () => {
+    expect(say('fr', 'range.pasted', { n: 12, refused: 2, readOnly: 3, tooLong: 0, outside: 4 })).toBe('Cellules collées\u202F: 12\u202F; refusées\u202F: 2\u202F; en lecture seule\u202F: 3\u202F; hors de la grille\u202F: 4');
+    expect(say('en', 'range.pasted', { n: 12, refused: 2, readOnly: 0, tooLong: 1 })).toBe('Cells pasted: 12; refused: 2; too long: 1');
+    expect(say('ar', 'range.pasted', { n: 12, refused: 2, readOnly: 3 })).toBe('اللصق: 12؛ مرفوضة: 2؛ للقراءة فقط: 3');
+    expect(say('fr', 'range.copied', { n: 6 })).toBe('Cellules copiées\u202F: 6');
+    expect(say('fr', 'range.cut', { n: 4, readOnly: 1 })).toBe('Cellules coupées\u202F: 4\u202F; en lecture seule\u202F: 1');
+    expect(say('fr', 'range.erased', { n: 4 })).toBe('Cellules effacées\u202F: 4');
+  });
+  it('too big and the refused copy', () => {
+    const fr = { locale: 'fr', text: { ...FR.text, ...FR_RANGE.text } };
+    expect(msg(fr, 'range.tooBig', { max: 100000 })).toBe('Collage trop grand\u202F: au plus 100\u202F000 cellules\u202F; rien n’est collé');
+    expect([EN_RANGE, FR_RANGE, AR_RANGE].map((b) => b.text['range.noCopy'])).toEqual(['Copying not allowed', 'Copie non autorisée', 'النسخ ممنوع']);
+    expect(msg({ locale: 'en', text: { ...EN.text, ...EN_RANGE.text } }, 'range.tooBig', { max: 4 })).toBe('Paste too large: at most 4 cells; nothing pasted');
+  });
+  it('no plural forms in the clipboard texts (one string each)', () => {
+    for (const b of [EN_RANGE, FR_RANGE, AR_RANGE]) for (const k of RANGE_KEYS.slice(5)) expect(typeof b.text[k], `${b.locale} ${k}`).toBe('string');
+  });
+});

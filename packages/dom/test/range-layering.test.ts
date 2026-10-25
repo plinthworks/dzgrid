@@ -21,13 +21,14 @@ describe('range seams: layering', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('the entry reaches the core, the shared internal entry, its own folder and the base\'s guarded writers and direction helpers only; never the editors, filters, tree or edit entries', () => {
+  it('the entry reaches the core, the shared internal entry, its own folder and the base\'s guarded writers, direction helpers and key owners only; never the editors, filters, tree or edit entries', () => {
     const entry = files(SRC).filter((f) => ENTRY.test(relative(SRC, f)));
     expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(expect.arrayContaining(['range.ts', 'range/index.ts']));
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/range|dom\/internal)$/.test(s) && !/^range(\/[^:]+)?\.ts: \.\/(range\/)?[a-z-]+\.js$/.test(s) && !/^range\/[^:]+\.ts: \.\.\/(render\/write|dir)\.js$/.test(s));
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/range|dom\/internal)$/.test(s) && !/^range(\/[^:]+)?\.ts: \.\/(range\/)?[a-z-]+\.js$/.test(s) && !/^range\/[^:]+\.ts: \.\.\/(render\/write|dir|keys\/owner)\.js$/.test(s));
     expect(offenders).toEqual([]);
-    for (const f of entry) expect(readFileSync(f, 'utf8'), relative(SRC, f)).not.toMatch(/from '[^']*(editors|filters|tree|\/edit)[^']*'/);
+    // Step 11b: the edits are reached through the grid (`g.edit.api`), typed only — no run-time import of them.
+    for (const f of entry) expect(readFileSync(f, 'utf8').replace(/^import type [^;]*;$/gm, ''), relative(SRC, f)).not.toMatch(/from '[^']*(editors|filters|tree|\/edit)[^']*'/);
   });
 });

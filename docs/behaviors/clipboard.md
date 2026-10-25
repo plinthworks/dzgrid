@@ -18,10 +18,11 @@ into the grid, or the other way round.
 
 ## What they observe
 - Ctrl+C on a block puts its cells on the clipboard: pasted into a spreadsheet, each value lands in its own
-  cell, numbers as numbers, dates as dates. « 6 cellules copiées » is said.
+  cell, numbers as numbers, dates as dates. « Cellules copiées : 6 » is said.
 - Ctrl+V writes the cells from the focused cell or into the block, in one go: the saving marks show on each
-  cell, and one Ctrl+Z gives every cell back. « 12 cellules collées ; 2 refusées ; 3 en lecture seule ;
-  4 hors de la grille » is said, the refused cells blink.
+  cell, and one Ctrl+Z gives every cell back. « Cellules collées : 12 ; refusées : 2 ; en lecture seule : 3 ;
+  hors de la grille : 4 » is said (owner S11b-Q4: a label and its count, no plural forms), the refused cells
+  blink.
 - Ctrl+X copies, then clears the editable cells; Delete clears them without copying.
 - Inside a field (an open editor, a filter input, the search box), these keys are the field's, as always.
 
@@ -196,6 +197,58 @@ Paste (spreadsheet → grid; the text, the grid's locale, the column → what th
 Real captures from Excel (Windows, macOS), Google Sheets, LibreOffice and Numbers: the owner, not blocking
 (S7 open point), added to `spikes/s7-clipboard/fixtures/` when they come.
 
+## As built at step 11b (lead decisions L1–L13, `docs/phase-5-steps/step11b-plan.md`; owner S11b-Q1–Q4)
+- **Routing (L1).** `copy`, `cut` and `paste` are heard on the document. The grid takes one only when no one
+  prevented it before (a host's own handler wins), the focused element's innermost `.dzg` root is its own, the
+  focus is on a cell (or on a header while a block exists), and there is something to copy or paste into (L2):
+  the block, else the focused cell when it is a data row's. A focus on a detail, filler or loading row with no
+  block: nothing taken, nothing said. Copy and cut with no block while the user has selected text INSIDE the grid:
+  the browser's (a paragraph selected elsewhere, then Tab to a cell, copies the cell — review 5). The focus is
+  followed into shadow roots: a grid inside one works, and a grid nested in another's shadow root is its own
+  (review 1). The keydown of Ctrl / Cmd + C, X, V is never prevented (a prevented keydown kills the event).
+- **Copy (L4, L5).** Once taken, the event is always prevented: a copy `canCopy` refuses leaves the clipboard
+  empty rather than leaking a page selection, and says « Copie non autorisée ». `text/html` is
+  `<table dir="ltr|rtl"><tbody><tr><td>…</td></tr></tbody></table>` (`<th>` for the API's header row), every
+  text escaped (`&`, `<`, `>`, `"` as numeric references) and its line breaks written `<br>`.
+- **Cut (owner S11b-Q1).** The copy, then the block's cells cleared at once in one save (origin `cut`), undone
+  by one Ctrl+Z. « Cellules coupées : n » counts the cells cleared; read-only cells are copied, not cleared,
+  counted apart.
+- **Pasted HTML on demand (owner S11b-Q5).** Its reader is a chunk of its own (`range/html/`), loaded only when a
+  paste carries no plain text: the HTML string is read inside the event (the data is readable then only), the event
+  prevented at once, the cells written when the chunk is there — at the corners of the paste's moment (row keys
+  and column ids; a corner no longer shown: nothing). A later paste drops one still waiting (review 4). A chunk
+  that fails to load: nothing written, « Échec du chargement » said (the grid's own text); the next paste tries
+  again. `api.paste('', html)` answers null at once. The reader skips `script`, `style`, `noscript`, `template` in
+  any case (SVG's are lower case, review 2); `rowspan="0"` spans to the end of its table section (HTML), within the
+  cap.
+- **A huge plain text (review 3).** A text over 64 K characters goes through the same chunk, which counts its cells
+  before decoding — its lines (one final break dropped; the count stops past the cap) × its first line's cells, a
+  quoted break or tab counted as one — and refuses it with the « too large » sentence; within the cap it is decoded
+  and pasted as always (a moment later). A shorter text is decoded at once.
+- **Paste (L6).** `text/plain` first; `text/html` only when the text is empty. Cells over their column's cap are
+  set aside (« trop longues »); without `edit()` every cell counts « en lecture seule ». Read-only refusals are
+  counted, not blinked; other refusals counted « refusées » and each mounted one blinks. The block shown after
+  is the block written (one cell written: no block); the keyboard focus does not move.
+- **Memo (L7).** Page-wide: the text a grid of the page last wrote, its values, each cell's column type and
+  id. A paste of exactly that text writes the values where the target column has the same type (an enum: the
+  same column of the same grid), else the text. Replaced by the next copy, dropped at the destroy of the grid
+  that wrote it.
+- **Options (L9).** `range({ canCopy, guard, raw, maxPaste })`: `canCopy` gets column ids and counts, never
+  values (a throw counts as a refusal); a `maxPaste` that is not a positive number is told (`invalid-setting`,
+  path `range.maxPaste`) and the default kept.
+- **Delete on a block (L10).** Delete or Backspace while a block exists clears its cells in one save (origin
+  `edit`), « Cellules effacées : n »; with no block the editors keep their one-cell Delete, whatever the order
+  of the features.
+- **Sentences (L11).** Each part is a label and its count; a zero count is left out, the first always said; the
+  parts after the first carry their own separator (` ; ` in French, `; ` in English, `؛ ` in Arabic). When the
+  save says « Enregistrement en cours » in the same moment, both are joined in one sentence (ours first); two
+  gestures in one moment (the API called twice) are said in order, the saving sentence once after them. A paste
+  too large gives the limit, not the count (an HTML table stops being read at the limit): « Collage trop grand :
+  au plus 100 000 cellules ; rien n'est collé ». Arabic, shortened to fit its 500 B (to be read by an Arabic
+  reader): « النسخ: n », « القص: n », « اللصق: n », « المسح: n », « اللصق أكبر من {max} خلية؛ لم يُلصق شيء ».
+- **API (L12).** `copy()`, `cut()`, `paste(text, html?)` and `erase()` act as the keys (the sentence, the
+  `rangeCopied` event with source `api`, the block after a paste); they never touch the system clipboard.
+
 ## Where DzGrid differs on purpose
 - The guard on copy (QB3): Excel would run `=…` pasted from us; we write `'` in front, as the CSV.
 - Too big writes nothing rather than a part (QB4): a part of a paste on health records is worse than none.
@@ -208,5 +261,8 @@ Step 10 (core): `conformance/cases/clipboard-tsv/*` (T1–T2, the spike's 14 dec
 round trip; random text never fails), `packages/core/test/paste-plan-property.test.ts` (against an
 oracle), `packages/core/test/range-copy.test.ts` (C1–C4, the copy table above),
 `packages/core/test/range-paste-text.test.ts` (P6, the paste table above through the editing reader).
-Step 11b (DOM): `range-copy`, `range-paste`, `range-cut`, `range-html-safety`, the re-pins of
-`edit-detail.test.ts` and `editors-paste-pin.test.ts`; browser: real keys in three engines.
+Step 11b (DOM): `range-copy`, `range-paste`, `range-cut`, `range-html-safety`, `range-html-lazy`,
+`range-html-fail`, `range-paste-property` (against a hand-written oracle, through the real `edit()`), the re-pins
+of `edit-detail.test.ts` and `editors-paste-pin.test.ts`, the source scan in `range-seams`; browser
+`scripts/browser-clipboard.mjs` (Chrome with the clipboard permissions and an insecure context; Firefox and WebKit
+through the events; Arabic; the playground).

@@ -16,6 +16,15 @@ Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
 
+- Phase 5 step 11b: **the clipboard in `@dzgrid/dom/range`** (docs/behaviors/clipboard.md; owner S11b-Q1–Q5). Ctrl+C /
+  Cmd+C on a block or a cell writes TSV (the export values: the locale's decimal mark, ISO days, wall-time instants,
+  labels, the formula guard, `="0123"`) and an escaped `<table dir>`; Ctrl+X copies then clears in one save; Ctrl+V
+  writes in one save and one undo (QB6 tiling, data rows only, outside / read-only / refused / too long counted,
+  refused cells blinking, too big writes nothing, the block written selected); Delete / Backspace on a block clears it.
+  The page's own copy pastes back its exact values. Pasted HTML (only without plain text) is read in an inert
+  document, text only, by a chunk loaded on demand. `range({ canCopy, guard, raw, maxPaste })`; API `copy`, `cut`,
+  `paste`, `erase`; event `rangeCopied` (counts only). Ten texts in `locales/{en,fr,ar}-range`. Sizes: `dom/range`
+  4 787 B gz (budget 4 500 → 4 800, S11b-Q3), its HTML reader 422 (500), texts 319 / 366 / 500.
 - Phase 5 step 11a: **`@dzgrid/dom/range`**, selecting a block of cells (docs/behaviors/range-selection.md; owner QB1,
   QB2, QB7, S11-Q1–Q6). `range({ drag })`: Shift+arrows, Shift+Home/End, Ctrl+Shift+arrows and edges, Shift+PageUp/Down
   (the grid's own moves, mirrored right to left; never into the header), Ctrl+A / Cmd+A (every cell shown, by the

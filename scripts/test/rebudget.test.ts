@@ -16,6 +16,8 @@ import {
 } from '../rebudget.mjs';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
+/** Step 11b (S11b-Q5): the lazy HTML reader's line, its measure + 10 % (rounded up to 50 B). */
+const LAZY_HTML = 600; // review 3 moved the long-text count into the chunk: measured 517
 const SCRIPT = join(ROOT, 'scripts/rebudget.mjs');
 
 describe('sizes: measure + 10 %, rounded up to 50 B', () => {
@@ -203,9 +205,22 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(['@dzgrid/core', '@dzgrid/core/edit'].map((n) => e[n]?.maxGzip)).toEqual([29000, 3100]);
   });
 
+  it('Phase 5 step 11b (owner S11b-Q3, S11b-Q5): @dzgrid/dom/range at most 4 800, its pasted-HTML reader a lazy chunk with its own line (the measure + 10 %), the -range texts unchanged', () => {
+    expect(ceilingFor('@dzgrid/dom/range')).toBe(4800);
+    expect(() => sizeBudget(4801, ceilingFor('@dzgrid/dom/range'))).toThrow(/ceiling/);
+    expect(ceilingFor('@dzgrid/dom/range: html (lazy)')).toBe(LAZY_HTML);
+    for (const [lang, c] of [['en', 350], ['fr', 400], ['ar', 500]] as const) expect(ceilingFor(`@dzgrid/dom/locales/${lang}-range`), lang).toBe(c);
+    type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
+    const ext = ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/range', '@dzgrid/dom/internal', './html/*'];
+    expect(e['@dzgrid/dom/range']).toEqual({ file: 'packages/dom/src/range.ts', maxGzip: e['@dzgrid/dom/range']!.maxGzip, over: '@dzgrid/dom', external: ext });
+    expect(e['@dzgrid/dom/range']!.maxGzip).toBeLessThanOrEqual(4800);
+    expect(e['@dzgrid/dom/range']!.maxGzip).toBeGreaterThan(4500);
+    expect(e['@dzgrid/dom/range: html (lazy)']).toEqual({ file: 'packages/dom/src/range/html/index.ts', maxGzip: LAZY_HTML, over: '@dzgrid/dom/range', external: ext }); // './html/*' kept: the line's « alone » build of dom/range must leave the chunk out, or the chunk is counted in it (review 6, answered)
+  });
+
   it('Phase 5 step 11a (owner Q16, Part B budgets): @dzgrid/dom/range a new entry, ceiling 4 500 over the DOM base; the -range texts 350 / 400 / 500; range.css 500; core 29 000, core/edit 3 100 and core/range 4 000 untouched; the DOM base inside 21 980', () => {
-    expect(ceilingFor('@dzgrid/dom/range')).toBe(4500);
-    expect(() => sizeBudget(4501, ceilingFor('@dzgrid/dom/range'))).toThrow(/ceiling/);
+    expect(ceilingFor('@dzgrid/dom/range')).toBe(4800); // step 11b, owner S11b-Q3
     for (const [lang, c] of [['en', 350], ['fr', 400], ['ar', 500]] as const) {
       expect(ceilingFor(`@dzgrid/dom/locales/${lang}-range`), lang).toBe(c);
       expect(() => sizeBudget(c + 1, ceilingFor(`@dzgrid/dom/locales/${lang}-range`)), lang).toThrow(/ceiling/);
@@ -218,7 +233,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(ceilingFor('@dzgrid/dom')).toBe(21980);
     type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
-    expect(e['@dzgrid/dom/range']).toEqual({ file: 'packages/dom/src/range.ts', maxGzip: 4500, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/range', '@dzgrid/dom/internal'] });
+    // Step 11b (S11b-Q3, S11b-Q5) moved the line and its externals: see the next test.
+    expect(e['@dzgrid/dom/range']).toMatchObject({ file: 'packages/dom/src/range.ts', over: '@dzgrid/dom' });
     expect(['en', 'fr', 'ar'].map((l) => e[`@dzgrid/dom/locales/${l}-range`])).toEqual(['en', 'fr', 'ar'].map((l, i) => ({ file: `packages/dom/src/locales/${l}-range.ts`, maxGzip: [350, 400, 500][i] })));
     expect(e['@dzgrid/theme/range.css']).toEqual({ file: 'packages/theme/range.css', maxGzip: 500 });
     expect(['@dzgrid/core', '@dzgrid/core/edit', '@dzgrid/core/range'].map((n) => e[n]?.maxGzip)).toEqual([29000, 3100, 4000]);

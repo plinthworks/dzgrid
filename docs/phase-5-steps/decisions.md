@@ -149,3 +149,16 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - Lead: `vite.config.ts` is not edited (it would restart the owner's 4700 server); the playground imports the range entry by path.
 - **S11-Q5 (owner, 2026-10-25):** 11a accepted at 2 846 B gz in `dom/range` (4 500); per QB8 the fill handle (step 12) goes to its own entry; the clipboard (11b) stays in `dom/range`.
 - **S11-Q6 (owner, 2026-10-25):** the `@dzgrid/core/range` (and needed `@dzgrid/dom/range`) aliases may be added to `vite.config.ts`; vite on 4700 reloads itself (never stopped or killed by an agent).
+
+## Step 11b (owner, 2026-10-25) — plan `step11b-plan.md`
+
+- **S11b-Q1:** cut (Ctrl+X) copies and clears the cells at once (one save, undoable).
+- **S11b-Q2:** no Safari workaround now; the owner tests on a real Safari; added only if that test shows a problem.
+- **S11b-Q3:** if `dom/range` goes over 4 500, its ceiling may rise to at most 4 800.
+- **S11b-Q4:** the paste sentence is « Cellules collées : 12 ; refusées : 2 » (no plural forms).
+- **S11b-Q5 (owner, 2026-10-25):** `dom/range` measured 5 098 > 4 800: the pasted-HTML reader becomes a lazy chunk loaded only when a paste carries no plain text (~4 710 in `dom/range`; the lazy chunk gets its own size line at the measure + 10 %). The shortened Arabic texts (to fit 500) go to the Arabic reviewer.
+
+## Order revised (owner, 2026-10-25)
+
+- After Phase 5 (step 13, 0.3.0 prepared): **Phase 6** (column menu, column chooser, group drop zone, column moving, GridState, pinned rows…) comes BEFORE the docs website. Docs website after Phase 6.
+- **Order confirmed (owner, 2026-10-25):** Phase 5 close → Phase 6 → docs website → Phase 7 (grouping) → 8 (server infinite/blocks) → 9 (xlsx, menus, status bar, advanced filter, row drag) → 10 (pivot) → 11 (hardening, ecosystem). `dmp-doctor-patients` last, after a security review.

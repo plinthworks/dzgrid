@@ -92,8 +92,9 @@ describe('range api', () => {
   });
 
   it('setup refuses a bundle without its texts, naming them', () => {
-    expect(RANGE_KEYS).toEqual(['range.rows', 'range.cols', 'range.size', 'range.cleared', 'range.reordered']);
-    expect(() => rmake({ messages: EN })).toThrow(/range: missing range\.rows, range\.cols, range\.size, range\.cleared, range\.reordered/);
+    // Step 11b adds the clipboard's ten texts (owner S11b-Q4).
+    expect(RANGE_KEYS).toEqual(['range.rows', 'range.cols', 'range.size', 'range.cleared', 'range.reordered', 'range.copied', 'range.cut', 'range.pasted', 'range.erased', 'range.refused', 'range.readOnly', 'range.tooLong', 'range.outside', 'range.tooBig', 'range.noCopy']);
+    expect(() => rmake({ messages: EN })).toThrow(/range: missing range\.rows, range\.cols, range\.size, range\.cleared, range\.reordered, range\.copied, .*range\.noCopy$/);
     void MSG;
     void rowsOf;
   });
@@ -128,5 +129,45 @@ describe('range api: review of step 11a', () => {
       expect(problems(t.events).map((p) => `${p.code}@${p.path}`), JSON.stringify(bad)).toEqual(['invalid-setting@range']);
     }
     expect(t.block()).toBe('r1/name:r2/n');
+  });
+});
+
+// Step 11b (step11b-plan.md L12; precedent S8-O2: the API acts as the keys): copy, cut, paste and erase say their
+// sentence, send `rangeCopied` with source `api`, set the block after a paste; never the system clipboard; null when
+// there is nothing to act on.
+describe('range api: the clipboard', () => {
+  it('copy / cut / paste / erase speak as the keys; source api; null with nothing to act on', async () => {
+    const { cmake, flush } = await import('./support-clip.js');
+    const t = cmake();
+    const nav = Object.getOwnPropertyDescriptor(window.navigator, 'clipboard');
+    const write = vi.fn();
+    Object.defineProperty(window.navigator, 'clipboard', { configurable: true, value: { write, writeText: write, read: write, readText: write } });
+    try {
+      expect(t.api().copy()).toBeNull();
+      expect(t.api().paste('1')).toBeNull();
+      expect(t.api().cut()).toBeNull();
+      expect(t.api().erase()).toBeNull();
+      t.at('r0', 'qty');
+      expect(t.api().copy()).toEqual({ text: '0\r\n', html: '<table dir="ltr"><tbody><tr><td>0</td></tr></tbody></table>' });
+      await flush();
+      expect(t.said().at(-1)).toBe('Cells copied: 1');
+      expect(t.api().paste('5\t6\r\n7\t8')).toEqual({ pasted: 4, refused: 0, readOnly: 0, tooLong: 0, outside: 0, tooBig: false });
+      expect(t.block()).toBe('r0/qty:r1/price');
+      expect(t.changes()).toEqual(['r0/qty=5', 'r0/price=6', 'r1/qty=7', 'r1/price=8']);
+      await flush();
+      expect(t.said().at(-1)).toBe('Cells pasted: 4. Saving');
+      expect(t.api().erase()).toMatchObject({ pasted: 4 });
+      expect(t.api().cut()).not.toBeNull();
+      expect(t.of('rangeCopied').map((e) => [e.source, e.cut])).toEqual([['api', false], ['api', true]]);
+      expect(write).not.toHaveBeenCalled();
+      // The HTML argument is read only when the text is empty.
+      // (S11b-Q5: null at once, written once the reader's chunk is loaded.)
+      expect(t.api().paste('', '<table><tr><td>9</td></tr></table>')).toBeNull();
+      await vi.dynamicImportSettled();
+      expect(t.value('r0', 'qty')).toBe('9');
+    } finally {
+      if (nav) Object.defineProperty(window.navigator, 'clipboard', nav);
+      else delete (window.navigator as { clipboard?: unknown }).clipboard;
+    }
   });
 });

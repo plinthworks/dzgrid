@@ -1,18 +1,54 @@
-import { intentFor, type CellAddr, type CellRange, type DisplayedRows, type FocusPos, type GridKernel, type KeyOwner, type Problem, type RowKey } from '@dzgrid/core';
+import { intentFor, type CellAddr, type CellRange, type DisplayedRows, type FocusPos, type GridKernel, type KeyOwner, type Problem, type ResolvedColumn, type RowKey } from '@dzgrid/core';
 import { emit, isDataKey } from '@dzgrid/core/internal';
-import { rangeBox, type RangeBox } from '@dzgrid/core/range';
+import { boxRows, boxSize, copyMatrix, decodeTsv, encodeTsv, PASTE_MAX, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
+import type { EditApi } from '../edit/index.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
+import { ownerOf } from '../keys/owner.js';
 import type { RangeMessageKey } from '../part-texts.js';
 import type { Frame, RowView } from '../render/rows.js';
 import { setAttr } from '../render/write.js';
+import { tableOf } from './clip.js';
 import { pointer, same, type Sel } from './pointer.js';
 
 /** The texts `range()` needs, from `@dzgrid/dom/locales/<lang>-range`. */
-export const RANGE_KEYS = ['range.rows', 'range.cols', 'range.size', 'range.cleared', 'range.reordered'] as const satisfies readonly RangeMessageKey[];
+export const RANGE_KEYS = [
+  'range.rows', 'range.cols', 'range.size', 'range.cleared', 'range.reordered',
+  'range.copied', 'range.cut', 'range.pasted', 'range.erased', 'range.refused', 'range.readOnly', 'range.tooLong', 'range.outside', 'range.tooBig', 'range.noCopy',
+] as const satisfies readonly RangeMessageKey[];
 
 export interface RangeOptions {
   /** A press and a drag of the mouse or a pen makes a block (range-selection.md 8); false: the keys, Shift+click and the API only. Default true. */
   readonly drag?: boolean;
+  /** May refuse a copy or a cut (health data): column ids and counts, never values; false or a throw refuses (clipboard.md 9). */
+  readonly canCopy?: (c: CopyAsk) => boolean;
+  /** The formula guard on copy (owner QB3); default true. */
+  readonly guard?: boolean;
+  /** Numbers copied with a point whatever the locale (QB9); default false. */
+  readonly raw?: boolean;
+  /** Over this many cells a paste writes nothing (owner QB4); default 100 000. */
+  readonly maxPaste?: number;
+}
+
+/** What `canCopy` is asked: the block's column ids, its data rows and cells, a cut or a copy. */
+export interface CopyAsk {
+  readonly columns: readonly string[];
+  readonly rows: number;
+  readonly cells: number;
+  readonly cut: boolean;
+}
+/** What a copy writes: the TSV and the HTML table. */
+export interface ClipboardText {
+  readonly text: string;
+  readonly html: string;
+}
+/** What a paste, a cut or an erase did, as said: `pasted` the cells written (or cleared). */
+export interface PasteCounts {
+  readonly pasted: number;
+  readonly refused: number;
+  readonly readOnly: number;
+  readonly tooLong: number;
+  readonly outside: number;
+  readonly tooBig: boolean;
 }
 
 /** A grid's block of cells, for the application. */
@@ -28,6 +64,17 @@ export interface RangeApi {
   clear(): void;
   /** The block's box for the rows shown now (as `rangeBox` of `@dzgrid/core/range`), null without a block. */
   box(): RangeBox | null;
+  /** As Ctrl+C on the block, else the focused data cell (a header row by the API only); null: nothing to copy, or `canCopy` refused. Never the system clipboard. */
+  copy(o?: { readonly headers?: boolean }): ClipboardText | null;
+  /** As Ctrl+X: the copy, then the cells cleared (one save, origin `cut`); null as `copy`. */
+  cut(): ClipboardText | null;
+  /**
+   * As Ctrl+V with this text (TSV; `html` read only when `text` is empty); null: nowhere to paste, or HTML being read
+   * (its reader is a chunk loaded on demand: the paste lands once it is there, said as the keys').
+   */
+  paste(text: string, html?: string): PasteCounts | null;
+  /** As Delete on the block (one save, origin `edit`); null: no block. */
+  erase(): PasteCounts | null;
 }
 
 export interface RangeFeature extends GridFeature {
@@ -36,6 +83,17 @@ export interface RangeFeature extends GridFeature {
 }
 
 const CLASSES = ['dzg-cell--range', 'dzg-cell--rs', 'dzg-cell--re', 'dzg-cell--rt', 'dzg-cell--rb'];
+
+/** The pasted-HTML reader's chunk (owner S11b-Q5): asked once, asked again after a failed load. */
+let reader: Promise<typeof import('./html/index.js')> | null = null;
+/**
+ * The page's own copy (clipboard.md 22, L7), page-wide: the TSV a grid of the page last wrote, its values shown, each
+ * column's kind (its type; an enum's own column: its options are its own), the grid. Replaced by the next copy, dropped at the destroy
+ * of the grid that wrote it; never sent anywhere.
+ */
+let memo: { readonly text: string; readonly values: readonly (readonly unknown[])[]; readonly kinds: readonly unknown[]; readonly owner: object } | null = null;
+type Counts = { -readonly [K in keyof PasteCounts]: PasteCounts[K] };
+
 
 /**
  * `range(options)`: blocks of cells (docs/behaviors/range-selection.md; owner QB1, QB2, QB7, S11-Q1…Q4). Shift with the
@@ -64,6 +122,10 @@ export function range(o: RangeOptions = {}): RangeFeature {
       const { kernel, rows, columns } = g;
       g.multi = true;
       let hush = (): void => {};
+      /** One sentence in the grid's polite region. */
+      const speak = (key: RangeMessageKey | 'announce.error', p?: Readonly<Record<string, string | number>>): void => g.live.announce(g.msg(key, p));
+      /** A problem told (never thrown); false for the API's refusals. */
+      const tell = (code: Problem['code'], path: string, detail: string, severity: Problem['severity'] = 'error'): false => (emit(kernel, { type: 'problems', source: 'api', problems: [{ code, severity, path, detail }] }), false);
       /** The visible columns' ids, in reading order. */
       const ids = (): string[] => columns.visible().map((c) => c.id);
       /** Which columns sit where: a change drops the block (hidden, moved, pinned); a width does not. */
@@ -77,10 +139,8 @@ export function range(o: RangeOptions = {}): RangeFeature {
       const size = (): void => {
         const b = boxOf(s.r);
         if (!b) return;
-        const d = rows.displayed;
-        let n = 0;
-        for (let i = b.top; i <= b.bottom; i++) if (isDataKey(d.keyAt(d.index(i)!))) n++;
-        g.live.announce(g.msg('range.size', { rows: g.msg('range.rows', { n }), cols: g.msg('range.cols', { n: b.end - b.start + 1 }) }));
+        const z = boxSize(b, rows.displayed);
+        g.live.announce(g.msg('range.size', { rows: g.msg('range.rows', { n: z.rows }), cols: g.msg('range.cols', { n: z.cols }) }));
       };
       let own = false;
       const s: Sel & { r: CellRange | null; drop(source: 'user' | 'data' | 'api', key?: RangeMessageKey): void } = {
@@ -103,7 +163,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
         drop(source, key: RangeMessageKey = 'range.cleared') {
           if (!s.r) return;
           s.set(null, source);
-          if (source !== 'api') g.live.announce(g.msg(key));
+          if (source !== 'api') speak(key);
         },
         focusTo(a) {
           own = true;
@@ -168,12 +228,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
                 // The editor's cell keeps what it shows (retained-row contract 5).
                 if (ci < b.start || ci > b.end || x === ed) continue;
                 now.add(x);
-                const l = x.classList;
-                l.toggle(CLASSES[0]!, true);
-                l.toggle(CLASSES[1]!, ci === b.start);
-                l.toggle(CLASSES[2]!, ci === b.end);
-                l.toggle(CLASSES[3]!, i === top);
-                l.toggle(CLASSES[4]!, i === bottom);
+                [true, ci === b.start, ci === b.end, i === top, i === bottom].forEach((on, k) => x.classList.toggle(CLASSES[k]!, on));
                 setAttr(x, 'aria-selected', read ? 'true' : null);
               }
             }
@@ -190,21 +245,166 @@ export function range(o: RangeOptions = {}): RangeFeature {
       // put last at the first paint; the keys keep the feature's place.
       const tail: FeatureHandle = { afterRows: paint, destroy() {} };
 
+      // ---- The clipboard (step 11b, clipboard.md; step11b-plan.md L1–L12) ----
+      const cap = typeof o.maxPaste === 'number' && o.maxPaste > 0 ? o.maxPaste : PASTE_MAX;
+      if (o.maxPaste !== undefined && cap !== o.maxPaste) tell('invalid-setting', 'range.maxPaste', String(o.maxPaste), 'warning');
+      /** Where a copy reads and a paste writes (L2): the block, else the focused cell when it is a data row's and its column visible. */
+      const where = (): CellRange | null => {
+        const f = kernel.focus;
+        return s.r ?? (f?.kind === 'cell' && isDataKey(f.row) ? { anchor: f, focus: f } : null);
+      };
+      const target = (): RangeBox | null => boxOf(where());
+      /** The editors' cap (S5-O5): a whole number ≥ 1; 0 or Infinity none; anything else 1 000. */
+      const capOf = (id: string): number => {
+        const m = (columns.get(id)?.def.edit as { maxLength?: number } | undefined)?.maxLength;
+        return m === 0 || m === Infinity ? Infinity : Number.isInteger(m) && m! > 0 ? m! : 1000;
+      };
+      /** A box's data cells, cleared (a cut, Delete). */
+      const clears = (b: RangeBox): PlannedCell[] => {
+        const cols = ids().slice(b.start, b.end + 1);
+        return boxRows(b, rows.displayed).flatMap((n) => cols.map((column) => ({ key: n.key, column, input: { text: '' } })));
+      };
+      let q = '';
+      const zero = (): Counts => ({ pasted: 0, refused: 0, readOnly: 0, tooLong: 0, outside: 0, tooBig: false });
+      /** A column's kind for the memo: its type; an enum, the column itself (its options are its own: this grid, this column). */
+      const kind = (c: ResolvedColumn<unknown>): unknown => (c.type === 'enum' ? c : c.type);
+      /** Pastes so far: an HTML paste overtaken by a later one is dropped when its reader comes (review 4); NaN once destroyed. */
+      let seq = 0;
+      /**
+       * One gesture (clipboard.md 18, 23, 24): the cells over their cap set aside, the rest given to the edits as ONE
+       * commit; read-only refusals counted, the others counted and blinked when mounted; without `edit()` all read-only.
+       * The sentence is said from a microtask queued after the commit's own (« Saving »), joined with it (L11).
+       */
+      const write = (cells: readonly PlannedCell[], origin: 'paste' | 'cut' | 'edit', source: 'user' | 'api', main: RangeMessageKey, c: Counts): PasteCounts => {
+        const ed = g.edit?.api as EditApi<unknown> | undefined;
+        const rest = cells.filter((x) => {
+          const v = 'text' in x.input ? x.input.text : x.input.value;
+          return !(typeof v === 'string' && v.length > capOf(x.column) && ++c.tooLong);
+        });
+        g.live.said = '';
+        if (!ed) c.readOnly += rest.length;
+        else for (const r of ed.commit(rest, { origin, source }).refused) r.code === 'read-only' ? c.readOnly++ : (c.refused++, g.rowRenderer.cell(r.key, r.column) && ed.refuse(r.key, r.column));
+        c.pasted = cells.length - c.tooLong - c.readOnly - c.refused;
+        // Two gestures in one task (the API called twice): both said, in order, then the saving sentence once — by the
+        // microtask of the last one, queued after every commit's own.
+        const mine = (q = (q && `${q}. `) + [g.msg(main, { n: c.pasted }), ...(['refused', 'readOnly', 'tooLong', 'outside'] as const).filter((k) => c[k]).map((k) => g.msg(`range.${k}`, { n: c[k] }))].join(''));
+        queueMicrotask(() => {
+          const x = g.live.said;
+          q === mine && ((q = ''), g.live.announce(x ? `${mine}. ${x}` : mine));
+        });
+        return c;
+      };
+      /** A copy or a cut of the target (L4): `canCopy` asked, the values read before any clear, the memo, the event, the sentence. */
+      const copy = (cut: boolean, source: 'user' | 'api', headers?: boolean): ClipboardText | null => {
+        const b = target();
+        if (!b) return null;
+        const d = rows.displayed;
+        const vis = columns.visible();
+        const cols = vis.slice(b.start, b.end + 1);
+        const z = boxSize(b, d);
+        let ok: unknown = 0;
+        try {
+          ok = !o.canCopy || o.canCopy({ columns: cols.map((c) => c.id), rows: z.rows, cells: z.cells, cut });
+        } catch {}
+        if (!ok) return speak('range.noCopy'), null;
+        const m = copyMatrix(b, d, vis, { ctx: g.ctx, reader: kernel.reader, guard: o.guard !== false, raw: !!o.raw, headers: !!headers });
+        const r = { text: encodeTsv(m.text), html: tableOf(m.text, g.dir, !!headers) };
+        if (!headers) memo = { text: r.text, values: m.values, kinds: cols.map(kind), owner: kernel };
+        emit(kernel, { type: 'rangeCopied', source, rows: z.rows, columns: cols.length, cells: z.cells, cut });
+        if (cut) write(clears(b), 'cut', source, 'range.cut', zero());
+        else speak('range.copied', { n: z.cells });
+        return r;
+      };
+      /**
+       * A paste (L6): the TSV, else the first table of the HTML. The HTML, and a plain text over 64 K characters, are read
+       * by the chunk loaded on demand (S11b-Q5, review 3): null at once, written when it is there at the corners of the
+       * paste's moment (none shown any more, or a later paste made: nothing); a failed load refuses it, said. Then the
+       * plan, the memo's values where the column is of the copied one's kind, the block after.
+       */
+      const paste = (text: string, html: string, source: 'user' | 'api'): PasteCounts | null => {
+        const at = where();
+        const b = boxOf(at);
+        if (!b) return null;
+        const my = ++seq;
+        // HTML only, or a plain text over 64 K characters (review 3: counted there before it is decoded): read by the chunk.
+        if (text ? text.length <= 1 << 16 : !html) return put(b, text ? decodeTsv(text) : null, text, source);
+        const win = g.win!;
+        (reader ??= import('./html/index.js')).then(
+          (m) => {
+            const now = my === seq && boxOf(at);
+            if (now) put(now, text ? m.tsv(text, cap) : m.readTable(html, win, cap), text, source);
+          },
+          () => void ((reader = null), my === seq && speak('announce.error')),
+        );
+        return null;
+      };
+      const put = (b: RangeBox, src: string[][] | false | null, text: string, source: 'user' | 'api'): PasteCounts => {
+        const c = zero();
+        if (src === null) return c;
+        const p = src && planPaste(src.map((r) => r.map((t) => ({ text: t }))), b, rows.displayed, columns.visible(), { max: cap });
+        if (!p || p.tooBig) return (c.tooBig = true), speak('range.tooBig', { max: cap }), c;
+        c.outside = p.outside;
+        const mine = memo?.text === text ? memo : null;
+        const wide = p.box ? p.box.end - p.box.start + 1 : 1;
+        const w = mine?.kinds.length ?? 1;
+        write(mine ? p.cells.map((x, i) => {
+          const j = (i % wide) % w;
+          return mine.kinds[j] === kind(columns.get(x.column)!) ? { ...x, input: { value: mine.values[((i / wide) | 0) % mine.values.length]![j] } } : x;
+        }) : p.cells, 'paste', source, 'range.pasted', c);
+        // The block written (clipboard.md 21): its first and last planned cells, row then column order.
+        const a = p.cells[0];
+        const z = p.cells.at(-1)!;
+        if (a) s.set({ anchor: { row: a.key, column: a.column }, focus: { row: z.key, column: z.column } }, source, false), (s.follows = false);
+        return c;
+      };
+      const erase = (source: 'user' | 'api'): PasteCounts | null => {
+        const b = boxOf(s.r);
+        return b && write(clears(b), 'edit', source, 'range.erased', zero());
+      };
+      /**
+       * Ours (L1): not prevented by the host; the focus — followed into shadow roots (review 1) — in this grid's own root,
+       * on a cell or a header; a target; a copy with no block leaves to the browser a text selection made INSIDE the grid
+       * (review 5: a paragraph selected elsewhere, then Tab to a cell, copies the cell).
+       */
+      const ours = (e: Event): boolean => {
+        let a = g.doc.activeElement;
+        while (a?.shadowRoot?.activeElement) a = a.shadowRoot.activeElement;
+        const w = a?.closest('.dzg') === g.el.root ? ownerOf(a, g.el.viewport) : 'outside';
+        // `copy` and `cut` sort before `paste`.
+        const sel = (g.el.root.getRootNode() as Document).getSelection?.() ?? g.doc.getSelection();
+        return !e.defaultPrevented && (w === 'cell' || w === 'header') && !!target() && !(e.type < 'p' && !s.r && String(sel) && g.el.root.contains(sel!.anchorNode));
+      };
+      for (const type of ['copy', 'cut', 'paste']) {
+        g.scope.on(g.doc, type, (e) => {
+          if (!ours(e)) return;
+          e.preventDefault();
+          const dt = (e as ClipboardEvent).clipboardData;
+          // The HTML read now: the event's data is readable during the event only.
+          if (type === 'paste') paste(dt?.getData('text/plain') ?? '', dt?.getData('text/html') ?? '', 'user');
+          else {
+            const r = copy(type === 'cut', 'user');
+            r && (dt?.setData('text/plain', r.text), dt?.setData('text/html', r.html));
+          }
+        });
+      }
+      // Delete / Backspace on a block (L10): asked before every other feature (the editors clear one cell), a handle put first.
+      const head: FeatureHandle = {
+        keys: (e, _at, owner) => owner === 'cell' && !!s.r && (e.key === 'Delete' || e.key === 'Backspace') && !(e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) && (erase('user'), true),
+        destroy() {},
+      };
+
       const api: RangeApi = {
         get: () => s.r,
         set(x) {
           // Never a throw (review 4): a value of the wrong shape is told and refused, nothing changed.
           const cell = (a: unknown): boolean => typeof (a as CellAddr | null)?.row === 'string' && typeof (a as CellAddr).column === 'string';
           if (x !== null && !(cell((x as CellRange | undefined)?.anchor) && cell(x.focus))) {
-            emit(kernel, { type: 'problems', source: 'api', problems: [{ code: 'invalid-setting', severity: 'error', path: 'range', detail: 'not a block' }] });
-            return false;
+            return tell('invalid-setting', 'range', 'shape');
           }
           if (x && !boxOf(x)) {
             // A corner's row not shown, else a column not visible: told, never thrown.
             const row = rows.displayed.indexOf(x.anchor.row) < 0 || rows.displayed.indexOf(x.focus.row) < 0;
-            const problem: Problem = { code: row ? 'unknown-row-id' : 'unknown-column', severity: 'error', path: 'range', detail: row ? 'row not shown' : 'column not visible' };
-            emit(kernel, { type: 'problems', source: 'api', problems: [problem] });
-            return false;
+            return tell(row ? 'unknown-row-id' : 'unknown-column', 'range', row ? 'row' : 'column');
           }
           s.set(x, 'api');
           s.follows = false;
@@ -212,13 +412,17 @@ export function range(o: RangeOptions = {}): RangeFeature {
         },
         clear: () => s.set(null, 'api'),
         box: () => boxOf(s.r),
+        copy: (x) => copy(false, 'api', x?.headers),
+        cut: () => copy(true, 'api'),
+        paste: (text, html = '') => paste(text, html, 'api'),
+        erase: () => erase('api'),
       };
       apis.set(kernel, api);
 
       return {
         afterRows(f: Frame<unknown>) {
           if (g.features.includes(tail)) return;
-          g.features = [...g.features, tail];
+          g.features = [head, ...g.features, tail];
           paint(f);
         },
         keys(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean {
@@ -251,7 +455,9 @@ export function range(o: RangeOptions = {}): RangeFeature {
           apis.delete(kernel);
           for (const x of decorated) x.classList.remove(...CLASSES), x.removeAttribute('aria-selected');
           decorated.clear();
-          g.features = g.features.filter((h) => h !== tail);
+          g.features = g.features.filter((h) => h !== tail && h !== head);
+          if (memo?.owner === kernel) memo = null;
+          seq = NaN;
           delete g.multi;
         },
       };
