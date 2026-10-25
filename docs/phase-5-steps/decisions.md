@@ -117,3 +117,11 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - Step 9 (Angular + Part A gate) → Part B (steps 10–13: ranges, clipboard, fill handle, bulk edit, 0.3.0) → the docs website.
 - Part B starts with the invented orders demo; the owner's real `pharma/stock` sheet (Q19) is integrated when it arrives (no longer a prerequisite).
 - **S8-O7 (owner, 2026-10-24):** `@dzgrid/dom/detail` 4 000 → 4 150 (measured 4 092): nothing lost in a closed nested grid (kept alive while saving or refused, released when its master row leaves or at the outer destroy).
+
+## Step 9 (owner, 2026-10-25) — plan `step09-plan.md`
+
+- **S9-Q4:** the real Angular example gets a second « stock » screen, loaded on demand, with editable columns; the audit screen's initial load stays under 90 000; the stock screen is measured apart.
+- **S9-Q5:** Part B may start before the owner's manual checks 124a–b; Part A stays open on that point until they are done.
+- **S9-Q6:** `@dzgrid/angular` ceiling at the measure + 50, at most 7 000.
+- **S9-Q1–Q3 (lead, recommendations kept):** editing wired through `[features]` (`edit()`, `editors()`, `listEditor`), no `[editing]` input; a live `[save]` input; outputs for the existing events; `c.reads(...)` for template editors through the existing `dzgPart slot="editor"`.
+- **S9-Q7 (owner, 2026-10-25):** the real Angular example's ceiling 90 000 → 92 000 (the stock screen loaded on demand splits the build: audit 91 082 with the split, 89 349 without; the ~1 700 B is the cost of two gzip streams, not editing code). The K.8 profile guard stays 83 500.

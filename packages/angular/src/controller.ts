@@ -1,6 +1,7 @@
 import { Injectable, computed, signal, untracked } from '@angular/core';
 import type { GridCommand, GridCommandResult, GridKernel, RowKey, RowModel } from '@dzgrid/core';
 import type { GridFeature, GridInstance } from '@dzgrid/dom';
+import type { EditApi, EditFeature } from '@dzgrid/dom/edit';
 
 type FilterOpener = GridFeature & { openFilter(column: string): boolean; closeFilter(): void };
 
@@ -54,6 +55,13 @@ export class DzgController<T = unknown> {
   }
   closeFilter(): void {
     this.#filters()?.closeFilter();
+  }
+  /**
+   * The grid's edits (Phase 5 step 9, edit-angular.md 6): the `edit()` feature given in `features`, its api for this
+   * grid (`undo()`, `redo()`, `reapply()`, `canUndo`, `commit`, …); null before the grid, without it, after it.
+   */
+  edit(): EditApi<T> | null {
+    return (this.#grid && (this.#features.find((f) => f.id === 'edit') as EditFeature<T> | undefined)?.api(this.#grid)) || null;
   }
   #filters(): FilterOpener | undefined {
     return this.#grid ? (this.#features.find((f) => f.id === 'filters') as FilterOpener | undefined) : undefined;

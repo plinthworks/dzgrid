@@ -5,7 +5,7 @@
  *   node scripts/example.mjs build [--no-pack]   pack the tarballs, install them into
  *       examples/angular-audit (copies, not links), ng build default, zone and baseline
  *   node scripts/example.mjs csv                  the Arabic CSV sample → examples/angular-audit/out/audit-ar.csv
- *   node scripts/example.mjs ssr [--lang ar] [--json] [--dir <example>]   renderApplication on the server build
+ *   node scripts/example.mjs ssr [--lang ar] [--screen stock] [--json] [--dir <example>]   renderApplication on the server build
  *   node scripts/example.mjs bytes                K.8 from the real build (default less baseline)
  *   node scripts/example.mjs browser              headless Chrome: the client builds (default, zone), fr and ar, the zone demo
  *   node scripts/example.mjs smoke <19|22> [--keep]   by hand: a copy in a scratch folder on that major, build + SSR
@@ -18,12 +18,12 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { forgetLocalPacks, indexOf, measureExample } from './example-lib.mjs';
+import { forgetLocalPacks, indexOf, measureExample, measureLazy } from './example-lib.mjs';
 import { measureSplit } from './size-split.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const EXAMPLE = join(ROOT, 'examples/angular-audit');
-const K8 = 90_000; // owner decision 2026-10-22 (docs/phase-4-steps/decisions.md Q17a; Q14 87 000, before it 85 000)
+const K8 = 92_000; // owner S9-Q7 (2026-10-25, docs/phase-5-steps/decisions.md: the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const option = (name, fallback) => {
@@ -103,6 +103,8 @@ function csv() {
 async function ssr() {
   const dir = option('dir', EXAMPLE);
   const lang = option('lang', 'fr');
+  // Phase 5 step 9: the editable « stock » screen (?screen=stock), its own bootstrap.
+  const stock = option('screen', 'audit') === 'stock';
   const server = join(dir, 'dist/audit/server');
   const count = (types) => types.filter((t) => t === 'Timeout' || t === 'Immediate').length;
   const before = count(process.getActiveResourcesInfo());
@@ -117,8 +119,8 @@ async function ssr() {
     const mod = await import(pathToFileURL(join(server, 'main.server.mjs')).href);
     probe = mod.newProbe();
     const document = readFileSync(join(server, 'index.server.html'), 'utf8');
-    html = await mod.renderApplication(mod.default, {
-      document, url: lang === 'ar' ? '/?lang=ar' : '/', platformProviders: [{ provide: mod.AUDIT_PROBE, useValue: probe }],
+    html = await mod.renderApplication(stock ? mod.bootstrapStock : mod.default, {
+      document, url: `/?${stock ? 'screen=stock&' : ''}${lang === 'ar' ? 'lang=ar' : ''}`, platformProviders: [{ provide: mod.AUDIT_PROBE, useValue: probe }],
     });
   } catch (e) {
     errors.push(String(e?.stack ?? e));
@@ -130,8 +132,12 @@ async function ssr() {
   const k = probe?.kernel;
   const result = {
     lang,
+    screen: stock ? 'stock' : 'audit',
+    // The screen asked for is the one rendered (review of step 9): its own marker in the server's HTML.
+    marker: html.includes(stock ? 'stock-saved' : 'audit-count'),
     host: /<dz-grid\b/.test(html),
-    rows: (html.match(/\bdzg-row\b/g) ?? []).length,
+    // In class attributes only: a screen whose component styles are rendered (the stock screen's edit.css) names .dzg-row in CSS.
+    rows: (html.match(/class="[^"]*\bdzg-row\b/g) ?? []).length,
     // The grid's own class, `dzg` as a whole word anywhere in the list (not dzg-row, dzg-viewport…).
     grids: (html.match(/class="[^"]*\bdzg\b(?!-)/g) ?? []).length,
     dir: /<html[^>]*\bdir="([^"]+)"/.exec(html)?.[1] ?? null,
@@ -143,10 +149,10 @@ async function ssr() {
     timers: left > 0 ? [`${left} timer(s) or immediate(s) left open`] : [],
     bytes: html.length,
   };
-  const ok = result.host && result.rows === 0 && result.grids === 0 && !errors.length && result.kernel === null && result.ready === false && !result.timers.length;
+  const ok = result.marker && result.host && result.rows === 0 && result.grids === 0 && !errors.length && result.kernel === null && result.ready === false && !result.timers.length;
   if (flag('json')) console.log(JSON.stringify(result));
   else {
-    console.log(`server render (${lang}): ${ok ? 'ok' : 'FAIL'}`);
+    console.log(`server render (${stock ? 'stock, ' : ''}${lang}): ${ok ? 'ok' : 'FAIL'}`);
     console.log(JSON.stringify(result, null, 2));
   }
   if (!ok) process.exitCode = 1;
@@ -163,8 +169,11 @@ async function bytes() {
   console.log(`  (1) DzGrid + theme + wrapper, real build: ${m.share} B gz — K.8 ${K8}: ${m.share <= K8 ? 'within' : 'OVER'}; esbuild profile (check:size): ${estimate.initialGzip} B gz (${m.share - estimate.initialGzip >= 0 ? '+' : ''}${m.share - estimate.initialGzip})`);
   console.log(`  (2) Angular runtime and the shell (baseline): ${m.baseline.total} B gz`);
   console.log(`  (3) @dzgrid/angular in the initial JS: ${m.wrapper.min} B min, ~${m.wrapper.gz} B gz (estimated from the build stats)`);
+  // Phase 5 step 9 (owner S9-Q4): the « stock » screen, loaded on demand, measured apart (no ceiling set).
+  const lazy = measureLazy(join(EXAMPLE, 'dist/audit'), /src\/app\/stock\.component/);
+  console.log(`  (4) the « stock » screen, loaded on demand (?screen=stock): ${lazy.total} B gz in ${lazy.files.length} files (${lazy.files.map((f) => `${f.file} ${f.gz}`).join(', ')}); not in (1)`);
   if (m.share > K8) {
-    console.log('STOP: the DzGrid share of the real build is over 90 000 B: ask the owner.');
+    console.log(`STOP: the DzGrid share of the real build is over ${K8} B: ask the owner.`);
     process.exitCode = 1;
   }
 }
@@ -228,6 +237,49 @@ async function browserCheck() {
             && after.count === '1' && after.last === label && after.actions === 1 && (build !== 'zone' || after.inZone === true)
             && perStep <= 2 && after.gridReady && errors.length === 0;
           results.push({ build, lang, ok, rows: first.rows, dir: first.dir, zone: first.zone, checksPerScrollStep: perStep, ...after, errors });
+          await page.close();
+        }
+        // Phase 5 step 9 (S9-Q4): the « stock » screen, loaded on demand: open, type, Enter, the fake save → saved;
+        // a refused save (S-0005) → the value back, the error mark, (saveFailed) inside the zone; checks per keystroke.
+        for (const lang of ['fr', 'ar']) {
+          const page = await chrome.newPage({ viewport: { width: 1280, height: 800 } });
+          const errors = [];
+          page.on('pageerror', (e) => errors.push(String(e)));
+          page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+          await page.goto(site.url(`/?probe=1&screen=stock${lang === 'ar' ? '&lang=ar' : ''}`));
+          await page.waitForSelector('.dzg-layer .dzg-row', { timeout: 15_000 });
+          const frames = (n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r(null) : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+          await frames(2);
+          const cell = (row, col) => `.dzg-layer .dzg-row[aria-rowindex="${row + 2}"] .dzg-cell[data-col="${col}"]`;
+          const read = (row, col) => page.evaluate((s) => { const c = document.querySelector(s); return { text: c?.textContent, cls: c?.className ?? '' }; }, cell(row, col));
+          const dir = await page.evaluate(() => document.querySelector('.dzg')?.getAttribute('dir'));
+          await page.click(cell(2, 'stock'));
+          await page.keyboard.press('F2');
+          await page.keyboard.press('ControlOrMeta+a');
+          const c0 = await page.evaluate(() => window.auditProbe.checks);
+          await page.keyboard.type('123');
+          const c1 = await page.evaluate(() => window.auditProbe.checks);
+          await page.keyboard.press('Enter');
+          // Review of step 9 (6): « Enregistrés » counts answered saves, not edits: nothing yet while the save runs.
+          const pending = await page.evaluate(() => document.querySelector('.stock-saved')?.textContent?.trim());
+          await page.waitForTimeout(400);
+          await frames(2);
+          const saved = await read(2, 'stock');
+          const savedCount = await page.evaluate(() => document.querySelector('.stock-saved')?.textContent?.trim());
+          const before = await read(5, 'stock');
+          await page.click(cell(5, 'stock'));
+          await page.keyboard.press('F2');
+          await page.keyboard.press('ControlOrMeta+a');
+          await page.keyboard.type('9');
+          await page.keyboard.press('Enter');
+          await page.waitForTimeout(1000);
+          await frames(2);
+          const refused = await read(5, 'stock');
+          const failed = await page.evaluate(() => ({ count: document.querySelector('.stock-failed')?.textContent?.trim(), inZone: window.auditProbe.inZone }));
+          const perKey = (c1 - c0) / 3;
+          const ok = dir === (lang === 'ar' ? 'rtl' : 'ltr') && pending === '0' && saved.text === '123' && savedCount === '1' && refused.text === before.text && /dzg-cell--failed/.test(refused.cls)
+            && failed.count === '1' && (build !== 'zone' || failed.inZone === true) && perKey <= 2 && errors.length === 0;
+          results.push({ build, lang, screen: 'stock', ok, dir, pending, saved, savedCount, refused, before, failed, checksPerKeystroke: perKey, errors });
           await page.close();
         }
       } finally {

@@ -23,7 +23,9 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import type { ColumnOrGroup, FilterModel, Query, GridEvent, GridKernel, Problem, RowIdInput, RowKey, RowModel, SelectionState } from '@dzgrid/core';
+import { problem } from '@dzgrid/core';
 import { canonical, emit, isDataKey } from '@dzgrid/core/internal';
+import type { SaveHandler } from '@dzgrid/core/edit';
 import { detailConflicts } from '@dzgrid/core/detail';
 import { createGrid, type GridFeature, type GridInstance, type GridMessages, type GridSettings, type SlotContext, type SlotPart } from '@dzgrid/dom';
 import { DzgController } from './controller';
@@ -41,7 +43,7 @@ const KEYS = [
   'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
 ] as const;
 /** Events with an output of their own name. */
-const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded'];
+const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged'];
 
 /** What `membershipOf` reads of a query with no filter and no search. */
 const NONE = { filter: {}, quick: '' } as Query;
@@ -106,6 +108,11 @@ export class DzGrid<T> implements AfterContentInit {
    * state comes back through `filters().floating.get()`.
    */
   readonly floatingFilters = input<boolean>();
+  /**
+   * The app's save (Phase 5 step 9, edit-angular.md 2): once set, each value goes to the grid's edits (`setSave`; a
+   * save in flight keeps its own); never set, `edit({ save })` stays. Without the `edit` feature, `missing-feature`.
+   */
+  readonly save = input<SaveHandler<T>>();
 
   /** Unset, the grid owns them; set, written as the host; the user's changes come back. */
   readonly quick = model<string>();
@@ -121,6 +128,10 @@ export class DzGrid<T> implements AfterContentInit {
   readonly partAction = output<Ev<T, 'partAction'>>();
   readonly fetchFailed = output<Ev<T, 'fetchFailed'>>();
   readonly rowExpanded = output<Ev<T, 'rowExpanded'>>();
+  readonly cellEdited = output<Ev<T, 'cellEdited'>>();
+  readonly saveFailed = output<Ev<T, 'saveFailed'>>();
+  readonly orderStale = output<Ev<T, 'orderStale'>>();
+  readonly undoChanged = output<Ev<T, 'undoChanged'>>();
   readonly problems = output<readonly Problem[]>();
   readonly gridReady = output<DzgController<T>>();
 
@@ -142,6 +153,8 @@ export class DzGrid<T> implements AfterContentInit {
   private readonly _told = new Set<string>();
   private _last: Record<string, unknown> = {};
   private _gone = false;
+  /** `[save]` was given a value once: from then on each value is the grid's save (`undefined`: the local save). */
+  private _saves = false;
   /** The events of the grid's making, told after the first render: written during the host's check, NG0100. */
   private _early: GridEvent<T>[] | null = [];
   /** The model's last set, the host's or the grid's copy: another one is a host write. */
@@ -194,6 +207,7 @@ export class DzGrid<T> implements AfterContentInit {
       });
     });
     effect(() => (this.quick(), this.filter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
+    effect(() => (this.save(), this._grid() && untracked(() => this._save())));
     effect(() => {
       const on = this.floatingFilters();
       // Only the input's own changes write (a new [features] array must not echo it over the user's toggle).
@@ -231,6 +245,7 @@ export class DzGrid<T> implements AfterContentInit {
     if (this.dzgNested()) this._nest(g.kernel);
     this.controller._attach(g.kernel, g, s.features);
     this._grid.set(g);
+    this._save();
     this._write(g.kernel);
     this._tell();
     this.gridReady.emit(this.controller);
@@ -275,6 +290,15 @@ export class DzGrid<T> implements AfterContentInit {
     for (const [rows, expanded] of [[[...now].filter((x) => !open.has(x)), false], [add, true]] as const) if (rows.length) k.dispatch({ type: 'rows.expand', rows, expanded }, 'host');
   }
 
+  /** `[save]` to the grid's edits, from its first value on; without `edit`, one warning per grid. */
+  private _save(): void {
+    const v = this.save();
+    if (!(this._saves ||= v !== undefined)) return;
+    const api = this.controller.edit();
+    if (api) api.setSave(v);
+    else if (this._k && !this._told.has('\0save')) this._told.add('\0save'), emit(this._k, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', 'save', 'edit')] });
+  }
+
   /** Inside a detail panel (`dzgNested`): the depth told, Escape back to the panel; on the host element, outside the zone. */
   private _nest(k: GridKernel<T, RowModel<T>>): void {
     const el = this._el;
@@ -308,7 +332,7 @@ export class DzGrid<T> implements AfterContentInit {
     const names = (r?: Readonly<Record<string, unknown>>) => Object.keys(r ?? {});
     const problems = shadowedParts(
       [
-        { from: 'feature', names: (this.features() ?? []).flatMap((f) => names(f.parts)) },
+        { from: 'feature', names: ((this.features() ?? this._defaults['features'] ?? []) as GridFeature[]).flatMap((f) => names(f.parts)) },
         { from: 'provider', names: names(this._provided) },
         { from: 'parts', names: names(this.parts()) },
         { from: 'template', names: this._templates().map((t) => t.dzgPart()) },
@@ -318,31 +342,53 @@ export class DzGrid<T> implements AfterContentInit {
     if (k && problems.length) emit(k, { type: 'problems', source: 'host', problems });
   }
 
+  /**
+   * The events told outside a real zone in one task (a key, a save's answer: `cellEdited`, `undoChanged`,
+   * `editingStopped`…), told together in one zone entry a microtask later: one change detection, not one each
+   * (Phase 5 step 9 T7). Zoneless, or inside the zone, at once.
+   */
+  private _q: GridEvent<T>[] | null = null;
+  private readonly _real = this._zone.run(() => NgZone.isInAngularZone());
+
   private _hear(e: GridEvent<T>): void {
     if (this._gone) return;
     if (this._early) return void this._early.push(e);
-    this._zone.run(() => {
-      this.gridEvent.emit(e);
-      if (e.type === 'problems') this.problems.emit(e.problems);
-      else if (OUTS.includes(e.type)) (this[e.type as 'cellClicked'] as OutputEmitterRef<unknown>).emit(e);
-      if (e.type === 'selectionChanged') {
-        // A host-caused clear (a narrower [selection] mode, a filter written by the host) too, when the
-        // model holds something else; never an echo of the host's own write.
-        const m = this.selected();
-        if (e.source !== 'host' || (m && !sameSelection(m, e.selection))) this.selected.set(e.selection);
-      }
-      // Rows opened or closed by anyone but the host; a data change (rows arrived or gone, a tree's
-      // `initial`): the model written again first (rows it names that just arrived), then followed.
-      // A query, an order, a page: written again too (a filter's layer gone, the host's set held there).
-      const k = this._k;
-      if (k && e.type === 'modelUpdated' && e.kind !== 'expand') this._zone.runOutsideAngular(() => this._shut(k)), this._open(k);
-      if (e.source === 'host') return;
-      if (k && e.type === 'rowExpanded') {
-        if (!e.expanded) for (const x of e.rows) this._closed.add(x);
-        this._open(k);
-      }
-      if (e.type === 'quickChanged') this.quick.set(e.text);
-      if (e.type === 'filterChanged') this.filter.set(e.filter);
-    });
+    // Events waiting (or a flush under way): every later one behind them, in order (review of step 9, 1).
+    if (this._q) return void this._q.push(e);
+    if (!this._real || NgZone.isInAngularZone()) return this._zone.run(() => this._one(e));
+    const q = (this._q = [e]);
+    queueMicrotask(() =>
+      this._zone.run(() => {
+        try {
+          for (let i = 0; i < q.length; i++) this._gone || this._one(q[i]!);
+        } finally {
+          this._q = null;
+        }
+      }),
+    );
+  }
+
+  private _one(e: GridEvent<T>): void {
+    this.gridEvent.emit(e);
+    if (e.type === 'problems') this.problems.emit(e.problems);
+    else if (OUTS.includes(e.type)) (this[e.type as 'cellClicked'] as OutputEmitterRef<unknown>).emit(e);
+    if (e.type === 'selectionChanged') {
+      // A host-caused clear (a narrower [selection] mode, a filter written by the host) too, when the
+      // model holds something else; never an echo of the host's own write.
+      const m = this.selected();
+      if (e.source !== 'host' || (m && !sameSelection(m, e.selection))) this.selected.set(e.selection);
+    }
+    // Rows opened or closed by anyone but the host; a data change (rows arrived or gone, a tree's
+    // `initial`): the model written again first (rows it names that just arrived), then followed.
+    // A query, an order, a page: written again too (a filter's layer gone, the host's set held there).
+    const k = this._k;
+    if (k && e.type === 'modelUpdated' && e.kind !== 'expand') this._zone.runOutsideAngular(() => this._shut(k)), this._open(k);
+    if (e.source === 'host') return;
+    if (k && e.type === 'rowExpanded') {
+      if (!e.expanded) for (const x of e.rows) this._closed.add(x);
+      this._open(k);
+    }
+    if (e.type === 'quickChanged') this.quick.set(e.text);
+    if (e.type === 'filterChanged') this.filter.set(e.filter);
   }
 }

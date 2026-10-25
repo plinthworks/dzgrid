@@ -12,7 +12,7 @@ type C = SlotContext['editor'];
 type Row = R & { c: string | null; d: string };
 
 /** A colour editor: one input of its own; `read` gives its text. */
-function colour(o: { focus?: boolean; read?: boolean; prevent?: boolean; onMount?: (c: C, host: HTMLElement) => void; mountThrows?: boolean } = {}) {
+function colour(o: { focus?: boolean; read?: boolean; readThrows?: boolean; prevent?: boolean; onMount?: (c: C, host: HTMLElement) => void; mountThrows?: boolean } = {}) {
   const log: string[] = [];
   let ctx: C | null = null;
   const part = definePart('editor', {
@@ -28,7 +28,7 @@ function colour(o: { focus?: boolean; read?: boolean; prevent?: boolean; onMount
       o.onMount?.(c, host);
       return {
         focus: () => (o.focus === false ? false : (i.focus(), true)),
-        ...(o.read !== false && { read: () => ({ text: i.value }) }),
+        ...(o.read !== false && { read: () => { if (o.readThrows) throw new Error('read broke'); return { text: i.value }; } }),
         destroy: () => log.push(`destroy ${host.contains(i)}`),
       };
     },
@@ -222,6 +222,32 @@ describe('the application’s editor', () => {
     expect(reported).toHaveLength(1);
     delete (window as unknown as { reportError?: unknown }).reportError;
   });
+
+  // Review of step 9 (5): a read() that throws is the part's fault, never the grid's: reported once, nothing kept, the
+  // editor closed (as given up: the cell's value stays), at Enter as at a blur.
+  for (const how of ['Enter', 'blur'] as const) {
+    it(`a read() that throws at ${how}: reported once, nothing kept, the editor closed, the value unchanged`, async () => {
+      const reported: unknown[] = [];
+      (window as unknown as { reportError: unknown }).reportError = (e: unknown) => void reported.push(e);
+      const p = colour({ readThrows: true });
+      const t = grid(p);
+      t.at('r2', 'c');
+      t.key('F2');
+      p.input()!.value = '#0000ff';
+      if (how === 'Enter') expect(() => t.key('Enter', {}, p.input()!)).not.toThrow();
+      else {
+        const out = document.body.appendChild(document.createElement('button'));
+        out.focus();
+        await tick();
+      }
+      expect(reported).toHaveLength(1);
+      expect(String(reported[0])).toMatch(/read broke/);
+      expect(t.host()).toBeNull();
+      expect(t.saved()).toEqual([]);
+      expect(t.cell('r2', 'c')!.textContent).toBe('#ff0000');
+      delete (window as unknown as { reportError?: unknown }).reportError;
+    });
+  }
 
   it('destroyed before its host is emptied; nothing left in the cell once closed', () => {
     const p = colour();

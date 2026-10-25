@@ -301,7 +301,14 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
       host.className = 'dzg-editor';
       host.tabIndex = -1;
       s.e = {
-        root: host, focus: host, input: () => handle?.read?.(),
+        // A read() that throws: reported, nothing kept (the editor closes, the value stays; review of step 9, 5).
+        root: host, focus: host, input: () => {
+          try {
+            return handle?.read?.();
+          } catch (err) {
+            g.report(err);
+          }
+        },
         drop() {
           try {
             handle?.destroy?.();

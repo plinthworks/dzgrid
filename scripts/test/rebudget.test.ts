@@ -46,7 +46,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     // Q17b (owner, 2026-10-22): the measure + 10 %, never above what the owner granted. The DOM and theme
     // bases since the showcase themes' grants (T7, 2026-10-23): 21 980 and 3 050.
     const grants: Record<string, number> = {
-      '@dzgrid/core': 29000, '@dzgrid/dom': 21980, '@dzgrid/angular': 6350, '@dzgrid/dom/tree': 3800, '@dzgrid/dom/detail': 4150, // S8-O1, S8-O3, S8-O7 (step 8)
+      '@dzgrid/core': 29000, '@dzgrid/dom': 21980, '@dzgrid/angular': 7000, '@dzgrid/dom/tree': 3800, '@dzgrid/dom/detail': 4150, // S8-O1, S8-O3, S8-O7 (step 8)
      
       '@dzgrid/dom/filters': 10000, '@dzgrid/theme': 3050, '@dzgrid/core/tree': 3500,
       '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
@@ -62,7 +62,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     }
     // Today's measures (step 13 plan) would have raised these to the measure + 10 %: the grants hold them.
     expect(sizeBudget(20700, ceilingFor('@dzgrid/dom'))).toBe(21980); // 22 770 → 21 980 (the T7 grant since 2026-10-23; 21 300 at the Phase 4 close)
-    expect(sizeBudget(6236, ceilingFor('@dzgrid/angular'))).toBe(6350); // 6 859.6 → 6 350 (owner D3; 6 300 by T8, 6 250 before)
+    expect(sizeBudget(6400, ceilingFor('@dzgrid/angular'))).toBe(7000); // 7 040 → 7 000 (owner S9-Q6: 6 250 + 650 Q16 + 50 T8 + 50 D3)
     expect(sizeBudget(3688, ceilingFor('@dzgrid/dom/tree'))).toBe(3800); // S8-O1 (step 8): 3 700 → 3 800
     expect(sizeBudget(1348, ceilingFor('@dzgrid/core/tree-lazy'))).toBe(1500);
     expect(sizeBudget(877, ceilingFor('@dzgrid/dom/tree-lazy'))).toBe(1000); // 964.7 → 1 000, not 1 050
@@ -188,6 +188,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     type Entry = { maxGzip: number | null };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
     expect(['@dzgrid/dom/edit', '@dzgrid/dom/tree', '@dzgrid/dom/detail', '@dzgrid/dom/editors', '@dzgrid/core', '@dzgrid/core/edit', '@dzgrid/dom', '@dzgrid/dom/locales/ar-edit'].map((n) => e[n]?.maxGzip)).toEqual([4150, 3800, 4150, 6650, 29000, 3100, 21700, 900]);
+    // The budget line at the step-9 measure + 50 (6 743 after its review → 6 793), under the S9-Q6 ceiling.
+    expect(e['@dzgrid/angular']?.maxGzip).toBe(6793);
   });
 
   it('the showcase themes\' grants (owner T7, 2026-10-23): each theme 650, the theme base up to 3 050, the DOM base 21 980', () => {
@@ -195,8 +197,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(ceilingFor('@dzgrid/theme/clinic.css')).toBe(650);
     expect(ceilingFor('@dzgrid/theme')).toBe(3050);
     expect(ceilingFor('@dzgrid/dom')).toBe(21980);
-    // T8: the Angular wrapper 6 250 → 6 300 for its [rowClass] input (the editing grant stays apart).
-    expect(ceilingFor('@dzgrid/angular')).toBe(6350);
+    // T8: the Angular wrapper 6 250 → 6 300 for its [rowClass] input; D3 6 350; S9-Q6 (step 9, editing): at most 7 000.
+    expect(ceilingFor('@dzgrid/angular')).toBe(7000);
     // Each framework bridge 500 (step 5).
     for (const b of ['tailwind.css', 'tailwind3.css', 'bootstrap.css']) expect(ceilingFor(`@dzgrid/theme/${b}`)).toBe(500);
     // A theme far under its grant gets its 10 %; near it, the grant; over it, refused.
@@ -206,7 +208,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(() => sizeBudget(3051, ceilingFor('@dzgrid/theme'))).toThrow(/ceiling/);
   });
 
-  it('the K.8 profile guard: 83 500 (Q17a; the real example\'s 90 000 is guarded by example:bytes, not here)', () => {
+  it('the K.8 profile guard: 83 500 (Q17a; the real example\'s 92 000, S9-Q7, is guarded by example:bytes, not here)', () => {
     expect(ceilingFor('profile: audit screen (K.8)')).toBe(83500);
     expect(sizeBudget(79000, ceilingFor('profile: audit screen (K.8)'))).toBe(83500); // 86 900 → 83 500
     expect(() => sizeBudget(83501, ceilingFor('profile: audit screen (K.8)'))).toThrow(/ceiling/);

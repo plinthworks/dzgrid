@@ -108,6 +108,29 @@ export function wrapperShare(dir, files, pattern = /node_modules\/@dzgrid\/angul
   return { min, gz: Math.round(share), estimated: true };
 }
 
+/**
+ * A screen loaded on demand (Phase 5 step 9, owner S9-Q4: the « stock » screen): from the build's stats, the
+ * chunk the first load imports dynamically whose modules match `pattern`, and every chunk it reaches by static
+ * imports that the first load does not already hold; each file's gzip (level 9), summed. Measured apart from K.8.
+ */
+export function measureLazy(dir, pattern) {
+  const browser = join(dir, 'browser');
+  const first = measureBuild(dir).files.map((f) => f.file);
+  const outputs = JSON.parse(readFileSync(join(dir, 'stats.json'), 'utf8')).outputs ?? {};
+  const rel = (k) => k.replace(/^browser\//, '');
+  const key = (f) => Object.keys(outputs).find((k) => rel(k) === rel(f));
+  const dynamic = first.flatMap((f) => outputs[key(f)]?.imports ?? []).filter((i) => i.kind === 'dynamic-import' && !i.external).map((i) => key(i.path)).filter(Boolean);
+  const root = dynamic.find((k) => Object.keys(outputs[k].inputs ?? {}).some((p) => pattern.test(p)));
+  if (!root) throw new Error(`${dir}: no dynamic chunk holds ${pattern}`);
+  const seen = new Set([root]);
+  for (const k of seen) for (const i of outputs[k]?.imports ?? []) if (i.kind === 'import-statement' && !i.external && key(i.path) && !first.includes(rel(i.path))) seen.add(key(i.path));
+  const files = [...seen].map((k) => {
+    const bytes = readFileSync(join(browser, rel(k)));
+    return { file: rel(k), min: bytes.length, gz: gz(bytes) };
+  });
+  return { files, total: files.reduce((s, f) => s + f.gz, 0) };
+}
+
 /** K.8 from the example's real builds: the default build less the baseline. */
 export function measureExample(example) {
   const audit = measureBuild(join(example, 'dist/audit'));

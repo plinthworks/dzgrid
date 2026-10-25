@@ -11,7 +11,7 @@ import { serve, browser } from '../../../spikes/kit.mjs';
 import { buildFixture } from './build.mjs';
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
-/** `--only tree`: the tree and detail pages alone (Phase 4 step 11). */
+/** `--only tree`: the tree and detail pages alone (Phase 4 step 11); `--only edit`: the edit page alone (Phase 5 step 9). */
 const only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
 const checks = [];
 const check = (label, ok, detail) => {
@@ -44,7 +44,132 @@ async function axe(page) {
   return page.evaluate(async () => (await window.axe.run(document, { resultTypes: ['violations'] })).violations.map((v) => `${v.id}: ${v.nodes.length} (${v.nodes[0]?.target?.join(' ')})`));
 }
 
+/** Phase 5 step 9 (`--only edit`): editing from Angular, French light Clinic and Arabic right to left dark Midnight. */
+async function editChecks() {
+  const sel = (id, col) => `.dzg-layer .dzg-row[aria-rowindex="${Number(id.slice(1)) + 2}"] .dzg-cell[data-col="${col}"]`;
+  const running = (page, id, col) => page.evaluate((s) => { const c = document.querySelector(s); return document.getAnimations().some((a) => a.effect?.target === c && a.effect.pseudoElement === '::before' && a.playState === 'running'); }, sel(id, col));
+  for (const lang of ['fr', 'ar']) {
+    const ar = lang === 'ar';
+    const { page, errors } = await open(`page=edit${ar ? '&lang=ar' : ''}`);
+    const st = () => page.evaluate(() => window.fx.state());
+    const cls = (id, col) => page.evaluate(([i, c]) => window.fx.cls(i, c), [id, col]);
+    const text = (id, col) => page.evaluate(([i, c]) => window.fx.text(i, c), [id, col]);
+    const s0 = await st();
+    check(`${lang} edit: direction ${ar ? 'rtl' : 'ltr'}`, s0.dir === (ar ? 'rtl' : 'ltr'), s0);
+    // 1. The built-in number field: F2, typing (Arabic-Indic digits in Arabic), Enter stays; the running border, then saved.
+    await page.evaluate(() => window.fx.hold(true));
+    await page.click(sel('s2', 'stock'));
+    await page.keyboard.press('F2');
+    const s1 = await st();
+    check(`${lang} edit: F2 opens the number field, focused`, s1.field && /dzg-field/.test(s1.active ?? ''), s1);
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type(ar ? '٤٢' : '42');
+    await page.keyboard.press('Enter');
+    await frames(page, 3);
+    const s2 = await st();
+    const r1 = await running(page, 's2', 'stock');
+    const c1 = await cls('s2', 'stock');
+    check(`${lang} edit: Enter keeps and stays (${s2.focus}); the running border while the save is held`, !s2.field && s2.focus === '4/stock' && /dzg-cell--saving/.test(c1) && r1, { s2, c1, r1 });
+    await page.evaluate(() => window.fx.answer());
+    const c2 = await cls('s2', 'stock');
+    const t2 = await text('s2', 'stock');
+    const r2 = await running(page, 's2', 'stock');
+    check(`${lang} edit: answered: the border stopped, the saved flash, the value ${t2}`, !r2 && /dzg-cell--saved/.test(c2) && t2 === '42', { c2, t2, r2 });
+    await page.evaluate(() => window.fx.hold(false));
+    // 2. A local refusal (min 0): still open, the bubble under the cell, the red blink, aria-invalid, aria-describedby; axe 0.
+    await page.click(sel('s3', 'stock'));
+    await page.keyboard.press('F2');
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('-1');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const ref = await page.evaluate((s) => {
+      const f = document.querySelector('.dzg-field');
+      const id = f?.getAttribute('aria-describedby');
+      const b = id ? document.getElementById(id.split(' ')[0]) : null;
+      const c = document.querySelector(s);
+      return { open: !!f, invalid: f?.getAttribute('aria-invalid'), bubble: b ? !b.hidden && b.getBoundingClientRect().top >= c.getBoundingClientRect().bottom - 2 : false, text: b?.textContent, cls: c.className };
+    }, sel('s3', 'stock'));
+    check(`${lang} edit: a refused value: open, aria-invalid, the bubble under the cell (aria-describedby), the red blink`, ref.open && ref.invalid === 'true' && ref.bubble && /dzg-cell--refused/.test(ref.cls), ref);
+    const a1 = await axe(page);
+    check(`${lang} edit: axe with a field open and refused, no violation`, a1.length === 0, a1);
+    await page.keyboard.press('Escape');
+    // 3. A server refusal (s5): the value back after the blink, the error mark, (saveFailed) heard.
+    await page.click(sel('s5', 'stock'));
+    await page.keyboard.press('F2');
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('9');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(900);
+    const c3 = await cls('s5', 'stock');
+    const t3 = await text('s5', 'stock');
+    const f3 = await page.evaluate(() => window.fx.editStats.failed);
+    check(`${lang} edit: a server refusal: the value back (${t3}), the error mark, (saveFailed) with its reason`, t3 === '35' && /dzg-cell--failed/.test(c3) && f3.length === 1 && f3[0].length > 0, { c3, t3, f3 });
+    // 4. The template editor: F2, typing; Ctrl+Z inside the field is the field's; Enter keeps through c.reads; Ctrl+Z outside undoes.
+    await page.click(sel('s2', 'note'));
+    await page.keyboard.press('F2');
+    const s4 = await st();
+    check(`${lang} edit: the template editor in the grid's editor host, its input focused`, s4.editor?.owner === 'editor' && s4.editor.note && /fx-note/.test(s4.active ?? ''), s4);
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('abc');
+    const u0 = await page.evaluate(() => document.querySelector('.fx-undo').textContent);
+    await page.keyboard.press('ControlOrMeta+z');
+    const z1 = await page.evaluate(() => ({ value: document.querySelector('.fx-note')?.value, undo: document.querySelector('.fx-undo').textContent, cell: window.fx.text('s2', 'stock') }));
+    check(`${lang} edit: Ctrl+Z inside the field is the field's (still open, the grid's edit kept)`, z1.value !== undefined && z1.value !== 'abc' && z1.undo === u0 && z1.cell === '42', z1);
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('abc');
+    const a2 = await axe(page);
+    check(`${lang} edit: axe with the template editor open, no violation`, a2.length === 0, a2);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    const t4 = await text('s2', 'note');
+    check(`${lang} edit: Enter keeps what c.reads gives`, t4 === 'abc', t4);
+    await page.keyboard.press('ControlOrMeta+z');
+    await page.waitForTimeout(300);
+    const t5 = await text('s2', 'note');
+    check(`${lang} edit: Ctrl+Z outside the field undoes on the grid`, t5 === 'n2', t5);
+    // 5. The component editor, and Tab: kept through read(), the next cell towards the line's end (leftwards in Arabic).
+    await page.click(sel('s4', 'note'));
+    await page.keyboard.press('F2');
+    await page.keyboard.type('x');
+    const xNote = await page.evaluate((s) => document.querySelector(s).getBoundingClientRect().left, sel('s4', 'note'));
+    await page.keyboard.press('Tab');
+    await frames(page, 2);
+    const tab = await page.evaluate(() => { const c = document.activeElement.closest('.dzg-cell'); return { col: c?.getAttribute('data-col'), left: c?.getBoundingClientRect().left, shelf: !!document.querySelector('.dzg-editor .fx-shelf') }; });
+    const t6 = await text('s4', 'note');
+    check(`${lang} edit: Tab keeps (${t6}) and goes to the next column, ${ar ? 'leftwards' : 'rightwards'}; the component editor opens there`, t6 === 'n4x' && tab.col === 'shelf' && (ar ? tab.left < xNote : tab.left > xNote) && tab.shelf, { tab, xNote, t6 });
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('r9');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    const t7 = await text('s4', 'shelf');
+    check(`${lang} edit: the component editor keeps what read() gives`, t7 === 'R9', t7);
+    // 6. 200 opens and closes with scrolls; destroy leaves nothing.
+    const ch = await page.evaluate(() => window.fx.churn(200));
+    check(`${lang} edit: 200 opens and closes with scrolls: made = destroyed + live, none live`, ch.made === ch.gone + ch.live && ch.live === 0 && ch.made >= 200, ch);
+    const gone = await page.evaluate(() => window.fx.destroyGrid());
+    check(`${lang} edit: grid destroyed, editors made = destroyed, nothing left`, gone.made === gone.gone && gone.live === 0 && gone.grids === 0, gone);
+    check(`${lang} edit: no error in the page`, errors.length === 0, errors);
+    await page.close();
+  }
+  {
+    const { page, errors } = await open('page=edit&enter=down');
+    await page.click(sel('s2', 'stock'));
+    await page.keyboard.press('F2');
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type('5');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const s = await page.evaluate(() => window.fx.state());
+    check(`fr edit ?enter=down: Enter keeps and moves down (${s.focus})`, s.focus === '5/stock', s);
+    check('fr edit ?enter=down: no error in the page', errors.length === 0, errors);
+    await page.close();
+  }
+}
+
 try {
+  if (only === 'edit' || !only) await editChecks();
+  if (only === 'edit') throw Object.assign(new Error('only'), { only: true });
   for (const lang of only === 'tree' ? [] : ['fr', 'ar']) {
     const { page, errors } = await open(lang === 'ar' ? 'lang=ar' : '');
     const seen = await page.evaluate(() => ({

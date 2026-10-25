@@ -9,6 +9,11 @@ import { detail } from '@dzgrid/dom/detail';
 import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
 import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
 import { quickSearch } from '@dzgrid/dom/search';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors';
+import { listEditor } from '@dzgrid/dom/editors-list';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
 import { COLUMNS, MESSAGES, ROWS, rowId } from './support';
 
 @Component({ selector: 't-c', template: `{{ cell().text }}` })
@@ -92,5 +97,56 @@ describe('on a server, trees and details', () => {
   it('tree and detail need no DOM to be called', () => {
     expect(tree({ parentId: () => null }).id).toBe('tree');
     expect(detail({ part: 'x' }).id).toBe('detail');
+  });
+});
+
+// Phase 5 step 9 (T8, edit-angular.md 8): editing on a server — `edit()`, `editors({ list })`, an editor template
+// and `[save]`: nothing rendered, the document untouched, no timer left, no problem told.
+@Component({
+  selector: 't-edit-host',
+  imports: [DzGrid, DzgPart],
+  template: `<dz-grid [rows]="rows" [columns]="cols" [getRowId]="id" [messages]="messages" [features]="features" [save]="save" (problems)="told = told + 1" (gridReady)="ready = true">
+      <ng-template dzgPart="stock" slot="editor" let-c><input [value]="c.text" (focus)="c.reads(read)" /></ng-template>
+    </dz-grid>`,
+})
+class EditHost {
+  rows = ROWS;
+  cols = COLUMNS.map((c) => ({ ...c, editable: true, edit: { editor: 'stock' } }));
+  id = rowId;
+  messages = { ...MESSAGES, text: { ...MESSAGES.text, ...EN_EDIT.text, ...EN_EDITORS.text } };
+  features = [edit(), editors({ list: listEditor })];
+  save = () => Promise.resolve();
+  read = () => ({ text: '' });
+  told = 0;
+  ready = false;
+}
+
+describe('on a server, editing', () => {
+  it('renders nothing, touches no document, leaves no timer, tells no problem', () => {
+    vi.useFakeTimers();
+    try {
+      TestBed.configureTestingModule({ providers: [{ provide: PLATFORM_ID, useValue: 'server' }] });
+      const before = document.body.innerHTML;
+      const fixture = TestBed.createComponent(EditHost);
+      expect(() => fixture.detectChanges()).not.toThrow();
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.dzg')).toBeNull();
+      expect(el.querySelector('input')).toBeNull();
+      expect(fixture.componentInstance.told).toBe(0);
+      expect(fixture.componentInstance.ready).toBe(false);
+      const ctrl = fixture.debugElement.children[0]!.injector.get(DzgController);
+      expect(ctrl.edit()).toBeNull();
+      expect(vi.getTimerCount()).toBe(0);
+      expect(document.body.innerHTML.replace(el.outerHTML, '')).toBe(before.replace(el.outerHTML, ''));
+      expect(() => fixture.destroy()).not.toThrow();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('edit(), editors(), listEditor and componentPart(\'editor\', …) need no DOM to be called', () => {
+    expect(edit().id).toBe('edit');
+    expect(editors({ list: listEditor }).id).toBe('editors');
+    expect(componentPart('editor', C as never).slot).toBe('editor');
   });
 });

@@ -39,7 +39,8 @@ export async function runSeed(seed: number, kind: 'client' | 'source', steps = 4
   /** The host's rows (the client's held rows; the server's truth), each object frozen as fed. */
   let truth: Row[] = IDS.map((id, i) => ({ id, v: i, w: 10 + i, n: WORDS[i]! }));
   const fed: [Row, string][] = [];
-  const feed = (r: Row): Row => (fed.push([r, JSON.stringify(r)]), r);
+  // Frozen (Part A gate G5): a write to a host row by the edits or a rollback throws here, besides the snapshot check.
+  const feed = (r: Row): Row => (fed.push([r, JSON.stringify(r)]), Object.freeze(r));
   truth.forEach(feed);
   const fake = fakeSource();
   let model: RowModel<Row>;

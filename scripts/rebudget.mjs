@@ -31,7 +31,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  * The ceilings a size budget never goes above. Phase 4 close (owner decision 2026-10-22,
  * docs/phase-4-steps/decisions.md Q17b): the owner's grants for the entries he named; the plan's ceilings
  * (ARCHITECTURE §5.2) for the others. K.8 (Q17a): the audit profile's guard stays 83 500; the real Angular
- * example's 90 000 is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
+ * example's 92 000 (S9-Q7) is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
  */
 const SIZE_CEILINGS = {
   '@dzgrid/core': 29000,
@@ -78,7 +78,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/tailwind.css': 500, // T7: each framework bridge
   '@dzgrid/theme/tailwind3.css': 500, // T7
   '@dzgrid/theme/bootstrap.css': 500, // T7
-  '@dzgrid/angular': 6350, // owner T8 (2026-10-23): +50 for [rowClass]; owner D3 (2026-10-23): +50 for [rowHeight]; the editing grant stays apart
+  '@dzgrid/angular': 7000, // owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
   'profile: audit screen (K.8)': 83500,
 };
 

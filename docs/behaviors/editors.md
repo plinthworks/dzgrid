@@ -76,7 +76,9 @@ the application made itself.
     'f2' | 'enter' | 'dblclick', char?, keep(value), cancel(), refuse(code) }`; it must return an element
     and a `focus()`.
 19. The grid marks the part's root `data-dzg-owner="editor"`; Enter, Tab and Escape reaching the root
-    unhandled act as in `editing.md`; `keep(value)` goes through the same checks and save.
+    unhandled act as in `editing.md`; `keep(value)` goes through the same checks and save. A handle's `read()`
+    that throws (Phase 5 step 9 review): the error reported, nothing kept, the editor closed as for a part that
+    gives nothing; the cell's value unchanged.
 
 ## Keyboard (besides `editing.md`)
 | Editor | Key | Result |

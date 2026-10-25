@@ -2,6 +2,7 @@ import { TemplateRef, createComponent, type ApplicationRef, type EnvironmentInje
 import type { GridKernel } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import type { SlotContext, SlotPart } from '@dzgrid/dom';
+import type { CellInput } from '@dzgrid/dom/editors';
 
 export type WiredSlot = keyof SlotContext;
 
@@ -12,13 +13,26 @@ export type DzgPartContext<S extends WiredSlot = 'cell'> = SlotContext[S] & {
    * row it shows at the call), `partAction { slot, column, name, detail }` from any other slot.
    */
   emit(name: string, detail?: unknown): void;
-};
+} & (S extends 'editor'
+    ? {
+        /**
+         * What Enter, Tab and a click elsewhere keep (Phase 5 step 9, owner Q5 and S9-Q3): the latest function given
+         * wins. Without it a template editor keeps only through `keep()`: a blur keeps nothing.
+         */
+        reads(fn: () => CellInput | undefined): void;
+      }
+    : unknown);
 
 /** A component drawing a slot: its whole context in one signal input named `cell` (owner Q2). */
 export interface DzgPartComponent<S extends WiredSlot = 'cell'> {
   readonly cell: InputSignal<DzgPartContext<S>>;
   /** The grid asks it to take the focus (Enter, F2); without it, the first tabbable element inside. */
   focus?(): boolean;
+}
+
+/** An editor component (slot `editor`): its `read()` is what Enter, Tab and a blur keep (none: nothing kept). */
+export interface DzgEditorComponent extends DzgPartComponent<'editor'> {
+  read?(): CellInput | undefined;
 }
 
 /** A cell component. */
@@ -63,7 +77,10 @@ export function boundPart<S extends WiredSlot>(b: Bindings, slot: S, what: Type<
           const column = (cur as { column?: { id: string } }).column?.id ?? null;
           if (k) emit(k, slot === 'cell' ? { type: 'cellAction', source: 'user', column: column!, key: (cur as SlotContext['cell']).key, name, detail } : { type: 'partAction', source: 'user', slot, column, name, detail });
         };
-        const ctx = (x: SlotContext[S]): DzgPartContext<WiredSlot> => ({ ...x, emit: send }) as never;
+        // An editor's reader: a template's `reads(fn)`, or the component's own `read()`.
+        let read: (() => CellInput | undefined) | undefined;
+        const reads = (f: typeof read): void => void (read = f);
+        const ctx = (x: SlotContext[S]): DzgPartContext<WiredSlot> => ({ ...x, emit: send, reads }) as never;
         let nodes: () => Node[];
         let set: (x: ReturnType<typeof ctx>) => void;
         let check: () => void;
@@ -79,13 +96,14 @@ export function boundPart<S extends WiredSlot>(b: Bindings, slot: S, what: Type<
           b.app.attachView(view);
         } else {
           const ref = createComponent(what, { environmentInjector: b.env, elementInjector: b.injector });
-          const inst = ref.instance as Partial<DzgPartComponent<S>>;
+          const inst = ref.instance as Partial<DzgEditorComponent>;
           const el: Node = ref.location.nativeElement;
           nodes = () => [el];
           set = (x) => ref.setInput('cell', x);
           check = () => ref.changeDetectorRef.detectChanges();
           drop = () => ref.destroy();
           focus = inst.focus && (() => inst.focus!());
+          if (inst.read) read = () => inst.read!();
           b.app.attachView(ref.hostView);
         }
         const destroy = (): void => {
@@ -107,6 +125,7 @@ export function boundPart<S extends WiredSlot>(b: Bindings, slot: S, what: Type<
             check();
           },
           destroy,
+          read: () => read?.(),
           focus: () => {
             if (focus) return focus();
             for (const n of nodes()) {

@@ -56,3 +56,7 @@ Nothing different from the plain grid: they scroll, sort, filter, search, tick r
 given in `[features]` (`filters().floating.set`). Unset, the feature decides; a new value only is written, never
 over the user's toggle (a button bound with `filters().floating.bind`) made since. No output: a host wanting the
 state reads `filters().floating.get()`. Without `filters()` among the features: ignored. Sheet: `floating-toggle.md`.
+
+## Editing (Phase 5 step 9, `docs/behaviors/edit-angular.md`, `docs/phase-5-steps/step09-plan.md`)
+- **Features** `edit({ save })`, `editors({ enterMoves, list: listEditor })` through `[features]` (fixed, as the tree's); their texts (`…-edit`, `…-editors`) in `[messages]`. Live input **`[save]`**; outputs **`(cellEdited)`**, **`(saveFailed)`**, **`(orderStale)`**, **`(undoChanged)`**, held until the first render like every output; **`controller.edit()`** gives the grid's `EditApi` (null without `edit`, before the grid, after it, on a server).
+- **An editor as a template:** `<ng-template dzgPart="stock" slot="editor" let-c>`; `c.keep(input)`, `c.cancel()`, `c.refuse(code)`, and `c.reads(() => input)` for what Enter, Tab and a click elsewhere keep. **As a component:** `componentPart('editor', C)`, with an optional `read()` and `focus()`. Its view is created when the editor opens and destroyed when it closes.

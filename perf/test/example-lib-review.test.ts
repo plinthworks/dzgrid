@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { gzipSync } from 'node:zlib';
 // @ts-expect-error a plain .mjs script
-import { forgetLocalPacks, measureBuild, measureExample, wrapperShare } from '../../scripts/example-lib.mjs';
+import { forgetLocalPacks, measureBuild, measureExample, measureLazy, wrapperShare } from '../../scripts/example-lib.mjs';
 
 const gz = (s: string) => gzipSync(Buffer.from(s), { level: 9 }).length;
 /** Pseudo-random text so gzip cannot fold it away. */
@@ -71,6 +71,41 @@ describe('measureExample (A - B), on a fake tree', () => {
     site(dir, files, `${hinted.join('')}<script src="main-D.js" type="module"></script>`);
     expect(() => measureBuild(dir)).toThrow(/stats-json/);
     expect(measureBuild(join(ex, 'dist/baseline')).files.map((f: { file: string }) => f.file)).toEqual(['main-B.js', 'styles-B.css']);
+  });
+
+  // Phase 5 step 9 (owner S9-Q4): the « stock » screen, loaded on demand, measured apart from the first load.
+  it('measureLazy: the chunk a page imports dynamically and what it imports statically, less the first load', () => {
+    const dir = join(ex, 'dist/lazy');
+    const files = { 'main-L.js': noise(800, 60), 'chunk-1.js': noise(400, 61), 'chunk-stock.js': noise(2000, 62), 'chunk-shared.js': noise(700, 63), 'chunk-other.js': noise(900, 64), 'chunk-later.js': noise(600, 65) };
+    site(dir, files, '<script src="main-L.js" type="module"></script>', 'index.html', {
+      outputs: {
+        'main-L.js': { inputs: {}, imports: [{ path: 'chunk-1.js', kind: 'import-statement' }, { path: 'chunk-stock.js', kind: 'dynamic-import' }, { path: 'chunk-other.js', kind: 'dynamic-import' }] },
+        'chunk-1.js': { inputs: {}, imports: [] },
+        'chunk-stock.js': { inputs: { 'src/app/stock.component.ts': { bytesInOutput: 10 } }, imports: [{ path: 'chunk-shared.js', kind: 'import-statement' }, { path: 'chunk-1.js', kind: 'import-statement' }, { path: 'chunk-later.js', kind: 'dynamic-import' }] },
+        'chunk-later.js': { inputs: {}, imports: [] },
+        'chunk-shared.js': { inputs: {}, imports: [] },
+        'chunk-other.js': { inputs: { 'node_modules/@dzgrid/dom/motion-gsap.js': { bytesInOutput: 10 } }, imports: [] },
+      },
+    });
+    const m = measureLazy(dir, /src\/app\/stock\.component/);
+    expect(m.files.map((f: { file: string }) => f.file).sort()).toEqual(['chunk-shared.js', 'chunk-stock.js']);
+    expect(m.total).toBe(gz(files['chunk-stock.js']) + gz(files['chunk-shared.js']));
+    expect(() => measureLazy(dir, /nothing-like-this/)).toThrow(/no dynamic chunk/);
+  });
+
+  it('measureLazy: a dynamic import made from a static chunk of the first load (review of step 9)', () => {
+    const dir = join(ex, 'dist/lazy-from-chunk');
+    const files = { 'main-M.js': noise(800, 70), 'chunk-init.js': noise(400, 71), 'chunk-stock2.js': noise(1500, 72) };
+    site(dir, files, '<script src="main-M.js" type="module"></script>', 'index.html', {
+      outputs: {
+        'main-M.js': { inputs: {}, imports: [{ path: 'chunk-init.js', kind: 'import-statement' }] },
+        'chunk-init.js': { inputs: {}, imports: [{ path: 'chunk-stock2.js', kind: 'dynamic-import' }] },
+        'chunk-stock2.js': { inputs: { 'src/app/stock.component.ts': { bytesInOutput: 10 } }, imports: [] },
+      },
+    });
+    const m = measureLazy(dir, /src\/app\/stock\.component/);
+    expect(m.files.map((f: { file: string }) => f.file)).toEqual(['chunk-stock2.js']);
+    expect(m.total).toBe(gz(files['chunk-stock2.js']));
   });
 
   it('refuses stats that do not know the page script (a stale stats.json)', () => {

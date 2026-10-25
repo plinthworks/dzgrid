@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-24. **Phase 5 (l'édition), étapes 1 à 8 faites, commitées et poussées** (dernier commit `1acaabf`). **Prochaine : étape 9** (Angular, puis le portail de la partie A). Phase 4 close techniquement ; **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). L'édition s'appelle **Phase 5** (décision Q2 ; phases suivantes +1 ; 0.3.0 à la fin).
+Mis à jour : 2026-10-25. **Phase 5 (l'édition), étapes 1 à 8 commitées et poussées** (dernier commit `60443c5`) ; **étape 9 faite, non commitée** : l'édition dans Angular, et la **partie A close techniquement** (portail G1–G17 vert, `docs/phase-5-steps/step09-plan.md` « Part A gate ») ; 124a–b restent au propriétaire. **Prochaine : partie B** (étape 10). Phase 4 close techniquement ; **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). L'édition s'appelle **Phase 5** (décision Q2 ; phases suivantes +1 ; 0.3.0 à la fin).
 
 L'ancien contenu de ce fichier (les paragraphes « Étape N faite » des Phases 3 et 4, revues et portails) est gardé mot pour mot dans `docs/phase-4-steps/status-log.md` ; le détail de chaque étape est aussi dans `ROADMAP.md`.
 
@@ -56,7 +56,9 @@ Aucun banc lancé (Q17d).
 
 ## Ce qui attend le propriétaire
 
-- **Bloquant pour clore la partie A de l'édition** : vérification à la main des méthodes de saisie (japonais, pinyin), des touches mortes françaises et du double toucher sur iOS et Android (`a11y-protocol.md` 124a–124b).
+- **Bloquant pour clore tout à fait la partie A** (S9-Q5 : la partie B peut commencer avant) : 124a (méthodes de saisie japonaise et pinyin, touches mortes françaises) et 124b (iOS, Android : toucher, double toucher, bulle au-dessus du clavier, VoiceOver / TalkBack), à la main, sur `orders-edit.html`.
+- **Étape 9** : faite, non commitée ; le commit (« feat(angular): editing… », puis le portail de la partie A) au chef de projet.
+
 - **Édition** : écoute §19 (dont 119, 124a–124g) ; relecture arabe de `ar-edit`, `ar-editors` (textes nouveaux des étapes 4 à 8) ; regarder la bordure orange dans l'anneau bleu.
 
 - **Écoute au lecteur d'écran** §16–§18 de `docs/a11y-protocol.md` (arbre, détail, ligne de filtres) : non bloquante ; tant qu'elle n'est pas faite, rien n'est dit « validé ».
@@ -85,12 +87,13 @@ Aucun banc lancé (Q17d).
 | 6 | dates + calendrier, oui/non, liste (`editors-list`), éditeurs de l'appli | `51131af` |
 | 7 | enregistrements de bout en bout ; Entrée reste par défaut ; bordures dans l'anneau | `9ba9541` |
 | 8 | annuler/rétablir au clavier, arbres, détails, grilles imbriquées | `1acaabf` |
+| 9 | Angular : `[save]`, sorties, `controller.edit()`, éditeurs en gabarit (`c.reads`) et composant ; écran « stock » de l'exemple chargé à la demande ; portail de la partie A ; revue appliquée (ordre des sorties sous zone.js, `read()` qui lève) | non commitée |
 
-**Ordre décidé par le propriétaire (2026-10-24)** : étape 9 (Angular + portail de la partie A) → **partie B** (étapes 10–13 : blocs de cellules, presse-papiers et Excel, poignée de recopie, Ctrl+D/R, modification en masse, 0.3.0 ; avec la démo commandes inventée, la fiche `pharma/stock` n'est plus un préalable) → **site de doc** (Astro Starlight comme DzCalendar, FR + EN, mis en ligne seulement sur sa parole ; `docs/phase-5-steps/showcase-plan.md`) → Phase 6 (menu de colonne, choix des colonnes, barre de regroupement, déplacement des colonnes).
+**Ordre décidé par le propriétaire (2026-10-24)** : étape 9 (Angular + portail de la partie A, faite) → **partie B** (étapes 10–13 : blocs de cellules, presse-papiers et Excel, poignée de recopie, Ctrl+D/R, modification en masse, 0.3.0 ; avec la démo commandes inventée, la fiche `pharma/stock` n'est plus un préalable) → **site de doc** (Astro Starlight comme DzCalendar, FR + EN, mis en ligne seulement sur sa parole ; `docs/phase-5-steps/showcase-plan.md`) → Phase 6 (menu de colonne, choix des colonnes, barre de regroupement, déplacement des colonnes).
 
 **Démo à essayer** : `http://127.0.0.1:4700/orders-edit.html` (`?locale=ar-DZ&theme=dark&skin=midnight`, `?paged=1`, `?tree=1`, `?enter=down`), `detail.html` (visites modifiables), `orders.html`, `hr.html`.
 
-**Tailles proches du plafond** (octets gz) : cœur 28 916 / 29 000, `core/edit` 3 098 / 3 100 (gelé), `dom/edit` 4 146 / 4 150, `dom/tree` 3 795 / 3 800, `dom/detail` 4 092 / 4 150, `/editors` 6 595 / 6 650, `edit.css` 2 197 / 2 200, `ar-edit` 895 / 900, angular 6 323 / 6 350. Toute hausse : décision écrite du propriétaire.
+**Tailles proches du plafond** (octets gz) : cœur 28 916 / 29 000, `core/edit` 3 098 / 3 100 (gelé), `dom/edit` 4 146 / 4 150, `dom/tree` 3 795 / 3 800, `dom/detail` 4 092 / 4 150, `/editors` 6 595 / 6 650, `edit.css` 2 197 / 2 200, `ar-edit` 895 / 900, angular 6 743 / 6 793 (plafond 7 000, S9-Q6) ; `/editors` 6 601 / 6 650 ; exemple réel 91 093 / 92 000 (S9-Q7). Toute hausse : décision écrite du propriétaire.
 
 **Pour l'étape 10** : le test « coller dans un détail » de `edit-detail.test.ts` est un repère vide, à refaire avec le collage (liste de passation dans `step08-plan.md`).
 
@@ -109,7 +112,8 @@ npm run build:theme    # dzgrid.css, contrast.css et leurs copies sans couche, d
 npm run test:browser   # la grille dans Chrome sans fenêtre (-- --only tree|detail|motion|filters|themes|demos …)
 npm run test:audit -- --full          # écran d'audit, 1 000 permutations
 node packages/angular/browser/run.mjs # Angular dans Chrome
-npm run example:build  # exemple Angular 21 depuis les archives ; puis example:bytes, example:csv, example:ssr, example:browser
+npm run example:build  # exemple Angular 21 depuis les archives ; puis example:bytes, example:csv, example:ssr, example:browser (`?screen=stock` : l'écran modifiable)
+node packages/angular/browser/run.mjs --only edit # l'édition dans Angular seule
 npm start              # bac à sable sur http://127.0.0.1:4700 — ne jamais l'arrêter
 ```
 

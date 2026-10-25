@@ -13,5 +13,11 @@ export default function bootstrap(context: ServerContext) {
   return bootstrapApplication(AuditScreen, { providers: [zoneless(), provideServerRendering()] }, context);
 }
 
+/** The « stock » screen on a server (`example:ssr --screen stock`): the same rule, no grid, no editor, no timer. */
+export async function bootstrapStock(context: ServerContext) {
+  const { StockScreen } = await import('./app/stock.component');
+  return bootstrapApplication(StockScreen, { providers: [zoneless(), provideServerRendering()] }, context);
+}
+
 export { renderApplication } from '@angular/platform-server';
 export { AUDIT_PROBE, newProbe } from './app/probe';

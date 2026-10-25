@@ -16,6 +16,16 @@ Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
 
+- Phase 5 step 9, editing from Angular (docs/behaviors/edit-angular.md, angular-parts.md « Editing »): `edit()`,
+  `editors()` and `listEditor` go in `[features]`; a live `[save]` input (the grid's save from its first value;
+  `missing-feature` at `save` without `edit`); outputs `(cellEdited)`, `(saveFailed)`, `(orderStale)`,
+  `(undoChanged)`; `DzgController.edit()` (the grid's `EditApi`); editors as templates (`<ng-template dzgPart="x"
+  slot="editor" let-c>`, `c.reads(() => input)` for what Enter, Tab and a click elsewhere keep) or components
+  (`componentPart('editor', C)`, `DzgEditorComponent` with `read()` and `focus()`); `DzGridDefaults.features`. With
+  zone.js, one gesture's events reach the outputs in one zone entry. A read-only app imports no editing code. The
+  Angular example gains an editable « stock » screen loaded on demand (`?screen=stock`); its ceiling is 92 000
+  (owner S9-Q7). `@dzgrid/angular` 6 743 B gz (budget 6 793). A `read()` that throws: reported, nothing kept, the editor closed.
+
 - Phase 5 step 8, undo and redo in the DOM, trees, details and nested grids (docs/behaviors/edit-undo.md,
   editing.md « Built at step 8 », master-detail.md): Ctrl/Cmd+Z, Ctrl+Y, Ctrl/Cmd+Shift+Z (and Cmd+Y) on a cell or a
   header, matched on `key` first (AZERTY) and on `code` when the key is not a Latin letter (an Arabic layout); the

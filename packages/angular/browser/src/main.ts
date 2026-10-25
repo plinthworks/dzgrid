@@ -10,6 +10,7 @@ import { dataKey } from '@dzgrid/core';
 import { AR_MODE, App, stats } from './app';
 import { AppA } from './a';
 import { DetailApp, TreeApp, treeStats } from './tree';
+import { EditApp, editStats } from './edit';
 
 declare global {
   interface Window {
@@ -119,9 +120,79 @@ async function mainTree(page: string): Promise<void> {
   window.fxReady = true;
 }
 
+/** `?page=edit` (Phase 5 step 9): the theme's edit.css and the skin (fr light Clinic, ar dark Midnight) first. */
+async function mainEdit(): Promise<void> {
+  document.documentElement.dataset['theme'] = AR_MODE ? 'dark' : 'light';
+  await Promise.all(['edit.css', AR_MODE ? 'midnight.css' : 'clinic.css'].map((href) => new Promise((r) => {
+    const l = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: `./${href}`, onload: r, onerror: r });
+    document.head.append(l);
+  })));
+  const appRef: ApplicationRef = await bootstrapApplication(EditApp, { providers: [provideZonelessChangeDetection()] });
+  const app = appRef.components[0]!.instance as EditApp;
+  await frame();
+  await frame();
+  const settle = async () => (await frame(), await frame());
+  const grid = () => document.querySelector<HTMLElement>('dzg-fixture .host .dzg')!;
+  const cell = (id: string, col: string) => grid()?.querySelector<HTMLElement>(`.dzg-layer .dzg-row[aria-rowindex="${Number(id.slice(1)) + 2}"] .dzg-cell[data-col="${col}"]`) ?? null;
+  const key = (k: string, on: Element = document.activeElement!) => on.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+  window.fx = {
+    editStats,
+    cellSel: (id: string, col: string) => `.dzg-layer .dzg-row[aria-rowindex="${Number(id.slice(1)) + 2}"] .dzg-cell[data-col="${col}"]`,
+    hold: (on: boolean) => void (app.hold = on),
+    answer: async () => {
+      for (const a of editStats.held.splice(0)) a();
+      await settle();
+    },
+    state: () => {
+      const ed = grid()?.querySelector<HTMLElement>('.dzg-editor');
+      const a = document.activeElement as HTMLElement | null;
+      const f = a?.closest('.dzg-cell');
+      return {
+        dir: grid()?.getAttribute('dir'),
+        editor: ed ? { owner: ed.getAttribute('data-dzg-owner'), note: !!ed.querySelector('.fx-note'), shelf: !!ed.querySelector('.fx-shelf') } : null,
+        field: !!grid()?.querySelector('.dzg-field'),
+        active: a?.className ?? null,
+        focus: f ? `${f.closest('.dzg-row')?.getAttribute('aria-rowindex')}/${f.getAttribute('data-col')}` : null,
+        log: document.querySelector('.fx-log')?.textContent?.trim(),
+        live: document.querySelectorAll('fx-shelf-editor, fx-note-life').length,
+      };
+    },
+    text: (id: string, col: string) => cell(id, col)?.textContent ?? null,
+    cls: (id: string, col: string) => cell(id, col)?.className ?? '',
+    /** `n` opens and closes on the template and component columns, with scrolls between. */
+    async churn(n: number) {
+      const vp = grid().querySelector<HTMLElement>(':scope > .dzg-viewport')!;
+      for (let i = 0; i < n; i++) {
+        vp.scrollTop = 0;
+        await settle();
+        const c = cell(`s${i % 8}`, i % 2 ? 'note' : 'shelf');
+        if (!c) throw new Error(`churn ${i}: no cell s${i % 8} in view`);
+        app.ctl!.focusCell(dataKey(`s${i % 8}`)!, i % 2 ? 'note' : 'shelf');
+        c.focus();
+        key('F2');
+        key('Escape');
+        if (i % 10 === 0) {
+          vp.scrollTop = 300 + i * 5;
+          await frame();
+        }
+      }
+      vp.scrollTop = 0;
+      await settle();
+      return { made: editStats.made, gone: editStats.gone, live: document.querySelectorAll('fx-shelf-editor, fx-note-life').length };
+    },
+    async destroyGrid() {
+      app.shown.set(false);
+      await settle();
+      return { made: editStats.made, gone: editStats.gone, live: document.querySelectorAll('fx-shelf-editor, fx-note-life').length, grids: document.querySelectorAll('.dzg').length };
+    },
+  };
+  window.fxReady = true;
+}
+
 async function main(): Promise<void> {
   if (params.get('a') === '1') return mainA();
   const page = params.get('page');
+  if (page === 'edit') return mainEdit();
   if (page === 'tree' || page === 'detail') return mainTree(page);
   const appRef: ApplicationRef = await bootstrapApplication(App, {
     providers: [provideZonelessChangeDetection(), ...(bench ? [{ provide: DZG_ENV, useValue: { sync: true } }] : [])],

@@ -52,7 +52,7 @@ export async function buildFixture() {
   });
   mkdirSync(`${here}build`, { recursive: true });
   writeFileSync(`${here}build/index.html`, readFileSync(`${here}index.html`, 'utf8'));
-  copyFileSync(`${root}packages/theme/dzgrid.css`, `${here}build/dzgrid.css`);
+  for (const css of ['dzgrid.css', 'edit.css', 'clinic.css', 'midnight.css']) copyFileSync(`${root}packages/theme/${css}`, `${here}build/${css}`);
   const js = readFileSync(`${here}build/main.js`);
   return { bytes: statSync(`${here}build/main.js`).size, gzip: gzipSync(js).length };
 }
