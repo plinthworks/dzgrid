@@ -1,0 +1,61 @@
+{
+  "id": "server-page-last-row",
+  "suite": "paste-plan",
+  "description": "On a page of two rows, lines past its last row are outside.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1"
+      ],
+      [
+        "2"
+      ],
+      [
+        "3"
+      ]
+    ],
+    "at": {
+      "top": 1,
+      "bottom": 1,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r2",
+        "a",
+        {
+          "text": "1"
+        }
+      ]
+    ],
+    "outside": 2,
+    "tooBig": false,
+    "box": {
+      "top": 1,
+      "bottom": 1,
+      "start": 0,
+      "end": 0
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "decode-quoted-crlf",
+  "suite": "clipboard-tsv",
+  "description": "A quoted cell holds a CRLF.",
+  "input": {
+    "decode": "\"l1\r\nl2\"\tx\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "l1\r\nl2",
+        "x"
+      ]
+    ]
+  }
+}

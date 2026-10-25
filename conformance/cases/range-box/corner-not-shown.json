@@ -1,0 +1,44 @@
+{
+  "id": "corner-not-shown",
+  "suite": "range-box",
+  "description": "A corner whose row is not shown (filtered out, another page) drops the block.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "range": {
+      "anchor": [
+        "r1",
+        "a"
+      ],
+      "focus": [
+        "zz",
+        "b"
+      ]
+    }
+  },
+  "expected": {
+    "box": null,
+    "rows": [],
+    "columns": [],
+    "size": null
+  }
+}

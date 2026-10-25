@@ -760,3 +760,54 @@ partie A de la Phase 5). Règle de décision propre à cette section : une phras
 fois (114–117), une bordure animée dite (113), un focus perdu ou ramené de force (116, 118, 123), une touche
 d'un champ qui agit sur la grille (119) ou un « lecture seule » manquant (111) se corrige avant la clôture de la
 partie A ; l'ordre « colonne, ligne » du nom d'un champ est noté, sans correction s'il est dit en entier.
+
+## 20. Étapes — blocs de cellules, presse-papiers, recopie (Phase 5, partie B)
+
+Page : le bac à sable, démo des commandes (`orders-edit.html`, plages actives ; `?range=0` les coupe), en
+**français** puis en **arabe** (`?locale=ar-DZ`). Fiches : `docs/behaviors/range-selection.md`,
+`clipboard.md`, `fill.md`. Un tableur ouvert à côté (Excel, LibreOffice ou Google Sheets) pour 129–130.
+Noter ce qui est **dit**, mot pour mot ; les phrases attendues sont celles des paquets `locales/{fr,ar}-range`
+prévus (si le paquet final les a changées, noter la phrase dite et la comparer au paquet). Couples A à D.
+Durée estimée : 20 min par couple et par langue.
+
+125. **Étendre au clavier.** Sur une cellule « Qté », `Maj+↓` deux fois puis `Maj+→` : chaque cellule
+     atteinte est lue (le focus suit le coin qui bouge, QB2), dite **sélectionnée** ; après une courte pause,
+     **une fois** fr « 3 lignes, 2 colonnes sélectionnées », ar « 3 صفوف، عمودان محددان » (ou proche).
+     Aucune phrase pendant que les touches se suivent.
+126. **La ligne entière.** `Maj+Espace` : la ligne entière est sélectionnée, sa taille dite une fois.
+127. **Tout.** `Ctrl+A` (Mac `Cmd+A`) : toutes les cellules affichées, la taille dite ; aucune ligne n'est
+     cochée (QB1 : les lignes se cochent par leur case).
+128. **Effacer le bloc.** `Échap` : fr « Sélection effacée », ar « أُلغي التحديد » (ou proche), une fois ; le
+     focus reste sur la cellule. Une flèche sans `Maj` fait de même sans phrase de plus.
+129. **Copier.** Un bloc de 3 × 2, `Ctrl+C` : fr « 6 cellules copiées », ar « نُسخت 6 خلايا » ; coller dans le
+     tableur : six cellules, les nombres reconnus comme nombres (virgule décimale en français), les dates
+     comme dates. Dans un champ ouvert, `Ctrl+C` copie le texte du champ, la grille ne dit rien.
+130. **Coller, avec un refus.** Copier dans le tableur trois cellules dont une « abc » vers « Qté » ;
+     `Ctrl+V` sur la grille : une phrase **une seule fois**, fr « 3 cellules collées ; 1 refusée », ar
+     équivalente ; la cellule refusée **clignote** (vue) ; « Enregistrement en cours » une fois, pas une par
+     cellule. Coller hors de la grille (sur la dernière ligne un bloc de 3 lignes) : « … ; 2 hors de la
+     grille ».
+131. **Annuler un collage.** `Ctrl+Z` : fr « Annulé : 3 cellules » (ou la phrase du paquet `-edit` pour
+     plusieurs cellules), une fois ; toutes les cellules collées reprennent leur valeur ; le focus va sur la
+     première.
+132. **Recopier vers le bas.** Un bloc de 3 lignes sur « Qté », `Ctrl+D` (Mac `Cmd+D`) : la première valeur
+     recopiée dans les deux autres, une phrase une fois ; le navigateur n'ouvre pas son dialogue de favori.
+133. **Supprimer un bloc.** `Suppr` sur un bloc dont une colonne est en lecture seule : les cellules
+     modifiables vidées, une phrase avec le compte « en lecture seule » ; un `Ctrl+Z` rend tout.
+134. **En arabe.** Mêmes étapes de droite à gauche : `Maj+←` étend vers la **fin** logique (la gauche à
+     l'écran), `Ctrl+R` recopie vers la gauche ; la poignée de recopie est en bas à gauche (vue) ; la copie
+     collée dans le tableur garde l'ordre logique (la première colonne de la grille en colonne A).
+135. **Grille imbriquée.** `detail.html` : un bloc dans les visites d'un patient, `Ctrl+C` : seules les
+     cellules du panneau sont copiées (la grille extérieure ne dit rien) ; `Échap` efface le bloc du panneau
+     seulement.
+136. **Bruit « non sélectionné ».** Avec un bloc présent, se déplacer hors du bloc avec les flèches : le
+     lecteur ne doit **pas** dire « non sélectionné » sur chaque cellule (les cellules hors du bloc n'ont pas
+     `aria-selected`, choix de la fiche `range-selection.md` 12). Dans le bloc : « sélectionné » dit. Noter,
+     par lecteur (NVDA, JAWS, VoiceOver, TalkBack), ce qui est dit dans et hors du bloc.
+
+Consigner le résultat dans `docs/behaviors/range-selection.md` (fin de la fiche) et dans `ROADMAP.md`
+(clôture de la partie B). Règle de décision propre à cette section : une phrase de compte manquante ou dite
+deux fois (125, 129–133), une phrase par cellule au lieu d'une par geste (130, 131), un focus perdu (128,
+131), une touche d'un champ qui agit sur la grille (129) se corrige avant la clôture de la partie B ; le
+« non sélectionné » d'un lecteur (136) est noté : s'il manque « sélectionné » dans le bloc chez un lecteur,
+question au propriétaire (mettre `aria-selected="false"` partout, ou garder le choix).

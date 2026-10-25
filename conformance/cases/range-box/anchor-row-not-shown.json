@@ -1,0 +1,44 @@
+{
+  "id": "anchor-row-not-shown",
+  "suite": "range-box",
+  "description": "The anchor's row not shown drops the block.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "range": {
+      "anchor": [
+        "zz",
+        "a"
+      ],
+      "focus": [
+        "r2",
+        "c"
+      ]
+    }
+  },
+  "expected": {
+    "box": null,
+    "rows": [],
+    "columns": [],
+    "size": null
+  }
+}

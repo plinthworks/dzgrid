@@ -1,0 +1,83 @@
+{
+  "id": "ragged-rows",
+  "suite": "paste-plan",
+  "description": "A short row's missing cells are written empty.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1",
+        "2"
+      ],
+      [
+        "3"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 0,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r1",
+        "b",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r2",
+        "a",
+        {
+          "text": "3"
+        }
+      ],
+      [
+        "r2",
+        "b",
+        {
+          "text": ""
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 1,
+      "start": 0,
+      "end": 1
+    }
+  }
+}

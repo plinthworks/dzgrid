@@ -1,0 +1,18 @@
+{
+  "id": "encode-quotes",
+  "suite": "clipboard-tsv",
+  "description": "A cell is quoted when it holds TAB, LF, CR or a quote; inner quotes doubled.",
+  "input": {
+    "encode": [
+      [
+        "a\tb",
+        "l1\nl2",
+        "5\" inch",
+        "x\ry"
+      ]
+    ]
+  },
+  "expected": {
+    "text": "\"a\tb\"\t\"l1\nl2\"\t\"5\"\" inch\"\t\"x\ry\"\r\n"
+  }
+}

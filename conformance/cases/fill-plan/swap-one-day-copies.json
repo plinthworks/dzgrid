@@ -1,0 +1,93 @@
+{
+  "id": "swap-one-day-copies",
+  "suite": "fill-plan",
+  "description": "Ctrl at the drop on one day: copied.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t"
+      },
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "En stock"
+          },
+          {
+            "value": "out",
+            "label": "Rupture"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "type": "boolean"
+      },
+      {
+        "id": "i",
+        "type": "instant"
+      }
+    ],
+    "rows": {
+      "r1": {
+        "d": "2026-03-05"
+      }
+    },
+    "src": {
+      "top": 0,
+      "bottom": 0,
+      "start": 1,
+      "end": 1
+    },
+    "to": {
+      "row": 2,
+      "col": 1
+    },
+    "swap": true
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 1,
+        "bottom": 2,
+        "start": 1,
+        "end": 1
+      },
+      "way": "down"
+    },
+    "cells": [
+      [
+        "r2",
+        "d",
+        {
+          "value": "2026-03-05"
+        }
+      ],
+      [
+        "r3",
+        "d",
+        {
+          "value": "2026-03-05"
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "id": "target-inside",
+  "suite": "fill-plan",
+  "description": "Back inside the source: nothing to fill.",
+  "input": {
+    "src": {
+      "top": 1,
+      "bottom": 2,
+      "start": 1,
+      "end": 2
+    },
+    "to": {
+      "row": 2,
+      "col": 1
+    },
+    "only": "target",
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "x",
+        "type": "number"
+      },
+      {
+        "id": "y",
+        "type": "number"
+      },
+      {
+        "id": "z",
+        "type": "number"
+      },
+      {
+        "id": "w",
+        "type": "number"
+      }
+    ]
+  },
+  "expected": {
+    "target": null
+  }
+}

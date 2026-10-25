@@ -1,0 +1,57 @@
+{
+  "id": "muted-ancestor-counted",
+  "suite": "range-box",
+  "description": "A filtered tree's muted ancestor is a data row shown: it counts.",
+  "input": {
+    "shown": [
+      "(p)",
+      "c1",
+      "c2"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "range": {
+      "anchor": [
+        "p",
+        "a"
+      ],
+      "focus": [
+        "c2",
+        "a"
+      ]
+    }
+  },
+  "expected": {
+    "box": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 0
+    },
+    "rows": [
+      "p",
+      "c1",
+      "c2"
+    ],
+    "columns": [
+      "a"
+    ],
+    "size": {
+      "rows": 3,
+      "cols": 1,
+      "cells": 3
+    }
+  }
+}

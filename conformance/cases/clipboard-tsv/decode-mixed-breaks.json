@@ -1,0 +1,24 @@
+{
+  "id": "decode-mixed-breaks",
+  "suite": "clipboard-tsv",
+  "description": "CR, LF and CRLF each end a row.",
+  "input": {
+    "decode": "a\rb\nc\r\nd"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a"
+      ],
+      [
+        "b"
+      ],
+      [
+        "c"
+      ],
+      [
+        "d"
+      ]
+    ]
+  }
+}

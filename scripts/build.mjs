@@ -26,7 +26,7 @@ const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'in
  * dist/ once built: a subpath is added here on purpose, never by accident.
  */
 const PACKAGES = {
-  core: ['.', './internal', './server', './spans', './csv', './rules', './tree', './tree-lazy', './detail', './edit'],
+  core: ['.', './internal', './server', './spans', './csv', './rules', './tree', './tree-lazy', './detail', './edit', './range'],
   dom: ['.', './internal', './popup', './spans', './slots', './search', './pagination', './export', './parts', './rules', './tree', './tree-lazy', './detail', './edit', './editors', './editors-list', './motion-gsap', './filters', './locales/en', './locales/fr', './locales/ar', './locales/en-filters', './locales/fr-filters', './locales/ar-filters', './locales/en-pagination', './locales/fr-pagination', './locales/ar-pagination', './locales/en-export', './locales/fr-export', './locales/ar-export', './locales/en-parts', './locales/fr-parts', './locales/ar-parts', './locales/en-rules', './locales/fr-rules', './locales/ar-rules', './locales/en-tree', './locales/fr-tree', './locales/ar-tree', './locales/en-detail', './locales/fr-detail', './locales/ar-detail', './locales/en-edit', './locales/fr-edit', './locales/ar-edit', './locales/en-editors', './locales/fr-editors', './locales/ar-editors'],
 };
 /** Built after the TypeScript packages, against their dist/ declarations. */

@@ -1,5 +1,6 @@
 import { describe, it, expectTypeOf } from 'vitest';
-import type { DisplayIndex, RowKey, Day, InstantMs, DisplayedRows, ColumnDef, EditableRule, EditChecks, FilterKind, GridEvent, LocaleCtx, Json, SaveOrigin } from '@dzgrid/core';
+import type { DisplayIndex, RowKey, Day, InstantMs, DisplayedRows, ColumnDef, EditableRule, EditChecks, FilterKind, GridEvent, LocaleCtx, Json, SaveOrigin, CellAddr, CellRange } from '@dzgrid/core';
+import type { PlannedCell, RangeBox } from '@dzgrid/core/range';
 import type { CellInput, SaveRequest } from '@dzgrid/core/edit';
 
 /**
@@ -96,12 +97,35 @@ describe('the edit controller (Phase 5 step 3)', () => {
   });
 
   it('the edit events and the save request carry their origin', () => {
-    expectTypeOf<SaveOrigin>().toEqualTypeOf<'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk'>();
+    expectTypeOf<SaveOrigin>().toEqualTypeOf<'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk' | 'cut'>(); // Part B step 10: `cut`
     expectTypeOf<Extract<GridEvent<Row>, { type: 'cellEdited' }>['origin']>().toEqualTypeOf<SaveOrigin>();
     expectTypeOf<Extract<GridEvent<Row>, { type: 'saveFailed' }>['source']>().toEqualTypeOf<'data'>();
     expectTypeOf<Extract<GridEvent<Row>, { type: 'saveFailed' }>['reason']>().toEqualTypeOf<string | null>();
     expectTypeOf<Extract<GridEvent<Row>, { type: 'undoChanged' }>['canUndo']>().toEqualTypeOf<boolean>();
     expectTypeOf<Extract<GridEvent<Row>, { type: 'editStates' }>['cells']>().toEqualTypeOf<readonly { readonly key: RowKey; readonly column: string }[]>();
     expectTypeOf<SaveRequest<Row>['changes'][number]['row']>().toEqualTypeOf<Readonly<Row>>();
+  });
+});
+
+describe('blocks of cells (Phase 5 step 10, range-selection.md 1)', () => {
+  type Row = { id: string };
+  it('a block is two corners by row key and column id, never positions', () => {
+    expectTypeOf<CellAddr>().toEqualTypeOf<{ readonly row: RowKey; readonly column: string }>();
+    expectTypeOf<CellRange>().toEqualTypeOf<{ readonly anchor: CellAddr; readonly focus: CellAddr }>();
+    // @ts-expect-error — a display position is not a corner
+    const bad: CellAddr = { row: 3, column: 'a' };
+    void bad;
+  });
+
+  it('the block events carry the corners, and counts only for a copy (never values)', () => {
+    expectTypeOf<Extract<GridEvent<Row>, { type: 'rangeChanged' }>['range']>().toEqualTypeOf<CellRange | null>();
+    type Copied = Extract<GridEvent<Row>, { type: 'rangeCopied' }>;
+    expectTypeOf<Omit<Copied, 'source'>>().toEqualTypeOf<{ readonly type: 'rangeCopied'; readonly rows: number; readonly columns: number; readonly cells: number; readonly cut: boolean }>();
+  });
+
+  it('a planned cell carries an input for the editing commit; a box holds numbers of one version', () => {
+    expectTypeOf<PlannedCell['input']>().toEqualTypeOf<CellInput>();
+    expectTypeOf<PlannedCell['key']>().toEqualTypeOf<RowKey>();
+    expectTypeOf<RangeBox>().toEqualTypeOf<{ readonly top: number; readonly bottom: number; readonly start: number; readonly end: number }>();
   });
 });

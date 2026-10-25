@@ -133,4 +133,31 @@ describe('layering of the base and the server entry', () => {
     expect(entry).toMatchObject({ file: 'packages/core/src/edit.ts', maxGzip: 3100, over: '@dzgrid/core' });
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
   });
+
+  it('no other entry holds a range module (Phase 5 step 10)', async () => {
+    const isRange = (f: string) => /(^|\/)src\/range(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts', 'edit.ts']) expect((await inputsOf(entry)).filter(isRange), entry).toEqual([]);
+  });
+
+  it('the range entry holds its modules and the shared CSV writer, never an edit module at run time, nor server, span, tree or detail modules or the model (Phase 5 step 10)', async () => {
+    const inputs = await inputsOf('range.ts');
+    for (const f of ['src/range/box.ts', 'src/range/tsv.ts', 'src/range/copy.ts', 'src/range/paste.ts', 'src/range/fill.ts', 'src/csv/writers.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    // `CellInput` is a type: erased, so no edit module is bundled (the commit parses and checks, one place).
+    expect(inputs.filter((f) => /(^|\/)src\/edit(\.ts$|\/)/.test(f))).toEqual([]);
+    expect(inputs.filter((f) => isServer(f) || isSpans(f) || /(^|\/)src\/(tree|detail)(\.ts$|-lazy\.ts$|\/)/.test(f))).toEqual([]);
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts') || f.endsWith('src/csv/chunks.ts'))).toBe(false);
+  });
+
+  it('the range entry fits its grant over the base (owner Q16 4 000 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
+    const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
+    const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
+    const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './range.ts';", resolveDir: SRC, loader: 'ts' } });
+    const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
+    const entry = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core/range'];
+    expect(entry).toMatchObject({ file: 'packages/core/src/range.ts', maxGzip: 4000, over: '@dzgrid/core' });
+    expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
+    // The step's planned share (step10-plan « Sizes »): 2 200–3 000; more is a question, not a failure here.
+    expect(both - alone).toBeGreaterThan(500);
+    expect(alone).toBeLessThanOrEqual(28916);
+  });
 });

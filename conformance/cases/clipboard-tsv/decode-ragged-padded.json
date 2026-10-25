@@ -1,0 +1,23 @@
+{
+  "id": "decode-ragged-padded",
+  "suite": "clipboard-tsv",
+  "description": "Ragged rows evened with empty cells when asked.",
+  "input": {
+    "decode": "a\tb\tc\r\nd\r\n",
+    "pad": true
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "b",
+        "c"
+      ],
+      [
+        "d",
+        "",
+        ""
+      ]
+    ]
+  }
+}

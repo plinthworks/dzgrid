@@ -12,6 +12,7 @@ import type { ChangeSource } from './model/types.js';
 import { problem, type Problem } from './problems.js';
 import type { DisplayedRows } from './row/displayed.js';
 import type { RowNode } from './row/node.js';
+import type { CellRange } from './selection/cells.js';
 import {
   clearSelection, isSelected, NO_SELECTION, reconcileSelection, selectionCount, selectOnly, selectRange, toggle, type SelectionState,
 } from './selection/rows.js';
@@ -129,6 +130,10 @@ export type GridEvent<T> =
   | { readonly type: 'editingStarted'; readonly source: 'user'; readonly key: RowKey; readonly column: string; readonly start: 'f2' | 'enter' | 'key' | 'dblclick' | 'tap' | 'tab' }
   /** The field closed: `kept` its text kept (saved or unchanged), and how (`lost`: the cell left the page). */
   | { readonly type: 'editingStopped'; readonly source: 'user'; readonly key: RowKey; readonly column: string; readonly kept: boolean; readonly via: 'enter' | 'tab' | 'escape' | 'blur' | 'lost' }
+  /** `@dzgrid/dom/range` (Phase 5 Part B; the core never sends these): the block of cells changed, or was dropped (null). */
+  | { readonly type: 'rangeChanged'; readonly source: ChangeSource; readonly range: CellRange | null }
+  /** A block copied (or cut): counts only, never values (clipboard.md 9; rows may be health records). */
+  | { readonly type: 'rangeCopied'; readonly source: ChangeSource; readonly rows: number; readonly columns: number; readonly cells: number; readonly cut: boolean }
   /** Undo or redo became possible or impossible: on each flip only (edit-undo.md 12). */
   | { readonly type: 'undoChanged'; readonly source: ChangeSource; readonly canUndo: boolean; readonly canRedo: boolean }
   /**
@@ -180,7 +185,7 @@ export interface ExportServerPart {
 export type SelectionReason = 'scope-changed' | 'rows-dropped';
 
 /** What made an edit (Phase 5): typed or picked, an undo, a redo; Part B's paste, fill and bulk edit. */
-export type SaveOrigin = 'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk';
+export type SaveOrigin = 'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk' | 'cut';
 
 /**
  * What a selection rule refused (step 21): `rows` in the order asked; `reason`, the rule's first

@@ -1,0 +1,61 @@
+{
+  "id": "across-detail-filler-loading",
+  "suite": "range-box",
+  "description": "A box across a detail, a filler and a loading row: those rows count for nothing.",
+  "input": {
+    "shown": [
+      "r1",
+      "> r1",
+      "r2",
+      "~r2",
+      "/g",
+      "r3"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "range": {
+      "anchor": [
+        "r1",
+        "a"
+      ],
+      "focus": [
+        "r3",
+        "b"
+      ]
+    }
+  },
+  "expected": {
+    "box": {
+      "top": 0,
+      "bottom": 5,
+      "start": 0,
+      "end": 1
+    },
+    "rows": [
+      "r1",
+      "r2",
+      "r3"
+    ],
+    "columns": [
+      "a",
+      "b"
+    ],
+    "size": {
+      "rows": 3,
+      "cols": 2,
+      "cells": 6
+    }
+  }
+}

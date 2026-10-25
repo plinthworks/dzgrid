@@ -1,0 +1,16 @@
+{
+  "id": "decode-arabic-rlm",
+  "suite": "clipboard-tsv",
+  "description": "Arabic text, Arabic-Indic digits and the RLM mark untouched.",
+  "input": {
+    "decode": "\u200fمحمد\t١٢٣\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "\u200fمحمد",
+        "١٢٣"
+      ]
+    ]
+  }
+}

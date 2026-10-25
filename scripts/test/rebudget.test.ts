@@ -192,6 +192,17 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(e['@dzgrid/angular']?.maxGzip).toBe(6793);
   });
 
+  it('Phase 5 step 10 (owner Q16, Part B): @dzgrid/core/range a new entry, ceiling 4 000 over the core; core 29 000 and core/edit 3 100 (frozen) untouched', () => {
+    expect(ceilingFor('@dzgrid/core/range')).toBe(4000);
+    expect(() => sizeBudget(4001, ceilingFor('@dzgrid/core/range'))).toThrow(/ceiling/);
+    expect(ceilingFor('@dzgrid/core')).toBe(29000);
+    expect(ceilingFor('@dzgrid/core/edit')).toBe(3100);
+    type Entry = { file?: string; maxGzip: number | null; over?: string };
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
+    expect(e['@dzgrid/core/range']).toEqual({ file: 'packages/core/src/range.ts', maxGzip: 4000, over: '@dzgrid/core' });
+    expect(['@dzgrid/core', '@dzgrid/core/edit'].map((n) => e[n]?.maxGzip)).toEqual([29000, 3100]);
+  });
+
   it('the showcase themes\' grants (owner T7, 2026-10-23): each theme 650, the theme base up to 3 050, the DOM base 21 980', () => {
     expect(ceilingFor('@dzgrid/theme/midnight.css')).toBe(650);
     expect(ceilingFor('@dzgrid/theme/clinic.css')).toBe(650);

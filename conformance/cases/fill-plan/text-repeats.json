@@ -1,0 +1,102 @@
+{
+  "id": "text-repeats",
+  "suite": "fill-plan",
+  "description": "Text a, b repeats.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t"
+      },
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "En stock"
+          },
+          {
+            "value": "out",
+            "label": "Rupture"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "type": "boolean"
+      },
+      {
+        "id": "i",
+        "type": "instant"
+      }
+    ],
+    "rows": {
+      "r1": {
+        "t": "a"
+      },
+      "r2": {
+        "t": "b"
+      }
+    },
+    "src": {
+      "top": 0,
+      "bottom": 1,
+      "start": 2,
+      "end": 2
+    },
+    "to": {
+      "row": 4,
+      "col": 2
+    }
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 2,
+        "bottom": 4,
+        "start": 2,
+        "end": 2
+      },
+      "way": "down"
+    },
+    "cells": [
+      [
+        "r3",
+        "t",
+        {
+          "value": "a"
+        }
+      ],
+      [
+        "r4",
+        "t",
+        {
+          "value": "b"
+        }
+      ],
+      [
+        "r5",
+        "t",
+        {
+          "value": "a"
+        }
+      ]
+    ]
+  }
+}

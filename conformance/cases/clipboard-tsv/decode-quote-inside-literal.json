@@ -1,0 +1,16 @@
+{
+  "id": "decode-quote-inside-literal",
+  "suite": "clipboard-tsv",
+  "description": "A quote not at the start is literal.",
+  "input": {
+    "decode": "5\" inch\tx\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "5\" inch",
+        "x"
+      ]
+    ]
+  }
+}

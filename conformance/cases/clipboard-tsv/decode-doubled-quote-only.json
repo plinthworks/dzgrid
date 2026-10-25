@@ -1,0 +1,15 @@
+{
+  "id": "decode-doubled-quote-only",
+  "suite": "clipboard-tsv",
+  "description": "\"a\"\"b\" is a\"b.",
+  "input": {
+    "decode": "\"a\"\"b\""
+  },
+  "expected": {
+    "rows": [
+      [
+        "a\"b"
+      ]
+    ]
+  }
+}

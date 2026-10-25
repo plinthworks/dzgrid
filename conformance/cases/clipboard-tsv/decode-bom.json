@@ -1,0 +1,16 @@
+{
+  "id": "decode-bom",
+  "suite": "clipboard-tsv",
+  "description": "A leading byte order mark is dropped.",
+  "input": {
+    "decode": "\ufeffa\tb\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "b"
+      ]
+    ]
+  }
+}

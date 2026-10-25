@@ -1,0 +1,18 @@
+{
+  "id": "decode-empty-last-row",
+  "suite": "clipboard-tsv",
+  "description": "Two final breaks: one dropped, the other keeps an empty last row.",
+  "input": {
+    "decode": "a\r\n\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a"
+      ],
+      [
+        ""
+      ]
+    ]
+  }
+}

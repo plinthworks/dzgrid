@@ -1,0 +1,22 @@
+{
+  "id": "decode-empty-trailing-cells",
+  "suite": "clipboard-tsv",
+  "description": "Empty trailing cells are kept.",
+  "input": {
+    "decode": "a\t\t\r\nb\t\t\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "",
+        ""
+      ],
+      [
+        "b",
+        "",
+        ""
+      ]
+    ]
+  }
+}

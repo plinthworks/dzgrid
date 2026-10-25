@@ -1,0 +1,16 @@
+{
+  "id": "decode-empty-quoted",
+  "suite": "clipboard-tsv",
+  "description": "An empty quoted cell.",
+  "input": {
+    "decode": "\"\"\tx"
+  },
+  "expected": {
+    "rows": [
+      [
+        "",
+        "x"
+      ]
+    ]
+  }
+}

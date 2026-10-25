@@ -93,9 +93,11 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
     changes its other cells, never the one being edited.
 
 **Inside the field** (the field is marked `data-dzg-owner="editor"`)
-19. Arrows, Home, End, Ctrl/Cmd+A, Ctrl/Cmd+Z, Ctrl/Cmd+V, Ctrl/Cmd+C, Ctrl/Cmd+X, Space and every
-    printable key belong to the field: the grid never acts on them (no move, no undo, no paste, no
-    selection).
+19. Arrows, Home, End, Ctrl/Cmd+A, Ctrl/Cmd+Z, Ctrl/Cmd+V, Ctrl/Cmd+C, Ctrl/Cmd+X, Ctrl/Cmd+D,
+    Ctrl/Cmd+R, Space and every printable key belong to the field: the grid never acts on them (no move,
+    no undo, no paste, no block, no fill). One exception (Part B, owner QB5): **Ctrl/Cmd+Enter** in the field
+    of a cell inside a block keeps the value in every editable cell of the block (bulk edit, `fill.md` 9);
+    without a block it keeps it in the one cell, as Enter.
 20. Enter and Escape during a composition belong to the input method.
 21. **Tree column**: the field fills the content box after the indent and the chevron; Left and Right move
     the caret, never open or close the row (the tree's keys ignore the `editor` owner).
@@ -108,8 +110,9 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
 
 **Events**
 24. `cellEdited { key, column, value, previous, origin }` after each kept value (one per cell), origin
-    `edit` (typed, toggled, picked or cleared by Delete) | `undo` | `redo` (Part B: `paste`, `fill`,
-    `bulk`). No event for Escape.
+    `edit` (typed, toggled, picked, or cleared by Delete on a cell or a block) | `undo` | `redo` | `paste`
+    | `fill` | `bulk` | `cut` (Part B: `clipboard.md`, `fill.md`; `cut` is new, a type only). No event for
+    Escape.
 25. `editingStarted { key, column, start }` (`f2`, `enter`, `key`, `dblclick`, `tap`, `tab`) and
     `editingStopped { key, column, kept: boolean, via }` (`enter`, `tab`, `escape`, `blur`, `lost`), once each
     per field, sent by `@dzgrid/dom/editors`.

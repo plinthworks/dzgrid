@@ -1,0 +1,16 @@
+{
+  "id": "decode-no-final-break",
+  "suite": "clipboard-tsv",
+  "description": "Typed text without a final line break.",
+  "input": {
+    "decode": "a\tb"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "b"
+      ]
+    ]
+  }
+}

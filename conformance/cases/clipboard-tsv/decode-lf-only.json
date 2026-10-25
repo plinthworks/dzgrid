@@ -1,0 +1,20 @@
+{
+  "id": "decode-lf-only",
+  "suite": "clipboard-tsv",
+  "description": "LF only (Mac applications, Google Sheets).",
+  "input": {
+    "decode": "a\tb\nc\td\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "b"
+      ],
+      [
+        "c",
+        "d"
+      ]
+    ]
+  }
+}

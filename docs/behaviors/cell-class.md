@@ -35,3 +35,8 @@ contract (space-separated names, diffed, `dzg-` tokens ignored, a throw reported
 
 ## Phase 5 step 4
 The `dzg-cell--*` classes (`pending`, `saving`, `still`, `saved`, `refused`, `blink-a`, `blink-b`, `failed`) belong to `@dzgrid/dom/edit`; a `cellClass` rule never sets them (the `dzg-` prefix is ignored, as before).
+
+## Phase 5 Part B
+`dzg-cell--range` (the block's tint) and the edge classes `dzg-cell--rs`, `--re`, `--rt`, `--rb` (logical
+start, end, top, bottom) belong to `@dzgrid/dom/range` (`range-selection.md` 11), written at each paint on
+the mounted cells; a `cellClass` rule never sets them.

@@ -1,0 +1,75 @@
+{
+  "id": "one-number-start",
+  "suite": "fill-plan",
+  "description": "One number toward the start is copied.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "x",
+        "type": "number"
+      },
+      {
+        "id": "y",
+        "type": "number"
+      },
+      {
+        "id": "z",
+        "type": "number"
+      },
+      {
+        "id": "w",
+        "type": "number"
+      }
+    ],
+    "rows": {
+      "r1": {
+        "w": 7
+      }
+    },
+    "src": {
+      "top": 0,
+      "bottom": 0,
+      "start": 3,
+      "end": 3
+    },
+    "to": {
+      "row": 0,
+      "col": 1
+    }
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 0,
+        "bottom": 0,
+        "start": 1,
+        "end": 2
+      },
+      "way": "start"
+    },
+    "cells": [
+      [
+        "r1",
+        "y",
+        {
+          "value": 7
+        }
+      ],
+      [
+        "r1",
+        "z",
+        {
+          "value": 7
+        }
+      ]
+    ]
+  }
+}

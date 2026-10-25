@@ -1,0 +1,57 @@
+{
+  "id": "one-cell",
+  "suite": "range-box",
+  "description": "Both corners on one cell: a box of one cell (the DOM paints a block from two cells).",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "range": {
+      "anchor": [
+        "r2",
+        "b"
+      ],
+      "focus": [
+        "r2",
+        "b"
+      ]
+    }
+  },
+  "expected": {
+    "box": {
+      "top": 1,
+      "bottom": 1,
+      "start": 1,
+      "end": 1
+    },
+    "rows": [
+      "r2"
+    ],
+    "columns": [
+      "b"
+    ],
+    "size": {
+      "rows": 1,
+      "cols": 1,
+      "cells": 1
+    }
+  }
+}

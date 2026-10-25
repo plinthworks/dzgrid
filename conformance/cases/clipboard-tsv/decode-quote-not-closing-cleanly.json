@@ -1,0 +1,16 @@
+{
+  "id": "decode-quote-not-closing-cleanly",
+  "suite": "clipboard-tsv",
+  "description": "A quote at the start whose closing quote is followed by text: literal.",
+  "input": {
+    "decode": "\"5\" inch\tx\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "\"5\" inch",
+        "x"
+      ]
+    ]
+  }
+}

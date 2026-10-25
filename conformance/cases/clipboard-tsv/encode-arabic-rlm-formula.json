@@ -1,0 +1,17 @@
+{
+  "id": "encode-arabic-rlm-formula",
+  "suite": "clipboard-tsv",
+  "description": "Arabic with RLM, a formula start and spaces stay unquoted, untouched.",
+  "input": {
+    "encode": [
+      [
+        "\u200fمحمد",
+        "=1+1",
+        " x "
+      ]
+    ]
+  },
+  "expected": {
+    "text": "\u200fمحمد\t=1+1\t x \r\n"
+  }
+}

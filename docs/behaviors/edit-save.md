@@ -22,8 +22,9 @@ cannot be reached; sometimes the row is reloaded or removed while they type.
 
 **The save handler**
 1. `edit({ save })` with `save(req, signal) => Promise<void> | void`; `req.changes` = `[{ key, column,
-   value, previous, origin }]`. One gesture = one request (a commit, a clear, an undo; Part B: one paste,
-   one fill, one bulk edit).
+   value, previous, origin }]`. One gesture = one request (a commit, a clear, an undo; Part B, now built
+   on the same `commit`: one paste, one cut, one fill, one bulk edit, one Delete on a block —
+   `clipboard.md` 18, 23, 24, `fill.md` 7, 9).
 2. Without `save`, a kept value is **saved locally** at once (state `saved`, no border, the flash): the
    host gets `cellEdited` and applies it to its rows if it wants.
 3. The source rows are never written by DzGrid: the value lives in the overlay until the source shows it

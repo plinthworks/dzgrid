@@ -52,6 +52,11 @@ describe('0.2.0, the four packages', () => {
     expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/editors-list'/);
   });
 
+  it('export the Phase 5 step 10 subpath @dzgrid/core/range, built like the others', () => {
+    expect(pkg('core').exports['./range']).toEqual({ types: './src/range.ts', default: './src/range.ts' });
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/edit', '\.\/range'\]/);
+  });
+
   it('keep gsap and tzslot optional peers', () => {
     const dom = pkg('dom');
     expect(dom.peerDependenciesMeta).toEqual({ '@tzslot/core': { optional: true }, '@tzslot/dom': { optional: true }, gsap: { optional: true } });

@@ -45,6 +45,11 @@
       "maxGzip": 3100,
       "over": "@dzgrid/core"
     },
+    "@dzgrid/core/range": {
+      "file": "packages/core/src/range.ts",
+      "maxGzip": 4000,
+      "over": "@dzgrid/core"
+    },
     "@dzgrid/dom/locales/en": {
       "file": "packages/dom/src/locales/en.ts",
       "maxGzip": 600

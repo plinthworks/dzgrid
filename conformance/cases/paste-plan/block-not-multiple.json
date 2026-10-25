@@ -1,0 +1,84 @@
+{
+  "id": "block-not-multiple",
+  "suite": "paste-plan",
+  "description": "A 2 x 2 block on a 3 x 3 block is written once from the top-left.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1",
+        "2"
+      ],
+      [
+        "3",
+        "4"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 2
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r1",
+        "b",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r2",
+        "a",
+        {
+          "text": "3"
+        }
+      ],
+      [
+        "r2",
+        "b",
+        {
+          "text": "4"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 1,
+      "start": 0,
+      "end": 1
+    }
+  }
+}

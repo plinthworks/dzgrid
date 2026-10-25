@@ -1,0 +1,15 @@
+{
+  "id": "decode-empty-text",
+  "suite": "clipboard-tsv",
+  "description": "The empty text is one empty cell (the paste plan writes nothing for it).",
+  "input": {
+    "decode": ""
+  },
+  "expected": {
+    "rows": [
+      [
+        ""
+      ]
+    ]
+  }
+}

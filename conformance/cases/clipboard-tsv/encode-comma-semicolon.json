@@ -1,0 +1,16 @@
+{
+  "id": "encode-comma-semicolon",
+  "suite": "clipboard-tsv",
+  "description": "A comma or a semicolon is not quoted (the separator is TAB).",
+  "input": {
+    "encode": [
+      [
+        "a,b",
+        "c;d"
+      ]
+    ]
+  },
+  "expected": {
+    "text": "a,b\tc;d\r\n"
+  }
+}

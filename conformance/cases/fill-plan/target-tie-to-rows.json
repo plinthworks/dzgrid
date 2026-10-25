@@ -1,0 +1,55 @@
+{
+  "id": "target-tie-to-rows",
+  "suite": "fill-plan",
+  "description": "As far out on both: rows win.",
+  "input": {
+    "src": {
+      "top": 1,
+      "bottom": 2,
+      "start": 1,
+      "end": 2
+    },
+    "to": {
+      "row": 4,
+      "col": 4
+    },
+    "only": "target",
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "x",
+        "type": "number"
+      },
+      {
+        "id": "y",
+        "type": "number"
+      },
+      {
+        "id": "z",
+        "type": "number"
+      },
+      {
+        "id": "w",
+        "type": "number"
+      }
+    ]
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 3,
+        "bottom": 4,
+        "start": 1,
+        "end": 2
+      },
+      "way": "down"
+    }
+  }
+}

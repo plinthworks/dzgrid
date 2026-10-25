@@ -13,8 +13,9 @@ The last change goes back, cell by cell gesture by gesture, and is saved again; 
 cell that changed back.
 
 ## Behaviours
-1. The stack holds the last **100 gestures** per grid (one commit, one clear; Part B: one paste, fill or
-   bulk edit = one gesture, all its cells). The 101st drops the oldest.
+1. The stack holds the last **100 gestures** per grid (one commit, one clear; Part B: one paste, cut,
+   fill, bulk edit or Delete on a block = one gesture, all its cells; origins `paste`, `cut`, `fill`,
+   `bulk`, `edit`). One Ctrl+Z after a paste gives every pasted cell back, one sentence. The 101st drops the oldest.
 2. **Ctrl/Cmd+Z** on the grid (focus on a cell, a header or the grid, never in a field) undoes the last
    gesture: each of its cells gets back the value it had before, as **one new gesture** with origin
    `undo`, saved like any edit (one request, the running border, the flash, the refusal) — Q11.

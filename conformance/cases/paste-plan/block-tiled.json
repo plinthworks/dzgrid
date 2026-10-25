@@ -1,0 +1,168 @@
+{
+  "id": "block-tiled",
+  "suite": "paste-plan",
+  "description": "A 2 x 2 block on a 4 x 4 block repeats (a whole multiple both ways).",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1",
+        "2"
+      ],
+      [
+        "3",
+        "4"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 3,
+      "start": 0,
+      "end": 3
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r1",
+        "b",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r1",
+        "c",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r1",
+        "d",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r2",
+        "a",
+        {
+          "text": "3"
+        }
+      ],
+      [
+        "r2",
+        "b",
+        {
+          "text": "4"
+        }
+      ],
+      [
+        "r2",
+        "c",
+        {
+          "text": "3"
+        }
+      ],
+      [
+        "r2",
+        "d",
+        {
+          "text": "4"
+        }
+      ],
+      [
+        "r3",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r3",
+        "b",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r3",
+        "c",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r3",
+        "d",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r4",
+        "a",
+        {
+          "text": "3"
+        }
+      ],
+      [
+        "r4",
+        "b",
+        {
+          "text": "4"
+        }
+      ],
+      [
+        "r4",
+        "c",
+        {
+          "text": "3"
+        }
+      ],
+      [
+        "r4",
+        "d",
+        {
+          "text": "4"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 3,
+      "start": 0,
+      "end": 3
+    }
+  }
+}

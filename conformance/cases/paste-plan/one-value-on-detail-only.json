@@ -1,0 +1,56 @@
+{
+  "id": "one-value-on-detail-only",
+  "suite": "paste-plan",
+  "description": "One value on a block holding only a detail: written once, on the next data row.",
+  "input": {
+    "shown": [
+      "r1",
+      "> r1",
+      "r2"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "x"
+      ]
+    ],
+    "at": {
+      "top": 1,
+      "bottom": 1,
+      "start": 0,
+      "end": 1
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r2",
+        "a",
+        {
+          "text": "x"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 2,
+      "bottom": 2,
+      "start": 0,
+      "end": 0
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "encode-last-empty-row",
+  "suite": "clipboard-tsv",
+  "description": "A last row of one empty cell survives.",
+  "input": {
+    "encode": [
+      [
+        "a"
+      ],
+      [
+        ""
+      ]
+    ]
+  },
+  "expected": {
+    "text": "a\r\n\r\n"
+  }
+}

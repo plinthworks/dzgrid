@@ -1,0 +1,50 @@
+{
+  "id": "anchor-column-hidden",
+  "suite": "range-box",
+  "description": "The anchor's column hidden drops the block.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "state": [
+      {
+        "id": "a",
+        "hidden": true
+      }
+    ],
+    "range": {
+      "anchor": [
+        "r1",
+        "a"
+      ],
+      "focus": [
+        "r2",
+        "c"
+      ]
+    }
+  },
+  "expected": {
+    "box": null,
+    "rows": [],
+    "columns": [],
+    "size": null
+  }
+}

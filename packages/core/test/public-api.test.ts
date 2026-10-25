@@ -8,6 +8,7 @@ import * as rules from '@dzgrid/core/rules';
 import * as tree from '@dzgrid/core/tree';
 import * as detail from '@dzgrid/core/detail';
 import * as edit from '@dzgrid/core/edit';
+import * as range from '@dzgrid/core/range';
 
 /**
  * The public surface, written out by hand: adding an export is a decision,
@@ -54,7 +55,15 @@ const DETAIL = ['detailConflicts', 'detailShape', 'sparseRowLayout'];
 /** `@dzgrid/core/edit` (Phase 5 step 3): the edit controller and its pure checks, never in the base. */
 const EDIT = ['checkValue', 'createEdits', 'parseInput'];
 
+/** `@dzgrid/core/range` (Phase 5 step 10): blocks of cells, the clipboard's TSV, the paste and fill plans, never in the base. */
+const RANGE = ['PASTE_MAX', 'boxRows', 'boxSize', 'copyMatrix', 'decodeTsv', 'encodeTsv', 'fillTarget', 'pasteText', 'planFill', 'planPaste', 'rangeBox'];
+
 describe('the public surface', () => {
+  it('keeps the range entry apart (Phase 5 step 10)', () => {
+    expect(Object.keys(range).sort()).toEqual([...RANGE].sort());
+    for (const name of RANGE) expect(name in core || name in internal || name in server || name in spans || name in csv || name in rules || name in tree || name in detail || name in edit, name).toBe(false);
+  });
+
   it('keeps the edit entry apart (Phase 5 step 3)', () => {
     expect(Object.keys(edit).sort()).toEqual([...EDIT].sort());
     for (const name of EDIT) expect(name in core || name in internal || name in server || name in spans || name in csv || name in rules || name in tree || name in detail, name).toBe(false);

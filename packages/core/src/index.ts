@@ -82,6 +82,7 @@ export { visibleWindow, windowAt, overscanRows } from './layout/window.js';
 export type { ScrollAnchor } from './layout/anchor.js';
 export { anchorFor, scrollTopFor } from './layout/anchor.js';
 export type { SelectionState, RangeResult } from './selection/rows.js';
+export type { CellAddr, CellRange } from './selection/cells.js';
 export { NO_SELECTION, isSelected, selectionCount, selectOnly, selectAll, clearSelection, toggle, selectRange, reconcileSelection } from './selection/rows.js';
 
 export { intentFor, INTENT_OWNERS } from './keys/intent.js';

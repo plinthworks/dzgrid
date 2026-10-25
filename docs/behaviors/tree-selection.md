@@ -46,3 +46,9 @@ Step 2: the non-data skip in select-all, ranges and `allDisplayed` (core). Step 
 `conformance/cases/tree/selection-*` (independent parent, ranges across levels, hidden selected
 kept and counted, fillers never selected), `packages/dom/test/tree-selection.test.ts`
 (clicks, Space, Ctrl+A, header box). The cascade: a later step, its own sheet section.
+
+## Blocks of cells in a tree (Phase 5 Part B)
+A block of cells (`range-selection.md` 14) across levels takes the data rows shown between its corners,
+whatever their level; filler and loading rows count for nothing. Copied, the tree column is written
+without its indent (`clipboard.md` 5); the structure columns (`tree({ structure })`) are read-only, so a
+paste, a fill or a bulk edit skips them and counts them « en lecture seule ».

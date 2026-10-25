@@ -1,0 +1,95 @@
+{
+  "id": "decimals-rounded",
+  "suite": "fill-plan",
+  "description": "0.1, 0.2 goes on exactly: 0.3, 0.4 (rounded to the source's decimals).",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t"
+      },
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "En stock"
+          },
+          {
+            "value": "out",
+            "label": "Rupture"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "type": "boolean"
+      },
+      {
+        "id": "i",
+        "type": "instant"
+      }
+    ],
+    "rows": {
+      "r1": {
+        "n": 0.1
+      },
+      "r2": {
+        "n": 0.2
+      }
+    },
+    "src": {
+      "top": 0,
+      "bottom": 1,
+      "start": 0,
+      "end": 0
+    },
+    "to": {
+      "row": 3,
+      "col": 0
+    }
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 2,
+        "bottom": 3,
+        "start": 0,
+        "end": 0
+      },
+      "way": "down"
+    },
+    "cells": [
+      [
+        "r3",
+        "n",
+        {
+          "value": 0.3
+        }
+      ],
+      [
+        "r4",
+        "n",
+        {
+          "value": 0.4
+        }
+      ]
+    ]
+  }
+}

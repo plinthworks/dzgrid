@@ -1,0 +1,93 @@
+{
+  "id": "bulk-empty-clears",
+  "suite": "paste-plan",
+  "description": "Bulk edit of an emptied field (one empty text) clears every cell of the block (fill.md 9); an empty clipboard text is the DOM's to skip (clipboard.md 14).",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        ""
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 1
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": ""
+        }
+      ],
+      [
+        "r1",
+        "b",
+        {
+          "text": ""
+        }
+      ],
+      [
+        "r2",
+        "a",
+        {
+          "text": ""
+        }
+      ],
+      [
+        "r2",
+        "b",
+        {
+          "text": ""
+        }
+      ],
+      [
+        "r3",
+        "a",
+        {
+          "text": ""
+        }
+      ],
+      [
+        "r3",
+        "b",
+        {
+          "text": ""
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 1
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "id": "filler-and-loading-stepped-over",
+  "suite": "paste-plan",
+  "description": "A filler and a loading row are stepped over the same way.",
+  "input": {
+    "shown": [
+      "r1",
+      "/g",
+      "r2",
+      "~r2",
+      "r3"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1"
+      ],
+      [
+        "2"
+      ],
+      [
+        "3"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 0,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r2",
+        "a",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r3",
+        "a",
+        {
+          "text": "3"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 4,
+      "start": 0,
+      "end": 0
+    }
+  }
+}

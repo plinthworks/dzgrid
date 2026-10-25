@@ -13,5 +13,11 @@ Types into a cell, or pastes text from a spreadsheet, into a column with a type.
 - Yes/no words are read in French, English and Arabic.
 - A typed date-time inside a clock change is refused (D8); one loaded from the host is read `compatible`, with a warning (see `instant-reading.md`).
 
+## Pasted text (Phase 5 Part B, `clipboard.md` 19)
+Before a pasted cell is read, its text is made ready for the column (`pasteText`): in a number column one
+currency sign or code at the start or the end is removed (owner QB10: `1 234,50 €` → 1234.5; `(1 234)`
+still refused); in other columns the copy's formula guard `'` (`'=1+1`) and identifier mark (`="0123"`)
+are removed. Everything else is read as typed, by the same reader.
+
 ## Tests
-`conformance/cases/value-parse/*`.
+`conformance/cases/value-parse/*`; pasted text: `packages/core/test/range-paste-text.test.ts`.

@@ -1,0 +1,15 @@
+{
+  "id": "decode-final-lf-dropped",
+  "suite": "clipboard-tsv",
+  "description": "One final LF dropped.",
+  "input": {
+    "decode": "a\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a"
+      ]
+    ]
+  }
+}

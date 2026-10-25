@@ -44,6 +44,10 @@
     "./edit": {
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"
+    },
+    "./range": {
+      "types": "./src/range.ts",
+      "default": "./src/range.ts"
     }
   }
 }

@@ -1,0 +1,95 @@
+{
+  "id": "bulk-value-null",
+  "suite": "paste-plan",
+  "description": "Bulk edit of the empty value clears every cell of the block.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        {
+          "value": null
+        }
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 1
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "value": null
+        }
+      ],
+      [
+        "r1",
+        "b",
+        {
+          "value": null
+        }
+      ],
+      [
+        "r2",
+        "a",
+        {
+          "value": null
+        }
+      ],
+      [
+        "r2",
+        "b",
+        {
+          "value": null
+        }
+      ],
+      [
+        "r3",
+        "a",
+        {
+          "value": null
+        }
+      ],
+      [
+        "r3",
+        "b",
+        {
+          "value": null
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 1
+    }
+  }
+}

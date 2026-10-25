@@ -1,0 +1,16 @@
+{
+  "id": "decode-unterminated-quote",
+  "suite": "clipboard-tsv",
+  "description": "An unterminated quote stays literal.",
+  "input": {
+    "decode": "\"abc\tx\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "\"abc",
+        "x"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "id": "pinned-reading-order",
+  "suite": "range-box",
+  "description": "Columns in reading order: a column pinned at the start comes first.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "state": [
+      {
+        "id": "d",
+        "pinned": "start"
+      }
+    ],
+    "range": {
+      "anchor": [
+        "r1",
+        "c"
+      ],
+      "focus": [
+        "r1",
+        "d"
+      ]
+    }
+  },
+  "expected": {
+    "box": {
+      "top": 0,
+      "bottom": 0,
+      "start": 0,
+      "end": 3
+    },
+    "rows": [
+      "r1"
+    ],
+    "columns": [
+      "d",
+      "a",
+      "b",
+      "c"
+    ],
+    "size": {
+      "rows": 1,
+      "cols": 4,
+      "cells": 4
+    }
+  }
+}

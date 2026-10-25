@@ -1,0 +1,16 @@
+{
+  "id": "decode-quoted-newline",
+  "suite": "clipboard-tsv",
+  "description": "A quoted cell holds a line break.",
+  "input": {
+    "decode": "\"line1\nline2\"\tx\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "line1\nline2",
+        "x"
+      ]
+    ]
+  }
+}

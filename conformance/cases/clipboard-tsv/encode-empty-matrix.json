@@ -1,0 +1,11 @@
+{
+  "id": "encode-empty-matrix",
+  "suite": "clipboard-tsv",
+  "description": "No rows, no text.",
+  "input": {
+    "encode": []
+  },
+  "expected": {
+    "text": ""
+  }
+}

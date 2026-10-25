@@ -1,0 +1,80 @@
+{
+  "id": "two-columns-down",
+  "suite": "fill-plan",
+  "description": "Each column of the source is its own line.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "x",
+        "type": "number"
+      },
+      {
+        "id": "y",
+        "type": "number"
+      },
+      {
+        "id": "z",
+        "type": "number"
+      },
+      {
+        "id": "w",
+        "type": "number"
+      }
+    ],
+    "rows": {
+      "r1": {
+        "x": 1,
+        "y": 5
+      },
+      "r2": {
+        "x": 2,
+        "y": 5
+      }
+    },
+    "src": {
+      "top": 0,
+      "bottom": 1,
+      "start": 0,
+      "end": 1
+    },
+    "to": {
+      "row": 2,
+      "col": 1
+    }
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 2,
+        "bottom": 2,
+        "start": 0,
+        "end": 1
+      },
+      "way": "down"
+    },
+    "cells": [
+      [
+        "r3",
+        "x",
+        {
+          "value": 3
+        }
+      ],
+      [
+        "r3",
+        "y",
+        {
+          "value": 5
+        }
+      ]
+    ]
+  }
+}

@@ -16,6 +16,19 @@ Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
 
+- Phase 5 step 10, Part B begins: blocks of cells, the clipboard and the fill handle, the pure half (sheets
+  docs/behaviors/range-selection.md, clipboard.md with its table of Excel cases, fill.md; a11y protocol §20; owner
+  decisions QB1–QB10). New entry **`@dzgrid/core/range`** (2 897 B gz over the core, grant 4 000; review: real currency codes only, bidi marks, a leading BOM, the `'=x` guard, midnight days, bulk clears): `rangeBox`,
+  `boxRows`, `boxSize` (a block by row keys and column ids, dropped when a corner leaves; details, fillers and loading
+  rows count for nothing); `encodeTsv` / `decodeTsv` (CRLF after every row, quotes only around TAB, CR, LF and `"`;
+  lenient reading that never fails); `copyMatrix` (the CSV export values with a tab, through the edit overlay: the
+  locale's decimal mark, ISO days, wall-time instants, labels, the formula guard, `="0123"`; headers on request);
+  `planPaste` and `PASTE_MAX` (the spreadsheet's shape rule, data rows only, a detail never uses a line, outside
+  counted, over 100 000 cells nothing); `pasteText` (a currency sign removed in a number column; our guard and
+  identifier mark read back); `fillTarget` / `planFill` (number and day series with one step, rounded to the source's
+  decimals; repeats otherwise; Ctrl swaps; backwards). Base `@dzgrid/core`: types only — `CellAddr`, `CellRange`,
+  `SaveOrigin` gains `cut`, events `rangeChanged` and `rangeCopied` (counts, never values); 28 916 B gz, unchanged.
+
 - Phase 5 step 9, editing from Angular (docs/behaviors/edit-angular.md, angular-parts.md « Editing »): `edit()`,
   `editors()` and `listEditor` go in `[features]`; a live `[save]` input (the grid's save from its first value;
   `missing-feature` at `save` without `edit`); outputs `(cellEdited)`, `(saveFailed)`, `(orderStale)`,

@@ -1,0 +1,20 @@
+{
+  "id": "encode-plain",
+  "suite": "clipboard-tsv",
+  "description": "Cells joined by TAB, every row ends with CRLF, the last too.",
+  "input": {
+    "encode": [
+      [
+        "a",
+        "b"
+      ],
+      [
+        "c",
+        "d"
+      ]
+    ]
+  },
+  "expected": {
+    "text": "a\tb\r\nc\td\r\n"
+  }
+}

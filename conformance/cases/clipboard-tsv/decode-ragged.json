@@ -1,0 +1,20 @@
+{
+  "id": "decode-ragged",
+  "suite": "clipboard-tsv",
+  "description": "Ragged rows are kept as they are.",
+  "input": {
+    "decode": "a\tb\tc\r\nd\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "b",
+        "c"
+      ],
+      [
+        "d"
+      ]
+    ]
+  }
+}

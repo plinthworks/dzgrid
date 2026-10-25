@@ -1,0 +1,15 @@
+{
+  "id": "decode-single-excel-cell",
+  "suite": "clipboard-tsv",
+  "description": "A single cell copied from Excel ends with CRLF: not an empty second row.",
+  "input": {
+    "decode": "12\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "12"
+      ]
+    ]
+  }
+}

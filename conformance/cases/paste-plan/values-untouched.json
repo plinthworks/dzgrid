@@ -1,0 +1,83 @@
+{
+  "id": "values-untouched",
+  "suite": "paste-plan",
+  "description": "Values (the own-copy memo) pass unchanged; text is made ready for its column.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "t"
+      }
+    ],
+    "src": [
+      [
+        {
+          "value": 5
+        },
+        {
+          "value": null
+        }
+      ],
+      [
+        "1 234,50 €",
+        "'=1+1"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 0,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "n",
+        {
+          "value": 5
+        }
+      ],
+      [
+        "r1",
+        "t",
+        {
+          "value": null
+        }
+      ],
+      [
+        "r2",
+        "n",
+        {
+          "text": "1 234,50"
+        }
+      ],
+      [
+        "r2",
+        "t",
+        {
+          "text": "=1+1"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 1,
+      "start": 0,
+      "end": 1
+    }
+  }
+}

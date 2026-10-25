@@ -125,3 +125,17 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S9-Q6:** `@dzgrid/angular` ceiling at the measure + 50, at most 7 000.
 - **S9-Q1–Q3 (lead, recommendations kept):** editing wired through `[features]` (`edit()`, `editors()`, `listEditor`), no `[editing]` input; a live `[save]` input; outputs for the existing events; `c.reads(...)` for template editors through the existing `dzgPart slot="editor"`.
 - **S9-Q7 (owner, 2026-10-25):** the real Angular example's ceiling 90 000 → 92 000 (the stock screen loaded on demand splits the build: audit 91 082 with the split, 89 349 without; the ~1 700 B is the cost of two gzip streams, not editing code). The K.8 profile guard stays 83 500.
+
+## Part B (owner, 2026-10-25) — plans `partB-plan.md`, `step10-plan.md`
+
+- **QB1:** Shift+click and Ctrl+A select a block of cells (like Excel); rows are checked by their box.
+- **QB2 (lead, recommendation kept):** during Shift+arrows the focus follows the moving corner.
+- **QB3:** copy guards formula starts (= + - @) like the CSV; our own paste removes the guard.
+- **QB4:** paste limit 100 000 cells; over it nothing is pasted and a sentence says so.
+- **QB5:** bulk edit by Ctrl+Enter in the field (`/editors` 6 650 → 6 720).
+- **QB6:** a value or a small block pasted on a larger range repeats, like Excel.
+- **QB7:** a sort/filter change while a block is selected drops the block, said once.
+- **QB8:** if `dom/range` goes over 4 500, the fill handle moves to its own entry; benches measured in Chrome at step 12, marked indicative until the quiet-machine run (Q17d).
+- **QB9 + QB10:** copied numbers follow the locale (decimal comma in fr, point in en, as the CSV); a pasted « 1 234,50 € » / « DZD » in a number column has the currency removed and is read as 1234.5.
+- **Budgets:** `core/range` 4 000, `dom/range` 4 500 (Q16); new `-range` texts en/fr/ar 350/400/500; `range.css` 500; `/editors` 6 720 (QB5); dom base ~+20 B for `aria-multiselectable` inside the 21 980 grant.
+- **QB10 confirmed (owner, 2026-10-25):** 3-letter codes are stripped too. Lead precision after the review: only REAL currency codes (ISO 4217, `Intl.supportedValuesOf('currency')`) plus the local forms `DA`, `د.ج`, `دج`, `ج.م`; never any 3 capitals (`SKU 100` stays refused). Bidi marks are ignored around the symbol; a sign before a leading symbol is kept (`-$1,234.50` → −1234.5); accounting parentheses stay refused.

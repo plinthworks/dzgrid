@@ -37,3 +37,8 @@ Reads a table where a value shared by consecutive rows (a ward, a date, a patien
 
 ## Tests
 `conformance/cases/spans/*`, `header-bands/*`, `keyboard-move/*`, `problems/{invalid-span,span-overlap,span-clipped,invalid-column-group}.json`; `packages/core/test/spans*.test.ts` (with property tests: no overlap, one owner per place, keyboard round trips); `packages/dom/test/spans*.test.ts` (commit 3: `spans-dom`, `spans-anchors`; its fixes: `spans-fixes`, `spans-bugs`, `spans-property`); `packages/core/test/spans-plan.test.ts`; `scripts/browser.mjs` (commit 3: a long merge covers the view, its label stays in view, a covered place hits the tall cell, centre and pinned; the pointer over a covered place lights that row, not the tall cell's own, plain grids still hovered; header and body aligned over spans; commit 4: a tall cell ending in view ends at its last row, the focused tall cell kept through a long scroll and a sort; grouped headers: header and body aligned (LTR, RTL, pinned, with the box), each group cell covers exactly its columns, a stretched column header covers the empty group cells, one header per column in each group row, Up and Down through the groups, axe clean, Chrome's tree exposing the groups' column index and span, and macOS pairing each cell with its own groups); `packages/dom/test/spans-groups.test.ts` (commit 4; its fixes: `spans-groups-fixes`, `spans-groups-property`).
+
+## Blocks of cells (Phase 5 Part B)
+A block of cells (`range-selection.md` 16) is not grown to cover a tall or wide cell in this phase: its
+corners are what the user reached. The places a span covers are real cells of their rows: copied, pasted,
+filled and cleared like any other, and painted by the block's classes on the cell that is mounted.

@@ -17,6 +17,8 @@ export interface WriterEnv<T> {
   readonly iso: boolean;
   readonly codes: boolean;
   readonly guard: boolean;
+  /** The clipboard's guard also covers a text starting with `'` before a formula start (`'=x` → `''=x`), so it survives Excel. */
+  readonly tick?: boolean;
   readonly quote: (s: string) => string;
   /** Blank and unreadable cells, counted as they are written. */
   readonly counts: { blank: number; invalid: number };
@@ -25,7 +27,7 @@ export interface WriterEnv<T> {
 const DIGITS = /^[0-9]+$/;
 
 /** A guarded text, quoted. */
-export const field = <T>(e: WriterEnv<T>, s: string): string => e.quote(e.guard && FORMULA.test(s) ? `'${s}` : s);
+export const field = <T>(e: WriterEnv<T>, s: string): string => e.quote(e.guard && (FORMULA.test(s) || (e.tick && /^'[=+\-@]/.test(s))) ? `'${s}` : s);
 
 /** The header of a column: its label (else its id), the zone after a wall-time instant's. */
 export const headerOf = <T>(col: ResolvedColumn<T>, e: WriterEnv<T>): string =>

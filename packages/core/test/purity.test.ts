@@ -39,8 +39,15 @@ function tokens(source: string): Token[] {
   return out;
 }
 
+/** Whether the import whose specifier is token `i` is an `import type` (the statement's second token is `type`). */
+function typeOnly(t: readonly Token[], i: number): boolean {
+  let k = i;
+  while (k > 0 && t[k]!.kind !== ts.SyntaxKind.ImportKeyword && t[k]!.kind !== ts.SyntaxKind.ExportKeyword) k--;
+  return t[k + 1]?.text === 'type';
+}
+
 /** Every reason a source breaks purity, as short labels. Exported for the self-test below. */
-export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean } = { base: true }): string[] {
+export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean; range?: boolean } = { base: true }): string[] {
   const found: string[] = [];
   const t = tokens(source);
   t.forEach((tok, i) => {
@@ -72,10 +79,14 @@ export function violations(source: string, opts: { base: boolean; server?: boole
       if (!opts.server && !opts.csv && /(^|\/)server(\.js|\/|$)/.test(spec)) found.push('server import');
       // Nor the spans entry (step 9b): a grid without span rules carries none of it.
       if (!opts.spans && !opts.csv && /(^|\/)spans(\.js|\/|$)/.test(spec)) found.push('spans import');
-      // Nor the csv entry (step 10): a grid that exports nothing carries none of it.
-      if (!opts.csv && /(^|\/)csv(\.js|\/|$)/.test(spec)) found.push('csv import');
-      // Nor the edit entry (Phase 5 step 3): a read-only grid carries none of it.
-      if (!opts.edit && /(^|\/)edit(\.js|\/|$)/.test(spec)) found.push('edit import');
+      // Nor the csv entry (step 10): a grid that exports nothing carries none of it. The range entry
+      // (Phase 5 step 10) shares its cell writer: a copy writes what an export writes.
+      if (!opts.csv && !opts.range && /(^|\/)csv(\.js|\/|$)/.test(spec)) found.push('csv import');
+      // Nor the edit entry (Phase 5 step 3): a read-only grid carries none of it. The range entry names
+      // its `CellInput` type only (`import type`, erased): the commit reads and checks, in one place.
+      if (!opts.edit && !(opts.range && typeOnly(t, i)) && /(^|\/)edit(\.js|\/|$)/.test(spec)) found.push('edit import');
+      // Nor the range entry (Phase 5 step 10): a grid without blocks of cells carries none of it.
+      if (!opts.range && /(^|\/)range(\.js|\/|$)/.test(spec)) found.push('range import');
     }
   });
   return found;
@@ -92,7 +103,7 @@ describe('core purity', () => {
   it('names no forbidden global, package or dynamic import', () => {
     const offenders = all.flatMap((f) => {
       const rel = f.slice(SRC.length + 1);
-      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/') });
+      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/') });
       return v.length ? [`${rel}: ${[...new Set(v)].join(', ')}`] : [];
     });
     expect(offenders).toEqual([]);
@@ -169,6 +180,19 @@ describe('the purity check itself', () => {
     expect(violations("import { parseInput } from './edit/input.js';", { base: true, edit: true })).toEqual([]);
     // A module that only has `edit` in its name is no edit entry.
     expect(violations("import { editableAt } from './columns/editable.js';")).toEqual([]);
+  });
+
+  it('catches an import of the range entry from the base, and a run-time edit import from the range entry (Phase 5 step 10)', () => {
+    expect(violations("import { planPaste } from './range.js';")).toEqual(['range import']);
+    expect(violations("import { encodeTsv } from '../range/tsv.js';", { base: true, csv: true, edit: true })).toEqual(['range import']);
+    expect(violations("import { encodeTsv } from './tsv.js';", { base: true, range: true })).toEqual([]);
+    expect(violations("import { writerFor } from '../csv/writers.js';", { base: true, range: true })).toEqual([]);
+    expect(violations("import type { CellInput } from '../edit/input.js';", { base: true, range: true })).toEqual([]);
+    expect(violations("import { parseInput } from '../edit/input.js';", { base: true, range: true })).toEqual(['edit import']);
+    expect(violations("import { type CellInput } from '../edit/input.js';", { base: true, range: true })).toEqual(['edit import']);
+    expect(violations("import type { CellInput } from '../edit/input.js';")).toEqual(['edit import']);
+    // A module that only has `range` in its name is no range entry.
+    expect(violations("import { x } from './layout/arrange.js';")).toEqual([]);
   });
 
   it('lets comments, strings and property names mention anything', () => {

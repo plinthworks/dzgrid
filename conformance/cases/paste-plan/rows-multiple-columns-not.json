@@ -1,0 +1,66 @@
+{
+  "id": "rows-multiple-columns-not",
+  "suite": "paste-plan",
+  "description": "Rows a multiple but not the columns: written once.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1",
+        "2"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 1,
+      "start": 0,
+      "end": 2
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r1",
+        "b",
+        {
+          "text": "2"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 0,
+      "start": 0,
+      "end": 1
+    }
+  }
+}

@@ -25,3 +25,9 @@ Clicks a row; Ctrl- or Cmd-clicks; Shift-clicks; presses Space on a row; presses
 
 ## Tests
 `conformance/cases/selection/*`, `conformance/cases/selection-across-pages/*`, `packages/core/test/selection-scope.test.ts`, `selection-scope-bugs.test.ts`, `selection-scope-gaps.test.ts`, `selection-scope-property.test.ts` (six models, random scripts), `packages/dom/test/server-select.test.ts`, `server-select-bugs.test.ts`, `server-select-gaps.test.ts`; the box on browser pages (step 17): `conformance/cases/selection-across-pages/box-union-browser-pages.json`, `packages/dom/test/pagination.test.ts`. Rules (step 21): `conformance/cases/selection-rules/*`, `packages/core/test/kernel-gate.test.ts`, `packages/dom/test/rules.test.ts`. Trees and details (Phase 4): `tree-selection.md`, `master-detail.md` (tests listed there).
+
+## With blocks of cells (Phase 5 Part B, owner QB1)
+With the `range()` feature on, Shift+click and Ctrl+A (Cmd+A) select a **block of cells**
+(`range-selection.md`), as in a spreadsheet; rows are then ticked by their box (click, Shift+click and
+Space on the box, the header box for all). Without `range()`, nothing above changes. `exclude` selections
+(« everything except ») are never written by a bulk edit (`fill.md` 10).

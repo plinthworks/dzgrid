@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-25. **Phase 5 (l'édition), étapes 1 à 8 commitées et poussées** (dernier commit `60443c5`) ; **étape 9 faite, non commitée** : l'édition dans Angular, et la **partie A close techniquement** (portail G1–G17 vert, `docs/phase-5-steps/step09-plan.md` « Part A gate ») ; 124a–b restent au propriétaire. **Prochaine : partie B** (étape 10). Phase 4 close techniquement ; **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). L'édition s'appelle **Phase 5** (décision Q2 ; phases suivantes +1 ; 0.3.0 à la fin).
+Mis à jour : 2026-10-25. **Phase 5 (l'édition), étapes 1 à 9 commitées** (dernier commit `7ba1020` : l'édition dans Angular, **partie A close techniquement**, portail G1–G17 vert ; 124a–b restent au propriétaire). **Partie B commencée : étape 10 faite, non commitée** (fiches `range-selection.md`, `clipboard.md`, `fill.md`, a11y §20 ; entrée pure `@dzgrid/core/range` ; plan `docs/phase-5-steps/step10-plan.md` « Done »). **Prochaine : 11a** (`@dzgrid/dom/range`, sélection au clavier et au pointeur). Phase 4 close techniquement ; **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). L'édition s'appelle **Phase 5** (décision Q2 ; phases suivantes +1 ; 0.3.0 à la fin).
 
 L'ancien contenu de ce fichier (les paragraphes « Étape N faite » des Phases 3 et 4, revues et portails) est gardé mot pour mot dans `docs/phase-4-steps/status-log.md` ; le détail de chaque étape est aussi dans `ROADMAP.md`.
 
@@ -87,15 +87,16 @@ Aucun banc lancé (Q17d).
 | 6 | dates + calendrier, oui/non, liste (`editors-list`), éditeurs de l'appli | `51131af` |
 | 7 | enregistrements de bout en bout ; Entrée reste par défaut ; bordures dans l'anneau | `9ba9541` |
 | 8 | annuler/rétablir au clavier, arbres, détails, grilles imbriquées | `1acaabf` |
-| 9 | Angular : `[save]`, sorties, `controller.edit()`, éditeurs en gabarit (`c.reads`) et composant ; écran « stock » de l'exemple chargé à la demande ; portail de la partie A ; revue appliquée (ordre des sorties sous zone.js, `read()` qui lève) | non commitée |
+| 9 | Angular : `[save]`, sorties, `controller.edit()`, éditeurs en gabarit (`c.reads`) et composant ; écran « stock » de l'exemple chargé à la demande ; portail de la partie A ; revue appliquée (ordre des sorties sous zone.js, `read()` qui lève) | `7ba1020` |
+| 10 | partie B : fiches (blocs, presse-papiers et cas Excel, recopie), a11y §20 ; `@dzgrid/core/range` (boîte, TSV, valeurs copiées, plan de collage, plan de recopie) ; types de base seulement | non commitée |
 
 **Ordre décidé par le propriétaire (2026-10-24)** : étape 9 (Angular + portail de la partie A, faite) → **partie B** (étapes 10–13 : blocs de cellules, presse-papiers et Excel, poignée de recopie, Ctrl+D/R, modification en masse, 0.3.0 ; avec la démo commandes inventée, la fiche `pharma/stock` n'est plus un préalable) → **site de doc** (Astro Starlight comme DzCalendar, FR + EN, mis en ligne seulement sur sa parole ; `docs/phase-5-steps/showcase-plan.md`) → Phase 6 (menu de colonne, choix des colonnes, barre de regroupement, déplacement des colonnes).
 
 **Démo à essayer** : `http://127.0.0.1:4700/orders-edit.html` (`?locale=ar-DZ&theme=dark&skin=midnight`, `?paged=1`, `?tree=1`, `?enter=down`), `detail.html` (visites modifiables), `orders.html`, `hr.html`.
 
-**Tailles proches du plafond** (octets gz) : cœur 28 916 / 29 000, `core/edit` 3 098 / 3 100 (gelé), `dom/edit` 4 146 / 4 150, `dom/tree` 3 795 / 3 800, `dom/detail` 4 092 / 4 150, `/editors` 6 595 / 6 650, `edit.css` 2 197 / 2 200, `ar-edit` 895 / 900, angular 6 743 / 6 793 (plafond 7 000, S9-Q6) ; `/editors` 6 601 / 6 650 ; exemple réel 91 093 / 92 000 (S9-Q7). Toute hausse : décision écrite du propriétaire.
+**Tailles proches du plafond** (octets gz) : cœur 28 916 / 29 000 (inchangé à l'étape 10), `core/range` 2 897 / 4 000 (nouvelle entrée, revue de l'étape 10 appliquée), `core/edit` 3 098 / 3 100 (gelé), `dom/edit` 4 146 / 4 150, `dom/tree` 3 795 / 3 800, `dom/detail` 4 092 / 4 150, `/editors` 6 595 / 6 650, `edit.css` 2 197 / 2 200, `ar-edit` 895 / 900, angular 6 743 / 6 793 (plafond 7 000, S9-Q6) ; `/editors` 6 601 / 6 650 ; exemple réel 91 093 / 92 000 (S9-Q7). Toute hausse : décision écrite du propriétaire.
 
-**Pour l'étape 10** : le test « coller dans un détail » de `edit-detail.test.ts` est un repère vide, à refaire avec le collage (liste de passation dans `step08-plan.md`).
+**Pour l'étape 11b** : le test « coller dans un détail » de `edit-detail.test.ts` est un repère vide, à refaire sur le vrai collage (la moitié cœur est faite à l'étape 10 : `conformance/cases/paste-plan/detail-*.json`) ; `editors-paste-pin.test.ts` à refaire contre le vrai écouteur. Les alias `@dzgrid/core/range` de `vite.config.ts` et `packages/dom/tsconfig.json` sont à ajouter à l'étape 11a (non touchés à l'étape 10 : modifier `vite.config.ts` redémarre le vite du port 4700).
 
 ## Commandes
 

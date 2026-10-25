@@ -1,0 +1,18 @@
+{
+  "id": "decode-lone-cr",
+  "suite": "clipboard-tsv",
+  "description": "A lone CR ends a row (classic Mac).",
+  "input": {
+    "decode": "a\rb"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a"
+      ],
+      [
+        "b"
+      ]
+    ]
+  }
+}

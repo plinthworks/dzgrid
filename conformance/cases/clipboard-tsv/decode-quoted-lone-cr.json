@@ -1,0 +1,18 @@
+{
+  "id": "decode-quoted-lone-cr",
+  "suite": "clipboard-tsv",
+  "description": "A quoted cell closed before a lone CR: the CR ends the row.",
+  "input": {
+    "decode": "\"a\"\rb"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a"
+      ],
+      [
+        "b"
+      ]
+    ]
+  }
+}

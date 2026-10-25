@@ -1,0 +1,95 @@
+{
+  "id": "series-up-backwards",
+  "suite": "fill-plan",
+  "description": "2, 4 filled up continues backwards: 0 then -2 (nearest first).",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t"
+      },
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "En stock"
+          },
+          {
+            "value": "out",
+            "label": "Rupture"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "type": "boolean"
+      },
+      {
+        "id": "i",
+        "type": "instant"
+      }
+    ],
+    "rows": {
+      "r3": {
+        "n": 2
+      },
+      "r4": {
+        "n": 4
+      }
+    },
+    "src": {
+      "top": 2,
+      "bottom": 3,
+      "start": 0,
+      "end": 0
+    },
+    "to": {
+      "row": 0,
+      "col": 0
+    }
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 0,
+        "bottom": 1,
+        "start": 0,
+        "end": 0
+      },
+      "way": "up"
+    },
+    "cells": [
+      [
+        "r1",
+        "n",
+        {
+          "value": -2
+        }
+      ],
+      [
+        "r2",
+        "n",
+        {
+          "value": 0
+        }
+      ]
+    ]
+  }
+}

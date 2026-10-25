@@ -1,0 +1,41 @@
+{
+  "id": "empty-source",
+  "suite": "paste-plan",
+  "description": "No rows: nothing planned, nothing said.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [],
+    "at": {
+      "top": 0,
+      "bottom": 0,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [],
+    "outside": 0,
+    "tooBig": false,
+    "box": null
+  }
+}

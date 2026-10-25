@@ -1,0 +1,15 @@
+{
+  "id": "decode-final-cr-dropped",
+  "suite": "clipboard-tsv",
+  "description": "One final lone CR dropped.",
+  "input": {
+    "decode": "a\r"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a"
+      ]
+    ]
+  }
+}

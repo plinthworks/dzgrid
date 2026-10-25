@@ -1,0 +1,105 @@
+{
+  "id": "unequal-steps-repeat",
+  "suite": "fill-plan",
+  "description": "1, 2, 4 has no single step: repeated.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t"
+      },
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "En stock"
+          },
+          {
+            "value": "out",
+            "label": "Rupture"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "type": "boolean"
+      },
+      {
+        "id": "i",
+        "type": "instant"
+      }
+    ],
+    "rows": {
+      "r1": {
+        "n": 1
+      },
+      "r2": {
+        "n": 2
+      },
+      "r3": {
+        "n": 4
+      }
+    },
+    "src": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 0
+    },
+    "to": {
+      "row": 5,
+      "col": 0
+    }
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 3,
+        "bottom": 5,
+        "start": 0,
+        "end": 0
+      },
+      "way": "down"
+    },
+    "cells": [
+      [
+        "r4",
+        "n",
+        {
+          "value": 1
+        }
+      ],
+      [
+        "r5",
+        "n",
+        {
+          "value": 2
+        }
+      ],
+      [
+        "r6",
+        "n",
+        {
+          "value": 4
+        }
+      ]
+    ]
+  }
+}

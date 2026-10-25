@@ -1,0 +1,57 @@
+{
+  "id": "space-clears",
+  "suite": "paste-plan",
+  "description": "A space given to a number column is planned as typed (its reader reads it as empty: a clear).",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "src": [
+      [
+        " "
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 1,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "n",
+        {
+          "text": " "
+        }
+      ],
+      [
+        "r2",
+        "n",
+        {
+          "text": " "
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 1,
+      "start": 0,
+      "end": 0
+    }
+  }
+}

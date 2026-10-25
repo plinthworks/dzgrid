@@ -143,3 +143,12 @@ per resize, top row kept, Down/Enter/Escape, inner keys ignored by the outer rou
 cap, not selectable or exported, depth 2 ok and 4 a problem, no row data in events, SSR); browser:
 axe, wheel chaining, 1M masters, 200 details opened. Spike: `spikes/s12-variable-heights/`.
 Manual: `docs/a11y-protocol.md` §17.
+
+## Blocks, clipboard and fill (Phase 5 Part B)
+A detail row is never a cell of a block: a block from a row above a detail to a row below takes the two
+data rows, not the detail; a paste or a fill steps over it **without using a line** of the source
+(`clipboard.md` 16, `fill.md` 6); a copy writes no line for it. Each nested grid has its own block, keys
+and clipboard: a block of the outer grid never reaches into a panel, and Ctrl+C in a panel copies the
+panel's cells (routed by the active element's innermost grid, `clipboard.md` 1). Step 10 holds the core
+half (`conformance/cases/paste-plan/detail-*.json`, `fill-plan/detail-in-target.json`); the
+`edit-detail.test.ts` placeholder is re-pinned on the real paste at step 11b.

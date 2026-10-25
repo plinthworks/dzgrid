@@ -1,0 +1,93 @@
+{
+  "id": "one-value-fills-block",
+  "suite": "paste-plan",
+  "description": "One value on a 3 x 2 block fills its 6 cells (QB6).",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "x"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 1
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": "x"
+        }
+      ],
+      [
+        "r1",
+        "b",
+        {
+          "text": "x"
+        }
+      ],
+      [
+        "r2",
+        "a",
+        {
+          "text": "x"
+        }
+      ],
+      [
+        "r2",
+        "b",
+        {
+          "text": "x"
+        }
+      ],
+      [
+        "r3",
+        "a",
+        {
+          "text": "x"
+        }
+      ],
+      [
+        "r3",
+        "b",
+        {
+          "text": "x"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 2,
+      "start": 0,
+      "end": 1
+    }
+  }
+}

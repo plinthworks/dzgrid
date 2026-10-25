@@ -1,0 +1,82 @@
+{
+  "id": "tiled-over-detail",
+  "suite": "paste-plan",
+  "description": "A block over a detail: its data rows decide the multiple; the detail is never written.",
+  "input": {
+    "shown": [
+      "r1",
+      "> r1",
+      "r2",
+      "r3",
+      "r4"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1"
+      ],
+      [
+        "2"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 4,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r2",
+        "a",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r3",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r4",
+        "a",
+        {
+          "text": "2"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 4,
+      "start": 0,
+      "end": 0
+    }
+  }
+}

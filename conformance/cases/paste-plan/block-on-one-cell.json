@@ -1,0 +1,84 @@
+{
+  "id": "block-on-one-cell",
+  "suite": "paste-plan",
+  "description": "A 2 x 2 block on one cell writes its own size from there.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1",
+        "2"
+      ],
+      [
+        "3",
+        "4"
+      ]
+    ],
+    "at": {
+      "top": 1,
+      "bottom": 1,
+      "start": 1,
+      "end": 1
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r2",
+        "b",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r2",
+        "c",
+        {
+          "text": "2"
+        }
+      ],
+      [
+        "r3",
+        "b",
+        {
+          "text": "3"
+        }
+      ],
+      [
+        "r3",
+        "c",
+        {
+          "text": "4"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 1,
+      "bottom": 2,
+      "start": 1,
+      "end": 2
+    }
+  }
+}

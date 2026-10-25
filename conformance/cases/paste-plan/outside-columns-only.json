@@ -1,0 +1,67 @@
+{
+  "id": "outside-columns-only",
+  "suite": "paste-plan",
+  "description": "A row longer than the columns left: the rest counted.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1",
+        "2",
+        "3"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 0,
+      "start": 2,
+      "end": 2
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "c",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r1",
+        "d",
+        {
+          "text": "2"
+        }
+      ]
+    ],
+    "outside": 1,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 0,
+      "start": 2,
+      "end": 3
+    }
+  }
+}

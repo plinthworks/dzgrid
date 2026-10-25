@@ -1,0 +1,20 @@
+{
+  "id": "decode-excel-two-rows",
+  "suite": "clipboard-tsv",
+  "description": "Excel: two rows, a CRLF after each, the last too.",
+  "input": {
+    "decode": "a\tb\r\nc\td\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "b"
+      ],
+      [
+        "c",
+        "d"
+      ]
+    ]
+  }
+}

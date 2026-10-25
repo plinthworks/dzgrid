@@ -1,0 +1,20 @@
+{
+  "id": "encode-empty-cells-row",
+  "suite": "clipboard-tsv",
+  "description": "A last row of empty cells survives.",
+  "input": {
+    "encode": [
+      [
+        "a",
+        "b"
+      ],
+      [
+        "",
+        ""
+      ]
+    ]
+  },
+  "expected": {
+    "text": "a\tb\r\n\t\r\n"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "id": "corner-on-detail",
+  "suite": "range-box",
+  "description": "A corner may rest on a detail row; it contributes no row.",
+  "input": {
+    "shown": [
+      "r1",
+      "> r1",
+      "r2",
+      "r3"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "range": {
+      "anchor": [
+        "> r1",
+        "a"
+      ],
+      "focus": [
+        "r2",
+        "a"
+      ]
+    }
+  },
+  "expected": {
+    "box": {
+      "top": 1,
+      "bottom": 2,
+      "start": 0,
+      "end": 0
+    },
+    "rows": [
+      "r2"
+    ],
+    "columns": [
+      "a"
+    ],
+    "size": {
+      "rows": 1,
+      "cols": 1,
+      "cells": 1
+    }
+  }
+}

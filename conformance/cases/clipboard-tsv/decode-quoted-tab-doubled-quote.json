@@ -1,0 +1,15 @@
+{
+  "id": "decode-quoted-tab-doubled-quote",
+  "suite": "clipboard-tsv",
+  "description": "A quoted cell holds a tab and a doubled quote.",
+  "input": {
+    "decode": "\"a\tb \"\"q\"\"\"\r\n"
+  },
+  "expected": {
+    "rows": [
+      [
+        "a\tb \"q\""
+      ]
+    ]
+  }
+}

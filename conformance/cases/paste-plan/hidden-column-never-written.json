@@ -1,0 +1,72 @@
+{
+  "id": "hidden-column-never-written",
+  "suite": "paste-plan",
+  "description": "A hidden column is not visible: the next visible one takes the value.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "state": [
+      {
+        "id": "b",
+        "hidden": true
+      }
+    ],
+    "src": [
+      [
+        "1",
+        "2"
+      ]
+    ],
+    "at": {
+      "top": 0,
+      "bottom": 0,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r1",
+        "a",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r1",
+        "c",
+        {
+          "text": "2"
+        }
+      ]
+    ],
+    "outside": 0,
+    "tooBig": false,
+    "box": {
+      "top": 0,
+      "bottom": 0,
+      "start": 0,
+      "end": 1
+    }
+  }
+}

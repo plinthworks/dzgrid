@@ -1,0 +1,43 @@
+{
+  "id": "nothing-below",
+  "suite": "paste-plan",
+  "description": "A block pasted on a detail with no data row below: all outside.",
+  "input": {
+    "shown": [
+      "r1",
+      "> r1"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "x",
+        "y"
+      ]
+    ],
+    "at": {
+      "top": 1,
+      "bottom": 1,
+      "start": 0,
+      "end": 0
+    }
+  },
+  "expected": {
+    "cells": [],
+    "outside": 2,
+    "tooBig": false,
+    "box": null
+  }
+}

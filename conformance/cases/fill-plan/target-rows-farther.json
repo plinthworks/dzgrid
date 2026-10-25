@@ -1,0 +1,55 @@
+{
+  "id": "target-rows-farther",
+  "suite": "fill-plan",
+  "description": "Farther out on rows than on columns: down, the source's columns.",
+  "input": {
+    "src": {
+      "top": 1,
+      "bottom": 2,
+      "start": 1,
+      "end": 2
+    },
+    "to": {
+      "row": 5,
+      "col": 3
+    },
+    "only": "target",
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "x",
+        "type": "number"
+      },
+      {
+        "id": "y",
+        "type": "number"
+      },
+      {
+        "id": "z",
+        "type": "number"
+      },
+      {
+        "id": "w",
+        "type": "number"
+      }
+    ]
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 3,
+        "bottom": 5,
+        "start": 1,
+        "end": 2
+      },
+      "way": "down"
+    }
+  }
+}

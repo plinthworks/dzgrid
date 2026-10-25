@@ -1,0 +1,95 @@
+{
+  "id": "instant-repeats",
+  "suite": "fill-plan",
+  "description": "Instants a day apart repeat: instants are never stepped.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6"
+    ],
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t"
+      },
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "En stock"
+          },
+          {
+            "value": "out",
+            "label": "Rupture"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "type": "boolean"
+      },
+      {
+        "id": "i",
+        "type": "instant"
+      }
+    ],
+    "rows": {
+      "r1": {
+        "i": "2026-03-05T10:00:00Z"
+      },
+      "r2": {
+        "i": "2026-03-06T10:00:00Z"
+      }
+    },
+    "src": {
+      "top": 0,
+      "bottom": 1,
+      "start": 5,
+      "end": 5
+    },
+    "to": {
+      "row": 3,
+      "col": 5
+    }
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 2,
+        "bottom": 3,
+        "start": 5,
+        "end": 5
+      },
+      "way": "down"
+    },
+    "cells": [
+      [
+        "r3",
+        "i",
+        {
+          "value": "2026-03-05T10:00:00Z"
+        }
+      ],
+      [
+        "r4",
+        "i",
+        {
+          "value": "2026-03-06T10:00:00Z"
+        }
+      ]
+    ]
+  }
+}

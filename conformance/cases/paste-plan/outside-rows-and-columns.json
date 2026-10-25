@@ -1,0 +1,72 @@
+{
+  "id": "outside-rows-and-columns",
+  "suite": "paste-plan",
+  "description": "Cells past the last row or the last visible column are counted, not written.",
+  "input": {
+    "shown": [
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5"
+    ],
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "src": [
+      [
+        "1",
+        "2",
+        "3"
+      ],
+      [
+        "4",
+        "5",
+        "6"
+      ]
+    ],
+    "at": {
+      "top": 4,
+      "bottom": 4,
+      "start": 2,
+      "end": 2
+    }
+  },
+  "expected": {
+    "cells": [
+      [
+        "r5",
+        "c",
+        {
+          "text": "1"
+        }
+      ],
+      [
+        "r5",
+        "d",
+        {
+          "text": "2"
+        }
+      ]
+    ],
+    "outside": 4,
+    "tooBig": false,
+    "box": {
+      "top": 4,
+      "bottom": 4,
+      "start": 2,
+      "end": 3
+    }
+  }
+}
