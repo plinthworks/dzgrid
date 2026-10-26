@@ -635,7 +635,9 @@ The real Angular example (`npm run example:bytes`, the DzGrid share of the produ
 
 > Owner decision 2026-10-22 (docs/phase-4-steps/decisions.md Q12): locales en/fr/ar-detail 150 / 200 / 200. Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Phase 3 close (2026-10-21, owner decisions step25-decisions.md Q2, Q3): each budget is the measure + 10 %, rounded up to 50 B, never above the ceilings of ARCHITECTURE §5.2 (core 28 000, dom 30 000, locales 2 000, theme 9 000, /server 6 000, /filters 10 000, angular 8 000) and K.8 (the audit screen profile, 85 000; its guard here is the measure + 10 %, the 85 000 ceiling guards the real Angular example, npm run example:bytes); set by scripts/rebudget.mjs. A budget is raised only by a decision written in ROADMAP.md, which keeps the history of every earlier one. Phase 4 (owner decision 2026-10-21, docs/phase-4-steps/decisions.md Q7): budgets during Phase 4 are core 29 000 (its plan ceiling 28 000 → 29 000, scripts/rebudget.mjs) and theme 2 500; others held (dom 21 300, /filters 10 000, angular 6 000, core/csv up to 2 000, K.8 guard 83 500); new entries, added with their source files by steps 2–4 and 8–10 (check:size cannot measure a file that does not exist yet): @dzgrid/core/tree 3 500 over @dzgrid/core, @dzgrid/core/detail 1 000 over @dzgrid/core, @dzgrid/dom/tree 2 600, @dzgrid/dom/detail 3 500, @dzgrid/dom/locales/en-tree 200, fr-tree 220, ar-tree 250. Every budget is reset to the measure + 10 % at the Phase 4 close (step 13). Phase 4 step 7 (docs/phase-4-steps/step07-plan.md): lazy children did not fit @dzgrid/core/tree (139 B left) nor @dzgrid/dom/tree (195 B left); two new opt-in entries, each the measure + 10 % rounded up to 50 B, owner-confirmed (docs/phase-4-steps/decisions.md Q9): @dzgrid/core/tree-lazy 1 500 over @dzgrid/core (measured 1 348), @dzgrid/dom/tree-lazy 1 000 (measured 877). No existing budget raised. Phase 4 step 8 (docs/phase-4-steps/step08-plan.md): @dzgrid/core/detail added with its file, at its planned budget 1 000 (measured 994 after cuts; first measure 1 452). Phase 4, sticky parent rows (docs/phase-4-steps/sticky-blueprint.md, owner decision decisions.md Q11a, 2026-10-21): @dzgrid/dom/tree 2 600 → 3 700 for Phase 4 (the sticky copies are on by default, so they live in the tree entry; measured 3 660 with them, 2 511 before), reset to the measure + 10 % at the Phase 4 close like every budget. No other budget raised (dom 19 758 of 21 300, theme 2 242 of 2 500, core unchanged). Phase 4 step 10 (docs/phase-4-steps/step10-plan.md): @dzgrid/dom/detail added with its files at its planned budget 3 500 (measured 3 413; external @dzgrid/dom, by the package's own name for nestedGrid, besides the core, core/internal, core/detail and dom/internal); @dzgrid/dom/locales/{en,fr,ar}-detail at the tree bundles' 200 / 220 / 250 (measured 133 / 146 / 159). No other budget raised (dom 20 627, theme 2 268). Phase 4 step 10 review (owner decision docs/phase-4-steps/decisions.md Q13): @dzgrid/dom/detail 3 500 → 3 900 (nested grids updated in place, their state kept by top row, open rows and focused cell: measured 3 787 before the low review items). Phase 4 step 11 review (owner decision docs/phase-4-steps/decisions.md Q15): @dzgrid/angular 6 000 -> 6 200 (the expanded model's pending keys, the tree filter's layer and the NG0100 deferral: measured 6 176; 5 965 before). Phase 4 step 12 (owner decision docs/phase-4-steps/decisions.md Q16): @dzgrid/angular 6 200 -> 6 250 for the one-way [floatingFilters] input (measured 6 236 with it).
 
-## Phase 5 — editing (planning done, step 1 under way, 2026-10-22)
+## Phase 5 — close techniquement, 2026-10-26
+
+Editing: Part A (cell editing, saves, refusals, undo) and Part B (blocks of cells, the clipboard, the fill handle, bulk edit), plus the showcase themes, bridges and demos. **0.3.0 prepared, not published.** « Close techniquement » (owner Q-C4): Part A stays open on 124a–b only (S9-Q5), and the owner's manual checks are listed under « Reporté (Phase 5) ». Next: Phase 6, then the docs website (owner order, 2026-10-25).
 
 **Naming (owner Q2 A, 2026-10-22):** editing, called « Part D » of Phase 4 until now, is **Phase 5**; the later phases move up by one (advanced columns 6, grouping 7, infinite and server-side 8, Excel and menus 9, pivot 10, hardening 11; ARCHITECTURE §6); 0.3.0 at the end. In entries written before 2026-10-22, « Part D » reads « Phase 5 » and « Phase N » for N ≥ 5 reads « Phase N+1 ».
 
@@ -659,3 +661,102 @@ Plan `docs/phase-5-plan.md`, owner decisions `docs/phase-5-steps/decisions.md` (
 - [ ] step 11b (2026-10-25, not committed; plan `docs/phase-5-steps/step11b-plan.md` « Done »; owner S11b-Q1–Q5): the clipboard in `@dzgrid/dom/range` — copy, cut (cleared at once), paste (one save, one undo, counts said, refused cells blinking), Delete on a block, the page's copy memo, pasted HTML read inertly by a lazy chunk; `canCopy`, `guard`, `raw`, `maxPaste`; API `copy / cut / paste / erase`. Property test against a hand-written oracle through the real `edit()`; re-pins of steps 8–9. Sizes: `dom/range` 4 787 (4 800, S11b-Q3), lazy reader 422 (500, S11b-Q5), `ar-range` 500 / 500 (shortened texts, to the Arabic reviewer). Owner's manual checks: Excel, Google Sheets, a real Safari (STATUS).
 - [ ] step 12 (2026-10-25, not committed; plan `docs/phase-5-steps/step12-plan.md` « Done »; owner S12-Q1–Q9): `@dzgrid/dom/fill` — the fill handle (also on one focused cell, S12-Q8; crosshair), its drag (mouse, pen), the click-then-click fill (WCAG 2.5.7), the keyboard fill mode, Ctrl/Cmd+D / R, Ctrl/Cmd+Enter bulk in `/editors`; S12-Q8 cues in the base theme (active cell ring + tint, active row tint). Property test through the real `edit()` against `planFill` (3 000 seeds at the gate) and the four ways deep-equal; mutants 52 run, 50 killed, 2 equivalent; browser `--only fill` Chrome 32 / 32, Firefox 26 / 26, WebKit 26 / 26. Sizes: `dom/fill` 2 729 (3 000, S12-Q9), `fill.css` 415 (460), texts 231 / 278 / 299, `/editors` 6 669 / 6 720, `dom/range` 4 768 / 4 800, theme 2 494 / 2 500, angular 6 813 (line 6 863). Dataset B bench (indicative, Q17d; load ≈ 5–6): bulk 3 000 17.7 ms, paste 1 000 cells 18.7 ms, fill 3 000 17.7 ms, Ctrl+D 3 000 × 12 73.6 ms (one long task), undo 3 000 15.9 ms. Real Angular example 92 059 B gz: ceiling 92 000 → **92 500** (owner S12-Q10, 2026-10-26; K.8 stays 83 500). Next: 13 (Part B close, 0.3.0).
 
+
+- [x] step 13, the close (2026-10-26, not committed; plan `docs/phase-5-steps/step13-plan.md` « Done »; owner Q-C1–Q-C4): budgets reset by the close rule (tests first: the pinned budget tests and `rebudget.mjs`'s ceilings and comment), 0.3.0 (tests first: `release.test.ts`, `release-review.test.ts`, now also every Phase 5 subpath, every relative import of a shipped module and the lazy chunks, no scratch file, a licence and a README in each tarball), the final gate, docs. Phase 5 steps and commits: step 1 `4880616`, 2 `6b390aa`, themes `8ccb6b0` `01b07ae`, demos `502e1c8`, 3 `904ed78`, 4 `b56279a`, 5 `9513cfe`, 6 `51131af`, 7 `9ba9541`, 8 `1acaabf`, STATUS `60443c5`, 9 `7ba1020`, 10 `7156ec0`, 11a `295e4e8`, 11b `832154d`, playground `9190b04`, 12 `a21428b`.
+
+### Exit criteria (Phase 5; Part A G1–G17 `step09-plan.md` §6, Part B PB1–PB13 `step13-plan.md` §1)
+
+The final gate of 2026-10-26 (`caffeinate -i`, one command at a time, vitest ≤ 2 workers, one headless browser at a time): `build`, `typecheck` green; `test:ci` **404 files, 6 325 tests** green (445 s, first run); `test:perm` 5 files / 10 tests green (231 s); property tests at **3 000 seeds**: `range-fill-property` and `range-paste-property` green; `test:tz` Auckland and Los Angeles 404 / 6 325 each, green; `check:size` 91 lines, 0 over; `check:contrast` 954 pairs, 0 below; `test:browser` full **967 / 967**; Firefox and WebKit: `edit-undo` 8 / 8, `range` 7 / 7, `clipboard` 13 / 13, `fill` 30 / 30 each; `--only playground` 41 / 41 on the running 4700 server; `test:audit -- --full` 42 / 42 (export 100 000 × 30 in 406 / 399 / 401 ms, no long task); Angular fixture 90 / 90; `example:build` (0.3.0 tarballs installed as copies; default, zone, baseline); `example:bytes` **92 059 / 92 500**; `example:csv` 10 tests, `audit-ar.csv` 13 450 B with BOM; `example:ssr` fr / ar × audit / stock: host only, 0 rows, no timer, no error; `example:browser` 8 / 8; `pack:local` four 0.3.0 tarballs. No test needed a rerun. No bench (Q17d).
+
+| # | Criterion | Result |
+|---|---|---|
+| G1 | sheets before code (Part A) | met (`4880616` before `6b390aa`; step09-plan « Part A gate ») |
+| G2 | bugs 1–5 of `a6c97f5`, each a test that failed first | met (in `test:ci`) |
+| G3 | K.14: no row moves before `reapply()` | met (conformance `edit-order`, walks, `test:perm`) |
+| G4 | ARCH §3.10 rules 1–6; 1 000 seeds, 0 stale | met |
+| G5 | rollback never touches the source | met |
+| G6 | keys inside an editor never act on the grid | met (`editors-keys`, `edit-undo-keys`, `edit-undo` in three engines) |
+| G7 | details, fillers, loading rows not editable | met; « pasteable / fillable » now met in Part B (PB6) |
+| G8 | tree column editor in RTL | met (`tree`, `edit-undo` Firefox / WebKit) |
+| G9 | nested grids independent | met |
+| G10 | validation accessible (axe 0, `aria-invalid`, fr / ar, light / dark / forced colours) | met (full browser run, fixture) |
+| G11 | save marks not colour-only; reduced motion | met (`edit-marks`, `check:contrast` 954 pairs) |
+| G12 | uniform paint unchanged without editing | met for the paint tests; the scroll bench not run (Q17d) — indicatif |
+| G13 | budgets by written decision | met (the table below, each ceiling and its decision) |
+| G14 | Angular | met (fixture 90 / 90, `example:*`) |
+| G15 | final gate green | met (above) |
+| G16 | docs updated | met (CHANGELOG `[0.3.0] - unreleased`, README, ARCHITECTURE, this section, STATUS) |
+| G17 | listening §19 scheduled | met (STATUS « Ce qui attend le propriétaire ») |
+| O1–O2 | 124a–b (input methods, phones, screen readers) | **owner, open** (S9-Q5) |
+| PB1 | sheets before code | met (`range-selection.md`, `clipboard.md`, `fill.md` added by `7156ec0`, sheets first; 40 range / clipboard / fill test files name their sheet or step plan — three headers completed at the close) |
+| PB2 | full range keyboard, ltr / rtl, Mac Cmd; never from a field, widget, popup, nested grid | met (`range-keys`, `range-fill-keys`; `range` in three engines) |
+| PB3 | range and fill handle right in RTL | met (`range-paint`, `range-fill`; `fill` Chrome / Firefox / WebKit) |
+| PB4 | one gesture = one request = one undo | met (recording-save tests, `range-walk`, fill property 3 000 seeds) |
+| PB5 | refused cells skipped and counted; mounted ones blink; S3-O2 | met (`range-paste`, `range-bulk`, paste property 3 000 seeds) |
+| PB6 | details, fillers, loading rows never pasted, filled, cleared, copied | met (conformance `paste-plan`, `fill-plan`, `range-box`; `edit-detail`) |
+| PB7 | Ctrl/Cmd keys inside a field are the field's (but Ctrl+Enter, QB5) | met |
+| PB8 | Excel interop cases of `clipboard.md` as hand tests | met in tests; real Excel / Sheets / Safari: **owner** |
+| PB9 | pasted HTML never live, nothing fetched | met (`range-html-safety`, clipboard browser checks) |
+| PB10 | a11y: axe 0 with a range fr light / ar dark / forced colours; `aria-selected`, `aria-multiselectable`; contrast | met (full run, `check:contrast` 954 pairs) |
+| PB11 | trees, nested grids, spans, server pages | met (their range / fill tests; `--only playground` 41 / 41) |
+| PB12 | dataset B bulk ≤ 30 ms one request; paste 1 000 ≤ 40 ms | « one request » met; timings **indicatif** (step 12: 17.7 / 18.7 ms under load; quiet-machine run pending, Q17d) |
+| PB13 | budgets by decision, `core/edit` and `dom/edit` unchanged, gate, docs, 0.3.0 unpublished, listening §20 and Excel scheduled | met (Q-C2, Q-C3; nothing published; STATUS lists the owner's items) |
+
+### Reporté (Phase 5)
+
+- **124a–b** (input methods, dead keys; phones, tablets, VoiceOver / TalkBack) → the owner; Part A stays open on this point only (S9-Q5).
+- **Real Excel (Windows, macOS), Google Sheets, Safari** (S11b-Q2), fr and ar, both ways; the Arabic CSV's column order in Excel → the owner.
+- **Screen-reader listening** §16–§20, **Arabic review** of `ar-tree`, `ar-detail`, `ar-filters`, `ar-edit`, `ar-editors`, `ar-range`, `ar-fill` → the owner, non-blocking.
+- **Ctrl/Cmd+D bookmark, Ctrl/Cmd+R reload** in real headed browsers → the owner (headless engines only prove the keydown is prevented).
+- **Time budgets** and the dataset B lines → the quiet-machine run (Q17d), then Q17c.
+- **GSAP licence** re-read before any publication; **npm publication** on the owner's word only.
+
+### Final budgets (Phase 5)
+
+Phase 5 close, step 13 (2026-10-26, owner decisions `docs/phase-5-steps/decisions.md` Q16, Q-C2, Q-C3). Set by `scripts/rebudget.mjs sizes` from its own measure after a fresh `npm run build` (Apple M4): two dry runs, identical, read line by line, then `--write`. The rule: the measure + 10 %, rounded up to 50 B, never above the owner's grants; `scripts/rebudget.mjs` now names theme 2 750 (Q-C2), `core/rules` 600 and `dom/parts` 800 (Q-C3) as ceilings. Entries not listed (the base locales, popup, spans, slots, search, pagination, export, rules, motion shell, the filters' lazy chunks) kept their budgets. « grant »: the rule would give more. The gate's `check:size` read `@dzgrid/angular` at 6 814 (one byte of gzip noise from the version string) under 7 000.
+
+| Entry | Old budget | Measure | New budget |
+|---|---|---|---|
+| `@dzgrid/core` | 29 000 | 28 916 | 29 000 — grant (Q16) |
+| `@dzgrid/core/server` | 6 100 | 6 088 | 6 100 — grant (S2-O4) |
+| `@dzgrid/core/spans` | 3 850 | 3 438 | 3 800 — lower |
+| `@dzgrid/core/csv` | 2 000 | 1 868 | 2 000 — grant (Q7) |
+| `@dzgrid/core/rules` | 550 | 512 | 600 — raise (Q-C3) |
+| `@dzgrid/core/tree` | 3 500 | 3 410 | 3 500 — grant |
+| `@dzgrid/core/tree-lazy` | 1 500 | 1 457 | 1 500 — grant |
+| `@dzgrid/core/detail` | 1 050 | 999 | 1 050 — grant (S2-O5) |
+| `@dzgrid/core/edit` | 3 100 | 3 098 | 3 100 — grant (S3-O4) |
+| `@dzgrid/core/range` | 4 000 | 2 897 | 3 200 — lower (grant 4 000) |
+| `@dzgrid/dom` | 21 700 | 21 565 | 21 980 — raise to the grant (T7, Q-C2) |
+| `@dzgrid/dom/tree` | 3 800 | 3 795 | 3 800 — grant (S8-O1) |
+| `@dzgrid/dom/tree-lazy` | 1 000 | 938 | 1 000 — grant |
+| `@dzgrid/dom/detail` | 4 150 | 4 092 | 4 150 — grant (S8-O7) |
+| `@dzgrid/dom/edit` | 4 150 | 4 146 | 4 150 — grant (S8-O6) |
+| `@dzgrid/dom/editors` | 6 720 | 6 669 | 6 720 — grant (QB5) |
+| `@dzgrid/dom/editors: calendar (lazy)` | 1 500 | 1 494 | 1 500 — grant (S6-O6) |
+| `@dzgrid/dom/editors-list` | 1 400 | 1 234 | 1 400 — same (S6-O7) |
+| `@dzgrid/dom/range` | 4 800 | 4 768 | 4 800 — grant (S11b-Q3) |
+| `@dzgrid/dom/range: html (lazy)` | 600 | 506 | 600 — same (S11b-Q5) |
+| `@dzgrid/dom/fill` | 3 000 | 2 781 | 3 000 — grant (S12-Q9) |
+| `@dzgrid/dom/parts` | 700 | 689 | 800 — raise (Q-C3) |
+| `@dzgrid/dom/internal` | 1 234 | 1 184 | 1 250 — raise to the ceiling (S6-O6, Q-C2) |
+| `@dzgrid/dom/motion-gsap: run (lazy)` | 3 500 | 3 382 | 3 500 — grant (Q16) |
+| `@dzgrid/dom/filters` | 10 000 | 9 673 | 10 000 — grant |
+| `locales/{en,fr,ar}-edit` | 560 / 630 / 900 | 517 / 598 / 895 | 560 / 630 / 900 — grants (S4-O4, S8-O1) |
+| `locales/{en,fr,ar}-editors` | 450 / 500 / 620 | 383 / 434 / 533 | 450 / 500 / 600 — ar lower (S5-O3) |
+| `locales/{en,fr,ar}-range` | 350 / 400 / 500 | 319 / 366 / 500 | 350 / 400 / 500 — grants; **ar at its cap, 0 B left** |
+| `locales/{en,fr,ar}-fill` | 250 / 300 / 380 | 231 / 278 / 299 | 250 / 300 / 350 — en, fr grants; ar lower (S12-Q4) |
+| `@dzgrid/theme` | 2 500 | 2 494 | 2 750 — raise (Q-C2, within T7's 3 050) |
+| `@dzgrid/theme/edit.css` | 2 200 | 2 197 | 2 200 — grant (S7-O1) |
+| `@dzgrid/theme/range.css` | 500 | 479 | 500 — grant (Part B) |
+| `@dzgrid/theme/fill.css` | 460 | 450 | 460 — grant (S12-Q9) |
+| `midnight.css` / `clinic.css` | 650 / 650 | 446 / 472 | 500 / 550 — lower (T7) |
+| `tailwind.css` / `tailwind3.css` / `bootstrap.css` | 500 each | 325 / 325 / 293 | 400 / 400 / 350 — lower (T7) |
+| profile: audit screen (K.8) | 83 500 | 82 986 | 83 500 — grant (Q16) |
+| `@dzgrid/angular` | 6 863 | 6 813 | 7 000 — raise to the ceiling (S9-Q6, Q-C2) |
+
+The real Angular example (`npm run example:bytes`): **92 059 / 92 500** (S12-Q10; not in the script), the « stock » screen 32 610 apart. Time budgets: not reset (Q17d).
+
+**History** (the `size-budget.json` `$comment` before this reset, kept word for word):
+
+> Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-22: each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-4-steps/decisions.md Q17) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 4) ».

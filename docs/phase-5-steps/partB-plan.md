@@ -347,3 +347,5 @@ Budgets à accorder (nouveaux, hors Q16) : textes `-range` 350 / 400 / 500 ; `ra
   `fill.md`, the updates, a11y §20) before any code; `@dzgrid/core/range` (2 643 B gz over the core, grant 4 000);
   base types only (28 916 B gz unchanged). Details, tests that failed first, mutants and deviations:
   `step10-plan.md` « Done ».
+- **Steps 11a, 11b, 12** (2026-10-25/26; `295e4e8`, `832154d`, `a21428b`): `@dzgrid/dom/range` (blocks, then the clipboard) and `@dzgrid/dom/fill`; details in each step plan's « Done ».
+- **Step 13, the close (2026-10-26, not committed)**: budgets by the close rule (Q-C2, Q-C3), 0.3.0 prepared, the final gate green, PB1–PB13 recorded in ROADMAP « Phase 5 — close techniquement » (PB8 real spreadsheets and PB12 timings: owner / indicatif). `step13-plan.md` « Done ».

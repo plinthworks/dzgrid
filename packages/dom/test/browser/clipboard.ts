@@ -1,4 +1,4 @@
-// The clipboard on the browser page (Phase 5 step 11b, scripts/browser-clipboard.mjs, `-- --only clipboard`):
+// The clipboard on the browser page (docs/behaviors/clipboard.md; Phase 5 step 11b, scripts/browser-clipboard.mjs, `-- --only clipboard`):
 // `@dzgrid/dom/range` with `@dzgrid/dom/edit` (a recording save that answers at once) and `@dzgrid/dom/editors`.
 // Query: locale, theme (light|dark), skin (midnight|clinic), shadow=1 (the grid inside an open shadow root, review 1). `window.t`: the grid, the requests, cells, the block,
 // what the live regions said, a MutationObserver count of elements a paste could have brought, the source button

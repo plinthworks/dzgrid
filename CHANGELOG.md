@@ -7,7 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Toward 0.3.0 (Phase 5, editing; not released).
+## [0.3.0] - unreleased
+
+Prepared at the Phase 5 close (2026-10-26), **not published**: the four packages at 0.3.0, their `@dzgrid/*` peers on
+`^0.3.0`. Phase 5, editing — Part A (cell editing, saves, undo) and Part B (blocks of cells, the clipboard, the fill
+handle, bulk edit) — plus the showcase themes, the framework bridges and two demos. Published on the owner's word only,
+under the same conditions as 0.1.0 and 0.2.0 (never published either). Sizes: ROADMAP « Final budgets (Phase 5) ».
+
+By area (the detail, step by step, below):
+
+- **Core** (`@dzgrid/core`): `ColumnDef.editable` / `validate` / `edit`, `editableAt`, the edit seams of the kernel
+  (`edits.reader`, `rows.reapply`, `context.app`), the stale order; new entries **`@dzgrid/core/edit`** (saves, local
+  and server refusals, undo / redo) and **`@dzgrid/core/range`** (blocks, TSV, copy values, paste and fill plans).
+- **DOM** (`@dzgrid/dom`): new entries **`/edit`**, **`/editors`**, **`/editors-list`**, **`/range`**, **`/fill`**
+  and their texts `locales/{en,fr,ar}-{edit,editors,range,fill}`; `settings.rowHeight`, `rowClass`, `headerClass`;
+  `aria-multiselectable` with a block; the lazy loader in `@dzgrid/dom/internal`.
+- **Theme** (`@dzgrid/theme`): `edit.css`, `range.css`, `fill.css` (each with a `.unlayered.css` copy), the showcase
+  themes `midnight.css` and `clinic.css`, the bridges `tailwind.css` (revised), `tailwind3.css`, `bootstrap.css`; the
+  cascade layer `dzgrid`; the visible keyboard position (S12-Q8 bis).
+- **Angular** (`@dzgrid/angular`): `edit()`, `editors()`, `listEditor`, `range()`, `fill()` through `[features]`, a live
+  `[save]`, `(cellEdited)`, `(saveFailed)`, `(orderStale)`, `(undoChanged)`, `(rangeChanged)`, `(rangeCopied)`,
+  `controller.edit()`, `.range()`, `.fill()`, template and component editors, `[rowClass]`, `[rowHeight]`.
+
+### Changed — breaking (against 0.2.0)
+
+Checked at the close on `git diff v0.2.0..HEAD` of the packages' sources (public types, injected CSS, theme files),
+not from memory:
+
+- **The CSS sits in the cascade layer `dzgrid`** (T1): `dzgrid.css`, `contrast.css`, the bridges and the layout the DOM
+  injects are layered (`dzgrid.layout < theme < skin < bridge < contrast`, T9). An application's unlayered rule now
+  wins over the grid's whatever its specificity; an app whose reset (Tailwind 3 preflight, Bootstrap Reboot) would
+  beat the grid imports the `.unlayered.css` copies.
+- **`aria-readonly` is computed**: the viewport keeps `aria-readonly="true"` only while no shown column is editable;
+  once one is, the viewport's attribute goes and each data cell that cannot be edited says `aria-readonly="true"`. A
+  test or a tool reading only the viewport's attribute must read the cells on an editable grid.
+- **`GridEvent` gains nine events** (`orderStale`, `cellEdited`, `saveFailed`, `editStates`, `editingStarted`,
+  `editingStopped`, `rangeChanged`, `rangeCopied`, `undoChanged`) and **`GridCommand` three commands**
+  (`edits.reader`, `rows.reapply`, `context.app`): a `switch` that claimed to be exhaustive must handle them.
+- **`ProblemCode` gains `edit-structure` and `invalid-setting`** (exhaustive switches, translated messages).
+- **`ClientModel.reapply()` is told with the source given, `api` by default** (it was always `user`).
+- **The base theme's look**: the focused cell's ring is stronger, with a cell tint and an active-row tint (S12-Q8 bis);
+  a visual change for every grid using `dzgrid.css`.
+- **Row heights follow the browser's default text size** (`font-size: medium`), no longer the page's root font size.
+- With `range()` on (opt-in, new in 0.3.0), Shift+click and Ctrl+A select a block of cells, not rows (QB1); rows are
+  checked by their box.
+
+Changed during Phase 5 but **not breaking against 0.2.0** (new in 0.3.0, so no 0.2.0 code depends on them):
+`editors({ enterMoves })` defaults to `'stay'` (Q3 revised); `SaveOrigin` includes `cut`; Space on a yes/no cell toggles
+it, not the row (O8); `FilterKind.test` / `wire` (and `FilterModel` kinds' `wire`) get the app context as an extra,
+optional argument (an older kind still type-checks); the tzslot loader moved from the filters' private module into
+`@dzgrid/dom/internal`.
 
 ### Changed
 

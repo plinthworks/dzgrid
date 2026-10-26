@@ -1,4 +1,4 @@
-// Blocks of cells on the browser page (Phase 5 step 11a, scripts/browser-range.mjs, `-- --only range`): `@dzgrid/dom/range`
+// Blocks of cells on the browser page (docs/behaviors/range-selection.md, fill.md; Phase 5 step 11a, scripts/browser-range.mjs, `-- --only range`): `@dzgrid/dom/range`
 // with `@dzgrid/theme/range.css`. Query: locale, theme (light|dark), skin (midnight|clinic), rows (default 400; 1000000 for
 // scaled scrolling), tree=1 (parents with children, two pinned parents); fill=1 (step 12: edit() and fill(), the columns
 // editable, « Qté » pinned at the start too — two start-pinned columns).

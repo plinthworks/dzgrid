@@ -25,16 +25,19 @@ const budget = JSON.parse(readFileSync(`${ROOT}/size-budget.json`, 'utf8')) as {
 /** name: value of each declaration of a body. */
 const decls = (body: string) => Object.fromEntries(body.split(';').map((d) => d.trim()).filter(Boolean).map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()]));
 
+/** The Phase 5 close (step 13, Q-C2): measure + 10 % rounded up to 50 B (midnight 446, clinic 472), under T7's 650. */
+const CLOSE_BUDGET = { midnight: 500, clinic: 550 } as const;
+
 for (const name of ['midnight', 'clinic'] as const) {
   describe(`${name}.css`, () => {
     const file = `${name}.css`;
     const fixturePath = here(`./fixtures/${name}.json`);
 
-    it('exists, is exported and shipped, and has its budget (T7: 650 B)', () => {
+    it('exists, is exported and shipped, and has its budget (T7 grant 650 B; the Phase 5 close: the measure + 10 %)', () => {
       expect(existsSync(here(`../${file}`))).toBe(true);
       expect(pkg.exports[`./${file}`]).toBe(`./${file}`);
       expect(pkg.files).toContain(file);
-      expect(budget.entries[`@dzgrid/theme/${file}`]).toEqual({ file: `packages/theme/${file}`, maxGzip: 650 });
+      expect(budget.entries[`@dzgrid/theme/${file}`]).toEqual({ file: `packages/theme/${file}`, maxGzip: CLOSE_BUDGET[name] });
     });
 
     it('opens with the order statement; its one block in dzgrid.skin, on the page and on an area (T6)', () => {

@@ -314,15 +314,16 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
   it('hold the budgets set at the close (measure + 10 %, rounded up to 50 B, owner Q2)', () => {
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[]; over?: string }> }).entries;
     expect(b['@dzgrid/core']!.maxGzip).toBe(29000); // the owner's grant, Phase 4 close (Q17b)
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(21700); // Phase 5 step 4: the measure 21 656 + a margin (grant 21 980)
-    // Owner S6-O6 (Phase 5 step 6): the filters' loader moved in, its measure + 50 (1 184 → 1 234), ceiling 1 250.
-    expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(1234);
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(21980); // Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant 21 980
+    // Owner S6-O6 (Phase 5 step 6): the filters' loader moved in, its measure + 50 (1 184 → 1 234), ceiling 1 250;
+    // Phase 5 close (Q-C2): the measure 1 184 + 10 %, capped at that ceiling → 1 250.
+    expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(1250);
     expect(b['@dzgrid/dom/slots']!.maxGzip).toBe(1400);
-    expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 550, over: '@dzgrid/core' }); // Phase 4 close: 492 + 10 %
+    expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 600, over: '@dzgrid/core' }); // Phase 4 close: 492 + 10 % = 550; Phase 5 close (Q-C3): 512 + 10 % = 600
     expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 750, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
     expect([b['@dzgrid/dom/locales/en-rules']!.maxGzip, b['@dzgrid/dom/locales/fr-rules']!.maxGzip, b['@dzgrid/dom/locales/ar-rules']!.maxGzip]).toEqual([200, 200, 250]);
     expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(10000); // the owner's grant (Q17b), §5.2's /filters 10 kB
-    expect(b['@dzgrid/theme']!.maxGzip).toBe(2500); // the owner's grant, Phase 4 close (Q17b)
+    expect(b['@dzgrid/theme']!.maxGzip).toBe(2750); // Phase 5 close (Q-C2): the measure 2 494 + 10 %, within T7's 3 050
     expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3550); // Phase 4 close: 3 211 + 10 %
     expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1350); // a raise: it was at its cap
   });

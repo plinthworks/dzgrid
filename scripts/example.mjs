@@ -61,7 +61,7 @@ function installed(dir) {
 
 function build() {
   if (!flag('no-pack')) sh('npm', ['run', 'pack:local'], ROOT);
-  // The same version on every pack (0.2.0 until a release): npm would keep the old copy. Removed, then installed again.
+  // The same version on every pack (0.3.0 until a release): npm would keep the old copy. Removed, then installed again.
   rmSync(join(EXAMPLE, 'node_modules/@dzgrid'), { recursive: true, force: true });
   // Their lock entries too: the old tarball's integrity made npm reinstall its cached copy (step 11).
   const lockFile = join(EXAMPLE, 'package-lock.json');

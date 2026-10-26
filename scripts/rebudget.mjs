@@ -8,7 +8,7 @@
  *
  * Dry by default: prints old / measure / new and changes nothing; `--write` saves the file.
  * - Sizes: measure + 10 %, rounded up to 50 B, never above the owner's grants (Phase 4 close,
- *   docs/phase-4-steps/decisions.md Q17b) or the plan's ceilings (ARCHITECTURE §5.2, K.8), never below
+ *   docs/phase-4-steps/decisions.md Q17b; Phase 5 close, docs/phase-5-steps/decisions.md Q16, Q-C2, Q-C3) or the plan's ceilings (ARCHITECTURE §5.2, K.8), never below
  *   the measure. Measured by size.mjs's own `measureEntries`, or read from a saved
  *   `npm run check:size` output (`--from`). Entries without a budget (maxGzip null) are kept.
  * - Node times (`npm run bench`, several runs: the median per line): max(m × 1.1, m + 0.5 ms) rounded
@@ -30,7 +30,8 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 /**
  * The ceilings a size budget never goes above. Phase 4 close (owner decision 2026-10-22,
  * docs/phase-4-steps/decisions.md Q17b): the owner's grants for the entries he named; the plan's ceilings
- * (ARCHITECTURE §5.2) for the others. K.8 (Q17a): the audit profile's guard stays 83 500; the real Angular
+ * (ARCHITECTURE §5.2) for the others. Phase 5 close (owner 2026-10-26, docs/phase-5-steps/decisions.md Q16,
+ * Q-C2, Q-C3): the measure + 10 % everywhere, capped at the Phase 5 grants named below. K.8 (Q17a): the audit profile's guard stays 83 500; the real Angular
  * example's 92 500 (S12-Q10; S9-Q7 92 000) is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
  */
 const SIZE_CEILINGS = {
@@ -41,11 +42,13 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/tree-lazy': 1500,
   '@dzgrid/core/detail': 1050, // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
   '@dzgrid/core/edit': 3100, // Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
+  '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
   '@dzgrid/core/range': 4000, // Phase 5 Q16 (Part B): blocks of cells, TSV, the paste and fill plans; the line at the measure + 10 % at the close
   '@dzgrid/dom': 21980, // showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10000,
   '@dzgrid/dom/tree': 3800, // owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said)
   '@dzgrid/dom/tree-lazy': 1000,
+  '@dzgrid/dom/parts': 800, // Phase 5 close Q-C3 (2026-10-26): 700 → 800 by the close rule (the measure 689 + 10 %), accepted
   '@dzgrid/dom/detail': 4150, // owner S8-O3 (2026-10-24): 3 900 → 4 000 (a nested grid kept alive while it saves); S8-O7: → 4 150 (kept while refused, let go with its master or the grid around)
   // Phase 5 Q16: /editors 8 000; owner S4-O1 (2026-10-23): @dzgrid/dom/edit taken out of it, the two together ≤ 8 000.
   // Split at the step-4 measure: dom/edit 3 311 + 10 % → 3 650, /editors the rest.
@@ -90,7 +93,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-fill': 300,
   '@dzgrid/dom/locales/ar-fill': 380,
   '@dzgrid/theme/fill.css': 460, // owner S12-Q9: 300 → 460 (measured 415)
-  '@dzgrid/theme': 3050, // T7: inside Q16's 2 900, up to 3 050 if needed
+  '@dzgrid/theme': 2750, // T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7
   '@dzgrid/theme/tailwind.css': 500, // T7: each framework bridge
@@ -116,7 +119,7 @@ export function sizeBudget(measure, ceiling = null) {
 }
 
 const SIZE_COMMENT = (date) =>
-  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on ${date}: each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-4-steps/decisions.md Q17) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 4) ».`;
+  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on ${date} (Phase 5 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-5-steps/decisions.md Q16, Q-C2, Q-C3) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 5) ».`;
 
 /**
  * A new size-budget.json from `measures` (name → gz bytes). Returns the new document (the given one

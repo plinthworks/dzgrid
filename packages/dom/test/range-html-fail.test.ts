@@ -1,4 +1,4 @@
-// The pasted-HTML reader that cannot be loaded (Phase 5 step 11b, owner S11b-Q5): the paste is refused with a
+// The pasted-HTML reader that cannot be loaded (docs/behaviors/clipboard.md 13 and « As built at step 11b »; Phase 5 step 11b, owner S11b-Q5): the paste is refused with a
 // sentence (« Loading failed »), nothing is written, a text paste never asks for the chunk, a later paste tries again.
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { cleanup, clip, cmake, flush } from './support-clip.js';

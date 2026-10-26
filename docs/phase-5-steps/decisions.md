@@ -174,3 +174,10 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S12-Q8 bis (owner, 2026-10-25):** « avec les flèches je ne vois pas la cellule, je ne sais pas où je suis »: the keyboard position must be obvious: a stronger ring plus a cell tint on the active cell, and a subtle active-row tint (contrast-checked, forced colours, RTL, no layout move), in the base theme and both skins.
 - **S12-Q9 (owner, 2026-10-25):** `@dzgrid/dom/fill` 1 600 → 3 000 (measured 2 729: base ~1 700, drag, keyboard mode, Ctrl+D/R, click-click all kept); `fill.css` 300 → 460.
 - **S12-Q10 (owner, 2026-10-26):** the real Angular example ceiling 92 000 → 92 500 (measured 92 059 after S12-Q8's theme cues and the Angular range/fill inputs). K.8 guard stays 83 500.
+
+## Phase 5 close (owner, 2026-10-26) — plan `step13-plan.md`
+
+- **Q-C1:** tag `v0.3.0` created locally only; `main` pushed without the tag; nothing published.
+- **Q-C2:** budgets at the close = measure + 10 % everywhere, capped at the owner's grants (theme up to 2 750 within T7's 3 050; Angular up to 7 000 per S9-Q6's ceiling; `dom/internal` up to 1 250 per S6-O6).
+- **Q-C3:** `core/rules` 600 and `dom/parts` 800 by the close rule are accepted.
+- **Q-C4:** Phase 5 called « close techniquement » with the owner's manual checks still open (124a–b, Excel/Sheets/Safari, listening, Arabic, Ctrl+D/R bookmark).

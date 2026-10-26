@@ -1,6 +1,6 @@
 {
   "name": "@dzgrid/theme",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "An optional stylesheet for DzGrid: tzslot's palette, light and dark, more contrast, forced colours; two showcase themes; bridges to Tailwind CSS 3 and 4 and Bootstrap 5.3. Plain CSS.",
   "license": "MIT",
   "repository": { "type": "git", "url": "git+https://github.com/plinthworks/dzgrid.git", "directory": "packages/theme" },

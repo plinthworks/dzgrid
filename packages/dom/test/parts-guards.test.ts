@@ -47,12 +47,12 @@ describe('@dzgrid/dom/parts', () => {
 
   it('has its size lines, at the budgets set at the Phase 3 close (step 25: measure + 10 %, rounded up to 50 B)', () => {
     const b = (JSON.parse(read('size-budget.json')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[] }> }).entries;
-    expect(b['@dzgrid/dom/parts']).toEqual({ file: 'packages/dom/src/parts.ts', maxGzip: 700, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
+    expect(b['@dzgrid/dom/parts']).toEqual({ file: 'packages/dom/src/parts.ts', maxGzip: 800, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] }); // Phase 5 close (Q-C3): 689 + 10 %
     expect(b['@dzgrid/dom/locales/en-parts']).toEqual({ file: 'packages/dom/src/locales/en-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/dom/locales/fr-parts']).toEqual({ file: 'packages/dom/src/locales/fr-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/dom/locales/ar-parts']).toEqual({ file: 'packages/dom/src/locales/ar-parts.ts', maxGzip: 150 });
-    expect(b['@dzgrid/theme']!.maxGzip).toBe(2500); // the owner's grant, Phase 4 close (Q17b)
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(21700); // Phase 5 step 4: the measure 21 656 + a margin (grant 21 980)
+    expect(b['@dzgrid/theme']!.maxGzip).toBe(2750); // Phase 5 close (Q-C2): the measure 2 494 + 10 %, within T7's 3 050
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(21980); // Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant
     expect(b['@dzgrid/core']!.maxGzip).toBe(29000); // the owner's grant, Phase 4 close (Q17b)
   });
 

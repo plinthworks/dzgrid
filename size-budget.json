@@ -1,5 +1,5 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-22: each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-4-steps/decisions.md Q17) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 4) ».",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-26 (Phase 5 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-5-steps/decisions.md Q16, Q-C2, Q-C3) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 5) ».",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
@@ -12,7 +12,7 @@
     },
     "@dzgrid/core/spans": {
       "file": "packages/core/src/spans.ts",
-      "maxGzip": 3850,
+      "maxGzip": 3800,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/csv": {
@@ -22,7 +22,7 @@
     },
     "@dzgrid/core/rules": {
       "file": "packages/core/src/rules.ts",
-      "maxGzip": 550,
+      "maxGzip": 600,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/tree": {
@@ -47,7 +47,7 @@
     },
     "@dzgrid/core/range": {
       "file": "packages/core/src/range.ts",
-      "maxGzip": 4000,
+      "maxGzip": 3200,
       "over": "@dzgrid/core"
     },
     "@dzgrid/dom/locales/en": {
@@ -168,7 +168,7 @@
     },
     "@dzgrid/dom/locales/ar-editors": {
       "file": "packages/dom/src/locales/ar-editors.ts",
-      "maxGzip": 620
+      "maxGzip": 600
     },
     "@dzgrid/dom/locales/en-range": {
       "file": "packages/dom/src/locales/en-range.ts",
@@ -192,31 +192,31 @@
     },
     "@dzgrid/dom/locales/ar-fill": {
       "file": "packages/dom/src/locales/ar-fill.ts",
-      "maxGzip": 380
+      "maxGzip": 350
     },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
-      "maxGzip": 2500
+      "maxGzip": 2750
     },
     "@dzgrid/theme/midnight.css": {
       "file": "packages/theme/midnight.css",
-      "maxGzip": 650
+      "maxGzip": 500
     },
     "@dzgrid/theme/clinic.css": {
       "file": "packages/theme/clinic.css",
-      "maxGzip": 650
+      "maxGzip": 550
     },
     "@dzgrid/theme/tailwind.css": {
       "file": "packages/theme/tailwind.css",
-      "maxGzip": 500
+      "maxGzip": 400
     },
     "@dzgrid/theme/tailwind3.css": {
       "file": "packages/theme/tailwind3.css",
-      "maxGzip": 500
+      "maxGzip": 400
     },
     "@dzgrid/theme/bootstrap.css": {
       "file": "packages/theme/bootstrap.css",
-      "maxGzip": 500
+      "maxGzip": 350
     },
     "@dzgrid/theme/edit.css": {
       "file": "packages/theme/edit.css",
@@ -232,7 +232,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 21700,
+      "maxGzip": 21980,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -307,7 +307,7 @@
     },
     "@dzgrid/dom/parts": {
       "file": "packages/dom/src/parts.ts",
-      "maxGzip": 700,
+      "maxGzip": 800,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -475,7 +475,7 @@
     },
     "@dzgrid/dom/internal": {
       "file": "packages/dom/src/internal.ts",
-      "maxGzip": 1234,
+      "maxGzip": 1250,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -625,7 +625,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 6863,
+      "maxGzip": 7000,
       "external": [
         "@angular/*",
         "@dzgrid/*",

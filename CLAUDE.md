@@ -8,7 +8,7 @@ code, Community or Enterprise, is read or copied. Sister projects: tzslot
 whose conventions we follow. ngx-sheetgrid (`/Users/nadou/Dev/ngx-sheetgrid`)
 is ours too: its *pure* modules may be reused, never the parts that talk to ag-Grid.
 
-**If a session was lost, read `docs/STATUS.md` first**: where the work is (Phase 4 closed technically, 0.2.0 local; Part D, editing, next), the working rules, what waits for the owner. The validated plan of each step is in `docs/phase-3-steps/` and `docs/phase-4-steps/`.
+**If a session was lost, read `docs/STATUS.md` first**: where the work is (Phase 5, editing, closed technically, 0.3.0 local, unpublished; Phase 6 next, then the docs website), the working rules, what waits for the owner. The validated plan of each step is in `docs/phase-3-steps/`, `docs/phase-4-steps/` and `docs/phase-5-steps/`.
 
 ## Where things are
 

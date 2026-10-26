@@ -1,107 +1,72 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-25. **Phase 5 (l'édition), étapes 1 à 9 commitées** (dernier commit `7ba1020` : l'édition dans Angular, **partie A close techniquement**, portail G1–G17 vert ; 124a–b restent au propriétaire). **Partie B commencée : étape 10 commitée (`7156ec0`)** (fiches `range-selection.md`, `clipboard.md`, `fill.md`, a11y §20 ; entrée pure `@dzgrid/core/range` ; plan `docs/phase-5-steps/step10-plan.md` « Done »). **Étape 11a faite, non commitée** (`@dzgrid/dom/range`, sélection au clavier et au pointeur ; acceptée à sa taille par le propriétaire, S11-Q5 ; revue appliquée (R1–R7, 21 tests de l'analyse) ; portail vert : 384 fichiers / 6 084 tests, navigateur 885 / 885, Firefox et WebKit 7 / 7 ; `dom/range` 2 949 / 4 500 ; plan `docs/phase-5-steps/step11a-plan.md` « Done »). **Étape 11b faite, non commitée** (le presse-papiers dans `dom/range` : copier, couper, coller, Suppr sur un bloc, mémoire de copie, HTML collé lu à part par un morceau chargé à la demande, S11b-Q5 ; plan `docs/phase-5-steps/step11b-plan.md` « Done » ; mutants 52, 51 tués, 1 équivalent ; navigateur Chrome 34 / 34, Firefox et WebKit 13 / 13 ; `dom/range` 4 796 / 4 800, lecteur HTML 517 / 600, `ar-range` 500 / 500 ; revue appliquée R1–R7 et les 20 sondes de l'analyse, `step11b-plan.md` « Review »). **Étape 12 faite, non commitée** (2026-10-26) : `@dzgrid/dom/fill` (poignée, glisser, clic-clic, mode clavier, Ctrl+D / R, Ctrl+Entrée en masse), S12-Q8 (cellule et ligne actives visibles) ; budgets S12-Q9 (`dom/fill` 2 729 / 3 000, `fill.css` 415 / 460) ; mutants 52, 50 tués, 2 équivalents ; revue (4 corrections) et manques de l'analyse appliqués, tests d'abord ; portail vert après eux : 404 fichiers / 6 321 tests, navigateur 967 / 967, `--only fill` Chrome 36, Firefox et WebKit 30 ; exemple réel 92 059 / 92 500 (S12-Q10) ; détail `docs/phase-5-steps/step12-plan.md` « Done ». Phase 4 close techniquement ; **0.2.0 préparée en local, non publiée** (0.1.0 ne l'a jamais été). L'édition s'appelle **Phase 5** (décision Q2 ; phases suivantes +1 ; 0.3.0 à la fin).
+Mis à jour : 2026-10-26. **Phase 5 (l'édition) close techniquement** (étape 13, décision Q-C4) : parties A et B faites, portail final vert, **0.3.0 préparée en local, non publiée** (0.1.0 et 0.2.0 ne l'ont jamais été). Le commit « release: 0.3.0 prepared » et l'étiquette locale `v0.3.0` (Q-C1 : `main` poussée sans l'étiquette) : au chef de projet. Jamais `npm publish`. **Suite : Phase 6**, puis le site de documentation.
 
-L'ancien contenu de ce fichier (les paragraphes « Étape N faite » des Phases 3 et 4, revues et portails) est gardé mot pour mot dans `docs/phase-4-steps/status-log.md` ; le détail de chaque étape est aussi dans `ROADMAP.md`.
+L'ancien texte de ce fichier (étapes 1 à 12 de la Phase 5) est gardé mot pour mot dans `docs/phase-5-steps/status-log.md` ; celui des Phases 3 et 4 dans `docs/phase-4-steps/status-log.md`. Le détail de chaque étape est dans `ROADMAP.md` et `docs/phase-5-steps/stepNN-plan.md` (« Done », « Review »).
 
 ## Où on en est
 
-- **Phases 0 à 3** : faites ; Phase 3 close côté DzGrid le 2026-10-21 (étiquette locale `v0.1.0`, jamais publiée). Ce qui touche Sehhaty vit dans la piste « Intégration Sehhaty » (`docs/sehhaty-track.md`).
-- **Phase 4, parties A–C** : faites, close techniquement le 2026-10-22 (étape 13, `docs/phase-4-steps/step13-plan.md`). Plan `docs/phase-4-plan.md` (§5 « fermé le 2026-10-22 »), décisions du propriétaire `docs/phase-4-steps/decisions.md` Q1–Q17 (elles priment), plan de chaque étape dans `docs/phase-4-steps/`, décisions en français dans ARCHITECTURE « Index des décisions de la Phase 4 » et « Ajustements après la Phase 4 », critères de sortie dans ROADMAP « Phase 4 — close techniquement, 2026-10-22 ».
-- **Version** : les quatre paquets à **0.2.0**, pairs `@dzgrid/*` en `^0.2.0` une fois construits ; `npm run pack:local` donne `packed/dzgrid-{core,dom,angular,theme}-0.2.0.tgz` ; l'exemple Angular s'installe depuis ces archives. CHANGELOG `[0.2.0] - unreleased`.
-- **Commit de la clôture** (« release: 0.2.0 prepared », étiquette locale `v0.2.0`, push de `main`) : au chef de projet, après lecture de ce portail. Jamais `npm publish`.
+- **Phases 0 à 3** : faites (clôture côté DzGrid le 2026-10-21, étiquette locale `v0.1.0`).
+- **Phase 4** (arbre, maître/détail, ligne de filtres) : close techniquement le 2026-10-22 (`v0.2.0` locale).
+- **Phase 5** (l'édition) : close techniquement le 2026-10-26. Partie A (édition, enregistrements, refus, annuler) ; partie B (blocs de cellules, presse-papiers, poignée de recopie, Ctrl+D / R, modification en masse) ; thèmes vitrines, ponts Tailwind / Bootstrap, démos. **La partie A reste ouverte sur 124a–b seulement** (S9-Q5). Plan `docs/phase-5-plan.md` (§5 « fermé le 2026-10-26 »), décisions `docs/phase-5-steps/decisions.md` (elles priment), critères G1–G17 et PB1–PB13 dans ROADMAP « Phase 5 — close techniquement », écarts dans ARCHITECTURE « Ajustements après la Phase 5 ».
+- **Version** : les quatre paquets à **0.3.0**, pairs `@dzgrid/*` en `^0.3.0` une fois construits ; `npm run pack:local` donne `packed/dzgrid-{core,dom,angular,theme}-0.3.0.tgz` ; l'exemple Angular s'installe depuis ces archives. CHANGELOG `[0.3.0] - unreleased` (liste des changements cassants vérifiée contre `v0.2.0`).
+- **Ordre décidé par le propriétaire (2026-10-25)** : **Phase 6** (menu de colonne, choix des colonnes, zone de regroupement, déplacement des colonnes, `GridState`, lignes épinglées…) → **site de documentation** (Astro Starlight, FR + EN, en ligne sur sa parole seulement ; `docs/phase-5-steps/showcase-plan.md`) → **Phases 7 à 11** (regroupement, serveur infini, xlsx / menus / barre d'état / filtre avancé / glisser de lignes, pivot, durcissement). `dmp-doctor-patients` en dernier, après une revue de sécurité.
 
-### Étapes de la Phase 4 et leurs commits
-
-| Étape | Sujet | Commits (`git log`) |
-|---|---|---|
-| plan | plan de la Phase 4 et décisions du propriétaire | `30131ce` |
-| 1 | fiches, spike S12 (hauteurs variables), budgets | `81e07a0` |
-| 2–3 | coutures du cœur (nœuds, expansion, forme), `@dzgrid/core/tree` | `49c3787`, revue `a9c91e6` |
-| 4 | coutures DOM, `@dzgrid/dom/tree` | `5fd4d0d`, revue `6bfb50c` |
-| 5 | formes imbriquée et chemin, lignes de remplissage, CSV d'un arbre | `3ce75cc`, revue `bc01afa` |
-| 6 | animation de l'arbre, arbre d'un million de lignes | `7334f8d`, revue `9ab4234` |
-| 7 | enfants paresseux (hôte et serveur), `tree-lazy` | `1b23ee0`, revue `3bb7de7` |
-| 8 | `@dzgrid/core/detail` | `05795fd`, revue `a06131e` |
-| parents épinglés | `tree({ sticky })` (Q10–Q11) | `206121e`, revue `1a6d18f` |
-| 9 | base DOM : hauteurs variables, ligne de détail | `f4c77b7`, revue `b20130e` |
-| 10 | `@dzgrid/dom/detail`, grilles imbriquées | `7b1b4cd`, budgets `497f14b`, revue `6233ee5` |
-| 11 | Angular : `[(expanded)]`, panneaux de détail, `[dzgNested]` | `d9439c4`, revue `6422626` |
-| 12 | ligne de filtres affichable en direct, `[floatingFilters]` | `dcec156`, revue `ef530ae` |
-| 13 | clôture, partie 1 : « aucune ligne », tests lents, budgets | `936b27a` |
-| 13 | clôture, partie 2 : 0.2.0, portail final, docs | non commitée |
-
-### Portail final de la clôture (2026-10-22, une commande à la fois, un Chrome sans fenêtre à la fois)
-
-| Commande | Résultat |
-|---|---|
-| `npm run build` | vert (core, dom, angular ; manifestes, `repository`, pairs `^0.2.0`, cartes vérifiés) |
-| `npm run test:ci` | 1re passe : 303 fichiers, 4 840 tests, **1 échec** : `core/test/clock-walk.test.ts` « every local midnight of a year… » à 5,3 s pour le délai de 5 s, sous une charge de la machine de ~60 (autres projets) ; il passe dans `test:tz` (2 × 4 840 verts). Relancé une fois : 303 fichiers, 4 840 tests, **tous verts** (354 s) |
-| `npm run test:perm` | 2 fichiers, 6 tests (1 000 permutations par configuration), 210 s |
-| `npm run typecheck` | vert |
-| `npm run test:tz` (`--maxWorkers=2`) | Auckland et Los Angeles : 303 fichiers, 4 840 tests chacun, verts |
-| `npm run check:size` | 0 dépassement ; cœur 28 240, dom 20 648, angular 6 238, profil K.8 80 286 (garde 83 500) |
-| `npm run check:contrast` | 176 paires, 0 sous leur minimum |
-| `npm run test:browser` (complet) | 499 / 499 |
-| `npm run test:audit -- --full` | 42 / 42 ; 1 000 permutations (rapide : 84 s et 40 s ; saisie : 76 s et 73 s) ; export 100 000 × 30 en 436 / 426 / 407 ms sans tâche longue |
-| `node packages/angular/browser/run.mjs` | 54 / 54 ; reliaison 5,45 µs par cellule composant |
-| `npm run example:build` | archives 0.2.0 refaites et installées en copies (les quatre à 0.2.0) ; default, zone, baseline |
-| `npm run example:bytes` | part DzGrid **86 988** ≤ 90 000 (Q17a) ; Angular et coquille 38 654 ; `@dzgrid/angular` ≈ 4 001 |
-| `npm run example:csv` | 10 tests ; `out/audit-ar.csv`, 13 450 o, BOM |
-| `npm run example:ssr` | fr et ar : hôte seul, 0 ligne, aucun minuteur, aucune erreur |
-| `npm run example:browser` | 4 / 4 (fr, ar ; sans zone, zone.js) |
-| `npm run pack:local` | quatre archives 0.2.0 : core 369 700 o (255 fichiers), dom 465 671 o (426), angular 38 082 o (6), theme 11 568 o (8). Ni tests, ni bac à sable, ni captures, ni résultats ; aucun `.d.ts.map` ; 0 problème de carte ; chaque fichier nommé par `exports` présent (`scripts/test/release-review.test.ts`) |
-
-Aucun banc lancé (Q17d).
-
-## Ce qui attend le propriétaire
-
-- **Étape 11b** : faite, non commitée ; le commit au chef de projet. À la main (non bloquant) : **Excel** (Windows et macOS) et **Google Sheets**, en fr et en ar, dans les deux sens — grille → tableur : nombres en nombres, dates en dates, `'=1+1` en texte, `0123` gardé, retours à la ligne dans une cellule, colonne A = première colonne de la grille en arabe (risque K1 : le tableur lit peut-être notre HTML avant le TSV) ; tableur → grille sur `orders-edit.html`. **Safari réel** (S11b-Q2) : Cmd+C / Cmd+V / Cmd+X sur `orders-edit.html` ; si rien ne se passe sans texte sélectionné, la parade vient à l'étape 12. Lecteurs d'écran : a11y §20, items 129–133 (phrases « Cellules collées : n ; refusées : n. Enregistrement en cours »). **Relecture arabe** des textes raccourcis de `locales/ar-range` (« النسخ: n »، « اللصق: n »، « اللصق أكبر من {max} خلية؛ لم يُلصق شيء »…).
-
-- **Étape 11a** : faite, non commitée ; le commit au chef de projet. À écouter : §20 items 125–128 et 136 (lecteurs d'écran) ; relecture arabe de `locales/ar-range` (« 3 صفوف، عمودان محددة », « أُلغي التحديد: تغيّر الترتيب ») ; regarder la couleur violette du bord de bloc dans Clinic (son vert était trop proche de son accent).
-- **Bloquant pour clore tout à fait la partie A** (S9-Q5 : la partie B peut commencer avant) : 124a (méthodes de saisie japonaise et pinyin, touches mortes françaises) et 124b (iOS, Android : toucher, double toucher, bulle au-dessus du clavier, VoiceOver / TalkBack), à la main, sur `orders-edit.html`.
-- **Étape 9** : faite, non commitée ; le commit (« feat(angular): editing… », puis le portail de la partie A) au chef de projet.
-
-- **Édition** : écoute §19 (dont 119, 124a–124g) ; relecture arabe de `ar-edit`, `ar-editors` (textes nouveaux des étapes 4 à 8) ; regarder la bordure orange dans l'anneau bleu.
-
-- **Écoute au lecteur d'écran** §16–§18 de `docs/a11y-protocol.md` (arbre, détail, ligne de filtres) : non bloquante ; tant qu'elle n'est pas faite, rien n'est dit « validé ».
-- **Relecture arabe** de `locales/ar-tree`, `ar-detail`, `ar-filters` (dont « {name}، لا توجد صفوف » et les phrases de la ligne de filtres).
-- **Excel** : ouvrir le CSV arabe (`npm run example:csv` → `examples/angular-audit/out/audit-ar.csv`) et vérifier l'ordre des colonnes.
-- **Licence de GSAP** à confirmer avant toute publication.
-- **Portée npm et publication** : portée `@dzgrid` réservée, `@tzslot/core` et `@tzslot/dom` 2.2.0 publiés ; puis publication par GitHub Actions (OIDC), sur sa parole seulement.
-- **tzslot** : les demandes T1–T11 (`docs/tzslot-requests.md`).
-- **Palettes** `sehhaty.json` et la **spécification de l'étape 24** (écran `admin/audit-logs`), piste `docs/sehhaty-track.md`.
-- **Mesure des vitesses sur machine calme** (Q17d, reportée) : 17 lignes Node à froid au-dessus de leur budget depuis `bc01afa`, « toggle near the end » 11,6 / 11,5 dans Chrome ; ensuite la règle Q17c (corriger au-delà de +25 % ou sur le chemin courant — tri, filtre, défilement ; relèvement écrit entre +10 et +25 %).
-
-## En cours : Phase 5, l'édition
-
-À lire dans cet ordre : `docs/phase-5-steps/decisions.md` (toutes les réponses du propriétaire, elles priment), `docs/phase-5-plan.md`, puis le plan de l'étape (`docs/phase-5-steps/stepNN-plan.md`, sections « Done » et « Review » : tests rouges d'abord, mutants, écarts, portail).
+### Étapes de la Phase 5 et leurs commits
 
 | Étape | Sujet | Commit |
 |---|---|---|
-| 1 | fiches de comportement, a11y §19, décisions Q1–Q19 | `4880616` |
+| 1 | fiches, a11y §19, décisions Q1–Q19 | `4880616` |
 | 2 | coutures du cœur (`editable`, `validate`, ordre périmé, contexte de l'appli) | `6b390aa` |
-| — | thèmes vitrines Midnight / Clinic, couche CSS, copies sans couche | `8ccb6b0` |
-| — | ponts Tailwind 4 / 3 / Bootstrap, `rowClass`, `headerClass`, classes de pastilles | `01b07ae` |
+| — | thèmes vitrines, couche CSS, ponts, `rowClass` / `headerClass` | `8ccb6b0`, `01b07ae` |
 | — | `rowHeight`, démos commandes et RH | `502e1c8` |
-| 3 | `@dzgrid/core/edit` (enregistrements, refus globaux, annuler) | `904ed78` |
-| 4 | affichage : marques, lignes grisées, marque de remise en ordre | `b56279a` |
-| 5 | `@dzgrid/dom/editors` partie 1 (texte, nombre, touches, bulle) | `9513cfe` |
-| 6 | dates + calendrier, oui/non, liste (`editors-list`), éditeurs de l'appli | `51131af` |
-| 7 | enregistrements de bout en bout ; Entrée reste par défaut ; bordures dans l'anneau | `9ba9541` |
-| 8 | annuler/rétablir au clavier, arbres, détails, grilles imbriquées | `1acaabf` |
-| 9 | Angular : `[save]`, sorties, `controller.edit()`, éditeurs en gabarit (`c.reads`) et composant ; écran « stock » de l'exemple chargé à la demande ; portail de la partie A ; revue appliquée (ordre des sorties sous zone.js, `read()` qui lève) | `7ba1020` |
-| 10 | partie B : fiches (blocs, presse-papiers et cas Excel, recopie), a11y §20 ; `@dzgrid/core/range` (boîte, TSV, valeurs copiées, plan de collage, plan de recopie) ; types de base seulement | `7156ec0` |
-| 11a | `@dzgrid/dom/range` partie 1 (clavier, pointeur, peinture, phrases, `range.css`) ; couture de base `g.multi`, `spawned` ; alias vite ajoutés (S11-Q6) | `295e4e8` |
-| 11b | `@dzgrid/dom/range` partie 2 : le presse-papiers (copier, couper, coller, Suppr, mémoire, HTML collé à la demande) | non commitée |
+| 3 | `@dzgrid/core/edit` | `904ed78` |
+| 4 | affichage : marques, lignes grisées, remise en ordre | `b56279a` |
+| 5–6 | `@dzgrid/dom/editors` (texte, nombre, dates, oui/non, liste) | `9513cfe`, `51131af` |
+| 7–8 | enregistrements de bout en bout ; annuler / rétablir, arbres, détails | `9ba9541`, `1acaabf` |
+| 9 | Angular ; portail de la partie A | `7ba1020` |
+| 10 | partie B : fiches, `@dzgrid/core/range` | `7156ec0` |
+| 11a–11b | `@dzgrid/dom/range` : blocs, presse-papiers | `295e4e8`, `832154d` |
+| 12 | `@dzgrid/dom/fill`, cellule active visible | `9190b04`, `a21428b` |
+| 13 | clôture : budgets, 0.3.0, portail, docs | non commitée |
 
-**Ordre décidé par le propriétaire (2026-10-24)** : étape 9 (Angular + portail de la partie A, faite) → **partie B** (étapes 10–13 : blocs de cellules, presse-papiers et Excel, poignée de recopie, Ctrl+D/R, modification en masse, 0.3.0 ; avec la démo commandes inventée, la fiche `pharma/stock` n'est plus un préalable) → **site de doc** (Astro Starlight comme DzCalendar, FR + EN, mis en ligne seulement sur sa parole ; `docs/phase-5-steps/showcase-plan.md`) → Phase 6 (menu de colonne, choix des colonnes, barre de regroupement, déplacement des colonnes).
+### Portail final (2026-10-26, une commande à la fois, `caffeinate -i`, vitest ≤ 2 processus, un navigateur sans fenêtre à la fois)
 
-**Démo à essayer** : `http://127.0.0.1:4700/orders-edit.html` (blocs : Maj+flèches, glisser, Maj+clic, Ctrl+A, Échap ; `?range=0` les coupe) (`?locale=ar-DZ&theme=dark&skin=midnight`, `?paged=1`, `?tree=1`, `?enter=down`), `detail.html` (visites modifiables), `orders.html`, `hr.html`.
+| Commande | Résultat |
+|---|---|
+| `build`, `typecheck` | verts |
+| `test:ci` | 404 fichiers, 6 325 tests, verts (445 s, premier passage) |
+| `test:perm` | 5 fichiers, 10 tests, verts (231 s) |
+| propriétés à 3 000 graines | `range-fill-property` et `range-paste-property` verts |
+| `test:tz` | Auckland et Los Angeles : 404 / 6 325 chacun, verts |
+| `check:size` | 0 dépassement (91 lignes) ; `ar-range` 500 / 500 au plafond |
+| `check:contrast` | 954 paires, 0 sous leur minimum |
+| `test:browser` complet | 967 / 967 ; Firefox et WebKit : `edit-undo` 8, `range` 7, `clipboard` 13, `fill` 30, tous verts ; `--only playground` 41 / 41 |
+| `test:audit -- --full` | 42 / 42 ; export 100 000 × 30 en 406 / 399 / 401 ms, sans tâche longue |
+| Angular (`packages/angular/browser/run.mjs`) | 90 / 90 |
+| exemple | `build` (archives 0.3.0 en copies), `bytes` **92 059 / 92 500** (écran stock 32 610 à part), `csv` 10 tests (BOM), `ssr` fr / ar × audit / stock sans erreur, `browser` 8 / 8 |
+| `pack:local` | core 422 356 o (288 fichiers), dom 634 791 (528), angular 43 772 (6), theme 28 600 (24) ; ni tests, ni brouillons, ni sources `.ts`, ni `.d.ts.map` ; licence et README dans chacune |
 
-**Tailles proches du plafond** (octets gz) : cœur 28 916 / 29 000 (inchangé à l'étape 10), `core/range` 2 897 / 4 000 (nouvelle entrée, revue de l'étape 10 appliquée), `core/edit` 3 098 / 3 100 (gelé), `dom/edit` 4 146 / 4 150, `dom/tree` 3 795 / 3 800, `dom/detail` 4 092 / 4 150, `/editors` 6 595 / 6 650, `edit.css` 2 197 / 2 200, `ar-edit` 895 / 900, angular 6 743 / 6 793 (plafond 7 000, S9-Q6) ; `/editors` 6 601 / 6 650 ; exemple réel 91 093 / 92 000 (S9-Q7). Toute hausse : décision écrite du propriétaire.
+Aucun banc lancé (Q17d). Aucune relance nécessaire.
 
-**Pour l'étape 12** : la poignée de recopie dans sa propre entrée (S11-Q5, QB8) ; `dom/range` est à 4 787 / 4 800, plus de place ; les repères de collage des étapes 8 et 9 sont refaits sur le vrai collage (11b). Le Safari réel (S11b-Q2) décide d'une parade éventuelle.
+**Tailles au plafond ou presque** (octets gz, budgets de la clôture) : `ar-range` 500 / 500, `core/edit` 3 098 / 3 100, `edit.css` 2 197 / 2 200, `dom/edit` 4 146 / 4 150, `dom/tree` 3 795 / 3 800, `ar-edit` 895 / 900, calendrier 1 494 / 1 500, cœur 28 916 / 29 000, `dom/range` 4 768 / 4 800. Toute hausse : décision écrite du propriétaire. Tableau complet : ROADMAP « Final budgets (Phase 5) ».
+
+## Ce qui attend le propriétaire (rien ne bloque la Phase 6)
+
+1. **124a–b** (le dernier point qui garde la partie A ouverte, S9-Q5) : méthodes de saisie japonaise et pinyin, touches mortes françaises ; iOS / Android (toucher, double toucher, bulle au-dessus du clavier, VoiceOver / TalkBack), sur `orders-edit.html`.
+2. **Excel** (Windows, macOS) et **Google Sheets**, fr et ar, dans les deux sens (nombres, dates, `'=1+1`, `0123`, retours à la ligne dans une cellule, colonne A en arabe : risque K1) ; le CSV arabe dans Excel (`examples/angular-audit/out/audit-ar.csv`, ordre des colonnes).
+3. **Safari réel** (S11b-Q2) : Cmd+C / V / X sur `orders-edit.html` sans texte sélectionné ; une parade seulement si cela échoue.
+4. **Écoute au lecteur d'écran** §16–§18 (arbre, détail, ligne de filtres), §19 (édition : 119, 124c–g), §20 (blocs, presse-papiers, recopie : 125–142). Jamais « validé » avant.
+5. **Relectures arabes** : `ar-tree`, `ar-detail`, `ar-filters`, `ar-edit`, `ar-editors`, `ar-range` (textes raccourcis), `ar-fill`.
+6. **Licence de GSAP** à relire (https://gsap.com/standard-license : produits concurrents, redistribution) avant toute publication.
+7. **Publication npm** (portée `@dzgrid`, GitHub Actions OIDC), sur sa parole seulement ; 0.1.0, 0.2.0 et 0.3.0 jamais publiées.
+8. **tzslot** : demandes T1–T11 (`docs/tzslot-requests.md`).
+9. **Palettes** `sehhaty.json` et la spécification de l'étape 24 (`docs/sehhaty-track.md`) ; la fiche `pharma/stock` (Q19).
+10. **Mesure sur machine calme** (Q17d) : les 17 lignes Node, « toggle near the end », les lignes du jeu B (masse, collage, recopie), puis la règle Q17c.
+11. **Ctrl/Cmd+D (favori) et Ctrl/Cmd+R (recharger)** dans de vrais navigateurs avec fenêtre (§20 132, 138) : sans fenêtre on prouve seulement que la touche est empêchée.
+12. **À regarder** : le bord violet du bloc dans Clinic, la bordure orange dans l'anneau bleu.
+
+**Démo à essayer** : `http://127.0.0.1:4700/orders-edit.html` (blocs, presse-papiers, poignée, Ctrl+D / R, Ctrl+Entrée ; `?locale=ar-DZ&theme=dark&skin=midnight`, `?paged=1`, `?tree=1`, `?enter=down`, `?range=0`), `detail.html`, `orders.html`, `hr.html`.
 
 ## Commandes
 
@@ -111,7 +76,7 @@ npm run test:perm      # 1 000 permutations de l'écran d'audit et de l'export, 
 npm run test:tz        # la suite à Auckland et à Los Angeles (chaque passe avec --maxWorkers=2)
 npm run typecheck      # cœur, DOM, tests, gabarits Angular (ngc)
 npm run build          # packages/*/dist (refuse un manifeste vers src/, une carte vers un fichier absent)
-npm run pack:local     # les quatre archives 0.2.0 dans packed/
+npm run pack:local     # les quatre archives 0.3.0 dans packed/
 npm run check:size     # tailles contre size-budget.json (npm run build d'abord pour la ligne Angular)
 npm run check:contrast # chaque paire de couleurs du thème, de Midnight et de Clinic
 npm run build:theme    # dzgrid.css, contrast.css et leurs copies sans couche, depuis le Sass

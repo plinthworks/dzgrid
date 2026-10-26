@@ -107,7 +107,8 @@ describe('layering of the base and the server entry', () => {
     // reset, the creation context; reader-off dropped) → 28 926. Showcase demos (owner D1, 2026-10-23): +6, the
     // problem code `invalid-setting` for `rowHeight` → 28 932. Phase 5 step 3 (2026-10-23): −16, the `validate`
     // shape check moved to `@dzgrid/core/edit` (the base gains only types: `EditChecks`, four events,
-    // `SaveOrigin`) → 28 916, the measure.
+    // `SaveOrigin`) → 28 916, the measure. Phase 5 close (step 13, 2026-10-26): steps 4–12 added no base byte
+    // (types only, the range and fill seams in their entries); the guard stays 28 916, the close's measure.
     expect(gz).toBeLessThanOrEqual(28916);
   });
 
@@ -148,13 +149,13 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts') || f.endsWith('src/csv/chunks.ts'))).toBe(false);
   });
 
-  it('the range entry fits its grant over the base (owner Q16 4 000 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
+  it('the range entry fits its line over the base (owner Q16 grant 4 000; the Phase 5 close: the measure 2 897 + 10 % = 3 200 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
     const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './range.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
     const entry = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core/range'];
-    expect(entry).toMatchObject({ file: 'packages/core/src/range.ts', maxGzip: 4000, over: '@dzgrid/core' });
+    expect(entry).toMatchObject({ file: 'packages/core/src/range.ts', maxGzip: 3200, over: '@dzgrid/core' });
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
     // The step's planned share (step10-plan « Sizes »): 2 200–3 000; more is a question, not a failure here.
     expect(both - alone).toBeGreaterThan(500);

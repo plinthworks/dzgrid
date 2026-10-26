@@ -83,13 +83,16 @@ function resolved(file: keyof typeof BRIDGES, own: Record<string, string>, schem
   return Object.fromEntries(Object.entries(own).map(([k, v]) => [k, v.replace(/theme\('([^']+)'\)/g, (_, p: string) => t[p] ?? `theme('${p}')`)]));
 }
 
+/** The Phase 5 close (step 13, Q-C2): measure + 10 % rounded up to 50 B (325 / 325 / 293), under T7's 500. */
+const CLOSE_BUDGET: Record<string, number> = { 'tailwind.css': 400, 'tailwind3.css': 400, 'bootstrap.css': 350 };
+
 for (const [file, b] of Object.entries(BRIDGES) as [keyof typeof BRIDGES, (typeof BRIDGES)[keyof typeof BRIDGES]][]) {
   describe(file, () => {
-    it('exists, is exported and shipped, and has its budget (T7: 500 B)', () => {
+    it('exists, is exported and shipped, and has its budget (T7 grant 500 B; the Phase 5 close: the measure + 10 %)', () => {
       expect(existsSync(here(`../${file}`))).toBe(true);
       expect(pkg.exports[`./${file}`]).toBe(`./${file}`);
       expect(pkg.files).toContain(file);
-      expect(budget.entries[`@dzgrid/theme/${file}`]).toEqual({ file: `packages/theme/${file}`, maxGzip: 500 });
+      expect(budget.entries[`@dzgrid/theme/${file}`]).toEqual({ file: `packages/theme/${file}`, maxGzip: CLOSE_BUDGET[file] });
     });
 
     it('opens with the order statement; every rule in dzgrid.bridge', () => {
