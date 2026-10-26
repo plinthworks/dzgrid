@@ -79,3 +79,11 @@ export interface RangeMessages {
   readonly locale: string;
   readonly text: { readonly [K in RangeMessageKey]: MessageValue };
 }
+
+/** Moving columns' texts (`@dzgrid/dom/columns`, Phase 6 step 2), in their own bundles (`locales/<lang>-columns`): optional here, required by `columns()`. */
+export type ColumnsMessageKey = 'move.placed' | 'move.edge' | 'move.locked' | 'move.cancelled';
+/** A columns bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_COLUMNS.text }`. */
+export interface ColumnsMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in ColumnsMessageKey]: MessageValue };
+}

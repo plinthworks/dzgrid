@@ -95,6 +95,9 @@
       "@dzgrid/dom/fill": [
         "./packages/dom/src/fill.ts"
       ],
+      "@dzgrid/dom/columns": [
+        "./packages/dom/src/columns.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

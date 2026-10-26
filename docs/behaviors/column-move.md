@@ -11,7 +11,7 @@ Entry: `@dzgrid/dom/columns`. Related: `pinned-columns.md`, `spans.md` (split gr
 (« Déplacer vers le début / la fin »), `columns-chooser.md` (reordering in the list).
 
 ## What the user does
-Presses a column header with the mouse or a pen and drags it sideways; or, on a focused header, presses
+Presses a column header with the mouse and drags it sideways (a pen clicks, see « As built »); or, on a focused header, presses
 Ctrl+Shift+Left / Right (one place) or Ctrl+Shift+Home / End (to the edge) — Cmd+Shift on a Mac; or uses the column menu or the
 chooser. On a touch screen, a finger on a header scrolls: the column moves through the menu or the chooser.
 
@@ -30,7 +30,7 @@ chooser. On a touch screen, a finger on a header scrolls: the column moves throu
 
 **Pointer**
 1. A drag starts on a column header's label area after the pointer moved **4 px** (logical distance, either
-   axis) with the primary button down, mouse or pen. Under 4 px it is a click (sort, as today). A press on the
+   axis) with the primary button down, the mouse only (a pen: « As built »). Under 4 px it is a click (sort, as today). A press on the
    resize edge, the ⋮ button, the filter button, the reapply mark, a header part's control or a floating
    filter cell never starts a drag.
 2. **Touch** (`pointerType: 'touch'`): never starts a drag; the header keeps `touch-action` scrolling
@@ -142,3 +142,38 @@ None left from this sheet.
 `columns-move-keys.test.ts` (LTR / RTL, edges, sentences, owners), `columns-drop-targets.test.ts`;
 browser: drag in Chrome fr / ar RTL dark (bar on the right side, pinned edges, header alignment 1 px after a
 move), Firefox and WebKit for the RTL drag and auto-scroll.
+
+## As built (Phase 6 step 2, 2026-10-26)
+
+- Entry `@dzgrid/dom/columns`: `columns({ drag? })` → `api(grid).move(column, -1 | 1 | 'start' | 'end', { say? })`
+  (`'moved' | 'edge' | 'locked' | 'unknown'`, source `user`) and `api(grid).dropTargets.add(el, { accept, drop, label? })`;
+  texts `locales/{en,fr,ar}-columns` (`COLUMNS_KEYS`, a missing one throws at setup); look `@dzgrid/theme/columns.css`
+  (`.dzg-move` layer, `.dzg-move-ghost`, `.dzg-move-bar` in `--dzg-move-bar`, fallback the accent; `data-dzg-moving`,
+  `data-dzg-dragging`; the host styles `data-dzg-drop="over"`).
+- Order logic `columns/order.ts`, DOM-free (reused by the chooser at step 4): the full order is the model's sort over
+  every column, hidden ones too; a move rewrites the ranks 0..n−1 that changed (the first move freezes them all) and the
+  pin in the same patch. Locked columns (`movable: false`) keep their slot in the full order; the others are reordered,
+  then poured into the free slots. A drop gap whose result would not land the column where the bar shows is not offered:
+  the bar goes to the nearest gap that is, toward the column's own place first.
+- **A pen does not drag a header** (review 2026-10-26, consistent with blocks and the fill, S12-Q12, in Q-M3's
+  spirit): its press is a click (sort); rule 1's « mouse or pen » is read « mouse » only. Columns move with a pen
+  through the keys, the menu (step 3) or the chooser (step 4).
+- The click that follows a drop or a cancelled drag (Escape, a lost capture, a blur…) is swallowed: a drag never sorts;
+  the swallow ends with the press's task (a later keyboard click sorts) or at the next press.
+- Rules 1–21 as written, with these details: the 4 px are a straight-line distance; a press while a cell editor is open
+  is a click; a thrown `drop` is reported through the grid's error report (no `invalid-drop-target` problem code: it would
+  add bytes to the core, step02-plan « Done »); an edge or locked sentence by the keys is not repeated within 300 ms;
+  pressing a header that does not have the focus moves the focus, which drops a block of cells by the block's own rule
+  (`range-selection.md`), the drag itself never does.
+- Tests: `packages/dom/test/columns-{order,texts,move,move-geom,move-keys,drop-targets,interplay}.test.ts`,
+  `packages/theme/test/columns.test.ts`; browser `npm run test:browser -- --only columns` (`--engine firefox|webkit`: the
+  right-to-left drag).
+
+## Known limit (step 2)
+
+The locked slots are kept in the **full** order, hidden columns and the other segments' columns included. When a movable
+column that is hidden, or pinned on another side, sits next to a locked one, it may be the column that crosses the locked
+one the other way. A key move is then not undone exactly by the reverse key. Example (`columns-order.test.ts`, « known
+limit »): full order a, h (hidden), L (locked), b — shown a, L, b. Ctrl+Shift+Left on b gives b, a, L (full b, a, L, h);
+Ctrl+Shift+Right then gives a, b, L, not a, L, b. Without a locked column, a move and its reverse are always exact
+(1 000-seed property). To revisit with the chooser (step 4) if the owner wants it.

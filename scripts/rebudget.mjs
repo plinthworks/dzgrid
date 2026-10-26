@@ -78,7 +78,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/ar-editors': 620,
   // Phase 5 Q16 (Part B): @dzgrid/dom/range 4 500 over the DOM base (selection 11a, clipboard 11b, fill 12; QB8: the fill
   // handle to its own entry if the three go over); the -range texts 350 / 400 / 500 and range.css 500 (Part B budgets, 2026-10-25).
-  '@dzgrid/dom/range': 4800, // owner S11b-Q3 (2026-10-25): at most 4 800 with the clipboard (step 11b, measured 4 765)
+  '@dzgrid/dom/range': 4950, // owner S11b-Q3 (2026-10-25): at most 4 800 with the clipboard (step 11b, measured 4 765); S12-Q14 (2026-10-26): 4 950 for the outside-press clear (measured 4 873)
   // Owner S11b-Q5 (2026-10-25): the pasted-HTML reader a chunk loaded on demand, its line the measure + 10 % (422 → 500;
   // the step-11b review moved the long-text count there: 517 → 600).
   '@dzgrid/dom/range: html (lazy)': 600,
@@ -93,6 +93,13 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-fill': 300,
   '@dzgrid/dom/locales/ar-fill': 380,
   '@dzgrid/theme/fill.css': 460, // owner S12-Q9: 300 → 460 (measured 415)
+  // Phase 6 (owner Q-B, 2026-10-26): moving columns, keyboard resize, auto-size in their own entry over the DOM base
+  // (part 1, step 2, stops at 2 300: step02-plan §4); its texts and styles apart, shared with the menu, chooser and groups.
+  '@dzgrid/dom/columns': 3500,
+  '@dzgrid/dom/locales/en-columns': 500,
+  '@dzgrid/dom/locales/fr-columns': 600,
+  '@dzgrid/dom/locales/ar-columns': 800,
+  '@dzgrid/theme/columns.css': 1100,
   '@dzgrid/theme': 2750, // T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7

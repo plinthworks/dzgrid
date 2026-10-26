@@ -160,7 +160,11 @@
     { "what": "the fill handle on the focused row", "fg": "--dzg-fill-handle", "bg": "--dzg-row-active-bg", "min": 3 },
     { "what": "the fill handle apart from the focus ring: a hue 60° away at least", "fg": "--dzg-fill-handle", "bg": "--dzg-focus-ring", "min": 1, "hue": 60 },
     { "what": "the fill handle apart from the saving border", "fg": "--dzg-fill-handle", "bg": "--dzg-saving-color", "min": 1, "hue": 60 },
-    { "what": "the fill handle apart from the refused border", "fg": "--dzg-fill-handle", "bg": "--dzg-refused-color", "min": 1, "hue": 60 }
+    { "what": "the fill handle apart from the refused border", "fg": "--dzg-fill-handle", "bg": "--dzg-refused-color", "min": 1, "hue": 60 },
+    { "what": "the column move bar on the header (Phase 6 step 2, columns.css)", "fg": "--dzg-move-bar", "bg": "--dzg-header-bg", "min": 3 },
+    { "what": "the column move bar on a row", "fg": "--dzg-move-bar", "bg": "--tz-bg", "min": 3 },
+    { "what": "the column move bar on a row under the pointer", "fg": "--dzg-move-bar", "bg": "--dzg-row-hover-bg", "min": 3 },
+    { "what": "the column move bar on a selected row", "fg": "--dzg-move-bar", "bg": "--dzg-row-selected-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -188,6 +192,7 @@
     "--dzg-range-bg": "var(--dzg-row-selected-bg)",
     "--dzg-range-edge": "var(--tz-success)",
     "--dzg-fill-handle": "var(--dzg-range-edge)",
+    "--dzg-move-bar": "var(--tz-accent)",
     "--dzg-cell-active-bg": "color-mix(in srgb, var(--tz-accent) 10%, var(--tz-bg))",
     "--dzg-row-active-bg": "color-mix(in srgb, var(--tz-fg) 6%, var(--tz-bg))"
   }

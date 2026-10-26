@@ -298,7 +298,8 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       scope.on(doc, 'pointerdown', (e) => {
         const c = (e.target as Element).closest?.('.dzg-cell');
         const r = c?.closest('.dzg-row');
-        if (gest?.kind === 'pick' && !(r && el.layer.contains(r) && g.rowRenderer.keyOf(r))) cancel(true);
+        // Silent when the block's own clearing speaks for this same press (outside the grid, a block there; review 2026-10-26).
+        if (gest?.kind === 'pick' && !(r && el.layer.contains(r) && g.rowRenderer.keyOf(r))) cancel(!cleared && !(R()?.get() && !e.composedPath().includes(el.root)));
       }, { capture: true });
       if (win) scope.on(win, 'blur', () => cancel());
       // The mode and the no-drag way left by the focus (a blur of the grid): one task later, the focus no longer in it;
@@ -306,8 +307,11 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       scope.on(el.root, 'focusin', place);
       scope.on(el.root, 'focusout', () => void scope.timeout(() => (place(), gest && gest.kind !== 'drag' && !el.root.contains(doc.activeElement) && cancel()), 0));
 
+      let cleared = false;
       const off = kernel.subscribe((e) => {
         if (!gest) return;
+        // The block cleared by the user in this task (a press outside, range first): the fill's cancel is then silent.
+        if (e.type === 'rangeChanged' && e.source === 'user' && !e.range) (cleared = true), scope.timeout(() => (cleared = false), 0);
         // An application's block change or clear (`rangeChanged` from `api`) cancels it: nothing written, nothing given back.
         if ((e.type === 'rangeChanged' && e.source === 'api') || e.type === 'sortChanged' || e.type === 'filterChanged' || e.type === 'quickChanged' || e.type === 'pageChanged' || e.type === 'columnsChanged' || (e.type === 'modelUpdated' && (e.kind === 'order' || e.kind === 'query' || !boxOf(gest.src))) || (e.type === 'focusChanged' && gest.kind === 'mode')) cancel();
       });

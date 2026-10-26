@@ -85,6 +85,21 @@ describe('0.3.0, the four packages', () => {
     }
   });
 
+  it('export the Phase 6 step 2 subpaths (@dzgrid/dom/columns, its texts, the theme\'s columns.css), built like the others', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./columns']).toEqual({ types: './src/columns.ts', default: './src/columns.ts' });
+    for (const lang of ['en', 'fr', 'ar']) expect(dom[`./locales/${lang}-columns`], lang).toEqual({ types: `./src/locales/${lang}-columns.ts`, default: `./src/locales/${lang}-columns.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/fill', '\.\/columns'/);
+    for (const lang of ['en', 'fr', 'ar']) expect(build).toContain(`'./locales/${lang}-columns'`);
+    const theme = JSON.parse(readFileSync(`${ROOT}packages/theme/package.json`, 'utf8'));
+    for (const f of ['columns.css', 'columns.unlayered.css', 'columns.scss']) {
+      expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
+      expect(theme.files, f).toContain(f);
+    }
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fill', 'columns'\]/);
+  });
+
   it('keep gsap and tzslot optional peers', () => {
     const dom = pkg('dom');
     expect(dom.peerDependenciesMeta).toEqual({ '@tzslot/core': { optional: true }, '@tzslot/dom': { optional: true }, gsap: { optional: true } });

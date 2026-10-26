@@ -36,3 +36,14 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **Q2-1:** A — the header drag ships in step 2; keyboard moves and `api.move()` cover access until the ⋮ menu (step 3) brings the single-pointer path; nothing is published before step 3.
 - **Q2-2:** A — no drop animation in Phase 6.
 - **S12-Q12 (owner, 2026-10-26; Phase 5 fill carried into Phase 6):** WCAG 2.5.8 for the fill: the 10 px handle stays (no accidental fills); the ≥ 24 px pointer equivalent is a pair of items in the column ⋮ menu (step 3): « Recopier vers le bas (Ctrl+D) » and « Recopier vers la droite (Ctrl+R) » acting on the current block. Until step 3, the fill is not WCAG 2.5.8-complete (nothing is published before). Lead: pen behaves like touch for the fill too (no pen fill), as for range.
+
+## Working method (owner, 2026-10-26: cost)
+
+- One agent after each change does both the code review and the test analysis; mutants run once, by it (~25); the implementer writes tests first but runs no mutant round.
+- During a step, only the touched browser groups (`--only …`, plus the playground page when the demo changes); the full browser suite (and test:tz, Firefox/WebKit `--all`) at a phase close.
+- Fewer progress messages to the owner.
+- **S12-Q13 (owner, 2026-10-26; replaces S12-Q11):** a pointer press outside the grid CLEARS the block. Lead: a press inside an element marked `data-dzg-keep-range` (an app's « Exporter / Envoyer » button) keeps it, so the app can still read the block; an app setting `range({ clearOnOutside: false })` keeps the old behaviour. The single-cell handle rule (fill.md 25) is unchanged.
+- **S12-Q14 (owner, 2026-10-26):** `@dzgrid/dom/range` 4 800 → 4 950 for the outside-press clear (measured 4 873).
+- **Step 2 lead (2026-10-26):** `dom/columns` part 1 measured 2 800 against the plan's internal stop of 2 300; accepted inside the owner's 3 500 grant (Q-B), leaving ~650 B for part 2 (step 6); if part 2 needs more, it goes back to the owner.
+- **S12-Q15 (owner, 2026-10-26; revises S11-Q1/QB2 for the pointer):** after a mouse drag selection the active cell (focus) stays on the START cell (the anchor), as in Excel; the handle stays at the block's far corner; after a fill the focus does not move and the block covers source + filled rows (handle at the new corner). Keyboard Shift+arrows keep their own rule (to be checked against the anchor rule by the implementer and reported).
+- **S12-Q16 (owner, 2026-10-26):** Escape means « je ne veux plus rien faire »: it clears the block AND hides the visible active-cell frame, tint and handle (a "quiet" state); the grid keeps the focus position, and the frame comes back at the next key (arrows, Tab, a character, F2…) or click. Lead note: keeps WCAG 2.4.7 (the indicator is visible whenever the keyboard is used to move).

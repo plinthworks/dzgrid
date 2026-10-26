@@ -14,7 +14,7 @@ import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
 import type { CellInput, PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
+import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -152,5 +152,5 @@ export interface GridContext<T> {
   bulk?: (at: CellAddr, input: CellInput | undefined) => { readonly own?: string | undefined } | null;
   /** Moves the focus as the grid's own keys would (the router's move: spans, details, the last row stays); the editors' Enter. */
   step?(intent: Intent): void;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

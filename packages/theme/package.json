@@ -30,9 +30,12 @@
     "./range.scss": "./range.scss",
     "./fill.css": "./fill.css",
     "./fill.unlayered.css": "./fill.unlayered.css",
-    "./fill.scss": "./fill.scss"
+    "./fill.scss": "./fill.scss",
+    "./columns.css": "./columns.css",
+    "./columns.unlayered.css": "./columns.unlayered.css",
+    "./columns.scss": "./columns.scss"
   },
-  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css", "edit.css", "edit.unlayered.css", "edit.scss", "range.css", "range.unlayered.css", "range.scss", "fill.css", "fill.unlayered.css", "fill.scss"],
+  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css", "edit.css", "edit.unlayered.css", "edit.scss", "range.css", "range.unlayered.css", "range.scss", "fill.css", "fill.unlayered.css", "fill.scss", "columns.css", "columns.unlayered.css", "columns.scss"],
   "sideEffects": ["*.css"],
   "sass": "./dzgrid.scss"
 }

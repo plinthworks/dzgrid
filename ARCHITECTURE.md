@@ -1842,6 +1842,8 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
 - **Livrables** : déplacement de colonnes (souris, clavier), groupes d'en-têtes repliables, auto-taille, menu de colonne, panneau latéral (colonnes, filtres), `GridState` (sauvegarde et restauration), lignes épinglées haut / bas, hauteur automatique, densité, `preparePrint()`. **Fiches** correspondantes. (Groupes d'en-têtes, fusions de lignes et de colonnes, lignes pleine largeur : avancés à la Phase 3, étape 9b.)
 - **Critères de sortie** : mode « redimensionner » au clavier ; état restauré à l'identique en RTL ; hauteur auto sans saut (spike S3).
 - **Dépend de** : P2 (P5 pour les menus éditables).
+- **Index de la Phase 6 (tel que construit)** — décisions `docs/phase-6-steps/decisions.md`, plans `docs/phase-6-steps/stepNN-plan.md` :
+  - étape 2 : `@dzgrid/dom/columns` partie 1 (`packages/dom/src/columns.ts`, `columns/index.ts` le glisser, les touches, l'API, le protocole de dépôt ; `columns/order.ts` l'ordre, sans DOM, repris par le choix des colonnes) ; textes `locales/{en,fr,ar}-columns` ; `@dzgrid/theme/columns.css` ; fiche `column-move.md` « As built », `group-drop-zone.md` partie 1. Taille 2 900 (mesure ≈ 2 800, décision « Step 2 lead ») dans l'octroi de 3 500 : ≈ 650 o pour la partie 2 (étape 7). Cœur et base DOM : 0 o (une union de types).
 
 ### Phase 7 : regroupement, agrégation
 - **Livrables** : `core/grouping`, `dom/groups` : regroupement multi-niveaux, pieds et total général, zone de glisser des colonnes de groupe, suites `group-agg`. (L'arbre et le maître/détail sont faits en Phase 4 ; un groupe réutilise ses coutures : `GroupNode`, expansion par le noyau, forme de lignes, `treegrid`.)

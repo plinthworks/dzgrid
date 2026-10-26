@@ -780,7 +780,12 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   out by default —, Cmd+Shift on a Mac, O1, O5 by the owner; the rest by the lead); C4 still open. Review fixes
   applied (WCAG 2.5.7 single-pointer ways, chooser as native checkboxes, `aria-keyshortcuts` in one place, Mac
   menu ways, `GridState` request count and versions, print scopes). No code, no budget change.
-- [ ] step 2: `@dzgrid/dom/columns` part 1, moving (pointer, Ctrl+Shift+arrows) and the drop protocol.
+- [x] step 2 (2026-10-26, not committed; plan `docs/phase-6-steps/step02-plan.md` « Done »): `@dzgrid/dom/columns`
+  part 1 — the header drag (mouse only; a pen clicks, never touch), Ctrl/Cmd+Shift+arrows, Home, End, `api.move`, drop targets;
+  `columns/order.ts` (locked slots, offered gaps); texts, `columns.css`, `--dzg-move-bar` in `check:contrast`;
+  playground `orders-edit.html` (columns on; `?columns=0` off). Size 2 900 line (measured ≈ 2 800, lead decision « Step 2
+  lead », inside the 3 500 grant: ≈ 650 B left for part 2); core and DOM base 0 B. Known limit: next to a locked column a
+  key move and its reverse are not always exact (column-move.md). Header groups split / join checked in jsdom.
 - [ ] step 3: `@dzgrid/dom/column-menu`.
 - [ ] step 4: `@dzgrid/dom/columns-panel` (the chooser).
 - [ ] step 5: `@dzgrid/core/state`.

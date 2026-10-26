@@ -30,6 +30,9 @@ import { AR_RANGE } from '@dzgrid/dom/locales/ar-range';
 import { fill as fillHandle } from '@dzgrid/dom/fill';
 import { FR_FILL } from '@dzgrid/dom/locales/fr-fill';
 import { AR_FILL } from '@dzgrid/dom/locales/ar-fill';
+import { columns as moveColumns, type ColumnsApi } from '@dzgrid/dom/columns';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { AR_COLUMNS } from '@dzgrid/dom/locales/ar-columns';
 import { pagination } from '@dzgrid/dom/pagination';
 import { tree } from '@dzgrid/dom/tree';
 import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
@@ -91,6 +94,8 @@ export interface OrdersEditDemo {
   readonly grid: GridInstance<Order>;
   /** The event log's lines, newest first. */
   readonly log: string[];
+  /** Moving columns (`?columns=0`: null). */
+  readonly columns: ColumnsApi | null;
 }
 
 export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { locale: string; onEvent?: (e: GridEvent<Order>) => void; paged?: boolean; enter?: 'stay' | 'down'; bar?: HTMLElement; tree?: boolean }): OrdersEditDemo {
@@ -99,7 +104,7 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
   const base = ar ? AR : FR;
   // A tree (`?tree=1`) on the browser's rows only.
   const asTree = !!o.tree && !o.paged;
-  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_RANGE : FR_RANGE).text, ...(ar ? AR_FILL : FR_FILL).text, 'validation.integer': w.integer } };
+  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_RANGE : FR_RANGE).text, ...(ar ? AR_FILL : FR_FILL).text, ...(ar ? AR_COLUMNS : FR_COLUMNS).text, 'validation.integer': w.integer } };
   // The orders of the tree demo, without their sub-orders: one flat list; « Urgent » added. `?tree=1`: with them, as child rows.
   const rows: Order[] = orders().filter((l) => asTree || l.parent === null).map((l, i) => ({ id: l.id, ...(asTree && { parent: l.parent }), ref: l.ref, client: l.client, day: l.day, status: l.status, qty: l.qty, amount: l.amount, urgent: i % 5 === 0 }));
   const columns: ColumnDef<Order, any>[] = [
@@ -151,13 +156,15 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
     blocks = range();
     return q.get('fill') === '0' ? [blocks] : [blocks, fillHandle(blocks)];
   };
+  /** Moving columns (Phase 6 step 2): drag a header, or Ctrl+Shift+arrows (⌘⇧ on a Mac); `?columns=0` none. */
+  const cols = new URLSearchParams(location.search).get('columns') === '0' ? null : moveColumns();
   let grid!: GridInstance<Order>;
   grid = createGrid<Order>(host, {
     ...(o.paged ? { source: sourceRows<Order>({ fetch: fetchPage }), operations: 'server', pagination: { pageSize: 20 } } : { rows }),
     getRowId: (r: Order) => r.id, columns, messages, locale: o.locale, direction: 'auto', label: w.title,
     parts: { status: badge({ tones: { pending: 'warning', ready: 'info', shipped: 'neutral', delivered: 'success', cancelled: 'danger' } }) },
     ...(asTree && { rowClass: (c: { row: Order }) => (c.row.parent ? 'orders-child' : null) }),
-    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...blockFeatures(), motion(), ...(o.paged ? [pagination()] : [])],
+    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...blockFeatures(), ...(cols ? [cols] : []), motion(), ...(o.paged ? [pagination()] : [])],
     onEvent(e: GridEvent<Order>) {
       o.onEvent?.(e);
       if (e.type === 'undoChanged') sync(e.canUndo, e.canRedo);
@@ -233,8 +240,9 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
       }),
       // `?focus=range` (owner 2026-10-26, « un événement qui peut effacer la sélection, ex. un retour serveur »): the block
       // sent to a pretend server (0.6 s), then cleared by the application — `range().api(grid).clear()`, source `api`,
-      // nothing said by the grid (range-selection.md « Clearing the block from the application »).
-      ...(blocks && new URLSearchParams(location.search).get('focus') === 'range' ? [Object.assign(button(w.send, () => {
+      // nothing said by the grid (range-selection.md « Clearing the block from the application »). Marked
+      // `data-dzg-keep-range` (S12-Q13): a press on it does not clear the block it sends.
+      ...(blocks && new URLSearchParams(location.search).get('focus') === 'range' ? [keepRange(Object.assign(button(w.send, () => {
         const b = blocks!.api(grid)?.box();
         const sent = blocks!.api(grid)?.get();
         if (!b || !sent) return say(w.noBlock);
@@ -250,12 +258,18 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
           r.clear();
           say(fill(w.sent2, { n }));
         }, 600);
-      }), { id: 'send-block' })] : []),
+      }), { id: 'send-block' }))] : []),
       ...(o.paged ? [button(w.next, () => void setTimeout(() => grid.kernel.dispatch({ type: 'page.go', index: (grid.kernel.rows.page?.index ?? 0) + 1 }, 'api'), 3000))] : []),
       // Last, in a group of their own (the page's other controls keep their places).
       Object.assign(document.createElement('span'), { className: 'undo' }),
     );
     o.bar.lastElementChild!.append(...undoB);
   }
-  return { grid, log };
+  return { grid, log, columns: cols && cols.api(grid) };
+}
+
+/** A control whose press keeps the grid's block (range-selection.md « A press outside the grid »). */
+function keepRange<E extends HTMLElement>(el: E): E {
+  el.setAttribute('data-dzg-keep-range', '');
+  return el;
 }

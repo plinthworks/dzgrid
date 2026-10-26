@@ -235,3 +235,68 @@ clavier, pas encore « d'un seul clic ».
 - B Un glissement des en-têtes et des cellules dans `motion-gsap` (≈ +150 o, désactivé si « réduire les animations »).
 
 **Handover to step 3** (S12-Q12, 2026-10-26): the column ⋮ menu gains « Recopier vers le bas (Ctrl+D) » and « Recopier vers la droite (Ctrl+R) » on the current block (`fill(blocks).api(grid).down()` / `.end()`), the ≥ 24 px pointer equivalent that makes the fill WCAG 2.5.8-complete (`fill.md` 21); until then a known gap, nothing published.
+
+## Done (2026-10-26, implementer; nothing committed)
+
+**First stopped by the §4 rule** (« if part 1 exceeds 2 300: stop and report »), then **accepted by the lead** (decisions
+« Step 2 lead »): the line is 2 900 (the measure plus a margin), inside the owner's 3 500 grant, so **part 2 (step 7) has
+about 650 B left**; more goes back to the owner. `@dzgrid/dom/columns` measures
+**2 800 B gz over the DOM base** (6 841 B min). Of that, the pure order logic (`columns/order.ts`: full order, locked
+slots, offered gaps, patches, keys) weighs ~770 B (estimate 350); the rest ~2 030 (estimate 1 750). Weighed by removal:
+auto-scroll ~110, drop-target hit test ~40, keys ~155. Golfing gained ~40 B; no cut reaches 2 300 without dropping a
+behaviour of the sheet. Core 0 B, DOM base 0 B (type-only union).
+
+Built so far: config (exports, build list, theme manifest, `size-budget.json` lines — `dom/columns` 2 300, texts 500 / 600 /
+800, `columns.css` 1 100 —, ceilings in `rebudget.mjs`, aliases in `vitest.config.ts` and `tsconfig.spec.json`; not yet in
+`vite.config.ts`); `part-texts.ts` `ColumnsMessageKey` (type only, added to the `msg` unions); `locales/{en,fr,ar}-columns`
+(162 / 184 / 216 B gz); `columns/order.ts`; `columns/index.ts` (drag, gaps, bar, ghost, auto-scroll, targets, keys,
+sentences, `api`). Then: `columns.scss` / `.css` (test first: `packages/theme/test/columns.test.ts`, 8 red, then green), the contrast pairs (`--dzg-move-bar` on the header, rows, hover, selection), the playground (`orders-edit.html`, `?columns=0` off; the vite alias), `scripts/browser-columns.mjs` (`--only columns`), the docs. Mutants not run (owner « Working method »: a combined review agent runs them).
+
+Tests first (each run red before its code, for the reason named):
+- `scripts/test/rebudget.test.ts` « Phase 6 step 2 » and `release.test.ts` « Phase 6 step 2 subpaths »: red on the missing
+  ceiling (`null` ≠ 3 500) and the missing export, then green.
+- `columns-texts.test.ts`: red (no `columns.js`), green with the bundles.
+- `columns-order.test.ts` (15, incl. three 1 000-seed properties): red (no `order.js`), then green. Property findings: the
+  pour keeps locked slots in the FULL order, so with a hidden or other-side movable column next to a locked one, the column
+  crossing it the other way may be that one: a key move and its reverse are then not always exact (asserted exactly only
+  without locked columns), and hidden columns' order relative to a hidden LOCKED one may change. Documented as a known
+  limit in `column-move.md`, the current result pinned by the hand test « known limit » (red-first not applicable: it
+  pins built behaviour).
+- `columns-move`, `-move-geom`, `-move-keys`, `-drop-targets`, `-interplay` (62): against a stub entry, 52 red on assertions;
+  10 green by nature (never-arm and owner guards: a press or key that must do nothing). The cancel tests were then made to
+  assert the drag had started first. All 77 green with the code.
+
+Deviations so far: (1) a thrown `drop` is reported through the grid's `report` (as every host callback), not as an
+`invalid-drop-target` problem: that code would add bytes to the core's `PROBLEM_CODES` (0 B rule). (2) Pressing a header
+that is not focused moves the focus, which drops the block by range's own rule; the drag itself never drops it (test with
+the header already focused). (3) An edge sentence is not repeated within 300 ms (a time check, no timer).
+
+Seen while measuring: `@dzgrid/dom/range` is at 4 873 / 4 800 in the working tree because of another agent's uncommitted
+`range/index.ts` change (4 791 at HEAD), not this step.
+
+Handover to step 3 unchanged (S12-Q12 fill items in the ⋮ menu).
+
+**Gate (2026-10-26, `caffeinate -i`, one command at a time):** `test:ci` 415 files, 6 440 tests green (454 s); `typecheck`
+green; `build` green; `check:size` 0 over — `dom/columns` 2 796 / 2 900, texts 162 / 184 / 216, `columns.css` 441 / 1 100
+(the plan aimed ≤ 250: the ghost's box and forced colours), core 28 916, DOM base 21 565 unchanged; `check:contrast` 978
+pairs, 0 below. Browser (owner « Working method »: touched groups only): `--only columns` Chrome 27 / 27 (fr light and ar
+dark: real drags, pinned segments, auto-scroll both ways, Cmd+Shift keys on this Mac with Ctrl+Shift doing nothing, focus
+kept, axe 0 mid-drag and after, forced colours, a finger never moves; 1 000 × 1 000: auto-scroll 485 px/s, a drop patch +
+paint 143 ms, a key move 117 ms, not gated), Firefox 7 / 7 and WebKit 7 / 7 (ar right to left drag, pinned, auto-scroll);
+`--only playground` 41 / 41, `--only demos` 38 / 38. Found in Chrome and fixed: the bar 1 px off in right to left (placed
+from the root's border box; now the layer's box; jsdom test « a root with a 1 px border » added after). No mutants (a
+combined review runs them). Demo: `http://127.0.0.1:4700/orders-edit.html` (`?locale=ar-DZ&theme=dark&skin=midnight`).
+
+**Review fixes (2026-10-26), each test red first on the code before:** (1) range in a CLOSED shadow root kept the block
+for a press on the grid's header — `range-outside.test.ts` « CLOSED shadow root » red, fixed by a capture listener on the
+grid's own shadow root (the document's skips presses whose path holds that host); (2) one outside press with the
+click-then-click fill armed and a block said two sentences — `range-fill.test.ts` « the fill's cancel silent » red (both
+feature orders), fixed (fill silent when the block's clearing speaks for that press); (3) the swallow stayed set without a
+click — red, now cleared at the end of the task (`scope.timeout(…, 0)`) or at the next press; (4) a drag cancelled by
+Escape, a lost capture, a blur, new definitions or a direction change let its click sort — 6 red, the swallow now set in
+`cancel()` when the drag was on; (5) a pen dragged headers — red, now the mouse only (column-move.md « As built »); (6) the
+duplicate `ColumnsMessageKey` in `context.ts` removed. Mutant-gap tests added (green on arrival, they guard): a
+floating-filter cell never arms; a locked column's press is a click that sorts; after a drag without its click, a new press
+lets the next click sort; a button stopping its own pointerdown still clears the block. Gate: `test:ci` 6 446 green,
+`typecheck`, `build`, `check:size` (columns 2 801 / 2 900, range 4 940 / 4 950, fill 2 974 / 3 000), `check:contrast` 978 / 0;
+Chrome `--only columns` 27, `range` 47, `fill` 58.

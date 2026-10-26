@@ -10,6 +10,7 @@ import '../../packages/theme/edit.css';
 // The block of cells (Phase 5 step 11a; orders-edit.html, `?range=0` turns it off).
 import '../../packages/theme/range.css';
 import '../../packages/theme/fill.css';
+import '../../packages/theme/columns.css';
 import { mountOrders } from './orders.js';
 import { mountHr } from './hr.js';
 import { mountOrdersEdit } from './orders-edit.js';
@@ -57,6 +58,11 @@ const TEXT = {
 const RANGE_TEXT = {
   fr: 'Bloc de cellules : Maj+flèches depuis une cellule, ou glissez à la souris (la vue défile près des bords), Maj+clic étend, Ctrl+A (⌘A) tout, Maj+Espace la ligne ; Échap l’efface. Un tri, un filtre ou une recherche l’efface aussi, et le dit (?range=0 l’éteint).',
   ar: 'كتلة خلايا: Shift+الأسهم من خلية، أو اسحب بالفأرة (يتمرّر العرض قرب الحواف)، Shift+نقرة توسّعها، Ctrl+A (⌘A) الكل، Shift+المسافة الصف؛ Escape يلغيها. الفرز أو التصفية أو البحث يلغيها أيضًا ويعلن ذلك (?range=0 يوقفها).',
+} as const;
+// Moving columns (Phase 6 step 2): the drag, the keys; the no-drag way (WCAG 2.5.7) is the ⋮ menu of step 3.
+const COLUMNS_TEXT = {
+  fr: 'Colonnes : glissez un en-tête pour le déplacer (dans les colonnes épinglées : il s’y épingle), ou sur un en-tête Ctrl+Maj+← / → (⌘⇧ sur Mac), Ctrl+Maj+Début / Fin ; Échap annule le glisser (?columns=0 l’éteint). 2.5.7 : chemin sans glisser à l’étape 3.',
+  ar: 'الأعمدة: اسحب رأس عمود لنقله (داخل الأعمدة المثبّتة يُثبَّت فيها)، أو على رأس العمود Ctrl+Shift+← / → (⌘⇧ على Mac)، Ctrl+Shift+Home / End؛ Escape يلغي السحب (?columns=0 يوقفه). 2.5.7: طريق بلا سحب في المرحلة 3.',
 } as const;
 // `?focus=range`: a title and five bullets on blocks of cells, the clipboard and the fill (steps 11a, 11b, 12).
 const FOCUS_TEXT = {
@@ -120,6 +126,7 @@ if (editing) {
     hint.replaceChildren(HINT_TEXT[lang], Object.assign(document.createElement('a'), { href: `?${to}`, textContent: HINT_LINK[lang] }));
     // Blocks of cells (step 11a): said under the grid, so the rows the checks click stay in a 900 px window.
     document.querySelector('main')!.append(Object.assign(document.createElement('p'), { className: 'note', textContent: RANGE_TEXT[lang] }));
+    document.querySelector('main')!.append(Object.assign(document.createElement('p'), { className: 'note', textContent: COLUMNS_TEXT[lang] }));
   }
   document.getElementById('log-title')!.textContent = logTitle;
   // The selectors' words in the page's language (« Entrée : reste / descend »).

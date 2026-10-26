@@ -1,7 +1,7 @@
 // The owner's report on `orders-edit.html?focus=range` (2026-10-26, after Phase 5): the block's corner and the focus
 // at the release are the cell under the RELEASE point, even when no move came between the last one and it (S11-Q1);
 // an application's `clear()` (« a server answer that sent the selection ») tells `rangeChanged` with source `api` and
-// says nothing; a press outside the grid keeps the block, Escape drops it and leaves the focus on the corner (S12-Q11).
+// says nothing; with `clearOnOutside: false` a press outside the grid keeps the block (the old S12-Q11; S12-Q13 clears it by default, range-outside.test.ts), Escape drops it and leaves the focus on the corner.
 // Expectations by hand.
 import { describe, it, expect, afterEach } from 'vitest';
 import { cleanup, rmake } from './support-range.js';
@@ -67,9 +67,9 @@ describe('the application clears the block during a drag (review of the fix)', (
   });
 });
 
-describe('S12-Q11: outside the grid, Escape', () => {
+describe('clearOnOutside: false (the old S12-Q11): outside the grid, Escape', () => {
   it('a press and a click outside the grid keep the block (as Excel); Escape then drops it, said, the focus on the corner', () => {
-    const t = rmake();
+    const t = rmake({ range: { clearOnOutside: false } });
     t.down(t.cell('r1', 'n')!, t.at('r1', 'n'));
     t.move(t.at('r4', 's'));
     t.up(t.at('r4', 's'));

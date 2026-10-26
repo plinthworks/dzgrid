@@ -6,8 +6,8 @@
  * - the owner's gesture: a drag-select Client O-0001 → Qté O-0007, released there: the focus and the handle on O-0007 /
  *   Qté (the block's corner, never a single-cell handle elsewhere); the handle dragged down 3 rows: the WHOLE block's
  *   rows repeated (clients O-0001…O-0003 in O-0008…O-0010), by hand; Ctrl+Z gives them back;
- * - Escape after a drag-select: the block gone, the focus on its corner; a click outside the grid keeps the block and its
- *   handle (S12-Q11); one cell without a block: a click outside hides its handle, a click back shows it (fill.md 25);
+ * - Escape after a drag-select: the block gone, the focus on its corner; a click outside the grid clears the block and
+ *   hides its handle (S12-Q13, replacing S12-Q11); one cell without a block: a click outside hides its handle, a click back shows it (fill.md 25);
  * - « Envoyer la sélection (simulé) »: 0.6 s later the block is cleared by the application (`clear()`), logged
  *   « Sélection envoyée puis effacée », and the grid says nothing of it (an api clear is never said).
  */
@@ -114,25 +114,30 @@ export async function fillAccidentChecks(name, ctx, h) {
       await page.keyboard.press('Escape');
     }
 
-    // 3. Escape after a drag-select: the block gone, the focus on its corner; a click outside the grid keeps it (S12-Q11).
+    // 3. Escape after a drag-select: the block gone, the focus on its corner; a click outside the grid clears the block
+    // and, the focus gone, its handle (S12-Q13, replacing S12-Q11; fill.md 25).
     {
       const a = await cell('O-0002', 'client');
       const z = await cell('O-0005', 'status');
-      await page.mouse.move(a.x, a.y);
-      await page.mouse.down();
-      await page.mouse.move(z.x, z.y, { steps: 6 });
-      await page.mouse.up();
-      await frames(page, 2);
-      const t = await page.evaluate(() => { const r = document.getElementById('title').getBoundingClientRect(); return { x: r.left + 20, y: r.top + r.height / 2 }; });
-      await page.mouse.click(t.x, t.y);
-      await frames(page, 2);
-      const kept = await state();
-      await page.locator('.dzg-cell[aria-selected="true"]').first().evaluate(() => {});
-      await page.evaluate(() => document.querySelector('.dzg-cell[tabindex="0"]')?.focus());
+      const select = async () => {
+        await page.mouse.move(a.x, a.y);
+        await page.mouse.down();
+        await page.mouse.move(z.x, z.y, { steps: 6 });
+        await page.mouse.up();
+        await frames(page, 2);
+      };
+      await select();
       await page.keyboard.press('Escape');
       await frames(page, 2);
       const s = await state();
-      check(name, `fill accident ${tag}: a click outside the grid keeps the block and its handle on O-0005 / Statut (S12-Q11, fill.md 25); Escape then clears it, the focus on its corner O-0005 / Statut, the handle there`, kept.n === 12 && kept.handle === 'O-0005/status' && s.n === 0 && s.focus === 'O-0005/status' && s.handle === 'O-0005/status', { kept, s });
+      await select();
+      const made = await state();
+      const t = await page.evaluate(() => { const r = document.getElementById('title').getBoundingClientRect(); return { x: r.left + 20, y: r.top + r.height / 2 }; });
+      await page.mouse.click(t.x, t.y);
+      await frames(page, 2);
+      await page.waitForTimeout(50);
+      const off = await state();
+      check(name, `fill accident ${tag}: Escape after a drag-select clears the block, the focus and the handle on its corner O-0005 / Statut; a block again, then a click outside the grid clears it and hides the handle (S12-Q13, fill.md 25)`, s.n === 0 && s.focus === 'O-0005/status' && s.handle === 'O-0005/status' && made.n === 12 && off.n === 0 && off.handles === 0, { s, made, off });
     }
 
     // 3b. One cell, no block: a click outside the grid hides its handle with the focus ring; a click back shows it (fill.md 25).

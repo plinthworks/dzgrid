@@ -207,6 +207,14 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(['@dzgrid/core', '@dzgrid/core/edit'].map((n) => e[n]?.maxGzip)).toEqual([29000, 3100]);
   });
 
+  it('owner S12-Q14 (2026-10-26): @dzgrid/dom/range 4 800 → 4 950 for the outside-press clear (measured 4 873); its budget the ceiling', () => {
+    expect(ceilingFor('@dzgrid/dom/range')).toBe(4950);
+    expect(() => sizeBudget(4951, ceilingFor('@dzgrid/dom/range'))).toThrow(/ceiling/);
+    expect(sizeBudget(4873, ceilingFor('@dzgrid/dom/range'))).toBe(4950);
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
+    expect(e['@dzgrid/dom/range']!.maxGzip).toBe(4950);
+  });
+
   it('Phase 5 step 12 (owner S12-Q1, S12-Q4, QB5; S12-Q9): @dzgrid/dom/fill 3 000 over dom/range; the -fill texts 250 / 300 / 380; fill.css 460; /editors 6 720; dom/range 4 800, dom/edit 4 150, core 29 000 unchanged', () => {
     expect(ceilingFor('@dzgrid/dom/fill')).toBe(3000); // S12-Q9: 1 600 → 3 000 (measured 2 729)
     expect(() => sizeBudget(3001, ceilingFor('@dzgrid/dom/fill'))).toThrow(/ceiling/);
@@ -218,7 +226,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(() => sizeBudget(461, ceilingFor('@dzgrid/theme/fill.css'))).toThrow(/ceiling/);
     expect(ceilingFor('@dzgrid/dom/editors')).toBe(6720);
     expect(() => sizeBudget(6721, ceilingFor('@dzgrid/dom/editors'))).toThrow(/ceiling/);
-    expect(['@dzgrid/dom/range', '@dzgrid/dom/edit', '@dzgrid/core', '@dzgrid/core/range', '@dzgrid/core/edit'].map(ceilingFor)).toEqual([4800, 4150, 29000, 4000, 3100]);
+    expect(['@dzgrid/dom/range', '@dzgrid/dom/edit', '@dzgrid/core', '@dzgrid/core/range', '@dzgrid/core/edit'].map(ceilingFor)).toEqual([4950, 4150, 29000, 4000, 3100]); // dom/range: S12-Q14
     type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
     const ext = ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/range', '@dzgrid/dom/internal', './html/*'];
@@ -231,7 +239,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(e['@dzgrid/theme/fill.css']!.maxGzip).toBeLessThanOrEqual(460);
     expect(e['@dzgrid/theme/fill.css']!.maxGzip).toBeGreaterThan(300);
     expect(e['@dzgrid/dom/editors']!.maxGzip).toBeLessThanOrEqual(6720);
-    expect(['@dzgrid/dom/range', '@dzgrid/dom/edit', '@dzgrid/core'].map((n) => e[n]?.maxGzip)).toEqual([4800, 4150, 29000]);
+    expect(['@dzgrid/dom/range', '@dzgrid/dom/edit', '@dzgrid/core'].map((n) => e[n]?.maxGzip)).toEqual([4950, 4150, 29000]); // dom/range: S12-Q14
   });
 
   it('Phase 5 close (owner Q-C2, Q-C3, 2026-10-26): theme up to 2 750, core/rules 600, dom/parts 800 become ceilings; angular 7 000 and dom/internal 1 250 kept; the close measures give these budgets', () => {
@@ -251,21 +259,20 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   });
 
   it('Phase 5 step 11b (owner S11b-Q3, S11b-Q5): @dzgrid/dom/range at most 4 800, its pasted-HTML reader a lazy chunk with its own line (the measure + 10 %), the -range texts unchanged', () => {
-    expect(ceilingFor('@dzgrid/dom/range')).toBe(4800);
-    expect(() => sizeBudget(4801, ceilingFor('@dzgrid/dom/range'))).toThrow(/ceiling/);
+    expect(ceilingFor('@dzgrid/dom/range')).toBe(4950); // S12-Q14
     expect(ceilingFor('@dzgrid/dom/range: html (lazy)')).toBe(LAZY_HTML);
     for (const [lang, c] of [['en', 350], ['fr', 400], ['ar', 500]] as const) expect(ceilingFor(`@dzgrid/dom/locales/${lang}-range`), lang).toBe(c);
     type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
     const ext = ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/range', '@dzgrid/dom/internal', './html/*'];
     expect(e['@dzgrid/dom/range']).toEqual({ file: 'packages/dom/src/range.ts', maxGzip: e['@dzgrid/dom/range']!.maxGzip, over: '@dzgrid/dom', external: ext });
-    expect(e['@dzgrid/dom/range']!.maxGzip).toBeLessThanOrEqual(4800);
+    expect(e['@dzgrid/dom/range']!.maxGzip).toBeLessThanOrEqual(4950); // S12-Q14
     expect(e['@dzgrid/dom/range']!.maxGzip).toBeGreaterThan(4500);
     expect(e['@dzgrid/dom/range: html (lazy)']).toEqual({ file: 'packages/dom/src/range/html/index.ts', maxGzip: LAZY_HTML, over: '@dzgrid/dom/range', external: ext }); // './html/*' kept: the line's « alone » build of dom/range must leave the chunk out, or the chunk is counted in it (review 6, answered)
   });
 
   it('Phase 5 step 11a (owner Q16, Part B budgets): @dzgrid/dom/range a new entry, ceiling 4 500 over the DOM base; the -range texts 350 / 400 / 500; range.css 500; core 29 000, core/edit 3 100 and core/range 4 000 untouched; the DOM base inside 21 980', () => {
-    expect(ceilingFor('@dzgrid/dom/range')).toBe(4800); // step 11b, owner S11b-Q3
+    expect(ceilingFor('@dzgrid/dom/range')).toBe(4950); // step 11b, owner S11b-Q3; S12-Q14
     for (const [lang, c] of [['en', 350], ['fr', 400], ['ar', 500]] as const) {
       expect(ceilingFor(`@dzgrid/dom/locales/${lang}-range`), lang).toBe(c);
       expect(() => sizeBudget(c + 1, ceilingFor(`@dzgrid/dom/locales/${lang}-range`)), lang).toThrow(/ceiling/);
@@ -300,6 +307,24 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(sizeBudget(600, ceilingFor('@dzgrid/theme/clinic.css'))).toBe(650);
     expect(() => sizeBudget(651, ceilingFor('@dzgrid/theme/clinic.css'))).toThrow(/ceiling/);
     expect(() => sizeBudget(3051, ceilingFor('@dzgrid/theme'))).toThrow(/ceiling/);
+  });
+
+  it('Phase 6 step 2 (owner Q-B): @dzgrid/dom/columns 3 500 over the DOM base (part 1 accepted at its measure ~2 800 + margin, 2 900: decisions « Step 2 lead »); the -columns texts 500 / 600 / 800; columns.css 1 100; core 29 000 and the DOM base untouched', () => {
+    expect(ceilingFor('@dzgrid/dom/columns')).toBe(3500);
+    expect(() => sizeBudget(3501, ceilingFor('@dzgrid/dom/columns'))).toThrow(/ceiling/);
+    for (const [lang, c] of [['en', 500], ['fr', 600], ['ar', 800]] as const) {
+      expect(ceilingFor(`@dzgrid/dom/locales/${lang}-columns`), lang).toBe(c);
+      expect(() => sizeBudget(c + 1, ceilingFor(`@dzgrid/dom/locales/${lang}-columns`)), lang).toThrow(/ceiling/);
+    }
+    expect(ceilingFor('@dzgrid/theme/columns.css')).toBe(1100);
+    expect(() => sizeBudget(1101, ceilingFor('@dzgrid/theme/columns.css'))).toThrow(/ceiling/);
+    expect(['@dzgrid/core', '@dzgrid/dom'].map(ceilingFor)).toEqual([29000, 21980]);
+    type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
+    expect(e['@dzgrid/dom/columns']).toEqual({ file: 'packages/dom/src/columns.ts', maxGzip: 2900, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
+    ['en', 'fr', 'ar'].forEach((l, i) => expect(e[`@dzgrid/dom/locales/${l}-columns`], l).toEqual({ file: `packages/dom/src/locales/${l}-columns.ts`, maxGzip: [500, 600, 800][i] }));
+    expect(e['@dzgrid/theme/columns.css']).toEqual({ file: 'packages/theme/columns.css', maxGzip: 1100 });
+    expect(['@dzgrid/core', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([29000, 21980]);
   });
 
   it('the K.8 profile guard: 83 500 (Q17a; the real example\'s 92 500, S12-Q10, is guarded by example:bytes, not here)', () => {

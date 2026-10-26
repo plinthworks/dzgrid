@@ -188,7 +188,8 @@ cell without a block, only there (11, already so).
 25. **The handle and the grid's focus** (owner's report 2026-10-26, lead decision): with **no block**, the one cell's
     handle is drawn only while the focus is in the grid (a focused data cell). The focus leaving the grid (a click on
     the page) hides it with the focus ring; the focus coming back shows it again. With a **block**, the block stays
-    when the grid loses the focus (S12-Q11) and its handle stays on its corner, so a mouse can still fill. Done in the
+    when the grid loses the focus by the keys and its handle stays on its corner, so a mouse can still fill; a pointer
+    press outside the grid clears the block (S12-Q13, replacing S12-Q11; `range-selection.md`), and so its handle. Done in the
     paint (`focusin` at once, `focusout` one task later), not in CSS: fill.css has no byte to spare. Tests:
     `range-fill.test.ts` (« fill.md 25 »); browser `browser-fill-accident.mjs` (a click outside hides it).
 

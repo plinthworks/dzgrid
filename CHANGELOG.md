@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `@dzgrid/dom/columns` (Phase 6 step 2, part 1; docs/behaviors/column-move.md): moving columns. A header dragged with the
+  mouse (never a finger; a pen clicks) past 4 px: a ghost, an insertion bar on the gap (logical, right to left mirrored),
+  auto-scroll near the centre's edges; dropped among pinned columns it pins there, out of them it unpins; one
+  `column.state` patch and one `columnsChanged` (source `user`), the new place said; Escape cancels. Ctrl+Shift+arrows,
+  Home, End on a header (Cmd+Shift on macOS) move it within its segment, the place said after a 300 ms pause.
+  `movable: false` columns keep their place. `api(grid).move()` for the column menu (step 3), `dropTargets` for the
+  group zone (Phase 7). Texts `locales/{en,fr,ar}-columns`, styles `@dzgrid/theme/columns.css` (`--dzg-move-bar`,
+  checked at 3:1). No drop animation (Q2-2). WCAG 2.5.7's single-pointer way comes with the menu (step 3); nothing is
+  published before.
+
 ### Fixed
 
 - **Accidental fills** (owner's report on `orders-edit.html?focus=range`, 2026-10-26: a block growing by one row
@@ -21,6 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `@dzgrid/dom/range`: in a closed shadow root, a press on the grid's own header no longer clears the block (the shadow
+  root decides for the presses inside it). `@dzgrid/dom/fill`: one outside press with the click-then-click fill armed and
+  a block says one sentence (the block's « cleared »; the fill's cancel silent).
+
+- `@dzgrid/dom/range` (owner S12-Q13, replaces S12-Q11): a pointer press outside the grid clears the block
+  (`rangeChanged` source `user`, said once as Escape). A press inside an element marked `data-dzg-keep-range` keeps it
+  (an app's « Envoyer / Exporter » button), as does a press on the grid's own popups, a nested grid, or the page's
+  scrollbar; shadow roots are followed. `range({ clearOnOutside: false })` keeps the old rule. The demo's « Envoyer la
+  sélection (simulé) » is marked. Size: `@dzgrid/dom/range` ceiling 4 800 → 4 950 (S12-Q14, measured 4 873).
 - `@dzgrid/dom/fill` (owner S12-Q12): a pen no longer drags the fill handle (as a finger, as for blocks). The fill is
   not WCAG 2.5.8-complete until the column menu's « Recopier vers le bas / la droite » (Phase 6 step 3).
 

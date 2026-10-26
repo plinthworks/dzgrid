@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-10-26. **En cours : Phase 6, étape 1 faite** (fiches de comportement, écoute §21, plan aligné sur les décisions ; rien de commité). **Suite : étape 2, déplacer les colonnes** (`@dzgrid/dom/columns` partie 1 et le protocole de dépôt), points O1–O12, C3, C5, C6 décidés (`docs/phase-6-steps/decisions.md` « Step 1 follow-ups » : O6, Mac, O1, O5 par le propriétaire, le reste par le chef de projet) ; seul C4 reste ouvert, il ne bloque pas l'étape 2.
+Mis à jour : 2026-10-26. **En cours : Phase 6, étape 2 faite** (déplacer les colonnes, `@dzgrid/dom/columns` partie 1, non commitée ; `step02-plan.md` « Done »). Avant : **étape 1 faite** (fiches de comportement, écoute §21, plan aligné sur les décisions ; rien de commité). **Suite : étape 2, déplacer les colonnes** (`@dzgrid/dom/columns` partie 1 et le protocole de dépôt), points O1–O12, C3, C5, C6 décidés (`docs/phase-6-steps/decisions.md` « Step 1 follow-ups » : O6, Mac, O1, O5 par le propriétaire, le reste par le chef de projet) ; seul C4 reste ouvert, il ne bloque pas l'étape 2.
 
 **Phase 5 (l'édition) close techniquement** (étape 13, décision Q-C4) : parties A et B faites, portail final vert, **0.3.0 préparée en local, non publiée** (0.1.0 et 0.2.0 ne l'ont jamais été). Le commit « release: 0.3.0 prepared » et l'étiquette locale `v0.3.0` (Q-C1 : `main` poussée sans l'étiquette) : au chef de projet. Jamais `npm publish`. **Suite : Phase 6**, puis le site de documentation.
 
@@ -17,7 +17,8 @@ L'ancien texte de ce fichier (étapes 1 à 12 de la Phase 5) est gardé mot pour
 - **Phase 6** (colonnes avancées et confort) : plan `docs/phase-6-plan.md` (aligné le 2026-10-26 : « Owner decisions applied »), décisions `docs/phase-6-steps/decisions.md` (elles priment ; **Q-P = C : lignes épinglées en haut et en bas modifiables** ; ordre du propriétaire : menu ⋮ et choix des colonnes d'abord). Plans d'étape dans `docs/phase-6-steps/stepNN-plan.md`.
   - **Étape 1 faite** (2026-10-26, non commitée) : fiches `docs/behaviors/{column-move,column-menu,columns-chooser,grid-state,header-groups,pinned-rows,auto-height,print,density,group-drop-zone}.md`, `column-resize.md` mise à jour (mode clavier, ajuster) ; `docs/a11y-protocol.md` §21 (143–166) ; plan aligné. Points O1–O12 décidés (« Step 1 follow-ups »), C4 ouvert ; contradictions C1–C7 et corrections de la relecture : `step01-plan.md`.
   - **Ordre des étapes** : 2 déplacer les colonnes → 3 menu ⋮ → 4 choix des colonnes → 5 `core/state` → 6 `dom/state` → 7 redimensionner au clavier et ajuster → 8 groupes repliables → 9 lignes épinglées modifiables → 10 hauteur automatique → 11 impression → 12 Angular et démos → 13 clôture (0.4.0 préparée).
-  - **Prochaine : étape 2.**
+  - **Étape 2 faite** (2026-10-26, non commitée) : glisser d’en-tête (souris seule ; le stylet clique, jamais le doigt), Ctrl+Maj+flèches (⌘⇧ sur Mac), `api.move`, cibles de dépôt ; `columns.css` ; démo `orders-edit.html` (`?columns=0` l'éteint). Taille 2 796 / 2 900 (décision « Step 2 lead » : ≈ 650 o pour la partie 2). Limite connue près d'une colonne verrouillée (`column-move.md`). 2.5.7 : chemin sans glisser à l'étape 3. Portail : `test:ci` 6 440 verts, `typecheck`, `build`, `check:size`, `check:contrast` verts ; navigateur `--only columns` Chrome 27, Firefox 7, WebKit 7 ; `playground` 41, `demos` 38.
+  - **Prochaine : étape 3** (menu ⋮, avec « Recopier vers le bas / la droite », S12-Q12).
 
 ### Étapes de la Phase 5 et leurs commits
 

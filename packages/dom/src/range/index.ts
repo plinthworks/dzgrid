@@ -27,6 +27,11 @@ export interface RangeOptions {
   readonly raw?: boolean;
   /** Over this many cells a paste writes nothing (owner QB4); default 100 000. */
   readonly maxPaste?: number;
+  /**
+   * A press outside the grid clears the block, said (owner S12-Q13); not inside an element marked
+   * `data-dzg-keep-range`, nor on the page's scrollbar. false: kept (Escape clears it). Default true.
+   */
+  readonly clearOnOutside?: boolean;
 }
 
 /** What `canCopy` is asked: the block's column ids, its data rows and cells, a cut or a copy. */
@@ -175,6 +180,16 @@ export function range(o: RangeOptions = {}): RangeFeature {
         },
       };
       const drag = pointer(g, s, o.drag !== false);
+      // A press outside this grid's root (its popups are in it; the path crosses shadow roots), not on the page's
+      // scrollbar (the document element) nor in a `data-dzg-keep-range` element, clears the block (S12-Q13).
+      // In a shadow root (closed: the document's path stops at its host), that root decides for the presses inside it.
+      const sr = g.el.root.getRootNode() as ShadowRoot;
+      const host = sr.host;
+      const out = (top: boolean) => (e: Event) => void (s.r && e.target !== g.doc.documentElement && !e.composedPath().some((x) => x === g.el.root || (top && x === host) || (x as Element).hasAttribute?.('data-dzg-keep-range')) && s.drop('user'));
+      if (o.clearOnOutside !== false) {
+        g.scope.on(g.doc, 'pointerdown', out(true), { capture: true });
+        if (host) g.scope.on(sr, 'pointerdown', out(false), { capture: true });
+      }
 
       const off = kernel.subscribe((e) => {
         if (e.type === 'columnsChanged') {

@@ -423,6 +423,21 @@ describe('the no-drag control (WCAG 2.5.7): a click on the handle, then a click 
     expect(t.events.filter((e) => e.type === 'cellClicked')).toHaveLength(1);
   });
 
+  it('with a block, a press outside the grid: the block\'s « cleared » alone, the fill\'s cancel silent (review 2026-10-26, one sentence a press)', () => {
+    for (const order of ['after', 'before'] as const) {
+      const t = fmake({ order });
+      t.api().set(R_(['r1', 'qty'], ['r2', 'qty']));
+      t.click(t.handle()!);
+      const n = t.said().length;
+      const b = document.body.appendChild(document.createElement('button'));
+      b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, button: 0, pointerId: 1, pointerType: 'mouse', isPrimary: true }));
+      expect(t.said().slice(n), order).toEqual(['Selection cleared']);
+      t.click(t.cell('r4', 'qty')!, t.pt('r4', 'qty'));
+      expect(t.requests, order).toHaveLength(0);
+      cleanup();
+    }
+  });
+
   it('a press outside this body disarms it, said once: the page, the box column (review 2)', () => {
     for (const where of ['page', 'box'] as const) {
       const t = fmake({ settings: { selection: { mode: 'multi', checkbox: true } } as never });

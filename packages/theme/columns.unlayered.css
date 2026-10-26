@@ -1,0 +1,49 @@
+.dzg-move {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.dzg-move-ghost {
+  position: absolute;
+  box-sizing: border-box;
+  margin-block-start: -0.75em;
+  padding: 0.25em 0.5em;
+  border: 1px solid var(--tz-border, transparent);
+  background: var(--dzg-header-bg, var(--tz-bg-raised));
+  color: var(--tz-fg);
+  opacity: 0.8;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dzg-move-bar {
+  position: absolute;
+  inset-block-start: 0;
+  inline-size: 2px;
+  background: var(--dzg-move-bar, var(--tz-accent));
+}
+
+.dzg-hcell[data-dzg-moving] {
+  opacity: 0.5;
+}
+
+[data-dzg-dragging] {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grabbing;
+}
+
+@media (forced-colors: active) {
+  .dzg-move-bar {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+  .dzg-move-ghost {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}

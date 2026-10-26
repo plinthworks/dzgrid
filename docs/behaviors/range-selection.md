@@ -70,7 +70,8 @@ a filter input or a nested grid's cells they are not the grid's (`editing.md` 19
 9. Touch: a tap focuses as today. Blocks by touch (handles) are not in this phase.
 
 **When it is dropped** (owner QB7)
-10. Escape on a cell, a click or an arrow without Shift, a sort, a filter or search change, a column hidden,
+10. Escape on a cell, a click or an arrow without Shift, a press outside the grid (S12-Q13: « A press outside
+    the grid » below), a sort, a filter or search change, a column hidden,
     moved or pinned, a page change, new rows from the host (`model` change): dropped, said once. A host
     transaction that keeps both corners shown keeps the block.
 
@@ -147,8 +148,9 @@ one row filled one row (`fill.md` 1, 13, 21).
   under it (`range-release.test.ts`).
 - **An application's `clear()` during a drag** stops the drag first: the release brings no block back, the focus stays
   on the pressed cell.
-- **S12-Q11 (owner):** a press or a click outside the grid keeps the block, as in Excel; Escape clears it, said, and
-  leaves the focus on the block's moving corner (the handle comes back on that cell alone).
+- **S12-Q11 (owner), replaced by S12-Q13:** a press outside the grid kept the block, as in Excel. It now clears it
+  (« A press outside the grid » below); `range({ clearOnOutside: false })` keeps the old rule. Escape still clears it,
+  said, and leaves the focus on the block's moving corner (the handle comes back on that cell alone).
 - **Clearing the block from the application** (owner: « un événement qui peut effacer la sélection, ex. un retour
   serveur qui a fait la copie »). `clear()` tells `rangeChanged` with `source: 'api'` and `range: null`; it is **not
   said** (« Sélection effacée » is for the user's gestures only, as for every other API call; the application says
@@ -183,3 +185,36 @@ async send() {
 }
 ```
 
+## A press outside the grid (owner S12-Q13, 2026-10-26; replaces S12-Q11)
+
+- A pointer press (`pointerdown`, captured on the grid's document) outside this grid's root **clears the block**: a
+  user drop, `rangeChanged` with `source: 'user'` and `range: null`, said once as Escape (« Sélection effacée »). A
+  press with no block tells nothing.
+- **Inside counts as inside**: the press's composed path is read, so a grid in a shadow root, a nested grid or a detail
+  panel in the root, and the grid's open popups (filter, editor list, calendar: all placed in its root) keep the block.
+  Two grids on a page: a press in grid B clears grid A's block (B's own press rules then apply to B).
+- **`data-dzg-keep-range`** on an element (or any of its ancestors, across shadow roots) keeps the block for a press
+  inside it: an application's « Envoyer / Exporter » button can still read the block in its click.
+- **The page's scrollbar**: a press whose target is the document element (where a browser sends a press on the page's
+  own scrollbar) is ignored, so scrolling the page keeps the block. A scrollbar of another scroller is a press on that
+  element: it clears, unless that element is marked `data-dzg-keep-range`.
+- **`range({ clearOnOutside: false })`** keeps the block on any press outside (the old S12-Q11 rule); Escape and the
+  other drops (10) are unchanged.
+- The focus leaving the grid by the keys (Tab) keeps the block: only a pointer press clears it.
+- Tests: `range-outside.test.ts`. Size: `@dzgrid/dom/range` ceiling 4 950 (S12-Q14, measured 4 873).
+
+```html
+<!-- A press here keeps the block: the click reads it, then clears it itself. -->
+<button data-dzg-keep-range id="send">Envoyer la sélection</button>
+```
+
+```ts
+const blocks = range();                          // default: a press outside clears the block
+const kept = range({ clearOnOutside: false });   // the old rule: kept until Escape or another drop
+document.getElementById('send')!.addEventListener('click', () => {
+  const box = blocks.api(grid)?.box();           // still there: the button is marked data-dzg-keep-range
+  if (box) send(box);
+});
+```
+
+Demo: « Envoyer la sélection (simulé) » on `orders-edit.html?focus=range` carries `data-dzg-keep-range`.
