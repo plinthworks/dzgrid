@@ -1,0 +1,70 @@
+{
+ "A_dragBlock": {
+  "focus": "O-0007/qty",
+  "block": 28,
+  "handleAt": "O-0007/qty",
+  "rows": [
+   "O-0001 | Polyclinique Hoggar | 18/01/2025 | iPréparée | 47 | 142 750 DZD",
+   "O-0002 | Cabinet Rimel | 21/10/2025 | !En attente | 177 | 538 700 DZD",
+   "O-0003 | Clinique des Oliviers | 05/03/2026 | iPréparée | 39 | 140 400 DZD",
+   "O-0004 | Cabinet Medjerda | 27/08/2025 | ✕Annulée | 104 | 356 350 DZD",
+   "O-0005 | Clinique El Bahia | 14/03/2025 | !En attente | 98 | 161 000 DZD",
+   "O-0006 | Officine du Port | 07/03/2025 | ✓Livrée | 18 | 74 700 DZD",
+   "O-0007 | Officine du Port | 25/12/2026 | iPréparée | 9 | 10 350 DZD",
+   "O-0008 | Officine du Port | 17/01/2025 | Expédiée | 198 | 474 350 DZD",
+   "O-0009 | Centre Tassili | 20/03/2025 | iPréparée | 103 | 401 150 DZD",
+   "O-0010 | Centre Tassili | 16/10/2025 | ✕Annulée | 21 | 66 150 DZD"
+  ]
+ },
+ "B_pressInsideCornerThenDown": {
+  "focus": "O-0007/qty",
+  "block": 32,
+  "handleAt": "O-0008/qty",
+  "rows": [
+   "O-0001 | Polyclinique Hoggar | 18/01/2025 | iPréparée | 47 | 142 750 DZD",
+   "O-0002 | Cabinet Rimel | 21/10/2025 | !En attente | 177 | 538 700 DZD",
+   "O-0003 | Clinique des Oliviers | 05/03/2026 | iPréparée | 39 | 140 400 DZD",
+   "O-0004 | Cabinet Medjerda | 27/08/2025 | ✕Annulée | 104 | 356 350 DZD",
+   "O-0005 | Clinique El Bahia | 14/03/2025 | !En attente | 98 | 161 000 DZD",
+   "O-0006 | Officine du Port | 07/03/2025 | ✓Livrée | 18 | 74 700 DZD",
+   "O-0007 | Officine du Port | 25/12/2026 | iPréparée | 9 | 10 350 DZD",
+   "O-0008 | Polyclinique Hoggar | 18/01/2025 | iPréparée | 47 | 474 350 DZD",
+   "O-0009 | Centre Tassili | 20/03/2025 | iPréparée | 103 | 401 150 DZD",
+   "O-0010 | Centre Tassili | 16/10/2025 | ✕Annulée | 21 | 66 150 DZD"
+  ]
+ },
+ "B_escape": {
+  "focus": "O-0007/qty",
+  "block": 0,
+  "handleAt": "O-0007/qty",
+  "rows": [
+   "O-0001 | Polyclinique Hoggar | 18/01/2025 | iPréparée | 47 | 142 750 DZD",
+   "O-0002 | Cabinet Rimel | 21/10/2025 | !En attente | 177 | 538 700 DZD",
+   "O-0003 | Clinique des Oliviers | 05/03/2026 | iPréparée | 39 | 140 400 DZD",
+   "O-0004 | Cabinet Medjerda | 27/08/2025 | ✕Annulée | 104 | 356 350 DZD",
+   "O-0005 | Clinique El Bahia | 14/03/2025 | !En attente | 98 | 161 000 DZD",
+   "O-0006 | Officine du Port | 07/03/2025 | ✓Livrée | 18 | 74 700 DZD",
+   "O-0007 | Officine du Port | 25/12/2026 | iPréparée | 9 | 10 350 DZD",
+   "O-0008 | Polyclinique Hoggar | 18/01/2025 | iPréparée | 47 | 474 350 DZD",
+   "O-0009 | Centre Tassili | 20/03/2025 | iPréparée | 103 | 401 150 DZD",
+   "O-0010 | Centre Tassili | 16/10/2025 | ✕Annulée | 21 | 66 150 DZD"
+  ]
+ },
+ "C_clickThenPressNearCornerAmount": {
+  "focus": "O-0005/amount",
+  "block": 5,
+  "handleAt": "O-0009/amount",
+  "rows": [
+   "O-0001 | Polyclinique Hoggar | 18/01/2025 | iPréparée | 47 | 142 750 DZD",
+   "O-0002 | Cabinet Rimel | 21/10/2025 | !En attente | 177 | 538 700 DZD",
+   "O-0003 | Clinique des Oliviers | 05/03/2026 | iPréparée | 39 | 140 400 DZD",
+   "O-0004 | Cabinet Medjerda | 27/08/2025 | ✕Annulée | 104 | 356 350 DZD",
+   "O-0005 | Clinique El Bahia | 14/03/2025 | !En attente | 98 | 161 000 DZD",
+   "O-0006 | Officine du Port | 07/03/2025 | ✓Livrée | 18 | 161 000 DZD",
+   "O-0007 | Officine du Port | 25/12/2026 | iPréparée | 9 | 161 000 DZD",
+   "O-0008 | Officine du Port | 17/01/2025 | Expédiée | 198 | 161 000 DZD",
+   "O-0009 | Centre Tassili | 20/03/2025 | iPréparée | 103 | 161 000 DZD",
+   "O-0010 | Centre Tassili | 16/10/2025 | ✕Annulée | 21 | 66 150 DZD"
+  ]
+ }
+}

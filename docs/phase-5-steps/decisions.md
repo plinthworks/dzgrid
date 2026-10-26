@@ -174,6 +174,8 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 - **S12-Q8 bis (owner, 2026-10-25):** « avec les flèches je ne vois pas la cellule, je ne sais pas où je suis »: the keyboard position must be obvious: a stronger ring plus a cell tint on the active cell, and a subtle active-row tint (contrast-checked, forced colours, RTL, no layout move), in the base theme and both skins.
 - **S12-Q9 (owner, 2026-10-25):** `@dzgrid/dom/fill` 1 600 → 3 000 (measured 2 729: base ~1 700, drag, keyboard mode, Ctrl+D/R, click-click all kept); `fill.css` 300 → 460.
 - **S12-Q10 (owner, 2026-10-26):** the real Angular example ceiling 92 000 → 92 500 (measured 92 059 after S12-Q8's theme cues and the Angular range/fill inputs). K.8 guard stays 83 500.
+- **S12-Q11 (owner, 2026-10-26):** a click outside the grid keeps the block of cells, as in Excel; Escape clears it.
+- **Lead, 2026-10-26 (owner's report on `orders-edit.html?focus=range`):** with a block the fill handle sits only at the block's corner (bottom-end, mirrored in RTL) and a fill takes the whole block as its source; the one-cell handle only without a block. The handle's hit area is its square + 2 px (10 px), a fill starts after 4 px of movement, a press near a cell's corner selects (fill.md 21; WCAG 2.5.8 by its equivalent controls). An application's `clear()` emits `rangeChanged` with source `api` and is not said.
 
 ## Phase 5 close (owner, 2026-10-26) — plan `step13-plan.md`
 

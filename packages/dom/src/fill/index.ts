@@ -9,12 +9,13 @@ import type { RangeFeature } from '../range/index.js';
 import type { Frame } from '../render/rows.js';
 import { setAttr } from '../render/write.js';
 import { autoScroll, cellAt } from '../range/geom.js';
+import { travel } from '../dir.js';
 
 /** The texts `fill()` needs, from `@dzgrid/dom/locales/<lang>-fill` (with `range()`'s, from `-range`). */
 export const FILL_KEYS = ['fill.filled', 'fill.bulk', 'fill.mode', 'fill.pick', 'fill.cancel', 'fill.down', 'fill.up', 'fill.end', 'fill.start'] as const satisfies readonly FillMessageKey[];
 
 export interface FillFeatureOptions {
-  /** The handle drawn, dragged and clicked (mouse, pen); false: the keys and the API only. Default true. */
+  /** The handle drawn, dragged and clicked (the mouse drags it; a pen only clicks it, S12-Q12); false: the keys and the API only. Default true. */
   readonly handle?: boolean;
 }
 /** What a fill or a bulk edit did, as said. */
@@ -45,7 +46,7 @@ type Gesture = { readonly kind: 'drag' | 'mode' | 'pick'; readonly src: CellRang
 
 /**
  * `fill(blocks, options)`: the fill over `range()`'s block (docs/behaviors/fill.md 11–20; owner S12-Q1–Q8). The handle on
- * the block's corner cell, or on the focused data cell (S12-Q8), re-appended at each paint; its drag (mouse, pen; the
+ * the block's corner cell, or on the focused data cell (S12-Q8), re-appended at each paint; its drag (the mouse only, S12-Q12; the
  * target outlined; the block drag's geometry and auto-scroll); a click on it then a click on a cell (WCAG 2.5.7); the
  * keyboard mode (Ctrl/Cmd+Shift+Enter, the arrows); Ctrl/Cmd+D and Ctrl/Cmd+R; bulk edit's seam (`g.bulk`, Ctrl+Enter
  * in the editors' field). Every way plans with `@dzgrid/core/range` (`fillTarget`, `planFill`, `planPaste`) and writes
@@ -88,6 +89,8 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       let frame = 0;
       let swallow = false;
       let last: { readonly clientX: number; readonly clientY: number } | null = null;
+      /** Where the handle was pressed: the drag starts 4 px from it (owner 2026-10-26, no accidental fill). */
+      let at = { clientX: 0, clientY: 0 };
       const aim = () => {
         const b = gest?.to && boxOf(gest.src);
         return b ? fillTarget(b, gest!.to!) : null;
@@ -214,13 +217,21 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         c ? span.parentNode !== c && c.append(span) : span.remove();
       };
 
-      /** The target follows the pointer; the first move out of the source starts the drag (its capture, no text selected). */
+      /**
+       * The target follows the pointer, a row counted once the pointer is half a row inside it (an edge slip fills
+       * nothing); the first move out of the source, 4 px or more from the press, starts the drag (its capture, no text
+       * selected). The release writes the last target shown.
+       */
       const track = (): void => {
-        const p = pos(last && cellAt(g, last));
         const b = gest?.kind === 'drag' && boxOf(gest.src);
+        const p = b && pos(last && cellAt(g, last));
         if (!p || !b) return;
+        const s = p.row > b.bottom ? 1 : p.row < b.top ? -1 : 0;
+        // Half a row back toward the source, less 2 px (a cell's middle counts, even where an engine rounds the pointer
+        // to whole pixels: Firefox, WebKit): the row then under the pointer.
+        if (s) p.row = pos(cellAt(g, last!, (-s * (g.rowHeight() - 4)) / 2))!.row;
         if (!gest!.moved) {
-          if (!fillTarget(b, p)) return;
+          if (!fillTarget(b, p) || travel(last!, at) < 4) return;
           gest!.moved = true;
           setAttr(el.root, 'data-dzg-filling', '');
           try {
@@ -238,12 +249,12 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         if (gest?.moved && last && autoScroll(g, last)) track();
       };
       scope.on(span, 'pointerdown', (e: PointerEvent) => {
-        // A finger scrolls (S12-Q3): its press is neither taken nor prevented.
-        if (e.pointerType === 'touch' || !e.isPrimary || e.button) return;
+        // A finger scrolls (S12-Q3), a pen too (S12-Q12, as range): its press is neither taken nor prevented.
+        if (e.pointerType !== 'mouse' || !e.isPrimary || e.button) return;
         e.stopPropagation();
         e.preventDefault();
         const s = gest ? null : source();
-        if (s) (gest = { kind: 'drag', src: s, to: null, id: e.pointerId }), (last = e), (swallow = false);
+        if (s) (gest = { kind: 'drag', src: s, to: null, id: e.pointerId }), (last = at = e), (swallow = false);
       });
       scope.on(span, 'dblclick', (e) => e.stopPropagation());
       const mine = (e: Event): boolean => gest?.kind === 'drag' && (e as PointerEvent).pointerId === gest.id;
@@ -292,7 +303,8 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
 
       const off = kernel.subscribe((e) => {
         if (!gest) return;
-        if (e.type === 'sortChanged' || e.type === 'filterChanged' || e.type === 'quickChanged' || e.type === 'pageChanged' || e.type === 'columnsChanged' || (e.type === 'modelUpdated' && (e.kind === 'order' || e.kind === 'query' || !boxOf(gest.src))) || (e.type === 'focusChanged' && gest.kind === 'mode')) cancel();
+        // An application's block change or clear (`rangeChanged` from `api`) cancels it: nothing written, nothing given back.
+        if ((e.type === 'rangeChanged' && e.source === 'api') || e.type === 'sortChanged' || e.type === 'filterChanged' || e.type === 'quickChanged' || e.type === 'pageChanged' || e.type === 'columnsChanged' || (e.type === 'modelUpdated' && (e.kind === 'order' || e.kind === 'query' || !boxOf(gest.src))) || (e.type === 'focusChanged' && gest.kind === 'mode')) cancel();
       });
 
       // ---- The keys (fill.md 15–16): asked before every other feature (range's Escape and Delete), a handle put first ----

@@ -223,15 +223,16 @@ describe('the drag (fill.md 13)', () => {
     expect(t.block()).toBe('r1/qty:r2/qty');
   });
 
-  it('the source is the one pressed: a block the application sets during the drag does not change what is filled (mutant « source re-read at the release »)', () => {
+  it('a block the application sets during the drag cancels it (review of the 2026-10-26 fix): nothing written, the application\'s block kept', () => {
     const t = fmake();
     t.at('r1', 'qty');
     t.down(t.handle()!, t.pt('r1', 'qty'));
     t.move(t.pt('r3', 'qty'));
     t.api().set(R_(['r5', 'qty'], ['r6', 'qty']));
+    expect(t.target()).toEqual([]);
     t.up(t.pt('r3', 'qty'));
-    // From r1 (1) alone: a copy into r2, r3; never from r5, r6.
-    expect(t.changes()).toEqual(['r2/qty=1', 'r3/qty=1']);
+    expect(t.changes()).toEqual([]);
+    expect(t.block()).toBe('r5/qty:r6/qty');
   });
 
   it('released inside the source (after leaving it): nothing written, nothing said', async () => {
@@ -298,11 +299,13 @@ describe('the drag (fill.md 13)', () => {
     expect(t.field()).toBeNull();
   });
 
-  it('a pen drags it (S12-Q3); a finger does not, and its press is not prevented (the view scrolls)', () => {
+  it('neither a pen (S12-Q12: as touch, as range) nor a finger drags it, and their press is not prevented (the view scrolls)', () => {
     const a = fmake();
     a.at('r1', 'qty');
-    a.dragTo('r3', 'qty', { type: 'pen' });
-    expect(a.changes()).toEqual(['r2/qty=1', 'r3/qty=1']);
+    const q = a.dragTo('r3', 'qty', { type: 'pen' });
+    expect(q.defaultPrevented).toBe(false);
+    expect(a.requests).toHaveLength(0);
+    expect(a.ctx.el.root.hasAttribute('data-dzg-filling')).toBe(false);
     const b = fmake();
     b.at('r1', 'qty');
     const p = b.dragTo('r3', 'qty', { type: 'touch' });

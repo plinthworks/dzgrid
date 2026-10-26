@@ -1,6 +1,6 @@
 // @vitest-environment node
 // The fill's styles (Phase 5 step 12, `@dzgrid/theme/fill.css`; docs/behaviors/fill.md 11–13; owner S12-Q3, S12-Q8):
-// the handle a 24 × 24 px hit box at the cell's inline-end / block-end corner (bottom-right, bottom-left right to left:
+// the handle a 10 × 10 px hit box (its square and 2 px, owner 2026-10-26: no accidental fill) at the cell's inline-end / block-end corner (bottom-right, bottom-left right to left:
 // logical sides only), its 8 px square drawn at that corner by its own `::before` (the cell's pseudo-elements are the
 // edit marks'), a crosshair over it, hidden where no fine pointer exists (touch only); the target outlined dashed in
 // the block's edge colour; forced colours Highlight; no transition or animation; no colour literal, no physical side;
@@ -32,13 +32,14 @@ describe('fill.css', () => {
     expect(read('fill.unlayered.css')).toBe(out('@use "fill" with ($layered: false);'));
   });
 
-  it('the handle: a 24 px hit box at the inline-end, block-end corner of its cell, a crosshair over it', () => {
+  it('the handle: a 10 px hit box (the 8 px square and 2 px, never a 24 px zone over the cell) at the inline-end, block-end corner of its cell, a crosshair over it', () => {
     const h = decl(/^\.dzg-fill$/);
     expect(h).toMatch(/position: absolute/);
     expect(h).toMatch(/inset-inline-end: 0/);
     expect(h).toMatch(/inset-block-end: 0/);
-    expect(h).toMatch(/inline-size: 24px/);
-    expect(h).toMatch(/block-size: 24px/);
+    expect(h).toMatch(/inline-size: 10px/);
+    expect(h).toMatch(/block-size: 10px/);
+    expect(h).not.toMatch(/24px/);
     expect(h).toMatch(/cursor: crosshair/);
   });
 

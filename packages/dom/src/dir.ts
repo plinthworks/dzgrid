@@ -64,6 +64,9 @@ export function setInlineScroll(el: HTMLElement, x: number, dir: Dir, conv: Scro
   el.scrollLeft = dir === 'ltr' || conv === 'reverse' ? v : conv === 'negative' ? -v : max - v;
 }
 
+/** How far a pointer went between two points, whatever the direction (the fill handle's 4 px threshold). */
+export const travel = (a: { readonly clientX: number; readonly clientY: number }, b: { readonly clientX: number; readonly clientY: number }): number => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+
 /** A pointer's distance from the start edge of `rect`. */
 export function logicalX(e: { readonly clientX: number }, rect: DOMRectReadOnly, dir: Dir): number {
   return dir === 'ltr' ? e.clientX - rect.left : rect.right - e.clientX;

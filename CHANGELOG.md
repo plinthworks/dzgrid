@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Accidental fills** (owner's report on `orders-edit.html?focus=range`, 2026-10-26: a block growing by one row
+  written with its first row, a whole column written with one value). `@dzgrid/theme/fill.css`: the handle's hit box is
+  its 8 px square and 2 px (10 × 10 px), no longer 24 × 24 px over the corner cell; a press near a cell's corner selects.
+  `@dzgrid/dom/fill`: a drag of the handle starts after 4 px of movement. WCAG 2.5.8 through its equivalent controls
+  (click-then-click, keyboard fill mode, Ctrl/Cmd+D/R; `fill.md` 21).
+- `@dzgrid/dom/range`: the block's corner is taken at the release point too (a release with no move before it).
+- `@dzgrid/dom/range`: an application's `clear()` during a drag stops the drag (the release no longer brings a block
+  back). `@dzgrid/dom/fill`: a block change or `clear()` from the application cancels a fill under way; a row joins the
+  fill's target only once the pointer is half a row inside it (an edge slip fills nothing).
+
+### Changed
+
+- `@dzgrid/dom/fill` (owner S12-Q12): a pen no longer drags the fill handle (as a finger, as for blocks). The fill is
+  not WCAG 2.5.8-complete until the column menu's « Recopier vers le bas / la droite » (Phase 6 step 3).
+
+### Added
+
+- `orders-edit.html?focus=range`: « Envoyer la sélection (simulé) » — the block cleared by the application after a
+  pretend server call (`range().api(grid).clear()`: `rangeChanged` source `api`, not said); documented in
+  `range-selection.md`.
+
 ## [0.3.0] - unreleased
 
 Prepared at the Phase 5 close (2026-10-26), **not published**: the four packages at 0.3.0, their `@dzgrid/*` peers on

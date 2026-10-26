@@ -131,7 +131,8 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
   });
   // This gesture's pointer only (review 3); a capture lost without its release, a blur: cancelled.
   const mine = (e: Event): boolean => (e as PointerEvent).pointerId === id;
-  scope.on(doc, 'pointerup', (e) => void (mine(e) && end(true)));
+  // The release point counts (a release with no move before it, owner 2026-10-26): the corner taken there, then the end.
+  scope.on(doc, 'pointerup', (e) => void (mine(e) && (ranging && ((last = e as PointerEvent), track()), end(true))));
   scope.on(doc, 'pointercancel', (e) => void (mine(e) && end()));
   scope.on(el.body, 'lostpointercapture', (e) => void (mine(e) && end()));
   if (win) scope.on(win, 'blur', () => end());

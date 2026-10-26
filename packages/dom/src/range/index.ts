@@ -410,7 +410,8 @@ export function range(o: RangeOptions = {}): RangeFeature {
           s.follows = false;
           return true;
         },
-        clear: () => s.set(null, 'api'),
+        // A drag under way stops first: its release must not bring a block back (review of the 2026-10-26 fix).
+        clear: () => (drag.stop(), s.set(null, 'api')),
         box: () => boxOf(s.r),
         copy: (x) => copy(false, 'api', x?.headers),
         cut: () => copy(true, 'api'),

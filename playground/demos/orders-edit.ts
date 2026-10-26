@@ -63,13 +63,15 @@ const W = {
     statuses: { pending: 'En attente', ready: 'Préparée', shipped: 'Expédiée', delivered: 'Livrée', cancelled: 'Annulée' },
     sent: '{col} : « {v} » envoyé…', saved: '{col} : enregistré', refused: '{col} refusé : {why}', local: 'Refus sur place : {why}', nothing: 'Rien encore.',
     motion: 'Animations', offline: 'Serveur injoignable', remove: 'Supprimer cette commande dans 3 s', removed: 'Commande {ref} supprimée', next: 'Page suivante dans 3 s', pick: 'Choisissez d\u2019abord une cellule.',
-    undo: 'Annuler', redo: 'Rétablir', undone: 'Annulé : {col}', redone: 'Rétabli : {col}', parent: 'Commande mère', structure: 'Structure de l\u2019arbre : non modifiable' },
+    undo: 'Annuler', redo: 'Rétablir', undone: 'Annulé : {col}', redone: 'Rétabli : {col}', parent: 'Commande mère', structure: 'Structure de l\u2019arbre : non modifiable',
+    send: 'Envoyer la sélection (simulé)', sending: 'Envoi de {n} cellules…', sent2: 'Sélection envoyée puis effacée ({n} cellules)', noBlock: 'Sélectionnez d\u2019abord un bloc.', changed: 'Sélection modifiée pendant l\u2019envoi : gardée' },
   ar: { title: 'الطلبات', ref: 'الطلب', client: 'العميل', day: 'التاريخ', status: 'الحالة', qty: 'الكمية', amount: 'المبلغ', urgent: 'عاجل',
     yes: 'نعم', no: 'لا', locked: 'غير قابل للتعديل', integer: 'المطلوب عدد صحيح', server: 'رفضه خادم العرض',
     statuses: { pending: 'قيد الانتظار', ready: 'جاهزة', shipped: 'مُرسلة', delivered: 'مُسلّمة', cancelled: 'ملغاة' },
     sent: '{col}: «{v}» أُرسل…', saved: '{col}: حُفظ', refused: '{col} مرفوض: {why}', local: 'رفض فوري: {why}', nothing: 'لا شيء بعد.',
     motion: 'الحركة', offline: 'الخادم غير متاح', remove: 'حذف هذا الطلب بعد 3 ث', removed: 'حُذف الطلب {ref}', next: 'الصفحة التالية بعد 3 ث', pick: 'اختر خلية أولاً.',
-    undo: 'تراجع', redo: 'إعادة', undone: 'تراجع: {col}', redone: 'إعادة: {col}', parent: 'الطلب الأصلي', structure: 'بنية الشجرة: غير قابلة للتعديل' },
+    undo: 'تراجع', redo: 'إعادة', undone: 'تراجع: {col}', redone: 'إعادة: {col}', parent: 'الطلب الأصلي', structure: 'بنية الشجرة: غير قابلة للتعديل',
+    send: 'إرسال التحديد (محاكاة)', sending: 'جارٍ إرسال {n} خلية…', sent2: 'أُرسل التحديد ثم مُسح ({n} خلية)', noBlock: 'حدّد كتلة أولاً.', changed: 'تغيّر التحديد أثناء الإرسال: أُبقي عليه' },
 } as const;
 
 /**
@@ -142,10 +144,11 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
   const sync = (u: boolean, r: boolean): void => undoB.forEach((b, i) => b.setAttribute('aria-disabled', String(!(i ? r : u))));
   const id = (k: RowKey, c: string): string => `${k}\n${c}`;
   /** Blocks of cells (`?range=0` none) and the fill over them (`?fill=0` none). */
+  let blocks: ReturnType<typeof range> | null = null;
   const blockFeatures = () => {
     const q = new URLSearchParams(location.search);
     if (q.get('range') === '0') return [];
-    const blocks = range();
+    blocks = range();
     return q.get('fill') === '0' ? [blocks] : [blocks, fillHandle(blocks)];
   };
   let grid!: GridInstance<Order>;
@@ -228,6 +231,26 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
           say(fill(w.removed, { ref: r.ref }));
         }, 3000);
       }),
+      // `?focus=range` (owner 2026-10-26, « un événement qui peut effacer la sélection, ex. un retour serveur »): the block
+      // sent to a pretend server (0.6 s), then cleared by the application — `range().api(grid).clear()`, source `api`,
+      // nothing said by the grid (range-selection.md « Clearing the block from the application »).
+      ...(blocks && new URLSearchParams(location.search).get('focus') === 'range' ? [Object.assign(button(w.send, () => {
+        const b = blocks!.api(grid)?.box();
+        const sent = blocks!.api(grid)?.get();
+        if (!b || !sent) return say(w.noBlock);
+        const n = String((b.bottom - b.top + 1) * (b.end - b.start + 1));
+        const key = (x: unknown): string => JSON.stringify(x);
+        say(fill(w.sending, { n }));
+        // At the answer the api is read again (null once the grid is destroyed: nothing done), and the block is cleared
+        // only if it is still the one sent (the same corners and the same rows shown); otherwise it is left alone.
+        setTimeout(() => {
+          const r = blocks!.api(grid);
+          if (!r) return;
+          if (key(r.get()) !== key(sent) || key(r.box()) !== key(b)) return say(w.changed);
+          r.clear();
+          say(fill(w.sent2, { n }));
+        }, 600);
+      }), { id: 'send-block' })] : []),
       ...(o.paged ? [button(w.next, () => void setTimeout(() => grid.kernel.dispatch({ type: 'page.go', index: (grid.kernel.rows.page?.index ?? 0) + 1 }, 'api'), 3000))] : []),
       // Last, in a group of their own (the page's other controls keep their places).
       Object.assign(document.createElement('span'), { className: 'undo' }),

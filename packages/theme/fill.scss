@@ -3,9 +3,10 @@
 // loaded by the applications that fill (`@dzgrid/dom/fill`), after range.css; the base theme does not grow. Compiled to
 // fill.css (layered) and fill.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when they drift.
 //
-// The handle (`.dzg-fill`, a child of its corner cell, aria-hidden) is a 24 × 24 px hit box at the cell's inline-end,
-// block-end corner (WCAG 2.5.8; bottom-left right to left), its 8 px square drawn by its own `::before` at that same
-// corner (the cell's pseudo-elements are the edit marks'), a crosshair over it (owner S12-Q8). Touch only (no fine
+// The handle (`.dzg-fill`, a child of its corner cell, aria-hidden) is a 10 × 10 px hit box at the cell's inline-end,
+// block-end corner — its square and 2 px, never a zone over the cell (owner 2026-10-26: a press near a cell's corner
+// selects; WCAG 2.5.8 by its equivalent controls, fill.md 1) — bottom-left right to left; its 8 px square drawn by its
+// own `::before` at that same corner (the cell's pseudo-elements are the edit marks'), a crosshair over it (S12-Q8). Touch only (no fine
 // pointer): not shown (S12-Q3). An open field hides it at once (`data-dzg-editing`, before the next paint removes it).
 // The cells to fill: a dashed line inside each, in the block's edge colour. Nothing moves. No colour literal, no
 // physical side (guards).
@@ -35,8 +36,8 @@ $handle: var(--dzg-fill-handle, var(--dzg-range-edge, var(--tz-success)));
     inset-inline-end: 0;
     inset-block-end: 0;
     z-index: 2;
-    inline-size: 24px;
-    block-size: 24px;
+    inline-size: 10px;
+    block-size: 10px;
     cursor: crosshair;
     touch-action: none;
   }

@@ -134,3 +134,52 @@ browser `--only range` (Chrome; Firefox and WebKit right to left).
 - During a drag the view scrolls near the body's edges (a band of a row height, at least 24 px; over the header and the
   tree's pinned parents too), at most a row height a frame; a point over the pinned parents is the row under them.
 
+## After the owner's report of 2026-10-26 (`orders-edit.html?focus=range`)
+
+Reproduced in headless Chrome with real mouse events (`spikes/fix-repro/`): 438 releases swept (heights in the row,
+the page scrolled, a 2× screen, slow and fast moves, the bottom band) — the block's corner and the focus were always
+the cell under the release, once the auto-scroll stopped. The « one row too far » was a **fill**: the handle's 24 px hit
+box covered three quarters of the corner cell, so a press « on 107 » just after the release grabbed it, and a move of
+one row filled one row (`fill.md` 1, 13, 21).
+
+- **The release point counts** (S11-Q1): the corner is taken once more at the release point before the focus moves, so
+  a release that comes without a move before it (an engine that coalesces moves, a fast flick) still ends on the cell
+  under it (`range-release.test.ts`).
+- **An application's `clear()` during a drag** stops the drag first: the release brings no block back, the focus stays
+  on the pressed cell.
+- **S12-Q11 (owner):** a press or a click outside the grid keeps the block, as in Excel; Escape clears it, said, and
+  leaves the focus on the block's moving corner (the handle comes back on that cell alone).
+- **Clearing the block from the application** (owner: « un événement qui peut effacer la sélection, ex. un retour
+  serveur qui a fait la copie »). `clear()` tells `rangeChanged` with `source: 'api'` and `range: null`; it is **not
+  said** (« Sélection effacée » is for the user's gestures only, as for every other API call; the application says
+  what it did, if anything). A second `clear()` tells nothing. Demo: « Envoyer la sélection (simulé) » on
+  `orders-edit.html?focus=range` (0.6 s, then `clear()`, logged « Sélection envoyée puis effacée »). At the answer the
+  demo reads the API again (none once the grid is destroyed) and clears only if the block is still the one sent (the
+  same corners and box); a block changed meanwhile is kept, logged « Sélection modifiée pendant l'envoi : gardée ».
+
+```ts
+// DOM
+const blocks = range();
+const grid = createGrid(host, { …, features: [edit(), blocks, fill(blocks)] });
+async function send() {
+  const box = blocks.api(grid)?.box();
+  if (!box) return;
+  const sent = blocks.api(grid)?.get();
+  await server.send(box);          // the application's own call
+  const r = blocks.api(grid);      // null once the grid is destroyed
+  if (r && JSON.stringify(r.get()) === JSON.stringify(sent)) r.clear();  // rangeChanged { source: 'api' }, nothing said
+}
+```
+
+```ts
+// Angular: the controller of <dzg-grid>, through [features]="[blocks, fill(blocks)]"
+private readonly grid = viewChild(DzGrid, { read: DzgController });
+async send() {
+  const sent = this.grid()?.range()?.get();
+  if (!sent) return;
+  await this.server.send(this.grid()!.range()!.box());
+  const r = this.grid()?.range();   // null once the grid is gone
+  if (r && JSON.stringify(r.get()) === JSON.stringify(sent)) r.clear();  // (rangeChanged) with source 'api'
+}
+```
+

@@ -22,11 +22,11 @@ Ctrl+Enter to write it in every cell of the block.
 ## Behaviours (numbered, each one a test)
 
 **The handle**
-1. A square drawn small (8 px) with a 24 × 24 px hit area (WCAG 2.5.8) at the block's bottom
-   **inline-end** corner: bottom-right in left to right, **bottom-left in right to left**. One cell has it
+1. A square drawn small (8 px) with a hit area of that square and 2 px — 10 × 10 px — at the block's bottom
+   **inline-end** corner (owner 2026-10-26, 21; was 24 × 24 px): bottom-right in left to right, **bottom-left in right to left**. One cell has it
    too (the focus cell); hidden while a field is open and on a read-only grid.
-2. `aria-hidden`: the keyboard way is Ctrl+D / Ctrl+R (WCAG 2.5.7: dragging is never the only way). Pointer
-   only (mouse, pen); touch later.
+2. `aria-hidden`: the keyboard way is Ctrl+D / Ctrl+R (WCAG 2.5.7: dragging is never the only way). The mouse
+   only: a pen is like a finger (S12-Q12, 23); touch later.
 3. The drag follows one axis: the one the pointer is farther out of the source block on (rows or columns;
    a tie goes to rows). Down or up extends the block's columns; toward the end or the start extends its
    rows. Back inside the source: nothing to fill (`fillTarget` null).
@@ -95,7 +95,7 @@ the browser's; Ctrl+Enter in a field keeps the value in its one cell, as Enter w
 
 11. **The handle** (owner S12-Q8, « comme Excel »): one per grid, on the block's corner cell — its last data row ×
     its end column — and, with no block, on the **focused data cell alone** too: bottom-right in left to right,
-    bottom-left in right to left. Drawn 8 px, hit area 24 × 24 px inside the cell; the pointer over it is a
+    bottom-left in right to left. Drawn 8 px, hit area 10 × 10 px inside the cell (21); the pointer over it is a
     **crosshair** (the small « + »). Not drawn: no `edit()`; a field open; the corner cell read-only (one cell) or
     every column of the block read-only; a detail, filler or loading row; a cell not mounted or covered by a span;
     the tree's pinned copies; a nested grid's panel (it has its own); while a block is being dragged; a screen with
@@ -105,7 +105,7 @@ the browser's; Ctrl+Enter in a field keeps the value in its one cell, as Enter w
     (range.css: `:focus`, not only `:focus-visible`); a block keeps its 2 px edge all round, in its own colour —
     a hue 60° apart from the focus ring, the saving border and the refused border, 3:1 on the cell and its
     neighbours, `Highlight` / `HighlightText` in forced colours. Nothing moves (reduced motion has nothing to reduce).
-13. **The drag** (mouse, pen; a finger scrolls, its press is not prevented): a press on the handle keeps the block;
+13. **The drag** (the mouse; a finger or a pen scrolls, its press is not prevented — S12-Q12, 23): a press on the handle keeps the block;
     the cells to fill are outlined dashed (`dzg-cell--fill` and its logical edges) as the pointer moves
     (`fillTarget`, the same function for every path); near the body's edges the view scrolls as for a block drag.
     The release writes (`planFill`; Ctrl or Cmd held **at the release** swaps copy and series — a Mac's Ctrl+press
@@ -148,3 +148,45 @@ the browser's; Ctrl+Enter in a field keeps the value in its one cell, as Enter w
 
 Not in this step: a double-click on the handle (fill down to the neighbour column's end), touch handles, a
 « series » dialog, text series, trends, an options menu after the drop, `[(range)]` in Angular.
+
+## After the owner's report of 2026-10-26 (`orders-edit.html?focus=range`)
+
+The owner, selecting a block, then pressing « on 107 » (the block's corner), saw the block grow by one row filled with
+the block's FIRST row, and earlier a whole Montant column written with 161 000. Reproduced in headless Chrome with real
+mouse events (`spikes/fix-repro/`, « before » with the 0.3.0 hit box put back in the page): both were **accidental
+fills**. The 24 px hit box covered 24 of the corner cell's 32 px height, so a press meant for the cell grabbed the
+handle; one row down is a target of one row, written with the source's row `n mod n` = its first (the cycle of 3 is
+right: the DOM gives `planFill` the whole block, pinned by `range-fill-accident.test.ts` and its property through the
+real handle). With a block the handle is only on the block's corner and fills from the whole block; on one focused
+cell without a block, only there (11, already so).
+
+21. **No accidental fill** (owner, 2026-10-26):
+    - the handle's pointer hit area is its drawn square and 2 px (10 × 10 px at the cell's corner), never a zone over
+      the cell: a press anywhere else in the cell, however near its corner, starts a **selection** (`range-selection.md`);
+    - a fill starts only once the pointer has moved **4 px** from its press on the handle (and left the source); the
+      dashed target shows from that move on. A press that slips less is a click: the no-drag way (14) is armed by it;
+    - **half a row**: a row joins the target only once the pointer is about half a row inside it (half a row less
+      2 px: its middle counts, also where an engine rounds the pointer to whole pixels); the dashed preview follows the same rule. An edge slip (a press 1 px above a cell's edge, a release
+      3 px below it) fills nothing;
+    - **WCAG 2.5.8 (target size, minimum; owner S12-Q12)**: the 10 px handle stays. The ≥ 24 px pointer equivalent is
+      a pair of items in the column ⋮ menu, « Recopier vers le bas (Ctrl+D) » and « Recopier vers la droite
+      (Ctrl+R) », acting on the current block — they come at **Phase 6 step 3**. Until then the fill is **not**
+      2.5.8-complete: a known gap, and nothing is published before it closes (`phase-6-steps/step02-plan.md`
+      « Handover to step 3 »).
+22. **Escape**: during a drag of the handle it cancels, nothing written (13); after a fill it drops the block and leaves
+    the focus where the fill left it (13: the focus does not move during a fill). After a drag-select, the focus is on
+    the block's moving corner, so Escape leaves it there (`range-selection.md`, S12-Q11). An application's block change
+    or `clear()` during a gesture (a drag, the keyboard mode, the no-drag way) cancels it: nothing written, the block not
+    given back (`rangeChanged` from `api`).
+23. **Pen** (S12-Q12, as `range-selection.md`): a pen is like a finger — its press on the handle is neither taken nor
+    prevented, no pen drag fills (a pen drag would scroll and fill at once). A pen cannot be told apart from a mouse in
+    CSS (both are `any-pointer: fine`), so the handle stays drawn and the pen's press is ignored by the code. A pen tap
+    on the handle is a click: it arms the no-drag way (14), which a pen may use.
+24. **What a drop writes**: the **last target shown** (the dashed preview), never a target recomputed from the release
+    point; a release that comes with no move before it writes the preview of the last move.
+
+Tests: `range-fill-accident.test.ts` (the 4 px threshold, the half-row rule, an app `clear()` mid-drag, the whole block repeated, a property of 2–5-row blocks through
+the real handle against values written by hand), `range-release.test.ts`; theme `fill.test.ts` (10 px); browser
+`--only fill` → `scripts/browser-fill-accident.mjs` (a press 16 px and 12 px in from the corner selects, a press on the
+square fills; the owner's gesture end to end; Escape; S12-Q11; the simulated send, kept when the block changed during it; Chrome: a pen drag writes nothing).
+

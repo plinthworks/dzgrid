@@ -1,0 +1,30 @@
+{
+ "tried": 438,
+ "mismatches": 2,
+ "bad": [
+  {
+   "dsf": 1,
+   "vh": 700,
+   "sy": 150,
+   "steps": 20,
+   "target": 12,
+   "dy": 14,
+   "under": "O-0014/qty",
+   "focus": "O-0013/qty",
+   "last": "O-0013",
+   "vtop": 34
+  },
+  {
+   "dsf": 2,
+   "vh": 700,
+   "sy": 150,
+   "steps": 20,
+   "target": 12,
+   "dy": 14,
+   "under": "O-0014/qty",
+   "focus": "O-0013/qty",
+   "last": "O-0013",
+   "vtop": 34
+  }
+ ]
+}

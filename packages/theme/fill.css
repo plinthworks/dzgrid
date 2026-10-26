@@ -5,8 +5,8 @@
     inset-inline-end: 0;
     inset-block-end: 0;
     z-index: 2;
-    inline-size: 24px;
-    block-size: 24px;
+    inline-size: 10px;
+    block-size: 10px;
     cursor: crosshair;
     touch-action: none;
   }

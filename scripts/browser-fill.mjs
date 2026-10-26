@@ -2,14 +2,14 @@
  * Phase 5 step 12 in real browsers (docs/phase-5-steps/step12-plan.md « Browser checks », owner S12-Q8), called by
  * scripts/browser.mjs (`-- --only fill`, and in the full run): the REAL playground page `orders-edit.html?focus=range`
  * on 127.0.0.1:4700 (or DZG_PLAYGROUND), never restarted. In fr light Clinic and ar dark Midnight:
- * - S12-Q8: the handle on a single clicked cell and on a block (bottom-right, bottom-left right to left, a 24 px hit box
+ * - S12-Q8: the handle on a single clicked cell and on a block (bottom-right, bottom-left right to left, a 10 px hit box
  *   found by `elementFromPoint`), the crosshair over it; the block's 2 px edge and its contrast; after ArrowDown × 2 the
  *   active cell's 2 px ring, its tint and its row's tint, each contrast-checked (ring ≥ 3:1 on the cell and its row,
  *   text ≥ 4.5:1 on both tints);
  * - a REAL drag of the handle with the mouse (Playwright mouse, real hit testing): the series written at once (before
  *   the simulated server answers), one sentence, Ctrl+Z gives it back; Ctrl held at the drop swaps; Escape mid-drag
  *   writes nothing; the no-drag click-then-click; Ctrl+D (prevented); Ctrl+Enter bulk on « Statut »;
- * - Chrome only: a pen drag by CDP, forced colours (the square and the outline drawn), axe 0 with the block, the handle and
+ * - Chrome only: a pen drag by CDP writes nothing (S12-Q12), forced colours (the square and the outline drawn), axe 0 with the block, the handle and
  *   the fill mode; screenshots in docs/screenshots/.
  * Firefox and WebKit (`--engine`): the same page, fr and ar: the handle, the crosshair, the ring, the drag, Ctrl+D.
  */
@@ -66,12 +66,12 @@ export async function fillChecks(name, ctx, h) {
     });
     const corner = (hd) => (ar ? hd.dl <= 1 : hd.dr <= 1) && hd.db <= 1;
 
-    // S12-Q8: a click on one Qté cell shows the handle on it, bottom-right (bottom-left in Arabic), 24 px, a crosshair.
+    // S12-Q8: a click on one Qté cell shows the handle on it, bottom-right (bottom-left in Arabic), a 10 px hit box, a crosshair.
     const c2 = await cell('O-0002', 'qty');
     await page.mouse.click(c2.x, c2.y);
     await frames(page, 2);
     const h1 = await handle();
-    check(name, `fill ${tag}: one clicked Qté cell carries the handle, one in the page, at its ${ar ? 'bottom-left' : 'bottom-right'} corner, a 24 px hit box (elementFromPoint at its four corners), the square 8 px at ≥ 3:1`, h1.n === 1 && h1.ref === 'O-0002' && h1.col === 'qty' && corner(h1) && h1.w === 24 && h1.h === 24 && h1.corners.every(Boolean) && h1.sq.w === '8px' && h1.ratio >= 3, h1);
+    check(name, `fill ${tag}: one clicked Qté cell carries the handle, one in the page, at its ${ar ? 'bottom-left' : 'bottom-right'} corner, a 10 px hit box (its square and 2 px, owner 2026-10-26; elementFromPoint at its four corners), the square 8 px at ≥ 3:1`, h1.n === 1 && h1.ref === 'O-0002' && h1.col === 'qty' && corner(h1) && h1.w === 10 && h1.h === 10 && h1.corners.every(Boolean) && h1.sq.w === '8px' && h1.ratio >= 3, h1);
     const hr = await page.evaluate(() => { const r = document.querySelector('.dzg-fill').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     await page.mouse.move(hr.x, hr.y);
     const cur = await page.evaluate(([x, y]) => getComputedStyle(document.elementFromPoint(x, y)).cursor, [hr.x, hr.y]);
@@ -212,7 +212,7 @@ export async function fillChecks(name, ctx, h) {
     check(name, `fill ${tag}: Ctrl+Enter in the Statut field of a 3-cell block writes one value in the three, closes the field, one sentence`, blk === 3 && !field && new Set(st).size === 1 && (ar ? /التعديل: 3/ : /Cellules modifiées\s?: 3/).test(await live()), { blk, st, field, said: await live() });
 
     if (name === 'chrome') {
-      // A pen drags it too (S12-Q3), by CDP.
+      // A pen does not drag it (S12-Q12), by CDP.
       await page.waitForTimeout(900);
       await page.keyboard.press('ControlOrMeta+z');
       await page.waitForTimeout(900);
@@ -221,13 +221,15 @@ export async function fillChecks(name, ctx, h) {
       await frames(page, 2);
       const hp2 = await page.evaluate(() => { const r = document.querySelector('.dzg-fill').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
       const t3 = await cell('O-0003', 'qty');
+      const before3 = (await cell('O-0003', 'qty')).text;
       const s = await page.context().newCDPSession(page);
       const pen = (type, x, y, buttons) => s.send('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons, clickCount: 1, pointerType: 'pen' });
       await pen('mousePressed', hp2.x, hp2.y, 1);
       for (let i = 1; i <= 6; i++) await pen('mouseMoved', hp2.x, hp2.y + ((t3.y - hp2.y) * i) / 6, 1);
       await pen('mouseReleased', t3.x, t3.y, 0);
       await frames(page, 2);
-      check(name, `fill ${tag}: a pen drag of the handle copies O-0002 into O-0003`, num((await cell('O-0003', 'qty')).text) === v2, { v2, got: (await cell('O-0003', 'qty')).text });
+      const pre3 = (await cell('O-0003', 'qty')).text;
+      check(name, `fill ${tag}: a pen drag of the handle writes nothing (S12-Q12: a pen is like a finger, as for blocks)`, pre3 === before3, { before3, pre3 });
       // axe 0 with a block, the handle and the fill mode on.
       await page.keyboard.press('Shift+ArrowDown');
       await page.keyboard.press('ControlOrMeta+Shift+Enter');

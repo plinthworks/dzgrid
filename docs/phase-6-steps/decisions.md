@@ -30,3 +30,9 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **O1 (owner):** the last shown column can never be hidden; no « Tout masquer ».
 - **O5 (owner):** in the chooser dialog a finger may drag a row by its handle.
 - **Lead decisions (as written in the sheets):** O2 keyboard moves never cross a pinned edge; O3 `movable: false` keeps its place and disables the pin items; O4 group headers do not move this phase; O7 one opaque `grid=1.…` URL parameter; O8 blocks/paste/fill stay inside one pinned band, Ctrl+Home/End stay on body rows, pinned bands take at most half the view; O9 print leaves out detail panels and writes merged cells on every row; O10 Tab or a click keeps the new width in resize mode; O11 Shift+right-click keeps the browser's menu; O12 Escape in a non-empty chooser search empties it first; C3 « no filters » is per column; C5 the density line in the menu is off by default; C6 editing.md rule 1 widened for pinned rows at their step.
+
+## Step 2 (owner, 2026-10-26) — plan `step02-plan.md`
+
+- **Q2-1:** A — the header drag ships in step 2; keyboard moves and `api.move()` cover access until the ⋮ menu (step 3) brings the single-pointer path; nothing is published before step 3.
+- **Q2-2:** A — no drop animation in Phase 6.
+- **S12-Q12 (owner, 2026-10-26; Phase 5 fill carried into Phase 6):** WCAG 2.5.8 for the fill: the 10 px handle stays (no accidental fills); the ≥ 24 px pointer equivalent is a pair of items in the column ⋮ menu (step 3): « Recopier vers le bas (Ctrl+D) » and « Recopier vers la droite (Ctrl+R) » acting on the current block. Until step 3, the fill is not WCAG 2.5.8-complete (nothing is published before). Lead: pen behaves like touch for the fill too (no pen fill), as for range.

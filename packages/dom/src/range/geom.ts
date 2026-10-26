@@ -26,14 +26,17 @@ const place = (g: GridContext<unknown>, p: Pt) => {
   return { block: (p.clientY - g.el.header.getBoundingClientRect().bottom) / (r.height / (v.offsetHeight || r.height) || 1), inline: logicalX(p, r, g.dir) / (r.width / (v.offsetWidth || r.width) || 1) };
 };
 
-/** The cell under a point: the row from the row layout (clamped, a point over the pinned parents is the row under them), the column from the widths. */
-export const cellAt = (g: GridContext<unknown>, p: Pt): CellAddr | null => {
+/**
+ * The cell under a point: the row from the row layout (clamped, a point over the pinned parents is the row under them), the
+ * column from the widths; `dy` (layout px) moves the point along the block axis first (the fill's half-row rule).
+ */
+export const cellAt = (g: GridContext<unknown>, p: Pt, dy = 0): CellAddr | null => {
   const d = g.rows.displayed;
   const L = g.layout;
   if (!d.count || !L) return null;
   const box = g.geometry.read();
   const { inline: x, block: y } = place(g, p);
-  const i = L.indexAt(g.scroll.logicalTop + Math.max(g.inset ?? 0, Math.min(box.block - 1, y)));
+  const i = L.indexAt(g.scroll.logicalTop + Math.max(g.inset ?? 0, Math.min(box.block - 1, y + dy)));
   const c = g.columns.layout;
   const e = extra(g);
   const end = Math.min(box.inline, c.totalWidth + e) - c.end.width;
