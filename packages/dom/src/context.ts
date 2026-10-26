@@ -1,4 +1,4 @@
-import type { ColumnModel, DisplayedRows, GridKernel, Intent, LocaleCtx, RowKey, RowLayout, RowModel } from '@dzgrid/core';
+import type { CellAddr, ColumnModel, DisplayedRows, GridKernel, Intent, LocaleCtx, RowKey, RowLayout, RowModel } from '@dzgrid/core';
 import type { LiveRegion } from './a11y/live-region.js';
 import type { Dir } from './dir.js';
 import type { ScrollController } from './interact/scroll.js';
@@ -12,9 +12,9 @@ import type { GridSettings } from './settings.js';
 import type { ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
-import type { PartBase, SlotPart } from './part.js';
+import type { CellInput, PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
+import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -144,7 +144,13 @@ export interface GridContext<T> {
    * whatever the row selection, and a Shift+click on a cell is the feature's (rows are ticked by their box, owner QB1).
    */
   multi?: boolean;
+  /**
+   * Bulk edit (`@dzgrid/dom/fill`, Phase 5 step 12, owner QB5): Ctrl/Cmd+Enter in a field at `at` keeps `input` (undefined:
+   * the field unchanged, the value shown) in every cell of the block; null when the cell is in no block (the editors then
+   * keep it as Enter, without the move); `own` the field's own cell's refusal code (it stays open). Set by `fill()`.
+   */
+  bulk?: (at: CellAddr, input: CellInput | undefined) => { readonly own?: string | undefined } | null;
   /** Moves the focus as the grid's own keys would (the router's move: spans, details, the last row stays); the editors' Enter. */
   step?(intent: Intent): void;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

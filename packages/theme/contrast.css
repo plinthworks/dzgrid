@@ -28,6 +28,7 @@
       --tz-success: light-dark(#14532d, #86efac);
       --dzg-saving-color: light-dark(#6b3a00, #7ce8ff);
       --dzg-range-edge: light-dark(#14532d, #ffffff);
+      --dzg-refused-color: light-dark(#8b0000, #ff6b9e);
     }
   }
   [data-contrast=more],
@@ -44,6 +45,7 @@
     --tz-success: light-dark(#14532d, #86efac);
     --dzg-saving-color: light-dark(#6b3a00, #7ce8ff);
     --dzg-range-edge: light-dark(#14532d, #ffffff);
+    --dzg-refused-color: light-dark(#8b0000, #ff6b9e);
   }
 }
 @layer dzgrid.contrast {

@@ -5,6 +5,7 @@
  * exits 1 when a line is over. Headless on a fast machine, the numbers are
  * indicative: K.8's figures are owed on a mid-range laptop, headed.
  * `-- --only tree`: the million-row tree alone (Phase 4 step 6, with its pinned parents); it runs last in a full run.
+ * `-- --only range-b`: dataset B's editing gestures (Phase 5 step 12), indicative, no budget (Q17d, S12-Q7); never in a full run.
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -201,6 +202,31 @@ try {
       line('1 000 000 rows (scaled): frames without rows', await pg.evaluate(() => window.p.coverage('block', 2000, 40)), '%');
       await pg.close();
     }
+  }
+
+  // ---- Phase 5 step 12: dataset B (3 000 × 12) — bulk, paste, fill, Ctrl+D, undo. Indicative (Q17d, S12-Q7): no budget ----
+  if (only === 'range-b') {
+    const pg = await b.newPage({ viewport: { width: 1300, height: 760 } });
+    const errors = [];
+    pg.on('pageerror', (e) => errors.push(e.message));
+    await pg.goto(site.root('packages/dom/test/browser/perf-range.html'));
+    await pg.waitForFunction(() => window.ready, null, { timeout: 30000 });
+    const { loadavg } = await import('node:os');
+    console.log(`       indicatif (Q17d) — load average ${loadavg().map((x) => x.toFixed(1)).join(' / ')}`);
+    for (const [name, fn, expect] of [['bulk B 3 000 × 1 (Ctrl+Enter) to the painted frame', 'bulk', 3000], ['paste 1 000 cells (100 × 10) from the paste event to the painted frame', 'paste', null], ['fill 3 000 (a 2-row series, api.fill) to the painted frame', 'series', 2998], ['Ctrl+D on 3 000 × 12 to the painted frame', 'down', null], ['undo of a bulk 3 000 to the painted frame', 'undo', null]]) {
+      const runs = [];
+      for (let i = 0; i < 7; i++) {
+        await pg.evaluate(() => window.p.make(3000));
+        if (fn === 'undo') await pg.evaluate(() => window.p.bulk());
+        runs.push(await pg.evaluate((f) => window.p[f](), fn));
+      }
+      const kept = runs.slice(2);
+      line(`range B: ${name} (median of 5)`, median(kept.map((r) => r.ms)), 'ms');
+      console.log(`       requests ${kept.map((r) => r.requests).join(',')}; changes ${kept.map((r) => r.changes).join(',')}${expect ? ` (expected ${expect})` : ''}; long tasks > 50 ms ${kept.map((r) => r.long).join(',')}`);
+    }
+    line('range B: page errors', errors.length, 'errors');
+    if (errors.length) console.log(`       ${JSON.stringify(errors).slice(0, 600)}`);
+    await pg.close();
   }
 
   // ---- Phase 4 step 6: the million-row tree (perf/profiles/tree.ts), everything opened ----

@@ -1,0 +1,92 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/fill.css — the fill handle and the cells to fill (Phase 5 step 12, docs/behaviors/fill.md 11–14):
+// loaded by the applications that fill (`@dzgrid/dom/fill`), after range.css; the base theme does not grow. Compiled to
+// fill.css (layered) and fill.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when they drift.
+//
+// The handle (`.dzg-fill`, a child of its corner cell, aria-hidden) is a 24 × 24 px hit box at the cell's inline-end,
+// block-end corner (WCAG 2.5.8; bottom-left right to left), its 8 px square drawn by its own `::before` at that same
+// corner (the cell's pseudo-elements are the edit marks'), a crosshair over it (owner S12-Q8). Touch only (no fine
+// pointer): not shown (S12-Q3). An open field hides it at once (`data-dzg-editing`, before the next paint removes it).
+// The cells to fill: a dashed line inside each, in the block's edge colour. Nothing moves. No colour literal, no
+// physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+$handle: var(--dzg-fill-handle, var(--dzg-range-edge, var(--tz-success)));
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-fill {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-end: 0;
+    z-index: 2;
+    inline-size: 24px;
+    block-size: 24px;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  // A pinned cell is not positioned (its segment is sticky): the one holding the handle becomes its anchor (review 1).
+  :where(.dzg-seg-start, .dzg-seg-end) > .dzg-cell:has(> .dzg-fill) {
+    position: relative;
+  }
+
+  .dzg-fill::before {
+    content: "";
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-end: 0;
+    inline-size: 8px;
+    block-size: 8px;
+    background: $handle;
+    box-shadow: 0 0 0 1px var(--tz-bg);
+  }
+
+  [data-dzg-editing] > .dzg-fill {
+    display: none;
+  }
+
+  @media not (any-pointer: fine) {
+    .dzg-fill {
+      display: none;
+    }
+  }
+
+  .dzg-cell--fill {
+    outline: 1px dashed $handle;
+    outline-offset: -1px;
+  }
+
+  // While the handle is dragged, no text is selected on the way.
+  [data-dzg-filling] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-fill::before {
+      forced-color-adjust: none;
+      background: Highlight;
+      box-shadow: 0 0 0 1px CanvasText;
+    }
+
+    .dzg-cell--fill {
+      outline-color: Highlight;
+    }
+  }
+}

@@ -16,6 +16,21 @@ Toward 0.3.0 (Phase 5, editing; not released).
 
 ### Added
 
+- Phase 5 step 12: **`@dzgrid/dom/fill`**, the fill handle, Ctrl+D / Ctrl+R and bulk edit (docs/behaviors/fill.md 11–20;
+  owner S12-Q1–Q9). `fill(range)`: a handle on the block's corner cell, or on the focused editable cell alone (S12-Q8),
+  bottom-right (bottom-left right to left), a crosshair over it; dragged by the mouse or a pen (a target outlined, the
+  view auto-scrolls, Ctrl / Cmd at the drop swaps copy and series, Escape cancels); a click on it then a click on a cell
+  (WCAG 2.5.7); the keyboard fill mode (Ctrl/Cmd+Shift+Enter, the arrows, Enter / Ctrl+Enter / Escape); Ctrl/Cmd+D and
+  Ctrl/Cmd+R (a copy; one row or column: the one before it); Ctrl/Cmd+Enter in an editor writes its value in every cell
+  of the block. One gesture = one save, one undo, one sentence. API `fill(to)`, `down()`, `end()`, `apply(input)`. Texts
+  `locales/{en,fr,ar}-fill`, styles `@dzgrid/theme/fill.css`. Angular: `controller.range()`, `controller.fill()`,
+  `(rangeChanged)`, `(rangeCopied)`. Sizes: `dom/fill` 2 729 B gz (3 000, S12-Q9), `fill.css` 415 (460), texts 231 / 278 /
+  299, `/editors` 6 669 (6 720, QB5), `dom/range` 4 768 (the pointer geometry shared).
+- Phase 5 step 12, S12-Q8: **the keyboard position is obvious** in the base theme — the focused cell, reached by keys or
+  by a click, has a 2 px ring with an inner line of the background and a light tint; its row a neutral tint (between
+  hover and selection); forced colours: a Highlight ring. `contrast.css`'s dark refusal colour moves to `#ff6b9e` (60° from
+  its yellow ring).
+
 - Phase 5 step 11b: **the clipboard in `@dzgrid/dom/range`** (docs/behaviors/clipboard.md; owner S11b-Q1–Q5). Ctrl+C /
   Cmd+C on a block or a cell writes TSV (the export values: the locale's decimal mark, ISO days, wall-time instants,
   labels, the formula guard, `="0123"`) and an escaped `<table dir>`; Ctrl+X copies then clears in one save; Ctrl+V

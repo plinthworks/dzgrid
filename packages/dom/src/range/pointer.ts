@@ -1,7 +1,7 @@
 import type { CellAddr, CellRange, ChangeSource } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
-import { logicalX } from '../dir.js';
-import { CHECK_WIDTH, setAttr } from '../render/write.js';
+import { setAttr } from '../render/write.js';
+import { autoScroll, cellAt } from './geom.js';
 
 /** What the pointer needs of the block (`range/index.ts`). */
 export interface Sel {
@@ -28,7 +28,7 @@ export const same = (a: CellAddr, b: CellAddr): boolean => a.row === b.row && a.
  * loop, as fast as the pointer is deep into the band (at most a row height a frame). Mouse and pen only.
  */
 export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { stop(): void } {
-  const { el, doc, win, scope, rowRenderer, rows, columns } = g;
+  const { el, doc, win, scope, rowRenderer } = g;
   const raf = g.env.raf ?? win;
   /** The cell pressed, while the button is down; the block's anchor for this gesture. */
   let press: CellAddr | null = null;
@@ -51,38 +51,9 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
     const w = x.closest('input, textarea, select, button, a[href], [contenteditable], [tabindex]:not(.dzg-cell)');
     return key && !(w && c!.contains(w)) ? { row: key, column: c!.dataset['col']! } : null;
   };
-  const extra = (): number => {
-    const s = g.settings.selection;
-    return s?.checkbox && (s.mode ?? 'none') !== 'none' ? CHECK_WIDTH : 0;
-  };
-  /**
-   * Where a point is, logically, in the grid's own pixels: block from the body's top, inline from the view's start edge
-   * (review 5: a CSS scale or zoom on an ancestor makes the client boxes bigger or smaller than the layout's).
-   */
-  const place = (p: { readonly clientX: number; readonly clientY: number }) => {
-    const v = el.viewport;
-    const r = v.getBoundingClientRect();
-    return { block: (p.clientY - el.header.getBoundingClientRect().bottom) / (r.height / (v.offsetHeight || r.height) || 1), inline: logicalX(p, r, g.dir) / (r.width / (v.offsetWidth || r.width) || 1) };
-  };
-  /** The cell under a point: the row from the row layout (clamped, a point over the pinned parents is the row under them), the column from the widths. */
-  const hit = (p: { readonly clientX: number; readonly clientY: number }): CellAddr | null => {
-    const d = rows.displayed;
-    const L = g.layout;
-    if (!d.count || !L) return null;
-    const box = g.geometry.read();
-    const { inline: x, block: y } = place(p);
-    const i = L.indexAt(g.scroll.logicalTop + Math.max(g.inset ?? 0, Math.min(box.block - 1, y)));
-    const c = columns.layout;
-    const e = extra();
-    const end = Math.min(box.inline, c.totalWidth + e) - c.end.width;
-    const col = c.start.columns.length && x < e + c.start.width ? c.start.columns[c.start.widths.indexAt(x - e)]
-      : c.end.columns.length && x >= end ? c.end.columns[c.end.widths.indexAt(x - end)]
-      : c.center.columns[c.center.widths.indexAt(x - e - c.start.width + box.scrollInline)] ?? c.start.columns.at(-1) ?? c.end.columns[0];
-    return col ? { row: d.keyAt(i), column: col.id } : null;
-  };
   /** The block follows the pointer; the first move off the pressed cell starts the drag. */
   const track = (): void => {
-    const a = last && hit(last);
+    const a = last && cellAt(g, last);
     if (!a || !press || !anchor) return;
     if (!ranging) {
       if (same(a, press)) return;
@@ -101,22 +72,7 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
   /** One frame of the auto-scroll: speeds from the depth into the bands, the corner again; stops when nothing moved. */
   const step = (): void => {
     frame = 0;
-    if (!ranging || !last) return;
-    const box = g.geometry.read();
-    const h = g.rowHeight();
-    const band = Math.max(24, h);
-    const c = columns.layout;
-    const e = extra();
-    const { inline: x, block: y } = place(last);
-    const v = (lo: number, hi: number, at: number): number => Math.max(-h, Math.min(h, ((at < lo ? at - lo : at > hi ? at - hi : 0) * h) / band));
-    const top = g.scroll.logicalTop;
-    g.scroll.scrollTo(top + v((g.inset ?? 0) + band, box.block - band, y));
-    const max = Math.max(0, c.center.width - (box.inline - e - c.start.width - c.end.width));
-    const to = Math.max(0, Math.min(max, box.scrollInline + v(e + c.start.width + band, Math.min(box.inline, c.totalWidth + e) - c.end.width - band, x)));
-    if (to !== box.scrollInline) g.geometry.writeScrollInline(to);
-    if (g.scroll.logicalTop === top && to === box.scrollInline) return;
-    g.schedule();
-    track();
+    if (ranging && last && autoScroll(g, last)) track();
   };
   /**
    * The gesture ends: the frames and the capture let go. Released (`up`): the focus to the moving corner, its size said,

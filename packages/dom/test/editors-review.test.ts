@@ -243,7 +243,8 @@ describe('gaps: starting', () => {
     t.at('r3', 'name');
     t.key('F2');
     const f = t.field()!;
-    for (const key of ['Enter', 'Tab', 'Escape']) for (const m of [{ ctrlKey: true }, { altKey: true }, { metaKey: true }]) expect(t.key(key, m, f).defaultPrevented, `${key} ${JSON.stringify(m)}`).toBe(false);
+    // Ctrl+Enter (Cmd+Enter on a Mac) is no longer the field's: bulk edit (owner QB5, step 12; range-bulk.test.ts).
+    for (const key of ['Enter', 'Tab', 'Escape']) for (const m of [{ ctrlKey: true }, { altKey: true }, { metaKey: true }]) if (!(key === 'Enter' && m.ctrlKey)) expect(t.key(key, m, f).defaultPrevented, `${key} ${JSON.stringify(m)}`).toBe(false);
     expect(t.field()).toBe(f);
     expect(t.of('editingStopped')).toEqual([]);
   });

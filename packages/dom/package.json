@@ -69,6 +69,10 @@
       "types": "./src/range.ts",
       "default": "./src/range.ts"
     },
+    "./fill": {
+      "types": "./src/fill.ts",
+      "default": "./src/fill.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"
@@ -212,6 +216,18 @@
     "./locales/ar-range": {
       "types": "./src/locales/ar-range.ts",
       "default": "./src/locales/ar-range.ts"
+    },
+    "./locales/en-fill": {
+      "types": "./src/locales/en-fill.ts",
+      "default": "./src/locales/en-fill.ts"
+    },
+    "./locales/fr-fill": {
+      "types": "./src/locales/fr-fill.ts",
+      "default": "./src/locales/fr-fill.ts"
+    },
+    "./locales/ar-fill": {
+      "types": "./src/locales/ar-fill.ts",
+      "default": "./src/locales/ar-fill.ts"
     }
   },
   "peerDependencies": {

@@ -17,7 +17,8 @@ describe('range seams: layering', () => {
   it('nothing of the base imports @dzgrid/dom/range (types and values)', () => {
     // By where an import lands (src/range.ts or src/range/), not by its name: the date filters have a range.ts of their own.
     const lands = (f: string) => [...readFileSync(f, 'utf8').matchAll(/from '(\.{1,2}\/[^']+)'/g)].map((m) => relative(SRC, join(f, '..', m[1]!)));
-    const offenders = files(SRC).filter((f) => !ENTRY.test(relative(SRC, f)) && lands(f).some((to) => to === 'range.js' || to.startsWith('range/'))).map((f) => relative(SRC, f));
+    // Step 12 (D2): the fill entry shares the block's geometry (`range/geom.ts`) and its types; nothing of the base does.
+    const offenders = files(SRC).filter((f) => !ENTRY.test(relative(SRC, f)) && !/^fill(\/|\.ts$)/.test(relative(SRC, f)) && lands(f).some((to) => to === 'range.js' || to.startsWith('range/'))).map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
   });
 

@@ -85,3 +85,32 @@ export function datasetA(n = 100_000, seed = 42): RowA[] {
   }
   return rows;
 }
+
+/**
+ * Dataset B (Phase 5 step 12, step12-plan.md « Bench »): an editable stock list, 3 000 × 12 by default, seeded. The
+ * columns a pharmacy's stock screen has: an id, the product (text, sometimes Arabic), its lot (`L-0001…`), the stock
+ * and its minimum (integers), the price (2 decimals), the expiry (a day), when it was received (an instant, ms), a status
+ * (4 values), active (yes/no), the site (6 values), a note (text, sometimes Arabic). Pure: one object literal a row.
+ */
+export interface RowB {
+  readonly id: string; readonly product: string; readonly lot: string; readonly stock: number; readonly min: number;
+  readonly price: number; readonly expiry: string; readonly received: number; readonly status: string;
+  readonly active: boolean; readonly site: string; readonly note: string;
+}
+const STATUS_B = ['ok', 'low', 'out', 'blocked'];
+const SITE_B = ['alger', 'oran', 'constantine', 'annaba', 'blida', 'setif'];
+export function datasetB(n = 3000, seed = 42): RowB[] {
+  const r = rng(seed);
+  const int = (k: number) => Math.floor(r() * k);
+  const word = (ar: boolean) => (ar ? Array.from({ length: 3 + int(4) }, () => AR_LET[int(AR_LET.length)]).join('') : Array.from({ length: 2 + int(3) }, () => FR_SYL[int(FR_SYL.length)]).join(''));
+  const out: RowB[] = new Array(n);
+  for (let i = 0; i < n; i++) {
+    const m = 1 + int(12);
+    out[i] = {
+      id: `b${i}`, product: `${word(r() < 0.3)} ${int(1000)} mg`, lot: `L-${String(i + 1).padStart(4, '0')}`, stock: int(500), min: int(50),
+      price: Math.round(r() * 100_000) / 100, expiry: `${2026 + int(4)}-${String(m).padStart(2, '0')}-${String(1 + int(28)).padStart(2, '0')}`,
+      received: Date.UTC(2025, int(12), 1 + int(28), int(24), int(60)), status: STATUS_B[int(4)]!, active: r() < 0.8, site: SITE_B[int(6)]!, note: r() < 0.5 ? word(r() < 0.4) : '',
+    };
+  }
+  return out;
+}

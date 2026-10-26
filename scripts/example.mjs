@@ -23,7 +23,7 @@ import { measureSplit } from './size-split.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const EXAMPLE = join(ROOT, 'examples/angular-audit');
-const K8 = 92_000; // owner S9-Q7 (2026-10-25, docs/phase-5-steps/decisions.md: the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
+const K8 = 92_500; // owner S12-Q10 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const option = (name, fallback) => {
@@ -276,10 +276,36 @@ async function browserCheck() {
           await frames(2);
           const refused = await read(5, 'stock');
           const failed = await page.evaluate(() => ({ count: document.querySelector('.stock-failed')?.textContent?.trim(), inZone: window.auditProbe.inZone }));
+          // Phase 5 step 12: the fill handle dragged (rows 10, 11: 370, 407 → 444, 481) and Ctrl+Enter on a block (rows 20–22).
+          await page.click(cell(10, 'stock'));
+          await page.keyboard.press('Shift+ArrowDown');
+          await frames(2);
+          const hb = await page.evaluate(() => { const h = document.querySelector('.dzg-fill'); const r = h?.getBoundingClientRect(); return r && { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+          const to = await page.evaluate((s) => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, cell(13, 'stock'));
+          if (hb) {
+            await page.mouse.move(hb.x, hb.y);
+            await page.mouse.down();
+            await page.mouse.move(to.x, to.y, { steps: 8 });
+            await page.mouse.up();
+          }
+          await frames(2);
+          const filled = [(await read(12, 'stock')).text, (await read(13, 'stock')).text];
+          await page.click(cell(20, 'stock'));
+          await page.keyboard.press('Shift+ArrowDown');
+          await page.keyboard.press('Shift+ArrowDown');
+          await page.keyboard.press('F2');
+          await page.keyboard.press('ControlOrMeta+a');
+          await page.keyboard.type('5');
+          await page.keyboard.press('ControlOrMeta+Enter');
+          await frames(2);
+          const bulk = [20, 21, 22].map((r) => r);
+          const bulked = [];
+          for (const r of bulk) bulked.push((await read(r, 'stock')).text);
+          const fillOk = !!hb && filled[0] === '444' && filled[1] === '481' && bulked.every((t) => t === '5');
           const perKey = (c1 - c0) / 3;
           const ok = dir === (lang === 'ar' ? 'rtl' : 'ltr') && pending === '0' && saved.text === '123' && savedCount === '1' && refused.text === before.text && /dzg-cell--failed/.test(refused.cls)
-            && failed.count === '1' && (build !== 'zone' || failed.inZone === true) && perKey <= 2 && errors.length === 0;
-          results.push({ build, lang, screen: 'stock', ok, dir, pending, saved, savedCount, refused, before, failed, checksPerKeystroke: perKey, errors });
+            && failed.count === '1' && (build !== 'zone' || failed.inZone === true) && perKey <= 2 && fillOk && errors.length === 0;
+          results.push({ build, lang, screen: 'stock', ok, dir, pending, saved, savedCount, refused, before, failed, checksPerKeystroke: perKey, filled, bulked, errors });
           await page.close();
         }
       } finally {

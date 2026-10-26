@@ -28,6 +28,9 @@ $tz-palette: (
   '--dzg-saving-color': (#6b3a00, #7ce8ff),
   // The block's edge (Phase 5 step 11a): its success is too near the cyan saving border in the dark; white there.
   '--dzg-range-edge': (#14532d, #ffffff),
+  // The refusal's border (owner S12-Q8): this palette's light red sits 50° from its yellow ring in the dark; a pinker red
+  // there, 70° away (the saving, refused and focus borders told apart without colour vision).
+  '--dzg-refused-color': (#8b0000, #ff6b9e),
 );
 
 @mixin palette {

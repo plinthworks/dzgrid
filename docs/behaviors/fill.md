@@ -83,3 +83,68 @@ start in reading order, a detail in the target, `fillTarget` axis and ties, insi
 `packages/core/test/range-fill.test.ts` (series property against an oracle, rounding, `1e-7`). Step 12 (DOM):
 `range-fill`, `range-fill-keys`, `range-bulk`, the walk `range-walk`; browser: the handle ltr / rtl, forced
 colours, drag with auto-scroll, Ctrl+D / Ctrl+R in three engines.
+
+## As built at step 12 (2026-10-25, written before the code; plan `step12-plan.md` D1–D9; owner S12-Q1–Q8)
+
+**The entry.** `@dzgrid/dom/fill`: `fill(blocks)` takes the `range()` feature it extends (S11-Q5, QB8); listed
+before or after it in `features`. It owns the handle, its drag, the click-then-click fill (the no-drag control), the
+keyboard fill mode, Ctrl/Cmd+D, Ctrl/Cmd+R, bulk edit's seam and its API. Without `fill()`: no handle; Ctrl+D / R are
+the browser's; Ctrl+Enter in a field keeps the value in its one cell, as Enter without the move. Texts
+`locales/{en,fr,ar}-fill`, styles `@dzgrid/theme/fill.css`. `fill(blocks)` without `range()` on the grid: a
+`missing-feature` problem, nothing drawn.
+
+11. **The handle** (owner S12-Q8, « comme Excel »): one per grid, on the block's corner cell — its last data row ×
+    its end column — and, with no block, on the **focused data cell alone** too: bottom-right in left to right,
+    bottom-left in right to left. Drawn 8 px, hit area 24 × 24 px inside the cell; the pointer over it is a
+    **crosshair** (the small « + »). Not drawn: no `edit()`; a field open; the corner cell read-only (one cell) or
+    every column of the block read-only; a detail, filler or loading row; a cell not mounted or covered by a span;
+    the tree's pinned copies; a nested grid's panel (it has its own); while a block is being dragged; a screen with
+    no fine pointer (`any-pointer: fine` absent — touch only, S12-Q3). Never in the cell's text: a copy, the
+    tooltip's overflow and the accessible name ignore it.
+12. **The border** (S12-Q8): the focused cell shows the focus ring whether it was reached by keys or by a click
+    (range.css: `:focus`, not only `:focus-visible`); a block keeps its 2 px edge all round, in its own colour —
+    a hue 60° apart from the focus ring, the saving border and the refused border, 3:1 on the cell and its
+    neighbours, `Highlight` / `HighlightText` in forced colours. Nothing moves (reduced motion has nothing to reduce).
+13. **The drag** (mouse, pen; a finger scrolls, its press is not prevented): a press on the handle keeps the block;
+    the cells to fill are outlined dashed (`dzg-cell--fill` and its logical edges) as the pointer moves
+    (`fillTarget`, the same function for every path); near the body's edges the view scrolls as for a block drag.
+    The release writes (`planFill`; Ctrl or Cmd held **at the release** swaps copy and series — a Mac's Ctrl+press
+    is a context click, so Ctrl is pressed after the press); the block becomes source ∪ target (its change event
+    says `api`), the focus does not move. Released inside the source: nothing, silent. Escape during the drag:
+    cancelled, « Recopie annulée »; a lost capture, `pointercancel`, a blur, a sort, a filter, a page or rows
+    changing: cancelled quietly. The click after a drag is swallowed once; a double-click on the handle opens no
+    editor.
+14. **The no-drag control** (WCAG 2.5.7, owner « Step 12 »): a **click on the handle** without dragging arms the
+    fill: « Recopie : cliquez la cellule jusqu'où recopier ; Échap pour annuler »; the **next click on a cell**
+    fills up to it, exactly as a drop there (Ctrl / Cmd held at that click swaps). A click inside the source, on
+    the handle again; a press outside this grid's own cells (the page, the box column, a detail panel, a nested grid —
+    said « Recopie annulée »); the focus leaving the grid; Escape (said); a sort or a filter: disarmed, nothing written. The
+    click on the target cell neither moves the focus nor drops the block before the fill.
+15. **The keyboard fill mode** (S12-Q2): Ctrl/Cmd+Shift+Enter on a cell enters it, said once
+    (« Recopie : flèches pour étendre, Entrée pour écrire, Échap pour annuler »). A virtual cell starts at the
+    source's bottom-end corner; the arrows move it as the grid's own moves (mirrored right to left), Home / End,
+    PageUp / PageDown too; the target is `fillTarget(source, virtual cell)`, outlined as in a drag, its size said
+    after a pause (« Vers le bas : 3 lignes »). Enter writes, Ctrl/Cmd+Enter writes swapped, Escape cancels (said,
+    the block stays), Tab cancels quietly and moves as usual; a click, a blur, a sort cancel quietly; every other
+    key is swallowed. The focus stays where it was.
+16. **Ctrl/Cmd+D, Ctrl/Cmd+R** (S12-Q6): a block of two data rows or more: its first data row copied into its
+    other rows; one row or one cell: the data row above (details stepped over) copied into it. Ctrl+R the same
+    with the first column toward the logical end, or the previous visible column (on the right in right to left).
+    Always a copy. Nothing to copy from (the first row, the first column): the key is left to the browser;
+    otherwise taken and prevented. The physical key counts on a non-Latin layout (KeyD, KeyR).
+17. **Bulk** (QB5, S12-Q5): Ctrl/Cmd+Enter in a field whose cell is inside the block writes the field's value
+    (unchanged: the value shown) in every cell of the block, one save, origin `bulk`; the field closes on its cell
+    and the focus does not move (even with `enterMoves: 'down'`); if the field's own cell refuses, the other cells
+    are written and the field stays open with its reason. Outside a block: as Enter, without the move.
+    Ctrl+Shift+Enter in a field is the field's.
+18. **One sentence per gesture**: « Cellules recopiées : 6 ; refusées : 1. Enregistrement en cours », « Cellules
+    modifiées : 12 ; en lecture seule : 3 » (range's parts, the saving sentence joined after them, once). Refused
+    cells shown on screen blink; read-only ones do not.
+19. **API** `fill(blocks).api(grid)`: `fill(to, { swap })` (as a drop on `to`), `down()`, `end()` (as Ctrl+D /
+    Ctrl+R), `apply(input)` (bulk on the block); each answers the counts, or null when nothing would be done.
+20. Trees, details, nested grids, spans, server pages (B13): the rows shown only; structure columns refused
+    read-only and counted; details stepped over; a nested grid has its own handle; a server grid fills the rows
+    it holds, a page change cancels a drag or the mode; a fill on a sorted or filtered column marks the order stale.
+
+Not in this step: a double-click on the handle (fill down to the neighbour column's end), touch handles, a
+« series » dialog, text series, trends, an options menu after the drop, `[(range)]` in Angular.

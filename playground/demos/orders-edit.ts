@@ -26,6 +26,10 @@ import { motion } from '@dzgrid/dom/motion-gsap';
 import { range } from '@dzgrid/dom/range';
 import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
 import { AR_RANGE } from '@dzgrid/dom/locales/ar-range';
+// Phase 5 step 12: the fill handle, Ctrl+D / Ctrl+R, the fill mode, bulk edit by Ctrl+Enter (`?fill=0` turns them off).
+import { fill as fillHandle } from '@dzgrid/dom/fill';
+import { FR_FILL } from '@dzgrid/dom/locales/fr-fill';
+import { AR_FILL } from '@dzgrid/dom/locales/ar-fill';
 import { pagination } from '@dzgrid/dom/pagination';
 import { tree } from '@dzgrid/dom/tree';
 import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
@@ -93,7 +97,7 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
   const base = ar ? AR : FR;
   // A tree (`?tree=1`) on the browser's rows only.
   const asTree = !!o.tree && !o.paged;
-  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_RANGE : FR_RANGE).text, 'validation.integer': w.integer } };
+  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_RANGE : FR_RANGE).text, ...(ar ? AR_FILL : FR_FILL).text, 'validation.integer': w.integer } };
   // The orders of the tree demo, without their sub-orders: one flat list; « Urgent » added. `?tree=1`: with them, as child rows.
   const rows: Order[] = orders().filter((l) => asTree || l.parent === null).map((l, i) => ({ id: l.id, ...(asTree && { parent: l.parent }), ref: l.ref, client: l.client, day: l.day, status: l.status, qty: l.qty, amount: l.amount, urgent: i % 5 === 0 }));
   const columns: ColumnDef<Order, any>[] = [
@@ -137,13 +141,20 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
   const undoB: HTMLButtonElement[] = [];
   const sync = (u: boolean, r: boolean): void => undoB.forEach((b, i) => b.setAttribute('aria-disabled', String(!(i ? r : u))));
   const id = (k: RowKey, c: string): string => `${k}\n${c}`;
+  /** Blocks of cells (`?range=0` none) and the fill over them (`?fill=0` none). */
+  const blockFeatures = () => {
+    const q = new URLSearchParams(location.search);
+    if (q.get('range') === '0') return [];
+    const blocks = range();
+    return q.get('fill') === '0' ? [blocks] : [blocks, fillHandle(blocks)];
+  };
   let grid!: GridInstance<Order>;
   grid = createGrid<Order>(host, {
     ...(o.paged ? { source: sourceRows<Order>({ fetch: fetchPage }), operations: 'server', pagination: { pageSize: 20 } } : { rows }),
     getRowId: (r: Order) => r.id, columns, messages, locale: o.locale, direction: 'auto', label: w.title,
     parts: { status: badge({ tones: { pending: 'warning', ready: 'info', shipped: 'neutral', delivered: 'success', cancelled: 'danger' } }) },
     ...(asTree && { rowClass: (c: { row: Order }) => (c.row.parent ? 'orders-child' : null) }),
-    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...(new URLSearchParams(location.search).get('range') === '0' ? [] : [range()]), motion(), ...(o.paged ? [pagination()] : [])],
+    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...blockFeatures(), motion(), ...(o.paged ? [pagination()] : [])],
     onEvent(e: GridEvent<Order>) {
       o.onEvent?.(e);
       if (e.type === 'undoChanged') sync(e.canUndo, e.canRedo);

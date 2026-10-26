@@ -31,7 +31,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  * The ceilings a size budget never goes above. Phase 4 close (owner decision 2026-10-22,
  * docs/phase-4-steps/decisions.md Q17b): the owner's grants for the entries he named; the plan's ceilings
  * (ARCHITECTURE §5.2) for the others. K.8 (Q17a): the audit profile's guard stays 83 500; the real Angular
- * example's 92 000 (S9-Q7) is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
+ * example's 92 500 (S12-Q10; S9-Q7 92 000) is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
  */
 const SIZE_CEILINGS = {
   '@dzgrid/core': 29000,
@@ -53,7 +53,7 @@ const SIZE_CEILINGS = {
   // Owner S6-O1 (2026-10-24): /editors 4 350 → 6 500 (dates, yes/no, list, the app's editors; DOM editing ~10 150, a
   // new grant over Q16's 8 000), measured over @dzgrid/dom/popup. S6-O5/O6: the lazy calendar 1 500 (inside Q16 d's
   // 2 600), @dzgrid/dom/internal at its measure + 50 up to 1 250 (the filters' loader moved in, not copied).
-  '@dzgrid/dom/editors': 6650, // owner S7-O1 (2026-10-24): 6 500 → 6 650 (retry, a row gone while edited)
+  '@dzgrid/dom/editors': 6720, // owner S7-O1 (2026-10-24): 6 500 → 6 650 (retry, a row gone while edited); QB5 (Part B, step 12): → 6 720 (bulk edit by Ctrl+Enter)
   '@dzgrid/dom/editors: calendar (lazy)': 1500,
   '@dzgrid/dom/internal': 1250,
   // Owner S6-O7 (2026-10-24): the list in its own entry, over the popup: its measure (1 254) + 10 %.
@@ -83,6 +83,13 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-range': 400,
   '@dzgrid/dom/locales/ar-range': 500,
   '@dzgrid/theme/range.css': 500,
+  // Owner S12-Q1, S12-Q4 (2026-10-25): the fill handle, Ctrl+D / R, the fill mode and bulk's seam in their own entry over
+  // dom/range; their texts and styles apart (the -range texts and range.css are full).
+  '@dzgrid/dom/fill': 3000, // owner S12-Q9 (2026-10-25): 1 600 → 3 000 (measured 2 729)
+  '@dzgrid/dom/locales/en-fill': 250,
+  '@dzgrid/dom/locales/fr-fill': 300,
+  '@dzgrid/dom/locales/ar-fill': 380,
+  '@dzgrid/theme/fill.css': 460, // owner S12-Q9: 300 → 460 (measured 415)
   '@dzgrid/theme': 3050, // T7: inside Q16's 2 900, up to 3 050 if needed
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7

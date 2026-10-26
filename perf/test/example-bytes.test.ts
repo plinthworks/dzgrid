@@ -30,18 +30,18 @@ describe('the initial files of an Angular build', () => {
 });
 
 describe('the real example\'s ceiling', () => {
-  it('is 92 000 in example:bytes (owner S9-Q7, 2026-10-25: the on-demand stock screen splits the build; 90 000 by Q17a before)', () => {
+  it('is 92 500 in example:bytes (owner S12-Q10, 2026-10-26: the stock screen\'s blocks and fill; S9-Q7 92 000, Q17a 90 000 before)', () => {
     const src = readFileSync(fileURLToPath(new URL('../../scripts/example.mjs', import.meta.url)), 'utf8');
-    expect(/const K8 = ([\d_]+);/.exec(src)?.[1]).toBe('92_000');
+    expect(/const K8 = ([\d_]+);/.exec(src)?.[1]).toBe('92_500');
   });
 });
 
 describe.skipIf(!built)('K.8 from the real ng build', () => {
-  it('the DzGrid share (default less baseline: initial JS and global CSS, gzip 9) stays within 92 000 (owner S9-Q7, 2026-10-25; Q17a 90 000, Q14 87 000)', () => {
+  it('the DzGrid share (default less baseline: initial JS and global CSS, gzip 9) stays within 92 500 (owner S12-Q10, 2026-10-26; S9-Q7 92 000, Q17a 90 000, Q14 87 000)', () => {
     const m = measureExample(EXAMPLE);
     expect(m.audit.files.length).toBeGreaterThan(0);
     expect(m.baseline.total).toBeGreaterThan(20_000);
-    expect(m.share).toBeLessThanOrEqual(92_000);
+    expect(m.share).toBeLessThanOrEqual(92_500);
     // DzGrid loads with the page: a share far below the esbuild profile would mean it did not.
     expect(m.share).toBeGreaterThan(40_000);
     expect(m.wrapper.min).toBeGreaterThan(0);

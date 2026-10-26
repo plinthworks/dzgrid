@@ -53,6 +53,17 @@ $edge: var(--dzg-range-edge, var(--tz-success));
     box-shadow: inset calc(-1 * var(--dzg-rs)) 0 0 0 $edge, inset var(--dzg-re) 0 0 0 $edge, inset 0 var(--dzg-rt) 0 0 $edge, inset 0 calc(-1 * var(--dzg-rb)) 0 0 $edge;
   }
 
+  // The focused cell in a block keeps the base's inner line inside its ring (owner S12-Q8), and its block edges just
+  // inside that line (review 4, fill.md 12): each edge's band grows by the line's 3 px, the line drawn over it (first);
+  // a side with no edge (0) stays under the line. Both directions, after the rules above of the same weight.
+  .dzg-cell--range:focus {
+    box-shadow: inset 0 0 0 3px var(--tz-bg), inset calc(var(--dzg-rs) + 3px) 0 0 0 $edge, inset calc(-1 * (var(--dzg-re) + 3px)) 0 0 0 $edge, inset 0 calc(var(--dzg-rt) + 3px) 0 0 $edge, inset 0 calc(-1 * (var(--dzg-rb) + 3px)) 0 0 $edge;
+  }
+
+  .dzg-cell--range:focus:dir(rtl) {
+    box-shadow: inset 0 0 0 3px var(--tz-bg), inset calc(-1 * (var(--dzg-rs) + 3px)) 0 0 0 $edge, inset calc(var(--dzg-re) + 3px) 0 0 0 $edge, inset 0 calc(var(--dzg-rt) + 3px) 0 0 $edge, inset 0 calc(-1 * (var(--dzg-rb) + 3px)) 0 0 $edge;
+  }
+
   // While the pointer drags a block, no text is selected on the way.
   [data-dzg-ranging] {
     -webkit-user-select: none;
@@ -67,6 +78,12 @@ $edge: var(--dzg-range-edge, var(--tz-success));
       --dzg-range-edge: HighlightText;
       background: Highlight;
       color: HighlightText;
+    }
+
+    // The focused cell of a block (S12-Q8): the system's highlight, never the base's tint under HighlightText.
+    .dzg-cell--range:focus {
+      background: Highlight;
+      outline-color: HighlightText;
     }
 
     // What the cell holds keeps the system's colours (badges, links, the edit marks): the adjust put back (review 6).

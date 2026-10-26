@@ -808,6 +808,26 @@ Durée estimée : 20 min par couple et par langue.
      `aria-selected`, choix de la fiche `range-selection.md` 12). Dans le bloc : « sélectionné » dit. Noter,
      par lecteur (NVDA, JAWS, VoiceOver, TalkBack), ce qui est dit dans et hors du bloc.
 
+137. **Mode recopie au clavier** (étape 12, S12-Q2). Sur « Qté » (deux cellules `1, 2` en bloc),
+     `Ctrl+Maj+Entrée` : fr « Recopie : flèches pour étendre, Entrée pour écrire, Échap pour annuler », une fois ;
+     `↓` trois fois, une pause : « Vers le bas : 3 lignes » ; `Entrée` : « Cellules recopiées : 3.
+     Enregistrement en cours », les valeurs `3, 4, 5`. En arabe, `←` va vers la **fin** logique. `Échap` dans le
+     mode : « Recopie annulée », le bloc reste. Noter si un lecteur ou une méthode de saisie prend
+     `Ctrl+Maj+Entrée` avant la page.
+138. **Ctrl+D / Ctrl+R avec un lecteur** : une phrase par geste ; **le navigateur n'ouvre ni son dialogue de
+     favori ni ne recharge** (vérifier dans un vrai navigateur, avec fenêtre : les navigateurs sans fenêtre ne le
+     montrent jamais). Sur la première ligne, `Ctrl+D` est laissé au navigateur (rien à recopier).
+139. **Ctrl+Entrée, modification en masse** : un bloc de « Statut », `F2`, choisir une valeur, `Ctrl+Entrée` :
+     « Cellules modifiées : n », une fois ; le champ se ferme, le focus reste sur la cellule (même avec
+     `?enter=down`).
+140. **Glisser la poignée avec un lecteur en marche** : une seule phrase, au lâcher. La poignée (petit carré en
+     bas à droite, **en bas à gauche en arabe**, pointeur en croix) se voit aussi sur une seule cellule cliquée
+     (S12-Q8) ; elle n'est pas lue (`aria-hidden`).
+141. **Annuler une recopie** : `Ctrl+Z` après un glisser : « Annulé : n cellules », le focus sur la première.
+142. **Sans glisser** (WCAG 2.5.7) : un clic sur la poignée : « Recopie : cliquez la cellule jusqu'où
+     recopier ; Échap pour annuler » ; un clic sur une cellule plus bas : écrit comme un lâcher là ; `Échap`
+     après le premier clic : « Recopie annulée », rien d'écrit.
+
 Consigner le résultat dans `docs/behaviors/range-selection.md` (fin de la fiche) et dans `ROADMAP.md`
 (clôture de la partie B). Règle de décision propre à cette section : une phrase de compte manquante ou dite
 deux fois (125, 129–133), une phrase par cellule au lieu d'une par geste (130, 131), un focus perdu (128,

@@ -143,7 +143,24 @@
     { "what": "focus ring on a cell of a block", "fg": "--dzg-focus-ring", "bg": "--dzg-range-bg", "min": 3 },
     { "what": "saving border on a cell of a block", "fg": "--dzg-saving-color", "bg": "--dzg-range-bg", "min": 3 },
     { "what": "a block's edge apart from the focus ring (step 11a): a hue 60° away at least; the shape differs too (inset lines, the ring outside)", "fg": "--dzg-range-edge", "bg": "--dzg-focus-ring", "min": 1, "hue": 60 },
-    { "what": "a block's edge apart from the saving border: a hue 60° away at least", "fg": "--dzg-range-edge", "bg": "--dzg-saving-color", "min": 1, "hue": 60 }
+    { "what": "a block's edge apart from the saving border: a hue 60° away at least", "fg": "--dzg-range-edge", "bg": "--dzg-saving-color", "min": 1, "hue": 60 },
+    { "what": "focused cell ring on its tint (owner S12-Q8)", "fg": "--dzg-focus-ring", "bg": "--dzg-cell-active-bg", "min": 3 },
+    { "what": "focused cell ring next to its row's tint", "fg": "--dzg-focus-ring", "bg": "--dzg-row-active-bg", "min": 3 },
+    { "what": "text in the focused cell", "fg": "--tz-fg", "bg": "--dzg-cell-active-bg", "min": 4.5 },
+    { "what": "muted text in the focused cell", "fg": "--tz-fg-muted", "bg": "--dzg-cell-active-bg", "min": 4.5 },
+    { "what": "text in the focused row", "fg": "--tz-fg", "bg": "--dzg-row-active-bg", "min": 4.5 },
+    { "what": "muted text in the focused row", "fg": "--tz-fg-muted", "bg": "--dzg-row-active-bg", "min": 4.5 },
+    { "what": "a block's edge next to the focused row", "fg": "--dzg-range-edge", "bg": "--dzg-row-active-bg", "min": 3 },
+    { "what": "refused border apart from the focus ring (owner S12-Q8): a hue 60° away at least", "fg": "--dzg-refused-color", "bg": "--dzg-focus-ring", "min": 1, "hue": 60 },
+    { "what": "a block's edge apart from the refused border: a hue 60° away at least", "fg": "--dzg-range-edge", "bg": "--dzg-refused-color", "min": 1, "hue": 60 },
+    { "what": "the fill handle on a cell (Phase 5 step 12, fill.css)", "fg": "--dzg-fill-handle", "bg": "--tz-bg", "min": 3 },
+    { "what": "the fill handle on a block's tint", "fg": "--dzg-fill-handle", "bg": "--dzg-range-bg", "min": 3 },
+    { "what": "the fill handle on the focused cell", "fg": "--dzg-fill-handle", "bg": "--dzg-cell-active-bg", "min": 3 },
+    { "what": "the fill handle on a selected row", "fg": "--dzg-fill-handle", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "the fill handle on the focused row", "fg": "--dzg-fill-handle", "bg": "--dzg-row-active-bg", "min": 3 },
+    { "what": "the fill handle apart from the focus ring: a hue 60° away at least", "fg": "--dzg-fill-handle", "bg": "--dzg-focus-ring", "min": 1, "hue": 60 },
+    { "what": "the fill handle apart from the saving border", "fg": "--dzg-fill-handle", "bg": "--dzg-saving-color", "min": 1, "hue": 60 },
+    { "what": "the fill handle apart from the refused border", "fg": "--dzg-fill-handle", "bg": "--dzg-refused-color", "min": 1, "hue": 60 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -169,6 +186,9 @@
     "--dzg-refused-color": "var(--tz-danger)",
     "--dzg-saved-color": "var(--tz-success)",
     "--dzg-range-bg": "var(--dzg-row-selected-bg)",
-    "--dzg-range-edge": "var(--tz-success)"
+    "--dzg-range-edge": "var(--tz-success)",
+    "--dzg-fill-handle": "var(--dzg-range-edge)",
+    "--dzg-cell-active-bg": "color-mix(in srgb, var(--tz-accent) 10%, var(--tz-bg))",
+    "--dzg-row-active-bg": "color-mix(in srgb, var(--tz-fg) 6%, var(--tz-bg))"
   }
 }

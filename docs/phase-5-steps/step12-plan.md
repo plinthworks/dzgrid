@@ -339,3 +339,100 @@ the full gate once at the commit (`build`, `test:ci`, `test:perm`, `typecheck`, 
 **S12-Q7. Les mesures de vitesse du jeu B :**
 - **A ★** affichées et notées « indicatives » ; aucune limite écrite avant la machine calme (Q17d).
 - B écrire tout de suite des limites (mesure + 35 %), à revoir sur la machine calme.
+
+## Done
+(2026-10-25/26, not committed. Owner S12-Q1–Q7 before the code; S12-Q8 / Q8 bis (Excel-like cues) during it; S12-Q9 after the
+first stop at the size budget.)
+
+**Built.** Sheets first: `fill.md` « As built at step 12 » (11–20), a11y §20 137–142, `range-selection.md`
+(Ctrl+Shift+Enter), `editing.md` 19. `range/geom.ts` (D2: `cellAt`, `autoScroll` shared with the block's drag; `dom/range`
+4 796 → 4 768). `@dzgrid/dom/fill` (`fill/index.ts`): the handle (one per grid, a child of the corner cell, also on the
+focused editable cell alone, S12-Q8), its drag (mouse, pen; the target outlined; auto-scroll; Ctrl / Cmd at the release
+swaps), the no-drag click-then-click (WCAG 2.5.7), the keyboard mode, Ctrl/Cmd+D / R, `g.bulk`, the API; one writer (one
+commit, the joined sentence). `/editors`: Ctrl/Cmd+Enter (`all`). Texts `-fill`, `fill.scss`; S12-Q8 in the base theme
+(`.dzg-cell:focus` ring, inner line, tint; `.dzg-row:focus-within` tint; forced colours) and `range.scss` (the focused cell
+of a block: the inner line; Highlight in forced colours); `contrast.css` dark refusal `#ff6b9e` (60° from its ring, pinned
+by a test, S12-Q9 correction). Angular `range()`, `fill()`, `(rangeChanged)`, `(rangeCopied)`. Playground `orders-edit`
+(`?fill=0` turns the fill off; `?focus=range` a fifth bullet on the fill). The real example's stock screen with `range()`
+and `fill()`. Dataset B (`perf/dataset.ts`), `perf/profiles/stock.ts` (recorded), `perf-range.{html,ts}`,
+`bench:browser -- --only range-b`. Browser `scripts/browser-fill.mjs` (`--only fill`, and in the full run).
+
+**Tests that failed first** (scratchpad `s12-red-*.txt`): theme `active.test.ts` 5 / 6; `rebudget` and `release` « step 12 »;
+on the stub 63 of 75 — `range-fill` 27 / 29, `range-fill-keys` 13 / 15, `range-bulk` 8 / 9, `range-fill-property`,
+`range-fill-paths` 2 / 2, theme `fill.test.ts` 9 / 9, Angular `range-fill` 3 / 3; S12-Q9: the 3 000 / 460 ceilings and the
+60° pin of contrast.css (red, then the colour); the angular line 6 863; the forced-colours rule of a focused block cell
+(red, found by the browser suite). Green on the stub (guards of an absence): the walk, the layering, the texts, five
+« not … » cases. Re-pinned by QB5: `editors-review` « Ctrl+Enter is the field's ».
+
+**Property test** (`range-fill-property.test.ts`, oracle: core's `planFill` then each cell judged by hand): 300 seeds in
+the suite, every way, shape and fill direction reached ≥ 3 times; **3 000 seeds once at the gate: green**. The four ways
+(drag, keys, click-click, API) deep-equal on 120 random fills, ltr and rtl.
+
+**Mutants** (a copy, rsync without node_modules, linked; deleted after): **52 run, 50 killed, 2 equivalent** (« a sort does
+not cancel »: the rows' `modelUpdated` order / query that comes with it cancels too; « the handle left after destroy »: a
+feature is destroyed only with its grid, whose DOM goes). Four survived the first pass and gave four tests: the source is
+the one pressed; Ctrl+D copies a day (never a series); an app's editor that keeps nothing (`read()` undefined) bulks the
+value shown; a second click on the handle disarms.
+
+**Browser**: `--only fill` Chrome **32 / 32**, Firefox **26 / 26**, WebKit **26 / 26** on the real `orders-edit.html?focus=range`
+(fr Clinic light, ar Midnight dark): the handle on one clicked cell and on a block (bottom-right / bottom-left, 24 px hit
+box by `elementFromPoint`, 8 px square ≥ 3:1), the crosshair, the active cell after ArrowDown × 2 (2 px ring, inner line,
+tint; ring 3.60 / 3.62 fr, 10.04 / 10.05 ar; text ≥ 4.5), the row's tint, the block's 2 px edge (3.02 fr, 9.92 ar), a real
+mouse drag (the series at once, one sentence, Ctrl+Z), Ctrl at the drop, Escape mid-drag, click-click, Ctrl/Cmd+D prevented,
+Ctrl+Enter on « Statut »; Chrome: a pen drag (CDP), axe 0 on the grid with the mode on, forced colours. Screenshots
+`docs/screenshots/step12-orders-edit-{fr,ar}.png`. Real Angular example (`example:browser`, 8 / 8): the handle dragged and
+Ctrl+Enter on the stock screen, fr / ar, zoneless and zone.js.
+
+**Bench B** (indicative, Q17d; load ≈ 5–6, headless, minified): bulk 3 000 (Ctrl+Enter) 17.7 ms, one request (2 990 changed,
+10 already 77); paste 1 000 cells 18.7 ms; fill 3 000 (series) 17.7 ms, 2 998 changes; Ctrl+D 3 000 × 12 73.6 ms, one long
+task; undo of the bulk 15.9 ms. No budget line (S12-Q7).
+
+**Sizes** (gz): `dom/fill` **2 729** / 3 000 (S12-Q9); `fill.css` 415 / 460; texts 231 / 278 / 299; `/editors` 6 669 / 6 720;
+`dom/range` 4 768 / 4 800; theme 2 494 / 2 500; `range.css` 420 / 500; base 21 565 / 21 700; angular **6 813** (line 6 863,
+S9-Q6); K.8 profile 82 986 / 83 500; stock profile 113 464 recorded (one bundle, lazy chunks inside). real example 92 059 / **92 500** (owner S12-Q10; first measured over the old 92 000); the stock chunk 32 469 apart.
+
+**Deviations (lead):** the target is a dashed line inside each cell (not only round the block); the no-drag control is the
+handle clicked then a cell clicked (same plan as a drop), hidden with the handle on touch only (no drag exists there);
+the active row's tint is neutral (`--tz-fg` 6 %), the cell's the accent 10 %; Ctrl+Enter without `fill()` = Enter without
+the move (as the sheet).
+
+**Gate** (`caffeinate -i`, every vitest pass at `--maxWorkers=2`): `build` green; `typecheck` green; `vitest run` **403
+files, 6 292 tests, green** (235 s); `test:perm` 5 files / 10 tests green; property 3 000 seeds green; `check:size` 0 over
+(after the angular line); `check:contrast` 954 pairs, 0 below; `test:browser` full **963 / 963** (third run: the first was
+red on the forced-colours block cell, fixed tests first; the second on a tooltip timing in `edit saves ar` under load
+7.9, green twice alone); Angular fixture 90 / 90; `example:build` ok; `example:browser` 8 / 8; `example:bytes` 92 059 / 92 500 (S12-Q10, the ceiling tests first).
+
+## Review (2026-10-26; fixed tests first, red runs in scratchpad `s12-red-review.txt`, `s12-red-pinned.txt`)
+1. (medium) The handle in a pinned column anchored to the sticky segment: `fill.css` gives the pinned cell that holds it
+   `position: relative` (`:where(.dzg-seg-start, .dzg-seg-end) > .dzg-cell:has(> .dzg-fill)`; CSS only, no paint class).
+   Tests: theme `fill.test.ts` (the rule, never the centre's cells), `range-fill.test.ts` (the handle on the pinned cell);
+   browser `fillPinnedChecks` (`range.html?fill=1`, « Commande » and « Qté » pinned at the start, scrolled, ltr and rtl):
+   red without the rule (110 px off, `position: static`), green with it.
+2. (medium) The click-then-click stayed armed after a press outside the body: a capture `pointerdown` on the document
+   disarms it, said once, unless the press is on a cell of THIS body (the box column, a panel, a nested grid, the page
+   count as outside); the focus leaving the grid disarms it too. Tests: `range-fill.test.ts` (page, box column, focus out,
+   a press on a cell keeps it).
+3. Forced colours: the focused cell of a block draws its ring in `HighlightText` on `Highlight`. Test: theme `fill.test.ts`.
+4. The focused corner of a block keeps its 2 px edges just inside the inner line (each band grows by 3 px under the line),
+   ltr and rtl. Test: theme `fill.test.ts`.
+Sizes after: `range.css` 479 / 500, `fill.css` 450 / 460, `dom/fill` 2 781 / 3 000; the base theme unchanged (2 494 / 2 500).
+
+**The test analysis's gaps** (24 of its 30 mutants survived on a snapshot from before the review fixes): every test it
+asked for added — keys (Ctrl+Cmd+D, Ctrl+D under an open panel, a detail row focused, Tab in the mode not prevented,
+Ctrl+End / Ctrl+Home / PageDown, the last row, a click elsewhere, a focusout alone, a column hidden, a page change, Mac
+Cmd+Enter), the handle (right button, non-primary, a target across a panel, `editable` by row, Mac Cmd at the second click,
+`data-dzg-filling` after the drop, a release without its click), bulk (the `validate` reason in the field), `fill.css`
+(`touch-action`, the editing hide), `active.test.ts` (edge / refused hue 60, edge / active row 3:1), Angular under zone.js
+(`test-zone/range-fill-zone.test.ts`: the range and fill outputs inside the zone, in one turn, in order). None failed on
+the current code beyond the review fixes already made (the outside press, the focusout of the no-drag way); two of the
+new expectations were mine to correct (the cells already holding the value; the target outlined on the mounted rows
+only). The gate then found one consequence of review 2: the property test's click-click onto a detail row is now a
+disarm (a panel is outside the body's cells) — the oracle routes that case to the drag, the sheet (`fill.md` 14) says it,
+and a hand test pins the panel press (said once, nothing written).
+
+**Gate after the review** (`caffeinate -i`, every vitest pass `--maxWorkers=2`): `build`, `typecheck` green; `vitest run`
+**404 files, 6 321 tests** green; `test:perm` 5 / 10 green; property **3 000 seeds** green; `check:size` 0 over;
+`check:contrast` 954 pairs, 0 below; `--only fill` Chrome 36 / 36, Firefox 30 / 30, WebKit 30 / 30; `--only playground`
+41 / 41; Angular fixture 90 / 90; `example:bytes` 92 059 / 92 500 (stock chunk 32 610 apart). Full browser suite **967 / 967** (the first run 966 / 967: a motion frame at 51 ms for 50 under load; green on the rerun).
+Sizes: `dom/fill` 2 781 / 3 000, `fill.css` 450 / 460, `range.css` 479 / 500, theme 2 494 / 2 500, angular 6 813 / 6 863,
+K.8 82 986 / 83 500.

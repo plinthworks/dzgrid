@@ -92,6 +92,9 @@
       "@dzgrid/dom/range": [
         "./packages/dom/src/range.ts"
       ],
+      "@dzgrid/dom/fill": [
+        "./packages/dom/src/fill.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

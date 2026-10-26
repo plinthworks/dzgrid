@@ -71,6 +71,20 @@ describe('0.2.0, the four packages', () => {
     }
   });
 
+  it('export the Phase 5 step 12 subpaths (@dzgrid/dom/fill, its texts, the theme\'s fill.css), built like the others', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./fill']).toEqual({ types: './src/fill.ts', default: './src/fill.ts' });
+    for (const lang of ['en', 'fr', 'ar']) expect(dom[`./locales/${lang}-fill`], lang).toEqual({ types: `./src/locales/${lang}-fill.ts`, default: `./src/locales/${lang}-fill.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/range', '\.\/fill'/);
+    for (const lang of ['en', 'fr', 'ar']) expect(build).toContain(`'./locales/${lang}-fill'`);
+    const theme = JSON.parse(readFileSync(`${ROOT}packages/theme/package.json`, 'utf8'));
+    for (const f of ['fill.css', 'fill.unlayered.css', 'fill.scss']) {
+      expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
+      expect(theme.files, f).toContain(f);
+    }
+  });
+
   it('keep gsap and tzslot optional peers', () => {
     const dom = pkg('dom');
     expect(dom.peerDependenciesMeta).toEqual({ '@tzslot/core': { optional: true }, '@tzslot/dom': { optional: true }, gsap: { optional: true } });

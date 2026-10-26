@@ -27,6 +27,14 @@
   box-shadow: inset calc(-1 * var(--dzg-rs)) 0 0 0 var(--dzg-range-edge, var(--tz-success)), inset var(--dzg-re) 0 0 0 var(--dzg-range-edge, var(--tz-success)), inset 0 var(--dzg-rt) 0 0 var(--dzg-range-edge, var(--tz-success)), inset 0 calc(-1 * var(--dzg-rb)) 0 0 var(--dzg-range-edge, var(--tz-success));
 }
 
+.dzg-cell--range:focus {
+  box-shadow: inset 0 0 0 3px var(--tz-bg), inset calc(var(--dzg-rs) + 3px) 0 0 0 var(--dzg-range-edge, var(--tz-success)), inset calc(-1 * (var(--dzg-re) + 3px)) 0 0 0 var(--dzg-range-edge, var(--tz-success)), inset 0 calc(var(--dzg-rt) + 3px) 0 0 var(--dzg-range-edge, var(--tz-success)), inset 0 calc(-1 * (var(--dzg-rb) + 3px)) 0 0 var(--dzg-range-edge, var(--tz-success));
+}
+
+.dzg-cell--range:focus:dir(rtl) {
+  box-shadow: inset 0 0 0 3px var(--tz-bg), inset calc(-1 * (var(--dzg-rs) + 3px)) 0 0 0 var(--dzg-range-edge, var(--tz-success)), inset calc(var(--dzg-re) + 3px) 0 0 0 var(--dzg-range-edge, var(--tz-success)), inset 0 calc(var(--dzg-rt) + 3px) 0 0 var(--dzg-range-edge, var(--tz-success)), inset 0 calc(-1 * (var(--dzg-rb) + 3px)) 0 0 var(--dzg-range-edge, var(--tz-success));
+}
+
 [data-dzg-ranging] {
   -webkit-user-select: none;
   user-select: none;
@@ -38,6 +46,10 @@
     --dzg-range-edge: HighlightText;
     background: Highlight;
     color: HighlightText;
+  }
+  .dzg-cell--range:focus {
+    background: Highlight;
+    outline-color: HighlightText;
   }
   .dzg-cell--range > *,
   .dzg-cell--range::before,

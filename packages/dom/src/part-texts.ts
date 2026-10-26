@@ -64,6 +64,16 @@ export type RangeMessageKey =
   | 'range.rows' | 'range.cols' | 'range.size' | 'range.cleared' | 'range.reordered'
   // The clipboard (step 11b): a label and its count each, no plural forms (owner S11b-Q4); the parts after the first carry their separator.
   | 'range.copied' | 'range.cut' | 'range.pasted' | 'range.erased' | 'range.refused' | 'range.readOnly' | 'range.tooLong' | 'range.outside' | 'range.tooBig' | 'range.noCopy';
+/** The fill's texts (`@dzgrid/dom/fill`, Phase 5 step 12), in their own bundles (`locales/<lang>-fill`): optional here, required by `fill()`. */
+export type FillMessageKey =
+  | 'fill.filled' | 'fill.bulk' | 'fill.mode' | 'fill.pick' | 'fill.cancel'
+  // The target's size in the fill mode, by its way (`FillWay`): `{n}` a `range.rows` or `range.cols` text.
+  | 'fill.down' | 'fill.up' | 'fill.end' | 'fill.start';
+/** A fill bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_RANGE.text, ...FR_FILL.text }`. */
+export interface FillMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in FillMessageKey]: MessageValue };
+}
 /** A range bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_RANGE.text }`. */
 export interface RangeMessages {
   readonly locale: string;

@@ -43,7 +43,7 @@ const KEYS = [
   'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
 ] as const;
 /** Events with an output of their own name. */
-const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged'];
+const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged', 'rangeChanged', 'rangeCopied'];
 
 /** What `membershipOf` reads of a query with no filter and no search. */
 const NONE = { filter: {}, quick: '' } as Query;
@@ -132,6 +132,9 @@ export class DzGrid<T> implements AfterContentInit {
   readonly saveFailed = output<Ev<T, 'saveFailed'>>();
   readonly orderStale = output<Ev<T, 'orderStale'>>();
   readonly undoChanged = output<Ev<T, 'undoChanged'>>();
+  /** A block of cells set or dropped (`range()`, Phase 5 step 11a), and a copy or a cut of one (11b). */
+  readonly rangeChanged = output<Ev<T, 'rangeChanged'>>();
+  readonly rangeCopied = output<Ev<T, 'rangeCopied'>>();
   readonly problems = output<readonly Problem[]>();
   readonly gridReady = output<DzgController<T>>();
 

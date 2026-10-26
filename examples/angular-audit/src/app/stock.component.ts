@@ -3,7 +3,8 @@
  * Angular, loaded on demand (`?screen=stock`, a dynamic import in main.ts) so the audit screen's first load carries
  * none of it. `edit()` and `editors({ list: listEditor })` in `[features]`; the app's save through `[save]` (a fake
  * server: 120 ± 60 ms, refuses the row « S-0005 »); `(saveFailed)`, `(undoChanged)`; a component
- * editor for the note (`componentPart('editor', …)`, `read()`; a template editor would bring Angular's embedded-view
+ * editor for the note (`componentPart('editor', …)`, `read()`; step 12: `range()` and `fill(range)` — blocks, the fill
+ * handle, Ctrl+D / R, Ctrl+Enter bulk; a template editor would bring Angular's embedded-view
  * code into the first load's shared chunk, against the audit screen's 90 000); the theme's edit.css with this chunk.
  * French, or Arabic right to left with `?lang=ar`.
  */
@@ -15,12 +16,18 @@ import type { GridMessages } from '@dzgrid/dom';
 import { edit } from '@dzgrid/dom/edit';
 import { editors, type CellInput } from '@dzgrid/dom/editors';
 import { listEditor } from '@dzgrid/dom/editors-list';
+import { range } from '@dzgrid/dom/range';
+import { fill } from '@dzgrid/dom/fill';
 import { FR } from '@dzgrid/dom/locales/fr';
 import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
 import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { FR_FILL } from '@dzgrid/dom/locales/fr-fill';
 import { AR } from '@dzgrid/dom/locales/ar';
 import { AR_EDIT } from '@dzgrid/dom/locales/ar-edit';
 import { AR_EDITORS } from '@dzgrid/dom/locales/ar-editors';
+import { AR_RANGE } from '@dzgrid/dom/locales/ar-range';
+import { AR_FILL } from '@dzgrid/dom/locales/ar-fill';
 import { DzGrid, DzgController, componentPart, type DzgEditorComponent, type DzgPartContext } from '@dzgrid/angular';
 import { AUDIT_LANG } from './lang';
 import { AUDIT_PROBE } from './probe';
@@ -39,8 +46,8 @@ const WORDS = {
   },
 } as const;
 const MESSAGES: Record<'fr' | 'ar', GridMessages> = {
-  fr: { locale: FR.locale, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text } as GridMessages['text'] },
-  ar: { locale: AR.locale, text: { ...AR.text, ...AR_EDIT.text, ...AR_EDITORS.text } as GridMessages['text'] },
+  fr: { locale: FR.locale, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text, ...FR_RANGE.text, ...FR_FILL.text } as GridMessages['text'] },
+  ar: { locale: AR.locale, text: { ...AR.text, ...AR_EDIT.text, ...AR_EDITORS.text, ...AR_RANGE.text, ...AR_FILL.text } as GridMessages['text'] },
 };
 
 export type StockRow = { id: string; ref: string; product: string; stock: number; status: (typeof STATUSES)[number]; expiry: string; note: string };
@@ -75,7 +82,8 @@ export class NoteEditor implements DzgEditorComponent {
   selector: 'audit-root',
   imports: [DzGrid],
   // The theme's edit marks and fields come with this screen's chunk only (the audit screen loads none of it).
-  styleUrl: '../../node_modules/@dzgrid/theme/edit.css',
+  // Phase 5 step 12: blocks of cells and the fill (their styles with this chunk too).
+  styleUrls: ['../../node_modules/@dzgrid/theme/edit.css', '../../node_modules/@dzgrid/theme/range.css', '../../node_modules/@dzgrid/theme/fill.css'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -108,7 +116,8 @@ export class StockScreen implements DoCheck, AfterViewInit {
     { id: 'note', header: this.w.note, width: 220, editable: true, edit: { editor: 'note', maxLength: 80 } },
   ];
   readonly id = (r: StockRow): string => r.id;
-  readonly features = [edit<StockRow>(), editors({ list: listEditor })];
+  private readonly blocks = range();
+  readonly features = [edit<StockRow>(), editors({ list: listEditor }), this.blocks, fill(this.blocks)];
   readonly saved = signal(0);
   readonly failed = signal(0);
   readonly canUndo = signal(false);

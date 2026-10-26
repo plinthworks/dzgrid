@@ -182,6 +182,18 @@
       "file": "packages/dom/src/locales/ar-range.ts",
       "maxGzip": 500
     },
+    "@dzgrid/dom/locales/en-fill": {
+      "file": "packages/dom/src/locales/en-fill.ts",
+      "maxGzip": 250
+    },
+    "@dzgrid/dom/locales/fr-fill": {
+      "file": "packages/dom/src/locales/fr-fill.ts",
+      "maxGzip": 300
+    },
+    "@dzgrid/dom/locales/ar-fill": {
+      "file": "packages/dom/src/locales/ar-fill.ts",
+      "maxGzip": 380
+    },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
       "maxGzip": 2500
@@ -213,6 +225,10 @@
     "@dzgrid/theme/range.css": {
       "file": "packages/theme/range.css",
       "maxGzip": 500
+    },
+    "@dzgrid/theme/fill.css": {
+      "file": "packages/theme/fill.css",
+      "maxGzip": 460
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
@@ -351,7 +367,7 @@
     },
     "@dzgrid/dom/editors": {
       "file": "packages/dom/src/editors.ts",
-      "maxGzip": 6650,
+      "maxGzip": 6720,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -398,6 +414,18 @@
     "@dzgrid/dom/range: html (lazy)": {
       "file": "packages/dom/src/range/html/index.ts",
       "maxGzip": 600,
+      "over": "@dzgrid/dom/range",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/range",
+        "@dzgrid/dom/internal",
+        "./html/*"
+      ]
+    },
+    "@dzgrid/dom/fill": {
+      "file": "packages/dom/src/fill.ts",
+      "maxGzip": 3000,
       "over": "@dzgrid/dom/range",
       "external": [
         "@dzgrid/core",
@@ -553,6 +581,10 @@
       "file": "perf/profiles/readonly-client.ts",
       "maxGzip": null
     },
+    "profile: stock, editing with blocks and the fill (dataset B, step 12)": {
+      "file": "perf/profiles/stock.ts",
+      "maxGzip": null
+    },
     "profile: audit screen (K.8)": {
       "file": "perf/profiles/audit.ts",
       "split": true,
@@ -593,7 +625,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 6793,
+      "maxGzip": 6863,
       "external": [
         "@angular/*",
         "@dzgrid/*",

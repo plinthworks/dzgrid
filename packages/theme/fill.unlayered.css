@@ -1,0 +1,55 @@
+.dzg-fill {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-end: 0;
+  z-index: 2;
+  inline-size: 24px;
+  block-size: 24px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+:where(.dzg-seg-start, .dzg-seg-end) > .dzg-cell:has(> .dzg-fill) {
+  position: relative;
+}
+
+.dzg-fill::before {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-end: 0;
+  inline-size: 8px;
+  block-size: 8px;
+  background: var(--dzg-fill-handle, var(--dzg-range-edge, var(--tz-success)));
+  box-shadow: 0 0 0 1px var(--tz-bg);
+}
+
+[data-dzg-editing] > .dzg-fill {
+  display: none;
+}
+
+@media not (any-pointer: fine) {
+  .dzg-fill {
+    display: none;
+  }
+}
+.dzg-cell--fill {
+  outline: 1px dashed var(--dzg-fill-handle, var(--dzg-range-edge, var(--tz-success)));
+  outline-offset: -1px;
+}
+
+[data-dzg-filling] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media (forced-colors: active) {
+  .dzg-fill::before {
+    forced-color-adjust: none;
+    background: Highlight;
+    box-shadow: 0 0 0 1px CanvasText;
+  }
+  .dzg-cell--fill {
+    outline-color: Highlight;
+  }
+}

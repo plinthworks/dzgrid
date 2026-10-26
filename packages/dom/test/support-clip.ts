@@ -82,24 +82,29 @@ export interface CMake {
   readonly noEdit?: boolean;
   /** `editors()` too, before (`'before'`) or after (`'after'`) `range()`. */
   readonly editors?: 'before' | 'after';
+  /** The editors' options (`enterMoves`, step 12). */
+  readonly editorsOptions?: Parameters<typeof editors>[0];
   /** The save; default: records the request and saves at once. */
   readonly save?: (req: SaveRequest<C>) => unknown;
   readonly settings?: Partial<GridSettings<C>>;
   readonly extra?: readonly GridFeature[];
+  /** Features put just before `range()` (the fill feature listed first, step 12). */
+  readonly pre?: readonly GridFeature[];
   readonly host?: HTMLElement;
   readonly block?: number;
+  readonly mac?: boolean;
 }
 
 /** A grid with the clipboard: `range()` with `edit()` (a recording save), every type of column. */
 export function cmake(o: CMake = {}) {
   const requests: SaveRequest<C>[] = [];
   const e: EditFeature<C> | null = o.noEdit ? null : edit<C>({ save: (req) => (requests.push(req), o.save?.(req)) });
-  const x = o.editors ? editors() : null;
+  const x = o.editors ? editors(o.editorsOptions) : null;
   const lang = o.lang ?? 'en';
   const t = rmake({
-    rows: (o.rows ?? crows(30)) as never, columns: (o.columns ?? CCOLS) as never, lang, messages: CMSG[lang], ...(o.range && { range: o.range }), ...(o.feature && { feature: o.feature }), ...(o.host && { host: o.host }), ...(o.block && { block: o.block }),
+    rows: (o.rows ?? crows(30)) as never, columns: (o.columns ?? CCOLS) as never, lang, messages: CMSG[lang], ...(o.range && { range: o.range }), ...(o.feature && { feature: o.feature }), ...(o.host && { host: o.host }), ...(o.block && { block: o.block }), ...(o.mac !== undefined && { mac: o.mac }),
     settings: { locale: lang === 'en' ? 'en-US' : lang === 'fr' ? 'fr-FR' : 'ar-DZ', timeZone: 'Africa/Algiers', ...o.settings } as never,
-    features: (r) => [...(e ? [e] : []), ...(o.editors === 'before' ? [x!] : []), r, ...(o.editors === 'after' ? [x!] : []), ...(o.extra ?? [])],
+    features: (r) => [...(e ? [e] : []), ...(o.editors === 'before' ? [x!] : []), ...(o.pre ?? []), r, ...(o.editors === 'after' ? [x!] : []), ...(o.extra ?? [])],
   });
   const edits = e ? (e.api(t.g as never) as EditApi<C>) : null;
   const refuse = edits ? vi.spyOn(edits, 'refuse') : null;
@@ -115,7 +120,8 @@ export function cmake(o: CMake = {}) {
   /** The changes of every request, as `row/col=value`. */
   const changes = () => requests.flatMap((r) => r.changes.map((c) => `${String(c.key).replace(/^d:\d+:/, '')}/${c.column}=${JSON.stringify(c.value)}`));
   const blinked = () => (refuse?.mock.calls ?? []).map(([key, col]) => `${String(key).replace(/^d:\d+:/, '')}/${col}`);
-  return { ...t, e, edits, refuse, requests, at, value, of, changes, blinked, lang };
+  // `pt`: the middle of a cell on screen (support-range's `at`, which `at` here replaces with a focus).
+  return { ...t, pt: t.at, e, edits, refuse, requests, at, value, of, changes, blinked, lang };
 }
 
 export const key = (id: string): RowKey => dataKey(id)!;

@@ -97,7 +97,8 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
     Ctrl/Cmd+R, Space and every printable key belong to the field: the grid never acts on them (no move,
     no undo, no paste, no block, no fill). One exception (Part B, owner QB5): **Ctrl/Cmd+Enter** in the field
     of a cell inside a block keeps the value in every editable cell of the block (bulk edit, `fill.md` 9);
-    without a block it keeps it in the one cell, as Enter.
+    without a block it keeps it in the one cell, as Enter. With `fill()` (step 12, `fill.md` 17) the field closes on its
+    cell and the focus never moves, even with `enterMoves: 'down'`; Ctrl/Cmd+Shift+Enter stays the field's.
 20. Enter and Escape during a composition belong to the input method.
 21. **Tree column**: the field fills the content box after the indent and the chevron; Left and Right move
     the caret, never open or close the row (the tree's keys ignore the `editor` owner).

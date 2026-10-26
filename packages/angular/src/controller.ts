@@ -2,6 +2,8 @@ import { Injectable, computed, signal, untracked } from '@angular/core';
 import type { GridCommand, GridCommandResult, GridKernel, RowKey, RowModel } from '@dzgrid/core';
 import type { GridFeature, GridInstance } from '@dzgrid/dom';
 import type { EditApi, EditFeature } from '@dzgrid/dom/edit';
+import type { RangeApi, RangeFeature } from '@dzgrid/dom/range';
+import type { FillApi, FillFeature } from '@dzgrid/dom/fill';
 
 type FilterOpener = GridFeature & { openFilter(column: string): boolean; closeFilter(): void };
 
@@ -61,9 +63,20 @@ export class DzgController<T = unknown> {
    * grid (`undo()`, `redo()`, `reapply()`, `canUndo`, `commit`, …); null before the grid, without it, after it.
    */
   edit(): EditApi<T> | null {
-    return (this.#grid && (this.#features.find((f) => f.id === 'edit') as EditFeature<T> | undefined)?.api(this.#grid)) || null;
+    return this.#find<EditFeature<T>>('edit')?.api(this.#grid!) || null;
+  }
+  /** The grid's block of cells (Phase 5 step 12): the `range()` feature given in `features`; null before, without it, after. */
+  range(): RangeApi | null {
+    return this.#find<RangeFeature>('range')?.api(this.#grid!) || null;
+  }
+  /** The grid's fill (Phase 5 step 12): the `fill()` feature given in `features`; null before, without it, after. */
+  fill(): FillApi | null {
+    return this.#find<FillFeature>('fill')?.api(this.#grid!) || null;
+  }
+  #find<F>(id: string): F | undefined {
+    return this.#grid ? (this.#features.find((f) => f.id === id) as F | undefined) : undefined;
   }
   #filters(): FilterOpener | undefined {
-    return this.#grid ? (this.#features.find((f) => f.id === 'filters') as FilterOpener | undefined) : undefined;
+    return this.#find<FilterOpener>('filters');
   }
 }

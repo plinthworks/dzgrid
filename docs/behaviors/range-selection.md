@@ -56,6 +56,7 @@ a filter input or a nested grid's cells they are not the grid's (`editing.md` 19
 | Delete / Backspace | clears the block's editable cells, one gesture (`clipboard.md`) |
 | Ctrl+C / Ctrl+X / Ctrl+V | copy, cut, paste (`clipboard.md`) |
 | Ctrl+D / Ctrl+R | fill down / to the logical end (`fill.md`) |
+| Ctrl+Shift+Enter | the keyboard fill mode (`fill.md` 15, `fill()` only) |
 
 7. The keys ask the grid's own moves (`intentFor` with the same key without Shift): spans, details as one
    stop, pages and variable heights behave as when moving the focus. Ctrl+Space (a column) is not taken in

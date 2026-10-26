@@ -16,7 +16,7 @@ const spec = JSON.parse(read('contrast-pairs.json')) as { derived: Record<string
 const TZSLOT = (r: Rule) => r.selector.startsWith('.dzg-popup ') && r.selector.includes('.tz-');
 /** A palette block: only --tz-* colours, each a light-dark() pair. */
 // A palette block: tzslot's colours, and (more contrast, step 7) the saving border's own.
-const PALETTE = (r: Rule) => r.body.split(';').map((d) => d.trim()).filter(Boolean).every((d) => /^--(tz-[a-z-]+|dzg-saving-color|dzg-range-edge): light-dark\(/.test(d)); // the block's edge: Phase 5 step 11a
+const PALETTE = (r: Rule) => r.body.split(';').map((d) => d.trim()).filter(Boolean).every((d) => /^--(tz-[a-z-]+|dzg-saving-color|dzg-range-edge|dzg-refused-color): light-dark\(/.test(d)); // the block's edge: Phase 5 step 11a; the refusal's colour: step 12 (S12-Q8)
 
 describe('every theme file opens with the order statement and keeps its rules in its layer', () => {
   for (const [file, layer] of [['dzgrid.css', 'dzgrid.theme'], ['contrast.css', 'dzgrid.contrast'], ['tailwind.css', 'dzgrid.bridge']] as const) {

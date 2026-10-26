@@ -98,6 +98,12 @@
   background: var(--dzg-row-hover-bg, color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg)));
 }
 
+.dzg-row:focus-within,
+.dzg-row:focus-within .dzg-seg-start,
+.dzg-row:focus-within .dzg-seg-end {
+  background: var(--dzg-row-active-bg, color-mix(in srgb, var(--tz-fg) 6%, var(--tz-bg)));
+}
+
 .dzg-row[aria-selected=true],
 .dzg-row[aria-selected=true] .dzg-seg-start,
 .dzg-row[aria-selected=true] .dzg-seg-end {
@@ -112,6 +118,13 @@
   z-index: 1;
   inline-size: var(--dzg-select-bar, 0);
   background: var(--tz-accent);
+}
+
+.dzg-cell:focus {
+  outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 3px var(--tz-bg);
+  background: var(--dzg-cell-active-bg, color-mix(in srgb, var(--tz-accent) 10%, var(--tz-bg)));
 }
 
 .dzg-cell:focus-visible,
@@ -396,6 +409,9 @@
   }
   .dzg-row[aria-selected=true] > .dzg-seg-start::before {
     background: Highlight;
+  }
+  .dzg-cell:focus {
+    outline-color: Highlight;
   }
 }
 .dzg[data-stale] .dzg-row,

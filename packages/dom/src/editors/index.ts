@@ -401,6 +401,17 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     return true;
   };
 
+  /**
+   * Ctrl/Cmd+Enter (owner QB5, S12-Q5; fill.md 17): with `fill()`, the value in every cell of the block when the field's
+   * cell is in it (its own refusal keeps the field open, said); otherwise kept as Enter. Never a move.
+   */
+  const all = (s: Open): true => {
+    const r = g.bulk?.({ row: s.k, column: s.c }, s.e.input());
+    if (r?.own) deny(s, why(s.c, r.own));
+    else if (r || keep(s)) close(s, true, true, 'enter');
+    return true;
+  };
+
   /** The next (`d` 1) or previous (−1) cell with an editor in reading order (a yes/no cell has none): visible columns, then the displayed rows. */
   const next = (k: RowKey, c: string, d: 1 | -1): { k: RowKey; c: string } | null => {
     const cols = g.columns.visible().filter((x) => x.def.editable && kind(x) && kind(x) !== 'boolean').map((x) => x.id);
@@ -470,7 +481,8 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
       const w = wait;
       const plain = !e.altKey && !e.ctrlKey && !e.metaKey;
       // The editor's own keys, then these three; a nested grid's editor is that grid's.
-      if (s) return s.e.root.contains(e.target as Node) && (caret(s, e, plain) || !!s.e.keys?.(e) || (plain && end(s, e.key, e.shiftKey)));
+      // Ctrl/Cmd+Enter (QB5, fill.md 17): before the editor's own keys (a list's Enter).
+      if (s) return s.e.root.contains(e.target as Node) && (caret(s, e, plain) || (e.key === 'Enter' && !e.altKey && !e.shiftKey && e.ctrlKey !== e.metaKey && e.metaKey === g.mac && all(s)) || !!s.e.keys?.(e) || (plain && end(s, e.key, e.shiftKey)));
       // An editor waiting for its paint takes the keys a field would (review R1): Backspace shortens what was typed,
       // Enter and Tab are kept for the opening, F2 and Delete change nothing, Escape gives it up.
       if (w && plain && at?.kind === 'cell' && at.row === w.k && at.column === w.c) {
