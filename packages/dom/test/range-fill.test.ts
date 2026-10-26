@@ -32,6 +32,35 @@ describe('the handle: where it is drawn (fill.md 11, owner S12-Q8)', () => {
     expect(t.handles()).toHaveLength(1);
   });
 
+  it('one cell, no block: hidden when the focus leaves the grid, shown again when it comes back (owner 2026-10-26, fill.md 25)', async () => {
+    const t = fmake();
+    t.at('r2', 'qty');
+    expect(t.handleAt()).toBe('r2/qty');
+    const out = document.body.appendChild(document.createElement('button'));
+    out.focus();
+    await new Promise((r) => setTimeout(r, 5));
+    expect(t.handles()).toHaveLength(0);
+    await flush();
+    expect(t.handles()).toHaveLength(0);
+    t.cell('r2', 'qty')!.focus();
+    expect(t.handleAt()).toBe('r2/qty');
+    await flush();
+    expect(t.handleAt()).toBe('r2/qty');
+    out.remove();
+  });
+
+  it('a block: the focus leaving the grid keeps the handle on its corner (S12-Q11, fill.md 25)', async () => {
+    const t = fmake();
+    t.at('r1', 'name');
+    block(t, ['r1', 'name'], ['r3', 'qty']);
+    const out = document.body.appendChild(document.createElement('button'));
+    out.focus();
+    await new Promise((r) => setTimeout(r, 5));
+    await flush();
+    expect(t.handleAt()).toBe('r3/qty');
+    out.remove();
+  });
+
   it('on a block: its last data row × its end column, whichever corner is the anchor', () => {
     const t = fmake();
     t.at('r1', 'name');

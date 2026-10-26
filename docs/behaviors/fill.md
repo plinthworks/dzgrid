@@ -185,6 +185,13 @@ cell without a block, only there (11, already so).
 24. **What a drop writes**: the **last target shown** (the dashed preview), never a target recomputed from the release
     point; a release that comes with no move before it writes the preview of the last move.
 
+25. **The handle and the grid's focus** (owner's report 2026-10-26, lead decision): with **no block**, the one cell's
+    handle is drawn only while the focus is in the grid (a focused data cell). The focus leaving the grid (a click on
+    the page) hides it with the focus ring; the focus coming back shows it again. With a **block**, the block stays
+    when the grid loses the focus (S12-Q11) and its handle stays on its corner, so a mouse can still fill. Done in the
+    paint (`focusin` at once, `focusout` one task later), not in CSS: fill.css has no byte to spare. Tests:
+    `range-fill.test.ts` (« fill.md 25 »); browser `browser-fill-accident.mjs` (a click outside hides it).
+
 Tests: `range-fill-accident.test.ts` (the 4 px threshold, the half-row rule, an app `clear()` mid-drag, the whole block repeated, a property of 2–5-row blocks through
 the real handle against values written by hand), `range-release.test.ts`; theme `fill.test.ts` (10 px); browser
 `--only fill` → `scripts/browser-fill-accident.mjs` (a press 16 px and 12 px in from the corner selects, a press on the

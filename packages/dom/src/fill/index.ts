@@ -186,9 +186,9 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       const span = doc.createElement('span');
       span.className = 'dzg-fill';
       span.setAttribute('aria-hidden', 'true');
-      /** The cell the handle sits on, or none (fill.md 11). */
+      /** The cell the handle sits on, or none (fill.md 11; with no block, only while the focus is in the grid, 25). */
       const corner = (): HTMLElement | null => {
-        const b = o.handle !== false && ed() && !g.editor && !el.root.hasAttribute('data-dzg-ranging') ? boxOf(gest?.src ?? source()) : null;
+        const b = o.handle !== false && ed() && !g.editor && !el.root.hasAttribute('data-dzg-ranging') && (gest || R()?.get() || el.root.contains(doc.activeElement)) ? boxOf(gest?.src ?? source()) : null;
         if (!b) return null;
         const n = boxRows(b, rows.displayed).at(-1);
         const cols = columns.visible();
@@ -213,6 +213,9 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         }
         for (const x of decorated) if (!now.has(x)) x.classList.remove('dzg-cell--fill');
         decorated = now;
+        place();
+      };
+      const place = (): void => {
         const c = corner();
         c ? span.parentNode !== c && c.append(span) : span.remove();
       };
@@ -298,8 +301,10 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         if (gest?.kind === 'pick' && !(r && el.layer.contains(r) && g.rowRenderer.keyOf(r))) cancel(true);
       }, { capture: true });
       if (win) scope.on(win, 'blur', () => cancel());
-      // The mode and the no-drag way left by the focus (a blur of the grid): one task later, the focus no longer in it.
-      scope.on(el.root, 'focusout', () => void scope.timeout(() => gest && gest.kind !== 'drag' && !el.root.contains(doc.activeElement) && cancel(), 0));
+      // The mode and the no-drag way left by the focus (a blur of the grid): one task later, the focus no longer in it;
+      // the handle of one cell hidden then, shown again when the focus comes back (25).
+      scope.on(el.root, 'focusin', place);
+      scope.on(el.root, 'focusout', () => void scope.timeout(() => (place(), gest && gest.kind !== 'drag' && !el.root.contains(doc.activeElement) && cancel()), 0));
 
       const off = kernel.subscribe((e) => {
         if (!gest) return;
