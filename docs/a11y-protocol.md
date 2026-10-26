@@ -834,3 +834,112 @@ deux fois (125, 129–133), une phrase par cellule au lieu d'une par geste (130,
 131), une touche d'un champ qui agit sur la grille (129) se corrige avant la clôture de la partie B ; le
 « non sélectionné » d'un lecteur (136) est noté : s'il manque « sélectionné » dans le bloc chez un lecteur,
 question au propriétaire (mettre `aria-selected="false"` partout, ou garder le choix).
+
+## 21. Étapes — colonnes : déplacer, menu ⋮, choisir, redimensionner, groupes repliables, lignes épinglées, densité, impression (Phase 6)
+
+Page : le bac à sable, démo des commandes (`orders.html`, avec le menu, le choix des colonnes, le
+déplacement, l'état et la densité, étape 12) et la démo RH (`hr.html` : groupes repliables, textes longs,
+une ligne de totaux modifiable), en **français** puis en **arabe** (`?locale=ar-DZ`). Fiches :
+`docs/behaviors/column-move.md`, `column-menu.md`, `columns-chooser.md`, `column-resize.md`,
+`header-groups.md`, `pinned-rows.md`, `density.md`, `grid-state.md`, `auto-height.md`, `print.md`.
+Noter ce qui est **dit**, mot pour mot ; les phrases attendues sont celles du paquet `locales/{fr,ar}-columns`
+prévu (si le paquet final les a changées, noter la phrase dite et la comparer au paquet). Couples A à D.
+Durée estimée : 30 min par couple et par langue. Rien n'est « validé » avant cette écoute.
+
+143. **Le bouton ⋮.** Tabuler jusqu'à la grille, monter sur l'en-tête « Nom » : le lecteur dit l'en-tête (nom,
+     tri) ; le bouton ⋮ n'est **pas** un arrêt de Tab de plus (une seule tabulation pour la grille). Avec la
+     souris, le bouton apparaît au survol ; sur un écran tactile, il est toujours là.
+144. **Ouvrir le menu au clavier.** Sur « Nom », `Maj+F10` (ou la touche Menu) : le lecteur dit « menu » et le
+     premier élément, fr « Tri croissant », ar « ترتيب تصاعدي » ; le tri en cours est dit **coché**. Un seul
+     menu s'ouvre (pas deux : `Maj+F10` déclenche aussi le menu contextuel dans certains navigateurs). Sur une
+     colonne **sans** filtre, `Alt+↓` ouvre aussi le menu ; sur une colonne avec filtre, `Alt+↓` ouvre toujours
+     le filtre.
+145. **Parcourir le menu.** `↓`, `↑`, `Début`, `Fin` ; taper « m » va à « Masquer la colonne » (en arabe, taper
+     la première lettre d'un élément). Les éléments grisés sont dits « indisponible » (ou « estompé ») et ne
+     font rien.
+146. **Épingler.** « Épingler au début », `Entrée` : fr « Nom épinglée au début », ar « Nom مثبّت في البداية » ;
+     le menu se ferme, le focus revient sur l'en-tête « Nom », qui est maintenant au bord de début (à droite en
+     arabe).
+147. **Fermer sans rien faire.** Rouvrir, `Échap` : rien n'est dit de plus ; le focus revient sur l'en-tête.
+     Rouvrir, `Tab` : même chose. Un clic dehors : même chose.
+148. **Masquer.** « Masquer la colonne » : fr « Nom masquée » ; le focus va sur l'en-tête voisin (jamais perdu,
+     jamais sur le haut de la page). Sur la dernière colonne visible, « Masquer » est indisponible.
+149. **Déplacer au clavier.** Sur « Qté », `Ctrl+Maj+→` (Mac `Cmd+Maj+→`, décision « Step 1 follow-ups ») :
+     fr « Qté : colonne 4 sur 9 », ar « Qté: العمود 4 من 9 » — le compte ne porte que sur les colonnes
+     **visibles** (masquer une colonne avant : « sur 8 ») ; le focus reste sur « Qté ». Trois fois vite : **une** phrase après la pause.
+     Au bord du groupe de colonnes non épinglées : « Qté : déjà au bord ». En arabe, `Ctrl+Maj+←` va vers la
+     **fin** logique (la gauche). Noter si un lecteur (NVDA, JAWS) ou le système (macOS : Spaces) prend la
+     touche avant la page.
+150. **Déplacer par le menu.** « Déplacer vers la fin » : même phrase qu'en 149 (le chemin sans glisser).
+151. **Glisser un en-tête avec un lecteur en marche.** Une seule phrase, au lâcher ; `Échap` pendant le
+     glisser : « Déplacement annulé ». Sur une colonne verrouillée (`movable: false`) au clavier : « … ne se
+     déplace pas ».
+152. **Choisir les colonnes.** Depuis le menu, « Choisir les colonnes… » : le lecteur dit la fenêtre, fr
+     « Choisir les colonnes, dialogue », et le champ « Rechercher une colonne » (étiquette visible). Taper
+     « dat » : après une pause, fr « Colonnes trouvées : 2 » ; en arabe, taper sans hamza (« اسم ») trouve
+     « إسم » si une colonne s'appelle ainsi.
+153. **Cocher et décocher.** `↓` dans la liste : chaque ligne est une vraie case à cocher, dite avec son nom et
+     son état **coché** / **non coché** ; la liste n'est qu'un seul arrêt de Tab. La dernière colonne cochée
+     est dite **indisponible** (on ne peut pas tout masquer).
+     `Espace` : la colonne disparaît de la grille à l'instant, fr « Date masquée » ; `Espace` encore : « Date
+     affichée ».
+154. **Changer l'ordre dans la fenêtre.** `Alt+↓` (Mac `Option+↓`) sur « Date » : fr « Date : place 5 sur 12 »,
+     ar « Date: الموضع 5 من 12 » — le compte porte sur **toutes** les colonnes de la liste, masquées comprises
+     (différent de 149) ; le focus reste sur la ligne ; la grille derrière a bougé. Au doigt ou à la souris, le
+     bouton ▼ de la ligne fait de même, la même phrase ; la poignée est dite « Glisser Date » si on y arrive. Avec du texte dans la recherche : fr « Videz la recherche pour
+     changer l'ordre ».
+155. **Fermer la fenêtre.** `Échap` dans la recherche non vide la vide ; `Échap` encore ferme ; le focus revient
+     sur l'en-tête d'où le menu était parti. Ouverte par un bouton de l'application : le focus revient à ce
+     bouton.
+156. **Redimensionner au clavier.** Sur « Nom », `Alt+R` (ou le menu « Redimensionner au clavier ») : fr
+     « Redimensionner Nom : 140 pixels. Flèches pour changer, Entrée pour garder, Échap pour annuler » ; `→`
+     trois fois puis une pause : « Nom : 170 pixels » (une seule phrase) ; `Maj+→` : 1 pixel ; au bout :
+     « …, maximum ». En arabe, `←` **élargit**. `Échap` : « Redimensionnement annulé », la largeur d'avant.
+     `Entrée` : garde, rien de plus. `F2` sur l'en-tête n'entre **pas** dans ce mode. À la souris : les boutons
+     « − », « + », « ✓ » sous l'en-tête font de même sans glisser ; dans le menu, « Élargir » laisse le menu
+     ouvert et la largeur est dite après une pause.
+157. **Ajuster au contenu.** Dans le mode, `Début` : la colonne prend la largeur de son texte le plus long,
+     la largeur dite. Menu « Ajuster toutes les colonnes » : fr « Colonnes ajustées : 9 », une fois. Vérifier à
+     l'œil en arabe que les textes arabes ne sont pas coupés.
+158. **Groupe repliable.** `hr.html`, monter sur l'en-tête de groupe « Identité » : fr « Identité, groupe
+     ouvert » ; `Entrée` : fr « Identité fermé, colonnes affichées : 1 » ; le focus reste sur l'en-tête de
+     groupe ; `Espace` : le rouvre. Fermer le groupe alors que le focus était sur une de ses cellules (par la
+     souris) : le focus va sur la colonne restante de la même ligne, jamais perdu.
+159. **Lignes épinglées — lecture.** `hr.html`, la ligne de totaux en bas : depuis la dernière ligne du corps,
+     `↓` y entre ; le lecteur dit (ou pas : le noter, par lecteur) « Lignes épinglées en bas ». `Ctrl+Fin` va sur
+     la dernière ligne **du corps**, pas sur les totaux. Trier par une colonne : la ligne épinglée ne bouge pas,
+     et le nombre de lignes dit après le tri ne la compte pas.
+160. **Lignes épinglées — modification** (décision Q-P = C). Sur une cellule modifiable de la ligne épinglée,
+     `F2`, taper, `Entrée` : les mêmes phrases que dans le corps (§19 : « Enregistrement en cours », refus,
+     « Annulé ») ; **aucune** phrase « ordre de la liste à mettre à jour ». Une cellule de totaux non modifiable
+     est dite « lecture seule ». `Ctrl+Z` : la valeur revient, le focus sur la cellule épinglée.
+161. **Densité.** Menu ⋮, groupe « Densité », « Compacte » : fr « Densité : compacte », ar « الكثافة: مضغوطة » ;
+     la ligne qui avait le focus reste visible ; le focus revient sur l'en-tête.
+162. **État retrouvé.** Déplacer, masquer, trier, filtrer, puis recharger la page (`?state=1`, stockage du
+     navigateur) : la grille revient pareille, filtres compris, et **rien n'est dit** au chargement en plus de
+     l'habituel ; le focus n'est pas volé. Recharger en arabe : mêmes colonnes au bord de début (à droite).
+     **L'adresse** (copier l'URL, l'ouvrir dans un autre onglet) : colonnes, tri et page reviennent, **mais pas
+     le filtre tapé ni la recherche** (décision O6 : ils ne vont dans l'adresse que si l'application le
+     demande) ; vérifier qu'aucun nom tapé n'apparaît dans l'adresse.
+163. **Hauteur automatique.** `hr.html`, colonne de titres longs : en lisant ligne à ligne vers le bas, le
+     lecteur et l'écran ne sautent pas (la ligne lue reste visible) ; agrandir le texte du navigateur à 200 % :
+     les lignes grandissent, rien n'est coupé.
+164. **Impression.** Bouton « Imprimer » du bac à sable, aperçu (ou PDF) : un vrai tableau, en-têtes répétés
+     sur chaque page, aucune ligne coupée ; en arabe, la première colonne à droite. Lire le PDF avec le lecteur
+     (si le lecteur PDF expose le tableau) : en-têtes de colonnes dits avec les cellules. Au-delà de 5 000
+     lignes : fr « 5 000 premières lignes sur 12 345 » au-dessus du tableau.
+165. **Tab enfermé dans « Choisir les colonnes ».** Fenêtre ouverte, `Tab` sans arrêt : recherche → liste (un
+     seul arrêt) → « Tout afficher » → « Réinitialiser » → « Fermer » → retour à la recherche ; jamais la page
+     derrière ni la grille. `Maj+Tab` dans l'autre sens. Le lecteur ne sort pas non plus de la fenêtre en mode
+     lecture (VoiceOver : `VO+→` ; NVDA : `↓` en mode navigation) : noter s'il y arrive.
+166. **Mac, VoiceOver.** Safari puis Chrome, VoiceOver en marche, sur l'en-tête « Nom » : `VO+Maj+M` ouvre le menu
+     de la colonne (pas le menu du navigateur), le premier élément dit ; `Ctrl+clic` sur l'en-tête fait de même ;
+     `Fn+Maj+F10` aussi. Puis `Échap` : retour sur l'en-tête. Noter si VoiceOver ouvre son propre menu à la place.
+
+Consigner le résultat dans les fiches concernées (fin de chaque fiche) et dans `ROADMAP.md` (clôture de la
+Phase 6). Règle de décision propre à cette section : un focus perdu ou envoyé en haut de la page (147, 148,
+155, 158), une phrase manquante ou dite deux fois (146, 149, 153, 154, 156), deux menus ouverts (144), une
+phrase « à mettre à jour » sur une ligne épinglée (160), une touche prise par la page alors qu'elle est dans
+un champ, se corrigent avant la clôture de la Phase 6. Une touche prise avant la page par un lecteur ou par le
+système (149, 156) : question au propriétaire (autre touche, ou le menu seulement). Un Tab qui sort de la
+fenêtre (165) ou `VO+Maj+M` qui n'ouvre pas le menu (166) se corrigent aussi avant la clôture.

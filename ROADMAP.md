@@ -760,3 +760,43 @@ The real Angular example (`npm run example:bytes`): **92 059 / 92 500** (S12-Q10
 **History** (the `size-budget.json` `$comment` before this reset, kept word for word):
 
 > Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-22: each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-4-steps/decisions.md Q17) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 4) ».
+
+## Phase 6 — advanced columns and comfort (in progress)
+
+Moving columns (pointer, keyboard), the ⋮ column menu, the « Choisir les colonnes » chooser, `GridState`
+(save, restore, URL and storage helpers), the keyboard resize mode and auto-size, collapsible header
+groups, pinned rows top and bottom (**editable**, owner Q-P = C), auto row height, density for the user,
+`preparePrint()`; the group drop zone's protocol (the zone itself is Phase 7). Plan `docs/phase-6-plan.md`
+(« Owner decisions applied »), owner decisions `docs/phase-6-steps/decisions.md` (Q-M1…Q-B, 2026-10-26;
+they win), step plans in `docs/phase-6-steps/`. Owner order: sheets → moving → menu → chooser → state (core,
+then helpers) → resize mode and auto-size → collapsible groups → pinned rows (editable) → auto height →
+print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4), reset at the close.
+
+- [x] step 1 (2026-10-26, not committed; plan `docs/phase-6-steps/step01-plan.md`): sheets
+  `docs/behaviors/{column-move,column-menu,columns-chooser,grid-state,header-groups,pinned-rows,auto-height,print,density,group-drop-zone}.md`,
+  `column-resize.md` updated (keyboard mode, auto-size); `docs/a11y-protocol.md` §21 (items 143–166);
+  `phase-6-plan.md` aligned on the decisions. Open points O1–O12, C3, C5, C6 **decided**
+  (`docs/phase-6-steps/decisions.md` « Step 1 follow-ups »: O6 — the address leaves typed filters and the search
+  out by default —, Cmd+Shift on a Mac, O1, O5 by the owner; the rest by the lead); C4 still open. Review fixes
+  applied (WCAG 2.5.7 single-pointer ways, chooser as native checkboxes, `aria-keyshortcuts` in one place, Mac
+  menu ways, `GridState` request count and versions, print scopes). No code, no budget change.
+- [ ] step 2: `@dzgrid/dom/columns` part 1, moving (pointer, Ctrl+Shift+arrows) and the drop protocol.
+- [ ] step 3: `@dzgrid/dom/column-menu`.
+- [ ] step 4: `@dzgrid/dom/columns-panel` (the chooser).
+- [ ] step 5: `@dzgrid/core/state`.
+- [ ] step 6: `@dzgrid/dom/state` (`persistLocal`, URL helpers).
+- [ ] step 7: `@dzgrid/dom/columns` part 2, keyboard resize mode and auto-size (exit criterion 1).
+- [ ] step 8: collapsible header groups.
+- [ ] step 9: pinned rows, editable.
+- [ ] step 10: auto row height (exit criterion 3, S3).
+- [ ] step 11: print.
+- [ ] step 12: Angular and demos.
+- [ ] step 13: close (rebudget, full gate, 0.4.0 prepared, unpublished).
+
+### Exit criteria (Phase 6; `docs/phase-6-plan.md` §5)
+Sheets before code; keyboard resize mode in LTR and RTL with sentences; a state saved in LTR restores
+identically in RTL and back; auto height with no jump (0 px at 10 000 rows, three engines); column moving by
+pointer and keyboard, `movable: false` held; the menu and the chooser follow APG (axe 0, forced colours,
+200 % zoom, fr / ar); collapsible groups keep focus; pinned rows aligned to 1 px, editable through the edit
+layer, never stale; print with repeated headers, no cut row, RTL; base grids unchanged within the granted
+bytes; budgets by written decision; final gate green; docs; listening §21 scheduled (owner, non-blocking).
