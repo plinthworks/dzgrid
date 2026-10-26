@@ -141,7 +141,8 @@ export interface GridContext<T> {
   editor?: { readonly key: RowKey; readonly column: string; readonly cell: HTMLElement; readonly field: HTMLElement } | null;
   /**
    * A feature selects blocks of cells (`@dzgrid/dom/range`, Phase 5 step 11a): the grid says `aria-multiselectable`
-   * whatever the row selection, and a Shift+click on a cell is the feature's (rows are ticked by their box, owner QB1).
+   * whatever the row selection, and a Shift+click on a cell is the feature's (rows are ticked by their box, owner QB1);
+   * Escape on a cell then puts the grid in its quiet state (`data-dzg-quiet` on the root, owner S12-Q16).
    */
   multi?: boolean;
   /**

@@ -164,10 +164,11 @@ $layered: true !default;
     background: var(--dzg-row-hover-bg, color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg)));
   }
 
-  // The row holding the focus (owner S12-Q8): a neutral tint across it, a hue apart from hover and selection.
-  .dzg-row:focus-within,
-  .dzg-row:focus-within .dzg-seg-start,
-  .dzg-row:focus-within .dzg-seg-end {
+  // The row holding the focus (owner S12-Q8): a neutral tint across it, a hue apart from hover and selection; none in
+  // Escape's quiet state (S12-Q16), the weight unchanged (`:where`).
+  .dzg-row:focus-within:where(:not([data-dzg-quiet] *)),
+  .dzg-row:focus-within:where(:not([data-dzg-quiet] *)) .dzg-seg-start,
+  .dzg-row:focus-within:where(:not([data-dzg-quiet] *)) .dzg-seg-end {
     background: var(--dzg-row-active-bg, color-mix(in srgb, var(--tz-fg) 6%, var(--tz-bg)));
   }
 
@@ -190,8 +191,9 @@ $layered: true !default;
     background: var(--tz-accent);
   }
 
-  // The focused cell, by the keys or a click (S12-Q8): the ring, a line of the background inside it, a tint.
-  .dzg-cell:focus {
+  // The focused cell, by the keys or a click (S12-Q8): the ring, a line of the background inside it, a tint; none of
+  // them in Escape's quiet state (S12-Q16), the weight unchanged (`:where`).
+  .dzg-cell:focus:where(:not([data-dzg-quiet] *)) {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
     outline-offset: -2px;
     box-shadow: inset 0 0 0 3px var(--tz-bg);
@@ -205,6 +207,14 @@ $layered: true !default;
   .dzg-box:focus-visible {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
     outline-offset: -2px;
+  }
+
+  // Escape's quiet state (owner S12-Q16, « je ne veux plus rien faire »): the focused cell keeps the focus (a screen
+  // reader still has it) but shows no ring (the `:focus-visible` ring and the browser's own; over every later layer:
+  // !important); the line and the tint are the guarded rule's above (a background set by the app stays), until the
+  // next key or press (`data-dzg-quiet` on the root, set by the grid with range()).
+  [data-dzg-quiet] .dzg-cell:focus {
+    outline: none !important;
   }
 
   .dzg-sortable {

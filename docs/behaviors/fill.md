@@ -110,7 +110,8 @@ the browser's; Ctrl+Enter in a field keeps the value in its one cell, as Enter w
     (`fillTarget`, the same function for every path); near the body's edges the view scrolls as for a block drag.
     The release writes (`planFill`; Ctrl or Cmd held **at the release** swaps copy and series — a Mac's Ctrl+press
     is a context click, so Ctrl is pressed after the press); the block becomes source ∪ target (its change event
-    says `api`), the focus does not move. Released inside the source: nothing, silent. Escape during the drag:
+    says `api`), the focus does not move (on the drag's start cell after a drag-select, S12-Q15); the handle on the new
+    far corner. Released inside the source: nothing, silent. Escape during the drag:
     cancelled, « Recopie annulée »; a lost capture, `pointercancel`, a blur, a sort, a filter, a page or rows
     changing: cancelled quietly. The click after a drag is swallowed once; a double-click on the handle opens no
     editor.
@@ -175,7 +176,8 @@ cell without a block, only there (11, already so).
       « Handover to step 3 »).
 22. **Escape**: during a drag of the handle it cancels, nothing written (13); after a fill it drops the block and leaves
     the focus where the fill left it (13: the focus does not move during a fill). After a drag-select, the focus is on
-    the block's moving corner, so Escape leaves it there (`range-selection.md`, S12-Q11). An application's block change
+    the block's START cell (S12-Q15), the handle on its far corner; Escape leaves the focus there and hides the frame and
+    the handle until the next key or press (the quiet state, S12-Q16, `range-selection.md`). An application's block change
     or `clear()` during a gesture (a drag, the keyboard mode, the no-drag way) cancels it: nothing written, the block not
     given back (`rangeChanged` from `api`).
 23. **Pen** (S12-Q12, as `range-selection.md`): a pen is like a finger — its press on the handle is neither taken nor

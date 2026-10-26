@@ -76,6 +76,8 @@ function walk(config: Config, seed: number, steps: number): string[] {
   // ---- the oracle's state ----
   let block = null as Block | null;
   let follows = false;
+  /** After a drag the focus is on the anchor (owner S12-Q15); after the keys and a Shift+click, on the moving corner (QB2). */
+  let lead = false;
   let changes = 0;
   let cleared = 0;
   let reordered = 0;
@@ -162,7 +164,7 @@ function walk(config: Config, seed: number, steps: number): string[] {
         if (seen !== want) errors.push(`${what}: ${key}/${col} shows « ${seen} », oracle « ${want} »`);
       }
     }
-    if (block && follows && !same(focusCell(), block.focus)) errors.push(`${what}: focus ${JSON.stringify(t.g.kernel.focus)} not on the corner ${show(block)}`);
+    if (block && follows && !same(focusCell(), lead ? block.anchor : block.focus)) errors.push(`${what}: focus ${JSON.stringify(t.g.kernel.focus)} not on the ${lead ? 'anchor' : 'corner'} ${show(block)}`);
     const ch = t.changes().length;
     if (ch !== changes) errors.push(`${what}: ${ch} rangeChanged, oracle ${changes}`);
     const said = t.said();
@@ -200,12 +202,14 @@ function walk(config: Config, seed: number, steps: number): string[] {
     if (r < 0.3 && fc) {
       const key = pick(shiftKeys);
       what = `Shift${ctrl ? '+Ctrl' : ''}+${key}`;
-      const to = target(fc, key, ctrl && !key.startsWith('Page'));
+      // From the far corner while the focus follows the block (on the anchor after a drag, S12-Q15).
+      const to = target(block && follows ? block.focus : fc, key, ctrl && !key.startsWith('Page'));
       t.press(key, { shiftKey: true, ctrlKey: ctrl && !key.startsWith('Page') });
       if (to !== 'none') {
         const anchor = block && follows ? block.anchor : fc;
         set({ anchor, focus: to }, true);
         follows = true;
+        lead = false;
       }
     } else if (r < 0.34 && fc) {
       what = 'Ctrl+A';
@@ -261,6 +265,7 @@ function walk(config: Config, seed: number, steps: number): string[] {
       const anchor = block && follows ? block.anchor : fc;
       set({ anchor, focus: { row: key, column: col } }, true);
       follows = true;
+      lead = false;
     } else if (r < 0.68) {
       const cs = mountedCells();
       if (cs.length < 2) continue;
@@ -284,6 +289,7 @@ function walk(config: Config, seed: number, steps: number): string[] {
         const before = changes;
         set(got && { anchor: got.anchor, focus: got.focus }, true);
         follows = true;
+        lead = true;
         // Each frame that moved the corner told one change: at least one when a block is there.
         if (got && t.changes().length <= before) errors.push(`${what}: no rangeChanged while dragging`);
         changes = t.changes().length;
@@ -292,7 +298,7 @@ function walk(config: Config, seed: number, steps: number): string[] {
         t.up(p);
         t.click(cellEl(kb, cb) ?? t.ctx.el.body);
         if (same({ row: ka, column: ca }, { row: kb, column: cb })) rowClicks++;
-        else set({ anchor: { row: ka, column: ca }, focus: { row: kb, column: cb } }, true), (follows = true);
+        else set({ anchor: { row: ka, column: ca }, focus: { row: kb, column: cb } }, true), (follows = true), (lead = true);
       }
     } else if (r < 0.71) {
       what = 'sort';

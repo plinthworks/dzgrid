@@ -9,14 +9,14 @@ import { cleanup, rmake } from './support-range.js';
 afterEach(cleanup);
 
 describe('the release point counts (S11-Q1)', () => {
-  it('a release two rows below the last move: the block reaches the release cell, the focus goes there', () => {
+  it('a release two rows below the last move: the block reaches the release cell, the focus stays on the anchor (S12-Q15)', () => {
     const t = rmake();
     t.down(t.cell('r1', 'n')!, t.at('r1', 'n'));
     t.move(t.at('r3', 's'));
     expect(t.block()).toBe('r1/n:r3/s');
     t.up(t.at('r5', 's'));
     expect(t.block()).toBe('r1/n:r5/s');
-    expect(t.where()).toBe('r5/s');
+    expect(t.where()).toBe('r1/n');
   });
 
   it('a release with no drag (a click) makes no block from the release point', () => {

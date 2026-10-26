@@ -6,7 +6,7 @@
  * - the owner's gesture: a drag-select Client O-0001 → Qté O-0007, released there: the focus and the handle on O-0007 /
  *   Qté (the block's corner, never a single-cell handle elsewhere); the handle dragged down 3 rows: the WHOLE block's
  *   rows repeated (clients O-0001…O-0003 in O-0008…O-0010), by hand; Ctrl+Z gives them back;
- * - Escape after a drag-select: the block gone, the focus on its corner; a click outside the grid clears the block and
+ * - Escape after a drag-select: the block gone, the focus on its start cell, no handle (S12-Q15, S12-Q16); a click outside the grid clears the block and
  *   hides its handle (S12-Q13, replacing S12-Q11); one cell without a block: a click outside hides its handle, a click back shows it (fill.md 25);
  * - « Envoyer la sélection (simulé) »: 0.6 s later the block is cleared by the application (`clear()`), logged
  *   « Sélection envoyée puis effacée », and the grid says nothing of it (an api clear is never said).
@@ -35,7 +35,7 @@ export async function fillAccidentChecks(name, ctx, h) {
       const a = document.activeElement;
       const fh = document.querySelector('.dzg-fill');
       const cs = [...document.querySelectorAll('.dzg-cell--range')];
-      return { focus: a?.classList.contains('dzg-cell') ? `${refOf(a)}/${a.dataset.col}` : null, n: cs.length, handle: fh ? `${refOf(fh)}/${fh.closest('.dzg-cell').dataset.col}` : null, handles: document.querySelectorAll('.dzg-fill').length, filling: document.querySelector('.dzg').hasAttribute('data-dzg-filling') };
+      return { focus: a?.classList.contains('dzg-cell') ? `${refOf(a)}/${a.dataset.col}` : null, n: cs.length, handle: fh ? `${refOf(fh)}/${fh.closest('.dzg-cell').dataset.col}` : null, handles: document.querySelectorAll('.dzg-fill').length, filling: document.querySelector('.dzg').hasAttribute('data-dzg-filling'), shown: !!fh && getComputedStyle(fh).display !== 'none', quiet: document.querySelector('.dzg').hasAttribute('data-dzg-quiet') };
     });
     const ref = (i) => `O-${String(i).padStart(4, '0')}`;
     /** A point `d` px in from a cell's bottom inline-end corner (bottom-left right to left). */
@@ -57,7 +57,7 @@ export async function fillAccidentChecks(name, ctx, h) {
       await frames(page, 2);
       const s = await state();
       const after = await Promise.all([5, 6].map(async (i) => (await cell(ref(i), 'amount')).text));
-      check(name, `fill accident ${tag}: a press ${d} px in from O-0004 / Montant's corner (off the handle's square) and a drag 2 rows down selects a block of 3 cells, the focus on O-0006, nothing written`, !mid.filling && s.n === 3 && s.focus === 'O-0006/amount' && JSON.stringify(after) === JSON.stringify(before), { mid, s, before, after });
+      check(name, `fill accident ${tag}: a press ${d} px in from O-0004 / Montant's corner (off the handle's square) and a drag 2 rows down selects a block of 3 cells, the focus on its start O-0004 (S12-Q15), nothing written`, !mid.filling && s.n === 3 && s.focus === 'O-0004/amount' && JSON.stringify(after) === JSON.stringify(before), { mid, s, before, after });
       await page.keyboard.press('Escape');
     }
     // 1 bis. A press ON the square (3 px in) fills.
@@ -92,7 +92,7 @@ export async function fillAccidentChecks(name, ctx, h) {
       await page.mouse.up();
       await frames(page, 2);
       const s = await state();
-      check(name, `fill accident ${tag}: a drag-select Client O-0001 → Qté O-0007 released on O-0007: 7 × 4 cells, the focus and the only handle on O-0007 / Qté`, s.n === 28 && s.focus === 'O-0007/qty' && s.handle === 'O-0007/qty' && s.handles === 1, s);
+      check(name, `fill accident ${tag}: a drag-select Client O-0001 → Qté O-0007 released on O-0007: 7 × 4 cells, the focus on the start O-0001 / Client (S12-Q15), the only handle on O-0007 / Qté`, s.n === 28 && s.focus === 'O-0001/client' && s.handle === 'O-0007/qty' && s.handles === 1, s);
       const src = await Promise.all([1, 2, 3].map(async (i) => (await cell(ref(i), 'client')).text));
       const before = await Promise.all([8, 9, 10].map(async (i) => (await cell(ref(i), 'client')).text));
       const c = await cell('O-0007', 'qty');
@@ -114,8 +114,8 @@ export async function fillAccidentChecks(name, ctx, h) {
       await page.keyboard.press('Escape');
     }
 
-    // 3. Escape after a drag-select: the block gone, the focus on its corner; a click outside the grid clears the block
-    // and, the focus gone, its handle (S12-Q13, replacing S12-Q11; fill.md 25).
+    // 3. Escape after a drag-select: the block gone, the focus kept on its start cell (S12-Q15), the quiet state
+    // (S12-Q16); a click outside the grid clears the block and, the focus gone, its handle (S12-Q13; fill.md 25).
     {
       const a = await cell('O-0002', 'client');
       const z = await cell('O-0005', 'status');
@@ -137,7 +137,7 @@ export async function fillAccidentChecks(name, ctx, h) {
       await frames(page, 2);
       await page.waitForTimeout(50);
       const off = await state();
-      check(name, `fill accident ${tag}: Escape after a drag-select clears the block, the focus and the handle on its corner O-0005 / Statut; a block again, then a click outside the grid clears it and hides the handle (S12-Q13, fill.md 25)`, s.n === 0 && s.focus === 'O-0005/status' && s.handle === 'O-0005/status' && made.n === 12 && off.n === 0 && off.handles === 0, { s, made, off });
+      check(name, `fill accident ${tag}: Escape after a drag-select clears the block, the focus kept on its start O-0002 / Client, no handle shown (the quiet state, S12-Q16); a block again, then a click outside the grid clears it and hides the handle (S12-Q13, fill.md 25)`, s.n === 0 && s.focus === 'O-0002/client' && s.quiet && !s.shown && made.n === 12 && off.n === 0 && off.handles === 0, { s, made, off });
     }
 
     // 3b. One cell, no block: a click outside the grid hides its handle with the focus ring; a click back shows it (fill.md 25).

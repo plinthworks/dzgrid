@@ -20,9 +20,16 @@ const rules = (sel: RegExp, at: (r: Rule) => boolean = plain) => s.rules.filter(
 const decl = (sel: RegExp, at: (r: Rule) => boolean = plain) => rules(sel, at).map((r) => r.body).join(' ');
 const spec = JSON.parse(read('contrast-pairs.json')) as { derived: Record<string, string>; pairs: { what: string; fg: string; bg: string; min: number; hue?: number }[] };
 
+/** The focused row's selectors: not in Escape's quiet state (S12-Q16), the weight unchanged (`:where`). */
+const Q = String.raw`:where\(:not\(\[data-dzg-quiet\] \*\)\)`;
+const CELL = new RegExp(String.raw`^\.dzg-cell:focus${Q}$`);
+const ROW = new RegExp(String.raw`^\.dzg-row:focus-within${Q}$`);
+const ROW_START = new RegExp(String.raw`^\.dzg-row:focus-within${Q} \.dzg-seg-start$`);
+const ROW_END = new RegExp(String.raw`^\.dzg-row:focus-within${Q} \.dzg-seg-end$`);
+
 describe('the active cell and its row (owner S12-Q8)', () => {
   it('the focused cell, by keys or by a click: a 2 px ring of the focus colour inside the cell, an inner line of the background, a tint', () => {
-    const c = decl(/^\.dzg-cell:focus$/);
+    const c = decl(CELL);
     expect(c).toMatch(/outline: 2px solid var\(--dzg-focus-ring, var\(--tz-accent\)\)/);
     expect(c).toMatch(/outline-offset: -2px/);
     // The inner contrast line: one px of the page's background inside the ring (the outline paints over the shadow).
@@ -33,7 +40,7 @@ describe('the active cell and its row (owner S12-Q8)', () => {
   });
 
   it('the focused row: a tint across the row and its pinned segments, its own variable, a neutral mix (not the accent of hover and selection)', () => {
-    for (const sel of [/^\.dzg-row:focus-within$/, /^\.dzg-row:focus-within \.dzg-seg-start$/, /^\.dzg-row:focus-within \.dzg-seg-end$/]) {
+    for (const sel of [ROW, ROW_START, ROW_END]) {
       expect(decl(sel), String(sel)).toMatch(/background: var\(--dzg-row-active-bg, color-mix\(in srgb, var\(--tz-fg\) \d+%, var\(--tz-bg\)\)\)/);
     }
   });
@@ -41,7 +48,7 @@ describe('the active cell and its row (owner S12-Q8)', () => {
   it('the order: hover, then the focused row, then a selected row (a selected row keeps its own tint)', () => {
     const at = (re: RegExp) => s.rules.findIndex((r) => plain(r) && r.selector.split(/,\s*/).some((x) => re.test(x)));
     const hover = at(/^\.dzg-row\[data-hover\]$/);
-    const active = at(/^\.dzg-row:focus-within$/);
+    const active = at(ROW);
     const selected = at(/^\.dzg-row\[aria-selected='?true'?\]$/);
     expect(hover).toBeGreaterThan(-1);
     expect(active).toBeGreaterThan(hover);
@@ -56,8 +63,8 @@ describe('the active cell and its row (owner S12-Q8)', () => {
     expect(spec.derived['--dzg-cell-active-bg']).toMatch(/^color-mix\(in srgb, var\(--tz-accent\) \d+%, var\(--tz-bg\)\)$/);
     expect(spec.derived['--dzg-row-active-bg']).toMatch(/^color-mix\(in srgb, var\(--tz-fg\) \d+%, var\(--tz-bg\)\)$/);
     // The fallbacks in the CSS are the derived values (one source of truth).
-    expect(decl(/^\.dzg-cell:focus$/)).toContain(`var(--dzg-cell-active-bg, ${spec.derived['--dzg-cell-active-bg']})`);
-    expect(decl(/^\.dzg-row:focus-within$/)).toContain(`var(--dzg-row-active-bg, ${spec.derived['--dzg-row-active-bg']})`);
+    expect(decl(CELL)).toContain(`var(--dzg-cell-active-bg, ${spec.derived['--dzg-cell-active-bg']})`);
+    expect(decl(ROW)).toContain(`var(--dzg-row-active-bg, ${spec.derived['--dzg-row-active-bg']})`);
     const has = (fg: string, bg: string, min: number) => spec.pairs.some((p) => p.fg === fg && p.bg === bg && p.min >= min);
     expect(has('--dzg-focus-ring', '--dzg-cell-active-bg', 3)).toBe(true);
     expect(has('--dzg-focus-ring', '--dzg-row-active-bg', 3)).toBe(true);
@@ -82,5 +89,23 @@ describe('the active cell and its row (owner S12-Q8)', () => {
   it('no colour literal, no physical side', () => {
     expect(checkScss(read('dzgrid.scss'))).toEqual([]);
     expect(checkScss(css).filter((f) => f.rule === 'physical')).toEqual([]);
+  });
+});
+
+describe('Escape\'s quiet state (owner S12-Q16)', () => {
+  it('the focused cell\'s ring, inner line and tint, and its row\'s tint, are guarded (`:where(:not([data-dzg-quiet] *))`, the weight unchanged); the quiet rule only drops the ring (over every layer: !important), never a background (an app\'s colour, a block\'s tint stay)', () => {
+    expect(decl(CELL)).toMatch(/outline: 2px solid/);
+    expect(decl(CELL)).toMatch(/background: var\(--dzg-cell-active-bg/);
+    for (const sel of [ROW, ROW_START, ROW_END]) expect(decl(sel), String(sel)).toMatch(/background: var\(--dzg-row-active-bg/);
+    const q = decl(/^\[data-dzg-quiet\] \.dzg-cell:focus$/);
+    expect(q).toMatch(/outline: none !important/);
+    expect(q).not.toMatch(/background|box-shadow/);
+  });
+
+  it('the SCSS source and the unlayered copy carry the same quiet rule, with !important', () => {
+    const rule = /\[data-dzg-quiet\] \.dzg-cell:focus \{\s*outline: none !important;\s*\}/;
+    expect(read('dzgrid.scss')).toMatch(rule);
+    expect(read('dzgrid.unlayered.css')).toMatch(rule);
+    expect(read('dzgrid.unlayered.css')).toContain('.dzg-cell:focus:where(:not([data-dzg-quiet] *))');
   });
 });

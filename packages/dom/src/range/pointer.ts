@@ -86,13 +86,14 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
     if (frame) raf!.cancelAnimationFrame(frame), (frame = 0);
     if (!was) return;
     setAttr(el.root, 'data-dzg-ranging', null);
+    // Painted again: the handle comes back on the far corner (the focus, on the anchor, may not move; S12-Q15).
+    g.schedule();
     if (!up) return void (keep || sel.set(before, 'user', false));
     const r = sel.r;
     if (!r) return;
     // The browser's click after the release comes in this same task; a later one (a key, a reader) is a click (review 1).
     swallow = true;
     scope.timeout(() => (swallow = false), 0);
-    sel.focusTo(r.focus);
     sel.follows = true;
     sel.say();
   };

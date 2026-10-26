@@ -129,7 +129,7 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 ## Part B (owner, 2026-10-25) — plans `partB-plan.md`, `step10-plan.md`
 
 - **QB1:** Shift+click and Ctrl+A select a block of cells (like Excel); rows are checked by their box.
-- **QB2 (lead, recommendation kept):** during Shift+arrows the focus follows the moving corner.
+- **QB2 (lead, recommendation kept):** during Shift+arrows the focus follows the moving corner. *S12-Q15 (2026-10-26): kept for the keys; after a mouse drag the focus is on the anchor, and Shift+arrows then move the far corner.*
 - **QB3:** copy guards formula starts (= + - @) like the CSV; our own paste removes the guard.
 - **QB4:** paste limit 100 000 cells; over it nothing is pasted and a sentence says so.
 - **QB5:** bulk edit by Ctrl+Enter in the field (`/editors` 6 650 → 6 720).
@@ -142,7 +142,7 @@ Questions: `questions.md`. These answers win over `docs/phase-5-plan.md`.
 
 ## Step 11a (owner, 2026-10-25) — plan `step11a-plan.md`
 
-- **S11-Q1:** during a mouse drag the focus moves to the moving corner when the button is released (not on every cell).
+- **S11-Q1:** during a mouse drag the focus moves to the moving corner when the button is released (not on every cell). *Revised by S12-Q15 (2026-10-26): the focus stays on the start cell (the anchor) after the release.*
 - **S11-Q2:** after Ctrl+A or Shift+Space the focus stays where it is.
 - **S11-Q3:** a tree's pinned parent copies show the block tint (~15 B in the base).
 - **S11-Q4:** a sort/filter that drops the block has its own sentence (« Sélection effacée : l'ordre a changé »), one more text.

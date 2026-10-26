@@ -45,12 +45,12 @@ export async function rangeChecks(name, ctx, h) {
   const pages = engines ? [['fr light clinic', 'locale=fr-FR&theme=light&skin=clinic', false], ['ar dark midnight', 'locale=ar-DZ&theme=dark&skin=midnight', true]] : [['ar', 'locale=ar-DZ', true]];
   for (const [tag, qs, rtl] of pages) {
     const { page, errors } = await open(qs);
-    // A real drag across cells: the block, the focus on the corner after the release.
+    // A real drag across cells: the block, the focus on the START cell after the release (S12-Q15, revising S11-Q1).
     await drag(page, ['r2', 'qty'], ['r5', 'c3']);
     const b1 = await block(page);
     const focus = await page.evaluate(() => { const f = window.t.grid.kernel.focus; return f && `${String(f.row).replace(/^d:\d+:/, '')}/${f.column}`; });
     const bad1 = await page.evaluate(() => window.t.disagree());
-    check(name, `range ${tag}: a real mouse drag r2/Qté → r5/C3 makes the block, the focus on the moving corner at release, every mounted cell agrees`, b1 === 'r2/qty:r5/c3' && focus === 'r5/c3' && bad1.length === 0, { b1, focus, bad1 });
+    check(name, `range ${tag}: a real mouse drag r2/Qté → r5/C3 makes the block, the focus on the start cell r2/Qté at release (S12-Q15), every mounted cell agrees`, b1 === 'r2/qty:r5/c3' && focus === 'r2/qty' && bad1.length === 0, { b1, focus, bad1 });
     // The edges on their physical sides: start = left in ltr, right in rtl (rects and the computed shadow's sign).
     const side = await page.evaluate(() => {
       const s = window.t.cell('r3', 'qty');
@@ -214,14 +214,14 @@ export async function playgroundRangeChecks(name, ctx, h) {
     const l1 = await live();
     check(name, `playground orders-edit (${tag}): its size said`, ar ? /3 صفوف/.test(l1) : /3 lignes, 1 colonne sélectionnées/.test(l1), l1);
     await page.screenshot({ path: `${SHOTS}step11a-orders-edit-${tag}.png` });
-    // F2 on the corner opens its editor; Escape closes it; the block is still there.
+    // F2 on the focused cell (the drag's start, S12-Q15) opens its editor; Escape closes it; the block is still there.
     await page.keyboard.press('F2');
     await frames(page, 2);
     const opened = await page.evaluate(() => !!document.querySelector('.dzg-field'));
     await page.keyboard.press('Escape');
     await frames(page, 2);
     const n2 = await tinted();
-    check(name, `playground orders-edit (${tag}): F2 opens the corner's editor, Escape closes it, the block stays`, opened && n2 === 3, { opened, n2 });
+    check(name, `playground orders-edit (${tag}): F2 opens the focused cell's editor, Escape closes it, the block stays`, opened && n2 === 3, { opened, n2 });
     // Shift+click extends from the anchor to « Montant ».
     const c = await cell('O-0005', 'amount');
     await page.keyboard.down('Shift');
@@ -242,6 +242,59 @@ export async function playgroundRangeChecks(name, ctx, h) {
     const l2 = await live();
     check(name, `playground orders-edit (${tag}): Ctrl+A tints every mounted cell, Escape clears it (« ${ar ? 'أُلغي التحديد' : 'Sélection effacée'} »)`, n4 > 20 && n5 === 0 && l2.includes(ar ? 'أُلغي التحديد' : 'Sélection effacée'), { n4, n5, l2 });
     check(name, `playground orders-edit (${tag}): no page error`, errors.length === 0, errors);
+    await page.close();
+  }
+
+  // Owner S12-Q15 / S12-Q16 on `orders-edit.html?focus=range` (French): a drag-select leaves the focus on its start cell,
+  // the handle on the far corner; Escape leaves no visible frame and no handle, the focus kept; ArrowDown brings the
+  // frame back on the next row.
+  {
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.goto(`${base}/orders-edit.html?focus=range&locale=fr-FR&theme=light&skin=clinic`);
+    await page.waitForSelector('.dzg-layer > .dzg-row .dzg-cell[data-col="qty"]', { timeout: 30000 });
+    await frames(page, 3);
+    const cell = (ref, col) => page.evaluate(([ref, col]) => {
+      const c = [...document.querySelectorAll('.dzg-layer > .dzg-row')].find((r) => r.querySelector('[data-col="ref"]')?.textContent === ref)?.querySelector(`[data-col="${col}"]`);
+      const r = c.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }, [ref, col]);
+    /** The focused cell (row's ref / column), its ring drawn or not, its tint; the handle's cell and whether it shows; the quiet flag. */
+    const state = () => page.evaluate(() => {
+      const a = document.activeElement;
+      const c = a?.closest('.dzg-cell');
+      const cs = c && getComputedStyle(c);
+      const h = document.querySelector('.dzg-fill');
+      const hc = h?.closest('.dzg-cell');
+      const hr = h?.getBoundingClientRect();
+      const name = (x) => x && `${x.closest('.dzg-row')?.querySelector('[data-col="ref"]')?.textContent}/${x.dataset.col}`;
+      return {
+        focus: name(c), ring: !!cs && cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0, bg: cs?.backgroundColor ?? null,
+        handle: name(hc) ?? null, handleShown: !!h && getComputedStyle(h).display !== 'none' && hr.width > 0,
+        quiet: document.querySelector('.dzg').hasAttribute('data-dzg-quiet'),
+      };
+    });
+    const a = await cell('O-0002', 'client');
+    const z = await cell('O-0005', 'qty');
+    await page.mouse.move(a.x, a.y);
+    await page.mouse.down();
+    await page.mouse.move(z.x, z.y, { steps: 8 });
+    await page.mouse.up();
+    await frames(page, 2);
+    const s1 = await state();
+    check(name, 'playground orders-edit?focus=range (fr): a drag-select Client O-0002 → Qté O-0005 leaves the focus (its ring shown) on the start cell O-0002 / Client, the handle shown on the far corner O-0005 / Qté (S12-Q15)', s1.focus === 'O-0002/client' && s1.ring && s1.handle === 'O-0005/qty' && s1.handleShown && !s1.quiet, s1);
+    await page.keyboard.press('Escape');
+    await frames(page, 2);
+    const s2 = await state();
+    const n2 = await page.evaluate(() => document.querySelectorAll('.dzg-layer .dzg-cell--range').length);
+    check(name, 'playground orders-edit?focus=range (fr): Escape clears the block and leaves no visible frame (no ring, no tint) and no handle; the focus stays on O-0002 / Client (S12-Q16)', n2 === 0 && s2.quiet && s2.focus === 'O-0002/client' && !s2.ring && (s2.bg === 'rgba(0, 0, 0, 0)' || s2.bg === 'transparent') && !s2.handleShown, { n2, s2 });
+    await page.keyboard.press('ArrowDown');
+    await frames(page, 2);
+    const s3 = await state();
+    check(name, 'playground orders-edit?focus=range (fr): ArrowDown brings the frame back, on O-0003 / Client, the handle with it', !s3.quiet && s3.focus === 'O-0003/client' && s3.ring && s3.handleShown, s3);
+    check(name, 'playground orders-edit?focus=range (fr): no page error', errors.length === 0, errors);
     await page.close();
   }
 }

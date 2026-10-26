@@ -6,6 +6,7 @@ import type { FocusControl } from './focus.js';
 import { moveFocus, type Goal } from './move.js';
 import { ownerOf } from './owner.js';
 import { rowLayout } from '../render/viewport.js';
+import { setAttr } from '../render/write.js';
 
 /**
  * One keydown on the scroller: who owns the key, what it means (`intentFor`,
@@ -49,6 +50,18 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     const from = focus.current();
     if (from) move(from, i);
   };
+
+  // Escape's quiet state (owner S12-Q16, « je ne veux plus rien faire »): with range(), Escape on a cell puts
+  // `data-dzg-quiet` on the root (the theme hides the focused cell's ring, its tint and the fill handle; the focus stays,
+  // so a screen reader keeps it). Any key, a press in the grid or the focus coming in ends it (WCAG 2.4.7: the ring is
+  // back whenever the keyboard moves).
+  // One Escape, one job: it goes quiet only when no feature took it, or when the one that did cleared the block
+  // (range's Escape); a fill cancelled, an editor given up, a modifier held: not quiet. A block set while quiet
+  // (`api.set`) ends it.
+  const quiet = (on?: unknown): void => setAttr(el.root, 'data-dzg-quiet', on ? '' : null);
+  for (const type of ['keydown', 'pointerdown', 'focusin']) scope.on(el.root, type, () => quiet(), { capture: true });
+  let cleared = false;
+  scope.add(kernel.subscribe((ev) => void (ev.type === 'rangeChanged' && (ev.range ? quiet() : (cleared = true)))));
 
   function apply(intent: Intent, owner: KeyOwner): void {
     const from = focus.current();
@@ -110,6 +123,8 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     }
     g.intentAt = g.now();
     const owner: KeyOwner = ownerOf(e.target, el.viewport);
+    const esc = e.key === 'Escape' && owner === 'cell' && g.multi && !(e.ctrlKey || e.shiftKey || e.altKey || e.metaKey);
+    cleared = false;
     // Up from a lower header row: the row above, a group row above the column headers too
     // (the core's table stops ArrowUp on a header).
     const at = kernel.focus;
@@ -119,7 +134,8 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
       return;
     }
     // A feature's own meaning of the key first (a tree's arrows on its column, `*`).
-    for (const f of g.features) if (f.keys?.(e, at, owner)) return void e.preventDefault();
+    for (const f of g.features) if (f.keys?.(e, at, owner)) return void (quiet(esc && cleared), e.preventDefault());
+    quiet(esc);
     const intent = intentFor(e, { dir: g.dir, owner, mac: g.mac });
     // Space on a header does nothing here, and must not scroll the page either.
     if (!intent && owner === 'header' && (e.key === ' ' || e.key === 'Spacebar')) e.preventDefault();

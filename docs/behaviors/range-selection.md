@@ -14,12 +14,13 @@ Ctrl+A (Cmd+A on a Mac); presses Shift+Space; presses Escape or clicks elsewhere
 
 ## What they observe
 - A rectangle of cells is tinted, with a line around its outside edge. One corner (the anchor) stays where
-  the block started; the other (the focus) moves with the keys or the pointer, and the keyboard focus is on
-  it (owner QB2).
+  the block started; the other (the far corner) moves with the keys or the pointer. With the keys the keyboard
+  focus is on the far corner (owner QB2); after a mouse drag it stays on the START cell, the anchor, as in Excel
+  (owner S12-Q15), and the fill handle sits on the far corner.
 - After the keys pause, a screen reader hears the block's size once: « 3 lignes, 2 colonnes
   sélectionnées ».
 - Escape, a click without Shift, or an arrow without Shift drops the block; it is said once (« sélection
-  effacée »).
+  effacée »). Escape also puts the grid in its quiet state (S12-Q16, « Escape: the quiet state » below).
 - The block covers what is shown: the columns in reading order (start pinned, centre, end pinned), the rows
   on screen between the two corners. A block is never two cells far apart on other rows after a sort.
 
@@ -52,7 +53,7 @@ a filter input or a nested grid's cells they are not the grid's (`editing.md` 19
 | Ctrl+Shift+Home / Ctrl+Shift+End | the moving corner to the first / last cell shown |
 | Shift+Space | the whole row (every visible column) |
 | Ctrl+A | every cell shown (owner QB1: with `range()`, no longer every row; rows by their box) |
-| Escape | drops the block (a cell keeps the focus) |
+| Escape | drops the block (a cell keeps the focus); the quiet state: no visible frame until the next key or press (S12-Q16) |
 | Delete / Backspace | clears the block's editable cells, one gesture (`clipboard.md`) |
 | Ctrl+C / Ctrl+X / Ctrl+V | copy, cut, paste (`clipboard.md`) |
 | Ctrl+D / Ctrl+R | fill down / to the logical end (`fill.md`) |
@@ -143,14 +144,15 @@ the cell under the release, once the auto-scroll stopped. The « one row too far
 box covered three quarters of the corner cell, so a press « on 107 » just after the release grabbed it, and a move of
 one row filled one row (`fill.md` 1, 13, 21).
 
-- **The release point counts** (S11-Q1): the corner is taken once more at the release point before the focus moves, so
+- **The release point counts** (S11-Q1; where the focus goes revised by S12-Q15: it stays on the anchor): the corner is taken once more at the release point, so
   a release that comes without a move before it (an engine that coalesces moves, a fast flick) still ends on the cell
   under it (`range-release.test.ts`).
 - **An application's `clear()` during a drag** stops the drag first: the release brings no block back, the focus stays
   on the pressed cell.
 - **S12-Q11 (owner), replaced by S12-Q13:** a press outside the grid kept the block, as in Excel. It now clears it
   (« A press outside the grid » below); `range({ clearOnOutside: false })` keeps the old rule. Escape still clears it,
-  said, and leaves the focus on the block's moving corner (the handle comes back on that cell alone).
+  said, and leaves the focus where it was (on the anchor after a drag, S12-Q15; on the moving corner after the keys), the
+  grid in its quiet state (S12-Q16).
 - **Clearing the block from the application** (owner: « un événement qui peut effacer la sélection, ex. un retour
   serveur qui a fait la copie »). `clear()` tells `rangeChanged` with `source: 'api'` and `range: null`; it is **not
   said** (« Sélection effacée » is for the user's gestures only, as for every other API call; the application says
@@ -218,3 +220,43 @@ document.getElementById('send')!.addEventListener('click', () => {
 ```
 
 Demo: « Envoyer la sélection (simulé) » on `orders-edit.html?focus=range` carries `data-dzg-keep-range`.
+
+## The active cell after a mouse selection (owner S12-Q15, 2026-10-26; revises S11-Q1 and QB2 for the pointer)
+
+- **A drag** leaves the focus (the active cell, DOM and kernel) on the cell it started from, the anchor, as in Excel; the
+  block runs from it to the cell under the release. The fill handle is on the block's far corner (fill.md 11). **The
+  release moves no focus** (the press put it on the start cell), so a drag that auto-scrolled far keeps the view where it
+  ended (moving the focus back to the anchor would scroll back to it). A **Shift+click** keeps QB2: the focus goes to
+  the clicked cell; a **Shift+drag** therefore ends with the focus where its Shift+press put it (not changed: the decision
+  names the plain drag).
+- **Shift+arrows after a drag** move the far corner, not the anchor: the focus first goes to the far corner, then moves
+  with the key (QB2 for the keys, unchanged). So Shift+↓ after a drag r1 → r4 gives r1 → r5, the focus on r5.
+- **The keys against Excel's anchor rule** (checked, not changed — the owner decides): with Shift+arrows Excel keeps the
+  active cell on the anchor and moves the far corner; DzGrid moves the focus with the far corner (QB2), so a screen
+  reader reads each new corner cell as it is reached. Shift+Space selects the focused cell's row (unchanged).
+- **A fill** (fill.md 13) leaves the focus where it is; the block becomes source ∪ filled cells, the handle at its new
+  far corner.
+- Tests: `range-anchor.test.ts`; `range-pointer`, `range-release` and the walk's oracle follow the new rule.
+
+## Escape: the quiet state (owner S12-Q16, 2026-10-26)
+
+- Escape on a cell means « je ne veux plus rien faire »: it drops the block (said once, as before) and puts
+  `data-dzg-quiet` on the grid's root. The theme then hides the focused cell's ring, inner line and tint, its row's tint
+  (`@dzgrid/theme`) and the fill handle (`fill.css`). An Escape with no block does the same, silently; a second Escape
+  changes nothing.
+- **The focus stays**: the DOM focus and the kernel's are untouched, so a screen reader still has the focused cell and
+  nothing is announced as moved.
+- **It ends** at the next key of any kind (arrows, Tab, a character, F2, Enter, a modifier), a pointer press in the grid,
+  or the focus coming into the grid (a click back, Tab from the page): the frame is back before the key acts.
+- Only with `range()` (the base grid's Escape is unchanged), only on a cell (never a header, a field, a widget or a
+  popup), only a plain Escape (Ctrl, Shift, Alt or Meta held: not quiet). **One Escape, one job**: an Escape another
+  feature takes for its own work — a fill drag or the keyboard fill mode cancelled, an editor waiting for its paint given
+  up, an editor's field closed, a tooltip closed — does not go quiet; range's own Escape (the block cleared) does.
+- A block set during the quiet state (`api.set`) ends it: its tint and handle show. The quiet state hides the ring only
+  through the focus rules being guarded (`:where(:not([data-dzg-quiet] *))`) plus `outline: none !important`; it never
+  resets a background, so an application's cell colour stays.
+- **WCAG 2.4.7 (Focus Visible)**: the indicator is hidden only after the user asked for it with Escape and only until the
+  keyboard is used again; any key that could move or act brings it back first, so whenever the keyboard operates the
+  grid the focus is visible. The ring hides with `!important` in the theme's layer, so a later layer (contrast.css) does
+  not draw it back during the quiet state.
+- Tests: `range-quiet.test.ts`; theme `active.test.ts`, `fill.test.ts`; browser `--only range` (orders-edit).

@@ -451,9 +451,13 @@ export function range(o: RangeOptions = {}): RangeFeature {
           if (owner !== 'cell' || !from || !i) return false;
           if (i.kind === 'toggleSelect') return isDataKey(from.row) && all(from.row), true;
           if (i.kind !== 'move' && i.kind !== 'edge' && i.kind !== 'page') return false;
+          // From the far corner while the focus follows the block (after a drag the focus is on the anchor, S12-Q15).
+          const c = s.r && s.follows ? s.r.focus : from;
           // Never into the header: Up from the first row leads there (the key is still taken).
-          if (i.kind === 'move' && i.axis === 'row' && i.delta < 0 && rows.displayed.indexOf(from.row) === 0) return true;
+          if (i.kind === 'move' && i.axis === 'row' && i.delta < 0 && rows.displayed.indexOf(c.row) === 0) return true;
           const anchor = s.r && s.follows ? s.r.anchor : from;
+          // The focus to that corner first (a step that moves nothing leaves it there, the block kept).
+          if (c !== from) s.focusTo(c);
           own = true;
           try {
             g.step?.(i);

@@ -33,6 +33,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `@dzgrid/dom/range` (owner S12-Q15, revises S11-Q1 for the pointer): after a mouse drag the focus stays on the START
+  cell, the anchor, as in Excel (the release moves no focus, so an auto-scrolled drag keeps its view); the fill handle on
+  the block's far corner. Shift+arrows after a drag
+  move the far corner (the focus goes there with them: the keys keep QB2). A fill still leaves the focus where it is,
+  the block source ∪ filled, the handle at its new corner. Shift+click unchanged (the focus to the clicked cell).
+- `@dzgrid/dom` + `@dzgrid/theme` (owner S12-Q16): Escape on a cell, with `range()`, also puts the grid in a quiet state
+  (`data-dzg-quiet` on the root): no ring, inner line or tint on the focused cell, no tint on its row, no fill handle.
+  The focus stays (screen readers keep it); any key, a press in the grid, the focus coming back or a block set by the API
+  ends it (WCAG 2.4.7: `range-selection.md` « Escape: the quiet state »). A second Escape changes nothing; an Escape
+  another feature takes (a fill cancelled, an editor given up) or one with a modifier does not go quiet.
 - `@dzgrid/dom/range`: in a closed shadow root, a press on the grid's own header no longer clears the block (the shadow
   root decides for the presses inside it). `@dzgrid/dom/fill`: one outside press with the click-then-click fill armed and
   a block says one sentence (the block's « cleared »; the fill's cancel silent).

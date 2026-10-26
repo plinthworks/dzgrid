@@ -24,7 +24,8 @@
   box-shadow: 0 0 0 1px var(--tz-bg);
 }
 
-[data-dzg-editing] > .dzg-fill {
+[data-dzg-editing] > .dzg-fill,
+[data-dzg-quiet] .dzg-fill {
   display: none;
 }
 

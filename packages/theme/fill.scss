@@ -58,7 +58,9 @@ $handle: var(--dzg-fill-handle, var(--dzg-range-edge, var(--tz-success)));
     box-shadow: 0 0 0 1px var(--tz-bg);
   }
 
-  [data-dzg-editing] > .dzg-fill {
+  // An open field hides it at once; so does Escape's quiet state (owner S12-Q16).
+  [data-dzg-editing] > .dzg-fill,
+  [data-dzg-quiet] .dzg-fill {
     display: none;
   }
 

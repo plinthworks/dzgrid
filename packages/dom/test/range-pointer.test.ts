@@ -13,7 +13,7 @@ import { cells, cleanup, COLUMNS, HEADER, ids, join, rmake, rowsOf, WIDE, type R
 afterEach(cleanup);
 
 describe('range pointer: a press and a drag', () => {
-  it('drags a block from the pressed cell to the cell under the pointer; the root says it is ranging; the focus stays on the pressed cell until the release, then goes to the moving corner (S11-Q1)', () => {
+  it('drags a block from the pressed cell to the cell under the pointer; the root says it is ranging; the focus stays on the pressed cell, the anchor, after the release too (S12-Q15, revising S11-Q1)', () => {
     const t = rmake();
     t.down(t.cell('r1', 'n')!, t.at('r1', 'n'));
     expect(t.where()).toBe('r1/n');
@@ -25,7 +25,7 @@ describe('range pointer: a press and a drag', () => {
     expect(t.ranged()).toEqual(cells(ids(1, 3), ['n', 's']));
     t.up(t.at('r3', 's'));
     expect(t.ctx.el.root.hasAttribute('data-dzg-ranging')).toBe(false);
-    expect(t.where()).toBe('r3/s');
+    expect(t.where()).toBe('r1/n');
     expect(t.block()).toBe('r1/n:r3/s');
   });
 
@@ -50,7 +50,7 @@ describe('range pointer: a press and a drag', () => {
     expect(t.events.filter((e) => e.type === 'cellClicked')).toHaveLength(1);
   });
 
-  it('Shift+click extends from the anchor and moves the focus there (QB2); again from the same anchor; Shift+drag goes on extending', () => {
+  it('Shift+click extends from the anchor and moves the focus there (QB2); again from the same anchor; Shift+drag goes on extending, its release leaves the focus where its press put it (S12-Q15: the release moves no focus)', () => {
     const t = rmake();
     t.focus('r1', 'n');
     const p = t.down(t.cell('r3', 's')!, t.at('r3', 's'), { shiftKey: true });
@@ -62,7 +62,7 @@ describe('range pointer: a press and a drag', () => {
     t.move(t.at('r5', 'q'), { shiftKey: true });
     expect(t.block()).toBe('r1/n:r5/q');
     t.up(t.at('r5', 'q'));
-    expect(t.where()).toBe('r5/q');
+    expect(t.where()).toBe('r4/q');
   });
 
   it('Shift+click on a cell makes cells, never rows, even with selection.click (QB1); Shift+click on a box still ticks rows', () => {

@@ -65,6 +65,11 @@ describe('fill.css', () => {
     expect(decl(/^\[data-dzg-editing\] > \.dzg-fill$/)).toMatch(/display: none/);
   });
 
+  it('hidden in Escape\'s quiet state (owner S12-Q16): `[data-dzg-quiet]` on the root', () => {
+    expect(decl(/^\[data-dzg-quiet\] \.dzg-fill$/)).toMatch(/display: none/);
+    for (const f of ['fill.scss', 'fill.unlayered.css']) expect(read(f), f).toMatch(/\[data-dzg-quiet\] \.dzg-fill \{\s*display: none;/);
+  });
+
   it('hidden on a screen with no fine pointer (touch only, S12-Q3)', () => {
     expect(decl(/^\.dzg-fill$/, media('not (any-pointer: fine)'))).toMatch(/display: none/);
   });
