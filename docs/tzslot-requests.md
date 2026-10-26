@@ -1,4 +1,4 @@
-# Requests for tzslot (2.2.0), from DzGrid's date filters (step 14)
+# Requests for tzslot (found on 2.2.0; reviewed against 2.4.0 on 2026-10-26), from DzGrid's date filters (step 14)
 
 For the owner of tzslot. Nothing here blocks DzGrid: each item has a workaround in our lazy kits
 (`packages/dom/src/filters/dates/`), to remove once tzslot ships the fix. Paths are in
@@ -18,6 +18,8 @@ spike S13 (`spikes/s13-tzslot/README.md`) and the tests of step 14 part B.
 | **T9** (a11y, found by axe) | The month title button is named by its action ("Choisir le mois") without the month it shows ("mars 2026"): axe `label-content-name-mismatch` (WCAG 2.5.3). | `dom/src/calendar.ts:372`; `dom/src/date-range.ts:361` | `named()` adds the shown text: "Choisir le mois, mars 2026". |
 | **T10** (a11y, found by axe) | The typed date-and-time field is an `<input>` with `aria-expanded` and `aria-haspopup="dialog"` but no role: `aria-expanded` is not allowed on a text box (axe `aria-allowed-attr`). | `dom/src/datetime-field.ts:286`, `:675` | `role="combobox"` and `aria-controls` (the panel's container) on that input (ARIA 1.2's editable combobox with a dialog). |
 | **T11** (a11y, found by axe) | Another month's days are faded with `opacity: 0.35`: their text falls under 4.5:1 (axe `color-contrast`), worse on a selected start or end. | `dom/src/styles.ts:98-99`, `:433`, `:504` | The theme sets `--tz-cal-outside-opacity: 1` inside a DzGrid popup. Ask: a muted colour that keeps 4.5:1 instead of an opacity. |
+
+**Status against tzslot 2.4.0 (CHANGELOG read 2026-10-26):** T3 is addressed by `@tzslot/core/lazy` (2.3.0) and `@tzslot/dom/lazy` (2.4.0) — DzGrid can adopt them when it moves to 2.4.0. T1, T2, T4, T6–T11 are not mentioned in the 2.3.0/2.4.0 notes: presumed still open, to be confirmed by removing each workaround behind its test. T5 is a note. DzGrid still pins 2.2.0.
 
 When one is fixed in a tzslot release: raise the peer range's floor, remove the workaround and its
 test's special case, and say so in the CHANGELOG.
