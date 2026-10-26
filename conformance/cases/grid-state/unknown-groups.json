@@ -1,0 +1,74 @@
+{
+  "id": "unknown-groups",
+  "suite": "grid-state",
+  "description": "Groups: an id the grid does not have is `state-group`; a known one with a value that is not true or false is `state-field`; the rest applied (G 10, 11).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "groups": [
+      "contact",
+      "meta"
+    ],
+    "restore": {
+      "v": 1,
+      "groups": {
+        "contact": false,
+        "gone": true,
+        "meta": "yes"
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-group",
+        "severity": "warning",
+        "path": "groups.gone"
+      },
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "groups.meta"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "city",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "groups": {
+        "contact": false
+      }
+    }
+  }
+}

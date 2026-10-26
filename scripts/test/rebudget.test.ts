@@ -70,7 +70,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(sizeBudget(1348, ceilingFor('@dzgrid/core/tree-lazy'))).toBe(1500);
     expect(sizeBudget(877, ceilingFor('@dzgrid/dom/tree-lazy'))).toBe(1000); // 964.7 → 1 000, not 1 050
     // The other entries keep their plan ceilings; the small text bundles follow the rule (≤ 2 kB).
-    expect(ceilingFor('@dzgrid/core/server')).toBe(6100); // Phase 5 S2-O4: 6 000 → 6 100
+    expect(ceilingFor('@dzgrid/core/server')).toBe(6150); // Phase 5 S2-O4: 6 000 → 6 100; owner E5-8: 6 150 for the hold seam
     expect(ceilingFor('@dzgrid/core/detail')).toBe(1050); // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core)
     expect(ceilingFor('@dzgrid/core/edit')).toBe(3100); // Phase 5 Q16 3 000, owner S3-O4 (2026-10-23) → 3 100
     expect(() => sizeBudget(3101, ceilingFor('@dzgrid/core/edit'))).toThrow(/ceiling/);
@@ -374,6 +374,28 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(e['@dzgrid/dom/popup']?.maxGzip).toBe(1650);
     ['en', 'fr', 'ar'].forEach((l, i) => expect(e[`@dzgrid/dom/locales/${l}-columns`]?.maxGzip, l).toBe([500, 600, 800][i]));
     expect(['@dzgrid/core', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([29000, 21980]);
+  });
+
+  it('Phase 6 step 5 (owner Q-B, E5-1): @dzgrid/core/state 1 500 over the core, @dzgrid/dom/state 1 150 (E5-8) over the DOM base (core/state outside it); the core within 29 150, the DOM base within 22 400; the server 6 150 for its hold seam (E5-8)', () => {
+    expect(ceilingFor('@dzgrid/core/state')).toBe(1500);
+    expect(ceilingFor('@dzgrid/dom/state')).toBe(1150); // owner E5-8: 800 → 1 150
+    expect(() => sizeBudget(1501, ceilingFor('@dzgrid/core/state'))).toThrow(/ceiling/);
+    expect(() => sizeBudget(1151, ceilingFor('@dzgrid/dom/state'))).toThrow(/ceiling/);
+    expect(ceilingFor('@dzgrid/core')).toBeLessThanOrEqual(29150);
+    expect(ceilingFor('@dzgrid/dom')).toBeLessThanOrEqual(22400);
+    expect(ceilingFor('@dzgrid/core/server')).toBe(6150);
+    type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
+    expect(e['@dzgrid/core/state']).toEqual({ file: 'packages/core/src/state.ts', maxGzip: e['@dzgrid/core/state']!.maxGzip, over: '@dzgrid/core' });
+    expect(e['@dzgrid/core/state']!.maxGzip).toBeLessThanOrEqual(1500);
+    const d = e['@dzgrid/dom/state']!;
+    expect({ ...d, maxGzip: 0 }).toEqual({ file: 'packages/dom/src/state.ts', maxGzip: 0, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/state', '@dzgrid/dom/internal'] });
+    expect(d.maxGzip).toBeLessThanOrEqual(1150);
+    expect(d.maxGzip).toBeGreaterThanOrEqual(1058);
+    expect(e['@dzgrid/core/server']!.maxGzip).toBe(6150); // owner E5-8: confirmed
+    expect(e['@dzgrid/core']!.maxGzip).toBeLessThanOrEqual(29150);
+    expect(e['@dzgrid/dom']!.maxGzip).toBeLessThanOrEqual(22400);
+    expect(e['@dzgrid/core/server']!.maxGzip).toBeLessThanOrEqual(ceilingFor('@dzgrid/core/server')!);
   });
 
   it('the K.8 profile guard: 83 500 (Q17a; the real example\'s 92 500, S12-Q10, is guarded by example:bytes, not here)', () => {

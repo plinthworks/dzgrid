@@ -118,6 +118,29 @@ None in the bundles (problems are codes; sentences belong to the application).
    « the application may ask for them »; decisions.md does not).
 3. `width` saved in CSS pixels as set (not scaled back for the reader's text size).
 
+## As built (Phase 6 steps 5–6, 2026-10-26; `docs/phase-6-steps/step05-plan.md` « Done »)
+- Entries: `@dzgrid/core/state` (`captureState(kernel, env?, opts?)`, `checkState(raw, upgrades?)`, `restoreState(kernel,
+  raw, env?, source = 'host')`, `stateText`, `STATE_UPGRADES` (empty: v1 is the first), `STATE_VERSION`); `@dzgrid/dom/state`
+  (`gridState({ debounce = 300, persist?: { key, include? } })` with `api(grid).state()` / `setState()`, `persistLocal(grid,
+  key, { include? })`, `toSearchParams(state, { name = 'grid', include? })` → `{ params, problems }`, `fromSearchParams(params,
+  { name })` → `{ state, problems }`).
+- The text is the core's `canonical` form: every object's keys sorted (so `v` is not first); the address's own version is
+  its `1.` prefix.
+- Restore order as rule 6, all under the server model's `hold(fn)`: one request (3 before the seam, measured). A state
+  given at creation (`persist`): the server model is made held (`GridFeature.held` → `ModelEnv.held`) and its first
+  request is the restored one.
+- A part absent from the state is not applied (the grid keeps its own); a column field absent means its default (no user
+  width, shown, unpinned); a wrong one keeps the grid's. Every column is named in the restore's patch (a state equal to the
+  grid sends no request). A `movable: false` column keeps its place and side; a state placing it elsewhere gives
+  `state-field` on its `order`.
+- Sort items that are not sortable, doubled or with a bad `nulls` go to the model, which refuses them (`invalid-sort`).
+- Density: checked by the DOM (`state-field` when not one of the three); the menu's line says `densityChanged`, which
+  `stateChanged` follows; an application's `update({ density })` is the host's and says nothing.
+- `stateChanged` compares with the last state told: a host change made before a gesture rides with that gesture's event.
+- Groups: an adapter `{ collapsible, get, set }` (step 8 wires it); until then every named group is `state-group`.
+- Problems never carry a value: `state-column` gives the id (not row data), `state-field` the path only; the 4 KB warning
+  is `state-field` at the parameter's name, detail `too-large`.
+
 ## Tests (to be written with the code)
 Conformance `conformance/cases/grid-state/*` (capture → JSON → restore round trips, unknown version /
 column / group / field, an older version upgraded, all-hidden refused, restore order, a planted row value

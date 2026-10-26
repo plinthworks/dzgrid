@@ -1,0 +1,75 @@
+{
+  "id": "unmovable-keeps-place",
+  "suite": "grid-state",
+  "description": "A `movable: false` column keeps its place and its side (O3); the others take the free places in the state's order. A state placing it elsewhere is told once (`state-field` on its `order`), its side never.",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name",
+        "movable": false
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "city",
+          "pinned": null,
+          "order": 0
+        },
+        {
+          "id": "name",
+          "pinned": "start",
+          "order": 1
+        },
+        {
+          "id": "age",
+          "pinned": null,
+          "order": 2
+        }
+      ]
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "columns.1.order"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "city",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

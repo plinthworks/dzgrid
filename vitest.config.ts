@@ -17,6 +17,7 @@ const alias = {
   '@dzgrid/core/detail': fileURLToPath(new URL('./packages/core/src/detail.ts', import.meta.url)),
   '@dzgrid/core/edit': fileURLToPath(new URL('./packages/core/src/edit.ts', import.meta.url)),
   '@dzgrid/core/range': fileURLToPath(new URL('./packages/core/src/range.ts', import.meta.url)),
+  '@dzgrid/core/state': fileURLToPath(new URL('./packages/core/src/state.ts', import.meta.url)),
   '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
   '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
 };
@@ -38,6 +39,7 @@ const domAlias = {
   '@dzgrid/dom/columns': fileURLToPath(new URL('./packages/dom/src/columns.ts', import.meta.url)),
   '@dzgrid/dom/column-menu': fileURLToPath(new URL('./packages/dom/src/column-menu.ts', import.meta.url)),
   '@dzgrid/dom/columns-panel': fileURLToPath(new URL('./packages/dom/src/columns-panel.ts', import.meta.url)),
+  '@dzgrid/dom/state': fileURLToPath(new URL('./packages/dom/src/state.ts', import.meta.url)),
   '@dzgrid/dom/editors': fileURLToPath(new URL('./packages/dom/src/editors.ts', import.meta.url)),
   '@dzgrid/dom/tree-lazy': fileURLToPath(new URL('./packages/dom/src/tree-lazy.ts', import.meta.url)),
   '@dzgrid/dom/motion-gsap': fileURLToPath(new URL('./packages/dom/src/motion-gsap.ts', import.meta.url)),

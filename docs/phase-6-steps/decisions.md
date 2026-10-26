@@ -66,3 +66,10 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **Q4-4:** `@dzgrid/dom/columns-panel` may rise from 4 000 up to 4 400 if needed.
 - Lead (from the plan): the chooser anchors on the grid root (unticking the opener's column must not close it); the popup host's Tab trap skips `tabindex="-1"` (+~15 B popup); new pure order functions get the mutants; `align: 'end'`; `columnsChooser()` with `open/close/isOpen` and `onClose`.
 - **Order revised again (owner, 2026-10-26):** the docs website moves to the very END (after Phase 11). Order: Phase 6 → 7 → 8 → 9 → 10 → 11 → docs website.
+
+## Step 5 (owner, 2026-10-26) — plan `step05-plan.md`
+
+- **E5-1:** one server request per restore: an internal `rows.hold(fn)` seam (≤ 110 B core) defers the fetch to one `load()` at release; used by `restoreState` and `persistLocal`.
+- **E5-3:** the address helper caps the state at 4 KB; beyond it, it keeps the minimum (columns, sort) and warns the developer.
+- **E5-2/E5-4/E5-5/E5-6/E5-7 (lead, recommendations kept):** the new problem codes live in `core/state` if the types allow; the state helper is a feature; Angular inputs at step 12; the rest as the plan recommends.
+- **E5-8 (owner, 2026-10-26):** `@dzgrid/dom/state` 800 → 1 150 (measured 1 058, one entry kept); `@dzgrid/core/server` 6 100 → 6 150 confirmed for the `rows.hold` seam (E5-1). Reminder to agents: never raise a size line without an owner decision.

@@ -1,0 +1,66 @@
+{
+  "id": "hideable-false",
+  "suite": "grid-state",
+  "description": "A `hideable: false` column is never hidden by a state (G 12).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name",
+        "hideable": false
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "hidden": true,
+          "pinned": null,
+          "order": 0
+        }
+      ]
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "columns.0.hidden"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "city",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "id": "round-trip",
+  "suite": "grid-state",
+  "description": "A full state (order, pins on both sides, a user width, a hidden column, sort, filter, page, size, density) restored, then captured: the same state (keys sorted), nothing skipped (G 1, 4, 6).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "name": "Amel",
+        "age": 40,
+        "city": "Oran"
+      },
+      {
+        "id": "r2",
+        "name": "Bilal",
+        "age": 25,
+        "city": "Oran"
+      },
+      {
+        "id": "r3",
+        "name": "Chems",
+        "age": 33,
+        "city": "Orléans"
+      },
+      {
+        "id": "r4",
+        "name": "Dalia",
+        "age": 51,
+        "city": "Oran"
+      },
+      {
+        "id": "r5",
+        "name": "Elias",
+        "age": 19,
+        "city": "Oran"
+      }
+    ],
+    "pageSize": 2,
+    "restore": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "city",
+          "pinned": "start",
+          "order": 0
+        },
+        {
+          "id": "name",
+          "width": 220,
+          "pinned": null,
+          "order": 1
+        },
+        {
+          "id": "age",
+          "hidden": true,
+          "pinned": "end",
+          "order": 2
+        }
+      ],
+      "sort": [
+        {
+          "column": "name",
+          "dir": "desc"
+        }
+      ],
+      "filter": {
+        "city": {
+          "type": "text",
+          "op": "contains",
+          "value": "or"
+        }
+      },
+      "quick": "",
+      "page": 1,
+      "pageSize": 2,
+      "density": "spacious"
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "city",
+          "pinned": "start",
+          "order": 0
+        },
+        {
+          "id": "name",
+          "width": 220,
+          "pinned": null,
+          "order": 1
+        },
+        {
+          "id": "age",
+          "hidden": true,
+          "pinned": "end",
+          "order": 2
+        }
+      ],
+      "sort": [
+        {
+          "column": "name",
+          "dir": "desc"
+        }
+      ],
+      "filter": {
+        "city": {
+          "type": "text",
+          "op": "contains",
+          "value": "or"
+        }
+      },
+      "quick": "",
+      "page": 1,
+      "pageSize": 2,
+      "density": "spacious"
+    },
+    "shown": [
+      "r3",
+      "r2"
+    ]
+  }
+}

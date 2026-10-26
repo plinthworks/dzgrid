@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DzGrid — état de la grille</title>
+  <style>
+    body { margin: 0; padding: 1rem; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: light dark; max-inline-size: 1100px; }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-block: .5rem .75rem; }
+    #host { block-size: 60vh; }
+    #host > .dzg { block-size: 100%; }
+    .note { margin-block: .25rem .5rem; color: var(--tz-fg-muted); line-height: 1.45; max-inline-size: 90ch; }
+    #address { inline-size: 100%; font: 12px ui-monospace, monospace; }
+    a { color: var(--tz-accent); }
+  </style>
+</head>
+<body>
+  <nav><a href="./index.html" id="back"></a></nav>
+  <main>
+  <h1 id="title"></h1>
+  <ul class="note" id="steps"></ul>
+  <div class="bar">
+    <label><span id="lang-label"></span> <select id="lang"><option value="fr">français</option><option value="ar">العربية</option></select></label>
+    <label><span id="search-label"></span> <input id="search" type="search"></label>
+    <button type="button" id="copy"></button>
+    <label><input type="checkbox" id="with"> <span id="with-label"></span></label>
+    <button type="button" id="forget"></button>
+  </div>
+  <p class="bar"><output id="requests"></output> <output id="problems"></output></p>
+  <div id="host"></div>
+  <p><input id="address" readonly aria-labelledby="copy"> <a id="open" target="_blank" hidden></a></p>
+  </main>
+  <script type="module" src="./state.ts"></script>
+</body>
+</html>

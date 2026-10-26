@@ -250,6 +250,16 @@ describe('density (column-menu.md 16, Q-R2, C5, Q3-4)', () => {
     expect(t.checked('density.compact')).toBe(true);
   });
 
+  it('a choice says `densityChanged` (source `user`, density.md 2; what `@dzgrid/dom/state` saves, step 5); the same one again says nothing', () => {
+    const t = mmake({ menu: { density: true } });
+    byKeys(t, 'n');
+    t.item('density.spacious')!.click();
+    expect(t.of('densityChanged')).toEqual([{ type: 'densityChanged', source: 'user', density: 'spacious' }]);
+    byKeys(t, 'n');
+    t.item('density.spacious')!.click();
+    expect(t.of('densityChanged').length).toBe(1);
+  });
+
   it('absent when the row height is a number', () => {
     const t = mmake({ menu: { density: true }, settings: { rowHeight: 40 } });
     byKeys(t, 'n');

@@ -47,7 +47,7 @@ function typeOnly(t: readonly Token[], i: number): boolean {
 }
 
 /** Every reason a source breaks purity, as short labels. Exported for the self-test below. */
-export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean; range?: boolean } = { base: true }): string[] {
+export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean; range?: boolean; state?: boolean } = { base: true }): string[] {
   const found: string[] = [];
   const t = tokens(source);
   t.forEach((tok, i) => {
@@ -87,6 +87,8 @@ export function violations(source: string, opts: { base: boolean; server?: boole
       if (!opts.edit && !(opts.range && typeOnly(t, i)) && /(^|\/)edit(\.js|\/|$)/.test(spec)) found.push('edit import');
       // Nor the range entry (Phase 5 step 10): a grid without blocks of cells carries none of it.
       if (!opts.range && /(^|\/)range(\.js|\/|$)/.test(spec)) found.push('range import');
+      // Nor the state entry (Phase 6 step 5): the kernel names the `GridState` type of its events only (erased).
+      if (!opts.state && !typeOnly(t, i) && /(^|\/)state(\.js|\/|$)/.test(spec)) found.push('state import');
     }
   });
   return found;
@@ -103,7 +105,7 @@ describe('core purity', () => {
   it('names no forbidden global, package or dynamic import', () => {
     const offenders = all.flatMap((f) => {
       const rel = f.slice(SRC.length + 1);
-      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/') });
+      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/'), state: rel === 'state.ts' || rel.startsWith('state/') });
       return v.length ? [`${rel}: ${[...new Set(v)].join(', ')}`] : [];
     });
     expect(offenders).toEqual([]);
@@ -180,6 +182,12 @@ describe('the purity check itself', () => {
     expect(violations("import { parseInput } from './edit/input.js';", { base: true, edit: true })).toEqual([]);
     // A module that only has `edit` in its name is no edit entry.
     expect(violations("import { editableAt } from './columns/editable.js';")).toEqual([]);
+  });
+
+  it('catches a run-time import of the state entry from the base; its types pass (Phase 6 step 5)', () => {
+    expect(violations("import { restoreState } from './state/state.js';")).toEqual(['state import']);
+    expect(violations("import type { GridState } from './state/state.js';")).toEqual([]);
+    expect(violations("import { canonical } from '../model/query.js';", { base: true, state: true })).toEqual([]);
   });
 
   it('catches an import of the range entry from the base, and a run-time edit import from the range entry (Phase 5 step 10)', () => {

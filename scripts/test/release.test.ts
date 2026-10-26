@@ -54,7 +54,8 @@ describe('0.3.0, the four packages', () => {
 
   it('export the Phase 5 step 10 subpath @dzgrid/core/range, built like the others', () => {
     expect(pkg('core').exports['./range']).toEqual({ types: './src/range.ts', default: './src/range.ts' });
-    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/edit', '\.\/range'\]/);
+    // Phase 6 step 5 adds './state' after it.
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/edit', '\.\/range'[,\]]/);
   });
 
   it('export the Phase 5 step 11a subpaths (@dzgrid/dom/range, its texts, the theme\'s range.css), built like the others', () => {
@@ -120,6 +121,14 @@ describe('0.3.0, the four packages', () => {
       expect(theme.files, f).toContain(f);
     }
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'columns', 'columns-panel'\]/);
+  });
+
+  it('export the Phase 6 step 5 subpaths (@dzgrid/core/state, @dzgrid/dom/state), built like the others', () => {
+    expect(pkg('core').exports['./state']).toEqual({ types: './src/state.ts', default: './src/state.ts' });
+    expect(pkg('dom').exports['./state']).toEqual({ types: './src/state.ts', default: './src/state.ts' });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/edit', '\.\/range', '\.\/state'\]/);
+    expect(build).toMatch(/'\.\/columns-panel', '\.\/state'/);
   });
 
   it('keep gsap and tzslot optional peers', () => {

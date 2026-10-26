@@ -48,7 +48,13 @@ export const PROBLEM_CODES = [
   'invalid-setting',
 ] as const;
 
-export type ProblemCode = (typeof PROBLEM_CODES)[number];
+/**
+ * The codes of `@dzgrid/core/state` (Phase 6 step 5, owner E5-2): a type here, their list there (`STATE_CODES`), so the
+ * base ships no byte for them.
+ */
+export type StateProblemCode = 'state-version' | 'state-column' | 'state-group' | 'state-field' | 'state-storage';
+
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode;
 
 export type Severity = 'error' | 'warning';
 

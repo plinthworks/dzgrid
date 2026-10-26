@@ -1,0 +1,69 @@
+{
+  "id": "duplicate-id",
+  "suite": "grid-state",
+  "description": "A column named twice: the first entry wins, the second is `state-field`.",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "city",
+          "pinned": "end",
+          "order": 0
+        },
+        {
+          "id": "city",
+          "pinned": "start",
+          "order": 1
+        }
+      ]
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "columns.1"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "city",
+          "order": 0,
+          "pinned": "end"
+        },
+        {
+          "id": "name",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

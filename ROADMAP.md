@@ -800,8 +800,15 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   `columns-panel.css` (Q4-2); `content-visibility` above 200 rows (Q4-3); popup Tab trap skips `tabindex="-1"`; demo
   `orders-edit.html` (« Colonnes » button, `?chooser=0` off). Sizes after the review: 4 286 / 4 400 (Q4-4 used), CSS 991 / 1 000.
   Browser `--only chooser`: Chrome 29, Firefox 8, WebKit 8.
-- [ ] step 5: `@dzgrid/core/state`.
-- [ ] step 6: `@dzgrid/dom/state` (`persistLocal`, URL helpers).
+- [~] steps 5–6 (2026-10-26, built together, not committed, no review yet; plan `docs/phase-6-steps/step05-plan.md` « Done »):
+  `@dzgrid/core/state` (capture, check, restore, versions, O1, unknown ids, one server request per restore through the
+  server model's `hold` seam, E5-1) and `@dzgrid/dom/state` (`gridState()` with `state()` / `setState()`, `stateChanged`
+  debounced once per gesture, `stateRestored`; the browser storage read before the first request (`persist`), or later
+  (`persistLocal`); the address helper, one `grid=1.…` parameter, typed filters and search out by default (O6), 4 KB
+  (E5-3)); the menu's density line says `densityChanged`. Sizes: `core/state` 1 499 / 1 500, `dom/state` 1 058 / 1 150
+  (owner E5-8), `core/server` 6 143 / 6 150 (E5-8), core base 28 930 (+0), DOM base 21 784 (+11). Property test 1 000
+  seeds LTR / RTL (3 000 green), 23 conformance cases, 2 000 garbage values. Demo `playground/state.html` (fr / ar,
+  reload, address). Browser `--only state` Chrome 13 / 13; `--only playground` 41.
 - [ ] step 7: `@dzgrid/dom/columns` part 2, keyboard resize mode and auto-size (exit criterion 1).
 - [ ] step 8: collapsible header groups.
 - [ ] step 9: pinned rows, editable.

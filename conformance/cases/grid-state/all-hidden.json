@@ -1,0 +1,79 @@
+{
+  "id": "all-hidden",
+  "suite": "grid-state",
+  "description": "A state hiding every column: the first of the restored order stays shown (O1, G 12).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "age",
+          "hidden": true,
+          "pinned": null,
+          "order": 0
+        },
+        {
+          "id": "name",
+          "hidden": true,
+          "pinned": null,
+          "order": 1
+        },
+        {
+          "id": "city",
+          "hidden": true,
+          "pinned": null,
+          "order": 2
+        }
+      ]
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "columns.0.hidden"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "age",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "name",
+          "hidden": true,
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "city",
+          "hidden": true,
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

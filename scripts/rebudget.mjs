@@ -36,7 +36,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  */
 const SIZE_CEILINGS = {
   '@dzgrid/core': 29000,
-  '@dzgrid/core/server': 6100, // Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order)
+  '@dzgrid/core/server': 6150, // Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order); owner E5-1 / E5-8 (2026-10-26): 6 150 for the hold seam (`rows.hold`, one request per restore; measured +56)
   '@dzgrid/core/csv': 2000, // Q7: « core/csv up to 2 000 »
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
@@ -44,6 +44,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/edit': 3100, // Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
   '@dzgrid/core/range': 4000, // Phase 5 Q16 (Part B): blocks of cells, TSV, the paste and fill plans; the line at the measure + 10 % at the close
+  '@dzgrid/core/state': 1500, // Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
   '@dzgrid/dom': 21980, // showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10000,
   '@dzgrid/dom/tree': 3800, // owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said)
@@ -109,6 +110,8 @@ const SIZE_CEILINGS = {
   // its texts in the -columns bundles (500 / 600 / 800 kept), its look in its own columns-panel.css (measure + 10 %, ≤ 1 000).
   '@dzgrid/dom/columns-panel': 4400, // Q4-4: up to 4 400 used at the review of steps 3–4 (its own live status, auto-scroll loop: measured 4 282)
   '@dzgrid/theme/columns-panel.css': 1000,
+  // Phase 6 step 5 (owner Q-B): the GridState feature, its storage and address helpers, over the DOM base (core/state outside it).
+  '@dzgrid/dom/state': 1150, // owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
   '@dzgrid/theme': 2750, // T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7

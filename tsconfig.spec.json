@@ -47,6 +47,9 @@
       "@dzgrid/core/range": [
         "./packages/core/src/range.ts"
       ],
+      "@dzgrid/core/state": [
+        "./packages/core/src/state.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],
@@ -103,6 +106,9 @@
       ],
       "@dzgrid/dom/columns-panel": [
         "./packages/dom/src/columns-panel.ts"
+      ],
+      "@dzgrid/dom/state": [
+        "./packages/dom/src/state.ts"
       ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"

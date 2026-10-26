@@ -85,6 +85,10 @@
       "types": "./src/columns-panel.ts",
       "default": "./src/columns-panel.ts"
     },
+    "./state": {
+      "types": "./src/state.ts",
+      "default": "./src/state.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"

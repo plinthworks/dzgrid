@@ -92,7 +92,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   // A feature's shape (a tree) goes to either model: a server's rows can be a tree too (tree-lazy.md).
   const shared = { ...(initial.filterKinds && { filterKinds: kinds.get }), now: initial.clock ?? Date.now, ...shapeOf(initial.features) };
   const rows: RowModel<T> = initial.source
-    ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...shared, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }) })
+    ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...shared, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }), held: initial.features?.some((f) => f.held) })
     : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page, ...shared });
   const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false });
   if (initial.context !== undefined) kernel.dispatch({ type: 'context.app', value: initial.context }, 'host'); // editable rules, custom kinds (Q12)

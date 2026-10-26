@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@dzgrid/core/state` and `@dzgrid/dom/state` (Phase 6 steps 5–6; docs/behaviors/grid-state.md, owner Q-S1, Q-S2, O1, O6,
+  O7, E5-1–E5-8): the grid's state as a small versioned JSON — columns (order, width a user set, hidden, logical pin),
+  header groups (step 8), sort, filters, search, page and size, density; never a row, a key or a cell value.
+  `captureState` / `restoreState` / `checkState` / `stateText` (pure): older versions upgraded step by step, newer or
+  odd ones refused (`state-version`, nothing applied), unknown columns and groups skipped (`state-column`,
+  `state-group`), wrong fields skipped (`state-field`), never every column hidden, `hideable: false` never hidden,
+  `movable: false` kept in its place; one server request per restore (the server model's `hold`). `gridState({ debounce?,
+  persist? })`: `api(grid).state()` / `setState()`, `stateChanged` once per gesture (never the host's nor a restore's),
+  `stateRestored`; `persist: { key, include? }` reads the browser storage before the grid's first request (one request
+  at start), `persistLocal(grid, key)` later; blocked, full or bad storage: one `state-storage` warning. The address:
+  `toSearchParams(state, { name?, include? })` → `{ params, problems }`, one `grid=1.` + base64url parameter, typed
+  filters and the search left out unless `include` names them, over 4 KB only columns and sort (a warning);
+  `fromSearchParams(params)` → `{ state, problems }`. Never a cookie, never the history. Demo `playground/state.html`.
+- The column menu's density line says `densityChanged { density, source: 'user' }` (density.md 2); events
+  `stateChanged`, `stateRestored` in `GridEvent`; `ProblemCode` gains the `state-*` codes (a type only).
+
 - `@dzgrid/dom/columns-panel` (Phase 6 step 4; docs/behaviors/columns-chooser.md, owner Q-C1, Q-C2, Q-H, O1, O5, O12,
   Q4-1–Q4-4): « Choisir les colonnes ». `columnsChooser()` and `api(grid).open(anchor?) / close() / isOpen`, opened by
   the column menu's « Choose columns… » (`use: { chooser }`) or the application's own button: a modal dialog named by its

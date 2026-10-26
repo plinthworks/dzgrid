@@ -162,4 +162,22 @@ describe('layering of the base and the server entry', () => {
     expect(both - alone).toBeGreaterThan(500);
     expect(alone).toBeLessThanOrEqual(28930);
   });
+
+  it('no other entry holds a state module; the state entry holds no server, span, csv, tree, edit or range module, nor the models (Phase 6 step 5)', async () => {
+    const isState = (f: string) => /(^|\/)src\/state(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts', 'edit.ts', 'range.ts']) expect((await inputsOf(entry)).filter(isState), entry).toEqual([]);
+    const inputs = await inputsOf('state.ts');
+    expect(inputs.some((i) => i.endsWith('src/state/state.ts'))).toBe(true);
+    expect(inputs.filter((f) => isServer(f) || isSpans(f) || isCsv(f) || /(^|\/)src\/(tree|detail|edit|range)(\.ts$|-lazy\.ts$|\/)/.test(f))).toEqual([]);
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
+  });
+
+  it('the state entry fits its grant over the base (owner Q-B 1 500 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
+    const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
+    const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
+    const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './state.ts';", resolveDir: SRC, loader: 'ts' } });
+    const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
+    expect(both - alone).toBeLessThanOrEqual(1500);
+    expect(alone).toBeLessThanOrEqual(28930);
+  });
 });

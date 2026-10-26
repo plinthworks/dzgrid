@@ -1,0 +1,91 @@
+{
+  "id": "page-past-end",
+  "suite": "grid-state",
+  "description": "A page past the last one: the last page (G 13).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "name": "Amel",
+        "age": 40,
+        "city": "Oran"
+      },
+      {
+        "id": "r2",
+        "name": "Bilal",
+        "age": 25,
+        "city": "Oran"
+      },
+      {
+        "id": "r3",
+        "name": "Chems",
+        "age": 33,
+        "city": "Orléans"
+      },
+      {
+        "id": "r4",
+        "name": "Dalia",
+        "age": 51,
+        "city": "Oran"
+      },
+      {
+        "id": "r5",
+        "name": "Elias",
+        "age": 19,
+        "city": "Oran"
+      }
+    ],
+    "pageSize": 2,
+    "restore": {
+      "v": 1,
+      "page": 9,
+      "pageSize": 2
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "city",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "page": 2,
+      "pageSize": 2
+    },
+    "shown": [
+      "r5"
+    ]
+  }
+}

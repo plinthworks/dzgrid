@@ -1,0 +1,87 @@
+{
+  "id": "omitted-after-named",
+  "suite": "grid-state",
+  "description": "Columns the state does not name keep their settings and go after the named ones, in their current order (G 10).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b",
+        "width": 90
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "before": [
+      {
+        "type": "column.state",
+        "patch": [
+          {
+            "id": "b",
+            "width": 120
+          },
+          {
+            "id": "d",
+            "pinned": "start"
+          }
+        ]
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "c",
+          "pinned": null,
+          "order": 0
+        },
+        {
+          "id": "a",
+          "pinned": null,
+          "order": 1
+        }
+      ]
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "c",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "a",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "b",
+          "order": 2,
+          "pinned": null,
+          "width": 120
+        },
+        {
+          "id": "d",
+          "order": 3,
+          "pinned": "start"
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

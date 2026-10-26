@@ -19,6 +19,7 @@ import {
 import type { SortItem } from './sort/compile.js';
 import { nextSort } from './sort/toggle.js';
 import { closedValues, type ValuesHandle, type ValuesOptions } from './model/values.js';
+import type { GridState } from './state/state.js';
 
 /**
  * The grid's state outside the DOM: the query (sort), the selection and its
@@ -134,6 +135,14 @@ export type GridEvent<T> =
   | { readonly type: 'rangeChanged'; readonly source: ChangeSource; readonly range: CellRange | null }
   /** A block copied (or cut): counts only, never values (clipboard.md 9; rows may be health records). */
   | { readonly type: 'rangeCopied'; readonly source: ChangeSource; readonly rows: number; readonly columns: number; readonly cells: number; readonly cut: boolean }
+  /**
+   * `@dzgrid/dom/state` (Phase 6 step 5, grid-state.md 5, 6; the core never sends these): the saved parts changed, once per
+   * gesture after its pause (never for the host's changes nor a restore); a state restored, with what it skipped.
+   */
+  | { readonly type: 'stateChanged'; readonly source: ChangeSource; readonly state: GridState }
+  | { readonly type: 'stateRestored'; readonly source: ChangeSource; readonly problems: readonly Problem[] }
+  /** The density a user picked (`@dzgrid/dom/column-menu`'s line, density.md 2): told on a change only. The core never sends it. */
+  | { readonly type: 'densityChanged'; readonly source: ChangeSource; readonly density: 'compact' | 'comfortable' | 'spacious' }
   /** Undo or redo became possible or impossible: on each flip only (edit-undo.md 12). */
   | { readonly type: 'undoChanged'; readonly source: ChangeSource; readonly canUndo: boolean; readonly canRedo: boolean }
   /**

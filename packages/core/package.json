@@ -48,6 +48,10 @@
     "./range": {
       "types": "./src/range.ts",
       "default": "./src/range.ts"
+    },
+    "./state": {
+      "types": "./src/state.ts",
+      "default": "./src/state.ts"
     }
   }
 }

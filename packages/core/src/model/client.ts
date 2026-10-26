@@ -140,6 +140,12 @@ export interface RowModel<T> {
   readonly orderStale?: boolean;
   /** The grid's `settings.context`, for the custom filter kinds (Q12): a new one filters again only under one. */
   setApp?(context: unknown, source?: ChangeSource): void;
+  /**
+   * Runs `fn` with the model's requests held (Phase 6 step 5, owner E5-1; `@dzgrid/core/state`): the queries, columns and pages
+   * it sets cost one request, sent once `fn` returns (or throws), carrying them all; none when nothing changed what is asked.
+   * A server's model only (the browser's asks nothing). Not re-entrant: the end of any hold sends the request.
+   */
+  hold?(fn: () => void): void;
   subscribe(fn: (c: ModelChange<T>) => void): () => void;
   destroy(): void;
 }
@@ -843,6 +849,11 @@ export interface ModelEnv<T> {
   readonly shape?: RowShape<T>;
   /** The application's context at creation: the first request's custom filters are wired with it. */
   readonly app?: unknown;
+  /**
+   * A server's model is made held (`@dzgrid/dom/state`, Phase 6 step 5): its first request waits for the end of the first
+   * `hold(fn)`, so a state restored at creation is the first thing asked (grid-state.md 17). The browser's model ignores it.
+   */
+  readonly held?: boolean | undefined;
 }
 
 /** A model to make once the grid knows its columns and language. */

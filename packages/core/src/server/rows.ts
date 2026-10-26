@@ -261,8 +261,12 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     return () => gate.cancel(ch);
   };
 
+  /** `hold(fn)` (E5-1): the loads asked meanwhile become one, sent at its end; made held, the first waits for the first hold. */
+  let held = env.held;
+  let wanted = false;
   const load = (): void => {
     setStatus(LOADING);
+    if (held) return void (wanted = true);
     const parts = partsOf();
     if (serverPages) parts.page = { index, size, offset: index * size, cursor: cursorMode ? cursors[index]! : null };
     const key = canonical(parts);
@@ -587,6 +591,18 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
       }, source);
     },
     get orderStale() { return inner.orderStale || staleAt >= 0; },
+    hold(fn) {
+      held = true;
+      try {
+        fn();
+      } finally {
+        held = false;
+        if (wanted) {
+          wanted = false;
+          if (!destroyed) load();
+        }
+      }
+    },
     setApp(next, source = 'api') {
       commit(() => {
         inner.setApp(next, source);

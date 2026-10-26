@@ -1,0 +1,67 @@
+{
+  "id": "width-absent-clears",
+  "suite": "grid-state",
+  "description": "A column the user sized, with no width in the state: back to its definition's width (E5-6, Q3-3).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name",
+        "width": 100
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "before": [
+      {
+        "type": "column.resize",
+        "column": "name",
+        "width": 300,
+        "finished": true
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "pinned": null,
+          "order": 0
+        }
+      ]
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "city",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

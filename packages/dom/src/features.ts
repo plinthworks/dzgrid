@@ -23,6 +23,11 @@ export interface GridFeature {
    * the model is made (a shape is fixed for the grid's life). The first feature giving one wins.
    */
   shape?(): RowShape<unknown>;
+  /**
+   * True: a server's model is made held (Phase 6 step 5, `@dzgrid/dom/state`'s storage at creation): its first request waits
+   * for the end of the feature's first `g.rows.hold(fn)` in `setup`, so what it restores is the first thing asked.
+   */
+  readonly held?: boolean;
   setup(g: GridContext<unknown>): FeatureHandle;
 }
 

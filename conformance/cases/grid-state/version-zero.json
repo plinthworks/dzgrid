@@ -1,0 +1,63 @@
+{
+  "id": "version-zero",
+  "suite": "grid-state",
+  "description": "`v` 0 with no upgrade step for it (none exist yet): refused, nothing applied.",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "restore": {
+      "v": 0,
+      "sort": [
+        {
+          "column": "name",
+          "dir": "asc"
+        }
+      ]
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-version",
+        "severity": "error",
+        "path": "v"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "city",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

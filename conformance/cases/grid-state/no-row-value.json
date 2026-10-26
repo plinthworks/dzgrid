@@ -1,0 +1,83 @@
+{
+  "id": "no-row-value",
+  "suite": "grid-state",
+  "description": "Rows hold a name (`SECRET-…`); the state names ids, numbers and the query only: the name is absent from its text (G 3).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "name": "SECRET-Fatima",
+        "age": 40,
+        "city": "Oran"
+      }
+    ],
+    "before": [
+      {
+        "type": "sort.set",
+        "sort": [
+          {
+            "column": "name",
+            "dir": "asc"
+          }
+        ]
+      },
+      {
+        "type": "selection.toggle",
+        "row": "r1"
+      }
+    ],
+    "restore": {
+      "v": 1
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "city",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [
+        {
+          "column": "name",
+          "dir": "asc"
+        }
+      ],
+      "filter": {},
+      "quick": ""
+    },
+    "leaks": false,
+    "shown": [
+      "r1"
+    ]
+  }
+}

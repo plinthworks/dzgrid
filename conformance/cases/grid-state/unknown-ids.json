@@ -1,0 +1,103 @@
+{
+  "id": "unknown-ids",
+  "suite": "grid-state",
+  "description": "A column renamed or removed: its entry, its sort item and its filter dropped with `state-column` (the id given); the rest applied (G 10).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "gone",
+          "pinned": null,
+          "order": 0
+        },
+        {
+          "id": "city",
+          "pinned": null,
+          "order": 1
+        }
+      ],
+      "sort": [
+        {
+          "column": "gone",
+          "dir": "asc"
+        },
+        {
+          "column": "age",
+          "dir": "asc"
+        }
+      ],
+      "filter": {
+        "gone": {
+          "type": "text",
+          "op": "contains",
+          "value": "x"
+        }
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-column",
+        "severity": "warning",
+        "path": "columns.0",
+        "detail": "gone"
+      },
+      {
+        "code": "state-column",
+        "severity": "warning",
+        "path": "sort.0",
+        "detail": "gone"
+      },
+      {
+        "code": "state-column",
+        "severity": "warning",
+        "path": "filter.gone"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "city",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "name",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [
+        {
+          "column": "age",
+          "dir": "asc"
+        }
+      ],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

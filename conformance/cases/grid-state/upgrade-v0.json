@@ -1,0 +1,57 @@
+{
+  "id": "upgrade-v0",
+  "suite": "grid-state",
+  "description": "An older version is read by the reader's own upgrade steps, one at a time: a planted v0 (`cols`, ids only) upgraded to v1, then restored (G 9).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      },
+      {
+        "id": "city"
+      }
+    ],
+    "upgradeV0": true,
+    "restore": {
+      "v": 0,
+      "cols": [
+        "city",
+        "name",
+        "age"
+      ]
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "city",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "name",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

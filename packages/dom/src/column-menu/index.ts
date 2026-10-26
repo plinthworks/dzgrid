@@ -1,5 +1,5 @@
 import { fold, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type Side } from '@dzgrid/core';
-import { isDataKey } from '@dzgrid/core/internal';
+import { emit, isDataKey } from '@dzgrid/core/internal';
 import type { GridFeature } from '../features.js';
 import type { ColumnMenuMessageKey } from '../part-texts.js';
 import type { Frame } from '../render/rows.js';
@@ -193,6 +193,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
           o.density && typeof g.settings.rowHeight !== 'number' && radios('density.label', ['density.compact', 'density.comfortable', 'density.spacious'], `density.${now}`, (d) => {
             g.settings = { ...g.settings, density: d as Density };
             g.schedule();
+            // density.md 2: what the state feature saves (Phase 6 step 5); the same density again says nothing.
+            if (d !== now) emit(kernel, { type: 'densityChanged', source: 'user', density: d as Density });
             o.onDensity?.(d as Density);
             say(g.msg('density.changed', { density: g.msg(`density.${d as Density}`) }));
           }),
