@@ -82,10 +82,12 @@ export interface RangeMessages {
 
 /** Moving columns' texts (`@dzgrid/dom/columns`, Phase 6 step 2), in their own bundles (`locales/<lang>-columns`): optional here, required by `columns()`. */
 export type ColumnsMessageKey = 'move.placed' | 'move.edge' | 'move.locked' | 'move.cancelled';
-/** A columns bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_COLUMNS.text }`. */
+/** The column chooser's texts (`@dzgrid/dom/columns-panel`, Phase 6 step 4, owner Q4-1): in the same `-columns` bundles, required by `columnsChooser()`. */
+export type ColumnsChooserMessageKey = `chooser.${'title' | 'search' | 'list' | 'handle' | 'up' | 'down' | 'placed' | 'showAll' | 'reset' | 'close' | 'none' | 'matches' | 'shown' | 'hidden' | 'allShown' | 'resetDone' | 'pinnedStart' | 'pinnedEnd' | 'last' | 'clearToMove'}`;
+/** A columns bundle (the moves' and the chooser's texts), spread by the host into its messages: `text: { ...FR.text, ...FR_COLUMNS.text }`. */
 export interface ColumnsMessages {
   readonly locale: string;
-  readonly text: { readonly [K in ColumnsMessageKey]: MessageValue };
+  readonly text: { readonly [K in ColumnsMessageKey | ColumnsChooserMessageKey]: MessageValue };
 }
 
 /** The column menu's texts (`@dzgrid/dom/column-menu`, Phase 6 step 3, owner Q3-2), in their own bundles (`locales/<lang>-column-menu`): optional here, required by `columnMenu()`. */

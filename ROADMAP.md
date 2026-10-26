@@ -793,7 +793,13 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   (Q3-3); `onDensity` (Q3-4); base `shortcuts` seam; popup `from` / `align` / `back`; playground `orders-edit.html`
   (`?menu=0` off). **Size granted (Q3-5)**: 4 300 line, texts 500 / 600 / 700; was — `dom/column-menu` ≈ 3 950 B gz against the 3 000 grant (stop 2 800), the
   `-column-menu` texts ≈ 20–25 B over 450 / 550 / 650: the owner's decision (options in the plan's « Done »).
-- [ ] step 4: `@dzgrid/dom/columns-panel` (the chooser).
+- [~] step 4 (2026-10-26, not committed, no review yet; plan `docs/phase-6-steps/step04-plan.md` « Done »):
+  `@dzgrid/dom/columns-panel` — « Choisir les colonnes », a modal dialog from the ⋮ menu or an app button: checkboxes,
+  folded search, header groups, Alt+↑ / ↓, ▲ ▼, a handle (mouse, pen, finger), Show all, Reset, live sync; pure order
+  functions in `columns/order.ts` (mutants there only, at the combined review); texts in `-columns` (Q4-1);
+  `columns-panel.css` (Q4-2); `content-visibility` above 200 rows (Q4-3); popup Tab trap skips `tabindex="-1"`; demo
+  `orders-edit.html` (« Colonnes » button, `?chooser=0` off). Sizes after the review: 4 286 / 4 400 (Q4-4 used), CSS 991 / 1 000.
+  Browser `--only chooser`: Chrome 29, Firefox 8, WebKit 8.
 - [ ] step 5: `@dzgrid/core/state`.
 - [ ] step 6: `@dzgrid/dom/state` (`persistLocal`, URL helpers).
 - [ ] step 7: `@dzgrid/dom/columns` part 2, keyboard resize mode and auto-size (exit criterion 1).

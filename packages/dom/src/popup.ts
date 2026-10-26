@@ -18,6 +18,8 @@ export interface PopupOptions {
   readonly align?: 'end';
   /** Where the focus goes when it closes, instead of the anchor (the grid's own focus: a menu opened by a pointer). */
   readonly back?: () => void;
+  /** Room neither below nor above: its end at the window's (inside it, scrolling within; the menu). Else below, as a filter popup always was. */
+  readonly fit?: boolean;
 }
 
 export interface PopupRef {
@@ -30,7 +32,8 @@ export interface PopupRef {
   close(): void;
 }
 
-const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+/** What Tab stops on: a control out of the tab order (`tabindex="-1"`: a roving list's other items, the chooser's ▲ ▼) is not one (step 4). */
+const FOCUSABLE = ':is(button, input, select, textarea):not([disabled], [tabindex="-1"]), [href], [tabindex]:not([tabindex="-1"])';
 
 const topLayer = (el: HTMLElement): el is HTMLElement & { showPopover(): void; hidePopover(): void } =>
   typeof (el as { showPopover?: unknown }).showPopover === 'function';
@@ -160,7 +163,7 @@ export class PopupHost {
   }
 
   /** Below (or beside) the anchor or `from`, start edges aligned (`align: 'end'`: end edges); above it when there is no room below. */
-  #place(anchor: HTMLElement, el: HTMLElement, { placement, from = anchor, align }: PopupOptions): void {
+  #place(anchor: HTMLElement, el: HTMLElement, { placement, from = anchor, align, fit }: PopupOptions): void {
     const win = this.#doc.defaultView;
     const box = el.getBoundingClientRect();
     const r = placedBy(from, !!align, box.width);
@@ -169,8 +172,8 @@ export class PopupHost {
     const dir = this.#dir();
     if (placement === 'block-end') {
       const below = r.bottom + 2;
-      // Below; else above; else (a tall menu, no room either way) its end at the window's: inside it, scrolling within (1.4.10).
-      const top = below + box.height <= winBlock ? below : r.top - 2 - box.height >= 0 ? r.top - 2 - box.height : winBlock - box.height;
+      // Below; else above; else (a tall menu, `fit`, no room either way) its end at the window's: inside it, scrolling within (1.4.10).
+      const top = below + box.height <= winBlock ? below : r.top - 2 - box.height >= 0 ? r.top - 2 - box.height : fit ? winBlock - box.height : below;
       setPx(el, 'inset-block-start', Math.max(0, top));
       setPx(el, 'inset-inline-start', fixedInlineStart(r, dir, winInline, box.width));
     } else {

@@ -81,6 +81,10 @@
       "types": "./src/column-menu.ts",
       "default": "./src/column-menu.ts"
     },
+    "./columns-panel": {
+      "types": "./src/columns-panel.ts",
+      "default": "./src/columns-panel.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"

@@ -163,3 +163,33 @@ reset, live sync), `columns-chooser-search.test.ts` (folding fr / ar, groups, co
 `columns-chooser-keys.test.ts` (Alt+arrows, ▲ / ▼, segments, groups, locked, `chooser.placed` counting hidden
 columns); browser: Chrome fr / ar RTL, 320 px, touch target sizes, a finger drag on the handle, axe 0, forced
 colours.
+
+## As built (Phase 6 step 4, 2026-10-26; `docs/phase-6-steps/step04-plan.md` « Done »)
+- Entry `@dzgrid/dom/columns-panel`: `columnsChooser({ onClose })`; `api(grid).open(anchor?)` (false when nothing is
+  listed; already open: the focus to the search), `close()`, `isOpen`. The menu's `use: { chooser }` opens it from the
+  header (step 3 seam). Texts in `locales/<lang>-columns` (`chooser.*`, owner Q4-1); look in `@dzgrid/theme/columns-panel.css` (Q4-2).
+- 1–2: anchored on the grid's root (unticking the opener's own column keeps it open), placed under the opener with its
+  **end edge on the opener's end edge** (the plan's choice over « Right to left »'s « start edge »: in Arabic its left
+  edge on the button's left edge), above when there is no room; without an anchor, under the grid's header. The width is
+  `min(22.5rem, 100vw − 2rem)` plus the popup's padding: inside a 320 px view.
+- 4: a press on the application's button while open leaves it open (its click opens it again: the focus to the search).
+  Closing gives the focus to that button; from a header, to the grid's own focus (that header when the grid had none).
+  New definitions with the same columns (a header renamed) redraw it; another set of columns closes it.
+- 6, 8: rows are `li.dzg-cp-row` in `ul[role=list]`; a group is `li > div[role=group][aria-labelledby]` (its label and
+  its own list), never a `listitem` with a group role. The description joins the pin and `chooser.last` (« dernière
+  colonne affichée ») for the last shown column.
+- 9: not built — collapsible groups come at step 8 (`chooser.inClosedGroup` lands with them).
+- 10 (owner Q4-3): no windowing code; above 200 rows the list is marked `data-dzg-long` and its rows get
+  `content-visibility: auto` (not below: WebKit misses a click on a freshly drawn skipped row). 300 columns open in ≈ 80 ms
+  in Chrome.
+- 11: sentences `chooser.shown` / `chooser.hidden` (the chooser's own, not the menu's `menu.hidden`); 13: `chooser.allShown`,
+  `chooser.resetDone`.
+- 15: the count is not said when the search is emptied.
+- 17–19: one place in the list = one step among the columns and sub-groups beside it at its level: a column outside a
+  group passes the whole group (groups stay whole), a grouped column stays in its group; a locked column is jumped and
+  keeps its slot. Sentences `chooser.placed`, `move.edge`, `move.locked`.
+- 20: the bar lands among the dragged row's own list items of its segment (never pins); Escape says `move.cancelled`
+  and keeps the dialog open; a locked column's handle is disabled.
+- Tab: the chooser moves the focus itself along search → list → « Tout afficher » → « Réinitialiser » → « Fermer »
+  (WebKit's Tab skips buttons by default); a click focuses what it pressed. « Fermer » is the third footer button.
+- Known risk: sentences go to the grid's live region, outside the `aria-modal` dialog; to be checked by ear (a11y §21).

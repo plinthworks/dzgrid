@@ -57,3 +57,12 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **Q3-4:** the density line now through the app (`onDensity`), `setDensity` at step 6.
 - Lead: keyboard resize is step 7 (not 6); no `invalid-menu` problem code; classes only (no replaceable parts) for the button and items.
 - **Q3-5 (owner, 2026-10-26):** `@dzgrid/dom/column-menu` 3 000 → 4 300 (measured 3 951, full menu kept); `-column-menu` texts en/fr/ar 450/550/650 → 500/600/700. Core seam guard 28 916 → 28 930 for `width: null` (Q3-3).
+
+## Step 4 (owner, 2026-10-26) — plan `step04-plan.md`
+
+- **Q4-1 (lead, recommendation kept):** the chooser texts live in `-columns` (fits 500/600/800).
+- **Q4-2:** a new `columns-panel.css` (~900 B; ceiling at the measure + 10 %, up to 1 000).
+- **Q4-3:** above 200 columns, CSS `content-visibility` instead of JS windowing.
+- **Q4-4:** `@dzgrid/dom/columns-panel` may rise from 4 000 up to 4 400 if needed.
+- Lead (from the plan): the chooser anchors on the grid root (unticking the opener's column must not close it); the popup host's Tab trap skips `tabindex="-1"` (+~15 B popup); new pure order functions get the mutants; `align: 'end'`; `columnsChooser()` with `open/close/isOpen` and `onClose`.
+- **Order revised again (owner, 2026-10-26):** the docs website moves to the very END (after Phase 11). Order: Phase 6 → 7 → 8 → 9 → 10 → 11 → docs website.

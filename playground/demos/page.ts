@@ -11,6 +11,7 @@ import '../../packages/theme/edit.css';
 import '../../packages/theme/range.css';
 import '../../packages/theme/fill.css';
 import '../../packages/theme/columns.css';
+import '../../packages/theme/columns-panel.css';
 import { mountOrders } from './orders.js';
 import { mountHr } from './hr.js';
 import { mountOrdersEdit } from './orders-edit.js';
@@ -61,8 +62,8 @@ const RANGE_TEXT = {
 } as const;
 // Moving columns (Phase 6 step 2): the drag, the keys; the no-drag way (WCAG 2.5.7) is the ⋮ menu of step 3.
 const COLUMNS_TEXT = {
-  fr: 'Colonnes : glissez un en-tête pour le déplacer (dans les colonnes épinglées : il s’y épingle), ou sur un en-tête Ctrl+Maj+← / → (⌘⇧ sur Mac), Ctrl+Maj+Début / Fin ; Échap annule le glisser (?columns=0 l’éteint). 2.5.7 : chemin sans glisser à l’étape 3.',
-  ar: 'الأعمدة: اسحب رأس عمود لنقله (داخل الأعمدة المثبّتة يُثبَّت فيها)، أو على رأس العمود Ctrl+Shift+← / → (⌘⇧ على Mac)، Ctrl+Shift+Home / End؛ Escape يلغي السحب (?columns=0 يوقفه). 2.5.7: طريق بلا سحب في المرحلة 3.',
+  fr: 'Colonnes : glissez un en-tête pour le déplacer (dans les colonnes épinglées : il s’y épingle), ou sur un en-tête Ctrl+Maj+← / → (⌘⇧ sur Mac), Ctrl+Maj+Début / Fin ; Échap annule le glisser (?columns=0 l’éteint). « Colonnes » (ou ⋮ → « Choisir les colonnes… ») : cocher, chercher, et changer l’ordre par Alt+↑ / ↓, ▲ ▼ ou la poignée (?chooser=0 l’éteint).',
+  ar: 'الأعمدة: اسحب رأس عمود لنقله (داخل الأعمدة المثبّتة يُثبَّت فيها)، أو على رأس العمود Ctrl+Shift+← / → (⌘⇧ على Mac)، Ctrl+Shift+Home / End؛ Escape يلغي السحب (?columns=0 يوقفه). «الأعمدة» (أو ⋮ ← «اختيار الأعمدة…»): التحديد والبحث وتغيير الترتيب بـ Alt+↑ / ↓ أو ▲ ▼ أو المقبض (?chooser=0 يوقفه).',
 } as const;
 // `?focus=range`: a title and five bullets on blocks of cells, the clipboard and the fill (steps 11a, 11b, 12).
 const FOCUS_TEXT = {

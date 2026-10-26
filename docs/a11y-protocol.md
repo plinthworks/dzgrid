@@ -890,7 +890,8 @@ Durée estimée : 30 min par couple et par langue. Rien n'est « validé » avan
      changer l'ordre ».
 155. **Fermer la fenêtre.** `Échap` dans la recherche non vide la vide ; `Échap` encore ferme ; le focus revient
      sur l'en-tête d'où le menu était parti. Ouverte par un bouton de l'application : le focus revient à ce
-     bouton.
+     bouton. (Étape 4, tel que construit : les phrases 152–155 passent par la zone d'annonce de la grille, hors de la
+     fenêtre modale ; noter, par lecteur, celles qui ne sont **pas** dites pendant que la fenêtre est ouverte.)
 156. **Redimensionner au clavier.** Sur « Nom », `Alt+R` (ou le menu « Redimensionner au clavier ») : fr
      « Redimensionner Nom : 140 pixels. Flèches pour changer, Entrée pour garder, Échap pour annuler » ; `→`
      trois fois puis une pause : « Nom : 170 pixels » (une seule phrase) ; `Maj+→` : 1 pixel ; au bout :

@@ -1,0 +1,202 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/columns-panel.css — the column chooser (Phase 6 step 4, owner Q4-2: its own file, loaded by the
+// applications that use `@dzgrid/dom/columns-panel`; columns.css is full). docs/behaviors/columns-chooser.md 2, 6, 20.
+// Compiled to columns-panel.css (layered) and columns-panel.unlayered.css ($layered: false) by `npm run build:theme`;
+// a test fails when they drift.
+//
+// The dialog (inside `.dzg-popup`, which draws the surface) is at most 360 px wide, the view's width on a phone
+// (1.4.10), and 70 % of the view high: its list scrolls inside. Each row: the checkbox and its label at the inline
+// start, ▲ ▼ and the handle at the inline end, 24 px targets drawn as shapes over currentColor (no glyph font); in a list
+// of more than 200 rows (`data-dzg-long`), rows are laid out only when seen (`content-visibility`, owner Q4-3: no
+// windowing code). The handle grabs and takes the finger
+// (`touch-action: none` on it only: the list still scrolls elsewhere, O5). A 2 px bar marks the landing gap, in the
+// move bar's colour; the dragged row is dimmed. Groups indent by `padding-inline-start`. No colour literal, no
+// physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-cp {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    inline-size: min(22.5rem, 100vw - 2rem);
+    max-block-size: 70vh;
+  }
+
+  .dzg-cp-title,
+  .dzg-cp-gl {
+    font-weight: 600;
+  }
+
+  .dzg-cp-q {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .dzg-cp-q input {
+    box-sizing: border-box;
+    min-block-size: var(--dzg-target-min, 24px);
+  }
+
+  .dzg-cp-list {
+    position: relative;
+    flex: 1 1 auto;
+    min-block-size: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .dzg-cp-list ul {
+    margin: 0;
+    padding: 0;
+    padding-inline-start: 1rem;
+    list-style: none;
+  }
+
+  .dzg-cp-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-block-size: 32px;
+  }
+
+  // Above 200 rows only (the script marks the list): WebKit hit-tests a freshly drawn skipped row as its item.
+  .dzg-cp-list[data-dzg-long] .dzg-cp-row {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 32px;
+  }
+
+  .dzg-cp-row label {
+    flex: 1;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dzg-cp-desc {
+    color: var(--tz-fg-muted);
+    font-size: 0.85em;
+  }
+
+  .dzg-cp-row button {
+    position: relative;
+    flex: none;
+    inline-size: var(--dzg-target-min, 24px);
+    block-size: var(--dzg-target-min, 24px);
+    padding: 0;
+    border: 0;
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: inherit;
+    background: none;
+    cursor: pointer;
+  }
+
+  .dzg-cp-row button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+  }
+
+  .dzg-cp-row [data-act=up]::before {
+    clip-path: polygon(50% 30%, 80% 66%, 20% 66%);
+  }
+
+  .dzg-cp-row [data-act=down]::before {
+    clip-path: polygon(20% 34%, 80% 34%, 50% 70%);
+  }
+
+  .dzg-cp-row [data-act=drag]::before {
+    clip-path: path("M7.5 6a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0zM13.5 6a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0zM7.5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0zM13.5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0zM7.5 18a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0zM13.5 18a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0z");
+  }
+
+  .dzg-cp-row [data-act=drag] {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .dzg-cp [aria-disabled=true] {
+    color: var(--dzg-menu-disabled, var(--tz-fg-muted));
+    cursor: default;
+  }
+
+  // A box that cannot flip (the last shown, `hideable: false`): faded AND a lock before its name, never colour alone.
+  .dzg-cp-row input[aria-disabled=true] {
+    opacity: 0.5;
+  }
+
+  .dzg-cp-row input[aria-disabled=true] + label::before {
+    content: '';
+    display: inline-block;
+    inline-size: 12px;
+    block-size: 14px;
+    margin-inline-end: 0.375rem;
+    background: currentColor;
+    clip-path: path("M1 6h10v8H1zM3 6V4a3 3 0 0 1 6 0v2H7.5V4a1.5 1.5 0 0 0-3 0v2z");
+  }
+
+  .dzg-cp-row[data-dzg-dragging] {
+    opacity: 0.5;
+  }
+
+  .dzg-cp-bar {
+    position: absolute;
+    inset-inline: 0;
+    block-size: 2px;
+    background: var(--dzg-move-bar, var(--tz-accent));
+    pointer-events: none;
+  }
+
+  .dzg-cp-foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .dzg-cp-foot button {
+    min-block-size: var(--dzg-target-min, 24px);
+  }
+
+  .dzg-cp-none:empty {
+    display: none;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-cp-row button::before {
+      forced-color-adjust: none;
+      background: ButtonText;
+    }
+
+    .dzg-cp-bar {
+      forced-color-adjust: none;
+      background: Highlight;
+    }
+
+    .dzg-cp-row input[aria-disabled=true] + label::before {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+  }
+}

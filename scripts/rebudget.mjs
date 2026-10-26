@@ -105,6 +105,10 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/en-column-menu': 500, // Q3-5: 450 → 500
   '@dzgrid/dom/locales/fr-column-menu': 600, // Q3-5: 550 → 600
   '@dzgrid/dom/locales/ar-column-menu': 700, // Q3-5: 650 → 700
+  // Phase 6 step 4 (owner Q-B, Q4-1, Q4-2, Q4-4): the column chooser over the popup host (4 000, up to 4 400 if needed);
+  // its texts in the -columns bundles (500 / 600 / 800 kept), its look in its own columns-panel.css (measure + 10 %, ≤ 1 000).
+  '@dzgrid/dom/columns-panel': 4400, // Q4-4: up to 4 400 used at the review of steps 3–4 (its own live status, auto-scroll loop: measured 4 282)
+  '@dzgrid/theme/columns-panel.css': 1000,
   '@dzgrid/theme': 2750, // T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7

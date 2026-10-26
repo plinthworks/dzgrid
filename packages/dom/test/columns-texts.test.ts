@@ -15,7 +15,8 @@ import { msg } from '../src/messages.js';
 describe('columns texts', () => {
   it('COLUMNS_KEYS are each bundle\'s keys, all four of them', () => {
     expect([...COLUMNS_KEYS].sort()).toEqual(['move.cancelled', 'move.edge', 'move.locked', 'move.placed']);
-    for (const b of [EN_COLUMNS, FR_COLUMNS, AR_COLUMNS]) expect(Object.keys(b.text).sort(), b.locale).toEqual([...COLUMNS_KEYS].sort());
+    // The chooser's own keys share the bundles (Phase 6 step 4, Q4-1): columns-chooser-texts.test.ts.
+    for (const b of [EN_COLUMNS, FR_COLUMNS, AR_COLUMNS]) expect(Object.keys(b.text).filter((k) => k.startsWith('move.')).sort(), b.locale).toEqual([...COLUMNS_KEYS].sort());
     expect([EN_COLUMNS.locale, FR_COLUMNS.locale, AR_COLUMNS.locale]).toEqual(['en', 'fr', 'ar']);
   });
 

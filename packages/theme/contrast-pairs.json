@@ -172,7 +172,12 @@
     { "what": "a menu item's keys hint", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
     { "what": "a menu item's keys hint under the pointer", "fg": "--tz-fg-muted", "bg": "--dzg-row-hover-bg", "min": 4.5 },
     { "what": "the focus ring on a menu item", "fg": "--dzg-focus-ring", "bg": "--tz-bg", "min": 3 },
-    { "what": "the ⋮ button on the header", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 3 }
+    { "what": "the ⋮ button on the header", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 3 },
+    { "what": "a row's description in the column chooser (Phase 6 step 4, columns-panel.css)", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "a disabled box or button in the column chooser (exempt from 1.4.3, kept at 3:1)", "fg": "--dzg-menu-disabled", "bg": "--tz-bg", "min": 3 },
+    { "what": "the column chooser's landing bar on the dialog", "fg": "--dzg-move-bar", "bg": "--tz-bg", "min": 3 },
+    { "what": "the column chooser's ▲ ▼ and handle on the dialog", "fg": "--tz-fg", "bg": "--tz-bg", "min": 3 },
+    { "what": "the column chooser's lock before a box that cannot flip (its label's colour)", "fg": "--tz-fg", "bg": "--tz-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",

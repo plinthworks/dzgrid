@@ -97,7 +97,8 @@ describe('0.3.0, the four packages', () => {
       expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
       expect(theme.files, f).toContain(f);
     }
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fill', 'columns'\]/);
+    // Step 4 adds 'columns-panel' after it.
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fill', 'columns'[,\]]/);
   });
 
   it('export the Phase 6 step 3 subpaths (@dzgrid/dom/column-menu, its -column-menu texts), built like the others; its look in columns.css', () => {
@@ -107,6 +108,18 @@ describe('0.3.0, the four packages', () => {
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
     expect(build).toMatch(/'\.\/columns', '\.\/column-menu'/);
     for (const lang of ['en', 'fr', 'ar']) expect(build).toContain(`'./locales/${lang}-column-menu'`);
+  });
+
+  it('export the Phase 6 step 4 subpath (@dzgrid/dom/columns-panel), built like the others; its look in columns-panel.css (built, exported, shipped)', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./columns-panel']).toEqual({ types: './src/columns-panel.ts', default: './src/columns-panel.ts' });
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/column-menu', '\.\/columns-panel'/);
+    const theme = JSON.parse(readFileSync(`${ROOT}packages/theme/package.json`, 'utf8'));
+    for (const f of ['columns-panel.css', 'columns-panel.unlayered.css', 'columns-panel.scss']) {
+      expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
+      expect(theme.files, f).toContain(f);
+    }
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'columns', 'columns-panel'\]/);
   });
 
   it('keep gsap and tzslot optional peers', () => {

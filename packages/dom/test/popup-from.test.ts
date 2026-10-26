@@ -75,11 +75,21 @@ describe('placed by another element, end edges aligned', () => {
     const h = host('ltr');
     boxOf(h.button, { left: 476, top: 60, width: 24, height: 24 });
     const content = document.createElement('div');
-    const p = h.popups.open(h.anchor, content, { placement: 'block-end', from: h.button, align: 'end' });
+    const p = h.popups.open(h.anchor, content, { placement: 'block-end', from: h.button, align: 'end', fit: true });
     // 750 high: 86 + 750 > 800 below, 60 − 2 − 750 < 0 above: 800 − 750.
     boxOf(p.el, { left: 0, top: 0, width: 200, height: 750 });
     p.reposition();
     expect(h.at(p).top).toBe('50px');
+  });
+
+  it('that window fit is the menu\'s only (`fit: true`, review of steps 3–4): without it (a filter popup) below, as before', () => {
+    const h = host('ltr');
+    boxOf(h.button, { left: 476, top: 60, width: 24, height: 24 });
+    const p = h.popups.open(h.anchor, document.createElement('div'), { placement: 'block-end', from: h.button, align: 'end' });
+    boxOf(p.el, { left: 0, top: 0, width: 200, height: 750 });
+    p.reposition();
+    // 60 + 24 + 2.
+    expect(h.at(p).top).toBe('86px');
   });
 
   it('without `from`: the anchor, start edges aligned, as before', () => {

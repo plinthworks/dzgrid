@@ -101,6 +101,9 @@
       "@dzgrid/dom/column-menu": [
         "./packages/dom/src/column-menu.ts"
       ],
+      "@dzgrid/dom/columns-panel": [
+        "./packages/dom/src/columns-panel.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

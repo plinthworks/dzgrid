@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@dzgrid/dom/columns-panel` (Phase 6 step 4; docs/behaviors/columns-chooser.md, owner Q-C1, Q-C2, Q-H, O1, O5, O12,
+  Q4-1–Q4-4): « Choisir les colonnes ». `columnsChooser()` and `api(grid).open(anchor?) / close() / isOpen`, opened by
+  the column menu's « Choose columns… » (`use: { chooser }`) or the application's own button: a modal dialog named by its
+  title, focus in its search box (visible label), every listed column in the grid's full order (start-pinned, centre,
+  end-pinned, hidden ones included) inside its header groups, a native checkbox each (changes apply at once, one patch,
+  said; the last shown column and `hideable: false` disabled but reachable), a search folded as the quick search (accents,
+  Arabic hamza forms and short vowels; a group's name shows its columns; the count said after a pause), reordering by
+  Alt+ArrowUp / ArrowDown (Option on a Mac), ▲ ▼ (WCAG 2.5.7) and a handle the mouse, a pen or a finger drags (the place
+  said among all listed columns, hidden ones counted; never across a pinned edge; groups kept whole; locked columns kept),
+  « Show all », « Reset » (the menu's patch), live sync with focus kept. Texts: twenty `chooser.*` keys in
+  `locales/{en,fr,ar}-columns`; look in the new `@dzgrid/theme/columns-panel.css` (contrast pairs added).
+- `@dzgrid/core`: `ColumnDef.chooser?: false` (type only): a column left out of the chooser's list.
+
 - `@dzgrid/dom/column-menu` (Phase 6 step 3; docs/behaviors/column-menu.md, owner Q-M1, Q-M2, Q-K1, Q3-1–Q3-4,
   S12-Q12): the column ⋮ menu. A ⋮ button on each column header of 96 px and more (out of the tab order, shown on hover,
   focus or touch), a right-click (Shift+right-click keeps the browser's), Shift+F10 and the Menu key, Alt+ArrowDown where
@@ -49,6 +62,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fill's target only once the pointer is half a row inside it (an edge slip fills nothing).
 
 ### Changed
+
+- `@dzgrid/dom/popup`: a modal popup's Tab trap skips controls taken out of the tab order (`tabindex="-1"`): Tab from
+  its real last control wraps to the first, Shift+Tab from the first to the real last (before, a `tabindex="-1"` button
+  or input still counted as the last, and Tab left the popup).
 
 - The header's `aria-keyshortcuts` is written by the base once, joining the features' lists (`FeatureHandle.shortcuts`),
   deduplicated and sorted: the filters no longer write it alone (they wiped any other), `columns()` now declares its

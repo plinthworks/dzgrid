@@ -37,6 +37,8 @@ import { AR_COLUMNS } from '@dzgrid/dom/locales/ar-columns';
 import { columnMenu } from '@dzgrid/dom/column-menu';
 import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
 import { AR_COLUMN_MENU } from '@dzgrid/dom/locales/ar-column-menu';
+// Phase 6 step 4: « Choisir les colonnes », from the ⋮ menu and the « Colonnes » button (`?chooser=0` turns it off).
+import { columnsChooser, type ColumnsChooserApi } from '@dzgrid/dom/columns-panel';
 import { pagination } from '@dzgrid/dom/pagination';
 import { tree } from '@dzgrid/dom/tree';
 import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
@@ -71,14 +73,14 @@ const W = {
     sent: '{col} : « {v} » envoyé…', saved: '{col} : enregistré', refused: '{col} refusé : {why}', local: 'Refus sur place : {why}', nothing: 'Rien encore.',
     motion: 'Animations', offline: 'Serveur injoignable', remove: 'Supprimer cette commande dans 3 s', removed: 'Commande {ref} supprimée', next: 'Page suivante dans 3 s', pick: 'Choisissez d\u2019abord une cellule.',
     undo: 'Annuler', redo: 'Rétablir', undone: 'Annulé : {col}', redone: 'Rétabli : {col}', parent: 'Commande mère', structure: 'Structure de l\u2019arbre : non modifiable',
-    send: 'Envoyer la sélection (simulé)', sending: 'Envoi de {n} cellules…', sent2: 'Sélection envoyée puis effacée ({n} cellules)', noBlock: 'Sélectionnez d\u2019abord un bloc.', changed: 'Sélection modifiée pendant l\u2019envoi : gardée' },
+    columns: 'Colonnes', send: 'Envoyer la sélection (simulé)', sending: 'Envoi de {n} cellules…', sent2: 'Sélection envoyée puis effacée ({n} cellules)', noBlock: 'Sélectionnez d\u2019abord un bloc.', changed: 'Sélection modifiée pendant l\u2019envoi : gardée' },
   ar: { title: 'الطلبات', ref: 'الطلب', client: 'العميل', day: 'التاريخ', status: 'الحالة', qty: 'الكمية', amount: 'المبلغ', urgent: 'عاجل',
     yes: 'نعم', no: 'لا', locked: 'غير قابل للتعديل', integer: 'المطلوب عدد صحيح', server: 'رفضه خادم العرض',
     statuses: { pending: 'قيد الانتظار', ready: 'جاهزة', shipped: 'مُرسلة', delivered: 'مُسلّمة', cancelled: 'ملغاة' },
     sent: '{col}: «{v}» أُرسل…', saved: '{col}: حُفظ', refused: '{col} مرفوض: {why}', local: 'رفض فوري: {why}', nothing: 'لا شيء بعد.',
     motion: 'الحركة', offline: 'الخادم غير متاح', remove: 'حذف هذا الطلب بعد 3 ث', removed: 'حُذف الطلب {ref}', next: 'الصفحة التالية بعد 3 ث', pick: 'اختر خلية أولاً.',
     undo: 'تراجع', redo: 'إعادة', undone: 'تراجع: {col}', redone: 'إعادة: {col}', parent: 'الطلب الأصلي', structure: 'بنية الشجرة: غير قابلة للتعديل',
-    send: 'إرسال التحديد (محاكاة)', sending: 'جارٍ إرسال {n} خلية…', sent2: 'أُرسل التحديد ثم مُسح ({n} خلية)', noBlock: 'حدّد كتلة أولاً.', changed: 'تغيّر التحديد أثناء الإرسال: أُبقي عليه' },
+    columns: 'الأعمدة', send: 'إرسال التحديد (محاكاة)', sending: 'جارٍ إرسال {n} خلية…', sent2: 'أُرسل التحديد ثم مُسح ({n} خلية)', noBlock: 'حدّد كتلة أولاً.', changed: 'تغيّر التحديد أثناء الإرسال: أُبقي عليه' },
 } as const;
 
 /**
@@ -100,6 +102,8 @@ export interface OrdersEditDemo {
   readonly log: string[];
   /** Moving columns (`?columns=0`: null). */
   readonly columns: ColumnsApi | null;
+  /** The column chooser (`?chooser=0`: null). */
+  readonly chooser: ColumnsChooserApi | null;
 }
 
 export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { locale: string; onEvent?: (e: GridEvent<Order>) => void; paged?: boolean; enter?: 'stay' | 'down'; bar?: HTMLElement; tree?: boolean }): OrdersEditDemo {
@@ -169,8 +173,10 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
    * The column ⋮ menu (Phase 6 step 3): the ⋮ on hover, a right-click on a header, Shift+F10 or Alt+↓ on a focused header;
    * with the moves, the block's « Recopier vers le bas / la droite » and the density line; `?menu=0` none.
    */
+  /** « Choisir les colonnes » (Phase 6 step 4): the menu's « Choisir les colonnes… » and the « Colonnes » button; `?chooser=0` none. */
+  const chooser = new URLSearchParams(location.search).get('chooser') === '0' ? null : columnsChooser();
   const menuFeature = () => (new URLSearchParams(location.search).get('menu') === '0' ? [] : [columnMenu({
-    use: { ...(cols && { columns: cols }), ...(blocks && { range: blocks }), ...(filler && { fill: filler }) },
+    use: { ...(cols && { columns: cols }), ...(blocks && { range: blocks }), ...(filler && { fill: filler }), ...(chooser && { chooser }) },
     density: true,
     onDensity: (d) => say(`onDensity(${d})`),
   })]);
@@ -180,7 +186,7 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
     getRowId: (r: Order) => r.id, columns, messages, locale: o.locale, direction: 'auto', label: w.title,
     parts: { status: badge({ tones: { pending: 'warning', ready: 'info', shipped: 'neutral', delivered: 'success', cancelled: 'danger' } }) },
     ...(asTree && { rowClass: (c: { row: Order }) => (c.row.parent ? 'orders-child' : null) }),
-    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...blockFeatures(), ...(cols ? [cols] : []), ...menuFeature(), motion(), ...(o.paged ? [pagination()] : [])],
+    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...blockFeatures(), ...(cols ? [cols] : []), ...menuFeature(), ...(chooser ? [chooser] : []), motion(), ...(o.paged ? [pagination()] : [])],
     onEvent(e: GridEvent<Order>) {
       o.onEvent?.(e);
       if (e.type === 'undoChanged') sync(e.canUndo, e.canRedo);
@@ -276,12 +282,14 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
         }, 600);
       }), { id: 'send-block' }))] : []),
       ...(o.paged ? [button(w.next, () => void setTimeout(() => grid.kernel.dispatch({ type: 'page.go', index: (grid.kernel.rows.page?.index ?? 0) + 1 }, 'api'), 3000))] : []),
+      // The application's own way to the chooser (columns-chooser.md 1; after the others: their places kept): the focus comes back to this button.
+      ...(chooser ? [Object.assign(button(w.columns, () => void chooser.api(grid)?.open(document.getElementById('open-chooser')!)), { id: 'open-chooser' })] : []),
       // Last, in a group of their own (the page's other controls keep their places).
       Object.assign(document.createElement('span'), { className: 'undo' }),
     );
     o.bar.lastElementChild!.append(...undoB);
   }
-  return { grid, log, columns: cols && cols.api(grid) };
+  return { grid, log, columns: cols && cols.api(grid), chooser: chooser && chooser.api(grid) };
 }
 
 /** A control whose press keeps the grid's block (range-selection.md « A press outside the grid »). */

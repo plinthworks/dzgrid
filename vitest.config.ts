@@ -37,6 +37,7 @@ const domAlias = {
   '@dzgrid/dom/fill': fileURLToPath(new URL('./packages/dom/src/fill.ts', import.meta.url)),
   '@dzgrid/dom/columns': fileURLToPath(new URL('./packages/dom/src/columns.ts', import.meta.url)),
   '@dzgrid/dom/column-menu': fileURLToPath(new URL('./packages/dom/src/column-menu.ts', import.meta.url)),
+  '@dzgrid/dom/columns-panel': fileURLToPath(new URL('./packages/dom/src/columns-panel.ts', import.meta.url)),
   '@dzgrid/dom/editors': fileURLToPath(new URL('./packages/dom/src/editors.ts', import.meta.url)),
   '@dzgrid/dom/tree-lazy': fileURLToPath(new URL('./packages/dom/src/tree-lazy.ts', import.meta.url)),
   '@dzgrid/dom/motion-gsap': fileURLToPath(new URL('./packages/dom/src/motion-gsap.ts', import.meta.url)),

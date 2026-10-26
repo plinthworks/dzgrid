@@ -37,6 +37,8 @@ export interface ColumnDef<T, V = unknown> {
   readonly hideable?: false;
   /** `false`: no column menu (no ⋮, no right-click menu; its keys left to the page). Phase 6 step 3. */
   readonly menu?: false;
+  /** `false`: left out of the column chooser's list (still hideable by the menu). Phase 6 step 4, columns-chooser.md 6. */
+  readonly chooser?: false;
   readonly sortable?: boolean;
   /**
    * `false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a

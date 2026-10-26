@@ -258,6 +258,10 @@
       "file": "packages/theme/columns.css",
       "maxGzip": 1100
     },
+    "@dzgrid/theme/columns-panel.css": {
+      "file": "packages/theme/columns-panel.css",
+      "maxGzip": 1000
+    },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
       "maxGzip": 21980,
@@ -476,6 +480,16 @@
     "@dzgrid/dom/column-menu": {
       "file": "packages/dom/src/column-menu.ts",
       "maxGzip": 4300,
+      "over": "@dzgrid/dom/popup",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/columns-panel": {
+      "file": "packages/dom/src/columns-panel.ts",
+      "maxGzip": 4400,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",

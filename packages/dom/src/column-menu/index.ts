@@ -217,7 +217,10 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         const all = items();
         const n = all.length;
         all.forEach((x, j) => (x.tabIndex = j === (((i % n) + n) % n) ? 0 : -1));
-        all[((i % n) + n) % n]?.focus({ preventScroll: true });
+        const x = all[((i % n) + n) % n];
+        x?.focus({ preventScroll: true });
+        // In view inside a menu that scrolls (never the page jumping).
+        x?.scrollIntoView?.({ block: 'nearest' });
       };
       /** The list drawn from `list`: roles, groups, separators (never first, last or doubled). */
       const draw = (c: Open, list: readonly MenuEntry[]): void => {
@@ -310,7 +313,7 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         draw(c, entries(id));
         cur = c;
         (c as { ref: PopupRef }).ref = popupsFor(g).open(cell, list, {
-          placement: 'block-end', from: at ?? btn ?? cell, ...(!at && { align: 'end' as const }), opener: () => btn,
+          placement: 'block-end', from: at ?? btn ?? cell, ...(!at && { align: 'end' as const }), fit: true, opener: () => btn,
           back: () => void (quiet || back(c)),
           onClose: () => void (cur === c && ((cur = null), g.schedule())),
         });
@@ -326,14 +329,16 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
       /** The menu's keys (APG): it owns them all but Escape, the popup host's. */
       const key = (e: KeyboardEvent): void => {
         const k = e.key;
-        if (k === 'Escape') return;
+        const arrow = k.startsWith('Arrow');
+        // The browser's own keys (F5, Ctrl/Cmd+R, Alt+letter…) stay the browser's; Escape is the popup host's.
+        if (k === 'Escape' || e.ctrlKey || e.metaKey || (e.altKey && !arrow) || ([...k].length > 1 && !arrow && !/^(Home|End|Enter|Tab)$/.test(k))) return;
         e.preventDefault();
         const i = items().indexOf(doc.activeElement as HTMLElement);
         if (k === 'ArrowDown' || k === 'ArrowUp') go(i + (k === 'ArrowDown' ? 1 : -1));
         else if (k === 'Home' || k === 'End') go(k === 'Home' ? 0 : -1);
         else if (k === 'Enter' || k === ' ') run(i);
         else if (k === 'Tab') close();
-        else if ([...k].length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        else if ([...k].length === 1) {
           // Type-ahead (folded as the quick search): a prefix typed within 500 ms; one letter again goes on to the next.
           hushBuf();
           hushBuf = scope.timeout(() => (buf = ''), 500);

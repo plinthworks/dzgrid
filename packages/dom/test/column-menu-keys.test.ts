@@ -155,3 +155,30 @@ describe('acting and closing (column-menu.md 19–20)', () => {
     expect(t.g.kernel.query.sort).toEqual([]);
   });
 });
+
+describe('review of steps 3–4: the browser\'s own keys; the focused item in view', () => {
+  it('Ctrl/Cmd+R, F5, Ctrl+F, Alt+letter are left to the browser (not prevented, the menu open); the menu\'s keys still prevented', () => {
+    const t = mmake();
+    byKeys(t, 'n');
+    for (const [k, mods] of [['r', { ctrlKey: true }], ['r', { metaKey: true }], ['F5', {}], ['f', { ctrlKey: true }], ['x', { altKey: true }], ['l', { metaKey: true }]] as const) {
+      expect(t.key(k, mods).defaultPrevented, `${k} ${JSON.stringify(mods)}`).toBe(false);
+    }
+    expect(t.list()).not.toBeNull();
+    expect(t.focused()).toBe('sort.asc');
+    for (const k of ['ArrowDown', 'Home', 'End']) expect(t.key(k).defaultPrevented, k).toBe(true);
+  });
+
+  it('each item the keys focus is scrolled into view (nearest), the menu may scroll inside', () => {
+    const into = vi.fn();
+    (Element.prototype as unknown as { scrollIntoView: unknown }).scrollIntoView = into;
+    try {
+      const t = mmake();
+      byKeys(t, 'n');
+      t.key('End');
+      expect(into).toHaveBeenLastCalledWith({ block: 'nearest' });
+      expect(into.mock.instances.at(-1)).toBe(document.activeElement);
+    } finally {
+      delete (Element.prototype as unknown as { scrollIntoView?: unknown }).scrollIntoView;
+    }
+  });
+});
