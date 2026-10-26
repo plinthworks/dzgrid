@@ -27,10 +27,10 @@ export interface FillCounts {
 export interface FillApi {
   /** As a drop of the handle on `to` (`swap`: Ctrl held); null: no block nor focused data cell, `to` inside it, or not shown. */
   fill(to: CellAddr, o?: { readonly swap?: boolean }): FillCounts | null;
-  /** As Ctrl+D; null when the key would not be taken. */
-  down(): FillCounts | null;
-  /** As Ctrl+R; null when the key would not be taken. */
-  end(): FillCounts | null;
+  /** As Ctrl+D; null when the key would not be taken. `user`: a user's gesture (the column menu's item, S12-Q12): source `user`, as the key. */
+  down(o?: { readonly user?: boolean }): FillCounts | null;
+  /** As Ctrl+R; null when the key would not be taken. `user`: as `down`. */
+  end(o?: { readonly user?: boolean }): FillCounts | null;
   /** Bulk (QB5): one input in every cell of the block, origin `bulk`; null without a block. */
   apply(input: CellInput): FillCounts | null;
 }
@@ -365,8 +365,8 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
           const s = source();
           return s && fillTo(s, pos(to), !!x?.swap, 'api');
         },
-        down: () => copy(false, 'api'),
-        end: () => copy(true, 'api'),
+        down: (x) => copy(false, x?.user ? 'user' : 'api'),
+        end: (x) => copy(true, x?.user ? 'user' : 'api'),
         apply: (input) => {
           const c = bulk(null, input, 'api');
           return c && { filled: c.filled, refused: c.refused, readOnly: c.readOnly };

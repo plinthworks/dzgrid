@@ -98,6 +98,9 @@
       "@dzgrid/dom/columns": [
         "./packages/dom/src/columns.ts"
       ],
+      "@dzgrid/dom/column-menu": [
+        "./packages/dom/src/column-menu.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

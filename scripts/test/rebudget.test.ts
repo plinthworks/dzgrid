@@ -327,6 +327,31 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(['@dzgrid/core', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([29000, 21980]);
   });
 
+  it('Phase 6 step 3 (owner Q-B, Q3-2, Q3-3, Q3-5): @dzgrid/dom/column-menu 4 300 over the popup host; its own -column-menu texts 500 / 600 / 700; the core (width: null) and the DOM base (the shortcuts seam) hold their lines 29 000 / 21 980 (grants 29 150 / 22 400 not needed); columns.css still 1 100', () => {
+    // Owner Q3-5 (2026-10-26): 3 000 → 4 300 (measured 3 951); texts 450 / 550 / 650 → 500 / 600 / 700.
+    expect(ceilingFor('@dzgrid/dom/column-menu')).toBe(4300);
+    expect(() => sizeBudget(4301, ceilingFor('@dzgrid/dom/column-menu'))).toThrow(/ceiling/);
+    for (const [lang, c] of [['en', 500], ['fr', 600], ['ar', 700]] as const) {
+      expect(ceilingFor(`@dzgrid/dom/locales/${lang}-column-menu`), lang).toBe(c);
+      expect(() => sizeBudget(c + 1, ceilingFor(`@dzgrid/dom/locales/${lang}-column-menu`)), lang).toThrow(/ceiling/);
+    }
+    expect(['@dzgrid/core', '@dzgrid/dom'].map(ceilingFor)).toEqual([29000, 21980]);
+    expect(ceilingFor('@dzgrid/theme/columns.css')).toBe(1100);
+    type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
+    const m = e['@dzgrid/dom/column-menu']!;
+    expect({ ...m, maxGzip: 0 }).toEqual({ file: 'packages/dom/src/column-menu.ts', maxGzip: 0, over: '@dzgrid/dom/popup', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
+    expect(m.maxGzip).toBeGreaterThan(0);
+    expect(m.maxGzip).toBeLessThanOrEqual(4300);
+    expect(m.maxGzip).toBeGreaterThanOrEqual(3951);
+    ['en', 'fr', 'ar'].forEach((l, i) => {
+      const t = e[`@dzgrid/dom/locales/${l}-column-menu`]!;
+      expect(t.file, l).toBe(`packages/dom/src/locales/${l}-column-menu.ts`);
+      expect(t.maxGzip, l).toBe([500, 600, 700][i]!);
+    });
+    expect(['@dzgrid/core', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([29000, 21980]);
+  });
+
   it('the K.8 profile guard: 83 500 (Q17a; the real example\'s 92 500, S12-Q10, is guarded by example:bytes, not here)', () => {
     expect(ceilingFor('profile: audit screen (K.8)')).toBe(83500);
     expect(sizeBudget(79000, ceilingFor('profile: audit screen (K.8)'))).toBe(83500); // 86 900 → 83 500

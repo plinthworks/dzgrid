@@ -33,6 +33,10 @@ import { AR_FILL } from '@dzgrid/dom/locales/ar-fill';
 import { columns as moveColumns, type ColumnsApi } from '@dzgrid/dom/columns';
 import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
 import { AR_COLUMNS } from '@dzgrid/dom/locales/ar-columns';
+// Phase 6 step 3: the column ⋮ menu (`?menu=0` turns it off).
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
+import { AR_COLUMN_MENU } from '@dzgrid/dom/locales/ar-column-menu';
 import { pagination } from '@dzgrid/dom/pagination';
 import { tree } from '@dzgrid/dom/tree';
 import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
@@ -104,7 +108,7 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
   const base = ar ? AR : FR;
   // A tree (`?tree=1`) on the browser's rows only.
   const asTree = !!o.tree && !o.paged;
-  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_RANGE : FR_RANGE).text, ...(ar ? AR_FILL : FR_FILL).text, ...(ar ? AR_COLUMNS : FR_COLUMNS).text, 'validation.integer': w.integer } };
+  const messages = { ...base, text: { ...base.text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, ...(ar ? AR_PAGINATION : FR_PAGINATION).text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_RANGE : FR_RANGE).text, ...(ar ? AR_FILL : FR_FILL).text, ...(ar ? AR_COLUMNS : FR_COLUMNS).text, ...(ar ? AR_COLUMN_MENU : FR_COLUMN_MENU).text, 'validation.integer': w.integer } };
   // The orders of the tree demo, without their sub-orders: one flat list; « Urgent » added. `?tree=1`: with them, as child rows.
   const rows: Order[] = orders().filter((l) => asTree || l.parent === null).map((l, i) => ({ id: l.id, ...(asTree && { parent: l.parent }), ref: l.ref, client: l.client, day: l.day, status: l.status, qty: l.qty, amount: l.amount, urgent: i % 5 === 0 }));
   const columns: ColumnDef<Order, any>[] = [
@@ -150,21 +154,33 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
   const id = (k: RowKey, c: string): string => `${k}\n${c}`;
   /** Blocks of cells (`?range=0` none) and the fill over them (`?fill=0` none). */
   let blocks: ReturnType<typeof range> | null = null;
+  let filler: ReturnType<typeof fillHandle> | null = null;
   const blockFeatures = () => {
     const q = new URLSearchParams(location.search);
     if (q.get('range') === '0') return [];
     blocks = range();
-    return q.get('fill') === '0' ? [blocks] : [blocks, fillHandle(blocks)];
+    if (q.get('fill') === '0') return [blocks];
+    filler = fillHandle(blocks);
+    return [blocks, filler];
   };
   /** Moving columns (Phase 6 step 2): drag a header, or Ctrl+Shift+arrows (⌘⇧ on a Mac); `?columns=0` none. */
   const cols = new URLSearchParams(location.search).get('columns') === '0' ? null : moveColumns();
+  /**
+   * The column ⋮ menu (Phase 6 step 3): the ⋮ on hover, a right-click on a header, Shift+F10 or Alt+↓ on a focused header;
+   * with the moves, the block's « Recopier vers le bas / la droite » and the density line; `?menu=0` none.
+   */
+  const menuFeature = () => (new URLSearchParams(location.search).get('menu') === '0' ? [] : [columnMenu({
+    use: { ...(cols && { columns: cols }), ...(blocks && { range: blocks }), ...(filler && { fill: filler }) },
+    density: true,
+    onDensity: (d) => say(`onDensity(${d})`),
+  })]);
   let grid!: GridInstance<Order>;
   grid = createGrid<Order>(host, {
     ...(o.paged ? { source: sourceRows<Order>({ fetch: fetchPage }), operations: 'server', pagination: { pageSize: 20 } } : { rows }),
     getRowId: (r: Order) => r.id, columns, messages, locale: o.locale, direction: 'auto', label: w.title,
     parts: { status: badge({ tones: { pending: 'warning', ready: 'info', shipped: 'neutral', delivered: 'success', cancelled: 'danger' } }) },
     ...(asTree && { rowClass: (c: { row: Order }) => (c.row.parent ? 'orders-child' : null) }),
-    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...blockFeatures(), ...(cols ? [cols] : []), motion(), ...(o.paged ? [pagination()] : [])],
+    features: [...(asTree ? [tree<Order>({ parentId: (r) => r.parent ?? null, column: 'ref', structure: ['parent'], sticky: 1 })] : []), editing, editors({ list: listEditor, enterMoves: o.enter ?? 'stay' }), ...blockFeatures(), ...(cols ? [cols] : []), ...menuFeature(), motion(), ...(o.paged ? [pagination()] : [])],
     onEvent(e: GridEvent<Order>) {
       o.onEvent?.(e);
       if (e.type === 'undoChanged') sync(e.canUndo, e.canRedo);

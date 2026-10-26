@@ -33,6 +33,10 @@ export interface ColumnDef<T, V = unknown> {
   readonly flex?: number;
   readonly resizable?: boolean;
   readonly movable?: boolean;
+  /** `false`: the column menu's « Hide » is disabled for it (Phase 6 step 3, column-menu.md 13). */
+  readonly hideable?: false;
+  /** `false`: no column menu (no ⋮, no right-click menu; its keys left to the page). Phase 6 step 3. */
+  readonly menu?: false;
   readonly sortable?: boolean;
   /**
    * `false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a

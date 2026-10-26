@@ -58,6 +58,7 @@ export default defineConfig({
       { find: '@dzgrid/dom/range', replacement: fileURLToPath(new URL('./packages/dom/src/range.ts', import.meta.url)) },
       { find: '@dzgrid/dom/fill', replacement: fileURLToPath(new URL('./packages/dom/src/fill.ts', import.meta.url)) },
       { find: '@dzgrid/dom/columns', replacement: fileURLToPath(new URL('./packages/dom/src/columns.ts', import.meta.url)) },
+      { find: '@dzgrid/dom/column-menu', replacement: fileURLToPath(new URL('./packages/dom/src/column-menu.ts', import.meta.url)) },
       { find: '@dzgrid/dom/tree-lazy', replacement: fileURLToPath(new URL('./packages/dom/src/tree-lazy.ts', import.meta.url)) },
       { find: '@dzgrid/dom/motion-gsap', replacement: fileURLToPath(new URL('./packages/dom/src/motion-gsap.ts', import.meta.url)) },
       { find: '@dzgrid/dom/pagination', replacement: fileURLToPath(new URL('./packages/dom/src/pagination.ts', import.meta.url)) },

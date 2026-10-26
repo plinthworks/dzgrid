@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@dzgrid/dom/column-menu` (Phase 6 step 3; docs/behaviors/column-menu.md, owner Q-M1, Q-M2, Q-K1, Q3-1–Q3-4,
+  S12-Q12): the column ⋮ menu. A ⋮ button on each column header of 96 px and more (out of the tab order, shown on hover,
+  focus or touch), a right-click (Shift+right-click keeps the browser's), Shift+F10 and the Menu key, Alt+ArrowDown where
+  the column has no filter popup, a Mac's Ctrl+click: an APG menu (arrows wrapping, Home / End, folded type-ahead, Enter /
+  Space, Escape / Tab back) with sort, pin, widen / narrow (the menu stays open, the width said after a pause), move one
+  place (with `columns()`), « Recopier vers le bas / la droite » on the current block (with `range()` and `fill()`: the
+  fill's ≥ 24 px pointer way, WCAG 2.5.8), « Filtrer… », hide (never the last column), « Choisir les colonnes… » (step 4),
+  reset to the definitions, an optional density line (`onDensity`), and the application's items (`items`, radio and
+  check items, `keepOpen`, an icon class, host `classes`). Opened by a pointer it never moves the grid's focus: a block
+  survives. Texts `locales/{en,fr,ar}-column-menu`, look in `@dzgrid/theme/columns.css` (contrast pairs added).
+- `@dzgrid/core`: a `column.state` patch may give `width: null` to clear the user's width (the definition's again, a
+  flexible column flexible again; owner Q3-3). `ColumnDef.hideable?: false` and `ColumnDef.menu?: false` (types only).
+- `@dzgrid/dom/fill`: `down({ user: true })` / `end({ user: true })` write as the keys (source `user`); without it the
+  API's own source, unchanged.
+- `@dzgrid/dom/popup`: `from` (placed by another element or at a point), `align: 'end'` (end edges aligned) and `back`
+  (where the focus goes on close).
+
 - `@dzgrid/dom/columns` (Phase 6 step 2, part 1; docs/behaviors/column-move.md): moving columns. A header dragged with the
   mouse (never a finger; a pen clicks) past 4 px: a ghost, an insertion bar on the gap (logical, right to left mirrored),
   auto-scroll near the centre's edges; dropped among pinned columns it pins there, out of them it unpins; one
@@ -32,6 +49,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fill's target only once the pointer is half a row inside it (an edge slip fills nothing).
 
 ### Changed
+
+- The header's `aria-keyshortcuts` is written by the base once, joining the features' lists (`FeatureHandle.shortcuts`),
+  deduplicated and sorted: the filters no longer write it alone (they wiped any other), `columns()` now declares its
+  moves (`Control+Shift+ArrowLeft/Right`, `Meta+…` on macOS). A popup that fits neither below nor above its anchor is
+  kept inside the window (its end at the window's end) instead of running off it. With `columns.css` loaded, the edit
+  feature's reapply mark is drawn last among the header's buttons (`order: 3`), clear of the resize grip.
 
 - `@dzgrid/dom/range` (owner S12-Q15, revises S11-Q1 for the pointer): after a mouse drag the focus stays on the START
   cell, the anchor, as in Excel (the release moves no focus, so an auto-scrolled drag keeps its view); the fill handle on

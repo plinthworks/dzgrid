@@ -79,4 +79,54 @@ describe('columns.css', () => {
     expect(spec.derived['--dzg-move-bar']).toBe('var(--tz-accent)');
     for (const bg of ['--dzg-header-bg', '--tz-bg', '--dzg-row-hover-bg', '--dzg-row-selected-bg']) expect(spec.pairs.some((p) => p.fg === '--dzg-move-bar' && p.bg === bg && p.min >= 3), bg).toBe(true);
   });
+
+  // ---- Phase 6 step 3: the column menu (column-menu.md 1–2, 7, WCAG notes; step03-plan §5) ----
+  it('the ⋮ button: a 24 px target, after the filter button and before the reapply mark (order 2 / 3), clear of the resize grip', () => {
+    const b = decl(/^\.dzg-mbtn$/);
+    expect(b).toMatch(/order: 2/);
+    expect(b).toMatch(/flex: none/);
+    expect(b).toMatch(/inline-size: var\(--dzg-target-min, 24px\)/);
+    expect(b).toMatch(/block-size: var\(--dzg-target-min, 24px\)/);
+    expect(b).toMatch(/margin-inline-end: calc\(var\(--dzg-target-min, 24px\) - var\(--dzg-cell-padding-inline, 0\.5rem\)\)/);
+    expect(decl(/^\.dzg-reapply$/)).toMatch(/order: 3/);
+    // Its dots: a shape over currentColor, no glyph font.
+    expect(decl(/^\.dzg-mbtn::before$/)).toMatch(/background: (currentColor|radial-gradient)/);
+    expect(css).not.toMatch(/content: ['"][⋮…]/);
+  });
+
+  it('hidden with its room kept, shown on hover, focus within, while open, and always without hover', () => {
+    expect(decl(/^\.dzg-mbtn$/)).toMatch(/opacity: 0/);
+    const shown = s.rules.filter((r) => /:is\(:hover, :focus-within, \[data-dzg-menu\]\) > \.dzg-mbtn/.test(r.selector) && plain(r)).map((r) => r.body).join(' ');
+    expect(shown).toMatch(/opacity: 1/);
+    const touch = s.rules.filter((r) => r.selector === '.dzg-mbtn' && r.at.some((a) => a.includes('hover: none') && a.includes('any-pointer: coarse'))).map((r) => r.body).join(' ');
+    expect(touch).toMatch(/opacity: 1/);
+    expect(decl(/^\.dzg-mbtn:focus-visible$/)).toMatch(/outline: 2px solid var\(--dzg-focus-ring/);
+  });
+
+  it('the menu: items at least 24 px (32), the checked one marked by a shape (not colour alone), disabled muted, the focused one ringed; scrolls inside the view', () => {
+    const list = decl(/^\.dzg-menu$/);
+    expect(list).toMatch(/max-block-size: calc\(100dvh - 2rem\)/);
+    expect(list).toMatch(/overflow-y: auto/);
+    const item = decl(/^\.dzg-menu \[role\^=menuitem\]$/);
+    expect(item).toMatch(/min-block-size: 32px/);
+    expect(item).toMatch(/padding-inline-start: /);
+    expect(decl(/^\.dzg-menu \[aria-checked=true\]::before$/)).toMatch(/background: currentColor/);
+    expect(decl(/^\.dzg-menu \[aria-disabled=true\]$/)).toMatch(/color: var\(--dzg-menu-disabled, var\(--tz-fg-muted\)\)/);
+    expect(decl(/^\.dzg-menu \[role\^=menuitem\]:focus$/)).toMatch(/outline: 2px solid var\(--dzg-focus-ring, var\(--tz-accent\)\)/);
+    expect(decl(/^\.dzg-menu \[role=separator\]$/)).toMatch(/border-block-start: /);
+  });
+
+  it('forced colours: the focused item Highlight / HighlightText, the button and separators in system colours', () => {
+    const f = media('forced-colors: active');
+    expect(decl(/^\.dzg-menu \[role\^=menuitem\]:focus$/, f)).toMatch(/background: Highlight/);
+    expect(decl(/^\.dzg-menu \[role\^=menuitem\]:focus$/, f)).toMatch(/color: HighlightText/);
+    expect(decl(/^\.dzg-mbtn$/, f)).toMatch(/color: ButtonText/);
+  });
+
+  it('the menu\'s colours in check:contrast: item text 4.5:1, the disabled 3:1, the focus ring 3:1 (light, dark, Midnight, Clinic)', () => {
+    expect(spec.pairs.some((p) => p.fg === '--tz-fg' && p.bg === '--tz-bg' && p.min >= 4.5)).toBe(true);
+    expect(spec.pairs.some((p) => p.fg === '--dzg-menu-disabled' && p.bg === '--tz-bg' && p.min >= 3)).toBe(true);
+    expect(spec.derived['--dzg-menu-disabled']).toBe('var(--tz-fg-muted)');
+  });
 });
+

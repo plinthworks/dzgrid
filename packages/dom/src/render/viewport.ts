@@ -233,8 +233,11 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       layout: L, cols: w.cols, height: h, colIndex,
       decorate: (col, cell) => {
         let label = decorateHeader(g, col, cell, sort);
-        for (const f of g.features) label = f.decorateHeader?.(col, cell, label) ?? label;
+        let keys = '';
+        for (const f of g.features) (label = f.decorateHeader?.(col, cell, label) ?? label), (keys += ` ${f.shortcuts?.(col) ?? ''}`);
         setAttr(cell, 'aria-label', label);
+        // Every feature's keys, once each, in one order whatever the features' (column-menu.md 5).
+        setAttr(cell, 'aria-keyshortcuts', [...new Set(keys.split(' ').filter(Boolean))].sort().join(' ') || null);
       }, content: g.slots?.header,
       keep: focus?.kind === 'header' ? { center: focusCenter, level: focus.level ?? 0 } : null,
       check, selectAll: mode === 'multi', extra: g.headerRows, bands: g.bands,

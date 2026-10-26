@@ -843,7 +843,7 @@ une ligne de totaux modifiable), en **français** puis en **arabe** (`?locale=ar
 `docs/behaviors/column-move.md`, `column-menu.md`, `columns-chooser.md`, `column-resize.md`,
 `header-groups.md`, `pinned-rows.md`, `density.md`, `grid-state.md`, `auto-height.md`, `print.md`.
 Noter ce qui est **dit**, mot pour mot ; les phrases attendues sont celles du paquet `locales/{fr,ar}-columns`
-prévu (si le paquet final les a changées, noter la phrase dite et la comparer au paquet). Couples A à D.
+(celles du menu ⋮ dans `locales/{fr,ar}-column-menu`, étape 3, Q3-2) prévu (si le paquet final les a changées, noter la phrase dite et la comparer au paquet). Couples A à D.
 Durée estimée : 30 min par couple et par langue. Rien n'est « validé » avant cette écoute.
 
 143. **Le bouton ⋮.** Tabuler jusqu'à la grille, monter sur l'en-tête « Nom » : le lecteur dit l'en-tête (nom,

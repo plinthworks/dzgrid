@@ -260,6 +260,7 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
           if (move(at.column, by, true, true) === 'moved') (refocus = at.column), g.restoreFocus();
           return true;
         },
+        shortcuts: () => (g.mac ? 'Meta+Shift+ArrowLeft Meta+Shift+ArrowRight' : 'Control+Shift+ArrowLeft Control+Shift+ArrowRight'),
         decorateHeader(col, cell) {
           setAttr(cell, 'data-dzg-moving', d?.on && d.id === col.id ? '' : null);
         },

@@ -64,6 +64,12 @@ export interface FeatureHandle {
    */
   decorateHeader?(col: ResolvedColumn<unknown>, cell: HTMLElement, label: string | null): string | void;
   /**
+   * The keys a column header takes from this feature, as `aria-keyshortcuts` words (Phase 6 step 3, column-menu.md 5):
+   * the base joins every feature's, drops duplicates, sorts them and writes the attribute once (none when empty), so
+   * no feature wipes another's. Level 0 only.
+   */
+  shortcuts?(col: ResolvedColumn<unknown>): string | void;
+  /**
    * The column filter's edits for a header part (the filters feature, step 21): `edits` the
    * column's (null: none; `who`, the part's host, owns its `cancel`), the same object while what it
    * holds is the same; `flush` applies the column's pending edit. The slots feature reads it; neither

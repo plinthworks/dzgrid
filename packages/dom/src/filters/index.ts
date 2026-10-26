@@ -158,6 +158,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
     },
     headerRows: shown.api.get() ? [row.spec] : [],
     decorateHeader: popup.decorate,
+    shortcuts: (col) => (popup.can(col) ? 'Alt+ArrowDown' : ''),
     afterRows(f) {
       row.sweep();
       popup.paint(f);

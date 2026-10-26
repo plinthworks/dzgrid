@@ -1,4 +1,4 @@
-import { fixedInlineStart, type Dir } from './dir.js';
+import { fixedInlineStart, placedBy, type Dir, type Point } from './dir.js';
 import { setPx } from './render/rows.js';
 import type { Scope } from './render/scope.js';
 import type { GridContext } from './context.js';
@@ -12,6 +12,12 @@ export interface PopupOptions {
   /** The control a press on which is left to its click (it toggles the popup), from the anchor; the anchor by default. */
   readonly opener?: (anchor: HTMLElement) => HTMLElement | null;
   readonly onClose?: () => void;
+  /** Placed by this instead of the anchor (a button in it), or at a point (a right-click: its start corner there); the anchor still owns its life (Phase 6 step 3). */
+  readonly from?: HTMLElement | Point;
+  /** `end`: its end edge on the end edge of what it is placed by (a menu under its ⋮ button). */
+  readonly align?: 'end';
+  /** Where the focus goes when it closes, instead of the anchor (the grid's own focus: a menu opened by a pointer). */
+  readonly back?: () => void;
 }
 
 export interface PopupRef {
@@ -89,7 +95,7 @@ export class PopupHost {
     const ref: PopupRef = {
       el,
       get open() { return isOpen; },
-      reposition: () => this.#place(at, el, o.placement),
+      reposition: () => this.#place(at, el, o),
       move: (a) => {
         if (isOpen) this.#open.set(ref, (at = a)), ref.reposition();
       },
@@ -107,7 +113,7 @@ export class PopupHost {
         }
         const hadFocus = el.contains(doc.activeElement);
         el.remove();
-        const back = (): void => (at.isConnected ? at.focus({ preventScroll: true }) : this.fallback());
+        const back = (): void => (o.back ? o.back() : at.isConnected ? at.focus({ preventScroll: true }) : this.fallback());
         const lost = (): boolean => !doc.activeElement || doc.activeElement === doc.body;
         // A grid going moves no focus (nothing of it may hear a focus event). Pressed outside: the
         // press focuses what it lands on, after this; the anchor only if that is nothing.
@@ -148,22 +154,23 @@ export class PopupHost {
       outside = true;
       ref.close();
     }, true);
-    this.#place(anchor, el, o.placement);
+    this.#place(anchor, el, o);
     if (o.modal) el.querySelector<HTMLElement>(FOCUSABLE)?.focus({ preventScroll: true });
     return ref;
   }
 
-  /** Below (or beside) the anchor, start edges aligned; above it when there is no room below. */
-  #place(anchor: HTMLElement, el: HTMLElement, placement: 'block-end' | 'inline-end'): void {
+  /** Below (or beside) the anchor or `from`, start edges aligned (`align: 'end'`: end edges); above it when there is no room below. */
+  #place(anchor: HTMLElement, el: HTMLElement, { placement, from = anchor, align }: PopupOptions): void {
     const win = this.#doc.defaultView;
-    const r = anchor.getBoundingClientRect();
     const box = el.getBoundingClientRect();
+    const r = placedBy(from, !!align, box.width);
     const winBlock = win?.innerHeight ?? 0;
     const winInline = win?.innerWidth ?? 0;
     const dir = this.#dir();
     if (placement === 'block-end') {
       const below = r.bottom + 2;
-      const top = below + box.height > winBlock && r.top - 2 - box.height >= 0 ? r.top - 2 - box.height : below;
+      // Below; else above; else (a tall menu, no room either way) its end at the window's: inside it, scrolling within (1.4.10).
+      const top = below + box.height <= winBlock ? below : r.top - 2 - box.height >= 0 ? r.top - 2 - box.height : winBlock - box.height;
       setPx(el, 'inset-block-start', Math.max(0, top));
       setPx(el, 'inset-inline-start', fixedInlineStart(r, dir, winInline, box.width));
     } else {

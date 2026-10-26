@@ -170,9 +170,23 @@ export const sideways = (e: { readonly deltaX: number; readonly deltaY: number; 
  * Where a fixed box goes so that its start edge lines up with `anchor`'s, for
  * `inset-inline-start` in the box's direction; clamped to the window.
  */
-export function fixedInlineStart(anchor: DOMRectReadOnly, dir: Dir, windowInline: number, boxInline: number): number {
+export function fixedInlineStart(anchor: Pick<DOMRectReadOnly, 'left' | 'right'>, dir: Dir, windowInline: number, boxInline: number): number {
   const start = dir === 'ltr' ? anchor.left : windowInline - anchor.right;
   return Math.max(0, Math.min(start, windowInline - boxInline));
+}
+
+/** A point on the screen (a right-click's), in client coordinates. */
+export type Point = { readonly x: number; readonly y: number };
+/** Where a mouse event happened; null when a key made it (Shift+F10, the Menu key: at 0, 0). */
+export const pointOf = (e: MouseEvent): Point | null => (e.clientX || e.clientY ? { x: e.clientX, y: e.clientY } : null);
+
+/**
+ * The box a popup is placed by (Phase 6 step 3): an element's, or a point's; `end`: moved so that a popup `w` wide,
+ * placed by its start edges, ends where the box ends (its end edge on the button's, in either direction).
+ */
+export function placedBy(from: Element | Point, end: boolean | undefined, w: number): Pick<DOMRectReadOnly, 'left' | 'right' | 'top' | 'bottom' | 'width'> {
+  const r = 'x' in from ? { left: from.x, right: from.x, top: from.y, bottom: from.y, width: 0 } : from.getBoundingClientRect();
+  return { left: end ? r.right - w : r.left, right: end ? r.left + w : r.right, top: r.top, bottom: r.bottom, width: r.width };
 }
 
 /** Two boxes apart along the inline axis, in either direction (the editors' bubble hides with a cell scrolled away). */

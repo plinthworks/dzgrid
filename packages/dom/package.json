@@ -77,6 +77,10 @@
       "types": "./src/columns.ts",
       "default": "./src/columns.ts"
     },
+    "./column-menu": {
+      "types": "./src/column-menu.ts",
+      "default": "./src/column-menu.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"
@@ -244,6 +248,18 @@
     "./locales/ar-columns": {
       "types": "./src/locales/ar-columns.ts",
       "default": "./src/locales/ar-columns.ts"
+    },
+    "./locales/en-column-menu": {
+      "types": "./src/locales/en-column-menu.ts",
+      "default": "./src/locales/en-column-menu.ts"
+    },
+    "./locales/fr-column-menu": {
+      "types": "./src/locales/fr-column-menu.ts",
+      "default": "./src/locales/fr-column-menu.ts"
+    },
+    "./locales/ar-column-menu": {
+      "types": "./src/locales/ar-column-menu.ts",
+      "default": "./src/locales/ar-column-menu.ts"
     }
   },
   "peerDependencies": {

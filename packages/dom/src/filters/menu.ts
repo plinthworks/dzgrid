@@ -123,7 +123,6 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
       const has = can(col);
       let b = cell.querySelector<HTMLButtonElement>(':scope > .dzg-fbtn');
       set(cell, 'data-dzg-filtered', filtered ? '' : null);
-      set(cell, 'aria-keyshortcuts', has ? 'Alt+ArrowDown' : null);
       // The base's name (the sort's, or none); the filter's joins it. With a button, the header
       // keeps its own name: the button's must not join it.
       const own = label ?? name(col);

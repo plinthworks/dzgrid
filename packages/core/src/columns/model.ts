@@ -16,7 +16,8 @@ export interface ColumnLookup<T> {
 /** What the user (or the host) changed about a column. Sorting lives in the query, not here (D6). */
 export interface ColumnState {
   readonly id: string;
-  readonly width?: number;
+  /** null in a patch: the user's width cleared, the definition's again (Phase 6 step 3, owner Q3-3); never kept. */
+  readonly width?: number | null;
   readonly hidden?: boolean;
   readonly pinned?: Side | null;
   readonly order?: number;
@@ -149,7 +150,7 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
         const changed: string[] = [];
         patch.forEach((p, i) => {
           if (!byId.has(p.id)) return void problems.push(problem('unknown-column', 'warning', `state[${i}]`));
-          if (p.width !== undefined && !(Number.isFinite(p.width) && p.width >= 0)) {
+          if (p.width != null && !(Number.isFinite(p.width) && p.width >= 0)) {
             return void problems.push(problem('invalid-column', 'error', `state[${i}].width`));
           }
           if (p.order !== undefined && !Number.isFinite(p.order)) return void problems.push(problem('invalid-column', 'error', `state[${i}].order`));
@@ -157,8 +158,10 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
             return void problems.push(problem('invalid-column', 'error', `state[${i}].pinned`));
           }
           // An undefined key in a patch means "unchanged", not "cleared".
-          const clean = Object.fromEntries(Object.entries(p).filter(([, v]) => v !== undefined)) as ColumnState;
-          user.set(p.id, { ...user.get(p.id), ...clean });
+          const u = { ...user.get(p.id), ...Object.fromEntries(Object.entries(p).filter(([, v]) => v !== undefined)) } as { width?: number | null };
+          // A null width clears the user's (Q3-3).
+          if (u.width === null) delete u.width;
+          user.set(p.id, u as ColumnState);
           changed.push(p.id);
         });
         return changed;

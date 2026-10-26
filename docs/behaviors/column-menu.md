@@ -195,3 +195,47 @@ ar, Alt+ArrowDown with and without a filter popup, Shift+F10 + `contextmenu` onc
 `aria-keyshortcuts` joined and never wiped by the filter, the ⋮ gone under 96 px with the keys still working,
 « Élargir » keeping the menu open), nested grids; browser:
 Chrome fr light / ar RTL dark, forced colours, 200 % zoom and 320 px, axe 0.
+
+## As built (Phase 6 step 3, 2026-10-26; `step03-plan.md` « Done »)
+
+`@dzgrid/dom/column-menu` (`packages/dom/src/column-menu.ts`, `column-menu/index.ts`) over `@dzgrid/dom/popup`; texts
+`locales/{en,fr,ar}-column-menu` (owner Q3-2), look in `@dzgrid/theme/columns.css`. Where this differs from the rules above:
+
+- **API**: `columnMenu({ use, density, onDensity, items, classes })`; `columnMenu().api(grid)` gives `open(column)`,
+  `close()`, `current()` (rule 4's `openColumnMenu`). `use.columns` / `use.range` / `use.fill` / `use.chooser` are the
+  other features' objects, reached through their `api(grid)` only (no import: an app with the menu ships none of them).
+  Without `use.columns` the move items are absent; auto-size and « Redimensionner au clavier » appear when `columns()`
+  gives `autoSize` / `autoSizeAll` / `resizeMode` (step 7); « Choisir les colonnes… » with `use.chooser` (step 4).
+- **Sections** (separators between): sort | pin | size | move | fill (S12-Q12) | filter | hide, choose, reset | density.
+  « Recopier vers le bas (Ctrl+D) » / « Recopier vers la droite (Ctrl+R) » (⌘D / ⌘R on a Mac, `aria-keyshortcuts`) act
+  on the current block (or the focused data cell) as the keys, source `user`, the key's sentence; disabled without one.
+- **Focus (owner Q3-1, replaces 20 and 22 for a pointer)**: a press on the ⋮, a right-click or a Mac's Ctrl+click never
+  moves the grid's focus (`mousedown` prevented), so a block of cells survives; on close the focus goes back where it
+  was — an element outside the grid gets it back, else the grid's own focus (the header when the grid had none). Opened
+  by the keys: back on the header (moved with its column; the nearest visible header after « Masquer »). « Filtrer… »
+  and « Choisir les colonnes… » hand the focus to what they open.
+- **Rule 5**: the base sorts the joined list alphabetically (one value whatever the features' order), not « filters,
+  menu, resize, move ». The menu declares `Alt+ArrowDown Shift+F10` on every column with a menu (Alt+ArrowDown opens the
+  filter or the menu: either way the header takes it); `columns()` declares `Control+Shift+ArrowLeft/Right`
+  (`Meta+…` on a Mac). Duplicates dropped.
+- **Rule 7**: by a pointer the menu's start corner is 2 px under the pointer. The popup host now keeps a popup inside the
+  window when it fits neither below nor above (its end at the window's end; the list scrolls inside: `max-block-size:
+  calc(100dvh − 2rem)`); a filter popup benefits too. The menu never moves while open (« Élargir » moves the button
+  under it).
+- **Rule 15**: one patch giving each column its definition's order, pin, hidden and width (`width: null`, a core
+  addition, Q3-3: a flexible column flexible again). Disabled when nothing differs from the definitions (a column moved
+  away and back by hand may keep it enabled: its order numbers changed).
+- **Rule 16**: density radios with `columnMenu({ density: true })`, absent when `rowHeight` is a number; the grid's
+  density changed at once, `onDensity(d)` told, « Densité : … » said (Q3-4; `setDensity` at step 6).
+- **Rule 17**: a throwing `items` or `action` is reported (`reportError`), the defaults shown / the menu closed; no
+  `invalid-menu` problem code. No replaceable parts: `classes.menu` / `classes.item` and an item's `icon` class.
+- **Rule 18**: type-ahead folds as the quick search (one letter again goes on to the next item; a prefix within 500 ms).
+- **Texts**: the size items read `menu.sizeAuto`, `menu.sizeAutoAll`, `menu.sizeWiden`, `menu.sizeNarrow`,
+  `menu.sizeResize` (an item's text is `menu.` + its id); added `menu.sort` / `menu.pin` (the radio groups' names),
+  `menu.width` (« Nom : 130 pixels », after « Élargir » / « Rétrécir »), `menu.fillDown` / `menu.fillEnd` (ar « نحو
+  اليسار »: Ctrl+R fills toward the logical end; owner's Arabic review), and the density keys of `density.md`.
+- **Look**: the ⋮ is drawn `order: 2` (after the filter button, before the reapply mark `order: 3`); the decorations' DOM
+  order follows the features' (the base appends the sort mark when a sort appears). Forced colours: Highlight on the
+  focused item, ButtonText on the ⋮.
+- **Engines (headless)**: Firefox sends the page no `contextmenu` for Shift+right-click (its own menu) nor for a Mac's
+  Ctrl+click; WebKit and Chrome turn Ctrl+click into `contextmenu`, which opens the menu without sorting.

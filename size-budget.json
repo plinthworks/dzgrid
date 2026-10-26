@@ -206,6 +206,18 @@
       "file": "packages/dom/src/locales/ar-columns.ts",
       "maxGzip": 800
     },
+    "@dzgrid/dom/locales/en-column-menu": {
+      "file": "packages/dom/src/locales/en-column-menu.ts",
+      "maxGzip": 500
+    },
+    "@dzgrid/dom/locales/fr-column-menu": {
+      "file": "packages/dom/src/locales/fr-column-menu.ts",
+      "maxGzip": 600
+    },
+    "@dzgrid/dom/locales/ar-column-menu": {
+      "file": "packages/dom/src/locales/ar-column-menu.ts",
+      "maxGzip": 700
+    },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
       "maxGzip": 2750
@@ -455,6 +467,16 @@
       "file": "packages/dom/src/columns.ts",
       "maxGzip": 2900,
       "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/column-menu": {
+      "file": "packages/dom/src/column-menu.ts",
+      "maxGzip": 4300,
+      "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",

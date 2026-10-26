@@ -1,0 +1,53 @@
+{
+  "id": "width-null-clears",
+  "suite": "columns-layout",
+  "description": "A width of null in a later patch clears the user's width: the flexible column shares the room again, the other goes back to its definition (Phase 6 step 3, owner Q3-3).",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "width": 100
+      },
+      {
+        "id": "f",
+        "flex": 1
+      }
+    ],
+    "available": 500,
+    "state": [
+      {
+        "id": "a",
+        "width": 160
+      },
+      {
+        "id": "f",
+        "width": 120
+      }
+    ],
+    "then": [
+      {
+        "id": "a",
+        "width": null
+      },
+      {
+        "id": "f",
+        "width": null
+      }
+    ]
+  },
+  "expected": {
+    "start": [],
+    "center": [
+      [
+        "a",
+        100
+      ],
+      [
+        "f",
+        400
+      ]
+    ],
+    "end": [],
+    "total": 500
+  }
+}

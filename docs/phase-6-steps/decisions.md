@@ -47,3 +47,13 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **Step 2 lead (2026-10-26):** `dom/columns` part 1 measured 2 800 against the plan's internal stop of 2 300; accepted inside the owner's 3 500 grant (Q-B), leaving ~650 B for part 2 (step 6); if part 2 needs more, it goes back to the owner.
 - **S12-Q15 (owner, 2026-10-26; revises S11-Q1/QB2 for the pointer):** after a mouse drag selection the active cell (focus) stays on the START cell (the anchor), as in Excel; the handle stays at the block's far corner; after a fill the focus does not move and the block covers source + filled rows (handle at the new corner). Keyboard Shift+arrows keep their own rule (to be checked against the anchor rule by the implementer and reported).
 - **S12-Q16 (owner, 2026-10-26):** Escape means « je ne veux plus rien faire »: it clears the block AND hides the visible active-cell frame, tint and handle (a "quiet" state); the grid keeps the focus position, and the frame comes back at the next key (arrows, Tab, a character, F2…) or click. Lead note: keeps WCAG 2.4.7 (the indicator is visible whenever the keyboard is used to move).
+- **Working method, second round (owner, 2026-10-26):** architects and the combined reviewer run on the lighter model (Sonnet); the implementer keeps the default model; mutants only on pure logic modules (core, order/state/fill planning), not on display code; the combined review runs once every 2–3 steps (each step still has its own implementer gate). The architect stays before each step.
+
+## Step 3 (owner, 2026-10-26) — plan `step03-plan.md`
+
+- **Q3-1:** opening the menu (⋮, right-click, Ctrl+click) does not move the focus; the block survives; on close the focus returns where it was.
+- **Q3-2:** a separate text bundle `-column-menu` en/fr/ar 450/550/650, loaded only with the menu.
+- **Q3-3:** exact reset: the core accepts `width: null` (~25 B core, inside 29 150).
+- **Q3-4:** the density line now through the app (`onDensity`), `setDensity` at step 6.
+- Lead: keyboard resize is step 7 (not 6); no `invalid-menu` problem code; classes only (no replaceable parts) for the button and items.
+- **Q3-5 (owner, 2026-10-26):** `@dzgrid/dom/column-menu` 3 000 → 4 300 (measured 3 951, full menu kept); `-column-menu` texts en/fr/ar 450/550/650 → 500/600/700. Core seam guard 28 916 → 28 930 for `width: null` (Q3-3).

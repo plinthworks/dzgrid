@@ -87,3 +87,16 @@ export interface ColumnsMessages {
   readonly locale: string;
   readonly text: { readonly [K in ColumnsMessageKey]: MessageValue };
 }
+
+/** The column menu's texts (`@dzgrid/dom/column-menu`, Phase 6 step 3, owner Q3-2), in their own bundles (`locales/<lang>-column-menu`): optional here, required by `columnMenu()`. */
+export type ColumnMenuMessageKey =
+  | 'menu.button' | 'menu.label' | 'menu.sort' | 'menu.sortAsc' | 'menu.sortDesc' | 'menu.sortNone' | 'menu.pin' | 'menu.pinStart' | 'menu.pinEnd' | 'menu.pinNone'
+  | 'menu.sizeAuto' | 'menu.sizeAutoAll' | 'menu.sizeResize' | 'menu.sizeWiden' | 'menu.sizeNarrow' | 'menu.width' | 'menu.moveStart' | 'menu.moveEnd' | 'menu.fillDown' | 'menu.fillEnd'
+  | 'menu.filter' | 'menu.hide' | 'menu.choose' | 'menu.reset' | 'menu.pinnedStart' | 'menu.pinnedEnd' | 'menu.unpinned' | 'menu.hidden' | 'menu.resetDone'
+  // The density line (density.md, owner Q3-4).
+  | 'density.label' | 'density.compact' | 'density.comfortable' | 'density.spacious' | 'density.changed';
+/** A column menu bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_COLUMN_MENU.text }`. */
+export interface ColumnMenuMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in ColumnMenuMessageKey]: MessageValue };
+}

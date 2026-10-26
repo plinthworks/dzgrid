@@ -100,6 +100,15 @@ describe('0.3.0, the four packages', () => {
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fill', 'columns'\]/);
   });
 
+  it('export the Phase 6 step 3 subpaths (@dzgrid/dom/column-menu, its -column-menu texts), built like the others; its look in columns.css', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./column-menu']).toEqual({ types: './src/column-menu.ts', default: './src/column-menu.ts' });
+    for (const lang of ['en', 'fr', 'ar']) expect(dom[`./locales/${lang}-column-menu`], lang).toEqual({ types: `./src/locales/${lang}-column-menu.ts`, default: `./src/locales/${lang}-column-menu.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/columns', '\.\/column-menu'/);
+    for (const lang of ['en', 'fr', 'ar']) expect(build).toContain(`'./locales/${lang}-column-menu'`);
+  });
+
   it('keep gsap and tzslot optional peers', () => {
     const dom = pkg('dom');
     expect(dom.peerDependenciesMeta).toEqual({ '@tzslot/core': { optional: true }, '@tzslot/dom': { optional: true }, gsap: { optional: true } });

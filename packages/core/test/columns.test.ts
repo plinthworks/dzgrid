@@ -78,6 +78,25 @@ describe('column model', () => {
     expect(m.layout.center.widths.sizeAt(0)).toBe(150);
   });
 
+  it('width: null clears what the user set (Phase 6 step 3, owner Q3-3): a flexible column flexible again, a default-width one back to its definition; undefined still unchanged', () => {
+    const m = createColumnModel([{ id: 'f', flex: 1, width: 50 }, { id: 'w' }, { id: 'd', width: 90 }], { availableInline: 600 });
+    // By hand: w 150 (default), d 90, f takes the rest 600 - 240 = 360.
+    expect([0, 1, 2].map((i) => m.layout.center.widths.sizeAt(i))).toEqual([360, 150, 90]);
+    m.apply([{ id: 'f', width: 200 }, { id: 'w', width: 300 }, { id: 'd', width: 120 }], 'user');
+    expect([0, 1, 2].map((i) => m.layout.center.widths.sizeAt(i))).toEqual([200, 300, 120]);
+    // undefined: unchanged.
+    m.apply([{ id: 'f', width: undefined }, { id: 'w', hidden: false }], 'user');
+    expect([0, 1, 2].map((i) => m.layout.center.widths.sizeAt(i))).toEqual([200, 300, 120]);
+    const r = m.apply([{ id: 'f', width: null }, { id: 'w', width: null }, { id: 'd', width: null }], 'user');
+    expect(r.problems).toEqual([]);
+    expect(r.changed).toEqual(['f', 'w', 'd']);
+    expect([0, 1, 2].map((i) => m.layout.center.widths.sizeAt(i))).toEqual([360, 150, 90]);
+    // The state no longer carries a width (never a null kept).
+    expect(m.state().map((s) => 'width' in s)).toEqual([false, false, false]);
+    // A bad width is still a problem; a string null is not null.
+    expect(m.apply([{ id: 'd', width: 'null' as never }], 'user').problems.map((p) => p.code)).toEqual(['invalid-column']);
+  });
+
   it('lists visible columns start, centre, end', () => {
     const m = createColumnModel([{ id: 'c' }, { id: 'e', pinned: 'end' }, { id: 's', pinned: 'start' }]);
     expect(m.visible().map((c) => c.id)).toEqual(['s', 'c', 'e']);

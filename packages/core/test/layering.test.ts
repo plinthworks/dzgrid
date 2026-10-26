@@ -109,7 +109,8 @@ describe('layering of the base and the server entry', () => {
     // shape check moved to `@dzgrid/core/edit` (the base gains only types: `EditChecks`, four events,
     // `SaveOrigin`) → 28 916, the measure. Phase 5 close (step 13, 2026-10-26): steps 4–12 added no base byte
     // (types only, the range and fill seams in their entries); the guard stays 28 916, the close's measure.
-    expect(gz).toBeLessThanOrEqual(28916);
+    // Phase 6 step 3 (owner Q3-3): `width: null` in a column patch, +14 → 28 930.
+    expect(gz).toBeLessThanOrEqual(28930);
   });
 
   it('the base holds no edit module: the edit controller is its own entry (Phase 5 step 3)', async () => {
@@ -159,6 +160,6 @@ describe('layering of the base and the server entry', () => {
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
     // The step's planned share (step10-plan « Sizes »): 2 200–3 000; more is a question, not a failure here.
     expect(both - alone).toBeGreaterThan(500);
-    expect(alone).toBeLessThanOrEqual(28916);
+    expect(alone).toBeLessThanOrEqual(28930);
   });
 });

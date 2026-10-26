@@ -786,7 +786,13 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   playground `orders-edit.html` (columns on; `?columns=0` off). Size 2 900 line (measured ≈ 2 800, lead decision « Step 2
   lead », inside the 3 500 grant: ≈ 650 B left for part 2); core and DOM base 0 B. Known limit: next to a locked column a
   key move and its reverse are not always exact (column-move.md). Header groups split / join checked in jsdom.
-- [ ] step 3: `@dzgrid/dom/column-menu`.
+- [~] step 3 (2026-10-26, not committed; plan `docs/phase-6-steps/step03-plan.md` « Done »): `@dzgrid/dom/column-menu` —
+  ⋮ button, right-click, Shift+F10 / Menu key, Alt+ArrowDown without a filter popup, Mac Ctrl+click; sort, pin, widen /
+  narrow, move, « Recopier vers le bas / la droite » (S12-Q12, WCAG 2.5.8 for the fill), filter, hide, choose, reset,
+  density, app items; the block survives a pointer opening (Q3-1); `-column-menu` texts (Q3-2); core `width: null`
+  (Q3-3); `onDensity` (Q3-4); base `shortcuts` seam; popup `from` / `align` / `back`; playground `orders-edit.html`
+  (`?menu=0` off). **Size granted (Q3-5)**: 4 300 line, texts 500 / 600 / 700; was — `dom/column-menu` ≈ 3 950 B gz against the 3 000 grant (stop 2 800), the
+  `-column-menu` texts ≈ 20–25 B over 450 / 550 / 650: the owner's decision (options in the plan's « Done »).
 - [ ] step 4: `@dzgrid/dom/columns-panel` (the chooser).
 - [ ] step 5: `@dzgrid/core/state`.
 - [ ] step 6: `@dzgrid/dom/state` (`persistLocal`, URL helpers).

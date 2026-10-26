@@ -145,7 +145,7 @@ describe('the DOM layer’s shape', () => {
 
   it('keeps the popup host out of the base: only the entries import it', () => {
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|editors|editors-list)\//.test(relative(SRC, f)) && relative(SRC, f) !== 'popup.ts')
+      .filter((f) => !/^(filters|editors|editors-list|column-menu)\//.test(relative(SRC, f)) && relative(SRC, f) !== 'popup.ts')
       .filter((f) => /^import (?!type )[^;]*from '\.{1,2}\/(?:.*\/)?popup\.js'/m.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
