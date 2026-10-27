@@ -72,6 +72,11 @@ export interface ColumnDef<T, V = unknown> {
   readonly rowSpan?: (ctx: SpanCtx<T>) => number;
   /** How many columns this cell covers, from the data (1 when absent). Needs the spans feature. */
   readonly colSpan?: (ctx: SpanCtx<T>) => number;
+  /**
+   * Under a collapsible group (header-groups.md 1): shown only while it is open (`'open'`) or closed (`'closed'`);
+   * absent, in both. Ignored under a group that does not open and close.
+   */
+  readonly groupShow?: 'open' | 'closed';
   /** `'text'`: in a CSV file, a digits-only value is written `="0123"` so Excel keeps it as text (csv-export.md). */
   readonly csv?: 'text';
   /**
@@ -143,6 +148,10 @@ export interface ColumnGroupDef<T> {
   /** Already translated by the host. */
   readonly header?: string;
   readonly children: readonly ColumnOrGroup<T>[];
+  /** Opens and closes (header-groups.md 1; needs the spans feature): a button in its header, Enter or Space on it. */
+  readonly collapsible?: boolean;
+  /** A collapsible group's state when the grid starts (default true: open). */
+  readonly open?: boolean;
 }
 
 export type ColumnOrGroup<T> = ColumnDef<T, any> | ColumnGroupDef<T>;

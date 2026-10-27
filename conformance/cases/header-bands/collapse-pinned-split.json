@@ -1,0 +1,62 @@
+{
+  "id": "collapse-pinned-split",
+  "suite": "header-bands",
+  "description": "A group split by a pin keeps one state: closed, each piece shows what is left of it.",
+  "refs": [
+    "docs/behaviors/header-groups.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g",
+        "header": "G",
+        "collapsible": true,
+        "children": [
+          {
+            "id": "a"
+          },
+          {
+            "id": "b",
+            "groupShow": "open"
+          },
+          {
+            "id": "c"
+          }
+        ]
+      }
+    ],
+    "state": [
+      {
+        "id": "c",
+        "pinned": "start"
+      }
+    ],
+    "open": {
+      "g": false
+    }
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "g",
+          "first": 0,
+          "count": 1,
+          "label": "G"
+        },
+        {
+          "group": "g",
+          "first": 1,
+          "count": 1,
+          "label": "G"
+        }
+      ]
+    ],
+    "problems": [],
+    "shown": [
+      "c",
+      "a"
+    ]
+  }
+}

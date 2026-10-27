@@ -39,7 +39,8 @@ const INTERNAL = [
 const SERVER = ['createGate', 'sourceRows', 'toWire'];
 
 /** `@dzgrid/core/spans` (step 9b): cell spans, never in the base. */
-const SPANS = ['buildSpanMap', 'headerBands', 'land', 'navigate', 'ownerFocus', 'rowPlanner', 'spanAt'];
+// Phase 6 step 7: the collapsible groups' table, folds and differences (`groupTable`, `foldedColumns`, `diffState`).
+const SPANS = ['buildSpanMap', 'diffState', 'foldedColumns', 'groupTable', 'headerBands', 'land', 'navigate', 'ownerFocus', 'rowPlanner', 'spanAt'];
 
 /** `@dzgrid/core/csv` (step 10): the CSV writer, never in the base. */
 const CSV = ['csvChunks', 'csvColumns', 'csvRows', 'csvSeparatorFor', 'toCsv'];

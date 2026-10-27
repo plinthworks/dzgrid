@@ -17,12 +17,14 @@ import { cleanup, join, rmake } from './support-range.js';
 
 afterEach(cleanup);
 
-const KEYS = 'title search list handle up down placed showAll reset close none matches shown hidden allShown resetDone pinnedStart pinnedEnd last clearToMove'.split(' ').map((k) => `chooser.${k}`).sort();
+const KEYS = 'title search list handle up down placed showAll reset close none matches shown hidden allShown resetDone pinnedStart pinnedEnd last clearToMove inClosedGroup'.split(' ').map((k) => `chooser.${k}`).sort();
+/** The collapsible groups' texts (`@dzgrid/dom/spans`, Phase 6 step 7, owner Q8-1), in the same bundles. */
+const GROUP_KEYS = 'toggle open closed closedSaid openedSaid'.split(' ').map((k) => `group.${k}`);
 
 describe('column chooser texts', () => {
-  it('COLUMNS_CHOOSER_KEYS and COLUMNS_KEYS are each -columns bundle\'s keys, all of them', () => {
+  it('COLUMNS_CHOOSER_KEYS, COLUMNS_KEYS and the group texts are each -columns bundle\'s keys, all of them', () => {
     expect([...COLUMNS_CHOOSER_KEYS].sort()).toEqual(KEYS);
-    for (const b of [EN_COLUMNS, FR_COLUMNS, AR_COLUMNS]) expect(Object.keys(b.text).sort(), b.locale).toEqual([...KEYS, ...COLUMNS_KEYS].sort());
+    for (const b of [EN_COLUMNS, FR_COLUMNS, AR_COLUMNS]) expect(Object.keys(b.text).sort(), b.locale).toEqual([...KEYS, ...COLUMNS_KEYS, ...GROUP_KEYS].sort());
   });
 
   it('a grid missing a text: columnsChooser() refuses it at setup, naming the key (a move sentence too)', () => {

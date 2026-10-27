@@ -24,6 +24,7 @@ const alias = {
 const domAlias = {
   ...alias,
   '@dzgrid/dom/spans': fileURLToPath(new URL('./packages/dom/src/spans.ts', import.meta.url)),
+  '@dzgrid/dom/groups': fileURLToPath(new URL('./packages/dom/src/groups.ts', import.meta.url)),
   '@dzgrid/dom/slots': fileURLToPath(new URL('./packages/dom/src/slots.ts', import.meta.url)),
   '@dzgrid/dom/search': fileURLToPath(new URL('./packages/dom/src/search.ts', import.meta.url)),
   '@dzgrid/dom/filters': fileURLToPath(new URL('./packages/dom/src/filters.ts', import.meta.url)),

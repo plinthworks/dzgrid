@@ -174,6 +174,9 @@ export const resetPatch = (m: M): ColumnState[] | null => {
     : null;
 };
 
-/** Whether the chooser's box of `id` may flip: a hidden column may always be shown; a shown one hides unless `hideable: false` or the last shown (O1). */
-export const canHide = (m: M, id: string): boolean =>
-  !m.visible().some((c) => c.id === id) || (m.get(id)?.def.hideable !== false && m.visible().length > 1);
+/** Whether the chooser's box of `id` may flip: a hidden column may always be shown; a shown one (or one a closed group hides) hides unless `hideable: false`, or the last shown (O1). */
+export const canHide = (m: M, id: string): boolean => {
+  const v = m.visible().some((c) => c.id === id);
+  // Folded by a closed group (Phase 6 step 7): ticked, so as a shown one, but never the last shown.
+  return (!v && !m.folded.has(id)) || (m.get(id)?.def.hideable !== false && (!v || m.visible().length > 1));
+};

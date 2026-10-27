@@ -263,9 +263,9 @@ describe('the DOM layer’s shape', () => {
     expect(files(SRC).filter((f) => !/^editors-list(\/|\.ts$)/.test(relative(SRC, f)) && /from '[^']*editors-list[^']*'/.test(readFileSync(f, 'utf8').replace(/^import type .*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
   });
 
-  it('keeps the core’s span engine out of the base: only the spans entry imports it', () => {
+  it('keeps the core’s span engine out of the base: only the spans and groups entries import it (groups: Phase 6 step 7, owner Q8-4)', () => {
     const offenders = files(SRC)
-      .filter((f) => !/^spans\//.test(relative(SRC, f)) && relative(SRC, f) !== 'spans.ts')
+      .filter((f) => !/^(spans|groups)\//.test(relative(SRC, f)) && !['spans.ts', 'groups.ts'].includes(relative(SRC, f)))
       .filter((f) => /from '@dzgrid\/core\/spans'/.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);

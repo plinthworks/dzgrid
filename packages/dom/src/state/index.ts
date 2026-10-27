@@ -27,7 +27,7 @@ export interface GridStateFeature extends GridFeature {
 type Kernel = GridKernel<unknown>;
 /** Every grid's state API and environment, by kernel: `persistLocal` finds them without the feature object. */
 const APIS = new WeakMap<object, GridStateApi & { env: StateEnv }>();
-/** The events of the parts a state keeps (its groups' at step 8). */
+/** The events of the parts a state keeps (a group opened or closed is a `columnsChanged`). */
 const SAVED = ['columnsChanged', 'columnResized', 'sortChanged', 'filterChanged', 'quickChanged', 'pageChanged', 'densityChanged'];
 const tell = (k: Kernel, p: Problem): void => emit(k, { type: 'problems', source: 'host', problems: [p] });
 
@@ -71,6 +71,8 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
         density: () => g.settings.density ?? 'comfortable',
         // Not one of the three: refused (the restore says `state-field`); as the menu does, through the live settings (density.md 1).
         setDensity: (d) => (typeof d == 'string' && ROW_HEIGHT[d as 'compact'] > 0 ? ((g.settings = { ...g.settings, density: d as 'compact' }), g.schedule()) : false),
+        // The collapsible groups (`@dzgrid/dom/spans`, Phase 6 step 7), read when used: none without them.
+        get groups() { return g.groups; },
       };
       let quiet = false;
       let source: ChangeSource;

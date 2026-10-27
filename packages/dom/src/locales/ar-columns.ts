@@ -38,5 +38,12 @@ export const AR_COLUMNS = {
     'chooser.pinnedEnd': "مثبّت في النهاية",
     'chooser.last': "آخر عمود ظاهر",
     'chooser.clearToMove': "أفرغ البحث لتغيير الترتيب",
+    'chooser.inClosedGroup': "مخفي لأن مجموعته مطويّة",
+    // مجموعات العناوين القابلة للطيّ (`@dzgrid/dom/spans`، المرحلة 6، الخطوة 7).
+    'group.toggle': "فتح {group} أو طيّه",
+    'group.open': "{group}، مجموعة مفتوحة",
+    'group.closed': "{group}، مجموعة مطويّة",
+    'group.closedSaid': "طُويت {group}، الأعمدة الظاهرة: {n}",
+    'group.openedSaid': "فُتحت {group}، الأعمدة الظاهرة: {n}",
   },
 } satisfies ColumnsMessages;

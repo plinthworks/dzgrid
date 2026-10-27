@@ -38,5 +38,12 @@ export const EN_COLUMNS = {
     'chooser.pinnedEnd': "pinned to the end",
     'chooser.last': "the last shown column",
     'chooser.clearToMove': "Empty the search to change the order",
+    'chooser.inClosedGroup': "hidden by its closed group",
+    // Collapsible header groups (`@dzgrid/dom/spans`, Phase 6 step 7, owner Q8-1).
+    'group.toggle': "Open or close {group}",
+    'group.open': "{group}, group open",
+    'group.closed': "{group}, group closed",
+    'group.closedSaid': "{group} closed, columns shown: {n}",
+    'group.openedSaid': "{group} open, columns shown: {n}",
   },
 } satisfies ColumnsMessages;

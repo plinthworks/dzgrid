@@ -1,0 +1,122 @@
+{
+  "id": "groups-unknown",
+  "suite": "grid-state",
+  "description": "Groups: an id the grid does not have, or a group that does not open and close, is `state-group`; a value that is not true or false is `state-field`; the rest applied.",
+  "refs": [
+    "docs/behaviors/grid-state.md",
+    "docs/behaviors/header-groups.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "patient",
+        "header": "Patient",
+        "collapsible": true,
+        "children": [
+          {
+            "id": "nom"
+          },
+          {
+            "id": "age",
+            "groupShow": "open"
+          }
+        ]
+      },
+      {
+        "id": "contact",
+        "header": "Contact",
+        "collapsible": true,
+        "open": false,
+        "children": [
+          {
+            "id": "tel"
+          },
+          {
+            "id": "mail",
+            "groupShow": "open"
+          }
+        ]
+      },
+      {
+        "id": "meta",
+        "children": [
+          {
+            "id": "x"
+          }
+        ]
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "groups": {
+        "gone": true,
+        "meta": false,
+        "patient": "yes",
+        "contact": true
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-group",
+        "severity": "warning",
+        "path": "groups.gone"
+      },
+      {
+        "code": "state-group",
+        "severity": "warning",
+        "path": "groups.meta"
+      },
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "groups.patient"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "nom",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "tel",
+          "order": 2,
+          "pinned": null
+        },
+        {
+          "id": "mail",
+          "order": 3,
+          "pinned": null
+        },
+        {
+          "id": "x",
+          "order": 4,
+          "pinned": null
+        }
+      ],
+      "groups": {
+        "contact": true
+      },
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    },
+    "shown": [
+      "nom",
+      "age",
+      "tel",
+      "mail",
+      "x"
+    ],
+    "folds": 1
+  }
+}

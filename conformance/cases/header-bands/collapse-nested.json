@@ -1,0 +1,70 @@
+{
+  "id": "collapse-nested",
+  "suite": "header-bands",
+  "description": "Nested groups: each its own state; a column shows when every collapsible group above it shows it.",
+  "refs": [
+    "docs/behaviors/header-groups.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "o",
+        "header": "O",
+        "collapsible": true,
+        "children": [
+          {
+            "id": "i",
+            "header": "I",
+            "collapsible": true,
+            "children": [
+              {
+                "id": "x"
+              },
+              {
+                "id": "y",
+                "groupShow": "open"
+              }
+            ]
+          },
+          {
+            "id": "z",
+            "groupShow": "open"
+          }
+        ]
+      },
+      {
+        "id": "w"
+      }
+    ],
+    "open": {
+      "i": false
+    }
+  },
+  "expected": {
+    "depth": 2,
+    "levels": [
+      [
+        {
+          "group": "o",
+          "first": 0,
+          "count": 2,
+          "label": "O"
+        }
+      ],
+      [
+        {
+          "group": "i",
+          "first": 0,
+          "count": 1,
+          "label": "I"
+        }
+      ]
+    ],
+    "problems": [],
+    "shown": [
+      "x",
+      "z",
+      "w"
+    ]
+  }
+}

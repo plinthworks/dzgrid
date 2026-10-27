@@ -11,7 +11,7 @@ import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
-import type { EditSeam, FeatureHandle, SlotDrivers, SpanFeature } from './features.js';
+import type { EditSeam, FeatureHandle, GroupsApi, SlotDrivers, SpanFeature } from './features.js';
 import type { CellInput, PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
 import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
@@ -134,6 +134,12 @@ export interface GridContext<T> {
   restoreFocus(): void;
   /** A double-click on a column's resize grip: set by `columns()` (auto-size, Phase 6 step 6); absent, nothing. */
   fit?: ((column: string) => void) | undefined;
+  /** The collapsible header groups (`@dzgrid/dom/groups`, set at its setup): read by the state and menu features. */
+  groups?: GroupsApi;
+  /** The group rows (`@dzgrid/dom/spans`, set at its setup): where a group shows (its row and header), for `groups()`. */
+  groupBands?: { find(id: string): { readonly level: number; readonly label: string } | undefined };
+  /** A group's header painted (by `spans()`): its button and name added by `groups()`. */
+  groupCell?: (cell: HTMLElement, group: string, label: string) => void;
   /** The edit seam (`@dzgrid/dom/edit`), the first feature's that gives one: found once, at setup. */
   edit?: EditSeam | undefined;
   /**

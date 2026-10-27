@@ -1,0 +1,57 @@
+{
+  "id": "collapse-user-hidden-kept",
+  "suite": "header-bands",
+  "description": "A column the user hid stays hidden in an open group.",
+  "refs": [
+    "docs/behaviors/header-groups.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g",
+        "header": "G",
+        "collapsible": true,
+        "open": false,
+        "children": [
+          {
+            "id": "a"
+          },
+          {
+            "id": "b",
+            "groupShow": "open"
+          },
+          {
+            "id": "c"
+          }
+        ]
+      }
+    ],
+    "state": [
+      {
+        "id": "b",
+        "hidden": true
+      }
+    ],
+    "open": {
+      "g": true
+    }
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "g",
+          "first": 0,
+          "count": 2,
+          "label": "G"
+        }
+      ]
+    ],
+    "problems": [],
+    "shown": [
+      "a",
+      "c"
+    ]
+  }
+}

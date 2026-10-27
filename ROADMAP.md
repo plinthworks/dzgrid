@@ -816,7 +816,13 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   1 200 / 550 · 650 · 850): `dom/columns` 3 981 / 4 100, `columns.css` 1 111 / 1 150, texts 512 / 530, 614 / 630,
   746 / 800; DOM base 21 855 / 21 980 (+71). Browser: `--only columns` Chrome 41, `--only column-menu` 38,
   `--only column-resize` Firefox 4, WebKit 4 (the keys right to left). Exit criterion 1.
-- [ ] step 8: collapsible header groups.
+- [~] step 7 (the plan's « step 8 »; 2026-10-27, not committed, no review yet; plan `docs/phase-6-steps/step08-plan.md`
+  « Done »): collapsible header groups — core seam `fold` (+35 B, 28 965), `core/spans` table / folds / differences
+  (3 784 / 3 800), the new entry `@dzgrid/dom/groups` (owner Q8-4: 1 893 / 2 100) for the button, keys, focus,
+  sentences and API; `dom/spans` 4 567 / 4 950; texts 589 / 708 / 876 (Q8-1); GridState, chooser, menu reset; a fold
+  clears the block (Q8-3 revised). Lines raised by compression only (Q8-5): `core/edit` 3 150, `core/server` 6 200,
+  K.8 84 000. Demo `spans.html` section 4 (« Patient », fr / ar). Browser `--only groups`: Chrome 20, Firefox 18,
+  WebKit 18.
 - [ ] step 9: pinned rows, editable.
 - [ ] step 10: auto row height (exit criterion 3, S3).
 - [ ] step 11: print.

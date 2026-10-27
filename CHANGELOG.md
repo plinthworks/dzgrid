@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@dzgrid/dom/groups` and collapsible header groups (Phase 6 step 7; docs/behaviors/header-groups.md, owner Q-GH,
+  Q8-1–Q8-5): `ColumnGroupDef.collapsible` / `open`, `ColumnDef.groupShow: 'open' | 'closed'`; `groups()` (with
+  `spans()`) draws a 24 px button at the group header's inline end (`aria-expanded`, named), Enter / Space on the group
+  header, the focus moved off a column that goes, a polite sentence with the count shown; `groups().api(grid)`
+  (`toggle`, `isOpen`, `reset`, `get`, `set`, `collapsible`). The open state is its own, never `hidden`; nested groups;
+  a group split by a pin keeps one state. Core: `ColumnModel.folded` / `fold()` (+35 B), `@dzgrid/core/spans`
+  `groupTable`, `foldedColumns`, `diffState`. `GridState.groups` saved and restored (`gridState()`), the menu's « Reset
+  columns » brings the groups back, the chooser keeps a group-hidden column ticked (`chooser.inClosedGroup`). A fold
+  clears the block of cells. Texts `group.*` in `-columns` (600 / 720 / 900).
+- **Breaking (unpublished):** a `-columns` bundle must carry `chooser.inClosedGroup` (`columnsChooser()` throws without
+  it) and the `group.*` keys when a tree has a collapsible group (`groups()` throws). A restore's `groups: {}` now brings
+  every group back to its definition.
+
 - `@dzgrid/dom/columns` part 2 (Phase 6 step 6; docs/behaviors/column-resize.md, owner Q-K3, Q6-1, Q6-2, Q6-6, O10): the
   keyboard resize mode — Alt+R on a focused column header (read by the key's place, then its letter), arrows ±10 px
   (Shift: 1) mirrored right to left, Home fits, Enter keeps, Escape restores the width and the flexibility, Tab / a

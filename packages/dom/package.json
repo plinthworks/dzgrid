@@ -17,6 +17,10 @@
       "types": "./src/spans.ts",
       "default": "./src/spans.ts"
     },
+    "./groups": {
+      "types": "./src/groups.ts",
+      "default": "./src/groups.ts"
+    },
     "./slots": {
       "types": "./src/slots.ts",
       "default": "./src/slots.ts"

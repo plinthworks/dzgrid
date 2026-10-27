@@ -35,7 +35,7 @@ export interface GridStateColumn {
 export interface GridState {
   readonly v: 1;
   readonly columns: readonly GridStateColumn[];
-  /** Header group id → open (step 8; absent until a grid has collapsible groups). */
+  /** Header group id → open: the collapsible groups whose state differs from their definition (Phase 6 step 7). */
   readonly groups?: Readonly<Record<string, boolean>>;
   readonly sort: readonly SortItem[];
   readonly filter: FilterModel;
@@ -53,7 +53,7 @@ export interface StateOptions {
   readonly exclude?: readonly StatePart[];
 }
 
-/** A grid's header groups that open and close (step 8 wires them; until then a state's `groups` are unknown). */
+/** A grid's header groups that open and close (`@dzgrid/dom/spans`, Phase 6 step 7). */
 export interface GroupsAdapter {
   /** False for an id the grid does not have. */
   collapsible(id: string): boolean;
@@ -66,7 +66,7 @@ export interface StateEnv {
   density?(): Density | undefined;
   /** False: not a density (`state-field`, nothing changed). */
   setDensity?(d: unknown): boolean | void;
-  readonly groups?: GroupsAdapter;
+  readonly groups?: GroupsAdapter | undefined;
 }
 
 /** A column entry's fields: the test of a value, and what an absent one means (an order: its place in the list). */
@@ -194,7 +194,8 @@ export function restoreState<T>(k: GridKernel<T>, raw: unknown, env: StateEnv = 
     const a = env.groups;
     const open = Object.entries(isObj(s.groups) ? s.groups : bad('groups') ?? {}).filter(([id, v]) =>
       !a?.collapsible(id) ? say('state-group', `groups.${id}`) : v === !!v || bad(`groups.${id}`));
-    if (open.length) run.push(() => a!.set(Object.fromEntries(open)));
+    // The groups it names, replacing the grid's (one fold, Phase 6 step 7): `{}` brings the definitions back.
+    run.push(() => a?.set(Object.fromEntries(open)));
   }
   // The DOM's to check: not one of the three, refused (false) and told.
   if (has('density')) run.push(() => void (env.setDensity?.(s.density) === false && bad('density')));

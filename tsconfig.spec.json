@@ -59,6 +59,9 @@
       "@dzgrid/dom/spans": [
         "./packages/dom/src/spans.ts"
       ],
+      "@dzgrid/dom/groups": [
+        "./packages/dom/src/groups.ts"
+      ],
       "@dzgrid/dom/slots": [
         "./packages/dom/src/slots.ts"
       ],

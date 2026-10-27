@@ -1,6 +1,10 @@
 // The spans page: merged values, spans decided by the data, full-width rows, grouped headers (step 9b).
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { spans } from '@dzgrid/dom/spans';
+// By path, not `@dzgrid/dom/groups`: no alias added to vite.config.ts while the playground server runs (a config change reloads it).
+import { groups } from '../packages/dom/src/groups';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { AR_COLUMNS } from '@dzgrid/dom/locales/ar-columns';
 import { FR } from '@dzgrid/dom/locales/fr';
 import { AR } from '@dzgrid/dom/locales/ar';
 import type { ColumnOrGroup, GridEvent, SortItem } from '@dzgrid/core';
@@ -169,10 +173,11 @@ function stayColumns(): ColumnOrGroup<Stay>[] {
   const t = w.groups;
   // Nom pinned (the shared control): the "Patient" group splits in two pieces, each labelled.
   return [
-    { id: 'g-patient', header: w.patient, children: [
+    // « Patient » opens and closes (Phase 6 step 7, `groups()`): closed, Nom alone stays.
+    { id: 'g-patient', header: w.patient, collapsible: on('fold'), children: [
       { id: 'nom', header: t.nom, width: 150, ...(on('pinned') && { pinned: 'start' as const }) },
-      { id: 'prenom', header: t.prenom, width: 130 },
-      { id: 'age', header: w.age, type: 'number', width: 80 },
+      { id: 'prenom', header: t.prenom, width: 130, groupShow: 'open' },
+      { id: 'age', header: w.age, type: 'number', width: 80, groupShow: 'open' },
     ] },
     { id: 'g-clinique', header: t.clinique, children: [
       { id: 'g-constantes', header: t.constantes, children: [
@@ -222,10 +227,18 @@ function build(): void {
   merge.kernel.dispatch({ type: 'sort.set', sort: SORTS[sortSelect.value]! }, 'api');
   grids.push(merge);
   grids.push(createGrid<Slot>(document.getElementById('data')!, { rows: schedule(), getRowId: (s) => s.id, columns: scheduleColumns(), ...common<Slot>() }));
-  grids.push(createGrid<Stay>(document.getElementById('groups')!, { rows: stays(), getRowId: (s) => s.id, columns: stayColumns(), ...common<Stay>() }));
+  // The grouped headers' grid: with `groups()` and the `-columns` texts when « Patient » folds.
+  const c = common<Stay>();
+  const cols = arabic() ? AR_COLUMNS : FR_COLUMNS;
+  grids.push(createGrid<Stay>(document.getElementById('groups')!, {
+    rows: stays(), getRowId: (s) => s.id, columns: stayColumns(), ...c,
+    ...(on('fold') && { messages: { ...c.messages!, text: { ...c.messages!.text, ...cols.text } }, features: [spans(), groups()] }),
+  }));
   grids.push(createGrid<Line>(document.getElementById('full')!, { rows: grouped(), getRowId: (l) => l.id, columns: groupedColumns(), fullWidth: (l) => l.title !== undefined, ...common<Line>() }));
 }
 
+// For the browser checks (`npm run test:browser -- --only groups`).
+Object.assign(window, { spansDemo: grids });
 form.addEventListener('change', build);
 sortSelect.addEventListener('change', () => grids[0]?.kernel.dispatch({ type: 'sort.set', sort: SORTS[sortSelect.value]! }, 'user'));
 build();

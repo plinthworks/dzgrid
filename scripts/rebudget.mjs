@@ -36,12 +36,12 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  */
 const SIZE_CEILINGS = {
   '@dzgrid/core': 29000,
-  '@dzgrid/core/server': 6150, // Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order); owner E5-1 / E5-8 (2026-10-26): 6 150 for the hold seam (`rows.hold`, one request per restore; measured +56)
+  '@dzgrid/core/server': 6200, // owner Q8-5 (2026-10-27): 6 200, pushed by compression with the base's fold seam; Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order); owner E5-1 / E5-8 (2026-10-26): 6 150 for the hold seam (`rows.hold`, one request per restore; measured +56)
   '@dzgrid/core/csv': 2000, // Q7: « core/csv up to 2 000 »
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
   '@dzgrid/core/detail': 1050, // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
-  '@dzgrid/core/edit': 3100, // Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
+  '@dzgrid/core/edit': 3150, // owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
   '@dzgrid/core/range': 4000, // Phase 5 Q16 (Part B): blocks of cells, TSV, the paste and fill plans; the line at the measure + 10 % at the close
   '@dzgrid/core/state': 1500, // Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
@@ -97,9 +97,9 @@ const SIZE_CEILINGS = {
   // Phase 6 (owner Q-B, 2026-10-26): moving columns, keyboard resize, auto-size in their own entry over the DOM base
   // (part 1, step 2, stops at 2 300: step02-plan §4); its texts and styles apart, shared with the menu, chooser and groups.
   '@dzgrid/dom/columns': 4200, // owner Q6-6 (2026-10-27): 3 500 → 4 200 (step 6: the resize mode and auto-size, measured 3 996)
-  '@dzgrid/dom/locales/en-columns': 550, // Q6-6: 500 → 550
-  '@dzgrid/dom/locales/fr-columns': 650, // Q6-6: 600 → 650
-  '@dzgrid/dom/locales/ar-columns': 850, // Q6-6: 800 → 850
+  '@dzgrid/dom/locales/en-columns': 600, // Q6-6: 500 → 550; Q8-1: 600 (the group texts)
+  '@dzgrid/dom/locales/fr-columns': 720, // Q6-6: 600 → 650; Q8-1: 720
+  '@dzgrid/dom/locales/ar-columns': 900, // Q6-6: 800 → 850; Q8-1: 900
   '@dzgrid/theme/columns.css': 1200, // Q6-6: 1 100 → 1 200 (the mode's outline)
   // Phase 6 step 3 (owner Q-B, Q3-2): the column menu over the popup host; its texts in their own bundles.
   '@dzgrid/dom/column-menu': 4300, // owner Q3-5 (2026-10-26): 3 000 → 4 300 (measured 3 951, the full menu kept)
@@ -119,7 +119,9 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/tailwind3.css': 500, // T7
   '@dzgrid/theme/bootstrap.css': 500, // T7
   '@dzgrid/angular': 7000, // owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
-  'profile: audit screen (K.8)': 83500,
+  'profile: audit screen (K.8)': 84000, // Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000
+  // `@dzgrid/dom/groups` (owner Q8-4, 2026-10-27): its measure + 10 %, no ceiling of its own (measured 1 893 → 2 100).
+  '@dzgrid/dom/spans': 5300, // Q-B: 4 950 → 5 300 for the phase; Q8-4: the fold UI moved out, measured 4 567
 };
 
 /** The plan's ceiling for an entry, or null. Every message bundle (locales/*) is ≤ 2 kB. */

@@ -185,8 +185,10 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
             // Back to the definitions in one patch (Q3-3: `width: null` gives a flexible column back); sort and filters kept.
             it('reset', () => {
               kernel.dispatch({ type: 'column.state', patch: m.state().map((s, order) => ({ id: s.id, order, width: null, hidden: !!m.get(s.id)!.def.hidden, pinned: m.get(s.id)!.def.pinned ?? null })) }, 'user');
+              // The header groups' states too (header-groups.md 6), in the same gesture.
+              g.groups?.reset({ user: true });
               say(g.msg('menu.resetDone'));
-            }, !m.state().some((s, i) => {
+            }, !Object.keys(g.groups?.get() ?? {}).length && !m.state().some((s, i) => {
               const d = m.get(s.id)!.def;
               return s.width != null || (s.order ?? i) !== i || (s.hidden ?? !!d.hidden) !== !!d.hidden || (s.pinned === undefined ? false : s.pinned !== (d.pinned ?? null));
             })),

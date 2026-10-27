@@ -1,0 +1,59 @@
+{
+  "id": "collapse-closed-keeps-listed",
+  "suite": "header-bands",
+  "description": "A closed group keeps the columns listed for its closed state (and those in both); its band narrows to them.",
+  "refs": [
+    "docs/behaviors/header-groups.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "patient",
+        "header": "Patient",
+        "collapsible": true,
+        "children": [
+          {
+            "id": "nom"
+          },
+          {
+            "id": "prenom",
+            "groupShow": "open"
+          },
+          {
+            "id": "age",
+            "groupShow": "open"
+          },
+          {
+            "id": "resume",
+            "groupShow": "closed"
+          }
+        ]
+      },
+      {
+        "id": "ward"
+      }
+    ],
+    "open": {
+      "patient": false
+    }
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "patient",
+          "first": 0,
+          "count": 2,
+          "label": "Patient"
+        }
+      ]
+    ],
+    "problems": [],
+    "shown": [
+      "nom",
+      "resume",
+      "ward"
+    ]
+  }
+}

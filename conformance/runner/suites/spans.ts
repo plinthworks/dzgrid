@@ -1,6 +1,6 @@
 import { createColumnModel, localeCtx, type ColumnOrGroup, type Problem } from '@dzgrid/core';
 import { createRowStore, flatDisplayed } from '@dzgrid/core/internal';
-import { buildSpanMap, headerBands, navigate, type SpanCell, type SpanLookup } from '@dzgrid/core/spans';
+import { buildSpanMap, foldedColumns, groupTable, headerBands, navigate, type SpanCell, type SpanLookup } from '@dzgrid/core/spans';
 import { FULL_WIDTH, SAME_RULES, SPAN_RULES } from '../spans-fixtures.js';
 import type { Suite } from './index.js';
 
@@ -51,8 +51,11 @@ export function runBands(input: any) {
   const tree = input.columns.map(columnOf);
   const columns = createColumnModel<Row>(tree);
   if (input.state) columns.apply(input.state, 'api');
+  // Collapsible groups (Phase 6 step 7): `open` gives the groups' state; the folded columns are left out first.
+  const t = input.open ? groupTable(tree) : null;
+  if (t) columns.fold(foldedColumns(t, new Map(Object.entries(input.open as Record<string, boolean>))));
   const b = headerBands(tree, columns.layout);
-  return { depth: b.depth, levels: b.levels, problems: shape(b.problems) };
+  return { depth: b.depth, levels: b.levels, problems: shape([...b.problems, ...(t?.problems ?? [])]), ...(t && { shown: columns.visible().map((c) => c.id) }) };
 }
 
 /** A literal map: the listed cells, and full-width rows over every column. */

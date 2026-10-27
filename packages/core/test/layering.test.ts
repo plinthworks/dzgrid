@@ -109,8 +109,9 @@ describe('layering of the base and the server entry', () => {
     // shape check moved to `@dzgrid/core/edit` (the base gains only types: `EditChecks`, four events,
     // `SaveOrigin`) → 28 916, the measure. Phase 5 close (step 13, 2026-10-26): steps 4–12 added no base byte
     // (types only, the range and fill seams in their entries); the guard stays 28 916, the close's measure.
-    // Phase 6 step 3 (owner Q3-3): `width: null` in a column patch, +14 → 28 930.
-    expect(gz).toBeLessThanOrEqual(28930);
+    // Phase 6 step 3 (owner Q3-3): `width: null` in a column patch, +14 → 28 930. Phase 6 step 7 (collapsible
+    // groups, owner Q-GH, Q-B: seam ≤ 120 B): `ColumnModel.folded` / `fold`, +35 → 28 965.
+    expect(gz).toBeLessThanOrEqual(28965);
   });
 
   it('the base holds no edit module: the edit controller is its own entry (Phase 5 step 3)', async () => {
@@ -126,13 +127,13 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(false);
   });
 
-  it('the edit entry fits its grant over the base (owner Q16 3 000, S3-O4 3 100 B gz), measured as check:size measures it', async () => {
+  it('the edit entry fits its grant over the base (owner Q16 3 000, S3-O4 3 100, Q8-5 3 150 B gz), measured as check:size measures it', async () => {
     const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './edit.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
     const entry = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core/edit'];
-    expect(entry).toMatchObject({ file: 'packages/core/src/edit.ts', maxGzip: 3100, over: '@dzgrid/core' });
+    expect(entry).toMatchObject({ file: 'packages/core/src/edit.ts', maxGzip: 3150, over: '@dzgrid/core' }); // Q8-5: 3 100 → 3 150 (compression with the base's fold seam)
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
   });
 
@@ -160,7 +161,7 @@ describe('layering of the base and the server entry', () => {
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
     // The step's planned share (step10-plan « Sizes »): 2 200–3 000; more is a question, not a failure here.
     expect(both - alone).toBeGreaterThan(500);
-    expect(alone).toBeLessThanOrEqual(28930);
+    expect(alone).toBeLessThanOrEqual(28965);
   });
 
   it('no other entry holds a state module; the state entry holds no server, span, csv, tree, edit or range module, nor the models (Phase 6 step 5)', async () => {
@@ -178,6 +179,6 @@ describe('layering of the base and the server entry', () => {
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './state.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
     expect(both - alone).toBeLessThanOrEqual(1500);
-    expect(alone).toBeLessThanOrEqual(28930);
+    expect(alone).toBeLessThanOrEqual(28965);
   });
 });

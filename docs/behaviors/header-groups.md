@@ -95,3 +95,15 @@ The button at the group header's inline end (left in Arabic); the closed chevron
 Conformance `conformance/cases/header-bands/collapse-*` (shown sets, nested, split groups, user-hidden kept,
 empty closed), `packages/core/test/columns-collapse.test.ts`, `packages/dom/test/spans-collapse.test.ts`
 (button, keys, focus fallback, sentences, state round trip); browser fr / ar RTL.
+
+## As built (Phase 6 step 7, 2026-10-27; `docs/phase-6-steps/step08-plan.md` « Done »)
+- Entry: `@dzgrid/dom/groups` (`groups()`, owner Q8-4), with `spans()` for the group rows; without it `collapsible` does
+  nothing. Needs the `-columns` texts (`TypeError` at setup).
+- Rules 1 / 4 as the plan: `groupShow` is read against every collapsible group above the column (closing an outer group
+  folds the `open` columns at any depth; a `closed` column shows only while all its collapsible groups are closed).
+- Rule 2: the warning's path follows the tree (`columns[1].children`, detail `empty-closed`), as the other group problems.
+- Rule 3: the base's `ColumnModel.folded` / `fold()`; `state()` and `hidden` untouched; a fold leaving no column is refused.
+- Button: `button.dzg-gtoggle`, chevron drawn with logical borders and a mirrored angle under `[dir=rtl]`, as the tree's
+  (not `scale: -1`); `ButtonText` in forced colours. The group header carries `data-g` (its group id).
+- API: `groups().api(grid)` → `collapsible`, `isOpen`, `toggle(id, open?, { say, user })`, `reset`, `get`, `set`.
+- A block of cells touching a folded column is cleared, as for a hidden one (owner Q8-3 revised).

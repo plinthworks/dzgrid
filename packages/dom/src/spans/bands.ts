@@ -24,6 +24,8 @@ export interface Bands {
   stretch(height: number): void;
   /** A key on a group row, or Up from a column header; undefined: not the group rows' (the grid's own move). */
   move(...a: Parameters<MoveFn>): ReturnType<MoveFn> | undefined;
+  /** A group shown now: its row (`level`, -depth the top one) and its header; undefined when none of its columns shows. */
+  find(id: string): { readonly level: number; readonly label: string } | undefined;
 }
 
 const header = (column: string, level: number): FocusPos => (level ? { kind: 'header', column, level } : { kind: 'header', column });
@@ -96,6 +98,7 @@ export function createBands(g: GridContext<unknown>): Bands | null {
   // The last paint's window and focus, for the column headers' stretching.
   let last: HeaderPaint | null = null;
 
+
   const specs = Array.from({ length: D }, (_, k): HeaderBandSpec => {
     const level = k - D;
     // A group's cell by group and first column (ids may hold any character); a hidden one by column.
@@ -130,12 +133,15 @@ export function createBands(g: GridContext<unknown>): Bands | null {
           let el = cells.get(key);
           if (!el) {
             el = g.doc.createElement('div');
+            // The label is a text node, so a group's button beside it stays (Phase 6 step 7).
+            el.append('');
             el.setAttribute('role', 'columnheader');
             if (head) {
               el.className = 'dzg-hcell dzg-hgroup';
               el.tabIndex = -1;
               el.dataset['col'] = all[f.first];
               el.dataset['level'] = String(level);
+              el.dataset['g'] = f.group;
             } else el.className = 'dzg-hslot';
             cells.set(key, el);
           }
@@ -149,7 +155,10 @@ export function createBands(g: GridContext<unknown>): Bands | null {
           // The group's own words, already translated (its id otherwise); where no group stands,
           // the column's own (its header reaches up to here).
           const text = f ? f.label || f.group : slice.columns[c - x]!.def.header ?? all[c]!;
-          if (el.textContent !== text) el.textContent = text;
+          const tn = el.firstChild as Text;
+          if (tn.data !== text) tn.data = text;
+          // A collapsible group's button and name (`@dzgrid/dom/groups`, Phase 6 step 7, owner Q8-4).
+          if (head) g.groupCell?.(el, f.group, text);
           items.push([s ? (s > 1 ? segs.end : segs.center) : segs.start, el]);
         }
         // What goes first, so that what stays is not moved (a moved node loses the focus).
@@ -193,6 +202,13 @@ export function createBands(g: GridContext<unknown>): Bands | null {
         setAttr(el, 'data-up', n ? '' : null);
         if (n) setPx(el, '--dzg-up', n * height);
         else el.style.removeProperty('--dzg-up');
+      }
+    },
+    find(id) {
+      const lv = bands().levels;
+      for (let k = 0; k < D; k++) {
+        const f = lv[k]!.find((x) => x.group === id);
+        if (f) return { level: k - D, label: f.label };
       }
     },
     move(_, s, from, goal, intent, base) {

@@ -81,3 +81,12 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **Q6-3..Q6-5 (lead, recommendations kept):** rows measured = the visible rows plus the first 200; badges/parts measured only when mounted; fonts measured at once, no waiting for font loading.
 - Update column-resize.md: remove the − / + / ✓ buttons, cite the menu path for 2.5.7.
 - **Q6-6 (owner, 2026-10-27):** `@dzgrid/dom/columns` 3 500 → 4 200 (measured 3 996 with the resize mode and auto-size in the same entry); `columns.css` 1 100 → 1 200; `-columns` texts en/fr/ar 500/600/800 → 550/650/850.
+
+## Step 7 — collapsible header groups (owner, 2026-10-27) — plan `step08-plan.md` (file named after the plan's original numbering)
+
+- **Q8-1:** `-columns` texts en/fr/ar → 600 / 720 / 900 (the 5 group sentences).
+- **Q8-2 (lead):** if the core seam goes over 120 B, `columnsChanged` is emitted from `dom/spans`, not a kernel command.
+- **Q8-3:** a block touching a column that gets folded shrinks to the remaining columns; if nothing remains it is cleared. If `dom/range` would go over its 4 950 line, stop and ask.
+- **Q8-4 (owner, 2026-10-27):** the fold UI goes to its own entry `@dzgrid/dom/groups` (~1 400 B; line at the measure + 10 %), loaded only with collapsible groups; `dom/spans` stays within 5 300.
+- **Q8-3 revised (owner, 2026-10-27):** folding a column clears the block (as for a hidden column); no shrink, 0 B in `dom/range`.
+- **Q8-5 (owner, 2026-10-27):** lines pushed by compression only: `core/edit` 3 100 → 3 150, `core/server` 6 150 → 6 200, K.8 profile guard 83 500 → 84 000 (already granted in Q-B).

@@ -93,6 +93,28 @@ export interface FeatureHandle {
   destroy(): void;
 }
 
+/**
+ * A grid's collapsible header groups (`@dzgrid/dom/spans`, Phase 6 step 7, docs/behaviors/header-groups.md), found by
+ * the state and menu features through `GridContext.groups`; `get` / `set` are what a GridState keeps (`GroupsAdapter`).
+ */
+export interface GroupsApi {
+  /** True for a valid group with `collapsible: true`. */
+  collapsible(id: string): boolean;
+  /** Its state now; null: not a collapsible group. */
+  isOpen(id: string): boolean | null;
+  /**
+   * Opens (`true`), closes (`false`) or flips one group, as one change (`columnsChanged`, source `api`, or `user` with
+   * `user`); `say`: its sentence. False: not a collapsible group, or a close that would leave no column shown (O1).
+   */
+  toggle(id: string, open?: boolean, o?: { readonly say?: boolean; readonly user?: boolean }): boolean;
+  /** Every group back to its definition's state. */
+  reset(o?: { readonly user?: boolean }): void;
+  /** The groups whose state differs from their definition (`GridState.groups`). */
+  get(): Readonly<Record<string, boolean>>;
+  /** Replaces the user's states (a restore: source `host`, nothing said); unknown ids ignored. */
+  set(open: Readonly<Record<string, boolean>>): void;
+}
+
 /** Where a key moves the focus (`moveFocus`); a feature's version gets the base one for what it leaves to it. */
 export type MoveFn = (map: SpanLookup | null, s: MoveShape, from: FocusPos, goal: Goal | null, intent: Intent, base?: MoveFn) => Move | null;
 

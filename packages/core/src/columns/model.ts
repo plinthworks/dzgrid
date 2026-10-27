@@ -48,6 +48,13 @@ export interface ColumnModel<T> extends ColumnLookup<T> {
   setDefs(defs: readonly ColumnOrGroup<T>[]): ColumnChange;
   /** The width the columns share; drives flexible columns. */
   setAvailableInline(px: number): ColumnChange;
+  /** Column ids hidden by a closed header group (Phase 6 step 7, header-groups.md 3): apart from the user's `hidden`. */
+  readonly folded: ReadonlySet<string>;
+  /**
+   * The columns closed groups hide (`@dzgrid/dom/spans`), replacing the last set; `state()` and `hidden` untouched.
+   * Refused, nothing changed, when it would leave no column shown (O1). Tells no event: its caller does.
+   */
+  fold(ids: ReadonlySet<string>): ColumnChange;
 }
 
 const DEFAULT_WIDTH = 150;
@@ -63,6 +70,7 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
   let dataVersion = 0;
   let layout: ColumnLayout;
   let visibleList: readonly ResolvedColumn<T>[] = [];
+  let folded: ReadonlySet<string> = new Set();
 
   const setColumns = (defs: readonly ColumnOrGroup<T>[]): void => {
     const r = resolveColumns(defs);
@@ -76,7 +84,7 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
     // A position the user asked for wins over the default position it ties with.
     const order = (c: ResolvedColumn<T>): number => user.get(c.id)?.order ?? pos.get(c.id)!;
     const asked = (c: ResolvedColumn<T>): number => (user.get(c.id)?.order === undefined ? 1 : 0);
-    const shown = columns.filter((c) => !(user.get(c.id)?.hidden ?? c.def.hidden ?? false));
+    const shown = columns.filter((c) => !folded.has(c.id) && !(user.get(c.id)?.hidden ?? c.def.hidden ?? false));
     const side = (c: ResolvedColumn<T>): Side | null => {
       const u = user.get(c.id);
       return u && u.pinned !== undefined ? u.pinned : (c.def.pinned ?? null);
@@ -141,6 +149,7 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
     get dataVersion() { return dataVersion; },
     get layout() { return layout; },
     get problems() { return defProblems; },
+    get folded() { return folded; },
     get: (id) => byId.get(id),
     visible: () => visibleList,
     state: () => columns.map((col) => ({ id: col.id, ...user.get(col.id) })),
@@ -172,6 +181,15 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
         setColumns(defs);
         return columns.map((col) => col.id);
       }, () => defProblems, true);
+    },
+    fold(ids) {
+      const was = folded;
+      return change(() => {
+        folded = ids;
+        recompute();
+        if (!visibleList.length) folded = was;
+        return [];
+      });
     },
     setAvailableInline(px) {
       if (!(Number.isFinite(px) && px >= 0)) {

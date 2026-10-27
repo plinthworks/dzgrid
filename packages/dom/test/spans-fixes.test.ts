@@ -135,8 +135,11 @@ describe('hover: the row under the pointer, not the row a tall cell lives in', (
 });
 
 describe('the feature’s CSS applies to the grid’s rows only', () => {
-  /** The selector lists of SPANS_CSS, out of their `:where()` (and out of the layer's wrapper, showcase themes step 2). */
-  const rules = SPANS_CSS.replace('@layer dzgrid.layout{', '').replace('}}', '}').split('}').filter(Boolean).map((r) => r.slice(0, r.indexOf('{')).replace(/^:where\((.*)\)(::before)?$/, '$1'));
+  /**
+   * The selector lists of SPANS_CSS, out of their `:where()` (and out of the layer's wrapper, showcase themes step 2); a
+   * media query's rule (the groups' forced colours, Phase 6 step 7) by its selector.
+   */
+  const rules = SPANS_CSS.replace('@layer dzgrid.layout{', '').replace(/@media[^{]*\{/g, '').replace(/\}\}/g, '}').split('}').filter(Boolean).map((r) => r.slice(0, r.indexOf('{')).replace(/^:where\((.*)\)(::before)?$/, '$1'));
 
   it('a host ancestor carrying data-full or data-spans changes none of the grid’s elements', () => {
     const outer = document.createElement('div');

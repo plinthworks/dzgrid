@@ -28,6 +28,7 @@
     <label>Données <select name="lang"><option value="fr">français</option><option value="ar">arabe</option></select></label>
     <label><input type="checkbox" name="pinned" checked> première colonne épinglée</label>
     <label><input type="checkbox" name="box"> cases de sélection</label>
+    <label><input type="checkbox" name="fold" checked> Patient repliable</label>
     <label>Densité <select name="density"><option>comfortable</option><option>compact</option><option>spacious</option></select></label>
     <output id="status"></output>
   </form>
@@ -74,6 +75,7 @@
       <li>Faites défiler de côté : un groupe à moitié sorti de la vue reste dessiné depuis sa première colonne ; élargissez une colonne : son groupe s’élargit avec elle.</li>
       <li>Clavier : sur l’en-tête Pouls, Haut monte sur « Constantes » puis « Clinique » ; Bas redescend sur Pouls. Sur une ligne de groupes, Gauche et Droite passent d’un groupe à l’autre, Début et Fin vont au premier et au dernier. Un clic ou Entrée sur un groupe ne trie pas.</li>
       <li>Sens de droite à gauche : les groupes suivent, les flèches aussi.</li>
+      <li>Groupe repliable (case « Patient repliable » cochée) : le petit chevron à droite de « Patient » (à gauche en arabe) ferme le groupe — seul Nom reste, la phrase « Patient fermé, colonnes affichées : 1 » est lue ; un second clic rouvre Prénom et Âge à leur largeur. Au clavier : Haut jusqu’à « Patient », puis Entrée ou Espace. Le focus sur Âge passe à « Patient » quand le groupe se ferme.</li>
     </ul>
     <div class="host short" id="groups"></div>
   </section>

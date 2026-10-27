@@ -38,5 +38,12 @@ export const FR_COLUMNS = {
     'chooser.pinnedEnd': "épinglée à la fin",
     'chooser.last': "dernière colonne affichée",
     'chooser.clearToMove': "Videz la recherche pour changer l'ordre",
+    'chooser.inClosedGroup': "masquée par son groupe replié",
+    // Groupes d'en-tête repliables (`@dzgrid/dom/spans`, phase 6, étape 7, Q8-1).
+    'group.toggle': "Ouvrir ou fermer {group}",
+    'group.open': "{group}, groupe ouvert",
+    'group.closed': "{group}, groupe fermé",
+    'group.closedSaid': "{group} fermé, colonnes affichées : {n}",
+    'group.openedSaid': "{group} ouvert, colonnes affichées : {n}",
   },
 } satisfies ColumnsMessages;

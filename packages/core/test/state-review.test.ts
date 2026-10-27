@@ -58,3 +58,16 @@ describe('captureState', () => {
     expect(Object.keys(s).sort()).toEqual(['columns', 'v']);
   });
 });
+
+describe('groups restored replace the grid’s (Phase 6 step 7)', () => {
+  it('a state with `groups: {}` brings the definitions back: the adapter is set once, with nothing', async () => {
+    const { createColumnModel, createKernel, clientRows, localeCtx } = await import('@dzgrid/core');
+    const { restoreState } = await import('@dzgrid/core/state');
+    const m = createColumnModel<{ id: string }>([{ id: 'a' }]);
+    const k = createKernel({ rows: clientRows({ rows: [], getRowId: (r: { id: string }) => r.id, columns: m, ctx: localeCtx({ locale: 'fr-FR' }) }), columns: m });
+    const sets: unknown[] = [];
+    const problems = restoreState(k, { v: 1, groups: {} }, { groups: { collapsible: () => true, get: () => ({}), set: (o) => void sets.push(o) } });
+    expect(problems).toEqual([]);
+    expect(sets).toEqual([{}]);
+  });
+});

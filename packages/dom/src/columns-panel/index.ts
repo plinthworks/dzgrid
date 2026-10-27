@@ -7,7 +7,7 @@ import { LiveRegion } from '../a11y/live-region.js';
 import { canHide, listed, listOrder, moveNear, placeInList, resetPatch, sidesOf, stepList } from '../columns/order.js';
 
 /** The texts `columnsChooser()` needs, from `@dzgrid/dom/locales/<lang>-columns` (owner Q4-1), with the moves' `move.edge`, `move.locked`, `move.cancelled`. */
-export const COLUMNS_CHOOSER_KEYS = 'title search list handle up down placed showAll reset close none matches shown hidden allShown resetDone pinnedStart pinnedEnd last clearToMove'
+export const COLUMNS_CHOOSER_KEYS = 'title search list handle up down placed showAll reset close none matches shown hidden allShown resetDone pinnedStart pinnedEnd last clearToMove inClosedGroup'
   .split(' ')
   .map((k) => `chooser.${k}`) as readonly ColumnsChooserMessageKey[];
 
@@ -69,6 +69,11 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
       const name = (id: string): string => m.get(id)?.def.header ?? id;
       const T = (k: string, id?: string, p?: Record<string, number>): string => g.msg(`chooser.${k}` as ColumnsChooserMessageKey, { column: id ? name(id) : '', ...p });
       const state = (patch: object[]): void => void kernel.dispatch({ type: 'column.state', patch: patch as never }, 'user');
+      /** Hidden by the user (the box unticked); a column only its closed group hides stays ticked (Phase 6 step 7, 9). */
+      const byUser = (): ((id: string) => boolean) => {
+        const st = new Map(m.state().map((s) => [s.id, s.hidden]));
+        return (id) => st.get(id) ?? !!m.get(id)!.def.hidden;
+      };
       const mk = <K extends keyof HTMLElementTagNameMap>(tag: K, parent: Element, cls = '', text?: string): HTMLElementTagNameMap[K] => {
         const x = doc.createElement(tag);
         if (cls) x.className = cls;
@@ -110,6 +115,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
         chains = new Map();
         walk(g.settings.columns, []);
         const shown = new Set(m.visible().map((c) => c.id));
+        const hid = byUser();
         const side = sidesOf(m);
         const rows = listOrder(m).filter((id) => listed(m)(id) && (!q || [name(id), ...(chains.get(id) ?? []).map((x) => x.header ?? '')].some((s) => fold(s).includes(q))));
         if (!rov || !rows.includes(rov)) rov = rows[0];
@@ -145,12 +151,12 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
           const box = mk('input', li);
           box.type = 'checkbox';
           box.id = `${base}c${i}`;
-          box.checked = shown.has(id);
+          box.checked = !hid(id);
           box.tabIndex = id === rov ? 0 : -1;
           if (!canHide(m, id)) box.setAttribute('aria-disabled', 'true');
           mk('bdi', mk('label', li), '', name(id)).parentElement!.setAttribute('for', box.id);
           // Its pin, and why it cannot be hidden when it is the last one shown (O1).
-          const desc = [s && T(s === 'start' ? 'pinnedStart' : 'pinnedEnd'), shown.has(id) && shown.size < 2 && T('last')].filter(Boolean).join(', ');
+          const desc = [s && T(s === 'start' ? 'pinnedStart' : 'pinnedEnd'), shown.has(id) && shown.size < 2 && T('last'), m.folded.has(id) && !hid(id) && T('inClosedGroup')].filter(Boolean).join(', ');
           if (desc) {
             mk('span', li, 'dzg-cp-desc', desc).id = `${box.id}d`;
             box.setAttribute('aria-describedby', `${box.id}d`);
@@ -252,7 +258,9 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
           const act = t.dataset['act'];
           if (id && (act === 'up' || act === 'down')) move(id, act === 'up' ? -1 : 1);
           else if (act === 'all') {
-            state(listOrder(m).filter((x) => listed(m)(x) && !m.visible().some((c) => c.id === x)).map((x) => ({ id: x, hidden: false })));
+            const hid = byUser();
+            // The user's hidden ones; a closed group stays closed.
+            state(listOrder(m).filter((x) => listed(m)(x) && hid(x)).map((x) => ({ id: x, hidden: false })));
             say(T('allShown'));
           } else if (act === 'reset') {
             const r = resetPatch(m);

@@ -1,0 +1,53 @@
+{
+  "id": "collapse-all-folded-refused",
+  "suite": "header-bands",
+  "description": "Closing a group that would leave no column shown (its closed column hidden by the user) is refused: nothing changes (O1).",
+  "refs": [
+    "docs/behaviors/header-groups.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g",
+        "header": "G",
+        "collapsible": true,
+        "children": [
+          {
+            "id": "a",
+            "groupShow": "open"
+          },
+          {
+            "id": "b",
+            "groupShow": "closed"
+          }
+        ]
+      }
+    ],
+    "state": [
+      {
+        "id": "b",
+        "hidden": true
+      }
+    ],
+    "open": {
+      "g": false
+    }
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "g",
+          "first": 0,
+          "count": 1,
+          "label": "G"
+        }
+      ]
+    ],
+    "problems": [],
+    "shown": [
+      "a"
+    ]
+  }
+}

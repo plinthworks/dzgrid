@@ -1,0 +1,56 @@
+{
+  "id": "collapse-empty-closed",
+  "suite": "header-bands",
+  "description": "A group with nothing listed for its closed state keeps its first child when closed, and warns once (rule 2).",
+  "refs": [
+    "docs/behaviors/header-groups.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g",
+        "collapsible": true,
+        "children": [
+          {
+            "id": "a",
+            "groupShow": "open"
+          },
+          {
+            "id": "b",
+            "groupShow": "open"
+          }
+        ]
+      },
+      {
+        "id": "x"
+      }
+    ],
+    "open": {
+      "g": false
+    }
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        {
+          "group": "g",
+          "first": 0,
+          "count": 1,
+          "label": ""
+        }
+      ]
+    ],
+    "problems": [
+      {
+        "code": "invalid-column-group",
+        "severity": "warning",
+        "path": "columns[0].children"
+      }
+    ],
+    "shown": [
+      "a",
+      "x"
+    ]
+  }
+}

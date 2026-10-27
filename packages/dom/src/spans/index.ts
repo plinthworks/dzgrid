@@ -36,6 +36,8 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   const body = createBody(g);
   // Grouped headers: the group rows, when the columns come in groups.
   const bands = createBands(g);
+  // For the collapsible groups' feature (`@dzgrid/dom/groups`, Phase 6 step 7): where a group shows.
+  if (bands) g.groupBands = bands;
 
   // ---- the map (the core gives the last one back while nothing it depends on changed) ----
   let map: SpanMap | null = null;
