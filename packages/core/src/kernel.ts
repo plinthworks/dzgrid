@@ -11,7 +11,7 @@ import { checkPage, samePage, type PageState } from './model/page.js';
 import type { ChangeSource } from './model/types.js';
 import { problem, type Problem } from './problems.js';
 import type { DisplayedRows } from './row/displayed.js';
-import type { RowNode } from './row/node.js';
+import type { DataNode, RowNode } from './row/node.js';
 import type { CellRange } from './selection/cells.js';
 import {
   clearSelection, isSelected, NO_SELECTION, reconcileSelection, selectionCount, selectOnly, selectRange, toggle, type SelectionState,
@@ -145,6 +145,8 @@ export type GridEvent<T> =
   | { readonly type: 'densityChanged'; readonly source: ChangeSource; readonly density: 'compact' | 'comfortable' | 'spacious' }
   /** Undo or redo became possible or impossible: on each flip only (edit-undo.md 12). */
   | { readonly type: 'undoChanged'; readonly source: ChangeSource; readonly canUndo: boolean; readonly canRedo: boolean }
+  /** `@dzgrid/dom/pinned-rows` (step 8b-1; the core never sends it): the application gave other pinned rows (`api.set`). */
+  | { readonly type: 'pinnedChanged'; readonly source: ChangeSource }
   /**
    * An Angular part's `emit(name, detail)` (`@dzgrid/angular`, step 22; the wrapper sends them, the
    * core and the DOM layer never do): a cell's, with the column and the key of the row it shows at
@@ -258,6 +260,8 @@ export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
    * this context, not a tree's structure column. A rule that throws says no, told once per column.
    */
   editable(key: RowKey, column: string): boolean;
+  /** A row by its key: the rows', else a pinned row's (`@dzgrid/dom/pinned-rows`, step 8b-1, its `pinned` side set). */
+  rowOf(key: RowKey): DataNode<T> | undefined;
   /**
    * Looks at the clock again (`RowModel.tick`): at midnight in the grid's zone a date shortcut's days
    * move (filter-relative.md). `@dzgrid/dom/filters` calls it; a host without that feature calls it itself.
@@ -281,6 +285,8 @@ const GATE = Symbol('dzgrid.gate');
 const HEAR = Symbol('dzgrid.hear');
 /** For a tree feature, through `@dzgrid/core/internal`: the columns that feed its structure, read-only (Q13). */
 const LOCK = Symbol('dzgrid.lock');
+/** For `@dzgrid/dom/pinned-rows` (step 8b-1), through `@dzgrid/core/internal`: the pinned rows by key. */
+const PIN = Symbol('dzgrid.pin');
 
 export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   readonly rows: M;
@@ -310,6 +316,9 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   let app: unknown;
   let stale = false;
   let locked: ReadonlySet<string> = NO_KEYS as ReadonlySet<string>;
+  /** The pinned rows' store (step 8b-1): asked for a key the rows do not hold. */
+  let pins: PinnedStore<T> | undefined;
+  const rowOf = (key: RowKey): DataNode<T> | undefined => rows.row(key) ?? pins?.(key);
   /** The columns whose rule threw: told once each. */
   const threw = new Set<string>();
   // Read on every paint while a box shows it: kept per selection, rows shown and count.
@@ -389,8 +398,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     focus = f;
     emit({ type: 'focusChanged', source, focus });
   };
-  // Which selected keys survive a change is the model's to say: a server keeps rows of other pages.
-  const exists = (key: RowKey): boolean => rows.keeps(key);
+  // Which selected keys survive a change is the model's to say: a server keeps rows of other pages. A pinned row: never (step 8b-1).
+  const exists = (key: RowKey): boolean => key[0] !== 'p' && rows.keeps(key);
 
   /**
    * After the rows or the columns moved: what no longer exists lets go —
@@ -405,7 +414,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     gate?.rowsChanged?.();
     if (anchor !== null && !exists(anchor)) anchor = null;
     selection = reconcileSelection(selection, exists);
-    focus = reconcileFocus(focus, shown, rows.displayed, columns, owner);
+    focus = reconcileFocus(focus, shown, rows.displayed, columns, owner, pins);
     shown = rows.displayed;
     if (head) emit(head);
     // The model holds the page (its index follows the filtered count); the kernel tells it.
@@ -676,7 +685,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         const f = cmd.focus;
         if (f) {
           if (!columns.visible().some((c) => c.id === f.column)) return refuse('unknown-column', [problem('unknown-column', 'error', 'focus.column', f.column)]);
-          if (f.kind === 'cell' && rows.displayed.indexOf(f.row) === -1) return refuse('row-not-displayed');
+          if (f.kind === 'cell' && rows.displayed.indexOf(f.row) === -1 && !pins?.(f.row)) return refuse('row-not-displayed');
         }
         // A cell a span covers (the focus owner, set by the spans feature): the cell owning it, at once.
         setFocus(f?.kind === 'cell' && owner ? owner(f, rows.displayed) : f, source);
@@ -716,7 +725,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
     return state;
   };
 
-  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void; [GATE]: (g?: SelectionGate) => void; [HEAR]: (fn?: (cmd: GridCommand) => void) => void; [LOCK]: (ids: readonly string[]) => void } = {
+  const kernel: GridKernel<T, M> & { [EMIT]: (e: GridEvent<T>) => void; [OWNER]: (fn?: FocusOwner<T>) => void; [GATE]: (g?: SelectionGate) => void; [HEAR]: (fn?: (cmd: GridCommand) => void) => void; [LOCK]: (ids: readonly string[]) => void; [PIN]: (store?: PinnedStore<T>) => void } = {
     rows,
     columns,
     get selection() { return selection; },
@@ -752,7 +761,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       listeners.add(fn);
       return () => listeners.delete(fn);
     },
-    editable: (key, column) => editableAt(rows.row(key), columns.get(column), app, locked, (id) => {
+    rowOf,
+    editable: (key, column) => editableAt(rowOf(key), columns.get(column), app, locked, (id) => {
       if (threw.has(id)) return;
       threw.add(id);
       emit({ type: 'problems', source: 'data', problems: [problem('invalid-column', 'warning', `columns.${id}.editable`, 'threw')] });
@@ -770,6 +780,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       locked = new Set(ids);
       checkLocks('host');
     },
+    [PIN]: (store) => { pins = store; },
   };
   return kernel;
 }
@@ -826,6 +837,15 @@ export const setSelectionGate = <T>(k: GridKernel<T>, gate?: SelectionGate): voi
 
 /** Names the columns that feed a tree's structure (Q13, O7): read-only, a warning for each one marked editable. The same set again: nothing. */
 export const lockColumns = <T>(k: GridKernel<T>, ids: readonly string[]): void => (k as unknown as { [LOCK]: (ids: readonly string[]) => void })[LOCK](ids);
+
+/**
+ * The pinned rows by key (`@dzgrid/dom/pinned-rows`, step 8b-1): a row the store gives is one a cell can be focused and
+ * edited on (`rowOf`, `focus.set`, `editable`), kept focused across the rows' changes, never selected nor shown in the rows.
+ */
+export type PinnedStore<T> = (key: RowKey) => (DataNode<T> & { readonly pinned: 'top' | 'bottom' }) | undefined;
+
+/** Sets (or, without `store`, removes) the kernel's pinned rows: the pinned-rows feature's. */
+export const setPinned = <T>(k: GridKernel<T>, store?: PinnedStore<T>): void => (k as unknown as { [PIN]: (s?: PinnedStore<T>) => void })[PIN](store);
 
 /** Sets (or, without `fn`, removes) the one listener told each command the kernel took, after it: the filters feature's. */
 export const onCommand = <T>(k: GridKernel<T>, fn?: (cmd: GridCommand) => void): void => (k as unknown as { [HEAR]: (fn?: (cmd: GridCommand) => void) => void })[HEAR](fn);

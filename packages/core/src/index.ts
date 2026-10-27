@@ -46,7 +46,7 @@ export { dayCodec, readDayText } from './value/codecs/day.js';
 export { instantCodec, instantToIso } from './value/codecs/instant.js';
 
 export { PrefixSums } from './layout/prefix-sums.js';
-export type { Side, CellClassContext, EditableRule, EditChecks, ColumnDef, ColumnGroupDef, ColumnOrGroup, ResolvedColumn, SpanCtx, ValueReader } from './columns/defs.js';
+export type { Side, CellClassContext, EditableRule, EditableInfo, EditChecks, ColumnDef, ColumnGroupDef, ColumnOrGroup, ResolvedColumn, SpanCtx, ValueReader } from './columns/defs.js';
 export { NO_OVERLAY, compilePath, resolveColumns } from './columns/defs.js';
 export { editableAt } from './columns/editable.js';
 export type { ColumnLookup, ColumnState, ColumnSlice, ColumnLayout, ColumnChange, ColumnModel } from './columns/model.js';

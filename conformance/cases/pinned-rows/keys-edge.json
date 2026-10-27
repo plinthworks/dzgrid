@@ -1,0 +1,97 @@
+{
+  "id": "keys-edge",
+  "suite": "pinned-rows",
+  "description": "Ctrl+Up / Ctrl+Down from a pinned row: the body's first / last row, the column kept; Ctrl+Home / Ctrl+End: the first / last column too (O8); Home / End inside the row are the grid's.",
+  "input": {
+    "top": [
+      "t0"
+    ],
+    "bottom": [
+      "z0"
+    ],
+    "body": 8,
+    "cols": [
+      "a",
+      "c",
+      "e"
+    ],
+    "moves": [
+      {
+        "at": {
+          "row": "z0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "edge",
+          "axis": "row",
+          "to": "first"
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "edge",
+          "axis": "row",
+          "to": "last"
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "edge",
+          "axis": "both",
+          "to": "last"
+        }
+      },
+      {
+        "at": {
+          "row": "z0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "edge",
+          "axis": "both",
+          "to": "first"
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "edge",
+          "axis": "col",
+          "to": "last"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "row": "b0",
+        "column": "c"
+      },
+      {
+        "row": "b7",
+        "column": "c"
+      },
+      {
+        "row": "b7",
+        "column": "e"
+      },
+      {
+        "row": "b0",
+        "column": "a"
+      },
+      null
+    ]
+  }
+}

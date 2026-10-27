@@ -102,6 +102,21 @@ describe('0.3.0, the four packages', () => {
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fill', 'columns'[,\]]/);
   });
 
+  it('export the Phase 6 step 8b-1 subpaths (@dzgrid/dom/pinned-rows, its -pinned texts), built like the others; its look in pinned-rows.css (built, exported, shipped)', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./pinned-rows']).toEqual({ types: './src/pinned-rows.ts', default: './src/pinned-rows.ts' });
+    for (const lang of ['en', 'fr', 'ar']) expect(dom[`./locales/${lang}-pinned`], lang).toEqual({ types: `./src/locales/${lang}-pinned.ts`, default: `./src/locales/${lang}-pinned.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toContain("'./pinned-rows'");
+    for (const lang of ['en', 'fr', 'ar']) expect(build).toContain(`'./locales/${lang}-pinned'`);
+    const theme = JSON.parse(readFileSync(`${ROOT}packages/theme/package.json`, 'utf8'));
+    for (const f of ['pinned-rows.css', 'pinned-rows.unlayered.css', 'pinned-rows.scss']) {
+      expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
+      expect(theme.files, f).toContain(f);
+    }
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'columns-panel', 'pinned-rows'\]/);
+  });
+
   it('export the Phase 6 step 3 subpaths (@dzgrid/dom/column-menu, its -column-menu texts), built like the others; its look in columns.css', () => {
     const dom = pkg('dom').exports;
     expect(dom['./column-menu']).toEqual({ types: './src/column-menu.ts', default: './src/column-menu.ts' });
@@ -120,7 +135,7 @@ describe('0.3.0, the four packages', () => {
       expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
       expect(theme.files, f).toContain(f);
     }
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'columns', 'columns-panel'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'columns', 'columns-panel'[,\]]/); // step 8b-1 adds 'pinned-rows' after it
   });
 
   it('export the Phase 6 step 5 subpaths (@dzgrid/core/state, @dzgrid/dom/state), built like the others', () => {

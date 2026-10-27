@@ -1,0 +1,180 @@
+{
+  "id": "keys-cross",
+  "suite": "pinned-rows",
+  "description": "Down and Up through the header, the top band, the body and the bottom band, the column kept (pinned-rows.md 8; step08b-plan §3).",
+  "input": {
+    "top": [
+      "t0",
+      "t1"
+    ],
+    "bottom": [
+      "z0",
+      "z1"
+    ],
+    "body": 3,
+    "level": 0,
+    "moves": [
+      {
+        "at": {
+          "header": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "t1",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "b0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "row": "b2",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "z0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "z1",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "z0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "row": "b1",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "col",
+          "delta": 1
+        }
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "row": "t0",
+        "column": "c"
+      },
+      {
+        "row": "t1",
+        "column": "c"
+      },
+      {
+        "row": "b0",
+        "column": "c"
+      },
+      {
+        "row": "t1",
+        "column": "c"
+      },
+      {
+        "header": "c"
+      },
+      {
+        "row": "z0",
+        "column": "c"
+      },
+      {
+        "row": "z1",
+        "column": "c"
+      },
+      {
+        "row": "z1",
+        "column": "c"
+      },
+      {
+        "row": "b2",
+        "column": "c"
+      },
+      null,
+      null
+    ]
+  }
+}

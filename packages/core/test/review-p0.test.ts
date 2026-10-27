@@ -99,8 +99,9 @@ describe('zones', () => {
 });
 
 describe('pinned keys', () => {
-  it('refuses an index that is not a row position', () => {
-    for (const i of [-1, 0.5, Number.NaN]) expect(() => pinnedKey('top', i)).toThrow(RangeError);
-    expect(() => pinnedKey('middle' as 'top', 0)).toThrow(RangeError);
+  // Phase 6 step 8b-1: keyed by the row's id (pinned-ids.test.ts), no longer by its position: a number is an id.
+  it('refuses an id that identifies nothing (null), never throws', () => {
+    for (const i of [Number.NaN, Infinity, '']) expect(pinnedKey('top', i)).toBeNull();
+    expect(pinnedKey('top', -1)).toBe('p:t:2:-1');
   });
 });

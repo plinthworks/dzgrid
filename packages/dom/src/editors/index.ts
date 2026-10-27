@@ -221,7 +221,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     close(s, focus, !code, via);
     // Gone with another page or query of a server grid whose answer came at once (a synchronous source): its text
     // could not leave (review 3: said so, never « removed »; the documented limit of S7-O3).
-    if (code) code === 'read-only' && !g.rows.row(s.k) ? api().alert(at() !== s.at ? msg('edit.pageDropped', { column: head(s.col) }) : msg('edit.rowRemoved', {})) : refused(s.k, s.c, msg('edit.refusedDropped', { column: head(s.col) }));
+    if (code) code === 'read-only' && !kernel.rowOf(s.k) ? api().alert(at() !== s.at ? msg('edit.pageDropped', { column: head(s.col) }) : msg('edit.rowRemoved', {})) : refused(s.k, s.c, msg('edit.refusedDropped', { column: head(s.col) }));
   };
   /** The focus in the editor, its popup or a node its part owns. */
   const within = (s: Open, a = (s.e.root.getRootNode() as Document).activeElement): boolean => s.e.root.contains(a) || !!s.e.inside?.(a) || [...s.own].some((n) => n.contains(a));
@@ -235,7 +235,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
   /** A yes/no cell toggled in place (editors.md 10–11, O8): `null → true → false → true`, one save, the new text said. */
   const toggle = (k: RowKey, c: string): boolean => {
     const col = g.columns.get(c)!;
-    const v = col.codec.coerce(g.edit!.read(col, g.rows.row(k)!.data, k), g.ctx) !== true;
+    const v = col.codec.coerce(g.edit!.read(col, kernel.rowOf(k)!.data, k), g.ctx) !== true;
     const code = api().commit([{ key: k, column: c, input: { value: v } }]).refused[0]?.code;
     if (code) refused(k, c, msg('edit.refused', { column: head(col), reason: api().reason(c, code) }));
     else g.live.announce(shown(col, v));
@@ -261,7 +261,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
 
   const open = (k: RowKey, c: string, start: Start, ch?: string): boolean => {
     const col = g.columns.get(c);
-    const node = g.rows.row(k);
+    const node = kernel.rowOf(k);
     let kd = kind(col);
     const id = `${k}\n${c}`;
     if (cur || !node || !kd || kd === 'boolean' || !kernel.editable(k, c) || broken.get(id) === node.data) return false;
@@ -412,10 +412,10 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     return true;
   };
 
-  /** The next (`d` 1) or previous (−1) cell with an editor in reading order (a yes/no cell has none): visible columns, then the displayed rows. */
+  /** The next (`d` 1) or previous (−1) cell with an editor in reading order (a yes/no cell has none): visible columns, then the displayed rows (a pinned row's: its band's, step 8b-1). */
   const next = (k: RowKey, c: string, d: 1 | -1): { k: RowKey; c: string } | null => {
     const cols = g.columns.visible().filter((x) => x.def.editable && kind(x) && kind(x) !== 'boolean').map((x) => x.id);
-    const D = g.rows.displayed;
+    const D = g.rowsOf?.(k) ?? g.rows.displayed;
     let r = D.indexOf(k);
     let i = cols.indexOf(c);
     if (!cols.length || r < 0) return null;

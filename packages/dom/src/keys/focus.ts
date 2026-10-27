@@ -84,8 +84,9 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
   function ensureVisible(row: RowKey, column?: string): void {
     // A cell spanning rows shows the row aimed at (the spans feature knows it), not only its first.
     const i = rows.displayed.indexOf(g.spans?.at(row) ?? row);
-    if (i === -1) return;
+    // Sideways first: a pinned row (step 8b-1), not a body row, still brings its column into view.
     if (column !== undefined) scrollInlineTo(column);
+    if (i === -1) return;
     if (g.reveal(i, g.geometry.read().block)) g.schedule();
   }
 

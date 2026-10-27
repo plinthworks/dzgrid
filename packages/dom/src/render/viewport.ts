@@ -204,9 +204,11 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     // ---- grid attributes ----
     setAttr(el.root, 'data-density', settings.density ?? 'comfortable');
     if (el.root.style.getPropertyValue('--dzg-row-height') !== `${h}px`) el.root.style.setProperty('--dzg-row-height', `${h}px`);
-    // Every header row counts: the group rows, the column headers and those the features add.
-    const headerRows = g.bands.length + 1 + g.headerRows.length;
-    setAttr(el.viewport, 'aria-rowcount', String(d.count + headerRows));
+    // Every header row counts: the group rows, the column headers and those the features add; the pinned rows too (step
+    // 8b-1): the body's rows are numbered after the top ones.
+    const pins = g.pins ?? [0, 0];
+    const headerRows = g.bands.length + 1 + g.headerRows.length + pins[0];
+    setAttr(el.viewport, 'aria-rowcount', String(d.count + headerRows + pins[1]));
     setAttr(el.viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
     const mode = settings.selection?.mode ?? 'none';
     // Blocks of cells (`@dzgrid/dom/range`, `g.multi`) are a multiple selection whatever the rows' mode.

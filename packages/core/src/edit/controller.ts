@@ -7,13 +7,17 @@ import { problem, type Problem } from '../problems.js';
 import type { LocaleCtx } from '../value/locale.js';
 import { checkValue, parseInput, rulesOf, same, type CellInput, type Checked } from './input.js';
 
-/** One cell of a request: the value kept, the value shown before it, and the row held when it left. */
+/**
+ * One cell of a request: the value kept, the value shown before it, and the row held when it left. `pinned`: a pinned
+ * row's side (`@dzgrid/dom/pinned-rows`, step 8b-1, Q5; `key` its grid key, `row` the application's object); undefined on a body row.
+ */
 export interface SaveChange<T> {
   readonly key: RowKey;
   readonly column: string;
   readonly value: unknown;
   readonly previous: unknown;
   readonly row: Readonly<T>;
+  readonly pinned?: 'top' | 'bottom' | undefined;
 }
 /** One gesture's save: one generation, never reused. */
 export interface SaveRequest<T> {
@@ -134,8 +138,9 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
 
   const ev = (e: GridEvent<T>): void => emit(kernel, e);
   const tell = (problems: Problem[]): void => ev({ type: 'problems', source: 'data', problems });
-  const idOf = (k: RowKey): string => idOfDataKey(k) ?? '';
-  const rowOf = (k: RowKey): T | undefined => rows.row(k)?.data;
+  // A pinned row's overlay id is its key (step 8b-1): never a body row's id, never another pinned row's.
+  const idOf = (k: RowKey): string => idOfDataKey(k) ?? k;
+  const rowOf = (k: RowKey): T | undefined => kernel.rowOf(k)?.data;
   const at = (k: RowKey, c: string): Entry | undefined => cells.get(cellKey(idOf(k), c));
   const drop = (e: Entry): unknown => cells.delete(e.id);
   /** Takes a cell out of the waiting gesture that holds it: an emptied gesture is never sent. */
@@ -165,9 +170,10 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
     if (now !== can) ev({ type: 'undoChanged', source, canUndo, canRedo });
     can = now;
   };
-  const showNew = (cols: Iterable<string>, source: ChangeSource): void => {
+  /** A new overlay version; the columns of the body's cells among `es` told (a pinned row's cell, step 8b-1, is never sorted nor filtered: it stales nothing, pinned-rows.md 14). */
+  const showNew = (es: Iterable<Entry>, source: ChangeSource): void => {
     version++;
-    kernel.dispatch({ type: 'edits.reader', reader, columns: [...new Set(cols)] }, source);
+    kernel.dispatch({ type: 'edits.reader', reader, columns: [...new Set([...es].filter((e) => e.k[0] !== 'p').map((e) => e.c))] }, source);
   };
 
   /**
@@ -202,7 +208,7 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
       const req: SaveRequest<T> = {
         origin: x.origin,
         generation: x.g,
-        changes: [...x.cells].map(([e, ch]) => ({ key: e.k, column: e.c, value: ch.v, previous: ch.p, row: e.d as T })),
+        changes: [...x.cells].map(([e, ch]) => ({ key: e.k, column: e.c, value: ch.v, previous: ch.p, row: e.d as T, pinned: kernel.rowOf(e.k)?.pinned })),
       };
       // A save that returns or throws at once settles in a microtask, as a promise would.
       void new Promise((ok) => ok(fn(req, h?.signal ?? NEVER))).then(() => settle(x.g), (err: unknown) => settle(x.g, err, true));
@@ -222,7 +228,7 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
     // A cell named by its RowKey or by the host's own row id (review R5).
     if (Array.isArray(list)) for (const n of list) for (const e of x.cells.keys()) if ((e.k === n?.key || e.k === dataKey(n?.key)) && e.c === n.column) named.set(e.id, n);
     if (failed && !named.size) for (const e of x.cells.keys()) named.set(e.id, err);
-    const rolled: string[] = [];
+    const rolled: Entry[] = [];
     const fails: GridEvent<T>[] = [];
     for (const [e, ch] of x.cells) {
       const cur = at(e.k, e.c);
@@ -241,7 +247,7 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
         // Back to the last saved value, or to the source: never `previous`, never the rows written (rule 4).
         const col = columns.get(e.c);
         const back = e.l ? e.l.v : col?.read(e.d as T);
-        if (!col || !same(col, e.v, back, o.ctx())) rolled.push(e.c);
+        if (!col || !same(col, e.v, back, o.ctx())) rolled.push(e);
         Object.assign(e, { s: 'failed', v: back, r: { v: ch.v, why, code } });
       }
     }
@@ -256,16 +262,16 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
     flip('data');
   };
 
-  /** Rows replaced or gone (edit-save.md 17–21): saved and refused values of a replaced row go; a removed row's changes too. */
-  const unsubscribe = rows.subscribe(() => {
+  /** Rows replaced or gone (edit-save.md 17–21), the body's or the pinned ones (step 8b-1): saved and refused values of a replaced row go; a removed row's changes too. */
+  const sweep = (): void => {
     const out: Entry[] = [];
     for (const e of cells.values()) {
       const n = rowOf(e.k);
       if (!live(e)) {
         if (n !== e.d) out.push(e), drop(e);
       } else if (n !== undefined) e.d = n;
-      // A source model holds one page: a row off it is only hidden (O9), its changes kept and sent.
-      else if (rows.kind === 'client' && !e.x) {
+      // A source model holds one page: a row off it is only hidden (O9), its changes kept and sent. A pinned row is the app's.
+      else if ((rows.kind === 'client' || e.k[0] === 'p') && !e.x) {
         unwait(e);
         out.push(e);
         if (e.f === undefined) drop(e);
@@ -273,7 +279,8 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
       }
     }
     if (out.length) states('data', [...out, ...pump()]);
-  });
+  };
+  const unsubscribe = rows.subscribe(sweep);
 
   /** The columns' rules, at creation and when the columns change: each wrong one told once while it stays wrong. */
   const scan = (): void => {
@@ -287,10 +294,7 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
     }
     if (ps.length) tell(ps);
   };
-  const unhear = kernel.subscribe((e) => {
-    if (e.type !== 'columnsChanged') return;
-    scan();
-  });
+  const unhear = kernel.subscribe((e) => void (e.type === 'columnsChanged' ? scan() : e.type === 'pinnedChanged' && sweep()));
 
   const check = (key: RowKey, column: string, input: CellInput): Checked => {
     if (!kernel.editable(key, column)) return { ok: false, code: 'read-only' };
@@ -345,7 +349,7 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
       redoS.length = 0;
     }
     waiting.set(x.g, x);
-    showNew([...x.cells.keys()].map((e) => e.c), source);
+    showNew(x.cells.keys(), source);
     for (const [e, ch] of x.cells) ev({ type: 'cellEdited', source, key: e.k, column: e.c, value: ch.v, previous: ch.p, origin });
     states(source, [...x.cells.keys(), ...pump()]);
     flip(source);
@@ -392,7 +396,7 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
         h?.abort('destroyed');
       }
       // The rows read the source again (a new version, the columns that had edits); nothing left to undo (review R4).
-      const cols = [...cells.values()].map((e) => e.c);
+      const cols = [...cells.values()];
       waiting.clear();
       flying.clear();
       cells.clear();

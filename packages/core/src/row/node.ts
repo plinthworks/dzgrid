@@ -10,6 +10,8 @@ export interface DataNode<T> {
   readonly level: number;
   readonly id: RowIdInput;
   readonly data: Readonly<T>;
+  /** A row pinned to the top or the bottom (`@dzgrid/dom/pinned-rows`, step 8b-1): never in the rows, its key a `pinnedKey`. */
+  readonly pinned?: 'top' | 'bottom';
 }
 
 /** A row that stands for a level with no row of its own (a path tree's folder): a label, never data, never selected. */

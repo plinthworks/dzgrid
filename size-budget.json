@@ -3,7 +3,7 @@
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
-      "maxGzip": 29000
+      "maxGzip": 29150
     },
     "@dzgrid/core/server": {
       "file": "packages/core/src/server.ts",
@@ -223,6 +223,18 @@
       "file": "packages/dom/src/locales/ar-column-menu.ts",
       "maxGzip": 700
     },
+    "@dzgrid/dom/locales/en-pinned": {
+      "file": "packages/dom/src/locales/en-pinned.ts",
+      "maxGzip": 120
+    },
+    "@dzgrid/dom/locales/fr-pinned": {
+      "file": "packages/dom/src/locales/fr-pinned.ts",
+      "maxGzip": 140
+    },
+    "@dzgrid/dom/locales/ar-pinned": {
+      "file": "packages/dom/src/locales/ar-pinned.ts",
+      "maxGzip": 170
+    },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
       "maxGzip": 2750
@@ -267,9 +279,13 @@
       "file": "packages/theme/columns-panel.css",
       "maxGzip": 1000
     },
+    "@dzgrid/theme/pinned-rows.css": {
+      "file": "packages/theme/pinned-rows.css",
+      "maxGzip": 350
+    },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 21980,
+      "maxGzip": 22400,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -520,6 +536,16 @@
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/core/state",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/pinned-rows": {
+      "file": "packages/dom/src/pinned-rows.ts",
+      "maxGzip": 2150,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
         "@dzgrid/dom/internal"
       ]
     },

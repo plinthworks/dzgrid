@@ -145,7 +145,7 @@ export interface Frame<T> {
   /** Span plans, when the spans feature is on. */
   readonly spans?: RowSpans | null;
   /** The host's classes for a data row (`settings.rowClass`). */
-  readonly rowClass?: ((c: { row: any; key: RowKey; context: unknown }) => string | null | undefined) | undefined;
+  readonly rowClass?: ((c: { row: any; key: RowKey; context: unknown; pinned?: 'top' | 'bottom' }) => string | null | undefined) | undefined;
   /** The view's inline size: a detail row's cell is as wide (never wider than the columns). */
   readonly view?: number;
   /** The edit seam's reader (a feature's `edit`), else null: the column's own. */
@@ -165,6 +165,8 @@ export class RowRenderer<T> {
   readonly #pool: RowView[] = [];
   /** The renderers spawned from this one (a tree's pinned parents): a touch reaches them. */
   readonly #spawned: RowRenderer<T>[] = [];
+  /** Those spawned as peers (the pinned rows' bands, step 8b-1): their rows are the grid's too (`keyOf`, `cell`, `partAt`, `forEach`). */
+  readonly #peers: RowRenderer<T>[] = [];
   /** Every row element made, for tests and the pool's high-water mark. */
   made = 0;
   /** Bumped by `touch` of a mounted row: a renderer that redraws on a signature (the pinned parents) redraws. */
@@ -175,7 +177,14 @@ export class RowRenderer<T> {
   /** The part drawing a mounted cell, or a detail row's part, if any (Enter hands it the focus). */
   partAt(key: RowKey, column: string): PartHandle<SlotContext['cell']> | PartHandle<SlotContext['detail']> | null {
     const v = this.#mounted.get(key);
-    return (v?.slot ? v.part : v?.cells.get(column)?.handle) ?? null;
+    return (v?.slot ? v.part : v?.cells.get(column)?.handle) ?? this.#peer((r) => r.partAt(key, column)) ?? null;
+  }
+
+  /** The first peer's answer: asked only when this renderer has none (a band's row is never the body's). */
+  #peer<R>(fn: (r: RowRenderer<T>) => R | null | undefined): R | null | undefined {
+    let x: R | null | undefined;
+    for (const r of this.#peers) if ((x = fn(r))) break;
+    return x;
   }
 
   constructor(doc: Document, layer: HTMLElement, report: (err: unknown) => void = () => {}) {
@@ -184,10 +193,14 @@ export class RowRenderer<T> {
     this.#layer = layer;
   }
 
-  /** Another renderer of the same grid into `layer` (its own rows and pool): a tree's pinned parents. */
-  spawn(layer: HTMLElement): RowRenderer<T> {
+  /**
+   * Another renderer of the same grid into `layer` (its own rows and pool): a tree's pinned parents (copies, never
+   * focused), or with `peer` the pinned rows' bands (step 8b-1: real rows, found through this one).
+   */
+  spawn(layer: HTMLElement, peer?: boolean): RowRenderer<T> {
     const r = new RowRenderer<T>(this.#doc, layer, this.#report);
     this.#spawned.push(r);
+    if (peer) this.#peers.push(r);
     return r;
   }
 
@@ -617,19 +630,20 @@ export class RowRenderer<T> {
     return this.#pool.map((v) => v.data);
   }
 
-  /** Each mounted row, for attributes that follow state rather than data (selection). */
+  /** Each mounted row, for attributes that follow state rather than data (selection), the peers' after. */
   forEach(fn: (key: RowKey, v: RowView) => void): void {
     for (const [k, v] of this.#mounted) fn(k, v);
+    for (const r of this.#peers) r.forEach(fn);
   }
 
   keyOf(rowEl: Element): RowKey | undefined {
-    return this.#keys.get(rowEl);
+    return this.#keys.get(rowEl) ?? this.#peer((r) => r.keyOf(rowEl)) ?? undefined;
   }
 
   /** The cell element for a row and column, when mounted (a detail row's one cell, whatever the column). */
   cell(key: RowKey, column: string): HTMLElement | null {
     const v = this.#mounted.get(key);
-    return v?.slot ?? v?.cells.get(column)?.el ?? null;
+    return v?.slot ?? v?.cells.get(column)?.el ?? this.#peer((r) => r.cell(key, column)) ?? null;
   }
 
   /** The grid's end: every part destroyed, every row removed. */

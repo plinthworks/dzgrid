@@ -79,11 +79,14 @@ export function detailKey(master: RowKey): RowKey {
   return `x:${master}` as RowKey;
 }
 
-/** The key of a row pinned to the top or the bottom. */
-export function pinnedKey(side: 'top' | 'bottom', index: number): RowKey {
-  if (side !== 'top' && side !== 'bottom') throw new RangeError(`not a side: ${String(side)}`);
-  if (!Number.isInteger(index) || index < 0) throw new RangeError(`not a row position: ${index}`);
-  return `p:${side === 'top' ? 't' : 'b'}:${index === 0 ? 0 : index}` as RowKey;
+/**
+ * The key of a row pinned to the top or the bottom (Phase 6 step 8b-1, pinned-rows.md 1): its id's, length first, in a
+ * family per side, so the same id keeps its key across the application's `set()` and never meets a body row's. Null when
+ * the id identifies nothing (see {@link canonicalId}).
+ */
+export function pinnedKey(side: 'top' | 'bottom', id: unknown): RowKey | null {
+  const c = canonicalId(id);
+  return c === null ? null : (`p:${side[0]}:${lengthPrefixed(c)}` as RowKey);
 }
 
 /**
@@ -91,9 +94,9 @@ export function pinnedKey(side: 'top' | 'bottom', index: number): RowKey {
  *
  * An invalid id rejects its row (`invalid-row-id`). A second row with an id
  * already seen is rejected too (`duplicate-row-id`) — the first one stays, so
- * the outcome does not depend on which copy is "newer".
+ * the outcome does not depend on which copy is "newer". `make`: the key of an id (a pinned side's, step 8b-1); a data key by default.
  */
-export function assignKeys(ids: readonly unknown[], path = 'rows'): {
+export function assignKeys(ids: readonly unknown[], path = 'rows', make: (id: unknown) => RowKey | null = dataKey): {
   readonly keys: readonly (RowKey | null)[];
   readonly problems: readonly Problem[];
 } {
@@ -104,7 +107,7 @@ export function assignKeys(ids: readonly unknown[], path = 'rows'): {
   // longer line up with the rows they belong to.
   for (let i = 0; i < ids.length; i++) {
     const id = ids[i];
-    const key = dataKey(id);
+    const key = make(id);
     if (key === null) {
       keys.push(null);
       problems.push(problem('invalid-row-id', 'error', `${path}[${i}]`, describe(id)));
@@ -130,3 +133,6 @@ function describe(id: unknown): string {
 
 /** Whether a key is a data row's (not a filler's, a detail's or a pinned row's): what selection takes. */
 export const isDataKey = (key: RowKey): boolean => key.startsWith('d:');
+
+/** Whether a key is a row whose cells take the focus and edits: a data row's or a pinned row's (step 8b-1; never selected). */
+export const isCellKey = (key: RowKey): boolean => key[0] === 'd' || key[0] === 'p';

@@ -91,6 +91,8 @@ export interface RowClassContext<T> {
   readonly row: Readonly<T>;
   readonly key: RowKey;
   readonly context: unknown;
+  /** A pinned row's side (`@dzgrid/dom/pinned-rows`, step 8b-1); absent on a body row. */
+  readonly pinned?: 'top' | 'bottom';
 }
 
 export const ROW_HEIGHT = { compact: 28, comfortable: 32, spacious: 40 } as const;

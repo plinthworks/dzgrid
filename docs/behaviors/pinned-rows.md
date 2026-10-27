@@ -23,19 +23,24 @@ the arrows; edits one of its cells as any other (F2, Enter, typing), saves, undo
 
 **Data**
 1. `pinnedRows({ top?: T[], bottom?: T[] })`, live (`api.set({ top, bottom })`); each row keyed by the grid's
-   `getRowId`, kept in **its own key space** (`top:` / `bottom:` prefixed internally) so a pinned row never
-   clashes with a body row of the same id. A duplicate id inside one side: the later one dropped, warning
-   `duplicate-row-id`.
+   `getRowId`, kept in **its own key space** (`pinnedKey(side, id)`: `p:t:` / `p:b:` and the id, length first) so a
+   pinned row never clashes with a body row of the same id, and keeps its key across a `set()`. A duplicate id inside
+   one side: the later one dropped, error `duplicate-row-id` (as for body rows; path `pinnedRows.top[i]`); an unusable
+   id: dropped, error `invalid-row-id`.
 2. Drawn with the columns' cell parts, formats, classes (`cellClass`, `rowClass` with `pinned` in its context)
    and widths; hidden columns hidden; spans do not merge across the pinned / body edge.
 3. Never sorted, filtered, searched, paged, grouped or counted in the row counts said (`announce.rows`):
    shown on every page of a paged grid; the same in a tree (flat, no chevron).
 4. More than 5 rows on one side: warning `too-many-pinned-rows` (path `pinnedRows.top|bottom`); still drawn.
-   Together they never take more than half the view: beyond, the pinned band scrolls inside itself (O8).
+   Together they never take more than half the view: beyond, the pinned band shows its rows in a window (whole rows,
+   the top band first, at least one row each), moved by the wheel over it and by the focus going to a row outside
+   it (O8); no native scroller (it would break the pinned columns' sticking). Touch panning inside it: not yet.
 
 **Place and screen readers**
 5. Top rows sit right under the last header row (after the floating filter row), `position: sticky`; bottom rows
-   in a sticky foot under the body. Rows use `contain: content`, never `strict` (S11).
+   in a sticky foot under the body. Rows use `contain: content`, never `strict` (S11). Each band is a **sibling**
+   `rowgroup` of the header and the body (never inside the header's: a rowgroup in a rowgroup is invalid). With few
+   body rows the bottom band sits at the grid's foot, like a table footer (Q3).
 6. Each side is a `rowgroup`; its rows are `row`s of `gridcell`s, counted in `aria-rowcount`; `aria-rowindex`
    runs header rows → top rows → body rows → bottom rows (on a paged grid: the page's rows). The rowgroup is
    named `pinned.top` / `pinned.bottom` (choice 1).
@@ -54,20 +59,21 @@ the arrows; edits one of its cells as any other (F2, Enter, typing), saves, undo
 
 **Editing** (Q-P = C)
 11. A pinned row is an **editable row** for the edit layer: a cell is editable when its column says so,
-    `editable(row, context)` receiving `context.pinned` = `'top' | 'bottom'` (a totals row says false there).
+    `editable(row, context, { pinned })` receiving a third argument, `pinned` = `'top' | 'bottom'` (undefined on a
+    body row; Q4: the application's context is left alone), so a totals row says false there.
     `aria-readonly` per cell as in the body (`editing.md` 3).
 12. Starting, ending, field keys, validation and the refusal bubble: as `editing.md`, `edit-validation.md`.
     The editor opens over the sticky cell and stays aligned while the body scrolls.
 13. Saving: one gesture, one request, through the same `save` handler; each change carries `pinned:
-    'top' | 'bottom'` and the row's key as given (without the internal prefix). Saving marks, the running
-    border, refusals, rollback: as `edit-save.md`.
+    'top' | 'bottom'` (undefined on a body row), `key` the grid's key (`p:b:…`) and `row` the application's object
+    (Q5: the application finds its row by `row`). Saving marks, the running border, refusals, rollback: as `edit-save.md`.
 14. **Never order-stale**: an edit of a pinned row does not mark the order out of date (they are never
     sorted or filtered); no muted look.
 15. Undo / redo: pinned edits are gestures in the same history (`edit-undo.md`); the focus goes back to the
     pinned cell.
 16. The application replacing the pinned rows while a cell is edited: same key kept → the field stays; key
     gone → `edit.rowRemoved` as in the body.
-17. Blocks, paste, fill (Phase 5 part B) in this phase (O8): a block **never crosses** the pinned / body
+17. Blocks, paste, fill (Phase 5 part B) in this phase (O8; **step 8b-2**, not 8b-1): a block **never crosses** the pinned / body
     edge; a block inside one pinned band works (copy, paste, Delete, fill inside the band); a paste that
     runs past the band's last row counts the rest `hors de la grille`. Ctrl+D / Ctrl+R within the band only.
 18. Bulk (Ctrl+Enter) applies to a block inside the band only.
@@ -87,7 +93,11 @@ the arrows; edits one of its cells as any other (F2, Enter, typing), saves, undo
 | last top pinned row | ArrowDown | first body row |
 | last body row | ArrowDown | first bottom pinned row |
 | pinned row | PageDown / PageUp | into the body by a page |
-| anywhere | Ctrl+Home / Ctrl+End (Mac: Cmd+Home / Cmd+End, or Fn+Cmd+Left / Right) | first / last body row (O8) |
+| pinned row | Ctrl+Home / Ctrl+End (Mac: Cmd+Home / Cmd+End, or Fn+Cmd+Left / Right) | first / last body row, first / last column (as in the body; O8) |
+| pinned row | Ctrl+Up / Ctrl+Down (Mac: Cmd+Up / Cmd+Down) | first / last body row, the column kept |
+| first body row / last bottom row | ArrowUp / ArrowDown | last top row / stays |
+| pinned row | Left / Right / Home / End | inside the row, as in the body (mirrored in RTL) |
+| editable pinned cell, field open | Enter / Shift+Enter (`enterMoves: 'down'`), Tab | the next row or cell **of the band**; never into the body |
 | editable pinned cell | F2, Enter, typing, Delete | as `editing.md` |
 | pinned row | Space | nothing (yes/no cell: toggle) |
 | pinned row | Ctrl+Z / Ctrl+Y, Ctrl+Shift+Z (Mac: Cmd+Z / Cmd+Shift+Z, Cmd+Y) | undo / redo, as `edit-undo.md` |
@@ -96,7 +106,7 @@ the arrows; edits one of its cells as any other (F2, Enter, typing), saves, undo
 None of their own: the reader says the row group's name on entering it and the cells as usual; saves,
 refusals and undo say their own sentences (`edit-save.md`).
 
-## Texts (`locales/{en,fr,ar}-columns`, choice 2)
+## Texts (`locales/{en,fr,ar}-pinned`, their own bundles: owner Q2, 120 / 140 / 170 B)
 | Key | en | fr | ar |
 |---|---|---|---|
 | `pinned.top` | Rows pinned at the top | Lignes épinglées en haut | صفوف مثبّتة في الأعلى |
@@ -123,12 +133,47 @@ engines in RTL (S2, S11).
 
 ## Choices to confirm (not settled by the decisions)
 1. Each band named as a rowgroup (some readers say it on entry, some never).
-2. The two names live in `-columns` (or a small `-pinned` bundle).
-3. The save carries `pinned` and the key without the prefix (the application decides where to write a
-   totals row).
+2. ~~The two names live in `-columns`~~ — decided: their own `-pinned` bundles (owner Q2).
+3. ~~The key without the prefix~~ — decided (Q5): the grid's key and the application's `row`, plus `pinned`.
 
 ## Tests (to be written with the code)
 `packages/dom/test/pinned-rows.test.ts` (keys, counts, indexes, alignment logic, live set, duplicates),
 `pinned-rows-edit.test.ts` (editable per `context.pinned`, save payload, never stale, undo, row replaced,
 blocks inside a band, paste clipped), conformance for the focus moves across bands; browser: three engines,
 sticky foot in RTL, 1 px alignment with pinned columns and horizontal scroll.
+
+## As built (Phase 6 step 8b-1, 2026-10-27)
+
+`@dzgrid/dom/pinned-rows` (`pinnedRows()`, `PINNED_KEYS`, `api(grid)`: `set`, `get`, `rows(side)`), texts
+`locales/{en,fr,ar}-pinned`, look `@dzgrid/theme/pinned-rows.css`. Blocks, paste and the fill inside a band are
+step 8b-2 (rules 17–18): until then a block started in a band is inert (it never leaves its row, copies and
+changes nothing).
+
+- **Core seam** (+36 B): `setPinned(kernel, store)` (internal): `kernel.rowOf(key)` (a body row, else a pinned
+  one, with `pinned` set), `focus.set` accepts a pinned key the store holds, a pinned focus is kept across the
+  rows' changes (its column fixed as any cell's), `editable` reads the pinned row and tells the rule `{ pinned }`;
+  a pinned key is never selected (`selection.toggle` / `only` refuse it, on server pages too). `pinnedKey(side, id)`
+  is id based now; `assignKeys(ids, path, make)` takes the key maker. The problem code `too-many-pinned-rows` is a
+  type only (the base ships no byte for it).
+- **`@dzgrid/core/edit`**: a pinned cell's overlay id is its key (never a body row's of the same id); its edits
+  tell no column to the rows (never order-stale, rule 14); `pinnedChanged` (`api.set`) sweeps its saved values and
+  a removed row's changes as `rows.subscribe` does for the body; `SaveChange.pinned`.
+- **DOM base seams** (+99 B): a renderer spawned as a **peer** (`spawn(layer, true)`): `keyOf`, `cell`, `partAt`,
+  `forEach` find the bands' rows after the body's (the tree's pinned parents are copies, never peers); the paint
+  counts the bands in `aria-rowcount` and numbers the body after the top band (`g.pins`); the router asks `g.move`
+  first (the bands' moves, then the spans', then the grid's own); `ensureVisible` scrolls sideways before it looks
+  for a body row (a pinned cell's far column).
+- **The feature**: the bands' layout is written once on the elements (sticky, `overflow: clip`, `contain: content`,
+  above the body; no style element, nothing for a CSP); the body's view is the view less the bands (the geometry
+  port's `read` wrapped: window, reveal, page keys and the scroll's end all clear of them, WCAG 2.4.11); the bands'
+  heights are computed (rows × row height), never read, the top band's offset from the header rows' count (a row
+  each: checked to 1 px in Chrome). Key moves: a pure `crossBand` (`pinned-rows/band.ts`, conformance
+  `cases/pinned-rows/`); inside a band, the grid's own moves over its rows. The editors' Tab walks the band's rows
+  (`g.rowsOf`), their Enter stays inside it. A focused pinned row removed by `set`: the nearest row of its band,
+  else the body's first row, else the header. A click on a pinned cell focuses it; it fires no `cellClicked` /
+  `rowClicked` (those name body rows), and shows no overflow tooltip (R7).
+- **Sizes**: core 29 001 / 29 150; DOM base 21 954 / 22 400; `dom/pinned-rows` 2 080 / 2 150 (ceiling 2 300: the
+  editing glue, ~180 B, needs more than 2 000, owner Q2); texts 116 / 130 / 156 (120 / 140 / 170);
+  `pinned-rows.css` 301 / 350; `core/edit` 3 136 / 3 150.
+- **Known limits**: touch panning inside a capped band; `rowAt` (rows of their own heights) is not used for a page
+  from a band (a page is `page` rows); a tree's pinned parents and a top band are not checked together.

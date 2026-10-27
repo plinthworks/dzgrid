@@ -54,7 +54,10 @@ export const PROBLEM_CODES = [
  */
 export type StateProblemCode = 'state-version' | 'state-column' | 'state-group' | 'state-field' | 'state-storage';
 
-export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode;
+/** `@dzgrid/dom/pinned-rows`' own (Phase 6 step 8b-1): a type here, so the base ships no byte for it. */
+export type PinnedProblemCode = 'too-many-pinned-rows';
+
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode;
 
 export type Severity = 'error' | 'warning';
 

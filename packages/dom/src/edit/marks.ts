@@ -213,7 +213,7 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
       const s = ctl.state(e.key, e.column);
       // A row the browser's rows no longer have: the host hears it (saveFailed), not the user (edit-save.md 21). A
       // server page's row only left the page (O9): said.
-      if (g.rows.kind === 'client' && !g.rows.row(e.key)) return;
+      if (g.rows.kind === 'client' && !kernel.rowOf(e.key)) return;
       // A cut (O11 note, S7-O2; review 2): what the browsers' fetch throws (a TypeError saying fetch, network or « load
       // failed »), a TimeoutError or a NetworkError, or the grid's window offline; an app's own TypeError is not one.
       // The host's reason and code win; its code `network` says it outright.
@@ -264,7 +264,8 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
     seam: {
       read: (col: ResolvedColumn<unknown>, row: unknown, key: RowKey): unknown => {
         const h = cells.size ? cells.get(ck(key, col.id))?.hold : undefined;
-        return h?.has ? h.v : ctl.reader.value(col as never, row as never, idOfDataKey(key) ?? '');
+        // A pinned row's overlay id is its key (step 8b-1, as the controller's).
+        return h?.has ? h.v : ctl.reader.value(col as never, row as never, idOfDataKey(key) ?? key);
       },
       tip: failed,
     },

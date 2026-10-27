@@ -32,7 +32,7 @@ const PUBLIC = [
 
 const INTERNAL = [
   'ColumnCache', 'Haystack', 'THREW', 'canNarrow', 'canonical', 'clearFormatCaches', 'collatorKey', 'compileFilter', 'compileQuick', 'createRowStore',
-  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'filterKindLookup', 'flatDisplayed', 'foldSlow', 'formatParts', 'hasRelative', 'intlTag', 'isDataKey', 'lockColumns', 'missingFeatureProblems', 'onCommand', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'setFocusOwner', 'setSelectionGate', 'shownAncestor', 'sortIndices', 'storeOf',
+  'checkPage', 'ctxKey', 'emit', 'filterIndices', 'filterKindLookup', 'flatDisplayed', 'foldSlow', 'formatParts', 'hasRelative', 'intlTag', 'isCellKey', 'isDataKey', 'lockColumns', 'missingFeatureProblems', 'onCommand', 'pageOf', 'resizeIndex', 'resolvePageOptions', 'sameFocus', 'samePage', 'separatorsFor', 'setFocusOwner', 'setPinned', 'setSelectionGate', 'shownAncestor', 'sortIndices', 'storeOf',
 ];
 
 /** `@dzgrid/core/server`: what a grid fed by a server needs, never in the base. */

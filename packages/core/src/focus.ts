@@ -28,14 +28,16 @@ export type FocusOwner<T> = (f: CellFocus, rows: DisplayedRows<T>) => FocusPos;
  * end; a detail's, at its master's); no rows at all sends focus to the
  * header. A column no longer visible gives way to the first visible column;
  * no columns, no focus. `owner`, when given, moves a cell's focus to the cell
- * owning its place.
+ * owning its place. `held`: a pinned row (step 8b-1) that still exists keeps the focus, whatever
+ * the rows shown, its column fixed as any cell's; no owner applies to it.
  */
-export function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, after: DisplayedRows<T>, columns: ColumnLookup<T>, owner?: FocusOwner<T>): FocusPos | null {
+export function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, after: DisplayedRows<T>, columns: ColumnLookup<T>, owner?: FocusOwner<T>, held?: (key: RowKey) => unknown): FocusPos | null {
   if (!f) return null;
   const visible = columns.visible();
   if (!visible.length) return null;
   const column = visible.some((c) => c.id === f.column) ? f.column : visible[0]!.id;
   if (f.kind === 'header') return column === f.column ? f : f.level ? { kind: 'header', column, level: f.level } : { kind: 'header', column };
+  if (held?.(f.row)) return column === f.column ? f : { kind: 'cell', row: f.row, column };
   if (after.count === 0) return { kind: 'header', column };
   let to: CellFocus;
   if (after.indexOf(f.row) !== -1) to = column === f.column ? f : { kind: 'cell', row: f.row, column };

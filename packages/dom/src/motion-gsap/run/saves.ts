@@ -45,10 +45,10 @@ export function saves(g: GridContext<unknown>) {
       told.clear();
       if (!s || list.length > 50) return;
       for (const [k, c, el, why] of list) {
-        const node = g.rows.row(k)!;
+        const node = g.kernel.rowOf(k)!;
         const col = g.columns.get(c)!;
         const [value] = valueOf(g, col, g.edit!.read(col, node.data, k));
-        const [, before] = valueOf(g, col, why === 'failed' ? g.kernel.reader.value(col as never, node.data, idOfDataKey(k) ?? '') : col.read(node.data));
+        const [, before] = valueOf(g, col, why === 'failed' ? g.kernel.reader.value(col as never, node.data, idOfDataKey(k) ?? k) : col.read(node.data));
         s.guard.finish(el);
         const ok = showing(g, el, k, c);
         const r = s.hook(s.o.onCell, ok, el, { key: k, column: c, value, text: el.textContent ?? '', previousText: before, row: node.data, context: g.settings.context, reduced: s.reduced }, why);

@@ -20,7 +20,7 @@ describe('idOfDataKey', () => {
   it('gives null for every other family and for malformed keys', () => {
     expect(idOfDataKey(groupKey(['a']))).toBeNull();
     expect(idOfDataKey(detailKey(dataKey('a')!))).toBeNull();
-    expect(idOfDataKey(pinnedKey('top', 0))).toBeNull();
+    expect(idOfDataKey(pinnedKey('top', 0)!)).toBeNull();
     for (const k of ['d:5:ab', 'd:2:a', 'd::a', 'd:01:a', 'd:a', 'd:0:', '']) expect(idOfDataKey(k as RowKey), k).toBeNull();
   });
 });

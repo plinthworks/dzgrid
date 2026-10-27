@@ -21,6 +21,9 @@ const isServer = (f: string) => /(^|\/)src\/server(\.ts$|\/)/.test(f);
 const isSpans = (f: string) => /(^|\/)src\/spans(\.ts$|\/)/.test(f);
 const isCsv = (f: string) => /(^|\/)src\/csv(\.ts$|\/)/.test(f);
 
+/** The base's seam guard: its measure after each step that adds a seam (history in the base test below). */
+const BASE = 29001;
+
 describe('layering of the base and the server entry', () => {
   it('the base bundle holds no server module', async () => {
     const inputs = await inputsOf('index.ts');
@@ -96,7 +99,7 @@ describe('layering of the base and the server entry', () => {
     const out = await build({ entryPoints: [SRC + 'index.ts'], bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' });
     const gz = gzipSync(out.outputFiles[0]!.contents, { level: 9 }).length;
     const budget = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core'].maxGzip as number;
-    expect(budget).toBe(29000);
+    expect(budget).toBe(29150); // owner Q2 of step 8b (pinned rows): 29 000 → 29 150 (Q-B)
     expect(gz).toBeLessThanOrEqual(budget);
     // The seams' guard, rebased at the Phase 4 close (step 13, 2026-10-22): Phase 4 took the base from
     // 26 984 to 28 240 (the tree and detail seams and their reviews, each step's bytes in ROADMAP « Phase 4 »).
@@ -110,8 +113,10 @@ describe('layering of the base and the server entry', () => {
     // `SaveOrigin`) → 28 916, the measure. Phase 5 close (step 13, 2026-10-26): steps 4–12 added no base byte
     // (types only, the range and fill seams in their entries); the guard stays 28 916, the close's measure.
     // Phase 6 step 3 (owner Q3-3): `width: null` in a column patch, +14 → 28 930. Phase 6 step 7 (collapsible
-    // groups, owner Q-GH, Q-B: seam ≤ 120 B): `ColumnModel.folded` / `fold`, +35 → 28 965.
-    expect(gz).toBeLessThanOrEqual(28965);
+    // groups, owner Q-GH, Q-B: seam ≤ 120 B): `ColumnModel.folded` / `fold`, +35 → 28 965. Phase 6 step 8b-1 (pinned rows,
+    // owner Q2: up to 29 150): the pinned store (`setPinned`, `rowOf`, a pinned focus kept, `editable`'s `{ pinned }`, never
+    // selected), `pinnedKey` by id and `assignKeys`' key maker, +36 → 29 001.
+    expect(gz).toBeLessThanOrEqual(BASE);
   });
 
   it('the base holds no edit module: the edit controller is its own entry (Phase 5 step 3)', async () => {
@@ -161,7 +166,7 @@ describe('layering of the base and the server entry', () => {
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
     // The step's planned share (step10-plan « Sizes »): 2 200–3 000; more is a question, not a failure here.
     expect(both - alone).toBeGreaterThan(500);
-    expect(alone).toBeLessThanOrEqual(28965);
+    expect(alone).toBeLessThanOrEqual(BASE);
   });
 
   it('no other entry holds a state module; the state entry holds no server, span, csv, tree, edit or range module, nor the models (Phase 6 step 5)', async () => {
@@ -179,6 +184,6 @@ describe('layering of the base and the server entry', () => {
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './state.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
     expect(both - alone).toBeLessThanOrEqual(1500);
-    expect(alone).toBeLessThanOrEqual(28965);
+    expect(alone).toBeLessThanOrEqual(BASE);
   });
 });

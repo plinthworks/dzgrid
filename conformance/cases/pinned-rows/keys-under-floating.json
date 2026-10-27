@@ -1,0 +1,60 @@
+{
+  "id": "keys-under-floating",
+  "suite": "pinned-rows",
+  "description": "Under a floating filter row (level 1): Down from it to the first top row, Up from the first top row back to it; the column headers (level 0) go down to the filter row by the grid's own move.",
+  "input": {
+    "top": [
+      "t0"
+    ],
+    "bottom": [],
+    "body": 5,
+    "level": 1,
+    "moves": [
+      {
+        "at": {
+          "header": "c",
+          "level": 1
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "header": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "row": "t0",
+        "column": "c"
+      },
+      {
+        "header": "c",
+        "level": 1
+      },
+      null
+    ]
+  }
+}

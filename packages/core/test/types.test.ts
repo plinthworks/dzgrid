@@ -1,5 +1,5 @@
 import { describe, it, expectTypeOf } from 'vitest';
-import type { DisplayIndex, RowKey, Day, InstantMs, DisplayedRows, ColumnDef, EditableRule, EditChecks, FilterKind, GridEvent, LocaleCtx, Json, SaveOrigin, CellAddr, CellRange } from '@dzgrid/core';
+import type { DisplayIndex, RowKey, Day, InstantMs, DisplayedRows, ColumnDef, EditableRule, EditableInfo, EditChecks, FilterKind, GridEvent, LocaleCtx, Json, SaveOrigin, CellAddr, CellRange } from '@dzgrid/core';
 import type { PlannedCell, RangeBox } from '@dzgrid/core/range';
 import type { CellInput, SaveRequest } from '@dzgrid/core/edit';
 
@@ -45,7 +45,8 @@ describe('branded types', () => {
 describe('the edit seams (Phase 5 step 2)', () => {
   type Row = { id: string; stock: number };
   it('an editable rule reads the row and the context; validate the value, the row and the context', () => {
-    expectTypeOf<EditableRule<Row>>().toEqualTypeOf<boolean | ((row: Readonly<Row>, context: unknown) => boolean)>();
+    // Phase 6 step 8b-1 (Q4): a third argument, `{ pinned }`.
+    expectTypeOf<EditableRule<Row>>().toEqualTypeOf<boolean | ((row: Readonly<Row>, context: unknown, info: EditableInfo) => boolean)>();
     const col: ColumnDef<Row, number> = {
       id: 'stock',
       editable: (row, context) => row.stock >= 0 && context !== null,

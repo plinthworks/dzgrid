@@ -93,6 +93,10 @@
       "types": "./src/state.ts",
       "default": "./src/state.ts"
     },
+    "./pinned-rows": {
+      "types": "./src/pinned-rows.ts",
+      "default": "./src/pinned-rows.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"
@@ -272,6 +276,18 @@
     "./locales/ar-column-menu": {
       "types": "./src/locales/ar-column-menu.ts",
       "default": "./src/locales/ar-column-menu.ts"
+    },
+    "./locales/en-pinned": {
+      "types": "./src/locales/en-pinned.ts",
+      "default": "./src/locales/en-pinned.ts"
+    },
+    "./locales/fr-pinned": {
+      "types": "./src/locales/fr-pinned.ts",
+      "default": "./src/locales/fr-pinned.ts"
+    },
+    "./locales/ar-pinned": {
+      "types": "./src/locales/ar-pinned.ts",
+      "default": "./src/locales/ar-pinned.ts"
     }
   },
   "peerDependencies": {

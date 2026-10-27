@@ -1,0 +1,63 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/pinned-rows.css — rows pinned to the top and the bottom (Phase 6 step 8b-1, docs/behaviors/pinned-rows.md 5):
+// loaded by the applications that pin rows (`@dzgrid/dom/pinned-rows`), after dzgrid.css; the base theme does not grow.
+// Compiled to pinned-rows.css (layered) and pinned-rows.unlayered.css ($layered: false) by `npm run build:theme`; a test
+// fails when they drift.
+//
+// The bands themselves (sticky, clipped, their row groups) are laid out by the feature's own injected rules; here only
+// their look: the pinned rows on the raised background, at the base row's weight (`:where`), so hover, the focused row and
+// a selection keep theirs; a 2 px line between each band and the body, drawn inside the band over its rows (a border would
+// add to the band's height, which is its rows'). No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+$line: var(--dzg-pinned-line, var(--tz-fg-muted));
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  :where(.dzg-pins) .dzg-row,
+  :where(.dzg-pins) .dzg-row .dzg-seg-start,
+  :where(.dzg-pins) .dzg-row .dzg-seg-end {
+    background: var(--dzg-pinned-bg, var(--tz-bg-raised));
+  }
+
+  .dzg-pins-top::after,
+  .dzg-pins-bottom::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    block-size: 2px;
+    background: $line;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .dzg-pins-top::after {
+    inset-block-end: 0;
+  }
+
+  .dzg-pins-bottom::after {
+    inset-block-start: 0;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-pins-top::after,
+    .dzg-pins-bottom::after {
+      background: CanvasText;
+    }
+  }
+}

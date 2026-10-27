@@ -113,6 +113,9 @@
       "@dzgrid/dom/state": [
         "./packages/dom/src/state.ts"
       ],
+      "@dzgrid/dom/pinned-rows": [
+        "./packages/dom/src/pinned-rows.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

@@ -1,0 +1,30 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  :where(.dzg-pins) .dzg-row,
+  :where(.dzg-pins) .dzg-row .dzg-seg-start,
+  :where(.dzg-pins) .dzg-row .dzg-seg-end {
+    background: var(--dzg-pinned-bg, var(--tz-bg-raised));
+  }
+  .dzg-pins-top::after,
+  .dzg-pins-bottom::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    block-size: 2px;
+    background: var(--dzg-pinned-line, var(--tz-fg-muted));
+    z-index: 3;
+    pointer-events: none;
+  }
+  .dzg-pins-top::after {
+    inset-block-end: 0;
+  }
+  .dzg-pins-bottom::after {
+    inset-block-start: 0;
+  }
+  @media (forced-colors: active) {
+    .dzg-pins-top::after,
+    .dzg-pins-bottom::after {
+      background: CanvasText;
+    }
+  }
+}

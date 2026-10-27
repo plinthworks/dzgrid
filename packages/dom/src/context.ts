@@ -11,10 +11,10 @@ import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
-import type { EditSeam, FeatureHandle, GroupsApi, SlotDrivers, SpanFeature } from './features.js';
+import type { EditSeam, FeatureHandle, GroupsApi, MoveFn, SlotDrivers, SpanFeature } from './features.js';
 import type { CellInput, PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
+import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, PinnedMessageKey, RulesMessageKey, TreeMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -161,5 +161,14 @@ export interface GridContext<T> {
   bulk?: (at: CellAddr, input: CellInput | undefined) => { readonly own?: string | undefined } | null;
   /** Moves the focus as the grid's own keys would (the router's move: spans, details, the last row stays); the editors' Enter. */
   step?(intent: Intent): void;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  /**
+   * The pinned rows (`@dzgrid/dom/pinned-rows`, Phase 6 step 8b-1), set at its setup: how many on each side, `[top, bottom]`
+   * (the paint counts them in `aria-rowcount`, and numbers the body's rows after the top ones); the key moves across the
+   * bands, over the spans' and the grid's own (`base`); a pinned key's band rows (undefined: a body row's, read
+   * `rows.displayed`): what the editors' Tab walks, inside one band.
+   */
+  pins?: readonly [number, number] | undefined;
+  move?: MoveFn | undefined;
+  rowsOf?: ((key: RowKey) => DisplayedRows<T> | undefined) | undefined;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | PinnedMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

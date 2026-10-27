@@ -1,0 +1,88 @@
+{
+  "id": "keys-page",
+  "suite": "pinned-rows",
+  "description": "Page keys: from the top band a page into the body (row page − 1); from the bottom band a page from the body's end (count − page); away from the body nothing; the body keeps its own (pinned-rows.md 9).",
+  "input": {
+    "top": [
+      "t0"
+    ],
+    "bottom": [
+      "z0"
+    ],
+    "body": 30,
+    "page": 10,
+    "moves": [
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "page",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "page",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "row": "z0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "page",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "row": "z0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "page",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "b5",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "page",
+          "delta": 1
+        }
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "row": "b9",
+        "column": "c"
+      },
+      {
+        "row": "t0",
+        "column": "c"
+      },
+      {
+        "row": "b20",
+        "column": "c"
+      },
+      {
+        "row": "z0",
+        "column": "c"
+      },
+      null
+    ]
+  }
+}

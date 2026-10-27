@@ -25,8 +25,9 @@ with Enter, Tab or a click elsewhere, or gives it up with Escape; clears a cell 
 ## Behaviours (numbered, each one a test)
 
 **Where editing is possible**
-1. A cell is editable when its row is a **data row** and its column says yes (`editable: true` or
-   `editable(row, context)` true). Detail rows, filler rows of a path tree, loading rows: never, whatever
+1. A cell is editable when its row is a **data row or a pinned row** (`pinned-rows.md` 11; C6, Phase 6 step 8b-1)
+   and its column says yes (`editable: true` or `editable(row, context, { pinned })` true; `pinned` is the pinned
+   row's side, undefined on a body row). Detail rows, filler rows of a path tree, loading rows: never, whatever
    the column says (`editableAt` in the core; Phase 4 criterion 5 carried here).
 2. In a tree, the columns that feed the structure (parent id, path) are read-only in this phase (Q13).
    `tree({ structure: ['parentId'] })` names them; in path mode the tree column is one by default (the

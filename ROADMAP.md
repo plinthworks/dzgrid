@@ -823,7 +823,15 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   clears the block (Q8-3 revised). Lines raised by compression only (Q8-5): `core/edit` 3 150, `core/server` 6 200,
   K.8 84 000. Demo `spans.html` section 4 (« Patient », fr / ar). Browser `--only groups`: Chrome 20, Firefox 18,
   WebKit 18.
-- [ ] step 9: pinned rows, editable.
+- [~] step 8b-1 (the plan's « step 9 », part 1; 2026-10-27, not committed, no review yet; plan
+  `docs/phase-6-steps/step08b-plan.md` « Done »): pinned rows top and bottom, editable — core seam (`setPinned`,
+  `rowOf`, a pinned focus kept, `editable`'s `{ pinned }`, never selected; +36 B, 29 001 / 29 150), `core/edit` (own
+  overlay ids, never stale, `pinnedChanged`, `SaveChange.pinned`; 3 136 / 3 150), DOM base seams (peer renderers,
+  aria counts, `g.move`, sideways reveal; +99 B, 21 954 / 22 400), the new entry `@dzgrid/dom/pinned-rows` (2 080 /
+  2 150, ceiling 2 300: the editing glue, owner Q2), texts 116 / 130 / 156, `pinned-rows.css` 301 / 350. Keys
+  (`crossBand`, 5 conformance cases), single-cell editing, undo, saves. Demo `playground/pinned.html` (fr / ar,
+  `?many=1`). Browser `--only pinned-rows`: Chrome 36, Firefox 7, WebKit 7.
+- [ ] step 8b-2: blocks, paste and the fill inside a band (`dom/range` ~5 200, `dom/fill` ~3 150, owner Q1).
 - [ ] step 10: auto row height (exit criterion 3, S3).
 - [ ] step 11: print.
 - [ ] step 12: Angular and demos.

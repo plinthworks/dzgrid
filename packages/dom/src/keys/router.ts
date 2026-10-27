@@ -21,8 +21,8 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
   let set: FocusPos | null = null;
   function move(from: FocusPos, intent: Intent): void {
     if (!sameFocus(kernel.focus, set)) goal = null;
-    // The spans feature moves over spanned cells, and hands the rest back to `moveFocus`.
-    const step: MoveFn = g.spans?.move ?? moveFocus;
+    // The pinned rows' move across their bands (step 8b-1), else the spans feature's over spanned cells; each hands the rest back to `moveFocus`.
+    const step: MoveFn = g.move ?? g.spans?.move ?? moveFocus;
     const d = rows.displayed;
     const h = g.rowHeight();
     const page = Math.max(1, Math.floor(g.geometry.read().block / h) - 1);

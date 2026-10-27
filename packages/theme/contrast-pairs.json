@@ -178,7 +178,11 @@
     { "what": "a disabled box or button in the column chooser (exempt from 1.4.3, kept at 3:1)", "fg": "--dzg-menu-disabled", "bg": "--tz-bg", "min": 3 },
     { "what": "the column chooser's landing bar on the dialog", "fg": "--dzg-move-bar", "bg": "--tz-bg", "min": 3 },
     { "what": "the column chooser's ▲ ▼ and handle on the dialog", "fg": "--tz-fg", "bg": "--tz-bg", "min": 3 },
-    { "what": "the column chooser's lock before a box that cannot flip (its label's colour)", "fg": "--tz-fg", "bg": "--tz-bg", "min": 3 }
+    { "what": "the column chooser's lock before a box that cannot flip (its label's colour)", "fg": "--tz-fg", "bg": "--tz-bg", "min": 3 },
+    { "what": "pinned row text on its raised background", "fg": "--tz-fg", "bg": "--dzg-pinned-bg", "min": 4.5 },
+    { "what": "pinned row muted text on its raised background", "fg": "--tz-fg-muted", "bg": "--dzg-pinned-bg", "min": 4.5 },
+    { "what": "pinned row band's line next to the body", "fg": "--dzg-pinned-line", "bg": "--tz-bg", "min": 3 },
+    { "what": "pinned row band's line on the band", "fg": "--dzg-pinned-line", "bg": "--dzg-pinned-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -210,6 +214,8 @@
     "--dzg-resize-mode": "var(--tz-accent)",
     "--dzg-menu-disabled": "var(--tz-fg-muted)",
     "--dzg-cell-active-bg": "color-mix(in srgb, var(--tz-accent) 10%, var(--tz-bg))",
-    "--dzg-row-active-bg": "color-mix(in srgb, var(--tz-fg) 6%, var(--tz-bg))"
+    "--dzg-row-active-bg": "color-mix(in srgb, var(--tz-fg) 6%, var(--tz-bg))",
+    "--dzg-pinned-bg": "var(--tz-bg-raised)",
+    "--dzg-pinned-line": "var(--tz-fg-muted)"
   }
 }

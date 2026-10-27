@@ -35,7 +35,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  * example's 92 500 (S12-Q10; S9-Q7 92 000) is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
  */
 const SIZE_CEILINGS = {
-  '@dzgrid/core': 29000,
+  '@dzgrid/core': 29150, // Phase 6 (owner Q-B, Q2 of step 8b, 2026-10-27): 29 000 → 29 150 for the pinned rows' seams
   '@dzgrid/core/server': 6200, // owner Q8-5 (2026-10-27): 6 200, pushed by compression with the base's fold seam; Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order); owner E5-1 / E5-8 (2026-10-26): 6 150 for the hold seam (`rows.hold`, one request per restore; measured +56)
   '@dzgrid/core/csv': 2000, // Q7: « core/csv up to 2 000 »
   '@dzgrid/core/tree': 3500,
@@ -45,7 +45,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
   '@dzgrid/core/range': 4000, // Phase 5 Q16 (Part B): blocks of cells, TSV, the paste and fill plans; the line at the measure + 10 % at the close
   '@dzgrid/core/state': 1500, // Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
-  '@dzgrid/dom': 21980, // showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
+  '@dzgrid/dom': 22400, // Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10000,
   '@dzgrid/dom/tree': 3800, // owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said)
   '@dzgrid/dom/tree-lazy': 1000,
@@ -121,6 +121,13 @@ const SIZE_CEILINGS = {
   '@dzgrid/angular': 7000, // owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
   'profile: audit screen (K.8)': 84000, // Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000
   // `@dzgrid/dom/groups` (owner Q8-4, 2026-10-27): its measure + 10 %, no ceiling of its own (measured 1 893 → 2 100).
+  // Phase 6 step 8b-1 (owner Q2, 2026-10-27): pinned rows over the DOM base, 2 000 (up to 2 300 only if editing needs
+  // it: asked again); their own -pinned texts 120 / 140 / 170; pinned-rows.css about 450 (the line at its measure + 10 %).
+  '@dzgrid/dom/pinned-rows': 2300, // Q2: 2 000, up to 2 300 for editing (8b-1 measured 2 080: the edit glue — the kernel's store, the band-bound Enter, `pinnedChanged`, the focus kept — weighs ~180 B of it)
+  '@dzgrid/dom/locales/en-pinned': 120,
+  '@dzgrid/dom/locales/fr-pinned': 140,
+  '@dzgrid/dom/locales/ar-pinned': 170,
+  '@dzgrid/theme/pinned-rows.css': 450, // its line the measure + 10 % (301 → 350)
   '@dzgrid/dom/spans': 5300, // Q-B: 4 950 → 5 300 for the phase; Q8-4: the fold UI moved out, measured 4 567
 };
 

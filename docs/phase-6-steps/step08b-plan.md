@@ -176,3 +176,42 @@ Step 0 measures (core, base, `core/edit`, `-columns`, `columns.css`); sheet edit
 **Q5. Ce que reçoit votre fonction d'enregistrement pour une ligne épinglée.**
 - A (recommandé) : même forme que pour le corps (`key` du grid, `row` = votre objet) plus `pinned: 'top' | 'bottom'` ; vous retrouvez la ligne par `row`.
 - B : en plus, l'identifiant de votre `getRowId` dans un champ `id` (quelques octets de plus dans `core/edit`).
+
+## Done — 8b-1 (2026-10-27, not committed, no review yet)
+
+Built: core seam, `core/edit`, DOM base seams, `@dzgrid/dom/pinned-rows` (bands, cap and window, keys, single-cell
+editing, undo, saves, never stale), texts `-pinned`, `pinned-rows.css`, demo `playground/pinned.html` (`?lang=ar`,
+`?theme=dark`, `?many=1`), browser group `pinned-rows`. Not built: §2.5 (blocks, paste, fill in a band) = 8b-2; until
+then a block started in a band is inert and never leaves its row (test). Plan changes made while building:
+- Ctrl+Home / Ctrl+End from a band go to the body's first / last row **and** first / last column, as in the body;
+  Ctrl+Up / Ctrl+Down keep the column (the sheet's table says so now).
+- The bands' layout is written on the elements (CSSOM: sticky, clip, contain, z-index) instead of an injected style
+  element: −35 B, nothing for a CSP.
+- All the key logic is one `g.move` (no `keys()` handler); the editors' Enter is kept inside a band by wrapping `g.step`.
+- `SaveChange.pinned` is `undefined` on a body row (present, not absent: −15 B in `core/edit`, at 3 136 / 3 150).
+
+**Tests that failed first (red for the right reason, then green):**
+- `scripts/test/rebudget.test.ts` (step 8b-1 lines, 17 red: ceilings 29 000 / 21 980, no entries) and
+  `release.test.ts` (exports, build lists): red before the config.
+- Core: `pinned-ids` (7 red: `pinnedKey` by position threw `RangeError`), `pinned-kernel` and `pinned-edit` (whole
+  files red: the same `pinnedKey`); then green with the seams.
+- DOM: `pinned-rows-band` (red: module missing), `pinned-rows` + `pinned-rows-keys` (23 red with the feature but
+  without the base seams: no peers, no `g.move`, no aria counts), `pinned-rows-edit` (13 red: no peers, editors on
+  `rows.row`); theme `pinned-rows.test.ts` (6 red: no sheet, no pairs).
+- Written after the code: the 5 conformance cases (`cases/pinned-rows/`, expectations by hand from §3), the range
+  guard test, the browser checks.
+
+**Sizes (check:size):** core 29 001 / 29 150 (+36); `core/edit` 3 135 / 3 150; DOM base 21 954 / 22 400 (+99);
+`dom/pinned-rows` 2 080 / 2 150, ceiling 2 300 (Q2: the editing glue — store, band-bound Enter, `pinnedChanged`,
+the focus kept — weighs ~180 B; without it ~1 900); texts 116 / 120, 130 / 140, 156 / 170; `pinned-rows.css` 301 / 350;
+`dom/edit` 4 147 / 4 150, `dom/editors` 6 672 / 6 720, motion run 3 385 / 3 500 (unchanged lines). K.8 profile
+83 911 / 84 000 (+174, 89 B left: step 10 should know). No line raised by compression alone.
+
+**Gate (once, `caffeinate -i`, 2 workers, Node 24):** vitest 455 files / 6 966 tests green; `test:perm` 5 / 10;
+`typecheck`; `build`; `check:size` 0 over; `check:contrast` 1 086 pairs, 0 below. Browser `--only pinned-rows`:
+Chrome 36 / 36 (fr light, ar dark: alignment 1 px at start / middle / end / sideways, 2.4.11 keys, editor in a band,
+save, undo, total recomputed, short body, axe 0, forced colours, 200 % zoom, the cap and its window), Firefox 7 / 7,
+WebKit 7 / 7 (keys, RTL foot, sideways pinned column, editor).
+
+**For the reviewer (mutants, pure logic only):** `pinned-rows/band.ts` (`crossBand`, `bandHeights`), `pinnedKey` /
+`isCellKey`, `reconcileFocus`'s `held` branch, `editableAt`'s info, `kernel.rowOf` / `exists`, `showNew`'s body filter.

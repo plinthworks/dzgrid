@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@dzgrid/dom/pinned-rows` (Phase 6 step 8b-1; docs/behaviors/pinned-rows.md, owner Q-P = C, Q2–Q5, O8, C6):
+  `pinnedRows({ top, bottom })` — rows pinned under the header and at the grid's foot (a reference row, a totals row),
+  each band a named `rowgroup` (`pinned.top` / `pinned.bottom`, texts `locales/{en,fr,ar}-pinned`), never sorted,
+  filtered, paged or selected, counted in `aria-rowcount` and numbered header → top → body → bottom; the body's view
+  shortened by them (WCAG 2.4.11), both together at most half the view (a taller band windowed, moved by the wheel and
+  the focus); the bottom band at the foot when the body is short (Q3). Keys across the bands (Down / Up from the header
+  through the top band, the body, the bottom band; PageUp / PageDown and Ctrl / Cmd edges into the body; Left / Right
+  inside a row, mirrored right to left). Editable through `edit()` and `editors()` like body rows: same keys, saves,
+  marks, refusals and undo; Tab and Enter's move stay inside the band; never order-stale. `api(grid)`: `set` (one side
+  at a time, an id kept keeps its focus and open field), `get`, `rows(side)`. Problems: `duplicate-row-id` /
+  `invalid-row-id` (path `pinnedRows.top[i]`), `too-many-pinned-rows` (warning, above 5 on a side). Its look in the new
+  `@dzgrid/theme/pinned-rows.css` (raised background, a 2 px line, `CanvasText` in forced colours; `--dzg-pinned-bg`,
+  `--dzg-pinned-line` in `check:contrast`). Blocks, paste and the fill inside a band: step 8b-2.
+- Core: `GridKernel.rowOf(key)` (a body row, else a pinned one); `EditableRule`'s third argument `EditableInfo`
+  (`{ pinned }`); `SaveChange.pinned`; `DataNode.pinned`; `RowClassContext.pinned`; the event `pinnedChanged`;
+  `assignKeys(ids, path, make?)`; internal `setPinned`, `isCellKey`. DOM base: `RowRenderer.spawn(layer, peer?)`, the
+  context's `pins`, `move`, `rowsOf` seams.
+- **Breaking (unpublished):** `pinnedKey(side, id)` is keyed by the row's id (`p:t:1:a`), no longer by a position, and
+  returns null for an unusable id instead of throwing.
+
 - `filters({ dateCalendar: { months, presets } })` (docs/behaviors/filter-date-picker.md, Calendar options): the
   period field's months side by side (2 by default) and its shortcuts, a list of `RelativeRange` names in the host's
   order (the six by default, `[]` for none); still none between two moments. A value it cannot take is dropped with an

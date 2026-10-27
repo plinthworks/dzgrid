@@ -1,0 +1,126 @@
+{
+  "id": "keys-empty-body",
+  "suite": "pinned-rows",
+  "description": "No body rows: the header goes down to the top band, the top band to the bottom band and back; a page or an edge stays; with no top band the bottom band's first row goes up to the header; inside a band the editors' Enter stops at its edges.",
+  "input": {
+    "top": [
+      "t0"
+    ],
+    "bottom": [
+      "z0",
+      "z1"
+    ],
+    "body": 0,
+    "moves": [
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        }
+      },
+      {
+        "at": {
+          "row": "z0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "row": "t0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "row": "z1",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "page",
+          "delta": -1
+        }
+      },
+      {
+        "at": {
+          "row": "z1",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "edge",
+          "axis": "both",
+          "to": "first"
+        }
+      },
+      {
+        "at": {
+          "row": "z1",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": 1
+        },
+        "inside": true
+      },
+      {
+        "at": {
+          "row": "z0",
+          "column": "c"
+        },
+        "intent": {
+          "kind": "move",
+          "axis": "row",
+          "delta": -1
+        },
+        "inside": true
+      }
+    ]
+  },
+  "expected": {
+    "moves": [
+      {
+        "row": "z0",
+        "column": "c"
+      },
+      {
+        "row": "t0",
+        "column": "c"
+      },
+      {
+        "header": "c"
+      },
+      {
+        "row": "z1",
+        "column": "c"
+      },
+      {
+        "row": "z1",
+        "column": "c"
+      },
+      {
+        "row": "z1",
+        "column": "c"
+      },
+      {
+        "row": "z0",
+        "column": "c"
+      }
+    ]
+  }
+}

@@ -104,3 +104,11 @@ export interface ColumnMenuMessages {
   readonly locale: string;
   readonly text: { readonly [K in ColumnMenuMessageKey]: MessageValue };
 }
+
+/** The pinned rows' texts (`@dzgrid/dom/pinned-rows`, Phase 6 step 8b-1), in their own bundles (`locales/<lang>-pinned`): the names of the two row groups. Optional here, required by `pinnedRows()`. */
+export type PinnedMessageKey = 'pinned.top' | 'pinned.bottom';
+/** A pinned rows bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_PINNED.text }`. */
+export interface PinnedMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in PinnedMessageKey]: MessageValue };
+}

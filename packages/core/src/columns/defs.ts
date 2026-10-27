@@ -112,8 +112,16 @@ export interface EditChecks<T, V = unknown> {
   readonly editor?: string;
 }
 
-/** A column's `editable`: yes, no, or a rule over the row and the application's context. */
-export type EditableRule<T> = boolean | ((row: Readonly<T>, context: unknown) => boolean);
+/**
+ * A column's `editable`: yes, no, or a rule over the row and the application's context; `info.pinned` says a pinned row's
+ * side (`@dzgrid/dom/pinned-rows`, step 8b-1, Q4: a totals row says false there), undefined on a body row.
+ */
+export type EditableRule<T> = boolean | ((row: Readonly<T>, context: unknown, info: EditableInfo) => boolean);
+/** What an `editable` rule is told of the row besides its data (step 8b-1). */
+export interface EditableInfo {
+  /** The pinned row's side; undefined on a body row. */
+  readonly pinned?: 'top' | 'bottom' | undefined;
+}
 
 /** What `ui.cellClass` is told about one body cell: its coerced value, displayed text, row, key, column id, `settings.context`. */
 export interface CellClassContext<T, V = unknown> {
