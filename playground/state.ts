@@ -94,7 +94,8 @@ const grid = createGrid<Visit>($('host'), {
 });
 const api = state.api(grid)!;
 // The address wins over the storage: a state read from it, applied (its missing filter and search keep the grid's own).
-const read = fromSearchParams(q);
+// This page offers « with the filters and the search » when copying, so it opts in when reading (O6).
+const read = fromSearchParams(q, { include: ['filter', 'quick'] });
 if (read.state) api.setState(read.state);
 else if (read.problems.length) {
   problems.push(...read.problems.map((p) => `${p.code} ${p.path}`));

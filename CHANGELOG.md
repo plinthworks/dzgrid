@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `autoSizeAll({ say })`, `resizeMode(id)`; a double-click on a header's edge fits the column (mouse, pen); the column
   menu's « Ajuster cette colonne / toutes les colonnes » and « Redimensionner au clavier » appear with `columns()`. No
   − / + / ✓ buttons: the single-pointer way is the menu's « Élargir / Rétrécir » (Q6-1).
+- `fromSearchParams(params, { include? })` (review 2026-10-27): typed filters and the search are read from an address
+  only when the application opts in, as when writing (O6); `toSearchParams` falls back to the sort alone when columns
+  and sort are still over 4 KB (`sort-only`); a state's density must be one of the three strings.
 - **Breaking (unpublished):** a `-columns` text bundle must carry the eight `size.*` keys; `columns()` throws at setup
   without them (the locales `en/fr/ar-columns` have them).
 

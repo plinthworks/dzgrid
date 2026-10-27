@@ -74,11 +74,13 @@ searches, pages, picks a density), leaves the page, comes back — or shares the
     blocked, full or holding bad JSON: nothing thrown, one warning `state-storage` (no content), the grid as
     defined. Local storage keeps every part by default (it stays in the user's own browser).
 18. `toSearchParams(state, { name = 'grid', include? }) → URLSearchParams` and `fromSearchParams(params,
-    { name }) → GridState | null`: one parameter, a compact, stable, URL-safe text (`1.` + base64url of the
+    { name, include? }) → GridState | null`: one parameter, a compact, stable, URL-safe text (`1.` + base64url of the
     JSON, O7), the version first. Same state → same text. A truncated or edited parameter: null and
     `state-version`.
 19. **The address leaves typed filters and the search out by default** (O6): `filter` and `quick` are
-    written only with `include: ['filter', 'quick']` (either or both). Read back, a parameter without them
+    written only with `include: ['filter', 'quick']` (either or both), and read back only with the same
+    `include` (review 2026-10-27: a hand-edited address cannot slip them in). Over 4 KB the address keeps
+    columns and sort (`too-large`), and if that is still over 4 KB the sort alone (`sort-only`). Read back, a parameter without them
     leaves the grid's filters and search as they are. Columns, groups, sort, page, page size and density are
     always written.
 20. Never a cookie; never row data; the helpers never touch `history` themselves (the application chooses
@@ -123,7 +125,7 @@ None in the bundles (problems are codes; sentences belong to the application).
   raw, env?, source = 'host')`, `stateText`, `STATE_UPGRADES` (empty: v1 is the first), `STATE_VERSION`); `@dzgrid/dom/state`
   (`gridState({ debounce = 300, persist?: { key, include? } })` with `api(grid).state()` / `setState()`, `persistLocal(grid,
   key, { include? })`, `toSearchParams(state, { name = 'grid', include? })` → `{ params, problems }`, `fromSearchParams(params,
-  { name })` → `{ state, problems }`).
+  { name, include? })` → `{ state, problems }`).
 - The text is the core's `canonical` form: every object's keys sorted (so `v` is not first); the address's own version is
   its `1.` prefix.
 - Restore order as rule 6, all under the server model's `hold(fn)`: one request (3 before the seam, measured). A state

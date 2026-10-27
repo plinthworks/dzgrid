@@ -261,7 +261,11 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
     return () => gate.cancel(ch);
   };
 
-  /** `hold(fn)` (E5-1): the loads asked meanwhile become one, sent at its end; made held, the first waits for the first hold. */
+  /**
+   * `hold(fn)` (E5-1): the loads asked meanwhile become one, sent at its end; made held, the first waits for the first hold.
+   * Not re-entrant: an inner hold's end would send the request early. Its callers (`restoreState`, `gridState`'s setup)
+   * run one after the other, never one inside another (dom state.test.ts « review fixes » 7).
+   */
   let held = env.held;
   let wanted = false;
   const load = (): void => {

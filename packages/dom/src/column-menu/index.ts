@@ -173,7 +173,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
             cols?.autoSizeAll && it('size.autoAll', () => cols.autoSizeAll!({ say: true })),
             def.resizable !== false && it('size.widen', size(10), w >= Math.max(min, def.maxWidth ?? Infinity), { keepOpen: true }),
             def.resizable !== false && it('size.narrow', size(-10), w <= min, { keepOpen: true }),
-            cols?.resizeMode && it('size.resize', () => cols.resizeMode!(id)),
+            // The mode put the focus on the header: handed over, never sent back outside (the focus going out would end it).
+            cols?.resizeMode && it('size.resize', () => (handed = cols.resizeMode!(id))),
           ],
           cols ? [it('move.start', () => cols.move(id, -1, { say: true }), locked || !at), it('move.end', () => cols.move(id, 1, { say: true }), locked || at === seg.length - 1)] : [],
           fill && range ? [it('fill.down', () => fill.down({ user: true }), noFill, { keys: `${mod}D` }), it('fill.end', () => fill.end({ user: true }), noFill, { keys: `${mod}R` })] : [],

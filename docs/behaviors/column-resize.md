@@ -39,7 +39,9 @@ the menu's « Élargir / Rétrécir » (9).
    `size.modeHint`, and one polite sentence `size.mode` (« Redimensionner Nom : 140 pixels. Flèches pour
    changer, Entrée pour garder, Échap pour annuler »). The focus stays on the header.
 3. **ArrowRight** widens by 10 px in left to right and **ArrowLeft** narrows; in right to left it is
-   mirrored (ArrowLeft, toward the column's end edge, widens). **Shift+arrow**: 1 px. Clamped by min / max;
+   mirrored (ArrowLeft, toward the column's end edge, widens). **Shift+arrow**: 1 px. Whatever side the grip is on — the last column pinned to the end too, whose grip
+   sits on its start edge — Right (left to right) or Left (right to left) widens: the grip's side reverses the pointer
+   only (lead decision, review 2026-10-27). Clamped by min / max;
    at a bound the sentence adds `size.min` / `size.max`.
 4. **Home**: fits the content (auto-size, below). **End**: nothing (choice 1). ArrowUp / ArrowDown, PageUp /
    PageDown, Enter's sort, letters: swallowed while in the mode (no move, no sort).

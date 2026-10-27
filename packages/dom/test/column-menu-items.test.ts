@@ -164,6 +164,21 @@ describe('the resize mode from the menu (column-resize.md 1, step06-plan §2 « 
   }
 });
 
+describe('the resize mode from a menu opened while the focus was outside the grid (review 2026-10-27, finding 1)', () => {
+  it('a right-click with an outside field focused: « Resize » leaves the focus on the header, the mode on', () => {
+    const t = mmake({ with: ['columns'], menu: ({ columns }) => ({ use: { columns: columns! } }) });
+    const field = document.body.appendChild(document.createElement('input'));
+    field.focus();
+    t.rclick('n');
+    expect(t.list()).not.toBeNull();
+    t.item('size.resize')!.click();
+    expect(document.activeElement).toBe(t.hcell('n'));
+    expect(t.hcell('n')!.hasAttribute('data-dzg-resizing')).toBe(true);
+    t.key('ArrowRight');
+    expect(t.g.kernel.columns.layout.center.widths.sizeAt(1)).toBe(110);
+  });
+});
+
 describe('move (column-menu.md 11, WCAG 2.5.7)', () => {
   it('through a real columns(): one place, said as the keys; disabled at the segment\'s edges and for `movable: false`', () => {
     const t = mmake({ with: ['columns'], columns: MCOLS({ q: { movable: false } }), menu: ({ columns }) => ({ use: { columns: columns! } }) });

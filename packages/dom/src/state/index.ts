@@ -32,8 +32,10 @@ const SAVED = ['columnsChanged', 'columnResized', 'sortChanged', 'filterChanged'
 const tell = (k: Kernel, p: Problem): void => emit(k, { type: 'problems', source: 'host', problems: [p] });
 
 /**
- * Reads `key` (a warning `state-storage` when the storage is blocked or holds no state, never its content), restores it,
- * and saves the parts `include` names after each gesture; `stop()` stops saving. Never a cookie, never the history.
+ * Reads `key` and restores it: nothing there, nothing said; one warning `state-storage` (never the content) when the
+ * storage is blocked, holds something that is not JSON, or a state of another version (the rest of a bad state is the
+ * restore's own `state-*` problems). Then saves the parts `include` names after each gesture until `stop()`. Never a
+ * cookie, never the history.
  */
 function keep(k: Kernel, api: GridStateApi & { env: StateEnv }, key: string, include?: readonly StatePart[]): () => void {
   let warned = false;
@@ -68,7 +70,7 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
       const env: StateEnv = {
         density: () => g.settings.density ?? 'comfortable',
         // Not one of the three: refused (the restore says `state-field`); as the menu does, through the live settings (density.md 1).
-        setDensity: (d) => (ROW_HEIGHT[d as 'compact'] > 0 ? ((g.settings = { ...g.settings, density: d as 'compact' }), g.schedule()) : false),
+        setDensity: (d) => (typeof d == 'string' && ROW_HEIGHT[d as 'compact'] > 0 ? ((g.settings = { ...g.settings, density: d as 'compact' }), g.schedule()) : false),
       };
       let quiet = false;
       let source: ChangeSource;
@@ -146,16 +148,23 @@ export function toSearchParams(state: GridState, o: { readonly name?: string; re
     problems.push(problem('state-field', 'warning', name, 'too-large'));
     bytes = utf8.encode(stateText({ v: 1, columns: state.columns, sort: state.sort } as GridState));
   }
+  // Still over: the sort alone (columns never cut in half), told again.
+  if (bytes.length > MAX) {
+    problems.push(problem('state-field', 'warning', name, 'sort-only'));
+    bytes = utf8.encode(stateText({ v: 1, sort: state.sort } as GridState));
+  }
   const b64 = btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return { params: new URLSearchParams([[name, `1.${b64}`]]), problems };
 }
 
 /**
  * The state an address carries (G 18): null and nothing said when it has none; null and `state-version` when the parameter
- * was edited, cut, is not version `1.` of the encoding, or holds over 4 KB. The parts it does not hold are not applied by
- * `setState` (the grid's own filters and search stay, G 19).
+ * was edited, cut, is not version `1.` of the encoding, or holds over 4 KB. Typed filters and the search are left out
+ * unless `include` names them, as when writing (O6: a hand-edited address cannot slip them in). The parts it does not
+ * hold are not applied by `setState` (the grid's own filters and search stay, G 19).
  */
-export function fromSearchParams(params: URLSearchParams, o: { readonly name?: string } = {}): { state: GridState | null; problems: Problem[] } {
+export function fromSearchParams(params: URLSearchParams, o: { readonly name?: string; readonly include?: readonly ('filter' | 'quick')[] } = {}): { state: GridState | null; problems: Problem[] } {
+  const inc = Array.isArray(o.include) ? o.include : [];
   const name = o.name ?? 'grid';
   const v = params.get(name);
   if (v === null) return { state: null, problems: [] };
@@ -163,8 +172,12 @@ export function fromSearchParams(params: URLSearchParams, o: { readonly name?: s
     if (!/^1\.[\w-]+$/.test(v)) throw 0;
     const bin = atob(v.slice(2).replace(/-/g, '+').replace(/_/g, '/'));
     if (bin.length > MAX) throw 0;
-    const s = checkState(JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))))).state;
-    if (s) return { state: s, problems: [] };
+    const s = checkState(JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))))).state as { -readonly [K in keyof GridState]?: GridState[K] } | null;
+    if (s) {
+      if (!inc.includes('filter')) delete s.filter;
+      if (!inc.includes('quick')) delete s.quick;
+      return { state: s as GridState, problems: [] };
+    }
   } catch {
     // Edited, cut, or not a state: below.
   }

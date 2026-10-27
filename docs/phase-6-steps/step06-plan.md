@@ -131,3 +131,15 @@ Browser (one at a time): Chrome `--only columns` 41 / 41 (with the resize checks
 `--only column-resize` Firefox 4 / 4, WebKit 4 / 4 (ar: Alt+R, ArrowLeft widens, Home, the menu's entry). « Ajuster
 toutes les colonnes » on `orders-edit.html`: no mounted cell clipped in fr and ar, ≈ 300 ms with the clicks (not gated).
 Gate (once, `caffeinate -i`, 2 workers): full vitest 442 files / 6 764 tests, `typecheck`, `build`, `check:size` 0 over, `check:contrast` 1 062 / 0. Found by the gate and fixed: physical arrow names outside `keys/` (now `intentFor`), the header shortcuts tests (Alt+R added).
+
+## Review fixes (combined review of steps 5–6, 2026-10-27; not committed)
+Each with a test first: 1 the menu's « Redimensionner au clavier » hands the focus over (`handed`), so a menu opened by a
+right-click while the focus was outside the grid no longer ends the mode at once (failed: focus back on the outside
+field); 2 `toSearchParams` still over 4 KB with columns and sort: the sort alone, `sort-only` warning (failed); 3
+`setDensity` takes strings only (`['compact']` refused; failed); 4 `fromSearchParams(params, { include? })` leaves
+`filter` / `quick` out unless opted in (failed; the state demo opts in); 5 Right (LTR) / Left (RTL) always widens, the
+last end-pinned column too (pinned, passed already; column-resize.md 3); 6 `keep()`'s comment; 7 `rows.hold` documented
+not re-entrant, its callers pinned as never nested (passed already). Core state survivors pinned in
+`packages/core/test/state-review.test.ts` (6, passing). Sizes: `dom/state` 1 086 / 1 150, `column-menu` 4 061 / 4 300,
+the rest unchanged. Browser Chrome: `--only column-menu` 38, `column-resize` 14, `state` 13. Gate: vitest 443 / 6 777,
+typecheck, build, check:size, check:contrast 1 062 / 0.

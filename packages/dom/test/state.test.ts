@@ -326,7 +326,7 @@ describe('the address (G 18–20, O6, O7, E5-3)', () => {
 
   it('read back: the state, without filter or search unless they were written; Unicode round trip', () => {
     const p = toSearchParams(STATE({ quick: 'محمد é ü 🙂' }), { include: ['quick'] }).params;
-    const r = fromSearchParams(new URLSearchParams(p.toString()));
+    const r = fromSearchParams(new URLSearchParams(p.toString()), { include: ['quick'] });
     expect(r.problems).toEqual([]);
     expect(r.state!.quick).toBe('محمد é ü 🙂');
     expect(r.state!.filter).toBeUndefined();
@@ -364,3 +364,61 @@ describe('the address (G 18–20, O6, O7, E5-3)', () => {
     expect(t.g.kernel.query.sort).toEqual([{ column: 'name', dir: 'asc' }]);
   });
 });
+
+// The combined review of steps 5–6 (2026-10-27): findings 2, 3, 4 and 7.
+describe('review fixes', () => {
+  it('2: columns and sort still over 4 KB: the sort alone, and the developer told again', () => {
+    const many = Array.from({ length: 300 }, (_, i) => ({ id: `une colonne au nom très long, numéro ${i}`, width: 100 + i, pinned: null, order: i }));
+    const { params, problems } = toSearchParams({ v: 1, columns: many, sort: [{ column: 'name', dir: 'asc' }], filter: {}, quick: '' });
+    expect(problems).toEqual([
+      { code: 'state-field', severity: 'warning', path: 'grid', detail: 'too-large' },
+      { code: 'state-field', severity: 'warning', path: 'grid', detail: 'sort-only' },
+    ]);
+    expect(decode(params)).toEqual({ v: 1, sort: [{ column: 'name', dir: 'asc' }] });
+    expect(params.get('grid')!.length).toBeLessThan(4096 * 1.4);
+  });
+
+  it('3: a density that is not a string (["compact"]) is refused, the density kept', () => {
+    const t = make({ rows: ROWS, density: 'comfortable' });
+    expect(t.api().setState({ v: 1, density: ['compact'] })).toEqual([{ code: 'state-field', severity: 'warning', path: 'density' }]);
+    expect((t.g as any).context.settings.density).toBe('comfortable');
+  });
+
+  it('4: a hand-edited address with a filter and a search: both left out unless the application opted in (O6)', () => {
+    const edited = `1.${Buffer.from(JSON.stringify({ v: 1, sort: [], filter: { name: { type: 'text', op: 'contains', value: 'Fatima' } }, quick: 'dossier' })).toString('base64url')}`;
+    const p = new URLSearchParams({ grid: edited });
+    const r = fromSearchParams(p);
+    expect(r.problems).toEqual([]);
+    expect(r.state).toEqual({ v: 1, sort: [] });
+    expect(fromSearchParams(p, { include: ['filter'] }).state).toEqual({ v: 1, sort: [], filter: { name: { type: 'text', op: 'contains', value: 'Fatima' } } });
+    expect(fromSearchParams(p, { include: ['filter', 'quick'] }).state).toMatchObject({ quick: 'dossier' });
+    // Garbage `include` opts in nothing.
+    expect(fromSearchParams(p, { include: 'quick' as never }).state).toEqual({ v: 1, sort: [] });
+  });
+
+  it('7: the model\'s hold is never nested by its callers (setState, persistLocal): one request each', () => {
+    const s = server();
+    const t = make({ source: s.source });
+    const rows = (t.g as any).context.rows;
+    const own = rows.hold.bind(rows);
+    let depth = 0;
+    let max = 0;
+    let calls = 0;
+    rows.hold = (fn: () => void) => own(() => {
+      calls++;
+      max = Math.max(max, ++depth);
+      try {
+        fn();
+      } finally {
+        depth--;
+      }
+    });
+    const n = s.reqs.length;
+    t.api().setState({ v: 1, sort: [{ column: 'name', dir: 'desc' }], quick: 'a', page: 1 });
+    localStorage.setItem(KEY, JSON.stringify({ v: 1, sort: [{ column: 'age', dir: 'asc' }], quick: 'b' }));
+    const stop = persistLocal(t.g, KEY);
+    stop();
+    expect([calls, max, s.reqs.length - n]).toEqual([2, 1, 2]);
+  });
+});
+

@@ -211,6 +211,21 @@ describe('the keys (column-resize.md 3–7)', () => {
     expect(captureState(t.g.kernel).columns?.find((c) => c.id === 'b')?.width).toBe(110);
   });
 
+  // Lead decision (review 2026-10-27, finding 5): Right in left to right, Left in right to left always widens, whatever
+  // side the grip is on — the last end-pinned column too (its grip on its start edge reverses the pointer only).
+  for (const lang of ['en', 'ar'] as const) {
+    it(`${lang}: the last end-pinned column: ${lang === 'ar' ? 'ArrowLeft' : 'ArrowRight'} widens, the other narrows`, () => {
+      const t = colmake({ lang, columns: SIX({ f: { pinned: 'end' } }) });
+      expect(t.hcell('f')!.querySelector('.dzg-resize')!.classList.contains('dzg-resize-start')).toBe(true);
+      t.focusHeader('f');
+      t.press('r', { altKey: true, code: 'KeyR' }, t.hcell('f')!);
+      t.press(lang === 'ar' ? 'ArrowLeft' : 'ArrowRight');
+      expect(w(t, 'f')).toBe(110);
+      t.press(lang === 'ar' ? 'ArrowRight' : 'ArrowLeft', { shiftKey: true });
+      expect(w(t, 'f')).toBe(109);
+    });
+  }
+
   it('a pinned column (the last one at the end, its grip on the start edge): the keys are not reversed', () => {
     const t = colmake({ columns: SIX({ f: { pinned: 'end' } }) });
     t.focusHeader('f');
