@@ -151,8 +151,8 @@ a click beside it sorts; the brand's teal in both themes.
 
 ## The owner's second look (2026-10-27, light theme)
 
-`docs/phase-6-steps/app-feedback.md` 23–28. Fixed in DzGrid (commit below, pushed) and in the app (`dzgrid-integration`,
-local commit only).
+`docs/phase-6-steps/app-feedback.md` 23–28. Fixed in DzGrid (`73a423f`, pushed; packs `0.3.1-local.20261027165943`) and in the app
+(`dzgrid-integration` `7c4deb3`, local commit only).
 
 **DzGrid** (tests written first, 14 failing before: `packages/dom/test/owner-look-2.test.ts`,
 `packages/theme/test/owner-look-2.test.ts`, two superseded expectations in `owner-look.test.ts`):
