@@ -145,17 +145,14 @@ const STATUS: ColumnDef<RowA, any> = { id: 'e0', header: 'Statut', type: 'enum',
 const TONES = { tones: ['accent', 'warm', 'cool'] };
 const PILL = definePart('filterOption', {
   mount(host, c) {
+    // The label area only (owner's look, app-feedback 11 and 17): the grid keeps its box and its count.
     const pill = document.createElement('span');
-    const count = document.createElement('span');
-    count.className = 'pg-pill-n';
-    host.append(pill, count);
+    host.append(pill);
     const draw = (n: SlotContext['filterOption']): void => {
       const tones = (n.column.def.ui?.data as typeof TONES | undefined)?.tones ?? ['accent'];
       pill.className = `pg-pill pg-pill--${n.blank ? 'blank' : tones[(n.label.codePointAt(0) ?? 0) % tones.length]}`;
       pill.dataset['on'] = String(n.selected);
       pill.textContent = n.label;
-      // The count by CSS from `data-n` (index.html), as the grid's own row: the visible text stays inside the option's name.
-      count.dataset['n'] = n.countText;
     };
     draw(c);
     return { update: draw };

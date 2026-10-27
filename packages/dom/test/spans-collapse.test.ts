@@ -375,10 +375,10 @@ describe('size lines (owner Q8-1, Q8-4, Q8-5)', () => {
     expect(b['@dzgrid/dom/spans'].maxGzip).toBeLessThanOrEqual(5300);
   });
 
-  it('lines pushed by compression only (Q8-5): core/edit 3 150, core/server 6 200, the K.8 guard 84 000 (84 150 since Q9-3)', async () => {
+  it('lines pushed by compression only (Q8-5): core/edit 3 150, core/server 6 200, the K.8 guard 84 000 (84 150 since Q9-3, 84 300 since the owner\'s look)', async () => {
     const { readFileSync } = await import('node:fs');
     const b = JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')).entries;
-    expect([b['@dzgrid/core/edit'].maxGzip, b['@dzgrid/core/server'].maxGzip, b['profile: audit screen (K.8)'].maxGzip]).toEqual([3150, 6200, 84150]);
+    expect([b['@dzgrid/core/edit'].maxGzip, b['@dzgrid/core/server'].maxGzip, b['profile: audit screen (K.8)'].maxGzip]).toEqual([3150, 6200, 84300]);
   });
 
   it('the -columns texts get 600 / 720 / 900 B gz for the group sentences', async () => {

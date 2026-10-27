@@ -121,6 +121,8 @@ export interface SlotContext {
     readonly state: Json | null;
     /** `server`: the popup keeps a draft and sends it at Apply (owner decision O3); `client`: live. */
     readonly where: Placement;
+    /** `filters({ apply })`: `'button'` keeps a draft in the browser too, sent at Apply or Enter, dropped on closing. */
+    readonly apply?: 'button' | 'live' | undefined;
     readonly debounceMs: number;
     /** As the floating cell's: edits of this popup's that another write dropped. */
     readonly dropped: number;
@@ -143,9 +145,10 @@ export interface SlotContext {
    * part paints the row's content; the grid keeps the row: `role=option`, `aria-selected`, its name (« label, count »),
    * the roving focus, the keys and the window (only the rows drawn have a part; one per row, updated, destroyed when the
    * row leaves the window or the popup closes). A click anywhere on the row toggles it: a control of the part's that
-   * calls `toggle()` stops its click. The part's host is `aria-hidden` (the row is the control, its name the grid's):
-   * no focusable control in it (a link, button, field, `tabindex`: reached by Tab but hidden, WCAG 4.1.2), a clickable
-   * span instead. Not checked (the set chunk's budget).
+   * calls `toggle()` stops its click. The part paints the label area only (owner's look, app-feedback 11 and 17): the
+   * grid keeps its box before it and its count after it. The part's host is `inert` (the row is the control, its name
+   * the grid's): out of the name, and a control put in it takes no focus (review finding 4, WCAG 4.1.2); a click on it
+   * lands on the row, which toggles.
    */
   filterOption: PartBase & {
     /** The value, or null for the blanks' row. */

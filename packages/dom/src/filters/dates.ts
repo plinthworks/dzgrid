@@ -96,6 +96,8 @@ export interface DateKit {
 /** The feature's side the date forms need: the grid (set up last), the kits, the words. */
 export interface DateEnv {
   g: GridContext<unknown> | null;
+  /** `filters({ dateZone })`: the instant form says its zone. */
+  readonly zone: boolean;
   readonly load: (kit: DateKitName) => Promise<DateKit>;
   readonly done: (kit: DateKitName) => DateKit | undefined;
   readonly messages?: Readonly<Record<string, object>>;
@@ -206,7 +208,7 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
   const mount = (): void => {
     const k = kit();
     hide(box, !k);
-    hide(zone, !k);
+    hide(zone, !k || !env.zone);
     tx(label, name());
     const w = k && (k === 'range' ? op : k);
     if (w === want) return;

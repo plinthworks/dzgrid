@@ -1,5 +1,5 @@
 import { RELATIVE_RANGES, type RelativeRange } from '@dzgrid/core';
-import { CALENDAR_CSS, createDateInput, createDateRange, DATEINPUT_CSS, RANGE_CSS, TIME_CSS, type DateInputInstance, type WallValue } from '@tzslot/dom/lazy';
+import { CALENDAR_CSS, createDateInput, createDateRange, DATEINPUT_CSS, patternFor, RANGE_CSS, TIME_CSS, type DateInputInstance, type WallValue } from '@tzslot/dom/lazy';
 import { presetRange, type PlainDate, type PlainTime } from '@tzslot/core/lazy';
 import type { DateAdapter, DateField, DatePart } from '../dates.js';
 import { base, day, lost, named, styles, T } from './shared.js';
@@ -40,9 +40,11 @@ export function adapt(a: DateAdapter): DateField {
   let st: PlainTime | null = null;
   let et: PlainTime | null = null;
   let range: RelativeRange | null = null;
+  // Each end says the date's form (owner's look, app-feedback 21: empty boxes looked unfinished): the locale's, lower
+  // case. The name is each end's own label, not the form's.
   const opts = () => {
     const b = base(a.settings());
-    return { locale: b.locale, today: b.today, messages: b.messages, min: b.min, max: b.max };
+    return { ...b, ariaLabel: undefined, placeholder: patternFor(b.locale).toLowerCase() };
   };
   const at = (d: PlainDate, t: PlainTime | null): string | null => {
     const i = d.toZonedDateTime({ timeZone: zone(), ...(t && { plainTime: t }) }).toInstant().toString({ fractionalSecondDigits: 3 });

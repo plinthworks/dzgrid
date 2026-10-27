@@ -30,8 +30,8 @@ let uid = 0;
  * The popup's shell (docs/behaviors/filter-ui.md, step 13): the kind's fields, or the summary
  * (`filter.summaryActive`) for a filter they cannot show; a footer with Clear and Apply. In the
  * browser what is typed goes to `set` after the pause, a choice at once, Apply and Enter apply now
- * and close. On a server (owner decision O3) the fields are a draft: Apply or Enter sends it,
- * closing without drops it. A number that does not read is never sent: marked, said once, and at
+ * and close. On a server (owner decision O3), or with `filters({ apply: 'button' })` (owner's look, app-feedback 20),
+ * the fields are a draft: Apply or Enter sends it, closing without drops it. A number that does not read is never sent: marked, said once, and at
  * Apply the focus goes to it, the popup stays. The echo rules are the floating box's (`field.ts`):
  * a filter from elsewhere rewrites clean fields, never ones being edited. A draft that cannot
  * filter yet (between with one bound, an empty value) keeps the filter in force and drops the
@@ -48,7 +48,7 @@ export function form(make: Make): Part<C> {
       /** The last change removes: a null draft is applied (Clear, All), not kept (L1). */
       let none = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
-      const live = (): boolean => c.where !== 'server';
+      const live = (): boolean => c.where !== 'server' && c.apply !== 'button';
       const sum = el(doc, 'p', 'dzg-fsum');
       const clear = el(doc, 'button', 'dzg-fclr');
       const apply = el(doc, 'button', 'dzg-fapply');

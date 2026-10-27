@@ -53,7 +53,6 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   search.autocomplete = 'off';
   search.dir = 'auto';
   search.setAttribute('spellcheck', 'false');
-  const [ls, ss] = labelled(doc, search);
   const status = el(doc, 'p', 'dzg-fstatus');
   status.setAttribute('role', 'status');
   status.setAttribute('aria-live', 'polite');
@@ -79,7 +78,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
         let m = ms.get(x);
         if (!m) ms.set(x, (m = mount<OC>(g)));
         // Drawn by the part, or (it threw) by the grid: the default row shows again.
-        x.toggleAttribute('data-part', m.set(x.lastElementChild as HTMLElement, part, { value: r.v, label: r.label, count: r.n, countText: r.count, selected: on(r), blank: r.v === null, column: col, toggle: () => flip(r) }));
+        x.toggleAttribute('data-part', m.set(x.children[1] as HTMLElement, part, { value: r.v, label: r.label, count: r.n, countText: r.count, selected: on(r), blank: r.v === null, column: col, toggle: () => flip(r) }));
       },
       gone(x: HTMLElement) {
         ms.get(x)?.clear();
@@ -180,7 +179,10 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
 
   function texts(): void {
     const c = get();
-    tx(ss, c.msg('filter.set.search'));
+    // A placeholder, no label above it (owner's look, app-feedback 18); the same words name it.
+    const p = c.msg('filter.set.search');
+    search.placeholder = p;
+    search.setAttribute('aria-label', p);
     tx(sa, c.msg(sent ? 'filter.set.allShown' : 'filter.set.all'));
     const name = c.msg('filter.popupLabel', { column: c.column.def.header ?? c.column.id });
     if (list.el.getAttribute('aria-label') !== name) list.el.setAttribute('aria-label', name);
@@ -190,7 +192,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   }
 
   return {
-    els: [ls, status, la, wrap],
+    els: [search, status, la, wrap],
     write(s: F | null) {
       const was = JSON.stringify(filterOf(d));
       d = draftOf((src = s) as SetFilter | null);

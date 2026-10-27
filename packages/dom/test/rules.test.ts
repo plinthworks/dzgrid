@@ -322,7 +322,7 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
     expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 600, over: '@dzgrid/core' }); // Phase 4 close: 492 + 10 % = 550; Phase 5 close (Q-C3): 512 + 10 % = 600
     expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 750, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
     expect([b['@dzgrid/dom/locales/en-rules']!.maxGzip, b['@dzgrid/dom/locales/fr-rules']!.maxGzip, b['@dzgrid/dom/locales/ar-rules']!.maxGzip]).toEqual([200, 200, 250]);
-    expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(10000); // the owner's grant (Q17b), §5.2's /filters 10 kB
+    expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(10100); // the owner's grant (Q17b), §5.2's /filters 10 kB; 10 100 since the owner's look (2026-10-27)
     expect(b['@dzgrid/theme']!.maxGzip).toBe(2750); // Phase 5 close (Q-C2): the measure 2 494 + 10 %, within T7's 3 050
     expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3550); // Phase 4 close: 3 211 + 10 %
     expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1350); // a raise: it was at its cap

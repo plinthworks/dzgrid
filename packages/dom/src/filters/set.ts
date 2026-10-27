@@ -64,8 +64,6 @@ export const setForm = (env: { g: GridContext<unknown> | null }, kit: Once<strin
         return fail(err);
       }
       if (focused) inner.focus();
-      // The popup grows: placed again.
-      box.dispatchEvent(new Event('change', { bubbles: true }));
     };
     function start(): void {
       const k = kit.done('');

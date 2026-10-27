@@ -82,14 +82,14 @@ describe('placed by another element, end edges aligned', () => {
     expect(h.at(p).top).toBe('50px');
   });
 
-  it('that window fit is the menu\'s only (`fit: true`, review of steps 3–4): without it (a filter popup) below, as before', () => {
+  it('the window fit is every popup\'s since the owner\'s look (app-feedback 21; it was the menu\'s only, `fit: true`, review of steps 3–4): a filter popup with no room either way ends at the window\'s end', () => {
     const h = host('ltr');
     boxOf(h.button, { left: 476, top: 60, width: 24, height: 24 });
     const p = h.popups.open(h.anchor, document.createElement('div'), { placement: 'block-end', from: h.button, align: 'end' });
     boxOf(p.el, { left: 0, top: 0, width: 200, height: 750 });
     p.reposition();
-    // 60 + 24 + 2.
-    expect(h.at(p).top).toBe('86px');
+    // 800 − 750 (before: 60 + 24 + 2 = 86, its end cut by the window).
+    expect(h.at(p).top).toBe('50px');
   });
 
   it('without `from`: the anchor, start edges aligned, as before', () => {

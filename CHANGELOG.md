@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The owner's look at the integrated screen (allergen-detector, 2026-10-27; `docs/phase-6-steps/app-feedback.md` 11–22,
+  decisions « Owner's-look budgets »):
+  - **`filters({ apply: 'button' })`**: the popup's fields are a draft in the browser too (set ticks, date picks, text),
+    sent at Apply or Enter, dropped on closing. `'live'` stays the default. (filter-ui.md)
+  - **`filters({ dateZone: false })`**: the instant form does not say its zone (an application with one zone).
+  - The period form's FROM and TO show the locale's date pattern, lower case (`dd/mm/yyyy`), as placeholder.
+  - Playground: `owner-look.html` (`?theme=dark|light`), a products screen set up as the app's, with its brand on the
+    documented tokens.
+
+### Changed
+
+- **Breaking (unpublished): a `filterOption` part paints the label area only.** The grid keeps its own box before it and
+  its count after it (the app had drawn a second box); the part's host is `inert` (no focus can land in it, review
+  finding 4), no longer `aria-hidden`. (filter-set.md)
+- **`header.filterBox` takes the title's place**: the box, the column's name as its placeholder, a magnifier (theme); the
+  column has no filter button. The summary kinds keep the name beside it. (parts.md)
+- **The set filter**: the search box has a placeholder and no label above it (`filter.set.search` is now « Search… » /
+  « Rechercher… » / « بحث… »); rows 2.25rem; the list as high as its rows (at most 18rem), no empty area under a short
+  list.
+- **The filter popup**: Apply is the primary button (the accent), Clear the secondary one; native boxes in the accent
+  (`accent-color`); more room (padding and gaps .75rem, fields 2rem high).
+- **Every popup stays inside the window**: placed again whenever its size changes (`ResizeObserver`: a date kit
+  arriving, a list filled), and, with room neither below nor above, its end at the window's (it was the menu's only).
+- Budgets (owner): `@dzgrid/dom/filters` 10 100, the set chunk 4 250, the date adapters 2 800, the K.8 profile 84 300.
+
+### Fixed
+
+- The date popup on the last column was cut by the window's edge (Sunday, Apply, the next-month arrow hidden): it was
+  placed while its kit was still loading and never placed again.
+
+### Added (feedback pass)
+
 - The feedback pass (« retours d'usage », allergen-detector, 2026-10-27; `docs/phase-6-steps/feedback-plan.md`,
   decisions « Feedback pass »):
   - **The period form in the filter popup itself** (owner Q2): FROM and TO typed fields (tzslot's `createDateInput`),

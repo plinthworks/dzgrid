@@ -77,11 +77,13 @@ export function listView(doc: Document, o: ListHooks): ListView {
     // Its number is in the option's name ("Oran, 12 rows"), and drawn by CSS from `data-n`: the
     // visible text is the label alone, so the name holds it (label in name, WCAG 2.5.3).
     count.setAttribute('aria-hidden', 'true');
-    // The last: the host of a `filterOption` part (`display: contents`, nothing drawn without one). Hidden from the
-    // name as the count is: an option's children are presentational, its name is the grid's « label, count » (2.5.3).
+    // After the box: the host of a `filterOption` part (owner's look, app-feedback 11 and 17: the part paints the label
+    // area only; the box and the count stay the grid's; nothing drawn without one). Inert: out of the name as the count
+    // is (an option's children are presentational, its name is the grid's « label, count », 2.5.3), and a control a part
+    // puts there takes no focus (review finding 4, WCAG 4.1.2); a click on it lands on the row, which toggles.
     const part = el(doc, 'span', 'dzg-fpart');
-    part.setAttribute('aria-hidden', 'true');
-    x.append(box, name, count, part);
+    part.setAttribute('inert', '');
+    x.append(box, part, name, count);
     return x;
   };
   const drop = (x: HTMLElement): void => {
@@ -125,7 +127,7 @@ export function listView(doc: Document, o: ListHooks): ListView {
       attr(x, 'aria-selected', String(o.ticked(r)));
       attr(x, 'aria-label', r.name);
       x.tabIndex = i === active ? 0 : -1;
-      const [, name, count] = x.children as unknown as HTMLElement[];
+      const [, , name, count] = x.children as unknown as HTMLElement[];
       tx(name!, r.label);
       if (name!.title !== r.label) name!.title = r.label;
       attr(count!, 'data-n', r.count);

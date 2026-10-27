@@ -1,9 +1,10 @@
 /**
  * The set filter's layout (docs/behaviors/filter-set.md), shipped in its lazy chunk and injected
  * when it loads: no colour, logical sides only, zero specificity (the theme colours it). The list
- * is about ten rows high, fixed (loading or an error never resizes the popup), and the status line
+ * is as high as its rows, at most 18rem (eight rows), at least 4.5rem for the loading or failure line (owner's look,
+ * app-feedback 18: no empty area under a short list; the popup is placed again as it grows), and the status line
  * one line high even while empty (the first load, step 18: the list moved 32 px when it filled); its options are
- * 1.75rem rows (28 px, at least 24 px at any zoom) placed over the spacer; a row is [box][label][count], the label in
+ * 2.25rem rows (36 px, owner's look: airy) placed over the spacer; a row is [box][label][count], the label in
  * its own direction and cut with an ellipsis, the count at the inline end (drawn from `data-n`, so the option's visible text is its label); the box a 1rem square,
  * its check mark a glyph (kept in forced colours).
  */
@@ -12,16 +13,17 @@ export const SET_CSS =
   '@layer dzgrid.layout{' +
   ':where(.dzg-fallw){display:flex;align-items:center;gap:.5rem;min-block-size:24px}' +
   ':where(.dzg-fstatus){min-block-size:1.2em;min-block-size:1lh}' +
-  ':where(.dzg-flistw){position:relative;block-size:17.5rem;min-inline-size:14rem}' +
-  ':where(.dzg-flist){position:relative;block-size:100%;overflow-y:auto}' +
-  ':where(.dzg-fopt){position:absolute;inset-inline:0;box-sizing:border-box;display:flex;align-items:center;gap:.5rem;block-size:1.75rem;padding-inline:.25rem}' +
+  ':where(.dzg-flistw){position:relative;min-inline-size:14rem}' +
+  ':where(.dzg-flist){position:relative;min-block-size:4.5rem;max-block-size:18rem;overflow-y:auto}' +
+  ':where(.dzg-fopt){position:absolute;inset-inline:0;box-sizing:border-box;display:flex;align-items:center;gap:.5rem;block-size:2.25rem;padding-inline:.5rem}' +
   ':where(.dzg-fname){flex:1;min-inline-size:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;unicode-bidi:plaintext;text-align:start}' +
-  ':where(.dzg-fcount){unicode-bidi:isolate}' +
+  ':where(.dzg-fcount){unicode-bidi:isolate;margin-inline-start:auto}' +
   ':where(.dzg-fcount):before{content:attr(data-n)}' +
   ':where(.dzg-fopt>.dzg-box){flex:none;display:inline-grid;place-items:center;inline-size:1rem;block-size:1rem;box-sizing:border-box;outline:1px solid;outline-offset:-1px;line-height:1}' +
   ':where(.dzg-fopt[aria-selected=true]>.dzg-box):before{content:"\\2713"}' +
-  // A `filterOption` part (feedback pass C) paints the row: the grid's own content steps aside.
-  ':where(.dzg-fopt[data-part]>:not(.dzg-fpart)){display:none}:where(.dzg-fpart){display:contents}' +
+  // A `filterOption` part (feedback pass C) paints the label area (owner's look): the grid's label steps aside, its
+  // box and its count stay.
+  ':where(.dzg-fopt[data-part]>.dzg-fname){display:none}:where(.dzg-fpart){display:contents}' +
   ':where(.dzg-flistw>p){position:absolute;inset-block-start:0;inset-inline:0;margin:.5rem}' +
   ':where(.dzg-flistw>.dzg-fretry){position:absolute;inset-block-end:.5rem;inset-inline-start:.5rem}' +
   '}';

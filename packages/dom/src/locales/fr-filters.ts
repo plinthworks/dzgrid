@@ -45,7 +45,7 @@ export const FR_FILTERS = {
     'filter.zone': "Fuseau horaire",
     'filter.loadingDates': "Chargement du calendrier\u2026",
     'filter.loadFailed': "Le calendrier n\u2019a pas pu être chargé. Réessayez, ou rechargez la page.",
-    'filter.set.search': "Rechercher des valeurs",
+    'filter.set.search': "Rechercher…",
     'filter.set.all': "Tout sélectionner",
     'filter.set.allShown': "Tout sélectionner (affichées)",
     'filter.set.blanks': "(Vides)",

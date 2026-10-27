@@ -28,6 +28,8 @@ interface Open {
   readonly loadSet?: () => Promise<unknown>;
   readonly values?: unknown;
   readonly floating?: boolean;
+  /** More of `filters()`' options (`apply`, …). */
+  readonly options?: Record<string, unknown>;
 }
 
 /** Lets the chunk's promise settle (microtasks only: fake timers stay still). */
@@ -36,7 +38,7 @@ export const settle = async () => {
 };
 
 export function grid(o: Open = {}) {
-  const feature = filters({ floating: o.floating ?? false, loadSet: (o.loadSet ?? (() => Promise.resolve(kit))) as never });
+  const feature = filters({ ...o.options, floating: o.floating ?? false, loadSet: (o.loadSet ?? (() => Promise.resolve(kit))) as never });
   const t = make({ columns: (o.columns ?? COLS) as never, rows: (o.rows ?? ROWS) as never, features: [feature], server: o.server, values: o.values as never, settings: o.settings as never });
   const popup = () => t.host.querySelector<HTMLElement>('.dzg-popup');
   const q = <E extends Element = HTMLElement>(s: string) => popup()?.querySelector<E>(s) ?? null;

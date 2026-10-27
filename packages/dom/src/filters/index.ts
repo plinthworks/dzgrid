@@ -40,6 +40,14 @@ export interface FiltersOptions {
    * it cannot take is dropped with an `invalid-setting` warning. Between two moments: no shortcuts, still.
    */
   readonly dateCalendar?: DateCalendarOptions;
+  /**
+   * When the popup's fields apply (owner's look, app-feedback 20): `'live'` (the default) as they change, after the
+   * pause; `'button'` only at Apply or Enter, closing without drops the draft (as on a server). The floating row and a
+   * header box stay live.
+   */
+  readonly apply?: 'button' | 'live';
+  /** The instant form says its zone (`filter.zone`); `false` for an application with one zone. */
+  readonly dateZone?: boolean;
   /** Advanced (step 15): where the set filter's chunk comes from, instead of DzGrid's own `import()` (as `loadDates`). */
   readonly loadSet?: () => Promise<SetKit>;
 }
@@ -82,7 +90,7 @@ export const FILTER_KEYS = [
 export function filters(o: FiltersOptions = {}): FiltersFeature {
   let popup: Menu | null = null;
   const cal = o.dateCalendar && calendarOf(o.dateCalendar);
-  const env: DateEnv = { g: null, ...kits(o.loadDates), ...(o.dateMessages && { messages: o.dateMessages }), ...(cal && { calendar: cal.calendar, calendarProblems: cal.problems }) };
+  const env: DateEnv = { g: null, zone: o.dateZone !== false, ...kits(o.loadDates), ...(o.dateMessages && { messages: o.dateMessages }), ...(cal && { calendar: cal.calendar, calendarProblems: cal.problems }) };
   const d = dateForms(env);
   const sets = setKit(o.loadSet);
   const set = setForm(env, sets);
@@ -119,7 +127,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   const resolve = resolver(g, o, set);
   const commit = committer(g, o);
   onCommand(g.kernel, commit.heard);
-  const popup = menu(g, resolve, commit, o.popup !== false);
+  const popup = menu(g, resolve, commit, o.popup !== false, o.apply);
   keep(popup);
   const row = floatingRow(g, resolve, commit, popup);
   // Shown or hidden live (floating-toggle.md): the row's spec in the header rows or not; a hide moves the grid's

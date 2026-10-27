@@ -39,14 +39,16 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   A source without `values` (`available: false`): the column's `enumOptions` as the list, no
   counts, searched locally on their labels (folded); a column without options shows `0 values`.
 - **Layout** (one tab stop per control): the search box (`filter.set.search`, `type="text"`,
-  `dir="auto"`, no placeholder, no autocomplete); a status line (`role="status"`, polite):
+  `dir="auto"`, no autocomplete; no label above it: its words are its placeholder and its name, « Rechercher… »,
+  owner's look, app-feedback 18); a status line (`role="status"`, polite):
   `filter.set.count {n}` (plural) or `filter.set.truncated {n}`, its first text written before it
   is shown, so opening says nothing; a native check box `filter.set.all` ("Select all"), or
   `filter.set.allShown` ("Select all shown") while a search is typed, checked, unchecked or mixed;
   the list; the footer (Clear, Apply). Tab order: search, select all, list, Clear, Apply.
 - **The list:** a `role="listbox"` with `aria-multiselectable="true"`, named `filter.popupLabel
-  {column}`, about ten rows high (fixed: loading, an empty list or an error never resizes the
-  popup), `aria-busy` while a request is out. Each row is a `role="option"` with `aria-selected`,
+  {column}`, as high as its rows (2.25rem each, owner's look: airy), at most 18rem, at least 4.5rem
+  (the loading or failure line): a short list leaves no empty area, and the popup is placed again as it
+  grows (it never leaves the window), `aria-busy` while a request is out. Each row is a `role="option"` with `aria-selected`,
   `aria-posinset` and `aria-setsize` (the whole list), named `filter.set.option {label, rows}`
   (`rows` = `announce.rows {n}`), or its label alone when the count is unknown. A row shows a box
   (drawn in CSS, a check mark that stays in forced colours) at the inline start, the label in its
@@ -157,12 +159,12 @@ The part is told `value` (null for the blanks' row), `label` (the grid's), `coun
 grid keeps the row: `role=option`, `aria-selected`, its name « label, count », the roving focus and the keys, the click
 (anywhere on the row toggles it; a control of the part's own that calls `toggle()` stops its click), the window over
 10 000 values: only the rows drawn have a part, one per row, updated when its tick or text changes, destroyed when the
-row leaves the window or the popup closes. The grid's own content steps aside (`data-part` on the row); the part's host
-is `aria-hidden` (an option's children are presentational), so it holds no focusable control (a link, a button, a
-field, a `tabindex`: reached by Tab but unnamed, WCAG 4.1.2); a clickable span that calls `toggle()` instead (review of
-0c114e3; the rule is not checked: a warning costs about 50 B gz in the set chunk, over its budget). Its visible text must stay inside the name (WCAG 2.5.3,
-axe `label-content-name-mismatch`): draw the count as the grid does, from an attribute by CSS
-(`content: attr(data-n)`), or not at all. A part that throws is reported and that row drawn by the grid; an unknown
+row leaves the window or the popup closes. The part paints the label area only (owner's look, app-feedback 11 and 17:
+the app's own box made two per row): the grid keeps its box before it and its count after it, and only the grid's label
+steps aside (`data-part` on the row). The part's host is `inert` (review finding 4, closed structurally): out of the
+name (an option's children are presentational) and out of the focus, so a control put in it is never reached by Tab
+(WCAG 4.1.2); a click on it lands on the row, which toggles. Its visible text must stay inside the name (WCAG 2.5.3,
+axe `label-content-name-mismatch`): the label, as given; the count is the grid's. A part that throws is reported and that row drawn by the grid; an unknown
 name is `unknown-part` (error, `columns.<id>.filter.optionPart`, said at each opening) and the default rows; a
 `filterOption` part without `filters()` is `missing-feature`. Its data: `ui.data` (parts.md). The playground's
 « Retours d'usage » page draws pills. Tests: `packages/dom/test/filters-set-option.test.ts`; Chrome: pills, two

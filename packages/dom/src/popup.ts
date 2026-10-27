@@ -18,7 +18,7 @@ export interface PopupOptions {
   readonly align?: 'end';
   /** Where the focus goes when it closes, instead of the anchor (the grid's own focus: a menu opened by a pointer). */
   readonly back?: () => void;
-  /** Room neither below nor above: its end at the window's (inside it, scrolling within; the menu). Else below, as a filter popup always was. */
+  /** Room neither below nor above: its end at the window's (inside it, scrolling within). Every popup does so since the owner's look; kept for the callers that say it. */
   readonly fit?: boolean;
 }
 
@@ -129,6 +129,14 @@ export class PopupHost {
     };
     this.#open.set(ref, anchor);
 
+    // Placed again whenever its size changes (a lazy widget arriving, a field shown, a list filled): never past the
+    // window's edge (owner's look, app-feedback 21: the date popup was cut on the right).
+    const RO = doc.defaultView?.ResizeObserver;
+    if (RO) {
+      const ro = new RO(ref.reposition);
+      ro.observe(el);
+      cleanups.push(() => ro.disconnect());
+    }
     on(el, 'keydown', (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -163,7 +171,7 @@ export class PopupHost {
   }
 
   /** Below (or beside) the anchor or `from`, start edges aligned (`align: 'end'`: end edges); above it when there is no room below. */
-  #place(anchor: HTMLElement, el: HTMLElement, { placement, from = anchor, align, fit }: PopupOptions): void {
+  #place(anchor: HTMLElement, el: HTMLElement, { placement, from = anchor, align }: PopupOptions): void {
     const win = this.#doc.defaultView;
     const box = el.getBoundingClientRect();
     const r = placedBy(from, !!align, box.width);
@@ -172,8 +180,9 @@ export class PopupHost {
     const dir = this.#dir();
     if (placement === 'block-end') {
       const below = r.bottom + 2;
-      // Below; else above; else (a tall menu, `fit`, no room either way) its end at the window's: inside it, scrolling within (1.4.10).
-      const top = below + box.height <= winBlock ? below : r.top - 2 - box.height >= 0 ? r.top - 2 - box.height : fit ? winBlock - box.height : below;
+      // Below; else above; else (no room either way) its end at the window's: inside it, scrolling within (1.4.10). Every
+      // popup since the owner's look (app-feedback 21: a filter popup taller than the room below stayed cut).
+      const top = below + box.height <= winBlock ? below : r.top - 2 - box.height >= 0 ? r.top - 2 - box.height : winBlock - box.height;
       setPx(el, 'inset-block-start', Math.max(0, top));
       setPx(el, 'inset-inline-start', fixedInlineStart(r, dir, winInline, box.width));
     } else {

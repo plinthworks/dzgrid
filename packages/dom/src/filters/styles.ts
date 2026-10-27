@@ -21,12 +21,12 @@ export const FILTERS_CSS =
   ':where(.dzg-hcell>.dzg-hlabel){min-inline-size:0;overflow:hidden;text-overflow:ellipsis}' +
   // Step 21, `header.filterBox`: the name, then the box taking what is left.
   ':where(.dzg-hlabel:has(>.dzg-hfbox)){display:flex;flex:1;align-items:center;gap:.25rem}' +
-  ':where(.dzg-hfbox){display:flex;flex:1;min-inline-size:0}' +
+  ':where(.dzg-hfbox){position:relative;display:flex;flex:1;align-items:center;min-inline-size:0}' +
   // The popup: the fields one under the other, each label above its control; the footer's buttons at the end.
-  ':where(.dzg-fpop){display:grid;gap:.5rem;min-inline-size:12rem}' +
+  ':where(.dzg-fpop){display:grid;gap:.75rem;min-inline-size:12rem}' +
   ':where(.dzg-fpop label){display:grid;gap:2px}' +
   ':where(.dzg-fpop [role=radiogroup] label){display:flex;align-items:center;gap:.5rem;min-block-size:24px}' +
-  ':where(.dzg-fpop :is(select,button,.dzg-finput)){min-block-size:24px}' +
+  ':where(.dzg-fpop :is(select,button,.dzg-finput)){min-block-size:2rem}' +
   ':where(.dzg-ffoot){display:flex;justify-content:end;gap:.5rem;white-space:nowrap}' +
   ':where(.dzg-fpop [hidden]){display:none}' +
   // Step 14: a date field (tzslot's) under its label, as wide as the form.

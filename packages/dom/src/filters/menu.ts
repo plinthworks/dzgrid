@@ -42,7 +42,7 @@ const set = (el: Element, k: string, v: string | null): void => {
  * header kept mounted out of view, D6, is left unhandled). While open, each paint updates the
  * part's context and places it again; nothing is moved or written as the grid goes.
  */
-export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, on: boolean): Menu {
+export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, on: boolean, apply?: 'button' | 'live'): Menu {
   let cur: { readonly column: string; anchor: HTMLElement; readonly cell: HTMLElement; readonly ref: PopupRef; readonly m: Mounted<C>; readonly host: HTMLElement; readonly part: Part<C>; readonly dir: string } | null = null;
   let frame: Frame<unknown> | null = null;
   /** The column is in the centre and out of the column window (its header kept mounted only for the focus). */
@@ -59,7 +59,7 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
   const draw = (m: Mounted<C>, host: HTMLElement, col: ResolvedColumn<unknown>, part: Part<C>): boolean => {
     const f = col.def.filter;
     const today = instantToDayIn((g.settings.clock ?? Date.now)() as never, g.ctx.timeZone) ?? '1970-01-01';
-    return m.set(host, part, { ...commit.edits(col, resolve(col, 'filter').kind, host), ops: (f && f.ops) || NONE, today, close, values: (o) => g.kernel.values(col.id, o) });
+    return m.set(host, part, { ...commit.edits(col, resolve(col, 'filter').kind, host), ops: (f && f.ops) || NONE, today, close, apply, values: (o) => g.kernel.values(col.id, o) });
   };
 
   function open(column: string, anchor?: HTMLElement | null): boolean {
@@ -91,8 +91,6 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
         g.schedule();
       },
     });
-    // A field shown or hidden changes its size.
-    host.addEventListener('change', () => ref.reposition());
     const it = (cur = { column, anchor: at, cell: at.closest<HTMLElement>('[data-col]') ?? at, ref, m, host, part, dir: g.dir });
     expanded(at, true);
     m.focus();
@@ -130,7 +128,8 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
       // keeps its own name: the button's must not join it.
       const own = label ?? name(col);
       const named = filtered ? g.msg('header.withFilter', { header: own }) : has ? own : undefined;
-      if (!has) return b?.remove(), named;
+      // No button where `header.filterBox` stands for it (owner's look, app-feedback 14, 22): the header box is the way in.
+      if (!has || col.def.ui?.header === 'header.filterBox') return b?.remove(), named;
       if (!b) {
         b = g.doc.createElement('button');
         b.type = 'button';

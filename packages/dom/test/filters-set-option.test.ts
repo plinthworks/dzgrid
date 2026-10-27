@@ -54,7 +54,8 @@ describe('filter.optionPart: a part paints each option row', () => {
     // The grid keeps the row's name: « label, count ».
     expect(t.option('Oran').getAttribute('aria-label')).toBe('Oran, 6 rows');
     // What the part paints is out of the name (axe label-content-name-mismatch in Chrome: the part's own count text).
-    expect(t.option('Oran').querySelector('.dzg-fpart')!.getAttribute('aria-hidden')).toBe('true');
+    // Inert since the owner's look (review finding 4): out of the name, and nothing in it takes the focus.
+    expect(t.option('Oran').querySelector('.dzg-fpart')!.hasAttribute('inert')).toBe(true);
     expect(t.option('Oran').getAttribute('role')).toBe('option');
   });
 

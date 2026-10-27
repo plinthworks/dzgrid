@@ -111,15 +111,16 @@ describe('the list', () => {
     expect(t.all().closest('label')!.textContent).toBe(T['filter.set.all']);
   });
 
-  it('the search box: labelled, text, its own direction, focused on open', async () => {
+  it('the search box: named, its placeholder the same words (owner\'s look), text, its own direction, focused on open', async () => {
     const t = grid();
     await t.open();
     const s = t.search();
     expect(s.type).toBe('text');
     expect(s.dir).toBe('auto');
     expect(s.autocomplete).toBe('off');
-    expect(s.placeholder).toBe('');
-    expect(s.closest('label')!.textContent).toBe(T['filter.set.search']);
+    expect(s.placeholder).toBe(T['filter.set.search']);
+    expect(s.getAttribute('aria-label')).toBe(T['filter.set.search']);
+    expect(s.closest('label')).toBeNull();
     expect(document.activeElement).toBe(s);
   });
 
@@ -389,7 +390,7 @@ describe('the echo, the summary, locale and direction', () => {
     const t = grid();
     await t.open();
     t.g.update({ messages: FR_MSG, locale: 'fr-FR' } as never);
-    expect(t.search().closest('label')!.textContent).toBe(FR_FILTERS.text['filter.set.search' as never]);
+    expect(t.search().placeholder).toBe(FR_FILTERS.text['filter.set.search' as never]);
     expect(t.all().closest('label')!.textContent).toBe(FR_FILTERS.text['filter.set.all' as never]);
     expect(t.option('Oran').getAttribute('aria-label')).toBe('Oran, 6 lignes');
     expect(t.status().textContent).toBe('5 valeurs');

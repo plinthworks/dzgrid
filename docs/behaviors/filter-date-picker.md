@@ -52,7 +52,9 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
 - **The grid's zone, never the machine's:** every field gets `timeZone` (the grid's, UTC unless
   set) and `today` (from the grid's `clock` in that zone), so a browser in Auckland filtering a Paris
   grid picks Paris days. The zone is written above an instant's field (`filter.zone` and the
-  identifier in its own `<bdi>`).
+  identifier in its own `<bdi>`), unless `filters({ dateZone: false })` (an application with one zone,
+  owner's look, app-feedback 21). The period form's FROM and TO show the locale's date pattern, lower case
+  (`dd/mm/yyyy`), as their placeholder (tzslot's `patternFor`).
 - **Locale:** `intlTag(ctx)`: the grid's locale with `-u-ca-gregory-nu-latn` (or the locale's
   digits with `numerals: 'locale'`), so `ar-SA` stays Gregorian. tzslot's words: its `EN`, `FR` or
   `AR` by the language, else English; `filters({ dateMessages: { es: … } })` gives others or

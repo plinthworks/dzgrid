@@ -45,7 +45,7 @@ export const AR_FILTERS = {
     'filter.zone': "المنطقة الزمنية",
     'filter.loadingDates': "جار تحميل التقويم\u2026",
     'filter.loadFailed': "تعذر تحميل التقويم. أعد المحاولة\u060C أو أعد تحميل الصفحة.",
-    'filter.set.search': "البحث في القيم",
+    'filter.set.search': "بحث…",
     'filter.set.all': "تحديد الكل",
     'filter.set.allShown': "تحديد كل المعروض",
     'filter.set.blanks': "(فارغ)",
