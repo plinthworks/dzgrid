@@ -183,7 +183,9 @@ in the column narrows the rows; a reload (or any save) shows the spinner and « 
 
 ## The owner's third look (2026-10-27, light and dark)
 
-`docs/phase-6-steps/app-feedback.md` 30–37; decisions « Feedback after a client filter », « Comfort stylesheet ».
+`docs/phase-6-steps/app-feedback.md` 30–37; decisions « Feedback after a client filter », « Comfort stylesheet ». Fixed in
+DzGrid (`373c73d`, pushed; packs `0.3.1-local.20261027192354`) and in the app (`dzgrid-integration` `6911879`, local commit
+only; `ng build` passes).
 
 **DzGrid** (tests written first, 17 failing before: `packages/dom/test/owner-look-3.test.ts` 5 — the input's width, the
 focus on the first open, two busy-flash cases, the flex fill with the selection boxes —, `packages/theme/test/owner-look-3.test.ts`
