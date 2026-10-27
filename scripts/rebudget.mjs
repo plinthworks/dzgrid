@@ -47,7 +47,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/state': 1500, // Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
   '@dzgrid/dom': 22400, // Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10000,
-  '@dzgrid/dom/tree': 3800, // owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said)
+  '@dzgrid/dom/tree': 3850, // owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
   '@dzgrid/dom/tree-lazy': 1000,
   '@dzgrid/dom/parts': 800, // Phase 5 close Q-C3 (2026-10-26): 700 → 800 by the close rule (the measure 689 + 10 %), accepted
   '@dzgrid/dom/detail': 4150, // owner S8-O3 (2026-10-24): 3 900 → 4 000 (a nested grid kept alive while it saves); S8-O7: → 4 150 (kept while refused, let go with its master or the grid around)
@@ -119,7 +119,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/tailwind3.css': 500, // T7
   '@dzgrid/theme/bootstrap.css': 500, // T7
   '@dzgrid/angular': 7000, // owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
-  'profile: audit screen (K.8)': 84000, // Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000
+  'profile: audit screen (K.8)': 84150, // Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000; Q9-3 (2026-10-27): 84 150 (auto height's base seam)
   // `@dzgrid/dom/groups` (owner Q8-4, 2026-10-27): its measure + 10 %, no ceiling of its own (measured 1 893 → 2 100).
   // Phase 6 step 8b-1 (owner Q2, 2026-10-27): pinned rows over the DOM base, 2 000 (up to 2 300 only if editing needs
   // it: asked again); their own -pinned texts 120 / 140 / 170; pinned-rows.css about 450 (the line at its measure + 10 %).
@@ -128,6 +128,8 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-pinned': 140,
   '@dzgrid/dom/locales/ar-pinned': 170,
   '@dzgrid/theme/pinned-rows.css': 450, // its line the measure + 10 % (301 → 350)
+  // Phase 6 step 9 (owner Q-B, Q9-3): automatic row height over the DOM base, @dzgrid/core/detail's sparse layout outside it.
+  '@dzgrid/dom/auto-height': 1400,
   '@dzgrid/dom/spans': 5300, // Q-B: 4 950 → 5 300 for the phase; Q8-4: the fold UI moved out, measured 4 567
 };
 

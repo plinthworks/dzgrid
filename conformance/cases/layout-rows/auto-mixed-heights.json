@@ -1,0 +1,17 @@
+{
+  "id": "auto-mixed-heights",
+  "suite": "layout-rows",
+  "description": "Automatic row height: measured rows taller than the row height take their own height, the others keep it; offsets are running totals and a position belongs to the row it falls in, up to the end.",
+  "input": {
+    "op": "auto",
+    "count": 8,
+    "height": 32,
+    "measured": [[1, 80], [2, 32], [3, 20], [5, 45]],
+    "probes": [0, 31, 32, 111, 112, 143, 144, 207, 208, 252, 253, 316, 317, 1000, -3]
+  },
+  "expected": {
+    "extras": { "at": [1, 5], "heights": [80, 45] },
+    "offsets": [0, 32, 112, 144, 176, 208, 253, 285, 317],
+    "indexAt": [0, 0, 1, 1, 2, 2, 3, 4, 5, 5, 6, 7, 7, 7, 0]
+  }
+}

@@ -41,6 +41,8 @@ export function stickyOracle(levels: readonly number[], heights: readonly number
     chain = p;
   }
   const shown = chain.slice(-cap);
+  // Rows of their own heights (auto height, owner Q9-5): never more pixels than half the view, the outermost dropped first.
+  while (shown.reduce((s, c) => s + hs[c]!, 0) > o.viewBlock / 2) shown.shift();
   const at: number[] = [];
   const y: number[] = [];
   let slot = 0;

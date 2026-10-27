@@ -145,7 +145,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
       const d = tree();
       let y = 0;
       // Called after a paint (a row above the view's top, or the paint's anchoring): the layout is there.
-      for (let c = d ? Math.min(sticky, Math.floor(g.viewBlock / 2 / g.rowHeight()), d.levelAt(i as DisplayIndex)) : 0; c-- > 0; ) y += g.layout!.heightOf((i = up(d!, i)) as DisplayIndex);
+      for (let c = d ? Math.min(sticky, Math.floor(g.viewBlock / 2 / g.rowHeight()), d.levelAt(i as DisplayIndex)) : 0; c-- > 0 && y + g.layout!.heightOf(up(d!, i) as DisplayIndex) <= g.viewBlock / 2; ) y += g.layout!.heightOf((i = up(d!, i)) as DisplayIndex);
       return y;
     };
     // Never the DOM focus inside (no default on the pointer going down).

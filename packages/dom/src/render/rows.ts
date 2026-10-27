@@ -343,12 +343,13 @@ export class RowRenderer<T> {
     const same = v.key === key && v.data === data && v.epoch === f.epoch && v.focusCol === focusCol && v.plan === plan;
     v.key = key;
     v.focusCol = focusCol;
+    // Before the rest: a row of the same data laid out again (a measure, auto height) takes its new height.
+    setPx(v.el, 'block-size', f.rowHeight(i));
     if (same && this.#matches(v, f, center, plan)) return;
     v.data = data;
     v.epoch = f.epoch;
     v.plan = plan;
     this.#rowClass(v, key, data, f);
-    setPx(v.el, 'block-size', f.rowHeight(i));
     if (f.spans) setAttr(v.el, 'data-spans', plan?.spans ? '' : null);
     const extra = f.check ? CHECK_WIDTH : 0;
     setPx(v.el, 'inline-size', L.totalWidth + extra);
@@ -539,6 +540,7 @@ export class RowRenderer<T> {
       cell.col = col;
       setAttr(cell.el, 'data-col', col.id);
       setAttr(cell.el, 'data-align', col.def.align ?? (col.type === 'number' ? 'end' : null));
+      setAttr(cell.el, 'data-wrap', col.def.wrap ? '' : null);
     }
     // The identity column is the frame's (it moves when columns are hidden or moved).
     setAttr(cell.el, 'role', col.id === f.rowHeader ? 'rowheader' : 'gridcell');

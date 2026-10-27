@@ -61,8 +61,46 @@ None (problems are codes).
 2. No maximum row height (a very long note makes a very tall row).
 3. Header labels never wrap (`wrapHeader` not in this phase).
 
-## Tests (to be written with the code)
-`packages/dom/test/auto-height.test.ts` (no layout read during writes, anchor kept across a measure in jsdom
-geometry, re-measure triggers, warning above 10 000, `rowHeight` wins), conformance `layout-rows/auto-*`;
-browser: 0 px jump at 10 000 rows in Chrome, Firefox, WebKit (S3's harness), ≤ 1.5 px at 100 000 in
-Firefox; the HR demo with wrapped titles, fr and ar.
+## As built (Phase 6 step 9, 2026-10-27; plan `docs/phase-6-steps/step09-plan.md` « Done »)
+- `ColumnDef.wrap: true` (core type only). The base marks the column's cells `data-wrap` and its layout CSS lets them
+  wrap in the body and the tree's pinned parents (`white-space: normal; overflow-wrap: anywhere`), never in the pinned
+  bands (Q9-1: one line there, clipped with …; no automatic tooltip — the grid never guesses one from the content, a
+  column `tooltip` gives the full text). Without `autoHeight()`: one `missing-feature` warning, path
+  `columns.<id>.wrap`, detail `auto-height` (1).
+- `autoHeight()` from `@dzgrid/dom/auto-height` (no options). It injects one rule once per document or shadow root
+  (`style[data-dzgrid-wrap]`, the grid's `nonce`): a wrapped cell's lines `--dzg-wrap-line` (1.25rem) tall, one line
+  centred in a row of the normal height, more below it.
+- **The measure** (4): after each paint, before the browser shows it (`GridContext.again`), the mounted data rows not
+  measured yet at these widths: a hidden copy of each wrapped cell in its own segment (same font, direction, padding,
+  width), all written, then read (`getBoundingClientRect`, whole pixels up), then all removed. Not measured: a row
+  with an open editor (it keeps its height until saved or cancelled), a detail panel, a cell spanning rows. A row's
+  height = the tallest of them, never under the row height (3). Rows changed are found by their wrapped cells' text
+  (a hash), so a host update, an edit saved, an undo measure that row again; a cancelled edit measures nothing (7).
+- **The frame** (5): when heights changed, the grid paints again in the same frame — three times at most, then at the
+  next frame — and only the last paint is shown. The anchor is the painter's (S3): the row at the view's top keeps its
+  distance into it (at most its new height), the top stays the top, the end the end; past the browser's height
+  (scaled scrolling) the same, logically. A scroll since the last paint (the user's, or one written just before the
+  frame) moves the anchor to the row now at the top, in the layout the user saw (a base fix: before it, rows laid
+  out again in that frame put the view back where the last paint left it).
+- **Forgotten and measured again** (7): every height when the wrapped columns' widths (resize, flex, auto-size, a
+  wrapped column shown or hidden), the row height (density, `rowHeight`, the reader's text size), the direction or
+  the language change, and when late fonts load (`document.fonts` `loadingdone`, Q9-4). As built, a column that is
+  not wrapped, moved, shown or hidden measures nothing (the wrapped widths are unchanged). Heights of rows gone from
+  the grid are dropped; rows scrolled away keep theirs until one of those changes.
+- **Layout**: the measured rows taller than the row height are rows of their own height in the core's sparse layout
+  (`@dzgrid/core/detail`'s, memory O(tall rows)), merged with a detail panel's (8): `autoHeight()` always lays out
+  outermost, whatever the features' order, and either feature taken away leaves the other working.
+- **Warning** (6): more than 10 000 rows shown (detail panels count) with a wrapped column: one `auto-height-large`
+  (path `columns.<id>.wrap`), once per grid.
+- **Tree** (9): a pinned parent copies its row's measured height; the copies never take more than half the view in
+  pixels, the outermost dropped first (owner Q9-5): a parent taller than half the view is not pinned.
+- Keys (12): PageDown / PageUp over measured rows; a row taller than the view gets the focus at its top and PageDown
+  moves past it.
+
+## Tests
+`packages/dom/test/auto-height{,-layout,-detail,-tree,-edit,-keys}.test.ts` (support `support-auto-height.ts`: a
+measure stub for jsdom), conformance `layout-rows/auto-{mixed-heights,with-details,empty}`; browser `npm run
+test:browser -- --only auto-height` on `playground/auto-height.html` (Chrome fr / ar: fit, the panel under its
+master, resize and density anchors, the keys, axe; S3's four scenarios at 10 000 rows ≤ 0.5 px; a million rows with
+the warning, the wheel, Ctrl+End; Firefox and WebKit `--engine`: Arabic wrapping and the 10 000-row scenarios; Firefox
+100 000 rows ≤ 1.5 px).

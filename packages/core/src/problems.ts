@@ -57,7 +57,10 @@ export type StateProblemCode = 'state-version' | 'state-column' | 'state-group' 
 /** `@dzgrid/dom/pinned-rows`' own (Phase 6 step 8b-1): a type here, so the base ships no byte for it. */
 export type PinnedProblemCode = 'too-many-pinned-rows';
 
-export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode;
+/** `@dzgrid/dom/auto-height`'s own (Phase 6 step 9): more than 10 000 rows with a wrapped column, told once; a type only. */
+export type AutoHeightProblemCode = 'auto-height-large';
+
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode;
 
 export type Severity = 'error' | 'warning';
 

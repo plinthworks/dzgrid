@@ -32,7 +32,9 @@ describe('@dzgrid/dom/detail without a DOM', () => {
     expect(imports.filter((s) => !/: @dzgrid\/(core|core\/internal|core\/detail)$/.test(s)).sort()).toEqual([
       'detail.ts: ./detail/index.js', 'detail.ts: ./detail/nested.js', 'detail/index.ts: ../dir.js', 'detail/index.ts: ./styles.js', 'detail/nested.ts: @dzgrid/dom',
     ]);
-    // Nothing else imports it, nor the core's detail entry: a grid without details carries none of it.
-    expect(files(SRC).filter((f) => !/^detail(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?detail(\/|\.js')|@dzgrid\/core\/detail')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    // Nothing else imports it, nor the core's detail entry: a grid without details carries none of it. But the automatic
+    // row height's own entry (Phase 6 step 9): its rows of their own heights are the core's sparse layout (an app with
+    // auto height ships @dzgrid/core/detail's layout, measured on its own line).
+    expect(files(SRC).filter((f) => !/^detail(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?detail(\/|\.js')|@dzgrid\/core\/detail')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f)).sort()).toEqual(['auto-height/index.ts', 'auto-height/layout.ts']);
   });
 });

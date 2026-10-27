@@ -104,7 +104,13 @@ export interface GridContext<T> {
    * same rows' layout at another row height (density, text zoom), whose heights the feature set (a measure)
    * it carries over.
    */
-  layoutFor?: (d: DisplayedRows<T>, h: number, was?: RowLayout) => RowLayout;
+  layoutFor?: ((d: DisplayedRows<T>, h: number, was?: RowLayout) => RowLayout) | undefined;
+  /**
+   * After a paint, before the browser shows it (`@dzgrid/dom/auto-height`, Phase 6 step 9): reads what the paint wrote (one
+   * layout read, after every write) and says true when the rows must be laid out again; the grid then paints again in
+   * the same frame, three times at most (a fourth: at the next frame), so the screen shows the measured rows only (S3).
+   */
+  again?: (() => boolean) | undefined;
   /** The row layout of the rows shown (`rowLayout`): made for the last paint, or since. */
   layout?: RowLayout;
   /** What `layout` was made for: the rows, the row height, the feature's `layoutFor`. */

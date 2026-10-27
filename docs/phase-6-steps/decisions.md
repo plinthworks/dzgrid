@@ -97,3 +97,18 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **Q2:** core up to 29 150; dom base +150–200 (≤ 22 400); `dom/pinned-rows` 2 000, up to 2 300 if editing needs it; new `-pinned` texts 120/140/170; `pinned-rows.css` ~450. Over any of these: ask.
 - **Q3:** with few rows, the bottom band sticks to the grid's bottom like a table footer (~40 B).
 - **Q4/Q5 (lead, recommendations kept):** `editable(row, context, { pinned })` third argument; the save payload gets `pinned: 'top' | 'bottom'`.
+
+## Step 9 — auto row height (owner, 2026-10-27) — plan `step09-plan.md`
+
+- **Q9-1:** pinned bands keep the normal row height (long text truncated with … and a tooltip).
+- **Q9-3:** the K.8 profile guard 84 000 → 84 150 for the base seam (~110–170 B).
+- **Q9-2/Q9-4 (lead, recommendations kept):** measure at the end of the same frame; re-measure once when late fonts load.
+
+## App feedback pass (owner, 2026-10-27) — `app-feedback.md`
+
+- A small « retours d'usage » pass right after step 9 (auto height), before print: pagination arrows drawn by the theme (bug), « Condition » hidden for a single operator, silent cases turned into problems (header parts without `slots()`, unknown `ui` keys / a pass-through bag for parts), a shorter fr `filter.clear`, Angular guide notes ([slot] binding, CSS escapes).
+- In the same pass: an inline period date form (FROM/TO fields + one month, no second panel; a tzslot `'inline'` FieldMode request prepared for the tzslot session if needed) and a `filter.set` option-row part (value, label, count given).
+- Reading the app's DzGrid consumer files under /Users/nadou/Dev/allergie-detector/admin-web is allowed by the owner (per the app session). Clean room: never open the app's screens built on other grid libraries (products-list, products-list-v2).
+- **Integration in a real app (owner, 2026-10-27):** after the feedback pass, the DzGrid session works directly in /Users/nadou/Dev/allergie-detector on its own branch (`dzgrid-integration`), touching only the DzGrid screen files (products-list-dz, shared/grid-dz/*, the DzGrid part of styles.scss, vendor/dzgrid, the dzgrid deps); re-vendors the tarballs, removes workarounds, verifies in the browser; never pushes or deploys without the owner. The app session commits its DzGrid work first and leaves those files during the integration.
+- **Q9-6 (owner, 2026-10-27):** `@dzgrid/dom/pinned-rows` line 2 150 → 2 200 (compression only; inside Q2's 2 300).
+- **Q9-5 (owner, 2026-10-27):** tree sticky parents taller than half the view: the outermost copies are dropped beyond half the view in pixels (+~40 B, `@dzgrid/dom/tree` 3 800 → 3 850).

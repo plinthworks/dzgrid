@@ -273,7 +273,7 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
       ro?.disconnect();
       boxes.clear();
       for (const c of decorated) undecorate(c);
-      delete g.layoutFor;
+      g.layoutFor = undefined;
     },
   };
 }

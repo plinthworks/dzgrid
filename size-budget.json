@@ -388,7 +388,7 @@
     },
     "@dzgrid/dom/tree": {
       "file": "packages/dom/src/tree.ts",
-      "maxGzip": 3800,
+      "maxGzip": 3850,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -541,11 +541,22 @@
     },
     "@dzgrid/dom/pinned-rows": {
       "file": "packages/dom/src/pinned-rows.ts",
-      "maxGzip": 2150,
+      "maxGzip": 2200,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/auto-height": {
+      "file": "packages/dom/src/auto-height.ts",
+      "maxGzip": 1400,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/detail",
         "@dzgrid/dom/internal"
       ]
     },
@@ -705,7 +716,7 @@
       "css": [
         "packages/theme/dzgrid.css"
       ],
-      "maxGzip": 84000,
+      "maxGzip": 84150,
       "external": [
         "@angular/*",
         "rxjs",

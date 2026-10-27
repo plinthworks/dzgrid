@@ -28,6 +28,7 @@ export const LAYOUT_CSS = `@layer dzgrid.layout {
 :where(.dzg-resize-start) { inset-inline-end: auto; inset-inline-start: 0; }
 :where(.dzg-cell, .dzg-hcell) { box-sizing: border-box; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 :where(.dzg-cell[data-align=end]) { text-align: end; }
+:where(.dzg-body .dzg-cell[data-wrap], .dzg-sticky .dzg-cell[data-wrap]) { white-space: normal; overflow-wrap: anywhere; }
 :where(.dzg-cell[data-align=center]) { text-align: center; }
 :where(.dzg-hrow) { display: flex; }
 :where(.dzg-row[data-kind=detail] > .dzg-seg) { display: none; }

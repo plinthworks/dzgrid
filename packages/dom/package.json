@@ -97,6 +97,10 @@
       "types": "./src/pinned-rows.ts",
       "default": "./src/pinned-rows.ts"
     },
+    "./auto-height": {
+      "types": "./src/auto-height.ts",
+      "default": "./src/auto-height.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"

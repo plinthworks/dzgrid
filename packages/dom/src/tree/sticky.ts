@@ -48,6 +48,8 @@ export function stickyStack(o: StackInput): Stack {
     if (!ext.length || (inner >= 0 && a !== inner)) break;
     shown = shown.concat(ext.reverse()).slice(-cap);
   }
+  // Never more than half the view (rows of their own heights, auto height): the outermost copies go first.
+  while (shown.reduce((a, c) => a + L.heightOf(c), 0) > o.viewBlock / 2) shown.shift();
   const m = shown.length;
   const end: number[] = shown.map(() => -1);
   if (m) {

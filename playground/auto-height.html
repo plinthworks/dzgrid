@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DzGrid — hauteur automatique des lignes</title>
+  <style>
+    body { margin: 0; padding: 1rem; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); max-inline-size: 1100px; }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-block: .5rem .75rem; }
+    #host { block-size: 60vh; }
+    #host > .dzg { block-size: 100%; }
+    .note { margin-block: .25rem .5rem; color: var(--tz-fg-muted); line-height: 1.45; max-inline-size: 90ch; }
+    .visits { padding: .5rem 1rem; line-height: 1.45; }
+    .visits p { margin: 0; }
+    #log { font: 12px ui-monospace, monospace; color: var(--tz-fg-muted); white-space: pre-line; min-block-size: 2lh; }
+    a { color: var(--tz-accent); }
+  </style>
+</head>
+<body>
+  <nav><a href="./index.html" id="back"></a></nav>
+  <main>
+  <h1 id="title"></h1>
+  <p class="note" id="steps"></p>
+  <form class="bar" id="controls">
+    <label><span id="lang-label"></span> <select name="lang"><option value="fr">français</option><option value="ar">العربية</option></select></label>
+    <label><span id="theme-label"></span> <select name="theme"><option value="">—</option><option>light</option><option>dark</option></select></label>
+    <label><span id="rows-label"></span> <select name="rows"><option value="5000">5 000</option><option value="10000">10 000</option><option value="100000">100 000</option><option value="1000000">1 000 000</option></select></label>
+    <label><span id="density-label"></span> <select name="density"><option>compact</option><option selected>comfortable</option><option>spacious</option></select></label>
+  </form>
+  <div id="host"></div>
+  <p id="log" aria-live="off"></p>
+  </main>
+  <script type="module" src="./auto-height.ts"></script>
+</body>
+</html>

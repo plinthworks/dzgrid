@@ -116,6 +116,9 @@
       "@dzgrid/dom/pinned-rows": [
         "./packages/dom/src/pinned-rows.ts"
       ],
+      "@dzgrid/dom/auto-height": [
+        "./packages/dom/src/auto-height.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

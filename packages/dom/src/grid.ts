@@ -1,4 +1,4 @@
-import { clientRows, createColumnModel, createKernel, resolveOperations, type ClientModel, type GridKernel, type RowKey, type RowModel } from '@dzgrid/core';
+import { clientRows, createColumnModel, createKernel, problem, resolveOperations, type ClientModel, type GridKernel, type RowKey, type RowModel } from '@dzgrid/core';
 import { emit, filterKindLookup, missingFeatureProblems } from '@dzgrid/core/internal';
 import { sortAnnouncer, selectionAnnouncer } from './a11y/announce.js';
 import { LiveRegion } from './a11y/live-region.js';
@@ -148,7 +148,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const painter = createPainter(g, focus);
   // The grid takes the focus back (`hasFocus`: a focus the kernel is about to move, its column hidden, follows).
   g.restoreFocus = () => void ((g.hasFocus = true), g.kernel.focus ? focus.focusTo(g.kernel.focus) : viewport.focus({ preventScroll: true }));
-  const job = { read: () => geometry.read(), write: (box: ReturnType<typeof geometry.read>) => { g.queued = false; painter.paint(box); } };
+  const job = { read: () => geometry.read(), write: (box: ReturnType<typeof geometry.read>) => { g.queued = false; painter.paint(box); for (let n = 0; g.again?.(); ) n++ < 3 ? painter.paint(box) : schedule(); } }; // `again`: a feature measured what the paint wrote (auto height), painted again in this frame, 3 times at most
   function schedule(): void {
     if (scope.isDisposed || g.queued) return;
     g.queued = true;
@@ -189,13 +189,13 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     scope.observe(ro);
   }
   g.warm = installWarmup(g);
-  // Optional features, set up once, read at each paint; span rules or slot parts without theirs: told once.
+  // Optional features, set up once, read at each paint; span rules, slot parts or wrapped columns (auto-height.md 1) without theirs: told once.
   const handles = (initial.features ?? []).map((f) => f.setup(g as GridContext<unknown>));
   g.headerRows = handles.flatMap((h) => h.headerRows ?? []);
   g.bands = handles.flatMap((h) => h.bands ?? []);
   g.spans = handles.find((h) => h.spans)?.spans ?? null;
   g.slots = handles.find((h) => h.slots)?.slots ?? null;
-  told.push(...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>, rows.page));
+  told.push(...(initial.features?.some((f) => f.id === 'auto-height') ? [] : columns.visible().filter((c) => c.def.wrap).slice(0, 1).map((c) => problem('missing-feature', 'warning', `columns.${c.id}.wrap`, 'auto-height'))), ...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>, rows.page));
   g.edit = (g.features = handles).find((h) => h.edit)?.edit; // the edit seam, found once
   scope.add(() => { for (const h of handles) h.destroy(); });
 

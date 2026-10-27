@@ -1,0 +1,17 @@
+{
+  "id": "auto-empty",
+  "suite": "layout-rows",
+  "description": "Automatic row height before any measure: every row the row height, the total the count times it.",
+  "input": {
+    "op": "auto",
+    "count": 4,
+    "height": 28,
+    "measured": [],
+    "probes": [0, 27, 28, 111, 112]
+  },
+  "expected": {
+    "extras": { "at": [], "heights": [] },
+    "offsets": [0, 28, 56, 84, 112],
+    "indexAt": [0, 0, 1, 3, 3]
+  }
+}

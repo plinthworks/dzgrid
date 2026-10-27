@@ -838,7 +838,16 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   5 002 / 5 050 (ceiling 5 200), `dom/fill` 3 042 / 3 100 (ceiling 3 150); `dom/pinned-rows` 2 145 / 2 150, `dom/edit`
   4 150 / 4 150, `core/state` 1 498 / 1 500, core 29 001, DOM base 21 954, K.8 83 921 / 84 000. Gate: 456 files /
   6 998 tests; browser `--only pinned-rows` Chrome 43, Firefox 12, WebKit 12; `range` 51, `fill` 58.
-- [ ] step 10: auto row height (exit criterion 3, S3).
+- [~] step 10 (file `step09`; 2026-10-27, not committed, no review yet; plan `docs/phase-6-steps/step09-plan.md`
+  « Done »): auto row height — `ColumnDef.wrap` (core type, 0 B), the new entry `@dzgrid/dom/auto-height`
+  (`autoHeight()`: hidden copies measured in one read after the paint, painted again in the same frame, three passes
+  at most; sparse layout composed with details in either order; re-measure triggers; `auto-height-large` above
+  10 000; its wrap look injected), base seams (`again`, `data-wrap`, the wrap layout rule, `missing-feature`, the
+  height rewritten on a re-layout, the anchor taken from the row the user scrolled to). Sizes: `dom/auto-height` 1 195 /
+  1 400, DOM base 22 193 / 22 400 (+239), core 28 999 / 29 150, K.8 84 118 / 84 150 (Q9-3); `dom/pinned-rows` 2 165 /
+  2 200 (Q9-6, compression alone); `dom/tree` 3 835 / 3 850 (Q9-5: sticky copies capped in pixels). Demo
+  `playground/auto-height.html`. Browser `--only auto-height`: Chrome 33, Firefox 14 (100 000 rows ≤ 1.5 px), WebKit 8;
+  exit criterion 3 met (0 px at 10 000 rows, three engines; a million rows).
 - [ ] step 11: print.
 - [ ] step 12: Angular and demos.
 - [ ] step 13: close (rebudget, full gate, 0.4.0 prepared, unpublished).

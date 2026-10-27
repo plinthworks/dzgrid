@@ -52,6 +52,11 @@ export interface ColumnDef<T, V = unknown> {
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';
   /**
+   * The cells' text wraps on several lines (Phase 6 step 9, docs/behaviors/auto-height.md 1): with `@dzgrid/dom/auto-height`
+   * the row grows to its tallest wrapped cell; without it, or under a fixed `rowHeight`, the text wraps and is clipped.
+   */
+  readonly wrap?: boolean;
+  /**
    * Parts by name for this column (a cell renderer, a header, a tooltip): plain names, resolved by the grid's registry.
    * `cellClass` (step 26, docs/behaviors/cell-class.md): classes for a body cell from its data, space-separated (null: none).
    * `headerClass` (showcase themes step 6): classes for the column's header cell, space-separated.

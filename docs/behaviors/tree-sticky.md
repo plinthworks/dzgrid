@@ -42,7 +42,9 @@ the pinned parents cover.
   row has more, the outermost are dropped first). `0`: none — no layer is made and no code runs at
   paint; `1`: the direct parent; `3` by default (owner Q10). A fraction is cut down, a negative
   number is `0`, anything not a number is the default. Never more than fit in half of the view:
-  `floor(view height / 2 / row height)` (a short grid keeps rows to read).
+  `floor(view height / 2 / row height)` (a short grid keeps rows to read); with rows of their own heights (automatic
+  row height, owner Q9-5) also never more pixels than half the view, the outermost copies dropped first (a parent
+  taller than half the view is not pinned).
 - **Which rows** (pure function `stickyStack`, `packages/dom/src/tree/sticky.ts`): starting with no
   copy, the row at the stack's lower edge is looked at; its ancestors, and itself when it is an
   open parent whose row starts above that edge, are pinned if they continue the stack; the edge

@@ -53,7 +53,26 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let available = -1;
   let colIndexOf: { version: number; index: Map<string, number> } = { version: -1, index: new Map() };
   let shown: { displayed: DisplayedRows<T>; key: RowKey | null; index: number; offset: number; delta: number; atTop: boolean; atEnd: boolean; h: number; total: number; layout: RowLayout } | null = null;
+  /** What a paint showed: the row at the view's top and the distance into it, the ends, the layout (what the next paint anchors on). */
+  const see = (d: DisplayedRows<T>, h: number, layout: RowLayout): NonNullable<typeof shown> => {
+    const top = scroll.logicalTop;
+    const i = d.count ? layout.indexAt(top) : null;
+    return {
+      displayed: d,
+      key: i !== null ? d.keyAt(i) : null,
+      index: i ?? -1,
+      offset: i !== null ? layout.offsetOf(i) : 0,
+      delta: i !== null ? top - layout.offsetOf(i) : 0,
+      atTop: scroll.atTop,
+      atEnd: scroll.atEnd,
+      h,
+      total: layout.total,
+      layout,
+    };
+  };
   let anchorNext: 'rows' | 'expand' | null = null;
+  // The last frame's read (the frame's passes share it): a scroll it found is taken once.
+  let seen: ViewportBox | null = null;
   let paints = 0;
   let firstData = false;
   // The cell part of each column: resolved again when the columns or the registry change.
@@ -118,6 +137,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       columns.setAvailableInline(box.inline);
     }
     const d = rows.displayed;
+    // A scroll not seen yet (written just before this frame), then one since the last paint: the row at the view's top now, in
+    // the layout it was seen with, is the one kept in place if the rows are laid out again (S3; auto height, step 9).
+    if (box !== seen && Math.abs((seen = box).scrollTop - scroll.physicalTop) > 1) scroll.onScroll();
+    if (shown && shown.offset + shown.delta !== scroll.logicalTop) shown = { ...see(shown.displayed, shown.h, shown.layout), total: shown.total };
     const h = g.rowHeight();
     // One row layout for these rows (D7): a feature's (variable heights), or every row `h` tall.
     const layout = rowLayout(g);
@@ -288,19 +311,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     else if (tipKey && !!g.edit?.tip?.(tipKey, tipAt!.dataset['col']!) !== g.tip.said) g.retip(tipAt!);
     for (const h of g.features) h.afterRows?.(frame as Frame<unknown>);
     after.rovingStop(d, visible);
-    const topIndex = d.count ? layout.indexAt(scroll.logicalTop) : null;
-    shown = {
-      displayed: d,
-      key: topIndex !== null ? d.keyAt(topIndex) : null,
-      index: topIndex ?? -1,
-      offset: topIndex !== null ? layout.offsetOf(topIndex) : 0,
-      delta: topIndex !== null ? scroll.logicalTop - layout.offsetOf(topIndex) : 0,
-      atTop: scroll.atTop,
-      atEnd: scroll.atEnd,
-      h,
-      total: layout.total,
-      layout,
-    };
+    shown = see(d, h, layout);
     // The focused cell or header moved to another pinned segment (a move blurs, unseen): given back.
     if (held && focus && !g.pendingFocus && !el.viewport.contains(root.activeElement)) g.pendingFocus = focus.kind === 'cell' ? focus : { header: focus.column, level: focus.level ?? 0 };
     const pending = g.pendingFocus;

@@ -1,4 +1,6 @@
 import { PrefixSums, uniformRowLayout, variableRowLayout, scrollMapper, layerPlacement, visibleWindow, anchorFor, scrollTopFor, MAX_PHYSICAL } from '@dzgrid/core';
+import { sparseRowLayout } from '@dzgrid/core/detail';
+import { extrasOf } from '../../../packages/dom/src/auto-height/layout.js';
 import type { Suite } from './index.js';
 
 /** A stand-in for displayed rows: only `count` and `index()` are needed to mint positions. */
@@ -20,6 +22,17 @@ export const layout: Record<string, Suite> = {
       const m = scrollMapper(l.total, MAX_PHYSICAL, input.view);
       const w = visibleWindow(l, new PrefixSums([100]), m, input.scrollBlock, 0, { block: input.view, inline: 100 }, { overscanRows: input.overscan, overscanCols: 0 });
       return { rows: w.rows ? [w.rows.first, w.rows.last] : null };
+    }
+    if (input.op === 'auto') {
+      // Automatic row height (step 9): the measured rows by key (`r<i>`), merged with a detail's extras.
+      const d = { ...rowsOf(input.count), indexOf: (k: string) => (/^r\d+$/.test(k) && +k.slice(1) < input.count ? +k.slice(1) : -1) };
+      const extras = extrasOf(d as never, new Map(input.measured.map(([i, v]: [number, number]) => [`r${i}`, v])), input.height, input.inner);
+      const l = sparseRowLayout(d, input.height, extras);
+      return {
+        extras,
+        offsets: [...Array.from({ length: input.count }, (_, i) => l.offsetOf(i as never)), l.total],
+        indexAt: input.probes.map((p: number) => l.indexAt(p)),
+      };
     }
     // anchor
     const r = rowsOf(input.count);

@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@dzgrid/dom/auto-height` (Phase 6 step 9; docs/behaviors/auto-height.md, owner Q-R1, Q9-1..Q9-4): `autoHeight()` —
+  rows as tall as their tallest wrapped cell (`ColumnDef.wrap: true`), never under the row height; measured after each
+  paint in one read (hidden copies of the wrapped cells, written, read, removed) and painted again in the same frame
+  (three passes at most), the row at the view's top held in place (S3: 0 px at 10 000 rows in Chrome, Firefox and
+  WebKit, a million rows with scaled scrolling); measured again when the wrapped columns' widths, the row height, the
+  direction, the language or a row's text change, and when late fonts load; not while an editor is open in the row;
+  composed with `detail()` panels in either order; one `auto-height-large` warning above 10 000 rows. `wrap` without
+  the feature wraps and clips, with a `missing-feature` warning; a fixed `rowHeight` wins (nothing measured); pinned
+  rows keep one line (Q9-1). Base seams: `GridContext.again` (a measure after the paint), the cells' `data-wrap`, a
+  row's height rewritten on a re-layout of the same data. Demo `playground/auto-height.html` (« Remarques », fr / ar,
+  details, `?rows=1000000`).
+
 - Pinned rows, part 2 (Phase 6 step 8b-2; pinned-rows.md 17–18, owner Q1, O8): blocks of cells, copy, cut, paste,
   Delete, Ctrl+D / Ctrl+R, the keyboard fill mode, the fill handle and bulk (Ctrl+Enter) inside one pinned band, by the
   keys and the mouse; never across a band's edge (Shift+keys stop there, a drag stays on its band's rows, a crossing
@@ -18,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Rows laid out again in the frame right after a scroll (a detail panel measured, a late measure) put the view back
+  where the last paint left it; the anchor is now the row the user scrolled to, and a scroll written just before the
+  frame is read by the paint (Phase 6 step 9, virtual-scroll.md).
+- `detail()` taken away sets `layoutFor` back to none instead of deleting it (so a feature laying out around it keeps
+  its own).
 - A body drag (block or fill) under a top pinned band landed its rows too low: the body's rows are measured from the
   band's foot (8b-2).
 - A pinned cell's overlay id is its key after a NUL (review R1): a body row whose id is the pinned key's text no longer
