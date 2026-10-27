@@ -8,6 +8,7 @@ spikes/**/results/quicklook/
 spikes/**/results/dist/
 spikes/**/build/
 packed.tmp/
+packed.stage/
 packages/dom/test/browser/results/
 packages/angular/browser/build/
 examples/angular-audit/out/

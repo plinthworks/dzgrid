@@ -100,7 +100,8 @@ npm run test:perm      # 1 000 permutations de l'écran d'audit et de l'export, 
 npm run test:tz        # la suite à Auckland et à Los Angeles (chaque passe avec --maxWorkers=2)
 npm run typecheck      # cœur, DOM, tests, gabarits Angular (ngc)
 npm run build          # packages/*/dist (refuse un manifeste vers src/, une carte vers un fichier absent)
-npm run pack:local     # les quatre archives 0.3.0 dans packed/
+npm run pack:local     # les quatre archives dans packed/, version unique 0.3.1-local.<horodatage> (pour une appli : app-feedback 15)
+npm run pack:release   # les quatre archives 0.3.0 (la version des sources : l'exemple Angular, la relecture de publication)
 npm run check:size     # tailles contre size-budget.json (npm run build d'abord pour la ligne Angular)
 npm run check:contrast # chaque paire de couleurs du thème, de Midnight et de Clinic
 npm run build:theme    # dzgrid.css, contrast.css et leurs copies sans couche, depuis le Sass

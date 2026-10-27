@@ -41,15 +41,19 @@ describe('0.3.0 as npm would receive it', () => {
   // After `npm run pack:local`: the tarballs carry no test source, sandbox, capture or measure result, and each
   // non-theme package declares no side effects.
   const packed = `${ROOT}packed`;
+  /** The packs' version: 0.3.0 (`npm run pack:release`), or a local one (`npm run pack:local`, app-feedback 15: `0.3.1-local.<stamp>`). */
+  const V = existsSync(packed) ? (readdirSync(packed).find((f) => f.startsWith('dzgrid-core-'))?.slice(12, -4) ?? '0.3.0') : '0.3.0';
+  const local = V !== '0.3.0';
   it.skipIf(!existsSync(packed))('the packed tarballs: no test sources, sideEffects as declared, version 0.3.0, every exported file present', () => {
     const tgz = readdirSync(packed).filter((f) => f.endsWith('.tgz'));
-    expect(tgz.sort()).toEqual(['dzgrid-angular-0.3.0.tgz', 'dzgrid-core-0.3.0.tgz', 'dzgrid-dom-0.3.0.tgz', 'dzgrid-theme-0.3.0.tgz']);
+    expect(V).toMatch(/^(0\.3\.0|0\.3\.1-local\.\d{14})$/);
+    expect(tgz.sort()).toEqual(['angular', 'core', 'dom', 'theme'].map((n) => `dzgrid-${n}-${V}.tgz`));
     for (const t of tgz) {
       const list = execFileSync('tar', ['-tzf', `${packed}/${t}`], { encoding: 'utf8' }).split('\n').filter(Boolean);
       expect(list.filter((f) => /(^|\/)(test|tests|__tests__|fixtures|playground|screenshots|results)\/|\.(test|spec)\.|\.d\.ts\.map$/.test(f)), t).toEqual([]);
       expect(list.filter((f) => f.endsWith('.ts') && !f.endsWith('.d.ts')), t).toEqual([]);
       const m = JSON.parse(execFileSync('tar', ['-xOzf', `${packed}/${t}`, 'package/package.json'], { encoding: 'utf8' }));
-      expect(m.version, t).toBe('0.3.0');
+      expect(m.version, t).toBe(V);
       // Every file the manifest's exports name is in the tarball (a subpath that ships missing fails on import).
       const named = new Set<string>();
       const walk = (v: unknown): void => { if (typeof v === 'string') named.add(v.replace(/^\.\//, '')); else if (v && typeof v === 'object') Object.values(v).forEach(walk); };
@@ -68,7 +72,7 @@ describe('0.3.0 as npm would receive it', () => {
     theme: ['./edit.css', './range.css', './fill.css', './midnight.css', './clinic.css', './tailwind.css', './tailwind3.css', './bootstrap.css',
       './dzgrid.unlayered.css', './contrast.unlayered.css', './edit.unlayered.css', './range.unlayered.css', './fill.unlayered.css'],
   } as const;
-  const tarOf = (n: string) => `${packed}/dzgrid-${n}-0.3.0.tgz`;
+  const tarOf = (n: string) => `${packed}/dzgrid-${n}-${V}.tgz`;
   const listOf = (n: string) => execFileSync('tar', ['-tzf', tarOf(n)], { encoding: 'utf8' }).split('\n').filter(Boolean);
   const manifestOf = (n: string) => JSON.parse(execFileSync('tar', ['-xOzf', tarOf(n), 'package/package.json'], { encoding: 'utf8' }));
   /** The tarball unpacked once into a fresh folder (reading each file through tar is slow). */
@@ -124,7 +128,7 @@ describe('0.3.0 as npm would receive it', () => {
     }
     const dom = manifestOf('dom');
     expect(Object.keys(dom.peerDependencies)).toEqual(expect.arrayContaining(['@dzgrid/core', 'gsap', '@tzslot/core', '@tzslot/dom']));
-    expect(dom.peerDependencies['@dzgrid/core']).toBe('^0.3.0');
+    expect(dom.peerDependencies['@dzgrid/core']).toBe(local ? V : '^0.3.0');
     // Not bundled: no shipped module carries gsap's or tzslot's code, only imports of them.
     for (const f of listOf('dom').filter((x) => x.endsWith('.js'))) {
       const text = readFileSync(join(unpack('dom'), f), 'utf8');
