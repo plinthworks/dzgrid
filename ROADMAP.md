@@ -852,6 +852,8 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
 - [ ] step 12: Angular and demos.
 - [ ] step 13: close (rebudget, full gate, 0.4.0 prepared, unpublished).
 
+- **Feedback pass (allergen-detector) and tzslot 2.4.0** (2026-10-27, built, not committed): items A–M of `docs/phase-6-steps/feedback-plan.md` « Done » — text glyphs instead of border glyphs, the box's outline, one operator without « Condition », `filterOption` parts, `ui.data`, popup `data-column`/`data-kind`, the period form in the popup itself, `@tzslot/dom/lazy` (a date kit's first use 66 962 → 33 317 B gz). Gate (once, caffeinate -i, vitest 2 workers, Node 24): vitest 470 files / 7 117 tests, test:perm 5 / 10, typecheck, build, check:size 0 over (core 28 999, dom 22 321, filters 9 990 — no raise needed —, theme 2 562, pagination 3 133, tree 3 821, K.8 84 077; raised by the strict need, Q1: date adapters 2 745 (2 744), set chunk 4 205 (4 204), calendar 1 520 (1 519)), check:contrast 1 092 / 0. Browser: Chrome --only filters 32, dates 56, pagination 45, tree 78 (and groups 20, detail 37, motion 50); Firefox and WebKit --only dates 12, pagination 24, tree 6, all green.
+
 ### Exit criteria (Phase 6; `docs/phase-6-plan.md` §5)
 Sheets before code; keyboard resize mode in LTR and RTL with sentences; a state saved in LTR restores
 identically in RTL and back; auto height with no jump (0 px at 10 000 rows, three engines); column moving by

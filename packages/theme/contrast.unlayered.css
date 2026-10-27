@@ -64,7 +64,7 @@
     outline-color: Highlight;
   }
   .dzg-box {
-    border-color: CanvasText;
+    outline-color: CanvasText;
   }
   .dzg-resize::after {
     background: CanvasText;

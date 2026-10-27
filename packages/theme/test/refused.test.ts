@@ -13,7 +13,7 @@ describe('the refused box', () => {
   it('is dashed on the raised surface, with the "not allowed" pointer on its cell', () => {
     expect(css).toMatch(/\.dzg-check\[data-dzg-refused\] \{\s*cursor: not-allowed;\s*\}/);
     const rule = /\.dzg-check\[data-dzg-refused\] \.dzg-box \{([^}]*)\}/.exec(css)![1]!;
-    expect(rule).toMatch(/border-style: dashed;/);
+    expect(rule).toMatch(/outline-style: dashed;/); // the edge an outline (feedback pass G)
     expect(rule).toMatch(/background: var\(--dzg-refused-bg, var\(--tz-bg-raised\)\);/);
   });
 
@@ -24,7 +24,7 @@ describe('the refused box', () => {
 
   it('keeps a mark in forced colours (GrayText)', () => {
     const forced = css.split('@media (forced-colors: active)').slice(1).join('');
-    expect(forced).toMatch(/\.dzg-check\[data-dzg-refused\] \.dzg-box \{\s*border-color: GrayText;\s*\}/);
+    expect(forced).toMatch(/\.dzg-check\[data-dzg-refused\] \.dzg-box \{\s*outline-color: GrayText;\s*\}/);
   });
 
   it('has its border checked at 3:1 on the box surface and on the row’s hover', () => {

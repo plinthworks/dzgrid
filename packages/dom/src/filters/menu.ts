@@ -73,6 +73,9 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
     commit.flush(column);
     const host = g.doc.createElement('div');
     host.className = 'dzg-fpop';
+    // For a host's global CSS (the popup is in the top layer, out of a component's scoped styles; owner Q5).
+    host.dataset['column'] = column;
+    host.dataset['kind'] = resolve(col!, 'filter').kind;
     const m = mounted<C>(g);
     if (!draw(m, host, col!, part)) return false;
     const ref = popupsFor(g).open(at, host, {

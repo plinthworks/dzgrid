@@ -102,7 +102,11 @@ then asks for every row of the query; clears the selection.
 - **Layout:** injected CSS without colour (`:where`, logical properties, wraps on a narrow screen,
   no horizontal scroll at 320 px). A hidden footer control is really hidden: the `[hidden]` rule comes
   after the buttons' `display` (same zero specificity, the later wins). The theme gives the colours; disabled buttons in the muted colour
-  with a not-allowed cursor; chevrons drawn in CSS and mirrored right to left.
+  with a not-allowed cursor. The arrows are characters in the DOM (feedback pass A, 2026-10-27): each button holds one
+  `aria-hidden` span with « ‹ › » (U+00AB, U+2039, U+203A, U+00BB), so its name stays the words (`pager.first` …);
+  they are Bidi_Mirrored, so right to left the browser turns them, no CSS. They used to be layered CSS borders, which
+  an app's unlayered reset (Tailwind 3's preflight, `*{border-width:0}`) erased: empty buttons. Themed with `font`
+  and `color` like any text (`.dzg-pbtn` is `1.25em`, `line-height: 1`).
 - **The overlay stops above the footer:** the feature measures the footer and sets
   `--dzg-footer-size` on the grid's root; the overlay's `inset-block-end` reads it.
 

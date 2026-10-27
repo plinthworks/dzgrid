@@ -55,7 +55,7 @@ describe('the DOM layer’s shape', () => {
     expect(entry.length).toBeGreaterThan(1);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^filters(\/[^:]+)?\.ts: \.\/(filters\/)?[a-z-]+\.js$/.test(s) && !/^filters\/[^:]+\.ts: \.\.\/popup\.js$/.test(s) && !/^filters\/dates\/[a-z]+\.ts: @tzslot\/(dom|core)$/.test(s) && !/^filters\/set\/[a-z]+\.ts: \.\.\/dom\.js$/.test(s));
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^filters(\/[^:]+)?\.ts: \.\/(filters\/)?[a-z-]+\.js$/.test(s) && !/^filters\/[^:]+\.ts: \.\.\/popup\.js$/.test(s) && !/^filters\/dates\/[a-z]+\.ts: @tzslot\/(dom|core)(\/lazy)?$/.test(s) && !/^filters\/set\/[a-z]+\.ts: \.\.\/dom\.js$/.test(s));
     expect(offenders).toEqual([]);
   });
 
@@ -82,7 +82,7 @@ describe('the DOM layer’s shape', () => {
     // The filters' kits keep their own name for it: a re-export, no code of its own.
     expect(readFileSync(join(SRC, 'filters/dates/shared.ts'), 'utf8').replace(/^\s*(\/\/.*|\/\*[\s\S]*?\*\/)?\s*$/gm, '').trim()).toMatch(/^export \{[^}]+\} from '\.\.\/\.\.\/dates\/shared\.js';$/);
     // It touches tzslot, the core and nothing of the eager DOM.
-    const offenders = [...readFileSync(join(SRC, 'dates/shared.ts'), 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]).filter((m) => !/^(@tzslot\/(dom|core)|@dzgrid\/core(\/internal)?)$/.test(m!));
+    const offenders = [...readFileSync(join(SRC, 'dates/shared.ts'), 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]).filter((m) => !/^(@tzslot\/(dom|core)(\/lazy)?|@dzgrid\/core(\/internal)?)$/.test(m!));
     expect(offenders).toEqual([]);
   });
 
@@ -91,7 +91,7 @@ describe('the DOM layer’s shape', () => {
     expect(chunk.map((f) => relative(SRC, f))).toEqual(['editors/dates/calendar.ts']);
     const offenders = chunk
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: (@tzslot\/(dom|core)|@dzgrid\/(core|core\/internal|dom\/internal)|\.\.\/\.\.\/dates\/shared\.js)$/.test(s));
+      .filter((s) => !/: (@tzslot\/(dom|core)(\/lazy)?|@dzgrid\/(core|core\/internal|dom\/internal)|\.\.\/\.\.\/dates\/shared\.js)$/.test(s));
     expect(offenders).toEqual([]);
   });
 
@@ -100,15 +100,19 @@ describe('the DOM layer’s shape', () => {
     expect(kits.map((f) => relative(SRC, f)).sort()).toEqual(['filters/dates/date.ts', 'filters/dates/moment.ts', 'filters/dates/range.ts', 'filters/dates/shared.ts']);
     const offenders = kits
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: (@tzslot\/(dom|core)|@dzgrid\/core(\/internal)?|\.\/shared\.js)$/.test(s));
+      .filter((s) => !/: (@tzslot\/(dom|core)(\/lazy)?|@dzgrid\/core(\/internal)?|\.\/shared\.js)$/.test(s));
     expect(offenders).toEqual([]);
   });
 
   it('has every date kit place tzslot’s panel in the popup (`container: a.panel`), so a press in it keeps the popup open (step 18, Q4)', () => {
     // A kit that forgot it would have the panel in the page's body: a press on a day there is
     // outside the popup and closes it.
-    const kits = files(join(SRC, 'filters/dates')).filter((f) => !f.endsWith('shared.ts'));
-    expect(kits.length).toBeGreaterThanOrEqual(3);
+    // The period kit (range.ts) has no panel since feedback pass K: its calendar and ends are the popup's own, and
+    // it must never build a field with a panel (no createRangeField, createDateField, createDateTimeField).
+    const range = readFileSync(join(SRC, 'filters/dates/range.ts'), 'utf8');
+    expect(range).not.toMatch(/\bcreate(RangeField|DateField|DateTimeField)\(/);
+    const kits = files(join(SRC, 'filters/dates')).filter((f) => !f.endsWith('shared.ts') && !f.endsWith('range.ts'));
+    expect(kits.length).toBeGreaterThanOrEqual(2);
     for (const f of kits) {
       const src = readFileSync(f, 'utf8');
       const calls = [...src.matchAll(/\bcreate[A-Z]\w*\(\s*a\.host\s*,\s*\{/g)];
@@ -132,7 +136,7 @@ describe('the DOM layer’s shape', () => {
     expect(readFileSync(join(SRC, 'filters/set.ts'), 'utf8')).toMatch(/import\('\.\/set\/index\.js'\)/);
   });
 
-  it('has the set chunk import only the core, its own folder and the leaf dom.ts (the eager part hands it the loading helper; never forms.ts or the menu)', () => {
+  it('has the set chunk import only the core, its own folder and the leaf dom.ts (the eager part hands it the loading helper and the part mounter; never forms.ts or the menu)', () => {
     const chunk = files(join(SRC, 'filters/set'));
     expect(chunk.map((f) => relative(SRC, f)).sort()).toEqual(['filters/set/draft.ts', 'filters/set/index.ts', 'filters/set/list.ts', 'filters/set/styles.ts']);
     const offenders = chunk

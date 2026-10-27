@@ -103,7 +103,8 @@ empty closed), `packages/core/test/columns-collapse.test.ts`, `packages/dom/test
   folds the `open` columns at any depth; a `closed` column shows only while all its collapsible groups are closed).
 - Rule 2: the warning's path follows the tree (`columns[1].children`, detail `empty-closed`), as the other group problems.
 - Rule 3: the base's `ColumnModel.folded` / `fold()`; `state()` and `hidden` untouched; a fold leaving no column is refused.
-- Button: `button.dzg-gtoggle`, chevron drawn with logical borders and a mirrored angle under `[dir=rtl]`, as the tree's
+- Button: `button.dzg-gtoggle`, chevron a character (U+203A in `::before`, feedback pass A: no border an unlayered
+  reset could erase), mirrored by the browser right to left and turned down when open (`--dzg-gch`), as the tree's
   (not `scale: -1`); `ButtonText` in forced colours. The group header carries `data-g` (its group id).
 - API: `groups().api(grid)` → `collapsible`, `isOpen`, `toggle(id, open?, { say, user })`, `reset`, `get`, `set`.
 - A block of cells touching a folded column is cleared, as for a hidden one (owner Q8-3 revised).

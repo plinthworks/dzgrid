@@ -85,7 +85,11 @@ export function form(make: Make): Part<C> {
         show();
         body.texts();
         tx(sum, c.msg('filter.summaryActive'));
-        tx(clear, c.msg('filter.clear', { column: nameOf(c) }));
+        // The column in the name, not in the text: a long name wrapped the footer (feedback pass J). The text is the
+        // name's start (WCAG 2.5.3): the template without its column.
+        const cl = c.msg('filter.clear', { column: nameOf(c) });
+        tx(clear, c.msg('filter.clear', { column: '' }).trim());
+        if (clear.getAttribute('aria-label') !== cl) clear.setAttribute('aria-label', cl);
         tx(apply, c.msg('filter.apply'));
       };
       const commit = (): void => {
@@ -203,6 +207,8 @@ export const conditions = (spec: Spec): Make => (get, doc, changed) => {
       const c = get();
       // An operator no longer offered: the first shown, and the draft is what the form says.
       if (fill()) vis(), changed(null);
+      // One operator: no « Condition » to choose (feedback pass B); hidden, so out of the tab order.
+      hide(lo, op.options.length < 2);
       tx(so, c.msg('filter.op'));
       v.texts();
       for (const o of op.options) tx(o, c.msg(`filter.op.${spec.label?.[o.value] ?? o.value}` as never));

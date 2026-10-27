@@ -6,14 +6,16 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import type { ColumnOrGroup } from '@dzgrid/core';
 import { addDays, zoneDayBounds, RELATIVE_RANGES, type Day } from '@dzgrid/core';
-import { Temporal } from '@tzslot/core';
+import { Temporal } from '@tzslot/core/lazy';
 import { filters } from '../src/filters.js';
 import { styles } from '../src/filters/dates/shared.js';
 import { cleanup, make, type R } from './support-filters.js';
 
 type Rec = { kind: string; opts: Record<string, any>; updates: Record<string, any>[]; destroyed: boolean };
 const rec: Rec[] = [];
-vi.mock('@tzslot/dom', async (orig) => {
+// The kits import tzslot's lazy entry (feedback pass L, T3); the period is the popup's own form since pass K:
+// tzslot's calendar (`createDateRange`) and two typed ends (`createDateInput`), no `createRangeField`.
+vi.mock('@tzslot/dom/lazy', async (orig) => {
   const m = (await orig()) as Record<string, any>;
   const wrap = (kind: string) => (host: HTMLElement, opts: Record<string, any>) => {
     const r: Rec = { kind, opts, updates: [], destroyed: false };
@@ -25,7 +27,7 @@ vi.mock('@tzslot/dom', async (orig) => {
     w.destroy = () => ((r.destroyed = true), destroy());
     return w;
   };
-  return { ...m, createDateField: wrap('createDateField'), createRangeField: wrap('createRangeField'), createDateTimeField: wrap('createDateTimeField') };
+  return { ...m, createDateField: wrap('createDateField'), createDateRange: wrap('createDateRange'), createDateInput: wrap('createDateInput'), createDateTimeField: wrap('createDateTimeField') };
 });
 
 afterEach(cleanup);
@@ -55,7 +57,7 @@ function grid(o: { settings?: Record<string, unknown>; loadDates?: (k: Kit) => P
   const popup = () => t.host.querySelector<HTMLElement>('.dzg-popup');
   const q = <E extends Element = HTMLElement>(s: string) => popup()?.querySelector<E>(s) ?? null;
   const op = () => q<HTMLSelectElement>('select.dzg-fop')!;
-  const widget = () => q<HTMLElement>('.dzg-fdate .tz-field');
+  const widget = () => q<HTMLElement>('.dzg-fdate .tz-field, .dzg-fdate .dzg-fperiod');
   const choose = (v: string) => {
     op().value = v;
     op().dispatchEvent(new Event('change', { bubbles: true }));
@@ -64,9 +66,13 @@ function grid(o: { settings?: Record<string, unknown>; loadDates?: (k: Kit) => P
   const filter = () => t.g.kernel.query.filter as Record<string, unknown>;
   const set = (column: string, f: unknown) => t.g.kernel.dispatch({ type: 'filter.column', column, filter: f as never }, 'api');
   const apply = () => q<HTMLButtonElement>('.dzg-fapply')!.click();
-  /** The live widget's record (the last not destroyed). */
+  /** The live widget's record (the last not destroyed): a field, or the period form's calendar. */
   const live = () => rec.filter((r) => !r.destroyed).at(-1)!;
-  return { ...t, feature, popup, q, op, widget, choose, ready, filter, set, apply, live };
+  /** The period form's typed ends, FROM and TO. */
+  const ends = () => rec.filter((r) => !r.destroyed && r.kind === 'createDateInput').slice(-2) as [Rec, Rec];
+  const pressed = () => q<HTMLElement>('.dzg-fpreset[aria-pressed=true]')?.dataset['range'] ?? null;
+  const preset = (name: string) => q<HTMLButtonElement>(`.dzg-fpreset[data-range="${name}"]`)!;
+  return { ...t, feature, popup, q, op, widget, choose, ready, filter, set, apply, live, ends, pressed, preset };
 }
 
 function deferred<T>() {
@@ -107,6 +113,13 @@ const randAt = (r: ReturnType<typeof rng>, zone: string): number => {
 const iso = (ms: number) => new Date(ms).toISOString();
 const inst = (ms: number) => Temporal.Instant.fromEpochMilliseconds(ms);
 const plain = (d: string) => Temporal.PlainDate.from(d);
+/** The wall clock of an instant in a zone, as a typed end holds it. */
+const wall = (ms: number, zone: string) => {
+  const z = inst(ms).toZonedDateTimeISO(zone);
+  return { date: z.toPlainDate(), time: z.toPlainTime() };
+};
+/** The day of an instant in a zone, by Intl (the oracle does not ask Temporal). */
+const dayIn = (ms: number, zone: string) => new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(ms);
 
 describe('the model per operator: random values through the real widgets’ onChange, against the core’s oracle', () => {
   const SEEDS = 120;
@@ -137,22 +150,25 @@ describe('the model per operator: random values through the real widgets’ onCh
           w.opts.onChange(inst(at));
           want = { type: 'instant', op, at: iso(at) };
         } else if (op === 'between' && col === 't') {
-          const a = randAt(r, zone);
-          const b = r.next() < 0.15 ? a : randAt(r, zone);
-          w.opts.onChange({ start: inst(a), end: inst(b) }, { preset: null });
+          // Two moments typed in the ends, each a wall clock in the grid's zone. A wall clock that does not name its
+          // moment alone (the second reading of a repeated hour) reads as the first: the typed end has no reading menu
+          // (tzslot's input layout), told in filter-date-picker.md; the oracle takes the moment the wall clock names.
+          let a = randAt(r, zone);
+          let b = r.next() < 0.15 ? a : randAt(r, zone);
+          const back = (ms: number) => { const v = wall(ms, zone); return v.date.toZonedDateTime({ timeZone: zone, plainTime: v.time }).epochMilliseconds; };
+          a = back(a);
+          b = back(b);
+          const [from, to] = t.ends();
+          from.opts.onChange(wall(a, zone));
+          to.opts.onChange(wall(b, zone));
           want = a < b ? { type: 'instant', op, at: iso(a), atTo: iso(b) } : undefined;
         } else {
-          // A period of days: tzslot carries it as [start of the first, start of the day after the last).
+          // A period of days: the calendar's two days, both in (no instant carries them since pass K).
           let a = randDay(r);
           let b = r.next() < 0.3 ? a : (addDays(a, r.int(0, 40)) as Day);
           if (a > b) [a, b] = [b, a];
-          const z = col === 'd' ? 'UTC' : zone;
-          const from = zoneDayBounds(a, z).from;
-          const to = zoneDayBounds(b, z).to;
-          w.opts.onChange({ start: inst(from), end: inst(to) }, { preset: null });
-          want = from >= to ? undefined : col === 'd' ? { type: 'day', op, value: a, valueTo: b } : { type: 'instant', op, day: a, dayTo: b };
-          // A lost first day starts where the next begins: the period reads from the next (no rows lost).
-          if (want && zoneDayBounds(a, z).from === zoneDayBounds(a, z).to) (want as Record<string, string>)[col === 'd' ? 'value' : 'day'] = addDays(a, 1)!;
+          w.opts.onChange({ start: plain(a), end: plain(b) }, { pressed: plain(b) });
+          want = col === 'd' ? { type: 'day', op, value: a, valueTo: b } : { type: 'instant', op, day: a, dayTo: b };
         }
         t.apply();
         expect(t.filter()[col], what).toEqual(want);
@@ -180,8 +196,6 @@ describe('the echo round trip: a host filter shown, nothing sent, Apply keeps it
           ? [{ type: 'day', op: r.pick(['equals', 'notEqual', 'lt', 'lte', 'gt', 'gte']), value: a }, { type: 'day', op: 'between', value: a, valueTo: b }, { type: 'day', op: 'relative', range: r.pick([...RELATIVE_RANGES]) }]
           : [{ type: 'instant', op: 'onDay', day: a }, { type: 'instant', op: 'betweenDays', day: a, dayTo: b }, { type: 'instant', op: r.pick(['before', 'after']), at: iso(at) }, { type: 'instant', op: 'between', at: iso(at), atTo: iso(atTo) }, { type: 'instant', op: 'relative', range: r.pick([...RELATIVE_RANGES]) }],
       ) as Record<string, string>;
-      // Apia's lost day as a period's first day reads from the next one: left to its own test.
-      if ((f['op'] === 'betweenDays' || f['op'] === 'between') && (f['day'] ?? f['value']) && zoneDayBounds((f['day'] ?? f['value']) as Day, col === 'd' ? 'UTC' : zone).from === zoneDayBounds((f['day'] ?? f['value']) as Day, col === 'd' ? 'UTC' : zone).to) continue;
       t.set(col, f);
       const what = `seed ${seed} ${zone} ${JSON.stringify(f)}`;
       const spy = vi.spyOn(t.g.kernel, 'dispatch');
@@ -193,16 +207,13 @@ describe('the echo round trip: a host filter shown, nothing sent, Apply keeps it
       expect(t.op().value, what).toBe(f['op'] === 'relative' ? (col === 'd' ? 'between' : 'betweenDays') : f['op']);
       // What the widget was handed.
       const w = t.live();
-      const ups = w.updates.filter((u) => 'value' in u || 'preset' in u);
-      const lastV = ups.filter((u) => 'value' in u).at(-1)?.value;
-      if (f['op'] === 'relative') expect(ups.at(-1)?.preset, what).toBe(f['range']);
+      const lastV = w.updates.filter((u) => 'value' in u).at(-1)?.value;
+      if (f['op'] === 'relative') expect(t.pressed(), what).toBe(f['range']);
       else if (w.kind === 'createDateField') expect(String(lastV), what).toBe(f['value'] ?? f['day']);
       else if (w.kind === 'createDateTimeField') expect(lastV?.epochMilliseconds, what).toBe(Date.parse(f['at']!));
-      else if (f['op'] === 'between' && col === 't') expect([lastV.start.epochMilliseconds, lastV.end.epochMilliseconds], what).toEqual([Date.parse(f['at']!), Date.parse(f['atTo']!)]);
-      else {
-        const z = col === 'd' ? 'UTC' : zone;
-        expect([lastV.start.epochMilliseconds, lastV.end.epochMilliseconds], what).toEqual([zoneDayBounds((f['value'] ?? f['day']) as Day, z).from, zoneDayBounds((f['valueTo'] ?? f['dayTo']) as Day, z).to]);
-      }
+      // The period form's calendar: the ends' days (in the grid's zone for two moments).
+      else if (f['op'] === 'between' && col === 't') expect([String(lastV.start), String(lastV.end)], what).toEqual([dayIn(Date.parse(f['at']!), zone), dayIn(Date.parse(f['atTo']!), zone)]);
+      else expect([String(lastV.start), String(lastV.end)], what).toEqual([f['value'] ?? f['day'], f['valueTo'] ?? f['dayTo']]);
       t.apply();
       expect(t.filter()[col], what).toEqual(f);
       cleanup();
@@ -269,26 +280,22 @@ describe('the six shortcuts', () => {
       await t.ready();
       const type = col === 'd' ? 'day' : 'instant';
       for (const range of RELATIVE_RANGES) {
-        const w = t.live();
-        expect(w.opts['presets']).toEqual([...RELATIVE_RANGES]);
-        w.opts.onChange({ start: inst(0), end: inst(86_400_000) }, { preset: range });
+        t.preset(range).click();
         expect(t.filter()[col], range).toEqual({ type, op: 'relative', range });
+        expect(t.pressed(), range).toBe(range);
       }
-      t.live().opts.onChange({ start: inst(zoneDayBounds('2026-10-01' as Day, col === 'd' ? 'UTC' : 'Europe/Paris').from), end: inst(zoneDayBounds('2026-10-03' as Day, col === 'd' ? 'UTC' : 'Europe/Paris').to) }, { preset: null });
+      t.live().opts.onChange({ start: plain('2026-10-01'), end: plain('2026-10-03') }, { pressed: plain('2026-10-03') });
       expect(t.filter()[col]).toEqual(col === 'd' ? { type, op, value: '2026-10-01', valueTo: '2026-10-03' } : { type, op, day: '2026-10-01', dayTo: '2026-10-03' });
-      // An unknown preset name (a host's own) is a period by its days.
-      t.live().opts.onChange({ start: inst(zoneDayBounds('2026-10-04' as Day, col === 'd' ? 'UTC' : 'Europe/Paris').from), end: inst(zoneDayBounds('2026-10-04' as Day, col === 'd' ? 'UTC' : 'Europe/Paris').to) }, { preset: 'payday' });
-      expect(t.filter()[col]).toMatchObject({ op });
+      expect(t.pressed()).toBeNull();
       t.feature.closeFilter();
       t.set(col, { type, op: 'relative', range: 'lastMonth' });
       const spy = vi.spyOn(t.g.kernel, 'dispatch');
       t.feature.openFilter(col);
       await t.ready();
-      const ups = t.live().updates;
-      // The value emptied first, then the shortcut named: tzslot resolves it against today.
-      const i = ups.findIndex((u) => u['preset'] === 'lastMonth');
-      expect(i).toBeGreaterThan(0);
-      expect(ups[i - 1]!['value']).toEqual({ start: null, end: null });
+      // Pressed, and the calendar handed the shortcut's days against today (2026-10-19): September.
+      expect(t.pressed()).toBe('lastMonth');
+      const v = t.live().updates.filter((u) => 'value' in u).at(-1)!['value'];
+      expect([String(v.start), String(v.end)]).toEqual(['2026-09-01', '2026-09-30']);
       await flush();
       expect(spy.mock.calls.filter(([c]) => (c as { type: string }).type === 'filter.column')).toEqual([]);
       t.apply();
@@ -296,33 +303,30 @@ describe('the six shortcuts', () => {
     });
   }
 
-  it('a host shortcut over an absolute period, the popup open: the value emptied right before the shortcut is named', async () => {
+  it('a host shortcut over an absolute period, the popup open: the same form shows it pressed, with its days', async () => {
     for (const [col, f] of [['d', { type: 'day', op: 'between', value: '2026-10-01', valueTo: '2026-10-03' }], ['t', { type: 'instant', op: 'betweenDays', day: '2026-10-01', dayTo: '2026-10-03' }]] as const) {
       const t = grid({ settings: { timeZone: 'Europe/Paris' } });
       t.set(col, f);
       t.feature.openFilter(col);
       await t.ready();
       const w = t.live();
-      const before = w.updates.length;
       expect(w.updates.at(-1)!['value'].start).not.toBeNull();
       t.set(col, { type: f.type, op: 'relative', range: 'last7Days' });
       expect(t.live(), col).toBe(w);
-      const ups = w.updates.slice(before);
-      const i = ups.findIndex((u) => u['preset'] === 'last7Days');
-      expect(i, col).toBeGreaterThan(0);
-      expect(ups[i - 1], col).toEqual({ value: { start: null, end: null } });
+      expect(t.pressed(), col).toBe('last7Days');
+      const v = w.updates.filter((u) => 'value' in u).at(-1)!['value'];
+      expect([String(v.start), String(v.end)], col).toEqual(['2026-10-13', '2026-10-19']);
       cleanup();
     }
   });
 
-  it('instant between moments offers no shortcut, and a preset reported there is still a shortcut only if named', async () => {
+  it('instant between moments offers no shortcut; its ends carry their hours', async () => {
     const t = grid({ settings: { timeZone: 'Europe/Paris' } });
     t.feature.openFilter('t');
     t.choose('between');
     await t.ready();
-    expect(t.live().opts['presets']).toEqual([]);
-    expect(t.live().opts['showPresets']).toBe(false);
-    expect(t.live().opts['showTime']).toBe(true);
+    expect(t.q('.dzg-fpreset')).toBeNull();
+    expect(t.ends().map((e) => e.opts['withTime'])).toEqual([true, true]);
   });
 });
 
@@ -430,7 +434,7 @@ describe('loading lifecycle', () => {
     expect(document.querySelectorAll('.tz-field, .tz-field__panel')).toHaveLength(0);
     expect(rec.every((r) => r.destroyed)).toBe(true);
     // DzGrid's own observers (named()): those watching the widget's host or panel.
-    const ours = observe.mock.calls.flatMap(([target], i) => ((target as Element).matches?.('.dzg-fwidget, .dzg-fpanel') ? [observe.mock.contexts[i]] : [])).filter((c, i, a) => a.indexOf(c) === i);
+    const ours = observe.mock.calls.flatMap(([target], i) => ((target as Element).matches?.('.dzg-fwidget, .dzg-fpanel, .dzg-fcal') ? [observe.mock.contexts[i]] : [])).filter((c, i, a) => a.indexOf(c) === i);
     expect(ours.length).toBeGreaterThanOrEqual(15);
     for (const mo of ours) expect(disconnect.mock.contexts, 'an observer never disconnected').toContain(mo);
     const ids = [...document.head.querySelectorAll<HTMLStyleElement>('style[data-tzslot]')].map((s) => s.dataset['tzslot']);
@@ -597,8 +601,10 @@ describe('the midnight timer', () => {
       const ups = t.live().updates;
       const i = ups.findLastIndex((u) => 'today' in u);
       expect(i, 'no update with today').toBeGreaterThanOrEqual(0);
-      expect(String(ups[i]!['today'])).toBe(new Date(to).toISOString().slice(0, 10));
-      expect(ups.slice(i).some((u) => u['preset'] === 'today')).toBe(true);
+      const day = new Date(to).toISOString().slice(0, 10);
+      expect(String(ups[i]!['today'])).toBe(day);
+      // The shortcut's days again, against the new today.
+      expect(String(ups[i]!['value'].start)).toBe(day);
     });
   }
 });

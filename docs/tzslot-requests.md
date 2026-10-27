@@ -1,4 +1,4 @@
-# Requests for tzslot (found on 2.2.0; reviewed against 2.4.0 on 2026-10-26), from DzGrid's date filters (step 14)
+# Requests for tzslot (found on 2.2.0; reviewed against 2.4.0 on 2026-10-26; DzGrid on 2.4.0 since 2026-10-27), from DzGrid's date filters (step 14)
 
 For the owner of tzslot. Nothing here blocks DzGrid: each item has a workaround in our lazy kits
 (`packages/dom/src/filters/dates/`), to remove once tzslot ships the fix. Paths are in
@@ -20,6 +20,30 @@ spike S13 (`spikes/s13-tzslot/README.md`) and the tests of step 14 part B.
 | **T11** (a11y, found by axe) | Another month's days are faded with `opacity: 0.35`: their text falls under 4.5:1 (axe `color-contrast`), worse on a selected start or end. | `dom/src/styles.ts:98-99`, `:433`, `:504` | The theme sets `--tz-cal-outside-opacity: 1` inside a DzGrid popup. Ask: a muted colour that keeps 4.5:1 instead of an opacity. |
 
 **Status against tzslot 2.4.0 (CHANGELOG read 2026-10-26):** T3 is addressed by `@tzslot/core/lazy` (2.3.0) and `@tzslot/dom/lazy` (2.4.0) — DzGrid can adopt them when it moves to 2.4.0. T1, T2, T4, T6–T11 are not mentioned in the 2.3.0/2.4.0 notes: presumed still open, to be confirmed by removing each workaround behind its test. T5 is a note. DzGrid still pins 2.2.0.
+
+## Feedback pass (2026-10-27): DzGrid on tzslot 2.4.0
+
+**DzGrid now pins `@tzslot/core` and `@tzslot/dom` 2.4.0** (devDependencies, exact; `npm view` on 2026-10-27: 2.4.0
+is the latest of both) and asks `>=2.4.0 <3` as its optional peers (`@dzgrid/dom`, `@dzgrid/angular`).
+
+| # | State on 2.4.0 (what the published package does) | DzGrid |
+|---|---|---|
+| **T3** | **Fixed**: `@tzslot/dom/lazy` (no polyfill bundled). | **Adopted.** The kits and the editors' calendar import `@tzslot/dom/lazy` / `@tzslot/core/lazy`; each chunk exports `ready` (`loadTemporal()`), awaited by DzGrid's loader before the chunk is used. Measured: the shared tzslot chunk 66 491 → 32 847 B gz; the first use of a date kit 66 962 → 33 317 B gz (Chrome with a native Temporal fetches no polyfill; Safari fetches it as a chunk of its own). |
+| **T6** | Open in 2.4.0 (`showZone` is on tzslot's main, unreleased). | **No workaround left**: the period is the popup's own form since feedback pass K (no range field, no summary). The `periodSummary` override is gone with `createRangeField`. |
+| **T8** | Open in 2.4.0 (the panel's Escape is still a bubbling `document` listener, `panel.js` 2.4.0 l. 206; the capture and stop are on main, unreleased). | Kept for the date and moment fields (the capture on `.dzg-fdate`); **gone for the period** (no panel, so no second Escape). |
+| **T2** | Open in 2.4.0 (`ensureStyles` still unconditional in the panel; `setStyleNonce` is on main, unreleased). | Kept: DzGrid injects the sheets first, marked, with the nonce (`styles()`); the period form's own layout sheet rides with them (`dzg-period`). |
+| **T11** | Open in 2.4.0 (`opacity: var(--tz-cal-outside-opacity, 0.35)`). | Kept, widened: `--tz-cal-outside-opacity: 1` on `.dzg-popup` (the panel and the period form's calendar). The browser checks found it: the inline calendar's neighbouring days at 2.05:1 under axe until the theme rule covered it. |
+| **T1, T9** | Open in 2.4.0 (on main, unreleased). | Kept: `named()` (the trigger's date, the month title's month; the period form's calendar too). |
+| **T4** | Open in 2.4.0 (on main, unreleased: « a typed field and a read-only one wrote different figures »). | Nothing to do on our side: with `numerals: 'locale'` in Arabic the calendar writes Latin day numbers and names the days in Arabic-Indic: axe `label-content-name-mismatch` on the day cells. The browser check (`--only dates`, ar-EG) records that state and will fail, to be updated, when tzslot ships. |
+| **T7** | Open in 2.4.0 (`keepsItsFace`, `core/slots.js`). | Kept: `lost()` greys the day for the moment fields and the period between two moments; `tzslot-agreement.test.ts` still records the divergence. |
+| **T10** | Open in 2.4.0. | Kept (`role="combobox"` on the typed moment). |
+| **T5** | A note. | Unchanged: the grid's zone and today always passed. |
+
+**Every fix the owner listed (T2 nonce, T6 showZone, T8 Escape, T11 neighbouring months), and T1, T4, T7, T9, are on
+tzslot's main branch, under « Unreleased » in its CHANGELOG (commits of 2026-10-26), not in 2.4.0, which is the latest
+on npm.** DzGrid cannot remove those workarounds against 2.4.0: each one's test still holds against the published
+package (the browser and jsdom suites ran on 2.4.0). Next step, for the tzslot session: release 2.5.0; then DzGrid
+moves its pin and peer floor to it and removes T1, T2, T4's note, T7, T8, T9, T10, T11 behind their tests.
 
 When one is fixed in a tzslot release: raise the peer range's floor, remove the workaround and its
 test's special case, and say so in the CHANGELOG.

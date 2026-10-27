@@ -28,7 +28,8 @@ export function resolver(g: GridContext<unknown>): (slot: ColumnSlot, col: Resol
         by[s] = new Map();
         for (const c of g.columns.visible()) {
           const r = partNameFor(s, { id: c.id, type: c.type, ...(c.def.ui && { ui: c.def.ui }) }, names);
-          for (const p of r.problems) if (!told.has(p.path)) told.add(p.path), problems.push(p);
+          // `header.filterBox` without `filters()`: told as missing-feature by the grid (`unslotted`), not twice.
+          for (const p of r.problems) if (!told.has(p.path) && p.detail !== 'header.filterBox') told.add(p.path), problems.push(p);
           const name = r.name ?? (names.has(s) ? s : null);
           by[s].set(c.id, name ? (reg[name]!.part as Part<never>) : null);
         }

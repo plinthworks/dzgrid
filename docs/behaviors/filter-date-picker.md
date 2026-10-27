@@ -22,8 +22,10 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
 
 ## What DzGrid does
 - **The control is tzslot** (owner decisions Q1, Q4: the owner's library, allowed by CLEANROOM):
-  `createDateField`, `createRangeField`, `createDateTimeField` of `@tzslot/dom` 2.2.0. No native
-  `<input type="date">`. `@tzslot/dom` and `@tzslot/core` (`>=2.2.0 <3`) are **optional peers** of
+  `createDateField`, `createDateTimeField`, and for a period `createDateInput` and `createDateRange` (feedback pass
+  K, below), from `@tzslot/dom/lazy` 2.4.0 (feedback pass L: no Temporal polyfill bundled; the native Temporal
+  where the browser has it, else the polyfill fetched as a chunk of its own). No native
+  `<input type="date">`. `@tzslot/dom` and `@tzslot/core` (`>=2.4.0 <3`) are **optional peers** of
   `@dzgrid/dom` (and `@dzgrid/angular`): an application with date filters installs them; without
   them a date filter shows the failure message below, no other control.
 - **Loaded on first use**, in three kits so a screen pays for what it opens: `date` (day *on*,
@@ -127,15 +129,15 @@ shortcut (*today*, *last 7 days*…) or a moment, from a calendar that opens und
   `docs/tzslot-requests.md`.
 
 ## Calendar options
-The period field (day *between*, instant *between days*) shows two months and the six shortcuts by
-default. `filters({ dateCalendar })` lets a dense screen ask for less:
+The period form (day *between*, instant *between days*) shows one month and the six shortcuts by
+default (two months before the feedback pass). `filters({ dateCalendar })` lets a dense screen ask for less:
 
 ```ts
 filters({ dateCalendar: { months: 1, presets: ['today', 'last7Days', 'thisMonth'] } });
 filters({ dateCalendar: { presets: [] } }); // no shortcut column
 ```
 
-- `months`: a positive integer, the months side by side (tzslot's `months`); 2 when absent; at most 12 (more:
+- `months`: a positive integer, the months side by side (tzslot's `months`); 1 when absent; at most 12 (more:
   12, with the warning below; review R2).
 - `presets`: `RelativeRange` names, offered in this order (a repeat is dropped); `[]` hides the
   column (tzslot's `showPresets: false`); the six when absent.
@@ -143,8 +145,8 @@ filters({ dateCalendar: { presets: [] } }); // no shortcut column
 - A value it cannot take (a `months` that is not a positive integer or is over 12, `presets` that is not a list, a
   name not among the six) is dropped, never thrown: one `invalid-setting` warning per value
   (`features.filters.dateCalendar.months` / `.presets`, the value as its detail) when the grid sets up.
-  A stored shortcut that is not offered stays in force: the period field opens empty (tzslot names
-  only the shortcuts it is given); a period picked replaces it, Clear removes it.
+  A stored shortcut that is not offered stays in force: the form shows its days, no shortcut pressed; a period picked
+  replaces it, Clear removes it.
 - Angular: nothing to add; `filters({ dateCalendar })` goes in `[features]` (or the `features` default).
 
 ## Tests
@@ -165,3 +167,34 @@ The loader (`once`, `notice`) moved, unchanged, from `filters/lazy.ts` into `@dz
 filters and the editors' calendar), and the lazy helpers (`base`, `styles`, `named`, `lost`, `muter`) from
 `filters/dates/shared.ts` to `src/dates/shared.ts` (the kits' file re-exports them). Nothing a user sees changed;
 every date-filter test runs unchanged.
+
+## The period form in the popup itself (feedback pass K, owner Q2, 2026-10-27)
+« Pourquoi inline — un popup juste qui s'ouvre en dessous de l'en-tête »: the column's filter popup, under its
+header, holds the period form itself, composed by DzGrid from tzslot's pieces; no field, no second panel on top of
+the popup (which overflowed the window on the last column). The lasting design, not a stopgap: no tzslot request.
+- **FROM and TO**: two typed fields (`createDateInput`, labelled by tzslot's `from` / `to` words: « Du », « Au »,
+  « من », « إلى »), in a group named by the form's label (`filter.period`). A day typed in the grid's locale reads after
+  the form's pause; Enter in a field applies and closes the popup (the popup's own Enter).
+- **One calendar** (`createDateRange`, one month unless `dateCalendar.months`), in the flow of the popup: a first
+  click sets FROM, a second TO (before FROM: the two swap, tzslot's rule); the fields follow, and the calendar
+  follows what is typed. Its keys are tzslot's grid (arrows, Page keys, Home / End, Enter).
+- **The shortcuts** as buttons under it (`aria-pressed`, the one in force pressed; `dateCalendar.presets`, or the six;
+  none between two moments). A shortcut pressed stores `{op: 'relative'}` and shows its days.
+- **Between two moments** (instant *between*): each end with its hour (tzslot's hour field beside the day), the
+  calendar setting the days, `[at, atTo)` in the grid's zone; a day the zone never had greyed (T7, `lost()`). A
+  typed end names a wall clock: in an hour a clock change repeats, it reads the first one (the input layout has no
+  reading menu).
+- **What is read**: a period of days (both in; no instant carries them, so a day the zone lost, Apia's 2011-12-30,
+  stays the day asked), a shortcut, two moments; one end alone, TO before FROM, or a period that holds nothing is
+  null (the filter in force stays, L1).
+- **Escape** closes the popup at once: there is no panel to close first. **Focus**: FROM, TO, the calendar, the
+  shortcuts, Clear, Apply. **No zone said for a day column** (no summary at all: T6 has nothing left to hide).
+- **Layout** in the kit's own small sheet (`dzg-period`, layered, injected with tzslot's, with the nonce): the ends
+  side by side and the shortcuts wrapping, within 20 rem. The theme unfades another month's days in the popup
+  (`--tz-cal-outside-opacity: 1` on `.dzg-popup`, T11) and outlines the pressed shortcut in the accent.
+- **Known, tzslot's**: with an Arabic locale's own digits (`numerals: 'locale'`, ar-EG) the calendar writes its day
+  numbers in Latin digits while it names the days in Arabic-Indic ones: axe `label-content-name-mismatch` on the day
+  cells (T4, fixed on tzslot's main, not in 2.4.0; the browser check records it and will flip).
+- Tests: `packages/dom/test/filters-dates-inline.test.ts`; the older date tests rewritten on the form; browser
+  `scripts/browser-feedback.mjs` (`--only dates`, Chrome, Firefox, WebKit: in the window on the last column, no panel,
+  keys alone, fr, ar, ar-EG).

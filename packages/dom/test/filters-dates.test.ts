@@ -1,4 +1,4 @@
-// Date filters on tzslot 2.2.0 (step 14 part B; docs/behaviors/filter-date-picker.md,
+// Date filters on tzslot (2.4.0's lazy entry since the feedback pass; step 14 part B; docs/behaviors/filter-date-picker.md,
 // filter-relative.md, filter-day.md, filter-instant.md). The real widgets run under jsdom (the
 // Temporal polyfill); `loadDates` stubs make loading, failure and Retry deterministic.
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
@@ -54,9 +54,10 @@ function grid(o: Open = {}) {
   const q = <E extends Element = HTMLElement>(s: string) => popup()?.querySelector<E>(s) ?? null;
   const op = () => q<HTMLSelectElement>('select.dzg-fop')!;
   const box = () => q<HTMLElement>('.dzg-fdate');
-  const widget = () => q<HTMLElement>('.dzg-fdate .tz-field');
+  // A field (a day, a moment), or the period form in the popup itself (feedback pass K: no field, no panel).
+  const widget = () => q<HTMLElement>('.dzg-fdate .tz-field, .dzg-fdate .dzg-fperiod');
   const trigger = () => q<HTMLElement>('.dzg-fdate .tz-field__trigger');
-  const panel = () => document.querySelector<HTMLElement>('.tz-field__panel');
+  const panel = () => document.querySelector<HTMLElement>('.tz-field__panel') ?? q<HTMLElement>('.dzg-fperiod');
   const choose = (v: string) => {
     op().value = v;
     op().dispatchEvent(new Event('change', { bubbles: true }));
@@ -64,6 +65,7 @@ function grid(o: Open = {}) {
   const ready = () => vi.waitFor(() => expect(widget()).not.toBeNull());
   /** Opens tzslot's panel by its trigger, as a click. */
   const openPanel = () => {
+    if (q('.dzg-fperiod')) return;
     const b = q<HTMLElement>('.dzg-fdate .tz-field__trigger:is(button)') ?? q<HTMLElement>('.dzg-fdate .tz-field__icon-button')!;
     b.click();
     expect(panel()).not.toBeNull();
@@ -285,10 +287,10 @@ describe('each operator to the model (real tzslot)', () => {
     t.feature.openFilter('d');
     await t.ready();
     t.choose('between');
-    await vi.waitFor(() => expect(t.q('.dzg-fdate .tz-field')).not.toBeNull());
+    await vi.waitFor(() => expect(t.q('.dzg-fdate .dzg-fperiod')).not.toBeNull());
     expect(t.q('.dzg-flabel')!.textContent).toBe('Period');
     t.openPanel();
-    expect(t.panel()!.querySelectorAll('.tz-rangefield__preset')).toHaveLength(6);
+    expect(t.panel()!.querySelectorAll('.dzg-fpreset')).toHaveLength(6);
     t.day('2026-10-05').click();
     // One end: inactive, nothing stored (L1).
     expect(t.filter()['d']).toBeUndefined();
@@ -304,7 +306,7 @@ describe('each operator to the model (real tzslot)', () => {
     t.choose('between');
     await vi.waitFor(() => expect(t.widget()).not.toBeNull());
     t.openPanel();
-    const preset = (name: string) => [...t.panel()!.querySelectorAll<HTMLButtonElement>('.tz-rangefield__preset')].find((b) => b.textContent === name)!;
+    const preset = (name: string) => [...t.panel()!.querySelectorAll<HTMLButtonElement>('.dzg-fpreset')].find((b) => b.textContent === name)!;
     preset('Last 7 days').click();
     expect(t.filter()['d']).toEqual({ type: 'day', op: 'relative', range: 'last7Days' });
     // 2026-10-13 .. 2026-10-19 in the grid's zone (UTC).
@@ -355,7 +357,7 @@ describe('each operator to the model (real tzslot)', () => {
     t.choose('betweenDays');
     await vi.waitFor(() => expect(t.widget()).not.toBeNull());
     t.openPanel();
-    expect(t.panel()!.querySelectorAll('.tz-rangefield__preset')).toHaveLength(6);
+    expect(t.panel()!.querySelectorAll('.dzg-fpreset')).toHaveLength(6);
     t.day('2026-10-05').click();
     t.day('2026-10-06').click();
     expect(t.filter()['t']).toEqual({ type: 'instant', op: 'betweenDays', day: '2026-10-05', dayTo: '2026-10-06' });
@@ -368,7 +370,7 @@ describe('each operator to the model (real tzslot)', () => {
     t.choose('between');
     await vi.waitFor(() => expect(t.widget()).not.toBeNull());
     t.openPanel();
-    expect(t.panel()!.querySelectorAll('.tz-rangefield__preset:not([hidden])').length === 0 || t.panel()!.querySelector<HTMLElement>('.tz-rangefield__presets')!.hidden).toBe(true);
+    expect(t.panel()!.querySelectorAll('.dzg-fpreset')).toHaveLength(0);
     t.day('2026-10-05').click();
     t.day('2026-10-09').click();
     expect(t.filter()['t']).toEqual({ type: 'instant', op: 'between', at: '2026-10-04T22:00:00.000Z', atTo: '2026-10-08T22:00:00.000Z' });
@@ -509,7 +511,7 @@ describe('the grid’s zone, today and the locale', () => {
     t.choose('between');
     await vi.waitFor(() => expect(t.widget()).not.toBeNull());
     t.openPanel();
-    expect([...t.panel()!.querySelectorAll('.tz-rangefield__preset')].map((b) => b.textContent)).toContain('آخر 7 أيام');
+    expect([...t.panel()!.querySelectorAll('.dzg-fpreset')].map((b) => b.textContent)).toContain('آخر 7 أيام');
   });
 
   it('dateMessages gives tzslot’s words for another language', async () => {
@@ -581,7 +583,8 @@ describe('drafts, echo and L1', () => {
     t.choose('between');
     await vi.waitFor(() => expect(t.widget()).not.toBeNull());
     t.openPanel();
-    t.day('2026-10-07').click();
+    // The day held before the operator changed is the period's FROM (the form keeps what the field held): half a period.
+    expect(t.day('2026-10-05').getAttribute('aria-selected')).toBe('true');
     expect(t.filter()['d']).toEqual({ type: 'day', op: 'equals', value: '2026-10-05' });
     t.q<HTMLButtonElement>('.dzg-fapply')!.click();
     expect(t.filter()['d']).toEqual({ type: 'day', op: 'equals', value: '2026-10-05' });
@@ -632,16 +635,25 @@ describe('keys, focus and the panel', () => {
     expect(t.popup()).toBeNull();
   });
 
-  it('Enter inside the panel is the panel’s: the popup stays', async () => {
-    const t = grid();
-    t.feature.openFilter('d');
+  it('Enter inside the panel is the panel’s: the popup stays (a moment\'s panel: the period has none since feedback pass K)', async () => {
+    const t = grid({ settings: { timeZone: 'Europe/Paris' } });
+    t.set('t', { type: 'instant', op: 'before', at: '2026-01-10T09:00:00.000Z' });
+    t.feature.openFilter('t');
     await t.ready();
-    t.choose('between');
-    await vi.waitFor(() => expect(t.widget()).not.toBeNull());
     t.openPanel();
-    const input = t.panel()!.querySelector<HTMLInputElement>('input')!;
+    const input = document.querySelector<HTMLElement>('.tz-field__panel')!.querySelector<HTMLElement>('input, button')!;
     t.key(input, 'Enter');
     expect(t.popup()).not.toBeNull();
+  });
+
+  it('Enter in the period form\'s FROM applies and closes (feedback pass K: the popup\'s own field)', async () => {
+    const t = grid();
+    t.set('d', { type: 'day', op: 'between', value: '2026-10-01', valueTo: '2026-10-02' });
+    t.feature.openFilter('d');
+    await t.ready();
+    t.key(t.q<HTMLInputElement>('.dzg-fends input')!, 'Enter');
+    expect(t.popup()).toBeNull();
+    expect(t.filter()['d']).toEqual({ type: 'day', op: 'between', value: '2026-10-01', valueTo: '2026-10-02' });
   });
 
   it('the panel opens inside the popup element; closing the popup leaves no panel', async () => {
@@ -693,12 +705,14 @@ describe('styles under a strict CSP', () => {
       t.feature.openFilter(c);
       t.choose(op);
       await vi.waitFor(() => expect(t.widget()).not.toBeNull());
-      const b = t.q<HTMLElement>('.dzg-fdate .tz-field__trigger:is(button)') ?? t.q<HTMLElement>('.dzg-fdate .tz-field__icon-button')!;
-      b.click();
+      const b = t.q<HTMLElement>('.dzg-fdate .tz-field__trigger:is(button)') ?? t.q<HTMLElement>('.dzg-fdate .tz-field__icon-button');
+      b?.click();
       t.feature.closeFilter();
     }
     const sheets = [...document.head.querySelectorAll<HTMLStyleElement>('style[data-tzslot]')];
-    expect(sheets.map((s) => s.dataset['tzslot']).sort()).toEqual(['calendar', 'dateinput', 'datetime', 'field', 'range', 'rangefield', 'time', 'timeselect']);
+    // The period form (feedback pass K) brings no field and no panel: no `rangefield` sheet.
+    // The form's own layout (`dzg-period`) rides with tzslot's, the same way (marked, with the nonce).
+    expect(sheets.map((s) => s.dataset['tzslot']).sort()).toEqual(['calendar', 'dateinput', 'datetime', 'dzg-period', 'field', 'range', 'time']);
     for (const s of sheets) expect(s.getAttribute('nonce'), s.dataset['tzslot']).toBe('n0nce');
     expect(document.head.querySelectorAll('style[data-tzslot="field"]')).toHaveLength(1);
   });
@@ -868,26 +882,25 @@ describe('filters({ dateCalendar }): the period widget’s months and shortcuts'
     t.feature.openFilter(column);
     await t.ready();
     t.choose(op);
-    await vi.waitFor(() => expect(t.q('.dzg-fdate .tz-rangefield, .dzg-fdate .tz-field')).not.toBeNull());
+    await vi.waitFor(() => expect(t.q('.dzg-fdate .dzg-fperiod, .dzg-fdate .tz-field')).not.toBeNull());
     await vi.waitFor(() => expect(t.q('.dzg-flabel')!.textContent).toBe('Period'));
     t.openPanel();
     const months = () => t.panel()!.querySelectorAll('.tz-range__month').length;
-    const column_ = () => t.panel()!.querySelector<HTMLElement>('.tz-rangefield__presets');
-    const shown = () => (column_() && !column_()!.hidden ? [...column_()!.querySelectorAll('.tz-rangefield__preset')].map((b) => b.textContent) : []);
+    const shown = () => [...t.panel()!.querySelectorAll('.dzg-fpreset')].map((b) => b.textContent);
     return { t, months, shown };
   };
   const warnings = (t: ReturnType<typeof grid>) => t.problems().filter((p) => p.path.startsWith('features.filters.dateCalendar'));
 
-  it('absent: two months and the six shortcuts, as before; nothing said', async () => {
+  it('absent: one month (owner Q2, the popup itself; two before the feedback pass) and the six shortcuts; nothing said', async () => {
     const { t, months, shown } = await period({});
-    expect(months()).toBe(2);
+    expect(months()).toBe(1);
     expect(shown()).toEqual(ALL);
     expect(warnings(t)).toEqual([]);
   });
 
-  it('months: 1 reaches the widget: one month drawn', async () => {
-    const { t, months, shown } = await period({ dateCalendar: { months: 1 } });
-    expect(months()).toBe(1);
+  it('months: 2 reaches the widget: two months drawn', async () => {
+    const { t, months, shown } = await period({ dateCalendar: { months: 2 } });
+    expect(months()).toBe(2);
     expect(shown()).toEqual(ALL);
     expect(warnings(t)).toEqual([]);
   });
@@ -896,7 +909,7 @@ describe('filters({ dateCalendar }): the period widget’s months and shortcuts'
     for (const [col, op] of [['d', 'between'], ['t', 'betweenDays']] as const) {
       const { months, shown } = await period({ dateCalendar: { presets: [] } }, col, op);
       expect(shown(), col).toEqual([]);
-      expect(months()).toBe(2);
+      expect(months()).toBe(1);
       cleanup();
     }
   });
@@ -933,14 +946,15 @@ describe('filters({ dateCalendar }): the period widget’s months and shortcuts'
     expect(t.op().value).toBe('between');
     expect(reported).toEqual([]);
     expect(t.filter()['d']).toEqual({ type: 'day', op: 'relative', range: 'lastMonth' });
-    // tzslot names only the shortcuts it was given: the field shows no period.
-    expect(t.trigger()!.textContent).toBe('Start date – End date');
+    // The form shows the shortcut's days (last month), no shortcut pressed: the one offered is not it.
+    expect(t.q('.dzg-fcal [data-date="2026-09-01"]')!.getAttribute('aria-selected')).toBe('true');
+    expect(t.q('.dzg-fpreset')!.getAttribute('aria-pressed')).toBe('false');
   });
 
-  it('months that is not a positive integer: a warning, ignored (two months)', async () => {
+  it('months that is not a positive integer: a warning, ignored (one month)', async () => {
     for (const bad of [0, -1, 1.5, '1', Number.NaN]) {
       const { t, months } = await period({ dateCalendar: { months: bad } });
-      expect(months(), String(bad)).toBe(2);
+      expect(months(), String(bad)).toBe(1);
       expect(warnings(t), String(bad)).toEqual([{ code: 'invalid-setting', severity: 'warning', path: 'features.filters.dateCalendar.months', detail: String(bad) }]);
       cleanup();
     }

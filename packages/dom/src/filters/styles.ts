@@ -27,7 +27,7 @@ export const FILTERS_CSS =
   ':where(.dzg-fpop label){display:grid;gap:2px}' +
   ':where(.dzg-fpop [role=radiogroup] label){display:flex;align-items:center;gap:.5rem;min-block-size:24px}' +
   ':where(.dzg-fpop :is(select,button,.dzg-finput)){min-block-size:24px}' +
-  ':where(.dzg-ffoot){display:flex;justify-content:end;gap:.5rem}' +
+  ':where(.dzg-ffoot){display:flex;justify-content:end;gap:.5rem;white-space:nowrap}' +
   ':where(.dzg-fpop [hidden]){display:none}' +
   // Step 14: a date field (tzslot's) under its label, as wide as the form.
   ':where(.dzg-fdate){display:grid;gap:2px}' +

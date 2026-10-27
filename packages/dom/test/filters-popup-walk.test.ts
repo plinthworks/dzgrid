@@ -369,8 +369,9 @@ describe('a random walk over the filter popup and the floating row', () => {
 // an inactive filter stored, a server asked only at Apply/Enter or a midnight, the wire's resolved
 // bounds the oracle's, no echo, the first/last rule, no panel left behind.
 const tz = vi.hoisted(() => ({ last: null as null | { kind: string; o: Record<string, any> } }));
-vi.mock('@tzslot/dom', async (orig) => {
-  const m = await orig<typeof import('@tzslot/dom')>();
+// tzslot's lazy entry (feedback pass L); the period is the popup's own form (pass K): its calendar is the record.
+vi.mock('@tzslot/dom/lazy', async (orig) => {
+  const m = await orig<typeof import('@tzslot/dom/lazy')>();
   const wrap = <F extends (h: HTMLElement, o?: any) => any>(kind: string, f: F) => ((h: HTMLElement, o: Record<string, any> = {}) => {
     const w = f(h, o);
     const rec = { kind, o: { ...o } };
@@ -381,7 +382,7 @@ vi.mock('@tzslot/dom', async (orig) => {
     w.destroy = () => (tz.last === rec && (tz.last = null), destroy());
     return w;
   }) as unknown as F;
-  return { ...m, createDateField: wrap('date', m.createDateField), createRangeField: wrap('range', m.createRangeField), createDateTimeField: wrap('moment', m.createDateTimeField) };
+  return { ...m, createDateField: wrap('date', m.createDateField), createDateRange: wrap('range', m.createDateRange), createDateTimeField: wrap('moment', m.createDateTimeField) };
 });
 
 type DRow = R & { t: string };
@@ -395,7 +396,7 @@ const D_ROWS: DRow[] = Array.from({ length: 48 }, (_, i) => ({ id: `r${i}`, name
 /** What the walks did, summed: a walk that never reaches a widget proves nothing. */
 const did = { opens: 0, widgets: 0, picks: 0, stored: 0, relative: 0, ticks: 0 };
 async function walkDates(seed: number, server: boolean, steps = 45) {
-  const { Temporal } = await import('@tzslot/core');
+  const { Temporal } = await import('@tzslot/core/lazy');
   const core = await import('@dzgrid/core');
   const KITS = { date: await import('../src/filters/dates/date.js'), range: await import('../src/filters/dates/range.js'), moment: await import('../src/filters/dates/moment.js') };
   const r = rng(seed);
@@ -481,7 +482,7 @@ async function walkDates(seed: number, server: boolean, steps = 45) {
     if (p) {
       const items = [...p.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((e) => !e.closest('[hidden]'));
       if (items.length && (items[0] !== op() && !p.querySelector('.dzg-fsum') || items.at(-1) !== p.querySelector('.dzg-fapply'))) fail(`${what}: first/last ${items[0]?.className} / ${items.at(-1)?.className}`);
-    } else if (document.querySelector('.tz-field__panel, .tz-field')) fail(`${what}: a tzslot widget left behind`);
+    } else if (document.querySelector('.tz-field__panel, .tz-field, .tz-range, .tz-dateinput')) fail(`${what}: a tzslot widget left behind`);
   };
   const step = async (what: string, act: () => unknown, o: { quiet?: boolean } = {}) => {
     const calls = t.f.calls.length;
@@ -515,7 +516,7 @@ async function walkDates(seed: number, server: boolean, steps = 45) {
           return;
         }
         const w = tz.last;
-        if (!w || !popup()!.contains(document.querySelector('.dzg-fdate .tz-field'))) return;
+        if (!w || !popup()!.contains(document.querySelector('.dzg-fdate .tz-field, .dzg-fdate .dzg-fperiod'))) return;
         did.widgets++;
         const was = JSON.stringify(model()[c]);
         queueMicrotask(() => { if (JSON.stringify(model()[c]) !== was) did.stored++, model()[c]?.op === 'relative' && did.relative++; });
@@ -524,9 +525,11 @@ async function walkDates(seed: number, server: boolean, steps = 45) {
         log.push(`  ${w.kind} ${d1} ${d2}`);
         if (w.kind === 'date') return w.o['onChange']?.(Temporal.PlainDate.from(d1));
         if (w.kind === 'moment') return w.o['onChange']?.(what === 'half' ? null : instant(d1, r.int(1440)));
-        if (what === 'preset' && w.o['showPresets'] !== false) return w.o['onChange']?.({ start: instant(d1, 0), end: instant(d2, 0) }, { preset: r.pick(RANGES) });
-        const end = what === 'half' ? null : w.o['showTime'] ? instant(d2, r.int(1440)) : instant(d2 < d1 ? d1 : d2, 0).toZonedDateTimeISO(w.o['timeZone']).add({ days: 1 }).startOfDay().toInstant();
-        return w.o['onChange']?.({ start: instant(d1, w.o['showTime'] ? r.int(1440) : 0), end }, { preset: null });
+        // The period form: a shortcut is a button; a pick, the calendar's two days (or one: half a period).
+        const shortcut = popup()!.querySelector<HTMLButtonElement>(`.dzg-fpreset[data-range="${r.pick(RANGES)}"]`);
+        if (what === 'preset' && shortcut) return shortcut.click();
+        const [a, b] = d2 < d1 ? [d2, d1] : [d1, d2];
+        return w.o['onChange']?.({ start: Temporal.PlainDate.from(a), end: what === 'half' ? null : Temporal.PlainDate.from(b) }, { pressed: null });
       }, { quiet: true });
       continue;
     }
@@ -569,7 +572,7 @@ async function walkDates(seed: number, server: boolean, steps = 45) {
     if (server && t.f.calls.length) await step('answer', () => t.f.answer([]));
   }
   t.g.destroy();
-  if (document.querySelector('.tz-field__panel, .tz-field')) fail('a tzslot widget survived destroy');
+  if (document.querySelector('.tz-field__panel, .tz-field, .tz-range, .tz-dateinput')) fail('a tzslot widget survived destroy');
 }
 
 describe('a random walk over the date forms (step 14 part B)', () => {

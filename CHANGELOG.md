@@ -9,6 +9,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The feedback pass (« retours d'usage », allergen-detector, 2026-10-27; `docs/phase-6-steps/feedback-plan.md`,
+  decisions « Feedback pass »):
+  - **The period form in the filter popup itself** (owner Q2): FROM and TO typed fields (tzslot's `createDateInput`),
+    one month of tzslot's inline calendar (`createDateRange`; `dateCalendar.months` for more) and the shortcuts as
+    buttons, composed by DzGrid in the column's popup: no second panel over the popup, nothing outside the window on the
+    last column, one Escape closes. Between two moments: each end with its hour. (filter-date-picker.md)
+  - **A part for the set filter's option row**: slot `filterOption`, named by `filter: { kind: 'set', optionPart }`; told
+    `value`, `label`, `count`, `countText`, `selected`, `blank`, `column`, `toggle()`; the grid keeps the row, its name,
+    keys and window. (filter-set.md)
+  - **`ColumnDef.ui.data`**, the app's own data for the column's parts, delivered as is; another key of `ui` is a warning
+    `unknown-ui-key`. (parts.md)
+  - **`data-column` / `data-kind` on the filter popup's content**, for an app's global CSS (owner Q5). (theming.md)
+  - A column naming a header or tooltip part without `slots()` (or `header.filterBox` without `filters()`) is a
+    `missing-feature` warning at `columns[i].ui.header|tooltip`.
+  - Docs: a header search (« filter as you type ») part over the column's filter, `dzgrid.unlayered.css` for an app with
+    an unlayered reset, `--dzg-row-height` read-only (use `rowHeight`), Angular notes (`[slot]` a binding, CSS escapes).
+  - Playground: « Retours d'usage » (`?filters=1&popup=1&dates=1&sets=1&pills=1&paging=client`): pills, one operator,
+    the period form, the pager's arrows.
+
+### Changed
+
+- **tzslot 2.4.0**: the date kits and the editors' calendar import `@tzslot/dom/lazy` / `@tzslot/core/lazy` (T3): no
+  Temporal polyfill bundled; a date kit's first use downloads 33 317 B gz instead of 66 962. The optional peers ask
+  `>=2.4.0 <3` (was `>=2.2.0 <3`); a chunk exports `ready`, awaited by the loader.
+- French `filter.clear`: « Effacer {column} » (was « Effacer le filtre {column} »); the popup's Clear button shows the
+  text without the column and keeps it in its name.
+- The tree, detail and group chevrons are a character (U+203A) turned by `rotate`, no longer borders: `--dzg-chevron`
+  is `90deg` / `-90deg` open, unset closed; `--dzg-gch` `90deg` / `-90deg` / `0deg`.
+- The theme draws the selection box's edge with an outline (dashed when refused, `CanvasText` in forced colours).
+- The period form opens on one month (two before); a stored shortcut the form does not offer shows its days.
+- Budgets (owner Q1, the lazy kits by the strict need): date adapters 2 600 → 2 745, set chunk 4 200 → 4 205, the
+  editors' calendar 1 500 → 1 520.
+
+### Fixed
+
+- **The pager's arrows were empty buttons in an app with an unlayered reset** (Tailwind 3's preflight): they were
+  layered CSS borders. They are now characters in the DOM (`aria-hidden`, mirrored right to left by the browser); the
+  same fault removed from the tree, detail and group chevrons and the value list's box.
+- **An unticked selection box was invisible in the light theme** under the same reset: its edge is an outline.
+- « Condition » no longer shows for a column offering one operator (`ops: ['betweenDays']`).
+- A long column name no longer wraps the filter popup's footer.
+- The neighbouring month's days in the period form's calendar are unfaded in a popup (T11, `--tz-cal-outside-opacity`
+  on `.dzg-popup`).
+
+### Added (Phase 6)
+
 - `@dzgrid/dom/auto-height` (Phase 6 step 9; docs/behaviors/auto-height.md, owner Q-R1, Q9-1..Q9-4): `autoHeight()` —
   rows as tall as their tallest wrapped cell (`ColumnDef.wrap: true`), never under the row height; measured after each
   paint in one read (hidden copies of the wrapped cells, written, read, removed) and painted again in the same frame

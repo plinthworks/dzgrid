@@ -18,8 +18,10 @@ export const SET_CSS =
   ':where(.dzg-fname){flex:1;min-inline-size:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;unicode-bidi:plaintext;text-align:start}' +
   ':where(.dzg-fcount){unicode-bidi:isolate}' +
   ':where(.dzg-fcount):before{content:attr(data-n)}' +
-  ':where(.dzg-fopt>.dzg-box){flex:none;display:inline-grid;place-items:center;inline-size:1rem;block-size:1rem;box-sizing:border-box;border:1px solid;line-height:1}' +
+  ':where(.dzg-fopt>.dzg-box){flex:none;display:inline-grid;place-items:center;inline-size:1rem;block-size:1rem;box-sizing:border-box;outline:1px solid;outline-offset:-1px;line-height:1}' +
   ':where(.dzg-fopt[aria-selected=true]>.dzg-box):before{content:"\\2713"}' +
+  // A `filterOption` part (feedback pass C) paints the row: the grid's own content steps aside.
+  ':where(.dzg-fopt[data-part]>:not(.dzg-fpart)){display:none}:where(.dzg-fpart){display:contents}' +
   ':where(.dzg-flistw>p){position:absolute;inset-block-start:0;inset-inline:0;margin:.5rem}' +
   ':where(.dzg-flistw>.dzg-fretry){position:absolute;inset-block-end:.5rem;inset-inline-start:.5rem}' +
   '}';

@@ -24,12 +24,14 @@ import { stateChecks } from './browser-state.mjs';
 import { groupsChecks } from './browser-groups.mjs';
 import { pinnedRowsChecks } from './browser-pinned-rows.mjs';
 import { autoHeightChecks } from './browser-auto-height.mjs';
+import { pagerGlyphChecks, treeGlyphChecks, inkOf } from './browser-glyphs.mjs';
+import { feedbackFilterChecks, periodChecks } from './browser-feedback.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const OUT = `${ROOT}packages/dom/test/browser/results`;
 mkdirSync(OUT, { recursive: true });
 // tzslot for the page's date filters (step 14): bundled once, two entries sharing one core (importmap in index.html).
-await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
+await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core', 'dom-lazy': '@tzslot/dom/lazy', 'core-lazy': '@tzslot/core/lazy' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
 // `-- --engine webkit`: one engine alone (with `--only`, a group's checks in that engine).
 const engines = process.argv.includes('--all') ? ['chrome', 'firefox', 'webkit'] : process.argv.includes('--engine') ? [process.argv[process.argv.indexOf('--engine') + 1]] : ['chrome'];
 // `-- --only parts`: one group of checks (step 20's cell parts), for work on it; the full run before a commit.
@@ -118,7 +120,7 @@ async function dateChecks(name, ctx) {
   });
   const filter = (page, c) => page.evaluate((c) => window.t.grid.kernel.query.filter[c] ?? null, c);
   const shown = (page) => page.evaluate(() => window.t.grid.kernel.rows.displayed.count);
-  const ready = (page) => page.waitForSelector('.dzg-popup .dzg-fdate .tz-field', { timeout: 15000 });
+  const ready = (page) => page.waitForSelector('.dzg-popup .dzg-fdate :is(.tz-field, .dzg-fperiod)', { timeout: 15000 });
   const openOn = async (page, c) => { await page.click(`.dzg-hcell[role=columnheader][data-col="${c}"] > .dzg-fbtn`); await frames(page); };
   const openPanel = async (page) => { await page.click('.dzg-popup .dzg-fdate .tz-field__trigger:is(button), .dzg-popup .dzg-fdate .tz-field__icon-button'); await frames(page, 3); };
   const op = (page, v) => page.selectOption('.dzg-popup select.dzg-fop', v);
@@ -183,18 +185,16 @@ async function dateChecks(name, ctx) {
     const picked = await filter(page, 'day');
     const s3 = await S(page);
     check(name, `${tag}: → then Enter picks the next day: stored at once, the calendar closed, the popup open`, picked?.value === '2026-03-30' && !s3.panel && s3.open, { picked, s3 });
-    // Between and the shortcuts; a shortcut stores the shortcut.
+    // Between and the shortcuts (the period form in the popup itself, feedback pass K); a shortcut stores the shortcut.
     await op(page, 'between');
-    await ready(page);
-    await openPanel(page);
+    await page.waitForSelector('.dzg-popup .dzg-fperiod', { timeout: 15000 });
     v = await axe(page);
-    const presets = await page.evaluate(() => [...document.querySelectorAll('.tz-field__panel .tz-rangefield__preset')].map((b) => b.textContent));
-    check(name, `${tag}: between offers the six shortcuts, axe 0 with the period panel open`, presets.length === 6 && v.length === 0, { presets, v });
-    await page.click('.tz-field__panel .tz-rangefield__preset >> nth=2');
+    const presets = await page.evaluate(() => [...document.querySelectorAll('.dzg-popup .dzg-fpreset')].map((b) => b.textContent));
+    check(name, `${tag}: between offers the six shortcuts in the popup's own period form, no panel, axe 0`, presets.length === 6 && v.length === 0 && !(await S(page)).panel, { presets, v });
+    await page.click('.dzg-popup .dzg-fpreset >> nth=2');
     await frames(page);
     const rel = await filter(page, 'day');
     check(name, `${tag}: the third shortcut stores {op: relative, range: last7Days}`, rel?.op === 'relative' && rel.range === 'last7Days', rel);
-    await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');
     await frames(page);
     await set(page, 'day', null);
@@ -648,10 +648,8 @@ async function pagingChecks(name, ctx) {
     const f = document.querySelector('.dzg-footer');
     const r = (e) => { const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom, w: b.width, h: b.height }; };
     const btn = (go) => f.querySelector(`[data-go="${go}"]`);
-    const before = (go) => btn(go) && getComputedStyle(btn(go), '::before').rotate;
     return {
       first: btn('first') && r(btn('first')), next: r(btn('next')), last: btn('last') && r(btn('last')),
-      rot: { first: before('first'), next: before('next') },
       targets: [...f.querySelectorAll('button:not([hidden]), select')].filter((e) => e.offsetParent).map((e) => { const b = e.getBoundingClientRect(); return Math.min(b.width, b.height); }),
       page: f.querySelector('.dzg-ppage').textContent, count: f.querySelector('.dzg-pcount').textContent,
       lives: document.querySelectorAll('.dzg [aria-live]').length, grids: document.querySelectorAll('.dzg').length,
@@ -670,9 +668,10 @@ async function pagingChecks(name, ctx) {
     const s0 = await F(page);
     let v = await axe(page);
     check(name, `${tag}: axe 0 with two grids; two distinct nav names; one live region per grid`, v.length === 0 && s0.navs.length === 2 && s0.navs[0] !== s0.navs[1] && s0.lives === s0.grids, { v, navs: s0.navs, lives: s0.lives });
-    // First at the inline start: left in French, right in Arabic; the chevrons turned the other way.
+    // First at the inline start: left in French, right in Arabic; the arrows (characters, feedback pass A) mirrored.
     const startFirst = rtl ? s0.first.l > s0.next.r : s0.first.r < s0.next.l;
-    check(name, `${tag}: first page at the inline start, chevrons mirrored (${s0.rot.first} / ${s0.rot.next})`, startFirst && s0.rot.first === (rtl ? '45deg' : '-45deg') && s0.rot.next === (rtl ? '-135deg' : '135deg'), s0);
+    const nx = await inkOf(await page.$('.dzg-footer [data-go="next"] > span'));
+    check(name, `${tag}: first page at the inline start, next pointing ${rtl ? 'left' : 'right'} (${nx.x})`, startFirst && nx.n > 6 && nx.x === (rtl ? -1 : 1), { s0, nx });
     check(name, `${tag}: targets at least 24 px; ${rtl ? 'no last button by cursor, "' + s0.page + '"' : 'a last button'}`, s0.targets.every((x) => x >= 24) && (rtl ? s0.last === null && !/ من /.test(s0.page) : s0.last !== null), s0);
     // Digits not reversed: "50" reads 5 then 0 in the reading order of the line, whatever the direction.
     const digits = await page.evaluate(() => {
@@ -1199,7 +1198,7 @@ async function treeChecks(name, ctx) {
       const rot = (x) => getComputedStyle(x, '::before').rotate;
       return { w: b.width, h: b.height, rot: rot(t), openRot: rot(open), startGap: document.documentElement.dir === 'rtl' ? cell.right - o.right : o.left - cell.left, indent: Math.abs(b.left - o.left), hidden: t.getAttribute('aria-hidden'), focusable: t.tabIndex };
     }, rowOf('s0p3'));
-    check(name, `${c.tag}: the toggle is aria-hidden, not focusable, ≥ 24 × 24 px at the cell's start; chevron ${c.rtl ? '45deg (left)' : '-45deg (right)'} closed, down open`, tg.w >= 24 && tg.h >= 24 && tg.hidden === 'true' && tg.focusable === -1 && tg.rot === (c.rtl ? '45deg' : '-45deg') && tg.openRot === (c.rtl ? '-45deg' : '45deg') && tg.startGap >= 0 && tg.startGap < 16 && Math.abs(tg.indent - 16) < 1, tg);
+    check(name, `${c.tag}: the toggle is aria-hidden, not focusable, ≥ 24 × 24 px at the cell's start; chevron (a character, feedback pass A) unturned closed, turned ${c.rtl ? '-90deg' : '90deg'} (down) open`, tg.w >= 24 && tg.h >= 24 && tg.hidden === 'true' && tg.focusable === -1 && tg.rot === 'none' && tg.openRot === (c.rtl ? '-90deg' : '90deg') && tg.startGap >= 0 && tg.startGap < 16 && Math.abs(tg.indent - 16) < 1, tg);
     // Real keys on Service 1 (closed), in the tree column.
     await page.evaluate(() => window.t.grid.api.focusCell(window.t.key('s1'), 'name'));
     await frames(page);
@@ -1300,7 +1299,7 @@ async function treeChecks(name, ctx) {
       const want = getComputedStyle(probe).color;
       probe.remove();
       const t = document.querySelector('.dzg-row[aria-expanded] .dzg-toggle');
-      return { want, color: getComputedStyle(t, '::before').borderBottomColor, visible: getComputedStyle(t).visibility };
+      return { want, color: getComputedStyle(t, '::before').color, visible: getComputedStyle(t).visibility };
     });
     await page.screenshot({ path: `${OUT}/${name}-tree-${c.rtl ? 'ar' : 'fr'}-forced.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
     // No axe here: Chrome's emulated forced colours over a dark page give the page's own heading a failing
@@ -1503,7 +1502,7 @@ async function treeChecks(name, ctx) {
       const probe = (c) => { const p = document.createElement('span'); p.style.color = c; document.body.append(p); const v = getComputedStyle(p).color; p.remove(); return v; };
       const last = [...document.querySelectorAll('.dzg-sticky > .dzg-row')].at(-1);
       const cell = last.querySelector('.dzg-cell');
-      return { line: getComputedStyle(cell).borderBlockEndColor, width: getComputedStyle(cell).borderBlockEndWidth, canvasText: probe('CanvasText'), chevron: getComputedStyle(last.querySelector('.dzg-toggle'), '::before').borderBottomColor, buttonText: probe('ButtonText') };
+      return { line: getComputedStyle(cell).borderBlockEndColor, width: getComputedStyle(cell).borderBlockEndWidth, canvasText: probe('CanvasText'), chevron: getComputedStyle(last.querySelector('.dzg-toggle'), '::before').color, buttonText: probe('ButtonText') };
     });
     await page.screenshot({ path: `${OUT}/${name}-tree-sticky-forced-${c.rtl ? 'ar' : 'fr'}.png`, clip: { x: 0, y: 0, width: 1000, height: 400 } });
     await page.emulateMedia({ forcedColors: 'none' });
@@ -3164,7 +3163,7 @@ async function editorsKindsChecks(name, ctx) {
     const asked = [];
     page.on('pageerror', (e) => errors.push(e.message));
     page.on('console', (m) => { if (m.type() === 'error' && !/offline \(calfail/.test(m.text())) errors.push(m.text()); });
-    page.on('request', (r) => { if (/editors\/dates\/calendar|dzgrid-browser\/(dom|core)\.js/.test(r.url())) asked.push(r.url().replace(/^.*\/(packages|node_modules)/, '$1')); });
+    page.on('request', (r) => { if (/editors\/dates\/calendar|dzgrid-browser\/(dom|core)(-lazy)?\.js/.test(r.url())) asked.push(r.url().replace(/^.*\/(packages|node_modules)/, '$1')); });
     await page.goto(site.root(`packages/dom/test/browser/editors.html?kinds=1&${qs}`));
     await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
     await frames(page, 3);
@@ -3834,11 +3833,15 @@ async function runEngine(name) {
       if (only === 'rules' && name === 'chrome') await rulesChecks(name, ctx);
       if (only === 'motion' && name === 'chrome') await motionChecks(name, ctx);
       if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx), await editTreeChecks(name, ctx, H);
+      // Feedback pass A: the glyphs are text under an unlayered reset (Firefox and WebKit by `--engine`: the RTL arrows).
+      if (only === 'tree') await treeGlyphChecks(name, ctx, H);
+      if (only === 'pagination') name === 'chrome' && (await pagingChecks(name, ctx)), await pagerGlyphChecks(name, ctx, H);
       if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx), await editDetailChecks(name, ctx, H);
-      if (only === 'filters' && name === 'chrome') await floatingToggleChecks(name, ctx);
+      if (only === 'filters' && name === 'chrome') await floatingToggleChecks(name, ctx), await feedbackFilterChecks(name, ctx, H);
       if (only === 'themes') await themeChecks(name, ctx);
       if (only === 'bridges' && name === 'chrome') await frameworkChecks(name, ctx);
-      if (only === 'dates' && name === 'chrome') await dateChecks(name, ctx);
+      // Feedback pass K: the period form in the popup in every engine (`--engine firefox|webkit`).
+      if (only === 'dates') name === 'chrome' && (await dateChecks(name, ctx)), await periodChecks(name, ctx, H);
       if (only === 'demos') await demosChecks(name, ctx);
       // Step 7: the marks in Firefox and WebKit too (`--engine firefox|webkit`: the ring, mask, :dir(rtl), blink, still).
       if (only === 'edit-marks') await editMarksChecks(name, ctx);
@@ -3972,9 +3975,9 @@ async function runEngine(name) {
     // ---- the floating filter row (step 12): fr light, ar right to left dark, with the box, with groups and pins ----
     if (name === 'chrome') {
       const cases = [
-        ['locale=fr-FR&theme=light&rows=2000&filters=1&floating=1', 'Filtrer Montant', '1,5', 'Effacer le filtre Montant'],
+        ['locale=fr-FR&theme=light&rows=2000&filters=1&floating=1', 'Filtrer Montant', '1,5', 'Effacer Montant'],
         ['locale=ar-DZ&dir=rtl&theme=dark&rows=2000&filters=1&floating=1', 'ترشيح المبلغ', '\u0661\u066B\u0665', 'مسح مرشح المبلغ'],
-        ['locale=fr-FR&rows=2000&filters=1&floating=1&box=1', 'Filtrer Montant', '1.5', 'Effacer le filtre Montant'],
+        ['locale=fr-FR&rows=2000&filters=1&floating=1&box=1', 'Filtrer Montant', '1.5', 'Effacer Montant'],
         ['locale=ar-DZ&dir=rtl&rows=2000&filters=1&floating=1&groups=1&pin=1&box=1', 'ترشيح المبلغ', '1,5', 'مسح مرشح المبلغ'],
       ];
       for (const [qs, label, typed, clearName] of cases) {

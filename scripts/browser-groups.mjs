@@ -63,7 +63,7 @@ export async function groupsChecks(name, ctx, h) {
     let s = await seen();
     check(name, `${tag}: « Patient » split by the pin, a button on each piece, 24 × 24 at the inline end, open (aria-expanded), named; cells aligned`,
       s.pieces === 2 && s.buttons === 2 && s.box.w === 24 && s.box.h === 24 && s.box.atEnd && s.expanded === 'true' && !!s.label && !!s.name && s.misaligned.length === 0, s);
-    check(name, `${tag}: chevron open points down (${rtl ? '-45deg' : '45deg'})`, s.rotate === (rtl ? '-45deg' : '45deg'), s.rotate);
+    check(name, `${tag}: chevron (a character) open turned down (${rtl ? '-90deg' : '90deg'})`, s.rotate === (rtl ? '-90deg' : '90deg'), s.rotate);
     const open = s;
 
     // A real click on the button while Âge's header has the focus: closed, the focus goes to « Patient ».
@@ -75,7 +75,7 @@ export async function groupsChecks(name, ctx, h) {
     s = await seen();
     check(name, `${tag}: a click closes « Patient »: Prénom and Âge gone, one piece left, aligned; the focus from Âge to « Patient »`,
       !s.order.includes('prenom') && !s.order.includes('age') && s.order.includes('nom') && s.pieces === 1 && s.expanded === 'false' && s.misaligned.length === 0 && s.active === 'group:g-patient', s);
-    check(name, `${tag}: chevron closed points to the inline end (${rtl ? '45deg' : '-45deg'})`, s.rotate === (rtl ? '45deg' : '-45deg'), s.rotate);
+    check(name, `${tag}: chevron closed unturned, toward the inline end (0deg; mirrored right to left by the character)`, s.rotate === '0deg', s.rotate);
     check(name, `${tag}: the sentence said, with the count of columns shown (1)`, s.said === (rtl ? 'طُويت المريض، الأعمدة الظاهرة: 1' : 'Patient fermé, colonnes affichées : 1'), s.said);
 
     // Scrolled sideways, still aligned.
@@ -106,7 +106,7 @@ export async function groupsChecks(name, ctx, h) {
       const fc = await page.evaluate(() => {
         const b = document.querySelector('#groups .dzg-gtoggle');
         const probe = document.body.appendChild(Object.assign(document.createElement('span'), { style: 'color: ButtonText' }));
-        const out = { button: getComputedStyle(b).color, before: getComputedStyle(b, '::before').borderBlockEndColor, ButtonText: getComputedStyle(probe).color };
+        const out = { button: getComputedStyle(b).color, before: getComputedStyle(b, '::before').color, ButtonText: getComputedStyle(probe).color };
         probe.remove();
         return out;
       });

@@ -232,7 +232,7 @@ langue. Noter ce qui est **dit**, mot pour mot si possible.
     **une fois**, et la boîte est annoncée « non valide » si on y revient ; taper à nouveau efface
     l'état. Le signe `-` seul, en cours de frappe, ne doit rien faire dire.
 25. **Résumé et Effacer.** Avec un filtre que la boîte ne sait pas modifier (sur « Jour », ou un
-    « entre » posé par l'hôte) : `Entrée` sur la cellule mène au bouton « Effacer le filtre Jour »
+    « entre » posé par l'hôte) : `Entrée` sur la cellule mène au bouton « Effacer Jour »
     (ar : « مسح مرشح اليوم ») ; on entend aussi « Filtre actif ». `Entrée` sur le bouton : le filtre
     part, le focus revient sur la cellule, le nombre de lignes est dit.
 26. **Un seul arrêt de tabulation.** Depuis le champ avant la grille, `Tab` entre dans la grille,
@@ -259,7 +259,7 @@ couple et par langue. Noter ce qui est **dit**, mot pour mot si possible.
     « Filtre Montant » (ar : « مرشح المبلغ »), dialogue, puis le champ « Valeur » (son texte
     sélectionné). Rien d'autre n'est dit à l'ouverture. Sur une cellule du corps, `Alt+↓` ne fait rien.
 29. **Les champs.** `Maj+Tab` : « Condition », liste déroulante, sa valeur (« Égal à ») ; la
-    changer pour « Entre » : un second champ « Jusqu’à » apparaît. `Tab` jusqu’à « Effacer le filtre
+    changer pour « Entre » : un second champ « Jusqu’à » apparaît. `Tab` jusqu’à « Effacer
     Montant » puis « Appliquer » ; `Tab` encore : retour sur « Condition » (le focus reste dans la
     fenêtre).
 30. **Appliquer.** Taper `1,5` (ar : `١٫٥`) dans « Valeur » et `50` dans « Jusqu’à », `Entrée` :
@@ -273,7 +273,7 @@ couple et par langue. Noter ce qui est **dit**, mot pour mot si possible.
 33. **Oui / non.** Sur l'en-tête « Actif », `Alt+↓` : un groupe d'options « Filtre Actif » avec
     « Tous », « Oui », « Non » ; choisir « Oui » : « Filtré. N lignes » une fois.
 34. **Résumé.** Avec un filtre « entre » sur « Montant », la cellule de la ligne flottante : `Entrée`
-    mène au bouton « Filtre actif » (bouton qui ouvre un dialogue), puis « Effacer le filtre Montant ».
+    mène au bouton « Filtre actif » (bouton qui ouvre un dialogue), puis « Effacer Montant ».
 35. **Sur un serveur** (page serveur quand elle existera, ou noter « non testé ») : la saisie
     n'envoie rien ; `Appliquer` : le nombre est dit une fois la réponse arrivée.
 
@@ -304,7 +304,7 @@ si possible. Durée estimée : 20 min par couple et par langue. Noter ce qui est
     champ, la fenêtre de filtre reste. `Échap` encore : la fenêtre se ferme, le focus revient sur
     l'en-tête (ou le bouton), sans fermer un dialogue autour de la grille.
 40. **Tab.** Calendrier ouvert, `Tab` / `Maj+Tab` restent dans le calendrier. Fermé, `Tab` depuis le
-    champ va vers « Effacer le filtre Jour » puis « Appliquer », puis revient sur « Condition ».
+    champ va vers « Effacer Jour » puis « Appliquer », puis revient sur « Condition ».
 41. **Entre et les raccourcis.** Choisir « Entre » : le champ « Période » ; l'ouvrir : les raccourcis
     « Aujourd'hui », « Hier », « 7 derniers jours »… (ar : « اليوم »، « أمس »، « آخر 7 أيام »),
     chacun bouton **bascule** (« enfoncé » pour celui en vigueur). En presser un : la période est dite

@@ -30,7 +30,7 @@ describe('every theme file opens with the order statement and keeps its rules in
           // R1 (review of part 1): tzslot sets `color: inherit` on its days, unlayered.
           '.dzg-popup :is(.tz-cal__day--outside, .tz-range__day--outside):not(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end)',
           '.dzg-popup .tz-field__panel',
-          '.dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .tz-rangefield__preset--on)',
+          '.dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .dzg-fpreset[aria-pressed=true])',
         ]);
         expect(outside.every((r) => TZSLOT(r) && r.layers.length === 0)).toBe(true);
       } else expect(outside).toEqual([]);

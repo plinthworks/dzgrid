@@ -1,5 +1,8 @@
-import { fold, formattersFor, type SetValue } from '@dzgrid/core';
-import type { SlotContext } from '../../part.js';
+import { fold, formattersFor, problem, type SetValue } from '@dzgrid/core';
+import { emit } from '@dzgrid/core/internal';
+import type { mounted, Mounted } from '@dzgrid/dom/internal';
+import type { GridContext } from '../../context.js';
+import type { Part, SlotContext } from '../../part.js';
 import { el, labelled, tx } from '../dom.js';
 import type { Body, Changed, F } from '../forms.js';
 import type { notice } from '@dzgrid/dom/internal';
@@ -7,6 +10,7 @@ import { draftOf, filterOf, settle, tick, ticked, type Draft, type SetFilter } f
 import { listView, type Row } from './list.js';
 
 type C = SlotContext['filter'];
+type OC = SlotContext['filterOption'];
 
 /** The chunk's own layout, injected by the eager part when it loads (with the grid's nonce). */
 export { SET_CSS as css } from './styles.js';
@@ -17,10 +21,20 @@ export { SET_CSS as css } from './styles.js';
  * the stored filter. The column's values handle is opened here and closed in `destroy`. In the
  * browser the search goes to the handle at once and the ticks to `changed` (the form's pause); on a
  * server the search after the pause, never inside an input method, and the ticks wait for Apply.
- * `note`: the eager part's loading / failure helper (`lazy.ts`), handed in so the chunk does not carry its own.
+ * `note`: the eager part's loading / failure helper (`lazy.ts`), and `mount` its part mounter (`mounted`, for the option
+ * rows' parts), handed in so the chunk does not carry its own nor split the internal entry out of the page's bundle.
  */
-export function body(get: () => C, doc: Document, changed: Changed, note: typeof notice): Omit<Body, 'edits'> {
+export function body(get: () => C, doc: Document, changed: Changed, note: typeof notice, g: GridContext<unknown>, mount: typeof mounted): Omit<Body, 'edits'> {
   const h = get().values();
+  // The column's option-row part (feedback pass C): a `filterOption` part by name; another name is unknown-part.
+  // Said at each opening of the popup.
+  const col = get().column;
+  const pn = col.def.filter && col.def.filter.optionPart;
+  const sp = pn && g.parts()[pn];
+  const part = sp && sp.slot === 'filterOption' ? (sp.part as Part<OC>) : null;
+  if (pn && !part) emit(g.kernel, { type: 'problems', source: 'host', problems: [problem('unknown-part', 'error', `columns.${col.id}.filter.optionPart`, pn)] });
+  /** One mounted part per drawn row node. */
+  const ms = new Map<HTMLElement, Mounted<OC>>();
   let d: Draft = draftOf(null);
   /** The search the list shows (asked, on a server after the pause): what select all and its label follow, not the box. */
   let sent = '';
@@ -50,14 +64,28 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   la.append(sa);
   const wrap = el(doc, 'div', 'dzg-flistw');
   const fmt = () => formattersFor(get().ctx).number();
+  const on = (r: Row): boolean => (r.v === null ? d.blanks : ticked(d, r.v));
+  const flip = (r: Row): void => {
+    if (r.v === null) d.blanks = !d.blanks;
+    else tick(d, r.v, !on(r));
+    edit();
+  };
   const list = listView(doc, {
-    ticked: (r) => (r.v === null ? d.blanks : ticked(d, r.v)),
-    toggle(r) {
-      if (r.v === null) d.blanks = !d.blanks;
-      else tick(d, r.v, !ticked(d, r.v));
-      edit();
-    },
+    ticked: on,
+    toggle: flip,
     empty: () => search.focus(),
+    ...(part && {
+      paint(x: HTMLElement, r: Row) {
+        let m = ms.get(x);
+        if (!m) ms.set(x, (m = mount<OC>(g)));
+        // Drawn by the part, or (it threw) by the grid: the default row shows again.
+        x.toggleAttribute('data-part', m.set(x.lastElementChild as HTMLElement, part, { value: r.v, label: r.label, count: r.n, countText: r.count, selected: on(r), blank: r.v === null, column: col, toggle: () => flip(r) }));
+      },
+      gone(x: HTMLElement) {
+        ms.get(x)?.clear();
+        ms.delete(x);
+      },
+    }),
   });
   wrap.append(list.el);
   let noted = '';
@@ -84,7 +112,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     const counted = vs.some((x) => x.count !== null) || blanks !== null;
     const f = fmt();
     const row = (v: string | null, label: string, count: number | null): Row => ({
-      v, label, count: counted && count !== null ? f(count) : '',
+      v, label, count: counted && count !== null ? f(count) : '', n: count,
       name: count === null ? label : c.msg('filter.set.option', { label, rows: c.msg('announce.rows', { n: count }) }),
     });
     const marked = d.mode === 'include' ? d.blanks : !d.blanks;
@@ -187,6 +215,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
       clearTimeout(said);
       stop();
       h.close();
+      for (const m of ms.values()) m.clear();
     },
   };
 }

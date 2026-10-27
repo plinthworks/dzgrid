@@ -35,6 +35,8 @@ const messages = more.length ? { ...base, text: Object.assign({}, base.text, ...
 document.documentElement.lang = locale;
 document.documentElement.dir = q.get('dir') ?? (locale.startsWith('ar') ? 'rtl' : 'ltr');
 if (q.get('theme')) document.documentElement.dataset['theme'] = q.get('theme')!;
+// `reset=1` (feedback pass A): an unlayered reset like Tailwind 3's preflight, which beats every layered rule.
+if (q.get('reset')) document.head.append(Object.assign(document.createElement('style'), { textContent: '*,::before,::after{border-width:0;border-style:solid}' }));
 
 type Row = { id: number; name: string; city: string; amount: number; day: string; paid: boolean; at?: string; commune?: string | null; status?: string };
 const sets = q.get('sets');
@@ -58,16 +60,20 @@ const rows: Row[] = Array.from({ length: N }, (_, i) => ({
   ...(sets && { commune: communeOf(i), status: ['open', 'closed', 'held'][i % 3]! }),
 }));
 
+// `fb=1` (the feedback pass, docs/phase-6-steps/feedback-plan.md): « Rendez-vous » with one operator (between days: no
+// « Condition », the period form in the popup), « Commune » drawn as pills (a `filterOption` part, its tones in
+// `ui.data`), « Nom » with a header search part over its filter (the doc's example), « Jour » a 44-character name.
+const fb = q.get('fb') === '1';
 const columns = [
-  { id: 'name', header: base === AR ? 'الاسم' : 'Nom', pinned: 'start' as const, width: ruled ? 220 : 140, ...(ruled && { ui: { header: 'nameSearch' } }) },
+  { id: 'name', header: base === AR ? 'الاسم' : 'Nom', pinned: 'start' as const, width: ruled || fb ? 220 : 140, ...(ruled && { ui: { header: 'nameSearch' } }), ...(fb && { ui: { header: 'hsearch' } }) },
   { id: 'city', header: base === AR ? 'المدينة' : 'Ville', width: 130, headerTooltip: base === AR ? 'مدينة الإقامة' : 'Ville de résidence', ...(q.get('spans') && { merge: true as const }), ...(q.get('pin') && { pinned: 'start' as const }) },
   ...(sets ? [
-    { id: 'commune', header: base === AR ? 'البلدية' : 'Commune', width: 150, filter: { kind: 'set' as const } },
+    { id: 'commune', header: base === AR ? 'البلدية' : 'Commune', width: 150, filter: { kind: 'set' as const, ...(fb && { optionPart: 'pill' }) }, ...(fb && { ui: { data: { tones: ['a', 'b'] } } }) },
     { id: 'status', header: base === AR ? 'الحالة' : 'Statut', type: 'enum' as const, width: 110, enumOptions: [{ value: 'open', label: base === AR ? 'مفتوح' : 'Ouvert' }, { value: 'closed', label: base === AR ? 'مغلق' : 'Fermé' }, { value: 'held', label: base === AR ? 'معلق' : 'Suspendu' }] },
   ] : []),
   { id: 'amount', header: base === AR ? 'المبلغ' : 'Montant', type: 'number' as const, width: 120 },
-  { id: 'day', header: base === AR ? 'اليوم' : 'Jour', type: 'day' as const, width: 120 },
-  ...(dates ? [{ id: 'at', header: base === AR ? 'الموعد' : 'Rendez-vous', type: 'instant' as const, width: 170 }] : []),
+  { id: 'day', header: fb ? (base === AR ? 'يوم آخر زيارة إلى المركز الصحي في المدينة' : 'Jour de la dernière visite au centre de santé') : base === AR ? 'اليوم' : 'Jour', type: 'day' as const, width: 120 },
+  ...(dates ? [{ id: 'at', header: base === AR ? 'الموعد' : 'Rendez-vous', type: 'instant' as const, width: 170, ...(fb && { filter: { kind: 'instant', ops: ['betweenDays'] } }) }] : []),
   ...(cellParts ? cellParts.columns : []),
   ...(q.get('popup') ? [{ id: 'paid', header: base === AR ? 'مدفوع' : 'Payé', type: 'boolean' as const, width: 100 }] : []),
   ...Array.from({ length: 16 }, (_, k) => ({ id: `x${k}`, header: `C${k}`, width: 110, value: (r: Row) => (r.id * (k + 3)) % 997 })),
@@ -109,6 +115,57 @@ if (q.get('slots')) {
   };
 }
 if (cellParts) parts = { ...parts, ...cellParts.parts };
+if (fb) {
+  const { slots } = await import('/packages/dom/src/slots.ts');
+  const { definePart } = await import('/packages/dom/src/part.ts');
+  if (!q.get('slots')) features.push(slots() as never);
+  parts = {
+    ...parts,
+    // The set filter's rows as pills (feedback pass C): the page paints the content, the grid keeps the row.
+    pill: definePart('filterOption', {
+      mount(el, c) {
+        const pill = document.createElement('span');
+        pill.className = 'fb-pill';
+        const n = document.createElement('span');
+        n.className = 'fb-n';
+        el.append(pill, n);
+        // The count drawn by CSS from `data-n`, as the grid's own row does: the visible text stays the label, inside the
+        // option's name « label, count » (WCAG 2.5.3, axe label-content-name-mismatch).
+        const draw = (x: typeof c) => { pill.textContent = x.label; pill.dataset['on'] = String(x.selected); n.dataset['n'] = x.countText; };
+        draw(c);
+        return { update: draw };
+      },
+    }),
+    // A header search over the column's filter (feedback pass I, docs/behaviors/parts.md « A header search »).
+    hsearch: definePart('header', {
+      mount(el, c) {
+        const name = document.createElement('span');
+        const input = document.createElement('input');
+        input.className = 'fb-hsearch';
+        input.style.cssText = 'flex:1;min-inline-size:0;margin-inline-start:.25rem';
+        el.style.cssText = 'display:flex;flex:1;align-items:center';
+        el.append(name, input);
+        let cur = c;
+        let last: unknown;
+        let dropped = -1;
+        input.addEventListener('input', () => cur.filter?.set(input.value ? { type: 'text', op: 'contains', value: input.value } : null));
+        const draw = (x: typeof c) => {
+          cur = x;
+          name.textContent = x.label;
+          input.setAttribute('aria-label', `${base === AR ? 'البحث في' : 'Chercher dans'} ${x.label}`);
+          const state = x.filter?.state ?? null;
+          const v = (state as { value?: string } | null)?.value ?? '';
+          if ((state !== last || x.filter?.dropped !== dropped) && v !== input.value) input.value = v;
+          last = state;
+          dropped = x.filter?.dropped ?? 0;
+        };
+        draw(c);
+        return { update: draw, focus: () => (input.focus(), true) };
+      },
+    }),
+  };
+  document.head.append(Object.assign(document.createElement('style'), { textContent: '.fb-pill{padding:2px 10px;border-radius:9999px;outline:1px solid var(--tz-accent);color:var(--tz-fg)}.fb-pill[data-on=true]{background:color-mix(in srgb,var(--tz-accent) 20%,var(--tz-bg))}.fb-n{margin-inline-start:auto;color:var(--tz-fg-muted)}.fb-n::before{content:attr(data-n)}' }));
+}
 if (ruled) (parts = { ...parts, ...ruled.parts }), features.push(...(ruled.features as never[]));
 const context = { max: 5 };
 const fail = { ...(dates === 'fail' && { loadDates: () => Promise.reject(new Error('the date kit is unreachable (dates=fail)')) }), ...(q.get('setfail') && { loadSet: () => Promise.reject(new Error('the set chunk is unreachable (setfail=1)')) }) };

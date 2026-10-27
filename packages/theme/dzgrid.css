@@ -166,7 +166,8 @@
     inline-size: 1rem;
     block-size: 1rem;
     box-sizing: border-box;
-    border: 1px solid var(--tz-fg-muted);
+    outline: 1px solid var(--tz-fg-muted);
+    outline-offset: -1px;
     border-radius: 0.25rem;
     background: var(--tz-bg);
     color: var(--tz-accent-fg);
@@ -180,7 +181,7 @@
   .dzg-fopt[aria-selected=true] .dzg-box,
   .dzg-box[aria-checked=true],
   .dzg-box[aria-checked=mixed] {
-    border-color: var(--tz-accent);
+    outline-color: var(--tz-accent);
     background: var(--tz-accent);
   }
   .dzg-row[aria-selected=true] .dzg-box::before,
@@ -192,7 +193,7 @@
     cursor: not-allowed;
   }
   .dzg-check[data-dzg-refused] .dzg-box {
-    border-style: dashed;
+    outline-style: dashed;
     background: var(--dzg-refused-bg, var(--tz-bg-raised));
   }
   .dzg-box[aria-checked=mixed]::before {
@@ -205,6 +206,7 @@
   }
   .dzg-overlay button,
   .dzg-ffoot button,
+  .dzg-fpreset,
   .dzg-pbtn,
   .dzg-retry,
   .dzg-footer select {
@@ -216,6 +218,15 @@
     background: var(--dzg-header-bg, var(--tz-bg-raised));
     font: inherit;
     cursor: pointer;
+  }
+  .dzg-fpreset {
+    min-block-size: 1.5rem;
+    padding-inline: 0.5rem;
+  }
+  .dzg-fpreset[aria-pressed=true] {
+    outline: 2px solid var(--tz-accent);
+    outline-offset: -2px;
+    font-weight: 600;
   }
   .dzg-overlay button:focus-visible,
   .dzg-retry:focus-visible {
@@ -337,7 +348,7 @@
   }
   @media (forced-colors: active) {
     .dzg-check[data-dzg-refused] .dzg-box {
-      border-color: GrayText;
+      outline-color: GrayText;
     }
     .dzg-toggle {
       color: ButtonText;
@@ -456,20 +467,22 @@
       display: none;
     }
   }
+  .dzg-popup {
+    --tz-cal-outside-opacity: 1;
+  }
 }
 .dzg-popup :is(.tz-cal__day--outside, .tz-range__day--outside):not(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end) {
   color: var(--tz-fg-muted);
 }
 
 .dzg-popup .tz-field__panel {
-  --tz-cal-outside-opacity: 1;
   border-color: var(--tz-border);
   color: var(--tz-fg);
   background: var(--tz-bg);
 }
 
 @media (forced-colors: active) {
-  .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .tz-rangefield__preset--on) {
+  .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .dzg-fpreset[aria-pressed=true]) {
     forced-color-adjust: none;
     color: HighlightText;
     background: Highlight;

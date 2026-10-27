@@ -148,3 +148,20 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
 
 ## Decisions (step 18, 2026-10-20)
 - **The size stays put from loading to loaded:** the status line keeps one line's height while empty (the first load on a server), so the list no longer moves down 32 px when the values arrive. Checked in Chrome on the audit screen, left to right and right to left, first load and a narrower search (`scripts/audit-browser.mjs`, ≤ 1 px).
+
+## The option row's part (feedback pass C, 2026-10-27)
+An app paints the rows of the value list with a part of slot `filterOption`, named by the column:
+`filter: { kind: 'set', optionPart: 'pill' }` and `parts: { pill: definePart('filterOption', { mount(host, c) { … } }) }`.
+The part is told `value` (null for the blanks' row), `label` (the grid's), `count` (a number or null) and `countText`
+(in the grid's digits, '' when not shown), `selected`, `blank`, `column`, `toggle()`, and what every part gets. The
+grid keeps the row: `role=option`, `aria-selected`, its name « label, count », the roving focus and the keys, the click
+(anywhere on the row toggles it; a control of the part's own that calls `toggle()` stops its click), the window over
+10 000 values: only the rows drawn have a part, one per row, updated when its tick or text changes, destroyed when the
+row leaves the window or the popup closes. The grid's own content steps aside (`data-part` on the row); the part's host
+is `aria-hidden` (an option's children are presentational). Its visible text must stay inside the name (WCAG 2.5.3,
+axe `label-content-name-mismatch`): draw the count as the grid does, from an attribute by CSS
+(`content: attr(data-n)`), or not at all. A part that throws is reported and that row drawn by the grid; an unknown
+name is `unknown-part` (error, `columns.<id>.filter.optionPart`, said at each opening) and the default rows; a
+`filterOption` part without `filters()` is `missing-feature`. Its data: `ui.data` (parts.md). The playground's
+« Retours d'usage » page draws pills. Tests: `packages/dom/test/filters-set-option.test.ts`; Chrome: pills, two
+unticked, Apply, scrolled to the end of 2 000 values, axe (`--only filters`).

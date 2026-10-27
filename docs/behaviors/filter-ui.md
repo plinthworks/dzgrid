@@ -60,3 +60,15 @@ Types into a box under a column header; clicks the filter button in a header, or
 - **Announcement on a server:** after the accepted answer, `announce.filtered {rows}` with `counts.filtered`; when the server does not know the count, `announce.filteredOpen`. Nothing is said while it loads beyond `aria-busy`.
 - **Clear all filters:** only the no-match overlay's `clearFilters()` in Phase 3; a host clears with `filter.set {}`.
 - **Escape in a floating box** returns focus to its cell and keeps the typed filter; tested at step 12.
+
+## Feedback pass (2026-10-27, docs/phase-6-steps/feedback-plan.md)
+- **One operator, no « Condition »** (B, item 3). A column whose `filter.ops` leaves one operator (`ops: ['betweenDays']`)
+  shows no operator menu: the select and its label are hidden (out of the tab order), the operator is used as is, the
+  first value field takes the focus. Changed live to two operators, the menu comes back; the typed value stays.
+- **Clear: the column in the name, not in the text** (J). The popup's Clear button shows `filter.clear` with the column
+  left out (« Effacer », "Clear filter", « مسح مرشح »), its name the whole text (« Effacer Nom »): the visible text
+  starts the name (WCAG 2.5.3) and a long column name no longer wraps the footer (`white-space: nowrap`). French
+  `filter.clear` is now « Effacer {column} ».
+- **`data-column` and `data-kind` on the popup's content** (H, owner Q5): `.dzg-fpop[data-column="…"][data-kind="…"]`,
+  for an app's global CSS (theming.md « Styling what the popup holds »).
+- Tests: `packages/dom/test/filters-feedback.test.ts`; Chrome: `scripts/browser-feedback.mjs` (`--only filters`).

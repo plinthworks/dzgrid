@@ -74,6 +74,26 @@ frameworks (Tailwind CSS 4.3.3 and 3.4.19, Bootstrap 5.3.8, root devDependencies
   layered, still replaces them in order. A showcase theme needs no copy: it only sets variables and adds
   rules of its own, which no reset overrides. The injected layout stays layered (its `:where()` rules lose to
   any reset anyway; apps in that setup already style what a reset removes).
+- **An app with an unlayered reset: use the unlayered copy** (feedback pass A and G, 2026-10-27). Tailwind 3's
+  `@tailwind base` (its preflight, `*,::before,::after{border-width:0;border-style:solid}`) and Bootstrap's Reboot
+  are unlayered: with `@dzgrid/theme/dzgrid.css` (layered) every border the theme draws is erased (button frames,
+  the floating box's edge, the cell rules). Import `@dzgrid/theme/dzgrid.unlayered.css` (and
+  `contrast.unlayered.css`) instead: same rules, outside the layer, compared by specificity with the reset's
+  universal selector, so they win. Whatever the stylesheet, the grid's own marks no longer depend on a border: the
+  pager's arrows are characters in the DOM, the tree, detail and group chevrons characters in `::before`, the
+  selection box's edge an outline (`outline: 1px solid var(--tz-fg-muted); outline-offset: -1px`; dashed when
+  refused, `CanvasText` in forced colours): an unticked box stays visible under the reset, which it did not (« on ne
+  voyait la colonne qu'une fois tout sélectionné »). `scripts/browser-glyphs.mjs` checks it with a stand-in reset.
+- **Styling what the popup holds** (feedback pass H, owner Q5). The filter popup is in the browser's top layer
+  (`popover`), outside the grid's host: a component's scoped styles (Angular's emulated encapsulation, a CSS
+  module) never reach it. Style it from a global sheet; the popup's content carries `data-column` (the column's id)
+  and `data-kind` (`text`, `number`, `day`, `instant`, `boolean`, `set`, a custom kind):
+  `.dzg-fpop[data-column="price"] { … }`, `.dzg-fpop[data-kind="set"] .pill { … }`. In a layer of the app's
+  above `dzgrid` or unlayered. `::ng-deep` is deprecated: use a global sheet or `ViewEncapsulation.None`.
+- **`--dzg-row-height` is read-only** (feedback pass F, owner Q4). The grid writes it on its root (inline style) from
+  `rowHeight` or the density, and the theme reads it; a stylesheet declaring it loses to the inline value and never
+  moves a row (the virtual rows count on the setting). To change the height: `rowHeight` (a number from 24), or
+  `density`; in Angular, `[rowHeight]`.
 - **One exception: tzslot's date panel.** tzslot's sheets (the date filters' calendar) are tzslot's own and
   unlayered, so the theme's three rules that restyle tzslot's panel (its surface, another month's days in the
   muted colour — tzslot gives its days `color: inherit` — and the chosen day in forced

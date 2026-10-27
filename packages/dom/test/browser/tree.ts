@@ -24,6 +24,8 @@ const total = Number(q.get('rows') ?? 10_000);
 document.documentElement.lang = locale;
 document.documentElement.dir = q.get('dir') ?? (ar ? 'rtl' : 'ltr');
 if (q.get('theme')) document.documentElement.dataset['theme'] = q.get('theme')!;
+// `reset=1` (feedback pass A): an unlayered reset like Tailwind 3's preflight, which beats every layered rule.
+if (q.get('reset')) document.head.append(Object.assign(document.createElement('style'), { textContent: '*,::before,::after{border-width:0;border-style:solid}' }));
 
 type Row = { id: string; parent: string | null; name: string; city: string; age: number | null; path?: string[] };
 const paths = q.get('shape') === 'path';

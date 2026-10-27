@@ -6,7 +6,7 @@ export const FR_FILTERS = {
   text: {
     'filter.inputLabel': "Filtrer {column}",
     'filter.summaryActive': "Filtre actif",
-    'filter.clear': "Effacer le filtre {column}",
+    'filter.clear': "Effacer {column}",
     'filter.invalid': "{column}\u202F: nombre non valide",
     'announce.filtered': "Filtré. {rows}",
     'announce.filteredOpen': "Filtré. Nombre de lignes inconnu",

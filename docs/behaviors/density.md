@@ -60,3 +60,8 @@ Nothing specific (heights only).
 ## Tests (to be written with the code)
 `packages/dom/test/density.test.ts` (API, event, no-op, invalid, `rowHeight` wins, anchor and focus),
 `column-menu.test.ts` (the line present / absent, sentence), `state.test.ts` (round trip).
+
+## `--dzg-row-height` (feedback pass F, 2026-10-27, owner Q4)
+Read-only: written by the grid on its root from `rowHeight` or the density, read by the theme. A host stylesheet
+setting it changes nothing (the inline value wins and the rows are placed by the setting): use `rowHeight` (a number,
+24 at least) or `density`; Angular `[rowHeight]`. Test: `packages/dom/test/feedback-row-height.test.ts`.

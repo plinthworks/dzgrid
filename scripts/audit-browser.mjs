@@ -32,7 +32,7 @@ const ONLY = process.argv.includes('--only') ? process.argv[process.argv.indexOf
 mkdirSync(OUT, { recursive: true });
 if (UPDATE) mkdirSync(SHOTS, { recursive: true });
 // tzslot for the instant filter's date kit: bundled once (importmap in audit.html), as test:browser does.
-await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
+await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core', 'dom-lazy': '@tzslot/dom/lazy', 'core-lazy': '@tzslot/core/lazy' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
 
 const site = await serve(import.meta.url);
 const checks = [];

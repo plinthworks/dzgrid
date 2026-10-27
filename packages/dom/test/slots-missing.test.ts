@@ -35,10 +35,12 @@ describe('slot parts without slots()', () => {
       { code: 'missing-feature', severity: 'warning', path: 'parts.myHeader', detail: 'slots' },
       { code: 'missing-feature', severity: 'warning', path: 'parts.overlay', detail: 'slots' },
       { code: 'missing-feature', severity: 'warning', path: 'parts.tip', detail: 'slots' },
+      // Feedback pass E: the column naming it is said too.
+      { code: 'missing-feature', severity: 'warning', path: 'columns[0].ui.header', detail: 'slots' },
     ]);
     t.g.api.refresh();
     t.g.update({ density: 'compact' });
-    expect(t.problems().filter((p) => p.code === 'missing-feature')).toHaveLength(3);
+    expect(t.problems().filter((p) => p.code === 'missing-feature')).toHaveLength(4);
     expect(t.host.querySelector('.dzg-hlabel')!.textContent).toBe('A');
     expect(t.host.querySelector('.dzg-overlay')!.textContent).toBe(EN.text['grid.noRows']);
     // An unknown-part is not said for a slot nobody draws.

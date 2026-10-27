@@ -94,7 +94,9 @@ describe('opening and focus', () => {
     expect(t.value()!.closest('label')!.textContent).toContain('Value');
     expect(t.value()!.getAttribute('placeholder')).toBeNull();
     expect(t.apply()!.textContent).toBe('Apply');
-    expect(t.clear()!.textContent).toBe('Clear filter Name');
+    // Feedback pass J: the column in the name, not in the text (a long name wrapped the footer).
+    expect(t.clear()!.textContent).toBe('Clear filter');
+    expect(t.clear()!.getAttribute('aria-label')).toBe('Clear filter Name');
   });
 
   it('a click on the button never sorts', () => {

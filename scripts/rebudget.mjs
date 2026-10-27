@@ -58,7 +58,7 @@ const SIZE_CEILINGS = {
   // new grant over Q16's 8 000), measured over @dzgrid/dom/popup. S6-O5/O6: the lazy calendar 1 500 (inside Q16 d's
   // 2 600), @dzgrid/dom/internal at its measure + 50 up to 1 250 (the filters' loader moved in, not copied).
   '@dzgrid/dom/editors': 6720, // owner S7-O1 (2026-10-24): 6 500 → 6 650 (retry, a row gone while edited); QB5 (Part B, step 12): → 6 720 (bulk edit by Ctrl+Enter)
-  '@dzgrid/dom/editors: calendar (lazy)': 1500,
+  '@dzgrid/dom/editors: calendar (lazy)': 1520, // feedback pass Q1 (owner, 2026-10-27): the lazy kits by the strict need (tzslot's lazy entry: the chunk's `ready`, measured 1 519)
   '@dzgrid/dom/internal': 1250,
   // Owner S6-O7 (2026-10-24): the list in its own entry, over the popup: its measure (1 254) + 10 %.
   '@dzgrid/dom/editors-list': 1400,

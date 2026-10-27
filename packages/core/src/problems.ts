@@ -60,7 +60,8 @@ export type PinnedProblemCode = 'too-many-pinned-rows';
 /** `@dzgrid/dom/auto-height`'s own (Phase 6 step 9): more than 10 000 rows with a wrapped column, told once; a type only. */
 export type AutoHeightProblemCode = 'auto-height-large';
 
-export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode;
+/** `unknown-ui-key`: a column's `ui` key the grid does not know (feedback pass D), told by `@dzgrid/dom`; a type only. */
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | 'unknown-ui-key';
 
 export type Severity = 'error' | 'warning';
 

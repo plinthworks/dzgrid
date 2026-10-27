@@ -1,7 +1,9 @@
-import { CALENDAR_CSS, TIMESELECT_CSS, createCalendar, createTimeSelect, type TimeSelectInstance } from '@tzslot/dom';
-import type { PlainDate, PlainTime } from '@tzslot/core';
+import { CALENDAR_CSS, TIMESELECT_CSS, createCalendar, createTimeSelect, type TimeSelectInstance } from '@tzslot/dom/lazy';
+import type { PlainDate, PlainTime } from '@tzslot/core/lazy';
 import { base, day, lost, named, styles, T } from '../../dates/shared.js';
 import type { CalendarAdapter, CalendarView } from '../dates.js';
+/** Temporal there before `open` (the loader waits for it). */
+export { ready } from '../../dates/shared.js';
 
 /**
  * The editors' calendar (Phase 5 step 6, step06-plan « Behaviour » 4–6; owner Q14, S6-O5), the only place

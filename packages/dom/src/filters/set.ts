@@ -3,14 +3,14 @@ import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import { el } from './dom.js';
 import { form, type Body, type Changed, type F } from './forms.js';
-import { notice, once, type Once } from '@dzgrid/dom/internal';
+import { mounted, notice, once, type Once } from '@dzgrid/dom/internal';
 import { injectFilterStyles } from './styles.js';
 
 type C = SlotContext['filter'];
 
 /** The set filter's lazy chunk (`filters({ loadSet })` returns one): its fields, and its layout CSS. */
 export interface SetKit {
-  body(get: () => C, doc: Document, changed: Changed, note: typeof notice): Omit<Body, 'edits'>;
+  body(get: () => C, doc: Document, changed: Changed, note: typeof notice, g: GridContext<unknown>, mount: typeof mounted): Omit<Body, 'edits'>;
   readonly css: string;
 }
 
@@ -50,7 +50,7 @@ export const setForm = (env: { g: GridContext<unknown> | null }, kit: Once<strin
       try {
         const root = g.el.root.getRootNode();
         if (g.settings.injectStyles !== false) injectFilterStyles(root.nodeType === 11 ? (root as ShadowRoot) : doc, g.settings.nonce, k.css, 'data-dzgrid-set');
-        inner = k.body(() => (inner ? get() : { ...get(), values: (o) => hs[hs.push(get().values(o)) - 1]! }), doc, changed, notice);
+        inner = k.body(() => (inner ? get() : { ...get(), values: (o) => hs[hs.push(get().values(o)) - 1]! }), doc, changed, notice, g, mounted);
         // The draft (and the status line's first text) before the fields show; the texts once in
         // the page, so the list measures its rows there.
         inner.write(last);

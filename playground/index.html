@@ -11,6 +11,15 @@
     #host { block-size: 70vh; }
     #host > .dzg { block-size: 100%; }
     output { color: var(--tz-fg-muted); }
+    /* `pills=1`: the set filter's rows drawn by the page's `filterOption` part. Global: the popup is in the top layer. */
+    .dzg-fpop[data-kind=set] .pg-pill { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: .8125rem; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-inline-size: 12rem; color: var(--tz-fg); background: color-mix(in srgb, var(--pg-tone) 18%, var(--tz-bg)); outline: 1px solid color-mix(in srgb, var(--pg-tone) 55%, var(--tz-bg)); }
+    .pg-pill--accent { --pg-tone: var(--tz-accent); }
+    .pg-pill--warm { --pg-tone: var(--tz-danger, var(--tz-accent)); }
+    .pg-pill--cool { --pg-tone: var(--tz-fg-muted); }
+    .pg-pill--blank { --pg-tone: var(--tz-fg-muted); font-style: italic; }
+    .pg-pill[data-on=false] { background: transparent; color: var(--tz-fg-muted); }
+    .pg-pill-n { margin-inline-start: auto; color: var(--tz-fg-muted); font-variant-numeric: tabular-nums; }
+    .pg-pill-n::before { content: attr(data-n); }
   </style>
 </head>
 <body>
@@ -28,6 +37,8 @@
     <a href="./?export=1&amp;filters=1&amp;floating=1&amp;popup=1&amp;search=1">Export CSV</a>
     <a href="./?parts=1&amp;filters=1&amp;floating=1&amp;popup=1&amp;search=1">Pièces de cellule (badges, oui / non)</a>
     <a href="./?rules=1&amp;paging=client">Règles de sélection (et un en-tête qui filtre)</a>
+    <a href="./?filters=1&amp;popup=1&amp;dates=1&amp;sets=1&amp;pills=1&amp;paging=client&amp;box=1">Retours d’usage : période dans le filtre, pastilles, flèches du pied</a>
+    <a href="./?filters=1&amp;popup=1&amp;dates=1&amp;sets=1&amp;pills=1&amp;paging=client&amp;box=1&amp;locale=ar-DZ&amp;direction=auto&amp;theme=dark">Retours d’usage (arabe, sombre)</a>
     <a href="./motion.html">Animations</a>
     <a href="./tree.html">Arbre (colonne parent)</a>
     <a href="./tree.html?shape=nested">Arbre (listes imbriquées)</a>

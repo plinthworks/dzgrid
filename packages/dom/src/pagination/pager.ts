@@ -14,7 +14,16 @@ const canLast = (p: C['page']): boolean => p.canJump && p.pageCount !== null && 
 export const pagerPart: Part<C> = {
   mount(host, c) {
     const doc = host.ownerDocument;
-    const [first, prev, next, last] = (['first', 'prev', 'next', 'last'] as const).map((go) => button(doc, 'data-go', go)) as [HTMLButtonElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement];
+    // Each arrow a character in the DOM (U+00AB, U+2039, U+203A, U+00BB), hidden from the name: no border a host's
+    // unlayered reset could erase (Tailwind 3's preflight), and Bidi_Mirrored, so right to left draws them turned.
+    const [first, prev, next, last] = (['first', 'prev', 'next', 'last'] as const).map((go, i) => {
+      const b = button(doc, 'data-go', go);
+      const g = el(doc, 'span', '');
+      g.setAttribute('aria-hidden', 'true');
+      g.textContent = '\xab\u2039\u203a\xbb'[i]!;
+      b.append(g);
+      return b;
+    }) as [HTMLButtonElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement];
     const text = el(doc, 'span', 'dzg-ppage');
     const label = el(doc, 'label', 'dzg-psize');
     const name = el(doc, 'span', '');

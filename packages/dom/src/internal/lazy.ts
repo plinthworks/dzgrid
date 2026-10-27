@@ -18,7 +18,9 @@ export function once<K, M>(get: (k: K) => Promise<M>, ok: (m: M) => unknown, wha
     load(k) {
       let p = asked.get(k);
       if (!p) {
-        asked.set(k, (p = new Promise<M>((res) => res(get(k))).then((m) => {
+        asked.set(k, (p = new Promise<M>((res) => res(get(k))).then(async (m) => {
+          // A chunk on tzslot's lazy entry says when Temporal is there (`ready`, feedback pass L).
+          await (m as { ready?: unknown } | null)?.ready;
           if (!ok(m)) throw new TypeError(`${who}: no ${what}${k}`);
           done.set(k, m);
           return m;

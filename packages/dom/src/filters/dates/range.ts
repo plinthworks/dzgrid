@@ -1,97 +1,145 @@
 import { RELATIVE_RANGES, type RelativeRange } from '@dzgrid/core';
-import { CALENDAR_CSS, createRangeField, DATEINPUT_CSS, DATETIME_CSS, FIELD_CSS, RANGE_CSS, RANGEFIELD_CSS, TIME_CSS, TIMESELECT_CSS, type RangeFieldValue } from '@tzslot/dom';
-import type { Instant } from '@tzslot/core';
+import { CALENDAR_CSS, createDateInput, createDateRange, DATEINPUT_CSS, RANGE_CSS, TIME_CSS, type DateInputInstance, type WallValue } from '@tzslot/dom/lazy';
+import { presetRange, type PlainDate, type PlainTime } from '@tzslot/core/lazy';
 import type { DateAdapter, DateField, DatePart } from '../dates.js';
-import { base, day, lost, muter, named, styles, T } from './shared.js';
+import { base, day, lost, named, styles, T } from './shared.js';
+/** Temporal there before `adapt` (the loader waits for it). */
+export { ready } from './shared.js';
 
-const NONE: RangeFieldValue = { start: null, end: null };
+/** The form's layout (no colour; layered, zero specificity, logical sides): the ends side by side, the shortcuts wrapping. */
+const PERIOD_CSS = '@layer dzgrid.layout{:where(.dzg-fperiod){display:grid;gap:.5rem}:where(.dzg-fends,.dzg-fpresets){display:flex;flex-wrap:wrap;gap:.5rem;max-inline-size:20rem}}';
 
 /**
- * The `range` kit: tzslot's period field. A day column's between (both days in, drawn on UTC
- * midnights only as carriers, the zone hidden from its summary: T6) and an instant's between days
- * (the grid's zone), each with the six shortcuts (owner Q5); an instant's between two moments
- * (`[at, atTo)`, no shortcuts). The host may ask for fewer months or shortcuts (`dateCalendar`).
- * A shortcut pressed is `{range}`; a period by hand, its days or moments; one end, or a period that
- * holds nothing, null (L1 keeps the filter in force).
+ * The `range` kit, in the popup itself (feedback pass K, owner Q2: « un popup juste qui s'ouvre en dessous de
+ * l'en-tête »): FROM and TO typed fields (tzslot's `createDateInput`), tzslot's inline calendar (`createDateRange`,
+ * one month unless `dateCalendar.months`), and the shortcuts as buttons (six, or `dateCalendar.presets`), composed
+ * here: no field, no panel of its own, so nothing outside the popup and no Escape but the popup's. A day column's
+ * between (both days in, no zone said: no summary, so T6 has nothing to hide) and an instant's between days (the
+ * grid's zone); an instant's between two moments (`[at, atTo)`, each end with its hour, no shortcut, a day the zone
+ * never had greyed: T7). A shortcut pressed is `{range}`; a period by hand, its days or moments; one end, TO before
+ * FROM, or a period that holds nothing, null (L1 keeps the filter in force).
  */
 export function adapt(a: DateAdapter): DateField {
-  styles(a, [['field', FIELD_CSS], ['range', RANGE_CSS], ['rangefield', RANGEFIELD_CSS], ['dateinput', DATEINPUT_CSS], ['datetime', DATETIME_CSS], ['timeselect', TIMESELECT_CSS], ['time', TIME_CSS], ['calendar', CALENDAR_CSS]]);
-  const days = a.kind === 'day';
-  const moments = !days && a.op === 'between';
-  const [from, to] = days ? ['value', 'valueTo'] as const : ['day', 'dayTo'] as const;
-  const zone = (): string => (days ? 'UTC' : a.settings().ctx.timeZone);
-  const mute = muter();
-  let cur: DatePart | null = null;
+  const moments = a.kind === 'instant' && a.op === 'between';
+  styles(a, [['range', RANGE_CSS], ['dateinput', DATEINPUT_CSS], ['calendar', CALENDAR_CSS], ...(moments ? [['time', TIME_CSS] as const] : []), ['dzg-period', PERIOD_CSS]]);
+  const [from, to] = a.kind === 'day' ? ['value', 'valueTo'] as const : ['day', 'dayTo'] as const;
+  const doc = a.host.ownerDocument;
+  const div = (cls: string): HTMLDivElement => Object.assign(doc.createElement('div'), { className: cls });
+  const box = div('dzg-fperiod');
+  const ends = div('dzg-fends');
+  const cal = div('dzg-fcal');
+  const list = div('dzg-fpresets');
+  ends.setAttribute('role', 'group');
+  box.append(ends, cal, list);
+  a.host.append(box);
+  const zone = (): string => a.settings().ctx.timeZone;
+  const months = (): number => a.settings().calendar?.months ?? 1;
+  /** What the form holds: each end's day and (moments) hour; the shortcut pressed. */
+  let s: PlainDate | null = null;
+  let e: PlainDate | null = null;
+  let st: PlainTime | null = null;
+  let et: PlainTime | null = null;
+  let range: RelativeRange | null = null;
   const opts = () => {
-    const s = a.settings();
-    const b = base(s);
-    const presets = moments ? [] : [...(s.calendar?.presets ?? RELATIVE_RANGES)];
-    return {
-      ...b, timeZone: zone(), title: s.label, showTime: moments,
-      // The host's calendar (`filters({ dateCalendar })`, checked there), or two months and the six
-      // shortcuts; none between two moments. An empty list hides the shortcut column.
-      months: s.calendar?.months ?? 2, presets, showPresets: presets.length > 0,
-      clearable: false, confirm: false, readingStyle: 'named' as const, blockAcrossDisabled: false,
-      ...(days && { messages: { ...b.messages, periodSummary: ({ length }: { length: string }) => length } }),
-      ...(moments && { min: day('1900-01-01'), isDateDisabled: lost(s.ctx.timeZone) }),
-    };
+    const b = base(a.settings());
+    return { locale: b.locale, today: b.today, messages: b.messages, min: b.min, max: b.max };
   };
-  const start = (d: string): Instant => day(d).toZonedDateTime({ timeZone: zone() }).toInstant();
-  const dayOf = (i: Instant, back = 0): string => i.toZonedDateTimeISO(zone()).toPlainDate().subtract({ days: back }).toString();
-  const iso = (i: Instant): string | null => {
-    const s = i.toString({ fractionalSecondDigits: 3 });
-    return s.length === 24 ? s : null;
+  const at = (d: PlainDate, t: PlainTime | null): string | null => {
+    const i = d.toZonedDateTime({ timeZone: zone(), ...(t && { plainTime: t }) }).toInstant().toString({ fractionalSecondDigits: 3 });
+    return i.length === 24 ? i : null;
   };
-  const read = (v: RangeFieldValue, preset: string | null): DatePart | null => {
-    if (RELATIVE_RANGES.has(preset as RelativeRange)) return { range: preset as RelativeRange };
-    if (!v.start || !v.end || T.Instant.compare(v.start, v.end) >= 0) return null;
-    if (!moments) return { [from]: dayOf(v.start), [to]: dayOf(v.end, 1) };
-    const at = iso(v.start);
-    const atTo = iso(v.end);
-    return at && atTo ? { at, atTo } : null;
+  /** The draft: a shortcut, the days, the moments, or null. */
+  const read = (): DatePart | null => {
+    if (range) return { range };
+    if (!s || !e) return null;
+    if (!moments) return T.PlainDate.compare(s, e) > 0 ? null : { [from]: s.toString(), [to]: e.toString() };
+    const f = at(s, st);
+    const t = at(e, et);
+    return f && t && f < t ? { at: f, atTo: t } : null;
   };
-  const value = (p: DatePart | null): RangeFieldValue => {
-    const f = p?.[moments ? 'at' : from];
-    const t = p?.[moments ? 'atTo' : to];
-    const end = (d: string): Instant => start(day(d).add({ days: 1 }).toString());
-    return moments
-      ? { start: f ? T.Instant.from(f) : null, end: t ? T.Instant.from(t) : null }
-      : { start: f ? start(f) : null, end: t ? end(t) : null };
+  /** The fields, the calendar and the shortcuts drawn from what the form holds (an update reports nothing). */
+  const paint = (): void => {
+    const o = opts();
+    if (range) {
+      const r = presetRange(range, { today: o.today });
+      s = r.start;
+      e = r.end;
+    }
+    fields.map((f, i) => f.update({ ...o, value: i ? { date: e, time: et } : { date: s, time: st } }));
+    ends.setAttribute('aria-label', a.settings().label);
+    w.update({ ...o, value: { start: s, end: e }, months: months() });
+    for (const b of list.children) b.setAttribute('aria-pressed', String((b as HTMLElement).dataset['range'] === range));
   };
-  const w = createRangeField(a.host, {
-    ...opts(), container: a.panel, injectStyles: false,
-    onChange(v, how) {
-      if (mute.on) return;
-      cur = read(v, how.preset);
+  const fields = [0, 1].map((i) => {
+    const h = div('');
+    ends.append(h);
+    const m = base(a.settings()).messages;
+    return createDateInput(h, {
+      ...opts(), injectStyles: false, withTime: moments, timeZone: zone(), icon: null, label: i ? m.to : m.from,
+      // Typed: after the form's pause; the calendar follows.
+      onChange(v: WallValue) {
+        range = null;
+        if (i) (e = v.date), (et = v.time);
+        else (s = v.date), (st = v.time);
+        paint();
+        a.changed(false);
+      },
+    });
+  }) as [DateInputInstance, DateInputInstance];
+  const w = createDateRange(cal, {
+    ...opts(), injectStyles: false, months: months(), blockAcrossDisabled: false,
+    ...(moments && { isDateDisabled: lost(zone()) }),
+    onChange(v) {
+      range = null;
+      s = v.start;
+      e = v.end;
+      paint();
       a.changed(true);
     },
   });
-  const stop = named(a.host, a.panel);
-  const write = (): void =>
-    mute.run(() => {
-      // A shortcut handed back is resolved again against today (tzslot's `preset`), after the
-      // value is emptied: the name it last applied would be an echo, not news.
-      w.update({ value: cur?.range ? NONE : value(cur) });
-      if (cur?.range) w.update({ preset: cur.range });
+  // The shortcuts (owner Q5): none between two moments; the host's list (`dateCalendar.presets`), or the six.
+  for (const name of moments ? [] : (a.settings().calendar?.presets ?? RELATIVE_RANGES)) {
+    const b = doc.createElement('button');
+    b.type = 'button';
+    b.className = 'dzg-fpreset';
+    b.dataset['range'] = name;
+    b.addEventListener('click', () => {
+      range = name;
+      paint();
+      a.changed(true);
     });
+    list.append(b);
+  }
+  const texts = (): void => {
+    const m = base(a.settings()).messages;
+    for (const b of list.children) b.textContent = m.presets[(b as HTMLElement).dataset['range'] as RelativeRange];
+  };
+  texts();
+  // The month title's name says the month it shows (T9).
+  const stop = named(cal);
   return {
     write(p) {
-      cur = p;
-      write();
+      range = p?.range ?? null;
+      const f = p?.[moments ? 'at' : from];
+      const t = p?.[moments ? 'atTo' : to];
+      const z = (v: string) => T.Instant.from(v).toZonedDateTimeISO(zone());
+      if (moments) [s, st, e, et] = [f ? z(f).toPlainDate() : null, f ? z(f).toPlainTime() : null, t ? z(t).toPlainDate() : null, t ? z(t).toPlainTime() : null];
+      else [s, e] = [f ? day(f) : null, t ? day(t) : null];
+      paint();
+      if (s) w.goTo({ year: s.year, month: s.month });
     },
-    // The host's own days or moments, once the widget can hold them: a round trip through the
-    // widget's instants would rewrite a period it was never asked to change (Apia's lost
-    // 2011-12-30 starts where the 31st does).
-    read: () => cur && (cur.range ? { range: cur.range } : read(value(cur), null) && (moments ? { at: cur.at!, atTo: cur.atTo! } : { [from]: cur[from]!, [to]: cur[to]! })),
+    read,
     update() {
-      mute.run(() => w.update(opts()));
-      write();
+      texts();
+      paint();
     },
-    closePanel: () => w.isOpen && (w.close(), true),
-    focus: () => a.host.querySelector<HTMLElement>('.tz-field__trigger')?.focus(),
+    closePanel: () => false,
+    focus: () => fields[0].focus(),
     destroy() {
       stop();
       w.destroy();
+      for (const f of fields) f.destroy();
+      box.remove();
     },
   };
 }

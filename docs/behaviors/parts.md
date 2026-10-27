@@ -71,3 +71,51 @@ New slot `editor` (`@dzgrid/dom/editors`, editors.md 18–19): `definePart('edit
 focus, read, destroy }; } })`, named by a column's `edit.editor`, or `editor.<type>` replacing that type's built-in
 editor. Registered without `editors()`: `missing-feature` (detail `editors`). The context and handle are in `SlotContext['editor']`
 and `EditorHandle`; Angular templates for it come at step 9.
+
+## Feedback pass (2026-10-27, docs/phase-6-steps/feedback-plan.md)
+- **`ui.data`, the app's own data for its parts** (D, owner Q3). `ColumnDef.ui.data` is plain data, delivered as is
+  (same reference) to every part of the column through `c.column.def.ui.data`. Any other key of `ui` (an app's
+  `pillOptions`) is a warning `unknown-ui-key` at `columns[i].ui.<key>` (i over the leaves), the column kept: the grid
+  used to drop it silently. Told by `@dzgrid/dom` at setup (the core ships no byte for it: a `ProblemCode` by type).
+- **A part named for a feature the grid lacks** (E). A column's `ui.header` or `ui.tooltip` without `slots()` is a
+  `missing-feature` warning at `columns[i].ui.header` (detail `slots`); `header.filterBox` also wants `filters()`
+  (detail `filters`), and is then not said again as `unknown-part`. `ui.cell` wants nothing (the base draws cells).
+- **The option row of the set filter** (C): slot `filterOption` (filter-set.md « The option row's part »).
+- **A header search: « filter as you type » in the header** (I, item 10). A header part drives its column's filter
+  through `c.filter` (step 21, needs `slots()` and `filters()`): the same pending edit as the floating row and the
+  popup, the header marked filtered, the state, clear-all. The doc's example (pinned by
+  `packages/dom/test/feedback-parts.test.ts`):
+
+  ```ts
+  const headerSearch = definePart('header', {
+    mount(host, c) {
+      const name = host.ownerDocument.createElement('span');
+      const input = host.ownerDocument.createElement('input');
+      host.append(name, input);
+      let cur = c, last: unknown, dropped = -1;
+      input.addEventListener('input', () => cur.filter?.set(input.value ? { type: 'text', op: 'contains', value: input.value } : null));
+      const draw = (n: typeof c) => {
+        cur = n;
+        name.textContent = n.label;
+        input.hidden = !n.filter; // `filter: false`, or no filters(): no box
+        input.setAttribute('aria-label', `Search ${n.label}`);
+        // The filter in force written back when it changed (clear all, a saved view) or when another write dropped
+        // what was typed; never over the text being typed (its own edit commits the same value).
+        const state = n.filter?.state ?? null;
+        const v = (state as { value?: string } | null)?.value ?? '';
+        if ((state !== last || n.filter?.dropped !== dropped) && v !== input.value) input.value = v;
+        last = state;
+        dropped = n.filter?.dropped ?? 0;
+      };
+      draw(c);
+      return { update: draw, focus: () => (input.focus(), true) };
+    },
+  });
+  // columns: [{ id: 'name', header: 'Name', ui: { header: 'search' } }], parts: { search: headerSearch },
+  // features: [slots(), filters()]
+  ```
+
+  What is typed applies after the pause (`debounced`, the column's or the grid's); Space, Enter and a click inside the
+  input stay the input's (a control inside a header cell owns its keys and its clicks: no sort); a click on the name
+  sorts as before. An app whose header search « swallowed the sort » had stopped the header's events itself, or put its
+  own handler on the cell: neither is needed. Checked in Chrome (`--only filters`).

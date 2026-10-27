@@ -183,8 +183,8 @@ describe('windowed list: invariants under random sizes, heights, scrolls and foc
     return { lv, list, ticks, fallback, emptied: () => emptied };
   }
   const rowsOf = (n: number, blanks: boolean, tag: string): LRow[] => [
-    ...(blanks ? [{ v: null, label: '(Blanks)', count: '', name: '(Blanks)' }] : []),
-    ...Array.from({ length: n }, (_, i) => ({ v: `${tag}${i}`, label: `${tag}${i}`, count: '1', name: `${tag}${i}` })),
+    ...(blanks ? [{ v: null, label: '(Blanks)', count: '', n: null, name: '(Blanks)' }] : []),
+    ...Array.from({ length: n }, (_, i) => ({ v: `${tag}${i}`, label: `${tag}${i}`, count: '1', n: 1, name: `${tag}${i}` })),
   ];
   const opts = (list: HTMLElement) => [...list.querySelectorAll<HTMLElement>('[role=option]')];
   const pos = (o: Element) => Number(o.getAttribute('aria-posinset'));
@@ -291,7 +291,7 @@ describe('type-ahead against a prefix oracle (diacritics, NFD, Arabic letter for
     void locale;
     const lv = listView(document, { ticked: () => false, toggle() {}, empty() {} });
     document.body.append(lv.el);
-    lv.set(labels.map((l, i) => ({ v: String(i), label: l, count: '', name: l })), true);
+    lv.set(labels.map((l, i) => ({ v: String(i), label: l, count: '', n: null, name: l })), true);
     lv.focus();
     const press = (k: string) => document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
     const at = () => Number(document.activeElement!.getAttribute('aria-posinset')) - 1;

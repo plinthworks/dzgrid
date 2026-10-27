@@ -339,10 +339,10 @@ describe('languages and right to left', () => {
     expect(a.said()).toEqual(['طُويت Patient، الأعمدة الظاهرة: 2']);
   });
 
-  it('the chevron is drawn in CSS (logical borders, as the tree’s), mirrored right to left, a shape in forced colours; 24 px hit area', () => {
+  it('the chevron is a character in CSS (U+203A, as the tree’s; feedback pass A: no border), mirrored right to left, a shape in forced colours; 24 px hit area', () => {
     expect(GROUPS_CSS).toContain('.dzg-gtoggle');
-    // Open: down; closed: toward the inline end (right in French, left in Arabic).
-    expect(GROUPS_CSS).toContain(':where(.dzg-gtoggle[aria-expanded=false],[dir=rtl] .dzg-gtoggle){--dzg-gch:-45deg}:where([dir=rtl] .dzg-gtoggle[aria-expanded=false]){--dzg-gch:45deg}');
+    // Open: turned down (90deg; -90deg for the mirrored glyph right to left); closed: unturned, toward the inline end.
+    expect(GROUPS_CSS).toContain(':where([dir=rtl] .dzg-gtoggle){--dzg-gch:-90deg}:where(.dzg-gtoggle[aria-expanded=false]){--dzg-gch:0deg}');
     expect(GROUPS_CSS).toMatch(/\.dzg-gtoggle\)\{[^}]*inline-size:var\(--dzg-target-min,24px\);block-size:var\(--dzg-target-min,24px\)/);
     expect(GROUPS_CSS).toMatch(/forced-colors:active\)\{[^}]*\.dzg-gtoggle[^}]*ButtonText/);
   });

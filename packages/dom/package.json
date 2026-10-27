@@ -296,8 +296,8 @@
   },
   "peerDependencies": {
     "@dzgrid/core": "0.3.0",
-    "@tzslot/core": ">=2.2.0 <3",
-    "@tzslot/dom": ">=2.2.0 <3",
+    "@tzslot/core": ">=2.4.0 <3",
+    "@tzslot/dom": ">=2.4.0 <3",
     "gsap": "^3.13.0"
   },
   "peerDependenciesMeta": {

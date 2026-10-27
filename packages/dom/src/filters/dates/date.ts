@@ -1,6 +1,8 @@
-import { CALENDAR_CSS, createDateField, FIELD_CSS } from '@tzslot/dom';
+import { CALENDAR_CSS, createDateField, FIELD_CSS } from '@tzslot/dom/lazy';
 import type { DateAdapter, DateField } from '../dates.js';
 import { base, day, named, styles } from './shared.js';
+/** Temporal there before `adapt` (the loader waits for it). */
+export { ready } from './shared.js';
 
 /**
  * The `date` kit: tzslot's date field for a day (a day column's on / before / after…, an

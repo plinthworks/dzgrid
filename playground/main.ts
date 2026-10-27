@@ -13,6 +13,9 @@
 // `rules=1` (step 21): a selection rule ("if row 4 is ticked, row 8 cannot be", and the reverse; at most N rows, N
 // from the "Au plus" menu, handed through `settings.context`), and two headers that drive their column's filter: "Nom"
 // with the page's own search box (a header part written here, as an application would), "Montant" with `header.filterBox`.
+// `pills=1` (the feedback pass, 2026-10-27): "Commune"'s value list drawn as pills by a `filterOption` part of the page
+// (its tones in `ui.data`), and "Rendez-vous" offering one operator (between days): no « Condition », the period form
+// (FROM, TO, one month of calendar) in the popup itself.
 import { createGrid, type GridInstance, type GridSettings } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { FR } from '@dzgrid/dom/locales/fr';
@@ -72,6 +75,7 @@ const paging = params.get('paging') as 'client' | 'offset' | 'cursor' | null;
 const withExport = params.get('export') === '1';
 const withParts = params.get('parts') === '1';
 const withRules = params.get('rules') === '1';
+const withPills = params.get('pills') === '1';
 if (withRules) {
   form.querySelector('output')!.insertAdjacentHTML('beforebegin', '<label>Au plus <select name="max"><option>5</option><option>3</option><option>10</option></select></label>');
   if (params.get('max')) (form.elements.namedItem('max') as HTMLSelectElement).value = params.get('max')!;
@@ -135,12 +139,34 @@ const AR_SYL = ['عين', 'بو', 'سيدي', 'أولاد', 'بني', 'ال', '�
 const commune = (i: number): string => (i % 7 ? `${SYL[i % 20]} ${SYL[Math.floor(i / 20) % 20]!.toLowerCase()}${ENDS[Math.floor(i / 400) % 5]}` : `${AR_SYL[i % 20]} ${AR_SYL[Math.floor(i / 20) % 20]}${'ةيرنل'[Math.floor(i / 400) % 5]}`);
 // "Statut": an enum with the filters (no list button, owner Q2) or the cell parts (a badge per value).
 const STATUS: ColumnDef<RowA, any> = { id: 'e0', header: 'Statut', type: 'enum', width: 130, enumOptions: [{ value: 'pending', label: 'En attente' }, { value: 'active', label: 'Actif' }, { value: 'suspended', label: 'Suspendu' }, { value: 'closed', label: 'Clos' }], ...(withParts && { ui: { cell: 'statusBadge' } }) };
+// `pills=1`: each value a pill, tinted by its first letter (the tones handed through `ui.data`, plain data); the
+// grid keeps the row (option, ticks, keys, window, its name « label, count »). Global CSS (index.html): the popup
+// is in the top layer, out of any scoped style.
+const TONES = { tones: ['accent', 'warm', 'cool'] };
+const PILL = definePart('filterOption', {
+  mount(host, c) {
+    const pill = document.createElement('span');
+    const count = document.createElement('span');
+    count.className = 'pg-pill-n';
+    host.append(pill, count);
+    const draw = (n: SlotContext['filterOption']): void => {
+      const tones = (n.column.def.ui?.data as typeof TONES | undefined)?.tones ?? ['accent'];
+      pill.className = `pg-pill pg-pill--${n.blank ? 'blank' : tones[(n.label.codePointAt(0) ?? 0) % tones.length]}`;
+      pill.dataset['on'] = String(n.selected);
+      pill.textContent = n.label;
+      // The count by CSS from `data-n` (index.html), as the grid's own row: the visible text stays inside the option's name.
+      count.dataset['n'] = n.countText;
+    };
+    draw(c);
+    return { update: draw };
+  },
+});
 const SET_COLUMNS: ColumnDef<RowA, any>[] = [
-  ...(withFilters ? [{ id: 'commune', header: 'Commune', width: 160, value: (r: RowA) => (r.n2 % 40 === 0 ? null : commune(r.n0 % 2000)), filter: { kind: 'set' } } as ColumnDef<RowA, any>] : []),
+  ...(withFilters ? [{ id: 'commune', header: 'Commune', width: 160, value: (r: RowA) => (r.n2 % 40 === 0 ? null : commune(r.n0 % 2000)), filter: { kind: 'set', ...(withPills && { optionPart: 'pill' }) }, ...(withPills && { ui: { data: TONES } }) } as ColumnDef<RowA, any>] : []),
   ...(withFilters || withParts ? [STATUS] : []),
 ];
 // The cell parts (`parts=1`): each status its tone (closed: neutral, no shape), yes/no on every boolean column.
-const PARTS: Readonly<Record<string, SlotPart>> | undefined = withParts ? { statusBadge: badge({ tones: { pending: 'warning', active: 'success', suspended: 'danger' } }), 'cell.boolean': cellBoolean } : withRules ? { nameSearch: NAME_SEARCH } : undefined;
+const PARTS: Readonly<Record<string, SlotPart>> | undefined = withParts ? { statusBadge: badge({ tones: { pending: 'warning', active: 'success', suspended: 'danger' } }), 'cell.boolean': cellBoolean } : withRules ? { nameSearch: NAME_SEARCH } : withPills ? { pill: PILL } : undefined;
 
 const COLUMNS: ColumnDef<RowA, any>[] = [
   { id: 'id', header: 'ID', pinned: 'start', width: 90 },
@@ -149,7 +175,7 @@ const COLUMNS: ColumnDef<RowA, any>[] = [
   { id: 'a0', header: 'الاسم', width: 160 },
   { id: 'n0', header: 'Montant', type: 'number', width: withRules ? 170 : 110, ...(withRules && { ui: { header: 'header.filterBox' } }) },
   { id: 'd0', header: 'Jour', type: 'day', width: 120 },
-  { id: 'i1', header: dates ? 'Rendez-vous' : 'Instant', type: 'instant', width: 180 },
+  { id: 'i1', header: dates ? 'Rendez-vous' : 'Instant', type: 'instant', width: 180, ...(withPills && { filter: { ops: ['betweenDays'] } }) },
   { id: 'e1', header: 'Service', width: 130 },
   { id: 'b0', header: 'Actif', type: 'boolean', width: 90 },
   ...(['t1', 't2', 't3', 'a1', 'a2', 'n1', 'n2', 'n3', 'n4', 'd1', 'd2', ...(withFilters || withParts ? [] : ['e0'] as const), 'e2', 'b1'] as const).map((id) => ({ id, width: 120, ...(id.startsWith('n') ? { type: 'number' as const } : id.startsWith('d') ? { type: 'day' as const } : id.startsWith('b') ? { type: 'boolean' as const } : {}) })),

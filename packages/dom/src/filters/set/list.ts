@@ -5,8 +5,9 @@ import { el, tx } from '../dom.js';
 export interface Row {
   readonly v: string | null;
   readonly label: string;
-  /** The count shown ('' when none), and the option's name. */
+  /** The count shown ('' when none), the count (null: unknown), and the option's name. */
   readonly count: string;
+  readonly n: number | null;
   readonly name: string;
 }
 
@@ -26,6 +27,9 @@ export interface ListHooks {
   toggle(r: Row): void;
   /** The focused row left and none is left: where the focus goes. */
   empty(): void;
+  /** A row drawn (a `filterOption` part, feedback pass C): its node and its row; `gone` when the node leaves. */
+  paint?(x: HTMLElement, r: Row): void;
+  gone?(x: HTMLElement): void;
 }
 
 /** Rows drawn above and below the view. */
@@ -73,8 +77,16 @@ export function listView(doc: Document, o: ListHooks): ListView {
     // Its number is in the option's name ("Oran, 12 rows"), and drawn by CSS from `data-n`: the
     // visible text is the label alone, so the name holds it (label in name, WCAG 2.5.3).
     count.setAttribute('aria-hidden', 'true');
-    x.append(box, name, count);
+    // The last: the host of a `filterOption` part (`display: contents`, nothing drawn without one). Hidden from the
+    // name as the count is: an option's children are presentational, its name is the grid's « label, count » (2.5.3).
+    const part = el(doc, 'span', 'dzg-fpart');
+    part.setAttribute('aria-hidden', 'true');
+    x.append(box, name, count, part);
     return x;
+  };
+  const drop = (x: HTMLElement): void => {
+    x.remove();
+    o.gone?.(x);
   };
   const attr = (x: Element, k: string, v: string): void => {
     if (x.getAttribute(k) !== v) x.setAttribute(k, v);
@@ -96,7 +108,7 @@ export function listView(doc: Document, o: ListHooks): ListView {
       keep.set(r.v, x);
       at.set(x, i);
     }
-    for (const [v, x] of nodes) if (keep.get(v) !== x) x.remove(), at.delete(x);
+    for (const [v, x] of nodes) if (keep.get(v) !== x) drop(x), at.delete(x);
     nodes = keep;
     // In index order; a node already placed never moves (the focused one would lose the focus).
     for (const i of [...want].sort((a, b) => a - b)) {
@@ -117,6 +129,7 @@ export function listView(doc: Document, o: ListHooks): ListView {
       tx(name!, r.label);
       if (name!.title !== r.label) name!.title = r.label;
       attr(count!, 'data-n', r.count);
+      o.paint?.(x, r);
     }
     if (!sized) {
       const m = nodes.values().next().value?.getBoundingClientRect().height;
@@ -194,11 +207,12 @@ export function listView(doc: Document, o: ListHooks): ListView {
       rows = next;
       keys = null;
       // The rows' order may have changed: nothing drawn is kept but the focused one.
-      for (const [v, x] of nodes) if (!(had && was && v === was.v)) x.remove(), at.delete(x), nodes.delete(v);
+      for (const [v, x] of nodes) if (!(had && was && v === was.v)) drop(x), at.delete(x), nodes.delete(v);
       const i = was && !home ? next.findIndex((r) => r.v === was.v) : -1;
       active = i >= 0 ? i : !next.length ? -1 : old >= 0 && !home ? Math.min(old, next.length - 1) : Math.max(0, next.findIndex(o.ticked));
       if (was && was !== next[active] && i < 0) {
-        nodes.get(was.v)?.remove();
+        const x = nodes.get(was.v);
+        if (x) drop(x);
         nodes.delete(was.v);
       }
       render();

@@ -45,9 +45,10 @@ export interface ColumnDef<T, V = unknown> {
    * custom kind's name). `floating`: a box in the floating filter row (`@dzgrid/dom/filters`; the
    * grid's `filters({ floating })` otherwise, `false` keeps this column out). `debounceMs`: the
    * pause before what is typed there applies (150 in the browser, 300 on a server by default).
-   * `ops`: the operators its popup offers, in this order (the kind's own list when absent).
+   * `ops`: the operators its popup offers, in this order (the kind's own list when absent). `optionPart`: the
+   * `filterOption` part painting each row of a set filter's list (feedback pass C).
    */
-  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[] };
+  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string };
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';
@@ -60,8 +61,10 @@ export interface ColumnDef<T, V = unknown> {
    * Parts by name for this column (a cell renderer, a header, a tooltip): plain names, resolved by the grid's registry.
    * `cellClass` (step 26, docs/behaviors/cell-class.md): classes for a body cell from its data, space-separated (null: none).
    * `headerClass` (showcase themes step 6): classes for the column's header cell, space-separated.
+   * `data` (feedback pass D): the app's own plain data for its parts, delivered as is (`c.column.def.ui.data`, same
+   * reference) to every part of the column. Any other key is a warning `unknown-ui-key` from the DOM layer.
    */
-  readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string; readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined; readonly headerClass?: string };
+  readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string; readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined; readonly headerClass?: string; readonly data?: Readonly<Record<string, unknown>> };
   /** Shown over the header, already translated by the host. */
   readonly headerTooltip?: string;
   /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */

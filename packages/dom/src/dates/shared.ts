@@ -1,7 +1,7 @@
 import { zoneDayBounds } from '@dzgrid/core';
 import { intlTag } from '@dzgrid/core/internal';
-import { Temporal, type PlainDate } from '@tzslot/core';
-import { AR, EN, FR, type TzslotMessages } from '@tzslot/dom';
+import { Temporal, type PlainDate } from '@tzslot/core/lazy';
+import { AR, EN, FR, loadTemporal, type TzslotMessages } from '@tzslot/dom/lazy';
 import type { LocaleCtx } from '@dzgrid/core';
 
 /**
@@ -27,6 +27,12 @@ export interface SheetHost {
 
 /** The only place DzGrid touches Temporal: tzslot's (native, or its polyfill), behind `import()` (K.2 amended). */
 export const T = Temporal;
+/**
+ * tzslot's lazy entries (`@tzslot/dom/lazy`, 2.4.0, T3): no polyfill bundled; the native Temporal where the browser has
+ * it, else the polyfill fetched as a chunk of its own. A chunk's module exports this promise, and the loader (`once`,
+ * `@dzgrid/dom/internal`) waits for it before the chunk is used: no widget reads a date before Temporal is there.
+ */
+export const ready: Promise<unknown> = loadTemporal();
 export const day = (d: string): PlainDate => T.PlainDate.from(d);
 const OWN: Readonly<Record<string, TzslotMessages>> = { en: EN, fr: FR, ar: AR };
 

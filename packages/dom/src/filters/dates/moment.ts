@@ -1,6 +1,8 @@
-import { CALENDAR_CSS, createDateTimeField, DATETIME_CSS, FIELD_CSS, TIME_CSS } from '@tzslot/dom';
+import { CALENDAR_CSS, createDateTimeField, DATETIME_CSS, FIELD_CSS, TIME_CSS } from '@tzslot/dom/lazy';
 import type { DateAdapter, DateField } from '../dates.js';
 import { base, day, lost, muter, named, styles, T } from './shared.js';
+/** Temporal there before `adapt` (the loader waits for it). */
+export { ready } from './shared.js';
 
 /**
  * The `moment` kit: tzslot's date-and-time field for an instant's before / after, in the grid's

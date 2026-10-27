@@ -60,3 +60,20 @@ state reads `filters().floating.get()`. Without `filters()` among the features: 
 ## Editing (Phase 5 step 9, `docs/behaviors/edit-angular.md`, `docs/phase-5-steps/step09-plan.md`)
 - **Features** `edit({ save })`, `editors({ enterMoves, list: listEditor })` through `[features]` (fixed, as the tree's); their texts (`…-edit`, `…-editors`) in `[messages]`. Live input **`[save]`**; outputs **`(cellEdited)`**, **`(saveFailed)`**, **`(orderStale)`**, **`(undoChanged)`**, held until the first render like every output; **`controller.edit()`** gives the grid's `EditApi` (null without `edit`, before the grid, after it, on a server).
 - **An editor as a template:** `<ng-template dzgPart="stock" slot="editor" let-c>`; `c.keep(input)`, `c.cancel()`, `c.refuse(code)`, and `c.reads(() => input)` for what Enter, Tab and a click elsewhere keep. **As a component:** `componentPart('editor', C)`, with an optional `read()` and `focus()`. Its view is created when the editor opens and destroyed when it closes.
+
+## Notes from an app (feedback pass M, 2026-10-27)
+- **`slot` is a binding.** `<ng-template dzgPart="search" [slot]="'header'" let-c>`: a static `slot="header"` sets an
+  attribute, not the signal input, so the part registers as a `cell` part and the header shows its default label (the
+  symptom). Same for `[slot]="'filterOption'"` (the set filter's row, filter-set.md) and every other slot.
+- **No CSS `content` for the grid's glyphs.** The pager's arrows are characters in the DOM and the chevrons characters
+  in the grid's own CSS (feedback pass A): an app writes no `::before` for them. If an app writes its own `content`,
+  use escapes in `.scss` (`content: '\00AB'`): a raw `«` came out of the Angular build as `content: ""` (the file's
+  charset), an empty glyph.
+- **The popup is out of the component's styles.** The filter popup is in the top layer, outside the host: emulated
+  encapsulation never reaches it. Global CSS (`styles.scss`) or `ViewEncapsulation.None`, keyed on the popup's
+  `data-column` / `data-kind` (theming.md); `::ng-deep` is deprecated.
+- **An unlayered reset** (Tailwind 3's `@tailwind base`): import `@dzgrid/theme/dzgrid.unlayered.css`, not
+  `dzgrid.css` (theming.md).
+- **The row height** is `[rowHeight]`; `--dzg-row-height` in CSS does nothing (it is the grid's output, density.md).
+- **A part's data**: `[columns]` with `ui: { data: { … } }`, read in the template as `c.column.def.ui.data`; another
+  key of `ui` is warned (`unknown-ui-key`).

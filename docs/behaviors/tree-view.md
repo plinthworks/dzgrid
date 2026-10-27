@@ -116,3 +116,11 @@ test over 1 000 seeded trees against a recursive oracle, timing targets (build 1
 pointer capture, announcements), browser axe in French and Arabic. Step 5: nested and path shapes,
 filler rules. Step 6: the million-row tree (`perf/profiles/tree.ts`, `playground/tree.html`).
 Manual: `docs/a11y-protocol.md` §16.
+
+## Feedback pass A (2026-10-27): the chevron is a character
+The toggle's chevron (and the detail rows' and the group headers', the same rule) is the character U+203A in `::before`,
+not two borders: an app's unlayered reset (Tailwind 3's preflight, `*,::before,::after{border-width:0}`) beats every
+rule of the `dzgrid.layout` layer and erased the borders. Closed: unturned, toward the inline end (the character is
+Bidi_Mirrored: left in Arabic, by the browser); open: turned down (`--dzg-chevron: 90deg`, `-90deg` right to left).
+`font-size: 1.25em; line-height: 1`. Checked in Chrome, Firefox and WebKit under a stand-in reset
+(`scripts/browser-glyphs.mjs`: ink, and the way it points).

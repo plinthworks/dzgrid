@@ -444,7 +444,7 @@
       "files": [
         "packages/dom/src/editors/dates/calendar.ts"
       ],
-      "maxGzip": 1500,
+      "maxGzip": 1520,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -623,7 +623,7 @@
       "files": [
         "packages/dom/src/filters/set/index.ts"
       ],
-      "maxGzip": 4200,
+      "maxGzip": 4205,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -636,7 +636,7 @@
         "packages/dom/src/filters/dates/range.ts",
         "packages/dom/src/filters/dates/moment.ts"
       ],
-      "maxGzip": 2600,
+      "maxGzip": 2745,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",

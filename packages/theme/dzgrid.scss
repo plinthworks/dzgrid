@@ -270,7 +270,10 @@ $layered: true !default;
     inline-size: 1rem;
     block-size: 1rem;
     box-sizing: border-box;
-    border: 1px solid var(--tz-fg-muted);
+    // The edge an outline, not a border (feedback pass G): an app's unlayered reset (Tailwind 3's preflight,
+    // `*{border-width:0}`) beats this layer and erased a border, leaving an unticked box invisible.
+    outline: 1px solid var(--tz-fg-muted);
+    outline-offset: -1px;
     border-radius: 0.25rem;
     background: var(--tz-bg);
     color: var(--tz-accent-fg);
@@ -287,7 +290,7 @@ $layered: true !default;
   .dzg-fopt[aria-selected='true'] .dzg-box,
   .dzg-box[aria-checked='true'],
   .dzg-box[aria-checked='mixed'] {
-    border-color: var(--tz-accent);
+    outline-color: var(--tz-accent);
     background: var(--tz-accent);
   }
 
@@ -304,7 +307,7 @@ $layered: true !default;
   }
 
   .dzg-check[data-dzg-refused] .dzg-box {
-    border-style: dashed;
+    outline-style: dashed;
     background: var(--dzg-refused-bg, var(--tz-bg-raised));
   }
 
@@ -322,6 +325,7 @@ $layered: true !default;
   // of at least 24 px (WCAG 2.5.8).
   .dzg-overlay button,
   .dzg-ffoot button,
+  .dzg-fpreset,
   .dzg-pbtn,
   .dzg-retry,
   .dzg-footer select {
@@ -333,6 +337,18 @@ $layered: true !default;
     background: var(--dzg-header-bg, var(--tz-bg-raised));
     font: inherit;
     cursor: pointer;
+  }
+
+  // The period form's shortcuts (feedback pass K): the footer's look, smaller; the one in force outlined in the accent.
+  .dzg-fpreset {
+    min-block-size: 1.5rem;
+    padding-inline: 0.5rem;
+  }
+
+  .dzg-fpreset[aria-pressed='true'] {
+    outline: 2px solid var(--tz-accent);
+    outline-offset: -2px;
+    font-weight: 600;
   }
 
   .dzg-overlay button:focus-visible,
@@ -497,7 +513,7 @@ $layered: true !default;
   @media (forced-colors: active) {
     // A refused row's box (step 21): the system's colour for what cannot be used.
     .dzg-check[data-dzg-refused] .dzg-box {
-      border-color: GrayText;
+      outline-color: GrayText;
     }
 
     // A tree's toggle (Phase 4 step 4): drawn as the system draws a control's text.
@@ -668,6 +684,12 @@ $layered: true !default;
       display: none;
     }
   }
+
+  // Another month's days in a filter popup, unfaded, in tzslot's panel and in the period form's own calendar
+  // (feedback pass K): tzslot's 0.35 opacity falls under 4.5:1 (T11). A custom property: in the layer, inherited.
+  .dzg-popup {
+    --tz-cal-outside-opacity: 1;
+  }
   }
 
   // tzslot's sheets (the date filters' panel, step 14) are tzslot's own and unlayered: the three rules that
@@ -683,8 +705,6 @@ $layered: true !default;
   // The date filters: tzslot's panel inside a filter popup takes the popup's surface, so a dark grid
   // opens a dark calendar.
   .dzg-popup .tz-field__panel {
-    // Another month's days, unfaded: tzslot's 0.35 opacity falls under 4.5:1 (T11).
-    --tz-cal-outside-opacity: 1;
     border-color: var(--tz-border);
     color: var(--tz-fg);
     background: var(--tz-bg);
@@ -692,7 +712,7 @@ $layered: true !default;
 
   // Forced colours: the chosen day and shortcut keep their mark when the system paints.
   @media (forced-colors: active) {
-    .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .tz-rangefield__preset--on) {
+    .dzg-popup :is(.tz-cal__day--selected, .tz-range__day--start, .tz-range__day--end, .dzg-fpreset[aria-pressed=true]) {
       forced-color-adjust: none;
       color: HighlightText;
       background: Highlight;

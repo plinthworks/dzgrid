@@ -18,7 +18,7 @@ const budgets = JSON.parse(readFileSync(`${ROOT}perf/browser-budgets.json`, 'utf
 // Step 25 lines: the audit screen's server (C) and the CSV of A load tzslot through audit.html's
 // importmap (bundled once, as test:audit does); `<dz-grid>` runs on the Angular fixture's `?a=1`
 // page, built here (AOT, minified; `npm run build` first).
-await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
+await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core', 'dom-lazy': '@tzslot/dom/lazy', 'core-lazy': '@tzslot/core/lazy' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
 if (!process.argv.includes("--only")) await buildFixture();
 // Minified, as a consumer ships it: never measure unminified code (§5.4).
 const site = await serve(import.meta.url, { minify: true });

@@ -138,6 +138,28 @@ export interface SlotContext {
      */
     values(o?: ValuesOptions): ValuesHandle;
   };
+  /**
+   * One row of the set filter's value list (`filters()`, feedback pass C), named by the column's `filter.optionPart`. The
+   * part paints the row's content; the grid keeps the row: `role=option`, `aria-selected`, its name (« label, count »),
+   * the roving focus, the keys and the window (only the rows drawn have a part; one per row, updated, destroyed when the
+   * row leaves the window or the popup closes). A click anywhere on the row toggles it: a control of the part's that
+   * calls `toggle()` stops its click.
+   */
+  filterOption: PartBase & {
+    /** The value, or null for the blanks' row. */
+    readonly value: string | null;
+    /** The grid's label for it (the blanks' row: `filter.set.blanks`). */
+    readonly label: string;
+    /** How many rows have it, when known; `countText` in the grid's digits ('' when not shown). */
+    readonly count: number | null;
+    readonly countText: string;
+    /** Ticked in the draft. */
+    readonly selected: boolean;
+    readonly blank: boolean;
+    readonly column: ResolvedColumn<unknown>;
+    /** Ticks or unticks it in the draft, as a click on the row. */
+    toggle(): void;
+  };
   /** The tooltip, shown only when the host gave text (`@dzgrid/dom/slots`). */
   tooltip: PartBase & {
     /** The host's text (`headerTooltip`, `tooltip(value, row)`). */
@@ -256,12 +278,15 @@ export function featureParts(features: readonly GridFeature[] = [], own: () => R
 }
 
 /** The feature each slot needs; the cell is the base's. */
-const NEEDS: Partial<Record<WiredSlot, string>> = { header: 'slots', overlay: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', footer: 'pagination', detail: 'detail', editor: 'editors' };
+const NEEDS: Partial<Record<WiredSlot, string>> = { header: 'slots', overlay: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', filterOption: 'filters', footer: 'pagination', detail: 'detail', editor: 'editors' };
+/** A column's `ui` keys (feedback pass D: any other is said). */
+const UI = ['cell', 'header', 'tooltip', 'cellClass', 'headerClass', 'data'];
 const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));
 
 /**
  * Parts whose slot needs a feature the grid lacks, columns asking for a filter UI without
- * `filters()` (`columns[i].filter`, i over the leaves), and paged rows without `pagination()`
+ * `filters()` (`columns[i].filter`, i over the leaves), a column's header or tooltip part without `slots()`
+ * (`columns[i].ui.header`; `header.filterBox` also without `filters()`), and paged rows without `pagination()`
  * (`settings.pagination`, step 17): told once, a warning each, the detail naming the feature.
  */
 export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
@@ -272,7 +297,16 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
     ...(paged ? missing('settings.pagination', 'pagination') : []),
     // A selection rule without its feature (step 21): an error, the grid selects nothing (fail closed).
     ...(s.selection?.canSelect ? missing('settings.selection.canSelect', 'rules', 'error') : []),
-    ...leaves(s.columns).flatMap((d, i) => (d?.filter && (d.filter.floating || d.filter.kind) ? missing(`columns[${i}].filter`, 'filters') : [])),
+    ...leaves(s.columns).flatMap((d, i) => [
+      ...(d?.filter && (d.filter.floating || d.filter.kind) ? missing(`columns[${i}].filter`, 'filters') : []),
+      ...Object.keys(d?.ui ?? {}).flatMap((k): Problem[] => {
+        const at = `columns[${i}].ui.${k}`;
+        const v = d!.ui![k as 'header'];
+        // A header or tooltip part named by the column (feedback pass E): `slots()` draws them; `header.filterBox` is
+        // `filters()`'. An app's own key (feedback pass D): said, its data belongs in `ui.data`.
+        return UI.includes(k) ? (v && (k === 'header' || k === 'tooltip') ? [...missing(at, 'slots'), ...(v === 'header.filterBox' ? missing(at, 'filters') : [])] : []) : [{ code: 'unknown-ui-key', severity: 'warning', path: at, detail: k }];
+      }),
+    ]),
   ];
 }
 
