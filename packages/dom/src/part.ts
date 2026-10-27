@@ -143,7 +143,9 @@ export interface SlotContext {
    * part paints the row's content; the grid keeps the row: `role=option`, `aria-selected`, its name (« label, count »),
    * the roving focus, the keys and the window (only the rows drawn have a part; one per row, updated, destroyed when the
    * row leaves the window or the popup closes). A click anywhere on the row toggles it: a control of the part's that
-   * calls `toggle()` stops its click.
+   * calls `toggle()` stops its click. The part's host is `aria-hidden` (the row is the control, its name the grid's):
+   * no focusable control in it (a link, button, field, `tabindex`: reached by Tab but hidden, WCAG 4.1.2), a clickable
+   * span instead. Not checked (the set chunk's budget).
    */
   filterOption: PartBase & {
     /** The value, or null for the blanks' row. */

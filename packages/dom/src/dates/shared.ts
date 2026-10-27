@@ -29,10 +29,12 @@ export interface SheetHost {
 export const T = Temporal;
 /**
  * tzslot's lazy entries (`@tzslot/dom/lazy`, 2.4.0, T3): no polyfill bundled; the native Temporal where the browser has
- * it, else the polyfill fetched as a chunk of its own. A chunk's module exports this promise, and the loader (`once`,
- * `@dzgrid/dom/internal`) waits for it before the chunk is used: no widget reads a date before Temporal is there.
+ * it, else the polyfill fetched as a chunk of its own. A chunk's module exports this function, and the loader (`once`,
+ * `@dzgrid/dom/internal`) calls it and waits before the chunk is used: no widget reads a date before Temporal is there.
+ * A function, not a promise made at import: a module is kept, so a failed load would stay failed and Retry could never
+ * succeed (review of 0c114e3); tzslot forgets a failed fetch and tries again on the next call.
  */
-export const ready: Promise<unknown> = loadTemporal();
+export const ready = loadTemporal;
 export const day = (d: string): PlainDate => T.PlainDate.from(d);
 const OWN: Readonly<Record<string, TzslotMessages>> = { en: EN, fr: FR, ar: AR };
 

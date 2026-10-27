@@ -84,7 +84,10 @@ None (problems are codes).
   out again in that frame put the view back where the last paint left it).
 - **Forgotten and measured again** (7): every height when the wrapped columns' widths (resize, flex, auto-size, a
   wrapped column shown or hidden), the row height (density, `rowHeight`, the reader's text size), the direction or
-  the language change, and when late fonts load (`document.fonts` `loadingdone`, Q9-4). As built, a column that is
+  the language change, the wrapped cells' line height (`--dzg-wrap-line`) or font size change (read off one wrapped
+  cell's computed style at each paint: a theme change alone paints nothing, the next paint — a scroll, or
+  `api.refresh()` — measures again; review of b64ba02), and when late fonts load (`document.fonts` `loadingdone`, Q9-4).
+  A row's text is told apart by code points (two emojis sharing a high surrogate are two texts). As built, a column that is
   not wrapped, moved, shown or hidden measures nothing (the wrapped widths are unchanged). Heights of rows gone from
   the grid are dropped; rows scrolled away keep theirs until one of those changes.
 - **Layout**: the measured rows taller than the row height are rows of their own height in the core's sparse layout

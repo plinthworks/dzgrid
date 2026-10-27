@@ -158,7 +158,9 @@ grid keeps the row: `role=option`, `aria-selected`, its name « label, count »,
 (anywhere on the row toggles it; a control of the part's own that calls `toggle()` stops its click), the window over
 10 000 values: only the rows drawn have a part, one per row, updated when its tick or text changes, destroyed when the
 row leaves the window or the popup closes. The grid's own content steps aside (`data-part` on the row); the part's host
-is `aria-hidden` (an option's children are presentational). Its visible text must stay inside the name (WCAG 2.5.3,
+is `aria-hidden` (an option's children are presentational), so it holds no focusable control (a link, a button, a
+field, a `tabindex`: reached by Tab but unnamed, WCAG 4.1.2); a clickable span that calls `toggle()` instead (review of
+0c114e3; the rule is not checked: a warning costs about 50 B gz in the set chunk, over its budget). Its visible text must stay inside the name (WCAG 2.5.3,
 axe `label-content-name-mismatch`): draw the count as the grid does, from an attribute by CSS
 (`content: attr(data-n)`), or not at all. A part that throws is reported and that row drawn by the grid; an unknown
 name is `unknown-part` (error, `columns.<id>.filter.optionPart`, said at each opening) and the default rows; a

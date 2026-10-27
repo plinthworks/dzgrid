@@ -45,7 +45,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   /** Rows measured (their height, never under the row height) and the text they were measured with (a hash). */
   const heights = new Map<RowKey, number>();
   const texts = new Map<RowKey, number>();
-  /** What every measure depends on but the text: the row height, the direction, the language, the wrapped columns' widths. */
+  /** What every measure depends on but the text: the row height, the direction, the language, the wrapped columns' widths, their line height and font size. */
   let sig = '';
   let told = false;
   let inner = g.layoutFor;
@@ -76,7 +76,10 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     let id = '';
     // A fixed row height wins (choice 1): nothing wraps into a taller row.
     if (typeof g.settings.rowHeight !== 'number') for (const x of [L.start, L.center, L.end]) x.columns.forEach((c, i) => c.def.wrap && ((id ||= c.id), (s += ` ${c.id} ${x.widths.sizeAt(i)}`)));
-    if (s) s += ` ${h} ${g.dir} ${g.ctx.locale}`;
+    // The wrapped cells' line height (`--dzg-wrap-line`) and font size, off one of them: a theme's change measures again.
+    const w = s && g.el.viewport.querySelector('.dzg-body .dzg-cell[data-wrap]');
+    const cs = w && g.doc.defaultView!.getComputedStyle(w);
+    if (s) s += ` ${h} ${g.dir} ${g.ctx.locale} ${cs && cs.lineHeight + cs.fontSize}`;
     let again = false;
     if (s !== sig) {
       sig = s;
@@ -97,7 +100,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
       if (v.slot || v.data === undefined || g.editor?.key === key) continue;
       const cells = [...v.cells.values()].map((c) => c.el).filter((e) => e.hasAttribute('data-wrap') && !e.hasAttribute('aria-rowspan'));
       let x = 0;
-      for (const e of cells) for (const ch of e.textContent!) x = (x * 31 + ch.charCodeAt(0)) | 0;
+      for (const e of cells) for (const ch of e.textContent!) x = (x * 31 + ch.codePointAt(0)!) | 0;
       if (!cells.length || texts.get(key) === x) continue;
       hashes.set(key, x);
       for (const e of cells) {
