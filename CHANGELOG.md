@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `filters({ dateCalendar: { months, presets } })` (docs/behaviors/filter-date-picker.md, Calendar options): the
+  period field's months side by side (2 by default) and its shortcuts, a list of `RelativeRange` names in the host's
+  order (the six by default, `[]` for none); still none between two moments. A value it cannot take is dropped with an
+  `invalid-setting` warning, never thrown. Type `DateCalendarOptions` from `@dzgrid/dom/filters`.
+
 - `@dzgrid/dom/groups` and collapsible header groups (Phase 6 step 7; docs/behaviors/header-groups.md, owner Q-GH,
   Q8-1–Q8-5): `ColumnGroupDef.collapsible` / `open`, `ColumnDef.groupShow: 'open' | 'closed'`; `groups()` (with
   `spans()`) draws a 24 px button at the group header's inline end (`aria-expanded`, named), Enter / Space on the group

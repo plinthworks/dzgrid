@@ -1,4 +1,4 @@
-import { parseDay, readInstant, RELATIVE_RANGES, type LocaleCtx, type RelativeRange } from '@dzgrid/core';
+import { parseDay, problem, readInstant, RELATIVE_RANGES, type LocaleCtx, type Problem, type RelativeRange } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import { conditions, el, form, hide, NUM, tx, type F, type Spec } from './forms.js';
@@ -30,6 +30,32 @@ export interface DateSettings {
   readonly label: string;
   /** `filters({ dateMessages })`: the widget's words by language, over its own. */
   readonly messages?: Readonly<Record<string, object>>;
+  /** `filters({ dateCalendar })`, checked: the period widget's months and shortcuts. */
+  readonly calendar?: DateCalendarOptions;
+}
+
+/** `filters({ dateCalendar })`: how the period widget shows itself (filter-date-picker.md, Calendar options). */
+export interface DateCalendarOptions {
+  /** Months side by side, a positive integer; 2 when absent. */
+  readonly months?: number;
+  /** The shortcuts beside the calendar, in this order; `[]` for none; the six when absent. Never between two moments. */
+  readonly presets?: readonly RelativeRange[];
+}
+
+const BAD = (name: string, v: unknown): Problem => problem('invalid-setting', 'warning', `features.filters.dateCalendar.${name}`, String(v));
+
+/**
+ * The host's `dateCalendar`, kept to what tzslot can take: a months that is not a positive integer,
+ * presets that are not a list, an unknown name in it, each dropped with a warning (said at setup), never thrown.
+ */
+export function calendarOf(c: DateCalendarOptions): { calendar: DateCalendarOptions; problems: Problem[] } {
+  const problems: Problem[] = [];
+  const { months: m, presets: p } = c;
+  const ok = Number.isInteger(m) && m! > 0;
+  if (m !== undefined && !ok) problems.push(BAD('months', m));
+  if (p !== undefined && !Array.isArray(p)) problems.push(BAD('presets', p));
+  const list = Array.isArray(p) ? p.filter((n, i) => (RELATIVE_RANGES.has(n) ? p.indexOf(n) === i : (problems.push(BAD('presets', n)), false))) : undefined;
+  return { calendar: { ...(ok && { months: m! }), ...(list && { presets: list }) }, problems };
 }
 
 /** What a kit's `adapt` is given: where to draw, which field, its settings, and how to say a change. */
@@ -72,6 +98,9 @@ export interface DateEnv {
   readonly load: (kit: DateKitName) => Promise<DateKit>;
   readonly done: (kit: DateKitName) => DateKit | undefined;
   readonly messages?: Readonly<Record<string, object>>;
+  readonly calendar?: DateCalendarOptions;
+  /** What was wrong in `dateCalendar`, said once the grid is there. */
+  readonly calendarProblems?: readonly Problem[];
 }
 
 const KITS: Record<DateKitName, () => Promise<DateKit>> = {
@@ -135,7 +164,7 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
   const name = (): string => get().msg(LABEL[kit() ?? DATE] as never);
   const settings = (): DateSettings => {
     const { ctx, today } = get();
-    return { ctx, label: name(), today, ...(env.messages && { messages: env.messages }) };
+    return { ctx, label: name(), today, ...(env.messages && { messages: env.messages }), ...(env.calendar && { calendar: env.calendar }) };
   };
   /** The loading line or the failure (with Retry), one at a time, after the label (`lazy.ts`). The focus waits on the box while it loads again, and goes to the field when it comes. */
   const n = notice(doc, box, () => (box.focus(), (want = ''), mount()), (w) => get().msg(w === 'load' ? 'filter.loadingDates' : 'filter.loadFailed'), () => get().msg('grid.retry'));

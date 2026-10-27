@@ -90,3 +90,10 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **Q8-4 (owner, 2026-10-27):** the fold UI goes to its own entry `@dzgrid/dom/groups` (~1 400 B; line at the measure + 10 %), loaded only with collapsible groups; `dom/spans` stays within 5 300.
 - **Q8-3 revised (owner, 2026-10-27):** folding a column clears the block (as for a hidden column); no shrink, 0 B in `dom/range`.
 - **Q8-5 (owner, 2026-10-27):** lines pushed by compression only: `core/edit` 3 100 → 3 150, `core/server` 6 150 → 6 200, K.8 profile guard 83 500 → 84 000 (already granted in Q-B).
+
+## Step 8 — pinned rows (owner, 2026-10-27) — plan `step08b-plan.md`
+
+- **Q1:** blocks, paste and fill inside the bands by keyboard AND mouse, in two sub-steps (8b-1 core/bands/keys/single-cell editing, 8b-2 blocks and fill); `dom/range` up to ~5 200, `dom/fill` up to ~3 150 (re-asked if over).
+- **Q2:** core up to 29 150; dom base +150–200 (≤ 22 400); `dom/pinned-rows` 2 000, up to 2 300 if editing needs it; new `-pinned` texts 120/140/170; `pinned-rows.css` ~450. Over any of these: ask.
+- **Q3:** with few rows, the bottom band sticks to the grid's bottom like a table footer (~40 B).
+- **Q4/Q5 (lead, recommendations kept):** `editable(row, context, { pinned })` third argument; the save payload gets `pinned: 'top' | 'bottom'`.

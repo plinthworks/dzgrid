@@ -10,8 +10,9 @@ const NONE: RangeFieldValue = { start: null, end: null };
  * The `range` kit: tzslot's period field. A day column's between (both days in, drawn on UTC
  * midnights only as carriers, the zone hidden from its summary: T6) and an instant's between days
  * (the grid's zone), each with the six shortcuts (owner Q5); an instant's between two moments
- * (`[at, atTo)`, no shortcuts). A shortcut pressed is `{range}`; a period by hand, its days or
- * moments; one end, or a period that holds nothing, null (L1 keeps the filter in force).
+ * (`[at, atTo)`, no shortcuts). The host may ask for fewer months or shortcuts (`dateCalendar`).
+ * A shortcut pressed is `{range}`; a period by hand, its days or moments; one end, or a period that
+ * holds nothing, null (L1 keeps the filter in force).
  */
 export function adapt(a: DateAdapter): DateField {
   styles(a, [['field', FIELD_CSS], ['range', RANGE_CSS], ['rangefield', RANGEFIELD_CSS], ['dateinput', DATEINPUT_CSS], ['datetime', DATETIME_CSS], ['timeselect', TIMESELECT_CSS], ['time', TIME_CSS], ['calendar', CALENDAR_CSS]]);
@@ -24,8 +25,12 @@ export function adapt(a: DateAdapter): DateField {
   const opts = () => {
     const s = a.settings();
     const b = base(s);
+    const presets = moments ? [] : [...(s.calendar?.presets ?? RELATIVE_RANGES)];
     return {
-      ...b, timeZone: zone(), title: s.label, showTime: moments, showPresets: !moments, presets: moments ? [] : [...RELATIVE_RANGES],
+      ...b, timeZone: zone(), title: s.label, showTime: moments,
+      // The host's calendar (`filters({ dateCalendar })`, checked there), or two months and the six
+      // shortcuts; none between two moments. An empty list hides the shortcut column.
+      months: s.calendar?.months ?? 2, presets, showPresets: presets.length > 0,
       clearable: false, confirm: false, readingStyle: 'named' as const, blockAcrossDisabled: false,
       ...(days && { messages: { ...b.messages, periodSummary: ({ length }: { length: string }) => length } }),
       ...(moments && { min: day('1900-01-01'), isDateDisabled: lost(s.ctx.timeZone) }),

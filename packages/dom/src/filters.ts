@@ -6,4 +6,4 @@
 export { filters, FILTER_KEYS } from './filters/index.js';
 export type { FiltersFeature, FiltersOptions } from './filters/index.js';
 export type { SetKit } from './filters/set.js';
-export type { DateAdapter, DateField, DateKit, DateKitName, DatePart, DateSettings } from './filters/dates.js';
+export type { DateAdapter, DateCalendarOptions, DateField, DateKit, DateKitName, DatePart, DateSettings } from './filters/dates.js';

@@ -1,12 +1,12 @@
 import { dayAt } from '@dzgrid/core';
-import { hasRelative, onCommand } from '@dzgrid/core/internal';
+import { emit, hasRelative, onCommand } from '@dzgrid/core/internal';
 import { settled } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { HeaderFilter } from '../part.js';
 import type { FilterMessageKey } from '../messages.js';
 import { committer } from './commit.js';
-import { dateForms, kits, type DateEnv, type DateKit, type DateKitName } from './dates.js';
+import { dateForms, kits, type DateEnv, type DateKit, type DateKitName, type DateCalendarOptions, calendarOf } from './dates.js';
 import { floatingRow } from './floating.js';
 import { filterBoxPart } from './header-box.js';
 import { booleanForm, numberForm, textForm } from './forms.js';
@@ -34,6 +34,12 @@ export interface FiltersOptions {
   readonly loadDates?: (kit: DateKitName) => Promise<DateKit>;
   /** tzslot's words for a language beyond English, French and Arabic, or over them: `{ es: {...} }` (its `TzslotMessages`, in part). */
   readonly dateMessages?: Readonly<Record<string, object>>;
+  /**
+   * The period widget's calendar: `{ months: 1 }` for one month (2 by default), `{ presets: [] }` for no
+   * shortcuts, `{ presets: ['today', 'last7Days'] }` for these, in this order (the six by default). A value
+   * it cannot take is dropped with an `invalid-setting` warning. Between two moments: no shortcuts, still.
+   */
+  readonly dateCalendar?: DateCalendarOptions;
   /** Advanced (step 15): where the set filter's chunk comes from, instead of DzGrid's own `import()` (as `loadDates`). */
   readonly loadSet?: () => Promise<SetKit>;
 }
@@ -75,7 +81,8 @@ export const FILTER_KEYS = [
  */
 export function filters(o: FiltersOptions = {}): FiltersFeature {
   let popup: Menu | null = null;
-  const env: DateEnv = { g: null, ...kits(o.loadDates), ...(o.dateMessages && { messages: o.dateMessages }) };
+  const cal = o.dateCalendar && calendarOf(o.dateCalendar);
+  const env: DateEnv = { g: null, ...kits(o.loadDates), ...(o.dateMessages && { messages: o.dateMessages }), ...(cal && { calendar: cal.calendar, calendarProblems: cal.problems }) };
   const d = dateForms(env);
   const sets = setKit(o.loadSet);
   const set = setForm(env, sets);
@@ -100,6 +107,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   env.g = g;
   const missing = FILTER_KEYS.filter((k) => g.settings.messages.text[k] === undefined);
   if (missing.length) throw new TypeError(`filters: missing ${missing.join(', ')}`);
+  if (env.calendarProblems?.length) emit(g.kernel, { type: 'problems', source: 'host', problems: [...env.calendarProblems] });
   const root = g.el.root.getRootNode();
   if (g.settings.injectStyles !== false) injectFilterStyles(root.nodeType === 11 ? (root as ShadowRoot) : g.doc, g.settings.nonce);
   // After a user's filter change, the filtered count (`announce.filtered {rows}`, or `announce.filteredOpen` when

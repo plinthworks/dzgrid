@@ -42,12 +42,13 @@ interface Open {
   readonly settings?: Record<string, unknown>;
   readonly loadDates?: (kit: Kit) => Promise<unknown>;
   readonly dateMessages?: Record<string, object>;
+  readonly dateCalendar?: unknown;
   readonly columns?: ColumnOrGroup<Row>[];
   readonly shadow?: boolean;
 }
 
 function grid(o: Open = {}) {
-  const feature = filters({ ...(o.loadDates && { loadDates: o.loadDates as never }), ...(o.dateMessages && { dateMessages: o.dateMessages }) });
+  const feature = filters({ ...(o.loadDates && { loadDates: o.loadDates as never }), ...(o.dateMessages && { dateMessages: o.dateMessages }), ...(o.dateCalendar !== undefined && { dateCalendar: o.dateCalendar as never }) });
   const t = make({ columns: (o.columns ?? COLS) as never, rows: ROWS, features: [feature], server: o.server, shadow: o.shadow, settings: { clock: () => NOW, ...o.settings } as never });
   const popup = () => t.host.querySelector<HTMLElement>('.dzg-popup');
   const q = <E extends Element = HTMLElement>(s: string) => popup()?.querySelector<E>(s) ?? null;
@@ -856,5 +857,92 @@ describe('the review of step 14 part B', () => {
     expect(t.q('.dzg-fdate [role=alert]')!.textContent).toBe(EN_FILTERS.text['filter.loadFailed']);
     expect(t.q('.dzg-fretry')).not.toBeNull();
     expect(t.q('.dzg-fwidget, .dzg-fpanel')).toBeNull();
+  });
+});
+
+describe('filters({ dateCalendar }): the period widget’s months and shortcuts', () => {
+  const ALL = ['Today', 'Yesterday', 'Last 7 days', 'Last 30 days', 'This month', 'Last month'];
+  /** Opens the period field of a column (`between` on a day, `betweenDays` or `between` on an instant) and its panel. */
+  const period = async (o: Open, column = 'd', op = 'between') => {
+    const t = grid(o);
+    t.feature.openFilter(column);
+    await t.ready();
+    t.choose(op);
+    await vi.waitFor(() => expect(t.q('.dzg-fdate .tz-rangefield, .dzg-fdate .tz-field')).not.toBeNull());
+    await vi.waitFor(() => expect(t.q('.dzg-flabel')!.textContent).toBe('Period'));
+    t.openPanel();
+    const months = () => t.panel()!.querySelectorAll('.tz-range__month').length;
+    const column_ = () => t.panel()!.querySelector<HTMLElement>('.tz-rangefield__presets');
+    const shown = () => (column_() && !column_()!.hidden ? [...column_()!.querySelectorAll('.tz-rangefield__preset')].map((b) => b.textContent) : []);
+    return { t, months, shown };
+  };
+  const warnings = (t: ReturnType<typeof grid>) => t.problems().filter((p) => p.path.startsWith('features.filters.dateCalendar'));
+
+  it('absent: two months and the six shortcuts, as before; nothing said', async () => {
+    const { t, months, shown } = await period({});
+    expect(months()).toBe(2);
+    expect(shown()).toEqual(ALL);
+    expect(warnings(t)).toEqual([]);
+  });
+
+  it('months: 1 reaches the widget: one month drawn', async () => {
+    const { t, months, shown } = await period({ dateCalendar: { months: 1 } });
+    expect(months()).toBe(1);
+    expect(shown()).toEqual(ALL);
+    expect(warnings(t)).toEqual([]);
+  });
+
+  it('presets: [] hides the column of shortcuts (a day column and an instant’s days)', async () => {
+    for (const [col, op] of [['d', 'between'], ['t', 'betweenDays']] as const) {
+      const { months, shown } = await period({ dateCalendar: { presets: [] } }, col, op);
+      expect(shown(), col).toEqual([]);
+      expect(months()).toBe(2);
+      cleanup();
+    }
+  });
+
+  it('a subset of presets is offered in the host’s order', async () => {
+    const { t, shown } = await period({ dateCalendar: { presets: ['thisMonth', 'today', 'last7Days'] } });
+    expect(shown()).toEqual(['This month', 'Today', 'Last 7 days']);
+    expect(warnings(t)).toEqual([]);
+  });
+
+  it('an instant between two moments keeps no shortcuts, whatever the host asks', async () => {
+    const { shown } = await period({ dateCalendar: { presets: ['today'] }, settings: { timeZone: 'Europe/Paris' } }, 't', 'between');
+    expect(shown()).toEqual([]);
+  });
+
+  it('an unknown preset name: a warning naming it, the others kept; never a throw', async () => {
+    const { t, shown } = await period({ dateCalendar: { presets: ['today', 'nextWeek', 'yesterday'] } });
+    expect(shown()).toEqual(['Today', 'Yesterday']);
+    expect(warnings(t)).toEqual([{ code: 'invalid-setting', severity: 'warning', path: 'features.filters.dateCalendar.presets', detail: 'nextWeek' }]);
+  });
+
+  it('presets that are not a list: a warning, the six shortcuts kept', async () => {
+    const { t, shown } = await period({ dateCalendar: { presets: 'today' } });
+    expect(shown()).toEqual(ALL);
+    expect(warnings(t)).toEqual([{ code: 'invalid-setting', severity: 'warning', path: 'features.filters.dateCalendar.presets', detail: 'today' }]);
+  });
+
+  it('a stored shortcut the host does not offer: kept in force, the period field opens empty, no error', async () => {
+    const t = grid({ dateCalendar: { presets: ['today'] } });
+    t.set('d', { type: 'day', op: 'relative', range: 'lastMonth' });
+    t.feature.openFilter('d');
+    await vi.waitFor(() => expect(t.widget()).not.toBeNull());
+    await flush();
+    expect(t.op().value).toBe('between');
+    expect(reported).toEqual([]);
+    expect(t.filter()['d']).toEqual({ type: 'day', op: 'relative', range: 'lastMonth' });
+    // tzslot names only the shortcuts it was given: the field shows no period.
+    expect(t.trigger()!.textContent).toBe('Start date – End date');
+  });
+
+  it('months that is not a positive integer: a warning, ignored (two months)', async () => {
+    for (const bad of [0, -1, 1.5, '1', Number.NaN]) {
+      const { t, months } = await period({ dateCalendar: { months: bad } });
+      expect(months(), String(bad)).toBe(2);
+      expect(warnings(t), String(bad)).toEqual([{ code: 'invalid-setting', severity: 'warning', path: 'features.filters.dateCalendar.months', detail: String(bad) }]);
+      cleanup();
+    }
   });
 });
