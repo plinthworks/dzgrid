@@ -34,11 +34,17 @@
     .act { display: inline-flex; align-items: center; justify-content: center; inline-size: 26px; block-size: 26px; border: 0; border-radius: 6px; background: transparent; color: var(--tz-accent); cursor: pointer; }
     .act:last-child { color: var(--tz-danger, #b91c1c); }
     body.wide #host { max-inline-size: none; }
+    .bar { display: flex; justify-content: flex-end; gap: .5rem; margin-block-end: .5rem; }
+    /* As the app's DzGrid block: the chooser's footer buttons drawn as buttons under the app's reset (the theme leaves
+       them to the browser's own look, which Tailwind's preflight removes). */
+    .dzg-cp-foot button { min-block-size: 2rem; padding-inline: .75rem; border: 1px solid var(--tz-fg-muted); border-radius: .375rem; color: var(--tz-fg); background: var(--tz-bg-raised); cursor: pointer; }
+    .tool { padding: .4rem .75rem; border: 1px solid var(--tz-border); border-radius: .5rem; background: var(--tz-bg-raised); color: var(--tz-fg); font: inherit; cursor: pointer; }
   </style>
 </head>
 <body>
   <h1>Produits (comme l'application)</h1>
   <p class="note">filters({ apply: 'button', dateZone: false }) : rien ne s'applique avant « Appliquer » ou Entrée. « Source » : une pastille par valeur (part filterOption, l'étiquette seule). « Mis à jour » : entre deux jours, un mois. « Code-barres » et « Nom » : la recherche à la place du titre. ?theme=dark|light.</p>
+  <div id="bar" class="bar" hidden><button id="cols" type="button" class="tool"></button><button id="resetLayout" type="button" class="tool">Réinitialiser la disposition</button></div>
   <div id="host"></div>
   <script type="module" src="./owner-look.ts"></script>
 </body>

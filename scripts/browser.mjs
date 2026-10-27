@@ -24,7 +24,7 @@ import { stateChecks } from './browser-state.mjs';
 import { groupsChecks } from './browser-groups.mjs';
 import { pinnedRowsChecks } from './browser-pinned-rows.mjs';
 import { autoHeightChecks } from './browser-auto-height.mjs';
-import { pagerGlyphChecks, treeGlyphChecks, inkOf } from './browser-glyphs.mjs';
+import { pagerGlyphChecks, treeGlyphChecks, inkOf, footerSelectionChecks } from './browser-glyphs.mjs';
 import { feedbackFilterChecks, periodChecks } from './browser-feedback.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -3835,7 +3835,7 @@ async function runEngine(name) {
       if (only === 'tree' && name === 'chrome') await treeChecks(name, ctx), await editTreeChecks(name, ctx, H);
       // Feedback pass A: the glyphs are text under an unlayered reset (Firefox and WebKit by `--engine`: the RTL arrows).
       if (only === 'tree') await treeGlyphChecks(name, ctx, H);
-      if (only === 'pagination') name === 'chrome' && (await pagingChecks(name, ctx)), await pagerGlyphChecks(name, ctx, H);
+      if (only === 'pagination') name === 'chrome' && (await pagingChecks(name, ctx)), await pagerGlyphChecks(name, ctx, H), await footerSelectionChecks(name, ctx, H);
       if (only === 'detail' && name === 'chrome') await detailChecks(name, ctx), await detailFeatureChecks(name, ctx), await editDetailChecks(name, ctx, H);
       if (only === 'filters' && name === 'chrome') await floatingToggleChecks(name, ctx), await feedbackFilterChecks(name, ctx, H);
       if (only === 'themes') await themeChecks(name, ctx);

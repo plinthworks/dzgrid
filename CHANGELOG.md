@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (the fourth look)
+
+- **The footer's selection actions** (« Select all N rows », « Clear selection ») share the pager's class and were drawn
+  in its 2rem squares since the second look: their words wrapped over each other and over the count. The square is the
+  pager's nav buttons' alone (`[data-go]`); the footer's buttons keep one line (`white-space: nowrap`) and size to their
+  words. Bytes found in the theme (the set list's focus offset joined the cells' rule, two focus rules merged). (app-feedback 38)
+
 ### Added
 
 - The owner's third look (allergen-detector, 2026-10-27; `docs/phase-6-steps/app-feedback.md` 30–37, decisions

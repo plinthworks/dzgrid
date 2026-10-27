@@ -223,3 +223,52 @@ stopped afterwards): `screens/polish3-{grid,date,flash,filtered}-{light,dark}.pn
 **Owner check on :4200** (after a restart): « Mis à jour »: DU focused, one ring, the field full width; type « pizza » in
 « Nom »: a brief spinner, « 11 produits sur 1 604 », the magnifier in teal; no horizontal scroll bar at full width; the
 four actions with room and centred; thin scroll bars, plainer on hover.
+
+## The owner's fourth look (2026-10-27, light theme) and the layout tools
+
+`docs/phase-6-steps/app-feedback.md` 38–40. Fixed in DzGrid (`FIXCOMMIT`, pushed; packs `PACKVERSION`) and in the app
+(`dzgrid-integration` `APPCOMMIT`, local commit only; `ng build` passes).
+
+**DzGrid** (tests written first: `packages/theme/test/owner-look-4.test.ts` 4 failing before, Chrome `--only pagination`
+`footerSelectionChecks` 6 failing before; `owner-look-2.test.ts` one expectation superseded):
+- The footer's « Sélectionner les N lignes » / « Effacer la sélection » are `button.dzg-pbtn`, the pager's class, so the
+  second look's square (`.dzg-pbtn{padding:0;inline-size:2rem}`) squeezed them. The square is `[data-go]`'s now (the
+  nav buttons'); the footer buttons keep one line; their width is their words'. Chrome: the pager 32 × 32, the two
+  actions 209 × 32 and 149 × 32 (ar 178 and 99), nothing overlapping, at 1 000 and 400 px (the strip on two lines), fr
+  light, fr dark, ar RTL dark.
+- The horizontal scroll (39) was not reproduced and no DzGrid cause was found: the app's columns and boxes at 1 920 px
+  with real scroll bars (thin 11 px, the system's 15 px), rows arriving after « Chargement… », 20 → 100 a page, the page
+  and all rows ticked, device pixel ratios 1 to 2.5, fractional widths: scroll width = client width each time. A jsdom
+  guard (`packages/dom/test/owner-look-4.test.ts`, 11 / 15 / 17 px gutters) passed at once. Most likely :4200 still
+  served the packs from before the third look's 40 px fix. With the fourth look's widths the columns need 1 546 px +
+  40 + the bar; below that a scroll is right.
+
+**The app** (no DzGrid change): `gridState({ persist })` (key `allergie-admin:products-dz:layout:<view>`), `columns()`,
+`columnsChooser()`, `columnMenu({ use: { columns, chooser } })`, the fr texts of `FR_COLUMNS` / `FR_COLUMN_MENU`; one grid
+per view and per reset; « Colonnes » and « Réinitialiser la disposition » in the filter bar; actions `movable: false,
+hideable: false, menu: false, chooser: false`, pinned at the end (the box column is the grid's own, never moved); the
+short columns 28 px wider for the ⋮, « Code-barres » 176; the chooser's footer buttons drawn by the DzGrid block of
+`styles.scss`; `columns.unlayered.css` and `columns-panel.unlayered.css` imported.
+
+**Sizes**: theme 2 764 / 2 850, comfort 551 / 650, K.8 84 449 / 84 450 (two merges in the theme paid for the fix).
+**Gates** (once, `caffeinate -i`, 2 workers): vitest 480 files / 7 190 tests, typecheck, check:size 0 over, build,
+check:contrast 1 092 / 0; Chrome `--only pagination` 69 / 69, `filters` 32 / 32.
+
+**Screens** (playground `owner-look.html?preflight=1&wide=1` with `late=1`, `cols=1`, `lang=ar`, `theme=dark`, a temporary
+vite on 4711, stopped afterwards): `screens/polish4-footer-{light,dark,rtl,narrow-light}.png`, `polish4-wide-light.png`,
+`polish4-columns-{menu,chooser}-{light,dark,rtl-dark,rtl-light}.png`, `polish4-columns-kept-light.png`.
+
+**Owner check on :4200** (after a restart):
+- Tick a page: « Sélectionner les 1 604 lignes » and « Effacer la sélection » as normal buttons on one line; the four
+  arrows square; narrow the window: the footer on two lines, nothing on top of anything.
+- 100 a page at full width: no horizontal bar.
+- Drag « Marque » after « Type »; focus a header and ⌘+Maj+→ (Ctrl+Maj+→ elsewhere): the column moves, the header search
+  boxes still filter.
+- Drag a header's edge; double-click it or « Ajuster cette colonne » in ⋮.
+- Right-click a header or Maj+F10: the ⋮ menu (sort, pin, size, move, hide, « Choisir les colonnes… », reset); none on
+  the actions column; the box column never moves.
+- « Colonnes »: the chooser; untick « Type »; reorder.
+- Reload: the same layout, page size, sort and filters; switch to « Produits scannés »: its own layout.
+- « Réinitialiser la disposition »: the definitions' layout back.
+- Same in dark mode.
+

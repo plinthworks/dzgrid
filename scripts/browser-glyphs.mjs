@@ -131,3 +131,47 @@ export async function treeGlyphChecks(name, ctx, h) {
     await page.close();
   }
 }
+
+/**
+ * The owner's fourth look (app-feedback 38): rows ticked, the footer's « Select all N » and « Clear selection » were
+ * drawn in the pager's 2rem squares, their words wrapping over each other and over the count. Now: the pager's four
+ * buttons square, the selection's two on one line, as wide as their words, nothing overlapping, at 1 000 px and at
+ * 420 px (the strip wraps onto two lines), French and Arabic, light and dark, under the stand-in reset.
+ */
+export async function footerSelectionChecks(name, ctx, h) {
+  const { check, frames, site } = h;
+  for (const qs of ['locale=fr-FR&theme=light&rows=2000&paging=client&box=1&reset=1', 'locale=ar-DZ&dir=rtl&theme=dark&rows=2000&paging=client&box=1&reset=1', 'locale=fr-FR&theme=dark&rows=2000&paging=client&box=1']) {
+    for (const width of [1000, 420]) {
+      const page = await ctx.newPage();
+      await page.setViewportSize({ width, height: 760 });
+      const errors = [];
+      page.on('pageerror', (e) => errors.push(e.message));
+      await page.goto(site.root(`packages/dom/test/browser/index.html?${qs}`));
+      await page.waitForFunction(() => window.ready, null, { timeout: 30000 });
+      await frames(page, 3);
+      // Narrow: the grid itself 400 px wide (the page's host has its own width).
+      if (width === 420) await page.evaluate(() => { document.querySelector('.dzg').parentElement.style.inlineSize = '400px'; });
+      await frames(page, 2);
+      await page.click('.dzg-hrow .dzg-box');
+      await frames(page, 2);
+      const s = await page.evaluate(() => {
+        const f = document.querySelector('.dzg-footer');
+        const box = (e) => { const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom, w: b.width, h: b.height }; };
+        const nav = [...f.querySelectorAll('[data-go]')].filter((e) => e.offsetParent).map(box);
+        const acts = [...f.querySelectorAll('[data-act]')].filter((e) => e.offsetParent).map((e) => ({ ...box(e), over: e.scrollWidth > e.clientWidth, lh: parseFloat(getComputedStyle(e).lineHeight) || 20, ws: getComputedStyle(e).whiteSpace }));
+        const words = [...f.querySelectorAll('.dzg-pseltext, .dzg-pcount, .dzg-ppage')].filter((e) => e.offsetParent).map(box);
+        return { nav, acts, words, fScroll: f.scrollWidth - f.clientWidth };
+      });
+      const meets = (a, b) => a.l < b.r - 0.5 && b.l < a.r - 0.5 && a.t < b.b - 0.5 && b.t < a.b - 0.5;
+      const all = [...s.nav, ...s.acts, ...s.words];
+      const overlaps = all.flatMap((a, i) => all.slice(i + 1).filter((b) => meets(a, b)).map((b) => [a, b]));
+      const tag = `footer selection ${qs.split('&rows')[0]} ${width} px`;
+      check(name, `${tag}: the pager's buttons 32 × 32 (${s.nav.map((b) => `${Math.round(b.w)}×${Math.round(b.h)}`).join(' ')})`, s.nav.length >= 3 && s.nav.every((b) => Math.round(b.w) === 32 && Math.round(b.h) === 32), s.nav);
+      check(name, `${tag}: Select all and Clear on one line, wider than a square, their words inside (${s.acts.map((b) => `${Math.round(b.w)}×${Math.round(b.h)}`).join(' ')})`, s.acts.length === 2 && s.acts.every((b) => b.w > 40 && !b.over && b.ws === 'nowrap' && b.h <= 34), s.acts);
+      check(name, `${tag}: nothing in the footer overlaps, no scroll in it`, overlaps.length === 0 && s.fScroll <= 0, { overlaps: overlaps.slice(0, 3), fScroll: s.fScroll });
+      check(name, `${tag}: no page error`, errors.length === 0, errors);
+      if (width === 420 || qs.includes('ar-DZ')) await page.screenshot({ path: `${h.OUT}/footer-selection-${qs.includes('ar-DZ') ? 'rtl' : qs.includes('dark') ? 'dark' : 'light'}-${width}.png`, clip: await page.evaluate(() => { const b = document.querySelector('.dzg-footer').getBoundingClientRect(); return { x: b.left, y: b.top - 4, width: b.width, height: b.height + 8 }; }) });
+      await page.close();
+    }
+  }
+}

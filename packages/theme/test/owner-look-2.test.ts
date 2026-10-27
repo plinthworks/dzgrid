@@ -19,7 +19,8 @@ const rule = (src: string, sel: string): string => {
 describe('the pager (app-feedback 24)', () => {
   for (const [name, src] of [['dzgrid.css', css], ['dzgrid.unlayered.css', unlayered]] as const) {
     it(`${name}: square buttons, 2rem by 2rem, no inline padding to widen them`, () => {
-      const b = rule(src, '.dzg-pbtn');
+      // The nav buttons' alone since the fourth look (app-feedback 38: the selection's actions share the class).
+      const b = rule(src, '[data-go]');
       expect(b).toContain('inline-size: 2rem;');
       expect(b).toContain('padding: 0;');
       // The height: the footer buttons' 2rem (the rule they share).
