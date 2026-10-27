@@ -12,7 +12,10 @@ export const SET_CSS =
   // In the cascade layer dzgrid.layout, as the base's (owner T1, docs/behaviors/theming.md).
   '@layer dzgrid.layout{' +
   ':where(.dzg-fallw){display:flex;align-items:center;gap:.5rem;min-block-size:24px}' +
-  ':where(.dzg-fstatus){min-block-size:1.2em;min-block-size:1lh}' +
+  // The search, the count line and select all apart (owner's second look, app-feedback 26: a host's reset of `p`
+  // margins left the count squeezed between them).
+  ':where(.dzg-fset){display:grid;gap:.5rem}' +
+  ':where(.dzg-fstatus){margin:0;min-block-size:1.2em;min-block-size:1lh}' +
   ':where(.dzg-flistw){position:relative;min-inline-size:14rem}' +
   ':where(.dzg-flist){position:relative;min-block-size:4.5rem;max-block-size:18rem;overflow-y:auto}' +
   ':where(.dzg-fopt){position:absolute;inset-inline:0;box-sizing:border-box;display:flex;align-items:center;gap:.5rem;block-size:2.25rem;padding-inline:.5rem}' +

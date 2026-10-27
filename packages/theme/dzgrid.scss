@@ -264,12 +264,13 @@ $layered: true !default;
     border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);
   }
 
+  // Never shrunk by its cell (owner's second look, app-feedback 27: a 15 px cell padding in the 40 px column made it a
+  // 10 × 16 pill).
   .dzg-box {
     display: inline-grid;
     place-items: center;
     inline-size: 1rem;
     block-size: 1rem;
-    box-sizing: border-box;
     // The edge an outline, not a border (feedback pass G): an app's unlayered reset (Tailwind 3's preflight,
     // `*{border-width:0}`) beats this layer and erased a border, leaving an unticked box invisible.
     outline: 1px solid var(--tz-fg-muted);
@@ -279,6 +280,7 @@ $layered: true !default;
     color: var(--tz-accent-fg);
     font-size: 0.75rem;
     line-height: 1;
+    flex: none;
   }
 
   // A row that cannot be selected (a tree's filler): its box cell stays, the box is not drawn.
@@ -294,8 +296,8 @@ $layered: true !default;
     background: var(--tz-accent);
   }
 
+  // A value row's tick: the set filter's own layout draws it (SET_CSS), the colours above.
   .dzg-row[aria-selected='true'] .dzg-box::before,
-  .dzg-fopt[aria-selected='true'] .dzg-box::before,
   .dzg-box[aria-checked='true']::before {
     content: '\2713';
   }
@@ -369,8 +371,10 @@ $layered: true !default;
     background: var(--dzg-header-bg, var(--tz-bg-raised));
   }
 
+  // Square, 2rem by 2rem, the glyph centred (owner's second look, app-feedback 24; the gaps: the layout's).
   .dzg-pbtn {
-    padding-inline: 0.375rem;
+    padding: 0;
+    inline-size: 2rem;
   }
 
   .dzg-ppage {

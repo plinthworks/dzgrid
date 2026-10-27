@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **`filters({ apply: 'button' })`**: the popup's fields are a draft in the browser too (set ticks, date picks, text),
     sent at Apply or Enter, dropped on closing. `'live'` stays the default. (filter-ui.md)
   - **`filters({ dateZone: false })`**: the instant form does not say its zone (an application with one zone).
-  - The period form's FROM and TO show the locale's date pattern, lower case (`dd/mm/yyyy`), as placeholder.
+  - ~~The period form's FROM and TO show the locale's date pattern, lower case (`dd/mm/yyyy`), as placeholder.~~ Removed
+    by the second look (below): the pattern was English in a French grid.
   - Playground: `owner-look.html` (`?theme=dark|light`), a products screen set up as the app's, with its brand on the
     documented tokens.
 
@@ -34,8 +35,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   arriving, a list filled), and, with room neither below nor above, its end at the window's (it was the menu's only).
 - Budgets (owner): `@dzgrid/dom/filters` 10 100, the set chunk 4 250, the date adapters 2 800, the K.8 profile 84 300.
 
+- The owner's second look (2026-10-27, light theme; `app-feedback.md` 23–28):
+  - **The period form**: each end's label on its field's row (DU / AU one column, the fields the next), no placeholder,
+    no « Période » heading over them (the group keeps the name), at least 18rem wide.
+  - **Every popup ends 8 px inside the window** when it would reach the edge (it ended on it).
+  - **The pager's buttons are square**, 2rem × 2rem, the glyph centred; the footer's items .5rem apart (« Page 1 sur 1 »
+    with room).
+  - **The set filter**: the search box, the count line and « Select all » .5rem apart (a host's reset of `p` margins
+    had left the count squeezed between them).
+  - Playground `owner-look.html`: the app's selection boxes and 15 px cell padding, `?preflight=1` (Tailwind 3's reset,
+    the theme unlayered), `?loading=1` (the grid's loading state with the app's spinner).
+
 ### Fixed
 
+- **The selection box became a 10 × 16 pill** in a cell whose padding leaves less than 1rem (an app's 15 px in the
+  40 px column): the box no longer shrinks (`flex: none`).
 - The date popup on the last column was cut by the window's edge (Sunday, Apply, the next-month arrow hidden): it was
   placed while its kit was still loading and never placed again.
 

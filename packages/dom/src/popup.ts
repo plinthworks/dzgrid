@@ -80,7 +80,7 @@ export class PopupHost {
       el.setAttribute('aria-modal', 'true');
     }
     if (o.label) el.setAttribute('aria-label', o.label);
-    el.setAttribute('dir', this.#dir());
+    el.dir = this.#dir();
     el.append(content);
     const usesTopLayer = topLayer(el);
     if (usesTopLayer) el.setAttribute('popover', 'manual');
@@ -184,7 +184,8 @@ export class PopupHost {
       // popup since the owner's look (app-feedback 21: a filter popup taller than the room below stayed cut).
       const top = below + box.height <= winBlock ? below : r.top - 2 - box.height >= 0 ? r.top - 2 - box.height : winBlock - box.height;
       setPx(el, 'inset-block-start', Math.max(0, top));
-      setPx(el, 'inset-inline-start', fixedInlineStart(r, dir, winInline, box.width));
+      // 8 px from the window's end edge, not on it (owner's second look, app-feedback 23).
+      setPx(el, 'inset-inline-start', fixedInlineStart(r, dir, winInline, box.width + 8));
     } else {
       setPx(el, 'inset-block-start', Math.max(0, Math.min(r.top, winBlock - box.height)));
       // Beside the anchor, toward the end of the line.

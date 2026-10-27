@@ -148,3 +148,35 @@ screens came from a temporary server on 4711, stopped afterwards.
 changes until « Appliquer »; close without it: nothing applied; « Mis à jour » on the right edge: the whole month and
 « Appliquer » visible, no zone line, `jj/mm/aaaa`-style hints; « Nom du produit »: the search box in the title's place,
 a click beside it sorts; the brand's teal in both themes.
+
+## The owner's second look (2026-10-27, light theme)
+
+`docs/phase-6-steps/app-feedback.md` 23–28. Fixed in DzGrid (commit below, pushed) and in the app (`dzgrid-integration`,
+local commit only).
+
+**DzGrid** (tests written first, 14 failing before: `packages/dom/test/owner-look-2.test.ts`,
+`packages/theme/test/owner-look-2.test.ts`, two superseded expectations in `owner-look.test.ts`):
+- The period form: DU / AU each on its field's row (a two-column grid), no placeholder (the English `dd/mm/yyyy` in a
+  French grid is gone, and no hint is left to localise), no « Période » heading (the group keeps the name), 18rem at
+  least. Every popup now ends 8 px inside the window (it ended on the edge).
+- The pager's buttons square, 2rem × 2rem; the footer's items .5rem apart.
+- The set filter: search, count line and « Tout sélectionner » .5rem apart (the app's reset of `p` margins had left
+  0 px).
+- The selection box (header and rows) a 16 × 16 square: `flex: none`; the app's 15 px cell padding in the 40 px column
+  had shrunk it to 10 × 16.
+- The 0-rows case was not a DzGrid bug: the period matches the app's instants (microseconds, `Z` and offsets), picked or
+  typed, `apply: 'button'`, two zones, paged from page 4. The production table has only 30 distinct `updated_at` values:
+  a period between them shows nothing, rightly.
+
+**The app**: `[overlay]="loading() ? 'loading' : null"` on `<dz-grid>` (the grid's own state: « Chargement… » over the
+rows, `aria-busy`, announced); the screen's own veil (under the grid, never seen) removed; a spinner in the accent drawn by
+the DzGrid block of `styles.scss` on `.dzg-viewport[aria-busy=true] ~ .dzg-overlay::before`, slower under reduced motion.
+The new `0.3.1-local` packs installed; `ng build` passes.
+
+**Screens** (playground `owner-look.html?preflight=1`, the app's reset, boxes and padding, 900 × 760, a temporary vite
+on 4711, stopped afterwards): `screens/polish2-{grid,pager,set,date,filtered,loading}-{light,dark}.png`.
+
+**Owner check on :4200** (after the app's server restarts): the header and row boxes square; the pager's four buttons
+square, « Page 1 sur N » with room; « Marque » filter: « N valeurs » with space above and below; « Mis à jour »: DU and AU
+on their fields' rows, empty fields, no « Période », the popup clear of the window's edge, a period around a date seen
+in the column narrows the rows; a reload (or any save) shows the spinner and « Chargement… » on the grid.

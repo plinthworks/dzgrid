@@ -1,13 +1,24 @@
 import { RELATIVE_RANGES, type RelativeRange } from '@dzgrid/core';
-import { CALENDAR_CSS, createDateInput, createDateRange, DATEINPUT_CSS, patternFor, RANGE_CSS, TIME_CSS, type DateInputInstance, type WallValue } from '@tzslot/dom/lazy';
+import { CALENDAR_CSS, createDateInput, createDateRange, DATEINPUT_CSS, RANGE_CSS, TIME_CSS, type DateInputInstance, type WallValue } from '@tzslot/dom/lazy';
 import { presetRange, type PlainDate, type PlainTime } from '@tzslot/core/lazy';
 import type { DateAdapter, DateField, DatePart } from '../dates.js';
 import { base, day, lost, named, styles, T } from './shared.js';
 /** Temporal there before `adapt` (the loader waits for it). */
 export { ready } from './shared.js';
 
-/** The form's layout (no colour; layered, zero specificity, logical sides): the ends side by side, the shortcuts wrapping. */
-const PERIOD_CSS = '@layer dzgrid.layout{:where(.dzg-fperiod){display:grid;gap:.5rem}:where(.dzg-fends,.dzg-fpresets){display:flex;flex-wrap:wrap;gap:.5rem;max-inline-size:20rem}}';
+/**
+ * The form's layout (no colour; layered, zero specificity, logical sides), owner's second look (app-feedback 23): each
+ * end's label on its field's row, the labels one column and the fields the next (a two-column grid, each tzslot field
+ * `display: contents`); the form at least 18rem, the shortcuts wrapping in it; no « Période » over DU / AU (the group keeps
+ * the name). tzslot's sheet is unlayered (`.tz-dateinput{flex-direction:column}`): its field undone by two classes
+ * after the layer, as `FILTERS_CSS` does for its trigger.
+ */
+const PERIOD_CSS =
+  '@layer dzgrid.layout{:where(.dzg-fperiod){display:grid;gap:.5rem;min-inline-size:18rem}' +
+  ':where(.dzg-fends){display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.5rem}' +
+  ':where(.dzg-fpresets){display:flex;flex-wrap:wrap;gap:.5rem}' +
+  ':where(.dzg-fdate:has(.dzg-fends)>.dzg-flabel){display:none}}' +
+  '.dzg-fends .tz-dateinput{display:contents}';
 
 /**
  * The `range` kit, in the popup itself (feedback pass K, owner Q2: « un popup juste qui s'ouvre en dessous de
@@ -40,12 +51,9 @@ export function adapt(a: DateAdapter): DateField {
   let st: PlainTime | null = null;
   let et: PlainTime | null = null;
   let range: RelativeRange | null = null;
-  // Each end says the date's form (owner's look, app-feedback 21: empty boxes looked unfinished): the locale's, lower
-  // case. The name is each end's own label, not the form's.
-  const opts = () => {
-    const b = base(a.settings());
-    return { ...b, ariaLabel: undefined, placeholder: patternFor(b.locale).toLowerCase() };
-  };
+  // No placeholder (owner's second look, app-feedback 23: the label beside each field says it, and tzslot's pattern
+  // was English in a French grid). The name is each end's own label, not the form's.
+  const opts = () => ({ ...base(a.settings()), ariaLabel: undefined });
   const at = (d: PlainDate, t: PlainTime | null): string | null => {
     const i = d.toZonedDateTime({ timeZone: zone(), ...(t && { plainTime: t }) }).toInstant().toString({ fractionalSecondDigits: 3 });
     return i.length === 24 ? i : null;

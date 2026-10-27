@@ -20,7 +20,7 @@
     }
     body { margin: 0; padding: 1rem; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme); }
     #host { block-size: 70vh; max-inline-size: 1100px; }
-    #host > .dzg { block-size: 100%; --dzg-font: 14px system-ui, sans-serif; }
+    #host > .dzg { block-size: 100%; --dzg-font: 14px system-ui, sans-serif; --dzg-header-size: 12px; --dzg-cell-padding-inline: 15px; }
     .note { color: var(--tz-fg-muted); margin-block: .25rem .75rem; max-inline-size: 90ch; }
     .pill { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: .75rem; font-weight: 500; line-height: 1.4; white-space: nowrap; }
     .pill-teal { background: rgb(204 251 241); color: rgb(17 94 89); }
@@ -29,6 +29,14 @@
     [data-theme='dark'] .pill-teal { background: rgb(19 78 74 / .3); color: rgb(45 212 191); }
     [data-theme='dark'] .pill-pink { background: rgb(131 24 67 / .3); color: rgb(244 114 182); }
     [data-theme='dark'] .pill-gray { background: rgb(55 65 81); color: rgb(156 163 175); }
+    /* The app's spinner on the grid's loading state (its DzGrid block, app-feedback 25): drawn while the grid says it
+       is busy, above « Chargement… »; slower when motion is reduced. */
+    .dzg-viewport[aria-busy='true'] ~ .dzg-overlay::before {
+      content: ''; inline-size: 1.75rem; block-size: 1.75rem; box-sizing: border-box; border-radius: 50%;
+      border: 3px solid var(--tz-border); border-block-start-color: var(--tz-accent); animation: app-dzg-spin .8s linear infinite;
+    }
+    @media (prefers-reduced-motion: reduce) { .dzg-viewport[aria-busy='true'] ~ .dzg-overlay::before { animation-duration: 2.4s; } }
+    @keyframes app-dzg-spin { to { transform: rotate(1turn); } }
   </style>
 </head>
 <body>

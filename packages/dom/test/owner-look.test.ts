@@ -106,7 +106,7 @@ describe('the set search box (app-feedback 18)', () => {
 });
 
 describe('the popup stays in the window when its content grows (app-feedback 21)', () => {
-  it('a wider content is placed again, its end on the window’s', () => {
+  it('a wider content is placed again, its end 8 px inside the window’s', () => {
     const seen: (() => void)[] = [];
     vi.stubGlobal('ResizeObserver', class {
       constructor(f: () => void) { seen.push(f); }
@@ -126,11 +126,11 @@ describe('the popup stays in the window when its content grows (app-feedback 21)
     box(p.el, { left: 0, top: 0, width: 100, height: 50 });
     p.reposition();
     expect(p.el.style.getPropertyValue('inset-inline-start')).toBe('800px');
-    // The widget arrives: 340 wide. The observer places it again, inside the window.
+    // The widget arrives: 340 wide. The observer places it again, inside the window, 8 px from its edge (app-feedback 23).
     box(p.el, { left: 0, top: 0, width: 340, height: 300 });
     expect(seen.length).toBe(1);
     seen[0]!();
-    expect(p.el.style.getPropertyValue('inset-inline-start')).toBe('660px');
+    expect(p.el.style.getPropertyValue('inset-inline-start')).toBe('652px');
     p.close();
   });
 });
@@ -169,14 +169,14 @@ describe('the instant form’s zone line (app-feedback 21)', () => {
   });
 });
 
-describe('the period form’s FROM and TO say the date’s form (app-feedback 21)', () => {
+describe('the period form’s FROM and TO (app-feedback 21; 23: no placeholder, an English hint in a French grid was a bug)', () => {
   type DRow = R & { t: string };
-  it('a placeholder from the locale’s pattern, lower case', async () => {
+  it('no placeholder: the label beside each says what it is', async () => {
     const f = filters({ dateCalendar: { months: 1, presets: [] } });
     const cols: ColumnOrGroup<DRow>[] = [{ id: 'name', header: 'Name' }, { id: 't', header: 'T', type: 'instant', filter: { kind: 'instant', ops: ['betweenDays'] } }];
     const t = make({ columns: cols as never, rows: [{ id: 'a', name: 'a', n: 1, t: '2026-10-01T10:00:00Z' }] as never, features: [f], settings: { timeZone: 'Europe/Paris' } as never });
     f.openFilter('t');
     await vi.waitFor(() => expect(t.host.querySelectorAll('.dzg-popup .dzg-fends input').length).toBe(2), { timeout: 5000 });
-    for (const i of t.host.querySelectorAll<HTMLInputElement>('.dzg-popup .dzg-fends input')) expect(i.placeholder).toMatch(/^(?=.*d)(?=.*m)(?=.*y)[dmy/.-]+$/);
+    for (const i of t.host.querySelectorAll<HTMLInputElement>('.dzg-popup .dzg-fends input')) expect(i.placeholder).toBe('');
   });
 });

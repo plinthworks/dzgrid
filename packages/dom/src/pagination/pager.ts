@@ -35,7 +35,7 @@ export const pagerPart: Part<C> = {
     prev.addEventListener('click', () => c.prev());
     next.addEventListener('click', () => c.next());
     last.addEventListener('click', () => canLast(c.page) && c.go(c.page.pageCount! - 1));
-    select.addEventListener('change', () => c.setSize(Number(select.value)));
+    select.addEventListener('change', () => c.setSize(+select.value));
     let options = '';
     const update = (n: C): void => {
       c = n;
