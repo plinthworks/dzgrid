@@ -110,13 +110,15 @@ describe('opening and loading', () => {
     for (const c of ['d', 't']) expect(t.host.querySelector(`.dzg-hcell[data-col="${c}"] > .dzg-fbtn`), c).not.toBeNull();
   });
 
-  it('opens at once while the kit loads: a status line, aria-busy, the focus on the operator; then the field, no focus moved', async () => {
+  // The focus: on the form while the kit loads, then in the field (owner's third look, app-feedback 31; it stayed on the
+  // operator before, and on nothing when the operator was hidden).
+  it('opens at once while the kit loads: a status line, aria-busy, the focus on the form; then in the field', async () => {
     const kit = deferred<unknown>();
     const loads: Kit[] = [];
     const t = grid({ loadDates: (k) => (loads.push(k), kit.p) });
     expect(t.feature.openFilter('d')).toBe(true);
     expect(t.op().value).toBe('equals');
-    expect(document.activeElement).toBe(t.op());
+    expect(document.activeElement).toBe(t.box());
     expect(loads).toEqual(['date']);
     expect(t.box()!.getAttribute('aria-busy')).toBe('true');
     const status = t.q('.dzg-fdate [role=status]')!;
@@ -127,6 +129,16 @@ describe('opening and loading', () => {
     await t.ready();
     expect(t.box()!.hasAttribute('aria-busy')).toBe(false);
     expect(t.q('.dzg-fdate [role=status]')).toBeNull();
+    expect(t.widget()!.contains(document.activeElement)).toBe(true);
+  });
+
+  it('the focus moved away while the kit loads (to the operator): the field comes without taking it', async () => {
+    const kit = deferred<unknown>();
+    const t = grid({ loadDates: () => kit.p });
+    t.feature.openFilter('d');
+    t.op().focus();
+    kit.ok(await realKit('date'));
+    await t.ready();
     expect(document.activeElement).toBe(t.op());
   });
 

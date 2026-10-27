@@ -446,6 +446,12 @@ $layered: true !default;
     padding-inline-start: 1.5rem;
   }
 
+  // Filtered: the magnifier in the accent, as the funnel (owner's third look, app-feedback 32).
+  [data-dzg-filtered] .dzg-hfbox::before,
+  [data-dzg-filtered] .dzg-hfbox::after {
+    border-color: var(--tz-accent);
+  }
+
   .dzg-fclear {
     padding: 0;
     cursor: pointer;
@@ -460,10 +466,12 @@ $layered: true !default;
     font-weight: 400;
   }
 
+  // A period's field (owner's third look, app-feedback 30): the ring on the field's box, none on the input inside it.
   .dzg-finput:focus-visible,
   .dzg-fclear:focus-visible,
   .dzg-fbtn:focus-visible,
-  .dzg-fpop :focus-visible {
+  .dzg-fpop :focus-visible:not(.tz-dateinput__row *),
+  .dzg-fpop .tz-dateinput__row:has(:focus-visible) {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
   }
 
@@ -717,6 +725,21 @@ $layered: true !default;
     .dzg:not([data-motion=off]) .dzg-row:focus-within .dzg-toggle::before {
       transition: rotate 120ms ease-out;
     }
+  }
+
+  // The pinned columns' edge (owner's third look, app-feedback 34): a line, so a column scrolled under them reads as
+  // passing beneath, not cut.
+  .dzg-seg-start:not(:empty)::after,
+  .dzg-seg-end:not(:empty)::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+
+  .dzg-seg-end:not(:empty)::after {
+    inset-inline: 0 auto;
   }
 
   @media print {

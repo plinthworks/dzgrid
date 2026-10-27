@@ -29,14 +29,11 @@
     [data-theme='dark'] .pill-teal { background: rgb(19 78 74 / .3); color: rgb(45 212 191); }
     [data-theme='dark'] .pill-pink { background: rgb(131 24 67 / .3); color: rgb(244 114 182); }
     [data-theme='dark'] .pill-gray { background: rgb(55 65 81); color: rgb(156 163 175); }
-    /* The app's spinner on the grid's loading state (its DzGrid block, app-feedback 25): drawn while the grid says it
-       is busy, above « Chargement… »; slower when motion is reduced. */
-    .dzg-viewport[aria-busy='true'] ~ .dzg-overlay::before {
-      content: ''; inline-size: 1.75rem; block-size: 1.75rem; box-sizing: border-box; border-radius: 50%;
-      border: 3px solid var(--tz-border); border-block-start-color: var(--tz-accent); animation: app-dzg-spin .8s linear infinite;
-    }
-    @media (prefers-reduced-motion: reduce) { .dzg-viewport[aria-busy='true'] ~ .dzg-overlay::before { animation-duration: 2.4s; } }
-    @keyframes app-dzg-spin { to { transform: rotate(1turn); } }
+    /* The app's actions cell (app-feedback 34, 36): four 26 px buttons 2 px apart, centred in the row. */
+    .acts { display: flex; align-items: center; gap: 2px; block-size: 100%; }
+    .act { display: inline-flex; align-items: center; justify-content: center; inline-size: 26px; block-size: 26px; border: 0; border-radius: 6px; background: transparent; color: var(--tz-accent); cursor: pointer; }
+    .act:last-child { color: var(--tz-danger, #b91c1c); }
+    body.wide #host { max-inline-size: none; }
   </style>
 </head>
 <body>

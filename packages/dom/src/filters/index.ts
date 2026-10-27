@@ -48,6 +48,12 @@ export interface FiltersOptions {
   readonly apply?: 'button' | 'live';
   /** The instant form says its zone (`filter.zone`); `false` for an application with one zone. */
   readonly dateZone?: boolean;
+  /**
+   * A brief busy state after each filter change, in milliseconds (owner's third look, app-feedback 32; off by default):
+   * `aria-busy` on the grid's root for that long, the theme's spinner over the rows (static under reduced motion).
+   * Nothing waits for it: the rows are filtered at once. For a client grid, whose filtering is instant.
+   */
+  readonly busyFlash?: number;
   /** Advanced (step 15): where the set filter's chunk comes from, instead of DzGrid's own `import()` (as `loadDates`). */
   readonly loadSet?: () => Promise<SetKit>;
 }
@@ -120,7 +126,10 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   if (g.settings.injectStyles !== false) injectFilterStyles(root.nodeType === 11 ? (root as ShadowRoot) : g.doc, g.settings.nonce);
   // After a user's filter change, the filtered count (`announce.filtered {rows}`, or `announce.filteredOpen` when
   // nobody knows it), once the rows are in. Any filter change asks for a paint, which `filterChanged` alone does not.
-  const quiet = g.kernel.subscribe(settled(g, (e) => e.type === 'filterChanged' && (g.schedule(), e.source === 'user'), () => {
+  // A busy flash (`busyFlash`): one timer, started again by each change.
+  const r = g.el.root;
+  let t: ReturnType<typeof setTimeout> | undefined;
+  const quiet = g.kernel.subscribe(settled(g, (e) => e.type === 'filterChanged' && (g.schedule(), o.busyFlash && (r.setAttribute('aria-busy', 'true'), clearTimeout(t), (t = setTimeout(() => r.removeAttribute('aria-busy'), o.busyFlash))), e.source === 'user'), () => {
     const n = g.rows.counts.filtered;
     g.live.announce(n === null ? g.msg('announce.filteredOpen') : g.msg('announce.filtered', { rows: g.msg('announce.rows', { n }) }));
   }));
@@ -185,6 +194,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
     destroy() {
       onCommand(g.kernel);
       quiet();
+      clearTimeout(t);
       popup.close();
       row.destroy();
       shown.detach(g);

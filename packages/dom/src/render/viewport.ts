@@ -131,10 +131,13 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const held = el.viewport.contains(root.activeElement);
     if (box.remPx && box.remPx !== g.remPx) g.remPx = box.remPx;
     const { settings, ctx, dir } = g;
-    // Flexible columns share what the view has: follow it.
-    if (box.inline !== available && box.inline > 0) {
-      available = box.inline;
-      columns.setAvailableInline(box.inline);
+    const check = settings.selection?.checkbox === true && (settings.selection.mode ?? 'none') !== 'none';
+    const extra = check ? CHECK_WIDTH : 0;
+    // Flexible columns share what the view has, less the selection boxes' column (owner's third look, app-feedback 34:
+    // it was counted twice, 40 px of horizontal scroll): follow it.
+    if (box.inline - extra !== available && box.inline > 0) {
+      available = box.inline - extra;
+      columns.setAvailableInline(available);
     }
     const d = rows.displayed;
     // A scroll not seen yet (written just before this frame), then one since the last paint: the row at the view's top now, in
@@ -149,8 +152,6 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const visible = columns.visible();
 
     // Everything a cell's text depends on, but the row: when it changes, cells are rechecked.
-    const check = settings.selection?.checkbox === true && (settings.selection.mode ?? 'none') !== 'none';
-    const extra = check ? CHECK_WIDTH : 0;
     resolveParts();
     if (settings.messages !== messages) {
       messages = settings.messages;

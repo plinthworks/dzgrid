@@ -257,7 +257,8 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
       const k = key();
       if (field && k !== seen) (seen = k), field.update();
     },
-    focus: () => !!field && (field.focus(), true),
+    // The kit still loading: the focus waits on the form, and goes to the field when it comes (app-feedback 31).
+    focus: () => ((field ?? box).focus(), true),
     destroy() {
       dead = true;
       drop();

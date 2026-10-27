@@ -47,3 +47,9 @@ moves its pin and peer floor to it and removes T1, T2, T4's note, T7, T8, T9, T1
 
 When one is fixed in a tzslot release: raise the peer range's floor, remove the workaround and its
 test's special case, and say so in the CHANGELOG.
+
+## The owner's third look (2026-10-27): the typed date field's width
+
+| # | What is wrong | Where | What DzGrid does meanwhile |
+|---|---|---|---|
+| **T12** | The typed date field's input is `width: 8.5rem; flex: 0 1 auto` inside its box (`.tz-dateinput__row`). When the box is wider (a form that stretches it, here DzGrid's period form at 18rem and more), the input covers half the box: the focus ring an app draws on the input then draws a box inside the box (the owner: « I don't understand why the input covers half the field »). The box already shows the focus (`.tz-dateinput__row:focus-within`). | `dom/src/styles.ts`, `DATEINPUT_CSS` (2.4.0: `styles.js` l. 965–977) | The period form undoes it outside the layer: `.dzg-fends .tz-dateinput__input{flex:1;width:0}` (the input fills its box); the theme rings the box (`.dzg-fpop .tz-dateinput__row:has(:focus-visible)`), never the input. Tests: `packages/dom/test/owner-look-3.test.ts`, `packages/theme/test/owner-look-3.test.ts`. Ask: the input `flex: 1 1 8.5rem; min-width: 0` (its 8.5rem a basis, not a width), or a `--tz-dateinput-width` custom property; and say in the docs that the box, not the input, carries the focus. |

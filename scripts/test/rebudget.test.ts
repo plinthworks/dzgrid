@@ -56,7 +56,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     const grants: Record<string, number> = {
       '@dzgrid/core': CORE, '@dzgrid/dom': DOM, '@dzgrid/angular': 7000, '@dzgrid/dom/tree': 3850, '@dzgrid/dom/detail': 4150, // S8-O1, S8-O3, S8-O7 (step 8); tree Q9-5 (Phase 6 step 9): 3 850
      
-      '@dzgrid/dom/filters': 10100, '@dzgrid/theme': 2750, // filters: owner's-look budgets (2026-10-27) 10 000 → 10 100
+      '@dzgrid/dom/filters': 10100, '@dzgrid/theme': 2850, // filters: owner's-look budgets (2026-10-27) 10 000 → 10 100
       '@dzgrid/core/tree': 3500, // theme: Q-C2 (Phase 5 close), « up to 2 750 within T7's 3 050 »
       '@dzgrid/core/rules': 600, '@dzgrid/dom/parts': 800, // Q-C3 (Phase 5 close): the rule's raises accepted, now grants
       '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
@@ -250,7 +250,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   });
 
   it('Phase 5 close (owner Q-C2, Q-C3, 2026-10-26): theme up to 2 750, core/rules 600, dom/parts 800 become ceilings; angular 7 000 and dom/internal 1 250 kept; the close measures give these budgets', () => {
-    expect(['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts', '@dzgrid/angular', '@dzgrid/dom/internal'].map(ceilingFor)).toEqual([2750, 600, 800, 7000, 1250]);
+    expect(['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts', '@dzgrid/angular', '@dzgrid/dom/internal'].map(ceilingFor)).toEqual([2850, 600, 800, 7000, 1250]); // theme 2 850 since the owner's third look
     for (const n of ['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts']) expect(() => sizeBudget(ceilingFor(n)! + 1, ceilingFor(n)), n).toThrow(/ceiling/);
     // The close's own measures (step13-plan §3, the dry run of 2026-10-26), each by the rule.
     const close: [string, number, number][] = [
@@ -303,7 +303,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('the showcase themes\' grants (owner T7, 2026-10-23): each theme 650, the theme base up to 3 050, the DOM base 21 980', () => {
     expect(ceilingFor('@dzgrid/theme/midnight.css')).toBe(650);
     expect(ceilingFor('@dzgrid/theme/clinic.css')).toBe(650);
-    expect(ceilingFor('@dzgrid/theme')).toBe(2750); // T7 3 050; the Phase 5 close (Q-C2): up to 2 750
+    expect(ceilingFor('@dzgrid/theme')).toBe(2850); // T7 3 050; the Phase 5 close (Q-C2): up to 2 750; the owner's third look: 2 850
     expect(ceilingFor('@dzgrid/dom')).toBe(DOM);
     // T8: the Angular wrapper 6 250 → 6 300 for its [rowClass] input; D3 6 350; S9-Q6 (step 9, editing): at most 7 000.
     expect(ceilingFor('@dzgrid/angular')).toBe(7000);
@@ -417,9 +417,9 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('Phase 6 step 7 (owner Q8-1, Q8-4, Q8-5): the -columns texts 600 / 720 / 900; @dzgrid/dom/groups a new entry at its measure + 10 % (1 893 → 2 100); core/edit 3 150, core/server 6 200, the K.8 guard 84 000 (compression only); dom/spans within 5 300', () => {
     for (const [lang, c] of [['en', 600], ['fr', 720], ['ar', 900]] as const) expect(ceilingFor(`@dzgrid/dom/locales/${lang}-columns`), lang).toBe(c);
     expect(sizeBudget(1893, ceilingFor('@dzgrid/dom/groups'))).toBe(2100);
-    expect([ceilingFor('@dzgrid/core/edit'), ceilingFor('@dzgrid/core/server'), ceilingFor('profile: audit screen (K.8)'), ceilingFor('@dzgrid/dom/spans')]).toEqual([3150, 6200, 84300, 5300]); // K.8: 84 150 since Q9-3, 84 300 since the owner's look
+    expect([ceilingFor('@dzgrid/core/edit'), ceilingFor('@dzgrid/core/server'), ceilingFor('profile: audit screen (K.8)'), ceilingFor('@dzgrid/dom/spans')]).toEqual([3150, 6200, 84450, 5300]); // K.8: 84 150 since Q9-3, 84 300 since the owner's look, 84 450 since the third
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
-    expect(['@dzgrid/dom/groups', '@dzgrid/core/edit', '@dzgrid/core/server', 'profile: audit screen (K.8)'].map((n) => e[n]?.maxGzip)).toEqual([2100, 3150, 6200, 84300]);
+    expect(['@dzgrid/dom/groups', '@dzgrid/core/edit', '@dzgrid/core/server', 'profile: audit screen (K.8)'].map((n) => e[n]?.maxGzip)).toEqual([2100, 3150, 6200, 84450]);
     expect(['en', 'fr', 'ar'].map((l) => e[`@dzgrid/dom/locales/${l}-columns`]?.maxGzip)).toEqual([600, 720, 900]);
   });
 
@@ -466,10 +466,10 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(['@dzgrid/dom/pinned-rows', '@dzgrid/dom/edit'].map(ceilingFor)).toEqual([2300, 4150]);
   });
 
-  it('the K.8 profile guard: 83 500 (Q17a), 84 000 since Q8-5, 84 150 since Q9-3, 84 300 since the owner\'s look (the real example\'s 92 500, S12-Q10, is guarded by example:bytes, not here)', () => {
-    expect(ceilingFor('profile: audit screen (K.8)')).toBe(84300); // the owner's look (2026-10-27)
-    expect(sizeBudget(79000, ceilingFor('profile: audit screen (K.8)'))).toBe(84300); // 86 900 → 84 300
-    expect(() => sizeBudget(84301, ceilingFor('profile: audit screen (K.8)'))).toThrow(/ceiling/);
+  it('the K.8 profile guard: 83 500 (Q17a), 84 000 since Q8-5, 84 150 since Q9-3, 84 300 since the owner\'s look, 84 450 since the third (the real example\'s 92 500, S12-Q10, is guarded by example:bytes, not here)', () => {
+    expect(ceilingFor('profile: audit screen (K.8)')).toBe(84450); // the owner's third look (2026-10-27); 84 300 at the first
+    expect(sizeBudget(79000, ceilingFor('profile: audit screen (K.8)'))).toBe(84450); // 86 900 → 84 450
+    expect(() => sizeBudget(84451, ceilingFor('profile: audit screen (K.8)'))).toThrow(/ceiling/);
   });
 
   it('Phase 6 step 9, owner Q9-5 / Q9-6: dom/tree 3 850 (the sticky copies capped in pixels), dom/pinned-rows 2 200 (compression alone)', () => {
@@ -484,7 +484,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(e['@dzgrid/dom/auto-height']).toMatchObject({ file: 'packages/dom/src/auto-height.ts', over: '@dzgrid/dom' });
     expect(e['@dzgrid/dom/auto-height']!.maxGzip).toBeLessThanOrEqual(1400);
     expect(e['@dzgrid/dom/auto-height']!.external).toEqual(expect.arrayContaining(['@dzgrid/core', '@dzgrid/core/detail']));
-    expect(e['profile: audit screen (K.8)']!.maxGzip).toBe(84300); // the owner's look
+    expect(e['profile: audit screen (K.8)']!.maxGzip).toBe(84450); // the owner's third look (84 300 at the first)
   });
 });
 
@@ -691,8 +691,9 @@ describe('the command: --dry by default, --write to save', () => {
     type Entry = { maxGzip: number | null };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
     const names = ['@dzgrid/dom/filters', '@dzgrid/dom/filters: set (lazy)', '@dzgrid/dom/filters: date adapters (lazy)', 'profile: audit screen (K.8)'];
-    expect(names.map(ceilingFor)).toEqual([10100, 4250, 2800, 84300]);
-    expect(names.map((n) => e[n]?.maxGzip)).toEqual([10100, 4250, 2800, 84300]);
-    expect(['@dzgrid/theme', '@dzgrid/dom/popup', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([2750, 1650, 22400]);
+    // The owner's third look (« Comfort stylesheet »): the date adapters 2 850, K.8 84 450, the theme 2 850.
+    expect(names.map(ceilingFor)).toEqual([10100, 4250, 2850, 84450]);
+    expect(names.map((n) => e[n]?.maxGzip)).toEqual([10100, 4250, 2850, 84450]);
+    expect(['@dzgrid/theme', '@dzgrid/dom/popup', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([2850, 1650, 22400]);
   });
 });

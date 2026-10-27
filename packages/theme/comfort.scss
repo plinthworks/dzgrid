@@ -1,0 +1,102 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/dzgrid.comfort.css — optional comforts (owner's third look, app-feedback 32–35; decisions.md « Comfort
+// stylesheet »): a default spinner and near-invisible scroll bars. Loaded after dzgrid.css by the applications that want
+// them; the base theme does not grow. Compiled to dzgrid.comfort.css (layered) and dzgrid.comfort.unlayered.css
+// ($layered: false) by `npm run build:theme`; a test fails when they drift. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  // The spinner: above the loading overlay's words, and over the rows while a filter's busy flash lasts
+  // (`filters({ busyFlash })`, `aria-busy` on the root), never in the pointer's way. A ring with a quarter in the
+  // accent; it turns only where motion is welcome and not switched off (`settings.motion: false`), still otherwise.
+  .dzg-viewport[aria-busy='true'] ~ .dzg-overlay::before,
+  .dzg[aria-busy='true']::after {
+    content: '';
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    box-sizing: border-box;
+    border: 3px solid var(--tz-border);
+    border-block-start-color: var(--tz-accent);
+    border-radius: 50%;
+  }
+
+  .dzg[aria-busy='true']::after {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    margin: auto;
+    pointer-events: none;
+  }
+
+  @keyframes dzg-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dzg:not([data-motion=off]) .dzg-viewport[aria-busy='true'] ~ .dzg-overlay::before,
+    .dzg:not([data-motion=off])[aria-busy='true']::after {
+      animation: dzg-spin 0.8s linear infinite;
+    }
+  }
+
+  // Near-invisible scroll bars, on with this sheet: thin, the thumb in the border's colour on a clear track, the muted
+  // text's under the pointer or the focus (still findable). `--dzg-scrollbar: auto` gives the system's back. Safari (no
+  // `scrollbar-color`) by its own pseudo-elements. Forced colours: the system's. The keys scroll as before.
+  .dzg-viewport {
+    scrollbar-width: var(--dzg-scrollbar, thin);
+    scrollbar-color: var(--tz-border) transparent;
+  }
+
+  .dzg:is(:hover, :focus-within) .dzg-viewport {
+    scrollbar-color: var(--tz-fg-muted) transparent;
+  }
+
+  @container style(--dzg-scrollbar: auto) {
+    .dzg-viewport {
+      scrollbar-color: auto;
+    }
+  }
+
+  @supports not (scrollbar-color: auto) {
+    @container not style(--dzg-scrollbar: auto) {
+      .dzg-viewport::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      .dzg-viewport::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background: var(--tz-border);
+      }
+
+      .dzg:is(:hover, :focus-within) .dzg-viewport::-webkit-scrollbar-thumb {
+        background: var(--tz-fg-muted);
+      }
+    }
+  }
+
+  @media (forced-colors: active) {
+    .dzg-viewport {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+  }
+}

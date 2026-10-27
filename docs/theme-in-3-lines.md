@@ -193,3 +193,22 @@ Space-separated names; `dzg-` names are the grid's and ignored. Give `rowClass` 
 each update (not an inline arrow): a new function binds every row again. A class changes only what it sets:
 contrast between the text and the surface you give is yours to keep (the examples above pass AA, light
 and dark, in the browser suite).
+
+## Comforts (optional)
+
+`@dzgrid/theme/dzgrid.comfort.css` (or `dzgrid.comfort.unlayered.css` beside the unlayered theme), after the theme:
+
+```css
+@import "@dzgrid/theme/dzgrid.css";
+@import "@dzgrid/theme/dzgrid.comfort.css";
+```
+
+- A spinner: over « Loading… » (`overlay: 'loading'` or a server's load) and over the rows while a
+  `filters({ busyFlash })` lasts. A ring with a quarter in `--tz-accent`; it turns only when motion is welcome
+  (`prefers-reduced-motion: no-preference`) and the grid's `motion` is not `false`; still otherwise.
+- Near-invisible scroll bars on the grid's view: thin, the thumb in `--tz-border` on a clear track, `--tz-fg-muted`
+  while the pointer or the focus is in the grid. Safari draws them by `::-webkit-scrollbar`. Forced colours: the
+  system's. `--dzg-scrollbar: auto` on the grid (or above it) gives the system's back. Keyboard scrolling is unchanged.
+
+Its own size line (650 B gz); the base theme and the audit profile do not load it.
+

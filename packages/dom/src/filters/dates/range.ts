@@ -11,14 +11,15 @@ export { ready } from './shared.js';
  * end's label on its field's row, the labels one column and the fields the next (a two-column grid, each tzslot field
  * `display: contents`); the form at least 18rem, the shortcuts wrapping in it; no « Période » over DU / AU (the group keeps
  * the name). tzslot's sheet is unlayered (`.tz-dateinput{flex-direction:column}`): its field undone by two classes
- * after the layer, as `FILTERS_CSS` does for its trigger.
+ * after the layer, as `FILTERS_CSS` does for its trigger. Its input fills the field's box (owner's third look,
+ * app-feedback 30: tzslot gives it 8.5rem, half the box, and the theme's ring then drew a box inside the box).
  */
 const PERIOD_CSS =
   '@layer dzgrid.layout{:where(.dzg-fperiod){display:grid;gap:.5rem;min-inline-size:18rem}' +
   ':where(.dzg-fends){display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.5rem}' +
   ':where(.dzg-fpresets){display:flex;flex-wrap:wrap;gap:.5rem}' +
   ':where(.dzg-fdate:has(.dzg-fends)>.dzg-flabel){display:none}}' +
-  '.dzg-fends .tz-dateinput{display:contents}';
+  '.dzg-fends .tz-dateinput{display:contents}.dzg-fends .tz-dateinput__input{flex:1;width:0}';
 
 /**
  * The `range` kit, in the popup itself (feedback pass K, owner Q2: « un popup juste qui s'ouvre en dessous de

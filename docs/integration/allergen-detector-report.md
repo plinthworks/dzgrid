@@ -180,3 +180,44 @@ on 4711, stopped afterwards): `screens/polish2-{grid,pager,set,date,filtered,loa
 square, « Page 1 sur N » with room; « Marque » filter: « N valeurs » with space above and below; « Mis à jour »: DU and AU
 on their fields' rows, empty fields, no « Période », the popup clear of the window's edge, a period around a date seen
 in the column narrows the rows; a reload (or any save) shows the spinner and « Chargement… » on the grid.
+
+## The owner's third look (2026-10-27, light and dark)
+
+`docs/phase-6-steps/app-feedback.md` 30–37; decisions « Feedback after a client filter », « Comfort stylesheet ».
+
+**DzGrid** (tests written first, 17 failing before: `packages/dom/test/owner-look-3.test.ts` 5 — the input's width, the
+focus on the first open, two busy-flash cases, the flex fill with the selection boxes —, `packages/theme/test/owner-look-3.test.ts`
+12, then the budget expectations; the filtered count passed at once: DzGrid already had it):
+- The period form: the half-width input was tzslot's own CSS (`.tz-dateinput__input{width:8.5rem}`); the input now fills
+  its field and the theme rings the field, never the input (tzslot request T12). Chrome: input 260 of a 262 px box, light,
+  dark and right to left; the input's outline `none`, the box's `solid`.
+- The focus goes to DU when the period popup opens, the first time too (it waited for nothing on a hidden select).
+- `filters({ busyFlash: 300 })`: `aria-busy` on the grid's root for 300 ms after each filter change; the count
+  (`count.filtered`) and the accent funnel already existed; the header search box's magnifier turns to the accent.
+- `@dzgrid/theme/dzgrid.comfort.css` (optional, 551 B gz, line 650): the default spinner (over « Chargement… » and
+  during a flash; still under reduced motion: Chrome `animation-name: none`, `dzg-spin` otherwise) and thin scroll bars
+  (`--dzg-scrollbar: auto` for the system's).
+- A bug: flexible columns ignored the selection boxes' 40 px — a grid with `checkbox: true` and a `flex` column always
+  scrolled 40 px sideways (the owner's « Nom du produit » under « Code-barres »). Chrome at 1 920 px: scroll width =
+  client width (1 886). A line now marks the pinned columns' edge.
+
+**The app**: actions 118 → 148 px (the trash 23 px from the cell's end, was at its edge), centred (`.acts` a flex box as
+tall as the cell: 0.5 px from the row's middle, was 2.5 px above); « Nom » `flex: 2` (min 220), « Marque » `flex: 1`
+(min 140); « {filtered} produits sur {total} »; `busyFlash: 300`; `dzgrid.comfort.unlayered.css` imported, its own spinner
+CSS removed.
+
+**Not ours (for the app session)**: product names in mojibake (« NÂ°9 - BÅ"uf »): UTF-8 read as Latin-1 somewhere in the
+data's path; not changed here.
+
+**Sizes**: theme 2 763 / 2 850, comfort 551 / 650, K.8 84 448 / 84 450, date adapters 2 809 / 2 850, filters 10 089 /
+10 100, DOM base 22 331 / 22 400. **Gates** (once, `caffeinate -i`, 2 workers): vitest 478 files / 7 183 tests,
+typecheck, check:size 0 over, build, check:contrast 1 092 / 0; Chrome `--only filters` 32 / 32, `dates` 56 / 56,
+`pagination` 45 / 45.
+
+**Screens** (playground `owner-look.html?preflight=1&wide=1`, the app's columns, 1 920 × 900, a temporary vite on 4711,
+stopped afterwards): `screens/polish3-{grid,date,flash,filtered}-{light,dark}.png`, `polish3-date-rtl.png`,
+`polish3-scrolled-light.png`, `polish3-loading-light.png` (reduced motion).
+
+**Owner check on :4200** (after a restart): « Mis à jour »: DU focused, one ring, the field full width; type « pizza » in
+« Nom »: a brief spinner, « 11 produits sur 1 604 », the magnifier in teal; no horizontal scroll bar at full width; the
+four actions with room and centred; thin scroll bars, plainer on hover.

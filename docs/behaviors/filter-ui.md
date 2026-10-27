@@ -41,6 +41,8 @@ Types into a box under a column header; clicks the filter button in a header, or
 - **Clear all** (the overlay's `clearFilters()`): one `query.set` keeping the sort, so a server is asked once.
 
 - **A header part driving the filter** (step 21, `parts.md`): with `slots()` and `filters()`, a column's `header` part gets `filter` (the same pending edit as the floating box and the popup), so an application's own control in the header (a search box) filters the column and the floating row becomes optional. Its keys: one tab stop, Enter or F2 enters, Escape flushes and comes back to the header, the focus leaving flushes.
+- **Busy flash** (owner's third look, app-feedback 32, opt-in): `filters({ busyFlash: 300 })` sets `aria-busy="true"` on the grid's root for that many milliseconds after each filter change (applied or cleared, any source), one timer started again by the next change, cleared when the grid goes. The rows are filtered at once; nothing waits for it and nothing is blocked (the spinner the comfort sheet draws ignores the pointer). For a client grid, whose filtering is instant and otherwise silent. `@dzgrid/theme/dzgrid.comfort.css` draws the spinner; without it, the flash is the attribute alone.
+- **Focus on opening a date popup**: the field's first input (FROM for a period), also the first time, when the date kit still loads: the focus waits on the form meanwhile, and a focus moved away in the meantime is left where it is.
 
 ## Tests
 - Now: `packages/dom/test/popup.test.ts`, `packages/dom/test/review-p3c.test.ts` (popup host), `packages/dom/test/owners.test.ts`, `packages/dom/test/header-rows.test.ts`, `conformance/cases/keyboard-intent/filter-input-*.json`.

@@ -296,6 +296,10 @@
   .dzg-hfbox input {
     padding-inline-start: 1.5rem;
   }
+  [data-dzg-filtered] .dzg-hfbox::before,
+  [data-dzg-filtered] .dzg-hfbox::after {
+    border-color: var(--tz-accent);
+  }
   .dzg-fclear {
     padding: 0;
     cursor: pointer;
@@ -310,7 +314,8 @@
   .dzg-finput:focus-visible,
   .dzg-fclear:focus-visible,
   .dzg-fbtn:focus-visible,
-  .dzg-fpop :focus-visible {
+  .dzg-fpop :focus-visible:not(.tz-dateinput__row *),
+  .dzg-fpop .tz-dateinput__row:has(:focus-visible) {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
   }
   .dzg-finput[aria-invalid=true] {
@@ -489,6 +494,17 @@
     .dzg:not([data-motion=off]) .dzg-row:focus-within .dzg-toggle::before {
       transition: rotate 120ms ease-out;
     }
+  }
+  .dzg-seg-start:not(:empty)::after,
+  .dzg-seg-end:not(:empty)::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+  .dzg-seg-end:not(:empty)::after {
+    inset-inline: 0 auto;
   }
   @media print {
     .dzg-resize,

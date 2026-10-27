@@ -59,3 +59,25 @@ Owner question answered: the screen filters client-side (all 1 604 rows are load
 - 26 done (DzGrid, set chunk): the set form a grid with .5rem gaps; the count line without a margin of its own. Chrome: 8 px each side.
 - 27 done (DzGrid, theme): `.dzg-box { flex: none }`: an app's 15 px cell padding in the 40 px column shrank the flex item to 10 px wide. Chrome: 16 × 16 in the header and the rows.
 - 28 not a DzGrid bug: tests with the app's instants (microseconds, `Z` and `+02:00` offsets), a range picked in the calendar and typed, `apply: 'button'`, Paris and Los Angeles, the end day kept whole, and paged at 20 a page from page 4: the right rows each time; Chrome on `owner-look.html` the same (120 rows for 5–6 October). Most likely the period picked held no update: the production table has only 30 distinct `updated_at` values (noted in the app's repository). The owner checks with a period around a date seen in the column.
+29. Loading overlay shows only the word « Chargement… »: the app had to draw its own spinner; give the theme a default spinner (reduced-motion aware).
+
+## The owner's third look (2026-10-27, light and dark)
+30. Date period popup: « I don't understand why the input covers half the field » — DU / AU drew a box inside the box.
+31. « tzslot puts the focus on the start date when it opens; when I open, the focus is on nothing. »
+32. After a filter, « I don't know what is happening » (client-side, instant). Owner: both — a filtered count in the footer and the active icon on the header, and a brief spinner (decisions.md « Feedback after a client filter »).
+33. The default spinner (29) in DzGrid, reduced-motion aware; the app drops its own.
+34. The last column struggles for space (the trash at the grid's edge); a horizontal scroll at ~1 880 px of grid, « Nom du produit » sliding under the pinned « Code-barres » and looking cut.
+35. Near-invisible scroll bars, no library, no JS (decisions.md « Comfort stylesheet »).
+36. The action icons sit above the row's vertical centre.
+37. Not ours: product names in mojibake (« NÂ°9 - BÅ"uf »), UTF-8 read as Latin-1 in the data: for the app session.
+
+## Status after the third look (2026-10-27)
+- 30 done (DzGrid): the half width was tzslot's own CSS (`.tz-dateinput__input{width:8.5rem;flex:0 1 auto}`); the period form undoes it outside the layer (`.dzg-fends .tz-dateinput__input{flex:1;width:0}`) and the theme rings the field's box only (`.dzg-fpop .tz-dateinput__row:has(:focus-visible)`, the input inside excluded). tzslot request T12 (`docs/tzslot-requests.md`).
+- 31 done (DzGrid): while the date kit loads the focus waits on the form, then goes to FROM (it went to the hidden « Condition », so nowhere); Escape and the return to the header unchanged. A focus moved away meanwhile is left alone.
+- 32 done: the count and the funnel already existed (`count.filtered`, `[data-dzg-filtered]`); the app says « {filtered} produits sur {total} »; the header search box's magnifier now turns to the accent when filtered (theme). `filters({ busyFlash: 300 })` (opt-in): `aria-busy` on the grid's root for that long after each change, one timer, nothing blocked.
+- 33 done (DzGrid, comfort sheet): `dzgrid.comfort.css` draws the spinner over « Chargement… » and over the rows during a flash; it turns only under `prefers-reduced-motion: no-preference` and not `data-motion=off`, still otherwise. The app's own spinner CSS is gone.
+- 34 done: the horizontal scroll was a DzGrid bug — flexible columns shared the whole view and the selection boxes' 40 px came on top (always 40 px of scroll); fixed in `render/viewport.ts`. The app: actions 118 → 148 px (four 26 px buttons, 2 px apart, 15 px each side), still pinned at the end; « Nom » `flex: 2` (min 220) and « Marque » `flex: 1` (min 140). The theme draws a line at the pinned columns' edge, so a column passing under them reads as passing beneath. Chrome at 1 920 × 900: the grid 1 888 px, scroll width = client width (1 886), the trash 23 px from the cell's end.
+- 35 done (DzGrid, comfort sheet): `scrollbar-width: var(--dzg-scrollbar, thin)`, the thumb in `--tz-border` on a clear track, `--tz-fg-muted` under the pointer or the focus; Safari by `::-webkit-scrollbar`; forced colours the system's; `--dzg-scrollbar: auto` the system's back. On when the sheet is imported (the default of the sheet); the base theme unchanged.
+- 36 done in the app: `.acts` a flex box as tall as the cell, centred (Chrome: the buttons' middle 0.5 px from the row's, 2.5 px before).
+- 37 noted for the app session (not changed).
+

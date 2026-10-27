@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The owner's third look (allergen-detector, 2026-10-27; `docs/phase-6-steps/app-feedback.md` 30–37, decisions
+  « Feedback after a client filter », « Comfort stylesheet »):
+  - **`filters({ busyFlash: ms })`** (opt-in): `aria-busy` on the grid's root for that long after each filter change,
+    one timer, nothing blocked; the comfort sheet draws a spinner over the rows meanwhile. For a client grid, whose
+    filtering is instant. (filter-ui.md)
+  - **`@dzgrid/theme/dzgrid.comfort.css`** (and `dzgrid.comfort.unlayered.css`, `comfort.scss`): an optional sheet with a
+    default spinner (over the loading overlay's words and during a busy flash; it turns only under
+    `prefers-reduced-motion: no-preference` and not `motion: false`) and near-invisible scroll bars (thin, the thumb in
+    `--tz-border`, `--tz-fg-muted` on hover or focus, Safari by `::-webkit-scrollbar`, the system's under forced colours;
+    `--dzg-scrollbar: auto` restores the system's). Its own size line (650 B gz).
+  - The theme: a line at the pinned columns' edge; the header search box's magnifier in the accent when its column is
+    filtered.
+
+### Fixed (the third look)
+
+- **Flexible columns with the selection boxes**: they shared the whole view and the boxes' 40 px came on top, so a grid
+  with `checkbox: true` and a `flex` column always scrolled 40 px sideways. (app-feedback 34)
+- **The period form's FROM / TO**: the input fills its field (tzslot gives it 8.5rem: half the box, a box inside the
+  box), one focus ring, the field's (tzslot request T12). (app-feedback 30)
+- **The focus when a date popup opens the first time**: it waits on the form while the date kit loads, then goes to the
+  field (it went to the hidden « Condition » of a single-operator column: nowhere). (app-feedback 31)
+
 - The owner's look at the integrated screen (allergen-detector, 2026-10-27; `docs/phase-6-steps/app-feedback.md` 11–22,
   decisions « Owner's-look budgets »):
   - **`filters({ apply: 'button' })`**: the popup's fields are a draft in the browser too (set ticks, date picks, text),

@@ -51,7 +51,7 @@ describe('@dzgrid/dom/parts', () => {
     expect(b['@dzgrid/dom/locales/en-parts']).toEqual({ file: 'packages/dom/src/locales/en-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/dom/locales/fr-parts']).toEqual({ file: 'packages/dom/src/locales/fr-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/dom/locales/ar-parts']).toEqual({ file: 'packages/dom/src/locales/ar-parts.ts', maxGzip: 150 });
-    expect(b['@dzgrid/theme']!.maxGzip).toBe(2750); // Phase 5 close (Q-C2): the measure 2 494 + 10 %, within T7's 3 050
+    expect(b['@dzgrid/theme']!.maxGzip).toBe(2850); // the owner's third look (decisions.md « Comfort stylesheet »); Phase 5 close (Q-C2): 2 750, the measure 2 494 + 10 %
     expect(b['@dzgrid/dom']!.maxGzip).toBe(22400); // Phase 6 step 8b-1 (owner Q2): 22 400; before: Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant
     expect(b['@dzgrid/core']!.maxGzip).toBe(29150); // Phase 6 step 8b-1 (owner Q2): 29 150; before: the owner's grant, Phase 4 close (Q17b)
   });

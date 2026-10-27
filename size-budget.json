@@ -237,7 +237,11 @@
     },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
-      "maxGzip": 2750
+      "maxGzip": 2850
+    },
+    "@dzgrid/theme/dzgrid.comfort.css": {
+      "file": "packages/theme/dzgrid.comfort.css",
+      "maxGzip": 650
     },
     "@dzgrid/theme/midnight.css": {
       "file": "packages/theme/midnight.css",
@@ -636,7 +640,7 @@
         "packages/dom/src/filters/dates/range.ts",
         "packages/dom/src/filters/dates/moment.ts"
       ],
-      "maxGzip": 2800,
+      "maxGzip": 2850,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -716,7 +720,7 @@
       "css": [
         "packages/theme/dzgrid.css"
       ],
-      "maxGzip": 84300,
+      "maxGzip": 84450,
       "external": [
         "@angular/*",
         "rxjs",
