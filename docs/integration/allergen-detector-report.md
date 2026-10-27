@@ -226,8 +226,8 @@ four actions with room and centred; thin scroll bars, plainer on hover.
 
 ## The owner's fourth look (2026-10-27, light theme) and the layout tools
 
-`docs/phase-6-steps/app-feedback.md` 38–40. Fixed in DzGrid (`FIXCOMMIT`, pushed; packs `PACKVERSION`) and in the app
-(`dzgrid-integration` `APPCOMMIT`, local commit only; `ng build` passes).
+`docs/phase-6-steps/app-feedback.md` 38–40. Fixed in DzGrid (`98a85a7`, pushed; packs `0.3.1-local.20261027222502`) and in the app
+(`dzgrid-integration` `505c2df`, local commit only; `ng build` passes).
 
 **DzGrid** (tests written first: `packages/theme/test/owner-look-4.test.ts` 4 failing before, Chrome `--only pagination`
 `footerSelectionChecks` 6 failing before; `owner-look-2.test.ts` one expectation superseded):
