@@ -107,3 +107,44 @@ is below.
 
 About 70 minutes of agent time: the install and lockfile 10 min, reading the DzGrid docs 15 min, the code 20 min,
 the build and review 10 min, the report 15 min. The browser step was blocked by the login.
+
+## After the owner's look (2026-10-27)
+
+The owner looked at the screen in the dark theme and found it badly finished (`docs/phase-6-steps/app-feedback.md`
+17–22). Fixed in DzGrid (`407c027`, pushed) and in the app (`dzgrid-integration` `d48cfb6`, local commit only).
+
+**DzGrid** (tests written first: `packages/dom/test/owner-look.test.ts`, 11 tests, 9 failing before):
+- One box per value row: a `filterOption` part paints the label area only; the grid keeps its box and its count. The
+  part's host is `inert` (review finding 4 closed: no control in it takes the focus).
+- `filters({ apply: 'button' })`: nothing applies before « Appliquer » or Enter (set ticks, date picks, text); closing
+  drops the draft. `'live'` stays the default.
+- `filters({ dateZone: false })`: no « Fuseau horaire » line. FROM / TO show `dd/mm/yyyy`.
+- Every popup stays inside the window: placed again when its size changes (`ResizeObserver`), and clamped vertically.
+  This was the date popup cut on the right: placed while its kit loaded, never placed again.
+- The popup: « Appliquer » the primary button (accent), « Effacer » the secondary one, boxes in the accent, more room,
+  the value list as high as its rows (≤ 18rem), « Rechercher… » as placeholder with no label.
+- `header.filterBox` takes the title's place: a magnifier, the column's name as placeholder, no filter button.
+- Budgets raised by the owner (decisions « Owner's-look budgets »): filters 10 048 / 10 100, set 4 208 / 4 250, date
+  adapters 2 752 / 2 800, K.8 84 297 / 84 300. Theme 2 689 / 2 750, popup 1 626 / 1 650.
+- Packaging (item 15, `b8feba0`): `npm run pack:local` gives `0.3.1-local.<stamp>` with the `@dzgrid/*` ranges pinned;
+  `pack:release` keeps 0.3.0. The app's lockfile updated by `npm install` alone (19 lines), no hand edit.
+
+**The app** (`d48cfb6`): the four `0.3.1-local.20261027162608` tarballs; `apply: 'button'`, `dateZone: false`; the pill
+part draws the pill alone (the `po-box` / `po-n` CSS gone); the admin's colours on DzGrid's tokens in the DzGrid block of
+`styles.scss`, scoped to `dz-grid`, light and `html.dark` (accent `#0C7075` light, white on it 5.85:1; `#5ec4ca` dark);
+no hard-coded colour left in the component; `dzgrid.unlayered.css` under Tailwind 3's preflight. `ng build` passes
+(warnings already there: NG8113 `DzgSearch`, NG8107 in product-preview, the initial bundle budget).
+
+**Gates** (once, `caffeinate -i`, 2 workers): vitest 473 files / 7 136 tests, typecheck, build, check:size 0 over,
+check:contrast 1 092 / 0; Chrome `--only filters` 32 / 32, `--only dates` 56 / 56.
+
+**Screens** (playground `owner-look.html`, the app's setup and brand, 900 × 760): `screens/owner-look-{grid,set,search,date,header}-{dark,light}.png`.
+Measured there: one box per row, rows 36 px, the focus ring in the accent, a tick applies only at « Appliquer », the
+date popup 650–900 of 900 (inside), no zone line, placeholders `dd/mm/yyyy`, no filter button on « Nom du produit ».
+The running playground on 4700 predates tzslot 2.4.0 (« Missing ./lazy »): its date kits fail until it is restarted; the
+screens came from a temporary server on 4711, stopped afterwards.
+
+**Owner check on :4200** (after the app session restarts the server): one box per row in « Source »; tick, wait: nothing
+changes until « Appliquer »; close without it: nothing applied; « Mis à jour » on the right edge: the whole month and
+« Appliquer » visible, no zone line, `jj/mm/aaaa`-style hints; « Nom du produit »: the search box in the title's place,
+a click beside it sorts; the brand's teal in both themes.
