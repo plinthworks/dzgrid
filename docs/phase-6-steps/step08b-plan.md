@@ -215,3 +215,42 @@ WebKit 7 / 7 (keys, RTL foot, sideways pinned column, editor).
 
 **For the reviewer (mutants, pure logic only):** `pinned-rows/band.ts` (`crossBand`, `bandHeights`), `pinnedKey` /
 `isCellKey`, `reconcileFocus`'s `held` branch, `editableAt`'s info, `kernel.rowOf` / `exists`, `showNew`'s body filter.
+
+## Done — 8b-2 (2026-10-27, not committed, no review yet)
+
+Built (§2.5, owner Q1, O8): a block lives in its anchor's region (`g.rowsOf(anchor)` or the body's) in `range()` and
+`fill()` — box, tint, `aria-selected`, size, copy, cut, paste (past a band's last row: `outside`), Delete, Ctrl+D / R,
+the keyboard fill mode, the handle, bulk; corners in two regions make no block (API refused, Shift+click drops). Keys:
+`crossBand`'s `inside` also stops a body row's move at a band's edge and hands a band's page / edge key to the grid's
+own move over the band. Mouse: range's press / Shift-press / swallowed click and fill's pick on `el.viewport`;
+`cellAt(g, p, dy, key)` asks `g.pinAt` for a gesture that started in a band (clamped to the rows it shows);
+`place()` takes the top band off (`g.pinTop`) — this fixed a real 8b-1 bug (a body drag under a top band landed rows
+too low); a band gesture scrolls sideways only. `pinnedChanged` without a corner's row drops the block. Column menu
+« Fill down / right » on a focused pinned cell (`isCellKey`). Plan changes: Enter / Shift+Enter from the body stays at
+the body's edge next to a band (R3: `inside` returns `from`, not the grid's move, so Shift+Enter on the first row does
+not jump over the top band to the header; with no band, the old rule).
+
+Review fixes: R1 overlay id `'\0' + key` (controller, marks, motion saves, and `core/range/copy` + `csv/writers` so a
+copy and a fill's source read a pinned cell's edit); R2 `calendarOf` caps `months` at 12, warns; R3 above; R4 O1
+counts folded columns, shows the first unfolded one; the two `foldedColumns` survivors pinned (they pass: mutant
+killers, not bugs).
+
+**Tests that failed first:** `pinned-rows-range.test.ts` (18 of 19 red: no block in a band, null copy / paste, the body
+drag r1→r4, the crossing Shift+click kept; the 19th, the band replaced, passed vacuously, now real); its fill-source and
+copy tests red with `idOfDataKey ?? ''` restored; `pinned-rows-band` 2 (`inside`); `pinned-rows-edit` R1 (red with the
+old marks line) and R3; core `pinned-edit` R1; `state-review` R4 (2); `filters-dates` R2; `column-menu-block` (pinned
+focus); `rebudget.test.ts` 5 (ceilings 4 950 / 3 000, lines). Survivors' tests green at once (as expected).
+
+**Sizes:** `dom/range` 5 002 / 5 050 (ceiling 5 200), `dom/fill` 3 042 / 3 100 (ceiling 3 150), `dom/pinned-rows` 2 145
+/ 2 150, `dom/edit` 4 150 / 4 150 (R1 pushed it to 4 152; trimmed in `marks.ts`, 0 B left), `core/edit` 3 144 / 3 150,
+`core/range` 2 894 / 3 200, `core/state` 1 498 / 1 500, `column-menu` 4 088 / 4 300, core 29 001, DOM base 21 954, K.8
+83 921 / 84 000 (79 B left). No line raised by compression alone.
+
+**Gate (once, `caffeinate -i`, 2 workers, Node 24):** vitest 456 files / 6 998 tests green (`audit-permutations` read
+`PERMS=''` as 0 seeds in my script: green alone with the default); `test:perm` 5 / 10; `typecheck`; `build`;
+`check:size` 0 over; `check:contrast` 1 086 / 0. Browser: `--only pinned-rows` Chrome 43 / 43 (new `bandBlocks`: drag in
+the band, past its foot, body drag under it, the handle, Shift+arrows, Ctrl+D, Delete), Firefox 12 / 12, WebKit 12 / 12;
+`--only range` 51, `--only fill` 58.
+
+**For the reviewer (mutants, pure logic):** `crossBand`'s `inside` branches, `pinAt`'s clamp, `cellAt`'s band branch,
+range / fill `D()`, the set guard `!boxOf(next)`, state O1 `find`.

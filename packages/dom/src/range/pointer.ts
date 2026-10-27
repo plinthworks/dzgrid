@@ -41,19 +41,23 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
   /** The block when this gesture's drag started (a Shift+press's own): given back if the drag is cancelled. */
   let before: CellRange | null = null;
 
-  /** A body cell of this grid under an event's target; none for a field or a widget drawn in it, a detail, a nested grid. */
+  /**
+   * A cell of this grid under an event's target — the body's, or a pinned band's (step 8b-2); none for a field or a widget
+   * drawn in it, a detail, a nested grid, the tree's pinned copies.
+   */
   const cellOf = (t: EventTarget | null): CellAddr | null => {
     const x = t as Element;
     const c = x.closest?.<HTMLElement>('.dzg-cell');
     const row = c?.closest('.dzg-row');
-    // A nested grid's row has no key here (another renderer's): its presses are its own.
-    const key = row && el.layer.contains(row) ? rowRenderer.keyOf(row) : undefined;
+    // A nested grid's row has no key here (another renderer's): its presses are its own; nor a tree's copy (not a peer).
+    const key = row && rowRenderer.keyOf(row);
     const w = x.closest('input, textarea, select, button, a[href], [contenteditable], [tabindex]:not(.dzg-cell)');
     return key && !(w && c!.contains(w)) ? { row: key, column: c!.dataset['col']! } : null;
   };
   /** The block follows the pointer; the first move off the pressed cell starts the drag. */
   const track = (): void => {
-    const a = last && cellAt(g, last);
+    // Inside the anchor's band when it is a pinned row's (O8: never across its edge).
+    const a = last && anchor && cellAt(g, last, 0, anchor.row);
     if (!a || !press || !anchor) return;
     if (!ranging) {
       if (same(a, press)) return;
@@ -72,7 +76,7 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
   /** One frame of the auto-scroll: speeds from the depth into the bands, the corner again; stops when nothing moved. */
   const step = (): void => {
     frame = 0;
-    if (ranging && last && autoScroll(g, last)) track();
+    if (ranging && last && autoScroll(g, last, anchor?.row)) track();
   };
   /**
    * The gesture ends: the frames and the capture let go. Released (`up`): the focus to the moving corner, its size said,
@@ -98,7 +102,8 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
     sel.say();
   };
 
-  scope.on(el.body, 'pointerdown', (e: PointerEvent) => {
+  // On the view: the body's cells and the pinned bands' (siblings of the body, step 8b-2).
+  scope.on(el.viewport, 'pointerdown', (e: PointerEvent) => {
     swallow = false;
     // The mouse only: a finger and a pen scroll the view (a pen drag would scroll and select at once; review 2).
     const a = e.isPrimary && e.button === 0 && e.pointerType === 'mouse' ? cellOf(e.target) : null;
@@ -123,7 +128,7 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
     if (!drag) press = null;
   });
   // Shift+press: no native focus, no text selection.
-  scope.on(el.body, 'mousedown', (e: MouseEvent) => void (e.shiftKey && cellOf(e.target) && e.preventDefault()));
+  scope.on(el.viewport, 'mousedown', (e: MouseEvent) => void (e.shiftKey && cellOf(e.target) && e.preventDefault()));
   scope.on(doc, 'pointermove', (e) => {
     const p = e as PointerEvent;
     if (!press || p.pointerId !== id) return;
@@ -138,7 +143,7 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
   scope.on(el.body, 'lostpointercapture', (e) => void (mine(e) && end()));
   if (win) scope.on(win, 'blur', () => end());
   // The click a drag ends with is not a click on a cell (no row selected, no cellClicked): swallowed once.
-  scope.on(el.body, 'click', (e: MouseEvent) => {
+  scope.on(el.viewport, 'click', (e: MouseEvent) => {
     if (!swallow) return;
     swallow = false;
     e.stopPropagation();

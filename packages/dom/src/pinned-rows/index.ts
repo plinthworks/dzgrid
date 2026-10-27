@@ -128,7 +128,14 @@ export function pinnedRows<T = unknown>(o: PinnedRowsOptions<T> = {}): PinnedRow
         const h = g.rowHeight();
         view = box.block;
         [T.px, B.px] = bandHeights(T.k.length * h, B.k.length * h, view, h);
+        g.pinTop = T.px;
         return { ...box, block: Math.max(0, view - T.px - B.px) };
+      };
+      // The pointer in a band (range, fill; step 8b-2): `y` from the body's top — the top band above it, the bottom band under
+      // the body's view — clamped to the rows the band shows (a drag never leaves its band, O8).
+      g.pinAt = (k, y) => {
+        const b = of(k);
+        return b?.k[Math.floor((Math.max(0, Math.min(b.px - 1, y + T.px + (b === T ? 0 : B.px - view))) + b.o) / g.rowHeight())];
       };
 
       // The keys across the bands (pinned-rows.md 8, 9); inside a band, the grid's own moves over its rows. The editors'
@@ -221,7 +228,7 @@ export function pinnedRows<T = unknown>(o: PinnedRowsOptions<T> = {}): PinnedRow
           setPinned(kernel);
           geo.read = read;
           g.step = step;
-          g.move = g.rowsOf = g.pins = undefined;
+          g.move = g.rowsOf = g.pins = g.pinTop = g.pinAt = undefined;
           for (const b of bands) b.r.clear(), b.el.remove();
         },
       };

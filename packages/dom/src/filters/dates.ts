@@ -36,7 +36,7 @@ export interface DateSettings {
 
 /** `filters({ dateCalendar })`: how the period widget shows itself (filter-date-picker.md, Calendar options). */
 export interface DateCalendarOptions {
-  /** Months side by side, a positive integer; 2 when absent. */
+  /** Months side by side, a positive integer, at most 12 (more: 12, a warning); 2 when absent. */
   readonly months?: number;
   /** The shortcuts beside the calendar, in this order; `[]` for none; the six when absent. Never between two moments. */
   readonly presets?: readonly RelativeRange[];
@@ -45,17 +45,18 @@ export interface DateCalendarOptions {
 const BAD = (name: string, v: unknown): Problem => problem('invalid-setting', 'warning', `features.filters.dateCalendar.${name}`, String(v));
 
 /**
- * The host's `dateCalendar`, kept to what tzslot can take: a months that is not a positive integer,
+ * The host's `dateCalendar`, kept to what tzslot can take: a months that is not a positive integer (over 12: 12),
  * presets that are not a list, an unknown name in it, each dropped with a warning (said at setup), never thrown.
  */
 export function calendarOf(c: DateCalendarOptions): { calendar: DateCalendarOptions; problems: Problem[] } {
   const problems: Problem[] = [];
   const { months: m, presets: p } = c;
   const ok = Number.isInteger(m) && m! > 0;
-  if (m !== undefined && !ok) problems.push(BAD('months', m));
+  // More than 12 (a year side by side): capped, told (review R2).
+  if (m !== undefined && !(ok && m! < 13)) problems.push(BAD('months', m));
   if (p !== undefined && !Array.isArray(p)) problems.push(BAD('presets', p));
   const list = Array.isArray(p) ? p.filter((n, i) => (RELATIVE_RANGES.has(n) ? p.indexOf(n) === i : (problems.push(BAD('presets', n)), false))) : undefined;
-  return { calendar: { ...(ok && { months: m! }), ...(list && { presets: list }) }, problems };
+  return { calendar: { ...(ok && { months: Math.min(m!, 12) }), ...(list && { presets: list }) }, problems };
 }
 
 /** What a kit's `adapt` is given: where to draw, which field, its settings, and how to say a change. */

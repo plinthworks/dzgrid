@@ -831,7 +831,13 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   2 150, ceiling 2 300: the editing glue, owner Q2), texts 116 / 130 / 156, `pinned-rows.css` 301 / 350. Keys
   (`crossBand`, 5 conformance cases), single-cell editing, undo, saves. Demo `playground/pinned.html` (fr / ar,
   `?many=1`). Browser `--only pinned-rows`: Chrome 36, Firefox 7, WebKit 7.
-- [ ] step 8b-2: blocks, paste and the fill inside a band (`dom/range` ~5 200, `dom/fill` ~3 150, owner Q1).
+- [~] step 8b-2 (2026-10-27, not committed, no review yet; plan `step08b-plan.md` « Done — 8b-2 »): blocks, clipboard,
+  Delete, Ctrl+D / R, the fill handle and bulk inside one pinned band, keys and mouse, never across an edge (O8); the
+  body's pointer under a top band fixed; review fixes R1 (overlay id `\0` + key), R2 (`months` ≤ 12), R3 (Enter stays in
+  its region), R4 (O1 counts folded columns) and the `foldedColumns` survivors pinned. Sizes (owner Q1): `dom/range`
+  5 002 / 5 050 (ceiling 5 200), `dom/fill` 3 042 / 3 100 (ceiling 3 150); `dom/pinned-rows` 2 145 / 2 150, `dom/edit`
+  4 150 / 4 150, `core/state` 1 498 / 1 500, core 29 001, DOM base 21 954, K.8 83 921 / 84 000. Gate: 456 files /
+  6 998 tests; browser `--only pinned-rows` Chrome 43, Firefox 12, WebKit 12; `range` 51, `fill` 58.
 - [ ] step 10: auto row height (exit criterion 3, S3).
 - [ ] step 11: print.
 - [ ] step 12: Angular and demos.

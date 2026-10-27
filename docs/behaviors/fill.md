@@ -72,6 +72,12 @@ end or the start; the source cells in that line, read as shown (through the edit
    every editable cell of the block (the plan writes an empty text; review of step 10).
 10. `exclude` row selections (« everything except ») are not blocks and are never written by bulk.
 
+**Pinned bands** (Phase 6 step 8b-2, owner Q1, O8; `pinned-rows.md` 17–18)
+- The handle, its drag, the click-then-click way, the keyboard mode, Ctrl+D / Ctrl+R and bulk work inside one
+  pinned band: the target never leaves the band (a drag past its edge stops at its last row; Ctrl+D on its first
+  row does nothing — the key is the browser's); the source is read as shown (a pinned cell's edit included). A
+  fill in a band never makes the body's order stale. Tests: `pinned-rows-range.test.ts`.
+
 ## Where DzGrid differs on purpose
 - No trend (least squares) for unequal steps, no text series (`INV-0042` → `INV-0043` is not guessed):
   on health data a value is copied or follows a stated step, nothing else.

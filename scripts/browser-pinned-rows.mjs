@@ -10,6 +10,9 @@
  * the view, whole rows, its rows moved by the wheel and by the keys; forced colours (the line in CanvasText); 200 % zoom
  * (aligned, the band under the header); axe 0; no page error. Firefox and WebKit (`--engine`): the keys, the sticky foot
  * in RTL, the pinned column inside a band scrolled sideways, an editor opened and closed in a band.
+ * Step 8b-2 (`bandBlocks`, every engine, `?many=1`): a mouse drag inside the top band makes a block there, a drag past its
+ * foot stops at its rows, a body drag under it takes the rows under the pointer, the fill handle dragged inside the band
+ * fills it; Chrome also: Shift+arrows, Ctrl+D (Cmd on a Mac) and Delete inside the band, the body untouched.
  */
 export async function pinnedRowsChecks(name, ctx, h) {
   const { check, frames } = h;
@@ -208,6 +211,8 @@ export async function pinnedRowsChecks(name, ctx, h) {
     await page.close();
   }
 
+  await bandBlocks(name, ctx, h, base);
+
   // ---- the half-view cap (O8): 12 reference rows ----
   if (!chrome) return;
   const page = await ctx.newPage();
@@ -243,5 +248,97 @@ export async function pinnedRowsChecks(name, ctx, h) {
   });
   check('chrome', 'cap: the focus on the last reference row brings it into the band\'s window', shown, shown);
   check('chrome', 'cap: no page error', errors.length === 0, errors);
+  await page.close();
+}
+
+/** Step 8b-2: blocks and the fill inside one band, by the mouse (every engine) and the keys (Chrome). */
+async function bandBlocks(name, ctx, h, base) {
+  const { check, frames } = h;
+  const chrome = name === 'chrome';
+  const page = await ctx.newPage();
+  await page.setViewportSize({ width: 1000, height: 800 });
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  await page.goto(`${base}/pinned.html?many=1`);
+  await page.waitForSelector('.dzg-pins-top .dzg-row');
+  await frames(page, 3);
+  const cmd = (await page.evaluate(() => /mac/i.test(navigator.platform))) ? 'Meta' : 'Control';
+  // Top rows: aria-rowindex 2… (one header row); the body's after the 12 top rows: p1 is 14.
+  const sel = (band, i, col) => `${band === 'top' ? '.dzg-pins-top' : '.dzg-layer'} .dzg-row[aria-rowindex="${i}"] .dzg-cell[data-col="${col}"]`;
+  const mid = async (css) => {
+    const b = await page.locator(css).boundingBox();
+    return [b.x + b.width / 2, b.y + b.height / 2];
+  };
+  const state = () => page.evaluate(() => {
+    const r = window.__pinned.blocks.api(window.__pinned.grid)?.get();
+    return {
+      block: r && `${r.anchor.row}/${r.anchor.column}:${r.focus.row}/${r.focus.column}`,
+      tinted: document.querySelectorAll('.dzg-pins-top .dzg-cell--range').length,
+      body: document.querySelectorAll('.dzg-layer .dzg-cell--range').length,
+      focus: window.__pinned.grid.kernel.focus?.row,
+    };
+  });
+  const drag = async (from, to, steps = 6) => {
+    await page.mouse.move(...from);
+    await page.mouse.down();
+    await page.mouse.move(...to, { steps });
+    await frames(page, 2);
+    const during = await state();
+    await page.mouse.up();
+    await frames(page, 2);
+    return during;
+  };
+
+  // A drag inside the top band: ref1 stock → ref3 price.
+  await drag(await mid(sel('top', 2, 'stock')), await mid(sel('top', 4, 'price')));
+  let s = await state();
+  check(name, `${name} 8b-2: a mouse drag inside the top band makes a block there (3 × 2 cells tinted), the focus left on its start`, s.block === 'p:t:4:ref1/stock:p:t:4:ref3/price' && s.tinted === 6 && s.body === 0 && s.focus === 'p:t:4:ref1', s);
+  // Past the band's foot, deep into the body: the corner stays on the band's rows.
+  const during = await drag(await mid(sel('top', 3, 'stock')), (await mid(sel('body', 20, 'stock'))));
+  s = await state();
+  check(name, `${name} 8b-2: a drag from the band past its foot stays in the band (never a body row)`, /^p:t:\S+\/stock:p:t:/.test(during.block ?? '') && /^p:t:\S+:p:t:/.test(s.block ?? '') && s.body === 0, { during, s });
+  // A body drag under the top band: the rows under the pointer (measured from the band's foot).
+  await drag(await mid(sel('body', 15, 'stock')), await mid(sel('body', 17, 'price')));
+  s = await state();
+  check(name, `${name} 8b-2: a body drag under the top band takes the rows under the pointer`, s.block === 'd:2:p2/stock:d:2:p4/price' && s.body === 6 && s.tinted === 0, s);
+
+  // The fill handle inside the band: ref4 stock (400) dragged down to ref5.
+  await page.locator(sel('top', 5, 'stock')).click();
+  await frames(page, 2);
+  const hd = await page.locator('.dzg-pins-top .dzg-fill').boundingBox().catch(() => null);
+  let filled = null;
+  if (hd) {
+    await page.mouse.move(hd.x + hd.width / 2, hd.y + hd.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(...(await mid(sel('top', 6, 'stock'))), { steps: 8 });
+    await frames(page, 2);
+    await page.mouse.up();
+    await page.waitForTimeout(700);
+    filled = await page.evaluate(() => document.querySelector('.dzg-pins-top .dzg-row[aria-rowindex="6"] .dzg-cell[data-col="stock"]').textContent.replace(/\D/g, ''));
+  }
+  check(name, `${name} 8b-2: the fill handle on a band cell; dragged one row down inside the band it fills there (400)`, !!hd && filled === '400', { hd, filled });
+
+  if (chrome) {
+    // Shift+arrows, Ctrl+D and Delete inside the band; the body untouched.
+    await page.locator(sel('top', 2, 'stock')).click();
+    await page.keyboard.press('Shift+ArrowDown');
+    await page.keyboard.press('Shift+ArrowDown');
+    await frames(page, 2);
+    s = await state();
+    const keys = s.block === 'p:t:4:ref1/stock:p:t:4:ref3/stock' && s.tinted === 3;
+    await page.keyboard.press(`${cmd}+d`);
+    await page.waitForTimeout(700);
+    const down = await page.evaluate(() => [3, 4].map((i) => document.querySelector(`.dzg-pins-top .dzg-row[aria-rowindex="${i}"] .dzg-cell[data-col="stock"]`).textContent.replace(/\D/g, '')));
+    const body = await page.evaluate(() => window.__pinned.rows[0].stock);
+    check(name, `${name} 8b-2: Shift+arrows make a block in the band; Ctrl+D (Cmd on a Mac) copies its first row down there`, keys && down.every((x) => x === '100'), { s, down, body });
+    await page.locator(sel('top', 3, 'note')).click();
+    await page.keyboard.press('Shift+ArrowDown');
+    await page.keyboard.press('Delete');
+    await page.waitForTimeout(700);
+    const empty = await page.evaluate(() => window.__pinned.pins.api(window.__pinned.grid).get().top.slice(1, 3).map((r) => r.note));
+    check(name, `${name} 8b-2: Delete clears the band block's editable cells`, empty.every((x) => x === null || x === ''), empty);
+  }
+  check(name, `${name} 8b-2: no page error`, errors.length === 0, errors);
   await page.close();
 }

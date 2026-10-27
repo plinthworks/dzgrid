@@ -102,6 +102,44 @@ describe('moves out of a field stay in the band (pinned-rows.md 12)', () => {
   });
 });
 
+describe('Enter stays in its region from the body too (review R3; pinned-rows.md 12)', () => {
+  it('Enter (enterMoves: down) on the last body row does not go into the bottom band; Shift+Enter on the first does not go into the top band; the arrows still cross', () => {
+    const p = pe({ top: [ref('a')], bottom: [tot('t')], rows: rowsOf(3), options: { enterMoves: 'down' } });
+    p.g.api.focusCell(k('r2'), 'n');
+    p.key('F2');
+    p.key('Enter', {}, p.field()!);
+    expect(p.g.kernel.focus).toEqual({ kind: 'cell', row: k('r2'), column: 'n' });
+    p.g.api.focusCell(k('r0'), 'n');
+    p.key('F2');
+    p.key('Enter', { shiftKey: true }, p.field()!);
+    expect(p.g.kernel.focus).toEqual({ kind: 'cell', row: k('r0'), column: 'n' });
+    p.key('ArrowUp');
+    expect(p.g.kernel.focus).toEqual({ kind: 'cell', row: T('a'), column: 'n' });
+    p.g.api.focusCell(k('r2'), 'n');
+    p.key('ArrowDown');
+    expect(p.g.kernel.focus).toEqual({ kind: 'cell', row: B('t'), column: 'n' });
+  });
+});
+
+describe('a body row whose id is a pinned key\'s text (review R1)', () => {
+  it('its pending edit never shows in the pinned cell, nor the pinned edit in its cell', () => {
+    const body = { ...rowsOf(1)[0]!, id: T('a'), n: 1 };
+    const p = pe({ top: [ref('a')], rows: [body], save: () => new Promise<void>(() => {}) });
+    p.g.api.focusCell(k(T('a')), 'n');
+    p.key('F2');
+    p.type('5');
+    p.key('Enter', {}, p.field()!);
+    expect(p.cell(T('a'), 'n')!.textContent).toBe('5');
+    expect(p.pcell(T('a'), 'n')!.textContent).toBe('10');
+    open(p, T('a'), 'n');
+    p.key('F2');
+    p.type('6');
+    p.key('Enter', {}, p.field()!);
+    expect(p.pcell(T('a'), 'n')!.textContent).toBe('6');
+    expect(p.cell(T('a'), 'n')!.textContent).toBe('5');
+  });
+});
+
 describe('the save, its marks and undo (pinned-rows.md 13, 15; Q5)', () => {
   it('one gesture, one request: the grid key, the app\'s row, pinned; the cell marked while it saves', async () => {
     const reqs: SaveRequest<R>[] = [];

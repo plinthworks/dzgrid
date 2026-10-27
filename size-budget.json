@@ -464,7 +464,7 @@
     },
     "@dzgrid/dom/range": {
       "file": "packages/dom/src/range.ts",
-      "maxGzip": 4950,
+      "maxGzip": 5050,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -488,7 +488,7 @@
     },
     "@dzgrid/dom/fill": {
       "file": "packages/dom/src/fill.ts",
-      "maxGzip": 3000,
+      "maxGzip": 3100,
       "over": "@dzgrid/dom/range",
       "external": [
         "@dzgrid/core",

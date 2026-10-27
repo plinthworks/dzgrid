@@ -125,3 +125,16 @@ describe('diffState', () => {
     expect(diffState(t, new Map([['c', false], ['gone', true]]))).toEqual({});
   });
 });
+
+// Review of steps 7–8b-1: the surviving mutants of `foldedColumns` pinned (header-groups.md 3, 4). Expectations by hand.
+describe('foldedColumns: the survivors of the review', () => {
+  it('an open group whose children are all groupShow: \'closed\' folds every one of them', () => {
+    const u = groupTable<R>([{ id: 'g', collapsible: true, children: [{ id: 'a', groupShow: 'closed' }, { id: 'b', groupShow: 'closed' }] }, { id: 'w' }]);
+    expect(sorted(foldedColumns(u, new Map()))).toEqual(['a', 'b']);
+    expect(sorted(foldedColumns(u, new Map([['g', true]])))).toEqual(['a', 'b']);
+  });
+  it('an untouched open: false group, with an empty state map, folds by its definition (closed)', () => {
+    const u = groupTable<R>([{ id: 'g', collapsible: true, open: false, children: [{ id: 'a', groupShow: 'open' }, { id: 'b' }] }]);
+    expect(sorted(foldedColumns(u, new Map()))).toEqual(['a']);
+  });
+});

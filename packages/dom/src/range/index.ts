@@ -1,5 +1,5 @@
 import { intentFor, type CellAddr, type CellRange, type DisplayedRows, type FocusPos, type GridKernel, type KeyOwner, type Problem, type ResolvedColumn, type RowKey } from '@dzgrid/core';
-import { emit, isDataKey } from '@dzgrid/core/internal';
+import { emit, isCellKey } from '@dzgrid/core/internal';
 import { boxRows, boxSize, copyMatrix, decodeTsv, encodeTsv, PASTE_MAX, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
 import type { EditApi } from '../edit/index.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
@@ -139,12 +139,14 @@ export function range(o: RangeOptions = {}): RangeFeature {
         return [L.start, L.center, L.end].map((x) => x.columns.map((c) => c.id)).join('|');
       };
       let shown = shape();
-      const boxOf = (x: CellRange | null, d: DisplayedRows<unknown> = rows.displayed): RangeBox | null => (x ? rangeBox(x, d, ids()) : null);
+      /** The rows a block lives in: its anchor's pinned band (step 8b-2, O8: a block never crosses its edge), else the body's. */
+      const D = (x: CellRange | null): DisplayedRows<unknown> => (x && g.rowsOf?.(x.anchor.row)) || rows.displayed;
+      const boxOf = (x: CellRange | null): RangeBox | null => (x ? rangeBox(x, D(x), ids()) : null);
       /** « 3 rows, 2 columns selected »: data rows only (details, fillers, loading rows count for nothing). */
       const size = (): void => {
         const b = boxOf(s.r);
         if (!b) return;
-        const z = boxSize(b, rows.displayed);
+        const z = boxSize(b, D(s.r));
         g.live.announce(g.msg('range.size', { rows: g.msg('range.rows', { n: z.rows }), cols: g.msg('range.cols', { n: z.cols }) }));
       };
       let own = false;
@@ -152,7 +154,8 @@ export function range(o: RangeOptions = {}): RangeFeature {
         r: null,
         follows: false,
         set(next, source, say = source === 'user') {
-          if (next && same(next.anchor, next.focus)) next = null;
+          // One cell is none; nor two corners across a band's edge (a Shift+click from a pinned cell onto the body, O8).
+          if (next && (same(next.anchor, next.focus) || !boxOf(next))) next = null;
           const r = s.r;
           if (next === r || (next && r && same(next.anchor, r.anchor) && same(next.focus, r.focus))) return;
           s.r = next;
@@ -200,7 +203,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
         // The model is told before the sort, filter or search event (the rows first): its `query` change is theirs.
         if (e.type === 'focusChanged' && !own && e.source !== 'data') s.drop('user');
         else if (e.type === 'sortChanged' || e.type === 'filterChanged' || e.type === 'quickChanged' || (e.type === 'modelUpdated' && (e.kind === 'order' || e.kind === 'query'))) s.drop('data', 'range.reordered');
-        else if (e.type === 'pageChanged' || (e.type === 'modelUpdated' && !boxOf(s.r))) s.drop('data');
+        else if (e.type === 'pageChanged' || ((e.type === 'modelUpdated' || e.type === 'pinnedChanged') && !boxOf(s.r))) s.drop('data');
       });
 
       /** The first cell, where the keys start from with nothing focused (the router's own rule). */
@@ -221,22 +224,22 @@ export function range(o: RangeOptions = {}): RangeFeature {
       let decorated = new Set<HTMLElement>();
       /** The tint and the edges on the mounted cells (the tree's pinned copies too: classes only, S11-Q3); the cells no longer in the block undone. */
       const paint = (f: Frame<unknown>): void => {
-        const b = boxOf(s.r, f.displayed);
+        const b = boxOf(s.r);
         if (!b && !decorated.size) return;
         const now = new Set<HTMLElement>();
         const ed = g.editor?.cell;
         if (b) {
-          const d = f.displayed;
+          const d = D(s.r);
           // The edges go on the first and last data rows: a detail at the box's top or bottom draws none.
           let top = b.top;
           let bottom = b.bottom;
-          while (top < bottom && !isDataKey(d.keyAt(d.index(top)!))) top++;
-          while (bottom > top && !isDataKey(d.keyAt(d.index(bottom)!))) bottom--;
+          while (top < bottom && !isCellKey(d.keyAt(d.index(top)!))) top++;
+          while (bottom > top && !isCellKey(d.keyAt(d.index(bottom)!))) bottom--;
           const at = new Map(ids().map((id, i) => [id, i]));
           const each = (m: ReadonlyMap<RowKey, RowView>, read: boolean): void => {
             for (const [key, v] of m) {
               const i = d.indexOf(key);
-              if (i < top || i > bottom || !isDataKey(key)) continue;
+              if (i < top || i > bottom || !isCellKey(key)) continue;
               for (const [id, cv] of v.cells) {
                 const ci = at.get(id) ?? -1;
                 const x = cv.el;
@@ -249,7 +252,8 @@ export function range(o: RangeOptions = {}): RangeFeature {
             }
           };
           each(g.rowRenderer.mounted, true);
-          for (const r of g.rowRenderer.spawned) each(r.mounted, false);
+          // The spawned renderers: the tree's copies (classes only), and a band's rows — said selected when the block is there.
+          for (const r of g.rowRenderer.spawned) each(r.mounted, d !== rows.displayed);
         }
         // The editor's cell keeps its classes while it edits; with no block it is no longer said selected (review 7).
         if (ed && decorated.has(ed)) now.add(ed), b || ed.removeAttribute('aria-selected');
@@ -266,7 +270,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
       /** Where a copy reads and a paste writes (L2): the block, else the focused cell when it is a data row's and its column visible. */
       const where = (): CellRange | null => {
         const f = kernel.focus;
-        return s.r ?? (f?.kind === 'cell' && isDataKey(f.row) ? { anchor: f, focus: f } : null);
+        return s.r ?? (f?.kind === 'cell' && isCellKey(f.row) ? { anchor: f, focus: f } : null);
       };
       const target = (): RangeBox | null => boxOf(where());
       /** The editors' cap (S5-O5): a whole number ≥ 1; 0 or Infinity none; anything else 1 000. */
@@ -274,10 +278,10 @@ export function range(o: RangeOptions = {}): RangeFeature {
         const m = (columns.get(id)?.def.edit as { maxLength?: number } | undefined)?.maxLength;
         return m === 0 || m === Infinity ? Infinity : Number.isInteger(m) && m! > 0 ? m! : 1000;
       };
-      /** A box's data cells, cleared (a cut, Delete). */
-      const clears = (b: RangeBox): PlannedCell[] => {
+      /** A box's data cells, cleared (a cut, Delete); `d` its rows. */
+      const clears = (b: RangeBox, d: DisplayedRows<unknown>): PlannedCell[] => {
         const cols = ids().slice(b.start, b.end + 1);
-        return boxRows(b, rows.displayed).flatMap((n) => cols.map((column) => ({ key: n.key, column, input: { text: '' } })));
+        return boxRows(b, d).flatMap((n) => cols.map((column) => ({ key: n.key, column, input: { text: '' } })));
       };
       let q = '';
       const zero = (): Counts => ({ pasted: 0, refused: 0, readOnly: 0, tooLong: 0, outside: 0, tooBig: false });
@@ -313,7 +317,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
       const copy = (cut: boolean, source: 'user' | 'api', headers?: boolean): ClipboardText | null => {
         const b = target();
         if (!b) return null;
-        const d = rows.displayed;
+        const d = D(where());
         const vis = columns.visible();
         const cols = vis.slice(b.start, b.end + 1);
         const z = boxSize(b, d);
@@ -326,7 +330,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
         const r = { text: encodeTsv(m.text), html: tableOf(m.text, g.dir, !!headers) };
         if (!headers) memo = { text: r.text, values: m.values, kinds: cols.map(kind), owner: kernel };
         emit(kernel, { type: 'rangeCopied', source, rows: z.rows, columns: cols.length, cells: z.cells, cut });
-        if (cut) write(clears(b), 'cut', source, 'range.cut', zero());
+        if (cut) write(clears(b, d), 'cut', source, 'range.cut', zero());
         else speak('range.copied', { n: z.cells });
         return r;
       };
@@ -342,21 +346,22 @@ export function range(o: RangeOptions = {}): RangeFeature {
         if (!b) return null;
         const my = ++seq;
         // HTML only, or a plain text over 64 K characters (review 3: counted there before it is decoded): read by the chunk.
-        if (text ? text.length <= 1 << 16 : !html) return put(b, text ? decodeTsv(text) : null, text, source);
+        if (text ? text.length <= 1 << 16 : !html) return put(b, text ? decodeTsv(text) : null, text, source, D(at));
         const win = g.win!;
         (reader ??= import('./html/index.js')).then(
           (m) => {
             const now = my === seq && boxOf(at);
-            if (now) put(now, text ? m.tsv(text, cap) : m.readTable(html, win, cap), text, source);
+            if (now) put(now, text ? m.tsv(text, cap) : m.readTable(html, win, cap), text, source, D(at));
           },
           () => void ((reader = null), my === seq && speak('announce.error')),
         );
         return null;
       };
-      const put = (b: RangeBox, src: string[][] | false | null, text: string, source: 'user' | 'api'): PasteCounts => {
+      /** `d`: the rows the target lives in (a band's: a paste past its last row is counted outside, pinned-rows.md 17). */
+      const put = (b: RangeBox, src: string[][] | false | null, text: string, source: 'user' | 'api', d: DisplayedRows<unknown>): PasteCounts => {
         const c = zero();
         if (src === null) return c;
-        const p = src && planPaste(src.map((r) => r.map((t) => ({ text: t }))), b, rows.displayed, columns.visible(), { max: cap });
+        const p = src && planPaste(src.map((r) => r.map((t) => ({ text: t }))), b, d, columns.visible(), { max: cap });
         if (!p || p.tooBig) return (c.tooBig = true), speak('range.tooBig', { max: cap }), c;
         c.outside = p.outside;
         const mine = memo?.text === text ? memo : null;
@@ -374,7 +379,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
       };
       const erase = (source: 'user' | 'api'): PasteCounts | null => {
         const b = boxOf(s.r);
-        return b && write(clears(b), 'edit', source, 'range.erased', zero());
+        return b && write(clears(b, D(s.r)), 'edit', source, 'range.erased', zero());
       };
       /**
        * Ours (L1): not prevented by the host; the focus — followed into shadow roots (review 1) — in this grid's own root,
@@ -449,7 +454,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
           if (!e.shiftKey) return i?.kind === 'selectAll' && (all(), true);
           const from = at?.kind === 'cell' ? at : at ? null : first();
           if (owner !== 'cell' || !from || !i) return false;
-          if (i.kind === 'toggleSelect') return isDataKey(from.row) && all(from.row), true;
+          if (i.kind === 'toggleSelect') return isCellKey(from.row) && all(from.row), true;
           if (i.kind !== 'move' && i.kind !== 'edge' && i.kind !== 'page') return false;
           // From the far corner while the focus follows the block (after a drag the focus is on the anchor, S12-Q15).
           const c = s.r && s.follows ? s.r.focus : from;

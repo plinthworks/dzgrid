@@ -70,6 +70,27 @@ describe('crossBand: Down and Up through the bands (pinned-rows.md 8)', () => {
     expect(crossBand(shape(), cell('t0'), down, true)).toEqual(cell('t1'));
     expect(crossBand(shape(), cell('z0'), up, true)).toEqual(cell('z0'));
   });
+
+  it('inside, from the body (the editors\' Enter, range\'s Shift+arrows; review R3): a band\'s edge stops it; no band there, the grid\'s own move', () => {
+    expect(crossBand(shape(), cell('b29'), down, true)).toEqual(cell('b29'));
+    expect(crossBand(shape(), cell('b0'), up, true)).toEqual(cell('b0'));
+    expect(crossBand(shape({ bottom: [] }), cell('b29'), down, true)).toBeUndefined();
+    expect(crossBand(shape({ top: [] }), cell('b0'), up, true)).toBeUndefined();
+    expect(crossBand(shape(), cell('b5'), down, true)).toBeUndefined();
+    expect(crossBand(shape(), cell('b29'), down)).toEqual(cell('z0'));
+    expect(crossBand(shape(), cell('b0'), up)).toEqual(cell('t1'));
+  });
+
+  it('inside, a page or an edge key on a band row (range\'s Shift+PageDown, Ctrl+Shift+End; step 8b-2): the grid\'s own move over the band, never into the body', () => {
+    const ctrlEnd: Intent = { kind: 'edge', axis: 'both', to: 'last' };
+    const ctrlDown: Intent = { kind: 'edge', axis: 'row', to: 'last' };
+    for (const i of [pgDown, pgUp, ctrlEnd, ctrlDown]) {
+      expect(crossBand(shape(), cell('t0'), i, true), JSON.stringify(i)).toBeUndefined();
+      expect(crossBand(shape(), cell('z1'), i, true), JSON.stringify(i)).toBeUndefined();
+      expect(crossBand(shape({ n: 0 }), cell('t0'), i, true), JSON.stringify(i)).toBeUndefined();
+    }
+    expect(crossBand(shape(), cell('t0'), pgDown)).toEqual(cell('b9'));
+  });
 });
 
 describe('crossBand: the column keys stay in the row (the grid moves them over the band)', () => {

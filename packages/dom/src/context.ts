@@ -170,5 +170,12 @@ export interface GridContext<T> {
   pins?: readonly [number, number] | undefined;
   move?: MoveFn | undefined;
   rowsOf?: ((key: RowKey) => DisplayedRows<T> | undefined) | undefined;
+  /**
+   * The pinned rows for the pointer (step 8b-2, set by `pinnedRows()`): the top band's height at the last read of the view
+   * (px: the body's rows start that far under the header), and the row of `key`'s band under `y` (px from the body's top,
+   * clamped to the rows the band shows) — undefined when `key` is not a pinned row's.
+   */
+  pinTop?: number | undefined;
+  pinAt?: ((key: RowKey, y: number) => RowKey | undefined) | undefined;
   msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | PinnedMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

@@ -63,7 +63,11 @@ the arrows; edits one of its cells as any other (F2, Enter, typing), saves, undo
     body row; Q4: the application's context is left alone), so a totals row says false there.
     `aria-readonly` per cell as in the body (`editing.md` 3).
 12. Starting, ending, field keys, validation and the refusal bubble: as `editing.md`, `edit-validation.md`.
-    The editor opens over the sticky cell and stays aligned while the body scrolls.
+    The editor opens over the sticky cell and stays aligned while the body scrolls. **Enter stays in its region**
+    (review R3, 8b-2): Enter / Shift+Enter (`enterMoves: 'down'`) in a band stops at the band's edges, and from the
+    body it stops at the body's edges next to a band — Enter on the last body row does not go into the bottom band,
+    Shift+Enter on the first does not go into the top band (with no band there, the body's own rule: Shift+Enter on
+    the first row goes to the header). The arrows still cross (8).
 13. Saving: one gesture, one request, through the same `save` handler; each change carries `pinned:
     'top' | 'bottom'` (undefined on a body row), `key` the grid's key (`p:b:…`) and `row` the application's object
     (Q5: the application finds its row by `row`). Saving marks, the running border, refusals, rollback: as `edit-save.md`.
@@ -73,7 +77,7 @@ the arrows; edits one of its cells as any other (F2, Enter, typing), saves, undo
     pinned cell.
 16. The application replacing the pinned rows while a cell is edited: same key kept → the field stays; key
     gone → `edit.rowRemoved` as in the body.
-17. Blocks, paste, fill (Phase 5 part B) in this phase (O8; **step 8b-2**, not 8b-1): a block **never crosses** the pinned / body
+17. Blocks, paste, fill (Phase 5 part B) in this phase (O8; **step 8b-2**, built — « As built (8b-2) » below): a block **never crosses** the pinned / body
     edge; a block inside one pinned band works (copy, paste, Delete, fill inside the band); a paste that
     runs past the band's last row counts the rest `hors de la grille`. Ctrl+D / Ctrl+R within the band only.
 18. Bulk (Ctrl+Enter) applies to a block inside the band only.
@@ -98,6 +102,8 @@ the arrows; edits one of its cells as any other (F2, Enter, typing), saves, undo
 | first body row / last bottom row | ArrowUp / ArrowDown | last top row / stays |
 | pinned row | Left / Right / Home / End | inside the row, as in the body (mirrored in RTL) |
 | editable pinned cell, field open | Enter / Shift+Enter (`enterMoves: 'down'`), Tab | the next row or cell **of the band**; never into the body |
+| last / first body row, field open | Enter / Shift+Enter (`enterMoves: 'down'`) | stays (never into a band; review R3) |
+| pinned row | Shift+arrows, Shift+PageUp / PageDown, Ctrl+Shift+Home / End | the block's moving corner inside the band; never across its edge (8b-2) |
 | editable pinned cell | F2, Enter, typing, Delete | as `editing.md` |
 | pinned row | Space | nothing (yes/no cell: toggle) |
 | pinned row | Ctrl+Z / Ctrl+Y, Ctrl+Shift+Z (Mac: Cmd+Z / Cmd+Shift+Z, Cmd+Y) | undo / redo, as `edit-undo.md` |
@@ -177,3 +183,30 @@ changes nothing).
   `pinned-rows.css` 301 / 350; `core/edit` 3 136 / 3 150.
 - **Known limits**: touch panning inside a capped band; `rowAt` (rows of their own heights) is not used for a page
   from a band (a page is `page` rows); a tree's pinned parents and a top band are not checked together.
+
+## As built (Phase 6 step 8b-2, 2026-10-27): blocks, the clipboard and the fill in a band (17, 18; owner Q1, O8)
+
+- **A block lives in one region**: its anchor's band, else the body. `range()` and `fill()` read a block's rows from
+  `g.rowsOf(anchor)` (the band's) or the body's, so its box, its tint and edges, `aria-selected`, its size said, a
+  copy, a paste, Delete, a cut, Ctrl+D / Ctrl+R, the keyboard fill mode, the handle and bulk (Ctrl+Enter) all work
+  inside a band. Two corners in different regions make no block: the API refuses it (`unknown-row-id`), a
+  Shift+click from a pinned cell onto the body (or back) drops the block.
+- **Keys**: Shift+arrows, Shift+PageUp / PageDown and Ctrl+Shift+Home / End on a pinned cell move the corner inside
+  the band (`crossBand`'s `inside`: the band's edges stop it, a page or an edge key is the grid's own move over the
+  band's rows); from the body they never go into a band. Shift+Space on a pinned cell: its row. Ctrl+A stays the
+  body's (O8).
+- **Mouse**: the block's press, drag, Shift+click and the click swallowed after a drag are listened to on the view
+  (the bands are siblings of the body); the cell under the pointer comes from the band when the gesture started in
+  one (`g.pinAt`: clamped to the rows the band shows — a drag past its edge stops at its last row, never a body row),
+  else from the body as before. The body's rows are measured from the top band's foot (`g.pinTop`; before, a body
+  drag under a top band landed rows too low). A gesture in a band scrolls the view sideways only.
+- **Paste**: a paste past a band's last row counts the rest `outside` (« hors de la grille »). The band's rows
+  replaced (`api.set`) without a corner's row: the block dropped, said once.
+- **Values as shown**: a copy and a fill read a pinned cell through the edit overlay like a body cell (its id: the
+  key after a NUL, review R1, never a body row's — not even a body id whose text is the key).
+- The column menu's « Fill down / right » acts on a focused pinned cell too.
+- Sizes: `dom/range` 5 002 / 5 050 (ceiling 5 200, Q1), `dom/fill` 3 042 / 3 100 (ceiling 3 150, Q1),
+  `dom/pinned-rows` 2 145 / 2 150; core, the DOM base unchanged; `dom/edit` 4 150 / 4 150 (R1).
+- Tests: `pinned-rows-range.test.ts` (keys, API, clipboard, fill, bulk, the mouse, the handle), `pinned-rows-band`
+  (`inside`), `pinned-rows-edit` (R1, R3), `column-menu-block`; browser `--only pinned-rows` (`bandBlocks`, every
+  engine).

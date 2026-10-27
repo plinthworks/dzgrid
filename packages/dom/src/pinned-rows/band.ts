@@ -22,7 +22,8 @@ export interface CrossShape {
 /**
  * Where a key leads from `from` when the bands are concerned (the plan's table, step08b-plan.md §3), or undefined when it
  * is the grid's own move (inside the body, a header row above the last, Left / Right / Home / End inside a pinned row).
- * `from` itself: the key leads nowhere (the focus stays). `inside` (the editors' Enter): a band's edge stops a move.
+ * `from` itself: the key leads nowhere (the focus stays). `inside` (the editors' Enter, range's Shift keys): a band's edge
+ * stops a move, a body row's move and a band's page or edge key are the grid's own (never across an edge, O8, review R3).
  */
 export function crossBand(s: CrossShape, from: FocusPos, intent: Intent, inside?: boolean): FocusPos | undefined {
   const { top: T, bottom: B, body: d } = s;
@@ -38,7 +39,9 @@ export function crossBand(s: CrossShape, from: FocusPos, intent: Intent, inside?
   const b = B.indexOf(from.row);
   if (t < 0 && b < 0) {
     const r = d.indexOf(from.row);
-    return up && !r && T.length ? cell(T[T.length - 1]!) : down && r === n - 1 && B[0] ? cell(B[0]) : undefined;
+    const x = up && !r && T.length ? cell(T[T.length - 1]!) : down && r === n - 1 && B[0] ? cell(B[0]) : undefined;
+    // `inside` (the editors' Enter, range's Shift keys): a band's edge stops a body row's move too (review R3, O8).
+    return x && inside ? from : x;
   }
   // Left, Right, Home, End: inside the row (the grid's move over the band).
   if ('axis' in intent && intent.axis === 'col') return undefined;
@@ -53,6 +56,8 @@ export function crossBand(s: CrossShape, from: FocusPos, intent: Intent, inside?
     if (t >= 0) return up ? head : n ? row(0) : B[0] ? cell(B[0]) : from;
     return down ? from : n ? row(n - 1) : T.length ? cell(T[T.length - 1]!) : head;
   }
+  // `inside`: a page or an edge key is the grid's own move over the band (range's Shift keys, step 8b-2: never the body).
+  if (inside) return;
   if (!n) return from;
   // Ctrl+Up / Down: the body's first / last row, the column kept; Ctrl+Home / End: its first / last column too (O8).
   if (intent.kind === 'edge') {

@@ -1,5 +1,5 @@
-import { intentFor, type CellAddr, type CellRange, type FocusPos, type GridKernel, type KeyOwner } from '@dzgrid/core';
-import { emit, isDataKey } from '@dzgrid/core/internal';
+import { intentFor, type CellAddr, type CellRange, type DisplayedRows, type FocusPos, type GridKernel, type KeyOwner } from '@dzgrid/core';
+import { emit, isCellKey } from '@dzgrid/core/internal';
 import { boxRows, fillTarget, planFill, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
 import type { EditApi } from '../edit/index.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
@@ -76,11 +76,13 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       const raf = g.env.raf ?? win;
       const ids = (): string[] => columns.visible().map((c) => c.id);
       const ed = () => g.edit?.api as EditApi<unknown> | undefined;
-      const boxOf = (x: CellRange | null | undefined): RangeBox | null => (x ? rangeBox(x, rows.displayed, ids()) : null);
-      /** The source: the block, else the focused data cell; corners by keys. */
+      /** The rows a block lives in: its anchor's pinned band (step 8b-2, O8: a fill never leaves it), else the body's. */
+      const D = (x: CellRange | null | undefined): DisplayedRows<unknown> => (x && g.rowsOf?.(x.anchor.row)) || rows.displayed;
+      const boxOf = (x: CellRange | null | undefined): RangeBox | null => (x ? rangeBox(x, D(x), ids()) : null);
+      /** The source: the block, else the focused data cell (a pinned one too); corners by keys. */
       const source = (): CellRange | null => {
         const f = kernel.focus;
-        return R() && (R()!.get() ?? (f?.kind === 'cell' && isDataKey(f.row) ? { anchor: f, focus: f } : null));
+        return R() && (R()!.get() ?? (f?.kind === 'cell' && isCellKey(f.row) ? { anchor: f, focus: f } : null));
       };
       const speak = (key: FillMessageKey, p?: Readonly<Record<string, string | number>>): void => g.live.announce(g.msg(key, p));
       const cmd = (e: KeyboardEvent | MouseEvent): boolean => (g.mac ? e.metaKey : e.ctrlKey);
@@ -95,8 +97,8 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         const b = gest?.to && boxOf(gest.src);
         return b ? fillTarget(b, gest!.to!) : null;
       };
-      /** A cell as positions of the rows shown and the visible columns. */
-      const pos = (a: CellAddr | null): Pos | null => (a ? { row: rows.displayed.indexOf(a.row), col: ids().indexOf(a.column) } : null);
+      /** A cell as positions of `src`'s rows (the body's or its band's: another region's row is -1) and the visible columns. */
+      const pos = (a: CellAddr | null, src: CellRange | null | undefined): Pos | null => (a ? { row: D(src).indexOf(a.row), col: ids().indexOf(a.column) } : null);
 
       /** The gesture under way given up (`say`: « Fill cancelled »): its frames, its target. */
       const cancel = (say?: boolean): void => {
@@ -138,7 +140,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         const b = boxOf(src);
         const t = b && to && to.row >= 0 && to.col >= 0 && fillTarget(b, to);
         if (!t || !ed()) return null;
-        const d = rows.displayed;
+        const d = D(src);
         const i = ids();
         const at = (r: number, c: number): CellAddr => ({ row: d.keyAt(d.index(r)!), column: i[c]! });
         const u = { anchor: at(Math.min(b.top, t.box.top), Math.min(b.start, t.box.start)), focus: at(Math.max(b.bottom, t.box.bottom), Math.max(b.end, t.box.end)) };
@@ -151,9 +153,10 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
        * others; one, the previous data row (visible column) copied in; nothing before it: null (the key is the browser's).
        */
       const copy = (end: boolean, via: Via): FillCounts | null => {
-        const b = boxOf(source());
+        const x = source();
+        const b = boxOf(x);
         if (!b || !ed()) return null;
-        const d = rows.displayed;
+        const d = D(x);
         let s: RangeBox;
         let t = b;
         if (end) {
@@ -174,11 +177,12 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       };
       /** Bulk (QB5, fill.md 17): one input in every cell of the block; `at` the field's cell, which must be in it. */
       const bulk = (at: CellAddr | null, input: CellInput | undefined, via: Via) => {
-        const b = boxOf(R()?.get());
-        const p = pos(at);
+        const r = R()?.get();
+        const b = boxOf(r);
+        const p = pos(at, r);
         if (!b || (p && (p.row < b.top || p.row > b.bottom || p.col < b.start || p.col > b.end))) return null;
-        const v = input ?? (at && { value: g.edit!.read(columns.get(at.column)!, rows.row(at.row)!.data, at.row) });
-        return v ? write(planPaste([[v]], b, rows.displayed, columns.visible()).cells, 'bulk', via, 'fill.bulk', at) : null;
+        const v = input ?? (at && { value: g.edit!.read(columns.get(at.column)!, kernel.rowOf(at.row)!.data, at.row) });
+        return v ? write(planPaste([[v]], b, D(r), columns.visible()).cells, 'bulk', via, 'fill.bulk', at) : null;
       };
       g.bulk = (at, input) => bulk(at, input, 'user');
 
@@ -188,9 +192,10 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       span.setAttribute('aria-hidden', 'true');
       /** The cell the handle sits on, or none (fill.md 11; with no block, only while the focus is in the grid, 25). */
       const corner = (): HTMLElement | null => {
-        const b = o.handle !== false && ed() && !g.editor && !el.root.hasAttribute('data-dzg-ranging') && (gest || R()?.get() || el.root.contains(doc.activeElement)) ? boxOf(gest?.src ?? source()) : null;
+        const x = gest?.src ?? source();
+        const b = o.handle !== false && ed() && !g.editor && !el.root.hasAttribute('data-dzg-ranging') && (gest || R()?.get() || el.root.contains(doc.activeElement)) ? boxOf(x) : null;
         if (!b) return null;
-        const n = boxRows(b, rows.displayed).at(-1);
+        const n = boxRows(b, D(x)).at(-1);
         const cols = columns.visible();
         const ok = n && (b.top === b.bottom && b.start === b.end ? kernel.editable(n.key, cols[b.end]!.id) : cols.slice(b.start, b.end + 1).some((c) => c.def.editable));
         return ok ? g.rowRenderer.cell(n.key, cols[b.end]!.id) : null;
@@ -202,14 +207,16 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         const now = new Set<HTMLElement>();
         if (t) {
           const at = new Map(ids().map((id, i) => [id, i]));
-          for (const [key, v] of g.rowRenderer.mounted) {
-            const i = f.displayed.indexOf(key);
-            if (i < t.box.top || i > t.box.bottom || !isDataKey(key)) continue;
+          const d = D(gest!.src);
+          // The body's rows and the bands' (peers): a key of another region is -1, outside.
+          g.rowRenderer.forEach((key, v) => {
+            const i = d.indexOf(key);
+            if (i < t.box.top || i > t.box.bottom || !isCellKey(key)) return;
             for (const [id, cv] of v.cells) {
               const c = at.get(id) ?? -1;
               if (c >= t.box.start && c <= t.box.end) now.add(cv.el), cv.el.classList.add('dzg-cell--fill');
             }
-          }
+          });
         }
         for (const x of decorated) if (!now.has(x)) x.classList.remove('dzg-cell--fill');
         decorated = now;
@@ -226,13 +233,16 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
        * selected). The release writes the last target shown.
        */
       const track = (): void => {
-        const b = gest?.kind === 'drag' && boxOf(gest.src);
-        const p = b && pos(last && cellAt(g, last));
+        const src = gest?.src;
+        const k = src?.anchor.row;
+        const b = gest?.kind === 'drag' && boxOf(src);
+        // Inside the source's band when it is a pinned one (O8).
+        const p = b && pos(last && cellAt(g, last, 0, k), src);
         if (!p || !b) return;
         const s = p.row > b.bottom ? 1 : p.row < b.top ? -1 : 0;
         // Half a row back toward the source, less 2 px (a cell's middle counts, even where an engine rounds the pointer
         // to whole pixels: Firefox, WebKit): the row then under the pointer.
-        if (s) p.row = pos(cellAt(g, last!, (-s * (g.rowHeight() - 4)) / 2))!.row;
+        if (s) p.row = pos(cellAt(g, last!, (-s * (g.rowHeight() - 4)) / 2, k), src)!.row;
         if (!gest!.moved) {
           if (!fillTarget(b, p) || travel(last!, at) < 4) return;
           gest!.moved = true;
@@ -249,7 +259,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       };
       const step = (): void => {
         frame = 0;
-        if (gest?.moved && last && autoScroll(g, last)) track();
+        if (gest?.moved && last && autoScroll(g, last, gest.src.anchor.row)) track();
       };
       scope.on(span, 'pointerdown', (e: PointerEvent) => {
         // A finger scrolls (S12-Q3), a pen too (S12-Q12, as range): its press is neither taken nor prevented.
@@ -276,8 +286,9 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       scope.on(doc, 'pointercancel', (e) => void (mine(e) && cancel()));
       scope.on(el.body, 'lostpointercapture', (e) => void (mine(e) && cancel()));
       // The no-drag way (WCAG 2.5.7): presses while it waits are its own (the block is not dropped, the focus not moved).
-      for (const type of ['pointerdown', 'mousedown']) scope.on(el.body, type, (e) => void (gest?.kind === 'pick' && e.target !== span && (e.stopPropagation(), e.preventDefault())), { capture: true });
-      scope.on(el.body, 'click', (e: MouseEvent) => {
+      // On the view: the body's cells and the pinned bands' (step 8b-2).
+      for (const type of ['pointerdown', 'mousedown']) scope.on(el.viewport, type, (e) => void (gest?.kind === 'pick' && e.target !== span && (e.stopPropagation(), e.preventDefault())), { capture: true });
+      scope.on(el.viewport, 'click', (e: MouseEvent) => {
         if (swallow) return void ((swallow = false), e.stopPropagation(), e.preventDefault());
         const x = gest;
         if (e.target === span) {
@@ -291,7 +302,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         e.stopPropagation();
         e.preventDefault();
         cancel();
-        fillTo(x.src, pos(cellAt(g, e)), e.ctrlKey || e.metaKey, 'user');
+        fillTo(x.src, pos(cellAt(g, e, 0, x.src.anchor.row), x.src), e.ctrlKey || e.metaKey, 'user');
       }, { capture: true });
       // A press anywhere but on a cell of this body (the page, the box column, a panel, a nested grid) disarms the
       // no-drag way, said (review 2).
@@ -299,7 +310,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         const c = (e.target as Element).closest?.('.dzg-cell');
         const r = c?.closest('.dzg-row');
         // Silent when the block's own clearing speaks for this same press (outside the grid, a block there; review 2026-10-26).
-        if (gest?.kind === 'pick' && !(r && el.layer.contains(r) && g.rowRenderer.keyOf(r))) cancel(!cleared && !(R()?.get() && !e.composedPath().includes(el.root)));
+        if (gest?.kind === 'pick' && !(r && el.viewport.contains(r) && g.rowRenderer.keyOf(r))) cancel(!cleared && !(R()?.get() && !e.composedPath().includes(el.root)));
       }, { capture: true });
       if (win) scope.on(win, 'blur', () => cancel());
       // The mode and the no-drag way left by the focus (a blur of the grid): one task later, the focus no longer in it;
@@ -323,7 +334,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         const x = gest!;
         if (e.key === 'Enter') return cancel(), fillTo(x.src, x.to, cmd(e), 'user'), true;
         const i = intentFor({ key: e.key, code: e.code, ctrlKey: e.ctrlKey, metaKey: e.metaKey, altKey: e.altKey, shiftKey: false }, { dir: g.dir, owner: 'cell', mac: g.mac });
-        const d = rows.displayed;
+        const d = D(x.src);
         const n = ids().length;
         const to = x.to!;
         const clamp = (v: number, hi: number): number => Math.max(0, Math.min(hi - 1, v));
@@ -363,7 +374,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       apis.set(kernel, {
         fill: (to, x) => {
           const s = source();
-          return s && fillTo(s, pos(to), !!x?.swap, 'api');
+          return s && fillTo(s, pos(to, s), !!x?.swap, 'api');
         },
         down: (x) => copy(false, x?.user ? 'user' : 'api'),
         end: (x) => copy(true, x?.user ? 'user' : 'api'),

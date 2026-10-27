@@ -80,3 +80,21 @@ describe('by the keys from a header (S12-Q12)', () => {
     expect(t.item('fill.down')).toBeNull();
   });
 });
+
+describe('a pinned cell focused (step 8b-2, pinned-rows.md 17)', () => {
+  it('« Fill down » enabled on a focused pinned cell; it copies the band\'s row above, never the body\'s', async () => {
+    const { pinnedRows } = await import('../src/pinned-rows.js');
+    const { EN_PINNED } = await import('../src/locales/en-pinned.js');
+    const { pinnedKey } = await import('@dzgrid/core');
+    const { MMSG } = await import('./support-column-menu.js');
+    const { join } = await import('./support-range.js');
+    const row = (id: string, n: number) => ({ id, name: id, n, s: 's', q: 0 });
+    const t = mmake({ with: ['fill'], messages: join(MMSG.en, EN_PINNED), more: [pinnedRows({ top: [row('a', 4), row('b', 9)] })], menu: ({ range, fill }) => ({ use: { range, fill: fill! } }) });
+    const b = pinnedKey('top', 'b')!;
+    t.g.api.focusCell(b, 'n');
+    t.open('q');
+    expect(t.off('fill.down')).toBe(false);
+    t.item('fill.down')!.click();
+    expect(t.requests.flatMap((r) => r.changes.map((c) => [c.key, c.column, c.value]))).toEqual([[b, 'n', 4]]);
+  });
+});

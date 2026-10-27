@@ -135,11 +135,12 @@ filters({ dateCalendar: { months: 1, presets: ['today', 'last7Days', 'thisMonth'
 filters({ dateCalendar: { presets: [] } }); // no shortcut column
 ```
 
-- `months`: a positive integer, the months side by side (tzslot's `months`); 2 when absent.
+- `months`: a positive integer, the months side by side (tzslot's `months`); 2 when absent; at most 12 (more:
+  12, with the warning below; review R2).
 - `presets`: `RelativeRange` names, offered in this order (a repeat is dropped); `[]` hides the
   column (tzslot's `showPresets: false`); the six when absent.
 - An instant *between* two moments keeps no shortcuts, whatever is asked.
-- A value it cannot take (a `months` that is not a positive integer, `presets` that is not a list, a
+- A value it cannot take (a `months` that is not a positive integer or is over 12, `presets` that is not a list, a
   name not among the six) is dropped, never thrown: one `invalid-setting` warning per value
   (`features.filters.dateCalendar.months` / `.presets`, the value as its detail) when the grid sets up.
   A stored shortcut that is not offered stays in force: the period field opens empty (tzslot names

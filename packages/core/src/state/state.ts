@@ -182,8 +182,10 @@ export function restoreState<T>(k: GridKernel<T>, raw: unknown, env: StateEnv = 
     let j = 0;
     const full = ids.map((id) => (locked(id) ? id : free[j++]!));
     const hidden = (id: string): boolean => named.get(id)?.hidden ?? now(m, cur[ids.indexOf(id)]!).hidden;
-    // O1: never every column hidden; the first of the restored order is shown.
-    const first = full.every(hidden) ? full[0] : undefined;
+    // O1: never every column hidden; a column a closed group folds counts as hidden (review R4): the first of the restored
+    // order that no group folds is shown.
+    const f = m.folded;
+    const first = full.every((id) => f.has(id) || hidden(id)) ? full.find((id) => !f.has(id)) : undefined;
     if (first !== undefined) bad(named.has(first) ? `columns.${named.get(first)!.i}.hidden` : 'columns');
     // Every column's place, and what the state says of it (undefined: unchanged); a state equal to the grid changes nothing.
     run.push({ type: 'column.state', patch: full.map((id, order) => ({ id, order, width: named.get(id)?.width, pinned: named.get(id)?.pinned, hidden: id !== first && hidden(id) })) });

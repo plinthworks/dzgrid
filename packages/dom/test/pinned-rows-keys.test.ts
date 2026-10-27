@@ -162,8 +162,8 @@ describe('the pointer and the tab stop', () => {
   });
 });
 
-describe('blocks of cells in the bands: step 8b-2 (until then inert, never across an edge)', () => {
-  it('with range(): Shift+arrows on a pinned cell throw nothing and never leave its row (a block there selects nothing yet); the plain keys still cross', async () => {
+describe('blocks of cells in the bands (step 8b-2: never across an edge; the rest in pinned-rows-range.test.ts)', () => {
+  it('with range(): Shift+arrows in a one-row band never leave its row; the plain keys still cross', async () => {
     const { range } = await import('../src/range.js');
     const { EN_RANGE } = await import('../src/locales/en-range.js');
     const { EN } = await import('../src/locales/en.js');

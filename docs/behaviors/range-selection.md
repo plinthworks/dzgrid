@@ -187,6 +187,16 @@ async send() {
 }
 ```
 
+## Pinned bands (Phase 6 step 8b-2, owner Q1, O8; `pinned-rows.md` 17, « As built (8b-2) »)
+
+A block lives in one region: one pinned band, or the body — never across an edge. Shift+keys from a pinned cell move
+the corner inside its band (the band's edges stop it; Shift+PageDown and Ctrl+Shift+End go to the band's last row);
+from the body they never enter a band. A drag started in a band stays on its rows (past its edge: its last row); a
+drag started in the body stays in the body (over a band: clamped, as over the header); the body's rows are measured
+from the top band's foot. A Shift+click across an edge drops the block; the API refuses such a block. Ctrl+A is the
+body's. The block's cells in a band are tinted and said selected as in the body. Tests:
+`pinned-rows-range.test.ts`.
+
 ## A press outside the grid (owner S12-Q13, 2026-10-26; replaces S12-Q11)
 
 - A pointer press (`pointerdown`, captured on the grid's document) outside this grid's root **clears the block**: a

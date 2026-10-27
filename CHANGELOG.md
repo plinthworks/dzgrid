@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Pinned rows, part 2 (Phase 6 step 8b-2; pinned-rows.md 17–18, owner Q1, O8): blocks of cells, copy, cut, paste,
+  Delete, Ctrl+D / Ctrl+R, the keyboard fill mode, the fill handle and bulk (Ctrl+Enter) inside one pinned band, by the
+  keys and the mouse; never across a band's edge (Shift+keys stop there, a drag stays on its band's rows, a crossing
+  Shift+click or API block is refused); a paste past a band's last row counted outside; Ctrl+A stays the body's; the
+  column menu's « Fill down / right » on a focused pinned cell. DOM context seams `pinTop`, `pinAt`; `range/geom`'s
+  `cellAt(g, p, dy, key?)` and `autoScroll(g, p, key?)`.
+
+### Fixed
+
+- A body drag (block or fill) under a top pinned band landed its rows too low: the body's rows are measured from the
+  band's foot (8b-2).
+- A pinned cell's overlay id is its key after a NUL (review R1): a body row whose id is the pinned key's text no longer
+  shares its edits (`core/edit`, `dom/edit` marks, motion saves, a copy and a fill's source).
+- `filters({ dateCalendar: { months } })` over 12: capped at 12, with an `invalid-setting` warning (review R2).
+- Enter / Shift+Enter (`enterMoves: 'down'`) on the body's last / first row no longer goes into a pinned band (review
+  R3); the arrows still cross.
+- `restoreState`: the O1 rule counts the columns a closed group folds, so a state never leaves zero columns shown
+  (review R4).
+
 - `@dzgrid/dom/pinned-rows` (Phase 6 step 8b-1; docs/behaviors/pinned-rows.md, owner Q-P = C, Q2–Q5, O8, C6):
   `pinnedRows({ top, bottom })` — rows pinned under the header and at the grid's foot (a reference row, a totals row),
   each band a named `rowgroup` (`pinned.top` / `pinned.bottom`, texts `locales/{en,fr,ar}-pinned`), never sorted,

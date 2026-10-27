@@ -79,7 +79,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/ar-editors': 620,
   // Phase 5 Q16 (Part B): @dzgrid/dom/range 4 500 over the DOM base (selection 11a, clipboard 11b, fill 12; QB8: the fill
   // handle to its own entry if the three go over); the -range texts 350 / 400 / 500 and range.css 500 (Part B budgets, 2026-10-25).
-  '@dzgrid/dom/range': 4950, // owner S11b-Q3 (2026-10-25): at most 4 800 with the clipboard (step 11b, measured 4 765); S12-Q14 (2026-10-26): 4 950 for the outside-press clear (measured 4 873)
+  '@dzgrid/dom/range': 5200, // owner S11b-Q3 (2026-10-25): at most 4 800 with the clipboard (step 11b, measured 4 765); S12-Q14 (2026-10-26): 4 950 for the outside-press clear (measured 4 873); Phase 6 step 8b-2 (owner Q1, 2026-10-27): up to ~5 200 for blocks in the pinned bands (measured 5 002, line 5 050)
   // Owner S11b-Q5 (2026-10-25): the pasted-HTML reader a chunk loaded on demand, its line the measure + 10 % (422 → 500;
   // the step-11b review moved the long-text count there: 517 → 600).
   '@dzgrid/dom/range: html (lazy)': 600,
@@ -89,7 +89,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/range.css': 500,
   // Owner S12-Q1, S12-Q4 (2026-10-25): the fill handle, Ctrl+D / R, the fill mode and bulk's seam in their own entry over
   // dom/range; their texts and styles apart (the -range texts and range.css are full).
-  '@dzgrid/dom/fill': 3000, // owner S12-Q9 (2026-10-25): 1 600 → 3 000 (measured 2 729)
+  '@dzgrid/dom/fill': 3150, // owner S12-Q9 (2026-10-25): 1 600 → 3 000 (measured 2 729); Phase 6 step 8b-2 (owner Q1, 2026-10-27): up to ~3 150 for the fill in the pinned bands (measured 3 042, line 3 100)
   '@dzgrid/dom/locales/en-fill': 250,
   '@dzgrid/dom/locales/fr-fill': 300,
   '@dzgrid/dom/locales/ar-fill': 380,

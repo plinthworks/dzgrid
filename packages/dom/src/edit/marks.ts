@@ -263,9 +263,9 @@ export function marks<T>(g: GridContext<unknown>, ctl: EditController<T>, border
   return {
     seam: {
       read: (col: ResolvedColumn<unknown>, row: unknown, key: RowKey): unknown => {
-        const h = cells.size ? cells.get(ck(key, col.id))?.hold : undefined;
-        // A pinned row's overlay id is its key (step 8b-1, as the controller's).
-        return h?.has ? h.v : ctl.reader.value(col as never, row as never, idOfDataKey(key) ?? key);
+        const h = cells.size && cells.get(ck(key, col.id))?.hold;
+        // A pinned row's overlay id is its key after a NUL (step 8b-1, review R1; as the controller's).
+        return h && h.has ? h.v : ctl.reader.value(col as never, row as never, idOfDataKey(key) ?? '\0' + key);
       },
       tip: failed,
     },

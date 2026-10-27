@@ -1,5 +1,5 @@
 import { fold, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type Side } from '@dzgrid/core';
-import { emit, isDataKey } from '@dzgrid/core/internal';
+import { emit, isCellKey } from '@dzgrid/core/internal';
 import type { GridFeature } from '../features.js';
 import type { ColumnMenuMessageKey } from '../part-texts.js';
 import type { Frame } from '../render/rows.js';
@@ -155,7 +155,7 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         const range = o.use?.range?.api(g);
         const f = kernel.focus;
         // Fill: a block, or a focused data cell (as Ctrl+D); a pointer opening kept them (Q3-1).
-        const noFill = !range?.get() && !(f?.kind === 'cell' && isDataKey(f.row));
+        const noFill = !range?.get() && !(f?.kind === 'cell' && isCellKey(f.row));
         const mod = g.mac ? 'Meta+' : 'Control+';
         const filter = g.features.find((x) => x.filter)?.filter?.edits(col, who);
         const chooser = o.use?.chooser?.api(g);

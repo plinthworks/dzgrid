@@ -71,3 +71,25 @@ describe('groups restored replace the grid’s (Phase 6 step 7)', () => {
     expect(sets).toEqual([{}]);
   });
 });
+
+describe('O1 counts the folded columns (review R4)', () => {
+  it('a state hiding every column a closed group does not fold: the first unfolded one is shown, told; never zero columns', () => {
+    const k = make();
+    k.columns.fold(new Set(['c', 'd']));
+    expect(ids(k)).toEqual(['a', 'b']);
+    const p = restoreState(k, { v: 1, columns: [{ id: 'a', order: 0, pinned: null, hidden: true }, { id: 'b', order: 1, pinned: null, hidden: true }] });
+    expect(ids(k)).toEqual(['a']);
+    expect(paths(p)).toEqual(['columns.0.hidden']);
+    // The folded columns are not made hidden by the user: unfolded, they come back.
+    k.columns.fold(new Set());
+    expect(ids(k)).toEqual(['a', 'c', 'd']);
+  });
+
+  it('every column folded but one, the state hiding that one: it stays shown, the folded ones untouched', () => {
+    const k = make();
+    k.columns.fold(new Set(['a', 'b', 'c']));
+    const p = restoreState(k, { v: 1, columns: [{ id: 'd', order: 3, pinned: null, hidden: true }] });
+    expect(ids(k)).toEqual(['d']);
+    expect(paths(p)).toEqual(['columns.0.hidden']);
+  });
+});

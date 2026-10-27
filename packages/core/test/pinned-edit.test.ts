@@ -13,8 +13,8 @@ const PT = pinnedKey('top', 'a')!;
 const PB = pinnedKey('bottom', 't')!;
 type Pin = DataNode<Row> & { readonly pinned: 'top' | 'bottom' };
 
-function setup(o: { defs?: ColumnDef<Row, any>[]; save?: boolean } = {}) {
-  const body: Row[] = [{ id: 'a', v: 3, n: 'x' }, { id: 'b', v: 1, n: 'y' }];
+function setup(o: { defs?: ColumnDef<Row, any>[]; save?: boolean; body?: Row[] } = {}) {
+  const body: Row[] = o.body ?? [{ id: 'a', v: 3, n: 'x' }, { id: 'b', v: 1, n: 'y' }];
   const columns = createColumnModel<Row>(o.defs ?? [{ id: 'v', type: 'number', editable: true }, { id: 'n', editable: true }]);
   const ctx = localeCtx({ locale: 'en-US' });
   const model = clientRows<Row>({ rows: body, getRowId: (r) => r.id, columns, ctx });
@@ -35,7 +35,8 @@ function setup(o: { defs?: ColumnDef<Row, any>[]; save?: boolean } = {}) {
   const save = (req: SaveRequest<Row>) => new Promise<void>((ok, fail) => reqs.push({ req, ok: () => ok(), fail }));
   const edits = createEdits<Row>(kernel, { ctx: () => ctx, ...(o.save !== false && { save }) });
   const v = columns.get('v')!;
-  const shown = (key: RowKey) => edits.reader.value(v, kernel.rowOf(key)!.data, key.startsWith('d:') ? key.slice(4) : key);
+  // A pinned cell's overlay id is its key after a NUL (review R1): no body id the application gives looks like it.
+  const shown = (key: RowKey) => edits.reader.value(v, kernel.rowOf(key)!.data, key.startsWith('d:') ? key.slice(4) : `\0${key}`);
   return { body, model, kernel, events, held, pin, top, tot, changed, reqs, edits, v, shown };
 }
 
@@ -50,6 +51,19 @@ describe('pinned cells edit on their own', () => {
     expect(s.edits.state(dataKey('a')!, 'v')?.status).toBe('saving');
     // Two gestures, two requests: neither waits behind the other (not the same cell).
     expect(s.reqs).toHaveLength(2);
+  });
+
+  it('a body row whose id is the pinned key\'s own text never shares its overlay (review R1)', () => {
+    const s = setup({ body: [{ id: PT, v: 3, n: 'x' }] });
+    const bodyKey = dataKey(PT)!;
+    s.edits.commit([{ key: bodyKey, column: 'v', input: { value: 7 } }]);
+    expect(s.edits.state(PT, 'v')).toBeUndefined();
+    expect(s.edits.state(bodyKey, 'v')?.status).toBe('saving');
+    s.edits.commit([{ key: PT, column: 'v', input: { value: 8 } }]);
+    // Two cells, two requests (one would wait behind the other if they were one cell).
+    expect(s.reqs).toHaveLength(2);
+    expect(s.edits.reader.value(s.v, s.body[0]!, PT)).toBe(7);
+    expect(s.edits.reader.value(s.v, s.top, `\0${PT}`)).toBe(8);
   });
 
   it('two pinned rows never collide', () => {

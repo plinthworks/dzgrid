@@ -58,7 +58,7 @@ export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: Ro
     // A filler or a detail has no cells to write (csv-export.md).
     if (node.kind !== 'data') return '';
     try {
-      const raw = reader.overlay ? reader.value(col, node.data, idOfDataKey(node.key) ?? '') : col.read(node.data);
+      const raw = reader.overlay ? reader.value(col, node.data, idOfDataKey(node.key) ?? `\0${node.key}`) : col.read(node.data);
       if (isBlank(raw) || c.isEmpty(raw)) {
         counts.blank++;
         // A blank tree cell keeps its row's indent (csv-export.md).

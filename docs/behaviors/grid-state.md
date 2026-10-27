@@ -58,8 +58,9 @@ searches, pages, picks a density), leaves the page, comes back — or shares the
     warning.
 11. A field of the wrong type: that field skipped, warning `state-field` (path only).
 12. **Never every column hidden** (O1): a state whose `hidden` would leave no column shown keeps the first
-    column of the restored order shown; a `hideable: false` column is never hidden by a state; each case gives
-    `state-field` (path `columns.<i>.hidden`).
+    column of the restored order shown — a column a closed group folds counts as not shown, so the column kept is
+    the first one no group folds (review R4, Phase 6 step 8b-2); a `hideable: false` column is never hidden by a
+    state; each case gives `state-field` (path `columns.<i>.hidden`).
 13. A page past the last page: the last page.
 14. **RTL identity**: a state captured in LTR and restored in RTL gives the same columns state (order, pins,
     widths) and the same query, and back (property test, 1 000 seeds).

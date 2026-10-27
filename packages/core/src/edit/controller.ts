@@ -138,8 +138,9 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
 
   const ev = (e: GridEvent<T>): void => emit(kernel, e);
   const tell = (problems: Problem[]): void => ev({ type: 'problems', source: 'data', problems });
-  // A pinned row's overlay id is its key (step 8b-1): never a body row's id, never another pinned row's.
-  const idOf = (k: RowKey): string => idOfDataKey(k) ?? k;
+  // A pinned row's overlay id is its key after a NUL (step 8b-1, review R1): never a body row's id — not even one whose
+  // text is that key — never another pinned row's.
+  const idOf = (k: RowKey): string => idOfDataKey(k) ?? `\0${k}`;
   const rowOf = (k: RowKey): T | undefined => kernel.rowOf(k)?.data;
   const at = (k: RowKey, c: string): Entry | undefined => cells.get(cellKey(idOf(k), c));
   const drop = (e: Entry): unknown => cells.delete(e.id);

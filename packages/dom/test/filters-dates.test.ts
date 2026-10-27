@@ -945,4 +945,14 @@ describe('filters({ dateCalendar }): the period widget’s months and shortcuts'
       cleanup();
     }
   });
+
+  it('months over 12: capped at 12, with a warning (review R2: no host can ask for a hundred months)', async () => {
+    const { calendarOf } = await import('../src/filters/dates.js');
+    expect(calendarOf({ months: 12 })).toEqual({ calendar: { months: 12 }, problems: [] });
+    expect(calendarOf({ months: 13 })).toEqual({ calendar: { months: 12 }, problems: [{ code: 'invalid-setting', severity: 'warning', path: 'features.filters.dateCalendar.months', detail: '13' }] });
+    expect(calendarOf({ months: 1e6 }).calendar).toEqual({ months: 12 });
+    const { t, months } = await period({ dateCalendar: { months: 40 } });
+    expect(months()).toBe(12);
+    expect(warnings(t)).toEqual([{ code: 'invalid-setting', severity: 'warning', path: 'features.filters.dateCalendar.months', detail: '40' }]);
+  });
 });

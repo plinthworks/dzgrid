@@ -22,7 +22,7 @@ export interface CopyOptions<T> {
 /** A cell's value as shown, coerced by its column, or null for a blank or one it cannot read (C2). */
 export function shownValue<T>(col: ResolvedColumn<T>, node: DataNode<T>, reader: ValueReader<T>, ctx: LocaleCtx): unknown {
   try {
-    const raw = reader.overlay ? reader.value(col, node.data, idOfDataKey(node.key) ?? '') : col.read(node.data);
+    const raw = reader.overlay ? reader.value(col, node.data, idOfDataKey(node.key) ?? `\0${node.key}`) : col.read(node.data);
     return isBlank(raw) || col.codec.isEmpty(raw) ? null : col.codec.coerce(raw, ctx);
   } catch {
     return null;
