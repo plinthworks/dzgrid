@@ -14,6 +14,7 @@ export function installHeaderClick<T>(g: GridContext<T>, toggleAll: () => void):
     reversed: (id) => isLastEnd(g, id),
     resize: (column, width, finished) => void kernel.dispatch({ type: 'column.resize', column, width, finished }, 'user'),
     nextFrame: (fn) => g.scheduler.schedule({ read: () => 0, write: fn }),
+    fit: (id) => g.fit?.(id),
   });
   scope.on(el.header, 'click', (e: MouseEvent) => {
     if (resizing.consumeClick()) return;

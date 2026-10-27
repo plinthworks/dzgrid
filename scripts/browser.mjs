@@ -17,7 +17,7 @@ import { rangeChecks, playgroundRangeChecks } from './browser-range.mjs';
 import { clipboardChecks, playgroundClipboardChecks, playgroundFocusChecks } from './browser-clipboard.mjs';
 import { fillChecks, fillPinnedChecks } from './browser-fill.mjs';
 import { fillAccidentChecks } from './browser-fill-accident.mjs';
-import { columnsChecks } from './browser-columns.mjs';
+import { columnsChecks, resizeChecks } from './browser-columns.mjs';
 import { columnMenuChecks } from './browser-column-menu.mjs';
 import { chooserChecks } from './browser-chooser.mjs';
 import { stateChecks } from './browser-state.mjs';
@@ -3851,6 +3851,8 @@ async function runEngine(name) {
       if (only === 'fill') await fillChecks(name, ctx, H), await fillPinnedChecks(name, ctx, H), await fillAccidentChecks(name, ctx, H);
       // Phase 6 step 2: moving columns on the real playground page (Firefox and WebKit by `--engine`: the right-to-left drag).
       if (only === 'columns') await columnsChecks(name, ctx, H);
+      // Phase 6 step 6: the keyboard resize mode and auto-size alone (Firefox and WebKit by `--engine`: the keys right to left).
+      if (only === 'column-resize') await resizeChecks(name, ctx, H);
       // Phase 6 step 3: the column menu on the real playground page (Firefox and WebKit by `--engine`: the right-click and the keys).
       if (only === 'column-menu') await columnMenuChecks(name, ctx, H);
       // Phase 6 step 4: the column chooser on the real playground page (Firefox and WebKit by `--engine`: the keys, the Tab loop, the handle's mouse drag).

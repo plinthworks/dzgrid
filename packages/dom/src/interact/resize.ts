@@ -13,6 +13,8 @@ export interface ResizeHost {
   resize(column: string, width: number, finished: boolean): void;
   /** Runs `fn` at the next frame (the grid's scheduler). */
   nextFrame(fn: () => void): void;
+  /** A double-click on the handle (mouse, pen; never a finger's taps): the column fitted (`columns()`, Phase 6 step 6). */
+  fit(column: string): void;
 }
 
 /**
@@ -24,6 +26,7 @@ export interface ResizeHost {
 export function attachResize(h: ResizeHost): { consumeClick(): boolean } {
   let drag: { column: string; startX: number; start: number; sign: 1 | -1; rect: DOMRectReadOnly; id: number; width: number; queued: boolean } | null = null;
   let suppress = false;
+  let touch = false;
 
   const widthAt = (d: NonNullable<typeof drag>, e: PointerEvent) => Math.max(1, d.start + d.sign * (logicalX(e, d.rect, h.dir()) - d.startX));
 
@@ -32,6 +35,7 @@ export function attachResize(h: ResizeHost): { consumeClick(): boolean } {
     const handle = (e.target as HTMLElement).closest<HTMLElement>('.dzg-resize');
     const column = handle?.closest<HTMLElement>('.dzg-hcell')?.dataset['col'];
     if (!handle || !column || e.button !== 0) return;
+    touch = e.pointerType === 'touch';
     e.preventDefault();
     e.stopPropagation();
     handle.setPointerCapture?.(e.pointerId);
@@ -60,6 +64,10 @@ export function attachResize(h: ResizeHost): { consumeClick(): boolean } {
   };
   h.scope.on(h.header, 'pointerup', (e: PointerEvent) => end(e, true));
   h.scope.on(h.header, 'pointercancel', (e: PointerEvent) => end(e, false));
+  h.scope.on(h.header, 'dblclick', (e: MouseEvent) => {
+    const c = !touch && (e.target as Element).closest('.dzg-resize')?.closest<HTMLElement>('.dzg-hcell')?.dataset['col'];
+    if (c) h.fit(c);
+  });
 
   return {
     consumeClick() {

@@ -7,6 +7,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { cleanup, colmake, join, SIX, R_ } from './support-columns.js';
 import { EN } from '../src/locales/en.js';
 import { EN_RANGE } from '../src/locales/en-range.js';
+import { EN_COLUMNS } from '../src/locales/en-columns.js';
 
 afterEach(cleanup);
 
@@ -180,6 +181,9 @@ describe('api.move (the menu\'s way, step 3)', () => {
   });
 
   it('a missing text: setup throws, naming it', () => {
-    expect(() => colmake({ columns: SIX(), messages: join(EN, EN_RANGE) })).toThrow(new TypeError('columns: missing move.placed, move.edge, move.locked, move.cancelled'));
+    expect(() => colmake({ columns: SIX(), messages: join(EN, EN_RANGE) })).toThrow(new TypeError('columns: missing move.placed, move.edge, move.locked, move.cancelled, size.mode, size.modeHint, size.width, size.min, size.max, size.cancelled, size.autoAll, size.locked'));
+    // A bundle from before step 6 (moves only): the resize mode's texts named (CHANGELOG « Unreleased »).
+    const { 'size.mode': _m, ...old } = EN_COLUMNS.text;
+    expect(() => colmake({ columns: SIX(), messages: join(EN, EN_RANGE, { locale: 'en', text: old }) })).toThrow(new TypeError('columns: missing size.mode'));
   });
 });

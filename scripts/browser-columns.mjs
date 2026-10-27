@@ -212,6 +212,144 @@ export async function columnsChecks(name, ctx, h) {
     await page.close();
   }
   if (name === 'chrome') await thousand(name, ctx, h);
+  await resizeChecks(name, ctx, h);
+}
+
+/**
+ * Phase 6 step 6 (docs/phase-6-steps/step06-plan.md §6; column-resize.md): the keyboard resize mode and auto-size on the
+ * REAL playground page `orders-edit.html`. Chrome fr light and ar dark; Firefox and WebKit (`--engine …`, `--only
+ * column-resize` for this group alone) ar only: the keys right to left. Alt+R by real keys (a Mac's Option gives « ® »:
+ * read by `code`), the dashed outline, ArrowLeft widening in Arabic, Shift by 1, Home fits with no cell clipped, Escape
+ * back; « Redimensionner au clavier » from the menu (the focus coming back does not leave the mode); Chrome: a real
+ * double-click on a header's edge (fitted, no sort), « Ajuster toutes les colonnes »: no mounted cell clipped (French
+ * accents, Arabic shaping, the status badges), the outline 3:1 on the header, axe 0 in the mode.
+ */
+export async function resizeChecks(name, ctx, { check, frames, axe: axeAll }) {
+  const base = process.env.DZG_PLAYGROUND ?? 'http://127.0.0.1:4700';
+  const chrome = name === 'chrome';
+  for (const [tag, qs, ar] of [['fr', 'locale=fr-FR&theme=light&skin=clinic', false], ['ar', 'locale=ar-DZ&theme=dark&skin=midnight', true]]) {
+    if (!chrome && !ar) continue;
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(`${base}/orders-edit.html?${qs}`);
+    await page.waitForSelector('.dzg-layer > .dzg-row .dzg-cell[data-col="qty"]', { timeout: 30000 });
+    await frames(page, 3);
+    await page.evaluate(() => {
+      window.said = [];
+      window.sorts = 0;
+      for (const el of document.querySelectorAll('.dzg-live')) new MutationObserver(() => { if (el.textContent) window.said.push(el.textContent); }).observe(el, { childList: true, characterData: true, subtree: true });
+      window.demo.grid.kernel.subscribe((e) => { if (e.type === 'sortChanged') window.sorts++; });
+    });
+    const hsel = (col) => `.dzg-header .dzg-hcell[data-col="${col}"]:not(.dzg-hgroup):not(.dzg-hextra)`;
+    const width = (col) => page.evaluate((s) => Math.round(document.querySelector(s).getBoundingClientRect().width), hsel(col));
+    const mode = (col) => page.evaluate((s) => { const c = document.querySelector(s); const o = getComputedStyle(c); return { on: c.hasAttribute('data-dzg-resizing'), style: o.outlineStyle, color: o.outlineColor, bg: o.backgroundColor, focused: document.activeElement === c }; }, hsel(col));
+    /** Mounted cells of these columns (all: every one) whose text is cut: scrollWidth beyond clientWidth. */
+    const clipped = (cols) => page.evaluate((cols) => [...document.querySelectorAll('.dzg-layer > .dzg-row .dzg-cell[data-col]')]
+      .filter((c) => (!cols || cols.includes(c.dataset.col)) && c.scrollWidth > c.clientWidth).map((c) => `${c.dataset.col}:${c.textContent}:${c.scrollWidth}>${c.clientWidth}`), cols);
+    const focusHeader = async (col) => {
+      await page.evaluate((col) => { window.demo.grid.kernel.dispatch({ type: 'focus.set', focus: { kind: 'header', column: col } }, 'user'); window.demo.grid.context.restoreFocus(); }, col);
+      await frames(page, 1);
+    };
+
+    // 1. Alt+R, the arrows (mirrored in Arabic), Shift, Escape back; then Home fits, Enter keeps.
+    await focusHeader('client');
+    const w0 = await width('client');
+    await page.keyboard.press('Alt+KeyR');
+    await frames(page, 2);
+    const m0 = await mode('client');
+    const wide = ar ? 'ArrowLeft' : 'ArrowRight';
+    await page.keyboard.press(wide);
+    await page.keyboard.press(wide);
+    await page.keyboard.press(`Shift+${ar ? 'ArrowRight' : 'ArrowLeft'}`);
+    await frames(page, 2);
+    const w1 = await width('client');
+    await page.waitForTimeout(400);
+    const said1 = await page.evaluate(() => window.said.slice());
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('End');
+    await page.keyboard.press('Escape');
+    await frames(page, 2);
+    const w2 = await width('client');
+    const m1 = await mode('client');
+    check(name, `resize ${tag}: Alt+R draws the mode (dashed outline, focus kept); ${wide} ×2 and Shift+the other: +19 px; the width said; ArrowDown / End swallowed; Escape puts it back`,
+      m0.on && m0.style === 'dashed' && m0.focused && w1 === w0 + 19 && said1.some((x) => x.includes(String(w0 + 19))) && w2 === w0 && !m1.on && m1.focused, { m0, w0, w1, w2, m1, said1 });
+    await page.keyboard.press('Alt+KeyR');
+    await page.keyboard.press('Home');
+    await frames(page, 2);
+    const w3 = await width('client');
+    await page.keyboard.press('Enter');
+    await frames(page, 2);
+    const c3 = await clipped(['client']);
+    const m3 = await mode('client');
+    const sorts = await page.evaluate(() => window.sorts);
+    check(name, `resize ${tag}: Home fits « client » (${w0} → ${w3} px) with no mounted cell clipped; Enter keeps it, never sorts`,
+      w3 !== w0 && c3.length === 0 && !m3.on && sorts === 0 && (await width('client')) === w3, { w0, w3, c3, sorts });
+
+    // 2. From the menu: Shift+F10, « Redimensionner au clavier »: the mode on the header, still on after the focus came back.
+    await focusHeader('qty');
+    const q0 = await width('qty');
+    await page.keyboard.press('Shift+F10');
+    await frames(page, 2);
+    await page.locator('.dzg-popup [role=menu] [data-id="size.resize"]').click();
+    await frames(page, 3);
+    await page.waitForTimeout(100);
+    const mq = await mode('qty');
+    await page.keyboard.press(wide);
+    await frames(page, 2);
+    const q1 = await width('qty');
+    await page.keyboard.press('Enter');
+    check(name, `resize ${tag}: the menu's « Redimensionner au clavier »: the menu closed, the mode on « qty » with the focus, the arrow +10 px`,
+      mq.on && mq.focused && q1 === q0 + 10 && !(await page.evaluate(() => !!document.querySelector('.dzg-popup [role=menu]'))), { mq, q0, q1 });
+
+    if (chrome) {
+      // 3. A real double-click on the edge of « day »: fitted, no sort.
+      const g = await page.evaluate((s) => { const r = document.querySelector(`${s} > .dzg-resize`).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, hsel('day'));
+      const d0 = await width('day');
+      const s0 = await page.evaluate(() => window.sorts);
+      await page.mouse.dblclick(g.x, g.y);
+      await frames(page, 3);
+      const d1 = await width('day');
+      check(name, `resize ${tag}: a double-click on « day »'s edge fits it (${d0} → ${d1} px), no sort, no cell clipped`,
+        d1 !== d0 && (await page.evaluate(() => window.sorts)) === s0 && (await clipped(['day'])).length === 0, { d0, d1 });
+
+      // 4. « Ajuster toutes les colonnes »: no mounted cell clipped anywhere (accents, Arabic, badges); one sentence.
+      await focusHeader('status');
+      await page.keyboard.press('Shift+F10');
+      await frames(page, 2);
+      await page.evaluate(() => (window.said = []));
+      const t = performance.now();
+      await page.locator('.dzg-popup [role=menu] [data-id="size.autoAll"]').click();
+      await frames(page, 3);
+      const ms = performance.now() - t;
+      // The live region writes its sentence a moment later (its own clear-then-set).
+      await page.waitForTimeout(300);
+      const all = await clipped(null);
+      const saidAll = await page.evaluate(() => window.said.slice());
+      check(name, `resize ${tag}: « Ajuster toutes les colonnes »: no mounted cell clipped (badges, ${ar ? 'Arabic' : 'accents'}), « fitted: n » said (${ms.toFixed(0)} ms with the clicks, not gated)`,
+        all.length === 0 && saidAll.some((x) => /\d/.test(x)), { all: all.slice(0, 5), saidAll });
+
+      // 5. The outline against the header (3:1, computed) and axe 0 in the mode.
+      await focusHeader('amount');
+      await page.keyboard.press('Alt+KeyR');
+      await frames(page, 2);
+      const mo = await mode('amount');
+      const ratio = (a, b) => {
+        const lum = (c) => { const [r, g2, b2] = c.match(/[\d.]+/g).slice(0, 3).map(Number).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g2 + 0.0722 * b2; };
+        const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+        return (x + 0.05) / (y + 0.05);
+      };
+      await axeAll(page);
+      const v = await page.evaluate(async () => (await window.axe.run(document.querySelector('.dzg'), { resultTypes: ['violations'] })).violations.map((x) => x.id));
+      const desc = await page.evaluate((s) => document.querySelector(s).getAttribute('aria-description'), hsel('amount'));
+      await page.keyboard.press('Escape');
+      check(name, `resize ${tag}: the mode's outline ${ratio(mo.color, mo.bg).toFixed(2)}:1 on the header (≥ 3), its hint « ${desc} », axe 0 in the mode`, ratio(mo.color, mo.bg) >= 3 && !!desc && v.length === 0, { mo, v, desc });
+    }
+    check(name, `resize ${tag}: no page error`, errors.length === 0, errors);
+    await page.close();
+  }
 }
 
 /** 7. 1 000 columns × 1 000 rows on a bare page of the playground's server: times printed, not gated (Q17d). */

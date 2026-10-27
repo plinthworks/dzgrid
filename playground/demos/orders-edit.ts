@@ -167,7 +167,11 @@ export function mountOrdersEdit(host: HTMLElement, logEl: HTMLElement, o: { loca
     filler = fillHandle(blocks);
     return [blocks, filler];
   };
-  /** Moving columns (Phase 6 step 2): drag a header, or Ctrl+Shift+arrows (⌘⇧ on a Mac); `?columns=0` none. */
+  /**
+   * Moving columns (Phase 6 step 2): drag a header, or Ctrl+Shift+arrows (⌘⇧ on a Mac). Resizing (step 6): Alt+R on a
+   * focused header (arrows ±10 px, Shift 1, Home fits, Enter keeps, Escape cancels), a double-click on a header's edge,
+   * the menu's « Ajuster cette colonne / toutes les colonnes » and « Redimensionner au clavier »; `?columns=0` none.
+   */
   const cols = new URLSearchParams(location.search).get('columns') === '0' ? null : moveColumns();
   /**
    * The column ⋮ menu (Phase 6 step 3): the ⋮ on hover, a right-click on a header, Shift+F10 or Alt+↓ on a focused header;

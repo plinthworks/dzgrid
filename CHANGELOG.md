@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@dzgrid/dom/columns` part 2 (Phase 6 step 6; docs/behaviors/column-resize.md, owner Q-K3, Q6-1, Q6-2, Q6-6, O10): the
+  keyboard resize mode — Alt+R on a focused column header (read by the key's place, then its letter), arrows ±10 px
+  (Shift: 1) mirrored right to left, Home fits, Enter keeps, Escape restores the width and the flexibility, Tab / a
+  press / the focus leaving / a sort keep it quietly; a dashed outline (`--dzg-resize-mode`, 3:1), the width said once
+  after a pause. Auto-size: the real header and mounted cells measured (badges, Arabic shaping, tree indentation) plus
+  the first 200 displayed rows' texts, in one read phase; one `column.state` patch. `ColumnsApi.autoSize(ids, { say })`,
+  `autoSizeAll({ say })`, `resizeMode(id)`; a double-click on a header's edge fits the column (mouse, pen); the column
+  menu's « Ajuster cette colonne / toutes les colonnes » and « Redimensionner au clavier » appear with `columns()`. No
+  − / + / ✓ buttons: the single-pointer way is the menu's « Élargir / Rétrécir » (Q6-1).
+- **Breaking (unpublished):** a `-columns` text bundle must carry the eight `size.*` keys; `columns()` throws at setup
+  without them (the locales `en/fr/ar-columns` have them).
+
 - `@dzgrid/core/state` and `@dzgrid/dom/state` (Phase 6 steps 5–6; docs/behaviors/grid-state.md, owner Q-S1, Q-S2, O1, O6,
   O7, E5-1–E5-8): the grid's state as a small versioned JSON — columns (order, width a user set, hidden, logical pin),
   header groups (step 8), sort, filters, search, page and size, density; never a row, a key or a cell value.

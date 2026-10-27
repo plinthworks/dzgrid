@@ -23,20 +23,20 @@ describe('the base joins the features\' shortcuts', () => {
   it('filters, columns and the menu: the same value in both orders; the filter\'s key no longer wipes the menu\'s', () => {
     for (const first of [false, true]) {
       const t = mmake({ with: ['filters', 'columns'], first, columns: MCOLS({ q: { filter: false } }) });
-      // A column with a filter popup: the filter's Alt+ArrowDown, the moves, the menu's Shift+F10.
-      expect(keys(t, 'name'), String(first)).toBe('Alt+ArrowDown Control+Shift+ArrowLeft Control+Shift+ArrowRight Shift+F10');
+      // A column with a filter popup: the filter's Alt+ArrowDown, the resize mode's Alt+R and the moves (columns, step 6), the menu's Shift+F10.
+      expect(keys(t, 'name'), String(first)).toBe('Alt+ArrowDown Alt+R Control+Shift+ArrowLeft Control+Shift+ArrowRight Shift+F10');
       // No popup: the menu takes Alt+ArrowDown (said once).
-      expect(keys(t, 'q'), String(first)).toBe('Alt+ArrowDown Control+Shift+ArrowLeft Control+Shift+ArrowRight Shift+F10');
+      expect(keys(t, 'q'), String(first)).toBe('Alt+ArrowDown Alt+R Control+Shift+ArrowLeft Control+Shift+ArrowRight Shift+F10');
       // A repaint changes nothing.
       t.g.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'n', dir: 'asc' }] }, 'api');
-      expect(keys(t, 'name'), String(first)).toBe('Alt+ArrowDown Control+Shift+ArrowLeft Control+Shift+ArrowRight Shift+F10');
+      expect(keys(t, 'name'), String(first)).toBe('Alt+ArrowDown Alt+R Control+Shift+ArrowLeft Control+Shift+ArrowRight Shift+F10');
       t.g.destroy();
     }
   });
 
   it('a Mac: the moves with Meta; the filters alone: Alt+ArrowDown only where a popup is', () => {
     const t = mmake({ mac: true, with: ['columns'] });
-    expect(keys(t, 'n')).toBe('Alt+ArrowDown Meta+Shift+ArrowLeft Meta+Shift+ArrowRight Shift+F10');
+    expect(keys(t, 'n')).toBe('Alt+ArrowDown Alt+R Meta+Shift+ArrowLeft Meta+Shift+ArrowRight Shift+F10');
     t.g.destroy();
     const f = mmake({ with: ['filters'], columns: MCOLS({ q: { filter: false, menu: false } }), more: [] });
     expect(keys(f, 'name')).toBe('Alt+ArrowDown Shift+F10');

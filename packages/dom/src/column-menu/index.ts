@@ -18,11 +18,11 @@ const keyOf = (id: string): ColumnMenuMessageKey => (id[0] === 'd' ? id : `menu.
 
 type Grid = { readonly kernel: GridKernel<any, any> };
 type Density = 'compact' | 'comfortable' | 'spacious';
-/** What `columns()` gives the menu: the moves now; auto-size and the keyboard resize at Phase 6 step 7 (their items appear then). */
+/** What `columns()` gives the menu: the moves, auto-size and the keyboard resize (Phase 6 step 6; their items appear with them). */
 export interface ColumnsApiLike {
   move(column: string, by: -1 | 1, o?: { readonly say?: boolean }): unknown;
-  autoSize?(ids?: readonly string[]): void;
-  autoSizeAll?(): void;
+  autoSize?(ids: readonly string[], o?: { readonly say?: boolean }): void;
+  autoSizeAll?(o?: { readonly say?: boolean }): void;
   resizeMode?(column: string): boolean;
 }
 export interface ColumnMenuOptions {
@@ -169,8 +169,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
             say(text(p ? (p === 'start' ? 'menu.pinnedStart' : 'menu.pinnedEnd') : 'menu.unpinned', id));
           }, locked),
           [
-            cols?.autoSize && it('size.auto', () => cols.autoSize!([id])),
-            cols?.autoSizeAll && it('size.autoAll', () => cols.autoSizeAll!()),
+            cols?.autoSize && it('size.auto', () => cols.autoSize!([id], { say: true })),
+            cols?.autoSizeAll && it('size.autoAll', () => cols.autoSizeAll!({ say: true })),
             def.resizable !== false && it('size.widen', size(10), w >= Math.max(min, def.maxWidth ?? Infinity), { keepOpen: true }),
             def.resizable !== false && it('size.narrow', size(-10), w <= min, { keepOpen: true }),
             cols?.resizeMode && it('size.resize', () => cols.resizeMode!(id)),

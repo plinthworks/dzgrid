@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import type { ColumnDef, GridEvent } from '@dzgrid/core';
 import { createGrid, type GridInstance } from '../src/grid.js';
 import type { Geometry, ViewportBox } from '../src/render/measure.js';
@@ -86,5 +86,51 @@ describe('column resize', () => {
     host.querySelector<HTMLElement>('.dzg-hcell[data-col="a"]')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(g.kernel.query.sort).toEqual([]);
     expect(host.querySelector('.dzg-hcell[data-col="a"]')!.hasAttribute('aria-sort')).toBe(false);
+  });
+});
+
+// The double-click seam (Phase 6 step 6, column-resize.md 10; step06-plan §1): the base answers a double-click on a grip
+// by asking `fit(column)` of the context, which `columns()` sets; nothing without it; never after a finger's taps.
+describe('double-click on the grip', () => {
+  const ctxOf = (g: GridInstance<R>) => (g as unknown as { context: { fit?: (id: string) => void } }).context;
+  const taps = (el: HTMLElement, pointerType: string) => {
+    for (let i = 0; i < 2; i++) {
+      el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 500, pointerId: 1, button: 0, pointerType }));
+      el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: 500, pointerId: 1, pointerType }));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: i + 1 }));
+    }
+    el.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, detail: 2 }));
+  };
+
+  it('asks `fit` once for the grip\'s column (mouse and pen); no sort', () => {
+    const { g, handle } = make();
+    const fit = vi.fn();
+    ctxOf(g).fit = fit;
+    taps(handle('a')!, 'mouse');
+    expect(fit.mock.calls).toEqual([['a']]);
+    taps(handle('b')!, 'pen');
+    expect(fit.mock.calls).toEqual([['a'], ['b']]);
+    expect(g.kernel.query.sort).toEqual([]);
+  });
+
+  it('a double-click elsewhere on the header: no fit', () => {
+    const { g, host } = make();
+    const fit = vi.fn();
+    ctxOf(g).fit = fit;
+    host.querySelector<HTMLElement>('.dzg-hcell[data-col="a"]')!.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    expect(fit).not.toHaveBeenCalled();
+  });
+
+  it('a finger\'s double tap is not a double-click', () => {
+    const { g, handle } = make();
+    const fit = vi.fn();
+    ctxOf(g).fit = fit;
+    taps(handle('a')!, 'touch');
+    expect(fit).not.toHaveBeenCalled();
+  });
+
+  it('without `columns()` (no `fit`): nothing, no throw', () => {
+    const { handle } = make();
+    expect(() => taps(handle('a')!, 'mouse')).not.toThrow();
   });
 });

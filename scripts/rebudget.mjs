@@ -96,11 +96,11 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/fill.css': 460, // owner S12-Q9: 300 → 460 (measured 415)
   // Phase 6 (owner Q-B, 2026-10-26): moving columns, keyboard resize, auto-size in their own entry over the DOM base
   // (part 1, step 2, stops at 2 300: step02-plan §4); its texts and styles apart, shared with the menu, chooser and groups.
-  '@dzgrid/dom/columns': 3500,
-  '@dzgrid/dom/locales/en-columns': 500,
-  '@dzgrid/dom/locales/fr-columns': 600,
-  '@dzgrid/dom/locales/ar-columns': 800,
-  '@dzgrid/theme/columns.css': 1100,
+  '@dzgrid/dom/columns': 4200, // owner Q6-6 (2026-10-27): 3 500 → 4 200 (step 6: the resize mode and auto-size, measured 3 996)
+  '@dzgrid/dom/locales/en-columns': 550, // Q6-6: 500 → 550
+  '@dzgrid/dom/locales/fr-columns': 650, // Q6-6: 600 → 650
+  '@dzgrid/dom/locales/ar-columns': 850, // Q6-6: 800 → 850
+  '@dzgrid/theme/columns.css': 1200, // Q6-6: 1 100 → 1 200 (the mode's outline)
   // Phase 6 step 3 (owner Q-B, Q3-2): the column menu over the popup host; its texts in their own bundles.
   '@dzgrid/dom/column-menu': 4300, // owner Q3-5 (2026-10-26): 3 000 → 4 300 (measured 3 951, the full menu kept)
   '@dzgrid/dom/locales/en-column-menu': 500, // Q3-5: 450 → 500

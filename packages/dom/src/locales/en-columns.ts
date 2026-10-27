@@ -8,6 +8,15 @@ export const EN_COLUMNS = {
     'move.edge': "{column}: already at the edge",
     'move.locked': "{column}: cannot be moved",
     'move.cancelled': "Move cancelled",
+    // The keyboard resize mode and auto-size (Phase 6 step 6, column-resize.md).
+    'size.mode': "Resize {column}: {width} pixels. Arrows to change, Enter to keep, Escape to cancel",
+    'size.modeHint': "resize mode",
+    'size.width': "{column}: {width} pixels",
+    'size.min': ", minimum",
+    'size.max': ", maximum",
+    'size.cancelled': "Resize cancelled",
+    'size.autoAll': "Columns fitted: {n}",
+    'size.locked': "{column}: fixed width",
     // The column chooser (`@dzgrid/dom/columns-panel`, Phase 6 step 4, owner Q4-1).
     'chooser.title': "Choose columns",
     'chooser.search': "Search a column",

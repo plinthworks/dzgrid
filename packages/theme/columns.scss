@@ -70,6 +70,14 @@ $layered: true !default;
     cursor: grabbing;
   }
 
+  // ---- The keyboard resize mode (Phase 6 step 6, column-resize.md 2; owner Q6-1: no buttons) ----
+  // A dashed outline inside the header, over its focus ring (a shape, not a colour alone; 3:1 by check:contrast). In
+  // forced colours the system paints it, the dashes stay.
+  .dzg-hcell[data-dzg-resizing] {
+    outline: 2px dashed var(--dzg-resize-mode, var(--tz-accent));
+    outline-offset: -2px;
+  }
+
   // ---- The column menu (Phase 6 step 3) ----
   .dzg-hcell > .dzg-hlabel {
     min-inline-size: 0;

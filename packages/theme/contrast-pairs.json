@@ -165,6 +165,7 @@
     { "what": "the column move bar on a row", "fg": "--dzg-move-bar", "bg": "--tz-bg", "min": 3 },
     { "what": "the column move bar on a row under the pointer", "fg": "--dzg-move-bar", "bg": "--dzg-row-hover-bg", "min": 3 },
     { "what": "the column move bar on a selected row", "fg": "--dzg-move-bar", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "the keyboard resize mode's outline on the header (Phase 6 step 6, columns.css)", "fg": "--dzg-resize-mode", "bg": "--dzg-header-bg", "min": 3 },
     { "what": "a column menu item (Phase 6 step 3, columns.css)", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
     { "what": "a column menu item under the pointer", "fg": "--tz-fg", "bg": "--dzg-row-hover-bg", "min": 4.5 },
     { "what": "a disabled column menu item (exempt from 1.4.3, kept at 3:1)", "fg": "--dzg-menu-disabled", "bg": "--tz-bg", "min": 3 },
@@ -206,6 +207,7 @@
     "--dzg-range-edge": "var(--tz-success)",
     "--dzg-fill-handle": "var(--dzg-range-edge)",
     "--dzg-move-bar": "var(--tz-accent)",
+    "--dzg-resize-mode": "var(--tz-accent)",
     "--dzg-menu-disabled": "var(--tz-fg-muted)",
     "--dzg-cell-active-bg": "color-mix(in srgb, var(--tz-accent) 10%, var(--tz-bg))",
     "--dzg-row-active-bg": "color-mix(in srgb, var(--tz-fg) 6%, var(--tz-bg))"

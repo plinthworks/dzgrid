@@ -132,6 +132,8 @@ export interface GridContext<T> {
   retip(anchor: HTMLElement): void;
   /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
   restoreFocus(): void;
+  /** A double-click on a column's resize grip: set by `columns()` (auto-size, Phase 6 step 6); absent, nothing. */
+  fit?: ((column: string) => void) | undefined;
   /** The edit seam (`@dzgrid/dom/edit`), the first feature's that gives one: found once, at setup. */
   edit?: EditSeam | undefined;
   /**

@@ -310,20 +310,13 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   });
 
   it('Phase 6 step 2 (owner Q-B): @dzgrid/dom/columns 3 500 over the DOM base (part 1 accepted at its measure ~2 800 + margin, 2 900: decisions « Step 2 lead »); the -columns texts 500 / 600 / 800; columns.css 1 100; core 29 000 and the DOM base untouched', () => {
-    expect(ceilingFor('@dzgrid/dom/columns')).toBe(3500);
-    expect(() => sizeBudget(3501, ceilingFor('@dzgrid/dom/columns'))).toThrow(/ceiling/);
-    for (const [lang, c] of [['en', 500], ['fr', 600], ['ar', 800]] as const) {
-      expect(ceilingFor(`@dzgrid/dom/locales/${lang}-columns`), lang).toBe(c);
-      expect(() => sizeBudget(c + 1, ceilingFor(`@dzgrid/dom/locales/${lang}-columns`)), lang).toThrow(/ceiling/);
-    }
-    expect(ceilingFor('@dzgrid/theme/columns.css')).toBe(1100);
-    expect(() => sizeBudget(1101, ceilingFor('@dzgrid/theme/columns.css'))).toThrow(/ceiling/);
+    // Step 6 (owner Q6-6) raised these ceilings: checked in its own test below.
     expect(['@dzgrid/core', '@dzgrid/dom'].map(ceilingFor)).toEqual([29000, 21980]);
     type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
-    expect(e['@dzgrid/dom/columns']).toEqual({ file: 'packages/dom/src/columns.ts', maxGzip: 2900, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
-    ['en', 'fr', 'ar'].forEach((l, i) => expect(e[`@dzgrid/dom/locales/${l}-columns`], l).toEqual({ file: `packages/dom/src/locales/${l}-columns.ts`, maxGzip: [500, 600, 800][i] }));
-    expect(e['@dzgrid/theme/columns.css']).toEqual({ file: 'packages/theme/columns.css', maxGzip: 1100 });
+    expect({ ...e['@dzgrid/dom/columns'], maxGzip: 0 }).toEqual({ file: 'packages/dom/src/columns.ts', maxGzip: 0, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
+    ['en', 'fr', 'ar'].forEach((l) => expect(e[`@dzgrid/dom/locales/${l}-columns`]?.file, l).toBe(`packages/dom/src/locales/${l}-columns.ts`));
+    expect(e['@dzgrid/theme/columns.css']?.file).toBe('packages/theme/columns.css');
     expect(['@dzgrid/core', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([29000, 21980]);
   });
 
@@ -336,7 +329,6 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
       expect(() => sizeBudget(c + 1, ceilingFor(`@dzgrid/dom/locales/${lang}-column-menu`)), lang).toThrow(/ceiling/);
     }
     expect(['@dzgrid/core', '@dzgrid/dom'].map(ceilingFor)).toEqual([29000, 21980]);
-    expect(ceilingFor('@dzgrid/theme/columns.css')).toBe(1100);
     type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
     const m = e['@dzgrid/dom/column-menu']!;
@@ -360,7 +352,6 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     const css = ceilingFor('@dzgrid/theme/columns-panel.css');
     expect(css).toBeGreaterThan(0);
     expect(css).toBeLessThanOrEqual(1000);
-    for (const [lang, c] of [['en', 500], ['fr', 600], ['ar', 800]] as const) expect(ceilingFor(`@dzgrid/dom/locales/${lang}-columns`), lang).toBe(c);
     expect(['@dzgrid/core', '@dzgrid/dom'].map(ceilingFor)).toEqual([29000, 21980]);
     type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
@@ -372,7 +363,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(c.file).toBe('packages/theme/columns-panel.css');
     expect(c.maxGzip).toBeLessThanOrEqual(css);
     expect(e['@dzgrid/dom/popup']?.maxGzip).toBe(1650);
-    ['en', 'fr', 'ar'].forEach((l, i) => expect(e[`@dzgrid/dom/locales/${l}-columns`]?.maxGzip, l).toBe([500, 600, 800][i]));
+
     expect(['@dzgrid/core', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([29000, 21980]);
   });
 
@@ -396,6 +387,23 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(e['@dzgrid/core']!.maxGzip).toBeLessThanOrEqual(29150);
     expect(e['@dzgrid/dom']!.maxGzip).toBeLessThanOrEqual(22400);
     expect(e['@dzgrid/core/server']!.maxGzip).toBeLessThanOrEqual(ceilingFor('@dzgrid/core/server')!);
+  });
+
+  it('Phase 6 step 6 (owner Q6-6): @dzgrid/dom/columns 4 200 (the resize mode and auto-size in the same entry, measured 3 996), columns.css 1 200, the -columns texts 550 / 650 / 850; each line at its measure plus a small margin, within the grant; the DOM base keeps 21 980 (the double-click seam, +71)', () => {
+    expect(ceilingFor('@dzgrid/dom/columns')).toBe(4200);
+    expect(() => sizeBudget(4201, ceilingFor('@dzgrid/dom/columns'))).toThrow(/ceiling/);
+    expect(ceilingFor('@dzgrid/theme/columns.css')).toBe(1200);
+    expect(() => sizeBudget(1201, ceilingFor('@dzgrid/theme/columns.css'))).toThrow(/ceiling/);
+    for (const [lang, c] of [['en', 550], ['fr', 650], ['ar', 850]] as const) {
+      expect(ceilingFor(`@dzgrid/dom/locales/${lang}-columns`), lang).toBe(c);
+      expect(() => sizeBudget(c + 1, ceilingFor(`@dzgrid/dom/locales/${lang}-columns`)), lang).toThrow(/ceiling/);
+    }
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
+    // The lines, by hand: measure 3 996 → 4 100; 1 111 → 1 150; texts 512 → 530, 614 → 630, 746 → 800 (kept).
+    expect(e['@dzgrid/dom/columns']?.maxGzip).toBe(4100);
+    expect(e['@dzgrid/theme/columns.css']?.maxGzip).toBe(1150);
+    expect(['en', 'fr', 'ar'].map((l) => e[`@dzgrid/dom/locales/${l}-columns`]?.maxGzip)).toEqual([530, 630, 800]);
+    expect(e['@dzgrid/dom']?.maxGzip).toBe(21980);
   });
 
   it('the K.8 profile guard: 83 500 (Q17a; the real example\'s 92 500, S12-Q10, is guarded by example:bytes, not here)', () => {

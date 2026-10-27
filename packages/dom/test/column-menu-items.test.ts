@@ -131,15 +131,37 @@ describe('size: widen and narrow (column-menu.md 10, column-resize.md 9)', () =>
     const t = mmake({ menu: { use: s.use } });
     byKeys(t, 'n');
     t.item('size.auto')!.click();
-    expect(s.cols.autoSize).toHaveBeenCalledWith(['n']);
+    // Said by the columns feature (the API alone is silent, column-resize.md 14).
+    expect(s.cols.autoSize).toHaveBeenCalledWith(['n'], { say: true });
     byKeys(t, 'n');
     t.item('size.autoAll')!.click();
-    expect(s.cols.autoSizeAll).toHaveBeenCalledTimes(1);
+    expect(s.cols.autoSizeAll).toHaveBeenCalledWith({ say: true });
     byKeys(t, 'n');
     t.item('size.resize')!.click();
     expect(s.cols.resizeMode).toHaveBeenCalledWith('n');
     expect(t.list()).toBeNull();
   });
+});
+
+describe('the resize mode from the menu (column-resize.md 1, step06-plan §2 « Mode and menu »)', () => {
+  for (const how of ['keys', 'mouse'] as const) {
+    it(`${how}: « Resize » closes the menu, the mode is on the header with the focus, and stays after the focus came back`, () => {
+      const t = mmake({ with: ['columns'], menu: ({ columns }) => ({ use: { columns: columns! } }) });
+      if (how === 'keys') byKeys(t, 'n');
+      else {
+        // A cell focused, the menu opened with the mouse: the focus goes to the header for the mode.
+        t.g.api.focusCell(t.g.kernel.rows.displayed.keyAt(t.g.kernel.rows.displayed.index(1)!), 'q');
+        t.open('n');
+      }
+      t.item('size.resize')!.click();
+      expect(t.list()).toBeNull();
+      expect(document.activeElement).toBe(t.hcell('n'));
+      expect(t.hcell('n')!.hasAttribute('data-dzg-resizing')).toBe(true);
+      t.key('ArrowRight');
+      expect(t.g.kernel.columns.layout.center.widths.sizeAt(1)).toBe(110);
+      expect(t.hcell('n')!.hasAttribute('data-dzg-resizing')).toBe(true);
+    });
+  }
 });
 
 describe('move (column-menu.md 11, WCAG 2.5.7)', () => {

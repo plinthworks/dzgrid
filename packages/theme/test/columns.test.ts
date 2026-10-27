@@ -128,5 +128,18 @@ describe('columns.css', () => {
     expect(spec.pairs.some((p) => p.fg === '--dzg-menu-disabled' && p.bg === '--tz-bg' && p.min >= 3)).toBe(true);
     expect(spec.derived['--dzg-menu-disabled']).toBe('var(--tz-fg-muted)');
   });
+
+  // ---- Phase 6 step 6: the keyboard resize mode (column-resize.md 2; owner Q6-1: no buttons) ----
+  it('the resize mode: a 2 px dashed outline inside the header in its token (fallback the accent), over the focus ring; no buttons', () => {
+    const o = decl(/^\.dzg-hcell\[data-dzg-resizing\]$/);
+    expect(o).toMatch(/outline: 2px dashed var\(--dzg-resize-mode, var\(--tz-accent\)\)/);
+    expect(o).toMatch(/outline-offset: -2px/);
+    expect(css).not.toMatch(/dzg-size-btn|dzg-resize-btn/);
+  });
+
+  it('the mode\'s outline checked at 3:1 on the header (WCAG 1.4.11)', () => {
+    expect(spec.derived['--dzg-resize-mode']).toBe('var(--tz-accent)');
+    expect(spec.pairs.some((p) => p.fg === '--dzg-resize-mode' && p.bg === '--dzg-header-bg' && p.min >= 3)).toBe(true);
+  });
 });
 

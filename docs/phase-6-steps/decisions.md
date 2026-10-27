@@ -73,3 +73,11 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **E5-3:** the address helper caps the state at 4 KB; beyond it, it keeps the minimum (columns, sort) and warns the developer.
 - **E5-2/E5-4/E5-5/E5-6/E5-7 (lead, recommendations kept):** the new problem codes live in `core/state` if the types allow; the state helper is a feature; Angular inputs at step 12; the rest as the plan recommends.
 - **E5-8 (owner, 2026-10-26):** `@dzgrid/dom/state` 800 → 1 150 (measured 1 058, one entry kept); `@dzgrid/core/server` 6 100 → 6 150 confirmed for the `rows.hold` seam (E5-1). Reminder to agents: never raise a size line without an owner decision.
+
+## Step 6 (owner, 2026-10-26) — plan `step06-plan.md`
+
+- **Q6-1:** no − / + / ✓ buttons in the resize mode; the single-pointer path (WCAG 2.5.7) is the menu's « Élargir / Rétrécir » (keeps the menu open). `dom/columns` stays within its 3 500 grant (target 3 500–3 800 → if over 3 500, stop and ask).
+- **Q6-2:** auto-size measures the real rendered cells (batched DOM probe), exact for Arabic and badges.
+- **Q6-3..Q6-5 (lead, recommendations kept):** rows measured = the visible rows plus the first 200; badges/parts measured only when mounted; fonts measured at once, no waiting for font loading.
+- Update column-resize.md: remove the − / + / ✓ buttons, cite the menu path for 2.5.7.
+- **Q6-6 (owner, 2026-10-27):** `@dzgrid/dom/columns` 3 500 → 4 200 (measured 3 996 with the resize mode and auto-size in the same entry); `columns.css` 1 100 → 1 200; `-columns` texts en/fr/ar 500/600/800 → 550/650/850.

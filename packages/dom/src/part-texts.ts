@@ -81,7 +81,7 @@ export interface RangeMessages {
 }
 
 /** Moving columns' texts (`@dzgrid/dom/columns`, Phase 6 step 2), in their own bundles (`locales/<lang>-columns`): optional here, required by `columns()`. */
-export type ColumnsMessageKey = 'move.placed' | 'move.edge' | 'move.locked' | 'move.cancelled';
+export type ColumnsMessageKey = 'move.placed' | 'move.edge' | 'move.locked' | 'move.cancelled' | `size.${'mode' | 'modeHint' | 'width' | 'min' | 'max' | 'cancelled' | 'autoAll' | 'locked'}`;
 /** The column chooser's texts (`@dzgrid/dom/columns-panel`, Phase 6 step 4, owner Q4-1): in the same `-columns` bundles, required by `columnsChooser()`. */
 export type ColumnsChooserMessageKey = `chooser.${'title' | 'search' | 'list' | 'handle' | 'up' | 'down' | 'placed' | 'showAll' | 'reset' | 'close' | 'none' | 'matches' | 'shown' | 'hidden' | 'allShown' | 'resetDone' | 'pinnedStart' | 'pinnedEnd' | 'last' | 'clearToMove'}`;
 /** A columns bundle (the moves' and the chooser's texts), spread by the host into its messages: `text: { ...FR.text, ...FR_COLUMNS.text }`. */

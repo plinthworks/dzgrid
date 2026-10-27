@@ -809,7 +809,13 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   (owner E5-8), `core/server` 6 143 / 6 150 (E5-8), core base 28 930 (+0), DOM base 21 784 (+11). Property test 1 000
   seeds LTR / RTL (3 000 green), 23 conformance cases, 2 000 garbage values. Demo `playground/state.html` (fr / ar,
   reload, address). Browser `--only state` Chrome 13 / 13; `--only playground` 41.
-- [ ] step 7: `@dzgrid/dom/columns` part 2, keyboard resize mode and auto-size (exit criterion 1).
+- [~] step 6 (the plan's « step 7 »; 2026-10-27, not committed, no review yet; plan `docs/phase-6-steps/step06-plan.md`
+  « Done »): `@dzgrid/dom/columns` part 2 — the keyboard resize mode (Alt+R, arrows mirrored RTL, Home fits, Enter /
+  Escape with the flexibility restored, O10) and auto-size (the real cells measured in one read phase, owner Q6-2), the
+  API, the menu's items, the base's double-click seam; no − / + / ✓ buttons (Q6-1). Sizes (owner Q6-6: grants 4 200 /
+  1 200 / 550 · 650 · 850): `dom/columns` 3 981 / 4 100, `columns.css` 1 111 / 1 150, texts 512 / 530, 614 / 630,
+  746 / 800; DOM base 21 855 / 21 980 (+71). Browser: `--only columns` Chrome 41, `--only column-menu` 38,
+  `--only column-resize` Firefox 4, WebKit 4 (the keys right to left). Exit criterion 1.
 - [ ] step 8: collapsible header groups.
 - [ ] step 9: pinned rows, editable.
 - [ ] step 10: auto row height (exit criterion 3, S3).

@@ -1,4 +1,5 @@
 import { intentFor, type ColumnState, type FocusPos, type GridKernel, type KeyOwner, type Side } from '@dzgrid/core';
+import { emit } from '@dzgrid/core/internal';
 import type { GridFeature } from '../features.js';
 import type { ColumnsMessageKey } from '../part-texts.js';
 import { INTERACTIVE } from '../keys/owner.js';
@@ -6,9 +7,13 @@ import { logicalSpan, logicalX, travel, type Dir } from '../dir.js';
 import { widthOf } from '../render/header-decor.js';
 import { CHECK_WIDTH, setAttr, setPx } from '../render/write.js';
 import { land, step } from './order.js';
+import { fits } from './size.js';
 
 /** The texts `columns()` needs, from `@dzgrid/dom/locales/<lang>-columns`. */
-export const COLUMNS_KEYS = ['move.placed', 'move.edge', 'move.locked', 'move.cancelled'] as const satisfies readonly ColumnsMessageKey[];
+export const COLUMNS_KEYS = [
+  'move.placed', 'move.edge', 'move.locked', 'move.cancelled',
+  'size.mode', 'size.modeHint', 'size.width', 'size.min', 'size.max', 'size.cancelled', 'size.autoAll', 'size.locked',
+] as const satisfies readonly ColumnsMessageKey[];
 
 export interface ColumnsOptions {
   /** A header dragged by the mouse (never a finger, Q-M3; a pen clicks); false: the keys and the API only. Default true. */
@@ -29,6 +34,16 @@ export interface ColumnsApi {
   move(column: string, by: -1 | 1 | 'start' | 'end', o?: { readonly say?: boolean }): MoveResult;
   /** Elements taking this grid's dragged headers; `add` returns the removal. */
   readonly dropTargets: { add(el: Element, t: DropTarget): () => void };
+  /**
+   * Fits shown, resizable columns to their content (column-resize.md 10–14): the header and the cells as drawn (the mounted
+   * rows and the first 200 displayed), one `column.state` patch; silent unless `say` (one column: its width; several: how
+   * many changed). Measured at once: call it once the fonts are loaded (Q6-5).
+   */
+  autoSize(columns: readonly string[], o?: { readonly say?: boolean }): void;
+  /** `autoSize` of every shown column. */
+  autoSizeAll(o?: { readonly say?: boolean }): void;
+  /** The keyboard resize mode on this column's header (focused): false when it is not shown or not resizable. */
+  resizeMode(column: string): boolean;
 }
 export interface ColumnsFeature extends GridFeature {
   /** The moves of a grid this feature is set up on; null before its setup and after it is destroyed. */
@@ -87,6 +102,78 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
         if (later) (said = t), (when = g.now());
         return r;
       };
+
+      // ---- Auto-size (column-resize.md 10–14) ----
+      const shown = (id: string) => m.visible().some((c) => c.id === id && c.def.resizable !== false);
+      /** One patch for the columns that can be fitted; `columnResized` for those whose width changed; said when asked. */
+      const size = (ids: readonly string[], say?: boolean): void => {
+        const r = fits(g, ids.filter(shown));
+        const was = new Map([...r.keys()].map((id) => [id, widthOf(g, id)]));
+        kernel.dispatch({ type: 'column.state', patch: [...r].map(([id, width]) => ({ id, width })) }, 'user');
+        let n = 0;
+        for (const [id, w0] of was) {
+          const width = widthOf(g, id);
+          if (width !== w0) n++, emit(kernel, { type: 'columnResized', source: 'user', column: id, width, finished: true });
+        }
+        if (say) g.live.announce(ids.length === 1 ? text('size.width', ids[0]!, { width: widthOf(g, ids[0]!) }) : g.msg('size.autoAll', { n }));
+      };
+      g.fit = (id) => size([id], true);
+
+      // ---- The keyboard resize mode (column-resize.md 1–7; Q-K3, Q6-1: no buttons, O10) ----
+      /** The column, its width on entering, its own width then (undefined: the definition's, maybe flexible), a key pressed. */
+      let rm: { id: string; w: number; s: number | null | undefined; k?: boolean } | null = null;
+      let hushW = (): void => {};
+      /** Out of the mode: kept (one `finished: true` when a key changed it) or put back, its flexibility too (Escape). */
+      const leave = (keep = true): void => {
+        const x = rm;
+        if (!x) return;
+        rm = null;
+        hushW();
+        g.schedule();
+        if (!x.k) return;
+        kernel.dispatch({ type: 'column.resize', column: x.id, width: keep ? widthOf(g, x.id) : x.w, finished: true }, 'user');
+        if (!keep && x.s == null) kernel.dispatch({ type: 'column.state', patch: [{ id: x.id, width: null }] }, 'user');
+      };
+      const enter = (id: string): boolean => {
+        if (!m.visible().some((c) => c.id === id)) return false;
+        if (!shown(id)) return g.live.announce(text('size.locked', id)), false;
+        leave();
+        const w = widthOf(g, id);
+        rm = { id, w, s: m.state().find((c) => c.id === id)?.width };
+        kernel.dispatch({ type: 'focus.set', focus: { kind: 'header', column: id } }, 'user');
+        g.restoreFocus();
+        g.schedule();
+        g.live.announce(text('size.mode', id, { width: w }));
+        return true;
+      };
+      // The mode's keys come first (the grid's and the other features' never see them): Tab keeps and goes on.
+      scope.on(el.root, 'keydown', (e: KeyboardEvent) => {
+        const x = rm;
+        const k = e.key;
+        if (!x || e.isComposing) return;
+        if (k === 'Tab') return leave();
+        e.stopPropagation();
+        if (!e.ctrlKey && !e.metaKey) e.preventDefault();
+        if (k === 'Escape') leave(false), g.live.announce(g.msg('size.cancelled'));
+        else if (k === 'Enter') leave();
+        else if (e.ctrlKey || e.metaKey || e.altKey) return;
+        // The arrow toward the column's end edge widens (its logical way, as a bare key on a cell: mirrored in right to
+        // left); Shift: 1 px. Home: fitted.
+        const i = intentFor({ key: k, ctrlKey: false, metaKey: false, shiftKey: false, altKey: false }, { dir: g.dir, owner: 'cell', mac: false });
+        const by = i?.kind === 'move' && i.axis === 'col' ? i.delta : 0;
+        if (k === 'Home' || by) {
+          const w0 = widthOf(g, x.id);
+          const to = by ? w0 + by * (e.shiftKey ? 1 : 10) : (fits(g, [x.id]).get(x.id) ?? w0);
+          kernel.dispatch({ type: 'column.resize', column: x.id, width: to, finished: false }, 'user');
+          x.k = true;
+          const w = widthOf(g, x.id);
+          hushW();
+          hushW = scope.timeout(() => g.live.announce(text('size.width', x.id, { width: w }) + (w === to ? '' : g.msg(w > to ? 'size.min' : 'size.max'))), 300);
+        }
+      }, { capture: true });
+      // A press anywhere or the focus going elsewhere: kept, quietly (O10).
+      scope.on(doc, 'pointerdown', () => leave(), { capture: true });
+      scope.on(doc, 'focusin', (e) => void (rm && e.target !== g.headerRenderer.cell(rm.id) && leave()));
 
       // ---- The drag (column-move.md 1–10) ----
       let d: Drag | null = null;
@@ -240,7 +327,8 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
         scope.on(doc, 'keydown', (e) => void (d?.on && (e as KeyboardEvent).key === 'Escape' && (e.preventDefault(), e.stopImmediatePropagation(), cancel(true))), { capture: true });
         if (win) scope.on(win, 'blur', () => cancel());
       }
-      const off = kernel.subscribe((e) => void (e.type === 'columnsChanged' && cancel()));
+      // New columns, a hidden one, a sort: the drag given up, the mode left (keeping its width).
+      const off = kernel.subscribe((e) => void ((e.type === 'columnsChanged' && cancel()) || ((e.type === 'columnsChanged' || e.type === 'sortChanged') && leave())));
 
       // ---- The keys (column-move.md 14–18) ----
       let refocus: string | null = null;
@@ -249,9 +337,14 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
         dropTargets: {
           add: (t, v) => (targets.set(t, v), () => void (targets.delete(t) && d?.over === t && mark(null))),
         },
+        autoSize: (ids, x) => size(ids, x?.say),
+        autoSizeAll: (x) => size(m.visible().map((c) => c.id), x?.say),
+        resizeMode: enter,
       });
       return {
         keys(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean {
+          // Alt+R on a column header (by the key's place, then by its letter: AZERTY, Arabic, a Mac's Option): the mode.
+          if (owner === 'header' && at?.kind === 'header' && !at.level && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.code === 'KeyR' || e.key.toLowerCase() === 'r')) return enter(at.column), true;
           if (owner !== 'header' || at?.kind !== 'header' || at.level || !e.shiftKey || e.altKey || (g.mac ? !e.metaKey || e.ctrlKey : !e.ctrlKey || e.metaKey)) return false;
           // The arrow's logical way (mirrored in right to left), Home and End: as a bare key on a cell.
           const i = intentFor({ key: e.key, ctrlKey: false, metaKey: false, shiftKey: false, altKey: false }, { dir: g.dir, owner: 'cell', mac: false });
@@ -260,9 +353,12 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
           if (move(at.column, by, true, true) === 'moved') (refocus = at.column), g.restoreFocus();
           return true;
         },
-        shortcuts: () => (g.mac ? 'Meta+Shift+ArrowLeft Meta+Shift+ArrowRight' : 'Control+Shift+ArrowLeft Control+Shift+ArrowRight'),
+        shortcuts: () => (g.mac ? 'Alt+R Meta+Shift+ArrowLeft Meta+Shift+ArrowRight' : 'Alt+R Control+Shift+ArrowLeft Control+Shift+ArrowRight'),
         decorateHeader(col, cell) {
           setAttr(cell, 'data-dzg-moving', d?.on && d.id === col.id ? '' : null);
+          const on = rm?.id === col.id;
+          setAttr(cell, 'data-dzg-resizing', on ? '' : null);
+          setAttr(cell, 'aria-description', on ? g.msg('size.modeHint') : null);
         },
         afterRows() {
           if (d && d.dir !== g.dir) cancel();
@@ -274,6 +370,9 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
         destroy() {
           off();
           cancel();
+          rm = null;
+          hushW();
+          g.fit = undefined;
           apis.delete(kernel);
           targets.clear();
         },

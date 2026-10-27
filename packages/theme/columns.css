@@ -33,6 +33,10 @@
     user-select: none;
     cursor: grabbing;
   }
+  .dzg-hcell[data-dzg-resizing] {
+    outline: 2px dashed var(--dzg-resize-mode, var(--tz-accent));
+    outline-offset: -2px;
+  }
   .dzg-hcell > .dzg-hlabel {
     min-inline-size: 0;
     overflow: hidden;

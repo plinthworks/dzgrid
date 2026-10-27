@@ -8,6 +8,15 @@ export const AR_COLUMNS = {
     'move.edge': "{column}: في الطرف أصلًا",
     'move.locked': "{column}: لا يمكن نقله",
     'move.cancelled': "أُلغي النقل",
+    // وضع تغيير العرض بلوحة المفاتيح والضبط التلقائي (المرحلة 6، الخطوة 6).
+    'size.mode': "تغيير عرض {column}: {width} بكسل. الأسهم للتغيير، Enter للحفظ، Escape للإلغاء",
+    'size.modeHint': "وضع تغيير العرض",
+    'size.width': "{column}: {width} بكسل",
+    'size.min': "، الحد الأدنى",
+    'size.max': "، الحد الأقصى",
+    'size.cancelled': "أُلغي تغيير العرض",
+    'size.autoAll': "الأعمدة المضبوطة: {n}",
+    'size.locked': "{column}: عرض ثابت",
     // اختيار الأعمدة (`@dzgrid/dom/columns-panel`، المرحلة 6، الخطوة 4).
     'chooser.title': "اختيار الأعمدة",
     'chooser.search': "البحث عن عمود",
