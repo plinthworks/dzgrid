@@ -14,9 +14,11 @@ import '../../packages/theme/columns.css';
 import '../../packages/theme/columns-panel.css';
 // The print table (Phase 6 step 11): « Imprimer » on orders.html.
 import '../../packages/theme/print.css';
+// The totals band of hr.html (Phase 6 step 12).
+import '../../packages/theme/pinned-rows.css';
 // By path, not `@dzgrid/dom/print`: no alias added to vite.config.ts while the playground server runs.
 import { print } from '../../packages/dom/src/print.js';
-import { mountOrders } from './orders.js';
+import { mountOrders, type OrdersDemo } from './orders.js';
 import { mountHr } from './hr.js';
 import { mountOrdersEdit } from './orders-edit.js';
 
@@ -38,7 +40,7 @@ field('locale').value = locale;
 field('theme').value = theme;
 field('skin').value = skin;
 // The editing page's own selectors (step 7): Enter's move and the paged mode, kept in the query.
-const extra = ['enter', 'paged', 'tree'].filter((n) => form.elements.namedItem(n));
+const extra = ['enter', 'paged', 'tree', 'view'].filter((n) => form.elements.namedItem(n));
 for (const n of extra) field(n).value = q.get(n) ?? field(n).value;
 form.addEventListener('change', () => {
   location.search = new URLSearchParams({ locale: field('locale').value, theme: field('theme').value, skin: field('skin').value, ...Object.fromEntries(extra.map((n) => [n, field(n).value])), ...(focus ? { focus: 'range' } : {}) }).toString();
@@ -51,12 +53,12 @@ if (css) document.head.append(Object.assign(document.createElement('style'), { i
 
 const TEXT = {
   orders: {
-    fr: ['Commandes et sous-commandes, mêmes colonnes', 'Des commandes ; une commande ouverte montre ses sous-commandes juste en dessous, dans les mêmes colonnes et sous le même en-tête, sur un fond un peu différent (une variable CSS de l’application, --orders-child-bg). Le petit chevron au début de la cellule « Commande » ouvre et ferme (un clic ailleurs dans la cellule la sélectionne seulement) ; au clavier, → ouvre, ← ferme. Tri et filtres gardent chaque sous-commande sous sa commande.'],
-    ar: ['الطلبات والطلبات الفرعية، الأعمدة نفسها', 'طلبات؛ يُظهر الطلب المفتوح طلباته الفرعية تحته مباشرة، بالأعمدة نفسها وتحت الترويسة نفسها، على خلفية مختلفة قليلاً (متغيّر CSS للتطبيق، ‎--orders-child-bg). السهم الصغير في بداية خلية «الطلب» يفتح ويغلق؛ بلوحة المفاتيح ← يفتح و→ يغلق. الترتيب والمرشحات يُبقيان كل طلب فرعي تحت طلبه.'],
+    fr: ['Commandes et sous-commandes, mêmes colonnes', 'À essayer : le menu ⋮ d’un en-tête (clic droit, Maj+F10) — trier, épingler, déplacer, masquer, densité, et « Mettre en évidence » (une ligne dessinée par l’application) ; « Colonnes » pour cocher et réordonner ; Ctrl+Maj+← / → (⌘⇧) déplace une colonne ; la disposition revient au rechargement et voyage dans l’adresse (?grid=…). Des commandes ; une commande ouverte montre ses sous-commandes juste en dessous, dans les mêmes colonnes et sous le même en-tête, sur un fond un peu différent (une variable CSS de l’application, --orders-child-bg). Le petit chevron au début de la cellule « Commande » ouvre et ferme (un clic ailleurs dans la cellule la sélectionne seulement) ; au clavier, → ouvre, ← ferme. Tri et filtres gardent chaque sous-commande sous sa commande.'],
+    ar: ['الطلبات والطلبات الفرعية، الأعمدة نفسها', 'جرّب: قائمة ⋮ لرأس عمود (نقرة يمنى، Shift+F10) — الترتيب والتثبيت والنقل والإخفاء والكثافة و«إبراز العمود» (سطر يرسمه التطبيق)؛ «الأعمدة» للتحديد وإعادة الترتيب؛ Ctrl+Shift+← / → (⌘⇧) ينقل عمودًا؛ يعود التخطيط بعد إعادة التحميل وينتقل في العنوان (?grid=…). طلبات؛ يُظهر الطلب المفتوح طلباته الفرعية تحته مباشرة، بالأعمدة نفسها وتحت الترويسة نفسها، على خلفية مختلفة قليلاً (متغيّر CSS للتطبيق، ‎--orders-child-bg). السهم الصغير في بداية خلية «الطلب» يفتح ويغلق؛ بلوحة المفاتيح ← يفتح و→ يغلق. الترتيب والمرشحات يُبقيان كل طلب فرعي تحت طلبه.'],
   },
   hr: {
-    fr: ['Ressources humaines (organigramme)', 'L’organigramme d’un hôpital (personnes inventées) : les trois responsables les plus proches restent épinglés sous l’en-tête. Lignes de 52 px (rowHeight). Au clavier : → ouvre, ← ferme dans la colonne « Employé » ; dans « Contact », Entrée va sur le premier lien, ← → passent de l’un à l’autre, Échap revient à la cellule.'],
-    ar: ['الموارد البشرية (الهيكل التنظيمي)', 'الهيكل التنظيمي لمستشفى (أشخاص من الخيال): يبقى أقرب ثلاثة مسؤولين مثبّتين تحت الترويسة. في عمود «الاتصال»: Enter ينتقل إلى الرابط الأول، والأسهم بين الرابطين، وEscape يعود إلى الخلية.'],
+    fr: ['Ressources humaines (organigramme)', 'À essayer : en vue liste (?view=list, sans arbre : un arbre refuse les groupes d’en-tête), le bouton des groupes « Identité » et « Emploi » les replie (au clavier : Entrée sur l’en-tête du groupe) ; la colonne « Équipe » passe à la ligne et la ligne grandit (?fixed=1 : lignes fixes de 52 px) ; la ligne « Total » en bas reste visible : son « Budget » se modifie (F2, Entrée garde, Échap annule ; enregistrement simulé 0,6 s, refusé s’il finit par 7). L’organigramme d’un hôpital (personnes inventées) : les trois responsables les plus proches restent épinglés sous l’en-tête. Au clavier : → ouvre, ← ferme dans la colonne « Employé » ; dans « Contact », Entrée va sur le premier lien, ← → passent de l’un à l’autre, Échap revient à la cellule.'],
+    ar: ['الموارد البشرية (الهيكل التنظيمي)', 'جرّب: في عرض القائمة (?view=list، دون شجرة: الشجرة ترفض مجموعات الترويسة) زر المجموعتين «الهوية» و«الوظيفة» يطويهما (Enter على رأس المجموعة)؛ عمود «الفريق» يلتف والصف يطول (?fixed=1: صفوف ثابتة 52 بكسل)؛ صف «المجموع» في الأسفل يبقى ظاهرًا وتُعدَّل «الميزانية» فيه (F2، Enter يحفظ، Escape يلغي؛ حفظ محاكى 0.6 ث، يُرفض إن انتهى بـ 7). الهيكل التنظيمي لمستشفى (أشخاص من الخيال): يبقى أقرب ثلاثة مسؤولين مثبّتين تحت الترويسة. في عمود «الاتصال»: Enter ينتقل إلى الرابط الأول، والأسهم بين الرابطين، وEscape يعود إلى الخلية.'],
   },
 } as const;
 // The editing demo (owner feedback, step 6): a title, four short bullets, the event log's heading.
@@ -149,12 +151,44 @@ const onEvent = (e: { type: string; problems?: readonly { code: string; path: st
 };
 const demo = editing
   ? mountOrdersEdit(host, document.getElementById('log')!, { locale, onEvent: onEvent as never, paged: q.get('paged') === '1', enter: q.get('enter') === 'down' ? 'down' : 'stay', tree: q.get('tree') === '1', bar: document.getElementById('live')! })
-  : which === 'hr' ? mountHr(host, { locale, onEvent }) : mountOrders(host, { locale, onEvent });
+  : which === 'hr' ? mountHr(host, { locale, onEvent, tools: true, fixed: q.get('fixed') === '1', list: q.get('view') === 'list' }) : mountOrders(host, { locale, onEvent, tools: page === 'orders' });
 if (which === 'orders') host.classList.add('demo-orders');
 // « Imprimer » (Phase 6 step 11, docs/behaviors/print.md): the orders shown (sorted, filtered, the open sub-orders), as a table.
 if (page === 'orders') {
   const b = Object.assign(document.createElement('button'), { type: 'button', id: 'print', textContent: ar ? 'طباعة' : 'Imprimer' });
   b.addEventListener('click', () => void print((demo as { grid: Parameters<typeof print>[0] }).grid, { title }));
   form.append(b);
+}
+// hr.html's « Vue » (step 12): its words in Arabic.
+if (which === 'hr' && ar) {
+  document.getElementById('view-label')!.textContent = 'العرض';
+  [field('view').options[0]!.text, field('view').options[1]!.text] = ['الهيكل التنظيمي', 'قائمة (مجموعات قابلة للطي)'];
+}
+// The step 12 tools (orders.html): « Colonnes » opens the chooser, « Densité » three buttons, « Réinitialiser la disposition ».
+const tools = page === 'orders' ? (demo as OrdersDemo).tools : undefined;
+if (tools) {
+  const L = ar
+    ? { columns: 'الأعمدة', density: 'الكثافة', compact: 'مضغوطة', comfortable: 'مريحة', spacious: 'واسعة', reset: 'إعادة تعيين التخطيط' }
+    : { columns: 'Colonnes', density: 'Densité', compact: 'Compacte', comfortable: 'Confortable', spacious: 'Espacée', reset: 'Réinitialiser la disposition' };
+  const grid = (demo as OrdersDemo).grid;
+  const button = (text: string, act: (b: HTMLButtonElement) => void, id?: string): HTMLButtonElement => {
+    const b = Object.assign(document.createElement('button'), { type: 'button', textContent: text, ...(id && { id }) });
+    b.addEventListener('click', () => act(b));
+    return b;
+  };
+  const group = Object.assign(document.createElement('span'), { role: 'group', className: 'demo-density' });
+  group.setAttribute('aria-label', L.density);
+  group.append(L.density, ' ', ...(['compact', 'comfortable', 'spacious'] as const).map((d) => button(L[d], () => void tools.state.api(grid)!.setState({ v: 1, density: d }))));
+  form.append(
+    button(L.columns, (b) => void tools.chooser.api(grid)?.open(b), 'open-chooser'),
+    group,
+    button(L.reset, () => {
+      try { localStorage.removeItem(tools.key); } catch { /* storage blocked: nothing kept anyway */ }
+      const q2 = new URLSearchParams(location.search);
+      q2.delete('grid');
+      history.replaceState(history.state, '', `?${q2}`);
+      location.reload();
+    }, 'reset-layout'),
+  );
 }
 (window as unknown as { demo: unknown }).demo = demo;

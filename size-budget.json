@@ -750,7 +750,7 @@
       "css": [
         "packages/theme/dzgrid.css"
       ],
-      "maxGzip": 84450,
+      "maxGzip": 84800,
       "external": [
         "@angular/*",
         "rxjs",
@@ -784,7 +784,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 7000,
+      "maxGzip": 7300,
       "external": [
         "@angular/*",
         "@dzgrid/*",

@@ -1,6 +1,8 @@
-import { fold, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type Side } from '@dzgrid/core';
+import { fold, problem, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type Side } from '@dzgrid/core';
 import { emit, isCellKey } from '@dzgrid/core/internal';
 import type { GridFeature } from '../features.js';
+import { mounted, type Mounted } from '@dzgrid/dom/internal';
+import type { SlotContext } from '../part.js';
 import type { ColumnMenuMessageKey } from '../part-texts.js';
 import type { Frame } from '../render/rows.js';
 import { popupsFor, type PopupRef } from '../popup.js';
@@ -61,6 +63,11 @@ export interface MenuItem {
   readonly keepOpen?: boolean;
   /** A class for an icon the host's CSS draws; never HTML. */
   readonly icon?: string;
+  /**
+   * A part of slot `menuItem` by name (`settings.parts`, an Angular `dzgPart` template; Phase 6 step 12, owner Q12-2): it
+   * paints the item's content in an `inert`, `aria-hidden` host; the item keeps `label` as its name. Unknown: `unknown-part`.
+   */
+  readonly part?: string;
   readonly action?: (c: MenuContext) => void;
 }
 export interface MenuContext {
@@ -120,6 +127,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
       let handed = false;
       let swallow = false;
       let buf = '';
+      /** The open menu's item parts (one menu at a time). */
+      let ms: Mounted<SlotContext['menuItem']>[] = [];
       let hush = (): void => {};
       let hushBuf = (): void => {};
 
@@ -230,6 +239,7 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
       /** The list drawn from `list`: roles, groups, separators (never first, last or doubled). */
       const draw = (c: Open, list: readonly MenuEntry[]): void => {
         const L = c.list;
+        drop();
         L.textContent = '';
         c.shown = [];
         let grp: HTMLElement | null = null;
@@ -258,11 +268,19 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
             const s = doc.createElement('span');
             s.className = cls;
             s.setAttribute('aria-hidden', 'true');
+            // Out of reach as well (a part's host: its controls take no focus); nothing else in an aside can.
+            s.setAttribute('inert', '');
             x.append(s);
             return s;
           };
           if (e.icon) aside(`dzg-micon ${e.icon}`);
-          x.append(e.label);
+          // Its content by a part (Q12-2): drawn, the item named by its text; else (none, it threw, unknown) the text.
+          const sp = e.part && g.parts()[e.part];
+          if (e.part && !sp) emit(kernel, { type: 'problems', source: 'host', problems: [problem('unknown-part', 'error', `menu.${e.id}.part`, e.part)] });
+          const p = mounted<SlotContext['menuItem']>(g);
+          ms.push(p);
+          if (sp && sp.slot === 'menuItem' && p.set(aside('dzg-mpart'), sp.part as never, { ...e, kind: e.kind ?? 'item', checked: !!e.checked, disabled: !!e.disabled, column: m.get(c.id)! })) x.setAttribute('aria-label', e.label);
+          else x.append(e.label);
           if (e.keys) {
             x.setAttribute('aria-keyshortcuts', e.keys);
             aside('dzg-mkeys').textContent = g.mac ? e.keys.replace('Meta+', '⌘') : e.keys.replace('Control', 'Ctrl');
@@ -272,6 +290,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         if (L.lastElementChild?.getAttribute('role') === 'separator') L.lastElementChild.remove();
       };
 
+      /** The items' parts destroyed. */
+      const drop = (): void => void (ms.forEach((p) => p.clear()), (ms = []));
       /** Where the focus goes back: where it was outside the grid, else the grid's own focus (the header when it had none). */
       const back = (c: Open): void => {
         const p = c.prev as HTMLElement | null;
@@ -320,7 +340,7 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         (c as { ref: PopupRef }).ref = popupsFor(g).open(cell, list, {
           placement: 'block-end', from: at ?? btn ?? cell, ...(!at && { align: 'end' as const }), fit: true, opener: () => btn,
           back: () => void (quiet || back(c)),
-          onClose: () => void (cur === c && ((cur = null), g.schedule())),
+          onClose: () => void (drop(), cur === c && ((cur = null), g.schedule())),
         });
         list.addEventListener('keydown', key);
         list.addEventListener('click', (e) => {

@@ -13,17 +13,17 @@
  * The example is not a workspace member: its node_modules are its own (gitignored).
  */
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { forgetLocalPacks, indexOf, measureExample, measureLazy } from './example-lib.mjs';
+import { dropStamp, forgetLocalPacks, indexOf, measureExample, measureLazy, stampProblem, writeStamp } from './example-lib.mjs';
 import { measureSplit } from './size-split.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const EXAMPLE = join(ROOT, 'examples/angular-audit');
-const K8 = 92_500; // owner S12-Q10 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
+const K8 = 95_000; // owner 2026-10-28 (Phase 6 step 12, decisions.md « Real Angular example line »: measured 94 596; the build had been broken since 1.0.0); owner S12-Q10 92 500 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const option = (name, fallback) => {
@@ -60,13 +60,28 @@ function installed(dir) {
 }
 
 function build() {
+  // No stamp until every build is clean (owner, 2026-10-28): a failed install or build leaves an old dist unmeasurable.
+  dropStamp(EXAMPLE);
   if (!flag('no-pack')) sh('npm', ['run', 'pack:local'], ROOT);
   // The same version on every pack (0.3.0 until a release): npm would keep the old copy. Removed, then installed again.
   rmSync(join(EXAMPLE, 'node_modules/@dzgrid'), { recursive: true, force: true });
   // Their lock entries too: the old tarball's integrity made npm reinstall its cached copy (step 11).
   const lockFile = join(EXAMPLE, 'package-lock.json');
   if (existsSync(lockFile)) writeFileSync(lockFile, JSON.stringify(forgetLocalPacks(JSON.parse(readFileSync(lockFile, 'utf8'))), null, 2) + '\n');
-  sh('npm', ['install', '--prefer-offline', '--no-audit', '--no-fund'], EXAMPLE);
+  // The manifest names the release tarballs (`packed/dzgrid-*-1.0.0.tgz`, `pack:release`); `pack:local` stamps its own
+  // version (1.0.1-local.<time>): npm is pointed at the tarballs packed, the manifest given back as it was after.
+  const manifest = join(EXAMPLE, 'package.json');
+  const kept = readFileSync(manifest, 'utf8');
+  const packs = readdirSync(join(ROOT, 'packed'));
+  writeFileSync(manifest, kept.replace(/file:\.\.\/\.\.\/packed\/dzgrid-(core|dom|angular|theme)-[^"]+\.tgz/g, (all, p) => {
+    const f = packs.find((x) => x.startsWith(`dzgrid-${p}-`) && x.endsWith('.tgz'));
+    return f ? `file:../../packed/${f}` : all;
+  }));
+  try {
+    sh('npm', ['install', '--prefer-offline', '--no-audit', '--no-fund'], EXAMPLE);
+  } finally {
+    writeFileSync(manifest, kept);
+  }
   const bad = installed(EXAMPLE);
   if (bad.length) throw new Error(bad.join('; '));
   const runs = [
@@ -83,7 +98,8 @@ function build() {
   console.log('\nexample build (Angular 21):');
   for (const r of report) console.log(`  ${r.ok ? 'ok  ' : 'FAIL'} ${r.name}${r.noisy.length ? `: ${r.noisy.join(' | ')}` : ''}`);
   console.log(`  installed @dzgrid/* as copies: ${installed(EXAMPLE).length === 0 ? 'yes' : 'no'}`);
-  if (report.some((r) => !r.ok)) process.exitCode = 1;
+  if (report.every((r) => r.ok)) writeStamp(EXAMPLE, ROOT);
+  else process.exitCode = 1;
 }
 
 function csv() {
@@ -104,7 +120,10 @@ async function ssr() {
   const dir = option('dir', EXAMPLE);
   const lang = option('lang', 'fr');
   // Phase 5 step 9: the editable « stock » screen (?screen=stock), its own bootstrap.
-  const stock = option('screen', 'audit') === 'stock';
+  const screen = option('screen', 'audit');
+  const stock = screen === 'stock';
+  // Phase 6 step 12 (Q12-3): the audit screen with its layout in the address, a grid=1.… parameter given.
+  const url = screen === 'audit-url';
   const server = join(dir, 'dist/audit/server');
   const count = (types) => types.filter((t) => t === 'Timeout' || t === 'Immediate').length;
   const before = count(process.getActiveResourcesInfo());
@@ -119,8 +138,8 @@ async function ssr() {
     const mod = await import(pathToFileURL(join(server, 'main.server.mjs')).href);
     probe = mod.newProbe();
     const document = readFileSync(join(server, 'index.server.html'), 'utf8');
-    html = await mod.renderApplication(stock ? mod.bootstrapStock : mod.default, {
-      document, url: `/?${stock ? 'screen=stock&' : ''}${lang === 'ar' ? 'lang=ar' : ''}`, platformProviders: [{ provide: mod.AUDIT_PROBE, useValue: probe }],
+    html = await mod.renderApplication(stock ? mod.bootstrapStock : url ? mod.bootstrapAuditUrl : mod.default, {
+      document, url: `/?${stock ? 'screen=stock&' : url ? 'screen=audit-url&grid=1.eyJ2IjoxLCJzb3J0IjpbXX0&' : ''}${lang === 'ar' ? 'lang=ar' : ''}`, platformProviders: [{ provide: mod.AUDIT_PROBE, useValue: probe }],
     });
   } catch (e) {
     errors.push(String(e?.stack ?? e));
@@ -132,7 +151,7 @@ async function ssr() {
   const k = probe?.kernel;
   const result = {
     lang,
-    screen: stock ? 'stock' : 'audit',
+    screen,
     // The screen asked for is the one rendered (review of step 9): its own marker in the server's HTML.
     marker: html.includes(stock ? 'stock-saved' : 'audit-count'),
     host: /<dz-grid\b/.test(html),
@@ -159,6 +178,13 @@ async function ssr() {
 }
 
 async function bytes() {
+  // A missing, failed or stale build is an error, never a skip nor an old number (owner, 2026-10-28).
+  const stale = stampProblem(EXAMPLE, ROOT);
+  if (stale) {
+    console.log(`FAIL ${stale}`);
+    process.exitCode = 1;
+    return;
+  }
   const m = measureExample(EXAMPLE);
   const budget = JSON.parse(readFileSync(join(ROOT, 'size-budget.json'), 'utf8')).entries['profile: audit screen (K.8)'];
   const estimate = await measureSplit(budget, ROOT);
@@ -172,6 +198,9 @@ async function bytes() {
   // Phase 5 step 9 (owner S9-Q4): the « stock » screen, loaded on demand, measured apart (no ceiling set).
   const lazy = measureLazy(join(EXAMPLE, 'dist/audit'), /src\/app\/stock\.component/);
   console.log(`  (4) the « stock » screen, loaded on demand (?screen=stock): ${lazy.total} B gz in ${lazy.files.length} files (${lazy.files.map((f) => `${f.file} ${f.gz}`).join(', ')}); not in (1)`);
+  // Phase 6 step 12 (owner Q12-3): the audit screen with its layout in the address, on demand, measured apart (no ceiling set).
+  const addr = measureLazy(join(EXAMPLE, 'dist/audit'), /src\/app\/audit-url\.ts/);
+  console.log(`  (5) the « audit-url » screen, loaded on demand (?screen=audit-url): ${addr.total} B gz in ${addr.files.length} files (${addr.files.map((f) => `${f.file} ${f.gz}`).join(', ')}); not in (1)`);
   if (m.share > K8) {
     console.log(`STOP: the DzGrid share of the real build is over ${K8} B: ask the owner.`);
     process.exitCode = 1;

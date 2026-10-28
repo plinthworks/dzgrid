@@ -2,7 +2,8 @@
  * The pure parts of scripts/example.mjs (step 23, docs/behaviors/angular-example.md), importable
  * by the tests: which files an Angular build loads first, and K.8 from the real build.
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
@@ -146,4 +147,38 @@ export function measureExample(example) {
 export function forgetLocalPacks(lock) {
   const packages = Object.fromEntries(Object.entries(lock.packages ?? {}).filter(([k]) => !k.startsWith('node_modules/@dzgrid/')));
   return { ...lock, packages };
+}
+
+/**
+ * The example build's stamp (owner, 2026-10-28): a digest of what the example installs from the workspace — every file
+ * of `packages/{core,dom,angular}/dist` and the theme's CSS — written by a clean `example:build`, checked by
+ * `example:bytes`. From 1.0.0 to Phase 6 step 12 the build failed at its install and the old dist was measured.
+ */
+const STAMP = 'dist/built-from.json';
+function filesUnder(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? (e.name === 'node_modules' ? [] : filesUnder(join(dir, e.name))) : [join(dir, e.name)]));
+}
+export function workspaceDigest(root) {
+  const h = createHash('sha256');
+  const theme = join(root, 'packages/theme');
+  const files = [
+    ...['core', 'dom', 'angular'].flatMap((p) => filesUnder(join(root, `packages/${p}/dist`))),
+    ...(existsSync(theme) ? readdirSync(theme).filter((f) => f.endsWith('.css')).map((f) => join(theme, f)) : []),
+  ].sort();
+  for (const f of files) h.update(f.slice(root.length)).update('\0').update(readFileSync(f)).update('\0');
+  return h.digest('hex');
+}
+export function writeStamp(example, root) {
+  writeFileSync(join(example, STAMP), JSON.stringify({ digest: workspaceDigest(root), at: new Date().toISOString() }) + '\n');
+}
+export function dropStamp(example) {
+  rmSync(join(example, STAMP), { force: true });
+}
+/** Why the example's build cannot be measured, or null. */
+export function stampProblem(example, root) {
+  if (!existsSync(join(example, 'dist/audit/stats.json'))) return 'no example build: run npm run example:build';
+  const file = join(example, STAMP);
+  if (!existsSync(file)) return 'the example build has no stamp (it failed, or predates the stamp): run npm run example:build';
+  return JSON.parse(readFileSync(file, 'utf8')).digest === workspaceDigest(root) ? null : 'the example build is stale (the packages changed since): run npm run example:build';
 }

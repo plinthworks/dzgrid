@@ -858,7 +858,16 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   334 / 400, twin 292 / 400, texts 132 / 140 / 160; base, core, K.8, Angular +0. Playground `print.html` and
   « Imprimer » on `orders.html`; Chrome `--only print` 39 (`page.pdf()` fr and ar under the preflight), `playground` 41.
   Gate: vitest **484 files / 7 247 passed** (2 skipped), `test:perm` 5 files / 10, `typecheck`, `build`, `check:size` **118 ok, 0 over** (core 28 999, DOM base 22 331, K.8 84 449 / 84 450, Angular 6 811: all as before), `check:contrast` 1 092 / 0.
-- [ ] step 12: Angular and demos.
+- [x] step 12 (2026-10-28; plan `docs/phase-6-steps/step12-plan.md` « Done »; owner Q12-1–Q12-3): Angular and demos —
+  `<dz-grid>` `[state]` (restored before the first request: one request on a server; no echo), `[pinnedRows]`,
+  `(stateChanged)`, `(densityChanged)`, `(selectionChanged)`; `DzgController.use()` / `.grid()`; `selectedIds()` (ids not
+  keys, mode, query) and `uiData()`; a content part per column-menu item (slot `menuItem`, inert host, the label as the
+  name) with its Angular template; `gridState()` ends only its own hold. Example `?screen=audit-url` (on demand, 3 017);
+  playground `orders.html` (tools) and `hr.html` (groups in `?view=list`: `spans()` refuses a tree; wrapped column;
+  editable totals row). Sizes: Angular 7 245 / **7 300**, K.8 84 776 / **84 800** (Q12-1), column-menu 4 297 / 4 300,
+  nothing else moved. Gate: vitest 492 files / 7 295 (the example line's test red, owner's), `test:perm` 10,
+  `check:size` 0 over, contrast 1 092 / 0; Chrome playground 41, columns 41, demos 38, Angular fixture 90,
+  `example:browser` 8. Real example 94 596 / **95 000** (owner; 93 780 before the step: the example build had been broken since 1.0.0 — `example:bytes` now fails on a missing or stale build, a stamp).
 - [ ] step 13: close (rebudget, full gate, **1.1.0** prepared — 1.0.0 is published, owner « Back to Phase 6 » —, published by the owner with `npm run publish:latest`).
 
 - **Feedback pass (allergen-detector) and tzslot 2.4.0** (2026-10-27, built, not committed): items A–M of `docs/phase-6-steps/feedback-plan.md` « Done » — text glyphs instead of border glyphs, the box's outline, one operator without « Condition », `filterOption` parts, `ui.data`, popup `data-column`/`data-kind`, the period form in the popup itself, `@tzslot/dom/lazy` (a date kit's first use 66 962 → 33 317 B gz). Gate (once, caffeinate -i, vitest 2 workers, Node 24): vitest 470 files / 7 117 tests, test:perm 5 / 10, typecheck, build, check:size 0 over (core 28 999, dom 22 321, filters 9 990 — no raise needed —, theme 2 562, pagination 3 133, tree 3 821, K.8 84 077; raised by the strict need, Q1: date adapters 2 745 (2 744), set chunk 4 205 (4 204), calendar 1 520 (1 519)), check:contrast 1 092 / 0. Browser: Chrome --only filters 32, dates 56, pagination 45, tree 78 (and groups 20, detail 37, motion 50); Firefox and WebKit --only dates 12, pagination 24, tree 6, all green.

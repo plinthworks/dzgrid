@@ -21,6 +21,17 @@ Opens the audit journal of an Angular application: scrolls, sorts, filters, sear
 - **Bytes (K.8):** the DzGrid share of the first load is the default build's initial files (JS, gzip level 9, plus the global CSS) less the baseline's — the initial JS read from the build's stats (`--stats-json`: the page's module script and every chunk it reaches by static imports), since Angular's page hints at most ten chunks; without stats, the page's hints alone, and a page at that cap is refused: DzGrid, its theme and the wrapper. The Angular runtime (the baseline) is recorded apart, the wrapper's own share for information. The size gate stays the esbuild profile in `check:size` (`perf/profiles/audit.ts`, which now names the wrapper's values the example imports); the real-build number is recorded. Over 85 000 B: stop and ask the owner.
 - **The Arabic CSV sample:** the real export (`@dzgrid/dom/export`) of the audit columns in Arabic, right to left, locale `ar-DZ` (Latin digits), with a note column whose cells hold a comma and a double quote. Written to `examples/angular-audit/out/audit-ar.csv` (not tracked) for the owner's Excel check.
 - **Other Angular majors:** Angular 19 and 22 are tried by hand (`npm run example:smoke -- 19|22`): the example copied to a scratch folder, Angular rewritten to that major, installed, built, rendered on the server. Offline it says "not run", never "passed". On 19, zoneless is `provideExperimentalZonelessChangeDetection` (one small file switches it).
+- **The address screen (Phase 6 step 12, owner Q12-3):** `?screen=audit-url` is the same audit screen with its layout
+  kept in the page's address. Its code (`src/app/audit-url.ts`: `gridState()`, `fromSearchParams`, `toSearchParams`,
+  `history.replaceState`) is a chunk loaded on demand, given to the audit screen as providers (`AUDIT_ADDRESS`, an
+  optional token): the default screen's first load holds none of the state code — only the token and two bindings
+  (`[state]="address?.initial" (stateChanged)="address?.keep($event.state)"`). A sort, a moved or hidden column, a
+  width, the page: the address gains one `grid=1.…` parameter (the language and the screen kept; filters and the search
+  left out, O6); a reload from it restores that layout with **one** request. `example:bytes` reports it as (5), apart
+  from (1); `example:ssr --screen audit-url` renders it on a server (the address read, nothing written).
+- **A stale build is an error (owner, 2026-10-28):** a clean `example:build` writes `dist/built-from.json` (a digest of
+  the workspace's built packages and theme CSS); `example:bytes` fails when it is missing or does not match — the
+  example build had been broken from 1.0.0 to Phase 6 step 12 while an old dist was measured. Line: 95 000.
 
 ## Where we differ on purpose
 - No server rendering of rows: a grid of health records is drawn in the browser, where the user's zone, language and rights are known; the server sends the place only. No hydration requirement.

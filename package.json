@@ -29,7 +29,7 @@
     "bench:browser": "node scripts/perf-browser.mjs",
     "example:build": "node scripts/example.mjs build",
     "example:csv": "node scripts/example.mjs csv",
-    "example:ssr": "node scripts/example.mjs ssr && node scripts/example.mjs ssr --lang ar && node scripts/example.mjs ssr --screen stock && node scripts/example.mjs ssr --screen stock --lang ar",
+    "example:ssr": "node scripts/example.mjs ssr && node scripts/example.mjs ssr --lang ar && node scripts/example.mjs ssr --screen stock && node scripts/example.mjs ssr --screen stock --lang ar && node scripts/example.mjs ssr --screen audit-url && node scripts/example.mjs ssr --screen audit-url --lang ar",
     "example:bytes": "node scripts/example.mjs bytes",
     "example:browser": "node scripts/example.mjs browser",
     "example:smoke": "node scripts/example.mjs smoke"

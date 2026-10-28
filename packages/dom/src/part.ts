@@ -165,6 +165,23 @@ export interface SlotContext {
     /** Ticks or unticks it in the draft, as a click on the row. */
     toggle(): void;
   };
+  /**
+   * The content of one item of the column ⋮ menu (`@dzgrid/dom/column-menu`, Phase 6 step 12, owner Q12-2), named by the
+   * item's `part`. The part paints the item's content (a swatch, an icon, the text styled); the grid keeps the item: its
+   * role, `aria-checked`, `aria-disabled`, the roving focus, the keys, the type-ahead, and its name, the item's `label`
+   * (`aria-label`): show that text too (WCAG 2.5.3). The part's host is `inert` and `aria-hidden`: a control put in it
+   * takes no focus, nothing of it joins the name; a click on it is the item's. Mounted when the menu draws the item,
+   * destroyed when it redraws or closes. A part that throws: the item's plain text.
+   */
+  menuItem: PartBase & {
+    readonly id: string;
+    readonly label: string;
+    readonly kind: 'item' | 'radio' | 'check';
+    readonly checked: boolean;
+    readonly disabled: boolean;
+    /** The column whose menu it is. */
+    readonly column: ResolvedColumn<unknown>;
+  };
   /** The tooltip, shown only when the host gave text (`@dzgrid/dom/slots`). */
   tooltip: PartBase & {
     /** The host's text (`headerTooltip`, `tooltip(value, row)`). */

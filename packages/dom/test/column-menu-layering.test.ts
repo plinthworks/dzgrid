@@ -21,12 +21,13 @@ describe('column-menu: layering', () => {
     expect(offenders).toEqual([]);
   });
 
+  // Step 12 (Q12-2): `@dzgrid/dom/internal` too, for the items' parts (`mounted`, one copy shared with the filters).
   it('the entry: the core, the popup host, the base\'s writers and direction helpers, its own folder; the features it drives typed only', () => {
     const entry = files(SRC).filter((f) => ENTRY.test(relative(SRC, f)));
     expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(expect.arrayContaining(['column-menu.ts', 'column-menu/index.ts']));
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/(core|core\/internal)$/.test(s) && !/^column-menu(\/[^:]+)?\.ts: \.\/(column-menu\/)?[a-z-]+\.js$/.test(s) && !/^column-menu\/[^:]+\.ts: \.\.\/(popup|render\/write|render\/header-decor|dir|keys\/owner)\.js$/.test(s));
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^column-menu(\/[^:]+)?\.ts: \.\/(column-menu\/)?[a-z-]+\.js$/.test(s) && !/^column-menu\/[^:]+\.ts: \.\.\/(popup|render\/write|render\/header-decor|dir|keys\/owner)\.js$/.test(s));
     expect(offenders).toEqual([]);
     for (const f of entry) expect(readFileSync(f, 'utf8').replace(/^import type [^;]*;$/gm, ''), relative(SRC, f)).not.toMatch(/from '[^']*(columns|fill|range|filters|editors|\/edit)[^']*'/);
   });

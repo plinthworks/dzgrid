@@ -1,5 +1,17 @@
 # Selecting rows
 
+## Keys and ids (read this first when you send a selection to a server)
+- The selection (`SelectionState`: `{ mode, keys }`, the `selectionChanged` event, the `selected` model) holds the
+  grid's **row keys**, such as `d:13:6132500711040`, **not** the ids your `getRowId` returns. A key sent to a server
+  matches nothing, silently (allergen-detector, 2026-10-28). `idOfDataKey(key)` (`@dzgrid/core`) gives the id back
+  (as a string; null for a key that is not a data row's). In Angular, `selectedIds(controller)` does it for the whole
+  selection (angular-parts.md « Selection »).
+- `mode: 'exclude'` (after « Select all », a few unticked) means « every row the query matches but these »: the host
+  cannot list those rows, the server can, by replaying the query. The query is the grid's `kernel.query` (`filter`,
+  `sort`, `quick`; `selectedIds()` returns it). On a server grid, the query as the server reads it — the filter in wire
+  form, the sort, the search — is the last `DataRequest` the source's `fetch` received (keep it, with its `key`); the
+  CSV export's `exportAll(request)` gets it as `request.server` (and `request.selection`, `request.query`).
+
 ## What the user does
 Clicks a row; Ctrl- or Cmd-clicks; Shift-clicks; presses Space on a row; presses Ctrl+A (Cmd+A on a Mac); ticks the header box.
 

@@ -26,7 +26,7 @@ import { AR_PAGINATION } from '@dzgrid/dom/locales/ar-pagination';
 import { AR_EXPORT } from '@dzgrid/dom/locales/ar-export';
 import { DzGrid, DzgController, DzgExport, DzgSearch, componentPart, fromObservable, type DzgPartContext } from '@dzgrid/angular';
 import { ACTIONS, createFakeServer, type AuditRow, type ExportAsk } from './fake-server';
-import { AUDIT_LANG } from './lang';
+import { AUDIT_ADDRESS, AUDIT_LANG } from './lang';
 import { AUDIT_PROBE } from './probe';
 
 const ZONE = 'Africa/Algiers';
@@ -104,6 +104,7 @@ function motionLater(zone: NgZone): GridFeature {
       <div class="audit-grid">
         <dz-grid [source]="source" [columns]="columns" [getRowId]="id" operations="server" [pagination]="paging" [selection]="selection"
           [features]="features" [parts]="parts" [messages]="messages" [locale]="locale" [timeZone]="zone" [direction]="dir" [label]="w.grid"
+          [state]="address?.initial" (stateChanged)="address?.keep($event.state)"
           (cellAction)="open($event.detail)" (problems)="noteProblems($event)" (gridReady)="ready()" />
       </div>
     </main>`,
@@ -141,7 +142,9 @@ export class AuditScreen implements DoCheck, AfterViewInit {
   readonly parts = { actor: componentPart('cell', ActorCell) };
   readonly search = quickSearch();
   readonly exporter = csvExport({ canExport: true, exportAll: (req, ctx) => this.server.exportAll(req as unknown as ExportAsk, ctx as { signal: AbortSignal }) });
-  readonly features = [filters({ floating: true, popup: true }), this.search, pagination(), this.exporter, motionLater(inject(NgZone))];
+  /** `?screen=audit-url` (step 12, Q12-3): the layout kept in the address, provided by its own chunk; null here. */
+  readonly address = inject(AUDIT_ADDRESS, { optional: true });
+  readonly features = [filters({ floating: true, popup: true }), this.search, pagination(), this.exporter, motionLater(inject(NgZone)), ...(this.address ? [this.address.feature] : [])];
 
   /** A plain field, not a signal: under zone.js only the zone's check shows it (the zone demo). */
   opened = 0;

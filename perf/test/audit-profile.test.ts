@@ -45,7 +45,8 @@ describe('the K.8 audit profile', () => {
 
   it('covers every @dzgrid/* value the Angular example imports, the wrapper included (step 23; its fr and en texts stand for ar)', () => {
     // The « stock » screen (Phase 5 step 9, S9-Q4) is not the first load: loaded on demand, measured apart (example:bytes (4)).
-    const lazy = /src\/app\/stock\.component\.ts$/;
+    // Nor the address screen (Phase 6 step 12, Q12-3): its chunk loaded on demand, measured apart (example:bytes (5)).
+    const lazy = /src\/app\/(stock\.component|audit-url)\.ts$/;
     const files = tsUnder('examples/angular-audit/src').filter((f) => !lazy.test(f));
     expect(files.length).toBeGreaterThan(2);
     const STATIC = /\b(?:import|export)\s+(?:[^'"();]*?\bfrom\s*)?['"][^'"]*stock\.component['"]/;
@@ -54,6 +55,9 @@ describe('the K.8 audit profile', () => {
     for (const planted of [`import { StockScreen } from './stock.component';`, `export { StockScreen } from "../app/stock.component";`, `import './app/stock.component';`]) expect(planted, planted).toMatch(STATIC);
     expect(`const m = await import('./app/stock.component');`).not.toMatch(STATIC);
     for (const main of ['main.ts', 'main.zone.ts']) expect(read(`examples/angular-audit/src/${main}`), main).toMatch(/import\('\.\/app\/stock\.component'\)/);
+    const URL_STATIC = /\b(?:import|export)\s+(?:[^'"();]*?\bfrom\s*)?['"][^'"]*\/audit-url['"]/;
+    for (const f of files) expect(read(f), f).not.toMatch(URL_STATIC);
+    for (const main of ['main.ts', 'main.zone.ts']) expect(read(`examples/angular-audit/src/${main}`), main).toMatch(/import\('\.\/app\/audit-url'\)/);
     const used = new Map<string, Set<string>>();
     for (const f of files) for (const [spec, names] of namedValues(read(f), 'import')) used.set(spec, new Set([...(used.get(spec) ?? []), ...names]));
     const lib = [...used].filter(([spec]) => spec.startsWith('@dzgrid/') && !/^@dzgrid\/dom\/locales\/(fr|en)(-|$)/.test(spec));

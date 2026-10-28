@@ -80,7 +80,7 @@ describe('the comfort sheet: built, exported, shipped, budgeted, not in K.8', ()
     expect(budget.entries['@dzgrid/theme/dzgrid.comfort.css']).toEqual({ file: 'packages/theme/dzgrid.comfort.css', maxGzip: 650 });
     expect(budget.entries['@dzgrid/theme']!.maxGzip).toBe(2850);
     expect(budget.entries['@dzgrid/dom/filters: date adapters (lazy)']!.maxGzip).toBe(2850);
-    expect(budget.entries['profile: audit screen (K.8)']!.maxGzip).toBe(84450);
+    expect(budget.entries['profile: audit screen (K.8)']!.maxGzip).toBe(84800); // 84 800 since step 12 (Q12-1)
   });
   it('compiled from comfort.scss (no drift), no colour literal, no physical side', () => {
     const out = (src: string) => `${compileString(src, { loadPaths: [here('..')], style: 'expanded' }).css}\n`;

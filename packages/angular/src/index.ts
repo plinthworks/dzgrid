@@ -11,5 +11,6 @@ export { componentPart } from './component-part';
 export { DzgSearch } from './search';
 export { DzgExport } from './export';
 export { fromObservable, type ObservableLike } from './from-observable';
+export { selectedIds, uiData } from './helpers';
 export { DZG_DEFAULTS, DZG_ENV, DZG_MESSAGES, DZG_PARTS, provideDzGrid, type DzGridConfig, type DzGridDefaults } from './providers';
 export type { DzgCell, DzgEditorComponent, DzgPartComponent, DzgPartContext, DzgTemplateContext, WiredSlot } from './part-bind';

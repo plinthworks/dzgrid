@@ -11,6 +11,25 @@ To be published as **1.1.0** at the Phase 6 close (owner, « Back to Phase 6 »:
 
 ### Added
 
+- **Angular (`@dzgrid/angular`, Phase 6 step 12; all additive, every 1.0.0 binding unchanged):** inputs `[state]` (with
+  `gridState()`: restored before the first request, one request on a server; a value equal to the grid's state or to the
+  last one applied does nothing, so `[state]` + `(stateChanged)` never echoes) and `[pinnedRows]` (with `pinnedRows()`,
+  live); outputs `(stateChanged)`, `(densityChanged)` and `(selectionChanged)` (before, `(selectionChanged)` bound
+  silently as a DOM event that never fired); `DzgController.use(feature)` (a feature's api, typed, no cast) and
+  `.grid()` (the instance, e.g. for `print`); functions `selectedIds(controller)` (`{ mode, ids, query }`: the row ids,
+  not the grid's keys, and the query to replay « all but these ») and `uiData<D>(c)` (a column's `ui.data`, typed);
+  `missing-feature` for `[state]` / `[pinnedRows]` without their feature. Templates for the new `menuItem` slot.
+- **A content part per column-menu item** (`@dzgrid/dom/column-menu`, owner Q12-2): `MenuItem.part` names a part of the
+  new slot `menuItem` (`SlotContext['menuItem']`: `id`, `label`, `kind`, `checked`, `disabled`, `column`); it paints the
+  item's content in an `inert`, `aria-hidden` host, the item keeping its role, state, keys and its `label` as its name.
+  Unknown name: `unknown-part`.
+- Docs: the outputs `<dz-grid>` has and the silent unknown-output trap (angular-parts.md); « Keys and ids » and how to
+  replay an « all but these » selection (selection.md).
+- Example: `?screen=audit-url`, the audit screen with its layout in the address, its chunk on demand (`example:bytes`
+  (5), `example:ssr --screen audit-url`). Playground: `orders.html` (moving, ⋮ menu with an item drawn by a part,
+  chooser, density, layout in the storage and the address), `hr.html` (collapsible groups, a wrapped column with
+  automatic row height, an editable pinned totals row).
+
 - **Printing** (`@dzgrid/dom/print`, Phase 6 step 11, docs/behaviors/print.md; owner Q-I, O9): `preparePrint(grid,
   { maxRows, title })` writes the rows the grid shows — filtered, sorted, searched; a tree's shown rows, indented; top
   pinned rows first and bottom ones last; a paged grid's shown page with « Page 2 of 5 » in the caption — as a real
@@ -32,6 +51,15 @@ To be published as **1.1.0** at the Phase 6 close (owner, « Back to Phase 6 »:
 
 Sizes (gzip): `@dzgrid/dom/print` 1 580 / 1 600 over the DOM base; `print.css` 334 / 400, `print.unlayered.css`
 292 / 400; texts 132 / 140 / 160 (150 / 150 / 200). The DOM base, core, K.8 profile and Angular unchanged.
+
+### Changed
+
+- `gridState()` without `persist` no longer ends a server model's hold it did not make (it never made one): the holder
+  (the Angular wrapper's `[state]`) ends it, so the restored state is the first request. No change with `persist`.
+- Sizes (owner Q12-1): the Angular wrapper's line 7 000 → 7 300, the K.8 audit profile's 84 450 → 84 800; the real
+  Angular example's 92 500 → 95 000 (owner, measured 94 596).
+- `npm run example:bytes` fails on a missing, failed or stale example build (a stamp written by a clean
+  `example:build`), instead of measuring an old one: the example build had been broken since 1.0.0 unnoticed.
 
 ## [1.0.0] - 2026-10-28
 

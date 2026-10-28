@@ -26,6 +26,7 @@ import type { ColumnOrGroup, FilterModel, Query, GridEvent, GridKernel, Problem,
 import { problem } from '@dzgrid/core';
 import { canonical, emit, isDataKey } from '@dzgrid/core/internal';
 import type { SaveHandler } from '@dzgrid/core/edit';
+import type { GridState } from '@dzgrid/core/state';
 import { detailConflicts } from '@dzgrid/core/detail';
 import { createGrid, type GridFeature, type GridInstance, type GridMessages, type GridSettings, type SlotContext, type SlotPart } from '@dzgrid/dom';
 import { DzgController } from './controller';
@@ -43,7 +44,7 @@ const KEYS = [
   'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
 ] as const;
 /** Events with an output of their own name. */
-const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged', 'rangeChanged', 'rangeCopied'];
+const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged', 'rangeChanged', 'rangeCopied', 'stateChanged', 'densityChanged', 'selectionChanged'];
 
 /** What `membershipOf` reads of a query with no filter and no search. */
 const NONE = { filter: {}, quick: '' } as Query;
@@ -113,6 +114,15 @@ export class DzGrid<T> implements AfterContentInit {
    * save in flight keeps its own); never set, `edit({ save })` stays. Without the `edit` feature, `missing-feature`.
    */
   readonly save = input<SaveHandler<T>>();
+  /**
+   * The grid's layout to apply (Phase 6 step 12; `gridState()` in `features`, docs/behaviors/angular-parts.md « State »):
+   * set when the grid is made, restored before its first request (a server asks once); each later value restored,
+   * unless it equals the grid's state (so `[state]="s()" (stateChanged)="s.set($event.state)"` never echoes). Problems
+   * come back in `stateRestored` (`gridEvent`). Without the feature, `missing-feature`. Null or unset: untouched.
+   */
+  readonly state = input<GridState | null>();
+  /** The pinned rows, live (Phase 6 step 12; `pinnedRows()` in `features`): each new value set; `[]` empties a side, an omitted side stays. */
+  readonly pinnedRows = input<{ readonly top?: readonly T[]; readonly bottom?: readonly T[] }>();
 
   /** Unset, the grid owns them; set, written as the host; the user's changes come back. */
   readonly quick = model<string>();
@@ -135,6 +145,12 @@ export class DzGrid<T> implements AfterContentInit {
   /** A block of cells set or dropped (`range()`, Phase 5 step 11a), and a copy or a cut of one (11b). */
   readonly rangeChanged = output<Ev<T, 'rangeChanged'>>();
   readonly rangeCopied = output<Ev<T, 'rangeCopied'>>();
+  /** Once per gesture after the pause (`gridState()`), never for `[state]`: what to keep (Phase 6 step 12). */
+  readonly stateChanged = output<Ev<T, 'stateChanged'>>();
+  /** The user's density (the ⋮ menu), a restore, the api; the `density` input is not written back (Phase 6 step 12). */
+  readonly densityChanged = output<Ev<T, 'densityChanged'>>();
+  /** `{ selection: { mode, keys }, count, source }` (Phase 6 step 12); the `selected` model follows as before. */
+  readonly selectionChanged = output<Ev<T, 'selectionChanged'>>();
   readonly problems = output<readonly Problem[]>();
   readonly gridReady = output<DzgController<T>>();
 
@@ -158,6 +174,8 @@ export class DzGrid<T> implements AfterContentInit {
   private _gone = false;
   /** `[save]` was given a value once: from then on each value is the grid's save (`undefined`: the local save). */
   private _saves = false;
+  /** The `[state]` value applied last, canonical: an equal one is not applied again. */
+  private _st?: string;
   /** The events of the grid's making, told after the first render: written during the host's check, NG0100. */
   private _early: GridEvent<T>[] | null = [];
   /** The model's last set, the host's or the grid's copy: another one is a host write. */
@@ -211,6 +229,14 @@ export class DzGrid<T> implements AfterContentInit {
     });
     effect(() => (this.quick(), this.filter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
     effect(() => (this.save(), this._grid() && untracked(() => this._save())));
+    effect(() => (this.state(), this._grid() && untracked(() => this._state())));
+    effect(() => {
+      const p = this.pinnedRows();
+      if (p && this._grid()) untracked(() => {
+        const api = this.controller._by<{ set(p: object): void }>('pinned-rows');
+        api ? this._zone.runOutsideAngular(() => api.set(p)) : this._miss('pinnedRows', 'pinned-rows');
+      });
+    });
     effect(() => {
       const on = this.floatingFilters();
       // Only the input's own changes write (a new [features] array must not echo it over the user's toggle).
@@ -241,13 +267,16 @@ export class DzGrid<T> implements AfterContentInit {
     this._last = s as unknown as Record<string, unknown>;
     // A feature first, set up before the first paint: the parts that paint mounts can emit, and
     // see the controller ready (its kernel; the API calls wait for createGrid to return).
-    const early: GridFeature = { id: 'dzg-kernel', setup: (c) => (this.controller._attach((this._k = c.kernel as never)), { destroy() {} }) };
+    // A state to restore: a server's model made held, its first request the restored state's (`_state`, then released).
+    const held = this.state() != null;
+    const early: GridFeature = { id: 'dzg-kernel', held, setup: (c) => (this.controller._attach((this._k = c.kernel as never)), { destroy() {} }) };
     const g = this._zone.runOutsideAngular(() =>
       createGrid<T, RowModel<T>>(this._el, { ...s, features: [early, ...(s.features ?? [])], onEvent: (e) => this._hear(e) }, this._env),
     );
     if (this.dzgNested()) this._nest(g.kernel);
     this.controller._attach(g.kernel, g, s.features);
     this._grid.set(g);
+    if (held) this._state(), this._zone.runOutsideAngular(() => g.kernel.rows.hold?.(() => {}));
     this._save();
     this._write(g.kernel);
     this._tell();
@@ -299,7 +328,23 @@ export class DzGrid<T> implements AfterContentInit {
     if (!(this._saves ||= v !== undefined)) return;
     const api = this.controller.edit();
     if (api) api.setSave(v);
-    else if (this._k && !this._told.has('\0save')) this._told.add('\0save'), emit(this._k, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', 'save', 'edit')] });
+    else this._miss('save', 'edit');
+  }
+
+  /** A binding whose feature is not in `features`: one warning per grid and binding. */
+  private _miss(path: string, feature: string): void {
+    if (this._k && !this._told.has('\0' + path)) this._told.add('\0' + path), emit(this._k, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', path, feature)] });
+  }
+
+  /** `[state]` to the grid, outside the zone: a new value only, and not when it equals the grid's own (no echo). */
+  private _state(): void {
+    const v = this.state();
+    const c = v == null ? this._st : canonical(v);
+    if (c === this._st) return;
+    this._st = c;
+    const api = this.controller._by<{ state(): GridState; setState(s: unknown): unknown }>('state');
+    if (!api) this._miss('state', 'state');
+    else if (c !== canonical(api.state())) this._zone.runOutsideAngular(() => api.setState(v));
   }
 
   /** Inside a detail panel (`dzgNested`): the depth told, Escape back to the panel; on the host element, outside the zone. */

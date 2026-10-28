@@ -13,7 +13,24 @@ import { FR } from '@dzgrid/dom/locales/fr';
 import { AR } from '@dzgrid/dom/locales/ar';
 import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
 import { AR_TREE } from '@dzgrid/dom/locales/ar-tree';
-import type { ColumnDef, GridEvent } from '@dzgrid/core';
+import type { ColumnOrGroup, GridEvent } from '@dzgrid/core';
+import type { SaveRequest } from '@dzgrid/core/edit';
+// Phase 6 step 12: collapsible header groups, a wrapped column with rows that grow, an editable totals row at the bottom.
+import { spans } from '@dzgrid/dom/spans';
+import { edit } from '@dzgrid/dom/edit';
+// By path, not `@dzgrid/dom/…`: no alias added to vite.config.ts while the playground server runs (a config change reloads it).
+import { groups } from '../../packages/dom/src/groups.js';
+import { autoHeight } from '../../packages/dom/src/auto-height.js';
+import { pinnedRows } from '../../packages/dom/src/pinned-rows.js';
+import { editors } from '../../packages/dom/src/editors.js';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { AR_COLUMNS } from '@dzgrid/dom/locales/ar-columns';
+import { FR_PINNED } from '@dzgrid/dom/locales/fr-pinned';
+import { AR_PINNED } from '@dzgrid/dom/locales/ar-pinned';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { AR_EDIT } from '@dzgrid/dom/locales/ar-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { AR_EDITORS } from '@dzgrid/dom/locales/ar-editors';
 import { seeded } from './seed.js';
 import { COUNTRIES, flagSvg, type Country } from './flags.js';
 
@@ -33,6 +50,8 @@ export interface Person {
   readonly status: HrStatus;
   readonly email: string;
   readonly phone: string;
+  /** The totals row's own figure (step 12), edited there; the people have none. */
+  readonly budget?: number | null;
 }
 
 const FIRST = ['Amina', 'Yacine', 'Lina', 'Karim', 'Sofia', 'Nassim', 'Inès', 'Rayan', 'Selma', 'Walid', 'Nora', 'Adel', 'Maya', 'Samir', 'Leïla', 'Hugo', 'Clara', 'Omar', 'Yasmine', 'Mehdi', 'Sara', 'Ilyes', 'Chloé', 'Anis', 'Dounia', 'Farid', 'Emma', 'Bilal', 'Hana', 'Tarek', 'Lucas', 'Nadia'];
@@ -84,6 +103,9 @@ const WORDS = {
     staff: ['Infirmier', 'Préparateur en pharmacie', 'Technicien de laboratoire', 'Assistant administratif', 'Développeur', 'Agent logistique'],
     statuses: { ok: 'À jour', due: 'Visite due', leave: 'En arrêt', part: 'Mi-temps thérapeutique' },
     write: (n: string) => `Écrire à ${n}`, call: (n: string) => `Appeler ${n}`,
+    identity: 'Identité', job: 'Emploi', team: 'Équipe', budget: 'Budget',
+    total: (n: string) => `Total : ${n} personnes`, teamOf: (lead: string, n: number) => `rattaché(e) à ${lead}${n ? `, encadre ${n} personne${n > 1 ? 's' : ''}` : ''}`, top: 'en tête de l’organigramme',
+    refused: 'refusé par le serveur de démonstration',
   },
   ar: {
     title: 'الموارد البشرية', employee: 'الموظف', dept: 'القسم', country: 'البلد', hired: 'التوظيف', salary: 'الراتب', status: 'الحالة', contact: 'الاتصال',
@@ -92,6 +114,9 @@ const WORDS = {
     staff: ['ممرض', 'محضّر صيدلي', 'تقني مخبر', 'مساعد إداري', 'مطوّر', 'عون إمداد'],
     statuses: { ok: 'محدَّث', due: 'زيارة مستحقة', leave: 'في عطلة مرضية', part: 'دوام جزئي علاجي' },
     write: (n: string) => `مراسلة ${n}`, call: (n: string) => `الاتصال بـ ${n}`,
+    identity: 'الهوية', job: 'الوظيفة', team: 'الفريق', budget: 'الميزانية',
+    total: (n: string) => `المجموع: ${n} شخصًا`, teamOf: (lead: string, n: number) => `تابع لـ ${lead}${n ? `، يشرف على ${n} أشخاص` : ''}`, top: 'على رأس الهيكل',
+    refused: 'رفضه خادم العرض',
   },
 } as const;
 
@@ -123,12 +148,33 @@ export interface HrDemo {
   readonly rows: readonly Person[];
 }
 
-export function mountHr(host: HTMLElement, o: { locale: string; onEvent?: (e: GridEvent<Person>) => void }): HrDemo {
+/**
+ * Step 12 (`hr.html`): « Identité » and « Emploi » header groups that fold (`groups()`), « Équipe » wrapped with rows as
+ * tall as it (`autoHeight()`; `fixed`: the old fixed 52 px rows, the job title back in the « Employé » cell), and a bottom
+ * « Total » row (`pinnedRows()`: headcount, payroll) whose « Budget » is edited (`edit()`, saved by a fake server 0.6 s
+ * later, refusing a value ending in 7). Off (`tools` unset: the demos' browser harness), the page as before step 12.
+ * The groups need `spans()`, which a tree grid refuses (`unsupported-combination spans tree`): they fold in the list
+ * view (`list`, `?view=list`: the same people, flat, no tree); the org chart keeps its tree and shows the leaves.
+ */
+export function mountHr(host: HTMLElement, o: { locale: string; onEvent?: (e: GridEvent<Person>) => void; tools?: boolean; fixed?: boolean; list?: boolean }): HrDemo {
   const ar = o.locale.startsWith('ar');
   const W = ar ? WORDS.ar : WORDS.fr;
   const base = ar ? AR : FR;
-  const messages = { ...base, text: { ...base.text, ...(ar ? AR_TREE : FR_TREE).text } };
+  const messages = { ...base, text: { ...base.text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_COLUMNS : FR_COLUMNS).text, ...(ar ? AR_PINNED : FR_PINNED).text, ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text } };
   const rows = people();
+  const byId = new Map(rows.map((p) => [p.id, p]));
+  const reports = new Map<string, number>();
+  for (const p of rows) if (p.manager) reports.set(p.manager, (reports.get(p.manager) ?? 0) + 1);
+  const isTotal = (p: Person): boolean => p.id === 'total';
+  const nf = new Intl.NumberFormat(o.locale);
+  let budget: number | null = 9_000_000;
+  /** The bottom band's one row: headcount in « Employé », the payroll in « Salaire », the editable « Budget ». */
+  const totalRow = (): Person => ({
+    id: 'total', manager: null, level: 0, first: 'Σ', last: '', name: W.total(nf.format(rows.length)), dept: 0, country: 'DZ', hired: '',
+    salary: rows.reduce((a, p) => a + p.salary, 0), status: '' as HrStatus, email: '', phone: '', budget,
+  });
+  const auto = !!o.tools && !o.fixed;
+  if (auto) host.classList.add('hr-auto');
   const leads = new Set(rows.map((p) => p.manager).filter((m): m is string => m !== null));
   const region = new Intl.DisplayNames([o.locale], { type: 'region' });
   const job = (p: Person): string => (p.level < 4 ? W.jobs[p.level]! : W.staff[p.dept]!);
@@ -154,10 +200,10 @@ export function mountHr(host: HTMLElement, o: { locale: string; onEvent?: (e: Gr
       cell.append(box);
       const set = (x: typeof c): void => {
         const p = x.row as Person;
-        disc.textContent = `${p.first[0]}${p.last[0]}`;
+        disc.textContent = `${p.first[0]}${p.last[0] ?? ''}`;
         disc.dataset['tone'] = String(tone(p.id));
         name.textContent = p.name;
-        title.textContent = job(p);
+        title.textContent = isTotal(p) ? '' : job(p);
       };
       set(c);
       return { update: set };
@@ -189,6 +235,8 @@ export function mountHr(host: HTMLElement, o: { locale: string; onEvent?: (e: Gr
       cell.append(box);
       const set = (x: typeof c): void => {
         const k = (x.row as Person).country;
+        // Not `hidden`: demos.css sets the box's display.
+        box.style.display = isTotal(x.row as Person) ? 'none' : '';
         if (flag?.dataset['country'] !== k) {
           flag?.remove();
           flag = flagSvg(doc, k);
@@ -225,6 +273,7 @@ export function mountHr(host: HTMLElement, o: { locale: string; onEvent?: (e: Gr
       const set = (x: typeof c): void => {
         const p = x.row as Person;
         dir = x.dir;
+        box.style.display = isTotal(p) ? 'none' : '';
         mail.href = `mailto:${p.email}`;
         mail.setAttribute('aria-label', W.write(p.name));
         tel.href = `tel:${p.phone.replace(/\s/g, '')}`;
@@ -235,22 +284,55 @@ export function mountHr(host: HTMLElement, o: { locale: string; onEvent?: (e: Gr
     },
   });
 
-  const columns: ColumnDef<Person, any>[] = [
+  const money = { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 } as const;
+  /** A sentence long enough to wrap: the job, the department, the manager and how many report to the person. */
+  const team = (p: Person): string => {
+    if (isTotal(p)) return '';
+    const lead = p.manager ? byId.get(p.manager)!.name : null;
+    return `${job(p)} · ${W.depts[p.dept]} — ${lead ? W.teamOf(lead, reports.get(p.id) ?? 0) : W.top}`;
+  };
+  /** Before step 12: one flat row of columns. */
+  const flat: ColumnOrGroup<Person>[] = [
     { id: 'name', header: W.employee, width: 310, pinned: 'start', ui: { cell: 'employee' } },
     { id: 'dept', header: W.dept, width: 160, value: (p: Person) => W.depts[p.dept], ui: { cell: 'dept' } },
     { id: 'country', header: W.country, width: 170, value: (p: Person) => region.of(p.country) ?? p.country, ui: { cell: 'country' } },
     { id: 'hired', header: W.hired, type: 'day', width: 130 },
-    { id: 'salary', header: W.salary, type: 'number', width: 140, numberFormat: { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 } },
+    { id: 'salary', header: W.salary, type: 'number', width: 140, numberFormat: money },
     { id: 'status', header: W.status, type: 'enum', width: 210, enumOptions: (Object.keys(W.statuses) as HrStatus[]).map((value) => ({ value, label: W.statuses[value] })), ui: { cell: 'status' } },
     { id: 'contact', header: W.contact, width: 100, value: (p: Person) => p.email, sortable: false, ui: { cell: 'contact' } },
   ];
+  const grouped: ColumnOrGroup<Person>[] = [
+    { id: 'g-identity', header: W.identity, collapsible: true, children: [
+      { id: 'name', header: W.employee, width: 310, pinned: 'start', ui: { cell: 'employee' } },
+      { id: 'dept', header: W.dept, width: 160, value: (p: Person) => (isTotal(p) ? '' : W.depts[p.dept]), ui: { cell: 'dept' }, groupShow: 'open' },
+      { id: 'country', header: W.country, width: 170, value: (p: Person) => (isTotal(p) ? '' : region.of(p.country) ?? p.country), ui: { cell: 'country' }, groupShow: 'open' },
+    ] },
+    { id: 'g-job', header: W.job, collapsible: true, children: [
+      { id: 'team', header: W.team, width: 240, value: team, wrap: true, sortable: false },
+      { id: 'hired', header: W.hired, type: 'day', width: 130, groupShow: 'open' },
+      { id: 'salary', header: W.salary, type: 'number', width: 140, numberFormat: money },
+      { id: 'status', header: W.status, type: 'enum', width: 210, enumOptions: (Object.keys(W.statuses) as HrStatus[]).map((value) => ({ value, label: W.statuses[value] })), ui: { cell: 'status' }, groupShow: 'open' },
+    ] },
+    // Edited on the totals row only (`editable(row, ctx, { pinned })`): the people's cells stay read-only.
+    { id: 'budget', header: W.budget, type: 'number', width: 150, numberFormat: money, edit: { min: 0 }, editable: (_p: Person, _c: unknown, i: { pinned?: string }) => i.pinned === 'bottom' },
+    { id: 'contact', header: W.contact, width: 100, value: (p: Person) => p.email, sortable: false, ui: { cell: 'contact' } },
+  ];
+  const pins = pinnedRows<Person>({ bottom: [totalRow()] });
+  /** The fake server: 0.6 s, refuses a value ending in 7; the totals row given back with its new budget. */
+  const save = (req: SaveRequest<Person>) => new Promise<void>((ok, no) => setTimeout(() => {
+    if (req.changes.some((c) => /7$/.test(String(c.value ?? '')))) return no({ reason: W.refused });
+    for (const c of req.changes) if (c.pinned && c.column === 'budget') budget = c.value as number | null;
+    pins.api(grid)!.set({ bottom: [totalRow()] });
+    ok();
+  }, 600));
 
   const grid = createGrid<Person>(host, {
-    rows, getRowId: (p) => p.id, columns, messages, locale: o.locale, direction: 'auto', label: W.title,
-    rowHeight: HR_ROW,
-    rowClass: (c) => (leads.has(c.row.id) ? 'hr-lead' : null),
+    rows, getRowId: (p) => p.id, columns: !o.tools ? flat : o.list ? grouped : grouped.flatMap((c) => ('children' in c ? c.children : [c])), messages, locale: o.locale, direction: 'auto', label: W.title,
+    // Fixed 52 px rows only with `?fixed=1`: a fixed row height wins over the measured ones (auto-height.md).
+    ...(!auto && { rowHeight: HR_ROW }),
+    rowClass: (c) => (c.pinned ? 'hr-total' : leads.has(c.row.id) ? 'hr-lead' : null),
     parts: { employee, dept, country, contact, status: badge({ tones: { ok: 'success', due: 'warning', leave: 'danger', part: 'info' } }) },
-    features: [tree<Person>({ parentId: (p) => p.manager, sticky: 3, initial: 2 })],
+    features: [...(o.list ? [spans(), groups()] : [tree<Person>({ parentId: (p) => p.manager, sticky: 3, initial: 2 })]), ...(o.tools ? [pins, edit<Person>({ save }), editors(), ...(auto ? [autoHeight()] : [])] : [])],
     ...(o.onEvent && { onEvent: o.onEvent }),
   });
   return { grid, rows };

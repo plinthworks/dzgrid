@@ -77,3 +77,101 @@ state reads `filters().floating.get()`. Without `filters()` among the features: 
 - **The row height** is `[rowHeight]`; `--dzg-row-height` in CSS does nothing (it is the grid's output, density.md).
 - **A part's data**: `[columns]` with `ui: { data: { … } }`, read in the template as `c.column.def.ui.data`; another
   key of `ui` is warned (`unknown-ui-key`).
+
+## Layout, pinned rows, density, selection and the controller (Phase 6 step 12, 1.1.0; `docs/phase-6-steps/step12-plan.md`)
+All additive: every 1.0.0 input, output and controller method is unchanged (`compat` test in `step12-api.test.ts`).
+
+### The outputs `<dz-grid>` has — and the silent trap
+An unknown `(event)` on `<dz-grid>` is **not an error**: Angular binds it as a DOM event on the host element, which
+never fires. Strict templates do not catch it (a typo, an output from another library, a renamed one). The outputs
+are exactly these; anything else goes through `(gridEvent)` and its `type`:
+
+| Output | Its `$event` | Since |
+|---|---|---|
+| `(gridEvent)` | every `GridEvent` (filter on `$event.type`) | 1.0.0 |
+| `(cellClicked)`, `(rowClicked)` | the event, with the row | 1.0.0 |
+| `(cellAction)`, `(partAction)` | `{ column, key, name, detail }`, `{ slot, column, name, detail }` | 1.0.0 |
+| `(fetchFailed)`, `(rowExpanded)` | the event | 1.0.0 |
+| `(cellEdited)`, `(saveFailed)`, `(orderStale)`, `(undoChanged)` | the edit events (edit-angular.md) | 1.0.0 |
+| `(rangeChanged)`, `(rangeCopied)` | the block's events | 1.0.0 |
+| `(problems)` | `readonly Problem[]` | 1.0.0 |
+| `(gridReady)` | the `DzgController` | 1.0.0 |
+| `(quickChange)`, `(filterChange)`, `(selectedChange)`, `(expandedChange)` | the models' two-way halves (`[(quick)]`…) | 1.0.0 |
+| `(stateChanged)` | `{ state, source }` | 1.1.0 |
+| `(densityChanged)` | `{ density, source }` | 1.1.0 |
+| `(selectionChanged)` | `{ selection: { mode, keys }, count, source }` — **keys, not ids** (below) | 1.1.0 |
+
+Before 1.1.0, `(selectionChanged)` was such a silent DOM binding (the allergen app's « selected rows stay empty »); it is
+now a real output. Strict templates check `$event` on these: `$event.rows` on `(selectionChanged)` does not compile
+(`scripts/test/angular-strict.test.ts`). No dev-mode check of unknown host listeners: the DOM gives no way to list them,
+and any check would cost the wrapper's bytes in production.
+
+### `[state]` and `(stateChanged)` (needs `gridState()` in `[features]`, grid-state.md)
+- `[state]` set when the grid is made is restored **before its first request**: a server grid asks **once**, with the
+  restored sort, filter and page (the wrapper holds the model; `gridState()` releases only the hold it made itself, with
+  `persist`). Each later value is restored, outside Angular's zone.
+- **No echo:** a value equal (canonically) to the grid's state, or to the value applied last, does nothing. So the
+  usual loop `[state]="saved()" (stateChanged)="saved.set($event.state)"` settles: the state just received is never
+  restored back. A restore never fires `(stateChanged)`; its problems come in `stateRestored` (`(gridEvent)`).
+- `(stateChanged)` fires once per gesture after the pause (300 ms), inside the zone; the pause's timer runs outside it.
+- `gridState({ persist })` is for the browser's storage; `[state]` for the page's address or the app's own store. Both:
+  the storage at creation, then `[state]` wins (two requests on a server; prefer one of them).
+- Without `gridState()`: one `missing-feature` (path `state`), the grid as defined.
+
+### `[pinnedRows]` (needs `pinnedRows()`, pinned-rows.md)
+`[pinnedRows]="{ bottom: [totals()] }"`: each new value is `api.set(value)` (an omitted side stays, `[]` empties it),
+outside the zone. A literal in the template is a new object only when its signal changes; a `computed` is clearer.
+Editing a pinned cell is the usual `edit()`; the save request carries `pinned: 'top' | 'bottom'`. Without the feature,
+one `missing-feature` (path `pinnedRows`).
+
+### `(densityChanged)`
+The user's density (the ⋮ menu's density line), a state restore, the api. One-way: the `density` input is not written
+back; after a user's choice the grid holds it, and the host imposes again by binding a **new** value.
+
+### Selection: keys are not ids — `selectedIds()`
+`SelectionState.keys` and the event's `selection.keys` are the grid's **row keys** (`d:13:6132500711040`), not your
+`getRowId` ids: sent to a server they match nothing. `selectedIds(controller)` gives
+`{ mode, ids, query }`: the ids (`idOfDataKey` of each key, held rows or not), the mode, and the grid's query (filter
+model, sort, search). With `mode: 'exclude'` (« Select all », then a few unticked) the selection is « every row the
+query matches but these »: the server replays the query. On a server grid the query as the server reads it is the
+last `DataRequest` its `fetch` received (`filter` in wire form, `sort`, `quick`, `key`); the CSV export's `exportAll`
+request carries it too (`request.server`). selection.md « Keys and ids ».
+
+```ts
+onSelection(): void {
+  const s = selectedIds(this.ctrl);              // null before the grid
+  if (s?.mode === 'include') this.api.delete(s.ids);
+  else if (s) this.api.deleteAllBut(s.ids, this.lastRequest); // the query the server last answered
+}
+```
+
+### `DzgController.use(feature)` and `.grid()`
+- `ctrl.use(chooser)?.open(button)`, `ctrl.use(pins)?.set({ bottom })`, `ctrl.use(state)?.state()`: the feature
+  object's own `api`, typed from it, no cast, no fake grid object; null before the grid, after it, on a server.
+- `ctrl.grid()`: the grid instance (same lifetime as `kernel()`), e.g. **printing**:
+  `print(this.ctrl.grid()!, { title })` from `@dzgrid/dom/print` (imported by the app where it prints).
+
+### `uiData<D>(c)`
+A column's `ui.data`, typed by the caller, from any part's context: `uiData<{ colours: Record<string, string> }>(c)`.
+Undefined when the column gives none. Tree-shaken when unused (as `selectedIds`).
+
+### A template per column-menu item (owner Q12-2)
+```html
+<dz-grid … [features]="[menu]">
+  <ng-template dzgPart="swatch" [slot]="'menuItem'" let-c>
+    <i class="dot" [class.on]="c.checked"></i>{{ c.label }}
+  </ng-template>
+</dz-grid>
+```
+```ts
+menu = columnMenu({ items: (col, defaults) => [...defaults, { separator: true },
+  { id: 'mark', label: 'Mettre en évidence', kind: 'check', checked: this.marked(col.id), part: 'swatch', action: … }] });
+```
+The template draws the item's content inside the menuitem, in a host the grid makes `inert` and `aria-hidden`; the item
+keeps its role, its check state, the keys, the type-ahead and its **name, the `label`** — show that text too (WCAG
+2.5.3), and put no control in it (none could take the focus). `c` has `id`, `label`, `kind`, `checked`, `disabled`,
+`column` and what every part gets. Destroyed when the menu redraws or closes. column-menu.md « Item content ».
+
+### `[slot]` is a binding, strictly typed
+`<ng-template dzgPart="x" [slot]="'menuItem'" let-c>` types `c` as that slot's context; `{{ c.nope }}` does not
+compile. A static `slot="…"` is an attribute (the input stays `cell`; « Notes from an app » below).

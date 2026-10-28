@@ -19,5 +19,11 @@ export async function bootstrapStock(context: ServerContext) {
   return bootstrapApplication(StockScreen, { providers: [zoneless(), provideServerRendering()] }, context);
 }
 
+/** The address screen on a server (`example:ssr --screen audit-url`): the address read, no grid, no timer. */
+export async function bootstrapAuditUrl(context: ServerContext) {
+  const { addressProviders } = await import('./app/audit-url');
+  return bootstrapApplication(AuditScreen, { providers: [zoneless(), provideServerRendering(), ...addressProviders()] }, context);
+}
+
 export { renderApplication } from '@angular/platform-server';
 export { AUDIT_PROBE, newProbe } from './app/probe';

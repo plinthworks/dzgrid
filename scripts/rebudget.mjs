@@ -122,8 +122,8 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/tailwind.css': 500, // T7: each framework bridge
   '@dzgrid/theme/tailwind3.css': 500, // T7
   '@dzgrid/theme/bootstrap.css': 500, // T7
-  '@dzgrid/angular': 7000, // owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
-  'profile: audit screen (K.8)': 84450, // the owner's third look (2026-10-27, « Comfort stylesheet »): 84 450; Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000; Q9-3 (2026-10-27): 84 150 (auto height's base seam); the owner's look (2026-10-27): 84 300
+  '@dzgrid/angular': 7300, // Phase 6 step 12 (owner Q12-1, the Q-B grant): 7 300; before: owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
+  'profile: audit screen (K.8)': 84800, // Phase 6 step 12 (owner Q12-1): 84 800; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 84 450; Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000; Q9-3 (2026-10-27): 84 150 (auto height's base seam); the owner's look (2026-10-27): 84 300
   // `@dzgrid/dom/groups` (owner Q8-4, 2026-10-27): its measure + 10 %, no ceiling of its own (measured 1 893 → 2 100).
   // Phase 6 step 8b-1 (owner Q2, 2026-10-27): pinned rows over the DOM base, 2 000 (up to 2 300 only if editing needs
   // it: asked again); their own -pinned texts 120 / 140 / 170; pinned-rows.css about 450 (the line at its measure + 10 %).

@@ -19,7 +19,7 @@ describe('11. sizes: the new lines; the base, core, K.8 and Angular unchanged', 
   });
 
   it('the base, core, K.8 and Angular lines unchanged (22 400, 29 150, 84 450, 7 000)', () => {
-    expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map((n) => budget[n]!.maxGzip)).toEqual([22400, 29150, 84450, 7000]);
+    expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map((n) => budget[n]!.maxGzip)).toEqual([22400, 29150, 84800, 7300]); // K.8 and Angular raised at step 12 (owner Q12-1)
   });
 
   it('neither the DOM base nor the K.8 profile reaches the print module (0 B by construction)', async () => {

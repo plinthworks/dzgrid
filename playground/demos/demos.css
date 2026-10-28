@@ -61,3 +61,20 @@
   clip-path: path(evenodd, "M3 6V4a3 3 0 0 1 6 0v2h1.5v8h-9V6zM4.5 6h3V4a1.5 1.5 0 0 0-3 0z");
 }
 @media (forced-colors: active) { .dzg-cell.demo-locked::after { forced-color-adjust: none; background: CanvasText; } }
+
+/* ---- Phase 6 step 12 ---- */
+/* hr.html with measured rows (not ?fixed=1): one line in « Employé », a smaller disc; the job title is in « Équipe ». */
+.hr-auto .hr-title { display: none; }
+.hr-auto .hr-avatar { inline-size: 22px; block-size: 22px; font-size: .625rem; }
+/* The totals band's row. */
+.hr-total .hr-name, .hr-total .dzg-cell { font-weight: 600; }
+/* orders.html: the ⋮ menu item drawn by the page (a dot, then its text), and the column « Mettre en évidence » marks. */
+.orders-swatch { display: inline-block; inline-size: .625rem; block-size: .625rem; margin-inline-end: .5rem; border-radius: 50%; border: 1px solid var(--tz-accent); vertical-align: middle; }
+.orders-swatch[data-on="true"] { background: var(--tz-accent); }
+.demo-orders[data-mark] .dzg-cell[data-col] { transition: background-color .15s; }
+.demo-orders[data-mark="ref"] .dzg-cell[data-col="ref"], .demo-orders[data-mark="client"] .dzg-cell[data-col="client"], .demo-orders[data-mark="day"] .dzg-cell[data-col="day"],
+.demo-orders[data-mark="status"] .dzg-cell[data-col="status"], .demo-orders[data-mark="qty"] .dzg-cell[data-col="qty"], .demo-orders[data-mark="amount"] .dzg-cell[data-col="amount"] {
+  background: color-mix(in oklab, var(--tz-accent) 16%, var(--tz-bg));
+}
+.demo-density { display: inline-flex; gap: .25rem; align-items: center; }
+@media (forced-colors: active) { .orders-swatch[data-on="true"] { background: Highlight; } }

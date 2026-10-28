@@ -1,9 +1,9 @@
 import { Injectable, computed, signal, untracked } from '@angular/core';
 import type { GridCommand, GridCommandResult, GridKernel, RowKey, RowModel } from '@dzgrid/core';
 import type { GridFeature, GridInstance } from '@dzgrid/dom';
-import type { EditApi, EditFeature } from '@dzgrid/dom/edit';
-import type { RangeApi, RangeFeature } from '@dzgrid/dom/range';
-import type { FillApi, FillFeature } from '@dzgrid/dom/fill';
+import type { EditApi } from '@dzgrid/dom/edit';
+import type { RangeApi } from '@dzgrid/dom/range';
+import type { FillApi } from '@dzgrid/dom/fill';
 
 type FilterOpener = GridFeature & { openFilter(column: string): boolean; closeFilter(): void };
 
@@ -63,15 +63,30 @@ export class DzgController<T = unknown> {
    * grid (`undo()`, `redo()`, `reapply()`, `canUndo`, `commit`, …); null before the grid, without it, after it.
    */
   edit(): EditApi<T> | null {
-    return this.#find<EditFeature<T>>('edit')?.api(this.#grid!) || null;
+    return this._by<EditApi<T>>('edit');
   }
   /** The grid's block of cells (Phase 5 step 12): the `range()` feature given in `features`; null before, without it, after. */
   range(): RangeApi | null {
-    return this.#find<RangeFeature>('range')?.api(this.#grid!) || null;
+    return this._by<RangeApi>('range');
   }
   /** The grid's fill (Phase 5 step 12): the `fill()` feature given in `features`; null before, without it, after. */
   fill(): FillApi | null {
-    return this.#find<FillFeature>('fill')?.api(this.#grid!) || null;
+    return this._by<FillApi>('fill');
+  }
+  /**
+   * A feature's api for this grid (Phase 6 step 12): `use(chooser)?.open(button)`, `use(pins)?.set({ bottom })`,
+   * `use(state)?.state()` — typed from the feature object, no cast; null before the grid, after it, and on a server.
+   */
+  use<A>(feature: { api(grid: GridInstance<T, RowModel<T>>): A | null }): A | null {
+    return this.#grid && feature.api(this.#grid);
+  }
+  /** The grid instance (Phase 6 step 12; `print(ctrl.grid()!, …)`): same lifetime as `kernel()`, null outside it. */
+  grid(): GridInstance<T, RowModel<T>> | null {
+    return this.#grid;
+  }
+  /** @internal The api of the feature given in `features` with this id; null without it or without the grid. */
+  _by<A>(id: string): A | null {
+    return this.#find<{ api(g: object): A | null }>(id)?.api(this.#grid!) || null;
   }
   #find<F>(id: string): F | undefined {
     return this.#grid ? (this.#features.find((f) => f.id === id) as F | undefined) : undefined;

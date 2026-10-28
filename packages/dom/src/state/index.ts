@@ -105,10 +105,11 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
       };
       APIS.set(k, api);
       g.scope.add(k.subscribe((e) => void (!quiet && e.source !== 'host' && SAVED.includes(e.type) && arm(e.source))));
-      try {
-        if (o.persist) g.scope.add(keep(k, api, o.persist.key, o.persist.include));
+      // The storage restored, then a server model this feature held asks: what was restored, or the grid as defined.
+      // Without `persist` the hold is someone else's (the Angular wrapper's `[state]`, Phase 6 step 12): theirs to end.
+      if (o.persist) try {
+        g.scope.add(keep(k, api, o.persist.key, o.persist.include));
       } finally {
-        // A held server model asks now: what was restored, or the grid as defined.
         g.rows.hold?.(() => {});
       }
       last = text();

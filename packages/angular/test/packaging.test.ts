@@ -90,6 +90,8 @@ describe('the Angular package’s manifest and public API (step 22)', () => {
     expect(Object.keys(api).sort()).toEqual([
       'DZGRID_ANGULAR_VERSION', 'DZG_DEFAULTS', 'DZG_ENV', 'DZG_MESSAGES', 'DZG_PARTS',
       'DzGrid', 'DzgController', 'DzgExport', 'DzgPart', 'DzgSearch', 'componentPart', 'fromObservable', 'provideDzGrid',
+      // Phase 6 step 12 (angular-parts.md « Selection », « uiData »): two free functions, tree-shaken when unused.
+      'selectedIds', 'uiData',
     ]);
   });
 

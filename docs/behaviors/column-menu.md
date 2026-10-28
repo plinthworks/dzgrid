@@ -239,3 +239,18 @@ Chrome fr light / ar RTL dark, forced colours, 200 % zoom and 320 px, axe 0.
   focused item, ButtonText on the ⋮.
 - **Engines (headless)**: Firefox sends the page no `contextmenu` for Shift+right-click (its own menu) nor for a Mac's
   Ctrl+click; WebKit and Chrome turn Ctrl+click into `contextmenu`, which opens the menu without sorting.
+
+## Item content (Phase 6 step 12, owner Q12-2; 1.1.0)
+- `MenuItem.part` names a part of slot **`menuItem`** (`definePart('menuItem', …)` in `settings.parts`, or an Angular
+  `dzgPart` template with `[slot]="'menuItem'"`). Built-in items can get one too, through `items` (`{ ...d, part }`).
+- The part paints the item's content inside the menuitem, in a `span.dzg-mpart` the grid makes **`inert`** and
+  **`aria-hidden`**: no control of the part's takes the focus, nothing of it joins the name. The item keeps its role,
+  `aria-checked`, `aria-disabled`, the roving focus, the keys and the type-ahead (on `label`); its accessible name is
+  the `label` (`aria-label`), so the part should show that text (WCAG 2.5.3, label in name). A click on the part is the
+  item's click.
+- Its context: `id`, `label`, `kind` (`item`, `radio`, `check`), `checked`, `disabled`, `column`, and `PartBase`.
+- Mounted when the menu draws the item; destroyed when the menu redraws (an item that keeps it open) or closes. A part
+  that throws is reported and the item shows its plain text. An unknown name: plain text and `unknown-part` (path
+  `menu.<id>.part`); a part of another slot: plain text.
+- Bytes: in `@dzgrid/dom/column-menu` (4 297 / 4 300, measured; the parts' mounter is `@dzgrid/dom/internal`'s shared
+  one). Tests: `packages/dom/test/column-menu-item-part.test.ts`, Angular `packages/angular/test/menu-template.test.ts`.
