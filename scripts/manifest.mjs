@@ -103,3 +103,26 @@ export function mapProblems(name, files, read) {
   }
   return problems;
 }
+
+/**
+ * How every package reaches npm (1.0.0, 2026-10-28): public under the `@dzgrid` organisation, with a provenance
+ * attestation that the release workflow (.github/workflows/release.yml, trusted publishing over OIDC) signs. A
+ * manual publish from a laptop has no such identity: it passes `--provenance=false` (docs/release-1.0.0.md).
+ */
+export const PUBLISH_CONFIG = { access: 'public', provenance: true };
+
+/** The Node the packages are checked on (ARCHITECTURE K.7: Node ≥ 22 for the tools); a browser ignores it. */
+export const ENGINES = { node: '>=22' };
+
+/** A manifest missing what the registry page and a consumer's install read; empty when it can ship. */
+export function publishProblems(name, manifest) {
+  const problems = [];
+  const pc = manifest.publishConfig;
+  if (!pc || pc.access !== 'public' || pc.provenance !== true) problems.push(`packages/${name} publishConfig is not { access: public, provenance: true }`);
+  if (!manifest.engines?.node) problems.push(`packages/${name} has no engines.node`);
+  if (!Array.isArray(manifest.keywords) || manifest.keywords.length === 0) problems.push(`packages/${name} has no keywords`);
+  if (!manifest.homepage) problems.push(`packages/${name} has no homepage`);
+  if (!manifest.bugs?.url) problems.push(`packages/${name} has no bugs.url`);
+  if (manifest.license !== 'MIT') problems.push(`packages/${name} license is ${manifest.license}, not MIT`);
+  return problems;
+}

@@ -1,32 +1,32 @@
 // @vitest-environment node
 // Step 25 (the Phase 3 close, owner Q4): 0.1.0 prepared, never published. Phase 4 step 13: 0.2.0 prepared,
-// not published. Phase 5 step 13 (the close): 0.3.0 prepared, not published. The four packages carry one version, their @dzgrid peers follow it, and every manifest
+// not published. Phase 5 step 13 (the close): 0.3.0 prepared, not published. 2026-10-28: 1.0.0, the first npm release (the owner publishes). The four packages carry one version, their @dzgrid peers follow it, and every manifest
 // that ships says where its source is.
 import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 // @ts-expect-error a plain .mjs script
-import { mapProblems, repositoryProblems } from '../manifest.mjs';
+import { mapProblems, publishProblems, repositoryProblems } from '../manifest.mjs';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const pkg = (name: string) => JSON.parse(readFileSync(`${ROOT}packages/${name}/package.json`, 'utf8'));
 const NAMES = ['core', 'dom', 'angular', 'theme'];
 
-describe('0.3.0, the four packages', () => {
-  it('share one version, 0.3.0', () => {
-    expect(NAMES.map((n) => pkg(n).version)).toEqual(['0.3.0', '0.3.0', '0.3.0', '0.3.0']);
+describe('1.0.0, the four packages', () => {
+  it('share one version, 1.0.0', () => {
+    expect(NAMES.map((n) => pkg(n).version)).toEqual(['1.0.0', '1.0.0', '1.0.0', '1.0.0']);
   });
 
-  it('name their @dzgrid peers at that version (build.mjs pins them to ^0.3.0)', () => {
+  it('name their @dzgrid peers at that version (build.mjs pins them to ^1.0.0)', () => {
     for (const n of NAMES) {
       for (const [dep, range] of Object.entries((pkg(n).peerDependencies ?? {}) as Record<string, string>)) {
-        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('0.3.0');
+        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('1.0.0');
       }
     }
   });
 
   it('the Angular package states its own version', () => {
-    expect(readFileSync(`${ROOT}packages/angular/src/version.ts`, 'utf8')).toContain("DZGRID_ANGULAR_VERSION = '0.3.0'");
+    expect(readFileSync(`${ROOT}packages/angular/src/version.ts`, 'utf8')).toContain("DZGRID_ANGULAR_VERSION = '1.0.0'");
   });
 
   it('export the Phase 4 subpaths (tree, lazy children, master/detail and their texts)', () => {
@@ -194,6 +194,42 @@ describe('mapProblems: no shipped source map points at a file left behind', () =
       const files = tree(dist);
       expect(files.filter((f) => f.endsWith('.d.ts.map'))).toEqual([]);
       expect(mapProblems(n, files, (f: string) => readFileSync(`${dist}/${f}`, 'utf8'))).toEqual([]);
+    });
+  }
+});
+
+// 1.0.0 (2026-10-28), the first npm release: every shipped manifest says how it is published (public, with a
+// provenance attestation from the release workflow), which Node it is checked on, and where to read and report.
+describe('publishProblems: a shipped manifest is ready for the registry', () => {
+  const good = {
+    license: 'MIT',
+    homepage: 'https://github.com/plinthworks/dzgrid#readme',
+    bugs: { url: 'https://github.com/plinthworks/dzgrid/issues' },
+    keywords: ['data-grid'],
+    engines: { node: '>=22' },
+    publishConfig: { access: 'public', provenance: true },
+  };
+
+  it('accepts a complete manifest', () => {
+    expect(publishProblems('core', good)).toEqual([]);
+  });
+
+  it('refuses a manifest without public access or provenance, without engines, keywords, homepage, bugs or licence', () => {
+    expect(publishProblems('core', { ...good, publishConfig: { access: 'public' } })).toEqual(['packages/core publishConfig is not { access: public, provenance: true }']);
+    expect(publishProblems('core', { ...good, publishConfig: undefined })).toHaveLength(1);
+    expect(publishProblems('core', { ...good, engines: undefined })).toEqual(['packages/core has no engines.node']);
+    expect(publishProblems('core', { ...good, keywords: [] })).toEqual(['packages/core has no keywords']);
+    expect(publishProblems('core', { ...good, homepage: undefined, bugs: undefined, license: 'ISC' })).toHaveLength(3);
+  });
+
+  it('the theme, published from its folder, is ready', () => {
+    expect(publishProblems('theme', pkg('theme'))).toEqual([]);
+  });
+
+  for (const n of ['core', 'dom', 'angular']) {
+    const file = `${ROOT}packages/${n}/dist/package.json`;
+    it.skipIf(!existsSync(file))(`the built ${n} is ready`, () => {
+      expect(publishProblems(n, JSON.parse(readFileSync(file, 'utf8')))).toEqual([]);
     });
   }
 });

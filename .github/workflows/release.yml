@@ -1,0 +1,62 @@
+# The npm release, on a version tag (docs/release-1.0.0.md).
+#
+# Publishing is driven by a tag, so what ships is always a named commit someone can go back and read. The job
+# runs the gates first, then publishes the four packages in dependency order (core, dom, theme, angular),
+# skipping any version npm already has, and asks the registry until all four are installable.
+#
+# Trusted publishing: GitHub mints a short-lived identity token for this job (id-token: write) and npm checks it
+# against the trusted publisher declared on each package (repository plinthworks/dzgrid, workflow release.yml).
+# No npm token is stored anywhere. npm signs a provenance attestation (publishConfig.provenance in each manifest).
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+
+      # Trusted publishing needs npm 11.5.1 or later.
+      - name: Use an npm that speaks OIDC
+        run: npm install -g npm@^11.5.1
+
+      - run: npm ci
+
+      # The tag is the only thing a human types: checked against the four manifests before anything else.
+      - name: The tag must match the packages' version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./packages/core/package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "Tag v$TAG does not match the packages' version $PKG. Fix one and tag again."
+            exit 1
+          fi
+
+      # The gates, as on a laptop: one worker (Angular's test environment is set up once per context).
+      - run: npm run test:ci
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run check:size
+      - run: npm run check:contrast
+      - run: npm run release:check
+
+      # No stored token: the OIDC token is the credential. Already published versions are skipped.
+      - name: Publish to npm (core, dom, theme, angular)
+        run: npm run publish:release

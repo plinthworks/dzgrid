@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-28
+
+The first release on npm: `@dzgrid/core`, `@dzgrid/dom`, `@dzgrid/theme` and `@dzgrid/angular`, all at 1.0.0
+(0.1.0, 0.2.0 and 0.3.0 were prepared locally and never published; their entries below are part of this release).
+From 1.0.0 on, a breaking change to the public API needs a major version; later phases add features in minors.
+
+- **Phase 1, the core** (`@dzgrid/core`): typed row identities, calendar days kept apart from instants, columns,
+  sorting and filtering that follow the language (Arabic folding, Arabic-Indic digits), quick search, selection,
+  paging, the keyboard model, problems as values. No DOM, no `Date`, no dependency; conformance cases in JSON.
+- **Phase 2, the DOM layer and the theme** (`@dzgrid/dom`, `@dzgrid/theme`): virtual rows and columns, pinned
+  columns, right to left, the WAI-ARIA grid pattern, popups in the top layer; the theme in a cascade layer, light and
+  dark, more contrast, forced colours, every pair checked for contrast.
+- **Phase 3, server, filters, export, Angular**: server rows behind a request gate, filter UI (text, number, set,
+  day, instant with tzslot), cells spanning rows and columns, the CSV export, English / French / Arabic
+  messages, motion (optional GSAP peer); `@dzgrid/angular` (`<dz-grid>`, signals, zoneless first, parts as
+  components or templates, Angular 19 to 22).
+- **Phase 4, tree and master/detail**: a WAI-ARIA treegrid with lazy children, master/detail rows with nested grids,
+  sticky parents, the filter row.
+- **Phase 5, editing**: F2 / Enter / typing opens an editor; the application's `save` decides; refusals said and
+  shown; undo and redo; blocks of cells, the clipboard in TSV, the fill handle, Ctrl+D / Ctrl+R, bulk edit; showcase
+  themes and Tailwind CSS 3 / 4 and Bootstrap 5.3 bridges.
+- **Phase 6 so far, advanced columns**: moving columns, the column menu, the column chooser, keyboard resize and
+  autofit, `GridState` (save and restore, local or in the address), collapsible header groups, editable pinned rows,
+  automatic row height, the optional comfort stylesheet; the owner's integration feedback (below).
+
+### Release
+
+- Every shipped manifest: built JavaScript and declarations only (`exports`, `types`), `sideEffects` (false; the
+  theme's CSS kept), licence, repository with its folder, homepage, bugs, keywords, `engines` (Node ≥ 22),
+  `publishConfig: { access: public, provenance: true }`, a short README and the licence. `publint` clean;
+  `@arethetypeswrong/cli` clean under its `esm-only` profile (the packages are ESM only).
+- `.github/workflows/release.yml`: on a `v*` tag, the gates, then npm trusted publishing (OIDC) with provenance, in
+  dependency order (core, dom, theme, angular), skipping versions already on npm; `scripts/release.mjs` (`release:check`,
+  `publish:release`, `publish:dry`, `publish:verify`). The owner's steps: `docs/release-1.0.0.md`.
+- GSAP's licence re-read before publishing (`docs/phase-5-steps/gsap-license.md`): an optional peer, never bundled.
+- `npm run pack:local` stamps `1.0.1-local.<time>`: above 1.0.0, never shadowed by the published version.
+
+### Known limits
+
+- Phase 6 is not closed: printing and the Angular inputs for the Phase 6 features (and their demos) are still to come.
+- Still open by hand: input methods and phones (a11y 124a–b), real Excel / Google Sheets / Safari checks,
+  screen-reader listening, the Arabic review.
+- Phases 7 to 11 (row grouping, infinite server rows, xlsx / menus / status bar / advanced filter / row dragging,
+  pivot, hardening) and the documentation website come later.
+
+### Phase 6 and integration feedback in detail
+
 ### Fixed (the fourth look)
 
 - **The footer's selection actions** (« Select all N rows », « Clear selection ») share the pager's class and were drawn
@@ -327,7 +374,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pretend server call (`range().api(grid).clear()`: `rangeChanged` source `api`, not said); documented in
   `range-selection.md`.
 
-## [0.3.0] - unreleased
+## [0.3.0] - never published (part of 1.0.0)
 
 Prepared at the Phase 5 close (2026-10-26), **not published**: the four packages at 0.3.0, their `@dzgrid/*` peers on
 `^0.3.0`. Phase 5, editing — Part A (cell editing, saves, undo) and Part B (blocks of cells, the clipboard, the fill
@@ -616,7 +663,7 @@ optional argument (an older kind still type-checks); the tzslot loader moved fro
   scrolled the grid instead of moving the caret (End ran to the last row, the edit kept out of sight); the field now
   moves the caret itself and the grid never scrolls under it.
 
-## [0.2.0] - unreleased
+## [0.2.0] - never published (part of 1.0.0)
 
 Prepared at the Phase 4 close (2026-10-22), **not published**: the four packages at 0.2.0, their
 `@dzgrid/*` peers on `^0.2.0`. Phase 4 Parts A–C: the tree view, master/detail, sticky parent rows
@@ -789,7 +836,7 @@ conditions as 0.1.0.
   `ModelEnv` gains `shape?`; `TreeRows` gains `kidsOf`, and `childrenAt` says -1 for a lazy parent
   not loaded. `tree()` with a server's rows is no longer refused.
 
-## [0.1.0] - unreleased
+## [0.1.0] - never published (part of 1.0.0)
 
 Prepared at the Phase 3 close (2026-10-21) and tagged `v0.1.0` locally, **never published** (0.2.0
 follows it; no 0.1.0 exists on npm): the four packages `@dzgrid/core`,

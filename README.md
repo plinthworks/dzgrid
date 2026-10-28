@@ -9,7 +9,7 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **A theme** (`@dzgrid/theme`): CSS custom properties in a cascade layer, light and dark, every text and part checked for contrast; two showcase themes (Midnight, Clinic) and bridges to Tailwind CSS 3 and 4 and Bootstrap 5.3.
 - **Angular** (`@dzgrid/angular`): `<dz-grid>` with signals, zoneless first, cells and other parts as Angular components or templates; Angular 19 to 22.
 
-> **Status: Phase 5 — editing, closed technically on 2026-10-26; 0.3.0 prepared, unpublished.** Phases 0 to 3 are done on the DzGrid side (closed 2026-10-21), Phase 4 (tree, master/detail, sticky parents, floating toggle) closed technically on 2026-10-22. Phase 5 adds cell editing with saves, refusals and undo (Part A), then blocks of cells, the clipboard, the fill handle and bulk edit (Part B), all in Angular too. Still open, by hand and by the owner: input methods and phones (a11y 124a–b), real Excel / Google Sheets / Safari checks, screen-reader listening, the Arabic review, and the GSAP licence before any publication. Nothing is on npm yet (0.1.0 and 0.2.0 were never published). Next: Phase 6 (column menu, column chooser, column moving), then the documentation website — see [`docs/STATUS.md`](docs/STATUS.md). The API may still change.
+> **Status: 1.0.0, the first npm release (prepared 2026-10-28; see [`CHANGELOG.md`](CHANGELOG.md)).** Phases 0 to 5 are done (core, DOM layer, theme, server, filters, export, Angular, tree, master/detail, editing, blocks of cells, the clipboard, the fill handle); Phase 6 (advanced columns) is well under way — printing and its Angular inputs are still to come. Still open by hand: input methods and phones (a11y 124a–b), real Excel / Google Sheets / Safari checks, screen-reader listening, the Arabic review. Next: the end of Phase 6, the documentation website, then Phases 7 to 11 — see [`docs/STATUS.md`](docs/STATUS.md). From 1.0.0 on, breaking changes need a major version.
 
 ## What it cares about
 
@@ -20,6 +20,19 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **Cells spanning rows and columns**, like an HTML table's `rowspan` and `colspan`: merged identical values, spans decided by the data, grouped headers, full-width rows.
 - **Problems are values.** A bad column, filter or server answer is reported as a structured problem — never a silent failure, never a crash.
 - **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 82 986 B gzipped (guard 83 500); in a real Angular 21 build (`ng build`, `npm run example:bytes`), DzGrid's share of the audit screen's first load is 92 059 B (ceiling 92 500, owner decision S12-Q10; the editable « stock » screen loads apart).
+
+## Install
+
+```sh
+npm install @dzgrid/core @dzgrid/dom @dzgrid/theme
+npm install @dzgrid/angular            # with Angular 19 to 22
+```
+
+ESM only, no runtime dependency (the Angular package: `tslib` only). Optional peers, only for the features that use them: `@tzslot/core` and
+`@tzslot/dom` (`>=2.4.0 <3`, date filters and date editors), `gsap` (`^3.13.0`, the `@dzgrid/dom/motion-gsap`
+entry; never bundled, under its own licence). Each package has a short README:
+[core](packages/core/README.md), [dom](packages/dom/README.md), [theme](packages/theme/README.md),
+[angular](packages/angular/README.md).
 
 ## A first grid
 
