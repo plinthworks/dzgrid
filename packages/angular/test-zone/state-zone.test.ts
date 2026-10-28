@@ -69,6 +69,22 @@ describe('step 12 with zone.js', () => {
     expect((fixture.nativeElement as HTMLElement).querySelector('.count')!.textContent).toBe('1');
   });
 
+  it('resetState() called outside the zone: its stateChanged still heard inside it', async () => {
+    where.state.length = 0;
+    TestBed.configureTestingModule({ providers: [provideZoneChangeDetection(), fakeEnv().provider] });
+    const fixture = TestBed.createComponent(Host);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+    const c = fixture.componentInstance.ctl!;
+    c.dispatch({ type: 'sort.set', sort: [{ column: 'n', dir: 'desc' }] });
+    await new Promise((r) => setTimeout(r, 400));
+    TestBed.inject(NgZone).runOutsideAngular(() => expect(c.resetState()).toEqual([]));
+    await new Promise((r) => setTimeout(r, 400));
+    await fixture.whenStable();
+    expect(where.state).toEqual([true, true]);
+    expect(c.kernel()!.query.sort).toEqual([]);
+  });
+
   it('densityChanged and selectionChanged inside the zone', async () => {
     where.density.length = where.selection.length = 0;
     TestBed.configureTestingModule({ providers: [provideZoneChangeDetection(), fakeEnv().provider] });

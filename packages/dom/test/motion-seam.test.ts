@@ -87,6 +87,6 @@ describe('the size lines (owner, 2026-10-20, step 26, Q4; reset at the Phase 3 c
     expect(run.maxGzip).toBe(3500); // Phase 5 close: the measure 3 382 + 10 %, capped at the Q16 grant
     expect(b['gsap kit: core']).toMatchObject({ maxGzip: null, without: ['gsap', 'gsap/*'] });
     expect(b['profile: audit screen + motion']).toMatchObject({ file: 'perf/profiles/audit-motion.ts', maxGzip: null, split: true });
-    expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(84800); // step 12 (Q12-1): 84 800; the owner's third look (« Comfort stylesheet »): 84 450; owner Q17a: 83 500; Q-B / Q8-5 (Phase 6 step 7): 84 000; Q9-3 (step 9): 84 150; the owner's look: 84 300; 90 000 guards example:bytes
+    expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(84900); // step 12 (Q12-1): 84 800; the owner's third look (« Comfort stylesheet »): 84 450; owner Q17a: 83 500; Q-B / Q8-5 (Phase 6 step 7): 84 000; Q9-3 (step 9): 84 150; the owner's look: 84 300; 90 000 guards example:bytes
   });
 });

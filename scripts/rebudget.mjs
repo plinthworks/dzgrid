@@ -116,15 +116,15 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/columns-panel': 4400, // Q4-4: up to 4 400 used at the review of steps 3–4 (its own live status, auto-scroll loop: measured 4 282)
   '@dzgrid/theme/columns-panel.css': 1000,
   // Phase 6 step 5 (owner Q-B): the GridState feature, its storage and address helpers, over the DOM base (core/state outside it).
-  '@dzgrid/dom/state': 1150, // owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
+  '@dzgrid/dom/state': 1200, // owner « clearFilters/resetState » (2026-10-28): 1 150 → 1 200; before: owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
   '@dzgrid/theme': 2850, // the owner's third look (2026-10-27, « Comfort stylesheet »): 2 750 → 2 850 (the pinned edge, the field's ring, the magnifier); T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7
   '@dzgrid/theme/tailwind.css': 500, // T7: each framework bridge
   '@dzgrid/theme/tailwind3.css': 500, // T7
   '@dzgrid/theme/bootstrap.css': 500, // T7
-  '@dzgrid/angular': 7300, // Phase 6 step 12 (owner Q12-1, the Q-B grant): 7 300; before: owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
-  'profile: audit screen (K.8)': 84800, // Phase 6 step 12 (owner Q12-1): 84 800; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 84 450; Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000; Q9-3 (2026-10-27): 84 150 (auto height's base seam); the owner's look (2026-10-27): 84 300
+  '@dzgrid/angular': 7350, // owner « clearFilters/resetState » (2026-10-28): 7 300 → 7 350; before: Phase 6 step 12 (owner Q12-1, the Q-B grant): 7 300; before: owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
+  'profile: audit screen (K.8)': 84900, // owner « clearFilters/resetState » (2026-10-28): 84 800 → 84 900; before: Phase 6 step 12 (owner Q12-1): 84 800; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 84 450; Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000; Q9-3 (2026-10-27): 84 150 (auto height's base seam); the owner's look (2026-10-27): 84 300
   // `@dzgrid/dom/groups` (owner Q8-4, 2026-10-27): its measure + 10 %, no ceiling of its own (measured 1 893 → 2 100).
   // Phase 6 step 8b-1 (owner Q2, 2026-10-27): pinned rows over the DOM base, 2 000 (up to 2 300 only if editing needs
   // it: asked again); their own -pinned texts 120 / 140 / 170; pinned-rows.css about 450 (the line at its measure + 10 %).

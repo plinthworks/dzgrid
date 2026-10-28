@@ -151,6 +151,14 @@ onSelection(): void {
 - `ctrl.grid()`: the grid instance (same lifetime as `kernel()`), e.g. **printing**:
   `print(this.ctrl.grid()!, { title })` from `@dzgrid/dom/print` (imported by the app where it prints).
 
+### `DzgController.clearFilters()` and `.resetState()` (1.1.0)
+- `clearFilters()`: every column filter and the quick search emptied, the sort kept, in one `query.set` (one request on
+  a server; the no-results panel's `clearFilters`, overlays.md); `(stateChanged)` follows as a gesture. False before
+  the grid.
+- `resetState()` (needs `gridState()`): the grid as defined at creation — columns, groups, sort, filters, search, page,
+  density — in one request (grid-state.md « Reset »); `(stateChanged)` follows, no restore back with `[state]` bound
+  to it. Null without the feature or the grid, else the restore's problems.
+
 ### `uiData<D>(c)`
 A column's `ui.data`, typed by the caller, from any part's context: `uiData<{ colours: Record<string, string> }>(c)`.
 Undefined when the column gives none. Tree-shaken when unused (as `selectedIds`).

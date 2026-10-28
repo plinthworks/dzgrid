@@ -1,9 +1,10 @@
 import { Injectable, computed, signal, untracked } from '@angular/core';
-import type { GridCommand, GridCommandResult, GridKernel, RowKey, RowModel } from '@dzgrid/core';
+import { makeQuery, type GridCommand, type GridCommandResult, type GridKernel, type Problem, type RowKey, type RowModel } from '@dzgrid/core';
 import type { GridFeature, GridInstance } from '@dzgrid/dom';
 import type { EditApi } from '@dzgrid/dom/edit';
 import type { RangeApi } from '@dzgrid/dom/range';
 import type { FillApi } from '@dzgrid/dom/fill';
+import type { GridStateApi } from '@dzgrid/dom/state';
 
 type FilterOpener = GridFeature & { openFilter(column: string): boolean; closeFilter(): void };
 
@@ -57,6 +58,17 @@ export class DzgController<T = unknown> {
   }
   closeFilter(): void {
     this.#filters()?.closeFilter();
+  }
+  /** Empties every column filter and the quick search, keeps the sort; one request on a server; stateChanged follows as a gesture. False before the grid. */
+  clearFilters(): boolean {
+    return this.dispatch({ type: 'query.set', query: makeQuery({ sort: untracked(this.kernel)?.query.sort }) }).ok;
+  }
+  /**
+   * Back to the grid as defined at creation (needs `gridState()` in `features`): columns, groups, sort, filters, search,
+   * page, density, in one request; stateChanged follows. Null without the feature or the grid, else the restore's problems.
+   */
+  resetState(): Problem[] | null {
+    return this._by<GridStateApi>('state')?.reset() ?? null;
   }
   /**
    * The grid's edits (Phase 5 step 9, edit-angular.md 6): the `edit()` feature given in `features`, its api for this

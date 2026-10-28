@@ -144,6 +144,19 @@ None in the bundles (problems are codes; sentences belong to the application).
 - Problems never carry a value: `state-column` gives the id (not row data), `state-field` the path only; the 4 KB warning
   is `state-field` at the parameter's name, detail `too-large`.
 
+## Reset (1.1.0, `api(grid).reset()`; Angular `DzgController.resetState()`)
+- **Initial** is the grid as defined at creation, captured when the feature is set up, before any restore (the
+  storage's with `persist`, the Angular wrapper's `[state]`): columns (order, widths, hidden, pins), sort, filters,
+  search, page and page size (paged grid), density. Taken once: a later `setState`, `update({ density })` or
+  `columns.set` does not move it.
+- Groups: always `{}`, the definitions back (one fold).
+- Applied as `setState` applies a state: under the model's hold, **one request** on a server; returns what was skipped.
+  As the host's change, then told as a gesture: **one `stateChanged`** (source `'api'`) after the pause, none when nothing
+  moved; **no `stateRestored`**. With Angular's `[state]="saved()" (stateChanged)="saved.set($event.state)"` the loop
+  settles (the value received equals the grid's state: not restored back).
+- Known limit: after the host's `columns.set`, a column of the initial state that is gone is skipped and told
+  (`state-column`, as any restore); a column added since is left as it is (it goes after the named ones).
+
 ## Tests (to be written with the code)
 Conformance `conformance/cases/grid-state/*` (capture → JSON → restore round trips, unknown version /
 column / group / field, an older version upgraded, all-hidden refused, restore order, a planted row value

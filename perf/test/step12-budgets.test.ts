@@ -11,8 +11,8 @@ const b = (JSON.parse(read('size-budget.json')) as { entries: Record<string, { m
 
 describe('step 12 budgets', () => {
   it('the two granted raises: K.8 84 800, Angular 7 300', () => {
-    expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(84800);
-    expect(b['@dzgrid/angular']!.maxGzip).toBe(7300);
+    expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(84900); // owner « clearFilters/resetState » (84 800 at step 12)
+    expect(b['@dzgrid/angular']!.maxGzip).toBe(7350); // owner « clearFilters/resetState » (7 300 at step 12)
   });
 
   it('the real example 95 000 (owner, decisions.md « Real Angular example line »: measured 94 596)', () => {
@@ -20,6 +20,6 @@ describe('step 12 budgets', () => {
   });
 
   it('no other line moves: column-menu 4 300, dom 22 400, core 29 150, dom/state 1 150', () => {
-    expect(['@dzgrid/dom/column-menu', '@dzgrid/dom', '@dzgrid/core', '@dzgrid/dom/state'].map((n) => b[n]!.maxGzip)).toEqual([4300, 22400, 29150, 1150]);
+    expect(['@dzgrid/dom/column-menu', '@dzgrid/dom', '@dzgrid/core', '@dzgrid/dom/state'].map((n) => b[n]!.maxGzip)).toEqual([4300, 22400, 29150, 1200]); // dom/state 1 200 since « clearFilters/resetState »
   });
 });

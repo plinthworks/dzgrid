@@ -61,6 +61,9 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
   `.grid()` (the instance, e.g. for `print`); functions `selectedIds(controller)` (`{ mode, ids, query }`: the row ids,
   not the grid's keys, and the query to replay « all but these ») and `uiData<D>(c)` (a column's `ui.data`, typed);
   `missing-feature` for `[state]` / `[pinnedRows]` without their feature. Templates for the new `menuItem` slot.
+- **`DzgController.clearFilters()` and `.resetState()`** (owner, 1.1.0): every filter and the search emptied, the sort
+  kept, one request; and, with `gridState()`, the grid as defined at creation (columns, groups, sort, filters, search,
+  page, density) in one request, `(stateChanged)` following, no loop with `[state]`. In the DOM: `GridStateApi.reset()`.
 - **A content part per column-menu item** (`@dzgrid/dom/column-menu`, owner Q12-2): `MenuItem.part` names a part of the
   new slot `menuItem` (`SlotContext['menuItem']`: `id`, `label`, `kind`, `checked`, `disabled`, `column`); it paints the
   item's content in an `inert`, `aria-hidden` host, the item keeping its role, state, keys and its `label` as its name.

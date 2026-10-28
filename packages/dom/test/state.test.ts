@@ -422,3 +422,89 @@ describe('review fixes', () => {
   });
 });
 
+
+// The owner's 1.1.0 addition (DzgController.resetState): `reset()` brings back the grid as defined at creation.
+describe('reset(): the grid as defined at creation', () => {
+  /** Every part moved by the user: order, width, hidden, pin, sort, filter, search, page, density. */
+  const move = (t: ReturnType<typeof make>): void => {
+    const k = t.g.kernel;
+    k.dispatch({ type: 'column.state', patch: [{ id: 'city', order: 0, pinned: 'start' }, { id: 'name', order: 1, width: 222 }, { id: 'age', order: 2, hidden: true }] }, 'user');
+    k.dispatch({ type: 'sort.set', sort: [{ column: 'age', dir: 'desc' }] }, 'user');
+    k.dispatch({ type: 'filter.column', column: 'city', filter: { type: 'text', op: 'contains', value: 'O' } }, 'user');
+    k.dispatch({ type: 'quick.set', text: 'o' }, 'user');
+    k.dispatch({ type: 'page.go', index: 1 }, 'user');
+    t.g.update({ density: 'compact' });
+  };
+
+  it('columns, sort, filter, search, page and density back to the capture at creation; nothing skipped', () => {
+    const t = make({ rows: ROWS, pagination: { pageSize: 1 } });
+    const initial = stateText(t.api().state());
+    move(t);
+    expect(stateText(t.api().state())).not.toBe(initial);
+    expect(t.api().reset()).toEqual([]);
+    expect(stateText(t.api().state())).toBe(initial);
+    expect(t.g.kernel.columns.visible().map((c) => c.id)).toEqual(['name', 'age', 'city']);
+  });
+
+  it('with persist: back to the grid as defined, not to what the storage restored', () => {
+    localStorage.setItem(KEY, JSON.stringify({ v: 1, columns: [{ id: 'city', pinned: 'start', order: 0 }], sort: [{ column: 'name', dir: 'desc' }], quick: 'ab', density: 'spacious' }));
+    const t = make({ rows: ROWS }, gridState({ persist: { key: KEY } }));
+    expect(t.g.kernel.query.quick).toBe('ab');
+    t.api().reset();
+    const s = t.api().state();
+    expect([s.sort, s.quick, s.density, s.columns.map((c) => [c.id, c.pinned])]).toEqual([[], '', 'comfortable', [['name', null], ['age', null], ['city', null]]]);
+  });
+
+  it('a setState or a host update before it does not move the baseline', () => {
+    const t = make({ rows: ROWS });
+    const initial = stateText(t.api().state());
+    t.api().setState({ v: 1, sort: [{ column: 'city', dir: 'asc' }], density: 'spacious' });
+    t.g.update({ density: 'compact' });
+    t.api().reset();
+    expect(stateText(t.api().state())).toBe(initial);
+  });
+
+  it('after a host columns.set (known limit): a vanished column skipped and told (state-column), a new one left as it is', () => {
+    const t = make({ rows: ROWS });
+    t.g.update({ columns: [{ id: 'name', width: 100 }, { id: 'age', type: 'number' }, { id: 'zip', width: 90, pinned: 'end' }] as never });
+    t.g.kernel.dispatch({ type: 'column.state', patch: [{ id: 'name', width: 300 }] }, 'user');
+    expect(t.api().reset()).toEqual([{ code: 'state-column', severity: 'warning', path: 'columns.2', detail: 'city' }]);
+    const s = t.api().state();
+    expect(s.columns.map((c) => [c.id, c.width, c.pinned])).toEqual([['name', undefined, null], ['age', undefined, null], ['zip', undefined, 'end']]);
+  });
+
+  it('events: no stateRestored; nothing on an unchanged grid; one stateChanged (source api) after the pause, even when only the density moved', () => {
+    vi.useFakeTimers();
+    const t = make({ rows: ROWS });
+    expect(t.api().reset()).toEqual([]);
+    vi.advanceTimersByTime(1000);
+    expect(t.of('stateChanged')).toEqual([]);
+    const ctx = (t.g as any).context;
+    ctx.settings = { ...ctx.settings, density: 'spacious' };
+    emit(t.g.kernel, { type: 'densityChanged', source: 'user', density: 'spacious' });
+    vi.advanceTimersByTime(300);
+    expect(t.of('stateChanged').length).toBe(1);
+    t.api().reset();
+    vi.advanceTimersByTime(299);
+    expect(t.of('stateChanged').length).toBe(1);
+    vi.advanceTimersByTime(1);
+    expect(t.of('stateChanged').map((e) => [e.source, e.state.density])).toEqual([['user', 'spacious'], ['api', 'comfortable']]);
+    expect(t.of('stateRestored')).toEqual([]);
+    vi.advanceTimersByTime(1000);
+    expect(t.of('stateChanged').length).toBe(2);
+  });
+
+  it('a server grid: ONE request for the reset, carrying the query and page at creation', () => {
+    const s = server();
+    const t = make({ source: s.source, pagination: { pageSize: 50 } });
+    const first = s.reqs[0]!;
+    t.g.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'name', dir: 'asc' }] }, 'user');
+    t.g.kernel.dispatch({ type: 'quick.set', text: 'x' }, 'user');
+    t.g.kernel.dispatch({ type: 'page.go', index: 2 }, 'user');
+    const n = s.reqs.length;
+    t.api().reset();
+    expect(s.reqs.length - n).toBe(1);
+    const r = s.reqs.at(-1)!;
+    expect([r.sort, r.quick, r.filter, r.page]).toEqual([first.sort, first.quick, first.filter, first.page]);
+  });
+});

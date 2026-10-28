@@ -313,6 +313,23 @@ describe('the API and the state (header-groups.md 6, 7)', () => {
     expect(t.of('stateChanged').length).toBe(1);
   });
 
+  it('gridState reset(): the groups back to their definitions, one fold; one stateChanged (source api) after the pause', () => {
+    vi.useFakeTimers();
+    const st = gridState({ debounce: 10 });
+    const t = make({ features: [st] });
+    const initial = st.api(t.g)!.state();
+    t.button('Patient')!.click();
+    vi.advanceTimersByTime(20);
+    expect(t.of('stateChanged').length).toBe(1);
+    const fold = vi.spyOn(t.ctx.columns, 'fold');
+    expect(st.api(t.g)!.reset()).toEqual([]);
+    expect(fold).toHaveBeenCalledTimes(1);
+    expect(st.api(t.g)!.state()).toEqual(initial);
+    expect(t.shown()).toContain('age');
+    vi.advanceTimersByTime(20);
+    expect(t.of('stateChanged').map((e) => [e.source, e.state.groups])).toEqual([['user', { patient: false }], ['api', initial.groups]]);
+  });
+
   it('the same state restores the same columns left to right and right to left', () => {
     const st = { v: 1, groups: { patient: false }, columns: [{ id: 'note', order: 0, pinned: 'start' }] };
     const out = (['en', 'ar'] as const).map((lang) => {
@@ -378,7 +395,7 @@ describe('size lines (owner Q8-1, Q8-4, Q8-5)', () => {
   it('lines pushed by compression only (Q8-5): core/edit 3 150, core/server 6 200, the K.8 guard 84 000 (84 150 since Q9-3, 84 300 since the owner\'s look)', async () => {
     const { readFileSync } = await import('node:fs');
     const b = JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')).entries;
-    expect([b['@dzgrid/core/edit'].maxGzip, b['@dzgrid/core/server'].maxGzip, b['profile: audit screen (K.8)'].maxGzip]).toEqual([3150, 6200, 84800]); // K.8: 84 800 at step 12 (Q12-1); 84 450 at the owner's third look (« Comfort stylesheet »)
+    expect([b['@dzgrid/core/edit'].maxGzip, b['@dzgrid/core/server'].maxGzip, b['profile: audit screen (K.8)'].maxGzip]).toEqual([3150, 6200, 84900]); // K.8: 84 800 at step 12 (Q12-1); 84 450 at the owner's third look (« Comfort stylesheet »)
   });
 
   it('the -columns texts get 600 / 720 / 900 B gz for the group sentences', async () => {

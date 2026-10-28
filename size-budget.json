@@ -1,5 +1,5 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 84 800. A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 84 900. A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
@@ -554,7 +554,7 @@
     },
     "@dzgrid/dom/state": {
       "file": "packages/dom/src/state.ts",
-      "maxGzip": 1150,
+      "maxGzip": 1200,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -750,7 +750,7 @@
       "css": [
         "packages/theme/dzgrid.css"
       ],
-      "maxGzip": 84800,
+      "maxGzip": 84900,
       "external": [
         "@angular/*",
         "rxjs",
@@ -784,7 +784,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 7300,
+      "maxGzip": 7350,
       "external": [
         "@angular/*",
         "@dzgrid/*",

@@ -11,6 +11,11 @@ export interface GridStateApi {
   state(): GridState;
   /** Applies a state (G 6): one `stateRestored` event; the focus not moved, nothing said, no `stateChanged`. */
   setState(state: unknown): Problem[];
+  /**
+   * Back to the grid as defined at creation, before any restore (columns, groups, sort, filters, search, page, density):
+   * one request, then `stateChanged` as a gesture (source `'api'`); no `stateRestored`.
+   */
+  reset(): Problem[];
 }
 
 export interface GridStateOptions {
@@ -79,6 +84,8 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
       let cancel = (): void => {};
       const text = (): string => stateText(captureState(k, env));
       let last = '';
+      // The grid as defined: taken before the storage's restore (below), never again.
+      const initial = captureState(k, env);
       const arm = (s: ChangeSource): void => {
         source = s;
         cancel();
@@ -102,6 +109,8 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
           emit(k, { type: 'stateRestored', source: 'host', problems });
           return problems;
         },
+        // Groups `{}`: the definitions back. As the host's change, told as a gesture when the pause ends (nothing if nothing moved).
+        reset: () => (arm('api'), restoreState(k, { ...initial, groups: {} }, env)),
       };
       APIS.set(k, api);
       g.scope.add(k.subscribe((e) => void (!quiet && e.source !== 'host' && SAVED.includes(e.type) && arm(e.source))));

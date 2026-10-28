@@ -53,6 +53,14 @@ npm update @dzgrid/core @dzgrid/dom @dzgrid/theme @dzgrid/angular
 (l'un ou l'autre) ; les clés ne sont pas des id (`selectedIds()`) ; l'impression (`print.css` ou `print.unlayered.css`) ;
 la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le spinner.
 
+## Ajouté au contrôleur Angular (demande du propriétaire)
+
+- `clearFilters()` : vide tous les filtres de colonne et la recherche, garde le tri ; une seule requête sur un
+  serveur ; `(stateChanged)` suit. `false` avant la grille.
+- `resetState()` (avec `gridState()`) : la grille telle que définie à sa création — colonnes, groupes, tri, filtres,
+  recherche, page, densité — en une requête ; `(stateChanged)` suit, sans boucle avec `[state]`. `null` sans la
+  fonctionnalité ou sans la grille. Côté DOM : `gridState().api(grid).reset()`.
+
 ## Ce qui a été vérifié (2026-10-28)
 
 Voir ROADMAP « Phase 6 — close » : le portail complet (vitest, `test:perm`, `test:tz`, `typecheck`, `build`,
