@@ -324,7 +324,7 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
     expect([b['@dzgrid/dom/locales/en-rules']!.maxGzip, b['@dzgrid/dom/locales/fr-rules']!.maxGzip, b['@dzgrid/dom/locales/ar-rules']!.maxGzip]).toEqual([200, 200, 250]);
     expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(10100); // the owner's grant (Q17b), §5.2's /filters 10 kB; 10 100 since the owner's look (2026-10-27)
     expect(b['@dzgrid/theme']!.maxGzip).toBe(2850); // the owner's third look (decisions.md « Comfort stylesheet »); Phase 5 close (Q-C2): 2 750, the measure 2 494 + 10 %
-    expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3550); // Phase 4 close: 3 211 + 10 %
+    expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3450); // Phase 4 close: 3 211 + 10 % → 3 550; Phase 6 close: 3 132 + 10 % → 3 450
     expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1350); // a raise: it was at its cap
   });
 });

@@ -7,7 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-To be published as **1.1.0** at the Phase 6 close (owner, « Back to Phase 6 »: a minor, no breaking change).
+## [1.1.0] - 2026-10-28
+
+The Phase 6 close (owner, « Back to Phase 6 »): a minor, additive over 1.0.0 — every 1.0.0 subpath and named export is
+still there (655 named exports of the published 1.0.0 checked against this build), the `<dz-grid>` inputs, outputs and
+controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
+
+### Upgrade notes (from 1.0.0)
+
+- **Angular selection: `[(selected)]` or `(selectionChanged)`.** `[(selected)]` is the model (a `SelectionState`, keys
+  and mode, written back as the user ticks); `(selectionChanged)` is the event (`{ selection, count, source }`), new in
+  1.1.0: in 1.0.0 a `(selectionChanged)` binding compiled and never fired (Angular binds an unknown output as a DOM
+  event). Use one or the other; both agree.
+- **Keys are not ids.** The grid's selection holds row KEYS (`d:13:3017620422003`), not your `getRowId` ids. To send a
+  selection to a server, use `selectedIds(controller)` (`{ mode, ids, query }`): the ids, and in `exclude` mode (after
+  « Select all ») the query to replay « every row it matches but these ». Group, pinned and detail keys are left out.
+- **Print**: import `@dzgrid/theme/print.css` (or `print.unlayered.css` under an unlayered reset such as Tailwind's
+  preflight) next to the theme, then `print(grid, { title })` from `@dzgrid/dom/print` (`ctrl.grid()` in Angular).
+- **Comfort sheet**: thin scroll bars and the default loading spinner left the base theme for the optional
+  `@dzgrid/theme/dzgrid.comfort.css` (and `dzgrid.comfort.unlayered.css`); import it to keep them
+  (`--dzg-scrollbar: auto` restores the system bars).
+
+### Fixed (review of the Angular step)
+
+- `[state]` given back equal to an older value after the user moved the grid (« reset to saved ») was ignored: it is
+  compared with the grid's state now, so it is restored; the value applied last is skipped only while the grid has not
+  moved (the effect run again, the `(stateChanged)` echo). A value then `null` restores nothing.
+- `gridState({ persist })` with `[state]` on a server grid asked twice (the storage's restore ended the hold, then
+  `[state]` asked again): the storage's restore now keeps the hold of another holder, one request in all.
+- The release gates the real Angular example: `release.yml` builds and measures it (`example:build`,
+  `example:bytes`) before `test:ci`, where its vitest measure now fails (not skips) on a missing, failed or stale
+  build under CI or `DZG_RELEASE_CHECK=1`; `npm run release:check` builds it when stale, measures it, then checks the
+  manifests.
+
+### Fixed (review after step 11)
+
+- `print()` twice in a row: the older build opened a dialog too; now only the newest prints (a cancelled
+  `preparePrint` resolves null) and each cleanup removes its own table. Without `afterprint` (Safari's PDF path) the
+  first `focus` or `pointerdown` after the dialog cleans up.
+- `print.truncated` and `print.page` are grid keys in the types (`GridMessages.text`, `msg`): a literal bundle with them
+  compiles, no cast (types only).
+- Filters: destroying the grid during a `busyFlash` left `aria-busy` on its root; removed with the timer.
+- Popups are kept inside the window less its scrollbars (`documentElement.clientWidth` / `clientHeight`, not
+  `innerWidth`): right to left, a popup no longer slides under the left scrollbar.
 
 ### Added
 
@@ -60,6 +102,22 @@ Sizes (gzip): `@dzgrid/dom/print` 1 580 / 1 600 over the DOM base; `print.css` 3
   Angular example's 92 500 → 95 000 (owner, measured 94 596).
 - `npm run example:bytes` fails on a missing, failed or stale example build (a stamp written by a clean
   `example:build`), instead of measuring an old one: the example build had been broken since 1.0.0 unnoticed.
+- Sizes at the close (`size-budget.json`, ROADMAP « Phase 6 — close »): every line the measure + 10 %, rounded up to
+  50 B, capped by the owner's grants; a line without a grant is its own ceiling (`scripts/rebudget.mjs`). Lowered:
+  pagination 3 550 → 3 450, editors-list 1 400 → 1 350, the pasted-HTML chunk 600 → 550, `print.unlayered.css` 400 →
+  350; raised within their grants: `dom/spans` 4 950 → 5 050 (Q-B 5 300), `dom/range` 5 050 → 5 200, `dom/fill`
+  3 100 → 3 150 (Q1), `dom/columns` 4 100 → 4 200, `columns.css` 1 150 → 1 200 (Q6-6), `dom/pinned-rows` 2 200 →
+  2 300 (Q2). The DOM base 22 400, core 29 150, K.8 84 800, Angular 7 300 unchanged.
+
+### Tests and tools
+
+- The light « real app » page (`playground/real-app.html`) and `npm run test:real-app` (Chrome, phase closes only):
+  Tailwind 3's preflight unlayered, a brand on the tokens, the unlayered theme, comfort and print sheets; row boxes,
+  set-filter pills, the inline period with `apply: 'button'`, header search boxes, the pager and its selection buttons,
+  the ⋮ menu, the chooser; light and dark at two sizes: no horizontal overflow, square pager buttons only, one box per
+  set-filter row, popups inside the viewport, the focus in each popup on open (« Du » for the period); six screenshots
+  compared with `docs/screenshots/real-app/`.
+- `npm run pack:local` stamps `1.1.1-local.<time>`: above 1.1.0.
 
 ## [1.0.0] - 2026-10-28
 
@@ -85,17 +143,6 @@ From 1.0.0 on, a breaking change to the public API needs a major version; later 
 - **Phase 6 so far, advanced columns**: moving columns, the column menu, the column chooser, keyboard resize and
   autofit, `GridState` (save and restore, local or in the address), collapsible header groups, editable pinned rows,
   automatic row height, the optional comfort stylesheet; the owner's integration feedback (below).
-
-### Fixed (review after step 11)
-
-- `print()` twice in a row: the older build opened a dialog too; now only the newest prints (a cancelled
-  `preparePrint` resolves null) and each cleanup removes its own table. Without `afterprint` (Safari's PDF path) the
-  first `focus` or `pointerdown` after the dialog cleans up.
-- `print.truncated` and `print.page` are grid keys in the types (`GridMessages.text`, `msg`): a literal bundle with them
-  compiles, no cast (types only).
-- Filters: destroying the grid during a `busyFlash` left `aria-busy` on its root; removed with the timer.
-- Popups are kept inside the window less its scrollbars (`documentElement.clientWidth` / `clientHeight`, not
-  `innerWidth`): right to left, a popup no longer slides under the left scrollbar.
 
 ### Release
 

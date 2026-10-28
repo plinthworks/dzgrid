@@ -1,6 +1,6 @@
 {
   "name": "@dzgrid/core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Data grid model, from scratch: typed row identities, calendar days kept apart from instants, sorting and filtering. No DOM, no framework, no Date, no dependency.",
   "type": "module",
   "license": "MIT",

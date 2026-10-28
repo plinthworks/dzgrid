@@ -1,6 +1,6 @@
 // @vitest-environment node
 // Step 25 (the Phase 3 close, owner Q4): 0.1.0 prepared, never published. Phase 4 step 13: 0.2.0 prepared,
-// not published. Phase 5 step 13 (the close): 0.3.0 prepared, not published. 2026-10-28: 1.0.0, the first npm release (the owner publishes). The four packages carry one version, their @dzgrid peers follow it, and every manifest
+// not published. Phase 5 step 13 (the close): 0.3.0 prepared, not published. 2026-10-28: 1.0.0, the first npm release (the owner publishes); the Phase 6 close: 1.1.0, a minor (additive over 1.0.0). The four packages carry one version, their @dzgrid peers follow it, and every manifest
 // that ships says where its source is.
 import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -12,21 +12,31 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const pkg = (name: string) => JSON.parse(readFileSync(`${ROOT}packages/${name}/package.json`, 'utf8'));
 const NAMES = ['core', 'dom', 'angular', 'theme'];
 
-describe('1.0.0, the four packages', () => {
-  it('share one version, 1.0.0', () => {
-    expect(NAMES.map((n) => pkg(n).version)).toEqual(['1.0.0', '1.0.0', '1.0.0', '1.0.0']);
+describe('1.1.0, the four packages', () => {
+  it('share one version, 1.1.0', () => {
+    expect(NAMES.map((n) => pkg(n).version)).toEqual(['1.1.0', '1.1.0', '1.1.0', '1.1.0']);
   });
 
-  it('name their @dzgrid peers at that version (build.mjs pins them to ^1.0.0)', () => {
+  it('name their @dzgrid peers at that version (build.mjs pins them to ^1.1.0)', () => {
     for (const n of NAMES) {
       for (const [dep, range] of Object.entries((pkg(n).peerDependencies ?? {}) as Record<string, string>)) {
-        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('1.0.0');
+        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('1.1.0');
       }
     }
   });
 
+  it('export the Phase 6 subpaths, their texts and sheets (1.1.0: columns, menu, chooser, state, pinned rows, auto height, print, groups)', () => {
+    const core = Object.keys(pkg('core').exports);
+    const dom = Object.keys(pkg('dom').exports);
+    const theme = Object.keys(pkg('theme').exports);
+    expect(core).toContain('./state');
+    for (const k of ['./columns', './column-menu', './columns-panel', './state', './pinned-rows', './auto-height', './print', './groups']) expect(dom, k).toContain(k);
+    for (const l of ['columns', 'column-menu', 'pinned', 'print']) for (const g of ['en', 'fr', 'ar']) expect(dom).toContain(`./locales/${g}-${l}`);
+    for (const f of ['columns', 'columns-panel', 'pinned-rows', 'print', 'dzgrid.comfort']) for (const u of ['', '.unlayered']) expect(theme).toContain(`./${f}${u}.css`);
+  });
+
   it('the Angular package states its own version', () => {
-    expect(readFileSync(`${ROOT}packages/angular/src/version.ts`, 'utf8')).toContain("DZGRID_ANGULAR_VERSION = '1.0.0'");
+    expect(readFileSync(`${ROOT}packages/angular/src/version.ts`, 'utf8')).toContain("DZGRID_ANGULAR_VERSION = '1.1.0'");
   });
 
   it('export the Phase 4 subpaths (tree, lazy children, master/detail and their texts)', () => {

@@ -153,7 +153,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
     const l = e['@dzgrid/dom/editors-list']!;
     expect(l.file).toBe('packages/dom/src/editors-list.ts');
-    expect(l.maxGzip).toBe(c);
+    expect(l.maxGzip).toBe(1350); // the Phase 6 close: lowered to its measure + 10 % (1 224 → 1 350), under its ceiling
+    expect(l.maxGzip!).toBeLessThanOrEqual(c!);
     expect(l.over).toBe('@dzgrid/dom/popup');
     expect(l.external).toEqual(expect.arrayContaining(['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal']));
   });
@@ -275,7 +276,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(e['@dzgrid/dom/range']).toEqual({ file: 'packages/dom/src/range.ts', maxGzip: e['@dzgrid/dom/range']!.maxGzip, over: '@dzgrid/dom', external: ext });
     expect(e['@dzgrid/dom/range']!.maxGzip).toBeLessThanOrEqual(RANGE); // S12-Q14, 8b-2 Q1
     expect(e['@dzgrid/dom/range']!.maxGzip).toBeGreaterThan(4500);
-    expect(e['@dzgrid/dom/range: html (lazy)']).toEqual({ file: 'packages/dom/src/range/html/index.ts', maxGzip: LAZY_HTML, over: '@dzgrid/dom/range', external: ext }); // './html/*' kept: the line's « alone » build of dom/range must leave the chunk out, or the chunk is counted in it (review 6, answered)
+    // The Phase 6 close: lowered to its measure + 10 % (500 → 550), under its ceiling LAZY_HTML.
+    expect(e['@dzgrid/dom/range: html (lazy)']).toEqual({ file: 'packages/dom/src/range/html/index.ts', maxGzip: 550, over: '@dzgrid/dom/range', external: ext }); // './html/*' kept: the line's « alone » build of dom/range must leave the chunk out, or the chunk is counted in it (review 6, answered)
   });
 
   it('Phase 5 step 11a (owner Q16, Part B budgets): @dzgrid/dom/range a new entry, ceiling 4 500 over the DOM base; the -range texts 350 / 400 / 500; range.css 500; core 29 000, core/edit 3 100 and core/range 4 000 untouched; the DOM base inside 21 980', () => {
@@ -408,8 +410,9 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     }
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
     // The lines, by hand: measure 3 996 → 4 100; 1 111 → 1 150; texts 512 → 530, 614 → 630, 746 → 800 (kept).
-    expect(e['@dzgrid/dom/columns']?.maxGzip).toBe(4100);
-    expect(e['@dzgrid/theme/columns.css']?.maxGzip).toBe(1150);
+    // The Phase 6 close (measure + 10 %, capped by Q6-6): 3 988 → 4 200; 1 111 → 1 200.
+    expect(e['@dzgrid/dom/columns']?.maxGzip).toBe(4200);
+    expect(e['@dzgrid/theme/columns.css']?.maxGzip).toBe(1200);
     expect(['en', 'fr', 'ar'].map((l) => e[`@dzgrid/dom/locales/${l}-columns`]?.maxGzip)).toEqual([600, 720, 900]); // Q8-1 (step 7)
     expect(e['@dzgrid/dom']?.maxGzip).toBe(DOM);
   });
@@ -448,7 +451,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     // The lines by hand (8b-1 measures): the entry 2 080 → 2 150 (inside 2 300: the editing glue, ~180 B, needs more than 2 000);
     // the texts at their grants (116 / 130 / 156); the sheet 301 + 10 % → 350.
     expect(ceilingFor('@dzgrid/dom/pinned-rows')).toBe(2300);
-    expect(p.maxGzip).toBe(2200); // 2 150, then 2 200 (Q9-6, compression alone)
+    expect(p.maxGzip).toBe(2300); // 2 150, then 2 200 (Q9-6, compression alone); the Phase 6 close: 2 158 + 10 % capped at Q2's 2 300
     expect(['en', 'fr', 'ar'].map((l) => e[`@dzgrid/dom/locales/${l}-pinned`]?.maxGzip)).toEqual([120, 140, 170]);
     expect(sizeBudget(301, ceilingFor('@dzgrid/theme/pinned-rows.css'))).toBe(350);
     const css = e['@dzgrid/theme/pinned-rows.css']!;
@@ -461,8 +464,9 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(() => sizeBudget(5201, ceilingFor('@dzgrid/dom/range'))).toThrow(/ceiling/);
     expect(() => sizeBudget(3151, ceilingFor('@dzgrid/dom/fill'))).toThrow(/ceiling/);
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
-    expect(['@dzgrid/dom/range', '@dzgrid/dom/fill'].map((n) => e[n]?.maxGzip)).toEqual([5050, 3100]);
-    expect(['@dzgrid/dom/pinned-rows', '@dzgrid/core', '@dzgrid/dom', '@dzgrid/dom/edit', '@dzgrid/core/state'].map((n) => e[n]?.maxGzip)).toEqual([2200, 29150, 22400, 4150, 1500]); // pinned-rows 2 200 since Q9-6
+    // The Phase 6 close: the measures + 10 % capped by Q1's grants (5 025 → 5 200, 3 042 → 3 150).
+    expect(['@dzgrid/dom/range', '@dzgrid/dom/fill'].map((n) => e[n]?.maxGzip)).toEqual([5200, 3150]);
+    expect(['@dzgrid/dom/pinned-rows', '@dzgrid/core', '@dzgrid/dom', '@dzgrid/dom/edit', '@dzgrid/core/state'].map((n) => e[n]?.maxGzip)).toEqual([2300, 29150, 22400, 4150, 1500]); // pinned-rows 2 200 since Q9-6, 2 300 at the close (Q2's cap)
     expect(['@dzgrid/dom/pinned-rows', '@dzgrid/dom/edit'].map(ceilingFor)).toEqual([2300, 4150]);
   });
 
@@ -475,7 +479,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('Phase 6 step 9, owner Q9-5 / Q9-6: dom/tree 3 850 (the sticky copies capped in pixels), dom/pinned-rows 2 200 (compression alone)', () => {
     expect(ceilingFor('@dzgrid/dom/tree')).toBe(3850);
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
-    expect(['@dzgrid/dom/tree', '@dzgrid/dom/pinned-rows'].map((n) => e[n]?.maxGzip)).toEqual([3850, 2200]);
+    expect(['@dzgrid/dom/tree', '@dzgrid/dom/pinned-rows'].map((n) => e[n]?.maxGzip)).toEqual([3850, 2300]); // pinned-rows 2 300 at the Phase 6 close (Q2's cap)
   });
 
   it('Phase 6 step 9 (owner Q-B, Q9-3): @dzgrid/dom/auto-height 1 400 over the DOM base (core/detail outside it), the K.8 guard 84 150', () => {
@@ -500,12 +504,12 @@ describe('rebudgetSizes: the size-budget.json document', () => {
   });
   const measures = { '@dzgrid/core': 26986, '@dzgrid/dom/export': 1200, 'tzslot kit: date': 36394, 'profile: audit screen (K.8)': 75879 };
 
-  it('sets each budgeted entry, raises included (export at its cap → 1 350)', () => {
+  it('sets each budgeted entry; an entry without a grant never rises (Phase 6 close: export at its line, 1 200, not 1 350)', () => {
     const { budget, rows } = rebudgetSizes(doc(), measures, { date: '2026-10-21' });
     expect(budget.entries['@dzgrid/core'].maxGzip).toBe(CORE); // 26 986 + 10 % capped at the Phase 4 ceiling
-    expect(budget.entries['@dzgrid/dom/export'].maxGzip).toBe(1350);
+    expect(budget.entries['@dzgrid/dom/export'].maxGzip).toBe(1200);
     expect(budget.entries['profile: audit screen (K.8)'].maxGzip).toBe(83500);
-    expect(rows.find((r: { name: string }) => r.name === '@dzgrid/dom/export')).toMatchObject({ old: 1200, measure: 1200, next: 1350 });
+    expect(rows.find((r: { name: string }) => r.name === '@dzgrid/dom/export')).toMatchObject({ old: 1200, measure: 1200, next: 1200 });
   });
 
   it('keeps the entries without a budget (maxGzip null) as they are, and every other field', () => {
@@ -526,19 +530,20 @@ describe('rebudgetSizes: the size-budget.json document', () => {
     const { budget } = rebudgetSizes(doc(), measures, { date: '2026-10-22' });
     expect(typeof budget.$comment).toBe('string');
     expect(budget.$comment.length).toBeLessThan(doc().$comment.length);
-    // Phase 5 step 13 (the close): the history lives in ROADMAP « Final budgets (Phase 5) » (the Phase 4 one
-    // before it); the comment names the Phase 5 rule (Q16: measure + 10 %, rounded up to 50, never above the
-    // owner's grants) and stays short.
-    expect(budget.$comment.length).toBeLessThan(600);
+    // The Phase 6 close: the history lives in ROADMAP « Phase 6 — close » (« Final budgets (Phase 5) » before it); the
+    // comment names the rule (Q-B: measure + 10 %, rounded up to 50, never above the owner's grants; a line without a
+    // grant is its own ceiling) and stays short.
+    expect(budget.$comment.length).toBeLessThan(700);
     expect(budget.$comment).toMatch(/10 %/);
     expect(budget.$comment).toMatch(/rounded up to 50 B/);
     expect(budget.$comment).toMatch(/2026-10-22/);
     expect(budget.$comment).toMatch(/ROADMAP/);
-    expect(budget.$comment).toMatch(/Final budgets \(Phase 5\)/);
-    expect(budget.$comment).toMatch(/docs\/phase-5-steps\/decisions\.md/);
-    expect(budget.$comment).toMatch(/Q16/);
-    expect(budget.$comment).toMatch(/83 500/);
-    expect(budget.$comment).not.toMatch(/Final budgets \(Phase 4\)/);
+    expect(budget.$comment).toMatch(/Phase 6 — close/);
+    expect(budget.$comment).toMatch(/docs\/phase-6-steps\/decisions\.md/);
+    expect(budget.$comment).toMatch(/Q-B/);
+    expect(budget.$comment).toMatch(/without a grant keeps its line/);
+    expect(budget.$comment).toMatch(/84 800/);
+    expect(budget.$comment).not.toMatch(/Final budgets \(Phase 5\)/);
     expect(budget.$comment).not.toMatch(/Phase 3 close/);
   });
 
@@ -662,13 +667,13 @@ describe('the command: --dry by default, --write to save', () => {
     const out = join(dir, 'size.txt');
     const before = JSON.stringify({ $comment: 'x'.repeat(2000), entries: { '@dzgrid/dom/export': { file: 'e.ts', maxGzip: 1200 } } }, null, 2) + '\n';
     writeFileSync(file, before);
-    writeFileSync(out, 'ok   @dzgrid/dom/export: 3000 B min, 1200 B gz (budget 1200)\n');
+    writeFileSync(out, 'ok   @dzgrid/dom/export: 3000 B min, 1000 B gz (budget 1200)\n');
     const dry = execFileSync(process.execPath, [SCRIPT, 'sizes', '--from', out, '--file', file], { encoding: 'utf8' });
     expect(dry).toMatch(/dry/i);
-    expect(dry).toMatch(/1200.*1350/);
+    expect(dry).toMatch(/1200.*1100/);
     expect(readFileSync(file, 'utf8')).toBe(before);
     execFileSync(process.execPath, [SCRIPT, 'sizes', '--from', out, '--file', file, '--write'], { encoding: 'utf8' });
-    expect(JSON.parse(readFileSync(file, 'utf8')).entries['@dzgrid/dom/export'].maxGzip).toBe(1350);
+    expect(JSON.parse(readFileSync(file, 'utf8')).entries['@dzgrid/dom/export'].maxGzip).toBe(1100);
   });
 
   it('node times from three saved bench outputs: the median, dry by default', () => {

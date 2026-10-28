@@ -17,6 +17,24 @@ const SCRIPT = join(ROOT, 'scripts/rebudget.mjs');
 const tmp = () => mkdtempSync(join(tmpdir(), 'dzg-rebudget-review-'));
 const run = (args: string[]) => spawnSync(process.execPath, [SCRIPT, ...args], { encoding: 'utf8' });
 
+describe('rebudgetSizes at the Phase 6 close: no line rises without a written grant', () => {
+  it('an entry without a ceiling keeps its line as its ceiling (popup 1 650, measured 1 626: not 1 800); below, it is lowered to the measure + 10 %', () => {
+    const { budget, rows } = rebudgetSizes({ entries: { held: { file: 'h.ts', maxGzip: 1650 }, low: { file: 'l.ts', maxGzip: 3550 } } }, { held: 1626, low: 3132 }, { date: '2026-10-28' });
+    expect(budget.entries.held.maxGzip).toBe(1650);
+    expect(budget.entries.low.maxGzip).toBe(3450);
+    expect(rows.map((r: { next: number }) => r.next)).toEqual([1650, 3450]);
+  });
+
+  it('an entry over its own line (no ceiling) is refused, never written', () => {
+    expect(() => rebudgetSizes({ entries: { x: { file: 'x.ts', maxGzip: 1000 } } }, { x: 1001 }, { date: '2026-10-28' })).toThrow(/ceiling/);
+  });
+
+  it('a written grant above the line still lets the line rise to it (columns 4 100 → 4 200, owner Q6-6)', () => {
+    const { budget } = rebudgetSizes({ entries: { '@dzgrid/dom/columns': { file: 'c.ts', maxGzip: 4100 } } }, { '@dzgrid/dom/columns': 3988 }, { date: '2026-10-28' });
+    expect(budget.entries['@dzgrid/dom/columns'].maxGzip).toBe(4200);
+  });
+});
+
 describe('rebudgetSizes: documents and entries the tests did not cover', () => {
   it('an entry with no maxGzip key at all is kept untouched, like maxGzip null (kills M4)', () => {
     const { budget, rows } = rebudgetSizes({ entries: { kit: { files: ['x.ts'] } } }, { kit: 36394 }, { date: '2026-10-21' });

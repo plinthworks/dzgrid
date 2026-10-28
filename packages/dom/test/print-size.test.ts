@@ -15,7 +15,8 @@ describe('11. sizes: the new lines; the base, core, K.8 and Angular unchanged', 
     expect(budget['@dzgrid/dom/print']).toEqual({ file: 'packages/dom/src/print.ts', maxGzip: 1600, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
     expect(['en', 'fr', 'ar'].map((l) => budget[`@dzgrid/dom/locales/${l}-print`]?.maxGzip)).toEqual([150, 150, 200]);
     expect(budget['@dzgrid/theme/print.css']).toEqual({ file: 'packages/theme/print.css', maxGzip: 400 });
-    expect(budget['@dzgrid/theme/print.unlayered.css']).toEqual({ file: 'packages/theme/print.unlayered.css', maxGzip: 400 });
+    // The Phase 6 close: lowered to its measure + 10 % (292 → 350).
+    expect(budget['@dzgrid/theme/print.unlayered.css']).toEqual({ file: 'packages/theme/print.unlayered.css', maxGzip: 350 });
   });
 
   it('the base, core, K.8 and Angular lines unchanged (22 400, 29 150, 84 450, 7 000)', () => {

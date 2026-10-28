@@ -761,7 +761,7 @@ The real Angular example (`npm run example:bytes`): **92 059 / 92 500** (S12-Q10
 
 > Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-22: each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-4-steps/decisions.md Q17) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 4) ».
 
-## Phase 6 — advanced columns and comfort (in progress)
+## Phase 6 — advanced columns and comfort (closed 2026-10-28, 1.1.0 prepared)
 
 Moving columns (pointer, keyboard), the ⋮ column menu, the « Choisir les colonnes » chooser, `GridState`
 (save, restore, URL and storage helpers), the keyboard resize mode and auto-size, collapsible header
@@ -868,10 +868,65 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   nothing else moved. Gate: vitest 492 files / 7 295 (the example line's test red, owner's), `test:perm` 10,
   `check:size` 0 over, contrast 1 092 / 0; Chrome playground 41, columns 41, demos 38, Angular fixture 90,
   `example:browser` 8. Real example 94 596 / **95 000** (owner; 93 780 before the step: the example build had been broken since 1.0.0 — `example:bytes` now fails on a missing or stale build, a stamp).
-- [ ] step 13: close (rebudget, full gate, **1.1.0** prepared — 1.0.0 is published, owner « Back to Phase 6 » —, published by the owner with `npm run publish:latest`).
+- [x] step 13 (2026-10-28): close — the review of 6166f12 fixed (Part A), the « real app » page, the rebudget, the full
+  gate, **1.1.0** prepared (owner « Back to Phase 6 »), published by the owner (`docs/release-1.1.0.md`). See « Phase 6 — close » below.
 
 - **Feedback pass (allergen-detector) and tzslot 2.4.0** (2026-10-27, built, not committed): items A–M of `docs/phase-6-steps/feedback-plan.md` « Done » — text glyphs instead of border glyphs, the box's outline, one operator without « Condition », `filterOption` parts, `ui.data`, popup `data-column`/`data-kind`, the period form in the popup itself, `@tzslot/dom/lazy` (a date kit's first use 66 962 → 33 317 B gz). Gate (once, caffeinate -i, vitest 2 workers, Node 24): vitest 470 files / 7 117 tests, test:perm 5 / 10, typecheck, build, check:size 0 over (core 28 999, dom 22 321, filters 9 990 — no raise needed —, theme 2 562, pagination 3 133, tree 3 821, K.8 84 077; raised by the strict need, Q1: date adapters 2 745 (2 744), set chunk 4 205 (4 204), calendar 1 520 (1 519)), check:contrast 1 092 / 0. Browser: Chrome --only filters 32, dates 56, pagination 45, tree 78 (and groups 20, detail 37, motion 50); Firefox and WebKit --only dates 12, pagination 24, tree 6, all green.
 - **The owner's look** (2026-10-27, app-feedback 11–22): one box per value row, `apply: 'button'`, `dateZone: false`, popups kept in the window, the header box in the title's place. Budgets raised by the owner (decisions « Owner's-look budgets »): filters 10 100 (10 048), set chunk 4 250 (4 208), date adapters 2 800 (2 752), K.8 84 300 (84 297).
+
+### Phase 6 — close (2026-10-28)
+
+**Part A, the review of 6166f12** (each with a test that failed first): (HIGH) the example's stamp gates the release —
+`exampleGate()`: the vitest measure fails, not skips, on a missing, failed or stale build under CI or
+`DZG_RELEASE_CHECK=1`; `release.yml` runs `example:build` + `example:bytes` before `test:ci`; `release:check` =
+`example.mjs build --if-stale` + `bytes` + the manifest check. Local `test:ci` still skips (with a note): the build takes
+minutes and the network, so it belongs to the release check. (MEDIUM) `[state]` compared with `canonical(api.state())`:
+« reset to saved » is restored; the last value is skipped only while the grid has not moved. (LOW) `gridState({ persist })`
++ `[state]` on a server: one request (the storage's restore keeps another holder's hold; dom/state golfed to 1 150 /
+1 150). Survivors: `selectedIds()` without group / pinned / detail / malformed keys; `[state]` value → null applies nothing.
+
+**The light « real app » page**: `playground/real-app.html`, `npm run test:real-app` (phase closes only; own Vite on 4711;
+fixed clock; light and dark, 1 280 × 900 and 760 × 640): 58 / 58 — no horizontal overflow, square buttons in the footer the pager's only (32 × 32; the selection buttons 209 × 32 and 149 × 32), one box per set-filter row, the set filter, the period, the ⋮ menu and the chooser inside the viewport, the focus in each on open (« Du » for the period); six screenshots equal to their references (0 px differ; a wrong reference fails at 4.8 %).
+
+**Rebudget** (`node scripts/rebudget.mjs sizes --from <check:size> --write`; measure + 10 %, rounded up to 50, capped by
+the grants; a line without a grant is its own ceiling — new in `rebudget.mjs`, so `core/spans` 3 800, `dom/popup` 1 650,
+the export run chunk 5 300 stay at their lines):
+
+| Line | Measure | Before | After | Grant |
+|---|---|---|---|---|
+| `@dzgrid/core` | 28 999 | 29 150 | 29 150 | Q-B 29 150 |
+| `@dzgrid/dom` (base) | 22 334 | 22 400 | 22 400 | Q-B 22 400 |
+| K.8 audit profile | 84 789 | 84 800 | 84 800 | Q12-1 84 800 |
+| `@dzgrid/angular` | 7 256 | 7 300 | 7 300 | Q12-1 7 300 |
+| real Angular example | 94 609 | 95 000 | 95 000 | owner 95 000 |
+| `@dzgrid/core/state` | 1 500 | 1 500 | 1 500 | Q-B 1 500 |
+| `@dzgrid/dom/state` | 1 150 | 1 150 | 1 150 | E5-8 1 150 |
+| `@dzgrid/dom/columns` | 3 988 | 4 100 | 4 200 | Q6-6 4 200 |
+| `@dzgrid/dom/column-menu` | 4 297 | 4 300 | 4 300 | Q3-5 4 300 |
+| `@dzgrid/dom/columns-panel` | 4 350 | 4 400 | 4 400 | Q4-4 4 400 |
+| `@dzgrid/dom/spans` | 4 577 | 4 950 | 5 050 | Q-B 5 300 |
+| `@dzgrid/dom/groups` | 1 887 | 2 100 | 2 100 | Q8-4 (measure + 10 %) |
+| `@dzgrid/dom/pinned-rows` | 2 158 | 2 200 | 2 300 | Q2 2 300 |
+| `@dzgrid/dom/auto-height` | 1 237 | 1 400 | 1 400 | Q-B 1 400 |
+| `@dzgrid/dom/print` | 1 598 | 1 600 | 1 600 | Q-B 1 600 |
+| `@dzgrid/dom/range` | 5 025 | 5 050 | 5 200 | Q1 5 200 |
+| `@dzgrid/dom/fill` | 3 042 | 3 100 | 3 150 | Q1 3 150 |
+| `@dzgrid/dom/filters` | 10 091 | 10 100 | 10 100 | owner's look 10 100 |
+| `@dzgrid/dom/pagination` | 3 132 | 3 550 | 3 450 | (lowered) |
+| `@dzgrid/dom/editors-list` | 1 224 | 1 400 | 1 350 | (lowered) |
+| range html chunk | 500 | 600 | 550 | (lowered) |
+| `@dzgrid/theme` | 2 764 | 2 850 | 2 850 | comfort 2 850 |
+| `columns.css` | 1 111 | 1 150 | 1 200 | Q6-6 1 200 |
+| `print.unlayered.css` | 292 | 400 | 350 | (lowered) |
+
+No line above a grant; `check:size` 0 over after the write.
+
+**Gate** (once, `caffeinate -i`, two vitest workers, Node 24.22.1): `build`, `example:build` (default, zone, baseline clean; stamped), `example:bytes` real example **94 609 / 95 000**, vitest (`DZG_RELEASE_CHECK=1`, 2 workers) 494 files / 7 313 of 7 314 — the one red a stale line expectation (`rules.test.ts`: pagination 3 550, lowered to 3 450 by this rebudget), fixed; then `test:tz` (the whole suite twice, Auckland and Los Angeles) **494 / 7 314 green** both times; `test:perm` 5 / 10; `typecheck`; `check:size` **118 ok, 0 over**; `check:contrast` 1 092 pairs, 0 below; `release:check` « the four packages at 1.1.0 ». Browsers, one at a time: `test:real-app` 58 / 58; Chrome full 1 108 / 1 114 at first — six stale checks, not regressions (the rules' refused box read `border-*` while the edge is an outline since the feedback pass G, four checks; the popup's padding expected 8 px, 12 px since the owner's look 407c027; the AX check looked for the city cell as the row header's sibling while the cells sit in their segments — none of these pages changed since 6166f12, `packages/dom/src` differs only in `state/index.ts`); the checks fixed, Chrome full again **1 114 / 1 114**; Firefox **101 / 101**, WebKit **104 / 104**.
+
+**Version**: 1.1.0 in the four manifests, `version.ts` and the example's tarball names; built peers `^1.1.0`;
+`pack:local` stamps `1.1.1-local.<time>`. Backward compatibility against the published 1.0.0 (= 8812b97): every subpath
+and all 655 named exports of 1.0.0 still there, the `<dz-grid>` 1.0.0 inputs, outputs and controller methods too
+(additive only). `npm run publish:dry`: the four accepted (core 441 kB, dom 799 kB, theme 38 kB, angular 45 kB packed).
 
 ### Exit criteria (Phase 6; `docs/phase-6-plan.md` §5)
 Sheets before code; keyboard resize mode in LTR and RTL with sentences; a state saved in LTR restores

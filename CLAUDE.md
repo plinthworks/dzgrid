@@ -8,7 +8,7 @@ code, Community or Enterprise, is read or copied. Sister projects: tzslot
 whose conventions we follow. ngx-sheetgrid (`/Users/nadou/Dev/ngx-sheetgrid`)
 is ours too: its *pure* modules may be reused, never the parts that talk to ag-Grid.
 
-**If a session was lost, read `docs/STATUS.md` first**: where the work is (Phase 5, editing, closed technically, 0.3.0 local, unpublished; Phase 6 next, then the docs website), the working rules, what waits for the owner. The validated plan of each step is in `docs/phase-3-steps/`, `docs/phase-4-steps/` and `docs/phase-5-steps/`.
+**If a session was lost, read `docs/STATUS.md` first**: where the work is (Phase 6 closed 2026-10-28, 1.1.0 prepared — the owner publishes; Phase 7 next, the docs website last), the working rules, what waits for the owner. The validated plan of each step is in `docs/phase-3-steps/`, `docs/phase-4-steps/` and `docs/phase-5-steps/`.
 
 ## Where things are
 
@@ -39,6 +39,7 @@ npm run typecheck      # core (lib ES2023, no DOM) then the tests
 npm run build          # packages/*/dist, refuses a manifest pointing at src/ or with runtime deps
 npm run spike          # Phase 0 spikes in real browsers, one after another
 npm start              # playground on http://localhost:4700 (tzslot 4500, DzCalendar 4600) — don't kill it
+npm run test:real-app  # phase closes only: the « real app » page in Chrome (own Vite on 4711), screenshots compared; -- --update rewrites them
 ```
 
 `npm install` needs `legacy-peer-deps` (set in `.npmrc`): npm 10 crashes on

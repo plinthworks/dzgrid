@@ -1,5 +1,5 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-26 (Phase 5 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-5-steps/decisions.md Q16, Q-C2, Q-C3) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 5) ».",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 84 800. A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
@@ -289,7 +289,7 @@
     },
     "@dzgrid/theme/columns.css": {
       "file": "packages/theme/columns.css",
-      "maxGzip": 1150
+      "maxGzip": 1200
     },
     "@dzgrid/theme/columns-panel.css": {
       "file": "packages/theme/columns-panel.css",
@@ -305,7 +305,7 @@
     },
     "@dzgrid/theme/print.unlayered.css": {
       "file": "packages/theme/print.unlayered.css",
-      "maxGzip": 400
+      "maxGzip": 350
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
@@ -336,7 +336,7 @@
     },
     "@dzgrid/dom/spans": {
       "file": "packages/dom/src/spans.ts",
-      "maxGzip": 4950,
+      "maxGzip": 5050,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -364,7 +364,7 @@
     },
     "@dzgrid/dom/pagination": {
       "file": "packages/dom/src/pagination.ts",
-      "maxGzip": 3550,
+      "maxGzip": 3450,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -478,7 +478,7 @@
     },
     "@dzgrid/dom/editors-list": {
       "file": "packages/dom/src/editors-list.ts",
-      "maxGzip": 1400,
+      "maxGzip": 1350,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -488,7 +488,7 @@
     },
     "@dzgrid/dom/range": {
       "file": "packages/dom/src/range.ts",
-      "maxGzip": 5050,
+      "maxGzip": 5200,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -500,7 +500,7 @@
     },
     "@dzgrid/dom/range: html (lazy)": {
       "file": "packages/dom/src/range/html/index.ts",
-      "maxGzip": 600,
+      "maxGzip": 550,
       "over": "@dzgrid/dom/range",
       "external": [
         "@dzgrid/core",
@@ -512,7 +512,7 @@
     },
     "@dzgrid/dom/fill": {
       "file": "packages/dom/src/fill.ts",
-      "maxGzip": 3100,
+      "maxGzip": 3150,
       "over": "@dzgrid/dom/range",
       "external": [
         "@dzgrid/core",
@@ -524,7 +524,7 @@
     },
     "@dzgrid/dom/columns": {
       "file": "packages/dom/src/columns.ts",
-      "maxGzip": 4100,
+      "maxGzip": 4200,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -565,7 +565,7 @@
     },
     "@dzgrid/dom/pinned-rows": {
       "file": "packages/dom/src/pinned-rows.ts",
-      "maxGzip": 2200,
+      "maxGzip": 2300,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",

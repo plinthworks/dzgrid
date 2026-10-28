@@ -827,7 +827,8 @@ async function rulesChecks(name, ctx) {
     const look = await page.evaluate((sel) => {
       const c = document.querySelector(sel), b = c.querySelector('.dzg-box'), s = getComputedStyle(b);
       const plain = getComputedStyle(document.querySelector('.dzg-row[aria-rowindex="5"] .dzg-box'));
-      return { refused: c.hasAttribute('data-dzg-refused'), cursor: getComputedStyle(c).cursor, style: s.borderTopStyle, plainStyle: plain.borderTopStyle, bg: s.backgroundColor, plainBg: plain.backgroundColor, disabled: !!document.querySelector('.dzg-row[aria-disabled], [aria-disabled][role=row]'), selected: c.closest('.dzg-row').getAttribute('aria-selected') };
+      // The box's edge is an outline since the feedback pass (G: an unlayered reset's `border-width: 0` erased a border).
+      return { refused: c.hasAttribute('data-dzg-refused'), cursor: getComputedStyle(c).cursor, style: s.outlineStyle, plainStyle: plain.outlineStyle, bg: s.backgroundColor, plainBg: plain.backgroundColor, disabled: !!document.querySelector('.dzg-row[aria-disabled], [aria-disabled][role=row]'), selected: c.closest('.dzg-row').getAttribute('aria-selected') };
     }, box(8));
     check(name, `${tag}: row 4 ticked, row 8's box greyed (dashed, raised surface, not-allowed), no aria-disabled`, look.refused && look.cursor === 'not-allowed' && look.style === 'dashed' && look.plainStyle === 'solid' && look.bg !== look.plainBg && !look.disabled && look.selected === 'false', look);
     // Space on row 8: the rule's own sentence, said again on a second try.
@@ -864,7 +865,7 @@ async function rulesChecks(name, ctx) {
       const gray = getComputedStyle(probe).color;
       probe.remove();
       const b = getComputedStyle(document.querySelector('.dzg-row[aria-rowindex="10"] .dzg-box'));
-      return { border: b.borderTopColor, gray, style: b.borderTopStyle };
+      return { border: b.outlineColor, gray, style: b.outlineStyle };
     });
     await page.screenshot({ path: `${OUT}/${name}-rules-${rtl ? 'ar' : 'fr'}-forced.png`, clip: { x: 0, y: 0, width: 1000, height: 640 } });
     check(name, `${tag}: forced colours: the refused box dashed in GrayText`, forced.border === forced.gray && forced.style === 'dashed', forced);
@@ -2078,7 +2079,8 @@ async function themeChecks(name, ctx) {
       return { pad: s.paddingTop, border: s.borderTopWidth, bg: s.backgroundColor, radius: s.borderStartStartRadius };
     });
     check(name, `themes: the filter popup keeps the theme's look over the layout's popover reset (padding ${pop?.pad}, border ${pop?.border}, surface ${pop?.bg})`,
-      pop && pop.pad === '8px' && pop.border === '1px' && pop.bg === 'rgb(24, 24, 27)', pop);
+      // 12 px since the owner's look (407c027, app-feedback 11–22: `.dzg .dzg-popup { padding: 0.75rem }`).
+      pop && pop.pad === '12px' && pop.border === '1px' && pop.bg === 'rgb(24, 24, 27)', pop);
     await page.keyboard.press('Escape');
     const l = await look(page);
     const shadow = l[1];
@@ -4277,9 +4279,14 @@ async function runEngine(name) {
         // Headless, the window itself has no focus, so the AX tree puts it on the page: the DOM
         // focus is checked above; here the retained row and its focused cell must be exposed.
         const header = nodes.find((n) => n.name?.value === 'Patient 42' && n.role?.value === 'rowheader');
-        const row = header && nodes.find((n) => n.childIds?.includes(header.parentId) || n.nodeId === header.parentId);
-        const city = nodes.find((n) => n.role?.value === 'gridcell' && n.parentId === header?.parentId && /^(Alger|Oran|Constantine|Annaba|Blida|Sétif)$/.test(n.name?.value ?? ''));
-        check(name, 'the retained row and its focused cell are in the accessibility tree, not ignored', header && !header.ignored && city && !city.ignored, { header: !!header, row: row?.role?.value, city: city?.name?.value });
+        // The cells sit in their segments (pinned start, centre): the AX tree keeps a node for each segment between the row
+        // and its cells, so the city cell is the row's descendant, not the row header's sibling (the check read siblings).
+        const byId = new Map(nodes.map((n) => [n.nodeId, n]));
+        let row = header && byId.get(header.parentId);
+        while (row && row.role?.value !== 'row') row = byId.get(row.parentId);
+        const under = (n, top) => { for (let p = n; p; p = byId.get(p.parentId)) if (p === top) return true; return false; };
+        const city = row && nodes.find((n) => n.role?.value === 'gridcell' && under(n, row) && /^(Alger|Oran|Constantine|Annaba|Blida|Sétif)$/.test(n.name?.value ?? ''));
+        check(name, 'the retained row and its focused cell are in the accessibility tree, not ignored', header && !header.ignored && row && !row.ignored && city && !city.ignored, { header: !!header, row: row?.role?.value, city: city?.name?.value });
       }
       await page.close();
     }

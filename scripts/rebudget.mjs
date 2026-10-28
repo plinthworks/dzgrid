@@ -7,7 +7,8 @@
  *   node scripts/rebudget.mjs browser browser1.txt browser2.txt browser3.txt [--file perf/browser-budgets.json] [--write]
  *
  * Dry by default: prints old / measure / new and changes nothing; `--write` saves the file.
- * - Sizes: measure + 10 %, rounded up to 50 B, never above the owner's grants (Phase 4 close,
+ * - Sizes: measure + 10 %, rounded up to 50 B, never above the owner's grants (Phase 6 close: an entry without one keeps
+ *   its line as its ceiling; Phase 4 close,
  *   docs/phase-4-steps/decisions.md Q17b; Phase 5 close, docs/phase-5-steps/decisions.md Q16, Q-C2, Q-C3) or the plan's ceilings (ARCHITECTURE §5.2, K.8), never below
  *   the measure. Measured by size.mjs's own `measureEntries`, or read from a saved
  *   `npm run check:size` output (`--from`). Entries without a budget (maxGzip null) are kept.
@@ -161,7 +162,7 @@ export function sizeBudget(measure, ceiling = null) {
 }
 
 const SIZE_COMMENT = (date) =>
-  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on ${date} (Phase 5 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-5-steps/decisions.md Q16, Q-C2, Q-C3) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 83 500. A budget is raised only by a written decision; the history is in ROADMAP.md, « Final budgets (Phase 5) ».`;
+  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on ${date} (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 84 800. A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».`;
 
 /**
  * A new size-budget.json from `measures` (name → gz bytes). Returns the new document (the given one
@@ -182,7 +183,9 @@ export function rebudgetSizes(budget, measures, { date }) {
       entries[name] = structuredClone(entry);
       continue;
     }
-    const next = sizeBudget(m, ceilingFor(name));
+    // Phase 6 close (owner Q-B: « reset to measure + 10 % at the close, never above »): an entry without a written grant
+    // has its line as its ceiling — a close lowers lines, it never raises one nobody granted.
+    const next = sizeBudget(m, ceilingFor(name) ?? entry.maxGzip);
     rows.push({ name, old: entry.maxGzip, measure: m, next });
     entries[name] = { ...structuredClone(entry), maxGzip: next };
   }
