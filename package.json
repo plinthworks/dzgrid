@@ -26,6 +26,7 @@
     "build:theme": "node scripts/build-theme.mjs",
     "test:browser": "node scripts/browser.mjs",
     "test:audit": "node scripts/audit-browser.mjs",
+    "test:real-app": "node scripts/browser-real-app.mjs",
     "bench:browser": "node scripts/perf-browser.mjs",
     "example:build": "node scripts/example.mjs build",
     "example:csv": "node scripts/example.mjs csv",

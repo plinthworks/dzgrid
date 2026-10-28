@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DzGrid — une vraie application (contrôle de clôture)</title>
+  <!-- The Phase 6 close's light « real app » page (decisions.md « Back to Phase 6 »): an application's unlayered reset
+       (Tailwind 3's preflight), its brand on the documented tokens, the unlayered theme, comfort and print sheets, and
+       the tools an admin screen uses. Checked by `npm run test:real-app` at phase closes only. ?theme=dark|light. -->
+  <style>
+    :root {
+      --tz-color-scheme: light;
+      --tz-bg: #ffffff; --tz-bg-raised: #f8fafc; --tz-fg: #1e293b; --tz-fg-muted: #64748b; --tz-border: #e2e8f0;
+      --tz-accent: #0c7075; --tz-accent-fg: #ffffff;
+    }
+    [data-theme='dark'] {
+      --tz-color-scheme: dark;
+      --tz-bg: #1e293b; --tz-bg-raised: #0f172a; --tz-fg: #f1f5f9; --tz-fg-muted: #94a3b8; --tz-border: #334155;
+      --tz-accent: #5ec4ca; --tz-accent-fg: #0f172a;
+    }
+    body { padding: 1rem 1.5rem; font-size: 14px; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme); }
+    h1 { font-size: 1.25rem; font-weight: 600; margin-block-end: .25rem; }
+    .note { color: var(--tz-fg-muted); margin-block-end: .75rem; max-inline-size: 90ch; }
+    .bar { display: flex; justify-content: flex-end; gap: .5rem; margin-block-end: .5rem; max-inline-size: 1200px; }
+    .tool { padding: .4rem .75rem; border: 1px solid var(--tz-border); border-radius: .5rem; background: var(--tz-bg-raised); color: var(--tz-fg); }
+    .tool:focus-visible { outline: 2px solid var(--tz-accent); outline-offset: 2px; }
+    #host { block-size: 620px; max-inline-size: 1200px; }
+    #host > .dzg { block-size: 100%; --dzg-font: 14px system-ui, sans-serif; --dzg-header-size: 12px; --dzg-cell-padding-inline: 15px; }
+    .pill { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: .75rem; font-weight: 500; line-height: 1.4; white-space: nowrap; }
+    .pill-teal { background: rgb(204 251 241); color: rgb(17 94 89); }
+    .pill-pink { background: rgb(252 231 243); color: rgb(157 23 77); }
+    .pill-gray { background: rgb(243 244 246); color: rgb(55 65 81); }
+    [data-theme='dark'] .pill-teal { background: rgb(19 78 74 / .3); color: rgb(45 212 191); }
+    [data-theme='dark'] .pill-pink { background: rgb(131 24 67 / .3); color: rgb(244 114 182); }
+    [data-theme='dark'] .pill-gray { background: rgb(55 65 81); color: rgb(156 163 175); }
+    .dzg-cp-foot button { min-block-size: 2rem; padding-inline: .75rem; border: 1px solid var(--tz-fg-muted); border-radius: .375rem; color: var(--tz-fg); background: var(--tz-bg-raised); }
+  </style>
+</head>
+<body>
+  <h1>Produits</h1>
+  <p class="note">Une application comme les autres : le reset de Tailwind 3 (non stratifié), sa marque (sarcelle, ardoise), les feuilles non stratifiées de DzGrid (thème, confort, impression). Cases à cocher, pastilles du filtre par liste, période entre deux jours avec « Appliquer », recherche dans l'en-tête, pages, menu ⋮, choix des colonnes. ?theme=dark</p>
+  <div class="bar"><button id="cols" type="button" class="tool">Colonnes</button><button id="print" type="button" class="tool">Imprimer</button></div>
+  <div id="host"></div>
+  <script type="module" src="./real-app.ts"></script>
+</body>
+</html>
