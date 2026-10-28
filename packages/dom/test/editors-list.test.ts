@@ -6,7 +6,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import type { ColumnDef } from '@dzgrid/core';
 import { listEditor } from '../src/editors-list.js';
-import { ed, cleanup, k, layout, rowsOf, tick, type R } from './support-editors.js';
+import { ed, cleanup, k, layout, rowsOf, tick, windowBox, type R } from './support-editors.js';
 
 afterEach(cleanup);
 
@@ -149,6 +149,7 @@ describe('placement (13)', () => {
     expect(parseFloat(pop.style.insetBlockStart)).toBeGreaterThanOrEqual(132);
     t.press('Escape');
     vi.restoreAllMocks();
+    windowBox();
     const rect = (top: number, bottom: number) => ({ top, bottom, left: 300, right: 380, x: 300, y: top, width: 80, height: bottom - top, toJSON() {} }) as DOMRect;
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
       if (this.classList.contains('dzg-viewport')) return rect(0, 768);

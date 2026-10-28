@@ -16,9 +16,12 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function host(dir: 'ltr' | 'rtl' = 'ltr') {
+/** `bar`: a vertical scrollbar that wide (innerWidth counts it, the root's clientWidth does not). */
+function host(dir: 'ltr' | 'rtl' = 'ltr', bar = 0) {
   vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1000);
   vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(800);
+  vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(1000 - bar);
+  vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(800);
   const root = document.createElement('div');
   const anchor = document.createElement('div');
   anchor.tabIndex = -1;
@@ -96,6 +99,15 @@ describe('placed by another element, end edges aligned', () => {
     const h = host('ltr');
     const p = h.open({});
     expect(h.at(p)).toEqual({ start: '300px', top: '142px' });
+  });
+});
+
+describe('the window less its scrollbar (review finding 4)', () => {
+  it('right to left with a 15 px scrollbar on the left: clamped by the root\'s clientWidth, not innerWidth (8 px clear of the bar)', () => {
+    const h = host('rtl', 15);
+    // The button at the far left: the popup's end (left) edge would pass the window's; clamped at 985 − 200 − 8.
+    boxOf(h.button, { left: 2, top: 108, width: 24, height: 24 });
+    expect(h.at(h.open({ from: h.button })).start).toBe('777px');
   });
 });
 

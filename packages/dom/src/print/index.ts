@@ -54,7 +54,8 @@ const pause = (w: any): Promise<unknown> =>
  * `preparePrint(grid, options)` (docs/behaviors/print.md 1–9; owner Q-I, O9): writes the rows the grid shows — filtered,
  * sorted, searched; a tree's shown rows, pinned rows first and last; a server's shown page — as a real `<table>` in a
  * container beside the grid (a child of <body>), hidden on screen, built in slices so the page stays responsive; resolves
- * with the cleanup (idempotent). The screen grid is not touched. Style: `@dzgrid/theme/print.css`.
+ * with the cleanup (idempotent), or with null when cancelled (a newer call, a cleanup, the grid gone: its table already
+ * removed). The screen grid is not touched. Style: `@dzgrid/theme/print.css`.
  *
  * ```ts
  * import { print } from '@dzgrid/dom/print';
@@ -62,7 +63,7 @@ const pause = (w: any): Promise<unknown> =>
  * button.onclick = () => print(grid, { title: 'Patients' });
  * ```
  */
-export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise<() => void> {
+export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise<(() => void) | null> {
   const g = (grid as unknown as { context: GridContext<unknown> }).context;
   stop?.();
   const my = ++gen;
@@ -77,7 +78,7 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
   const text = g.settings.messages.text as Readonly<Record<string, unknown>>;
   const missing = PRINT_KEYS.filter((k) => text[k] === undefined);
   if (missing.length && !told.has(K)) told.add(K), tell('missing-message', 'messages.text', missing.join(', '));
-  const say = (k: PrintMessageKey, p: Record<string, string | number>): string => (text[k] === undefined ? '' : g.msg(k as never, p));
+  const say = (k: PrintMessageKey, p: Record<string, string | number>): string => (text[k] === undefined ? '' : g.msg(k, p));
 
   const box = add('div', doc.body);
   box.className = 'dzg-print';
@@ -137,7 +138,7 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
     return out;
   };
   const depth = Math.max(0, ...cols.map((c) => up.get(c.id)?.length ?? 0));
-  if (depth) for (const [, span] of runs(0)) span > 1 && (add('colgroup', table).span = span), span < 2 && add('colgroup', table);
+  if (depth) for (const [, span] of runs(0)) add('colgroup', table).span = span;
   const head = add('thead', table);
   for (let l = 0; l < depth; l++) {
     const tr = add('tr', head);
@@ -178,8 +179,8 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
       tb.append(part);
       if (k < jobs.length) {
         await pause(g.win);
-        // A newer call, a cleanup or the grid gone: this build stops, its table removed.
-        if (my !== gen || !box.isConnected || g.scope.isDisposed) return clean(), clean;
+        // A newer call, a cleanup or the grid gone: this build stops, its table removed, null.
+        if (my !== gen || !box.isConnected || g.scope.isDisposed) return clean(), null;
       }
     }
     if (box.isConnected) html.classList.add('dzg-printing');
@@ -188,13 +189,16 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
 }
 
 /**
- * `print(grid, options)`: `preparePrint`, the browser's print dialog, and the cleanup on `afterprint` (every engine of the
- * support matrix sends it; the plan's `matchMedia('print')` fallback was dropped for the 1 600 B line, as §5 orders).
+ * `print(grid, options)`: `preparePrint`, the browser's print dialog, and the cleanup on `afterprint` — or on the first
+ * `focus` or `pointerdown` after the dialog, for a browser that sends no `afterprint` (Safari's PDF path; the cleanup is
+ * idempotent, so the later ones do nothing). A build cancelled or overtaken by a newer call opens no dialog: only the
+ * newest prints, and each cleanup removes its own table only.
  */
 export async function print(grid: PrintableGrid, o?: PrintOptions): Promise<void> {
   const done = await preparePrint(grid, o);
   const w = (grid as unknown as { context: GridContext<unknown> }).context.win;
+  if (!done || done !== stop) return;
   if (!w) return done();
-  w.addEventListener('afterprint', done, { once: true });
+  for (const t of ['afterprint', 'focus', 'pointerdown']) w.addEventListener(t, done, { once: true });
   w.print();
 }

@@ -5,7 +5,7 @@ import type { CalendarAdapter, CalendarKit } from '../src/editors.js';
 import { listEditor } from '../src/editors-list.js';
 import { definePart, type SlotContext } from '../src/part.js';
 import { atText } from '../src/editors/dates.js';
-import { ed, cleanup, k, layout, rowsOf, settle, tick, type R } from './support-editors.js';
+import { ed, cleanup, k, layout, rowsOf, settle, tick, windowBox, type R } from './support-editors.js';
 
 afterEach(cleanup);
 let reported: unknown[] = [];
@@ -262,6 +262,7 @@ describe('the date field (analyser gaps)', () => {
 
   it('a paint places the dialog again (it follows the field)', async () => {
     const s = stub();
+    windowBox();
     let top = 100;
     const rect = (a: number, b: number) => ({ top: a, bottom: b, left: 300, right: 380, x: 300, y: a, width: 80, height: b - a, toJSON() {} }) as DOMRect;
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {

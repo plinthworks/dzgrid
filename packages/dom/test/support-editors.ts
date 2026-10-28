@@ -84,7 +84,14 @@ export function ed(o: EdMake = {}) {
 }
 
 /** A layout for jsdom (no layout of its own): every element a cell's size, inside a 1000 × 700 view; the bubble 200 × 30. */
+/** jsdom's window (1 024 × 768) as the root's client box, which popups are kept inside (the window less its scrollbars). */
+export function windowBox(): void {
+  vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(window.innerWidth);
+  vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(window.innerHeight);
+}
+
 export function layout(): void {
+  windowBox();
   const rect = (top: number, bottom: number, left: number, right: number) => ({ top, bottom, left, right, x: left, y: top, width: right - left, height: bottom - top, toJSON() {} }) as DOMRect;
   vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
     if (this.classList.contains('dzg-viewport')) return rect(0, 700, 0, 1000);

@@ -115,6 +115,9 @@ describe('the popup stays in the window when its content grows (app-feedback 21)
     });
     vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1000);
     vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(800);
+    // The popup keeps inside the window less its scrollbars (the root's client box); none here.
+    vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(1000);
+    vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(800);
     const root = document.createElement('div');
     const anchor = document.createElement('button');
     document.body.append(root, anchor);

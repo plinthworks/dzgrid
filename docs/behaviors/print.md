@@ -19,10 +19,12 @@ prepared the grid).
 - Above 5 000 rows, a line says only the first 5 000 are printed.
 
 ## Behaviours (numbered, each one a test)
-1. `preparePrint(grid, { maxRows = 5000, title? }) → Promise<() => void>` builds a print-only `<table>` and
-   resolves with a cleanup; `print(grid, opts)` prepares, calls `window.print()`, cleans up on `afterprint` (the
-   plan's `matchMedia('print')` fallback was left out to hold the 1 600 B line, as plan §5 orders: every engine of the
-   support matrix sends `afterprint`).
+1. `preparePrint(grid, { maxRows = 5000, title? }) → Promise<(() => void) | null>` builds a print-only `<table>` and
+   resolves with a cleanup, or with null when cancelled (a newer call, a cleanup, the grid gone); `print(grid, opts)`
+   prepares, calls `window.print()` only for the newest build (a cancelled or overtaken one opens no dialog), cleans up
+   on `afterprint`, or on the first `focus` or `pointerdown` after the dialog when no `afterprint` comes (Safari's PDF
+   path; the plan's `matchMedia('print')` fallback was left out to hold the 1 600 B line, as plan §5 orders). Each
+   cleanup removes its own table only. `maxRows` not a positive integer (0, −1): the default 5 000.
 2. Rows: the displayed rows in order (filtered, sorted, searched), the tree's shown rows (expanded only, the
    level shown as an indentation of the tree column's text); **top pinned rows at the start of `tbody`**
    (printed once, never repeated per page: only `thead` repeats) and bottom pinned rows at its end

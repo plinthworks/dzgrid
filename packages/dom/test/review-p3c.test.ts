@@ -230,6 +230,9 @@ describe('text zoom, live', () => {
 });
 
 function popupHost(dir: 'ltr' | 'rtl' = 'ltr') {
+  // jsdom's window, 1 024 × 768, as the root's client box (the window less its scrollbars; none here).
+  vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(window.innerWidth);
+  vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(window.innerHeight);
   const root = document.createElement('div');
   const anchor = document.createElement('button');
   document.body.append(root, anchor);

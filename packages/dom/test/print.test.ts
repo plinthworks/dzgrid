@@ -19,6 +19,8 @@ import { pinnedRows } from '../src/pinned-rows.js';
 import { definePart } from '../src/part.js';
 import type { GridFeature } from '../src/features.js';
 import { createGrid, type GridInstance } from '../src/grid.js';
+import type { GridMessages } from '../src/messages.js';
+import type { GridContext } from '../src/context.js';
 import type { Geometry, ViewportBox } from '../src/render/measure.js';
 import { EN } from '../src/locales/en.js';
 import { FR } from '../src/locales/fr.js';
@@ -44,21 +46,21 @@ describe('1. the table: caption, header cells, groups, direction and language (p
     const m = emake({ rows: rowsOf(3), settings: { messages: MSG, label: 'Patients du jour' } });
     let done = await preparePrint(m.g, { title: 'Liste imprimée' });
     expect(table().caption!.textContent).toBe('Liste imprimée');
-    done();
+    done!();
     done = await preparePrint(m.g);
     expect(table().caption!.textContent).toBe('Patients du jour');
-    done();
+    done!();
     const named = document.body.appendChild(Object.assign(document.createElement('h2'), { id: 'named', textContent: 'Admissions' }));
     m.vp.removeAttribute('aria-label');
     m.vp.setAttribute('aria-labelledby', 'named');
     done = await preparePrint(m.g);
     expect(table().caption!.textContent).toBe('Admissions');
-    done();
+    done!();
     named.remove();
     m.vp.removeAttribute('aria-labelledby');
     done = await preparePrint(m.g);
     expect(table().caption).toBeNull();
-    done();
+    done!();
   });
 
   it('a real table: thead with th scope="col" (the headers), tbody with td; no tfoot', async () => {
@@ -244,12 +246,28 @@ describe('5. the cap: maxRows, the note, one print-too-many with counts only (pr
     expect(JSON.stringify(problemsOf(m.events))).not.toMatch(/Name|s\d/);
   });
 
+  for (const maxRows of [0, -1]) {
+    it(`maxRows ${maxRows}: not a cap, the default 5 000 (a mutant survivor)`, async () => {
+      const m = emake({ rows: rowsOf(5001), settings: { messages: MSG } });
+      await preparePrint(m.g, { maxRows });
+      expect(table().tBodies[0]!.rows).toHaveLength(5000);
+      expect(problemsOf(m.events).filter((x) => x.code === 'print-too-many').map((x) => x.detail)).toEqual(['{"total":5001,"max":5000}']);
+    }, 30_000);
+  }
+
+  it('print-too-many once per call: two calls, two problems (not told once per grid like missing-message)', async () => {
+    const m = emake({ rows: rowsOf(10), settings: { messages: MSG } });
+    (await preparePrint(m.g, { maxRows: 3 }))!();
+    (await preparePrint(m.g, { maxRows: 3 }))!();
+    expect(problemsOf(m.events).filter((x) => x.code === 'print-too-many').map((x) => x.detail)).toEqual(['{"total":10,"max":3}', '{"total":10,"max":3}']);
+  });
+
   it('maxRows given: 3 of 10, in French; no note and no problem when all fit', async () => {
     const m = emake({ rows: rowsOf(10), settings: { messages: join(FR, FR_PRINT), locale: 'fr-FR' } });
     let done = await preparePrint(m.g, { maxRows: 3 });
     expect(body()).toHaveLength(3);
     expect(box()[0]!.querySelector('.dzg-print-note')!.textContent).toBe('3 premières lignes sur 10');
-    done();
+    done!();
     m.events.length = 0;
     done = await preparePrint(m.g, { maxRows: 10 });
     expect(body()).toHaveLength(10);
@@ -279,7 +297,7 @@ describe('6. chunks: time-sliced, cancelled by a second call (print.md 7)', () =
     expect(table().tBodies[0]!.rows[4999]!.cells).toHaveLength(20);
   }, 30_000);
 
-  it('a second call while the first builds cancels it: the first resolves with a no-op, its partial table gone, one container', async () => {
+  it('a second call while the first builds cancels it: the first resolves with null, its partial table gone, one container', async () => {
     const m = emake({ rows: rowsOf(200), settings: { messages: MSG } });
     let t = 0;
     vi.spyOn(window.performance, 'now').mockImplementation(() => (t += 1));
@@ -291,10 +309,10 @@ describe('6. chunks: time-sliced, cancelled by a second call (print.md 7)', () =
     expect(box()).toHaveLength(1);
     expect(table().caption!.textContent).toBe('second');
     expect(body()).toHaveLength(200);
-    undoA();
+    expect(undoA).toBeNull();
     expect(box()).toHaveLength(1);
     expect(document.documentElement.classList.contains('dzg-printing')).toBe(true);
-    undoB();
+    undoB!();
     expect(box()).toHaveLength(0);
   });
 });
@@ -307,24 +325,22 @@ describe('7. cleanup (print.md 1, 7)', () => {
     expect(document.documentElement.classList.contains('dzg-printing')).toBe(true);
     expect(box()).toHaveLength(1);
     expect(box()[0]!.parentElement).toBe(document.body);
-    done();
-    done();
+    done!();
+    done!();
     expect(document.documentElement.classList.contains('dzg-printing')).toBe(false);
     expect(document.documentElement.outerHTML).toBe(before);
   });
 
-  it('the grid destroyed during the build cancels it: nothing left, the build\'s promise resolves with a no-op', async () => {
+  it('the grid destroyed during the build cancels it: nothing left, the build\'s promise resolves with null', async () => {
     const m = emake({ rows: rowsOf(300), settings: { messages: MSG } });
     let t = 0;
     vi.spyOn(window.performance, 'now').mockImplementation(() => (t += 1));
     const p = preparePrint(m.g);
     expect(box()).toHaveLength(1);
     m.g.destroy();
-    const done = await p;
+    expect(await p).toBeNull();
     expect(box()).toHaveLength(0);
     expect(document.documentElement.classList.contains('dzg-printing')).toBe(false);
-    done();
-    expect(box()).toHaveLength(0);
   });
 
   it('print(): prepares, calls window.print(), cleans up on afterprint', async () => {
@@ -342,6 +358,49 @@ describe('7. cleanup (print.md 1, 7)', () => {
     window.dispatchEvent(new Event('afterprint'));
     expect(box()).toHaveLength(0);
   });
+
+  it('two print() calls in a row: one dialog, the newer table\'s; a cleanup removes its own table only (review finding 1)', async () => {
+    const m = emake({ rows: rowsOf(5), settings: { messages: MSG } });
+    const captions: string[] = [];
+    const spy = vi.spyOn(window, 'print').mockImplementation(() => void captions.push(...[...box()].map((b) => b.querySelector('caption')!.textContent!)));
+    await Promise.all([print(m.g, { title: 'A' }), print(m.g, { title: 'B' })]);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(captions).toEqual(['B']);
+    expect(box()).toHaveLength(1);
+    window.dispatchEvent(new Event('afterprint'));
+    expect(box()).toHaveLength(0);
+    expect(document.documentElement.classList.contains('dzg-printing')).toBe(false);
+  });
+
+  it('two print() calls while the first builds: the first resolves null and opens no dialog; the second prints (review finding 1)', async () => {
+    const m = emake({ rows: rowsOf(200), settings: { messages: MSG } });
+    let t = 0;
+    vi.spyOn(window.performance, 'now').mockImplementation(() => (t += 1));
+    const spy = vi.spyOn(window, 'print').mockImplementation(() => {
+      expect(box()).toHaveLength(1);
+      expect(table().caption!.textContent).toBe('B');
+      expect(body()).toHaveLength(200);
+    });
+    await Promise.all([print(m.g, { title: 'A' }), print(m.g, { title: 'B' })]);
+    expect(spy).toHaveBeenCalledTimes(1);
+    window.dispatchEvent(new Event('afterprint'));
+    expect(box()).toHaveLength(0);
+  });
+
+  for (const type of ['focus', 'pointerdown']) {
+    it(`no afterprint (Safari's PDF path): the first ${type} after the dialog cleans up, once (review finding 5)`, async () => {
+      const m = emake({ rows: rowsOf(5), settings: { messages: MSG } });
+      vi.spyOn(window, 'print').mockImplementation(() => {});
+      await print(m.g);
+      expect(box()).toHaveLength(1);
+      window.dispatchEvent(new Event(type));
+      expect(box()).toHaveLength(0);
+      expect(document.documentElement.classList.contains('dzg-printing')).toBe(false);
+      // The other triggers later: nothing more to do (idempotent), nothing thrown.
+      for (const e of ['afterprint', 'focus', 'pointerdown']) window.dispatchEvent(new Event(e));
+      expect(box()).toHaveLength(0);
+    });
+  }
 });
 
 describe('8. a server grid: the page shown only, its place in the caption, no request (print.md 2)', () => {
@@ -375,7 +434,7 @@ describe('9. the screen grid untouched; the container hidden on screen (print.md
     m.g.kernel.subscribe((e) => void seen.push(e.type));
     const before = { top: m.box.scrollTop, inline: m.box.scrollInline, focus: document.activeElement, paints: (m.g as unknown as { paints: number }).paints, html: m.host.innerHTML };
     const done = await preparePrint(m.g);
-    done();
+    done!();
     expect({ top: m.box.scrollTop, inline: m.box.scrollInline, focus: document.activeElement, paints: (m.g as unknown as { paints: number }).paints, html: m.host.innerHTML }).toEqual(before);
     expect(seen).toEqual([]);
   });
@@ -419,10 +478,19 @@ describe('10. no row data kept; the texts (print.md 4, « Texts »)', () => {
     expect([EN_PRINT.locale, FR_PRINT.locale, AR_PRINT.locale]).toEqual(['en', 'fr', 'ar']);
   });
 
+  it('the print keys are grid keys in the types (review finding 2): a literal bundle with them, msg() taking them, no cast', () => {
+    // Checked by `npm run typecheck` (an excess key, or a key msg() refuses, fails it); at run time the bundle is plain data.
+    const m: GridMessages = { locale: 'en', text: { ...EN.text, 'print.truncated': 'First {n} rows of {total}', 'print.page': 'Page {page} of {pages}' } };
+    const say = (g: GridContext<unknown>): string => g.msg('print.truncated', { n: 1, total: 2 }) + g.msg('print.page', { page: 1, pages: 2 });
+    expect(m.text['print.page']).toBe('Page {page} of {pages}');
+    expect(typeof say).toBe('function');
+    expect(readFileSync(`${ROOT}packages/dom/src/print/index.ts`, 'utf8')).not.toMatch(/as never, p\)/);
+  });
+
   it('a missing print bundle: the table all the same, one missing-message problem for the grid, told once', async () => {
     const m = emake({ rows: rowsOf(10), settings: { messages: EN } });
-    (await preparePrint(m.g, { maxRows: 2 }))();
-    (await preparePrint(m.g, { maxRows: 2 }))();
+    (await preparePrint(m.g, { maxRows: 2 }))!();
+    (await preparePrint(m.g, { maxRows: 2 }))!();
     const p = problemsOf(m.events).filter((x) => x.code === 'missing-message');
     expect(p).toEqual([{ code: 'missing-message', severity: 'warning', path: 'messages.text', detail: 'print.truncated, print.page' }]);
   });

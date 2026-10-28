@@ -172,18 +172,17 @@ export class PopupHost {
 
   /** Below (or beside) the anchor or `from`, start edges aligned (`align: 'end'`: end edges); above it when there is no room below. */
   #place(anchor: HTMLElement, el: HTMLElement, { placement, from = anchor, align }: PopupOptions): void {
-    const win = this.#doc.defaultView;
+    // The window less its scrollbars (innerWidth counts them: an RTL page's left scrollbar would cover the popup).
+    const { clientHeight: winBlock, clientWidth: winInline } = this.#doc.documentElement;
     const box = el.getBoundingClientRect();
     const r = placedBy(from, !!align, box.width);
-    const winBlock = win?.innerHeight ?? 0;
-    const winInline = win?.innerWidth ?? 0;
     const dir = this.#dir();
     if (placement === 'block-end') {
       const below = r.bottom + 2;
       // Below; else above; else (no room either way) its end at the window's: inside it, scrolling within (1.4.10). Every
       // popup since the owner's look (app-feedback 21: a filter popup taller than the room below stayed cut).
-      const top = below + box.height <= winBlock ? below : r.top - 2 - box.height >= 0 ? r.top - 2 - box.height : winBlock - box.height;
-      setPx(el, 'inset-block-start', Math.max(0, top));
+      const up = r.top - 2 - box.height;
+      setPx(el, 'inset-block-start', Math.max(0, below + box.height <= winBlock ? below : up >= 0 ? up : winBlock - box.height));
       // 8 px from the window's end edge, not on it (owner's second look, app-feedback 23).
       setPx(el, 'inset-inline-start', fixedInlineStart(r, dir, winInline, box.width + 8));
     } else {

@@ -98,6 +98,17 @@ describe('a brief busy flash after a filter applies or clears (app-feedback 32, 
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it('the grid destroyed during a flash: aria-busy taken off the root with the timer (review finding 3)', () => {
+    vi.useFakeTimers();
+    const t = grid({ busyFlash: 300 });
+    const root = t.root();
+    t.filter('ann');
+    expect(root.getAttribute('aria-busy')).toBe('true');
+    t.g.destroy?.();
+    expect(root.hasAttribute('aria-busy')).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('it never blocks: the rows are filtered at once, under the flash', () => {
     vi.useFakeTimers();
     const t = grid({ busyFlash: 300 });

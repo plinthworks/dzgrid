@@ -195,6 +195,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
       onCommand(g.kernel);
       quiet();
       clearTimeout(t);
+      r.removeAttribute('aria-busy');
       popup.close();
       row.destroy();
       shown.detach(g);

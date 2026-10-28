@@ -19,7 +19,8 @@ To be published as **1.1.0** at the Phase 6 close (owner, « Back to Phase 6 »:
   cells written on every row, a full-width row as one cell; detail panels, loading and filler rows left out. Built in
   slices of about 8 ms, a second call cancels the first, the cleanup is idempotent; the screen grid is not touched.
   Above `maxRows` (5 000): the first ones, a line saying so (`print.truncated`) and one `print-too-many` problem
-  (counts only). `print(grid, options)` adds the browser's dialog and the cleanup on `afterprint`. Texts in
+  (counts only). `print(grid, options)` adds the browser's dialog (the newest call's only) and the cleanup on `afterprint` (or the first
+  `focus` / `pointerdown` after it, when none comes); a cancelled `preparePrint` resolves null. Texts in
   `locales/{en,fr,ar}-print`, spread into the grid's messages; `PrintMessageKey`, `PrintMessages`, the `print-too-many`
   problem code (types only).
 - **`@dzgrid/theme/print.css`** and `print.unlayered.css` (and `print.scss`): the table's borders, header repeated on each
@@ -56,6 +57,17 @@ From 1.0.0 on, a breaking change to the public API needs a major version; later 
 - **Phase 6 so far, advanced columns**: moving columns, the column menu, the column chooser, keyboard resize and
   autofit, `GridState` (save and restore, local or in the address), collapsible header groups, editable pinned rows,
   automatic row height, the optional comfort stylesheet; the owner's integration feedback (below).
+
+### Fixed (review after step 11)
+
+- `print()` twice in a row: the older build opened a dialog too; now only the newest prints (a cancelled
+  `preparePrint` resolves null) and each cleanup removes its own table. Without `afterprint` (Safari's PDF path) the
+  first `focus` or `pointerdown` after the dialog cleans up.
+- `print.truncated` and `print.page` are grid keys in the types (`GridMessages.text`, `msg`): a literal bundle with them
+  compiles, no cast (types only).
+- Filters: destroying the grid during a `busyFlash` left `aria-busy` on its root; removed with the timer.
+- Popups are kept inside the window less its scrollbars (`documentElement.clientWidth` / `clientHeight`, not
+  `innerWidth`): right to left, a popup no longer slides under the left scrollbar.
 
 ### Release
 
