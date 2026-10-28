@@ -57,4 +57,27 @@ describe('gridState() and a hold it did not make', () => {
     const t = make([gridState()]);
     expect(t.reqs.length).toBe(1);
   });
+
+  // Phase 6 close review (LOW): `persist` AND another holder (the Angular wrapper's `[state]`) made two requests: the
+  // storage's restore ended the hold, then the holder's restore asked again. Now the hold stays the holder's.
+  it('with persist AND another holder: the storage restored without a request; the holder\'s restore is the one request, over it', () => {
+    localStorage.setItem('k', JSON.stringify({ v: 1, sort: [{ column: 'name', dir: 'asc' }] }));
+    const st = gridState({ persist: { key: 'k' } });
+    const t = make([holder, st]);
+    expect(t.reqs.length).toBe(0);
+    expect(t.g.kernel.query.sort).toEqual([{ column: 'name', dir: 'asc' }]);
+    st.api(t.g)!.setState({ v: 1, sort: [{ column: 'name', dir: 'desc' }] });
+    expect(t.reqs.length).toBe(1);
+    expect(t.reqs[0]!.sort).toEqual([{ column: 'name', dir: 'desc' }]);
+    t.g.kernel.rows.hold!(() => {});
+    expect(t.reqs.length).toBe(1);
+  });
+
+  it('with persist, another holder, and storage that cannot be read: the hold still comes back (no request until the holder ends it)', () => {
+    localStorage.setItem('k', '{not json');
+    const t = make([holder, gridState({ persist: { key: 'k' } })]);
+    expect(t.reqs.length).toBe(0);
+    t.g.kernel.rows.hold!(() => {});
+    expect(t.reqs.length).toBe(1);
+  });
 });

@@ -2,16 +2,21 @@
 // K.8 in the Angular example's real build (step 23, docs/behaviors/angular-example.md): the DzGrid
 // share of the first load is the default build's initial files less the baseline's (the same
 // shell drawing a plain table). The parsing of index.html runs always; the measure needs the
-// example's builds (`npm run example:build`) and is skipped without them.
+// example's fresh, stamped build (`npm run example:build`): a missing, failed or stale one FAILS under CI or the
+// release check (DZG_RELEASE_CHECK=1) and is skipped, with a note, on a laptop's test:ci (Phase 6 close review: the
+// build takes minutes and the network, so it runs in the release check, not in every test run).
 import { describe, it, expect } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 // @ts-expect-error a plain .mjs script
-import { initialFiles, measureExample } from '../../scripts/example-lib.mjs';
+import { exampleGate, initialFiles, measureExample, stampProblem } from '../../scripts/example-lib.mjs';
 
 const EXAMPLE = fileURLToPath(new URL('../../examples/angular-audit/', import.meta.url));
-const page = (b: string) => existsSync(`${EXAMPLE}dist/${b}/browser/index.html`) || existsSync(`${EXAMPLE}dist/${b}/browser/index.csr.html`);
-const built = page('audit') && page('baseline');
+const ROOT = fileURLToPath(new URL('../../', import.meta.url));
+const problem: string | null = stampProblem(EXAMPLE, ROOT);
+const gate: 'measure' | 'fail' | 'skip' = exampleGate(stampProblem(EXAMPLE, ROOT), process.env);
+if (gate === 'skip') console.warn(`example-bytes: skipped (${problem}); CI and DZG_RELEASE_CHECK=1 fail instead`);
+const skip = gate === 'skip';
 
 describe('the initial files of an Angular build', () => {
   it('takes the module scripts, the module preloads and the stylesheets, once each, in page order', () => {
@@ -36,7 +41,11 @@ describe('the real example\'s ceiling', () => {
   });
 });
 
-describe.skipIf(!built)('K.8 from the real ng build', () => {
+describe.skipIf(skip)('K.8 from the real ng build', () => {
+  it('the example build is there, clean and fresh (its stamp)', () => {
+    expect(problem, 'the example build').toBeNull();
+  });
+
   it('the DzGrid share (default less baseline: initial JS and global CSS, gzip 9) stays within 95 000 (owner 2026-10-28, step 12; S12-Q10 92 500, S9-Q7 92 000, Q17a 90 000, Q14 87 000)', () => {
     const m = measureExample(EXAMPLE);
     expect(m.audit.files.length).toBeGreaterThan(0);
@@ -64,7 +73,7 @@ describe('the URL screen (?screen=audit-url, owner Q12-3)', () => {
     expect(readFileSync(fileURLToPath(new URL('../../scripts/example.mjs', import.meta.url)), 'utf8')).toMatch(/\(5\) the « audit-url » screen/);
   });
 
-  it.skipIf(!built)('measured: its lazy chunks hold the state code, the first load holds none of it', () => {
+  it.skipIf(skip)('measured: its lazy chunks hold the state code, the first load holds none of it', () => {
     // @ts-expect-error a plain .mjs script
     return import('../../scripts/example-lib.mjs').then(({ measureLazy, measureBuild }) => {
       const dist = fileURLToPath(new URL('../../examples/angular-audit/dist/audit', import.meta.url));

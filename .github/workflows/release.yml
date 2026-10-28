@@ -49,12 +49,17 @@ jobs:
             exit 1
           fi
 
-      # The gates, as on a laptop: one worker (Angular's test environment is set up once per context).
-      - run: npm run test:ci
+      # The gates, as on a laptop. The build first, then the Angular example built from it and measured (K.8 in a real
+      # ng build; a missing, failed or stale example build fails, never skips: Phase 6 close review), so that test:ci
+      # (one worker: Angular's test environment is set up once per context) measures it too: under CI it fails, not skips.
       - run: npm run typecheck
       - run: npm run build
+      - run: npm run example:build
+      - run: npm run example:bytes
+      - run: npm run test:ci
       - run: npm run check:size
       - run: npm run check:contrast
+      # The example's stamp is fresh here: release:check keeps the build, measures it again, checks the manifests.
       - run: npm run release:check
 
       # No stored token: the OIDC token is the credential. Already published versions are skipped.

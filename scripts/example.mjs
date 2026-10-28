@@ -2,8 +2,9 @@
  * The Angular example (step 23, docs/behaviors/angular-example.md; plan
  * docs/phase-3-steps/step23-example-blueprint.md, decisions step23-decisions.md).
  *
- *   node scripts/example.mjs build [--no-pack]   pack the tarballs, install them into
- *       examples/angular-audit (copies, not links), ng build default, zone and baseline
+ *   node scripts/example.mjs build [--no-pack] [--if-stale]   pack the tarballs, install them into
+ *       examples/angular-audit (copies, not links), ng build default, zone and baseline; `--if-stale`: only when
+ *       the stamp does not match the packages (release:check)
  *   node scripts/example.mjs csv                  the Arabic CSV sample → examples/angular-audit/out/audit-ar.csv
  *   node scripts/example.mjs ssr [--lang ar] [--screen stock] [--json] [--dir <example>]   renderApplication on the server build
  *   node scripts/example.mjs bytes                K.8 from the real build (default less baseline)
@@ -60,6 +61,8 @@ function installed(dir) {
 }
 
 function build() {
+  // `--if-stale` (release:check, Phase 6 close): a build stamped from the packages as they are now is kept.
+  if (flag('if-stale') && !stampProblem(EXAMPLE, ROOT)) return void console.log('example build: fresh (its stamp matches the packages), kept');
   // No stamp until every build is clean (owner, 2026-10-28): a failed install or build leaves an old dist unmeasurable.
   dropStamp(EXAMPLE);
   if (!flag('no-pack')) sh('npm', ['run', 'pack:local'], ROOT);

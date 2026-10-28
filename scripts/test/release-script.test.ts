@@ -44,7 +44,7 @@ describe('release.mjs', () => {
     expect(wf).toMatch(/tags: \['v\*'\]/);
     expect(wf).toContain('id-token: write');
     expect(wf).not.toMatch(/NODE_AUTH_TOKEN|NPM_TOKEN|secrets\./);
-    const order = ['npm run test:ci', 'npm run typecheck', 'npm run build', 'npm run check:size', 'npm run release:check', 'npm run publish:release'];
+    const order = ['npm run typecheck', 'npm run build', 'npm run example:build', 'npm run example:bytes', 'npm run test:ci', 'npm run check:size', 'npm run release:check', 'npm run publish:release'];
     const where = order.map((s) => wf.indexOf(s));
     expect(where.every((i) => i >= 0), String(where)).toBe(true);
     expect([...where].sort((a, b) => a - b)).toEqual(where);

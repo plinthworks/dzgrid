@@ -13,7 +13,7 @@
     "build:angular": "node scripts/build.mjs --angular",
     "pack:local": "npm run build && node scripts/pack-local.mjs",
     "pack:release": "npm run build && rm -rf packed.tmp && mkdir packed.tmp && for p in core dom angular; do (cd packages/$p/dist && npm pack --pack-destination ../../../packed.tmp >/dev/null) || exit 1; done && (cd packages/theme && npm pack --pack-destination ../../packed.tmp >/dev/null) && rm -rf packed && mv packed.tmp packed && ls packed",
-    "release:check": "node scripts/release.mjs check",
+    "release:check": "node scripts/example.mjs build --if-stale && node scripts/example.mjs bytes && node scripts/release.mjs check",
     "publish:release": "npm run build && node scripts/release.mjs publish",
     "publish:dry": "npm run build && node scripts/release.mjs publish --dry-run --no-provenance",
     "publish:verify": "node scripts/release.mjs verify",

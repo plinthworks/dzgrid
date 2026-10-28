@@ -107,10 +107,20 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
       g.scope.add(k.subscribe((e) => void (!quiet && e.source !== 'host' && SAVED.includes(e.type) && arm(e.source))));
       // The storage restored, then a server model this feature held asks: what was restored, or the grid as defined.
       // Without `persist` the hold is someone else's (the Angular wrapper's `[state]`, Phase 6 step 12): theirs to end.
-      if (o.persist) try {
-        g.scope.add(keep(k, api, o.persist.key, o.persist.include));
-      } finally {
-        g.rows.hold?.(() => {});
+      // With `persist` and another feature holding too (that wrapper's `[state]`), the storage's restore keeps the hold
+      // (the rows have no `hold` meanwhile): the other ends it, one request in all (Phase 6 close review).
+      if (o.persist) {
+        const r = g.rows;
+        const h = r.hold;
+        const own = !g.settings.features!.filter((f) => f.held)[1]; // this feature holds; a second one too?
+        // Without `hold`, a restore applies its commands one by one, each load still held.
+        own || delete r.hold;
+        try {
+          g.scope.add(keep(k, api, o.persist.key, o.persist.include));
+        } finally {
+          r.hold = h!;
+          own && h?.(() => {});
+        }
       }
       last = text();
       // Its timer and listeners go with the grid's scope.
@@ -133,6 +143,14 @@ export function persistLocal(grid: { readonly kernel: GridKernel<any> }, key: st
 /** The largest state an address carries (owner E5-3): 4 KB of JSON. */
 const MAX = 4096;
 const utf8 = new TextEncoder();
+type Loose = { -readonly [K in keyof GridState]?: GridState[K] };
+/** Typed filters and the search out of `s` (in place) unless `include` names them (O6). */
+const strip = (s: Loose, o: { readonly include?: readonly ('filter' | 'quick')[] }): Loose => {
+  const inc = Array.isArray(o.include) ? o.include : [];
+  if (!inc.includes('filter')) delete s.filter;
+  if (!inc.includes('quick')) delete s.quick;
+  return s;
+};
 
 /**
  * The state as ONE parameter of an address (G 18, 19, O6, O7): `name` = `1.` + base64url of its text (`stateText`). Typed
@@ -140,13 +158,9 @@ const utf8 = new TextEncoder();
  * (`state-field`, E5-3). The application writes it into the address itself (`history.replaceState`): never done here.
  */
 export function toSearchParams(state: GridState, o: { readonly name?: string; readonly include?: readonly ('filter' | 'quick')[] } = {}): { params: URLSearchParams; problems: Problem[] } {
-  const inc = Array.isArray(o.include) ? o.include : [];
   const name = o.name ?? 'grid';
   const problems: Problem[] = [];
-  const s: { -readonly [K in keyof GridState]?: GridState[K] } = { ...state };
-  if (!inc.includes('filter')) delete s.filter;
-  if (!inc.includes('quick')) delete s.quick;
-  let bytes = utf8.encode(stateText(s as GridState));
+  let bytes = utf8.encode(stateText(strip({ ...state }, o) as GridState));
   if (bytes.length > MAX) {
     problems.push(problem('state-field', 'warning', name, 'too-large'));
     bytes = utf8.encode(stateText({ v: 1, columns: state.columns, sort: state.sort } as GridState));
@@ -167,7 +181,6 @@ export function toSearchParams(state: GridState, o: { readonly name?: string; re
  * hold are not applied by `setState` (the grid's own filters and search stay, G 19).
  */
 export function fromSearchParams(params: URLSearchParams, o: { readonly name?: string; readonly include?: readonly ('filter' | 'quick')[] } = {}): { state: GridState | null; problems: Problem[] } {
-  const inc = Array.isArray(o.include) ? o.include : [];
   const name = o.name ?? 'grid';
   const v = params.get(name);
   if (v === null) return { state: null, problems: [] };
@@ -175,12 +188,8 @@ export function fromSearchParams(params: URLSearchParams, o: { readonly name?: s
     if (!/^1\.[\w-]+$/.test(v)) throw 0;
     const bin = atob(v.slice(2).replace(/-/g, '+').replace(/_/g, '/'));
     if (bin.length > MAX) throw 0;
-    const s = checkState(JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))))).state as { -readonly [K in keyof GridState]?: GridState[K] } | null;
-    if (s) {
-      if (!inc.includes('filter')) delete s.filter;
-      if (!inc.includes('quick')) delete s.quick;
-      return { state: s as GridState, problems: [] };
-    }
+    const s = checkState(JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))))).state as Loose | null;
+    if (s) return { state: strip(s, o) as GridState, problems: [] };
   } catch {
     // Edited, cut, or not a state: below.
   }

@@ -174,8 +174,9 @@ export class DzGrid<T> implements AfterContentInit {
   private _gone = false;
   /** `[save]` was given a value once: from then on each value is the grid's save (`undefined`: the local save). */
   private _saves = false;
-  /** The `[state]` value applied last, canonical: an equal one is not applied again. */
+  /** The `[state]` value applied last and the grid's state right after it, canonical. */
   private _st?: string;
+  private _sn?: string;
   /** The events of the grid's making, told after the first render: written during the host's check, NG0100. */
   private _early: GridEvent<T>[] | null = [];
   /** The model's last set, the host's or the grid's copy: another one is a host write. */
@@ -336,15 +337,19 @@ export class DzGrid<T> implements AfterContentInit {
     if (this._k && !this._told.has('\0' + path)) this._told.add('\0' + path), emit(this._k, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', path, feature)] });
   }
 
-  /** `[state]` to the grid, outside the zone: a new value only, and not when it equals the grid's own (no echo). */
+  /**
+   * `[state]` to the grid, outside the zone. Null or unset: nothing. Not applied when it equals the grid's own state (the
+   * echo), nor when it is the value applied last and the grid has not moved since (the effect run again); otherwise
+   * applied, an equal but new value too once the grid moved (« reset to saved », Phase 6 close review).
+   */
   private _state(): void {
     const v = this.state();
-    const c = v == null ? this._st : canonical(v);
-    if (c === this._st) return;
-    this._st = c;
+    if (v == null) return;
     const api = this.controller._by<{ state(): GridState; setState(s: unknown): unknown }>('state');
-    if (!api) this._miss('state', 'state');
-    else if (c !== canonical(api.state())) this._zone.runOutsideAngular(() => api.setState(v));
+    if (!api) return this._miss('state', 'state');
+    const c = canonical(v);
+    const n = canonical(api.state());
+    if (c !== n && (c !== this._st || n !== this._sn)) this._zone.runOutsideAngular(() => api.setState(v)), (this._st = c), (this._sn = canonical(api.state()));
   }
 
   /** Inside a detail panel (`dzgNested`): the depth told, Escape back to the panel; on the host element, outside the zone. */

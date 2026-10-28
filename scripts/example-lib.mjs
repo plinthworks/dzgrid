@@ -182,3 +182,15 @@ export function stampProblem(example, root) {
   if (!existsSync(file)) return 'the example build has no stamp (it failed, or predates the stamp): run npm run example:build';
   return JSON.parse(readFileSync(file, 'utf8')).digest === workspaceDigest(root) ? null : 'the example build is stale (the packages changed since): run npm run example:build';
 }
+
+/**
+ * What the vitest measure of the example does with `problem` (stampProblem's answer; Phase 6 close review): a fresh
+ * build is measured; a missing, failed or stale one FAILS under CI (GitHub sets CI=true) or the release check
+ * (DZG_RELEASE_CHECK=1), and is skipped on a laptop's test:ci — the build takes minutes (pack, install, three ng
+ * builds) and needs the network, so it runs in the release check, not in every test run.
+ */
+export function exampleGate(problem, env) {
+  if (!problem) return 'measure';
+  const on = (v) => !!v && v !== 'false' && v !== '0';
+  return on(env.CI) || on(env.DZG_RELEASE_CHECK) ? 'fail' : 'skip';
+}
