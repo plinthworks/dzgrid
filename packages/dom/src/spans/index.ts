@@ -96,6 +96,10 @@ function setup(g: GridContext<unknown>): FeatureHandle {
 
   const feature: SpanFeature = {
     move,
+    // The map of the rows shown now, for what reads cells by position (`@dzgrid/dom/print`, Phase 6 step 11).
+    get map() {
+      return current();
+    },
     anchors(first, last) {
       win = { first, last };
       const d = g.rows.displayed;

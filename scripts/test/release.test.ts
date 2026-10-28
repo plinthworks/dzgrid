@@ -114,7 +114,22 @@ describe('1.0.0, the four packages', () => {
       expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
       expect(theme.files, f).toContain(f);
     }
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'columns-panel', 'pinned-rows'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'columns-panel', 'pinned-rows'[,\]]/); // step 11 adds 'print' after it
+  });
+
+  it('export the Phase 6 step 11 subpaths (@dzgrid/dom/print, its -print texts), built like the others; its look in print.css (built, exported, shipped)', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./print']).toEqual({ types: './src/print.ts', default: './src/print.ts' });
+    for (const lang of ['en', 'fr', 'ar']) expect(dom[`./locales/${lang}-print`], lang).toEqual({ types: `./src/locales/${lang}-print.ts`, default: `./src/locales/${lang}-print.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toContain("'./print'");
+    for (const lang of ['en', 'fr', 'ar']) expect(build).toContain(`'./locales/${lang}-print'`);
+    const theme = JSON.parse(readFileSync(`${ROOT}packages/theme/package.json`, 'utf8'));
+    for (const f of ['print.css', 'print.unlayered.css', 'print.scss']) {
+      expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
+      expect(theme.files, f).toContain(f);
+    }
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pinned-rows', 'print'\]/);
   });
 
   it('export the Phase 6 step 3 subpaths (@dzgrid/dom/column-menu, its -column-menu texts), built like the others; its look in columns.css', () => {

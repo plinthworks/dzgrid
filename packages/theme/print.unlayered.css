@@ -1,0 +1,42 @@
+@media print {
+  .dzg-printing body > :not(.dzg-print) {
+    display: none !important;
+  }
+  .dzg-printing .dzg-print {
+    display: block !important;
+  }
+}
+.dzg-print {
+  display: none;
+}
+
+@media print {
+  .dzg-printing .dzg-print table {
+    border-collapse: collapse;
+    inline-size: 100%;
+    color: black;
+    background: white;
+    font-size: inherit;
+  }
+  .dzg-printing .dzg-print th,
+  .dzg-printing .dzg-print td {
+    border: 1px solid black;
+    padding: 0.2em 0.4em;
+    text-align: start;
+    vertical-align: top;
+  }
+  .dzg-printing .dzg-print thead {
+    display: table-header-group;
+  }
+  .dzg-printing .dzg-print tr {
+    break-inside: avoid;
+  }
+  .dzg-printing .dzg-print caption {
+    caption-side: top;
+    text-align: start;
+    font-weight: bold;
+  }
+  .dzg-printing .dzg-print-note {
+    text-align: start;
+  }
+}

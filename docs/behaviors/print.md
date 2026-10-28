@@ -20,7 +20,9 @@ prepared the grid).
 
 ## Behaviours (numbered, each one a test)
 1. `preparePrint(grid, { maxRows = 5000, title? }) → Promise<() => void>` builds a print-only `<table>` and
-   resolves with a cleanup; `print(grid, opts)` prepares, calls `window.print()`, cleans up on `afterprint`.
+   resolves with a cleanup; `print(grid, opts)` prepares, calls `window.print()`, cleans up on `afterprint` (the
+   plan's `matchMedia('print')` fallback was left out to hold the 1 600 B line, as plan §5 orders: every engine of the
+   support matrix sends `afterprint`).
 2. Rows: the displayed rows in order (filtered, sorted, searched), the tree's shown rows (expanded only, the
    level shown as an indentation of the tree column's text); **top pinned rows at the start of `tbody`**
    (printed once, never repeated per page: only `thead` repeats) and bottom pinned rows at its end
@@ -40,7 +42,10 @@ prepared the grid).
 7. Built in chunks (no long task over 200 ms; 5 000 × 20 within 1.5 s), so the page stays responsive; a second
    call while one is being built cancels the first; the cleanup removes everything (idempotent).
 8. Never mounts the virtual body: the screen grid is untouched (no scroll, no focus change, no event).
-9. The print container is `display: none` on screen and not in the accessibility tree there.
+9. The print container is `display: none` on screen and not in the accessibility tree there (an inline `display: none`
+   and `aria-hidden`; `print.css` shows it in print only while `.dzg-printing` is on `<html>`, with `!important` outside the
+   layer, and hides the rest of the page; `print.unlayered.css` for a page whose reset is unlayered, such as Tailwind's
+   preflight).
 
 ## Keyboard
 None of its own (the application's button and the browser's Ctrl+P).
@@ -67,9 +72,14 @@ the start. Numbers and dates isolated as on screen.
 
 ## Choices to confirm (not settled by the decisions)
 1. The Ctrl+P of the browser, without `preparePrint`, prints only what is on screen (as today); no
-   `beforeprint` hook building the table by itself.
+   `beforeprint` hook building the table by itself. Kept at step 11.
 
-## Tests (to be written with the code)
-`packages/dom/test/print.test.ts` (table in order, columns, groups, pinned rows, the cap and its problem,
-chunks, cancel, cleanup on `afterprint`, `dir`, no row data in problems); browser: Chrome `page.pdf()` fr and
-ar (headers repeated, no cut rows, pinned columns first), the playground « Imprimer » button.
+## Tests
+`packages/dom/test/print.test.ts` (32: the table, caption, groups, `dir` / `lang`; rows in order after sort, filter and
+search, a tree's shown rows, pinned rows, no detail or filler, merged and full-width cells; columns in reading order;
+the screen's text, parts, edits, HTML-looking text; the cap and its one problem; chunks, cancel, cleanup, `afterprint`;
+a server page; the screen untouched; the texts), `print-size.test.ts`, `packages/theme/test/print.test.ts` (the sheet and
+its twin under a simulated preflight). Browser: `npm run test:browser -- --only print` (Chrome `page.pdf()` fr and ar,
+under Tailwind's preflight and with the layered sheet, 1 200 and 5 001 rows: the header rows on every page, every row once
+and none cut, the pinned column first, the caption, the truncation line; `print()` and `afterprint`; orders.html's button).
+Playground: `print.html` (`?lang=ar`, `?rows=5001`, `?preflight=1`) and « Imprimer » on `orders.html`.

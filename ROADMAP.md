@@ -848,9 +848,18 @@ print → Angular and demos → close (0.4.0 prepared). Budgets: Q-B A (plan §4
   2 200 (Q9-6, compression alone); `dom/tree` 3 835 / 3 850 (Q9-5: sticky copies capped in pixels). Demo
   `playground/auto-height.html`. Browser `--only auto-height`: Chrome 33, Firefox 14 (100 000 rows ≤ 1.5 px), WebKit 8;
   exit criterion 3 met (0 px at 10 000 rows, three engines; a million rows).
-- [ ] step 11: print.
+- [x] step 11 (2026-10-28; plan `docs/phase-6-steps/step11-plan.md` « Done »): print — `@dzgrid/dom/print`
+  (`preparePrint(grid, { maxRows, title })`, `print(grid, options)`): the shown rows as a real table beside the grid
+  (caption, `th scope`, header groups with `<colgroup>`, `dir` / `lang`, pinned rows first and last, a tree indented,
+  merged and full-width cells, a server's page in the caption; detail, loading and filler rows out), built in ~8 ms
+  slices, cancelled by a second call, idempotent cleanup, the screen grid untouched; above 5 000 rows the line and one
+  `print-too-many`. Texts `-print`; `print.css` and `print.unlayered.css` (survives Tailwind's preflight); the spans
+  feature exposes `map`. Sizes: `dom/print` 1 590 / 1 600 (the `matchMedia` fallback dropped, plan §5), `print.css`
+  334 / 400, twin 292 / 400, texts 132 / 140 / 160; base, core, K.8, Angular +0. Playground `print.html` and
+  « Imprimer » on `orders.html`; Chrome `--only print` 39 (`page.pdf()` fr and ar under the preflight), `playground` 41.
+  Gate: vitest **484 files / 7 247 passed** (2 skipped), `test:perm` 5 files / 10, `typecheck`, `build`, `check:size` **118 ok, 0 over** (core 28 999, DOM base 22 331, K.8 84 449 / 84 450, Angular 6 811: all as before), `check:contrast` 1 092 / 0.
 - [ ] step 12: Angular and demos.
-- [ ] step 13: close (rebudget, full gate, 0.4.0 prepared, unpublished).
+- [ ] step 13: close (rebudget, full gate, **1.1.0** prepared — 1.0.0 is published, owner « Back to Phase 6 » —, published by the owner with `npm run publish:latest`).
 
 - **Feedback pass (allergen-detector) and tzslot 2.4.0** (2026-10-27, built, not committed): items A–M of `docs/phase-6-steps/feedback-plan.md` « Done » — text glyphs instead of border glyphs, the box's outline, one operator without « Condition », `filterOption` parts, `ui.data`, popup `data-column`/`data-kind`, the period form in the popup itself, `@tzslot/dom/lazy` (a date kit's first use 66 962 → 33 317 B gz). Gate (once, caffeinate -i, vitest 2 workers, Node 24): vitest 470 files / 7 117 tests, test:perm 5 / 10, typecheck, build, check:size 0 over (core 28 999, dom 22 321, filters 9 990 — no raise needed —, theme 2 562, pagination 3 133, tree 3 821, K.8 84 077; raised by the strict need, Q1: date adapters 2 745 (2 744), set chunk 4 205 (4 204), calendar 1 520 (1 519)), check:contrast 1 092 / 0. Browser: Chrome --only filters 32, dates 56, pagination 45, tree 78 (and groups 20, detail 37, motion 50); Firefox and WebKit --only dates 12, pagination 24, tree 6, all green.
 - **The owner's look** (2026-10-27, app-feedback 11–22): one box per value row, `apply: 'button'`, `dateZone: false`, popups kept in the window, the header box in the title's place. Budgets raised by the owner (decisions « Owner's-look budgets »): filters 10 100 (10 048), set chunk 4 250 (4 208), date adapters 2 800 (2 752), K.8 84 300 (84 297).

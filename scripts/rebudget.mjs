@@ -135,6 +135,13 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/dzgrid.comfort.css': 650, // the owner's third look (2026-10-27, « Comfort stylesheet »): the spinner and thin scroll bars, its line the measure + 10 % (551 → 650)
   // Phase 6 step 9 (owner Q-B, Q9-3): automatic row height over the DOM base, @dzgrid/core/detail's sparse layout outside it.
   '@dzgrid/dom/auto-height': 1400,
+  // Phase 6 step 11 (owner Q-B): print over the DOM base; its -print texts; print.css and its unlayered twin, 400 each.
+  '@dzgrid/dom/print': 1600,
+  '@dzgrid/dom/locales/en-print': 150,
+  '@dzgrid/dom/locales/fr-print': 150,
+  '@dzgrid/dom/locales/ar-print': 200,
+  '@dzgrid/theme/print.css': 400,
+  '@dzgrid/theme/print.unlayered.css': 400,
   '@dzgrid/dom/spans': 5300, // Q-B: 4 950 → 5 300 for the phase; Q8-4: the fold UI moved out, measured 4 567
 };
 

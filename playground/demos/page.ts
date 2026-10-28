@@ -12,6 +12,10 @@ import '../../packages/theme/range.css';
 import '../../packages/theme/fill.css';
 import '../../packages/theme/columns.css';
 import '../../packages/theme/columns-panel.css';
+// The print table (Phase 6 step 11): « Imprimer » on orders.html.
+import '../../packages/theme/print.css';
+// By path, not `@dzgrid/dom/print`: no alias added to vite.config.ts while the playground server runs.
+import { print } from '../../packages/dom/src/print.js';
 import { mountOrders } from './orders.js';
 import { mountHr } from './hr.js';
 import { mountOrdersEdit } from './orders-edit.js';
@@ -147,4 +151,10 @@ const demo = editing
   ? mountOrdersEdit(host, document.getElementById('log')!, { locale, onEvent: onEvent as never, paged: q.get('paged') === '1', enter: q.get('enter') === 'down' ? 'down' : 'stay', tree: q.get('tree') === '1', bar: document.getElementById('live')! })
   : which === 'hr' ? mountHr(host, { locale, onEvent }) : mountOrders(host, { locale, onEvent });
 if (which === 'orders') host.classList.add('demo-orders');
+// « Imprimer » (Phase 6 step 11, docs/behaviors/print.md): the orders shown (sorted, filtered, the open sub-orders), as a table.
+if (page === 'orders') {
+  const b = Object.assign(document.createElement('button'), { type: 'button', id: 'print', textContent: ar ? 'طباعة' : 'Imprimer' });
+  b.addEventListener('click', () => void print((demo as { grid: Parameters<typeof print>[0] }).grid, { title }));
+  form.append(b);
+}
 (window as unknown as { demo: unknown }).demo = demo;

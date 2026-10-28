@@ -112,3 +112,11 @@ export interface PinnedMessages {
   readonly locale: string;
   readonly text: { readonly [K in PinnedMessageKey]: MessageValue };
 }
+
+/** The print table's texts (`@dzgrid/dom/print`, Phase 6 step 11), in their own bundles (`locales/<lang>-print`): the truncation line and a paged grid's place. Optional here, required by `preparePrint()` (a missing one told once, `missing-message`). */
+export type PrintMessageKey = 'print.truncated' | 'print.page';
+/** A print bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_PRINT.text }`. */
+export interface PrintMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in PrintMessageKey]: MessageValue };
+}

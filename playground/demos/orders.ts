@@ -20,6 +20,8 @@ import { AR_EDIT } from '@dzgrid/dom/locales/ar-edit';
 import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
 import { AR_EDITORS } from '@dzgrid/dom/locales/ar-editors';
 import { AR_FILTERS } from '@dzgrid/dom/locales/ar-filters';
+import { FR_PRINT } from '@dzgrid/dom/locales/fr-print';
+import { AR_PRINT } from '@dzgrid/dom/locales/ar-print';
 import type { ColumnDef, GridEvent } from '@dzgrid/core';
 import { seeded } from './seed.js';
 
@@ -89,7 +91,7 @@ export function mountOrders(host: HTMLElement, o: { locale: string; onEvent?: (e
   const ar = o.locale.startsWith('ar');
   const W = ar ? WORDS.ar : WORDS.fr;
   const base = ar ? AR : FR;
-  const messages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_TREE : FR_TREE).text, ...(o.editing && { ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, 'validation.integer': ar ? 'المطلوب عدد صحيح' : 'nombre entier attendu' }) } };
+  const messages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_TREE : FR_TREE).text, ...(ar ? AR_PRINT : FR_PRINT).text, ...(o.editing && { ...(ar ? AR_EDIT : FR_EDIT).text, ...(ar ? AR_EDITORS : FR_EDITORS).text, 'validation.integer': ar ? 'المطلوب عدد صحيح' : 'nombre entier attendu' }) } };
   // Editing: the sub-orders' client, quantity and amount (an order's figures are its sub-orders' sums).
   const sub = (r: Line) => r.parent !== null;
   const ed = o.editing ? { editable: sub } : {};

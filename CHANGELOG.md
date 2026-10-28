@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+To be published as **1.1.0** at the Phase 6 close (owner, « Back to Phase 6 »: a minor, no breaking change).
+
+### Added
+
+- **Printing** (`@dzgrid/dom/print`, Phase 6 step 11, docs/behaviors/print.md; owner Q-I, O9): `preparePrint(grid,
+  { maxRows, title })` writes the rows the grid shows — filtered, sorted, searched; a tree's shown rows, indented; top
+  pinned rows first and bottom ones last; a paged grid's shown page with « Page 2 of 5 » in the caption — as a real
+  `<table>` beside the grid (`caption`, `th scope="col"`, header groups as `scope="colgroup"` rows with a `<colgroup>`
+  each, `dir` and `lang` of the grid), the screen's text of each cell (formatter, parts' text, edits shown), merged
+  cells written on every row, a full-width row as one cell; detail panels, loading and filler rows left out. Built in
+  slices of about 8 ms, a second call cancels the first, the cleanup is idempotent; the screen grid is not touched.
+  Above `maxRows` (5 000): the first ones, a line saying so (`print.truncated`) and one `print-too-many` problem
+  (counts only). `print(grid, options)` adds the browser's dialog and the cleanup on `afterprint`. Texts in
+  `locales/{en,fr,ar}-print`, spread into the grid's messages; `PrintMessageKey`, `PrintMessages`, the `print-too-many`
+  problem code (types only).
+- **`@dzgrid/theme/print.css`** and `print.unlayered.css` (and `print.scss`): the table's borders, header repeated on each
+  page, no row cut, the page's own content hidden while printing — explicit enough to survive an unlayered reset such
+  as Tailwind's preflight (use the unlayered twin there).
+- The spans feature exposes its current span map (`SpanFeature.map`), read by the print table.
+- Playground: `print.html` (1 200 patients × 12 columns, `?lang=ar`, `?rows=5001`, `?preflight=1`) and « Imprimer » on
+  `orders.html`; `npm run test:browser -- --only print` reads Chrome's PDF back (`scripts/pdf-text.py`, pdfminer.six).
+
+Sizes (gzip): `@dzgrid/dom/print` 1 580 / 1 600 over the DOM base; `print.css` 334 / 400, `print.unlayered.css`
+292 / 400; texts 132 / 140 / 160 (150 / 150 / 200). The DOM base, core, K.8 profile and Angular unchanged.
+
 ## [1.0.0] - 2026-10-28
 
 The first release on npm: `@dzgrid/core`, `@dzgrid/dom`, `@dzgrid/theme` and `@dzgrid/angular`, all at 1.0.0

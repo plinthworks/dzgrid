@@ -119,6 +119,9 @@
       "@dzgrid/dom/auto-height": [
         "./packages/dom/src/auto-height.ts"
       ],
+      "@dzgrid/dom/print": [
+        "./packages/dom/src/print.ts"
+      ],
       "@dzgrid/dom/tree-lazy": [
         "./packages/dom/src/tree-lazy.ts"
       ],

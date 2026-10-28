@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DzGrid — impression</title>
+  <style>
+    body { margin: 0; padding: 1rem; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: light dark; max-inline-size: 1100px; }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-block: .5rem .75rem; }
+    #host { block-size: 60vh; }
+    #host > .dzg { block-size: 100%; }
+    .note { margin-block: .25rem .5rem; color: var(--tz-fg-muted); line-height: 1.45; max-inline-size: 90ch; }
+    a { color: var(--tz-accent); }
+  </style>
+</head>
+<body>
+  <nav><a href="./index.html" id="back"></a></nav>
+  <main>
+  <h1 id="title"></h1>
+  <ul class="note" id="steps"></ul>
+  <div class="bar">
+    <button type="button" id="print"></button>
+    <label><span id="lang-label"></span> <select id="lang"><option value="fr">français</option><option value="ar">العربية</option></select></label>
+    <label><span id="rows-label"></span> <select id="rows"><option value="1200">1 200</option><option value="5001">5 001</option></select></label>
+    <label><input type="checkbox" id="preflight"> <span id="preflight-label"></span></label>
+  </div>
+  <div id="host"></div>
+  </main>
+  <script type="module" src="./print.ts"></script>
+</body>
+</html>
