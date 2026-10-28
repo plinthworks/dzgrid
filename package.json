@@ -17,6 +17,7 @@
     "publish:release": "npm run build && node scripts/release.mjs publish",
     "publish:dry": "npm run build && node scripts/release.mjs publish --dry-run --no-provenance",
     "publish:verify": "node scripts/release.mjs verify",
+    "publish:latest": "npm run build && node scripts/release.mjs publish --no-provenance",
     "spike": "node scripts/spikes.mjs",
     "start": "vite",
     "bench": "node scripts/bench.mjs",

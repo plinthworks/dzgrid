@@ -53,7 +53,7 @@ Ou en une commande (même ordre, saute ce qui est déjà publié, puis demande a
 installables) :
 
 ```sh
-npm run publish:release -- --no-provenance --otp=CODE
+npm run publish:latest -- --otp=CODE      # comme tzslot : un seul code, les quatre paquets, puis la vérification
 ```
 
 Pour finir, vérifier :

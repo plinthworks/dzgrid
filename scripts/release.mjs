@@ -3,7 +3,7 @@
  *
  *   npm run release:check [-- --tag v1.0.0]   the four built manifests agree with each other and with the tag
  *   npm run publish:release [-- --dry-run]    publish what the registry does not have yet, then verify it arrived
- *   npm run publish:release -- --no-provenance --otp=123456   the same from a laptop (the first publication)
+ *   npm run publish:latest -- --otp=123456   the same from a laptop (as tzslot: one code, all four)
  *   npm run publish:verify                    the verification alone
  *
  * Run by .github/workflows/release.yml on a `v*` tag, after the gates, with npm's trusted publishing (OIDC): no
