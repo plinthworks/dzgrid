@@ -54,8 +54,11 @@ vitest's optional peers otherwise.
 - Every phase ends with the architect agent checking it against
   `ARCHITECTURE.md` and a code review; findings are fixed before the phase is
   called done. Every change: a test that fails first, then the fix.
-- Every step, not only phase closes, ends with `npm run gate:step` green. A
-  public type removed or narrowed is an owner decision (`scripts/api.mjs --accept`).
+- Every batch of work ends with `npm run gate:step` green (owner, 2026-10-29:
+  during the work, run only the tests concerned). A public type removed or
+  narrowed is an owner decision (`scripts/api.mjs --accept`).
+- Spend little (owner, 2026-10-29): small fixes done directly, not by an agent;
+  reviews only for new code, not for small fixes; short messages to the owner.
 - A test's `as never` / `as any` carries a comment saying why (same line or the
   line before); `scripts/test/test-casts-baseline.json` counts only go down.
 - A review lists every place that recomputes the same thing (screen, export,
