@@ -101,7 +101,20 @@ la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le 
 - Nouvelles limites (accord du propriétaire, 2026-10-29) : `core/row-gaps` 450 (409), `dom/row-gaps` 900 (575) ;
   `core/spans` 3 800 → 3 950 (3 914, la mesure plus une petite marge) ; `dom/tree` 3 839 / 3 950 ; K.8 84 912 / 84 950.
 
-## Ce qui a été vérifié (2026-10-28)
+## Ce qui a été vérifié (2026-10-29, après les six ajouts)
+
+Sur `main` à la clôture des ajouts (`57b7fec` + la correction du clignotement) : vitest 7 516 / 7 516, `test:ci`
+(un seul processus), `test:perm` 10 / 10, `test:tz` (Auckland et Los Angeles) 7 516 / 7 516, `typecheck`, `build`,
+`check:size` (0 dépassement), `check:contrast` (1 092 paires, 0 sous le minimum), `release:check` (les quatre paquets
+en 1.1.0), les navigateurs (`test:browser` 1 114 / 1 114 ; fusion dans l'arbre et espaces dans Chrome, Firefox,
+WebKit), la page « vraie application » (`test:real-app` 58 / 58, captures identiques), `publish:dry` (les quatre
+acceptés), le contrôle de l'architecte sur toute la 1.1.0.
+
+Trouvé et corrigé en route : sous forte charge, la marque du clignotement pouvait manquer à sa première image (GSAP
+remettait son premier rendu à son premier battement) ; le tween du clignotement est désormais rendu tout de suite
+(`lazy: false`), test `motion-flash-time.test.ts`.
+
+### Avant les six ajouts (2026-10-28)
 
 Voir ROADMAP « Phase 6 — close » : le portail complet (vitest, `test:perm`, `test:tz`, `typecheck`, `build`,
 `check:size`, `check:contrast`, l'exemple Angular, `release:check`), les navigateurs (Chrome complet, Firefox,

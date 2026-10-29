@@ -82,8 +82,9 @@ export function tint(s: Scene, el: HTMLElement, ok: () => boolean): void {
   const { gsap, guard, time: [hold, fade] } = s;
   el.classList.add('dzg-flash');
   // The mark is the guard's call: a new one kills the one running, even one still waiting in its hold (GSAP's
-  // `overwrite` sees only tweens already started); a host's tweens on the cell stay.
+  // `overwrite` sees only tweens already started); a host's tweens on the cell stay. `lazy: false`: at 1 in this paint,
+  // even before GSAP's first frame (it defers a first render to its next tick then: the class with no value).
   guard.track(el, ok, s.reduced
     ? (el.style.setProperty('--dzg-flash', '1'), gsap.delayedCall(hold + fade, () => guard.release(el)))
-    : s.play(el, ok, { '--dzg-flash': 1 }, { '--dzg-flash': 0, delay: hold, duration: fade }));
+    : s.play(el, ok, { '--dzg-flash': 1 }, { '--dzg-flash': 0, delay: hold, duration: fade, lazy: false }));
 }

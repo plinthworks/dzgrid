@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.0] - 2026-10-28
+## [1.1.0] - 2026-10-29
 
 The Phase 6 close (owner, « Back to Phase 6 »): a minor, additive over 1.0.0 — every 1.0.0 subpath and named export is
 still there (655 named exports of the published 1.0.0 checked against this build), the `<dz-grid>` inputs, outputs and

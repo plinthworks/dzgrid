@@ -193,3 +193,25 @@ describe('the saved flash takes the same durations (owner Q14-6)', () => {
     expect(mark(c)).toEqual([false, '']);
   });
 });
+
+describe('the mark is drawn at once, even before GSAP has drawn its first frame', () => {
+  // GSAP defers a tween's first render to its next tick when it has not ticked yet (its « lazy » rendering): a
+  // flash right after GSAP loads (a busy page; the zone test under load) left `dzg-flash` with no `--dzg-flash`
+  // until then. A fresh GSAP whose frames never come, so its frame stays 0.
+  it('a flash right after GSAP loads: at 1 in the same paint', async () => {
+    const raf = window.requestAnimationFrame;
+    window.requestAnimationFrame = (() => 0) as never;
+    vi.resetModules();
+    const fresh = (await import('gsap')).gsap;
+    window.requestAnimationFrame = raf;
+    expect(fresh.ticker.frame).toBe(0);
+    const m = motion({ gsap: fresh });
+    const g = mount({ features: [m] });
+    made.push(g);
+    await m.load();
+    later();
+    update(g, 77);
+    expect(mark(g.cell('r2', 'n')!)).toEqual([true, '1']);
+    fresh.globalTimeline.clear();
+  });
+});
