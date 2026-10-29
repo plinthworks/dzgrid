@@ -125,6 +125,9 @@
       "@dzgrid/dom/row-gaps": [
         "./packages/dom/src/row-gaps.ts"
       ],
+      "@dzgrid/dom/fresh-rows": [
+        "./packages/dom/src/fresh-rows.ts"
+      ],
       "@dzgrid/dom/auto-height": [
         "./packages/dom/src/auto-height.ts"
       ],

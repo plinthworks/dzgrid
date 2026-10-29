@@ -35,6 +35,8 @@
     /* The value flash, its own hue (owner, step 16: « par thème »): Bootstrap's dark warning is so light that the
        refusal sign over it, on a selected row, falls under 3:1; its success green holds every pair. */
     --dzg-flash-color: var(--tz-success);
+    /* A new row's mark (step 16h): a hue apart from the flash, now success, and from the accent: the warning. */
+    --dzg-fresh-color: var(--tz-warning);
   }
 
   :root,

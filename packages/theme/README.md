@@ -79,7 +79,8 @@ What the grid derives can be set on any ancestor of `.dzg` (each has a fallback 
 `--dzg-row-hover-bg`, `--dzg-row-selected-bg`, `--dzg-focus-ring`, `--dzg-stale-fg`,
 `--dzg-refused-bg`, `--dzg-flash`, `--dzg-flash-color`, `--dzg-line` (rule width), `--dzg-pill-radius`,
 `--dzg-header-size`, `--dzg-header-tracking` (none in Arabic), `--dzg-select-bar` (a selected row's bar
-at its start, 0 by default).
+at its start, 0 by default); with `fresh-rows.css`: `--dzg-fresh-color`, `--dzg-fresh-bg`, `--dzg-fresh-bar` (a new
+row's tint and bar).
 
 ```css
 :root {

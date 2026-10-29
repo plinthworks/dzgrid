@@ -9,6 +9,7 @@
  *   columns-panel.scss → columns-panel.css and columns-panel.unlayered.css, Phase 6 step 4 (owner Q4-2)
  *   pinned-rows.scss → pinned-rows.css and pinned-rows.unlayered.css, Phase 6 step 8b-1 (owner Q2)
  *   print.scss    → print.css and print.unlayered.css, Phase 6 step 11 (the print table)
+ *   fresh-rows.scss → fresh-rows.css and fresh-rows.unlayered.css, 1.1.0 step 16h (the rows a refresh brought)
  *   comfort.scss  → dzgrid.comfort.css and dzgrid.comfort.unlayered.css, the owner's third look (decisions.md « Comfort stylesheet »)
  * The tests compile the same way and fail when a file drifts from its source.
  */
@@ -22,7 +23,7 @@ const out = (source, file) => {
   writeFileSync(`${dir}${file}`, `${css}\n`);
   console.log(`build:theme: ${file}`);
 };
-for (const name of ['dzgrid', 'contrast', 'edit', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print']) {
+for (const name of ['dzgrid', 'contrast', 'edit', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows']) {
   out(`@use "${name}";`, `${name}.css`);
   out(`@use "${name}" with ($layered: false);`, `${name}.unlayered.css`);
 }

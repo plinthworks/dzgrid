@@ -136,6 +136,7 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/dom/pinned-rows` | rows pinned above and below the body (over the DOM) | 2 160 |
 | `@dzgrid/dom/auto-height` | rows as tall as their wrapped text (over the DOM) | 1 237 |
 | `@dzgrid/dom/row-gaps` | `rowGaps`: a space between categories (over the DOM) | 575 |
+| `@dzgrid/dom/fresh-rows` | `freshRows`: the rows a refresh brought, marked 5 s (over the DOM) | 544 |
 | `@dzgrid/dom/print` | `preparePrint`, `print` (over the DOM) | 1 599 |
 | `@dzgrid/dom/slots` | header, overlay and tooltip slots | 1 266 |
 | `@dzgrid/dom/parts` | `badge()`, `cellBoolean` | 689 |
@@ -153,6 +154,7 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/dom/locales/{en,fr,ar}-column-menu` | the column menu's messages | 477 / 570 / 673 |
 | `@dzgrid/dom/locales/{en,fr,ar}-pinned` | the pinned rows' messages | 116 / 130 / 156 |
 | `@dzgrid/dom/locales/{en,fr,ar}-print` | printing's messages | 132 / 140 / 160 |
+| `@dzgrid/dom/locales/{en,fr,ar}-fresh` | the new rows' sentence | 115 / 132 / 197 |
 | `@dzgrid/theme` | the stylesheet / its comfortable density (`dzgrid.comfort.css`) | 2 764 / 551 |
 | `@dzgrid/theme/{edit,range,fill}.css` | editing, blocks, the fill handle | 2 236 / 479 / 457 |
 | `@dzgrid/theme/{columns,columns-panel,pinned-rows}.css` | columns, the columns chooser, pinned rows | 1 111 / 991 / 301 |

@@ -225,6 +225,15 @@ foreseen needs. Plan: `step16-plan.md`; structural points go to the owner before
 - +2 % rule used (2026-10-29): `@dzgrid/dom/state` 1 200 → 1 224 (measured 1 211; `gridState({ initial })`, the plain-DOM initial state of the owner's demo).
 - Q16-1, Q16-3 … Q16-7 (not answered): built as answer A each (`step16-plan.md`), one place to change each.
 
+- Q16-9: **A** (owner, 2026-10-29) — new rows after a refresh tinted with a bar at the inline start for 5 s, one sentence
+  « 3 nouvelles lignes » (en/fr/ar), a still mark under reduced motion. Built as step 16h (`freshRows()`, fresh-rows.md).
+  New lines (the plan's, « nouvelles lignes 700 », granted with Q16-15): `@dzgrid/dom/fresh-rows` 700 (measured 544),
+  `en / fr / ar-fresh` 150 / 150 / 200 (115 / 132 / 197); a new line not in the plan: `@dzgrid/theme/fresh-rows.css`
+  350 (308, its measure + 10 %, the look kept out of the base theme so a grid without the feature pays 0 B). No raise
+  of any existing line; `clinic.css` 483 / 550, `bootstrap.css` 310 / 350 grew by their fresh colour, within their lines.
+  The plan's event `rowsArrived { keys }` is a callback option instead (`freshRows({ rowsArrived })`): a new member of
+  the 1.0.0 `GridEvent` union is refused by `check:api`; making it an event is the owner's call.
+
 ## Size budgets: automatic small raises (owner, 2026-10-29)
 
 « Oui » to: a line may be raised without asking up to **+2 %** of its value, to the measure plus a small margin,

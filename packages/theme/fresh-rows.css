@@ -1,0 +1,22 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  .dzg-row:where([data-dzg-fresh]),
+  .dzg-row:where([data-dzg-fresh]) .dzg-seg-start,
+  .dzg-row:where([data-dzg-fresh]) .dzg-seg-end {
+    background: var(--dzg-fresh-bg, color-mix(in srgb, var(--dzg-fresh-color, var(--tz-success)) 14%, var(--tz-bg)));
+  }
+  .dzg-row[data-dzg-fresh] > .dzg-seg-start::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    border-inline-start: var(--dzg-fresh-bar, 3px) solid var(--dzg-fresh-color, var(--tz-success));
+    z-index: 1;
+    pointer-events: none;
+  }
+  @media (forced-colors: active) {
+    .dzg-row[data-dzg-fresh] > .dzg-seg-start::after {
+      border-inline-start-color: Highlight;
+    }
+  }
+}

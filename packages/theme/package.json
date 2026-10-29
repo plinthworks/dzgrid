@@ -47,11 +47,14 @@
     "./print.css": "./print.css",
     "./print.unlayered.css": "./print.unlayered.css",
     "./print.scss": "./print.scss",
+    "./fresh-rows.css": "./fresh-rows.css",
+    "./fresh-rows.unlayered.css": "./fresh-rows.unlayered.css",
+    "./fresh-rows.scss": "./fresh-rows.scss",
     "./dzgrid.comfort.css": "./dzgrid.comfort.css",
     "./dzgrid.comfort.unlayered.css": "./dzgrid.comfort.unlayered.css",
     "./comfort.scss": "./comfort.scss"
   },
-  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css", "edit.css", "edit.unlayered.css", "edit.scss", "range.css", "range.unlayered.css", "range.scss", "fill.css", "fill.unlayered.css", "fill.scss", "columns.css", "columns.unlayered.css", "columns.scss", "columns-panel.css", "columns-panel.unlayered.css", "columns-panel.scss", "pinned-rows.css", "pinned-rows.unlayered.css", "pinned-rows.scss", "print.css", "print.unlayered.css", "print.scss", "dzgrid.comfort.css", "dzgrid.comfort.unlayered.css", "comfort.scss"],
+  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css", "edit.css", "edit.unlayered.css", "edit.scss", "range.css", "range.unlayered.css", "range.scss", "fill.css", "fill.unlayered.css", "fill.scss", "columns.css", "columns.unlayered.css", "columns.scss", "columns-panel.css", "columns-panel.unlayered.css", "columns-panel.scss", "pinned-rows.css", "pinned-rows.unlayered.css", "pinned-rows.scss", "print.css", "print.unlayered.css", "print.scss", "fresh-rows.css", "fresh-rows.unlayered.css", "fresh-rows.scss", "dzgrid.comfort.css", "dzgrid.comfort.unlayered.css", "comfort.scss"],
   "sideEffects": ["*.css"],
   "sass": "./dzgrid.scss"
 }

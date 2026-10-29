@@ -143,6 +143,16 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
     column hidden and shown back (tree-view.md).
   - **Open rows by id** (16f): `expandedIds(controller)` in `@dzgrid/angular`, the ids of the open data rows (fillers,
     details and pinned keys left out); restore with `[expanded]` (angular-parts.md).
+  - **New rows after a refresh** (16h, owner Q16-9 A): `freshRows({ ms })` in the new entry `@dzgrid/dom/fresh-rows`
+    (texts `locales/<lang>-fresh`, look `@dzgrid/theme/fresh-rows.css`): the rows a live change added (a transaction,
+    or a reload / a server's answer for the same page and query with `sameRow`) and the query keeps carry
+    `data-dzg-fresh` for 5 s (0–60 000 ms) wherever they are drawn — a tint and a bar at the inline start, still under
+    reduced motion — and one polite sentence counts them (« 3 nouvelles lignes »); `freshRows({ rowsArrived: (keys, source) => … })` gives the keys. Never on
+    a first load, a page, a sort or a filter, nor when more than half the rows changed. `--dzg-fresh-color`: the
+    palette's success, a hue apart from the selection and the flash (Clinic and the high-contrast palette a violet,
+    Bootstrap its warning). A server source without `sameRow` tells `missing-feature` (`freshRows`, `sameRow`); a bad
+    `ms` `invalid-setting` (`freshRows.ms`) (fresh-rows.md). Sizes: new lines `dom/fresh-rows` 544 / 700, texts
+    115 / 132 / 197 under 150 / 150 / 200, `fresh-rows.css` 308 / 350; 0 B elsewhere.
 - **A documented hook for styling one header group** (owner, 1.1.0): every group header cell carries `.dzg-hgroup`,
   `data-g="<ColumnGroupDef.id>"` and `data-level`, now a stable public contract pinned by a test (left to right and
   right to left): `.dzg-hgroup[data-g="REAL_TIME"] { background: var(--app-…); }` from the app's sheet. An empty

@@ -109,6 +109,10 @@
       "types": "./src/print.ts",
       "default": "./src/print.ts"
     },
+    "./fresh-rows": {
+      "types": "./src/fresh-rows.ts",
+      "default": "./src/fresh-rows.ts"
+    },
     "./motion-gsap": {
       "types": "./src/motion-gsap.ts",
       "default": "./src/motion-gsap.ts"
@@ -312,6 +316,18 @@
     "./locales/ar-print": {
       "types": "./src/locales/ar-print.ts",
       "default": "./src/locales/ar-print.ts"
+    },
+    "./locales/en-fresh": {
+      "types": "./src/locales/en-fresh.ts",
+      "default": "./src/locales/en-fresh.ts"
+    },
+    "./locales/fr-fresh": {
+      "types": "./src/locales/fr-fresh.ts",
+      "default": "./src/locales/fr-fresh.ts"
+    },
+    "./locales/ar-fresh": {
+      "types": "./src/locales/ar-fresh.ts",
+      "default": "./src/locales/ar-fresh.ts"
     }
   },
   "peerDependencies": {

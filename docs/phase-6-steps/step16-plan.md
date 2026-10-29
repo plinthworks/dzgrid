@@ -338,6 +338,17 @@ running border only after `apply`). Planted fault: `apply()` sending one request
 **Size.** `core/edit` +≈150, `dom/edit` +≈150, `edit.css` +≈50, `*-edit` +≈40 → raises (§E).
 
 ### C4 → 16h. New rows after an SSE refresh (F:P10) — structural (what the user sees)
+**Done** (2026-10-29, not committed): as recommended, `freshRows({ ms })` with `ms`, texts `announce.fresh` (`{n}`); the
+keys go to a callback `freshRows({ rowsArrived: (keys, source) => … })`, not a `GridEvent`: adding `rowsArrived` to the
+1.0.0 `GridEvent` union is refused by `check:api` (an app's exhaustive switch would break) — an owner decision
+(`node scripts/api.mjs --accept`), not taken here. Built beside the plan: a server source without `sameRow` tells `missing-feature`
+(`freshRows`, `sameRow`); the rows counted and marked are those the query keeps (on any page); a row keeps its mark for
+the rest of its time when sorted, filtered back, paged or scrolled into view; the look in its own file
+`@dzgrid/theme/fresh-rows.css` (not the base theme: 0 B to grids without it), `--dzg-fresh-color` the palette's
+success (Clinic and the high-contrast palette's dark a violet, Bootstrap its warning). Tests: `dom/test/fresh-rows.test.ts`
+(31), `theme/test/fresh-rows.test.ts` (7), five planted faults caught. No conformance case: no core logic (the core
+gained only the event's type). Sizes: `dom/fresh-rows` 544 / 700, texts 115 / 132 / 197 under 150 / 150 / 200,
+`fresh-rows.css` 308 / 350 (a new line, the measure + 10 %).
 Needs C1 (`sameRow`), so that a refresh of the same page is a delta with `added` keys (fact 6).
 **Recommended (Q16-9 A).** A feature `freshRows({ ms: 5000 })` in a new entry `@dzgrid/dom/fresh-rows`: rows added by a
 live change (a client delta, or a server refresh of the **same** page and query) get `data-dzg-fresh` for `ms`: a tint
@@ -411,7 +422,7 @@ Small first; each line ends with `npm run gate:step` and a review (code review +
 | **16e** | `sameRow` + `@dzgrid/core/compare` + perf line | Q16-7 (opt-in built) | **yes** |
 | **16f** | `expandedIds` + restore recipe | Q16-8 for fillers only | **yes** |
 | — | apply §A to the rewrite (lead, outside the repo) | 16a, 16c for A1.6–A1.7 | **yes** for the rest |
-| **16h** | `freshRows()` | Q16-9, needs 16e | no |
+| **16h** | `freshRows()` — **done** (2026-10-29) | Q16-9 (A), needs 16e | done |
 | ~~16i~~ | ~~live value vs held edit (conflict)~~ — **dropped** (owner Q16-11, 2026-10-29) | — | — |
 | ~~16j~~ | ~~batch apply (`hold`)~~ — **dropped** (owner Q16-11: `autoApply` only calls the server) | — | — |
 | ~~16k~~ | ~~tree totals~~ — **dropped** (owner Q16-14: the server computes every value) | — | — |

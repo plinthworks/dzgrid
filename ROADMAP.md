@@ -973,6 +973,11 @@ sheet → architect → tests first → code → review → gate, and is ticked 
   works with `fixedOpen`. Done 2026-10-29 (step 15), row-gaps.md; Chrome (10 000 and 1 000 000 rows), Firefox, WebKit
   `--only row-gaps`. Sizes of step 15: `core/row-gaps` 409 / 450, `dom/row-gaps` 575 / 900, `core/spans` 3 914 / 3 950
   (was 3 800), `dom/tree` 3 839 / 3 950, DOM base 22 347 / 22 400, K.8 84 912 / 84 950.
+- [x] **New rows after a refresh** (step 16h, owner Q16-9 A) — `freshRows({ ms })` (`@dzgrid/dom/fresh-rows`, texts
+  `locales/<lang>-fresh`, look `@dzgrid/theme/fresh-rows.css`): the rows a live change added (with `sameRow` for a reload
+  or a server) marked 5 s, a tint and a bar at the inline start, still under reduced motion; « 3 nouvelles lignes »
+  told once; the keys to `freshRows({ rowsArrived })`; never on a first load, a page, a sort or a filter. Done 2026-10-29, fresh-rows.md.
+  Sizes: new lines `dom/fresh-rows` 544 / 700, texts 115 / 132 / 197 (150 / 150 / 200), `fresh-rows.css` 308 / 350.
 
 Also seen, nothing to add: grid context for parts (`context`), saving open rows (`rowExpanded` + `rows.expand`; open
 rows stay out of `GridState` by Q-S1), header component, two label renderers in one cell part, row classes, no

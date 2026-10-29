@@ -44,6 +44,7 @@ const domAlias = {
   '@dzgrid/dom/columns-panel': fileURLToPath(new URL('./packages/dom/src/columns-panel.ts', import.meta.url)),
   '@dzgrid/dom/state': fileURLToPath(new URL('./packages/dom/src/state.ts', import.meta.url)),
   '@dzgrid/dom/row-gaps': fileURLToPath(new URL('./packages/dom/src/row-gaps.ts', import.meta.url)),
+  '@dzgrid/dom/fresh-rows': fileURLToPath(new URL('./packages/dom/src/fresh-rows.ts', import.meta.url)),
   '@dzgrid/dom/pinned-rows': fileURLToPath(new URL('./packages/dom/src/pinned-rows.ts', import.meta.url)),
   '@dzgrid/dom/auto-height': fileURLToPath(new URL('./packages/dom/src/auto-height.ts', import.meta.url)),
   '@dzgrid/dom/print': fileURLToPath(new URL('./packages/dom/src/print.ts', import.meta.url)),

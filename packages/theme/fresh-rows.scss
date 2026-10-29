@@ -1,0 +1,56 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/fresh-rows.css — the rows a refresh brought (1.1.0 step 16h, docs/behaviors/fresh-rows.md « Its look »;
+// owner Q16-9 A): loaded by the applications that mark them (`@dzgrid/dom/fresh-rows`), after dzgrid.css; the base theme
+// does not grow. Compiled to fresh-rows.css (layered) and fresh-rows.unlayered.css ($layered: false) by
+// `npm run build:theme`; a test fails when they drift.
+//
+// A row marked `data-dzg-fresh` and its pinned segments tinted at the base row's weight (`:where`), so hover, the focused
+// row, a selection and stale rows keep theirs; a bar at the start segment's inline start (sticky with it: in view when the
+// row scrolls sideways; left in French, right in Arabic), not colour alone. Still: nothing animated, reduced motion or not.
+// `--dzg-fresh-color`: the palette's success by default, a hue apart from the selection (the accent) and from the value
+// flash (the warning). No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+$color: var(--dzg-fresh-color, var(--tz-success));
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-row:where([data-dzg-fresh]),
+  .dzg-row:where([data-dzg-fresh]) .dzg-seg-start,
+  .dzg-row:where([data-dzg-fresh]) .dzg-seg-end {
+    background: var(--dzg-fresh-bg, color-mix(in srgb, #{$color} 14%, var(--tz-bg)));
+  }
+
+  // The bar is the ::after's start border: with start-pinned columns the base's ::after (dzgrid.scss) already spans the
+  // segment and draws the pinned edge as its end border, which stays (review of 16h); without them, a 3 px box.
+  .dzg-row[data-dzg-fresh] > .dzg-seg-start::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    border-inline-start: var(--dzg-fresh-bar, 3px) solid #{$color};
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-row[data-dzg-fresh] > .dzg-seg-start::after {
+      border-inline-start-color: Highlight;
+    }
+  }
+}

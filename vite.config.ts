@@ -65,6 +65,7 @@ export default defineConfig({
       { find: '@dzgrid/dom/columns-panel', replacement: fileURLToPath(new URL('./packages/dom/src/columns-panel.ts', import.meta.url)) },
       { find: '@dzgrid/dom/state', replacement: fileURLToPath(new URL('./packages/dom/src/state.ts', import.meta.url)) },
       { find: '@dzgrid/dom/row-gaps', replacement: fileURLToPath(new URL('./packages/dom/src/row-gaps.ts', import.meta.url)) },
+      { find: '@dzgrid/dom/fresh-rows', replacement: fileURLToPath(new URL('./packages/dom/src/fresh-rows.ts', import.meta.url)) },
       { find: '@dzgrid/dom/tree-lazy', replacement: fileURLToPath(new URL('./packages/dom/src/tree-lazy.ts', import.meta.url)) },
       { find: '@dzgrid/dom/motion-gsap', replacement: fileURLToPath(new URL('./packages/dom/src/motion-gsap.ts', import.meta.url)) },
       { find: '@dzgrid/dom/pagination', replacement: fileURLToPath(new URL('./packages/dom/src/pagination.ts', import.meta.url)) },

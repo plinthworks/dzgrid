@@ -149,6 +149,13 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/ar-print': 200,
   '@dzgrid/theme/print.css': 400,
   '@dzgrid/theme/print.unlayered.css': 400,
+  // 1.1.0 step 16h (owner Q16-15, 2026-10-29: « nouvelles lignes 700 »): the new rows' mark over the DOM base; its -fresh
+  // texts 150 / 150 / 200 (the plan's lines); fresh-rows.css a new line at its measure + 10 % (no grant asked: a new file).
+  '@dzgrid/dom/fresh-rows': 700,
+  '@dzgrid/dom/locales/en-fresh': 150,
+  '@dzgrid/dom/locales/fr-fresh': 150,
+  '@dzgrid/dom/locales/ar-fresh': 200,
+  '@dzgrid/theme/fresh-rows.css': 350,
   '@dzgrid/dom/spans': 5300, // Q-B: 4 950 → 5 300 for the phase; Q8-4: the fold UI moved out, measured 4 567
 };
 

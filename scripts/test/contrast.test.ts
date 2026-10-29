@@ -127,8 +127,9 @@ describe('check-contrast', () => {
     for (const n of ['midnight', 'clinic']) {
       const sk = skinFromCss(readFileSync(join(root, `packages/theme/${n}.css`), 'utf8'));
       expect(sk.name).toBe(n);
-      // A colour of the grid's own a theme gives (`--dzg-*`, a pair of hex values): Clinic's block edge (Phase 5 step 11a).
-      const own = n === 'clinic' ? ['--dzg-range-edge'] : [];
+      // A colour of the grid's own a theme gives (`--dzg-*`, a pair of hex values): Clinic's block edge (Phase 5 step 11a)
+      // and its new rows' mark (step 16h).
+      const own = n === 'clinic' ? ['--dzg-range-edge', '--dzg-fresh-color'] : [];
       for (const scheme of ['light', 'dark']) expect(Object.keys(sk[scheme]).sort(), `${n} ${scheme}`).toEqual([...TEN, ...own].sort());
       for (const k of [...TEN, ...own]) expect(sk.light[k]).toMatch(/^light-dark\(#[0-9a-f]{6}, #[0-9a-f]{6}\)$/);
     }

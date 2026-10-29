@@ -186,7 +186,14 @@
     { "what": "pinned row text on its raised background", "fg": "--tz-fg", "bg": "--dzg-pinned-bg", "min": 4.5 },
     { "what": "pinned row muted text on its raised background", "fg": "--tz-fg-muted", "bg": "--dzg-pinned-bg", "min": 4.5 },
     { "what": "pinned row band's line next to the body", "fg": "--dzg-pinned-line", "bg": "--tz-bg", "min": 3 },
-    { "what": "pinned row band's line on the band", "fg": "--dzg-pinned-line", "bg": "--dzg-pinned-bg", "min": 3 }
+    { "what": "pinned row band's line on the band", "fg": "--dzg-pinned-line", "bg": "--dzg-pinned-bg", "min": 3 },
+    { "what": "cell text on a new row's tint (fresh-rows.css, step 16h)", "fg": "--tz-fg", "bg": "--dzg-fresh-bg", "min": 4.5 },
+    { "what": "muted text on a new row's tint", "fg": "--tz-fg-muted", "bg": "--dzg-fresh-bg", "min": 4.5 },
+    { "what": "a new row's bar on its tint", "fg": "--dzg-fresh-color", "bg": "--dzg-fresh-bg", "min": 3 },
+    { "what": "a new row's bar on a selected row", "fg": "--dzg-fresh-color", "bg": "--dzg-row-selected-bg", "min": 3 },
+    { "what": "a new row's bar on a hovered row", "fg": "--dzg-fresh-color", "bg": "--dzg-row-hover-bg", "min": 3 },
+    { "what": "a new row a hue apart from the selection and a block (their accent): 60° at least", "fg": "--dzg-fresh-color", "bg": "--tz-accent", "min": 1, "hue": 60 },
+    { "what": "a new row a hue apart from the value flash: 60° at least", "fg": "--dzg-flash-color", "bg": "--dzg-fresh-color", "min": 1, "hue": 60 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -221,6 +228,8 @@
     "--dzg-cell-active-bg": "color-mix(in srgb, var(--tz-accent) 10%, var(--tz-bg))",
     "--dzg-row-active-bg": "color-mix(in srgb, var(--tz-fg) 6%, var(--tz-bg))",
     "--dzg-pinned-bg": "var(--tz-bg-raised)",
-    "--dzg-pinned-line": "var(--tz-fg-muted)"
+    "--dzg-pinned-line": "var(--tz-fg-muted)",
+    "--dzg-fresh-color": "var(--tz-success)",
+    "--dzg-fresh-bg": "color-mix(in srgb, var(--dzg-fresh-color) 14%, var(--tz-bg))"
   }
 }

@@ -56,8 +56,8 @@ for (const name of ['midnight', 'clinic'] as const) {
       // No colour computed (T2): every one a pair of hex values.
       for (const k of TZ) expect(d[`--tz-${k}`], k).toMatch(/^light-dark\(#[0-9a-f]{6}, #[0-9a-f]{6}\)$/);
       for (const [k, v] of Object.entries(fx.shape)) expect(d[k], k).toBe(v);
-      // Clinic gives the block's edge too (Phase 5 step 11a): its success is too near its accent.
-      const own = name === 'clinic' ? ['--dzg-range-edge'] : [];
+      // Clinic gives the block's edge too (Phase 5 step 11a): its success is too near its accent; and a new row's mark (step 16h).
+      const own = name === 'clinic' ? ['--dzg-range-edge', '--dzg-fresh-color'] : [];
       for (const k of own) expect(d[k], k).toBe(`light-dark(${(fx.light as Record<string, string>)[k]}, ${(fx.dark as Record<string, string>)[k]})`);
       expect(Object.keys(d).sort()).toEqual([...TZ.map((k) => `--tz-${k}`), ...KNOBS, ...own].sort());
     });

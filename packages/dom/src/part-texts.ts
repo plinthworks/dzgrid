@@ -120,3 +120,11 @@ export interface PrintMessages {
   readonly locale: string;
   readonly text: { readonly [K in PrintMessageKey]: MessageValue };
 }
+
+/** The new rows' sentence (`@dzgrid/dom/fresh-rows`, 1.1.0 step 16h), in its own bundles (`locales/<lang>-fresh`): `{n}` rows came in. Optional here, required by `freshRows()`. */
+export type FreshMessageKey = 'announce.fresh';
+/** A new rows bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_FRESH.text }`. */
+export interface FreshMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in FreshMessageKey]: MessageValue };
+}

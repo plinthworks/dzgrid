@@ -139,7 +139,7 @@ describe('1.1.0, the four packages', () => {
       expect(theme.exports[`./${f}`], f).toBe(`./${f}`);
       expect(theme.files, f).toContain(f);
     }
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pinned-rows', 'print'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pinned-rows', 'print'[,\]]/); // step 16h adds 'fresh-rows' after it
   });
 
   it('export the Phase 6 step 3 subpaths (@dzgrid/dom/column-menu, its -column-menu texts), built like the others; its look in columns.css', () => {
@@ -182,6 +182,21 @@ describe('1.1.0, the four packages', () => {
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
     expect(build).toMatch(/'\.\/state', '\.\/row-gaps'\]/);
     expect(build).toMatch(/'\.\/auto-height', '\.\/row-gaps'/);
+  });
+
+  it('export the 1.1.0 step 16h subpath (@dzgrid/dom/fresh-rows), its -fresh texts and fresh-rows.css, built like the others', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./fresh-rows']).toEqual({ types: './src/fresh-rows.ts', default: './src/fresh-rows.ts' });
+    for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-fresh`]).toEqual({ types: `./src/locales/${g}-fresh.ts`, default: `./src/locales/${g}-fresh.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/row-gaps', '\.\/fresh-rows'/);
+    expect(build).toMatch(/'\.\/locales\/ar-print', '\.\/locales\/en-fresh', '\.\/locales\/fr-fresh', '\.\/locales\/ar-fresh'\]/);
+    const theme = pkg('theme').exports;
+    for (const f of ['fresh-rows.css', 'fresh-rows.unlayered.css', 'fresh-rows.scss']) {
+      expect(theme[`./${f}`], f).toBe(`./${f}`);
+      expect(pkg('theme').files, f).toContain(f);
+    }
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'print', 'fresh-rows'\]/);
   });
 
   it('keep gsap and tzslot optional peers', () => {

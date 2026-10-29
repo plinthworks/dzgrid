@@ -120,6 +120,10 @@ frameworks (Tailwind CSS 4.3.3 and 3.4.19, Bootstrap 5.3.8, root devDependencies
   `check:contrast` holds the text on its tint at full mark (plain, selected, hovered, over a block) and the mark;
   `bootstrap.css` sets it to its success green (Bootstrap's dark warning under the refusal sign falls below 3:1),
   `contrast.css` to a green in the dark (its accent and warning are both yellow there).
+  `--dzg-fresh-color` (a new row's tint and bar, `@dzgrid/theme/fresh-rows.css`, fresh-rows.md, step 16h; default the
+  palette's success, a hue 60° at least from the accent and from the flash), `--dzg-fresh-bg` (its tint, 14 %) and
+  `--dzg-fresh-bar` (3 px): `clinic.css` and `contrast.css` (dark) set a violet (their success is near their accent,
+  or is their flash), `bootstrap.css` its warning (its flash is its success).
 - **A showcase theme gives every colour by hand** (T2): the ten `--tz-*` colours, each a `light-dark()` pair,
   nothing computed from the main four. It may also set the shape knobs (`--dzg-radius`, `--dzg-pill-radius`,
   `--dzg-line`, `--dzg-cell-padding-inline`, `--dzg-font`). It lives in `dzgrid.skin`, declared on

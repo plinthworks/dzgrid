@@ -34,6 +34,9 @@ $tz-palette: (
   // The value flash (step 16, « par thème »): its default warning is yellow like this palette's accent in the dark,
   // the hue the selection and a block of cells are drawn in; a green there, 90° away.
   '--dzg-flash-color': (#6b3a00, #86efac),
+  // A new row's mark (step 16h): its default success is that green in the dark; a violet there, a hue apart from the
+  // yellow accent and the green flash.
+  '--dzg-fresh-color': (#14532d, #d0b3ff),
 );
 
 @mixin palette {

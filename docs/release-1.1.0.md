@@ -122,6 +122,12 @@ Tes réponses aux questions Q16-1 à Q16-8 ne sont pas encore là : chaque choix
   ajoutées et retirées.
 - **Lignes ouvertes par id** : `expandedIds(controller)` ; on restaure avec `[expanded]`. Pour des catégories sans id
   (Q16-8), on les restaure par leur chemin (`groupKey`).
+- **Nouvelles lignes après un rafraîchissement** (Q16-9 A) : `freshRows()` de `@dzgrid/dom/fresh-rows`, avec
+  `[sameRow]="sameValues"` — les lignes arrivées sont teintées avec une barre au début, 5 secondes (immobile, même en
+  mouvement réduit) ; le lecteur d'écran dit une fois « 3 nouvelles lignes ». Rien au premier chargement, ni en
+  changeant de page, de tri ou de filtre. Importer `@dzgrid/theme/fresh-rows.css` et les textes
+  `locales/fr-fresh`. Couleur : `--dzg-fresh-color` (vert par défaut). Tailles : nouvelles lignes 544 / 700, textes
+  115 / 132 / 197 sous 150 / 150 / 200, `fresh-rows.css` 308 / 350.
 - **Tailles** (accord du propriétaire, 2026-10-29, « ok pour les hausses ») : écran d'audit 84 950 → 90 000
   (85 133), liste de filtre 4 350 → 4 500 (4 467), détail (cœur) 1 050 → 1 150 (1 132), Angular 7 350 → 7 450
   (7 438), garde de la base du cœur 29 070 → 29 150 (29 106), comparaison (nouvelle) 300 (273).

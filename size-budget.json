@@ -256,6 +256,18 @@
       "file": "packages/dom/src/locales/ar-print.ts",
       "maxGzip": 200
     },
+    "@dzgrid/dom/locales/en-fresh": {
+      "file": "packages/dom/src/locales/en-fresh.ts",
+      "maxGzip": 150
+    },
+    "@dzgrid/dom/locales/fr-fresh": {
+      "file": "packages/dom/src/locales/fr-fresh.ts",
+      "maxGzip": 150
+    },
+    "@dzgrid/dom/locales/ar-fresh": {
+      "file": "packages/dom/src/locales/ar-fresh.ts",
+      "maxGzip": 200
+    },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
       "maxGzip": 2850
@@ -314,6 +326,10 @@
     },
     "@dzgrid/theme/print.unlayered.css": {
       "file": "packages/theme/print.unlayered.css",
+      "maxGzip": 350
+    },
+    "@dzgrid/theme/fresh-rows.css": {
+      "file": "packages/theme/fresh-rows.css",
       "maxGzip": 350
     },
     "@dzgrid/dom": {
@@ -601,6 +617,16 @@
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/core/row-gaps",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/fresh-rows": {
+      "file": "packages/dom/src/fresh-rows.ts",
+      "maxGzip": 700,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
         "@dzgrid/dom/internal"
       ]
     },
