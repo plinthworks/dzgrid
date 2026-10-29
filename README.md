@@ -19,7 +19,7 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **Server data without surprises.** A request gate guarantees that only the answer to the last request of the current query is shown, whatever order answers arrive in. Pages, cursors, unknown totals, retry and errors are part of the model.
 - **Cells spanning rows and columns**, like an HTML table's `rowspan` and `colspan`: merged identical values, spans decided by the data, grouped headers, full-width rows.
 - **Problems are values.** A bad column, filter or server answer is reported as a structured problem — never a silent failure, never a crash.
-- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 82 986 B gzipped (guard 83 500); in a real Angular 21 build (`ng build`, `npm run example:bytes`), DzGrid's share of the audit screen's first load is 92 059 B (ceiling 92 500, owner decision S12-Q10; the editable « stock » screen loads apart).
+- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 84 912 B gzipped (guard 84 950); in a real Angular 21 build (`ng build`, `npm run example:bytes`), DzGrid's share of the audit screen's first load is 94 609 B (ceiling 95 000, owner decision; the editable « stock » screen loads apart).
 
 ## Install
 
@@ -88,40 +88,51 @@ createGrid<Patient>(host, {
 
 ## Entries and sizes
 
-Minified and gzipped, each entry bundled as a consumer ships it, the packages it builds on left out (`npm run check:size`, measured at the Phase 5 close, 2026-10-26).
+Minified and gzipped, each entry bundled as a consumer ships it, the packages it builds on left out (`npm run check:size`, measured for 1.1.0, 2026-10-29).
 
 | Entry | What it holds | Size (B gz) |
 |---|---|---|
-| `@dzgrid/core` | rows, columns, codecs, sort, filters, quick search, selection, client model, paging, expansion, the edit seams | 28 916 |
-| `@dzgrid/core/server` | request gate, `sourceRows` (with server children), `toWire` (over the core) | 6 088 |
-| `@dzgrid/core/csv` | `toCsv`, chunks, scopes, trees (over the core) | 1 868 |
-| `@dzgrid/core/spans` | the span map (over the core) | 3 438 |
-| `@dzgrid/core/rules` | selection rules (over the core) | 512 |
-| `@dzgrid/core/tree` | `treeShape`: parent ids, nested rows, paths (over the core) | 3 410 |
-| `@dzgrid/core/tree-lazy` | `lazyShape`: children loaded on demand (over the tree) | 1 457 |
-| `@dzgrid/core/detail` | `detailShape`, `sparseRowLayout` (over the core) | 999 |
-| `@dzgrid/core/edit` | `createEdits`: saves, checks, refusals, undo / redo (over the core) | 3 098 |
-| `@dzgrid/core/range` | blocks, TSV, copied values, paste and fill plans (over the core) | 2 897 |
-| `@dzgrid/dom` | the grid in the browser | 21 565 |
-| `@dzgrid/dom/tree` | the tree on screen, sticky parents | 3 795 |
-| `@dzgrid/dom/tree-lazy` | `lazyChildren` on screen | 938 |
-| `@dzgrid/dom/detail` | detail panels, `nestedGrid` | 4 092 |
-| `@dzgrid/dom/edit` | editing wired to the grid: marks, saves, stale rows, undo keys | 4 146 |
-| `@dzgrid/dom/editors` | the fields, keys and bubble (over `@dzgrid/dom/popup`, 1 470) / the lazy calendar (tzslot apart) | 6 669 / 1 494 |
-| `@dzgrid/dom/editors-list` | the list editor (over the popup) | 1 234 |
-| `@dzgrid/dom/range` | blocks by keys and pointer, the clipboard (over the DOM) / the lazy pasted-HTML reader | 4 768 / 506 |
-| `@dzgrid/dom/fill` | the fill handle, fill mode, Ctrl+D / R, bulk (over the range entry) | 2 781 |
-| `@dzgrid/dom/filters` | floating row (shown and hidden live) and filter popup (over `@dzgrid/dom/popup`) | 9 673 |
-| `@dzgrid/dom/filters`, lazy | the value list / the three date adapters (tzslot apart) | 3 807 / 2 321 |
+| `@dzgrid/core` | rows, columns, codecs, sort, filters, quick search, selection, client model, paging, expansion, the edit seams | 29 064 |
+| `@dzgrid/core/server` | request gate, `sourceRows` (with server children), `toWire` (over the core) | 6 134 |
+| `@dzgrid/core/csv` | `toCsv`, chunks, scopes, trees (over the core) | 1 877 |
+| `@dzgrid/core/spans` | the span map, siblings inside a tree too (over the core) | 3 914 |
+| `@dzgrid/core/rules` | selection rules (over the core) | 516 |
+| `@dzgrid/core/tree` | `treeShape`: parent ids, nested rows, paths, rows always open (over the core) | 3 485 |
+| `@dzgrid/core/tree-lazy` | `lazyShape`: children loaded on demand (over the tree) | 1 488 |
+| `@dzgrid/core/detail` | `detailShape`, `sparseRowLayout` (over the core) | 1 012 |
+| `@dzgrid/core/edit` | `createEdits`: saves, checks, refusals, undo / redo (over the core) | 3 156 |
+| `@dzgrid/core/range` | blocks, TSV, copied values, paste and fill plans (over the core) | 2 902 |
+| `@dzgrid/core/state` | the grid's state as small versioned JSON: columns, groups, sort, filters, search, page, density (over the core) | 1 507 |
+| `@dzgrid/core/row-gaps` | where the gaps between categories stand, and the row layout that places them (over the core) | 409 |
+| `@dzgrid/dom` | the grid in the browser | 22 347 |
+| `@dzgrid/dom/tree` | the tree on screen, sticky parents, rows always open | 3 839 |
+| `@dzgrid/dom/tree-lazy` | `lazyChildren` on screen | 944 |
+| `@dzgrid/dom/detail` | detail panels, `nestedGrid` | 4 077 |
+| `@dzgrid/dom/edit` | editing wired to the grid: marks, saves, stale rows, undo keys | 4 150 |
+| `@dzgrid/dom/editors` | the fields, keys and bubble (over `@dzgrid/dom/popup`, 1 626) / the lazy calendar (tzslot apart) | 6 671 / 1 517 |
+| `@dzgrid/dom/editors-list` | the list editor (over the popup) | 1 224 |
+| `@dzgrid/dom/range` | blocks by keys and pointer, the clipboard (over the DOM) / the lazy pasted-HTML reader | 5 050 / 500 |
+| `@dzgrid/dom/fill` | the fill handle, fill mode, Ctrl+D / R, bulk, one axis only (over the range entry) | 3 143 |
+| `@dzgrid/dom/filters` | floating row (shown and hidden live) and filter popup (over `@dzgrid/dom/popup`) | 10 091 |
+| `@dzgrid/dom/filters`, lazy | the value list / the three date adapters (tzslot apart) | 4 339 / 2 809 |
 | `@dzgrid/dom/search` | binds the host's search input | 1 298 |
-| `@dzgrid/dom/pagination` | footer and pager | 3 225 |
-| `@dzgrid/dom/export` | `csvExport`, eager / its lazy run (with the CSV core) | 1 200 / 4 810 |
-| `@dzgrid/dom/spans` | spans in the DOM | 4 465 |
-| `@dzgrid/dom/slots` | header, overlay and tooltip slots | 1 246 |
+| `@dzgrid/dom/pagination` | footer and pager | 3 132 |
+| `@dzgrid/dom/export` | `csvExport`, eager / its lazy run (with the CSV core) | 1 200 / 4 862 |
+| `@dzgrid/dom/spans` | spans in the DOM | 4 733 |
+| `@dzgrid/dom/groups` | collapsible header groups | 1 887 |
+| `@dzgrid/dom/columns` | moving and sizing columns, by drag and by keys (over the DOM) | 3 988 |
+| `@dzgrid/dom/column-menu` | the column ⋮ menu: sort, pin, size, move, filter, hide, density (over the popup) | 4 297 |
+| `@dzgrid/dom/columns-panel` | « choose the columns », a dialog (over the popup) | 4 350 |
+| `@dzgrid/dom/state` | `gridState()`, browser storage, the page address (over the DOM) | 1 174 |
+| `@dzgrid/dom/pinned-rows` | rows pinned above and below the body (over the DOM) | 2 160 |
+| `@dzgrid/dom/auto-height` | rows as tall as their wrapped text (over the DOM) | 1 237 |
+| `@dzgrid/dom/row-gaps` | `rowGaps`: a space between categories (over the DOM) | 575 |
+| `@dzgrid/dom/print` | `preparePrint`, `print` (over the DOM) | 1 599 |
+| `@dzgrid/dom/slots` | header, overlay and tooltip slots | 1 266 |
 | `@dzgrid/dom/parts` | `badge()`, `cellBoolean` | 689 |
 | `@dzgrid/dom/rules` | selection rules in the DOM | 654 |
-| `@dzgrid/dom/motion-gsap` | `motion()`, eager / its lazy run (GSAP apart) | 593 / 3 382 |
-| `@dzgrid/dom/internal` | shared by the features (the lazy loader) | 1 184 |
+| `@dzgrid/dom/motion-gsap` | `motion()`, eager / its lazy run (GSAP apart) | 648 / 3 479 |
+| `@dzgrid/dom/internal` | shared by the features (the lazy loader) | 1 201 |
 | `@dzgrid/dom/locales/{en,fr,ar}` | the grid's messages | 519 / 636 / 825 |
 | `@dzgrid/dom/locales/{en,fr,ar}-tree` | the tree's messages | 162 / 197 / 266 |
 | `@dzgrid/dom/locales/{en,fr,ar}-detail` | the detail panels' messages | 133 / 146 / 159 |
@@ -129,15 +140,21 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/dom/locales/{en,fr,ar}-editors` | the editors' messages | 383 / 434 / 533 |
 | `@dzgrid/dom/locales/{en,fr,ar}-range` | blocks' and the clipboard's messages | 319 / 366 / 500 |
 | `@dzgrid/dom/locales/{en,fr,ar}-fill` | the fill handle's messages | 231 / 278 / 299 |
-| `@dzgrid/theme` | the stylesheet | 2 494 |
-| `@dzgrid/theme/{edit,range,fill}.css` | editing, blocks, the fill handle | 2 197 / 479 / 450 |
+| `@dzgrid/dom/locales/{en,fr,ar}-columns` | moving columns' and the chooser's messages | 589 / 708 / 876 |
+| `@dzgrid/dom/locales/{en,fr,ar}-column-menu` | the column menu's messages | 477 / 570 / 673 |
+| `@dzgrid/dom/locales/{en,fr,ar}-pinned` | the pinned rows' messages | 116 / 130 / 156 |
+| `@dzgrid/dom/locales/{en,fr,ar}-print` | printing's messages | 132 / 140 / 160 |
+| `@dzgrid/theme` | the stylesheet / its comfortable density (`dzgrid.comfort.css`) | 2 764 / 551 |
+| `@dzgrid/theme/{edit,range,fill}.css` | editing, blocks, the fill handle | 2 236 / 479 / 457 |
+| `@dzgrid/theme/{columns,columns-panel,pinned-rows}.css` | columns, the columns chooser, pinned rows | 1 111 / 991 / 301 |
+| `@dzgrid/theme/print.css` | printing / its unlayered copy | 334 / 292 |
 | `@dzgrid/theme/{midnight,clinic}.css` | the showcase themes | 446 / 472 |
 | `@dzgrid/theme/{tailwind,tailwind3,bootstrap}.css` | the framework bridges | 325 / 325 / 293 |
-| `@dzgrid/angular` | the Angular wrapper | 6 813 |
-| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 82 986 |
-| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`) | 92 059 |
+| `@dzgrid/angular` | the Angular wrapper | 7 316 |
+| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 84 912 |
+| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`, at the Phase 6 close) | 94 609 |
 
-Optional peers: `@tzslot/core` and `@tzslot/dom` 2.2 (date filters), `gsap` 3.13 (motion).
+Optional peers: `@tzslot/core` and `@tzslot/dom` 2.4 (date filters and date editors), `gsap` 3.13 (motion).
 
 ## Developing
 
@@ -149,7 +166,7 @@ npm run test:perm      # 1 000 permutations of the audit screen and of the expor
 npm run test:tz        # again in Auckland and Los Angeles
 npm run typecheck      # TypeScript, and the Angular templates with ngc
 npm run build          # every package into its dist/
-npm run pack:local     # the four 0.3.0 tarballs, in packed/
+npm run pack:local     # the four 1.1.0 tarballs, in packed/
 npm run check:size     # minified + gzipped, against size-budget.json
 npm run check:contrast # every colour pair of the theme
 npm run bench          # Node, against perf/budgets.json

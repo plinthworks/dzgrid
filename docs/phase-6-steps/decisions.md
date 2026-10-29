@@ -155,7 +155,7 @@ Step 14 (`step14-plan.md`):
 - Sizes (Q14-7): accepted — K.8 → 85 000, `theme/edit.css` → 2 250, `dom/tree` see step 15.
 
 Step 14 built (2026-10-29), final sizes (gz, measured on minified code): `dom/tree` 3 863 / **3 950** (raised from
-3 850; 87 B left for step 15), `theme/edit.css` 2 222 / **2 250** (raised from 2 200: the field of a row always open
+3 850; 87 B left for step 15), `theme/edit.css` 2 236 / **2 250** (raised from 2 200: the field of a row always open
 starts at the indent), K.8 84 901 / 84 950 (**not raised**: the audit screen does not load fill, motion or tree; 85 000
 not needed). Within their lines, no raise: `dom/fill` 3 143 / 3 150 (the axis rule moved into the core's
 `fillTarget(src, to, along)`, `core/range` 2 904 / 3 200), `motion-gsap` 648 / 700 and its chunk 3 479 / 3 500 (the bad

@@ -85,7 +85,7 @@ la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le 
   « tout replier » et `rows.expand(false)` ne les ferment pas ; `aria-expanded="true"` reste. Les autres parents gardent
   leur flèche. Pour leur style : `rowClass` et du CSS.
 - Limites relevées (accord du propriétaire, 2026-10-29) : `dom/tree` 3 850 → 3 950 (3 863, la marge restante pour
-  l'étape 15), `theme/edit.css` 2 200 → 2 250 (2 222). K.8 reste à 84 950 (84 901 mesuré : la hausse à 85 000 n'a pas
+  l'étape 15), `theme/edit.css` 2 200 → 2 250 (2 236). K.8 reste à 84 950 (84 901 mesuré : la hausse à 85 000 n'a pas
   servi).
 
 ## Ajouté à l'étape 15 (propriétaire, 2026-10-29)
@@ -99,7 +99,7 @@ la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le 
   (qui grandit avec le texte) avant chaque ligne du premier niveau sauf la première ; jamais une ligne (ni focus, ni
   sélection, ni export, ni impression). La ligne d'après porte `data-gap` pour un thème.
 - Nouvelles limites (accord du propriétaire, 2026-10-29) : `core/row-gaps` 450 (409), `dom/row-gaps` 900 (575) ;
-  `core/spans` 3 800 → 3 950 (3 914, la mesure plus une petite marge) ; `dom/tree` 3 829 / 3 950 ; K.8 84 912 / 84 950.
+  `core/spans` 3 800 → 3 950 (3 914, la mesure plus une petite marge) ; `dom/tree` 3 839 / 3 950 ; K.8 84 912 / 84 950.
 
 ## Ce qui a été vérifié (2026-10-28)
 

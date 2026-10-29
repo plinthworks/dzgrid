@@ -965,14 +965,14 @@ sheet → architect → tests first → code → review → gate, and is ticked 
 - [x] **Tree rows always open** (replaces « tree without its chevron », owner 2026-10-29) — `tree({ fixedOpen })`: those
   rows always open (the core refuses to close them), no chevron and no 24 px slot, `aria-expanded="true"` kept; other
   parents unchanged; styled with `rowClass` + CSS. Done 2026-10-29 (step 14), tree-view.md « rows always open ».
-  Sizes of step 14: `dom/tree` 3 863 / 3 950, `theme/edit.css` 2 222 / 2 250, K.8 84 901 (unchanged, 84 950).
+  Sizes of step 14: `dom/tree` 3 863 / 3 950, `theme/edit.css` 2 236 / 2 250, K.8 84 901 (unchanged, 84 950).
 
 - [x] **A gap between two big categories** — `rowGaps({ before: roots })` (`@dzgrid/dom/row-gaps`, the core part in
   `@dzgrid/core/row-gaps`): an empty space above a row, outside every row, 16 px scaled with the text, never above the
   first row, not exported, not printed, `data-gap` / `--dzg-gap` for a theme, through the one seam in `rowLayout()`;
   works with `fixedOpen`. Done 2026-10-29 (step 15), row-gaps.md; Chrome (10 000 and 1 000 000 rows), Firefox, WebKit
   `--only row-gaps`. Sizes of step 15: `core/row-gaps` 409 / 450, `dom/row-gaps` 575 / 900, `core/spans` 3 914 / 3 950
-  (was 3 800), `dom/tree` 3 829 / 3 950, DOM base 22 347 / 22 400, K.8 84 912 / 84 950.
+  (was 3 800), `dom/tree` 3 839 / 3 950, DOM base 22 347 / 22 400, K.8 84 912 / 84 950.
 
 Also seen, nothing to add: grid context for parts (`context`), saving open rows (`rowExpanded` + `rows.expand`; open
 rows stay out of `GridState` by Q-S1), header component, two label renderers in one cell part, row classes, no

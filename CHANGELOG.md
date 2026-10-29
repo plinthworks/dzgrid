@@ -84,7 +84,7 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
   parents unchanged. A throw counts as false; a value that is not a function is ignored with `invalid-setting`
   (`tree.fixedOpen`). Style them with `rowClass` and CSS (tree-view.md « rows always open »). `@dzgrid/theme/edit.css`:
   the editor's field in such a cell starts at the indent.
-- Sizes of these three (owner, 2026-10-29): `dom/tree` 3 863 / 3 950 (was 3 850), `theme/edit.css` 2 222 / 2 250 (was
+- Sizes of these three (owner, 2026-10-29): `dom/tree` 3 863 / 3 950 (was 3 850), `theme/edit.css` 2 236 / 2 250 (was
   2 200); within their lines: `dom/fill` 3 143 / 3 150, motion 648 / 700 and its chunk 3 479 / 3 500, `core/tree`
   3 490 / 3 500, `core/range` 2 904 / 3 200; K.8 unchanged (84 901 / 84 950; its granted 85 000 not needed).
 - **Merged cells inside a tree** (owner, 2026-10-29, step 15; spans.md « In a tree »): `spans()` beside `tree()` is no
@@ -96,7 +96,7 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
   groups. The travelling label of a long merge sticks under the pinned parents (`--dzg-inset`, written by the tree).
   Full-width rows stay refused beside a tree (`unsupported-combination`, path `settings.fullWidth`, detail `tree`).
   `@dzgrid/core/spans`: `SpanInput.apart?(row)` (a row that never continues a span from the row above) and
-  `SpanInput.treeColumn?`; `treeConflicts()` no longer takes `spans`.
+  `SpanInput.treeColumn?`; `treeConflicts()` ignores `spans` (still accepted by its type, deprecated).
 - **A gap between two categories** (owner, 2026-10-29, step 15; row-gaps.md): new entries `@dzgrid/dom/row-gaps`
   (`rowGaps({ before, size })`, `roots`) and `@dzgrid/core/row-gaps` (`gapsOf`, `gapLayout`, `roots`; types `GapCtx`,
   `GapRule`). An empty space above the rows the rule names (`true`: `size`, 16 px by default; a number: that many
@@ -107,7 +107,7 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
   `invalid-gap` (a rule that threw or answered no size, once per kind). The DOM base gains one seam: `rowLayout()`
   wraps its layout with the gaps' (`gapsFor`), always the outermost.
 - Sizes of step 15 (owner, 2026-10-29): new lines `@dzgrid/core/row-gaps` 409 / 450, `@dzgrid/dom/row-gaps` 575 / 900;
-  `@dzgrid/core/spans` 3 914 / 3 950 (was 3 800, raised to the measure plus a small margin); `dom/tree` 3 829 / 3 950
+  `@dzgrid/core/spans` 3 914 / 3 950 (was 3 800, raised to the measure plus a small margin); `dom/tree` 3 839 / 3 950
   (down from 3 863: the refusal code went); `dom/spans` 4 733 / 5 050; the DOM base 22 347 / 22 400; K.8 84 912 /
   84 950; `@dzgrid/core` 29 064 unchanged. A new perf line: « tree open + span map rebuilt, one merge column in the
   tree column (100 000 rows) » 20.5 ms (median 18.4).

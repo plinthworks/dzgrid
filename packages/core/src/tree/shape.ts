@@ -333,7 +333,12 @@ interface View { readonly all: Buckets; readonly F: Filtered; readonly shown: Bu
  * Cell spans are allowed since 1.1.0 (owner Q15-1, siblings only); full-width rows stay refused (Q15-5), told by
  * the spans feature, which drops the rule beside a tree.
  */
-export function treeConflicts(o: { readonly detail?: boolean; readonly page?: boolean }): Problem[] {
+export function treeConflicts(o: {
+  /** @deprecated Ignored since 1.1.0 (spans are allowed beside a tree); kept so 1.0.0 callers still compile. */
+  readonly spans?: boolean;
+  readonly detail?: boolean;
+  readonly page?: boolean;
+}): Problem[] {
   return (['detail', 'page'] as const).filter((f) => o[f]).map((f) => problem('unsupported-combination', 'warning', f === 'page' ? 'pagination' : f, 'tree'));
 }
 

@@ -322,8 +322,10 @@ describe('what a tree does not combine with', () => {
     expect(treeConflicts({ detail: true })).toEqual([
       { code: 'unsupported-combination', severity: 'warning', path: 'detail', detail: 'tree' },
     ]);
-    // Cell spans are no longer refused (spans.md « In a tree »).
-    expect(treeConflicts({ spans: true } as never)).toEqual([]);
+    // Cell spans are no longer refused (spans.md « In a tree »). A 1.0.0 caller passing `spans` still compiles (1.1.0
+    // is a minor: the field stays in the type, ignored), no cast.
+    expect(treeConflicts({ spans: true })).toEqual([]);
+    expect(treeConflicts({ spans: true, detail: true })).toHaveLength(1);
     expect(treeConflicts({})).toEqual([]);
   });
 

@@ -1,4 +1,4 @@
-# Step 15 plan: merged cells inside a tree, and a gap between categories (1.2.0)
+# Step 15 plan: merged cells inside a tree, and a gap between categories (1.1.0 — written for 1.2.0; the owner moved it into 1.1.0, decisions.md « 1.1.0 scope widened »; « 1.2.0 » below reads 1.1.0)
 
 Sources: ROADMAP « 1.1.0 — additions asked by the owner after the Phase 6 close (2026-10-29) » (the two structural
 items, owner decision: 1.2.0, planned together); Phase 4 D2, D6, D7, D9 (`docs/phase-4-plan.md` §2;
