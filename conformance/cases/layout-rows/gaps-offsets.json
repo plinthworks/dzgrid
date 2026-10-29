@@ -1,0 +1,35 @@
+{
+  "id": "gaps-offsets",
+  "suite": "layout-rows",
+  "description": "A gap before a row (row-gaps.md « Layout »): the row's box starts after its gap and every gap above it; rows keep their own height; the total counts every gap. Four rows of 32, a gap of 16 before row 2 and of 24 before row 3.",
+  "input": {
+    "op": "gaps",
+    "count": 4,
+    "height": 32,
+    "at": [
+      2,
+      3
+    ],
+    "sizes": [
+      16,
+      24
+    ],
+    "probes": [
+      0,
+      63
+    ]
+  },
+  "expected": {
+    "offsets": [
+      0,
+      32,
+      80,
+      136,
+      168
+    ],
+    "indexAt": [
+      0,
+      1
+    ]
+  }
+}

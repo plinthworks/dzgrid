@@ -22,6 +22,9 @@ Presses the host's "Export" button (the grid has none of its own), after filteri
 - **Server export:** `exportAll(request)` receives the current query (filter, quick search, sort, params) without the page, and returns `{ url }`, `{ blob }` or nothing.
 - **No frozen page:** the file is built in chunks that yield about every 16 ms, then downloaded through `<a download>`. `run(scope)` resolves to `done`, `refused`, `failed`, `cancelled` or `busy` (step 19).
 
+- **Gaps and trees** (1.1.0): a gap between categories (`row-gaps.md`) is no row and writes no line; merged cells in a
+  tree are written on every row they cover, as on a flat grid.
+
 ## Tests
 - Hand-written text: guard on `=1+1`, `+33…`, `@SUM(`, not on the number `-5`; doubled quotes; CR and LF quoted; Arabic; `;` and `1,5` in French, `,` and `1.5` in English; an Algiers instant written `2026-03-05 23:59:00`; ISO days; enum label or code; BOM; chunks joined equal the whole — `conformance/cases/csv/*` (15 cases) and `packages/core/test/csv/` (unit, scopes, spans, an RFC 4180 round trip), step 10.
 - `canExport` false gives no Blob, `exportRefused` and an announcement; paged `all` calls `exportAll` and fetches no page; the Blob starts with a BOM and matches step 10's text — step 19, `packages/dom/test/export.test.ts`.

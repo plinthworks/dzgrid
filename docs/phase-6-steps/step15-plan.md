@@ -311,3 +311,19 @@ la colonne de l'arbre ne fusionne pas (Q15-2 B) et l'espace attend.
   or covering the tree column is the open case (proposed: refused with `invalid-span`, the cell drawn unmerged).
 - The screen is three tables in one tree, each led by an always-open top-level node without chevron (step 14,
   `fixedOpen`); the gap goes before each of those nodes but the first — `rowGaps({ before: roots })` (Q15-6 A) fits.
+
+## Done (2026-10-29)
+
+Built in the plan's order, not committed. Sheets first (`spans.md` « In a tree », new `row-gaps.md`, `tree-view.md`,
+`tree-keys.md`, `tree-sticky.md`, `auto-height.md`, `print.md`, `csv-export.md`, `a11y-protocol.md` §22). Tests first,
+red then green: core `spans-tree{,-property}` (1 000 seeded trees; planted fault: the engine without its level check
+fails the oracle), `row-gaps-{layout,property,rule}` (planted fault: a layout putting a row's gap after it fails the
+oracle); conformance `spans/tree-{siblings-only,open-splits,column-leaves-only,colspan-refused}.json`,
+`spans/gap-cuts-merge.json`, `layout-rows/gaps-{offsets,index-in-gap,with-tall-rows}.json`, `tree/conflicts.json`
+rewritten; DOM `tree-spans` (LTR and RTL keys, both feature orders, the export), `row-gaps`, `row-gaps-walk` (3 seeds
+over 10 100 rows). Mutants planted by hand in `core/spans`, `core/row-gaps`, `dom/spans`, `dom/tree`, `dom/row-gaps` and
+the base seam: all killed but one (`delete g.laid` at the gaps' setup: redundant, removed). Browser (own Vite, never
+:4700): `--only tree-spans` and `--only row-gaps` on `playground/arbre.html`, Chrome, Firefox, WebKit, green; `--only
+tree`, `auto-height`, `groups`, `pinned-rows` as regression, green. Not done here: the fill handle and a block drag
+across a gap, motion with gaps, auto height + gaps in a browser (covered in jsdom only); the listening (§22). Sizes and
+lead decisions: `decisions.md` « Step 15 built ».

@@ -179,6 +179,24 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
   });
 
+  it('no other entry holds a row-gaps module; the row-gaps entry holds no model, no span or tree module (1.1.0 step 15)', async () => {
+    const isGaps = (f: string) => /(^|\/)src\/row-gaps(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts', 'edit.ts', 'range.ts', 'state.ts']) expect((await inputsOf(entry)).filter(isGaps), entry).toEqual([]);
+    const inputs = await inputsOf('row-gaps.ts');
+    expect(inputs.some((i) => i.endsWith('src/row-gaps/layout.ts'))).toBe(true);
+    expect(inputs.filter((f) => isServer(f) || isSpans(f) || isCsv(f) || /(^|\/)src\/(tree|detail|edit|range|state)(\.ts$|-lazy\.ts$|\/)/.test(f))).toEqual([]);
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
+  });
+
+  it('the row-gaps entry fits its grant over the base (owner Q15-9: 450 B gz); the base gains no byte (types only)', async () => {
+    const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
+    const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
+    const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './row-gaps.ts';", resolveDir: SRC, loader: 'ts' } });
+    const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
+    expect(both - alone).toBeLessThanOrEqual(450);
+    expect(alone).toBeLessThanOrEqual(BASE);
+  });
+
   it('the state entry fits its grant over the base (owner Q-B 1 500, « set include only » 1 510 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
     const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;

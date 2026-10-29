@@ -50,6 +50,9 @@
       "@dzgrid/core/state": [
         "./packages/core/src/state.ts"
       ],
+      "@dzgrid/core/row-gaps": [
+        "./packages/core/src/row-gaps.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],
@@ -115,6 +118,9 @@
       ],
       "@dzgrid/dom/pinned-rows": [
         "./packages/dom/src/pinned-rows.ts"
+      ],
+      "@dzgrid/dom/row-gaps": [
+        "./packages/dom/src/row-gaps.ts"
       ],
       "@dzgrid/dom/auto-height": [
         "./packages/dom/src/auto-height.ts"

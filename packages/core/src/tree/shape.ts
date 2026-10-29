@@ -328,9 +328,13 @@ interface Filtered { readonly st: Structure; readonly matched: Uint8Array | null
 /** The children shown, per parent, with each row's place among them. */
 interface View { readonly all: Buckets; readonly F: Filtered; readonly shown: Buckets; readonly pos: Int32Array; readonly size: Int32Array }
 
-/** What a tree refuses beside it (D2, D9, owner Q5): told by the grid, which shows the tree without the other feature. */
-export function treeConflicts(o: { readonly spans?: boolean; readonly detail?: boolean; readonly page?: boolean }): Problem[] {
-  return (['spans', 'detail', 'page'] as const).filter((f) => o[f]).map((f) => problem('unsupported-combination', 'warning', f === 'page' ? 'pagination' : f, 'tree'));
+/**
+ * What a tree refuses beside it (D2, owner Q5): told by the grid, which shows the tree without the other feature.
+ * Cell spans are allowed since 1.1.0 (owner Q15-1, siblings only); full-width rows stay refused (Q15-5), told by
+ * the spans feature, which drops the rule beside a tree.
+ */
+export function treeConflicts(o: { readonly detail?: boolean; readonly page?: boolean }): Problem[] {
+  return (['detail', 'page'] as const).filter((f) => o[f]).map((f) => problem('unsupported-combination', 'warning', f === 'page' ? 'pagination' : f, 'tree'));
 }
 
 /**

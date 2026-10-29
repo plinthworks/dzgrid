@@ -167,8 +167,16 @@ describe('1.1.0, the four packages', () => {
     expect(pkg('core').exports['./state']).toEqual({ types: './src/state.ts', default: './src/state.ts' });
     expect(pkg('dom').exports['./state']).toEqual({ types: './src/state.ts', default: './src/state.ts' });
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
-    expect(build).toMatch(/'\.\/edit', '\.\/range', '\.\/state'\]/);
+    expect(build).toMatch(/'\.\/edit', '\.\/range', '\.\/state'[,\]]/);
     expect(build).toMatch(/'\.\/columns-panel', '\.\/state'/);
+  });
+
+  it('export the 1.1.0 step 15 subpaths (@dzgrid/core/row-gaps, @dzgrid/dom/row-gaps), built like the others', () => {
+    expect(pkg('core').exports['./row-gaps']).toEqual({ types: './src/row-gaps.ts', default: './src/row-gaps.ts' });
+    expect(pkg('dom').exports['./row-gaps']).toEqual({ types: './src/row-gaps.ts', default: './src/row-gaps.ts' });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/state', '\.\/row-gaps'\]/);
+    expect(build).toMatch(/'\.\/auto-height', '\.\/row-gaps'/);
   });
 
   it('keep gsap and tzslot optional peers', () => {

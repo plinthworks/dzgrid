@@ -1,0 +1,61 @@
+{
+  "id": "tree-open-splits",
+  "suite": "spans",
+  "description": "In a tree, closed: the roots A, B, C are three consecutive siblings and merge (opening A would split them: tree-siblings-only). Computed on the rows shown; the hidden children are never part of a merged cell.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "g",
+        "merge": true
+      }
+    ],
+    "rows": [
+      [
+        "A",
+        "x"
+      ],
+      [
+        "a1",
+        "y"
+      ],
+      [
+        "a2",
+        "y"
+      ],
+      [
+        "a3",
+        "y"
+      ],
+      [
+        "B",
+        "x"
+      ],
+      [
+        "C",
+        "x"
+      ]
+    ],
+    "parents": [
+      null,
+      0,
+      0,
+      0,
+      null,
+      null
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 1,
+        "rows": 3,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

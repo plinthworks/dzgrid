@@ -94,9 +94,11 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
   rows shown, as on a flat grid. Opening and closing are also said in the live region:
   "Service 50 expanded, 100 rows", "Service 50 collapsed" (bundles `locales/{en,fr,ar}-tree`),
   because screen readers do not all say a change of `aria-expanded` on a row.
-- **Not with**: cell spans (`unsupported-combination`, D9), browser pages
-  (`unsupported-combination`, D2), a master/detail on the same grid (owner Q5). Each gives a
-  problem and the grid shows the tree without the other feature. **A server's rows** can be a tree
+- **Not with**: full-width rows (`settings.fullWidth` beside `spans()`: `unsupported-combination`, path
+  `settings.fullWidth`, owner Q15-5), browser pages (`unsupported-combination`, D2), a master/detail on the same grid
+  (owner Q5). Each gives a problem and the grid shows the tree without the other feature. **Cell spans and grouped
+  headers are allowed since 1.1.0** (owner Q15-1/Q15-4, `spans.md` « In a tree »): a merge joins siblings only; until
+  1.0.x they were refused (D9). **A server's rows** can be a tree
   (step 7, `tree-lazy.md`): its pages count the roots, a parent's children come whole.
 - **Theme**: the toggle's chevron and its focus ring meet 3:1 against the row (WCAG 1.4.11),
   forced colours draw it in `ButtonText`, motion follows `motion.md`.

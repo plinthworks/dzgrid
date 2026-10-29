@@ -49,6 +49,9 @@ prepared the grid).
    layer, and hides the rest of the page; `print.unlayered.css` for a page whose reset is unlayered, such as Tailwind's
    preflight).
 
+- **Gaps** (1.1.0, `row-gaps.md`): not printed in 1.1.0; print shows a tree's levels by its indent. Merged cells in a
+  tree: written on every row, as on a flat grid.
+
 ## Keyboard
 None of its own (the application's button and the browser's Ctrl+P).
 

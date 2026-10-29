@@ -42,3 +42,46 @@ Reads a table where a value shared by consecutive rows (a ward, a date, a patien
 A block of cells (`range-selection.md` 16) is not grown to cover a tall or wide cell in this phase: its
 corners are what the user reached. The places a span covers are real cells of their rows: copied, pasted,
 filled and cleared like any other, and painted by the block's classes on the cell that is mounted.
+
+## In a tree (1.1.0, step 15; owner 2026-10-29; written before the code)
+The owner's « arbre » screen: three tables in one tree, each led by a row always open (`tree({ fixedOpen })`),
+a label column whose equal values are one tall cell. Before 1.1.0 a tree refused the spans feature (D9, a scope
+choice); it is lifted. Plan: `docs/phase-6-steps/step15-plan.md` (A-D1…A-D10); decisions: `decisions.md` « Steps 14
+and 15 ».
+
+- **Siblings only** (owner Q15-1, rows and columns alike): a merged or spanned cell covers **consecutive shown
+  siblings** — same parent, same level — never a parent and its children, never across a filler (path trees), a
+  loading row, or a gap (`row-gaps.md`). In the order a tree shows its rows, two consecutive rows of one level are
+  always siblings, so the engine's existing cut at a level change is the rule. It is computed on the rows shown, as
+  after a sort: opening a parent inside a run splits it (its children come between), closing it joins the siblings
+  again. A hidden (folded or filtered) row is never part of a merged cell; a merged cell is never half folded.
+- **The tree column** (Q15-2): it may merge, but **only between leaves**. A parent (a lazy parent not loaded counts as
+  one) keeps its own cell, its chevron and its keys: the slot of a parent, and the slot right under it, never
+  continue a span from the row above. A `rowSpan` asked over a parent there is cut where the parent stands
+  (`span-clipped`, detail `rows`, once per column layout); a `merge` simply stops there.
+- **Column spans** stay inside one row, so they never cross a parent and its child. A column span that **starts on or
+  covers the tree column** is refused: `invalid-span` (path `rows[i].<column>.colSpan`, detail `tree`), and the cell
+  is drawn unmerged (one row, one column), its neighbours keep their own cells.
+- **Keys** (as above, plus `tree-keys.md`): Up / Down step over a merged cell, one stop, the row aimed at
+  remembered. In the tree column, on a merged leaf cell: back (Left in left to right, Right in right to left) goes to
+  the parent of the row aimed at; forward moves to the next column; `*` opens the siblings of the row aimed at.
+  Folding the parent of a focused merged cell moves the focus to the parent.
+- **Screen readers** (Q15-3): as on a flat grid — `aria-rowspan` on the cell where the merge starts, covered places
+  absent; each row keeps `aria-level`, `aria-posinset`, `aria-setsize`, `aria-expanded`. **Known limit:** on a covered
+  row the focus is on the tall cell, so a reader says the first row's place (« 1 of 5 ») while the user aims at the
+  third; the tree's live sentences name the right row. A hidden repeat of the value is added only if the listening
+  (`docs/a11y-protocol.md` §22) shows the value is lost.
+- **Pinned parents** (`tree-sticky.md`): their copies stay text only and unmerged; a copy shows its own row's value.
+  The travelling label of a long merge sticks **under the copies** too (`--dzg-header-h` plus the copies' height,
+  `--dzg-inset`, written by the tree).
+- **Grouped headers** (Q15-4): lifting the refusal also gives a tree grouped headers and collapsible header groups
+  (the same feature); the pinned parents' layer sits under the group rows.
+- **Full-width rows** (Q15-5): still refused beside a tree: `settings.fullWidth` with `tree()` and `spans()` is one
+  `unsupported-combination` (path `settings.fullWidth`, detail `tree`), told once by the spans feature; no row is full
+  width.
+- **Export, print, editing, fill, copy**: unchanged from flat grids (covered places are real cells of their rows; CSV
+  and print write the value on every row).
+- Master/detail beside a tree, or beside spans, stays refused.
+- Tests: `packages/core/test/spans-tree{,-property}.test.ts`; conformance `spans/tree-*.json`, `spans/gap-cuts-merge.json`,
+  `tree/conflicts.json` (rewritten by the owner's decision); `packages/dom/test/tree-spans.test.ts`; browser
+  `npm run test:browser -- --only tree-spans`.

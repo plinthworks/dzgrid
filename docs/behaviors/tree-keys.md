@@ -35,6 +35,9 @@ left-to-right page and in an Arabic (right-to-left) one.
   parent row, same column, scrolled into view; a root → nothing.
 - **A row always open** (`tree({ fixedOpen })`, 1.1.0, tree-view.md): back acts as on a leaf (its parent, a root:
   nothing), forward is the column move, `*` never closes it; the kernel refuses to close it whatever asks.
+- **A merged cell in the tree column** (1.1.0, `spans.md` « In a tree »: only leaves merge there): the keys act on
+  the row aimed at — back goes to its parent (the same for every covered sibling), forward is the column move, `*`
+  opens its siblings; a parent always has its own cell, so opening and closing never meet a merged cell.
 - **`*`**: opens the closed siblings that have children, one `rowExpanded` event, one sentence
   ("5 rows expanded").
 - **Focus fallback** (D6): a collapse that hides the focused row moves the focus to the nearest

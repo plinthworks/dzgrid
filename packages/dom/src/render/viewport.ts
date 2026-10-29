@@ -34,7 +34,9 @@ export function rowLayout<T>(g: GridContext<T>): RowLayout {
   const l = g.laid;
   if (!g.layout || !l || l[0] !== d || l[1] !== h || l[2] !== by) {
     // Only the row height changed: the heights set on the old layout go to the feature (a measure kept).
-    g.layout = by?.(d, h, l?.[0] === d && l[2] === by ? g.layout : undefined) ?? uniformRowLayout(d, h);
+    const L = by?.(d, h, l?.[0] === d && l[2] === by ? g.layout : undefined) ?? uniformRowLayout(d, h);
+    // A gap between categories (`@dzgrid/dom/row-gaps`): the outermost layout, whatever the features' order.
+    g.layout = g.gapsFor?.(d, L) ?? L;
     g.laid = [d, h, by];
   }
   return g.layout;

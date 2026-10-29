@@ -1,5 +1,6 @@
 import { PrefixSums, uniformRowLayout, variableRowLayout, scrollMapper, layerPlacement, visibleWindow, anchorFor, scrollTopFor, MAX_PHYSICAL } from '@dzgrid/core';
 import { sparseRowLayout } from '@dzgrid/core/detail';
+import { gapLayout } from '@dzgrid/core/row-gaps';
 import { extrasOf } from '../../../packages/dom/src/auto-height/layout.js';
 import type { Suite } from './index.js';
 
@@ -13,6 +14,16 @@ export const layout: Record<string, Suite> = {
       const r = rowsOf(input.heights.length);
       return {
         offsets: [...input.heights.map((_: number, i: number) => l.offsetOf(r.index(i)!)), l.total],
+        indexAt: input.probes.map((p: number) => l.indexAt(p)),
+      };
+    }
+    if (input.op === 'gaps') {
+      // A gap before some rows (1.1.0, row-gaps.md): `height` for every row, or `heights` one each; `at` / `sizes` the gaps.
+      const r = rowsOf(input.heights?.length ?? input.count);
+      const inner = input.heights ? variableRowLayout(r, 0, input.heights) : uniformRowLayout(r, input.height);
+      const l = gapLayout(inner, input.at, input.sizes);
+      return {
+        offsets: [...Array.from({ length: r.count }, (_, i) => l.offsetOf(i as never)), l.total],
         indexAt: input.probes.map((p: number) => l.indexAt(p)),
       };
     }

@@ -41,7 +41,9 @@ export const SPANS_CSS =
   ':where(.dzg-row[data-spans]>.dzg-seg-start>.dzg-cell,.dzg-row[data-spans]>.dzg-seg-end>.dzg-cell){position:absolute;inset-block:0}' +
   ':where(.dzg-cell[aria-rowspan]){overflow:clip;z-index:1}' +
   ':where(.dzg-cell[aria-rowspan])::before{content:"";display:block;block-size:var(--dzg-span-at)}' +
-  ':where(.dzg-span-label){position:sticky;inset-block:var(--dzg-header-h) 0;line-height:var(--dzg-row-height);overflow:hidden;text-overflow:ellipsis;text-align:center}' +
+  // A merged leaf cell in a tree's column (spans.md « In a tree »): its hidden toggle takes no line above the label.
+  ':where(.dzg-cell[aria-rowspan]>.dzg-toggle){display:none}' +
+  ':where(.dzg-span-label){position:sticky;inset-block:calc(var(--dzg-header-h) + var(--dzg-inset,0px)) 0;line-height:var(--dzg-row-height);overflow:hidden;text-overflow:ellipsis;text-align:center}' +
   ':where(.dzg-row[data-full]>.dzg-seg){display:contents}' +
   ':where(.dzg-row[data-full]>.dzg-seg>.dzg-check){position:sticky;inset-inline-start:0;z-index:2}' +
   ':where(.dzg-hgroup){position:absolute;inset-block:0}' +

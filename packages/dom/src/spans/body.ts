@@ -47,7 +47,8 @@ export function createBody(g: GridContext<unknown>): Body {
       label.className = 'dzg-span-label';
       labels.set(cell, label);
     }
-    for (const n of [...cell.childNodes]) if (n !== label) label.append(n);
+    // A tree's toggle stays the cell's first child (`tree()` finds it there, spans.md « In a tree »).
+    for (const n of [...cell.childNodes]) if (n !== label && !(n as Element).classList?.contains('dzg-toggle')) label.append(n);
     if (label.parentNode !== cell) cell.append(label);
   }
 

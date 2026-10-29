@@ -1,0 +1,44 @@
+{
+  "id": "gaps-index-in-gap",
+  "suite": "layout-rows",
+  "description": "A point inside a gap belongs to the row under it (a click, a drag, the view's top row). Rows of 32, a gap of 16 before row 2: row 1 ends at 63, the gap is 64–79, row 2's box 80–111.",
+  "input": {
+    "op": "gaps",
+    "count": 3,
+    "height": 32,
+    "at": [
+      2
+    ],
+    "sizes": [
+      16
+    ],
+    "probes": [
+      63,
+      64,
+      79,
+      80,
+      111,
+      112,
+      500,
+      -1
+    ]
+  },
+  "expected": {
+    "offsets": [
+      0,
+      32,
+      80,
+      112
+    ],
+    "indexAt": [
+      1,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      0
+    ]
+  }
+}

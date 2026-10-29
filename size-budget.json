@@ -12,7 +12,7 @@
     },
     "@dzgrid/core/spans": {
       "file": "packages/core/src/spans.ts",
-      "maxGzip": 3800,
+      "maxGzip": 3950,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/csv": {
@@ -53,6 +53,11 @@
     "@dzgrid/core/state": {
       "file": "packages/core/src/state.ts",
       "maxGzip": 1510,
+      "over": "@dzgrid/core"
+    },
+    "@dzgrid/core/row-gaps": {
+      "file": "packages/core/src/row-gaps.ts",
+      "maxGzip": 450,
       "over": "@dzgrid/core"
     },
     "@dzgrid/dom/locales/en": {
@@ -581,6 +586,17 @@
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/core/detail",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/row-gaps": {
+      "file": "packages/dom/src/row-gaps.ts",
+      "maxGzip": 900,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/row-gaps",
         "@dzgrid/dom/internal"
       ]
     },

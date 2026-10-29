@@ -45,6 +45,8 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/edit': 3160, // owner « set include only » (2026-10-29): 3 150 → 3 160 (`exclude: false` refused in compile); owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
   '@dzgrid/core/range': 4000, // Phase 5 Q16 (Part B): blocks of cells, TSV, the paste and fill plans; the line at the measure + 10 % at the close
+  '@dzgrid/core/spans': 3950, // owner step 15 (2026-10-29, Q15-9: « only if the measure needs it »): 3 800 → 3 950 (measured 3 914: `apart` for gaps, the tree column's leaves-only rule, a column span over it refused)
+  '@dzgrid/core/row-gaps': 450, // owner step 15 (2026-10-29, Q15-9): a new line for the gaps between categories (measured 409)
   '@dzgrid/core/state': 1510, // owner « set include only » (2026-10-29): 1 500 → 1 510; Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
   '@dzgrid/dom': 22400, // Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10100, // the owner's-look budgets (2026-10-27, decisions.md): 10 000 → 10 100 (apply, the header box, the zone option)
@@ -137,6 +139,8 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/dzgrid.comfort.css': 650, // the owner's third look (2026-10-27, « Comfort stylesheet »): the spinner and thin scroll bars, its line the measure + 10 % (551 → 650)
   // Phase 6 step 9 (owner Q-B, Q9-3): automatic row height over the DOM base, @dzgrid/core/detail's sparse layout outside it.
   '@dzgrid/dom/auto-height': 1400,
+  // 1.1.0 step 15 (owner Q15-9, 2026-10-29): the gaps between categories over the DOM base, core/row-gaps outside it.
+  '@dzgrid/dom/row-gaps': 900,
   // Phase 6 step 11 (owner Q-B): print over the DOM base; its -print texts; print.css and its unlayered twin, 400 each.
   '@dzgrid/dom/print': 1600,
   '@dzgrid/dom/locales/en-print': 150,

@@ -1,5 +1,5 @@
 {
-  "$comment": "Milliseconds, median of the runs, measured on a MINIFIED bundle in node (scripts/bench.mjs). Phase 3 close (2026-10-21, owner decision step25-decisions.md Q2): each line of 5 ms and more is max(m × 1.1, m + 0.5 ms) rounded up to the half-ms, m the median of three npm run bench; the lines under 5 ms keep their ceiling (noise); memory lines kept. Set by scripts/rebudget.mjs; history and earlier decisions in ROADMAP.md. Phase 4 step 6 (2026-10-21): the three million-row tree lines (perf/profiles/tree.ts) set by the same rule from three runs; no older line changed. Phase 4 step 8 (2026-10-21): three detail lines, each under 5 ms (medians of three runs 0.0, 2.3, 1.5–1.7 ms): a ceiling of their own (0.5, 3, 5), as the lines under 5 ms; no older line changed.",
+  "$comment": "Milliseconds, median of the runs, measured on a MINIFIED bundle in node (scripts/bench.mjs). Phase 3 close (2026-10-21, owner decision step25-decisions.md Q2): each line of 5 ms and more is max(m × 1.1, m + 0.5 ms) rounded up to the half-ms, m the median of three npm run bench; the lines under 5 ms keep their ceiling (noise); memory lines kept. Set by scripts/rebudget.mjs; history and earlier decisions in ROADMAP.md. Phase 4 step 6 (2026-10-21): the three million-row tree lines (perf/profiles/tree.ts) set by the same rule from three runs; no older line changed. Phase 4 step 8 (2026-10-21): three detail lines, each under 5 ms (medians of three runs 0.0, 2.3, 1.5–1.7 ms): a ceiling of their own (0.5, 3, 5), as the lines under 5 ms; no older line changed. 1.1.0 step 15 (2026-10-29): one line, « tree open + span map rebuilt » (medians of three runs 17.6–19.4 ms, 18.4: max(m × 1.1, m + 0.5) rounded up to the half-ms = 20.5); no older line changed.",
   "runs": 7,
   "memory": {
     "store overhead bytes/row (100 000 rows)": 120,
@@ -9,6 +9,7 @@
   "budgets": {
     "tree build 100 000 rows (cold: parents, cycles, depths, order, flatten)": 40,
     "tree expand one parent of 10 000 children (100 000 rows)": 30,
+    "tree open + span map rebuilt, one merge column in the tree column (100 000 rows)": 20.5,
     "tree filter 100 000 rows (number filter, ancestors kept and opened)": 60,
     "tree toggle at 1 000 000 rows with 300 000 open parents": 16,
     "tree build 1 000 000 rows (cold: clientRows with the tree shape, ten levels)": 419.5,

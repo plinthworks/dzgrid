@@ -88,6 +88,19 @@ la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le 
   l'étape 15), `theme/edit.css` 2 200 → 2 250 (2 222). K.8 reste à 84 950 (84 901 mesuré : la hausse à 85 000 n'a pas
   servi).
 
+## Ajouté à l'étape 15 (propriétaire, 2026-10-29)
+
+- **Cellules fusionnées dans un arbre** : `spans()` à côté de `tree()` n'est plus refusé. Une fusion ne joint que des
+  lignes sœurs qui se suivent (même parent, même niveau) ; ouvrir un parent au milieu la coupe, le refermer la recolle.
+  La colonne de l'arbre ne fusionne que des feuilles ; une fusion de colonnes qui touche la colonne de l'arbre est
+  refusée (`invalid-span`) et dessinée sans fusion. Les en-têtes groupés marchent aussi dans un arbre. Le libellé d'une
+  longue fusion reste visible sous les parents épinglés. Lignes pleine largeur : toujours refusées à côté d'un arbre.
+- **Un espace entre catégories** : `rowGaps({ before: roots })` de `@dzgrid/dom/row-gaps` — un espace vide de 16 px
+  (qui grandit avec le texte) avant chaque ligne du premier niveau sauf la première ; jamais une ligne (ni focus, ni
+  sélection, ni export, ni impression). La ligne d'après porte `data-gap` pour un thème.
+- Nouvelles limites (accord du propriétaire, 2026-10-29) : `core/row-gaps` 450 (409), `dom/row-gaps` 900 (575) ;
+  `core/spans` 3 800 → 3 950 (3 914, la mesure plus une petite marge) ; `dom/tree` 3 829 / 3 950 ; K.8 84 912 / 84 950.
+
 ## Ce qui a été vérifié (2026-10-28)
 
 Voir ROADMAP « Phase 6 — close » : le portail complet (vitest, `test:perm`, `test:tz`, `typecheck`, `build`,

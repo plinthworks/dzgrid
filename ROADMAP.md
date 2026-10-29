@@ -952,11 +952,11 @@ sheet → architect → tests first → code → review → gate, and is ticked 
   4 350 (was 4 250), K.8 84 902 / 84 950 (was 84 900), `core/edit` 3 155 / 3 160 (was 3 150), `core/state` 1 506 /
   1 510 (was 1 500), core base 29 064 (guard 29 001 → 29 070; `@dzgrid/core` 29 150). Done: review fixes (search then
   re-tick = no filter; a stored exclude never reaches another column's server list), gate green (7 370 tests).
-- [ ] **Merged cells inside a tree** — `span` on a column of a `tree()` grid. Today refused with
-  `unsupported-combination` (`treeConflicts`, `packages/core/src/tree/shape.ts:327`, Phase 4 D2/D9). The arbre
-  screen needs its label column merged over consecutive rows (one tall cell, the repeats hidden). **Structural**:
-  what a merged cell becomes when some of its rows are folded, the keyboard and the screen reader over a merged cell
-  in a `treegrid`, sticky parents. Needs its own plan and owner decisions before code; the largest of the four.
+- [x] **Merged cells inside a tree** — `spans()` beside `tree()`: siblings only (rows and columns), the tree column
+  merging leaves only, a column span touching the tree column refused (`invalid-span`, drawn unmerged), the label under
+  the pinned parents, grouped headers in a treegrid; full-width rows still refused. Owner answers Q15-1…Q15-5
+  (`docs/phase-6-steps/decisions.md` « Steps 14 and 15 »). Done 2026-10-29 (step 15), spans.md « In a tree »; Chrome,
+  Firefox, WebKit `--only tree-spans` (arbre.html).
 - [x] **Fill in one direction** — `fill(blocks, { along: 'row' | 'column' })`: every way (drag, no-drag click, keyboard
   mode, `api.fill`) along that axis only, the rule in the core (`fillTarget(src, to, along)`); Ctrl/Cmd+D (R) for the
   forbidden axis not taken; the menu's « Fill down » removed by the host (Q14-1). Done 2026-10-29 (step 14), fill.md 26.
@@ -967,12 +967,12 @@ sheet → architect → tests first → code → review → gate, and is ticked 
   parents unchanged; styled with `rowClass` + CSS. Done 2026-10-29 (step 14), tree-view.md « rows always open ».
   Sizes of step 14: `dom/tree` 3 863 / 3 950, `theme/edit.css` 2 222 / 2 250, K.8 84 901 (unchanged, 84 950).
 
-- [ ] **A gap between two big categories** — arbre inserts empty data rows by hand to space its categories. In
-  DzGrid a fake row is focused, counted by screen readers (« row 12 of 40 », empty), selected, filled, copied and
-  exported. Wanted: a visual gap before a row (a rule on the row's data, e.g. the first row of a top-level category),
-  outside `role="grid"` and the row count, never focused, kept by sort, filter and virtual scroll (a layout height,
-  not a row). Today rows have one height (`rowHeight`), so it needs a per-row extra height in the layout. To plan
-  with the merged-cells item (both touch the tree's row layout).
+- [x] **A gap between two big categories** — `rowGaps({ before: roots })` (`@dzgrid/dom/row-gaps`, the core part in
+  `@dzgrid/core/row-gaps`): an empty space above a row, outside every row, 16 px scaled with the text, never above the
+  first row, not exported, not printed, `data-gap` / `--dzg-gap` for a theme, through the one seam in `rowLayout()`;
+  works with `fixedOpen`. Done 2026-10-29 (step 15), row-gaps.md; Chrome (10 000 and 1 000 000 rows), Firefox, WebKit
+  `--only row-gaps`. Sizes of step 15: `core/row-gaps` 409 / 450, `dom/row-gaps` 575 / 900, `core/spans` 3 914 / 3 950
+  (was 3 800), `dom/tree` 3 829 / 3 950, DOM base 22 347 / 22 400, K.8 84 912 / 84 950.
 
 Also seen, nothing to add: grid context for parts (`context`), saving open rows (`rowExpanded` + `rows.expand`; open
 rows stay out of `GridState` by Q-S1), header component, two label renderers in one cell part, row classes, no

@@ -63,7 +63,7 @@ export interface SpanInput<T> {
    * rule; `undefined`, `null` or `false`: no full-width row; anything else is
    * refused (`invalid-span` at `settings.fullWidth`).
    */
-  readonly fullWidth?: ((row: Readonly<T>) => boolean | { readonly part?: string }) | undefined;
+  readonly fullWidth?: ((row: Readonly<T>) => boolean | { readonly part?: string }) | null | undefined;
   /**
    * A cell's stable export text, null for a blank (an export cache, through
    * the edit overlay). Defaults to the column's codec. Part of the memo key:
@@ -71,20 +71,28 @@ export interface SpanInput<T> {
    * once per column.
    */
   readonly text?: ((col: ResolvedColumn<T>, row: Readonly<T>, index: number) => string | null) | undefined;
+  /**
+   * A row that never continues a span from the row above, in any column (a gap before it, row-gaps.md); a span
+   * may start on it. Must not throw. Part of the memo key (identity).
+   */
+  readonly apart?: ((row: number) => boolean) | undefined;
+  /**
+   * A tree's column (spans.md « In a tree »): there, a parent's slot and the slot under it never continue a span
+   * from the row above (a parent keeps its cell; a lazy one not loaded counts); a column span starting on it or
+   * covering it is refused (`invalid-span`, detail `tree`), its cell drawn alone. Part of the memo key.
+   */
+  readonly treeColumn?: string | undefined;
 }
 
 /** At most this many problems of one code per column are told; the rest are counted. */
 const MAX_TOLD = 10;
 
 interface Memo {
-  readonly rows: DisplayedRows<unknown>;
-  readonly rowsVersion: number;
+  /** The rows, their version, the full-width rule, the text reader, `apart`, the tree column, the language. */
+  readonly deps: readonly unknown[];
   readonly columns: SpanColumns<unknown>;
   /** The visible columns of each segment, in order: new definitions are new objects, so this also tells them (widths do not count). */
   readonly segs: readonly (readonly unknown[])[];
-  readonly fullWidth: unknown;
-  readonly text: unknown;
-  readonly ctx: string;
   /** The clipped spans told under this column layout. */
   readonly told: Set<string>;
 }
@@ -93,7 +101,7 @@ const MEMO = new WeakMap<SpanMap, Memo>();
 /** The map was built for exactly these rows. */
 export const builtFor = (map: SpanMap, rows: DisplayedRows<unknown>): boolean => {
   const m = MEMO.get(map);
-  return !!m && m.rows === rows && m.rowsVersion === rows.version;
+  return !!m && m.deps[0] === rows && m.deps[1] === rows.version;
 };
 
 type Same<T> = (a: SpanCtx<T>, b: SpanCtx<T>) => boolean;
@@ -106,6 +114,8 @@ interface Rule<T> {
   readonly rowSpan?: (ctx: SpanCtx<T>) => number;
   readonly colSpan?: (ctx: SpanCtx<T>) => number;
   ends?: Uint32Array;
+  /** Where a span starting on a row may end, at most: the run of one level, cut by `apart` (and parents in the tree column). */
+  lim?: Uint32Array;
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -126,17 +136,14 @@ const isObj = (v: unknown): v is Record<string, unknown> => v !== null && typeof
  */
 export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): SpanMap {
   const { rows, columns } = input;
-  const ctx = ctxKey(input.ctx);
+  const deps = [rows, rows.version, input.fullWidth, input.text, input.apart, input.treeColumn, ctxKey(input.ctx)];
   const last = prev ? MEMO.get(prev) : undefined;
   const { start, center, end } = columns.layout;
   const segs = [start.columns, center.columns, end.columns];
   const sameLayout =
     !!last && last.columns === columns &&
     last.segs.every((s, i) => s.length === segs[i]!.length && s.every((c, j) => c === segs[i]![j]));
-  if (
-    sameLayout && prev && last!.rows === rows && last!.rowsVersion === rows.version &&
-    last!.fullWidth === input.fullWidth && last!.text === input.text && last!.ctx === ctx
-  ) return prev;
+  if (sameLayout && prev && deps.every((x, j) => x === last!.deps[j])) return prev;
   const told = new Set(sameLayout ? last!.told : []);
 
   const problems: Problem[] = [];
@@ -199,7 +206,6 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
   // Spans are refused with trees and details (D9): a row that is not data reads as none.
   const dataOf = (i: number): T | null => (nodes[i]!.kind === 'data' ? (nodes[i] as DataNode<T>).data : null);
   const fw = new Uint8Array(n);
-  const blockEnd = new Uint32Array(n);
   for (let i = 0; i < n; i++) {
     const node = rows.nodeAt(i as DisplayIndex);
     nodes[i] = node;
@@ -212,9 +218,18 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     }
   }
   const spannable = (i: number) => nodes[i]!.kind === 'data' && !fw[i];
-  for (let i = n - 1; i >= 0; i--) {
-    blockEnd[i] = i < n - 1 && spannable(i) && spannable(i + 1) && nodes[i + 1]!.level === nodes[i]!.level ? blockEnd[i + 1]! : i;
-  }
+  // A run is of one level (siblings, in a tree's order), cut before a row `apart` (a gap); in the tree column, also around a parent.
+  // A parent: children shown, or not known yet (-1, a lazy one).
+  const lone = (i: number) => !!(rows as { childrenAt?: (i: DisplayIndex) => number }).childrenAt?.(i as DisplayIndex);
+  const ends = (tree: boolean): Uint32Array => {
+    const e = new Uint32Array(n);
+    for (let i = n - 1; i >= 0; i--) e[i] = i < n - 1 && spannable(i) && spannable(i + 1) && nodes[i + 1]!.level === nodes[i]!.level && !input.apart?.(i + 1) && !(tree && (lone(i) || lone(i + 1))) ? e[i + 1]! : i;
+    return e;
+  };
+  const blockEnd = ends(false);
+  let treeEnd: Uint32Array | undefined;
+  for (const rule of rules) rule.lim = rule.col.id === input.treeColumn ? (treeEnd ??= ends(true)) : blockEnd;
+  const treeAt = visible.findIndex((c) => c.id === input.treeColumn);
 
   // What a rule is told: two reused objects (a merge compares two cells).
   const ctxA = { row: null as unknown, value: undefined as unknown, key: '' as RowKey, index: 0, column: '', prev: null as unknown, next: null as unknown };
@@ -261,8 +276,9 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     const { same, within } = rule.merge;
     const t = textsOf(rule.col);
     const cuts = within.map(textsOf);
+    const lim = rule.lim!;
     rule.ends = runEnds(n, (i) => {
-      if (blockEnd[i]! <= i || t[i] === null || t[i + 1] === null) return false;
+      if (lim[i]! <= i || t[i] === null || t[i + 1] === null) return false;
       for (const w of cuts) if (w[i] === null || w[i] !== w[i + 1]) return false;
       if (!same) return t[i] === t[i + 1];
       try {
@@ -312,8 +328,9 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
         if (rule.rowSpan) h = ask(rule.rowSpan, rule.col, r, 'rowSpan');
         if (rule.colSpan) w = ask(rule.colSpan, rule.col, r, 'colSpan');
       }
-      if (h > blockEnd[r]! - r + 1) {
-        h = blockEnd[r]! - r + 1;
+      const most = rule.lim![r]! - r + 1;
+      if (h > most) {
+        h = most;
         clipped(rule.col.id, 'rows');
       }
       if (w > rule.segEnd - c + 1) {
@@ -321,6 +338,11 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
         clipped(rule.col.id, 'segment');
       }
       if (h === 1 && w === 1) continue;
+      // A column span on or over a tree's column: refused, the cell alone.
+      if (w > 1 && treeAt >= c && treeAt < c + w) {
+        say('invalid-span', rule.col.id, `rows[${r}].${rule.col.id}.colSpan`, 'tree');
+        continue;
+      }
       let free = true;
       for (let k = c + 1; k < c + w && free; k++) free = until[k]! < r;
       if (!free) {
@@ -401,7 +423,7 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     fullWidth: (r) => inRange(r, 0) && fw[r] === 1,
     problems,
   };
-  MEMO.set(map, { rows: rows as DisplayedRows<unknown>, rowsVersion: rows.version, columns: columns as SpanColumns<unknown>, segs, fullWidth: input.fullWidth, text: input.text, ctx, told });
+  MEMO.set(map, { deps, columns: columns as SpanColumns<unknown>, segs, told });
   return map;
 }
 

@@ -1,0 +1,47 @@
+{
+  "id": "gap-cuts-merge",
+  "suite": "spans",
+  "description": "A gap before a row (row-gaps.md, B-D5) cuts a merged run: the row under the gap never continues a span from the row above, but may start one. Flat grid: x x | x x.",
+  "input": {
+    "columns": [
+      {
+        "id": "a",
+        "merge": true
+      }
+    ],
+    "rows": [
+      [
+        "x"
+      ],
+      [
+        "x"
+      ],
+      [
+        "x"
+      ],
+      [
+        "x"
+      ]
+    ],
+    "gaps": [
+      2
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 0,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      },
+      {
+        "row": 2,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

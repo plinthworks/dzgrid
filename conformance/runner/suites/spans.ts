@@ -1,4 +1,5 @@
-import { createColumnModel, localeCtx, type ColumnOrGroup, type Problem } from '@dzgrid/core';
+import { clientRows, createColumnModel, createKernel, dataKey, localeCtx, type ColumnOrGroup, type DisplayedRows, type Problem } from '@dzgrid/core';
+import { treeShape } from '@dzgrid/core/tree';
 import { createRowStore, flatDisplayed } from '@dzgrid/core/internal';
 import { buildSpanMap, foldedColumns, groupTable, headerBands, navigate, type SpanCell, type SpanLookup } from '@dzgrid/core/spans';
 import { FULL_WIDTH, SAME_RULES, SPAN_RULES } from '../spans-fixtures.js';
@@ -26,8 +27,19 @@ export function runSpans(input: any) {
   const ids = columns.state().map((s) => s.id);
   const store = createRowStore<Row>((r) => r.id);
   store.replaceAll(input.rows.map((vals: unknown[], i: number) => ({ id: `r${i}`, ...Object.fromEntries(ids.map((id, j) => [id, vals[j]])) })));
-  const rows = flatDisplayed(store.snapshot, input.order ? Uint32Array.from(input.order) : null, 1);
-  const map = buildSpanMap({ rows, columns, ctx: localeCtx({ locale: 'en-US' }), ...(input.fullWidth && { fullWidth: FULL_WIDTH[input.fullWidth] }) });
+  let rows: DisplayedRows<Row> = flatDisplayed(store.snapshot, input.order ? Uint32Array.from(input.order) : null, 1);
+  // A tree (1.1.0, spans.md « In a tree »): `parents` gives each row's parent (an index, null for a root), `open` the
+  // rows opened; `treeColumn` the tree's column; `gaps` the rows a gap stands before (row-gaps.md).
+  if (input.parents) {
+    const data = input.rows.map((vals: unknown[], i: number) => ({ id: `r${i}`, p: input.parents[i] === null ? null : `r${input.parents[i]}`, ...Object.fromEntries(ids.map((id, j) => [id, vals[j]])) }));
+    const model = clientRows<Row>({ rows: data, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<Row>({ parentId: (r) => r.p as string | null }) });
+    createKernel<Row>({ rows: model, columns }).dispatch({ type: 'rows.expand', rows: (input.open ?? []).map((i: number) => dataKey(`r${i}`)!), expanded: true }, 'user');
+    rows = model.displayed;
+  }
+  const map = buildSpanMap({
+    rows, columns, ctx: localeCtx({ locale: 'en-US' }), ...(input.fullWidth && { fullWidth: FULL_WIDTH[input.fullWidth] }),
+    ...(input.treeColumn && { treeColumn: input.treeColumn }), ...(input.gaps && { apart: (i: number) => input.gaps.includes(i) }),
+  });
   const n = columns.visible().length;
   const cells: SpanCell[] = [];
   const fullWidth: number[] = [];

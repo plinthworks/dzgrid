@@ -119,6 +119,12 @@ export interface GridContext<T> {
   inset?: number;
   /** The room a row needs above it to be seen whole (its pinned parents); none when unset. */
   insetFor?: (i: number) => number;
+  /** The tree's column, set by `tree()` (1.1.0 step 15): the spans feature merges leaves only there (spans.md « In a tree »). */
+  treeColumn?: () => string | undefined;
+  /** A gap stands before row `i` of these rows (`@dzgrid/dom/row-gaps`): the spans feature cuts a merge there. */
+  gapAt?: (rows: DisplayedRows<T>, i: number) => boolean;
+  /** The gaps' layout around the one `rowLayout()` made (`@dzgrid/dom/row-gaps`): always the outermost. */
+  gapsFor?: (rows: DisplayedRows<T>, inner: RowLayout) => RowLayout;
 
   schedule(): void;
   /** The parts: the features' under the host's `settings.parts`; the same object until that changes. */

@@ -1,0 +1,70 @@
+{
+  "id": "tree-siblings-only",
+  "suite": "spans",
+  "description": "In a tree (1.1.0, spans.md « In a tree », owner Q15-1): a merge joins consecutive shown siblings only. A is open: A stays alone (its children follow at another level), its children a1–a3 merge, the roots B and C merge; a parent never merges with its child.",
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "g",
+        "merge": true
+      }
+    ],
+    "rows": [
+      [
+        "A",
+        "x"
+      ],
+      [
+        "a1",
+        "y"
+      ],
+      [
+        "a2",
+        "y"
+      ],
+      [
+        "a3",
+        "y"
+      ],
+      [
+        "B",
+        "x"
+      ],
+      [
+        "C",
+        "x"
+      ]
+    ],
+    "parents": [
+      null,
+      0,
+      0,
+      0,
+      null,
+      null
+    ],
+    "open": [
+      0
+    ]
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 1,
+        "col": 1,
+        "rows": 3,
+        "cols": 1
+      },
+      {
+        "row": 4,
+        "col": 1,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

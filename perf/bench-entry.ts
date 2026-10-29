@@ -30,6 +30,24 @@ export const CASES: Record<string, Case> = {
     },
     run: ({ snap, shape }: TreeCtx) => shape.build({ snap, order: null, matched: null, filterActive: false, expansion: new Set([snap.keyAt(0 as never)]), layer: null, version: 2 }).count,
   },
+  // 1.1.0 step 15 (spans.md « In a tree »): opening a parent makes a new shown order, so the span map is built again
+  // (O(rows), one merge column read through its codec, the tree column's leaves-only rule). Everything open but r0;
+  // each run opens or closes r0 (10 000 children) and builds the map over the ~100 000 rows shown, from the last one.
+  'tree open + span map rebuilt, one merge column in the tree column (100 000 rows)': {
+    setup: () => {
+      const columns = createColumnModel<TreeRow>([{ id: 'n', type: 'number', merge: true }, { id: 'id' }]);
+      const m = clientRows<TreeRow>({ rows: treeRows(100_000, 10_000).snapshot.rows, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<TreeRow>({ parentId: (r) => r.p }) });
+      m.expandAll(true);
+      const key = dataKey('r0')!;
+      m.expand([key], false);
+      return { m, key, columns, map: null as ReturnType<typeof buildSpanMap> | null };
+    },
+    run: (t: { m: ReturnType<typeof clientRows<TreeRow>>; key: ReturnType<typeof dataKey> & {}; columns: ReturnType<typeof createColumnModel<TreeRow>>; map: ReturnType<typeof buildSpanMap> | null }) => {
+      t.m.expand([t.key], !t.m.isExpanded(t.key));
+      t.map = buildSpanMap({ rows: t.m.displayed, columns: t.columns, ctx: localeCtx({ locale: 'en-US' }), treeColumn: 'n' }, t.map);
+      return t.map.ownerAt(1, 0)?.rows ?? 0;
+    },
+  },
   'tree filter 100 000 rows (number filter, ancestors kept and opened)': {
     setup: () => {
       const columns = createColumnModel<TreeRow>([{ id: 'n', type: 'number' }]);

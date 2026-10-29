@@ -318,11 +318,12 @@ describe('what a tree does not combine with', () => {
     expect(view(model)).toEqual(['a 1/2', 'b 2/2']);
   });
 
-  it('cell spans and details: the problems the DOM layer tells', () => {
-    expect(treeConflicts({ spans: true, detail: true })).toEqual([
-      { code: 'unsupported-combination', severity: 'warning', path: 'spans', detail: 'tree' },
+  it('details: the problem the DOM layer tells (spans allowed since 1.1.0, owner Q15-1; full width told by the spans feature)', () => {
+    expect(treeConflicts({ detail: true })).toEqual([
       { code: 'unsupported-combination', severity: 'warning', path: 'detail', detail: 'tree' },
     ]);
+    // Cell spans are no longer refused (spans.md « In a tree »).
+    expect(treeConflicts({ spans: true } as never)).toEqual([]);
     expect(treeConflicts({})).toEqual([]);
   });
 

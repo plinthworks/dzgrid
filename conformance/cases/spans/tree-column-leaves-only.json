@@ -1,0 +1,81 @@
+{
+  "id": "tree-column-leaves-only",
+  "suite": "spans",
+  "description": "The tree column merges leaves only (owner Q15-2): A (a parent, open) keeps its own cell although its name equals its children's; its leaves a1–a3 merge; the roots B and C (leaves) merge. The colSpan of 1 asked on n changes nothing.",
+  "input": {
+    "columns": [
+      {
+        "id": "name",
+        "merge": true
+      },
+      {
+        "id": "g"
+      },
+      {
+        "id": "n",
+        "colSpan": "value"
+      }
+    ],
+    "rows": [
+      [
+        "s",
+        "x",
+        1
+      ],
+      [
+        "s",
+        "y",
+        1
+      ],
+      [
+        "s",
+        "y",
+        1
+      ],
+      [
+        "s",
+        "y",
+        1
+      ],
+      [
+        "s",
+        "x",
+        1
+      ],
+      [
+        "s",
+        "x",
+        1
+      ]
+    ],
+    "parents": [
+      null,
+      0,
+      0,
+      0,
+      null,
+      null
+    ],
+    "open": [
+      0
+    ],
+    "treeColumn": "name"
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 1,
+        "col": 0,
+        "rows": 3,
+        "cols": 1
+      },
+      {
+        "row": 4,
+        "col": 0,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

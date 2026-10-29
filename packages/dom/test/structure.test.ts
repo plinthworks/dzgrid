@@ -199,6 +199,18 @@ describe('the DOM layer’s shape', () => {
     expect(files(SRC).filter((f) => !/^rules(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?rules(\/|\.js')|@dzgrid\/core\/rules')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
   });
 
+  it('has the row-gaps entry reach the base only through the grid’s context and the types (1.1.0 step 15)', () => {
+    // @dzgrid/dom/row-gaps: value imports from the core, its internal entry, @dzgrid/core/row-gaps and its own folder only.
+    const entry = files(SRC).filter((f) => /^row-gaps(\/|\.ts$)/.test(relative(SRC, f)));
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['row-gaps.ts', 'row-gaps/index.ts']);
+    const offenders = entry
+      .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/row-gaps)$/.test(s) && s !== 'row-gaps.ts: ./row-gaps/index.js');
+    expect(offenders).toEqual([]);
+    // Nothing else imports it, nor the core's row-gaps entry: a grid without gaps carries none of it.
+    expect(files(SRC).filter((f) => !/^row-gaps(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?row-gaps(\/|\.js')|@dzgrid\/core\/row-gaps')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+  });
+
   it('has the tree entry reach the base only through the grid’s context and the types (Phase 4 step 4)', () => {
     // @dzgrid/dom/tree: value imports from the core, its internal entry, @dzgrid/core/tree and its own folder only
     // (the sticky parent rows' pure stack, tree/sticky.ts, imports nothing).

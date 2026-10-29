@@ -18,6 +18,7 @@ const alias = {
   '@dzgrid/core/edit': fileURLToPath(new URL('./packages/core/src/edit.ts', import.meta.url)),
   '@dzgrid/core/range': fileURLToPath(new URL('./packages/core/src/range.ts', import.meta.url)),
   '@dzgrid/core/state': fileURLToPath(new URL('./packages/core/src/state.ts', import.meta.url)),
+  '@dzgrid/core/row-gaps': fileURLToPath(new URL('./packages/core/src/row-gaps.ts', import.meta.url)),
   '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
   '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
 };
@@ -41,6 +42,7 @@ const domAlias = {
   '@dzgrid/dom/column-menu': fileURLToPath(new URL('./packages/dom/src/column-menu.ts', import.meta.url)),
   '@dzgrid/dom/columns-panel': fileURLToPath(new URL('./packages/dom/src/columns-panel.ts', import.meta.url)),
   '@dzgrid/dom/state': fileURLToPath(new URL('./packages/dom/src/state.ts', import.meta.url)),
+  '@dzgrid/dom/row-gaps': fileURLToPath(new URL('./packages/dom/src/row-gaps.ts', import.meta.url)),
   '@dzgrid/dom/pinned-rows': fileURLToPath(new URL('./packages/dom/src/pinned-rows.ts', import.meta.url)),
   '@dzgrid/dom/auto-height': fileURLToPath(new URL('./packages/dom/src/auto-height.ts', import.meta.url)),
   '@dzgrid/dom/print': fileURLToPath(new URL('./packages/dom/src/print.ts', import.meta.url)),

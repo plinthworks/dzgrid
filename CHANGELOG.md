@@ -15,6 +15,8 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
 
 ### Upgrade notes (from 1.0.0)
 
+- **`spans()` beside `tree()` now merges.** An app that passed both and ignored the `unsupported-combination` warning
+  now sees merged cells (siblings only); `settings.fullWidth` beside a tree is still refused.
 - **Angular selection: `[(selected)]` or `(selectionChanged)`.** `[(selected)]` is the model (a `SelectionState`, keys
   and mode, written back as the user ticks); `(selectionChanged)` is the event (`{ selection, count, source }`), new in
   1.1.0: in 1.0.0 a `(selectionChanged)` binding compiled and never fired (Angular binds an unknown output as a DOM
@@ -85,6 +87,30 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
 - Sizes of these three (owner, 2026-10-29): `dom/tree` 3 863 / 3 950 (was 3 850), `theme/edit.css` 2 222 / 2 250 (was
   2 200); within their lines: `dom/fill` 3 143 / 3 150, motion 648 / 700 and its chunk 3 479 / 3 500, `core/tree`
   3 490 / 3 500, `core/range` 2 904 / 3 200; K.8 unchanged (84 901 / 84 950; its granted 85 000 not needed).
+- **Merged cells inside a tree** (owner, 2026-10-29, step 15; spans.md « In a tree »): `spans()` beside `tree()` is no
+  longer refused. A merged or spanned cell joins **consecutive shown siblings only** (same parent, same level; never a
+  parent and its children, never across a filler, a loading row or a gap); opening a parent inside a run splits it,
+  closing joins it. The tree column merges **leaves only** (a parent keeps its cell, chevron and keys; a `rowSpan` over
+  a parent there is cut, `span-clipped`). A column span starting on or covering the tree column is refused
+  (`invalid-span`, detail `tree`) and drawn unmerged. A tree now also gets grouped headers and collapsible header
+  groups. The travelling label of a long merge sticks under the pinned parents (`--dzg-inset`, written by the tree).
+  Full-width rows stay refused beside a tree (`unsupported-combination`, path `settings.fullWidth`, detail `tree`).
+  `@dzgrid/core/spans`: `SpanInput.apart?(row)` (a row that never continues a span from the row above) and
+  `SpanInput.treeColumn?`; `treeConflicts()` no longer takes `spans`.
+- **A gap between two categories** (owner, 2026-10-29, step 15; row-gaps.md): new entries `@dzgrid/dom/row-gaps`
+  (`rowGaps({ before, size })`, `roots`) and `@dzgrid/core/row-gaps` (`gapsOf`, `gapLayout`, `roots`; types `GapCtx`,
+  `GapRule`). An empty space above the rows the rule names (`true`: `size`, 16 px by default; a number: that many
+  pixels), scaled with the text, never above the first row, outside every row (no element, no focus, not counted in
+  `aria-rowcount`, never selected, copied or exported; not printed in 1.1.0), kept by sort, filter and folding; it
+  cuts merged runs. The row under a gap carries `data-gap` and `--dzg-gap`. Beside master/detail: refused
+  (`unsupported-combination`, path `rowGaps`). Problems: `invalid-setting` (`rowGaps.before`, `rowGaps.size`),
+  `invalid-gap` (a rule that threw or answered no size, once per kind). The DOM base gains one seam: `rowLayout()`
+  wraps its layout with the gaps' (`gapsFor`), always the outermost.
+- Sizes of step 15 (owner, 2026-10-29): new lines `@dzgrid/core/row-gaps` 409 / 450, `@dzgrid/dom/row-gaps` 575 / 900;
+  `@dzgrid/core/spans` 3 914 / 3 950 (was 3 800, raised to the measure plus a small margin); `dom/tree` 3 829 / 3 950
+  (down from 3 863: the refusal code went); `dom/spans` 4 733 / 5 050; the DOM base 22 347 / 22 400; K.8 84 912 /
+  84 950; `@dzgrid/core` 29 064 unchanged. A new perf line: « tree open + span map rebuilt, one merge column in the
+  tree column (100 000 rows) » 20.5 ms (median 18.4).
 - **A documented hook for styling one header group** (owner, 1.1.0): every group header cell carries `.dzg-hgroup`,
   `data-g="<ColumnGroupDef.id>"` and `data-level`, now a stable public contract pinned by a test (left to right and
   right to left): `.dzg-hgroup[data-g="REAL_TIME"] { background: var(--app-…); }` from the app's sheet. An empty

@@ -1,7 +1,7 @@
 /**
  * The grid in a real browser: what jsdom cannot see. `npm run test:browser`
  * (Chrome; `-- --all` adds Firefox and WebKit for the RTL and focus checks; `-- --only parts` the cell parts alone, `-- --only rules` the selection rules and the header's box, step 21;
- * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6; `-- --only edit-saves` the saves end to end, step 7; `-- --only edit-undo` undo and redo, the tree's field, step 8; `-- --only range` blocks of cells, step 11a, and the playground's `?focus=range` page; `-- --only clipboard` the clipboard, step 11b; `-- --only fill` the fill and S12-Q8's cues on the playground, step 12, `-- --only columns` moving columns, Phase 6 step 2, `-- --only column-menu` the column menu, Phase 6 step 3, `-- --only chooser` the column chooser, Phase 6 step 4, `-- --only state` the grid's state, storage and address, Phase 6 step 5, `-- --only groups` collapsible header groups, Phase 6 step 7, `-- --only pinned-rows` pinned rows, Phase 6 step 8b-1, and the owner's accidental fills of 2026-10-26 (browser-fill-accident.mjs), `-- --only auto-height` automatic row height, Phase 6 step 9, `-- --only print` printing, Phase 6 step 11 — `tree`, `detail` and `playground` gain step 8's checks).
+ * `-- --only motion` motion with GSAP, step 26, with a tree's toggles, Phase 4 step 6; `-- --only tree` the tree, Phase 4 step 4; `-- --only detail` detail rows over a million, step 9, and `@dzgrid/dom/detail`, step 10; `-- --only filters` the floating row shown and hidden live, Phase 4 step 12; `-- --only themes` the cascade layer, the showcase themes and the framework bridges on real builds, docs/behaviors/theming.md (`-- --only bridges` the bridges alone); `-- --only dates` the date filters; `-- --only demos` the showcase demos, docs/phase-5-steps/demos-plan.md §4; `-- --only edit-marks` the edit marks, Phase 5 step 4; `-- --only editors` the editors, Phase 5 steps 5–6; `-- --only playground` the editing demo on the running playground, step 6; `-- --only edit-saves` the saves end to end, step 7; `-- --only edit-undo` undo and redo, the tree's field, step 8; `-- --only range` blocks of cells, step 11a, and the playground's `?focus=range` page; `-- --only clipboard` the clipboard, step 11b; `-- --only fill` the fill and S12-Q8's cues on the playground, step 12, `-- --only columns` moving columns, Phase 6 step 2, `-- --only column-menu` the column menu, Phase 6 step 3, `-- --only chooser` the column chooser, Phase 6 step 4, `-- --only state` the grid's state, storage and address, Phase 6 step 5, `-- --only groups` collapsible header groups, Phase 6 step 7, `-- --only pinned-rows` pinned rows, Phase 6 step 8b-1, and the owner's accidental fills of 2026-10-26 (browser-fill-accident.mjs), `-- --only auto-height` automatic row height, Phase 6 step 9, `-- --only print` printing, Phase 6 step 11, `-- --only tree-spans` merged cells in a tree and `-- --only row-gaps` the gaps between categories, 1.1.0 step 15 — `tree`, `detail` and `playground` gain step 8's checks).
  * One browser at a time, closed in finally. Screenshots go to
  * packages/dom/test/browser/results/ (gitignored), for a person to look at.
  */
@@ -24,6 +24,7 @@ import { stateChecks } from './browser-state.mjs';
 import { groupsChecks } from './browser-groups.mjs';
 import { pinnedRowsChecks } from './browser-pinned-rows.mjs';
 import { autoHeightChecks } from './browser-auto-height.mjs';
+import { arbreChecks } from './browser-arbre.mjs';
 import { printChecks } from './browser-print.mjs';
 import { pagerGlyphChecks, treeGlyphChecks, inkOf, footerSelectionChecks } from './browser-glyphs.mjs';
 import { feedbackFilterChecks, periodChecks } from './browser-feedback.mjs';
@@ -3876,6 +3877,8 @@ async function runEngine(name) {
       if (only === 'auto-height') await autoHeightChecks(name, ctx, H);
       // Phase 6 step 11: printing on the real playground page (Chrome: `page.pdf()`, fr and ar, under Tailwind's preflight).
       if (only === 'print') await printChecks(name, ctx, H);
+      // 1.1.0 step 15: merged cells in a tree (Chrome, fr and ar) and the gaps between categories (every engine by `--engine`).
+      if (only === 'tree-spans' || only === 'row-gaps') await arbreChecks(name, ctx, H, only);
       return;
     }
 

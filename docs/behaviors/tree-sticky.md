@@ -73,6 +73,14 @@ the pinned parents cover.
   nothing is written. Motion never moves the copies (they snap). Master/detail is not combined
   with it.
 
+- **With merged cells** (1.1.0, `spans.md` « In a tree »): a copy of a row inside a merged run shows its own value,
+  unmerged; an open parent never starts a merged run (its children follow it). The travelling label of a long merge
+  sticks under the copies: the tree writes the copies' height on the grid's root (`--dzg-inset`, px), the label's
+  sticky top adds it.
+- **With gaps** (`row-gaps.md`): a copy never carries a gap (it has its row's own height). A copy is pushed up by the
+  box of the row after its subtree, so while the next category's gap scrolls by, the copy hangs over the gap until
+  that row arrives (looked at in Chrome; to change only if the owner dislikes it).
+
 ## Where we differ on purpose
 - No row semantics on copies: a copy is a picture of a row, not a second row; assistive
   technologies meet each row once, in its place.

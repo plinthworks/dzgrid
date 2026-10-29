@@ -101,6 +101,10 @@
       "types": "./src/auto-height.ts",
       "default": "./src/auto-height.ts"
     },
+    "./row-gaps": {
+      "types": "./src/row-gaps.ts",
+      "default": "./src/row-gaps.ts"
+    },
     "./print": {
       "types": "./src/print.ts",
       "default": "./src/print.ts"

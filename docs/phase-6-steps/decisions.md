@@ -168,3 +168,23 @@ Step 15 (`step15-plan.md`): all recommendations A. Spans (row and column) only b
 parent; a column span touching the tree column is refused (`invalid-span`, drawn unmerged). `rowGaps({ before })`,
 16 px scaling with the text, never above the first row, not exported, not printed. Sizes accepted: `core/row-gaps`
 450, `dom/row-gaps` 900, `dom/tree` → 3 950 (both steps), `core/spans` only if the measure needs it.
+
+Step 15 built (2026-10-29), final sizes (gz, measured on minified code): `@dzgrid/core/row-gaps` 409 / **450** (new line),
+`@dzgrid/dom/row-gaps` 575 / **900** (new line), `@dzgrid/core/spans` 3 914 / **3 950** (raised from 3 800 because the
+measure needed it: the measure plus 36 B; golfed first — the memo key as one list), `dom/tree` 3 829 / 3 950 (down from
+3 863: the refusal and its `beforeRows` went), `dom/spans` 4 733 / 5 050, DOM base 22 347 / 22 400 (the `rowLayout()`
+seam, +13 B), K.8 84 912 / 84 950, `core/tree` 3 485 / 3 500, `@dzgrid/core` 29 064 unchanged, Angular 7 316 unchanged.
+Perf: « tree open + span map rebuilt, one merge column in the tree column (100 000 rows) » 20.5 ms (median 18.4 of three).
+Lead decisions (inside the owner's answers):
+- `SpanInput.apart(row)` means « this row never continues a span from the row above » (a span may still start on it);
+  the plan's two-sided reading would forbid a merge starting right after a gap. The tree column's rule is the core's
+  (`SpanInput.treeColumn`): there a parent's slot and the slot under it never continue a span (a lazy parent counts).
+- The full-width refusal beside a tree is told by the spans feature (once), not by `treeConflicts` (`core/tree` had 10 B
+  left); `treeConflicts` no longer takes `spans` nor `fullWidth`; the conformance case `tree/conflicts.json` rewritten.
+- The pinned parents' height reaches the travelling label as a CSS variable (`--dzg-inset` on the grid's root, written by
+  the tree when it changes), so the order of `tree()` and `spans()` in `features` does not matter.
+- A merged leaf cell in the tree column hides its (invisible) toggle (`display: none`): the label is centred anyway.
+- A gap's size, from `size` or from a number the rule answers, is scaled with the text the same way.
+- The export's span map beside a tree follows the tree's rules too (no full-width row, the tree column's).
+- Known, for the owner's look: a pinned parent's copy is pushed by the box of the next table's first row, so it hangs
+  over the gap until that row arrives (screenshot `chrome-row-gaps-fr-pinned.png`).

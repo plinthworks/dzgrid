@@ -192,10 +192,10 @@ describe('what is said', () => {
 });
 
 describe('what a tree refuses beside it', () => {
-  it('cell spans: a problem, and the tree shown without them', () => {
+  it('cell spans: allowed since 1.1.0 (owner Q15-1, spans.md « In a tree »), siblings only — no problem; only V1 and V2 (the one pair of consecutive siblings) merge', () => {
     const t = tmake({ features: [spans()], tree: { initial: 'all' }, settings: { columns: [{ id: 'name', header: 'Name', width: 160 }, { id: 'g', header: 'G', value: () => 'same', merge: true, width: 100 }] } });
-    expect(problemsOf(t.events)).toContainEqual(expect.objectContaining({ code: 'unsupported-combination', path: 'spans', detail: 'tree' }));
-    expect(t.host.querySelector('[aria-rowspan]')).toBeNull();
+    expect(problemsOf(t.events).filter((p) => p.code === 'unsupported-combination')).toEqual([]);
+    expect([...t.host.querySelectorAll('.dzg-layer [aria-rowspan]')].map((c) => [c.closest('.dzg-row')!.getAttribute('aria-rowindex'), c.getAttribute('aria-rowspan')])).toEqual([['4', '2']]);
     expect(t.shown().length).toBe(8);
   });
 

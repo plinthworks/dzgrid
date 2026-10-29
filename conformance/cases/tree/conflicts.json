@@ -1,7 +1,7 @@
 {
   "id": "conflicts",
   "suite": "tree",
-  "description": "Cell spans and details are refused beside a tree.",
+  "description": "Details are refused beside a tree. Cell spans were refused until 1.0.x (D9); since 1.1.0 they are allowed, siblings only (owner decision Q15-1, 2026-10-29, docs/behaviors/spans.md « In a tree »), so `spans` asks for nothing (full-width rows, still refused, are told by the spans feature).",
   "input": {
     "conflicts": {
       "spans": true,
@@ -10,11 +10,6 @@
   },
   "expected": {
     "problems": [
-      {
-        "code": "unsupported-combination",
-        "severity": "warning",
-        "path": "spans"
-      },
       {
         "code": "unsupported-combination",
         "severity": "warning",

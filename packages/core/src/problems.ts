@@ -64,7 +64,10 @@ export type AutoHeightProblemCode = 'auto-height-large';
  * `unknown-ui-key`: a column's `ui` key the grid does not know (feedback pass D), told by `@dzgrid/dom`; `print-too-many`:
  * `@dzgrid/dom/print`'s (Phase 6 step 11), more shown rows than `maxRows`, counts only. Types only.
  */
-export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | 'print-too-many' | 'unknown-ui-key';
+/** `@dzgrid/core/row-gaps`' own (1.1.0 step 15, row-gaps.md): a gap rule that threw or answered no size; a type only. */
+export type GapProblemCode = 'invalid-gap';
+
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | 'print-too-many' | 'unknown-ui-key';
 
 export type Severity = 'error' | 'warning';
 

@@ -100,6 +100,9 @@ None (problems are codes).
 - Keys (12): PageDown / PageUp over measured rows; a row taller than the view gets the focus at its top and PageDown
   moves past it.
 
+- **With gaps** (1.1.0, `row-gaps.md`): a row may be both measured taller and gapped; the gaps feature wraps whatever
+  layout auto height makes (it is the outermost one whatever the order of the features).
+
 ## Tests
 `packages/dom/test/auto-height{,-layout,-detail,-tree,-edit,-keys}.test.ts` (support `support-auto-height.ts`: a
 measure stub for jsdom), conformance `layout-rows/auto-{mixed-heights,with-details,empty}`; browser `npm run

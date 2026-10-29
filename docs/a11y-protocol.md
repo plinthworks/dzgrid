@@ -944,3 +944,19 @@ phrase « à mettre à jour » sur une ligne épinglée (160), une touche prise 
 un champ, se corrigent avant la clôture de la Phase 6. Une touche prise avant la page par un lecteur ou par le
 système (149, 156) : question au propriétaire (autre touche, ou le menu seulement). Un Tab qui sort de la
 fenêtre (165) ou `VO+Maj+M` qui n'ouvre pas le menu (166) se corrigent aussi avant la clôture.
+
+## 22. Étapes — cellules fusionnées dans un arbre, espaces entre catégories (1.1.0, étape 15)
+
+Page : `playground/arbre.html` (trois tableaux dans un arbre, une colonne libellé fusionnée, un espace avant
+chaque tableau sauf le premier), en **français** puis en **arabe** (`?locale=ar-DZ`). Fiches : `docs/behaviors/spans.md`
+« In a tree », `row-gaps.md`, `tree-keys.md`. Couples A à D (NVDA + Firefox, JAWS + Chrome, VoiceOver + Safari,
+TalkBack + Chrome). Durée estimée : 20 min par couple et par langue.
+
+167. **Cellule fusionnée dans un arbre.** Descendre (`↓`) dans la colonne fusionnée : le lecteur dit la valeur une
+     fois en entrant, puis le niveau et la place de la ligne (`aria-level`, « 1 sur 5 »). Noter si la place dite est
+     celle de la première ligne alors qu'on vise la troisième (limite connue) et si la **valeur** est perdue sur les
+     lignes couvertes : si elle l'est, une copie cachée pour le lecteur sera ajoutée (Q15-3).
+168. **Retour au parent depuis une feuille fusionnée.** Dans la colonne de l'arbre, sur une cellule fusionnée de
+     feuilles : `←` (`→` en arabe) va au parent ; la phrase dite est celle du parent.
+169. **Un espace est muet.** Descendre d'une ligne au-dessus d'un espace à celle d'en dessous : rien n'est dit
+     pour l'espace, le nombre de lignes (`aria-rowcount`) ne change pas.

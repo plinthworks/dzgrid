@@ -1,4 +1,4 @@
-import type { DisplayedRows, FocusPos, RowKey } from '@dzgrid/core';
+import { problem, type DisplayedRows, type FocusPos, type RowKey } from '@dzgrid/core';
 import { emit, sameFocus, setFocusOwner } from '@dzgrid/core/internal';
 import { buildSpanMap, navigate, ownerFocus, rowPlanner, type RowSpanPlan, type SpanMap } from '@dzgrid/core/spans';
 import type { GridContext } from '../context.js';
@@ -41,8 +41,17 @@ function setup(g: GridContext<unknown>): FeatureHandle {
 
   // ---- the map (the core gives the last one back while nothing it depends on changed) ----
   let map: SpanMap | null = null;
+  // The rows the map is built on, for `apart` (one function: the map's memo keeps its identity).
+  let on: DisplayedRows<unknown>;
+  const apart = (i: number) => g.gapAt!(on, i);
+  let refused = false;
   function mapFor(rows: DisplayedRows<unknown>): SpanMap {
-    const next = buildSpanMap({ rows, columns, ctx: g.ctx, fullWidth: g.settings.fullWidth }, map);
+    const tree = g.treeColumn;
+    const fw = g.settings.fullWidth;
+    // Beside a tree (spans.md « In a tree »): leaves only in its column, no full-width row (told once, Q15-5).
+    if (tree && fw && !refused) (refused = true), emit(kernel, { type: 'problems', source: 'host', problems: [problem('unsupported-combination', 'warning', 'settings.fullWidth', 'tree')] });
+    on = rows;
+    const next = buildSpanMap({ rows, columns, ctx: g.ctx, fullWidth: tree ? null : fw, treeColumn: tree?.(), apart: g.gapAt && apart }, map);
     if (next !== map && next.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: next.problems });
     return (map = next);
   }

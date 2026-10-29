@@ -1,6 +1,6 @@
-import { intentFor, type DisplayIndex, type FocusPos, type KeyOwner, type Problem, type RowKey } from '@dzgrid/core';
+import { intentFor, type DisplayIndex, type FocusPos, type KeyOwner, type RowKey } from '@dzgrid/core';
 import { emit, lockColumns } from '@dzgrid/core/internal';
-import { treeColumnProblems, treeConflicts, treeShape, type TreeOptions, type TreeRows, type TreeShape } from '@dzgrid/core/tree';
+import { treeColumnProblems, treeShape, type TreeOptions, type TreeRows, type TreeShape } from '@dzgrid/core/tree';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { Frame, RowView } from '../render/rows.js';
@@ -58,17 +58,14 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
   const { kernel, el, rowRenderer, doc } = g;
   injectTreeStyles(el.root.getRootNode() as Document | ShadowRoot, g.settings.nonce);
   el.viewport.setAttribute('role', 'treegrid');
-  // What a tree refuses beside it (D2, D9): told once; the grid shows the tree without it.
-  const spans = !!g.settings.features?.some((f) => f.id === 'spans');
-  const told: Problem[] = treeConflicts({ spans });
-  if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
+  // Cell spans beside a tree (1.1.0, spans.md « In a tree »): siblings only; the spans feature merges leaves only here.
 
   /** The rows shown, when they are a tree's. */
   const tree = (): Rows | null => {
     const d = g.rows.displayed as Partial<Rows>;
     return d.posAt ? (d as Rows) : null;
   };
-  const treeColumn = (): string | undefined => column ?? g.columns.visible()[0]?.id;
+  const treeColumn = (g.treeColumn = (): string | undefined => column ?? g.columns.visible()[0]?.id);
   // The structure read-only (Q13): given, once; a path tree's own column, again when it changes (at a paint).
   let locked = '';
   const relock = (): void => {
@@ -201,12 +198,8 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
   const labelOf = (cell: HTMLElement): Element | null => cell.querySelector(':scope > .dzg-label');
 
   return {
-    // Spans are off beside a tree (D9): the grid paints without them.
-    beforeRows() {
-      if (spans) (g.spans = null), (g.bands = []);
-      // Before the cells are written: a path tree's new tree column read-only in this paint.
-      relock();
-    },
+    // Before the cells are written: a path tree's new tree column read-only in this paint.
+    beforeRows: relock,
     afterRows(f: Frame<unknown>) {
       const d = tree();
       const col = treeColumn();
@@ -218,7 +211,9 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
       if (stack) {
         // The pinned parents (tree-sticky.md): worked out at each paint, redrawn only when they change.
         const r = d ? stickyStack({ top: g.scroll.logicalTop, n: sticky, viewBlock: g.viewBlock, h: g.rowHeight(), count: d.count, layout: g.layout!, levelAt: (i) => d.levelAt(i as DisplayIndex), ancestorOf: (i) => up(d, i) }) : { at: [] as number[], y: [] as number[], height: 0 };
-        g.inset = r.height;
+        // Also for a merged cell's travelling label, which sticks under the copies (spans.md « In a tree »).
+        const inset = `${(g.inset = r.height)}px`;
+        if (el.root.style.getPropertyValue('--dzg-inset') !== inset) el.root.style.setProperty('--dzg-inset', inset);
         const sig = [d, f.epoch, f.cols?.first, f.cols?.last, kernel.selection, stack.rev, ...r.at, ...r.y];
         if (sig.length !== last.length || sig.some((x, j) => x !== last[j])) {
           last = sig;
@@ -302,7 +297,9 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
       stack?.clear();
       layer?.remove();
       g.inset = 0;
+      el.root.style.removeProperty('--dzg-inset');
       delete g.insetFor;
+      delete g.treeColumn;
       for (const c of decorated) undecorate(c);
       el.viewport.setAttribute('role', 'grid');
     },
