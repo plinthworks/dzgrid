@@ -12,6 +12,8 @@ export const DETAIL_CSS =
   ':where(.dzg-dbody){box-sizing:border-box;block-size:100%;overflow:auto}:where(.dzg-dbody[data-auto]){block-size:auto;overflow:visible}:where(.dzg-dbody>.dzg){box-sizing:border-box;block-size:100%}:where(.dzg-dbody>.dzg>.dzg-viewport){overscroll-behavior:auto}' +
   ':where(.dzg-toggle){display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;inline-size:var(--dzg-target-min,24px);block-size:var(--dzg-target-min,24px);margin-inline-end:.125rem;cursor:pointer}' +
   ':where(.dzg-toggle)::before{content:"\\203a";font-size:1.25em;line-height:1;rotate:var(--dzg-chevron)}' +
+  // A row without a detail keeps the slot, empty (Q16-3 A; B, the text at the edge: `display:none`).
+  ':where(.dzg-toggle[data-none]){visibility:hidden}' +
   ':where(.dzg-toggle[data-open]){--dzg-chevron:90deg}:where([dir=rtl] .dzg-toggle[data-open]){--dzg-chevron:-90deg}' +
   '}';
 

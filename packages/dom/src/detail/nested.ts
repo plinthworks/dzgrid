@@ -127,11 +127,11 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
         host.addEventListener('keydown', peek, true);
         host.addEventListener('keydown', esc);
         const h: PartHandle<NestedContext> = {
-          // Another master row (new data) or language: the host's settings again, given to the grid in place
-          // (its focus, scroll and state untouched); a fixed setting changed: the grid made again, its state
-          // and the focus inside it kept.
+          // Another master row (new data), language or app context (a new object, parts.md; the « follow the
+          // master's columns » recipe): the host's settings again, given to the grid in place (its focus, scroll
+          // and state untouched); a fixed setting changed: the grid made again, its state and the focus inside it kept.
           update(n) {
-            if (n.row === c.row && n.ctx === c.ctx) return void (c = n);
+            if (n.row === c.row && n.ctx === c.ctx && n.context === c.context) return void (c = n);
             c = n;
             const was = s;
             s = o.settings(n);

@@ -2,7 +2,7 @@
 
 Written before the code (CLEANROOM). Plan: `docs/phase-6-steps/step15-plan.md` Part B (B-D1…B-D9); owner answers:
 `docs/phase-6-steps/decisions.md` « Steps 14 and 15 — owner answers » (all recommendations A). Behaviour borrowed from
-what the owner's « arbre » screen shows: three tables in one tree, an empty band of space before each table but
+what the owner's tree screen shows: three tables in one tree, an empty band of space before each table but
 the first.
 
 ## What the user does

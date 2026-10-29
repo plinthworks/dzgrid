@@ -127,6 +127,36 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   comes back first, the same grid is put back, as it is (its marks, its undo stack; never a second controller on
   the same rows). Its undo stack goes with the grid. Nothing is said on a panel that is gone. A save refused meanwhile is heard by the application (`saveFailed`) and keeps the grid until its panel comes back and shows the refusal; such a grid is let go when its master row leaves the rows (one still saving: once answered) and, every kept grid, when the grid around is destroyed (review of step 8).
 - **Not with**: spans (D9), a tree on the same grid (Q5): `unsupported-combination`.
+- **Rows without a detail** (step 16c, `detail({ isMaster: (row) => boolean })`; the old screens' « master rows only
+  when they have children »): the core asks the function, once per row and per version of the rows, and decides
+  for every place at once (`DetailRows.isMaster(key)`, which the shape's opening rule and expand-all read); the
+  DOM only reads that answer, never calls the function itself.
+  - A row it answers false for: no chevron, no `aria-expanded` on its cell; forward / back there are plain column
+    moves; `rows.expand`, expand-all, `initial: 'all'` and a restored open key leave it closed (the core refuses, no
+    `rowExpanded`).
+  - Its first cell keeps an **empty 24 px slot** (`.dzg-toggle[data-none]`, no glyph, no pointer) so the texts of
+    the column line up (owner question Q16-3, answer A built; B — the text at the edge — is the one CSS rule
+    `:where(.dzg-toggle[data-none])` in `detail/styles.ts` set to `display:none`).
+  - A function that throws: that row is not a master (fail closed), silently, as `height` (no room for a problem
+    in `core/detail`).
+  - An open master whose data stops being a master (a patch) is shown closed: no panel, no chevron; its key stays
+    in the open set, and it opens again if it becomes a master again (`[(expanded)]` unchanged).
+  - Without `isMaster`, every data row is a master (as before).
+- **Detail columns that follow the master's** (step 16c, recipe; owner question Q16-4, answer A, 0 B): the app keeps
+  the outer grid's column state (`columnsChanged`, or `columns.state()` after it) and gives the grid a **new**
+  `context` object holding it; the nested grid's `settings: (c) => ({ …, columns: follow(detailColumns,
+  c.context) })` reorders, hides and sizes the ids the two share. A new context updates each inner grid in place
+  (columns are live), its focus and scroll kept (in Angular: a signal set from `(gridEvent)`, bound to `[context]`).
+  `follow` is ten lines of the app's (tested: `packages/dom/test/detail-follow.test.ts`):
+  ```ts
+  const follow = (cols, ctx) => {
+    const st = ctx.columns; if (!st) return cols;
+    const at = new Map(st.map((s, i) => [s.id, s.order ?? i]));
+    return cols.filter((c) => !st.find((s) => s.id === c.id)?.hidden)
+      .map((c) => { const s = st.find((x) => x.id === c.id); return s?.width ? { ...c, width: s.width } : c; })
+      .sort((a, b) => (at.get(a.id) ?? 1e9) - (at.get(b.id) ?? 1e9));
+  };
+  ```
 
 ## Where DzGrid differs on purpose
 - The panel is a single focus stop with Enter to go in (APG "cell with widgets"), never a set of
@@ -142,7 +172,8 @@ Step 10: `packages/dom/test/detail*.test.ts` (lazy mount and destroy, `'auto'` h
 per resize, top row kept, Down/Enter/Escape, inner keys ignored by the outer router, LRU restore and
 cap, not selectable or exported, depth 2 ok and 4 a problem, no row data in events, SSR); browser:
 axe, wheel chaining, 1M masters, 200 details opened. Spike: `spikes/s12-variable-heights/`.
-Manual: `docs/a11y-protocol.md` §17.
+Manual: `docs/a11y-protocol.md` §17. Rows without a detail: `packages/core/test/detail-master.test.ts`,
+`packages/dom/test/detail-master.test.ts`; the follow recipe: `packages/dom/test/detail-follow.test.ts`.
 
 ## Blocks, clipboard and fill (Phase 5 Part B)
 A detail row is never a cell of a block: a block from a row above a detail to a row below takes the two

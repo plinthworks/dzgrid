@@ -114,6 +114,12 @@ frameworks (Tailwind CSS 4.3.3 and 3.4.19, Bootstrap 5.3.8, root devDependencies
   Two colour names reserved for Phase 5's save states, checked for contrast now so a theme never needs
   changing when they are drawn: `--dzg-saving-color` (the running border while a value saves, Q10; default
   the accent) and `--dzg-refused-color` (the 0.5 s refusal blink, Q9; default the danger colour).
+  `--dzg-flash-color` (the value flash's tint and mark, motion.md « Value flash »; default the palette's warning, an
+  amber a hue apart from the selection and a block of cells — owner, step 16: « la couleur, on peut donner ce qu'on
+  veut et par thème »): set it per theme, dark included, e.g. `:root[data-theme=dark] .dzg { --dzg-flash-color: … }`.
+  `check:contrast` holds the text on its tint at full mark (plain, selected, hovered, over a block) and the mark;
+  `bootstrap.css` sets it to its success green (Bootstrap's dark warning under the refusal sign falls below 3:1),
+  `contrast.css` to a green in the dark (its accent and warning are both yellow there).
 - **A showcase theme gives every colour by hand** (T2): the ten `--tz-*` colours, each a `light-dark()` pair,
   nothing computed from the main four. It may also set the shape knobs (`--dzg-radius`, `--dzg-pill-radius`,
   `--dzg-line`, `--dzg-cell-padding-inline`, `--dzg-font`). It lives in `dzgrid.skin`, declared on

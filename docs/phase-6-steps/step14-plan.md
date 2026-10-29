@@ -1,6 +1,6 @@
 # Step 14 plan: three small 1.1.0 options (fill in one direction, flash duration, tree without its chevron)
 
-Sources: ROADMAP « 1.1.0 — additions asked by the owner after the Phase 6 close (2026-10-29) » (the owner's « arbre »
+Sources: ROADMAP « 1.1.0 — additions asked by the owner after the Phase 6 close (2026-10-29) » (the owner's tree screen
 screen: an editable tree), `docs/behaviors/fill.md` (11–25), `motion.md`, `tree-view.md`, `tree-keys.md`,
 `packages/dom/src/fill/index.ts`, `motion-gsap/{index,run/index,run/flash,run/saves,run/guard}.ts`, `tree/{index,styles}.ts`,
 `packages/theme/edit.css`, `check:size` run on 2026-10-29. ag-Grid's `fillHandleDirection` named as the behaviour seen,
@@ -50,7 +50,7 @@ export interface FillFeatureOptions {
 ```
 Logical words only ( `row` / `column`, never x / y / left / right). Default (absent) = today exactly. Any other value
 (`'x'`, `''`, `1`): both ways, ONE `invalid-setting` warning per grid, path `fill.along`, detail `String(v)` (the
-`range.maxPaste` convention), no throw. arbre: `fill(blocks, { along: 'row' })`.
+`range.maxPaste` convention), no throw. The owner's tree screen: `fill(blocks, { along: 'row' })`.
 
 ### Behaviour (new fill.md 26, written before the code)
 - **One projection**, one helper `towards(b, p)` used by `aim`, `fillTo` and `track`'s start test: with `along: 'row'`
@@ -106,7 +106,7 @@ export interface MotionEffects {
   readonly flash?: boolean | { readonly hold?: number; readonly fade?: number };
 }
 ```
-Default (`true` / absent / `{}`) = today exactly (0 + 600). arbre: `flash: { hold: 3000, fade: 1000 }`.
+Default (`true` / absent / `{}`) = today exactly (0 + 600). The owner's tree screen: `flash: { hold: 3000, fade: 1000 }`.
 Bounds: each a finite number, `0 ≤ v ≤ 10 000` ms. Otherwise that field takes its default and ONE `invalid-setting`
 warning per grid and field (path `motion.effects.flash.hold` / `.fade`, detail `String(v)`), no throw. Read in the
 **chunk** (`start(o)` / `attach(g)`), so the eager part (K.8) does not grow; the warning comes when the chunk loads
@@ -114,7 +114,7 @@ warning per grid and field (path `motion.effects.flash.hold` / `.fade`, detail `
 ### Behaviour (motion.md, new bullet under « Value flash »)
 - Not reduced: `--dzg-flash` set to 1 at once, held `hold`, then 1 → 0 in `fade` (one `fromTo` with `delay: hold/1000`,
   `duration: fade/1000`, `immediateRender` as today).
-- Reduced motion: a still mark for **hold + fade** (4 s for arbre; 0.6 s by default, unchanged), no fade (Q14-5).
+- Reduced motion: a still mark for **hold + fade** (4 s for the owner's tree screen; 0.6 s by default, unchanged), no fade (Q14-5).
 - A cell changed again during the hold: the 500 ms cap is unchanged (a second change within 500 ms of the last mark is
   not re-marked, the running mark goes on); after it, the mark restarts at full with a full hold (the tween is
   replaced, never two on one cell). A value changing every second therefore stays lit.
@@ -187,7 +187,7 @@ too (a detail test stays green only if not) — the detail feature must not chan
 
 ## 4. Docs at the commit
 Sheets above; `CHANGELOG.md` `[1.1.0]` « Added » (three lines); `docs/release-1.1.0.md` new section « Ajouté pour
-l'écran arbre » (French, three bullets + the raised lines); ROADMAP ticks; `docs/phase-6-steps/decisions.md`
+l'écran arbre du propriétaire » (French, three bullets + the raised lines); ROADMAP ticks; `docs/phase-6-steps/decisions.md`
 (answers Q14-*); STATUS top line.
 
 ## 5. Bytes (gz; estimates, measured at the end on minified code, never asserted)
@@ -230,7 +230,7 @@ colonne ne fait plus rien.
 niveau reste) ; B on garde la place vide (les libellés restent où ils sont aujourd'hui).
 
 **Q14-5 — Mouvement réduit.** Quand l'utilisateur demande moins d'animations, la marque ne s'efface pas en fondu : elle
-reste fixe puis disparaît. A (recommandé) : fixe pendant attente + fondu (4 s pour arbre) ; B : pendant l'attente
+reste fixe puis disparaît. A (recommandé) : fixe pendant attente + fondu (4 s pour l'écran arbre du propriétaire) ; B : pendant l'attente
 seulement (3 s).
 
 **Q14-6 — Le flash « enregistré ».** La même marque sert après un enregistrement réussi. A (recommandé) : même durée
@@ -241,12 +241,12 @@ pour les deux ; B : la nouvelle durée pour les changements en direct seulement 
 
 ## Owner input (2026-10-29) — changes §3
 
-The arbre screen shows three tables in one tree: each starts with a top-level node that is **always open** and has
+The owner's tree screen shows three tables in one tree: each starts with a top-level node that is **always open** and has
 **no chevron**; under it, the children may hold nested nodes, and **those keep their chevron** (they open and close).
 So the chevron option is per row, not grid-wide, and it comes with « cannot be closed »:
 
 - Proposed: `tree({ fixedOpen?: (row) => boolean })` — rows it answers true for are open whatever the saved / expand
   state, draw no chevron (no 24 px slot), and ← / `*` / `rows.expand(false)` / collapse-all leave them open;
   `aria-expanded="true"` stays on the row (it has children and they are shown). Every other parent row keeps today's
-  chevron and behaviour. `chevron: false` (grid-wide) is then not needed for arbre; kept as an open question only.
+  chevron and behaviour. `chevron: false` (grid-wide) is then not needed for the owner's tree screen; kept as an open question only.
 - Q14-2 / Q14-3 / Q14-4 are re-asked on this shape.

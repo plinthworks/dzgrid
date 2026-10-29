@@ -23,6 +23,12 @@ export interface GridStateOptions {
   readonly debounce?: number;
   /** The browser storage at creation (G 17): read before the first request, written after each gesture (`include`: the parts kept). */
   readonly persist?: { readonly key: string; readonly include?: readonly StatePart[] };
+  /**
+   * What the grid starts with, applied before the first request (owner demo, step 16; sort.md « An initial sort »): a
+   * server is asked once, as Angular's `[state]`. Its parts only (`{ v: 1, sort: [...] }`); a stored state (`persist`)
+   * applies over it; `reset()` still goes back to the definitions.
+   */
+  readonly initial?: { readonly v: 1 } & Partial<GridState>;
 }
 
 export interface GridStateFeature extends GridFeature {
@@ -68,7 +74,7 @@ function keep(k: Kernel, api: GridStateApi & { env: StateEnv }, key: string, inc
 export function gridState(o: GridStateOptions = {}): GridStateFeature {
   return {
     id: 'state',
-    held: !!o.persist,
+    held: !!(o.persist || o.initial),
     api: (grid) => APIS.get(grid.kernel) ?? null,
     setup(g: GridContext<unknown>) {
       const k = g.kernel;
@@ -118,14 +124,21 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
       // Without `persist` the hold is someone else's (the Angular wrapper's `[state]`, Phase 6 step 12): theirs to end.
       // With `persist` and another feature holding too (that wrapper's `[state]`), the storage's restore keeps the hold
       // (the rows have no `hold` meanwhile): the other ends it, one request in all (Phase 6 close review).
-      if (o.persist) {
+      if (o.persist || o.initial) {
         const r = g.rows;
         const h = r.hold;
         const own = !g.settings.features!.filter((f) => f.held)[1]; // this feature holds; a second one too?
         // Without `hold`, a restore applies its commands one by one, each load still held.
         own || delete r.hold;
         try {
-          g.scope.add(keep(k, api, o.persist.key, o.persist.include));
+          // `initial` first; with `persist` the stored state then applies over it and releases the hold (one request).
+          if (o.initial) {
+            const x = r.hold;
+            if (o.persist) delete r.hold;
+            api.setState(o.initial);
+            r.hold = x!;
+          }
+          if (o.persist) g.scope.add(keep(k, api, o.persist.key, o.persist.include));
         } finally {
           r.hold = h!;
           own && h?.(() => {});

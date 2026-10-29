@@ -41,7 +41,7 @@ type Ev<T, K extends GridEvent<T>['type']> = Extract<GridEvent<T>, { type: K }>;
 /** The settings read from the inputs, in this order; the defaults' keys fall back to `provideDzGrid`. */
 const KEYS = [
   'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'rowHeight', 'overlay', 'label', 'tooltips', 'overscan',
-  'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features',
+  'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features', 'multiSort', 'sameRow',
 ] as const;
 /** Events with an output of their own name. */
 const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged', 'rangeChanged', 'rangeCopied', 'stateChanged', 'densityChanged', 'selectionChanged'];
@@ -103,6 +103,10 @@ export class DzGrid<T> implements AfterContentInit {
   readonly injectStyles = input<boolean>();
   readonly nonce = input<string>();
   readonly features = input<S<T>['features']>();
+  /** False: one sort only, Shift+click acts as a click (sort.md « One sort only »). Fixed. */
+  readonly multiSort = input<boolean>();
+  /** A full reload compares rows by value: only real changes flash (`sameValues` from `@dzgrid/core/compare`). Fixed. */
+  readonly sameRow = input<S<T>['sameRow']>();
   /**
    * The floating filter row shown or hidden live (`filters().floating`, Phase 4 step 12): unset, the feature's
    * own state; each new value set, never written back over a user's toggle made since (no echo). One-way: the

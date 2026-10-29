@@ -46,6 +46,10 @@ export class DzgController<T = unknown> {
   ensureVisible(row: RowKey, column?: string): void {
     this.#api()?.ensureVisible(row, column);
   }
+  /** A column into view sideways only, no row named (column-layout.md, step 16d). */
+  ensureColumnVisible(column: string): void {
+    this.#api()?.ensureColumnVisible?.(column);
+  }
   refresh(): void {
     this.#api()?.refresh();
   }

@@ -7,7 +7,8 @@ import { rowLayout } from '../render/viewport.js';
 export interface FocusControl<T> {
   focusCellAs(row: RowKey, column: string, source: 'api' | 'user'): void;
   focusTo(to: FocusPos): void;
-  ensureVisible(row: RowKey, column?: string): void;
+  /** `row` null: the column only, sideways (column-layout.md); the block scroll and the focus unchanged. */
+  ensureVisible(row: RowKey | null, column?: string): void;
   scrollInlineTo(column: string): void;
   /** Where the keys start from: the focus, or the first cell. */
   current(): FocusPos | null;
@@ -81,9 +82,9 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     }
   }
 
-  function ensureVisible(row: RowKey, column?: string): void {
-    // A cell spanning rows shows the row aimed at (the spans feature knows it), not only its first.
-    const i = rows.displayed.indexOf(g.spans?.at(row) ?? row);
+  function ensureVisible(row: RowKey | null, column?: string): void {
+    // A cell spanning rows shows the row aimed at (the spans feature knows it), not only its first; no row: none.
+    const i = row ? rows.displayed.indexOf(g.spans?.at(row) ?? row) : -1;
     // Sideways first: a pinned row (step 8b-1), not a body row, still brings its column into view.
     if (column !== undefined) scrollInlineTo(column);
     if (i === -1) return;

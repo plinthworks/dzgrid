@@ -29,7 +29,7 @@ import { shapeOf } from './features.js';
 
 export interface GridApi {
   focusCell(row: RowKey, column: string): void;
-  ensureVisible(row: RowKey, column?: string): void;
+  ensureVisible(row: RowKey, column?: string): void; /** Sideways only, no row (column-layout.md, 16d); always set on a grid's api. */ ensureColumnVisible?(column: string): void;
   refresh(): void;
   announce(text: string): void;
 }
@@ -90,11 +90,11 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const page = initial.pagination && { page: initial.pagination };
   const kinds = filterKindLookup(initial.filterKinds);
   // A feature's shape (a tree) goes to either model: a server's rows can be a tree too (tree-lazy.md).
-  const shared = { ...(initial.filterKinds && { filterKinds: kinds.get }), now: initial.clock ?? Date.now, ...shapeOf(initial.features) };
+  const shared = { ...(initial.filterKinds && { filterKinds: kinds.get }), now: initial.clock ?? Date.now, ...shapeOf(initial.features), sameRow: initial.sameRow };
   const rows: RowModel<T> = initial.source
     ? initial.source.create({ getRowId: initial.getRowId, columns, ctx, ...page, ...shared, ...(initial.operations !== undefined && { operations: initial.operations }), ...(win?.AbortController && { abort: () => new win.AbortController() }), held: initial.features?.some((f) => f.held) })
     : clientRows<T>({ rows: initial.rows ?? [], getRowId: initial.getRowId, columns, ctx, ...page, ...shared });
-  const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false });
+  const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false, multiSort: initial.multiSort });
   if (initial.context !== undefined) kernel.dispatch({ type: 'context.app', value: initial.context }, 'host'); // editable rules, custom kinds (Q12)
   // Operations without a source run in the browser, and are told (a source's model tells its own); the filter kinds refused too.
   const told = [...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems), ...rowHeightProblems(initial.rowHeight)];
@@ -212,7 +212,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
 
   const api: GridApi = {
     focusCell: (row, column) => focus.focusCellAs(row, column, 'api'),
-    ensureVisible: (row, column) => focus.ensureVisible(row, column),
+    ensureVisible: (row, column) => focus.ensureVisible(row, column), ensureColumnVisible: (column) => focus.ensureVisible(null, column),
     refresh: () => schedule(),
     announce: (text) => live.announce(text),
   };

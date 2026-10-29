@@ -3,6 +3,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import type { Problem } from '@dzgrid/core';
 import { spans } from '../src/spans.js';
+import { sourceRows } from '@dzgrid/core/server';
 import { pagination } from '../src/pagination.js';
 import { EN_PAGINATION } from '../src/locales/en-pagination.js';
 import { TREE_KEYS } from '../src/tree.js';
@@ -118,6 +119,29 @@ describe('the tree cell', () => {
     const warned = problemsOf(t.events).filter((p) => p.code === 'tree-column-not-first');
     expect(warned).toEqual([expect.objectContaining({ code: 'tree-column-not-first', severity: 'warning', path: 'tree.column' })]);
     t.g.api.refresh();
+    expect(problemsOf(t.events).filter((p) => p.code === 'tree-column-not-first').length).toBe(1);
+  });
+
+  it('warns a tree column not first once per grid, not again at each row update (owner demo, step 16)', () => {
+    for (const features of [[], [spans()]]) {
+      const t = tmake({ tree: { column: 'n', initial: 'all' }, features });
+      for (let i = 0; i < 3; i++) t.g.update({ rows: SMALL.map((r) => ({ ...r })) });
+      expect(problemsOf(t.events).filter((p) => p.code === 'tree-column-not-first').length).toBe(1);
+    }
+  });
+
+  it('a column hidden then shown again in the same order: not warned again (once per column order)', () => {
+    const t = tmake({ tree: { column: 'n', initial: 'all' } });
+    t.g.kernel.dispatch({ type: 'column.state', patch: [{ id: 'n', hidden: true }] }, 'api');
+    t.g.kernel.dispatch({ type: 'column.state', patch: [{ id: 'n', hidden: false }] }, 'api');
+    for (let i = 0; i < 3; i++) t.g.update({ rows: SMALL.map((r) => ({ ...r })) });
+    expect(problemsOf(t.events).filter((p) => p.code === 'tree-column-not-first').length).toBe(1);
+  });
+
+  it('warns once per grid on a server source too, over three refreshes', () => {
+    // A source in place of rows: the settings' exact optional types refuse `rows: undefined`, hence the cast.
+    const t = tmake({ tree: { column: 'n', initial: 'all' }, settings: { rows: undefined, source: sourceRows({ fetch: () => ({ rows: SMALL.map((r) => ({ ...r })), total: SMALL.length }) }) } as never });
+    for (let i = 0; i < 3; i++) t.g.kernel.dispatch({ type: 'rows.refresh' }, 'api');
     expect(problemsOf(t.events).filter((p) => p.code === 'tree-column-not-first').length).toBe(1);
   });
 

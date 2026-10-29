@@ -3,7 +3,7 @@
 ## Résumé pour le propriétaire
 
 - Les six demandes de 1.1.0 venaient de vos écrans, pas de notre liste générique. On a donc relu tout votre code
-  (le tableau des journaux, les requêtes, arbre) pour deviner les prochaines.
+  (le tableau des journaux, les requêtes, l'écran arbre du propriétaire) pour deviner les prochaines.
 - **Déjà cassé dans la réécriture du tableau des journaux** (`~/Desktop/data-table-dzgrid`) :
   1. Les cases à cocher n'apparaissent pas : `selectable` donne une règle `canSelect`, mais la fonction `rules()`
      n'est pas dans `features`. Sans elle, la grille passe en « aucune sélection ». « Tout acquitter » n'envoie rien.
@@ -14,17 +14,17 @@
   4. Maj+clic ajoute un deuxième tri. La grille affiche deux flèches, mais le serveur n'en reçoit qu'une.
   5. Le filtre « sources » venu de l'extérieur n'est plus branché.
   6. Le filtre à liste s'ouvre avec tout coché. Aujourd'hui il s'ouvre vide, sans « tout sélectionner ».
-- **Piège pour arbre** : si l'appli recharge tout le tableau (de nouveaux objets à chaque fois), la grille
+- **Piège pour l'écran arbre du propriétaire** : si l'appli recharge tout le tableau (de nouveaux objets à chaque fois), la grille
   le traite comme un rechargement complet et **ne fait aucun flash**. Il faut garder les objets inchangés ou
   envoyer des `patch`.
 - **Les trois besoins les plus probables qui arrivent** :
-  1. arbre : saisir puis « Appliquer » d'un coup (votre bouton `autoApply`). Il faut des cellules marquées
+  1. L'écran arbre du propriétaire : saisir puis « Appliquer » d'un coup (votre bouton `autoApply`). Il faut des cellules marquées
      « modifiées », un envoi groupé, et un « annuler tout ».
-  2. arbre : des colonnes par créneau horaire (vos groupes PAST / REAL_TIME / ADJUST_*), qui changent de groupe
+  2. L'écran arbre du propriétaire : des colonnes par créneau horaire (vos groupes PAST / REAL_TIME / ADJUST_*), qui changent de groupe
      avec l'heure, avec le passé en lecture seule et un défilement jusqu'à « maintenant ».
   3. Journaux : marquer les nouvelles lignes après un rafraîchissement SSE.
 - Une partie est déjà possible avec 1.1.0, souvent au prix d'un peu de code dans l'appli. Le regroupement de la
-  Phase 7 n'aide pas arbre : il refuse les arbres. Les totaux dans un arbre ne sont prévus nulle part.
+  Phase 7 n'aide pas l'écran arbre du propriétaire : il refuse les arbres. Les totaux dans un arbre ne sont prévus nulle part.
 
 ## Sources read
 
@@ -35,13 +35,13 @@
   cited as **RW:file:line**.
 - DzGrid at `3953e8a`: `packages/core/src/kernel.ts` (`GridCommand`, `GridEvent`), `packages/angular/src/{grid,controller,helpers}.ts`,
   `packages/core/src/columns/defs.ts`, `docs/behaviors/*`, `ROADMAP.md` « 1.1.0 », `docs/phase-7-plan.md` (draft).
-- Not given: arbre's own `columnDefs` (only `autoGroupColumnDef`), `arbreUtils`, its cell renderers and its
+- Not given: the owner's tree screen's own `columnDefs` (only `autoGroupColumnDef`), `TreeScreenUtils`, its cell renderers and its
   save code. Predictions that depend on them are marked *inferred*.
 
 ## 1. Inventory and mapping
 
 Grades: **(a)** covered, **(b)** covered but awkward, **(c)** missing. **(!)** marks something broken today in the
-rewrite or for arbre.
+rewrite or for the owner's tree screen.
 
 ### 1.1 Shared log table (`DataTableComponent`, OM:7–593)
 
@@ -73,7 +73,7 @@ rewrite or for arbre.
 | L24 | `defaultColDef`: sortable, resizable, filter, `unSortIcon`, `minWidth: 30` (OM:134–145) | defaults | per-column defaults; no "always show the unsorted icon" | a |
 | L25 | `screenName === 'alarmLog'` branching inside the shared table (OM:527) | screen-specific buttons | content projection `[actions]` | a |
 
-### 1.2 arbre (OM:692–761, 1030–1092)
+### 1.2 The owner's tree screen (OM:692–761, 1030–1092)
 
 | # | ag-Grid usage (evidence) | DzGrid today | Grade |
 |---|---|---|---|
@@ -87,10 +87,10 @@ rewrite or for arbre.
 | B8 | `cellClassRules: hide-duplicate` + `rowSpan` (OM:742–745) | `merge` / `rowSpan` with `spans()` inside a tree (1.1.0) | a |
 | B9 | `cellRendererParams: suppressCount / suppressExpandIcon / suppressPadding` (OM:753–756) | `tree({ fixedOpen })` (1.1.0) for the always-open rows; no count is drawn | a |
 | B10 | Header component on the tree column with `autoApply` callback (OM:733–736) | `ui.header` part (Angular `componentPart`), `partAction` to the app | a |
-| B11 | `getRowStyle: arbreUtils.getRowStyle` (OM:759) | `rowClass` (classes, colours via CSS variables only) | b (style → class) |
+| B11 | `getRowStyle: TreeScreenUtils.getRowStyle` (OM:759) | `rowClass` (classes, colours via CSS variables only) | b (style → class) |
 | B12 | Header group renderer: `'SAM.' + groupName \| translate`, label hidden for `PAST`, background per group (OM:1030–1092) | `data-g` hook on `.dzg-hgroup` for the background (1.1.0, `header-groups.md`). The header is a pre-translated string (`defs.ts:165`), so a language change means `columns.set`. An empty header shows the id, so hiding PAST's label needs a visually hidden real label (`theming.md`). There is no part slot for a group header | b |
 | B13 | `gridContext.getSelectedValue` / `onRadioSelection` (OM:692–706) | `settings.context` reaches every part (`parts.md` 37). **A context changed in place is not seen**, and their code mutates `this.selectedValue` in place. They must pass a new object | b |
-| B14 | `gridContext.onExpandNode` → `localProfileService.saveGridState("arbre_GRID", ids)` (OM:695–704) | `[(expanded)]` model / `rowExpanded` (`angular/src/grid.ts:132`). It holds **RowKeys** (`d:…`; path fillers `g:…`), not ids, and expansion is never in `GridState` (Q-S1). ROADMAP 1.1.0 already flags "the keys of a path tree's fillers versus the ids the app saves" | b |
+| B14 | `gridContext.onExpandNode` → `localProfileService.saveGridState("TREE_SCREEN_GRID", ids)` (OM:695–704) | `[(expanded)]` model / `rowExpanded` (`angular/src/grid.ts:132`). It holds **RowKeys** (`d:…`; path fillers `g:…`), not ids, and expansion is never in `GridState` (Q-S1). ROADMAP 1.1.0 already flags "the keys of a path tree's fillers versus the ids the app saves" | b |
 
 ### 1.3 Events they listen to, and DzGrid's
 
@@ -103,7 +103,7 @@ rewrite or for arbre.
 | `columnMoved`, `columnVisible` | sync detail grids | `columnsChanged { changed, layoutChanged }` | a (the sync itself is c, L18) |
 | expand via renderer → context | save open rows | `rowExpanded`, `[(expanded)]` | b (keys, B14) |
 | radio via renderer → context | one chosen value | `cellAction` from an Angular part | a |
-| *(implicit, arbre)* cell value changed after edit or fill | save, recompute | `cellEdited { key, column, value, previous, origin }` (`origin` includes `fill`, `paste`, `undo`) | a |
+| *(implicit, the owner's tree screen)* cell value changed after edit or fill | save, recompute | `cellEdited { key, column, value, previous, origin }` (`origin` includes `fill`, `paste`, `undo`) | a |
 | *(implicit)* editing started or stopped | lock, presence | `editingStarted` / `editingStopped` | a |
 | *(implicit)* selection changed | enable "Tout acquitter" | `selectionChanged` gives keys and a count, **not rows**; rows through `kernel().rows.row(key)` (held rows only) or `selectedIds()` | b |
 
@@ -111,7 +111,7 @@ rewrite or for arbre.
 
 Each prediction cites the owner's code. Likelihood: H(igh), M(edium), L(ow). Cost: S (≤ 1 session), M (2–4), L (≥ 5).
 
-### arbre (editable tree, flash, fill)
+### The owner's tree screen (editable tree, flash, fill)
 
 **P1. Deferred apply: dirty cells, one batch "Appliquer", discard all. H · M.**
 Evidence: `headerComponentParams: { autoApply: this.autoApply.bind(this) }` (OM:734–736). An "auto apply" switch
@@ -125,7 +125,7 @@ and discard as an undo of everything) is **new**.
 
 **P2. Time-slot columns generated from data, regrouped as time passes. H · S–M.**
 Evidence: header groups `PAST`, `REAL_TIME`, `ADJUST_A`, `ADJUST_B` and a default (OM:1066–1084). These are horizons of
-a arbre day (A / B adjustments). The header label is hidden for PAST (OM:1043). Likely 96 quarter-hour or 24
+a day of the owner's tree screen (A / B adjustments). The header label is hidden for PAST (OM:1043). Likely 96 quarter-hour or 24
 hourly columns, each moving from REAL_TIME to PAST over the day.
 Needs:
 - `columns.set` every slot change, keeping the user's widths by id (covered, `kernel.ts` `columns.set`).
@@ -150,7 +150,7 @@ specified before P1 ships.
 
 **P5. Totals or balance rows inside the tree. M · L.**
 Evidence: `isMainLabel` rows with their own renderer (OM:747–749), merged duplicate labels (OM:743–745), and the domain
-itself ("arbre" = need versus offers).
+itself (need versus offers).
 If the server sends the totals, P3 covers it. If the client must sum children after an edit, nothing covers it: Phase 7
 aggregation refuses a tree (`phase-7-plan.md` D20). A pinned bottom row with host-computed totals is covered
 (`pinned-rows`, editable, but a `T` row). Grade: **(c)** for in-tree aggregates, **new**.
@@ -234,7 +234,7 @@ Ordered by likelihood × how soon their screens hit it, then by cost.
 | — | P6, P8, P14, P15 | H/M | 0 | covered | 1.1.0 as built |
 
 **Phase 7 (grouping) does not serve these screens.** The log screens are server-paged, and Phase 7 refuses
-grouping on a server (D16). arbre is a tree, and Phase 7 refuses grouping beside a tree (D20). Two Phase 7 items
+grouping on a server (D16). The owner's tree screen is a tree, and Phase 7 refuses grouping beside a tree (D20). Two Phase 7 items
 still matter: D14 / D15 (edits and transactions marking order stale and re-aggregating) should be designed so that a
 later in-tree aggregation (P5) can reuse them. And Q-SE should be extended: ask the owner whether any of *their* screens
 groups rows at all.
@@ -249,5 +249,5 @@ groups rows at all.
    `height: (m) => rowsOf(m).length * rowHeight + header + 7`. Every row also shows a chevron (no `isMaster`).
 4. **Rewrite, sort** (RW:to-query.ts:65): Shift+click shows two sorts, but one is sent.
 5. **Rewrite, sources filter**: not wired (OM:347).
-6. **arbre, flash**: whole-table reloads of new objects never flash (`store.ts:119, 250`).
-7. **arbre, context**: mutating `selectedValue` in place is not seen by the parts (`parts.md` 37).
+6. **The owner's tree screen, flash**: whole-table reloads of new objects never flash (`store.ts:119, 250`).
+7. **The owner's tree screen, context**: mutating `selectedValue` in place is not seen by the parts (`parts.md` 37).

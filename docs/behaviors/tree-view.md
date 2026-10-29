@@ -85,7 +85,8 @@ keys of `tree-keys.md`; sorts by a column; scrolls a tree of a million rows.
   toggle (`<span class="dzg-toggle" aria-hidden="true">`), with a hit area of at least 24 × 24 px
   (WCAG 2.5.8), never a tab stop. A pointer press on the toggle opens or closes the row and does
   not select it or move a range. A tree column that is not the first visible column is allowed,
-  with a `tree-column-not-first` warning (screen readers expect the hierarchy first).
+  with a `tree-column-not-first` warning (screen readers expect the hierarchy first), told once per order of the
+  visible columns: never again for a paint, a row update or a column hidden and shown back (owner demo, step 16).
 - **Accessibility** (WAI-ARIA 1.2 treegrid): the grid's role is `treegrid`; each row carries
   `aria-level` (1 for the roots), `aria-posinset` and `aria-setsize` among its visible siblings
   (after a filter, the siblings shown; `-1` while a lazy parent's size is unknown), and parents carry
@@ -129,7 +130,7 @@ Bidi_Mirrored: left in Arabic, by the browser); open: turned down (`--dzg-chevro
 
 ## 1.1.0: rows always open (step 14, owner 2026-10-29; written before the code)
 
-The owner's « arbre » screen shows three tables in one tree: each starts with a top-level node that is **always
+The owner's the owner's tree screen shows three tables in one tree: each starts with a top-level node that is **always
 open** and has **no chevron**; nested nodes under it keep theirs. `tree({ fixedOpen: (row) => boolean })`:
 
 - **What it is**: a function of a data row, asked once per row when the rows change (never per paint of the core); a

@@ -1,5 +1,6 @@
-import { detailKey, type DisplayIndex, type RowKey } from '../ids.js';
+import { detailKey, idOfDataKey, type DisplayIndex, type RowKey } from '../ids.js';
 import type { RowShape } from '../model/client.js';
+import type { RowSnapshot } from '../row/store.js';
 import { problem, type Problem } from '../problems.js';
 import { flatDisplayed, type DisplayedRows } from '../row/displayed.js';
 import type { DataNode, RowNode } from '../row/node.js';
@@ -16,6 +17,11 @@ export interface DetailOptions<T> {
    * frame's new measures go to the current layout in one `setHeights`.
    */
   readonly sizes?: ReadonlyMap<RowKey, number>;
+  /**
+   * Whether a row has a detail (master-detail.md « Rows without a detail »): asked once per row and version of the
+   * rows; a throw is no. Default: every row.
+   */
+  readonly isMaster?: (master: Readonly<T>) => boolean;
 }
 
 /** The rows shown with their details: one `x:` row right after each open master. */
@@ -28,6 +34,8 @@ export interface DetailRows<T> extends DisplayedRows<T> {
   readonly heights: readonly number[];
   /** A detail's master; null for a data row. */
   parentOf(key: RowKey): RowKey | null;
+  /** Whether a data row has a detail (`isMaster`), in these rows' version: what the chevron and the keys read (always set by `detailShape`). */
+  isMaster?(key: RowKey): boolean;
 }
 
 export interface DetailShape<T> extends RowShape<T> {
@@ -44,24 +52,45 @@ const fix = (v: unknown): number => (v === +v! && v >= 0 && v < Infinity ? v : 2
  */
 export function detailShape<T>(o: DetailOptions<T> = {}): DetailShape<T> {
   const H = o.height;
+  const M = o.isMaster;
   /** The last build's data rows (a new flat list per build: its index of keys made on the first lookup). */
   let shown: DisplayedRows<T>;
+  /**
+   * Whether a data row is a master, in a version of the rows (`snap`): `fx`, 1 for a master, the app's function asked
+   * once per row and version (as the tree's `fixedOpen`); a throw is no (fail closed, silently as `height`); a key the
+   * rows lack: yes.
+   */
+  /** The open keys of the last build. */
+  let open: ReadonlySet<RowKey> | undefined;
+  let S: RowSnapshot<T> | undefined;
+  let F: unknown;
+  let fx: Uint8Array;
+  const is = (key: RowKey, snap = S): boolean => {
+    if (!M || !snap) return true;
+    if (snap !== F) (F = snap), (fx = Uint8Array.from(snap.rows, ((r: T) => { try { return +!!M(r); } catch {} }) as (r: T) => number));
+    const i = snap.lookup(idOfDataKey(key) ?? '');
+    return i < 0 || !!fx[i];
+  };
   return {
     kind: 'detail',
     ...(o.initial && { initial: o.initial }),
     problems: [],
-    // A data row (the kernel refuses one it does not hold); a detail's or a filler's key opens nothing.
-    opens: (key) => key.startsWith('d:'),
-    // Every row (initial, expandable), none at depth 0 (masters are level 0, as a tree's roots);
+    // A master (the kernel refuses a row it does not hold); a detail's or a filler's key opens nothing. A key already
+    // open is always let through, so a row that stopped being a master can still be closed (review of 16c).
+    opens: (key) => key.startsWith('d:') && (!!open?.has(key) || is(key)),
+    // Every master (initial, expandable), none at depth 0 (masters are level 0, as a tree's roots);
     // `now`: the data rows of the last build (expand-all).
     parents(snap, depth, now) {
       const r = now ? shown : flatDisplayed(snap, null, 0);
-      return Array.from({ length: depth && r.count }, (_, i) => r.keyAt(i as DisplayIndex));
+      return Array.from({ length: depth && r.count }, (_, i) => r.keyAt(i as DisplayIndex)).filter((k) => is(k, snap));
     },
     build({ snap, order, expansion, version }) {
-      const d = (shown = flatDisplayed(snap, order, 0));
-      // The open masters' places among the data rows, and their details' among all the rows.
-      const ms = Uint32Array.from([...expansion].map((k) => d.indexOf(k)).filter((p) => p >= 0)).sort();
+      open = expansion;
+      const d = (shown = flatDisplayed((S = snap), order, 0));
+      const isMaster = (k: RowKey): boolean => is(k, snap);
+      // The open masters' places among the data rows (a row no longer a master shows closed, its key kept), and
+      // their details' among all the rows.
+      const ms = Uint32Array.from([...expansion].filter(isMaster).map((k) => d.indexOf(k)).filter((p) => p >= 0)).sort();
       const details = ms.map((p, j) => p + j + 1);
       // Each open master's detail height (owner Q4), for the layout: `sparseRowLayout(rows, h, { at: rows.details, heights: rows.heights })`.
       const heights = Array.from(ms, (p) => {
@@ -107,6 +136,7 @@ export function detailShape<T>(o: DetailOptions<T> = {}): DetailShape<T> {
           return d.nextData((p < 0 ? ms[~p]! + +(s < 0) : p) as DisplayIndex, s);
         },
         parentOf: (key) => (key.startsWith('x:') ? (key.slice(2) as RowKey) : null),
+        isMaster,
       } satisfies DetailRows<T>;
     },
   };

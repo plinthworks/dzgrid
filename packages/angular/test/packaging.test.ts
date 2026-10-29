@@ -89,7 +89,10 @@ describe('the Angular package’s manifest and public API (step 22)', () => {
     const api = await import('@dzgrid/angular');
     expect(Object.keys(api).sort()).toEqual([
       'DZGRID_ANGULAR_VERSION', 'DZG_DEFAULTS', 'DZG_ENV', 'DZG_MESSAGES', 'DZG_PARTS',
-      'DzGrid', 'DzgController', 'DzgExport', 'DzgPart', 'DzgSearch', 'componentPart', 'fromObservable', 'provideDzGrid',
+      'DzGrid', 'DzgController', 'DzgExport', 'DzgPart', 'DzgSearch', 'componentPart',
+      // Step 16f (angular-parts.md « Saving the open rows by the app's own ids »): a free function, tree-shaken when unused.
+      'expandedIds',
+      'fromObservable', 'provideDzGrid',
       // Phase 6 step 12 (angular-parts.md « Selection », « uiData »): two free functions, tree-shaken when unused.
       'selectedIds', 'uiData',
     ]);

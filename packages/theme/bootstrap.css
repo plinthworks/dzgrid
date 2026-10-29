@@ -32,6 +32,9 @@
     --tz-success: var(--bs-success-text-emphasis);
     --dzg-font: 400 0.875rem/1.5 var(--bs-body-font-family);
     --dzg-radius: var(--bs-border-radius);
+    /* The value flash, its own hue (owner, step 16: « par thème »): Bootstrap's dark warning is so light that the
+       refusal sign over it, on a selected row, falls under 3:1; its success green holds every pair. */
+    --dzg-flash-color: var(--tz-success);
   }
 
   :root,

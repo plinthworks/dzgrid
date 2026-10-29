@@ -7,7 +7,7 @@
     "conformance/runner/suites/pinned.ts": 2,
     "conformance/runner/suites/spans.ts": 1,
     "conformance/runner/suites/state.ts": 1,
-    "packages/angular/test/arbre.test.ts": 2,
+    "packages/angular/test/tree-spans-gaps.test.ts": 2,
     "packages/angular/test/bench.test.ts": 2,
     "packages/angular/test/close-review.test.ts": 2,
     "packages/angular/test/controller-reset.test.ts": 2,

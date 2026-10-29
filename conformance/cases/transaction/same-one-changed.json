@@ -1,0 +1,11 @@
+{
+  "id": "same-one-changed",
+  "suite": "transaction",
+  "description": "Rows compared by value: a full reload of equal copies with one value changed is a delta updating that row only.",
+  "input": {
+    "same": "values",
+    "rows": [{ "id": "a", "v": 1 }, { "id": "b", "v": 2 }, { "id": "c", "v": 3 }, { "id": "d", "v": 4 }],
+    "ops": [{ "replaceAll": [{ "id": "a", "v": 1 }, { "id": "b", "v": 20 }, { "id": "c", "v": 3 }, { "id": "d", "v": 4 }] }]
+  },
+  "expected": { "ids": ["a", "b", "c", "d"], "values": [1, 20, 3, 4], "problems": [], "kind": "delta", "updated": ["b"] }
+}

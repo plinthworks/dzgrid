@@ -171,6 +171,11 @@ describe('1.1.0, the four packages', () => {
     expect(build).toMatch(/'\.\/columns-panel', '\.\/state'/);
   });
 
+  it('export the step 16e subpath @dzgrid/core/compare, built like the others', () => {
+    expect(pkg('core').exports['./compare']).toEqual({ types: './src/compare.ts', default: './src/compare.ts' });
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/detail', '\.\/compare', '\.\/edit'/);
+  });
+
   it('export the 1.1.0 step 15 subpaths (@dzgrid/core/row-gaps, @dzgrid/dom/row-gaps), built like the others', () => {
     expect(pkg('core').exports['./row-gaps']).toEqual({ types: './src/row-gaps.ts', default: './src/row-gaps.ts' });
     expect(pkg('dom').exports['./row-gaps']).toEqual({ types: './src/row-gaps.ts', default: './src/row-gaps.ts' });

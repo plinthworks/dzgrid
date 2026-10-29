@@ -22,6 +22,13 @@ Ticks rows in a grid whose application forbids some choices: "if row 4 is ticked
 - **Said aloud** (user actions only): refused rows "Not selectable", "3 not selectable" (`rules.refused`, plural on n; for a refused select-all matching, n is the filtered count); the rule's own string instead when it gave one (`rules.refusedReason`, `{reason}` as given: the application writes the whole sentence, owner Q2); a partial action "{selected}, {n} not selectable" (`rules.partly`), one sentence. A refusal is always said, even the same twice in a row. A host's `selection.set` refused is told as a problem (`selection-refused`, warning, path `selection`, detail the cause), never said; never a row key in a problem.
 - **The refused look:** `data-dzg-refused` on the row's box cell (`.dzg-check`), for unselected rows the rule refuses, painted by `rules()` on the rows mounted only; the rule is asked again only when the selection, the rule or the context changed (0 calls on scroll for rows already asked). No `aria-disabled` on the row (it would read the whole row as unavailable, owner Q2); `aria-selected` stays the truth.
 - **Fail closed:** a rule that throws refuses that row and the error is reported (`reportError`). `canSelect` given to a grid without `rules()` is an error problem (`missing-feature`, path `settings.selection.canSelect`, detail `rules`) and the grid's selection mode becomes `none`: no row can be selected unvetted.
+- **Seeing that `rules()` is missing** (step 16d): the `missing-feature` error above reaches the application only
+  through `onEvent` / `(problems)`; nothing is written to the console. Bind it and log it in development (README « A
+  first grid », angular-example.md « Seeing the configuration problems »).
+- **A rule never unticks** (step 16d, recipe, 0 B): after a bulk action that makes the ticked rows refused (« Acquit »:
+  acknowledged alarms are no longer tickable), the rule leaves them ticked — it judges additions only. Clear after the
+  action: `dispatch({ type: 'selection.clear' })` (Angular: `controller.dispatch(…)`), then reload. Dropping the rows
+  the rule now refuses by itself is not built: it would untick rows under the user's eyes without a gesture.
 - **Texts** in their own bundles `@dzgrid/dom/locales/{en,fr,ar}-rules` (`RULES_KEYS`); `rules()` throws naming a missing one.
 
 ## Where DzGrid differs on purpose

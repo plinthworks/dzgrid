@@ -70,7 +70,7 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
   the browser and in the request to a server (docs/behaviors/filter-set.md « Include only »). Sizes (owner, 2026-10-29):
   the set chunk 4 339 / 4 350 (was 4 250), K.8 84 902 / 84 950 (was 84 900), `core/edit` 3 155 / 3 160 (was 3 150),
   `core/state` 1 506 / 1 510 (was 1 500); the core base 29 064 (its guard 29 070, `@dzgrid/core` 29 150 unchanged).
-- **Fill in one direction** (owner, 2026-10-29, the « arbre » screen): `fill(blocks, { along: 'row' | 'column' })`
+- **Fill in one direction** (owner, 2026-10-29, the owner's tree screen): `fill(blocks, { along: 'row' | 'column' })`
   — every way (the handle's drag, its no-drag click, the keyboard mode, `api.fill`) fills along that axis only; Ctrl/Cmd+D
   with `row` (Ctrl/Cmd+R with `column`) is not taken; another value fills both ways with one `invalid-setting` warning
   (`fill.along`). The rule is the core's: `fillTarget(src, to, along)` in `@dzgrid/core/range` (fill.md 26).
@@ -111,6 +111,38 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
   (down from 3 863: the refusal code went); `dom/spans` 4 733 / 5 050; the DOM base 22 347 / 22 400; K.8 84 912 /
   84 950; `@dzgrid/core` 29 064 unchanged. A new perf line: « tree open + span map rebuilt, one merge column in the
   tree column (100 000 rows) » 20.5 ms (median 18.4).
+- **Step 16 — the owner-needs forecast's small options** (owner, 2026-10-29; the owner questions Q16-1…Q16-8 not
+  answered yet: each built as its answer A, each choice in one place; sizes over their lines wait for the owner,
+  docs/phase-6-steps/step16-plan.md « Sizes awaiting the owner »):
+  - **One sort only** (16a): `GridSettings.multiSort: false` (Angular `[multiSort]`, fixed): Shift+click, Shift+Enter
+    and a header part's `toggleSort(true)` act as a plain click; the rule is the kernel's (`createKernel({ multiSort })`),
+    so every gesture reaches it; the app's own `sort.set` of several is kept (sort.md « One sort only »).
+  - **A set list that starts empty** (16b): `filter: { kind: 'set', start: 'empty', selectAll: false }` — nothing
+    ticked when no filter is in force, nothing ticked is no filter (Q16-1 A: never `include: []`), with
+    `exclude: false` every value of a complete list ticked is no filter (Q16-2, the owner's Q1); no « Select all » box. Another value:
+    the default and `invalid-setting` (`columns.<id>.filter.start` / `.selectAll`) (filter-set.md « Starting empty »).
+  - **Details on some rows only** (16c): `detail({ isMaster: (row) => boolean })`; the core decides once per row and
+    version of the rows (`DetailRows.isMaster?(key)`), the DOM reads it: no chevron, no `aria-expanded`, forward /
+    back move columns, expand-all and `initial: 'all'` skip the row, an empty 24 px slot keeps the texts aligned
+    (Q16-3 A); a throw: not a master. `nestedGrid` now rebuilds its settings on a new app `context` too (the « detail
+    columns that follow the master's » recipe, Q16-4 A) (master-detail.md « Rows without a detail »).
+  - **Docs and a column scroll** (16d): `GridApi.ensureColumnVisible?(column)` and `DzgController.ensureColumnVisible`
+    (a column into view sideways, no row; `ensureVisible`'s 1.0.0 type kept); recipes: configuration problems logged
+    through `(problems)` in dev mode (Q16-5 A), clear the selection after a bulk action, time-slot column groups
+    (`docs/recipes/time-slots.md`), a language change.
+  - **Rows compared by value** (16e): `GridSettings.sameRow` (Angular `[sameRow]`, fixed; Q16-7 A: opt-in) and
+    `sameValues` in the new entry `@dzgrid/core/compare`: in a `rows` replacement or a server answer, a row equal to
+    its old copy keeps its old object, only real changes count (a reload of the same data flashes only what changed;
+    a server refresh is a delta with its added and removed rows); more than half changed is still a reset; a throw is
+    a change and one `invalid-setting` warning (`sameRow`) per load (row-identity-transactions.md « Rows compared by
+    value »).
+  - **An initial state in plain DOM** (owner demo): `gridState({ initial: { v: 1, sort: [...] } })` applies it before
+    the first request — a server grid is asked once (as Angular's `[state]`); a stored state (`persist`) applies over it
+    (sort.md « An initial sort »). `@dzgrid/dom/state` 1 211 / 1 224 (owner's +2 % rule).
+  - **`tree-column-not-first`** is told once per order of the visible columns, never again at a row update or a
+    column hidden and shown back (tree-view.md).
+  - **Open rows by id** (16f): `expandedIds(controller)` in `@dzgrid/angular`, the ids of the open data rows (fillers,
+    details and pinned keys left out); restore with `[expanded]` (angular-parts.md).
 - **A documented hook for styling one header group** (owner, 1.1.0): every group header cell carries `.dzg-hgroup`,
   `data-g="<ColumnGroupDef.id>"` and `data-level`, now a stable public contract pinned by a test (left to right and
   right to left): `.dzg-hgroup[data-g="REAL_TIME"] { background: var(--app-…); }` from the app's sheet. An empty

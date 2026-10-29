@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
 /**
  * 1.1.0 step 15 in real browsers (docs/phase-6-steps/step15-plan.md §4; docs/behaviors/spans.md « In a tree »,
  * row-gaps.md): the playground page `arbre.html` on 127.0.0.1:4700 (or DZG_PLAYGROUND; never restarted) — three
@@ -11,8 +14,13 @@
  * neighbours) at 10 000 rows and at 1 000 000 under scaled scrolling, LTR and RTL; a click in a gap selects and focuses
  * nothing; the pinned parents over a gap (screenshot).
  */
-export async function arbreChecks(name, ctx, h, part) {
+export async function treeTablesChecks(name, ctx, h, part) {
   const { check, frames, axe, OUT } = h;
+  // The page is the owner's local demo, kept out of the repository (owner, 2026-10-29): absent, these checks are skipped.
+  if (!existsSync(fileURLToPath(new URL('../playground/arbre.html', import.meta.url)))) {
+    console.log(`skip ${name}: ${part} (playground/arbre.html is a local demo, not in the repository)`);
+    return;
+  }
   const base = process.env.DZG_PLAYGROUND ?? 'http://127.0.0.1:4700';
   const chrome = name === 'chrome';
 

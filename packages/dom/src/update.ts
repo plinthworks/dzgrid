@@ -47,6 +47,8 @@ export const UPDATE_POLICY: UpdatePolicy = {
   context: 'live',
   rowClass: 'live',
   motion: 'live',
+  multiSort: 'fixed',
+  sameRow: 'fixed',
 };
 
 /** A selection rule without `rules()` (step 21): no row is selectable unvetted (fail closed). */

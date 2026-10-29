@@ -208,9 +208,12 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
             t.setAttribute('aria-hidden', 'true');
             cell.prepend(t);
           }
-          const open = kernel.expansion.has(key);
+          // A row without a detail (`isMaster`, the core's answer for these rows): an empty slot, no state.
+          const m = (d as DetailRows<unknown>).isMaster?.(key) ?? true;
+          const open = m && kernel.expansion.has(key);
+          set(t, 'data-none', m ? null : '');
           set(t, 'data-open', open ? '' : null);
-          set(cell, 'aria-expanded', String(open));
+          set(cell, 'aria-expanded', m ? String(open) : null);
           continue;
         }
         const i = d.indexOf(key);
@@ -259,7 +262,7 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
       decorated = now;
     },
     keys(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean {
-      if (owner !== 'cell' || at?.kind !== 'cell' || at.column !== col() || at.row[0] !== 'd' || e.ctrlKey || e.altKey || e.metaKey) return false;
+      if (owner !== 'cell' || at?.kind !== 'cell' || at.column !== col() || at.row[0] !== 'd' || e.ctrlKey || e.altKey || e.metaKey || (g.rows.displayed as DetailRows<unknown>).isMaster?.(at.row) === false) return false;
       // The grid's own reading of the key: forward and back are mirrored right to left there.
       const step = intentFor(e, { dir: g.dir, owner, mac: g.mac });
       const open = kernel.expansion.has(at.row);

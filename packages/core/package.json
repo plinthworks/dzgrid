@@ -56,6 +56,10 @@
     "./row-gaps": {
       "types": "./src/row-gaps.ts",
       "default": "./src/row-gaps.ts"
+    },
+    "./compare": {
+      "types": "./src/compare.ts",
+      "default": "./src/compare.ts"
     }
   }
 }

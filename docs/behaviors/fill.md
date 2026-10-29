@@ -209,7 +209,7 @@ square fills; the owner's gesture end to end; Escape; S12-Q11; the simulated sen
 
 ## 1.1.0: fill in one direction (step 14, owner 2026-10-29; written before the code)
 
-26. **`fill(blocks, { along: 'row' | 'column' })`** — the owner's « arbre » screen fills along a row only. The
+26. **`fill(blocks, { along: 'row' | 'column' })`** — the owner's tree screen fills along a row only. The
     words are logical (`row`: along the row, toward the inline end or start — right or left in French, mirrored in
     Arabic; `column`: up or down), never x / y / left / right. Absent (or null): both ways, exactly as before. Any other
     value (`'x'`, `''`, `1`): both ways, and one `invalid-setting` warning per grid (path `fill.along`, detail the value

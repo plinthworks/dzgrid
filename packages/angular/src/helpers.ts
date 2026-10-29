@@ -20,3 +20,13 @@ export function selectedIds<T>(controller: DzgController<T>): { readonly mode: '
   const k = controller.kernel();
   return k && { mode: k.selection.mode, ids: [...k.selection.keys].map(idOfDataKey).filter((x) => x !== null), query: k.query };
 }
+
+/**
+ * The open rows as the app saves them (step 16f, angular-parts.md « Saving the open rows by the app's own ids »): the
+ * ids of the open data rows (`getRowId`'s, as strings), never the grid's keys; a path tree's fillers (no id), details'
+ * and pinned rows' keys left out. Restore with `[expanded]` and `dataKey(id)`. Null without a grid. Tree-shaken unused.
+ */
+export function expandedIds<T>(controller: DzgController<T>): string[] | null {
+  const k = controller.kernel();
+  return k && [...k.expansion].map(idOfDataKey).filter((x) => x !== null);
+}

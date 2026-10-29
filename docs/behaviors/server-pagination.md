@@ -25,6 +25,10 @@ Moves to the next, previous, first or last page; picks another page size; change
 - **Paging in the browser** (`page: 'client'`): a cut of the sorted rows, memoised; a page change only cuts again, no request. `counts.total` is the length of the fetched set.
 - **`maxRows`** guards the fetched set (`page` off or client): above 100 000 rows by default, the warning `fetched-set-large`. It does not apply to server pages.
 
+## Starting on a sort or a filter (step 16)
+One request at creation: `gridState({ initial: { v: 1, sort: [...] } })` (plain DOM) or `[state]` (Angular); a
+`sort.set` dispatched after `createGrid` asks twice (sort.md « An initial sort »).
+
 ## Tests
 - `packages/core/test/source-rows.test.ts`, `source-rows-gaps.test.ts`, `conformance/cases/source-model/*` (step 5): unknown total, the inferred `hasNext`, the clamp, page 4 at 25 to size 100 lands on page 1, loading keeps the rows.
 - `packages/core/test/source-rows-cursor.test.ts`, `source-model/cursor-next-back`, `cursor-size-resets` (step 5 part 3): cursor to page 2 and back to 1, the jump that stops at the last page reached, the new size back to page 0.

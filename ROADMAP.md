@@ -938,7 +938,7 @@ bytes; budgets by written decision; final gate green; docs; listening §21 sched
 
 ## 1.1.0 — additions asked by the owner after the Phase 6 close (2026-10-29)
 
-From two real screens of the owner's app (a server log table, and an editable « arbre » tree used natively, without
+From two real screens of the owner's app (a server log table, and an editable tree screen used natively, without
 a shared wrapper). Owner decision (2026-10-29): the set filter option and the three small options (fill in one
 direction, flash duration, tree without its chevron) in **1.1.0**; then (owner, 2026-10-29, later the same day) the two
 structural items (merged cells inside a tree, a gap between categories) join **1.1.0** too, planned together — the

@@ -144,6 +144,12 @@ None in the bundles (problems are codes; sentences belong to the application).
 - Problems never carry a value: `state-column` gives the id (not row data), `state-field` the path only; the 4 KB warning
   is `state-field` at the parameter's name, detail `too-large`.
 
+## An initial state (step 16, `gridState({ initial })`)
+`initial: { v: 1, …parts }` is applied at setup, before the first request: a server grid is asked once, with it (as
+Angular's `[state]`; with another holder, it stays held until that one releases). With `persist`, the stored state
+applies over it, still one request. `reset()` is unchanged (the definitions, not `initial`). The plain-DOM way to start
+on a sort or a filter (sort.md « An initial sort », server-pagination.md).
+
 ## Reset (1.1.0, `api(grid).reset()`; Angular `DzgController.resetState()`)
 - **Initial** is the grid as defined at creation, captured when the feature is set up, before any restore (the
   storage's with `persist`, the Angular wrapper's `[state]`): columns (order, widths, hidden, pins), sort, filters,

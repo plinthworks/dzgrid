@@ -52,6 +52,9 @@ function walk(o: Opt, steps: number) {
   const treeSaid = () => t.said().filter((s) => TREE_SAID.test(s) || /توسيع|طي/.test(s));
   const notFirstTold = () => t.events.filter((e) => e.type === 'problems').flatMap((e) => (e as unknown as { problems: Problem[] }).problems).filter((p) => p.code === 'tree-column-not-first').length;
   const notFirstNow = () => { const v = t.ctx.columns.visible().map((c) => c.id); return o.column !== undefined && v[0] !== o.column && v.includes(o.column); };
+  /** The visible orders already told (owner demo, step 16: once per order, never again for one seen). */
+  const toldOrders = new Set<string>();
+  if (notFirstNow()) toldOrders.add(`${t.ctx.columns.visible().map((c) => c.id)}`);
   const mounted = () => [...t.host.querySelectorAll<HTMLElement>('.dzg-layer > .dzg-row')].filter((r) => t.ctx.rowRenderer.keyOf(r) !== undefined && r.isConnected);
 
   /** The oracle: level from the parent chain, place and count among the siblings shown, open state. */
@@ -124,7 +127,6 @@ function walk(o: Opt, steps: number) {
     const topI = d().count ? L.indexAt(s.logicalTop) : null;
     const top = topI === null ? null : { key: d().keyAt(topI), delta: s.logicalTop - L.offsetOf(topI), atTop: s.atTop };
     const told = notFirstTold();
-    const wasNotFirst = notFirstNow();
     act();
     flush();
     check(where);
@@ -132,7 +134,10 @@ function walk(o: Opt, steps: number) {
     const expectSaid = user ? fresh.filter((e) => e.rows.length === 1 || e.expanded).length : 0;
     expect(treeSaid().length - said, `${where}: said ${JSON.stringify(treeSaid().slice(said))}`).toBe(expectSaid);
     if (!user) expect(fresh.length, `${where}: user events from a host step`).toBe(0);
-    expect(notFirstTold() - told, `${where}: not-first told`).toBe(notFirstNow() && !wasNotFirst ? 1 : 0);
+    const order = `${t.ctx.columns.visible().map((c) => c.id)}`;
+    const fresh1 = notFirstNow() && !toldOrders.has(order);
+    if (fresh1) toldOrders.add(order);
+    expect(notFirstTold() - told, `${where}: not-first told`).toBe(fresh1 ? 1 : 0);
     // An opening or closing only (no scroll, no row added): the top row stays where it was.
     const onlyExpand = /^(api expand|key (fwd|back|\*)|click)/.test(name) && t.events.filter((e) => e.type === 'rowExpanded').length > all;
     if (onlyExpand && top) {

@@ -12,7 +12,7 @@ import { createRowStore, type RowSnapshot, type RowStore, type RowTransaction, t
 
 /** The store behind a client model — for the grid's own layers, through `@dzgrid/core/internal`. */
 export const storeOf = <T>(m: ClientModel<T>): RowStore<T> => (m as unknown as { [STORE]: RowStore<T> })[STORE];
-const STORE = Symbol('dzgrid.store');
+const STORE = Symbol();
 import { sortIndices } from '../sort/compile.js';
 import { ctxKey, type LocaleCtx } from '../value/locale.js';
 import { dayAt, hasRelative } from '../value/relative.js';
@@ -226,6 +226,8 @@ export interface ClientOptions<T> {
   readonly shape?: RowShape<T>;
   /** The application's context at creation (Q12): what the custom filter kinds are told until `setApp`. */
   readonly app?: unknown;
+  /** A full reload compares a row kept by id with its new copy (row-identity-transactions.md « Rows compared by value »). */
+  readonly sameRow?: ((a: T, b: T) => boolean) | undefined;
 }
 
 export interface ClientModel<T> extends RowModel<T> {
@@ -293,7 +295,7 @@ export interface ClientModel<T> extends RowModel<T> {
  * written to.
  */
 export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
-  const store = createRowStore<T>(o.getRowId);
+  const store = createRowStore<T>(o.getRowId, o.sameRow);
   const cache = new ColumnCache<T>();
   let columns = o.columns;
   let ctx = o.ctx;
@@ -854,6 +856,8 @@ export interface ModelEnv<T> {
    * `hold(fn)`, so a state restored at creation is the first thing asked (grid-state.md 17). The browser's model ignores it.
    */
   readonly held?: boolean | undefined;
+  /** A server's answer compared row by row with the rows it replaces (`GridSettings.sameRow`). */
+  readonly sameRow?: ((a: T, b: T) => boolean) | undefined;
 }
 
 /** A model to make once the grid knows its columns and language. */

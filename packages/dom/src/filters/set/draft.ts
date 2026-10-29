@@ -11,9 +11,19 @@ export interface Draft {
   blanks: boolean;
 }
 
-/** The draft of a stored filter (one it can show); none is everything ticked. */
-export const draftOf = (f: SetFilter | null): Draft =>
-  f?.include ? { mode: 'include', vals: new Set(f.include), blanks: f.blanks === 'include' } : { mode: 'exclude', vals: new Set(f?.exclude), blanks: f?.blanks !== 'exclude' };
+/**
+ * Owner questions of step 16b, each built as its answer A (filter-set.md « Starting empty »); a different answer is
+ * this one line. Q16-1: on a list that starts empty, nothing ticked is no filter (B: `false`, keeps no row).
+ * Q16-2, answered by the owner's earlier Q1 (« tout coché == pas de filtre du tout », decisions.md « Set filter include
+ * only »): with `exclude: false` too, every value of a complete list ticked is no filter (`true` would write an include
+ * of them all).
+ */
+const NONE_TICKED_IS_NO_FILTER = true;
+const ALL_TICKED_IS_INCLUDE = false;
+
+/** The draft of a stored filter (one it can show); none is everything ticked, or nothing on a list that starts `empty`. */
+export const draftOf = (f: SetFilter | null, empty?: boolean): Draft =>
+  f?.include || (!f && empty) ? { mode: 'include', vals: new Set(f?.include), blanks: f?.blanks === 'include' } : { mode: 'exclude', vals: new Set(f?.exclude), blanks: f?.blanks !== 'exclude' };
 
 export const ticked = (d: Draft, v: string): boolean => d.vals.has(v) === (d.mode === 'include');
 
@@ -43,19 +53,23 @@ export const settle = (d: Draft, all: readonly string[] | null): void => {
  * « everything » is an include of the whole list (`known`: the last complete one shown, else the values shown) less
  * the unticked; blanks are never kept; every value ticked on a complete list (`all`) is « everything » again (no filter).
  */
-export const only = (d: Draft, all: readonly string[] | null, known: readonly string[]): void => {
+export const only = (d: Draft, all: readonly string[] | null, known: readonly string[], empty?: boolean): void => {
   if (d.mode === 'exclude') {
     if (!d.vals.size && d.blanks) return;
     d.vals = new Set(known.filter((v) => !d.vals.has(v)));
     d.mode = 'include';
   }
   d.blanks = false;
-  if (all?.length && all.every((v) => d.vals.has(v))) (d.mode = 'exclude'), (d.vals = new Set()), (d.blanks = true);
+  if (!(empty && ALL_TICKED_IS_INCLUDE) && all?.length && all.every((v) => d.vals.has(v))) (d.mode = 'exclude'), (d.vals = new Set()), (d.blanks = true);
 };
 
-/** The filter a draft writes: its list sorted by code unit, `blanks` only when not the mode's default; null for "everything". */
-export const filterOf = (d: Draft): SetFilter | null => {
+/**
+ * The filter a draft writes: its list sorted by code unit, `blanks` only when not the mode's default; null for
+ * "everything", and for nothing ticked on a list that starts `empty` (an include of nothing; an exclude of everything
+ * turns into one on a complete list, the half rule).
+ */
+export const filterOf = (d: Draft, empty?: boolean): SetFilter | null => {
   const list = [...d.vals].sort();
-  if (d.mode === 'include') return { type: 'set', include: list, ...(d.blanks && { blanks: 'include' }) };
+  if (d.mode === 'include') return empty && NONE_TICKED_IS_NO_FILTER && !list.length && !d.blanks ? null : { type: 'set', include: list, ...(d.blanks && { blanks: 'include' }) };
   return !list.length && d.blanks ? null : { type: 'set', exclude: list, ...(!d.blanks && { blanks: 'exclude' }) };
 };

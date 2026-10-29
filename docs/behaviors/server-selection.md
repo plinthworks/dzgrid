@@ -27,6 +27,11 @@ Ticks rows on page 1, moves to page 3 and ticks more; ticks the header box ("sel
 - **All in the browser:** see `selection.md`.
 - **Under a selection rule** (step 21, `selection-rules.md`, owner Q1): the header box and Ctrl+A tick the rows of the page shown (an include set; other pages keep their keys), the box speaks for the page, `selection.allFiltered` and a host's exclude set are refused (`needs-rows`: the rule cannot judge rows not loaded), and a host's include keys of rows on other pages are refused (`unknown-row`).
 
+## After a bulk action (step 16d, recipe)
+Send the ids (`selectedIds(controller).ids` in Angular: with a selection rule it is always an include list, every
+ticked row on every page), then clear and reload: `dispatch({ type: 'selection.clear' })`, `rows.refresh`. The
+grid never unticks by itself after the action.
+
 ## Tests
 - `packages/core/test/kernel-p3.test.ts` (keys of other pages kept; exclude tied to the query and cleared; null count; kept through a sort; count over the filtered rows), `packages/core/test/review-p3a.test.ts` (C2–C4: host exclude, unticked row, event order, anchor forgotten).
 - `conformance/cases/selection-across-pages/*` (step 7): r3 on page 0 and r120 on page 2 both kept through a filter; select all, untick r7, go to page 5; a filter change clears exclude and keeps include; zone, params, a half-typed filter; the header state; fetched-set drop and `allFiltered`; `keepOnFilter` off.

@@ -20,7 +20,10 @@ describe('the value flash in the theme', () => {
   it('tints the cell by --dzg-flash (1 → 0, tweened) and marks its start edge, text unmoved (border-box: the padding gives the mark back)', () => {
     const rule = bodies('.dzg-cell.dzg-flash').find((b) => b.includes('background-color'));
     expect(rule).toBeDefined();
-    expect(rule).toMatch(/background-color: color-mix\(in srgb, var\(--dzg-flash-color, var\(--tz-accent\)\) calc\(var\(--dzg-flash, 1\) \* 18%\), transparent\);/);
+    // Amber by default (owner, step 16: « la couleur, on peut donner ce qu'on veut et par thème »): a hue apart from the
+    // selection and a block of cells (accent), so a flash on a just-filled block shows in dark too.
+    expect(rule).toMatch(/background-color: color-mix\(in srgb, var\(--dzg-flash-color, var\(--tz-warning\)\) calc\(var\(--dzg-flash, 1\) \* 18%\), transparent\);/);
+    expect(rule).toMatch(/border-inline-start: 3px solid color-mix\(in srgb, var\(--dzg-flash-color, var\(--tz-warning\)\)/);
     expect(rule).toMatch(/border-inline-start: 3px solid/);
     expect(rule).toMatch(/padding-inline-start: calc\(var\(--dzg-cell-padding-inline, 0\.5rem\) - 3px\);/);
   });
@@ -42,13 +45,19 @@ describe('the value flash in the theme', () => {
     for (const bg of ['--dzg-flash-bg', '--dzg-flash-selected-bg']) expect(spec.pairs.some((p) => p.fg === '--dzg-flash-color' && p.bg === bg && p.min === 3), bg).toBe(true);
     expect(spec.derived['--dzg-flash-bg']).toBe('color-mix(in srgb, var(--dzg-flash-color) 18%, var(--tz-bg))');
     expect(spec.derived['--dzg-flash-selected-bg']).toBe('color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-row-selected-bg))');
+    expect(spec.derived['--dzg-flash-color']).toBe('var(--tz-warning)');
+    // Over a block of cells (right after a fill): the text at 4.5:1, the mark at 3:1, the tint a hue apart from the block's.
+    expect(spec.derived['--dzg-flash-range-bg']).toBe('color-mix(in srgb, var(--dzg-flash-color) 18%, var(--dzg-range-bg))');
+    expect(spec.pairs.some((p) => p.fg === '--tz-fg' && p.bg === '--dzg-flash-range-bg' && p.min === 4.5)).toBe(true);
+    expect(spec.pairs.some((p) => p.fg === '--dzg-flash-color' && p.bg === '--dzg-flash-range-bg' && p.min === 3)).toBe(true);
+    expect(spec.pairs.some((p) => p.fg === '--dzg-flash-color' && p.bg === '--tz-accent' && (p as { hue?: number }).hue === 60)).toBe(true);
   });
 
   it('passes them with the shipped palette and the more-contrast one, light and dark', () => {
     const base = paletteFromCss(css);
     const flash = { ...spec, pairs: spec.pairs.filter((p) => p.bg.startsWith('--dzg-flash')) };
-    // 5 of the flash itself, 9 of the edit marks over it (Phase 5 step 7).
-    expect(flash.pairs.length).toBe(14);
+    // 5 of the flash itself, 9 of the edit marks over it (Phase 5 step 7), 2 over a block of cells (step 16).
+    expect(flash.pairs.length).toBe(16);
     for (const scheme of ['light', 'dark'] as const) {
       expect(check(base, flash, scheme).failures.map((f: { what: string }) => f.what), scheme).toEqual([]);
       const vars = { ...base, ...Object.fromEntries(Object.entries(high.palettes[0]![scheme]).map(([k, v]) => [`--tz-${k}`, v])) };

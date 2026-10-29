@@ -1,0 +1,11 @@
+{
+  "id": "same-most-changed-reset",
+  "suite": "transaction",
+  "description": "Rows compared by value: more than half the rows really changed is still a reset.",
+  "input": {
+    "same": "values",
+    "rows": [{ "id": "a", "v": 1 }, { "id": "b", "v": 2 }, { "id": "c", "v": 3 }, { "id": "d", "v": 4 }],
+    "ops": [{ "replaceAll": [{ "id": "a", "v": 10 }, { "id": "b", "v": 20 }, { "id": "c", "v": 30 }, { "id": "d", "v": 4 }] }]
+  },
+  "expected": { "ids": ["a", "b", "c", "d"], "values": [10, 20, 30, 4], "problems": [], "kind": "reset", "updated": [] }
+}

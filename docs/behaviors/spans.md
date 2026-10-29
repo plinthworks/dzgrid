@@ -44,7 +44,7 @@ corners are what the user reached. The places a span covers are real cells of th
 filled and cleared like any other, and painted by the block's classes on the cell that is mounted.
 
 ## In a tree (1.1.0, step 15; owner 2026-10-29; written before the code)
-The owner's « arbre » screen: three tables in one tree, each led by a row always open (`tree({ fixedOpen })`),
+The owner's the owner's tree screen: three tables in one tree, each led by a row always open (`tree({ fixedOpen })`),
 a label column whose equal values are one tall cell. Before 1.1.0 a tree refused the spans feature (D9, a scope
 choice); it is lifted. Plan: `docs/phase-6-steps/step15-plan.md` (A-D1…A-D10); decisions: `decisions.md` « Steps 14
 and 15 ».

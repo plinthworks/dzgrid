@@ -181,7 +181,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
   }
 
   let decorated = new Set<HTMLElement>();
-  let warned = false;
+  const warned = new Set<string>();
   const set = (x: Element, name: string, v: string | null): void => {
     if (v === null) x.removeAttribute(name);
     else if (x.getAttribute(name) !== v) x.setAttribute(name, v);
@@ -203,10 +203,11 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     afterRows(f: Frame<unknown>) {
       const d = tree();
       const col = treeColumn();
-      // A tree column that is not first: allowed, told once each time it becomes so.
-      const notFirst = treeColumnProblems(g.columns.visible().map((c) => c.id), column);
-      if (notFirst.length && !warned) emit(kernel, { type: 'problems', source: 'host', problems: notFirst });
-      warned = notFirst.length > 0;
+      // A tree column that is not first: allowed, told once per order of the visible columns (never again for a
+      // paint, a row update or a column hidden and shown back in the same order: owner demo, step 16).
+      const ids = g.columns.visible().map((c) => c.id);
+      const notFirst = treeColumnProblems(ids, column);
+      if (notFirst.length && !warned.has(`${ids}`)) warned.add(`${ids}`), emit(kernel, { type: 'problems', source: 'host', problems: notFirst });
       const now = new Set<HTMLElement>();
       if (stack) {
         // The pinned parents (tree-sticky.md): worked out at each paint, redrawn only when they change.

@@ -1,4 +1,4 @@
-// Step 14 (1.1.0, the owner's « arbre » screen; docs/behaviors/fill.md 26): `fill(blocks, { along: 'row' | 'column' })`
+// Step 14 (1.1.0, docs/behaviors/fill.md 26): `fill(blocks, { along: 'row' | 'column' })`
 // — the target brought back onto the allowed axis for every way (drag, no-drag click, keyboard mode, api.fill), Ctrl+D /
 // Ctrl+R for the forbidden axis not taken, a bad value warned once and ignored. Rows: frows (qty = i² mod 11: r2 4, r3 9,
 // r4 5, r5 3; price = i + 0.5). Expectations by hand.

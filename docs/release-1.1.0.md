@@ -71,7 +71,7 @@ la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le 
   (84 902), `core/edit` 3 150 → 3 160 (3 155), `core/state` 1 500 → 1 510 (1 506), garde de la base du cœur
   29 001 → 29 070 (29 064 ; `@dzgrid/core` reste 29 150).
 
-## Ajouté pour l'écran « arbre » (propriétaire, 2026-10-29)
+## Ajouté pour l'écran arbre du propriétaire (propriétaire, 2026-10-29)
 
 - `fill(blocks, { along: 'row' })` : la poignée de recopie, son clic sans glisser, le mode clavier et `api.fill` ne
   recopient que le long de la ligne (`'column'` : vers le haut ou le bas). Ctrl/Cmd+D n'est plus pris avec `'row'`
@@ -100,6 +100,31 @@ la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le 
   sélection, ni export, ni impression). La ligne d'après porte `data-gap` pour un thème.
 - Nouvelles limites (accord du propriétaire, 2026-10-29) : `core/row-gaps` 450 (409), `dom/row-gaps` 900 (575) ;
   `core/spans` 3 800 → 3 950 (3 914, la mesure plus une petite marge) ; `dom/tree` 3 839 / 3 950 ; K.8 84 912 / 84 950.
+
+## Ajouté pour vos écrans (étape 16, 2026-10-29)
+
+Tes réponses aux questions Q16-1 à Q16-8 ne sont pas encore là : chaque choix est construit selon la réponse A
+(recommandée), à un seul endroit, pour qu'une autre réponse soit une ligne à changer.
+
+- **Un seul tri** : `[multiSort]="false"` — Maj+clic et Maj+Entrée font un clic simple ; un `sort.set` de l'app à
+  plusieurs colonnes reste permis.
+- **Liste de filtre vide au départ** : `filter: { kind: 'set', exclude: false, start: 'empty', selectAll: false }` —
+  rien de coché à l'ouverture, rien de coché = pas de filtre (Q16-1 A), tout coché = pas de filtre
+  (Q16-2, ta réponse Q1), pas de case « Tout sélectionner ».
+- **Détail sur certaines lignes seulement** : `detail({ isMaster: (ligne) => … })` — pas de flèche ni de clavier
+  d'ouverture sur les autres lignes, la place de la flèche reste vide (Q16-3 A). Colonnes du détail qui suivent le
+  tableau : une recette dans `master-detail.md` (Q16-4 A) ; `nestedGrid` suit maintenant un nouveau `context`.
+- **Docs** : écrire les `(problems)` dans la console en développement (Q16-5 A) ; vider la sélection après
+  « Acquitter » ; colonnes de quarts d'heure (`docs/recipes/time-slots.md`) ; `ensureColumnVisible(colonne)` pour
+  défiler jusqu'à une colonne sans ligne.
+- **Clignotement après un rechargement complet** : `[sameRow]="sameValues"` (`@dzgrid/core/compare`, Q16-7 A : l'app
+  l'active) — seules les cellules vraiment changées clignotent ; un rafraîchissement serveur garde ses lignes
+  ajoutées et retirées.
+- **Lignes ouvertes par id** : `expandedIds(controller)` ; on restaure avec `[expanded]`. Pour des catégories sans id
+  (Q16-8), on les restaure par leur chemin (`groupKey`).
+- **Tailles** (accord du propriétaire, 2026-10-29, « ok pour les hausses ») : écran d'audit 84 950 → 90 000
+  (85 133), liste de filtre 4 350 → 4 500 (4 467), détail (cœur) 1 050 → 1 150 (1 132), Angular 7 350 → 7 450
+  (7 438), garde de la base du cœur 29 070 → 29 150 (29 106), comparaison (nouvelle) 300 (273).
 
 ## Ce qui a été vérifié (2026-10-29, après les six ajouts)
 

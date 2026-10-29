@@ -48,8 +48,10 @@ export interface ColumnDef<T, V = unknown> {
    * `ops`: the operators its popup offers, in this order (the kind's own list when absent). `optionPart`: the
    * `filterOption` part painting each row of a set filter's list (feedback pass C). `exclude: false`: its set
    * filter never writes an `exclude` filter, nor `blanks` (docs/behaviors/filter-set.md « Include only »).
+   * `start: 'empty'`: its set list opens with nothing ticked when no filter is in force, and nothing ticked is no
+   * filter (default `'all'`); `selectAll: false`: no « Select all » box (filter-set.md « Starting empty »).
    */
-  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string; readonly exclude?: false };
+  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string; readonly exclude?: false; readonly start?: 'all' | 'empty'; readonly selectAll?: boolean };
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';

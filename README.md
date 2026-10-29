@@ -57,9 +57,18 @@ const grid = createGrid<Patient>(document.getElementById('grid')!, {
   timeZone: 'Africa/Algiers',
   selection: { mode: 'multi', checkbox: true },
   pagination: { pageSize: 50 },
-  onEvent: (e) => { if (e.type === 'selectionChanged') console.log(e.count); },
+  onEvent: (e) => {
+    if (e.type === 'selectionChanged') console.log(e.count);
+    // A setting the grid refuses (a selection rule without `rules()`, an unknown part…) is told here, never thrown
+    // nor logged by the grid: log it while developing. A problem never carries row data.
+    if (e.type === 'problems') for (const p of e.problems) console.warn('dzgrid', p.code, p.path, p.detail);
+  },
 });
 ```
+
+In Angular, the same through `(problems)`:
+`<dz-grid … (problems)="onProblems($event)" />` with
+`onProblems(ps: readonly Problem[]) { if (isDevMode()) for (const p of ps) console.warn('dzgrid', p.code, p.path, p.detail); }`.
 
 Rows from a server instead of memory:
 

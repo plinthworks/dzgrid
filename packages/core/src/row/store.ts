@@ -85,7 +85,11 @@ function snapshot<T>(version: number, rows: readonly T[], ids: readonly string[]
  * Every refusal is a problem on its entry; the others still apply, in one
  * version. The host's arrays and rows are never written to.
  */
-export function createRowStore<T>(getRowId: (row: T) => RowIdInput): RowStore<T> {
+/**
+ * `same` (`sameRow`, row-identity-transactions.md « Rows compared by value »): in a full reload, a row kept by id whose
+ * new copy it calls equal is unchanged and keeps its previous object; one that throws counts as changed (one warning).
+ */
+export function createRowStore<T>(getRowId: (row: T) => RowIdInput, same?: (a: T, b: T) => boolean): RowStore<T> {
   let version = 0;
   let snap = snapshot<T>(0, [], [], new Map());
   let index = new Map<string, number>();
@@ -240,14 +244,23 @@ export function createRowStore<T>(getRowId: (row: T) => RowIdInput): RowStore<T>
       const keys = { added: [] as RowKey[], updated: [] as RowKey[], removed: [] as RowKey[] };
       let i = 0;
       let sameOrder = true;
-      for (const row of input) {
+      let threw = 0;
+      for (let row of input) {
         const at = `rows[${i++}]`;
         const id = idOf(row);
         if (id === null) { problems.push(idProblem(row, at)); continue; }
         if (map.has(id)) { problems.push(problem('duplicate-row-id', 'error', at)); continue; }
         const was = prev.lookup(id);
+        const old = prev.rows[was]!;
         if (was < 0) keys.added.push(dataKey(id)!);
-        else if (prev.rows[was] !== row) keys.updated.push(dataKey(id)!);
+        else if (old !== row) {
+          try {
+            if (same?.(old, row)) row = old;
+          } catch {
+            threw ||= problems.push(problem('invalid-setting', 'warning', 'sameRow', 'threw'));
+          }
+          if (old !== row) keys.updated.push(dataKey(id)!);
+        }
         if (was !== rows.length) sameOrder = false;
         map.set(id, rows.length);
         rows.push(row);

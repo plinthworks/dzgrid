@@ -238,6 +238,93 @@ describe('include only (only; filter-set.md « Include only »)', () => {
   });
 });
 
+describe('start empty (filter-set.md « Starting empty », step 16b)', () => {
+  it('no filter in force: nothing ticked, blanks unticked, and it writes no filter', () => {
+    const d = draftOf(null, true);
+    expect(on(d)).toEqual([]);
+    expect(d.blanks).toBe(false);
+    expect(filterOf(d, true)).toBeNull();
+  });
+
+  it('a filter in force shows its ticks, as on any column', () => {
+    const d = draftOf({ type: 'set', include: ['b'] }, true);
+    expect(on(d)).toEqual(['b']);
+    const x = draftOf({ type: 'set', exclude: ['b'] }, true);
+    expect(on(x)).toEqual(['a', 'c', 'd']);
+  });
+
+  it('tick Oran → include [Oran]; untick it → no filter (Q16-1 A), never include []', () => {
+    const d = draftOf(null, true);
+    tick(d, 'Oran', true);
+    expect(filterOf(d, true)).toEqual({ type: 'set', include: ['Oran'] });
+    tick(d, 'Oran', false);
+    expect(filterOf(d, true)).toBeNull();
+  });
+
+  it('a column without start: empty keeps Phase 3 Q1 (nothing ticked keeps no row)', () => {
+    const d = draftOf({ type: 'set', include: ['a'] });
+    tick(d, 'a', false);
+    expect(filterOf(d)).toEqual({ type: 'set', include: [] });
+  });
+
+  it('with exclude: false, every value of a complete list ticked is no filter (Q16-2: the owner\'s Q1, « tout coché == pas de filtre du tout »)', () => {
+    const d = draftOf(null, true);
+    tickAll(d, ['d', 'b', 'a', 'c'], true);
+    only(d, ALL, ALL, true);
+    expect(filterOf(d, true)).toBeNull();
+    // Reopened: no filter on a list that starts empty, nothing ticked.
+    expect(on(draftOf(filterOf(d, true), true))).toEqual([]);
+    // During a search (no complete list), every value shown ticked is still an include of them.
+    const x = draftOf(null, true);
+    tickAll(x, ['a', 'b'], true);
+    only(x, null, ALL, true);
+    expect(filterOf(x, true)).toEqual({ type: 'set', include: ['a', 'b'] });
+  });
+
+  it('with exclude: false, blanks ticked are never written; nothing ticked is null', () => {
+    const d = draftOf(null, true);
+    d.blanks = true;
+    only(d, ALL, ALL, true);
+    expect(filterOf(d, true)).toBeNull();
+  });
+
+  it('exclude allowed: the half rule still writes the shorter list; nothing ticked is null in either mode', () => {
+    const d = draftOf(null, true);
+    tickAll(d, ['a', 'b', 'c'], true);
+    settle(d, ALL);
+    expect(filterOf(d, true)).toEqual({ type: 'set', exclude: ['d'], blanks: 'exclude' });
+    tickAll(d, ALL, false);
+    settle(d, ALL);
+    expect(filterOf(d, true)).toBeNull();
+    // From an exclude in force: everything unticked on the complete list turns into an include of nothing, null.
+    const x = draftOf({ type: 'set', exclude: ['a'], blanks: 'exclude' }, true);
+    tickAll(x, ALL, false);
+    settle(x, ALL);
+    expect(filterOf(x, true)).toBeNull();
+  });
+
+  it('a seeded walk (500 steps) with exclude: false: never exclude, blanks nor include []', () => {
+    let s = 11;
+    const next = (n: number) => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0), s % n);
+    const d = draftOf(null, true);
+    for (let k = 0; k < 500; k++) {
+      const step = next(3);
+      if (step === 0) tick(d, ALL[next(4)]!, next(2) === 0);
+      else if (step === 1) tickAll(d, ALL.filter(() => next(2) === 0), next(2) === 0);
+      else d.blanks = !d.blanks;
+      const whole = next(2) === 0;
+      only(d, whole ? ALL : null, ALL, true);
+      const f = filterOf(d, true);
+      expect(f && ('exclude' in f || 'blanks' in f), `step ${k}`).toBeFalsy();
+      expect(f?.include?.length, `step ${k}`).not.toBe(0);
+      const shown = ALL.filter((v) => ticked(d, v));
+      // On a complete list every value ticked is no filter (the owner's Q1); otherwise exactly what is ticked.
+      if (whole && shown.length === ALL.length) expect(f, `step ${k}`).toBeNull();
+      else if (f) expect(f.include, `step ${k}`).toEqual(shown);
+    }
+  });
+});
+
 describe('select all (shown)', () => {
   it('ticks and unticks only the values given, in include mode', () => {
     const d = draftOf({ type: 'set', include: ['d'] });

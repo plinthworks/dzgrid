@@ -31,6 +31,9 @@ $tz-palette: (
   // The refusal's border (owner S12-Q8): this palette's light red sits 50° from its yellow ring in the dark; a pinker red
   // there, 70° away (the saving, refused and focus borders told apart without colour vision).
   '--dzg-refused-color': (#8b0000, #ff6b9e),
+  // The value flash (step 16, « par thème »): its default warning is yellow like this palette's accent in the dark,
+  // the hue the selection and a block of cells are drawn in; a green there, 90° away.
+  '--dzg-flash-color': (#6b3a00, #86efac),
 );
 
 @mixin palette {

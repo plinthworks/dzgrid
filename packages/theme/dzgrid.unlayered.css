@@ -504,9 +504,9 @@
 }
 
 .dzg-cell.dzg-flash {
-  border-inline-start: 3px solid color-mix(in srgb, var(--dzg-flash-color, var(--tz-accent)) calc(var(--dzg-flash, 1) * 100%), transparent);
+  border-inline-start: 3px solid color-mix(in srgb, var(--dzg-flash-color, var(--tz-warning)) calc(var(--dzg-flash, 1) * 100%), transparent);
   padding-inline-start: calc(var(--dzg-cell-padding-inline, 0.5rem) - 3px);
-  background-color: color-mix(in srgb, var(--dzg-flash-color, var(--tz-accent)) calc(var(--dzg-flash, 1) * 18%), transparent);
+  background-color: color-mix(in srgb, var(--dzg-flash-color, var(--tz-warning)) calc(var(--dzg-flash, 1) * 18%), transparent);
 }
 
 .dzg-badge,

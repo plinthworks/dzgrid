@@ -1,7 +1,7 @@
 import type { LocaleCtx } from './locale.js';
 
 /** What `parse` returns for text it will not read as the column's type. */
-export const REJECTED: unique symbol = Symbol('dzgrid.rejected');
+export const REJECTED: unique symbol = Symbol();
 export type Rejected = typeof REJECTED;
 
 export type ColumnType = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'enum' | 'custom';

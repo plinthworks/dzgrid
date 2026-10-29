@@ -276,17 +276,17 @@ const NO_KEYS: ReadonlySet<RowKey> = new Set();
 const refuse = (reason: string, problems: readonly Problem[] = []): GridCommandResult => ({ ok: false, reason, problems });
 
 /** For the DOM layer, through `@dzgrid/core/internal`: events the kernel cannot see (clicks, first render). */
-export const EMIT = Symbol('dzgrid.emit');
+export const EMIT = Symbol();
 /** For the DOM spans feature, through `@dzgrid/core/internal`: where a reconciled cell focus belongs. */
-const OWNER = Symbol('dzgrid.owner');
+const OWNER = Symbol();
 /** For `@dzgrid/dom/rules`, through `@dzgrid/core/internal`: the selection gate. */
-const GATE = Symbol('dzgrid.gate');
+const GATE = Symbol();
 /** For `@dzgrid/dom/filters`: told each command the kernel took (a pending filter edit it overrides is dropped). */
-const HEAR = Symbol('dzgrid.hear');
+const HEAR = Symbol();
 /** For a tree feature, through `@dzgrid/core/internal`: the columns that feed its structure, read-only (Q13). */
-const LOCK = Symbol('dzgrid.lock');
+const LOCK = Symbol();
 /** For `@dzgrid/dom/pinned-rows` (step 8b-1), through `@dzgrid/core/internal`: the pinned rows by key. */
-const PIN = Symbol('dzgrid.pin');
+const PIN = Symbol();
 
 export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   readonly rows: M;
@@ -294,6 +294,8 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
   readonly query?: Query;
   /** False: a filter or search change clears the selection (the owner's `keepOnFilter`). True by default. */
   readonly keepSelectionOnFilter?: boolean;
+  /** False: a user's multi toggle (Shift+click, Shift+Enter) acts as a plain one, one sort only (sort.md). True by default. */
+  readonly multiSort?: boolean | undefined;
 }): GridKernel<T, M> {
   const { rows, columns } = o;
   let query: Query = o.query ?? makeQuery();
@@ -507,7 +509,7 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         const col = columns.get(cmd.column);
         if (!col) return refuse('unknown-column', [problem('unknown-column', 'error', 'column', cmd.column)]);
         if (!col.sortable) return refuse('not-sortable', [problem('invalid-sort', 'error', 'column', cmd.column)]);
-        setQuery(withSort(nextSort(query.sort, cmd.column, cmd.multi)), source);
+        setQuery(withSort(nextSort(query.sort, cmd.column, cmd.multi && o.multiSort !== false)), source);
         return OK;
       }
       case 'sort.set': {

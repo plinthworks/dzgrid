@@ -7,7 +7,7 @@ items, owner decision: 1.2.0, planned together); Phase 4 D2, D6, D7, D9 (`docs/p
 `packages/core/src/spans/{map,plan}.ts`, `packages/core/src/tree/shape.ts`, `packages/core/src/layout/rows.ts`,
 `packages/core/src/detail/layout.ts`, `packages/dom/src/{spans,tree,auto-height,detail}/index.ts`,
 `packages/dom/src/spans/body.ts`, `packages/dom/src/tree/sticky.ts`, `packages/dom/src/render/{viewport,rows}.ts`.
-Clean room: behaviour only; the owner's arbre screen is described from what it shows, never from its ag-Grid setup's
+Clean room: behaviour only; the owner's tree screen is described from what it shows, never from its ag-Grid setup's
 code. Plan only: nothing built; sizes measured once (`node scripts/size.mjs`, 2026-10-29) and estimated otherwise.
 
 ## 0. Facts that shape the plan
@@ -110,7 +110,7 @@ code. Plan only: nothing built; sizes measured once (`node scripts/size.mjs`, 20
   `before(c) => boolean | number` with `c = { row: T | null (null: a path tree's filler), key, index, level, prev:
   T | null }`, asked for each shown row on each new order of the rows shown (sort, filter, open, close, new rows);
   `true` = `size`, a number = that many pixels for that row; `size` in pixels at the default text size (16 by default),
-  scaled with the text like the row height. `roots` exported: `(c) => c.level === 0` (arbre: a gap before each
+  scaled with the text like the row height. `roots` exported: `(c) => c.level === 0` (the owner's tree screen: a gap before each
   top-level category). No default rule: without `before`, nothing (and `invalid-setting`).
 - **B-D3 Where (Q15-8, lead A):** never above the first row shown (the header separates it already), nor of each
   client page; never in pinned-row bands; never on a pinned parent's copy. Kept by sort, filter and virtual scroll
@@ -160,7 +160,7 @@ code. Plan only: nothing built; sizes measured once (`node scripts/size.mjs`, 20
 | `packages/dom/src/spans/{index,body}.ts` | `apart`, no full width under a tree, toggle-aware label, inset |
 | `packages/dom/src/row-gaps.ts`, `row-gaps/index.ts` (new), `packages/dom/package.json` | the feature |
 | `packages/angular` | nothing (features are plain objects); one example in the guide |
-| `playground/arbre.html`, `.ts` (new) | a arbre-like screen: tree, merged label column, gaps, fr / ar |
+| `playground/arbre.html`, `.ts` (new) | a tree-screen-like screen: tree, merged label column, gaps, fr / ar |
 | `docs/behaviors/*` | §2 |
 
 ## 2. Sheets first (`docs/behaviors/`, before any code)
@@ -272,7 +272,7 @@ label, pinned parents, keys); Part B is mostly new, isolated code plus one base 
 - B : pareil, mais une ligne qui a des enfants reste toujours seule (rien ne bouge quand on ouvre ou ferme).
 - C : aussi un parent avec ses enfants ouverts. Plus de travail, et un lecteur d'écran s'y perd (une cellule à
   cheval sur deux niveaux). Pour trancher : pouvez-vous me dire (ou montrer) quelles lignes la colonne libellé de
-  arbre fusionne : des lignes du même niveau, ou un parent avec ses enfants ?
+  L'écran arbre du propriétaire fusionne : des lignes du même niveau, ou un parent avec ses enfants ?
 **Q15-2 — La colonne de l'arbre (celle du chevron) peut-elle fusionner ?**
 - A (recommandé) : oui, mais seulement entre lignes sans enfants ; un parent garde sa cellule à lui, avec son
   chevron et ses touches.

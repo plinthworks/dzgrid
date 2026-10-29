@@ -611,3 +611,116 @@ describe('include only (filter: { kind: set, exclude: false }; filter-set.md « 
     expect(t.filter()['city']).toEqual({ type: 'set', include: ['Annaba', 'Blida', 'Oran', 'Sétif'] });
   });
 });
+
+describe('start empty (filter: { kind: set, start: empty, selectAll: false }; filter-set.md « Starting empty », step 16b)', () => {
+  const colsWith = (filter: Record<string, unknown>) => COLS.map((c) => ('id' in c && c.id === 'city' ? { ...c, filter: { kind: 'set', ...filter } } : c)) as typeof COLS;
+  const LOG = colsWith({ exclude: false, start: 'empty', selectAll: false });
+
+  it('opens with nothing ticked when no filter is in force', async () => {
+    const t = grid({ columns: LOG });
+    await t.open();
+    expect(t.labels()).toEqual(['Alger', 'Annaba', 'Blida', 'Oran', 'Sétif']);
+    expect(t.selected()).toEqual([]);
+  });
+
+  it('opening with include [KO] stored shows KO ticked', async () => {
+    const t = grid({ columns: LOG });
+    t.set('city', { type: 'set', include: ['Oran'] });
+    await t.open();
+    expect(t.selected()).toEqual(['Oran']);
+  });
+
+  it('tick Oran and Apply: include [Oran]; reopen, untick, Apply: no filter, all 30 rows (Q16-1 A)', async () => {
+    const t = grid({ columns: LOG });
+    await t.open();
+    t.option('Oran').click();
+    t.apply();
+    expect(t.filter()['city']).toEqual({ type: 'set', include: ['Oran'] });
+    expect(t.ids()).toHaveLength(6);
+    await t.open();
+    t.option('Oran').click();
+    t.apply();
+    expect(t.filter()['city']).toBeUndefined();
+    expect(t.ids()).toHaveLength(30);
+  });
+
+  it('every town ticked: no filter, all 30 rows; reopened, nothing ticked (Q16-2: the owner\'s Q1)', async () => {
+    const t = grid({ columns: LOG });
+    t.set('city', { type: 'set', include: ['Oran'] });
+    await t.open();
+    for (const v of TOWNS) if (v !== 'Oran') t.option(v).click();
+    t.apply();
+    expect(t.filter()['city']).toBeUndefined();
+    expect(t.ids()).toHaveLength(30);
+    await t.open();
+    expect(t.selected()).toEqual([]);
+  });
+
+  it('selectAll: false: no box and no « Select all » text; Tab order search → list → Clear → Apply', async () => {
+    const t = grid({ columns: LOG });
+    await t.open();
+    expect(t.all()).toBeNull();
+    expect(t.popup()!.textContent).not.toContain(String(T['filter.set.all']));
+    const tabbable = [...t.popup()!.querySelectorAll<HTMLElement>('input, button, [tabindex]')].filter((e) => e.tabIndex >= 0 && !(e as HTMLButtonElement).disabled);
+    expect(tabbable.map((e) => (e.matches('input.dzg-fsearch') ? 'search' : e.matches('[role=option], [role=listbox]') ? 'list' : e.matches('.dzg-fapply') ? 'apply' : e.matches('.dzg-fclr') ? 'clear' : e.className))).toEqual(['search', 'list', 'clear', 'apply']);
+  });
+
+  it('exclude allowed and start empty: the blanks row is unticked; 3 of 5 ticked: the half rule writes the shorter list', async () => {
+    const t = grid({ columns: colsWith({ start: 'empty' }) });
+    await t.open();
+    expect(t.labels()[0]).toBe(String(T['filter.set.blanks']));
+    expect(t.selected()).toEqual([]);
+    expect(t.all()).not.toBeNull();
+    for (const v of ['Oran', 'Alger', 'Blida']) t.option(v).click();
+    t.apply();
+    // 3 of the 5 values ticked is more than half: an exclude of the two others, blanks left out.
+    expect(t.filter()['city']).toEqual({ type: 'set', exclude: ['Annaba', 'Sétif'], blanks: 'exclude' });
+  });
+
+  it('a bad start or selectAll: the default and one invalid-setting warning each, per column', async () => {
+    const t = grid({ columns: colsWith({ start: 'nothing', selectAll: 'no' }) });
+    await t.open();
+    expect(t.selected()).toContain('Oran');
+    expect(t.all()).not.toBeNull();
+    const ps = t.problems().filter((p) => p.code === 'invalid-setting');
+    expect(ps.map((p) => [p.path, p.detail, p.severity])).toEqual([['columns.city.filter.start', 'nothing', 'warning'], ['columns.city.filter.selectAll', 'no', 'warning']]);
+  });
+
+  it('right to left, in Arabic: the same, nothing ticked and no box', async () => {
+    const t = grid({ columns: LOG, settings: { messages: AR_MSG, locale: 'ar', direction: 'rtl' } });
+    await t.open();
+    expect(t.selected()).toEqual([]);
+    expect(t.all()).toBeNull();
+    t.option('Oran').click();
+    t.apply();
+    expect(t.filter()['city']).toEqual({ type: 'set', include: ['Oran'] });
+  });
+
+  describe('on a server', () => {
+    const vals = () => ({ values: TOWNS.map((v, i) => ({ value: v, count: i + 1 })), blanks: 2 });
+    // `grid()` takes the value source untyped (`values?: unknown`) and hands it on as never: the fixture's own seam.
+    it('Apply with nothing ticked and no filter in force sends no request', async () => {
+      const t = grid({ server: true, columns: LOG, values: (() => vals()) as never }); // the fixture's untyped values seam
+      t.f.answer(['a']);
+      await t.open();
+      const before = t.f.calls.length;
+      t.apply();
+      expect(t.f.calls.length).toBe(before);
+      expect(t.filter()['city']).toBeUndefined();
+    });
+
+    it('Apply with nothing ticked over a filter in force clears it (one request, no include [])', async () => {
+      const t = grid({ server: true, columns: LOG, values: (() => vals()) as never }); // the fixture's untyped values seam
+      t.f.answer(['a']);
+      t.set('city', { type: 'set', include: ['Oran'] });
+      t.f.answer(['a']);
+      await t.open();
+      const before = t.f.calls.length;
+      t.option('Oran').click();
+      t.apply();
+      expect(t.f.calls.length).toBe(before + 1);
+      expect(t.filter()['city']).toBeUndefined();
+      expect(JSON.stringify(t.f.calls.at(-1)!.req)).not.toContain('include');
+    });
+  });
+});

@@ -19,6 +19,7 @@ const alias = {
   '@dzgrid/core/range': fileURLToPath(new URL('./packages/core/src/range.ts', import.meta.url)),
   '@dzgrid/core/state': fileURLToPath(new URL('./packages/core/src/state.ts', import.meta.url)),
   '@dzgrid/core/row-gaps': fileURLToPath(new URL('./packages/core/src/row-gaps.ts', import.meta.url)),
+  '@dzgrid/core/compare': fileURLToPath(new URL('./packages/core/src/compare.ts', import.meta.url)),
   '@dzgrid/core/internal': fileURLToPath(new URL('./packages/core/src/internal.ts', import.meta.url)),
   '@dzgrid/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
 };

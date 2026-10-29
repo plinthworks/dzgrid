@@ -33,6 +33,19 @@ Opens the audit journal of an Angular application: scrolls, sorts, filters, sear
   the workspace's built packages and theme CSS); `example:bytes` fails when it is missing or does not match — the
   example build had been broken from 1.0.0 to Phase 6 step 12 while an old dist was measured. Line: 95 000.
 
+## Seeing the configuration problems (step 16d, owner question Q16-5, answer A)
+The grid never throws on a bad setting and never writes to the console: it tells a `Problem` (code, path, raw
+detail; never row data) through `(problems)`. An application that does not bind it sees nothing — a selection rule
+without `rules()` then selects nothing, silently. Bind it on every screen and log in development:
+```ts
+// <dz-grid … (problems)="onProblems($event)" />
+onProblems(ps: readonly Problem[]): void {
+  if (isDevMode()) for (const p of ps) console.warn('dzgrid', p.code, p.path, p.detail);
+}
+```
+(Answer B, the wrapper itself writing error problems to the console in dev mode, is not built: it would take the
+audit screen's last bytes.)
+
 ## Where we differ on purpose
 - No server rendering of rows: a grid of health records is drawn in the browser, where the user's zone, language and rights are known; the server sends the place only. No hydration requirement.
 - The example is not in the playground's menu: it has its own dependencies and its own build (owner Q1).

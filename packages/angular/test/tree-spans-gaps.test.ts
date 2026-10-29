@@ -1,4 +1,4 @@
-// The owner's « arbre » screen through `<dz-grid [features]>` (1.1.0 steps 14–15, the architect's check): three
+// An editable tree of three tables (an owner's screen) through `<dz-grid [features]>` (1.1.0 steps 14–15, the architect's check): three
 // tables in one tree, each root always open (`tree({ fixedOpen })`); a « Rubrique » column merging consecutive siblings
 // of one value (`spans()`); a gap before each table but the first (`rowGaps({ before: roots })`); the fill along the row
 // only (`fill(blocks, { along: 'row' })`); the value flash held 3 s then faded 1 s (`motion({ effects: { flash } })`,
@@ -125,7 +125,7 @@ function mount(o: { open?: ReadonlySet<RowKey> } = {}) {
   return { fixture, host, grid, ctl, el, m, row, cell, shown, frame, detect };
 }
 
-describe('the arbre setup through <dz-grid [features]>', () => {
+describe('a tree of tables (fixedOpen, spans, rowGaps, fill along the row, flash) through <dz-grid [features]>', () => {
   it('the three roots open at once, no toggle, aria-expanded="true"; their lines shown', () => {
     const t = mount();
     expect(t.shown()).toEqual(SHOWN);

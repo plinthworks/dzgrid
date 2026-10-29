@@ -53,6 +53,9 @@
       "@dzgrid/core/row-gaps": [
         "./packages/core/src/row-gaps.ts"
       ],
+      "@dzgrid/core/compare": [
+        "./packages/core/src/compare.ts"
+      ],
       "@dzgrid/core/internal": [
         "./packages/core/src/internal.ts"
       ],

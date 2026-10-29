@@ -22,7 +22,7 @@ const isSpans = (f: string) => /(^|\/)src\/spans(\.ts$|\/)/.test(f);
 const isCsv = (f: string) => /(^|\/)src\/csv(\.ts$|\/)/.test(f);
 
 /** The base's seam guard: its measure after each step that adds a seam (history in the base test below). */
-const BASE = 29070;
+const BASE = 29150;
 
 describe('layering of the base and the server entry', () => {
   it('the base bundle holds no server module', async () => {
@@ -116,7 +116,8 @@ describe('layering of the base and the server entry', () => {
     // groups, owner Q-GH, Q-B: seam ≤ 120 B): `ColumnModel.folded` / `fold`, +35 → 28 965. Phase 6 step 8b-1 (pinned rows,
     // owner Q2: up to 29 150): the pinned store (`setPinned`, `rowOf`, a pinned focus kept, `editable`'s `{ pinned }`, never
     // selected), `pinnedKey` by id and `assignKeys`' key maker, +36 → 29 001. Owner « set include only » (2026-10-29):
-    // `exclude: false` refused in compile and wire, +63 → 29 064, guard 29 070.
+    // `exclude: false` refused in compile and wire, +63 → 29 064, guard 29 070. Step 16 (owner « ok pour les hausses », 2026-10-29):
+    // `multiSort` +10, `sameRow` in the store +72, nine internal symbols without descriptions −51 → 29 106, guard 29 150.
     expect(gz).toBeLessThanOrEqual(BASE);
   });
 

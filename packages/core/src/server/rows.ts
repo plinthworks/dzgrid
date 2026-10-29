@@ -144,7 +144,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
   const sizes = pageOptions.config?.sizes ?? DEFAULT_PAGE_SIZES;
 
   const gate = createGate(o.abort ?? env.abort ?? plainAbort);
-  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }), ...(env.now && { now: env.now }), ...(env.shape && { shape: env.shape }), app: env.app });
+  const inner = clientRows<T>({ rows: [], getRowId: env.getRowId, columns: env.columns, ctx: env.ctx, ...(ops.page === 'client' && { page: env.page ?? {} }), ...(env.filterKinds && { filterKinds: env.filterKinds }), ...(env.now && { now: env.now }), ...(env.shape && { shape: env.shape }), app: env.app, sameRow: env.sameRow });
   /** A lazy tree's loads (tree-lazy.md, B): its children asked through the gate, one channel per parent. */
   const lazy = (env.shape as { lazy?: LazyControl<T> } | undefined)?.lazy;
   let current = binding;

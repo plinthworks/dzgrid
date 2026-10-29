@@ -116,6 +116,29 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
      filter of the wrong type it stays stored (in the query, in the state) and applies again if the option goes; it
      is never sent to a server. The popup shows it as no filter (everything ticked; Apply sends nothing), a tick
      replaces it with an include, Clear removes it.
+- **Starting empty** (step 16b; `filter: { kind: 'set', start: 'empty', selectAll: false }`):
+  for a screen whose list must open with nothing ticked (the log screen: `exclude: false, start: 'empty',
+  selectAll: false`).
+  1. With no filter in force, the list opens with **nothing ticked** (blanks row unticked too); with a filter in force,
+     it shows that filter's ticks, as on any column.
+  2. **Nothing ticked is no filter** (null), on Apply or closing (owner question Q16-1, answer A built; the one line is
+     `NONE_TICKED_IS_NO_FILTER` in `filters/set/draft.ts`): with `start: 'empty'`, `include: []` is never written.
+     Columns without it keep Phase 3's Q1: unticking everything keeps no row.
+  3. With `exclude: false` too, the list writes what is ticked, an `include`; « Include only » rule 3 (leaving
+     « everything ») does not apply, the list never starting from it. **Every value of a complete list ticked is no
+     filter** (null), as rule 2 says (owner question Q16-2, answered by the owner's earlier Q1 of « Set filter include
+     only »: « tout coché == pas de filtre du tout »; the one line is `ALL_TICKED_IS_INCLUDE` in `draft.ts`):
+     reopened, the list shows nothing ticked, as any list with no filter in force. During a search, every value shown
+     ticked is an include of them. Its rules 5 (no blanks row) and 6 (an `exclude` from elsewhere ignored) are unchanged.
+  4. With `exclude` allowed (the default), the half rule still writes the shorter list (3 of 4 ticked: an `exclude`
+     of the fourth); nothing ticked is null in either mode.
+  5. `selectAll: false`: no « Select all » / « Select all shown » box; the Tab order is search → list → Clear →
+     Apply; Space on the rows is unchanged.
+  6. A value outside `'all' | 'empty'` (`start`) or `true | false` (`selectAll`): the default (`'all'`, `true`) and
+     one `invalid-setting` warning per column at each opening of the popup (as `optionPart`; path
+     `columns.<id>.filter.start` / `.selectAll`, detail the value), read in the lazy chunk.
+  7. The floating summary, a saved state, the request to a server and the CSV of the filtered rows are unchanged:
+     they read the stored filter, never the draft.
 - **Apply** (O3): in the browser ticks apply after the pause (`debounceMs`, 150 ms: several ticks,
   a key held or "select all" give one change and one announcement), Apply, Enter and closing apply
   at once; on a server the ticks are a draft until Apply or Enter (one request), and closing drops
@@ -163,6 +186,8 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   kept and moved).
 - `packages/dom/test/filters-set-server.test.ts` (a source's `values` delayed, failing, superseded;
   search after the pause; input method).
+- Starting empty: `filters-set-draft.test.ts` « start empty » (with a seeded walk that never writes `exclude`,
+  `blanks` nor `include: []` beside `exclude: false`), `filters-set.test.ts` « start empty ».
 - Include only: `filters-set-draft.test.ts` « include only » (`only`, a seeded 500-step walk that never writes
   `exclude` nor `blanks`), `filters-set.test.ts` « include only » (no blanks row, include of the others, null when all
   ticked again, a search, 2 005 values, an exclude stored from elsewhere, a server's request, Space);

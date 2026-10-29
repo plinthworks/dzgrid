@@ -19,7 +19,7 @@ export interface GapCtx<T> {
 /** `true`: a gap of the feature's size; a number: that many pixels; `false`, `0`, `null`, `undefined`: none. */
 export type GapRule<T> = (c: GapCtx<T>) => boolean | number | null | undefined;
 
-/** A gap before each top-level row but the first (the owner's « arbre » screen). */
+/** A gap before each top-level row but the first (three tables in one tree). */
 export const roots = (c: GapCtx<unknown>): boolean => c.level === 0;
 
 /**

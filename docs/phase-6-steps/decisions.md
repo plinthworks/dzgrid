@@ -196,3 +196,36 @@ parked (`docs/phase-7-plan.md` kept, untracked). Next: everything `docs/owner-ne
 found in the owner's log-table rewrite, the small missing options (one sort only, a set list opening with nothing
 ticked and without select all, details on some rows only, a warning when `rules()` is missing), and the ten
 foreseen needs. Plan: `step16-plan.md`; structural points go to the owner before code. Still before publishing 1.1.0.
+
+## Step 16 — owner answers (2026-10-29)
+
+- Q16-8: **yes** — the owner's tree screen's category (parent) rows are real rows with an id, added from a configuration table.
+  They hold no value for the time-slot columns: shown empty, they read as a big title across the table (the owner's
+  look; `rowClass` + CSS for the weight). Open rows are saved by id (16f).
+- Q16-14: **no totals computed in the browser** — every value comes from the server; ag-Grid only computes CSS classes
+  from the data. 16k (tree totals) is dropped. Conditional styles: the existing cell class rules (`cell-class.md`)
+  and `rowClass`; values changed by the server flash with `sameRow` (16e).
+- Q16-11: `autoApply` **sends a request to the server and does nothing to the grid** (a header button calling the app's
+  service). No batch apply is needed: 16j (batch apply) is dropped, and with it 16i (a live value on an unapplied
+  batch edit) and Q16-12 / Q16-13. An edit while a live value lands keeps today's behaviour (`edit/stale.ts`).
+- Q16-15 (sizes): « ok pour les hausses, pourquoi tu te casses la tête sur la taille » (owner, 2026-10-29). Lines set
+  to the measure plus a small margin, after 16a–16f (measured 2026-10-29, `node scripts/size.mjs`):
+  | Line | Was | Measured | Now |
+  |---|---|---|---|
+  | K.8 audit profile | 84 950 | 85 133 | **90 000** (ARCHITECTURE K.8: ≤ 90 kB gz, was 85) |
+  | `@dzgrid/dom/filters: set (lazy)` | 4 350 | 4 467 | 4 500 |
+  | `@dzgrid/core/detail` | 1 050 | 1 132 | 1 150 |
+  | `@dzgrid/angular` | 7 350 | 7 438 | 7 450 |
+  | core base guard (`layering.test.ts` `BASE`) | 29 070 | 29 106 | 29 150 (`@dzgrid/core` stays 29 150) |
+  | `@dzgrid/core/compare` (new) | — | 273 | 300 |
+  No other entry was over its line. Pinned in `size-budget.json`, `scripts/rebudget.mjs`, `scripts/test/rebudget.test.ts`,
+  `layering.test.ts`, `print-size.test.ts`, `motion-seam.test.ts`, `spans-collapse.test.ts`, `owner-look-3.test.ts`,
+  `perf/test/step12-budgets.test.ts`.
+- Q16-2: answered by the owner's earlier Q1 (« tout coché == pas de filtre du tout », « Set filter include only »): on a list that starts empty, every value of a complete list ticked is no filter (`ALL_TICKED_IS_INCLUDE = false`).
+- +2 % rule used (2026-10-29): `@dzgrid/dom/state` 1 200 → 1 224 (measured 1 211; `gridState({ initial })`, the plain-DOM initial state of the owner's demo).
+- Q16-1, Q16-3 … Q16-7 (not answered): built as answer A each (`step16-plan.md`), one place to change each.
+
+## Size budgets: automatic small raises (owner, 2026-10-29)
+
+« Oui » to: a line may be raised without asking up to **+2 %** of its value, to the measure plus a small margin,
+recorded in decisions.md with the numbers; above 2 %, or K.8 past its 90 kB line, the owner decides.

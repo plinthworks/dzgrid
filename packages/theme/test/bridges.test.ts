@@ -109,8 +109,11 @@ for (const [file, b] of Object.entries(BRIDGES) as [keyof typeof BRIDGES, (typeo
       for (const k of TZ) expect(d[`--tz-${k}`], k).toBe(b.map[k]);
       expect(d['--dzg-font']).toBe(b.font);
       expect(d['--dzg-radius']).toBe(b.radius);
-      // Nothing else: a bridge maps, it does not restyle.
-      expect(Object.keys(d).sort()).toEqual([...TZ.map((k) => `--tz-${k}`), '--dzg-font', '--dzg-radius'].sort());
+      // Nothing else: a bridge maps, it does not restyle — but Bootstrap names its flash hue (step 16: its dark warning
+      // under a refusal sign on a selected row falls below 3:1; « la couleur … par thème », owner).
+      const flash = file === 'bootstrap.css' ? ['--dzg-flash-color'] : [];
+      if (flash.length) expect(d['--dzg-flash-color']).toBe('var(--tz-success)');
+      expect(Object.keys(d).sort()).toEqual([...TZ.map((k) => `--tz-${k}`), '--dzg-font', '--dzg-radius', ...flash].sort());
     });
 
     it('--dzg-font is a valid font shorthand (a weight, a size and line height, then the families)', () => {

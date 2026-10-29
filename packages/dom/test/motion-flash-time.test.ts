@@ -1,4 +1,4 @@
-// Step 14 (1.1.0, the owner's « arbre » screen; docs/behaviors/motion.md « Its duration »): `effects.flash:
+// Step 14 (1.1.0, docs/behaviors/motion.md « Its duration »): `effects.flash:
 // { hold, fade }` in ms — the live flash and the saved flash held then faded; reduced motion: a still mark for
 // hold + fade; bad values: that field's default and one invalid-setting warning per grid and field. Real GSAP in
 // jsdom, matchMedia stubbed, frames by hand; GSAP's time moved by hand on its global timeline.

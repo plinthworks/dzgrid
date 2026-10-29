@@ -1,0 +1,22 @@
+{
+  "id": "regroup-slot",
+  "suite": "header-bands",
+  "description": "Time slots (docs/recipes/time-slots.md): after « now » passes 03:00 the slot s3 sits in PAST; a width the user set on it changes no band.",
+  "input": {
+    "columns": [
+      { "id": "PAST", "header": "Passé", "children": [{ "id": "s1" }, { "id": "s2" }, { "id": "s3" }] },
+      { "id": "REAL_TIME", "header": "Temps réel", "children": [{ "id": "s4" }] }
+    ],
+    "state": [{ "id": "s3", "width": 90 }]
+  },
+  "expected": {
+    "depth": 1,
+    "levels": [
+      [
+        { "group": "PAST", "first": 0, "count": 3, "label": "Passé" },
+        { "group": "REAL_TIME", "first": 3, "count": 1, "label": "Temps réel" }
+      ]
+    ],
+    "problems": []
+  }
+}

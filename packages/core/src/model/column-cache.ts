@@ -25,7 +25,7 @@ export interface ColumnEnv<T> {
 }
 
 /** What `raw` returns for a cell whose accessor threw. */
-export const THREW: unique symbol = Symbol('dzgrid.threw');
+export const THREW: unique symbol = Symbol();
 
 /** The coerced value of a raw cell, or null; `bad` is set when a non-blank value could not be read. */
 function coerceCell<T>(col: ResolvedColumn<T>, raw: unknown, env: ColumnEnv<T>): { v: unknown; bad: string | null; warn: 'wall-time-skipped' | 'wall-time-ambiguous' | null } {

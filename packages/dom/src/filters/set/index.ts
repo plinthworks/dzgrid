@@ -1,4 +1,4 @@
-import { fold, formattersFor, problem, type SetValue } from '@dzgrid/core';
+import { fold, formattersFor, problem, type ProblemCode, type SetValue } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import type { mounted, Mounted } from '@dzgrid/dom/internal';
 import type { GridContext } from '../../context.js';
@@ -29,13 +29,20 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   // The column's option-row part (feedback pass C): a `filterOption` part by name; another name is unknown-part.
   // Said at each opening of the popup.
   const col = get().column;
-  const pn = col.def.filter && col.def.filter.optionPart;
+  const fo = col.def.filter || {};
+  const pn = fo.optionPart;
   const sp = pn && g.parts()[pn];
   const part = sp && sp.slot === 'filterOption' ? (sp.part as Part<OC>) : null;
-  if (pn && !part) emit(g.kernel, { type: 'problems', source: 'host', problems: [problem('unknown-part', 'error', `columns.${col.id}.filter.optionPart`, pn)] });
+  const say = (k: string, v: unknown, code: ProblemCode = 'invalid-setting', s: 'error' | 'warning' = 'warning') => emit(g.kernel, { type: 'problems', source: 'host', problems: [problem(code, s, `columns.${col.id}.filter.${k}`, String(v))] });
+  if (pn && !part) say('optionPart', pn, 'unknown-part', 'error');
+  // Starting empty (filter-set.md « Starting empty »): read at each opening; another value is the default, told.
+  const empty = fo.start === 'empty';
+  const box = fo.selectAll !== false;
+  if (!empty && fo.start && fo.start !== 'all') say('start', fo.start);
+  if (box && fo.selectAll != null && fo.selectAll !== true) say('selectAll', fo.selectAll);
   /** One mounted part per drawn row node. */
   const ms = new Map<HTMLElement, Mounted<OC>>();
-  let d: Draft = draftOf(null);
+  let d: Draft = draftOf(null, empty);
   /** Include only (`filter.exclude: false`, read live: `columns.set` while open), and the last complete list shown. */
   // `filter` may be false: `false.exclude` reads undefined.
   const ix = (): boolean => (get().column.def.filter as { exclude?: false } | undefined)?.exclude === false;
@@ -148,10 +155,10 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   }
   /** A tick: the half rule on a complete list, then the form's pause (or the draft on a server). */
   function edit(): void {
-    ix() ? only(d, complete() ?? whole, whole ?? values().map((x) => x.value)) : settle(d, complete());
+    ix() ? only(d, complete() ?? whole, whole ?? values().map((x) => x.value), empty) : settle(d, complete());
     list.paint();
     boxes();
-    changed(false, filterOf(d) === null);
+    changed(false, filterOf(d, empty) === null);
   }
   all.addEventListener('change', () => {
     const on = all.checked;
@@ -197,19 +204,19 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   }
 
   return {
-    els: [search, status, la, wrap],
+    els: box ? [search, status, la, wrap] : [search, status, wrap],
     write(s: F | null) {
-      const was = JSON.stringify(filterOf(d));
+      const was = JSON.stringify(filterOf(d, empty));
       // Include only: an exclude or blanks stored from elsewhere (ignored, a problem) shows as no filter.
-      d = draftOf((src = s) && !(ix() && ((s as SetFilter).exclude || (s as SetFilter).blanks)) ? (s as SetFilter) : null);
-      canon = JSON.stringify(filterOf(d));
+      d = draftOf((src = s) && !(ix() && ((s as SetFilter).exclude || (s as SetFilter).blanks)) ? (s as SetFilter) : null, empty);
+      canon = JSON.stringify(filterOf(d, empty));
       // Another draft starts on its first ticked row; the same one written again (a locale change) keeps the focus.
       home ||= canon !== was;
       draw();
     },
     // The filter in force written in another order (a host's) is read as written: nothing to send.
     read() {
-      const f = filterOf(d) as F | null;
+      const f = filterOf(d, empty) as F | null;
       return JSON.stringify(f) === canon ? src : f;
     },
     texts,

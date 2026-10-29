@@ -19,6 +19,17 @@ export interface GridSettings<T> {
   readonly direction?: 'auto' | 'ltr' | 'rtl';
   readonly density?: 'compact' | 'comfortable' | 'spacious';
   /**
+   * False: one sort only — Shift+click, Shift+Enter and a header part's `toggleSort(true)` act as a plain
+   * click (sort.md « One sort only »); the app's own `sort.set` of several is kept. True by default. Fixed.
+   */
+  readonly multiSort?: boolean;
+  /**
+   * A full reload (`rows` again, a server's answer) compares a row kept by id with its new copy: equal, it is
+   * unchanged and keeps its old object, so only real changes flash (row-identity-transactions.md « Rows compared by
+   * value »; `sameValues` from `@dzgrid/core/compare`). A throw: changed, one warning per load. Fixed.
+   */
+  readonly sameRow?: (a: T, b: T) => boolean;
+  /**
    * The row height in px at 16 px text, over the density's (owner D1, virtual-scroll.md « Row height »):
    * from 24 to 1 000, grown with the reader's text size; header rows follow. Anything else is told
    * (`invalid-setting`, a warning) and the density's height is used. Live.

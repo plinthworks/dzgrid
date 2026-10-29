@@ -24,7 +24,7 @@ import { stateChecks } from './browser-state.mjs';
 import { groupsChecks } from './browser-groups.mjs';
 import { pinnedRowsChecks } from './browser-pinned-rows.mjs';
 import { autoHeightChecks } from './browser-auto-height.mjs';
-import { arbreChecks } from './browser-arbre.mjs';
+import { treeTablesChecks } from './browser-tree-tables.mjs';
 import { printChecks } from './browser-print.mjs';
 import { pagerGlyphChecks, treeGlyphChecks, inkOf, footerSelectionChecks } from './browser-glyphs.mjs';
 import { feedbackFilterChecks, periodChecks } from './browser-feedback.mjs';
@@ -3878,7 +3878,7 @@ async function runEngine(name) {
       // Phase 6 step 11: printing on the real playground page (Chrome: `page.pdf()`, fr and ar, under Tailwind's preflight).
       if (only === 'print') await printChecks(name, ctx, H);
       // 1.1.0 step 15: merged cells in a tree (Chrome, fr and ar) and the gaps between categories (every engine by `--engine`).
-      if (only === 'tree-spans' || only === 'row-gaps') await arbreChecks(name, ctx, H, only);
+      if (only === 'tree-spans' || only === 'row-gaps') await treeTablesChecks(name, ctx, H, only);
       return;
     }
 
