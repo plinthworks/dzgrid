@@ -940,8 +940,9 @@ bytes; budgets by written decision; final gate green; docs; listening §21 sched
 
 From two real screens of the owner's app (a server log table, and an editable « arbre » tree used natively, without
 a shared wrapper). Owner decision (2026-10-29): the set filter option and the three small options (fill in one
-direction, flash duration, tree without its chevron) in **1.1.0**, published once they are done; the two structural
-items (merged cells inside a tree, a gap between categories) in **1.2.0**, planned together. Each goes through
+direction, flash duration, tree without its chevron) in **1.1.0**; then (owner, 2026-10-29, later the same day) the two
+structural items (merged cells inside a tree, a gap between categories) join **1.1.0** too, planned together — the
+owner waits for all six before publishing 1.1.0. Each goes through
 sheet → architect → tests first → code → review → gate, and is ticked here when done.
 
 - [x] **Set filter « include only »** — `filter: { kind: 'set', exclude: false }`: the list never writes `exclude` nor
@@ -951,20 +952,22 @@ sheet → architect → tests first → code → review → gate, and is ticked 
   4 350 (was 4 250), K.8 84 902 / 84 950 (was 84 900), `core/edit` 3 155 / 3 160 (was 3 150), `core/state` 1 506 /
   1 510 (was 1 500), core base 29 064 (guard 29 001 → 29 070; `@dzgrid/core` 29 150). Done: review fixes (search then
   re-tick = no filter; a stored exclude never reaches another column's server list), gate green (7 370 tests).
-- [ ] **(1.2.0) Merged cells inside a tree** — `span` on a column of a `tree()` grid. Today refused with
+- [ ] **Merged cells inside a tree** — `span` on a column of a `tree()` grid. Today refused with
   `unsupported-combination` (`treeConflicts`, `packages/core/src/tree/shape.ts:327`, Phase 4 D2/D9). The arbre
   screen needs its label column merged over consecutive rows (one tall cell, the repeats hidden). **Structural**:
   what a merged cell becomes when some of its rows are folded, the keyboard and the screen reader over a merged cell
   in a `treegrid`, sticky parents. Needs its own plan and owner decisions before code; the largest of the four.
-- [ ] **Fill in one direction** — an option on `fill()` limiting the fill handle and its keys to one axis
-  (horizontal only for arbre; in logical terms, along the row). Today `fill()` fills both ways.
-- [ ] **Flash duration** — the live value flash of `motion({ effects: { flash } })` has a fixed 0.6 s; arbre
-  wants about 3 s held then 1 s fading. An option for the hold and the fade, reduced motion unchanged (a still mark).
-- [ ] **Tree without its chevron** — arbre opens and closes its groups from its own label cells. The chevron is
-  the tree's keyboard and screen-reader affordance (`aria-expanded`), so hiding it must keep an equivalent: to decide
-  with the owner (the label cell carries the state, Enter / forward / back still toggle).
+- [x] **Fill in one direction** — `fill(blocks, { along: 'row' | 'column' })`: every way (drag, no-drag click, keyboard
+  mode, `api.fill`) along that axis only, the rule in the core (`fillTarget(src, to, along)`); Ctrl/Cmd+D (R) for the
+  forbidden axis not taken; the menu's « Fill down » removed by the host (Q14-1). Done 2026-10-29 (step 14), fill.md 26.
+- [x] **Flash duration** — `motion({ effects: { flash: { hold, fade } } })` ms, live and saved flash alike (Q14-6 A);
+  reduced motion: a still mark for hold + fade (Q14-5 A). Done 2026-10-29 (step 14), motion.md « Its duration ».
+- [x] **Tree rows always open** (replaces « tree without its chevron », owner 2026-10-29) — `tree({ fixedOpen })`: those
+  rows always open (the core refuses to close them), no chevron and no 24 px slot, `aria-expanded="true"` kept; other
+  parents unchanged; styled with `rowClass` + CSS. Done 2026-10-29 (step 14), tree-view.md « rows always open ».
+  Sizes of step 14: `dom/tree` 3 863 / 3 950, `theme/edit.css` 2 222 / 2 250, K.8 84 901 (unchanged, 84 950).
 
-- [ ] **(1.2.0) A gap between two big categories** — arbre inserts empty data rows by hand to space its categories. In
+- [ ] **A gap between two big categories** — arbre inserts empty data rows by hand to space its categories. In
   DzGrid a fake row is focused, counted by screen readers (« row 12 of 40 », empty), selected, filled, copied and
   exported. Wanted: a visual gap before a row (a rule on the row's data, e.g. the first row of a top-level category),
   outside `role="grid"` and the row count, never focused, kept by sort, filter and virtual scroll (a layout height,

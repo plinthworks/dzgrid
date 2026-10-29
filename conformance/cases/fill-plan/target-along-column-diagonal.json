@@ -1,0 +1,84 @@
+{
+  "id": "target-along-column-diagonal",
+  "suite": "fill-plan",
+  "description": "fillTarget with along 'column': two columns toward the start and one row up \u2014 the target is the row above, on the source's columns.",
+  "input": {
+    "src": {
+      "top": 4,
+      "bottom": 5,
+      "start": 3,
+      "end": 4
+    },
+    "to": {
+      "row": 3,
+      "col": 1
+    },
+    "along": "column",
+    "only": "target",
+    "shown": [
+      "r0",
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6",
+      "r7",
+      "r8",
+      "r9"
+    ],
+    "columns": [
+      {
+        "id": "a",
+        "type": "number"
+      },
+      {
+        "id": "b",
+        "type": "number"
+      },
+      {
+        "id": "c",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "number"
+      },
+      {
+        "id": "e",
+        "type": "number"
+      },
+      {
+        "id": "f",
+        "type": "number"
+      },
+      {
+        "id": "g",
+        "type": "number"
+      },
+      {
+        "id": "h",
+        "type": "number"
+      },
+      {
+        "id": "i",
+        "type": "number"
+      },
+      {
+        "id": "j",
+        "type": "number"
+      }
+    ]
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 3,
+        "bottom": 3,
+        "start": 3,
+        "end": 4
+      },
+      "way": "up"
+    }
+  }
+}

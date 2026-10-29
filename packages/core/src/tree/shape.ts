@@ -18,6 +18,12 @@ export interface TreeOptions<T> {
   readonly filter?: 'ancestors' | 'subtree';
   /** What is open at the first non-empty load: nothing (default), everything, or the levels above a depth (1: the roots). */
   readonly initial?: 'none' | 'all' | number;
+  /**
+   * The data rows always open (1.1.0, tree-view.md): open whatever the expansion, never closed by the kernel, never
+   * listed by expand-all / collapse-all; the DOM draws them no chevron. A throw counts as false; a value that is not a
+   * function is ignored, told (`invalid-setting`).
+   */
+  readonly fixedOpen?: (row: T) => boolean;
 }
 
 /** A tree's rows as shown: the displayed rows, and what a treegrid's rows say (WAI-ARIA 1.2). */
@@ -51,10 +57,14 @@ export interface TreeShape<T> extends RowShape<T> {
 export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
   const d = { builds: 0, orders: 0, filters: 0, flattens: 0 };
   const given = (['parentId', 'children', 'path'] as const).filter((m) => o[m]);
-  const told = given.length === 1 ? [] : [problem('tree-shape', 'error', 'tree', given.join(',') || 'none')];
+  const told: Problem[] = given.length === 1 ? [] : [problem('tree-shape', 'error', 'tree', given.join(',') || 'none')];
+  // `fixedOpen`, when a function (another value: ignored, told).
+  let fo = o.fixedOpen;
+  if (fo && typeof fo != 'function') told.push(problem('invalid-setting', 'warning', 'tree.fixedOpen', String(fo))), (fo = void 0);
   /** Nested rows: each row's parent id, by id, from the walks (a load, a transaction's rows). */
   let index = new Map<string, string>();
-  let S: { snap: RowSnapshot<T>; st: Structure; ps: readonly Problem[] } | null = null;
+  /** `fx`: 1 for a row `fixedOpen` keeps open (asked once per snapshot). */
+  let S: { snap: RowSnapshot<T>; st: Structure; ps: readonly Problem[]; fx: Uint8Array | undefined } | null = null;
   let O: { st: Structure; order: Uint32Array | null; ord: Uint32Array | null; all: Buckets } | null = null;
   let F: Filtered | null = null;
   let V: View | null = null;
@@ -67,7 +77,9 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       d.builds++;
       const m = given[0];
       const st = m === 'path' ? pathStructure(snap, o.path!) : structure(snap, (r, id) => (m === 'children' ? index.get(id) : m && o.parentId!(r)));
-      S = { snap, st, ps: told.length ? [...told, ...st.problems] : st.problems };
+      // The data rows only (a filler's place reads as undefined: not fixed); a throw is false.
+      const fx = fo && Uint8Array.from(snap.rows, ((r: T) => { try { return +!!fo!(r); } catch {} }) as (r: T) => number);
+      S = { snap, st, ps: [...told, ...st.problems], fx };
     }
     return S.st;
   };
@@ -229,7 +241,8 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       // Shown: the rows the filter keeps that show children (what a chevron is drawn on).
       const b = shown && V?.F.st === st ? V.shown.start : null;
       const out: RowKey[] = [];
-      for (let i = 0; i < st.n; i++) if ((b ? b[i + 1]! > b[i]! : st.kids[i]! > 0) && st.depth[i]! < depth) out.push(keyOf(snap, st, i));
+      // A row always open is never one of them (no toggle to make).
+      for (let i = 0; i < st.n; i++) if ((b ? b[i + 1]! > b[i]! : st.kids[i]! > 0) && st.depth[i]! < depth && !S!.fx?.[i]) out.push(keyOf(snap, st, i));
       return out;
     },
     isOpen: (key) => {
@@ -238,7 +251,9 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
     },
     opens: (key) => {
       const s = last ? srcOf(last.snap, last.st, key) : -1;
-      return s >= 0 && last!.v.shown.start[s + 1]! > last!.v.shown.start[s]!;
+      // A row always open is not toggled (closing it is refused; it is open already). `S` is the last build's
+      // structure here: a change builds again before any toggle.
+      return s >= 0 && !S!.fx?.[s] && last!.v.shown.start[s + 1]! > last!.v.shown.start[s]!;
     },
     ...(given[0] === 'path' && {
       // A row taking a filler's place, or a filler a row's: the key passes to what stands there now (lead decision 6c).
@@ -287,24 +302,14 @@ export function treeShape<T>(o: TreeOptions<T>): TreeShape<T> {
       // A toggle patches the last flags (copied: an earlier build keeps its own) for its keys only.
       const anc = i.filterActive ? F.anc : null;
       const flag = (k: RowKey, s: number): number => (i.layer?.has(k) ? +i.layer.get(k)! : i.expansion.has(k) || anc?.[s] ? 1 : 0);
-      let isOpen: Uint8Array;
-      if (i.changed && flags?.st === st && flags.F === F && flags.anc === anc) {
-        isOpen = flags.a.slice();
-        for (const k of i.changed) {
-          const s = srcOf(snap, st, k);
-          if (s >= 0) isOpen[s] = flag(k, s);
-        }
-      } else {
-        isOpen = anc ? anc.slice() : new Uint8Array(st.n);
-        for (const k of i.expansion) {
-          const s = srcOf(snap, st, k);
-          if (s >= 0) isOpen[s] = 1;
-        }
-        if (i.layer) for (const k of i.layer.keys()) {
-          const s = srcOf(snap, st, k);
-          if (s >= 0) isOpen[s] = flag(k, s);
-        }
+      // Patched: the toggled keys; built again: the user's rows, then the layer's (each read through `flag`).
+      const patch = i.changed && flags?.st === st && flags.F === F && flags.anc === anc;
+      const isOpen = patch ? flags!.a.slice() : anc ? anc.slice() : new Uint8Array(st.n);
+      for (const k of patch ? i.changed! : [...i.expansion, ...(i.layer?.keys() ?? [])]) {
+        const s = srcOf(snap, st, k);
+        if (s >= 0) isOpen[s] = flag(k, s);
       }
+      S!.fx?.forEach((v, s) => v && (isOpen[s] = 1));
       flags = { st, F, anc, a: isOpen };
       open = isOpen;
       last = { snap, st, v: V, f: F, version: i.version };

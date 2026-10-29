@@ -124,3 +124,41 @@ rule of the `dzgrid.layout` layer and erased the borders. Closed: unturned, towa
 Bidi_Mirrored: left in Arabic, by the browser); open: turned down (`--dzg-chevron: 90deg`, `-90deg` right to left).
 `font-size: 1.25em; line-height: 1`. Checked in Chrome, Firefox and WebKit under a stand-in reset
 (`scripts/browser-glyphs.mjs`: ink, and the way it points).
+
+## 1.1.0: rows always open (step 14, owner 2026-10-29; written before the code)
+
+The owner's « arbre » screen shows three tables in one tree: each starts with a top-level node that is **always
+open** and has **no chevron**; nested nodes under it keep theirs. `tree({ fixedOpen: (row) => boolean })`:
+
+- **What it is**: a function of a data row, asked once per row when the rows change (never per paint of the core); a
+  row it answers `true` for is **always open**. Fillers (path trees) and loading rows are never asked. A throw counts
+  as `false` for that row. A value that is not a function: ignored, with one `invalid-setting` warning (path
+  `tree.fixedOpen`).
+- **Always open**: whatever the user's or the host's expansion says — the arrow back (←, → in Arabic), `*`,
+  collapse-all (`rows.expandAll(false)`, any depth), `rows.expand([key], false)` and any expansion the host sets leave
+  it open. A close asked for one changes nothing and tells nothing (no `rowExpanded`, no sentence). It is never listed
+  among the rows expand-all or collapse-all toggle (`expandable()` leaves it out). The gate is in the core
+  (`@dzgrid/core/tree`), so the kernel's commands refuse to close it, not only the keys.
+- **No chevron and no 24 px slot**: its tree-column cell has no toggle element at all; its text starts at the indent
+  (`level × indent`, kept). The editor's field in that cell starts at the indent too (`@dzgrid/theme/edit.css`,
+  `[style*="--dzg-tree-pad"] > [data-dzg-owner]`; a field whose own direction is not the cell's, nested under a fixed
+  row, is not moved to its other end — the chevron's rule does that, this one does not yet).
+- **Unchanged**: `aria-expanded="true"` on the row when it shows children (they are shown), `aria-level`,
+  `aria-posinset`, `aria-setsize`; every other parent keeps its chevron and its behaviour. The arrow back on it moves
+  to its parent, as on a leaf (a root: nothing); the arrow forward moves to the next column (it is already open). A
+  filter that hides all its children shows it as a leaf, as any parent (no `aria-expanded`, the leaf's hidden toggle
+  keeping its place).
+- **How the DOM knows**: the core's shape says a row showing children cannot be toggled (`opens` false); the DOM asks
+  that, never the function again (one answer for both).
+- **Styling those rows** (a bolder font, a band colour) uses what exists: `rowClass` gives the row a class from the
+  same test, and CSS styles it — no new option:
+  ```ts
+  const top = (r: Line) => r.kind === 'table';
+  createGrid(host, { …, rowClass: ({ row }) => (top(row) ? 'is-table' : null), features: [tree({ parentId, fixedOpen: top })] });
+  ```
+  ```css
+  .is-table { font-weight: 600; --dzg-row-bg: var(--tz-surface-2); }
+  ```
+  (a cell part on the label column can draw more; the colours stay CSS variables).
+- Tests: `packages/core/test/tree-fixed-open.test.ts`, conformance `tree/fixed-open*.json`,
+  `packages/dom/test/tree-fixed-open.test.ts`, theme `edit.test.ts`.

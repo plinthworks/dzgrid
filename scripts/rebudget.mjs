@@ -53,7 +53,7 @@ const SIZE_CEILINGS = {
   // Owner « set include only » (2026-10-29): the set chunk 4 250 → 4 350 (`exclude: false`: the list without its exclude mode).
   '@dzgrid/dom/filters: set (lazy)': 4350,
   '@dzgrid/dom/filters: date adapters (lazy)': 2850, // the owner's third look (2026-10-27, « Comfort stylesheet »): 2 800 → 2 850 (the FROM / TO input fills its field)
-  '@dzgrid/dom/tree': 3850, // owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
+  '@dzgrid/dom/tree': 3950, // owner step 14/15 (2026-10-29): 3 850 → 3 950 (tree({ fixedOpen }), then step 15's spans and gaps); owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
   '@dzgrid/dom/tree-lazy': 1000,
   '@dzgrid/dom/parts': 800, // Phase 5 close Q-C3 (2026-10-26): 700 → 800 by the close rule (the measure 689 + 10 %), accepted
   '@dzgrid/dom/detail': 4150, // owner S8-O3 (2026-10-24): 3 900 → 4 000 (a nested grid kept alive while it saves); S8-O7: → 4 150 (kept while refused, let go with its master or the grid around)
@@ -77,8 +77,8 @@ const SIZE_CEILINGS = {
   // Owner S4-O4: edit.css 1 350 (measured 1 231 at step 4), taken from the theme grants' unused part (S4-O2);
   // owner S5-O2 (2026-10-23): 1 700 with the field and the bubble of step 5; owner S6-O6 (2026-10-24): 2 100 (dates, list).
   // Owner S7-O1 (2026-10-24): a reserve up to 2 200, used for the owner's step-7 request (the saving border inside
-  // the focus ring, measured 2 101).
-  '@dzgrid/theme/edit.css': 2200,
+  // the focus ring, measured 2 101). Owner step 14 (2026-10-29): 2 250 (the field of a row always open starts at the indent).
+  '@dzgrid/theme/edit.css': 2250,
   // Owner S5-O3 (2026-10-23): the editors' texts (the 5 parse codes moved there from -edit), room for step 6.
   '@dzgrid/dom/locales/en-editors': 450,
   '@dzgrid/dom/locales/fr-editors': 500,

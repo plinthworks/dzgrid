@@ -77,6 +77,8 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
   };
   relock();
   const expand = (rows: readonly RowKey[], expanded: boolean): void => void kernel.dispatch({ type: 'rows.expand', rows, expanded }, 'user');
+  /** A row always open (`fixedOpen`, tree-view.md): it shows children and the core will not toggle it. */
+  const fixed = (key: RowKey): boolean => s?.opens?.(key) === false;
   /** The row's label in the tree column, as its cell shows it (that column hidden: the first one shown); a filler's own. */
   const nameOf = (key: RowKey, d: Rows): string => {
     const i = d.indexOf(key);
@@ -246,18 +248,23 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
         if (!cell) return;
         now.add(cell);
         let t = cell.firstElementChild;
-        if (!t?.classList.contains('dzg-toggle')) {
-          t = doc.createElement('span');
-          t.className = 'dzg-toggle';
-          t.setAttribute('aria-hidden', 'true');
-          cell.prepend(t);
+        const had = t?.classList.contains('dzg-toggle');
+        // Always open: no toggle at all, no slot (a pooled cell's taken off).
+        if (open && fixed(key)) had && t!.remove();
+        else {
+          if (!had) {
+            t = doc.createElement('span');
+            t.className = 'dzg-toggle';
+            t.setAttribute('aria-hidden', 'true');
+            cell.prepend(t);
+          }
+          set(t!, 'data-open', open ? '' : null);
+          set(t!, 'data-leaf', kids ? null : '');
         }
-        set(t, 'data-open', open ? '' : null);
-        set(t, 'data-leaf', kids ? null : '');
         // A filler (path trees) or a loading row has no cells: its label goes in the tree column (tree-view.md).
         let l = labelOf(cell);
         if (node.kind === 'group' || node.kind === 'loading') {
-          if (!l) (l = doc.createElement('span')), (l.className = 'dzg-free dzg-label'), t.after(l);
+          if (!l) (l = doc.createElement('span')), (l.className = 'dzg-free dzg-label'), t!.after(l);
           if (node.kind === 'loading') lz?.fill(l as HTMLElement, node);
           else if (l.textContent !== node.label) l.textContent = node.label;
         } else l?.remove();
@@ -283,7 +290,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
       const open = kids && d.expandedAt(i);
       // Forward: a closed parent opens; otherwise the column move.
       if (step.delta > 0) return kids && !open && (expand([at.row], true), true);
-      if (open) return expand([at.row], false), true;
+      if (open && !fixed(at.row)) return expand([at.row], false), true;
       // Back on a closed parent or a leaf: its parent row, same column (a root: nothing).
       const parent = d.parentOf(at.row);
       if (parent !== null && kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: parent, column: at.column } }, 'user').ok) g.restoreFocus();

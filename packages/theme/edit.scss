@@ -258,6 +258,19 @@ $opaque: linear-gradient(currentColor 0 0);
   // (Phase 5 step 8): the tree's indent (`--dzg-tree-pad`, written by the tree) or the cell's padding, the 24 px target.
   // Its sides are its own direction's (a text field is dir=auto): a field whose direction is not its cell's (a Latin
   // name in an Arabic grid) takes the room at its other end.
+  // A tree cell without a chevron (a row always open, `tree({ fixedOpen })`, 1.1.0): the field starts at the indent.
+  // Same weight as the rule below, which wins by coming after it when the cell has a chevron.
+  [style*="--dzg-tree-pad"] > [data-dzg-owner] {
+    inset-inline-start: calc(var(--dzg-tree-pad) - var(--dzg-cell-padding-inline, 0.5rem));
+  }
+
+  // Its sides are its own direction's (dir=auto): a field whose direction is not its cell's takes the indent at its
+  // other end (as the chevron's rule below, which wins in a cell with a chevron: same weight, later).
+  :dir(rtl)[style*="--dzg-tree-pad"] > :dir(ltr),
+  :dir(ltr)[style*="--dzg-tree-pad"] > :dir(rtl) {
+    inset-inline: 0 calc(var(--dzg-tree-pad) - var(--dzg-cell-padding-inline, 0.5rem));
+  }
+
   .dzg-toggle ~ [data-dzg-owner] {
     --dzg-tree-at: calc(var(--dzg-tree-pad, var(--dzg-cell-padding-inline, 0.5rem)) + var(--dzg-target-min, 24px));
     inset-inline-start: var(--dzg-tree-at);

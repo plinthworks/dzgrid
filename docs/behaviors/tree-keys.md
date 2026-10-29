@@ -33,6 +33,8 @@ left-to-right page and in an Arabic (right-to-left) one.
   usual column move.
 - **Back**: open parent → close it, focus stays; closed parent or leaf with a parent → focus the
   parent row, same column, scrolled into view; a root → nothing.
+- **A row always open** (`tree({ fixedOpen })`, 1.1.0, tree-view.md): back acts as on a leaf (its parent, a root:
+  nothing), forward is the column move, `*` never closes it; the kernel refuses to close it whatever asks.
 - **`*`**: opens the closed siblings that have children, one `rowExpanded` event, one sentence
   ("5 rows expanded").
 - **Focus fallback** (D6): a collapse that hides the focused row moves the focus to the nearest

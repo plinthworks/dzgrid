@@ -176,6 +176,13 @@
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
     outline-offset: -2px;
   }
+  [style*="--dzg-tree-pad"] > [data-dzg-owner] {
+    inset-inline-start: calc(var(--dzg-tree-pad) - var(--dzg-cell-padding-inline, 0.5rem));
+  }
+  :dir(rtl)[style*="--dzg-tree-pad"] > :dir(ltr),
+  :dir(ltr)[style*="--dzg-tree-pad"] > :dir(rtl) {
+    inset-inline: 0 calc(var(--dzg-tree-pad) - var(--dzg-cell-padding-inline, 0.5rem));
+  }
   .dzg-toggle ~ [data-dzg-owner] {
     --dzg-tree-at: calc(var(--dzg-tree-pad, var(--dzg-cell-padding-inline, 0.5rem)) + var(--dzg-target-min, 24px));
     inset-inline-start: var(--dzg-tree-at);

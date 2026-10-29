@@ -22,10 +22,12 @@ export interface FillOptions<T> {
 /**
  * A drag of the fill handle from `src` to a cell (display row, column index): the box beside the source
  * to fill and its way, on the axis the cell is farther out on (ties: rows); null back inside (fill.md 3; F1).
+ * `along`: that axis only, the other distance ignored (1.1.0, fill.md 26); another value: both.
  */
-export function fillTarget(src: RangeBox, to: { readonly row: number; readonly col: number }): { readonly box: RangeBox; readonly way: FillWay } | null {
-  const dr = to.row < src.top ? src.top - to.row : to.row > src.bottom ? to.row - src.bottom : 0;
-  const dc = to.col < src.start ? src.start - to.col : to.col > src.end ? to.col - src.end : 0;
+export function fillTarget(src: RangeBox, to: { readonly row: number; readonly col: number }, along?: 'row' | 'column'): { readonly box: RangeBox; readonly way: FillWay } | null {
+  // One way only (fill.md 26): the other distance counts as none (`row`: along the row, `column`: up or down).
+  const dr = along == 'row' ? 0 : to.row < src.top ? src.top - to.row : to.row > src.bottom ? to.row - src.bottom : 0;
+  const dc = along == 'column' ? 0 : to.col < src.start ? src.start - to.col : to.col > src.end ? to.col - src.end : 0;
   if (!dr && !dc) return null;
   if (dr >= dc) return to.row > src.bottom ? { box: { ...src, top: src.bottom + 1, bottom: to.row }, way: 'down' } : { box: { ...src, top: to.row, bottom: src.top - 1 }, way: 'up' };
   return to.col > src.end ? { box: { ...src, start: src.end + 1, end: to.col }, way: 'end' } : { box: { ...src, start: to.col, end: src.start - 1 }, way: 'start' };

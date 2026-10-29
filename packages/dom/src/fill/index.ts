@@ -1,4 +1,4 @@
-import { intentFor, type CellAddr, type CellRange, type DisplayedRows, type FocusPos, type GridKernel, type KeyOwner } from '@dzgrid/core';
+import { intentFor, type Problem, type CellAddr, type CellRange, type DisplayedRows, type FocusPos, type GridKernel, type KeyOwner } from '@dzgrid/core';
 import { emit, isCellKey } from '@dzgrid/core/internal';
 import { boxRows, fillTarget, planFill, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
 import type { EditApi } from '../edit/index.js';
@@ -17,6 +17,11 @@ export const FILL_KEYS = ['fill.filled', 'fill.bulk', 'fill.mode', 'fill.pick', 
 export interface FillFeatureOptions {
   /** The handle drawn, dragged and clicked (the mouse drags it; a pen only clicks it, S12-Q12); false: the keys and the API only. Default true. */
   readonly handle?: boolean;
+  /**
+   * The one way a fill may go (1.1.0, fill.md 26): `row` along the row (toward the inline end or start), `column` up or
+   * down; every gesture's target brought back onto it. Default: both. Another value: both, an `invalid-setting` warning.
+   */
+  readonly along?: 'row' | 'column';
 }
 /** What a fill or a bulk edit did, as said. */
 export interface FillCounts {
@@ -71,7 +76,12 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       if (missing.length) throw new TypeError(`fill: missing ${missing.join(', ')}`);
       const { kernel, rows, columns, el, doc, win, scope } = g;
       const on = !!g.settings.features?.includes(blocks);
-      if (!on) emit(kernel, { type: 'problems', source: 'api', problems: [{ code: 'missing-feature', severity: 'error', path: 'features', detail: 'range' }] });
+      // The one way allowed (fill.md 26): along the row, the column, or both (absent, or a bad value told).
+      const ax = o.along;
+      const told: Problem[] = [];
+      if (!on) told.push({ code: 'missing-feature', severity: 'error', path: 'features', detail: 'range' });
+      if (ax != null && ax != 'row' && ax != 'column') told.push({ code: 'invalid-setting', severity: 'warning', path: 'fill.along', detail: String(ax) });
+      if (told[0]) emit(kernel, { type: 'problems', source: 'api', problems: told });
       const R = () => (on ? blocks.api(g) : null);
       const raf = g.env.raf ?? win;
       const ids = (): string[] => columns.visible().map((c) => c.id);
@@ -95,7 +105,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       let at = { clientX: 0, clientY: 0 };
       const aim = () => {
         const b = gest?.to && boxOf(gest.src);
-        return b ? fillTarget(b, gest!.to!) : null;
+        return b ? fillTarget(b, gest!.to!, ax) : null;
       };
       /** A cell as positions of `src`'s rows (the body's or its band's: another region's row is -1) and the visible columns. */
       const pos = (a: CellAddr | null, src: CellRange | null | undefined): Pos | null => (a ? { row: D(src).indexOf(a.row), col: ids().indexOf(a.column) } : null);
@@ -138,7 +148,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       /** A drop on `to` (fill.md 13): the plan, one commit, then the block source ∪ target; the focus stays. */
       const fillTo = (src: CellRange, to: Pos | null, swap: boolean, via: Via): FillCounts | null => {
         const b = boxOf(src);
-        const t = b && to && to.row >= 0 && to.col >= 0 && fillTarget(b, to);
+        const t = b && to && to.row >= 0 && to.col >= 0 && fillTarget(b, to, ax);
         if (!t || !ed()) return null;
         const d = D(src);
         const i = ids();
@@ -155,7 +165,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       const copy = (end: boolean, via: Via): FillCounts | null => {
         const x = source();
         const b = boxOf(x);
-        if (!b || !ed()) return null;
+        if (!b || !ed() || ax == (end ? 'column' : 'row')) return null;
         const d = D(x);
         let s: RangeBox;
         let t = b;
@@ -244,7 +254,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         // to whole pixels: Firefox, WebKit): the row then under the pointer.
         if (s) p.row = pos(cellAt(g, last!, (-s * (g.rowHeight() - 4)) / 2, k), src)!.row;
         if (!gest!.moved) {
-          if (!fillTarget(b, p) || travel(last!, at) < 4) return;
+          if (!fillTarget(b, p, ax) || travel(last!, at) < 4) return;
           gest!.moved = true;
           setAttr(el.root, 'data-dzg-filling', '');
           try {
@@ -344,6 +354,9 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
           if (i.axis !== 'row') to.col = i.to === 'first' ? 0 : n - 1;
         } else if (i?.kind === 'page') to.row = clamp(to.row + i.delta * Math.max(1, Math.floor(g.geometry.read().block / g.rowHeight())), d.count);
         else return true;
+        // The forbidden axis (fill.md 26): taken, the target stays on the allowed one (the view never follows it).
+        const b = boxOf(x.src);
+        if (b) ax == 'row' ? (to.row = b.bottom) : ax == 'column' && (to.col = b.end);
         g.ensureVisible(d.keyAt(d.index(to.row)!), ids()[to.col]);
         g.schedule();
         hush();

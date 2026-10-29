@@ -28,6 +28,11 @@ export interface LazyControl<T> {
   abort: (() => AbortHandle) | null;
   /** A failed parent asks again. */
   retry(parent: RowKey): void;
+  /**
+   * The loads of the rows shown open started now (else at the next change): rows open from the first build (`fixedOpen`)
+   * load once the host is ready (the DOM calls it after setting `abort`).
+   */
+  sync(): void;
   /** Every load forgotten, those running aborted (a new epoch, a refresh, a model destroyed); `again`: shown again at once, the open parents ask again (a server's refresh). */
   reset(again?: boolean): void;
   /** Told after each answer applied: the parent, whether it loaded, and the request's number (`diagnostics.started` once it began). */
@@ -61,16 +66,17 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
   let idOf: (row: T) => RowIdInput = () => '';
   let last: TreeRows<T> | null = null;
   let slots: Slot[] = [];
+  /** The rows shown open by the inner shape alone (`fixedOpen`) while their children are not loaded: never toggled. */
+  let kept = new Set<RowKey>();
   /** Loads forgotten since the last sync: a setRows that shows nothing new must show the rows again. */
   let forgot = false;
   const fns = new Set<(parent: RowKey, ok: boolean, request: number) => void>();
   const d = { started: 0, answered: 0, failed: 0, aborted: 0 };
 
   /** A row declared, holding no child whatever the filter, not answered: one to load when open. */
-  const unloaded = (key: RowKey, rows: TreeRows<T> | null): boolean => {
-    const row = model?.row(key);
-    return !!row && !rows?.kidsOf(key) && states.get(key)?.s !== 2 && o.has(row.data as T);
-  };
+  // `data`: the row's (a build reads it from its rows: the first one comes before the model is attached).
+  const unloaded = (key: RowKey, rows: TreeRows<T> | null, data = model?.row(key)?.data): boolean =>
+    data !== void 0 && !rows?.kidsOf(key) && states.get(key)?.s !== 2 && o.has(data as T);
   /** Its load stopped and forgotten (closed, hidden, reset). */
   const drop = (key: RowKey): void => {
     const st = states.get(key);
@@ -123,6 +129,7 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
   const ctl: LazyControl<T> = {
     loader: null,
     abort: null,
+    sync: () => sync(),
     retry(parent) {
       if (states.get(parent)?.s !== 1) return;
       states.delete(parent);
@@ -176,7 +183,8 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
       ctl.reset();
       if (ids.length) model?.applyTransaction({ remove: ids }, 'data');
     },
-    opens: (key: RowKey) => !!inner.opens?.(key) || unloaded(key, last),
+    // A row the inner shape keeps open by itself (`fixedOpen`) is never toggled, loaded or not.
+    opens: (key: RowKey) => !!inner.opens?.(key) || (unloaded(key, last) && !kept.has(key)),
     // Collapse-all closes a parent showing a loading row too (expand-all never opens one: no burst of requests).
     parents(snap: RowSnapshot<T>, depth: number, shown?: boolean) {
       const out = inner.parents?.(snap, depth, shown) ?? [];
@@ -184,13 +192,13 @@ export function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<
     },
     build(i: ShapeInput<T>) {
       const t = (last = inner.build(i) as TreeRows<T>);
-      // The rows open: the user's, and those opened under a filter (an ancestor of a match shows children).
-      const keys = new Set(i.expansion);
-      for (const [key, on] of i.layer ?? []) on ? keys.add(key) : keys.delete(key);
+      // Every row shown open: the user's, those opened under a filter (an ancestor of a match shows children), and
+      // those the inner shape keeps open by itself (`fixedOpen`, tree-view.md: `kept`, neither the user's nor the layer's).
       const out: Slot[] = [];
-      for (const key of keys) {
-        const at = t.indexOf(key) as DisplayIndex;
-        if (at >= 0 && t.expandedAt(at) && unloaded(key, t)) out.push({ at, parent: key, level: t.levelAt(at) + 1, failed: states.get(key)?.s === 1 });
+      kept = new Set();
+      for (let at = 0 as DisplayIndex; at < t.count; at++) {
+        const key = t.keyAt(at);
+        if (t.expandedAt(at) && unloaded(key, t, (t.nodeAt(at) as { data?: T }).data)) out.push({ at, parent: key, level: t.levelAt(at) + 1, failed: states.get(key)?.s === 1 }), (i.layer?.get(key) ?? i.expansion.has(key)) || kept.add(key);
       }
       slots = out.sort((a, b) => a.at - b.at);
       return withLoading(t, slots, (key) => unloaded(key, t));

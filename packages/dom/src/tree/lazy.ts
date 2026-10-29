@@ -42,6 +42,8 @@ export function lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T> {
       const win = doc.defaultView;
       if (win?.AbortController) ctl.abort = () => new win.AbortController();
       if (!ctl.loader && !o.load) tell('tree.lazy', 'missing-feature', 'load');
+      // Rows open from the start (`fixedOpen`) load now, with the window's signals.
+      else ctl.sync();
       // Only the user's actions are said (tree-lazy.md): an answer when its « Loading » was — a user's
       // opening of one row, a user's Retry —, by the request's number: not the API's, nor a refresh's.
       const asked = new Map<RowKey, number>();

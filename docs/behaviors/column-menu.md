@@ -92,6 +92,8 @@ disabled when it cannot act now)
 17. The application's items: `columnMenu({ items(column, defaults) => MenuItem[] })` may reorder, remove or add
     (`{ id, label, action, disabled?, checked?, icon? }`); a thrown `items` gives the defaults and one
     `invalid-menu` problem (path `columnMenu.items`, no row data).
+    With `fill(blocks, { along: 'row' })` (1.1.0, fill.md 26) « Fill down » does nothing; the host removes it:
+    `items: (col, defaults) => defaults.filter((i) => i.id !== 'fill.down')` (`fill.end` with `along: 'column'`).
 
 **Keys inside** (APG menu; the menu owns every key, `data-dzg-owner="popup"`)
 18. ArrowDown / ArrowUp: next / previous item, wrapping; disabled items stay focusable (APG),

@@ -17,8 +17,8 @@ const MAX_ADDED = 20;
 
 /**
  * The value flash (owner Q3: live changes only): the cells of the rows a transaction updated whose
- * displayed text changed get `dzg-flash` with `--dzg-flash` tweened 1 → 0; under reduced motion the
- * mark stays still 0.6 s. A row it added fades in once, as a row entering (owner Q5: `onRow`
+ * displayed text changed get `dzg-flash` with `--dzg-flash` tweened 1 → 0 after its hold (`effects.flash`); under
+ * reduced motion the mark stays still for hold + fade. A row it added fades in once, as a row entering (owner Q5: `onRow`
  * `'entered'`, not under reduced motion; `fade` false when a glide in the same paint did it), its
  * cells unmarked. Not announced.
  */
@@ -74,12 +74,16 @@ export function fresh(s: Scene, k: RowKey, c: string): boolean {
   return true;
 }
 
-/** The built-in flash on a cell: `dzg-flash`, `--dzg-flash` 1 → 0 in 0.6 s; reduced motion: the mark still 0.6 s. */
+/**
+ * The built-in flash on a cell: `dzg-flash`, `--dzg-flash` at 1, held then 1 → 0 (`s.time`; default 0 + 0.6 s); reduced
+ * motion: the mark still for hold + fade. A mark running (or waiting in its hold) is replaced, never doubled.
+ */
 export function tint(s: Scene, el: HTMLElement, ok: () => boolean): void {
-  const { gsap, guard } = s;
+  const { gsap, guard, time: [hold, fade] } = s;
   el.classList.add('dzg-flash');
-  if (s.reduced) {
-    el.style.setProperty('--dzg-flash', '1');
-    guard.track(el, ok, gsap.delayedCall(0.6, () => guard.release(el)));
-  } else s.play(el, ok, { '--dzg-flash': 1 }, { '--dzg-flash': 0, duration: 0.6 });
+  // The mark is the guard's call: a new one kills the one running, even one still waiting in its hold (GSAP's
+  // `overwrite` sees only tweens already started); a host's tweens on the cell stay.
+  guard.track(el, ok, s.reduced
+    ? (el.style.setProperty('--dzg-flash', '1'), gsap.delayedCall(hold + fade, () => guard.release(el)))
+    : s.play(el, ok, { '--dzg-flash': 1 }, { '--dzg-flash': 0, delay: hold, duration: fade }));
 }

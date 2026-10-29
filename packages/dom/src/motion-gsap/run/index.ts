@@ -24,6 +24,8 @@ export interface Scene {
   readonly o: MotionOptions;
   readonly reduced: boolean;
   readonly now: number;
+  /** The flash's hold and fade, in seconds (`effects.flash`, checked once per grid). */
+  readonly time: readonly [number, number];
   on(k: keyof MotionEffects): boolean;
   /** The 500 ms cap of the flash, per cell (row key, then column): when each was last marked. */
   readonly marked: Map<RowKey, Map<string, number>>;
@@ -33,14 +35,17 @@ export interface Scene {
    * are finished when the element shows another row.
    */
   hook<A extends [HTMLElement, ...unknown[]]>(fn: ((...a: A) => void | false) | undefined, valid: () => boolean, ...a: A): void | false;
-  /** Tweens an element from `from` to `to` (immediate render, GSAP's own ticker), followed by the guard. */
-  play(el: HTMLElement, valid: () => boolean, from: object, to: object): void;
+  /** Tweens an element from `from` to `to` (immediate render, GSAP's own ticker), followed by the guard; the tween. */
+  play(el: HTMLElement, valid: () => boolean, from: object, to: object): { kill(): unknown };
   /** The y each row is drawn at by its running glide (none: 0), by row key, before the paint. */
   readonly ys: ReadonlyMap<RowKey, number>;
 }
 
+/** Tells one grid that a field of `effects.flash` is bad (the eager part's emit). */
+export type Say = (g: GridContext<unknown>, k: string, v: unknown) => void;
+
 /** Loads GSAP (the application's, or `import('gsap')`): null when it is not installed. */
-export async function start(o: MotionOptions): Promise<Engine | null> {
+export async function start(o: MotionOptions, say: Say): Promise<Engine | null> {
   let gsap = o.gsap;
   if (!gsap) {
     try {
@@ -50,7 +55,7 @@ export async function start(o: MotionOptions): Promise<Engine | null> {
       return null;
     }
   }
-  return gsap ? engine(gsap, o) : null;
+  return gsap ? engine(gsap, o, say) : null;
 }
 
 const FLIP = 1;
@@ -58,7 +63,7 @@ const FLASH = 2;
 const PAGE = 4;
 const EXPAND = 8;
 
-function engine(gsap: Gsap, o: MotionOptions): Engine {
+function engine(gsap: Gsap, o: MotionOptions, say: Say): Engine {
   const attached = new Set<Guard>();
   // A change of the setting finishes what runs, in every grid.
   const reduced = reducedMotion(gsap, () => attached.forEach((a) => a.finishAll()));
@@ -70,6 +75,14 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
   return {
     attach(g) {
       const guarded = guard(gsap);
+      // The flash's durations, in ms then seconds: a bad field takes its default, told once (this grid).
+      const fl = o.effects?.flash as { [k: string]: unknown } | undefined;
+      const ms = (k: string, d: number): number => {
+        const v = fl?.[k];
+        // A number (not NaN, not a string: equal to its own number) from 0 to 10 000.
+        return v === +v! && v >= 0 && v <= 1e4 ? v / 1e3 : (v !== void 0 && say(g, k, v), d);
+      };
+      const time = [ms('hold', 0), ms('fade', 0.6)] as const;
       attached.add(guarded);
       const live = (): boolean => g.settings.motion !== false;
       let armed = 0;
@@ -100,7 +113,7 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
       const scene = (now: number, ys: ReadonlyMap<RowKey, number> = new Map()): Scene => {
         let calls = 0;
         return {
-          gsap, g, guard: guarded, o, now, on, marked, ys, reduced: reduced(),
+          gsap, g, guard: guarded, o, now, on, marked, ys, time, reduced: reduced(),
           hook(fn, valid, ...a) {
             if (!fn || calls >= 50) return;
             calls++;
@@ -115,6 +128,7 @@ function engine(gsap: Gsap, o: MotionOptions): Engine {
             guarded.track(el, valid);
             const t = gsap.fromTo(el, from, { ...to, ease: 'power2.out', force3D: false, overwrite: 'auto', immediateRender: true, onComplete: () => guarded.release(el) });
             if ('y' in from) glides.set(el, [(from as { y: number }).y, t]);
+            return t;
           },
         };
       };

@@ -206,3 +206,27 @@ the real handle against values written by hand), `range-release.test.ts`; theme 
 `--only fill` → `scripts/browser-fill-accident.mjs` (a press 16 px and 12 px in from the corner selects, a press on the
 square fills; the owner's gesture end to end; Escape; S12-Q11; the simulated send, kept when the block changed during it; Chrome: a pen drag writes nothing).
 
+
+## 1.1.0: fill in one direction (step 14, owner 2026-10-29; written before the code)
+
+26. **`fill(blocks, { along: 'row' | 'column' })`** — the owner's « arbre » screen fills along a row only. The
+    words are logical (`row`: along the row, toward the inline end or start — right or left in French, mirrored in
+    Arabic; `column`: up or down), never x / y / left / right. Absent (or null): both ways, exactly as before. Any other
+    value (`'x'`, `''`, `1`): both ways, and one `invalid-setting` warning per grid (path `fill.along`, detail the value
+    as text); nothing throws. (ag-Grid's `fillHandleDirection` named for the behaviour seen; nothing read.)
+    - **One rule for every way**, in the core (`fillTarget(src, to, along)`, `@dzgrid/core/range`): the distance on the
+      forbidden axis counts as none, then the usual rule (the larger distance wins, 13) picks the way. So a drag straight the forbidden way has no target: the drag never starts (no
+      dashed outline, no `data-dzg-filling`, no pointer capture), the release writes and says nothing. A diagonal drag
+      fills along the allowed axis by its own distance, even when the forbidden distance is larger (B2 → E9 with `row`:
+      C2:E2). The no-drag click (14) and `api.fill(to)` follow the same rule. Auto-scroll during a drag is unchanged.
+    - **The keyboard mode** (15): an arrow, PageUp or PageDown on the forbidden axis is taken (the page does not scroll)
+      and moves nothing — the target stays (with a target already there, its size is said again after the pause);
+      Ctrl+Home / Ctrl+End move only the allowed coordinate (the view never follows the other); Enter with no target
+      writes nothing.
+    - **Ctrl/Cmd+D with `row`, Ctrl/Cmd+R with `column`** (16): not taken (the browser keeps its key), as when there is
+      nothing to fill; `api.down()` / `api.end()` return null for the forbidden one.
+    - **The column menu's « Fill down »** stays; with `along: 'row'` the host removes it (owner Q14-1):
+      `columnMenu({ items: (col, defaults) => defaults.filter((i) => i.id !== 'fill.down') })` (`fill.end` with
+      `column`). 0 byte in the grid.
+    - Bulk edit (17) has no direction: unchanged.
+    Tests: `fill-along.test.ts`; conformance `fill-plan/target-along-*.json`.

@@ -24,7 +24,9 @@ const tell = (ps: readonly Problem[]) => ps.map((p) => ({ code: p.code, severity
  */
 export function runTree(input: any) {
   const columns = createColumnModel<Row>([{ id: 'n', type: 'number' }, { id: 't' }]);
-  const base = treeShape<Row>({ ...SHAPES[(input.shape ?? 'parent') as keyof typeof SHAPES], ...input.tree });
+  // `fixed` (1.1.0, tree-view.md « rows always open »): the ids `fixedOpen` answers true for.
+  const fixed: string[] | undefined = input.fixed;
+  const base = treeShape<Row>({ ...SHAPES[(input.shape ?? 'parent') as keyof typeof SHAPES], ...input.tree, ...(fixed && { fixedOpen: (r: Row) => fixed.includes(r.id) }) });
   // Lazy children (step 7, tree-lazy.md): `lazy.has` the ids declared; each load logged (`ask a`,
   // `abort a`) and answered by a step (`answer`/`fail`: the latest request for that id, even aborted).
   const declared = new Set<string>(input.lazy?.has ?? []);

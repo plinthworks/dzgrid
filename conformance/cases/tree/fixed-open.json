@@ -1,0 +1,90 @@
+{
+  "id": "fixed-open",
+  "suite": "tree",
+  "description": "tree.fixedOpen (1.1.0): the rows it answers true for (input.fixed) are open from the first load and stay open whatever closes them \u2014 one row, collapse-all, collapse-all at depth 0; a nested parent opens and closes as usual; the fixed rows are never in the user's expansion.",
+  "input": {
+    "rows": [
+      {
+        "id": "A",
+        "n": 1,
+        "t": "table"
+      },
+      {
+        "id": "a1",
+        "p": "A",
+        "n": 1,
+        "t": "line"
+      },
+      {
+        "id": "a2",
+        "p": "A",
+        "n": 2,
+        "t": "group"
+      },
+      {
+        "id": "a21",
+        "p": "a2",
+        "n": 1,
+        "t": "line"
+      },
+      {
+        "id": "B",
+        "n": 2,
+        "t": "table"
+      },
+      {
+        "id": "b1",
+        "p": "B",
+        "n": 1,
+        "t": "line"
+      }
+    ],
+    "fixed": [
+      "A",
+      "B"
+    ],
+    "steps": [
+      {
+        "expand": [
+          "A",
+          "B"
+        ],
+        "expanded": false
+      },
+      {
+        "expandAll": true
+      },
+      {
+        "expandAll": false
+      },
+      {
+        "expandAll": false,
+        "depth": 0
+      },
+      {
+        "expand": [
+          "a2"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "A 1/2",
+      ". a1 1/2",
+      ". a2 2/2",
+      ". . a21 1/1",
+      "B 2/2",
+      ". b1 1/1"
+    ],
+    "expansion": [
+      "a2"
+    ],
+    "counts": {
+      "total": 6,
+      "filtered": 6,
+      "displayed": 6
+    },
+    "problems": []
+  }
+}

@@ -127,3 +127,10 @@ and `packages/dom/test/tree-lazy-gaps.test.ts`, conformance
 `conformance/cases/tree/lazy-*`, `packages/dom/test/tree-lazy.test.ts` (the rows drawn, Retry by
 click and by Enter, announcements in French and Arabic, the focus through the replacement), browser
 `npm run test:browser -- --only tree`.
+
+## Rows always open with lazy children (1.1.0)
+
+A `fixedOpen` row whose children load lazily is open from the first build, before any expand: its load starts when the
+host calls the lazy control's `sync()` (the DOM does it once the abort handles are set). A host driving the core alone
+calls `sync()` itself after setting `abort`; until it does, the row shows its loading row and nothing is asked.
+Not loaded yet, the row still refuses to close: no chevron, back goes to the parent.

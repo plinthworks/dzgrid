@@ -14,8 +14,12 @@ export interface MotionEffects {
   readonly flip?: boolean;
   /** Rows coming into view after a sort or a filter fade in. */
   readonly enter?: boolean;
-  /** A value a transaction changed is tinted and marked a moment. */
-  readonly flash?: boolean;
+  /**
+   * A value a transaction changed (or a save succeeded) is tinted: at full at once, held `hold` ms, then faded in
+   * `fade` ms (each 0–10 000; `true` = `{ hold: 0, fade: 600 }`; a bad field: its default and an `invalid-setting`
+   * warning). Reduced motion: a still mark for `hold + fade`.
+   */
+  readonly flash?: boolean | { readonly hold?: number; readonly fade?: number };
   /** The rows slide a little on a page change. */
   readonly page?: boolean;
   /** A popup opening and the overlay appearing fade in (owner Q2). */
@@ -91,9 +95,10 @@ export function motion(o: MotionOptions = {}): Motion {
   let missing = false;
   const grids = new Map<GridContext<unknown>, { h: FeatureHandle | null }>();
   // GSAP missing: the grid works without motion, told once.
-  const tell = (g: GridContext<unknown>): void => emit(g.kernel, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'error', 'features.motion', 'gsap')] });
+  const tell = (g: GridContext<unknown>, problems = [problem('missing-feature', 'error', 'features.motion', 'gsap')]): void => emit(g.kernel, { type: 'problems', source: 'host', problems });
   const load = (): Promise<Run.Engine | null> => {
-    const p = (chunk ??= import('./run/index.js').then((m) => m.start(o)));
+    // The chunk checks `effects.flash` per grid; a bad field told from here.
+    const p = (chunk ??= import('./run/index.js').then((m) => m.start(o, (g, k, v) => tell(g, [problem('invalid-setting', 'warning', `motion.effects.flash.${k}`, String(v))]))));
     return p.then(
       (e) => {
         if (!e && !missing) (missing = true), grids.forEach((_, g) => tell(g));

@@ -55,7 +55,7 @@ function runPaste(input: any) {
 
 function runFill(input: any) {
   const { columns, displayed } = setup(input);
-  const target = fillTarget(input.src as RangeBox, input.to);
+  const target = fillTarget(input.src as RangeBox, input.to, input.along);
   if (input.only === 'target') return { target };
   const ctx = localeCtx({ locale: input.locale ?? 'en-US', ...(input.timeZone && { timeZone: input.timeZone }) });
   // `edits`: values shown over the rows' own (`"id.column": value`), as the editing overlay gives them.

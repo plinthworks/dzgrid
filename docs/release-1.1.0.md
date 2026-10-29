@@ -71,6 +71,23 @@ la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le 
   (84 902), `core/edit` 3 150 → 3 160 (3 155), `core/state` 1 500 → 1 510 (1 506), garde de la base du cœur
   29 001 → 29 070 (29 064 ; `@dzgrid/core` reste 29 150).
 
+## Ajouté pour l'écran « arbre » (propriétaire, 2026-10-29)
+
+- `fill(blocks, { along: 'row' })` : la poignée de recopie, son clic sans glisser, le mode clavier et `api.fill` ne
+  recopient que le long de la ligne (`'column'` : vers le haut ou le bas). Ctrl/Cmd+D n'est plus pris avec `'row'`
+  (Ctrl/Cmd+R avec `'column'`). Le menu ⋮ garde « Recopier vers le bas » : l'app le retire
+  (`columnMenu({ items: (col, d) => d.filter((i) => i.id !== 'fill.down') })`). Une autre valeur : les deux sens et un
+  avertissement `invalid-setting`.
+- `motion({ effects: { flash: { hold: 3000, fade: 1000 } } })` : la marque reste pleine 3 s puis s'efface en 1 s, pour
+  les changements en direct et après un enregistrement ; en mouvement réduit, marque fixe 4 s. Sans l'option : comme
+  avant (0,6 s).
+- `tree({ fixedOpen: (row) => boolean })` : ces lignes sont toujours ouvertes, sans flèche ni sa place de 24 px ; ←, `*`,
+  « tout replier » et `rows.expand(false)` ne les ferment pas ; `aria-expanded="true"` reste. Les autres parents gardent
+  leur flèche. Pour leur style : `rowClass` et du CSS.
+- Limites relevées (accord du propriétaire, 2026-10-29) : `dom/tree` 3 850 → 3 950 (3 863, la marge restante pour
+  l'étape 15), `theme/edit.css` 2 200 → 2 250 (2 222). K.8 reste à 84 950 (84 901 mesuré : la hausse à 85 000 n'a pas
+  servi).
+
 ## Ce qui a été vérifié (2026-10-28)
 
 Voir ROADMAP « Phase 6 — close » : le portail complet (vitest, `test:perm`, `test:tz`, `typecheck`, `build`,

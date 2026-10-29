@@ -68,6 +68,23 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
   the browser and in the request to a server (docs/behaviors/filter-set.md « Include only »). Sizes (owner, 2026-10-29):
   the set chunk 4 339 / 4 350 (was 4 250), K.8 84 902 / 84 950 (was 84 900), `core/edit` 3 155 / 3 160 (was 3 150),
   `core/state` 1 506 / 1 510 (was 1 500); the core base 29 064 (its guard 29 070, `@dzgrid/core` 29 150 unchanged).
+- **Fill in one direction** (owner, 2026-10-29, the « arbre » screen): `fill(blocks, { along: 'row' | 'column' })`
+  — every way (the handle's drag, its no-drag click, the keyboard mode, `api.fill`) fills along that axis only; Ctrl/Cmd+D
+  with `row` (Ctrl/Cmd+R with `column`) is not taken; another value fills both ways with one `invalid-setting` warning
+  (`fill.along`). The rule is the core's: `fillTarget(src, to, along)` in `@dzgrid/core/range` (fill.md 26).
+- **Flash duration** (owner, 2026-10-29): `motion({ effects: { flash: { hold, fade } } })` in ms (0–10 000; default
+  `{ hold: 0, fade: 600 }`, today's): the mark held at full, then faded; the saved flash takes the same durations;
+  reduced motion: a still mark for hold + fade. A bad field: its default and one `invalid-setting` warning per grid
+  (`motion.effects.flash.hold` / `.fade`) (motion.md « Its duration »).
+- **Tree rows always open** (owner, 2026-10-29): `tree({ fixedOpen: (row) => boolean })` — those rows are open whatever
+  the expansion, never closed by the keys, `*`, collapse-all, `rows.expand(false)` or an expansion the host sets (the
+  core refuses, no event), never listed by expand-all; no chevron and no 24 px slot, `aria-expanded="true"` kept; other
+  parents unchanged. A throw counts as false; a value that is not a function is ignored with `invalid-setting`
+  (`tree.fixedOpen`). Style them with `rowClass` and CSS (tree-view.md « rows always open »). `@dzgrid/theme/edit.css`:
+  the editor's field in such a cell starts at the indent.
+- Sizes of these three (owner, 2026-10-29): `dom/tree` 3 863 / 3 950 (was 3 850), `theme/edit.css` 2 222 / 2 250 (was
+  2 200); within their lines: `dom/fill` 3 143 / 3 150, motion 648 / 700 and its chunk 3 479 / 3 500, `core/tree`
+  3 490 / 3 500, `core/range` 2 904 / 3 200; K.8 unchanged (84 901 / 84 950; its granted 85 000 not needed).
 - **A documented hook for styling one header group** (owner, 1.1.0): every group header cell carries `.dzg-hgroup`,
   `data-g="<ColumnGroupDef.id>"` and `data-level`, now a stable public contract pinned by a test (left to right and
   right to left): `.dzg-hgroup[data-g="REAL_TIME"] { background: var(--app-…); }` from the app's sheet. An empty

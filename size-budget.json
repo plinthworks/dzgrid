@@ -277,7 +277,7 @@
     },
     "@dzgrid/theme/edit.css": {
       "file": "packages/theme/edit.css",
-      "maxGzip": 2200
+      "maxGzip": 2250
     },
     "@dzgrid/theme/range.css": {
       "file": "packages/theme/range.css",
@@ -412,7 +412,7 @@
     },
     "@dzgrid/dom/tree": {
       "file": "packages/dom/src/tree.ts",
-      "maxGzip": 3850,
+      "maxGzip": 3950,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",

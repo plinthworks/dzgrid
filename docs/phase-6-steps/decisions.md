@@ -132,3 +132,39 @@ Questions: `questions.md`. These answers win over `docs/phase-6-plan.md`.
 - **Real Angular example line (owner, 2026-10-28):** 94 500 → 95 000 (measured 94 596; the example build had been broken since 1.0.0, so earlier growth went unmeasured — a gate must catch a broken example build).
 - **clearFilters / resetState (owner, 2026-10-28, in 1.1.0):** `DzgController.clearFilters()` (every column filter and the quick search, sort kept, one request) and `resetState()` (back to the grid as defined at creation, before any restore; needs `gridState()`; `GridStateApi.reset()`), asked from the owner's NgRx screen. Budgets raised by the owner (measured over by 24 / 16 / 47 B): `@dzgrid/dom/state` 1 150 → 1 200 (1 174), `@dzgrid/angular` 7 300 → 7 350 (7 316), K.8 audit profile 84 800 → 84 900 (84 847).
 - **Set filter include only (owner, 2026-10-29, in 1.1.0):** `ColumnDef.filter: { kind: 'set', exclude: false }` — a set filter on that column only ever writes no filter (null) or `{ type: 'set', include: [...] }`, never `exclude`, never `blanks` (docs/behaviors/filter-set.md « Include only »). (1) Everything ticked on a complete list = no filter (null). (2) The blanks row is hidden on such a column. (3) A set filter with `exclude` or `blanks` arriving from elsewhere on such a column is ignored with a Problem (`invalid-filter`, stored and ignored like a wrong-type filter, not a refused command). (4) Ships in 1.1.0. Budgets (owner, 2026-10-29, accepted; measured over by compression noise and the refusal in compile and wire): `@dzgrid/dom/filters: set (lazy)` 4 250 → 4 350 (4 339), the core base guard (`layering.test.ts` `BASE`) 29 001 → 29 070 (29 064; `check:size`'s `@dzgrid/core` stays 29 150), K.8 audit profile 84 900 → 84 950 (84 902), `@dzgrid/core/edit` 3 150 → 3 160 (3 155), `@dzgrid/core/state` 1 500 → 1 510 (1 506).
+
+## 1.1.0 scope widened (owner, 2026-10-29)
+
+« Je peux attendre la 1.1.0, donc faisons tout dans cette version » : the two structural items (merged cells inside
+a tree, a gap between two big categories) join 1.1.0 with the set filter include-only option and the three small
+options (fill in one direction, flash duration, tree without its chevron). 1.1.0 is published once all six are done.
+Plans: `step14-plan.md` (the three small options), `step15-plan.md` (the two structural items).
+
+## Steps 14 and 15 — owner answers (2026-10-29)
+
+Step 14 (`step14-plan.md`):
+- Fill: `fill(blocks, { along: 'row' | 'column' })` — horizontal only / vertical only; none = both, as today (the
+  owner's « x ou y »; logical names for right to left). Q14-1: the « fill down » menu entry is removed by the host
+  (doc recipe).
+- Flash: `effects.flash: { hold, fade }` ms; the saved flash uses the same durations (Q14-6 A); reduced motion: a still
+  mark for hold + fade (Q14-5 A).
+- Tree: **not** a grid-wide `chevron: false`. `tree({ fixedOpen: (row) => boolean })`: a function; rows it answers
+  true for are always open, draw no chevron and no 24 px slot, and no key, collapse-all or saved state closes them;
+  other parents keep their chevron. Styling those rows (font, colour) uses what exists: `rowClass` (a class from a
+  function on the row) and CSS, or a cell part for the label. `data-dzg-toggle` (Q14-3) not needed now.
+- Sizes (Q14-7): accepted — K.8 → 85 000, `theme/edit.css` → 2 250, `dom/tree` see step 15.
+
+Step 14 built (2026-10-29), final sizes (gz, measured on minified code): `dom/tree` 3 863 / **3 950** (raised from
+3 850; 87 B left for step 15), `theme/edit.css` 2 222 / **2 250** (raised from 2 200: the field of a row always open
+starts at the indent), K.8 84 901 / 84 950 (**not raised**: the audit screen does not load fill, motion or tree; 85 000
+not needed). Within their lines, no raise: `dom/fill` 3 143 / 3 150 (the axis rule moved into the core's
+`fillTarget(src, to, along)`, `core/range` 2 904 / 3 200), `motion-gsap` 648 / 700 and its chunk 3 479 / 3 500 (the bad
+field's problem built in the eager part, the chunk checks), `core/tree` 3 490 / 3 500 (golfed: one loop for the open
+flags), `@dzgrid/core` 29 064 unchanged. Lead decisions: the `fixedOpen` gate is in the core (`opens` false, `parents`
+leaves them out, the build opens them) so the kernel refuses a close from any side; the DOM reads `opens` rather than
+calling the function again; `chevron: false` and `data-dzg-toggle` dropped.
+
+Step 15 (`step15-plan.md`): all recommendations A. Spans (row and column) only between siblings under the same
+parent; a column span touching the tree column is refused (`invalid-span`, drawn unmerged). `rowGaps({ before })`,
+16 px scaling with the text, never above the first row, not exported, not printed. Sizes accepted: `core/row-gaps`
+450, `dom/row-gaps` 900, `dom/tree` → 3 950 (both steps), `core/spans` only if the measure needs it.

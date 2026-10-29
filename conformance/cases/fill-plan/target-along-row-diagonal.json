@@ -1,0 +1,84 @@
+{
+  "id": "target-along-row-diagonal",
+  "suite": "fill-plan",
+  "description": "fillTarget with along 'row' (fill.md 26): the pointer seven rows down and one column to the end \u2014 the row distance is ignored, the target is the column on the source's rows.",
+  "input": {
+    "src": {
+      "top": 2,
+      "bottom": 2,
+      "start": 1,
+      "end": 1
+    },
+    "to": {
+      "row": 9,
+      "col": 2
+    },
+    "along": "row",
+    "only": "target",
+    "shown": [
+      "r0",
+      "r1",
+      "r2",
+      "r3",
+      "r4",
+      "r5",
+      "r6",
+      "r7",
+      "r8",
+      "r9"
+    ],
+    "columns": [
+      {
+        "id": "a",
+        "type": "number"
+      },
+      {
+        "id": "b",
+        "type": "number"
+      },
+      {
+        "id": "c",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "number"
+      },
+      {
+        "id": "e",
+        "type": "number"
+      },
+      {
+        "id": "f",
+        "type": "number"
+      },
+      {
+        "id": "g",
+        "type": "number"
+      },
+      {
+        "id": "h",
+        "type": "number"
+      },
+      {
+        "id": "i",
+        "type": "number"
+      },
+      {
+        "id": "j",
+        "type": "number"
+      }
+    ]
+  },
+  "expected": {
+    "target": {
+      "box": {
+        "top": 2,
+        "bottom": 2,
+        "start": 2,
+        "end": 2
+      },
+      "way": "end"
+    }
+  }
+}
