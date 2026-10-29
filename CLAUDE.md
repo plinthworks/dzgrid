@@ -37,6 +37,8 @@ npm run test:ci        # one worker — catches state shared between files
 npm run test:tz        # the suite in Auckland and Los Angeles
 npm run typecheck      # core (lib ES2023, no DOM) then the tests
 npm run build          # packages/*/dist, refuses a manifest pointing at src/ or with runtime deps
+npm run check:api      # after build: no public type removed or narrowed vs api/*.api.txt (1.0.0 baseline)
+npm run gate:step      # every step's gate: test:ci, test:tz, typecheck, build, check:size, check:api
 npm run spike          # Phase 0 spikes in real browsers, one after another
 npm start              # playground on http://localhost:4700 (tzslot 4500, DzCalendar 4600) — don't kill it
 npm run test:real-app  # phase closes only: the « real app » page in Chrome (own Vite on 4711), screenshots compared; -- --update rewrites them
@@ -52,6 +54,12 @@ vitest's optional peers otherwise.
 - Every phase ends with the architect agent checking it against
   `ARCHITECTURE.md` and a code review; findings are fixed before the phase is
   called done. Every change: a test that fails first, then the fix.
+- Every step, not only phase closes, ends with `npm run gate:step` green. A
+  public type removed or narrowed is an owner decision (`scripts/api.mjs --accept`).
+- A test's `as never` / `as any` carries a comment saying why (same line or the
+  line before); `scripts/test/test-casts-baseline.json` counts only go down.
+- A review lists every place that recomputes the same thing (screen, export,
+  print, clipboard, server wire) and checks a new rule reached each.
 - Bad input never throws: it becomes a `Problem` (code + path + raw detail;
   sentences belong to the DOM layer's translated messages). A `Problem` never
   carries row data — rows may be health records.

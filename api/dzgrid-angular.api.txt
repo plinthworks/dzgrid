@@ -1,0 +1,521 @@
+# The accepted public type surface — written by scripts/api.mjs, checked by `npm run check:api`.
+# Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
+# history: 1.0.0 as published on npm (first baseline of the guard, 2026-10-29)
+
+@ @dzgrid/angular
+## DZGRID_ANGULAR_VERSION
+  declare const DZGRID_ANGULAR_VERSION = "1.0.0";
+## DZG_DEFAULTS
+  declare const DZG_DEFAULTS: InjectionToken<DzGridDefaults>;
+## DZG_ENV
+  declare const DZG_ENV: InjectionToken<GridEnv>;
+## DZG_MESSAGES
+  declare const DZG_MESSAGES: InjectionToken<GridMessages | null>;
+## DZG_PARTS
+  declare const DZG_PARTS: InjectionToken<Readonly<Record<string, SlotPart<keyof _dzgrid_dom.SlotContext>>>>;
+## DzGrid
+  declare class DzGrid<T> implements AfterContentInit {
+      readonly rows: _angular_core.InputSignal<Iterable<T> | undefined>;
+      readonly source: _angular_core.InputSignal<_dzgrid_core.SourceBinding<T> | undefined>;
+      readonly columns: _angular_core.InputSignal<readonly ColumnOrGroup<T>[]>;
+      readonly getRowId: _angular_core.InputSignal<(row: T) => RowIdInput>;
+      readonly messages: _angular_core.InputSignal<GridMessages | undefined>;
+      readonly locale: _angular_core.InputSignal<string | undefined>;
+      readonly timeZone: _angular_core.InputSignal<string | undefined>;
+      readonly numerals: _angular_core.InputSignal<"locale" | "latn" | undefined>;
+      readonly direction: _angular_core.InputSignal<"ltr" | "rtl" | "auto" | undefined>;
+      readonly density: _angular_core.InputSignal<"compact" | "comfortable" | "spacious" | undefined>;
+      readonly rowHeight: _angular_core.InputSignal<number | undefined>;
+      readonly overlay: _angular_core.InputSignal<"loading" | "error" | null | undefined>;
+      readonly label: _angular_core.InputSignal<string | undefined>;
+      readonly tooltips: _angular_core.InputSignal<{
+          readonly delayMs?: number;
+      } | undefined>;
+      readonly overscan: _angular_core.InputSignal<{
+          readonly rows?: number;
+          readonly cols?: number;
+      } | undefined>;
+      readonly searchWarmup: _angular_core.InputSignal<"idle" | "off" | undefined>;
+      readonly selection: _angular_core.InputSignal<{
+          readonly mode: "none" | "single" | "multi";
+          readonly checkbox?: boolean;
+          readonly click?: boolean;
+          readonly keepOnFilter?: boolean;
+          readonly canSelect?: ((row: _dzgrid_core.DataNode<T>, selection: SelectionState, context: unknown) => boolean | string) | undefined;
+      } | undefined>;
+      readonly context: _angular_core.InputSignal<unknown>;
+      readonly rowClass: _angular_core.InputSignal<((c: _dzgrid_dom.RowClassContext<T>) => string | null | undefined) | undefined>;
+      readonly fullWidth: _angular_core.InputSignal<((row: Readonly<T>) => boolean | {
+          readonly part?: string;
+      }) | undefined>;
+      readonly parts: _angular_core.InputSignal<Readonly<Record<string, SlotPart<keyof SlotContext>>> | undefined>;
+      readonly dzgNested: _angular_core.InputSignal<(_dzgrid_dom.PartBase & {
+          readonly row: Readonly<unknown>;
+          readonly key: RowKey;
+          readonly master: RowKey;
+          readonly height: number;
+          readonly depth?: number;
+          leave?(): void;
+      }) | undefined>;
+      readonly operations: _angular_core.InputSignal<_dzgrid_core.OperationsInput | undefined>;
+      readonly pagination: _angular_core.InputSignal<_dzgrid_core.PageOptions | undefined>;
+      readonly filterKinds: _angular_core.InputSignal<readonly _dzgrid_core.AnyFilterKind[] | undefined>;
+      readonly clock: _angular_core.InputSignal<(() => number) | undefined>;
+      readonly injectStyles: _angular_core.InputSignal<boolean | undefined>;
+      readonly nonce: _angular_core.InputSignal<string | undefined>;
+      readonly features: _angular_core.InputSignal<readonly GridFeature[] | undefined>;
+      readonly floatingFilters: _angular_core.InputSignal<boolean | undefined>;
+      readonly save: _angular_core.InputSignal<SaveHandler<T> | undefined>;
+      readonly quick: _angular_core.ModelSignal<string | undefined>;
+      readonly filter: _angular_core.ModelSignal<Readonly<Record<string, _dzgrid_core.ColumnFilter>> | undefined>;
+      readonly selected: _angular_core.ModelSignal<SelectionState | undefined>;
+      readonly expanded: _angular_core.ModelSignal<ReadonlySet<RowKey> | undefined>;
+      readonly gridEvent: OutputEmitterRef<GridEvent<T>>;
+      readonly cellClicked: OutputEmitterRef<{
+          readonly type: "cellClicked";
+          readonly source: "user";
+          readonly row: _dzgrid_core.RowNode<T>;
+          readonly column: string;
+      }>;
+      readonly rowClicked: OutputEmitterRef<{
+          readonly type: "rowClicked";
+          readonly source: "user";
+          readonly row: _dzgrid_core.RowNode<T>;
+      }>;
+      readonly cellAction: OutputEmitterRef<{
+          readonly type: "cellAction";
+          readonly source: "user";
+          readonly column: string;
+          readonly key: RowKey;
+          readonly name: string;
+          readonly detail: unknown;
+      }>;
+      readonly partAction: OutputEmitterRef<{
+          readonly type: "partAction";
+          readonly source: "user";
+          readonly slot: string;
+          readonly column: string | null;
+          readonly name: string;
+          readonly detail: unknown;
+      }>;
+      readonly fetchFailed: OutputEmitterRef<{
+          readonly type: "fetchFailed";
+          readonly source: "data";
+          readonly error: unknown;
+          readonly key: string;
+          readonly page: number | null;
+      }>;
+      readonly rowExpanded: OutputEmitterRef<{
+          readonly type: "rowExpanded";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly rows: readonly RowKey[];
+          readonly expanded: boolean;
+      }>;
+      readonly cellEdited: OutputEmitterRef<{
+          readonly type: "cellEdited";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly key: RowKey;
+          readonly column: string;
+          readonly value: unknown;
+          readonly previous: unknown;
+          readonly origin: _dzgrid_core.SaveOrigin;
+      }>;
+      readonly saveFailed: OutputEmitterRef<{
+          readonly type: "saveFailed";
+          readonly source: "data";
+          readonly key: RowKey;
+          readonly column: string;
+          readonly value: unknown;
+          readonly error: unknown;
+          readonly reason: string | null;
+          readonly code: string | null;
+      }>;
+      readonly orderStale: OutputEmitterRef<{
+          readonly type: "orderStale";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly stale: boolean;
+      }>;
+      readonly undoChanged: OutputEmitterRef<{
+          readonly type: "undoChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly canUndo: boolean;
+          readonly canRedo: boolean;
+      }>;
+      readonly rangeChanged: OutputEmitterRef<{
+          readonly type: "rangeChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly range: _dzgrid_core.CellRange | null;
+      }>;
+      readonly rangeCopied: OutputEmitterRef<{
+          readonly type: "rangeCopied";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly rows: number;
+          readonly columns: number;
+          readonly cells: number;
+          readonly cut: boolean;
+      }>;
+      readonly problems: OutputEmitterRef<readonly Problem[]>;
+      readonly gridReady: OutputEmitterRef<DzgController<T>>;
+      readonly controller: DzgController<T>;
+      private readonly _defaults;
+      private readonly _provided;
+      private readonly _messages;
+      private readonly _env;
+      private readonly _zone;
+      private readonly _el;
+      private readonly _browser;
+      private readonly _templates;
+      private readonly _grid;
+      private _k;
+      private readonly _b;
+      private readonly _bound;
+      private readonly _told;
+      private _last;
+      private _gone;
+      private _saves;
+      private _early;
+      private _seen?;
+      private _pend;
+      private _closed;
+      private readonly _registry;
+      private readonly _settings;
+      constructor();
+      ngAfterContentInit(): void;
+      private _write;
+      private _shut;
+      private _save;
+      private _nest;
+      private _open;
+      private _tell;
+      private _q;
+      private readonly _real;
+      private _hear;
+      private _one;
+      static ɵfac: _angular_core.ɵɵFactoryDeclaration<DzGrid<any>, never>;
+      static ɵcmp: _angular_core.ɵɵComponentDeclaration<DzGrid<any>, "dz-grid", [
+          "dzGrid"
+      ], {
+          "rows": {
+              "alias": "rows";
+              "required": false;
+              "isSignal": true;
+          };
+          "source": {
+              "alias": "source";
+              "required": false;
+              "isSignal": true;
+          };
+          "columns": {
+              "alias": "columns";
+              "required": true;
+              "isSignal": true;
+          };
+          "getRowId": {
+              "alias": "getRowId";
+              "required": true;
+              "isSignal": true;
+          };
+          "messages": {
+              "alias": "messages";
+              "required": false;
+              "isSignal": true;
+          };
+          "locale": {
+              "alias": "locale";
+              "required": false;
+              "isSignal": true;
+          };
+          "timeZone": {
+              "alias": "timeZone";
+              "required": false;
+              "isSignal": true;
+          };
+          "numerals": {
+              "alias": "numerals";
+              "required": false;
+              "isSignal": true;
+          };
+          "direction": {
+              "alias": "direction";
+              "required": false;
+              "isSignal": true;
+          };
+          "density": {
+              "alias": "density";
+              "required": false;
+              "isSignal": true;
+          };
+          "rowHeight": {
+              "alias": "rowHeight";
+              "required": false;
+              "isSignal": true;
+          };
+          "overlay": {
+              "alias": "overlay";
+              "required": false;
+              "isSignal": true;
+          };
+          "label": {
+              "alias": "label";
+              "required": false;
+              "isSignal": true;
+          };
+          "tooltips": {
+              "alias": "tooltips";
+              "required": false;
+              "isSignal": true;
+          };
+          "overscan": {
+              "alias": "overscan";
+              "required": false;
+              "isSignal": true;
+          };
+          "searchWarmup": {
+              "alias": "searchWarmup";
+              "required": false;
+              "isSignal": true;
+          };
+          "selection": {
+              "alias": "selection";
+              "required": false;
+              "isSignal": true;
+          };
+          "context": {
+              "alias": "context";
+              "required": false;
+              "isSignal": true;
+          };
+          "rowClass": {
+              "alias": "rowClass";
+              "required": false;
+              "isSignal": true;
+          };
+          "fullWidth": {
+              "alias": "fullWidth";
+              "required": false;
+              "isSignal": true;
+          };
+          "parts": {
+              "alias": "parts";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzgNested": {
+              "alias": "dzgNested";
+              "required": false;
+              "isSignal": true;
+          };
+          "operations": {
+              "alias": "operations";
+              "required": false;
+              "isSignal": true;
+          };
+          "pagination": {
+              "alias": "pagination";
+              "required": false;
+              "isSignal": true;
+          };
+          "filterKinds": {
+              "alias": "filterKinds";
+              "required": false;
+              "isSignal": true;
+          };
+          "clock": {
+              "alias": "clock";
+              "required": false;
+              "isSignal": true;
+          };
+          "injectStyles": {
+              "alias": "injectStyles";
+              "required": false;
+              "isSignal": true;
+          };
+          "nonce": {
+              "alias": "nonce";
+              "required": false;
+              "isSignal": true;
+          };
+          "features": {
+              "alias": "features";
+              "required": false;
+              "isSignal": true;
+          };
+          "floatingFilters": {
+              "alias": "floatingFilters";
+              "required": false;
+              "isSignal": true;
+          };
+          "save": {
+              "alias": "save";
+              "required": false;
+              "isSignal": true;
+          };
+          "quick": {
+              "alias": "quick";
+              "required": false;
+              "isSignal": true;
+          };
+          "filter": {
+              "alias": "filter";
+              "required": false;
+              "isSignal": true;
+          };
+          "selected": {
+              "alias": "selected";
+              "required": false;
+              "isSignal": true;
+          };
+          "expanded": {
+              "alias": "expanded";
+              "required": false;
+              "isSignal": true;
+          };
+      }, {
+          "quick": "quickChange";
+          "filter": "filterChange";
+          "selected": "selectedChange";
+          "expanded": "expandedChange";
+          "gridEvent": "gridEvent";
+          "cellClicked": "cellClicked";
+          "rowClicked": "rowClicked";
+          "cellAction": "cellAction";
+          "partAction": "partAction";
+          "fetchFailed": "fetchFailed";
+          "rowExpanded": "rowExpanded";
+          "cellEdited": "cellEdited";
+          "saveFailed": "saveFailed";
+          "orderStale": "orderStale";
+          "undoChanged": "undoChanged";
+          "rangeChanged": "rangeChanged";
+          "rangeCopied": "rangeCopied";
+          "problems": "problems";
+          "gridReady": "gridReady";
+      }, [
+          "_templates"
+      ], never, true, never>;
+  }
+## DzGridConfig
+  interface DzGridConfig {
+      readonly messages?: GridMessages;
+      readonly parts?: Readonly<Record<string, SlotPart>>;
+      readonly defaults?: DzGridDefaults;
+  }
+## DzGridDefaults
+  type DzGridDefaults = Pick<GridSettings<unknown>, 'locale' | 'timeZone' | 'direction' | 'density' | 'rowHeight' | 'numerals' | 'features'>;
+## DzgCell
+  type DzgCell = DzgPartComponent<'cell'>;
+## DzgController
+  declare class DzgController<T = unknown> {
+      #private;
+      readonly ready: _angular_core.Signal<boolean>;
+      readonly kernel: _angular_core.Signal<GridKernel<T, RowModel<T>> | null>;
+      _attach(k: GridKernel<T, RowModel<T>> | null, g?: GridInstance<T, RowModel<T>> | null, features?: readonly GridFeature[]): void;
+      dispatch(cmd: GridCommand): GridCommandResult;
+      focusCell(row: RowKey, column: string): void;
+      ensureVisible(row: RowKey, column?: string): void;
+      refresh(): void;
+      announce(text: string): void;
+      openFilter(column: string): boolean;
+      closeFilter(): void;
+      edit(): EditApi<T> | null;
+      range(): RangeApi | null;
+      fill(): FillApi | null;
+      static ɵfac: _angular_core.ɵɵFactoryDeclaration<DzgController<any>, never>;
+      static ɵprov: _angular_core.ɵɵInjectableDeclaration<DzgController<any>>;
+  }
+## DzgEditorComponent
+  interface DzgEditorComponent extends DzgPartComponent<'editor'> {
+      read?(): CellInput | undefined;
+  }
+## DzgExport
+  declare class DzgExport {
+      readonly dzgExport: _angular_core.InputSignal<CsvExport>;
+      readonly dzgExportScope: _angular_core.InputSignal<_dzgrid_core.ExportScope | undefined>;
+      constructor();
+      static ɵfac: _angular_core.ɵɵFactoryDeclaration<DzgExport, never>;
+      static ɵdir: _angular_core.ɵɵDirectiveDeclaration<DzgExport, "button[dzgExport]", never, {
+          "dzgExport": {
+              "alias": "dzgExport";
+              "required": true;
+              "isSignal": true;
+          };
+          "dzgExportScope": {
+              "alias": "dzgExportScope";
+              "required": false;
+              "isSignal": true;
+          };
+      }, {}, never, never, true, never>;
+  }
+## DzgPart
+  declare class DzgPart<S extends WiredSlot = 'cell'> {
+      readonly dzgPart: _angular_core.InputSignal<string>;
+      readonly slot: _angular_core.InputSignal<S>;
+      readonly template: TemplateRef<DzgTemplateContext<S>>;
+      static ngTemplateContextGuard<S extends WiredSlot>(_d: DzgPart<S>, _c: unknown): _c is DzgTemplateContext<S>;
+      static ɵfac: _angular_core.ɵɵFactoryDeclaration<DzgPart<any>, never>;
+      static ɵdir: _angular_core.ɵɵDirectiveDeclaration<DzgPart<any>, "ng-template[dzgPart]", never, {
+          "dzgPart": {
+              "alias": "dzgPart";
+              "required": true;
+              "isSignal": true;
+          };
+          "slot": {
+              "alias": "slot";
+              "required": false;
+              "isSignal": true;
+          };
+      }, {}, never, never, true, never>;
+  }
+## DzgPartComponent
+  interface DzgPartComponent<S extends WiredSlot = 'cell'> {
+      readonly cell: InputSignal<DzgPartContext<S>>;
+      focus?(): boolean;
+  }
+## DzgPartContext
+  type DzgPartContext<S extends WiredSlot = 'cell'> = SlotContext[S] & {
+      emit(name: string, detail?: unknown): void;
+  } & (S extends 'editor' ? {
+      reads(fn: () => CellInput | undefined): void;
+  } : unknown);
+## DzgSearch
+  declare class DzgSearch {
+      readonly dzgSearch: _angular_core.InputSignal<QuickSearch>;
+      readonly dzgSearchDebounce: _angular_core.InputSignal<number | undefined>;
+      constructor();
+      static ɵfac: _angular_core.ɵɵFactoryDeclaration<DzgSearch, never>;
+      static ɵdir: _angular_core.ɵɵDirectiveDeclaration<DzgSearch, "input[dzgSearch]", never, {
+          "dzgSearch": {
+              "alias": "dzgSearch";
+              "required": true;
+              "isSignal": true;
+          };
+          "dzgSearchDebounce": {
+              "alias": "dzgSearchDebounce";
+              "required": false;
+              "isSignal": true;
+          };
+      }, {}, never, never, true, never>;
+  }
+## DzgTemplateContext
+  interface DzgTemplateContext<S extends WiredSlot = 'cell'> {
+      $implicit: DzgPartContext<S>;
+      cell: DzgPartContext<S>;
+  }
+## ObservableLike
+  interface ObservableLike<V> {
+      subscribe(o: {
+          next(v: V): void;
+          error(e: unknown): void;
+          complete(): void;
+      }): {
+          unsubscribe(): void;
+      };
+  }
+## WiredSlot
+  type WiredSlot = keyof SlotContext;
+## componentPart
+  declare function componentPart<S extends WiredSlot>(slot: S, cmp: Type<DzgPartComponent<S>>): SlotPart<S>;
+## fromObservable
+  declare function fromObservable<T>(fetch: (req: DataRequest) => ObservableLike<DataResponse<T>>, values?: (req: ValuesRequest) => ObservableLike<ValuesResponse>): DataSource<T>;
+## provideDzGrid
+  declare function provideDzGrid(c: DzGridConfig): Provider[];

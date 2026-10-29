@@ -1,0 +1,2312 @@
+# The accepted public type surface — written by scripts/api.mjs, checked by `npm run check:api`.
+# Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
+# history: 1.0.0 as published on npm (first baseline of the guard, 2026-10-29)
+# history: 1.1.0 changes found on the guard's first run (2026-10-29), compatible for callers: required members added to interfaces the grid hands out (LazyControl.sync, GridStateApi.reset, SlotContext.menuItem), inputs widened (SpanInput, MotionEffects.flash); owner to confirm — @dzgrid/core/spans#SpanInput, @dzgrid/core/tree-lazy#LazyControl
+
+@ @dzgrid/core
+## AbortHandle
+  export interface AbortHandle {
+      readonly signal: AbortSignalLike;
+      abort(reason?: unknown): void;
+  }
+## AbortSignalLike
+  export interface AbortSignalLike {
+      readonly aborted: boolean;
+      readonly reason?: unknown;
+  }
+## AnyFilterKind
+  export type AnyFilterKind = FilterKind<any, any>;
+## CellAddr
+  export interface CellAddr {
+      readonly row: RowKey;
+      readonly column: string;
+  }
+## CellClassContext
+  export interface CellClassContext<T, V = unknown> {
+      readonly value: V | null;
+      readonly text: string;
+      readonly row: Readonly<T>;
+      readonly key: RowKey;
+      readonly column: string;
+      readonly context: unknown;
+  }
+## CellFocus
+  export type CellFocus = Extract<FocusPos, {
+      readonly kind: 'cell';
+  }>;
+## CellRange
+  export interface CellRange {
+      readonly anchor: CellAddr;
+      readonly focus: CellAddr;
+  }
+## ChangeSource
+  export type ChangeSource = 'user' | 'host' | 'api' | 'data';
+## ClientModel
+  export interface ClientModel<T> extends RowModel<T> {
+      readonly kind: 'client';
+      readonly allRows: DisplayedRows<T>;
+      row(key: RowKey): DataNode<T> | undefined;
+      readonly query: Query;
+      readonly counts: {
+          readonly total: number;
+          readonly filtered: number;
+          readonly displayed: number;
+      };
+      readonly problems: readonly Problem[];
+      setRows(rows: Iterable<T>, source?: ChangeSource): TransactionResult;
+      applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
+      setColumns(columns: ColumnLookup<T>, source?: ChangeSource): void;
+      setContext(ctx: LocaleCtx, source?: ChangeSource): void;
+      setReader(reader: ValueReader<T>, changed?: readonly string[]): void;
+      reapply(source?: ChangeSource): void;
+      readonly orderStale: boolean;
+      setApp(context: unknown, source?: ChangeSource): void;
+      setValues(column: string, o?: ValuesOptions): ValuesHandle;
+      warmSearch(): SearchWarmup;
+      tick(): void;
+      isExpanded(key: RowKey): boolean;
+      setExpansion(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
+      expand(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
+      expandable(depth?: number): readonly RowKey[];
+      expandAll(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
+      readonly diagnostics: {
+          readonly foldBuilds: number;
+          readonly filterRuns: number;
+          readonly sortRuns: number;
+          readonly displayedBuilds: number;
+          readonly retested: number;
+          readonly keyBuilds: number;
+          readonly rankBuilds: number;
+          readonly quickScanned: number;
+          readonly displayBuilds: number;
+          readonly pageCuts: number;
+          readonly indexBuilds: number;
+          readonly countBuilds: number;
+      };
+  }
+## ClientOptions
+  export interface ClientOptions<T> {
+      readonly rows: Iterable<T>;
+      readonly getRowId: (row: T) => RowIdInput;
+      readonly columns: ColumnLookup<T>;
+      readonly ctx: LocaleCtx;
+      readonly reader?: ValueReader<T>;
+      readonly page?: PageOptions;
+      readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
+      readonly now?: () => number;
+      readonly shape?: RowShape<T>;
+      readonly app?: unknown;
+  }
+## CollatorSpec
+  export interface CollatorSpec {
+      readonly sensitivity?: 'base' | 'accent' | 'variant';
+      readonly numeric?: boolean;
+  }
+## ColumnChange
+  export interface ColumnChange {
+      readonly changed: readonly string[];
+      readonly layoutChanged: boolean;
+      readonly problems: readonly Problem[];
+  }
+## ColumnDef
+  export interface ColumnDef<T, V = unknown> {
+      readonly id: string;
+      readonly field?: string;
+      readonly value?: (row: Readonly<T>) => V;
+      readonly header?: string;
+      readonly type?: ColumnType;
+      readonly codec?: ValueCodec<V>;
+      readonly enumOptions?: readonly EnumOption[];
+      readonly assumeZone?: string;
+      readonly numberFormat?: NumberFormatSpec;
+      readonly instantFormat?: InstantFormatSpec;
+      readonly width?: number;
+      readonly minWidth?: number;
+      readonly maxWidth?: number;
+      readonly flex?: number;
+      readonly resizable?: boolean;
+      readonly movable?: boolean;
+      readonly hideable?: false;
+      readonly menu?: false;
+      readonly chooser?: false;
+      readonly sortable?: boolean;
+      readonly filter?: false | {
+          readonly kind?: string;
+          readonly floating?: boolean;
+          readonly debounceMs?: number;
+          readonly ops?: readonly string[];
+          readonly optionPart?: string;
+      };
+      readonly pinned?: Side | null;
+      readonly hidden?: boolean;
+      readonly align?: 'start' | 'center' | 'end';
+      readonly wrap?: boolean;
+      readonly ui?: {
+          readonly cell?: string;
+          readonly header?: string;
+          readonly tooltip?: string;
+          readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined;
+          readonly headerClass?: string;
+          readonly data?: Readonly<Record<string, unknown>>;
+      };
+      readonly headerTooltip?: string;
+      readonly tooltip?: (value: V | null, row: Readonly<T>, context: unknown) => string | null;
+      readonly merge?: true | ((a: SpanCtx<T>, b: SpanCtx<T>) => boolean) | {
+          readonly same?: (a: SpanCtx<T>, b: SpanCtx<T>) => boolean;
+          readonly within?: readonly string[];
+      };
+      readonly rowSpan?: (ctx: SpanCtx<T>) => number;
+      readonly colSpan?: (ctx: SpanCtx<T>) => number;
+      readonly groupShow?: 'open' | 'closed';
+      readonly csv?: 'text';
+      readonly editable?: EditableRule<T>;
+      readonly validate?: (value: V | null, row: Readonly<T>, context: unknown) => string | null | undefined;
+      readonly edit?: EditChecks<T, V>;
+  }
+## ColumnFilter
+  export type ColumnFilter = {
+      readonly type: 'text';
+      readonly op: TextOp;
+      readonly value?: string;
+      readonly caseSensitive?: boolean;
+  } | {
+      readonly type: 'number';
+      readonly op: NumOp;
+      readonly value?: number;
+      readonly valueTo?: number;
+  } | {
+      readonly type: 'day';
+      readonly op: NumOp | 'relative';
+      readonly value?: Day | string;
+      readonly valueTo?: Day | string;
+      readonly range?: RelativeRange;
+  } | {
+      readonly type: 'instant';
+      readonly op: InstantOp | 'relative';
+      readonly day?: Day | string;
+      readonly dayTo?: Day | string;
+      readonly at?: string;
+      readonly atTo?: string;
+      readonly range?: RelativeRange;
+  } | {
+      readonly type: 'boolean';
+      readonly value: boolean | null;
+  } | {
+      readonly type: 'set';
+      readonly include?: readonly string[];
+      readonly exclude?: readonly string[];
+      readonly blanks?: 'include' | 'exclude';
+  } | {
+      readonly type: 'combined';
+      readonly join: 'and' | 'or';
+      readonly conditions: readonly ColumnFilter[];
+  } | {
+      readonly type: 'custom';
+      readonly kind: string;
+      readonly state: Json;
+  };
+## ColumnGroupDef
+  export interface ColumnGroupDef<T> {
+      readonly id: string;
+      readonly header?: string;
+      readonly children: readonly ColumnOrGroup<T>[];
+      readonly collapsible?: boolean;
+      readonly open?: boolean;
+  }
+## ColumnLayout
+  export interface ColumnLayout {
+      readonly start: ColumnSlice;
+      readonly center: ColumnSlice;
+      readonly end: ColumnSlice;
+      readonly totalWidth: number;
+  }
+## ColumnLookup
+  export interface ColumnLookup<T> {
+      get(id: string): ResolvedColumn<T> | undefined;
+      visible(): readonly ResolvedColumn<T>[];
+      readonly version: number;
+      readonly dataVersion: number;
+  }
+## ColumnModel
+  export interface ColumnModel<T> extends ColumnLookup<T> {
+      readonly layout: ColumnLayout;
+      readonly problems: readonly Problem[];
+      state(): readonly ColumnState[];
+      apply(patch: readonly ColumnState[], source: ChangeSource): ColumnChange;
+      setDefs(defs: readonly ColumnOrGroup<T>[]): ColumnChange;
+      setAvailableInline(px: number): ColumnChange;
+      readonly folded: ReadonlySet<string>;
+      fold(ids: ReadonlySet<string>): ColumnChange;
+  }
+## ColumnOrGroup
+  export type ColumnOrGroup<T> = ColumnDef<T, any> | ColumnGroupDef<T>;
+## ColumnSlice
+  export interface ColumnSlice {
+      readonly columns: readonly ResolvedColumn<any>[];
+      readonly widths: PrefixSums;
+      readonly width: number;
+  }
+## ColumnState
+  export interface ColumnState {
+      readonly id: string;
+      readonly width?: number | null;
+      readonly hidden?: boolean;
+      readonly pinned?: Side | null;
+      readonly order?: number;
+  }
+## ColumnType
+  export type ColumnType = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'enum' | 'custom';
+## DEFAULT_PAGE_SIZE
+  export declare const DEFAULT_PAGE_SIZE = 50;
+## DEFAULT_PAGE_SIZES
+  export declare const DEFAULT_PAGE_SIZES: readonly number[];
+## DataNode
+  export interface DataNode<T> {
+      readonly key: RowKey;
+      readonly kind: 'data';
+      readonly level: number;
+      readonly id: RowIdInput;
+      readonly data: Readonly<T>;
+      readonly pinned?: 'top' | 'bottom';
+  }
+## Day
+  export type Day = string & {
+      readonly [dayBrand]: true;
+  };
+## DetailNode
+  export interface DetailNode<T> {
+      readonly key: RowKey;
+      readonly kind: 'detail';
+      readonly level: number;
+      readonly master: RowKey;
+      readonly data: Readonly<T>;
+  }
+## Disambiguation
+  export type Disambiguation = 'compatible' | 'earlier' | 'later' | 'reject';
+## DisplayIndex
+  export type DisplayIndex = number & {
+      readonly [displayIndexBrand]: true;
+  };
+## DisplayedRows
+  export interface DisplayedRows<T> {
+      readonly version: number;
+      readonly count: number;
+      nodeAt(i: DisplayIndex): RowNode<T>;
+      keyAt(i: DisplayIndex): RowKey;
+      indexOf(key: RowKey): DisplayIndex | -1;
+      index(n: number): DisplayIndex | null;
+      nextData(i: DisplayIndex, delta: 1 | -1): DataNode<T> | null;
+      readonly dataCount?: number;
+      matchedAt?(i: DisplayIndex): boolean;
+      parentOf?(key: RowKey): RowKey | null;
+      levelAt?(i: DisplayIndex): number;
+  }
+## EMPTY_QUERY
+  export declare const EMPTY_QUERY: Query;
+## EditChecks
+  export interface EditChecks<T, V = unknown> {
+      readonly required?: boolean;
+      readonly min?: V;
+      readonly max?: V;
+      readonly pattern?: string | RegExp;
+      readonly options?: readonly EnumOption[] | ((row: Readonly<T>, context: unknown) => readonly EnumOption[]);
+      readonly maxLength?: number;
+      readonly editor?: string;
+  }
+## EditableInfo
+  export interface EditableInfo {
+      readonly pinned?: 'top' | 'bottom' | undefined;
+  }
+## EditableRule
+  export type EditableRule<T> = boolean | ((row: Readonly<T>, context: unknown, info: EditableInfo) => boolean);
+## EnumOption
+  export interface EnumOption {
+      readonly value: string;
+      readonly label?: string;
+      readonly aliases?: readonly string[];
+  }
+## ExportScope
+  export type ExportScope = 'displayed' | 'selected' | 'all';
+## ExportServerPart
+  export interface ExportServerPart {
+      readonly filter?: Readonly<Record<string, unknown>>;
+      readonly quick?: string;
+      readonly sort?: readonly SortItem[];
+      readonly params: Readonly<Record<string, Json>>;
+      readonly zone: string;
+      readonly key: string;
+  }
+## ExportTrace
+  export interface ExportTrace {
+      readonly source: ChangeSource;
+      readonly id: string;
+      readonly at: string;
+      readonly scope: ExportScope;
+  }
+## FilterKind
+  export interface FilterKind<S extends Json = Json, V = unknown> {
+      readonly name: string;
+      readonly types?: readonly ColumnType[];
+      read(state: unknown): S | 'invalid';
+      active(s: S): boolean;
+      test?(s: S, ctx: LocaleCtx, context?: unknown): (value: V | null, row: Readonly<unknown>) => boolean;
+      wire?(s: S, ctx: LocaleCtx, zone: string, context?: unknown): Json;
+  }
+## FilterModel
+  export type FilterModel = Readonly<Record<string, ColumnFilter>>;
+## FocusOwner
+  export type FocusOwner<T> = (f: CellFocus, rows: DisplayedRows<T>) => FocusPos;
+## FocusPos
+  export type FocusPos = {
+      readonly kind: 'cell';
+      readonly row: RowKey;
+      readonly column: string;
+  } | {
+      readonly kind: 'header';
+      readonly column: string;
+      readonly level?: number;
+  };
+## Formatters
+  export interface Formatters {
+      number(spec?: NumberFormatSpec): (n: number) => string;
+      day(): (d: Day) => string;
+      instant(spec?: InstantFormatSpec): (ms: InstantMs) => string;
+  }
+## GridCommand
+  export type GridCommand = {
+      readonly type: 'sort.toggle';
+      readonly column: string;
+      readonly multi: boolean;
+  } | {
+      readonly type: 'sort.set';
+      readonly sort: readonly SortItem[];
+  } | {
+      readonly type: 'query.set';
+      readonly query: Query;
+  } | {
+      readonly type: 'selection.toggle';
+      readonly row: RowKey;
+  } | {
+      readonly type: 'selection.only';
+      readonly row: RowKey;
+  } | {
+      readonly type: 'selection.range';
+      readonly target: RowKey;
+      readonly additive: boolean;
+  } | {
+      readonly type: 'selection.allDisplayed';
+  } | {
+      readonly type: 'selection.clear';
+  } | {
+      readonly type: 'selection.set';
+      readonly selection: SelectionState;
+  } | {
+      readonly type: 'column.resize';
+      readonly column: string;
+      readonly width: number;
+      readonly finished: boolean;
+  } | {
+      readonly type: 'column.state';
+      readonly patch: readonly ColumnState[];
+  } | {
+      readonly type: 'focus.set';
+      readonly focus: FocusPos | null;
+  } | {
+      readonly type: 'filter.set';
+      readonly filter: FilterModel;
+  } | {
+      readonly type: 'filter.column';
+      readonly column: string;
+      readonly filter: ColumnFilter | null;
+  } | {
+      readonly type: 'quick.set';
+      readonly text: string;
+  } | {
+      readonly type: 'selection.all';
+  } | {
+      readonly type: 'selection.allFiltered';
+  } | {
+      readonly type: 'selection.keepOnFilter';
+      readonly keep: boolean;
+  } | {
+      readonly type: 'rows.refresh';
+  } | {
+      readonly type: 'columns.set';
+      readonly defs: readonly ColumnOrGroup<any>[];
+  } | {
+      readonly type: 'context.set';
+      readonly ctx: LocaleCtx;
+  } | {
+      readonly type: 'page.go';
+      readonly index: number;
+  } | {
+      readonly type: 'page.size';
+      readonly size: number;
+  } | {
+      readonly type: 'rows.expand';
+      readonly rows: readonly RowKey[];
+      readonly expanded: boolean;
+  } | {
+      readonly type: 'rows.expandAll';
+      readonly expanded: boolean;
+      readonly depth?: number;
+  } | {
+      readonly type: 'edits.reader';
+      readonly reader: ValueReader<any>;
+      readonly columns?: readonly string[];
+  } | {
+      readonly type: 'rows.reapply';
+  } | {
+      readonly type: 'context.app';
+      readonly value: unknown;
+  };
+## GridCommandResult
+  export type GridCommandResult = {
+      readonly ok: true;
+  } | {
+      readonly ok: false;
+      readonly reason: string;
+      readonly problems: readonly Problem[];
+  };
+## GridEvent
+  export type GridEvent<T> = {
+      readonly type: 'modelUpdated';
+      readonly source: ChangeSource;
+      readonly displayed: DisplayedRows<T>;
+      readonly kind: ModelChange<T>['kind'];
+  } | {
+      readonly type: 'sortChanged';
+      readonly source: ChangeSource;
+      readonly sort: readonly SortItem[];
+  } | {
+      readonly type: 'selectionChanged';
+      readonly source: ChangeSource;
+      readonly selection: SelectionState;
+      readonly count: number | null;
+      readonly query: Query | null;
+      readonly scope: RowScope | null;
+      readonly reason: SelectionReason | null;
+  } | ({
+      readonly type: 'selectionRefused';
+      readonly source: ChangeSource;
+  } & SelectionRefusal) | {
+      readonly type: 'filterChanged';
+      readonly source: ChangeSource;
+      readonly filter: FilterModel;
+  } | {
+      readonly type: 'quickChanged';
+      readonly source: ChangeSource;
+      readonly text: string;
+  } | {
+      readonly type: 'columnResized';
+      readonly source: ChangeSource;
+      readonly column: string;
+      readonly width: number;
+      readonly finished: boolean;
+  } | {
+      readonly type: 'columnsChanged';
+      readonly source: ChangeSource;
+      readonly changed: readonly string[];
+      readonly layoutChanged: boolean;
+  } | {
+      readonly type: 'focusChanged';
+      readonly source: ChangeSource;
+      readonly focus: FocusPos | null;
+  } | {
+      readonly type: 'cellClicked';
+      readonly source: 'user';
+      readonly row: RowNode<T>;
+      readonly column: string;
+  } | {
+      readonly type: 'rowClicked';
+      readonly source: 'user';
+      readonly row: RowNode<T>;
+  } | {
+      readonly type: 'problems';
+      readonly source: ChangeSource;
+      readonly problems: readonly Problem[];
+  } | {
+      readonly type: 'firstDataRendered';
+      readonly source: 'data';
+  } | {
+      readonly type: 'rowExpanded';
+      readonly source: ChangeSource;
+      readonly rows: readonly RowKey[];
+      readonly expanded: boolean;
+  } | {
+      readonly type: 'pageChanged';
+      readonly source: ChangeSource;
+      readonly page: PageState;
+  } | {
+      readonly type: 'fetchFailed';
+      readonly source: 'data';
+      readonly error: unknown;
+      readonly key: string;
+      readonly page: number | null;
+  } | {
+      readonly type: 'orderStale';
+      readonly source: ChangeSource;
+      readonly stale: boolean;
+  } | {
+      readonly type: 'cellEdited';
+      readonly source: ChangeSource;
+      readonly key: RowKey;
+      readonly column: string;
+      readonly value: unknown;
+      readonly previous: unknown;
+      readonly origin: SaveOrigin;
+  } | {
+      readonly type: 'saveFailed';
+      readonly source: 'data';
+      readonly key: RowKey;
+      readonly column: string;
+      readonly value: unknown;
+      readonly error: unknown;
+      readonly reason: string | null;
+      readonly code: string | null;
+  } | {
+      readonly type: 'editStates';
+      readonly source: ChangeSource;
+      readonly cells: readonly {
+          readonly key: RowKey;
+          readonly column: string;
+      }[];
+  } | {
+      readonly type: 'editingStarted';
+      readonly source: 'user';
+      readonly key: RowKey;
+      readonly column: string;
+      readonly start: 'f2' | 'enter' | 'key' | 'dblclick' | 'tap' | 'tab';
+  } | {
+      readonly type: 'editingStopped';
+      readonly source: 'user';
+      readonly key: RowKey;
+      readonly column: string;
+      readonly kept: boolean;
+      readonly via: 'enter' | 'tab' | 'escape' | 'blur' | 'lost';
+  } | {
+      readonly type: 'rangeChanged';
+      readonly source: ChangeSource;
+      readonly range: CellRange | null;
+  } | {
+      readonly type: 'rangeCopied';
+      readonly source: ChangeSource;
+      readonly rows: number;
+      readonly columns: number;
+      readonly cells: number;
+      readonly cut: boolean;
+  } | {
+      readonly type: 'stateChanged';
+      readonly source: ChangeSource;
+      readonly state: GridState;
+  } | {
+      readonly type: 'stateRestored';
+      readonly source: ChangeSource;
+      readonly problems: readonly Problem[];
+  } | {
+      readonly type: 'densityChanged';
+      readonly source: ChangeSource;
+      readonly density: 'compact' | 'comfortable' | 'spacious';
+  } | {
+      readonly type: 'undoChanged';
+      readonly source: ChangeSource;
+      readonly canUndo: boolean;
+      readonly canRedo: boolean;
+  } | {
+      readonly type: 'pinnedChanged';
+      readonly source: ChangeSource;
+  } | {
+      readonly type: 'cellAction';
+      readonly source: 'user';
+      readonly column: string;
+      readonly key: RowKey;
+      readonly name: string;
+      readonly detail: unknown;
+  } | {
+      readonly type: 'partAction';
+      readonly source: 'user';
+      readonly slot: string;
+      readonly column: string | null;
+      readonly name: string;
+      readonly detail: unknown;
+  } | ({
+      readonly type: 'exportRequested';
+  } & ExportTrace & {
+      readonly columns: readonly string[];
+      readonly query: Query;
+      readonly queryKey: string;
+      readonly server?: ExportServerPart;
+      readonly count: number | null;
+      readonly selection?: {
+          readonly mode: 'include' | 'exclude';
+          readonly count: number | null;
+      };
+      readonly zone: string;
+      readonly locale: string;
+  }) | ({
+      readonly type: 'exportRefused';
+  } & ExportTrace & {
+      readonly refusal: 'host' | 'too-large' | 'error';
+      readonly reason?: string;
+  }) | ({
+      readonly type: 'exportFinished';
+  } & ExportTrace & {
+      readonly outcome: 'done' | 'failed' | 'cancelled';
+      readonly via: 'browser' | 'server';
+      readonly rows: number | null;
+      readonly columns: number;
+      readonly bytes: number | null;
+      readonly fileName: string | null;
+      readonly hidden?: number;
+      readonly durationMs: number;
+      readonly blank?: number;
+      readonly invalid?: number;
+      readonly failure?: {
+          readonly stage: 'load' | 'rows' | 'canExport' | 'exportAll' | 'build' | 'download';
+          readonly name: string;
+      };
+  });
+## GridKernel
+  export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
+      readonly rows: M;
+      readonly columns: ColumnModel<T>;
+      readonly query: Query;
+      readonly selection: SelectionState;
+      readonly anchor: RowKey | null;
+      readonly focus: FocusPos | null;
+      readonly expansion: ReadonlySet<RowKey>;
+      readonly selectionScope: SelectionScope | null;
+      readonly headerState: HeaderSelection;
+      dispatch(cmd: GridCommand, source: ChangeSource): GridCommandResult;
+      values(column: string, o?: ValuesOptions): ValuesHandle;
+      readonly reader: ValueReader<T>;
+      readonly app: unknown;
+      readonly orderStale: boolean;
+      editable(key: RowKey, column: string): boolean;
+      rowOf(key: RowKey): DataNode<T> | undefined;
+      tick(): void;
+      subscribe(fn: (e: GridEvent<T>) => void): () => void;
+      destroy(): void;
+  }
+## GroupNode
+  export interface GroupNode {
+      readonly key: RowKey;
+      readonly kind: 'group';
+      readonly level: number;
+      readonly label: string;
+      readonly path: readonly string[];
+  }
+## HeaderSelection
+  export type HeaderSelection = 'none' | 'some' | 'all';
+## INTENT_OWNERS
+  export declare const INTENT_OWNERS: {
+      readonly [K in Intent['kind']]: readonly KeyOwner[];
+  };
+## InstantFilter
+  export type InstantFilter = Extract<ColumnFilter, {
+      type: 'instant';
+  }>;
+## InstantFormatSpec
+  export interface InstantFormatSpec {
+      readonly seconds?: boolean;
+      readonly date?: boolean;
+      readonly time?: boolean;
+  }
+## InstantMs
+  export type InstantMs = number & {
+      readonly [instantBrand]: true;
+  };
+## InstantOp
+  export type InstantOp = 'onDay' | 'betweenDays' | 'before' | 'after' | 'between' | 'blank' | 'notBlank';
+## InstantOptions
+  export interface InstantOptions {
+      readonly assumeZone?: string;
+      readonly disambiguation?: Disambiguation;
+  }
+## InstantRange
+  export interface InstantRange {
+      readonly from: number | null;
+      readonly to: number | null;
+  }
+## InstantReading
+  export type InstantReading = {
+      readonly ok: true;
+      readonly value: InstantMs;
+      readonly warning?: 'wall-time-skipped' | 'wall-time-ambiguous';
+  } | {
+      readonly ok: false;
+      readonly code: 'invalid-instant' | 'ambiguous-instant' | 'unknown-zone' | 'wall-time-skipped' | 'wall-time-ambiguous';
+  };
+## Intent
+  export type Intent = {
+      readonly kind: 'move';
+      readonly axis: 'row' | 'col';
+      readonly delta: -1 | 1;
+  } | {
+      readonly kind: 'edge';
+      readonly axis: 'row' | 'col' | 'both';
+      readonly to: 'first' | 'last';
+  } | {
+      readonly kind: 'page';
+      readonly delta: -1 | 1;
+  } | {
+      readonly kind: 'toggleSelect';
+  } | {
+      readonly kind: 'selectAll';
+  } | {
+      readonly kind: 'sort';
+      readonly multi: boolean;
+  } | {
+      readonly kind: 'enter';
+  } | {
+      readonly kind: 'leave';
+  };
+## IntentContext
+  export interface IntentContext {
+      readonly dir: 'ltr' | 'rtl';
+      readonly owner: KeyOwner;
+      readonly mac: boolean;
+  }
+## Json
+  export type Json = null | boolean | number | string | readonly Json[] | {
+      readonly [k: string]: Json;
+  };
+## KeyLike
+  export interface KeyLike {
+      readonly key: string;
+      readonly ctrlKey: boolean;
+      readonly metaKey: boolean;
+      readonly shiftKey: boolean;
+      readonly altKey: boolean;
+      readonly code?: string;
+  }
+## KeyOwner
+  export type KeyOwner = 'cell' | 'header' | 'editor' | 'filter-input' | 'popup' | 'cell-widget' | 'outside';
+## LayerPlacement
+  export interface LayerPlacement {
+      readonly base: number;
+      readonly layerTop: number;
+  }
+## LoadingNode
+  export interface LoadingNode {
+      readonly key: RowKey;
+      readonly kind: 'loading';
+      readonly level: number;
+      readonly parent: RowKey;
+      readonly failed: boolean;
+  }
+## LocaleCtx
+  export interface LocaleCtx {
+      readonly locale: string;
+      readonly numerals: 'latn' | 'locale';
+      readonly timeZone: string;
+      readonly calendar: 'gregory';
+  }
+## MAX_INSTANT
+  export declare const MAX_INSTANT = 8640000000000000;
+## MAX_PHYSICAL
+  export declare const MAX_PHYSICAL = 4000000;
+## ModelChange
+  export interface ModelChange<T> {
+      readonly source: ChangeSource;
+      readonly displayed: DisplayedRows<T>;
+      readonly kind: 'rows' | 'order' | 'query' | 'context' | 'page' | 'status' | 'expand';
+      readonly transaction?: TransactionResult;
+      readonly problems: readonly Problem[];
+      readonly told?: readonly Problem[];
+      readonly failure?: {
+          readonly error: unknown;
+          readonly key: string;
+          readonly page: number | null;
+      };
+  }
+## ModelEnv
+  export interface ModelEnv<T> {
+      readonly getRowId: (row: T) => RowIdInput;
+      readonly columns: ColumnLookup<T>;
+      readonly ctx: LocaleCtx;
+      readonly page?: PageOptions;
+      readonly operations?: OperationsInput;
+      readonly query?: Query;
+      readonly abort?: () => AbortHandle;
+      readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
+      readonly now?: () => number;
+      readonly shape?: RowShape<T>;
+      readonly app?: unknown;
+      readonly held?: boolean | undefined;
+  }
+## ModelStatus
+  export type ModelStatus = {
+      readonly phase: 'idle';
+  } | {
+      readonly phase: 'loading';
+  } | {
+      readonly phase: 'error';
+      readonly failure: unknown;
+      readonly key?: string;
+      readonly page?: number | null;
+  };
+## NO_OVERLAY
+  export declare const NO_OVERLAY: ValueReader<never>;
+## NO_SELECTION
+  export declare const NO_SELECTION: SelectionState;
+## NumOp
+  export type NumOp = 'equals' | 'notEqual' | 'lt' | 'lte' | 'gt' | 'gte' | 'between' | 'blank' | 'notBlank';
+## NumberFormatSpec
+  export interface NumberFormatSpec {
+      readonly style?: 'decimal' | 'percent' | 'currency';
+      readonly currency?: string;
+      readonly minimumFractionDigits?: number;
+      readonly maximumFractionDigits?: number;
+      readonly useGrouping?: boolean;
+  }
+## NumberSeparators
+  export interface NumberSeparators {
+      readonly group: string;
+      readonly decimal: string;
+  }
+## Operation
+  export type Operation = 'filter' | 'quick' | 'sort' | 'page';
+## Operations
+  export interface Operations {
+      readonly filter: Placement;
+      readonly quick: Placement;
+      readonly sort: Placement;
+      readonly page: Placement | 'off';
+  }
+## OperationsInput
+  export type OperationsInput = 'client' | 'server' | Partial<Operations>;
+## PROBLEM_CODES
+  export declare const PROBLEM_CODES: readonly [
+      "invalid-row-id",
+      "duplicate-row-id",
+      "unknown-row-id",
+      "invalid-transaction",
+      "invalid-day",
+      "invalid-instant",
+      "ambiguous-instant",
+      "unknown-zone",
+      "wall-time-skipped",
+      "wall-time-ambiguous",
+      "invalid-column",
+      "duplicate-column-id",
+      "invalid-field-path",
+      "unknown-column",
+      "invalid-sort",
+      "invalid-filter",
+      "filter-needs-server",
+      "invalid-cell-value",
+      "too-many-pinned",
+      "invalid-operations",
+      "unsupported-live-change",
+      "unknown-part",
+      "missing-message",
+      "invalid-page",
+      "invalid-page-response",
+      "fetched-set-large",
+      "invalid-values-response",
+      "invalid-span",
+      "span-overlap",
+      "span-clipped",
+      "invalid-column-group",
+      "missing-feature",
+      "selection-refused",
+      "part-shadowed",
+      "unsupported-combination",
+      "tree-orphan",
+      "tree-cycle",
+      "tree-column-not-first",
+      "tree-shape",
+      "edit-structure",
+      "invalid-setting"
+  ];
+## PageOptions
+  export interface PageOptions {
+      readonly pageSize?: number;
+      readonly pageSizes?: readonly number[];
+  }
+## PageState
+  export interface PageState {
+      readonly index: number;
+      readonly size: number;
+      readonly sizes: readonly number[];
+      readonly total: number | null;
+      readonly pageCount: number | null;
+      readonly hasNext: boolean;
+      readonly canJump: boolean;
+  }
+## PartColumn
+  export interface PartColumn {
+      readonly id: string;
+      readonly type: ColumnType;
+      readonly ui?: {
+          readonly cell?: string;
+          readonly header?: string;
+          readonly tooltip?: string;
+      };
+      readonly filter?: false | {
+          readonly kind?: string;
+          readonly floating?: boolean;
+          readonly debounceMs?: number;
+          readonly ops?: readonly string[];
+      };
+  }
+## PartSlot
+  export type PartSlot = 'cell' | 'header' | 'filter' | 'floating' | 'overlay' | 'tooltip' | 'footer' | 'detail' | 'filterOption';
+## Placement
+  export type Placement = 'client' | 'server';
+## PrefixSums
+  export declare class PrefixSums {
+      #private;
+      constructor(sizes: ArrayLike<number>);
+      get length(): number;
+      get total(): number;
+      sizeAt(i: number): number;
+      set(i: number, size: number): boolean;
+      offsetOf(i: number): number;
+      indexAt(offset: number): number;
+      rebuild(): void;
+  }
+## Problem
+  export interface Problem {
+      readonly code: ProblemCode;
+      readonly severity: Severity;
+      readonly path: string;
+      readonly detail?: string;
+  }
+## ProblemCode
+  export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | 'unknown-ui-key';
+## Query
+  export interface Query {
+      readonly sort: readonly SortItem[];
+      readonly filter: FilterModel;
+      readonly quick: string;
+      readonly key: string;
+  }
+## REBASE
+  export declare const REBASE: number;
+## REJECTED
+  export declare const REJECTED: unique symbol;
+## RELATIVE_RANGES
+  export declare const RELATIVE_RANGES: ReadonlySet<RelativeRange>;
+## RangeResult
+  export type RangeResult = {
+      readonly ok: true;
+      readonly state: SelectionState;
+  } | {
+      readonly ok: false;
+      readonly reason: 'anchor-not-displayed' | 'target-not-displayed';
+  };
+## Rejected
+  export type Rejected = typeof REJECTED;
+## RelativeRange
+  export type RelativeRange = 'today' | 'yesterday' | 'last7Days' | 'last30Days' | 'thisMonth' | 'lastMonth';
+## ResolvedColumn
+  export interface ResolvedColumn<T> {
+      readonly id: string;
+      readonly def: ColumnDef<T, any>;
+      readonly type: ColumnType;
+      readonly codec: ValueCodec<any>;
+      readonly read: (row: Readonly<T>) => unknown;
+      readonly sortable: boolean;
+      readonly filterable: boolean;
+  }
+## RowCounts
+  export interface RowCounts {
+      readonly total: number | null;
+      readonly filtered: number | null;
+      readonly displayed: number;
+  }
+## RowIdInput
+  export type RowIdInput = string | number;
+## RowKey
+  export type RowKey = string & {
+      readonly [rowKeyBrand]: true;
+  };
+## RowKind
+  export type RowKind = 'data' | 'group' | 'footer' | 'detail' | 'full-width' | 'loading';
+## RowLayout
+  export interface RowLayout {
+      readonly count: number;
+      readonly total: number;
+      readonly uniform: boolean;
+      offsetOf(i: DisplayIndex): number;
+      heightOf(i: DisplayIndex): number;
+      indexAt(offset: number): DisplayIndex;
+      setHeight(i: DisplayIndex, h: number): boolean;
+  }
+## RowModel
+  export interface RowModel<T> {
+      readonly kind: 'client' | 'source';
+      readonly ops: Operations;
+      readonly displayed: DisplayedRows<T>;
+      readonly status: ModelStatus;
+      readonly counts: RowCounts;
+      readonly problems: readonly Problem[];
+      readonly selectAll: 'displayed' | 'query';
+      readonly allRows?: DisplayedRows<T> | undefined;
+      keeps(key: RowKey): boolean;
+      membershipOf(q: Query): string;
+      matches?(key: RowKey): boolean;
+      readonly scope: RowScope;
+      row(key: RowKey): DataNode<T> | undefined;
+      setQuery(q: Query, source?: ChangeSource): void;
+      setColumns(columns: ColumnLookup<T>, source?: ChangeSource): void;
+      setContext(ctx: LocaleCtx, source?: ChangeSource): void;
+      invalidate(o?: {
+          readonly purge?: boolean;
+      }): void;
+      readonly page: PageState | null;
+      warmSearch?(): SearchWarmup;
+      setPage(p: {
+          readonly index?: number;
+          readonly size?: number;
+      }, source?: ChangeSource): void;
+      setValues?(column: string, o?: ValuesOptions): ValuesHandle;
+      tick?(): void;
+      readonly expansion?: ReadonlySet<RowKey>;
+      isExpanded?(key: RowKey): boolean;
+      setExpansion?(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
+      expand?(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
+      expandable?(depth?: number): readonly RowKey[];
+      expandAll?(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
+      setReader?(reader: ValueReader<T>, changed?: readonly string[]): void;
+      reapply?(source?: ChangeSource): void;
+      readonly orderStale?: boolean;
+      setApp?(context: unknown, source?: ChangeSource): void;
+      hold?(fn: () => void): void;
+      subscribe(fn: (c: ModelChange<T>) => void): () => void;
+      destroy(): void;
+  }
+## RowNode
+  export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode;
+## RowScope
+  export interface RowScope {
+      readonly params: Readonly<Record<string, Json>>;
+      readonly zone: string;
+  }
+## RowShape
+  export interface RowShape<T> {
+      readonly kind: 'tree' | 'detail';
+      readonly initial?: 'none' | 'all' | number;
+      build(input: ShapeInput<T>): DisplayedRows<T>;
+      all?(): DisplayedRows<T>;
+      parents?(snap: RowSnapshot<T>, depth: number, shown?: boolean): readonly RowKey[];
+      isOpen?(key: RowKey): boolean;
+      opens?(key: RowKey): boolean;
+      readonly problems: readonly Problem[];
+      load?(rows: Iterable<T>, id: (row: T) => RowIdInput): Iterable<T>;
+      tx?(tx: RowTransaction<T>, id: (row: T) => RowIdInput, snap: RowSnapshot<T>): RowTransaction<T>;
+      rekey?(snap: RowSnapshot<T>): ((key: RowKey) => RowKey) | null;
+      attach?(model: ClientModel<T>, redraw: () => void): void;
+      refresh?(): void;
+  }
+## RowTransaction
+  export interface RowTransaction<T> {
+      readonly add?: readonly T[];
+      readonly addAt?: number;
+      readonly update?: readonly T[];
+      readonly patch?: readonly {
+          readonly id: RowIdInput;
+          readonly set: Partial<T>;
+      }[];
+      readonly remove?: readonly RowIdInput[];
+  }
+## SaveOrigin
+  export type SaveOrigin = 'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk' | 'cut';
+## ScrollAnchor
+  export type ScrollAnchor = {
+      readonly kind: 'row';
+      readonly index: DisplayIndex;
+      readonly delta: number;
+  } | {
+      readonly kind: 'end';
+  };
+## ScrollMapper
+  export interface ScrollMapper {
+      readonly scaled: boolean;
+      readonly logicalHeight: number;
+      readonly physicalHeight: number;
+      readonly ratio: number;
+      readonly maxLogical: number;
+      readonly maxPhysical: number;
+      toLogical(physicalTop: number): number;
+      toPhysical(logicalTop: number): number;
+  }
+## SelectionGate
+  export interface SelectionGate {
+      readonly on: boolean;
+      vet(prev: SelectionState, next: SelectionState): {
+          readonly state: SelectionState;
+          readonly refused: SelectionRefusal | null;
+      } | null;
+      readonly skip: (key: RowKey) => boolean;
+      rowsChanged?(): void;
+  }
+## SelectionRefusal
+  export interface SelectionRefusal {
+      readonly rows: readonly RowKey[];
+      readonly reason: string | null;
+      readonly cause: 'rule' | 'unknown-row' | 'needs-rows';
+  }
+## SelectionScope
+  export interface SelectionScope extends RowScope {
+      readonly query: Query;
+  }
+## SelectionState
+  export type SelectionState = {
+      readonly mode: 'include';
+      readonly keys: ReadonlySet<RowKey>;
+  } | {
+      readonly mode: 'exclude';
+      readonly keys: ReadonlySet<RowKey>;
+  };
+## ServerQuery
+  export interface ServerQuery {
+      readonly filter?: FilterModel;
+      readonly quick?: string;
+      readonly sort?: readonly SortItem[];
+      readonly key: string;
+  }
+## SetValue
+  export interface SetValue {
+      readonly value: string;
+      readonly label: string;
+      readonly count: number | null;
+      readonly selected?: boolean;
+  }
+## Severity
+  export type Severity = 'error' | 'warning';
+## ShapeInput
+  export interface ShapeInput<T> {
+      readonly snap: RowSnapshot<T>;
+      readonly order: Uint32Array | null;
+      readonly matched: Uint8Array | null;
+      readonly filterActive: boolean;
+      readonly expansion: ReadonlySet<RowKey>;
+      readonly layer: ReadonlyMap<RowKey, boolean> | null;
+      readonly changed?: readonly RowKey[];
+      readonly version: number;
+  }
+## Side
+  export type Side = 'start' | 'end';
+## SortItem
+  export interface SortItem {
+      readonly column: string;
+      readonly dir: 'asc' | 'desc';
+      readonly nulls?: 'first' | 'last';
+  }
+## SourceBinding
+  export interface SourceBinding<T> {
+      create(env: ModelEnv<T>): SourceHandle<T>;
+  }
+## SourceHandle
+  export interface SourceHandle<T> extends RowModel<T> {
+      readonly kind: 'source';
+      setSource(next: SourceBinding<T>, source?: ChangeSource): void;
+      tick(): void;
+  }
+## SpanCtx
+  export interface SpanCtx<T> {
+      readonly row: Readonly<T>;
+      readonly value: unknown;
+      readonly key: RowKey;
+      readonly index: number;
+      readonly column: string;
+      readonly prev: Readonly<T> | null;
+      readonly next: Readonly<T> | null;
+  }
+## TextOp
+  export type TextOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank';
+## TransactionResult
+  export interface TransactionResult {
+      readonly kind: 'reset' | 'delta' | 'none';
+      readonly version: number;
+      readonly added: readonly RowKey[];
+      readonly updated: readonly RowKey[];
+      readonly removed: readonly RowKey[];
+      readonly problems: readonly Problem[];
+  }
+## VALUES_MAX
+  export declare const VALUES_MAX = 2000;
+## ValueCodec
+  export interface ValueCodec<V> {
+      readonly kind: ColumnType;
+      readonly keyKind: 'number' | 'text';
+      coerce(raw: unknown, ctx: LocaleCtx): V | null;
+      why?(raw: unknown, ctx: LocaleCtx): string;
+      warning?(raw: unknown, ctx: LocaleCtx): 'wall-time-skipped' | 'wall-time-ambiguous' | null;
+      parse(text: string, ctx: LocaleCtx): V | Rejected;
+      format(v: V, ctx: LocaleCtx): string;
+      sortKey(v: V, ctx: LocaleCtx): number | string;
+      compare(a: V, b: V, ctx: LocaleCtx): number;
+      isEmpty(v: unknown): boolean;
+      equals(a: V, b: V): boolean;
+      toExport(v: V): string;
+  }
+## ValueList
+  export interface ValueList {
+      readonly values: readonly SetValue[];
+      readonly blanks: number | null;
+      readonly truncated: boolean;
+  }
+## ValueReader
+  export interface ValueReader<T> {
+      readonly version: number;
+      readonly overlay: boolean;
+      value(col: ResolvedColumn<T>, row: Readonly<T>, id: string): unknown;
+  }
+## ValuesHandle
+  export interface ValuesHandle {
+      readonly status: 'idle' | 'loading' | 'error';
+      readonly result: ValueList | null;
+      readonly available: boolean;
+      readonly failure?: unknown;
+      readonly problems: readonly Problem[];
+      search(text: string): void;
+      refresh(): void;
+      subscribe(fn: () => void): () => void;
+      close(): void;
+  }
+## ValuesOptions
+  export interface ValuesOptions {
+      readonly search?: string;
+      readonly max?: number;
+  }
+## WallResolution
+  export type WallResolution = {
+      readonly ok: true;
+      readonly value: InstantMs;
+      readonly warning?: 'wall-time-skipped' | 'wall-time-ambiguous';
+  } | {
+      readonly ok: false;
+      readonly code: 'unknown-zone' | 'invalid-instant' | 'wall-time-skipped' | 'wall-time-ambiguous';
+  };
+## Window2D
+  export interface Window2D {
+      readonly rows: {
+          readonly first: DisplayIndex;
+          readonly last: DisplayIndex;
+      } | null;
+      readonly cols: {
+          readonly first: number;
+          readonly last: number;
+      } | null;
+      readonly placement: LayerPlacement;
+  }
+## WindowView
+  export interface WindowView {
+      readonly block: number;
+      readonly inline: number;
+  }
+## addDays
+  export declare const addDays: (day: Day, n: number) => Day | null;
+## anchorFor
+  export declare function anchorFor(layout: RowLayout, scrollTop: number, viewBlock: number, isMeasured: (i: DisplayIndex) => boolean): ScrollAnchor | null;
+## assignKeys
+  export declare function assignKeys(ids: readonly unknown[], path?: string, make?: (id: unknown) => RowKey | null): {
+      readonly keys: readonly (RowKey | null)[];
+      readonly problems: readonly Problem[];
+  };
+## booleanCodec
+  export declare const booleanCodec: ValueCodec<boolean>;
+## booleanCodecWith
+  export declare function booleanCodecWith(labels: {
+      readonly true: string;
+      readonly false: string;
+  }): ValueCodec<boolean>;
+## canonicalId
+  export declare function canonicalId(id: unknown): string | null;
+## civilToEpochDay
+  export declare function civilToEpochDay(y: number, m: number, d: number): number;
+## clearSelection
+  export declare const clearSelection: () => SelectionState;
+## clientRows
+  export declare function clientRows<T>(o: ClientOptions<T>): ClientModel<T>;
+## collatorFor
+  export declare function collatorFor(ctx: Pick<LocaleCtx, 'locale'>, spec?: CollatorSpec): Intl.Collator;
+## compareDays
+  export declare const compareDays: (a: Day, b: Day) => number;
+## compilePath
+  export declare function compilePath(path: string): ((row: unknown) => unknown) | null;
+## createColumnModel
+  export declare function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o?: {
+      availableInline?: number;
+  }): ColumnModel<T>;
+## createKernel
+  export declare function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
+      readonly rows: M;
+      readonly columns: ColumnModel<T>;
+      readonly query?: Query;
+      readonly keepSelectionOnFilter?: boolean;
+  }): GridKernel<T, M>;
+## dataKey
+  export declare function dataKey(id: unknown): RowKey | null;
+## dayAt
+  export declare function dayAt(now: number, zone: string): {
+      readonly day: Day;
+      readonly until: number;
+  } | null;
+## dayCodec
+  export declare const dayCodec: ValueCodec<Day>;
+## dayFieldOrder
+  export declare function dayFieldOrder(ctx: LocaleCtx): readonly [
+      'd' | 'm' | 'y',
+      'd' | 'm' | 'y',
+      'd' | 'm' | 'y'
+  ];
+## dayToEpochDay
+  export declare function dayToEpochDay(day: Day): number;
+## daysInMonth
+  export declare function daysInMonth(y: number, m: number): number;
+## detailKey
+  export declare function detailKey(master: RowKey): RowKey;
+## editableAt
+  export declare function editableAt<T>(node: RowNode<T> | undefined, col: ResolvedColumn<T> | undefined, context: unknown, locked?: ReadonlySet<string>, threw?: (column: string) => void): boolean;
+## enumCodec
+  export declare function enumCodec(options: readonly EnumOption[], o?: {
+      sort?: 'label' | 'option-order';
+  }): ValueCodec<string>;
+## epochDayToCivil
+  export declare function epochDayToCivil(n: number): {
+      y: number;
+      m: number;
+      d: number;
+  };
+## epochDayToDay
+  export declare function epochDayToDay(n: number): Day | null;
+## filterKindOf
+  export declare const filterKindOf: (c: PartColumn) => string;
+## fold
+  export declare function fold(s: string): string;
+## formattersFor
+  export declare function formattersFor(ctx: LocaleCtx): Formatters;
+## groupKey
+  export declare function groupKey(path: readonly string[]): RowKey;
+## headerSelection
+  export declare function headerSelection<T>(s: SelectionState, d: DisplayedRows<T>): HeaderSelection;
+## idOfDataKey
+  export declare function idOfDataKey(key: RowKey): string | null;
+## instantCodec
+  export declare function instantCodec(o?: {
+      assumeZone?: string;
+      format?: InstantFormatSpec;
+  }): ValueCodec<InstantMs>;
+## instantToDayIn
+  export declare function instantToDayIn(instant: InstantMs, zone: string): Day | null;
+## instantToIso
+  export declare function instantToIso(ms: InstantMs): string;
+## intentFor
+  export declare function intentFor(e: KeyLike, ctx: IntentContext): Intent | null;
+## isAscii
+  export declare const isAscii: (s: string) => boolean;
+## isBlank
+  export declare const isBlank: (v: unknown) => boolean;
+## isKnownZone
+  export declare function isKnownZone(zone: string): boolean;
+## isLeapYear
+  export declare const isLeapYear: (y: number) => boolean;
+## isSelected
+  export declare function isSelected(s: SelectionState, k: RowKey): boolean;
+## layerPlacement
+  export declare function layerPlacement(logicalTop: number, physicalTop: number, rebase?: number): LayerPlacement;
+## liveChangeProblems
+  export declare function liveChangeProblems(policy: Readonly<Record<string, 'live' | 'fixed'>>, prev: Readonly<Record<string, unknown>>, patch: Readonly<Record<string, unknown>>): Problem[];
+## localeCtx
+  export declare function localeCtx(o: {
+      locale: string;
+      numerals?: 'latn' | 'locale';
+      timeZone?: string;
+  }): LocaleCtx;
+## makeQuery
+  export declare function makeQuery(q?: Partial<Pick<Query, 'sort' | 'filter' | 'quick'>>): Query;
+## messageProblems
+  export declare function messageProblems(key: string, available: ReadonlySet<string>): Problem[];
+## nextSort
+  export declare function nextSort(sort: readonly SortItem[], column: string, multi: boolean): readonly SortItem[];
+## normalizeDigits
+  export declare function normalizeDigits(s: string): string;
+## numberCodec
+  export declare const numberCodec: ValueCodec<number>;
+## numberCodecWith
+  export declare function numberCodecWith(spec?: NumberFormatSpec): ValueCodec<number>;
+## offsetAt
+  export declare function offsetAt(instant: number, zone: string): number;
+## overscanRows
+  export declare function overscanRows(speedPxPerSec: number, rowHeight: number, o?: {
+      readonly min?: number;
+      readonly max?: number;
+  }): number;
+## parseDay
+  export declare function parseDay(s: unknown): Day | null;
+## parseInstant
+  export declare function parseInstant(v: unknown, o?: InstantOptions): InstantMs | null;
+## partNameFor
+  export declare function partNameFor(slot: PartSlot, column: PartColumn, available: ReadonlySet<string>): {
+      readonly name: string | null;
+      readonly problems: readonly Problem[];
+  };
+## pinnedKey
+  export declare function pinnedKey(side: 'top' | 'bottom', id: unknown): RowKey | null;
+## problem
+  export declare const problem: (code: ProblemCode, severity: Severity, path: string, detail?: string) => Problem;
+## quickWords
+  export declare function quickWords(text: string): readonly string[];
+## readDayText
+  export declare function readDayText(text: string, order: readonly [
+      'd' | 'm' | 'y',
+      'd' | 'm' | 'y',
+      'd' | 'm' | 'y'
+  ]): Day | null;
+## readInstant
+  export declare function readInstant(v: unknown, o?: InstantOptions): InstantReading;
+## readMachineNumber
+  export declare function readMachineNumber(raw: unknown): number | null;
+## readNumber
+  export declare function readNumber(text: string, ctx: LocaleCtx): number | null;
+## reconcileFocus
+  export declare function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, after: DisplayedRows<T>, columns: ColumnLookup<T>, owner?: FocusOwner<T>, held?: (key: RowKey) => unknown): FocusPos | null;
+## reconcileSelection
+  export declare function reconcileSelection(s: SelectionState, has: (k: RowKey) => boolean): SelectionState;
+## relativeDays
+  export declare function relativeDays(range: RelativeRange, today: Day): {
+      readonly from: Day;
+      readonly to: Day;
+  } | null;
+## resolveColumns
+  export declare function resolveColumns<T>(tree: readonly ColumnOrGroup<T>[]): {
+      readonly columns: readonly ResolvedColumn<T>[];
+      readonly problems: readonly Problem[];
+  };
+## resolveInstantRange
+  export declare function resolveInstantRange(f: InstantFilter, zone: string, path?: string, now?: number): {
+      range: InstantRange | null;
+      problems: readonly Problem[];
+      days?: {
+          readonly from: Day;
+          readonly to: Day;
+      };
+  };
+## resolveOperations
+  export declare function resolveOperations(input: OperationsInput | undefined, hasSource: boolean): {
+      readonly ops: Operations;
+      readonly problems: readonly Problem[];
+  };
+## resolveWall
+  export declare function resolveWall(wallMs: number, zone: string, disambiguation?: Disambiguation): WallResolution;
+## scrollMapper
+  export declare function scrollMapper(logicalHeight: number, maxPhysical: number, viewportBlockSize: number): ScrollMapper;
+## scrollTopFor
+  export declare function scrollTopFor(anchor: ScrollAnchor, layout: RowLayout, viewBlock: number): number;
+## selectAll
+  export declare const selectAll: () => SelectionState;
+## selectOnly
+  export declare const selectOnly: (keys: Iterable<RowKey>) => SelectionState;
+## selectRange
+  export declare function selectRange<T>(s: SelectionState, displayed: DisplayedRows<T>, anchor: RowKey, target: RowKey, o?: {
+      readonly additive?: boolean;
+  }): RangeResult;
+## selectionCount
+  export declare function selectionCount(s: SelectionState, total: number | null): number | null;
+## splitQuery
+  export declare function splitQuery(q: Query, ops: Operations): {
+      readonly server: ServerQuery;
+      readonly client: Query;
+  };
+## stripMarks
+  export declare function stripMarks(s: string): string;
+## textCodec
+  export declare const textCodec: ValueCodec<string>;
+## toggle
+  export declare function toggle(s: SelectionState, k: RowKey): SelectionState;
+## uniformRowLayout
+  export declare function uniformRowLayout(rows: IndexMint, height: number): RowLayout;
+## variableRowLayout
+  export declare function variableRowLayout(rows: IndexMint, estimate: number, heights?: ArrayLike<number>): RowLayout;
+## visibleWindow
+  export declare function visibleWindow(rows: RowLayout, centerCols: PrefixSums, mapper: ScrollMapper, physicalScrollTop: number, scrollInline: number, view: WindowView, o: {
+      readonly overscanRows: number;
+      readonly overscanCols: number;
+  }): Window2D;
+## windowAt
+  export declare function windowAt(rows: RowLayout, centerCols: PrefixSums, logicalTop: number, physicalScrollTop: number, scrollInline: number, view: WindowView, o: {
+      readonly overscanRows: number;
+      readonly overscanCols: number;
+  }): Window2D;
+## zoneDayBounds
+  export declare function zoneDayBounds(day: Day, zone: string): {
+      readonly from: InstantMs;
+      readonly to: InstantMs;
+  };
+
+@ @dzgrid/core/server
+## AbortHandle
+  export interface AbortHandle {
+      readonly signal: AbortSignalLike;
+      abort(reason?: unknown): void;
+  }
+## AbortSignalLike
+  export interface AbortSignalLike {
+      readonly aborted: boolean;
+      readonly reason?: unknown;
+  }
+## ChildRequest
+  export interface ChildRequest<T> {
+      readonly parent: RowKey;
+      readonly id: string;
+      readonly row: T;
+      readonly filter?: WireFilterModel;
+      readonly quick?: string;
+      readonly sort?: readonly SortItem[];
+      readonly params: Readonly<Record<string, Json>>;
+      readonly zone: string;
+      readonly epoch: number;
+      readonly key: string;
+      readonly signal: AbortSignalLike;
+  }
+## ChildResponse
+  export type ChildResponse<T> = readonly T[] | {
+      readonly rows: readonly T[];
+  };
+## DataRequest
+  export interface DataRequest {
+      readonly filter?: WireFilterModel;
+      readonly quick?: string;
+      readonly sort?: readonly SortItem[];
+      readonly page?: PageWindow;
+      readonly params: Readonly<Record<string, Json>>;
+      readonly zone: string;
+      readonly key: string;
+      readonly signal: AbortSignalLike;
+  }
+## DataResponse
+  export interface DataResponse<T> {
+      readonly rows: readonly T[];
+      readonly total?: number;
+      readonly hasNext?: boolean;
+      readonly nextCursor?: string | null;
+  }
+## DataSource
+  export interface DataSource<T> {
+      readonly fetch: (req: DataRequest) => Promise<DataResponse<T>> | PromiseLike<DataResponse<T>> | DataResponse<T>;
+      readonly values?: (req: ValuesRequest) => Promise<ValuesResponse> | PromiseLike<ValuesResponse> | ValuesResponse;
+      readonly children?: (req: ChildRequest<T>) => Promise<ChildResponse<T>> | PromiseLike<ChildResponse<T>> | ChildResponse<T>;
+  }
+## DropReason
+  export type DropReason = 'superseded' | 'stale-epoch' | 'aborted' | 'destroyed';
+## GateDiagnostics
+  export interface GateDiagnostics {
+      readonly begun: number;
+      readonly accepted: number;
+      readonly dropped: Readonly<Record<DropReason, number>>;
+  }
+## Json
+  export type Json = null | boolean | number | string | readonly Json[] | {
+      readonly [k: string]: Json;
+  };
+## PageWindow
+  export interface PageWindow {
+      readonly index: number;
+      readonly size: number;
+      readonly offset: number;
+      readonly cursor: string | null;
+  }
+## RequestGate
+  export interface RequestGate {
+      begin(channel: string, key: string): {
+          readonly ticket: Ticket;
+          readonly signal: AbortSignalLike;
+      };
+      accepts(t: Ticket): DropReason | null;
+      settle(t: Ticket): DropReason | null;
+      cancel(channel: string): void;
+      newEpoch(): void;
+      destroy(): void;
+      readonly epoch: number;
+      readonly diagnostics: GateDiagnostics;
+  }
+## SourceModel
+  export interface SourceModel<T> extends SourceHandle<T> {
+      readonly diagnostics: {
+          readonly fetches: number;
+          readonly valueFetches: number;
+          readonly childFetches?: number;
+          readonly gate: GateDiagnostics;
+      };
+  }
+## SourceRows
+  export interface SourceRows<T> extends SourceBinding<T> {
+      create(env: ModelEnv<T>): SourceModel<T>;
+  }
+## SourceRowsOptions
+  export interface SourceRowsOptions {
+      readonly paging?: 'offset' | 'cursor';
+      readonly maxRows?: number;
+      readonly params?: Readonly<Record<string, Json>>;
+      readonly abort?: () => AbortHandle;
+  }
+## Ticket
+  export interface Ticket {
+      readonly seq: number;
+      readonly epoch: number;
+      readonly channel: string;
+      readonly key: string;
+  }
+## ValuesRequest
+  export interface ValuesRequest {
+      readonly column: string;
+      readonly search: string;
+      readonly limit: number;
+      readonly filter?: WireFilterModel;
+      readonly quick?: string;
+      readonly params: Readonly<Record<string, Json>>;
+      readonly zone: string;
+      readonly key: string;
+      readonly signal: AbortSignalLike;
+  }
+## ValuesResponse
+  export type ValuesResponse = readonly SetValue[] | {
+      readonly values: readonly SetValue[];
+      readonly blanks?: number | null;
+      readonly truncated?: boolean;
+  };
+## WireEnv
+  export interface WireEnv<T> {
+      readonly ctx: LocaleCtx;
+      readonly columns: ColumnLookup<T>;
+      readonly kinds?: (name: string) => WireKind | undefined;
+      readonly now?: number;
+      readonly app?: unknown;
+  }
+## WireFilter
+  export type WireFilter = {
+      readonly type: 'text';
+      readonly op: TextOp;
+      readonly value?: string;
+      readonly caseSensitive?: true;
+  } | {
+      readonly type: 'number';
+      readonly op: NumOp;
+      readonly value?: number;
+      readonly valueTo?: number;
+  } | {
+      readonly type: 'day';
+      readonly op: NumOp;
+      readonly value?: Day;
+      readonly valueTo?: Day;
+      readonly relative?: RelativeRange;
+      readonly zone?: string;
+  } | {
+      readonly type: 'instant';
+      readonly op: 'blank' | 'notBlank';
+  } | {
+      readonly type: 'instant';
+      readonly op: 'onDay' | 'betweenDays' | 'before' | 'after' | 'between';
+      readonly day?: string;
+      readonly dayTo?: string;
+      readonly at?: string | number;
+      readonly atTo?: string | number;
+      readonly resolved: {
+          readonly from: WireInstant | null;
+          readonly to: WireInstant | null;
+      };
+      readonly zone: string;
+      readonly relative?: RelativeRange;
+  } | {
+      readonly type: 'boolean';
+      readonly value: boolean;
+  } | {
+      readonly type: 'set';
+      readonly include?: readonly string[];
+      readonly exclude?: readonly string[];
+      readonly blanks?: 'include' | 'exclude';
+  } | {
+      readonly type: 'combined';
+      readonly join: 'and' | 'or';
+      readonly conditions: readonly WireFilter[];
+  } | {
+      readonly type: 'custom';
+      readonly kind: string;
+      readonly value: Json;
+  };
+## WireFilterModel
+  export type WireFilterModel = Readonly<Record<string, WireFilter>>;
+## WireInstant
+  export type WireInstant = string;
+## WireKind
+  export interface WireKind {
+      read(state: Json): Json | 'invalid';
+      active(state: Json): boolean;
+      wire?(state: Json, ctx: LocaleCtx, zone: string, context?: unknown): Json;
+      readonly types?: readonly ColumnType[];
+  }
+## createGate
+  export declare function createGate(abort: () => AbortHandle): RequestGate;
+## sourceRows
+  export declare function sourceRows<T>(data: DataSource<T>, o?: SourceRowsOptions): SourceRows<T>;
+## toWire
+  export declare function toWire<T>(f: FilterModel, env: WireEnv<T>): {
+      readonly filter: WireFilterModel;
+      readonly problems: readonly Problem[];
+  };
+
+@ @dzgrid/core/spans
+## BandFragment
+  export interface BandFragment {
+      readonly group: string;
+      readonly first: number;
+      readonly count: number;
+      readonly label: string;
+  }
+## GroupEntry
+  export interface GroupEntry {
+      readonly open: boolean;
+      readonly leaves: readonly string[];
+      readonly shownOpen: readonly string[];
+      readonly shownClosed: readonly string[];
+  }
+## GroupTable
+  export interface GroupTable {
+      readonly groups: ReadonlyMap<string, GroupEntry>;
+      readonly problems: readonly Problem[];
+  }
+## HeaderBands
+  export interface HeaderBands {
+      readonly depth: number;
+      readonly levels: readonly (readonly BandFragment[])[];
+      readonly problems: readonly Problem[];
+  }
+## NavMove
+  export interface NavMove {
+      readonly to: Slot;
+      readonly goal: Slot;
+  }
+## NavShape
+  export interface NavShape {
+      readonly rows: number;
+      readonly cols: number;
+      readonly page: number;
+  }
+## RowSpanPlan
+  export interface RowSpanPlan {
+      readonly covered: ReadonlySet<number>;
+      readonly cells: ReadonlyMap<number, {
+          readonly rows: number;
+          readonly cols: number;
+          readonly width: number;
+      }>;
+      readonly mount: readonly number[];
+      readonly spans: boolean;
+      readonly full: boolean;
+      readonly tall: readonly (readonly [
+          string,
+          SpanCell
+      ])[];
+      readonly pinned: readonly (readonly [
+          string,
+          number,
+          boolean
+      ])[];
+  }
+## Slot
+  export interface Slot {
+      readonly row: number;
+      readonly col: number;
+  }
+## SpanCell
+  export interface SpanCell {
+      readonly row: number;
+      readonly col: number;
+      readonly rows: number;
+      readonly cols: number;
+  }
+## SpanColumns
+  export interface SpanColumns<T> {
+      readonly layout: {
+          readonly start: {
+              readonly columns: readonly ResolvedColumn<T>[];
+          };
+          readonly center: {
+              readonly columns: readonly ResolvedColumn<T>[];
+          };
+          readonly end: {
+              readonly columns: readonly ResolvedColumn<T>[];
+          };
+      };
+      get(id: string): ResolvedColumn<T> | undefined;
+  }
+## SpanInput
+  export interface SpanInput<T> {
+      readonly rows: DisplayedRows<T>;
+      readonly columns: SpanColumns<T>;
+      readonly ctx: LocaleCtx;
+      readonly fullWidth?: ((row: Readonly<T>) => boolean | {
+          readonly part?: string;
+      }) | null | undefined;
+      readonly text?: ((col: ResolvedColumn<T>, row: Readonly<T>, index: number) => string | null) | undefined;
+      readonly apart?: ((row: number) => boolean) | undefined;
+      readonly treeColumn?: string | undefined;
+  }
+## SpanLookup
+  export interface SpanLookup {
+      ownerAt(row: number, col: number): SpanCell | null;
+  }
+## SpanMap
+  export interface SpanMap extends SpanLookup {
+      readonly version: number;
+      readonly none: boolean;
+      coveringAbove(firstRow: number): SpanCell[];
+      inRow(row: number, colFirst: number, colLast: number): SpanCell[];
+      fullWidth(row: number): boolean;
+      readonly problems: readonly Problem[];
+  }
+## buildSpanMap
+  export declare function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): SpanMap;
+## diffState
+  export declare function diffState(t: GroupTable, state: ReadonlyMap<string, boolean>): Record<string, boolean>;
+## foldedColumns
+  export declare function foldedColumns(t: GroupTable, state: ReadonlyMap<string, boolean>): Set<string>;
+## groupTable
+  export declare function groupTable<T>(tree: readonly ColumnOrGroup<T>[]): GroupTable;
+## headerBands
+  export declare function headerBands<T>(tree: readonly ColumnOrGroup<T>[], layout: Segments): HeaderBands;
+## land
+  export declare const land: (map: SpanLookup | null, row: number, col: number) => Slot;
+## navigate
+  export declare function navigate(map: SpanLookup | null, s: NavShape, from: Slot, goal: Slot | null, intent: Intent): NavMove | null;
+## ownerFocus
+  export declare function ownerFocus<T>(map: SpanMap, columns: readonly string[]): FocusOwner<T>;
+## rowPlanner
+  export declare function rowPlanner(map: SpanMap, layout: ColumnLayout): (row: number) => RowSpanPlan | null;
+## spanAt
+  export declare const spanAt: (map: SpanMap | null, row: number, col: number) => SpanCell | null;
+
+@ @dzgrid/core/csv
+## CsvInput
+  export interface CsvInput<T> {
+      readonly rows: DisplayedRows<T>;
+      readonly at?: Uint32Array | null;
+      readonly columns: ColumnLookup<T>;
+      readonly ctx: LocaleCtx;
+      readonly reader?: ValueReader<T>;
+      readonly spans?: SpanMap | null;
+      readonly spanColumns?: readonly string[];
+  }
+## CsvOptions
+  export interface CsvOptions {
+      readonly text?: 'value' | 'display';
+      readonly separator?: ',' | ';' | '\t';
+      readonly bom?: boolean;
+      readonly header?: boolean;
+      readonly numbers?: 'excel' | 'raw';
+      readonly instants?: 'wall' | 'iso';
+      readonly enums?: 'label' | 'code';
+      readonly sanitizeFormulas?: boolean;
+      readonly spans?: 'repeat' | 'first';
+      readonly columns?: readonly string[];
+      readonly chunkRows?: number;
+      readonly tree?: 'none' | 'level' | 'indent';
+      readonly levelHeader?: string;
+      readonly treeColumn?: string;
+  }
+## CsvScope
+  export type CsvScope = ExportScope;
+## CsvSummary
+  export interface CsvSummary {
+      readonly rows: number;
+      readonly columns: number;
+      readonly blank: number;
+      readonly invalid: number;
+  }
+## ExportRequest
+  export interface ExportRequest {
+      readonly scope: CsvScope;
+      readonly columns: readonly string[];
+      readonly query: Query;
+      readonly count: number | null;
+      readonly selection?: SelectionState;
+      readonly server?: Omit<DataRequest, 'page' | 'signal'>;
+  }
+## csvChunks
+  export declare function csvChunks<T>(i: CsvInput<T>, o?: CsvOptions): Generator<string, CsvSummary>;
+## csvColumns
+  export declare function csvColumns<T>(cols: ColumnLookup<T>, ids?: readonly string[]): {
+      columns: ResolvedColumn<T>[];
+      problems: Problem[];
+  };
+## csvRows
+  export declare function csvRows<T>(model: Pick<RowModel<T>, 'displayed' | 'allRows'>, scope: CsvScope, selection: SelectionState): {
+      rows: DisplayedRows<T>;
+      at: Uint32Array | null;
+      count: number;
+  } | null;
+## csvSeparatorFor
+  export declare const csvSeparatorFor: (ctx: LocaleCtx) => "," | ";";
+## toCsv
+  export declare function toCsv<T>(i: CsvInput<T>, o?: CsvOptions): string;
+
+@ @dzgrid/core/rules
+## SelectionRule
+  export type SelectionRule<T> = (row: DataNode<T>, selection: SelectionState) => boolean | string;
+## refusalProblems
+  export declare const refusalProblems: (r: SelectionRefusal) => Problem[];
+## ruleGate
+  export declare function ruleGate<T>(rule: () => ((row: DataNode<T>, selection: SelectionState, context: unknown) => boolean | string) | undefined, rowOf: (key: RowKey) => DataNode<T> | undefined, selection: () => SelectionState, context: () => unknown, report: (err: unknown) => void): SelectionGate & {
+      refused(key: RowKey): boolean;
+  };
+## vetSelection
+  export declare function vetSelection<T>(rule: SelectionRule<T>, rowOf: (key: RowKey) => DataNode<T> | undefined, prev: SelectionState, next: SelectionState): {
+      readonly state: SelectionState;
+      readonly refused: SelectionRefusal | null;
+  };
+
+@ @dzgrid/core/tree
+## TreeOptions
+  export interface TreeOptions<T> {
+      readonly parentId?: (row: T) => RowIdInput | null | undefined;
+      readonly children?: (row: T) => readonly T[] | undefined;
+      readonly path?: (row: T) => readonly string[];
+      readonly filter?: 'ancestors' | 'subtree';
+      readonly initial?: 'none' | 'all' | number;
+  }
+## TreeRows
+  export interface TreeRows<T> extends DisplayedRows<T> {
+      parentOf(key: RowKey): RowKey | null;
+      levelAt(i: DisplayIndex): number;
+      posAt(i: DisplayIndex): number;
+      sizeAt(i: DisplayIndex): number;
+      childrenAt(i: DisplayIndex): number;
+      kidsOf(key: RowKey): number;
+      expandedAt(i: DisplayIndex): boolean;
+      matchedAt(i: DisplayIndex): boolean;
+  }
+## TreeShape
+  export interface TreeShape<T> extends RowShape<T> {
+      readonly kind: 'tree';
+      readonly diagnostics: {
+          readonly builds: number;
+          readonly orders: number;
+          readonly filters: number;
+          readonly flattens: number;
+      };
+  }
+## treeColumnProblems
+  export declare function treeColumnProblems(visible: readonly string[], column: string | undefined): Problem[];
+## treeConflicts
+  export declare function treeConflicts(o: {
+      readonly spans?: boolean;
+      readonly detail?: boolean;
+      readonly page?: boolean;
+  }): Problem[];
+## treeShape
+  export declare function treeShape<T>(o: TreeOptions<T>): TreeShape<T>;
+
+@ @dzgrid/core/tree-lazy
+## ChildLoader
+  export type ChildLoader<T> = (parent: RowKey, row: T, answer: (ok: boolean, value: unknown) => void) => () => void;
+## LazyControl
+  export interface LazyControl<T> {
+      loader: ChildLoader<T> | null;
+      abort: (() => AbortHandle) | null;
+      retry(parent: RowKey): void;
+      sync(): void;
+      reset(again?: boolean): void;
+      on(fn: (parent: RowKey, ok: boolean, request: number) => void): () => void;
+      readonly diagnostics: {
+          readonly started: number;
+          readonly answered: number;
+          readonly failed: number;
+          readonly aborted: number;
+          readonly live: number;
+      };
+  }
+## LazyOptions
+  export interface LazyOptions<T> {
+      readonly has: (row: T) => boolean;
+      readonly load?: (row: T, o: {
+          readonly signal: AbortSignalLike;
+      }) => PromiseLike<readonly T[]> | readonly T[];
+  }
+## LazyShape
+  export interface LazyShape<T> extends TreeShape<T> {
+      readonly lazy: LazyControl<T>;
+  }
+## lazyShape
+  export declare function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<T>;
+
+@ @dzgrid/core/detail
+## DetailOptions
+  export interface DetailOptions<T> {
+      readonly height?: number | ((master: Readonly<T>) => number) | 'auto';
+      readonly initial?: 'none' | 'all';
+      readonly sizes?: ReadonlyMap<RowKey, number>;
+  }
+## DetailRows
+  export interface DetailRows<T> extends DisplayedRows<T> {
+      readonly dataCount: number;
+      readonly details: Uint32Array;
+      readonly heights: readonly number[];
+      parentOf(key: RowKey): RowKey | null;
+  }
+## DetailShape
+  export interface DetailShape<T> extends RowShape<T> {
+      readonly kind: 'detail';
+  }
+## SparseExtras
+  export interface SparseExtras {
+      readonly at: ArrayLike<number>;
+      readonly heights: ArrayLike<number>;
+  }
+## SparseLayout
+  export interface SparseLayout extends RowLayout {
+      setHeights(changes: Iterable<readonly [
+          DisplayIndex,
+          number
+      ]>): boolean;
+  }
+## detailConflicts
+  export declare function detailConflicts(o: {
+      readonly spans?: boolean;
+      readonly tree?: boolean;
+      readonly depth?: number;
+  }): Problem[];
+## detailShape
+  export declare function detailShape<T>(o?: DetailOptions<T>): DetailShape<T>;
+## sparseRowLayout
+  export declare function sparseRowLayout(rows: Pick<DisplayedRows<unknown>, 'count' | 'index'>, h: number, x: SparseExtras): SparseLayout;
+
+@ @dzgrid/core/edit
+## CellInput
+  export type CellInput = {
+      readonly text: string;
+  } | {
+      readonly value: unknown;
+  };
+## CellState
+  export interface CellState {
+      readonly status: 'pending' | 'saving' | 'saved' | 'failed';
+      readonly generation: number;
+      readonly refused?: unknown;
+      readonly reason: string | null;
+      readonly code: string | null;
+  }
+## Checked
+  export type Checked = {
+      readonly ok: true;
+      readonly value: unknown;
+  } | {
+      readonly ok: false;
+      readonly code: string;
+  };
+## CommitResult
+  export interface CommitResult {
+      readonly generation: number | null;
+      readonly staged: number;
+      readonly refused: readonly {
+          readonly key: RowKey;
+          readonly column: string;
+          readonly code: string;
+      }[];
+  }
+## EditController
+  export interface EditController<T> {
+      readonly reader: ValueReader<T>;
+      check(key: RowKey, column: string, input: CellInput): Checked;
+      commit(cells: readonly {
+          readonly key: RowKey;
+          readonly column: string;
+          readonly input: CellInput;
+      }[], o?: {
+          readonly origin?: SaveOrigin;
+          readonly source?: ChangeSource;
+      }): CommitResult;
+      state(key: RowKey, column: string): CellState | undefined;
+      readonly dirty: boolean;
+      undo(source?: ChangeSource): UndoResult | null;
+      redo(source?: ChangeSource): UndoResult | null;
+      readonly canUndo: boolean;
+      readonly canRedo: boolean;
+      setSave(save?: SaveHandler<T>): void;
+      destroy(): number;
+  }
+## EditOptions
+  export interface EditOptions<T> {
+      readonly ctx: () => LocaleCtx;
+      readonly save?: SaveHandler<T>;
+      readonly abort?: () => AbortHandle;
+  }
+## SaveChange
+  export interface SaveChange<T> {
+      readonly key: RowKey;
+      readonly column: string;
+      readonly value: unknown;
+      readonly previous: unknown;
+      readonly row: Readonly<T>;
+      readonly pinned?: 'top' | 'bottom' | undefined;
+  }
+## SaveHandler
+  export type SaveHandler<T> = (req: SaveRequest<T>, signal: AbortSignalLike) => unknown;
+## SaveRequest
+  export interface SaveRequest<T> {
+      readonly origin: SaveOrigin;
+      readonly generation: number;
+      readonly changes: readonly SaveChange<T>[];
+  }
+## UndoResult
+  export interface UndoResult {
+      readonly cells: readonly {
+          readonly key: RowKey;
+          readonly column: string;
+      }[];
+      readonly skipped: number;
+  }
+## checkValue
+  export declare function checkValue<T>(col: ResolvedColumn<T>, value: unknown, o: {
+      readonly row: Readonly<T>;
+      readonly app: unknown;
+      readonly ctx: LocaleCtx;
+      readonly current?: unknown;
+      readonly threw?: (column: string, rule: string) => void;
+  }): Checked;
+## createEdits
+  export declare function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditController<T>;
+## parseInput
+  export declare function parseInput<T>(col: ResolvedColumn<T>, input: CellInput, ctx: LocaleCtx): Checked;
+
+@ @dzgrid/core/range
+## CopyOptions
+  export interface CopyOptions<T> {
+      readonly ctx: LocaleCtx;
+      readonly reader: ValueReader<T>;
+      readonly guard?: boolean;
+      readonly raw?: boolean;
+      readonly headers?: boolean;
+  }
+## FillOptions
+  export interface FillOptions<T> {
+      readonly ctx: LocaleCtx;
+      readonly reader: ValueReader<T>;
+      readonly mode?: 'auto' | 'copy';
+      readonly swap?: boolean;
+  }
+## FillWay
+  export type FillWay = 'down' | 'up' | 'end' | 'start';
+## PASTE_MAX
+  export declare const PASTE_MAX = 100000;
+## PastePlan
+  export interface PastePlan {
+      readonly cells: readonly PlannedCell[];
+      readonly outside: number;
+      readonly tooBig: boolean;
+      readonly box: RangeBox | null;
+  }
+## PlannedCell
+  export interface PlannedCell {
+      readonly key: RowKey;
+      readonly column: string;
+      readonly input: CellInput;
+  }
+## RangeBox
+  export interface RangeBox {
+      readonly top: number;
+      readonly bottom: number;
+      readonly start: number;
+      readonly end: number;
+  }
+## boxRows
+  export declare function boxRows<T>(b: RangeBox, displayed: DisplayedRows<T>): DataNode<T>[];
+## boxSize
+  export declare function boxSize(b: RangeBox, displayed: DisplayedRows<unknown>): {
+      rows: number;
+      cols: number;
+      cells: number;
+  };
+## copyMatrix
+  export declare function copyMatrix<T>(b: RangeBox, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: CopyOptions<T>): {
+      readonly text: string[][];
+      readonly values: unknown[][];
+  };
+## decodeTsv
+  export declare function decodeTsv(text: string, o?: {
+      readonly pad?: boolean;
+  }): string[][];
+## encodeTsv
+  export declare function encodeTsv(m: readonly (readonly string[])[]): string;
+## fillTarget
+  export declare function fillTarget(src: RangeBox, to: {
+      readonly row: number;
+      readonly col: number;
+  }): {
+      readonly box: RangeBox;
+      readonly way: FillWay;
+  } | null;
+## pasteText
+  export declare function pasteText<T>(text: string, col: ResolvedColumn<T>): string;
+## planFill
+  export declare function planFill<T>(src: RangeBox, target: RangeBox, way: FillWay, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: FillOptions<T>): PlannedCell[];
+## planPaste
+  export declare function planPaste<T>(src: readonly (readonly CellInput[])[], at: RangeBox, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o?: {
+      readonly max?: number;
+  }): PastePlan;
+## rangeBox
+  export declare function rangeBox(r: CellRange, displayed: DisplayedRows<unknown>, columns: readonly string[]): RangeBox | null;
+
+@ @dzgrid/core/state
+## Density
+  export type Density = 'compact' | 'comfortable' | 'spacious';
+## GridState
+  export interface GridState {
+      readonly v: 1;
+      readonly columns: readonly GridStateColumn[];
+      readonly groups?: Readonly<Record<string, boolean>>;
+      readonly sort: readonly SortItem[];
+      readonly filter: FilterModel;
+      readonly quick: string;
+      readonly page?: number;
+      readonly pageSize?: number;
+      readonly density?: Density;
+  }
+## GridStateColumn
+  export interface GridStateColumn {
+      readonly id: string;
+      readonly width?: number;
+      readonly hidden?: boolean;
+      readonly pinned: Side | null;
+      readonly order: number;
+  }
+## GroupsAdapter
+  export interface GroupsAdapter {
+      collapsible(id: string): boolean;
+      get(): Readonly<Record<string, boolean>>;
+      set(open: Readonly<Record<string, boolean>>): void;
+  }
+## STATE_UPGRADES
+  export declare const STATE_UPGRADES: readonly ((s: any) => any)[];
+## STATE_VERSION
+  export declare const STATE_VERSION = 1;
+## StateEnv
+  export interface StateEnv {
+      density?(): Density | undefined;
+      setDensity?(d: unknown): boolean | void;
+      readonly groups?: GroupsAdapter | undefined;
+  }
+## StateOptions
+  export interface StateOptions {
+      readonly include?: readonly StatePart[];
+      readonly exclude?: readonly StatePart[];
+  }
+## StatePart
+  export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density';
+## StateProblemCode
+  export type StateProblemCode = 'state-version' | 'state-column' | 'state-group' | 'state-field' | 'state-storage';
+## captureState
+  export declare function captureState<T>(k: GridKernel<T>, env?: StateEnv, opts?: StateOptions): GridState;
+## checkState
+  export declare function checkState(raw: unknown, upgrades?: readonly ((s: any) => any)[]): {
+      state: GridState | null;
+      problems: Problem[];
+  };
+## restoreState
+  export declare function restoreState<T>(k: GridKernel<T>, raw: unknown, env?: StateEnv, source?: ChangeSource): Problem[];
+## stateText
+  export declare const stateText: (s: GridState) => string;

@@ -22,6 +22,8 @@
     "start": "vite",
     "bench": "node scripts/bench.mjs",
     "check:size": "node scripts/size.mjs",
+    "check:api": "node scripts/api.mjs",
+    "gate:step": "npm run test:ci && npm run test:tz && npm run typecheck && npm run build && npm run check:size && npm run check:api",
     "check:contrast": "node scripts/check-contrast.mjs",
     "build:theme": "node scripts/build-theme.mjs",
     "test:browser": "node scripts/browser.mjs",
