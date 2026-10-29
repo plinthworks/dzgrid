@@ -188,3 +188,11 @@ Lead decisions (inside the owner's answers):
 - The export's span map beside a tree follows the tree's rules too (no full-width row, the tree column's).
 - Known, for the owner's look: a pinned parent's copy is pushed by the box of the next table's first row, so it hangs
   over the gap until that row arrives (screenshot `chrome-row-gaps-fr-pinned.png`).
+
+## Phase 7 parked; the forecast's needs first (owner, 2026-10-29)
+
+« Je ne veux pas la phase 7 pour l'instant, je veux que tu fixes tout ce que tu as énoncé » : Phase 7 (grouping) is
+parked (`docs/phase-7-plan.md` kept, untracked). Next: everything `docs/owner-needs-forecast.md` names — the gaps
+found in the owner's log-table rewrite, the small missing options (one sort only, a set list opening with nothing
+ticked and without select all, details on some rows only, a warning when `rules()` is missing), and the ten
+foreseen needs. Plan: `step16-plan.md`; structural points go to the owner before code. Still before publishing 1.1.0.
