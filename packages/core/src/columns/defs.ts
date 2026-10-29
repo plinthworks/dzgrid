@@ -46,9 +46,10 @@ export interface ColumnDef<T, V = unknown> {
    * grid's `filters({ floating })` otherwise, `false` keeps this column out). `debounceMs`: the
    * pause before what is typed there applies (150 in the browser, 300 on a server by default).
    * `ops`: the operators its popup offers, in this order (the kind's own list when absent). `optionPart`: the
-   * `filterOption` part painting each row of a set filter's list (feedback pass C).
+   * `filterOption` part painting each row of a set filter's list (feedback pass C). `exclude: false`: its set
+   * filter never writes an `exclude` filter, nor `blanks` (docs/behaviors/filter-set.md « Include only »).
    */
-  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string };
+  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string; readonly exclude?: false };
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';

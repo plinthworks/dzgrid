@@ -471,3 +471,143 @@ describe('the chunk and the handle', () => {
     expect((got as { values: unknown[] }).values).toHaveLength(5);
   });
 });
+
+describe('include only (filter: { kind: set, exclude: false }; filter-set.md « Include only »)', () => {
+  const ONLY = COLS.map((c) => ('id' in c && c.id === 'city' ? { ...c, filter: { kind: 'set', exclude: false } } : c)) as typeof COLS;
+  const OTHERS = ['Alger', 'Annaba', 'Blida', 'Sétif'];
+
+  it('no blanks row: the five towns only, set size 5', async () => {
+    const t = grid({ columns: ONLY });
+    await t.open();
+    expect(t.labels()).toEqual(['Alger', 'Annaba', 'Blida', 'Oran', 'Sétif']);
+    expect(t.options()[0]!.getAttribute('aria-setsize')).toBe('5');
+  });
+
+  it('unticking Oran and Apply: an include of the four others, 21 rows (no blank row)', async () => {
+    const t = grid({ columns: ONLY });
+    await t.open();
+    t.option('Oran').click();
+    t.apply();
+    expect(t.filter()['city']).toEqual({ type: 'set', include: OTHERS });
+    expect(t.ids()).toHaveLength(21);
+  });
+
+  it('ticking it back: no filter, the 30 rows', async () => {
+    const t = grid({ columns: ONLY });
+    t.set('city', { type: 'set', include: OTHERS });
+    await t.open();
+    t.option('Oran').click();
+    t.apply();
+    expect(t.filter()['city']).toBeUndefined();
+    expect(t.ids()).toHaveLength(30);
+  });
+
+  it('select all off: include []; on again: no filter', async () => {
+    const t = grid({ columns: ONLY });
+    await t.open();
+    t.clickAll();
+    t.apply();
+    expect(t.filter()['city']).toEqual({ type: 'set', include: [] });
+    expect(t.ids()).toEqual([]);
+    await t.open();
+    expect(t.labels()).toEqual(['Alger', 'Annaba', 'Blida', 'Oran', 'Sétif']);
+    t.clickAll();
+    t.apply();
+    expect(t.filter()['city']).toBeUndefined();
+  });
+
+  it('search « an », select all shown, from nothing ticked: include of Annaba and Oran', async () => {
+    const t = grid({ columns: ONLY });
+    t.set('city', { type: 'set', include: [] });
+    await t.open();
+    expect(t.labels()[0]).toBe('Alger');
+    t.type('an');
+    expect(t.labels()).toEqual(['Annaba', 'Oran']);
+    t.clickAll();
+    t.apply();
+    expect(t.filter()['city']).toEqual({ type: 'set', include: ['Annaba', 'Oran'] });
+  });
+
+  it('from no filter, search « an », untick Oran: include of the four others (the whole list was shown first)', async () => {
+    const t = grid({ columns: ONLY });
+    await t.open();
+    t.type('an');
+    t.option('Oran').click();
+    t.apply();
+    expect(t.filter()['city']).toEqual({ type: 'set', include: OTHERS });
+  });
+
+  it('untick Oran, search « an », tick Oran back: every value of the whole list ticked is no filter (rule 2, review 2026-10-29)', async () => {
+    const t = grid({ columns: ONLY });
+    await t.open();
+    t.option('Oran').click();
+    t.type('an');
+    t.option('Oran').click();
+    t.apply();
+    expect(t.filter()['city']).toBeUndefined();
+  });
+
+  it('on a server, a stored exclude on an include-only column never reaches another column’s value list (review 2026-10-29)', async () => {
+    const asked: unknown[] = [];
+    const values = ((req: { column: string; filter?: unknown }) => (asked.push([req.column, req.filter ?? null]), { values: [{ value: 'a', count: 1 }, { value: 'c', count: 1 }] })) as never;
+    const cols = ONLY.map((c) => ('id' in c && c.id === 'st' ? { ...c, filter: { kind: 'set' } } : c)) as typeof COLS;
+    const t = grid({ server: true, columns: cols, values });
+    t.f.answer(['a']);
+    t.set('city', { type: 'set', exclude: ['Oran'] });
+    t.f.answer(['a']);
+    await t.open('st');
+    expect(asked).toEqual([['st', null]]);
+  });
+
+  it('a truncated list (2 005 values): unticking one writes an include of the 1 999 others shown', async () => {
+    const rows = Array.from({ length: 2005 }, (_, i) => ({ id: `r${i}`, name: 'x', n: i, city: `v${String(i).padStart(4, '0')}`, st: 'a' }));
+    const t = grid({ rows, columns: ONLY });
+    await t.open();
+    t.option('v0000').click();
+    t.apply();
+    const f = t.filter()['city'] as { include?: string[]; exclude?: string[] };
+    expect(f.exclude).toBeUndefined();
+    expect(f.include).toHaveLength(1999);
+    expect(f.include![0]).toBe('v0001');
+    expect(f.include!.at(-1)).toBe('v1999');
+    expect(t.ids()).toHaveLength(1999);
+  });
+
+  it('an exclude stored from elsewhere: ignored with a problem, the popup all ticked, Apply sends nothing, a tick writes an include', async () => {
+    const t = grid({ columns: ONLY });
+    t.set('city', { type: 'set', exclude: ['Oran'] });
+    expect(t.problems().map((p) => [p.code, p.path])).toContainEqual(['invalid-filter', 'filter.city.exclude']);
+    expect(t.ids()).toHaveLength(30);
+    await t.open();
+    expect(t.selected()).toHaveLength(5);
+    expect(t.all().checked).toBe(true);
+    const before = t.filterEvents().length;
+    t.apply();
+    expect(t.filterEvents()).toHaveLength(before);
+    expect(t.filter()['city']).toEqual({ type: 'set', exclude: ['Oran'] });
+    await t.open();
+    t.option('Blida').click();
+    t.apply();
+    expect(t.filter()['city']).toEqual({ type: 'set', include: ['Alger', 'Annaba', 'Oran', 'Sétif'] });
+  });
+
+  it('on a server: the DataRequest never carries exclude nor blanks', async () => {
+    const t = grid({ server: true, columns: ONLY, values: (() => ({ values: TOWNS.map((v, i) => ({ value: v, count: i + 1 })), blanks: 2 })) as never });
+    t.f.answer(['a']);
+    await t.open();
+    expect(t.labels()).not.toContain(T['filter.set.blanks']);
+    t.option('Oran').click();
+    t.apply();
+    expect(t.f.calls.at(-1)!.req.filter).toEqual({ city: { type: 'set', include: ['Alger', 'Annaba', 'Blida', 'Sétif'] } });
+  });
+
+  it('Space on the first row (Alger): include of the four others', async () => {
+    const t = grid({ columns: ONLY });
+    await t.open();
+    t.search().focus();
+    t.press('ArrowDown');
+    t.press(' ');
+    t.apply();
+    expect(t.filter()['city']).toEqual({ type: 'set', include: ['Annaba', 'Blida', 'Oran', 'Sétif'] });
+  });
+});

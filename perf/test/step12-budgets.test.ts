@@ -11,7 +11,7 @@ const b = (JSON.parse(read('size-budget.json')) as { entries: Record<string, { m
 
 describe('step 12 budgets', () => {
   it('the two granted raises: K.8 84 800, Angular 7 300', () => {
-    expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(84900); // owner « clearFilters/resetState » (84 800 at step 12)
+    expect(b['profile: audit screen (K.8)']!.maxGzip).toBe(84950); // owner « set include only » (2026-10-29): 84 950; owner « clearFilters/resetState »: 84 900 (84 800 at step 12)
     expect(b['@dzgrid/angular']!.maxGzip).toBe(7350); // owner « clearFilters/resetState » (7 300 at step 12)
   });
 

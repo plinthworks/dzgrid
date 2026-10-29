@@ -96,6 +96,15 @@ Conformance `conformance/cases/header-bands/collapse-*` (shown sets, nested, spl
 empty closed), `packages/core/test/columns-collapse.test.ts`, `packages/dom/test/spans-collapse.test.ts`
 (button, keys, focus fallback, sentences, state round trip); browser fr / ar RTL.
 
+## Styling hook (stable from 1.1.0)
+
+The group header cell carries `.dzg-hgroup` and `data-g="<ColumnGroupDef.id>"` (plus `data-level`, its group row):
+a public hook for per-group styling from the app's sheet (`.dzg-hgroup[data-g="REAL_TIME"] { … }`), colours through
+CSS variables only (theming.md « Styling one header group »). It does not move with the open / closed state. An
+empty `header` shows the group's id, so to hide a group's label keep a real `header` and hide it visually: screen
+readers still name the group. Pinned by a test in `packages/dom/test/spans-groups.test.ts`, left to right and right
+to left.
+
 ## As built (Phase 6 step 7, 2026-10-27; `docs/phase-6-steps/step08-plan.md` « Done »)
 - Entry: `@dzgrid/dom/groups` (`groups()`, owner Q8-4), with `spans()` for the group rows; without it `collapsible` does
   nothing. Needs the `-columns` texts (`TypeError` at setup).

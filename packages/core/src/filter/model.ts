@@ -40,6 +40,19 @@ export type ColumnFilter =
 
 export type InstantFilter = Extract<ColumnFilter, { type: 'instant' }>;
 
+/**
+ * What is wrong with a set filter, read alike by the browser (filter/compile.ts) and the wire form (server/wire.ts):
+ * the end of its path and the detail, nothing when sound. The shape first; then, on a column whose `filter` says
+ * `exclude: false` (`d`), an `exclude` or a `blanks` (docs/behaviors/filter-set.md « Include only »).
+ */
+export const setFault = (f: Extract<ColumnFilter, { type: 'set' }>, d: false | { readonly exclude?: false } | undefined): readonly [string, string?] | undefined => {
+  const list = f.include ?? f.exclude;
+  return (f.include && f.exclude) || (list !== undefined && (!Array.isArray(list) || list.some((x) => typeof x !== 'string'))) ? ['']
+    : f.blanks !== undefined && f.blanks !== 'include' && f.blanks !== 'exclude' ? ['.blanks']
+    : (d as { exclude?: false } | undefined)?.exclude === false && (f.exclude || f.blanks) ? [f.exclude ? '.exclude' : '.blanks', 'exclude: false']
+    : undefined;
+};
+
 export const TEXT_OPS: ReadonlySet<string> = new Set(['contains', 'notContains', 'equals', 'notEqual', 'startsWith', 'endsWith', 'blank', 'notBlank']);
 export const NUM_OPS: ReadonlySet<string> = new Set(['equals', 'notEqual', 'lt', 'lte', 'gt', 'gte', 'between', 'blank', 'notBlank']);
 export const DAY_OPS: ReadonlySet<string> = new Set([...NUM_OPS, 'relative']);

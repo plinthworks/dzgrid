@@ -1,0 +1,36 @@
+{
+  "id": "set-include-only-exclude-refused",
+  "suite": "wire",
+  "description": "On a column whose set filter never writes exclude (filter.exclude: false), an exclude is not sent: invalid-filter at its exclude.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "e",
+        "filter": {
+          "kind": "set",
+          "exclude": false
+        }
+      }
+    ],
+    "filter": {
+      "e": {
+        "type": "set",
+        "exclude": [
+          "a"
+        ],
+        "blanks": "exclude"
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {},
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.e.exclude"
+      ]
+    ]
+  }
+}

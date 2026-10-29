@@ -38,6 +38,21 @@ export const settle = (d: Draft, all: readonly string[] | null): void => {
   d.mode = inc ? 'exclude' : 'include';
 };
 
+/**
+ * Include only (filter-set.md « Include only »; `filter.exclude: false`), in place of the half rule: leaving
+ * « everything » is an include of the whole list (`known`: the last complete one shown, else the values shown) less
+ * the unticked; blanks are never kept; every value ticked on a complete list (`all`) is « everything » again (no filter).
+ */
+export const only = (d: Draft, all: readonly string[] | null, known: readonly string[]): void => {
+  if (d.mode === 'exclude') {
+    if (!d.vals.size && d.blanks) return;
+    d.vals = new Set(known.filter((v) => !d.vals.has(v)));
+    d.mode = 'include';
+  }
+  d.blanks = false;
+  if (all?.length && all.every((v) => d.vals.has(v))) (d.mode = 'exclude'), (d.vals = new Set()), (d.blanks = true);
+};
+
 /** The filter a draft writes: its list sorted by code unit, `blanks` only when not the mode's default; null for "everything". */
 export const filterOf = (d: Draft): SetFilter | null => {
   const list = [...d.vals].sort();

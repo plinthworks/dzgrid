@@ -61,6 +61,17 @@ controller methods of 1.0.0 too. `@dzgrid/*` peers on `^1.1.0`.
   `.grid()` (the instance, e.g. for `print`); functions `selectedIds(controller)` (`{ mode, ids, query }`: the row ids,
   not the grid's keys, and the query to replay « all but these ») and `uiData<D>(c)` (a column's `ui.data`, typed);
   `missing-feature` for `[state]` / `[pinnedRows]` without their feature. Templates for the new `menuItem` slot.
+- **Include-only set filter** (owner, 2026-10-29): `ColumnDef.filter: { kind: 'set', exclude: false }` — the set
+  filter's list only ever writes no filter or `{ type: 'set', include: [...] }` (never `exclude`, never `blanks`;
+  everything ticked on a complete list is no filter; no blanks row). A set filter with `exclude` or `blanks` arriving
+  on such a column is ignored with `invalid-filter` (`filter.<col>.exclude` / `.blanks`, detail `exclude: false`), in
+  the browser and in the request to a server (docs/behaviors/filter-set.md « Include only »). Sizes (owner, 2026-10-29):
+  the set chunk 4 339 / 4 350 (was 4 250), K.8 84 902 / 84 950 (was 84 900), `core/edit` 3 155 / 3 160 (was 3 150),
+  `core/state` 1 506 / 1 510 (was 1 500); the core base 29 064 (its guard 29 070, `@dzgrid/core` 29 150 unchanged).
+- **A documented hook for styling one header group** (owner, 1.1.0): every group header cell carries `.dzg-hgroup`,
+  `data-g="<ColumnGroupDef.id>"` and `data-level`, now a stable public contract pinned by a test (left to right and
+  right to left): `.dzg-hgroup[data-g="REAL_TIME"] { background: var(--app-…); }` from the app's sheet. An empty
+  `header` shows the id: to hide a label keep a real `header` and hide it visually (theming.md, header-groups.md).
 - **`DzgController.clearFilters()` and `.resetState()`** (owner, 1.1.0): every filter and the search emptied, the sort
   kept, one request; and, with `gridState()`, the grid as defined at creation (columns, groups, sort, filters, search,
   page, density) in one request, `(stateChanged)` following, no loop with `[state]`. In the DOM: `GridStateApi.reset()`.

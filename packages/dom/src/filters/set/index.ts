@@ -6,7 +6,7 @@ import type { Part, SlotContext } from '../../part.js';
 import { el, labelled, tx } from '../dom.js';
 import type { Body, Changed, F } from '../forms.js';
 import type { notice } from '@dzgrid/dom/internal';
-import { draftOf, filterOf, settle, tick, ticked, type Draft, type SetFilter } from './draft.js';
+import { draftOf, filterOf, only, settle, tick, ticked, type Draft, type SetFilter } from './draft.js';
 import { listView, type Row } from './list.js';
 
 type C = SlotContext['filter'];
@@ -36,6 +36,10 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   /** One mounted part per drawn row node. */
   const ms = new Map<HTMLElement, Mounted<OC>>();
   let d: Draft = draftOf(null);
+  /** Include only (`filter.exclude: false`, read live: `columns.set` while open), and the last complete list shown. */
+  // `filter` may be false: `false.exclude` reads undefined.
+  const ix = (): boolean => (get().column.def.filter as { exclude?: false } | undefined)?.exclude === false;
+  let whole: readonly string[] | null = null;
   /** The search the list shows (asked, on a server after the pause): what select all and its label follow, not the box. */
   let sent = '';
   /** The filter written (`write`), and its canonical form: a draft equal to it reads as it, so Apply sends nothing. */
@@ -107,6 +111,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     const c = get();
     const r = h.result;
     const vs = values();
+    whole = complete() ?? whole;
     const blanks = h.available ? (r?.blanks ?? null) : null;
     const counted = vs.some((x) => x.count !== null) || blanks !== null;
     const f = fmt();
@@ -117,7 +122,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     const marked = d.mode === 'include' ? d.blanks : !d.blanks;
     const any = !h.available || !!r;
     rows = [
-      ...(any && !sent && (blanks !== 0 || marked) ? [row(null, c.msg('filter.set.blanks'), blanks)] : []),
+      ...(!ix() && any && !sent && (blanks !== 0 || marked) ? [row(null, c.msg('filter.set.blanks'), blanks)] : []),
       ...vs.map((x) => row(x.value, x.label, x.count)),
     ];
     list.set(rows, home);
@@ -143,7 +148,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   }
   /** A tick: the half rule on a complete list, then the form's pause (or the draft on a server). */
   function edit(): void {
-    settle(d, complete());
+    ix() ? only(d, complete() ?? whole, whole ?? values().map((x) => x.value)) : settle(d, complete());
     list.paint();
     boxes();
     changed(false, filterOf(d) === null);
@@ -195,7 +200,8 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     els: [search, status, la, wrap],
     write(s: F | null) {
       const was = JSON.stringify(filterOf(d));
-      d = draftOf((src = s) as SetFilter | null);
+      // Include only: an exclude or blanks stored from elsewhere (ignored, a problem) shows as no filter.
+      d = draftOf((src = s) && !(ix() && ((s as SetFilter).exclude || (s as SetFilter).blanks)) ? (s as SetFilter) : null);
       canon = JSON.stringify(filterOf(d));
       // Another draft starts on its first ticked row; the same one written again (a locale change) keeps the focus.
       home ||= canon !== was;

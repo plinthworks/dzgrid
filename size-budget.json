@@ -1,5 +1,5 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 84 900. A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 84 950 (owner « set include only » (2026-10-29): 84 900 → 84 950, set chunk 4 250 → 4 350, core/edit 3 150 → 3 160, core/state 1 500 → 1 510). A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
@@ -42,7 +42,7 @@
     },
     "@dzgrid/core/edit": {
       "file": "packages/core/src/edit.ts",
-      "maxGzip": 3150,
+      "maxGzip": 3160,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/range": {
@@ -52,7 +52,7 @@
     },
     "@dzgrid/core/state": {
       "file": "packages/core/src/state.ts",
-      "maxGzip": 1500,
+      "maxGzip": 1510,
       "over": "@dzgrid/core"
     },
     "@dzgrid/dom/locales/en": {
@@ -657,7 +657,7 @@
       "files": [
         "packages/dom/src/filters/set/index.ts"
       ],
-      "maxGzip": 4250,
+      "maxGzip": 4350,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -750,7 +750,7 @@
       "css": [
         "packages/theme/dzgrid.css"
       ],
-      "maxGzip": 84900,
+      "maxGzip": 84950,
       "external": [
         "@angular/*",
         "rxjs",

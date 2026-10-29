@@ -1,7 +1,7 @@
 import type { ColumnLookup } from '../columns/model.js';
 import type { ResolvedColumn } from '../columns/defs.js';
 import { relativeOf, resolveInstantRange } from '../filter/instant.js';
-import { INSTANT_OPS, isJson, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel, type Json, type NumOp, type RelativeRange, type TextOp, type WireKind } from '../filter/model.js';
+import { INSTANT_OPS, isJson, NUM_OPS, setFault, TEXT_OPS, type ColumnFilter, type FilterModel, type Json, type NumOp, type RelativeRange, type TextOp, type WireKind } from '../filter/model.js';
 import { problem, type Problem } from '../problems.js';
 import { epochDayToDay, parseDay, type Day } from '../value/day.js';
 import type { LocaleCtx } from '../value/locale.js';
@@ -173,9 +173,9 @@ function wireOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: 
       if (typeof f.value !== 'boolean') return bad(`${path}.value`);
       return { type: 'boolean', value: f.value };
     case 'set': {
+      const x = setFault(f, col.def.filter);
+      if (x) return bad(path + x[0], x[1]);
       const list = f.include ?? f.exclude;
-      if ((f.include && f.exclude) || (list !== undefined && (!Array.isArray(list) || list.some((x) => typeof x !== 'string')))) return bad();
-      if (f.blanks !== undefined && f.blanks !== 'include' && f.blanks !== 'exclude') return bad(`${path}.blanks`);
       if (!list) return OFF;
       return { type: 'set', ...(f.include ? { include: list } : { exclude: list }), ...(f.blanks && { blanks: f.blanks }) };
     }

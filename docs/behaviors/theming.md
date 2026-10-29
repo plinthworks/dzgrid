@@ -90,6 +90,13 @@ frameworks (Tailwind CSS 4.3.3 and 3.4.19, Bootstrap 5.3.8, root devDependencies
   and `data-kind` (`text`, `number`, `day`, `instant`, `boolean`, `set`, a custom kind):
   `.dzg-fpop[data-column="price"] { … }`, `.dzg-fpop[data-kind="set"] .pill { … }`. In a layer of the app's
   above `dzgrid` or unlayered. `::ng-deep` is deprecated: use a global sheet or `ViewEncapsulation.None`.
+- **Styling one header group** (stable hook from 1.1.0). Every group header cell carries the class `dzg-hgroup` (with
+  `dzg-hcell`), `data-g="<ColumnGroupDef.id>"` and `data-level` (its row among the group rows): an app styles one
+  group from its own sheet, `.dzg-hgroup[data-g="REAL_TIME"] { background: var(--app-realtime-bg); }`, colours
+  through CSS variables as everywhere (contrast is the app's to keep). The class and the two attributes are a public
+  contract, pinned by a test (`packages/dom/test/spans-groups.test.ts`). A group whose `header` is empty shows its
+  id: to hide a group's label, keep a real `header` and hide it visually (a visually-hidden rule on the cell's text,
+  not `display: none`), so screen readers still name the group.
 - **`--dzg-row-height` is read-only** (feedback pass F, owner Q4). The grid writes it on its root (inline style) from
   `rowHeight` or the density, and the theme reads it; a stylesheet declaring it loses to the inline value and never
   moves a row (the virtual rows count on the setting). To change the height: `rowHeight` (a number from 24), or

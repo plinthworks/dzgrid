@@ -22,7 +22,7 @@ const isSpans = (f: string) => /(^|\/)src\/spans(\.ts$|\/)/.test(f);
 const isCsv = (f: string) => /(^|\/)src\/csv(\.ts$|\/)/.test(f);
 
 /** The base's seam guard: its measure after each step that adds a seam (history in the base test below). */
-const BASE = 29001;
+const BASE = 29070;
 
 describe('layering of the base and the server entry', () => {
   it('the base bundle holds no server module', async () => {
@@ -115,7 +115,8 @@ describe('layering of the base and the server entry', () => {
     // Phase 6 step 3 (owner Q3-3): `width: null` in a column patch, +14 → 28 930. Phase 6 step 7 (collapsible
     // groups, owner Q-GH, Q-B: seam ≤ 120 B): `ColumnModel.folded` / `fold`, +35 → 28 965. Phase 6 step 8b-1 (pinned rows,
     // owner Q2: up to 29 150): the pinned store (`setPinned`, `rowOf`, a pinned focus kept, `editable`'s `{ pinned }`, never
-    // selected), `pinnedKey` by id and `assignKeys`' key maker, +36 → 29 001.
+    // selected), `pinnedKey` by id and `assignKeys`' key maker, +36 → 29 001. Owner « set include only » (2026-10-29):
+    // `exclude: false` refused in compile and wire, +63 → 29 064, guard 29 070.
     expect(gz).toBeLessThanOrEqual(BASE);
   });
 
@@ -132,13 +133,13 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(false);
   });
 
-  it('the edit entry fits its grant over the base (owner Q16 3 000, S3-O4 3 100, Q8-5 3 150 B gz), measured as check:size measures it', async () => {
+  it('the edit entry fits its grant over the base (owner Q16 3 000, S3-O4 3 100, Q8-5 3 150, « set include only » 3 160 B gz), measured as check:size measures it', async () => {
     const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './edit.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
     const entry = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core/edit'];
-    expect(entry).toMatchObject({ file: 'packages/core/src/edit.ts', maxGzip: 3150, over: '@dzgrid/core' }); // Q8-5: 3 100 → 3 150 (compression with the base's fold seam)
+    expect(entry).toMatchObject({ file: 'packages/core/src/edit.ts', maxGzip: 3160, over: '@dzgrid/core' }); // Q8-5: 3 100 → 3 150 (compression with the base's fold seam); owner « set include only » (2026-10-29): 3 150 → 3 160
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
   });
 
@@ -178,12 +179,12 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
   });
 
-  it('the state entry fits its grant over the base (owner Q-B 1 500 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
+  it('the state entry fits its grant over the base (owner Q-B 1 500, « set include only » 1 510 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
     const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './state.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
-    expect(both - alone).toBeLessThanOrEqual(1500);
+    expect(both - alone).toBeLessThanOrEqual(1510); // owner « set include only » (2026-10-29): 1 500 → 1 510
     expect(alone).toBeLessThanOrEqual(BASE);
   });
 });

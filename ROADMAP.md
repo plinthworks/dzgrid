@@ -935,3 +935,43 @@ pointer and keyboard, `movable: false` held; the menu and the chooser follow APG
 200 % zoom, fr / ar); collapsible groups keep focus; pinned rows aligned to 1 px, editable through the edit
 layer, never stale; print with repeated headers, no cut row, RTL; base grids unchanged within the granted
 bytes; budgets by written decision; final gate green; docs; listening §21 scheduled (owner, non-blocking).
+
+## 1.1.0 — additions asked by the owner after the Phase 6 close (2026-10-29)
+
+From two real screens of the owner's app (a server log table, and an editable « arbre » tree used natively, without
+a shared wrapper). Owner decision (2026-10-29): the set filter option and the three small options (fill in one
+direction, flash duration, tree without its chevron) in **1.1.0**, published once they are done; the two structural
+items (merged cells inside a tree, a gap between categories) in **1.2.0**, planned together. Each goes through
+sheet → architect → tests first → code → review → gate, and is ticked here when done.
+
+- [x] **Set filter « include only »** — `filter: { kind: 'set', exclude: false }`: the list never writes `exclude` nor
+  `blanks`; everything ticked on a complete list is no filter; no blanks row; an `exclude` / `blanks` filter from
+  elsewhere on that column is ignored with `invalid-filter`. For servers that read a value list as an inclusion only.
+  Owner answers Q1–Q4 in `docs/phase-6-steps/decisions.md`. Sizes (owner, 2026-10-29, accepted): set chunk 4 339 /
+  4 350 (was 4 250), K.8 84 902 / 84 950 (was 84 900), `core/edit` 3 155 / 3 160 (was 3 150), `core/state` 1 506 /
+  1 510 (was 1 500), core base 29 064 (guard 29 001 → 29 070; `@dzgrid/core` 29 150). Done: review fixes (search then
+  re-tick = no filter; a stored exclude never reaches another column's server list), gate green (7 370 tests).
+- [ ] **(1.2.0) Merged cells inside a tree** — `span` on a column of a `tree()` grid. Today refused with
+  `unsupported-combination` (`treeConflicts`, `packages/core/src/tree/shape.ts:327`, Phase 4 D2/D9). The arbre
+  screen needs its label column merged over consecutive rows (one tall cell, the repeats hidden). **Structural**:
+  what a merged cell becomes when some of its rows are folded, the keyboard and the screen reader over a merged cell
+  in a `treegrid`, sticky parents. Needs its own plan and owner decisions before code; the largest of the four.
+- [ ] **Fill in one direction** — an option on `fill()` limiting the fill handle and its keys to one axis
+  (horizontal only for arbre; in logical terms, along the row). Today `fill()` fills both ways.
+- [ ] **Flash duration** — the live value flash of `motion({ effects: { flash } })` has a fixed 0.6 s; arbre
+  wants about 3 s held then 1 s fading. An option for the hold and the fade, reduced motion unchanged (a still mark).
+- [ ] **Tree without its chevron** — arbre opens and closes its groups from its own label cells. The chevron is
+  the tree's keyboard and screen-reader affordance (`aria-expanded`), so hiding it must keep an equivalent: to decide
+  with the owner (the label cell carries the state, Enter / forward / back still toggle).
+
+- [ ] **(1.2.0) A gap between two big categories** — arbre inserts empty data rows by hand to space its categories. In
+  DzGrid a fake row is focused, counted by screen readers (« row 12 of 40 », empty), selected, filled, copied and
+  exported. Wanted: a visual gap before a row (a rule on the row's data, e.g. the first row of a top-level category),
+  outside `role="grid"` and the row count, never focused, kept by sort, filter and virtual scroll (a layout height,
+  not a row). Today rows have one height (`rowHeight`), so it needs a per-row extra height in the layout. To plan
+  with the merged-cells item (both touch the tree's row layout).
+
+Also seen, nothing to add: grid context for parts (`context`), saving open rows (`rowExpanded` + `rows.expand`; open
+rows stay out of `GridState` by Q-S1), header component, two label renderers in one cell part, row classes, no
+column moving, no row animation. To check when the screen is built: the keys DzGrid gives a path tree's filler rows
+versus the ids the app saves today.

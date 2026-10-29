@@ -95,6 +95,27 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   already in `exclude` stays so (unticking a found value adds it to the excluded ones).
 - **What it edits:** no filter, or a set filter with exactly one of `include` / `exclude` (lists of
   text) and a valid `blanks`. Anything else (combined, both lists) shows "Filter active" and Clear.
+- **Include only** (owner, 2026-10-29; `filter: { kind: 'set', exclude: false }`): for a server or an app that
+  only understands « these values ». On such a column:
+  1. The list only ever writes no filter (null) or `{ type: 'set', include: [...] }`: never `exclude`, never `blanks`.
+     The half rule is off.
+  2. Every value ticked on a complete list (unsearched, settled, not truncated) is no filter; so is every value of the
+     last complete list shown in this popup ticked during a search (untick Oran, search « an », tick Oran back: no
+     filter; review 2026-10-29).
+  3. Leaving « everything » (a value unticked, from no filter) writes an include of the whole list less the unticked
+     ones. The whole list is the last complete one shown in this popup (so unticking during a search still lists the
+     values the search hides); a list never complete (truncated past 2 000) uses the values shown.
+  4. On an incomplete list (searched, truncated), ticking every value shown is an include of them, null only by rule 2;
+     unticking every value is `include: []`, which keeps no row.
+  5. No blanks row (a blank row is never kept by an include); the labels, keys, order and counts of the other rows
+     are unchanged.
+  6. A set filter with `exclude` or `blanks` arriving from elsewhere (the API, a restored `GridState`, a host's
+     filter model, a column given the option later) is ignored with `invalid-filter`, detail `exclude: false`, at
+     `filter.<col>.exclude` (or `.blanks`; inside a combined filter at `.conditions[i].exclude`, which drops the
+     whole combined filter, as any refused member does). The shape checks come first, with their own paths. Like a
+     filter of the wrong type it stays stored (in the query, in the state) and applies again if the option goes; it
+     is never sent to a server. The popup shows it as no filter (everything ticked; Apply sends nothing), a tick
+     replaces it with an include, Clear removes it.
 - **Apply** (O3): in the browser ticks apply after the pause (`debounceMs`, 150 ms: several ticks,
   a key held or "select all" give one change and one announcement), Apply, Enter and closing apply
   at once; on a server the ticks are a draft until Apply or Enter (one request), and closing drops
@@ -142,6 +163,12 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   kept and moved).
 - `packages/dom/test/filters-set-server.test.ts` (a source's `values` delayed, failing, superseded;
   search after the pause; input method).
+- Include only: `filters-set-draft.test.ts` « include only » (`only`, a seeded 500-step walk that never writes
+  `exclude` nor `blanks`), `filters-set.test.ts` « include only » (no blanks row, include of the others, null when all
+  ticked again, a search, 2 005 values, an exclude stored from elsewhere, a server's request, Space);
+  `packages/core/test/set-no-exclude.test.ts` (compile, kernel, `columns.set`, a restored state),
+  `packages/core/test/wire.test.ts` « include-only column », conformance `filter-combined/set-include-only-*`,
+  `wire/set-include-only-*`.
 - `packages/dom/test/filters-set-walk.test.ts` (a seeded random walk, in the browser and on a server); `structure.test.ts` (`filters/set/` reached only
   through `import()`).
 - Browser: `scripts/browser.mjs` (`filters=1&popup=1&sets=1`, fr light, ar right to left dark);

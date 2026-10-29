@@ -31,6 +31,7 @@ The same as the browser's, same codes and paths:
 - a column with `filter: false`, a filter of the wrong type for the column, an unknown op or a value of the wrong type (`NaN`, `Infinity`, a number for text): `invalid-filter` (at `filter.<col>`, or at `.op`, `.value`, `.valueTo`, `.blanks`);
 - a day that is not one: `invalid-day`; a moment that is not one: `invalid-instant`; one written without an offset: `ambiguous-instant` (never guessed);
 - a bound outside the years 0000–9999, which the wire form cannot write: `invalid-instant` at `filter.<col>.resolved`;
+- on a column whose set filter is include only (`filter: { kind: 'set', exclude: false }`, filter-set.md « Include only »), a set filter with `exclude` or `blanks`: `invalid-filter` at `filter.<col>.exclude` (or `.blanks`), detail `exclude: false`;
 - a custom kind unknown, refusing its state, not for this column type, whose `wire` throws or returns something that is not JSON: `invalid-filter` with a detail.
 A filter with an error is dropped from the request and the error stays in the model's `problems`. A half-typed filter is dropped with no problem.
 

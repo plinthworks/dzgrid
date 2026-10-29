@@ -402,3 +402,41 @@ describe('toWire: custom kinds', () => {
     expect(f.problems.map((p) => [p.code, p.path])).toEqual([['invalid-filter', 'filter.n']]);
   });
 });
+
+describe('toWire: a set filter on an include-only column (filter-set.md « Include only »)', () => {
+  const ONLY: ColumnDef<Row>[] = [{ id: 'i', filter: { kind: 'set', exclude: false } }];
+  const full = (f: unknown) => {
+    const r = toWire({ i: f } as unknown as FilterModel, { ctx: ALG, columns: createColumnModel<Row>(ONLY) });
+    return { filter: r.filter as unknown, problems: r.problems.map((p) => [p.code, p.path, p.detail]) };
+  };
+
+  it('an exclude is not sent: filter {} and invalid-filter at filter.i.exclude', () => {
+    expect(full({ type: 'set', exclude: ['a'] })).toEqual({ filter: {}, problems: [['invalid-filter', 'filter.i.exclude', 'exclude: false']] });
+  });
+
+  it('blanks is not sent either: invalid-filter at filter.i.blanks', () => {
+    expect(full({ type: 'set', include: ['a'], blanks: 'include' })).toEqual({ filter: {}, problems: [['invalid-filter', 'filter.i.blanks', 'exclude: false']] });
+  });
+
+  it('the shape check first: both lists at filter.i, no detail', () => {
+    expect(full({ type: 'set', include: ['a'], exclude: ['b'] })).toEqual({ filter: {}, problems: [['invalid-filter', 'filter.i', undefined]] });
+  });
+
+  it('an include passes as always', () => {
+    expect(full({ type: 'set', include: ['b', 'a'] })).toEqual({ filter: { i: { type: 'set', include: ['b', 'a'] } }, problems: [] });
+  });
+
+  it('inside a combined filter: the combined filter dropped', () => {
+    expect(full({ type: 'combined', join: 'and', conditions: [{ type: 'set', exclude: ['a'] }] })).toEqual({ filter: {}, problems: [['invalid-filter', 'filter.i.conditions[0].exclude', 'exclude: false']] });
+  });
+
+  it('sourceRows: the request carries no exclude', async () => {
+    const { sourceRows } = await import('@dzgrid/core/server');
+    const { fakeSource } = await import('./support/fake-source.js');
+    const { makeQuery } = await import('@dzgrid/core');
+    const fake = fakeSource();
+    const model = sourceRows<Row>(fake.source as never).create({ getRowId: (r) => String(r.id), columns: createColumnModel<Row>(ONLY), ctx: ALG, abort: fake.abort, operations: 'server', page: { pageSize: 2 } });
+    model.setQuery(makeQuery({ filter: { i: { type: 'set', exclude: ['a'] } } }));
+    expect(fake.last().req.filter).toEqual({});
+  });
+});

@@ -61,6 +61,16 @@ la feuille de confort (`dzgrid.comfort.css`) pour garder les barres fines et le 
   recherche, page, densité — en une requête ; `(stateChanged)` suit, sans boucle avec `[state]`. `null` sans la
   fonctionnalité ou sans la grille. Côté DOM : `gridState().api(grid).reset()`.
 
+## Ajouté au filtre par valeurs (propriétaire, 2026-10-29)
+
+- `ColumnDef.filter: { kind: 'set', exclude: false }` : la liste n'écrit que « pas de filtre » ou
+  `{ type: 'set', include: [...] }`, jamais `exclude` ni `blanks` (tout coché sur une liste complète = pas de filtre ;
+  pas de ligne « (Vides) »). Un `exclude` ou un `blanks` venu d'ailleurs sur une telle colonne est ignoré avec
+  `invalid-filter` (`filter.<col>.exclude` / `.blanks`), dans le navigateur et dans la requête au serveur.
+- Limites relevées par le propriétaire (2026-10-29) : morceau « set » 4 250 → 4 350 (4 339), K.8 84 900 → 84 950
+  (84 902), `core/edit` 3 150 → 3 160 (3 155), `core/state` 1 500 → 1 510 (1 506), garde de la base du cœur
+  29 001 → 29 070 (29 064 ; `@dzgrid/core` reste 29 150).
+
 ## Ce qui a été vérifié (2026-10-28)
 
 Voir ROADMAP « Phase 6 — close » : le portail complet (vitest, `test:perm`, `test:tz`, `typecheck`, `build`,

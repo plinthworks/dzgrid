@@ -42,15 +42,16 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
   '@dzgrid/core/detail': 1050, // Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
-  '@dzgrid/core/edit': 3150, // owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
+  '@dzgrid/core/edit': 3160, // owner « set include only » (2026-10-29): 3 150 → 3 160 (`exclude: false` refused in compile); owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
   '@dzgrid/core/range': 4000, // Phase 5 Q16 (Part B): blocks of cells, TSV, the paste and fill plans; the line at the measure + 10 % at the close
-  '@dzgrid/core/state': 1500, // Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
+  '@dzgrid/core/state': 1510, // owner « set include only » (2026-10-29): 1 500 → 1 510; Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
   '@dzgrid/dom': 22400, // Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 10100, // the owner's-look budgets (2026-10-27, decisions.md): 10 000 → 10 100 (apply, the header box, the zone option)
   // The owner's look (2026-10-27): the set chunk 4 205 → 4 250 (one box, the search placeholder, the inert host), the
   // date adapters 2 745 → 2 800 (the FROM / TO placeholder); written grants, no longer the measure + 10 %.
-  '@dzgrid/dom/filters: set (lazy)': 4250,
+  // Owner « set include only » (2026-10-29): the set chunk 4 250 → 4 350 (`exclude: false`: the list without its exclude mode).
+  '@dzgrid/dom/filters: set (lazy)': 4350,
   '@dzgrid/dom/filters: date adapters (lazy)': 2850, // the owner's third look (2026-10-27, « Comfort stylesheet »): 2 800 → 2 850 (the FROM / TO input fills its field)
   '@dzgrid/dom/tree': 3850, // owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
   '@dzgrid/dom/tree-lazy': 1000,
@@ -124,7 +125,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/tailwind3.css': 500, // T7
   '@dzgrid/theme/bootstrap.css': 500, // T7
   '@dzgrid/angular': 7350, // owner « clearFilters/resetState » (2026-10-28): 7 300 → 7 350; before: Phase 6 step 12 (owner Q12-1, the Q-B grant): 7 300; before: owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
-  'profile: audit screen (K.8)': 84900, // owner « clearFilters/resetState » (2026-10-28): 84 800 → 84 900; before: Phase 6 step 12 (owner Q12-1): 84 800; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 84 450; Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000; Q9-3 (2026-10-27): 84 150 (auto height's base seam); the owner's look (2026-10-27): 84 300
+  'profile: audit screen (K.8)': 84950, // owner « set include only » (2026-10-29): 84 900 → 84 950; before: owner « clearFilters/resetState » (2026-10-28): 84 800 → 84 900; before: Phase 6 step 12 (owner Q12-1): 84 800; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 84 450; Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000; Q9-3 (2026-10-27): 84 150 (auto height's base seam); the owner's look (2026-10-27): 84 300
   // `@dzgrid/dom/groups` (owner Q8-4, 2026-10-27): its measure + 10 %, no ceiling of its own (measured 1 893 → 2 100).
   // Phase 6 step 8b-1 (owner Q2, 2026-10-27): pinned rows over the DOM base, 2 000 (up to 2 300 only if editing needs
   // it: asked again); their own -pinned texts 120 / 140 / 170; pinned-rows.css about 450 (the line at its measure + 10 %).
@@ -162,7 +163,7 @@ export function sizeBudget(measure, ceiling = null) {
 }
 
 const SIZE_COMMENT = (date) =>
-  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on ${date} (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 84 800. A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».`;
+  `Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on ${date} (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 84 950. A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».`;
 
 /**
  * A new size-budget.json from `measures` (name → gz bytes). Returns the new document (the given one

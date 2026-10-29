@@ -208,6 +208,25 @@ describe('group rows on screen', () => {
     const { groups } = make({ columns: [{ id: 'g1', children: [leaf('a'), leaf('b')] }, leaf('c')] });
     expect(groups(0).map((e) => e.textContent)).toEqual(['g1']);
   });
+
+  // The public styling hook (stable from 1.1.0, theming.md « Styling one header group », header-groups.md):
+  // `.dzg-hgroup[data-g="<group id>"]` with `data-level`, in both directions.
+  for (const direction of ['ltr', 'rtl'] as const) {
+    it(`the styling hook: each group cell has .dzg-hgroup, data-g = the group's id and data-level (${direction})`, () => {
+      const { groups, host } = make({ settings: { direction } });
+      const hook = (e: HTMLElement) => ({ hgroup: e.classList.contains('dzg-hgroup'), hcell: e.classList.contains('dzg-hcell'), g: e.dataset['g'], level: e.dataset['level'], text: e.textContent });
+      expect(groups(0).map(hook)).toEqual([
+        { hgroup: true, hcell: true, g: 'patient', level: '-2', text: 'Patient' },
+        { hgroup: true, hcell: true, g: 'clinique', level: '-2', text: 'Clinique' },
+      ]);
+      expect(groups(1).map(hook)).toEqual([{ hgroup: true, hcell: true, g: 'constantes', level: '-1', text: 'Constantes' }]);
+      // The selector an app writes reaches exactly that group's cell.
+      for (const [id, text] of [['patient', 'Patient'], ['clinique', 'Clinique'], ['constantes', 'Constantes']]) {
+        const found = [...host.querySelectorAll<HTMLElement>(`.dzg-hgroup[data-g="${id}"]`)];
+        expect(found.map((e) => e.textContent), id).toEqual([text]);
+      }
+    });
+  }
 });
 
 describe('no groups: nothing changes', () => {

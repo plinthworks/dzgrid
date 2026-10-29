@@ -1,0 +1,36 @@
+{
+  "id": "set-include-only-include-sent",
+  "suite": "wire",
+  "description": "On an include-only set column, an include is sent as on any column.",
+  "input": {
+    "timeZone": "UTC",
+    "columns": [
+      {
+        "id": "e",
+        "filter": {
+          "kind": "set",
+          "exclude": false
+        }
+      }
+    ],
+    "filter": {
+      "e": {
+        "type": "set",
+        "include": [
+          "a"
+        ]
+      }
+    },
+    "locale": "fr-FR"
+  },
+  "expected": {
+    "filter": {
+      "e": {
+        "type": "set",
+        "include": [
+          "a"
+        ]
+      }
+    }
+  }
+}

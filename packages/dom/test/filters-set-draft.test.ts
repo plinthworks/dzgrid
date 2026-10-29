@@ -2,7 +2,7 @@
 // the ticks mean and what they write. Expectations by hand; a seeded run checks the written filter
 // against the core's own set filter on a grid.
 import { describe, it, expect, afterEach } from 'vitest';
-import { draftOf, filterOf, settle, tick, tickAll, ticked, type Draft } from '../src/filters/set/draft.js';
+import { draftOf, filterOf, only, settle, tick, tickAll, ticked, type Draft } from '../src/filters/set/draft.js';
 import { filters } from '../src/filters.js';
 import { cleanup, make } from './support-filters.js';
 
@@ -154,6 +154,87 @@ describe('the half rule (settle)', () => {
     tick(d, 'a', true);
     settle(d, null);
     expect(filterOf(d)).toEqual({ type: 'set', exclude: ['b'] });
+  });
+});
+
+describe('include only (only; filter-set.md « Include only »)', () => {
+  it('3 of 4 ticked, from everything: include of the 3, no blanks', () => {
+    const d = draftOf(null);
+    tick(d, 'b', false);
+    only(d, ALL, ALL);
+    expect(filterOf(d)).toEqual({ type: 'set', include: ['a', 'c', 'd'] });
+  });
+
+  it('every value ticked on a complete list: no filter', () => {
+    const d = draftOf({ type: 'set', include: ['a', 'b', 'c'] });
+    tick(d, 'd', true);
+    only(d, ALL, ALL);
+    expect(filterOf(d)).toBeNull();
+  });
+
+  it('every shown value ticked during a search (no complete list): an include, never null', () => {
+    const d = draftOf({ type: 'set', include: [] });
+    tickAll(d, ['a', 'b'], true);
+    only(d, null, ALL);
+    expect(filterOf(d)).toEqual({ type: 'set', include: ['a', 'b'] });
+  });
+
+  it('unticking from everything during a search, the whole list known: include of all the others', () => {
+    const d = draftOf(null);
+    tick(d, 'c', false);
+    only(d, null, ALL);
+    expect(filterOf(d)).toEqual({ type: 'set', include: ['a', 'b', 'd'] });
+  });
+
+  it('a truncated list never complete: include of the values shown less the unticked', () => {
+    const d = draftOf(null);
+    tick(d, 'a', false);
+    only(d, null, ['a', 'b', 'c']);
+    expect(filterOf(d)).toEqual({ type: 'set', include: ['b', 'c'] });
+  });
+
+  it('unticking every value: include [], and it stays so', () => {
+    const d = draftOf(null);
+    tickAll(d, ALL, false);
+    d.blanks = false;
+    only(d, ALL, ALL);
+    expect(filterOf(d)).toEqual({ type: 'set', include: [] });
+    only(d, ALL, ALL);
+    expect(filterOf(d)).toEqual({ type: 'set', include: [] });
+  });
+
+  it('an empty list: unticking blanks from everything is include []', () => {
+    const d = draftOf(null);
+    d.blanks = false;
+    only(d, [], []);
+    expect(filterOf(d)).toEqual({ type: 'set', include: [] });
+  });
+
+  it('never writes blanks, even when blanks were ticked in an include', () => {
+    const d = draftOf({ type: 'set', include: ['a'] });
+    d.blanks = true;
+    only(d, ALL, ALL);
+    expect(filterOf(d)).toEqual({ type: 'set', include: ['a'] });
+  });
+
+  it('a seeded walk (500 steps): never exclude nor blanks; on a complete list null exactly when all ticked, never null with one unticked', () => {
+    let s = 7;
+    const next = (n: number) => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0), s % n);
+    const d = draftOf(null);
+    for (let k = 0; k < 500; k++) {
+      const step = next(3);
+      if (step === 0) tick(d, ALL[next(4)]!, next(2) === 0);
+      else if (step === 1) tickAll(d, ALL.filter(() => next(2) === 0), next(2) === 0);
+      else d.blanks = !d.blanks;
+      const whole = next(2) === 0;
+      only(d, whole ? ALL : null, ALL);
+      const f = filterOf(d);
+      expect(f && ('exclude' in f || 'blanks' in f), `step ${k}`).toBeFalsy();
+      const every = ALL.every((v) => ticked(d, v));
+      // A search that changed nothing keeps « everything » (null); otherwise null needs the complete list.
+      if (whole) expect(f === null, `step ${k} ${JSON.stringify(f)}`).toBe(every);
+      else if (f === null) expect(every, `step ${k}`).toBe(true);
+    }
   });
 });
 

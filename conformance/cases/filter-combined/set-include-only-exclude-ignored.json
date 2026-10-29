@@ -1,0 +1,52 @@
+{
+  "id": "set-include-only-exclude-ignored",
+  "suite": "filter-combined",
+  "description": "On a column whose set filter never writes exclude (filter.exclude: false), an exclude is ignored with invalid-filter at its exclude: every row stays.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "s",
+        "filter": {
+          "kind": "set",
+          "exclude": false
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "A"
+      },
+      {
+        "id": "2",
+        "s": "B"
+      },
+      {
+        "id": "3",
+        "s": null
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "set",
+        "exclude": [
+          "A"
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2",
+      "3"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.s.exclude"
+      ]
+    ]
+  }
+}

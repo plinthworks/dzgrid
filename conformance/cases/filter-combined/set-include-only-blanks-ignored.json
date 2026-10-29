@@ -1,0 +1,53 @@
+{
+  "id": "set-include-only-blanks-ignored",
+  "suite": "filter-combined",
+  "description": "On an include-only set column, an include that says blanks is ignored with invalid-filter at its blanks.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "s",
+        "filter": {
+          "kind": "set",
+          "exclude": false
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "A"
+      },
+      {
+        "id": "2",
+        "s": "B"
+      },
+      {
+        "id": "3",
+        "s": null
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "set",
+        "include": [
+          "A"
+        ],
+        "blanks": "include"
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2",
+      "3"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "filter.s.blanks"
+      ]
+    ]
+  }
+}

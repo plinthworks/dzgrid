@@ -5,7 +5,7 @@ import { problem, type Problem } from '../problems.js';
 import { dayToEpochDay, parseDay } from '../value/day.js';
 import { relativeOf, resolveInstantRange } from './instant.js';
 import type { AnyFilterKind } from './kind.js';
-import { INSTANT_OPS, NUM_OPS, TEXT_OPS, type ColumnFilter, type FilterModel } from './model.js';
+import { INSTANT_OPS, NUM_OPS, setFault, TEXT_OPS, type ColumnFilter, type FilterModel } from './model.js';
 
 /** A test on a source row index (D7): no node is built per row. */
 export type RowTest = (src: number) => boolean;
@@ -245,17 +245,15 @@ function instantTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type:
 }
 
 function setTest<T>(col: ResolvedColumn<T>, f: Extract<ColumnFilter, { type: 'set' }>, path: string, env: ColumnEnv<T>, problems: Problem[]): Compiled {
+  const x = setFault(f, col.def.filter);
+  if (x) return bad(problems, path + x[0], x[1]);
   const list = f.include ?? f.exclude;
-  if ((f.include && f.exclude) || (list !== undefined && (!Array.isArray(list) || list.some((x) => typeof x !== 'string')))) return bad(problems, path);
-  if (f.blanks !== undefined && f.blanks !== 'include' && f.blanks !== 'exclude') return bad(problems, `${path}.blanks`);
   if (!list) return INACTIVE;
   const wanted = new Set(list);
   const exports = env.cache.exports(col, env);
-  if (f.include) {
-    const blanks = f.blanks === 'include';
-    return (src) => (exports[src] === null ? blanks : wanted.has(exports[src]!));
-  }
-  const blanks = f.blanks !== 'exclude';
-  return (src) => (exports[src] === null ? blanks : !wanted.has(exports[src]!));
+  // An include keeps what it lists (blanks when it says so); an exclude the rest (blanks unless it says not).
+  const inc = !!f.include;
+  const blanks = inc ? f.blanks === 'include' : f.blanks !== 'exclude';
+  return (src) => (exports[src] === null ? blanks : wanted.has(exports[src]!) === inc);
 }
 
