@@ -261,6 +261,19 @@ describe('start empty (filter-set.md « Starting empty », step 16b)', () => {
     expect(filterOf(d, true)).toBeNull();
   });
 
+  it('blanks hidden (none in the column): past half, the exclude keeps blanks, so every value ticked is no filter', () => {
+    const d = draftOf(null, true);
+    for (const v of ['a', 'b', 'c']) tick(d, v, true), settle(d, ALL, true);
+    expect(d.mode).toBe('exclude');
+    expect(d.blanks).toBe(true);
+    tick(d, 'd', true), settle(d, ALL, true);
+    expect(filterOf(d, true)).toBeNull();
+    // Blanks shown (the column has some): the exclude leaves them out, as the user never ticked them.
+    const s = draftOf(null, true);
+    for (const v of ['a', 'b', 'c']) tick(s, v, true), settle(s, ALL);
+    expect(filterOf(s, true)).toEqual({ type: 'set', exclude: ['d'], blanks: 'exclude' });
+  });
+
   it('a column without start: empty keeps Phase 3 Q1 (nothing ticked keeps no row)', () => {
     const d = draftOf({ type: 'set', include: ['a'] });
     tick(d, 'a', false);

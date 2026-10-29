@@ -155,7 +155,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
   }
   /** A tick: the half rule on a complete list, then the form's pause (or the draft on a server). */
   function edit(): void {
-    ix() ? only(d, complete() ?? whole, whole ?? values().map((x) => x.value), empty) : settle(d, complete());
+    ix() ? only(d, complete() ?? whole, whole ?? values().map((x) => x.value), empty) : settle(d, complete(), h.available && h.result?.blanks === 0);
     list.paint();
     boxes();
     changed(false, filterOf(d, empty) === null);

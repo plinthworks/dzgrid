@@ -722,5 +722,20 @@ describe('start empty (filter: { kind: set, start: empty, selectAll: false }; fi
       expect(t.filter()['city']).toBeUndefined();
       expect(JSON.stringify(t.f.calls.at(-1)!.req)).not.toContain('include');
     });
+
+    it('exclude allowed, a column without blank cells: every town ticked one by one is no filter, no blanks row ever (review of 9c4f6b6)', async () => {
+      const none = () => ({ values: TOWNS.map((v, i) => ({ value: v, count: i + 1 })), blanks: 0 });
+      const t = grid({ server: true, columns: colsWith({ start: 'empty' }), values: (() => none()) as never }); // the fixture's untyped values seam
+      t.f.answer(['a']);
+      await t.open();
+      for (const v of TOWNS) {
+        t.option(v).click();
+        expect(t.labels()).not.toContain(String(T['filter.set.blanks']));
+      }
+      const before = t.f.calls.length;
+      t.apply();
+      expect(t.filter()['city']).toBeUndefined();
+      expect(t.f.calls.length).toBe(before);
+    });
   });
 });

@@ -37,15 +37,17 @@ export const tickAll = (d: Draft, vs: readonly string[], on: boolean): void => {
 /**
  * The half rule, on a complete list only (`all`; null: searched, truncated or unavailable): more
  * than half ticked is written as an `exclude` of the others, fewer than half as an `include`; a
- * tie keeps the mode.
+ * tie keeps the mode. `hidden`: the column has no blank cell, so no blanks row is shown — an exclude then keeps
+ * blanks (nothing the user could have left out), and every value ticked is no filter.
  */
-export const settle = (d: Draft, all: readonly string[] | null): void => {
+export const settle = (d: Draft, all: readonly string[] | null, hidden?: boolean): void => {
   if (!all) return;
   const on = all.filter((v) => ticked(d, v));
   const inc = d.mode === 'include';
   if (inc ? on.length * 2 <= all.length : on.length * 2 >= all.length) return;
   d.vals = new Set(inc ? all.filter((v) => !d.vals.has(v)) : on);
   d.mode = inc ? 'exclude' : 'include';
+  if (inc && hidden) d.blanks = true;
 };
 
 /**
