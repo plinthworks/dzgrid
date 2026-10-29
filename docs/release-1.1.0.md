@@ -132,7 +132,13 @@ Tes réponses aux questions Q16-1 à Q16-8 ne sont pas encore là : chaque choix
   (85 133), liste de filtre 4 350 → 4 500 (4 467), détail (cœur) 1 050 → 1 150 (1 132), Angular 7 350 → 7 450
   (7 438), garde de la base du cœur 29 070 → 29 150 (29 106), comparaison (nouvelle) 300 (273).
 
-## Ce qui a été vérifié (2026-10-29, après les six ajouts)
+## Ce qui a été vérifié (2026-10-29, version finale, `b480fcd`)
+
+`gate:step` (test:ci, test:tz, typecheck, build, check:size, check:api) ; puis `check:contrast` (1 152 paires, 0 sous
+le minimum), `release:check` (les quatre paquets en 1.1.0), `test:perm` 10 / 10, `test:tz` 7 656 / 7 656 dans les deux
+fuseaux, `publish:dry` (les quatre acceptés), `test:browser` 1 114 / 1 114, `test:real-app` 58 / 58.
+
+### Ce qui a été vérifié (2026-10-29, après les six ajouts)
 
 Sur `main` à la clôture des ajouts (`57b7fec` + la correction du clignotement) : vitest 7 516 / 7 516, `test:ci`
 (un seul processus), `test:perm` 10 / 10, `test:tz` (Auckland et Los Angeles) 7 516 / 7 516, `typecheck`, `build`,
