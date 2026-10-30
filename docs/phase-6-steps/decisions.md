@@ -258,3 +258,7 @@ step 15). Structural: plan and owner questions first; first item for the week of
 - **Withdrawn the same day** (owner: « non, j'ai pas ce cas »): no line inside a merged block is a node. The real
   extra case — nodes inside nodes with lines sharing no « Rubrique » (no block) — works today (empty group value: no
   merge). Nothing left to build for this screen.
+- **Back on the list** (owner, later the same day: « il y a le node qui contient des enfants sous un bloc »): the case
+  is real — a line inside a merged block (TITI) that is a node, its chevron in the label column, its children in the
+  same block. The two DzGrid changes above (tree column per row; a merge that continues across a parent and its
+  children) are the first item for the week of 2026-11-02, plan and owner questions first.
