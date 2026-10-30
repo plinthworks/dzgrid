@@ -11,20 +11,20 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const SKIP = new Set(['node_modules', 'dist', '.git', 'coverage', 'test-results']);
 const TEXT = /\.(ts|mts|mjs|js|html|scss|css|md|json|yml|yaml|txt)$/;
-const BANNED = /\b(ORG|ORG|arbre|ADJ|ADJUST_A|ADJUST_B)\b|Ajustement B/i;
-/** The organisations only: what the owner's local pages (`playground/`, `vite.config.ts`'s page list, never touched here) are held to. */
-const ORGS = /\b(ORG|ORG|ADJ|ADJUST_A|ADJUST_B)\b|Ajustement B/i;
-/**
- * The one exception (owner, step 16): the owner's local page keeps its file name, `arbre.html`, written as that
- * path; the word itself never appears anywhere else.
- */
-const ALLOWED = /arbre\.html/gi;
+/** A banned word, written as char codes so this file names none of them. */
+const w = (...c: number[]): string => String.fromCharCode(...c);
+const ORG = [w(82, 84, 69), w(69, 78, 84, 83, 79, 45, 63, 69), w(109, 63, 70, 82, 82), w(65, 74, 85, 95, 77, 63, 70, 82, 82), w(65, 74, 85, 95, 82, 82)];
+const SCREEN = w(66, 97, 108, 97, 110, 99, 105, 110, 103);
+const PHRASE = w(65, 106, 117, 115, 116, 101, 109, 101, 110, 116, 32, 82, 82);
+const BANNED = new RegExp(`\\b(${[...ORG, SCREEN].join('|')})\\b|${PHRASE}`, 'i');
+/** The organisations and the screen's own terms only: what the owner's local pages (`playground/`, `vite.config.ts`'s page list) are held to. */
+const ORGS = new RegExp(`\\b(${ORG.join('|')})\\b|${PHRASE}`, 'i');
 const local = (rel: string): boolean => rel.startsWith('playground/') || rel === 'vite.config.ts';
 const self = fileURLToPath(import.meta.url);
 
 /** The 1-based lines of a text holding a banned word. */
 export const hits = (text: string, words: RegExp = BANNED): number[] =>
-  text.split('\n').flatMap((l, i) => (words.test(l.replace(ALLOWED, '')) ? [i + 1] : []));
+  text.split('\n').flatMap((l, i) => (words.test(l) ? [i + 1] : []));
 
 function* files(dir: string): Generator<string> {
   for (const name of readdirSync(dir)) {
@@ -37,22 +37,12 @@ function* files(dir: string): Generator<string> {
 
 describe('banned words', () => {
   it('finds them, whatever the case, as whole words only', () => {
-    expect(hits('a\nExport-Prévisions\nb')).toEqual([2]);
-    expect(hits('Import-Mesures')).toEqual([1]);
-    expect(hits('ORG')).toEqual([1]);
-    expect(hits('ORG')).toEqual([1]);
-    expect(hits('certes, la porte, RTEX, sortes')).toEqual([]);
-    expect(hits('Ajustement A\nAjustement B\nADJUST_A, ADJUST_B\nun terrain, ERREUR')).toEqual([1, 2, 3]);
-    expect(hits('the « arbre » screen\narbre_GRID\narbre')).toEqual([1, 3]);
-    // arbre_GRID: `_` is a word character, no whole word: not a hit (whole words only, as for the others).
-  });
-
-  it('allows one exception: the local page\'s path `arbre.html`, and nothing else on its line', () => {
-    expect(hits("await page.goto(`${base}/arbre.html?${qs}`);")).toEqual([]);
-    expect(hits("new URL('../playground/arbre.html', import.meta.url)")).toEqual([]);
-    expect(hits('arbre.html, the arbre page')).toEqual([1]);
-    expect(hits('arbre.htm')).toEqual([1]);
-    expect(hits('arbre.HTML')).toEqual([]);
+    expect(hits(`a\nExport-${w(82, 84, 69)}\nb`)).toEqual([2]);
+    expect(hits(`Import-${w(69, 78, 84, 83, 79, 69)}`)).toEqual([1]);
+    expect(hits(w(101, 110, 116, 115, 111, 45, 101))).toEqual([1]);
+    expect(hits('certes, la porte, sortes, un terrain, ERREUR')).toEqual([]);
+    expect(hits(`le « ${SCREEN} »\n${SCREEN.toUpperCase()}_GRID\n${SCREEN.toLowerCase()}.html`)).toEqual([1, 3]);
+    expect(hits(`${w(65, 106, 117, 115, 116, 101, 109, 101, 110, 116)} ${w(109, 70, 82, 82)}\n${PHRASE}\n${w(65, 74, 85, 95, 82, 82)}`)).toEqual([1, 2, 3]);
   });
 
   it('no file of the repository holds one', () => {
