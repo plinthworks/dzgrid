@@ -246,3 +246,12 @@ menus, status bar, advanced filter, row drag), 10 (pivot), 11 (hardening) and th
 ARCHITECTURE.md. Phase 7 is no longer parked; its plan `docs/phase-7-plan.md` waits for the owner's answers (§5).
 Work resumes the week of 2026-11-02 (the owner's weekly budget), starting with those answers. Spend little:
 see CLAUDE.md working rules.
+
+## The owner's tree screen: one case left for DzGrid (owner, 2026-10-30)
+
+Seen on the local demo. Works today: nodes as « Rubriques » with their chevron in the Rubrique column
+(`tree({ column: 'group', indent: 0 })`), nodes under nodes, merged blocks of lines under a node. **Missing**: a line
+inside a merged block (« TITI », lines 5–8) that is itself a node — its chevron in the label column, its children
+also in the « TITI » block. Needs (1) the tree column chosen per row (`tree({ column: (row) => id })`) and (2) a merge
+in the Rubrique column that continues across a parent line and its children (today: siblings only, D9 lifted in
+step 15). Structural: plan and owner questions first; first item for the week of 2026-11-02.
