@@ -238,3 +238,11 @@ foreseen needs. Plan: `step16-plan.md`; structural points go to the owner before
 
 « Oui » to: a line may be raised without asking up to **+2 %** of its value, to the measure plus a small margin,
 recorded in decisions.md with the numbers; above 2 %, or K.8 past its 90 kB line, the owner decides.
+
+## After 1.1.0: every remaining phase wanted (owner, 2026-10-30)
+
+« Je veux toutes ces fonctionnalités » : Phases 7 (grouping), 8 (infinite scroll, server-side model), 9 (Excel,
+menus, status bar, advanced filter, row drag), 10 (pivot), 11 (hardening) and the docs website, in the order of
+ARCHITECTURE.md. Phase 7 is no longer parked; its plan `docs/phase-7-plan.md` waits for the owner's answers (§5).
+Work resumes the week of 2026-11-02 (the owner's weekly budget), starting with those answers. Spend little:
+see CLAUDE.md working rules.
