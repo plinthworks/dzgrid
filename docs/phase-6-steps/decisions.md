@@ -262,3 +262,14 @@ step 15). Structural: plan and owner questions first; first item for the week of
   is real — a line inside a merged block (TITI) that is a node, its chevron in the label column, its children in the
   same block. The two DzGrid changes above (tree column per row; a merge that continues across a parent and its
   children) are the first item for the week of 2026-11-02, plan and owner questions first.
+
+## Found while running an Angular app (2026-10-30)
+
+- **Bug to fix**: column groups given after the grid is created (a `columns` update that turns flat columns into
+  groups, e.g. `<dz-grid [columns]>` bound to data that arrives later) draw no group header row; the same groups
+  given at creation do. Workaround in the app: create `<dz-grid>` once the first data is there. Test first next week.
+- **Doc to add**: `editors()` loads the date editors, which import `@tzslot/core` and `@tzslot/dom`: an app using
+  `editors()` needs both installed even without date columns (the bundler resolves the lazy imports). Today the
+  Angular package marks them optional.
+- **Doc to add**: a column id must not contain « . » — it is read as a path (`a.b.c`); an id built from an ISO
+  date silently reads `undefined`. Consider a `invalid-column` warning for such ids when no `field` is given.
