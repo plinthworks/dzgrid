@@ -255,3 +255,6 @@ inside a merged block (« TITI », lines 5–8) that is itself a node — its ch
 also in the « TITI » block. Needs (1) the tree column chosen per row (`tree({ column: (row) => id })`) and (2) a merge
 in the Rubrique column that continues across a parent line and its children (today: siblings only, D9 lifted in
 step 15). Structural: plan and owner questions first; first item for the week of 2026-11-02.
+- **Withdrawn the same day** (owner: « non, j'ai pas ce cas »): no line inside a merged block is a node. The real
+  extra case — nodes inside nodes with lines sharing no « Rubrique » (no block) — works today (empty group value: no
+  merge). Nothing left to build for this screen.
