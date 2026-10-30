@@ -125,7 +125,7 @@ and discard as an undo of everything) is **new**.
 
 **P2. Time-slot columns generated from data, regrouped as time passes. H · S–M.**
 Evidence: header groups `PAST`, `REAL_TIME`, `ADJUST_A`, `ADJUST_B` and a default (OM:1066–1084). These are horizons of
-a day of the owner's tree screen (A / B adjustments). The header label is hidden for PAST (OM:1043). Likely 96 quarter-hour or 24
+a day of the owner's tree screen (two kinds of adjustment). The header label is hidden for PAST (OM:1043). Likely 96 quarter-hour or 24
 hourly columns, each moving from REAL_TIME to PAST over the day.
 Needs:
 - `columns.set` every slot change, keeping the user's widths by id (covered, `kernel.ts` `columns.set`).

@@ -11,9 +11,9 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const SKIP = new Set(['node_modules', 'dist', '.git', 'coverage', 'test-results']);
 const TEXT = /\.(ts|mts|mjs|js|html|scss|css|md|json|yml|yaml|txt)$/;
-const BANNED = /\b(ORG|ORG|arbre)\b/i;
+const BANNED = /\b(ORG|ORG|arbre|ADJ|ADJUST_A|ADJUST_B)\b|Ajustement B/i;
 /** The organisations only: what the owner's local pages (`playground/`, `vite.config.ts`'s page list, never touched here) are held to. */
-const ORGS = /\b(ORG|ORG)\b/i;
+const ORGS = /\b(ORG|ORG|ADJ|ADJUST_A|ADJUST_B)\b|Ajustement B/i;
 /**
  * The one exception (owner, step 16): the owner's local page keeps its file name, `arbre.html`, written as that
  * path; the word itself never appears anywhere else.
@@ -42,6 +42,7 @@ describe('banned words', () => {
     expect(hits('ORG')).toEqual([1]);
     expect(hits('ORG')).toEqual([1]);
     expect(hits('certes, la porte, RTEX, sortes')).toEqual([]);
+    expect(hits('Ajustement A\nAjustement B\nADJUST_A, ADJUST_B\nun terrain, ERREUR')).toEqual([1, 2, 3]);
     expect(hits('the « arbre » screen\narbre_GRID\narbre')).toEqual([1, 3]);
     // arbre_GRID: `_` is a word character, no whole word: not a hit (whole words only, as for the others).
   });

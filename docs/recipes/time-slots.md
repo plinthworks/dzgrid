@@ -14,8 +14,8 @@ const slotColumn = (s: Slot): ColumnDef<Row> => ({ id: s.id, header: s.label, wi
 const groups = (slots: readonly Slot[], now: InstantMs): ColumnOrGroup<Row>[] => [
   { id: 'PAST', header: t('past'), children: slots.filter((s) => s.end <= now).map((s) => ({ ...slotColumn(s), editable: false })) },
   { id: 'REAL_TIME', header: t('realTime'), children: slots.filter((s) => s.start <= now && now < s.end).map(slotColumn) },
-  { id: 'ADJUST_A', header: t('A'), children: /* … */ [] },
-  { id: 'ADJUST_B', header: t('rr'), children: /* … */ [] },
+  { id: 'ADJUST_A', header: t('adjustA'), children: /* … */ [] },
+  { id: 'ADJUST_B', header: t('adjustB'), children: /* … */ [] },
 ];
 ```
 
