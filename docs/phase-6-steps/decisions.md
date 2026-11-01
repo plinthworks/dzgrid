@@ -279,3 +279,8 @@ step 15). Structural: plan and owner questions first; first item for the week of
 Next item, before the rest: `tree({ column })` also takes a function, so each row says which column carries its
 chevron (a group row in one column, a node inside a merged block in another), and a merge in the other column
 continues across that node and its children. Owner questions first, then plan and tests.
+- Owner answers (2026-11-01): Q1 yes — folding a node inside a merged block shrinks the block to the rows left.
+  Q2 yes — the node's children stay in the block when their merged value is the same (else the block stops before
+  them). Q3 — `tree({ column: (row) => columnId })`, per row; no function = one column as today. Added: the indent
+  per row too — `tree({ indent: number | ((row, level) => px) })` (some users want a node's children at the
+  parent's indent, others below it); display only, levels for screen readers unchanged.
