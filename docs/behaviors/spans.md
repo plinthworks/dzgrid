@@ -49,7 +49,8 @@ a label column whose equal values are one tall cell. Before 1.1.0 a tree refused
 choice); it is lifted. Plan: `docs/phase-6-steps/step15-plan.md` (A-D1…A-D10); decisions: `decisions.md` « Steps 14
 and 15 ».
 
-- **Siblings only** (owner Q15-1, rows and columns alike): a merged or spanned cell covers **consecutive shown
+- **Siblings only** (owner Q15-1, rows and columns alike; 1.2.0 can widen it outside a row's tree column, opt-in:
+  « Across levels » below): a merged or spanned cell covers **consecutive shown
   siblings** — same parent, same level — never a parent and its children, never across a filler (path trees), a
   loading row, or a gap (`row-gaps.md`). In the order a tree shows its rows, two consecutive rows of one level are
   always siblings, so the engine's existing cut at a level change is the rule. It is computed on the rows shown, as
@@ -85,3 +86,36 @@ and 15 ».
 - Tests: `packages/core/test/spans-tree{,-property}.test.ts`; conformance `spans/tree-*.json`, `spans/gap-cuts-merge.json`,
   `tree/conflicts.json` (rewritten by the owner's decision); `packages/dom/test/tree-spans.test.ts`; browser
   `npm run test:browser -- --only tree-spans`.
+
+## Across levels (1.2.0, « étape 7 »; owner 2026-11-01; written before the code)
+
+**Opt-in** (owner, 2026-11-01): `spans({ acrossLevels: true })`. Without it, merges in a tree keep the 1.1.0 rule
+exactly (a span stops at a level change), so no existing grid changes. What follows describes the option on; rule 3's
+« or » part is the option.
+
+The owner's screen: in the « group » column, block TITI covers lines 5, 6, 7, 7.1, 7.2, 8, where 7 is a node (its
+chevron in the « label » column, `tree-view.md` « row by row ») and 7.1, 7.2 its children. With 7 open that is **one**
+merged cell over 5…8; 7 folded, the block shrinks to 5, 6, 7, 8. A different value stops the block, as always.
+
+**The rule.** Whether row `i + 1` continues a span from row `i` (consecutive rows shown) in column C:
+1. Both are data rows, neither full width, no gap before `i + 1` (as before).
+2. **C is the tree column of `i` or of `i + 1`** (each row has its own, `tree({ column })`): the step 15 rule — the two
+   rows are on one level (siblings), and a row whose tree column is C is a leaf (a lazy parent not loaded counts as a
+   parent). A node keeps its chevron's cell.
+3. **C is the tree column of neither**: the two rows are on one level (siblings, as before), **or** their levels differ
+   and **neither is a top-level row** (both levels ≥ 1). In the order a tree shows its rows, two consecutive rows not at
+   the top level stand under the same top-level row, so a block that spans levels never leaves one top-level row's
+   subtree, never includes a top-level row (a « fixedOpen » table head included), and joins a node, its descendants
+   shown and the siblings around them.
+A run is a chain of such links, then cut by the merge's own test (equal values, `within`) or the span's height. Top-level
+rows next to each other still merge as siblings (step 15). Folding a node hides its descendants, so the block is
+computed again on the rows left (it shrinks); a hidden row is never in a block.
+
+- **Unchanged**: the tree column's own rule (2); column spans touching a row's tree column are refused (detail `tree`,
+  checked against that row's tree column); gaps, fillers and loading rows cut; export (`spans: 'first'`) and print use
+  the same map, built with the same per-row tree column and the same option.
+- **Screen readers**: a merged cell spanning levels is announced as any merged cell: `aria-rowspan` on the cell in its
+  first row; each row keeps its `aria-level`, `aria-posinset`, `aria-setsize`, `aria-expanded`. What Chrome's
+  accessibility tree makes of it: recorded in `decisions.md` « Étape 7 built ».
+- Tests: `packages/core/test/spans-levels.test.ts` and `spans-levels-property.test.ts` (an oracle over random trees
+  written from parent ids, not levels); conformance `spans/levels-*.json`; DOM `packages/dom/test/tree-columns.test.ts`.

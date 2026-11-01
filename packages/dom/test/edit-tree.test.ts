@@ -113,6 +113,21 @@ describe('the field in the tree column (behaviour 9–10)', () => {
     expect(t.cell('V1', 'n')!.style.getPropertyValue('--dzg-tree-pad')).toBe('');
   });
 
+  it('per row (1.2.0, tree({ column }) a function): the field sits after the chevron in that row’s column', () => {
+    const t = tr({ parentId: (r) => r.pid, column: (r) => (r.pid === null ? 'name' : 'n') });
+    const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${px}px)`;
+    expect(t.cell('S0')!.style.getPropertyValue('--dzg-tree-pad')).toBe(pad(0));
+    expect(t.cell('P1', 'n')!.style.getPropertyValue('--dzg-tree-pad')).toBe(pad(16));
+    expect(t.cell('P1', 'name')!.style.getPropertyValue('--dzg-tree-pad')).toBe('');
+    t.at('P1', 'n');
+    t.key('F2');
+    const c = t.cell('P1', 'n')!;
+    expect(c.firstElementChild!.classList.contains('dzg-toggle')).toBe(true);
+    expect(c.lastElementChild).toBe(t.field());
+    // The field's owner is a child of the cell that carries --dzg-tree-pad: edit.css's rule reaches it.
+    expect(c.querySelector(':scope > [data-dzg-owner]')).not.toBeNull();
+  });
+
   it('the chevron stays in the cell while the field is open, before it', () => {
     const t = tr();
     t.at('P1', 'name');

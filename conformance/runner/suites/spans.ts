@@ -29,16 +29,17 @@ export function runSpans(input: any) {
   store.replaceAll(input.rows.map((vals: unknown[], i: number) => ({ id: `r${i}`, ...Object.fromEntries(ids.map((id, j) => [id, vals[j]])) })));
   let rows: DisplayedRows<Row> = flatDisplayed(store.snapshot, input.order ? Uint32Array.from(input.order) : null, 1);
   // A tree (1.1.0, spans.md « In a tree »): `parents` gives each row's parent (an index, null for a root), `open` the
-  // rows opened; `treeColumn` the tree's column; `gaps` the rows a gap stands before (row-gaps.md).
+  // rows opened; `treeColumn` the tree's column, or `treeColumns` one per row (1.2.0, spans.md « Across levels »);
+  // `fixedOpen` the rows always open; `acrossLevels` the opt-in merge across levels; `gaps` the rows a gap stands before (row-gaps.md).
   if (input.parents) {
     const data = input.rows.map((vals: unknown[], i: number) => ({ id: `r${i}`, p: input.parents[i] === null ? null : `r${input.parents[i]}`, ...Object.fromEntries(ids.map((id, j) => [id, vals[j]])) }));
-    const model = clientRows<Row>({ rows: data, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<Row>({ parentId: (r) => r.p as string | null }) });
+    const model = clientRows<Row>({ rows: data, getRowId: (r) => r.id, columns, ctx: localeCtx({ locale: 'en-US' }), shape: treeShape<Row>({ parentId: (r) => r.p as string | null, ...(input.fixedOpen && { fixedOpen: (r: Row) => input.fixedOpen.includes(+r.id.slice(1)) }) }) });
     createKernel<Row>({ rows: model, columns }).dispatch({ type: 'rows.expand', rows: (input.open ?? []).map((i: number) => dataKey(`r${i}`)!), expanded: true }, 'user');
     rows = model.displayed;
   }
   const map = buildSpanMap({
     rows, columns, ctx: localeCtx({ locale: 'en-US' }), ...(input.fullWidth && { fullWidth: FULL_WIDTH[input.fullWidth] }),
-    ...(input.treeColumn && { treeColumn: input.treeColumn }), ...(input.gaps && { apart: (i: number) => input.gaps.includes(i) }),
+    ...(input.treeColumn && { treeColumn: input.treeColumn }), ...(input.treeColumns && { treeColumn: (r: Row) => input.treeColumns[+r.id.slice(1)] }), ...(input.acrossLevels && { acrossLevels: true }), ...(input.gaps && { apart: (i: number) => input.gaps.includes(i) }),
   });
   const n = columns.visible().length;
   const cells: SpanCell[] = [];

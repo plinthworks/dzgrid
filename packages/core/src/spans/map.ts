@@ -77,11 +77,18 @@ export interface SpanInput<T> {
    */
   readonly apart?: ((row: number) => boolean) | undefined;
   /**
-   * A tree's column (spans.md « In a tree »): there, a parent's slot and the slot under it never continue a span
-   * from the row above (a parent keeps its cell; a lazy one not loaded counts); a column span starting on it or
-   * covering it is refused (`invalid-span`, detail `tree`), its cell drawn alone. Part of the memo key.
+   * A tree's column (spans.md « In a tree »), one for every row or one per data row (a function, 1.2.0; « Across
+   * levels »; it must not throw: a throw reads as none). In a row's own tree column a span stays on one level and a
+   * parent's slot never continues one (a lazy parent not loaded counts); elsewhere two rows of different levels may
+   * continue one when neither is a top-level row. A column span starting on or covering that row's tree column is
+   * refused (`invalid-span`, detail `tree`), its cell drawn alone. Part of the memo key (identity).
    */
-  readonly treeColumn?: string | undefined;
+  readonly treeColumn?: string | ((row: T) => string | undefined) | undefined;
+  /**
+   * A tree (1.2.0, opt-in, spans.md « Across levels »): outside a row's tree column, two rows of different levels
+   * continue a span when neither is a top-level row. Without it a span stops at a level change (1.1.0). Part of the memo key.
+   */
+  readonly acrossLevels?: boolean | undefined;
 }
 
 /** At most this many problems of one code per column are told; the rest are counted. */
@@ -114,7 +121,7 @@ interface Rule<T> {
   readonly rowSpan?: (ctx: SpanCtx<T>) => number;
   readonly colSpan?: (ctx: SpanCtx<T>) => number;
   ends?: Uint32Array;
-  /** Where a span starting on a row may end, at most: the run of one level, cut by `apart` (and parents in the tree column). */
+  /** Where a span starting on a row may end, at most: cut by `apart`, by levels and parents in a row's tree column, by a top-level row elsewhere. */
   lim?: Uint32Array;
 }
 
@@ -136,7 +143,7 @@ const isObj = (v: unknown): v is Record<string, unknown> => v !== null && typeof
  */
 export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): SpanMap {
   const { rows, columns } = input;
-  const deps = [rows, rows.version, input.fullWidth, input.text, input.apart, input.treeColumn, ctxKey(input.ctx)];
+  const deps = [rows, rows.version, input.fullWidth, input.text, input.apart, input.treeColumn, input.acrossLevels, ctxKey(input.ctx)];
   const last = prev ? MEMO.get(prev) : undefined;
   const { start, center, end } = columns.layout;
   const segs = [start.columns, center.columns, end.columns];
@@ -206,9 +213,15 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
   // Spans are refused with trees and details (D9): a row that is not data reads as none.
   const dataOf = (i: number): T | null => (nodes[i]!.kind === 'data' ? (nodes[i] as DataNode<T>).data : null);
   const fw = new Uint8Array(n);
+  // Each row's tree column (a data row's, by the function; a string: every row's).
+  const tcIn = input.treeColumn;
+  const tc: (string | undefined)[] = new Array(n);
   for (let i = 0; i < n; i++) {
     const node = rows.nodeAt(i as DisplayIndex);
     nodes[i] = node;
+    try {
+      tc[i] = typeof tcIn != 'function' ? tcIn : node.kind === 'data' ? tcIn(node.data) : void 0;
+    } catch {}
     if (fwRule && node.kind === 'data') {
       try {
         if (fwRule(node.data)) fw[i] = 1;
@@ -218,18 +231,27 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     }
   }
   const spannable = (i: number) => nodes[i]!.kind === 'data' && !fw[i];
-  // A run is of one level (siblings, in a tree's order), cut before a row `apart` (a gap); in the tree column, also around a parent.
+  // Where a run may go in column `id`, never past a row `apart` (a gap). Two rows of one level (siblings, in a tree's
+  // order): yes, but a row whose tree column this is must be a leaf. Two levels: only with `acrossLevels`, never in
+  // either row's tree column, and when neither is a top-level row (then both stand under one; spans.md « Across levels »).
   // A parent: children shown, or not known yet (-1, a lazy one).
   const lone = (i: number) => !!(rows as { childrenAt?: (i: DisplayIndex) => number }).childrenAt?.(i as DisplayIndex);
-  const ends = (tree: boolean): Uint32Array => {
+  const lv = (i: number) => nodes[i]!.level;
+  const ends = (id: string): Uint32Array => {
     const e = new Uint32Array(n);
-    for (let i = n - 1; i >= 0; i--) e[i] = i < n - 1 && spannable(i) && spannable(i + 1) && nodes[i + 1]!.level === nodes[i]!.level && !input.apart?.(i + 1) && !(tree && (lone(i) || lone(i + 1))) ? e[i + 1]! : i;
+    for (let i = n - 1, j = n; i >= 0; j = i--) {
+      const a = tc[i] === id;
+      const b = tc[j] === id;
+      e[i] = j < n && spannable(i) && spannable(j) && !input.apart?.(j) && ((nodes[i + 1]!.level === nodes[i]!.level && !(a && lone(i)) && !(b && lone(j))) || (!!input.acrossLevels && !a && !b && lv(i) > 0 && lv(j) > 0)) ? e[j]! : i;
+    }
     return e;
   };
-  const blockEnd = ends(false);
-  let treeEnd: Uint32Array | undefined;
-  for (const rule of rules) rule.lim = rule.col.id === input.treeColumn ? (treeEnd ??= ends(true)) : blockEnd;
-  const treeAt = visible.findIndex((c) => c.id === input.treeColumn);
+  // One per column a row may take as its tree column; the others share one.
+  const lims = new Map<string, Uint32Array>();
+  for (const rule of rules) {
+    const id = typeof tcIn == 'function' || rule.col.id === tcIn ? rule.col.id : '';
+    lims.set(id, (rule.lim = lims.get(id) ?? ends(id)));
+  }
 
   // What a rule is told: two reused objects (a merge compares two cells).
   const ctxA = { row: null as unknown, value: undefined as unknown, key: '' as RowKey, index: 0, column: '', prev: null as unknown, next: null as unknown };
@@ -338,8 +360,8 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
         clipped(rule.col.id, 'segment');
       }
       if (h === 1 && w === 1) continue;
-      // A column span on or over a tree's column: refused, the cell alone.
-      if (w > 1 && treeAt >= c && treeAt < c + w) {
+      // A column span on or over a tree's column — of any row it covers (the tree column may differ per row): refused.
+      if (w > 1 && visible.slice(c, c + w).some((x) => tc.slice(r, r + h).includes(x.id))) {
         say('invalid-span', rule.col.id, `rows[${r}].${rule.col.id}.colSpan`, 'tree');
         continue;
       }

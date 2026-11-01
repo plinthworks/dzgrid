@@ -1,0 +1,92 @@
+{
+  "id": "levels-own-column",
+  "suite": "spans",
+  "description": "Across levels (1.2.0, opt-in `acrossLevels`): one tree column for all, « label » (a string). « group » is nobody's tree column: lines 4 to 8 are one block across node 7's level, the head (top-level, always open) stays alone. « label », the rows' own tree column, keeps step 15's rule: one level, leaves only — lines 4–6 merge, node 7 keeps its cell, 7.1–7.2 merge, line 8 (another level than 7.2) stays alone.",
+  "input": {
+    "columns": [
+      {
+        "id": "group",
+        "merge": true
+      },
+      {
+        "id": "label",
+        "merge": true
+      }
+    ],
+    "rows": [
+      [
+        "TITI",
+        "x"
+      ],
+      [
+        "TITI",
+        "same"
+      ],
+      [
+        "TITI",
+        "same"
+      ],
+      [
+        "TITI",
+        "same"
+      ],
+      [
+        "TITI",
+        "same"
+      ],
+      [
+        "TITI",
+        "same"
+      ],
+      [
+        "TITI",
+        "same"
+      ],
+      [
+        "TITI",
+        "same"
+      ]
+    ],
+    "parents": [
+      null,
+      0,
+      0,
+      0,
+      0,
+      4,
+      4,
+      0
+    ],
+    "fixedOpen": [
+      0
+    ],
+    "open": [
+      4
+    ],
+    "treeColumn": "label",
+    "acrossLevels": true
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 1,
+        "col": 0,
+        "rows": 7,
+        "cols": 1
+      },
+      {
+        "row": 1,
+        "col": 1,
+        "rows": 3,
+        "cols": 1
+      },
+      {
+        "row": 5,
+        "col": 1,
+        "rows": 2,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

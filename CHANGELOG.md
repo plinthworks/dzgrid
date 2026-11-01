@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Planned as 1.2.0 (minor).
+
+### Added
+- `tree({ column })` also takes a function of the row, `(row) => columnId`: each row's chevron, indent and keys
+  (← / → open and close a node in that column) go in that row's column. An answer that is not a visible column's id,
+  or a throw, uses the default tree column (the first visible), with one `invalid-setting` warning (`tree.column`).
+  No function: one column, as before.
+- `tree({ indent })` also takes a function, `(row, level) => px`: the indent of that row's tree cell, for display
+  only (`aria-level`, keys and folding unchanged; the edit field follows). A result that is not a number from 0 to
+  1 000 uses `level × 16`, with one `invalid-setting` warning (`tree.indent`).
+- `@dzgrid/core/spans`: `SpanInput.treeColumn` also takes a function of the row (each row's own tree column).
+
+- `spans({ acrossLevels: true })` (opt-in, owner 2026-11-01; `spans.md` « Across levels »): in a tree, a merge in a
+  column that is not the row's tree column continues across a node and its children shown when the value is the
+  same: two consecutive rows join when they are siblings or when neither is a top-level row, so a block never leaves
+  one top-level row's subtree and never includes a top-level row. Folding the node shrinks the block. In a row's own
+  tree column the 1.1.0 rule stays (one level, leaves only). Without the option nothing changes. `SpanInput`
+  gains `acrossLevels` too.
+
 ## [1.1.0] - 2026-10-29
 
 The Phase 6 close (owner, « Back to Phase 6 »): a minor, additive over 1.0.0 — every 1.0.0 subpath and named export is

@@ -12,7 +12,7 @@
     },
     "@dzgrid/core/spans": {
       "file": "packages/core/src/spans.ts",
-      "maxGzip": 3950,
+      "maxGzip": 4029,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/csv": {
@@ -437,7 +437,7 @@
     },
     "@dzgrid/dom/tree": {
       "file": "packages/dom/src/tree.ts",
-      "maxGzip": 3950,
+      "maxGzip": 4080,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",

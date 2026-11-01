@@ -979,6 +979,17 @@ sheet → architect → tests first → code → review → gate, and is ticked 
   told once; the keys to `freshRows({ rowsArrived })`; never on a first load, a page, a sort or a filter. Done 2026-10-29, fresh-rows.md.
   Sizes: new lines `dom/fresh-rows` 544 / 700, texts 115 / 132 / 197 (150 / 150 / 200), `fresh-rows.css` 308 / 350.
 
+## 1.2.0 — unreleased
+
+- [x] **« Étape 7 »: the chevron's column per row, and merges across a node** (owner 2026-11-01) — `tree({ column: (row)
+  => id })` (each row's chevron, indent and keys in its column; unknown or hidden → the default, told once),
+  `tree({ indent: (row, level) => px })` (display only; NaN, negative, over 1 000 → `level × 16`, told once); with
+  `spans({ acrossLevels: true })` (opt-in, owner), outside a row's tree column a merge crosses levels under one top-level row (spans.md « Across levels »), in its own tree column
+  step 15's rule. Built 2026-11-01, not committed: core `spans-levels{,-property}` (1 000 trees, oracle from parent ids,
+  two planted faults), conformance `spans/levels-*.json`, DOM `tree-columns` (LTR and RTL, export), `edit-tree` +1;
+  Chrome on a local page (`playground/tree-columns.html`, not committed). Sizes: `core/spans` 4 024 / 4 029 (raised
+  from 3 950, +2 % rule), `dom/tree` 4 069 / 4 080 (owner, 2026-11-01).
+
 Also seen, nothing to add: grid context for parts (`context`), saving open rows (`rowExpanded` + `rows.expand`; open
 rows stay out of `GridState` by Q-S1), header component, two label renderers in one cell part, row classes, no
 column moving, no row animation. To check when the screen is built: the keys DzGrid gives a path tree's filler rows

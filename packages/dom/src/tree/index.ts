@@ -1,4 +1,4 @@
-import { intentFor, type DisplayIndex, type FocusPos, type KeyOwner, type RowKey } from '@dzgrid/core';
+import { intentFor, problem, type DisplayIndex, type Problem, type RowNode, type FocusPos, type KeyOwner, type RowKey } from '@dzgrid/core';
 import { emit, lockColumns } from '@dzgrid/core/internal';
 import { treeColumnProblems, treeShape, type TreeOptions, type TreeRows, type TreeShape } from '@dzgrid/core/tree';
 import type { GridContext } from '../context.js';
@@ -13,10 +13,17 @@ import { stickyStack } from './sticky.js';
 export const TREE_KEYS = ['tree.expanded', 'tree.collapsed', 'tree.expandedSome', 'tree.empty'] as const satisfies readonly TreeMessageKey[];
 
 export interface TreeFeatureOptions<T> extends TreeOptions<T> {
-  /** The column that shows the hierarchy: the first visible one by default (screen readers expect it first). */
-  readonly column?: string;
-  /** Pixels per level of indent (16 by default). */
-  readonly indent?: number;
+  /**
+   * The column that shows the hierarchy: the first visible one by default (screen readers expect it first). A function
+   * (1.2.0) names it per data row: that row's chevron, indent and keys go there (tree-view.md « row by row »); an
+   * answer that is not a visible column's id, or a throw: the default, told once (`invalid-setting`, `tree.column`).
+   */
+  readonly column?: string | ((row: T) => string);
+  /**
+   * Pixels per level of indent (16 by default), or a data row's indent (1.2.0), for display only: an answer that is
+   * not a number from 0 to 1 000, or a throw: `level × 16`, told once (`invalid-setting`, `tree.indent`).
+   */
+  readonly indent?: number | ((row: T, level: number) => number);
   /** Children loaded when their parent opens: `lazyChildren({ has, load })` from `@dzgrid/dom/tree-lazy` (tree-lazy.md). */
   readonly lazy?: LazyChildren<T>;
   /** Parents kept pinned under the header while their children scroll, the nearest first (tree-sticky.md): 0 none, 3 by default. */
@@ -43,16 +50,18 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
  */
 export function tree<T>(o: TreeFeatureOptions<T>): GridFeature {
   let s: TreeShape<T> | undefined;
-  return { id: 'tree', shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column, o.indent ?? 16, o.lazy, s, o.sticky, o.structure ?? (o.path && !o.parentId && !o.children ? null : [])) };
+  return { id: 'tree', shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column as Col, o.indent as Indent ?? 16, o.lazy, s, o.sticky, o.structure ?? (o.path && !o.parentId && !o.children ? null : [])) };
 }
 
 type Rows = TreeRows<unknown>;
+type Col = string | ((row: unknown) => string) | undefined;
+type Indent = number | ((row: unknown, level: number) => number);
 const PAD = 'padding-inline-start';
 /** The cell's indent, read by the field's place (after the chevron, TREE_CSS). */
 const VAR = '--dzg-tree-pad';
 
 /** `lock`: the structure columns; null: the tree column's, followed (a path tree). */
-function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: number, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined, sticky = 3, lock: readonly string[] | null = []): FeatureHandle {
+function setup<T>(g: GridContext<unknown>, column: Col, indent: Indent, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined, sticky = 3, lock: readonly string[] | null = []): FeatureHandle {
   const missing = TREE_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`tree: missing ${missing.join(', ')}`);
   const { kernel, el, rowRenderer, doc } = g;
@@ -65,7 +74,25 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     const d = g.rows.displayed as Partial<Rows>;
     return d.posAt ? (d as Rows) : null;
   };
-  const treeColumn = (g.treeColumn = (): string | undefined => column ?? g.columns.visible()[0]?.id);
+  /** The default tree column (every row's without a function). */
+  const treeColumn = (): string | undefined => (typeof column == 'string' ? column : g.columns.visible()[0]?.id);
+  const fn = typeof column == 'function';
+  // For the spans feature and the export: the default, or the rows' own (one function, kept: the span map's memo keys on it).
+  g.treeColumn = () => (fn ? own : treeColumn());
+  const tell = (problems: Problem[]): void => emit(kernel, { type: 'problems', source: 'host', problems });
+  // A bad answer of `column` or `indent` (tree-view.md « row by row »): told once each (`invalid-setting`).
+  let told = '';
+  const bad = (path: string): unknown => told.includes(path) || ((told += path), tell([problem('invalid-setting', 'warning', path)]));
+  /** A data row's tree column by `column` (a function): a visible column's id, else the default. */
+  const own = (row: unknown): string | undefined => {
+    let id: unknown;
+    try {
+      id = (column as (row: unknown) => string)(row);
+    } catch {}
+    return g.columns.visible().some((c) => c.id === id) ? (id as string) : (bad('tree.column'), treeColumn());
+  };
+  /** A row's tree column: a filler's or a loading row's is the default. */
+  const colOf = (n: RowNode<unknown> | null): string | undefined => (fn && n?.kind === 'data' ? own(n.data) : treeColumn());
   // The structure read-only (Q13): given, once; a path tree's own column, again when it changes (at a paint).
   let locked = '';
   const relock = (): void => {
@@ -82,7 +109,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     const node = i === -1 ? null : d.nodeAt(i);
     if (node?.kind === 'group') return node.label;
     const shown = g.columns.visible();
-    const col = shown.find((c) => c.id === treeColumn()) ?? shown[0];
+    const col = shown.find((c) => c.id === colOf(node)) ?? shown[0];
     const data = g.rows.row(key)?.data;
     if (!col || data === undefined) return '';
     try {
@@ -162,7 +189,7 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
       const i = key && d ? d.indexOf(key) : -1;
       if (i === -1 || t.closest('.dzg-check')) return;
       if (t.closest('.dzg-toggle')) return expand([key!], !d!.expandedAt(i));
-      const c = t.closest<HTMLElement>('.dzg-cell')?.dataset['col'] ?? treeColumn();
+      const c = t.closest<HTMLElement>('.dzg-cell')?.dataset['col'] ?? colOf(d!.nodeAt(i));
       if (c && kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: key!, column: c } }, 'user').ok) g.restoreFocus();
     }, { capture: true });
   }
@@ -202,12 +229,12 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     beforeRows: relock,
     afterRows(f: Frame<unknown>) {
       const d = tree();
-      const col = treeColumn();
       // A tree column that is not first: allowed, told once per order of the visible columns (never again for a
       // paint, a row update or a column hidden and shown back in the same order: owner demo, step 16).
       const ids = g.columns.visible().map((c) => c.id);
-      const notFirst = treeColumnProblems(ids, column);
-      if (notFirst.length && !warned.has(`${ids}`)) warned.add(`${ids}`), emit(kernel, { type: 'problems', source: 'host', problems: notFirst });
+      // A function is never told here (not a string: never among the ids).
+      const notFirst = treeColumnProblems(ids, column as string | undefined);
+      if (notFirst.length && !warned.has(`${ids}`)) warned.add(`${ids}`), tell(notFirst);
       const now = new Set<HTMLElement>();
       if (stack) {
         // The pinned parents (tree-sticky.md): worked out at each paint, redrawn only when they change.
@@ -240,7 +267,9 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
           set(v.el, 'aria-expanded', kids ? String(open) : null);
         }
         set(v.el, 'data-context-row', d!.matchedAt(i) ? null : '');
-        const cell = col === undefined ? undefined : v.cells.get(col)?.el;
+        const col = colOf(node);
+        // No column (none shown): no cell (a Map has no undefined key here).
+        const cell = v.cells.get(col!)?.el;
         if (!cell) return;
         now.add(cell);
         let t = cell.firstElementChild;
@@ -264,7 +293,15 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
           if (node.kind === 'loading') lz?.fill(l as HTMLElement, node);
           else if (l.textContent !== node.label) l.textContent = node.label;
         } else l?.remove();
-        const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${level * indent}px)`;
+        // The indent: `level × indent`, or a data row's answer from 0 to 1 000 (a number: not NaN, not a string), else `level × 16`.
+        let px: unknown = level * (typeof indent == 'function' ? 16 : indent);
+        if (typeof indent == 'function' && node.kind === 'data') {
+          try {
+            px = indent(node.data, level);
+          } catch {}
+          if (!(px === +px! && px >= 0 && px <= 1000)) bad('tree.indent'), (px = level * 16);
+        }
+        const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${px}px)`;
         if (cell.style.getPropertyValue(PAD) !== pad) cell.style.setProperty(PAD, pad), cell.style.setProperty(VAR, pad);
       };
       for (const [key, v] of rowRenderer.mounted) decorate(key, v);
@@ -275,9 +312,10 @@ function setup<T>(g: GridContext<unknown>, column: string | undefined, indent: n
     },
     keys(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean {
       const d = tree();
-      if (!d || owner !== 'cell' || at?.kind !== 'cell' || at.column !== treeColumn() || e.ctrlKey || e.altKey || e.metaKey) return false;
+      if (!d || owner !== 'cell' || at?.kind !== 'cell' || e.ctrlKey || e.altKey || e.metaKey) return false;
       const i = d.indexOf(at.row);
-      if (i === -1) return false;
+      // The keys of the row's own tree column (1.2.0: per row, tree-view.md « row by row »).
+      if (i === -1 || at.column !== colOf(d.nodeAt(i))) return false;
       if (e.key === '*') return siblings(d, i), true;
       // The grid's own reading of the key: forward and back are mirrored right to left there (Shift: no move).
       const step = intentFor(e, { dir: g.dir, owner, mac: g.mac });

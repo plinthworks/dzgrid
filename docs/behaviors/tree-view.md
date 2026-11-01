@@ -165,3 +165,29 @@ open** and has **no chevron**; nested nodes under it keep theirs. `tree({ fixedO
   (a cell part on the label column can draw more; the colours stay CSS variables).
 - Tests: `packages/core/test/tree-fixed-open.test.ts`, conformance `tree/fixed-open*.json`,
   `packages/dom/test/tree-fixed-open.test.ts`, theme `edit.test.ts`.
+
+## 1.2.0: the chevron's column and the indent, row by row (« étape 7 », owner 2026-11-01; written before the code)
+
+Some screens put a group row's chevron in one column (« group ») and a node's chevron, inside a merged block of that
+column, in another (« label »). `tree({ column })` and `tree({ indent })` also take a function:
+
+- **`column: (row) => columnId`**: asked for each data row shown, at each paint and each new span map; the answer is
+  that row's **tree column**: its chevron (or a leaf's empty place), its indent and its keys go there. No function:
+  one column for every row, as before. A filler (path trees) or a loading row has no data: it uses the **default
+  tree column** (the first visible column). An answer that is not the id of a visible column (unknown, hidden, not a
+  string), or a throw: that row uses the default tree column, told **once** per grid (`invalid-setting`, path
+  `tree.column`, no detail: never the answer itself, which might be data). The `tree-column-not-first`
+  warning is for a named string column only.
+- **`indent: (row, level) => px`**: that row's indent in its tree column, for display only (the padding before the
+  chevron, and the edit field's place after it). `aria-level`, keys, folding and the order are unchanged. Fillers and
+  loading rows: `level × 16`. An answer that is not a number from 0 to 1 000 (NaN, negative, over 1 000, not a
+  number) or a throw: `level × 16` for that row, told **once** per grid (`invalid-setting`, path `tree.indent`). A number: as before, `level × indent`.
+- **Keys**: ← / → on a node open or close it **in that row's tree column**, wherever it is (forward and back mirror
+  in Arabic); in another column they move the focus cell by cell, as always. `*` there too. A pinned parent's copy
+  clicked outside its toggle focuses the cell clicked, else that row's tree column.
+- **The edit field** of a tree cell sits after its chevron and indent (`--dzg-tree-pad`, written on the cell that
+  carries them): it follows the row's column.
+- **Live sentences** (« … expanded, 3 rows ») name the row by its value in its own tree column.
+- **Merged cells across a node**: opt-in, `spans({ acrossLevels: true })`, `spans.md` « Across levels ».
+- Tests: `packages/dom/test/tree-columns.test.ts` (left to right and right to left); Chrome: `playground/tree-columns.html`
+  (local page, not committed).

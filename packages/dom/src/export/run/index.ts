@@ -212,7 +212,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
         // As on screen: beside a tree, its rules (spans.md « In a tree »: leaves only in its column, no full-width row);
         // a gap cuts a run (row-gaps.md).
         const { treeColumn: tree, gapAt } = g;
-        spans = { spans: buildSpanMap({ rows: held.rows, columns: g.columns, ctx: g.ctx, fullWidth: tree ? null : g.settings.fullWidth, treeColumn: tree?.(), apart: gapAt && ((i) => gapAt(held.rows, i)) }), spanColumns: g.columns.visible().map((c) => c.id) };
+        spans = { spans: buildSpanMap({ rows: held.rows, columns: g.columns, ctx: g.ctx, fullWidth: tree ? null : g.settings.fullWidth, treeColumn: tree?.(), acrossLevels: g.acrossLevels, apart: gapAt && ((i) => gapAt(held.rows, i)) }), spanColumns: g.columns.visible().map((c) => c.id) };
       }
       const it = csvChunks({ rows: held.rows, at: held.at, columns: g.columns, ctx: g.ctx, ...spans }, { ...o, columns: request.columns, chunkRows: ROWS_PER_CHUNK });
       const b = batcher();

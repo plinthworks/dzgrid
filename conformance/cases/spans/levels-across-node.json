@@ -1,0 +1,88 @@
+{
+  "id": "levels-across-node",
+  "suite": "spans",
+  "description": "Across levels (1.2.0, opt-in `acrossLevels`, « étape 7 », spans.md « Across levels », owner 2026-11-01): the head (row 0, always open) carries its chevron in « group », every line in « label ». Node 7 (row 4) is open over 7.1 and 7.2. In « group » lines 5, 6, 7, 7.1, 7.2, 8 are one merged cell; line 4 (another value) and the head (a top-level row) stay apart.",
+  "input": {
+    "columns": [
+      {
+        "id": "group",
+        "merge": true
+      },
+      {
+        "id": "label"
+      }
+    ],
+    "rows": [
+      [
+        "TITI",
+        "table 1"
+      ],
+      [
+        "TOTO",
+        "line 4"
+      ],
+      [
+        "TITI",
+        "line 5"
+      ],
+      [
+        "TITI",
+        "line 6"
+      ],
+      [
+        "TITI",
+        "node 7"
+      ],
+      [
+        "TITI",
+        "line 7.1"
+      ],
+      [
+        "TITI",
+        "line 7.2"
+      ],
+      [
+        "TITI",
+        "line 8"
+      ]
+    ],
+    "parents": [
+      null,
+      0,
+      0,
+      0,
+      0,
+      4,
+      4,
+      0
+    ],
+    "fixedOpen": [
+      0
+    ],
+    "open": [
+      4
+    ],
+    "treeColumns": [
+      "group",
+      "label",
+      "label",
+      "label",
+      "label",
+      "label",
+      "label",
+      "label"
+    ],
+    "acrossLevels": true
+  },
+  "expected": {
+    "cells": [
+      {
+        "row": 2,
+        "col": 0,
+        "rows": 6,
+        "cols": 1
+      }
+    ],
+    "problems": []
+  }
+}

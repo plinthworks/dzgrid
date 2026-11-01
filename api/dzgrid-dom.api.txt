@@ -2,6 +2,8 @@
 # Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
 # history: 1.0.0 as published on npm (first baseline of the guard, 2026-10-29)
 # history: 1.1.0 changes found on the guard's first run (2026-10-29), compatible for callers: required members added to interfaces the grid hands out (LazyControl.sync, GridStateApi.reset, SlotContext.menuItem), inputs widened (SpanInput, MotionEffects.flash); owner to confirm — @dzgrid/dom#SlotContext, @dzgrid/dom/state#GridStateApi, @dzgrid/dom/motion-gsap#MotionEffects
+# history: Owner, 2026-11-01 (« étape 7 », decisions.md): tree({ column, indent }) also take a function; SpanInput.treeColumn a function per row. Inputs widened, nothing removed. — @dzgrid/dom/tree#TreeFeatureOptions
+# history: Owner, 2026-11-01 (decisions.md « Étape 7 »): spans({ acrossLevels }) opt-in; an optional argument added, nothing removed. — @dzgrid/dom/spans#spans
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -415,7 +417,9 @@
 
 @ @dzgrid/dom/spans
 ## spans
-  export declare function spans(): GridFeature;
+  export declare function spans(o?: {
+      readonly acrossLevels?: boolean;
+  }): GridFeature;
 
 @ @dzgrid/dom/groups
 ## GroupsApi
@@ -578,8 +582,8 @@
   ];
 ## TreeFeatureOptions
   export interface TreeFeatureOptions<T> extends TreeOptions<T> {
-      readonly column?: string;
-      readonly indent?: number;
+      readonly column?: string | ((row: T) => string);
+      readonly indent?: number | ((row: T, level: number) => number);
       readonly lazy?: LazyChildren<T>;
       readonly sticky?: number;
       readonly structure?: readonly string[];

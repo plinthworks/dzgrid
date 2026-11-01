@@ -22,8 +22,14 @@ import { injectSpanStyles } from './styles.js';
  * createGrid(host, { columns: [{ id: 'ward', merge: true }, …], features: [spans()], … });
  * ```
  */
-export function spans(): GridFeature {
-  return { id: 'spans', setup };
+export function spans(o?: {
+  /**
+   * In a tree (1.2.0, opt-in, spans.md « Across levels »): outside a row's tree column, a merge continues across a node
+   * and its children shown, under one top-level row. Without it a merge stops at a level change (1.1.0).
+   */
+  readonly acrossLevels?: boolean;
+}): GridFeature {
+  return { id: 'spans', setup: (g) => ((g.acrossLevels = o?.acrossLevels === true), setup(g)) };
 }
 
 /** Plans kept per map: a long scroll forgets the oldest at this size. */
@@ -51,7 +57,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     // Beside a tree (spans.md « In a tree »): leaves only in its column, no full-width row (told once, Q15-5).
     if (tree && fw && !refused) (refused = true), emit(kernel, { type: 'problems', source: 'host', problems: [problem('unsupported-combination', 'warning', 'settings.fullWidth', 'tree')] });
     on = rows;
-    const next = buildSpanMap({ rows, columns, ctx: g.ctx, fullWidth: tree ? null : fw, treeColumn: tree?.(), apart: g.gapAt && apart }, map);
+    const next = buildSpanMap({ rows, columns, ctx: g.ctx, fullWidth: tree ? null : fw, treeColumn: tree?.(), acrossLevels: g.acrossLevels, apart: g.gapAt && apart }, map);
     if (next !== map && next.problems.length) emit(kernel, { type: 'problems', source: 'host', problems: next.problems });
     return (map = next);
   }

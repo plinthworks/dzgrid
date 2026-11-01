@@ -2,6 +2,7 @@
 # Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
 # history: 1.0.0 as published on npm (first baseline of the guard, 2026-10-29)
 # history: 1.1.0 changes found on the guard's first run (2026-10-29), compatible for callers: required members added to interfaces the grid hands out (LazyControl.sync, GridStateApi.reset, SlotContext.menuItem), inputs widened (SpanInput, MotionEffects.flash); owner to confirm — @dzgrid/core/spans#SpanInput, @dzgrid/core/tree-lazy#LazyControl
+# history: Owner, 2026-11-01 (« étape 7 », decisions.md): tree({ column, indent }) also take a function; SpanInput.treeColumn a function per row. Inputs widened, nothing removed. — @dzgrid/core/spans#SpanInput
 
 @ @dzgrid/core
 ## AbortHandle
@@ -1845,7 +1846,7 @@
       }) | null | undefined;
       readonly text?: ((col: ResolvedColumn<T>, row: Readonly<T>, index: number) => string | null) | undefined;
       readonly apart?: ((row: number) => boolean) | undefined;
-      readonly treeColumn?: string | undefined;
+      readonly treeColumn?: string | ((row: T) => string | undefined) | undefined;
   }
 ## SpanLookup
   export interface SpanLookup {

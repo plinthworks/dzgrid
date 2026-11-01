@@ -284,3 +284,37 @@ continues across that node and its children. Owner questions first, then plan an
   them). Q3 — `tree({ column: (row) => columnId })`, per row; no function = one column as today. Added: the indent
   per row too — `tree({ indent: number | ((row, level) => px) })` (some users want a node's children at the
   parent's indent, others below it); display only, levels for screen readers unchanged.
+
+## « Étape 7 » built (2026-11-01, not committed)
+
+- **The merge rule** (`spans.md` « Across levels »): row `i + 1` continues a span from row `i` in column C when both
+  are data rows (not full width, no gap) and — C is the tree column of `i` or `i + 1`: one level, and a row whose tree
+  column C is must be a leaf (step 15) — C is the tree column of neither: one level, or both levels ≥ 1.
+- **Lead decisions** (the owner may overturn): (1) a top-level row never joins a block across levels, even when it is
+  not `fixedOpen` (« never across two top-level parents » made local: a root never merges with its own children
+  outside its tree column; top-level rows next to each other still merge as siblings, as in 1.1.0); so `fixedOpen` needs
+  no rule of its own (the owner's heads are top level). (2) The widened rule applies to every tree, also with one tree
+  column (a string), not only with the function: it is the owner's Q2. (3) A filler or loading row uses the default
+  tree column and `level × 16`. (4) The warnings carry no detail (the answer might be data). (5) Keys: back on a leaf
+  goes to its parent in the same column, as before (not the parent's own tree column).
+- **Chrome** (`playwright-core`, `channel: 'chrome'`, own Vite on 4712, page `playground/tree-columns.html`, local):
+  the TITI cell ends at line 8's bottom (0 px) open (6 rows) and folded (4 rows); chevrons in « Group » (a head) and
+  « Label » (node 7), never both; indent nested (7.1's chevron 16 px further) and flat (`indent: () => 0`, aligned);
+  right to left mirrored (16 px toward the left); no console error. **Accessibility tree:** the tall cell is one node
+  (`rowheader` « TITI », the first column's role) inside its first row (« line 5 », `level=2`); the covered rows'
+  names do not hold TITI; CDP's AX properties carry `level` / `expanded` but no row span or row index, so what a
+  reader says of the span stays for the listening (`a11y-protocol.md` §22). Across levels it is the same as within
+  one level.
+- **Sizes** (gz): `core/spans` 3 911 → **3 999** (+88), line 3 950 → **4 010** (+2 % rule: ≤ 4 029). `dom/tree` 3 848 →
+  **4 069** (+221 after golf: the per-row column, its fallback and warning, the indent function and its check),
+  line 3 950: **over the +2 % line (4 029) — not raised; owner to decide** (proposed: 4 080). `dom/spans`,
+  `export` run, core base, DOM base, Angular: within their lines; K.8 85 138 / 90 000.
+- **API** (`check:api`): `SpanInput.treeColumn` and `TreeFeatureOptions.column` / `indent` are widened inputs the owner asked for; accepted with `scripts/api.mjs --accept` citing the owner's 2026-11-01 answers (nothing removed).
+- Owner (2026-11-01): `dom/tree` line raised to **4 080** (measured 4 069 with étape 7). The merge across levels is
+  **opt-in** — `spans({ acrossLevels: true })`; without it, merges in a tree keep the 1.1.0 rule (cut at a level
+  change), so no existing grid changes.
+- Applied (2026-11-01): `acrossLevels` threaded to the core map (part of its memo key), the screen's map and the CSV
+  export's map (print reuses the screen's). The 1.1.0 tests run unchanged without it; a test proves `spans()` and
+  `spans({ acrossLevels: false })` draw the same layer byte for byte; faults planted (option ignored, in the core, the
+  DOM feature, the export) caught. Sizes: `core/spans` **4 024**, line **4 029** (the +2 % rule over 3 950, not above);
+  `dom/tree` 4 069 / 4 080; `dom/spans` 4 763 / 5 050; export run 4 874 / 5 300.

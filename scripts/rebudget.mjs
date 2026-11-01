@@ -45,7 +45,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/edit': 3160, // owner « set include only » (2026-10-29): 3 150 → 3 160 (`exclude: false` refused in compile); owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
   '@dzgrid/core/range': 4000, // Phase 5 Q16 (Part B): blocks of cells, TSV, the paste and fill plans; the line at the measure + 10 % at the close
-  '@dzgrid/core/spans': 3950, // owner step 15 (2026-10-29, Q15-9: « only if the measure needs it »): 3 800 → 3 950 (measured 3 914: `apart` for gaps, the tree column's leaves-only rule, a column span over it refused)
+  '@dzgrid/core/spans': 4029, // « étape 7 » (2026-11-01, +2 % rule over 3 950, measured 4 024: the tree column per row, the opt-in merge across levels); before: owner step 15 (2026-10-29, Q15-9: « only if the measure needs it »): 3 800 → 3 950 (measured 3 914: `apart` for gaps, the tree column's leaves-only rule, a column span over it refused)
   '@dzgrid/core/compare': 300, // owner step 16 (2026-10-29, « ok pour les hausses »): a new line for `sameValues` (measured 273)
   '@dzgrid/core/row-gaps': 450, // owner step 15 (2026-10-29, Q15-9): a new line for the gaps between categories (measured 409)
   '@dzgrid/core/state': 1510, // owner « set include only » (2026-10-29): 1 500 → 1 510; Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
@@ -56,7 +56,7 @@ const SIZE_CEILINGS = {
   // Owner « set include only » (2026-10-29): the set chunk 4 250 → 4 350 (`exclude: false`: the list without its exclude mode).
   '@dzgrid/dom/filters: set (lazy)': 4500, // owner step 16 (2026-10-29, « ok pour les hausses »): 4 350 → 4 500 (`start: 'empty'`, `selectAll: false`; measured 4 467)
   '@dzgrid/dom/filters: date adapters (lazy)': 2850, // the owner's third look (2026-10-27, « Comfort stylesheet »): 2 800 → 2 850 (the FROM / TO input fills its field)
-  '@dzgrid/dom/tree': 3950, // owner step 14/15 (2026-10-29): 3 850 → 3 950 (tree({ fixedOpen }), then step 15's spans and gaps); owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
+  '@dzgrid/dom/tree': 4080, // « étape 7 » (owner 2026-11-01, measured 4 069: the tree column and indent per row); owner step 14/15 (2026-10-29): 3 850 → 3 950 (tree({ fixedOpen }), then step 15's spans and gaps); owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
   '@dzgrid/dom/tree-lazy': 1000,
   '@dzgrid/dom/parts': 800, // Phase 5 close Q-C3 (2026-10-26): 700 → 800 by the close rule (the measure 689 + 10 %), accepted
   '@dzgrid/dom/detail': 4150, // owner S8-O3 (2026-10-24): 3 900 → 4 000 (a nested grid kept alive while it saves); S8-O7: → 4 150 (kept while refused, let go with its master or the grid around)

@@ -120,7 +120,10 @@ export interface GridContext<T> {
   /** The room a row needs above it to be seen whole (its pinned parents); none when unset. */
   insetFor?: (i: number) => number;
   /** The tree's column, set by `tree()` (1.1.0 step 15): the spans feature merges leaves only there (spans.md « In a tree »). */
-  treeColumn?: () => string | undefined;
+  /** `spans({ acrossLevels })` (1.2.0, opt-in): a merge in a tree may cross levels (spans.md « Across levels »). */
+  acrossLevels?: boolean;
+  /** 1.2.0: a function of a data row when `tree({ column })` is one (spans.md « Across levels »), always the same. */
+  treeColumn?: () => string | ((row: unknown) => string | undefined) | undefined;
   /** A gap stands before row `i` of these rows (`@dzgrid/dom/row-gaps`): the spans feature cuts a merge there. */
   gapAt?: (rows: DisplayedRows<T>, i: number) => boolean;
   /** The gaps' layout around the one `rowLayout()` made (`@dzgrid/dom/row-gaps`): always the outermost. */
