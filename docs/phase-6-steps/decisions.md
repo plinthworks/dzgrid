@@ -273,3 +273,9 @@ step 15). Structural: plan and owner questions first; first item for the week of
   Angular package marks them optional.
 - **Doc to add**: a column id must not contain « . » — it is read as a path (`a.b.c`); an id built from an ISO
   date silently reads `undefined`. Consider a `invalid-column` warning for such ids when no `field` is given.
+
+## « Étape 7 »: the tree chevron in the column the app chooses (owner, 2026-11-01)
+
+Next item, before the rest: `tree({ column })` also takes a function, so each row says which column carries its
+chevron (a group row in one column, a node inside a merged block in another), and a merge in the other column
+continues across that node and its children. Owner questions first, then plan and tests.
