@@ -24,7 +24,7 @@ import { measureSplit } from './size-split.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const EXAMPLE = join(ROOT, 'examples/angular-audit');
-const K8 = 95_000; // owner 2026-10-28 (Phase 6 step 12, decisions.md « Real Angular example line »: measured 94 596; the build had been broken since 1.0.0); owner S12-Q10 92 500 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
+const K8 = 95_500; // +2 % rule 2026-11-02 (1.2.0: measured 95 054); owner 2026-10-28 (Phase 6 step 12, decisions.md « Real Angular example line »: measured 94 596; the build had been broken since 1.0.0); owner S12-Q10 92 500 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const option = (name, fallback) => {
@@ -71,8 +71,8 @@ function build() {
   // Their lock entries too: the old tarball's integrity made npm reinstall its cached copy (step 11).
   const lockFile = join(EXAMPLE, 'package-lock.json');
   if (existsSync(lockFile)) writeFileSync(lockFile, JSON.stringify(forgetLocalPacks(JSON.parse(readFileSync(lockFile, 'utf8'))), null, 2) + '\n');
-  // The manifest names the release tarballs (`packed/dzgrid-*-1.1.0.tgz`, `pack:release`); `pack:local` stamps its own
-  // version (1.1.1-local.<time>): npm is pointed at the tarballs packed, the manifest given back as it was after.
+  // The manifest names the release tarballs (`packed/dzgrid-*-1.2.0.tgz`, `pack:release`); `pack:local` stamps its own
+  // version (1.2.1-local.<time>): npm is pointed at the tarballs packed, the manifest given back as it was after.
   const manifest = join(EXAMPLE, 'package.json');
   const kept = readFileSync(manifest, 'utf8');
   const packs = readdirSync(join(ROOT, 'packed'));

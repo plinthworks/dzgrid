@@ -1,6 +1,6 @@
 // @vitest-environment node
 // Step 25 (the Phase 3 close, owner Q4): 0.1.0 prepared, never published. Phase 4 step 13: 0.2.0 prepared,
-// not published. Phase 5 step 13 (the close): 0.3.0 prepared, not published. 2026-10-28: 1.0.0, the first npm release (the owner publishes); the Phase 6 close: 1.1.0, a minor (additive over 1.0.0). The four packages carry one version, their @dzgrid peers follow it, and every manifest
+// not published. Phase 5 step 13 (the close): 0.3.0 prepared, not published. 2026-10-28: 1.0.0, the first npm release (the owner publishes); the Phase 6 close: 1.1.0, a minor (additive over 1.0.0); 2026-11-02: 1.2.0, a minor (additive over 1.1.0). The four packages carry one version, their @dzgrid peers follow it, and every manifest
 // that ships says where its source is.
 import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -12,15 +12,15 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const pkg = (name: string) => JSON.parse(readFileSync(`${ROOT}packages/${name}/package.json`, 'utf8'));
 const NAMES = ['core', 'dom', 'angular', 'theme'];
 
-describe('1.1.0, the four packages', () => {
-  it('share one version, 1.1.0', () => {
-    expect(NAMES.map((n) => pkg(n).version)).toEqual(['1.1.0', '1.1.0', '1.1.0', '1.1.0']);
+describe('1.2.0, the four packages', () => {
+  it('share one version, 1.2.0', () => {
+    expect(NAMES.map((n) => pkg(n).version)).toEqual(['1.2.0', '1.2.0', '1.2.0', '1.2.0']);
   });
 
-  it('name their @dzgrid peers at that version (build.mjs pins them to ^1.1.0)', () => {
+  it('name their @dzgrid peers at that version (build.mjs pins them to ^1.2.0)', () => {
     for (const n of NAMES) {
       for (const [dep, range] of Object.entries((pkg(n).peerDependencies ?? {}) as Record<string, string>)) {
-        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('1.1.0');
+        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('1.2.0');
       }
     }
   });
@@ -36,7 +36,7 @@ describe('1.1.0, the four packages', () => {
   });
 
   it('the Angular package states its own version', () => {
-    expect(readFileSync(`${ROOT}packages/angular/src/version.ts`, 'utf8')).toContain("DZGRID_ANGULAR_VERSION = '1.1.0'");
+    expect(readFileSync(`${ROOT}packages/angular/src/version.ts`, 'utf8')).toContain("DZGRID_ANGULAR_VERSION = '1.2.0'");
   });
 
   it('export the Phase 4 subpaths (tree, lazy children, master/detail and their texts)', () => {

@@ -347,3 +347,4 @@ continues across that node and its children. Owner questions first, then plan an
   form and one `missing-feature` warning per visible day / instant column (lead's choice: a text fallback would
   filter days as text, wrong without a word); `loadDates` brings the forms back. Sizes: `/filters` 10 091 → 10 207,
   `/filters-base` 10 166; line 10 100 → 10 210 for both (+2 % rule).
+- 1.2.0 (2026-11-02): the real Angular example's line 95 000 → 95 500 under the +2 % rule (measured 95 054 gz).

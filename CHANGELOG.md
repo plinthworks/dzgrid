@@ -5,9 +5,17 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-11-02
 
-Planned as 1.2.0 (minor).
+A minor: nothing of 1.1.0 is removed or narrowed (`npm run check:api` against the published surface).
+
+### Upgrading from 1.1.0
+- Nothing to change. Merges in a tree keep the 1.1.0 rule unless you pass `spans({ acrossLevels: true })`.
+- An app with no date column may import `@dzgrid/dom/editors-base` / `@dzgrid/dom/filters-base` instead of
+  `/editors` / `/filters` and drop `@tzslot/*` from its dependencies.
+- A column id holding « . » now reads the row's own property of that exact name first (before: the path only). A row
+  holding both shows the exact name.
+- `<dz-grid>` may be created before its data: groups given later now draw their header rows.
 
 ### Added
 - `tree({ column })` also takes a function of the row, `(row) => columnId`: each row's chevron, indent and keys
