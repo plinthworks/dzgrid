@@ -37,3 +37,17 @@ owner's.
 - Owner (2026-11-02): `context-menu` line **2 400** (measured 2 325; the default items ≈ 650 B), `@dzgrid/theme/menu.css`
   **750** (measured 716). `check:api`: accept `tree()` returning `TreeFeature` and the generic `MenuItem` / `MenuEntry`
   (nothing removed; existing code compiles).
+
+## Filters, every kind (owner, 2026-11-02)
+
+Plan: `filters-plan.md`. All in one pass for 1.3.0. Owner: A to every question.
+- Q-F1 A: the advanced filter (opt-in, its own entry) and the column filters both apply (AND); an app wanting « one or
+  the other » turns the column filter buttons off.
+- Q-F2 A: « + condition » and « match case » only when the app enables them; up to 5 conditions.
+- Q-F3 A: value list and condition stacked in one popup (stored as a `combined` AND, no new `multi` type).
+- Q-F4 A: no typed rule with suggestions in this pass (later).
+- Q-F5 A: a one-line bar above the grid summing up the rule, with « Modifier » / « Effacer »; the app can hide it.
+- Q-F6: sizes accepted as in the plan's table (core 29 450, core/advanced-filter 1 250, core/server 6 450,
+  core/state 1 600, filters / filters-base 11 400, set chunk 4 850, dom/advanced-filter 5 500, dom 22 500,
+  dom/edit 4 200, Angular 7 600, filter locales 900 / 1 050 / 1 200, advanced locales 350 / 400 / 500,
+  advanced-filter.css 650, K.8 kept at 90 000).
