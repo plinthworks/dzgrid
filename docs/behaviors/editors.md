@@ -199,3 +199,14 @@ dark: axe 0 with each editor open.
 - Yes/no: a held Space or Enter (key repeat) toggles once and selects nothing.
 - The app's editor: a `mount` that gives no handle is a broken part (reported, the cell focused, not tried again on that
   cell until its data changes); `cancel()` and `refuse()` after the editor closed do nothing.
+
+## Without tzslot (1.2.0, found in an Angular app 2026-10-30)
+
+- `@dzgrid/dom/editors` gives the day and instant fields tzslot's calendar, loaded by `import()` at the first open. An
+  application's bundler (Angular's esbuild, Vite) follows every `import()` at build time, so `@tzslot/core` and
+  `@tzslot/dom` must be installed to build an application using `editors()`, date column or not.
+- `@dzgrid/dom/editors-base` is the same `editors()` with no calendar named anywhere it reaches: an application without
+  `@tzslot/*` builds. Its day and instant fields are typed only (no calendar button, no Alt+Down), unless
+  `loadCalendar` brings a calendar (`CalendarKit`). Every other editor and option is the same.
+- `@dzgrid/dom/editors` is unchanged: a 1.1.0 application keeps its calendar without a change.
+- Tests: `packages/dom/test/editors-base{,-bundle}.test.ts` (the entry bundled by esbuild with no `@tzslot/*` to find).

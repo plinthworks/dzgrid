@@ -1,4 +1,4 @@
-import { dayAt } from '@dzgrid/core';
+import { dayAt, problem } from '@dzgrid/core';
 import { emit, hasRelative, onCommand } from '@dzgrid/core/internal';
 import { settled } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
@@ -93,10 +93,11 @@ export const FILTER_KEYS = [
  * `openFilter` and `closeFilter` act on the last grid the feature was set up on.
  * One `filters()` object acts on the last grid set up: its `floating` toggle too (as `openFilter`).
  */
-export function filters(o: FiltersOptions = {}): FiltersFeature {
+export function filtersWith(o: FiltersOptions, load?: (kit: DateKitName) => Promise<DateKit>): FiltersFeature {
   let popup: Menu | null = null;
   const cal = o.dateCalendar && calendarOf(o.dateCalendar);
-  const env: DateEnv = { g: null, zone: o.dateZone !== false, ...kits(o.loadDates), ...(o.dateMessages && { messages: o.dateMessages }), ...(cal && { calendar: cal.calendar, calendarProblems: cal.problems }) };
+  const dl = o.loadDates ?? load;
+  const env: DateEnv = { g: null, zone: o.dateZone !== false, ...kits(dl), ...(!dl && { off: true }), ...(o.dateMessages && { messages: o.dateMessages }), ...(cal && { calendar: cal.calendar, calendarProblems: cal.problems }) };
   const d = dateForms(env);
   const sets = setKit(o.loadSet);
   const set = setForm(env, sets);
@@ -106,7 +107,7 @@ export function filters(o: FiltersOptions = {}): FiltersFeature {
     parts: {
       'floating.text': { slot: 'floating', part: textPart }, 'floating.number': { slot: 'floating', part: numberPart }, floating: { slot: 'floating', part: summaryPart },
       'filter.text': { slot: 'filter', part: textForm }, 'filter.number': { slot: 'filter', part: numberForm }, 'filter.boolean': { slot: 'filter', part: booleanForm },
-      'filter.day': { slot: 'filter', part: d.day }, 'filter.instant': { slot: 'filter', part: d.instant }, 'filter.set': { slot: 'filter', part: set },
+      ...(dl && { 'filter.day': { slot: 'filter', part: d.day }, 'filter.instant': { slot: 'filter', part: d.instant } }), 'filter.set': { slot: 'filter', part: set },
       // Step 21: a ready header part with the column's box (needs `slots()`), named per column.
       'header.filterBox': { slot: 'header', part: filterBoxPart },
     },
@@ -134,6 +135,12 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
     g.live.announce(n === null ? g.msg('announce.filteredOpen') : g.msg('announce.filtered', { rows: g.msg('announce.rows', { n }) }));
   }));
   const resolve = resolver(g, o, set);
+  // No date kits (`@dzgrid/dom/filters-base` alone): a day or instant column has no form; told once per column.
+  if (env.off)
+    for (const c of g.columns.visible()) {
+      const r = resolve(c, 'filter');
+      if (r.ok && /^(day|instant)$/.test(r.kind)) emit(g.kernel, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', `columns.${c.id}.filter`, '@dzgrid/dom/filters')] });
+    }
   const commit = committer(g, o);
   onCommand(g.kernel, commit.heard);
   const popup = menu(g, resolve, commit, o.popup !== false, o.apply);

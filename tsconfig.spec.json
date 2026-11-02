@@ -95,6 +95,12 @@
       "@dzgrid/dom/edit": [
         "./packages/dom/src/edit.ts"
       ],
+      "@dzgrid/dom/filters-base": [
+        "./packages/dom/src/filters-base.ts"
+      ],
+      "@dzgrid/dom/editors-base": [
+        "./packages/dom/src/editors-base.ts"
+      ],
       "@dzgrid/dom/editors-list": [
         "./packages/dom/src/editors-list.ts"
       ],

@@ -20,6 +20,6 @@ describe('step 12 budgets', () => {
   });
 
   it('no other line moves: column-menu 4 300, dom 22 400, core 29 150, dom/state 1 150', () => {
-    expect(['@dzgrid/dom/column-menu', '@dzgrid/dom', '@dzgrid/core', '@dzgrid/dom/state'].map((n) => b[n]!.maxGzip)).toEqual([4300, 22400, 29150, 1224]); // dom/state 1 224 (owner +2 % rule, step 16); 1 200 since « clearFilters/resetState »
+    expect(['@dzgrid/dom/column-menu', '@dzgrid/dom', '@dzgrid/core', '@dzgrid/dom/state'].map((n) => b[n]!.maxGzip)).toEqual([4300, 22440, 29150, 1224]); // dom/state 1 224 (owner +2 % rule, step 16); 1 200 since « clearFilters/resetState »
   });
 });

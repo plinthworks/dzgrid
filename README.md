@@ -29,7 +29,8 @@ npm install @dzgrid/angular            # with Angular 19 to 22
 ```
 
 ESM only, no runtime dependency (the Angular package: `tslib` only). Optional peers, only for the features that use them: `@tzslot/core` and
-`@tzslot/dom` (`>=2.4.0 <3`, date filters and date editors), `gsap` (`^3.13.0`, the `@dzgrid/dom/motion-gsap`
+`@tzslot/dom` (`>=2.4.0 <3`, date filters and date editors; needed at build time by `@dzgrid/dom/editors` and
+`@dzgrid/dom/filters`, date column or not — `@dzgrid/dom/editors-base` and `@dzgrid/dom/filters-base` name none), `gsap` (`^3.13.0`, the `@dzgrid/dom/motion-gsap`
 entry; never bundled, under its own licence). Each package has a short README:
 [core](packages/core/README.md), [dom](packages/dom/README.md), [theme](packages/theme/README.md),
 [angular](packages/angular/README.md).
@@ -118,11 +119,13 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/dom/tree-lazy` | `lazyChildren` on screen | 944 |
 | `@dzgrid/dom/detail` | detail panels, `nestedGrid` | 4 077 |
 | `@dzgrid/dom/edit` | editing wired to the grid: marks, saves, stale rows, undo keys | 4 150 |
-| `@dzgrid/dom/editors` | the fields, keys and bubble (over `@dzgrid/dom/popup`, 1 626) / the lazy calendar (tzslot apart) | 6 671 / 1 517 |
+| `@dzgrid/dom/editors` | the fields, keys and bubble (over `@dzgrid/dom/popup`, 1 626) / the lazy calendar (tzslot apart) | 6 695 / 1 517 |
+| `@dzgrid/dom/editors-base` | the same editors without tzslot's calendar (1.2.0) | 6 672 |
 | `@dzgrid/dom/editors-list` | the list editor (over the popup) | 1 224 |
 | `@dzgrid/dom/range` | blocks by keys and pointer, the clipboard (over the DOM) / the lazy pasted-HTML reader | 5 050 / 500 |
 | `@dzgrid/dom/fill` | the fill handle, fill mode, Ctrl+D / R, bulk, one axis only (over the range entry) | 3 143 |
-| `@dzgrid/dom/filters` | floating row (shown and hidden live) and filter popup (over `@dzgrid/dom/popup`) | 10 091 |
+| `@dzgrid/dom/filters` | floating row (shown and hidden live) and filter popup (over `@dzgrid/dom/popup`) | 10 207 |
+| `@dzgrid/dom/filters-base` | the same filters without tzslot's date forms (1.2.0) | 10 166 |
 | `@dzgrid/dom/filters`, lazy | the value list / the three date adapters (tzslot apart) | 4 339 / 2 809 |
 | `@dzgrid/dom/search` | binds the host's search input | 1 298 |
 | `@dzgrid/dom/pagination` | footer and pager | 3 132 |

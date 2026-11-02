@@ -13,6 +13,12 @@ npm install @dzgrid/core @dzgrid/dom @dzgrid/theme
 Optional peers, only for the features that use them: `@tzslot/core` and `@tzslot/dom` (date filters and date
 editors), `gsap` (the `@dzgrid/dom/motion-gsap` entry). GSAP is never bundled; it comes under its own licence.
 
+**Needed at build time** when you import `@dzgrid/dom/editors` or `@dzgrid/dom/filters`, even with no date column:
+their date code is loaded by `import()`, and your bundler resolves every `import()` when it builds. Without
+`@tzslot/*` installed, take the editors from `@dzgrid/dom/editors-base` (same `editors()`, day and instant fields typed
+only, a calendar only through `loadCalendar`) and the filters from `@dzgrid/dom/filters-base` (same `filters()`, no
+date form: a day or instant column gets one `missing-feature` warning, unless `loadDates` is given).
+
 ## A first grid
 
 ```ts

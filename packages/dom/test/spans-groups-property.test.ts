@@ -420,9 +420,10 @@ describe('group rows: the remembered column and the tree read again (targeted)',
   it('the same columns grouped otherwise (update): the new groups show', () => {
     const { g, host } = grid(TREE);
     g.update({ columns: [{ id: 'tout', header: 'Tout', children: [leaf('nom'), leaf('prenom'), leaf('age'), leaf('tension'), leaf('pouls'), leaf('temp'), leaf('note')] }, leaf('entree')] });
-    const top = [...host.querySelectorAll<HTMLElement>('.dzg-hgroup[data-level="-2"]')].map((e) => [e.textContent, e.getAttribute('aria-colspan')]);
+    // One level now: one group row (1.2.0, the rows follow the tree's depth).
+    const top = [...host.querySelectorAll<HTMLElement>('.dzg-hgroup[data-level="-1"]')].map((e) => [e.textContent, e.getAttribute('aria-colspan')]);
     expect(top).toEqual([['Tout', '7']]);
-    expect(host.querySelectorAll('.dzg-hgroup[data-level="-1"]').length).toBe(0);
+    expect(host.querySelectorAll('.dzg-hgroup[data-level="-2"]').length).toBe(0);
   });
 });
 

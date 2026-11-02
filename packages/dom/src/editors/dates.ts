@@ -66,9 +66,11 @@ export function atText(ctx: LocaleCtx, ms: number): string {
 /** Today by the grid's clock, in its zone. */
 export const today = (g: GridContext<unknown>): string => instantToDayIn((g.settings.clock ?? Date.now)() as never, g.ctx.timeZone) ?? '1970-01-01';
 
-/** The calendar chunk, imported once (a failure forgotten: Retry imports again), `loadCalendar` replacing the import. */
-export const calendars = (own?: () => Promise<CalendarKit>) =>
-  once((_: 0) => (own ?? (() => import('./dates/calendar.js')))(), (m) => typeof m?.open === 'function', 'open in calendar ', 'editors');
+/**
+ * The calendar chunk, imported once (a failure forgotten: Retry imports again). The `import()` is the entry's
+ * (`@dzgrid/dom/editors`), never this module's: `@dzgrid/dom/editors-base` reaches no calendar (1.2.0).
+ */
+export const calendars = (load: () => Promise<CalendarKit>) => once((_: 0) => load(), (m) => typeof m?.open === 'function', 'open in calendar ', 'editors');
 
 let uid = 0;
 
@@ -92,8 +94,9 @@ export function dateEd(x: EdEnv, f: HTMLInputElement, col: ResolvedColumn<unknow
   f.placeholder = dayText(g.ctx, today(g)) + (at ? ` ${num(g.ctx, 0, 2)}:${num(g.ctx, 0, 2)}` : '');
   box.append(f);
   let pop: PopupRef | null = null;
-  const btn = o.calendar === false ? null : doc.createElement('button');
-  const L = x.cal;
+  // No calendar to load (`@dzgrid/dom/editors-base` alone): no button, no Alt+Down; typing only.
+  const L = x.cal!;
+  const btn = o.calendar === false || !L ? null : doc.createElement('button');
   const calendar = (): void => {
     if (pop) return;
     const host = doc.createElement('div');

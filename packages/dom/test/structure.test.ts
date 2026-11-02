@@ -19,7 +19,7 @@ describe('the DOM layer’s shape', () => {
   it('keeps the optional features out of the base: only features.ts may know them', () => {
     const optional = /from '\.{1,2}\/(?:.*\/)?(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules|motion-gsap)\/|from '\.{1,2}\/(?:.*\/)?(spans|slots|search|rules|motion-gsap)\.js'/;
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules|motion-gsap)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'search.ts', 'pagination.ts', 'export.ts', 'parts.ts', 'rules.ts', 'motion-gsap.ts'].includes(relative(SRC, f)))
+      .filter((f) => !/^(filters|pagination|export|tzslot-picker|parts|spans|slots|search|rules|motion-gsap)\//.test(relative(SRC, f)) && !['features.ts', 'spans.ts', 'slots.ts', 'filters.ts', 'filters-base.ts', 'search.ts', 'pagination.ts', 'export.ts', 'parts.ts', 'rules.ts', 'motion-gsap.ts'].includes(relative(SRC, f)))
       .filter((f) => optional.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
@@ -69,9 +69,11 @@ describe('the DOM layer’s shape', () => {
     // The eager part reaches the kits only through import(): never a static import of ./dates/.
     const eager = files(SRC).filter((f) => !LAZY.test(relative(SRC, f)));
     expect(eager.filter((f) => /^import [^;]*from '\.{1,2}\/(?:.*\/)?dates\//m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
-    expect(readFileSync(join(SRC, 'filters/dates.ts'), 'utf8')).toMatch(/import\('\.\/dates\/date\.js'\)/);
-    // The editors' calendar (step 6, owner S6-O4): reached only by import(), from the editors' date code.
-    expect(files(SRC).filter((f) => /import\('\.\/dates\/calendar\.js'\)/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual(['editors/dates.ts']);
+    // 1.2.0: the kits' import() in the `@dzgrid/dom/filters` entry module only (filters-base names none).
+    expect(files(SRC).filter((f) => /import\('\.\/(filters\/)?dates\/date\.js'\)/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual(['filters.ts']);
+    // The editors' calendar (step 6, owner S6-O4): reached only by import(), from the `@dzgrid/dom/editors` entry module
+    // only (1.2.0: `@dzgrid/dom/editors-base` names no calendar, so an application without tzslot builds).
+    expect(files(SRC).filter((f) => /import\('\.\/(editors\/)?dates\/calendar\.js'\)/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual(['editors.ts']);
   });
 
   it('shares the lazy date helpers (dates/shared.ts, moved from filters/dates/ at step 6, not copied): only the two lazy date folders import it', () => {
@@ -245,16 +247,16 @@ describe('the DOM layer’s shape', () => {
     // @dzgrid/dom/editors: the core, its internal entry, the dom's internal entry, its own folder, the guarded writes and
     // the direction helpers (no import of their own besides types); never @dzgrid/dom/edit's code (the grid hands its API).
     // Step 6: the popup host too (measured apart, `over` it); the calendar chunk (editors/dates/) by import() only.
-    const entry = files(SRC).filter((f) => /^editors(\/[^/]+|\.ts)$/.test(relative(SRC, f)));
-    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['editors.ts', 'editors/bubble.ts', 'editors/dates.ts', 'editors/host.ts', 'editors/index.ts']);
+    const entry = files(SRC).filter((f) => /^editors(\/[^/]+|\.ts|-base\.ts)$/.test(relative(SRC, f)));
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['editors-base.ts', 'editors.ts', 'editors/bubble.ts', 'editors/dates.ts', 'editors/host.ts', 'editors/index.ts']);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^editors(\/[^:]+)?\.ts: \.\/(editors\/)?[a-z-]+\.js$/.test(s) && !/^editors\/[a-z]+\.ts: \.\.\/(render\/write|dir|popup)\.js$/.test(s));
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^editors(\/[^:]+|-base)?\.ts: \.\/(editors\/)?[a-z-]+\.js$/.test(s) && !/^editors\/[a-z]+\.ts: \.\.\/(render\/write|dir|popup)\.js$/.test(s));
     expect(offenders).toEqual([]);
     expect(readFileSync(join(SRC, 'dir.ts'), 'utf8').match(/^import (?!type ).*$/gm) ?? []).toEqual([]);
     // Nothing imports it: a grid that does not edit (or edits only by its API) carries none of it; the base's host is gone.
     // (Types aside: the list's entry names the editors' `Ed` shape, step 6.)
-    expect(files(SRC).filter((f) => !/^editors(\/|\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?editors(\/|\.js')/.test(readFileSync(f, 'utf8').replace(/^import type .*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
+    expect(files(SRC).filter((f) => !/^editors(\/|\.ts$|-base\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?editors(\/|\.js')/.test(readFileSync(f, 'utf8').replace(/^import type .*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
     expect(files(SRC).map((f) => relative(SRC, f))).not.toContain('render/editor.ts');
     // Never the filters (layering, phase plan §4), not even their types: what both use lives in @dzgrid/dom/internal or dates/.
     expect(files(SRC).filter((f) => /^editors(\/|\.ts$)/.test(relative(SRC, f)) && /from '[^']*filters[^']*'/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);

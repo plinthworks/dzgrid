@@ -43,7 +43,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   // Grouped headers: the group rows, when the columns come in groups.
   const bands = createBands(g);
   // For the collapsible groups' feature (`@dzgrid/dom/groups`, Phase 6 step 7): where a group shows.
-  if (bands) g.groupBands = bands;
+  g.groupBands = bands;
 
   // ---- the map (the core gives the last one back while nothing it depends on changed) ----
   let map: SpanMap | null = null;
@@ -88,7 +88,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   let aimed: { readonly focus: FocusPos; readonly row: RowKey; readonly click?: true } | null = null;
   const move: MoveFn = (_, s, from, goal, intent, base) => {
     // The group rows' keys, and Up from a column header into them.
-    const b = bands?.move(_, s, from, goal, intent, base);
+    const b = bands.move(_, s, from, goal, intent, base);
     if (b !== undefined) return b;
     const m = current();
     const d = s.rows;
@@ -161,9 +161,21 @@ function setup(g: GridContext<unknown>): FeatureHandle {
 
   return {
     spans: feature,
-    ...(bands && { bands: bands.specs }),
+    get bands() {
+      return bands.specs;
+    },
+    // The group rows of the tree in the settings now (groups given or taken away by an update);
+    // none beside details, which turn the spans off (D9).
+    beforeRows() {
+      if (g.spans !== feature) return;
+      g.bands = bands.specs;
+      // A focused group cell whose row went (fewer levels): the focus goes to its column's header; `afterRows`
+      // gives the DOM focus back. A level still there keeps the focus.
+      const h = kernel.focus;
+      if (h?.kind === 'header' && (h.level ?? 0) < -g.bands.length) kernel.dispatch({ type: 'focus.set', focus: { kind: 'header', column: h.column } }, 'api');
+    },
     afterRows(f) {
-      bands?.stretch(g.rowHeight());
+      bands.stretch(g.rowHeight());
       // A focused header moved to another segment or made again (a pin, a move, a group cut in
       // two) lost the DOM focus: the paint gives it back (`pendingFocus`, without scrolling).
       const h = kernel.focus;

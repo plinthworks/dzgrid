@@ -281,9 +281,12 @@ export function resolveColumns<T>(tree: readonly ColumnOrGroup<T>[]): {
     let read: (row: Readonly<T>) => unknown;
     if (def.value) read = def.value;
     else {
-      const path = compilePath(def.field ?? def.id);
+      const id = def.id;
+      const path = compilePath(def.field ?? id);
       if (!path) return void problems.push(problem('invalid-field-path', 'error', `${at}.field`));
-      read = path as (row: Readonly<T>) => unknown;
+      // An id with a dot and no field (column-values.md, 1.2.0): the row's own property of that exact
+      // name first (an id built from an ISO instant), then the path.
+      read = (def.field == null && id.includes('.') ? (row: unknown) => (row != null && Object.hasOwn(row as object, id) ? (row as Record<string, unknown>)[id] : path(row)) : path) as (row: Readonly<T>) => unknown;
     }
     // A wrong `editable`: told, the column kept, read-only (editableAt wants `true`). A wrong `validate` is
     // told by `@dzgrid/core/edit`, which runs it (Phase 5 step 3).

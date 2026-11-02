@@ -318,3 +318,32 @@ continues across that node and its children. Owner questions first, then plan an
   `spans({ acrossLevels: false })` draw the same layer byte for byte; faults planted (option ignored, in the core, the
   DOM feature, the export) caught. Sizes: `core/spans` **4 024**, line **4 029** (the +2 % rule over 3 950, not above);
   `dom/tree` 4 069 / 4 080; `dom/spans` 4 763 / 5 050; export run 4 874 / 5 300.
+
+## The three findings of the Angular app, fixed (2026-11-02, not committed)
+
+- **Group rows after creation.** Cause: `createBands` read the tree once, at the grid's setup, and returned nothing
+  for a flat tree; the header renderer only ever added rows. Now the rows follow the tree's depth (read again when
+  the tree's identity changes): new specs for a new depth, the header renderer swaps its group rows when the list
+  changes, the spans feature hands the list over before each paint (not beside details, which turn spans off, D9).
+  This replaces the documented 1.1.0 limit (spans.md); two tests that pinned it were rewritten to the new rule.
+- **`editors()` and tzslot — lead's choice: (a), as a new entry, `@dzgrid/dom/editors-base`.** Measured: an option on
+  `editors()` cannot help (the `import()` stays in the entry's code, the bundler still resolves it), and moving the
+  calendar out of `@dzgrid/dom/editors` would take it away from 1.1.0 apps with date columns (not backward
+  compatible). So `@dzgrid/dom/editors` keeps its calendar unchanged (its `import()` now lives in the entry module,
+  +24 B: 6 695 / 6 720), and `@dzgrid/dom/editors-base` is the same feature with no calendar unless `loadCalendar` is
+  given (6 672, line 6 720). An esbuild test bundles each entry with `@tzslot/*` unresolvable. `check:api`: additions
+  only. (b) done too: READMEs say `@tzslot/*` is needed at build time by `/editors` and `/filters`.
+- **Ids with a dot — lead's choice: read the exact own property first, then the path** (rather than a warning only):
+  cheap (one `hasOwn` for dotted ids without `field`), every reader goes through `col.read` (screen, sort, filter,
+  export, print, clipboard, merges), the server wire sends ids only. Behaviour change written in `column-values.md`
+  and the CHANGELOG: a row with both `'a.b'` and `a.b` now shows `'a.b'`. The warning was not added: with the read
+  fixed, the case it would report cannot happen.
+- **Left for the owner:** the DOM base line 22 400 → 22 440 (+2 % rule, measured 22 432).
+- **Review fix (2026-11-02):** a focused group cell whose row goes (fewer levels) moved the focus to `<body>` and left
+  the kernel on a level that no longer exists. The spans feature now moves the focus to that column's header (level
+  0) before the paint, which gives the DOM focus back; a level still there keeps it.
+- **`@dzgrid/dom/filters-base` (owner, 2026-11-02)**, the same pattern as `editors-base`: the kits' `import()` moved
+  to the `@dzgrid/dom/filters` entry module (`filtersWith(o, load)` shared, nothing duplicated). Date columns: no date
+  form and one `missing-feature` warning per visible day / instant column (lead's choice: a text fallback would
+  filter days as text, wrong without a word); `loadDates` brings the forms back. Sizes: `/filters` 10 091 → 10 207,
+  `/filters-base` 10 166; line 10 100 → 10 210 for both (+2 % rule).

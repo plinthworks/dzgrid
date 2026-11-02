@@ -98,6 +98,7 @@ export class HeaderRenderer {
   readonly #rows: HeaderRowView[] = [];
   /** The group rows, top to bottom (levels -depth to -1). */
   readonly #bands: HeaderRowView[] = [];
+  #last: readonly HeaderBandSpec[] | null = null;
   /** The select-all box's header cell, when the grid shows a selection column. */
   check: HTMLElement | null = null;
   checkBox: HTMLElement | null = null;
@@ -125,8 +126,10 @@ export class HeaderRenderer {
   }
 
   #syncBands(bands: readonly HeaderBandSpec[]): void {
-    // Made once: the features (and so their group rows) are set up with the grid.
-    if (bands.length === this.#bands.length) return;
+    // By the list's identity: a new tree depth brings a new list (1.2.0), the old rows go.
+    if (bands === this.#last) return;
+    this.#last = bands;
+    for (const v of this.#bands.splice(0)) v.el.remove();
     bands.forEach((b, i) => {
       const view = new HeaderRowView(this.#doc, i - bands.length, null, b);
       this.#bands.push(view);

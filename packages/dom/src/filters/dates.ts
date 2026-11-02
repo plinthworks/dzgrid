@@ -102,19 +102,18 @@ export interface DateEnv {
   readonly done: (kit: DateKitName) => DateKit | undefined;
   readonly messages?: Readonly<Record<string, object>>;
   readonly calendar?: DateCalendarOptions;
+  /** No kits (`@dzgrid/dom/filters-base` without `loadDates`): no date form. */
+  readonly off?: boolean;
   /** What was wrong in `dateCalendar`, said once the grid is there. */
   readonly calendarProblems?: readonly Problem[];
 }
 
-const KITS: Record<DateKitName, () => Promise<DateKit>> = {
-  date: () => import('./dates/date.js'),
-  range: () => import('./dates/range.js'),
-  moment: () => import('./dates/moment.js'),
-};
-
-/** The kits, each imported once (`loadDates` replaces the import; `lazy.ts`). A module without `adapt` is a failure. */
-export const kits = (own?: (kit: DateKitName) => Promise<DateKit>): Once<DateKitName, DateKit> =>
-  once((k) => (own ?? KITS[k])(k), (m) => typeof m?.adapt === 'function', 'adapt in date kit ');
+/**
+ * The kits, each loaded once (`lazy.ts`). A module without `adapt` is a failure. The `import()` of DzGrid's own kits is
+ * the entry's (`@dzgrid/dom/filters`), never this module's: `@dzgrid/dom/filters-base` reaches no kit (1.2.0).
+ */
+export const kits = (load?: (kit: DateKitName) => Promise<DateKit>): Once<DateKitName, DateKit> =>
+  once((k) => load!(k), (m) => typeof m?.adapt === 'function', 'adapt in date kit ');
 
 const DATE = 'date';
 /** The kit of each operator (the others need none). */

@@ -11,6 +11,11 @@ npm install @dzgrid/core @dzgrid/dom @dzgrid/theme @dzgrid/angular
 
 Add `node_modules/@dzgrid/theme/dzgrid.css` to the `styles` of `angular.json` (or `@import` it).
 
+Editing or filtering with `editors()` of `@dzgrid/dom/editors` or `filters()` needs `@tzslot/core` and `@tzslot/dom`
+installed (`>=2.4.0 <3`), even with no date column: the build resolves their date code. Without them, use `editors()`
+of `@dzgrid/dom/editors-base` (day and instant fields typed only) and `filters()` of `@dzgrid/dom/filters-base` (no
+date form). `<dz-grid [features]>` takes them as it takes the others.
+
 ## A first grid
 
 ```ts

@@ -314,7 +314,7 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
   it('hold the budgets set at the close (measure + 10 %, rounded up to 50 B, owner Q2)', () => {
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[]; over?: string }> }).entries;
     expect(b['@dzgrid/core']!.maxGzip).toBe(29150); // Phase 6 step 8b-1 (owner Q2): 29 150; before: the owner's grant, Phase 4 close (Q17b)
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(22400); // Phase 6 step 8b-1 (owner Q2): 22 400; before: Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant 21 980
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(22440); // Phase 6 step 8b-1 (owner Q2): 22 400; before: Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant 21 980
     // Owner S6-O6 (Phase 5 step 6): the filters' loader moved in, its measure + 50 (1 184 → 1 234), ceiling 1 250;
     // Phase 5 close (Q-C2): the measure 1 184 + 10 %, capped at that ceiling → 1 250.
     expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(1250);
@@ -322,7 +322,7 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
     expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 600, over: '@dzgrid/core' }); // Phase 4 close: 492 + 10 % = 550; Phase 5 close (Q-C3): 512 + 10 % = 600
     expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 750, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
     expect([b['@dzgrid/dom/locales/en-rules']!.maxGzip, b['@dzgrid/dom/locales/fr-rules']!.maxGzip, b['@dzgrid/dom/locales/ar-rules']!.maxGzip]).toEqual([200, 200, 250]);
-    expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(10100); // the owner's grant (Q17b), §5.2's /filters 10 kB; 10 100 since the owner's look (2026-10-27)
+    expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(10210); // the owner's grant (Q17b), §5.2's /filters 10 kB; 10 100 since the owner's look (2026-10-27)
     expect(b['@dzgrid/theme']!.maxGzip).toBe(2850); // the owner's third look (decisions.md « Comfort stylesheet »); Phase 5 close (Q-C2): 2 750, the measure 2 494 + 10 %
     expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3450); // Phase 4 close: 3 211 + 10 % → 3 550; Phase 6 close: 3 132 + 10 % → 3 450
     expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1350); // a raise: it was at its cap

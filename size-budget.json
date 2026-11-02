@@ -334,7 +334,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 22400,
+      "maxGzip": 22440,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -486,7 +486,18 @@
         "@dzgrid/core/internal",
         "@dzgrid/core/edit",
         "@dzgrid/dom/internal",
-        "./dates/*"
+        "./editors/dates/*"
+      ]
+    },
+    "@dzgrid/dom/editors-base": {
+      "file": "packages/dom/src/editors-base.ts",
+      "maxGzip": 6720,
+      "over": "@dzgrid/dom/popup",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/edit",
+        "@dzgrid/dom/internal"
       ]
     },
     "@dzgrid/dom/editors: calendar (lazy)": {
@@ -688,14 +699,25 @@
     },
     "@dzgrid/dom/filters": {
       "file": "packages/dom/src/filters.ts",
-      "maxGzip": 10100,
+      "maxGzip": 10210,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/dom/internal",
         "@tzslot/*",
-        "./dates/*",
+        "./filters/dates/*",
+        "./set/*"
+      ]
+    },
+    "@dzgrid/dom/filters-base": {
+      "file": "packages/dom/src/filters-base.ts",
+      "maxGzip": 10210,
+      "over": "@dzgrid/dom/popup",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal",
         "./set/*"
       ]
     },

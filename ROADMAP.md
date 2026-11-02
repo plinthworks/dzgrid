@@ -989,6 +989,14 @@ sheet → architect → tests first → code → review → gate, and is ticked 
   two planted faults), conformance `spans/levels-*.json`, DOM `tree-columns` (LTR and RTL, export), `edit-tree` +1;
   Chrome on a local page (`playground/tree-columns.html`, not committed). Sizes: `core/spans` 4 024 / 4 029 (raised
   from 3 950, +2 % rule), `dom/tree` 4 069 / 4 080 (owner, 2026-11-01).
+- [x] **The three findings of an Angular app (2026-10-30)**, built 2026-11-02, not committed: (1) the group rows follow a
+  `columns` update (created flat → groups → flat; depth up and down; DOM `spans-groups` and Angular
+  `column-groups-later`; Chrome on a local page `playground/zz-groups-later.html`); (2) `@dzgrid/dom/editors-base`, the
+  editors with no `@tzslot` named (esbuild test with no `@tzslot` to find), `/editors` unchanged; (3) an id with « . »
+  reads the own property of that exact name first, then the path (`column-values.md`). Sizes: DOM base 22 432, line
+  22 400 → 22 440 (+2 % rule); core 29 147 / 29 150; `/editors` 6 695 / 6 720, `/editors-base` 6 672 / 6 720.
+  Then (owner, 2026-11-02): the review fix (focus of a group row taken away) and `@dzgrid/dom/filters-base` (no date
+  form, one `missing-feature` per date column, `loadDates` brings them); `/filters` 10 207, line 10 100 → 10 210.
 
 Also seen, nothing to add: grid context for parts (`context`), saving open rows (`rowExpanded` + `rows.expand`; open
 rows stay out of `GridState` by Q-S1), header component, two label renderers in one cell part, row classes, no

@@ -18,6 +18,13 @@ Planned as 1.2.0 (minor).
   only (`aria-level`, keys and folding unchanged; the edit field follows). A result that is not a number from 0 to
   1 000 uses `level × 16`, with one `invalid-setting` warning (`tree.indent`).
 - `@dzgrid/core/spans`: `SpanInput.treeColumn` also takes a function of the row (each row's own tree column).
+- `@dzgrid/dom/editors-base`: `editors()` without tzslot's calendar, for an application that has no `@tzslot/*`
+  installed (its bundler finds no import of them). Day and instant fields are typed only, unless `loadCalendar`
+  brings a calendar. `@dzgrid/dom/editors` is unchanged (`editors.md` « Without tzslot »).
+- `@dzgrid/dom/filters-base`: `filters()` without tzslot's date forms (owner, 2026-11-02). Text, number, yes/no and
+  the value list as with `filters()`; a day or instant column gets no date form (no popup, no button) and one
+  `missing-feature` warning (`columns.<id>.filter`, detail `@dzgrid/dom/filters`), unless `loadDates` brings the
+  kits. `@dzgrid/dom/filters` is unchanged (`filter-ui.md` « Without tzslot »).
 
 - `spans({ acrossLevels: true })` (opt-in, owner 2026-11-01; `spans.md` « Across levels »): in a tree, a merge in a
   column that is not the row's tree column continues across a node and its children shown when the value is the
@@ -25,6 +32,20 @@ Planned as 1.2.0 (minor).
   one top-level row's subtree and never includes a top-level row. Folding the node shrinks the block. In a row's own
   tree column the 1.1.0 rule stays (one level, leaves only). Without the option nothing changes. `SpanInput`
   gains `acrossLevels` too.
+
+### Fixed (found while running an Angular app, 2026-10-30)
+- Column groups given after the grid was created (`grid.update({ columns })`, `<dz-grid [columns]>` bound to data
+  that arrives later) now draw their group rows; groups taken away remove them; fewer or more levels give fewer or
+  more rows. The header height, the sticky header, `aria-rowcount` and `aria-rowindex` follow (`spans.md`). Before,
+  the number of group rows was set once, at creation.
+- A column id holding « . » with no `field` and no `value` (an id built from an ISO instant) read `undefined`
+  silently: it now reads the row's own property of that exact name first, then the path. An id that is a real path
+  still reads it; an explicit `field` is a path only (`column-values.md`). A row holding both the exact name and the
+  path now shows the exact name.
+
+### Documented
+- `@dzgrid/dom/editors` and `@dzgrid/dom/filters` need `@tzslot/core` and `@tzslot/dom` at build time, date column or
+  not (READMEs): their date code is reached by `import()`, which bundlers resolve.
 
 ## [1.1.0] - 2026-10-29
 

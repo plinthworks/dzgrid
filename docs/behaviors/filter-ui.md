@@ -74,3 +74,18 @@ Types into a box under a column header; clicks the filter button in a header, or
 - **`data-column` and `data-kind` on the popup's content** (H, owner Q5): `.dzg-fpop[data-column="…"][data-kind="…"]`,
   for an app's global CSS (theming.md « Styling what the popup holds »).
 - Tests: `packages/dom/test/filters-feedback.test.ts`; Chrome: `scripts/browser-feedback.mjs` (`--only filters`).
+
+## Without tzslot (1.2.0, owner 2026-11-02)
+
+- `@dzgrid/dom/filters` loads its date forms (tzslot's) by `import()`; an application's bundler resolves every
+  `import()` at build time, so `@tzslot/core` and `@tzslot/dom` must be installed to build an application using
+  `filters()`, date column or not.
+- `@dzgrid/dom/filters-base` is the same `filters()` with no date kit named anywhere it reaches. Text, number, yes/no
+  and the value list work as with `filters()`. A day or instant column (by its filter kind) has no date form: no
+  popup, no filter button, `openFilter` false; its floating cell is the summary. One `missing-feature` warning per such
+  visible column at setup (`columns.<id>.filter`, detail `@dzgrid/dom/filters`, no value), so the developer knows
+  where the forms are. `filter: false` columns are not told. With `loadDates`, the forms come back, no warning.
+- Why not a fallback form: a text field over a date column would filter on text where the rows hold days and
+  instants (zones, formats): wrong results without a word. Saying it is safer.
+- `@dzgrid/dom/filters` is unchanged: a 1.1.0 application keeps its date filters without a change.
+- Tests: `packages/dom/test/filters-base.test.ts`, `editors-base-bundle.test.ts` (esbuild, no `@tzslot/*` to find).

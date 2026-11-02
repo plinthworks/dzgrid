@@ -10,12 +10,13 @@ vi.mock('@tzslot/dom/lazy', async (orig) => {
 
 const { kits } = await import('../src/filters/dates.js');
 const { calendars } = await import('../src/editors/dates.js');
+const KITS = { date: () => import('../src/filters/dates/date.js'), range: () => import('../src/filters/dates/range.js'), moment: () => import('../src/filters/dates/moment.js') };
 
 describe('Temporal failed once: Retry loads the chunk (review finding 1)', () => {
   for (const k of ['date', 'range', 'moment'] as const)
     it(`the ${k} date kit`, async () => {
       fail.n = 1;
-      const l = kits();
+      const l = kits((n) => KITS[n]()); // the loader of @dzgrid/dom/filters (1.2.0: the entry holds it)
       await expect(l.load(k)).rejects.toThrow('offline');
       const m = await l.load(k);
       expect(typeof m.adapt).toBe('function');
@@ -24,7 +25,7 @@ describe('Temporal failed once: Retry loads the chunk (review finding 1)', () =>
 
   it("the editors' calendar", async () => {
     fail.n = 1;
-    const l = calendars();
+    const l = calendars(() => import('../src/editors/dates/calendar.js')); // the default loader of @dzgrid/dom/editors (1.2.0: the entry holds it)
     await expect(l.load(0)).rejects.toThrow('offline');
     expect(typeof (await l.load(0)).open).toBe('function');
   });

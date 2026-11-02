@@ -18,7 +18,7 @@ import { CHECK_WIDTH, setAttr, setPx } from '../render/write.js';
  * over them (CSS, `data-up`).
  */
 export interface Bands {
-  /** The group rows, top first: one per level of the tree the grid starts with. */
+  /** The group rows, top first: one per level of the tree in the settings now (none without a group). */
   readonly specs: readonly HeaderBandSpec[];
   /** Once the header is painted: the column headers stretched over their empty group cells. */
   stretch(height: number): void;
@@ -59,19 +59,13 @@ function mounted(L: ColumnLayout, cols: HeaderPaint['cols'], keep: number): numb
   return out;
 }
 
-/** Null when the grid starts with no group: no row, nothing changes. */
-export function createBands(g: GridContext<unknown>): Bands | null {
+/**
+ * The group rows follow the tree of the settings (1.2.0): as many rows as its depth, made again when
+ * the depth changes (groups given after the grid was made, or taken away), none while it has no group.
+ */
+export function createBands(g: GridContext<unknown>): Bands {
   const { columns } = g;
-  // The rows are made once, with the grid (features are fixed): the tree it starts with sets
-  // how many; a deeper tree given later shows its outer levels only.
   const tell = (b: HeaderBands) => b.problems.length && emit(g.kernel, { type: 'problems', source: 'host', problems: b.problems });
-  const first = headerBands(g.settings.columns, columns.layout);
-  const D = first.depth;
-  // No valid group: no row; a refused one is still told.
-  if (!D) {
-    tell(first);
-    return null;
-  }
   /**
    * The groups of one column layout: read again when the tree changes or the visible columns
    * of a segment do (in order, by identity, as the span map), not on a resize (the widths are
@@ -79,6 +73,9 @@ export function createBands(g: GridContext<unknown>): Bands | null {
    */
   let memo: { tree: unknown; version: number; segs: readonly (readonly unknown[])[]; levels: Levels; all: string[]; pos: Map<string, number> } | null = null;
   let told: unknown;
+  // The depth of the tree read last, and the rows made for it.
+  let D = 0;
+  let specs: readonly HeaderBandSpec[] = [];
   function bands() {
     const tree = g.settings.columns;
     const L = columns.layout;
@@ -88,18 +85,19 @@ export function createBands(g: GridContext<unknown>): Bands | null {
       // Told once per tree: a resize or a repaint does not tell it again.
       if (told !== tree) tell(b);
       told = tree;
-      const levels = b.levels.slice(0, D);
+      // A new depth: new rows (the old ones and their cells go with them).
+      if (b.depth !== D) specs = Array.from({ length: (D = b.depth) }, (_, k) => spec(k));
       const all = segs.flat().map((c) => c.id);
-      memo = { tree, version: 0, segs, levels, all, pos: new Map(all.map((id, i) => [id, i])) };
+      memo = { tree, version: 0, segs, levels: b.levels, all, pos: new Map(all.map((id, i) => [id, i])) };
     }
     memo.version = columns.version;
     return memo;
   }
   // The last paint's window and focus, for the column headers' stretching.
   let last: HeaderPaint | null = null;
+  let up = false;
 
-
-  const specs = Array.from({ length: D }, (_, k): HeaderBandSpec => {
+  function spec(k: number): HeaderBandSpec {
     const level = k - D;
     // A group's cell by group and first column (ids may hold any character); a hidden one by column.
     const cells = new Map<string, HTMLElement>();
@@ -187,13 +185,20 @@ export function createBands(g: GridContext<unknown>): Bands | null {
         return f ? cells.get(keyOf(f, all)) ?? null : g.headerRenderer.cell(column);
       },
     };
-  });
+  }
+  // The tree the grid starts with: its rows, its problems told now.
+  bands();
 
   return {
-    specs,
+    get specs() {
+      return bands(), specs;
+    },
     stretch(height) {
       // The column headers mounted (those of the last paint), not every visible column.
       const { all, levels: lv } = bands();
+      // No group row now nor at the last paint: nothing stretched, nothing to undo.
+      const was = up;
+      if (!(up = D > 0) && !was) return;
       if (last) for (const i of mounted(last.layout, last.cols, last.keep?.level ? -1 : last.keep?.center ?? -1)) {
         const el = g.headerRenderer.cell(all[i]!);
         if (!el) continue;
@@ -217,6 +222,7 @@ export function createBands(g: GridContext<unknown>): Bands | null {
       // Group rows; Up from a column header.
       if (lv > 0 || (!lv && !(row && intent.delta < 0))) return undefined;
       const all = bands().levels;
+      if (!D) return undefined;
       const col = s.cols.indexOf(from.column);
       const k = lv + D;
       const own = at(all, k, col);

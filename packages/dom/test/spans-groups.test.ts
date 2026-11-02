@@ -274,24 +274,73 @@ describe('problems', () => {
   });
 });
 
-describe('the number of group rows is set when the grid is created (documented limit)', () => {
-  it('a tree with no group later: the rows stay, empty, every column header stretched over them', () => {
-    const { g, hrows, host, leafCell } = make();
-    g.update({ columns: [leaf('nom'), leaf('pouls')] });
-    expect(hrows().length).toBe(3);
-    expect(host.querySelectorAll('.dzg-hgroup').length).toBe(0);
-    expect(leafCell('nom').style.getPropertyValue('--dzg-up')).toBe(`${2 * H}px`);
-    // Back to groups: a column under two of them is no longer stretched.
+describe('the group rows follow the column definitions (1.2.0, found in an Angular app 2026-10-30)', () => {
+  it('created flat, groups given later: the group rows appear; back to flat: they go', () => {
+    const { g, hrows, groups, desc, host, vp, leafCell } = make({ columns: [leaf('nom'), leaf('pouls')] });
+    expect(hrows().length).toBe(1);
+    expect(vp.getAttribute('aria-rowcount')).toBe('41');
     g.update({ columns: TREE });
-    expect(leafCell('pouls').hasAttribute('data-up')).toBe(false);
-    expect(leafCell('pouls').style.getPropertyValue('--dzg-up')).toBe('');
+    expect(hrows().length).toBe(3);
+    expect(hrows().map((r) => r.getAttribute('aria-rowindex'))).toEqual(['1', '2', '3']);
+    expect(vp.getAttribute('aria-rowcount')).toBe('43');
+    expect(groups(0).map((e) => [e.dataset['g'], desc(e).colspan])).toEqual([['patient', '3'], ['clinique', '4']]);
+    expect(groups(1).map((e) => [e.dataset['g'], desc(e).colspan])).toEqual([['constantes', '3']]);
+    expect((host.firstElementChild as HTMLElement).style.getPropertyValue('--dzg-header-h')).toBe(`${3 * H}px`);
+    expect(leafCell('entree').style.getPropertyValue('--dzg-up')).toBe(`${2 * H}px`);
+    g.update({ columns: [leaf('nom'), leaf('pouls')] });
+    expect(hrows().length).toBe(1);
+    expect(hrows()[0]!.getAttribute('aria-rowindex')).toBe('1');
+    expect(host.querySelectorAll('.dzg-hgroup').length).toBe(0);
+    expect(vp.getAttribute('aria-rowcount')).toBe('41');
+    expect((host.firstElementChild as HTMLElement).style.getPropertyValue('--dzg-header-h')).toBe(`${H}px`);
+    expect(leafCell('nom').hasAttribute('data-up')).toBe(false);
   });
 
-  it('a deeper tree later: its outer levels only', () => {
+  it('fewer levels later: the lower row goes; more levels later: every level shows', () => {
     const { g, groups, hrows } = make();
+    g.update({ columns: [{ id: 'p', header: 'P', children: [leaf('nom')] }, leaf('pouls')] });
+    expect(hrows().length).toBe(2);
+    expect(groups(0).map((e) => e.textContent)).toEqual(['P']);
     g.update({ columns: [{ id: 'a', header: 'A', children: [{ id: 'b', header: 'B', children: [{ id: 'c', header: 'C', children: [leaf('nom')] }] }] }] });
-    expect(hrows().length).toBe(3);
-    expect([groups(0).map((e) => e.textContent), groups(1).map((e) => e.textContent)]).toEqual([['A'], ['B']]);
+    expect(hrows().length).toBe(4);
+    expect([0, 1, 2].map((k) => groups(k).map((e) => [e.textContent, e.dataset['level']]))).toEqual([[['A', '-3']], [['B', '-2']], [['C', '-1']]]);
+  });
+
+  it('a tree with no group later and back: rows go and come back, keys climb them', () => {
+    const { g, hrows, leafCell, press, active } = make();
+    g.update({ columns: [leaf('nom'), leaf('pouls')] });
+    expect(hrows().length).toBe(1);
+    g.update({ columns: TREE });
+    expect(leafCell('pouls').hasAttribute('data-up')).toBe(false);
+    leafCell('pouls').focus();
+    press('ArrowUp');
+    expect(g.kernel.focus).toEqual({ kind: 'header', column: 'tension', level: -1 });
+    expect(active().dataset['g']).toBe('constantes');
+  });
+});
+
+describe('a focused group header taken away by an update', () => {
+  it('no throw; the keys still move', () => {
+    const { g, leafCell, press } = make();
+    leafCell('pouls').focus();
+    press('ArrowUp');
+    press('ArrowUp');
+    expect(g.kernel.focus).toEqual({ kind: 'header', column: 'tension', level: -2 });
+    expect(() => g.update({ columns: [leaf('tension'), leaf('pouls')] })).not.toThrow();
+    // Its row gone: the focus goes to that column's header, in the DOM and in the kernel.
+    expect(g.kernel.focus).toEqual({ kind: 'header', column: 'tension' });
+    expect(document.activeElement).toBe(leafCell('tension'));
+    expect(() => press('ArrowRight')).not.toThrow();
+  });
+
+  it('one of two levels goes while the focus is on level -1: it stays there', () => {
+    const { g, leafCell, press, active } = make();
+    leafCell('pouls').focus();
+    press('ArrowUp');
+    expect(g.kernel.focus).toEqual({ kind: 'header', column: 'tension', level: -1 });
+    g.update({ columns: [leaf('nom'), { id: 'constantes', header: 'Constantes', children: [leaf('tension'), leaf('pouls')] }] });
+    expect(g.kernel.focus).toEqual({ kind: 'header', column: 'tension', level: -1 });
+    expect(active().dataset['g']).toBe('constantes');
   });
 });
 

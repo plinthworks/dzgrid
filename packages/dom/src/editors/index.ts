@@ -62,7 +62,8 @@ export interface EdEnv {
   readonly g: GridContext<unknown>;
   readonly o: EditorsOptions;
   readonly msg: (key: EditorsMessageKey, p: Readonly<Record<string, string>>) => string;
-  readonly cal: Once<0, CalendarKit>;
+  /** None: no calendar (`@dzgrid/dom/editors-base` without `loadCalendar`). */
+  readonly cal: Once<0, CalendarKit> | null;
 }
 type Kind = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'list' | Part<SlotContext['editor']>;
 type Start = SlotContext['editor']['start'];
@@ -95,13 +96,13 @@ export const EDITORS_CSS =
  * createGrid(host, { …, messages: { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text } }, features: [edit({ save }), editors()] });
  * ```
  */
-export function editors(o: EditorsOptions = {}): GridFeature {
+export function editorsWith(o: EditorsOptions, load?: () => Promise<CalendarKit>): GridFeature {
   // One loader per feature object: the chunk is imported once for all its grids.
-  const cal = calendars(o.loadCalendar);
+  const cal = load ? calendars(load) : null;
   return { id: 'editors', setup: (g) => setup(g, o, cal) };
 }
 
-function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, CalendarKit>): FeatureHandle {
+function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, CalendarKit> | null): FeatureHandle {
   const missing = EDITORS_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`editors: missing ${missing.join(', ')}`);
   const { kernel, el, doc, scope } = g;
