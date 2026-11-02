@@ -5,7 +5,15 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 1.3.0
+## [1.3.0] - 2026-11-02
+
+A minor: nothing of 1.2.0 is removed or narrowed (`npm run check:api`).
+
+### Upgrading from 1.2.0
+- Nothing to change. The cell menu (`@dzgrid/dom/context-menu` + `@dzgrid/theme/menu.css`) and the extra filter
+  conditions (`maxConditions`, match case, list + condition) are off until the app asks.
+- `tree()` now returns `TreeFeature` (with an `api`), `MenuItem` / `MenuEntry` take an optional type parameter: code
+  written for 1.2.0 compiles unchanged.
 
 ### Added
 - `@dzgrid/dom/context-menu` (Phase 9, the cell menu): `contextMenu({ use, items, classes, onPin })`. A right-click
