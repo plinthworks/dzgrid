@@ -1,4 +1,6 @@
-import type { LocaleCtx } from '@dzgrid/core';
+import { problem, type LocaleCtx } from '@dzgrid/core';
+import { emit } from '@dzgrid/core/internal';
+import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import { composing } from '@dzgrid/dom/internal';
 import { el, labelled, tx } from './dom.js';
@@ -114,8 +116,8 @@ export function form(make: Make): Part<C> {
         const t = k.target as HTMLInputElement;
         // Enter inside a date panel is the panel's (step 14).
         if (k.key === 'Enter' && !composing(k) && t.tagName !== 'BUTTON' && !t.closest('.tz-field__panel')) k.preventDefault(), commit();
-        // A radio group is one Tab stop: back from it wraps to the last control.
-        else if (k.key === 'Tab' && k.shiftKey && t.type === 'radio') k.preventDefault(), apply.focus();
+        // The boolean's radio group, the first control, is one Tab stop: back from it wraps to the last one (not the join's).
+        else if (k.key === 'Tab' && k.shiftKey && t.type === 'radio' && !t.closest('.dzg-fjoin')) k.preventDefault(), apply.focus();
       });
       host.append(foot);
       draw();
@@ -320,6 +322,174 @@ const yesNo: Make = (get, doc, changed) => {
   };
 };
 
-export const textForm = form(conditions({ type: 'text', ops: TEXT, values: boxes(false) }));
-export const numberForm = form(conditions({ type: 'number', ops: NUM, values: boxes(true) }));
+export const TEXT_SPEC: Spec = { type: 'text', ops: TEXT, values: boxes(false) };
+export const NUM_SPEC: Spec = { type: 'number', ops: NUM, values: boxes(true) };
 export const booleanForm = form(yesNo);
+
+/** The popup's rows (filter-combined.md): the grid's `maxConditions` (checked at setup) and `matchCase`; `words`: the bundle has the texts. */
+export interface Rows {
+  g: GridContext<unknown> | null;
+  max: number;
+  mc?: boolean | undefined;
+  words?: boolean;
+}
+/** A count of rows a popup may offer: an integer 1 to 5. */
+export const rowsOk = (n: unknown): n is number => Number.isInteger(n) && (n as number) > 0 && (n as number) < 6;
+
+type Row = { readonly b: Body; readonly el: HTMLElement; readonly rm: HTMLButtonElement; readonly cs: HTMLInputElement; readonly cl: HTMLLabelElement; keep: boolean };
+
+/**
+ * Several conditions (docs/behaviors/filter-combined.md, owner Q-F2 A): the condition form `spec` once per row, up
+ * to the column's `filter.maxConditions` (else the grid's), one AND/OR join for all, « Add condition » and
+ * « Remove », « Match case » per text row when asked. Neither asked (or no texts): the condition form alone, today's.
+ * One live row is stored plain, two or more as a flat `combined`; a row that cannot filter yet is left out (L1).
+ */
+export const several = (spec: Spec, o: Rows): Make => (get, doc, changed) => {
+  const one = conditions(spec);
+  const c0 = get();
+  const f = c0.column.def.filter || {};
+  let max = o.max;
+  if (f.maxConditions !== undefined) {
+    if (rowsOk(f.maxConditions)) max = f.maxConditions;
+    else emit(o.g!.kernel, { type: 'problems', source: 'host', problems: [problem('invalid-column', 'warning', `columns.${c0.column.id}.filter.maxConditions`, String(f.maxConditions))] });
+  }
+  const mc = spec.type === 'text' && !!(f.matchCase ?? o.mc);
+  if (!o.words || (max < 2 && !mc)) return one(get, doc, changed);
+  const box = el(doc, 'div', 'dzg-fconds');
+  const join = el(doc, 'div', 'dzg-fjoin');
+  join.setAttribute('role', 'radiogroup');
+  const id = `dzg-fj${uid++}`;
+  const names: HTMLSpanElement[] = [];
+  const radios = [0, 1].map(() => {
+    const r = el(doc, 'input');
+    r.type = 'radio';
+    r.name = id;
+    r.addEventListener('change', () => changed(true));
+    const [l, s] = labelled(doc, r);
+    l.append(s);
+    names.push(s);
+    join.append(l);
+    return r;
+  });
+  radios[0]!.checked = true;
+  const add = el(doc, 'button', 'dzg-fadd');
+  add.type = 'button';
+  let rows: Row[] = [];
+  const opOf = (r: Row): HTMLSelectElement => r.el.querySelector('select')!;
+  const mk = (): Row => {
+    const b = one(get, doc, changed);
+    const e = el(doc, 'div', 'dzg-fcond');
+    const rm = el(doc, 'button', 'dzg-frm');
+    rm.type = 'button';
+    const cs = el(doc, 'input', 'dzg-fcase');
+    cs.type = 'checkbox';
+    const [cl, s] = labelled(doc, cs);
+    cl.className = 'dzg-fcasel';
+    cl.append(s);
+    cs.addEventListener('change', () => changed(true));
+    e.append(...b.els, ...(mc ? [cl] : []), ...(rows.length ? [rm] : []));
+    const r: Row = { b, el: e, rm, cs, cl, keep: false };
+    rm.addEventListener('click', () => {
+      const i = rows.indexOf(r);
+      rows.splice(i, 1);
+      b.destroy?.();
+      e.remove();
+      texts();
+      const c = get();
+      c.announce(c.msg('filter.conditionRemoved', { n: i + 1 }));
+      rows[i - 1]!.b.focus();
+      changed(true);
+    });
+    e.addEventListener('change', sync);
+    return r;
+  };
+  /** As many rows as `n`, the first kept. */
+  const count = (n: number): void => {
+    while (rows.length > n) {
+      const r = rows.pop()!;
+      r.b.destroy?.();
+      r.el.remove();
+    }
+    while (rows.length < n) {
+      const r = mk();
+      rows.push(r);
+      add.before(r.el);
+    }
+  };
+  box.append(add);
+  count(1);
+  rows[0]!.el.after(join);
+  add.addEventListener('click', () => {
+    count(rows.length + 1);
+    const r = rows.at(-1)!;
+    r.b.write(null);
+    texts();
+    const c = get();
+    c.announce(c.msg('filter.conditionAdded', { n: rows.length }));
+    const s = opOf(r);
+    if (s.closest('[hidden]')) r.b.focus();
+    else s.focus();
+  });
+  /** What is shown with the rows: the join from two, the add button below the cap, match case under a value operator. */
+  function sync(): void {
+    hide(join, rows.length < 2);
+    hide(add, rows.length >= max);
+    for (const r of rows) hide(r.cl, empty(opOf(r).value));
+  }
+  function texts(): void {
+    const c = get();
+    tx(add, c.msg('filter.conditionAdd'));
+    const l = c.msg('filter.joinLabel');
+    if (join.getAttribute('aria-label') !== l) join.setAttribute('aria-label', l);
+    tx(names[0]!, c.msg('filter.joinAnd'));
+    tx(names[1]!, c.msg('filter.joinOr'));
+    rows.forEach((r, i) => {
+      r.b.texts();
+      tx(r.cl.lastChild!, c.msg('filter.matchCase'));
+      tx(r.rm, c.msg('filter.conditionRemove', { n: '' }).trim());
+      r.rm.setAttribute('aria-label', c.msg('filter.conditionRemove', { n: i + 1 }));
+    });
+    sync();
+  }
+  /** A row's draft, its `caseSensitive` from its box (or kept as written without one). */
+  const read = (r: Row, judge: boolean): F | null | undefined => {
+    const d = r.b.read(judge);
+    if (!d || d.type !== 'text' || !('value' in d)) return d;
+    const { caseSensitive: _, ...rest } = d;
+    return (mc ? r.cs.checked : r.keep) ? { ...rest, caseSensitive: true } : rest;
+  };
+  return {
+    els: [box],
+    edits(s) {
+      const ok = rows[0]!.b.edits;
+      if (s?.type !== 'combined') return ok(s);
+      const cs = s['conditions'] as readonly F[];
+      return (s['join'] === 'and' || s['join'] === 'or') && Array.isArray(cs) && cs.length > 0 && cs.length <= max && cs.every((x) => x && ok(x));
+    },
+    write(s) {
+      const list = s?.type === 'combined' ? (s['conditions'] as readonly F[]) : [s];
+      count(list.length);
+      rows.forEach((r, i) => {
+        const x = list[i] ?? null;
+        r.b.write(x);
+        r.cs.checked = r.keep = !!x?.caseSensitive;
+      });
+      radios[s?.['join'] === 'or' ? 1 : 0]!.checked = true;
+      sync();
+    },
+    read(judge) {
+      let bad = false;
+      const live: F[] = [];
+      for (const r of rows) {
+        const d = read(r, judge);
+        if (d === undefined) bad = true;
+        else if (d) live.push(d);
+      }
+      if (bad) return undefined;
+      return live.length > 1 ? { type: 'combined', join: radios[1]!.checked ? 'or' : 'and', conditions: live } : (live[0] ?? null);
+    },
+    texts,
+    focus: () => rows[0]!.b.focus(),
+    destroy: () => rows.forEach((r) => r.b.destroy?.()),
+  };
+};

@@ -1005,6 +1005,15 @@ versus the ids the app saves today.
 
 ## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
 
+- [x] **Filters F0–F2** (`docs/phase-9-steps/filters-plan.md` §1–2, owner Q-F2 A, Q-F3 A, sizes B) — built
+  2026-11-02, not committed: sheets `filter-combined.md`, `filter-multi.md` (+ `filter-ui`, `filter-text`,
+  `filter-set`), a11y protocol §23; conformance `filter-combined/ui-*`, `multi-*` (5, by hand). DOM only: `several()`
+  in `filters/forms.ts` (rows, join, add / remove, match case), the set popup's condition (`filters/set.ts`), « n
+  conditions » (`summary.ts`); `filters-base` shares it. Tests `filters-{conditions,match-case,multi}` (44); 6 planted
+  faults caught. Browsers: Chrome, Firefox, WebKit, fr light and ar dark RTL, keyboard, axe (local
+  `playground/filter-rows-check.html`, not committed). Sizes: `filters` 11 929 / 12 000, `filters-base` 11 886 /
+  12 000 (owner B), set chunk 4 499 / 4 850, filter texts 856 / 1 007 / 1 194. Found, older than F1 (not fixed): in a dark theme the floating summary button
+  (`.dzg-fsum`) keeps the browser's grey button background, contrast 2.07 (axe, Chrome, ar dark). Next: F3 (the advanced filter's core).
 - [x] **The cell menu** (`docs/phase-9-steps/context-menu-plan.md`, owner Q-CM1 A, Q-CM2 A, Q-CM3 A, Q-CM4) — built
   2026-11-02, not committed: `@dzgrid/dom/context-menu` over the column menu's list moved into `@dzgrid/dom/internal`
   (`menu/list.ts`: one menu per grid, submenus), `popup` (an `inline-end` popup flips), `range/pointer.ts` (a Mac's

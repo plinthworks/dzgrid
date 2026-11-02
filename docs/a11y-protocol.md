@@ -960,3 +960,26 @@ TalkBack + Chrome). Durée estimée : 20 min par couple et par langue.
      feuilles : `←` (`→` en arabe) va au parent ; la phrase dite est celle du parent.
 169. **Un espace est muet.** Descendre d'une ligne au-dessus d'un espace à celle d'en dessous : rien n'est dit
      pour l'espace, le nombre de lignes (`aria-rowcount`) ne change pas.
+
+## 23. Étapes — plusieurs conditions, liste et condition (Phase 9, F1–F2)
+
+Page : une grille avec `filters({ maxConditions: 3, matchCase: true })`, une colonne texte, une colonne nombre et une
+colonne `filter: { kind: 'set', condition: true }` (en local : `playground/filter-rows-check.html`, hors dépôt), en
+**français** puis en **arabe** (`?lang=ar`, droite à gauche). Fiches : `docs/behaviors/filter-combined.md`,
+`filter-multi.md`. Couples A à D. Durée estimée : 15 min par couple et par langue.
+
+170. **Ajouter une condition.** Ouvrir le filtre de « Nom » (`Alt+↓`), taper une valeur, `Tab` jusqu'à « Ajouter une
+     condition », `Entrée` : « Condition 2 ajoutée » dit une fois ; le focus sur l'opérateur de la nouvelle ligne,
+     dit avec son libellé « Condition ».
+171. **Le choix ET / OU.** `Maj+Tab` depuis la deuxième ligne : le groupe « Joindre les conditions » est dit, avec
+     « Toutes (ET) » coché ; `↓` (ou `→`) passe à « Au moins une (OU) » ; le groupe est un seul arrêt de `Tab`.
+172. **Retirer.** Sur « Retirer la condition 2 », `Entrée` : « Condition 2 retirée » dit une fois ; le focus revient
+     sur la valeur de la ligne 1 ; jamais en haut de la page.
+173. **Respecter la casse.** La case est dite « Respecter la casse, case à cocher, non cochée » ; `Espace` la coche.
+174. **Liste et condition.** Sur la colonne à liste : la condition d'abord, puis `Tab` → la recherche de la liste →
+     « Tout sélectionner » → la liste (un arrêt) → « Effacer » → « Appliquer ». Le séparateur n'est pas dit.
+175. **Ligne flottante.** Avec deux conditions en vigueur, la cellule dit « 2 conditions » (arabe : « شرطان ») et
+     s'ouvre au clic ; avec trois, « 3 conditions » (« 3 شروط »).
+
+Règle de décision : une phrase manquante ou dite deux fois (170, 172), un focus perdu (172) ou un `Tab` qui sort de
+la fenêtre (174) se corrigent avant la clôture de la Phase 9.

@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tree()` returns a `TreeFeature` with `api(grid)`: `state(key)` and `toggle(key, open?)` (as a click on the chevron).
 - `FillApi.along` and `FillApi.can(end)` (optional members): the fill's one way, and whether Ctrl+D / Ctrl+R would act.
 - `SlotContext['menuItem']` gains `row?` and `menu?` (`'column'` or `'cell'`).
+- Several conditions in a column's filter popup (Phase 9 F1, owner Q-F2 A; `docs/behaviors/filter-combined.md`):
+  `filters({ maxConditions, matchCase })` and `filter.maxConditions` / `filter.matchCase` on a column. Up to 5 rows
+  (text, number, day, instant), « Add condition » / « Remove », one AND/OR join, stored as a flat `combined` (one row
+  stays a plain filter); a « Match case » box per text row writes its `caseSensitive`. Off by default: today's popup
+  exactly. The floating row says « 2 conditions » for a flat combined filter.
+- A value list and a condition in one popup (Phase 9 F2, owner Q-F3 A; `docs/behaviors/filter-multi.md`):
+  `filter: { kind: 'set', condition: true }` puts the condition above the list; both stored as a `combined` AND, the
+  condition first (one part alone stays plain). No new filter type; nothing changes on the wire.
+- `FilterRowsMessageKey`: the nine new texts, in `locales/{en,fr,ar}-filters`, optional for an application's own
+  bundle; `filters()` requires them only when something asks for rows, match case or a condition.
 
 ### Changed
 - The column menu's list moved into a shared module (`@dzgrid/dom/internal`, not public): one menu per grid across

@@ -10,7 +10,10 @@ import { localeCtx, makeQuery, readNumber, type ColumnOrGroup, type LocaleCtx } 
 import { canonical } from '@dzgrid/core/internal';
 import { definePart, type SlotContext } from '../src/part.js';
 import { filters } from '../src/filters.js';
-import { textForm, numberForm, booleanForm } from '../src/filters/forms.js';
+import { booleanForm, conditions, form, NUM_SPEC, TEXT_SPEC } from '../src/filters/forms.js';
+
+const textForm = form(conditions(TEXT_SPEC));
+const numberForm = form(conditions(NUM_SPEC));
 import { FR } from '../src/locales/fr.js';
 import { AR } from '../src/locales/ar.js';
 import { FR_FILTERS } from '../src/locales/fr-filters.js';

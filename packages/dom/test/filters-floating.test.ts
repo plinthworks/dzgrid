@@ -343,7 +343,8 @@ describe('the summary', () => {
       expect(b.tabIndex).toBe(-1);
     }
     t.g.kernel.dispatch({ type: 'filter.column', column: 'n', filter: { type: 'combined', join: 'or', conditions: [{ type: 'number', op: 'equals', value: 1 }, { type: 'number', op: 'equals', value: 2 }] } }, 'api');
-    expect(t.cell('n').textContent).toBe('Filter active');
+    // Phase 9 (filter-combined.md): a flat combined says how many conditions.
+    expect(t.cell('n').textContent).toBe('2 conditions');
   });
 
   it('Clear removes the column’s filter at once and the box comes back', () => {
@@ -521,9 +522,12 @@ describe('messages', () => {
   it('every filter bundle has the same keys and placeholders, every plural category its language has', () => {
     const place = (v: unknown): string[] => [...new Set((typeof v === 'string' ? [v] : Object.values(v as object)).flatMap((s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]!)))].sort();
     const keys = Object.keys(EN_FILTERS.text).sort();
-    expect(keys).toEqual([...FILTER_KEYS].sort());
-    // 41 at step 14, 8 more at step 15 (the value list), 3 at Phase 4 step 12 (the live toggle).
-    expect(keys).toHaveLength(52);
+    // Phase 9: the rows' 9 texts, in the bundles, not in FILTER_KEYS (required only when asked for).
+    const rows = keys.filter((k) => /^filter\.(condition|join|matchCase|summaryConditions)/.test(k));
+    expect(rows).toHaveLength(9);
+    expect(keys.filter((k) => !rows.includes(k))).toEqual([...FILTER_KEYS].sort());
+    // 41 at step 14, 8 more at step 15 (the value list), 3 at Phase 4 step 12 (the live toggle), 9 at Phase 9.
+    expect(keys).toHaveLength(61);
     for (const b of [FR_FILTERS, AR_FILTERS]) {
       expect(Object.keys(b.text).sort()).toEqual(keys);
       for (const k of keys) expect(place((b.text as Record<string, unknown>)[k]), `${b.locale} ${k}`).toEqual(place((EN_FILTERS.text as Record<string, unknown>)[k]));

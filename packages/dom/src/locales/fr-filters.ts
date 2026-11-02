@@ -1,4 +1,17 @@
-import type { FilterMessages } from '../messages.js';
+import type { FilterMessages, FilterRowsMessageKey, MessageValue } from '../messages.js';
+
+/** Les lignes du filtre (Phase 9) : facultatives pour les textes propres d'une application (`FilterRowsMessageKey`). */
+const ROWS: { readonly [K in FilterRowsMessageKey]?: MessageValue } = {
+  'filter.conditionAdd': "Ajouter une condition",
+  'filter.conditionRemove': "Retirer la condition {n}",
+  'filter.joinLabel': "Joindre les conditions",
+  'filter.joinAnd': "Toutes (ET)",
+  'filter.joinOr': "Au moins une (OU)",
+  'filter.matchCase': "Respecter la casse",
+  'filter.conditionAdded': "Condition {n} ajoutée",
+  'filter.conditionRemoved': "Condition {n} retirée",
+  'filter.summaryConditions': { one: "{n} condition", many: "{n} de conditions", other: "{n} conditions" },
+};
 
 /** Français, les textes des filtres (`@dzgrid/dom/filters`) : à ajouter aux messages de la grille, `text: { ...FR.text, ...FR_FILTERS.text }`. */
 export const FR_FILTERS = {
@@ -56,5 +69,6 @@ export const FR_FILTERS = {
     'filter.floatingToggle': "Ligne de filtres",
     'announce.floatingHidden': "Ligne de filtres masquée",
     'announce.floatingShown': "Ligne de filtres affichée",
+    ...ROWS,
   },
 } satisfies FilterMessages;

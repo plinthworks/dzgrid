@@ -28,6 +28,12 @@ export const FILTERS_CSS =
   ':where(.dzg-fpop [role=radiogroup] label){display:flex;align-items:center;gap:.5rem;min-block-size:24px}' +
   ':where(.dzg-fpop :is(select,button,.dzg-finput)){min-block-size:2rem}' +
   ':where(.dzg-ffoot){display:flex;justify-content:end;gap:.5rem;white-space:nowrap}' +
+  // Phase 9: the condition rows, the join on one line, match case beside its box, a list's separator.
+  ':where(.dzg-fconds,.dzg-fcond){display:grid;gap:.75rem}' +
+  ':where(.dzg-fjoin){display:flex;flex-wrap:wrap;column-gap:1rem}' +
+  ':where(.dzg-fpop .dzg-fcasel){display:flex;align-items:center;gap:.5rem}' +
+  ':where(.dzg-fadd,.dzg-frm){justify-self:start}' +
+  ':where(.dzg-fsep){inline-size:100%;margin:0}' +
   ':where(.dzg-fpop [hidden]){display:none}' +
   // Step 14: a date field (tzslot's) under its label, as wide as the form.
   ':where(.dzg-fdate){display:grid;gap:2px}' +

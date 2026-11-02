@@ -11,7 +11,7 @@ export interface Resolved {
   /** The column can filter here with this slot's switches (part or not): what a header part drives (step 21). */
   readonly ok: boolean;
 }
-const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));
+export const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));
 /** A column, hidden ones included, asks for a floating field (`filter.floating: true`). */
 export const asked = (g: GridContext<unknown>): boolean => leaves(g.settings.columns).some((d) => d?.filter && d.filter.floating === true);
 

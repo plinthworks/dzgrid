@@ -15,6 +15,18 @@ export interface View {
  * column has a popup (step 13), the text is a button opening it (`aria-haspopup="dialog"`,
  * `aria-expanded` set by the popup), out of the Tab order like every control of the row.
  */
+/** A flat combined of conditions says how many (filter-combined.md); one holding a list or nested, or a bundle without the text: « Filter active ». */
+const said = (n: FC): string => {
+  const s = n.state as { type?: string; conditions?: readonly { type?: string }[] };
+  const cs = s.type === 'combined' && s.conditions;
+  try {
+    if (cs && cs.every((x) => !/^(set|combined)$/.test(x?.type ?? ''))) return n.msg('filter.summaryConditions', { n: cs.length });
+  } catch {
+    // A host's bundle from before Phase 9.
+  }
+  return n.msg('filter.summaryActive');
+};
+
 export function summaryView(host: HTMLElement): View {
   const doc = host.ownerDocument;
   let c: FC;
@@ -52,7 +64,7 @@ export function summaryView(host: HTMLElement): View {
         });
         host.replaceChildren(text, clear);
       }
-      text.textContent = n.msg('filter.summaryActive');
+      text.textContent = said(n);
       clear.setAttribute('aria-label', n.msg('filter.clear', { column: nameOf(n) }));
     },
     focus: () => !!clear && ((opens ? text : clear).focus(), true),

@@ -1,0 +1,69 @@
+{
+  "id": "ui-three-or-rows",
+  "suite": "filter-combined",
+  "description": "Three rows of the popup joined by OR (filter-combined.md): any one row keeps the row.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "apple"
+      },
+      {
+        "id": "2",
+        "n": "berry"
+      },
+      {
+        "id": "3",
+        "n": "cherry"
+      },
+      {
+        "id": "4",
+        "n": "date"
+      },
+      {
+        "id": "5",
+        "n": "fig"
+      },
+      {
+        "id": "6",
+        "n": null
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "combined",
+        "join": "or",
+        "conditions": [
+          {
+            "type": "text",
+            "op": "equals",
+            "value": "apple"
+          },
+          {
+            "type": "text",
+            "op": "startsWith",
+            "value": "ch"
+          },
+          {
+            "type": "text",
+            "op": "endsWith",
+            "value": "g"
+          }
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "3",
+      "5"
+    ]
+  }
+}

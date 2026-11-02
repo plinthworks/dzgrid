@@ -50,11 +50,11 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/row-gaps': 450, // owner step 15 (2026-10-29, Q15-9): a new line for the gaps between categories (measured 409)
   '@dzgrid/core/state': 1510, // owner « set include only » (2026-10-29): 1 500 → 1 510; Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
   '@dzgrid/dom': 22440, // 1.2.0 (+2 % rule, 2026-11-02, measured 22 432: the group rows follow a columns update); before: Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
-  '@dzgrid/dom/filters': 10210, // 1.2.0 (+2 % rule, 2026-11-02, measured 10 207: the kits' import() in the entry, filters-base's warning); before: the owner's-look budgets (2026-10-27, decisions.md): 10 000 → 10 100 (apply, the header box, the zone option)
+  '@dzgrid/dom/filters': 12000, // Phase 9 (owner B after F1–F2, 2026-11-02; Q-F6 had 11 400): rows, join, match case, a condition over a list; before: 10210, // 1.2.0 (+2 % rule, 2026-11-02, measured 10 207: the kits' import() in the entry, filters-base's warning); before: the owner's-look budgets (2026-10-27, decisions.md): 10 000 → 10 100 (apply, the header box, the zone option)
   // The owner's look (2026-10-27): the set chunk 4 205 → 4 250 (one box, the search placeholder, the inert host), the
   // date adapters 2 745 → 2 800 (the FROM / TO placeholder); written grants, no longer the measure + 10 %.
   // Owner « set include only » (2026-10-29): the set chunk 4 250 → 4 350 (`exclude: false`: the list without its exclude mode).
-  '@dzgrid/dom/filters: set (lazy)': 4500, // owner step 16 (2026-10-29, « ok pour les hausses »): 4 350 → 4 500 (`start: 'empty'`, `selectAll: false`; measured 4 467)
+  '@dzgrid/dom/filters: set (lazy)': 4850, // Phase 9 (owner Q-F6, 2026-11-02); before: 4500, // owner step 16 (2026-10-29, « ok pour les hausses »): 4 350 → 4 500 (`start: 'empty'`, `selectAll: false`; measured 4 467)
   '@dzgrid/dom/filters: date adapters (lazy)': 2850, // the owner's third look (2026-10-27, « Comfort stylesheet »): 2 800 → 2 850 (the FROM / TO input fills its field)
   '@dzgrid/dom/tree': 4200, // Phase 9 cell menu (owner Q-CM4, 2026-11-02): 4 150 granted, 4 200 by the +2 % rule (the tree's `api`: state and toggle, measured 4 194); « étape 7 » (owner 2026-11-01, measured 4 069: the tree column and indent per row); owner step 14/15 (2026-10-29): 3 850 → 3 950 (tree({ fixedOpen }), then step 15's spans and gaps); owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
   '@dzgrid/dom/tree-lazy': 1000,

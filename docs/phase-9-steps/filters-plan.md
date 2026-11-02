@@ -207,7 +207,7 @@ hand-written cases (§5, F4); the backend must read it before an app turns the r
   `advanced.removed`, `advanced.joinChanged`). Enter in a value field applies (as the popup).
 - **RTL**: indentation by `padding-inline-start`, the group line by `border-inline-start`; the bar's text built as
   isolated pieces (`<bdi>` per column name and value) so « ET / و » and values in two scripts read in order.
-- **A11y protocol**: new section 23 in `docs/a11y-protocol.md` (NVDA + Firefox, VoiceOver + Safari, TalkBack):
+- **A11y protocol**: new section 24 in `docs/a11y-protocol.md` (NVDA + Firefox, VoiceOver + Safari, TalkBack):
   build « A ET (B OU C) » blind, change a join, remove a group, apply; axe on the dialog fr light and ar dark RTL.
 
 ### 3.6 Text form with autocomplete

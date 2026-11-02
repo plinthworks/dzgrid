@@ -53,6 +53,13 @@ export type FilterMessageKey =
   | 'filter.set.search' | 'filter.set.all' | 'filter.set.allShown' | 'filter.set.blanks' | 'filter.set.option' | 'filter.set.count' | 'filter.set.truncated' | 'filter.set.failed'
   // The live floating row (Phase 4 step 12): a bound button's name, the user's toggle said.
   | 'filter.floatingToggle' | 'announce.floatingHidden' | 'announce.floatingShown';
+/**
+ * The popup's rows (Phase 9, docs/behaviors/filter-combined.md, filter-multi.md), in the filter bundles too: optional
+ * here and for `filters()`, required when a grid or a column asks for several conditions, match case or a condition.
+ */
+export type FilterRowsMessageKey =
+  | 'filter.conditionAdd' | 'filter.conditionRemove' | 'filter.joinLabel' | 'filter.joinAnd' | 'filter.joinOr' | 'filter.matchCase'
+  | 'filter.conditionAdded' | 'filter.conditionRemoved' | 'filter.summaryConditions';
 /** The operators the popup names: text's and number's, and the date ones (step 14). */
 export type FilterOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank' | 'lt' | 'lte' | 'gt' | 'gte' | 'between'
   | 'onDay' | 'notOnDay' | 'betweenDays' | 'before' | 'after' | 'onOrBefore' | 'onOrAfter';
@@ -102,7 +109,7 @@ export type MessageValue = string | PluralForms;
 export interface GridMessages {
   /** The language the bundle is written in: plural forms follow it, numbers follow the context. */
   readonly locale: string;
-  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ColumnsMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey]?: MessageValue };
+  readonly text: { readonly [K in MessageKey]: MessageValue } & { readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ColumnsMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | FilterRowsMessageKey]?: MessageValue };
 }
 
 /** A bundle missing a key fails at once, naming it — not on some later paint. */
@@ -127,7 +134,7 @@ const rulesFor = (locale: string): Intl.PluralRules => {
  * placeholder without a value stays visible, so a missing one is seen in
  * testing rather than read as nothing.
  */
-export function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
+export function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | FilterRowsMessageKey | AppMessageKey, params: Readonly<Record<string, string | number>> = {}, ctx?: LocaleCtx): string {
   const value = (m.text as Readonly<Record<string, MessageValue | undefined>>)[key];
   if (value === undefined) {
     // A host's key it forgot is shown as itself (and told by the caller); a grid key is a bug.

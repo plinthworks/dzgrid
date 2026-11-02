@@ -1,0 +1,62 @@
+{
+  "id": "multi-set-and-text",
+  "suite": "filter-combined",
+  "description": "A condition and a value list on one column (filter-multi.md): a row must pass both.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "s"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "s": "red one"
+      },
+      {
+        "id": "2",
+        "s": "red two"
+      },
+      {
+        "id": "3",
+        "s": "blue one"
+      },
+      {
+        "id": "4",
+        "s": "blue two"
+      },
+      {
+        "id": "5",
+        "s": null
+      }
+    ],
+    "filter": {
+      "s": {
+        "type": "combined",
+        "join": "and",
+        "conditions": [
+          {
+            "type": "text",
+            "op": "notContains",
+            "value": "two"
+          },
+          {
+            "type": "set",
+            "include": [
+              "blue one",
+              "red one",
+              "red two"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "3"
+    ]
+  }
+}

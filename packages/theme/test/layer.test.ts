@@ -87,8 +87,8 @@ describe('the new tokens (themes-plan §1)', () => {
     expect(css).not.toMatch(/\b1px solid var\(--tz-border\)/);
     const uses = css.match(/var\(--dzg-line, 1px\) solid var\(--tz-border\)/g) ?? [];
     // The frame, the cell rule, a group's rule, the footer's, the popup's, the value list's, a detail panel's, the pinned
-    // columns' edge (app-feedback 34).
-    expect(uses.length).toBe(8);
+    // columns' edge (app-feedback 34), a value list's separator under its condition (Phase 9).
+    expect(uses.length).toBe(9);
     // A body cell's line height leaves room for its rule, whatever its width.
     expect(css).toMatch(/line-height: calc\(var\(--dzg-row-height, 2rem\) - var\(--dzg-line, 1px\)\)/);
   });

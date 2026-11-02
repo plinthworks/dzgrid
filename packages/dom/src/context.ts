@@ -9,7 +9,7 @@ import type { FrameScheduler } from './render/scheduler.js';
 import type { Scope } from './render/scope.js';
 import type { Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
-import type { ExportMessageKey, FilterMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
+import type { ExportMessageKey, FilterMessageKey, FilterRowsMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, GroupsApi, MoveFn, SlotDrivers, SpanFeature } from './features.js';
 import type { CellInput, PartBase, SlotPart } from './part.js';
@@ -192,5 +192,5 @@ export interface GridContext<T> {
    */
   pinTop?: number | undefined;
   pinAt?: ((key: RowKey, y: number) => RowKey | undefined) | undefined;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | FilterRowsMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

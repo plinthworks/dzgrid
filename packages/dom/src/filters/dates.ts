@@ -1,7 +1,7 @@
 import { parseDay, problem, readInstant, RELATIVE_RANGES, type LocaleCtx, type Problem, type RelativeRange } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
-import { conditions, el, form, hide, NUM, tx, type F, type Spec } from './forms.js';
+import { el, form, hide, NUM, several, tx, type F, type Make, type Rows, type Spec } from './forms.js';
 import { notice, once, type Once } from '@dzgrid/dom/internal';
 
 type C = SlotContext['filter'];
@@ -94,8 +94,7 @@ export interface DateKit {
 }
 
 /** The feature's side the date forms need: the grid (set up last), the kits, the words. */
-export interface DateEnv {
-  g: GridContext<unknown> | null;
+export interface DateEnv extends Rows {
   /** `filters({ dateZone })`: the instant form says its zone. */
   readonly zone: boolean;
   readonly load: (kit: DateKitName) => Promise<DateKit>;
@@ -267,10 +266,11 @@ const dates = (kind: 'day' | 'instant', env: DateEnv): Spec['values'] => (get, d
 
 const shortcutUnder = (op: string) => (s: F): string => (s.op === 'relative' ? op : s.op!);
 
-/** `filter.day` and `filter.instant` (step 14): the date forms on tzslot. */
-export function dateForms(env: DateEnv): { day: Part<C>; instant: Part<C> } {
-  return {
-    day: form(conditions({ type: 'day', ops: NUM, label: DAY_LABELS, opOf: shortcutUnder('between'), values: dates('day', env) })),
-    instant: form(conditions({ type: 'instant', ops: INSTANT_OPS, opOf: shortcutUnder('betweenDays'), values: dates('instant', env) })),
+/** `filter.day` and `filter.instant` (step 14): the date forms on tzslot, with their rows (Phase 9); `m`: the bodies alone (a set's condition). */
+export function dateForms(env: DateEnv): { day: Part<C>; instant: Part<C>; m: { day: Make; instant: Make } } {
+  const m = {
+    day: several({ type: 'day', ops: NUM, label: DAY_LABELS, opOf: shortcutUnder('between'), values: dates('day', env) }, env),
+    instant: several({ type: 'instant', ops: INSTANT_OPS, opOf: shortcutUnder('betweenDays'), values: dates('instant', env) }, env),
   };
+  return { day: form(m.day), instant: form(m.instant), m };
 }

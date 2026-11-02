@@ -328,6 +328,8 @@ $layered: true !default;
   // of at least 24 px (WCAG 2.5.8).
   .dzg-overlay button,
   .dzg-ffoot button,
+  .dzg-fadd,
+  .dzg-frm,
   .dzg-fpreset,
   .dzg-pbtn,
   .dzg-retry,
@@ -406,6 +408,15 @@ $layered: true !default;
   }
 
   // Apply is the primary action, on the accent; Clear keeps the secondary look (owner's look, app-feedback 19).
+  // Phase 9: the condition rows after the first, and a list's separator (filter-combined.md, filter-multi.md).
+  .dzg-fjoin ~ .dzg-fcond {
+    padding-block-start: 0.75rem;
+    border-block-start: var(--dzg-line, 1px) dashed var(--tz-border);
+  }
+  .dzg-fsep {
+    border: 0;
+    border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
+  }
   .dzg-ffoot .dzg-fapply {
     border-color: var(--tz-accent);
     color: var(--tz-accent-fg);
@@ -457,7 +468,13 @@ $layered: true !default;
 
   .dzg-fsum {
     color: var(--tz-fg-muted);
+    font: inherit;
     font-weight: 400;
+    // A button when its popup can open: no grey face of the browser's own (dark themes, 4.5:1).
+    background: transparent;
+    border: 0;
+    padding: 0;
+    text-align: start;
   }
 
   // A period's field (owner's third look, app-feedback 30): the ring on the field's box, none on the input inside it.

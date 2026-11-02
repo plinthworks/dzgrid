@@ -1,4 +1,17 @@
-import type { FilterMessages } from '../messages.js';
+import type { FilterMessages, FilterRowsMessageKey, MessageValue } from '../messages.js';
+
+/** The popup's rows (Phase 9): optional for a host's own bundle (`FilterRowsMessageKey`). */
+const ROWS: { readonly [K in FilterRowsMessageKey]?: MessageValue } = {
+  'filter.conditionAdd': "Add condition",
+  'filter.conditionRemove': "Remove condition {n}",
+  'filter.joinLabel': "Join the conditions",
+  'filter.joinAnd': "All (AND)",
+  'filter.joinOr': "Any (OR)",
+  'filter.matchCase': "Match case",
+  'filter.conditionAdded': "Condition {n} added",
+  'filter.conditionRemoved': "Condition {n} removed",
+  'filter.summaryConditions': { one: "{n} condition", other: "{n} conditions" },
+};
 
 /** English, the filters' texts (`@dzgrid/dom/filters`): spread into the grid's messages, `text: { ...EN.text, ...EN_FILTERS.text }`. */
 export const EN_FILTERS = {
@@ -56,5 +69,6 @@ export const EN_FILTERS = {
     'filter.floatingToggle': "Filter row",
     'announce.floatingHidden': "Filter row hidden",
     'announce.floatingShown': "Filter row shown",
+    ...ROWS,
   },
 } satisfies FilterMessages;

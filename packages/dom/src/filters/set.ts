@@ -2,7 +2,7 @@ import type { ValuesHandle } from '@dzgrid/core';
 import type { GridContext } from '../context.js';
 import type { Part, SlotContext } from '../part.js';
 import { el } from './dom.js';
-import { form, type Body, type Changed, type F } from './forms.js';
+import { form, type Body, type Changed, type F, type Make } from './forms.js';
 import { mounted, notice, once, type Once } from '@dzgrid/dom/internal';
 import { injectFilterStyles } from './styles.js';
 
@@ -29,8 +29,57 @@ const edits = (s: F | null): boolean =>
  * `filter.set.failed` with Retry (the error reported); the filter in force stays (it reads null).
  * The chunk's sheet is injected once per root, with the grid's nonce, unless `injectStyles: false`.
  */
-export const setForm = (env: { g: GridContext<unknown> | null }, kit: Once<string, SetKit>): Part<C> =>
+export const setForm = (env: { g: GridContext<unknown> | null }, kit: Once<string, SetKit>, m: Readonly<Record<string, Make>>): Part<C> =>
   form((get, doc, changed) => {
+    const list = setBody(env, kit, get, doc, changed);
+    // A condition above the list (filter-multi.md, owner Q-F3 A): the column type's (a day or instant one only with the kits).
+    const f = get().column.def.filter;
+    const t = get().column.type;
+    const mk = f && f.condition && (/^(number|day|instant)$/.test(t) ? m[t] : m['text']);
+    if (!mk) return list;
+    const cond = mk(get, doc, changed);
+    const hr = el(doc, 'hr', 'dzg-fsep');
+    hr.setAttribute('role', 'presentation');
+    /** A stored filter as [condition, list]: a combined AND of a condition then a set, a set alone, else a condition alone. */
+    const split = (s: F | null): [F | null, F | null] => {
+      const cs = s?.['conditions'] as readonly F[] | undefined;
+      return s?.type === 'set' ? [null, s] : s?.type === 'combined' && s['join'] === 'and' && cs?.length === 2 && cs[1]?.type === 'set' ? [cs[0]!, cs[1]] : [s, null];
+    };
+    return {
+      els: [...cond.els, hr, ...list.els],
+      edits(s) {
+        const [a, b] = split(s);
+        return cond.edits(a) && list.edits(b);
+      },
+      write(s) {
+        const [a, b] = split(s);
+        cond.write(a);
+        list.write(b);
+      },
+      read(j) {
+        const a = cond.read(j);
+        const b = list.read(j);
+        if (a === undefined || b === undefined) return undefined;
+        return a && b ? { type: 'combined', join: 'and', conditions: [a, b] } : (a ?? b);
+      },
+      texts() {
+        cond.texts();
+        list.texts();
+      },
+      // The list measures its rows once shown (its focus), then the condition takes the focus.
+      focus() {
+        list.focus();
+        cond.focus();
+      },
+      destroy() {
+        cond.destroy?.();
+        list.destroy?.();
+      },
+    };
+  });
+
+/** The list's body: a proxy that loads the chunk on first use. */
+function setBody(env: { g: GridContext<unknown> | null }, kit: Once<string, SetKit>, get: () => C, doc: Document, changed: Changed): Body {
     const box = el(doc, 'div', 'dzg-fset');
     box.tabIndex = -1;
     let inner: Omit<Body, 'edits'> | null = null;
@@ -79,7 +128,8 @@ export const setForm = (env: { g: GridContext<unknown> | null }, kit: Once<strin
         last = s;
         inner?.write(s);
       },
-      read: (judge) => (inner ? inner.read(judge) : null),
+      // Not loaded yet: the part written stays (a condition beside it must not drop it).
+      read: (judge) => (inner ? inner.read(judge) : last),
       texts() {
         n.words();
         inner?.texts();
@@ -90,4 +140,4 @@ export const setForm = (env: { g: GridContext<unknown> | null }, kit: Once<strin
         inner?.destroy?.();
       },
     };
-  });
+}

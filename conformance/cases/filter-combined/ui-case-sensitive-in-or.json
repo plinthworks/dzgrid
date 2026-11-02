@@ -1,0 +1,61 @@
+{
+  "id": "ui-case-sensitive-in-or",
+  "suite": "filter-combined",
+  "description": "Match case ticked on one row only: that row compares exactly, the other folds case.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "n"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "n": "Alpha"
+      },
+      {
+        "id": "2",
+        "n": "alpha"
+      },
+      {
+        "id": "3",
+        "n": "BETA"
+      },
+      {
+        "id": "4",
+        "n": "beta"
+      },
+      {
+        "id": "5",
+        "n": "gamma"
+      }
+    ],
+    "filter": {
+      "n": {
+        "type": "combined",
+        "join": "or",
+        "conditions": [
+          {
+            "type": "text",
+            "op": "contains",
+            "value": "Al",
+            "caseSensitive": true
+          },
+          {
+            "type": "text",
+            "op": "equals",
+            "value": "beta"
+          }
+        ]
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "3",
+      "4"
+    ]
+  }
+}

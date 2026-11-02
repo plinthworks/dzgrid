@@ -78,15 +78,15 @@
     },
     "@dzgrid/dom/locales/en-filters": {
       "file": "packages/dom/src/locales/en-filters.ts",
-      "maxGzip": 850
+      "maxGzip": 900
     },
     "@dzgrid/dom/locales/fr-filters": {
       "file": "packages/dom/src/locales/fr-filters.ts",
-      "maxGzip": 1000
+      "maxGzip": 1050
     },
     "@dzgrid/dom/locales/ar-filters": {
       "file": "packages/dom/src/locales/ar-filters.ts",
-      "maxGzip": 1100
+      "maxGzip": 1200
     },
     "@dzgrid/dom/locales/en-pagination": {
       "file": "packages/dom/src/locales/en-pagination.ts",
@@ -737,7 +737,7 @@
     },
     "@dzgrid/dom/filters": {
       "file": "packages/dom/src/filters.ts",
-      "maxGzip": 10210,
+      "maxGzip": 12000,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -750,7 +750,7 @@
     },
     "@dzgrid/dom/filters-base": {
       "file": "packages/dom/src/filters-base.ts",
-      "maxGzip": 10210,
+      "maxGzip": 12000,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -763,7 +763,7 @@
       "files": [
         "packages/dom/src/filters/set/index.ts"
       ],
-      "maxGzip": 4500,
+      "maxGzip": 4850,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",

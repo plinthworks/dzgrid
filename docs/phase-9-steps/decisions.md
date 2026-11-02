@@ -51,3 +51,25 @@ Plan: `filters-plan.md`. All in one pass for 1.3.0. Owner: A to every question.
   core/state 1 600, filters / filters-base 11 400, set chunk 4 850, dom/advanced-filter 5 500, dom 22 500,
   dom/edit 4 200, Angular 7 600, filter locales 900 / 1 050 / 1 200, advanced locales 350 / 400 / 500,
   advanced-filter.css 650, K.8 kept at 90 000).
+
+## Filters F0–F2 — measures (2026-11-02, built, not committed, **stopped: over a line**)
+
+Gzipped, minified (`npm run check:size`; the accepted lines applied for these entries only, the others wait for F3+):
+| Line | Before | Measured | Line |
+|---|---|---|---|
+| `@dzgrid/dom/filters` | 10 207 | **11 929** | 11 400 — **over by 529 (+4.6 %): owner** |
+| `@dzgrid/dom/filters-base` (same shared code) | 10 207 | **11 886** | 11 400 — **over by 486 (+4.3 %): owner** |
+| `@dzgrid/dom/filters: set (lazy)` | 4 499 | 4 499 (the list + condition is composed in the eager part) | 4 850 |
+| `locales/{en,fr,ar}-filters` | 744 / 869 / 992 | 856 / 1 007 / 1 194 | 900 / 1 050 / 1 200 |
+| `@dzgrid/theme` | 2 767 | 2 809 | 2 850 |
+| K.8 audit profile | 85 280 | 87 338 | 90 000 |
+
+Where the +1 722 B go: the rows' body (`several`: rows, join, add / remove, match case, focus, announcements)
+1 034; a value list with a condition (eager `set.ts`) ≈ 190; « n conditions » ≈ 70; layout CSS ≈ 65; the texts' check
+at setup and the grid's `maxConditions` warning ≈ 100; the rest is the per-instance forms. The plan's 1 100 counted
+only part of the rows' body. `check:api`: nothing removed or narrowed (new: `FilterRowsMessageKey`, optional options
+and column fields, optional keys in the filter bundles).
+- Owner (2026-11-02, F1–F2 measured): `filters` and `filters-base` lines **12 000** (measured 11 929 / 11 886; the
+  condition rows ≈ 1 034 B, kept in the eager part — option B, not a lazy chunk).
+- Owner (2026-11-02): cost too high for now — **1.3.0 = the cell context menu + filters part 1 (F0–F2)**. The
+  advanced filter (F3–F6, ≈ 8 sessions) is postponed until the owner's backend can read a multi-column rule.

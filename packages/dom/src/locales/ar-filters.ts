@@ -1,4 +1,17 @@
-import type { FilterMessages } from '../messages.js';
+import type { FilterMessages, FilterRowsMessageKey, MessageValue } from '../messages.js';
+
+/** The popup's rows (Phase 9): optional for a host's own bundle (`FilterRowsMessageKey`). */
+const ROWS: { readonly [K in FilterRowsMessageKey]?: MessageValue } = {
+  'filter.conditionAdd': "إضافة شرط",
+  'filter.conditionRemove': "إزالة الشرط {n}",
+  'filter.joinLabel': "ربط الشروط",
+  'filter.joinAnd': "كلها (و)",
+  'filter.joinOr': "أحدها على الأقل (أو)",
+  'filter.matchCase': "مطابقة حالة الأحرف",
+  'filter.conditionAdded': "تمت إضافة الشرط {n}",
+  'filter.conditionRemoved': "تمت إزالة الشرط {n}",
+  'filter.summaryConditions': { zero: "لا شروط", one: "شرط واحد", two: "شرطان", few: "{n} شروط", many: "{n} شرطًا", other: "{n} شرط" },
+};
 
 /** العربية, the filters' texts (`@dzgrid/dom/filters`): spread into the grid's messages, `text: { ...AR.text, ...AR_FILTERS.text }`. To be read by an Arabic reader. */
 export const AR_FILTERS = {
@@ -56,5 +69,6 @@ export const AR_FILTERS = {
     'filter.floatingToggle': "صف المرشحات",
     'announce.floatingHidden': "تم إخفاء صف المرشحات",
     'announce.floatingShown': "تم إظهار صف المرشحات",
+    ...ROWS,
   },
 } satisfies FilterMessages;

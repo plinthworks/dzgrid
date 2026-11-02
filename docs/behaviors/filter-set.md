@@ -173,6 +173,11 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   loads (once per document or shadow root, `data-dzgrid-set`, with the grid's nonce; not with
   `injectStyles: false`) and hands the chunk its loading / failure helper.
 
+## With a condition (Phase 9, F2)
+`filter: { kind: 'set', condition: true }` puts a condition form above the list, one popup (owner Q-F3 A); both
+parts are stored as a `combined` AND, the condition first, one part alone stored plain: `filter-multi.md`. The list's
+values and counts leave the whole column filter out (both parts), so a value the condition excludes still shows.
+
 ## Tests
 - `packages/dom/test/filters-set-draft.test.ts` (the pure draft: ticks, canonical output, sorted
   `include`, default blanks, the half rule and its tie, no `exclude` on a searched or truncated list,

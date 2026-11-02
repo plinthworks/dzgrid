@@ -240,6 +240,8 @@
 
 .dzg-overlay button,
 .dzg-ffoot button,
+.dzg-fadd,
+.dzg-frm,
 .dzg-fpreset,
 .dzg-pbtn,
 .dzg-retry,
@@ -305,6 +307,16 @@
   padding-inline: 0.5rem;
 }
 
+.dzg-fjoin ~ .dzg-fcond {
+  padding-block-start: 0.75rem;
+  border-block-start: var(--dzg-line, 1px) dashed var(--tz-border);
+}
+
+.dzg-fsep {
+  border: 0;
+  border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
+}
+
 .dzg-ffoot .dzg-fapply {
   border-color: var(--tz-accent);
   color: var(--tz-accent-fg);
@@ -353,7 +365,12 @@
 
 .dzg-fsum {
   color: var(--tz-fg-muted);
+  font: inherit;
   font-weight: 400;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: start;
 }
 
 .dzg-finput:focus-visible,

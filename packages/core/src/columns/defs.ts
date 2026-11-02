@@ -50,8 +50,11 @@ export interface ColumnDef<T, V = unknown> {
    * filter never writes an `exclude` filter, nor `blanks` (docs/behaviors/filter-set.md « Include only »).
    * `start: 'empty'`: its set list opens with nothing ticked when no filter is in force, and nothing ticked is no
    * filter (default `'all'`); `selectAll: false`: no « Select all » box (filter-set.md « Starting empty »).
+   * Phase 9 (docs/behaviors/filter-combined.md, filter-multi.md): `maxConditions` 1 to 5, the rows its popup offers
+   * (over `filters({ maxConditions })`); `matchCase`: a « Match case » box on each text row; `condition` (a set
+   * column): a condition above the list, both stored as a `combined` AND.
    */
-  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string; readonly exclude?: false; readonly start?: 'all' | 'empty'; readonly selectAll?: boolean };
+  readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string; readonly exclude?: false; readonly start?: 'all' | 'empty'; readonly selectAll?: boolean; readonly maxConditions?: number; readonly matchCase?: boolean; readonly condition?: boolean };
   readonly pinned?: Side | null;
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';

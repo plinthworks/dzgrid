@@ -9,7 +9,7 @@ import { committer } from './commit.js';
 import { dateForms, kits, type DateEnv, type DateKit, type DateKitName, type DateCalendarOptions, calendarOf } from './dates.js';
 import { floatingRow } from './floating.js';
 import { filterBoxPart } from './header-box.js';
-import { booleanForm, numberForm, textForm } from './forms.js';
+import { booleanForm, form, NUM_SPEC, rowsOk, several, TEXT_SPEC } from './forms.js';
 import { numberPart, textPart } from './inputs.js';
 import { menu, type Menu } from './menu.js';
 import { setForm, setKit, type SetKit } from './set.js';
@@ -17,7 +17,7 @@ import { resolver } from './resolve.js';
 import { injectFilterStyles } from './styles.js';
 import { summaryPart } from './summary.js';
 import { toggle, type FloatingToggle, type Toggle } from './toggle.js';
-import { asked } from './resolve.js';
+import { asked, leaves } from './resolve.js';
 
 export interface FiltersOptions {
   /** A floating row under the headers, for every filterable column (a column's `filter.floating` wins); shown or hidden live by `floating`. */
@@ -56,6 +56,13 @@ export interface FiltersOptions {
   readonly busyFlash?: number;
   /** Advanced (step 15): where the set filter's chunk comes from, instead of DzGrid's own `import()` (as `loadDates`). */
   readonly loadSet?: () => Promise<SetKit>;
+  /**
+   * Phase 9 (docs/behaviors/filter-combined.md, owner Q-F2 A): the condition rows a popup offers, 1 to 5 (1 by default:
+   * today's popup); « Add condition » and one AND/OR join from 2. A column's `filter.maxConditions` wins.
+   */
+  readonly maxConditions?: number;
+  /** Phase 9: a « Match case » box on each text row (off by default); a column's `filter.matchCase` wins. */
+  readonly matchCase?: boolean;
 }
 
 /** The feature, with the popup's handles (owner decision O6: here, not on the grid). */
@@ -78,6 +85,8 @@ export const FILTER_KEYS = [
   ...(['search', 'all', 'allShown', 'blanks', 'option', 'count', 'truncated', 'failed'] as const).map((k) => `filter.set.${k}` as const),
   'filter.floatingToggle', 'announce.floatingHidden', 'announce.floatingShown',
 ] satisfies readonly FilterMessageKey[];
+/** The rows' texts (Phase 9): required only when something asks for rows, match case or a condition. */
+const ROW_KEYS = ['conditionAdd', 'conditionRemove', 'joinLabel', 'joinAnd', 'joinOr', 'matchCase', 'conditionAdded', 'conditionRemoved', 'summaryConditions'].map((k) => `filter.${k}`);
 
 /**
  * `filters()`: the filter UI (docs/behaviors/filter-ui.md). Step 12: the floating row, with its
@@ -97,16 +106,18 @@ export function filtersWith(o: FiltersOptions, load?: (kit: DateKitName) => Prom
   let popup: Menu | null = null;
   const cal = o.dateCalendar && calendarOf(o.dateCalendar);
   const dl = o.loadDates ?? load;
-  const env: DateEnv = { g: null, zone: o.dateZone !== false, ...kits(dl), ...(!dl && { off: true }), ...(o.dateMessages && { messages: o.dateMessages }), ...(cal && { calendar: cal.calendar, calendarProblems: cal.problems }) };
+  const env: DateEnv = { g: null, max: rowsOk(o.maxConditions) ? o.maxConditions : 1, mc: o.matchCase, zone: o.dateZone !== false, ...kits(dl), ...(!dl && { off: true }), ...(o.dateMessages && { messages: o.dateMessages }), ...(cal && { calendar: cal.calendar, calendarProblems: cal.problems }) };
   const d = dateForms(env);
+  const text = several(TEXT_SPEC, env);
+  const number = several(NUM_SPEC, env);
   const sets = setKit(o.loadSet);
-  const set = setForm(env, sets);
+  const set = setForm(env, sets, { text, number, ...(dl && d.m) });
   const shown = toggle(o.floating === true);
   return {
     id: 'filters',
     parts: {
       'floating.text': { slot: 'floating', part: textPart }, 'floating.number': { slot: 'floating', part: numberPart }, floating: { slot: 'floating', part: summaryPart },
-      'filter.text': { slot: 'filter', part: textForm }, 'filter.number': { slot: 'filter', part: numberForm }, 'filter.boolean': { slot: 'filter', part: booleanForm },
+      'filter.text': { slot: 'filter', part: form(text) }, 'filter.number': { slot: 'filter', part: form(number) }, 'filter.boolean': { slot: 'filter', part: booleanForm },
       ...(dl && { 'filter.day': { slot: 'filter', part: d.day }, 'filter.instant': { slot: 'filter', part: d.instant } }), 'filter.set': { slot: 'filter', part: set },
       // Step 21: a ready header part with the column's box (needs `slots()`), named per column.
       'header.filterBox': { slot: 'header', part: filterBoxPart },
@@ -120,9 +131,16 @@ export function filtersWith(o: FiltersOptions, load?: (kit: DateKitName) => Prom
 
 function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => void, env: DateEnv, set: object, fetchSet: () => void, shown: Toggle): FeatureHandle {
   env.g = g;
-  const missing = FILTER_KEYS.filter((k) => g.settings.messages.text[k] === undefined);
+  const text = g.settings.messages.text as Readonly<Record<string, unknown>>;
+  const lack = ROW_KEYS.filter((k) => text[k] === undefined);
+  // The rows' texts are required only when asked for (a host's own bundle from before Phase 9 keeps working).
+  const rows = env.max > 1 || o.matchCase || leaves(g.settings.columns).some((d) => d?.filter && ((d.filter.maxConditions ?? 0) > 1 || d.filter.matchCase || d.filter.condition));
+  const missing = [...FILTER_KEYS, ...(rows ? lack : [])].filter((k) => text[k] === undefined);
   if (missing.length) throw new TypeError(`filters: missing ${missing.join(', ')}`);
-  if (env.calendarProblems?.length) emit(g.kernel, { type: 'problems', source: 'host', problems: [...env.calendarProblems] });
+  env.words = !lack.length;
+  const bad = o.maxConditions !== undefined && !rowsOk(o.maxConditions) ? [problem('invalid-setting', 'warning', 'features.filters.maxConditions', String(o.maxConditions))] : [];
+  const told = [...(env.calendarProblems ?? []), ...bad];
+  if (told.length) emit(g.kernel, { type: 'problems', source: 'host', problems: told });
   const root = g.el.root.getRootNode();
   if (g.settings.injectStyles !== false) injectFilterStyles(root.nodeType === 11 ? (root as ShadowRoot) : g.doc, g.settings.nonce);
   // After a user's filter change, the filtered count (`announce.filtered {rows}`, or `announce.filteredOpen` when
