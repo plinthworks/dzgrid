@@ -119,6 +119,9 @@
       "@dzgrid/dom/column-menu": [
         "./packages/dom/src/column-menu.ts"
       ],
+      "@dzgrid/dom/context-menu": [
+        "./packages/dom/src/context-menu.ts"
+      ],
       "@dzgrid/dom/columns-panel": [
         "./packages/dom/src/columns-panel.ts"
       ],

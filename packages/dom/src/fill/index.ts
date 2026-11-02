@@ -38,6 +38,10 @@ export interface FillApi {
   end(o?: { readonly user?: boolean }): FillCounts | null;
   /** Bulk (QB5): one input in every cell of the block, origin `bulk`; null without a block. */
   apply(input: CellInput): FillCounts | null;
+  /** The one way a fill may go (`fill({ along })`, 1.1.0); absent: both (Phase 9: the cell menu's items follow it). */
+  readonly along?: 'row' | 'column';
+  /** Whether Ctrl+R (`end`) or Ctrl+D would be taken now, nothing done (Phase 9: the cell menu's items disabled). */
+  can?(end: boolean): boolean;
 }
 export interface FillFeature extends GridFeature {
   /** The fill of a grid this feature is set up on; null before its setup and after it is destroyed. */
@@ -162,7 +166,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
        * Ctrl+D (`end` false) and Ctrl+R (fill.md 16, S12-Q6): two data rows (columns) or more, the first copied into the
        * others; one, the previous data row (visible column) copied in; nothing before it: null (the key is the browser's).
        */
-      const copy = (end: boolean, via: Via): FillCounts | null => {
+      const copy = (end: boolean, via: Via, dry?: boolean): FillCounts | null => {
         const x = source();
         const b = boxOf(x);
         if (!b || !ed() || ax == (end ? 'column' : 'row')) return null;
@@ -183,7 +187,7 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
             s = { ...b, top: i, bottom: i };
           }
         }
-        return write(planFill(s, t, end ? 'end' : 'down', d, columns.visible(), { ctx: g.ctx, reader: kernel.reader, mode: 'copy' }), 'fill', via, 'fill.filled');
+        return dry ? ({} as FillCounts) : write(planFill(s, t, end ? 'end' : 'down', d, columns.visible(), { ctx: g.ctx, reader: kernel.reader, mode: 'copy' }), 'fill', via, 'fill.filled');
       };
       /** Bulk (QB5, fill.md 17): one input in every cell of the block; `at` the field's cell, which must be in it. */
       const bulk = (at: CellAddr | null, input: CellInput | undefined, via: Via) => {
@@ -391,6 +395,8 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
         },
         down: (x) => copy(false, x?.user ? 'user' : 'api'),
         end: (x) => copy(true, x?.user ? 'user' : 'api'),
+        can: (end: boolean) => !!copy(end, 'api', true),
+        ...((ax == 'row' || ax == 'column') && { along: ax }),
         apply: (input) => {
           const c = bulk(null, input, 'api');
           return c && { filled: c.filled, refused: c.refused, readOnly: c.readOnly };

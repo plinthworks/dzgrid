@@ -105,6 +105,16 @@ export interface ColumnMenuMessages {
   readonly text: { readonly [K in ColumnMenuMessageKey]: MessageValue };
 }
 
+/** The cell menu's texts (`@dzgrid/dom/context-menu`, Phase 9), in their own bundles (`locales/<lang>-context-menu`): optional here, required by `contextMenu()`. */
+export type ContextMenuMessageKey =
+  | 'cmenu.label' | 'cmenu.copy' | 'cmenu.copyHeaders' | 'cmenu.cut' | 'cmenu.paste' | 'cmenu.useCopyKey' | 'cmenu.usePasteKey' | 'cmenu.fillDown' | 'cmenu.fillEnd'
+  | 'cmenu.undo' | 'cmenu.redo' | 'cmenu.expand' | 'cmenu.collapse' | 'cmenu.pinTop' | 'cmenu.pinBottom' | 'cmenu.unpin' | 'cmenu.pinnedTop' | 'cmenu.pinnedBottom' | 'cmenu.unpinned' | 'cmenu.exportCsv';
+/** A cell menu bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_CONTEXT_MENU.text }`. */
+export interface ContextMenuMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in ContextMenuMessageKey]: MessageValue };
+}
+
 /** The pinned rows' texts (`@dzgrid/dom/pinned-rows`, Phase 6 step 8b-1), in their own bundles (`locales/<lang>-pinned`): the names of the two row groups. Optional here, required by `pinnedRows()`. */
 export type PinnedMessageKey = 'pinned.top' | 'pinned.bottom';
 /** A pinned rows bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_PINNED.text }`. */

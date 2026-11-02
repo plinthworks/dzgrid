@@ -4,6 +4,7 @@
 # history: 1.1.0 changes found on the guard's first run (2026-10-29), compatible for callers: required members added to interfaces the grid hands out (LazyControl.sync, GridStateApi.reset, SlotContext.menuItem), inputs widened (SpanInput, MotionEffects.flash); owner to confirm — @dzgrid/dom#SlotContext, @dzgrid/dom/state#GridStateApi, @dzgrid/dom/motion-gsap#MotionEffects
 # history: Owner, 2026-11-01 (« étape 7 », decisions.md): tree({ column, indent }) also take a function; SpanInput.treeColumn a function per row. Inputs widened, nothing removed. — @dzgrid/dom/tree#TreeFeatureOptions
 # history: Owner, 2026-11-01 (decisions.md « Étape 7 »): spans({ acrossLevels }) opt-in; an optional argument added, nothing removed. — @dzgrid/dom/spans#spans
+# history: owner 2026-11-02 (Phase 9 cell menu, decisions.md): tree() returns TreeFeature; MenuItem / MenuEntry generic with today's type as default — nothing removed — @dzgrid/dom/tree#tree, @dzgrid/dom/column-menu#MenuItem, @dzgrid/dom/column-menu#MenuEntry
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -598,7 +599,7 @@
       };
   }
 ## tree
-  export declare function tree<T>(o: TreeFeatureOptions<T>): GridFeature;
+  export declare function tree<T>(o: TreeFeatureOptions<T>): TreeFeature;
 
 @ @dzgrid/dom/tree-lazy
 ## LazyChildren
@@ -1072,11 +1073,11 @@
       say(text: string): void;
   }
 ## MenuEntry
-  export type MenuEntry = MenuItem | {
+  export type MenuEntry<C = MenuContext> = MenuItem<C> | {
       readonly separator: true;
   };
 ## MenuItem
-  export interface MenuItem {
+  export interface MenuItem<C = MenuContext> {
       readonly id: string;
       readonly label: string;
       readonly kind?: 'item' | 'radio' | 'check';
@@ -1086,7 +1087,9 @@
       readonly keys?: string;
       readonly keepOpen?: boolean;
       readonly icon?: string;
-      readonly action?: (c: MenuContext) => void;
+      readonly part?: string;
+      readonly submenu?: readonly MenuEntry<C>[];
+      readonly action?: (c: C) => void;
   }
 ## columnMenu
   export declare function columnMenu(o?: ColumnMenuOptions): ColumnMenuFeature;

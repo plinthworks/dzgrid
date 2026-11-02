@@ -1,0 +1,55 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/menu.css — the menus on their own (Phase 9, docs/behaviors/context-menu.md; context-menu-plan §3): loaded
+// by the applications with the cell menu (`@dzgrid/dom/context-menu`) and no column menu, or with submenus; the same
+// list rules as columns.css (the `_menu-list` partial), plus the submenu's mark: a chevron at the item's inline end (a clipped
+// shape over currentColor), mirrored in right to left; CanvasText in forced colours. Compiled to menu.css (layered) and
+// menu.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when they drift.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@use 'menu-list' as list;
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  @include list.rules;
+
+  .dzg-msub {
+    flex: none;
+    inline-size: 1rem;
+    block-size: 1rem;
+    margin-inline-start: auto;
+    background: currentColor;
+    clip-path: path("M6 3.5l4.5 4.5L6 12.5l-1.1-1.1L8.3 8 4.9 4.6z");
+  }
+
+  .dzg-mkeys + .dzg-msub {
+    margin-inline-start: 0.25rem;
+  }
+
+  [dir=rtl] .dzg-msub {
+    transform: scaleX(-1);
+  }
+
+  @media (forced-colors: active) {
+    @include list.forced;
+
+    .dzg-msub {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+  }
+}

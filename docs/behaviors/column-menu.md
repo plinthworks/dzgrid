@@ -99,8 +99,8 @@ disabled when it cannot act now)
 18. ArrowDown / ArrowUp: next / previous item, wrapping; disabled items stay focusable (APG),
     `aria-disabled="true"`, and do nothing; Home / End: first / last. A printable character moves to the next
     item starting with it (type-ahead, folded as the quick search: case, accents, Arabic hamza forms).
-19. Enter or Space: does the item and closes; a radio item checks and closes. ArrowLeft / ArrowRight: nothing
-    (no submenu in this phase).
+19. Enter or Space: does the item and closes; a radio item checks and closes. ArrowLeft / ArrowRight: nothing,
+    except on an application's item with a submenu (Phase 9, « Shared list » below).
 20. Escape: closes, the focus back on the header (on the button if it was focused). Tab / Shift+Tab: closes
     and the focus goes back to the header (choice 1).
 21. A pointer press outside closes it as Escape (the press's own target then acts).
@@ -188,7 +188,7 @@ language; a column name in another script is isolated (`<bdi>`).
 ## Choices to confirm (not settled by the decisions)
 1. Tab in the menu closes it and goes back to the header (APG would move on to the next element).
 2. A menu sort replaces the whole sort (no « add to the sort » item).
-3. No right-click menu on body cells in this phase (Phase 9's menus).
+3. No right-click menu on body cells in this phase (Phase 9's menus: built, `context-menu.md`).
 
 ## Tests (to be written with the code)
 `packages/dom/test/column-menu.test.ts` (opening ways, one menu, items present / absent / disabled, focus
@@ -256,3 +256,22 @@ Chrome fr light / ar RTL dark, forced colours, 200 % zoom and 320 px, axe 0.
   `menu.<id>.part`); a part of another slot: plain text.
 - Bytes: in `@dzgrid/dom/column-menu` (4 297 / 4 300, measured; the parts' mounter is `@dzgrid/dom/internal`'s shared
   one). Tests: `packages/dom/test/column-menu-item-part.test.ts`, Angular `packages/angular/test/menu-template.test.ts`.
+
+## Shared list (Phase 9, 2026-11-02; `context-menu.md`, `phase-9-steps/context-menu-plan.md` §3)
+- The generic half of the menu — drawing (roles, radio groups, separators, icon, keys' hint, `menuItem` parts), the
+  roving focus, the keys and the type-ahead, running an item, the focus going back, the popup — moved **as is** into
+  `packages/dom/src/menu/list.ts`, exported by `@dzgrid/dom/internal` (`menuList`, not public). The column menu keeps
+  its own half (defaults, ⋮ button, header keys, right-click on headers, `decorateHeader`). Its tests are unchanged.
+- **One menu per grid across both menus**: the list is the grid's; opening the cell menu closes a column menu and back.
+- **Shared opening rules**: Shift+F10 / the Menu key (`menuKey`), a `contextmenu` inside the open menu prevented (the
+  key's own, once the menu holds the focus), the Mac's trailing click swallowed (in the header for this menu, in the
+  body for the cell menu), the focus back where it was outside the grid, else the grid's own.
+- **Submenus** (for the application's items, in both menus): `MenuItem.submenu`; `aria-haspopup="menu"`,
+  `aria-expanded`; opens beside the item toward the inline end (on its start side without room) by the forward arrow
+  (the grid's own reading: ArrowLeft in Arabic), Enter, Space, a click or a 300 ms hover; the back arrow or Escape
+  closes it alone, the focus on its item; an item inside acts and closes everything; a press inside it never closes
+  its parent; its `action` is ignored; `keepOpen` inside a submenu is ignored. The submenu's mark (`.dzg-msub`) is
+  drawn by `@dzgrid/theme/menu.css` (columns.css unchanged: an app giving submenus to the column menu loads it too).
+- `MenuItem`, `MenuEntry` take a context type parameter (`MenuItem<C = MenuContext>`); the column menu's read the same.
+- `@dzgrid/theme/menu.css`: the list's rules (the `_menu-list.scss` partial, also `@use`d by columns.scss) for an app
+  with the cell menu and no column menu.

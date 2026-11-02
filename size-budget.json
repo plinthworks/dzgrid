@@ -232,6 +232,18 @@
       "file": "packages/dom/src/locales/ar-column-menu.ts",
       "maxGzip": 700
     },
+    "@dzgrid/dom/locales/en-context-menu": {
+      "file": "packages/dom/src/locales/en-context-menu.ts",
+      "maxGzip": 350
+    },
+    "@dzgrid/dom/locales/fr-context-menu": {
+      "file": "packages/dom/src/locales/fr-context-menu.ts",
+      "maxGzip": 400
+    },
+    "@dzgrid/dom/locales/ar-context-menu": {
+      "file": "packages/dom/src/locales/ar-context-menu.ts",
+      "maxGzip": 500
+    },
     "@dzgrid/dom/locales/en-pinned": {
       "file": "packages/dom/src/locales/en-pinned.ts",
       "maxGzip": 120
@@ -312,6 +324,10 @@
       "file": "packages/theme/columns.css",
       "maxGzip": 1200
     },
+    "@dzgrid/theme/menu.css": {
+      "file": "packages/theme/menu.css",
+      "maxGzip": 750
+    },
     "@dzgrid/theme/columns-panel.css": {
       "file": "packages/theme/columns-panel.css",
       "maxGzip": 1000
@@ -342,7 +358,7 @@
     },
     "@dzgrid/dom/popup": {
       "file": "packages/dom/src/popup.ts",
-      "maxGzip": 1650,
+      "maxGzip": 1700,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -437,7 +453,7 @@
     },
     "@dzgrid/dom/tree": {
       "file": "packages/dom/src/tree.ts",
-      "maxGzip": 4080,
+      "maxGzip": 4200,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -548,7 +564,7 @@
     },
     "@dzgrid/dom/fill": {
       "file": "packages/dom/src/fill.ts",
-      "maxGzip": 3150,
+      "maxGzip": 3200,
       "over": "@dzgrid/dom/range",
       "external": [
         "@dzgrid/core",
@@ -576,6 +592,27 @@
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/context-menu": {
+      "file": "packages/dom/src/context-menu.ts",
+      "maxGzip": 2400,
+      "over": "@dzgrid/dom/popup",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "profile: both menus (column and cell, the shared list counted once)": {
+      "files": [
+        "packages/dom/src/column-menu.ts",
+        "packages/dom/src/context-menu.ts"
+      ],
+      "maxGzip": null,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal"
       ]
     },
     "@dzgrid/dom/columns-panel": {
@@ -691,10 +728,11 @@
     },
     "@dzgrid/dom/internal": {
       "file": "packages/dom/src/internal.ts",
-      "maxGzip": 1250,
+      "maxGzip": 3700,
       "external": [
         "@dzgrid/core",
-        "@dzgrid/core/internal"
+        "@dzgrid/core/internal",
+        "../popup.js"
       ]
     },
     "@dzgrid/dom/filters": {

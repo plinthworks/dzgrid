@@ -93,6 +93,10 @@
       "types": "./src/column-menu.ts",
       "default": "./src/column-menu.ts"
     },
+    "./context-menu": {
+      "types": "./src/context-menu.ts",
+      "default": "./src/context-menu.ts"
+    },
     "./columns-panel": {
       "types": "./src/columns-panel.ts",
       "default": "./src/columns-panel.ts"
@@ -300,6 +304,18 @@
     "./locales/ar-column-menu": {
       "types": "./src/locales/ar-column-menu.ts",
       "default": "./src/locales/ar-column-menu.ts"
+    },
+    "./locales/en-context-menu": {
+      "types": "./src/locales/en-context-menu.ts",
+      "default": "./src/locales/en-context-menu.ts"
+    },
+    "./locales/fr-context-menu": {
+      "types": "./src/locales/fr-context-menu.ts",
+      "default": "./src/locales/fr-context-menu.ts"
+    },
+    "./locales/ar-context-menu": {
+      "types": "./src/locales/ar-context-menu.ts",
+      "default": "./src/locales/ar-context-menu.ts"
     },
     "./locales/en-pinned": {
       "types": "./src/locales/en-pinned.ts",

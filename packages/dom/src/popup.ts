@@ -54,6 +54,7 @@ export class PopupHost {
   readonly #dir: () => Dir;
   readonly #scope: Scope;
   readonly #open = new Map<PopupRef, HTMLElement>();
+
   /** Where focus goes when a popup closes and its anchor is gone (the grid's focused cell). */
   fallback: () => void = () => {};
 
@@ -187,9 +188,9 @@ export class PopupHost {
       setPx(el, 'inset-inline-start', fixedInlineStart(r, dir, winInline, box.width + 8));
     } else {
       setPx(el, 'inset-block-start', Math.max(0, Math.min(r.top, winBlock - box.height)));
-      // Beside the anchor, toward the end of the line.
+      // Beside the anchor, toward the end of the line; on its start side when there is no room (a submenu).
       const start = fixedInlineStart(r, dir, winInline, box.width) + r.width;
-      setPx(el, 'inset-inline-start', Math.max(0, Math.min(start, winInline - box.width)));
+      setPx(el, 'inset-inline-start', Math.max(0, start + box.width > winInline ? start - r.width - box.width : start));
     }
   }
 }

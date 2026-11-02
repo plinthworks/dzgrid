@@ -1,4 +1,4 @@
-import { intentFor, problem, type DisplayIndex, type Problem, type RowNode, type FocusPos, type KeyOwner, type RowKey } from '@dzgrid/core';
+import { intentFor, problem, type DisplayIndex, type GridKernel, type Problem, type RowNode, type FocusPos, type KeyOwner, type RowKey } from '@dzgrid/core';
 import { emit, lockColumns } from '@dzgrid/core/internal';
 import { treeColumnProblems, treeShape, type TreeOptions, type TreeRows, type TreeShape } from '@dzgrid/core/tree';
 import type { GridContext } from '../context.js';
@@ -36,6 +36,18 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
   readonly structure?: readonly string[];
 }
 
+/** A grid's tree, for the cell menu (Phase 9) and the application: a row's state, opened or closed as a click. */
+export interface TreeApi {
+  /** A shown parent's state (`fixed`: always open, `fixedOpen`); null for a leaf or a row not shown. */
+  state(key: RowKey): 'open' | 'closed' | 'fixed' | null;
+  /** Opens (`open` true), closes, or toggles a shown parent as a click on its chevron (source `user`, said); false: not one. */
+  toggle(key: RowKey, open?: boolean): boolean;
+}
+export interface TreeFeature extends GridFeature {
+  /** The tree of a grid this feature is set up on; null before its setup and after it is destroyed. */
+  api(grid: { readonly kernel: GridKernel<any, any> }): TreeApi | null;
+}
+
 /**
  * `tree(options)`: the rows as a tree (docs/behaviors/tree-view.md, tree-keys.md, tree-filter.md;
  * WAI-ARIA 1.2 treegrid). Hands `treeShape` from `@dzgrid/core/tree` to the grid's rows at creation;
@@ -48,9 +60,10 @@ export interface TreeFeatureOptions<T> extends TreeOptions<T> {
  * createGrid(host, { rows, getRowId, columns, messages: { ...FR, text: { ...FR.text, ...FR_TREE.text } }, features: [tree({ parentId: (r) => r.parent })] });
  * ```
  */
-export function tree<T>(o: TreeFeatureOptions<T>): GridFeature {
+export function tree<T>(o: TreeFeatureOptions<T>): TreeFeature {
   let s: TreeShape<T> | undefined;
-  return { id: 'tree', shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column as Col, o.indent as Indent ?? 16, o.lazy, s, o.sticky, o.structure ?? (o.path && !o.parentId && !o.children ? null : [])) };
+  const apis = new WeakMap<object, TreeApi>();
+  return { id: 'tree', api: (grid) => apis.get(grid.kernel) ?? null, shape: () => (s = o.lazy ? o.lazy.wrap(treeShape(o), !!o.children) : treeShape(o)) as never, setup: (g) => setup(g, o.column as Col, o.indent as Indent ?? 16, o.lazy, s, o.sticky, o.structure ?? (o.path && !o.parentId && !o.children ? null : []), apis) };
 }
 
 type Rows = TreeRows<unknown>;
@@ -61,7 +74,7 @@ const PAD = 'padding-inline-start';
 const VAR = '--dzg-tree-pad';
 
 /** `lock`: the structure columns; null: the tree column's, followed (a path tree). */
-function setup<T>(g: GridContext<unknown>, column: Col, indent: Indent, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined, sticky = 3, lock: readonly string[] | null = []): FeatureHandle {
+function setup<T>(g: GridContext<unknown>, column: Col, indent: Indent, lazy: LazyChildren<T> | undefined, s: TreeShape<T> | undefined, sticky = 3, lock: readonly string[] | null = [], apis: WeakMap<object, TreeApi>): FeatureHandle {
   const missing = TREE_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`tree: missing ${missing.join(', ')}`);
   const { kernel, el, rowRenderer, doc } = g;
@@ -138,6 +151,20 @@ function setup<T>(g: GridContext<unknown>, column: Col, indent: Indent, lazy: La
     else if (e.expanded) g.live.announce(g.msg('tree.expandedSome', { n: e.rows.length }));
   });
   const lz = lazy?.setup(g, s, say);
+  const api: TreeApi = {
+    state(key) {
+      const d = tree();
+      const i = (d ? d.indexOf(key) : -1) as DisplayIndex;
+      return i < 0 || !d!.childrenAt(i) ? null : fixed(key) ? 'fixed' : d!.expandedAt(i) ? 'open' : 'closed';
+    },
+    toggle(key, open) {
+      const s = api.state(key);
+      // A leaf, a fixed row: false; else as a click on its chevron (`closed` opens).
+      return !!s && s != 'fixed' && (expand([key], open ?? s < 'o'), true);
+    },
+  };
+  apis.set(kernel, api);
+
 
   // The pointer on a parent's toggle opens or closes it, and nothing else (no selection, no row click).
   g.scope.on(el.viewport, 'click', (e) => {
@@ -332,6 +359,7 @@ function setup<T>(g: GridContext<unknown>, column: Col, indent: Indent, lazy: La
     },
     destroy() {
       off();
+      apis.delete(kernel);
       lz?.destroy();
       stack?.clear();
       layer?.remove();

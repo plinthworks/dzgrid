@@ -43,6 +43,7 @@ const domAlias = {
   '@dzgrid/dom/fill': fileURLToPath(new URL('./packages/dom/src/fill.ts', import.meta.url)),
   '@dzgrid/dom/columns': fileURLToPath(new URL('./packages/dom/src/columns.ts', import.meta.url)),
   '@dzgrid/dom/column-menu': fileURLToPath(new URL('./packages/dom/src/column-menu.ts', import.meta.url)),
+  '@dzgrid/dom/context-menu': fileURLToPath(new URL('./packages/dom/src/context-menu.ts', import.meta.url)),
   '@dzgrid/dom/columns-panel': fileURLToPath(new URL('./packages/dom/src/columns-panel.ts', import.meta.url)),
   '@dzgrid/dom/state': fileURLToPath(new URL('./packages/dom/src/state.ts', import.meta.url)),
   '@dzgrid/dom/row-gaps': fileURLToPath(new URL('./packages/dom/src/row-gaps.ts', import.meta.url)),

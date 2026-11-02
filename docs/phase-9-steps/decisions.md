@@ -9,3 +9,31 @@ Started on its own, before Phases 7 and 8 (no dependency on them). Plan: `contex
 - Q-CM4: sizes accepted as estimated in the plan (new `context-menu`, `internal` with the shared menu list, `popup`,
   `tree`, `fill` raises, locales and `menu.css` lines; `column-menu` shrinks). The audit screen (K.8) must not move;
   if it would, the shared code becomes its own entry `@dzgrid/dom/menu`.
+
+## Cell context menu — measures (2026-11-02, built, not committed)
+
+Gzipped, minified, `npm run check:size` (accepted lines applied):
+| Line | Before | Measured | Line now |
+|---|---|---|---|
+| `@dzgrid/dom/internal` (the shared list moved in; the popup host outside it) | 1 201 / 1 250 | 3 609 | 3 700 (granted) |
+| `@dzgrid/dom/popup` (an `inline-end` popup flips; the submenu's press rule lives in the list, 0 B here) | 1 626 / 1 650 | 1 633 | 1 700 (granted) |
+| `@dzgrid/dom/tree` (`api`: state, toggle) | 4 069 / 4 080 | 4 194 | 4 200 (granted 4 150, +2 % rule) |
+| `@dzgrid/dom/fill` (`along`, `can`) | 3 143 / 3 150 | 3 174 | 3 200 (granted) |
+| `@dzgrid/dom/column-menu` (its half only) | 4 297 / 4 300 | 2 963 | 4 300 kept (pinned by a step 12 test) |
+| `@dzgrid/dom/range` (Mac Ctrl press) | 5 037 / 5 200 | 5 050 | 5 200 |
+| `@dzgrid/dom/context-menu` (new) | — | **2 325** | 2 100 (granted) — **over by 225 (+10.7 %): owner** |
+| `locales/{en,fr,ar}-context-menu` (new) | — | 309 / 366 / 444 | 350 / 400 / 500 |
+| `@dzgrid/theme/menu.css` (new: the whole list's rules + the submenu mark) | — | **716** | 500 (granted) — **over by 216: owner** |
+| `columns.css` | 1 111 | 1 111 (byte for byte the same) | 1 200 |
+| DOM base, filters, Angular | 22 432, 10 207, 7 436 | 22 428, 10 207, 7 436 | unchanged |
+| K.8 audit profile | 85 287 | 85 280 | 90 000 — did not move (no `@dzgrid/dom/menu` entry needed) |
+| profile: both menus (recorded) | — | 8 791 | — |
+
+The plan's 1 900 for the cell menu did not count its default items (≈ 650 B gz: the system clipboard, cut's guard,
+pin and unpin); `menu.css` carries the list's rules whole (≈ 600 B), not only the new ones.
+`check:api`: no export removed; « changed » (text) for `tree` (returns `TreeFeature`, a subtype) and for the column
+menu's `MenuItem` / `MenuEntry` (a type parameter with today's type as default, `submenu?` added): `--accept` is the
+owner's.
+- Owner (2026-11-02): `context-menu` line **2 400** (measured 2 325; the default items ≈ 650 B), `@dzgrid/theme/menu.css`
+  **750** (measured 716). `check:api`: accept `tree()` returning `TreeFeature` and the generic `MenuItem` / `MenuEntry`
+  (nothing removed; existing code compiles).

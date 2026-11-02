@@ -151,7 +151,7 @@ describe('the DOM layer’s shape', () => {
 
   it('keeps the popup host out of the base: only the entries import it', () => {
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|editors|editors-list|column-menu|columns-panel)\//.test(relative(SRC, f)) && relative(SRC, f) !== 'popup.ts')
+      .filter((f) => !/^(filters|editors|editors-list|column-menu|columns-panel|context-menu|menu)\//.test(relative(SRC, f)) && relative(SRC, f) !== 'popup.ts')
       .filter((f) => /^import (?!type )[^;]*from '\.{1,2}\/(?:.*\/)?popup\.js'/m.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
@@ -160,9 +160,10 @@ describe('the DOM layer’s shape', () => {
   it('keeps @dzgrid/dom/internal for the feature entries (step 17): slots, filters, search, pagination and the editors (Phase 5 step 5) import it, by name; the base never', () => {
     const named = /^import (?!type )[^;]*from '@dzgrid\/dom\/internal'/m;
     const users = files(SRC).filter((f) => named.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f).split('/')[0]!.replace(/\.ts$/, ''));
-    expect([...new Set(users)].sort()).toEqual(['column-menu', 'editors', 'filters', 'pagination', 'search', 'slots']); // column-menu: its items' parts (Phase 6 step 12)
+    expect([...new Set(users)].sort()).toEqual(['column-menu', 'context-menu', 'editors', 'filters', 'pagination', 'search', 'slots']); // column-menu: its items' parts (Phase 6 step 12); both menus: the shared list (Phase 9)
     // Never by a relative path (a second copy in each bundle), never from the base.
-    const relative_ = files(SRC).filter((f) => !/^internal(\/|\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?internal(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f));
+    // The menus' shared list (Phase 9) is part of the internal entry (exported by it only).
+    const relative_ = files(SRC).filter((f) => !/^(internal(\/|\.ts$)|menu\/list\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?internal(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f));
     expect(relative_).toEqual([]);
     // What it replaced is gone: one copy of each helper.
     const all = files(SRC).map((f) => relative(SRC, f));
@@ -175,8 +176,11 @@ describe('the DOM layer’s shape', () => {
     expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['internal.ts', 'internal/keys.ts', 'internal/lazy.ts', 'internal/mounted.ts', 'internal/settled.ts']);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^internal(\/[^:]+)?\.ts: \.\/(internal\/)?[a-z-]+\.js$/.test(s));
+      .filter((s) => !/: @dzgrid\/core(\/internal)?$/.test(s) && !/^internal(\/[^:]+)?\.ts: \.\/((internal\/)?[a-z-]+|menu\/list)\.js$/.test(s));
     expect(offenders).toEqual([]);
+    // The menus' shared list (Phase 9): the core, the internal folder and the popup host (its own entry, never the base's).
+    const list = [...readFileSync(join(SRC, 'menu/list.ts'), 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]);
+    expect(list.filter((x) => !/^(@dzgrid\/core(\/internal)?|\.\.\/internal\/[a-z-]+\.js|\.\.\/popup\.js)$/.test(x!))).toEqual([]);
   });
 
   it('has the pagination entry reach the base only through the grid’s context, the types and the internal entry (step 17)', () => {

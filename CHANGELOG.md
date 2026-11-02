@@ -5,6 +5,30 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 1.3.0
+
+### Added
+- `@dzgrid/dom/context-menu` (Phase 9, the cell menu): `contextMenu({ use, items, classes, onPin })`. A right-click
+  on a body or pinned-band cell, Shift+F10 or the Menu key on a focused cell, a Mac's Ctrl+click opens a menu: Copy,
+  Copy with headers, Cut, Paste (the system clipboard, asked inside the click; refused: « Use Ctrl+C to copy »), Fill
+  down / right (by `fill({ along })`), Undo / Redo, Expand / Collapse (a tree's parent), Pin to the top / bottom and
+  Unpin (the row copied into the band, `onPin` told), Export to CSV — each only when its feature is in `use` — then the
+  application's `items(ctx, defaults)`. Inside the block it acts on the block; outside, the cell is focused first.
+  Shift+right-click, a finger or a pen, an open editor's field, nothing to offer: the browser's own menu.
+  `api(grid)`: `open({ row, column }, point?)`, `close()`, `current()`. Texts `locales/{en,fr,ar}-context-menu`; look
+  `@dzgrid/theme/menu.css` (+ `menu.unlayered.css`, `menu.scss`). Behaviour sheet `docs/behaviors/context-menu.md`.
+- Submenus in both menus: a `MenuItem` with `submenu` opens beside it toward the inline end (the forward arrow —
+  ArrowLeft in Arabic —, Enter, Space, a click, a 300 ms hover); the back arrow or Escape closes it alone.
+- `tree()` returns a `TreeFeature` with `api(grid)`: `state(key)` and `toggle(key, open?)` (as a click on the chevron).
+- `FillApi.along` and `FillApi.can(end)` (optional members): the fill's one way, and whether Ctrl+D / Ctrl+R would act.
+- `SlotContext['menuItem']` gains `row?` and `menu?` (`'column'` or `'cell'`).
+
+### Changed
+- The column menu's list moved into a shared module (`@dzgrid/dom/internal`, not public): one menu per grid across
+  the column menu and the cell menu. The column menu's behaviour and `columns.css` are unchanged.
+- A popup placed `inline-end` flips to the start side when there is no room (a submenu at the window's edge).
+- A Mac's Ctrl+click on a cell no longer starts a block of cells (it is the right-click).
+
 ## [1.2.0] - 2026-11-02
 
 A minor: nothing of 1.1.0 is removed or narrowed (`npm run check:api` against the published surface).

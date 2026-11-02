@@ -1002,3 +1002,14 @@ Also seen, nothing to add: grid context for parts (`context`), saving open rows 
 rows stay out of `GridState` by Q-S1), header component, two label renderers in one cell part, row classes, no
 column moving, no row animation. To check when the screen is built: the keys DzGrid gives a path tree's filler rows
 versus the ids the app saves today.
+
+## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
+
+- [x] **The cell menu** (`docs/phase-9-steps/context-menu-plan.md`, owner Q-CM1 A, Q-CM2 A, Q-CM3 A, Q-CM4) — built
+  2026-11-02, not committed: `@dzgrid/dom/context-menu` over the column menu's list moved into `@dzgrid/dom/internal`
+  (`menu/list.ts`: one menu per grid, submenus), `popup` (an `inline-end` popup flips), `range/pointer.ts` (a Mac's
+  Ctrl+click is no block press), `tree().api`, `FillApi.along` / `can`, `menu.css`. Tests: `context-menu{,-block,
+  -items,-clipboard,-app}` (63), Angular `context-menu-template`, theme `menu`; every column-menu test unchanged and
+  green; 9 planted faults caught. Browsers: Chrome, Firefox, WebKit, fr light and ar dark, 82 checks on a local page
+  (`playground/cell-menu-check.html`, not committed). Sizes in `phase-9-steps/decisions.md`; two lines over their
+  grant (`context-menu` 2 325 / 2 100, `menu.css` 716 / 500) and the `check:api` changes wait for the owner.

@@ -6,6 +6,7 @@
  *   range.scss    → range.css (layered) and range.unlayered.css ($layered: false), Phase 5 step 11a
  *   fill.scss     → fill.css and fill.unlayered.css, Phase 5 step 12
  *   columns.scss  → columns.css and columns.unlayered.css, Phase 6 step 2
+ *   menu.scss     → menu.css and menu.unlayered.css, Phase 9 (the menus' list and submenus; _menu-list.scss shared with columns.scss)
  *   columns-panel.scss → columns-panel.css and columns-panel.unlayered.css, Phase 6 step 4 (owner Q4-2)
  *   pinned-rows.scss → pinned-rows.css and pinned-rows.unlayered.css, Phase 6 step 8b-1 (owner Q2)
  *   print.scss    → print.css and print.unlayered.css, Phase 6 step 11 (the print table)
@@ -23,7 +24,7 @@ const out = (source, file) => {
   writeFileSync(`${dir}${file}`, `${css}\n`);
   console.log(`build:theme: ${file}`);
 };
-for (const name of ['dzgrid', 'contrast', 'edit', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows']) {
+for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows']) {
   out(`@use "${name}";`, `${name}.css`);
   out(`@use "${name}" with ($layered: false);`, `${name}.unlayered.css`);
 }

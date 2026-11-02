@@ -56,7 +56,7 @@ const SIZE_CEILINGS = {
   // Owner « set include only » (2026-10-29): the set chunk 4 250 → 4 350 (`exclude: false`: the list without its exclude mode).
   '@dzgrid/dom/filters: set (lazy)': 4500, // owner step 16 (2026-10-29, « ok pour les hausses »): 4 350 → 4 500 (`start: 'empty'`, `selectAll: false`; measured 4 467)
   '@dzgrid/dom/filters: date adapters (lazy)': 2850, // the owner's third look (2026-10-27, « Comfort stylesheet »): 2 800 → 2 850 (the FROM / TO input fills its field)
-  '@dzgrid/dom/tree': 4080, // « étape 7 » (owner 2026-11-01, measured 4 069: the tree column and indent per row); owner step 14/15 (2026-10-29): 3 850 → 3 950 (tree({ fixedOpen }), then step 15's spans and gaps); owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
+  '@dzgrid/dom/tree': 4200, // Phase 9 cell menu (owner Q-CM4, 2026-11-02): 4 150 granted, 4 200 by the +2 % rule (the tree's `api`: state and toggle, measured 4 194); « étape 7 » (owner 2026-11-01, measured 4 069: the tree column and indent per row); owner step 14/15 (2026-10-29): 3 850 → 3 950 (tree({ fixedOpen }), then step 15's spans and gaps); owner S8-O1 (2026-10-24): 3 700 → 3 800 (tree({ structure }), the field after the chevron, the edited name said); Q9-5 (2026-10-27): 3 850 (the sticky copies capped in pixels)
   '@dzgrid/dom/tree-lazy': 1000,
   '@dzgrid/dom/parts': 800, // Phase 5 close Q-C3 (2026-10-26): 700 → 800 by the close rule (the measure 689 + 10 %), accepted
   '@dzgrid/dom/detail': 4150, // owner S8-O3 (2026-10-24): 3 900 → 4 000 (a nested grid kept alive while it saves); S8-O7: → 4 150 (kept while refused, let go with its master or the grid around)
@@ -68,7 +68,7 @@ const SIZE_CEILINGS = {
   // 2 600), @dzgrid/dom/internal at its measure + 50 up to 1 250 (the filters' loader moved in, not copied).
   '@dzgrid/dom/editors': 6720, // owner S7-O1 (2026-10-24): 6 500 → 6 650 (retry, a row gone while edited); QB5 (Part B, step 12): → 6 720 (bulk edit by Ctrl+Enter)
   '@dzgrid/dom/editors: calendar (lazy)': 1520, // feedback pass Q1 (owner, 2026-10-27): the lazy kits by the strict need (tzslot's lazy entry: the chunk's `ready`, measured 1 519)
-  '@dzgrid/dom/internal': 1250,
+  '@dzgrid/dom/internal': 3700, // Phase 9 cell menu (owner Q-CM4, 2026-11-02): 1 250 → 3 700, the menus' shared list moved in (the popup host outside it)
   // Owner S6-O7 (2026-10-24): the list in its own entry, over the popup: its measure (1 254) + 10 %.
   '@dzgrid/dom/editors-list': 1400,
   // Phase 5 Q16 (written grant): the motion run chunk up to 3 500 (step 7: the saves' reasons, the saved flash).
@@ -98,7 +98,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/range.css': 500,
   // Owner S12-Q1, S12-Q4 (2026-10-25): the fill handle, Ctrl+D / R, the fill mode and bulk's seam in their own entry over
   // dom/range; their texts and styles apart (the -range texts and range.css are full).
-  '@dzgrid/dom/fill': 3150, // owner S12-Q9 (2026-10-25): 1 600 → 3 000 (measured 2 729); Phase 6 step 8b-2 (owner Q1, 2026-10-27): up to ~3 150 for the fill in the pinned bands (measured 3 042, line 3 100)
+  '@dzgrid/dom/fill': 3200, // Phase 9 cell menu (owner Q-CM4, 2026-11-02): 3 150 → 3 200 (`along`, `can`); owner S12-Q9 (2026-10-25): 1 600 → 3 000 (measured 2 729); Phase 6 step 8b-2 (owner Q1, 2026-10-27): up to ~3 150 for the fill in the pinned bands (measured 3 042, line 3 100)
   '@dzgrid/dom/locales/en-fill': 250,
   '@dzgrid/dom/locales/fr-fill': 300,
   '@dzgrid/dom/locales/ar-fill': 380,
@@ -115,6 +115,12 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/en-column-menu': 500, // Q3-5: 450 → 500
   '@dzgrid/dom/locales/fr-column-menu': 600, // Q3-5: 550 → 600
   '@dzgrid/dom/locales/ar-column-menu': 700, // Q3-5: 650 → 700
+  // Phase 9, the cell menu (owner Q-CM4, 2026-11-02): over the popup host, the shared list in the internal entry; its texts in their own bundles; its look in menu.css.
+  '@dzgrid/dom/context-menu': 2400, // owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
+  '@dzgrid/dom/locales/en-context-menu': 350,
+  '@dzgrid/dom/locales/fr-context-menu': 400,
+  '@dzgrid/dom/locales/ar-context-menu': 500,
+  '@dzgrid/theme/menu.css': 750, // owner 2026-11-02: 500 → 750 (measured 716; the list's rules whole)
   // Phase 6 step 4 (owner Q-B, Q4-1, Q4-2, Q4-4): the column chooser over the popup host (4 000, up to 4 400 if needed);
   // its texts in the -columns bundles (500 / 600 / 800 kept), its look in its own columns-panel.css (measure + 10 %, ≤ 1 000).
   '@dzgrid/dom/columns-panel': 4400, // Q4-4: up to 4 400 used at the review of steps 3–4 (its own live status, auto-scroll loop: measured 4 282)

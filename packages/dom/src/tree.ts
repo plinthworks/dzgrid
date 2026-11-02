@@ -4,5 +4,5 @@
  * texts come in their own bundles (`locales/<lang>-tree`).
  */
 export { tree, TREE_KEYS } from './tree/index.js';
-export type { TreeFeatureOptions } from './tree/index.js';
+export type { TreeApi, TreeFeature, TreeFeatureOptions } from './tree/index.js';
 export type { TreeMessageKey, TreeMessages } from './part-texts.js';

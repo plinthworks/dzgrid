@@ -106,7 +106,8 @@ export function pointer(g: GridContext<unknown>, sel: Sel, drag: boolean): { sto
   scope.on(el.viewport, 'pointerdown', (e: PointerEvent) => {
     swallow = false;
     // The mouse only: a finger and a pen scroll the view (a pen drag would scroll and select at once; review 2).
-    const a = e.isPrimary && e.button === 0 && e.pointerType === 'mouse' ? cellOf(e.target) : null;
+    // A Mac's Ctrl+click is a right-click (the menu's): never a block press (context-menu.md 7).
+    const a = e.isPrimary && e.button === 0 && e.pointerType === 'mouse' && !(g.mac && e.ctrlKey) ? cellOf(e.target) : null;
     if (!a) return;
     id = e.pointerId;
     last = e;
