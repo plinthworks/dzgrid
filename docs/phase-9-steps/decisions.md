@@ -127,3 +127,14 @@ Gzipped, minified (`npm run check:size`), the accepted lines applied:
 After the status bar: **Excel export first**, then find in grid (Ctrl+F), then row grouping (Phase 7) if the
 screens need it; the dock and the filters panel later. The status bar's two points are taken as accepted (no
 objection): `internal` 3 800 (+2 % rule), `SlotContext.status` added (check:api, additive).
+
+## Excel export — owner answers (2026-11-03)
+
+Plan: `excel-plan.md`. Owner: A to Q-X1…Q-X5, sizes accepted (core/xlsx 5 000, Excel DOM chunk 1 100, context-menu
+2 500; export and its run chunk kept).
+- Q-X1 A: dates in the user's Excel format (real Excel dates, sortable and filterable).
+- Q-X2 A: merged values repeated on each row (Excel's sort and filter work); a true merge as an option.
+- Q-X3 A: a tree as Excel's outline groups (+ / −, up to 7 levels), all open.
+- Q-X4 A: an `xlsxStyle` hook filled by the app (no CSS class copying).
+- Q-X5 A: past Excel's limits (1 048 576 rows, 16 384 columns) the export is refused with a clear message.
+The owner opens two reference files (fr, ar) in a real Excel with a checklist.
