@@ -105,6 +105,10 @@
       "types": "./src/find.ts",
       "default": "./src/find.ts"
     },
+    "./filters-panel": {
+      "types": "./src/filters-panel.ts",
+      "default": "./src/filters-panel.ts"
+    },
     "./columns-panel": {
       "types": "./src/columns-panel.ts",
       "default": "./src/columns-panel.ts"
@@ -384,6 +388,18 @@
     "./locales/ar-find": {
       "types": "./src/locales/ar-find.ts",
       "default": "./src/locales/ar-find.ts"
+    },
+    "./locales/en-filters-panel": {
+      "types": "./src/locales/en-filters-panel.ts",
+      "default": "./src/locales/en-filters-panel.ts"
+    },
+    "./locales/fr-filters-panel": {
+      "types": "./src/locales/fr-filters-panel.ts",
+      "default": "./src/locales/fr-filters-panel.ts"
+    },
+    "./locales/ar-filters-panel": {
+      "types": "./src/locales/ar-filters-panel.ts",
+      "default": "./src/locales/ar-filters-panel.ts"
     }
   },
   "peerDependencies": {

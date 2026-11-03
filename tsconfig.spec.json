@@ -131,6 +131,9 @@
       "@dzgrid/dom/find": [
         "./packages/dom/src/find.ts"
       ],
+      "@dzgrid/dom/filters-panel": [
+        "./packages/dom/src/filters-panel.ts"
+      ],
       "@dzgrid/dom/columns-panel": [
         "./packages/dom/src/columns-panel.ts"
       ],

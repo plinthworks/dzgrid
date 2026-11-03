@@ -203,3 +203,21 @@ Added to 1.4.0, before the dock. A A:
 Content: the filterable columns with a column search; each unfolds to its full filter (the popup's forms, conditions
 and value lists included); a dot on active filters; « Effacer tous les filtres » at the top. Keyboard, screen reader,
 RTL.
+
+## Filters panel — measures (2026-11-03, built, not committed)
+
+| Line | Measured | Line |
+|---|---|---|
+| `@dzgrid/dom/filters-panel` (new, over the DOM base) | 2 957 | 3 250 (measure + 10 %) |
+| `locales/{en,fr,ar}-filters-panel` (new) | 197 / 224 / 270 | 250 / 250 / 300 |
+| `@dzgrid/theme/filters-panel.css` (new) | 593 | 700 |
+| `@dzgrid/dom/filters` / `filters-base` (the bridge on the handle) | 11 929 → 11 950 / 11 886 → 11 907 | 12 000 kept |
+| K.8 audit profile | 87 657 → 87 678 | 90 000 kept |
+
+- Lead decisions: the panel reaches the popup's forms through `filters()`'s handle (`resolve`, `commit`, `apply`), typed
+  by shape on the panel's side: no filter code in its bundle, so no `filters-panel-base`; the panel sits inside the
+  grid's root (the root's padding on its side), not in a frame around it, so an app's `#host > .dzg` rule keeps
+  working; a strip button by default (`button: false` for an app's own); Apply keeps the form open (a panel is not a
+  popup); « Effacer tous les filtres » also empties the quick search, as the menus' item; hidden columns are listed.
+- `check:api`: additions only (`@dzgrid/dom/filters-panel`, `FiltersPanelMessageKey`, `PartBase.msg` keys).
+

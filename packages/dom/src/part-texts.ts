@@ -171,3 +171,14 @@ export interface FindMessages {
   readonly locale: string;
   readonly text: { readonly [K in FindMessageKey]: MessageValue };
 }
+
+/**
+ * The filters panel's texts (`@dzgrid/dom/filters-panel`, Phase 9, filters-panel.md), in their own bundles
+ * (`locales/<lang>-filters-panel`): optional here, required by `filtersPanel()`. `{n}` a number.
+ */
+export type FiltersPanelMessageKey = `fpanel.${'title' | 'close' | 'clearAll' | 'search' | 'none' | 'matches' | 'active' | 'count'}`;
+/** A filters panel bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_FILTERS_PANEL.text }`. */
+export interface FiltersPanelMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in FiltersPanelMessageKey]: MessageValue };
+}

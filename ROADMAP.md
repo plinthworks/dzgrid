@@ -1005,6 +1005,16 @@ versus the ids the app saves today.
 
 ## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
 
+- [x] **The filters panel** (owner answers, `phase-9-steps/decisions.md` « Filters panel — owner answers
+  (2026-11-03) ») — built 2026-11-03, not committed (1.4.0, unreleased): sheet `docs/behaviors/filters-panel.md`, a11y
+  protocol §25; `@dzgrid/dom/filters-panel` (`filtersPanel({ side, open, button })`, `api(grid)`), the popup's forms
+  mounted as parts through a small bridge on the `filters()` handle (no filter code bundled twice, no `filters-panel-base`
+  needed), texts `locales/{en,fr,ar}-filters-panel`, `@dzgrid/theme/filters-panel.css`. Tests `filters-panel` (21),
+  theme 5, Angular 1; 10 planted faults caught (one survivor: a redundant guard, removed). Browsers: Chrome, Firefox,
+  WebKit, fr / ar, start / end, light / dark, 360 px, the columns dialog beside it, axe 0 (local
+  `playground/panel-check.html`, not committed); found there: the strip's vertical button, nested form grids too wide
+  for tzslot's field, WebKit's click without focus (fixed, the last with a test). Sizes in decisions.md « Filters
+  panel — measures ». Next: the dock V1 (D0); the panel registers there unchanged for apps.
 - [x] **Find in the grid (Ctrl+F) and « Effacer tous les filtres »** (owner answers, `phase-9-steps/decisions.md` « Find
   in grid — owner answers (2026-11-03) ») — built 2026-11-03, not committed: sheet `docs/behaviors/find.md`;
   `@dzgrid/dom/find` (`find({ debounceMs })`, `api(grid)`: `open`, `close`, `next`, `previous`, `state`), texts

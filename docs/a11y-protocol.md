@@ -1001,3 +1001,24 @@ et par langue.
 
 Règle de décision : une phrase dite deux fois ou dite sans demande (176, 177), un focus perdu (177) se corrigent
 avant la clôture de la Phase 9.
+
+## 25. Étapes — panneau des filtres (Phase 9)
+
+Page : une grille avec `filters({ maxConditions: 2 })` et `filtersPanel()`, une colonne texte, une de nombres, une de
+jours, une liste de valeurs, en **français** puis en **arabe** (droite à gauche). Fiche :
+`docs/behaviors/filters-panel.md`. Couples A (NVDA + Firefox) et C (VoiceOver + Safari). Durée estimée : 15 min par
+couple et par langue.
+
+179. **Le bouton.** Tab jusqu'au bouton « Filtres » au bord de la grille : nom et état (« réduit ») dits ; `Entrée` :
+     le panneau s'ouvre, le focus dans « Chercher une colonne » ; la région « Filtres » se trouve dans la liste des
+     régions du lecteur.
+180. **La liste.** `↓` : le premier bouton de colonne, son nom et « réduit » ; une colonne filtrée dit « Nom filtre
+     actif » ; `↑ ↓`, `Début`, `Fin` passent d'une colonne à l'autre ; `Entrée` déplie, l'état « développé » est dit.
+181. **Le formulaire.** Tab entre dans le formulaire de la colonne (le même que la fenêtre du filtre, groupe nommé par
+     la colonne) ; une valeur tapée filtre après la pause et le nombre de lignes est dit une fois ; `Échap` revient au
+     bouton de la colonne, le panneau reste ouvert.
+182. **Effacer tout.** « Effacer tous les filtres » : le nombre de lignes dit une fois ; sans filtre, le bouton est dit
+     « indisponible » et ne fait rien. × ferme le panneau, le focus revient sur « Filtres ».
+
+Règle de décision : un focus perdu (179, 181, 182), un état non dit (180) ou une phrase dite deux fois (181, 182) se
+corrigent avant la clôture de la Phase 9.

@@ -34,6 +34,19 @@ A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
   loaded page only, said in the bar. `api(grid)`: `open(text?)`, `close()`, `next()`, `previous()`, `state()`. Texts
   `locales/{en,fr,ar}-find`; look `@dzgrid/theme/find.css` (`--dzg-find-color`, a hue apart from the selection, the
   flash and the new rows).
+- **Filters panel** (Phase 9, `docs/behaviors/filters-panel.md`, owner answers 2026-11-03): `@dzgrid/dom/filters-panel`,
+  `filtersPanel({ side, open, button })` beside `filters()` (or `filters-base`: it names no date kit, so no
+  `@tzslot/*`). A side panel inside the grid's box at the side the application chose (logical: `end` is the left in
+  right to left), the rows, headers, find bar and footer taking the room left; a strip with a « Filtres » button and
+  the count of active filters; on a narrow screen the open panel covers the rows. The panel (a `region`): ×,
+  « Effacer tous les filtres » (the filters and the quick search, the sort kept; `aria-disabled` with nothing to
+  clear), a column search (case and accents ignored), every filterable column (hidden ones too) unfolding to the
+  popup's own form (conditions, match case, value list, dates), a dot on active filters heard in the button's name.
+  Apply as `filters({ apply })`; folding applies what is pending. In step with the popup, the floating row, the API
+  and a restored state. Keys: ↑ ↓ Home End between columns, ↓ from the search, Escape back to the column. `api(grid)`:
+  `open(column?)`, `close()`, `toggle()`, `isOpen`. Texts `locales/{en,fr,ar}-filters-panel`; look
+  `@dzgrid/theme/filters-panel.css` (`--dzg-fpanel-size`, `--dzg-fstrip-size`). Its body is apart from where it stands,
+  ready for the dock.
 - The column menu and the cell menu: « Effacer tous les filtres » while a column filter or the quick search is on; it
   does what `clearFilters()` does. Its keys `menu.clearFilters` and `cmenu.clearFilters` are in our bundles and
   optional in an application's own (missing: no item).

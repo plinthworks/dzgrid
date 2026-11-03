@@ -273,6 +273,18 @@
       "file": "packages/dom/src/locales/ar-find.ts",
       "maxGzip": 300
     },
+    "@dzgrid/dom/locales/en-filters-panel": {
+      "file": "packages/dom/src/locales/en-filters-panel.ts",
+      "maxGzip": 250
+    },
+    "@dzgrid/dom/locales/fr-filters-panel": {
+      "file": "packages/dom/src/locales/fr-filters-panel.ts",
+      "maxGzip": 250
+    },
+    "@dzgrid/dom/locales/ar-filters-panel": {
+      "file": "packages/dom/src/locales/ar-filters-panel.ts",
+      "maxGzip": 300
+    },
     "@dzgrid/dom/locales/en-pinned": {
       "file": "packages/dom/src/locales/en-pinned.ts",
       "maxGzip": 120
@@ -380,6 +392,10 @@
     "@dzgrid/theme/find.css": {
       "file": "packages/theme/find.css",
       "maxGzip": 550
+    },
+    "@dzgrid/theme/filters-panel.css": {
+      "file": "packages/theme/filters-panel.css",
+      "maxGzip": 700
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
@@ -662,6 +678,16 @@
     "@dzgrid/dom/find": {
       "file": "packages/dom/src/find.ts",
       "maxGzip": 2650,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/filters-panel": {
+      "file": "packages/dom/src/filters-panel.ts",
+      "maxGzip": 3250,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",

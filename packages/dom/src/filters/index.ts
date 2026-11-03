@@ -190,7 +190,9 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   const midnight = clockwork(g);
   // A header part's filter (step 21): the shared edits, one object per column while what it holds stays.
   const heads = new Map<string, { readonly k: readonly unknown[]; readonly f: HeaderFilter }>();
-  const handle: FeatureHandle = {
+  // What the filters panel (`@dzgrid/dom/filters-panel`) reaches: the forms' parts, the shared edits, `apply`.
+  const handle: FeatureHandle & { readonly panel: object } = {
+    panel: { resolve, commit, apply: o.apply },
     filter: {
       edits(col, who) {
         const r = resolve(col, 'filter');

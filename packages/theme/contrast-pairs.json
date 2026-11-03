@@ -203,7 +203,10 @@
     { "what": "the find marks a hue apart from the value flash: 60° at least", "fg": "--dzg-flash-color", "bg": "--dzg-find-color", "min": 1, "hue": 60 },
     { "what": "the find marks a hue apart from the new rows: 60° at least", "fg": "--dzg-find-color", "bg": "--dzg-fresh-color", "min": 1, "hue": 60 },
     { "what": "find bar text", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 4.5 },
-    { "what": "find field text", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 }
+    { "what": "find field text", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "filters panel: « Clear all filters » and the active count (Phase 9, filters-panel.css)", "fg": "--tz-accent", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "filters panel: a column button, hovered or open", "fg": "--tz-fg", "bg": "--tz-bg-raised", "min": 4.5 },
+    { "what": "filters panel: the dot of an active filter, on an open column", "fg": "--tz-accent", "bg": "--tz-bg-raised", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",

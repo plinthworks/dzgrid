@@ -217,7 +217,19 @@ describe('1.3.0, the four packages', () => {
     expect(build).toMatch(/'\.\/locales\/ar-status', '\.\/locales\/en-find', '\.\/locales\/fr-find', '\.\/locales\/ar-find'/);
     const theme = pkg('theme');
     for (const f of ['find.css', 'find.unlayered.css', 'find.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fresh-rows', 'find'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fresh-rows', 'find'[,\]]/); // the filters panel's after it
+  });
+
+  it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./filters-panel']).toEqual({ types: './src/filters-panel.ts', default: './src/filters-panel.ts' });
+    for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-filters-panel`]).toEqual({ types: `./src/locales/${g}-filters-panel.ts`, default: `./src/locales/${g}-filters-panel.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/find', '\.\/filters-panel'/);
+    expect(build).toMatch(/'\.\/locales\/ar-find', '\.\/locales\/en-filters-panel', '\.\/locales\/fr-filters-panel', '\.\/locales\/ar-filters-panel'/);
+    const theme = pkg('theme');
+    for (const f of ['filters-panel.css', 'filters-panel.unlayered.css', 'filters-panel.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'find', 'filters-panel'\]/);
   });
 
   it('keep gsap and tzslot optional peers', () => {

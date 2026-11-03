@@ -133,6 +133,12 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-find': 250,
   '@dzgrid/dom/locales/ar-find': 300,
   '@dzgrid/theme/find.css': 550,
+  // Phase 9 filters panel (filters-panel.md): the side panel over the DOM base, its -filters-panel texts, filters-panel.css; new lines at their measure + 10 %.
+  '@dzgrid/dom/filters-panel': 3250,
+  '@dzgrid/dom/locales/en-filters-panel': 250,
+  '@dzgrid/dom/locales/fr-filters-panel': 250,
+  '@dzgrid/dom/locales/ar-filters-panel': 300,
+  '@dzgrid/theme/filters-panel.css': 700,
   '@dzgrid/theme/menu.css': 750, // owner 2026-11-02: 500 → 750 (measured 716; the list's rules whole)
   // Phase 6 step 4 (owner Q-B, Q4-1, Q4-2, Q4-4): the column chooser over the popup host (4 000, up to 4 400 if needed);
   // its texts in the -columns bundles (500 / 600 / 800 kept), its look in its own columns-panel.css (measure + 10 %, ≤ 1 000).
