@@ -74,3 +74,10 @@ and column fields, optional keys in the filter bundles).
 - Owner (2026-11-02): cost too high for now — **1.3.0 = the cell context menu + filters part 1 (F0–F2)**. The
   advanced filter (F3–F6, ≈ 8 sessions) is postponed until the owner's backend can read a multi-column rule.
 - 1.3.0 (2026-11-02): the real Angular example's line 95 500 → 97 400 under the +2 % rule (measured 97 173 gz; the context menu and the condition rows).
+
+## Next in Phase 9 (owner, 2026-11-03)
+
+Order: **status bar** first, then the **filters panel** (added to Phase 9: every column's filter in one side panel,
+the same forms as the popups), the **Excel export**, then **row dragging**. Owner wish for the panels: dockable like an
+editor's tool windows — anchored at the start or the end side, at the bottom, or floating. To plan with the status
+bar (owner questions first).
