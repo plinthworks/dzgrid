@@ -193,3 +193,13 @@ A to all, and the bar is opt-in:
   colour `color-mix(accent 40 %, danger)`, own colours in Clinic, Bootstrap and more contrast (checked 60° apart).
 - `check:api`: additions only (`@dzgrid/dom/find`, `FindMessageKey`, `ClearFiltersKey`, `PartBase.msg` keys).
 - Owner (2026-11-03): context-menu 2 560 and fr-context-menu 420 accepted (find + « Effacer tous les filtres »).
+
+## Filters panel — owner answers (2026-11-03)
+
+Added to 1.4.0, before the dock. A A:
+- A side panel like the columns panel (side chosen by the app, a button to open and close it); next to the columns
+  panel when both are used, or the app shows one; it becomes dockable later without app changes.
+- Apply as the popups do: `filters({ apply: 'button' })` → an « Appliquer » button; otherwise at each change.
+Content: the filterable columns with a column search; each unfolds to its full filter (the popup's forms, conditions
+and value lists included); a dot on active filters; « Effacer tous les filtres » at the top. Keyboard, screen reader,
+RTL.
