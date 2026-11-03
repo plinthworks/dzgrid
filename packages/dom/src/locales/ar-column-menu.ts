@@ -1,4 +1,8 @@
-import type { ColumnMenuMessages } from '../part-texts.js';
+import type { MessageValue } from '../messages.js';
+import type { ClearFiltersKey, ColumnMenuMessages } from '../part-texts.js';
+
+/** « Clear all filters » (Phase 9): optional in an application's own bundle (`ClearFiltersKey`). */
+const CLEAR: { readonly [K in ClearFiltersKey]?: MessageValue } = { 'menu.clearFilters': "مسح كل المرشحات" };
 
 /** العربية، نصوص قائمة العمود (`@dzgrid/dom/column-menu`): تُضاف إلى رسائل الجدول، `text: { ...AR.text, ...AR_COLUMN_MENU.text }`. */
 export const AR_COLUMN_MENU = {
@@ -38,5 +42,6 @@ export const AR_COLUMN_MENU = {
     'density.comfortable': "عادية",
     'density.spacious': "واسعة",
     'density.changed': "الكثافة: {density}",
+    ...CLEAR,
   },
 } satisfies ColumnMenuMessages;

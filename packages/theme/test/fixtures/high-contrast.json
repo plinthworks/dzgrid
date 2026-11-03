@@ -18,7 +18,8 @@
         "--dzg-range-edge": "#14532d",
         "--dzg-refused-color": "#8b0000",
         "--dzg-flash-color": "#6b3a00",
-        "--dzg-fresh-color": "#14532d"
+        "--dzg-fresh-color": "#14532d",
+        "--dzg-find-color": "#a3006b"
       },
       "dark": {
         "bg": "#000000",
@@ -35,7 +36,8 @@
         "--dzg-range-edge": "#ffffff",
         "--dzg-refused-color": "#ff6b9e",
         "--dzg-flash-color": "#86efac",
-        "--dzg-fresh-color": "#d0b3ff"
+        "--dzg-fresh-color": "#d0b3ff",
+        "--dzg-find-color": "#ff80b0"
       }
     }
   ]

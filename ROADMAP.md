@@ -1005,6 +1005,15 @@ versus the ids the app saves today.
 
 ## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
 
+- [x] **Find in the grid (Ctrl+F) and « Effacer tous les filtres »** (owner answers, `phase-9-steps/decisions.md` « Find
+  in grid — owner answers (2026-11-03) ») — built 2026-11-03, not committed: sheet `docs/behaviors/find.md`;
+  `@dzgrid/dom/find` (`find({ debounceMs })`, `api(grid)`: `open`, `close`, `next`, `previous`, `state`), texts
+  `locales/{en,fr,ar}-find`, `@dzgrid/theme/find.css` (magenta marks: the accent mixed with the danger; Clinic,
+  Bootstrap and more contrast give their own); the menus' item (optional keys `menu.clearFilters`,
+  `cmenu.clearFilters`). Tests `find` (24), `menus-clear-filters` (7), theme `find` (6), Angular 1; 14 planted faults
+  caught. Browsers: Chrome, Firefox, WebKit, fr and ar, light and dark, axe 0, a tree (local
+  `playground/find-check.html`, not committed). Sizes in decisions.md « Find in grid — measures »; two lines above the
+  2 % rule wait for the owner.
 - [x] **The Excel export X0–X5** (`docs/phase-9-steps/excel-plan.md`, owner A to Q-X1…Q-X5) — built 2026-11-03, not
   committed (1.4.0, unreleased): sheet `xlsx-export.md`; conformance `xlsx/` (36, by hand, read back with node's zlib
   and jsdom's DOMParser); `@dzgrid/core/xlsx` (zip, CRC, UTF-8, typed cells, formats, widths, panes, group merges,

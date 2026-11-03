@@ -1,4 +1,5 @@
 import type { FocusPos, KeyOwner, ResolvedColumn, Side } from '@dzgrid/core';
+import { makeQuery } from '@dzgrid/core';
 import { emit, isCellKey } from '@dzgrid/core/internal';
 import type { GridFeature } from '../features.js';
 import { menuKey, menuList, needTexts } from '@dzgrid/dom/internal';
@@ -59,6 +60,7 @@ export interface ColumnMenuFeature extends GridFeature {
 }
 
 type Open = { readonly id: string; readonly dir: string; readonly ctx: object };
+
 
 /**
  * `columnMenu(options)`: the column ⋮ menu (docs/behaviors/column-menu.md; step03-plan; owner Q-M1, Q-M2, Q-K1, Q3-1–Q3-4).
@@ -132,6 +134,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         const filter = g.features.find((x) => x.filter)?.filter?.edits(col, who);
         const chooser = o.use?.chooser?.api(g);
         const now = g.settings.density ?? 'comfortable';
+        // The query with every filter and the search emptied, the sort kept: differs while one is on (find.md 15).
+        const clear = makeQuery({ sort });
         const S: (MenuItem | false | null | undefined)[][] = [
           col.sortable && radios('menu.sort', ['sort.asc', 'sort.desc', 'sort.none'], `sort.${sort.find((s) => s.column === id)?.dir ?? 'none'}`,
             (d) => kernel.dispatch({ type: 'sort.set', sort: d === 'none' ? sort.filter((s) => s.column !== id) : [{ column: id, dir: d as 'asc' }] }, 'user')),
@@ -150,7 +154,9 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
           ],
           cols ? [it('move.start', () => cols.move(id, -1, { say: true }), locked || !at), it('move.end', () => cols.move(id, 1, { say: true }), locked || at === seg.length - 1)] : [],
           fill && range ? [it('fill.down', () => fill.down({ user: true }), noFill, { keys: `${mod}D` }), it('fill.end', () => fill.end({ user: true }), noFill, { keys: `${mod}R` })] : [],
-          [filter?.canOpen && it('filter', () => (L.hand(), filter.openFilter()))],
+          [filter?.canOpen && it('filter', () => (L.hand(), filter.openFilter())), 
+            // « Clear all filters » (find.md 15): while a filter or the search is on, its text given; as `clearFilters()` (the sort kept, one command).
+            clear.key !== kernel.query.key && g.settings.messages.text['menu.clearFilters'] && it('clearFilters', () => kernel.dispatch({ type: 'query.set', query: clear }, 'user'))],
           [
             it('hide', () => (state({ id, hidden: true }), say(text('menu.hidden', id))), def.hideable === false || m.visible().length < 2),
             chooser && it('choose', () => (L.hand(), chooser.open(g.headerRenderer.cell(id) ?? undefined))),

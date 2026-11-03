@@ -1,8 +1,8 @@
 import type { MessageValue } from '../messages.js';
-import type { ContextMenuMessages, ContextMenuXlsxKey } from '../part-texts.js';
+import type { ClearFiltersKey, ContextMenuMessages, ContextMenuXlsxKey } from '../part-texts.js';
 
-/** « Export to Excel » (Phase 9): optional in an application's own bundle (`ContextMenuXlsxKey`). */
-const XLSX: { readonly [K in ContextMenuXlsxKey]?: MessageValue } = { 'cmenu.exportXlsx': "Export to Excel" };
+/** « Export to Excel », « Clear all filters » (Phase 9): optional in an application's own bundle (`ContextMenuXlsxKey`). */
+const XLSX: { readonly [K in ContextMenuXlsxKey | ClearFiltersKey]?: MessageValue } = { 'cmenu.exportXlsx': "Export to Excel", 'cmenu.clearFilters': "Clear all filters" };
 
 /** English, the cell menu's texts (`@dzgrid/dom/context-menu`): added to the grid's messages, `text: { ...EN.text, ...EN_CONTEXT_MENU.text }`. `{keys}`: Ctrl+V, or ⌘V on a Mac. */
 export const EN_CONTEXT_MENU = {

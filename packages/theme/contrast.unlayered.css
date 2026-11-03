@@ -31,6 +31,7 @@
       --dzg-refused-color: light-dark(#8b0000, #ff6b9e);
       --dzg-flash-color: light-dark(#6b3a00, #86efac);
       --dzg-fresh-color: light-dark(#14532d, #d0b3ff);
+      --dzg-find-color: light-dark(#a3006b, #ff80b0);
     }
   }
   [data-contrast=more],
@@ -50,6 +51,7 @@
     --dzg-refused-color: light-dark(#8b0000, #ff6b9e);
     --dzg-flash-color: light-dark(#6b3a00, #86efac);
     --dzg-fresh-color: light-dark(#14532d, #d0b3ff);
+    --dzg-find-color: light-dark(#a3006b, #ff80b0);
   }
 }
 /* Forced colours: the system decides; the grid only says which role each part plays. */

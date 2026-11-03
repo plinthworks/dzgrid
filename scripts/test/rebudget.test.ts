@@ -334,7 +334,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     // Owner Q3-5 (2026-10-26): 3 000 → 4 300 (measured 3 951); texts 450 / 550 / 650 → 500 / 600 / 700.
     expect(ceilingFor('@dzgrid/dom/column-menu')).toBe(4300);
     expect(() => sizeBudget(4301, ceilingFor('@dzgrid/dom/column-menu'))).toThrow(/ceiling/);
-    for (const [lang, c] of [['en', 500], ['fr', 600], ['ar', 700]] as const) {
+    // Phase 9 « Clear all filters » (find.md 15): 500 / 600 / 700 → 510 / 610 / 710 by the 2 % rule.
+    for (const [lang, c] of [['en', 510], ['fr', 610], ['ar', 710]] as const) {
       expect(ceilingFor(`@dzgrid/dom/locales/${lang}-column-menu`), lang).toBe(c);
       expect(() => sizeBudget(c + 1, ceilingFor(`@dzgrid/dom/locales/${lang}-column-menu`)), lang).toThrow(/ceiling/);
     }
@@ -349,7 +350,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     ['en', 'fr', 'ar'].forEach((l, i) => {
       const t = e[`@dzgrid/dom/locales/${l}-column-menu`]!;
       expect(t.file, l).toBe(`packages/dom/src/locales/${l}-column-menu.ts`);
-      expect(t.maxGzip, l).toBe([500, 600, 700][i]!);
+      expect(t.maxGzip, l).toBe([510, 610, 710][i]!); // Phase 9: the 2 % rule
     });
     expect(['@dzgrid/core', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([CORE, DOM]);
   });

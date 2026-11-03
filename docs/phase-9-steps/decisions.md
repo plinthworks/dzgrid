@@ -174,3 +174,22 @@ A to all, and the bar is opt-in:
 - « Effacer tous les filtres »: not in the find bar (searching is not filtering). Apps already have `clearFilters()`
   for their own button; add an item « Effacer tous les filtres » to the column menu and the cell menu, shown only
   when at least one filter is active.
+
+## Find in grid — measures (2026-11-03, built, not committed)
+
+| Line | Measured | Line |
+|---|---|---|
+| `@dzgrid/dom/find` (new, over the DOM base) | 2 399 | 2 650 (measure + 10 %) |
+| `locales/{en,fr,ar}-find` (new) | 186 / 215 / 267 | 250 / 250 / 300 |
+| `@dzgrid/theme/find.css` (new) | 482 | 550 |
+| `@dzgrid/dom/column-menu` | 2 963 → 3 039 | 4 300 kept |
+| `locales/{en,fr,ar}-column-menu` | 505 / 603 / 709 | 510 / 610 / 710 (2 % rule) |
+| `locales/ar-context-menu` | 508 | 510 (2 % rule) |
+| `@dzgrid/dom/context-menu` | 2 481 → 2 560 | **2 560: to confirm (+2.4 % on the line)** |
+| `locales/fr-context-menu` | 413 | **420: to confirm (+3.3 %, « Effacer tous les filtres »)** |
+
+- Lead decisions: a hit is a cell (the focus and the keys work by cell); the item shows while the query differs from
+  the cleared one (a filter or the search on); the Arabic label « مسح كل المرشحات » (the filters' word); the marks'
+  colour `color-mix(accent 40 %, danger)`, own colours in Clinic, Bootstrap and more contrast (checked 60° apart).
+- `check:api`: additions only (`@dzgrid/dom/find`, `FindMessageKey`, `ClearFiltersKey`, `PartBase.msg` keys).
+- Owner (2026-11-03): context-menu 2 560 and fr-context-menu 420 accepted (find + « Effacer tous les filtres »).

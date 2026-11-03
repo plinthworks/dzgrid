@@ -196,7 +196,7 @@ describe('1.3.0, the four packages', () => {
       expect(theme[`./${f}`], f).toBe(`./${f}`);
       expect(pkg('theme').files, f).toContain(f);
     }
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'print', 'fresh-rows'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'print', 'fresh-rows'[,\]]/); // Phase 9 adds 'find' after it
   });
 
   it('export the Phase 9 status bar (@dzgrid/dom/statusbar) and its -status texts, built like the others', () => {
@@ -206,6 +206,18 @@ describe('1.3.0, the four packages', () => {
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
     expect(build).toMatch(/'\.\/context-menu', '\.\/statusbar'/);
     expect(build).toMatch(/'\.\/locales\/ar-context-menu', '\.\/locales\/en-status', '\.\/locales\/fr-status', '\.\/locales\/ar-status'/);
+  });
+
+  it('export the Phase 9 find bar (@dzgrid/dom/find), its -find texts and find.css, built like the others', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./find']).toEqual({ types: './src/find.ts', default: './src/find.ts' });
+    for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-find`]).toEqual({ types: `./src/locales/${g}-find.ts`, default: `./src/locales/${g}-find.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/statusbar', '\.\/find'/);
+    expect(build).toMatch(/'\.\/locales\/ar-status', '\.\/locales\/en-find', '\.\/locales\/fr-find', '\.\/locales\/ar-find'/);
+    const theme = pkg('theme');
+    for (const f of ['find.css', 'find.unlayered.css', 'find.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fresh-rows', 'find'\]/);
   });
 
   it('keep gsap and tzslot optional peers', () => {

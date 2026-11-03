@@ -227,15 +227,15 @@
     },
     "@dzgrid/dom/locales/en-column-menu": {
       "file": "packages/dom/src/locales/en-column-menu.ts",
-      "maxGzip": 500
+      "maxGzip": 510
     },
     "@dzgrid/dom/locales/fr-column-menu": {
       "file": "packages/dom/src/locales/fr-column-menu.ts",
-      "maxGzip": 600
+      "maxGzip": 610
     },
     "@dzgrid/dom/locales/ar-column-menu": {
       "file": "packages/dom/src/locales/ar-column-menu.ts",
-      "maxGzip": 700
+      "maxGzip": 710
     },
     "@dzgrid/dom/locales/en-context-menu": {
       "file": "packages/dom/src/locales/en-context-menu.ts",
@@ -243,11 +243,11 @@
     },
     "@dzgrid/dom/locales/fr-context-menu": {
       "file": "packages/dom/src/locales/fr-context-menu.ts",
-      "maxGzip": 400
+      "maxGzip": 420
     },
     "@dzgrid/dom/locales/ar-context-menu": {
       "file": "packages/dom/src/locales/ar-context-menu.ts",
-      "maxGzip": 500
+      "maxGzip": 510
     },
     "@dzgrid/dom/locales/en-status": {
       "file": "packages/dom/src/locales/en-status.ts",
@@ -260,6 +260,18 @@
     "@dzgrid/dom/locales/ar-status": {
       "file": "packages/dom/src/locales/ar-status.ts",
       "maxGzip": 350
+    },
+    "@dzgrid/dom/locales/en-find": {
+      "file": "packages/dom/src/locales/en-find.ts",
+      "maxGzip": 250
+    },
+    "@dzgrid/dom/locales/fr-find": {
+      "file": "packages/dom/src/locales/fr-find.ts",
+      "maxGzip": 250
+    },
+    "@dzgrid/dom/locales/ar-find": {
+      "file": "packages/dom/src/locales/ar-find.ts",
+      "maxGzip": 300
     },
     "@dzgrid/dom/locales/en-pinned": {
       "file": "packages/dom/src/locales/en-pinned.ts",
@@ -364,6 +376,10 @@
     "@dzgrid/theme/fresh-rows.css": {
       "file": "packages/theme/fresh-rows.css",
       "maxGzip": 350
+    },
+    "@dzgrid/theme/find.css": {
+      "file": "packages/theme/find.css",
+      "maxGzip": 550
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
@@ -624,7 +640,7 @@
     },
     "@dzgrid/dom/context-menu": {
       "file": "packages/dom/src/context-menu.ts",
-      "maxGzip": 2500,
+      "maxGzip": 2560,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -640,6 +656,16 @@
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/core/range",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/find": {
+      "file": "packages/dom/src/find.ts",
+      "maxGzip": 2650,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
         "@dzgrid/dom/internal"
       ]
     },

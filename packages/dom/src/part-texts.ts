@@ -154,3 +154,20 @@ export interface StatusMessages {
   readonly locale: string;
   readonly text: { readonly [K in StatusMessageKey]: MessageValue };
 }
+
+/**
+ * « Clear all filters » in the menus (Phase 9, find.md 15): optional in an application's own column menu and cell menu
+ * bundles (made for 1.3.0, they keep compiling); missing, the item is not shown.
+ */
+export type ClearFiltersKey = 'menu.clearFilters' | 'cmenu.clearFilters';
+
+/**
+ * Find in the grid's texts (`@dzgrid/dom/find`, Phase 9, find.md), in their own bundles (`locales/<lang>-find`): optional
+ * here, required by `find()`. `{i}` the current hit, `{n}` how many.
+ */
+export type FindMessageKey = `find.${'label' | 'count' | 'said' | 'none' | 'prev' | 'next' | 'close' | 'page'}`;
+/** A find bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_FIND.text }`. */
+export interface FindMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in FindMessageKey]: MessageValue };
+}

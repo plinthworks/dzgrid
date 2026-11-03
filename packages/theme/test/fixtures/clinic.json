@@ -15,7 +15,8 @@
         "warning": "#8a5300",
         "success": "#1a7442",
         "--dzg-range-edge": "#6b3fb8",
-        "--dzg-fresh-color": "#6b3fb8"
+        "--dzg-fresh-color": "#6b3fb8",
+        "--dzg-find-color": "#a3226e"
       },
       "dark": {
         "bg": "#0d1b20",
@@ -29,7 +30,8 @@
         "warning": "#efc062",
         "success": "#6ad49a",
         "--dzg-range-edge": "#c9adff",
-        "--dzg-fresh-color": "#c9adff"
+        "--dzg-fresh-color": "#c9adff",
+        "--dzg-find-color": "#f28cc6"
       },
       "shape": {
         "--dzg-font": "400 0.875rem/1.5 system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", \"Noto Sans Arabic\", Tahoma, sans-serif",

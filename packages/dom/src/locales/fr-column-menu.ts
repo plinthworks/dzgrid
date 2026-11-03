@@ -1,4 +1,8 @@
-import type { ColumnMenuMessages } from '../part-texts.js';
+import type { MessageValue } from '../messages.js';
+import type { ClearFiltersKey, ColumnMenuMessages } from '../part-texts.js';
+
+/** « Clear all filters » (Phase 9): optional in an application's own bundle (`ClearFiltersKey`). */
+const CLEAR: { readonly [K in ClearFiltersKey]?: MessageValue } = { 'menu.clearFilters': "Effacer tous les filtres" };
 
 /** Français, les textes du menu de colonne (`@dzgrid/dom/column-menu`) : à ajouter aux messages de la grille, `text: { ...FR.text, ...FR_COLUMN_MENU.text }`. */
 export const FR_COLUMN_MENU = {
@@ -38,5 +42,6 @@ export const FR_COLUMN_MENU = {
     'density.comfortable': "Normale",
     'density.spacious': "Aérée",
     'density.changed': "Densité\u202F: {density}",
+    ...CLEAR,
   },
 } satisfies ColumnMenuMessages;

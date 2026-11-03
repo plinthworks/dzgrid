@@ -160,7 +160,7 @@ describe('the DOM layer’s shape', () => {
   it('keeps @dzgrid/dom/internal for the feature entries (step 17): slots, filters, search, pagination and the editors (Phase 5 step 5) import it, by name; the base never', () => {
     const named = /^import (?!type )[^;]*from '@dzgrid\/dom\/internal'/m;
     const users = files(SRC).filter((f) => named.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f).split('/')[0]!.replace(/\.ts$/, ''));
-    expect([...new Set(users)].sort()).toEqual(['column-menu', 'context-menu', 'editors', 'filters', 'pagination', 'search', 'slots', 'statusbar']); // statusbar: the shared strip (Phase 9); column-menu: its items' parts (Phase 6 step 12); both menus: the shared list (Phase 9)
+    expect([...new Set(users)].sort()).toEqual(['column-menu', 'context-menu', 'editors', 'filters', 'find', 'pagination', 'search', 'slots', 'statusbar']); // find: the menus' texts check and the input method's keys (Phase 9); statusbar: the shared strip (Phase 9); column-menu: its items' parts (Phase 6 step 12); both menus: the shared list (Phase 9)
     // Never by a relative path (a second copy in each bundle), never from the base.
     // The menus' shared list (Phase 9) is part of the internal entry (exported by it only).
     const relative_ = files(SRC).filter((f) => !/^(internal(\/|\.ts$)|menu\/list\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?internal(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f));

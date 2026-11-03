@@ -114,19 +114,25 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/columns.css': 1200, // Q6-6: 1 100 → 1 200 (the mode's outline)
   // Phase 6 step 3 (owner Q-B, Q3-2): the column menu over the popup host; its texts in their own bundles.
   '@dzgrid/dom/column-menu': 4300, // owner Q3-5 (2026-10-26): 3 000 → 4 300 (measured 3 951, the full menu kept)
-  '@dzgrid/dom/locales/en-column-menu': 500, // Q3-5: 450 → 500
-  '@dzgrid/dom/locales/fr-column-menu': 600, // Q3-5: 550 → 600
-  '@dzgrid/dom/locales/ar-column-menu': 700, // Q3-5: 650 → 700
+  '@dzgrid/dom/locales/en-column-menu': 510, // Phase 9 « Clear all filters » (2 % rule, measured 505); Q3-5: 450 → 500
+  '@dzgrid/dom/locales/fr-column-menu': 610, // Phase 9 « Clear all filters » (2 % rule, measured 603); Q3-5: 550 → 600
+  '@dzgrid/dom/locales/ar-column-menu': 710, // Phase 9 « Clear all filters » (2 % rule, measured 709); Q3-5: 650 → 700
   // Phase 9, the cell menu (owner Q-CM4, 2026-11-02): over the popup host, the shared list in the internal entry; its texts in their own bundles; its look in menu.css.
-  '@dzgrid/dom/context-menu': 2500, // owner 2026-11-03 (Excel export): 2 450 → 2 500 (« Export to Excel »); owner 2026-11-03: 2 400 → 2 450 (« Read the totals »); owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
+  '@dzgrid/dom/context-menu': 2560, // Phase 9 « Clear all filters » (2026-11-03): 2 500 → 2 560 (measured 2 560, +2.4 %: TO CONFIRM by the owner, above the 2 % rule); owner 2026-11-03 (Excel export): 2 450 → 2 500 (« Export to Excel »); owner 2026-11-03: 2 400 → 2 450 (« Read the totals »); owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
   // Phase 9 status bar (owner 2026-11-03, status-dock-plan.md §5): the strip over the DOM base, its -status texts.
   '@dzgrid/dom/statusbar': 2300,
   '@dzgrid/dom/locales/en-status': 250,
   '@dzgrid/dom/locales/fr-status': 300,
   '@dzgrid/dom/locales/ar-status': 350,
   '@dzgrid/dom/locales/en-context-menu': 350,
-  '@dzgrid/dom/locales/fr-context-menu': 400,
-  '@dzgrid/dom/locales/ar-context-menu': 500,
+  '@dzgrid/dom/locales/fr-context-menu': 420, // Phase 9 « Effacer tous les filtres »: 400 → 420 (measured 413, +3.3 %: TO CONFIRM by the owner)
+  '@dzgrid/dom/locales/ar-context-menu': 510, // Phase 9 « Clear all filters » (2 % rule, measured 508)
+  // Phase 9 find in the grid (find.md): the bar over the DOM base, its -find texts, find.css; new lines at their measure + 10 %.
+  '@dzgrid/dom/find': 2650,
+  '@dzgrid/dom/locales/en-find': 250,
+  '@dzgrid/dom/locales/fr-find': 250,
+  '@dzgrid/dom/locales/ar-find': 300,
+  '@dzgrid/theme/find.css': 550,
   '@dzgrid/theme/menu.css': 750, // owner 2026-11-02: 500 → 750 (measured 716; the list's rules whole)
   // Phase 6 step 4 (owner Q-B, Q4-1, Q4-2, Q4-4): the column chooser over the popup host (4 000, up to 4 400 if needed);
   // its texts in the -columns bundles (500 / 600 / 800 kept), its look in its own columns-panel.css (measure + 10 %, ≤ 1 000).

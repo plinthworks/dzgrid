@@ -26,7 +26,8 @@ const KEYS = [
 describe('column menu texts', () => {
   it('COLUMN_MENU_KEYS are each bundle\'s keys, all of them', () => {
     expect([...COLUMN_MENU_KEYS].sort()).toEqual(KEYS);
-    for (const b of [EN_COLUMN_MENU, FR_COLUMN_MENU, AR_COLUMN_MENU]) expect(Object.keys(b.text).sort(), b.locale).toEqual(KEYS);
+    // « Clear all filters » (Phase 9, find.md 15): in our bundles, optional in a host's (not one of COLUMN_MENU_KEYS).
+    for (const b of [EN_COLUMN_MENU, FR_COLUMN_MENU, AR_COLUMN_MENU]) expect(Object.keys(b.text).sort(), b.locale).toEqual([...KEYS, 'menu.clearFilters'].sort());
     expect([EN_COLUMN_MENU.locale, FR_COLUMN_MENU.locale, AR_COLUMN_MENU.locale]).toEqual(['en', 'fr', 'ar']);
   });
 

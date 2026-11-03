@@ -1,8 +1,8 @@
 import type { MessageValue } from '../messages.js';
-import type { ContextMenuMessages, ContextMenuXlsxKey } from '../part-texts.js';
+import type { ClearFiltersKey, ContextMenuMessages, ContextMenuXlsxKey } from '../part-texts.js';
 
-/** « Export to Excel » (Phase 9): optional in an application's own bundle (`ContextMenuXlsxKey`). */
-const XLSX: { readonly [K in ContextMenuXlsxKey]?: MessageValue } = { 'cmenu.exportXlsx': "تصدير إلى Excel" };
+/** « Export to Excel », « Clear all filters » (Phase 9): optional in an application's own bundle (`ContextMenuXlsxKey`). */
+const XLSX: { readonly [K in ContextMenuXlsxKey | ClearFiltersKey]?: MessageValue } = { 'cmenu.exportXlsx': "تصدير إلى Excel", 'cmenu.clearFilters': "مسح كل المرشحات" };
 
 /** العربية، نصوص قائمة الخلية (`@dzgrid/dom/context-menu`): تُضاف إلى رسائل الجدول، `text: { ...AR.text, ...AR_CONTEXT_MENU.text }`. */
 export const AR_CONTEXT_MENU = {

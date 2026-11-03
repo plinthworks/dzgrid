@@ -193,7 +193,17 @@
     { "what": "a new row's bar on a selected row", "fg": "--dzg-fresh-color", "bg": "--dzg-row-selected-bg", "min": 3 },
     { "what": "a new row's bar on a hovered row", "fg": "--dzg-fresh-color", "bg": "--dzg-row-hover-bg", "min": 3 },
     { "what": "a new row a hue apart from the selection and a block (their accent): 60° at least", "fg": "--dzg-fresh-color", "bg": "--tz-accent", "min": 1, "hue": 60 },
-    { "what": "a new row a hue apart from the value flash: 60° at least", "fg": "--dzg-flash-color", "bg": "--dzg-fresh-color", "min": 1, "hue": 60 }
+    { "what": "a new row a hue apart from the value flash: 60° at least", "fg": "--dzg-flash-color", "bg": "--dzg-fresh-color", "min": 1, "hue": 60 },
+    { "what": "cell text on a find hit (find.css, Phase 9)", "fg": "--tz-fg", "bg": "--dzg-find-bg", "min": 4.5 },
+    { "what": "cell text on the current find hit", "fg": "--tz-fg", "bg": "--dzg-find-current-bg", "min": 4.5 },
+    { "what": "muted text on a find hit", "fg": "--tz-fg-muted", "bg": "--dzg-find-bg", "min": 4.5 },
+    { "what": "the find underline on its tint", "fg": "--dzg-find-color", "bg": "--dzg-find-bg", "min": 3 },
+    { "what": "the current hit's ring on its tint", "fg": "--dzg-find-color", "bg": "--dzg-find-current-bg", "min": 3 },
+    { "what": "the find marks a hue apart from the selection and a block (their accent): 60° at least", "fg": "--dzg-find-color", "bg": "--tz-accent", "min": 1, "hue": 60 },
+    { "what": "the find marks a hue apart from the value flash: 60° at least", "fg": "--dzg-flash-color", "bg": "--dzg-find-color", "min": 1, "hue": 60 },
+    { "what": "the find marks a hue apart from the new rows: 60° at least", "fg": "--dzg-find-color", "bg": "--dzg-fresh-color", "min": 1, "hue": 60 },
+    { "what": "find bar text", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 4.5 },
+    { "what": "find field text", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -230,6 +240,9 @@
     "--dzg-pinned-bg": "var(--tz-bg-raised)",
     "--dzg-pinned-line": "var(--tz-fg-muted)",
     "--dzg-fresh-color": "var(--tz-success)",
-    "--dzg-fresh-bg": "color-mix(in srgb, var(--dzg-fresh-color) 14%, var(--tz-bg))"
+    "--dzg-fresh-bg": "color-mix(in srgb, var(--dzg-fresh-color) 14%, var(--tz-bg))",
+    "--dzg-find-color": "color-mix(in srgb, var(--tz-accent) 40%, var(--tz-danger))",
+    "--dzg-find-bg": "color-mix(in srgb, var(--dzg-find-color) 16%, var(--tz-bg))",
+    "--dzg-find-current-bg": "color-mix(in srgb, var(--dzg-find-color) 30%, var(--tz-bg))"
   }
 }

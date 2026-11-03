@@ -24,6 +24,20 @@ A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
 - The cell menu: `contextMenu({ use: { status } })` adds « Read the totals » on a cell of the block (Shift+F10): one
   polite sentence of the strip's figures. Its label comes from the status texts (no new `-context-menu` key).
 
+- **Find in the grid** (Phase 9, `docs/behaviors/find.md`): `@dzgrid/dom/find`, `find({ debounceMs })`. Opt-in:
+  Ctrl+F (⌘F on a Mac) opens a bar above the headers only while the focus is in the grid (elsewhere, and without the
+  feature, the browser's own). It searches the displayed text of the visible columns, case and accents ignored, and
+  never hides a row; a tree's closed nodes are searched too, and going to a hit inside one opens it. Every hit is
+  marked (`data-dzg-find`), the current one more (`="current"`), scrolled into view and made the grid's focused cell;
+  « 3 / 12 », ↑ ↓, Enter / Shift+Enter, Escape (the focus back on the grid); kept up to date when the data, sort,
+  filters or columns change; « 3 sur 12 » / « Aucun résultat » said politely once typing settles. On a server: the
+  loaded page only, said in the bar. `api(grid)`: `open(text?)`, `close()`, `next()`, `previous()`, `state()`. Texts
+  `locales/{en,fr,ar}-find`; look `@dzgrid/theme/find.css` (`--dzg-find-color`, a hue apart from the selection, the
+  flash and the new rows).
+- The column menu and the cell menu: « Effacer tous les filtres » while a column filter or the quick search is on; it
+  does what `clearFilters()` does. Its keys `menu.clearFilters` and `cmenu.clearFilters` are in our bundles and
+  optional in an application's own (missing: no item).
+
 - **Excel export** (Phase 9, `docs/behaviors/xlsx-export.md`, owner Q-X1…Q-X5): `csvExport({ xlsx: true | { … } })`,
   then `run(scope, { format: 'xlsx' })`, `bind(button, { format: 'xlsx' })` or `exporter.xlsx.run()`. One `.xlsx`
   written by hand (no spreadsheet or zip library): typed cells (numbers, real dates in the reader's own format, an

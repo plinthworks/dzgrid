@@ -101,6 +101,10 @@
       "types": "./src/statusbar.ts",
       "default": "./src/statusbar.ts"
     },
+    "./find": {
+      "types": "./src/find.ts",
+      "default": "./src/find.ts"
+    },
     "./columns-panel": {
       "types": "./src/columns-panel.ts",
       "default": "./src/columns-panel.ts"
@@ -368,6 +372,18 @@
     "./locales/ar-status": {
       "types": "./src/locales/ar-status.ts",
       "default": "./src/locales/ar-status.ts"
+    },
+    "./locales/en-find": {
+      "types": "./src/locales/en-find.ts",
+      "default": "./src/locales/en-find.ts"
+    },
+    "./locales/fr-find": {
+      "types": "./src/locales/fr-find.ts",
+      "default": "./src/locales/fr-find.ts"
+    },
+    "./locales/ar-find": {
+      "types": "./src/locales/ar-find.ts",
+      "default": "./src/locales/ar-find.ts"
     }
   },
   "peerDependencies": {

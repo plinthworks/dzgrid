@@ -1,4 +1,4 @@
-import { editableAt, pinnedKey, type CellRange, type DisplayIndex, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type RowKey } from '@dzgrid/core';
+import { editableAt, makeQuery, pinnedKey, type CellRange, type DisplayIndex, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type RowKey } from '@dzgrid/core';
 import { menuKey, menuList, needTexts } from '@dzgrid/dom/internal';
 import type { GridFeature } from '../features.js';
 import type { ContextMenuMessageKey } from '../part-texts.js';
@@ -213,6 +213,8 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
           say(T(c.band ? 'unpinned' : side === 'top' ? 'pinnedTop' : 'pinnedBottom'));
         };
         const sig = (): string => JSON.stringify([r!.get(), kernel.focus]);
+        // The query with every filter and the search emptied, the sort kept: differs while one is on (find.md 15).
+        const z = makeQuery({ sort: kernel.query.sort });
         const S: (MenuItem<CellMenuContext<T>> | false | null | undefined)[][] = [
           r ? [
             it('copy', () => put(r.copy())?.catch(no('C')), false, 'C'),
@@ -235,6 +237,8 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
             : (['top', 'bottom'] as const).map((s) => it(`pin.${s}`, pin(s, [...p.get()[s], c.row]), p.get()[s].some((x) => id(s, x) === id(s, c.row))))) : [],
           [csv && it('export.csv', () => void csv.run('displayed')), xl && it('export.xlsx', () => void xl.run('displayed'))],
           [c.block && st?.stats() && { id: 'status.read', label: g.msg('status.read'), action: () => st.announce() }],
+          // « Clear all filters » (find.md 15): while a filter or the search is on, its text given; as `clearFilters()`.
+          [z.key !== kernel.query.key && g.settings.messages.text['cmenu.clearFilters'] && it('clearFilters', () => kernel.dispatch({ type: 'query.set', query: z }, 'user'))],
         ].map((x) => x.filter(Boolean) as MenuItem<CellMenuContext<T>>[]);
         return (S as MenuItem<CellMenuContext<T>>[][]).filter((s) => s.length).flatMap((s, i) => (i ? [{ separator: true } as const, ...s] : s));
       };

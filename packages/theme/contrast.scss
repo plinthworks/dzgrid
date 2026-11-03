@@ -37,6 +37,9 @@ $tz-palette: (
   // A new row's mark (step 16h): its default success is that green in the dark; a violet there, a hue apart from the
   // yellow accent and the green flash.
   '--dzg-fresh-color': (#14532d, #d0b3ff),
+  // The find marks (Phase 9, find.css): a magenta in the light, a pink in the dark, a hue apart from the accent (blue,
+  // then yellow), the flash and the new rows.
+  '--dzg-find-color': (#a3006b, #ff80b0),
 );
 
 @mixin palette {
