@@ -1,11 +1,18 @@
 import { settled } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { GridFeature } from '../features.js';
+import { marker } from '../highlight/use.js';
 import { bindBox, type Off } from './bind.js';
 
 export interface QuickSearchOptions {
   /** The pause before a typed search applies (a finite number of 0 or more); default 150 ms in the browser, 300 ms on a server. */
   readonly debounceMs?: number;
+}
+
+/** `quickSearch(setup)`: what the feature does in every grid it is set up in. */
+export interface QuickSearchSetup {
+  /** The words searched tinted inside the cells shown (docs/behaviors/search-highlight.md); default true. */
+  readonly highlight?: boolean;
 }
 
 export interface QuickSearch extends GridFeature {
@@ -27,8 +34,11 @@ export interface QuickSearch extends GridFeature {
  * createGrid(host, { features: [search], … });
  * const unbind = search.bind(document.querySelector('#q')!, { debounceMs: 200 });
  * ```
+ *
+ * The words found are tinted inside the cells the grid draws (search-highlight.md; `@dzgrid/theme/search.css`), not in
+ * a part's (its context's `search.quick`); `quickSearch({ highlight: false })` leaves the cells alone.
  */
-export function quickSearch(): QuickSearch {
+export function quickSearch(o: QuickSearchSetup = {}): QuickSearch {
   /** The grids it is set up in, still alive. */
   const grids = new Set<GridContext<unknown>>();
   /** The fields bound (until their unbind): each binds itself to a grid. */
@@ -60,8 +70,10 @@ export function quickSearch(): QuickSearch {
         if (n != null) g.live.announce(g.msg('announce.rows', { n }));
       })));
       binds.forEach((attach) => attach(g));
+      // The words tinted inside the cells (search-highlight.md 3), by the lazy chunk.
+      const tint = o.highlight === false ? () => {} : marker(g, false);
       // Its fields' bindings end with the grid's scope.
-      return { destroy: () => void grids.delete(g) };
+      return { afterRows: () => tint(g.kernel.query.quick || null), destroy: () => void (grids.delete(g), tint(null)) };
     },
   };
 }

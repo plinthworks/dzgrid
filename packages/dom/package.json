@@ -105,6 +105,10 @@
       "types": "./src/find.ts",
       "default": "./src/find.ts"
     },
+    "./row-numbers": {
+      "types": "./src/row-numbers.ts",
+      "default": "./src/row-numbers.ts"
+    },
     "./filters-panel": {
       "types": "./src/filters-panel.ts",
       "default": "./src/filters-panel.ts"
@@ -388,6 +392,18 @@
     "./locales/ar-find": {
       "types": "./src/locales/ar-find.ts",
       "default": "./src/locales/ar-find.ts"
+    },
+    "./locales/en-row-numbers": {
+      "types": "./src/locales/en-row-numbers.ts",
+      "default": "./src/locales/en-row-numbers.ts"
+    },
+    "./locales/fr-row-numbers": {
+      "types": "./src/locales/fr-row-numbers.ts",
+      "default": "./src/locales/fr-row-numbers.ts"
+    },
+    "./locales/ar-row-numbers": {
+      "types": "./src/locales/ar-row-numbers.ts",
+      "default": "./src/locales/ar-row-numbers.ts"
     },
     "./locales/en-filters-panel": {
       "types": "./src/locales/en-filters-panel.ts",

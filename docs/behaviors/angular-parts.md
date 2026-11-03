@@ -191,3 +191,21 @@ keeps its role, its check state, the keys, the type-ahead and its **name, the `l
 ### `[slot]` is a binding, strictly typed
 `<ng-template dzgPart="x" [slot]="'menuItem'" let-c>` types `c` as that slot's context; `{{ c.nope }}` does not
 compile. A static `slot="…"` is an attribute (the input stays `cell`; « Notes from an app » below).
+
+## A component class in a column (1.4.0, owner 2026-11-03)
+Written before the code. The way other grids let a column name its cell renderer's class directly, in our own words.
+- **What the developer writes**: `{ id: 'label', ui: { cell: LabelCell } }` in `[columns]`, the class itself where a part
+  name goes; the same for `ui.header` and `ui.tooltip`. No `[parts]` entry, no name to invent. A name (`ui: { cell:
+  'status' }`) works exactly as before.
+- **What the wrapper does**: before handing the columns to the grid, it gives each class a stable name of its own
+  (`dzg-ng-<slot>-<n>`: one per class and slot for the page, from a `WeakMap`), registers `componentPart(slot, Class)`
+  under it (after every other layer: no application name is ever taken, so a `[parts]` name keeps winning on its own
+  name and no `part-shadowed` is told), and passes the columns with that name in place of the class. The core and the
+  DOM layer see strings only: export, print, the grid's state, the columns panel and the server's request work as with
+  a name (none of them carries `ui`).
+- **Identity**: the same `[columns]` array gives the same columns to the grid (no extra `update`); a new array with the
+  same classes gives the same names. Columns without a class are passed as they are (the same objects).
+- **Types**: `[columns]` takes `DzgColumnOrGroup<T>` (additive: every `ColumnOrGroup<T>` is one): `ui.cell` a string or
+  a `Type<DzgPartComponent<'cell'>>`, `ui.header` of `'header'`, `ui.tooltip` of `'tooltip'`. The component receives its
+  context in its `cell` input, as with `componentPart`.
+- **A header or tooltip component** needs what a named one needs (`slots()` in `[features]`), told the same way.

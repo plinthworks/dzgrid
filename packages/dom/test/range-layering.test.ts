@@ -17,9 +17,12 @@ describe('range seams: layering', () => {
   it('nothing of the base imports @dzgrid/dom/range (types and values)', () => {
     // By where an import lands (src/range.ts or src/range/), not by its name: the date filters have a range.ts of their own.
     const lands = (f: string) => [...readFileSync(f, 'utf8').matchAll(/from '(\.{1,2}\/[^']+)'/g)].map((m) => relative(SRC, join(f, '..', m[1]!)));
-    // Step 12 (D2): the fill entry shares the block's geometry (`range/geom.ts`) and its types; nothing of the base does.
-    const offenders = files(SRC).filter((f) => !ENTRY.test(relative(SRC, f)) && !/^fill(\/|\.ts$)/.test(relative(SRC, f)) && lands(f).some((to) => to === 'range.js' || to.startsWith('range/'))).map((f) => relative(SRC, f));
+    // Row numbers (1.4.0) name the block's API by its type only (checked below). Step 12 (D2): the fill entry shares the block's geometry (`range/geom.ts`) and its types; nothing of the base does.
+    const offenders = files(SRC).filter((f) => !ENTRY.test(relative(SRC, f)) && !/^fill(\/|\.ts$)/.test(relative(SRC, f)) && !/^row-numbers\//.test(relative(SRC, f)) && lands(f).some((to) => to === 'range.js' || to.startsWith('range/'))).map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
+    // Row numbers: types only, nothing of the block's code in their bundle.
+    expect(readFileSync(join(SRC, 'row-numbers/index.ts'), 'utf8')).toMatch(/^import type \{ RangeFeature \} from '\.\.\/range\/index\.js';$/m);
+    expect(readFileSync(join(SRC, 'row-numbers/index.ts'), 'utf8')).not.toMatch(/^import (?!type )[^;]*from '\.\.\/range/m);
   });
 
   it('the entry reaches the core, the shared internal entry, its own folder and the base\'s guarded writers, direction helpers and key owners only; never the editors, filters, tree or edit entries', () => {

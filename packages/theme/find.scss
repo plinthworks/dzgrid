@@ -7,7 +7,8 @@
 // (`data-dzg-find`) tinted with the find colour and underlined; the current one (`="current"`) tinted more, with a ring:
 // not colour alone. `--dzg-find-color`: the accent mixed with the danger (a magenta), a hue apart from the selection and
 // the block (the accent), the value flash (the warning) and the new rows (the success). Forced colours: Mark and
-// Highlight. No colour literal, no physical side (guards); nothing animated.
+// Highlight. The letters typed tinted inside (`::highlight(dzg-find)`, `dzg-find-current`, search-highlight.md).
+// No colour literal, no physical side (guards); nothing animated.
 // ─────────────────────────────────────────────────────────────────────────────
 
 $layered: true !default;
@@ -70,7 +71,30 @@ $color: var(--dzg-find-color, color-mix(in srgb, var(--tz-accent) 40%, var(--tz-
     box-shadow: inset 0 0 0 2px #{$color};
   }
 
+  // The letters typed, inside the hit cells (search-highlight.md 4, 5): drawn by the browser over the text
+  // (`::highlight()`, the cells' DOM unchanged), over the quick search's; the current hit's stronger and underlined.
+  ::highlight(dzg-find) {
+    color: var(--tz-fg);
+    background-color: var(--dzg-find-mark, color-mix(in srgb, #{$color} 32%, var(--tz-bg)));
+  }
+
+  ::highlight(dzg-find-current) {
+    color: var(--tz-fg);
+    background-color: var(--dzg-find-mark-current, color-mix(in srgb, #{$color} 45%, var(--tz-bg)));
+    text-decoration: underline 2px var(--tz-fg);
+  }
+
   @media (forced-colors: active) {
+    ::highlight(dzg-find) {
+      color: MarkText;
+      background-color: Mark;
+    }
+
+    ::highlight(dzg-find-current) {
+      color: HighlightText;
+      background-color: Highlight;
+    }
+
     .dzg-cell[data-dzg-find] {
       background: Mark;
       color: MarkText;

@@ -1005,6 +1005,15 @@ versus the ids the app saves today.
 
 ## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
 
+- [x] **Row numbers, the searched text tinted, Angular column components** (owner 2026-11-03) — built 2026-11-03, not
+  committed (1.4.0, unreleased): sheets `row-numbers.md`, `search-highlight.md` (+ `parts.md`, `angular-parts.md`);
+  `@dzgrid/dom/row-numbers` (`rowNumbers()`), the base's lead strip, texts `locales/{en,fr,ar}-row-numbers`,
+  `row-numbers.css`; the highlight chunk shared by `quickSearch({ highlight })` and `find({ highlight })`, `search.css`,
+  find.css's letter marks; the cell part's `search`; Angular `ui.cell: Component`. Tests `row-numbers` (16),
+  `search-highlight` (11), Angular 2, `api-surface` (+4 cases). Browsers: Chrome, Firefox, WebKit, fr / ar, light /
+  dark, comfortable / compact, axe 0, 144 checks (local `playground/rownum-check.html`, not committed). Sizes in
+  decisions.md « Row numbers, search highlight… — measures »: `@dzgrid/angular` 7 627 over its line 7 450 (+2.4 %), for
+  the owner.
 - [x] **The filters panel** (owner answers, `phase-9-steps/decisions.md` « Filters panel — owner answers
   (2026-11-03) ») — built 2026-11-03, not committed (1.4.0, unreleased): sheet `docs/behaviors/filters-panel.md`, a11y
   protocol §25; `@dzgrid/dom/filters-panel` (`filtersPanel({ side, open, button })`, `api(grid)`), the popup's forms

@@ -48,6 +48,8 @@ export interface HeaderPaint {
   /** The focused header cell: its centre column stays mounted in its row out of the window (D6). */
   readonly keep: { readonly center: number; readonly level: number } | null;
   readonly check: boolean;
+  /** The lead strip's width (`GridContext.lead`), before the box column; 0 or absent: none. */
+  readonly lead?: number;
   readonly selectAll: boolean;
   readonly extra: readonly HeaderRowSpec[];
   /** Group rows above the column headers, top to bottom. */
@@ -64,6 +66,7 @@ class HeaderRowView {
   readonly segs: HeaderSegments;
   readonly cells = new Map<string, HTMLElement>();
   check: HTMLElement | null = null;
+  lead: HTMLElement | null = null;
   readonly level: number;
   readonly spec: HeaderRowSpec | null;
   readonly band: HeaderBandSpec | null;
@@ -104,6 +107,8 @@ export class HeaderRenderer {
   checkBox: HTMLElement | null = null;
   /** The box column's name when there is no select-all box (single mode). */
   checkName: HTMLElement | null = null;
+  /** The lead strip's corner (the column headers row), when the grid has one: its words the feature's. */
+  lead: HTMLElement | null = null;
 
   constructor(doc: Document, group: HTMLElement) {
     this.#doc = doc;
@@ -141,14 +146,16 @@ export class HeaderRenderer {
   #frame(view: HeaderRowView, p: HeaderPaint, depth: number): number {
     const { layout } = p;
     const height = (view.spec ?? view.band)?.height ?? p.height;
-    const extra = p.check ? CHECK_WIDTH : 0;
+    const extra = (p.check ? CHECK_WIDTH : 0) + (p.lead ?? 0);
     setAttr(view.el, 'aria-rowindex', String(view.level + depth + 1));
     setPx(view.el, 'block-size', height);
     setPx(view.el, 'inline-size', layout.totalWidth + extra);
     setPx(view.segs.start, 'inline-size', layout.start.width + extra);
     setPx(view.segs.center, 'inline-size', layout.center.width);
     setPx(view.segs.end, 'inline-size', layout.end.width);
+    this.#leadCell(view, p.lead);
     this.#checkCell(view, p.check, p.selectAll);
+    if (view.check) setAttr(view.check, 'aria-colindex', p.lead ? '2' : '1');
     view.band?.paint(view.segs, p);
     return height;
   }
@@ -187,6 +194,7 @@ export class HeaderRenderer {
     }
     const place = (seg: HTMLElement, slice: ColumnLayout['start'], indices: readonly number[], absolute: boolean) => {
       let cursor: ChildNode | null = seg.firstChild;
+      if (cursor && cursor === view.lead) cursor = cursor.nextSibling;
       if (cursor && cursor === view.check) cursor = cursor.nextSibling;
       for (const c of indices) {
         const col = slice.columns[c]!;
@@ -242,6 +250,25 @@ export class HeaderRenderer {
     return el;
   }
 
+  /** The lead strip's cell, first in the start segment (the corner a column header, a gridcell elsewhere), `w` px wide. */
+  #leadCell(view: HeaderRowView, w?: number): void {
+    if (!w) {
+      view.lead?.remove();
+      view.lead = null;
+      if (view.level === 0) this.lead = null;
+      return;
+    }
+    if (!view.lead) {
+      const cell = (view.lead = this.#doc.createElement('div'));
+      cell.className = 'dzg-hcell dzg-lead';
+      cell.setAttribute('role', view.level === 0 ? 'columnheader' : 'gridcell');
+      cell.setAttribute('aria-colindex', '1');
+      if (view.level === 0) this.lead = cell;
+    }
+    setPx(view.lead, 'inline-size', w);
+    if (view.segs.start.firstChild !== view.lead) view.segs.start.prepend(view.lead);
+  }
+
   /** The select-all box (main row), or an empty cell keeping the column in the extra rows (D8). */
   #checkCell(view: HeaderRowView, on: boolean, selectAll: boolean): void {
     if (!on) {
@@ -259,7 +286,7 @@ export class HeaderRenderer {
       view.check = cell;
       if (view.level === 0) this.check = cell;
     }
-    if (view.segs.start.firstChild !== view.check) view.segs.start.prepend(view.check);
+    if ((view.lead?.nextSibling ?? view.segs.start.firstChild) !== view.check) view.lead ? view.lead.after(view.check) : view.segs.start.prepend(view.check);
     if (view.level !== 0) return;
     // The select-all box only where all can be selected (multi); the column stays for alignment.
     if (selectAll && !this.checkBox) {

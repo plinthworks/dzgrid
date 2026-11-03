@@ -29,11 +29,13 @@ import type { SaveHandler } from '@dzgrid/core/edit';
 import type { GridState } from '@dzgrid/core/state';
 import { detailConflicts } from '@dzgrid/core/detail';
 import { createGrid, type GridFeature, type GridInstance, type GridMessages, type GridSettings, type SlotContext, type SlotPart } from '@dzgrid/dom';
+import type { DzgColumnOrGroup, DzgColumns } from './columns';
 import { DzgController } from './controller';
 import { DzgPart } from './dzg-part';
 import { MARKS, boundPart, type Bindings } from './part-bind';
 import { DZG_DEFAULTS, DZG_ENV, DZG_MESSAGES, DZG_PARTS } from './providers';
 import { shadowedParts } from './shadow';
+import { componentPart } from './component-part';
 
 type S<T> = GridSettings<T>;
 type Ev<T, K extends GridEvent<T>['type']> = Extract<GridEvent<T>, { type: K }>;
@@ -51,6 +53,35 @@ const NONE = { filter: {}, quick: '' } as Query;
 const sameSet = (a: ReadonlySet<unknown>, b: ReadonlySet<unknown>): boolean => a.size === b.size && [...a].every((k) => b.has(k));
 const sameSelection = (a: SelectionState, b: SelectionState): boolean => a.mode === b.mode && sameSet(a.keys, b.keys);
 
+let made = 0;
+/** A number per component class named in `[columns]`, for the page. */
+const ids = new WeakMap<object, number>();
+/** Every part made for a class named in `[columns]` (angular-parts.md, 1.4.0), by its name `dzg-ng-<slot>-<n>`. */
+const own: Record<string, SlotPart> = {};
+/** Per `[columns]` array, the columns the grid takes: the same answer for the same array (the grid sees no change). */
+const memo = new WeakMap<object, readonly ColumnOrGroup<any>[]>();
+
+/** The columns with a name in place of each component class (strings only for the grid); a column without one kept. */
+const walk = (list: readonly any[]): any[] =>
+  list.map((c) => {
+    if (c.children) return { ...c, children: walk(c.children) };
+    let ui: any;
+    for (const s of ['cell', 'header', 'tooltip'] as const) {
+      const x = c.ui?.[s];
+      if (typeof x !== 'function') continue;
+      if (!ids.has(x)) ids.set(x, ++made);
+      const n = `dzg-ng-${s}-${ids.get(x)}`;
+      own[n] ??= componentPart(s, x) as SlotPart;
+      (ui ??= { ...c.ui })[s] = n;
+    }
+    return ui ? { ...c, ui } : c;
+  });
+const named = <T>(cols: readonly DzgColumnOrGroup<T>[]): readonly ColumnOrGroup<T>[] => {
+  let m = memo.get(cols);
+  if (!m) memo.set(cols, (m = walk(cols)));
+  return m;
+};
+
 /**
  * `<dz-grid>`: the grid of `@dzgrid/dom` in an Angular template (docs/behaviors/angular-parts.md).
  * Inputs map to `createGrid`'s settings (live ones through `update()`, by identity), events to
@@ -67,7 +98,8 @@ const sameSelection = (a: SelectionState, b: SelectionState): boolean => a.mode 
 export class DzGrid<T> implements AfterContentInit {
   readonly rows = input<Iterable<T>>();
   readonly source = input<S<T>['source']>();
-  readonly columns = input.required<readonly ColumnOrGroup<T>[]>();
+  /** The columns; a `ui` slot takes a part's name or the component class itself (angular-parts.md, 1.4.0). */
+  readonly columns = input.required<readonly ColumnOrGroup<T>[] | DzgColumns<T>>();
   readonly getRowId = input.required<(row: T) => RowIdInput>();
   /** Required here or through `provideDzGrid({ messages })`. */
   readonly messages = input<GridMessages>();
@@ -190,7 +222,7 @@ export class DzGrid<T> implements AfterContentInit {
   /** Rows closed by the user or the API since the host's write: a pending key below one is dropped. */
   private _closed = new Set<RowKey>();
 
-  /** The registry: the provider's, `[parts]`, then the templates; Angular entries bound to this grid. */
+  /** The registry: the classes named in `[columns]`, the provider's, `[parts]`, then the templates; Angular entries bound to this grid. */
   private readonly _registry = computed(() => {
     const all: Record<string, SlotPart> = {};
     const put = (n: string, e: SlotPart, key: object = e): void => {
@@ -199,7 +231,9 @@ export class DzGrid<T> implements AfterContentInit {
       if (m && (!b || b.slot !== e.slot)) this._bound.set(key, (b = boundPart(this._b, e.slot, m)));
       all[n] = b ?? e;
     };
-    for (const r of [this._provided, this.parts() ?? {}]) for (const n in r) put(n, r[n]!);
+    // The classes named in `[columns]` (angular-parts.md, 1.4.0): their own names, never an application's; a new
+    // `[columns]` array rebinds every row anyway, and their bound entries are kept by `_bound`.
+    for (const r of [(named(this.columns()), own), this._provided, this.parts() ?? {}]) for (const n in r) put(n, r[n]!);
     for (const t of this._templates()) {
       const e = { slot: t.slot(), part: null! } as SlotPart;
       MARKS.set(e, t.template);
@@ -214,6 +248,7 @@ export class DzGrid<T> implements AfterContentInit {
     // Unset after creation with no provider: the bundle in force stays (the grid needs one).
     s['messages'] = this.messages() ?? this._messages ?? this._last['messages'];
     s['parts'] = this._registry();
+    s['columns'] = named(this.columns());
     return s as unknown as S<T>;
   });
 

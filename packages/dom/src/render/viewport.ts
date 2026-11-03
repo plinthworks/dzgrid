@@ -84,6 +84,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   // The messages object: a part reading `msg` is rebound when it changes, as cells are.
   let messages: unknown = null;
   let messagesRev = 0;
+  let search = { quick: '', find: '' };
   // The application's context: a new one rebinds the cell parts too (step 21), as new messages do.
   let context: unknown;
   let rowClass: GridSettings<any>['rowClass'];
@@ -134,7 +135,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     if (box.remPx && box.remPx !== g.remPx) g.remPx = box.remPx;
     const { settings, ctx, dir } = g;
     const check = settings.selection?.checkbox === true && (settings.selection.mode ?? 'none') !== 'none';
-    const extra = check ? CHECK_WIDTH : 0;
+    const lead = g.lead ?? 0;
+    const extra = (check ? CHECK_WIDTH : 0) + lead;
     // Flexible columns share what the view has, less the selection boxes' column (owner's third look, app-feedback 34:
     // it was counted twice, 40 px of horizontal scroll): follow it.
     if (box.inline - extra !== available && box.inline > 0) {
@@ -163,8 +165,12 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     if (settings.context !== context) (context = settings.context), messagesRev++;
     // A new row rule binds every row again (its classes are asked on a bind only).
     if (settings.rowClass !== rowClass) (rowClass = settings.rowClass), messagesRev++;
+    // The texts searched, one object while they are the same: a cell part is told when they change (search-highlight.md 6).
+    const q = kernel.query.quick ?? '';
+    const fx = g.findText ?? '';
+    if (q !== search.quick || fx !== search.find) (search = { quick: q, find: fx }), messagesRev++;
     // Direction too: whether a value is isolated depends on it; and which parts draw cells.
-    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}|${parts.rev}|${messagesRev}`;
+    const ek = `${columns.version}|${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${h}|${check}|${dir}|${parts.rev}|${messagesRev}|${lead}`;
     if (ek !== epochKey) {
       epochKey = ek;
       epoch++;
@@ -235,7 +241,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const pins = g.pins ?? [0, 0];
     const headerRows = g.bands.length + 1 + g.headerRows.length + pins[0];
     setAttr(el.viewport, 'aria-rowcount', String(d.count + headerRows + pins[1]));
-    setAttr(el.viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0)));
+    setAttr(el.viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0) + (lead ? 1 : 0)));
     const mode = settings.selection?.mode ?? 'none';
     // Blocks of cells (`@dzgrid/dom/range`, `g.multi`) are a multiple selection whatever the rows' mode.
     setAttr(el.viewport, 'aria-multiselectable', mode === 'multi' || g.multi ? 'true' : null);
@@ -249,8 +255,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     setAttr(el.root, 'data-motion', settings.motion === false ? 'off' : null);
     setPx(el.layer, 'inset-block-start', w.placement.layerTop);
 
-    const ciKey = columns.version * 2 + (check ? 1 : 0);
-    if (colIndexOf.version !== ciKey) colIndexOf = { version: ciKey, index: new Map(visible.map((c, i) => [c.id, i + 1 + (check ? 1 : 0)])) };
+    const ciKey = columns.version * 4 + (check ? 1 : 0) + (lead ? 2 : 0);
+    if (colIndexOf.version !== ciKey) colIndexOf = { version: ciKey, index: new Map(visible.map((c, i) => [c.id, i + 1 + (check ? 1 : 0) + (lead ? 1 : 0)])) };
     const index = colIndexOf.index;
     const colIndex = (id: string) => index.get(id) ?? 0;
     const focus = kernel.focus;
@@ -268,7 +274,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
         setAttr(cell, 'aria-keyshortcuts', [...new Set(keys.split(' ').filter(Boolean))].sort().join(' ') || null);
       }, content: g.slots?.header,
       keep: focus?.kind === 'header' ? { center: focusCenter, level: focus.level ?? 0 } : null,
-      check, selectAll: mode === 'multi', extra: g.headerRows, bands: g.bands,
+      check, lead, selectAll: mode === 'multi', extra: g.headerRows, bands: g.bands,
     });
     if (headerRenderer.checkName) {
       const text = g.msg('selection.column');
@@ -293,7 +299,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       rowHeight: (i) => layout.heightOf(d.index(i)!),
       rowHeader: visible[0]?.id ?? null, colIndex,
       rowAttrs: (key, row) => setAttr(row, 'aria-selected', mode === 'none' || !isDataKey(key) ? null : isSelected(kernel.selection, key) ? 'true' : 'false'),
-      check, dir, headerRows, partFor, report: g.report,
+      check, lead, search, dir, headerRows, partFor, report: g.report,
       partBase: g.partBase,
       focusRow: focus?.kind === 'cell' ? focus.row : null, focusCenter,
       focusColumn: focus?.kind === 'cell' ? focus.column : null, partRev: messagesRev, view: box.inline, rowClass,

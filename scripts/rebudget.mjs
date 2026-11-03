@@ -51,7 +51,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/compare': 300, // owner step 16 (2026-10-29, « ok pour les hausses »): a new line for `sameValues` (measured 273)
   '@dzgrid/core/row-gaps': 450, // owner step 15 (2026-10-29, Q15-9): a new line for the gaps between categories (measured 409)
   '@dzgrid/core/state': 1510, // owner « set include only » (2026-10-29): 1 500 → 1 510; Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
-  '@dzgrid/dom': 22440, // 1.2.0 (+2 % rule, 2026-11-02, measured 22 432: the group rows follow a columns update); before: Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
+  '@dzgrid/dom': 22880, // 1.4.0 (+2 % rule, 2026-11-03, measured 22 853: the lead strip of row numbers and the texts searched in a cell part's context); before: 22 440, 1.2.0 (+2 % rule, 2026-11-02, measured 22 432: the group rows follow a columns update); before: Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 12000, // Phase 9 (owner B after F1–F2, 2026-11-02; Q-F6 had 11 400): rows, join, match case, a condition over a list; before: 10210, // 1.2.0 (+2 % rule, 2026-11-02, measured 10 207: the kits' import() in the entry, filters-base's warning); before: the owner's-look budgets (2026-10-27, decisions.md): 10 000 → 10 100 (apply, the header box, the zone option)
   // The owner's look (2026-10-27): the set chunk 4 205 → 4 250 (one box, the search placeholder, the inert host), the
   // date adapters 2 745 → 2 800 (the FROM / TO placeholder); written grants, no longer the measure + 10 %.
@@ -132,13 +132,22 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/en-find': 250,
   '@dzgrid/dom/locales/fr-find': 250,
   '@dzgrid/dom/locales/ar-find': 300,
-  '@dzgrid/theme/find.css': 550,
+  '@dzgrid/theme/find.css': 561, // 1.4.0 (+2 % rule, measured 559): the letters tinted inside the hits (search-highlight.md)
   // Phase 9 filters panel (filters-panel.md): the side panel over the DOM base, its -filters-panel texts, filters-panel.css; new lines at their measure + 10 %.
   '@dzgrid/dom/filters-panel': 3250,
   '@dzgrid/dom/locales/en-filters-panel': 250,
   '@dzgrid/dom/locales/fr-filters-panel': 250,
   '@dzgrid/dom/locales/ar-filters-panel': 300,
   '@dzgrid/theme/filters-panel.css': 700,
+  // 1.4.0 row numbers (row-numbers.md) and the searched text tinted (search-highlight.md): new lines at their measure + 10 %.
+  '@dzgrid/dom/search': 1479, // 1.4.0 (+2 % rule over 1 450, measured 1 475): the highlight's loader (its code a lazy chunk)
+  '@dzgrid/dom/row-numbers': 1428,
+  '@dzgrid/dom/locales/en-row-numbers': 116,
+  '@dzgrid/dom/locales/fr-row-numbers': 120,
+  '@dzgrid/dom/locales/ar-row-numbers': 132,
+  '@dzgrid/theme/row-numbers.css': 353,
+  '@dzgrid/theme/search.css': 249,
+  '@dzgrid/dom/search: highlight (lazy)': 1051,
   '@dzgrid/theme/menu.css': 750, // owner 2026-11-02: 500 → 750 (measured 716; the list's rules whole)
   // Phase 6 step 4 (owner Q-B, Q4-1, Q4-2, Q4-4): the column chooser over the popup host (4 000, up to 4 400 if needed);
   // its texts in the -columns bundles (500 / 600 / 800 kept), its look in its own columns-panel.css (measure + 10 %, ≤ 1 000).
@@ -152,7 +161,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/tailwind.css': 500, // T7: each framework bridge
   '@dzgrid/theme/tailwind3.css': 500, // T7
   '@dzgrid/theme/bootstrap.css': 500, // T7
-  '@dzgrid/angular': 7450, // owner step 16 (2026-10-29, « ok pour les hausses »): 7 350 → 7 450 ([multiSort], [sameRow], expandedIds; measured 7 438); owner « clearFilters/resetState » (2026-10-28): 7 300 → 7 350; before: Phase 6 step 12 (owner Q12-1, the Q-B grant): 7 300; before: owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
+  '@dzgrid/angular': 7650, // owner 2026-11-03: 7 450 → 7 650 (component classes in ui.cell; measured 7 627); owner step 16 (2026-10-29, « ok pour les hausses »): 7 350 → 7 450 ([multiSort], [sameRow], expandedIds; measured 7 438); owner « clearFilters/resetState » (2026-10-28): 7 300 → 7 350; before: Phase 6 step 12 (owner Q12-1, the Q-B grant): 7 300; before: owner T8 (2026-10-23): +50 for [rowClass]; D3 (2026-10-23): +50 for [rowHeight]; S9-Q6 (2026-10-25): editing, at most 7 000 = 6 250 + 650 (Q16) + 50 (T8) + 50 (D3); the budget line the measure + 50
   'profile: audit screen (K.8)': 90000, // owner step 16 (2026-10-29, « ok pour les hausses »): 84 950 → 90 000 (measured 85 133; ARCHITECTURE K.8 ≤ 90 kB); owner « set include only » (2026-10-29): 84 900 → 84 950; before: owner « clearFilters/resetState » (2026-10-28): 84 800 → 84 900; before: Phase 6 step 12 (owner Q12-1): 84 800; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 84 450; Q17a 83 500; Q-B / Q8-5 (2026-10-27): 84 000; Q9-3 (2026-10-27): 84 150 (auto height's base seam); the owner's look (2026-10-27): 84 300
   // `@dzgrid/dom/groups` (owner Q8-4, 2026-10-27): its measure + 10 %, no ceiling of its own (measured 1 893 → 2 100).
   // Phase 6 step 8b-1 (owner Q2, 2026-10-27): pinned rows over the DOM base, 2 000 (up to 2 300 only if editing needs

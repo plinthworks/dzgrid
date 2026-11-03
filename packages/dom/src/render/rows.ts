@@ -38,8 +38,10 @@ export interface RowView {
   focusCol: string | null;
   readonly cells: Map<string, CellView>;
   top: number;
-  /** The selection box, first in the start segment, when the grid shows one (D8). */
+  /** The selection box, first in the start segment (after the lead), when the grid shows one (D8). */
   check: HTMLElement | null;
+  /** The lead strip's cell (`GridContext.lead`, `@dzgrid/dom/row-numbers`), first in the start segment; its content the feature's. */
+  lead: HTMLElement | null;
   /** The span plan the row was bound with (null: plain cells). */
   plan: RowPlan | null;
   /** A detail row's one cell (D8), where its part mounts; null on any other row. */
@@ -105,6 +107,9 @@ export function cellValue<T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: Loca
 export const cellText = <T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: LocaleCtx): string => cellValue(col, row, ctx).text;
 
 
+/** No text searched: what a cell part is given outside a paint that says (`SlotContext['cell'].search`). */
+const NO_SEARCH = { quick: '', find: '' } as const;
+
 export const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 
 
@@ -130,6 +135,10 @@ export interface Frame<T> {
   readonly partRev: number;
   /** A selection box column before the start columns (D8): widths and indices shift by it. */
   readonly check: boolean;
+  /** The lead strip's width (`GridContext.lead`), before the box column; 0 or absent: none. */
+  readonly lead?: number;
+  /** The texts searched, given to a cell part (`SlotContext['cell'].search`); the same object while they are the same. */
+  readonly search?: { readonly quick: string; readonly find: string };
   /** The grid's direction: whether a value needs isolating depends on it. */
   readonly dir: 'ltr' | 'rtl';
   /** Header rows above the body: body row i has aria-rowindex headerRows + 1 + i. */
@@ -137,7 +146,7 @@ export interface Frame<T> {
   /** The cell part a column has, if any. */
   readonly partFor: (col: ResolvedColumn<any>) => SlotPart<'cell'> | null;
   /** What every part gets (language, direction, messages). */
-  readonly partBase: Omit<SlotContext['cell'], 'value' | 'text' | 'row' | 'key' | 'column' | 'focused'>;
+  readonly partBase: Omit<SlotContext['cell'], 'value' | 'text' | 'row' | 'key' | 'column' | 'focused' | 'search'>;
   /** A part's error: reported, its cell left empty. */
   readonly report: (err: unknown) => void;
   readonly colIndex: (id: string) => number;
@@ -238,7 +247,7 @@ export class RowRenderer<T> {
     };
     const segs = { start: seg('start'), center: seg('center'), end: seg('end') };
     this.made++;
-    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null, plan: null, slot: null, part: null, cls: '' };
+    return { el, segs, key: null, data: undefined, epoch: -1, focusCol: null, cells: new Map(), top: Number.NaN, check: null, lead: null, plan: null, slot: null, part: null, cls: '' };
   }
 
   #makeCell(): CellView {
@@ -351,12 +360,13 @@ export class RowRenderer<T> {
     v.plan = plan;
     this.#rowClass(v, key, data, f);
     if (f.spans) setAttr(v.el, 'data-spans', plan?.spans ? '' : null);
-    const extra = f.check ? CHECK_WIDTH : 0;
+    const extra = (f.check ? CHECK_WIDTH : 0) + (f.lead ?? 0);
     setPx(v.el, 'inline-size', L.totalWidth + extra);
     setPx(v.segs.start, 'inline-size', L.start.width + extra);
+    this.#leadCell(v, f.lead);
     this.#checkCell(v, f.check, !!data);
     // The box is not a value to edit: read-only once the grid edits.
-    if (v.check) setAttr(v.check, 'aria-readonly', f.ro ? 'true' : null);
+    if (v.check) setAttr(v.check, 'aria-readonly', f.ro ? 'true' : null), setAttr(v.check, 'aria-colindex', f.lead ? '2' : '1');
     setPx(v.segs.center, 'inline-size', L.center.width);
     setPx(v.segs.end, 'inline-size', L.end.width);
     // Cells that go are taken out first: a focused cell is then never moved past them (a move blurs).
@@ -380,6 +390,7 @@ export class RowRenderer<T> {
     }
     const place = (seg: HTMLElement, cols: readonly ResolvedColumn<any>[], widths: ColumnLayout['start']['widths'], indices: Iterable<number>, absolute: boolean, at: number) => {
       let cursor: ChildNode | null = seg.firstChild;
+      if (cursor && cursor === v.lead) cursor = cursor.nextSibling;
       if (cursor && cursor === v.check) cursor = cursor.nextSibling;
       for (const c of indices) {
         const col = cols[c]!;
@@ -409,7 +420,7 @@ export class RowRenderer<T> {
    */
   #whole(v: RowView, key: RowKey, node: DetailNode<unknown>, i: number, f: Frame<T>): void {
     const L = f.layout;
-    const width = L.totalWidth + (f.check ? CHECK_WIDTH : 0);
+    const width = L.totalWidth + (f.check ? CHECK_WIDTH : 0) + (f.lead ?? 0);
     setPx(v.el, 'block-size', f.rowHeight(i));
     setPx(v.el, 'inline-size', width);
     // Another master's detail: its part is not this one's.
@@ -426,6 +437,7 @@ export class RowRenderer<T> {
     }
     v.cells.clear();
     this.#checkCell(v, false);
+    this.#leadCell(v);
     let s = v.slot;
     if (!s) {
       s = this.#doc.createElement('div');
@@ -437,7 +449,7 @@ export class RowRenderer<T> {
       v.slot = s;
     }
     setPx(s, 'inline-size', Math.min(f.view ?? width, width));
-    setAttr(s, 'aria-colspan', String(L.start.columns.length + L.center.columns.length + L.end.columns.length + (f.check ? 1 : 0)));
+    setAttr(s, 'aria-colspan', String(L.start.columns.length + L.center.columns.length + L.end.columns.length + (f.check ? 1 : 0) + (f.lead ? 1 : 0)));
     setAttr(s, 'aria-readonly', f.ro ? 'true' : null);
     // A new key comes from the pool or another detail: its data differs (a pooled row holds none).
     if (v.data !== node.data || v.epoch !== f.epoch) {
@@ -494,15 +506,28 @@ export class RowRenderer<T> {
       setPx(el, 'inline-size', CHECK_WIDTH);
       v.check = el;
     }
-    if (v.segs.start.firstChild !== v.check) v.segs.start.prepend(v.check);
+    if ((v.lead?.nextSibling ?? v.segs.start.firstChild) !== v.check) v.lead ? v.lead.after(v.check) : v.segs.start.prepend(v.check);
     // A row that cannot be selected keeps the cell (the columns line up), not its box.
     (v.check.firstChild as HTMLElement).hidden = !box;
+  }
+
+  /** The lead strip's cell, first in the start segment, `w` px wide (none: removed); a gridcell at colindex 1. */
+  #leadCell(v: RowView, w?: number): void {
+    if (!w) return void (v.lead?.remove(), (v.lead = null));
+    if (!v.lead) {
+      v.lead = this.#doc.createElement('div');
+      v.lead.className = 'dzg-lead';
+      v.lead.setAttribute('role', 'gridcell');
+      v.lead.setAttribute('aria-colindex', '1');
+    }
+    setPx(v.lead, 'inline-size', w);
+    if (v.segs.start.firstChild !== v.lead) v.segs.start.prepend(v.lead);
   }
 
   /** True when the row holds exactly the cells it should: then nothing needs placing. */
   #matches(v: RowView, f: Frame<T>, center: readonly number[], plan: RowPlan | null): boolean {
     const L = f.layout;
-    if (!!v.check !== f.check) return false;
+    if (!!v.check !== f.check || !!v.lead !== !!f.lead) return false;
     let n = center.length;
     for (const c of center) if (!v.cells.has(L.center.columns[c]!.id)) return false;
     // Every pinned slot not covered has its cell, and nothing else is there.
@@ -590,8 +615,8 @@ export class RowRenderer<T> {
         const focused = key === f.focusRow && col.id === f.focusColumn;
         const l = cell.last;
         // A rebind for the row height, the box column or the column window changes nothing a part sees.
-        if (cell.handle && l && l.key === key && l.row === data && Object.is(l.value, value) && l.text === text && l.column === col && l.focused === focused && l.ctx === f.partBase.ctx && l.dir === f.partBase.dir && cell.lastRev === f.partRev) return;
-        const c: SlotContext['cell'] = { ...f.partBase, value, text, row: data as never, key, column: col, focused };
+        if (cell.handle && l && l.key === key && l.row === data && Object.is(l.value, value) && l.text === text && l.column === col && l.focused === focused && l.ctx === f.partBase.ctx && l.dir === f.partBase.dir && l.search === (f.search ?? NO_SEARCH) && cell.lastRev === f.partRev) return;
+        const c: SlotContext['cell'] = { ...f.partBase, value, text, row: data as never, key, column: col, focused, search: f.search ?? NO_SEARCH };
         cell.last = c;
         cell.lastRev = f.partRev;
         try {

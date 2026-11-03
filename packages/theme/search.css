@@ -1,0 +1,14 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  ::highlight(dzg-search) {
+    color: var(--tz-fg);
+    background-color: var(--dzg-search-mark, color-mix(in srgb, var(--tz-warning) 30%, var(--tz-bg)));
+    text-decoration: underline 1px var(--tz-fg);
+  }
+  @media (forced-colors: active) {
+    ::highlight(dzg-search) {
+      color: MarkText;
+      background-color: Mark;
+    }
+  }
+}

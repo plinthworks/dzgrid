@@ -1,0 +1,28 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  .dzg-lead {
+    border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);
+    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
+    color: var(--tz-fg-muted);
+    background: var(--dzg-header-bg, var(--tz-bg-raised));
+  }
+  .dzg-row .dzg-lead:hover {
+    color: var(--tz-fg);
+  }
+  .dzg-lead[data-on],
+  .dzg-row[aria-selected=true] .dzg-lead {
+    color: var(--tz-fg);
+    font-weight: 600;
+    background: var(--dzg-row-selected-bg, color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg)));
+  }
+  @media (forced-colors: active) {
+    .dzg-lead {
+      border-color: CanvasText;
+    }
+    .dzg-lead[data-on],
+    .dzg-row[aria-selected=true] .dzg-lead {
+      color: HighlightText;
+      background: Highlight;
+    }
+  }
+}

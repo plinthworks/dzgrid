@@ -148,7 +148,7 @@ export function createBands(g: GridContext<unknown>): Bands {
             const z = f.first - x + f.count;
             setAttr(el, 'aria-colspan', String(f.count));
             setPx(el, 'inline-size', slice.widths.offsetOf(z) - slice.widths.offsetOf(f.first - x));
-            setPx(el, 'inset-inline-start', slice.widths.offsetOf(f.first - x) + (s || !p.check ? 0 : CHECK_WIDTH));
+            setPx(el, 'inset-inline-start', slice.widths.offsetOf(f.first - x) + (s ? 0 : (p.check ? CHECK_WIDTH : 0) + (p.lead ?? 0)));
           }
           // The group's own words, already translated (its id otherwise); where no group stands,
           // the column's own (its header reaches up to here).
@@ -166,13 +166,15 @@ export function createBands(g: GridContext<unknown>): Bands {
           el.remove();
           cells.delete(key);
         }
-        // In column order in each segment, after the box.
+        // In column order in each segment, after the lead and the box.
         let seg: HTMLElement | null = null;
         let cur: ChildNode | null = null;
         for (const [sg, el] of items) {
           if (sg !== seg) {
             seg = sg;
-            cur = (sg.firstChild as HTMLElement | null)?.classList.contains('dzg-check') ? sg.firstChild!.nextSibling : sg.firstChild;
+            cur = sg.firstChild;
+            // After the lead strip's cell and the box (row numbers, selection).
+            while ((cur as HTMLElement | null)?.matches?.('.dzg-lead,.dzg-check')) cur = cur!.nextSibling;
           }
           if (el === cur) cur = el.nextSibling;
           else sg.insertBefore(el, cur);

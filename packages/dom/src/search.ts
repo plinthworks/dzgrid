@@ -4,4 +4,4 @@
  * so an app with only a search box carries neither. It reaches the base only through the grid
  * it is set up on.
  */
-export { quickSearch, type QuickSearch, type QuickSearchOptions } from './search/index.js';
+export { quickSearch, type QuickSearch, type QuickSearchOptions, type QuickSearchSetup } from './search/index.js';

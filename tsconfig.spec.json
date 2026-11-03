@@ -134,6 +134,9 @@
       "@dzgrid/dom/filters-panel": [
         "./packages/dom/src/filters-panel.ts"
       ],
+      "@dzgrid/dom/row-numbers": [
+        "./packages/dom/src/row-numbers.ts"
+      ],
       "@dzgrid/dom/columns-panel": [
         "./packages/dom/src/columns-panel.ts"
       ],

@@ -42,7 +42,8 @@ describe('the DOM layer’s shape', () => {
     expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['search.ts', 'search/bind.ts', 'search/index.ts']);
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
-      .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^search(\/[^:]+)?\.ts: \.\/(search\/)?[a-z-]+\.js$/.test(s));
+      // 1.4.0: the shared highlight loader (search-highlight.md; its matching is a chunk loaded on demand).
+      .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^search(\/[^:]+)?\.ts: \.\/(search\/)?[a-z-]+\.js$/.test(s) && s !== 'search/index.ts: ../highlight/use.js');
     expect(offenders).toEqual([]);
     // Nothing of the base imports it, the features seam included.
     expect(files(SRC).filter((f) => !/^search(\/|\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?search(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
@@ -160,7 +161,7 @@ describe('the DOM layer’s shape', () => {
   it('keeps @dzgrid/dom/internal for the feature entries (step 17): slots, filters, search, pagination and the editors (Phase 5 step 5) import it, by name; the base never', () => {
     const named = /^import (?!type )[^;]*from '@dzgrid\/dom\/internal'/m;
     const users = files(SRC).filter((f) => named.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f).split('/')[0]!.replace(/\.ts$/, ''));
-    expect([...new Set(users)].sort()).toEqual(['column-menu', 'context-menu', 'editors', 'filters', 'filters-panel', 'find', 'pagination', 'search', 'slots', 'statusbar']); // filters-panel: the parts' mount and the texts check (Phase 9); find: the menus' texts check and the input method's keys (Phase 9); statusbar: the shared strip (Phase 9); column-menu: its items' parts (Phase 6 step 12); both menus: the shared list (Phase 9)
+    expect([...new Set(users)].sort()).toEqual(['column-menu', 'context-menu', 'editors', 'filters', 'filters-panel', 'find', 'pagination', 'row-numbers', 'search', 'slots', 'statusbar']); // row-numbers: the texts check (1.4.0); filters-panel: the parts' mount and the texts check (Phase 9); find: the menus' texts check and the input method's keys (Phase 9); statusbar: the shared strip (Phase 9); column-menu: its items' parts (Phase 6 step 12); both menus: the shared list (Phase 9)
     // Never by a relative path (a second copy in each bundle), never from the base.
     // The menus' shared list (Phase 9) is part of the internal entry (exported by it only).
     const relative_ = files(SRC).filter((f) => !/^(internal(\/|\.ts$)|menu\/list\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?internal(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f));

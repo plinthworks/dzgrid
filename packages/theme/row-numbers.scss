@@ -1,0 +1,57 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/row-numbers.css — the row numbers' strip (1.4.0, docs/behaviors/row-numbers.md 12): loaded by the
+// applications that add `rowNumbers()` (`@dzgrid/dom/row-numbers`), after dzgrid.css; the base theme does not grow.
+// Compiled to row-numbers.css (layered) and row-numbers.unlayered.css ($layered: false) by `npm run build:theme`.
+//
+// The header's surface and muted text, a line at its end edge (the left in Arabic) and under each number; a row taken
+// whole (the block over all its columns, `data-on`, or the row selected) its number in the text colour, bold, on the
+// selection's tint: not colour alone. Forced colours: system colours. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-lead {
+    border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);
+    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
+    color: var(--tz-fg-muted);
+    background: var(--dzg-header-bg, var(--tz-bg-raised));
+  }
+
+  .dzg-row .dzg-lead:hover {
+    color: var(--tz-fg);
+  }
+
+  .dzg-lead[data-on],
+  .dzg-row[aria-selected='true'] .dzg-lead {
+    color: var(--tz-fg);
+    font-weight: 600;
+    background: var(--dzg-row-selected-bg, color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg)));
+  }
+
+  @media (forced-colors: active) {
+    .dzg-lead {
+      border-color: CanvasText;
+    }
+
+    .dzg-lead[data-on],
+    .dzg-row[aria-selected='true'] .dzg-lead {
+      color: HighlightText;
+      background: Highlight;
+    }
+  }
+}

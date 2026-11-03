@@ -10,10 +10,10 @@ import { CHECK_WIDTH } from '../render/write.js';
  */
 type Pt = { readonly clientX: number; readonly clientY: number };
 
-/** The box column's width when it is shown. */
+/** The box column's width when it is shown, and the lead strip's (row numbers). */
 const extra = (g: GridContext<unknown>): number => {
   const s = g.settings.selection;
-  return s?.checkbox && (s.mode ?? 'none') !== 'none' ? CHECK_WIDTH : 0;
+  return (s?.checkbox && (s.mode ?? 'none') !== 'none' ? CHECK_WIDTH : 0) + (g.lead ?? 0);
 };
 
 /**

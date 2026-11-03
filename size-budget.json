@@ -1,5 +1,5 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 90 000 (owner step 16, 2026-10-29: « ok pour les hausses » — K.8 84 950 → 90 000, set chunk 4 350 → 4 500, core/detail 1 050 → 1 150, Angular 7 350 → 7 450, core/compare 300 new; before: owner « set include only » (2026-10-29): 84 900 → 84 950, set chunk 4 250 → 4 350, core/edit 3 150 → 3 160, core/state 1 500 → 1 510). A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 90 000 (owner step 16, 2026-10-29: « ok pour les hausses » — K.8 84 950 → 90 000, set chunk 4 350 → 4 500, core/detail 1 050 → 1 150, Angular 7 350 → 7 450, core/compare 300 new; owner 2026-11-03: Angular 7 450 → 7 650 (component classes in ui.cell); before: owner « set include only » (2026-10-29): 84 900 → 84 950, set chunk 4 250 → 4 350, core/edit 3 150 → 3 160, core/state 1 500 → 1 510). A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
@@ -285,6 +285,18 @@
       "file": "packages/dom/src/locales/ar-filters-panel.ts",
       "maxGzip": 300
     },
+    "@dzgrid/dom/locales/en-row-numbers": {
+      "file": "packages/dom/src/locales/en-row-numbers.ts",
+      "maxGzip": 116
+    },
+    "@dzgrid/dom/locales/fr-row-numbers": {
+      "file": "packages/dom/src/locales/fr-row-numbers.ts",
+      "maxGzip": 120
+    },
+    "@dzgrid/dom/locales/ar-row-numbers": {
+      "file": "packages/dom/src/locales/ar-row-numbers.ts",
+      "maxGzip": 132
+    },
     "@dzgrid/dom/locales/en-pinned": {
       "file": "packages/dom/src/locales/en-pinned.ts",
       "maxGzip": 120
@@ -391,15 +403,23 @@
     },
     "@dzgrid/theme/find.css": {
       "file": "packages/theme/find.css",
-      "maxGzip": 550
+      "maxGzip": 561
     },
     "@dzgrid/theme/filters-panel.css": {
       "file": "packages/theme/filters-panel.css",
       "maxGzip": 700
     },
+    "@dzgrid/theme/row-numbers.css": {
+      "file": "packages/theme/row-numbers.css",
+      "maxGzip": 353
+    },
+    "@dzgrid/theme/search.css": {
+      "file": "packages/theme/search.css",
+      "maxGzip": 249
+    },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 22440,
+      "maxGzip": 22880,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -445,11 +465,12 @@
     },
     "@dzgrid/dom/search": {
       "file": "packages/dom/src/search.ts",
-      "maxGzip": 1450,
+      "maxGzip": 1479,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
-        "@dzgrid/dom/internal"
+        "@dzgrid/dom/internal",
+        "./chunk.js"
       ]
     },
     "@dzgrid/dom/pagination": {
@@ -682,7 +703,8 @@
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
-        "@dzgrid/dom/internal"
+        "@dzgrid/dom/internal",
+        "./chunk.js"
       ]
     },
     "@dzgrid/dom/filters-panel": {
@@ -693,6 +715,23 @@
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/row-numbers": {
+      "file": "packages/dom/src/row-numbers.ts",
+      "maxGzip": 1428,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/search: highlight (lazy)": {
+      "file": "packages/dom/src/highlight/chunk.ts",
+      "maxGzip": 1051,
+      "external": [
+        "@dzgrid/core"
       ]
     },
     "profile: both menus (column and cell, the shared list counted once)": {
@@ -981,7 +1020,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 7450,
+      "maxGzip": 7650,
       "external": [
         "@angular/*",
         "@dzgrid/*",

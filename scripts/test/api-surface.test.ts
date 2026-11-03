@@ -12,6 +12,11 @@ describe('api.mjs, what counts as a compatible change', () => {
   const iface = (...members: string[]) => ['export interface Opts {', ...members.map((m) => `    ${m}`), '}'].join('\n');
 
   it('passes an optional member added, fails a required one', () => {
+    // 1.4.0: the printer may list a union's members in another order (the same type); a member added in front widens.
+    expect(compatible(iface('readonly n: X<"locale" | "latn" | undefined>;'), iface('readonly n: X<"latn" | "locale" | undefined>;'))).toBe(true);
+    expect(compatible(iface('readonly c: X<readonly A<T>[]>;'), iface('readonly c: X<B<T> | readonly A<T>[]>;'))).toBe(true);
+    expect(compatible(iface('readonly n: X<"locale" | "latn" | undefined>;'), iface('readonly n: X<"latn" | undefined>;'))).toBe(false);
+    expect(compatible(iface('readonly c: X<readonly A<T>[]>;'), iface('readonly c: X<B<T>>;'))).toBe(false);
     expect(compatible(iface('readonly a: string;'), iface('readonly a: string;', 'readonly b?: number;'))).toBe(true);
     expect(compatible(iface('readonly a: string;'), iface('readonly a: string;', 'readonly b: number;'))).toBe(false);
   });

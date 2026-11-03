@@ -69,9 +69,35 @@ A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
   `cmenu.exportXlsx` is optional in a bundle (`ContextMenuXlsxKey`): a 1.3.0 bundle keeps compiling; it is asked only
   with `use.xlsx`.
 
+- **Row numbers** (1.4.0, `docs/behaviors/row-numbers.md`, owner 2026-11-03): `@dzgrid/dom/row-numbers`, `rowNumbers()`.
+  A strip at the inline start of every row (before the selection boxes and the start-pinned columns, pinned with them),
+  1, 2, 3… in display order (after a sort, a filter, the quick search, a tree's opening; a detail panel neither numbered
+  nor counted; a paged grid going on from the pages before), in the grid's digits, as wide as its largest number. Never a
+  column: no sort, filter, edit, move, export, print, copy, state or server request sees it. A click on a number takes
+  the row as the block (`range()`), Shift+click the rows between (the focus kept), the corner every cell; without
+  `range()` the row selection's click (Ctrl/⌘ toggles, Shift the rows between); with neither, nothing. On the keys:
+  Shift+Space, Ctrl+A (the strip is not an arrow stop). Pinned rows keep an empty strip cell. The corner is a column
+  header « Row number » (`aria-colindex` 1, every column after it). Texts `locales/{en,fr,ar}-row-numbers`; look
+  `@dzgrid/theme/row-numbers.css`. The DOM base reserves the strip (`GridContext.lead`, `RowView.lead`,
+  `HeaderRenderer.lead`, `.dzg-lead`).
+- **The searched text tinted inside the cells** (1.4.0, `docs/behaviors/search-highlight.md`, owner 2026-11-03): the
+  quick search's words (`quickSearch()`) and find's text (`find()`), folded as the search folds (case, accents, Arabic
+  marks, digits), tinted over the original letters with the CSS Custom Highlight API — the cells' DOM never changed;
+  nothing where the browser lacks it. Only the grid's own cells (never a part's, the editor's, a pinned row's); find's
+  current hit stronger. On by default; `quickSearch({ highlight: false })`, `find({ highlight: false })`. The code is a
+  lazy chunk shared by both, loaded at the first search. Look: `@dzgrid/theme/search.css` (new, `--dzg-search-mark`)
+  and `find.css` (`--dzg-find-mark`, `--dzg-find-mark-current`), 4.5:1 checked light and dark, forced colours.
+- A cell part's context: `search: { quick, find }`, the texts searched, so a part can tint itself (`parts.md`).
+- `@dzgrid/angular`: a component class directly in a column, `{ id: 'label', ui: { cell: LabelCell } }` (also
+  `ui.header`, `ui.tooltip`): the wrapper names it (`dzg-ng-<slot>-<n>`) and registers it; the grid sees strings only.
+  Names and `[parts]` unchanged. Types `DzgColumnOrGroup`, `DzgColumnDef`, `DzgColumnGroup`, `DzgColumnUi`, `DzgColumns`
+  (`[columns]` takes them besides the core's).
+
 ### Changed
 - CSV and Excel read a cell through one rule (`readValue`) and one wall-time rule (`wallMs`).
 - `pagination()` draws into the bottom strip shared with the status bar (`@dzgrid/dom/internal`); alone, unchanged.
+- `npm run check:api` reads a union whose members the declaration printer lists in another order as the same type (a
+  member added in front is a widening), as it always read one with members added at the end.
 
 ## [1.3.0] - 2026-11-02
 

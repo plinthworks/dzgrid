@@ -169,7 +169,7 @@ export function pinnedRows<T = unknown>(o: PinnedRowsOptions<T> = {}): PinnedRow
         b.f = fk;
         b.o = Math.max(0, Math.min(b.o, n * h - b.px));
         setPx(b.el, 'block-size', b.px);
-        setPx(b.el, 'inline-size', f.layout.totalWidth + (f.check ? CHECK_WIDTH : 0));
+        setPx(b.el, 'inline-size', f.layout.totalWidth + (f.check ? CHECK_WIDTH : 0) + (f.lead ?? 0));
         const wanted: number[] = [];
         for (let i = Math.floor(b.o / h); i < n && i * h < b.o + b.px; i++) wanted.push(i);
         const rc = f.rowClass;

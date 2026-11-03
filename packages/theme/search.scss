@@ -1,0 +1,41 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/search.css — the quick search's words tinted inside the cells (1.4.0, docs/behaviors/search-highlight.md
+// 10): loaded by the applications that use `quickSearch()` (`@dzgrid/dom/search`), after dzgrid.css; the base theme does
+// not grow. Compiled to search.css (layered) and search.unlayered.css ($layered: false) by `npm run build:theme`.
+//
+// Drawn by the browser over the text (`::highlight(dzg-search)`, the CSS Custom Highlight API): the cells' DOM is never
+// changed. `--dzg-search-mark`: the palette's warning mixed into the surface (a highlighter's tint), the text in the
+// text colour, 4.5:1 checked; underlined: not colour alone. Find's marks (find.css) are drawn over it. Forced colours:
+// Mark / MarkText. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  ::highlight(dzg-search) {
+    color: var(--tz-fg);
+    background-color: var(--dzg-search-mark, color-mix(in srgb, var(--tz-warning) 30%, var(--tz-bg)));
+    text-decoration: underline 1px var(--tz-fg);
+  }
+
+  @media (forced-colors: active) {
+    ::highlight(dzg-search) {
+      color: MarkText;
+      background-color: Mark;
+    }
+  }
+}

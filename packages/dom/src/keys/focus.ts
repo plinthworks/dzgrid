@@ -69,7 +69,7 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     const c = L.center.columns.findIndex((x) => x.id === column);
     if (c === -1) return;
     const s = g.settings.selection;
-    const extra = s?.checkbox && (s.mode ?? 'none') !== 'none' ? CHECK_WIDTH : 0;
+    const extra = (s?.checkbox && (s.mode ?? 'none') !== 'none' ? CHECK_WIDTH : 0) + (g.lead ?? 0);
     const view = Math.max(0, box.inline - L.start.width - extra - L.end.width);
     const start = L.center.widths.offsetOf(c);
     const end = start + L.center.widths.sizeAt(c);

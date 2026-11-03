@@ -8,6 +8,7 @@ export { DzGrid } from './grid';
 export { DzgController } from './controller';
 export { DzgPart } from './dzg-part';
 export { componentPart } from './component-part';
+export type { DzgColumnDef, DzgColumnGroup, DzgColumnOrGroup, DzgColumns, DzgColumnUi } from './columns';
 export { DzgSearch } from './search';
 export { DzgExport } from './export';
 export { fromObservable, type ObservableLike } from './from-observable';

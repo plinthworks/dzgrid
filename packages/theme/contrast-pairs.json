@@ -206,7 +206,13 @@
     { "what": "find field text", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
     { "what": "filters panel: « Clear all filters » and the active count (Phase 9, filters-panel.css)", "fg": "--tz-accent", "bg": "--tz-bg", "min": 4.5 },
     { "what": "filters panel: a column button, hovered or open", "fg": "--tz-fg", "bg": "--tz-bg-raised", "min": 4.5 },
-    { "what": "filters panel: the dot of an active filter, on an open column", "fg": "--tz-accent", "bg": "--tz-bg-raised", "min": 3 }
+    { "what": "filters panel: the dot of an active filter, on an open column", "fg": "--tz-accent", "bg": "--tz-bg-raised", "min": 3 },
+    { "what": "quick search: the words tinted in a cell (search.css, 1.4.0)", "fg": "--tz-fg", "bg": "--dzg-search-mark", "min": 4.5 },
+    { "what": "find: the letters tinted in a hit cell (find.css, 1.4.0)", "fg": "--tz-fg", "bg": "--dzg-find-mark", "min": 4.5 },
+    { "what": "find: the letters tinted in the current hit", "fg": "--tz-fg", "bg": "--dzg-find-mark-current", "min": 4.5 },
+    { "what": "row numbers: a number on the header's surface (row-numbers.css, 1.4.0)", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 4.5 },
+    { "what": "row numbers: a number hovered", "fg": "--tz-fg", "bg": "--dzg-header-bg", "min": 4.5 },
+    { "what": "row numbers: a row taken whole, its number on the selection's tint", "fg": "--tz-fg", "bg": "--dzg-row-selected-bg", "min": 4.5 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",
@@ -246,6 +252,9 @@
     "--dzg-fresh-bg": "color-mix(in srgb, var(--dzg-fresh-color) 14%, var(--tz-bg))",
     "--dzg-find-color": "color-mix(in srgb, var(--tz-accent) 40%, var(--tz-danger))",
     "--dzg-find-bg": "color-mix(in srgb, var(--dzg-find-color) 16%, var(--tz-bg))",
-    "--dzg-find-current-bg": "color-mix(in srgb, var(--dzg-find-color) 30%, var(--tz-bg))"
+    "--dzg-find-current-bg": "color-mix(in srgb, var(--dzg-find-color) 30%, var(--tz-bg))",
+    "--dzg-search-mark": "color-mix(in srgb, var(--tz-warning) 30%, var(--tz-bg))",
+    "--dzg-find-mark": "color-mix(in srgb, var(--dzg-find-color) 32%, var(--tz-bg))",
+    "--dzg-find-mark-current": "color-mix(in srgb, var(--dzg-find-color) 45%, var(--tz-bg))"
   }
 }

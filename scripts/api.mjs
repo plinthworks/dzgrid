@@ -162,8 +162,42 @@ function optionalParamAdded(prev, next) {
 /** A version constant moving with a release: `declare const X_VERSION = "1.0.0";`. */
 const VERSION = /^(export )?declare const [\w$]+ = "\d+\.\d+\.\d+[^"]*";$/;
 
-/** A changed line that only widens: union members added, an optional parameter added, a version stamp. */
-const lineWidened = (prev, next) => unionWidened(prev, next) || optionalParamAdded(prev, next) || (VERSION.test(prev) && VERSION.test(next));
+/** A union's members at bracket depth 0 (` | ` between them), or null when the text is not balanced. */
+function members(text) {
+  const out = [];
+  let d = 0;
+  let from = 0;
+  for (let i = 0; i < text.length; i++) {
+    d += '{(<['.includes(text[i]) ? 1 : '})>]'.includes(text[i]) ? -1 : 0;
+    if (d < 0) return null;
+    if (d === 0 && text.startsWith(' | ', i)) out.push(text.slice(from, i)), (from = i + 3);
+  }
+  return d === 0 ? [...out, text.slice(from)] : null;
+}
+
+/**
+ * The same union with members added, in any order (1.4.0: the declaration printer may list a union's members in another
+ * order from one build to the next — the same type): the differing middle, cut at member boundaries, must hold every
+ * member it held.
+ */
+function unionReordered(prev, next) {
+  let p = 0;
+  while (p < prev.length && prev[p] === next[p]) p++;
+  while (p > 0 && !/(<|\(|: | \| )$/.test(prev.slice(0, p))) p--;
+  let t = 0;
+  while (t < prev.length - p && t < next.length - p && prev[prev.length - 1 - t] === next[next.length - 1 - t]) t++;
+  // The longest common end at a member's end leaving both middles balanced.
+  for (; t >= 0; t--) {
+    if (t && !/^(>|\)|;|,| \| )/.test(prev.slice(prev.length - t))) continue;
+    const a = members(prev.slice(p, prev.length - t));
+    const b = members(next.slice(p, next.length - t));
+    if (a && b) return b.length > 1 && a.every((m) => b.includes(m)) && !b.some((m) => !a.includes(m) && NULLISH.has(m.trim()));
+  }
+  return false;
+}
+
+/** A changed line that only widens: union members added (or listed in another order), an optional parameter added, a version stamp. */
+const lineWidened = (prev, next) => unionWidened(prev, next) || unionReordered(prev, next) || optionalParamAdded(prev, next) || (VERSION.test(prev) && VERSION.test(next));
 
 const net = (line) => {
   let d = 0;

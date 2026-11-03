@@ -221,3 +221,43 @@ RTL.
   popup); « Effacer tous les filtres » also empties the quick search, as the menus' item; hidden columns are listed.
 - `check:api`: additions only (`@dzgrid/dom/filters-panel`, `FiltersPanelMessageKey`, `PartBase.msg` keys).
 
+
+## Row numbers, search highlight, Angular column components — owner decisions (2026-11-03)
+
+Asked through the lead, taken: row numbers (an opt-in strip, display order, a click takes the row, Shift+click the rows
+between, never a column); the searched text tinted inside the cells for the quick search and find (CSS Custom
+Highlight API, the core's `fold`, nothing where unsupported); a cell part given the texts searched (`search`); in
+Angular a component class directly in `ui.cell` / `ui.header` / `ui.tooltip`.
+
+## Row numbers, search highlight, Angular column components — measures and lead decisions (2026-11-03, not committed)
+
+| Line | Measured | Line |
+|---|---|---|
+| `@dzgrid/dom/row-numbers` (new, over the DOM base) | 1 298 | 1 428 (measure + 10 %) |
+| `locales/{en,fr,ar}-row-numbers` (new) | 105 / 109 / 120 | 116 / 120 / 132 |
+| `@dzgrid/theme/row-numbers.css` (new) | 321 | 353 |
+| `@dzgrid/theme/search.css` (new) | 226 | 249 |
+| `@dzgrid/dom/search: highlight (lazy)` (new, shared by search and find) | 955 | 1 051 |
+| `@dzgrid/dom` (the lead strip, the part's `search`) | 22 435 → 22 853 | 22 440 → **22 880** (+2 % rule) |
+| `@dzgrid/dom/search` (the loader) | 1 298 → 1 475 | 1 450 → **1 479** (+2 % rule) |
+| `@dzgrid/theme/find.css` (the letters' marks) | 482 → 559 | 550 → **561** (+2 % rule) |
+| `@dzgrid/dom/find` | 2 410 → 2 570 | 2 650 kept |
+| `@dzgrid/angular` (column components) | 7 440 → 7 627 | 7 450: **over the 2 % rule (7 599) — not raised, the owner decides** (proposed 7 650) |
+| K.8 audit profile | 88 883 | 90 000 kept |
+
+- Lead decisions: the strip is a lane of the base like the selection boxes (`GridContext.lead` px; `.dzg-lead` first in
+  every start segment), not a column — so every place that recomputes the columns (screen cells, CSV and Excel export,
+  print, the clipboard, the grid's state, the server's request, the columns panel and menus, quick search and find)
+  reads `columns.visible()` and never sees it; only the base's geometry knows its width (rows, header rows, body,
+  pinned bands, `--dzg-check-w` for full-width cells, group bands, the pointer's `cellAt` and auto-scroll, a column's
+  drag, a centre column scrolled clear). A detail panel is neither numbered nor counted; pinned rows keep an empty
+  strip cell; group / filler rows count. Not an arrow stop: Shift+Space / Ctrl+A / Space are the keys (WCAG 2.1.1).
+  Without `range()`, the row selection's click. The corner with `range()`: every cell.
+- Highlight: on by default, opt-out per feature (`highlight: false`); the matching (`spans`) and the cell walking are a
+  lazy chunk shared by both features (the static side ≈ 180 B gz); a text whose letter-by-letter folding differs from
+  its whole folding is not tinted (never a wrong place). Supported in Chrome 156, Firefox 157 and WebKit 27.2 here.
+- `search` on the cell part context is optional in the type (a context built by hand keeps compiling), always given.
+- Angular: one name per class and slot for the page (`dzg-ng-<slot>-<n>`), registered under every other layer (an
+  application's name never taken); one answer per `[columns]` array (the grid sees no change on a re-render).
+- `check:api`: additions only — after `scripts/api.mjs` learnt that a union printed in another order is the same type
+  (the 1.4.0 dom types moved `numerals` / `direction` literal order in the Angular declarations; tests added).

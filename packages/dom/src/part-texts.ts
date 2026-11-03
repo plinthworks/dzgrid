@@ -173,6 +173,18 @@ export interface FindMessages {
 }
 
 /**
+ * The row numbers' texts (`@dzgrid/dom/row-numbers`, 1.4.0, row-numbers.md), in their own bundles
+ * (`locales/<lang>-row-numbers`): optional here, required by `rowNumbers()`. `rownum.header`: the strip's corner, heard
+ * before each number.
+ */
+export type RowNumbersMessageKey = 'rownum.header';
+/** A row numbers bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_ROW_NUMBERS.text }`. */
+export interface RowNumbersMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in RowNumbersMessageKey]: MessageValue };
+}
+
+/**
  * The filters panel's texts (`@dzgrid/dom/filters-panel`, Phase 9, filters-panel.md), in their own bundles
  * (`locales/<lang>-filters-panel`): optional here, required by `filtersPanel()`. `{n}` a number.
  */

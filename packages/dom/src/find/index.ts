@@ -4,6 +4,7 @@ import { composing, needTexts } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { FindMessageKey } from '../part-texts.js';
+import { marker } from '../highlight/use.js';
 import { injectFindStyles } from './styles.js';
 
 /** The texts `find()` needs, from `@dzgrid/dom/locales/<lang>-find`. */
@@ -12,6 +13,8 @@ export const FIND_KEYS = 'label count said none prev next close page'.split(' ')
 export interface FindOptions {
   /** The pause before typed text is searched (a finite number of 0 or more); default 150 ms. */
   readonly debounceMs?: number;
+  /** The text tinted inside the hit cells the grid draws, the current hit's more (search-highlight.md); default true. */
+  readonly highlight?: boolean;
 }
 /** A hit: a cell, by its row and its column. */
 export interface FindHit {
@@ -99,6 +102,8 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
   const next = button('next', '↓');
   const shut = button('close', '×');
   bar.append(input, count, note, prev, next, shut);
+  // The text inside the hits (search-highlight.md 4, 5): over the quick search's, the current hit's over both.
+  const tint = o.highlight !== false ? marker(g, true) : null;
   el.root.insertBefore(bar, el.viewport);
 
   let open = false;
@@ -192,6 +197,8 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
     count.textContent = hits.length ? g.msg('find.count', { i: num(cur + 1), n: num(hits.length) }) : text ? g.msg('find.none') : '';
     note.hidden = g.rows.kind !== 'source';
     note.textContent = note.hidden ? '' : g.msg('find.page');
+    // The letters, inside the hit cells the grid draws (the lazy chunk).
+    tint?.(hits.length ? [text, byRow] : null);
     // No hit: every mark gone, a pooled row's too (re-mounted later, it would keep it).
     if (!hits.length) return el.root.querySelectorAll(`[${ATTR}]`).forEach((c) => c.removeAttribute(ATTR));
     g.rowRenderer.forEach((key, v) => {
@@ -233,6 +240,9 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
     pending?.();
     pending = null;
     text = input.value.trim();
+    // What a cell part is told (`search.find`), at the next paint.
+    g.findText = text;
+    g.schedule();
     search(true);
     if (!(cur >= 0 && go(cur, false))) paint();
     if (text) say();
@@ -263,7 +273,9 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
       cur = -1;
       seen = [];
       byRow = new Map();
+      g.findText = '';
       paint();
+      g.schedule();
       g.restoreFocus();
     },
     next: () => step(1),
@@ -307,6 +319,7 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
     },
     destroy() {
       pending?.();
+      delete g.findText;
       hits = [];
       byRow = new Map();
       paint();
