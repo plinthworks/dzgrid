@@ -1,0 +1,36 @@
+{
+  "id": "instant-algiers",
+  "suite": "xlsx",
+  "description": "An instant is the serial of the wall time in the display zone (milliseconds dropped), shown as date and time (built-in 22); the zone in the header.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "at",
+        "header": "Date",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "at": "2026-03-05T11:00:00.700Z"
+      },
+      {
+        "at": "2026-03-05T23:00:00Z"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Date (Africa/Algiers)",
+      "A2": 46086.5,
+      "A3": 46087
+    },
+    "formats": {
+      "A2": "22",
+      "A3": "22"
+    },
+    "problems": []
+  }
+}

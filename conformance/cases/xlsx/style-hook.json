@@ -1,0 +1,77 @@
+{
+  "id": "style-hook",
+  "suite": "xlsx",
+  "description": "xlsxStyle: the application's fill, colour, bold, italic; a colour that is not RRGGBB is ignored and told once.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Name"
+      },
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number",
+        "numberFormat": {
+          "minimumFractionDigits": 2,
+          "maximumFractionDigits": 2
+        }
+      },
+      {
+        "id": "c",
+        "header": "C"
+      }
+    ],
+    "rows": [
+      {
+        "name": "x",
+        "n": 1.5,
+        "c": "y"
+      }
+    ],
+    "style": {
+      "header": {
+        "bold": true,
+        "fill": "DDEEFF"
+      },
+      "n": {
+        "fill": "ffeecc",
+        "color": "990000",
+        "italic": true
+      },
+      "c": {
+        "fill": "red"
+      }
+    }
+  },
+  "expected": {
+    "fills": {
+      "A1": "FFDDEEFF",
+      "B1": "FFDDEEFF",
+      "C1": "FFDDEEFF",
+      "B2": "FFFFEECC"
+    },
+    "colors": {
+      "B2": "FF990000"
+    },
+    "italic": [
+      "B2"
+    ],
+    "bold": [
+      "A1",
+      "B1",
+      "C1"
+    ],
+    "formats": {
+      "B2": "#,##0.00"
+    },
+    "problems": [
+      {
+        "code": "invalid-setting",
+        "severity": "warning",
+        "path": "xlsx.xlsxStyle"
+      }
+    ]
+  }
+}

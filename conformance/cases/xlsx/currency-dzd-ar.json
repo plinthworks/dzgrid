@@ -1,0 +1,33 @@
+{
+  "id": "currency-dzd-ar",
+  "suite": "xlsx",
+  "description": "Algerian dinar in ar-DZ: the symbol after the number with a space; the direction marks around it are not written.",
+  "input": {
+    "locale": "ar-DZ",
+    "columns": [
+      {
+        "id": "p",
+        "header": "السعر",
+        "type": "number",
+        "numberFormat": {
+          "style": "currency",
+          "currency": "DZD"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "p": 1500
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "السعر",
+      "A2": 1500
+    },
+    "formats": {
+      "A2": "#,##0.00\\ \"د.ج.\""
+    }
+  }
+}

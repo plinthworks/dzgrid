@@ -18,6 +18,8 @@ export interface ExportRequest {
   readonly selection?: SelectionState;
   /** With a source: what the server would be asked, without the page. */
   readonly server?: Omit<DataRequest, 'page' | 'signal'>;
+  /** The file asked (Phase 9): `'xlsx'` for Excel; absent for CSV. */
+  readonly format?: 'csv' | 'xlsx';
 }
 
 /**

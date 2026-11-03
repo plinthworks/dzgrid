@@ -1,0 +1,114 @@
+{
+  "id": "number-formats",
+  "suite": "xlsx",
+  "description": "Numbers are number cells with an Excel code built from numberFormat: General, grouping, fraction digits as 0 then #, no grouping, percent.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "a",
+        "header": "Plain",
+        "type": "number"
+      },
+      {
+        "id": "b",
+        "header": "Whole",
+        "type": "number",
+        "numberFormat": {
+          "minimumFractionDigits": 0,
+          "maximumFractionDigits": 0
+        }
+      },
+      {
+        "id": "c",
+        "header": "Two",
+        "type": "number",
+        "numberFormat": {
+          "minimumFractionDigits": 2,
+          "maximumFractionDigits": 2
+        }
+      },
+      {
+        "id": "d",
+        "header": "TwoToFour",
+        "type": "number",
+        "numberFormat": {
+          "minimumFractionDigits": 2,
+          "maximumFractionDigits": 4
+        }
+      },
+      {
+        "id": "e",
+        "header": "NoGroup",
+        "type": "number",
+        "numberFormat": {
+          "minimumFractionDigits": 2,
+          "maximumFractionDigits": 2,
+          "useGrouping": false
+        }
+      },
+      {
+        "id": "f",
+        "header": "Pct",
+        "type": "number",
+        "numberFormat": {
+          "style": "percent"
+        }
+      },
+      {
+        "id": "g",
+        "header": "Pct1",
+        "type": "number",
+        "numberFormat": {
+          "style": "percent",
+          "minimumFractionDigits": 1
+        }
+      }
+    ],
+    "rows": [
+      {
+        "a": 1234.5,
+        "b": 1234.5,
+        "c": 1234.5,
+        "d": 1234.5,
+        "e": 1234.5,
+        "f": 0.125,
+        "g": 0.125
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Plain",
+      "B1": "Whole",
+      "C1": "Two",
+      "D1": "TwoToFour",
+      "E1": "NoGroup",
+      "F1": "Pct",
+      "G1": "Pct1",
+      "A2": 1234.5,
+      "B2": 1234.5,
+      "C2": 1234.5,
+      "D2": 1234.5,
+      "E2": 1234.5,
+      "F2": 0.125,
+      "G2": 0.125
+    },
+    "formats": {
+      "B2": "#,##0",
+      "C2": "#,##0.00",
+      "D2": "#,##0.00##",
+      "E2": "0.00",
+      "F2": "0%",
+      "G2": "0.0%"
+    },
+    "rtl": false,
+    "summary": {
+      "rows": 1,
+      "columns": 7,
+      "blank": 0,
+      "invalid": 0
+    },
+    "problems": []
+  }
+}

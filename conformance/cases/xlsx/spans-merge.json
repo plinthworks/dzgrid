@@ -1,0 +1,51 @@
+{
+  "id": "spans-merge",
+  "suite": "xlsx",
+  "description": "spans merge: the value once, the slots merged.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Unit",
+        "merge": true
+      },
+      {
+        "id": "name",
+        "header": "Name"
+      }
+    ],
+    "rows": [
+      {
+        "ward": "N",
+        "name": "a"
+      },
+      {
+        "ward": "N",
+        "name": "b"
+      },
+      {
+        "ward": "S",
+        "name": "c"
+      }
+    ],
+    "spans": true,
+    "options": {
+      "spans": "merge"
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "Unit",
+      "B1": "Name",
+      "A2": "N",
+      "B2": "a",
+      "B3": "b",
+      "A4": "S",
+      "B4": "c"
+    },
+    "merges": [
+      "A2:A3"
+    ]
+  }
+}

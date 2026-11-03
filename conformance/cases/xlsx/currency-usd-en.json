@@ -1,0 +1,33 @@
+{
+  "id": "currency-usd-en",
+  "suite": "xlsx",
+  "description": "Dollar in English: the symbol before the number, no space.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "p",
+        "header": "Price",
+        "type": "number",
+        "numberFormat": {
+          "style": "currency",
+          "currency": "USD"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "p": -3.5
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Price",
+      "A2": -3.5
+    },
+    "formats": {
+      "A2": "\"$\"#,##0.00"
+    }
+  }
+}

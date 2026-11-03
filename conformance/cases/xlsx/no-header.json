@@ -1,0 +1,30 @@
+{
+  "id": "no-header",
+  "suite": "xlsx",
+  "description": "header false: no header row, nothing frozen, no filter.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "a",
+        "header": "A"
+      }
+    ],
+    "rows": [
+      {
+        "a": "x"
+      }
+    ],
+    "options": {
+      "header": false
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "x"
+    },
+    "bold": [],
+    "pane": null,
+    "filter": null
+  }
+}

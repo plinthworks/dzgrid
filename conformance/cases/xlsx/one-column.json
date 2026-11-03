@@ -1,0 +1,27 @@
+{
+  "id": "one-column",
+  "suite": "xlsx",
+  "description": "One column: no width given, no col element.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "a",
+        "header": "A"
+      }
+    ],
+    "rows": [
+      {
+        "a": "x"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "A",
+      "A2": "x"
+    },
+    "filter": "A1:A2",
+    "widths": {}
+  }
+}

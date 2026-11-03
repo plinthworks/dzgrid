@@ -1,0 +1,21 @@
+{
+  "id": "sheet-name",
+  "suite": "xlsx",
+  "description": "The sheet name cleaned: []:*?/\\ removed, no quote at either end.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "a",
+        "header": "A"
+      }
+    ],
+    "rows": [],
+    "options": {
+      "sheetName": "'Report [Q1]: a/b'"
+    }
+  },
+  "expected": {
+    "sheet": "Report Q1 ab"
+  }
+}

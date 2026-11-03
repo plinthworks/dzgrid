@@ -1,0 +1,47 @@
+{
+  "id": "spans-repeat",
+  "suite": "xlsx",
+  "description": "A merged value is repeated on every row it covers by default (Excel sorts and filters).",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Unit",
+        "merge": true
+      },
+      {
+        "id": "name",
+        "header": "Name"
+      }
+    ],
+    "rows": [
+      {
+        "ward": "N",
+        "name": "a"
+      },
+      {
+        "ward": "N",
+        "name": "b"
+      },
+      {
+        "ward": "S",
+        "name": "c"
+      }
+    ],
+    "spans": true
+  },
+  "expected": {
+    "cells": {
+      "A1": "Unit",
+      "B1": "Name",
+      "A2": "N",
+      "B2": "a",
+      "A3": "N",
+      "B3": "b",
+      "A4": "S",
+      "B4": "c"
+    },
+    "merges": []
+  }
+}

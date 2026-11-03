@@ -24,7 +24,26 @@ A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
 - The cell menu: `contextMenu({ use: { status } })` adds « Read the totals » on a cell of the block (Shift+F10): one
   polite sentence of the strip's figures. Its label comes from the status texts (no new `-context-menu` key).
 
+- **Excel export** (Phase 9, `docs/behaviors/xlsx-export.md`, owner Q-X1…Q-X5): `csvExport({ xlsx: true | { … } })`,
+  then `run(scope, { format: 'xlsx' })`, `bind(button, { format: 'xlsx' })` or `exporter.xlsx.run()`. One `.xlsx`
+  written by hand (no spreadsheet or zip library): typed cells (numbers, real dates in the reader's own format, an
+  instant's wall time in the display zone with the zone in the header, booleans), never a formula (`=1+1` stays text,
+  no guard character), `csv: 'text'` columns keep their zeros, Excel number formats from `numberFormat` (€, $, د.ج., %),
+  the grid's widths, a bold frozen header with filter buttons, the start-pinned columns frozen, column groups as merged
+  header rows, a tree as Excel's outline (7 levels), a right-to-left sheet in Arabic, merged values repeated (or
+  `spans: 'merge'`), the application's colours through `xlsxStyle`. Deflated by the browser (`CompressionStream`),
+  stored where it is missing. The same `canExport`, events, cancel and server path as CSV: `ExportRequest.format` and
+  the events' `format` are `'xlsx'` (absent for CSV); past Excel's limits (1 048 576 rows, 16 384 columns) the export
+  is refused before `canExport`. The Excel code is loaded at the first Excel export only.
+- `@dzgrid/core/xlsx` (pure, also for a Node server): `xlsxParts`, `toXlsx(input, options, deflate?)`, `numFmtFor`,
+  `sheetNameOf`, `serialOfDay`, `crc32`, `utf8`, `zipFile`, `XLSX_MIME`, `XLSX_ROWS`, `XLSX_COLUMNS`; problem codes
+  `xlsx-early-day`, `xlsx-text-cut`, `xlsx-outline-depth`, `xlsx-style-limit`, `xlsx-too-large` (counts only).
+- The cell menu: `contextMenu({ use: { xlsx: exporter.xlsx } })` adds « Export to Excel » after the CSV item. Its text
+  `cmenu.exportXlsx` is optional in a bundle (`ContextMenuXlsxKey`): a 1.3.0 bundle keeps compiling; it is asked only
+  with `use.xlsx`.
+
 ### Changed
+- CSV and Excel read a cell through one rule (`readValue`) and one wall-time rule (`wallMs`).
 - `pagination()` draws into the bottom strip shared with the status bar (`@dzgrid/dom/internal`); alone, unchanged.
 
 ## [1.3.0] - 2026-11-02

@@ -1,0 +1,40 @@
+{
+  "id": "identifier",
+  "suite": "xlsx",
+  "description": "A csv text column is text: leading zeros kept, no =\"…\" trick, a number written as its text.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "nin",
+        "header": "NIN",
+        "csv": "text"
+      },
+      {
+        "id": "code",
+        "header": "Code",
+        "type": "number",
+        "csv": "text"
+      }
+    ],
+    "rows": [
+      {
+        "nin": "00123",
+        "code": 123
+      },
+      {
+        "nin": "=1+1"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "NIN",
+      "B1": "Code",
+      "A2": "00123",
+      "B2": "123",
+      "A3": "=1+1"
+    },
+    "formats": {}
+  }
+}

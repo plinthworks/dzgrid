@@ -1005,6 +1005,18 @@ versus the ids the app saves today.
 
 ## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
 
+- [x] **The Excel export X0–X5** (`docs/phase-9-steps/excel-plan.md`, owner A to Q-X1…Q-X5) — built 2026-11-03, not
+  committed (1.4.0, unreleased): sheet `xlsx-export.md`; conformance `xlsx/` (36, by hand, read back with node's zlib
+  and jsdom's DOMParser); `@dzgrid/core/xlsx` (zip, CRC, UTF-8, typed cells, formats, widths, panes, group merges,
+  spans, outline, RTL, limits, `xlsxStyle`), CSV's reads shared (`readValue`, `wallMs`); DOM: `format`, the lazy
+  `export/xlsx/` chunk (CompressionStream, stored fallback, slices, cancel), the limits before `canExport`, « Exporter
+  en Excel » (optional text). Tests: core `xlsx/` (16, `unzip -t`, `xmllint`), the CSV oracle on 200 seeds, DOM
+  `export-xlsx` (15), the optional key (2 + a type check); 8 planted faults caught; 2 bugs found by the tests (a
+  duplicated plain style, CSV names one character short). Browsers: Chrome, Firefox, WebKit build the same content,
+  deflated, the chunk fetched at the first Excel export only; 100 000 × 30 in Chrome 1.7 s, longest frame 36 ms (local
+  `playground/sheet-check.html`, not committed). Sizes: `core/xlsx` 6 902 / 7 100 (owner A), Excel DOM chunk 967 /
+  1 100, context-menu 2 481 / 2 500, run chunk 5 111 / 5 300. The owner's reference files and checklist:
+  `~/Desktop/dzgrid-excel-check/` (outside the repo). Next: the owner's look in Excel, then find in grid (Ctrl+F).
 - [x] **The status bar SB0–SB3** (`docs/phase-9-steps/status-dock-plan.md` §1, owner Q-SB1–Q-SB4) — built
   2026-11-03, not committed (1.4.0, unreleased): sheet `status-bar.md` (+ `pagination-footer`, `parts`,
   `range-selection`, `context-menu`), a11y protocol §24; conformance `range-stats/` (15, by hand); core `rangeStats`

@@ -10,11 +10,11 @@ const BAD = /[\x00-\x08\x0e-\x1f\x7f-\x9f\\/:*?"<>|\u2065]|(?![\u0600-\u0605\u06
 /** Windows' reserved device names, the superscript digits and the console's included. */
 const RESERVED = /^(con|prn|aux|nul|(com|lpt)[1-9\u00b9\u00b2\u00b3]|conin\$|conout\$)(\.|$)/i;
 
-/** Dots and spaces trimmed at the end, `.csv` removed, cut to 116 code points — again until nothing changes. */
-const fit = (s: string): string => {
+/** Dots and spaces trimmed at the end, `.csv` (or `.xlsx`) removed, cut so the name and `.ext` hold 120 code points — again until nothing changes. */
+const fit = (s: string, ext: string): string => {
   for (let was = ''; was !== s; ) {
     was = s;
-    s = [...s.replace(/[.\s]+$/, '').replace(/\.csv$/i, '')].slice(0, 116).join('');
+    s = [...s.replace(/[.\s]+$/, '').replace(/\.(csv|xlsx)$/i, '')].slice(0, 119 - ext.length).join('');
   }
   return s;
 };
@@ -22,20 +22,20 @@ const fit = (s: string): string => {
 /**
  * A name a file system takes and a reader cannot be misled by (docs/behaviors/csv-export.md, step 19):
  * the characters above removed, white space collapsed, dots and spaces trimmed at the ends, a Windows
- * reserved name prefixed with `_`, at most 120 code points with `.csv` once at the end; `export.csv`
+ * reserved name prefixed with `_`, at most 120 code points with `.csv` (or `ext`) once at the end; `export.csv`
  * when nothing is left. Arabic and accents are kept. Idempotent.
  */
-export function safeFileName(name: unknown): string {
+export function safeFileName(name: unknown, ext = 'csv'): string {
   // A tab or a line break parts two words: white space (BAD leaves it) becomes one space.
-  let s = fit(String(name ?? '').replace(BAD, '').replace(/\s+/g, ' ')).replace(/^[.\s]+/, '');
-  if (RESERVED.test(s)) s = fit('_' + s);
-  return (s || 'export') + '.csv';
+  let s = fit(String(name ?? '').replace(BAD, '').replace(/\s+/g, ' '), ext).replace(/^[.\s]+/, '');
+  if (RESERVED.test(s)) s = fit('_' + s, ext);
+  return `${s || 'export'}.${ext}`;
 }
 
 const two = (n: number): string => (n < 10 ? '0' : '') + n;
 
 /** `prefix-YYYY-MM-DD-HHmm.csv`, the wall clock of `zone` at `now`, Latin digits, cleaned. */
-export function defaultFileName(prefix: string, now: number, zone: string): string {
+export function defaultFileName(prefix: string, now: number, zone: string, ext?: string): string {
   const d = new Date(now + offsetAt(now, zone));
-  return safeFileName(`${prefix}-${d.getUTCFullYear()}-${two(d.getUTCMonth() + 1)}-${two(d.getUTCDate())}-${two(d.getUTCHours())}${two(d.getUTCMinutes())}`);
+  return safeFileName(`${prefix}-${d.getUTCFullYear()}-${two(d.getUTCMonth() + 1)}-${two(d.getUTCDate())}-${two(d.getUTCHours())}${two(d.getUTCMinutes())}`, ext);
 }

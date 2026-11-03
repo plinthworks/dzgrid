@@ -1,0 +1,46 @@
+{
+  "id": "currency-eur-fr",
+  "suite": "xlsx",
+  "description": "Euro in French: the symbol after the number, a space between, as a quoted literal; the currency's own digits (yen: none).",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "p",
+        "header": "Prix",
+        "type": "number",
+        "numberFormat": {
+          "style": "currency",
+          "currency": "EUR"
+        }
+      },
+      {
+        "id": "y",
+        "header": "Yen",
+        "type": "number",
+        "numberFormat": {
+          "style": "currency",
+          "currency": "JPY"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "p": 1234.5,
+        "y": 1200
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Prix",
+      "B1": "Yen",
+      "A2": 1234.5,
+      "B2": 1200
+    },
+    "formats": {
+      "A2": "#,##0.00\\ \"€\"",
+      "B2": "#,##0\\ \"JPY\""
+    }
+  }
+}

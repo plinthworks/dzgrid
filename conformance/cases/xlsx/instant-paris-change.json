@@ -1,0 +1,31 @@
+{
+  "id": "instant-paris-change",
+  "suite": "xlsx",
+  "description": "Paris on 2026-03-29, the clocks moving forward at 02:00: 00:30Z reads 01:30, 01:00Z reads 03:00.",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Europe/Paris",
+    "columns": [
+      {
+        "id": "at",
+        "header": "Quand",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "at": "2026-03-29T00:30:00Z"
+      },
+      {
+        "at": "2026-03-29T01:00:00Z"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Quand (Europe/Paris)",
+      "A2": 46110.0625,
+      "A3": 46110.125
+    }
+  }
+}

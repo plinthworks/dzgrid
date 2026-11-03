@@ -1,5 +1,6 @@
 import type { ChangeSource, LocaleCtx } from '@dzgrid/core';
 import type { CsvOptions, CsvScope, ExportRequest } from '@dzgrid/core/csv';
+import type { XlsxOptions } from '@dzgrid/core/xlsx';
 import { emit } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { GridFeature } from '../features.js';
@@ -26,6 +27,14 @@ export interface ExportProgress {
   readonly total: number | null;
 }
 
+/** The file an export writes (Phase 9): CSV, or Excel when the `xlsx` option is set. */
+export type ExportFormat = 'csv' | 'xlsx';
+/**
+ * The Excel file's own options (docs/behaviors/xlsx-export.md); `text`, `enums`, `header`, `columns`, `levelHeader` and
+ * `treeColumn` are the CSV options', shared. `sheetName` defaults to the `export.fileName` text, `rtl` to the grid's direction.
+ */
+export type XlsxExportOptions = Omit<XlsxOptions, 'text' | 'enums' | 'header' | 'columns' | 'levelHeader' | 'treeColumn' | 'chunkRows'>;
+
 /** `csvExport()`'s options: how the file is written (step 10's), and the export's own. */
 export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {
   /**
@@ -47,11 +56,13 @@ export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {
   readonly deliver?: (f: { readonly blob?: Blob; readonly url?: string; readonly fileName: string }) => void | Promise<void>;
   /** Where the export's code comes from (`import()` of the chunk otherwise). */
   readonly loadRun?: () => Promise<typeof Chunk>;
+  /** Excel files too (Phase 9): `run(scope, { format: 'xlsx' })`, `bind(button, { format: 'xlsx' })`, `xlsx.run()`. Absent: CSV only. */
+  readonly xlsx?: true | XlsxExportOptions;
 }
 
 export interface CsvExport extends GridFeature {
   /** Exports `scope` (`displayed` by default); `columns` other than the options' (or the visible ones). */
-  run(scope?: CsvScope, o?: { readonly columns?: readonly string[] }): Promise<ExportOutcome>;
+  run(scope?: CsvScope, o?: { readonly columns?: readonly string[]; readonly format?: ExportFormat }): Promise<ExportOutcome>;
   /** Stops the export running: nothing downloads. */
   cancel(): void;
   readonly busy: boolean;
@@ -61,7 +72,9 @@ export interface CsvExport extends GridFeature {
    * The host's button: a click exports (`source: 'user'`), `aria-busy` while one runs (never
    * `disabled`), a hover or focus fetches the code. Returns the unbind.
    */
-  bind(button: HTMLElement, o?: { readonly scope?: CsvScope }): () => void;
+  bind(button: HTMLElement, o?: { readonly scope?: CsvScope; readonly format?: ExportFormat }): () => void;
+  /** With the `xlsx` option: the Excel export for the cell menu's `use.xlsx` (Phase 9). */
+  readonly xlsx?: { run(scope?: CsvScope): Promise<ExportOutcome> };
 }
 
 /** The texts `csvExport()` needs, from `@dzgrid/dom/locales/<lang>-export`. */
@@ -96,7 +109,7 @@ export function csvExport(o: CsvExportOptions): CsvExport {
     p.catch(() => chunk === p && (chunk = null));
     return p;
   };
-  const run = async (scope: CsvScope = 'displayed', ro: { readonly columns?: readonly string[] } = {}, source: ChangeSource = 'api'): Promise<ExportOutcome> => {
+  const run = async (scope: CsvScope = 'displayed', ro: { readonly columns?: readonly string[] | undefined; readonly format?: ExportFormat | undefined } = {}, source: ChangeSource = 'api'): Promise<ExportOutcome> => {
     const grid = g;
     if (!grid || ac) return grid ? 'busy' : 'failed';
     const c = (ac = new AbortController());
@@ -118,7 +131,7 @@ export function csvExport(o: CsvExportOptions): CsvExport {
         try {
           emit(grid.kernel, {
             type: 'exportFinished', source, id, at: new Date().toISOString(), scope, outcome, via: scope !== 'displayed' && !grid.rows.allRows ? 'server' : 'browser',
-            rows: null, columns: 0, bytes: null, fileName: null, durationMs: Math.round(grid.now() - t0),
+            rows: null, columns: 0, bytes: null, fileName: null, durationMs: Math.round(grid.now() - t0), ...(ro.format === 'xlsx' && { format: 'xlsx' }),
             // The error's name only when it is a short identifier (a class name): never data.
             ...(!cut && { failure: { stage: 'load', name: typeof n == 'string' && /^[a-z]\w{0,39}$/i.test(n) ? n : 'Error' } }),
           });
@@ -128,7 +141,7 @@ export function csvExport(o: CsvExportOptions): CsvExport {
         grid.live.announce(grid.msg(cut ? 'announce.exportCancelled' : 'announce.exportFailed'));
         return outcome;
       }
-      return await m.run(grid, o, { scope, columns: ro.columns ?? o.columns, source, id, t0, signal: c.signal });
+      return await m.run(grid, o, { scope, columns: ro.columns ?? o.columns, source, id, t0, signal: c.signal, format: ro.format });
     } finally {
       if (ac === c) ac = null;
       buttons.forEach(mark);
@@ -141,10 +154,11 @@ export function csvExport(o: CsvExportOptions): CsvExport {
       return !!ac;
     },
     run: (scope, ro) => run(scope, ro),
+    ...(o.xlsx && { xlsx: { run: (scope?: CsvScope) => run(scope, { format: 'xlsx' }) } }),
     cancel: () => ac?.abort(),
     prefetch,
     bind(b, bo) {
-      const click = (): unknown => run(bo?.scope, {}, 'user');
+      const click = (): unknown => run(bo?.scope, { format: bo?.format }, 'user');
       const on = (fn: (e: Event) => unknown, ...types: string[]) => types.map((t) => (b.addEventListener(t, fn), () => b.removeEventListener(t, fn)));
       const offs = [...on(click, 'click'), ...on(prefetch, 'pointerenter', 'focus')];
       buttons.add(b);

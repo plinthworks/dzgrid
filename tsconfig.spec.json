@@ -29,6 +29,9 @@
       "@dzgrid/core/csv": [
         "./packages/core/src/csv.ts"
       ],
+      "@dzgrid/core/xlsx": [
+        "./packages/core/src/xlsx.ts"
+      ],
       "@dzgrid/core/rules": [
         "./packages/core/src/rules.ts"
       ],

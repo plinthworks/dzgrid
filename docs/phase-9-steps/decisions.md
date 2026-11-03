@@ -138,3 +138,27 @@ Plan: `excel-plan.md`. Owner: A to Q-X1…Q-X5, sizes accepted (core/xlsx 5 000,
 - Q-X4 A: an `xlsxStyle` hook filled by the app (no CSS class copying).
 - Q-X5 A: past Excel's limits (1 048 576 rows, 16 384 columns) the export is refused with a clear message.
 The owner opens two reference files (fr, ar) in a real Excel with a checklist.
+- Owner (2026-11-03): `core/xlsx` line **7 100** (measured 6 898; lazy, loaded at the first Excel export only) —
+  every feature kept. The context menu's new Excel text must be optional (a host's own `ContextMenuMessages` bundle
+  keeps compiling).
+
+## Excel export X0–X5 — measures (2026-11-03, built, not committed)
+
+| Line | Measured | Line |
+|---|---|---|
+| `@dzgrid/core/xlsx` (new, over core) | 6 902 | 7 100 (owner A) |
+| `@dzgrid/dom/export: xlsx (lazy)` (new) | 967 | 1 100 |
+| `@dzgrid/dom/export` (eager) | 1 248 | 1 350 kept |
+| `@dzgrid/dom/export: run (lazy)` | 5 111 | 5 300 kept |
+| `@dzgrid/core/csv` (`readValue`, `wallMs`) | 1 893 | 2 000 kept |
+| `@dzgrid/core/range` (shares the CSV writer) | 3 196 | 3 200 kept |
+| `@dzgrid/dom/context-menu` | 2 481 | 2 500 |
+| `locales/{en,fr,ar}-context-menu` | 333 / 390 / 478 | kept |
+| K.8 audit profile | 87 657 | 90 000 kept |
+
+- Lead decisions: widths `trunc(px / 7 × 256) / 256` (ECMA-376 §18.3.1.13: the stored width holds the 5 px padding;
+  the plan's `(px − 5) / 7` would draw each column 5 px narrower); `format` absent for CSV (requests and events
+  unchanged); `headerOf` not shared with XLSX's label (the range entry sits at its line), the two rules side by side
+  in `csv/writers.ts`; a span whose origin column is not written counts its problems under the first column; the
+  CSV oracle in `packages/core/test/xlsx/oracle.test.ts` (not `perf/`).
+- `check:api`: additions only, accepted (owner A, 2026-11-03).

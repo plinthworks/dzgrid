@@ -1,0 +1,68 @@
+{
+  "id": "groups-off",
+  "suite": "xlsx",
+  "description": "groups false: one header row, as CSV.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "person",
+        "header": "Person",
+        "children": [
+          {
+            "id": "name",
+            "header": "Name",
+            "children": [
+              {
+                "id": "first",
+                "header": "First"
+              },
+              {
+                "id": "last",
+                "header": "Last"
+              }
+            ]
+          },
+          {
+            "id": "age",
+            "header": "Age",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "id": "city",
+        "header": "City"
+      }
+    ],
+    "rows": [
+      {
+        "first": "Ann",
+        "last": "Lee",
+        "age": 40,
+        "city": "Oran"
+      }
+    ],
+    "options": {
+      "groups": false
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "First",
+      "B1": "Last",
+      "C1": "Age",
+      "D1": "City",
+      "A2": "Ann",
+      "B2": "Lee",
+      "C2": 40,
+      "D2": "Oran"
+    },
+    "merges": [],
+    "pane": {
+      "x": 0,
+      "y": 1
+    },
+    "filter": "A1:D2"
+  }
+}

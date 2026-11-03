@@ -1,0 +1,45 @@
+{
+  "id": "escapes",
+  "suite": "xlsx",
+  "description": "What XML cannot hold round-trips: a literal _x0041_, a control character, a carriage return, a lone surrogate (U+FFFD), leading spaces, markup characters.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "t",
+        "header": "T"
+      }
+    ],
+    "rows": [
+      {
+        "t": "_x0041_"
+      },
+      {
+        "t": "a\u0001b"
+      },
+      {
+        "t": "a\r\nb"
+      },
+      {
+        "t": "\ud800x"
+      },
+      {
+        "t": "  lead"
+      },
+      {
+        "t": "<b>&\"'</b>"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "T",
+      "A2": "_x0041_",
+      "A3": "a\u0001b",
+      "A4": "a\r\nb",
+      "A5": "\ufffdx",
+      "A6": "  lead",
+      "A7": "<b>&\"'</b>"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "id": "arabic-rtl",
+  "suite": "xlsx",
+  "description": "An Arabic grid: a right-to-left sheet, Arabic text and sheet name kept.",
+  "input": {
+    "locale": "ar-DZ",
+    "columns": [
+      {
+        "id": "name",
+        "header": "الاسم"
+      },
+      {
+        "id": "n",
+        "header": "العدد",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "name": "مرحبا",
+        "n": 3
+      }
+    ],
+    "options": {
+      "rtl": true,
+      "sheetName": "تصدير"
+    }
+  },
+  "expected": {
+    "sheet": "تصدير",
+    "rtl": true,
+    "cells": {
+      "A1": "الاسم",
+      "B1": "العدد",
+      "A2": "مرحبا",
+      "B2": 3
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "id": "spans-selected",
+  "suite": "xlsx",
+  "description": "spans merge over selected rows: a merge would cross rows not written, so the value is repeated.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Unit",
+        "merge": true
+      },
+      {
+        "id": "name",
+        "header": "Name"
+      }
+    ],
+    "rows": [
+      {
+        "ward": "N",
+        "name": "a"
+      },
+      {
+        "ward": "N",
+        "name": "b"
+      },
+      {
+        "ward": "S",
+        "name": "c"
+      }
+    ],
+    "spans": true,
+    "scope": "selected",
+    "select": [
+      "r0",
+      "r1"
+    ],
+    "options": {
+      "spans": "merge"
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "Unit",
+      "B1": "Name",
+      "A2": "N",
+      "B2": "a",
+      "A3": "N",
+      "B3": "b"
+    },
+    "merges": []
+  }
+}

@@ -18,6 +18,8 @@ export interface RunArgs {
   /** When the export was asked (`g.now()`). */
   readonly t0: number;
   readonly signal: AbortSignal;
+  /** `'xlsx'`: the Excel file (Phase 9); CSV otherwise. */
+  readonly format?: 'csv' | 'xlsx' | undefined;
 }
 
 type Stage = NonNullable<Extract<GridEvent<unknown>, { type: 'exportFinished' }>['failure']>['stage'];
@@ -48,11 +50,12 @@ export const cellCap = (n: unknown): number => (typeof n == 'number' && n > 0 &&
 export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunArgs): Promise<ExportOutcome> {
   const { kernel: K, rows: M } = g;
   const { scope, signal } = r;
+  const xl = r.format === 'xlsx';
   const gone = (): boolean => g.scope.isDisposed;
   // Events are told whatever a listener does (a host's onEvent is fenced by the grid already).
   const tell = (e: Record<string, unknown>): void => {
     try {
-      emit(K, { ...e, source: r.source, id: r.id, at: new Date().toISOString(), scope } as GridEvent<unknown>);
+      emit(K, { ...e, source: r.source, id: r.id, at: new Date().toISOString(), scope, ...(xl && { format: 'xlsx' }) } as GridEvent<unknown>);
     } catch (err) {
       g.report(err);
     }
@@ -108,6 +111,11 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
 
   async function steps(): Promise<ExportOutcome> {
     if (signal.aborted) return finish('cancelled');
+    // An Excel export without the `xlsx` option: told, nothing built.
+    if (xl && !o.xlsx) {
+      emit(K, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', 'export.xlsx')] });
+      return finish('failed', { stage: 'build', err: own('missing-feature') });
+    }
     // The rows the browser writes are those of a settled model: never a page still loading.
     if (!server) {
       progress('preparing', 0, null);
@@ -119,14 +127,15 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
     }
 
     reached = 'build';
-    const { request, held, event } = await buildRequest(g, scope, r.columns);
+    const { request, held, event } = await buildRequest(g, scope, r.columns, xl);
     end.columns = request.columns.length;
     if (gone() || signal.aborted) return finish('cancelled');
     tell(event);
     // A cancel from an `exportRequested` listener: nobody is asked.
     if (signal.aborted) return finish('cancelled');
     // The browser's cap (owner Q4), before asking anyone: past it, the host's server export.
-    if (held && held.count * request.columns.length > cellCap(o.maxCells)) return refuse('too-large');
+    // Excel's own (owner Q-X5): 1 048 576 rows, a header row included, and 16 384 columns; refused, never cut.
+    if (held && (held.count * request.columns.length > cellCap(o.maxCells) || (xl && (held.count >= 1_048_576 || request.columns.length > 16_384)))) return refuse('too-large');
 
     let verdict: unknown;
     try {
@@ -143,14 +152,15 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
     // "Exporting…" only if still running a second after the user asked.
     quiet = g.scope.timeout(() => say('announce.exportStarted'), Math.max(0, 1000 - (g.now() - r.t0)));
 
+    const ext = xl ? 'xlsx' : 'csv';
     const name = (given?: string): string => {
       const now = Date.now();
       try {
-        if (given ?? o.fileName) return safeFileName(given ?? o.fileName!({ scope, ctx: g.ctx, now }));
+        if (given ?? o.fileName) return safeFileName(given ?? o.fileName!({ scope, ctx: g.ctx, now }), ext);
       } catch (err) {
         g.report(err);
       }
-      return defaultFileName(g.msg('export.fileName'), now, g.ctx.timeZone);
+      return defaultFileName(g.msg('export.fileName'), now, g.ctx.timeZone, ext);
     };
     const save = async (f: { blob?: Blob; url?: string; fileName: string }): Promise<ExportOutcome> => {
       if (signal.aborted) return finish('cancelled');
@@ -214,11 +224,24 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
         const { treeColumn: tree, gapAt } = g;
         spans = { spans: buildSpanMap({ rows: held.rows, columns: g.columns, ctx: g.ctx, fullWidth: tree ? null : g.settings.fullWidth, treeColumn: tree?.(), acrossLevels: g.acrossLevels, apart: gapAt && ((i) => gapAt(held.rows, i)) }), spanColumns: g.columns.visible().map((c) => c.id) };
       }
-      const it = csvChunks({ rows: held.rows, at: held.at, columns: g.columns, ctx: g.ctx, ...spans }, { ...o, columns: request.columns, chunkRows: ROWS_PER_CHUNK });
-      const b = batcher();
-      const sum = await drain(it, { now: g.now, yield: yieldTo(g.win), aborted: () => signal.aborted }, b.push, (k) => progress('building', Math.min(k * ROWS_PER_CHUNK, held.count), held.count));
-      if (!sum) return finish('cancelled');
-      blob = b.blob('text/csv;charset=utf-8');
+      const env = { now: g.now, yield: yieldTo(g.win), aborted: () => signal.aborted };
+      let sum;
+      if (xl) {
+        // The Excel file's code: a chunk of its own, loaded at the first Excel export (CSV's first download unchanged).
+        const x = await race(import('../xlsx/index.js'));
+        const made = await x.build(g, o, held, request.columns, spans, env, (n) => progress('building', Math.min(n, held.count), held.count));
+        if (!made) return finish('cancelled');
+        sum = made.sum;
+        if (sum.problems.length) emit(K, { type: 'problems', source: 'host', problems: sum.problems });
+        if (!made.blob) return finish('failed', { stage: 'build', err: own('xlsx-too-large') });
+        blob = made.blob;
+      } else {
+        const it = csvChunks({ rows: held.rows, at: held.at, columns: g.columns, ctx: g.ctx, ...spans }, { ...o, columns: request.columns, chunkRows: ROWS_PER_CHUNK });
+        const b = batcher();
+        sum = await drain(it, env, b.push, (k) => progress('building', Math.min(k * ROWS_PER_CHUNK, held.count), held.count));
+        if (!sum) return finish('cancelled');
+        blob = b.blob('text/csv;charset=utf-8');
+      }
       // The selection taken with the request, not one changed during the build.
       const sel = request.selection;
       const hidden = sel?.mode === 'include' ? sel.keys.size - sum.rows : 0;

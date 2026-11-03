@@ -1,0 +1,51 @@
+{
+  "id": "formula-text",
+  "suite": "xlsx",
+  "description": "A text that looks like a formula stays text, as typed, with no guard character (no formula is ever written); the number -5 is a number.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "t",
+        "header": "Note"
+      },
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "t": "=1+1",
+        "n": -5
+      },
+      {
+        "t": "@SUM(A1)"
+      },
+      {
+        "t": "-5"
+      },
+      {
+        "t": "+213 555"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Note",
+      "B1": "N",
+      "A2": "=1+1",
+      "B2": -5,
+      "A3": "@SUM(A1)",
+      "A4": "-5",
+      "A5": "+213 555"
+    },
+    "summary": {
+      "rows": 4,
+      "columns": 2,
+      "blank": 3,
+      "invalid": 0
+    }
+  }
+}

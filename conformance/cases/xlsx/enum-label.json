@@ -1,0 +1,32 @@
+{
+  "id": "enum-label",
+  "suite": "xlsx",
+  "description": "An enum by its label.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "e",
+        "header": "État",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "Admis"
+          }
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "e": "in"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "État",
+      "A2": "Admis"
+    }
+  }
+}

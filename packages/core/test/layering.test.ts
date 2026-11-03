@@ -46,6 +46,15 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts'))).toBe(false);
   });
 
+  it('no other entry holds an xlsx module; the xlsx entry holds its writer, CSV\'s reads, and no server, model or kernel (Phase 9)', async () => {
+    const isXlsx = (f: string) => /(^|\/)src\/xlsx(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'range.ts', 'edit.ts', 'tree.ts']) expect((await inputsOf(entry)).filter(isXlsx), entry).toEqual([]);
+    const inputs = await inputsOf('xlsx.ts');
+    for (const f of ['src/xlsx/zip.ts', 'src/xlsx/sheet.ts', 'src/xlsx/styles.ts', 'src/xlsx/xml.ts', 'src/csv/writers.ts', 'src/csv/wall.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    expect(inputs.filter(isServer)).toEqual([]);
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
+  });
+
   it('no other entry holds a csv module (step 10)', async () => {
     for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts']) expect((await inputsOf(entry)).filter(isCsv), entry).toEqual([]);
   });

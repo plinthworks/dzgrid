@@ -67,7 +67,14 @@ export type AutoHeightProblemCode = 'auto-height-large';
 /** `@dzgrid/core/row-gaps`' own (1.1.0 step 15, row-gaps.md): a gap rule that threw or answered no size; a type only. */
 export type GapProblemCode = 'invalid-gap';
 
-export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | 'print-too-many' | 'unknown-ui-key';
+/**
+ * `@dzgrid/core/xlsx`'s own (Phase 9, xlsx-export.md), counts only: a day before 1900-03-01 written as text, a text cut at
+ * 32 767 characters, a tree deeper than Excel's seven outline levels, more than 60 000 styles, a file past Excel's or
+ * ZIP's limits. A type only.
+ */
+export type XlsxProblemCode = 'xlsx-early-day' | 'xlsx-text-cut' | 'xlsx-outline-depth' | 'xlsx-style-limit' | 'xlsx-too-large';
+
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | 'print-too-many' | 'unknown-ui-key';
 
 export type Severity = 'error' | 'warning';
 

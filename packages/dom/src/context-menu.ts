@@ -6,4 +6,4 @@
  */
 export { contextMenu, CONTEXT_MENU_KEYS } from './context-menu/index.js';
 export type { CellMenuContext, ContextMenuApi, ContextMenuFeature, ContextMenuOptions, EditApiLike, FillApiLike, MenuEntry, MenuItem, PinnedRowsApiLike, RangeApiLike, StatusApiLike, TreeApiLike } from './context-menu/index.js';
-export type { ContextMenuMessageKey, ContextMenuMessages } from './part-texts.js';
+export type { ContextMenuMessageKey, ContextMenuMessages, ContextMenuXlsxKey } from './part-texts.js';

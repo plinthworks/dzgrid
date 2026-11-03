@@ -1,0 +1,72 @@
+{
+  "id": "groups-nested",
+  "suite": "xlsx",
+  "description": "Two levels of groups: a label merged across its columns; a column with no group at a level has its header merged upward; the header rows frozen, the filter on the last.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "person",
+        "header": "Person",
+        "children": [
+          {
+            "id": "name",
+            "header": "Name",
+            "children": [
+              {
+                "id": "first",
+                "header": "First"
+              },
+              {
+                "id": "last",
+                "header": "Last"
+              }
+            ]
+          },
+          {
+            "id": "age",
+            "header": "Age",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "id": "city",
+        "header": "City"
+      }
+    ],
+    "rows": [
+      {
+        "first": "Ann",
+        "last": "Lee",
+        "age": 40,
+        "city": "Oran"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Person",
+      "D1": "City",
+      "A2": "Name",
+      "C2": "Age",
+      "A3": "First",
+      "B3": "Last",
+      "A4": "Ann",
+      "B4": "Lee",
+      "C4": 40,
+      "D4": "Oran"
+    },
+    "merges": [
+      "A1:C1",
+      "A2:B2",
+      "C2:C3",
+      "D1:D3"
+    ],
+    "pane": {
+      "x": 0,
+      "y": 3
+    },
+    "filter": "A3:D4"
+  }
+}

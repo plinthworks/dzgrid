@@ -1,0 +1,36 @@
+{
+  "id": "booleans",
+  "suite": "xlsx",
+  "description": "Booleans are boolean cells.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "ok",
+        "header": "OK",
+        "type": "boolean"
+      }
+    ],
+    "rows": [
+      {
+        "ok": true
+      },
+      {
+        "ok": false
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "OK",
+      "A2": true,
+      "A3": false
+    },
+    "summary": {
+      "rows": 2,
+      "columns": 1,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

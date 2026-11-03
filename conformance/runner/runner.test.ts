@@ -58,8 +58,8 @@ describe('conformance', () => {
           expect(`${c.id}.json`).toBe(file);
           // A suite may answer later (the edit saves settle in microtasks).
           const got = (await SUITES[suite]!(c.input)) as Record<string, unknown>;
-          // A format case states either the text or the parts it cares about; so does a save or undo script.
-          const partial = suite === 'format' || suite === 'transaction' || suite === 'edit-saves' || suite === 'undo';
+          // A format case states either the text or the parts it cares about; so does a save or undo script, and an xlsx case.
+          const partial = suite === 'xlsx' || suite === 'format' || suite === 'transaction' || suite === 'edit-saves' || suite === 'undo';
           const compared = partial ? Object.fromEntries(Object.keys(c.expected).map((k) => [k, got[k]])) : got;
           expect(compared).toEqual(c.expected);
         });

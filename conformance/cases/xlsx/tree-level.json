@@ -1,0 +1,77 @@
+{
+  "id": "tree-level",
+  "suite": "xlsx",
+  "description": "tree level: a level column first (1 for the roots), as CSV; no outline.",
+  "input": {
+    "locale": "en-US",
+    "tree": true,
+    "scope": "all",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Name"
+      },
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "f1",
+        "name": "a.pdf",
+        "n": 5,
+        "path": [
+          "docs",
+          "2024",
+          "f1"
+        ]
+      },
+      {
+        "id": "d",
+        "name": "Docs",
+        "n": 7,
+        "path": [
+          "docs"
+        ]
+      },
+      {
+        "id": "g",
+        "name": "c.png",
+        "n": 2,
+        "path": [
+          "img",
+          "g"
+        ]
+      }
+    ],
+    "options": {
+      "tree": "level",
+      "levelHeader": "Level"
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "Level",
+      "B1": "Name",
+      "C1": "N",
+      "A2": 1,
+      "B2": "Docs",
+      "C2": 7,
+      "A3": 2,
+      "B3": "2024",
+      "A4": 3,
+      "B4": "a.pdf",
+      "C4": 5,
+      "A5": 1,
+      "B5": "img",
+      "A6": 2,
+      "B6": "c.png",
+      "C6": 2
+    },
+    "outline": {},
+    "indent": {},
+    "summaryBelow": null
+  }
+}

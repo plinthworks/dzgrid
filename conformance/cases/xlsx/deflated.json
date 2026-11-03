@@ -1,0 +1,49 @@
+{
+  "id": "deflated",
+  "suite": "xlsx",
+  "description": "Parts deflated by an injected deflate read back the same.",
+  "input": {
+    "locale": "en-US",
+    "deflate": true,
+    "columns": [
+      {
+        "id": "a",
+        "header": "A"
+      },
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "a": "x",
+        "n": 1
+      },
+      {
+        "a": "x",
+        "n": 2
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "A",
+      "B1": "N",
+      "A2": "x",
+      "B2": 1,
+      "A3": "x",
+      "B3": 2
+    },
+    "parts": [
+      "[Content_Types].xml",
+      "_rels/.rels",
+      "xl/_rels/workbook.xml.rels",
+      "xl/sharedStrings.xml",
+      "xl/styles.xml",
+      "xl/workbook.xml",
+      "xl/worksheets/sheet1.xml"
+    ]
+  }
+}

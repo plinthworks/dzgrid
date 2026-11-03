@@ -42,7 +42,7 @@ export interface Built {
  * unknown id skipped and told), the query, the count, the selection for `selected`, the server's part
  * with a source; and the event that tells it, the selection as mode and count only.
  */
-export async function buildRequest(g: GridContext<unknown>, scope: CsvScope, ids: readonly string[] | undefined): Promise<Built> {
+export async function buildRequest(g: GridContext<unknown>, scope: CsvScope, ids: readonly string[] | undefined, xlsx?: boolean): Promise<Built> {
   const { kernel: K, rows: M } = g;
   const { columns: cols, problems } = csvColumns(g.columns, ids);
   if (problems.length) emit(K, { type: 'problems', source: 'host', problems });
@@ -53,7 +53,7 @@ export async function buildRequest(g: GridContext<unknown>, scope: CsvScope, ids
   const count = held ? held.count : scope === 'all' ? M.counts.filtered : picked;
   const server = g.settings.source ? await serverPart(g) : null;
   const query = K.query;
-  const request: ExportRequest = { scope, columns, query, count, ...(scope === 'selected' && { selection: sel }), ...(server && { server }) };
+  const request: ExportRequest = { scope, columns, query, count, ...(scope === 'selected' && { selection: sel }), ...(server && { server }), ...(xlsx && { format: 'xlsx' as const }) };
   return {
     request, held,
     event: {

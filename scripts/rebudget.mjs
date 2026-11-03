@@ -39,6 +39,8 @@ const SIZE_CEILINGS = {
   '@dzgrid/core': 29150, // Phase 6 (owner Q-B, Q2 of step 8b, 2026-10-27): 29 000 → 29 150 for the pinned rows' seams
   '@dzgrid/core/server': 6200, // owner Q8-5 (2026-10-27): 6 200, pushed by compression with the base's fold seam; Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order); owner E5-1 / E5-8 (2026-10-26): 6 150 for the hold seam (`rows.hold`, one request per restore; measured +56)
   '@dzgrid/core/csv': 2000, // Q7: « core/csv up to 2 000 »
+  '@dzgrid/core/xlsx': 7100, // owner A (2026-11-03, decisions.md « Excel export »): 5 000 asked, measured 6 898, every feature kept; lazy, the first Excel export only
+  '@dzgrid/dom/export: xlsx (lazy)': 1100, // owner (2026-11-03, Excel export): the Excel DOM chunk
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
   '@dzgrid/core/detail': 1150, // owner step 16 (2026-10-29, « ok pour les hausses »): 1 050 → 1 150 (`isMaster`, measured 1 132); Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
@@ -116,7 +118,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-column-menu': 600, // Q3-5: 550 → 600
   '@dzgrid/dom/locales/ar-column-menu': 700, // Q3-5: 650 → 700
   // Phase 9, the cell menu (owner Q-CM4, 2026-11-02): over the popup host, the shared list in the internal entry; its texts in their own bundles; its look in menu.css.
-  '@dzgrid/dom/context-menu': 2450, // owner 2026-11-03: 2 400 → 2 450 (« Read the totals »); owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
+  '@dzgrid/dom/context-menu': 2500, // owner 2026-11-03 (Excel export): 2 450 → 2 500 (« Export to Excel »); owner 2026-11-03: 2 400 → 2 450 (« Read the totals »); owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
   // Phase 9 status bar (owner 2026-11-03, status-dock-plan.md §5): the strip over the DOM base, its -status texts.
   '@dzgrid/dom/statusbar': 2300,
   '@dzgrid/dom/locales/en-status': 250,

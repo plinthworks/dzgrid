@@ -1,4 +1,8 @@
-import type { ContextMenuMessages } from '../part-texts.js';
+import type { MessageValue } from '../messages.js';
+import type { ContextMenuMessages, ContextMenuXlsxKey } from '../part-texts.js';
+
+/** « Export to Excel » (Phase 9): optional in an application's own bundle (`ContextMenuXlsxKey`). */
+const XLSX: { readonly [K in ContextMenuXlsxKey]?: MessageValue } = { 'cmenu.exportXlsx': "Export to Excel" };
 
 /** English, the cell menu's texts (`@dzgrid/dom/context-menu`): added to the grid's messages, `text: { ...EN.text, ...EN_CONTEXT_MENU.text }`. `{keys}`: Ctrl+V, or ⌘V on a Mac. */
 export const EN_CONTEXT_MENU = {
@@ -24,5 +28,6 @@ export const EN_CONTEXT_MENU = {
     'cmenu.pinnedBottom': "Row pinned to the bottom",
     'cmenu.unpinned': "Row unpinned",
     'cmenu.exportCsv': "Export to CSV",
+    ...XLSX,
   },
 } satisfies ContextMenuMessages;

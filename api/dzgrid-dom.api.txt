@@ -6,6 +6,7 @@
 # history: Owner, 2026-11-01 (decisions.md « Étape 7 »): spans({ acrossLevels }) opt-in; an optional argument added, nothing removed. — @dzgrid/dom/spans#spans
 # history: owner 2026-11-02 (Phase 9 cell menu, decisions.md): tree() returns TreeFeature; MenuItem / MenuEntry generic with today's type as default — nothing removed — @dzgrid/dom/tree#tree, @dzgrid/dom/column-menu#MenuItem, @dzgrid/dom/column-menu#MenuEntry
 # history: Phase 9 status bar (2026-11-03, decisions.md « Status bar SB0–SB3 — measures »): SlotContext gains the slot status, an interface the grid hands out (as menuItem in 1.1.0); nothing removed; owner to confirm — @dzgrid/dom#SlotContext
+# history: Owner A (2026-11-03, phase-9-steps/decisions.md « Excel export »): the Excel export, additions only — @dzgrid/core/xlsx, ExportRequest.format, ExportTrace.format, XlsxProblemCode, csvExport({ xlsx }), use.xlsx and the optional ContextMenuXlsxKey — @dzgrid/dom/export#ExportFormat, @dzgrid/dom/export#XlsxExportOptions, @dzgrid/dom/export#CsvExport, @dzgrid/dom/export#CsvExportOptions, @dzgrid/dom#msg, @dzgrid/dom#GridMessages, @dzgrid/dom/context-menu#ContextMenuOptions, @dzgrid/dom/context-menu#ContextMenuXlsxKey
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -86,7 +87,7 @@
       readonly text: {
           readonly [K in MessageKey]: MessageValue;
       } & {
-          readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ColumnsMessageKey | PinnedMessageKey]?: MessageValue;
+          readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | ColumnsMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FilterRowsMessageKey]?: MessageValue;
       };
   }
 ## GridSettings
@@ -395,7 +396,7 @@
 ## injectStyles
   export declare function injectStyles(target: Document | ShadowRoot, nonce?: string): void;
 ## msg
-  export declare function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | PinnedMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>, ctx?: LocaleCtx): string;
+  export declare function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FilterRowsMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>, ctx?: LocaleCtx): string;
 
 @ @dzgrid/dom/popup
 ## PopupHost
@@ -490,13 +491,18 @@
   export interface CsvExport extends GridFeature {
       run(scope?: CsvScope, o?: {
           readonly columns?: readonly string[];
+          readonly format?: ExportFormat;
       }): Promise<ExportOutcome>;
       cancel(): void;
       readonly busy: boolean;
       prefetch(): void;
       bind(button: HTMLElement, o?: {
           readonly scope?: CsvScope;
+          readonly format?: ExportFormat;
       }): () => void;
+      readonly xlsx?: {
+          run(scope?: CsvScope): Promise<ExportOutcome>;
+      };
   }
 ## CsvExportOptions
   export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {
@@ -515,6 +521,7 @@
           readonly fileName: string;
       }) => void | Promise<void>;
       readonly loadRun?: () => Promise<typeof Chunk>;
+      readonly xlsx?: true | XlsxExportOptions;
   }
 ## EXPORT_KEYS
   export declare const EXPORT_KEYS: ("export.fileName" | "announce.exportStarted" | "announce.exportDone" | "announce.exportDoneHidden" | "announce.exportDoneOpen" | "announce.exportFailed" | "announce.exportRefused" | "announce.exportCancelled")[];
@@ -547,6 +554,10 @@
   };
 ## csvExport
   export declare function csvExport(o: CsvExportOptions): CsvExport;
+## ExportFormat
+  export type ExportFormat = 'csv' | 'xlsx';
+## XlsxExportOptions
+  export type XlsxExportOptions = Omit<XlsxOptions, 'text' | 'enums' | 'header' | 'columns' | 'levelHeader' | 'treeColumn' | 'chunkRows'>;
 
 @ @dzgrid/dom/parts
 ## BadgeOptions
@@ -2667,3 +2678,45 @@
           'pinned.bottom': string;
       };
   };
+
+@ @dzgrid/dom/context-menu
+## ContextMenuOptions
+  export interface ContextMenuOptions<T = unknown> {
+      readonly use?: {
+          readonly range?: {
+              api(grid: Grid): RangeApiLike | null;
+          };
+          readonly fill?: {
+              api(grid: Grid): FillApiLike | null;
+          };
+          readonly edit?: {
+              api(grid: Grid): EditApiLike | null;
+          };
+          readonly csv?: {
+              run(scope?: 'displayed'): Promise<unknown>;
+          };
+          readonly xlsx?: {
+              run(scope?: 'displayed'): Promise<unknown>;
+          } | undefined;
+          readonly tree?: {
+              api(grid: Grid): TreeApiLike | null;
+          };
+          readonly pinned?: {
+              api(grid: Grid): PinnedRowsApiLike<T> | null;
+          };
+          readonly status?: {
+              api(grid: Grid): StatusApiLike | null;
+          };
+      };
+      readonly items?: (c: CellMenuContext<T>, defaults: readonly MenuEntry<CellMenuContext<T>>[]) => readonly MenuEntry<CellMenuContext<T>>[];
+      readonly classes?: {
+          readonly menu?: string;
+          readonly item?: string;
+      };
+      readonly onPin?: (rows: {
+          readonly top: readonly T[];
+          readonly bottom: readonly T[];
+      }) => void;
+  }
+## ContextMenuXlsxKey
+  export type ContextMenuXlsxKey = 'cmenu.exportXlsx';

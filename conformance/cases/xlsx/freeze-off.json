@@ -1,0 +1,32 @@
+{
+  "id": "freeze-off",
+  "suite": "xlsx",
+  "description": "freeze false: nothing frozen.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "a",
+        "header": "A",
+        "pinned": "start"
+      },
+      {
+        "id": "b",
+        "header": "B"
+      }
+    ],
+    "rows": [
+      {
+        "a": "x",
+        "b": "y"
+      }
+    ],
+    "options": {
+      "freeze": false
+    }
+  },
+  "expected": {
+    "pane": null,
+    "filter": "A1:B2"
+  }
+}

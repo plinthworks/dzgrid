@@ -1,6 +1,6 @@
 import type { ResolvedColumn, ValueReader } from '../columns/defs.js';
 import { idOfDataKey } from '../ids.js';
-import type { RowNode } from '../row/node.js';
+import type { DataNode, RowNode } from '../row/node.js';
 import { isBlank } from '../value/codec.js';
 import type { LocaleCtx } from '../value/locale.js';
 import { separatorsFor } from '../value/number.js';
@@ -34,13 +34,28 @@ export const headerOf = <T>(col: ResolvedColumn<T>, e: WriterEnv<T>): string =>
   field(e, (col.def.header ?? col.id) + (col.type === 'instant' && !e.display && !e.iso ? ` (${e.ctx.timeZone})` : ''));
 
 /**
+ * XLSX's column label: `headerOf`'s rule (keep the two together), the zone given (`UTC` with `instants: 'utc'`). Not
+ * shared with `headerOf` itself: the clipboard's range entry, which carries `headerOf`, sits at its line (3 200).
+ */
+export const labelOf = <T>(col: ResolvedColumn<T>, zone: string | false): string => (col.def.header ?? col.id) + (col.type === 'instant' && zone ? ` (${zone})` : '');
+
+/**
+ * A data row's cell as every export reads it (CSV, XLSX, the clipboard: one rule): through the edit overlay, then
+ * the column's codec. `undefined`: blank; null: unreadable. May throw (a host's `value`): the caller counts it.
+ */
+export function readValue<T>(col: ResolvedColumn<T>, node: DataNode<T>, e: Pick<WriterEnv<T>, 'reader' | 'ctx'>): unknown {
+  const raw = e.reader.overlay ? e.reader.value(col, node.data, idOfDataKey(node.key) ?? `\0${node.key}`) : col.read(node.data);
+  return isBlank(raw) || col.codec.isEmpty(raw) ? undefined : col.codec.coerce(raw, e.ctx);
+}
+
+/**
  * One column's cell writer (csv-export.md, the table of types), built once
  * per file: read through the overlay, blank or unreadable gives an empty
  * field (counted), then the text, `="…"` for a digits-only identifier, the
  * guard (never on a typed number), the quotes.
  */
 export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: RowNode<T>, pad?: string) => string {
-  const { ctx, reader, counts } = e;
+  const { ctx, counts } = e;
   const c = col.codec;
   const number = c.kind === 'number';
   let text: (v: any) => string | null = (v) => c.toExport(v);
@@ -58,13 +73,12 @@ export function writerFor<T>(col: ResolvedColumn<T>, e: WriterEnv<T>): (node: Ro
     // A filler or a detail has no cells to write (csv-export.md).
     if (node.kind !== 'data') return '';
     try {
-      const raw = reader.overlay ? reader.value(col, node.data, idOfDataKey(node.key) ?? `\0${node.key}`) : col.read(node.data);
-      if (isBlank(raw) || c.isEmpty(raw)) {
+      v = readValue(col, node, e);
+      if (v === undefined) {
         counts.blank++;
         // A blank tree cell keeps its row's indent (csv-export.md).
         return pad;
       }
-      v = c.coerce(raw, ctx);
       s = v === null ? null : text(v);
     } catch {
       s = null;

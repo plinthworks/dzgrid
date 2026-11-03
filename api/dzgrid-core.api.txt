@@ -3,6 +3,7 @@
 # history: 1.0.0 as published on npm (first baseline of the guard, 2026-10-29)
 # history: 1.1.0 changes found on the guard's first run (2026-10-29), compatible for callers: required members added to interfaces the grid hands out (LazyControl.sync, GridStateApi.reset, SlotContext.menuItem), inputs widened (SpanInput, MotionEffects.flash); owner to confirm — @dzgrid/core/spans#SpanInput, @dzgrid/core/tree-lazy#LazyControl
 # history: Owner, 2026-11-01 (« étape 7 », decisions.md): tree({ column, indent }) also take a function; SpanInput.treeColumn a function per row. Inputs widened, nothing removed. — @dzgrid/core/spans#SpanInput
+# history: Owner A (2026-11-03, phase-9-steps/decisions.md « Excel export »): the Excel export, additions only — @dzgrid/core/xlsx, ExportRequest.format, ExportTrace.format, XlsxProblemCode, csvExport({ xlsx }), use.xlsx and the optional ContextMenuXlsxKey — @dzgrid/core#ProblemCode, @dzgrid/core#ExportTrace, @dzgrid/core/csv#ExportRequest, @dzgrid/core/xlsx#XLSX_COLUMNS, @dzgrid/core/xlsx#XLSX_MIME, @dzgrid/core/xlsx#XLSX_ROWS, @dzgrid/core/xlsx#XlsxInput, @dzgrid/core/xlsx#XlsxOptions, @dzgrid/core/xlsx#XlsxPiece, @dzgrid/core/xlsx#XlsxStyle, @dzgrid/core/xlsx#XlsxStyleContext, @dzgrid/core/xlsx#XlsxSummary, @dzgrid/core/xlsx#ZipEntry, @dzgrid/core/xlsx#crc32, @dzgrid/core/xlsx#numFmtFor, @dzgrid/core/xlsx#serialOfDay, @dzgrid/core/xlsx#sheetNameOf, @dzgrid/core/xlsx#toXlsx, @dzgrid/core/xlsx#utf8, @dzgrid/core/xlsx#xlsxParts, @dzgrid/core/xlsx#zipFile
 
 @ @dzgrid/core
 ## AbortHandle
@@ -343,6 +344,7 @@
       readonly id: string;
       readonly at: string;
       readonly scope: ExportScope;
+      readonly format?: 'csv' | 'xlsx';
   }
 ## FilterKind
   export interface FilterKind<S extends Json = Json, V = unknown> {
@@ -976,7 +978,7 @@
       readonly detail?: string;
   }
 ## ProblemCode
-  export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | 'unknown-ui-key';
+  export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | 'print-too-many' | 'unknown-ui-key';
 ## Query
   export interface Query {
       readonly sort: readonly SortItem[];
@@ -1927,6 +1929,7 @@
       readonly count: number | null;
       readonly selection?: SelectionState;
       readonly server?: Omit<DataRequest, 'page' | 'signal'>;
+      readonly format?: 'csv' | 'xlsx';
   }
 ## csvChunks
   export declare function csvChunks<T>(i: CsvInput<T>, o?: CsvOptions): Generator<string, CsvSummary>;
@@ -2311,3 +2314,88 @@
   export declare function restoreState<T>(k: GridKernel<T>, raw: unknown, env?: StateEnv, source?: ChangeSource): Problem[];
 ## stateText
   export declare const stateText: (s: GridState) => string;
+
+@ @dzgrid/core/xlsx
+## XLSX_COLUMNS
+  export declare const XLSX_COLUMNS = 16384;
+## XLSX_MIME
+  export declare const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+## XLSX_ROWS
+  export declare const XLSX_ROWS = 1048576;
+## XlsxInput
+  export interface XlsxInput<T> extends CsvInput<T> {
+      readonly widths?: Readonly<Record<string, number>>;
+      readonly pinned?: readonly string[];
+      readonly groups?: readonly ColumnOrGroup<T>[];
+  }
+## XlsxOptions
+  export interface XlsxOptions<T = any> {
+      readonly text?: 'value' | 'display' | undefined;
+      readonly enums?: 'label' | 'code' | undefined;
+      readonly header?: boolean | undefined;
+      readonly columns?: readonly string[];
+      readonly levelHeader?: string | undefined;
+      readonly treeColumn?: string | undefined;
+      readonly sheetName?: string;
+      readonly groups?: boolean;
+      readonly freeze?: boolean;
+      readonly spans?: 'repeat' | 'merge';
+      readonly tree?: 'outline' | 'level' | 'none';
+      readonly instants?: 'wall' | 'utc';
+      readonly rtl?: boolean;
+      readonly xlsxStyle?: (c: XlsxStyleContext<T>) => XlsxStyle | null | undefined;
+      readonly chunkRows?: number;
+  }
+## XlsxPiece
+  export interface XlsxPiece {
+      readonly entry: string;
+      readonly text: string;
+  }
+## XlsxStyle
+  export interface XlsxStyle {
+      readonly fill?: string;
+      readonly color?: string;
+      readonly bold?: boolean;
+      readonly italic?: boolean;
+  }
+## XlsxStyleContext
+  export interface XlsxStyleContext<T> {
+      readonly column: string;
+      readonly value: unknown;
+      readonly row: Readonly<T> | null;
+      readonly header: boolean;
+  }
+## XlsxSummary
+  export interface XlsxSummary extends CsvSummary {
+      readonly problems: readonly Problem[];
+  }
+## ZipEntry
+  export interface ZipEntry {
+      readonly name: string;
+      readonly crc: number;
+      readonly size: number;
+      readonly method: 0 | 8;
+      readonly data: readonly Uint8Array[];
+  }
+## crc32
+  export declare function crc32(b: Uint8Array, crc?: number): number;
+## numFmtFor
+  export declare function numFmtFor(spec: NumberFormatSpec | undefined, ctx: LocaleCtx): string | 0;
+## serialOfDay
+  export declare const serialOfDay: (d: Day) => number | null;
+## sheetNameOf
+  export declare function sheetNameOf(name: unknown): string;
+## toXlsx
+  export declare function toXlsx<T>(i: XlsxInput<T>, o?: XlsxOptions<T>, deflate?: (b: Uint8Array) => Uint8Array): {
+      readonly parts: Uint8Array[];
+      readonly summary: XlsxSummary;
+  };
+## utf8
+  export declare function utf8(s: string): Uint8Array;
+## xlsxParts
+  export declare function xlsxParts<T>(i: XlsxInput<T>, o?: XlsxOptions<T>): Generator<XlsxPiece, XlsxSummary>;
+## zipFile
+  export declare function zipFile(entries: readonly ZipEntry[]): {
+      readonly parts: Uint8Array[];
+      readonly problems: Problem[];
+  };

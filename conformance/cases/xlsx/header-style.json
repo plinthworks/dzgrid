@@ -1,0 +1,42 @@
+{
+  "id": "header-style",
+  "suite": "xlsx",
+  "description": "The header row is bold, frozen, with the filter buttons over the written range.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "a",
+        "header": "A"
+      },
+      {
+        "id": "b",
+        "header": "B",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "a": "x",
+        "b": 1
+      },
+      {
+        "a": "y",
+        "b": 2
+      }
+    ]
+  },
+  "expected": {
+    "bold": [
+      "A1",
+      "B1"
+    ],
+    "pane": {
+      "x": 0,
+      "y": 1
+    },
+    "filter": "A1:B3",
+    "italic": [],
+    "fills": {}
+  }
+}

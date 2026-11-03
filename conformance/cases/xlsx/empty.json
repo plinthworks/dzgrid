@@ -1,0 +1,36 @@
+{
+  "id": "empty",
+  "suite": "xlsx",
+  "description": "No rows: the header alone.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "a",
+        "header": "A"
+      },
+      {
+        "id": "b",
+        "header": "B"
+      }
+    ],
+    "rows": []
+  },
+  "expected": {
+    "cells": {
+      "A1": "A",
+      "B1": "B"
+    },
+    "filter": "A1:B1",
+    "pane": {
+      "x": 0,
+      "y": 1
+    },
+    "summary": {
+      "rows": 0,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

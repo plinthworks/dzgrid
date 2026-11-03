@@ -1,0 +1,59 @@
+{
+  "id": "days",
+  "suite": "xlsx",
+  "description": "Days are serials of the 1900 system shown in the reader's short date (built-in 14); before 1900-03-01 a text cell and one problem for the column, with the count.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "d",
+        "header": "Day",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "d": "1900-03-01"
+      },
+      {
+        "d": "1900-02-28"
+      },
+      {
+        "d": "2026-03-05"
+      },
+      {
+        "d": null
+      },
+      {
+        "d": "1899-12-31"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Day",
+      "A2": 61,
+      "A3": "1900-02-28",
+      "A4": 46086,
+      "A6": "1899-12-31"
+    },
+    "formats": {
+      "A2": "14",
+      "A4": "14"
+    },
+    "summary": {
+      "rows": 5,
+      "columns": 1,
+      "blank": 1,
+      "invalid": 0
+    },
+    "problems": [
+      {
+        "code": "xlsx-early-day",
+        "severity": "warning",
+        "path": "xlsx.columns[0]",
+        "detail": "2"
+      }
+    ]
+  }
+}

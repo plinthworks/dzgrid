@@ -75,6 +75,8 @@ export interface ContextMenuOptions<T = unknown> {
     readonly edit?: { api(grid: Grid): EditApiLike | null };
     /** Export to CSV (the displayed rows). */
     readonly csv?: { run(scope?: 'displayed'): Promise<unknown> };
+    /** Export to Excel (the displayed rows): `csvExport({ xlsx })`'s `xlsx` (Phase 9); its label `cmenu.exportXlsx` is then required. */
+    readonly xlsx?: { run(scope?: 'displayed'): Promise<unknown> } | undefined;
     /** Expand / Collapse on a parent row. */
     readonly tree?: { api(grid: Grid): TreeApiLike | null };
     /** Pin / Unpin the row (owner Q-CM3 A). */
@@ -118,7 +120,7 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
     id: 'context-menu',
     api: (grid) => apis.get(grid.kernel) ?? null,
     setup(g) {
-      needTexts(g, CONTEXT_MENU_KEYS, 'context-menu');
+      needTexts(g, o.use?.xlsx ? [...CONTEXT_MENU_KEYS, 'cmenu.exportXlsx'] : CONTEXT_MENU_KEYS, 'context-menu');
       const { kernel, el, scope, columns: m } = g;
       const grid = { kernel };
       const L = menuList(g);
@@ -191,6 +193,7 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
         const tr = o.use?.tree?.api(g)?.state(c.key);
         const p = o.use?.pinned?.api(g);
         const csv = o.use?.csv;
+        const xl = o.use?.xlsx;
         const st = o.use?.status?.api(g);
         const b = c.block && r?.box();
         // Cut: disabled when no cell of the block (or the cell) is editable; Paste: when its target (the block's first cell) is read-only.
@@ -230,7 +233,7 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
           p ? (c.band
             ? [it('unpin', pin(c.band, p.get()[c.band].filter((x) => id(c.band!, x) !== c.key)))]
             : (['top', 'bottom'] as const).map((s) => it(`pin.${s}`, pin(s, [...p.get()[s], c.row]), p.get()[s].some((x) => id(s, x) === id(s, c.row))))) : [],
-          [csv && it('export.csv', () => void csv.run('displayed'))],
+          [csv && it('export.csv', () => void csv.run('displayed')), xl && it('export.xlsx', () => void xl.run('displayed'))],
           [c.block && st?.stats() && { id: 'status.read', label: g.msg('status.read'), action: () => st.announce() }],
         ].map((x) => x.filter(Boolean) as MenuItem<CellMenuContext<T>>[]);
         return (S as MenuItem<CellMenuContext<T>>[][]).filter((s) => s.length).flatMap((s, i) => (i ? [{ separator: true } as const, ...s] : s));

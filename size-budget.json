@@ -20,6 +20,11 @@
       "maxGzip": 2000,
       "over": "@dzgrid/core"
     },
+    "@dzgrid/core/xlsx": {
+      "file": "packages/core/src/xlsx.ts",
+      "maxGzip": 7100,
+      "over": "@dzgrid/core"
+    },
     "@dzgrid/core/rules": {
       "file": "packages/core/src/rules.ts",
       "maxGzip": 600,
@@ -442,7 +447,18 @@
         "@dzgrid/core/internal",
         "@dzgrid/dom/internal",
         "@dzgrid/core/server",
-        "@dzgrid/core/spans"
+        "@dzgrid/core/spans",
+        "../xlsx/*"
+      ]
+    },
+    "@dzgrid/dom/export: xlsx (lazy)": {
+      "file": "packages/dom/src/export/xlsx/index.ts",
+      "maxGzip": 1100,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/xlsx",
+        "@dzgrid/dom/internal"
       ]
     },
     "@dzgrid/dom/parts": {
@@ -608,7 +624,7 @@
     },
     "@dzgrid/dom/context-menu": {
       "file": "packages/dom/src/context-menu.ts",
-      "maxGzip": 2450,
+      "maxGzip": 2500,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",

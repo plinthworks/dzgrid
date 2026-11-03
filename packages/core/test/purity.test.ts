@@ -47,7 +47,7 @@ function typeOnly(t: readonly Token[], i: number): boolean {
 }
 
 /** Every reason a source breaks purity, as short labels. Exported for the self-test below. */
-export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean; range?: boolean; state?: boolean } = { base: true }): string[] {
+export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean; range?: boolean; state?: boolean; xlsx?: boolean } = { base: true }): string[] {
   const found: string[] = [];
   const t = tokens(source);
   t.forEach((tok, i) => {
@@ -78,10 +78,13 @@ export function violations(source: string, opts: { base: boolean; server?: boole
       // The csv entry (step 10) names the server's and the spans' types; layering.test.ts checks it bundles none of them.
       if (!opts.server && !opts.csv && /(^|\/)server(\.js|\/|$)/.test(spec)) found.push('server import');
       // Nor the spans entry (step 9b): a grid without span rules carries none of it.
-      if (!opts.spans && !opts.csv && /(^|\/)spans(\.js|\/|$)/.test(spec)) found.push('spans import');
+      // The xlsx entry (Phase 9) builds on CSV's reads and the groups' walk: a fix to one rule reaches both files.
+      if (!opts.spans && !opts.csv && !opts.xlsx && /(^|\/)spans(\.js|\/|$)/.test(spec)) found.push('spans import');
       // Nor the csv entry (step 10): a grid that exports nothing carries none of it. The range entry
       // (Phase 5 step 10) shares its cell writer: a copy writes what an export writes.
-      if (!opts.csv && !opts.range && /(^|\/)csv(\.js|\/|$)/.test(spec)) found.push('csv import');
+      if (!opts.csv && !opts.range && !opts.xlsx && /(^|\/)csv(\.js|\/|$)/.test(spec)) found.push('csv import');
+      // Nor the xlsx entry: a grid exporting CSV only carries none of it.
+      if (!opts.xlsx && /(^|\/)xlsx(\.js|\/|$)/.test(spec)) found.push('xlsx import');
       // Nor the edit entry (Phase 5 step 3): a read-only grid carries none of it. The range entry names
       // its `CellInput` type only (`import type`, erased): the commit reads and checks, in one place.
       if (!opts.edit && !(opts.range && typeOnly(t, i)) && /(^|\/)edit(\.js|\/|$)/.test(spec)) found.push('edit import');
@@ -105,7 +108,7 @@ describe('core purity', () => {
   it('names no forbidden global, package or dynamic import', () => {
     const offenders = all.flatMap((f) => {
       const rel = f.slice(SRC.length + 1);
-      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/'), state: rel === 'state.ts' || rel.startsWith('state/') });
+      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/'), state: rel === 'state.ts' || rel.startsWith('state/'), xlsx: rel === 'xlsx.ts' || rel.startsWith('xlsx/') });
       return v.length ? [`${rel}: ${[...new Set(v)].join(', ')}`] : [];
     });
     expect(offenders).toEqual([]);
@@ -158,6 +161,14 @@ describe('the purity check itself', () => {
     expect(violations("import { createGate } from '../server/gate.js';")).toEqual(['server import']);
     expect(violations("import type { AbortHandle } from '../abort.js';", { base: true, server: true })).toEqual([]);
     expect(violations("import { createGate } from './server/gate.js';", { base: true, server: true })).toEqual([]);
+  });
+
+  it('catches an import of the xlsx entry from anywhere else; the xlsx entry may read the csv and spans modules', () => {
+    expect(violations("import { toXlsx } from './xlsx.js';")).toEqual(['xlsx import']);
+    expect(violations("import { crc32 } from '../xlsx/zip.js';", { base: true, csv: true, spans: true })).toEqual(['xlsx import']);
+    expect(violations("import { readValue } from '../csv/writers.js';", { base: true, xlsx: true })).toEqual([]);
+    expect(violations("import { groupChains } from '../spans/bands.js';", { base: true, xlsx: true })).toEqual([]);
+    expect(violations("import { x } from '../edit/input.js';", { base: true, xlsx: true })).toEqual(['edit import']);
   });
 
   it('catches an import of the csv entry from the base, and only from the csv entry', () => {

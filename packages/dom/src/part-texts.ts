@@ -109,6 +109,11 @@ export interface ColumnMenuMessages {
 export type ContextMenuMessageKey =
   | 'cmenu.label' | 'cmenu.copy' | 'cmenu.copyHeaders' | 'cmenu.cut' | 'cmenu.paste' | 'cmenu.useCopyKey' | 'cmenu.usePasteKey' | 'cmenu.fillDown' | 'cmenu.fillEnd'
   | 'cmenu.undo' | 'cmenu.redo' | 'cmenu.expand' | 'cmenu.collapse' | 'cmenu.pinTop' | 'cmenu.pinBottom' | 'cmenu.unpin' | 'cmenu.pinnedTop' | 'cmenu.pinnedBottom' | 'cmenu.unpinned' | 'cmenu.exportCsv';
+/**
+ * « Export to Excel » (Phase 9, xlsx-export.md), in the cell menu bundles too: optional here, so a host's own
+ * `ContextMenuMessages` bundle made for 1.3.0 keeps compiling; required by `contextMenu()` only with `use.xlsx`.
+ */
+export type ContextMenuXlsxKey = 'cmenu.exportXlsx';
 /** A cell menu bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_CONTEXT_MENU.text }`. */
 export interface ContextMenuMessages {
   readonly locale: string;

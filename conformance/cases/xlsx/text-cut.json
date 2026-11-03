@@ -1,0 +1,46 @@
+{
+  "id": "text-cut",
+  "suite": "xlsx",
+  "description": "A text past 32 767 characters is cut there; one problem for the column, the count only.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "t",
+        "header": "T"
+      }
+    ],
+    "rows": [
+      {
+        "t": {
+          "$repeat": [
+            "a",
+            32768
+          ]
+        }
+      },
+      {
+        "t": {
+          "$repeat": [
+            "b",
+            32767
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "lengths": {
+      "A2": 32767,
+      "A3": 32767
+    },
+    "problems": [
+      {
+        "code": "xlsx-text-cut",
+        "severity": "warning",
+        "path": "xlsx.columns[0]",
+        "detail": "1"
+      }
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "instant-utc",
+  "suite": "xlsx",
+  "description": "instants utc: the UTC serial, the header says (UTC).",
+  "input": {
+    "locale": "fr-FR",
+    "timeZone": "Africa/Algiers",
+    "columns": [
+      {
+        "id": "at",
+        "header": "Date",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "at": "2026-03-05T12:00:00Z"
+      }
+    ],
+    "options": {
+      "instants": "utc"
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "Date (UTC)",
+      "A2": 46086.5
+    },
+    "formats": {
+      "A2": "22"
+    }
+  }
+}

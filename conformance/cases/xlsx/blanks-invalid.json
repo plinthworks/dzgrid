@@ -1,0 +1,38 @@
+{
+  "id": "blanks-invalid",
+  "suite": "xlsx",
+  "description": "A blank cell and an unreadable number write no cell, counted.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "n",
+        "header": "N",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "n": null
+      },
+      {
+        "n": "abc"
+      },
+      {
+        "n": 4
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "N",
+      "A4": 4
+    },
+    "summary": {
+      "rows": 3,
+      "columns": 1,
+      "blank": 1,
+      "invalid": 1
+    }
+  }
+}

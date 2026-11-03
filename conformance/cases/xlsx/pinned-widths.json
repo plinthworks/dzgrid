@@ -1,0 +1,55 @@
+{
+  "id": "pinned-widths",
+  "suite": "xlsx",
+  "description": "Widths from pixels (px / 7, in 256ths, at most 255); the start-pinned column written first is frozen, the end-pinned one is not.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "c",
+        "header": "C",
+        "pinned": "end"
+      },
+      {
+        "id": "b",
+        "header": "B"
+      },
+      {
+        "id": "a",
+        "header": "A",
+        "pinned": "start"
+      }
+    ],
+    "rows": [
+      {
+        "a": "1",
+        "b": "2",
+        "c": "3"
+      }
+    ],
+    "widths": {
+      "a": 100,
+      "b": 150,
+      "c": 2000
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "A",
+      "B1": "B",
+      "C1": "C",
+      "A2": "1",
+      "B2": "2",
+      "C2": "3"
+    },
+    "widths": {
+      "A": 14.28515625,
+      "B": 21.42578125,
+      "C": 255
+    },
+    "pane": {
+      "x": 1,
+      "y": 1
+    }
+  }
+}

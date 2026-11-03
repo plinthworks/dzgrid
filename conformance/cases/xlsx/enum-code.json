@@ -1,0 +1,35 @@
+{
+  "id": "enum-code",
+  "suite": "xlsx",
+  "description": "enums code: the code.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "e",
+        "header": "État",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "in",
+            "label": "Admis"
+          }
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "e": "in"
+      }
+    ],
+    "options": {
+      "enums": "code"
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "État",
+      "A2": "in"
+    }
+  }
+}

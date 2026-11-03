@@ -15,6 +15,7 @@
       "@dzgrid/core/internal": ["../core/src/internal.ts"],
       "@dzgrid/core/spans": ["../core/src/spans.ts"],
       "@dzgrid/core/csv": ["../core/src/csv.ts"],
+      "@dzgrid/core/xlsx": ["../core/src/xlsx.ts"],
       "@dzgrid/core/rules": ["../core/src/rules.ts"],
       "@dzgrid/core/tree": ["../core/src/tree.ts"],
       "@dzgrid/core/tree-lazy": ["../core/src/tree-lazy.ts"],

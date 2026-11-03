@@ -1,0 +1,80 @@
+{
+  "id": "groups-split",
+  "suite": "xlsx",
+  "description": "The written columns break the groups (a column moved between): each piece gets its own label.",
+  "input": {
+    "locale": "en-US",
+    "columns": [
+      {
+        "id": "person",
+        "header": "Person",
+        "children": [
+          {
+            "id": "name",
+            "header": "Name",
+            "children": [
+              {
+                "id": "first",
+                "header": "First"
+              },
+              {
+                "id": "last",
+                "header": "Last"
+              }
+            ]
+          },
+          {
+            "id": "age",
+            "header": "Age",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "id": "city",
+        "header": "City"
+      }
+    ],
+    "rows": [
+      {
+        "first": "Ann",
+        "last": "Lee",
+        "age": 40,
+        "city": "Oran"
+      }
+    ],
+    "options": {
+      "columns": [
+        "first",
+        "city",
+        "last",
+        "age"
+      ]
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "Person",
+      "B1": "City",
+      "C1": "Person",
+      "A2": "Name",
+      "C2": "Name",
+      "D2": "Age",
+      "A3": "First",
+      "C3": "Last",
+      "A4": "Ann",
+      "B4": "Oran",
+      "C4": "Lee",
+      "D4": 40
+    },
+    "merges": [
+      "B1:B3",
+      "C1:D1",
+      "D2:D3"
+    ],
+    "pane": {
+      "x": 0,
+      "y": 3
+    }
+  }
+}

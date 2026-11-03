@@ -314,7 +314,13 @@ describe('the DOM layer’s shape', () => {
       .filter((s) => !/: (@dzgrid\/core(\/internal|\/csv)?|\.\/[a-z]+\.js)$/.test(s));
     expect(offenders).toEqual([]);
     const dynamic = chunk.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/import\('([^']+)'\)/g)].map((m) => m[1]));
-    expect(dynamic.sort()).toEqual(['@dzgrid/core/server', '@dzgrid/core/spans']);
+    // Phase 9: the Excel chunk, by import() only, so a CSV export never downloads it.
+    expect(dynamic.sort()).toEqual(['../xlsx/index.js', '@dzgrid/core/server', '@dzgrid/core/spans']);
+    // The Excel chunk: the xlsx entry and the run chunk's slices only; the core's xlsx entry nowhere else.
+    const xl = files(join(SRC, 'export/xlsx'));
+    expect(xl.map((f) => relative(SRC, f))).toEqual(['export/xlsx/index.ts']);
+    expect(xl.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]))).toEqual(['@dzgrid/core/xlsx', '../run/slice.js']);
+    expect(files(SRC).filter((f) => !/^export\/xlsx\//.test(relative(SRC, f)) && /^import (?!type )[^;]*from '@dzgrid\/core\/xlsx'/m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
     // The base never reaches the csv entry; only the export chunk does.
     expect(files(SRC).filter((f) => !/^export\/run\//.test(relative(SRC, f)) && /^import (?!type )[^;]*from '@dzgrid\/core\/csv'/m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
   });

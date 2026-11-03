@@ -1,0 +1,160 @@
+{
+  "id": "tree-outline-deep",
+  "suite": "xlsx",
+  "description": "A tree nine deep as Excel's outline: the parent above its children, levels capped at 7 with one problem, the tree column indented by level.",
+  "input": {
+    "locale": "en-US",
+    "tree": true,
+    "scope": "all",
+    "columns": [
+      {
+        "id": "name",
+        "header": "Name"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "name": "a",
+        "path": [
+          "a"
+        ]
+      },
+      {
+        "id": "b",
+        "name": "b",
+        "path": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "id": "c",
+        "name": "c",
+        "path": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "id": "d",
+        "name": "d",
+        "path": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ]
+      },
+      {
+        "id": "e",
+        "name": "e",
+        "path": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e"
+        ]
+      },
+      {
+        "id": "f",
+        "name": "f",
+        "path": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f"
+        ]
+      },
+      {
+        "id": "g",
+        "name": "g",
+        "path": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f",
+          "g"
+        ]
+      },
+      {
+        "id": "h",
+        "name": "h",
+        "path": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f",
+          "g",
+          "h"
+        ]
+      },
+      {
+        "id": "i",
+        "name": "i",
+        "path": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f",
+          "g",
+          "h",
+          "i"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Name",
+      "A2": "a",
+      "A3": "b",
+      "A4": "c",
+      "A5": "d",
+      "A6": "e",
+      "A7": "f",
+      "A8": "g",
+      "A9": "h",
+      "A10": "i"
+    },
+    "outline": {
+      "3": 1,
+      "4": 2,
+      "5": 3,
+      "6": 4,
+      "7": 5,
+      "8": 6,
+      "9": 7,
+      "10": 7
+    },
+    "summaryBelow": false,
+    "indent": {
+      "A3": 1,
+      "A4": 2,
+      "A5": 3,
+      "A6": 4,
+      "A7": 5,
+      "A8": 6,
+      "A9": 7,
+      "A10": 7
+    },
+    "problems": [
+      {
+        "code": "xlsx-outline-depth",
+        "severity": "warning",
+        "path": "xlsx.tree",
+        "detail": "1"
+      }
+    ]
+  }
+}

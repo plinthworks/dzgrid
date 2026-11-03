@@ -1,4 +1,8 @@
-import type { ContextMenuMessages } from '../part-texts.js';
+import type { MessageValue } from '../messages.js';
+import type { ContextMenuMessages, ContextMenuXlsxKey } from '../part-texts.js';
+
+/** « Export to Excel » (Phase 9): optional in an application's own bundle (`ContextMenuXlsxKey`). */
+const XLSX: { readonly [K in ContextMenuXlsxKey]?: MessageValue } = { 'cmenu.exportXlsx': "Exporter en Excel" };
 
 /** Français, les textes du menu de cellule (`@dzgrid/dom/context-menu`) : à ajouter aux messages de la grille, `text: { ...FR.text, ...FR_CONTEXT_MENU.text }`. `{keys}` : Ctrl+V, ou ⌘V sur un Mac. */
 export const FR_CONTEXT_MENU = {
@@ -24,5 +28,6 @@ export const FR_CONTEXT_MENU = {
     'cmenu.pinnedBottom': "Ligne épinglée en bas",
     'cmenu.unpinned': "Ligne désépinglée",
     'cmenu.exportCsv': "Exporter en CSV",
+    ...XLSX,
   },
 } satisfies ContextMenuMessages;
