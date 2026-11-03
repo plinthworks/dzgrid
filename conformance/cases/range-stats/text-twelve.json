@@ -1,0 +1,14 @@
+{
+  "id": "text-twelve",
+  "suite": "range-stats",
+  "description": "A text column holding « 12 » is text, not a number: counted as filled, never summed (no guessing).",
+  "input": {
+    "shown": ["r1", "r2"],
+    "columns": [{ "id": "t" }, { "id": "n", "type": "number" }],
+    "rows": { "r1": { "t": "12", "n": 5 }, "r2": { "t": "7", "n": 5 } },
+    "range": { "anchor": ["r1", "t"], "focus": ["r2", "n"] }
+  },
+  "expected": {
+    "stats": { "cells": 4, "filled": 4, "numbers": 2, "sum": 10, "min": 5, "max": 5, "partial": false, "formats": [{}] }
+  }
+}

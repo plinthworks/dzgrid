@@ -5,6 +5,28 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 1.4.0
+
+A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
+
+### Added
+- `@dzgrid/dom/statusbar` (Phase 9, the status bar): `statusBar({ items, maxCells })`. A strip under the rows, outside
+  `role="grid"`: while a block is selected (`range()`), its count of filled cells, then from two numbers its sum
+  (compensated: 0.1 ten times is 1), mean, smallest and largest, in the column's `numberFormat` when every number
+  shares one (the plain number, two decimals at most, when formats differ; the mean two decimals more), in the grid's
+  digits (Arabic-Indic in `ar`), each figure isolated in a `<bdi>`. Row counts on request (`status.rows`,
+  `status.filtered`, `status.selected`); an app's own items as parts of the new slot `status` (context `stats`,
+  `busy`, `counts`, `selection`, `figure(name)`, `format(n, column?)`). Past `maxCells` (200 000) a moving block shows
+  « … » until the keys stop (150 ms) or the pointer is released. One strip with `pagination()`: the pager's parts, the
+  figures, the pager last. Nothing is said on its own: `api(grid).announce()` and `stats()`. Texts
+  `locales/{en,fr,ar}-status`; colours the footer's. Behaviour sheet `docs/behaviors/status-bar.md`.
+- `@dzgrid/core/range`: `rangeStats(box, displayed, columns, { ctx, reader })` and `RangeStats` (pure).
+- The cell menu: `contextMenu({ use: { status } })` adds « Read the totals » on a cell of the block (Shift+F10): one
+  polite sentence of the strip's figures. Its label comes from the status texts (no new `-context-menu` key).
+
+### Changed
+- `pagination()` draws into the bottom strip shared with the status bar (`@dzgrid/dom/internal`); alone, unchanged.
+
 ## [1.3.0] - 2026-11-02
 
 A minor: nothing of 1.2.0 is removed or narrowed (`npm run check:api`).

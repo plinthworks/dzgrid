@@ -68,7 +68,7 @@ const SIZE_CEILINGS = {
   // 2 600), @dzgrid/dom/internal at its measure + 50 up to 1 250 (the filters' loader moved in, not copied).
   '@dzgrid/dom/editors': 6720, // owner S7-O1 (2026-10-24): 6 500 → 6 650 (retry, a row gone while edited); QB5 (Part B, step 12): → 6 720 (bulk edit by Ctrl+Enter)
   '@dzgrid/dom/editors: calendar (lazy)': 1520, // feedback pass Q1 (owner, 2026-10-27): the lazy kits by the strict need (tzslot's lazy entry: the chunk's `ready`, measured 1 519)
-  '@dzgrid/dom/internal': 3700, // Phase 9 cell menu (owner Q-CM4, 2026-11-02): 1 250 → 3 700, the menus' shared list moved in (the popup host outside it)
+  '@dzgrid/dom/internal': 3800, // Phase 9 status bar (owner 2026-11-03): 3 700 → 3 750 asked, measured 3 799: 3 800 under the 2 % rule (the shared bottom strip); Phase 9 cell menu (owner Q-CM4, 2026-11-02): 1 250 → 3 700, the menus' shared list moved in (the popup host outside it)
   // Owner S6-O7 (2026-10-24): the list in its own entry, over the popup: its measure (1 254) + 10 %.
   '@dzgrid/dom/editors-list': 1400,
   // Phase 5 Q16 (written grant): the motion run chunk up to 3 500 (step 7: the saves' reasons, the saved flash).
@@ -116,7 +116,12 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-column-menu': 600, // Q3-5: 550 → 600
   '@dzgrid/dom/locales/ar-column-menu': 700, // Q3-5: 650 → 700
   // Phase 9, the cell menu (owner Q-CM4, 2026-11-02): over the popup host, the shared list in the internal entry; its texts in their own bundles; its look in menu.css.
-  '@dzgrid/dom/context-menu': 2400, // owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
+  '@dzgrid/dom/context-menu': 2450, // owner 2026-11-03: 2 400 → 2 450 (« Read the totals »); owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
+  // Phase 9 status bar (owner 2026-11-03, status-dock-plan.md §5): the strip over the DOM base, its -status texts.
+  '@dzgrid/dom/statusbar': 2300,
+  '@dzgrid/dom/locales/en-status': 250,
+  '@dzgrid/dom/locales/fr-status': 300,
+  '@dzgrid/dom/locales/ar-status': 350,
   '@dzgrid/dom/locales/en-context-menu': 350,
   '@dzgrid/dom/locales/fr-context-menu': 400,
   '@dzgrid/dom/locales/ar-context-menu': 500,

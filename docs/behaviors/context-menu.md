@@ -122,3 +122,9 @@ colours on the focused item and the submenu mark.
 ## Tests
 `packages/dom/test/context-menu*.test.ts` (opening, block, items, clipboard, app items and submenus), Angular
 `packages/angular/test/context-menu-template.test.ts`; browsers `scripts/browser-context-menu.mjs`.
+
+## Read the totals (Phase 9, `status-bar.md`, owner Q-SB3)
+`contextMenu({ use: { status } })` with `statusBar()`: on a cell inside the block, a last section with « Lire les
+totaux » (`status.read`, from the status bar's texts: no new key in `-context-menu`). It says the strip's figures in one
+polite sentence through the grid's live region, then the menu closes and the focus goes back to the cell. Outside a
+block, or without `use.status`: absent.

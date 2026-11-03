@@ -1,0 +1,18 @@
+{
+  "id": "same-format",
+  "suite": "range-stats",
+  "description": "Two columns with the same format, one with no number in the box: one format; a column with no number met adds none.",
+  "input": {
+    "shown": ["r1", "r2"],
+    "columns": [
+      { "id": "p", "type": "number", "numberFormat": { "style": "currency", "currency": "EUR" } },
+      { "id": "r", "type": "number", "numberFormat": { "style": "percent" } },
+      { "id": "q", "type": "number", "numberFormat": { "style": "currency", "currency": "EUR" } }
+    ],
+    "rows": { "r1": { "p": 1.25, "q": 2 }, "r2": { "p": 3, "q": null } },
+    "range": { "anchor": ["r1", "p"], "focus": ["r2", "q"] }
+  },
+  "expected": {
+    "stats": { "cells": 6, "filled": 3, "numbers": 3, "sum": 6.25, "min": 1.25, "max": 3, "partial": false, "formats": [{ "style": "currency", "currency": "EUR" }] }
+  }
+}

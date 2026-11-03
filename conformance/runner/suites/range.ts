@@ -1,5 +1,6 @@
 import { createColumnModel, dataKey, detailKey, localeCtx, NO_OVERLAY, type ColumnDef, type ColumnState, type RowKey, type ValueReader } from '@dzgrid/core';
-import { boxRows, boxSize, decodeTsv, encodeTsv, fillTarget, planFill, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
+import { boxRows, boxSize, decodeTsv, encodeTsv, fillTarget, planFill, planPaste, rangeBox, rangeStats, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
+import { numberCodec, type ValueCodec } from '@dzgrid/core';
 import type { CellInput } from '@dzgrid/core/edit';
 import { shown, tokenOf } from '../../../packages/core/test/support/shown.js';
 import { iso } from '../iso.js';
@@ -67,7 +68,29 @@ function runFill(input: any) {
   return { target, cells: cells.map((c) => cellOf(displayed, columns, c)) };
 }
 
+/** `{"$": "NaN" | "Infinity" | "-Infinity"}` in a case's rows: the number JSON cannot write. */
+const unjson = (v: unknown): unknown => (v && typeof v === 'object' && '$' in v ? Number((v as { $: string }).$) : v);
+/** A number column whose own codec lets any number through (`"codec": "lenient-number"`): the stats' own finite guard. */
+const lenient: ValueCodec<number> = { ...numberCodec, coerce: (raw) => (typeof raw === 'number' && !Number.isNaN(raw) ? raw : null), isEmpty: (v) => v === null || v === undefined || v === '' };
+
+/** The block's figures (status-bar.md, Phase 9 SB1): `edits` as in the fill suite. */
+function runStats(input: any) {
+  const rows = Object.fromEntries(Object.entries((input.rows ?? {}) as Record<string, Record<string, unknown>>).map(([id, r]) => [id, Object.fromEntries(Object.entries(r).map(([k, v]) => [k, unjson(v)]))]));
+  const columns0 = input.columns.map((c: { codec?: string }) => (c.codec === 'lenient-number' ? { ...c, codec: lenient } : c));
+  const { columns, displayed } = setup({ ...input, rows, columns: columns0 });
+  const r = { anchor: { row: keyOf(input.range.anchor[0]), column: input.range.anchor[1] }, focus: { row: keyOf(input.range.focus[0]), column: input.range.focus[1] } };
+  const box = rangeBox(r, displayed, columns.map((c) => c.id));
+  const edits: Record<string, unknown> = input.edits ?? {};
+  const reader: ValueReader<Row> = input.edits
+    ? { version: 1, overlay: true, value: (col, row, id) => (`${id}.${col.id}` in edits ? edits[`${id}.${col.id}`] : col.read(row)) }
+    : (NO_OVERLAY as ValueReader<Row>);
+  const stats = box ? rangeStats(box, displayed, columns, { ctx: localeCtx({ locale: 'en-US' }), reader }) : null;
+  // A sum JSON cannot write (±Infinity, NaN) is written as `{"$": …}`.
+  return { stats: stats && { ...stats, sum: Number.isFinite(stats.sum) ? stats.sum : { $: String(stats.sum) } } };
+}
+
 export const range: Record<string, Suite> = {
+  'range-stats': runStats,
   'range-box': runBox,
   'clipboard-tsv': (input) => ('encode' in input ? { text: encodeTsv(input.encode) } : { rows: decodeTsv(input.decode, input.pad ? { pad: true } : undefined) }),
   'paste-plan': runPaste,

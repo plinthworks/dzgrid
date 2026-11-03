@@ -1,0 +1,14 @@
+{
+  "id": "detail-only",
+  "suite": "range-stats",
+  "description": "A detail row and a filler inside the box, no loading row: not counted, and the figures are whole.",
+  "input": {
+    "shown": ["r1", "> r1", "/g", "r2"],
+    "columns": [{ "id": "a", "type": "number" }],
+    "rows": { "r1": { "a": 1.5 }, "r2": { "a": 2.5 } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r2", "a"] }
+  },
+  "expected": {
+    "stats": { "cells": 2, "filled": 2, "numbers": 2, "sum": 4, "min": 1.5, "max": 2.5, "partial": false, "formats": [{}] }
+  }
+}

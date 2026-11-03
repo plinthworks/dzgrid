@@ -5,6 +5,7 @@
 # history: Owner, 2026-11-01 (« étape 7 », decisions.md): tree({ column, indent }) also take a function; SpanInput.treeColumn a function per row. Inputs widened, nothing removed. — @dzgrid/dom/tree#TreeFeatureOptions
 # history: Owner, 2026-11-01 (decisions.md « Étape 7 »): spans({ acrossLevels }) opt-in; an optional argument added, nothing removed. — @dzgrid/dom/spans#spans
 # history: owner 2026-11-02 (Phase 9 cell menu, decisions.md): tree() returns TreeFeature; MenuItem / MenuEntry generic with today's type as default — nothing removed — @dzgrid/dom/tree#tree, @dzgrid/dom/column-menu#MenuItem, @dzgrid/dom/column-menu#MenuEntry
+# history: Phase 9 status bar (2026-11-03, decisions.md « Status bar SB0–SB3 — measures »): SlotContext gains the slot status, an interface the grid hands out (as menuItem in 1.1.0); nothing removed; owner to confirm — @dzgrid/dom#SlotContext
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -301,6 +302,8 @@
           readonly checked: boolean;
           readonly disabled: boolean;
           readonly column: ResolvedColumn<unknown>;
+          readonly row?: unknown;
+          readonly menu?: 'column' | 'cell';
       };
       tooltip: PartBase & {
           readonly text: string;
@@ -329,6 +332,16 @@
           setSize(size: number): void;
           selectAll(): void;
           clearSelection(): void;
+      };
+      status: PartBase & {
+          readonly stats: StatusStats | null;
+          readonly busy: boolean;
+          readonly counts: RowCounts;
+          readonly selection: {
+              readonly count: number | null;
+          };
+          figure(name: 'count' | 'sum' | 'avg' | 'min' | 'max'): string | null;
+          format(n: number, column?: string): string;
       };
       editor: PartBase & {
           readonly value: unknown;

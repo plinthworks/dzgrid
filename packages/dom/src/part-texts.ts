@@ -138,3 +138,14 @@ export interface FreshMessages {
   readonly locale: string;
   readonly text: { readonly [K in FreshMessageKey]: MessageValue };
 }
+
+/**
+ * The status bar's texts (`@dzgrid/dom/statusbar`, Phase 9, status-bar.md), in their own bundles (`locales/<lang>-status`):
+ * optional here, required by `statusBar()`. An item's text holds its figure as `{v}` (the strip isolates it).
+ */
+export type StatusMessageKey = `status.${'label' | 'rows' | 'filtered' | 'selected' | 'all' | 'count' | 'sum' | 'avg' | 'min' | 'max' | 'partial' | 'read' | 'none' | 'sep'}`;
+/** A status bar bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_STATUS.text }`. */
+export interface StatusMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in StatusMessageKey]: MessageValue };
+}

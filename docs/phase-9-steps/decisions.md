@@ -93,3 +93,31 @@ Plan: `status-dock-plan.md`. Owner: yes to Q-SB1…Q-SB5, sizes accepted as in t
   GridState); tabs, the bottom area (with the filters panel) and the floating window later.
 - Sizes: statusbar 2 300, locales 250 / 300 / 350, internal 3 750, context-menu 2 450; dock V1: dock 3 400,
   core/state 1 700, columns-panel 4 800, dom/state 1 300, dock.css 650, locales 250 / 300 / 350.
+
+## Status bar SB0–SB3 — measures (2026-11-03, built, not committed)
+
+Gzipped, minified (`npm run check:size`), the accepted lines applied:
+| Line | Before | Measured | Line |
+|---|---|---|---|
+| `@dzgrid/dom/statusbar` (new, over dom) | — | 2 105 | 2 300 |
+| `locales/{en,fr,ar}-status` (new) | — | 238 / 268 / 322 | 250 / 300 / 350 |
+| `@dzgrid/dom/internal` (the shared strip) | 3 643 | **3 799** | 3 750 asked → **3 800 by the 2 % rule** (+49, 1.3 %) |
+| `@dzgrid/dom/context-menu` (« Lire les totaux ») | 2 400 (line) | 2 444 | 2 450 |
+| `@dzgrid/dom/pagination` (on the strip) | 3 132 | 3 084 | 3 450 kept |
+| `@dzgrid/core/range` (`rangeStats`) | 2 896 | 3 183 | 3 200 kept |
+| `@dzgrid/dom` (base) | 22 428 | 22 434 | 22 440 kept |
+| K.8 audit profile | 87 346 | 87 392 | 90 000 kept |
+
+- The strip costs 154 B in `internal` (find-or-make, `--dzg-footer-size`, its observer); the plan counted 90. Each
+  feature places its own hosts (pager's parts, status group, pager last), so `internal` holds no ordering code.
+- The base's « `status` part without `statusBar()` » warning (`missing-feature`) was left out: it put the base 2 B over
+  its guarded line. A `status` part registered without the feature is simply not drawn (parts.md).
+- Owner Q-SB1 read literally: the count from a block (two cells), the sum, mean, min and max **from two numbers**.
+- `check:api`: `SlotContext` gains the required member `status` (an interface the grid hands out, as `menuItem` in
+  1.1.0); nothing removed. Accepted with `--only @dzgrid/dom#SlotContext`, **owner to confirm**.
+- Found and fixed on the way: `scripts/test/release-review.test.ts` still expected packs of 1.2.x (its own comment says
+  1.3.0 / 1.3.1-local): the regex now says 1.3.
+- Review (2026-11-03, one reviewer, new code): 3 findings, each with a test first — a sum past the largest double gave
+  NaN (now +Infinity, conformance `sum-overflow`); a column format Intl refuses threw in the paint (now the plain
+  number, `invalid-setting` at `statusBar.numberFormat` once); « … » could stay after a block came back to the one last
+  counted (not reachable today: each block is a new object; `busy` now cleared on a memo hit).

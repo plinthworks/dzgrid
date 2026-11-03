@@ -1,0 +1,14 @@
+{
+  "id": "not-finite",
+  "suite": "range-stats",
+  "description": "NaN and ±Infinity in a number column are not numbers and not filled (the column cannot show them); the others sum.",
+  "input": {
+    "shown": ["r1", "r2", "r3", "r4", "r5"],
+    "columns": [{ "id": "a", "type": "number" }],
+    "rows": { "r1": { "a": { "$": "NaN" } }, "r2": { "a": { "$": "Infinity" } }, "r3": { "a": { "$": "-Infinity" } }, "r4": { "a": 2 }, "r5": { "a": 3 } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r5", "a"] }
+  },
+  "expected": {
+    "stats": { "cells": 5, "filled": 2, "numbers": 2, "sum": 5, "min": 2, "max": 3, "partial": false, "formats": [{}] }
+  }
+}

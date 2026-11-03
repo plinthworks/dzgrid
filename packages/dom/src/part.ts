@@ -1,6 +1,6 @@
-import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, ModelStatus, PageState, PartSlot, Placement, Problem, ResolvedColumn, RowCounts, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
+import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, ModelStatus, NumberFormatSpec, PageState, PartSlot, Placement, Problem, ResolvedColumn, RowCounts, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
 import type { AppMessageKey, ExportMessageKey, FilterMessageKey, FilterRowsMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
-import type { PartsMessageKey, DetailMessageKey, EditMessageKey, EditorsMessageKey, RulesMessageKey, TreeMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, PinnedMessageKey, PrintMessageKey, FreshMessageKey } from './part-texts.js';
+import type { PartsMessageKey, DetailMessageKey, EditMessageKey, EditorsMessageKey, RulesMessageKey, TreeMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, PinnedMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey } from './part-texts.js';
 import type { GridFeature } from './features.js';
 import type { GridSettings } from './settings.js';
 
@@ -28,7 +28,7 @@ export interface PartBase {
   readonly ctx: LocaleCtx;
   readonly dir: 'ltr' | 'rtl';
   /** The grid's messages, and the host's own `app.*` ones (a missing one shows its key, told once). */
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | FilterRowsMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FilterRowsMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
   announce(text: string): void;
   readonly doc: Document;
   /** The application's `settings.context` (step 21): its own, beside `ctx`, the grid's language and zone. */
@@ -222,6 +222,24 @@ export interface SlotContext {
     clearSelection(): void;
   };
   /**
+   * An item of the status bar (`@dzgrid/dom/statusbar`, Phase 9, status-bar.md): `status.count`, `status.sum`, `status.avg`,
+   * `status.min`, `status.max`, `status.rows`, `status.filtered`, `status.selected`, or a host's own listed in
+   * `statusBar({ items })`. Plain text: nothing here is said on its own.
+   */
+  status: PartBase & {
+    /** The block's figures (`rangeStats` of `@dzgrid/core/range`, and the mean), null without a block; while `busy`, the last counted. */
+    readonly stats: StatusStats | null;
+    /** A block bigger than `maxCells` still moving: the figures show « … ». */
+    readonly busy: boolean;
+    readonly counts: RowCounts;
+    /** The selected rows, as the last `selectionChanged` told (null: every matching row, their number unknown). */
+    readonly selection: { readonly count: number | null };
+    /** The text the strip writes for a figure, in the grid's digits and the block's format; null when it shows none. */
+    figure(name: 'count' | 'sum' | 'avg' | 'min' | 'max'): string | null;
+    /** A number as the grid writes it: a column's `numberFormat` when `column` names one, else the plain one. */
+    format(n: number, column?: string): string;
+  };
+  /**
    * The application's editor of a cell (`@dzgrid/dom/editors`, Phase 5 step 6; editors.md 18–19): registered as a
    * part of slot `editor`, named by the column's `edit.editor`, or `editor.<type>` replacing that type's built-in.
    * Mounted in a host put in the cell (`data-dzg-owner="editor"`); its `focus()` takes the focus (false: the host).
@@ -264,6 +282,19 @@ export interface SlotContext {
     /** Puts the focus back on this panel's cell, as Escape from a control inside does (a nested grid's Escape). Given by `detail()`. */
     leave?(): void;
   };
+}
+
+/** A block's figures for the status bar: the core's `RangeStats` and the mean (null without a number). */
+export interface StatusStats {
+  readonly cells: number;
+  readonly filled: number;
+  readonly numbers: number;
+  readonly sum: number;
+  readonly min: number | null;
+  readonly max: number | null;
+  readonly avg: number | null;
+  readonly partial: boolean;
+  readonly formats: readonly NumberFormatSpec[];
 }
 
 /** What an editor keeps: text typed (read by the column's codec) or a value picked. */

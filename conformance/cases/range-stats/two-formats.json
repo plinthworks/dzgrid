@@ -1,0 +1,17 @@
+{
+  "id": "two-formats",
+  "suite": "range-stats",
+  "description": "Numbers met in a currency column and a percent column: both formats, in reading order of the columns met first.",
+  "input": {
+    "shown": ["r1", "r2"],
+    "columns": [
+      { "id": "p", "type": "number", "numberFormat": { "style": "currency", "currency": "EUR" } },
+      { "id": "q", "type": "number", "numberFormat": { "style": "percent" } }
+    ],
+    "rows": { "r1": { "p": 10, "q": 0.5 }, "r2": { "p": 20, "q": 0.25 } },
+    "range": { "anchor": ["r1", "p"], "focus": ["r2", "q"] }
+  },
+  "expected": {
+    "stats": { "cells": 4, "filled": 4, "numbers": 4, "sum": 30.75, "min": 0.25, "max": 20, "partial": false, "formats": [{ "style": "currency", "currency": "EUR" }, { "style": "percent" }] }
+  }
+}

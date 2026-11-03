@@ -1,0 +1,14 @@
+{
+  "id": "text-only",
+  "suite": "range-stats",
+  "description": "No number column in the box: no number, no sum, no smallest or largest.",
+  "input": {
+    "shown": ["r1", "r2", "r3"],
+    "columns": [{ "id": "t" }, { "id": "u" }],
+    "rows": { "r1": { "t": "a", "u": "b" }, "r2": { "t": "c" }, "r3": { "u": "d" } },
+    "range": { "anchor": ["r1", "t"], "focus": ["r3", "u"] }
+  },
+  "expected": {
+    "stats": { "cells": 6, "filled": 4, "numbers": 0, "sum": 0, "min": null, "max": null, "partial": false, "formats": [] }
+  }
+}

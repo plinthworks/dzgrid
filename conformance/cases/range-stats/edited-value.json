@@ -1,0 +1,15 @@
+{
+  "id": "edited-value",
+  "suite": "range-stats",
+  "description": "A value edited but not saved yet counts as the user sees it (the edit overlay).",
+  "input": {
+    "shown": ["r1", "r2"],
+    "columns": [{ "id": "a", "type": "number" }],
+    "rows": { "r1": { "a": 1 }, "r2": { "a": 2 } },
+    "edits": { "r2.a": 40 },
+    "range": { "anchor": ["r1", "a"], "focus": ["r2", "a"] }
+  },
+  "expected": {
+    "stats": { "cells": 2, "filled": 2, "numbers": 2, "sum": 41, "min": 1, "max": 40, "partial": false, "formats": [{}] }
+  }
+}

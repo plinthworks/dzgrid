@@ -1,6 +1,6 @@
 import { problem, type GridCommand, type Problem } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
-import { mounted, settled } from '@dzgrid/dom/internal';
+import { bottomStrip, mounted, settled } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { PaginationMessageKey } from '../messages.js';
@@ -55,27 +55,18 @@ function setup(g: GridContext<unknown>, names: readonly string[]): FeatureHandle
   const target = el.root.getRootNode();
   if (g.settings.injectStyles !== false) injectPaginationStyles(target.nodeType === 11 ? (target as ShadowRoot) : doc, g.settings.nonce);
 
-  // The strip, last in the grid, outside role="grid"; one host per name, the pager's a <nav>.
-  const footer = doc.createElement('div');
-  footer.className = 'dzg-footer';
+  // The strip, last in the grid, outside role="grid" (shared with the status bar); one host per name, the pager's a
+  // <nav>, last when it is listed last (after the status bar's figures).
+  const strip = bottomStrip(g);
   const parts = g.parts();
   const hosts = names.map((name, i) => {
     const h = doc.createElement(name === 'footer.pager' ? 'nav' : 'div');
     h.dataset['part'] = name;
-    footer.append(h);
+    // Before the status bar's group, if there; the pager listed last, at the very end.
+    strip.insertBefore(h, name === 'footer.pager' && i === names.length - 1 ? null : strip.querySelector(':scope>.dzg-status'));
     if (parts[name]?.slot !== 'footer') tell([problem('unknown-part', 'error', `pagination.footer[${i}]`, name)]);
     return { name, h, m: mounted<C>(g) };
   });
-  el.root.append(footer);
-  // The overlay stops above it.
-  const size = (): void => el.root.style.setProperty('--dzg-footer-size', `${footer.offsetHeight}px`);
-  size();
-  const RO = (g.win as (Window & typeof globalThis) | null)?.ResizeObserver;
-  if (RO) {
-    const ro = new RO(size);
-    ro.observe(footer);
-    g.scope.observe(ro);
-  }
 
   // The user's own page change (a button, the size): said once the rows are in.
   let mine = false;
@@ -111,8 +102,8 @@ function setup(g: GridContext<unknown>, names: readonly string[]): FeatureHandle
       }
     },
     destroy() {
-      for (const { m } of hosts) m.clear();
-      footer.remove();
+      for (const { m, h } of hosts) m.clear(), h.remove();
+      if (!strip.firstChild) strip.remove();
     },
   };
 }

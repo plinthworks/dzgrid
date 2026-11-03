@@ -43,6 +43,11 @@ export interface PinnedRowsApiLike<T> {
   set(rows: { readonly top?: readonly T[]; readonly bottom?: readonly T[] }): void;
   get(): { readonly top: readonly T[]; readonly bottom: readonly T[] };
 }
+/** What `statusBar()` gives it: the block's figures said on demand (« Read the totals »). */
+export interface StatusApiLike {
+  announce(): void;
+  stats(): object | null;
+}
 /** What the cell menu's items act on (and the application's items get). */
 export interface CellMenuContext<T = unknown> {
   /** The data row (a band's row too). */
@@ -74,6 +79,8 @@ export interface ContextMenuOptions<T = unknown> {
     readonly tree?: { api(grid: Grid): TreeApiLike | null };
     /** Pin / Unpin the row (owner Q-CM3 A). */
     readonly pinned?: { api(grid: Grid): PinnedRowsApiLike<T> | null };
+    /** « Read the totals » on a cell of the block (`statusBar()`, owner Q-SB3; its label from the status bar's texts). */
+    readonly status?: { api(grid: Grid): StatusApiLike | null };
   };
   /** The application's items: the defaults kept, reordered, removed or added to. A throw: the defaults, reported. */
   readonly items?: (c: CellMenuContext<T>, defaults: readonly MenuEntry<CellMenuContext<T>>[]) => readonly MenuEntry<CellMenuContext<T>>[];
@@ -184,6 +191,7 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
         const tr = o.use?.tree?.api(g)?.state(c.key);
         const p = o.use?.pinned?.api(g);
         const csv = o.use?.csv;
+        const st = o.use?.status?.api(g);
         const b = c.block && r?.box();
         // Cut: disabled when no cell of the block (or the cell) is editable; Paste: when its target (the block's first cell) is read-only.
         const d = g.rowsOf?.(c.block?.anchor.row ?? c.key) || g.rows.displayed;
@@ -223,6 +231,7 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
             ? [it('unpin', pin(c.band, p.get()[c.band].filter((x) => id(c.band!, x) !== c.key)))]
             : (['top', 'bottom'] as const).map((s) => it(`pin.${s}`, pin(s, [...p.get()[s], c.row]), p.get()[s].some((x) => id(s, x) === id(s, c.row))))) : [],
           [csv && it('export.csv', () => void csv.run('displayed'))],
+          [c.block && st?.stats() && { id: 'status.read', label: g.msg('status.read'), action: () => st.announce() }],
         ].map((x) => x.filter(Boolean) as MenuItem<CellMenuContext<T>>[]);
         return (S as MenuItem<CellMenuContext<T>>[][]).filter((s) => s.length).flatMap((s, i) => (i ? [{ separator: true } as const, ...s] : s));
       };

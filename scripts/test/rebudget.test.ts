@@ -118,10 +118,10 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     // Owner S7-O1 (step 7): 6 500 → 6 650.
     expect(ceilingFor('@dzgrid/dom/editors')).toBe(6720); // QB5 (step 12)
     expect(ceilingFor('@dzgrid/theme/edit.css')).toBe(2250); // S7-O1's reserve, used at step 7; owner step 14 (2026-10-29): 2 250
-    expect(ceilingFor('@dzgrid/dom/internal')).toBe(3700); // Phase 9 (owner Q-CM4): the menus' shared list
+    expect(ceilingFor('@dzgrid/dom/internal')).toBe(3800); // Phase 9 status bar: the shared strip (3 750 asked, 3 800 by the 2 % rule); Phase 9 (owner Q-CM4): the menus' shared list
     expect(ceilingFor('@dzgrid/dom/editors: calendar (lazy)')).toBe(1520); // feedback pass Q1: tzslot's lazy entry (`ready`), by the strict need
     expect(() => sizeBudget(6721, ceilingFor('@dzgrid/dom/editors'))).toThrow(/ceiling/);
-    expect(() => sizeBudget(3701, ceilingFor('@dzgrid/dom/internal'))).toThrow(/ceiling/); // Phase 9 (Q-CM4): 1 250 → 3 700
+    expect(() => sizeBudget(3801, ceilingFor('@dzgrid/dom/internal'))).toThrow(/ceiling/); // Phase 9 status bar: 3 800; Phase 9 (Q-CM4): 1 250 → 3 700
     // Untouched by the step.
     expect(ceilingFor('@dzgrid/core')).toBe(CORE);
     expect(ceilingFor('@dzgrid/core/edit')).toBe(3160); // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
@@ -132,7 +132,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(['@dzgrid/dom/editors', '@dzgrid/theme/edit.css', '@dzgrid/dom/editors: calendar (lazy)', '@dzgrid/core', '@dzgrid/core/edit', '@dzgrid/dom/edit', '@dzgrid/dom', '@dzgrid/dom/filters'].map((n) => e[n]?.maxGzip)).toEqual([6720, 2250, 1520, CORE, 3160, 4150, DOM, 12000]); // Phase 9 (owner B after F1–F2): filters 12 000; // Q8-5: core/edit 3 150; // Phase 5 close: dom 21 980 (Q-C2) // S7-O1 (step 7): /editors 6 650, dom/edit 3 750; QB5 (step 12): /editors 6 720 // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
     // The internal entry: its measure with the filters' loader moved in, + 50 (S6-O6), never above 1 250.
     expect(e['@dzgrid/dom/internal']!.maxGzip).toBeGreaterThan(900);
-    expect(e['@dzgrid/dom/internal']!.maxGzip).toBeLessThanOrEqual(3700); // Phase 9 (owner Q-CM4): 1 250 → 3 700, the menus' shared list
+    expect(e['@dzgrid/dom/internal']!.maxGzip).toBeLessThanOrEqual(3800); // Phase 9 status bar: 3 800; Phase 9 (owner Q-CM4): 1 250 → 3 700, the menus' shared list
     // The editors measured over the popup host (a consumer with the filters pays it once); the calendar chunk is lazy
     // (never in the entry), and tzslot is never DzGrid's bytes.
     const x = e['@dzgrid/dom/editors']!;
@@ -251,7 +251,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   });
 
   it('Phase 5 close (owner Q-C2, Q-C3, 2026-10-26): theme up to 2 750, core/rules 600, dom/parts 800 become ceilings; angular 7 000 and dom/internal 1 250 kept; the close measures give these budgets', () => {
-    expect(['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts', '@dzgrid/angular', '@dzgrid/dom/internal'].map(ceilingFor)).toEqual([2850, 600, 800, 7450, 3700]); // Phase 9 (Q-CM4): internal 3 700, the menus' shared list; // angular 7 300 since step 12 (Q12-1) // theme 2 850 since the owner's third look; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
+    expect(['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts', '@dzgrid/angular', '@dzgrid/dom/internal'].map(ceilingFor)).toEqual([2850, 600, 800, 7450, 3800]); // Phase 9 status bar: internal 3 800; Phase 9 (Q-CM4): internal 3 700, the menus' shared list; // angular 7 300 since step 12 (Q12-1) // theme 2 850 since the owner's third look; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
     for (const n of ['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts']) expect(() => sizeBudget(ceilingFor(n)! + 1, ceilingFor(n)), n).toThrow(/ceiling/);
     // The close's own measures (step13-plan §3, the dry run of 2026-10-26), each by the rule.
     const close: [string, number, number][] = [

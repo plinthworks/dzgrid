@@ -59,7 +59,7 @@ const DETAIL = ['detailConflicts', 'detailShape', 'sparseRowLayout'];
 const EDIT = ['checkValue', 'createEdits', 'parseInput'];
 
 /** `@dzgrid/core/range` (Phase 5 step 10): blocks of cells, the clipboard's TSV, the paste and fill plans, never in the base. */
-const RANGE = ['PASTE_MAX', 'boxRows', 'boxSize', 'copyMatrix', 'decodeTsv', 'encodeTsv', 'fillTarget', 'pasteText', 'planFill', 'planPaste', 'rangeBox'];
+const RANGE = ['PASTE_MAX', 'boxRows', 'boxSize', 'copyMatrix', 'decodeTsv', 'encodeTsv', 'fillTarget', 'pasteText', 'planFill', 'planPaste', 'rangeBox', 'rangeStats'];
 
 /** `@dzgrid/core/state` (Phase 6 step 5): capture, check, restore, the text; never in the base. */
 const STATE = ['STATE_UPGRADES', 'STATE_VERSION', 'captureState', 'checkState', 'restoreState', 'stateText'];

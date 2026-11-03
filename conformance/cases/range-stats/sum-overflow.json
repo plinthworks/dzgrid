@@ -1,0 +1,14 @@
+{
+  "id": "sum-overflow",
+  "suite": "range-stats",
+  "description": "Finite numbers whose sum passes the largest double: the sum is +Infinity, never NaN (no compensation past the edge).",
+  "input": {
+    "shown": ["r1", "r2"],
+    "columns": [{ "id": "a", "type": "number" }],
+    "rows": { "r1": { "a": 1e308 }, "r2": { "a": 1e308 } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r2", "a"] }
+  },
+  "expected": {
+    "stats": { "cells": 2, "filled": 2, "numbers": 2, "sum": { "$": "Infinity" }, "min": 1e308, "max": 1e308, "partial": false, "formats": [{}] }
+  }
+}

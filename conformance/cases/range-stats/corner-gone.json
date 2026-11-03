@@ -1,0 +1,12 @@
+{
+  "id": "corner-gone",
+  "suite": "range-stats",
+  "description": "A corner's row is no longer shown: no box, no figures.",
+  "input": {
+    "shown": ["r1", "r2"],
+    "columns": [{ "id": "a", "type": "number" }],
+    "rows": { "r1": { "a": 1 }, "r2": { "a": 2 } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r9", "a"] }
+  },
+  "expected": { "stats": null }
+}

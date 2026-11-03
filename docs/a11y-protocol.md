@@ -983,3 +983,21 @@ colonne `filter: { kind: 'set', condition: true }` (en local : `playground/filte
 
 Règle de décision : une phrase manquante ou dite deux fois (170, 172), un focus perdu (172) ou un `Tab` qui sort de
 la fenêtre (174) se corrigent avant la clôture de la Phase 9.
+
+## 24. Étapes — barre d'état (Phase 9, SB)
+
+Page : une grille avec `range()`, `statusBar()`, `contextMenu({ use: { range, status } })`, deux colonnes de nombres
+(une en euros, une en pourcentage), en **français** puis en **arabe** (droite à gauche). Fiche :
+`docs/behaviors/status-bar.md`. Couples A (NVDA + Firefox) et C (VoiceOver + Safari). Durée estimée : 15 min par couple
+et par langue.
+
+176. **Rien n'est dit tout seul.** `Maj+→` puis `Maj+↓` : seule la taille du bloc est dite (comme avant), jamais les
+     totaux.
+177. **Lire les totaux.** Sur une cellule du bloc, `Maj+F10` : le menu s'ouvre ; « Lire les totaux » est le dernier
+     élément ; `Entrée` : une phrase, dite une fois (« Nombre : 4, Somme : … ») ; le focus revient sur la cellule.
+178. **La barre se trouve par son nom.** Avec la liste des régions et groupes du lecteur, « Barre d'état, … » est
+     trouvée ; lue, chaque chiffre est dit dans l'ordre de la langue (arabe : chiffres arabes-indiens, jamais
+     inversés).
+
+Règle de décision : une phrase dite deux fois ou dite sans demande (176, 177), un focus perdu (177) se corrigent
+avant la clôture de la Phase 9.

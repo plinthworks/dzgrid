@@ -1,0 +1,14 @@
+{
+  "id": "blanks",
+  "suite": "range-stats",
+  "description": "Empty and null cells are cells of the box but not filled; a text column's cells are filled, never numbers.",
+  "input": {
+    "shown": ["r1", "r2", "r3", "r4"],
+    "columns": [{ "id": "a", "type": "number" }, { "id": "t" }],
+    "rows": { "r1": { "a": 4, "t": "x" }, "r2": { "a": null, "t": null }, "r3": { "a": "", "t": "" }, "r4": { "a": 6, "t": "y" } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r4", "t"] }
+  },
+  "expected": {
+    "stats": { "cells": 8, "filled": 4, "numbers": 2, "sum": 10, "min": 4, "max": 6, "partial": false, "formats": [{}] }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "decimals-tenths",
+  "suite": "range-stats",
+  "description": "0.1 ten times sums to exactly 1 (a compensated sum: a plain one gives 0.9999999999999999).",
+  "input": {
+    "shown": ["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10"],
+    "columns": [{ "id": "a", "type": "number" }],
+    "rows": { "r1": { "a": 0.1 }, "r2": { "a": 0.1 }, "r3": { "a": 0.1 }, "r4": { "a": 0.1 }, "r5": { "a": 0.1 }, "r6": { "a": 0.1 }, "r7": { "a": 0.1 }, "r8": { "a": 0.1 }, "r9": { "a": 0.1 }, "r10": { "a": 0.1 } },
+    "range": { "anchor": ["r10", "a"], "focus": ["r1", "a"] }
+  },
+  "expected": {
+    "stats": { "cells": 10, "filled": 10, "numbers": 10, "sum": 1, "min": 0.1, "max": 0.1, "partial": false, "formats": [{}] }
+  }
+}

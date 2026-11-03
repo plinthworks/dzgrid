@@ -97,6 +97,10 @@
       "types": "./src/context-menu.ts",
       "default": "./src/context-menu.ts"
     },
+    "./statusbar": {
+      "types": "./src/statusbar.ts",
+      "default": "./src/statusbar.ts"
+    },
     "./columns-panel": {
       "types": "./src/columns-panel.ts",
       "default": "./src/columns-panel.ts"
@@ -352,6 +356,18 @@
     "./locales/ar-fresh": {
       "types": "./src/locales/ar-fresh.ts",
       "default": "./src/locales/ar-fresh.ts"
+    },
+    "./locales/en-status": {
+      "types": "./src/locales/en-status.ts",
+      "default": "./src/locales/en-status.ts"
+    },
+    "./locales/fr-status": {
+      "types": "./src/locales/fr-status.ts",
+      "default": "./src/locales/fr-status.ts"
+    },
+    "./locales/ar-status": {
+      "types": "./src/locales/ar-status.ts",
+      "default": "./src/locales/ar-status.ts"
     }
   },
   "peerDependencies": {

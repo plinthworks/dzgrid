@@ -270,3 +270,8 @@ Demo: « Envoyer la sélection (simulé) » on `orders-edit.html?focus=range` ca
   grid the focus is visible. The ring hides with `!important` in the theme's layer, so a later layer (contrast.css) does
   not draw it back during the quiet state.
 - Tests: `range-quiet.test.ts`; theme `active.test.ts`, `fill.test.ts`; browser `--only range` (orders-edit).
+
+## The block's figures (Phase 9, `status-bar.md`)
+With `statusBar()`, the block's count, sum, mean, smallest and largest show in the strip under the grid and follow the
+block at most once a frame; nothing is said on its own (the block's size stays what `range.size` says). Read on demand
+by the cell menu's « Lire les totaux ».

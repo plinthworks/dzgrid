@@ -122,6 +122,9 @@
       "@dzgrid/dom/context-menu": [
         "./packages/dom/src/context-menu.ts"
       ],
+      "@dzgrid/dom/statusbar": [
+        "./packages/dom/src/statusbar.ts"
+      ],
       "@dzgrid/dom/columns-panel": [
         "./packages/dom/src/columns-panel.ts"
       ],

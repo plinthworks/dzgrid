@@ -5,5 +5,5 @@
  * column menu's shared list. Its texts in `locales/<lang>-context-menu`, its look in `@dzgrid/theme/menu.css`.
  */
 export { contextMenu, CONTEXT_MENU_KEYS } from './context-menu/index.js';
-export type { CellMenuContext, ContextMenuApi, ContextMenuFeature, ContextMenuOptions, EditApiLike, FillApiLike, MenuEntry, MenuItem, PinnedRowsApiLike, RangeApiLike, TreeApiLike } from './context-menu/index.js';
+export type { CellMenuContext, ContextMenuApi, ContextMenuFeature, ContextMenuOptions, EditApiLike, FillApiLike, MenuEntry, MenuItem, PinnedRowsApiLike, RangeApiLike, StatusApiLike, TreeApiLike } from './context-menu/index.js';
 export type { ContextMenuMessageKey, ContextMenuMessages } from './part-texts.js';

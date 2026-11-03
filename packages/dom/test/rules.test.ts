@@ -317,7 +317,7 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
     expect(b['@dzgrid/dom']!.maxGzip).toBe(22440); // Phase 6 step 8b-1 (owner Q2): 22 400; before: Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant 21 980
     // Owner S6-O6 (Phase 5 step 6): the filters' loader moved in, its measure + 50 (1 184 → 1 234), ceiling 1 250;
     // Phase 5 close (Q-C2): the measure 1 184 + 10 %, capped at that ceiling → 1 250.
-    expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(3700); // Phase 9 (owner Q-CM4, 2026-11-02): the menus' shared list moved in
+    expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(3800); // Phase 9 status bar (owner 2026-11-03: 3 750, measured 3 799: 3 800 by the 2 % rule); Phase 9 (owner Q-CM4, 2026-11-02): the menus' shared list moved in
     expect(b['@dzgrid/dom/slots']!.maxGzip).toBe(1400);
     expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 600, over: '@dzgrid/core' }); // Phase 4 close: 492 + 10 % = 550; Phase 5 close (Q-C3): 512 + 10 % = 600
     expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 750, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });

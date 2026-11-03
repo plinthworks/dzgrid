@@ -9,3 +9,4 @@ export { settled } from './internal/settled.js';
 export { cellKeys, composing, type CellPart } from './internal/keys.js';
 export { once, notice, type Once, type Notice } from './internal/lazy.js';
 export { menuList, menuKey, needTexts, type MenuList, type MenuOpen } from './menu/list.js';
+export { bottomStrip } from './internal/strip.js';

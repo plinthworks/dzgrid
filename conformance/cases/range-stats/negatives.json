@@ -1,0 +1,14 @@
+{
+  "id": "negatives",
+  "suite": "range-stats",
+  "description": "Negative numbers: the smallest is the most negative, the sum below zero.",
+  "input": {
+    "shown": ["r1", "r2", "r3", "r4"],
+    "columns": [{ "id": "a", "type": "number" }],
+    "rows": { "r1": { "a": -5 }, "r2": { "a": 3 }, "r3": { "a": -0.5 }, "r4": { "a": 2 } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r4", "a"] }
+  },
+  "expected": {
+    "stats": { "cells": 4, "filled": 4, "numbers": 4, "sum": -0.5, "min": -5, "max": 3, "partial": false, "formats": [{}] }
+  }
+}

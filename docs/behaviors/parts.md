@@ -119,3 +119,10 @@ and `EditorHandle`; Angular templates for it come at step 9.
   input stay the input's (a control inside a header cell owns its keys and its clicks: no sort); a click on the name
   sorts as before. An app whose header search « swallowed the sort » had stopped the header's events itself, or put its
   own handler on the cell: neither is needed. Checked in Chrome (`--only filters`).
+
+## Phase 9 — slot `status` (`status-bar.md`)
+- **`status`** (`statusBar()`): one host per name of `statusBar({ items })` inside the status bar's group. Built-in
+  names `status.rows`, `status.filtered`, `status.selected`, `status.count`, `status.sum`, `status.avg`, `status.min`,
+  `status.max`; a host's part of the same name replaces one; a host's dotless part may be listed. Context: `stats`
+  (`RangeStats` and `avg`, null without a block), `busy`, `counts`, `selection.count`, `figure(name)`,
+  `format(n, column?)`. A `status` part registered without `statusBar()` is not drawn (not told: the base stays as it is).

@@ -121,3 +121,9 @@ ticked, the announcer's request ownership, the box in a tied selection),
 `tied-all-reticks-every-row.json`; browser checks in
 `scripts/browser.mjs` (`paging=client` French light, `paging=cursor` Arabic right to left dark); by
 ear: `docs/a11y-protocol.md` §13.
+
+## The shared strip (Phase 9, status bar; `status-bar.md`, owner Q-SB2)
+With `statusBar()` too, there is one strip, not two: `div.dzg-footer` is made by whichever of the two features is set
+up first (`@dzgrid/dom/internal`'s bottom strip) and goes with the last. The pager's parts come first, then the status
+bar's group (`role="group"`), then the pager (`footer.pager`, when it is the last name listed). `--dzg-footer-size`
+covers the whole strip. Without `statusBar()`, nothing changes.

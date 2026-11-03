@@ -1,0 +1,14 @@
+{
+  "id": "custom-not-finite",
+  "suite": "range-stats",
+  "description": "A number column whose own reading lets Infinity through: filled, but never a number (the sum stays finite).",
+  "input": {
+    "shown": ["r1", "r2", "r3"],
+    "columns": [{ "id": "a", "type": "number", "codec": "lenient-number" }],
+    "rows": { "r1": { "a": { "$": "Infinity" } }, "r2": { "a": 4 }, "r3": { "a": 1 } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r3", "a"] }
+  },
+  "expected": {
+    "stats": { "cells": 3, "filled": 3, "numbers": 2, "sum": 5, "min": 1, "max": 4, "partial": false, "formats": [{}] }
+  }
+}

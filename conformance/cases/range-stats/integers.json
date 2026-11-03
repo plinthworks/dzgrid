@@ -1,0 +1,14 @@
+{
+  "id": "integers",
+  "suite": "range-stats",
+  "description": "Two number columns of whole numbers: every cell filled and a number; the sum, the smallest, the largest.",
+  "input": {
+    "shown": ["r1", "r2", "r3"],
+    "columns": [{ "id": "a", "type": "number" }, { "id": "b", "type": "number" }],
+    "rows": { "r1": { "a": 1, "b": 10 }, "r2": { "a": 2, "b": 20 }, "r3": { "a": 3, "b": 30 } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r3", "b"] }
+  },
+  "expected": {
+    "stats": { "cells": 6, "filled": 6, "numbers": 6, "sum": 66, "min": 1, "max": 30, "partial": false, "formats": [{}] }
+  }
+}

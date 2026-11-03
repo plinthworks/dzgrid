@@ -65,6 +65,8 @@ export interface RMake {
   readonly mac?: boolean;
   readonly maxPhysical?: number;
   readonly host?: HTMLElement;
+  /** Paints at once (default) or at the frames the test runs (`tick`). */
+  readonly sync?: boolean;
 }
 
 /** A grid with `range()`, synchronous paints, a fake geometry and frames the test runs. */
@@ -89,7 +91,7 @@ export function rmake(o: RMake = {}) {
   const g = createGrid<R>(host, {
     rows: o.rows ?? rowsOf(200), getRowId: (r) => r.id, columns: o.columns ?? COLUMNS, messages: o.messages ?? MSG[o.lang ?? 'en'],
     ...(o.lang === 'ar' && { direction: 'rtl' as const }), features: o.features ? o.features(feature) : [feature], onEvent: (e) => events.push(e), ...o.settings,
-  }, { geometry, sync: true, raf, ...(o.maxPhysical !== undefined && { maxPhysical: o.maxPhysical }) });
+  }, { geometry, sync: o.sync ?? true, raf, ...(o.maxPhysical !== undefined && { maxPhysical: o.maxPhysical }) });
   grids.push(g);
   const ctx = (g as unknown as { context: GridContext<R> }).context;
   const announce = vi.spyOn(ctx.live, 'announce');

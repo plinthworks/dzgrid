@@ -199,6 +199,15 @@ describe('1.3.0, the four packages', () => {
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'print', 'fresh-rows'\]/);
   });
 
+  it('export the Phase 9 status bar (@dzgrid/dom/statusbar) and its -status texts, built like the others', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./statusbar']).toEqual({ types: './src/statusbar.ts', default: './src/statusbar.ts' });
+    for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-status`]).toEqual({ types: `./src/locales/${g}-status.ts`, default: `./src/locales/${g}-status.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/context-menu', '\.\/statusbar'/);
+    expect(build).toMatch(/'\.\/locales\/ar-context-menu', '\.\/locales\/en-status', '\.\/locales\/fr-status', '\.\/locales\/ar-status'/);
+  });
+
   it('keep gsap and tzslot optional peers', () => {
     const dom = pkg('dom');
     expect(dom.peerDependenciesMeta).toEqual({ '@tzslot/core': { optional: true }, '@tzslot/dom': { optional: true }, gsap: { optional: true } });

@@ -1,0 +1,15 @@
+{
+  "id": "hidden-column",
+  "suite": "range-stats",
+  "description": "A hidden column between the corners is not in the box: its numbers count for nothing.",
+  "input": {
+    "shown": ["r1", "r2"],
+    "columns": [{ "id": "a", "type": "number" }, { "id": "b", "type": "number" }, { "id": "c", "type": "number" }],
+    "state": [{ "id": "b", "hidden": true }],
+    "rows": { "r1": { "a": 1, "b": 100, "c": 2 }, "r2": { "a": 3, "b": 100, "c": 4 } },
+    "range": { "anchor": ["r1", "a"], "focus": ["r2", "c"] }
+  },
+  "expected": {
+    "stats": { "cells": 4, "filled": 4, "numbers": 4, "sum": 10, "min": 1, "max": 4, "partial": false, "formats": [{}] }
+  }
+}

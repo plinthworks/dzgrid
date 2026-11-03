@@ -46,7 +46,7 @@ describe('1.3.0 as npm would receive it', () => {
   const local = V !== '1.3.0';
   it.skipIf(!existsSync(packed))('the packed tarballs: no test sources, sideEffects as declared, version 1.3.0, every exported file present', () => {
     const tgz = readdirSync(packed).filter((f) => f.endsWith('.tgz'));
-    expect(V).toMatch(/^(1\.2\.0|1\.2\.1-local\.\d{14})$/);
+    expect(V).toMatch(/^(1\.3\.0|1\.3\.1-local\.\d{14})$/);
     expect(tgz.sort()).toEqual(['angular', 'core', 'dom', 'theme'].map((n) => `dzgrid-${n}-${V}.tgz`));
     for (const t of tgz) {
       const list = execFileSync('tar', ['-tzf', `${packed}/${t}`], { encoding: 'utf8' }).split('\n').filter(Boolean);

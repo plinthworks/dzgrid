@@ -1005,6 +1005,17 @@ versus the ids the app saves today.
 
 ## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
 
+- [x] **The status bar SB0–SB3** (`docs/phase-9-steps/status-dock-plan.md` §1, owner Q-SB1–Q-SB4) — built
+  2026-11-03, not committed (1.4.0, unreleased): sheet `status-bar.md` (+ `pagination-footer`, `parts`,
+  `range-selection`, `context-menu`), a11y protocol §24; conformance `range-stats/` (15, by hand); core `rangeStats`
+  (Neumaier) with a property test (an exact oracle in cents); `@dzgrid/dom/statusbar` (items as `status` parts,
+  formats and digits, frame-bound counting, `maxCells`, `announce()` / `stats()`), the shared strip
+  (`internal/strip.ts`, pagination moved onto it), « Lire les totaux » in the cell menu (`use.status`), texts en/fr/ar,
+  Angular through `[features]`. Tests `statusbar{,-menu}` (30) + Angular 1; 10 planted faults caught (a plain sum, no
+  `<bdi>`, the first format kept, no memo, no « … », the pager not last, a sentence on its own, figures from one
+  number, the item outside the block, a physical side in RTL). Browsers: Chrome, Firefox, WebKit, fr light, ar dark
+  RTL, 320 px, keyboard, axe 0 (132 checks, local `playground/status-check.html`, not committed). Sizes in
+  `phase-9-steps/decisions.md` « Status bar SB0–SB3 — measures » (with the review: 3 findings fixed). Next: the dock V1 (D0).
 - [x] **Filters F0–F2** (`docs/phase-9-steps/filters-plan.md` §1–2, owner Q-F2 A, Q-F3 A, sizes B) — built
   2026-11-02, not committed: sheets `filter-combined.md`, `filter-multi.md` (+ `filter-ui`, `filter-text`,
   `filter-set`), a11y protocol §23; conformance `filter-combined/ui-*`, `multi-*` (5, by hand). DOM only: `several()`

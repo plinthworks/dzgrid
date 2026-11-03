@@ -244,6 +244,18 @@
       "file": "packages/dom/src/locales/ar-context-menu.ts",
       "maxGzip": 500
     },
+    "@dzgrid/dom/locales/en-status": {
+      "file": "packages/dom/src/locales/en-status.ts",
+      "maxGzip": 250
+    },
+    "@dzgrid/dom/locales/fr-status": {
+      "file": "packages/dom/src/locales/fr-status.ts",
+      "maxGzip": 300
+    },
+    "@dzgrid/dom/locales/ar-status": {
+      "file": "packages/dom/src/locales/ar-status.ts",
+      "maxGzip": 350
+    },
     "@dzgrid/dom/locales/en-pinned": {
       "file": "packages/dom/src/locales/en-pinned.ts",
       "maxGzip": 120
@@ -596,11 +608,22 @@
     },
     "@dzgrid/dom/context-menu": {
       "file": "packages/dom/src/context-menu.ts",
-      "maxGzip": 2400,
+      "maxGzip": 2450,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/statusbar": {
+      "file": "packages/dom/src/statusbar.ts",
+      "maxGzip": 2300,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/range",
         "@dzgrid/dom/internal"
       ]
     },
@@ -728,7 +751,7 @@
     },
     "@dzgrid/dom/internal": {
       "file": "packages/dom/src/internal.ts",
-      "maxGzip": 3700,
+      "maxGzip": 3800,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
