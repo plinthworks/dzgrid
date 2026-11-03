@@ -81,3 +81,15 @@ Order: **status bar** first, then the **filters panel** (added to Phase 9: every
 the same forms as the popups), the **Excel export**, then **row dragging**. Owner wish for the panels: dockable like an
 editor's tool windows — anchored at the start or the end side, at the bottom, or floating. To plan with the status
 bar (owner questions first).
+
+## Status bar and dock — owner answers (2026-11-03)
+
+Plan: `status-dock-plan.md`. Owner: yes to Q-SB1…Q-SB5, sizes accepted as in the plan.
+- Q-SB1: block figures by default (Count, Sum, Average, Min, Max) from 2 numeric cells; row counts if the app asks.
+- Q-SB2: one strip with the pager: the figures first, the pager at the end.
+- Q-SB3: nothing read out on its own; a « Lire les totaux » item in the cell menu (Shift+F10).
+- Q-SB4: mixed formats → the plain number; one shared format is kept.
+- Q-SB5: the dock's V1 after the status bar (start / end side, one panel per side, edge resize, collapse, saved in
+  GridState); tabs, the bottom area (with the filters panel) and the floating window later.
+- Sizes: statusbar 2 300, locales 250 / 300 / 350, internal 3 750, context-menu 2 450; dock V1: dock 3 400,
+  core/state 1 700, columns-panel 4 800, dom/state 1 300, dock.css 650, locales 250 / 300 / 350.
