@@ -121,3 +121,9 @@ Gzipped, minified (`npm run check:size`), the accepted lines applied:
   NaN (now +Infinity, conformance `sum-overflow`); a column format Intl refuses threw in the paint (now the plain
   number, `invalid-setting` at `statusBar.numberFormat` once); « … » could stay after a block came back to the one last
   counted (not reachable today: each block is a new object; `busy` now cleared on a memo hit).
+
+## Order changed (owner, 2026-11-03)
+
+After the status bar: **Excel export first**, then find in grid (Ctrl+F), then row grouping (Phase 7) if the
+screens need it; the dock and the filters panel later. The status bar's two points are taken as accepted (no
+objection): `internal` 3 800 (+2 % rule), `SlotContext.status` added (check:api, additive).
