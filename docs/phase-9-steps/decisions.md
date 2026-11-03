@@ -162,3 +162,15 @@ The owner opens two reference files (fr, ar) in a real Excel with a checklist.
   in `csv/writers.ts`; a span whose origin column is not written counts its problems under the first column; the
   CSV oracle in `packages/core/test/xlsx/oracle.test.ts` (not `perf/`).
 - `check:api`: additions only, accepted (owner A, 2026-11-03).
+
+## Find in grid (Ctrl+F) — owner answers (2026-11-03)
+
+A to all, and the bar is opt-in:
+- Ctrl/Cmd+F opens the grid's find bar only when the focus is in the grid; elsewhere the browser's own find.
+- Searched: the displayed text of visible columns, case- and accent-insensitive; collapsed tree rows too (the node
+  opens to show a hit). Rows are never hidden (unlike the quick search, which filters).
+- On a server source: the loaded page only, and the bar says so.
+- The bar exists only when the app adds the feature (`find()`); without it, Ctrl+F stays the browser's.
+- « Effacer tous les filtres »: not in the find bar (searching is not filtering). Apps already have `clearFilters()`
+  for their own button; add an item « Effacer tous les filtres » to the column menu and the cell menu, shown only
+  when at least one filter is active.
