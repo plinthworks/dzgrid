@@ -1,0 +1,48 @@
+{
+  "id": "structure-conflicts",
+  "suite": "group-agg",
+  "description": "What grouping refuses beside it (plan D20, owner Q-PG A, Q-SRV A): each told, never a throw.",
+  "input": {
+    "conflicts": {
+      "tree": true,
+      "detail": true,
+      "spans": true,
+      "page": true,
+      "server": true
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "tree",
+        "detail": "grouping"
+      },
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "detail",
+        "detail": "grouping"
+      },
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "spans",
+        "detail": "grouping"
+      },
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "pagination",
+        "detail": "grouping"
+      },
+      {
+        "code": "unsupported-combination",
+        "severity": "warning",
+        "path": "source",
+        "detail": "grouping"
+      }
+    ]
+  }
+}

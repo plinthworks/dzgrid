@@ -1084,3 +1084,30 @@ versus the ids the app saves today.
   green; 9 planted faults caught. Browsers: Chrome, Firefox, WebKit, fr light and ar dark, 82 checks on a local page
   (`playground/cell-menu-check.html`, not committed). Sizes in `phase-9-steps/decisions.md`; two lines over their
   grant (`context-menu` 2 325 / 2 100, `menu.css` 716 / 500) and the `check:api` changes wait for the owner.
+
+## Phase 7 — row grouping and aggregation (started 2026-11-04)
+
+Plan `docs/phase-7-plan.md` (aligned 2026-11-04); owner answers « ★ everywhere in §5, sizes OK » (`docs/phase-7-steps/
+questions.md`); the lead's decisions and measures in `docs/phase-7-steps/decisions.md`, which win over the plan.
+
+- [x] **Step 1 — sheets and questions** (2026-11-04): `row-grouping.md`, `aggregation.md`; amendments to
+  `group-drop-zone.md` (Q-Z1 B, Q-Z2 A), `tree-keys.md` (Enter on a group row), `edit-reapply.md` (grouping columns),
+  `csv-export.md`, `xlsx-export.md`, `print.md` (Q-EX A, Excel included), `grid-state.md` (`rowGroups`),
+  `column-menu.md` (« Regrouper par »); `a11y-protocol.md` §26 (183–187); `questions.md` (French), `decisions.md`.
+- [x] **Step 2 — core base seams** (2026-11-04): `RowShape.kind` `'group'`, `reads()` in the stale rule, `values(changed)`
+  after an edit, `ShapeInput.env`, `parents(…, env)` at the first load, `attach` redraw `(kind, source)`, pages refused
+  beside any shape but details. Core base 29 147 → 29 204 (+57 with the review fix, line 29 150 → 29 250 by the 2 % rule); K.8 89 197 /
+  90 000. Tests `shape-seams.test.ts` (9, failing first).
+- [x] **Steps 3–4 — `@dzgrid/core/grouping`** (2026-11-04): `groupShape({ by, aggFuncs, expanded, footers, grandTotal })`
+  with `setBy`, `totals()`; typed group keys; groups by value (collation over the shared rank cache, blank last,
+  reversed by a descending sort); leaves under their last group; totals `sum` (Neumaier) / `avg` / `min` / `max` /
+  `count` / `first` / `last` / a function, footers and the grand total (`FooterNode`); edits total at once, regroup at
+  « Réappliquer »; live updates regroup only when a grouping value moved; `groupConflicts`. Conformance `group-agg`
+  48 cases (written by hand); `grouping.test.ts` (21), `grouping-property.test.ts` (1 000 seeded cases against a
+  recursive oracle); 27 / 27 planted faults caught; review fixes (a regroup while stale goes through a whole run, `expanded` and odd settings told) each with a failing test first. `core/grouping` 4 285 B, line 4 750 (measure + 10 %). Perf (minified, node, medians of three): **A grouped by 2 columns + 3
+  totals, cold 59.9 ms (exit criterion ≤ 150)**; regroup 8.2; expand a group of ~10 000 rows 0.1; one-row update 3.2;
+  ~100 000 distinct texts 256.8 (the collation's own cost, recorded); memory 64 B / row over the flat model.
+- [ ] Step 5 — `@dzgrid/dom/grouping` (the painter shared with the tree, group cells, footers, keys, `aria-*`).
+- [ ] Step 6 — `@dzgrid/dom/group-zone` (`groupZone()`, Q-Z1 B) and the menu item.
+- [ ] Step 7 — state (`rowGroups`), CSV, Excel and print with group rows and totals.
+- [ ] Step 8 — Angular and demos. Step 9 — close.

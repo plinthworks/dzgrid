@@ -1,0 +1,53 @@
+{
+  "id": "structure-instant",
+  "suite": "group-agg",
+  "description": "An instant column groups by the instant: three spellings of one instant are one group; a time without an offset is unreadable (empty group).",
+  "input": {
+    "columns": [
+      {
+        "id": "i",
+        "type": "instant"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "i": "2026-03-05T10:00:00Z"
+      },
+      {
+        "id": "b",
+        "i": "2026-03-05T11:00:00+01:00"
+      },
+      {
+        "id": "c",
+        "i": 1772704800000
+      },
+      {
+        "id": "d",
+        "i": "2026-03-05T10:00:00"
+      },
+      {
+        "id": "e",
+        "i": "2026-03-06T12:30:00Z"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "i"
+      ]
+    }
+  },
+  "expected": {
+    "shown": [
+      "[03/05/2026, 10:00] (3) 1/3 +",
+      "[03/06/2026, 12:30] (1) 2/3 +",
+      "[] (1) 3/3 +"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 3
+    },
+    "problems": []
+  }
+}

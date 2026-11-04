@@ -275,3 +275,8 @@ Chrome fr light / ar RTL dark, forced colours, 200 % zoom and 320 px, axe 0.
 - `MenuItem`, `MenuEntry` take a context type parameter (`MenuItem<C = MenuContext>`); the column menu's read the same.
 - `@dzgrid/theme/menu.css`: the list's rules (the `_menu-list.scss` partial, also `@use`d by columns.scss) for an app
   with the cell menu and no column menu.
+
+## Grouping (Phase 7, plan D13; built at step 6)
+With `columnMenu({ use: { grouping } })`: « Regrouper par cette colonne » on a groupable column that is not grouped,
+« Ne plus regrouper par cette colonne » on one that is — the way to group without dragging (WCAG 2.5.7). The grouped
+column stays visible (Q-H A).

@@ -1,0 +1,105 @@
+{
+  "id": "agg-neumaier",
+  "suite": "group-agg",
+  "description": "Sums are compensated (Neumaier): 0.1 ten times is 1; 1e16 + 1 - 1e16 is 1; the grand total 2 (aggregation.md 6).",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a0",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a1",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a2",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a3",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a4",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a5",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a6",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a7",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a8",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "a9",
+        "g": "a",
+        "v": 0.1
+      },
+      {
+        "id": "b1",
+        "g": "b",
+        "v": 1e+16
+      },
+      {
+        "id": "b2",
+        "g": "b",
+        "v": 1
+      },
+      {
+        "id": "b3",
+        "g": "b",
+        "v": -1e+16
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ]
+    },
+    "totals": true
+  },
+  "expected": {
+    "shown": [
+      "[a] (10) 1/2 + {v=1}",
+      "[b] (3) 2/2 + {v=1}"
+    ],
+    "counts": {
+      "total": 13,
+      "filtered": 13,
+      "displayed": 2
+    },
+    "totals": {
+      "v": "2"
+    },
+    "problems": []
+  }
+}

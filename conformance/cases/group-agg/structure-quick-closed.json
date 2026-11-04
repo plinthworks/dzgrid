@@ -1,0 +1,89 @@
+{
+  "id": "structure-quick-closed",
+  "suite": "group-agg",
+  "description": "A search keeps the groups holding a match, and opens none (owner Q-E2 A).",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "h",
+        "type": "number"
+      },
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "g": "Nord",
+        "h": 1,
+        "v": 10,
+        "d": "2026-01-05"
+      },
+      {
+        "id": "r2",
+        "g": "Sud",
+        "h": 2,
+        "v": 5,
+        "d": "2026-02-01"
+      },
+      {
+        "id": "r3",
+        "g": "Nord",
+        "h": 2,
+        "v": 2.5,
+        "d": "2026-01-20"
+      },
+      {
+        "id": "r4",
+        "g": "Nord",
+        "h": 1,
+        "v": null,
+        "d": null
+      },
+      {
+        "id": "r5",
+        "g": "Est",
+        "h": 1,
+        "v": 7,
+        "d": "2026-03-01"
+      },
+      {
+        "id": "r6",
+        "g": null,
+        "h": 3,
+        "v": 1,
+        "d": "2026-01-01"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ]
+    },
+    "steps": [
+      {
+        "quick": "Sud"
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "[Sud] (1) 1/1 +"
+    ],
+    "counts": {
+      "total": 6,
+      "filtered": 1,
+      "displayed": 1
+    },
+    "problems": []
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "id": "structure-enum",
+  "suite": "group-agg",
+  "description": "A list column groups by its value and orders its groups as it sorts (by label here), its label shown.",
+  "input": {
+    "columns": [
+      {
+        "id": "e",
+        "type": "enum",
+        "enumOptions": [
+          {
+            "value": "lo",
+            "label": "Low"
+          },
+          {
+            "value": "hi",
+            "label": "High"
+          }
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "e": "lo"
+      },
+      {
+        "id": "b",
+        "e": "hi"
+      },
+      {
+        "id": "c",
+        "e": "lo"
+      },
+      {
+        "id": "d",
+        "e": "zz"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "e"
+      ]
+    },
+    "steps": [
+      {
+        "open": [
+          [
+            "e",
+            "elo"
+          ]
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "[High] (1) 1/3 +",
+      "[Low] (2) 2/3 -",
+      ". a 1/2",
+      ". c 2/2",
+      "[zz] (1) 3/3 +"
+    ],
+    "counts": {
+      "total": 4,
+      "filtered": 4,
+      "displayed": 5
+    },
+    "problems": []
+  }
+}

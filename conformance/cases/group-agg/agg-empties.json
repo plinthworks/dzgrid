@@ -1,0 +1,66 @@
+{
+  "id": "agg-empties",
+  "suite": "group-agg",
+  "description": "A group whose values are all empty shows nothing (never 0); `count` counts the rows, empty values included (aggregation.md 4, 5).",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      },
+      {
+        "id": "u",
+        "type": "number",
+        "aggFunc": "avg"
+      },
+      {
+        "id": "w",
+        "aggFunc": "count"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "x",
+        "v": null,
+        "u": null,
+        "w": null
+      },
+      {
+        "id": "b",
+        "g": "x",
+        "v": null,
+        "u": null,
+        "w": "p"
+      },
+      {
+        "id": "c",
+        "g": "y",
+        "v": 3,
+        "u": 4,
+        "w": null
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ]
+    }
+  },
+  "expected": {
+    "shown": [
+      "[x] (2) 1/2 + {v=null u=null w=2}",
+      "[y] (1) 2/2 + {v=3 u=4 w=1}"
+    ],
+    "counts": {
+      "total": 3,
+      "filtered": 3,
+      "displayed": 2
+    },
+    "problems": []
+  }
+}

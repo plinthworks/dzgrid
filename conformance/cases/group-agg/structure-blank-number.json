@@ -1,0 +1,48 @@
+{
+  "id": "structure-blank-number",
+  "suite": "group-agg",
+  "description": "A value a number column cannot read joins the empty group (row-grouping.md 3).",
+  "input": {
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 2
+      },
+      {
+        "id": "b",
+        "n": "abc"
+      },
+      {
+        "id": "c",
+        "n": null
+      },
+      {
+        "id": "d",
+        "n": 2
+      }
+    ],
+    "grouping": {
+      "by": [
+        "n"
+      ]
+    }
+  },
+  "expected": {
+    "shown": [
+      "[2] (2) 1/2 +",
+      "[] (2) 2/2 +"
+    ],
+    "counts": {
+      "total": 4,
+      "filtered": 4,
+      "displayed": 2
+    },
+    "problems": []
+  }
+}

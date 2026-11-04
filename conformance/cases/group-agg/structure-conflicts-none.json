@@ -1,0 +1,13 @@
+{
+  "id": "structure-conflicts-none",
+  "suite": "group-agg",
+  "description": "Nothing refused when nothing else is there.",
+  "input": {
+    "conflicts": {
+      "tree": false
+    }
+  },
+  "expected": {
+    "problems": []
+  }
+}

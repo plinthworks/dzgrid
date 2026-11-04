@@ -1022,3 +1022,22 @@ couple et par langue.
 
 Règle de décision : un focus perdu (179, 181, 182), un état non dit (180) ou une phrase dite deux fois (181, 182) se
 corrigent avant la clôture de la Phase 9.
+
+## 26. Étapes — regroupement des lignes et totaux (Phase 7)
+
+Page : une grille de lignes inventées regroupée par deux colonnes, avec une somme et une moyenne, des pieds de groupe et
+le total général, la zone « Nom × » et le menu ⋮, en **français** puis en **arabe**. Fiches :
+`docs/behaviors/row-grouping.md`, `aggregation.md`, `group-drop-zone.md`. Couples A (NVDA + Firefox) et C (VoiceOver +
+Safari). Durée estimée : 20 min par couple et par langue. À écouter après l'étape 6 (rien n'est visible avant l'étape 5).
+
+183. **Les groupes.** Flèche bas jusqu'à une ligne de groupe : le libellé, le nombre de lignes, « niveau 1 », « 2 sur
+     5 », « réduit » dits ; `→` (`←` en arabe) : « développé », les sous-groupes au niveau 2 ; `←` revient au parent.
+184. **Entrée** sur une ligne de groupe l'ouvre ou la ferme ; l'état est dit une fois.
+185. **Les totaux.** Sur une ligne de groupe, `→` de cellule en cellule : la somme dite dans le format de la colonne ;
+     une colonne sans total : vide. Le pied « Total … » et le total général dits sans « développé / réduit ».
+186. **La zone.** Tab jusqu'à la barre « Regroupement des lignes » : son nom ; les étiquettes dites avec « Ne plus
+     regrouper par … » ; `Suppr` en retire une et la phrase est dite une fois.
+187. **Le menu.** Maj+F10 sur un en-tête : « Regrouper par cette colonne » ; choisi, la phrase « Regroupé par … » dite.
+
+Règle de décision : un niveau ou un état faux (183), une phrase dite deux fois (184, 186, 187) ou un total illisible
+(185) se corrigent avant la clôture de la Phase 7.

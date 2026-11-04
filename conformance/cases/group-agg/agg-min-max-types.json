@@ -1,0 +1,84 @@
+{
+  "id": "agg-min-max-types",
+  "suite": "group-agg",
+  "description": "Min and max of numbers, days, instants and text (the language's collation), each written as the column reads it (aggregation.md 3).",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "i",
+        "type": "instant"
+      },
+      {
+        "id": "t"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "x",
+        "n": 5,
+        "d": "2026-01-05",
+        "i": "2026-03-05T10:00:00Z",
+        "t": "pomme"
+      },
+      {
+        "id": "b",
+        "g": "x",
+        "n": -2,
+        "d": "2025-12-31",
+        "i": "2026-03-04T23:00:00Z",
+        "t": "Poire"
+      },
+      {
+        "id": "c",
+        "g": "x",
+        "n": null,
+        "d": null,
+        "i": null,
+        "t": null
+      },
+      {
+        "id": "e",
+        "g": "y",
+        "n": 3,
+        "d": "2026-02-01",
+        "i": "2026-03-05T12:00:00+02:00",
+        "t": "ananas"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ],
+      "aggFuncs": {
+        "n": "min",
+        "d": "max",
+        "i": "min",
+        "t": "max"
+      }
+    }
+  },
+  "expected": {
+    "shown": [
+      "[x] (3) 1/2 + {n=-2 d=2026-01-05 i=2026-03-04T23:00:00Z t=pomme}",
+      "[y] (1) 2/2 + {n=3 d=2026-02-01 i=2026-03-05T10:00:00Z t=ananas}"
+    ],
+    "counts": {
+      "total": 4,
+      "filtered": 4,
+      "displayed": 2
+    },
+    "problems": []
+  }
+}

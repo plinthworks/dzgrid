@@ -94,3 +94,7 @@ number.
 - DOM `packages/dom/test/export-xlsx.test.ts`: the format in the request and events, `exportAll`, the stored fallback,
   cancel, the limits before `canExport`, the cell menu item.
 - Chrome, Firefox and WebKit build the same content.
+
+## Grouped rows (Phase 7, owner Q-EX A « et l'export Excel aussi »; built at step 7)
+As the CSV (`csv-export.md` « Grouped rows »): group rows with their label and their totals as typed cells (numbers as
+numbers, days as dates), footers and the grand total; the outline levels as for a tree.

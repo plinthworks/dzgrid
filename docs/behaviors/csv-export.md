@@ -116,3 +116,9 @@ Presses the host's "Export" button (the grid has none of its own), after filteri
   - Detail rows are never exported, in any scope; a nested grid exports itself through its own feature.
   - Server trees (lazy children) go through the host's `exportAll`, as server pages do: the browser does not hold the unopened children.
 - **Tests:** `conformance/cases/csv/tree-*` (the three modes, fillers, `displayed` vs `all` with closed parents, `selected` with hidden rows, no detail rows), `packages/core/test/csv/tree.test.ts`.
+
+## Grouped rows (Phase 7, owner Q-EX A; built at step 7)
+A grouped grid's CSV writes its group rows (the label in the group column, the level column as for a tree) **with their
+totals** under the aggregated columns, and its footer and grand total rows, as shown; `all` writes every group open.
+`csv.groups: 'none'` writes the data rows only, flat. Totals are written through the column's own writer (raw, never
+the display). The same for the Excel export (`xlsx-export.md`).

@@ -1,0 +1,63 @@
+{
+  "id": "structure-blank-text",
+  "suite": "group-agg",
+  "description": "Empty, null and missing values form one group, last, labelled empty (row-grouping.md 3).",
+  "input": {
+    "columns": [
+      {
+        "id": "t"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "t": "x"
+      },
+      {
+        "id": "b",
+        "t": null
+      },
+      {
+        "id": "c",
+        "t": ""
+      },
+      {
+        "id": "d"
+      },
+      {
+        "id": "e",
+        "t": "x"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "t"
+      ]
+    },
+    "steps": [
+      {
+        "open": [
+          [
+            "t",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "[x] (2) 1/2 +",
+      "[] (3) 2/2 -",
+      ". b 1/3",
+      ". c 2/3",
+      ". d 3/3"
+    ],
+    "counts": {
+      "total": 5,
+      "filtered": 5,
+      "displayed": 5
+    },
+    "problems": []
+  }
+}

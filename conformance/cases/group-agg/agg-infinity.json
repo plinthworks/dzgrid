@@ -1,0 +1,56 @@
+{
+  "id": "agg-infinity",
+  "suite": "group-agg",
+  "description": "A sum past the largest number is Infinity (or -Infinity), shown as such.",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "p",
+        "v": 1e+308
+      },
+      {
+        "id": "b",
+        "g": "p",
+        "v": 1e+308
+      },
+      {
+        "id": "c",
+        "g": "q",
+        "v": -1e+308
+      },
+      {
+        "id": "d",
+        "g": "q",
+        "v": -1e+308
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ]
+    }
+  },
+  "expected": {
+    "shown": [
+      "[p] (2) 1/2 + {v=Infinity}",
+      "[q] (2) 2/2 + {v=-Infinity}"
+    ],
+    "counts": {
+      "total": 4,
+      "filtered": 4,
+      "displayed": 2
+    },
+    "problems": []
+  }
+}

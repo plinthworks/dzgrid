@@ -1,0 +1,90 @@
+{
+  "id": "agg-custom",
+  "suite": "group-agg",
+  "description": "An application's function gets the group's values in order (empty as null) and its level (null for the grand total); one that throws shows nothing, told once (aggregation.md 15).",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "t",
+        "aggFunc": {
+          "fn": "joined"
+        }
+      },
+      {
+        "id": "n",
+        "type": "number",
+        "aggFunc": {
+          "fn": "level"
+        }
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": {
+          "fn": "throws"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "x",
+        "t": "p",
+        "n": 1,
+        "v": 1
+      },
+      {
+        "id": "b",
+        "g": "x",
+        "t": null,
+        "n": 2,
+        "v": 2
+      },
+      {
+        "id": "c",
+        "g": "y",
+        "t": "q",
+        "n": 3,
+        "v": 3
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ],
+      "footers": "both"
+    },
+    "steps": [
+      {
+        "expandAll": true
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "[x] (2) 1/3 - {t=p|- n=0 v=null}",
+      ". a 1/3",
+      ". b 2/3",
+      ". Σ x 3/3 {t=p|- n=0 v=null}",
+      "[y] (1) 2/3 - {t=q n=0 v=null}",
+      ". c 1/2",
+      ". Σ y 2/2 {t=q n=0 v=null}",
+      "Σ* 3/3 {t=p|-|q n=grand v=null}"
+    ],
+    "counts": {
+      "total": 3,
+      "filtered": 3,
+      "displayed": 8
+    },
+    "problems": [
+      {
+        "code": "agg-threw",
+        "severity": "warning",
+        "path": "columns.v.aggFunc"
+      }
+    ]
+  }
+}

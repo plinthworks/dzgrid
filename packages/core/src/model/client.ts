@@ -177,22 +177,27 @@ export interface ShapeInput<T> {
   /** Set by a toggle: the only keys whose state changed since the last build (nothing else did). */
   readonly changed?: readonly RowKey[];
   readonly version: number;
+  /** The model's columns, language, edit overlay and key cache (Phase 7 step 2): what a grouping reads its values through. */
+  readonly env?: ColumnEnv<T>;
 }
 
 /**
- * How the rows are shown when they are not a flat list (Phase 4, D2): a tree (`@dzgrid/core/tree`)
- * or details under their masters. Set once, at creation. Opening a row builds again from the same
- * order and matches, by identity: a shape keeps what did not change.
+ * How the rows are shown when they are not a flat list (Phase 4, D2): a tree (`@dzgrid/core/tree`),
+ * details under their masters, or groups (`@dzgrid/core/grouping`, Phase 7). Set once, at creation. Opening a row
+ * builds again from the same order and matches, by identity: a shape keeps what did not change.
  */
 export interface RowShape<T> {
-  readonly kind: 'tree' | 'detail';
+  readonly kind: 'tree' | 'detail' | 'group';
   /** What is open at the first non-empty load: nothing, everything, or the levels above a depth. */
   readonly initial?: 'none' | 'all' | number;
   build(input: ShapeInput<T>): DisplayedRows<T>;
   /** Every row the filters keep, all open: what a CSV of `all` writes. */
   all?(): DisplayedRows<T>;
-  /** The rows that have children, above `depth`; `shown`: those showing children in the last build (under a filter, kept ones). */
-  parents?(snap: RowSnapshot<T>, depth: number, shown?: boolean): readonly RowKey[];
+  /**
+   * The rows that have children, above `depth`; `shown`: those showing children in the last build (under a filter, kept
+   * ones). `env`: given at the first load, before any build (a grouping finds its groups through it).
+   */
+  parents?(snap: RowSnapshot<T>, depth: number, shown?: boolean, env?: ColumnEnv<T>): readonly RowKey[];
   /** Whether a row is open in the last build. */
   isOpen?(key: RowKey): boolean;
   /** Whether a row shows children when open, in the last build: opening one that does not is a no-op (tree-view.md). */
@@ -204,8 +209,15 @@ export interface RowShape<T> {
   tx?(tx: RowTransaction<T>, id: (row: T) => RowIdInput, snap: RowSnapshot<T>): RowTransaction<T>;
   /** After a change: what each open key becomes (a path tree's row taking a filler's place, or the reverse); null: unchanged. */
   rekey?(snap: RowSnapshot<T>): ((key: RowKey) => RowKey) | null;
-  /** Called once by the model it is handed to (lazy children, tree-lazy.md): the model, and how to show its rows again. */
-  attach?(model: ClientModel<T>, redraw: () => void): void;
+  /**
+   * Called once by the model it is handed to (lazy children, tree-lazy.md): the model, and how to show its rows again —
+   * told as `kind` (`expand` by default; a regroup is `rows`) from `source` (`data` by default).
+   */
+  attach?(model: ClientModel<T>, redraw: (kind?: 'rows' | 'expand', source?: ChangeSource) => void): void;
+  /** The columns the shape reads to place rows (a grouping's): an edit of one makes the order stale, as a sort column's (K.14). */
+  reads?(): readonly string[];
+  /** Told after each edit that moved the reader: the columns it touched (absent: any). A grouping totals again. */
+  values?(changed?: readonly string[]): void;
   /** Called first by `invalidate` (a refresh): what the shape brought is dropped. */
   refresh?(): void;
 }
@@ -307,10 +319,10 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   const d = { filterRuns: 0, sortRuns: 0, displayedBuilds: 0, retested: 0, pageCuts: 0 };
   const shape = o.shape;
   const tree = shape?.kind === 'tree';
-  // A tree is not paged (D2): the tree is shown whole, and told. Details are: a page's masters, each with its detail.
-  const pageRefused = tree && o.page !== undefined;
+  // A tree or groups are not paged (D2, Phase 7 Q-PG): shown whole, and told. Details are: a page's masters, each with its detail.
+  const pageRefused = shape && shape.kind != 'detail' && o.page;
   const paging = resolvePageOptions(pageRefused ? undefined : o.page);
-  const shapeProblems: readonly Problem[] = pageRefused ? [problem('unsupported-combination', 'warning', 'pagination', 'tree')] : [];
+  const shapeProblems: readonly Problem[] = pageRefused ? [problem('unsupported-combination', 'warning', 'pagination', shape.kind)] : [];
   /** The rows the user opened (changed in place by a toggle); under a filter, a layer of toggles of its own, tied to that filter. */
   let open = new Set<RowKey>();
   let layer: Map<RowKey, boolean> | null = null;
@@ -356,7 +368,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   };
   /** Whether `changed` (absent: any column) holds a column the sort, the applied filters or the search read. */
   const touches = (changed?: readonly string[]): boolean => {
-    const read = [...query.sort.map((s) => s.column), ...Object.keys(appliedOf(query.filter).m), ...(quickWords(query.quick).length ? columns.visible().map((c) => c.id) : [])];
+    const read = [...query.sort.map((s) => s.column), ...Object.keys(appliedOf(query.filter).m), ...(quickWords(query.quick).length ? columns.visible().map((c) => c.id) : []), ...(shape?.reads?.() ?? [])];
     return changed ? changed.some((c) => read.includes(c)) : read.length > 0;
   };
 
@@ -459,9 +471,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
         opened = true;
         const initial = shape.initial;
         // Only when the host set nothing before (tree-view.md).
-        if (!touched && initial !== undefined && initial !== 'none') open = new Set(shape.parents?.(store.snapshot, initial === 'all' ? Infinity : initial) ?? []);
+        if (!touched && initial !== undefined && initial !== 'none') open = new Set(shape.parents?.(store.snapshot, initial === 'all' ? Infinity : initial, !1, env()) ?? []);
       }
-      displayed = shape.build({ snap: store.snapshot, order, matched: f.mask, filterActive: f.order !== null, expansion: open, layer, version: ++version, ...(changed && { changed }) });
+      displayed = shape.build({ snap: store.snapshot, order, matched: f.mask, filterActive: f.order !== null, expansion: open, layer, version: ++version, env: env(), ...(changed && { changed }) });
       return;
     }
     displayed = flatDisplayed(store.snapshot, order, ++version);
@@ -549,8 +561,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       run();
       return notify('rows', source, r);
     }
-    // The old sort keys of the changed rows, read before the cache follows the store.
-    const sortCols = query.sort.map((s) => columns.get(s.column)).filter((c) => c !== undefined);
+    // The old sort keys of the changed rows, read before the cache follows the store; a shape's read columns too (a
+    // grouping's: a row changing group runs everything again, as one changing place in the sort).
+    const sortCols = [...query.sort.map((s) => s.column), ...(shape?.reads?.() ?? [])].map((c) => columns.get(c)).filter((c) => c !== undefined);
     const oldSnap = { ...env(), source: storeBefore };
     const before = sortCols.map((c) => Array.from(delta.changedSrc!, (src) => (c.codec.keyKind === 'number' ? cache.keys(c, oldSnap).keys : cache.ranks(c, oldSnap).ranks)[src]));
     // Stale, the mask is older than the edits: whether a row passed is read again, with them, on the old rows.
@@ -785,12 +798,14 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     },
     // Taken, not applied: what is shown keeps its order until reapply() (K.14).
     setReader(next, changed) {
-      // A version that did not move changed no value: nothing goes stale.
-      if (next.version !== filtered!.in.reader) stale ||= touches(changed);
+      // A version that did not move changed no value: nothing goes stale, the shape is not told.
+      const moved = next.version !== filtered!.in.reader;
+      if (moved) stale ||= touches(changed);
       reader = next;
       // The stages count as up to date for this reader: nothing reruns because of it alone.
       filtered = { ...filtered!, in: { ...filtered!.in, reader: next.version } };
       sorted = { ...sorted!, in: { ...sorted!.in, reader: next.version } };
+      if (moved) shape?.values?.(changed);
     },
     reapply(source = 'api') {
       full();
@@ -814,7 +829,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       for (const b of [...lists.values()]) b.close();
     },
   };
-  shape?.attach?.(model, () => (show(), notify('expand', 'data')));
+  shape?.attach?.(model, (kind, source) => (show(), notify(kind || 'expand', source || 'data')));
   return model;
 }
 

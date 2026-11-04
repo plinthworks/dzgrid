@@ -1,0 +1,58 @@
+{
+  "id": "structure-regroup-closed",
+  "suite": "group-agg",
+  "description": "Grouping by another column never reopens a group of the same value: the column is part of a group's key.",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "k"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "x",
+        "k": "x"
+      },
+      {
+        "id": "b",
+        "g": "y",
+        "k": "x"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ]
+    },
+    "steps": [
+      {
+        "open": [
+          [
+            "g",
+            "tx"
+          ]
+        ]
+      },
+      {
+        "by": [
+          "k"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "[x] (2) 1/1 +"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 1
+    },
+    "problems": []
+  }
+}

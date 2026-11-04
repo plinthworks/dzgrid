@@ -20,7 +20,7 @@ describe('11. sizes: the new lines; the base, core, K.8 and Angular unchanged', 
   });
 
   it('the base, core, K.8 and Angular lines unchanged (22 400, 29 150, 84 450, 7 000)', () => {
-    expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map((n) => budget[n]!.maxGzip)).toEqual([23260, 29150, 90000, 7665]); // 1.4.0 busy part: dom 23 250 (+2 % rule); busy bar: 23 070, 7 665 (+2 % rule); // owner step 16: K.8 90 000, Angular 7 450; K.8 and Angular raised at step 12 (owner Q12-1); K.8 84 950: owner « set include only » (2026-10-29) // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
+    expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map((n) => budget[n]!.maxGzip)).toEqual([23260, 29250, 90000, 7665]); // Phase 7 step 2: 29 250 (+2 % rule, the grouping seams); 1.4.0 busy part: dom 23 250 (+2 % rule); busy bar: 23 070, 7 665 (+2 % rule); // owner step 16: K.8 90 000, Angular 7 450; K.8 and Angular raised at step 12 (owner Q12-1); K.8 84 950: owner « set include only » (2026-10-29) // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
   });
 
   it('neither the DOM base nor the K.8 profile reaches the print module (0 B by construction)', async () => {

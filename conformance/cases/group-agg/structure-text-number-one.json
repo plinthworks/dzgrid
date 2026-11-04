@@ -1,0 +1,38 @@
+{
+  "id": "structure-text-number-one",
+  "suite": "group-agg",
+  "description": "A text column reads the number 1 and the text « 1 » as the same text: one group.",
+  "input": {
+    "columns": [
+      {
+        "id": "t"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "t": 1
+      },
+      {
+        "id": "b",
+        "t": "1"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "t"
+      ]
+    }
+  },
+  "expected": {
+    "shown": [
+      "[1] (2) 1/1 +"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 1
+    },
+    "problems": []
+  }
+}

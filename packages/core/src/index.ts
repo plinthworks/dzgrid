@@ -1,4 +1,4 @@
-export type { Problem, ProblemCode, Severity } from './problems.js';
+export type { GroupProblemCode, Problem, ProblemCode, Severity } from './problems.js';
 export { problem, PROBLEM_CODES } from './problems.js';
 export type { ChangeSource } from './model/types.js';
 
@@ -46,13 +46,13 @@ export { dayCodec, readDayText } from './value/codecs/day.js';
 export { instantCodec, instantToIso } from './value/codecs/instant.js';
 
 export { PrefixSums } from './layout/prefix-sums.js';
-export type { Side, CellClassContext, EditableRule, EditableInfo, EditChecks, ColumnDef, ColumnGroupDef, ColumnOrGroup, ResolvedColumn, SpanCtx, ValueReader } from './columns/defs.js';
+export type { AggCtx, AggFn, AggFuncName, Side, CellClassContext, EditableRule, EditableInfo, EditChecks, ColumnDef, ColumnGroupDef, ColumnOrGroup, ResolvedColumn, SpanCtx, ValueReader } from './columns/defs.js';
 export { NO_OVERLAY, compilePath, resolveColumns } from './columns/defs.js';
 export { editableAt } from './columns/editable.js';
 export type { ColumnLookup, ColumnState, ColumnSlice, ColumnLayout, ColumnChange, ColumnModel } from './columns/model.js';
 export { createColumnModel } from './columns/model.js';
 
-export type { RowKind, DataNode, GroupNode, DetailNode, LoadingNode, RowNode } from './row/node.js';
+export type { RowKind, DataNode, GroupNode, DetailNode, LoadingNode, FooterNode, RowNode } from './row/node.js';
 export type { RowTransaction, TransactionResult } from './row/store.js';
 export type { DisplayedRows } from './row/displayed.js';
 

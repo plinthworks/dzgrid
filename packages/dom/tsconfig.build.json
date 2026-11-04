@@ -18,6 +18,7 @@
       "@dzgrid/core/tree": ["../core/dist/tree.d.ts"],
       "@dzgrid/core/tree-lazy": ["../core/dist/tree-lazy.d.ts"],
       "@dzgrid/core/detail": ["../core/dist/detail.d.ts"],
+      "@dzgrid/core/grouping": ["../core/dist/grouping.d.ts"],
       "@dzgrid/core/edit": ["../core/dist/edit.d.ts"],
       "@dzgrid/core/range": ["../core/dist/range.d.ts"],
       "@dzgrid/core/state": ["../core/dist/state.d.ts"],

@@ -45,6 +45,10 @@
       "types": "./src/detail.ts",
       "default": "./src/detail.ts"
     },
+    "./grouping": {
+      "types": "./src/grouping.ts",
+      "default": "./src/grouping.ts"
+    },
     "./edit": {
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"

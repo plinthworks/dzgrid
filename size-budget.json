@@ -3,7 +3,7 @@
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
-      "maxGzip": 29150
+      "maxGzip": 29250
     },
     "@dzgrid/core/server": {
       "file": "packages/core/src/server.ts",
@@ -43,6 +43,11 @@
     "@dzgrid/core/detail": {
       "file": "packages/core/src/detail.ts",
       "maxGzip": 1150,
+      "over": "@dzgrid/core"
+    },
+    "@dzgrid/core/grouping": {
+      "file": "packages/core/src/grouping.ts",
+      "maxGzip": 4750,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/edit": {

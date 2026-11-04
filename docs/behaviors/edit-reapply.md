@@ -107,3 +107,9 @@ browser: axe with the mark, ar RTL. Manual: §19.
 - 4–5: the mark is `<button class="dzg-reapply">`, appended last in the header cell; F2 on the header focuses it (tab stop while inside), Escape goes back to the header cell. With a `slots()` header part, F2 goes to the part first; the mark is then reached by Tab from the part.
 - The stale sentence is joined after the save's (« … . … ») when both fall in the same task.
 - Review of step 4: when the row header is not mounted (its column scrolled out), the sign and the description go to the row's first mounted cell (`data-dzg-stale` on that cell).
+
+## Grouping columns (Phase 7, `row-grouping.md` 9; owner Q-ED A)
+A grouping column is read like a sort column: editing it marks the order stale (the « Réappliquer » mark), the row stays
+in its group until then. The totals of grouped rows are not part of the order: they follow the edit at once
+(`aggregation.md` 13). Seam: `RowShape.reads()` (the columns a shape reads) joins the columns that make the order stale;
+`RowShape.values(changed)` is told every edit.

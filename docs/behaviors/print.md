@@ -88,3 +88,7 @@ its twin under a simulated preflight). Browser: `npm run test:browser -- --only 
 under Tailwind's preflight and with the layered sheet, 1 200 and 5 001 rows: the header rows on every page, every row once
 and none cut, the pinned column first, the caption, the truncation line; `print()` and `afterprint`; orders.html's button).
 Playground: `print.html` (`?lang=ar`, `?rows=5001`, `?preflight=1`) and « Imprimer » on `orders.html`.
+
+## Grouped rows (Phase 7, owner Q-EX A; built at step 7)
+Print shows the group rows as shown on screen (label indented, count, totals), their footers and the grand total; a
+closed group prints as its row only.

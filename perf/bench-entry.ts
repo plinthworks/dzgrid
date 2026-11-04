@@ -1,10 +1,11 @@
-import { dataKey, assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
+import { dataKey, groupKey, assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache, filterKindLookup, flatDisplayed } from '../packages/core/src/internal.js';
 import { toWire, createGate } from '../packages/core/src/server.js';
 import { buildSpanMap } from '../packages/core/src/spans.js';
 import { toCsv } from '../packages/core/src/csv.js';
 import { treeShape } from '../packages/core/src/tree.js';
 import { detailShape, sparseRowLayout } from '../packages/core/src/detail.js';
+import { groupShape } from '../packages/core/src/grouping.js';
 import { treeProfile, type TreeRow as MRow } from './profiles/tree.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
@@ -231,6 +232,7 @@ export const CASES: Record<string, Case> = {
   ...modelCases(),
   ...layoutCases(),
   ...csvCases(),
+  ...groupCases(),
 };
 
 function layoutCases(): Record<string, Case> {
@@ -263,6 +265,66 @@ function layoutCases(): Record<string, Case> {
       let acc = 0;
       for (let i = 0; i < 100_000; i++) acc += scrollMapper(32_000_000 + i, MAX_PHYSICAL, 700).ratio;
       return acc;
+    },
+  };
+}
+
+/**
+ * Phase 7 steps 3–4 (plan §6 exit criterion: « A grouped by 2 columns + 3 aggregations ≤ 150 ms », minified, node).
+ * Dataset A grouped by a list column (6 values) then a number (100 values): ~600 groups; totals: a sum, a mean, the
+ * latest day. Cold: the model made with the shape (the load, the keys, the grouping, the totals). Beside it: a regroup,
+ * a toggle of a group of ~10 000 rows, a one-row live update that moves no row, and the worst case of a text column of
+ * ~100 000 distinct values (its collation is the sort's own cost, recorded, no exit line).
+ */
+function groupCases(): Record<string, Case> {
+  const opts = (values: string[]) => values.map((value) => ({ value, label: value.toUpperCase() }));
+  const columns = createColumnModel<RowA>([
+    { id: 'e1', type: 'enum', enumOptions: opts(['cardiology', 'pediatrics', 'radiology', 'oncology', 'dermatology', 'neurology']) },
+    { id: 'n2', type: 'number' },
+    { id: 'tenth', type: 'number', value: (r) => Math.floor(r.n2 / 10) },
+    { id: 'e0', type: 'enum', enumOptions: opts(['pending', 'active', 'suspended', 'closed']) },
+    { id: 't0' },
+    { id: 'n1', type: 'number', aggFunc: 'sum' },
+    { id: 'n0', type: 'number', aggFunc: 'avg' },
+    { id: 'd0', type: 'day', aggFunc: 'max' },
+  ]);
+  const ctx = localeCtx({ locale: 'fr-FR', timeZone: 'Africa/Algiers' });
+  let rows: RowA[] | null = null;
+  const grouped = (by: string[]) => {
+    rows ??= datasetA();
+    const shape = groupShape<RowA>({ by });
+    return { shape, m: clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx, shape }) };
+  };
+  let tick = 0;
+  return {
+    'group A by 2 columns + 3 aggregations (cold: clientRows with the grouping shape, 100 000 rows)': {
+      setup: () => (rows ??= datasetA()),
+      run: (r: RowA[]) => clientRows<RowA>({ rows: r, getRowId: (x) => x.id, columns, ctx, shape: groupShape<RowA>({ by: ['e1', 'n2'] }) }).displayed.count,
+    },
+    'group A regroup by 2 other columns + 3 aggregations (setBy, warm keys)': {
+      setup: () => {
+        const g = grouped(['e1', 'n2']);
+        g.shape.setBy(['e0', 'tenth']);
+        g.shape.setBy(['e1', 'n2']);
+        return g;
+      },
+      run: (g: ReturnType<typeof grouped>) => (g.shape.setBy(g.shape.by[0] === 'e1' ? ['e0', 'tenth'] : ['e1', 'n2']), g.m.displayed.count),
+    },
+    'group expand one group of ~10 000 rows (A grouped by 1 column, 3 aggregations)': {
+      setup: () => {
+        const g = grouped(['tenth']);
+        const key = groupKey(['tenth', 'n3']);
+        return { ...g, key };
+      },
+      run: (g: ReturnType<typeof grouped> & { key: ReturnType<typeof groupKey> }) => (g.m.expand([g.key], !g.m.isExpanded(g.key)), g.m.displayed.count),
+    },
+    'group transaction update 1 row on A grouped by 2 columns, no grouping column touched': {
+      setup: () => grouped(['e1', 'n2']),
+      run: (g: ReturnType<typeof grouped>) => g.m.applyTransaction({ patch: [{ id: 'r500', set: { n1: tick++ } }] }).version,
+    },
+    'group A by a text column of ~100 000 distinct values (cold, recorded)': {
+      setup: () => (rows ??= datasetA()),
+      run: (r: RowA[]) => clientRows<RowA>({ rows: r, getRowId: (x) => x.id, columns, ctx, shape: groupShape<RowA>({ by: ['t0'] }) }).displayed.count,
     },
   };
 }
@@ -500,6 +562,26 @@ const heap = (): number => {
 
 /** Bytes measured after collection; see scripts/bench.mjs. */
 export const MEMORY: Record<string, () => number> = {
+  // Phase 7 step 3 (plan §4 « memory of the grouped view ≤ 60 B / row over the flat model », to set): A grouped by 2
+  // columns with 3 totals, all open, less the same model flat with the same columns (keys and totals' caches included).
+  // Typed arrays live outside the JS heap: counted here (`arrayBuffers`), unlike the older lines.
+  'grouped view over the flat model, bytes/row (100 000, 2 columns, 3 totals, all open)': () => {
+    const heap = (): number => {
+      (globalThis as { gc?: () => void }).gc?.();
+      const u = process.memoryUsage();
+      return u.heapUsed + u.arrayBuffers;
+    };
+    const rows = datasetA();
+    const columns = createColumnModel<RowA>([{ id: 'e1' }, { id: 'n2', type: 'number' }, { id: 'n1', type: 'number', aggFunc: 'sum' }, { id: 'n0', type: 'number', aggFunc: 'avg' }, { id: 'd0', type: 'day', aggFunc: 'max' }]);
+    const ctx = localeCtx({ locale: 'fr-FR' });
+    const b0 = heap();
+    const flat = clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx });
+    const b1 = heap();
+    const m = clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx, shape: groupShape<RowA>({ by: ['e1', 'n2'], expanded: 'all' }) });
+    const b2 = heap();
+    void flat.displayed.count, m.displayed.count;
+    return (b2 - b1 - (b1 - b0)) / rows.length;
+  },
   'client model after the quick-search warm-up, bytes/row (100 000 x 10 text)': () => {
     const rows = datasetA();
     const columns = createColumnModel<RowA>(['t0', 't1', 't2', 't3', 't4', 'a0', 'a1', 'a2', 'a3', 'a4'].map((id) => ({ id })));

@@ -1,0 +1,74 @@
+{
+  "id": "agg-first-last",
+  "suite": "group-agg",
+  "description": "First and last skip empty values at either end and follow the grid's sort.",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "n",
+        "type": "number"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "first"
+      },
+      {
+        "id": "t",
+        "aggFunc": "last"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "x",
+        "n": 3,
+        "v": 9,
+        "t": null
+      },
+      {
+        "id": "b",
+        "g": "x",
+        "n": 1,
+        "v": null,
+        "t": "one"
+      },
+      {
+        "id": "c",
+        "g": "x",
+        "n": 2,
+        "v": 4,
+        "t": "three"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ]
+    },
+    "steps": [
+      {
+        "sort": [
+          [
+            "n",
+            "asc"
+          ]
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "[x] (3) 1/1 + {v=4 t=three}"
+    ],
+    "counts": {
+      "total": 3,
+      "filtered": 3,
+      "displayed": 1
+    },
+    "problems": []
+  }
+}

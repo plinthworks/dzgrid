@@ -1,0 +1,71 @@
+{
+  "id": "agg-type",
+  "suite": "group-agg",
+  "description": "A total that does not fit its column's type is not shown, and told by the column and the function, never a value (aggregation.md 3).",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "t",
+        "aggFunc": "sum"
+      },
+      {
+        "id": "b",
+        "type": "boolean",
+        "aggFunc": "min"
+      },
+      {
+        "id": "n",
+        "type": "number",
+        "aggFunc": "first"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "x",
+        "t": "p",
+        "b": true,
+        "n": 4
+      },
+      {
+        "id": "c",
+        "g": "x",
+        "t": "q",
+        "b": false,
+        "n": 6
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ]
+    }
+  },
+  "expected": {
+    "shown": [
+      "[x] (2) 1/1 + {n=4}"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 1
+    },
+    "problems": [
+      {
+        "code": "agg-type",
+        "severity": "warning",
+        "path": "columns.t.aggFunc",
+        "detail": "sum"
+      },
+      {
+        "code": "agg-type",
+        "severity": "warning",
+        "path": "columns.b.aggFunc",
+        "detail": "min"
+      }
+    ]
+  }
+}

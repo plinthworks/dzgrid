@@ -170,3 +170,9 @@ absent), `packages/core/test/state-property.test.ts` (RTL identity, 1 000 seeds)
 `packages/dom/test/state.test.ts` (debounce, one event per gesture, none on restore, storage blocked, URL round
 trip and tamper, filters and search absent from the address without `include`); server request count: one
 for a restore, one at start with `persistLocal`; browser: save in fr LTR, reload in ar RTL, identical.
+
+## Row grouping (Phase 7, owner Q-ST A; built at step 7)
+A new optional part `rowGroups: string[]` — the grouping columns' ids, in order (not `groups`, which are header groups).
+Restored after the columns, the header groups and the density, before the one query. An unknown id is told
+(`state-column`), a non-groupable one too (`state-field`). Never the open groups: their keys hold row values. Written
+in the address by default (column ids are not row data). Reset brings the application's own grouping back.

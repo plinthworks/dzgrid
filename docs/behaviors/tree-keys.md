@@ -63,3 +63,8 @@ focus fallback after a collapse by key, by click, by `rows.expand` from the API,
 filter; announcements once; outside the tree column, flat moves unchanged (the existing key tests
 pass without edits). Browser: `npm run test:browser -- --only tree` (real keys, French and Arabic).
 Manual: `docs/a11y-protocol.md` §16.
+
+## On a grouped grid (Phase 7, `row-grouping.md` 10; owner Q-K1 A)
+The same keys in the group column. One difference: **Enter on a group row opens or closes it** (a group row has nothing
+to edit); on a data row Enter keeps its meaning. A totals row (`aggregation.md` 9–10) has no chevron: forward and back do
+nothing there but back goes to its group.

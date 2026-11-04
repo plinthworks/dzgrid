@@ -13,6 +13,21 @@ import { isKnownZone } from '../value/zone-day.js';
 /** A side of the grid, logically: in right-to-left the start is on the right. Never left or right. */
 export type Side = 'start' | 'end';
 
+/** A built-in total (aggregation.md 2): `count` counts the group's rows; the others skip empty values. Phase 7. */
+export type AggFuncName = 'sum' | 'avg' | 'min' | 'max' | 'count' | 'first' | 'last';
+
+/** What an application's total function is told besides the values: its column, and the group's level (null: the grand total). */
+export interface AggCtx {
+  readonly column: string;
+  readonly level: number | null;
+}
+
+/**
+ * An application's total: the group's values in its order (empty ones as null); pure; what it returns is shown. Phase 7.
+ * Written as a method's type so a column of numbers still passes where any column is asked (as `ValueCodec` does).
+ */
+export type AggFn<V = unknown> = { agg(values: readonly (V | null)[], ctx: AggCtx): unknown }['agg'];
+
 export interface ColumnDef<T, V = unknown> {
   /** Required and stable: the key of the column's state. */
   readonly id: string;
@@ -40,6 +55,13 @@ export interface ColumnDef<T, V = unknown> {
   /** `false`: left out of the column chooser's list (still hideable by the menu). Phase 6 step 4, columns-chooser.md 6. */
   readonly chooser?: false;
   readonly sortable?: boolean;
+  /** `false`: rows are never grouped by it (`@dzgrid/core/grouping`, row-grouping.md 14; the zone and the menu refuse it). Phase 7. */
+  readonly groupable?: boolean;
+  /**
+   * Its total on group rows, footers and the grand total (`@dzgrid/core/grouping`, aggregation.md 2–3): a built-in, or a
+   * function of the group's values. The grouping's own `aggFuncs` win over it. Phase 7.
+   */
+  readonly aggFunc?: AggFuncName | AggFn<V>;
   /**
    * `false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a
    * custom kind's name). `floating`: a box in the floating filter row (`@dzgrid/dom/filters`; the

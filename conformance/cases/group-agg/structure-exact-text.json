@@ -1,0 +1,58 @@
+{
+  "id": "structure-exact-text",
+  "suite": "group-agg",
+  "description": "Equal means exactly equal (owner Q-G3 A): « Alger » and « alger » are two groups, side by side; two spellings of « é » two groups; ties of the collation in code-unit order.",
+  "input": {
+    "columns": [
+      {
+        "id": "t"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "t": "Alger"
+      },
+      {
+        "id": "b",
+        "t": "alger"
+      },
+      {
+        "id": "c",
+        "t": "Alger"
+      },
+      {
+        "id": "d",
+        "t": "é"
+      },
+      {
+        "id": "e",
+        "t": "é"
+      },
+      {
+        "id": "f",
+        "t": "b"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "t"
+      ]
+    }
+  },
+  "expected": {
+    "shown": [
+      "[Alger] (2) 1/5 +",
+      "[alger] (1) 2/5 +",
+      "[b] (1) 3/5 +",
+      "[é] (1) 4/5 +",
+      "[é] (1) 5/5 +"
+    ],
+    "counts": {
+      "total": 6,
+      "filtered": 6,
+      "displayed": 5
+    },
+    "problems": []
+  }
+}

@@ -77,3 +77,9 @@ Phase 6: none (the application's target speaks for itself). Phase 7: 11.
 ## Tests (Phase 6, with the code)
 `packages/dom/test/columns-drop-targets.test.ts` (accept / drop, no patch, thrown callbacks, removed target,
 Escape, nested grids). Phase 7: the zone's own tests.
+
+## Confirmed for Phase 7 (owner 2026-11-04, `docs/phase-7-steps/questions.md`)
+- **Q-Z1 B**: the zone is its own feature, `groupZone()` (`@dzgrid/dom/group-zone`), added by the application when it
+  wants it; grouping works without it (the column menu's item, the API).
+- **Q-Z2 A**: the three choices above stand as written — the dropped column stays visible (also Q-H A), a chip dragged
+  out does nothing, one zone per grid.

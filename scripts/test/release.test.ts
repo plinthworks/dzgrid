@@ -176,11 +176,16 @@ describe('1.4.0, the four packages', () => {
     expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/detail', '\.\/compare', '\.\/edit'/);
   });
 
+  it('export the Phase 7 subpath @dzgrid/core/grouping, built like the others', () => {
+    expect(pkg('core').exports['./grouping']).toEqual({ types: './src/grouping.ts', default: './src/grouping.ts' });
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/row-gaps', '\.\/grouping'\]/);
+  });
+
   it('export the 1.1.0 step 15 subpaths (@dzgrid/core/row-gaps, @dzgrid/dom/row-gaps), built like the others', () => {
     expect(pkg('core').exports['./row-gaps']).toEqual({ types: './src/row-gaps.ts', default: './src/row-gaps.ts' });
     expect(pkg('dom').exports['./row-gaps']).toEqual({ types: './src/row-gaps.ts', default: './src/row-gaps.ts' });
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
-    expect(build).toMatch(/'\.\/state', '\.\/row-gaps'\]/);
+    expect(build).toMatch(/'\.\/state', '\.\/row-gaps'[,\]]/); // Phase 7: './grouping' after it
     expect(build).toMatch(/'\.\/auto-height', '\.\/row-gaps'/);
   });
 

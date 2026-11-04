@@ -1,0 +1,76 @@
+{
+  "id": "structure-number-one",
+  "suite": "group-agg",
+  "description": "A number column reads 1, '1' and 1.0 as one number, -0 as 0: one group each; groups in number order.",
+  "input": {
+    "columns": [
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "n": 1
+      },
+      {
+        "id": "b",
+        "n": "1"
+      },
+      {
+        "id": "c",
+        "n": 1.0
+      },
+      {
+        "id": "d",
+        "n": -0.0
+      },
+      {
+        "id": "e",
+        "n": 0
+      },
+      {
+        "id": "f",
+        "n": 2.5
+      }
+    ],
+    "grouping": {
+      "by": [
+        "n"
+      ]
+    },
+    "steps": [
+      {
+        "open": [
+          [
+            "n",
+            "n1"
+          ],
+          [
+            "n",
+            "n0"
+          ]
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "[0] (2) 1/3 -",
+      ". d 1/2",
+      ". e 2/2",
+      "[1] (3) 2/3 -",
+      ". a 1/3",
+      ". b 2/3",
+      ". c 3/3",
+      "[2.5] (1) 3/3 +"
+    ],
+    "counts": {
+      "total": 6,
+      "filtered": 6,
+      "displayed": 8
+    },
+    "problems": []
+  }
+}

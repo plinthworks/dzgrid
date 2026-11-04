@@ -36,13 +36,14 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  * example's 92 500 (S12-Q10; S9-Q7 92 000) is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
  */
 const SIZE_CEILINGS = {
-  '@dzgrid/core': 29150, // Phase 6 (owner Q-B, Q2 of step 8b, 2026-10-27): 29 000 → 29 150 for the pinned rows' seams
+  '@dzgrid/core': 29250, // Phase 7 step 2 (owner Q-B 2026-11-04, +2 % rule): 29 150 → 29 250, the grouping seams; Phase 6 (owner Q-B, Q2 of step 8b, 2026-10-27): 29 000 → 29 150 for the pinned rows' seams
   '@dzgrid/core/server': 6200, // owner Q8-5 (2026-10-27): 6 200, pushed by compression with the base's fold seam; Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order); owner E5-1 / E5-8 (2026-10-26): 6 150 for the hold seam (`rows.hold`, one request per restore; measured +56)
   '@dzgrid/core/csv': 2000, // Q7: « core/csv up to 2 000 »
   '@dzgrid/core/xlsx': 7100, // owner A (2026-11-03, decisions.md « Excel export »): 5 000 asked, measured 6 898, every feature kept; lazy, the first Excel export only
   '@dzgrid/dom/export: xlsx (lazy)': 1100, // owner (2026-11-03, Excel export): the Excel DOM chunk
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
+  '@dzgrid/core/grouping': 4750, // Phase 7 steps 3–4 (owner Q-B 2026-11-04: a new entry at its measure + 10 %): measured 4 285; ARCH §5.2 5 000
   '@dzgrid/core/detail': 1150, // owner step 16 (2026-10-29, « ok pour les hausses »): 1 050 → 1 150 (`isMaster`, measured 1 132); Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
   '@dzgrid/core/edit': 3160, // owner « set include only » (2026-10-29): 3 150 → 3 160 (`exclude: false` refused in compile); owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted

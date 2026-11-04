@@ -14,13 +14,41 @@ export interface DataNode<T> {
   readonly pinned?: 'top' | 'bottom';
 }
 
-/** A row that stands for a level with no row of its own (a path tree's folder): a label, never data, never selected. */
+/**
+ * A row that stands for a level with no row of its own (a path tree's folder), or a group of rows (`@dzgrid/core/grouping`,
+ * Phase 7): a label, never data, never selected. A group's `label` is its value as the column formats it ('' for the
+ * empty group, which the DOM names); `path` the labels from the first level down.
+ */
 export interface GroupNode {
   readonly key: RowKey;
   readonly kind: 'group';
   readonly level: number;
   readonly label: string;
   readonly path: readonly string[];
+  /** A group's column id (row-grouping.md 1). */
+  readonly column?: string;
+  /** A group's value, typed as the column reads it (a day as `YYYY-MM-DD`, an instant as epoch ms); null for the empty group. */
+  readonly value?: unknown;
+  /** How many rows the group holds (after the filters). */
+  readonly count?: number;
+  /** The group's totals, by column id (aggregation.md 1–7); a column whose total is not shown is absent. */
+  readonly aggs?: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * A totals row (aggregation.md 9–10, Phase 7): a group's footer, after its open group's last child (`f:` + the group's
+ * key), or the grand total (`group: null`, `t:` + its side). Never data: never selected, copied, edited or filled.
+ */
+export interface FooterNode {
+  readonly key: RowKey;
+  readonly kind: 'footer';
+  readonly level: number;
+  /** The group it closes; null for the grand total. */
+  readonly group: RowKey | null;
+  /** The group's label ('' for the grand total and the empty group). */
+  readonly label: string;
+  readonly count: number;
+  readonly aggs: Readonly<Record<string, unknown>>;
 }
 
 /** The detail row under an open master row (master/detail): the master's data, never selected, copied or edited. */
@@ -45,5 +73,5 @@ export interface LoadingNode {
   readonly failed: boolean;
 }
 
-/** A row as shown: a data row, a filler of a tree, a detail, or a lazy parent's loading row. Narrow by `kind` before reading `data`. */
-export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode;
+/** A row as shown: a data row, a filler of a tree or a group, a detail, a lazy parent's loading row, or a totals row. Narrow by `kind` before reading `data`. */
+export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode | FooterNode;

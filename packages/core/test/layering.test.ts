@@ -22,7 +22,7 @@ const isSpans = (f: string) => /(^|\/)src\/spans(\.ts$|\/)/.test(f);
 const isCsv = (f: string) => /(^|\/)src\/csv(\.ts$|\/)/.test(f);
 
 /** The base's seam guard: its measure after each step that adds a seam (history in the base test below). */
-const BASE = 29150;
+const BASE = 29250;
 
 describe('layering of the base and the server entry', () => {
   it('the base bundle holds no server module', async () => {
@@ -104,11 +104,21 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
   });
 
+  it('no other entry holds a grouping module; the grouping entry holds no tree, detail, server, span or csv module, nor the model (Phase 7 steps 3–4)', async () => {
+    const isGrouping = (f: string) => /(^|\/)src\/grouping(\.ts$|\/)/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'xlsx.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts', 'edit.ts', 'range.ts', 'state.ts']) expect((await inputsOf(entry)).filter(isGrouping), entry).toEqual([]);
+    const inputs = await inputsOf('grouping.ts');
+    for (const f of ['src/grouping/shape.ts', 'src/grouping/agg.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    // The tree's rows type only: the grouping answers its questions, it carries none of its code.
+    expect(inputs.filter((f) => isServer(f) || isSpans(f) || isCsv(f) || /(^|\/)src\/(tree|detail)(\.ts$|-lazy\.ts$|\/)/.test(f))).toEqual([]);
+    expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts'))).toBe(false);
+  });
+
   it('the base, with its tree seams (Phase 4 step 2), fits its budget, minified and gzipped as a consumer ships it', async () => {
     const out = await build({ entryPoints: [SRC + 'index.ts'], bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' });
     const gz = gzipSync(out.outputFiles[0]!.contents, { level: 9 }).length;
     const budget = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core'].maxGzip as number;
-    expect(budget).toBe(29150); // owner Q2 of step 8b (pinned rows): 29 000 → 29 150 (Q-B)
+    expect(budget).toBe(29250); // Phase 7 step 2 (owner Q-B, 2 % rule): 29 150 → 29 250; owner Q2 of step 8b (pinned rows): 29 000 → 29 150
     expect(gz).toBeLessThanOrEqual(budget);
     // The seams' guard, rebased at the Phase 4 close (step 13, 2026-10-22): Phase 4 took the base from
     // 26 984 to 28 240 (the tree and detail seams and their reviews, each step's bytes in ROADMAP « Phase 4 »).
@@ -127,6 +137,9 @@ describe('layering of the base and the server entry', () => {
     // selected), `pinnedKey` by id and `assignKeys`' key maker, +36 → 29 001. Owner « set include only » (2026-10-29):
     // `exclude: false` refused in compile and wire, +63 → 29 064, guard 29 070. Step 16 (owner « ok pour les hausses », 2026-10-29):
     // `multiSort` +10, `sameRow` in the store +72, nine internal symbols without descriptions −51 → 29 106, guard 29 150.
+    // 1.2.0–1.4.0 (busy bar, status bar, find…) took it to 29 147. Phase 7 step 2 (owner Q-B, the 2 % rule): the grouping
+    // seams — a shape's `reads` in the stale rule, `values` told after an edit, `env` in a shape's input and its first
+    // `parents`, `redraw(kind, source)`, pages refused beside any shape but details — +49 → 29 196; the review fix (a regroup while stale through a whole run) +8 → 29 204, guard 29 250.
     expect(gz).toBeLessThanOrEqual(BASE);
   });
 

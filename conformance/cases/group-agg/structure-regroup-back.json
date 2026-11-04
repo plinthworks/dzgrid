@@ -1,0 +1,65 @@
+{
+  "id": "structure-regroup-back",
+  "suite": "group-agg",
+  "description": "Grouping back by the first column finds its open group as it was.",
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "k"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "x",
+        "k": "x"
+      },
+      {
+        "id": "b",
+        "g": "y",
+        "k": "x"
+      }
+    ],
+    "grouping": {
+      "by": [
+        "g"
+      ]
+    },
+    "steps": [
+      {
+        "open": [
+          [
+            "g",
+            "tx"
+          ]
+        ]
+      },
+      {
+        "by": [
+          "k"
+        ]
+      },
+      {
+        "by": [
+          "g"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "shown": [
+      "[x] (1) 1/2 -",
+      ". a 1/1",
+      "[y] (1) 2/2 +"
+    ],
+    "counts": {
+      "total": 2,
+      "filtered": 2,
+      "displayed": 3
+    },
+    "problems": []
+  }
+}
