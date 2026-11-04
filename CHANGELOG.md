@@ -99,6 +99,12 @@ A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
   nothing announced (a poll would repeat it). In the base; look in `@dzgrid/theme` (`--dzg-busy-bar`, the accent by
   default, 3:1 light and dark): a segment slides toward the end side, still and full under reduced motion or
   `motion: false`, kept in forced colours.
+- **Busy part** (`docs/behaviors/overlays.md` « The busy part »): with `slots()`, a part named `busy` (`definePart('busy', …)`,
+  a feature's parts, Angular `componentPart('busy', Cmp)` or `<ng-template dzgPart="busy" slot="busy">`) draws the busy
+  mark in place of the line, in its own `aria-hidden` host just under the header (its block size the part's, over the
+  rows). The grid still decides when (200 ms, 400 ms, never with the loading overlay, `aria-busy`). Mounted at its first
+  show, then kept: each show and hide is an `update` of `active`; context `reducedMotion` (reduced-motion preference,
+  followed live, or `motion: false`). A part that throws: the line instead, reported once. `SlotContext` gains `busy`.
 
 ### Changed
 - CSV and Excel read a cell through one rule (`readValue`) and one wall-time rule (`wallMs`).

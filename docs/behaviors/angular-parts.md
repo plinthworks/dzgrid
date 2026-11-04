@@ -209,3 +209,4 @@ Written before the code. The way other grids let a column name its cell renderer
   a `Type<DzgPartComponent<'cell'>>`, `ui.header` of `'header'`, `ui.tooltip` of `'tooltip'`. The component receives its
   context in its `cell` input, as with `componentPart`.
 - **A header or tooltip component** needs what a named one needs (`slots()` in `[features]`), told the same way.
+- **The busy mark (1.4.0, `overlays.md` « The busy part »):** `componentPart('busy', Cmp)` in `[parts]` or `provideDzGrid({ parts })`, or `<ng-template dzgPart="busy" slot="busy" let-c>`, with `slots()` in `[features]`; `c.active` and `c.reducedMotion` start and pause its animation (the component is created once, at the first show). Not a column's: the component-class path of `ui` does not apply.

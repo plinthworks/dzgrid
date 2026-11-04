@@ -314,7 +314,7 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
   it('hold the budgets set at the close (measure + 10 %, rounded up to 50 B, owner Q2)', () => {
     const b = (JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')) as { entries: Record<string, { file?: string; maxGzip: number | null; external?: string[]; over?: string }> }).entries;
     expect(b['@dzgrid/core']!.maxGzip).toBe(29150); // Phase 6 step 8b-1 (owner Q2): 29 150; before: the owner's grant, Phase 4 close (Q17b)
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(23070); // 1.4.0 busy bar (+2 % rule); // Phase 6 step 8b-1 (owner Q2): 22 400; before: Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant 21 980 // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(23250); // 1.4.0 busy part: 23 250 (+2 % rule); busy bar: 23 070 (+2 % rule); // Phase 6 step 8b-1 (owner Q2): 22 400; before: Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant 21 980 // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
     // Owner S6-O6 (Phase 5 step 6): the filters' loader moved in, its measure + 50 (1 184 → 1 234), ceiling 1 250;
     // Phase 5 close (Q-C2): the measure 1 184 + 10 %, capped at that ceiling → 1 250.
     expect(b['@dzgrid/dom/internal']!.maxGzip).toBe(3800); // Phase 9 status bar (owner 2026-11-03: 3 750, measured 3 799: 3 800 by the 2 % rule); Phase 9 (owner Q-CM4, 2026-11-02): the menus' shared list moved in

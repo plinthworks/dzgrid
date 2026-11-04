@@ -145,4 +145,10 @@ export interface SlotDrivers {
   overlay(state: OverlayState | null): boolean;
   /** The tooltip being shown; null: hidden (a part there is destroyed). */
   tooltip(tip: TipFor | null): boolean;
+  /**
+   * The busy mark at each paint (1.4.0): `active` shown now; `host()` the part's element (made by the base at its first
+   * call, placed and shown by it); `still()` reduced motion (followed live from its first call). True when a part draws
+   * (the base's line then stays hidden).
+   */
+  busy?(active: boolean, host: () => HTMLElement, still: () => boolean): boolean;
 }

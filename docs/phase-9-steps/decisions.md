@@ -286,3 +286,26 @@ host too (`busy`, Angular `[busy]`). Sheet: `overlays.md` « Busy bar ».
   two new layout lines (`.dzg-busy`, its `::before`) count as a change, not an addition; nothing removed. Accept with
   `node scripts/api.mjs --accept "busy bar: two layout lines" --only "@dzgrid/dom#LAYOUT_CSS"`, or decide to type it
   `string` (also reported as a change once). Every other step of `gate:step` is green.
+
+## Busy part — measures and lead decisions (2026-11-04, not committed)
+
+Owner's ask (2026-11-04): a `busy` slot so an application draws its own busy mark (an animated logo); the grid keeps
+when it shows. Sheet: `overlays.md` « The busy part ».
+
+| Line | Before | After | Line |
+|---|---|---|---|
+| `@dzgrid/dom` (the part's host, reduced motion followed) | 23 070 | 23 246 | 23 070 → **23 250** (+0.8 %, 2 % rule) |
+| `@dzgrid/dom/slots` (the driver) | 1 266 | 1 380 | 1 400 kept |
+| `@dzgrid/theme`, `@dzgrid/angular` | 2 907, 7 665 | unchanged | kept |
+| K.8 audit profile | 88 968 | 89 139 | 90 000 kept |
+
+- Lead decisions: in `slots()` like `overlay` (`missing-feature` without it). **Mounted once at the first show, then
+  kept**, `active` updated at each show and hide, the host hidden meanwhile: an animation library builds its timeline
+  once and pauses / resumes it (cheaper than a mount per poll, and no half-killed tween on a fast hide). Its own host
+  `.dzg-busy-part` (no layout CSS: `LAYOUT_CSS` unchanged; position written on the element), block size the part's,
+  floating over the first rows (never pushes them). `reducedMotion`: `motion: false`, the media query (listened to once
+  a part asked), or « reduce » when the page cannot tell. A part that throws: the line from then on, reported once, not
+  tried again until another busy part is registered (a poll would report it each cycle). The host and the media query
+  live in the base so the slots line stays under its 1 400.
+- **For the owner — `check:api`:** `@dzgrid/dom#SlotContext` gains the required key `busy` (an interface the grid
+  hands out, as `status` in Phase 9): accepted in `api/` with « owner to confirm ». Nothing removed; no CSS export changed.

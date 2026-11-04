@@ -8,6 +8,7 @@
 # history: Phase 9 status bar (2026-11-03, decisions.md « Status bar SB0–SB3 — measures »): SlotContext gains the slot status, an interface the grid hands out (as menuItem in 1.1.0); nothing removed; owner to confirm — @dzgrid/dom#SlotContext
 # history: Owner A (2026-11-03, phase-9-steps/decisions.md « Excel export »): the Excel export, additions only — @dzgrid/core/xlsx, ExportRequest.format, ExportTrace.format, XlsxProblemCode, csvExport({ xlsx }), use.xlsx and the optional ContextMenuXlsxKey — @dzgrid/dom/export#ExportFormat, @dzgrid/dom/export#XlsxExportOptions, @dzgrid/dom/export#CsvExport, @dzgrid/dom/export#CsvExportOptions, @dzgrid/dom#msg, @dzgrid/dom#GridMessages, @dzgrid/dom/context-menu#ContextMenuOptions, @dzgrid/dom/context-menu#ContextMenuXlsxKey
 # history: busy bar: two layout lines (owner 2026-11-04) — @dzgrid/dom#LAYOUT_CSS
+# history: 1.4.0 busy part (2026-11-04, overlays.md « The busy part »): SlotContext gains the slot busy, an interface the grid hands out (as status in Phase 9); nothing removed; owner to confirm — @dzgrid/dom#SlotContext
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -243,6 +244,10 @@
           readonly key: RowKey;
           readonly column: ResolvedColumn<unknown>;
           readonly focused: boolean;
+          readonly search?: {
+              readonly quick: string;
+              readonly find: string;
+          };
       };
       header: PartBase & {
           readonly column: ResolvedColumn<unknown>;
@@ -257,6 +262,10 @@
           readonly failure: unknown;
           retry(): void;
           clearFilters(): void;
+      };
+      busy: PartBase & {
+          readonly active: boolean;
+          readonly reducedMotion: boolean;
       };
       floating: PartBase & {
           readonly column: ResolvedColumn<unknown>;

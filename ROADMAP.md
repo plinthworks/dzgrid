@@ -1005,6 +1005,11 @@ versus the ids the app saves today.
 
 ## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
 
+- [x] **Busy part** (owner 2026-11-04) — built 2026-11-04, not committed (1.4.0, unreleased): `overlays.md` « The busy
+  part », `parts.md`; slot `busy` in `slots()` (mounted at first show, kept, `active` / `reducedMotion`), host
+  `.dzg-busy-part` made by the base. Tests `slots-busy` (10), Angular `busy` (+2: component, template). Browsers: Chrome,
+  Firefox, WebKit, fr / ar, motion on / reduced / off, the preference changed live, 204 checks (local
+  `playground/busy-part-check.*`). Sizes in decisions.md « Busy part — measures ».
 - [x] **Busy bar** (owner 2026-11-03) — built 2026-11-03, not committed (1.4.0, unreleased): sheet `overlays.md`
   « Busy bar »; `settings.busy` (live), Angular `[busy]`; `.dzg-busy` in the base (200 ms delay, 400 ms hold, never
   with the loading overlay, `aria-busy`, no sentence); theme `--dzg-busy-bar` (2 contrast pairs), reduced motion still,

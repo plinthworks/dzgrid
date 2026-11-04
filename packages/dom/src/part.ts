@@ -86,6 +86,17 @@ export interface SlotContext {
     clearFilters(): void;
   };
   /**
+   * The busy mark (`@dzgrid/dom/slots`, 1.4.0, overlays.md « The busy part »), in place of the busy bar's line: the grid
+   * decides when it shows. Mounted at its first show, then kept: each show and hide is an `update` of `active` (start or
+   * resume an animation when it turns true, pause it when false; the host is hidden meanwhile).
+   */
+  busy: PartBase & {
+    /** Shown now. */
+    readonly active: boolean;
+    /** `prefers-reduced-motion: reduce`, `motion: false`, or a page that cannot tell: draw a still frame. */
+    readonly reducedMotion: boolean;
+  };
+  /**
    * A cell of the floating filter row (`@dzgrid/dom/filters`, step 12): `floating.<kind>`, else
    * the bare `floating` (the summary).
    */
@@ -342,7 +353,7 @@ export function featureParts(features: readonly GridFeature[] = [], own: () => R
 }
 
 /** The feature each slot needs; the cell is the base's. */
-const NEEDS: Partial<Record<WiredSlot, string>> = { header: 'slots', overlay: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', filterOption: 'filters', footer: 'pagination', detail: 'detail', editor: 'editors' };
+const NEEDS: Partial<Record<WiredSlot, string>> = { header: 'slots', overlay: 'slots', busy: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', filterOption: 'filters', footer: 'pagination', detail: 'detail', editor: 'editors' };
 /** A column's `ui` keys (feedback pass D: any other is said). */
 const UI = ['cell', 'header', 'tooltip', 'cellClass', 'headerClass', 'data'];
 const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));

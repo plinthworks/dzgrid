@@ -13,24 +13,43 @@ export function overlayPainter<T>(g: GridContext<T>): (displayed: number, top: n
   const { overlay } = g.el;
   const text = g.doc.createTextNode('');
   let retry: HTMLButtonElement | null = null;
-  // The busy bar (overlays.md « Busy bar »): made when it first shows; `wait` the 200 ms before, `held` the 400 ms after.
-  let bar: HTMLElement | null = null, wait: (() => void) | null = null, held = false, at = 0;
+  // The busy bar (overlays.md « Busy bar »): made when it first shows, unless a busy part draws it (`@dzgrid/dom/slots`);
+  // `on` shown, `wait` the 200 ms before, `held` the 400 ms after.
+  let mq: MediaQueryList | null | undefined, bar: HTMLElement | null = null, mark: HTMLElement | null = null, wait: (() => void) | null = null, held = false, on = false, at = 0;
+  // Outside `role="grid"`, decorative (the grid's `aria-busy` says it), after the viewport.
+  const make = (c: string, css = ''): HTMLElement => {
+    const el = g.doc.createElement('div');
+    el.className = c;
+    el.style.cssText = css;
+    el.setAttribute('aria-hidden', 'true');
+    g.el.viewport.after(el);
+    return el;
+  };
+  // Reduced motion for a busy part: followed live once asked; a page that cannot tell reads « reduce ».
+  const still = (): boolean => {
+    if (mq === undefined && (mq = g.doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)') ?? null)) g.scope.on(mq, 'change', () => g.schedule());
+    return g.settings.motion === false || !mq || mq.matches;
+  };
+  const draw = (): void => {
+    // The part's host: placed here, not by the layout CSS (its block size is the part's).
+    const own = !!g.slots?.busy?.(on, () => (mark ??= make('dzg-busy-part', 'position:absolute;inset-inline:0;z-index:3;pointer-events:none')), still);
+    if (on && !own) bar ??= make('dzg-busy');
+    for (const [el, show] of [[bar, !own], [mark, own]] as const) if (el) (el.hidden = !on || !show), setPx(el, 'inset-block-start', at);
+  };
   const paintBar = (want: boolean, cover: boolean): void => {
-    if (bar) setPx(bar, 'inset-block-start', at);
-    if (want) {
-      wait ??= bar && !bar.hidden ? null : g.scope.timeout(() => {
+    if (want)
+      wait ??= on ? null : g.scope.timeout(() => {
         wait = null;
-        held = true;
-        if (!bar) (bar = g.doc.createElement('div')), (bar.className = 'dzg-busy'), bar.setAttribute('aria-hidden', 'true'), g.el.viewport.after(bar);
-        bar.hidden = false;
-        setPx(bar, 'inset-block-start', at);
+        held = on = true;
+        draw();
         g.scope.timeout(() => ((held = false), g.schedule()), 400);
       }, 200);
-    } else {
+    else {
       wait?.();
       wait = null;
-      if (bar && (!held || cover)) bar.hidden = true;
+      if (!held || cover) on = false;
     }
+    draw();
   };
   return (displayed, top) => {
     // A server's failure covers the rows kept; its loading shows only when there is nothing to keep.

@@ -6,7 +6,7 @@ import type { Part, SlotContext } from '../part.js';
 import { resolver } from './resolve.js';
 
 /**
- * `slots()`: a host's parts draw the column headers' labels, the overlay and the tooltip in
+ * `slots()`: a host's parts draw the column headers' labels, the overlay, the busy mark (1.4.0) and the tooltip in
  * place of the grid's own (docs/behaviors/parts.md, step 11). The grid keeps the rest: the
  * header's role, sort state, mark, grip and click; the overlay's place and retry button; the
  * tooltip's element, timing, Escape and placement.
@@ -25,6 +25,10 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   const heads = new Map<string, Mounted<SlotContext['header']>>();
   const overlay = mounted<SlotContext['overlay']>(g);
   const tip = mounted<SlotContext['tooltip']>(g);
+  // The busy mark (1.4.0, overlays.md « The busy part »): in the base's host, mounted at the first show, then kept; a part
+  // that threw is not tried again until the registry gives another (a poll would report it every cycle).
+  const busy = mounted<SlotContext['busy']>(g);
+  let cur: unknown = null, broken: unknown = null;
   const send = (cmd: Parameters<typeof g.kernel.dispatch>[0]) => g.kernel.dispatch(cmd, 'user');
   // What the retry button does (render/overlay.ts).
   const retry = (): void => {
@@ -80,6 +84,14 @@ function setup(g: GridContext<unknown>): FeatureHandle {
         retry, clearFilters,
       });
     },
+    busy(active, host, still) {
+      const p = g.parts()['busy'];
+      const part = p?.slot === 'busy' && p.part !== broken ? (p.part as Part<SlotContext['busy']>) : null;
+      // Another part, or none: the one mounted goes; the next show mounts the new one.
+      if (part !== cur) busy.clear(), (cur = null);
+      if (!part || (!cur && !active)) return false;
+      return busy.set(host(), part, { active, reducedMotion: still() }) ? !!(cur = part) : !(broken = part);
+    },
     tooltip(t) {
       // Mounted at show, destroyed at hide: a hidden tooltip keeps no row; another anchor mounts afresh.
       tip.clear();
@@ -103,6 +115,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
       for (const m of heads.values()) m.clear();
       heads.clear();
       overlay.clear();
+      busy.clear();
       tip.clear();
     },
   };
