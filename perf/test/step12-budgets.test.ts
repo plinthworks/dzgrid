@@ -15,8 +15,8 @@ describe('step 12 budgets', () => {
     expect(b['@dzgrid/angular']!.maxGzip).toBe(7665); // 1.4.0 [busy] (+2 % rule); // owner 2026-11-03: 7 650; owner step 16: 7 450; owner « clearFilters/resetState » (7 300 at step 12)
   });
 
-  it('the real example 97 400 (+2 % rule at 1.3.0, measured 97 173; 1.2.0: 95 500; before 95 000: owner, decisions.md « Real Angular example line »: measured 94 596)', () => {
-    expect(/const K8 = ([\d_]+);/.exec(read('scripts/example.mjs'))?.[1]).toBe('97_400'); // +2 % rule at 1.3.0 (2026-11-02, measured 97 173)
+  it('the real example 98 800 (+2 % rule at 1.4.0, measured 98 624; 1.3.0: 97 400; 1.2.0: 95 500; before 95 000: owner, decisions.md « Real Angular example line »: measured 94 596)', () => {
+    expect(/const K8 = ([\d_]+);/.exec(read('scripts/example.mjs'))?.[1]).toBe('98_800'); // +2 % rule at 1.4.0 (measured 98 624); before at 1.3.0 (2026-11-02, measured 97 173)
   });
 
   it('no other line moves: column-menu 4 300, dom 22 400, core 29 150, dom/state 1 150', () => {

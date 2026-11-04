@@ -5,7 +5,17 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 1.4.0
+## [1.4.0] - 2026-11-04
+
+A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
+
+### Upgrading from 1.3.0
+- Nothing to change. Every addition is off until the app asks: the status bar, the Excel export (`csvExport({ xlsx })`),
+  find (Ctrl+F), the filters panel, row numbers, the busy part — each its own entry and CSS.
+- On by default where the feature is already on: the searched text is tinted by `quickSearch()` and `find()`
+  (`highlight: false` turns it off, add `@dzgrid/theme/search.css`); the thin busy bar shows while a server reload
+  keeps the rows (the base, no CSS to add).
+- Angular: `ui.cell` / `ui.header` / `ui.tooltip` also take a component class; the name + `[parts]` way is unchanged.
 
 A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
 
