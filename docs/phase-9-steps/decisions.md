@@ -261,3 +261,28 @@ Angular a component class directly in `ui.cell` / `ui.header` / `ui.tooltip`.
   application's name never taken); one answer per `[columns]` array (the grid sees no change on a re-render).
 - `check:api`: additions only — after `scripts/api.mjs` learnt that a union printed in another order is the same type
   (the 1.4.0 dom types moved `numerals` / `direction` literal order in the Angular declarations; tests added).
+
+## Busy bar — measures and lead decisions (2026-11-03, not committed)
+
+Owner's ask (2026-11-03): a thin bar while rows are reloaded and kept on screen; automatic for a server, driven by the
+host too (`busy`, Angular `[busy]`). Sheet: `overlays.md` « Busy bar ».
+
+| Line | Before | After | Line |
+|---|---|---|---|
+| `@dzgrid/dom` (the bar, its timers, the layout's 2 lines) | 22 853 | 23 050 | 22 880 → **23 070** (+0.8 %, 2 % rule) |
+| `@dzgrid/theme` (colour, motion, keyframes) | 2 832 | 2 907 | 2 850 → **2 907** (+2.0 %, at the rule's edge) |
+| `@dzgrid/angular` (`[busy]`) | 7 627 | 7 665 | 7 650 → **7 665** (+0.2 %) |
+| K.8 audit profile | 88 653 | 88 960 | 90 000 kept |
+
+- Lead decisions: in the base, not a feature (≈ 200 B gz; a feature would cost its own wiring for as much). Delay
+  200 ms, hold 400 ms (our scope's timers; no clock read). `aria-busy` at once, no delay. **No sentence** for a busy
+  reload, at any length (a poll every few seconds would repeat it; the rows that arrive are told by `freshRows()`).
+  The rows' stale muting stays a server's only (a poll does not grey the rows every cycle). The host's `busy` shows
+  the bar over « no rows », « no match » and an error too (a poll still runs); never with the loading overlay, which
+  hides a bar still held at once. Drawn as a border (forced colours keep it as the text colour), the segment animated
+  by `inset-inline` (right to left without a mirror rule); under reduced motion or `motion: false` a still full line.
+  `.dzg-busy` made the first time it shows (a grid never busy has no extra node).
+- **For the owner — `check:api`:** `@dzgrid/dom#LAYOUT_CSS: changed`. The export is typed as its literal string, so the
+  two new layout lines (`.dzg-busy`, its `::before`) count as a change, not an addition; nothing removed. Accept with
+  `node scripts/api.mjs --accept "busy bar: two layout lines" --only "@dzgrid/dom#LAYOUT_CSS"`, or decide to type it
+  `string` (also reported as a change once). Every other step of `gate:step` is green.

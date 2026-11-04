@@ -481,6 +481,15 @@
   color: var(--dzg-stale-fg, var(--tz-fg-muted));
 }
 
+.dzg-busy::before {
+  border-block-start: 3px solid var(--dzg-busy-bar, var(--tz-accent));
+}
+
+@keyframes dzg-busy {
+  from {
+    inset-inline: -40% 100%;
+  }
+}
 .dzg-toggle {
   color: var(--dzg-toggle-fg, var(--tz-fg-muted));
 }
@@ -575,6 +584,10 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .dzg:not([data-motion=off]) .dzg-busy::before {
+    inset-inline: 100% -40%;
+    animation: dzg-busy 1.2s infinite;
+  }
   .dzg:not([data-motion=off]) .dzg-row,
   .dzg:not([data-motion=off]) .dzg-row .dzg-seg-start,
   .dzg:not([data-motion=off]) .dzg-row .dzg-seg-end {

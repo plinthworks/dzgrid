@@ -13,6 +13,25 @@ export function overlayPainter<T>(g: GridContext<T>): (displayed: number, top: n
   const { overlay } = g.el;
   const text = g.doc.createTextNode('');
   let retry: HTMLButtonElement | null = null;
+  // The busy bar (overlays.md « Busy bar »): made when it first shows; `wait` the 200 ms before, `held` the 400 ms after.
+  let bar: HTMLElement | null = null, wait: (() => void) | null = null, held = false, at = 0;
+  const paintBar = (want: boolean, cover: boolean): void => {
+    if (bar) setPx(bar, 'inset-block-start', at);
+    if (want) {
+      wait ??= bar && !bar.hidden ? null : g.scope.timeout(() => {
+        wait = null;
+        held = true;
+        if (!bar) (bar = g.doc.createElement('div')), (bar.className = 'dzg-busy'), bar.setAttribute('aria-hidden', 'true'), g.el.viewport.after(bar);
+        bar.hidden = false;
+        setPx(bar, 'inset-block-start', at);
+        g.scope.timeout(() => ((held = false), g.schedule()), 400);
+      }, 200);
+    } else {
+      wait?.();
+      wait = null;
+      if (bar && (!held || cover)) bar.hidden = true;
+    }
+  };
   return (displayed, top) => {
     // A server's failure covers the rows kept; its loading shows only when there is nothing to keep.
     const phase = g.rows.status.phase;
@@ -20,6 +39,9 @@ export function overlayPainter<T>(g: GridContext<T>): (displayed: number, top: n
     // Written only when it changes: a repaint that changes nothing touches nothing.
     if (overlay.hidden !== (state === null)) overlay.hidden = state === null;
     setPx(overlay, 'inset-block-start', top);
+    at = top;
+    // Rows reloaded and kept: a server's request, or the host's `busy`; never with the loading overlay.
+    paintBar((!!g.settings.busy || phase === 'loading') && state !== 'loading', state === 'loading');
     if (g.slots?.overlay(state)) return;
     if (state === null) {
       if (overlay.firstChild) overlay.replaceChildren();

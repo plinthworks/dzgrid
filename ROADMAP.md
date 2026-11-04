@@ -1005,6 +1005,12 @@ versus the ids the app saves today.
 
 ## Phase 9 — started 2026-11-02 (1.3.0, unreleased)
 
+- [x] **Busy bar** (owner 2026-11-03) — built 2026-11-03, not committed (1.4.0, unreleased): sheet `overlays.md`
+  « Busy bar »; `settings.busy` (live), Angular `[busy]`; `.dzg-busy` in the base (200 ms delay, 400 ms hold, never
+  with the loading overlay, `aria-busy`, no sentence); theme `--dzg-busy-bar` (2 contrast pairs), reduced motion still,
+  forced colours. Tests `busy-bar` (9), Angular `busy` (1). Browsers: Chrome, Firefox, WebKit, fr / ar, light / dark,
+  motion on / reduced / off, forced colours, 253 checks (local `playground/busy-check.*`). Sizes in decisions.md
+  « Busy bar — measures » (three lines raised within the 2 % rule).
 - [x] **Row numbers, the searched text tinted, Angular column components** (owner 2026-11-03) — built 2026-11-03, not
   committed (1.4.0, unreleased): sheets `row-numbers.md`, `search-highlight.md` (+ `parts.md`, `angular-parts.md`);
   `@dzgrid/dom/row-numbers` (`rowNumbers()`), the base's lead strip, texts `locales/{en,fr,ar}-row-numbers`,

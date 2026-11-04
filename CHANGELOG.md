@@ -92,6 +92,13 @@ A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
   `ui.header`, `ui.tooltip`): the wrapper names it (`dzg-ng-<slot>-<n>`) and registers it; the grid sees strings only.
   Names and `[parts]` unchanged. Types `DzgColumnOrGroup`, `DzgColumnDef`, `DzgColumnGroup`, `DzgColumnUi`, `DzgColumns`
   (`[columns]` takes them besides the core's).
+- **Busy bar** (`docs/behaviors/overlays.md` « Busy bar »): rows reloaded and kept on screen show a thin bar just under
+  the header — a server's request with rows kept (the loading overlay still covers a grid with no row), or the host's
+  new live setting `busy` (`update({ busy: true })`; Angular `[busy]="loading()"`). Shown after 200 ms (a fast answer
+  never flashes), held 400 ms once shown, never with the loading overlay. `aria-busy="true"` on the grid at once;
+  nothing announced (a poll would repeat it). In the base; look in `@dzgrid/theme` (`--dzg-busy-bar`, the accent by
+  default, 3:1 light and dark): a segment slides toward the end side, still and full under reduced motion or
+  `motion: false`, kept in forced colours.
 
 ### Changed
 - CSV and Excel read a cell through one rule (`readValue`) and one wall-time rule (`wallMs`).

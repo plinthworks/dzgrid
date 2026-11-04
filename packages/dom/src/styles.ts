@@ -37,6 +37,8 @@ export const LAYOUT_CSS = `@layer dzgrid.layout {
 :where(.dzg-num) { unicode-bidi: isolate; direction: ltr; }
 :where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: var(--dzg-footer-size, 0px); display: grid; place-content: center; place-items: center; pointer-events: none; }
 :where(.dzg-overlay > *) { pointer-events: auto; }
+:where(.dzg-busy) { position: absolute; inset-inline: 0; block-size: 3px; overflow: hidden; z-index: 3; pointer-events: none; }
+:where(.dzg-busy)::before { content: ''; position: absolute; inset: 0; }
 :where(.dzg-tooltip) { position: fixed; margin: 0; z-index: 10; }
 :where(.dzg-overlay[hidden], .dzg-tooltip[hidden]) { display: none; }
 :where(.dzg-popup) { position: fixed; margin: 0; z-index: 10; }

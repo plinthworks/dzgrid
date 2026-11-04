@@ -29,6 +29,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   rowHeight: 'live',
   selection: 'live',
   overlay: 'live',
+  busy: 'live',
   label: 'live',
   tooltips: 'live',
   onEvent: 'live',

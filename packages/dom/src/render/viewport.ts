@@ -247,7 +247,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     setAttr(el.viewport, 'aria-multiselectable', mode === 'multi' || g.multi ? 'true' : null);
     setAttr(el.viewport, 'aria-label', settings.label ?? g.msg('grid.label'));
     const loading = settings.overlay === 'loading' || rows.status.phase === 'loading';
-    setAttr(el.viewport, 'aria-busy', loading ? 'true' : null);
+    setAttr(el.viewport, 'aria-busy', loading || settings.busy ? 'true' : null);
     // Rows kept while the next ones load: shown, marked stale.
     setAttr(el.root, 'data-stale', loading && d.count ? '' : null);
     setPx(el.body, 'block-size', mapper.physicalHeight);

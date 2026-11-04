@@ -609,6 +609,19 @@ $layered: true !default;
     color: var(--dzg-stale-fg, var(--tz-fg-muted));
   }
 
+  // The busy bar (overlays.md « Busy bar »): a line under the header while rows reload and stay; a segment slides
+  // from the start side where motion is welcome, still and full otherwise. A border: forced colours keep it.
+  .dzg-busy::before {
+    border-block-start: 3px solid var(--dzg-busy-bar, var(--tz-accent));
+  }
+
+  // A segment 40 % wide, from before the start side to past the end side (the rule under motion holds the end).
+  @keyframes dzg-busy {
+    from {
+      inset-inline: -40% 100%;
+    }
+  }
+
   // A tree (@dzgrid/dom/tree, Phase 4 step 4): the toggle's chevron in the muted colour (3:1 against
   // the row, hovered or selected too); an ancestor shown only for its matches (`data-context-row`)
   // in the muted text colour, not an opacity (it keeps 4.5:1), its text the same for a screen reader.
@@ -721,6 +734,12 @@ $layered: true !default;
 
   // CSS motion only where it is welcome, and not switched off (`settings.motion: false`, step 26).
   @media (prefers-reduced-motion: no-preference) {
+    // The busy bar's segment slides (above: still and full otherwise).
+    .dzg:not([data-motion=off]) .dzg-busy::before {
+      inset-inline: 100% -40%;
+      animation: dzg-busy 1.2s infinite;
+    }
+
     .dzg:not([data-motion=off]) .dzg-row,
     .dzg:not([data-motion=off]) .dzg-row .dzg-seg-start,
     .dzg:not([data-motion=off]) .dzg-row .dzg-seg-end {

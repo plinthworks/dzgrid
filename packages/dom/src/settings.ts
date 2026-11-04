@@ -57,6 +57,12 @@ export interface GridSettings<T> {
    */
   readonly rowClass?: (c: RowClassContext<T>) => string | null | undefined;
   readonly overlay?: 'loading' | 'error' | null;
+  /**
+   * The host is reloading rows it keeps on screen (a poll, its own arrows; 1.4.0, overlays.md « Busy bar »):
+   * `aria-busy` on the grid at once, a thin bar under the header after 200 ms (held 400 ms once shown), never with
+   * the loading overlay. A server's request with rows kept shows it by itself. Live; nothing announced.
+   */
+  readonly busy?: boolean;
   /** The grid's accessible name, already translated; the bundle's `grid.label` otherwise. */
   readonly label?: string;
   readonly tooltips?: { readonly delayMs?: number };
