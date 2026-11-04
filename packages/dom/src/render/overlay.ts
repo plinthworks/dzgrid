@@ -34,7 +34,8 @@ export function overlayPainter<T>(g: GridContext<T>): (displayed: number, top: n
     // The part's host: placed here, not by the layout CSS (its block size is the part's).
     const own = !!g.slots?.busy?.(on, () => (mark ??= make('dzg-busy-part', 'position:absolute;inset-inline:0;z-index:3;pointer-events:none')), still);
     if (on && !own) bar ??= make('dzg-busy');
-    for (const [el, show] of [[bar, !own], [mark, own]] as const) if (el) (el.hidden = !on || !show), setPx(el, 'inset-block-start', at);
+    // Hidden inline too: an app's `display` on the class would beat [hidden] (owner's example, 2026-11-04).
+    for (const [el, show] of [[bar, !own], [mark, own]] as const) if (el) (el.hidden = !on || !show), (el.style.display = el.hidden ? 'none' : ''), setPx(el, 'inset-block-start', at);
   };
   const paintBar = (want: boolean, cover: boolean): void => {
     if (want)

@@ -419,7 +419,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 23250,
+      "maxGzip": 23260,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"

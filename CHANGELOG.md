@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).
 
+- The busy line and the busy part's host stay hidden even when an app's CSS gives them a `display` (inline `display: none` when hidden; dom line 23 260, +2 % rule).
+
 ### Upgrading from 1.3.0
 - Nothing to change. Every addition is off until the app asks: the status bar, the Excel export (`csvExport({ xlsx })`),
   find (Ctrl+F), the filters panel, row numbers, the busy part — each its own entry and CSS.

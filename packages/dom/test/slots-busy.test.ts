@@ -109,6 +109,35 @@ describe('the busy part', () => {
     expect(t.live.textContent).toBe('');
   });
 
+  it('stays hidden when the app styles its host with a display (owner, 2026-11-04: `.dzg-busy-part { display: flex }`)', () => {
+    const css = document.createElement('style');
+    css.textContent = '.dzg-busy-part, .dzg-busy { display: flex }';
+    document.head.append(css);
+    try {
+      const p = busyPart();
+      const t = make({ busy: p.part });
+      t.g.update({ busy: true });
+      vi.advanceTimersByTime(200);
+      expect(getComputedStyle(t.own()!).display).toBe('flex');
+      t.g.update({ busy: false });
+      vi.advanceTimersByTime(400);
+      expect(t.ownShown()).toBe(false);
+      // jsdom lets [hidden] win over an author rule (a browser does not), so the hiding itself is checked: an inline
+      // display none, which beats the app's class rule in every browser (checked in Chrome on the owner's example).
+      expect(t.own()!.style.display).toBe('none');
+      expect(getComputedStyle(t.own()!).display).toBe('none');
+      // The built-in line too.
+      const u = make({});
+      u.g.update({ busy: true });
+      vi.advanceTimersByTime(200);
+      u.g.update({ busy: false });
+      vi.advanceTimersByTime(400);
+      expect(u.host.querySelector<HTMLElement>('.dzg-busy')!.style.display).toBe('none');
+    } finally {
+      css.remove();
+    }
+  });
+
   it('mounted once, then kept: each show and hide is an update of active; destroyed with the grid', () => {
     const p = busyPart();
     const t = make({ busy: p.part });
