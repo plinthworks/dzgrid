@@ -880,6 +880,8 @@ export interface ModelEnv<T> {
   readonly sameRow?: ((a: T, b: T) => boolean) | undefined;
   /** A timer (the DOM's, Phase 8): a block model's rest and batch delays wait on it. Absent: nothing waits. */
   readonly timer?: ((fn: () => void, ms: number) => () => void) | undefined;
+  /** The next frame (the DOM's): a block model's batched transactions land there when it comes before their delay. */
+  readonly frame?: ((fn: () => void) => void) | undefined;
 }
 
 /** A model to make once the grid knows its columns and language. */

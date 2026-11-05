@@ -50,6 +50,19 @@ Arabic.
 - **Accessibility**: the tree's `aria-level`, `aria-posinset`, `aria-setsize` (-1 while unknown), `aria-expanded`; a
   user's opening says « Nom développé, n lignes » once its first block is in; scrolling says nothing.
 
+## Built (steps 6–7), and what the lead decided
+- A group opening shows one loading row (the lazy tree's `LoadingNode`, `l:` + its key), failed with Retry when its first
+  block fails (only that group: the model stays idle); a level's places not held are block loading rows (`l:#` + place).
+- A group's key: column id, the **value's own type tag** and the value; its label the column's format of the value.
+- Grouped, the number of rows is the groups' (`counts.filtered` null): `aria-rowcount` -1; each level's `aria-setsize` its
+  size when known, -1 while unknown.
+- `expandAll` opens the groups held without asking anything (the window asks what it shows); past the first level it is
+  told (`unsupported-combination`, path `expandAll`, detail `server`).
+- The DOM grouping's `by` and options reach the model at creation (one grouped first request); `setBy` is a new epoch; a
+  state's `rowGroups` restored in its one request whatever the order of the features; an export of « all » or « selected »
+  carries `server.group = { by, path: [], aggs }`.
+- Not built: transactions and edits on a server-side grid.
+
 ## Tests (written before the code, steps 6–7)
 Conformance `server-side/*` (request per level, typed paths and keys, a custom aggregation refused, a planted wrong
 total shown as sent, a group reopened after a sort asks only when shown, eviction across levels, a group of unknown size

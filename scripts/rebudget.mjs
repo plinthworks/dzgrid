@@ -43,6 +43,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/export: xlsx (lazy)': 1100, // owner (2026-11-03, Excel export): the Excel DOM chunk
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
+  '@dzgrid/core/server-side': 11265, // Phase 8 step 6 (owner Q-B: a new entry at its measure + 10 %): measured 10 241 (plan §4 estimated 3 800–5 000 with the block store: the wire form, the gate, the value lists and the block store come with it)
   '@dzgrid/core/infinite': 8580, // Phase 8 steps 3–4 (owner Q-B 2026-11-05: a new entry at its measure + 10 %): measured 7 867 (plan §4 estimated 2 600–3 400: the wire form, the gate and the value lists come with it; 4 273 over @dzgrid/core/server)
   '@dzgrid/core/grouping': 4950, // Phase 7 close (a new entry at its measure + 10 %: 4 468, checkRowGroups); steps 3–4 (owner Q-B 2026-11-04: a new entry at its measure + 10 %): measured 4 285; ARCH §5.2 5 000
   // Phase 7 steps 5–6 (owner Q-B: a new entry at its measure + 10 %): the grouping painter, the band, their texts and CSS.
@@ -105,11 +106,11 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/range: html (lazy)': 600,
   '@dzgrid/dom/locales/en-range': 350,
   '@dzgrid/dom/locales/fr-range': 400,
-  '@dzgrid/dom/locales/ar-range': 500,
+  '@dzgrid/dom/locales/ar-range': 535, // Phase 8 step 5: « بعض الصفوف لم تُحمَّل بعد » (range.notLoaded), measured 535 — +7 %, beyond the +2 % rule: the owner decides (decisions.md); before: 500
   '@dzgrid/theme/range.css': 500,
   // Owner S12-Q1, S12-Q4 (2026-10-25): the fill handle, Ctrl+D / R, the fill mode and bulk's seam in their own entry over
   // dom/range; their texts and styles apart (the -range texts and range.css are full).
-  '@dzgrid/dom/fill': 3200, // Phase 9 cell menu (owner Q-CM4, 2026-11-02): 3 150 → 3 200 (`along`, `can`); owner S12-Q9 (2026-10-25): 1 600 → 3 000 (measured 2 729); Phase 6 step 8b-2 (owner Q1, 2026-10-27): up to ~3 150 for the fill in the pinned bands (measured 3 042, line 3 100)
+  '@dzgrid/dom/fill': 3264, // Phase 8 step 5 (+2 %): no fill over rows not loaded, the bounded walks of core/range (measured 3 226); before 3 200; Phase 9 cell menu (owner Q-CM4, 2026-11-02): 3 150 → 3 200 (`along`, `can`); owner S12-Q9 (2026-10-25): 1 600 → 3 000 (measured 2 729); Phase 6 step 8b-2 (owner Q1, 2026-10-27): up to ~3 150 for the fill in the pinned bands (measured 3 042, line 3 100)
   '@dzgrid/dom/locales/en-fill': 250,
   '@dzgrid/dom/locales/fr-fill': 300,
   '@dzgrid/dom/locales/ar-fill': 380,
@@ -163,7 +164,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/columns-panel': 4400, // Q4-4: up to 4 400 used at the review of steps 3–4 (its own live status, auto-scroll loop: measured 4 282)
   '@dzgrid/theme/columns-panel.css': 1000,
   // Phase 6 step 5 (owner Q-B): the GridState feature, its storage and address helpers, over the DOM base (core/state outside it).
-  '@dzgrid/dom/state': 1240, // Phase 7 close (+2 %): rowGroups and a state restored before the grouping, measured 1 233; owner +2 % rule (step 16, 2026-10-29): 1 200 → 1 224 (`gridState({ initial })`, measured 1 211); owner « clearFilters/resetState » (2026-10-28): 1 150 → 1 200; before: owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
+  '@dzgrid/dom/state': 1264, // Phase 8 step 7 (+2 %): restored rowGroups handed to a server-side model inside the hold (measured 1 244); before 1 240; Phase 7 close (+2 %): rowGroups and a state restored before the grouping, measured 1 233; owner +2 % rule (step 16, 2026-10-29): 1 200 → 1 224 (`gridState({ initial })`, measured 1 211); owner « clearFilters/resetState » (2026-10-28): 1 150 → 1 200; before: owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
   '@dzgrid/theme': 2960, // Phase 8 step 4 (+2 % rule, plan §4 2 960): a block list's loading rows muted, their words over the empty cells (measured 2 913); before: 2907; 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 2 907): 2 850; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 2 750 → 2 850 (the pinned edge, the field's ring, the magnifier); T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7

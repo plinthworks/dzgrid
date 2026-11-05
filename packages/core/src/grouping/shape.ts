@@ -30,6 +30,8 @@ export type GroupedRows<T> = TreeRows<T>;
 
 export interface GroupShape<T> extends RowShape<T> {
   readonly kind: 'group';
+  /** The options it was made with (Phase 8: a server-side model groups on the server by them: its totals, its totals rows). */
+  readonly options?: GroupingOptions;
   /** The grouping columns as given (the last `setBy`); unknown or refused ones are told, and skipped when grouping. */
   readonly by: readonly string[];
   /** Groups by other columns, at once (told as a `rows` change); the open groups are kept (a group's key names its column). */
@@ -286,6 +288,7 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
 
   const shape: GroupShape<T> = {
     kind: 'group',
+    options: o,
     ...(expanded !== undefined && { initial: expanded }),
     get by() { return by; },
     get diagnostics() { return { ...d }; },

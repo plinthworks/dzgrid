@@ -1178,5 +1178,20 @@ decisions and measures `docs/phase-8-steps/decisions.md`.
   frame after its answer, wheel 59.9 fps median / p95 16.7 ms, thumb drag 1 block, held ≤ 20, axe 0 fr / ar, row 10⁷ at
   0 px in Chrome, Firefox, WebKit. Dom base 23 637 / 23 660 (+2 % rule; plan asked 23 500), theme 2 913 / 2 960, K.8
   89 882 / 90 000. Review: two fixes (a refresh stuck loading, an error not cleared), with their tests.
-- [ ] Step 5 — transactions' next-frame flush, edits, `range-not-loaded`, exports. Step 6 — `@dzgrid/core/server-side`.
-  Step 7 — `dom/grouping` on it. Step 8 — Angular and demos. Step 9 — close.
+- [x] **Step 5 — transactions, edits, copy, exports** (not committed): async batch at the frame or 50 ms (`ModelEnv.frame`),
+  edits on held rows (`orderStale`, reapply asks the window); copy / cut / paste / Delete over rows not loaded refused
+  (`rows-not-loaded`, `range.notLoaded` in `locales/*-range`), the fill neither, the status bar's figures partial; every
+  block walk of `core/range` bounded (`boxHeld`); CSV / Excel `displayed` = rows held, `all` / `selected` through
+  `exportAll`. Perf « 100 updates in one async batch » 0.1 ms (line 4), one change, one paint. **`ar-range` 535 / 500:
+  beyond the +2 % rule, for the owner.**
+- [x] **Step 6 — `@dzgrid/core/server-side`** (not committed): `serverSideRows` — levels in blocks on the shared store,
+  `DataRequest.group { by, path, aggs }`, `{ groups, total, hasNext, totals }`, typed keys, totals as sent, custom totals
+  refused, footers and grand total from the server, open groups kept across epochs, `setBy` a new epoch, `expandAll` over
+  the groups held, `TreeRows`. Conformance `server-side` (7, new suite), unit 21, three perf lines (flatten 0.1 ms, a 10⁶
+  group's first block 0.0 ms, 1 000 windows 85 ms). Size 10 241, line 11 265 (measure + 10 %; plan 3 800–5 000).
+- [x] **Step 7 — `dom/grouping` on it** (not committed): the painter on the model's rows, `setBy` forwarded, server totals
+  in group cells, footers and grand total, the opening said once loaded, `rowGroups` restored in one request (either
+  order), `ExportRequest.server.group`; refusals kept beside `sourceRows` / `infiniteRows`. jsdom 8; browser
+  `node scripts/browser-server-groups.mjs --engine all` 30 / 30 (axe 0 fr / ar, RTL keys in three engines). In-row Retry
+  raised above the cells beside (it could not be clicked, theme +5 B). `dom/grouping` 4 782 / 5 100, `dom/state` 1 264.
+- [ ] Step 8 — Angular and demos. Step 9 — close.

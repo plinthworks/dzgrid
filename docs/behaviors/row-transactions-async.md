@@ -32,9 +32,16 @@ on screen changes, a row is added or removed somewhere, fifty changes arrive in 
   together: one change, at most one request of the window; `done(result)` is called for each, in order, with its own
   result. Without a timer (the core alone) each one is applied at once.
 - A row id that identifies nothing is told (`invalid-row-id`, path `update[i]` / `patch[i]`), never with the row.
-- Still to come (step 5): a sort or filter column touched marks the order stale (K.14) and « Réappliquer » asks the window
-  again; the flush at the next frame when it comes before 50 ms.
+- The batch lands at the next frame when it comes before `batchMs` (the DOM gives the model its frame, `ModelEnv.frame`;
+  a hidden page has no frames: the 50 ms then): one change of kind `rows`, its `transaction.updated` listing every key
+  the batch updated, one paint.
+- Edits (step 5, K.14): an edit changes the row held where it is shown; nothing moves. An edit of a column the server
+  sorts, filters or searches by marks the order stale (`orderStale`); « Réappliquer » (`rows.reapply`) asks the window
+  again with its rows kept (the thin busy line), the other blocks stale; the first answer asked after the edit ends the
+  mark. An edit of a row whose block is let go stays in the edit layer (keyed by the row, never by its place) and shows
+  again when the block comes back.
 
 ## Tests
-`packages/core/test/infinite.test.ts` « transactions », conformance `block-cache/blocks-transaction`; step 5 adds the
-edits, the 100-update perf line (« one change, ≤ 4 ms core, one paint »).
+`packages/core/test/infinite.test.ts` « transactions » and « step 5 », conformance `block-cache/blocks-transaction`,
+`packages/dom/test/infinite.test.ts` « step 5 » (one change, one paint at the frame; edits and reapply), the perf line
+« infinite async batch: 100 updates on 2 000 rows held, one change » (≤ 4 ms).

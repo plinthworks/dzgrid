@@ -74,10 +74,15 @@ export interface FillMessages {
   readonly locale: string;
   readonly text: { readonly [K in FillMessageKey]: MessageValue };
 }
+/**
+ * A block over rows not loaded yet (a list loaded in blocks, Phase 8): in the `-range` bundles, optional in an
+ * application's own (a 1.4 bundle keeps compiling); `range()` asks for it beside a list loaded in blocks only.
+ */
+export type RangeLoadKey = 'range.notLoaded';
 /** A range bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_RANGE.text }`. */
 export interface RangeMessages {
   readonly locale: string;
-  readonly text: { readonly [K in RangeMessageKey]: MessageValue };
+  readonly text: { readonly [K in RangeMessageKey]: MessageValue } & { readonly [K in RangeLoadKey]?: MessageValue };
 }
 
 /** Moving columns' texts (`@dzgrid/dom/columns`, Phase 6 step 2), in their own bundles (`locales/<lang>-columns`): optional here, required by `columns()`. */

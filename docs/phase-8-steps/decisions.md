@@ -41,9 +41,8 @@ Below: what the lead took alone while applying them (steps 1–4), and the measu
   `forget` op.
 - **The view is immutable per version** (a snapshot of the blocks held, its key index built on first use): the kernel's
   focus fallback reads the old view after the model moved.
-- **Not done in steps 1–4** (step 5): edits on a block list (`setReader` / `reapply`), the « next frame » flush of async
-  transactions, `range-not-loaded`, exports' `displayed` note, the find bar's « lignes chargées » wording (it keeps the
-  server pages' note).
+- **Not done in steps 1–4**: done at step 5 (edits, the frame, rows not loaded, exports' `displayed` count) but the find
+  bar's « lignes chargées » wording (it keeps the server pages' note).
 
 ## Review (code review + test analysis, step 4)
 - **Fixed**: a block a refresh waited for, let go without a request ended (left the window while waiting, dropped by an
@@ -75,6 +74,64 @@ Below: what the lead took alone while applying them (steps 1–4), and the measu
   unknown total each Ctrl+End goes further (300 → 400 → 500 → 600), `aria-rowcount` -1.
 
 
+## Decisions taken alone (steps 5–7)
+- **The frame** (step 5): `ModelEnv.frame?` (types); the DOM base passes `requestAnimationFrame` (+11 B, base 23 648 /
+  23 660). The async batch lands at the frame or at `batchMs`, the first cancels the other; its change carries
+  `transaction.updated` (every key of the batch, for fresh-rows).
+- **Edits on blocks** (step 5): `setReader` marks the order stale when a column the server sorts, filters or searches by is
+  touched; `reapply` = the refresh of the window, told as `order`; the first answer asked after the edit ends the mark.
+- **One code for rows not loaded**: `rows-not-loaded` (the selection's reason since step 4) is also the `Problem` of a copy,
+  cut, paste or Delete refused (path `range`, detail `rows`); the sheet's `range-not-loaded` renamed. Its sentence
+  `range.notLoaded` is optional in a bundle (`RangeLoadKey`), required by `range()` beside a block list only.
+- **The status bar** shows the figures of the rows held, said partial (as a lazy tree's loading rows), not refused; **the
+  fill** takes no source nor target over rows not loaded (nothing filled, no sentence: the bytes of `fill` are at its line).
+- **Bounded block walks**: `@dzgrid/core/range` `boxHeld` (exported) and an internal `boxAt`; `boxRows`, the figures and the
+  plans read the rows held (Ctrl+A on 10⁷ rows: its size said in ms).
+- **The server-side model** (step 6): one module `server/server-side.ts`, the block store shared (`take(order, keep, near)`
+  added: blocks that are not one run); block ids = level × 2²¹ + block. Group keys take the **value's own type tag**
+  (`typeof` initial + value), so `1` / `'1'` and a day / an instant are two groups whatever the column; labels the column's
+  format (text). An open group not answered shows one `LoadingNode` (`l:` + its key, the lazy tree's); unheld places of a
+  level are `BlockLoadingNode`s. The group rows above every level shown are pinned (their levels hang from them).
+  `expandAll(true)` opens the groups held, never a request by itself; past the first level it is told
+  (`unsupported-combination`, path `expandAll`, detail `server`). Grouped, `counts.filtered` is null (`aria-rowcount` -1).
+  The DOM grouping's shape hands its `by` and options (`GroupShape.options`, added): the first request is grouped already.
+  `ServerSideModel.group` (the export's `server.group`). Transactions and edits on a server-side grid: not built (not asked).
+- **Step 7**: the grouping adapts to the model (`setBy`, `reads`, `totals`); totals from a server coerced by the column; the
+  « développé, n lignes » sentence waits for the group's loading row to go. A state restored before the grouping's setup
+  hands `rowGroups` to the model inside its hold (`@dzgrid/dom/state`, +2 %): one request in either order of the features.
+- **Seen in Chrome**: an in-row Retry running over the next empty cells could not be clicked (the cells beside took the
+  click): `.dzg-retry` raised (`position: relative; z-index: 1`, theme +5 B). It touched the step-4 rows too.
+
+## Review (steps 5–7)
+- Fixed: a `groups` entry that is no record (`null`) threw (review 1, test). Tests added for a stale answer after `setBy`, a
+  level's total shrinking, duplicate ids across a level's blocks.
+- Left, noted: a level whose end was found does not grow again on a later full block without a total (as `infiniteRows`);
+  levels of closed groups are kept for the epoch (reopening is instant); a group whose first block failed is never said
+  « développé » (it did not open).
+
+## Measures (steps 5–7)
+- Sizes: `core/server-side` **10 241, line 11 265** (new entry, measure + 10 %; plan 3 800–5 000); `core/infinite` 8 071 /
+  8 580; `core/range` 3 260 / 3 264, `dom/fill` 3 226 / 3 264, `dom/state` 1 244 / 1 264 (+2 %); `dom/grouping` 4 782 / 5 100;
+  export run 5 396 / 5 450; theme 2 918 / 2 960; dom base 23 648 / 23 660; K.8 89 894 / 90 000. **Beyond the rule:
+  `locales/ar-range` 535 (line 500, +7 %)** — the shortest correct sentence is 519: the owner decides (the line is set at
+  535 pending his answer).
+- Node: async batch of 100 updates on 2 000 rows held 0.1 ms (one change, line 4); server-side flatten (1 000 groups, 50
+  open) 0.0–0.1 ms (line 2); a 10⁶-row group's first block 0.0 ms (line 30); 1 000 windows through it 85 ms (line 94),
+  blocks held ≤ maxBlocks + the group row above.
+- Browsers: `node scripts/browser-server-groups.mjs --engine all` 30/30 (Chrome fr/ar: treegrid, counts and totals as
+  sent, groups opened and closed while loading — reopened with no new request, the sentence once loaded, a shop's rows at
+  level 3, a failed level with Retry by the mouse, axe 0; Firefox, WebKit, Chrome: arrows mirrored right to left);
+  `browser-infinite.mjs` 18/18 again.
+
+- Gate: test:ci, test:tz, typecheck, build, check:size green; **check:api flags four existing exports as changed** — the
+  optional `range.notLoaded` key added to `RangeMessages` and the new key in `EN_RANGE` / `FR_RANGE` / `AR_RANGE` (additions
+  the guard cannot read as such, as `GridEvent` at Phase 7). Not accepted: the owner's (`scripts/api.mjs --accept`).
+
 ## Owner, 2026-11-05
 
 - The loading row without a parent: `BlockLoadingNode` added to `RowNode` (A); `LoadingNode` unchanged.
+
+## Owner, 2026-11-05 (steps 5–7)
+
+- `locales/ar-range` line 500 → 535 (« 1 oui »).
+- `RangeMessages`, `EN_RANGE`, `FR_RANGE`, `AR_RANGE` gain the optional `range.notLoaded`: accepted in api/ (« 2 oui »).

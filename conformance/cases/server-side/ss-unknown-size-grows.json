@@ -1,0 +1,128 @@
+{
+  "id": "ss-unknown-size-grows",
+  "suite": "server-side",
+  "description": "An open group of unknown size: its rows so far and one block of loading rows while more follow; a short block ends it.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "by": [
+        "region"
+      ],
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "groups": [
+          "Nord"
+        ],
+        "total": 1
+      },
+      {
+        "open": [
+          "Nord"
+        ]
+      },
+      {
+        "want": [
+          0,
+          1
+        ]
+      },
+      {
+        "answer": "c2",
+        "rows": 10,
+        "hasNext": true
+      },
+      {
+        "want": [
+          11,
+          20
+        ]
+      },
+      {
+        "answer": "c3",
+        "rows": 3,
+        "hasNext": false
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        0
+      ],
+      [
+        "c2",
+        [
+          "Nord"
+        ],
+        0
+      ],
+      [
+        "c3",
+        [
+          "Nord"
+        ],
+        1
+      ]
+    ],
+    "changes": [
+      "query",
+      "expand",
+      "rows",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "shown": [
+        "Nord+",
+        "Nord#0",
+        "Nord#1",
+        "Nord#2",
+        "Nord#3",
+        "Nord#4",
+        "Nord#5",
+        "Nord#6",
+        "Nord#7",
+        "Nord#8",
+        "Nord#9",
+        "Nord#10",
+        "Nord#11",
+        "Nord#12"
+      ],
+      "keys": [
+        "g:6:region5:sNord"
+      ],
+      "totals": [
+        [
+          "Nord",
+          {
+            "qty": 100
+          }
+        ]
+      ],
+      "by": [
+        "region"
+      ],
+      "aggs": [
+        {
+          "column": "qty",
+          "fn": "sum"
+        }
+      ],
+      "grand": {}
+    },
+    "diagnostics": {
+      "blocks": {
+        "held": 3,
+        "max": 3,
+        "evicted": 0
+      },
+      "levels": 2
+    }
+  }
+}

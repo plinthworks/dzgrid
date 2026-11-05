@@ -1,6 +1,6 @@
 import { intentFor, type Problem, type CellAddr, type CellRange, type DisplayedRows, type FocusPos, type GridKernel, type KeyOwner } from '@dzgrid/core';
 import { emit, isCellKey } from '@dzgrid/core/internal';
-import { boxRows, fillTarget, planFill, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
+import { boxHeld, boxRows, fillTarget, planFill, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
 import type { EditApi } from '../edit/index.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { CellInput } from '../part.js';
@@ -92,7 +92,11 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       const ed = () => g.edit?.api as EditApi<unknown> | undefined;
       /** The rows a block lives in: its anchor's pinned band (step 8b-2, O8: a fill never leaves it), else the body's. */
       const D = (x: CellRange | null | undefined): DisplayedRows<unknown> => (x && g.rowsOf?.(x.anchor.row)) || rows.displayed;
-      const boxOf = (x: CellRange | null | undefined): RangeBox | null => (x ? rangeBox(x, D(x), ids()) : null);
+      /** A block over rows not loaded yet (a list loaded in blocks) is no source nor target: nothing filled with holes (range-selection.md). */
+      const boxOf = (x: CellRange | null | undefined): RangeBox | null => {
+        const b = x && rangeBox(x, D(x), ids());
+        return b && boxHeld(b, D(x)) ? b : null;
+      };
       /** The source: the block, else the focused data cell (a pinned one too); corners by keys. */
       const source = (): CellRange | null => {
         const f = kernel.focus;
@@ -153,8 +157,8 @@ export function fill(blocks: RangeFeature, o: FillFeatureOptions = {}): FillFeat
       const fillTo = (src: CellRange, to: Pos | null, swap: boolean, via: Via): FillCounts | null => {
         const b = boxOf(src);
         const t = b && to && to.row >= 0 && to.col >= 0 && fillTarget(b, to, ax);
-        if (!t || !ed()) return null;
         const d = D(src);
+        if (!t || !ed() || !boxHeld(t.box, d)) return null;
         const i = ids();
         const at = (r: number, c: number): CellAddr => ({ row: d.keyAt(d.index(r)!), column: i[c]! });
         const u = { anchor: at(Math.min(b.top, t.box.top), Math.min(b.start, t.box.start)), focus: at(Math.max(b.bottom, t.box.bottom), Math.max(b.end, t.box.end)) };

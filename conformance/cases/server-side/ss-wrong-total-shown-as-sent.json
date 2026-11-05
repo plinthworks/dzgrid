@@ -1,0 +1,125 @@
+{
+  "id": "ss-wrong-total-shown-as-sent",
+  "suite": "server-side",
+  "description": "Totals are never computed in the browser: a group's planted wrong total (999 over two rows of 1) shows as sent, in its row and its footer, after its rows are loaded; the grand total is the server's.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "by": [
+        "region"
+      ],
+      "footers": "both"
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "groups": [
+          {
+            "value": "Nord",
+            "count": 2,
+            "aggs": {
+              "qty": 999
+            }
+          }
+        ],
+        "total": 1,
+        "totals": {
+          "qty": 12345
+        }
+      },
+      {
+        "open": [
+          "Nord"
+        ]
+      },
+      {
+        "want": [
+          0,
+          2
+        ]
+      },
+      {
+        "answer": "c2",
+        "rows": 2,
+        "total": 2
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        0
+      ],
+      [
+        "c2",
+        [
+          "Nord"
+        ],
+        0
+      ]
+    ],
+    "changes": [
+      "query",
+      "expand",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "shown": [
+        "Nord+",
+        "Nord#0",
+        "Nord#1",
+        "ΣNord",
+        "Σ"
+      ],
+      "keys": [
+        "g:6:region5:sNord",
+        "f:g:6:region5:sNord",
+        "t:bottom"
+      ],
+      "totals": [
+        [
+          "Nord",
+          {
+            "qty": 999
+          }
+        ],
+        [
+          "ΣNord",
+          {
+            "qty": 999
+          }
+        ],
+        [
+          "Σ",
+          {
+            "qty": 12345
+          }
+        ]
+      ],
+      "by": [
+        "region"
+      ],
+      "aggs": [
+        {
+          "column": "qty",
+          "fn": "sum"
+        }
+      ],
+      "grand": {
+        "qty": 12345
+      }
+    },
+    "diagnostics": {
+      "blocks": {
+        "held": 2,
+        "max": 2,
+        "evicted": 0
+      },
+      "levels": 2
+    }
+  }
+}

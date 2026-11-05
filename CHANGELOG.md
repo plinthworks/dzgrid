@@ -22,6 +22,18 @@ closed) are in the working tree too; the owner decides which release carries the
   (« Les données n'ont pas pu être chargées » with one « Réessayer »; Enter on a failed row retries), tells the model its
   window after each paint, `aria-rowcount` -1 while the total is unknown, Shift+click across rows not loaded ticks the
   clicked row only. Find, print, the pager's counts and the CSV of `displayed` walk the rows held only.
+- Phase 8 steps 5–7: `applyTransactionAsync` lands at the next frame or after 50 ms (`ModelEnv.frame`); edits on a block
+  list (`orderStale`, « Réappliquer » asks the window again); a copy, cut, paste or Delete over rows not loaded is refused
+  with « Certaines lignes ne sont pas encore chargées » (`range.notLoaded`, optional in an application's bundle; problem
+  `rows-not-loaded`), the fill takes no such block; `@dzgrid/core/range` `boxHeld`, every block walk bounded by the rows
+  held. CSV / Excel of « displayed » on a block list write the rows held.
+- `@dzgrid/core/server-side` (Phase 8 step 6): `serverSideRows(data, { blockSize, maxBlocks, ahead, concurrency, restMs,
+  by, aggFuncs, footers, grandTotal, params, abort })` — a server's list grouped on the server, each open group loaded in
+  blocks under one cache, `DataRequest.group { by, path, aggs }` (typed values of the open groups), the answer
+  `{ groups: [{ value, count, aggs }], total, hasNext, totals }`, totals never computed in the browser, open groups kept
+  across a sort or a filter; `GroupPart`, `GroupResponse`, `GroupValue`, `GroupShape.options`.
+- `@dzgrid/dom/grouping` on `serverSideRows` (Phase 8 step 7): the band, the menu, `setBy`, the state's `rowGroups`, the
+  server's totals in group rows, footers and the grand total; an export's `server.group`.
 - Core types (additions): `BlockLoadingNode` (in `RowNode`), `DisplayedRows.held?()`, `RowModel.want?()`,
   `ModelEnv.timer?`, `RequestGate.forget?()`, `RangeResult` reason `rows-not-loaded`.
 - `@dzgrid/core/grouping`: `groupShape({ by, aggFuncs, expanded, footers, grandTotal })` — rows grouped by columns,

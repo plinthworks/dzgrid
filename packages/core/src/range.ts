@@ -6,7 +6,7 @@
  * DOM (`@dzgrid/dom/range`, steps 11–12) hands the planned cells to the editing commit, which reads and
  * checks them (one place for the rules); bulk edit is the paste plan of one value.
  */
-export { boxRows, boxSize, rangeBox } from './range/box.js';
+export { boxHeld, boxRows, boxSize, rangeBox } from './range/box.js';
 export type { RangeBox } from './range/box.js';
 export { decodeTsv, encodeTsv } from './range/tsv.js';
 export { copyMatrix } from './range/copy.js';

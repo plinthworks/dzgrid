@@ -1,0 +1,157 @@
+{
+  "id": "ss-reopened-after-sort-asks-when-shown",
+  "suite": "server-side",
+  "description": "After a sort the open groups stay open; their content is asked again only for the group shown in the window.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "by": [
+        "region"
+      ],
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "groups": [
+          "Nord",
+          "Sud"
+        ],
+        "total": 2
+      },
+      {
+        "open": [
+          "Nord",
+          "Sud"
+        ]
+      },
+      {
+        "want": [
+          0,
+          3
+        ]
+      },
+      {
+        "answer": "c2",
+        "rows": 1,
+        "total": 1
+      },
+      {
+        "answer": "c3",
+        "rows": 1,
+        "total": 1
+      },
+      {
+        "sort": [
+          [
+            "qty",
+            "desc"
+          ]
+        ]
+      },
+      {
+        "answer": "c4",
+        "groups": [
+          "Sud",
+          "Nord"
+        ],
+        "total": 2
+      },
+      {
+        "want": [
+          0,
+          1
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        0
+      ],
+      [
+        "c2",
+        [
+          "Nord"
+        ],
+        0
+      ],
+      [
+        "c3",
+        [
+          "Sud"
+        ],
+        0
+      ],
+      [
+        "c4",
+        [],
+        0
+      ],
+      [
+        "c5",
+        [
+          "Sud"
+        ],
+        0
+      ]
+    ],
+    "changes": [
+      "query",
+      "expand",
+      "rows",
+      "rows",
+      "query",
+      "query"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "shown": [
+        "Sud+",
+        "…",
+        "Nord+",
+        "…"
+      ],
+      "keys": [
+        "g:6:region4:sSud",
+        "g:6:region5:sNord"
+      ],
+      "totals": [
+        [
+          "Sud",
+          {
+            "qty": 100
+          }
+        ],
+        [
+          "Nord",
+          {
+            "qty": 100
+          }
+        ]
+      ],
+      "by": [
+        "region"
+      ],
+      "aggs": [
+        {
+          "column": "qty",
+          "fn": "sum"
+        }
+      ],
+      "grand": {}
+    },
+    "diagnostics": {
+      "blocks": {
+        "held": 1,
+        "max": 3,
+        "evicted": 0
+      },
+      "levels": 6
+    }
+  }
+}

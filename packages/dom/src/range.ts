@@ -6,4 +6,4 @@
  */
 export { range, RANGE_KEYS } from './range/index.js';
 export type { ClipboardText, CopyAsk, PasteCounts, RangeApi, RangeFeature, RangeOptions } from './range/index.js';
-export type { RangeMessageKey, RangeMessages } from './part-texts.js';
+export type { RangeLoadKey, RangeMessageKey, RangeMessages } from './part-texts.js';

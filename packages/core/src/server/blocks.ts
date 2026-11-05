@@ -39,6 +39,11 @@ export interface BlockStore<R> {
    * may have (`limit`, Infinity while unknown): what lacks is asked, nearest first, what left is let go.
    */
   want(lo: number, hi: number, keep: readonly number[], limit: number): void;
+  /**
+   * The same for blocks that are not one run (the server-side model's levels, ids of its own): `order` the blocks wanted,
+   * the most wanted first; `keep` held besides; `near` where the window is (requests running farthest from it give way).
+   */
+  take(order: readonly number[], keep: readonly number[], near: number): void;
   /** A block's rows arrived: held, then the cache trimmed to `max` and the next asked. */
   answered(n: number, rows: readonly R[]): void;
   /** A block's request failed: rows kept if it had some (asked again), else the block fails; `hard`: its rows let go too. */
@@ -118,7 +123,6 @@ export function createBlockStore<R>(o: BlockStoreOptions): BlockStore<R> {
     want(lo, hi, keep, limit) {
       if (lo !== lastLo) dir = lo > lastLo ? 1 : -1;
       lastLo = lo;
-      tick++;
       // The kept ones first (the focused row: where the user looks), the window in the scroll's direction, then ahead.
       const order: number[] = [];
       for (let n = lo; n <= hi && n < limit; n++) order.push(n);
@@ -128,8 +132,12 @@ export function createBlockStore<R>(o: BlockStoreOptions): BlockStore<R> {
         const n = dir > 0 ? hi + k : lo - k;
         if (n >= 0 && n < limit) order.push(n);
       }
-      pins = new Set([...order, ...keep]);
-      order.splice(0, order.length, ...new Set(order));
+      this.take(order, keep, lo);
+    },
+    take(want, keep, lo) {
+      tick++;
+      pins = new Set([...want, ...keep]);
+      const order = [...new Set(want)];
       for (const n of keep) {
         const b = blocks.get(n);
         if (b) b.seen = tick;

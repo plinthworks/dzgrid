@@ -9,6 +9,10 @@
 # history: Owner A (2026-11-03, phase-9-steps/decisions.md « Excel export »): the Excel export, additions only — @dzgrid/core/xlsx, ExportRequest.format, ExportTrace.format, XlsxProblemCode, csvExport({ xlsx }), use.xlsx and the optional ContextMenuXlsxKey — @dzgrid/dom/export#ExportFormat, @dzgrid/dom/export#XlsxExportOptions, @dzgrid/dom/export#CsvExport, @dzgrid/dom/export#CsvExportOptions, @dzgrid/dom#msg, @dzgrid/dom#GridMessages, @dzgrid/dom/context-menu#ContextMenuOptions, @dzgrid/dom/context-menu#ContextMenuXlsxKey
 # history: busy bar: two layout lines (owner 2026-11-04) — @dzgrid/dom#LAYOUT_CSS
 # history: 1.4.0 busy part (2026-11-04, overlays.md « The busy part »): SlotContext gains the slot busy, an interface the grid hands out (as status in Phase 9); nothing removed; owner to confirm — @dzgrid/dom#SlotContext
+# history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/range#RangeMessages
+# history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/locales/en-range#EN_RANGE
+# history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/locales/fr-range#FR_RANGE
+# history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/locales/ar-range#AR_RANGE
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -900,6 +904,8 @@
       readonly locale: string;
       readonly text: {
           readonly [K in RangeMessageKey]: MessageValue;
+      } & {
+          readonly [K in RangeLoadKey]?: MessageValue;
       };
   }
 ## RangeOptions
@@ -2275,6 +2281,7 @@
           'range.outside': string;
           'range.tooBig': string;
           'range.noCopy': string;
+          'range.notLoaded': string;
       };
   };
 
@@ -2304,6 +2311,7 @@
           'range.outside': string;
           'range.tooBig': string;
           'range.noCopy': string;
+          'range.notLoaded': string;
       };
   };
 
@@ -2341,6 +2349,7 @@
           'range.outside': string;
           'range.tooBig': string;
           'range.noCopy': string;
+          'range.notLoaded': string;
       };
   };
 

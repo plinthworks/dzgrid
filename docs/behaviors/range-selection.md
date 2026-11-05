@@ -277,6 +277,12 @@ block at most once a frame; nothing is said on its own (the block's size stays w
 by the cell menu's « Lire les totaux ».
 
 ## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D16; owner Q-COPY A — built at step 5)
-A block of cells may cross loading rows. Copy, cut, paste, fill and the status bar's figures over such a block are
-refused, with the sentence « Certaines lignes ne sont pas encore chargées » (`range-not-loaded`, warning); inside rows
-held everything works as today. Ctrl+A with `range()` is a block of every row: its copy is refused above the rows held.
+A block of cells may cross loading rows. Copy, cut, paste and Delete over such a block are refused, with the sentence
+« Certaines lignes ne sont pas encore chargées » (`range.notLoaded` in `locales/<lang>-range`, optional in an
+application's own bundle, required by `range()` beside a list loaded in blocks only) and the problem `rows-not-loaded`
+(warning, path `range`, detail `rows`) — never a file or a paste with holes. The fill takes no such block as its source
+nor its target (nothing filled, as when it cannot act). The status bar's figures are those of the rows held, said
+partial (`status.partial`, as a lazy tree's loading rows already are) — decision of the lead at step 5: a figure is
+never refused, it says what it counts. Inside rows held everything works as today. Ctrl+A with `range()` is a block of
+every row: its size is said from the rows held, its copy refused; every walk of a block (`boxRows`, the figures, the
+copy, the paste and fill plans) reads the rows held only (`@dzgrid/core/range` `boxHeld`), never ten million.

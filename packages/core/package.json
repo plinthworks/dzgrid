@@ -53,6 +53,10 @@
       "types": "./src/infinite.ts",
       "default": "./src/infinite.ts"
     },
+    "./server-side": {
+      "types": "./src/server-side.ts",
+      "default": "./src/server-side.ts"
+    },
     "./edit": {
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"

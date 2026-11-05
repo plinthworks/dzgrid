@@ -1,0 +1,203 @@
+{
+  "id": "ss-typed-keys-and-paths",
+  "suite": "server-side",
+  "description": "1 and '1', a day and an instant of that day, true and null: six groups, six keys (column, type tag, value), each path sent back typed as the server sent it.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "by": [
+        "region"
+      ]
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "groups": [
+          1,
+          "1",
+          "2026-03-04",
+          1772582400000,
+          true,
+          null
+        ],
+        "total": 6
+      },
+      {
+        "expandAll": true
+      },
+      {
+        "want": [
+          0,
+          11
+        ]
+      },
+      {
+        "answer": "c2",
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "answer": "c3",
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "answer": "c4",
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "answer": "c5",
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "answer": "c6",
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "answer": "c7",
+        "rows": 0,
+        "total": 0
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        0
+      ],
+      [
+        "c2",
+        [
+          1
+        ],
+        0
+      ],
+      [
+        "c3",
+        [
+          "1"
+        ],
+        0
+      ],
+      [
+        "c4",
+        [
+          "2026-03-04"
+        ],
+        0
+      ],
+      [
+        "c5",
+        [
+          1772582400000
+        ],
+        0
+      ],
+      [
+        "c6",
+        [
+          true
+        ],
+        0
+      ],
+      [
+        "c7",
+        [
+          null
+        ],
+        0
+      ]
+    ],
+    "changes": [
+      "query",
+      "expand",
+      "rows",
+      "rows",
+      "rows",
+      "rows",
+      "rows",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "shown": [
+        "1+",
+        "1+",
+        "2026-03-04+",
+        "1772582400000+",
+        "true+",
+        "+"
+      ],
+      "keys": [
+        "g:6:region2:n1",
+        "g:6:region2:s1",
+        "g:6:region11:s2026-03-04",
+        "g:6:region14:n1772582400000",
+        "g:6:region5:btrue",
+        "g:6:region0:"
+      ],
+      "totals": [
+        [
+          "1",
+          {
+            "qty": 100
+          }
+        ],
+        [
+          "1",
+          {
+            "qty": 100
+          }
+        ],
+        [
+          "2026-03-04",
+          {
+            "qty": 100
+          }
+        ],
+        [
+          "1772582400000",
+          {
+            "qty": 100
+          }
+        ],
+        [
+          "true",
+          {
+            "qty": 100
+          }
+        ],
+        [
+          "",
+          {
+            "qty": 100
+          }
+        ]
+      ],
+      "by": [
+        "region"
+      ],
+      "aggs": [
+        {
+          "column": "qty",
+          "fn": "sum"
+        }
+      ],
+      "grand": {}
+    },
+    "diagnostics": {
+      "blocks": {
+        "held": 7,
+        "max": 7,
+        "evicted": 0
+      },
+      "levels": 7
+    }
+  }
+}

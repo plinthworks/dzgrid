@@ -1,0 +1,55 @@
+{
+  "id": "ss-custom-aggregation-refused",
+  "suite": "server-side",
+  "description": "A total by an application's function cannot run on the server: refused (agg-type, detail server), never asked; the named totals are.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "by": [
+        "region"
+      ],
+      "aggFuncs": {
+        "qty": {
+          "function": true
+        },
+        "day": "max"
+      }
+    },
+    "steps": []
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        0
+      ]
+    ],
+    "changes": [],
+    "told": [],
+    "final": {
+      "status": "loading",
+      "shown": [],
+      "keys": [],
+      "totals": [],
+      "by": [
+        "region"
+      ],
+      "aggs": [
+        {
+          "column": "day",
+          "fn": "max"
+        }
+      ],
+      "grand": {}
+    },
+    "diagnostics": {
+      "blocks": {
+        "held": 0,
+        "max": 0,
+        "evicted": 0
+      },
+      "levels": 1
+    }
+  }
+}

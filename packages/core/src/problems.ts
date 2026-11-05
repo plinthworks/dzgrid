@@ -80,7 +80,9 @@ export type XlsxProblemCode = 'xlsx-early-day' | 'xlsx-text-cut' | 'xlsx-outline
  */
 export type GroupProblemCode = 'agg-type' | 'agg-threw';
 
-export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | 'print-too-many' | 'unknown-ui-key';
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | 'print-too-many' | 'unknown-ui-key'
+  /** A block of cells over rows a list loaded in blocks does not hold yet: its copy, cut, paste or erase refused (Phase 8). */
+  | 'rows-not-loaded';
 
 export type Severity = 'error' | 'warning';
 

@@ -1,6 +1,7 @@
 import { formattersFor, intentFor, type ChangeSource, type DisplayIndex, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type RowKey, type RowNode } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import { checkRowGroups, groupConflicts, groupShape, type GroupedRows, type GroupingOptions, type GroupShape } from '@dzgrid/core/grouping';
+import type { ServerSideModel } from '@dzgrid/core/server-side';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { GroupMessageKey } from '../part-texts.js';
@@ -86,12 +87,14 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
   // What grouping refuses beside it (row-grouping.md 13, 21): told once. Beside a tree (which took the rows) or on a server it steps aside.
   const has = (id: string): boolean => !!g.settings.features?.some((f) => f.id === id);
   const tree = has('tree');
-  const server = g.rows.kind === 'source';
+  // A list grouped on the server (`serverSideRows`, server-side-groups.md): the model groups, this feature draws and forwards.
+  const side = typeof (g.rows as Partial<ServerSideModel<unknown>>).setBy == 'function' ? (g.rows as ServerSideModel<unknown>) : null;
+  const server = g.rows.kind === 'source' && !side;
   const spans = has('spans');
   const told = groupConflicts({ tree, detail: has('detail'), spans, server });
   if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
   if (!s || tree || server) return s?.off(), { destroy() {} };
-  const shape = s;
+  const shape: Pick<GroupShape<unknown>, 'by' | 'setBy' | 'reads' | 'totals'> = side ? { get by() { return side.by; }, setBy: (by, x) => side.setBy(by, x), reads: () => side.by, totals: () => side.totals() } : s;
   injectTreeStyles(el.root.getRootNode() as Document | ShadowRoot, g.settings.nonce);
 
   const rows = (): Rows | null => {
@@ -118,8 +121,8 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
     const fn = fnOf(col);
     try {
       if (fn === 'count' && col.type !== 'number') return formattersFor(g.ctx).number()(v as number);
-      // The core's totals are typed values; an application's function may give anything the column can read.
-      const x = typeof fn == 'function' ? col.codec.coerce(v, g.ctx) : v;
+      // The core's totals are typed values; an application's function, or a server, may give anything the column can read.
+      const x = typeof fn == 'function' || side ? col.codec.coerce(v, g.ctx) : v;
       return x === null ? (typeof v == 'string' ? v : '') : col.codec.format(x as never, g.ctx);
     } catch {
       return '';
@@ -141,14 +144,22 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
     }
   };
 
+  /** A group opened on a server: said once its first block is in (its loading row gone), with its children's number. */
+  let wait: RowKey | null = null;
+  const said = (key: RowKey, expanded: boolean): void => {
+    const d = rows();
+    const i = (d ? d.indexOf(key) : -1) as DisplayIndex;
+    const n = i < 0 ? null : d!.nodeAt(i);
+    const next = expanded && i >= 0 && i + 1 < d!.count ? d!.nodeAt((i + 1) as DisplayIndex) : null;
+    wait = next?.kind === 'loading' && next.parent === key ? key : null;
+    if (n?.kind === 'group' && !wait) g.live.announce(expanded ? g.msg('group.expanded', { name: nameOf(n), n: d!.childrenAt(i) }) : g.msg('group.collapsed', { name: nameOf(n) }));
+  };
   // A user's opening or closing, said once (screen readers do not all say aria-expanded): the value, without its count.
   const off = kernel.subscribe((e) => {
+    if (e.type === 'modelUpdated' && wait) said(wait, true);
     if (e.type !== 'rowExpanded' || e.source !== 'user' || !grouped()) return;
-    const d = rows();
     if (e.rows.length > 1) return void (e.expanded && g.live.announce(g.msg('group.expandedSome', { n: e.rows.length })));
-    const i = (d ? d.indexOf(e.rows[0]!) : -1) as DisplayIndex;
-    const n = i < 0 ? null : d!.nodeAt(i);
-    if (n?.kind === 'group') g.live.announce(e.expanded ? g.msg('group.expanded', { name: nameOf(n), n: d!.childrenAt(i) }) : g.msg('group.collapsed', { name: nameOf(n) }));
+    said(e.rows[0]!, e.expanded);
   });
   /** Regroups, told once when the columns changed (grid-state.md « Row grouping » 4): column ids only. */
   const setBy = (by: readonly string[], source: ChangeSource): void => {

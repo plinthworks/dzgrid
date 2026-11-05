@@ -146,6 +146,8 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
   const listeners = new Set<(c: ModelChange<T>) => void>();
   const lists = new Map<string, ReturnType<typeof serverValues<T>>>();
   let reask = false;
+  /** An edit touched a column the server sorts, filters or searches by (K.14): the gate's count then; -1 none. */
+  let staleAt = -1;
   /** No block of this epoch answered yet: the first answer is told as a new query's. */
   let opening = true;
 
@@ -302,7 +304,7 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
       gate.forget?.(ch);
       if (verdict !== null || tickets.get(n) !== ticket) return;
       tickets.delete(n);
-      commit(() => (ok ? answer(n, v, key) : fail(n, v, key)), 'data');
+      commit(() => (ok ? answer(n, v, key, ticket.seq) : fail(n, v, key)), 'data');
     };
     try {
       const r: unknown = data.fetch({ ...parts, key, signal } as DataRequest);
@@ -329,11 +331,13 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
     }
   }
 
-  function answer(n: number, r: unknown, asked: string): void {
+  function answer(n: number, r: unknown, asked: string, seq: number): void {
     const a = readAnswer(r, { index: n, size, cursors: false }, 0);
     answerProblems = a.problems;
     told.push(...a.problems);
     if (!a.rows) return fail(n, a.problems[0], asked);
+    // Asked after the edit: in the server's order again.
+    if (seq > staleAt) staleAt = -1;
     const offset = n * size;
     const rows = a.rows.slice(0, size) as readonly T[];
     // This block's own keys go first: its new rows replace them.
@@ -475,22 +479,27 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
   let batch: [RowTransaction<T>, ((r: TransactionResult) => void) | undefined][] = [];
   let flushing: (() => void) | null = null;
   const flush = (): void => {
+    flushing?.();
     flushing = null;
     const q = batch;
+    if (!q.length || destroyed) return;
     batch = [];
     const out: [RowKey[], boolean, Problem[]][] = [];
     commit(() => {
       let moved = false;
+      const all: RowKey[] = [];
       for (const [t] of q) {
         const u: RowKey[] = [];
         const bad: Problem[] = [];
         const m = take(t, u, bad);
         moved ||= m;
         out.push([u, m, bad]);
-        if (u.length) touch('rows');
+        all.push(...u);
       }
+      if (all.length) touch('rows');
       if (moved) refresh();
       told.push(...out.flatMap((x) => x[2]));
+      tx = { kind: all.length || moved ? 'delta' : 'none', version: 0, added: [], updated: all, removed: [], problems: [] };
     }, 'data');
     q.forEach(([, done], i) => done?.(result(...out[i]!)));
   };
@@ -611,6 +620,15 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
         restart();
       }, source);
     },
+    // Edits (K.14): nothing moves; a column the server sorts, filters or searches by marks the order stale, reapply asks the window again.
+    setReader(_r, changed) {
+      const read = [...(server.sort ?? []).map((s) => s.column), ...Object.keys(wire ?? {}), ...(server.quick?.trim() ? columns.visible().map((c) => c.id) : [])];
+      if (changed ? changed.some((c) => read.includes(c)) : read.length > 0) staleAt = gate.diagnostics.begun;
+    },
+    reapply(source = 'api') {
+      commit(() => void (staleAt >= 0 && (refresh(), mark('order'))), source);
+    },
+    get orderStale() { return staleAt >= 0; },
     applyTransaction(t, source = 'api') {
       const u: RowKey[] = [];
       const bad: Problem[] = [];
@@ -627,8 +645,11 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
     applyTransactionAsync(t, done) {
       if (destroyed) return;
       batch.push([t, done]);
-      if (!env.timer) return flush();
-      flushing ??= env.timer(flush, batchMs);
+      if (!env.timer && !env.frame) return flush();
+      if (batch.length > 1) return;
+      // 50 ms or the next frame, whichever comes first (Q-TX A): the first cancels the other.
+      flushing = env.timer?.(flush, batchMs) ?? null;
+      env.frame?.(flush);
     },
     subscribe(fn) {
       listeners.add(fn);

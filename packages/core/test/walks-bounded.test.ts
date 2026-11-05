@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { createColumnModel, createKernel, dataKey, headerSelection, type DisplayIndex, type DisplayedRows, type RowKey, type RowModel, type RowNode } from '@dzgrid/core';
+import { createColumnModel, createKernel, dataKey, headerSelection, localeCtx, NO_OVERLAY, type DisplayIndex, type DisplayedRows, type RowKey, type RowModel, type RowNode } from '@dzgrid/core';
 import { setSelectionGate } from '@dzgrid/core/internal';
+import { boxHeld, boxRows, boxSize, rangeStats } from '@dzgrid/core/range';
 
 /**
  * Phase 8 step 2 (D15): a list loaded in blocks shows ten million rows and holds a few hundred. Every place of the core
@@ -72,5 +73,31 @@ describe('every walk of the core is bounded by the rows held (planted 10⁷ rows
     expect(p.calls()).toBeLessThan(10_000);
     expect(kernel.dispatch({ type: 'selection.range', target: dataKey('r50')!, additive: false }, 'user').ok).toBe(true);
     expect(kernel.selection.keys.size).toBe(51);
+  });
+});
+
+describe('the block of cells reads the rows held (Phase 8 step 5, range-selection.md « A list loaded in blocks »)', () => {
+  const box = (top: number, bottom: number) => ({ top, bottom, start: 0, end: 0 });
+  const cols = createColumnModel<R>([{ id: 'id' }]).visible();
+  const ctx = localeCtx({ locale: 'en-US' });
+  it('every row of the whole list (Ctrl+A): its rows, its size and its figures from the rows held, never ten million', () => {
+    const p = planted();
+    p.reset();
+    const all = box(0, N - 1);
+    expect(boxHeld(all, p.d)).toBe(false);
+    expect(boxRows(all, p.d).map((n) => n.id)).toHaveLength(200);
+    expect(boxSize(all, p.d)).toEqual({ rows: 200, cols: 1, cells: 200 });
+    const s = rangeStats(all, p.d, cols, { ctx, reader: NO_OVERLAY as never }); // never: the reader of no edits, typed for any row
+    expect(s.filled).toBe(200);
+    expect(s.partial).toBe(true);
+    expect(p.calls()).toBeLessThan(10_000);
+  });
+
+  it('a box inside the rows held is held; one past their end is not', () => {
+    const p = planted();
+    expect(boxHeld(box(10, 99), p.d)).toBe(true);
+    expect(boxHeld(box(5_000_000, 5_000_099), p.d)).toBe(true);
+    expect(boxHeld(box(90, 100), p.d)).toBe(false);
+    expect(rangeStats(box(10, 19), p.d, cols, { ctx, reader: NO_OVERLAY as never }).partial).toBe(false); // never: as above
   });
 });

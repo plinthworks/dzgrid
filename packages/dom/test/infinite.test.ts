@@ -16,6 +16,15 @@ import { rowGaps } from '../src/row-gaps.js';
 import { spans } from '../src/spans.js';
 import { tree } from '../src/tree.js';
 import { preparePrint } from '../src/print.js';
+import { range } from '../src/range.js';
+import { csvExport, type CsvExportOptions } from '../src/export.js';
+import { edit } from '../src/edit.js';
+import { EN_RANGE } from '../src/locales/en-range.js';
+import { EN_EXPORT } from '../src/locales/en-export.js';
+import { EN_EDIT } from '../src/locales/en-edit.js';
+import { EN_FILL } from '../src/locales/en-fill.js';
+import { fill } from '../src/fill.js';
+import type { GridContext } from '../src/context.js';
 
 type R = { id: string; name: string };
 let grids: GridInstance<R, any>[] = []; // any: the grid's second parameter (its features) is not under test
@@ -35,7 +44,7 @@ const geometry = (): Geometry => {
 const columns: ColumnDef<R, any>[] = [{ id: 'name' }, { id: 'id' }]; // any: the column's value type is not under test
 
 /** A server of `total` rows (null: it says only whether more follow), answered by the test, call by call. */
-function server(total: number | null, o: { features?: unknown[]; options?: object; settings?: object } = {}) {
+function server(total: number | null, o: { features?: unknown[]; options?: object; settings?: object; env?: object } = {}) {
   const calls: { req: DataRequest; ok(v: unknown): void; no(e: unknown): void }[] = [];
   const source: DataSource<R> = {
     // A thenable answered by the test: never a real promise, so answers land synchronously.
@@ -46,7 +55,7 @@ function server(total: number | null, o: { features?: unknown[]; options?: objec
   const events: GridEvent<R>[] = [];
   const settings = { source: infiniteRows(source, { blockSize: 10, ...o.options }), getRowId: (r: R) => r.id, columns, messages: { locale: EN.locale, text: { ...EN.text, ...EN_FIND.text, ...EN_TREE.text, ...EN_PAGINATION.text, ...EN_PRINT.text } }, rowHeight: 40, onEvent: (e: GridEvent<R>) => events.push(e), ...(o.features && { features: o.features }), ...o.settings };
   // never: a server's settings without its query type; the instance's `scroll` (a test handle) is not in GridInstance's type
-  const g = createGrid<R>(host, settings as never, { geometry: geometry(), sync: true }) as GridInstance<R, any> & { scroll: { readonly logicalTop: number; scrollTo(l: number): void } };
+  const g = createGrid<R>(host, settings as never, { geometry: geometry(), sync: true, ...o.env }) as GridInstance<R, any> & { scroll: { readonly logicalTop: number; scrollTo(l: number): void } };
   grids.push(g);
   const answer = (c: (typeof calls)[number], rows?: number) => {
     const { offset, size } = c.req.page!;
@@ -224,5 +233,130 @@ describe('infinite scroll: every walk bounded, combinations refused (D15, D17)',
     t.answer(t.calls[0]!);
     t.g.kernel.dispatch({ type: 'query.set', query: makeQuery({ quick: 'n1' }) } as never, 'api'); // the query command's shape is the kernel's, not under test
     expect(t.calls.at(-1)!.req.quick ?? 'n1').toBe('n1');
+  });
+});
+
+describe('infinite scroll: step 5 — the block of cells, exports, edits, live updates (D11, D16)', () => {
+  const texts = { locale: EN.locale, text: { ...EN.text, ...EN_RANGE.text, ...EN_EXPORT.text, ...EN_EDIT.text, ...EN_FILL.text } };
+  const ctxOf = (g: unknown) => (g as { context: GridContext<unknown> }).context;
+  const told = (t: ReturnType<typeof server>) => t.events.flatMap((e) => (e.type === 'problems' ? e.problems.map((p) => `${p.code} ${p.severity} ${p.path}`) : []));
+
+  it('a block of cells across rows not loaded: copy, cut, paste and erase refused (rows-not-loaded), said; inside the rows held it copies', () => {
+    const blocks = range();
+    const t = server(1000, { features: [blocks], settings: { messages: texts } });
+    t.answer(t.calls[0]!);
+    const said = vi.spyOn(ctxOf(t.g).live, 'announce');
+    const api = blocks.api(t.g)!;
+    expect(api.set({ anchor: { row: dataKey('r2')!, column: 'name' }, focus: { row: 'l:#15' as RowKey, column: 'id' } })).toBe(true);
+    expect(api.copy()).toBeNull();
+    expect(api.cut()).toBeNull();
+    expect(api.paste('a\tb')).toBeNull();
+    expect(api.erase()).toBeNull();
+    expect(told(t).filter((x) => x.startsWith('rows-not-loaded'))).toEqual(Array(4).fill('rows-not-loaded warning range'));
+    expect(said.mock.calls.map((c) => c[0])).toEqual(Array(4).fill('Some rows are not loaded yet'));
+    expect(t.events.some((e) => e.type === 'rangeCopied')).toBe(false);
+    // The block answered: the same block copies.
+    t.answer(t.block(1));
+    expect(api.set({ anchor: { row: dataKey('r2')!, column: 'name' }, focus: { row: dataKey('r15')!, column: 'id' } })).toBe(true);
+    expect(api.copy()!.text.split('\r\n').filter(Boolean)).toHaveLength(14);
+  });
+
+  it('the fill: a target or a block over rows not loaded fills nothing (never with holes); inside the rows held it fills', () => {
+    const saves: unknown[] = [];
+    const blocks = range();
+    const f = fill(blocks);
+    const t = server(1000, { features: [blocks, f, edit({ save: (c) => (saves.push(c), Promise.resolve()) })], settings: { messages: texts, columns: [{ id: 'name', editable: true }, { id: 'id' }] } });
+    t.answer(t.calls[0]!);
+    const fa = f.api(t.g as never)!; // never: the grid's row type against the feature's own
+    blocks.api(t.g)!.set({ anchor: { row: dataKey('r2')!, column: 'name' }, focus: { row: dataKey('r3')!, column: 'name' } });
+    expect(fa.fill({ row: 'l:#14' as RowKey, column: 'name' })).toBeNull();
+    blocks.api(t.g)!.set({ anchor: { row: dataKey('r2')!, column: 'name' }, focus: { row: 'l:#14' as RowKey, column: 'name' } });
+    expect(fa.down()).toBeNull();
+    expect(fa.apply({ text: 'x' })).toBeNull();
+    blocks.api(t.g)!.set({ anchor: { row: dataKey('r2')!, column: 'name' }, focus: { row: dataKey('r3')!, column: 'name' } });
+    expect(fa.fill({ row: dataKey('r6')!, column: 'name' })).toMatchObject({ filled: 3 });
+  });
+
+  it('Ctrl+A on ten million rows: its size said from the rows held, its copy refused, both fast', () => {
+    const blocks = range();
+    const t = server(10_000_000, { features: [blocks], settings: { messages: texts } });
+    t.answer(t.calls[0]!);
+    const said = vi.spyOn(ctxOf(t.g).live, 'announce');
+    t.g.kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: dataKey('r0')!, column: 'name' } }, 'api');
+    const t0 = performance.now();
+    t.row(0)!.querySelector<HTMLElement>('[data-col=name]')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', code: 'KeyA', ctrlKey: true, bubbles: true }));
+    expect(blocks.api(t.g)!.box()).toMatchObject({ top: 0, bottom: 9_999_999 });
+    vi.advanceTimersByTime(400);
+    expect(said.mock.calls.map((c) => c[0])).toEqual(['10 rows, 2 columns selected']);
+    expect(blocks.api(t.g)!.copy()).toBeNull();
+    expect(performance.now() - t0).toBeLessThan(1000);
+  });
+
+  it('CSV of « displayed »: the rows held, in order, its count said; « all » and « selected » go to exportAll with the server part, no block', async () => {
+    vi.useRealTimers();
+    const delivered: Blob[] = [];
+    const asked: unknown[] = [];
+    const exporter = csvExport({ canExport: true, deliver: (d) => void delivered.push(d.blob!), loadRun: () => import('../src/export/run/index.js'), exportAll: async (r) => void asked.push(r) } as CsvExportOptions);
+    const t = server(1000, { features: [exporter], settings: { messages: texts, selection: { mode: 'multi' } } });
+    t.answer(t.calls[0]!);
+    // Blocks 0 and 1 held, the rest loading: the file has 20 rows.
+    t.answer(t.block(1));
+    expect(await exporter.run('displayed')).toBe('done');
+    const text = await delivered[0]!.text();
+    expect(text.trim().split('\r\n')).toHaveLength(21);
+    expect(text).toContain('n19');
+    expect(t.events.find((e) => e.type === 'exportRequested')).toMatchObject({ count: 20 });
+    expect(await exporter.run('all')).toBe('done');
+    t.g.kernel.dispatch({ type: 'selection.all' }, 'user');
+    expect(await exporter.run('selected')).toBe('done');
+    expect(asked).toHaveLength(2);
+    const [all, sel] = asked as { scope: string; count: number | null; server: Record<string, unknown>; selection?: { mode: string } }[];
+    expect(all).toMatchObject({ scope: 'all', count: 1000 });
+    expect(all!.server).not.toHaveProperty('page');
+    expect(all!.server).not.toHaveProperty('blocks');
+    expect(all!.server).toMatchObject({ params: {}, zone: expect.any(String) });
+    expect(sel).toMatchObject({ scope: 'selected', count: 1000, selection: { mode: 'exclude' } });
+  });
+
+  it('an edit of a row held: saved and shown in place; an edit of the sorted column marks the order stale, reapply asks the window again', async () => {
+    const saves: unknown[] = [];
+    const ed = edit({ save: (c) => (saves.push(c), Promise.resolve()) });
+    const t = server(1000, { features: [ed], settings: { messages: texts, columns: [{ id: 'name', editable: true }, { id: 'id' }] } });
+    t.answer(t.calls[0]!);
+    t.g.kernel.dispatch({ type: 'sort.toggle', column: 'name', multi: false }, 'user');
+    t.answer(t.calls.at(-1)!);
+    // The window's other blocks answered: nothing runs.
+    for (const c of t.calls.slice(-2)) t.answer(c);
+    const ea = ed.api(t.g as never)!; // never: the grid's row type against the feature's own
+    ea.commit([{ key: dataKey('r3')!, column: 'name', input: { text: 'zed' } }]);
+    await Promise.resolve();
+    expect(t.row(3)!.querySelector('[data-col=name]')!.textContent).toBe('zed');
+    expect(t.events.filter((e) => e.type === 'orderStale').map((e) => (e as { stale: boolean }).stale)).toEqual([true]);
+    const n = t.calls.length;
+    ea.reapply();
+    expect(t.calls.slice(n).map((c) => c.req.page!.index)).toContain(0);
+    expect(t.row(3)!.getAttribute('data-kind')).toBeNull();
+    t.answer(t.calls.slice(n).find((c) => c.req.page!.index === 0)!);
+    expect(t.events.filter((e) => e.type === 'orderStale').map((e) => (e as { stale: boolean }).stale)).toEqual([true, false]);
+  });
+
+  it('100 live updates in one async batch on 2 000 rows held: one change, one paint, at the next frame', () => {
+    const frames: FrameRequestCallback[] = [];
+    const raf = { requestAnimationFrame: (f: FrameRequestCallback) => frames.push(f), cancelAnimationFrame: () => {} };
+    let paints = 0;
+    const count = { id: 'count', setup: () => ({ afterRows: () => void paints++, destroy() {} }) };
+    const t = server(10_000, { features: [count], options: { blockSize: 100, maxBlocks: 20 }, env: { raf } });
+    t.answer(t.calls[0]!);
+    for (const c of t.calls.slice(1)) t.answer(c);
+    const m = t.model;
+    const updates = t.events.length;
+    paints = 0;
+    for (let i = 0; i < 100; i++) m.applyTransactionAsync({ update: [{ id: `r${i}`, name: `u${i}` }] });
+    expect(t.events.length).toBe(updates);
+    expect(frames).toHaveLength(1);
+    frames.splice(0).forEach((f) => f(0));
+    expect(t.events.slice(updates).filter((e) => e.type === 'modelUpdated')).toHaveLength(1);
+    expect(paints).toBe(1);
+    expect(t.row(5)!.querySelector('[data-col=name]')!.textContent).toBe('u5');
   });
 });

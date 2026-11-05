@@ -112,6 +112,14 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.filter((f) => isSpans(f) || isCsv(f) || /(^|\/)src\/(tree|detail|grouping)(\.ts$|-lazy\.ts$|\/)/.test(f) || f.endsWith('src/server/rows.ts'))).toEqual([]);
   });
 
+  it('no other entry holds the server-side model; it holds the block store and no tree, span, csv, grouping or infinite module (Phase 8 step 6)', async () => {
+    const isSide = (f: string) => /(^|\/)src\/(server-side\.ts|server\/server-side\.ts)$/.test(f);
+    for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'xlsx.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts', 'edit.ts', 'range.ts', 'state.ts', 'grouping.ts', 'infinite.ts']) expect((await inputsOf(entry)).filter(isSide), entry).toEqual([]);
+    const inputs = await inputsOf('server-side.ts');
+    for (const f of ['src/server/blocks.ts', 'src/server/server-side.ts', 'src/server/gate.ts', 'src/server/shared.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    expect(inputs.filter((f) => isSpans(f) || isCsv(f) || /(^|\/)src\/(tree|detail|grouping)(\.ts$|-lazy\.ts$|\/)/.test(f) || /src\/server\/(rows|infinite)\.ts$/.test(f))).toEqual([]);
+  });
+
   it('no other entry holds a grouping module; the grouping entry holds no tree, detail, server, span or csv module, nor the model (Phase 7 steps 3–4)', async () => {
     const isGrouping = (f: string) => /(^|\/)src\/grouping(\.ts$|\/)/.test(f);
     for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'xlsx.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts', 'edit.ts', 'range.ts', 'state.ts']) expect((await inputsOf(entry)).filter(isGrouping), entry).toEqual([]);
@@ -188,13 +196,13 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts') || f.endsWith('src/csv/chunks.ts'))).toBe(false);
   });
 
-  it('the range entry fits its line over the base (owner Q16 grant 4 000; the Phase 5 close: the measure 2 897 + 10 % = 3 200 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
+  it('the range entry fits its line over the base (owner Q16 grant 4 000; the Phase 5 close: the measure 2 897 + 10 % = 3 200 B gz; Phase 8 step 5: +2 %, 3 264 — the walks bounded by the rows held), measured as check:size measures it; the base gains no byte (types only)', async () => {
     const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './range.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
     const entry = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core/range'];
-    expect(entry).toMatchObject({ file: 'packages/core/src/range.ts', maxGzip: 3200, over: '@dzgrid/core' });
+    expect(entry).toMatchObject({ file: 'packages/core/src/range.ts', maxGzip: 3264, over: '@dzgrid/core' });
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
     // The step's planned share (step10-plan « Sizes »): 2 200–3 000; more is a question, not a failure here.
     expect(both - alone).toBeGreaterThan(500);

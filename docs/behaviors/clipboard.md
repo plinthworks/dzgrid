@@ -273,5 +273,5 @@ of `edit-detail.test.ts` and `editors-paste-pin.test.ts`, the source scan in `ra
 through the events; Arabic; the playground).
 
 ## A list loaded in blocks (Phase 8, owner Q-COPY A — built at step 5)
-See `range-selection.md` « A list loaded in blocks »: a copy or a paste over rows not loaded is refused with its sentence,
-never written with holes.
+See `range-selection.md` « A list loaded in blocks »: a copy, a cut, a paste or Delete over rows not loaded is refused
+with its sentence and `rows-not-loaded`, never written with holes (built at step 5).

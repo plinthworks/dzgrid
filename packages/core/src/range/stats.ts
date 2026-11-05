@@ -2,7 +2,7 @@ import type { ResolvedColumn, ValueReader } from '../columns/defs.js';
 import type { NumberFormatSpec } from '../i18n/format.js';
 import type { DisplayedRows } from '../row/displayed.js';
 import type { LocaleCtx } from '../value/locale.js';
-import type { RangeBox } from './box.js';
+import { boxAt, type RangeBox } from './box.js';
 import { shownValue } from './copy.js';
 
 /**
@@ -30,9 +30,11 @@ export interface RangeStats {
 export function rangeStats<T>(b: RangeBox, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: { readonly ctx: LocaleCtx; readonly reader: ValueReader<T> }): RangeStats {
   const cols = columns.slice(b.start, b.end + 1);
   const seen = new Map<string, NumberFormatSpec>();
-  let cells = 0, filled = 0, numbers = 0, sum = 0, fix = 0, partial = false;
+  let cells = 0, filled = 0, numbers = 0, sum = 0, fix = 0, partial = false, k = b.top;
   let min: number | null = null, max: number | null = null;
-  for (let i = b.top; i <= b.bottom; i++) {
+  // Rows not held (a list loaded in blocks): the figures of those held, said partial.
+  for (const i of boxAt(b, displayed)) {
+    k++;
     const at = displayed.index(i);
     const n = at === null ? null : displayed.nodeAt(at);
     if (n?.kind !== 'data') {
@@ -57,5 +59,5 @@ export function rangeStats<T>(b: RangeBox, displayed: DisplayedRows<T>, columns:
       if (!seen.has(k)) seen.set(k, f);
     }
   }
-  return { cells, filled, numbers, sum: Number.isFinite(sum) ? sum + fix : sum, min, max, partial, formats: [...seen.values()] };
+  return { cells, filled, numbers, sum: Number.isFinite(sum) ? sum + fix : sum, min, max, partial: partial || k <= b.bottom, formats: [...seen.values()] };
 }

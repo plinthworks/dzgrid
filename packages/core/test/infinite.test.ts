@@ -456,6 +456,73 @@ describe('infiniteRows: transactions (D11)', () => {
   });
 });
 
+describe('infiniteRows: step 5 — the frame, edits (D11, K.14)', () => {
+  it('async: the next frame flushes before batchMs when it comes first; the 50 ms timer then does nothing', () => {
+    const frames: (() => void)[] = [];
+    const { fake, model, answer, changes, timers } = setup({ ahead: 0 }, { frame: (fn) => void frames.push(fn) });
+    answer(fake.calls[0]!, { total: 30 });
+    model.want(0, 9);
+    changes.length = 0;
+    const done: string[] = [];
+    model.applyTransactionAsync({ update: [{ id: 'r1', name: 'a' }] }, (r) => done.push(r.kind));
+    model.applyTransactionAsync({ update: [{ id: 'r2', name: 'b' }] }, (r) => done.push(r.kind));
+    expect(frames).toHaveLength(1);
+    expect(changes).toEqual([]);
+    frames.shift()!();
+    expect(changes.map((c) => c.kind)).toEqual(['rows']);
+    // The change lists every key the batch updated (what fresh-rows flashes).
+    expect(changes[0]!.transaction?.updated).toEqual([dataKey('r1'), dataKey('r2')]);
+    expect(done).toEqual(['delta', 'delta']);
+    for (const t of timers.splice(0)) if (!t.off) t.fn();
+    expect(changes).toHaveLength(1);
+    // A new batch asks a new frame.
+    model.applyTransactionAsync({ update: [{ id: 'r3', name: 'c' }] });
+    expect(frames).toHaveLength(1);
+  });
+
+  it('an edit of a column the server sorts by marks the order stale; reapply asks the window again, rows kept; its answer ends it', () => {
+    const { fake, model, answer, changes } = setup({ ahead: 0, maxBlocks: 10 });
+    answer(fake.calls[0]!, { total: 30 });
+    model.setQuery(makeQuery({ sort: [{ column: 'name', dir: 'asc' }] }));
+    answer(fake.calls.at(-1)!, { total: 30 });
+    model.want(0, 9);
+    const reader = { version: 1, overlay: true, value: () => 'x' };
+    model.setReader!(reader as never, ['other']); // never: a reader of the test's own shape
+    expect(model.orderStale).toBe(false);
+    model.setReader!(reader as never, ['name']); // never: as above
+    expect(model.orderStale).toBe(true);
+    const asked = fake.calls.length;
+    changes.length = 0;
+    model.reapply!('user');
+    expect(fake.calls).toHaveLength(asked + 1);
+    expect(fake.calls.at(-1)!.req.page!.index).toBe(0);
+    expect(model.displayed.nodeAt(model.displayed.index(3)!).kind).toBe('data');
+    expect(model.status.phase).toBe('loading');
+    expect(model.orderStale).toBe(true);
+    answer(fake.calls.at(-1)!, { total: 30 });
+    expect(model.orderStale).toBe(false);
+    expect(model.status.phase).toBe('idle');
+  });
+
+  it('a filter or the search the server runs reads the edited column too; with nothing applied an edit marks nothing', () => {
+    const { fake, model, answer } = setup({ ahead: 0 });
+    answer(fake.calls[0]!, { total: 30 });
+    const reader = { version: 1, overlay: true, value: () => 'x' };
+    model.setReader!(reader as never); // never: a reader of the test's own shape
+    expect(model.orderStale).toBe(false);
+    model.setQuery(makeQuery({ quick: 'n1' }));
+    answer(fake.calls.at(-1)!, { total: 30 });
+    model.setReader!(reader as never, ['name']); // never: as above
+    expect(model.orderStale).toBe(true);
+    // A reapply with nothing stale asks nothing.
+    model.setQuery(makeQuery({}));
+    answer(fake.calls.at(-1)!, { total: 30 });
+    const asked = fake.calls.length;
+    model.reapply!();
+    expect(fake.calls).toHaveLength(asked);
+  });
+});
+
 describe('infiniteRows: hold, source, destroy', () => {
   it('a held model asks nothing until the hold ends: one request then', () => {
     const fake = fakeSource();

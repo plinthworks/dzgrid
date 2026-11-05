@@ -19,5 +19,6 @@ export const AR_RANGE = {
     'range.outside': "؛ خارج الجدول: {n}",
     'range.tooBig': "اللصق أكبر من {max} خلية؛ لم يُلصق شيء",
     'range.noCopy': "النسخ ممنوع",
+    'range.notLoaded': "بعض الصفوف لم تُحمَّل بعد",
   },
 } satisfies RangeMessages;

@@ -452,6 +452,8 @@
     overflow: visible;
   }
   .dzg-retry {
+    position: relative;
+    z-index: 1;
     min-block-size: var(--dzg-target-min, 24px);
     margin-inline-start: 0.25rem;
     padding-block: 0;

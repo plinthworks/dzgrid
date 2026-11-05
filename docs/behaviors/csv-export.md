@@ -149,5 +149,6 @@ Numbered (step 7, 2026-11-05; each one a test, `conformance/cases/csv/group-*`, 
 ## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D15–D16; owner Q-EX A)
 `displayed` writes the rows held, in order (what the user has scrolled through, at most `maxBlocks × blockSize`): the
 walk reads `DisplayedRows.held`, never ten million positions, and loading rows are never written. `all` and `selected`
-go to the host's `exportAll` with the server's part of the query, as server pages (step 5 adds the request's note of
-it). Built: the bounded walk (step 4); the rest at step 5.
+go to the host's `exportAll` with the server's part of the query, as server pages (no page, no `blocks`; `count` the
+query's). The request's and the event's `count` for `displayed` is the number of rows held written. The same for Excel
+(the same request). Built: the bounded walk (step 4), the rest checked at step 5.

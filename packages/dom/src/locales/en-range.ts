@@ -19,5 +19,6 @@ export const EN_RANGE = {
     'range.outside': "; outside the grid: {n}",
     'range.tooBig': "Paste too large: at most {max} cells; nothing pasted",
     'range.noCopy': "Copying not allowed",
+    'range.notLoaded': "Some rows are not loaded yet",
   },
 } satisfies RangeMessages;

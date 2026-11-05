@@ -1,4 +1,4 @@
-import { dataKey, groupKey, assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
+import { dataKey, groupKey, type RowKey, assignKeys, parseDay, readInstant, zoneDayBounds, epochDayToDay, dayToEpochDay, localeCtx, readNumber, formattersFor, instantCodec, createColumnModel, NO_OVERLAY, fold, clientRows, makeQuery, PrefixSums, variableRowLayout, scrollMapper, visibleWindow, MAX_PHYSICAL, type SortItem, type FilterModel } from '../packages/core/src/index.js';
 import { createRowStore, sortIndices, compileFilter, filterIndices, compileQuick, ColumnCache, filterKindLookup, flatDisplayed } from '../packages/core/src/internal.js';
 import { toWire, createGate } from '../packages/core/src/server.js';
 import { buildSpanMap } from '../packages/core/src/spans.js';
@@ -7,6 +7,7 @@ import { treeShape } from '../packages/core/src/tree.js';
 import { detailShape, sparseRowLayout } from '../packages/core/src/detail.js';
 import { groupShape } from '../packages/core/src/grouping.js';
 import { infiniteRows, type InfiniteModel } from '../packages/core/src/infinite.js';
+import { serverSideRows, type ServerSideModel } from '../packages/core/src/server-side.js';
 import { treeProfile, type TreeRow as MRow } from './profiles/tree.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
@@ -22,7 +23,7 @@ export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly 
  */
 type IRow = { readonly id: number; readonly v: number };
 const TEN_M = 10_000_000;
-function infiniteModel(o: { hold?: boolean } = {}): { m: InfiniteModel<IRow>; release: () => void } {
+function infiniteModel(o: { hold?: boolean; timer?: (fn: () => void, ms: number) => () => void } = {}): { m: InfiniteModel<IRow>; release: () => void } {
   const waiting: (() => void)[] = [];
   const reply = (offset: number, size: number) => ({ rows: Array.from({ length: Math.min(size, TEN_M - offset) }, (_, j) => ({ id: offset + j, v: (offset + j) % 97 })), total: TEN_M });
   const m = infiniteRows<IRow>({
@@ -31,7 +32,7 @@ function infiniteModel(o: { hold?: boolean } = {}): { m: InfiniteModel<IRow>; re
       if (!o.hold) return reply(p.offset, p.size);
       return { then: (ok: (v: unknown) => void) => void waiting.push(() => ok(reply(p.offset, p.size))) } as never; // a thenable the case settles
     },
-  }).create({ getRowId: (r) => r.id, columns: createColumnModel<IRow>([{ id: 'v', type: 'number' }]), ctx: localeCtx({ locale: 'fr-FR' }) }) as InfiniteModel<IRow>;
+  }).create({ getRowId: (r) => r.id, columns: createColumnModel<IRow>([{ id: 'v', type: 'number' }]), ctx: localeCtx({ locale: 'fr-FR' }), ...(o.timer && { timer: o.timer }) }) as InfiniteModel<IRow>;
   return { m, release: () => { for (const f of waiting.splice(0)) f(); } };
 }
 /** 10 000 windows of 60 rows: one in four a jump anywhere, the others a scroll of 0 to 3 rows (a fixed seed). */
@@ -266,7 +267,94 @@ export const CASES: Record<string, Case> = {
   ...csvCases(),
   ...groupCases(),
   ...infiniteCases(),
+  ...serverSideCases(),
 };
+
+/**
+ * Phase 8 step 6 (server-side-groups.md, plan §4 « Time »): a server grouped by one column. The server answers when the case
+ * says (a thenable it settles), so what is timed is the model's work: the flatten, a group's first block landing, the
+ * windows through a group of 10⁶ rows.
+ */
+type SRow = { readonly id: number; readonly g: string; readonly v: number };
+function serverSideModel(o: { groups: number; leaves: number; maxBlocks?: number }) {
+  const waiting: (() => void)[] = [];
+  const m = serverSideRows<SRow>({
+    fetch: (req) => {
+      const p = req.page!;
+      const path = req.group!.path;
+      const reply = path.length
+        ? { rows: Array.from({ length: Math.max(0, Math.min(p.size, o.leaves - p.offset)) }, (_, j) => ({ id: p.offset + j + 1e7 * Number(String(path[0]).slice(1)), g: String(path[0]), v: j })), total: o.leaves }
+        : { groups: Array.from({ length: Math.max(0, Math.min(p.size, o.groups - p.offset)) }, (_, j) => ({ value: `g${p.offset + j}`, count: o.leaves, aggs: { v: 1 } })), total: o.groups };
+      return { then: (ok: (v: unknown) => void) => void waiting.push(() => ok(reply)) } as never; // a thenable the case settles
+    },
+  }, { by: ['g'], maxBlocks: o.maxBlocks ?? 20 }).create({ getRowId: (r) => r.id, columns: createColumnModel<SRow>([{ id: 'g' }, { id: 'v', type: 'number', aggFunc: 'sum' }]), ctx: localeCtx({ locale: 'fr-FR' }) }) as ServerSideModel<SRow>;
+  const release = (): void => {
+    while (waiting.length) for (const f of waiting.splice(0)) f();
+  };
+  return { m, release };
+}
+function serverSideCases(): Record<string, Case> {
+  return {
+    // 1 000 top groups, 50 of them open with their first block held: one flatten (a group opened).
+    'server-side flatten: 1 000 top groups, 50 open (one opened more)': {
+      setup: () => {
+        const { m, release } = serverSideModel({ groups: 1000, leaves: 30, maxBlocks: 200 });
+        for (let b = 0; b < 10; b++) (m.want(b * 100, b * 100 + 99), release());
+        const keys = Array.from({ length: 51 }, (_, k) => groupKey(['g', `sg${k * 19}`]));
+        m.expand(keys.slice(0, 50), true);
+        for (let k = 0; k < 50; k++) {
+          const i = m.displayed.indexOf(keys[k]!);
+          m.want(i, i + 1);
+          release();
+        }
+        return { m, last: keys[50]! };
+      },
+      run: (x: { m: ServerSideModel<SRow>; last: RowKey }) => {
+        x.m.expand([x.last], true);
+        if (x.m.displayed.count !== 1000 + 50 * 30 + 1) throw new Error(`count ${x.m.displayed.count}`);
+        return x.m.diagnostics.flattens;
+      },
+    },
+    // A group of 10⁶ rows opened: from its first block's answer to its rows shown (plan: ≤ 30 ms).
+    'server-side open a group of 10⁶ rows: its first block in (answer to rows shown)': {
+      setup: () => {
+        const h = serverSideModel({ groups: 3, leaves: 1_000_000 });
+        h.release();
+        h.m.expand([groupKey(['g', 'sg1'])], true);
+        h.m.want(0, 40);
+        return h;
+      },
+      run: (h: ReturnType<typeof serverSideModel>) => {
+        h.release();
+        const d = h.m.displayed;
+        if (d.nodeAt(d.index(2)!).kind !== 'data' || d.count !== 3 + 1_000_000) throw new Error(`count ${d.count}`);
+        return d.count;
+      },
+    },
+    // Through a group of 10⁶ rows to its end, 1 000 windows, every block answered: never more than maxBlocks held.
+    'server-side 10⁶-row group: 1 000 windows to its end, blocks held checked ≤ maxBlocks at each': {
+      setup: () => {
+        const h = serverSideModel({ groups: 1, leaves: 1_000_000 });
+        h.release();
+        h.m.expand([groupKey(['g', 'sg0'])], true);
+        h.m.want(0, 40);
+        h.release();
+        return h;
+      },
+      run: (h: ReturnType<typeof serverSideModel>) => {
+        for (let k = 1; k <= 1000; k++) {
+          const at = Math.min(1_000_000 - 40, k * 1000);
+          h.m.want(at, at + 40);
+          h.release();
+          if (h.m.diagnostics.blocks.held > 21) throw new Error(`held ${h.m.diagnostics.blocks.held}`);
+        }
+        const d = h.m.displayed;
+        if (d.nodeAt(d.index(d.count - 1)!).kind !== 'data') throw new Error('end not shown');
+        return h.m.diagnostics.blocks.max;
+      },
+    },
+  };
+}
 
 function infiniteCases(): Record<string, Case> {
   const seen = windows();
@@ -294,6 +382,25 @@ function infiniteCases(): Record<string, Case> {
         let n = 0;
         for (const at of seen) for (let i = at; i < at + 60; i++) n += d.nodeAt(d.index(i)!).level;
         return n;
+      },
+    },
+    // Step 5 (row-transactions-async.md): 100 live updates gathered in one batch over 2 000 rows held — one change.
+    'infinite async batch: 100 updates on 2 000 rows held, one change': {
+      setup: () => {
+        const fire: (() => void)[] = [];
+        const { m } = infiniteModel({ timer: (fn) => (fire.push(fn), () => {}) });
+        for (let b = 0; b < 20; b++) m.want!(b * 100, b * 100 + 59);
+        let changes = 0;
+        let updated = 0;
+        m.subscribe((c) => void (changes++, (updated = c.transaction?.updated.length ?? 0)));
+        return { m, fire, changes: () => changes, updated: () => updated };
+      },
+      run: (x: { m: InfiniteModel<IRow>; fire: (() => void)[]; changes: () => number; updated: () => number }) => {
+        const before = x.changes();
+        for (let i = 0; i < 100; i++) x.m.applyTransactionAsync({ update: [{ id: 100 + i * 20, v: i }] });
+        for (const f of x.fire.splice(0)) f();
+        if (x.changes() !== before + 1 || x.updated() !== 100 || x.m.diagnostics.blocks.held !== 20) throw new Error(`changes ${x.changes() - before}, updated ${x.updated()}`);
+        return x.changes();
       },
     },
     // A sort with 20 blocks held and 2 running: nothing of the old epoch left, block 0 asked in the same call.

@@ -50,6 +50,9 @@
       "@dzgrid/core/infinite": [
         "./packages/core/src/infinite.ts"
       ],
+      "@dzgrid/core/server-side": [
+        "./packages/core/src/server-side.ts"
+      ],
       "@dzgrid/core/edit": [
         "./packages/core/src/edit.ts"
       ],

@@ -13,8 +13,9 @@ import { AR } from '../src/locales/ar.js';
 const BUNDLES = { en: [EN, EN_RANGE], fr: [FR, FR_RANGE], ar: [AR, AR_RANGE] } as const;
 
 describe('range texts', () => {
-  it('RANGE_KEYS are each bundle\'s keys, all of them', () => {
-    for (const [lang, [, b]] of Object.entries(BUNDLES)) expect(Object.keys(b.text).sort(), lang).toEqual([...RANGE_KEYS].sort());
+  it('RANGE_KEYS are each bundle\'s keys, all of them, and the optional sentence of rows not loaded (Phase 8)', () => {
+    for (const [lang, [, b]] of Object.entries(BUNDLES)) expect(Object.keys(b.text).sort(), lang).toEqual([...RANGE_KEYS, 'range.notLoaded'].sort());
+    expect([EN_RANGE, FR_RANGE, AR_RANGE].map((b) => b.text['range.notLoaded'])).toEqual(['Some rows are not loaded yet', 'Certaines lignes ne sont pas encore chargées', 'بعض الصفوف لم تُحمَّل بعد']);
   });
 
   it('the size sentence in each language, with the plural forms', () => {

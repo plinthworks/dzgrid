@@ -88,7 +88,8 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
         // grouping's own setup, listed after this feature (review 2026-11-05); a grid without grouping never reads it.
         get rowGroups() { return g.rowGroups ?? later; },
       };
-      const later = { get: () => undefined as never, set: (raw: unknown) => ((g.rowGroupsLater = raw), []) };
+      // A list grouped on the server takes it now, in this restore's one request (server-side-groups.md); the grouping's setup checks it.
+      const later = { get: () => undefined as never, set: (raw: unknown) => ((g.rowGroupsLater = raw), Array.isArray(raw) && (g.rows as { setBy?(by: unknown[]): void }).setBy?.(raw), []) };
       let quiet = false;
       let source: ChangeSource;
       let cancel = (): void => {};

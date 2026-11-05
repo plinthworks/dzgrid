@@ -26,6 +26,9 @@ export async function serverPart(g: GridContext<unknown>): Promise<ServerPart> {
   if (s.filter) parts.filter = toWire(s.filter, { ctx: g.ctx, columns: g.columns, now: (g.settings.clock ?? Date.now)(), ...(kinds && { kinds: filterKindLookup(kinds).get }) }).filter;
   if (s.quick !== undefined) parts.quick = s.quick;
   if (s.sort) parts.sort = s.sort;
+  // Grouped on the server (`serverSideRows`): the groups and totals asked, without a block (server-side-groups.md).
+  const gp = (M as { group?: ServerPart['group'] | null }).group;
+  if (gp) parts.group = gp;
   return { ...parts, key: canonical(parts) } as ServerPart;
 }
 

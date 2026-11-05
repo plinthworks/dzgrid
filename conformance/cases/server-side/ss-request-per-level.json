@@ -1,0 +1,144 @@
+{
+  "id": "ss-request-per-level",
+  "suite": "server-side",
+  "description": "Each level is asked with the typed values of the open groups from the top: groups while the path is shorter than the columns, the rows at the last level.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "by": [
+        "region",
+        "day"
+      ]
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "groups": [
+          "Nord",
+          "Sud"
+        ],
+        "total": 2
+      },
+      {
+        "open": [
+          "Nord"
+        ]
+      },
+      {
+        "want": [
+          0,
+          2
+        ]
+      },
+      {
+        "answer": "c2",
+        "groups": [
+          "2026-03-04"
+        ],
+        "total": 1
+      },
+      {
+        "open": [
+          "03/04/2026"
+        ]
+      },
+      {
+        "want": [
+          0,
+          3
+        ]
+      },
+      {
+        "answer": "c3",
+        "rows": 2,
+        "total": 2
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        0
+      ],
+      [
+        "c2",
+        [
+          "Nord"
+        ],
+        0
+      ],
+      [
+        "c3",
+        [
+          "Nord",
+          "2026-03-04"
+        ],
+        0
+      ]
+    ],
+    "changes": [
+      "query",
+      "expand",
+      "rows",
+      "expand",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "shown": [
+        "Nord+",
+        "03/04/2026+",
+        "Nord/2026-03-04#0",
+        "Nord/2026-03-04#1",
+        "Sud"
+      ],
+      "keys": [
+        "g:6:region5:sNord",
+        "g:6:region5:sNord3:day11:s2026-03-04",
+        "g:6:region4:sSud"
+      ],
+      "totals": [
+        [
+          "Nord",
+          {
+            "qty": 100
+          }
+        ],
+        [
+          "03/04/2026",
+          {
+            "qty": 100
+          }
+        ],
+        [
+          "Sud",
+          {
+            "qty": 100
+          }
+        ]
+      ],
+      "by": [
+        "region",
+        "day"
+      ],
+      "aggs": [
+        {
+          "column": "qty",
+          "fn": "sum"
+        }
+      ],
+      "grand": {}
+    },
+    "diagnostics": {
+      "blocks": {
+        "held": 3,
+        "max": 3,
+        "evicted": 0
+      },
+      "levels": 3
+    }
+  }
+}

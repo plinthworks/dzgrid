@@ -22,10 +22,26 @@ export function rangeBox(r: CellRange, displayed: DisplayedRows<unknown>, column
   return a < 0 || f < 0 || c < 0 || d < 0 ? null : { top: Math.min(a, f), bottom: Math.max(a, f), start: Math.min(c, d), end: Math.max(c, d) };
 }
 
+/**
+ * The positions of a box's rows to read, in order: a list loaded in blocks gives its rows held only (Phase 8 D15: Ctrl+A
+ * on ten million rows reads a few thousand).
+ */
+export function* boxAt(b: RangeBox, d: DisplayedRows<unknown>): Generator<number> {
+  if (d.held) for (const i of d.held()) i >= b.top && i <= b.bottom && (yield i);
+  else for (let i = b.top; i <= b.bottom; i++) yield i;
+}
+
+/** Whether every row of a box is there: a list loaded in blocks may hold some of them only (range-selection.md). */
+export function boxHeld(b: RangeBox, d: DisplayedRows<unknown>): boolean {
+  let n = b.top;
+  for (const _ of boxAt(b, d)) n++;
+  return n > b.bottom;
+}
+
 /** The data rows of a box in display order: details, fillers and loading rows count for nothing (R2, D11). */
 export function boxRows<T>(b: RangeBox, displayed: DisplayedRows<T>): DataNode<T>[] {
   const out: DataNode<T>[] = [];
-  for (let i = b.top; i <= b.bottom; i++) {
+  for (const i of boxAt(b, displayed)) {
     const at = displayed.index(i);
     const n = at === null ? null : displayed.nodeAt(at);
     if (n?.kind === 'data') out.push(n);

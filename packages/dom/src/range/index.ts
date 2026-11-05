@@ -1,10 +1,10 @@
 import { intentFor, type CellAddr, type CellRange, type DisplayedRows, type FocusPos, type GridKernel, type KeyOwner, type Problem, type ResolvedColumn, type RowKey } from '@dzgrid/core';
 import { emit, isCellKey } from '@dzgrid/core/internal';
-import { boxRows, boxSize, copyMatrix, decodeTsv, encodeTsv, PASTE_MAX, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
+import { boxHeld, boxRows, boxSize, copyMatrix, decodeTsv, encodeTsv, PASTE_MAX, planPaste, rangeBox, type PlannedCell, type RangeBox } from '@dzgrid/core/range';
 import type { EditApi } from '../edit/index.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import { ownerOf } from '../keys/owner.js';
-import type { RangeMessageKey } from '../part-texts.js';
+import type { RangeLoadKey, RangeMessageKey } from '../part-texts.js';
 import type { Frame, RowView } from '../render/rows.js';
 import { setAttr } from '../render/write.js';
 import { tableOf } from './clip.js';
@@ -122,13 +122,14 @@ export function range(o: RangeOptions = {}): RangeFeature {
     id: 'range',
     api: (grid) => apis.get(grid.kernel) ?? null,
     setup(g) {
-      const missing = RANGE_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
+      // Beside a list loaded in blocks, the sentence of a block over rows not loaded too (Phase 8).
+      const missing = [...RANGE_KEYS, ...(g.rows.want ? ['range.notLoaded' as const] : [])].filter((key) => g.settings.messages.text[key] === undefined);
       if (missing.length) throw new TypeError(`range: missing ${missing.join(', ')}`);
       const { kernel, rows, columns } = g;
       g.multi = true;
       let hush = (): void => {};
       /** One sentence in the grid's polite region. */
-      const speak = (key: RangeMessageKey | 'announce.error', p?: Readonly<Record<string, string | number>>): void => g.live.announce(g.msg(key, p));
+      const speak = (key: RangeMessageKey | RangeLoadKey | 'announce.error', p?: Readonly<Record<string, string | number>>): void => g.live.announce(g.msg(key as RangeMessageKey, p));
       /** A problem told (never thrown); false for the API's refusals. */
       const tell = (code: Problem['code'], path: string, detail: string, severity: Problem['severity'] = 'error'): false => (emit(kernel, { type: 'problems', source: 'api', problems: [{ code, severity, path, detail }] }), false);
       /** The visible columns' ids, in reading order. */
@@ -273,6 +274,8 @@ export function range(o: RangeOptions = {}): RangeFeature {
         return s.r ?? (f?.kind === 'cell' && isCellKey(f.row) ? { anchor: f, focus: f } : null);
       };
       const target = (): RangeBox | null => boxOf(where());
+      /** A block over rows a list loaded in blocks does not hold yet: refused, said and told (range-selection.md, Q-COPY A). */
+      const unheld = (b: RangeBox, d: DisplayedRows<unknown>): boolean => !boxHeld(b, d) && (speak('range.notLoaded'), tell('rows-not-loaded', 'range', 'rows', 'warning'), true);
       /** The editors' cap (S5-O5): a whole number ≥ 1; 0 or Infinity none; anything else 1 000. */
       const capOf = (id: string): number => {
         const m = (columns.get(id)?.def.edit as { maxLength?: number } | undefined)?.maxLength;
@@ -320,6 +323,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
         const d = D(where());
         const vis = columns.visible();
         const cols = vis.slice(b.start, b.end + 1);
+        if (unheld(b, d)) return null;
         const z = boxSize(b, d);
         let ok: unknown = 0;
         try {
@@ -343,7 +347,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
       const paste = (text: string, html: string, source: 'user' | 'api'): PasteCounts | null => {
         const at = where();
         const b = boxOf(at);
-        if (!b) return null;
+        if (!b || unheld(b, D(at))) return null;
         const my = ++seq;
         // HTML only, or a plain text over 64 K characters (review 3: counted there before it is decoded): read by the chunk.
         if (text ? text.length <= 1 << 16 : !html) return put(b, text ? decodeTsv(text) : null, text, source, D(at));
@@ -379,7 +383,7 @@ export function range(o: RangeOptions = {}): RangeFeature {
       };
       const erase = (source: 'user' | 'api'): PasteCounts | null => {
         const b = boxOf(s.r);
-        return b && write(clears(b, D(s.r)), 'edit', source, 'range.erased', zero());
+        return b && !unheld(b, D(s.r)) ? write(clears(b, D(s.r)), 'edit', source, 'range.erased', zero()) : null;
       };
       /**
        * Ours (L1): not prevented by the host; the focus — followed into shadow roots (review 1) — in this grid's own root,

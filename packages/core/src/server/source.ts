@@ -1,4 +1,5 @@
 import type { AbortHandle, AbortSignalLike } from '../abort.js';
+import type { AggFuncName } from '../columns/defs.js';
 import type { RowKey } from '../ids.js';
 import type { Json } from '../filter/model.js';
 import type { ModelEnv, SourceBinding, SourceHandle } from '../model/client.js';
@@ -82,12 +83,36 @@ export interface DataRequest {
   readonly page?: PageWindow;
   /** A block of a list loaded as it scrolls (`@dzgrid/core/infinite`): its `page` is the block, by offset. */
   readonly blocks?: true;
+  /** A level of a list grouped on the server (`@dzgrid/core/server-side`, server-side-groups.md): which groups, under which. */
+  readonly group?: GroupPart;
   readonly params: Readonly<Record<string, Json>>;
   /** The zone instants are read in (a day filter's bounds depend on it). */
   readonly zone: string;
   /** Canonical: two requests with equal keys ask the same thing. */
   readonly key: string;
   readonly signal: AbortSignalLike;
+}
+
+/** A group's value as sent and sent back: a day as `YYYY-MM-DD`, an instant as epoch ms, null for the empty group. */
+export type GroupValue = string | number | boolean | null;
+
+/**
+ * The group part of a request (server-side-groups.md, owner Q-WIRE A): `by` the grouping columns, `path` the typed values
+ * of the open groups from the top (empty: the first level), `aggs` the totals asked, by Phase 7's names. The level asked
+ * is `path.length`: groups while it is less than `by.length`, the rows at the last one.
+ */
+export interface GroupPart {
+  readonly by: readonly string[];
+  readonly path: readonly GroupValue[];
+  readonly aggs: readonly { readonly column: string; readonly fn: AggFuncName }[];
+}
+
+/** A server's answer at a level of groups: each group's value, row count and totals; `totals` the grand ones (any block may send them). */
+export interface GroupResponse {
+  readonly groups: readonly { readonly value: GroupValue; readonly count?: number; readonly aggs?: Readonly<Record<string, Json>> }[];
+  readonly total?: number;
+  readonly hasNext?: boolean;
+  readonly totals?: Readonly<Record<string, Json>>;
 }
 
 /** A page asked for: by number and offset, or by the cursor the page before gave (null for the first). */

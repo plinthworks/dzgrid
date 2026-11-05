@@ -108,7 +108,7 @@ describe('core purity', () => {
   it('names no forbidden global, package or dynamic import', () => {
     const offenders = all.flatMap((f) => {
       const rel = f.slice(SRC.length + 1);
-      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel === 'infinite.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/'), state: rel === 'state.ts' || rel.startsWith('state/'), xlsx: rel === 'xlsx.ts' || rel.startsWith('xlsx/') });
+      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel === 'infinite.ts' || rel === 'server-side.ts' || rel.startsWith('server/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/'), state: rel === 'state.ts' || rel.startsWith('state/'), xlsx: rel === 'xlsx.ts' || rel.startsWith('xlsx/') });
       return v.length ? [`${rel}: ${[...new Set(v)].join(', ')}`] : [];
     });
     expect(offenders).toEqual([]);

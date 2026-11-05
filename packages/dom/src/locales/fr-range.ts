@@ -19,5 +19,6 @@ export const FR_RANGE = {
     'range.outside': "\u202F; hors de la grille\u202F: {n}",
     'range.tooBig': "Collage trop grand\u202F: au plus {max} cellules\u202F; rien n\u2019est collé",
     'range.noCopy': "Copie non autorisée",
+    'range.notLoaded': "Certaines lignes ne sont pas encore chargées",
   },
 } satisfies RangeMessages;
