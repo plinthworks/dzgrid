@@ -194,3 +194,17 @@ export const inlineApart = (a: DOMRectReadOnly, b: DOMRectReadOnly): boolean => 
 
 /** How far apart two pointer events are, whatever the direction (a double tap's 10 px). */
 export const pointerGap = (a: { readonly clientX: number; readonly clientY: number }, b: { readonly clientX: number; readonly clientY: number }): number => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+
+/**
+ * Where a pointer falls among boxes in reading order (a band's chips, group-drop-zone.md 16): the index of the first box
+ * whose middle is logically past it, or their count; null outside `ref`.
+ */
+export function slotAt(e: { readonly clientX: number; readonly clientY: number }, boxes: readonly DOMRectReadOnly[], ref: DOMRectReadOnly, dir: Dir): number | null {
+  if (e.clientX < ref.left || e.clientX > ref.right || e.clientY < ref.top || e.clientY > ref.bottom) return null;
+  const x = logicalX(e, ref, dir);
+  const i = boxes.findIndex((b) => {
+    const s = logicalSpan(b, ref, dir);
+    return x < (s.start + s.end) / 2;
+  });
+  return i < 0 ? boxes.length : i;
+}

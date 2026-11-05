@@ -35,6 +35,11 @@ export interface GroupShape<T> extends RowShape<T> {
   setBy(by: readonly string[], source?: ChangeSource): void;
   /** The grand totals by column id, over the rows the filters keep, whatever the footers (aggregation.md 11); `{}` before any build. */
   totals(): Readonly<Record<string, unknown>>;
+  /**
+   * Grouping steps aside for good (a server source, a tree beside it; plan D16, D20): the rows flat, no totals rows, no
+   * totals, `setBy` ignored. Told as a `rows` change.
+   */
+  off(): void;
   /** Work done, for tests: structures built (a regroup), totals computed, flattens. */
   readonly diagnostics: { readonly builds: number; readonly aggs: number; readonly flattens: number };
 }
@@ -107,8 +112,9 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
   if (expanded !== undefined && expanded !== 'none' && expanded !== 'all' && !(typeof expanded == 'number' && expanded >= 1)) bad('expanded', expanded), (expanded = undefined);
   let aggFuncs = o.aggFuncs;
   if (aggFuncs !== undefined && (aggFuncs === null || typeof aggFuncs != 'object')) bad('aggFuncs', typeof aggFuncs), (aggFuncs = undefined);
-  const footG = footers === 'group' || footers === 'both';
-  const footT = footers === 'grand' || footers === 'both';
+  let footG = footers === 'group' || footers === 'both';
+  let footT = footers === 'grand' || footers === 'both';
+  let off = false;
 
   let model: ClientModel<T> | null = null;
   let redraw: ((kind?: 'rows' | 'expand', source?: ChangeSource) => void) | null = null;
@@ -298,7 +304,15 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
       model = m;
       redraw = r;
     },
+    off() {
+      off = true;
+      by = [];
+      byV++;
+      footG = footT = false;
+      redraw?.('rows', 'host');
+    },
     setBy(next, source = 'api') {
+      if (off) return;
       // Not a list (untyped code): no grouping, told.
       if (!Array.isArray(next)) bad('by', typeof next), (next = []);
       if (next.length === by.length && next.every((c, i) => c === by[i])) return;
@@ -309,7 +323,7 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
       if (model?.orderStale) model.reapply(source);
       else redraw?.('rows', source);
     },
-    totals: () => A?.t.grand ?? {},
+    totals: () => (off ? {} : A?.t.grand ?? {}),
     parents(snap, depth, shown, env) {
       // At the first load (no build yet), the groups of every row; afterwards, the last build's.
       const s = S && (shown || !env || S.snap === snap) ? S : env ? groupsOf(env, null) : null;
@@ -330,7 +344,7 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
       const s = groupsOf(env, i.order);
       if (A?.S !== s || A.reader !== env.reader.version || A.snap !== env.source) {
         d.aggs++;
-        A = { S: s, reader: env.reader.version, snap: env.source, t: totalsOf(s, env, aggFuncs) };
+        A = { S: s, reader: env.reader.version, snap: env.source, t: off ? { at: [], grand: {}, columns: [], problems: [] } : totalsOf(s, env, aggFuncs) };
       }
       const t = A.t;
       const isOpen = new Uint8Array(s.G);

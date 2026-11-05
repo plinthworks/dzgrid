@@ -214,7 +214,15 @@
     { "what": "find: the letters tinted in the current hit", "fg": "--tz-fg", "bg": "--dzg-find-mark-current", "min": 4.5 },
     { "what": "row numbers: a number on the header's surface (row-numbers.css, 1.4.0)", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 4.5 },
     { "what": "row numbers: a number hovered", "fg": "--tz-fg", "bg": "--dzg-header-bg", "min": 4.5 },
-    { "what": "row numbers: a row taken whole, its number on the selection's tint", "fg": "--tz-fg", "bg": "--dzg-row-selected-bg", "min": 4.5 }
+    { "what": "row numbers: a row taken whole, its number on the selection's tint", "fg": "--tz-fg", "bg": "--dzg-row-selected-bg", "min": 4.5 },
+    { "what": "grouping: a group or totals row's label and totals on the header's surface (grouping.css, Phase 7)", "fg": "--tz-fg", "bg": "--dzg-header-bg", "min": 4.5 },
+    { "what": "grouping: the chevron of a group row", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 3 },
+    { "what": "grouping band: its empty text", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 4.5 },
+    { "what": "grouping band: a chip's outline on the band", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 3 },
+    { "what": "grouping band: a chip's name", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "grouping band: a chip's ×", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "grouping band: the focus ring and the drop outline on the band", "fg": "--dzg-focus-ring", "bg": "--dzg-header-bg", "min": 3 },
+    { "what": "grouping band: the focus ring on a chip", "fg": "--dzg-focus-ring", "bg": "--tz-bg", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",

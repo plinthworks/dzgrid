@@ -24,7 +24,7 @@ const CORE = 29250; // Phase 7 step 2 (owner Q-B 2026-11-04, +2 % rule): 29 150 
 /** @dzgrid/dom/range and /fill's ceilings: 4 950 and 3 000 until Phase 6 step 8b-2 (owner Q1: blocks and the fill in the pinned bands, up to ~5 200 and ~3 150). */
 const RANGE = 5200;
 const FILL = 3200; // Phase 9 (owner Q-CM4, 2026-11-02): 3 150 → 3 200 (the fill's `along` and `can`)
-const DOM = 23260; // 1.4.0 (+2 % rule): 22 440 → 22 880; the busy bar: 23 070; the busy part: 23 250
+const DOM = 23290; // 1.4.0 (+2 % rule): 22 440 → 22 880; the busy bar: 23 070; the busy part: 23 250; Phase 7 `shapeAfter`: 23 290
 
 describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('rounds up to the next 50 B', () => {
@@ -701,11 +701,11 @@ describe('the command: --dry by default, --write to save', () => {
     // The owner's third look (« Comfort stylesheet »): the date adapters 2 850, K.8 84 450, the theme 2 850.
     expect(names.map(ceilingFor)).toEqual([12000, 4850, 2850, 90000]); // Phase 9 (owner Q-F6): filters 11 400, set chunk 4 850; // K.8 84 800 since step 12; owner « set include only » (2026-10-29): the set chunk 4 350, K.8 84 950; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
     expect(names.map((n) => e[n]?.maxGzip)).toEqual([12000, 4850, 2850, 90000]); // Phase 9 (owner Q-F6); // owner « set include only » (2026-10-29); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
-    expect(['@dzgrid/theme', '@dzgrid/dom/popup', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([2907, 1700, 23260]); // Phase 9 (Q-CM4): the popup host 1 700
+    expect(['@dzgrid/theme', '@dzgrid/dom/popup', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([2907, 1700, DOM]); // Phase 9 (Q-CM4): the popup host 1 700
   });
 
   it('Phase 6 step 11 (owner Q-B): @dzgrid/dom/print 1 600 over the DOM base, its -print texts 150 / 150 / 200, print.css and its unlayered twin 400 each; nothing else raised', () => {
     expect(['@dzgrid/dom/print', '@dzgrid/dom/locales/en-print', '@dzgrid/dom/locales/fr-print', '@dzgrid/dom/locales/ar-print', '@dzgrid/theme/print.css', '@dzgrid/theme/print.unlayered.css'].map(ceilingFor)).toEqual([1600, 150, 150, 200, 400, 400]);
-    expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map(ceilingFor)).toEqual([23260, CORE, 90000, 7665]); // K.8 and Angular raised at step 12 (Q12-1); K.8 84 950 (owner « set include only » (2026-10-29)); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
+    expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map(ceilingFor)).toEqual([DOM, CORE, 90000, 7665]); // K.8 and Angular raised at step 12 (Q12-1); K.8 84 950 (owner « set include only » (2026-10-29)); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
   });
 });

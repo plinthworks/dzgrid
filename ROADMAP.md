@@ -1107,7 +1107,22 @@ questions.md`); the lead's decisions and measures in `docs/phase-7-steps/decisio
   recursive oracle); 27 / 27 planted faults caught; review fixes (a regroup while stale goes through a whole run, `expanded` and odd settings told) each with a failing test first. `core/grouping` 4 285 B, line 4 750 (measure + 10 %). Perf (minified, node, medians of three): **A grouped by 2 columns + 3
   totals, cold 59.9 ms (exit criterion ≤ 150)**; regroup 8.2; expand a group of ~10 000 rows 0.1; one-row update 3.2;
   ~100 000 distinct texts 256.8 (the collation's own cost, recorded); memory 64 B / row over the flat model.
-- [ ] Step 5 — `@dzgrid/dom/grouping` (the painter shared with the tree, group cells, footers, keys, `aria-*`).
-- [ ] Step 6 — `@dzgrid/dom/group-zone` (`groupZone()`, Q-Z1 B) and the menu item.
+- [x] **Step 5 — `@dzgrid/dom/grouping`** (2026-11-05, not committed): `grouping({ …, column, indent, sticky })`, `api(grid)`
+  `by` / `setBy` / `expandAll(depth?)` / `collapseAll` / `totals`; group rows « value (n) » in the first visible column
+  with the chevron and indent, totals in their columns' format, footers « Total … » and the grand total, Enter on a group
+  row, the group column's keys mirrored in Arabic, `*`, pinned group rows, `treegrid` / `grid`, `aria-level` / `posinset`
+  / `setsize` / `expanded`, sentences; refusals (tree, server: grouping steps aside through the core's new `off()`;
+  spans off; details told). Shares the tree's pinned-rows stack and chevron CSS only: `dom/tree` untouched (4 194 /
+  4 200). Texts `locales/{en,fr,ar}-group`, `@dzgrid/theme/grouping.css` (+ unlayered). Tests `grouping.test.ts` (45),
+  Angular `grouping.test.ts` (through `[features]`). **Chrome: a group of 10 000 opened to the next frame 17.4–17.8 ms
+  (exit ≤ 30)**; keys LTR / RTL in Chrome, Firefox, WebKit; axe 0 fr / ar light / dark (pinned columns too); 24 px
+  targets; forced colours (`npm run test:browser -- --only grouping`, `--engine firefox|webkit`).
+- [x] **Step 6 — `@dzgrid/dom/group-zone` and the menu item** (2026-11-05, not committed): `groupZone({ use: { grouping,
+  columns? } })` — toolbar above the rows, chip + × per grouping column, arrows mirrored, Home / End, Delete /
+  Backspace, Ctrl+Shift+arrows, mouse / pen chip drag (`slotAt` in `dir.ts`), a header dropped through `dropTargets`;
+  `columnMenu({ use: { grouping } })` « Regrouper par cette colonne » / « Ne plus regrouper… » (WCAG 2.5.7). Tests
+  `grouping-zone.test.ts` (26). Sizes: `dom/grouping` 4 434 (line 4 878), `dom/group-zone` 2 576 (2 834), texts 318 /
+  367 / 507 (350 / 404 / 558), `grouping.css` 533 (587), `core/grouping` 4 334 / 4 750, `column-menu` 3 164 / 4 300,
+  dom base 23 282 / 23 290 (`shapeAfter`: a tree wins over grouping in either order, +2 % rule), K.8 89 218 / 90 000.
 - [ ] Step 7 — state (`rowGroups`), CSV, Excel and print with group rows and totals.
 - [ ] Step 8 — Angular and demos. Step 9 — close.

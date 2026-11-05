@@ -73,3 +73,42 @@ The label's indent and chevron follow the reading direction (tree); « (42) » i
 ## Tests
 `conformance/cases/group-agg/structure-*`, `packages/core/test/grouping*.test.ts` (structure, seams, a seeded property
 walk against a hand-written oracle); DOM and browser at step 5.
+
+## On screen (step 5, `@dzgrid/dom/grouping`; decided 2026-11-04, lead, from the owner's answers)
+15. **The group column** is the first visible column, or `grouping({ column })` when that one is shown. A group row
+    shows there its chevron (24 px target), then « {value} ({n}) » (`group.label`; « (Vide) » for the empty group,
+    `group.blank`), indented `level × 16` px (`indent`). Data rows sit one step deeper, a chevron's place kept empty so
+    their text lines up. A column with a total that is also the group column shows the label there, not the total (its total
+    stays in `totals()`).
+16. **The other cells of a group row** show the group's totals, each in its column's format and alignment
+    (`aggregation.md` 1); a count under a column that is not a number column is written as a number of the grid's
+    language. A footer shows « Total {value} » (`group.total`) in the group column, the grand total « Total »
+    (`group.grandTotal`), and their totals in the other cells.
+17. **Pointer**: a click on the chevron opens or closes; elsewhere on a group row a click focuses its cell, never
+    selects. **Enter anywhere on a group row** opens or closes it (Q-K1 A); Space does nothing there.
+18. **Group rows stay pinned under the header** while their rows scroll (as the tree's parents, `tree-sticky.md`,
+    3 levels by default, `sticky: 0` for none).
+19. **Roles**: `treegrid` while at least one grouping column is in use, `grid` otherwise (no grouping column, or all of
+    them unknown). Group rows: `aria-level` (1 = first level), `aria-posinset` / `aria-setsize` among their siblings,
+    `aria-expanded`; data rows `aria-level` = levels + 1; totals rows the level of the rows they close, no
+    `aria-expanded`. Flat (with a grand total only): no levels written.
+20. **Sentences**: a group opened or closed by the user, said once — « Cardiologie développé, 3 lignes » / « Cardiologie
+    réduit » (`group.expanded`, `group.collapsed`, the value without its count); `*`: « 4 lignes développées »
+    (`group.expandedSome`).
+21. **Refusals on screen** (13): beside a tree, whichever comes first in `features`, **the tree wins**: grouping steps
+    aside (told) and the tree works exactly as without it (its rows, chevrons, keys, sentences; coordinator 2026-11-05,
+    through the base's `GridFeature.shapeAfter`); after a master/detail listed first, the same; listed before details, grouping works and the
+    details are told; merged cells: told, and the grid paints without merges; a server source: told, the rows flat, no
+    totals rows, `setBy` does nothing; browser pages: told by the core, the groups shown whole.
+22. **API** (`grouping().api(grid)`): `by()`, `setBy(columns, { user })`, `expandAll(depth?)`, `collapseAll()`,
+    `totals()`; null before setup, after destroy, and on a grid where grouping stepped aside.
+
+| Key | en | fr | ar |
+|---|---|---|---|
+| `group.label` | {name} ({n}) | {name} ({n}) | {name} ({n}) |
+| `group.blank` | (Blank) | (Vide) | (فارغ) |
+| `group.total` | Total {name} | Total {name} | إجمالي {name} |
+| `group.grandTotal` | Total | Total | الإجمالي |
+| `group.expanded` | {name} expanded, {n} rows | {name} développé, {n} lignes | تم توسيع {name}، {n} صف |
+| `group.collapsed` | {name} collapsed | {name} réduit | تم طي {name} |
+| `group.expandedSome` | {n} groups expanded | {n} groupes développés | تم توسيع {n} مجموعات |

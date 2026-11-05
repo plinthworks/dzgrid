@@ -50,6 +50,8 @@ const domAlias = {
   '@dzgrid/dom/find': fileURLToPath(new URL('./packages/dom/src/find.ts', import.meta.url)),
   '@dzgrid/dom/filters-panel': fileURLToPath(new URL('./packages/dom/src/filters-panel.ts', import.meta.url)),
   '@dzgrid/dom/row-numbers': fileURLToPath(new URL('./packages/dom/src/row-numbers.ts', import.meta.url)),
+  '@dzgrid/dom/grouping': fileURLToPath(new URL('./packages/dom/src/grouping.ts', import.meta.url)),
+  '@dzgrid/dom/group-zone': fileURLToPath(new URL('./packages/dom/src/group-zone.ts', import.meta.url)),
   '@dzgrid/dom/columns-panel': fileURLToPath(new URL('./packages/dom/src/columns-panel.ts', import.meta.url)),
   '@dzgrid/dom/state': fileURLToPath(new URL('./packages/dom/src/state.ts', import.meta.url)),
   '@dzgrid/dom/row-gaps': fileURLToPath(new URL('./packages/dom/src/row-gaps.ts', import.meta.url)),

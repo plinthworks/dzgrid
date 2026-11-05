@@ -23,6 +23,8 @@ export interface GridFeature {
    * the model is made (a shape is fixed for the grid's life). The first feature giving one wins.
    */
   shape?(): RowShape<unknown>;
+  /** Features whose shape wins over this one's whatever the order (grouping gives way to a tree, Phase 7): present, this one gives none. */
+  readonly shapeAfter?: readonly string[];
   /**
    * True: a server's model is made held (Phase 6 step 5, `@dzgrid/dom/state`'s storage at creation): its first request waits
    * for the end of the feature's first `g.rows.hold(fn)` in `setup`, so what it restores is the first thing asked.
@@ -33,7 +35,7 @@ export interface GridFeature {
 
 /** The model's options a feature's shape adds (none without one). */
 export const shapeOf = (features: readonly GridFeature[] | undefined): { shape?: RowShape<any> } => {
-  const f = features?.find((x) => x.shape);
+  const f = features?.find((x) => x.shape && !x.shapeAfter?.some((id) => features.some((y) => y.id === id)));
   return f ? { shape: f.shape!() } : {};
 };
 

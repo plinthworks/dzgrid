@@ -1,0 +1,85 @@
+.dzg-row:is([data-kind=group], [data-kind=footer]) :is(.dzg-cell, .dzg-check, .dzg-lead) {
+  color: var(--tz-fg);
+  font-weight: 600;
+  background: var(--dzg-header-bg, var(--tz-bg-raised));
+}
+
+.dzg-row[data-kind=footer] .dzg-cell {
+  border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
+}
+
+.dzg-gzone {
+  color: var(--tz-fg);
+  background: var(--dzg-header-bg, var(--tz-bg-raised));
+  border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
+}
+
+.dzg-gzone-empty {
+  color: var(--tz-fg-muted);
+}
+
+.dzg-gzone[data-dzg-drop=over] {
+  outline: 2px dashed var(--dzg-focus-ring, var(--tz-accent));
+  outline-offset: -3px;
+}
+
+.dzg-gchip {
+  border: var(--dzg-line, 1px) solid var(--tz-fg-muted);
+  border-radius: var(--dzg-radius, 4px);
+  background: var(--tz-bg);
+  cursor: grab;
+}
+
+.dzg-chip,
+.dzg-chip-x {
+  border: 0;
+  border-radius: var(--dzg-radius, 4px);
+  background: transparent;
+  color: var(--tz-fg);
+}
+
+.dzg-chip {
+  padding-inline: 0.5rem 0.25rem;
+}
+
+.dzg-chip-x {
+  color: var(--tz-fg-muted);
+}
+
+.dzg-chip-x:hover {
+  color: var(--tz-fg);
+}
+
+.dzg-chip:focus-visible,
+.dzg-chip-x:focus-visible {
+  outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+  outline-offset: -2px;
+}
+
+.dzg-gchip[data-dzg-gap]::before {
+  background: var(--dzg-focus-ring, var(--tz-accent));
+}
+
+@media (forced-colors: active) {
+  .dzg-row:is([data-kind=group], [data-kind=footer]) .dzg-cell {
+    color: CanvasText;
+    background: Canvas;
+  }
+  .dzg-gzone,
+  .dzg-gchip {
+    border-color: CanvasText;
+  }
+  .dzg-chip,
+  .dzg-chip-x {
+    color: ButtonText;
+    background: ButtonFace;
+  }
+  .dzg-chip:focus-visible,
+  .dzg-chip-x:focus-visible,
+  .dzg-gzone[data-dzg-drop=over] {
+    outline-color: Highlight;
+  }
+  .dzg-gchip[data-dzg-gap]::before {
+    background: Highlight;
+  }
+}

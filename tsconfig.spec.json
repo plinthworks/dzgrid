@@ -140,6 +140,12 @@
       "@dzgrid/dom/row-numbers": [
         "./packages/dom/src/row-numbers.ts"
       ],
+      "@dzgrid/dom/grouping": [
+        "./packages/dom/src/grouping.ts"
+      ],
+      "@dzgrid/dom/group-zone": [
+        "./packages/dom/src/group-zone.ts"
+      ],
       "@dzgrid/dom/columns-panel": [
         "./packages/dom/src/columns-panel.ts"
       ],

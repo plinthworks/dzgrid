@@ -15,6 +15,7 @@
  *   filters-panel.scss → filters-panel.css and filters-panel.unlayered.css, Phase 9 (the filters panel)
  *   row-numbers.scss → row-numbers.css and row-numbers.unlayered.css, 1.4.0 (the row numbers' strip)
  *   search.scss   → search.css and search.unlayered.css, 1.4.0 (the quick search's words tinted in the cells)
+ *   grouping.scss → grouping.css and grouping.unlayered.css, Phase 7 steps 5–6 (grouped rows, the « Regrouper par » band)
  *   comfort.scss  → dzgrid.comfort.css and dzgrid.comfort.unlayered.css, the owner's third look (decisions.md « Comfort stylesheet »)
  * The tests compile the same way and fail when a file drifts from its source.
  */
@@ -28,7 +29,7 @@ const out = (source, file) => {
   writeFileSync(`${dir}${file}`, `${css}\n`);
   console.log(`build:theme: ${file}`);
 };
-for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows', 'find', 'filters-panel', 'row-numbers', 'search']) {
+for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows', 'find', 'filters-panel', 'row-numbers', 'search', 'grouping']) {
   out(`@use "${name}";`, `${name}.css`);
   out(`@use "${name}" with ($layered: false);`, `${name}.unlayered.css`);
 }

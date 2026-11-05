@@ -302,6 +302,18 @@
       "file": "packages/dom/src/locales/ar-row-numbers.ts",
       "maxGzip": 132
     },
+    "@dzgrid/dom/locales/en-group": {
+      "file": "packages/dom/src/locales/en-group.ts",
+      "maxGzip": 350
+    },
+    "@dzgrid/dom/locales/fr-group": {
+      "file": "packages/dom/src/locales/fr-group.ts",
+      "maxGzip": 404
+    },
+    "@dzgrid/dom/locales/ar-group": {
+      "file": "packages/dom/src/locales/ar-group.ts",
+      "maxGzip": 558
+    },
     "@dzgrid/dom/locales/en-pinned": {
       "file": "packages/dom/src/locales/en-pinned.ts",
       "maxGzip": 120
@@ -422,9 +434,13 @@
       "file": "packages/theme/search.css",
       "maxGzip": 249
     },
+    "@dzgrid/theme/grouping.css": {
+      "file": "packages/theme/grouping.css",
+      "maxGzip": 587
+    },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 23260,
+      "maxGzip": 23290,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -555,6 +571,25 @@
         "@dzgrid/core/internal",
         "@dzgrid/core/tree",
         "@dzgrid/core/tree-lazy",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/grouping": {
+      "file": "packages/dom/src/grouping.ts",
+      "maxGzip": 4878,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/grouping",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/group-zone": {
+      "file": "packages/dom/src/group-zone.ts",
+      "maxGzip": 2834,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
         "@dzgrid/dom/internal"
       ]
     },

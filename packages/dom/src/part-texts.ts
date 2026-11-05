@@ -194,3 +194,17 @@ export interface FiltersPanelMessages {
   readonly locale: string;
   readonly text: { readonly [K in FiltersPanelMessageKey]: MessageValue };
 }
+
+/**
+ * Row grouping's texts (`@dzgrid/dom/grouping`, `@dzgrid/dom/group-zone`, the column menu's items; Phase 7 steps 5–6), in
+ * their own bundles (`locales/<lang>-group`): optional here; `group.*` required by `grouping()`, `zone.*` by `groupZone()`,
+ * `menu.groupBy` / `menu.groupOff` by `columnMenu({ use: { grouping } })`.
+ */
+export type GroupMessageKey =
+  | 'group.label' | 'group.blank' | 'group.total' | 'group.grandTotal' | 'group.expanded' | 'group.collapsed' | 'group.expandedSome'
+  | 'zone.label' | 'zone.empty' | 'zone.remove' | 'zone.grouped' | 'zone.removed' | 'zone.placed' | 'menu.groupBy' | 'menu.groupOff';
+/** A grouping bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_GROUP.text }`. */
+export interface GroupMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in GroupMessageKey]: MessageValue };
+}

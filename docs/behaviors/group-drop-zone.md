@@ -83,3 +83,20 @@ Escape, nested grids). Phase 7: the zone's own tests.
   wants it; grouping works without it (the column menu's item, the API).
 - **Q-Z2 A**: the three choices above stand as written — the dropped column stays visible (also Q-H A), a chip dragged
   out does nothing, one zone per grid.
+
+## Built (step 6, decided 2026-11-04 by the lead within 8–12)
+13. **Where**: the band is the first child of the grid's root, above the scrolling rows (it never scrolls away), outside
+    the `grid` / `treegrid` element. `groupZone({ use: { grouping, columns? } })`: the grouping feature it drives (its
+    API only); `columns()` for the header drop — without it, no drop (the menu item and the API still group).
+14. **Its items** (APG toolbar, one tab stop, roving): for each grouping column in order, a chip button named by the
+    column's header, then its × button named `zone.remove` (« Ne plus regrouper par Nom »), both 24 px high at least, the
+    × 24 × 24. A chip button and its × are two items: the arrows go through every item, Home / End to the first / last;
+    Delete or Backspace on either removes its column, Enter / Space on × too (a click as well); Ctrl+Shift+arrows on
+    either moves its column one place. After a removal the focus goes to the item at the same place (or the last one);
+    the zone emptied, back to the grid (its focused cell, or the grid itself).
+15. **Drop**: a header accepted when its column is groupable and not grouped yet; dropped, it is added last, said
+    (`zone.grouped`). While a header is over the band, the band carries `data-dzg-drop="over"` (styled by the theme).
+16. **Chip drag** (mouse or pen, 4 px to start, never a finger): the chip follows nothing — a bar marks the gap it lands
+    in (`data-dzg-gap="before|after"` on the chip next to it, logical); released inside the band, one move, said
+    (`zone.placed`); released outside, or Escape: nothing.
+17. A column no longer known (columns changed) or refused (`groupable: false`) shows no chip.

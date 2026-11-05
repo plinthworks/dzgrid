@@ -109,6 +109,14 @@
       "types": "./src/row-numbers.ts",
       "default": "./src/row-numbers.ts"
     },
+    "./grouping": {
+      "types": "./src/grouping.ts",
+      "default": "./src/grouping.ts"
+    },
+    "./group-zone": {
+      "types": "./src/group-zone.ts",
+      "default": "./src/group-zone.ts"
+    },
     "./filters-panel": {
       "types": "./src/filters-panel.ts",
       "default": "./src/filters-panel.ts"
@@ -404,6 +412,18 @@
     "./locales/ar-row-numbers": {
       "types": "./src/locales/ar-row-numbers.ts",
       "default": "./src/locales/ar-row-numbers.ts"
+    },
+    "./locales/en-group": {
+      "types": "./src/locales/en-group.ts",
+      "default": "./src/locales/en-group.ts"
+    },
+    "./locales/fr-group": {
+      "types": "./src/locales/fr-group.ts",
+      "default": "./src/locales/fr-group.ts"
+    },
+    "./locales/ar-group": {
+      "types": "./src/locales/ar-group.ts",
+      "default": "./src/locales/ar-group.ts"
     },
     "./locales/en-filters-panel": {
       "types": "./src/locales/en-filters-panel.ts",

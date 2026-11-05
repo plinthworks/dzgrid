@@ -5,6 +5,23 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased — 1.5.0]
+
+A minor, additive (Phase 7, row grouping; steps 5–6 of 9, not released).
+
+### Added
+- `@dzgrid/core/grouping`: `groupShape({ by, aggFuncs, expanded, footers, grandTotal })` — rows grouped by columns,
+  totals (sum, mean, min, max, count, first, last, a function), group footers and the grand total; `setBy`, `totals()`,
+  `off()`; `ColumnDef.aggFunc`, `ColumnDef.groupable`, `FooterNode`.
+- `@dzgrid/dom/grouping`: `grouping(options)` — group rows « value (n) » with chevron and indent in the first column,
+  totals in their columns, totals rows, Enter and the arrows (mirrored right to left) to open and close, group rows pinned
+  under the header, a `treegrid` while grouped; `api(grid)`: `by`, `setBy`, `expandAll`, `collapseAll`, `totals`. Not
+  beside a tree or a server source (told; Phase 8 brings server grouping).
+- `@dzgrid/dom/group-zone`: `groupZone({ use: { grouping, columns } })` — the « Regrouper par » band: chips « Nom × »,
+  a header dropped on it, chips moved by keys or the mouse, removed by × or Delete.
+- `columnMenu({ use: { grouping } })`: « Regrouper par cette colonne » / « Ne plus regrouper par cette colonne ».
+- Texts `@dzgrid/dom/locales/{en,fr,ar}-group`; look `@dzgrid/theme/grouping.css` (and `.unlayered.css`).
+
 ## [1.4.0] - 2026-11-04
 
 A minor: nothing of 1.3.0 is removed or narrowed (`npm run check:api`).

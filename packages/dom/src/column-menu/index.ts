@@ -36,6 +36,8 @@ export interface ColumnMenuOptions {
     readonly fill?: { api(grid: Grid): { down(o?: { readonly user?: boolean }): unknown; end(o?: { readonly user?: boolean }): unknown } | null };
     /** « Choose columns… » (Phase 6 step 4), opened by the column's header. */
     readonly chooser?: { api(grid: Grid): { open(anchor?: HTMLElement): boolean } | null };
+    /** « Group by this column » / « Stop grouping by this column » (Phase 7, `grouping()`; the way without dragging, WCAG 2.5.7). */
+    readonly grouping?: { api(grid: Grid): { by(): readonly string[]; setBy(by: readonly string[], o?: { readonly user?: boolean }): void } | null };
   };
   /** The density line (off by default, C5; absent when `rowHeight` is a number). */
   readonly density?: boolean;
@@ -85,6 +87,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
     api: (grid) => apis.get(grid.kernel) ?? null,
     setup(g) {
       needTexts(g, COLUMN_MENU_KEYS, 'column-menu');
+      // Its items' texts and sentences come with grouping's (`locales/<lang>-group`).
+      if (o.use?.grouping) needTexts(g, ['menu.groupBy', 'menu.groupOff', 'zone.grouped', 'zone.removed'], 'column-menu');
       const { kernel, columns: m, el, doc, scope } = g;
       const grid = { kernel };
       const say = (t: string): void => g.live.announce(t);
@@ -133,6 +137,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         const mod = g.mac ? 'Meta+' : 'Control+';
         const filter = g.features.find((x) => x.filter)?.filter?.edits(col, who);
         const chooser = o.use?.chooser?.api(g);
+        const grp = o.use?.grouping?.api(g);
+        const by = grp?.by();
         const now = g.settings.density ?? 'comfortable';
         // The query with every filter and the search emptied, the sort kept: differs while one is on (find.md 15).
         const clear = makeQuery({ sort });
@@ -153,6 +159,8 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
             cols?.resizeMode && it('size.resize', () => cols.resizeMode!(id) && L.hand()),
           ],
           cols ? [it('move.start', () => cols.move(id, -1, { say: true }), locked || !at), it('move.end', () => cols.move(id, 1, { say: true }), locked || at === seg.length - 1)] : [],
+          // Grouping (column-menu.md « Grouping »): by this column, or no longer; the column stays shown (Q-H A).
+          [grp && def.groupable !== false && (by!.includes(id) ? it('group.off', () => (grp.setBy(by!.filter((c) => c !== id), { user: true }), say(g.msg('zone.removed', { column: name(id) })))) : it('group.by', () => (grp.setBy([...by!, id], { user: true }), say(g.msg('zone.grouped', { column: name(id) })))))],
           fill && range ? [it('fill.down', () => fill.down({ user: true }), noFill, { keys: `${mod}D` }), it('fill.end', () => fill.end({ user: true }), noFill, { keys: `${mod}R` })] : [],
           [filter?.canOpen && it('filter', () => (L.hand(), filter.openFilter())), 
             // « Clear all filters » (find.md 15): while a filter or the search is on, its text given; as `clearFilters()` (the sort kept, one command).

@@ -228,10 +228,26 @@ describe('the DOM layer’s shape', () => {
       .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/tree)$/.test(s) && s !== 'tree.ts: ./tree/index.js' && s !== 'tree/index.ts: ./styles.js' && s !== 'tree/index.ts: ./sticky.js' && s !== 'tree/lazy.ts: @dzgrid/core/tree-lazy');
     expect(offenders).toEqual([]);
     // Nothing else imports it, nor the core's tree entry: a flat grid carries none of it (the lazy entry, step 7, only its own file).
-    expect(files(SRC).filter((f) => !/^tree(\/|\.ts$)/.test(relative(SRC, f)) && relative(SRC, f) !== 'tree-lazy.ts' && /from '(\.{1,2}\/(?:.*\/)?tree(\/|\.js')|@dzgrid\/core\/tree')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    // Grouping (Phase 7 step 5) shares the tree's pure pinned-rows stack and its chevron styles, nothing else (checked below).
+    expect(files(SRC).filter((f) => !/^tree(\/|\.ts$)/.test(relative(SRC, f)) && relative(SRC, f) !== 'tree-lazy.ts' && relative(SRC, f) !== 'grouping/index.ts' && /from '(\.{1,2}\/(?:.*\/)?tree(\/|\.js')|@dzgrid\/core\/tree')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
     // Lazy children (step 7): the tree names their type only; the lazy entry is its file and nothing else.
     expect(/from '\.\/lazy\.js'/.test(readFileSync(join(SRC, 'tree/index.ts'), 'utf8').replace(/^import type .*$/gm, ''))).toBe(false);
     expect([...readFileSync(join(SRC, 'tree-lazy.ts'), 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1])).toEqual(['./tree/lazy.js']);
+  });
+
+  it('has the grouping and zone entries reach the base only through the grid’s context, the types and pure helpers (Phase 7 steps 5–6)', () => {
+    // @dzgrid/dom/grouping: the core, its internal entry, @dzgrid/core/grouping, its own folder, the tree's pinned-rows stack
+    // and chevron styles (pure, no import of their own), the cells' isolation rule (pure). @dzgrid/dom/group-zone: the core and
+    // the direction helpers (dir.ts, types only besides). Neither reaches the other: the zone drives grouping through its API.
+    const value = (f: string) => [...readFileSync(join(SRC, f), 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]);
+    expect(value('grouping.ts')).toEqual(['./grouping/index.js']);
+    expect(value('grouping/index.ts')).toEqual(['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/grouping', '../render/bidi.js', '../tree/styles.js', '../tree/sticky.js']);
+    expect(value('group-zone.ts')).toEqual(['./group-zone/index.js']);
+    expect(value('group-zone/index.ts')).toEqual(['@dzgrid/core', '../dir.js']);
+    for (const f of ['render/bidi.ts', 'tree/styles.ts', 'tree/sticky.ts']) expect(readFileSync(join(SRC, f), 'utf8')).not.toMatch(/^import (?!type )/m);
+    expect(readFileSync(join(SRC, 'dir.ts'), 'utf8')).not.toMatch(/^import (?!type )/m);
+    // Nothing in the base imports them: a flat grid carries none of it.
+    expect(files(SRC).filter((f) => !/^(grouping|group-zone)(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?(grouping|group-zone)(\/|\.js')|@dzgrid\/core\/grouping')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
   });
 
   it('has the edit entry reach the base only through the grid’s context, the types and the shared writes (Phase 5 step 4)', () => {

@@ -293,3 +293,21 @@ describe('the shape before and beside the model', () => {
     expect(t.model.problems).toContainEqual({ code: 'invalid-setting', severity: 'warning', path: 'grouping.by', detail: 'object' });
   });
 });
+
+describe('groupShape: off() (step 5, a server source or a tree beside it; row-grouping.md 21)', () => {
+  it('flattens the rows, drops the totals rows and the totals, and ignores setBy from then on', () => {
+    const t = setup({ by: ['g'], footers: 'both' });
+    expect(t.shown()).toEqual(['[Nord]', '[Sud]', 'Σ']);
+    expect(t.shape.totals()).toEqual({ v: 17.5 });
+    const kinds: string[] = [];
+    t.kernel.subscribe((e) => e.type === 'modelUpdated' && kinds.push(`${e.kind}/${e.source}`));
+    t.shape.off();
+    expect(t.shown()).toEqual(['r1', 'r2', 'r3', 'r4']);
+    expect(kinds).toEqual(['rows/host']);
+    expect(t.shape.totals()).toEqual({});
+    expect(t.shape.by).toEqual([]);
+    t.shape.setBy(['g']);
+    expect(t.shown()).toEqual(['r1', 'r2', 'r3', 'r4']);
+    expect(t.shape.by).toEqual([]);
+  });
+});

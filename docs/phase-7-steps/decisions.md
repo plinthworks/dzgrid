@@ -98,3 +98,41 @@ Perf (medians of three runs of `npm run bench -- group`, minified, node; lines i
 
 The plan's « ≤ 60 B / row » memory estimate is over by 4 B: 40 B of it are the number and rank caches the sort shares
 (counted because they are typed arrays), 20 B the places and levels of the shown rows.
+
+## Decisions taken alone (steps 5–6, 2026-11-05; sheets amended first: row-grouping.md 15–22, group-drop-zone.md 13–17)
+- **The tree painter is not shared whole**: `dom/tree` sits 6 B under its line and its `setup` names its own texts and
+  options; sharing it meant changing it. `dom/grouping` has its own painter and imports only the tree's pure pieces
+  (`tree/sticky.ts`, the pinned-rows stack; `tree/styles.ts`, the chevron CSS), both unchanged: `dom/tree` 4 194 / 4 200,
+  untouched. Cost: `dom/grouping` 4 434 B (plan estimate 3 400).
+- **Beside a tree the tree wins, either order** (follow-up 2026-11-05): `GridFeature.shapeAfter?: string[]` (new
+  optional member, base `shapeOf` skips a feature whose listed ids are present; dom base measured below); grouping gives
+  `['tree']`, so it gets no shape and steps aside, told. **On a server source** grouping steps aside through the core
+  shape's new `off()` (rows flat, no totals rows, `totals()` `{}`, `setBy` ignored; `core/grouping` +49 B) and no painter, no API.
+  Listed after details, details win (told); listed before, grouping wins (told). Merged cells told, `g.spans` off at
+  each paint (as details do); header bands kept.
+- **The label wins its cell**: a total of the group column itself is not drawn there (it stays in `totals()`). A count
+  under a non-number column is written as a number of the language; an application's function result is read by the
+  column's codec, else shown as its text.
+- **Enter on a group row works in any column**; the group column's back key on a first-level group does nothing (as the
+  tree's root).
+- **Band items**: a chip button (its column's header) and its × button (`zone.remove`) are both toolbar items; Delete
+  and Backspace act on either, without modifiers; a removal keeps the focus at the same place, an emptied band gives it
+  back to the grid. A sentence only when the grouping really changed. The chip drag captures the pointer only once past
+  4 px; no finger drag.
+- **The menu items' texts and the zone's live in `locales/<lang>-group`**, checked at setup by `columnMenu` only when
+  `use.grouping` is given: `column-menu` texts unchanged.
+
+## Measures (steps 5–6, 2026-11-05)
+| Line | Measured | Line set |
+|---|---|---|
+| `@dzgrid/dom/grouping` (new) | 4 434 | 4 878 (measure + 10 %) |
+| `@dzgrid/dom/group-zone` (new) | 2 576 | 2 834 |
+| `locales/{en,fr,ar}-group` (new) | 318 / 367 / 507 | 350 / 404 / 558 |
+| `@dzgrid/theme/grouping.css` (new) | 533 | 587 |
+| `@dzgrid/core/grouping` | 4 334 (+49, `off()`) | 4 750 held |
+| `@dzgrid/dom/column-menu` | 3 164 (+126) | 4 300 held |
+| `@dzgrid/dom` base (`shapeAfter`, follow-up) | 23 282 (+23) | 23 260 → 23 290 (+0.1 %, 2 % rule) |
+| `dom/tree`, K.8 | 4 194, 89 218 | unchanged |
+
+Chrome (headless, minified sources served, `--only grouping`): a group of 10 000 rows opened to the next frame, median
+of 6: 17.4–17.8 ms over three runs (exit criterion ≤ 30; the model and events 0.2–0.4 ms — the rest is the frame).

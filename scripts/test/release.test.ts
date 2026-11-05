@@ -234,7 +234,7 @@ describe('1.4.0, the four packages', () => {
     expect(build).toMatch(/'\.\/locales\/ar-find', '\.\/locales\/en-filters-panel', '\.\/locales\/fr-filters-panel', '\.\/locales\/ar-filters-panel'/);
     const theme = pkg('theme');
     for (const f of ['filters-panel.css', 'filters-panel.unlayered.css', 'filters-panel.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'find', 'filters-panel', 'row-numbers', 'search'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'find', 'filters-panel', 'row-numbers', 'search'[,\]]/); // grouping's after it (Phase 7)
   });
 
   it('keep gsap and tzslot optional peers', () => {

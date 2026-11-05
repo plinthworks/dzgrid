@@ -44,6 +44,13 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
   '@dzgrid/core/grouping': 4750, // Phase 7 steps 3–4 (owner Q-B 2026-11-04: a new entry at its measure + 10 %): measured 4 285; ARCH §5.2 5 000
+  // Phase 7 steps 5–6 (owner Q-B: a new entry at its measure + 10 %): the grouping painter, the band, their texts and CSS.
+  '@dzgrid/dom/grouping': 4878, // measured 4 434
+  '@dzgrid/dom/group-zone': 2834, // measured 2 576
+  '@dzgrid/dom/locales/en-group': 350,
+  '@dzgrid/dom/locales/fr-group': 404,
+  '@dzgrid/dom/locales/ar-group': 558,
+  '@dzgrid/theme/grouping.css': 587, // measured 533
   '@dzgrid/core/detail': 1150, // owner step 16 (2026-10-29, « ok pour les hausses »): 1 050 → 1 150 (`isMaster`, measured 1 132); Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
   '@dzgrid/core/edit': 3160, // owner « set include only » (2026-10-29): 3 150 → 3 160 (`exclude: false` refused in compile); owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
@@ -52,7 +59,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/compare': 300, // owner step 16 (2026-10-29, « ok pour les hausses »): a new line for `sameValues` (measured 273)
   '@dzgrid/core/row-gaps': 450, // owner step 15 (2026-10-29, Q15-9): a new line for the gaps between categories (measured 409)
   '@dzgrid/core/state': 1510, // owner « set include only » (2026-10-29): 1 500 → 1 510; Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
-  '@dzgrid/dom': 23260, // 1.4.0 busy part (+2 % rule, 2026-11-04, measured 23 246: the part's host and reduced motion in the base): 23 070; before: 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 23 050 → 23 070 with the layout's lines): 22 880; before: 1.4.0 (+2 % rule, 2026-11-03, measured 22 853: the lead strip of row numbers and the texts searched in a cell part's context); before: 22 440, 1.2.0 (+2 % rule, 2026-11-02, measured 22 432: the group rows follow a columns update); before: Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
+  '@dzgrid/dom': 23290, // Phase 7 follow-up (+2 % rule, 2026-11-05, measured 23 282: `shapeAfter`, a tree wins over grouping): 23 260; before: 1.4.0 busy part (+2 % rule, 2026-11-04, measured 23 246: the part's host and reduced motion in the base): 23 070; before: 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 23 050 → 23 070 with the layout's lines): 22 880; before: 1.4.0 (+2 % rule, 2026-11-03, measured 22 853: the lead strip of row numbers and the texts searched in a cell part's context); before: 22 440, 1.2.0 (+2 % rule, 2026-11-02, measured 22 432: the group rows follow a columns update); before: Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 12000, // Phase 9 (owner B after F1–F2, 2026-11-02; Q-F6 had 11 400): rows, join, match case, a condition over a list; before: 10210, // 1.2.0 (+2 % rule, 2026-11-02, measured 10 207: the kits' import() in the entry, filters-base's warning); before: the owner's-look budgets (2026-10-27, decisions.md): 10 000 → 10 100 (apply, the header box, the zone option)
   // The owner's look (2026-10-27): the set chunk 4 205 → 4 250 (one box, the search placeholder, the inert host), the
   // date adapters 2 745 → 2 800 (the FROM / TO placeholder); written grants, no longer the measure + 10 %.
