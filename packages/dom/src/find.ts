@@ -5,4 +5,4 @@
  */
 export { find, FIND_KEYS } from './find/index.js';
 export type { FindApi, FindFeature, FindHit, FindOptions, FindState } from './find/index.js';
-export type { FindMessageKey, FindMessages } from './part-texts.js';
+export type { FindHeldKey, FindMessageKey, FindMessages } from './part-texts.js';

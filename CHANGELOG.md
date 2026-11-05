@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased — 1.5.0]
 
-A minor, additive (Phase 7, row grouping; closed 2026-11-05, not released). Phase 8 steps 1–4 (infinite scroll, not
-closed) are in the working tree too; the owner decides which release carries them.
+A minor, additive (Phase 7, row grouping, and Phase 8, infinite scroll and the server-side row model; both closed
+2026-11-05, not released). The owner decides the version and the release.
 
 ### Added
 - `@dzgrid/core/infinite` (Phase 8 steps 1–4): `infiniteRows(data, { blockSize, maxBlocks, ahead, concurrency, restMs,
@@ -34,6 +34,11 @@ closed) are in the working tree too; the owner decides which release carries the
   across a sort or a filter; `GroupPart`, `GroupResponse`, `GroupValue`, `GroupShape.options`.
 - `@dzgrid/dom/grouping` on `serverSideRows` (Phase 8 step 7): the band, the menu, `setBy`, the state's `rowGroups`, the
   server's totals in group rows, footers and the grand total; an export's `server.group`.
+- Phase 8 step 8: `serverSideRows` takes live updates and edits — `applyTransaction` / `applyTransactionAsync` /
+  `batchMs` (rows held updated in place; grouped, an update also asks the window again so the server's totals follow),
+  `orderStale` / `reapply` for edits of a column the server sorts, filters, searches, groups or totals by. The find bar on a
+  list in blocks says « Lignes chargées seulement » (`find.held`, optional in a bundle). A paste running past the rows held
+  is refused like one over them. Angular: `DzgController.refresh({ purge })`, `applyTransaction`, `applyTransactionAsync`.
 - Core types (additions): `BlockLoadingNode` (in `RowNode`), `DisplayedRows.held?()`, `RowModel.want?()`,
   `ModelEnv.timer?`, `RequestGate.forget?()`, `RangeResult` reason `rows-not-loaded`.
 - `@dzgrid/core/grouping`: `groupShape({ by, aggFuncs, expanded, footers, grandTotal })` — rows grouped by columns,

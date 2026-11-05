@@ -105,10 +105,10 @@ describe('layering of the base and the server entry', () => {
   });
 
   it('no other entry holds the block code; the infinite entry holds no tree, span, csv or grouping module (Phase 8 D1: the audit screen on server pages pays nothing)', async () => {
-    const isBlocks = (f: string) => /(^|\/)src\/(infinite\.ts|server\/(blocks|infinite)\.ts)$/.test(f);
+    const isBlocks = (f: string) => /(^|\/)src\/(infinite\.ts|server\/(blocks|infinite|tx)\.ts)$/.test(f);
     for (const entry of ['index.ts', 'internal.ts', 'server.ts', 'spans.ts', 'csv.ts', 'xlsx.ts', 'rules.ts', 'tree.ts', 'tree-lazy.ts', 'detail.ts', 'edit.ts', 'range.ts', 'state.ts', 'grouping.ts']) expect((await inputsOf(entry)).filter(isBlocks), entry).toEqual([]);
     const inputs = await inputsOf('infinite.ts');
-    for (const f of ['src/server/blocks.ts', 'src/server/infinite.ts', 'src/server/gate.ts', 'src/server/shared.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
+    for (const f of ['src/server/blocks.ts', 'src/server/infinite.ts', 'src/server/gate.ts', 'src/server/shared.ts', 'src/server/tx.ts']) expect(inputs.some((i) => i.endsWith(f)), f).toBe(true);
     expect(inputs.filter((f) => isSpans(f) || isCsv(f) || /(^|\/)src\/(tree|detail|grouping)(\.ts$|-lazy\.ts$|\/)/.test(f) || f.endsWith('src/server/rows.ts'))).toEqual([]);
   });
 

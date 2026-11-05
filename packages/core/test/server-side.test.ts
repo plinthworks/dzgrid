@@ -339,3 +339,124 @@ describe('serverSideRows: review of step 6', () => {
     expect(v.indexOf(dataKey('secret0')!)).toBe(11);
   });
 });
+
+describe('serverSideRows: live updates and edits (step 8, server-side-groups.md « Live updates and edits »)', () => {
+  /** Grouped by region, Nord open with three rows held. */
+  const nord = (o: ServerSideOptions = {}, env: Partial<ModelEnv<Row>> = {}) => {
+    const s = setup({ by: ['region'], ahead: 0, ...o }, env);
+    s.groups(s.fake.calls[0]!, ['Nord', 'Sud']);
+    s.model.expand([s.keyOf('Nord')], true);
+    s.model.want(0, 5);
+    s.fake.calls.at(-1)!.resolve({ rows: ['n1', 'n2', 'n3'].map((id) => ({ id, region: 'Nord', day: '2026-03-04', qty: 1 })), total: 3 });
+    return s;
+  };
+  const qty = (m: ServerSideModel<Row>, id: string) => (m.row(dataKey(id)!)!.data as Row).qty;
+
+  it('not grouped: an update or a patch replaces a row held in place; a row not held is ignored; nothing is asked', () => {
+    const { fake, model, rows } = setup({ ahead: 0 });
+    rows(fake.calls[0]!, 5);
+    const app = { id: '#2', region: '', day: '2026-03-04', qty: 9 };
+    const r = model.applyTransaction({ update: [app, { id: 'far', region: '', day: '2026-03-04', qty: 1 }], patch: [{ id: '#3', set: { qty: 7 } }] });
+    expect(r.kind).toBe('delta');
+    expect(r.updated).toEqual([dataKey('#2'), dataKey('#3')]);
+    expect(qty(model, '#2')).toBe(9);
+    expect(qty(model, '#3')).toBe(7);
+    expect(fake.calls).toHaveLength(1);
+  });
+
+  it('grouped: an update replaces the row at once and asks the window again behind, rows and open groups kept', () => {
+    const { fake, model, shown } = nord();
+    const asked = fake.calls.length;
+    const r = model.applyTransaction({ patch: [{ id: 'n2', set: { qty: 40 } }] });
+    expect(r.updated).toEqual([dataKey('n2')]);
+    expect(qty(model, 'n2')).toBe(40);
+    // The server's counts and totals may have moved: asked again, never recomputed here.
+    expect(fake.calls.length).toBeGreaterThan(asked);
+    expect(fake.calls.slice(asked).map((c) => c.req.group!.path)).toContainEqual([]);
+    expect(shown()).toBe('Nord+ n1 n2 n3 Sud');
+    expect(model.status.phase).toBe('loading');
+  });
+
+  it('an add or a remove asks the window again, rows kept; a group row is no row id; a bad id told without the row', () => {
+    const { fake, model, shown, keyOf, told } = nord();
+    const asked = fake.calls.length;
+    const r = model.applyTransaction({ remove: ['n1'], update: [{ id: undefined as never, region: 'secret', day: '2026-03-04', qty: 1 }] }); // never: a row without an id, as a bad host sends it
+    expect(r.problems.map((p) => `${p.code} ${p.path}`)).toEqual(['invalid-row-id update[0]']);
+    expect(JSON.stringify(r.problems)).not.toContain('secret');
+    expect(fake.calls.length).toBeGreaterThan(asked);
+    expect(shown()).toBe('Nord+ n1 n2 n3 Sud');
+    expect(model.isExpanded(keyOf('Nord'))).toBe(true);
+    expect(told()).toContain('invalid-row-id update[0]');
+  });
+
+  it('async: what arrives within batchMs is one change and one request round; done per transaction, in order', () => {
+    const timers: { fn: () => void; ms: number }[] = [];
+    const { fake, model, changes } = nord({ batchMs: 30 }, { timer: (fn, ms) => (timers.push({ fn, ms }), () => {}) });
+    changes.length = 0;
+    const asked = fake.calls.length;
+    const done: string[] = [];
+    model.applyTransactionAsync({ patch: [{ id: 'n1', set: { qty: 2 } }] }, (r) => done.push(`a ${r.updated.length}`));
+    model.applyTransactionAsync({ patch: [{ id: 'n3', set: { qty: 3 } }] }, (r) => done.push(`b ${r.updated.length}`));
+    expect(changes).toEqual([]);
+    expect(timers.map((t) => t.ms)).toContain(30);
+    timers.find((t) => t.ms === 30)!.fn();
+    expect(changes).toHaveLength(1);
+    expect(changes[0]!.transaction?.updated).toEqual([dataKey('n1'), dataKey('n3')]);
+    expect(done).toEqual(['a 1', 'b 1']);
+    const round = fake.calls.length - asked;
+    expect(round).toBeGreaterThan(0);
+    // The same pair applied one by one asks twice that.
+    const one = nord();
+    const before = one.fake.calls.length;
+    one.model.applyTransaction({ patch: [{ id: 'n1', set: { qty: 2 } }] });
+    one.model.applyTransaction({ patch: [{ id: 'n3', set: { qty: 3 } }] });
+    expect(one.fake.calls.length - before).toBeGreaterThanOrEqual(round);
+  });
+
+  it('async: the next frame flushes first; without a timer nor a frame each one is applied at once', () => {
+    const frames: (() => void)[] = [];
+    const { model, changes } = nord({}, { frame: (fn) => void frames.push(fn) });
+    changes.length = 0;
+    model.applyTransactionAsync({ patch: [{ id: 'n1', set: { qty: 5 } }] });
+    expect(frames).toHaveLength(1);
+    frames.shift()!();
+    expect(qty(model, 'n1')).toBe(5);
+    const bare = nord({}, { timer: undefined });
+    bare.model.applyTransactionAsync({ patch: [{ id: 'n2', set: { qty: 6 } }] });
+    expect(qty(bare.model, 'n2')).toBe(6);
+  });
+
+  it('an edit of a column the server groups or totals by marks the order stale; another does not; reapply asks again and its answer ends it', () => {
+    const { fake, model, groups } = nord();
+    const reader = { version: 1, overlay: true, value: () => 'x' };
+    model.setReader!(reader as never, ['day']); // never: a reader of the test's own shape
+    expect(model.orderStale).toBe(false);
+    model.setReader!(reader as never, ['qty']); // never: as above — qty is totalled (sum)
+    expect(model.orderStale).toBe(true);
+    const asked = fake.calls.length;
+    model.reapply!('user');
+    expect(fake.calls.length).toBeGreaterThan(asked);
+    expect(model.orderStale).toBe(true);
+    groups(fake.calls.find((c, i) => i >= asked && c.req.group!.path.length === 0)!, ['Nord', 'Sud']);
+    expect(model.orderStale).toBe(false);
+    model.setReader!(reader as never, ['region']); // never: as above — the grouping column
+    expect(model.orderStale).toBe(true);
+  });
+
+  it('review: an unreadable answer asked after the edit leaves the order stale (as infiniteRows)', () => {
+    const { fake, model } = nord();
+    const reader = { version: 1, overlay: true, value: () => 'x' };
+    model.setReader!(reader as never, ['qty']); // never: a reader of the test's own shape
+    const asked = fake.calls.length;
+    model.reapply!('user');
+    fake.calls.find((c, i) => i >= asked && c.req.group!.path.length === 0)!.resolve({ nothing: true });
+    expect(model.orderStale).toBe(true);
+  });
+
+  it('close review: a patch whose id is unreadable is told at its place, without the row', () => {
+    const { model } = nord();
+    const r = model.applyTransaction({ patch: [{ id: { secret: 1 } as never, set: { qty: 1 } }] }); // never: an id no key can be made of, as a bad host sends it
+    expect(r.problems.map((p) => `${p.code} ${p.path}`)).toEqual(['invalid-row-id patch[0]']);
+    expect(JSON.stringify(r.problems)).not.toContain('secret');
+  });
+});

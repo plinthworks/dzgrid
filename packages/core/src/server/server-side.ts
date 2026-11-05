@@ -8,10 +8,12 @@ import { problem, type Problem } from '../problems.js';
 import { dataKey, groupKey, type DisplayIndex, type RowKey } from '../ids.js';
 import type { BlockLoadingNode, DataNode, FooterNode, GroupNode, LoadingNode, RowNode } from '../row/node.js';
 import type { TreeRows } from '../tree/shape.js';
+import type { RowTransaction, TransactionResult } from '../row/store.js';
 import type { AbortHandle } from '../abort.js';
 import { createBlockStore } from './blocks.js';
 import { createGate, type GateDiagnostics, type Ticket } from './gate.js';
 import { isThenable, plainAbort, readAnswer, wireCache } from './shared.js';
+import { heldTransactions } from './tx.js';
 import type { DataRequest, DataSource, GroupPart, GroupValue, Json } from './source.js';
 import { serverValues } from './values.js';
 import type { WireFilterModel } from './wire.js';
@@ -28,6 +30,8 @@ export interface ServerSideOptions {
   readonly concurrency?: number;
   /** After a jump of more than one block, nothing is asked until the window has rested this long (60 ms). */
   readonly restMs?: number;
+  /** `applyTransactionAsync` gathers what arrives within this delay into one change (50 ms, owner Q-TX A). */
+  readonly batchMs?: number;
   /** The grouping columns, the first level first (empty: one flat list). `grouping({ by })` of `@dzgrid/dom/grouping` wins. */
   readonly by?: readonly string[];
   /** Totals asked of the server, by column id, by Phase 7's names (a function is refused: the server computes them). */
@@ -73,6 +77,14 @@ export interface ServerSideModel<T> extends SourceHandle<T> {
   expandable(depth?: number): readonly RowKey[];
   /** Opens the groups held above `depth` (never a level not loaded: asked for more, told), or closes the open ones above it. */
   expandAll(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
+  /**
+   * A host's live change (server-side-groups.md « Live updates and edits »): the leaf rows held are updated or patched in
+   * place; grouped, an update, and any add or remove, asks the window again behind, rows kept (the server's counts and
+   * totals, never computed here). One change.
+   */
+  applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
+  /** The same, gathered: what arrives within `batchMs` or before the next frame is one change; `done` per transaction. */
+  applyTransactionAsync(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void;
 }
 
 /** What `serverSideRows` gives: a binding for the `source` setting. */
@@ -297,6 +309,9 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
   let version = 0;
   let told: Problem[] = [];
   let failure: ModelChange<T>['failure'];
+  let tx: TransactionResult | undefined;
+  /** An edit touched what the server orders, groups or totals by: the gate's count then (-1: none). */
+  let staleAt = -1;
   const mark = (k: Kind): void => {
     if (kind === null || RANK[k] > RANK[kind]) kind = k;
   };
@@ -324,10 +339,11 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     if (dirty) view = makeView();
     dirty = false;
     const k = kind;
-    const c: ModelChange<T> | null = k && !destroyed ? { source, displayed: view, kind: k, problems: problems(), ...(told.length > 0 && { told }), ...(failure && { failure }) } : null;
+    const c: ModelChange<T> | null = k && !destroyed ? { source, displayed: view, kind: k, problems: problems(), ...(told.length > 0 && { told }), ...(failure && { failure }), ...(tx && { transaction: tx }) } : null;
     kind = null;
     told = [];
     failure = undefined;
+    tx = undefined;
     if (c) for (const fn of [...listeners]) fn(c);
     const again = reask;
     reask = false;
@@ -541,7 +557,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       gate.forget?.(ch);
       if (verdict !== null || tickets.get(id) !== ticket) return;
       tickets.delete(id);
-      commit(() => (ok ? answer(lv, id, v, key) : fail(lv, id, v, key)), 'data');
+      commit(() => (ok ? answer(lv, id, v, key, ticket.seq) : fail(lv, id, v, key)), 'data');
     };
     try {
       const r: unknown = data.fetch({ ...parts, key, signal } as DataRequest);
@@ -564,7 +580,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     touch('rows');
   }
 
-  function answer(lv: Level, id: number, r: unknown, asked: string): void {
+  function answer(lv: Level, id: number, r: unknown, asked: string, seq: number): void {
     const n = id % B;
     const isLeaf = leaf(lv);
     const raw = r as { groups?: unknown; totals?: unknown } | null;
@@ -572,6 +588,8 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     answerProblems = a.problems;
     told.push(...a.problems);
     if (!a.rows) return fail(lv, id, a.problems[0], asked);
+    // Asked after the edit: in the server's order again.
+    if (seq > staleAt) staleAt = -1;
     // The grand totals as sent (Q-TOT A): any block of the first level may bring them.
     if (lv === root && !isLeaf && raw && 'totals' in raw) {
       if (plain(raw.totals)) root.totals = raw.totals;
@@ -750,6 +768,21 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
 
   commit(() => restart(), 'data');
 
+  const txs = heldTransactions(env, int(o.batchMs, 0, 50, 'batchMs'), {
+    store,
+    index,
+    commit,
+    changed(all, moved, bad) {
+      if (all.length) touch('rows');
+      // Grouped, a row updated may have changed its group's count and totals: the server's to say (Q-TOT A).
+      if (moved || (all.length && by.length)) refresh();
+      told.push(...bad);
+      tx = { kind: all.length || moved ? 'delta' : 'none', version: 0, added: [], updated: all, removed: [], problems: [] };
+    },
+    version: () => view.version,
+    dead: () => destroyed,
+  });
+
   /** Every group held above `depth`, in display order of their levels. */
   const groupsHeld = (depthBelow: number): RowKey[] => {
     const out: RowKey[] = [];
@@ -906,6 +939,17 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
         restart();
       }, source);
     },
+    // Edits (K.14): nothing moves; a column the server sorts, filters, searches, groups or totals by marks the order stale.
+    setReader(_r, changed) {
+      const read = [...(server.sort ?? []).map((s) => s.column), ...Object.keys(wire ?? {}), ...(server.quick?.trim() ? columns.visible().map((c) => c.id) : []), ...by, ...aggs.map((a) => a.column)];
+      if (changed ? changed.some((c) => read.includes(c)) : read.length > 0) staleAt = gate.diagnostics.begun;
+    },
+    reapply(source = 'api') {
+      commit(() => void (staleAt >= 0 && (refresh(), mark('order'))), source);
+    },
+    get orderStale() { return staleAt >= 0; },
+    applyTransaction: (t, source = 'api') => txs.apply(t, source),
+    applyTransactionAsync: (t, done) => txs.async(t, done),
     subscribe(fn) {
       listeners.add(fn);
       return () => void listeners.delete(fn);
@@ -915,6 +959,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       destroyed = true;
       listeners.clear();
       rest?.();
+      txs.stop();
       gate.destroy();
       for (const h of [...lists.values()]) h.close();
     },

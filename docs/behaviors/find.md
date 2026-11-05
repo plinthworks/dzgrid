@@ -57,5 +57,8 @@ Enter, Shift+Enter or the ↑ ↓ buttons, and closes with Escape.
 - A cell is the unit of a hit (not a word inside it): the focus and the keys work by cell.
 
 ## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D15)
-Ctrl+F searches the rows held only (the bar's note says, as for server pages, that only the rows loaded are searched),
-never ten million: the search reads `DisplayedRows.held`; loading rows hold no text.
+Ctrl+F searches the rows held only, never ten million: the search reads `DisplayedRows.held`; loading rows hold no text.
+The bar's note says so in words that fit a list with no pages (Phase 8 step 8): « Lignes chargées seulement » (« Loaded
+rows only », « الصفوف المحمّلة فقط »), key `find.held`, for `infiniteRows` and `serverSideRows` alike; server pages keep
+« Page chargée seulement ». The key is optional in an application's own bundle (made before 1.6): missing, the page's
+note shows.

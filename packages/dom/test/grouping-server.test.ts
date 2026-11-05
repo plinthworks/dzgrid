@@ -16,6 +16,9 @@ import { csvExport, type CsvExportOptions } from '../src/export.js';
 import { EN } from '../src/locales/en.js';
 import { EN_GROUP } from '../src/locales/en-group.js';
 import { EN_EXPORT } from '../src/locales/en-export.js';
+import { EN_EDIT } from '../src/locales/en-edit.js';
+import { edit } from '../src/edit.js';
+import { dataKey } from '@dzgrid/core';
 
 type R = { id: string; region: string; qty: number };
 let grids: GridInstance<R, any>[] = []; // any: the grid's second parameter (its features) is not under test
@@ -155,6 +158,44 @@ describe('grouping on a server-side model: what is forwarded', () => {
     expect(t.g.kernel.expansion.size).toBe(2);
     // Only the window asks: both groups' loading rows are in view.
     expect(t.calls.length - n).toBe(2);
+  });
+});
+
+describe('grouping on a server-side model: live updates and edits (step 8)', () => {
+  /** Nord opened, its two rows drawn. */
+  const opened = (t: ReturnType<typeof make>) => {
+    t.groups(t.calls[0]!, ['Nord', 'Sud']);
+    t.model.expand([t.g.kernel.rows.displayed.keyAt(0 as never)], true); // never: a position of the rows shown
+    t.leaves(t.calls.at(-1)!, 2);
+  };
+
+  it('a patch of a row held shows at once in its place, and the window is asked again behind (the server\'s totals)', () => {
+    const t = make();
+    opened(t);
+    const n = t.calls.length;
+    const r = t.model.applyTransaction({ patch: [{ id: 'Nord1', set: { qty: 42 } }] });
+    expect(r.updated).toEqual([dataKey('Nord1')]);
+    expect(cellText(t.row(2), 'qty')).toBe('42');
+    expect(t.calls.slice(n).map((c) => c.req.group!.path)).toContainEqual([]);
+    // Rows kept while asked again: the group row is still drawn above its rows.
+    expect(t.row(0).querySelector('.dzg-label')!.textContent).toBe('Nord (2)');
+  });
+
+  it('an edit of a totalled column: shown in place, the order said stale; reapply asks again and the answer ends it', async () => {
+    const ed = edit({ save: () => Promise.resolve() });
+    const t = make({ features: [grouping({ by: ['region'] }), ed], settings: { messages: { locale: 'en', text: { ...text.text, ...EN_EDIT.text } }, columns: [COLS[0], { ...COLS[1], editable: true }] } });
+    opened(t);
+    const ea = ed.api(t.g as never)!; // never: the grid's row type against the feature's own
+    ea.commit([{ key: dataKey('Nord0')!, column: 'qty', input: { text: '9' } }]);
+    await Promise.resolve();
+    expect(cellText(t.row(1), 'qty')).toBe('9');
+    expect(t.events.filter((e) => e.type === 'orderStale').map((e) => (e as { stale: boolean }).stale)).toEqual([true]);
+    const n = t.calls.length;
+    ea.reapply();
+    const top = t.calls.slice(n).find((c) => c.req.group!.path.length === 0)!;
+    expect(top).toBeDefined();
+    t.groups(top, ['Nord', 'Sud']);
+    expect(t.events.filter((e) => e.type === 'orderStale').map((e) => (e as { stale: boolean }).stale)).toEqual([true, false]);
   });
 });
 

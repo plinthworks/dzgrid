@@ -12,6 +12,7 @@ import type { AbortHandle } from '../abort.js';
 import { createBlockStore } from './blocks.js';
 import { createGate, type GateDiagnostics, type Ticket } from './gate.js';
 import { isThenable, plainAbort, readAnswer, wireCache } from './shared.js';
+import { heldTransactions } from './tx.js';
 import type { DataRequest, DataSource, Json } from './source.js';
 import { serverValues } from './values.js';
 import type { WireFilterModel } from './wire.js';
@@ -452,57 +453,19 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
   const apply = (): void => commit(() => void (win && store.want(win.lo, win.hi, win.keep, limit())), 'data');
 
   // ---- transactions (D11) ----
-  const take = (t: RowTransaction<T>, updated: RowKey[], bad: Problem[]): boolean => {
-    const put = (row: T, path: string): void => {
-      let id: unknown;
-      try {
-        id = env.getRowId(row);
-      } catch {}
-      const key = dataKey(id);
-      if (!key) return void bad.push(problem('invalid-row-id', 'error', path));
-      const n = index.get(key);
-      const b = n === undefined ? undefined : store.blocks.get(n);
-      if (!b?.rows) return;
-      b.rows = b.rows.map((x) => (x?.key === key ? { ...x, data: row } : x));
-      updated.push(key);
-    };
-    t.update?.forEach((r, i) => put(r, `update[${i}]`));
-    t.patch?.forEach((p, i) => {
-      const key = dataKey(p.id);
-      const n = key ? index.get(key) : undefined;
-      const node = n === undefined ? undefined : store.blocks.get(n)?.rows?.find((x) => x?.key === key);
-      if (node) put({ ...node.data, ...p.set } as T, `patch[${i}]`);
-    });
-    return !!(t.add?.length || t.remove?.length);
-  };
-  const result = (updated: RowKey[], moved: boolean, bad: Problem[]): TransactionResult => ({ kind: updated.length || moved ? 'delta' : 'none', version: view.version, added: [], updated, removed: [], problems: bad });
-  let batch: [RowTransaction<T>, ((r: TransactionResult) => void) | undefined][] = [];
-  let flushing: (() => void) | null = null;
-  const flush = (): void => {
-    flushing?.();
-    flushing = null;
-    const q = batch;
-    if (!q.length || destroyed) return;
-    batch = [];
-    const out: [RowKey[], boolean, Problem[]][] = [];
-    commit(() => {
-      let moved = false;
-      const all: RowKey[] = [];
-      for (const [t] of q) {
-        const u: RowKey[] = [];
-        const bad: Problem[] = [];
-        const m = take(t, u, bad);
-        moved ||= m;
-        out.push([u, m, bad]);
-        all.push(...u);
-      }
+  const txs = heldTransactions(env, batchMs, {
+    store,
+    index,
+    commit,
+    changed(all, moved, bad) {
       if (all.length) touch('rows');
       if (moved) refresh();
-      told.push(...out.flatMap((x) => x[2]));
+      told.push(...bad);
       tx = { kind: all.length || moved ? 'delta' : 'none', version: 0, added: [], updated: all, removed: [], problems: [] };
-    }, 'data');
-    q.forEach(([, done], i) => done?.(result(...out[i]!)));
-  };
+    },
+    version: () => view.version,
+    dead: () => destroyed,
+  });
 
   commit(() => restart(), 'data');
 
@@ -629,28 +592,8 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
       commit(() => void (staleAt >= 0 && (refresh(), mark('order'))), source);
     },
     get orderStale() { return staleAt >= 0; },
-    applyTransaction(t, source = 'api') {
-      const u: RowKey[] = [];
-      const bad: Problem[] = [];
-      let m = false;
-      commit(() => {
-        m = take(t, u, bad);
-        if (u.length) touch('rows');
-        if (m) refresh();
-        told.push(...bad);
-        tx = { kind: u.length || m ? 'delta' : 'none', version: 0, added: [], updated: u, removed: [], problems: [] };
-      }, source);
-      return result(u, m, bad);
-    },
-    applyTransactionAsync(t, done) {
-      if (destroyed) return;
-      batch.push([t, done]);
-      if (!env.timer && !env.frame) return flush();
-      if (batch.length > 1) return;
-      // 50 ms or the next frame, whichever comes first (Q-TX A): the first cancels the other.
-      flushing = env.timer?.(flush, batchMs) ?? null;
-      env.frame?.(flush);
-    },
+    applyTransaction: (t, source = 'api') => txs.apply(t, source),
+    applyTransactionAsync: (t, done) => txs.async(t, done),
     subscribe(fn) {
       listeners.add(fn);
       return () => void listeners.delete(fn);
@@ -660,7 +603,7 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
       destroyed = true;
       listeners.clear();
       rest?.();
-      flushing?.();
+      txs.stop();
       gate.destroy();
       for (const h of [...lists.values()]) h.close();
     },

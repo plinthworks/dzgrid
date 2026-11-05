@@ -174,8 +174,10 @@ export type FindMessageKey = `find.${'label' | 'count' | 'said' | 'none' | 'prev
 /** A find bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_FIND.text }`. */
 export interface FindMessages {
   readonly locale: string;
-  readonly text: { readonly [K in FindMessageKey]: MessageValue };
+  readonly text: { readonly [K in FindMessageKey]: MessageValue } & { readonly [K in FindHeldKey]?: MessageValue };
 }
+/** The bar's note on a list loaded in blocks (Phase 8, find.md): optional, missing the page's note shows. */
+export type FindHeldKey = 'find.held';
 
 /**
  * The row numbers' texts (`@dzgrid/dom/row-numbers`, 1.4.0, row-numbers.md), in their own bundles

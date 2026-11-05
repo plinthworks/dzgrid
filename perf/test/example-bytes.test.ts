@@ -37,7 +37,7 @@ describe('the initial files of an Angular build', () => {
 describe('the real example\'s ceiling', () => {
   it('is 98 800 in example:bytes (+2 % rule at 1.4.0, 2026-11-04, measured 98 624; 1.3.0: 97 400; owner 2026-10-28, Phase 6 step 12: measured 94 596; S12-Q10 92 500, S9-Q7 92 000, Q17a 90 000 before)', () => {
     const src = readFileSync(fileURLToPath(new URL('../../scripts/example.mjs', import.meta.url)), 'utf8');
-    expect(/const K8 = ([\d_]+);/.exec(src)?.[1]).toBe('99_000'); // +2 % rule at the Phase 7 close (measured 98 833); 1.4.0 (measured 98 624); 1.3.0 (2026-11-02, measured 97 173)
+    expect(/const K8 = ([\d_]+);/.exec(src)?.[1]).toBe('99_500'); // +2 % rule at the Phase 8 close (measured 99 425); Phase 7 close (measured 98 833); 1.4.0 (measured 98 624); 1.3.0 (2026-11-02, measured 97 173)
   });
 });
 
@@ -50,7 +50,7 @@ describe.skipIf(skip)('K.8 from the real ng build', () => {
     const m = measureExample(EXAMPLE);
     expect(m.audit.files.length).toBeGreaterThan(0);
     expect(m.baseline.total).toBeGreaterThan(20_000);
-    expect(m.share).toBeLessThanOrEqual(99_000); // the K8 line, +2 % rule at the Phase 7 close
+    expect(m.share).toBeLessThanOrEqual(99_500); // the K8 line, +2 % rule at the Phase 7 close
     // DzGrid loads with the page: a share far below the esbuild profile would mean it did not.
     expect(m.share).toBeGreaterThan(40_000);
     expect(m.wrapper.min).toBeGreaterThan(0);

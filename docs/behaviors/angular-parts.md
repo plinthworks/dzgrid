@@ -150,6 +150,18 @@ one `missing-feature` (path `pinnedRows`).
 5. `rowGroups` rides in `[state]` / `(stateChanged)` (grid-state.md « Row grouping »).
 6. The « real app » example does not group (owner Q-RA A); its bytes are measured, the wrapper's growth only.
 
+### A server's list in blocks or grouped on the server (Phase 8 step 8, Q-NG A)
+1. `[source]` takes `infiniteRows(data, …)` or `serverSideRows(data, …)` as it takes `sourceRows`: no new input.
+2. `DzgController.refresh()` paints again, as before. `refresh({})` first asks the server again for the window, its rows
+   kept (the thin busy line); `refresh({ purge: true })` lets every block go and starts again at the top. (Two overloads:
+   `refresh()` is unchanged for the API guard.)
+3. `applyTransaction(tx)`: the client grid's rows, or the rows held of a list in blocks (row-transactions-async.md,
+   server-side-groups.md « Live updates and edits »); null without a grid or on server pages.
+   `applyTransactionAsync(tx, done?)`: gathered by a block list (50 ms or the next frame); elsewhere applied at once,
+   `done` called with its result.
+4. `[(groupBy)]` on `serverSideRows`: the host's value is the server's grouping (one grouped request); a user's regroup
+   comes back through `groupByChange` and asks the server again.
+
 ### `(densityChanged)`
 The user's density (the ⋮ menu's density line), a state restore, the api. One-way: the `density` input is not written
 back; after a user's choice the grid holds it, and the host imposes again by binding a **new** value.

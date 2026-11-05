@@ -198,6 +198,8 @@ describe('infinite scroll: every walk bounded, combinations refused (D15, D17)',
     expect(fd.api(t.g)!.open('n7')).toBe(true);
     expect(fd.api(t.g)!.state()).toMatchObject({ count: 1 });
     expect(performance.now() - start).toBeLessThan(2000);
+    // The bar's note fits a list with no pages (find.md « A list loaded in blocks »).
+    expect(t.q('.dzg-find-note')!.textContent).toBe('Loaded rows only');
     // No pager: the model has no page.
     expect(t.host.querySelector('.dzg-pager button')).toBeNull();
     // Print: the rows held (10), not ten million.
@@ -207,6 +209,15 @@ describe('infinite scroll: every walk bounded, combinations refused (D15, D17)',
       expect(performance.now() - p0).toBeLessThan(2000);
       done?.();
     });
+  });
+
+  it('find: a bundle made before 1.6, without find.held, shows the page\'s note', () => {
+    const fd = find({ debounceMs: 0 });
+    const { 'find.held': _, ...old } = EN_FIND.text;
+    const t = server(100, { features: [fd], settings: { messages: { locale: EN.locale, text: { ...EN.text, ...old } } } });
+    t.answer(t.calls[0]!);
+    fd.api(t.g)!.open('n1');
+    expect(t.q('.dzg-find-note')!.textContent).toBe('Loaded page only');
   });
 
   it('cells spanning rows, row gaps and a tree are refused beside blocks; header groups alone are kept', () => {
@@ -259,6 +270,17 @@ describe('infinite scroll: step 5 — the block of cells, exports, edits, live u
     t.answer(t.block(1));
     expect(api.set({ anchor: { row: dataKey('r2')!, column: 'name' }, focus: { row: dataKey('r15')!, column: 'id' } })).toBe(true);
     expect(api.copy()!.text.split('\r\n').filter(Boolean)).toHaveLength(14);
+  });
+
+  it('close review: a paste taller than the rows held below its cell is refused (rows-not-loaded), never walked to the end', () => {
+    const blocks = range();
+    const t = server(1000, { features: [blocks, edit({ save: () => Promise.resolve() })], settings: { messages: texts, columns: [{ id: 'name', editable: true }, { id: 'id' }] } });
+    t.answer(t.calls[0]!);
+    const api = blocks.api(t.g)!;
+    api.set({ anchor: { row: dataKey('r8')!, column: 'name' }, focus: { row: dataKey('r8')!, column: 'id' } });
+    expect(api.paste('a\nb\nc\nd')).toMatchObject({ pasted: 0 });
+    expect(told(t)).toContain('rows-not-loaded warning range');
+    expect(api.paste('a\nb')).toMatchObject({ outside: 0 });
   });
 
   it('the fill: a target or a block over rows not loaded fills nothing (never with holes); inside the rows held it fills', () => {

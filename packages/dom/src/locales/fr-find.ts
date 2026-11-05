@@ -12,5 +12,6 @@ export const FR_FIND = {
     'find.next': "Résultat suivant",
     'find.close': "Fermer la recherche",
     'find.page': "Page chargée seulement",
+    'find.held': "Lignes chargées seulement",
   },
 } satisfies FindMessages;

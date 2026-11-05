@@ -1,5 +1,5 @@
 import { Injectable, computed, signal, untracked } from '@angular/core';
-import { makeQuery, type GridCommand, type GridCommandResult, type GridKernel, type Problem, type RowKey, type RowModel } from '@dzgrid/core';
+import { makeQuery, type GridCommand, type GridCommandResult, type GridKernel, type Problem, type RowKey, type RowModel, type RowTransaction, type TransactionResult } from '@dzgrid/core';
 import type { GridFeature, GridInstance } from '@dzgrid/dom';
 import type { EditApi } from '@dzgrid/dom/edit';
 import type { RangeApi } from '@dzgrid/dom/range';
@@ -7,6 +7,8 @@ import type { FillApi } from '@dzgrid/dom/fill';
 import type { GridStateApi } from '@dzgrid/dom/state';
 import type { GroupingApi } from '@dzgrid/dom/grouping';
 
+/** A model that takes a host's live changes: the client's, `infiniteRows`', `serverSideRows`'. */
+type Live<T> = { applyTransaction?(tx: RowTransaction<T>, source?: 'api'): TransactionResult; applyTransactionAsync?(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void };
 type FilterOpener = GridFeature & { openFilter(column: string): boolean; closeFilter(): void };
 
 /**
@@ -51,8 +53,27 @@ export class DzgController<T = unknown> {
   ensureColumnVisible(column: string): void {
     this.#api()?.ensureColumnVisible?.(column);
   }
-  refresh(): void {
+  /** Paints again. */
+  refresh(): void;
+  /**
+   * The rows asked of the server again, then painted (Phase 8, Q-NG A): the window behind the rows shown (the thin busy
+   * line), or with `{ purge: true }` everything let go and the list back at its top.
+   */
+  refresh(o: { readonly purge?: boolean }): void;
+  refresh(o?: { readonly purge?: boolean }): void {
+    if (o) untracked(this.kernel)?.rows.invalidate(o);
     this.#api()?.refresh();
+  }
+  /** A host's live change (row-transactions-async.md): the client's rows, or the rows held of a list in blocks. Null without a grid or on pages. */
+  applyTransaction(tx: RowTransaction<T>): TransactionResult | null {
+    return (untracked(this.kernel)?.rows as Live<T> | undefined)?.applyTransaction?.(tx, 'api') ?? null;
+  }
+  /** The same, gathered by a list in blocks (50 ms or the next frame); elsewhere applied at once. `done` with its result. */
+  applyTransactionAsync(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void {
+    const rows = untracked(this.kernel)?.rows as Live<T> | undefined;
+    if (rows?.applyTransactionAsync) return rows.applyTransactionAsync(tx, done);
+    const r = this.applyTransaction(tx);
+    if (r) done?.(r);
   }
   announce(text: string): void {
     this.#api()?.announce(text);

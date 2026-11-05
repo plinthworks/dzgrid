@@ -12,5 +12,6 @@ export const EN_FIND = {
     'find.next': "Next result",
     'find.close': "Close find",
     'find.page': "Loaded page only",
+    'find.held': "Loaded rows only",
   },
 } satisfies FindMessages;

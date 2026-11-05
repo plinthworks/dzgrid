@@ -1152,7 +1152,7 @@ questions.md`); the lead's decisions and measures in `docs/phase-7-steps/decisio
   multi-line union member as a change); the listening §26; Q-SE B on his screens; the §5.2 ceiling of the core's
   sub-entries.
 
-## Phase 8 — infinite scroll and the server-side row model (started 2026-11-05)
+## Phase 8 — infinite scroll and the server-side row model (started 2026-11-05, closed 2026-11-05)
 
 Plan `docs/phase-8-plan.md`; owner « ★ partout, tailles OK » (2026-11-05, `docs/phase-8-steps/questions.md`); the lead's
 decisions and measures `docs/phase-8-steps/decisions.md`.
@@ -1194,4 +1194,28 @@ decisions and measures `docs/phase-8-steps/decisions.md`.
   order), `ExportRequest.server.group`; refusals kept beside `sourceRows` / `infiniteRows`. jsdom 8; browser
   `node scripts/browser-server-groups.mjs --engine all` 30 / 30 (axe 0 fr / ar, RTL keys in three engines). In-row Retry
   raised above the cells beside (it could not be clicked, theme +5 B). `dom/grouping` 4 782 / 5 100, `dom/state` 1 264.
-- [ ] Step 8 — Angular and demos. Step 9 — close.
+- [x] **Step 8 — Angular and demos, and the two gaps of steps 5–7** (not committed): `serverSideRows` takes transactions
+  (`applyTransaction`, `applyTransactionAsync`, `batchMs`; grouped, an update also asks the window again: the server's
+  totals) and edits (`orderStale`, `reapply`: a column sorted, filtered, searched, grouped or totalled by the server);
+  `server/tx.ts` shared with `infiniteRows`; the find note on a block list « Lignes chargées seulement » (`find.held`,
+  optional). Angular `DzgController.refresh({ purge })` (an overload), `applyTransaction`, `applyTransactionAsync`;
+  `[(groupBy)]` on a server-side source tested. Local demos `playground/infini.html`, `playground/groupes-serveur.html`
+  (out of git), Chrome: no console error, fr / ar dark.
+
+### Phase 8 — close (2026-11-05, step 9; not committed)
+- Architect check against ARCHITECTURE and plan §6, and a code review of step 8: fixed with failing tests first (a stale
+  order cleared by an unreadable answer; a `patch` with an unreadable id dropped silently; a paste taller than the rows
+  held walking to the list's end, now refused `rows-not-loaded`); the layering test guards `server/tx.ts`. Left, noted:
+  `docs/phase-8-steps/decisions.md` « Review (step 8) ».
+- Exit criteria (§6): sheets first; `server-gate` 22 old + 7 block cases, `block-cache` 19; 10⁷ rows in Chrome, Firefox,
+  WebKit at 0 px, held ≤ `maxBlocks` every step (node) and every frame (Chrome); purge on a sort or filter, 0 stale over
+  1 000 permutations; loading rows accessible, axe 0 fr / ar; server groups with typed keys, totals as sent (planted wrong
+  total), `aria-level` / `setsize` / `expanded`; walks bounded (planted 10⁷); no `Date`, no row value in a Problem;
+  refusals told; server pages and client grids unchanged (suites untouched); final gate green; `test:real-app` 58 / 58.
+  The listening §27 is the owner's to schedule.
+- Budgets (owner rule): new entries at measure + 10 % (`core/infinite` 8 990, `core/server-side` 12 160); existing lines
+  +2 % at most (angular 7 900; real example 99 500, measured 99 426); K.8 profile 89 976 / 90 000 held.
+- Gate (`npm run gate:step`): test:ci 587 files, 8 627 tests (3 skipped); test:tz both zones green; typecheck; build;
+  check:size 0 over; check:api additions only.
+- For the owner: the version (CHANGELOG « Unreleased — 1.5.0 » carries Phases 7 and 8); K.8 has 24 B left; the listening
+  §27; Q-SE on his screens.

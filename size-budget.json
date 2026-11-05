@@ -52,12 +52,12 @@
     },
     "@dzgrid/core/infinite": {
       "file": "packages/core/src/infinite.ts",
-      "maxGzip": 8580,
+      "maxGzip": 8990,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/server-side": {
       "file": "packages/core/src/server-side.ts",
-      "maxGzip": 11265,
+      "maxGzip": 12160,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/edit": {
@@ -1070,7 +1070,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 7810,
+      "maxGzip": 7900,
       "external": [
         "@angular/*",
         "@dzgrid/*",

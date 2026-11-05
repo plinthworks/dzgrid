@@ -61,7 +61,23 @@ Arabic.
 - The DOM grouping's `by` and options reach the model at creation (one grouped first request); `setBy` is a new epoch; a
   state's `rowGroups` restored in its one request whatever the order of the features; an export of « all » or « selected »
   carries `server.group = { by, path: [], aggs }`.
-- Not built: transactions and edits on a server-side grid.
+- Transactions and edits: see « Live updates and edits » below (Phase 8 step 8).
+
+## Live updates and edits (Phase 8 step 8, owner Q-TX A applied to groups)
+- The same calls as `infiniteRows` (`row-transactions-async.md`): `applyTransaction(tx)` and `applyTransactionAsync(tx,
+  done?)` on the model (`grid.kernel.rows`, Angular's controller), `batchMs` (50 ms) and the next frame, `done` per
+  transaction in order.
+- `update` / `patch`: a leaf row held, at any level, is replaced in place at once (a new object for a patch); a row not
+  held is left to the server; a group row is never a row id (ignored). Nothing moves.
+- Grouped, a row updated may belong to another group now, and its groups' counts and totals may have changed: the
+  browser never recomputes them (Q-TOT A). So an update of a row held in a grouped grid also asks the window again
+  behind, its rows kept (the thin busy line if slow), every other block stale — as an `add` or a `remove` does. The open
+  groups stay open. Not grouped, an update asks nothing (as `infiniteRows`).
+- `add` / `remove`: the window asked again with its rows kept, the other blocks stale, the open groups kept.
+- Edits (K.14): an edit changes the row held where it is shown; nothing moves. An edit of a column the server sorts,
+  filters, searches, groups or totals by marks the order stale (`orderStale`); « Réappliquer » (`rows.reapply`) asks
+  the window again with its rows kept; the first answer asked after the edit ends the mark.
+- A row id that names nothing is told (`invalid-row-id`, path `update[i]` / `patch[i]`), never with the row.
 
 ## Tests (written before the code, steps 6–7)
 Conformance `server-side/*` (request per level, typed paths and keys, a custom aggregation refused, a planted wrong

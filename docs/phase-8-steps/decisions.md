@@ -135,3 +135,54 @@ Below: what the lead took alone while applying them (steps 1–4), and the measu
 
 - `locales/ar-range` line 500 → 535 (« 1 oui »).
 - `RangeMessages`, `EN_RANGE`, `FR_RANGE`, `AR_RANGE` gain the optional `range.notLoaded`: accepted in api/ (« 2 oui »).
+
+## Decisions taken alone (step 8, and the two gaps of steps 5–7)
+- **Transactions on a server-side grid** (sheet `server-side-groups.md` « Live updates and edits »): the same calls and
+  `batchMs` as `infiniteRows`; `update` / `patch` replace a leaf row held at any level in place; **grouped, an update of a
+  row held also asks the window again behind, rows kept** — the row may belong to another group now and its groups' counts
+  and totals are the server's (Q-TOT A), never recomputed. Not grouped, an update asks nothing. `add` / `remove` ask the
+  window again, the open groups kept. A group row is never a row id.
+- **Edits on a server-side grid**: the order is marked stale by an edit of a column the server sorts, filters, searches,
+  **groups or totals** by; `reapply` asks the window again; the first answer asked after the edit clears the mark.
+- **One code for both block models**: `server/tx.ts` (internal) holds the in-place update and the batch (timer or frame,
+  first wins); `infiniteRows` moved onto it (its tests untouched and green; +91 B in `core/infinite`).
+- **The find bar's note** on a list in blocks (`infiniteRows`, `serverSideRows`): « Lignes chargées seulement » (« Loaded
+  rows only », « الصفوف المحمّلة فقط »), key `find.held`, optional in a bundle (`FindHeldKey`): a bundle made before keeps
+  the page's note. Server pages keep « Page chargée seulement ».
+- **Angular** (Q-NG A): `refresh(o)` as an **overload** beside `refresh()` — the guard read the optional parameter added
+  to the one signature as a change of `DzgController`; with the overload `check:api` sees additions only. With an argument
+  it calls `rows.invalidate(o)` (the `rows.refresh` command is left as it is: a `purge` in `GridCommand` would change a
+  core union). `applyTransaction` returns null without a grid or on server pages; `applyTransactionAsync` falls back to an
+  immediate apply (with `done`) on a model without batching (the client's).
+- **Demos** (local, `.git/info/exclude`): `playground/infini.html` (10⁷ rows of `perf/fake-server.ts`; the resource column
+  left out: its made-up kinds read as a work domain), `playground/groupes-serveur.html` (120 000 made-up sales of a
+  fictitious bookshop grouped by a server simulated in the page). Both load in Chrome with no console error (fr, ar dark).
+
+## Review (step 8)
+- Fixed: on the server-side model an answer asked after an edit cleared the stale order **before** it was read, so an
+  unreadable answer cleared it too (`infiniteRows` clears it after reading). Moved into `answer` after the rows are read
+  (test « review: an unreadable answer… », shown to fail first).
+- Left, noted: the batch arms a timer and a frame; the frame cannot be cancelled (`ModelEnv.frame` returns nothing), so
+  when the timer wins, the frame later flushes whatever batch began since — at most earlier than `batchMs`, never later
+  (the rule is « whichever comes first »).
+- Fixed (architect check): a `patch` whose id is unreadable was dropped without a word; told now (`invalid-row-id`,
+  `patch[i]`, never the row) on both block models (test). A paste taller than the rows held below its cell walked the rows
+  not loaded to the end of the list (`planPaste`): `dom/range` now refuses it as a paste over them (`rows-not-loaded`,
+  « Certaines lignes… »), checked by `boxHeld` before planning (test shown to fail first). `@dzgrid/core/range` `planPaste`
+  itself is unchanged (a host calling it on a block list walks; its line had no room: 3 260 / 3 264). The layering test
+  now guards `server/tx.ts` like the block code.
+- Checked, not a bug: bulk edit (`fill`) over a box not held is already refused (`boxOf` reads `boxHeld`).
+- Left, noted: `dom/grouping`'s `*` (open the siblings) walks every row of the open groups, loading leaves included;
+  `aria-setsize` -1 is tested in the core only; the DOM permutations (`perf/permutation.ts`) were not extended with scroll
+  gestures (the 1 000 permutations run on the core model).
+
+## Measures (step 8 and the close)
+- Sizes: `core/infinite` 8 173 (line 8 580 → **8 990**, new entry at measure + 10 %); `core/server-side` 11 056 (11 265
+  → **12 160**); angular 7 884 (7 810 → **7 900**, +1.2 %); `dom/range` 5 139 / 5 200; `dom/find` 2 634 / 2 650;
+  `locales/{en,fr,ar}-find` 196 / 228 / 280 (250 / 250 / 300); core base 29 258 / 29 300, dom base 23 650 / 23 660,
+  **K.8 profile 89 976 / 90 000** (24 B left); real Angular example (`example:bytes`) **99 425** (line 99 000 → **99 500**,
+  +0.5 %, owner's +2 % rule).
+- `check:api`: additions only (the `refresh` overload).
+- Demos: http://localhost:4700/infini.html and http://localhost:4700/groupes-serveur.html (fr; `?lang=ar&theme=dark`):
+  no console error in Chrome; Ctrl+End, find (« Lignes chargées seulement »), live updates, a group opened, a sale added
+  (the server's total follows), all driven once.

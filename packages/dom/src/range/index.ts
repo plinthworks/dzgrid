@@ -364,7 +364,8 @@ export function range(o: RangeOptions = {}): RangeFeature {
       /** `d`: the rows the target lives in (a band's: a paste past its last row is counted outside, pinned-rows.md 17). */
       const put = (b: RangeBox, src: string[][] | false | null, text: string, source: 'user' | 'api', d: DisplayedRows<unknown>): PasteCounts => {
         const c = zero();
-        if (src === null) return c;
+        // A list in blocks: a paste running past the rows held below its cell is refused, as one over them (never walked).
+        if (src === null || (src && unheld({ ...b, bottom: Math.max(b.bottom, b.top + src.length - 1) }, d))) return c;
         const p = src && planPaste(src.map((r) => r.map((t) => ({ text: t }))), b, d, columns.visible(), { max: cap });
         if (!p || p.tooBig) return (c.tooBig = true), speak('range.tooBig', { max: cap }), c;
         c.outside = p.outside;

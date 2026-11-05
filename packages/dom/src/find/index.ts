@@ -200,7 +200,8 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
     shut.setAttribute('aria-label', g.msg('find.close'));
     count.textContent = hits.length ? g.msg('find.count', { i: num(cur + 1), n: num(hits.length) }) : text ? g.msg('find.none') : '';
     note.hidden = g.rows.kind !== 'source';
-    note.textContent = note.hidden ? '' : g.msg('find.page');
+    // A list in blocks: its rows held, no page (find.md); a bundle without the key, the page's note.
+    note.textContent = note.hidden ? '' : g.msg((g.rows.displayed.held && g.settings.messages.text['find.held'] !== undefined ? 'find.held' : 'find.page') as 'find.page');
     // The letters, inside the hit cells the grid draws (the lazy chunk).
     tint?.(hits.length ? [text, byRow] : null);
     // No hit: every mark gone, a pooled row's too (re-mounted later, it would keep it).

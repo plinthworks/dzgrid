@@ -12,5 +12,6 @@ export const AR_FIND = {
     'find.next': "النتيجة التالية",
     'find.close': "إغلاق البحث",
     'find.page': "الصفحة المحمّلة فقط",
+    'find.held': "الصفوف المحمّلة فقط",
   },
 } satisfies FindMessages;
