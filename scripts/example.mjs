@@ -24,7 +24,7 @@ import { measureSplit } from './size-split.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const EXAMPLE = join(ROOT, 'examples/angular-audit');
-const K8 = 98_800; // +2 % rule 2026-11-04 (1.4.0: measured 98 624); 2026-11-02 (1.3.0: measured 97 173 → 97 400; 1.2.0: 95 054 → 95 500); owner 2026-10-28 (Phase 6 step 12, decisions.md « Real Angular example line »: measured 94 596; the build had been broken since 1.0.0); owner S12-Q10 92 500 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
+const K8 = 99_000; // +2 % rule, Phase 7 close 2026-11-05 (measured 98 833: the base seams, [(groupBy)]); 2026-11-04 (1.4.0: measured 98 624); 2026-11-02 (1.3.0: measured 97 173 → 97 400; 1.2.0: 95 054 → 95 500); owner 2026-10-28 (Phase 6 step 12, decisions.md « Real Angular example line »: measured 94 596; the build had been broken since 1.0.0); owner S12-Q10 92 500 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const option = (name, fallback) => {

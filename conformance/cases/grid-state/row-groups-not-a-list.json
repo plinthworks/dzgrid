@@ -1,0 +1,78 @@
+{
+  "id": "row-groups-not-a-list",
+  "suite": "grid-state",
+  "description": "`rowGroups` not a list: told at `rowGroups`, the grouping left as it was (« Row grouping » 2).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "month",
+        "header": "Month"
+      },
+      {
+        "id": "amount",
+        "type": "number"
+      },
+      {
+        "id": "code",
+        "groupable": false
+      }
+    ],
+    "rowGroups": [
+      "month"
+    ],
+    "restore": {
+      "v": 1,
+      "rowGroups": "ward"
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "rowGroups"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "month",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "amount",
+          "order": 2,
+          "pinned": null
+        },
+        {
+          "id": "code",
+          "order": 3,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": [
+        "month"
+      ]
+    },
+    "by": [
+      "month"
+    ]
+  }
+}

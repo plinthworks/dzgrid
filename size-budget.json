@@ -1,5 +1,5 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 90 000 (owner step 16, 2026-10-29: « ok pour les hausses » — K.8 84 950 → 90 000, set chunk 4 350 → 4 500, core/detail 1 050 → 1 150, Angular 7 350 → 7 450, core/compare 300 new; owner 2026-11-03: Angular 7 450 → 7 650 (component classes in ui.cell); before: owner « set include only » (2026-10-29): 84 900 → 84 950, set chunk 4 250 → 4 350, core/edit 3 150 → 3 160, core/state 1 500 → 1 510). A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ».",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 90 000 (owner step 16, 2026-10-29: « ok pour les hausses » — K.8 84 950 → 90 000, set chunk 4 350 → 4 500, core/detail 1 050 → 1 150, Angular 7 350 → 7 450, core/compare 300 new; owner 2026-11-03: Angular 7 450 → 7 650 (component classes in ui.cell); before: owner « set include only » (2026-10-29): 84 900 → 84 950, set chunk 4 250 → 4 350, core/edit 3 150 → 3 160, core/state 1 500 → 1 510). A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ». Phase 7 close (2026-11-05, owner rule Q-B 2026-11-04): a new entry's line is its measure + 10 % rounded up to 50 (core/grouping 4 468 → 4 950, dom/grouping 4 612 → 5 100; group-zone, the -group locales and grouping.css as set at step 6); an existing line moves by 2 % at most (core/state 1 510 → 1 540, core/csv 2 000 → 2 040, core/xlsx 7 100 → 7 150, dom/print 1 600 → 1 632, export run 5 300 → 5 350, angular 7 665 → 7 810, dom/state 1 224 → 1 240): rowGroups, grouped files and print, [(groupBy)].",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
@@ -17,12 +17,12 @@
     },
     "@dzgrid/core/csv": {
       "file": "packages/core/src/csv.ts",
-      "maxGzip": 2000,
+      "maxGzip": 2040,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/xlsx": {
       "file": "packages/core/src/xlsx.ts",
-      "maxGzip": 7100,
+      "maxGzip": 7150,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/rules": {
@@ -47,7 +47,7 @@
     },
     "@dzgrid/core/grouping": {
       "file": "packages/core/src/grouping.ts",
-      "maxGzip": 4750,
+      "maxGzip": 4950,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/edit": {
@@ -62,7 +62,7 @@
     },
     "@dzgrid/core/state": {
       "file": "packages/core/src/state.ts",
-      "maxGzip": 1510,
+      "maxGzip": 1540,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/row-gaps": {
@@ -515,7 +515,7 @@
     },
     "@dzgrid/dom/export: run (lazy)": {
       "file": "packages/dom/src/export/run/index.ts",
-      "maxGzip": 5300,
+      "maxGzip": 5350,
       "over": "@dzgrid/core",
       "external": [
         "@dzgrid/core/internal",
@@ -576,7 +576,7 @@
     },
     "@dzgrid/dom/grouping": {
       "file": "packages/dom/src/grouping.ts",
-      "maxGzip": 4878,
+      "maxGzip": 5100,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -797,7 +797,7 @@
     },
     "@dzgrid/dom/state": {
       "file": "packages/dom/src/state.ts",
-      "maxGzip": 1224,
+      "maxGzip": 1240,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -850,7 +850,7 @@
     },
     "@dzgrid/dom/print": {
       "file": "packages/dom/src/print.ts",
-      "maxGzip": 1600,
+      "maxGzip": 1632,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -1060,7 +1060,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 7665,
+      "maxGzip": 7810,
       "external": [
         "@angular/*",
         "@dzgrid/*",

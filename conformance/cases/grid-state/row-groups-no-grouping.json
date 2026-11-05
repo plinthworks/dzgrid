@@ -1,0 +1,66 @@
+{
+  "id": "row-groups-no-grouping",
+  "suite": "grid-state",
+  "description": "A grid without grouping ignores `rowGroups`, says nothing, and never writes it (« Row grouping » 1, 3).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "month",
+        "header": "Month"
+      },
+      {
+        "id": "amount",
+        "type": "number"
+      },
+      {
+        "id": "code",
+        "groupable": false
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "rowGroups": [
+        "ghost",
+        "ward"
+      ]
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "month",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "amount",
+          "order": 2,
+          "pinned": null
+        },
+        {
+          "id": "code",
+          "order": 3,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

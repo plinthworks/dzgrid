@@ -57,6 +57,8 @@ export interface XlsxOptions<T = any> {
   readonly xlsxStyle?: (c: XlsxStyleContext<T>) => XlsxStyle | null | undefined;
   /** Rows per sheet piece; default 500. */
   readonly chunkRows?: number;
+  /** A grouped grid's group, footer and grand total rows (Phase 7): written (default), or `false` for the data rows only. */
+  readonly groupRows?: boolean | undefined;
 }
 
 /** What the file is written from: CSV's input, and the grid's layout. */
@@ -119,7 +121,10 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   const n = cols.length;
   const at = i.at ?? null;
   const total = n ? (at ? at.length : rows.count) : 0;
-  const levelAt = o.tree === 'none' ? undefined : rows.levelAt;
+  // `groupRows: false`: data rows only, flat (xlsx-export.md « Grouped rows » 4).
+  const flat = o.groupRows === false;
+  const skip = (nd: RowNode<T>) => nd.kind === 'detail' || nd.key[0] === 'l' || (flat && nd.kind !== 'data');
+  const levelAt = o.tree === 'none' || flat ? undefined : rows.levelAt;
   const lead = levelAt && o.tree === 'level' ? 1 : 0;
   const outline = !!levelAt && !lead;
   const W = n && n + lead;
@@ -219,8 +224,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   if (outline) {
     for (let k = 0; k < total; k++) {
       const r = (at ? at[k]! : k) as DisplayIndex;
-      const nd = rows.nodeAt(r);
-      if (nd.kind === 'detail' || nd.key[0] === 'l') continue;
+      if (skip(rows.nodeAt(r))) continue;
       const lv = levelAt!.call(rows, r);
       if (lv > OUTLINE) deep++;
       top = Math.max(top, Math.min(lv, OUTLINE));
@@ -247,12 +251,14 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   // A span's origin column not written (j -1): its slots counted under the first column rather than a path `[-1]`.
   const more = (m: Map<number, number>, j: number) => m.set(Math.max(0, j), (m.get(Math.max(0, j)) ?? 0) + 1);
   const indents = new Map<string, number>();
-  type Cell = (ref: string, node: DataNode<T>, lv: number) => string;
+  type Cell = (ref: string, node: RowNode<T>, lv: number) => string;
   const cellOf = (col: ResolvedColumn<T>, j: number): Cell => {
     const c = col.codec;
     const type = display || col.def.csv === 'text' ? 'text' : c.kind === 'number' ? 'number' : col.type;
     const fmt = type === 'day' ? 14 : type === 'instant' ? 22 : type === 'number' ? numFmtFor(col.def.numberFormat, ctx) : 0;
     const tree = outline && j === treeAt;
+    const fns = i.aggFuncs;
+    const fn = fns && Object.hasOwn(fns, col.id) ? fns[col.id] : col.def.aggFunc;
     /** The cell's look at a tree level: its format, the indent in the tree column. */
     const lookAt = (lv: number, f: string | number): CellLook => ({ fmt: f, ...(tree && lv && { indent: Math.min(lv, OUTLINE) }) });
     const styleAt = (lv: number, f: string | number): number => {
@@ -270,25 +276,41 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
     };
     return (ref, node, lv) => {
       let v: unknown;
-      try {
-        v = readValue(col, node, env);
-      } catch {
-        v = null;
-      }
+      let t = type;
       let f: string | number = fmt;
+      // A group's or a totals row's total (« Grouped rows » 3): typed as the column's cells; a count a plain number; an
+      // application's result read by the column (unreadable: no cell). Never counted blank.
+      const total = node.kind !== 'data';
+      if (total) {
+        v = (node as { aggs?: Record<string, unknown> }).aggs?.[col.id] ?? undefined;
+        if (v !== undefined && fn === 'count') (t = 'number'), (f = 0);
+        else if (v !== undefined && typeof fn == 'function') {
+          try {
+            v = c.coerce(v, ctx) ?? undefined;
+          } catch {
+            v = undefined;
+          }
+        }
+      } else {
+        try {
+          v = readValue(col, node, env);
+        } catch {
+          v = null;
+        }
+      }
       let w: (st: number) => string = (st) => (st ? `<c r="${ref}" s="${st}"/>` : '');
-      if (v === undefined) counts.blank++;
+      if (v === undefined) total || counts.blank++;
       else {
         try {
           if (v === null) throw 0;
-          if (type === 'text') {
+          if (t === 'text') {
             const s = display ? c.format(v, ctx) : c.toExport(v);
             w = (st) => text(ref, s, st);
-          } else if (type === 'number' && typeof v == 'number') {
+          } else if (t === 'number' && typeof v == 'number') {
             if (!Number.isFinite(v)) throw 0;
             w = (st) => numCell(ref, v as number, st);
-          } else if ((type === 'day' || type === 'instant') && v !== null) {
-            const day = type === 'day';
+          } else if ((t === 'day' || t === 'instant') && v !== null) {
+            const day = t === 'day';
             const ms = day ? 0 : wall(v as number);
             const s = day ? serialOfDay(v as Day) : ms / DAY + EPOCH >= 61 ? ms / DAY + EPOCH : null;
             if (s === null) {
@@ -298,18 +320,19 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
               f = 0;
               w = (st) => text(ref, t, st);
             } else w = (st) => numCell(ref, s, st);
-          } else if (type === 'boolean' && typeof v == 'boolean') w = (st) => `<c r="${ref}"${sAttr(st)} t="b"><v>${v ? 1 : 0}</v></c>`;
+          } else if (t === 'boolean' && typeof v == 'boolean') w = (st) => `<c r="${ref}"${sAttr(st)} t="b"><v>${v ? 1 : 0}</v></c>`;
           else {
-            const s = type === 'enum' && o.enums !== 'code' ? c.format(v, ctx) : c.toExport(v);
+            const s = t === 'enum' && o.enums !== 'code' ? c.format(v, ctx) : c.toExport(v);
             w = (st) => text(ref, s, st);
           }
         } catch {
-          counts.invalid++;
+          // A total that cannot be written is not a data cell: never counted.
+          total || counts.invalid++;
           v = null;
         }
       }
       // A blank or unreadable cell: no cell, unless the application gives it a look.
-      return v == null && !hook ? '' : w(hook ? hooked(lookAt(lv, f), { column: col.id, value: v ?? null, row: node.data, header: false }) : styleAt(lv, f));
+      return v == null && !hook ? '' : w(hook ? hooked(lookAt(lv, f), { column: col.id, value: v ?? null, row: total ? null : (node as DataNode<T>).data, header: false }) : styleAt(lv, f));
     };
   };
   const writers = new Map<string, Cell>();
@@ -332,7 +355,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   for (let k = 0; k < total; k++) {
     const r = at ? at[k]! : k;
     const node: RowNode<T> = rows.nodeAt(r as DisplayIndex);
-    if (node.kind === 'detail' || node.key[0] === 'l') continue;
+    if (skip(node)) continue;
     const y = H + ++written;
     if (outRow) outRow[r] = y;
     const lv = levelAt ? levelAt.call(rows, r as DisplayIndex) : 0;
@@ -348,11 +371,13 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
     if (lead) line += numCell(`A${y}`, lv + 1, 0);
     cols.forEach((col, j) => {
       const ref = L[j + lead]! + y;
-      // A filler: its label in the tree column, nothing else.
-      if (node.kind !== 'data') {
-        if (j === treeAt) line += textCell(ref, node.kind === 'group' ? node.label : '', outline && lv ? look({ indent: Math.min(lv, OUTLINE) }) : 0);
+      // A filler, a group or a totals row: its label in the tree column (the grid's text when given); a filler nothing else,
+      // a group or a totals row its totals.
+      if (node.kind !== 'data' && (j === treeAt || !('aggs' in node))) {
+        if (j === treeAt) line += textCell(ref, node.kind === 'group' || node.kind === 'footer' ? (i.groupLabel?.(node) ?? node.label) : '', outline && lv ? look({ indent: Math.min(lv, OUTLINE) }) : 0);
         return;
       }
+      if (node.kind !== 'data') return void (line += writer(col)(ref, node, lv));
       const s = over?.[place[j]!];
       if (!s || (s.row === r && s.col === place[j])) {
         // A merge where its slots are written side by side in the same order.

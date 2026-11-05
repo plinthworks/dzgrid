@@ -1,0 +1,71 @@
+{
+  "id": "group-level",
+  "suite": "csv",
+  "description": "Grouped by ward, Alger open: each group line holds its value and totals (a count a plain number), its rows one level deeper; a closed group, its line only (« Grouped rows » 1–4).",
+  "refs": [
+    "docs/behaviors/csv-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "grouping": {
+      "by": [
+        "ward"
+      ]
+    },
+    "open": [
+      [
+        "ward",
+        "tAlger"
+      ]
+    ],
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "name",
+        "header": "Name",
+        "aggFunc": "count"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "Alger",
+        "name": "a",
+        "amount": 1.5
+      },
+      {
+        "id": "r1",
+        "ward": "Oran",
+        "name": "b",
+        "amount": 2
+      },
+      {
+        "id": "r2",
+        "ward": "Alger",
+        "name": "c",
+        "amount": 2.25
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Ward,Name,Amount\r\n1,Alger,2,3.75\r\n2,Alger,a,1.5\r\n2,Alger,c,2.25\r\n1,Oran,1,2\r\n",
+    "summary": {
+      "rows": 4,
+      "columns": 3,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

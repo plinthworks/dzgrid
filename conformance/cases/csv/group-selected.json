@@ -1,0 +1,74 @@
+{
+  "id": "group-selected",
+  "suite": "csv",
+  "description": "`selected`: the selected data rows only, at their level; never a group or totals line (« Grouped rows » 1).",
+  "refs": [
+    "docs/behaviors/csv-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "scope": "selected",
+    "select": {
+      "mode": "include",
+      "ids": [
+        "r2",
+        "r1"
+      ]
+    },
+    "grouping": {
+      "by": [
+        "ward"
+      ],
+      "footers": "both"
+    },
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "name",
+        "header": "Name",
+        "aggFunc": "count"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "Alger",
+        "name": "a",
+        "amount": 1.5
+      },
+      {
+        "id": "r1",
+        "ward": "Oran",
+        "name": "b",
+        "amount": 2
+      },
+      {
+        "id": "r2",
+        "ward": "Alger",
+        "name": "c",
+        "amount": 2.25
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Ward,Name,Amount\r\n2,Alger,c,2.25\r\n2,Oran,b,2\r\n",
+    "summary": {
+      "rows": 2,
+      "columns": 3,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

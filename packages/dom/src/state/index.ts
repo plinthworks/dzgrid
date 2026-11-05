@@ -39,7 +39,7 @@ type Kernel = GridKernel<unknown>;
 /** Every grid's state API and environment, by kernel: `persistLocal` finds them without the feature object. */
 const APIS = new WeakMap<object, GridStateApi & { env: StateEnv }>();
 /** The events of the parts a state keeps (a group opened or closed is a `columnsChanged`). */
-const SAVED = ['columnsChanged', 'columnResized', 'sortChanged', 'filterChanged', 'quickChanged', 'pageChanged', 'densityChanged'];
+const SAVED = ['columnsChanged', 'columnResized', 'sortChanged', 'filterChanged', 'quickChanged', 'pageChanged', 'densityChanged', 'groupByChanged'];
 const tell = (k: Kernel, p: Problem): void => emit(k, { type: 'problems', source: 'host', problems: [p] });
 
 /**
@@ -84,7 +84,11 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
         setDensity: (d) => (typeof d == 'string' && ROW_HEIGHT[d as 'compact'] > 0 ? ((g.settings = { ...g.settings, density: d as 'compact' }), g.schedule()) : false),
         // The collapsible groups (`@dzgrid/dom/spans`, Phase 6 step 7), read when used: none without them.
         get groups() { return g.groups; },
+        // The row grouping (`@dzgrid/dom/grouping`, Phase 7). None (yet): a state's part is left on the context for the
+        // grouping's own setup, listed after this feature (review 2026-11-05); a grid without grouping never reads it.
+        get rowGroups() { return g.rowGroups ?? later; },
       };
+      const later = { get: () => undefined as never, set: (raw: unknown) => ((g.rowGroupsLater = raw), []) };
       let quiet = false;
       let source: ChangeSource;
       let cancel = (): void => {};
@@ -115,8 +119,8 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
           emit(k, { type: 'stateRestored', source: 'host', problems });
           return problems;
         },
-        // Groups `{}`: the definitions back. As the host's change, told as a gesture when the pause ends (nothing if nothing moved).
-        reset: () => (arm('api'), restoreState(k, { ...initial, groups: {} }, env)),
+        // Groups `{}`: the definitions back; the row grouping the application gave. As the host's change, told as a gesture when the pause ends (nothing if nothing moved).
+        reset: () => (arm('api'), restoreState(k, { ...initial, groups: {}, rowGroups: g.rowGroups?.initial }, env)),
       };
       APIS.set(k, api);
       g.scope.add(k.subscribe((e) => void (!quiet && e.source !== 'host' && SAVED.includes(e.type) && arm(e.source))));
@@ -185,7 +189,7 @@ export function toSearchParams(state: GridState, o: { readonly name?: string; re
   let bytes = utf8.encode(stateText(strip({ ...state }, o) as GridState));
   if (bytes.length > MAX) {
     problems.push(problem('state-field', 'warning', name, 'too-large'));
-    bytes = utf8.encode(stateText({ v: 1, columns: state.columns, sort: state.sort } as GridState));
+    bytes = utf8.encode(stateText({ v: 1, columns: state.columns, sort: state.sort, rowGroups: state.rowGroups } as GridState));
   }
   // Still over: the sort alone (columns never cut in half), told again.
   if (bytes.length > MAX) {

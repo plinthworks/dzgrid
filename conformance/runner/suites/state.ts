@@ -1,5 +1,6 @@
 import { clientRows, createColumnModel, createKernel, localeCtx, type ColumnOrGroup, type GridCommand } from '@dzgrid/core';
 import { diffState, foldedColumns, groupTable } from '@dzgrid/core/spans';
+import { checkRowGroups, groupShape } from '@dzgrid/core/grouping';
 import { captureState, checkState, restoreState, stateText, type GroupsAdapter } from '@dzgrid/core/state';
 import type { Suite } from './index.js';
 
@@ -9,12 +10,14 @@ const DENSITIES = ['compact', 'comfortable', 'spacious'];
 /**
  * `grid-state` (Phase 6 step 5, docs/behaviors/grid-state.md): a client grid on `columns` and `rows` (paged by `pageSize`), the
  * user's `before` commands, then `restore` of a raw state (any JSON). `upgradeV0`: a planted v0 → v1 step (a test-only shape:
- * `{ v: 0, cols: [ids] }`). `groups`: the collapsible group ids of a stub adapter. Out: the problems, the state captured after, the rows shown, and whether a `SECRET…` cell value reached the text.
+ * `{ v: 0, cols: [ids] }`). `groups`: the collapsible group ids of a stub adapter. `rowGroups`: the grid grouped by these columns (a real
+ * `groupShape`, its `setBy` as the adapter; Phase 7 step 7), the grouping read back as `by`. Out: the problems, the state captured after, the rows shown, and whether a `SECRET…` cell value reached the text.
  */
 export const state: Record<string, Suite> = {
-  'grid-state': ({ columns, rows = [], pageSize, before = [], restore, upgradeV0, groups }) => {
+  'grid-state': ({ columns, rows = [], pageSize, before = [], restore, upgradeV0, groups, rowGroups }) => {
     const m = createColumnModel<Row>(columns as ColumnOrGroup<Row>[]);
-    const model = clientRows<Row>({ rows, getRowId: (r) => r.id, columns: m, ctx: localeCtx({ locale: 'fr-FR' }), ...(pageSize && { page: { pageSize } }) });
+    const shape = rowGroups && groupShape<Row>({ by: rowGroups });
+    const model = clientRows<Row>({ rows, getRowId: (r) => r.id, columns: m, ctx: localeCtx({ locale: 'fr-FR' }), ...(pageSize && { page: { pageSize } }), ...(shape && { shape }) });
     const k = createKernel<Row>({ rows: model, columns: m });
     for (const cmd of before as GridCommand[]) k.dispatch(cmd, 'user');
     let open: Record<string, boolean> = {};
@@ -25,7 +28,16 @@ export const state: Record<string, Suite> = {
     const adapter: GroupsAdapter | undefined = t
       ? { collapsible: (id) => t.groups.has(id), get: () => diffState(t, new Map(Object.entries(open))), set: (o) => void ((open = { ...o }), folds++, m.fold(foldedColumns(t, new Map(Object.entries(open))))) }
       : groups && { collapsible: (id) => (groups as string[]).includes(id), get: () => open, set: (o) => void (open = { ...open, ...o }) };
-    const env = { ...(adapter && { groups: adapter }), density: () => density as never, setDensity: (d: unknown) => DENSITIES.includes(d as string) && ((density = d as string), true) };
+    // As `@dzgrid/dom/grouping` hands it: checked by the grouping, applied when a list.
+    const rg = shape && {
+      get: () => shape.by,
+      set: (raw: unknown) => {
+        const r = checkRowGroups(raw, m);
+        if (r.by) shape.setBy(r.by, 'host');
+        return r.problems;
+      },
+    };
+    const env = { ...(adapter && { groups: adapter }), ...(rg && { rowGroups: rg }), density: () => density as never, setDensity: (d: unknown) => DENSITIES.includes(d as string) && ((density = d as string), true) };
     const raw = upgradeV0 && checkState(restore, [(s: { cols: string[] }) => ({ v: 1, columns: s.cols.map((id, order) => ({ id, pinned: null, order })) })]).state;
     const problems = restoreState(k, upgradeV0 ? (raw ?? restore) : restore, env);
     const text = stateText(captureState(k, env));
@@ -36,7 +48,13 @@ export const state: Record<string, Suite> = {
       ...(secret.length > 0 && { leaks: secret.some((v) => text.includes(v as string)) }),
       // The rows shown after the restore (when the case has rows): the order and page it gave.
       ...(t && { shown: m.visible().map((c) => c.id), folds }),
-      ...((rows as Row[]).length > 0 && { shown: Array.from({ length: k.rows.displayed.count }, (_, i) => String((k.rows.displayed.nodeAt(k.rows.displayed.index(i)!) as { id: unknown }).id)) }),
+      ...((rows as Row[]).length > 0 && {
+        shown: Array.from({ length: k.rows.displayed.count }, (_, i) => {
+          const n = k.rows.displayed.nodeAt(k.rows.displayed.index(i)!);
+          return n.kind === 'group' ? `[${n.label}]` : String((n as { id: unknown }).id);
+        }),
+      }),
+      ...(shape && { by: shape.by }),
     };
   },
 };

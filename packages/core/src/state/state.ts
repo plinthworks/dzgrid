@@ -44,9 +44,11 @@ export interface GridState {
   readonly page?: number;
   readonly pageSize?: number;
   readonly density?: Density;
+  /** The grouping columns' ids, the first level first (Phase 7, owner Q-ST A): never the open groups (their keys hold row values). */
+  readonly rowGroups?: readonly string[];
 }
 
-export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density';
+export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density' | 'rowGroups';
 /** Which parts a capture writes and a restore applies: every one by default. `page` stands for `page` and `pageSize`. */
 export interface StateOptions {
   readonly include?: readonly StatePart[];
@@ -61,12 +63,25 @@ export interface GroupsAdapter {
   set(open: Readonly<Record<string, boolean>>): void;
 }
 
-/** What the DOM layer holds and the core does not: the density, the groups. */
+/** A grid's row grouping (`@dzgrid/dom/grouping`, Phase 7): its columns, read and set (grid-state.md « Row grouping »). */
+export interface RowGroupsAdapter {
+  get(): readonly string[];
+  /**
+   * Applies a state's `rowGroups` as given (any JSON): the known, groupable ids, once each, in order; returns what it
+   * skipped (`state-column`, `state-field` at `rowGroups.<i>`; not a list: `state-field` at `rowGroups`, nothing applied).
+   * `@dzgrid/core/grouping`'s `checkRowGroups` does the checking.
+   */
+  set(raw: unknown): readonly Problem[];
+}
+
+/** What the DOM layer holds and the core does not: the density, the groups, the row grouping. */
 export interface StateEnv {
   density?(): Density | undefined;
   /** False: not a density (`state-field`, nothing changed). */
   setDensity?(d: unknown): boolean | void;
   readonly groups?: GroupsAdapter | undefined;
+  /** Absent: a grid without grouping, which neither writes nor applies `rowGroups`. */
+  readonly rowGroups?: RowGroupsAdapter | undefined;
 }
 
 /** A column entry's fields: the test of a value, and what an absent one means (an order: its place in the list). */
@@ -116,6 +131,7 @@ export function captureState<T>(k: GridKernel<T>, env: StateEnv = {}, opts?: Sta
     page: pg?.index,
     pageSize: pg?.size,
     density: env.density?.(),
+    rowGroups: env.rowGroups?.get(),
   };
   for (const p in s) if (!on(opts, (p == 'pageSize' ? 'page' : p) as StatePart)) delete s[p];
   return JSON.parse(canonical({ ...s, v: 1 }));
@@ -201,6 +217,8 @@ export function restoreState<T>(k: GridKernel<T>, raw: unknown, env: StateEnv = 
   }
   // The DOM's to check: not one of the three, refused (false) and told.
   if (has('density')) run.push(() => void (env.setDensity?.(s.density) === false && bad('density')));
+  // ---- the row grouping (Phase 7): the grouping checks its own columns (a grid without it ignores the part).
+  if (env.rowGroups && has('rowGroups')) run.push(() => void problems.push(...env.rowGroups!.set(s.rowGroups)));
 
   // ---- the query (G 10, 11): unknown or removed columns dropped; what the state does not name stays the grid's.
   if (has('sort') || has('filter') || has('quick')) {

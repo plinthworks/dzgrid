@@ -1,4 +1,5 @@
-import type { CellAddr, ColumnModel, DisplayedRows, GridKernel, Intent, LocaleCtx, RowKey, RowLayout, RowModel } from '@dzgrid/core';
+import type { AggFn, AggFuncName, CellAddr, ColumnModel, DisplayedRows, FooterNode, GridKernel, GroupNode, Intent, LocaleCtx, ResolvedColumn, RowKey, RowLayout, RowModel } from '@dzgrid/core';
+import type { RowGroupsAdapter } from '@dzgrid/core/state';
 import type { LiveRegion } from './a11y/live-region.js';
 import type { Dir } from './dir.js';
 import type { ScrollController } from './interact/scroll.js';
@@ -151,6 +152,25 @@ export interface GridContext<T> {
   fit?: ((column: string) => void) | undefined;
   /** The collapsible header groups (`@dzgrid/dom/groups`, set at its setup): read by the state and menu features. */
   groups?: GroupsApi;
+  /**
+   * A grouped grid's rows as the screen writes them (`@dzgrid/dom/grouping`, set at its setup; Phase 7 step 7): read by
+   * print and the export, so a file and a page say what the screen says.
+   */
+  grouped?: {
+    /** The column holding the labels: the grouping's `column` when shown, else the first shown. */
+    column(): string | undefined;
+    /** The grouping columns in use (none: flat, with a grand total at most). */
+    by(): readonly string[];
+    /** « Alger (3) », « Total Alger », « Total ». */
+    label(n: GroupNode | FooterNode): string;
+    /** A group's or a totals row's cell as the screen shows it: the label in the label column, else the column's total. */
+    cell(n: GroupNode | FooterNode, col: ResolvedColumn<unknown>): string;
+    readonly aggFuncs: Readonly<Record<string, AggFuncName | AggFn>> | undefined;
+  };
+  /** The row grouping a state saves (`@dzgrid/dom/grouping`, read by `@dzgrid/dom/state`); `initial` the application's own. */
+  rowGroups?: RowGroupsAdapter & { readonly initial: readonly string[] };
+  /** A state's `rowGroups` restored before the grouping was set up (`gridState` listed first): applied at its setup. */
+  rowGroupsLater?: unknown;
   /** The group rows (`@dzgrid/dom/spans`, set at its setup): where a group shows (its row and header), for `groups()`. */
   groupBands?: { find(id: string): { readonly level: number; readonly label: string } | undefined };
   /** A group's header painted (by `spans()`): its button and name added by `groups()`. */

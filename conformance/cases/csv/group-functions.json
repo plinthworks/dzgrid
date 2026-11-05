@@ -1,0 +1,75 @@
+{
+  "id": "group-functions",
+  "suite": "csv",
+  "description": "An application's function read by its column (a number a text column can read; a text a number column cannot: empty); a count named in the options under an instant column is a plain number, not a time (« Grouped rows » 3).",
+  "refs": [
+    "docs/behaviors/csv-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "timeZone": "UTC",
+    "grouping": {
+      "by": [
+        "ward"
+      ],
+      "aggFuncs": {
+        "name": {
+          "fn": "distinct"
+        },
+        "amount": {
+          "fn": "joined"
+        },
+        "at": "count"
+      }
+    },
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "name",
+        "header": "Name"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number"
+      },
+      {
+        "id": "at",
+        "header": "At",
+        "type": "instant",
+        "aggFunc": "max"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "A",
+        "name": "x",
+        "amount": 1,
+        "at": "2026-01-01T00:00:00Z"
+      },
+      {
+        "id": "r1",
+        "ward": "A",
+        "name": "y",
+        "amount": 2,
+        "at": "2026-01-02T00:00:00Z"
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Ward,Name,Amount,At (UTC)\r\n1,A,2,,2\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 4,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

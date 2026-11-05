@@ -1,0 +1,75 @@
+{
+  "id": "row-groups-round-trip",
+  "suite": "grid-state",
+  "description": "A grouped grid: the grouping columns restored in their order, captured back as given (grid-state.md « Row grouping » 1, 2).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "month",
+        "header": "Month"
+      },
+      {
+        "id": "amount",
+        "type": "number"
+      },
+      {
+        "id": "code",
+        "groupable": false
+      }
+    ],
+    "rowGroups": [],
+    "restore": {
+      "v": 1,
+      "rowGroups": [
+        "month",
+        "ward"
+      ]
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "month",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "amount",
+          "order": 2,
+          "pinned": null
+        },
+        {
+          "id": "code",
+          "order": 3,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": [
+        "month",
+        "ward"
+      ]
+    },
+    "by": [
+      "month",
+      "ward"
+    ]
+  }
+}

@@ -120,5 +120,28 @@ Presses the host's "Export" button (the grid has none of its own), after filteri
 ## Grouped rows (Phase 7, owner Q-EX A; built at step 7)
 A grouped grid's CSV writes its group rows (the label in the group column, the level column as for a tree) **with their
 totals** under the aggregated columns, and its footer and grand total rows, as shown; `all` writes every group open.
-`csv.groups: 'none'` writes the data rows only, flat. Totals are written through the column's own writer (raw, never
+`groupRows: false` writes the data rows only, flat. Totals are written through the column's own writer (raw, never
 the display). The same for the Excel export (`xlsx-export.md`).
+
+Numbered (step 7, 2026-11-05; each one a test, `conformance/cases/csv/group-*`, `packages/core/test/grouping-export.test.ts`):
+1. **Lines in screen order**: a group row, then (open) its children, its footer (`footers: 'group' | 'both'`), and the
+   grand total where the screen has it (first or last). `displayed` writes what is shown (a closed group: its line
+   only); `all` writes every group open, every row of the query; `selected` the selected data rows only, never a group
+   or totals line.
+2. **The group column** (the grouping's label column; `treeColumn` names it, else the first written) holds the group's
+   label as the screen writes it — « Alger (3) », « Total Alger », « Total » — when the export is the grid's (the DOM
+   passes its texts, `groupLabel`); written alone by `@dzgrid/core/csv`, the group's value as the column formats it,
+   the footer the same, the grand total empty. A label is text: guarded and quoted like any text, never typed.
+3. **Totals** go under their columns, written as a data cell of that column is (numbers with the file's decimal mark,
+   days `YYYY-MM-DD`, instants in wall time, enums by label…), never the screen's text. A **count** is a plain number
+   whatever the column's type. An application's function's result is read by the column (its codec); one it cannot read
+   is left empty in the file (the screen shows it as its text). A column without a total, or an empty total, is an empty field (not counted
+   `blank`: only data cells are). The group column holds the label, never its own total (as on screen).
+4. **Levels** (`tree: 'level'`, the default): the level column says 1 for the first grouping level, `by.length + 1` for
+   the data rows, a footer the level of the rows it closes, the grand total 1. `indent`: two spaces per level before the
+   group column's text; `none`: no level.
+5. **`groupRows: false`**: the data rows only (no group, footer or grand total line), without level or indent: the flat
+   list for a spreadsheet's own pivot. `displayed` then writes the rows of the open groups only (what is shown).
+6. A grid grouped by no column but with a grand total writes its rows then the « Total » line.
+7. The summary's `rows` counts every line written, group and totals lines included. No group key, no total, no value in
+   a problem or an event.

@@ -2,7 +2,7 @@
 // their fruit, a quantity (sum), a price (mean), a day (earliest); grouped by region then fruit, group footers and the
 // grand total, the « Regrouper par » band and the column menu. Query: locale, theme, `rows` (2 000 by default),
 // `big=1` (20 000 rows, two regions of 10 000, grouped by region only: the exit criterion's group), `pin=1` (« Boutique »
-// pinned at the start, « Prix » at the end).
+// pinned at the start, « Prix » at the end). `preparePrint` for step 7's PDF (print.md « Grouped rows »).
 import { createGrid } from '/packages/dom/src/index.ts';
 import { grouping } from '/packages/dom/src/grouping.ts';
 import { groupZone } from '/packages/dom/src/group-zone.ts';
@@ -16,6 +16,9 @@ import { FR_COLUMNS } from '/packages/dom/src/locales/fr-columns.ts';
 import { AR_COLUMNS } from '/packages/dom/src/locales/ar-columns.ts';
 import { FR_COLUMN_MENU } from '/packages/dom/src/locales/fr-column-menu.ts';
 import { AR_COLUMN_MENU } from '/packages/dom/src/locales/ar-column-menu.ts';
+import { preparePrint } from '/packages/dom/src/print.ts';
+import { FR_PRINT } from '/packages/dom/src/locales/fr-print.ts';
+import { AR_PRINT } from '/packages/dom/src/locales/ar-print.ts';
 import { dataKey, groupKey } from '@dzgrid/core';
 
 const q = new URLSearchParams(location.search);
@@ -35,7 +38,7 @@ const rows: Row[] = Array.from({ length: total }, (_, i) => ({
   qty: i % 13 === 0 ? null : (i * 37) % 100, price: ((i * 13) % 50) / 4 + 1, day: `2026-03-${String((i % 28) + 1).padStart(2, '0')}`,
 }));
 const base = ar ? AR : FR;
-const messages = { ...base, text: { ...base.text, ...(ar ? AR_GROUP : FR_GROUP).text, ...(ar ? AR_COLUMNS : FR_COLUMNS).text, ...(ar ? AR_COLUMN_MENU : FR_COLUMN_MENU).text } };
+const messages = { ...base, text: { ...base.text, ...(ar ? AR_GROUP : FR_GROUP).text, ...(ar ? AR_COLUMNS : FR_COLUMNS).text, ...(ar ? AR_COLUMN_MENU : FR_COLUMN_MENU).text, ...(ar ? AR_PRINT : FR_PRINT).text } };
 const pin = q.get('pin') === '1';
 const g = grouping(big ? { by: ['region'] } : { by: ['region', 'fruit'], footers: 'both' });
 const moves = columns();
@@ -53,5 +56,5 @@ const grid = createGrid<Row>(document.getElementById('host')!, {
   selection: { mode: 'multi', checkbox: true, click: true },
 });
 // The checks reach the page through `window` (untyped on purpose: a test page).
-(window as any).t = { grid, api: () => g.api(grid), key: (id: string) => dataKey(id)!, groupKey, regions, fruit, scrollTo: (l: number) => (grid as any).scroll.scrollTo(l) }; // the grid's scroller is internal: reached for the checks
+(window as any).t = { grid, preparePrint, api: () => g.api(grid), key: (id: string) => dataKey(id)!, groupKey, regions, fruit, scrollTo: (l: number) => (grid as any).scroll.scrollTo(l) }; // the grid's scroller is internal: reached for the checks
 (window as any).ready = true; // as above

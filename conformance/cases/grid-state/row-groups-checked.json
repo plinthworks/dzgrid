@@ -1,0 +1,103 @@
+{
+  "id": "row-groups-checked",
+  "suite": "grid-state",
+  "description": "Unknown, not a text, twice, not groupable: each skipped and told by its place; the id told only when unknown (« Row grouping » 2).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "month",
+        "header": "Month"
+      },
+      {
+        "id": "amount",
+        "type": "number"
+      },
+      {
+        "id": "code",
+        "groupable": false
+      }
+    ],
+    "rowGroups": [
+      "amount"
+    ],
+    "restore": {
+      "v": 1,
+      "rowGroups": [
+        "ghost",
+        "ward",
+        7,
+        "ward",
+        "code",
+        "month"
+      ]
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-column",
+        "severity": "warning",
+        "path": "rowGroups.0",
+        "detail": "ghost"
+      },
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "rowGroups.2"
+      },
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "rowGroups.3"
+      },
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "rowGroups.4"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "month",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "amount",
+          "order": 2,
+          "pinned": null
+        },
+        {
+          "id": "code",
+          "order": 3,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": [
+        "ward",
+        "month"
+      ]
+    },
+    "by": [
+      "ward",
+      "month"
+    ]
+  }
+}

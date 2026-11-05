@@ -1,0 +1,71 @@
+{
+  "id": "row-groups-absent-kept",
+  "suite": "grid-state",
+  "description": "A state without `rowGroups` leaves the grouping as it is (an absent part is not applied, G 19).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "month",
+        "header": "Month"
+      },
+      {
+        "id": "amount",
+        "type": "number"
+      },
+      {
+        "id": "code",
+        "groupable": false
+      }
+    ],
+    "rowGroups": [
+      "ward"
+    ],
+    "restore": {
+      "v": 1
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "month",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "amount",
+          "order": 2,
+          "pinned": null
+        },
+        {
+          "id": "code",
+          "order": 3,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": [
+        "ward"
+      ]
+    },
+    "by": [
+      "ward"
+    ]
+  }
+}

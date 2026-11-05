@@ -1,4 +1,4 @@
-import { problem, type ColumnOrGroup, type GridKernel, type RowNode } from '@dzgrid/core';
+import { problem, type ColumnOrGroup, type GridKernel, type GroupNode, type RowNode } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { PrintMessageKey } from '../part-texts.js';
@@ -98,10 +98,14 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
   };
   const jobs = band('top');
   let total = 0;
+  // A grouped grid (print.md « Grouped rows »): its group and totals rows printed as shown, the label in its column.
+  const gr = g.grouped;
+  const lc = gr ? cols.findIndex((c) => c.id == gr.column()) : 0;
   for (let i = 0; i < D.count; i++) {
     const node = D.nodeAt(i as never);
-    // A detail panel, a lazy parent's loading row, a filler: never printed (O9).
-    if (node.kind === 'data' && total++ < max) jobs.push([node, i]);
+    // A detail panel, a lazy parent's loading row, a tree's filler: never printed (O9).
+    // A group or a totals row has totals (`aggs`): only grouping makes them.
+    if ((node.kind == 'data' || 'aggs' in node) && total++ < max) jobs.push([node, i]);
   }
   jobs.push(...band('bottom'));
 
@@ -155,9 +159,12 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
   // ---------- the rows, in slices: the screen's text of each cell, as text ----------
   const read = g.edit?.read ?? null;
   const map = g.spans?.map;
-  const cellText = (j: number, node: RowNode<unknown>): string => (node.kind === 'data' ? cellValue(cols[j]!, node.data, g.ctx, read, node.key).text : '');
+  const cellText = (j: number, node: RowNode<unknown>): string =>
+    node.kind == 'data' ? cellValue(cols[j]!, node.data, g.ctx, read, node.key).text : gr!.cell(node as GroupNode, cols[j]!);
   const row = (node: RowNode<unknown>, i: number): HTMLTableRowElement => {
     const tr = doc.createElement('tr');
+    // A group or a totals row, set apart without colour.
+    if ('aggs' in node) tr.className = 'dzg-print-group';
     const whole = i < 0 ? null : map?.ownerAt(i, 0);
     // A full-width row (or one cell across every column): one cell.
     if (whole && whole.row === i && whole.cols >= n) return (add('td', tr, cellText(0, node)).colSpan = n), tr;
@@ -165,7 +172,7 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
       // A merged cell: its value on every row and column it covers (O9, as the CSV).
       const s = i < 0 ? null : map?.ownerAt(i, j);
       const t = s ? cellText(s.col, s.row === i ? node : D.nodeAt(s.row as never)) : cellText(j, node);
-      add('td', tr, j || !node.level ? t : EM.repeat(node.level) + t);
+      add('td', tr, j - lc || !node.level ? t : EM.repeat(node.level) + t);
     }
     return tr;
   };

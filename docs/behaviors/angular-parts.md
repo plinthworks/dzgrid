@@ -108,6 +108,7 @@ are exactly these; anything else goes through `(gridEvent)` and its `type`:
 | `(stateChanged)` | `{ state, source }` | 1.1.0 |
 | `(densityChanged)` | `{ density, source }` | 1.1.0 |
 | `(selectionChanged)` | `{ selection: { mode, keys }, count, source }` — **keys, not ids** (below) | 1.1.0 |
+| `(groupByChange)` | the model's half of `[(groupBy)]` (below); `groupByChanged` `{ by, source }` comes through `(gridEvent)` | 1.5.0 |
 
 Before 1.1.0, `(selectionChanged)` was such a silent DOM binding (the allergen app's « selected rows stay empty »); it is
 now a real output. Strict templates check `$event` on these: `$event.rows` on `(selectionChanged)` does not compile
@@ -131,6 +132,23 @@ and any check would cost the wrapper's bytes in production.
 outside the zone. A literal in the template is a new object only when its signal changes; a `computed` is clearer.
 Editing a pinned cell is the usual `edit()`; the save request carries `pinned: 'top' | 'bottom'`. Without the feature,
 one `missing-feature` (path `pinnedRows`).
+
+### Row grouping (Phase 7 step 8, 1.5.0; needs `grouping()` in `[features]`, row-grouping.md)
+1. `[(groupBy)]="by"` — the grouping columns, a model like `[(quick)]`: each new value the host writes regroups the grid
+   as the **host** (`setBy(by, { host: true })`: `stateChanged` does not follow it, the open groups are kept); a value
+   equal to the grid's grouping (same ids, same order) writes nothing (the echo guard). A user's regroup (the band, the
+   column menu) or the application's `setBy` comes back in `groupBy` (`(groupByChange)`). The event `groupByChanged`
+   (`{ by, source }`, every regroup, the host's own included with `source: 'host'`) comes through `(gridEvent)`: no
+   output of its own (the wrapper's +2 % line, 2026-11-05).
+   Unset, the grid keeps `grouping({ by })`. Without `grouping()`: one `missing-feature` (path `groupBy`).
+2. `DzgController.grouping()`: the feature's api for this grid (`by()`, `setBy()`, `expandAll(depth?)`, `collapseAll()`,
+   `totals()`), null before the grid, without the feature, after it — as `edit()`, `range()`.
+3. No `expandAll()` / `collapseAll()` on the controller itself (plan D19): `grouping()?.expandAll()` does it, and the
+   wrapper stays within its +2 % line (measured 2026-11-05: the two methods cost 34 B over it).
+4. The band is `groupZone({ use: { grouping } })` in `[features]`, and « Regrouper par » comes with
+   `columnMenu({ use: { grouping } })`: nothing in the wrapper (Q-Z1 B).
+5. `rowGroups` rides in `[state]` / `(stateChanged)` (grid-state.md « Row grouping »).
+6. The « real app » example does not group (owner Q-RA A); its bytes are measured, the wrapper's growth only.
 
 ### `(densityChanged)`
 The user's density (the ⋮ menu's density line), a state restore, the api. One-way: the `density` input is not written

@@ -10,7 +10,7 @@ import type { Suite } from './index.js';
 type Row = Record<string, unknown> & { id: string };
 
 /** The application total functions a case may name (`{ "fn": name }`): a fixture table, the same for every implementation. */
-const FNS: Record<string, AggFn> = {
+export const FNS: Record<string, AggFn> = {
   // How many distinct non-empty values, as their export text would say them.
   distinct: (values) => new Set(values.filter((v) => v !== null).map(String)).size,
   // The values joined with '|', empties as '-': shows what the function is given, in which order.
@@ -23,7 +23,7 @@ const FNS: Record<string, AggFn> = {
 };
 
 /** A case's column: `aggFunc` as a built-in name, or `{ fn }` from the table above. */
-const columnOf = (c: any): ColumnDef<Row> => ({ ...c, ...(c.aggFunc?.fn && { aggFunc: FNS[c.aggFunc.fn] }) });
+export const columnOf = (c: any): ColumnDef<Row> => ({ ...c, ...(c.aggFunc?.fn && { aggFunc: FNS[c.aggFunc.fn] }) });
 
 /** A value as a case writes it: instants (epoch ms of an instant column) as ISO, null as `null`. */
 const written = (v: unknown, type: string | undefined): string =>

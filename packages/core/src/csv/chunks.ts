@@ -1,9 +1,9 @@
-import { NO_OVERLAY, type ResolvedColumn, type ValueReader } from '../columns/defs.js';
+import { NO_OVERLAY, type AggFn, type AggFuncName, type ResolvedColumn, type ValueReader } from '../columns/defs.js';
 import type { ColumnLookup } from '../columns/model.js';
 import type { DisplayIndex } from '../ids.js';
 import { problem, type Problem } from '../problems.js';
 import type { DisplayedRows } from '../row/displayed.js';
-import type { RowNode } from '../row/node.js';
+import type { FooterNode, GroupNode, RowNode } from '../row/node.js';
 import type { SpanCell, SpanMap } from '../spans/map.js';
 import type { LocaleCtx } from '../value/locale.js';
 import { separatorsFor } from '../value/number.js';
@@ -42,6 +42,11 @@ export interface CsvOptions {
   readonly levelHeader?: string;
   /** The column that carries the indent and a filler's label; absent or not written: the first written. */
   readonly treeColumn?: string;
+  /**
+   * A grouped grid's group, footer and grand total lines (Phase 7, csv-export.md « Grouped rows »): written (default), or
+   * `false` for the data rows only, flat (no level, no indent).
+   */
+  readonly groupRows?: boolean;
 }
 
 /** What the file is written from: pure data, no grid. */
@@ -56,6 +61,13 @@ export interface CsvInput<T> {
   readonly spans?: SpanMap | null;
   /** The visible column ids, in the map's order. */
   readonly spanColumns?: readonly string[];
+  /**
+   * A group's or a totals row's label in the group column (Phase 7): the grid's own texts (« Alger (3) », « Total Alger »,
+   * « Total »). Absent: the group's value as formatted, the footer's too, the grand total empty.
+   */
+  readonly groupLabel?: ((node: GroupNode | FooterNode) => string) | undefined;
+  /** The grouping's `aggFuncs` (they win over a column's `aggFunc`): how each total is written (a count, an application's result). */
+  readonly aggFuncs?: Readonly<Record<string, AggFuncName | AggFn>> | undefined;
 }
 
 /** Counts only: no cell value is ever in it. */
@@ -104,12 +116,16 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
     guard: o.sanitizeFormulas !== false,
     quote: quoter(sep),
   };
+  // A total is written by its column's writer as a cell holding it (read as is), its counts apart: a total is never
+  // counted blank or unreadable (csv-export.md « Grouped rows » 3). Kept out of `writerFor`, which the clipboard's range
+  // entry carries.
+  const te = { ...e, counts: { ...counts }, reader: { overlay: true, value: (_: unknown, v: unknown) => v } } as unknown as WriterEnv<T>;
   const cols = csvColumns(i.columns, o.columns).columns;
   const n = cols.length;
   const writers = new Map<string, (node: RowNode<T>, pad?: string) => string>();
-  const writer = (col: ResolvedColumn<T>) => {
-    let w = writers.get(col.id);
-    if (!w) writers.set(col.id, (w = writerFor(col, e)));
+  const writer = (col: ResolvedColumn<T>, x = e) => {
+    let w = writers.get(col.id + (x == e));
+    if (!w) writers.set(col.id + (x == e), (w = writerFor(col, x)));
     return w;
   };
   const at = i.at ?? null;
@@ -127,7 +143,9 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
     sylk = false;
     return (n === 1 && fields[0] === '' ? '""' : fields.join(sep)) + '\r\n';
   };
-  const levelAt = o.tree === 'none' ? undefined : rows.levelAt;
+  // `groupRows: false`: data rows only, flat (csv-export.md « Grouped rows » 5).
+  const flat = o.groupRows == false;
+  const levelAt = o.tree === 'none' || flat ? undefined : rows.levelAt;
   const indent = o.tree === 'indent';
   // The tree column: the one named, else (absent, or not written) the first written.
   const treeAt = rows.levelAt ? Math.max(0, cols.findIndex((c) => c.id === o.treeColumn)) : -1;
@@ -140,7 +158,7 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
     const r = at ? at[k]! : k;
     const node = rows.nodeAt(r as DisplayIndex);
     // A detail panel is never written (csv-export.md), nor a lazy parent's loading row (tree-lazy.md).
-    if (node.kind === 'detail' || node.key[0] === 'l') continue;
+    if (node.kind === 'detail' || node.key[0] === 'l' || (flat && node.kind != 'data')) continue;
     written++;
     const lv = levelAt ? levelAt.call(rows, r as DisplayIndex) : 0;
     const pad = indent ? '  '.repeat(lv) : '';
@@ -153,8 +171,12 @@ export function* csvChunks<T>(i: CsvInput<T>, o: CsvOptions = {}): Generator<str
       }
     }
     const fields = cols.map((col, j) => {
-      // A filler: its label in the tree column, every other field empty.
-      if (j === treeAt) return node.kind === 'group' ? field(e, pad + node.label) : writer(col)(node, pad);
+      // A filler, a group or a totals row: its label in the tree column (the grid's text when given); its totals elsewhere.
+      if (j === treeAt) return node.kind != 'data' ? field(e, pad + (i.groupLabel?.(node as GroupNode) ?? (node as GroupNode).label)) : writer(col)(node, pad);
+      // A group's or a totals row's total (the options' function winning: one with none has no total): a count a plain
+      // number; any other read by the column (an application's result it cannot read: empty).
+      const v = (node as { aggs?: Record<string, unknown> }).aggs?.[col.id];
+      if (node.kind != 'data') return v == null ? '' : (i.aggFuncs?.[col.id] ?? col.def.aggFunc) == 'count' ? e.quote('' + v) : writer(col, te)({ kind: 'data', key: '', data: v } as never);
       const s = over?.[place[j]!];
       if (!s) return writer(col)(node);
       if (s.row === r && s.col === place[j]) return writer(col)(node);

@@ -1,0 +1,48 @@
+{
+  "id": "group-guard",
+  "suite": "csv",
+  "description": "A group label is text: a value starting with `=` is guarded and quoted as any text (« Grouped rows » 2).",
+  "refs": [
+    "docs/behaviors/csv-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "labels": true,
+    "grouping": {
+      "by": [
+        "ward"
+      ]
+    },
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "=1+1,2",
+        "amount": -3
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Ward,Amount\r\n1,\"'=1+1,2 (1)\",-3\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 2,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

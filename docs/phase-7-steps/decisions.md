@@ -136,3 +136,75 @@ The plan's « ≤ 60 B / row » memory estimate is over by 4 B: 40 B of it are t
 
 Chrome (headless, minified sources served, `--only grouping`): a group of 10 000 rows opened to the next frame, median
 of 6: 17.4–17.8 ms over three runs (exit criterion ≤ 30; the model and events 0.2–0.4 ms — the rest is the frame).
+
+## Decisions taken alone (steps 7–8, 2026-11-05; sheets amended first: csv-export.md, xlsx-export.md, print.md, grid-state.md « Grouped rows » / « Row grouping », angular-parts.md « Row grouping »)
+- **The state's checking lives in the grouping.** `core/state` was 0–10 B from its line: it only carries the part
+  (`rowGroups: env.rowGroups?.get()`, and the adapter's `set(raw)` returns what it skipped). The checks (unknown id
+  `state-column`, not a text / twice / `groupable: false` `state-field`, not a list: nothing applied) are
+  `checkRowGroups` in `@dzgrid/core/grouping`, which `@dzgrid/dom/grouping` hands the state through the context (a flat
+  grid pays nothing). A grid without grouping ignores the part, silently. `reset()` brings back the grouping given at
+  creation. **Order**: with `gridState({ persist | initial })`, list `grouping()` before it (the state is applied at
+  its setup).
+- **A new event `groupByChanged { by, source }`** (core `GridEvent`, type only): told by `@dzgrid/dom/grouping` when the
+  columns really changed; `user` (band, menu), `api`, `host` (a restore, Angular's `[groupBy]`: `setBy(by, { host })`).
+  `stateChanged` follows it as a gesture except for `host`. **`check:api` flags it** (a member added to a multi-line
+  union; the guard's text rule cannot see it as an addition): owner to accept.
+- **Files**: the group column is the grouping's label column (`treeColumn`, the DOM passes it); labels are the screen's
+  (`groupLabel`: « Alger (3) », « Total Alger », « Total »), written as guarded text; a total is written by its
+  column's own writer (a reader that returns the value), so it reads as a data cell does; a **count** is a plain number
+  (CSV `'' + n`, Excel a number cell without the column's format), in `text: 'display'` too; an application's result the
+  column cannot read is left empty in files (the screen shows its text). Totals cells are never counted `blank` /
+  `invalid`. The writer for totals is kept out of `writerFor` (the clipboard's range entry carries it, 7 B from its
+  line). The function is read with `aggFuncs?.[id] ?? column.aggFunc` in CSV, `hasOwn` in Excel: the same answer, since
+  a column the options name with no function has no total at all. Grouped by no column (a grand total only), the DOM
+  export writes no level column (`tree: 'none'`). Excel: the outline as a tree's (summary above), footers fold with the
+  rows they close; `xlsxStyle` asked for totals cells with `row: null`.
+- **Print**: the cell text of a group or totals row comes from the grouping (`g.grouped.cell`), the indent on the label
+  column; `.dzg-print-group` (bold in `print.css`); `maxRows` counts printed lines. `dom/print` sits at its +2 % line
+  exactly (1 632).
+- **Angular (D19 as built)**: `[(groupBy)]` (a model: `(groupByChange)`), `DzgController.grouping()` (the whole api:
+  `by`, `setBy`, `expandAll`, `collapseAll`, `totals`). **Not built**, to hold the wrapper's +2 % line (measured: the
+  controller's own `expandAll()` / `collapseAll()` 34 B, a `(groupByChanged)` output 23 B over it): the event comes
+  through `(gridEvent)`. `rowGroups` rides in `[state]`. The band through `[features]`.
+- **Demo**: the owner's local page `playground/regroupement.html` gains « Excel », « CSV » (every group) and « Imprimer »
+  (as shown); no committed `grouping.html` (playground pages stay local, the brief); the « real app » unchanged (Q-RA A).
+
+## Measures (steps 7–9, 2026-11-05)
+| Line | Measured | Line set (rule) |
+|---|---|---|
+| `@dzgrid/core/state` | 1 537 | 1 510 → 1 540 (+2 %) |
+| `@dzgrid/core/csv` | 2 038 | 2 000 → 2 040 (+2 %) |
+| `@dzgrid/core/xlsx` | 7 130 | 7 100 → 7 150 (+2 %) |
+| `@dzgrid/dom/print` | 1 632 | 1 600 → 1 632 (+2 %) |
+| export run (lazy) | 5 342 | 5 300 → 5 350 (+2 %) |
+| `@dzgrid/angular` | 7 803 | 7 665 → 7 810 (+2 %) |
+| `@dzgrid/core/grouping` (new) | 4 468 | 4 750 → 4 950 (measure + 10 %) |
+| `@dzgrid/dom/grouping` (new) | 4 612 | 4 878 → 5 100 (measure + 10 %) |
+| `@dzgrid/dom/state` | 1 233 (after the review) | 1 224 → 1 240 (+2 %) |
+| core base, dom base, K.8 | 29 202, 23 282, 89 405 | 29 250, 23 290, 90 000 held |
+| real Angular example | 98 833 | 98 800 → 99 000 (+2 %) |
+
+Exit criterion in Chrome (minified bundle of the node bench, Chrome headless, 7 runs): A grouped by 2 columns + 3
+totals, cold, **median 40.2 ms** (≤ 150). Chrome `page.pdf()` of a grouped grid, fr and ar: labels, footers, every row
+once, the label column at the start, rows indented (`--only grouping`, 37 / 37).
+
+## Review of steps 7–8 and architect check (2026-11-05), fixed with a failing test first
+- An address over 4 KB kept columns and sort only: `rowGroups` now kept with them (`state-grouping.test.ts` « review 1 »).
+- `gridState({ persist | initial })` listed **before** `grouping()` lost the stored grouping: the state leaves the part
+  on the context (`rowGroupsLater`) and the grouping applies it at its setup, what it skips told (« review 2 »). Either
+  order works now.
+- The state saves the grouping columns **in use** (`reads()`), not refused ones (« review 4 »).
+- Excel counted a total it cannot write (a sum past the largest number) as `invalid`: never counted now
+  (`grouping-export.test.ts` « review 5 »).
+- A displayed export's row count left out the grand total (`t:` keys sort after `l`): counted (« review 6 »). With
+  `groupRows: false` the count given before the file (`exportRequested`, the cap) still includes group lines: the file's
+  own `rows` is right; left as is (bytes).
+- The clipboard: group and totals rows inside a block copy empty (clipboard.md « Grouped rows »): for the owner.
+- Not done: a committed playground `grouping.html` (playground pages stay local); the plan's `CHANGELOG 1.2.0` is 1.5.0.
+- Lines after the fixes: `core/csv` 2 040 / 2 040 (golfed), `dom/state` 1 233 → line 1 240 (+2 %), `core/xlsx` 7 130.
+
+
+## Owner, 2026-11-05 (close)
+
+- `GridEvent` gains `groupByChanged`: accepted in api/ (« 1 oui »).
+- Copy of a block holding group or total rows: those lines stay empty in the clipboard (« 2 A »); the Excel export carries group rows and totals.

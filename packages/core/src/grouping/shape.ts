@@ -1,4 +1,5 @@
 import type { AggFn, AggFuncName, ResolvedColumn } from '../columns/defs.js';
+import type { ColumnLookup } from '../columns/model.js';
 import { groupKey, idOfDataKey, type DisplayIndex, type RowKey } from '../ids.js';
 import type { ClientModel, RowShape, ShapeInput } from '../model/client.js';
 import type { ColumnEnv } from '../model/column-cache.js';
@@ -497,4 +498,23 @@ export function groupConflicts(o: { readonly tree?: boolean; readonly detail?: b
   return (['tree', 'detail', 'spans', 'page', 'server'] as const)
     .filter((f) => o[f])
     .map((f) => problem('unsupported-combination', 'warning', f === 'page' ? 'pagination' : f === 'server' ? 'source' : f, 'grouping'));
+}
+
+/**
+ * A saved state's `rowGroups` (any JSON) checked against the grid's columns (grid-state.md « Row grouping » 2): the
+ * known, groupable ids, once each, in order. An unknown id: `state-column` (path `rowGroups.<i>`, the id); not a text,
+ * given twice, `groupable: false`: `state-field` (no detail); not a list: `by` null and `state-field` at `rowGroups`.
+ * Never a value of a row: a state holds column ids only.
+ */
+export function checkRowGroups<T>(raw: unknown, columns: Pick<ColumnLookup<T>, 'get'>): { readonly by: readonly string[] | null; readonly problems: readonly Problem[] } {
+  const problems: Problem[] = [];
+  if (!Array.isArray(raw)) return { by: null, problems: [problem('state-field', 'warning', 'rowGroups')] };
+  const by = raw.filter((id, i) => {
+    const p = `rowGroups.${i}`;
+    const col = typeof id == 'string' ? columns.get(id) : undefined;
+    const ok = !!col && col.def.groupable !== false && raw.indexOf(id) === i;
+    if (!ok) problems.push(typeof id == 'string' && !col ? problem('state-column', 'warning', p, id) : problem('state-field', 'warning', p));
+    return ok;
+  });
+  return { by, problems };
 }

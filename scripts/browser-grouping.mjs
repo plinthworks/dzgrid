@@ -8,7 +8,15 @@
  * aligned with their column's header, pinned columns included; forced colours; a header dropped onto the band; the
  * column menu's « Regrouper par cette colonne »; the exit criterion — a group of 10 000 rows opened to the next frame
  * (median of 6) ≤ 30 ms; screenshots fr and ar dark in packages/dom/test/browser/results/.
+ * Chrome, step 7 (print.md « Grouped rows »): `preparePrint` of 40 rows grouped by region then fruit, every group open, then
+ * `page.pdf()` fr and ar read back (scripts/pdf-text.py): group labels with their counts, footers, the grand total, every
+ * row once; the label column on the start side (right in Arabic), a group's rows one step further in.
  */
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
+
 export async function groupingChecks(name, ctx, h) {
   const { check, frames, site, axe, OUT } = h;
   const open = async (qs, scheme = 'light') => {
@@ -195,6 +203,68 @@ export async function groupingChecks(name, ctx, h) {
       check(name, 'grouping drop and menu: no page error', errors.length === 0, errors);
     } finally {
       await page.close();
+    }
+  }
+
+  // ---- step 7: a grouped grid printed to PDF, fr and ar (Chrome's page.pdf) ----
+  if (name === 'chrome') {
+    const read = (file) => JSON.parse(execFileSync('python3', ['-I', `${ROOT}scripts/pdf-text.py`, file], { timeout: 240_000, maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] }).toString('utf8'));
+    for (const lang of ['fr', 'ar']) {
+      const rtl = lang === 'ar';
+      const { page, errors } = await open(`locale=${rtl ? 'ar-DZ' : 'fr-FR'}&rows=40`);
+      try {
+        const names = await page.evaluate(async () => {
+          window.t.api().expandAll();
+          window.undo = await window.t.preparePrint(window.t.grid, { title: 'Ventes' });
+          const { regions, fruit } = window.t;
+          return { regions, fruit };
+        });
+        await page.emulateMedia({ media: 'print' });
+        // In print media, from the table: the marked rows, and where a group's label and its first row's text start
+        // (the text itself, past the em spaces of the indent).
+        const dom = await page.evaluate(() => {
+          const edge = (td) => {
+            const node = td.firstChild;
+            const r = document.createRange();
+            r.setStart(node, node.data.length - node.data.trimStart().length);
+            r.setEnd(node, node.data.length);
+            const b = r.getBoundingClientRect();
+            return { left: b.left, right: b.right };
+          };
+          const trs = [...document.querySelectorAll('.dzg-print tbody tr')];
+          const g = trs.find((tr) => tr.classList.contains('dzg-print-group'));
+          const d = trs.find((tr) => !tr.classList.contains('dzg-print-group'));
+          return { marked: trs.filter((tr) => tr.classList.contains('dzg-print-group')).length, all: trs.length, label: edge(g.cells[0]), row: edge(d.cells[0]) };
+        });
+        const file = `${OUT}/print-grouping-${lang}.pdf`;
+        await page.pdf({ path: file, format: 'A4' });
+        await page.emulateMedia({ media: 'screen' });
+        await page.evaluate(() => window.undo?.());
+        const lines = read(file).flatMap((p) => p.lines);
+        const text = lines.map((l) => l.text);
+        const xs = lines.map((l) => [l.x0, l.x1]).flat();
+        // 4 regions × 4 fruit: 4 + 16 group rows, as many footers, the grand total; 40 rows.
+        check(name, `grouping print ${lang}: 81 printed lines, the 41 group and totals rows marked`, dom.all === 81 && dom.marked === 41, dom);
+        check(name, `grouping print ${lang}: a group's rows one step further in than its label (the start edge, ${rtl ? 'right' : 'left'})`, rtl ? dom.row.right < dom.label.right - 5 : dom.row.left > dom.label.left + 5, dom);
+        // The PDF read back. Arabic comes out of pdfminer in presentation forms, so in Arabic the counts and numbers only.
+        const tens = lines.filter((l) => /\(10\)/.test(l.text));
+        const start = tens.length === 4 && tens.every((l) => (rtl ? l.x1 > Math.max(...xs) - 80 : l.x0 < Math.min(...xs) + 80));
+        if (rtl) {
+          const shops = lines.filter((l) => l.x0 > Math.max(...xs) - 120).map((l) => /^(\d+) /.exec(l.text)?.[1]).filter(Boolean).map(Number);
+          const once = Array.from({ length: 40 }, (_, i) => shops.filter((n) => n === i).length);
+          check(name, 'grouping print ar: four regions « (10) » on the right, every shop once', start && once.every((n) => n === 1), { tens: tens.length, missing: once.map((n, i) => (n === 1 ? -1 : i)).filter((i) => i >= 0) });
+        } else {
+          const has = (re) => text.some((t) => re.test(t));
+          const groups = names.regions.every((r) => has(new RegExp(`^${r} \\(10\\)$`)) && has(new RegExp(`^Total ${r}$`)));
+          const fruitGroups = names.fruit.every((f) => has(new RegExp(`^${f} \\(\\d+\\)$`)));
+          const rows = Array.from({ length: 40 }, (_, i) => text.filter((t) => t === `Boutique ${i}`).length);
+          check(name, 'grouping print fr: « Nord (10) » and « Total Nord » for every region, the fruit groups, « Total », every row once, labels on the left',
+            start && groups && fruitGroups && rows.every((n) => n === 1) && has(/^Total$/), { start, groups, fruitGroups, rows: rows.filter((n) => n !== 1).length });
+        }
+        check(name, `grouping print ${lang}: no page error`, errors.length === 0, errors);
+      } finally {
+        await page.close();
+      }
     }
   }
 

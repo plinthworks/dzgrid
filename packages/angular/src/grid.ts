@@ -168,6 +168,11 @@ export class DzGrid<T> implements AfterContentInit {
   readonly selected = model<SelectionState>();
   /** The rows open (a tree's parents, details' masters): the host's set written, the user's and the data's changes back. */
   readonly expanded = model<ReadonlySet<RowKey>>();
+  /**
+   * The grouping columns (Phase 7, `grouping()` in `features`; angular-parts.md « Row grouping »): the host's value
+   * regroups as the host (an equal one writes nothing), a user's or the API's regroup comes back.
+   */
+  readonly groupBy = model<readonly string[]>();
 
   readonly gridEvent = output<GridEvent<T>>();
   readonly cellClicked = output<Ev<T, 'cellClicked'>>();
@@ -272,6 +277,7 @@ export class DzGrid<T> implements AfterContentInit {
     effect(() => (this.quick(), this.filter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
     effect(() => (this.save(), this._grid() && untracked(() => this._save())));
     effect(() => (this.state(), this._grid() && untracked(() => this._state())));
+    effect(() => (this.groupBy(), this._grid() && untracked(() => this._group())));
     effect(() => {
       const p = this.pinnedRows();
       if (p && this._grid()) untracked(() => {
@@ -393,6 +399,15 @@ export class DzGrid<T> implements AfterContentInit {
     if (c !== n && (c !== this._st || n !== this._sn)) this._zone.runOutsideAngular(() => api.setState(v)), (this._st = c), (this._sn = canonical(api.state()));
   }
 
+  /** `[groupBy]` to the grid as the host, outside the zone, unless it equals the grid's grouping; without `grouping`, one warning. */
+  private _group(): void {
+    const by = this.groupBy();
+    if (!by) return;
+    const api = this.controller.grouping();
+    if (!api) return this._miss('groupBy', 'grouping');
+    if (by.join('\0') !== api.by().join('\0')) this._zone.runOutsideAngular(() => api.setBy(by, { host: true }));
+  }
+
   /** Inside a detail panel (`dzgNested`): the depth told, Escape back to the panel; on the host element, outside the zone. */
   private _nest(k: GridKernel<T, RowModel<T>>): void {
     const el = this._el;
@@ -483,6 +498,7 @@ export class DzGrid<T> implements AfterContentInit {
       this._open(k);
     }
     if (e.type === 'quickChanged') this.quick.set(e.text);
+    if (e.type === 'groupByChanged') this.groupBy.set(e.by);
     if (e.type === 'filterChanged') this.filter.set(e.filter);
   }
 }

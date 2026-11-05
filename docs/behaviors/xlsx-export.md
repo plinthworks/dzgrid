@@ -96,5 +96,20 @@ number.
 - Chrome, Firefox and WebKit build the same content.
 
 ## Grouped rows (Phase 7, owner Q-EX A « et l'export Excel aussi »; built at step 7)
-As the CSV (`csv-export.md` « Grouped rows »): group rows with their label and their totals as typed cells (numbers as
-numbers, days as dates), footers and the grand total; the outline levels as for a tree.
+As the CSV (`csv-export.md` « Grouped rows » 1–7): group rows with their label and their totals as typed cells (numbers
+as numbers, days as dates), footers and the grand total; the outline levels as for a tree.
+
+Numbered (step 7, 2026-11-05; `conformance/cases/xlsx/group-*`, `packages/core/test/grouping-export.test.ts`):
+1. **Outline** (`tree: 'outline'`, the default): Excel's row groups — a group row is the summary **above** its rows
+   (its + / − beside it), its rows one level deeper, a footer at the level of the rows it closes (it folds with them),
+   the grand total at the top level. Everything open in the file, whatever the screen (`displayed` writes only what is
+   shown; `all` every group). Past 7 levels: `xlsx-outline-depth`, as a tree.
+2. **The group column**: the label as text (« Alger (3) », « Total Alger », « Total » from the grid; the value as
+   formatted when written alone), indented one step per level as a tree's.
+3. **Totals as typed cells**: a sum, a mean, a min, a max, a first or a last in the column's own cell type and format
+   (a number with its `numberFormat`, a day as a date serial, an instant as a date-time serial in the zone); a count
+   always a plain number; an application's function's result read by the column (one it cannot read: no cell). Never a formula: Excel's
+   own SUBTOTAL is not used (the file holds the grid's numbers, the compensated sums).
+4. `tree: 'level'` writes CSV's level column instead of the outline; `'none'` flat lines with group rows still in;
+   `groupRows: false` data rows only (CSV 5).
+5. `xlsxStyle` is called for totals cells too, with `row: null` and `header: false`.

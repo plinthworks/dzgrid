@@ -92,3 +92,14 @@ Playground: `print.html` (`?lang=ar`, `?rows=5001`, `?preflight=1`) and « Impri
 ## Grouped rows (Phase 7, owner Q-EX A; built at step 7)
 Print shows the group rows as shown on screen (label indented, count, totals), their footers and the grand total; a
 closed group prints as its row only.
+
+Numbered (step 7, 2026-11-05; `packages/dom/test/print-grouping.test.ts`, Chrome `page.pdf()` fr and ar):
+1. The printed rows are the screen's rows, in order: group rows, the rows of open groups, footers, the grand total
+   (first or last, as shown). A closed group prints as its row only.
+2. **The group column** prints the label as the screen writes it (« Alger (3) », « Total Alger », « Total »), indented
+   one em per level; data rows one step deeper, as on screen. The group column is the grouping's (its `column`, else
+   the first shown), not always the first.
+3. **Totals** print as the screen shows them (the column's format; a count as a number of the language); the group
+   column holds the label.
+4. Group and totals rows are set in bold (`dzg-print-group`), so they read apart without colour.
+5. `maxRows` counts printed lines, group and totals lines included.

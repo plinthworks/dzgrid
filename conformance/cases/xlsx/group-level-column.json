@@ -1,0 +1,89 @@
+{
+  "id": "group-level-column",
+  "suite": "xlsx",
+  "description": "`tree: 'level'`: CSV's level column instead of the outline, group rows at 1 and rows at 2 (« Grouped rows » 4).",
+  "refs": [
+    "docs/behaviors/xlsx-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "scope": "all",
+    "grouping": {
+      "by": [
+        "ward"
+      ]
+    },
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "name",
+        "header": "Name",
+        "aggFunc": "count"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number",
+        "aggFunc": "sum",
+        "numberFormat": {
+          "style": "currency",
+          "currency": "EUR"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "Alger",
+        "name": "a",
+        "amount": 1.5,
+        "seen": "2026-03-05"
+      },
+      {
+        "id": "r1",
+        "ward": "Oran",
+        "name": "b",
+        "amount": 2,
+        "seen": "2026-01-09"
+      }
+    ],
+    "options": {
+      "tree": "level"
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "Level",
+      "B1": "Ward",
+      "C1": "Name",
+      "D1": "Amount",
+      "A2": 1,
+      "B2": "Alger",
+      "C2": 1,
+      "D2": 1.5,
+      "A3": 2,
+      "B3": "Alger",
+      "C3": "a",
+      "D3": 1.5,
+      "A4": 1,
+      "B4": "Oran",
+      "C4": 1,
+      "D4": 2,
+      "A5": 2,
+      "B5": "Oran",
+      "C5": "b",
+      "D5": 2
+    },
+    "outline": {},
+    "summary": {
+      "rows": 4,
+      "columns": 3,
+      "blank": 0,
+      "invalid": 0
+    },
+    "problems": []
+  }
+}

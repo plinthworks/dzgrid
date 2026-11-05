@@ -236,7 +236,14 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
         if (!made.blob) return finish('failed', { stage: 'build', err: own('xlsx-too-large') });
         blob = made.blob;
       } else {
-        const it = csvChunks({ rows: held.rows, at: held.at, columns: g.columns, ctx: g.ctx, ...spans }, { ...o, columns: request.columns, chunkRows: ROWS_PER_CHUNK });
+        // A grouped grid (csv-export.md « Grouped rows »): the screen's labels, the grouping's totals and label column;
+        // grouped by no column (a grand total only), no level column.
+        const gr = g.grouped;
+        const tc = o.treeColumn ?? gr?.column();
+        const it = csvChunks(
+          { rows: held.rows, at: held.at, columns: g.columns, ctx: g.ctx, ...spans, ...(gr && { groupLabel: gr.label, aggFuncs: gr.aggFuncs }) },
+          { ...o, ...(tc !== undefined && { treeColumn: tc }), ...(gr && { tree: o.tree ?? (gr.by().length ? 'level' : 'none') }), columns: request.columns, chunkRows: ROWS_PER_CHUNK },
+        );
         const b = batcher();
         sum = await drain(it, env, b.push, (k) => progress('building', Math.min(k * ROWS_PER_CHUNK, held.count), held.count));
         if (!sum) return finish('cancelled');

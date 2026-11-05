@@ -1,0 +1,79 @@
+{
+  "id": "row-groups-no-row-value",
+  "suite": "grid-state",
+  "description": "Grouped by a name column, a group open: the state holds the column id, never the name nor a group key (Q-ST A, G 3).",
+  "refs": [
+    "docs/behaviors/grid-state.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "name"
+      },
+      {
+        "id": "age",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "name": "SECRET-Fatima",
+        "age": 40
+      },
+      {
+        "id": "r2",
+        "name": "SECRET-Fatima",
+        "age": 41
+      }
+    ],
+    "rowGroups": [
+      "name"
+    ],
+    "restore": {
+      "v": 1,
+      "rowGroups": [
+        "name"
+      ]
+    },
+    "before": [
+      {
+        "type": "rows.expandAll",
+        "expanded": true
+      }
+    ]
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "name",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "age",
+          "order": 1,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": [
+        "name"
+      ]
+    },
+    "by": [
+      "name"
+    ],
+    "leaks": false,
+    "shown": [
+      "[SECRET-Fatima]",
+      "r1",
+      "r2"
+    ]
+  }
+}

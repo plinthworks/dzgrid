@@ -1,0 +1,74 @@
+{
+  "id": "group-indent-column",
+  "suite": "csv",
+  "description": "`indent` in the group column the application names (`name`): two spaces per level before the label and the rows' values; a grouping column's own cells keep their value (« Grouped rows » 2, 4).",
+  "refs": [
+    "docs/behaviors/csv-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "labels": true,
+    "grouping": {
+      "by": [
+        "ward"
+      ]
+    },
+    "open": [
+      [
+        "ward",
+        "tOran"
+      ]
+    ],
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "name",
+        "header": "Name",
+        "aggFunc": "count"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "Alger",
+        "name": "a",
+        "amount": 1.5
+      },
+      {
+        "id": "r1",
+        "ward": "Oran",
+        "name": "b",
+        "amount": 2
+      },
+      {
+        "id": "r2",
+        "ward": "Alger",
+        "name": "c",
+        "amount": 2.25
+      }
+    ],
+    "options": {
+      "bom": false,
+      "tree": "indent",
+      "treeColumn": "name"
+    }
+  },
+  "expected": {
+    "text": "Ward,Name,Amount\r\n,Alger (2),3.75\r\n,Oran (1),2\r\nOran,  b,2\r\n",
+    "summary": {
+      "rows": 3,
+      "columns": 3,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

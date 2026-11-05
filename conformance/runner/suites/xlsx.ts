@@ -1,5 +1,7 @@
 import { deflateRawSync } from 'node:zlib';
-import { clientRows, createColumnModel, createKernel, dataKey, localeCtx, type ColumnDef } from '@dzgrid/core';
+import { clientRows, createColumnModel, createKernel, dataKey, groupKey, localeCtx, type ColumnDef } from '@dzgrid/core';
+import { groupShape } from '@dzgrid/core/grouping';
+import { groupLabel } from './csv.js';
 import { csvRows } from '@dzgrid/core/csv';
 import { buildSpanMap } from '@dzgrid/core/spans';
 import { treeShape } from '@dzgrid/core/tree';
@@ -22,15 +24,17 @@ const expand = (r: Record<string, unknown>): Record<string, unknown> =>
 function runXlsx(input: any) {
   const ctx = localeCtx({ locale: input.locale, ...(input.timeZone && { timeZone: input.timeZone }) });
   const columns = createColumnModel<Row>(input.columns as ColumnDef<Row>[]);
-  const shape = input.tree ? treeShape<Row>({ path: (r) => r['path'] as string[] }) : undefined;
+  // Grouped (Phase 7 step 7): `grouping` the shape's options, `open` group keys' segments, `labels` the grid's texts (csv.ts).
+  const shape = input.tree ? treeShape<Row>({ path: (r) => r['path'] as string[] }) : input.grouping ? groupShape<Row>(input.grouping) : undefined;
   const model = clientRows<Row>({ rows: input.rows.map((r: Record<string, unknown>, i: number) => ({ id: `r${i}`, ...expand(r) })), getRowId: (r) => r.id, columns, ctx, ...(shape && { shape }) });
   const kernel = createKernel<Row>({ rows: model, columns });
+  if (input.open) kernel.dispatch({ type: 'rows.expand', rows: input.open.map((p: string[]) => groupKey(p)), expanded: true }, 'user');
   if (input.select) kernel.dispatch({ type: 'selection.set', selection: { mode: 'include', keys: new Set(input.select.map((id: string) => dataKey(id)!)) } }, 'user');
   const held = csvRows(model, input.scope ?? 'displayed', kernel.selection)!;
   const spans = input.spans ? { spans: buildSpanMap({ rows: model.displayed, columns, ctx }), spanColumns: columns.visible().map((c) => c.id) } : {};
   const style = input.style as Record<string, object> | undefined;
   const { parts, summary } = toXlsx(
-    { rows: held.rows, at: held.at, columns, ctx, ...spans, widths: input.widths, pinned: columns.layout.start.columns.map((c) => c.id), groups: input.columns },
+    { rows: held.rows, at: held.at, columns, ctx, ...spans, ...(input.labels && { groupLabel }), widths: input.widths, pinned: columns.layout.start.columns.map((c) => c.id), groups: input.columns },
     { ...input.options, ...(style && { xlsxStyle: (c: { column: string; header: boolean }) => style[c.header ? 'header' : c.column] ?? null }) },
     input.deflate ? (b: Uint8Array) => new Uint8Array(deflateRawSync(b)) : undefined,
   );

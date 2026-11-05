@@ -31,10 +31,15 @@ export async function build(
   for (const s of [layout.start, layout.center, layout.end]) s.columns.forEach((c, i) => (widths[c.id] = s.widths.sizeAt(i)));
   // A hidden column named: its definition's width.
   for (const id of columns) widths[id] ??= g.columns.get(id)?.def.width!;
+  // A grouped grid (xlsx-export.md « Grouped rows »): the screen's labels and totals, the outline; grouped by no column, flat.
+  const gr = g.grouped;
   const it = xlsxParts(
-    { ...held, ...spans, columns: g.columns, ctx: g.ctx, widths, pinned: layout.start.columns.map((c) => c.id), groups: g.settings.columns },
+    { ...held, ...spans, columns: g.columns, ctx: g.ctx, widths, pinned: layout.start.columns.map((c) => c.id), groups: g.settings.columns, ...(gr && { groupLabel: gr.label, aggFuncs: gr.aggFuncs }) },
     // CSV's options shared with Excel (its `tree`, `spans`, `instants` are CSV's own).
-    { text: o.text, enums: o.enums, header: o.header, levelHeader: o.levelHeader, treeColumn: o.treeColumn, ...x, columns, sheetName: x.sheetName ?? g.msg('export.fileName'), rtl: x.rtl ?? g.dir === 'rtl', chunkRows: 200 },
+    {
+      text: o.text, enums: o.enums, header: o.header, levelHeader: o.levelHeader, treeColumn: o.treeColumn ?? gr?.column(), groupRows: o.groupRows,
+      ...(gr && !gr.by().length && { tree: 'none' as const }), ...x, columns, sheetName: x.sheetName ?? g.msg('export.fileName'), rtl: x.rtl ?? g.dir === 'rtl', chunkRows: 200,
+    },
   );
   const enc = new TextEncoder();
   const Z = ((g.win ?? globalThis) as typeof globalThis).CompressionStream;

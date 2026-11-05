@@ -4,6 +4,7 @@
 # history: 1.1.0 changes found on the guard's first run (2026-10-29), compatible for callers: required members added to interfaces the grid hands out (LazyControl.sync, GridStateApi.reset, SlotContext.menuItem), inputs widened (SpanInput, MotionEffects.flash); owner to confirm — @dzgrid/core/spans#SpanInput, @dzgrid/core/tree-lazy#LazyControl
 # history: Owner, 2026-11-01 (« étape 7 », decisions.md): tree({ column, indent }) also take a function; SpanInput.treeColumn a function per row. Inputs widened, nothing removed. — @dzgrid/core/spans#SpanInput
 # history: Owner A (2026-11-03, phase-9-steps/decisions.md « Excel export »): the Excel export, additions only — @dzgrid/core/xlsx, ExportRequest.format, ExportTrace.format, XlsxProblemCode, csvExport({ xlsx }), use.xlsx and the optional ContextMenuXlsxKey — @dzgrid/core#ProblemCode, @dzgrid/core#ExportTrace, @dzgrid/core/csv#ExportRequest, @dzgrid/core/xlsx#XLSX_COLUMNS, @dzgrid/core/xlsx#XLSX_MIME, @dzgrid/core/xlsx#XLSX_ROWS, @dzgrid/core/xlsx#XlsxInput, @dzgrid/core/xlsx#XlsxOptions, @dzgrid/core/xlsx#XlsxPiece, @dzgrid/core/xlsx#XlsxStyle, @dzgrid/core/xlsx#XlsxStyleContext, @dzgrid/core/xlsx#XlsxSummary, @dzgrid/core/xlsx#ZipEntry, @dzgrid/core/xlsx#crc32, @dzgrid/core/xlsx#numFmtFor, @dzgrid/core/xlsx#serialOfDay, @dzgrid/core/xlsx#sheetNameOf, @dzgrid/core/xlsx#toXlsx, @dzgrid/core/xlsx#utf8, @dzgrid/core/xlsx#xlsxParts, @dzgrid/core/xlsx#zipFile
+# history: groupByChanged event added (owner 2026-11-05) — @dzgrid/core#GridEvent
 
 @ @dzgrid/core
 ## AbortHandle
@@ -615,6 +616,10 @@
       readonly source: ChangeSource;
       readonly canUndo: boolean;
       readonly canRedo: boolean;
+  } | {
+      readonly type: 'groupByChanged';
+      readonly source: ChangeSource;
+      readonly by: readonly string[];
   } | {
       readonly type: 'pinnedChanged';
       readonly source: ChangeSource;

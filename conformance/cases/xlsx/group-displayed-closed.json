@@ -1,0 +1,81 @@
+{
+  "id": "group-displayed-closed",
+  "suite": "xlsx",
+  "description": "`displayed`, groups closed: the group rows alone, with their totals; written alone (no labels given) the group column holds the value (« Grouped rows » 1, 2).",
+  "refs": [
+    "docs/behaviors/xlsx-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "grouping": {
+      "by": [
+        "ward"
+      ]
+    },
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "name",
+        "header": "Name",
+        "aggFunc": "count"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number",
+        "aggFunc": "sum",
+        "numberFormat": {
+          "style": "currency",
+          "currency": "EUR"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "Alger",
+        "name": "a",
+        "amount": 1.5,
+        "seen": "2026-03-05"
+      },
+      {
+        "id": "r1",
+        "ward": "Oran",
+        "name": "b",
+        "amount": 2,
+        "seen": "2026-01-09"
+      },
+      {
+        "id": "r2",
+        "ward": "Alger",
+        "name": "c",
+        "amount": 2.25,
+        "seen": "2026-02-01"
+      }
+    ]
+  },
+  "expected": {
+    "cells": {
+      "A1": "Ward",
+      "B1": "Name",
+      "C1": "Amount",
+      "A2": "Alger",
+      "B2": 2,
+      "C2": 3.75,
+      "A3": "Oran",
+      "B3": 1,
+      "C3": 2
+    },
+    "outline": {},
+    "summary": {
+      "rows": 2,
+      "columns": 3,
+      "blank": 0,
+      "invalid": 0
+    },
+    "problems": []
+  }
+}

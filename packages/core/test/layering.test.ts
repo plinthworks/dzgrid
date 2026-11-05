@@ -220,12 +220,12 @@ describe('layering of the base and the server entry', () => {
     expect(alone).toBeLessThanOrEqual(BASE);
   });
 
-  it('the state entry fits its grant over the base (owner Q-B 1 500, « set include only » 1 510 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
+  it('the state entry fits its grant over the base (owner Q-B 1 500, « set include only » 1 510, Phase 7 +2 % 1 540 B gz), measured as check:size measures it; the base gains no byte (types only)', async () => {
     const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './state.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
-    expect(both - alone).toBeLessThanOrEqual(1510); // owner « set include only » (2026-10-29): 1 500 → 1 510
+    expect(both - alone).toBeLessThanOrEqual(1540); // Phase 7 step 7 (owner rule, +2 %): 1 510 → 1 540, `rowGroups`; owner « set include only » (2026-10-29): 1 500 → 1 510
     expect(alone).toBeLessThanOrEqual(BASE);
   });
 });

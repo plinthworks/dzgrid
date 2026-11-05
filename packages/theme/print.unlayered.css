@@ -39,4 +39,7 @@
   .dzg-printing .dzg-print-note {
     text-align: start;
   }
+  .dzg-printing .dzg-print-group {
+    font-weight: bold;
+  }
 }

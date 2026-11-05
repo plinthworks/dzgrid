@@ -78,5 +78,10 @@ $layered: true !default;
     .dzg-printing .dzg-print-note {
       text-align: start;
     }
+
+    // A grouped grid's group and totals rows (print.md « Grouped rows » 4): set apart by weight, not colour.
+    .dzg-printing .dzg-print-group {
+      font-weight: bold;
+    }
   }
 }

@@ -5,6 +5,7 @@ import type { EditApi } from '@dzgrid/dom/edit';
 import type { RangeApi } from '@dzgrid/dom/range';
 import type { FillApi } from '@dzgrid/dom/fill';
 import type { GridStateApi } from '@dzgrid/dom/state';
+import type { GroupingApi } from '@dzgrid/dom/grouping';
 
 type FilterOpener = GridFeature & { openFilter(column: string): boolean; closeFilter(): void };
 
@@ -88,6 +89,10 @@ export class DzgController<T = unknown> {
   /** The grid's fill (Phase 5 step 12): the `fill()` feature given in `features`; null before, without it, after. */
   fill(): FillApi | null {
     return this._by<FillApi>('fill');
+  }
+  /** The grid's row grouping (Phase 7): the `grouping()` feature given in `features` (`by`, `setBy`, `totals`…); null before, without it, after. */
+  grouping(): GroupingApi | null {
+    return this._by<GroupingApi>('grouping');
   }
   /**
    * A feature's api for this grid (Phase 6 step 12): `use(chooser)?.open(button)`, `use(pins)?.set({ bottom })`,

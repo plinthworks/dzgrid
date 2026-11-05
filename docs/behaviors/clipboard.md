@@ -249,6 +249,11 @@ Real captures from Excel (Windows, macOS), Google Sheets, LibreOffice and Number
 - **API (L12).** `copy()`, `cut()`, `paste(text, html?)` and `erase()` act as the keys (the sentence, the
   `rangeCopied` event with source `api`, the block after a paste); they never touch the system clipboard.
 
+## Grouped rows (Phase 7 close, review 2026-11-05)
+A block of cells holds data cells only: on a grouped grid, a group, footer or grand total row inside a block's span copies
+as an empty line (as a tree's filler does); its label and totals are in the CSV, the Excel file and the print. To ask
+the owner: copy them as the files write them (`groupLabel`, totals), at a cost in `core/range` (7 B from its line).
+
 ## Where DzGrid differs on purpose
 - The guard on copy (QB3): Excel would run `=…` pasted from us; we write `'` in front, as the CSV.
 - Too big writes nothing rather than a part (QB4): a part of a paste on health records is worse than none.

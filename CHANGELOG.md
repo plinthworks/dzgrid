@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased — 1.5.0]
 
-A minor, additive (Phase 7, row grouping; steps 5–6 of 9, not released).
+A minor, additive (Phase 7, row grouping; closed 2026-11-05, not released).
 
 ### Added
 - `@dzgrid/core/grouping`: `groupShape({ by, aggFuncs, expanded, footers, grandTotal })` — rows grouped by columns,
@@ -21,6 +21,13 @@ A minor, additive (Phase 7, row grouping; steps 5–6 of 9, not released).
   a header dropped on it, chips moved by keys or the mouse, removed by × or Delete.
 - `columnMenu({ use: { grouping } })`: « Regrouper par cette colonne » / « Ne plus regrouper par cette colonne ».
 - Texts `@dzgrid/dom/locales/{en,fr,ar}-group`; look `@dzgrid/theme/grouping.css` (and `.unlayered.css`).
+- The grid's state keeps the grouping columns: `rowGroups` (ids only, never the open groups); `StateEnv.rowGroups`,
+  `checkRowGroups` in `@dzgrid/core/grouping`; a regroup is a gesture (`stateChanged`).
+- A new event `groupByChanged { by, source }`.
+- CSV and Excel exports of a grouped grid: group rows with the screen's labels, typed totals, footers and the grand
+  total; Excel's outline; `groupRows: false` for the data rows only. Core inputs `groupLabel`, `aggFuncs`.
+- Print of a grouped grid: group and totals rows as shown, set in bold (`.dzg-print-group` in `print.css`).
+- Angular: `[(groupBy)]` and `DzgController.grouping()`.
 
 ## [1.4.0] - 2026-11-04
 

@@ -4,4 +4,4 @@
  * and restored in one server request. Pure: no DOM, no clock, no storage (those are `@dzgrid/dom/state`'s).
  */
 export { captureState, checkState, restoreState, stateText, STATE_UPGRADES, STATE_VERSION } from './state/state.js';
-export type { Density, StateProblemCode, GridState, GridStateColumn, GroupsAdapter, StateEnv, StateOptions, StatePart } from './state/state.js';
+export type { Density, StateProblemCode, GridState, GridStateColumn, GroupsAdapter, RowGroupsAdapter, StateEnv, StateOptions, StatePart } from './state/state.js';

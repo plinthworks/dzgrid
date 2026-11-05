@@ -145,6 +145,11 @@ export type GridEvent<T> =
   | { readonly type: 'densityChanged'; readonly source: ChangeSource; readonly density: 'compact' | 'comfortable' | 'spacious' }
   /** Undo or redo became possible or impossible: on each flip only (edit-undo.md 12). */
   | { readonly type: 'undoChanged'; readonly source: ChangeSource; readonly canUndo: boolean; readonly canRedo: boolean }
+  /**
+   * `@dzgrid/dom/grouping` (Phase 7 step 7, grid-state.md « Row grouping » 4; the core never sends it): the grouping columns
+   * changed (the zone, the column menu, `setBy`, a restore as `host`). Column ids only, never a group's value.
+   */
+  | { readonly type: 'groupByChanged'; readonly source: ChangeSource; readonly by: readonly string[] }
   /** `@dzgrid/dom/pinned-rows` (step 8b-1; the core never sends it): the application gave other pinned rows (`api.set`). */
   | { readonly type: 'pinnedChanged'; readonly source: ChangeSource }
   /**

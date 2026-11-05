@@ -1,0 +1,61 @@
+{
+  "id": "group-two-levels",
+  "suite": "csv",
+  "description": "Two levels, all open by the options: levels 1, 2, then the rows at 3; the inner group's label in the group column (« Grouped rows » 4).",
+  "refs": [
+    "docs/behaviors/csv-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "grouping": {
+      "by": [
+        "ward",
+        "name"
+      ],
+      "expanded": "all"
+    },
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "name",
+        "header": "Name",
+        "aggFunc": "count"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "A",
+        "name": "x",
+        "amount": 1
+      },
+      {
+        "id": "r1",
+        "ward": "A",
+        "name": "x",
+        "amount": 2
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Ward,Name,Amount\r\n1,A,2,3\r\n2,x,2,3\r\n3,A,x,1\r\n3,A,x,2\r\n",
+    "summary": {
+      "rows": 4,
+      "columns": 3,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

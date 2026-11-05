@@ -1,6 +1,6 @@
-import { formattersFor, intentFor, type DisplayIndex, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type RowKey, type RowNode } from '@dzgrid/core';
+import { formattersFor, intentFor, type ChangeSource, type DisplayIndex, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type RowKey, type RowNode } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
-import { groupConflicts, groupShape, type GroupedRows, type GroupingOptions, type GroupShape } from '@dzgrid/core/grouping';
+import { checkRowGroups, groupConflicts, groupShape, type GroupedRows, type GroupingOptions, type GroupShape } from '@dzgrid/core/grouping';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { GroupMessageKey } from '../part-texts.js';
@@ -25,8 +25,11 @@ export interface GroupingFeatureOptions extends GroupingOptions {
 export interface GroupingApi {
   /** The grouping columns as given, the first level first. */
   by(): readonly string[];
-  /** Groups by these columns at once (source `api`, or `user` with `user`); the open groups are kept. */
-  setBy(by: readonly string[], o?: { readonly user?: boolean }): void;
+  /**
+   * Groups by these columns at once, told by `groupByChanged` (source `api`; `user` with `user`; `host` with `host`, a
+   * binding's write such as Angular's `[groupBy]`, which `stateChanged` does not follow); the open groups are kept.
+   */
+  setBy(by: readonly string[], o?: { readonly user?: boolean; readonly host?: boolean }): void;
   /** Opens every group, or the levels above `depth` (1: the first level). */
   expandAll(depth?: number): void;
   /** Closes every group. */
@@ -147,9 +150,34 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
     const n = i < 0 ? null : d!.nodeAt(i);
     if (n?.kind === 'group') g.live.announce(e.expanded ? g.msg('group.expanded', { name: nameOf(n), n: d!.childrenAt(i) }) : g.msg('group.collapsed', { name: nameOf(n) }));
   });
+  /** Regroups, told once when the columns changed (grid-state.md « Row grouping » 4): column ids only. */
+  const setBy = (by: readonly string[], source: ChangeSource): void => {
+    const was = shape.by;
+    shape.setBy(by, source);
+    if (shape.by !== was) emit(kernel, { type: 'groupByChanged', source, by: shape.by });
+  };
+  // What print and the export read, and the state's part (checked by the core; a restore is the host's).
+  g.grouped = { column: labelColumn, by: () => shape.reads!(), label: labelOf, cell: (n, c) => (c.id === labelColumn() ? labelOf(n) : textOf(c, n.aggs?.[c.id])), aggFuncs: o.aggFuncs };
+  const initial = shape.by;
+  g.rowGroups = {
+    initial,
+    // The columns in use (refused ones dropped), so a state restores without a word.
+    get: () => shape.reads!(),
+    set(raw) {
+      const r = checkRowGroups(raw, g.columns);
+      if (r.by) setBy(r.by, 'host');
+      return r.problems;
+    },
+  };
+  // A state restored before this setup (`gridState` listed first): its part applied now, what it skipped told.
+  if (g.rowGroupsLater !== undefined) {
+    const ps = g.rowGroups.set(g.rowGroupsLater);
+    delete g.rowGroupsLater;
+    if (ps.length) emit(kernel, { type: 'problems', source: 'host', problems: ps });
+  }
   apis.set(kernel, {
     by: () => shape.by,
-    setBy: (by, x) => shape.setBy(by, x?.user ? 'user' : 'api'),
+    setBy: (by, x) => setBy(by, x?.user ? 'user' : x?.host ? 'host' : 'api'),
     expandAll: (depth) => void kernel.dispatch({ type: 'rows.expandAll', expanded: true, ...(depth !== undefined && { depth }) }, 'api'),
     collapseAll: () => void kernel.dispatch({ type: 'rows.expandAll', expanded: false }, 'api'),
     totals: () => shape.totals(),
@@ -331,6 +359,8 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
     destroy() {
       off();
       apis.delete(kernel);
+      delete g.grouped;
+      delete g.rowGroups;
       stack?.clear();
       layer?.remove();
       g.inset = 0;

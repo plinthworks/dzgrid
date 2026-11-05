@@ -176,3 +176,16 @@ A new optional part `rowGroups: string[]` — the grouping columns' ids, in orde
 Restored after the columns, the header groups and the density, before the one query. An unknown id is told
 (`state-column`), a non-groupable one too (`state-field`). Never the open groups: their keys hold row values. Written
 in the address by default (column ids are not row data). Reset brings the application's own grouping back.
+
+Numbered (step 7, 2026-11-05; `conformance/cases/grid-state/row-groups-*`, `packages/dom/test/state-grouping.test.ts`):
+1. Captured only on a grid with `grouping()` (through `StateEnv.rowGroups`, which `@dzgrid/dom/grouping` hands
+   `@dzgrid/dom/state`): `rowGroups: []` when grouped by nothing. A grid without grouping writes no `rowGroups`.
+2. Restored after density, before the query: the ids kept in their order. An id the grid does not know: skipped,
+   `state-column` (path `rowGroups.<i>`, the id as detail); not a text, given twice, or a column with `groupable: false`:
+   skipped, `state-field` (path `rowGroups.<i>`, no detail); not a list: `state-field` at `rowGroups`, nothing changed.
+   The ids kept regroup the grid at once (the open groups are not touched; they are never in the state).
+3. A grid without grouping ignores the part (nothing told: the state may come from a grouped screen).
+4. A user's regroup (the zone, the column menu, `setBy(…, { user: true })`) is a gesture: one `stateChanged` after the
+   pause. It is told by a new event `groupByChanged { by, source }` (source `user` or `api`; a restore's is `host`).
+5. `reset()` brings back the grouping the application gave at creation.
+6. In the address (`toSearchParams`) `rowGroups` is always written, like the columns: ids only.

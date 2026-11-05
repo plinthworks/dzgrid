@@ -1,0 +1,68 @@
+{
+  "id": "group-typed-totals",
+  "suite": "csv",
+  "description": "Totals written as their column writes a cell: a day ISO, an instant in wall time (the zone in the header), min and max; an empty total an empty field (« Grouped rows » 3).",
+  "refs": [
+    "docs/behaviors/csv-export.md"
+  ],
+  "input": {
+    "locale": "en-GB",
+    "timeZone": "Africa/Algiers",
+    "grouping": {
+      "by": [
+        "ward"
+      ]
+    },
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "seen",
+        "header": "Seen",
+        "type": "day",
+        "aggFunc": "min"
+      },
+      {
+        "id": "at",
+        "header": "At",
+        "type": "instant",
+        "aggFunc": "max"
+      },
+      {
+        "id": "note",
+        "header": "Note",
+        "aggFunc": "first"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "A",
+        "seen": "2026-03-05",
+        "at": "2026-03-05T22:59:00Z",
+        "note": null
+      },
+      {
+        "id": "r1",
+        "ward": "A",
+        "seen": "2026-01-09",
+        "at": "2026-03-01T08:00:00Z",
+        "note": null
+      }
+    ],
+    "options": {
+      "bom": false
+    }
+  },
+  "expected": {
+    "text": "Level,Ward,Seen,At (Africa/Algiers),Note\r\n1,A,2026-01-09,2026-03-05 23:59:00,\r\n",
+    "summary": {
+      "rows": 1,
+      "columns": 4,
+      "blank": 0,
+      "invalid": 0
+    }
+  }
+}

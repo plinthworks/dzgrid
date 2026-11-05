@@ -1,0 +1,55 @@
+{
+  "id": "group-style-hook",
+  "suite": "xlsx",
+  "description": "`xlsxStyle` is asked for totals cells too (row null), so an application can colour them; the label cell keeps its indent look (« Grouped rows » 5).",
+  "refs": [
+    "docs/behaviors/xlsx-export.md"
+  ],
+  "input": {
+    "locale": "en-US",
+    "grouping": {
+      "by": [
+        "ward"
+      ]
+    },
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "amount",
+        "header": "Amount",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r0",
+        "ward": "Alger",
+        "name": "a",
+        "amount": 1.5,
+        "seen": "2026-03-05"
+      }
+    ],
+    "style": {
+      "amount": {
+        "bold": true
+      }
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "Ward",
+      "B1": "Amount",
+      "A2": "Alger",
+      "B2": 1.5
+    },
+    "bold": [
+      "A1",
+      "B1",
+      "B2"
+    ]
+  }
+}

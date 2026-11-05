@@ -1085,7 +1085,7 @@ versus the ids the app saves today.
   (`playground/cell-menu-check.html`, not committed). Sizes in `phase-9-steps/decisions.md`; two lines over their
   grant (`context-menu` 2 325 / 2 100, `menu.css` 716 / 500) and the `check:api` changes wait for the owner.
 
-## Phase 7 — row grouping and aggregation (started 2026-11-04)
+## Phase 7 — row grouping and aggregation (started 2026-11-04, closed 2026-11-05, 1.5.0 unreleased)
 
 Plan `docs/phase-7-plan.md` (aligned 2026-11-04); owner answers « ★ everywhere in §5, sizes OK » (`docs/phase-7-steps/
 questions.md`); the lead's decisions and measures in `docs/phase-7-steps/decisions.md`, which win over the plan.
@@ -1124,5 +1124,30 @@ questions.md`); the lead's decisions and measures in `docs/phase-7-steps/decisio
   `grouping-zone.test.ts` (26). Sizes: `dom/grouping` 4 434 (line 4 878), `dom/group-zone` 2 576 (2 834), texts 318 /
   367 / 507 (350 / 404 / 558), `grouping.css` 533 (587), `core/grouping` 4 334 / 4 750, `column-menu` 3 164 / 4 300,
   dom base 23 282 / 23 290 (`shapeAfter`: a tree wins over grouping in either order, +2 % rule), K.8 89 218 / 90 000.
-- [ ] Step 7 — state (`rowGroups`), CSV, Excel and print with group rows and totals.
-- [ ] Step 8 — Angular and demos. Step 9 — close.
+- [x] **Step 7 — state, CSV, Excel, print** (2026-11-05, not committed): `rowGroups` in `core/state` (carried; checked by
+  `checkRowGroups` in `core/grouping`, handed by `dom/grouping` through the context) and `dom/state` (the new event
+  `groupByChanged` is a gesture; `reset()` brings the given grouping back); CSV and Excel write group rows with the
+  screen's labels, typed totals (a count a plain number), footers and the grand total, `groupRows: false` for the data
+  only, Excel's outline as a tree's; print prints group and totals rows as shown (`.dzg-print-group`). Conformance
+  `grid-state/row-groups-*` (7), `csv/group-*` (9), `xlsx/group-*` (5), each failing first; `grouping-export.test.ts`,
+  `state-grouping`, `export-grouping`, `print-grouping` (dom). Chrome `page.pdf()` fr and ar of a grouped grid
+  (`--only grouping`, 37 / 37). Local page `regroupement.html`: Excel, CSV, Imprimer.
+- [x] **Step 8 — Angular** (2026-11-05, not committed): `[(groupBy)]` (host writes as `host`, echo guarded, missing feature
+  told), `DzgController.grouping()`; the band through `[features]`; `grouping-bindings.test.ts` (5). Controller
+  `expandAll` / `collapseAll` and a `(groupByChanged)` output left out to hold the +2 % line. Real Angular example
+  98 833 (line 98 800 → 99 000, +2 %); Q-RA A: no grouped view there.
+
+### Phase 7 — close (2026-11-05, step 9; not committed)
+- Architect check against ARCHITECTURE and plan §6 and a code review of steps 7–8: findings fixed or listed for the owner
+  (`docs/phase-7-steps/decisions.md` « steps 7–8 », ARCHITECTURE « Ajustements après la Phase 7 »).
+- Exit criteria: A by 2 columns + 3 totals **59.9 ms node, 40.2 ms Chrome** (≤ 150); a group of 10 000 opened
+  **17.4–17.8 ms** (≤ 30); RTL keys mirrored (jsdom, Chrome, Firefox, WebKit); `aria-*` and axe 0 fr / ar; the zone as
+  an APG toolbar, 24 px, the menu item for 2.5.7; Neumaier sums, no `Date` in the core; no row value in a Problem or the
+  state (planted-value tests); refusals told, never thrown; base lines held (core 29 202 / 29 250, dom 23 282 / 23 290,
+  K.8 89 405 / 90 000).
+- Budgets (owner rule): new entries at measure + 10 % (`core/grouping` 4 950, `dom/grouping` 5 100); existing lines
+  +2 % at most (`core/state` 1 540, `core/csv` 2 040, `core/xlsx` 7 150, `dom/print` 1 632, export run 5 350, angular
+  7 810, `dom/state` 1 240, real example 99 000). Review fixes: rowGroups kept in long addresses, a state restored before the grouping applied at its setup, refused columns not saved, Excel totals never counted invalid, the grand total counted.
+- For the owner: accept `@dzgrid/core#GridEvent` in `check:api` (the `groupByChanged` member; the guard reads a
+  multi-line union member as a change); the listening §26; Q-SE B on his screens; the §5.2 ceiling of the core's
+  sub-entries.
