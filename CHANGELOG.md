@@ -5,10 +5,18 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased — 1.5.0]
+## [1.5.0] - 2026-11-05
 
-A minor, additive (Phase 7, row grouping, and Phase 8, infinite scroll and the server-side row model; both closed
-2026-11-05, not released). The owner decides the version and the release.
+A minor: nothing of 1.4.0 is removed or narrowed (`npm run check:api`). Phase 7 (row grouping and aggregation) and
+Phase 8 (infinite scroll and the server-side row model).
+
+### Upgrading from 1.4.0
+- Nothing to change. Grouping (`@dzgrid/dom/grouping`, `@dzgrid/dom/group-zone`, `@dzgrid/theme/grouping.css`),
+  infinite scroll (`infiniteRows`) and server-side groups (`serverSideRows`) are off until the app asks.
+- `RowNode` gains `BlockLoadingNode` (a loading row with no parent, only on a block list): code that reads
+  `node.parent` on a loading node may need a `kind` or `parent` check to compile.
+- The range texts gain the optional `range.notLoaded`, find the optional `find.held`: an app's own bundle without them
+  keeps working (built-in sentences are used).
 
 ### Added
 - `@dzgrid/core/infinite` (Phase 8 steps 1–4): `infiniteRows(data, { blockSize, maxBlocks, ahead, concurrency, restMs,
