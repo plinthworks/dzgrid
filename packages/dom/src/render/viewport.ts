@@ -5,7 +5,7 @@ import type { GridContext } from '../context.js';
 import type { GridSettings } from '../settings.js';
 import { decorateHeader } from './header-decor.js';
 import type { ViewportBox } from './measure.js';
-import { overlayPainter } from './overlay.js';
+import { overlayPainter, retryButton } from './overlay.js';
 import { CHECK_WIDTH, setAttr, setPx, type Frame } from './rows.js';
 
 const OVERSCAN_ROWS = 2;
@@ -73,6 +73,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     };
   };
   let anchorNext: 'rows' | 'expand' | null = null;
+  let retry: HTMLButtonElement | undefined;
   // The last frame's read (the frame's passes share it): a scroll it found is taken once.
   let seen: ViewportBox | null = null;
   let paints = 0;
@@ -208,7 +209,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     if (relaid) anchorNext ??= 'rows';
     if (anchorNext && shown && (shown.displayed !== d || relaid)) {
       if (shown.atTop) scroll.scrollTo(0);
-      else if (shown.atEnd && anchorNext === 'rows') scroll.scrollTo(mapper.maxLogical);
+      // The end stays the end, never on a block list: its end grows as blocks arrive (infinite-scroll.md).
+      else if (shown.atEnd && anchorNext === 'rows' && !rows.want) scroll.scrollTo(mapper.maxLogical);
       else if (shown.key !== null) {
         const at = d.indexOf(shown.key);
         // The distance into it, at most its new height (a top detail that shrank).
@@ -240,7 +242,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     // 8b-1): the body's rows are numbered after the top ones.
     const pins = g.pins ?? [0, 0];
     const headerRows = g.bands.length + 1 + g.headerRows.length + pins[0];
-    setAttr(el.viewport, 'aria-rowcount', String(d.count + headerRows + pins[1]));
+    // A block list whose length is not known yet: -1 (ARIA 1.2, infinite-scroll.md).
+    setAttr(el.viewport, 'aria-rowcount', String(rows.want && rows.counts.filtered === null ? -1 : d.count + headerRows + pins[1]));
     setAttr(el.viewport, 'aria-colcount', String(visible.length + (check ? 1 : 0) + (lead ? 1 : 0)));
     const mode = settings.selection?.mode ?? 'none';
     // Blocks of cells (`@dzgrid/dom/range`, `g.multi`) are a multiple selection whatever the rows' mode.
@@ -309,6 +312,23 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const retained: RowKey[] = focus?.kind === 'cell' ? [focus.row] : [];
     if (spans && w.rows) retained.push(...spans.anchors(w.rows.first, w.rows.last));
     rowRenderer.render(frame, wanted, retained);
+    if (rows.want) {
+      // A block list (infinite-scroll.md): a row not arrived says « Loading… », busy; a failed one the error, the first shown with Retry.
+      let first = -1;
+      retry ??= retryButton(g, 'dzg-retry');
+      retry.textContent = g.msg('grid.retry');
+      for (const [k, v] of rowRenderer.mounted) {
+        const i = d.indexOf(k);
+        const n = i < 0 ? null : d.nodeAt(i as DisplayIndex);
+        const l = n?.kind === 'loading' ? n : null;
+        const c = l && frame.rowHeader ? v.cells.get(frame.rowHeader) : null;
+        setAttr(v.el, 'aria-busy', l && !l.failed ? 'true' : null);
+        if (c) c.text.data = g.msg(l!.failed ? 'grid.error' : 'grid.loading');
+        if (c && l!.failed && (first < 0 || i < first)) (first = i), c.el.append(retry);
+      }
+      if (first < 0) retry.remove();
+      if (w.rows) rows.want(w.rows.first, w.rows.last, focus?.kind === 'cell' && d.indexOf(focus.row) >= 0 ? [d.indexOf(focus.row)] : []);
+    }
     // A tooltip whose anchor left the page (its column hidden), or whose pooled cell now shows
     // another row or new data (a sort, a filter, an update): hidden, its text would be stale.
     const tipAt = g.tip.anchor;

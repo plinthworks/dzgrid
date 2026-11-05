@@ -3,7 +3,7 @@
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
-      "maxGzip": 29250
+      "maxGzip": 29300
     },
     "@dzgrid/core/server": {
       "file": "packages/core/src/server.ts",
@@ -12,12 +12,12 @@
     },
     "@dzgrid/core/spans": {
       "file": "packages/core/src/spans.ts",
-      "maxGzip": 4029,
+      "maxGzip": 4050,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/csv": {
       "file": "packages/core/src/csv.ts",
-      "maxGzip": 2040,
+      "maxGzip": 2080,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/xlsx": {
@@ -48,6 +48,11 @@
     "@dzgrid/core/grouping": {
       "file": "packages/core/src/grouping.ts",
       "maxGzip": 4950,
+      "over": "@dzgrid/core"
+    },
+    "@dzgrid/core/infinite": {
+      "file": "packages/core/src/infinite.ts",
+      "maxGzip": 8580,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/edit": {
@@ -352,7 +357,7 @@
     },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
-      "maxGzip": 2907
+      "maxGzip": 2960
     },
     "@dzgrid/theme/dzgrid.comfort.css": {
       "file": "packages/theme/dzgrid.comfort.css",
@@ -440,7 +445,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 23290,
+      "maxGzip": 23660,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -515,7 +520,7 @@
     },
     "@dzgrid/dom/export: run (lazy)": {
       "file": "packages/dom/src/export/run/index.ts",
-      "maxGzip": 5350,
+      "maxGzip": 5450,
       "over": "@dzgrid/core",
       "external": [
         "@dzgrid/core/internal",
@@ -850,7 +855,7 @@
     },
     "@dzgrid/dom/print": {
       "file": "packages/dom/src/print.ts",
-      "maxGzip": 1632,
+      "maxGzip": 1664,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",

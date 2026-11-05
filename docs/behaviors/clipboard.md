@@ -271,3 +271,7 @@ Step 11b (DOM): `range-copy`, `range-paste`, `range-cut`, `range-html-safety`, `
 of `edit-detail.test.ts` and `editors-paste-pin.test.ts`, the source scan in `range-seams`; browser
 `scripts/browser-clipboard.mjs` (Chrome with the clipboard permissions and an insecure context; Firefox and WebKit
 through the events; Arabic; the playground).
+
+## A list loaded in blocks (Phase 8, owner Q-COPY A — built at step 5)
+See `range-selection.md` « A list loaded in blocks »: a copy or a paste over rows not loaded is refused with its sentence,
+never written with holes.

@@ -73,5 +73,21 @@ export interface LoadingNode {
   readonly failed: boolean;
 }
 
-/** A row as shown: a data row, a filler of a tree or a group, a detail, a lazy parent's loading row, or a totals row. Narrow by `kind` before reading `data`. */
-export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode | FooterNode;
+/**
+ * A place of a list loaded in blocks whose block has not arrived (`@dzgrid/core/infinite`, Phase 8, infinite-scroll.md):
+ * key `l:#` + its position, the same while loading and after a failure (`failed`: its block failed, or its row could not
+ * be taken). No parent. Never data: never selected, copied, edited or exported.
+ */
+export interface BlockLoadingNode {
+  readonly key: RowKey;
+  readonly kind: 'loading';
+  readonly level: number;
+  readonly parent: null;
+  readonly failed: boolean;
+}
+
+/**
+ * A row as shown: a data row, a filler of a tree or a group, a detail, a lazy parent's loading row or a block's place
+ * not arrived, or a totals row. Narrow by `kind` before reading `data`.
+ */
+export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode | FooterNode | BlockLoadingNode;

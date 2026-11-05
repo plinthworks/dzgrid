@@ -1,4 +1,4 @@
-import { intentFor, problem, type DisplayIndex, type GridKernel, type Problem, type RowNode, type FocusPos, type KeyOwner, type RowKey } from '@dzgrid/core';
+import { intentFor, problem, type DisplayIndex, type GridKernel, type Problem, type RowNode, type FocusPos, type KeyOwner, type RowKey , type LoadingNode } from '@dzgrid/core';
 import { emit, lockColumns } from '@dzgrid/core/internal';
 import { treeColumnProblems, treeShape, type TreeOptions, type TreeRows, type TreeShape } from '@dzgrid/core/tree';
 import type { GridContext } from '../context.js';
@@ -317,7 +317,8 @@ function setup<T>(g: GridContext<unknown>, column: Col, indent: Indent, lazy: La
         let l = labelOf(cell);
         if (node.kind === 'group' || node.kind === 'loading') {
           if (!l) (l = doc.createElement('span')), (l.className = 'dzg-free dzg-label'), t!.after(l);
-          if (node.kind === 'loading') lz?.fill(l as HTMLElement, node);
+          // A tree's loading row has its parent (a block's place never reaches a tree, D17).
+          if (node.kind === 'loading') lz?.fill(l as HTMLElement, node as LoadingNode);
           else if (l.textContent !== node.label) l.textContent = node.label;
         } else l?.remove();
         // The indent: `level × indent`, or a data row's answer from 0 to 1 000 (a number: not NaN, not a string), else `level × 16`.

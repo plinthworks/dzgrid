@@ -112,3 +112,8 @@ walk against a hand-written oracle); DOM and browser at step 5.
 | `group.expanded` | {name} expanded, {n} rows | {name} développé, {n} lignes | تم توسيع {name}، {n} صف |
 | `group.collapsed` | {name} collapsed | {name} réduit | تم طي {name} |
 | `group.expandedSome` | {n} groups expanded | {n} groupes développés | تم توسيع {n} مجموعات |
+
+## Groups from a server (Phase 8, `server-side-groups.md`; owner Q-SE A, Q-OPEN A)
+Grouping stays refused beside `sourceRows` and `infiniteRows` (`unsupported-combination`, path `source`). Beside
+`serverSideRows` (steps 6–7) the band, the menu item, `[(groupBy)]` and `rowGroups` work as on the client; `setBy` asks
+the server again; the open groups stay open across a sort or a filter; the totals are the server's.

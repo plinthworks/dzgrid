@@ -55,7 +55,8 @@ export function lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T> {
         const d = g.rows.displayed;
         const i = key ? d.indexOf(key) : -1;
         const node = i === -1 ? null : d.nodeAt(i);
-        if (node?.kind !== 'loading' || !node.failed) return null;
+        // A block's place (`@dzgrid/core/infinite`, no parent) is the base's to retry.
+        if (node?.kind !== 'loading' || !node.failed || !node.parent) return null;
         ctl.retry(node.parent);
         said(node.parent);
         g.live.announce(g.msg('announce.loading'));

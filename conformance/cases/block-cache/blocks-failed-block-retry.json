@@ -1,0 +1,87 @@
+{
+  "id": "blocks-failed-block-retry",
+  "suite": "block-cache",
+  "description": "A block failing while scrolling fails its rows only; Retry (a refresh) asks it again.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 10,
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 25
+      },
+      {
+        "want": [
+          10,
+          19
+        ]
+      },
+      {
+        "fail": "c2"
+      },
+      {
+        "refresh": true
+      },
+      {
+        "answer": "c3",
+        "total": 25
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        1
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows",
+      "status",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 25,
+      "shown": [
+        "0-19 data",
+        "20-24 loading"
+      ],
+      "counts": {
+        "total": 25,
+        "filtered": 25,
+        "displayed": 25
+      }
+    },
+    "diagnostics": {
+      "fetches": 3,
+      "blocks": {
+        "held": 2,
+        "asked": 3,
+        "evicted": 0,
+        "max": 2,
+        "failed": 1
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

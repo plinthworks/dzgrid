@@ -1,4 +1,4 @@
-import { intentFor, isSelected, type FocusPos, type Intent, type KeyOwner } from '@dzgrid/core';
+import { intentFor, isSelected, type DisplayIndex, type FocusPos, type Intent, type KeyOwner } from '@dzgrid/core';
 import { sameFocus } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { MoveFn } from '../features.js';
@@ -133,6 +133,10 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
       move(at, { kind: 'move', axis: 'row', delta: -1 });
       return;
     }
+    // A block list's failed row (infinite-scroll.md): Enter asks again, as its Retry does.
+    const fi = e.key === 'Enter' && rows.want && at?.kind === 'cell' ? rows.displayed.indexOf(at.row) : -1;
+    const fn = fi < 0 ? null : rows.displayed.nodeAt(fi as DisplayIndex);
+    if (fn?.kind === 'loading' && fn.failed) return void (e.preventDefault(), kernel.dispatch({ type: 'rows.refresh' }, 'user'), g.live.announce(g.msg('announce.loading')));
     // A feature's own meaning of the key first (a tree's arrows on its column, `*`).
     for (const f of g.features) if (f.keys?.(e, at, owner)) return void (quiet(esc && cleared), e.preventDefault());
     quiet(esc);

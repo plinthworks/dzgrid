@@ -73,7 +73,8 @@ async function walk(seed: number): Promise<{ fail: string[]; requests: number; s
     for (let i = 0; i < t.count; i++) {
       const at = t.index(i)!;
       const node = t.nodeAt(at);
-      if (node.kind !== 'loading') continue;
+      // A tree's loading row always has its parent (a block's place, parent null, never reaches a tree).
+      if (node.kind !== 'loading' || !node.parent) continue;
       const p = idOf(node.parent);
       places.set(p, node.failed);
       const pi = t.indexOf(node.parent);
@@ -189,7 +190,7 @@ async function walk(seed: number): Promise<{ fail: string[]; requests: number; s
       const failed: RowKey[] = [];
       for (let i = 0; i < t.count; i++) {
         const n = t.nodeAt(t.index(i)!);
-        if (n.kind === 'loading' && n.failed) failed.push(n.parent);
+        if (n.kind === 'loading' && n.failed && n.parent) failed.push(n.parent);
       }
       const p = pick(failed);
       if (p) {

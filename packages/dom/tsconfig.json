@@ -21,6 +21,7 @@
       "@dzgrid/core/tree-lazy": ["../core/src/tree-lazy.ts"],
       "@dzgrid/core/detail": ["../core/src/detail.ts"],
       "@dzgrid/core/grouping": ["../core/src/grouping.ts"],
+      "@dzgrid/core/infinite": ["../core/src/infinite.ts"],
       "@dzgrid/core/edit": ["../core/src/edit.ts"],
       "@dzgrid/core/range": ["../core/src/range.ts"],
       "@dzgrid/core/state": ["../core/src/state.ts"],

@@ -12,7 +12,7 @@ describe('11. sizes: the new lines; the base, core, K.8 and Angular unchanged', 
   const budget = JSON.parse(readFileSync(`${ROOT}size-budget.json`, 'utf8')).entries as Record<string, { file?: string; maxGzip: number | null; over?: string; external?: string[] }>;
 
   it('@dzgrid/dom/print 1 632 over the DOM base (Phase 7 close, +2 %: group rows printed); -print texts 150 / 150 / 200; print.css 400 and its unlayered twin 400', () => {
-    expect(budget['@dzgrid/dom/print']).toEqual({ file: 'packages/dom/src/print.ts', maxGzip: 1632, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
+    expect(budget['@dzgrid/dom/print']).toEqual({ file: 'packages/dom/src/print.ts', maxGzip: 1664, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
     expect(['en', 'fr', 'ar'].map((l) => budget[`@dzgrid/dom/locales/${l}-print`]?.maxGzip)).toEqual([150, 150, 200]);
     expect(budget['@dzgrid/theme/print.css']).toEqual({ file: 'packages/theme/print.css', maxGzip: 400 });
     // The Phase 6 close: lowered to its measure + 10 % (292 → 350).
@@ -20,7 +20,7 @@ describe('11. sizes: the new lines; the base, core, K.8 and Angular unchanged', 
   });
 
   it('the base, core, K.8 and Angular lines unchanged (22 400, 29 150, 84 450, 7 000)', () => {
-    expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map((n) => budget[n]!.maxGzip)).toEqual([23290, 29250, 90000, 7810]); // Phase 7 close: Angular 7 665 → 7 810 (+2 % rule); step 2: 29 250 (+2 % rule, the grouping seams); 1.4.0 busy part: dom 23 250 (+2 % rule); busy bar: 23 070, 7 665 (+2 % rule); // owner step 16: K.8 90 000, Angular 7 450; K.8 and Angular raised at step 12 (owner Q12-1); K.8 84 950: owner « set include only » (2026-10-29) // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
+    expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map((n) => budget[n]!.maxGzip)).toEqual([23660, 29300, 90000, 7810]); // Phase 8 step 4: dom 23 660, core 29 300 (+2 % rule, a block list in the base); Phase 7 close: Angular 7 665 → 7 810 (+2 % rule); step 2: 29 250 (+2 % rule, the grouping seams); 1.4.0 busy part: dom 23 250 (+2 % rule); busy bar: 23 070, 7 665 (+2 % rule); // owner step 16: K.8 90 000, Angular 7 450; K.8 and Angular raised at step 12 (owner Q12-1); K.8 84 950: owner « set include only » (2026-10-29) // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
   });
 
   it('neither the DOM base nor the K.8 profile reaches the print module (0 B by construction)', async () => {

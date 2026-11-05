@@ -189,3 +189,8 @@ Numbered (step 7, 2026-11-05; `conformance/cases/grid-state/row-groups-*`, `pack
    pause. It is told by a new event `groupByChanged { by, source }` (source `user` or `api`; a restore's is `host`).
 5. `reset()` brings back the grouping the application gave at creation.
 6. In the address (`toSearchParams`) `rowGroups` is always written, like the columns: ids only.
+
+## A list loaded in blocks (Phase 8)
+Nothing new is saved: the sort, the filters, the search and the columns restore as on server pages, in one request (the
+model is made held, `hold(fn)`); the scroll position, the blocks held and the end found are never saved (a restore starts
+at the top, as a new query does).

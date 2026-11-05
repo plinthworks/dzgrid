@@ -5,6 +5,22 @@ import { setPx } from './rows.js';
 export type OverlayState = 'loading' | 'error' | 'noRows' | 'noMatches';
 
 /**
+ * Retry (O3; a block list's failed rows, infinite-scroll.md, with their class and out of the Tab order): asks again, the
+ * focus back on the grid, the loading said.
+ */
+export function retryButton<T>(g: GridContext<T>, cls?: string): HTMLButtonElement {
+  const b = g.doc.createElement('button');
+  b.type = 'button';
+  if (cls) (b.className = cls), (b.tabIndex = -1);
+  g.scope.on(b, 'click', () => {
+    g.kernel.dispatch({ type: 'rows.refresh' }, 'user');
+    g.restoreFocus();
+    g.live.announce(g.msg('announce.loading'));
+  });
+  return b;
+}
+
+/**
  * The overlay (docs/behaviors/overlays.md): the host's state first (loading, error), then what
  * the counts say. Outside `role="grid"` (S4). Its message, and under an error the retry button
  * (made the first time one shows); or what the overlay part draws (`@dzgrid/dom/slots`).
@@ -72,16 +88,7 @@ export function overlayPainter<T>(g: GridContext<T>): (displayed: number, top: n
     let button: HTMLButtonElement | null = null;
     if (state === 'error') {
       // Every server grid needs it (O3): asks again, the focus back on the grid, the loading said.
-      if (!retry) {
-        retry = g.doc.createElement('button');
-        retry.type = 'button';
-        g.scope.on(retry, 'click', () => {
-          g.kernel.dispatch({ type: 'rows.refresh' }, 'user');
-          g.restoreFocus();
-          g.live.announce(g.msg('announce.loading'));
-        });
-      }
-      button = retry;
+      button = retry ??= retryButton(g);
       const label = g.msg('grid.retry');
       if (button.textContent !== label) button.textContent = label;
     }

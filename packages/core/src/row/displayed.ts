@@ -23,6 +23,17 @@ export interface DisplayedRows<T> {
   parentOf?(key: RowKey): RowKey | null;
   /** A tree's: the depth of a row shown, 0 for the roots. */
   levelAt?(i: DisplayIndex): number;
+  /**
+   * Rows loaded in blocks (`@dzgrid/core/infinite`, Phase 8 D15): the positions of the data rows held, ascending. Present,
+   * whatever walks every row (select-all, the header box, a range of rows, find, print, a CSV) walks these instead.
+   */
+  held?(): Iterable<DisplayIndex>;
+}
+
+/** Every position shown, ascending; a block list's rows held only (Phase 8 D15: what walks the rows never walks ten million). */
+export function* positions<T>(d: DisplayedRows<T>): Iterable<DisplayIndex> {
+  if (d.held) yield* d.held();
+  else for (let i = 0; i < d.count; i++) yield i as DisplayIndex;
 }
 
 /** A flat list: `order` maps display → source, or null for the source order itself. */

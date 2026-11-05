@@ -1,0 +1,102 @@
+{
+  "id": "blocks-running-gives-place",
+  "suite": "block-cache",
+  "description": "Two newer blocks waiting: the requests running out of the window are aborted, farthest first, as many as wait; a late answer is dropped.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 10,
+      "ahead": 0,
+      "restMs": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 100000
+      },
+      {
+        "want": [
+          10,
+          29
+        ]
+      },
+      {
+        "want": [
+          500,
+          529
+        ]
+      },
+      {
+        "answer": "c2",
+        "total": 100000
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        2
+      ],
+      [
+        "c4",
+        50
+      ],
+      [
+        "c5",
+        51
+      ]
+    ],
+    "aborted": [
+      [
+        "c2",
+        "aborted"
+      ],
+      [
+        "c3",
+        "aborted"
+      ]
+    ],
+    "changes": [
+      "query"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 100000,
+      "shown": [
+        "0-9 data",
+        "10-99999 loading"
+      ],
+      "counts": {
+        "total": 100000,
+        "filtered": 100000,
+        "displayed": 100000
+      }
+    },
+    "diagnostics": {
+      "fetches": 5,
+      "blocks": {
+        "held": 1,
+        "asked": 5,
+        "evicted": 0,
+        "max": 1,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 1,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

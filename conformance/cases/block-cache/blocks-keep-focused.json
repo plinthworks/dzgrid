@@ -1,0 +1,107 @@
+{
+  "id": "blocks-keep-focused",
+  "suite": "block-cache",
+  "description": "The focused row's block is kept while the window moves; another goes instead.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 2,
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 1000
+      },
+      {
+        "want": [
+          0,
+          9
+        ],
+        "keep": [
+          3
+        ]
+      },
+      {
+        "want": [
+          10,
+          19
+        ],
+        "keep": [
+          3
+        ]
+      },
+      {
+        "answer": "c2",
+        "total": 1000
+      },
+      {
+        "want": [
+          20,
+          29
+        ],
+        "keep": [
+          3
+        ]
+      },
+      {
+        "answer": "c3",
+        "total": 1000
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        2
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 1000,
+      "shown": [
+        "0-9 data",
+        "10-19 loading",
+        "20-29 data",
+        "30-999 loading"
+      ],
+      "counts": {
+        "total": 1000,
+        "filtered": 1000,
+        "displayed": 1000
+      }
+    },
+    "diagnostics": {
+      "fetches": 3,
+      "blocks": {
+        "held": 2,
+        "asked": 3,
+        "evicted": 1,
+        "max": 2,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

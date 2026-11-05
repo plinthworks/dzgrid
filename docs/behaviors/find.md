@@ -55,3 +55,7 @@ Enter, Shift+Enter or the ↑ ↓ buttons, and closes with Escape.
 ## Where DzGrid differs on purpose
 - The browser's find cannot see virtual rows (not in the page) nor closed tree nodes; the grid's can.
 - A cell is the unit of a hit (not a word inside it): the focus and the keys work by cell.
+
+## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D15)
+Ctrl+F searches the rows held only (the bar's note says, as for server pages, that only the rows loaded are searched),
+never ten million: the search reads `DisplayedRows.held`; loading rows hold no text.

@@ -36,8 +36,9 @@ function setup<T>(g: GridContext<T>, o: RowGapsOptions<T>): FeatureHandle {
   const bad: Problem[] = [];
   if (!(Number.isFinite(size) && size >= 0)) (size = 16), bad.push(problem('invalid-setting', 'warning', 'rowGaps.size'));
   // Detail panels set heights on the layout themselves (B-D8): no gap beside them in 1.1.0.
-  const off = typeof rule !== 'function' ? 'before' : g.settings.features?.some((f) => f.id === 'detail') ? 'detail' : '';
-  if (off) bad.push(off === 'detail' ? problem('unsupported-combination', 'warning', 'rowGaps', 'detail') : problem('invalid-setting', 'warning', 'rowGaps.before'));
+  // A block list (infinite-scroll.md, D17): its positions are the server's, no gap between them.
+  const off = typeof rule !== 'function' ? 'before' : g.settings.features?.some((f) => f.id === 'detail') ? 'detail' : g.rows.want ? 'blocks' : '';
+  if (off) bad.push(off === 'before' ? problem('invalid-setting', 'warning', 'rowGaps.before') : problem('unsupported-combination', 'warning', 'rowGaps', off));
   tell(bad);
   if (off) return { destroy() {} };
 

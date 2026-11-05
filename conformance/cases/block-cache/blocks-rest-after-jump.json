@@ -1,0 +1,97 @@
+{
+  "id": "blocks-rest-after-jump",
+  "suite": "block-cache",
+  "description": "A jump of more than one block asks nothing until the window rests; then the blocks where it rests.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 10
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 100000
+      },
+      {
+        "want": [
+          0,
+          9
+        ]
+      },
+      {
+        "answer": "c2",
+        "total": 100000
+      },
+      {
+        "want": [
+          50000,
+          50009
+        ]
+      },
+      {
+        "want": [
+          90000,
+          90009
+        ]
+      },
+      {
+        "rest": true
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        9000
+      ],
+      [
+        "c4",
+        9001
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 100000,
+      "shown": [
+        "0-19 data",
+        "20-99999 loading"
+      ],
+      "counts": {
+        "total": 100000,
+        "filtered": 100000,
+        "displayed": 100000
+      }
+    },
+    "diagnostics": {
+      "fetches": 4,
+      "blocks": {
+        "held": 2,
+        "asked": 4,
+        "evicted": 0,
+        "max": 2,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

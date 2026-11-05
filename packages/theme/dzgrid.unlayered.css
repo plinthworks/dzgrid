@@ -519,8 +519,12 @@
   padding: 0.5rem;
 }
 
-.dzg-row[data-kind=loading] .dzg-label {
+.dzg-row[data-kind=loading] {
   color: var(--dzg-context-fg, var(--tz-fg-muted));
+}
+
+.dzg-row[data-kind=loading] .dzg-cell {
+  overflow: visible;
 }
 
 .dzg-retry {

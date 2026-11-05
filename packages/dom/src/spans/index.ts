@@ -37,6 +37,8 @@ const MAX_PLANS = 4096;
 
 function setup(g: GridContext<unknown>): FeatureHandle {
   const { kernel, columns } = g;
+  // A block list (infinite-scroll.md, D17): cells spanning read every row; refused, the grid shown without them (header groups alone read none).
+  if (g.rows.want && (g.settings.fullWidth || columns.visible().some((c) => c.def.rowSpan || c.def.colSpan || c.def.merge))) return emit(kernel, { type: 'problems', source: 'host', problems: [problem('unsupported-combination', 'warning', 'spans', 'blocks')] }), { destroy() {} };
   const root = g.el.root.getRootNode();
   if (g.settings.injectStyles !== false) injectSpanStyles(root.nodeType === 11 ? (root as ShadowRoot) : g.doc, g.settings.nonce);
   const body = createBody(g);

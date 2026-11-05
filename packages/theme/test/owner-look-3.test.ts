@@ -78,7 +78,7 @@ describe('the comfort sheet: built, exported, shipped, budgeted, not in K.8', ()
   });
   it('its own line, the measure + 10 % (551 → 650); the base theme 2 850, the date adapters 2 850, K.8 84 450', () => {
     expect(budget.entries['@dzgrid/theme/dzgrid.comfort.css']).toEqual({ file: 'packages/theme/dzgrid.comfort.css', maxGzip: 650 });
-    expect(budget.entries['@dzgrid/theme']!.maxGzip).toBe(2907); // 1.4.0 busy bar (+2 % rule)
+    expect(budget.entries['@dzgrid/theme']!.maxGzip).toBe(2960); // Phase 8 step 4: 2 960 (+2 % rule, loading rows); 1.4.0 busy bar (+2 % rule)
     expect(budget.entries['@dzgrid/dom/filters: date adapters (lazy)']!.maxGzip).toBe(2850);
     expect(budget.entries['profile: audit screen (K.8)']!.maxGzip).toBe(90000); // owner step 16 « ok pour les hausses »: 90 000; 84 800 since step 12 (Q12-1); 84 950: owner « set include only » (2026-10-29)
   });

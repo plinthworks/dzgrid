@@ -36,13 +36,14 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  * example's 92 500 (S12-Q10; S9-Q7 92 000) is guarded by `npm run example:bytes` (scripts/example.mjs), not here.
  */
 const SIZE_CEILINGS = {
-  '@dzgrid/core': 29250, // Phase 7 step 2 (owner Q-B 2026-11-04, +2 % rule): 29 150 → 29 250, the grouping seams; Phase 6 (owner Q-B, Q2 of step 8b, 2026-10-27): 29 000 → 29 150 for the pinned rows' seams
+  '@dzgrid/core': 29300, // Phase 8 steps 2–3 (owner Q-B 2026-11-05, +2 % rule; plan §4 29 300): walks bounded by the rows held, `rows-not-loaded`, the shared server helpers (measured 29 258); before: 29250; Phase 7 step 2 (owner Q-B 2026-11-04, +2 % rule): 29 150 → 29 250, the grouping seams; Phase 6 (owner Q-B, Q2 of step 8b, 2026-10-27): 29 000 → 29 150 for the pinned rows' seams
   '@dzgrid/core/server': 6200, // owner Q8-5 (2026-10-27): 6 200, pushed by compression with the base's fold seam; Phase 5 S2-O4: 6 000 → 6 100 (app context in a kind's wire, the server's stale order); owner E5-1 / E5-8 (2026-10-26): 6 150 for the hold seam (`rows.hold`, one request per restore; measured +56)
-  '@dzgrid/core/csv': 2040, // Phase 7 close (+2 % rule): grouped files, measured 2 038; Q7: « core/csv up to 2 000 »
+  '@dzgrid/core/csv': 2080, // Phase 8 step 4 (+2 % rule, plan ≤ 2 080): a block list's CSV of `displayed` walks the rows held (measured 2 072); before: 2040; Phase 7 close (+2 % rule): grouped files, measured 2 038; Q7: « core/csv up to 2 000 »
   '@dzgrid/core/xlsx': 7150, // Phase 7 close (+2 % rule): grouped files, measured 7 130; owner A (2026-11-03, decisions.md « Excel export »): 5 000 asked, measured 6 898, every feature kept; lazy, the first Excel export only
   '@dzgrid/dom/export: xlsx (lazy)': 1100, // owner (2026-11-03, Excel export): the Excel DOM chunk
   '@dzgrid/core/tree': 3500,
   '@dzgrid/core/tree-lazy': 1500,
+  '@dzgrid/core/infinite': 8580, // Phase 8 steps 3–4 (owner Q-B 2026-11-05: a new entry at its measure + 10 %): measured 7 867 (plan §4 estimated 2 600–3 400: the wire form, the gate and the value lists come with it; 4 273 over @dzgrid/core/server)
   '@dzgrid/core/grouping': 4950, // Phase 7 close (a new entry at its measure + 10 %: 4 468, checkRowGroups); steps 3–4 (owner Q-B 2026-11-04: a new entry at its measure + 10 %): measured 4 285; ARCH §5.2 5 000
   // Phase 7 steps 5–6 (owner Q-B: a new entry at its measure + 10 %): the grouping painter, the band, their texts and CSS.
   '@dzgrid/dom/grouping': 5100, // Phase 7 close (measure + 10 %): 4 612; step 5: 4 434
@@ -55,11 +56,11 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/edit': 3160, // owner « set include only » (2026-10-29): 3 150 → 3 160 (`exclude: false` refused in compile); owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
   '@dzgrid/core/range': 4000, // Phase 5 Q16 (Part B): blocks of cells, TSV, the paste and fill plans; the line at the measure + 10 % at the close
-  '@dzgrid/core/spans': 4029, // « étape 7 » (2026-11-01, +2 % rule over 3 950, measured 4 024: the tree column per row, the opt-in merge across levels); before: owner step 15 (2026-10-29, Q15-9: « only if the measure needs it »): 3 800 → 3 950 (measured 3 914: `apart` for gaps, the tree column's leaves-only rule, a column span over it refused)
+  '@dzgrid/core/spans': 4050, // Phase 8 (+2 % rule, 2026-11-05): gzip noise over the grown base, its code unchanged (measured 4 030); before: 4029; « étape 7 » (2026-11-01, +2 % rule over 3 950, measured 4 024: the tree column per row, the opt-in merge across levels); before: owner step 15 (2026-10-29, Q15-9: « only if the measure needs it »): 3 800 → 3 950 (measured 3 914: `apart` for gaps, the tree column's leaves-only rule, a column span over it refused)
   '@dzgrid/core/compare': 300, // owner step 16 (2026-10-29, « ok pour les hausses »): a new line for `sameValues` (measured 273)
   '@dzgrid/core/row-gaps': 450, // owner step 15 (2026-10-29, Q15-9): a new line for the gaps between categories (measured 409)
   '@dzgrid/core/state': 1540, // Phase 7 close (+2 % rule): rowGroups, measured 1 537; owner « set include only » (2026-10-29): 1 500 → 1 510; Phase 6 (owner Q-B, 2026-10-26): GridState, pure (step 5)
-  '@dzgrid/dom': 23290, // Phase 7 follow-up (+2 % rule, 2026-11-05, measured 23 282: `shapeAfter`, a tree wins over grouping): 23 260; before: 1.4.0 busy part (+2 % rule, 2026-11-04, measured 23 246: the part's host and reduced motion in the base): 23 070; before: 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 23 050 → 23 070 with the layout's lines): 22 880; before: 1.4.0 (+2 % rule, 2026-11-03, measured 22 853: the lead strip of row numbers and the texts searched in a cell part's context); before: 22 440, 1.2.0 (+2 % rule, 2026-11-02, measured 22 432: the group rows follow a columns update); before: Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
+  '@dzgrid/dom': 23660, // Phase 8 step 4 (owner Q-B 2026-11-05, +2 % rule; plan §4 asked 23 500): the window told to the model, loading and failed rows drawn with Retry, Enter retries, aria-rowcount -1, the end not held, back to the top on a new query, Shift+click over rows not loaded (measured 23 637); before: 23290; Phase 7 follow-up (+2 % rule, 2026-11-05, measured 23 282: `shapeAfter`, a tree wins over grouping): 23 260; before: 1.4.0 busy part (+2 % rule, 2026-11-04, measured 23 246: the part's host and reduced motion in the base): 23 070; before: 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 23 050 → 23 070 with the layout's lines): 22 880; before: 1.4.0 (+2 % rule, 2026-11-03, measured 22 853: the lead strip of row numbers and the texts searched in a cell part's context); before: 22 440, 1.2.0 (+2 % rule, 2026-11-02, measured 22 432: the group rows follow a columns update); before: Phase 6 (owner Q-B, Q2 of step 8b): 21 980 → 22 400 (the pinned rows' base seams); before: showcase themes T7 (2026-10-23): 21 800 (Phase 5 Q16) → 21 980 (class hooks, the layer's wrapper)
   '@dzgrid/dom/filters': 12000, // Phase 9 (owner B after F1–F2, 2026-11-02; Q-F6 had 11 400): rows, join, match case, a condition over a list; before: 10210, // 1.2.0 (+2 % rule, 2026-11-02, measured 10 207: the kits' import() in the entry, filters-base's warning); before: the owner's-look budgets (2026-10-27, decisions.md): 10 000 → 10 100 (apply, the header box, the zone option)
   // The owner's look (2026-10-27): the set chunk 4 205 → 4 250 (one box, the search placeholder, the inert host), the
   // date adapters 2 745 → 2 800 (the FROM / TO placeholder); written grants, no longer the measure + 10 %.
@@ -163,7 +164,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/columns-panel.css': 1000,
   // Phase 6 step 5 (owner Q-B): the GridState feature, its storage and address helpers, over the DOM base (core/state outside it).
   '@dzgrid/dom/state': 1240, // Phase 7 close (+2 %): rowGroups and a state restored before the grouping, measured 1 233; owner +2 % rule (step 16, 2026-10-29): 1 200 → 1 224 (`gridState({ initial })`, measured 1 211); owner « clearFilters/resetState » (2026-10-28): 1 150 → 1 200; before: owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
-  '@dzgrid/theme': 2907, // 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 2 907): 2 850; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 2 750 → 2 850 (the pinned edge, the field's ring, the magnifier); T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
+  '@dzgrid/theme': 2960, // Phase 8 step 4 (+2 % rule, plan §4 2 960): a block list's loading rows muted, their words over the empty cells (measured 2 913); before: 2907; 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 2 907): 2 850; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 2 750 → 2 850 (the pinned edge, the field's ring, the magnifier); T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7
   '@dzgrid/theme/tailwind.css': 500, // T7: each framework bridge
@@ -185,7 +186,7 @@ const SIZE_CEILINGS = {
   // 1.1.0 step 15 (owner Q15-9, 2026-10-29): the gaps between categories over the DOM base, core/row-gaps outside it.
   '@dzgrid/dom/row-gaps': 900,
   // Phase 6 step 11 (owner Q-B): print over the DOM base; its -print texts; print.css and its unlayered twin, 400 each.
-  '@dzgrid/dom/print': 1632, // Phase 7 close (+2 % rule): group and totals rows printed, measured 1 632
+  '@dzgrid/dom/print': 1664, // Phase 8 step 4 (+2 % rule, plan §4): a block list's rows held printed (measured 1 642); before: 1632; Phase 7 close (+2 % rule): group and totals rows printed, measured 1 632
   '@dzgrid/dom/locales/en-print': 150,
   '@dzgrid/dom/locales/fr-print': 150,
   '@dzgrid/dom/locales/ar-print': 200,

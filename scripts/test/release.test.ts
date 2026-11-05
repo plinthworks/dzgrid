@@ -178,7 +178,12 @@ describe('1.4.0, the four packages', () => {
 
   it('export the Phase 7 subpath @dzgrid/core/grouping, built like the others', () => {
     expect(pkg('core').exports['./grouping']).toEqual({ types: './src/grouping.ts', default: './src/grouping.ts' });
-    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/row-gaps', '\.\/grouping'\]/);
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/row-gaps', '\.\/grouping'[,\]]/); // Phase 8: './infinite' after it
+  });
+
+  it('export the Phase 8 subpath @dzgrid/core/infinite, built like the others', () => {
+    expect(pkg('core').exports['./infinite']).toEqual({ types: './src/infinite.ts', default: './src/infinite.ts' });
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/grouping', '\.\/infinite'\]/);
   });
 
   it('export the 1.1.0 step 15 subpaths (@dzgrid/core/row-gaps, @dzgrid/dom/row-gaps), built like the others', () => {

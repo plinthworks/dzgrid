@@ -4,7 +4,7 @@ import type { Suite } from './index.js';
 type Step =
   | { op: 'begin'; channel: string; key: string; as: string }
   | { op: 'settle' | 'reject'; ticket: string }
-  | { op: 'cancel'; channel: string }
+  | { op: 'cancel' | 'forget'; channel: string }
   | { op: 'newEpoch' | 'destroy' };
 
 export const server: Record<string, Suite> = {
@@ -32,6 +32,9 @@ export const server: Record<string, Suite> = {
           return gate.settle(tickets.get(s.ticket)!);
         case 'cancel':
           gate.cancel(s.channel);
+          return null;
+        case 'forget':
+          gate.forget!(s.channel);
           return null;
         case 'newEpoch':
           gate.newEpoch();

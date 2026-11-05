@@ -1041,3 +1041,26 @@ Safari). Durée estimée : 20 min par couple et par langue. À écouter après l
 
 Règle de décision : un niveau ou un état faux (183), une phrase dite deux fois (184, 186, 187) ou un total illisible
 (185) se corrigent avant la clôture de la Phase 7.
+
+## 27. Étapes — défilement continu, lignes chargées par paquets (Phase 8)
+
+Page : `packages/dom/test/browser/infinite.html` (10 millions de lignes inventées, un serveur simulé à 150 ms), en
+**français** puis en **arabe** ; `?total=unknown` pour un total inconnu, `?fail=1` pour un paquet qui échoue. Fiche :
+`docs/behaviors/infinite-scroll.md`. Couples A (NVDA + Firefox) et C (VoiceOver + Safari). Durée estimée : 15 min par
+couple et par langue. À écouter après l'étape 4 (les lignes « Chargement » sont dessinées). Les groupes chargés par le
+serveur (étapes 6–7) ajouteront leurs points ici.
+
+188. **Le nombre de lignes.** En entrant dans la grille : « 10 000 001 lignes » (total connu) ; avec `?total=unknown`, le
+     nombre n'est pas annoncé (`aria-rowcount` -1), et rien de faux n'est dit.
+189. **Descendre au clavier.** Flèche bas jusqu'à une ligne pas encore arrivée : « Chargement… », occupée ; quand le paquet
+     arrive, la même position est lue avec ses données, sans phrase en plus. Défiler à la molette ne dit rien.
+190. **Ctrl+Fin / Ctrl+Début.** Ctrl+Fin : la ligne 10 000 001 (« Chargement… » puis ses données) ; avec un total inconnu,
+     la dernière ligne connue, et un nouvel appui va plus loin. Ctrl+Début : la première ligne.
+191. **Un paquet en échec** (`?fail=1`, lignes 100 à 199) : « Les données n'ont pas pu être chargées » lu sur ces lignes ;
+     Entrée sur l'une d'elles : « Chargement » dit une fois, puis les données. Le bouton « Réessayer » n'est pas un arrêt
+     de Tab (la grille reste un seul arrêt).
+192. **Après un tri.** Le tri annoncé comme d'habitude, la grille revient en haut ; « Chargement » n'est pas répété à
+     chaque paquet.
+
+Règle de décision : une ligne en chargement lue comme une ligne de données (189), une phrase dite à chaque paquet en
+défilant (189, 192) ou un total faux (188) se corrigent avant la clôture de la Phase 8.

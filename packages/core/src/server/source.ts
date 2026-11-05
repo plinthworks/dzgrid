@@ -78,8 +78,10 @@ export interface DataRequest {
   readonly filter?: WireFilterModel;
   readonly quick?: string;
   readonly sort?: readonly SortItem[];
-  /** With server pages only. */
+  /** With server pages, and for a block (by offset). */
   readonly page?: PageWindow;
+  /** A block of a list loaded as it scrolls (`@dzgrid/core/infinite`): its `page` is the block, by offset. */
+  readonly blocks?: true;
   readonly params: Readonly<Record<string, Json>>;
   /** The zone instants are read in (a day filter's bounds depend on it). */
   readonly zone: string;

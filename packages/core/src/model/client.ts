@@ -141,6 +141,11 @@ export interface RowModel<T> {
   /** The grid's `settings.context`, for the custom filter kinds (Q12): a new one filters again only under one. */
   setApp?(context: unknown, source?: ChangeSource): void;
   /**
+   * Rows loaded in blocks (`@dzgrid/core/infinite`, Phase 8 D6): the positions painted (`first`..`last`, the overscan in),
+   * told after each paint, and positions to keep held besides (the focused row's). The model asks what it lacks.
+   */
+  want?(first: number, last: number, keep?: readonly number[]): void;
+  /**
    * Runs `fn` with the model's requests held (Phase 6 step 5, owner E5-1; `@dzgrid/core/state`): the queries, columns and pages
    * it sets cost one request, sent once `fn` returns (or throws), carrying them all; none when nothing changed what is asked.
    * A server's model only (the browser's asks nothing). Not re-entrant: the end of any hold sends the request.
@@ -873,6 +878,8 @@ export interface ModelEnv<T> {
   readonly held?: boolean | undefined;
   /** A server's answer compared row by row with the rows it replaces (`GridSettings.sameRow`). */
   readonly sameRow?: ((a: T, b: T) => boolean) | undefined;
+  /** A timer (the DOM's, Phase 8): a block model's rest and batch delays wait on it. Absent: nothing waits. */
+  readonly timer?: ((fn: () => void, ms: number) => () => void) | undefined;
 }
 
 /** A model to make once the grid knows its columns and language. */

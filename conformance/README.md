@@ -26,8 +26,9 @@ One case per file, `cases/<suite>/<id>.json`, validated by `schema/case.schema.j
 | `day-arith` | `{op: 'toEpochDay' \| 'fromEpochDay' \| 'parse' \| 'add', …}` | `{epochDay}` or `{day}` (null when refused or out of range) |
 | `instant-parse` | `{text, assumeZone?, disambiguation?}` | `{instant}` (ISO UTC) with an optional `warning`, or `{instant: null, code}` |
 | `row-key` | `{ids}` | `{accepted[], problems: [code, path][]}` |
-| `server-gate` | `{steps: (begin \| settle \| reject \| cancel \| newEpoch \| destroy)[]}` | `{outcomes, aborted: [ticket, reason][], diagnostics}` |
+| `server-gate` | `{steps: (begin \| settle \| reject \| cancel \| forget \| newEpoch \| destroy)[]}` | `{outcomes, aborted: [ticket, reason][], diagnostics}` |
 | `source-model` | `{columns, operations, pagination, options?, steps: (query \| go \| size \| refresh \| purge \| swap \| ctx \| destroy \| answer \| fail)[]}`, calls named `c1`, `c2`… | `{calls, aborted: [call, reason][], changes: kind[], final: {status, displayed, page, counts}, problems, failures}` |
+| `block-cache` | `{options?, steps: ({want: [first, last], keep?} \| {answer: call, rows?, ids?, total?, hasNext?, response?} \| {fail} \| {rest} \| {sort} \| {quick} \| {refresh} \| {purge} \| {update} \| {add} \| {remove} \| {swap} \| {destroy})[]}`, calls `c1`, `c2`… (Phase 8, infinite-scroll.md) | `{calls: [call, block, sort?, quick?, params?][], aborted, changes, told, final: {status, count, shown: "from-to data\|loading\|failed"[], counts}, diagnostics: {fetches, blocks, dropped}}` |
 | `wire` | `{locale, timeZone, columns, filter, kinds?}` (`kinds` from the suite's fixture table: `between`, `throws`, `bad-json`) | `{filter, problems?: [code, path][]}`: the filter as the server receives it, through JSON |
 | `spans` | `{columns, rows, order?, state?, fullWidth?}` (rules by fixture name from `runner/spans-fixtures.ts`) | `{cells: {row, col, rows, cols}[], fullWidth?: rows[], problems}`: every span, in reading order |
 | `header-bands` | `{columns (a tree of groups), state?}` | `{depth, levels: {group, first, count, label}[][], problems}` |

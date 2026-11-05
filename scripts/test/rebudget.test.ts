@@ -20,11 +20,11 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const LAZY_HTML = 600; // review 3 moved the long-text count into the chunk: measured 517
 const SCRIPT = join(ROOT, 'scripts/rebudget.mjs');
 /** The DOM and core base lines and ceilings: 29 000 and 21 980 until Phase 6 step 8b-1 (owner Q2, pinned rows: core up to 29 150, the DOM base up to 22 400, Q-B). */
-const CORE = 29250; // Phase 7 step 2 (owner Q-B 2026-11-04, +2 % rule): 29 150 → 29 250, the grouping seams
+const CORE = 29300; // Phase 8 steps 2–3 (owner Q-B 2026-11-05, +2 % rule): 29 250 → 29 300; Phase 7 step 2 (owner Q-B 2026-11-04, +2 % rule): 29 150 → 29 250, the grouping seams
 /** @dzgrid/dom/range and /fill's ceilings: 4 950 and 3 000 until Phase 6 step 8b-2 (owner Q1: blocks and the fill in the pinned bands, up to ~5 200 and ~3 150). */
 const RANGE = 5200;
 const FILL = 3200; // Phase 9 (owner Q-CM4, 2026-11-02): 3 150 → 3 200 (the fill's `along` and `can`)
-const DOM = 23290; // 1.4.0 (+2 % rule): 22 440 → 22 880; the busy bar: 23 070; the busy part: 23 250; Phase 7 `shapeAfter`: 23 290
+const DOM = 23660; // Phase 8 step 4 (+2 % rule, a block list in the base): 23 290 → 23 660; 1.4.0 (+2 % rule): 22 440 → 22 880; the busy bar: 23 070; the busy part: 23 250; Phase 7 `shapeAfter`: 23 290
 
 describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('rounds up to the next 50 B', () => {
@@ -56,12 +56,12 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     const grants: Record<string, number> = {
       '@dzgrid/core': CORE, '@dzgrid/dom': DOM, '@dzgrid/angular': 7810, '@dzgrid/dom/tree': 4200, '@dzgrid/dom/detail': 4150, // Phase 9 (Q-CM4, +2 % rule): tree 4 200; S8-O1, S8-O3, S8-O7 (step 8); tree Q9-5 (Phase 6 step 9): 3 850; owner step 14/15 (2026-10-29): 3 950; « étape 7 » (owner 2026-11-01): 4 080; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
      
-      '@dzgrid/dom/filters': 12000, '@dzgrid/theme': 2907, // filters: owner's-look budgets (2026-10-27) 10 000 → 10 100; Phase 9 (Q-F6) 11 400
+      '@dzgrid/dom/filters': 12000, '@dzgrid/theme': 2960, // Phase 8 step 4 (+2 %): 2 907 → 2 960; filters: owner's-look budgets (2026-10-27) 10 000 → 10 100; Phase 9 (Q-F6) 11 400
       '@dzgrid/core/tree': 3500, // theme: Q-C2 (Phase 5 close), « up to 2 750 within T7's 3 050 »
       '@dzgrid/core/rules': 600, '@dzgrid/dom/parts': 800, // Q-C3 (Phase 5 close): the rule's raises accepted, now grants
       '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
       // Q7 (2026-10-21): « core/csv up to 2 000 », a grant the close keeps (1 847 + 10 % would be 2 050).
-      '@dzgrid/core/csv': 2040, // Phase 7 close (+2 %): grouped files, 2 000 → 2 040
+      '@dzgrid/core/csv': 2080, // Phase 8 step 4 (+2 %): 2 040 → 2 080; Phase 7 close (+2 %): grouped files, 2 000 → 2 040
     };
     for (const [name, grant] of Object.entries(grants)) {
       expect(ceilingFor(name), name).toBe(grant);
@@ -251,7 +251,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   });
 
   it('Phase 5 close (owner Q-C2, Q-C3, 2026-10-26): theme up to 2 750, core/rules 600, dom/parts 800 become ceilings; angular 7 000 and dom/internal 1 250 kept; the close measures give these budgets', () => {
-    expect(['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts', '@dzgrid/angular', '@dzgrid/dom/internal'].map(ceilingFor)).toEqual([2907, 600, 800, 7810, 3800]); // Angular: Phase 7 close 7 810; // Phase 9 status bar: internal 3 800; Phase 9 (Q-CM4): internal 3 700, the menus' shared list; // angular 7 300 since step 12 (Q12-1) // theme 2 850 since the owner's third look; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
+    expect(['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts', '@dzgrid/angular', '@dzgrid/dom/internal'].map(ceilingFor)).toEqual([2960, 600, 800, 7810, 3800]); // theme: Phase 8 step 4 // Angular: Phase 7 close 7 810; // Phase 9 status bar: internal 3 800; Phase 9 (Q-CM4): internal 3 700, the menus' shared list; // angular 7 300 since step 12 (Q12-1) // theme 2 850 since the owner's third look; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
     for (const n of ['@dzgrid/theme', '@dzgrid/core/rules', '@dzgrid/dom/parts']) expect(() => sizeBudget(ceilingFor(n)! + 1, ceilingFor(n)), n).toThrow(/ceiling/);
     // The close's own measures (step13-plan §3, the dry run of 2026-10-26), each by the rule.
     const close: [string, number, number][] = [
@@ -306,7 +306,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('the showcase themes\' grants (owner T7, 2026-10-23): each theme 650, the theme base up to 3 050, the DOM base 21 980', () => {
     expect(ceilingFor('@dzgrid/theme/midnight.css')).toBe(650);
     expect(ceilingFor('@dzgrid/theme/clinic.css')).toBe(650);
-    expect(ceilingFor('@dzgrid/theme')).toBe(2907); // busy bar 2 907; // T7 3 050; the Phase 5 close (Q-C2): up to 2 750; the owner's third look: 2 850
+    expect(ceilingFor('@dzgrid/theme')).toBe(2960); // Phase 8 step 4: 2 960; // busy bar 2 907; // T7 3 050; the Phase 5 close (Q-C2): up to 2 750; the owner's third look: 2 850
     expect(ceilingFor('@dzgrid/dom')).toBe(DOM);
     // T8: the Angular wrapper 6 250 → 6 300 for its [rowClass] input; D3 6 350; S9-Q6 (step 9, editing): at most 7 000.
     expect(ceilingFor('@dzgrid/angular')).toBe(7810); // Phase 7 close 7 810 (+2 %); busy bar 7 665; owner 2026-11-03: 7 650 // owner « clearFilters/resetState »; 7 300 at step 12 (Q12-1); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
@@ -701,11 +701,11 @@ describe('the command: --dry by default, --write to save', () => {
     // The owner's third look (« Comfort stylesheet »): the date adapters 2 850, K.8 84 450, the theme 2 850.
     expect(names.map(ceilingFor)).toEqual([12000, 4850, 2850, 90000]); // Phase 9 (owner Q-F6): filters 11 400, set chunk 4 850; // K.8 84 800 since step 12; owner « set include only » (2026-10-29): the set chunk 4 350, K.8 84 950; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
     expect(names.map((n) => e[n]?.maxGzip)).toEqual([12000, 4850, 2850, 90000]); // Phase 9 (owner Q-F6); // owner « set include only » (2026-10-29); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
-    expect(['@dzgrid/theme', '@dzgrid/dom/popup', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([2907, 1700, DOM]); // Phase 9 (Q-CM4): the popup host 1 700
+    expect(['@dzgrid/theme', '@dzgrid/dom/popup', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([2960, 1700, DOM]); // theme: Phase 8 step 4 // Phase 9 (Q-CM4): the popup host 1 700
   });
 
   it('Phase 6 step 11 (owner Q-B): @dzgrid/dom/print 1 600 over the DOM base, its -print texts 150 / 150 / 200, print.css and its unlayered twin 400 each; nothing else raised', () => {
-    expect(['@dzgrid/dom/print', '@dzgrid/dom/locales/en-print', '@dzgrid/dom/locales/fr-print', '@dzgrid/dom/locales/ar-print', '@dzgrid/theme/print.css', '@dzgrid/theme/print.unlayered.css'].map(ceilingFor)).toEqual([1632, 150, 150, 200, 400, 400]); // print 1 632 at the Phase 7 close (+2 %)
+    expect(['@dzgrid/dom/print', '@dzgrid/dom/locales/en-print', '@dzgrid/dom/locales/fr-print', '@dzgrid/dom/locales/ar-print', '@dzgrid/theme/print.css', '@dzgrid/theme/print.unlayered.css'].map(ceilingFor)).toEqual([1664, 150, 150, 200, 400, 400]); // print 1 664 at Phase 8 step 4 (+2 %); // print 1 632 at the Phase 7 close (+2 %)
     expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map(ceilingFor)).toEqual([DOM, CORE, 90000, 7810]); // Angular 7 810 at the Phase 7 close; // K.8 and Angular raised at step 12 (Q12-1); K.8 84 950 (owner « set include only » (2026-10-29)); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
   });
 });

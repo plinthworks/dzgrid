@@ -35,6 +35,11 @@ export interface RequestGate {
   settle(t: Ticket): DropReason | null;
   /** Aborts the channel's waiting request ('aborted'): a values popup closed. */
   cancel(channel: string): void;
+  /**
+   * Lets a channel go once nothing waits on it (Phase 8: a list of 10⁵ blocks keeps no 10⁵ channels). A late answer to a
+   * request of a channel forgotten is dropped ('superseded').
+   */
+  forget?(channel: string): void;
   /** The query changed: every waiting request is stale ('stale-epoch'). */
   newEpoch(): void;
   /** Everything waiting is aborted ('destroyed'), and the gate does nothing more. */
@@ -123,6 +128,9 @@ export function createGate(abort: () => AbortHandle): RequestGate {
       ch.handle = null;
       ch.cancelled.add(ch.seq);
       h.abort('aborted');
+    },
+    forget(channel) {
+      if (!channels.get(channel)?.handle) channels.delete(channel);
     },
     newEpoch() {
       if (destroyed) return;

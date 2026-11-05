@@ -1,0 +1,79 @@
+{
+  "id": "blocks-cancel-leaves-neighbours",
+  "suite": "server-gate",
+  "description": "Phase 8: a block whose request is aborted (it left the view) is dropped; its neighbours on their own channels are applied.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "block:1",
+        "key": "k1",
+        "as": "a"
+      },
+      {
+        "op": "begin",
+        "channel": "block:2",
+        "key": "k2",
+        "as": "b"
+      },
+      {
+        "op": "begin",
+        "channel": "block:3",
+        "key": "k3",
+        "as": "c"
+      },
+      {
+        "op": "cancel",
+        "channel": "block:2"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "c"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      {
+        "seq": 3,
+        "epoch": 0
+      },
+      null,
+      null,
+      "aborted",
+      null
+    ],
+    "aborted": [
+      [
+        "b",
+        "aborted"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 3,
+      "accepted": 2,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 1,
+        "destroyed": 0
+      }
+    }
+  }
+}

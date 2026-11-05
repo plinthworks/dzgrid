@@ -1,0 +1,75 @@
+{
+  "id": "blocks-empty-past-end",
+  "suite": "block-cache",
+  "description": "An empty block past the rows answered is the end: the list stops before it.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "hasNext": true
+      },
+      {
+        "want": [
+          10,
+          19
+        ]
+      },
+      {
+        "answer": "c2",
+        "rows": 0
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows"
+    ],
+    "told": [
+      "invalid-page-response response.hasNext"
+    ],
+    "final": {
+      "status": "idle",
+      "count": 10,
+      "shown": [
+        "0-9 data"
+      ],
+      "counts": {
+        "total": 10,
+        "filtered": 10,
+        "displayed": 10
+      }
+    },
+    "diagnostics": {
+      "fetches": 2,
+      "blocks": {
+        "held": 2,
+        "asked": 2,
+        "evicted": 0,
+        "max": 2,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

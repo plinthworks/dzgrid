@@ -134,3 +134,9 @@ A `fixedOpen` row whose children load lazily is open from the first build, befor
 host calls the lazy control's `sync()` (the DOM does it once the abort handles are set). A host driving the core alone
 calls `sync()` itself after setting `abort`; until it does, the row shows its loading row and nothing is asked.
 Not loaded yet, the row still refuses to close: no chevron, back goes to the parent.
+
+## Not the same node as a block's place (Phase 8)
+A list loaded in blocks (`infinite-scroll.md`) shows its places not arrived as `BlockLoadingNode` (`l:#` + position,
+`parent: null`), a member of `RowNode` of its own; the tree's `LoadingNode` keeps its required `parent`, unchanged. A tree
+beside blocks is refused (`unsupported-combination`, path `shape`): the two never meet. The DOM base draws a block's
+place; the tree painter keeps drawing its own loading rows.

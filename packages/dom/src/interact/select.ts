@@ -60,6 +60,8 @@ export function installSelect<T>(g: GridContext<T>): { toggleAll(): void } {
     else if (mode === 'multi' && e.shiftKey) {
       const r = kernel.dispatch({ type: 'selection.range', target: key, additive: toggle }, 'user');
       if (!r.ok && r.reason === 'anchor-not-displayed') g.live.announce(g.msg('announce.rangeCancelled'));
+      // Rows between not loaded (a block list, infinite-scroll.md): the clicked row only.
+      if (!r.ok && r.reason === 'rows-not-loaded') kernel.dispatch({ type: 'selection.only', row: key }, 'user');
     } else if (toggle && mode === 'multi') kernel.dispatch({ type: 'selection.toggle', row: key }, 'user');
     else if (toggle && isSelected(kernel.selection, key)) kernel.dispatch({ type: 'selection.clear' }, 'user');
     else kernel.dispatch({ type: 'selection.only', row: key }, 'user');

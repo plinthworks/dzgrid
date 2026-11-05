@@ -1,0 +1,79 @@
+{
+  "id": "blocks-forget",
+  "suite": "server-gate",
+  "description": "Phase 8: a channel forgotten once answered is made again by the next request (nothing aborted); a channel with a request running is not forgotten.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "block:1",
+        "key": "k1",
+        "as": "a"
+      },
+      {
+        "op": "settle",
+        "ticket": "a"
+      },
+      {
+        "op": "forget",
+        "channel": "block:1"
+      },
+      {
+        "op": "begin",
+        "channel": "block:1",
+        "key": "k1",
+        "as": "b"
+      },
+      {
+        "op": "settle",
+        "ticket": "b"
+      },
+      {
+        "op": "begin",
+        "channel": "block:2",
+        "key": "k2",
+        "as": "c"
+      },
+      {
+        "op": "forget",
+        "channel": "block:2"
+      },
+      {
+        "op": "settle",
+        "ticket": "c"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      null,
+      null,
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      null,
+      {
+        "seq": 3,
+        "epoch": 0
+      },
+      null,
+      null
+    ],
+    "aborted": [],
+    "diagnostics": {
+      "begun": 3,
+      "accepted": 3,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

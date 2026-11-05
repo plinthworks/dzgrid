@@ -145,3 +145,9 @@ Numbered (step 7, 2026-11-05; each one a test, `conformance/cases/csv/group-*`, 
 6. A grid grouped by no column but with a grand total writes its rows then the « Total » line.
 7. The summary's `rows` counts every line written, group and totals lines included. No group key, no total, no value in
    a problem or an event.
+
+## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D15–D16; owner Q-EX A)
+`displayed` writes the rows held, in order (what the user has scrolled through, at most `maxBlocks × blockSize`): the
+walk reads `DisplayedRows.held`, never ten million positions, and loading rows are never written. `all` and `selected`
+go to the host's `exportAll` with the server's part of the query, as server pages (step 5 adds the request's note of
+it). Built: the bounded walk (step 4); the rest at step 5.

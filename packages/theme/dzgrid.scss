@@ -660,10 +660,15 @@ $layered: true !default;
     padding: 0.5rem;
   }
 
-  // A lazy tree's loading and error rows (Phase 4 step 7, tree-lazy.md): their words in the muted
-  // colour, as an ancestor's (4.5:1); Retry takes the retry button's look, inside a row: a 24 px target.
-  .dzg-row[data-kind=loading] .dzg-label {
+  // A lazy tree's loading and error rows (Phase 4 step 7, tree-lazy.md), a block list's rows not arrived (Phase 8,
+  // infinite-scroll.md): their words in the muted colour, as an ancestor's (4.5:1), running over the empty cells beside;
+  // Retry takes the retry button's look, inside a row: a 24 px target.
+  .dzg-row[data-kind=loading] {
     color: var(--dzg-context-fg, var(--tz-fg-muted));
+  }
+
+  .dzg-row[data-kind=loading] .dzg-cell {
+    overflow: visible;
   }
 
   .dzg-retry {

@@ -47,6 +47,9 @@
       "@dzgrid/core/grouping": [
         "./packages/core/src/grouping.ts"
       ],
+      "@dzgrid/core/infinite": [
+        "./packages/core/src/infinite.ts"
+      ],
       "@dzgrid/core/edit": [
         "./packages/core/src/edit.ts"
       ],

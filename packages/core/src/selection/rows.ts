@@ -36,7 +36,8 @@ export function toggle(s: SelectionState, k: RowKey): SelectionState {
 
 export type RangeResult =
   | { readonly ok: true; readonly state: SelectionState }
-  | { readonly ok: false; readonly reason: 'anchor-not-displayed' | 'target-not-displayed' };
+  /** `rows-not-loaded`: rows between the two are not loaded yet (a list loaded in blocks, infinite-scroll.md). */
+  | { readonly ok: false; readonly reason: 'anchor-not-displayed' | 'target-not-displayed' | 'rows-not-loaded' };
 
 /**
  * Selects the rows between `anchor` and `target` in the order on screen. A
@@ -51,6 +52,12 @@ export function selectRange<T>(s: SelectionState, displayed: DisplayedRows<T>, a
   const lo = Math.min(a, b);
   const hi = Math.max(a, b);
   const span: RowKey[] = [];
+  // Blocks: every row between must be held, else nothing is walked (Phase 8 D14).
+  if (displayed.held) {
+    let n = 0;
+    for (const i of displayed.held()) if (i >= lo && i <= hi) n++;
+    if (n <= hi - lo) return { ok: false, reason: 'rows-not-loaded' };
+  }
   // Fillers and details between the bounds are never selected (tree-selection.md).
   for (let i = lo; i <= hi; i++) {
     const k = displayed.keyAt(displayed.index(i)!);

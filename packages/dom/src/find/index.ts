@@ -1,5 +1,5 @@
 import { fold, formattersFor, isBlank, problem, type DisplayIndex, type DisplayedRows, type GridKernel, type ResolvedColumn, type RowKey } from '@dzgrid/core';
-import { emit } from '@dzgrid/core/internal';
+import { emit, positions } from '@dzgrid/core/internal';
 import { composing, needTexts } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
@@ -113,7 +113,7 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
   /** What the hits were found from: the rows, the edits, the language, the text, the columns. */
   let seen: readonly unknown[] = [];
   /** The folded texts of the searched rows (one string a row), for `hay[0]` (the rows, the edits, the language, the columns). */
-  let hay: [readonly unknown[], string[]] = [[], []];
+  let hay: [readonly unknown[], string[], number[]] = [[], [], []];
   let byRow = new Map<RowKey, Map<string, boolean>>();
   let pending: (() => void) | null = null;
   let typing = false;
@@ -147,16 +147,20 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
       if (base.length !== hay[0].length || !base.every((v, i) => Object.is(v, hay[0][i]))) {
         // One string per row, its cells joined by U+0000 (never in a typed text): few objects for a big grid.
         const h: string[] = [];
-        for (let i = 0; i < R.count; i++) {
-          const n = R.nodeAt(i as DisplayIndex);
+        const ix: number[] = [];
+        // A block list: its rows held only (infinite-scroll.md).
+        for (const i of positions(R)) {
+          const n = R.nodeAt(i);
+          ix.push(i);
           h.push(n.kind === 'data' ? vis.map((c) => fold(textOf(c, n.data as object, n.key))).join('\0') : '');
         }
-        hay = [base, h];
+        hay = [base, h, ix];
       }
       const q = fold(text);
-      const h = hay[1];
-      for (let i = 0; i < h.length; i++) {
-        const s = h[i]!;
+      const [, h, ix] = hay;
+      for (let x = 0; x < h.length; x++) {
+        const s = h[x]!;
+        const i = ix[x]!;
         // Each cell holding the text once, in column order: the cell of `at` found by its separators.
         for (let at = s.indexOf(q), j = 0, p = 0; at >= 0; ) {
           let e = s.indexOf('\0', p);
@@ -226,7 +230,7 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
       const S = rowsOf();
       const re = (a: readonly unknown[], at: number): unknown[] => a.map((v, y) => (y === at ? S : y === at + 1 ? S.version : v));
       seen = re(seen, 1);
-      hay = [re(hay[0], 0), hay[1]];
+      hay = [re(hay[0], 0), hay[1], hay[2]];
     }
     k.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: h.row, column: h.column } }, 'api');
     g.ensureVisible(h.row, h.column);

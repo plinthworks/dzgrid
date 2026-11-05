@@ -20,6 +20,6 @@ describe('step 12 budgets', () => {
   });
 
   it('no other line moves: column-menu 4 300, dom 22 400, core 29 150, dom/state 1 150', () => {
-    expect(['@dzgrid/dom/column-menu', '@dzgrid/dom', '@dzgrid/core', '@dzgrid/dom/state'].map((n) => b[n]!.maxGzip)).toEqual([4300, 23290, 29250, 1240]); // dom/state 1 240 at the Phase 7 close (+2 %); Phase 7 step 2: core 29 250 (+2 % rule, the grouping seams); // 1.4.0 busy part: dom 23 250 (+2 % rule); busy bar: dom 23 070 (+2 % rule); // dom/state 1 224 (owner +2 % rule, step 16); 1 200 since « clearFilters/resetState » // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
+    expect(['@dzgrid/dom/column-menu', '@dzgrid/dom', '@dzgrid/core', '@dzgrid/dom/state'].map((n) => b[n]!.maxGzip)).toEqual([4300, 23660, 29300, 1240]); // Phase 8 step 4: dom 23 660, core 29 300 (+2 % rule); dom/state 1 240 at the Phase 7 close (+2 %); Phase 7 step 2: core 29 250 (+2 % rule, the grouping seams); // 1.4.0 busy part: dom 23 250 (+2 % rule); busy bar: dom 23 070 (+2 % rule); // dom/state 1 224 (owner +2 % rule, step 16); 1 200 since « clearFilters/resetState » // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
   });
 });

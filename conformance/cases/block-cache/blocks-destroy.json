@@ -1,0 +1,61 @@
+{
+  "id": "blocks-destroy",
+  "suite": "block-cache",
+  "description": "Destroy aborts the request running; its answer is never applied.",
+  "input": {
+    "options": {
+      "blockSize": 10
+    },
+    "steps": [
+      {
+        "destroy": true
+      },
+      {
+        "answer": "c1",
+        "total": 30
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ]
+    ],
+    "aborted": [
+      [
+        "c1",
+        "destroyed"
+      ]
+    ],
+    "changes": [],
+    "told": [],
+    "final": {
+      "status": "loading",
+      "count": 0,
+      "shown": [],
+      "counts": {
+        "total": null,
+        "filtered": null,
+        "displayed": 0
+      }
+    },
+    "diagnostics": {
+      "fetches": 1,
+      "blocks": {
+        "held": 0,
+        "asked": 1,
+        "evicted": 0,
+        "max": 0,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 1
+      }
+    }
+  }
+}

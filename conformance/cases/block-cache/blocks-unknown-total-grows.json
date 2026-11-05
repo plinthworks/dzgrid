@@ -1,0 +1,91 @@
+{
+  "id": "blocks-unknown-total-grows",
+  "suite": "block-cache",
+  "description": "No total: one block of loading rows after the rows answered while more follow; a short block ends the list.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 3,
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "hasNext": true
+      },
+      {
+        "want": [
+          10,
+          19
+        ]
+      },
+      {
+        "answer": "c2",
+        "hasNext": true
+      },
+      {
+        "want": [
+          20,
+          29
+        ]
+      },
+      {
+        "answer": "c3",
+        "rows": 4
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        2
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows",
+      "rows"
+    ],
+    "told": [
+      "invalid-page-response response.hasNext"
+    ],
+    "final": {
+      "status": "idle",
+      "count": 24,
+      "shown": [
+        "0-23 data"
+      ],
+      "counts": {
+        "total": 24,
+        "filtered": 24,
+        "displayed": 24
+      }
+    },
+    "diagnostics": {
+      "fetches": 3,
+      "blocks": {
+        "held": 3,
+        "asked": 3,
+        "evicted": 0,
+        "max": 3,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

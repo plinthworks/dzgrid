@@ -42,3 +42,11 @@ Tests: `packages/dom/test/busy-bar.test.ts` (delay, hold, the overlay wins, host
 ## Tests
 `packages/dom/test/grid.test.ts` (overlay states), `review-p2c.test.ts` (hidden and cleared), `tooltip.test.ts` (announced); `overlay-retry.test.ts` (the button, its click, the focus, when it shows), `slots-overlay.test.ts` (the part, its four phases, `failure`, `clearFilters`), `slots-gaps.test.ts` (the layout rules give pointer events to a link, a field, a select, a textarea, a summary, a `[role=button]`, a `[tabindex]` and a nested link inside the overlay, never to the overlay itself); `npm run test:browser` (axe with each overlay, the overlay really hides; the retry button in fr and in ar right to left: axe, reached by Tab, pressed by Enter, outside the grid, no focus trap; an overlay part's link and field on top under the pointer, the link followed by a click, the field focused, the overlay around them still letting the pointer through).
 - **Hidden whatever the app's CSS (2026-11-04):** the line and the part's host are hidden with `hidden` and an inline `display: none`, so an app rule such as `.dzg-busy-part { display: flex }` (found on the owner's example) never keeps them on screen.
+
+## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D8)
+- **Blocks loading under rows already shown are not « busy »**: no `aria-busy` on the grid, no `data-stale`, no busy line,
+  no overlay — the loading rows themselves say it (`aria-busy` on each). The model's status is `loading` only for the
+  first block of a query (nothing shown: the loading overlay) and for a refresh (rows kept: the busy line after 200 ms).
+- A failed block is not the overlay's error: its rows say it, with their own Retry (one per run of failed rows shown,
+  `.dzg-retry`, out of the Tab order, Enter on a failed row does the same). The first block of a query failing, or a
+  refresh failing, is the overlay's error as on server pages; its Retry asks again.

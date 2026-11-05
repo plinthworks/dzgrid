@@ -49,6 +49,10 @@
       "types": "./src/grouping.ts",
       "default": "./src/grouping.ts"
     },
+    "./infinite": {
+      "types": "./src/infinite.ts",
+      "default": "./src/infinite.ts"
+    },
     "./edit": {
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"

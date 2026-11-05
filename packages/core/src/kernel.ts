@@ -646,10 +646,10 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
         const d = rows.displayed;
         const keys: RowKey[] = rows.page && selection.mode === 'include' ? [...selection.keys] : [];
         // Fillers, details and a filtered tree's muted ancestors are not taken (tree-selection.md, tree-filter.md).
-        for (let i = 0; i < d.count; i++) {
-          const k = d.keyAt(d.index(i)!);
+        each(d, (i) => {
+          const k = d.keyAt(i as DisplayIndex);
           if (takes(d, i, k)) keys.push(k);
-        }
+        });
         setSelection(selectOnly(keys), source);
         return OK;
       }
@@ -712,13 +712,10 @@ export function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
       const skip = gate.skip;
       if (header && header.s === selection && header.d === d && header.n === skip) return header.state;
       let state: HeaderSelection = 'all';
-      for (let i = 0; i < d.count; i++) {
-        const k = d.keyAt(d.index(i)!);
-        if (takes(d, i, k) && !isSelected(selection, k) && !skip(k)) {
-          state = 'some';
-          break;
-        }
-      }
+      each(d, (i) => {
+        const k = d.keyAt(i as DisplayIndex);
+        if (takes(d, i, k) && !isSelected(selection, k) && !skip(k)) return !!(state = 'some');
+      });
       header = { s: selection, d, n: skip, state };
       return state;
     }
@@ -873,6 +870,13 @@ export function headerSelection<T>(s: SelectionState, d: DisplayedRows<T>): Head
   return state;
 }
 
+/** Every position, or a block list's rows held only (Phase 8 D15: never ten million); `fn` true stops. */
+const each = <T>(d: DisplayedRows<T>, fn: (i: number) => boolean | void): void => {
+  if (d.held) {
+    for (const i of d.held()) if (fn(i)) return;
+  } else for (let i = 0; i < d.count; i++) if (fn(i)) return;
+};
+
 /** A row select-all takes: a data row, not a filtered tree's muted ancestor. */
 const takes = <T>(d: DisplayedRows<T>, i: number, k: RowKey): boolean => isDataKey(k) && (!d.matchedAt || d.matchedAt(i as DisplayIndex));
 
@@ -886,11 +890,10 @@ function readHeader<T>(s: SelectionState, d: DisplayedRows<T>): HeaderSelection 
       const i = isDataKey(key) ? d.indexOf(key) : -1;
       if (i !== -1 && takes(d, i, key)) selected++;
     }
-  } else {
-    for (let i = 0; i < d.count; i++) {
-      const k = d.keyAt(d.index(i)!);
+  } else
+    each(d, (i) => {
+      const k = d.keyAt(i as DisplayIndex);
       if (takes(d, i, k) && isSelected(s, k)) selected++;
-    }
-  }
+    });
   return selected === 0 ? 'none' : selected === n ? 'all' : 'some';
 }

@@ -1,0 +1,136 @@
+{
+  "id": "blocks-lru-never-above-max",
+  "suite": "block-cache",
+  "description": "Scrolling block by block never holds more than maxBlocks: the least recently seen goes first.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 3,
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 1000
+      },
+      {
+        "want": [
+          10,
+          19
+        ]
+      },
+      {
+        "answer": "c2",
+        "total": 1000
+      },
+      {
+        "want": [
+          20,
+          29
+        ]
+      },
+      {
+        "answer": "c3",
+        "total": 1000
+      },
+      {
+        "want": [
+          30,
+          39
+        ]
+      },
+      {
+        "answer": "c4",
+        "total": 1000
+      },
+      {
+        "want": [
+          40,
+          49
+        ]
+      },
+      {
+        "answer": "c5",
+        "total": 1000
+      },
+      {
+        "want": [
+          50,
+          59
+        ]
+      },
+      {
+        "answer": "c6",
+        "total": 1000
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        2
+      ],
+      [
+        "c4",
+        3
+      ],
+      [
+        "c5",
+        4
+      ],
+      [
+        "c6",
+        5
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows",
+      "rows",
+      "rows",
+      "rows",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 1000,
+      "shown": [
+        "0-29 loading",
+        "30-59 data",
+        "60-999 loading"
+      ],
+      "counts": {
+        "total": 1000,
+        "filtered": 1000,
+        "displayed": 1000
+      }
+    },
+    "diagnostics": {
+      "fetches": 6,
+      "blocks": {
+        "held": 3,
+        "asked": 6,
+        "evicted": 3,
+        "max": 3,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

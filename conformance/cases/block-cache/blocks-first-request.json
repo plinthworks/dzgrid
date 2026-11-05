@@ -1,0 +1,48 @@
+{
+  "id": "blocks-first-request",
+  "suite": "block-cache",
+  "description": "The first block is asked at once, nothing shown until it answers; the model is loading.",
+  "input": {
+    "options": {
+      "blockSize": 10
+    },
+    "steps": []
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ]
+    ],
+    "aborted": [],
+    "changes": [],
+    "told": [],
+    "final": {
+      "status": "loading",
+      "count": 0,
+      "shown": [],
+      "counts": {
+        "total": null,
+        "filtered": null,
+        "displayed": 0
+      }
+    },
+    "diagnostics": {
+      "fetches": 1,
+      "blocks": {
+        "held": 0,
+        "asked": 1,
+        "evicted": 0,
+        "max": 0,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

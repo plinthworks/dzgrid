@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased — 1.5.0]
 
-A minor, additive (Phase 7, row grouping; closed 2026-11-05, not released).
+A minor, additive (Phase 7, row grouping; closed 2026-11-05, not released). Phase 8 steps 1–4 (infinite scroll, not
+closed) are in the working tree too; the owner decides which release carries them.
 
 ### Added
+- `@dzgrid/core/infinite` (Phase 8 steps 1–4): `infiniteRows(data, { blockSize, maxBlocks, ahead, concurrency, restMs,
+  batchMs, params, abort })` — a server's list loaded in blocks of 100 as it scrolls, 20 blocks held at most (least
+  recently seen let go), one list with no pager, the same `DataSource.fetch` as server pages (a block is a page by offset,
+  `DataRequest.blocks: true`); a known total sizes the scrollbar, an unknown one grows; a sort, a filter or a search goes
+  back to the top and asks again; refresh keeps the screen; one request channel per block, two at once, nothing asked
+  while a jump has not rested 60 ms; `applyTransaction` / `applyTransactionAsync` (updates in place, adds and removes ask
+  the window again, batched 50 ms); `diagnostics.blocks`.
+- The DOM base draws a block list's rows not arrived (« Chargement… », `aria-busy`, muted) and a failed block's rows
+  (« Les données n'ont pas pu être chargées » with one « Réessayer »; Enter on a failed row retries), tells the model its
+  window after each paint, `aria-rowcount` -1 while the total is unknown, Shift+click across rows not loaded ticks the
+  clicked row only. Find, print, the pager's counts and the CSV of `displayed` walk the rows held only.
+- Core types (additions): `BlockLoadingNode` (in `RowNode`), `DisplayedRows.held?()`, `RowModel.want?()`,
+  `ModelEnv.timer?`, `RequestGate.forget?()`, `RangeResult` reason `rows-not-loaded`.
 - `@dzgrid/core/grouping`: `groupShape({ by, aggFuncs, expanded, footers, grandTotal })` — rows grouped by columns,
   totals (sum, mean, min, max, count, first, last, a function), group footers and the grand total; `setBy`, `totals()`,
   `off()`; `ColumnDef.aggFunc`, `ColumnDef.groupable`, `FooterNode`.

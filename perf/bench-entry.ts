@@ -6,6 +6,7 @@ import { toCsv } from '../packages/core/src/csv.js';
 import { treeShape } from '../packages/core/src/tree.js';
 import { detailShape, sparseRowLayout } from '../packages/core/src/detail.js';
 import { groupShape } from '../packages/core/src/grouping.js';
+import { infiniteRows, type InfiniteModel } from '../packages/core/src/infinite.js';
 import { treeProfile, type TreeRow as MRow } from './profiles/tree.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
@@ -14,6 +15,37 @@ import { AR } from '../packages/dom/src/locales/ar.js';
 
 /** A timed case: a function, or an untimed `setup` whose result is passed to `run`; `done` after its runs, untimed. */
 export type Case = (() => unknown) | { readonly setup?: () => unknown; readonly run: (ctx: any) => unknown; readonly done?: () => void };
+
+/**
+ * Phase 8 step 3 (infinite-scroll.md, plan §4 « Time »): a list of 10⁷ rows loaded in blocks of 100, 20 held. The server
+ * answers at once (row i computed from i): what is timed is the model's work, never a wait.
+ */
+type IRow = { readonly id: number; readonly v: number };
+const TEN_M = 10_000_000;
+function infiniteModel(o: { hold?: boolean } = {}): { m: InfiniteModel<IRow>; release: () => void } {
+  const waiting: (() => void)[] = [];
+  const reply = (offset: number, size: number) => ({ rows: Array.from({ length: Math.min(size, TEN_M - offset) }, (_, j) => ({ id: offset + j, v: (offset + j) % 97 })), total: TEN_M });
+  const m = infiniteRows<IRow>({
+    fetch: (req) => {
+      const p = req.page!;
+      if (!o.hold) return reply(p.offset, p.size);
+      return { then: (ok: (v: unknown) => void) => void waiting.push(() => ok(reply(p.offset, p.size))) } as never; // a thenable the case settles
+    },
+  }).create({ getRowId: (r) => r.id, columns: createColumnModel<IRow>([{ id: 'v', type: 'number' }]), ctx: localeCtx({ locale: 'fr-FR' }) }) as InfiniteModel<IRow>;
+  return { m, release: () => { for (const f of waiting.splice(0)) f(); } };
+}
+/** 10 000 windows of 60 rows: one in four a jump anywhere, the others a scroll of 0 to 3 rows (a fixed seed). */
+function windows(): number[] {
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+  const out: number[] = [];
+  let at = 0;
+  for (let i = 0; i < 10_000; i++) {
+    at = rnd() < 0.25 ? Math.floor(rnd() * (TEN_M - 60)) : Math.min(TEN_M - 60, at + Math.floor(rnd() * 4));
+    out.push(at);
+  }
+  return out;
+}
 
 /** Each case returns a value so the work cannot be optimised away. */
 export const CASES: Record<string, Case> = {
@@ -233,7 +265,60 @@ export const CASES: Record<string, Case> = {
   ...layoutCases(),
   ...csvCases(),
   ...groupCases(),
+  ...infiniteCases(),
 };
+
+function infiniteCases(): Record<string, Case> {
+  const seen = windows();
+  return {
+    // Exit criterion: 10⁷ rows scrolled with never more than maxBlocks blocks held (checked at every step: a throw fails the bench).
+    'infinite 10⁷ rows: 10 000 seeded windows (jumps and scrolls), blocks held checked ≤ maxBlocks at each': {
+      setup: () => infiniteModel().m,
+      run: (m: InfiniteModel<IRow>) => {
+        for (const at of seen) {
+          m.want!(at, at + 59);
+          if (m.diagnostics.blocks.held > 20) throw new Error(`held ${m.diagnostics.blocks.held}`);
+        }
+        return m.diagnostics.blocks.max;
+      },
+    },
+    // nodeAt over a 60-row window, 10 000 times (plan: ≤ 0.05 ms a window, so ≤ 500 ms here).
+    'infinite nodeAt over a 60-row window x 10 000 (10⁷ rows, 20 blocks held)': {
+      setup: () => {
+        const { m } = infiniteModel();
+        for (let b = 0; b < 20; b++) m.want!(b * 100_000, b * 100_000 + 59);
+        return m;
+      },
+      run: (m: InfiniteModel<IRow>) => {
+        const d = m.displayed;
+        let n = 0;
+        for (const at of seen) for (let i = at; i < at + 60; i++) n += d.nodeAt(d.index(i)!).level;
+        return n;
+      },
+    },
+    // A sort with 20 blocks held and 2 running: nothing of the old epoch left, block 0 asked in the same call.
+    'infinite purge on a sort (20 blocks held, 2 running)': {
+      setup: () => {
+        const h = infiniteModel({ hold: true });
+        for (let b = 0; b < 20; b++) {
+          h.m.want!(b * 1000, b * 1000 + 59);
+          h.release();
+        }
+        h.m.want!(500_000, 500_259);
+        return h;
+      },
+      run: (h: ReturnType<typeof infiniteModel>) => {
+        const before = h.m.diagnostics.fetches;
+        h.m.setQuery(makeQuery({ sort: [{ column: 'v', dir: 'desc' }] }));
+        const d = h.m.diagnostics;
+        if (d.blocks.held !== 0 || d.fetches !== before + 1) throw new Error(`held ${d.blocks.held}, asked ${d.fetches - before}`);
+        h.release();
+        if (h.m.diagnostics.gate.dropped['stale-epoch'] !== 2) throw new Error('an old answer counted');
+        return d.fetches;
+      },
+    },
+  };
+}
 
 function layoutCases(): Record<string, Case> {
   const sizes = Float64Array.from({ length: 100_000 }, (_, i) => 24 + (i % 7) * 9);
@@ -562,6 +647,18 @@ const heap = (): number => {
 
 /** Bytes measured after collection; see scripts/bench.mjs. */
 export const MEMORY: Record<string, () => number> = {
+  // Phase 8 step 3: heap retained by a 10⁷-row block model after 10 000 windows, less its rows held (20 blocks × 100 rows,
+  // measured as the same rows alone): the plan's « ≤ the rows held + 1 MB ».
+  'infinite model after 10 000 windows, bytes over its rows held (10⁷ rows, 20 × 100 held)': () => {
+    const before = heap();
+    const { m } = infiniteModel();
+    for (const at of windows()) m.want!(at, at + 59);
+    const after = heap();
+    const rows = Array.from({ length: 2000 }, (_, i) => ({ id: i, v: i % 97 }));
+    const withRows = heap();
+    void m.displayed.count, rows.length;
+    return after - before - (withRows - after);
+  },
   // Phase 7 step 3 (plan §4 « memory of the grouped view ≤ 60 B / row over the flat model », to set): A grouped by 2
   // columns with 3 totals, all open, less the same model flat with the same columns (keys and totals' caches included).
   // Typed arrays live outside the JS heap: counted here (`arrayBuffers`), unlike the older lines.

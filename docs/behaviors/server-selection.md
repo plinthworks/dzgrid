@@ -48,3 +48,11 @@ grid never unticks by itself after the action.
 ## Decisions (step 17, 2026-10-20)
 - **The header box on browser pages** (owner Q1, closing Q2 of step 7): it acts on the page shown only. Ticking adds the page's rows (the core's `selection.allDisplayed` is a union while the rows are paged); unticking a fully ticked page sends `selection.set` without the page's rows (an include set less them, or an everything-except with them excluded), so other pages keep their rows; Ctrl+A follows the box. Server pages are unchanged: the box and Ctrl+A select the query.
 - **The footer** (`footer.selected`) says the count, "(some not shown)" when selected rows are off the page, and offers "Select all N rows" (`selection.allFiltered`) once every row of the page is ticked and more rows match, and "Clear selection". No second live region: its text is plain, the user's own selection is said by the grid's announcer.
+
+## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D14; owner Q-SEL A)
+The same policies as server pages: `selectAll: 'query'` (« Tout sélectionner » on ten million rows is everything the
+filters and the search match, sent to the host as the query and the excluded keys; nothing is loaded), a selected key is
+always kept, membership = the wire filter, the search and the params (never the sort). Under a selection rule, « all »
+and the header box take the rows held only (never ten million). Shift+click takes the data rows held between the anchor
+and the click; when rows between are not loaded the range is refused (`rows-not-loaded`) and the clicked row alone is
+ticked. Loading rows are never ticked.

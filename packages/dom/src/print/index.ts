@@ -1,5 +1,5 @@
 import { problem, type ColumnOrGroup, type GridKernel, type GroupNode, type RowNode } from '@dzgrid/core';
-import { emit } from '@dzgrid/core/internal';
+import { emit, positions } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { PrintMessageKey } from '../part-texts.js';
 import { cellValue } from '../render/rows.js';
@@ -101,8 +101,8 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
   // A grouped grid (print.md « Grouped rows »): its group and totals rows printed as shown, the label in its column.
   const gr = g.grouped;
   const lc = gr ? cols.findIndex((c) => c.id == gr.column()) : 0;
-  for (let i = 0; i < D.count; i++) {
-    const node = D.nodeAt(i as never);
+  for (const i of positions(D)) {
+    const node = D.nodeAt(i);
     // A detail panel, a lazy parent's loading row, a tree's filler: never printed (O9).
     // A group or a totals row has totals (`aggs`): only grouping makes them.
     if ((node.kind == 'data' || 'aggs' in node) && total++ < max) jobs.push([node, i]);

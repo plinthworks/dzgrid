@@ -1,0 +1,82 @@
+{
+  "id": "blocks-window-ahead-two-at-once",
+  "suite": "block-cache",
+  "description": "The window's blocks then one ahead are asked, two at a time; the next waits for an answer.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 10
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 1000
+      },
+      {
+        "want": [
+          5,
+          25
+        ]
+      },
+      {
+        "answer": "c2",
+        "total": 1000
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        2
+      ],
+      [
+        "c4",
+        3
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 1000,
+      "shown": [
+        "0-19 data",
+        "20-999 loading"
+      ],
+      "counts": {
+        "total": 1000,
+        "filtered": 1000,
+        "displayed": 1000
+      }
+    },
+    "diagnostics": {
+      "fetches": 4,
+      "blocks": {
+        "held": 2,
+        "asked": 4,
+        "evicted": 0,
+        "max": 2,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

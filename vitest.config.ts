@@ -17,6 +17,7 @@ const alias = {
   '@dzgrid/core/tree-lazy': fileURLToPath(new URL('./packages/core/src/tree-lazy.ts', import.meta.url)),
   '@dzgrid/core/detail': fileURLToPath(new URL('./packages/core/src/detail.ts', import.meta.url)),
   '@dzgrid/core/grouping': fileURLToPath(new URL('./packages/core/src/grouping.ts', import.meta.url)),
+  '@dzgrid/core/infinite': fileURLToPath(new URL('./packages/core/src/infinite.ts', import.meta.url)),
   '@dzgrid/core/edit': fileURLToPath(new URL('./packages/core/src/edit.ts', import.meta.url)),
   '@dzgrid/core/range': fileURLToPath(new URL('./packages/core/src/range.ts', import.meta.url)),
   '@dzgrid/core/state': fileURLToPath(new URL('./packages/core/src/state.ts', import.meta.url)),

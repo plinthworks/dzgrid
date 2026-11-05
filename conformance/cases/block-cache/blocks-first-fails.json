@@ -1,0 +1,62 @@
+{
+  "id": "blocks-first-fails",
+  "suite": "block-cache",
+  "description": "The first block failing is the model's error; a refresh asks it again.",
+  "input": {
+    "options": {
+      "blockSize": 10
+    },
+    "steps": [
+      {
+        "fail": "c1"
+      },
+      {
+        "refresh": true
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        0
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "status",
+      "status"
+    ],
+    "told": [],
+    "final": {
+      "status": "loading",
+      "count": 0,
+      "shown": [],
+      "counts": {
+        "total": null,
+        "filtered": null,
+        "displayed": 0
+      }
+    },
+    "diagnostics": {
+      "fetches": 2,
+      "blocks": {
+        "held": 0,
+        "asked": 2,
+        "evicted": 0,
+        "max": 0,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "id": "blocks-refresh-keeps-rows",
+  "suite": "block-cache",
+  "description": "A refresh asks the window again with its rows kept (loading meanwhile); a block off screen is stale and asked again when shown.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 10,
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 30
+      },
+      {
+        "want": [
+          10,
+          19
+        ]
+      },
+      {
+        "answer": "c2",
+        "total": 30
+      },
+      {
+        "refresh": true
+      },
+      {
+        "answer": "c3",
+        "total": 30
+      },
+      {
+        "want": [
+          0,
+          9
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        1
+      ],
+      [
+        "c4",
+        0
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows",
+      "status",
+      "rows"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 30,
+      "shown": [
+        "0-19 data",
+        "20-29 loading"
+      ],
+      "counts": {
+        "total": 30,
+        "filtered": 30,
+        "displayed": 30
+      }
+    },
+    "diagnostics": {
+      "fetches": 4,
+      "blocks": {
+        "held": 2,
+        "asked": 4,
+        "evicted": 0,
+        "max": 2,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

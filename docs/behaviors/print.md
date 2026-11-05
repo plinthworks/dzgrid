@@ -103,3 +103,7 @@ Numbered (step 7, 2026-11-05; `packages/dom/test/print-grouping.test.ts`, Chrome
    column holds the label.
 4. Group and totals rows are set in bold (`dzg-print-group`), so they read apart without colour.
 5. `maxRows` counts printed lines, group and totals lines included.
+
+## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D15–D16; owner Q-EX A)
+Print prints the rows held, in order, 5 000 at most (`print-too-many` above, as today); loading and failed rows are never
+printed. The walk reads `DisplayedRows.held`, never ten million positions (step 4; tested on 10⁷ rows).

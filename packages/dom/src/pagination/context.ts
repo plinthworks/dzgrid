@@ -1,5 +1,5 @@
 import { isSelected, type GridCommand } from '@dzgrid/core';
-import { isDataKey } from '@dzgrid/core/internal';
+import { isDataKey, positions } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { PartBase, SlotContext } from '../part.js';
 
@@ -90,8 +90,8 @@ export function footerContext(g: GridContext<unknown>, act: (cmd: GridCommand) =
     let shown = 0;
     let data = 0;
     let rows = 0;
-    for (let i = 0; i < d.count; i++) {
-      const at = d.index(i)!;
+    // A block list's rows held only (infinite-scroll.md): never ten million.
+    for (const at of positions(d)) {
       const key = d.keyAt(at);
       if (isSelected(k.selection, key)) shown++;
       if (isDataKey(key)) data++, d.levelAt?.(at) || rows++;

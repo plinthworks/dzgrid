@@ -1,8 +1,8 @@
-import { isDataKey, type DisplayIndex } from '../ids.js';
+import { isDataKey } from '../ids.js';
 import type { ExportScope } from '../kernel.js';
 import type { RowModel } from '../model/client.js';
 import type { Query } from '../model/query.js';
-import type { DisplayedRows } from '../row/displayed.js';
+import { positions, type DisplayedRows } from '../row/displayed.js';
 import { isSelected, type SelectionState } from '../selection/rows.js';
 import type { DataRequest } from '../server/source.js';
 
@@ -35,13 +35,14 @@ export function csvRows<T>(model: Pick<RowModel<T>, 'displayed' | 'allRows'>, sc
   if (!rows) return null;
   if (scope === 'all') return { rows, at: null, count: rows.count };
   const at: number[] = [];
-  for (let i = 0; i < rows.count; i++) {
-    const k = rows.keyAt(i as DisplayIndex);
+  // A block list: its rows held only (infinite-scroll.md).
+  for (const i of positions(rows)) {
+    const k = rows.keyAt(i);
     // Shown: every row but a lazy tree's loading rows (tree-lazy.md) and details (master-detail.md),
     // never written: keys `d:`, `f:` and `g:` sort before `l`, `l:` and `x:` after, a grand total's `t:` between
     // them (an explicit test of the kinds does not fit the entry's budget, step 8 review). Selected: a tree's
     // fillers and details never are, even under everything-except.
     if (shown ? k < 'l' || k[0] == 't' : isDataKey(k) && isSelected(selection, k)) at.push(i);
   }
-  return { rows, at: shown ? null : Uint32Array.from(at), count: at.length };
+  return { rows, at: shown && !rows.held ? null : Uint32Array.from(at), count: at.length };
 }

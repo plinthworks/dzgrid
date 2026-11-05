@@ -1,0 +1,100 @@
+{
+  "id": "blocks-duplicate-moves",
+  "suite": "block-cache",
+  "description": "A row already held elsewhere takes its new place; the block that held it is let go and asked again when shown.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 10,
+      "ahead": 0
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 30
+      },
+      {
+        "want": [
+          0,
+          19
+        ]
+      },
+      {
+        "answer": "c2",
+        "ids": [
+          "r9",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19"
+        ],
+        "total": 30
+      },
+      {
+        "want": [
+          0,
+          19
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        0
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query",
+      "rows"
+    ],
+    "told": [
+      "duplicate-row-id response.rows[0]"
+    ],
+    "final": {
+      "status": "idle",
+      "count": 30,
+      "shown": [
+        "0-9 loading",
+        "10-19 data",
+        "20-29 loading"
+      ],
+      "counts": {
+        "total": 30,
+        "filtered": 30,
+        "displayed": 30
+      }
+    },
+    "diagnostics": {
+      "fetches": 3,
+      "blocks": {
+        "held": 1,
+        "asked": 3,
+        "evicted": 1,
+        "max": 1,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

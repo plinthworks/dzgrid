@@ -1,0 +1,58 @@
+{
+  "id": "blocks-known-total",
+  "suite": "block-cache",
+  "description": "A total sizes the list at once: the rows of block 0, then loading rows to the end.",
+  "input": {
+    "options": {
+      "blockSize": 10
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 35
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ]
+    ],
+    "aborted": [],
+    "changes": [
+      "query"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 35,
+      "shown": [
+        "0-9 data",
+        "10-34 loading"
+      ],
+      "counts": {
+        "total": 35,
+        "filtered": 35,
+        "displayed": 35
+      }
+    },
+    "diagnostics": {
+      "fetches": 1,
+      "blocks": {
+        "held": 1,
+        "asked": 1,
+        "evicted": 0,
+        "max": 1,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 0,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

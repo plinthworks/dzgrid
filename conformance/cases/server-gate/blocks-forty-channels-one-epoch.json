@@ -1,0 +1,789 @@
+{
+  "id": "blocks-forty-channels-one-epoch",
+  "suite": "server-gate",
+  "description": "Phase 8: forty blocks asked at once, one channel each; a new query (epoch) drops every one of them, whatever arrives after.",
+  "input": {
+    "steps": [
+      {
+        "op": "begin",
+        "channel": "block:0",
+        "key": "k0",
+        "as": "b0"
+      },
+      {
+        "op": "begin",
+        "channel": "block:1",
+        "key": "k1",
+        "as": "b1"
+      },
+      {
+        "op": "begin",
+        "channel": "block:2",
+        "key": "k2",
+        "as": "b2"
+      },
+      {
+        "op": "begin",
+        "channel": "block:3",
+        "key": "k3",
+        "as": "b3"
+      },
+      {
+        "op": "begin",
+        "channel": "block:4",
+        "key": "k4",
+        "as": "b4"
+      },
+      {
+        "op": "begin",
+        "channel": "block:5",
+        "key": "k5",
+        "as": "b5"
+      },
+      {
+        "op": "begin",
+        "channel": "block:6",
+        "key": "k6",
+        "as": "b6"
+      },
+      {
+        "op": "begin",
+        "channel": "block:7",
+        "key": "k7",
+        "as": "b7"
+      },
+      {
+        "op": "begin",
+        "channel": "block:8",
+        "key": "k8",
+        "as": "b8"
+      },
+      {
+        "op": "begin",
+        "channel": "block:9",
+        "key": "k9",
+        "as": "b9"
+      },
+      {
+        "op": "begin",
+        "channel": "block:10",
+        "key": "k10",
+        "as": "b10"
+      },
+      {
+        "op": "begin",
+        "channel": "block:11",
+        "key": "k11",
+        "as": "b11"
+      },
+      {
+        "op": "begin",
+        "channel": "block:12",
+        "key": "k12",
+        "as": "b12"
+      },
+      {
+        "op": "begin",
+        "channel": "block:13",
+        "key": "k13",
+        "as": "b13"
+      },
+      {
+        "op": "begin",
+        "channel": "block:14",
+        "key": "k14",
+        "as": "b14"
+      },
+      {
+        "op": "begin",
+        "channel": "block:15",
+        "key": "k15",
+        "as": "b15"
+      },
+      {
+        "op": "begin",
+        "channel": "block:16",
+        "key": "k16",
+        "as": "b16"
+      },
+      {
+        "op": "begin",
+        "channel": "block:17",
+        "key": "k17",
+        "as": "b17"
+      },
+      {
+        "op": "begin",
+        "channel": "block:18",
+        "key": "k18",
+        "as": "b18"
+      },
+      {
+        "op": "begin",
+        "channel": "block:19",
+        "key": "k19",
+        "as": "b19"
+      },
+      {
+        "op": "begin",
+        "channel": "block:20",
+        "key": "k20",
+        "as": "b20"
+      },
+      {
+        "op": "begin",
+        "channel": "block:21",
+        "key": "k21",
+        "as": "b21"
+      },
+      {
+        "op": "begin",
+        "channel": "block:22",
+        "key": "k22",
+        "as": "b22"
+      },
+      {
+        "op": "begin",
+        "channel": "block:23",
+        "key": "k23",
+        "as": "b23"
+      },
+      {
+        "op": "begin",
+        "channel": "block:24",
+        "key": "k24",
+        "as": "b24"
+      },
+      {
+        "op": "begin",
+        "channel": "block:25",
+        "key": "k25",
+        "as": "b25"
+      },
+      {
+        "op": "begin",
+        "channel": "block:26",
+        "key": "k26",
+        "as": "b26"
+      },
+      {
+        "op": "begin",
+        "channel": "block:27",
+        "key": "k27",
+        "as": "b27"
+      },
+      {
+        "op": "begin",
+        "channel": "block:28",
+        "key": "k28",
+        "as": "b28"
+      },
+      {
+        "op": "begin",
+        "channel": "block:29",
+        "key": "k29",
+        "as": "b29"
+      },
+      {
+        "op": "begin",
+        "channel": "block:30",
+        "key": "k30",
+        "as": "b30"
+      },
+      {
+        "op": "begin",
+        "channel": "block:31",
+        "key": "k31",
+        "as": "b31"
+      },
+      {
+        "op": "begin",
+        "channel": "block:32",
+        "key": "k32",
+        "as": "b32"
+      },
+      {
+        "op": "begin",
+        "channel": "block:33",
+        "key": "k33",
+        "as": "b33"
+      },
+      {
+        "op": "begin",
+        "channel": "block:34",
+        "key": "k34",
+        "as": "b34"
+      },
+      {
+        "op": "begin",
+        "channel": "block:35",
+        "key": "k35",
+        "as": "b35"
+      },
+      {
+        "op": "begin",
+        "channel": "block:36",
+        "key": "k36",
+        "as": "b36"
+      },
+      {
+        "op": "begin",
+        "channel": "block:37",
+        "key": "k37",
+        "as": "b37"
+      },
+      {
+        "op": "begin",
+        "channel": "block:38",
+        "key": "k38",
+        "as": "b38"
+      },
+      {
+        "op": "begin",
+        "channel": "block:39",
+        "key": "k39",
+        "as": "b39"
+      },
+      {
+        "op": "newEpoch"
+      },
+      {
+        "op": "settle",
+        "ticket": "b0"
+      },
+      {
+        "op": "settle",
+        "ticket": "b1"
+      },
+      {
+        "op": "settle",
+        "ticket": "b2"
+      },
+      {
+        "op": "settle",
+        "ticket": "b3"
+      },
+      {
+        "op": "settle",
+        "ticket": "b4"
+      },
+      {
+        "op": "settle",
+        "ticket": "b5"
+      },
+      {
+        "op": "settle",
+        "ticket": "b6"
+      },
+      {
+        "op": "settle",
+        "ticket": "b7"
+      },
+      {
+        "op": "settle",
+        "ticket": "b8"
+      },
+      {
+        "op": "settle",
+        "ticket": "b9"
+      },
+      {
+        "op": "settle",
+        "ticket": "b10"
+      },
+      {
+        "op": "settle",
+        "ticket": "b11"
+      },
+      {
+        "op": "settle",
+        "ticket": "b12"
+      },
+      {
+        "op": "settle",
+        "ticket": "b13"
+      },
+      {
+        "op": "settle",
+        "ticket": "b14"
+      },
+      {
+        "op": "settle",
+        "ticket": "b15"
+      },
+      {
+        "op": "settle",
+        "ticket": "b16"
+      },
+      {
+        "op": "settle",
+        "ticket": "b17"
+      },
+      {
+        "op": "settle",
+        "ticket": "b18"
+      },
+      {
+        "op": "settle",
+        "ticket": "b19"
+      },
+      {
+        "op": "settle",
+        "ticket": "b20"
+      },
+      {
+        "op": "settle",
+        "ticket": "b21"
+      },
+      {
+        "op": "settle",
+        "ticket": "b22"
+      },
+      {
+        "op": "settle",
+        "ticket": "b23"
+      },
+      {
+        "op": "settle",
+        "ticket": "b24"
+      },
+      {
+        "op": "settle",
+        "ticket": "b25"
+      },
+      {
+        "op": "settle",
+        "ticket": "b26"
+      },
+      {
+        "op": "settle",
+        "ticket": "b27"
+      },
+      {
+        "op": "settle",
+        "ticket": "b28"
+      },
+      {
+        "op": "settle",
+        "ticket": "b29"
+      },
+      {
+        "op": "settle",
+        "ticket": "b30"
+      },
+      {
+        "op": "settle",
+        "ticket": "b31"
+      },
+      {
+        "op": "settle",
+        "ticket": "b32"
+      },
+      {
+        "op": "settle",
+        "ticket": "b33"
+      },
+      {
+        "op": "settle",
+        "ticket": "b34"
+      },
+      {
+        "op": "settle",
+        "ticket": "b35"
+      },
+      {
+        "op": "settle",
+        "ticket": "b36"
+      },
+      {
+        "op": "settle",
+        "ticket": "b37"
+      },
+      {
+        "op": "settle",
+        "ticket": "b38"
+      },
+      {
+        "op": "settle",
+        "ticket": "b39"
+      }
+    ]
+  },
+  "expected": {
+    "outcomes": [
+      {
+        "seq": 1,
+        "epoch": 0
+      },
+      {
+        "seq": 2,
+        "epoch": 0
+      },
+      {
+        "seq": 3,
+        "epoch": 0
+      },
+      {
+        "seq": 4,
+        "epoch": 0
+      },
+      {
+        "seq": 5,
+        "epoch": 0
+      },
+      {
+        "seq": 6,
+        "epoch": 0
+      },
+      {
+        "seq": 7,
+        "epoch": 0
+      },
+      {
+        "seq": 8,
+        "epoch": 0
+      },
+      {
+        "seq": 9,
+        "epoch": 0
+      },
+      {
+        "seq": 10,
+        "epoch": 0
+      },
+      {
+        "seq": 11,
+        "epoch": 0
+      },
+      {
+        "seq": 12,
+        "epoch": 0
+      },
+      {
+        "seq": 13,
+        "epoch": 0
+      },
+      {
+        "seq": 14,
+        "epoch": 0
+      },
+      {
+        "seq": 15,
+        "epoch": 0
+      },
+      {
+        "seq": 16,
+        "epoch": 0
+      },
+      {
+        "seq": 17,
+        "epoch": 0
+      },
+      {
+        "seq": 18,
+        "epoch": 0
+      },
+      {
+        "seq": 19,
+        "epoch": 0
+      },
+      {
+        "seq": 20,
+        "epoch": 0
+      },
+      {
+        "seq": 21,
+        "epoch": 0
+      },
+      {
+        "seq": 22,
+        "epoch": 0
+      },
+      {
+        "seq": 23,
+        "epoch": 0
+      },
+      {
+        "seq": 24,
+        "epoch": 0
+      },
+      {
+        "seq": 25,
+        "epoch": 0
+      },
+      {
+        "seq": 26,
+        "epoch": 0
+      },
+      {
+        "seq": 27,
+        "epoch": 0
+      },
+      {
+        "seq": 28,
+        "epoch": 0
+      },
+      {
+        "seq": 29,
+        "epoch": 0
+      },
+      {
+        "seq": 30,
+        "epoch": 0
+      },
+      {
+        "seq": 31,
+        "epoch": 0
+      },
+      {
+        "seq": 32,
+        "epoch": 0
+      },
+      {
+        "seq": 33,
+        "epoch": 0
+      },
+      {
+        "seq": 34,
+        "epoch": 0
+      },
+      {
+        "seq": 35,
+        "epoch": 0
+      },
+      {
+        "seq": 36,
+        "epoch": 0
+      },
+      {
+        "seq": 37,
+        "epoch": 0
+      },
+      {
+        "seq": 38,
+        "epoch": 0
+      },
+      {
+        "seq": 39,
+        "epoch": 0
+      },
+      {
+        "seq": 40,
+        "epoch": 0
+      },
+      null,
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch",
+      "stale-epoch"
+    ],
+    "aborted": [
+      [
+        "b0",
+        "stale-epoch"
+      ],
+      [
+        "b1",
+        "stale-epoch"
+      ],
+      [
+        "b2",
+        "stale-epoch"
+      ],
+      [
+        "b3",
+        "stale-epoch"
+      ],
+      [
+        "b4",
+        "stale-epoch"
+      ],
+      [
+        "b5",
+        "stale-epoch"
+      ],
+      [
+        "b6",
+        "stale-epoch"
+      ],
+      [
+        "b7",
+        "stale-epoch"
+      ],
+      [
+        "b8",
+        "stale-epoch"
+      ],
+      [
+        "b9",
+        "stale-epoch"
+      ],
+      [
+        "b10",
+        "stale-epoch"
+      ],
+      [
+        "b11",
+        "stale-epoch"
+      ],
+      [
+        "b12",
+        "stale-epoch"
+      ],
+      [
+        "b13",
+        "stale-epoch"
+      ],
+      [
+        "b14",
+        "stale-epoch"
+      ],
+      [
+        "b15",
+        "stale-epoch"
+      ],
+      [
+        "b16",
+        "stale-epoch"
+      ],
+      [
+        "b17",
+        "stale-epoch"
+      ],
+      [
+        "b18",
+        "stale-epoch"
+      ],
+      [
+        "b19",
+        "stale-epoch"
+      ],
+      [
+        "b20",
+        "stale-epoch"
+      ],
+      [
+        "b21",
+        "stale-epoch"
+      ],
+      [
+        "b22",
+        "stale-epoch"
+      ],
+      [
+        "b23",
+        "stale-epoch"
+      ],
+      [
+        "b24",
+        "stale-epoch"
+      ],
+      [
+        "b25",
+        "stale-epoch"
+      ],
+      [
+        "b26",
+        "stale-epoch"
+      ],
+      [
+        "b27",
+        "stale-epoch"
+      ],
+      [
+        "b28",
+        "stale-epoch"
+      ],
+      [
+        "b29",
+        "stale-epoch"
+      ],
+      [
+        "b30",
+        "stale-epoch"
+      ],
+      [
+        "b31",
+        "stale-epoch"
+      ],
+      [
+        "b32",
+        "stale-epoch"
+      ],
+      [
+        "b33",
+        "stale-epoch"
+      ],
+      [
+        "b34",
+        "stale-epoch"
+      ],
+      [
+        "b35",
+        "stale-epoch"
+      ],
+      [
+        "b36",
+        "stale-epoch"
+      ],
+      [
+        "b37",
+        "stale-epoch"
+      ],
+      [
+        "b38",
+        "stale-epoch"
+      ],
+      [
+        "b39",
+        "stale-epoch"
+      ]
+    ],
+    "diagnostics": {
+      "begun": 40,
+      "accepted": 0,
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 40,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

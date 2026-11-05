@@ -1,0 +1,109 @@
+{
+  "id": "blocks-sort-purges",
+  "suite": "block-cache",
+  "description": "A sort drops every block and request, asks block 0 at once with the sort; old answers are dropped.",
+  "input": {
+    "options": {
+      "blockSize": 10,
+      "maxBlocks": 10
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "total": 1000
+      },
+      {
+        "want": [
+          10,
+          29
+        ]
+      },
+      {
+        "sort": [
+          [
+            "name",
+            "desc"
+          ]
+        ]
+      },
+      {
+        "answer": "c2",
+        "total": 1000
+      },
+      {
+        "answer": "c3",
+        "total": 1000
+      },
+      {
+        "answer": "c4",
+        "total": 5,
+        "rows": 5
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        0
+      ],
+      [
+        "c2",
+        1
+      ],
+      [
+        "c3",
+        2
+      ],
+      [
+        "c4",
+        0,
+        "name desc"
+      ]
+    ],
+    "aborted": [
+      [
+        "c2",
+        "stale-epoch"
+      ],
+      [
+        "c3",
+        "stale-epoch"
+      ]
+    ],
+    "changes": [
+      "query",
+      "query",
+      "query"
+    ],
+    "told": [],
+    "final": {
+      "status": "idle",
+      "count": 5,
+      "shown": [
+        "0-4 data"
+      ],
+      "counts": {
+        "total": 5,
+        "filtered": 5,
+        "displayed": 5
+      }
+    },
+    "diagnostics": {
+      "fetches": 4,
+      "blocks": {
+        "held": 1,
+        "asked": 4,
+        "evicted": 0,
+        "max": 1,
+        "failed": 0
+      },
+      "dropped": {
+        "superseded": 0,
+        "stale-epoch": 2,
+        "aborted": 0,
+        "destroyed": 0
+      }
+    }
+  }
+}

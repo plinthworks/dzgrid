@@ -275,3 +275,8 @@ Demo: « Envoyer la sélection (simulé) » on `orders-edit.html?focus=range` ca
 With `statusBar()`, the block's count, sum, mean, smallest and largest show in the strip under the grid and follow the
 block at most once a frame; nothing is said on its own (the block's size stays what `range.size` says). Read on demand
 by the cell menu's « Lire les totaux ».
+
+## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D16; owner Q-COPY A — built at step 5)
+A block of cells may cross loading rows. Copy, cut, paste, fill and the status bar's figures over such a block are
+refused, with the sentence « Certaines lignes ne sont pas encore chargées » (`range-not-loaded`, warning); inside rows
+held everything works as today. Ctrl+A with `range()` is a block of every row: its copy is refused above the rows held.

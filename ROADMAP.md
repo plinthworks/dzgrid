@@ -1151,3 +1151,32 @@ questions.md`); the lead's decisions and measures in `docs/phase-7-steps/decisio
 - For the owner: accept `@dzgrid/core#GridEvent` in `check:api` (the `groupByChanged` member; the guard reads a
   multi-line union member as a change); the listening §26; Q-SE B on his screens; the §5.2 ceiling of the core's
   sub-entries.
+
+## Phase 8 — infinite scroll and the server-side row model (started 2026-11-05)
+
+Plan `docs/phase-8-plan.md`; owner « ★ partout, tailles OK » (2026-11-05, `docs/phase-8-steps/questions.md`); the lead's
+decisions and measures `docs/phase-8-steps/decisions.md`.
+
+- [x] **Step 1 — sheets** (2026-11-05, not committed): `infinite-scroll.md`, `server-side-groups.md`,
+  `row-transactions-async.md`; amendments to `overlays`, `server-selection`, `csv-export`, `print`, `find`,
+  `range-selection`, `clipboard`, `tree-lazy`, `row-grouping`, `grid-state`; a11y protocol §27 (188–192).
+- [x] **Step 2 — core seams** (not committed): `DisplayedRows.held?`, `positions` (internal), `RowModel.want?`,
+  `ModelEnv.timer?`, `BlockLoadingNode` (in `RowNode`; the plan's `LoadingNode.parent | null` was flagged by `check:api`),
+  the kernel's walks and `selectRange` bounded by the rows held (`rows-not-loaded`), `server/rows.ts` helpers moved to
+  `server/shared.ts` (`core/server` 6 151 / 6 200, behaviour unchanged: its suites untouched and green). Core base
+  29 258 / 29 300. `walks-bounded.test.ts` (planted 10⁷).
+- [x] **Step 3 — `@dzgrid/core/infinite`** (not committed): `infiniteRows`, the block store (`server/blocks.ts`: LRU,
+  pins, focused block first, 2 at once, abort as many as wait, rest 60 ms on the DOM's timer), `block:<n>` channels with
+  the gate's new `forget`, epochs and purge, unknown end growing, failures, refresh, duplicates, transactions (sync and
+  batched), selection policies, `hold`. Conformance `block-cache` (19, new suite) and `server-gate/blocks-*` (7); unit 34;
+  permutations 1 000 (0 stale); node perf lines (10⁷ rows, 10 000 windows 175.7 ms, held ≤ 20 at every step; purge
+  0.1 ms; memory 0.4 MB over the rows held). Size 7 867, line 8 580 (measure + 10 %; plan estimated 2 600–3 400).
+- [x] **Step 4 — the DOM** (not committed): `want` after each paint, loading and failed rows drawn by the base with one
+  Retry, Enter retries, `aria-rowcount` -1, back to the top on a new query, the end not anchored, Shift+click over rows not
+  loaded; find, print, the pager's counts, CSV `displayed` bounded; spans across rows and row gaps refused beside blocks.
+  `infinite.test.ts` (dom, 13); browser `node scripts/browser-infinite.mjs --engine all` 28 / 28: Ctrl+End to row 10⁷ one
+  frame after its answer, wheel 59.9 fps median / p95 16.7 ms, thumb drag 1 block, held ≤ 20, axe 0 fr / ar, row 10⁷ at
+  0 px in Chrome, Firefox, WebKit. Dom base 23 637 / 23 660 (+2 % rule; plan asked 23 500), theme 2 913 / 2 960, K.8
+  89 882 / 90 000. Review: two fixes (a refresh stuck loading, an error not cleared), with their tests.
+- [ ] Step 5 — transactions' next-frame flush, edits, `range-not-loaded`, exports. Step 6 — `@dzgrid/core/server-side`.
+  Step 7 — `dom/grouping` on it. Step 8 — Angular and demos. Step 9 — close.
