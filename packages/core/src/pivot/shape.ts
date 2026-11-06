@@ -1,6 +1,6 @@
 import type { AggFn, AggFuncName, ColumnDef, ColumnOrGroup, ResolvedColumn } from '../columns/defs.js';
 import type { ColumnLookup } from '../columns/model.js';
-import { groupKey } from '../ids.js';
+import { groupKey, type RowKey } from '../ids.js';
 import type { ClientModel } from '../model/client.js';
 import type { ColumnEnv } from '../model/column-cache.js';
 import type { ChangeSource } from '../model/types.js';
@@ -62,6 +62,10 @@ export interface PivotShape<T> extends GroupShape<T> {
   generated(): PivotColumns<T>;
   /** Whether an id is one the pivot makes (a created column, band or sub-total): kept out of the saved state. */
   made(id: string): boolean;
+  /** The value column of a created column or a sub-total (undefined: not one the last build made). */
+  valueColumn(id: string): string | undefined;
+  /** The data rows of a group in the last build, in order (none: unknown, or pivot off): what find reads (pivot.md 25). */
+  rows(key: RowKey): readonly T[];
   /** The last build for a chart: groups at `level` (1: the first, default), the created columns of `value` (default the first). */
   series(o?: { readonly value?: string; readonly level?: number }): PivotSeries;
   /** Work done, for tests: crossing passes. */
@@ -108,7 +112,7 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
   let redraw: ((kind?: 'rows' | 'expand', source?: ChangeSource) => void) | null = null;
   let passes = 0;
   /** The last pass: its inputs, its cells, its columns (with each deepest crossing's leaves for `series`). */
-  let X: { k: unknown[]; t: Totals; specs: Spec<T>[]; leaves: { id: string; name: string; v: number }[] } | null = null;
+  let X: { k: unknown[]; t: Totals; specs: Spec<T>[]; leaves: { id: string; name: string; v: number }[]; of: Map<string, string> } | null = null;
   /** The crossings and what they were made of: kept while a live update moves no row's crossing (as groups, Q-T A). */
   let K: { k: unknown[]; C: Groups<T> } | null = null;
   let out: PivotColumns<T> = EMPTY;
@@ -169,6 +173,7 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
       const grand: Record<string, unknown> = {};
       const leafs: { id: string; name: string; v: number }[] = [];
       let tree: ColumnOrGroup<T>[] = [];
+      const ids: string[] = [];
       let key = '';
       if (count > max) {
         // Checked before any column or cell is made (pivot.md 9): told by the count.
@@ -176,7 +181,6 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
         key = `>${count}`;
       } else if (C && n) {
         const slot = new Int32Array(C.G).fill(-1);
-        const ids: string[] = [];
         const heads = specs.map((x) => x.col.def.header ?? x.col.id);
         const label = (c: number): string => (C.val[c] === null ? blank : C.label[c]!);
         const def = (id: string, header: string, x: Spec<T>): ColumnDef<T> => {
@@ -307,7 +311,7 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
       }
       // Another list of columns only when it differs (pivot.md 13): the host sets columns again only then.
       if (key !== out.key) out = { columns: tree, key, count };
-      X = { k, t: { at, grand, columns: [], problems: ps }, specs, leaves: leafs };
+      X = { k, t: { at, grand, columns: [], problems: ps }, specs, leaves: leafs, of: new Map(ids.map((id, i) => [id, specs[i % V]!.col.id])) };
       return X.t;
     },
     kids(s, t) {
@@ -318,7 +322,10 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
       if (it) {
         k = s.kids.slice();
         const dir = it.dir === 'desc' ? -1 : 1;
-        const of = (g: number): unknown => t.at[g]![it.column];
+        // The label column (the DOM's `~p:rows`): by value, the groups' own order or its reverse, the blank one last.
+        const pos = new Int32Array(s.G);
+        s.kids.forEach((g, j) => (pos[g] = j));
+        const of = (g: number): unknown => (it.column === '~p:rows' ? (s.val[g] === null ? null : pos[g]) : t.at[g]![it.column]);
         for (let x = 0; x <= s.G; x++) {
           const part = Array.from(k.subarray(s.ks[x]!, s.ks[x + 1]!)).sort((a, b) => {
             const p = of(a);
@@ -370,6 +377,13 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
     },
     generated: () => (on ? out : EMPTY),
     made: (id: string) => /^~[pbt]/.test(id),
+    valueColumn: (id: string) => X?.of.get(id),
+    rows(key: RowKey): readonly T[] {
+      const s = on && last?.s;
+      if (!s) return [];
+      const g = (s.byKey ??= new Map(s.key.map((k, i) => [k, i]))).get(key) ?? -1;
+      return g < 0 ? [] : Array.from(s.leaves.subarray(s.lo[g], s.hi[g]), (i) => s.snap.rows[i]!);
+    },
     series(so: { readonly value?: string; readonly level?: number } = {}): PivotSeries {
       if (!on || !last || !X) return { categories: [], series: [] };
       const { s, t, k } = last;

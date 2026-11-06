@@ -153,6 +153,6 @@ go to the host's `exportAll` with the server's part of the query, as server page
 query's). The request's and the event's `count` for `displayed` is the number of rows held written. The same for Excel
 (the same request). Built: the bounded walk (step 4), the rest checked at step 5.
 
-## Pivot (Phase 10, `pivot.md`; plan D18 A; built in the DOM batch)
+## Pivot (Phase 10, `pivot.md` 27; plan D18 A; built 2026-11-07)
 What the screen shows: the label column, the created columns with their **full chain** as header (« 2025 › Janv. ›
 Montant »), the row totals, the grand total row. One header line, as always.

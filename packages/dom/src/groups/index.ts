@@ -95,12 +95,18 @@ function createGroups(g: GridContext<unknown>): GroupsApi {
   };
   if (table().groups.size && g.settings.messages.text['group.toggle'] === undefined) throw new TypeError('groups: missing group.toggle');
   const ids = (): string[] => columns.visible().map((c) => c.id);
+  /** The groups' fold joined with the pivot's (pivot.md 18). */
+  const fold = (s: ReadonlyMap<string, boolean>): ReadonlySet<string> => {
+    const f = foldedColumns(table(), s);
+    return g.foldExtra?.size ? new Set([...f, ...g.foldExtra]) : f;
+  };
+  g.refold = () => columns.fold(fold(open));
 
   /** The states `next` applied; `id`: the group a gesture changed (the focus follows it, the sentence names it). */
   const apply = (next: Map<string, boolean>, source: ChangeSource, id?: string, say?: boolean): boolean => {
     const was = columns.folded;
     const before = ids();
-    const f = foldedColumns(table(), next);
+    const f = fold(next);
     const { layoutChanged } = columns.fold(f);
     // Refused: it would leave no column shown (O1).
     if (columns.folded !== f) return false;
@@ -124,9 +130,9 @@ function createGroups(g: GridContext<unknown>): GroupsApi {
   };
 
   // New definitions (`update`): the fold again, before the rows are told (inside the kernel's `columns.set`).
-  g.scope.add(kernel.subscribe((ev) => void (ev.type === 'columnsChanged' && tree !== g.settings.columns && columns.fold(foldedColumns(table(), open)))));
+  g.scope.add(kernel.subscribe((ev) => void (ev.type === 'columnsChanged' && tree !== g.settings.columns && g.refold!())));
   // The definitions' states, at once and quietly (nothing changed yet for anyone): the rows told.
-  if (columns.fold(foldedColumns(table(), open)).layoutChanged) kernel.dispatch({ type: 'column.state', patch: [] }, 'host');
+  if (g.refold().layoutChanged) kernel.dispatch({ type: 'column.state', patch: [] }, 'host');
 
   const api: GroupsApi = {
     collapsible: (id) => table().groups.has(id),

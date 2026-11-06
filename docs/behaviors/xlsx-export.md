@@ -114,6 +114,6 @@ Numbered (step 7, 2026-11-05; `conformance/cases/xlsx/group-*`, `packages/core/t
    `groupRows: false` data rows only (CSV 5).
 5. `xlsxStyle` is called for totals cells too, with `row: null` and `header: false`.
 
-## Pivot (Phase 10, `pivot.md`; plan D18 A; checked in the DOM batch)
+## Pivot (Phase 10, `pivot.md` 27; plan D18 A; checked 2026-11-07, no code)
 The created bands are header groups: written as merged header rows, as any header group; cells typed by their value
 column (a count as a number).

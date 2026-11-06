@@ -3,6 +3,7 @@ import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { GroupMessageKey } from '../part-texts.js';
 import { slotAt, travel } from '../dir.js';
+import { menuList } from '@dzgrid/dom/internal';
 
 /** The texts `groupZone()` needs, from `@dzgrid/dom/locales/<lang>-group`. */
 export const ZONE_KEYS = ['zone.label', 'zone.empty', 'zone.remove', 'zone.grouped', 'zone.removed', 'zone.placed'] as const satisfies readonly GroupMessageKey[];
@@ -12,6 +13,8 @@ type Grid = { readonly kernel: GridKernel<any, any> };
 export interface GroupingApiLike {
   by(): readonly string[];
   setBy(by: readonly string[], o?: { readonly user?: boolean }): void;
+  /** Whether the « + » may offer a column (absent: any groupable one; group-drop-zone.md 18). */
+  accepts?(id: string): boolean;
 }
 export interface GroupZoneOptions {
   readonly use: {
@@ -20,6 +23,8 @@ export interface GroupZoneOptions {
     /** Moving columns (`columns()`): a header dragged onto the band groups by it. Absent: no drop (the menu and the keys still work). */
     readonly columns?: { api(grid: Grid): { readonly dropTargets: { add(el: Element, t: { accept(column: string): boolean; drop(column: string): void; readonly label?: string }): () => void } } | null };
   };
+  /** Another band's texts: `'pivot'` reads `pivot.label`, `pivot.empty`… instead of `zone.*` (the « Colonnes » band, pivot.md 19). */
+  readonly texts?: 'pivot';
 }
 
 /**
@@ -53,7 +58,9 @@ export function groupZone(o: GroupZoneOptions): GridFeature {
 }
 
 function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
-  const missing = ZONE_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
+  /** A text's key in this band's bundle. */
+  const K = (k: string): GroupMessageKey => (o.texts ? k.replace('zone', o.texts) : k) as GroupMessageKey;
+  const missing = ZONE_KEYS.map(K).filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`groupZone: missing ${missing.join(', ')}`);
   const { el, doc, columns: m, scope } = g;
   const root = el.root.getRootNode() as Document | ShadowRoot;
@@ -68,11 +75,12 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
   zone.className = 'dzg-gzone';
   zone.setAttribute('role', 'toolbar');
   zone.tabIndex = -1;
-  el.root.prepend(zone);
+  // Just above the rows: under a band set up before it (group-drop-zone.md 19).
+  el.root.insertBefore(zone, el.viewport);
 
   const api = (): GroupingApiLike | null => o.use.grouping.api(g);
   const name = (id: string): string => m.get(id)?.def.header ?? id;
-  const say = (k: GroupMessageKey, column: string, p?: Record<string, number>): void => g.live.announce(g.msg(k, { column: name(column), ...p }));
+  const say = (k: GroupMessageKey, column: string, p?: Record<string, number>): void => g.live.announce(g.msg(K(k), { column: name(column), ...p }));
   /** The columns shown as chips: known, groupable, once each, in grouping order (sheet 17). */
   const shown = (): string[] => [...new Set(api()?.by() ?? [])].filter((id) => m.get(id) && m.get(id)!.def.groupable !== false);
   const set = (by: readonly string[]): void => api()?.setBy(by, { user: true });
@@ -99,6 +107,26 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
   let sig = '';
   let at = 0;
   const items = (): HTMLElement[] => [...zone.querySelectorAll<HTMLElement>('.dzg-chip, .dzg-chip-x')];
+
+  // ---- « + » (group-drop-zone.md 18): the columns the band accepts, in the grid's menu; the way without dragging ----
+  const L = menuList(g);
+  const plus = g.settings.messages.text[K('zone.add')] === undefined ? null : doc.createElement('button');
+  /** Known, groupable, in neither band, in the grid's order. */
+  const offer = (): string[] => m.state().map((x) => x.id).filter((id) => !shown().includes(id) && m.get(id)!.def.groupable !== false && api()?.accepts?.(id) !== false);
+  let back = false;
+  if (plus) {
+    plus.type = 'button';
+    // Drawn and sized as a chip's ×.
+    plus.className = 'dzg-chip-x dzg-zadd';
+    plus.textContent = '+';
+    plus.setAttribute('aria-haspopup', 'menu');
+    scope.on(plus, 'click', () => L.open({
+      owner: zone, id: '+', anchor: plus, label: g.msg(K('zone.add')), ctx: () => ({}), part: () => ({}),
+      entries: () => offer().map((id) => ({ id, label: name(id), action: () => (L.hand(), set([...shown(), id]), say('zone.grouped', id), plus.focus()) })),
+      // Escape: the focus back on « + », not on the grid (the popup's own way, then this).
+      back: () => void (back = true), onClose: () => back && ((back = false), plus.focus()),
+    }));
+  }
   const rove = (i: number, focus?: boolean): void => {
     const all = items();
     at = Math.max(0, Math.min(all.length - 1, i));
@@ -107,19 +135,19 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
   };
   const draw = (): void => {
     const by = shown();
-    const next = [g.settings.messages.locale, g.msg('zone.label'), ...by.map((id) => `${id}\u0000${name(id)}`)].join('\u0001');
+    const next = [g.settings.messages.locale, g.msg(K('zone.label')), offer().length, ...by.map((id) => `${id}\u0000${name(id)}`)].join('\u0001');
     if (next === sig) return;
     sig = next;
     const had = zone.contains(root.activeElement ?? null);
     const was = had ? (root.activeElement as HTMLElement) : null;
     const wasCol = was?.closest<HTMLElement>('.dzg-gchip')?.dataset['col'];
     const wasX = !!was?.classList.contains('dzg-chip-x');
-    zone.setAttribute('aria-label', g.msg('zone.label'));
+    zone.setAttribute('aria-label', g.msg(K('zone.label')));
     zone.replaceChildren();
     if (!by.length) {
       const e = doc.createElement('span');
       e.className = 'dzg-gzone-empty';
-      e.textContent = g.msg('zone.empty');
+      e.textContent = g.msg(K('zone.empty'));
       zone.append(e);
     }
     for (const id of by) {
@@ -135,13 +163,15 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
       x.type = 'button';
       x.className = 'dzg-chip-x';
       x.textContent = '×';
-      x.setAttribute('aria-label', g.msg('zone.remove', { column: name(id) }));
+      x.setAttribute('aria-label', g.msg(K('zone.remove'), { column: name(id) }));
       c.append(b, x);
       zone.append(c);
     }
+    // Nothing to offer: no « + ».
+    if (plus && offer().length) plus.setAttribute('aria-label', g.msg(K('zone.add'))), zone.append(plus);
     // The focus kept on its column's item; its column gone, the item at the same place; nothing left, the grid.
     const all = items();
-    const same = wasCol ? all.findIndex((b) => b.closest<HTMLElement>('.dzg-gchip')!.dataset['col'] === wasCol && b.classList.contains('dzg-chip-x') === wasX) : -1;
+    const same = wasCol ? all.findIndex((b) => b.closest<HTMLElement>('.dzg-gchip')?.dataset['col'] === wasCol && b.classList.contains('dzg-chip-x') === wasX) : -1;
     rove(same >= 0 ? same : at, had);
     if (had && !all.length) g.restoreFocus();
   };
@@ -149,8 +179,8 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
   // ---- keys (APG toolbar; group-drop-zone.md 9, 14) ----
   scope.on(zone, 'keydown', (e: KeyboardEvent) => {
     const t = (e.target as Element).closest<HTMLElement>('.dzg-chip, .dzg-chip-x');
-    const id = t?.closest<HTMLElement>('.dzg-gchip')?.dataset['col'];
-    if (!t || !id) return;
+    const id = t?.closest<HTMLElement>('.dzg-gchip')?.dataset['col'] ?? '';
+    if (!t) return;
     const all = items();
     const i = all.indexOf(t);
     const k = e.key;
@@ -224,7 +254,7 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
     unregister = cols.dropTargets.add(zone, {
       accept: (id) => !!api() && !!m.get(id) && m.get(id)!.def.groupable !== false && !shown().includes(id),
       drop: (id) => (set([...shown(), id]), shown().includes(id) && say('zone.grouped', id)),
-      label: g.msg('zone.label'),
+      label: g.msg(K('zone.label')),
     });
   };
 

@@ -134,6 +134,37 @@ describe('pivotShape: the API', () => {
   });
 });
 
+describe('pivotShape: what the DOM half reads (pivot.md 17, 20, 25)', () => {
+  const labels = (t: ReturnType<typeof setup>) => t.nodes().filter((n) => n.kind === 'group').map((n) => (n as { label: string }).label);
+  it('a sort on the label column (~p:rows) orders the groups by value: as they are, then reversed, the blank group last both ways', () => {
+    const rows: Row[] = [...ROWS, { id: 'r4', g: null, h: 3, y: '2025', m: 'Jan', v: 1 }, { id: 'r5', g: 'Est', h: 3, y: '2026', m: 'Feb', v: 4 }];
+    const t = setup({ by: ['g'], columns: ['y'] }, rows);
+    expect(labels(t)).toEqual(['Est', 'Nord', 'Sud', '']);
+    // The DOM's label column, which reads nothing.
+    t.kernel.dispatch({ type: 'columns.set', defs: [{ id: '~p:rows', value: () => null }, ...DEFS, ...t.shape.generated().columns] }, 'host');
+    t.kernel.dispatch({ type: 'sort.set', sort: [{ column: '~p:rows', dir: 'asc' }] }, 'user');
+    expect(labels(t)).toEqual(['Est', 'Nord', 'Sud', '']);
+    t.kernel.dispatch({ type: 'sort.set', sort: [{ column: '~p:rows', dir: 'desc' }] }, 'user');
+    expect(labels(t)).toEqual(['Sud', 'Nord', 'Est', '']);
+  });
+
+  it('valueColumn(id): the value column of a created column or of a sub-total; anything else undefined', () => {
+    const t = setup({ by: ['g'], columns: ['y'], values: { v: 'sum', g: 'count' }, subtotals: false });
+    expect(t.shape.valueColumn('~p1:y5:t20251:v')).toBe('v');
+    expect(t.shape.valueColumn('~p1:y5:t20251:g')).toBe('g');
+    expect(t.shape.valueColumn('~b1:y5:t2025')).toBeUndefined();
+    expect(t.shape.valueColumn('v')).toBeUndefined();
+  });
+
+  it('rows(key): the data rows of a group in the last build, in order; an unknown key or a pivot off: none', () => {
+    const t = setup({ by: ['g'], columns: ['y'] });
+    expect(t.shape.rows(groupKey(['g', 'tNord'])).map((r) => r.id)).toEqual(['r1', 'r2']);
+    expect(t.shape.rows(groupKey(['g', 'tOuest']))).toEqual([]);
+    t.shape.setOn(false);
+    expect(t.shape.rows(groupKey(['g', 'tNord']))).toEqual([]);
+  });
+});
+
 describe('pivot: the cells\' rules (aggregation.md 6, 16)', () => {
   it('a crossing\'s sum is compensated: 0.1 ten times is 1, in every group and the grand total', () => {
     const rows = Array.from({ length: 10 }, (_, i) => ({ id: `r${i}`, g: 'a', h: 1, y: 'x', m: 'p', v: 0.1 }));

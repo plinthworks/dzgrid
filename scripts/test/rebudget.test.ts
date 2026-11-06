@@ -380,9 +380,9 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
 
   it('Phase 6 step 5 (owner Q-B, E5-1): @dzgrid/core/state 1 500 over the core, @dzgrid/dom/state 1 150 (E5-8) over the DOM base (core/state outside it); the core within 29 150, the DOM base within 22 400; the server 6 150 for its hold seam (E5-8)', () => {
     expect(ceilingFor('@dzgrid/core/state')).toBe(1601); // Phase 10 pivot (+2 %): 1 601; Phase 9 dock (+2 %): 1 570; Phase 7 close (+2 %, rowGroups): 1 540; owner « set include only » (2026-10-29): core/state 1 500 → 1 510
-    expect(ceilingFor('@dzgrid/dom/state')).toBe(1289); // Phase 9 dock (+2 %): 1 289 // Phase 8 step 7 (+2 %) // Phase 7 close 1 240; // owner +2 % rule (step 16): 1 224; owner « clearFilters/resetState »: 1 150 → 1 200; E5-8: 800 → 1 150
+    expect(ceilingFor('@dzgrid/dom/state')).toBe(1300); // Phase 10 DOM batch (+2 %): 1 300 // Phase 9 dock (+2 %): 1 289 // Phase 8 step 7 (+2 %) // Phase 7 close 1 240; // owner +2 % rule (step 16): 1 224; owner « clearFilters/resetState »: 1 150 → 1 200; E5-8: 800 → 1 150
     expect(() => sizeBudget(1602, ceilingFor('@dzgrid/core/state'))).toThrow(/ceiling/);
-    expect(() => sizeBudget(1290, ceilingFor('@dzgrid/dom/state'))).toThrow(/ceiling/);
+    expect(() => sizeBudget(1301, ceilingFor('@dzgrid/dom/state'))).toThrow(/ceiling/);
     expect(ceilingFor('@dzgrid/core')).toBeLessThanOrEqual(CORE);
     expect(ceilingFor('@dzgrid/dom')).toBeLessThanOrEqual(DOM);
     expect(ceilingFor('@dzgrid/core/server')).toBe(6200);
@@ -392,7 +392,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(e['@dzgrid/core/state']!.maxGzip).toBeLessThanOrEqual(1601); // Phase 10 pivot 1 601 (+2 %); Phase 9 dock 1 570 (+2 %); Phase 7 close 1 540; owner « set include only » (2026-10-29): core/state 1 500 → 1 510
     const d = e['@dzgrid/dom/state']!;
     expect({ ...d, maxGzip: 0 }).toEqual({ file: 'packages/dom/src/state.ts', maxGzip: 0, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/state', '@dzgrid/dom/internal'] });
-    expect(d.maxGzip).toBeLessThanOrEqual(1289); // Phase 9 dock (+2 %) // Phase 8 step 7 // Phase 7 close 1 240; // owner +2 % rule (step 16): 1 224
+    expect(d.maxGzip).toBeLessThanOrEqual(1300); // Phase 10 DOM batch (+2 %) // Phase 9 dock (+2 %) // Phase 8 step 7 // Phase 7 close 1 240; // owner +2 % rule (step 16): 1 224
     expect(d.maxGzip).toBeGreaterThanOrEqual(1058);
     expect(e['@dzgrid/core/server']!.maxGzip).toBe(6200); // owner E5-8: confirmed 6 150; Q8-5: 6 200
     expect(e['@dzgrid/core']!.maxGzip).toBeLessThanOrEqual(CORE);

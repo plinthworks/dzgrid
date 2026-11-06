@@ -152,7 +152,8 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
         for (const i of positions(R)) {
           const n = R.nodeAt(i);
           ix.push(i);
-          h.push(n.kind === 'data' ? vis.map((c) => fold(textOf(c, n.data as object, n.key))).join('\0') : '');
+          // A pivot's rows (pivot.md 25): its cells' texts as shown.
+          h.push(n.kind === 'data' ? vis.map((c) => fold(textOf(c, n.data as object, n.key))).join('\0') : g.rowText?.(n, vis)?.map(fold).join('\0') ?? '');
         }
         hay = [base, h, ix];
       }

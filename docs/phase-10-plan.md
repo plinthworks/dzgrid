@@ -1,6 +1,6 @@
 # Phase 10 plan: pivot (architect, 2026-11-06)
 
-Status: **owner answered 2026-11-06 — « ★ partout, tailles OK »** (§5, French; `docs/phase-10-steps/questions.md`). Core batch done (steps 1–3 and step 6's state), DOM batch next (`decisions.md`). Read at `520ae9e` (1.6.0 published; working tree: `playground/index.html`,
+Status: **owner answered 2026-11-06 — « ★ partout, tailles OK »** (§5, French; `docs/phase-10-steps/questions.md`). Core batch done (steps 1–3 and step 6's state), then the DOM batch and the close (2026-11-07, `decisions.md`). Read at `520ae9e` (1.6.0 published; working tree: `playground/index.html`,
 `vite.config.ts` modified, unrelated). When the owner answers, `docs/phase-10-steps/questions.md` (French) and
 `decisions.md` (the lead's decisions and measures) win over this plan. Clean room: behaviour from public documentation only
 (CLEANROOM.md: what a user sees when a grid or a spreadsheet « pivots » — rows grouped, the values of a column turned into

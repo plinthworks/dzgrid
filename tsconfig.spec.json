@@ -152,6 +152,9 @@
       "@dzgrid/dom/row-drag": [
         "./packages/dom/src/row-drag.ts"
       ],
+      "@dzgrid/dom/pivot": [
+        "./packages/dom/src/pivot.ts"
+      ],
       "@dzgrid/dom/dock": [
         "./packages/dom/src/dock.ts"
       ],

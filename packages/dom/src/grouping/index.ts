@@ -1,4 +1,4 @@
-import { formattersFor, intentFor, type ChangeSource, type DisplayIndex, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type RowKey, type RowNode } from '@dzgrid/core';
+import { formattersFor, intentFor, problem, type ChangeSource, type DisplayIndex, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type RowKey, type RowNode } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import { checkRowGroups, groupConflicts, groupShape, type GroupedRows, type GroupingOptions, type GroupShape } from '@dzgrid/core/grouping';
 import type { ServerSideModel } from '@dzgrid/core/server-side';
@@ -20,6 +20,11 @@ export interface GroupingFeatureOptions extends GroupingOptions {
   readonly indent?: number;
   /** Group rows kept pinned under the header while their rows scroll, the nearest first: 0 none, 3 by default. */
   readonly sticky?: number;
+  /** A pivot table over the groups (`pivot()` from `@dzgrid/dom/pivot`, Phase 10, pivot.md 17–30); refused on a server (told). */
+  readonly pivot?: {
+    make(o: GroupingOptions): GroupShape<unknown>;
+    setup(g: GridContext<unknown>, s: GroupShape<unknown>): (FeatureHandle & { column(): string | undefined; by(): readonly string[] }) | null;
+  };
 }
 
 /** A grid's grouping (row-grouping.md 22), for the zone, the column menu and the application. */
@@ -37,6 +42,8 @@ export interface GroupingApi {
   collapseAll(): void;
   /** The grand totals by column id, over the rows the filters keep (aggregation.md 11). */
   totals(): Readonly<Record<string, unknown>>;
+  /** Whether the band's « + » may offer a column (not a pivot column; group-drop-zone.md 18). */
+  accepts?(id: string): boolean;
 }
 export interface GroupingFeature extends GridFeature {
   /** The grouping of a grid this feature is set up on; null before its setup, after it is destroyed, and where it stepped aside. */
@@ -66,7 +73,7 @@ export function grouping(o: GroupingFeatureOptions = {}): GroupingFeature {
     // A tree wins the rows in either order (row-grouping.md 21): grouping then gives no shape and steps aside.
     shapeAfter: ['tree'],
     api: (grid) => apis.get(grid.kernel) ?? null,
-    shape: () => (made = groupShape(o)) as never,
+    shape: () => (made = o.pivot ? o.pivot.make(o) : groupShape(o)) as never,
     setup(g) {
       const s = made;
       made = undefined;
@@ -90,8 +97,11 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
   // A list grouped on the server (`serverSideRows`, server-side-groups.md): the model groups, this feature draws and forwards.
   const side = typeof (g.rows as Partial<ServerSideModel<unknown>>).setBy == 'function' ? (g.rows as ServerSideModel<unknown>) : null;
   const server = g.rows.kind === 'source' && !side;
-  const spans = has('spans');
+  // Merged cells only (pivot.md 21): header bands are drawn beside grouping.
+  const spans = has('spans') && (!!g.settings.fullWidth || g.columns.visible().some((c) => c.def.merge || c.def.rowSpan || c.def.colSpan));
   const told = groupConflicts({ tree, detail: has('detail'), spans, server });
+  // A pivot on a server (pivot.md 26): not made, the grid as grouping alone shows it.
+  if (o.pivot && g.rows.kind === 'source') told.push(problem('unsupported-combination', 'warning', 'source', 'pivot'));
   if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
   if (!s || tree || server) return s?.off(), { destroy() {} };
   const shape: Pick<GroupShape<unknown>, 'by' | 'setBy' | 'reads' | 'totals'> = side ? { get by() { return side.by; }, setBy: (by, x) => side.setBy(by, x), reads: () => side.by, totals: () => side.totals() } : s;
@@ -103,9 +113,11 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
   };
   /** At least one grouping column in use (refused ones dropped): a tree grid. */
   const grouped = (): boolean => shape.reads!().length > 0;
+  let pv: ReturnType<NonNullable<GroupingFeatureOptions['pivot']>['setup']> = null;
   const labelColumn = (): string | undefined => {
     const shown = g.columns.visible();
-    return (shown.some((c) => c.id === o.column) ? o.column : shown[0]?.id);
+    const want = pv?.column() ?? o.column;
+    return (shown.some((c) => c.id === want) ? want : shown[0]?.id);
   };
   const indent = o.indent === +o.indent! && o.indent >= 0 && o.indent <= 1000 ? o.indent : 16;
   const expand = (keys: readonly RowKey[], expanded: boolean): void => void kernel.dispatch({ type: 'rows.expand', rows: keys, expanded }, 'user');
@@ -114,7 +126,10 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
   const labelOf = (n: RowNode<unknown>): string =>
     n.kind === 'group' ? g.msg('group.label', { name: nameOf(n), n: n.count ?? 0 }) : n.kind === 'footer' ? (n.group === null ? g.msg('group.grandTotal') : g.msg('group.total', { name: nameOf(n) })) : '';
   /** A column's total function, as the core reads it (the options win). */
-  const fnOf = (col: ResolvedColumn<unknown>): unknown => (o.aggFuncs && Object.hasOwn(o.aggFuncs, col.id) ? o.aggFuncs[col.id] : col.def.aggFunc);
+  const fnOf = (col: ResolvedColumn<unknown>): unknown => {
+    const f = g.grouped?.aggFuncs;
+    return f && Object.hasOwn(f, col.id) ? f[col.id] : col.def.aggFunc;
+  };
   /** A total as its cell shows it (aggregation.md 1, row-grouping.md 16): the column's format; a count, a number of the language. */
   const textOf = (col: ResolvedColumn<unknown>, v: unknown): string => {
     if (v === null || v === undefined) return '';
@@ -192,6 +207,7 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
     expandAll: (depth) => void kernel.dispatch({ type: 'rows.expandAll', expanded: true, ...(depth !== undefined && { depth }) }, 'api'),
     collapseAll: () => void kernel.dispatch({ type: 'rows.expandAll', expanded: false }, 'api'),
     totals: () => shape.totals(),
+    accepts: (id) => !pv?.by().includes(id),
   });
 
   // The pointer on a group's chevron opens or closes it, and nothing else (no selection, no row click).
@@ -269,6 +285,8 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
     cell.style.removeProperty(VAR);
   };
   const ROW_ATTRS = ['aria-level', 'aria-posinset', 'aria-setsize', 'aria-expanded'];
+  // The pivot beside it (browser rows only), once what it reads is set.
+  if (!side) pv = o.pivot?.setup(g, s) ?? null;
   let decorated = new Set<HTMLElement>();
   let leveled = new Set<HTMLElement>();
 
@@ -308,7 +326,8 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
           set(v.el, 'aria-level', String(level + 1));
           set(v.el, 'aria-posinset', String(d!.posAt(i)));
           set(v.el, 'aria-setsize', String(d!.sizeAt(i)));
-          set(v.el, 'aria-expanded', node.kind === 'group' ? String(open) : null);
+          // A pivot's last rows hold nothing to open (pivot.md 2): no state.
+          set(v.el, 'aria-expanded', node.kind === 'group' && d!.childrenAt(i) !== 0 ? String(open) : null);
         }
         const totals = node.kind === 'group' || node.kind === 'footer' ? node.aggs ?? {} : null;
         // The totals in the other cells (aggregation.md 1); the group column holds the label.
@@ -345,6 +364,7 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
       for (const r of leveled) if (!lv.has(r)) for (const a of ROW_ATTRS) r.removeAttribute(a);
       decorated = now;
       leveled = lv;
+      pv?.afterRows?.(f);
     },
     keys(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean {
       const d = rows();
@@ -368,6 +388,7 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
       return true;
     },
     destroy() {
+      pv?.destroy();
       off();
       apis.delete(kernel);
       delete g.grouped;

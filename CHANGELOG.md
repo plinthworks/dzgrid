@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased — 1.7.0
 
-A minor in the making (`npm run check:api`: additions only). Phase 10, the pivot — first batch, the core only (the screen
-comes next). Sheets: `docs/behaviors/pivot.md` (owner Q-SC, Q-P1…Q-P12 A, 2026-11-06), amendments to `aggregation.md`
-16–18 and `grid-state.md` « Pivot ».
+A minor in the making (`npm run check:api`: additions only). Phase 10, the pivot: the core, then the screen. Sheets:
+`docs/behaviors/pivot.md` (owner Q-SC, Q-P1…Q-P12 A, 2026-11-06), amendments to `aggregation.md` 16–18, `grid-state.md`
+« Pivot », `group-drop-zone.md` 18–19, `find.md` 16, `quick-filter.md`, `row-grouping.md` 21.
 
 ### Added
 - `@dzgrid/core/pivot` (pure): `pivotShape({ by, columns, values, on, subtotals, maxColumns, width, labels, … })` — a
@@ -21,10 +21,26 @@ comes next). Sheets: `docs/behaviors/pivot.md` (owner Q-SC, Q-P1…Q-P12 A, 2026
 - `GridState.pivot` (`StatePart` `'pivot'`, `StateEnv.pivot`, type `PivotState`): the mode, the pivot columns, the values'
   functions by name. The created columns, their sizes and a sort on one are never saved (their ids hold row values).
 - `GroupProblemCode` gains `pivot-too-many`.
+- `@dzgrid/dom/pivot`: `pivot({ columns, values, subtotals, maxColumns, width, toggle, labelWidth })`, handed to
+  `grouping({ by, pivot })` — a label column at the start, the data columns folded away (never hidden), the created
+  columns and their header bands (with `spans()`), the value columns under « Total », the grand total row; its api
+  (`on / setOn`, `by / setBy`, `values / setValues`, `accepts`, `valueColumn`, `count`, `series`) through `p.api(grid)` or
+  Angular's `ctrl.use(p)`; a « Tableau croisé » switch (`toggle`); above `maxColumns`, a note and one sentence (a count);
+  refused beside any source (`unsupported-combination`, path `source`). Texts `locales/{en,fr,ar}-pivot`.
+- `groupZone({ texts: 'pivot' })`: the « Colonnes » band over the pivot; each band ends with « + », a menu of the
+  columns it accepts (the way without dragging); `GroupingApi.accepts?`.
+- `columnMenu({ use: { pivot } })`: « Total » (Somme, Moyenne, Min, Max, Nombre) on a created column or a row total;
+  « Mettre en colonnes » on a data column.
+- In pivot mode the quick search still tests the data columns' values, and find searches the cells shown and the data
+  of a last row's rows; CSV writes a created column's chain of headers (« 2025 › Janv. › Montant »).
+- `PivotShape.valueColumn(id)`, `PivotShape.rows(key)`; a sort on the label column orders the groups by value.
 
 ### Changed
 - Grouping: a column change that keeps the grouping columns' definitions no longer groups again, nor totals again when
   no totalled column changed (a filter's new list of the same rows is the same order).
+- Grouping: `spans()` is told refused only when a column merges cells or rows are full width (header bands are drawn
+  beside grouping); a group row without children has no `aria-expanded`.
+- `groupZone()`: a band places itself just above the rows, so two bands stack in the order of `features`.
 
 ## [1.6.0] - 2026-11-06
 

@@ -1263,6 +1263,33 @@ after a report to the owner.
 - [x] **Step 6, core part — state** (not committed): `GridState.pivot`, `StatePart` `'pivot'`, `StateEnv.pivot`; created
   columns, their sizes and sorts never captured (`grid-state/pivot-*`, 5 cases, a planted name); `core/state` 1 587 /
   1 601 (+2 %).
-- [ ] Steps 4–5 (the DOM: `@dzgrid/dom/pivot`, the « Colonnes » band and « + » lists, the menu items, texts, Chrome),
-  step 6's DOM part (CSV header chain, Excel and print checked), step 7 (demo, close).
+- [x] **Steps 4–5 — `@dzgrid/dom/pivot`, the bands, the menu** (2026-11-07, not committed): `pivot()` handed to
+  `grouping({ pivot })`; the label column, the data columns folded (`foldExtra`, joined by `groups()`), the « Total »
+  band, the created tree set when its key moves, a host `update({ columns })` kept; the « Colonnes » band
+  (`groupZone({ texts: 'pivot' })`) and « + » in both bands (the grid's menu, 2.5.7); « Total » radios and « Mettre en
+  colonnes » in the ⋮ menu; the « Tableau croisé » switch and the limit's note; `-pivot` texts en / fr / ar; refused on
+  any source. Grouping tells `spans` only for merged cells; no `aria-expanded` on a group without children.
+- [x] **The known issue — search and find in pivot mode**: the quick search tests the data columns' values (through the
+  label column's search text, the digit rule kept), find searches the cells shown and, on a last row's label, its rows'
+  data. Mutant-checked.
+- [x] **Step 6, DOM part**: CSV writes a created column's chain of headers (« Feb › Amount », « Total › Amount »); Excel
+  and print read the effective tree (Excel tested); the `pivot` state part in `dom/state` (one grouping build per restore,
+  a user's change a gesture, `reset()`).
+- [x] **Step 7 — demo and close**: local `playground/pivot.html` (made-up bookshop, fr / ar, light / dark; not committed);
+  review and test analysis (`decisions.md` « DOM batch »).
+
+## Phase 10 — close (2026-11-07, not committed; 1.7.0 not published)
+
+- Exit criteria: `pivot` conformance (21 + 5 state) and the seeded oracle green; **A with 2 row columns, 2 pivot columns,
+  3 values: 103 ms cold (node, ≤ 150)**, one grouping build per load and per restore; Chrome, 100 000 rows: pivot on to the
+  next frame 17 ms, pivot columns changed 24 ms (medians); created ids stable when a crossing appears (the user's width
+  kept); no data row in pivot mode; `count` and `avg` exact per crossing; the limit holds (told by count, said once);
+  last rows without `aria-expanded`, bands with `aria-colspan`, axe 0 fr / ar light / dark; bands keyboard-complete, « + »
+  the no-drag path, 24 px; no row value in a `Problem`, the state or its text (planted titles); refusals told; core and
+  DOM bases 0 B; budgets by the owner's rule (`size-budget.json`); `check:api` additions only.
+- Browsers: Chrome (fr / ar, light / dark, axe, header layout, timings); Firefox and WebKit once each for the Arabic
+  header layout (0 px).
+- For the owner: K.8 89 978 (+1 B, a chunk name's hash, no audit code); the a11y listening §29 (198–201) to schedule;
+  `test:real-app` not run (its page did not change).
+
 

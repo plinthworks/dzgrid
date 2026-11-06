@@ -108,5 +108,5 @@ Numbered (step 7, 2026-11-05; `packages/dom/test/print-grouping.test.ts`, Chrome
 Print prints the rows held, in order, 5 000 at most (`print-too-many` above, as today); loading and failed rows are never
 printed. The walk reads `DisplayedRows.held`, never ten million positions (step 4; tested on 10⁷ rows).
 
-## Pivot (Phase 10, `pivot.md`; plan D18 A; checked in the DOM batch)
+## Pivot (Phase 10, `pivot.md` 27; plan D18 A; checked 2026-11-07, no code)
 The created bands print as `th scope="colgroup"` rows when bands are on (`spans()`); `all` = every group open.

@@ -7,6 +7,8 @@ Types words into one search box above the grid (the page's own field, bound with
 ## What they observe
 - Every word must appear somewhere in the row, in any visible column, in any order.
 - The list narrows as the user types. Hidden columns are not searched.
+- In pivot mode (`pivot.md` 25) the data columns folded away by the pivot are still searched (those the user had shown),
+  under the same rules; the created columns are not.
 
 ## What DzGrid does
 - Folding: case, accents, Arabic short vowels, tatweel, alef forms, `ى` read as `ي`, Arabic presentation forms decomposed (`ﻻ` is `لا`); Arabic-Indic and Latin digits are the same digits.

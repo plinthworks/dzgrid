@@ -79,8 +79,8 @@ only: never in a `Problem`, the saved state, the page address or an event's deta
 - A pivot's totals rows default to the grand total (`footers: 'grand'`); `series()` is the core's (the DOM hands it on).
 - An edit of a pivot column moves its row to its new crossing at once (as totals follow an edit); an edit of a grouping
   column still waits for « Réappliquer ».
-- The DOM half (`@dzgrid/dom/pivot`, the « Colonnes » band, the menu items, the label column, the folded data columns)
-  comes in the next batch; its sheet items are 17 onwards.
+- The DOM half (`@dzgrid/dom/pivot`, the « Colonnes » band, the menu items, the label column, the folded data columns):
+  items 17–30 below.
 
 ## Right to left
 Bands and created columns follow the reading direction like any header; the order of crossings is logical (the first
@@ -88,12 +88,79 @@ at the start).
 
 ## Tests
 `conformance/cases/pivot/*`, `packages/core/test/pivot.test.ts` (seeded walk against a hand-written oracle of nested
-maps, one build per load, planted values), `conformance/cases/grid-state/pivot-*`; the DOM at the next batch.
+maps, one build per load, planted values), `conformance/cases/grid-state/pivot-*`; the DOM half (17–30):
+`packages/dom/test/pivot.test.ts`, `pivot-zone.test.ts`, `pivot-out.test.ts` (search, find, exports, state).
 
-## On screen (next batch; plan D4, D9–D13, D16)
-17. A label column at the start, pinned, its header the grouping columns' names joined; chevrons and indent of the
-    grouping. 18. The data columns hidden by a fold of their own (never `hidden`: the user's choices and the state
-    never see pivot mode). 19. The « Colonnes » band (`group-drop-zone.md`) and a « + » list in both bands (2.5.7).
-20. The ⋮ menu of a created column: sort, pin, size, hide, « Total : Somme / Moyenne / Min / Max / Nombre ».
-21. Header bands are `columnheader`s with `aria-colspan` (`spans()` needed); a cell's name is its header chain.
-22. Sentences « Mis en colonnes : {name} », « {name} retiré des colonnes », « {n} colonnes », the limit's sentence.
+## On screen (`@dzgrid/dom/pivot`, DOM batch; plan D4, D9–D16, D18–D20; written before its code)
+`pivot(options)` is handed to `grouping({ by, pivot: p })` (one feature in `features`, `ctrl.use(p)` / `p.api(grid)` for the
+application). Its texts come in `locales/<lang>-pivot`.
+17. **The label column** (`~p:rows`, made by the pivot): pinned at the start, its header the grouping columns' names joined
+    (« Région / Mois »), the grouping's chevrons, indent and labels; never moved, hidden, filtered or grouped. The last
+    rows (deepest groups) have no chevron and no `aria-expanded`. A click on its header orders the groups by value: the
+    first click as they are (the groups' own order), the second reversed, « (Vide) » last both ways.
+18. **The data columns are folded away** by a fold of the pivot's own (never `hidden`: the user's hidden / shown, the
+    columns panel and the saved state never see pivot mode; a collapsible header group's fold and the pivot's are
+    joined). The value columns stay shown, at the end, under a « Total » band: they are the row totals (8), with their
+    own width, pin and sort. Pivot off: the columns as the application gave them, nothing folded.
+19. **The « Colonnes » band**: `groupZone({ use: { grouping: p }, texts: 'pivot' })`, after « Regrouper par »: the same
+    chips, keys, reorder and × as `group-drop-zone.md`, labelled « Colonnes du tableau croisé ». **Each band ends with a
+    « + » button** (its texts given: `zone.add`, `pivot.add`) opening a menu of the columns it accepts — known,
+    groupable, in neither band, never a column the pivot made — by their names in the grid's order: Enter (or a click)
+    adds one at the end, said as a drop is (« Mis en colonnes : Mois »); Escape closes it, the focus back on « + ». It is
+    the path without dragging (WCAG 2.5.7) while the data columns' headers are folded away.
+20. **The ⋮ menu** (`columnMenu({ use: { pivot: p } })`): on a created column and on a row total, « Total » radios —
+    Somme, Moyenne, Min, Max, Nombre, those that fit the value column's type (sum and mean: numbers; min and max:
+    numbers, days, instants, texts; count: any) — change the value column's function for all its columns, said
+    (« Montant : Moyenne »); no « Regrouper par », no filter. On a data column whose header is shown: « Mettre en
+    colonnes » / « Ne plus mettre en colonnes ».
+21. **Header bands** are header groups (`spans()` loaded): `columnheader` with `aria-colspan`, a cell named by its header
+    chain. Grouping now tells `spans` refused only when a column merges cells (`merge`, `rowSpan`, `colSpan`) or rows are
+    full width; header bands alone are drawn beside grouping, pivot or not. Without `spans()` the created headers show
+    their last line only (the application loads `spans()`; not told).
+22. **Sort** (10): a click on a created column or a row total orders the groups by that total; the data rows are never
+    shown, so the base sort over them reads nothing (the created columns' cells read nothing).
+23. **Sentences** (polite, once): the band's own (19); after a change of the pivot columns or the mode by the user, the
+    number of created columns (« 24 colonnes »); above the limit (9), a visible note in the pivot's strip and the same
+    sentence once: « 1 240 colonnes : trop pour l'écran ; retirez une colonne » (the count only, never a value).
+24. **« Tableau croisé »** (`pivot({ toggle: true })`, Q-P6 A): a `role="switch"` button in the pivot's strip, above the
+    rows, `aria-checked` the mode; 24 px. Without `toggle`, the mode is the application's alone (`api.setOn`).
+25. **Search and find in pivot mode.** The quick search keeps testing the **data** columns' values, as on the flat grid:
+    the folded columns the user had shown (a hidden one is still never searched), a word with a digit in the numbers,
+    days and instants by their shown and export texts, any word in texts and lists — a row whose data holds the words is
+    kept, so its groups and crossings stay. The created columns are never searched (12). It reads them through the label
+    column's search text (one haystack, the digit rule kept by keeping only the digit-bearing pieces of a number's or a
+    date's texts; a word without a digit may still meet the letters inside such a piece, « h » in « 12h30 »).
+    **Find (Ctrl+F)** in pivot mode searches the cells shown (the labels and the totals as written) and, on a last-row
+    group's label cell, the data columns' shown texts of its rows: a hit there is that group's label cell.
+26. **Refused** (15): beside a server or block source the pivot is not made (`unsupported-combination`, path `source`,
+    detail `pivot`), the grid as grouping alone shows it, `api()` null.
+27. **Exports** (D18 A): CSV writes the label column, each created column with its **full chain** as header (« 2025 ›
+    Janv. › Montant »), the row totals as « Total › Montant », the grand total row; Excel writes the bands as merged
+    header rows (the effective tree), totals typed; print prints the bands (`spans()`), `all` = every group open.
+28. **State** (14): restored with one grouping build (rows grouping and pivot together); a user's change of the pivot
+    columns, the mode or a function is a gesture (`stateChanged` after the pause).
+29. **The application's columns**: an `update({ columns })` keeps the pivot (the effective tree made again from the new
+    columns); a created column keeps its width, pin and sort by id while it exists.
+30. **Angular**: nothing new — `grouping({ …, pivot: p })` in `features`, `ctrl.use(p)` for the api, `pivot` in `[state]`.
+
+### Texts (`locales/<lang>-pivot`)
+| key | en | fr | ar |
+|---|---|---|---|
+| `pivot.label` | Pivot columns | Colonnes du tableau croisé | أعمدة الجدول المحوري |
+| `pivot.empty` | Add a column here to spread it across | Ajoutez une colonne ici pour la mettre en colonnes | أضف عمودًا هنا لتوزيعه أعمدةً |
+| `pivot.remove` | Remove {column} from the columns | Retirer {column} des colonnes | إزالة {column} من الأعمدة |
+| `pivot.grouped` | Spread across: {column} | Mis en colonnes : {column} | وُزِّع أعمدةً: {column} |
+| `pivot.removed` | {column} removed from the columns | {column} retiré des colonnes | أُزيل {column} من الأعمدة |
+| `pivot.placed` | {column}: level {n} of {total} | {column} : niveau {n} sur {total} | {column}: المستوى {n} من {total} |
+| `pivot.add` | Add a column | Ajouter une colonne | إضافة عمود |
+| `zone.add` (the « Regrouper par » band's « + », in this bundle) | Add a column | Ajouter une colonne | إضافة عمود |
+| `pivot.total` | Total | Total | المجموع |
+| `pivot.subtotal` | Total {name} | Total {name} | مجموع {name} |
+| `pivot.count` | {n} columns | {n} colonnes | {n} أعمدة |
+| `pivot.tooMany` | {n} columns: too many for the screen; remove a column | {n} colonnes : trop pour l'écran ; retirez une colonne | {n} عمود: كثيرة على الشاشة؛ أزل عمودًا |
+| `pivot.switch` | Pivot table | Tableau croisé | جدول محوري |
+| `menu.pivotBy` | Spread across columns | Mettre en colonnes | توزيع أعمدةً |
+| `menu.pivotOff` | Stop spreading across columns | Ne plus mettre en colonnes | إيقاف التوزيع أعمدةً |
+| `menu.total` | Total | Total | المجموع |
+| `fn.sum` / `fn.avg` / `fn.min` / `fn.max` / `fn.count` | Sum / Average / Min / Max / Count | Somme / Moyenne / Min / Max / Nombre | المجموع / المتوسط / الأدنى / الأقصى / العدد |
+| `pivot.fnSaid` | {column}: {fn} | {column} : {fn} | {column}: {fn} |

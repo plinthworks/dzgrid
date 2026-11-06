@@ -38,6 +38,14 @@ export interface ColumnMenuOptions {
     readonly chooser?: { api(grid: Grid): { open(anchor?: HTMLElement): boolean } | null };
     /** « Group by this column » / « Stop grouping by this column » (Phase 7, `grouping()`; the way without dragging, WCAG 2.5.7). */
     readonly grouping?: { api(grid: Grid): { by(): readonly string[]; setBy(by: readonly string[], o?: { readonly user?: boolean }): void } | null };
+    /**
+     * The pivot (`pivot()`, Phase 10, pivot.md 20): « Total » on a created column and a row total, « Mettre en colonnes »
+     * on a data column whose header is shown. Its texts from `locales/<lang>-pivot`.
+     */
+    readonly pivot?: { api(grid: Grid): {
+      on(): boolean; by(): readonly string[]; setBy(by: readonly string[], o?: { readonly user?: boolean }): void; accepts(id: string): boolean;
+      values(): Readonly<Record<string, unknown>>; setValues(v: Readonly<Record<string, any>>, o?: { readonly user?: boolean }): void; valueColumn(id: string): string | undefined;
+    } | null };
   };
   /** The density line (off by default, C5; absent when `rowHeight` is a number). */
   readonly density?: boolean;
@@ -89,6 +97,7 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
       needTexts(g, COLUMN_MENU_KEYS, 'column-menu');
       // Its items' texts and sentences come with grouping's (`locales/<lang>-group`).
       if (o.use?.grouping) needTexts(g, ['menu.groupBy', 'menu.groupOff', 'zone.grouped', 'zone.removed'], 'column-menu');
+      if (o.use?.pivot) needTexts(g, ['menu.pivotBy', 'menu.pivotOff', 'menu.total', 'pivot.grouped', 'pivot.removed', 'pivot.fnSaid', 'fn.sum', 'fn.avg', 'fn.min', 'fn.max', 'fn.count'], 'column-menu');
       const { kernel, columns: m, el, doc, scope } = g;
       const grid = { kernel };
       const say = (t: string): void => g.live.announce(t);
@@ -139,6 +148,11 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         const chooser = o.use?.chooser?.api(g);
         const grp = o.use?.grouping?.api(g);
         const by = grp?.by();
+        const pv = o.use?.pivot?.api(g);
+        // A created column's value, or a row total's (a value while pivot mode is on).
+        const vc = pv?.on() ? pv.valueColumn(id) ?? (Object.hasOwn(pv.values(), id) ? id : undefined) : undefined;
+        const vcol = vc === undefined ? undefined : m.get(vc);
+        const fn = vc === undefined ? undefined : pv!.values()[vc];
         const now = g.settings.density ?? 'comfortable';
         // The query with every filter and the search emptied, the sort kept: differs while one is on (find.md 15).
         const clear = makeQuery({ sort });
@@ -161,6 +175,13 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
           cols ? [it('move.start', () => cols.move(id, -1, { say: true }), locked || !at), it('move.end', () => cols.move(id, 1, { say: true }), locked || at === seg.length - 1)] : [],
           // Grouping (column-menu.md « Grouping »): by this column, or no longer; the column stays shown (Q-H A).
           [grp && def.groupable !== false && (by!.includes(id) ? it('group.off', () => (grp.setBy(by!.filter((c) => c !== id), { user: true }), say(g.msg('zone.removed', { column: name(id) })))) : it('group.by', () => (grp.setBy([...by!, id], { user: true }), say(g.msg('zone.grouped', { column: name(id) })))))],
+          // The pivot (pivot.md 20): a value's function, for all its columns; a data column spread across, or no longer.
+          vcol ? (['sum', 'avg', 'min', 'max', 'count'] as const).filter((f) => (f === 'sum' || f === 'avg' ? vcol.type === 'number' : f === 'count' || /^(number|day|instant|text)$/.test(vcol.type))).map((f) => ({
+            id: `fn.${f}`, label: g.msg(`fn.${f}`), kind: 'radio' as const, group: g.msg('menu.total'), checked: fn === f,
+            action: () => (pv!.setValues({ ...pv!.values(), [vc!]: f }, { user: true }), say(g.msg('pivot.fnSaid', { column: name(vc!), fn: g.msg(`fn.${f}`) }))),
+          })) : [pv && pv.accepts(id) && (pv.by().includes(id)
+            ? it('pivot.off', () => (pv.setBy(pv.by().filter((c) => c !== id), { user: true }), say(g.msg('pivot.removed', { column: name(id) }))))
+            : it('pivot.by', () => (pv.setBy([...pv.by(), id], { user: true }), say(g.msg('pivot.grouped', { column: name(id) })))))],
           fill && range ? [it('fill.down', () => fill.down({ user: true }), noFill, { keys: `${mod}D` }), it('fill.end', () => fill.end({ user: true }), noFill, { keys: `${mod}R` })] : [],
           [filter?.canOpen && it('filter', () => (L.hand(), filter.openFilter())), 
             // « Clear all filters » (find.md 15): while a filter or the search is on, its text given; as `clearFilters()` (the sort kept, one command).

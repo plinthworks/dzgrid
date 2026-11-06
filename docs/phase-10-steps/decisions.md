@@ -1,8 +1,8 @@
 # Phase 10 (pivot): decisions
 
 The owner's answers (2026-11-06, « ★ partout, tailles OK »): `questions.md`. They win over `docs/phase-10-plan.md`. Below:
-what the lead took alone while applying them, and the measures. This batch is the core only (sheets, the grouping's
-cache, `@dzgrid/core/pivot`, the exit-criterion line, `series()`, state); the DOM comes in the next batch.
+what the lead took alone while applying them, and the measures. The core batch (sheets, the grouping's cache,
+`@dzgrid/core/pivot`, the exit-criterion line, `series()`, state) first, then the DOM batch (at the end).
 
 ## Decisions taken alone (core batch)
 - **Names.** Entry `@dzgrid/core/pivot`: `pivotShape(o)`, `checkPivot(raw, columns)`, `pivotState(shape, columns)`;
@@ -122,3 +122,66 @@ Code review and test analysis of the new code (`grouping/shape.ts`, `grouping/ag
 - Left for the DOM batch: the quick search reads the **shown** columns — with the data columns folded in pivot mode it
   would search the created columns only; the DOM must hand the search the data columns (plan D15). The label column id
   `~p:rows` is a made id by the prefix rule: never in the state, as wanted.
+
+## DOM batch (2026-11-07): decisions taken alone
+- **Wiring.** `pivot(o)` (`@dzgrid/dom/pivot`) is handed to `grouping({ by, pivot: p })` and is not itself in `features`:
+  `grouping()` asks it for the shape (`make`) and sets it up at the end of its own setup (`setup(g, s)`), forwarding
+  `afterRows` / `destroy`; `p.api(grid)` and Angular's `ctrl.use(p)` give its api. `PivotApi`: `on / setOn`, `by / setBy`
+  (the names the band drives), `accepts`, `values / setValues`, `valueColumn`, `count`, `series` (the core's, the
+  language's headers put back). Options: the core's (but the grouping's and `labels`), `toggle`, `labelWidth`.
+- **The effective columns** are composed from the application's tree at each change that matters (`sig`: mode, created
+  columns' key, grouping columns, values, language, the user's hidden): `[label, the application's tree without the
+  values, the created tree, « Total » band over the value columns]`, written in `g.settings.columns` and set with one
+  `columns.set` (a host `update({ columns })` makes it again from the new tree). The data columns are folded by the
+  pivot's own set (`GridContext.foldExtra`, joined by `groups()` through `g.refold`), never `hidden`.
+- **The core writes no sentence**: it is given sentinels for the empty crossing's and a sub-total's headers, and the DOM
+  translates them when it sets the columns (a language change sets them again) and in `series()`.
+- **Search in pivot mode (the known issue).** No base byte: the label column (`~p:rows`, `type: 'custom'`, keyKind text)
+  reads the row itself, and its search text is the data columns' texts (the folded ones the user had shown): texts and
+  lists whole, numbers, days and instants by the digit-bearing pieces of their shown and export texts — so a word with a
+  digit finds them as on the flat grid, a word without one does not (residual, in the sheet: a digitless word may meet
+  the letters inside such a piece, « h » in « 12h30 »). Its sort key is one empty text (a sort on it is cheap). Find gets
+  `GridContext.rowText` (a group's or totals row's cells as shown; on a last row's label cell, its rows' data texts).
+- **Sort on the label column** orders the groups by value (asc as they are, desc reversed, « (Vide) » last): in the core's
+  `kids` seam (`~p:rows`), +30 B in `core/pivot`. `PivotShape` gains `valueColumn(id)` and `rows(key)` (find).
+- **CSV's chain of headers** through `GridContext.exportColumns` read by the export run (a lookup whose created columns'
+  headers are their chain); Excel and print read the effective tree (no code).
+- **Refusals**: a source (server pages, blocks, server-side groups): `unsupported-combination` at `source`, detail
+  `pivot`, told by `grouping()`; the pivot is not set up (`api` null). Grouping now tells `spans` only when a column
+  merges cells or rows are full width (header bands are drawn beside grouping), and a group row with no children
+  (a pivot's last rows) has no `aria-expanded`.
+- **The bands**: `groupZone({ texts: 'pivot' })` reads `pivot.*`; each band places itself just above the rows (the order
+  of `features`); « + » (`zone.add` / `pivot.add`, both in the `-pivot` bundle so the `-group` bundles do not change) is
+  drawn as a chip's ×, opens the grid's menu (`menuList`), shown only when it has a column to offer; Escape and a choice
+  put the focus back on it. `GroupingApi.accepts?` / `GroupingApiLike.accepts?` keep the two bands apart.
+- **The strip**: a `.dzg-gzone.dzg-pbar` before the rows with the « Tableau croisé » switch (`toggle`) and the limit's
+  note; hidden when empty. The limit is said once per count, not at creation; a user's change says « {n} colonnes ».
+- **Column menu**: « Total » radios (fitting the value's type) on a created column and on a row total; « Mettre en
+  colonnes » / « Ne plus mettre en colonnes » on a shown data column (`pivot.by` / `pivot.off`, texts `menu.pivotBy` /
+  `menu.pivotOff`).
+
+## DOM batch: measures (2026-11-07)
+- Chrome (local demo, 100 000 made-up sales, 6 months × 2 values = 12 created columns + totals, grouped by region then
+  city): pivot switched on to the next frame 16.6–18.1 ms (median 17.4, caches warm: the crossings kept); pivot columns
+  changed (`mois` ↔ `mois, titre`) 17.3–42.0 ms (median 24.4). The cold load stays the node line (103 ms ≤ 150).
+- Chrome fr / ar, light / dark: bands span exactly their columns (0 px), body cells under their headers (0 px), label
+  column at the inline start, first month at the start (right in Arabic), 24 px targets, last rows without
+  `aria-expanded`, axe 0 (also with « + »'s menu open), no page error. Firefox and WebKit, Arabic: the same header layout.
+- Sizes (gzip): `dom/pivot` 2 120 over `dom/grouping` (new, line 2 350); `-pivot` texts 369 / 411 / 548 (450 / 500 /
+  650); `group-zone` 2 883 (2 834 → 2 890, +2 %); `find` 2 653 (→ 2 660); `dom/state` 1 292 (→ 1 300); `dom/grouping`
+  4 966 / 5 100; `column-menu` 3 487 / 4 300; `groups` 1 934 / 2 100; export run 5 406 / 5 450; `core/pivot` 3 577 /
+  3 750; `grouping.css` 573 / 587; core base 29 258, DOM base 23 650, Angular 7 884 unchanged. **K.8 89 978 (+1 B)**: no
+  code of the audit screen changed — the export run chunk's content hash in the split build's file names (89 977 with
+  the run reverted), as Phase 9's byte.
+- `check:api`: additions only.
+
+## DOM batch: review and test analysis (lead, 2026-11-07)
+- Found and fixed, each with a test that failed first: (R1) a user's change that changed nothing left « say the count »
+  armed for the next change from elsewhere; per paint, the hidden state was looked up per column (one map per call now).
+- Mutants run by hand, all killed: the label column's search text empty (2 search tests), no `exportColumns` (CSV), no
+  `rowText` (2 find tests).
+- Checked, no code: R3 sub-total and blank headers translated, R4 the fold joined with a collapsible group's, R5
+  `reset()` brings the application's pivot back, R6 Excel's header rows (bands, « Total »).
+- Left: the export's functions with pivot mode **off** read the pivot's values (`g.grouped.aggFuncs`): only a count
+  written under a non-number column could differ, not observable in any made-up case — not changed. The columns panel
+  lists the folded data columns as shown (it reads the user's hidden, not the fold), as with collapsed header groups.

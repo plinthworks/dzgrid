@@ -98,7 +98,9 @@ walk against a hand-written oracle); DOM and browser at step 5.
 21. **Refusals on screen** (13): beside a tree, whichever comes first in `features`, **the tree wins**: grouping steps
     aside (told) and the tree works exactly as without it (its rows, chevrons, keys, sentences; coordinator 2026-11-05,
     through the base's `GridFeature.shapeAfter`); after a master/detail listed first, the same; listed before details, grouping works and the
-    details are told; merged cells: told, and the grid paints without merges; a server source: told, the rows flat, no
+    details are told; merged cells: told, and the grid paints without merges (Phase 10, `pivot.md` 21: told only when a
+    column merges cells — `merge`, `rowSpan`, `colSpan` — or rows are full width; header bands alone are drawn beside
+    grouping); a server source: told, the rows flat, no
     totals rows, `setBy` does nothing; browser pages: told by the core, the groups shown whole.
 22. **API** (`grouping().api(grid)`): `by()`, `setBy(columns, { user })`, `expandAll(depth?)`, `collapseAll()`,
     `totals()`; null before setup, after destroy, and on a grid where grouping stepped aside.

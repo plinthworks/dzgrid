@@ -101,7 +101,13 @@ Escape, nested grids). Phase 7: the zone's own tests.
     (`zone.placed`); released outside, or Escape: nothing.
 17. A column no longer known (columns changed) or refused (`groupable: false`) shows no chip.
 
-## The « Colonnes » band (Phase 10, `pivot.md` 19; owner Q-P7 A; built in the DOM batch)
+## The « Colonnes » band (Phase 10, `pivot.md` 19; owner Q-P7 A; built 2026-11-07)
 A second band over the pivot's api, labelled « Colonnes », after « Regrouper par » in the same strip: same chips, keys,
 reorder, ×. Each band gains a « + » button listing the columns it accepts (a menu: the no-drag path, 2.5.7), because the
 data columns' headers are folded away in pivot mode.
+18. **« + »** (`zone.add` given — it comes with `locales/<lang>-pivot`; `pivot.add` for the « Colonnes » band, `groupZone({ texts: 'pivot' })`): the band's last
+    item (in its roving order), `aria-haspopup="menu"`, 24 px; it opens the grid's menu under it, listing by name, in the
+    grid's column order, the columns the band accepts: known, groupable, not in this band nor the other, never one the
+    pivot made. Enter / Space / a click on one adds it at the end, said as a drop (`zone.grouped` / `pivot.grouped`), the
+    focus back on « + »; Escape closes the menu, the focus back on « + ». No column to offer: no « + ». Its text missing from an older bundle: no « + » (the column menu's item stays the way without drag).
+19. **Two bands** stack in the order of `features`: a band set up after another sits under it.

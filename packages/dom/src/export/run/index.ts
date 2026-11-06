@@ -241,7 +241,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
         const gr = g.grouped;
         const tc = o.treeColumn ?? gr?.column();
         const it = csvChunks(
-          { rows: held.rows, at: held.at, columns: g.columns, ctx: g.ctx, ...spans, ...(gr && { groupLabel: gr.label, aggFuncs: gr.aggFuncs }) },
+          { rows: held.rows, at: held.at, columns: g.exportColumns?.() ?? g.columns, ctx: g.ctx, ...spans, ...(gr && { groupLabel: gr.label, aggFuncs: gr.aggFuncs }) },
           { ...o, ...(tc !== undefined && { treeColumn: tc }), ...(gr && { tree: o.tree ?? (gr.by().length ? 'level' : 'none') }), columns: request.columns, chunkRows: ROWS_PER_CHUNK },
         );
         const b = batcher();

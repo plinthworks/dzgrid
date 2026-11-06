@@ -52,6 +52,11 @@ Enter, Shift+Enter or the ↑ ↓ buttons, and closes with Escape.
     request on a server; the filters' own sentence follows. Its text is optional in an application's own bundle
     (`menu.clearFilters`, `cmenu.clearFilters`): missing, the item is not shown.
 
+## A pivot (Phase 10, `pivot.md` 25)
+16. In pivot mode no data row is shown: find searches the cells shown — the labels and the totals as the screen writes
+    them — and, on a last-row group's label cell, the shown texts of the data columns (those the user had shown) of its
+    rows. A hit there is that group's label cell; a group inside a closed one is opened to show it, as in a tree.
+
 ## Where DzGrid differs on purpose
 - The browser's find cannot see virtual rows (not in the page) nor closed tree nodes; the grid's can.
 - A cell is the unit of a hit (not a word inside it): the focus and the keys work by cell.

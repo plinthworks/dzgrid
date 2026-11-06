@@ -34,6 +34,8 @@
     { "what": "check box border", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 3 },
     { "what": "check box border on a hovered row", "fg": "--tz-fg-muted", "bg": "--dzg-row-hover-bg", "min": 3 },
     { "what": "check mark", "fg": "--tz-accent-fg", "bg": "--tz-accent", "min": 3 },
+    { "what": "pivot switch on (Tableau croisé)", "fg": "--tz-accent-fg", "bg": "--tz-accent", "min": 4.5 },
+    { "what": "pivot strip note", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 4.5 },
     { "what": "ticked box on a selected row", "fg": "--tz-accent", "bg": "--dzg-row-selected-bg", "min": 3 },
     { "what": "selected row's bar at its start (a showcase theme's --dzg-select-bar)", "fg": "--tz-accent", "bg": "--dzg-row-selected-bg", "min": 3 },
     { "what": "resize grip, hover", "fg": "--tz-accent", "bg": "--dzg-header-bg", "min": 3 },

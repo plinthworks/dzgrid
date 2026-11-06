@@ -113,6 +113,10 @@
       "types": "./src/dock.ts",
       "default": "./src/dock.ts"
     },
+    "./pivot": {
+      "types": "./src/pivot.ts",
+      "default": "./src/pivot.ts"
+    },
     "./row-numbers": {
       "types": "./src/row-numbers.ts",
       "default": "./src/row-numbers.ts"
@@ -432,6 +436,18 @@
     "./locales/ar-dock": {
       "types": "./src/locales/ar-dock.ts",
       "default": "./src/locales/ar-dock.ts"
+    },
+    "./locales/en-pivot": {
+      "types": "./src/locales/en-pivot.ts",
+      "default": "./src/locales/en-pivot.ts"
+    },
+    "./locales/fr-pivot": {
+      "types": "./src/locales/fr-pivot.ts",
+      "default": "./src/locales/fr-pivot.ts"
+    },
+    "./locales/ar-pivot": {
+      "types": "./src/locales/ar-pivot.ts",
+      "default": "./src/locales/ar-pivot.ts"
     },
     "./locales/en-row-numbers": {
       "types": "./src/locales/en-row-numbers.ts",

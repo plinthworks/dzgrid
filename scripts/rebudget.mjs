@@ -48,7 +48,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/core/grouping': 4950, // Phase 7 close (a new entry at its measure + 10 %: 4 468, checkRowGroups); steps 3–4 (owner Q-B 2026-11-04: a new entry at its measure + 10 %): measured 4 285; ARCH §5.2 5 000
   // Phase 7 steps 5–6 (owner Q-B: a new entry at its measure + 10 %): the grouping painter, the band, their texts and CSS.
   '@dzgrid/dom/grouping': 5100, // Phase 7 close (measure + 10 %): 4 612; step 5: 4 434
-  '@dzgrid/dom/group-zone': 2834, // measured 2 576
+  '@dzgrid/dom/group-zone': 2890, // Phase 10 DOM batch (+2 % rule, measured 2 883): the texts option and the « + » list; before 2 834, measured 2 576
   '@dzgrid/dom/locales/en-group': 350,
   '@dzgrid/dom/locales/fr-group': 404,
   '@dzgrid/dom/locales/ar-group': 558,
@@ -138,7 +138,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-context-menu': 420, // Phase 9 « Effacer tous les filtres »: 400 → 420 (measured 413, +3.3 %: TO CONFIRM by the owner)
   '@dzgrid/dom/locales/ar-context-menu': 510, // Phase 9 « Clear all filters » (2 % rule, measured 508)
   // Phase 9 find in the grid (find.md): the bar over the DOM base, its -find texts, find.css; new lines at their measure + 10 %.
-  '@dzgrid/dom/find': 2650,
+  '@dzgrid/dom/find': 2660, // Phase 10 DOM batch (+2 % rule, measured 2 653): a pivot's rows searched; before 2 650
   '@dzgrid/dom/locales/en-find': 250,
   '@dzgrid/dom/locales/fr-find': 250,
   '@dzgrid/dom/locales/ar-find': 300,
@@ -183,7 +183,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/columns-panel': 4488, // Phase 9 dock (+2 % rule, measured 4 475): the panel `columns` in the dock, not modal; Q4-4: up to 4 400 used at the review of steps 3–4 (its own live status, auto-scroll loop: measured 4 282)
   '@dzgrid/theme/columns-panel.css': 1000,
   // Phase 6 step 5 (owner Q-B): the GridState feature, its storage and address helpers, over the DOM base (core/state outside it).
-  '@dzgrid/dom/state': 1289, // Phase 9 dock (+2 % rule, measured 1 273): the dock's part, a dock change is a gesture, reset puts it back; Phase 8 step 7 (+2 %): restored rowGroups handed to a server-side model inside the hold (measured 1 244); before 1 240; Phase 7 close (+2 %): rowGroups and a state restored before the grouping, measured 1 233; owner +2 % rule (step 16, 2026-10-29): 1 200 → 1 224 (`gridState({ initial })`, measured 1 211); owner « clearFilters/resetState » (2026-10-28): 1 150 → 1 200; before: owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
+  '@dzgrid/dom/state': 1300, // Phase 10 DOM batch (+2 % rule, measured 1 292): the pivot's part and its reset; Phase 9 dock (+2 % rule, measured 1 273): the dock's part, a dock change is a gesture, reset puts it back; Phase 8 step 7 (+2 %): restored rowGroups handed to a server-side model inside the hold (measured 1 244); before 1 240; Phase 7 close (+2 %): rowGroups and a state restored before the grouping, measured 1 233; owner +2 % rule (step 16, 2026-10-29): 1 200 → 1 224 (`gridState({ initial })`, measured 1 211); owner « clearFilters/resetState » (2026-10-28): 1 150 → 1 200; before: owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
   '@dzgrid/theme': 2960, // Phase 8 step 4 (+2 % rule, plan §4 2 960): a block list's loading rows muted, their words over the empty cells (measured 2 913); before: 2907; 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 2 907): 2 850; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 2 750 → 2 850 (the pinned edge, the field's ring, the magnifier); T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)
   '@dzgrid/theme/midnight.css': 650, // T7
   '@dzgrid/theme/clinic.css': 650, // T7

@@ -257,7 +257,7 @@ describe('1.6.0, the four packages', () => {
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
     expect(build).toMatch(/'\.\/row-drag', '\.\/dock'[,\]]/); // Phase 10: './pivot' after it in the core
     expect(build).toMatch(/'\.\/row-drag', '\.\/dock', '\.\/motion-gsap'/);
-    expect(build).toMatch(/'\.\/locales\/ar-row-drag', '\.\/locales\/en-dock', '\.\/locales\/fr-dock', '\.\/locales\/ar-dock'\]/);
+    expect(build).toMatch(/'\.\/locales\/ar-row-drag', '\.\/locales\/en-dock', '\.\/locales\/fr-dock', '\.\/locales\/ar-dock'[,\]]/); // Phase 10: the -pivot texts after them
     const theme = pkg('theme');
     for (const f of ['dock.css', 'dock.unlayered.css', 'dock.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'row-drag', 'dock'\]/);

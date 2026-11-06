@@ -89,6 +89,8 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
         get rowGroups() { return g.rowGroups ?? later; },
         // The dock (`@dzgrid/dom/dock`, Phase 9): set up later, its part waits on the context for its setup.
         get dock() { return g.dock ?? { get: () => undefined, set: (raw: unknown) => ((g.dockLater = raw), []) }; },
+        // The pivot (`@dzgrid/dom/pivot`, Phase 10): with grouping's setup; listed before it, its part is not applied.
+        get pivot() { return g.pivotState; },
       };
       // A list grouped on the server takes it now, in this restore's one request (server-side-groups.md); the grouping's setup checks it.
       const later = { get: () => undefined as never, set: (raw: unknown) => ((g.rowGroupsLater = raw), Array.isArray(raw) && (g.rows as { setBy?(by: unknown[]): void }).setBy?.(raw), []) };
@@ -123,7 +125,7 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
           return problems;
         },
         // Groups `{}`: the definitions back; the row grouping the application gave. As the host's change, told as a gesture when the pause ends (nothing if nothing moved).
-        reset: () => (arm('api'), restoreState(k, { ...initial, groups: {}, rowGroups: g.rowGroups?.initial, dock: g.dock?.initial }, env)),
+        reset: () => (arm('api'), restoreState(k, { ...initial, groups: {}, rowGroups: g.rowGroups?.initial, dock: g.dock?.initial, pivot: g.pivotState?.initial }, env)),
       };
       APIS.set(k, api);
       g.saved = arm;

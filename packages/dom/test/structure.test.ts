@@ -161,7 +161,7 @@ describe('the DOM layer’s shape', () => {
   it('keeps @dzgrid/dom/internal for the feature entries (step 17): slots, filters, search, pagination and the editors (Phase 5 step 5) import it, by name; the base never', () => {
     const named = /^import (?!type )[^;]*from '@dzgrid\/dom\/internal'/m;
     const users = files(SRC).filter((f) => named.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f).split('/')[0]!.replace(/\.ts$/, ''));
-    expect([...new Set(users)].sort()).toEqual(['column-menu', 'context-menu', 'dock', 'editors', 'filters', 'filters-panel', 'find', 'pagination', 'row-drag', 'row-numbers', 'search', 'slots', 'statusbar']); // dock: the texts check and the menu list (Phase 9); row-drag: the texts check (Phase 9); row-numbers: the texts check (1.4.0); filters-panel: the parts' mount and the texts check (Phase 9); find: the menus' texts check and the input method's keys (Phase 9); statusbar: the shared strip (Phase 9); column-menu: its items' parts (Phase 6 step 12); both menus: the shared list (Phase 9)
+    expect([...new Set(users)].sort()).toEqual(['column-menu', 'context-menu', 'dock', 'editors', 'filters', 'filters-panel', 'find', 'group-zone', 'pagination', 'row-drag', 'row-numbers', 'search', 'slots', 'statusbar']); // group-zone: the menu list for « + » (Phase 10); dock: the texts check and the menu list (Phase 9); row-drag: the texts check (Phase 9); row-numbers: the texts check (1.4.0); filters-panel: the parts' mount and the texts check (Phase 9); find: the menus' texts check and the input method's keys (Phase 9); statusbar: the shared strip (Phase 9); column-menu: its items' parts (Phase 6 step 12); both menus: the shared list (Phase 9)
     // Never by a relative path (a second copy in each bundle), never from the base.
     // The menus' shared list (Phase 9) is part of the internal entry (exported by it only).
     const relative_ = files(SRC).filter((f) => !/^(internal(\/|\.ts$)|menu\/list\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?internal(\/|\.js')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f));
@@ -243,11 +243,12 @@ describe('the DOM layer’s shape', () => {
     expect(value('grouping.ts')).toEqual(['./grouping/index.js']);
     expect(value('grouping/index.ts')).toEqual(['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/core/grouping', '../render/bidi.js', '../tree/styles.js', '../tree/sticky.js']);
     expect(value('group-zone.ts')).toEqual(['./group-zone/index.js']);
-    expect(value('group-zone/index.ts')).toEqual(['@dzgrid/core', '../dir.js']);
+    expect(value('group-zone/index.ts')).toEqual(['@dzgrid/core', '../dir.js', '@dzgrid/dom/internal']); // Phase 10: the menu list for « + »
     for (const f of ['render/bidi.ts', 'tree/styles.ts', 'tree/sticky.ts']) expect(readFileSync(join(SRC, f), 'utf8')).not.toMatch(/^import (?!type )/m);
     expect(readFileSync(join(SRC, 'dir.ts'), 'utf8')).not.toMatch(/^import (?!type )/m);
     // Nothing in the base imports them: a flat grid carries none of it.
-    expect(files(SRC).filter((f) => !/^(grouping|group-zone)(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?(grouping|group-zone)(\/|\.js')|@dzgrid\/core\/grouping')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    // The pivot's entry (Phase 10) builds on grouping too: an optional entry, not the base.
+    expect(files(SRC).filter((f) => !/^(grouping|group-zone|pivot)(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?(grouping|group-zone)(\/|\.js')|@dzgrid\/core\/grouping')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
   });
 
   it('has the edit entry reach the base only through the grid’s context, the types and the shared writes (Phase 5 step 4)', () => {

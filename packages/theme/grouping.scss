@@ -7,7 +7,8 @@
 // Group and totals rows on the header's surface, their text in the text colour and bold (not colour alone); a totals
 // row opened by a line. The band on the header's surface, a line at its block end; each chip outlined in the muted
 // text colour, its name and × as 24 px targets, the focus ring in the accent; a header held over the band: a dashed
-// accent outline. Forced colours: system colours. No colour literal, no physical side (guards).
+// accent outline. The pivot (Phase 10, pivot.md 19, 23, 24): « + » drawn as a chip's ×, the « Tableau croisé » switch as
+// a chip's name, on in the accent; the limit's note muted. Forced colours: system colours. No colour literal, no physical side (guards).
 // ─────────────────────────────────────────────────────────────────────────────
 
 $layered: true !default;
@@ -43,7 +44,8 @@ $layered: true !default;
     border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
   }
 
-  .dzg-gzone-empty {
+  .dzg-gzone-empty,
+  .dzg-pnote {
     color: var(--tz-fg-muted);
   }
 
@@ -79,6 +81,11 @@ $layered: true !default;
     color: var(--tz-fg);
   }
 
+  .dzg-pswitch[aria-checked=true] {
+    color: var(--tz-accent-fg);
+    background: var(--tz-accent);
+  }
+
   .dzg-chip:focus-visible,
   .dzg-chip-x:focus-visible {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
@@ -104,6 +111,11 @@ $layered: true !default;
     .dzg-chip-x {
       color: ButtonText;
       background: ButtonFace;
+    }
+
+    .dzg-pswitch[aria-checked=true] {
+      color: HighlightText;
+      background: Highlight;
     }
 
     .dzg-chip:focus-visible,

@@ -228,6 +228,21 @@ export interface GroupMessages {
 }
 
 /**
+ * The pivot's texts (`@dzgrid/dom/pivot`, Phase 10, pivot.md 17–30), in their own bundles (`locales/<lang>-pivot`): optional
+ * here; `pivot.*` required by `pivot()` and by `groupZone({ texts: 'pivot' })`, `menu.pivotBy` … `fn.*` by
+ * `columnMenu({ use: { pivot } })`; `zone.add` gives the « Regrouper par » band its « + ». `{column}` a column's header,
+ * `{n}` a count, `{name}` a band's header, `{fn}` a function's name. Never a value of a row but in the headers shown.
+ */
+export type PivotMessageKey =
+  | `pivot.${'label' | 'empty' | 'remove' | 'grouped' | 'removed' | 'placed' | 'add' | 'total' | 'subtotal' | 'count' | 'tooMany' | 'switch' | 'fnSaid'}`
+  | 'zone.add' | 'menu.pivotBy' | 'menu.pivotOff' | 'menu.total' | `fn.${'sum' | 'avg' | 'min' | 'max' | 'count'}`;
+/** A pivot bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_GROUP.text, ...FR_PIVOT.text }`. */
+export interface PivotMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in PivotMessageKey]: MessageValue };
+}
+
+/**
  * Moving rows' texts (`@dzgrid/dom/row-drag`, Phase 9, row-move.md 22, 25), in their own bundles (`locales/<lang>-row-drag`):
  * optional here, required by `rowDrag()`. `{n}` a place or a count, `{total}` the siblings shown, `{level}` a tree's level
  * from 1, `{max}` the most rows a gesture moves. Rows are named by place, never by value.

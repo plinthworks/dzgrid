@@ -14,7 +14,8 @@
   border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
 }
 
-.dzg-gzone-empty {
+.dzg-gzone-empty,
+.dzg-pnote {
   color: var(--tz-fg-muted);
 }
 
@@ -50,6 +51,11 @@
   color: var(--tz-fg);
 }
 
+.dzg-pswitch[aria-checked=true] {
+  color: var(--tz-accent-fg);
+  background: var(--tz-accent);
+}
+
 .dzg-chip:focus-visible,
 .dzg-chip-x:focus-visible {
   outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
@@ -73,6 +79,10 @@
   .dzg-chip-x {
     color: ButtonText;
     background: ButtonFace;
+  }
+  .dzg-pswitch[aria-checked=true] {
+    color: HighlightText;
+    background: Highlight;
   }
   .dzg-chip:focus-visible,
   .dzg-chip-x:focus-visible,
