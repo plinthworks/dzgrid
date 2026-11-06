@@ -6,6 +6,7 @@ import type { FeatureHandle, GridFeature } from '../features.js';
 import type { Part, PartBase, SlotContext } from '../part.js';
 import type { FiltersPanelMessageKey } from '../part-texts.js';
 import { injectPanelStyles } from './styles.js';
+import type { DockPanelSpec } from '../dock/types.js';
 
 /** The texts `filtersPanel()` needs, from `@dzgrid/dom/locales/<lang>-filters-panel`. */
 export const FILTERS_PANEL_KEYS = 'title close clearAll search none matches active count'.split(' ').map((k) => `fpanel.${k}`) as readonly FiltersPanelMessageKey[];
@@ -90,6 +91,34 @@ function setup(g: GridContext<unknown>, o: FiltersPanelOptions, apis: WeakMap<ob
   if (g.settings.injectStyles !== false) injectPanelStyles(target.nodeType === 11 ? (target as ShadowRoot) : doc, g.settings.nonce);
   const fx = (): PanelBridge | undefined => g.features.map((h) => (h as { panel?: PanelBridge }).panel).find(Boolean);
   const b = body(g, fx);
+  const T = (): string => {
+    const c = b.count();
+    return g.msg('fpanel.title') + (c ? ` ${g.msg('fpanel.count', { n: c })}` : '');
+  };
+  // With `dock()` (dock.md 3, 6; filters-panel.md 15): the panel `filters` there, its strip the area collapsed; the
+  // dock's head names it and closes it (× collapses while there is a strip).
+  if (g.settings.features?.some((f) => f.id === 'dock')) {
+    b.el.removeAttribute('role');
+    const keep = o.button !== false;
+    const api: FiltersPanelApi = {
+      open: (column) => !!fx() && !!g.dock?.show('filters') && (b.paint(), b.focus(column)),
+      close: () => void g.dock?.close('filters'),
+      toggle: () => (api.isOpen ? api.close() : api.open(), api.isOpen),
+      get isOpen() {
+        return !!g.dock?.seen('filters');
+      },
+    };
+    apis.set(k, api);
+    const dock: DockPanelSpec = { id: 'filters', title: T, el: b.el, area: o.side ?? 'end', open: keep || !!o.open, collapsed: !o.open, keep, shown: (on) => (on ? b.paint() : b.foldAll()) };
+    return {
+      dock,
+      afterRows: () => void (api.isOpen && b.paint()),
+      destroy() {
+        b.foldAll();
+        apis.delete(k);
+      },
+    } as FeatureHandle;
+  }
   const side = doc.createElement('div');
   side.className = 'dzg-fside';
   side.append(b.el);

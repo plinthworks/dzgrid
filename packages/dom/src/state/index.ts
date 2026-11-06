@@ -87,6 +87,8 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
         // The row grouping (`@dzgrid/dom/grouping`, Phase 7). None (yet): a state's part is left on the context for the
         // grouping's own setup, listed after this feature (review 2026-11-05); a grid without grouping never reads it.
         get rowGroups() { return g.rowGroups ?? later; },
+        // The dock (`@dzgrid/dom/dock`, Phase 9): set up later, its part waits on the context for its setup.
+        get dock() { return g.dock ?? { get: () => undefined, set: (raw: unknown) => ((g.dockLater = raw), []) }; },
       };
       // A list grouped on the server takes it now, in this restore's one request (server-side-groups.md); the grouping's setup checks it.
       const later = { get: () => undefined as never, set: (raw: unknown) => ((g.rowGroupsLater = raw), Array.isArray(raw) && (g.rows as { setBy?(by: unknown[]): void }).setBy?.(raw), []) };
@@ -121,9 +123,10 @@ export function gridState(o: GridStateOptions = {}): GridStateFeature {
           return problems;
         },
         // Groups `{}`: the definitions back; the row grouping the application gave. As the host's change, told as a gesture when the pause ends (nothing if nothing moved).
-        reset: () => (arm('api'), restoreState(k, { ...initial, groups: {}, rowGroups: g.rowGroups?.initial }, env)),
+        reset: () => (arm('api'), restoreState(k, { ...initial, groups: {}, rowGroups: g.rowGroups?.initial, dock: g.dock?.initial }, env)),
       };
       APIS.set(k, api);
+      g.saved = arm;
       g.scope.add(k.subscribe((e) => void (!quiet && e.source !== 'host' && SAVED.includes(e.type) && arm(e.source))));
       // The storage restored, then a server model this feature held asks: what was restored, or the grid as defined.
       // Without `persist` the hold is someone else's (the Angular wrapper's `[state]`, Phase 6 step 12): theirs to end.

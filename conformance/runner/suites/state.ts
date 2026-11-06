@@ -2,6 +2,7 @@ import { clientRows, createColumnModel, createKernel, localeCtx, type ColumnOrGr
 import { diffState, foldedColumns, groupTable } from '@dzgrid/core/spans';
 import { checkRowGroups, groupShape } from '@dzgrid/core/grouping';
 import { captureState, checkState, restoreState, stateText, type GroupsAdapter } from '@dzgrid/core/state';
+import { checkDock, type DockState } from '@dzgrid/core/dock';
 import type { Suite } from './index.js';
 
 type Row = Record<string, unknown> & { id: string };
@@ -11,10 +12,11 @@ const DENSITIES = ['compact', 'comfortable', 'spacious'];
  * `grid-state` (Phase 6 step 5, docs/behaviors/grid-state.md): a client grid on `columns` and `rows` (paged by `pageSize`), the
  * user's `before` commands, then `restore` of a raw state (any JSON). `upgradeV0`: a planted v0 → v1 step (a test-only shape:
  * `{ v: 0, cols: [ids] }`). `groups`: the collapsible group ids of a stub adapter. `rowGroups`: the grid grouped by these columns (a real
- * `groupShape`, its `setBy` as the adapter; Phase 7 step 7), the grouping read back as `by`. Out: the problems, the state captured after, the rows shown, and whether a `SECRET…` cell value reached the text.
+ * `groupShape`, its `setBy` as the adapter; Phase 7 step 7), the grouping read back as `by`. `dock`: a dock's adapter (Phase 9,
+ * dock.md 11) holding `initial`, checked by `@dzgrid/core/dock`'s `checkDock` between `min` and `max`. `text`: the state's text too. Out: the problems, the state captured after, the rows shown, and whether a `SECRET…` cell value reached the text.
  */
 export const state: Record<string, Suite> = {
-  'grid-state': ({ columns, rows = [], pageSize, before = [], restore, upgradeV0, groups, rowGroups }) => {
+  'grid-state': ({ columns, rows = [], pageSize, before = [], restore, upgradeV0, groups, rowGroups, dock, text: withText }) => {
     const m = createColumnModel<Row>(columns as ColumnOrGroup<Row>[]);
     const shape = rowGroups && groupShape<Row>({ by: rowGroups });
     const model = clientRows<Row>({ rows, getRowId: (r) => r.id, columns: m, ctx: localeCtx({ locale: 'fr-FR' }), ...(pageSize && { page: { pageSize } }), ...(shape && { shape }) });
@@ -37,7 +39,17 @@ export const state: Record<string, Suite> = {
         return r.problems;
       },
     };
-    const env = { ...(adapter && { groups: adapter }), ...(rg && { rowGroups: rg }), density: () => density as never, setDensity: (d: unknown) => DENSITIES.includes(d as string) && ((density = d as string), true) };
+    // As `@dzgrid/dom/dock` hands it: checked by the core, the layout replaced when it is an object.
+    let layout: DockState | undefined = dock && (dock.initial ?? { panels: {}, areas: {} });
+    const dk = dock && {
+      get: () => layout,
+      set: (raw: unknown) => {
+        const r = checkDock(raw, dock);
+        if (r.dock) layout = r.dock;
+        return r.problems;
+      },
+    };
+    const env = { ...(adapter && { groups: adapter }), ...(rg && { rowGroups: rg }), ...(dk && { dock: dk }), density: () => density as never, setDensity: (d: unknown) => DENSITIES.includes(d as string) && ((density = d as string), true) };
     const raw = upgradeV0 && checkState(restore, [(s: { cols: string[] }) => ({ v: 1, columns: s.cols.map((id, order) => ({ id, pinned: null, order })) })]).state;
     const problems = restoreState(k, upgradeV0 ? (raw ?? restore) : restore, env);
     const text = stateText(captureState(k, env));
@@ -45,6 +57,7 @@ export const state: Record<string, Suite> = {
     return {
       problems: problems.map((p) => ({ code: p.code, severity: p.severity, path: p.path, ...(p.detail !== undefined && { detail: p.detail }) })),
       state: JSON.parse(text),
+      ...(withText && { text }),
       ...(secret.length > 0 && { leaks: secret.some((v) => text.includes(v as string)) }),
       // The rows shown after the restore (when the case has rows): the order and page it gave.
       ...(t && { shown: m.visible().map((c) => c.id), folds }),

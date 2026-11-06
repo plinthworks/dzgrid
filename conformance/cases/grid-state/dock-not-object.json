@@ -1,0 +1,22 @@
+{
+  "id": "dock-not-object",
+  "suite": "grid-state",
+  "description": "Dock: a part that is not an object is state-field at `dock`, and the dock keeps its layout; `panels` or `areas` that are not objects are told and read as empty.",
+  "refs": ["docs/behaviors/dock.md"],
+  "input": {
+    "columns": [{ "id": "nom" }],
+    "dock": { "min": 160, "max": 800, "initial": { "panels": { "columns": { "area": "start", "open": true } }, "areas": {} } },
+    "restore": { "v": 1, "dock": "end" }
+  },
+  "expected": {
+    "problems": [{ "code": "state-field", "severity": "warning", "path": "dock" }],
+    "state": {
+      "v": 1,
+      "columns": [{ "id": "nom", "order": 0, "pinned": null }],
+      "dock": { "areas": {}, "panels": { "columns": { "area": "start", "open": true } } },
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

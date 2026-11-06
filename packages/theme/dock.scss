@@ -1,0 +1,121 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/dock.css — the dock (Phase 9, docs/behaviors/dock.md 4, 5, 7, 8, 16, 17): its own file, loaded by the
+// applications that use `@dzgrid/dom/dock`. Its layout (the room of each area, the edge's gutter, the strip) is injected
+// by the feature; this file colours it. Compiled to dock.css (layered) and dock.unlayered.css ($layered: false) by
+// `npm run build:theme`; a test fails when they drift.
+//
+// The areas take the grid's surface, a line between them and the rows; the edge's line muted (3:1, a control's
+// boundary), in the accent under the pointer and while focused; the shown tab underlined in the accent; the buttons
+// flat, the focus a 2 px ring. The columns panel fills its area instead of its dialog's size. System colours in forced
+// colours. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-dock {
+    color: var(--tz-fg);
+    background: var(--tz-bg);
+    accent-color: var(--tz-accent);
+  }
+
+  .dzg-dock-head {
+    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+
+  .dzg-dock[data-collapsed] .dzg-dock-head {
+    border-block-end: 0;
+  }
+
+  .dzg-dock[data-area='end'] {
+    border-inline-start: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+
+  .dzg-dock[data-area='start'] {
+    border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+
+  .dzg-dock[data-area='bottom'] {
+    border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+
+  .dzg-dock-sep::before {
+    background: var(--tz-fg-muted);
+  }
+
+  .dzg-dock-sep:hover::before,
+  .dzg-dock-sep:focus-visible::before {
+    background: var(--tz-accent);
+    inline-size: 3px;
+  }
+
+  [data-area='bottom'] > .dzg-dock-sep:hover::before,
+  [data-area='bottom'] > .dzg-dock-sep:focus-visible::before {
+    inline-size: auto;
+    block-size: 3px;
+  }
+
+  .dzg-dock-title {
+    font-weight: 600;
+  }
+
+  .dzg-dock-head button {
+    border: 0;
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: inherit;
+    background: none;
+    cursor: pointer;
+  }
+
+  .dzg-dock-head button:hover {
+    background: var(--tz-bg-raised);
+  }
+
+  .dzg-dock-tab[aria-selected='true'] {
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 var(--tz-accent);
+  }
+
+  .dzg-dock :focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: -2px;
+  }
+
+  .dzg-dock-box > .dzg-cp {
+    inline-size: auto;
+    block-size: 100%;
+    max-block-size: none;
+    padding: 0.5rem;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-dock-sep::before {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+
+    .dzg-dock-sep:hover::before,
+    .dzg-dock-sep:focus-visible::before {
+      background: Highlight;
+    }
+
+    .dzg-dock-tab[aria-selected='true'] {
+      forced-color-adjust: none;
+      box-shadow: inset 0 -2px 0 Highlight;
+    }
+  }
+}

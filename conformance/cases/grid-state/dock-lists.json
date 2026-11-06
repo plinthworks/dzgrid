@@ -1,0 +1,25 @@
+{
+  "id": "dock-lists",
+  "suite": "grid-state",
+  "description": "Dock: `panels` and `areas` that are lists are told (state-field) and read as empty: every panel back to the grid's own placement.",
+  "refs": ["docs/behaviors/dock.md"],
+  "input": {
+    "columns": [{ "id": "nom" }],
+    "dock": { "min": 160, "max": 800 },
+    "restore": { "v": 1, "dock": { "panels": [], "areas": [1] } }
+  },
+  "expected": {
+    "problems": [
+      { "code": "state-field", "severity": "warning", "path": "dock.panels" },
+      { "code": "state-field", "severity": "warning", "path": "dock.areas" }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [{ "id": "nom", "order": 0, "pinned": null }],
+      "dock": { "areas": {}, "panels": {} },
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

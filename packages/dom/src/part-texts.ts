@@ -203,6 +203,17 @@ export interface FiltersPanelMessages {
 }
 
 /**
+ * The dock's texts (`@dzgrid/dom/dock`, Phase 9, dock.md), in their own bundles (`locales/<lang>-dock`): optional here,
+ * required by `dock()`. `{panel}` a panel's title, `{grid}` the grid's name.
+ */
+export type DockMessageKey = `dock.${'region' | 'tabs' | 'collapse' | 'expand' | 'close' | 'place' | 'start' | 'end' | 'bottom' | 'width' | 'height'}`;
+/** A dock bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_DOCK.text }`. */
+export interface DockMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in DockMessageKey]: MessageValue };
+}
+
+/**
  * Row grouping's texts (`@dzgrid/dom/grouping`, `@dzgrid/dom/group-zone`, the column menu's items; Phase 7 steps 5–6), in
  * their own bundles (`locales/<lang>-group`): optional here; `group.*` required by `grouping()`, `zone.*` by `groupZone()`,
  * `menu.groupBy` / `menu.groupOff` by `columnMenu({ use: { grouping } })`.

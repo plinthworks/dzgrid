@@ -1,6 +1,7 @@
-import type { AggFn, AggFuncName, CellAddr, ColumnModel, DisplayedRows, FooterNode, GridKernel, GroupNode, Intent, LocaleCtx, ResolvedColumn, RowKey, RowLayout, RowModel } from '@dzgrid/core';
+import type { AggFn, AggFuncName, CellAddr, ChangeSource, ColumnModel, DisplayedRows, FooterNode, GridKernel, GroupNode, Intent, LocaleCtx, ResolvedColumn, RowKey, RowLayout, RowModel } from '@dzgrid/core';
 import type { RowGroupsAdapter } from '@dzgrid/core/state';
 import type { LiveRegion } from './a11y/live-region.js';
+import type { DockHost } from './dock/types.js';
 import type { Dir } from './dir.js';
 import type { ScrollController } from './interact/scroll.js';
 import type { HeaderRenderer } from './render/header.js';
@@ -15,7 +16,7 @@ import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, GroupsApi, MoveFn, SlotDrivers, SpanFeature } from './features.js';
 import type { CellInput, PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, RowNumbersMessageKey, RulesMessageKey, TreeMessageKey, GroupMessageKey } from './part-texts.js';
+import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, DockMessageKey, RowNumbersMessageKey, RulesMessageKey, TreeMessageKey, GroupMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -218,7 +219,13 @@ export interface GridContext<T> {
    * `RowView.lead`), counts it in the widths, `aria-colcount` and `aria-colindex`; the feature fills it.
    */
   lead?: number;
+  /** The dock (`@dzgrid/dom/dock`, Phase 9), set at its setup: the panels' features show and hide theirs through it. */
+  dock?: DockHost;
+  /** A state's `dock` restored before the dock was set up (`gridState` listed first): applied at its setup. */
+  dockLater?: unknown;
+  /** Set by `@dzgrid/dom/state`: a change that is not a kernel event (the dock) is a gesture, `stateChanged` after the pause. */
+  saved?: (source: ChangeSource) => void;
   /** Find's text in force (`@dzgrid/dom/find`), '' or absent: none — what a cell part is given (`search.find`). */
   findText?: string;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

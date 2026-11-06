@@ -194,3 +194,12 @@ Numbered (step 7, 2026-11-05; `conformance/cases/grid-state/row-groups-*`, `pack
 Nothing new is saved: the sort, the filters, the search and the columns restore as on server pages, in one request (the
 model is made held, `hold(fn)`); the scroll position, the blocks held and the end found are never saved (a restore starts
 at the top, as a new query does).
+
+## The dock (Phase 9, docs/behaviors/dock.md 11)
+With `dock()`, the part `dock` (`StatePart` `'dock'`): `{ panels: { [id]: { area, open } }, areas: { start | end | bottom:
+{ active?, size?, collapsed? } } }` — ids, areas and numbers, never a value. Checked by `@dzgrid/core/dock`'s
+`checkDock` (an unknown area drops its panel; a flag, a tab or a size that is not one: `state-field` at its path; sizes
+kept between the dock's `min` and `max`; unknown panels kept for later); `float` refused by the DOM for now
+(`state-field`, detail `float`). A grid without the dock neither writes nor applies it (its text unchanged). A dock change
+is a gesture (`stateChanged` after the pause); `reset()` puts it back as the options placed it; a state restored before
+the dock is set up (gridState listed first) applies at its setup.

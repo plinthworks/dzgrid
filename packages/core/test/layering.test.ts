@@ -241,7 +241,7 @@ describe('layering of the base and the server entry', () => {
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './state.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
-    expect(both - alone).toBeLessThanOrEqual(1540); // Phase 7 step 7 (owner rule, +2 %): 1 510 → 1 540, `rowGroups`; owner « set include only » (2026-10-29): 1 500 → 1 510
+    expect(both - alone).toBeLessThanOrEqual(1570); // Phase 9 dock (+2 %): 1 540 → 1 570, the `dock` part; Phase 7 step 7 (owner rule, +2 %): 1 510 → 1 540, `rowGroups`; owner « set include only » (2026-10-29): 1 500 → 1 510
     expect(alone).toBeLessThanOrEqual(BASE);
   });
 });

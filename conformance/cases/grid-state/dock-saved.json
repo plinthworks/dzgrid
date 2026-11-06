@@ -1,0 +1,45 @@
+{
+  "id": "dock-saved",
+  "suite": "grid-state",
+  "description": "Dock: a layout restored is the one captured after (each panel's area and whether it is shown, each area's tab, size and collapse), keys in canonical order; no problem.",
+  "refs": ["docs/behaviors/dock.md", "docs/behaviors/grid-state.md"],
+  "input": {
+    "columns": [{ "id": "nom" }],
+    "dock": { "min": 160, "max": 800 },
+    "restore": {
+      "v": 1,
+      "dock": {
+        "panels": {
+          "filters": { "open": true, "area": "end" },
+          "columns": { "area": "end", "open": true },
+          "notes": { "area": "bottom", "open": false }
+        },
+        "areas": {
+          "end": { "size": 320, "active": "filters" },
+          "bottom": { "collapsed": true, "size": 240 }
+        }
+      }
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [{ "id": "nom", "order": 0, "pinned": null }],
+      "dock": {
+        "areas": {
+          "bottom": { "collapsed": true, "size": 240 },
+          "end": { "active": "filters", "size": 320 }
+        },
+        "panels": {
+          "columns": { "area": "end", "open": true },
+          "filters": { "area": "end", "open": true },
+          "notes": { "area": "bottom", "open": false }
+        }
+      },
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

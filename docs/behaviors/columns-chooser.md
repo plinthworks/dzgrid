@@ -193,3 +193,10 @@ colours.
 - Tab: the chooser moves the focus itself along search → list → « Tout afficher » → « Réinitialiser » → « Fermer »
   (WebKit's Tab skips buttons by default); a click focuses what it pressed. « Fermer » is the third footer button.
 - Known risk: sentences go to the grid's live region, outside the `aria-modal` dialog; to be checked by ear (a11y §21).
+
+## In the dock (Phase 9, docs/behaviors/dock.md; « Dock — owner B », 2026-11-06)
+With `dock()` the chooser is the dock's panel `columns` (at the `end` by default, hidden until opened; `dock({ open })`
+shows it from the start): the same search, list, ticks, moves, drag and buttons, but **not modal** — no dialog, no
+`aria-modal`, no focus trap (Tab is the page's), no live region of its own (the grid's); its title is the area's head.
+`open(anchor)` shows it (its search focused), « Fermer » and `close()` hide it, the focus back to what opened it;
+`isOpen` is « its body is seen »; new definitions redraw it (it stays). Without the dock: the dialog, unchanged.

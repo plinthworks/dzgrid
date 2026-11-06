@@ -1,0 +1,22 @@
+{
+  "id": "dock-absent",
+  "suite": "grid-state",
+  "description": "Dock: a grid without the dock neither writes the part nor applies it (its state's text is the one of a grid before the dock existed), and says nothing about it.",
+  "refs": ["docs/behaviors/dock.md", "docs/behaviors/grid-state.md"],
+  "input": {
+    "columns": [{ "id": "nom" }],
+    "text": true,
+    "restore": { "v": 1, "dock": { "panels": { "columns": { "area": "end", "open": true } }, "areas": {} } }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [{ "id": "nom", "order": 0, "pinned": null }],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    },
+    "text": "{\"columns\":[{\"id\":\"nom\",\"order\":0,\"pinned\":null}],\"filter\":{},\"quick\":\"\",\"sort\":[],\"v\":1}"
+  }
+}

@@ -5,6 +5,7 @@ import { popupsFor, type PopupRef } from '../popup.js';
 import { setAttr, setPx } from '../render/write.js';
 import { LiveRegion } from '../a11y/live-region.js';
 import { canHide, listed, listOrder, moveNear, placeInList, resetPatch, sidesOf, stepList } from '../columns/order.js';
+import type { DockPanelSpec } from '../dock/types.js';
 
 /** The texts `columnsChooser()` needs, from `@dzgrid/dom/locales/<lang>-columns` (owner Q4-1), with the moves' `move.edge`, `move.locked`, `move.cancelled`. */
 export const COLUMNS_CHOOSER_KEYS = 'title search list handle up down placed showAll reset close none matches shown hidden allShown resetDone pinnedStart pinnedEnd last clearToMove inClosedGroup'
@@ -61,6 +62,8 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
       if (missing.length) throw new TypeError(`columns-panel: missing ${missing.join(', ')}`);
       const { kernel, columns: m, el, doc, scope } = g;
       const base = `dzg-cp${++uid}`;
+      /** With `dock()`: the panel `columns` in its end area (dock.md 1, 3), built once, not modal; else the dialog. */
+      const docked = !!g.settings.features?.some((f) => f.id === 'dock');
       /** The dialog's own polite status while it is open (the grid's region is outside the `aria-modal` dialog); the grid's otherwise. */
       let region: LiveRegion | null = null;
       const say = (t: string): void => (cur && region ? region : g.live).announce(t);
@@ -195,9 +198,8 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
         d = null;
       };
 
-      const open = (a?: HTMLElement): boolean => {
-        if (cur) return search.focus(), true;
-        if (!listOrder(m).some(listed(m))) return false;
+      /** The panel's body: its search, list and buttons, and their listeners (the dialog's at each opening, the dock's once). */
+      const build = (): HTMLElement => {
         const p = doc.createElement('div');
         p.className = 'dzg-cp';
         mk('div', p, 'dzg-cp-title', T('title')).id = base;
@@ -205,9 +207,11 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
         search.type = 'search';
         status = mk('div', p, 'dzg-cp-none');
         status.setAttribute('role', 'status');
-        region = new LiveRegion(doc, scope);
-        region.el.setAttribute('role', 'status');
-        p.append(region.el);
+        if (!docked) {
+          region = new LiveRegion(doc, scope);
+          region.el.setAttribute('role', 'status');
+          p.append(region.el);
+        }
         list = mk('ul', p, 'dzg-cp-list');
         list.setAttribute('role', 'list');
         list.setAttribute('aria-label', T('list'));
@@ -265,7 +269,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
           } else if (act === 'reset') {
             const r = resetPatch(m);
             if (r) state(r), say(T('resetDone'));
-          } else if (act === 'close') cur?.ref.close();
+          } else if (act === 'close') close('user');
         });
         p.addEventListener('keydown', (e) => {
           const t = e.target as HTMLElement;
@@ -281,7 +285,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
           const i = all.indexOf(t as HTMLInputElement);
           // Tab: search → the list's one stop → « Show all » → « Reset » → « Close », wrapping (165); the same in every
           // engine (WebKit's Tab skips buttons by default).
-          if (k === 'Tab') {
+          if (k === 'Tab' && cur) {
             const stops = [search, all.find((b) => b.tabIndex === 0), ...p.querySelectorAll<HTMLElement>('.dzg-cp-foot button')].filter((x): x is HTMLElement => !!x);
             stop();
             return void stops[(stops.indexOf(t) + (e.shiftKey ? -1 : 1) + stops.length) % stops.length]!.focus();
@@ -304,7 +308,15 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
           d = { id: li.dataset['col']!, li, pid: e.pointerId, y: e.clientY, at: e.clientY };
           h.setPointerCapture?.(e.pointerId);
         });
+        return p;
+      };
+      const close = (src?: 'user'): void => void (docked ? g.dock?.hide('columns', src) : cur?.ref.close());
 
+      const open = (a?: HTMLElement): boolean => {
+        if (cur) return search.focus(), true;
+        if (!listOrder(m).some(listed(m))) return false;
+        if (docked) return !!g.dock?.show('columns') && (search.focus(), true);
+        const p = build();
         const ref = popupsFor(g).open(el.root, p, {
           placement: 'block-end', modal: true, from: a ?? el.header, align: 'end', fit: true,
           // The application's button is left to its own click (it opens again: the focus to the search).
@@ -377,20 +389,22 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
 
       // Live sync (22): a change made anywhere redraws the list; new definitions with another column set close it.
       const off = kernel.subscribe((e) => {
-        if (e.type !== 'columnsChanged' || !cur) return;
-        if (set() !== cur.set) return cur.ref.close();
+        if (e.type !== 'columnsChanged' || !(cur || g.dock?.seen('columns'))) return;
+        if (cur && set() !== cur.set) return cur.ref.close();
         cancel();
         draw();
       });
 
       apis.set(kernel, {
         open,
-        close: () => cur?.ref.close(),
+        close,
         get isOpen() {
-          return !!cur;
+          return !!(cur || g.dock?.seen('columns'));
         },
       });
+      const dock: DockPanelSpec | undefined = docked ? { id: 'columns', title: () => T('title'), el: build(), shown: (on) => (on ? draw() : (cancel(), hush())) } : undefined;
       return {
+        ...(dock && { dock }),
         destroy() {
           off();
           hush();

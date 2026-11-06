@@ -386,3 +386,67 @@ Built R0–R5 (`row-drag-plan.md`): sheet first, conformance by hand, tests red 
 
 - `GridEvent` gains `rowMove`: accepted in api/ (« 1 oui »).
 - Angular: no `(rowMove)` output nor `ctl.rowDrag()` for now (« 2 A »): apps use `(gridEvent)`; K.8 line kept at 90 000.
+
+## Dock — owner B (2026-11-06)
+
+Owner: **B — the dock's V1 + V2 for 1.6.0**: areas `start` and `end` (one panel per area, resize by the edge and by
+keys, collapse, saved in GridState, RTL, the columns panel docked) **plus V2**: tabs (several panels in one area, e.g.
+columns + filters) and the `bottom` area. The floating window (V3) later: the model, the state's shape and the API are
+the full ones, a `float` area refused with a warning for now. Work slowly: one gate at the end. Sheet `docs/behaviors/dock.md`.
+
+### Lead decisions
+- **Inside the grid's root, not a frame around it** (plan §2.1 written before the filters panel): as the filters panel,
+  each area is absolute inside `.dzg`, the root keeping its room by padding (`--dzg-dock-start`, `-end`, `-bottom`),
+  so an application's `#host > .dzg` rule keeps working and everything placed from the viewport's box follows (checked
+  in three engines). The start area is the root's first child (Tab order: start panel, grid, end, bottom).
+- **The layout's check is pure, in a new core entry `@dzgrid/core/dock`** (`checkDock`, types `DockArea`, `DockState`…):
+  `@dzgrid/core/state` only reads and hands the part (`StateEnv.dock`, +23 B), as `rowGroups` with the grouping. Shape:
+  `{ panels: { [id]: { area, open, at? } }, areas: { start|end|bottom: { active?, size?, collapsed? } } }`; `at` (a
+  floating window's corner) and `area: 'float'` are in the model for V3. Sizes per area, not per panel (tabs share it).
+- **No shared code between the panels and the dock**: a feature hands `handle.dock = { id, title(), el, area, open,
+  collapsed, keep, shown(on) }` (read by shape, types only in `dom/dock/types.ts`) and talks to `g.dock` (set by
+  `dock()` on the grid's context) — nothing in the DOM base nor in `@dzgrid/dom/internal`; a panel knows the dock is
+  there from `settings.features` (as the filters panel finds `filters`).
+- **The columns panel's body is not split into a file of its own** (plan §2.4): the same function builds it for the dialog
+  (at each opening) and for the dock (once); docked it has no live region of its own (the grid's), no Tab trap, its
+  « Fermer » hides the panel; its title is left to the area's head (hidden by the dock's CSS: 0 B in the panel).
+- **The filters panel docked**: its strip becomes its area collapsed (default `button: true`: shown collapsed, as the strip
+  was), `open: true` expanded, `button: false` hidden until `api(grid).open()`; × collapses while it has a strip
+  (`keep`), else hides; its title carries the count (« Filtres Actifs : 2 »). Its own side is not drawn.
+- **Edge**: a 24 px gutter on the rows' side of the area (WCAG 2.5.8 without covering the rows' scrollbar or the
+  panel's controls); the line in its middle (`--tz-fg-muted`, 3:1). Arrows move the edge the way they point (logical
+  through the core's `intentFor`, so right to left needs no code of its own); Enter collapses and gives the focus to
+  « Déplier » (the edge is hidden while collapsed).
+- **Collapse is per area**; a collapsed area keeps its head along the edge (2 rem, words written downward).
+- **Close vs collapse**: × hides the panel (back with its app's button / menu item, at the same place and size);
+  collapse keeps its tab in the strip.
+- **No F6** (plan §2.1's rule): a page cannot count on receiving F6 (the browsers' own bars) and automation cannot
+  answer it (synthetic keys bypass the browser's chrome); the areas are named regions in Tab order. To try by hand.
+- **Sizes**: 288 px beside, 240 under by default; `sizes: { min: 160, max: 800 }`; the rows keep 160 px; a size that
+  no longer fits is kept and shown smaller.
+- **`float`**: `dock({ open })`, `show`, `move` → `invalid-setting` (`dock.open.<id>`, `dock.area`, `dock.move`); a
+  restored state → `state-field` at `dock.panels.<id>.area`, detail `float`; the panel at its first place.
+- **A dock change is a gesture for `gridState()`**: `g.saved(source)` (set by the state feature), `stateChanged` after the
+  pause; a restore is not told; `reset()` puts the dock back as the options placed it (`g.dock.initial`). A state
+  restored before the dock was set up (`gridState` listed first) waits on the context (`dockLater`), as `rowGroups`.
+- **Angular**: nothing in the wrapper (K.8 untouched): `dock()` in `[features]`, `ctl.use(dock)` (tested).
+
+### Measures (gzipped, minified, `npm run check:size`)
+| Line | Before | Measured | Line |
+|---|---|---|---|
+| `@dzgrid/core/dock` (new, over the core) | — | 451 | **500** (measure + 10 %) |
+| `@dzgrid/dom/dock` (new, over the DOM base) | — | 4 174 | **4 600** (measure + 10 %; plan V1 + V2 ≈ 4 200) |
+| `locales/{en,fr,ar}-dock` (new, 11 texts) | — | 209 / 233 / 276 | **250 / 300 / 350** |
+| `@dzgrid/theme/dock.css` (new) | — | 546 | **650** |
+| `@dzgrid/core/state` (reads the part) | 1 523 / 1 540 | 1 546 | **1 570** (+2 % rule) |
+| `@dzgrid/dom/state` (the adapter, the gesture, reset) | 1 241 / 1 264 | 1 273 | **1 289** (+2 % rule) |
+| `@dzgrid/dom/columns-panel` (docked) | 4 348 / 4 400 | 4 475 | **4 488** (+2 % rule; Q-SB5 had granted 4 800) |
+| `@dzgrid/dom/filters-panel` (docked) | 2 914 / 3 250 | 3 106 | 3 250 kept |
+| `@dzgrid/core`, `@dzgrid/dom`, `internal`, theme, Angular | 29 258, 23 650, 3 799, 2 918, 7 883 | unchanged | kept |
+| **K.8 audit profile** | 89 977 | 89 977 | 90 000 kept |
+
+- `check:api`: additions only (`@dzgrid/core/dock`, `@dzgrid/dom/dock`, `DockMessageKey`; `GridState.dock?`,
+  `StatePart` `'dock'`, `StateEnv.dock?`, the messages' unions).
+- Gate (2026-11-06): `test:ci` / `test:tz` 8 742 passed; then a type-only cast fixed in `dock-state.test.ts` and the rest
+  of the chain run (`typecheck`, `build`, `check:size` 0 over, `check:api` additions only). Browsers
+  (`node scripts/browser-dock.mjs`): Chrome 21 / 21, Firefox 15 / 15, WebKit 15 / 15; planted fault (a physical drag) red.

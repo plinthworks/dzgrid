@@ -1,0 +1,60 @@
+{
+  "id": "dock-bad",
+  "suite": "grid-state",
+  "description": "Dock: an unknown area drops its panel, a flag or a size that is not one is skipped (state-field, a path, never a value), a size is kept between min and max without a word, a panel the grid may not have is kept, an area left empty is dropped. `float` is part of the model (the DOM refuses it for now).",
+  "refs": ["docs/behaviors/dock.md"],
+  "input": {
+    "columns": [{ "id": "nom" }],
+    "dock": { "min": 160, "max": 800 },
+    "restore": {
+      "v": 1,
+      "dock": {
+        "panels": {
+          "columns": { "area": "left", "open": true },
+          "filters": { "area": "start", "open": "yes" },
+          "notes": { "area": "bottom", "open": true },
+          "win": { "area": "float", "open": true, "at": { "inline": 10, "block": 20 } },
+          "win2": { "area": "float", "open": false, "at": { "inline": "x" } },
+          "x": 5
+        },
+        "areas": {
+          "end": { "size": 5000 },
+          "bottom": { "size": 12 },
+          "start": { "size": "wide", "collapsed": 1, "active": 7 },
+          "side": {}
+        }
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      { "code": "state-field", "severity": "warning", "path": "dock.panels.columns.area" },
+      { "code": "state-field", "severity": "warning", "path": "dock.panels.filters.open" },
+      { "code": "state-field", "severity": "warning", "path": "dock.panels.win2.at" },
+      { "code": "state-field", "severity": "warning", "path": "dock.panels.x" },
+      { "code": "state-field", "severity": "warning", "path": "dock.areas.start.size" },
+      { "code": "state-field", "severity": "warning", "path": "dock.areas.start.collapsed" },
+      { "code": "state-field", "severity": "warning", "path": "dock.areas.start.active" },
+      { "code": "state-field", "severity": "warning", "path": "dock.areas.side" }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [{ "id": "nom", "order": 0, "pinned": null }],
+      "dock": {
+        "areas": {
+          "bottom": { "size": 160 },
+          "end": { "size": 800 }
+        },
+        "panels": {
+          "filters": { "area": "start", "open": false },
+          "notes": { "area": "bottom", "open": true },
+          "win": { "area": "float", "at": { "block": 20, "inline": 10 }, "open": true },
+          "win2": { "area": "float", "open": false }
+        }
+      },
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

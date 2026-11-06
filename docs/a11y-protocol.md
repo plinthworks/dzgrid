@@ -1064,3 +1064,24 @@ serveur (étapes 6–7) ajouteront leurs points ici.
 
 Règle de décision : une ligne en chargement lue comme une ligne de données (189), une phrase dite à chaque paquet en
 défilant (189, 192) ou un total faux (188) se corrigent avant la clôture de la Phase 8.
+
+## 28. Étapes — le dock (Phase 9)
+
+Page : `packages/dom/test/browser/dock.html` (stock inventé ; `?open=columns:end` : le panneau des colonnes et celui
+des filtres en onglets à la fin), en **français** puis en **arabe** (`?locale=ar-DZ`, droite à gauche). Fiche :
+`docs/behaviors/dock.md`. Couples A (NVDA + Firefox) et C (VoiceOver + Safari). Durée estimée : 15 min par couple et par
+langue. F6 n'est pas proposé (décisions « Dock — owner B ») : essayer F6 une fois pour noter ce que fait le navigateur.
+
+193. **Les régions.** La liste des régions du lecteur donne « Choisir les colonnes, Stock » ; Tab depuis la grille arrive
+     dans la zone de fin (le bord, les onglets, les boutons), dans l'ordre de lecture.
+194. **Les onglets.** « Panneaux, liste d'onglets » ; `→` (`←` en arabe) passe à « Filtres, onglet, 2 sur 2, non
+     sélectionné » sans l'afficher ; `Entrée` l'affiche (« sélectionné ») ; Tab entre dans le panneau affiché.
+195. **Le bord.** Tab jusqu'au bord : « Largeur de Choisir les colonnes, séparateur, 288 » ; `←` : « 304 » dit ; `Fin`,
+     `Début` : les limites ; `Entrée` replie, le focus sur « Déplier Choisir les colonnes, réduit ».
+196. **Placer.** « Placer Choisir les colonnes, menu » ; `Entrée` : « Au début, À la fin (coché), En bas » ; « En bas »
+     déplace le panneau, le focus sur son bouton « Placer » dans la zone du bas, la région dite en y entrant.
+197. **Fermer.** × : le panneau disparaît, le focus revient au bouton « Colonnes » de la page (ou à la cellule de la
+     grille) ; rien n'est dit en trop.
+
+Règle de décision : un focus perdu (195, 196, 197), un état ou une valeur non dits (194, 195) ou un ordre de Tab qui ne
+suit pas l'écran (193) se corrigent avant la clôture de la Phase 9.

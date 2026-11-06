@@ -109,6 +109,10 @@
       "types": "./src/row-drag.ts",
       "default": "./src/row-drag.ts"
     },
+    "./dock": {
+      "types": "./src/dock.ts",
+      "default": "./src/dock.ts"
+    },
     "./row-numbers": {
       "types": "./src/row-numbers.ts",
       "default": "./src/row-numbers.ts"
@@ -416,6 +420,18 @@
     "./locales/ar-row-drag": {
       "types": "./src/locales/ar-row-drag.ts",
       "default": "./src/locales/ar-row-drag.ts"
+    },
+    "./locales/en-dock": {
+      "types": "./src/locales/en-dock.ts",
+      "default": "./src/locales/en-dock.ts"
+    },
+    "./locales/fr-dock": {
+      "types": "./src/locales/fr-dock.ts",
+      "default": "./src/locales/fr-dock.ts"
+    },
+    "./locales/ar-dock": {
+      "types": "./src/locales/ar-dock.ts",
+      "default": "./src/locales/ar-dock.ts"
     },
     "./locales/en-row-numbers": {
       "types": "./src/locales/en-row-numbers.ts",

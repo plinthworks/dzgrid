@@ -1095,6 +1095,17 @@ versus the ids the app saves today.
   Arabic), a finger on the grip moves / elsewhere scrolls, forced colours Highlight, axe 0 fr / ar. Local demo
   `playground/deplacer.html` (out of git). Sizes and lead decisions: decisions.md « Row drag — lead decisions ».
 
+- [x] **The dock V1 + V2** (owner B, 2026-11-06; plan `phase-9-steps/status-dock-plan.md` §2, D0–D5) — built 2026-11-06,
+  not committed (1.6.0, unreleased): sheet `docs/behaviors/dock.md`; `@dzgrid/core/dock` (`checkDock`, the layout's
+  types) and `GridState.dock`; `@dzgrid/dom/dock` (areas start / end / bottom inside the root, tabs, the edge as an APG
+  window splitter, collapse, « Placer » menu, `float` refused for V3), the columns panel and the filters panel docked,
+  `@dzgrid/dom/state` (the part, a gesture, reset), texts `-dock`, `dock.css` (5 contrast pairs); no F6 (decided).
+  Tests: conformance `grid-state/dock-*` 5, DOM 31 (`dock`, `dock-panels`, `dock-state`), theme 5, Angular 1.
+  Browsers (`node scripts/browser-dock.mjs`): Chrome 21, Firefox 15, WebKit 15 — the area at the inline end, a mouse drag
+  of the edge, keys, collapse, the bottom area, right to left (planted fault: a physical drag caught), 320 px, forced
+  colours, axe 0 fr / ar. Local demo `playground/dock.html` (out of git). Sizes and lead decisions: decisions.md « Dock —
+  owner B ». Next: V3, the floating window.
+
 ## Phase 7 — row grouping and aggregation (started 2026-11-04, closed 2026-11-05, 1.5.0 unreleased)
 
 Plan `docs/phase-7-plan.md` (aligned 2026-11-04); owner answers « ★ everywhere in §5, sizes OK » (`docs/phase-7-steps/

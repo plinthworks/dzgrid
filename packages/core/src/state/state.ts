@@ -1,5 +1,6 @@
 import type { Side } from '../columns/defs.js';
 import type { ColumnModel, ColumnState } from '../columns/model.js';
+import type { DockState } from '../dock/layout.js';
 import type { FilterModel } from '../filter/model.js';
 import type { GridCommand, GridKernel } from '../kernel.js';
 import { canonical, makeQuery, type Query } from '../model/query.js';
@@ -46,9 +47,11 @@ export interface GridState {
   readonly density?: Density;
   /** The grouping columns' ids, the first level first (Phase 7, owner Q-ST A): never the open groups (their keys hold row values). */
   readonly rowGroups?: readonly string[];
+  /** Where the dock's panels stand (Phase 9, dock.md 11; `@dzgrid/core/dock`): on a grid with `dock()` only. */
+  readonly dock?: DockState;
 }
 
-export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density' | 'rowGroups';
+export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density' | 'rowGroups' | 'dock';
 /** Which parts a capture writes and a restore applies: every one by default. `page` stands for `page` and `pageSize`. */
 export interface StateOptions {
   readonly include?: readonly StatePart[];
@@ -82,6 +85,8 @@ export interface StateEnv {
   readonly groups?: GroupsAdapter | undefined;
   /** Absent: a grid without grouping, which neither writes nor applies `rowGroups`. */
   readonly rowGroups?: RowGroupsAdapter | undefined;
+  /** Absent: a grid without the dock, which neither writes nor applies `dock` (`@dzgrid/dom/dock`; checked by `checkDock`). */
+  readonly dock?: { get(): DockState | undefined; set(raw: unknown): readonly Problem[] } | undefined;
 }
 
 /** A column entry's fields: the test of a value, and what an absent one means (an order: its place in the list). */
@@ -132,6 +137,7 @@ export function captureState<T>(k: GridKernel<T>, env: StateEnv = {}, opts?: Sta
     pageSize: pg?.size,
     density: env.density?.(),
     rowGroups: env.rowGroups?.get(),
+    dock: env.dock?.get(),
   };
   for (const p in s) if (!on(opts, (p == 'pageSize' ? 'page' : p) as StatePart)) delete s[p];
   return JSON.parse(canonical({ ...s, v: 1 }));
@@ -219,6 +225,8 @@ export function restoreState<T>(k: GridKernel<T>, raw: unknown, env: StateEnv = 
   if (has('density')) run.push(() => void (env.setDensity?.(s.density) === false && bad('density')));
   // ---- the row grouping (Phase 7): the grouping checks its own columns (a grid without it ignores the part).
   if (env.rowGroups && has('rowGroups')) run.push(() => void problems.push(...env.rowGroups!.set(s.rowGroups)));
+  // ---- the dock (Phase 9): its own checking; a grid without it ignores the part.
+  if (env.dock && has('dock')) run.push(() => void problems.push(...env.dock!.set(s.dock)));
 
   // ---- the query (G 10, 11): unknown or removed columns dropped; what the state does not name stays the grid's.
   if (has('sort') || has('filter') || has('quick')) {

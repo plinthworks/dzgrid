@@ -61,6 +61,10 @@
       "types": "./src/row-drag.ts",
       "default": "./src/row-drag.ts"
     },
+    "./dock": {
+      "types": "./src/dock.ts",
+      "default": "./src/dock.ts"
+    },
     "./edit": {
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"

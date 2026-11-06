@@ -22,6 +22,7 @@
       "@dzgrid/core/infinite": ["../core/dist/infinite.d.ts"],
       "@dzgrid/core/server-side": ["../core/dist/server-side.d.ts"],
       "@dzgrid/core/row-drag": ["../core/dist/row-drag.d.ts"],
+      "@dzgrid/core/dock": ["../core/dist/dock.d.ts"],
       "@dzgrid/core/edit": ["../core/dist/edit.d.ts"],
       "@dzgrid/core/range": ["../core/dist/range.d.ts"],
       "@dzgrid/core/state": ["../core/dist/state.d.ts"],

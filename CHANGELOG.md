@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased — 1.6.0
 
-Phase 9, moving rows (owner answers Q-RD1…Q-RD12, 2026-11-05; sheet `docs/behaviors/row-move.md`). Nothing of 1.5.0 is
-removed or narrowed; `GridEvent` gains a member (`check:api` reports the union « changed »: owner to accept).
+Phase 9, moving rows (owner answers Q-RD1…Q-RD12, 2026-11-05; sheet `docs/behaviors/row-move.md`) and the dock (owner
+B, 2026-11-06; sheet `docs/behaviors/dock.md`). Nothing of 1.5.0 is removed or narrowed; `GridEvent` gains a member
+(`check:api` reports the union « changed »: accepted by the owner 2026-11-06).
 
 ### Added
 - `@dzgrid/core/row-drag` (pure): `moveRows(rows, move, getRowId, { parentId, setParent })` — the reorder an application
@@ -27,6 +28,20 @@ removed or narrowed; `GridEvent` gains a member (`check:api` reports the union �
   `menuItems(c)` for the cell menu (Monter, Descendre, En haut, En bas, Rentrer, Ressortir). Texts
   `locales/{en,fr,ar}-row-drag`; look `@dzgrid/theme/row-drag.css` (forced colours, contrast pairs).
 - Angular: nothing new in the wrapper — `(gridEvent)` carries `rowMove`, `ctl.use(rowDragFeature)` gives its api.
+- `@dzgrid/dom/dock` (opt-in, `dock({ open, panels, sizes, onChange })`): panels beside the rows (`start`, `end`) and under
+  them (`bottom`), inside the grid's box (the rows take the room left); tabs when an area holds several (APG, manual
+  activation, ← → the reading way); the edge a focusable `separator` (APG window splitter: drag, ← → / ↑ ↓ 16 px, Shift
+  64, Home / End, Enter collapses), 24 px gutter; collapse to a 2 rem strip; « Placer » menu (Au début · À la fin · En
+  bas); × closes, the focus back to what opened it; right to left by logical sides; 30 rem or less: an open side area
+  covers the rows. `DockApi`: `show`, `hide`, `move`, `collapse`, `resize`, `layout`, `setLayout`. The columns panel
+  (`columnsChooser()`) and the filters panel (`filtersPanel()`) stand in it when both are used, their options and api
+  unchanged (the columns panel then not modal; the filters panel's strip its area collapsed). The floating window
+  (`float`) is in the model but refused for now (`invalid-setting` / `state-field`). Texts `locales/{en,fr,ar}-dock`;
+  look `@dzgrid/theme/dock.css` (forced colours, contrast pairs).
+- `@dzgrid/core/dock` (pure): `checkDock(raw, { min, max })` and the types `DockArea`, `DockState`, `DockPanelState`,
+  `DockAreaState`. `GridState.dock?` and `StatePart` `'dock'` (`StateEnv.dock?`): with `gridState()`, where the panels
+  stand, saved and restored; a dock change is a gesture (`stateChanged`); `reset()` puts it back.
+- Angular: nothing new in the wrapper — `dock()` in `[features]`, `ctl.use(dockFeature)` gives its api.
 
 ## [1.5.0] - 2026-11-05
 

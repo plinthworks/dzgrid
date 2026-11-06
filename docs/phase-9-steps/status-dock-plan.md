@@ -15,6 +15,17 @@ Plan only; nothing coded. Sheet → tests first (red) → code → review → ga
 
 ## 0. What the code already holds
 
+**Re-read against the code on 2026-11-06 (dock, owner B), what moved since this was written:** the status bar is built
+(`@dzgrid/dom/statusbar`, the shared strip `bottomStrip` in `@dzgrid/dom/internal`); the **filters panel** is built
+(`@dzgrid/dom/filters-panel`) and stands **inside the grid's root**, which keeps its room by padding — the rows, the
+overlay and everything placed from the viewport's box follow it in three engines, so the « frame around the root » of
+§2.1 is not needed: the dock does the same (decisions.md « Dock — owner B »). Its body is already apart from its side
+(`body()`), ready to be hosted. The columns panel's body is still built inside `open()`; the cell menu's list moved to
+`@dzgrid/dom/internal` (`menuList`), which the dock's « Place » menu reuses. Budgets now: core 29 258 / 29 300, core/state
+1 523 / 1 540, dom 23 650 / 23 660, internal 3 799 / 3 800 (full), columns-panel 4 348 / 4 400, filters-panel 2 914 /
+3 250, dom/state 1 241 / 1 264, theme 2 918, Angular 7 883 / 7 900, K.8 89 977 / 90 000 (so nothing may go into the
+core base, the DOM base, internal or the wrapper). The facts below are those of 2026-11-03.
+
 - **The block is in the core already.** `rangeBox(range, displayed, columns)` and `boxRows(box, displayed)` (data rows
   only: details, fillers, loading rows count for nothing) in `@dzgrid/core/range`; the kernel emits
   `rangeChanged {source, range}`. Nothing sums yet.
@@ -134,7 +145,7 @@ pager, a11y). Edits: `pagination-footer.md` (the shared strip), `parts.md` (slot
 
 ### 2.1 The model
 
-- **A dock is a frame around the grid, not inside it.** `dock()` wraps the grid's root at setup:
+- *(2026-11-06: built inside the root instead, as the filters panel — see §0.)* **A dock is a frame around the grid, not inside it.** `dock()` wraps the grid's root at setup:
   `host > div.dzg-frame > [area start, .dzg, area end] / [area bottom]` (CSS grid, logical areas). The grid's root and
   everything placed from its viewport are untouched (§0). The status strip stays inside the grid's root, under the
   rows; a bottom panel sits under the whole grid (status strip included).

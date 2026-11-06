@@ -53,9 +53,11 @@ filter at once from the top of the panel.
     the open form is a group named by its column; announcements polite, through the grid's region.
 14. **Beside the columns panel.** Both may be used: the columns dialog opens under the headers, which stop where the
     filters panel starts, so the two stand side by side, never one over the other. The application may show only one.
-15. **Ready to dock.** The panel's body is built apart from where it stands: when the dock comes (status-dock-plan.md
-    §2), it registers there as the panel `filters` and the application changes nothing (`filtersPanel(options)` and its
-    api stay).
+15. **In the dock.** The panel's body is built apart from where it stands: with `dock()` (docs/behaviors/dock.md) it is
+    the dock's panel `filters` and the application changes nothing (`filtersPanel(options)` and its api stay): on its
+    `side` (`end` by default); its strip is its area collapsed (« Filtres » with the count), `open: true` expanded,
+    `button: false` hidden until `api(grid).open()`; the area's head names it, its × collapses the area while there is a
+    strip (else hides it); its own side, strip and head are not drawn; beside the columns panel, two tabs.
 16. **Look.** Colours from the theme (`@dzgrid/theme/filters-panel.css`), CSS variables only; layout injected by the
     feature. The panel's width: `--dzg-fpanel-size` (18 rem), the strip's: `--dzg-fstrip-size` (2 rem).
 
@@ -66,4 +68,4 @@ at setup, naming them.
 
 ## Where DzGrid differs on purpose
 - The panel is inside the grid's box, not a page's sidebar: one component to place.
-- No drag-and-drop docking yet (the dock comes later, status-dock-plan.md).
+- No drag-and-drop docking: the dock's « Placer » menu moves it (dock.md 10).
