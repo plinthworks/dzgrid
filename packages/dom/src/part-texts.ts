@@ -215,3 +215,15 @@ export interface GroupMessages {
   readonly locale: string;
   readonly text: { readonly [K in GroupMessageKey]: MessageValue };
 }
+
+/**
+ * Moving rows' texts (`@dzgrid/dom/row-drag`, Phase 9, row-move.md 22, 25), in their own bundles (`locales/<lang>-row-drag`):
+ * optional here, required by `rowDrag()`. `{n}` a place or a count, `{total}` the siblings shown, `{level}` a tree's level
+ * from 1, `{max}` the most rows a gesture moves. Rows are named by place, never by value.
+ */
+export type RowDragMessageKey = `rmove.${'placed' | 'placedLevel' | 'many' | 'hidden' | 'edge' | 'locked' | 'sorted' | 'grouped' | 'refused' | 'tooMany' | 'cancelled' | 'ghost' | 'up' | 'down' | 'top' | 'bottom' | 'in' | 'out'}`;
+/** A row-drag bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_ROW_DRAG.text }`. */
+export interface RowDragMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in RowDragMessageKey]: MessageValue };
+}

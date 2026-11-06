@@ -60,6 +60,11 @@
       "maxGzip": 12160,
       "over": "@dzgrid/core"
     },
+    "@dzgrid/core/row-drag": {
+      "file": "packages/core/src/row-drag.ts",
+      "maxGzip": 1550,
+      "over": "@dzgrid/core"
+    },
     "@dzgrid/core/edit": {
       "file": "packages/core/src/edit.ts",
       "maxGzip": 3160,
@@ -288,6 +293,18 @@
       "file": "packages/dom/src/locales/ar-find.ts",
       "maxGzip": 300
     },
+    "@dzgrid/dom/locales/en-row-drag": {
+      "file": "packages/dom/src/locales/en-row-drag.ts",
+      "maxGzip": 350
+    },
+    "@dzgrid/dom/locales/fr-row-drag": {
+      "file": "packages/dom/src/locales/fr-row-drag.ts",
+      "maxGzip": 450
+    },
+    "@dzgrid/dom/locales/ar-row-drag": {
+      "file": "packages/dom/src/locales/ar-row-drag.ts",
+      "maxGzip": 550
+    },
     "@dzgrid/dom/locales/en-filters-panel": {
       "file": "packages/dom/src/locales/en-filters-panel.ts",
       "maxGzip": 250
@@ -431,6 +448,10 @@
     "@dzgrid/theme/find.css": {
       "file": "packages/theme/find.css",
       "maxGzip": 561
+    },
+    "@dzgrid/theme/row-drag.css": {
+      "file": "packages/theme/row-drag.css",
+      "maxGzip": 450
     },
     "@dzgrid/theme/filters-panel.css": {
       "file": "packages/theme/filters-panel.css",
@@ -755,6 +776,17 @@
         "@dzgrid/core/internal",
         "@dzgrid/dom/internal",
         "./chunk.js"
+      ]
+    },
+    "@dzgrid/dom/row-drag": {
+      "file": "packages/dom/src/row-drag.ts",
+      "maxGzip": 5350,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/row-drag",
+        "@dzgrid/dom/internal"
       ]
     },
     "@dzgrid/dom/filters-panel": {

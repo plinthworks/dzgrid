@@ -1,0 +1,63 @@
+{
+  "id": "flat-inverse",
+  "suite": "row-move-apply",
+  "description": "A move then its opposite gives the list back (the keys' undo, row-move.md 26).",
+  "input": {
+    "rows": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      },
+      {
+        "id": "e"
+      }
+    ],
+    "moves": [
+      {
+        "keys": [
+          "b"
+        ],
+        "target": {
+          "key": "d",
+          "where": "after"
+        }
+      },
+      {
+        "keys": [
+          "b"
+        ],
+        "target": {
+          "key": "c",
+          "where": "before"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "c",
+        "d",
+        "b",
+        "e"
+      ],
+      [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ]
+    ],
+    "same": true
+  }
+}

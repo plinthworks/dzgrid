@@ -50,6 +50,9 @@
       "@dzgrid/core/infinite": [
         "./packages/core/src/infinite.ts"
       ],
+      "@dzgrid/core/row-drag": [
+        "./packages/core/src/row-drag.ts"
+      ],
       "@dzgrid/core/server-side": [
         "./packages/core/src/server-side.ts"
       ],
@@ -139,6 +142,9 @@
       ],
       "@dzgrid/dom/find": [
         "./packages/dom/src/find.ts"
+      ],
+      "@dzgrid/dom/row-drag": [
+        "./packages/dom/src/row-drag.ts"
       ],
       "@dzgrid/dom/filters-panel": [
         "./packages/dom/src/filters-panel.ts"

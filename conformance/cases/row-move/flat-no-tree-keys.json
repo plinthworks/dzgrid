@@ -1,0 +1,51 @@
+{
+  "id": "flat-no-tree-keys",
+  "suite": "row-move",
+  "description": "A flat list has no inside and no out: the keys say edge (row-move.md 17).",
+  "input": {
+    "tree": false,
+    "shown": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      }
+    ],
+    "steps": [
+      {
+        "next": "in",
+        "keys": [
+          "b"
+        ],
+        "focus": "b"
+      },
+      {
+        "next": "out",
+        "keys": [
+          "b"
+        ],
+        "focus": "b"
+      },
+      {
+        "drop": [
+          0,
+          0.3
+        ],
+        "moving": [
+          "b"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "steps": [
+      null,
+      null,
+      {
+        "key": "a",
+        "where": "before"
+      }
+    ]
+  }
+}

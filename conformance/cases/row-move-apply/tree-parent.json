@@ -1,0 +1,132 @@
+{
+  "id": "tree-parent",
+  "suite": "row-move-apply",
+  "description": "moveRows on a parentId tree: inside as the last child, a sibling before keeps its parent, never into itself or under itself, the end of the roots (row-move.md 7, 8).",
+  "input": {
+    "tree": true,
+    "rows": [
+      {
+        "id": "r1",
+        "parent": null
+      },
+      {
+        "id": "a",
+        "parent": "r1"
+      },
+      {
+        "id": "b",
+        "parent": "r1"
+      },
+      {
+        "id": "r2",
+        "parent": null
+      },
+      {
+        "id": "c",
+        "parent": "r2"
+      }
+    ],
+    "moves": [
+      {
+        "keys": [
+          "c"
+        ],
+        "target": {
+          "key": "r1",
+          "where": "inside"
+        }
+      },
+      {
+        "keys": [
+          "a"
+        ],
+        "target": {
+          "key": "r2",
+          "where": "inside"
+        }
+      },
+      {
+        "keys": [
+          "r2"
+        ],
+        "target": {
+          "key": "r1",
+          "where": "before"
+        }
+      },
+      {
+        "keys": [
+          "r1"
+        ],
+        "target": {
+          "key": "a",
+          "where": "inside"
+        }
+      },
+      {
+        "keys": [
+          "r2"
+        ],
+        "target": {
+          "key": "r1",
+          "where": "after"
+        }
+      },
+      {
+        "keys": [
+          "b"
+        ],
+        "target": {
+          "key": null,
+          "where": "after"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "rows": [
+      [
+        "r1<",
+        "a<r1",
+        "b<r1",
+        "c<r1",
+        "r2<"
+      ],
+      [
+        "r1<",
+        "b<r1",
+        "c<r1",
+        "r2<",
+        "a<r2"
+      ],
+      [
+        "r2<",
+        "r1<",
+        "b<r1",
+        "c<r1",
+        "a<r2"
+      ],
+      [
+        "r2<",
+        "b<r1",
+        "c<r1",
+        "a<r2",
+        "r1<a"
+      ],
+      [
+        "r2<",
+        "b<r1",
+        "c<r1",
+        "a<r2",
+        "r1<a"
+      ],
+      [
+        "r2<",
+        "c<r1",
+        "a<r2",
+        "r1<a",
+        "b<"
+      ]
+    ]
+  }
+}

@@ -15,7 +15,7 @@ import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, GroupsApi, MoveFn, SlotDrivers, SpanFeature } from './features.js';
 import type { CellInput, PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, FiltersPanelMessageKey, RowNumbersMessageKey, RulesMessageKey, TreeMessageKey, GroupMessageKey } from './part-texts.js';
+import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, RowNumbersMessageKey, RulesMessageKey, TreeMessageKey, GroupMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -220,5 +220,5 @@ export interface GridContext<T> {
   lead?: number;
   /** Find's text in force (`@dzgrid/dom/find`), '' or absent: none — what a cell part is given (`search.find`). */
   findText?: string;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | FiltersPanelMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

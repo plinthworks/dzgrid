@@ -1,0 +1,152 @@
+{
+  "id": "tree-quarters",
+  "suite": "row-move",
+  "description": "A tree: upper quarter before, lower quarter after, the middle inside; the lower quarter of an open parent is before its first child; never into itself or under itself (row-move.md 7, 8).",
+  "input": {
+    "tree": true,
+    "shown": [
+      {
+        "id": "r1"
+      },
+      {
+        "id": "a",
+        "parent": "r1"
+      },
+      {
+        "id": "b",
+        "parent": "r1"
+      },
+      {
+        "id": "r2"
+      },
+      {
+        "id": "c",
+        "parent": "r2"
+      }
+    ],
+    "steps": [
+      {
+        "drop": [
+          0,
+          0.1
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          0,
+          0.5
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          0,
+          0.9
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          2,
+          0.9
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          1,
+          0.5
+        ],
+        "moving": [
+          "r1"
+        ]
+      },
+      {
+        "drop": [
+          4,
+          0.5
+        ],
+        "moving": [
+          "r2"
+        ]
+      },
+      {
+        "drop": [
+          4,
+          0.9
+        ],
+        "moving": [
+          "r1"
+        ]
+      },
+      {
+        "drop": [
+          3,
+          0.5
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          3,
+          0.9
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          2,
+          0.5
+        ],
+        "moving": [
+          "c"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "steps": [
+      {
+        "key": "r1",
+        "where": "before"
+      },
+      {
+        "key": "r1",
+        "where": "inside"
+      },
+      {
+        "key": "a",
+        "where": "before"
+      },
+      {
+        "key": "b",
+        "where": "after"
+      },
+      null,
+      null,
+      {
+        "key": "c",
+        "where": "after"
+      },
+      null,
+      null,
+      {
+        "key": "b",
+        "where": "inside"
+      }
+    ]
+  }
+}

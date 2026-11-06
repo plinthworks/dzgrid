@@ -1,0 +1,110 @@
+{
+  "id": "flat-halves",
+  "suite": "row-move",
+  "description": "A flat list: the upper half of a row is before it, the lower half after it; a place that changes nothing, or on the row moved, is none (row-move.md 7, 8).",
+  "input": {
+    "tree": false,
+    "shown": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      }
+    ],
+    "steps": [
+      {
+        "drop": [
+          1,
+          0.2
+        ],
+        "moving": [
+          "d"
+        ]
+      },
+      {
+        "drop": [
+          1,
+          0.7
+        ],
+        "moving": [
+          "d"
+        ]
+      },
+      {
+        "drop": [
+          2,
+          0.9
+        ],
+        "moving": [
+          "d"
+        ]
+      },
+      {
+        "drop": [
+          3,
+          0.1
+        ],
+        "moving": [
+          "d"
+        ]
+      },
+      {
+        "drop": [
+          0,
+          0.1
+        ],
+        "moving": [
+          "d"
+        ]
+      },
+      {
+        "drop": [
+          3,
+          0.6
+        ],
+        "moving": [
+          "a"
+        ]
+      },
+      {
+        "drop": [
+          1,
+          0.2
+        ],
+        "moving": [
+          "a"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "steps": [
+      {
+        "key": "b",
+        "where": "before"
+      },
+      {
+        "key": "b",
+        "where": "after"
+      },
+      null,
+      null,
+      {
+        "key": "a",
+        "where": "before"
+      },
+      {
+        "key": "d",
+        "where": "after"
+      },
+      null
+    ]
+  }
+}

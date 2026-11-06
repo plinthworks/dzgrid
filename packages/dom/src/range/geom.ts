@@ -11,7 +11,7 @@ import { CHECK_WIDTH } from '../render/write.js';
 type Pt = { readonly clientX: number; readonly clientY: number };
 
 /** The box column's width when it is shown, and the lead strip's (row numbers). */
-const extra = (g: GridContext<unknown>): number => {
+export const extra = (g: GridContext<unknown>): number => {
   const s = g.settings.selection;
   return (s?.checkbox && (s.mode ?? 'none') !== 'none' ? CHECK_WIDTH : 0) + (g.lead ?? 0);
 };
@@ -21,7 +21,7 @@ const extra = (g: GridContext<unknown>): number => {
  * step 8b-2; the view read first), inline from the view's start edge (review 5: a CSS scale or zoom on an ancestor makes
  * the client boxes bigger or smaller than the layout's).
  */
-const place = (g: GridContext<unknown>, p: Pt) => {
+export const place = (g: GridContext<unknown>, p: Pt) => {
   const v = g.el.viewport;
   const r = v.getBoundingClientRect();
   return { block: (p.clientY - g.el.header.getBoundingClientRect().bottom) / (r.height / (v.offsetHeight || r.height) || 1) - (g.pinTop ?? 0), inline: logicalX(p, r, g.dir) / (r.width / (v.offsetWidth || r.width) || 1) };

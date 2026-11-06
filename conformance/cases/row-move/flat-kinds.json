@@ -1,0 +1,120 @@
+{
+  "id": "flat-kinds",
+  "suite": "row-move",
+  "description": "A detail panel is its master's « after », never split from it; pinned rows, details and groups never move nor count; places are among the data rows shown (row-move.md 1, 7, 8, 25).",
+  "input": {
+    "tree": false,
+    "shown": [
+      {
+        "id": "a"
+      },
+      {
+        "detail": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "p",
+        "pinned": true
+      },
+      {
+        "group": "g"
+      },
+      {
+        "id": "c"
+      }
+    ],
+    "steps": [
+      {
+        "drop": [
+          1,
+          0.3
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          3,
+          0.3
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          4,
+          0.3
+        ],
+        "moving": [
+          "c"
+        ]
+      },
+      {
+        "drop": [
+          1,
+          0.3
+        ],
+        "moving": [
+          "a"
+        ]
+      },
+      {
+        "moving": [
+          "p",
+          "a",
+          "c"
+        ]
+      },
+      {
+        "place": "b"
+      },
+      {
+        "place": "p"
+      },
+      {
+        "next": 1,
+        "keys": [
+          "a"
+        ],
+        "focus": "a"
+      },
+      {
+        "next": "in",
+        "keys": [
+          "b"
+        ],
+        "focus": "b"
+      }
+    ]
+  },
+  "expected": {
+    "steps": [
+      {
+        "key": "a",
+        "where": "after"
+      },
+      null,
+      null,
+      null,
+      [
+        "a",
+        "c"
+      ],
+      {
+        "n": 2,
+        "total": 3,
+        "level": 0
+      },
+      null,
+      {
+        "key": "b",
+        "where": "after"
+      },
+      null
+    ]
+  }
+}

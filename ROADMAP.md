@@ -1085,6 +1085,16 @@ versus the ids the app saves today.
   (`playground/cell-menu-check.html`, not committed). Sizes in `phase-9-steps/decisions.md`; two lines over their
   grant (`context-menu` 2 325 / 2 100, `menu.css` 716 / 500) and the `check:api` changes wait for the owner.
 
+- [x] **Moving rows** (owner answers Q-RD1…Q-RD12 « A », 2026-11-05; plan `phase-9-steps/row-drag-plan.md` R0–R5) —
+  built 2026-11-05, not committed (1.6.0, unreleased): sheet `docs/behaviors/row-move.md`; `@dzgrid/core/row-drag`
+  (`moveRows`, the shared rules), `GridEvent` `rowMove`; `@dzgrid/dom/row-drag` (grip, drag, keys, menu items, drop
+  targets, managed `apply`), texts `-row-drag`, `row-drag.css` (6 contrast pairs). Tests: conformance `row-move` 7 +
+  `row-move-apply` 3, a 1 000-seed property ×3 (core), DOM 50 (`row-drag-{move,tree,rules,keys}`), theme 5, Angular 1.
+  Browsers (`node scripts/browser-row-drag.mjs`): Chrome 19, Firefox 12, WebKit 12 — a drag over 10 000 rows with
+  auto-scroll (worst frame 17–18 ms), the line on the gap within 1 px, RTL tree line at its indent, keys (← indents in
+  Arabic), a finger on the grip moves / elsewhere scrolls, forced colours Highlight, axe 0 fr / ar. Local demo
+  `playground/deplacer.html` (out of git). Sizes and lead decisions: decisions.md « Row drag — lead decisions ».
+
 ## Phase 7 — row grouping and aggregation (started 2026-11-04, closed 2026-11-05, 1.5.0 unreleased)
 
 Plan `docs/phase-7-plan.md` (aligned 2026-11-04); owner answers « ★ everywhere in §5, sizes OK » (`docs/phase-7-steps/

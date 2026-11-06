@@ -309,3 +309,80 @@ when it shows. Sheet: `overlays.md` « The busy part ».
   live in the base so the slots line stays under its 1 400.
 - **For the owner — `check:api`:** `@dzgrid/dom#SlotContext` gains the required key `busy` (an interface the grid
   hands out, as `status` in Phase 9): accepted in `api/` with « owner to confirm ». Nothing removed; no CSS export changed.
+
+## Row drag — owner answers (2026-11-05)
+
+Plan `row-drag-plan.md`; sheet `docs/behaviors/row-move.md`. The owner answered **A to every question Q-RD1…Q-RD12**:
+
+- **Q-RD1** the application reorders by default: one `rowMove` event and the pure `moveRows`; opt-in `apply: true` for
+  flat browser rows (the grid reorders the same objects).
+- **Q-RD2** a ⠿ grip at the start of a column the application names (default the first visible one).
+- **Q-RD3** the selected rows move together (display order kept); an unselected row's grip moves it alone.
+- **Q-RD4** in a tree the middle of a row = inside (reparent, last child); a closed parent opens after 0.8 s.
+- **Q-RD5** sorted or grouped → refused with a sentence unless the application allows (`whenSorted: 'allow'`);
+  filtered → allowed.
+- **Q-RD6** server sources (pages, `infiniteRows`, `serverSideRows`) → event only, among the rows loaded.
+- **Q-RD7** other grids and zones through drop targets, as the column drag (the exact place in another grid later).
+- **Q-RD8** keys Alt+Shift+↑ / ↓, Alt+Shift+Home / End, Alt+Shift+→ / ← in a tree (Option+Shift on a Mac). The sheet
+  notes that Alt+Shift may switch the keyboard layout on Windows: **to check on a real Windows (owner)**.
+- **Q-RD9** a finger on the grip only (`touch-action: none` there; a finger elsewhere scrolls).
+- **Q-RD10** no grid undo in V1 (Ctrl+Z stays the cell edits').
+- **Q-RD11** sizes: new entries at their measure + 10 %, Angular +2 % at most; nothing in the core base, the DOM base,
+  the theme, the menus or K.8 (89 976 / 90 000); the real example unchanged.
+- **Q-RD12** cell-menu items Monter / Descendre / En haut / En bas (+ Rentrer / Ressortir in a tree) through the
+  existing application-items hook (`contextMenu({ items })`).
+
+## Row drag — lead decisions and measures (2026-11-05, not committed)
+
+Built R0–R5 (`row-drag-plan.md`): sheet first, conformance by hand, tests red first, code, review, browsers.
+
+| Line | Measure (gz) | Line | Rule |
+|---|---|---|---|
+| `@dzgrid/core/row-drag` (new, over the core) | 1 377 | **1 550** | measure + 10 % (plan 900–1 200) |
+| `@dzgrid/dom/row-drag` (new, over the DOM base; `range/geom` inside) | 4 848 | **5 350** | measure + 10 % (plan 3 000–3 600: the tree, several rows, menu items, managed mode, drop targets) |
+| `locales/{en,fr,ar}-row-drag` (new, 18 texts) | 318 / 367 / 485 | **350 / 450 / 550** | measure + 10 % |
+| `@dzgrid/theme/row-drag.css` (new) | 391 | **450** | measure + 10 % |
+| `@dzgrid/core` base, `@dzgrid/dom` base, `@dzgrid/theme` | 29 258, 23 650, 2 918 | unchanged | byte for byte |
+| `range`, `columns`, `tree`, `grouping`, `context-menu` (+ locales), `edit` | — | unchanged | |
+| `@dzgrid/angular` | 7 883 | unchanged | nothing in the wrapper (below) |
+| **K.8 audit profile** | **89 977** (was 89 976) | 90 000 | **for the owner** (below) |
+
+- **The shared rules live in the core** (`dropPlace`, `nextPlace`, `unchanged`, `movingRows`, `placeOf`): the pointer,
+  the keys, the menu and the API all go through them; the DOM computes no target of its own. `moveRows` is the same
+  reorder the managed mode applies.
+- **API names**: `api(grid).move(keys, target, { say })` and `api(grid).step(key, by, { say })` (`by`: -1, 1, `start`,
+  `end`, `in`, `out`) instead of `up` / `down` / `indent` / `outdent` (one method, the keyboard's own steps); silent
+  unless `say`. `feature.menuItems(c)` (on the feature, so an app's `contextMenu({ items })` needs no grid lookup).
+  Result codes: `moved`, `edge`, `locked`, `sorted`, `grouped`, `refused`, `tooMany`, `unknown`.
+- **No `handle: 'row'` mode** in V1 (Q-RD2 A: the grip only). **No « click the grip, then the gap »** (the menu covers
+  2.5.7, plan).
+- **`whenSorted: 'allow'`** lets the event go when sorted **or grouped**; the managed mode never reorders those.
+- **The texts' keys are `rmove.*`** (`move.*` are the columns'); the menu labels « En haut » / « En bas » (owner
+  Q-RD12), « Monter », « Descendre », « Rentrer », « Ressortir ».
+- **The sentence waits for the application's rows**: said at once when they changed during the event (a synchronous app,
+  the managed mode), else at the next rows change within 5 s (a server first), else never (no stale place). « Ligne
+  déplacée » when the moved row is not shown (filtered out, not given back). In a tree « Ligne n sur N, niveau L »
+  (no parent named: it would be a value).
+- **Opening**: a row moved inside a closed parent opens it (source `api`: the tree says nothing, the move's sentence
+  follows); the spring-open too.
+- **A finger**: the browser's implicit capture on the grip is handed to the grid's root; only the root's own lost capture
+  cancels (found in Chrome's touch emulation, fixed with its jsdom test).
+- **Auto-scroll** reuses `range/geom.ts` (`autoScroll`, `place`, `extra` now exported there: 0 B in `range`); the
+  sideways scroll it may write is put back at once (row-move.md 9).
+- **The line's indent** reads the tree cell's `--dzg-tree-pad` (its own indent function included), else 16 px a level.
+- **Angular: nothing new in the wrapper.** `(rowMove)` and `DzgController.rowDrag()` cost +42 B in `@dzgrid/angular`
+  (7 925) and therefore +43 B in K.8 (90 019 > 90 000): against Q-RD11 (« nothing in K.8 »). Left out; an app uses
+  `(gridEvent)` and `ctl.use(feature)` (tested). The diff is ready if the owner prefers the output (K.8 line to raise).
+- **For the owner — K.8 89 977 (+1 B)**: no code of the audit screen changed; the byte is the core chunk's content hash
+  in the split build's file names (`GridEvent`'s new member is a type, but `kernel.ts`'s text changed; measured with
+  `kernel.ts` alone reverted: 89 976). Any edit to `kernel.ts` moves it by ±1.
+- **For the owner — `check:api`**: `@dzgrid/core#GridEvent: changed` (a union member added, printed as « changed »,
+  as `groupByChanged` in Phase 7). Accept with `node scripts/api.mjs --accept "Phase 9 row drag: GridEvent rowMove"
+  --only "@dzgrid/core#GridEvent"`. Everything else is additions.
+- **For the owner — Windows**: Alt+Shift may be the system's keyboard-layout chord; check Alt+Shift+↑ / ↓ on a real
+  Windows (with NVDA / JAWS: the S4 protocol). VoiceOver pass on the demo too.
+
+## Row drag — owner, 2026-11-06
+
+- `GridEvent` gains `rowMove`: accepted in api/ (« 1 oui »).
+- Angular: no `(rowMove)` output nor `ctl.rowDrag()` for now (« 2 A »): apps use `(gridEvent)`; K.8 line kept at 90 000.

@@ -1,0 +1,53 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  .dzg-grip {
+    color: var(--tz-fg-muted);
+  }
+  .dzg-grip:hover {
+    color: var(--tz-fg);
+  }
+  .dzg-grip[data-dzg-off] {
+    opacity: 0.4;
+  }
+  .dzg-rmove-ghost {
+    padding: 0.25em 0.5em;
+    border: 1px solid var(--tz-border, transparent);
+    background: var(--dzg-header-bg, var(--tz-bg-raised));
+    color: var(--tz-fg);
+    opacity: 0.8;
+  }
+  .dzg-rmove-bar {
+    background: var(--dzg-move-bar, var(--tz-accent));
+  }
+  .dzg-rmove-in {
+    outline-color: var(--dzg-move-bar, var(--tz-accent));
+  }
+  .dzg-row[data-dzg-moving] {
+    opacity: 0.5;
+  }
+  [data-dzg-dragging] {
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: grabbing;
+  }
+  @media (forced-colors: active) {
+    .dzg-grip {
+      color: ButtonText;
+    }
+    .dzg-grip[data-dzg-off] {
+      color: GrayText;
+    }
+    .dzg-rmove-bar {
+      forced-color-adjust: none;
+      background: Highlight;
+    }
+    .dzg-rmove-in {
+      outline-color: Highlight;
+    }
+    .dzg-rmove-ghost {
+      border-color: CanvasText;
+      background: Canvas;
+      color: CanvasText;
+    }
+  }
+}

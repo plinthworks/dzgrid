@@ -153,6 +153,18 @@ export type GridEvent<T> =
   /** `@dzgrid/dom/pinned-rows` (step 8b-1; the core never sends it): the application gave other pinned rows (`api.set`). */
   | { readonly type: 'pinnedChanged'; readonly source: ChangeSource }
   /**
+   * `@dzgrid/dom/row-drag` (Phase 9, row-move.md 24; the core never sends it): rows moved by a drag, the keys, the menu or
+   * the API. `keys` and `rows` in display order; `target.key` null: the end of the list (of the roots); `parent` the new
+   * parent in a tree (null: a root, or a flat list). `applied`: the grid reordered its rows itself (`apply: true`);
+   * otherwise the application gives them back in the new order (`moveRows` of `@dzgrid/core/row-drag`).
+   */
+  | {
+      readonly type: 'rowMove'; readonly source: ChangeSource; readonly via: 'pointer' | 'keys' | 'menu' | 'api';
+      readonly keys: readonly RowKey[]; readonly rows: readonly T[];
+      readonly target: { readonly key: RowKey | null; readonly where: 'before' | 'after' | 'inside' };
+      readonly parent: RowKey | null; readonly applied: boolean;
+    }
+  /**
    * An Angular part's `emit(name, detail)` (`@dzgrid/angular`, step 22; the wrapper sends them, the
    * core and the DOM layer never do): a cell's, with the column and the key of the row it shows at
    * the call; any other slot's, with its column (null for the overlay and the footer).

@@ -1,0 +1,137 @@
+{
+  "id": "flat-several",
+  "suite": "row-move",
+  "description": "Several rows move in display order; a place among them that changes nothing is none; the keys step past the moved rows, an edge is null (row-move.md 13, 17, 18).",
+  "input": {
+    "tree": false,
+    "shown": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      },
+      {
+        "id": "e"
+      },
+      {
+        "id": "f"
+      }
+    ],
+    "steps": [
+      {
+        "moving": [
+          "e",
+          "b"
+        ]
+      },
+      {
+        "drop": [
+          0,
+          0.2
+        ],
+        "moving": [
+          "e",
+          "b"
+        ]
+      },
+      {
+        "drop": [
+          2,
+          0.3
+        ],
+        "moving": [
+          "b",
+          "e"
+        ]
+      },
+      {
+        "drop": [
+          0,
+          0.7
+        ],
+        "moving": [
+          "b",
+          "c"
+        ]
+      },
+      {
+        "next": -1,
+        "keys": [
+          "b",
+          "e"
+        ],
+        "focus": "e"
+      },
+      {
+        "next": 1,
+        "keys": [
+          "b",
+          "e"
+        ],
+        "focus": "b"
+      },
+      {
+        "next": "start",
+        "keys": [
+          "b",
+          "e"
+        ],
+        "focus": "b"
+      },
+      {
+        "next": 1,
+        "keys": [
+          "e",
+          "f"
+        ],
+        "focus": "f"
+      },
+      {
+        "next": "end",
+        "keys": [
+          "e",
+          "f"
+        ],
+        "focus": "e"
+      }
+    ]
+  },
+  "expected": {
+    "steps": [
+      [
+        "b",
+        "e"
+      ],
+      {
+        "key": "a",
+        "where": "before"
+      },
+      {
+        "key": "c",
+        "where": "before"
+      },
+      null,
+      {
+        "key": "a",
+        "where": "before"
+      },
+      {
+        "key": "f",
+        "where": "after"
+      },
+      {
+        "key": "a",
+        "where": "before"
+      },
+      null,
+      null
+    ]
+  }
+}

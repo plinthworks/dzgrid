@@ -188,7 +188,7 @@ describe('1.5.0, the four packages', () => {
 
   it('export the Phase 8 subpath @dzgrid/core/server-side, built like the others', () => {
     expect(pkg('core').exports['./server-side']).toEqual({ types: './src/server-side.ts', default: './src/server-side.ts' });
-    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/infinite', '\.\/server-side'\]/);
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/infinite', '\.\/server-side'[,\]]/); // Phase 9: './row-drag' after it
   });
 
   it('export the 1.1.0 step 15 subpaths (@dzgrid/core/row-gaps, @dzgrid/dom/row-gaps), built like the others', () => {
@@ -205,7 +205,7 @@ describe('1.5.0, the four packages', () => {
     for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-fresh`]).toEqual({ types: `./src/locales/${g}-fresh.ts`, default: `./src/locales/${g}-fresh.ts` });
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
     expect(build).toMatch(/'\.\/row-gaps', '\.\/fresh-rows'/);
-    expect(build).toMatch(/'\.\/locales\/ar-print', '\.\/locales\/en-fresh', '\.\/locales\/fr-fresh', '\.\/locales\/ar-fresh'\]/);
+    expect(build).toMatch(/'\.\/locales\/ar-print', '\.\/locales\/en-fresh', '\.\/locales\/fr-fresh', '\.\/locales\/ar-fresh'[,\]]/); // Phase 9: the -row-drag texts after them
     const theme = pkg('theme').exports;
     for (const f of ['fresh-rows.css', 'fresh-rows.unlayered.css', 'fresh-rows.scss']) {
       expect(theme[`./${f}`], f).toBe(`./${f}`);
@@ -233,6 +233,20 @@ describe('1.5.0, the four packages', () => {
     const theme = pkg('theme');
     for (const f of ['find.css', 'find.unlayered.css', 'find.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'fresh-rows', 'find'[,\]]/); // the filters panel's after it
+  });
+
+  it('export the Phase 9 row moves (@dzgrid/core/row-drag, @dzgrid/dom/row-drag), their -row-drag texts and row-drag.css, built like the others', () => {
+    expect(pkg('core').exports['./row-drag']).toEqual({ types: './src/row-drag.ts', default: './src/row-drag.ts' });
+    const dom = pkg('dom').exports;
+    expect(dom['./row-drag']).toEqual({ types: './src/row-drag.ts', default: './src/row-drag.ts' });
+    for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-row-drag`]).toEqual({ types: `./src/locales/${g}-row-drag.ts`, default: `./src/locales/${g}-row-drag.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/server-side', '\.\/row-drag'\]/);
+    expect(build).toMatch(/'\.\/group-zone', '\.\/row-drag'/);
+    expect(build).toMatch(/'\.\/locales\/ar-fresh', '\.\/locales\/en-row-drag', '\.\/locales\/fr-row-drag', '\.\/locales\/ar-row-drag'\]/);
+    const theme = pkg('theme');
+    for (const f of ['row-drag.css', 'row-drag.unlayered.css', 'row-drag.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'grouping', 'row-drag'\]/);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

@@ -143,6 +143,14 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-find': 250,
   '@dzgrid/dom/locales/ar-find': 300,
   '@dzgrid/theme/find.css': 561, // 1.4.0 (+2 % rule, measured 559): the letters tinted inside the hits (search-highlight.md)
+  // Phase 9 moving rows (owner Q-RD11 A, 2026-11-05: new entries at their measure + 10 %): the rules over the core, the
+  // gestures over the DOM base (the block's geometry inside), the -row-drag texts, row-drag.css.
+  '@dzgrid/core/row-drag': 1550, // measured 1 377
+  '@dzgrid/dom/row-drag': 5350, // measured 4 848 (plan §5 estimated 3 000–3 600: the tree, several rows, the menu, the managed mode, drop targets)
+  '@dzgrid/dom/locales/en-row-drag': 350, // measured 318
+  '@dzgrid/dom/locales/fr-row-drag': 450, // measured 367
+  '@dzgrid/dom/locales/ar-row-drag': 550, // measured 485
+  '@dzgrid/theme/row-drag.css': 450, // measured 391
   // Phase 9 filters panel (filters-panel.md): the side panel over the DOM base, its -filters-panel texts, filters-panel.css; new lines at their measure + 10 %.
   '@dzgrid/dom/filters-panel': 3250,
   '@dzgrid/dom/locales/en-filters-panel': 250,

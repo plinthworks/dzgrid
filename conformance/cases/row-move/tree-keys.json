@@ -1,0 +1,142 @@
+{
+  "id": "tree-keys",
+  "suite": "row-move",
+  "description": "The keys in a tree: one place among siblings, inside the sibling before, out after the parent; edges are null; a moved row's descendant travels with it; places among siblings with the level (row-move.md 13, 17, 25).",
+  "input": {
+    "tree": true,
+    "shown": [
+      {
+        "id": "r1"
+      },
+      {
+        "id": "a",
+        "parent": "r1"
+      },
+      {
+        "id": "b",
+        "parent": "r1"
+      },
+      {
+        "id": "r2"
+      }
+    ],
+    "steps": [
+      {
+        "next": -1,
+        "keys": [
+          "b"
+        ],
+        "focus": "b"
+      },
+      {
+        "next": -1,
+        "keys": [
+          "a"
+        ],
+        "focus": "a"
+      },
+      {
+        "next": "in",
+        "keys": [
+          "b"
+        ],
+        "focus": "b"
+      },
+      {
+        "next": "in",
+        "keys": [
+          "a"
+        ],
+        "focus": "a"
+      },
+      {
+        "next": "out",
+        "keys": [
+          "a"
+        ],
+        "focus": "a"
+      },
+      {
+        "next": "out",
+        "keys": [
+          "r1"
+        ],
+        "focus": "r1"
+      },
+      {
+        "next": 1,
+        "keys": [
+          "r1"
+        ],
+        "focus": "r1"
+      },
+      {
+        "next": "end",
+        "keys": [
+          "r1"
+        ],
+        "focus": "r1"
+      },
+      {
+        "next": "start",
+        "keys": [
+          "r1"
+        ],
+        "focus": "r1"
+      },
+      {
+        "place": "b"
+      },
+      {
+        "place": "r2"
+      },
+      {
+        "moving": [
+          "a",
+          "r1"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "steps": [
+      {
+        "key": "a",
+        "where": "before"
+      },
+      null,
+      {
+        "key": "a",
+        "where": "inside"
+      },
+      null,
+      {
+        "key": "r1",
+        "where": "after"
+      },
+      null,
+      {
+        "key": "r2",
+        "where": "after"
+      },
+      {
+        "key": "r2",
+        "where": "after"
+      },
+      null,
+      {
+        "n": 2,
+        "total": 2,
+        "level": 2
+      },
+      {
+        "n": 2,
+        "total": 2,
+        "level": 1
+      },
+      [
+        "r1"
+      ]
+    ]
+  }
+}

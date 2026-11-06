@@ -1,0 +1,61 @@
+{
+  "id": "tree-loading",
+  "suite": "row-move",
+  "description": "A lazy parent open on its loading row: its lower quarter is inside it; the loading row is never a place (row-move.md 8, 10).",
+  "input": {
+    "tree": true,
+    "shown": [
+      {
+        "id": "p"
+      },
+      {
+        "loading": "p"
+      },
+      {
+        "id": "q"
+      }
+    ],
+    "steps": [
+      {
+        "drop": [
+          0,
+          0.9
+        ],
+        "moving": [
+          "q"
+        ]
+      },
+      {
+        "drop": [
+          1,
+          0.5
+        ],
+        "moving": [
+          "q"
+        ]
+      },
+      {
+        "drop": [
+          2,
+          0.5
+        ],
+        "moving": [
+          "p"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "steps": [
+      {
+        "key": "p",
+        "where": "inside"
+      },
+      null,
+      {
+        "key": "q",
+        "where": "inside"
+      }
+    ]
+  }
+}

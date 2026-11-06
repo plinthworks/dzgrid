@@ -1,0 +1,144 @@
+{
+  "id": "flat-basic",
+  "suite": "row-move-apply",
+  "description": "moveRows on a flat list: before, the end, several in the order given; a target moved or unknown, or no known row: nothing moves; the objects are the application's (row-move.md « Who reorders »).",
+  "input": {
+    "rows": [
+      {
+        "id": "a"
+      },
+      {
+        "id": "b"
+      },
+      {
+        "id": "c"
+      },
+      {
+        "id": "d"
+      },
+      {
+        "id": "e"
+      }
+    ],
+    "moves": [
+      {
+        "keys": [
+          "d"
+        ],
+        "target": {
+          "key": "b",
+          "where": "before"
+        }
+      },
+      {
+        "keys": [
+          "a"
+        ],
+        "target": {
+          "key": null,
+          "where": "after"
+        }
+      },
+      {
+        "keys": [
+          "b",
+          "e"
+        ],
+        "target": {
+          "key": "d",
+          "where": "before"
+        }
+      },
+      {
+        "keys": [
+          "c"
+        ],
+        "target": {
+          "key": "c",
+          "where": "after"
+        }
+      },
+      {
+        "keys": [
+          "z"
+        ],
+        "target": {
+          "key": "a",
+          "where": "before"
+        }
+      },
+      {
+        "keys": [
+          "a"
+        ],
+        "target": {
+          "key": "z",
+          "where": "after"
+        }
+      },
+      {
+        "keys": [
+          "a"
+        ],
+        "target": {
+          "key": "e",
+          "where": "inside"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "rows": [
+      [
+        "a",
+        "d",
+        "b",
+        "c",
+        "e"
+      ],
+      [
+        "d",
+        "b",
+        "c",
+        "e",
+        "a"
+      ],
+      [
+        "b",
+        "e",
+        "d",
+        "c",
+        "a"
+      ],
+      [
+        "b",
+        "e",
+        "d",
+        "c",
+        "a"
+      ],
+      [
+        "b",
+        "e",
+        "d",
+        "c",
+        "a"
+      ],
+      [
+        "b",
+        "e",
+        "d",
+        "c",
+        "a"
+      ],
+      [
+        "b",
+        "e",
+        "a",
+        "d",
+        "c"
+      ]
+    ],
+    "same": true
+  }
+}

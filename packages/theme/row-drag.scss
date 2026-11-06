@@ -1,0 +1,91 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/row-drag.css — moving rows (Phase 9, docs/behaviors/row-move.md 1, 4, 6): loaded by the applications that
+// add `rowDrag()` (`@dzgrid/dom/row-drag`), after dzgrid.css; the base theme does not grow. Compiled to row-drag.css
+// (layered) and row-drag.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when they drift.
+//
+// The grip (⠿, drawn by the feature's layout) in the muted text colour, the text colour under the pointer; off (sorted,
+// grouped) dimmed with its cursor. During a drag the layer holds a ghost on the header's surface at 0.8 opacity, a 2 px
+// line or an outline (inside a tree row) in the column move's colour (`--dzg-move-bar`, 3:1 by check:contrast); the moved
+// rows dimmed. Nothing animates. Forced colours: system colours. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-grip {
+    color: var(--tz-fg-muted);
+  }
+
+  .dzg-grip:hover {
+    color: var(--tz-fg);
+  }
+
+  .dzg-grip[data-dzg-off] {
+    opacity: 0.4;
+  }
+
+  .dzg-rmove-ghost {
+    padding: 0.25em 0.5em;
+    border: 1px solid var(--tz-border, transparent);
+    background: var(--dzg-header-bg, var(--tz-bg-raised));
+    color: var(--tz-fg);
+    opacity: 0.8;
+  }
+
+  .dzg-rmove-bar {
+    background: var(--dzg-move-bar, var(--tz-accent));
+  }
+
+  .dzg-rmove-in {
+    outline-color: var(--dzg-move-bar, var(--tz-accent));
+  }
+
+  .dzg-row[data-dzg-moving] {
+    opacity: 0.5;
+  }
+
+  [data-dzg-dragging] {
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: grabbing;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-grip {
+      color: ButtonText;
+    }
+
+    .dzg-grip[data-dzg-off] {
+      color: GrayText;
+    }
+
+    .dzg-rmove-bar {
+      forced-color-adjust: none;
+      background: Highlight;
+    }
+
+    .dzg-rmove-in {
+      outline-color: Highlight;
+    }
+
+    .dzg-rmove-ghost {
+      border-color: CanvasText;
+      background: Canvas;
+      color: CanvasText;
+    }
+  }
+}

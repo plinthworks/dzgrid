@@ -5,6 +5,29 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased — 1.6.0
+
+Phase 9, moving rows (owner answers Q-RD1…Q-RD12, 2026-11-05; sheet `docs/behaviors/row-move.md`). Nothing of 1.5.0 is
+removed or narrowed; `GridEvent` gains a member (`check:api` reports the union « changed »: owner to accept).
+
+### Added
+- `@dzgrid/core/row-drag` (pure): `moveRows(rows, move, getRowId, { parentId, setParent })` — the reorder an application
+  applies on `rowMove` (flat lists and `parentId` trees; never into itself); the shared rules `dropPlace`, `nextPlace`,
+  `movingRows`, `placeOf`, `unchanged`, `parentAfter`, `siblings`, `within`.
+- `GridEvent` `rowMove`: `{ source, via: 'pointer' | 'keys' | 'menu' | 'api', keys, rows, target: { key, where:
+  'before' | 'after' | 'inside' }, parent, applied }` — keys and rows in display order, never a position.
+- `@dzgrid/dom/row-drag` (opt-in, `rowDrag({ column, apply, whenSorted, canDrag, canDrop, maxRows, drag })`): a ⠿ grip
+  (24 px, `aria-hidden`) at the start of a column's cells, dragged by a mouse, a pen or a finger (4 px threshold); a
+  ghost, a line on the gap (a tree's middle: inside, outlined), auto-scroll on the block axis, a closed parent opened
+  after 0.8 s; the selected rows move together; Escape cancels; Alt+Shift+↑ / ↓ / Home / End (Option+Shift on a Mac) and,
+  in a tree, Alt+Shift+→ / ← (mirrored right to left); `aria-keyshortcuts` on the focused cell; the place said by
+  position (« Ligne 4 sur 120 »), never by value; sorted or grouped rows refused with a sentence (`whenSorted: 'allow'`
+  to let the app decide), filtered rows allowed; server sources: the event only; `apply: true` reorders flat browser
+  rows itself (same objects: selection, edits, focus kept); `api(grid).move / step / dropTargets.add`;
+  `menuItems(c)` for the cell menu (Monter, Descendre, En haut, En bas, Rentrer, Ressortir). Texts
+  `locales/{en,fr,ar}-row-drag`; look `@dzgrid/theme/row-drag.css` (forced colours, contrast pairs).
+- Angular: nothing new in the wrapper — `(gridEvent)` carries `rowMove`, `ctl.use(rowDragFeature)` gives its api.
+
 ## [1.5.0] - 2026-11-05
 
 A minor: nothing of 1.4.0 is removed or narrowed (`npm run check:api`). Phase 7 (row grouping and aggregation) and

@@ -57,6 +57,10 @@
       "types": "./src/server-side.ts",
       "default": "./src/server-side.ts"
     },
+    "./row-drag": {
+      "types": "./src/row-drag.ts",
+      "default": "./src/row-drag.ts"
+    },
     "./edit": {
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"
