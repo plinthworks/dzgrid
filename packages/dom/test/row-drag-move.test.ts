@@ -77,6 +77,29 @@ describe('the drag (5, 6, 11)', () => {
     expect(t.rowEl('r1')!.hasAttribute('data-dzg-moving')).toBe(false);
   });
 
+  it('the ghost floats over the page (owner, 2026-11-06: hidden under the other grid): top layer, viewport coordinates', () => {
+    const shown: Element[] = [];
+    const proto = HTMLElement.prototype as unknown as { showPopover?: () => void }; // unknown: jsdom has no popover API
+    const had = proto.showPopover;
+    proto.showPopover = function (this: HTMLElement) { shown.push(this); };
+    try {
+      const t = dmake({ rows: flatRows(6) });
+      const p0 = t.over('r1', 0.5, 10);
+      t.hold('r1');
+      t.move({ clientX: p0.clientX + 30, clientY: p0.clientY + 40 });
+      t.tick();
+      const ghost = t.ghost()!;
+      expect(ghost.getAttribute('popover')).toBe('manual');
+      expect(shown).toContain(ghost);
+      // Placed against the viewport (position fixed), not the grid's box: the pointer's own coordinates.
+      expect(ghost.style.insetBlockStart).toBe(`${p0.clientY + 40}px`);
+      expect(ghost.style.insetInlineStart).toBe(`${p0.clientX + 30 + 12}px`);
+      t.up({ clientX: p0.clientX + 30, clientY: p0.clientY + 40 });
+    } finally {
+      proto.showPopover = had;
+    }
+  });
+
   it('a mouse, a pen and a finger all drag from the grip (Q-RD9)', () => {
     for (const pointerType of ['mouse', 'pen', 'touch']) {
       const t = dmake({ rows: flatRows(6) });

@@ -75,7 +75,7 @@ const CSS =
   ':where(.dzg-grip)::before{content:"\\283f";line-height:1}:where(.dzg-grip[data-dzg-off]){cursor:not-allowed}' +
   ':where(.dzg-rmove){position:absolute;inset:0;z-index:6;pointer-events:none}' +
   ':where(.dzg-rmove>*){position:absolute;box-sizing:border-box}' +
-  ':where(.dzg-rmove-ghost){max-inline-size:240px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-block-start:-.75em}' +
+  ':where(.dzg-rmove-ghost){position:fixed;margin:0;inset:auto;max-inline-size:240px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-block-start:-.75em}' +
   ':where(.dzg-rmove-bar){block-size:2px;background:currentColor}:where(.dzg-rmove-in){outline:2px solid currentColor;outline-offset:-2px}' +
   '}';
 
@@ -250,6 +250,8 @@ function setup(g: GridContext<unknown>, o: RowDragOptions<unknown>, apis: WeakMa
   const layer = div('dzg-rmove');
   layer.setAttribute('aria-hidden', 'true');
   const ghost = div('dzg-rmove-ghost', layer);
+  // In the top layer: over the other grids and drop zones, never cut by this grid's box (owner, 2026-11-06).
+  ghost.setAttribute('popover', 'manual');
   const bar = div('dzg-rmove-bar', layer);
   const box = div('dzg-rmove-in', layer);
   const mark = (t: Element | null): void => {
@@ -364,8 +366,9 @@ function setup(g: GridContext<unknown>, o: RowDragOptions<unknown>, apis: WeakMa
         setPx(bar, 'inline-size', Math.max(0, w - e - ind));
       }
     }
-    setPx(ghost, 'inset-inline-start', logicalX(p, R, dir) + 12);
-    setPx(ghost, 'inset-block-start', p.clientY - R.top);
+    // Fixed, so against the viewport: the pointer's own coordinates (from the viewport's start edge).
+    setPx(ghost, 'inset-inline-start', logicalX(p, { left: 0, right: doc.documentElement.clientWidth } as DOMRectReadOnly, dir) + 12);
+    setPx(ghost, 'inset-block-start', p.clientY);
     return moved;
   };
   const tick = (): void => {
@@ -389,6 +392,11 @@ function setup(g: GridContext<unknown>, o: RowDragOptions<unknown>, apis: WeakMa
     ghost.textContent = mv.length > 1 ? T('ghost', { n: mv.length }) : (c && g.rowRenderer.cell(mv[0]!, c)?.textContent) || '';
     bar.hidden = box.hidden = true;
     el.root.append(layer);
+    try {
+      ghost.showPopover?.();
+    } catch {
+      // No top layer (an old engine): the fixed ghost still escapes the grid's clipping.
+    }
     g.schedule();
     return true;
   };

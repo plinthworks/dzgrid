@@ -4,7 +4,7 @@
 // (layered) and row-drag.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when they drift.
 //
 // The grip (⠿, drawn by the feature's layout) in the muted text colour, the text colour under the pointer; off (sorted,
-// grouped) dimmed with its cursor. During a drag the layer holds a ghost on the header's surface at 0.8 opacity, a 2 px
+// grouped) dimmed with its cursor. During a drag the layer holds a ghost on the header's surface at 0.95 opacity with a shadow, a 2 px
 // line or an outline (inside a tree row) in the column move's colour (`--dzg-move-bar`, 3:1 by check:contrast); the moved
 // rows dimmed. Nothing animates. Forced colours: system colours. No colour literal, no physical side (guards).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -43,7 +43,9 @@ $layered: true !default;
     border: 1px solid var(--tz-border, transparent);
     background: var(--dzg-header-bg, var(--tz-bg-raised));
     color: var(--tz-fg);
-    opacity: 0.8;
+    // Readable over another grid's rows (owner, 2026-11-06): nearly opaque, lifted by a shadow.
+    opacity: 0.95;
+    box-shadow: 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 25%, transparent);
   }
 
   .dzg-rmove-bar {

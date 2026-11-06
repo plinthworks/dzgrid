@@ -14,7 +14,8 @@
     border: 1px solid var(--tz-border, transparent);
     background: var(--dzg-header-bg, var(--tz-bg-raised));
     color: var(--tz-fg);
-    opacity: 0.8;
+    opacity: 0.95;
+    box-shadow: 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 25%, transparent);
   }
   .dzg-rmove-bar {
     background: var(--dzg-move-bar, var(--tz-accent));

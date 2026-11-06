@@ -39,7 +39,7 @@ describe('row-drag.css', () => {
     expect(decl('.dzg-rmove-bar')).toBe(`background: ${BAR};`);
     expect(decl('.dzg-rmove-in')).toBe(`outline-color: ${BAR};`);
     expect(decl('.dzg-row[data-dzg-moving]')).toBe('opacity: 0.5;');
-    expect(decl('.dzg-rmove-ghost')).toMatch(/background: var\(--dzg-header-bg, var\(--tz-bg-raised\)\); color: var\(--tz-fg\); opacity: 0.8;/);
+    expect(decl('.dzg-rmove-ghost')).toMatch(/background: var\(--dzg-header-bg, var\(--tz-bg-raised\)\); color: var\(--tz-fg\); opacity: 0\.95; box-shadow: 0 0\.25rem 0\.75rem color-mix\(in srgb, var\(--tz-fg\) 25%, transparent\);/); // owner 2026-11-06: readable over another grid
   });
 
   it('forced colours: the line and the outline in Highlight, the ghost Canvas / CanvasText, the grip ButtonText (GrayText off)', () => {
