@@ -43,7 +43,8 @@ export function checkDock(raw: unknown, lim: { readonly min: number; readonly ma
   const panels: Record<string, DockPanelState> = {};
   for (const [id, p] of Object.entries(obj('panels'))) {
     const at = `.panels.${id}`;
-    if (!isObj(p)) bad(at);
+    // A built-in of every object (`__proto__`, `constructor`…) is never a key: it would change the layout or read as a panel.
+    if (id in {} || !isObj(p)) bad(at);
     else if (!DOCK_AREAS.includes(p.area)) bad(`${at}.area`);
     else {
       const c = p.at;

@@ -117,6 +117,12 @@ describe('dock: the areas', () => {
     expect(t.api().layout().panels['help']).toEqual({ area: 'end', open: true });
   });
 
+  it('a panel id every object already has (`constructor`) is refused with a warning, the others placed (review, 2026-11-06)', () => {
+    const t = grid({ panels: [{ id: 'constructor', title: 'C', mount: () => undefined }, { id: 'notes', title: 'N', mount: () => undefined }], open: { notes: 'end' } });
+    expect(t.problems().map((p) => [p.code, p.path, p.detail])).toEqual([['invalid-setting', 'dock.panels', 'constructor']]);
+    expect(Object.keys(t.api().layout().panels)).toEqual(['notes']);
+  });
+
   it('the grid going removes the areas, runs the panels’ cleanups, and the API is gone', () => {
     const t = grid({ open: { notes: 'end' } });
     t.g.destroy();

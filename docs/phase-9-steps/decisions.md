@@ -450,3 +450,7 @@ the full ones, a `float` area refused with a warning for now. Work slowly: one g
 - Gate (2026-11-06): `test:ci` / `test:tz` 8 742 passed; then a type-only cast fixed in `dock-state.test.ts` and the rest
   of the chain run (`typecheck`, `build`, `check:size` 0 over, `check:api` additions only). Browsers
   (`node scripts/browser-dock.mjs`): Chrome 21 / 21, Firefox 15 / 15, WebKit 15 / 15; planted fault (a physical drag) red.
+
+## Review before 1.6.0 (2026-11-06)
+
+No high or medium finding. Fixed, each test first: a grip press released outside the window no longer blocks the next press (row-drag); a panel id every object already has (`__proto__`, `constructor`, `toString`) is refused in the saved layout (`dock-proto` case) and at registration. Left, low: `destroy` does not close an open « Place » menu and a throwing panel cleanup stops the next ones; a state's `dock` restored before the dock exists reports its problems as an event, not in `setState`'s return; `state()` before the first paint may omit the columns / filters panels (they are collected lazily).

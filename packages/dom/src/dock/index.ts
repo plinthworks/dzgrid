@@ -238,6 +238,8 @@ function setup(g: GridContext<unknown>, o: DockOptions, apis: WeakMap<object, Do
   const inside = (s: Side): boolean => A[s].el.contains(doc.activeElement);
 
   const add = (s: DockPanelSpec): void => {
+    // Same rule as the saved layout: an id every object already has is refused, never a key.
+    if (s.id in {}) return void refuse('dock.panels', s.id);
     const tab = btn(A.end.tabs, 'dzg-dock-tab', '');
     tab.id = `${base}t${reg.size}`;
     const box = mk('div', null, 'dzg-dock-box');

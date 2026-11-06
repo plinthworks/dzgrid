@@ -1,0 +1,40 @@
+{
+  "id": "dock-proto",
+  "suite": "grid-state",
+  "description": "Dock: a panel id that names a built-in of every object (`__proto__`, `constructor`, `toString`) is refused (state-field, its path), never written as a key: it would change the layout object itself or be taken for an existing panel (review before 1.6.0, 2026-11-06).",
+  "refs": ["docs/behaviors/dock.md"],
+  "input": {
+    "columns": [{ "id": "nom" }],
+    "dock": { "min": 160, "max": 800 },
+    "restore": {
+      "v": 1,
+      "dock": {
+        "panels": {
+          "__proto__": { "area": "end", "open": true },
+          "constructor": { "area": "start", "open": true },
+          "toString": { "area": "end", "open": true },
+          "columns": { "area": "end", "open": true }
+        },
+        "areas": { "end": { "size": 300 } }
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      { "code": "state-field", "severity": "warning", "path": "dock.panels.__proto__" },
+      { "code": "state-field", "severity": "warning", "path": "dock.panels.constructor" },
+      { "code": "state-field", "severity": "warning", "path": "dock.panels.toString" }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [{ "id": "nom", "order": 0, "pinned": null }],
+      "dock": {
+        "areas": { "end": { "size": 300 } },
+        "panels": { "columns": { "area": "end", "open": true } }
+      },
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

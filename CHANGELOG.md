@@ -5,11 +5,19 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased — 1.6.0
+## [1.6.0] - 2026-11-06
 
-Phase 9, moving rows (owner answers Q-RD1…Q-RD12, 2026-11-05; sheet `docs/behaviors/row-move.md`) and the dock (owner
-B, 2026-11-06; sheet `docs/behaviors/dock.md`). Nothing of 1.5.0 is removed or narrowed; `GridEvent` gains a member
-(`check:api` reports the union « changed »: accepted by the owner 2026-11-06).
+A minor: nothing of 1.5.0 is removed or narrowed (`npm run check:api`). Row dragging and the dock (Phase 9).
+
+### Upgrading from 1.5.0
+- Nothing to change. Row dragging (`@dzgrid/dom/row-drag`, `row-drag.css`) and the dock (`@dzgrid/dom/dock`,
+  `dock.css`) are off until the app asks; with a dock, the columns and filters panels stand in it, their options
+  unchanged.
+- `GridEvent` gains `rowMove`: a `switch` over every event type may need a case.
+- Fixed before release (review): a grip press released outside the window no longer blocks the next one; a dock panel
+  id every object already has (`constructor`…) is refused.
+
+Sheets: `docs/behaviors/row-move.md` (owner Q-RD1…Q-RD12, 2026-11-05), `docs/behaviors/dock.md` (owner B, 2026-11-06).
 
 ### Added
 - `@dzgrid/core/row-drag` (pure): `moveRows(rows, move, getRowId, { parentId, setParent })` — the reorder an application

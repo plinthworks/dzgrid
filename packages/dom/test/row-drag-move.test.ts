@@ -100,6 +100,14 @@ describe('the drag (5, 6, 11)', () => {
     }
   });
 
+  it('a press whose release was lost (outside the window) gives way to the next press (review, 2026-11-06)', () => {
+    const t = dmake({ rows: flatRows(6) });
+    t.hold('r1'); // released outside the window: no pointerup ever comes
+    t.drag('r3', ['r5', 0.8]);
+    expect(t.moves()).toHaveLength(1);
+    expect(t.moves()[0]!.keys).toEqual([t.K('r3')]);
+  });
+
   it('a mouse, a pen and a finger all drag from the grip (Q-RD9)', () => {
     for (const pointerType of ['mouse', 'pen', 'touch']) {
       const t = dmake({ rows: flatRows(6) });

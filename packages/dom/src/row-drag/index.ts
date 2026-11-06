@@ -414,6 +414,8 @@ function setup(g: GridContext<unknown>, o: RowDragOptions<unknown>, apis: WeakMa
     e.stopPropagation();
     const r = gr.closest('.dzg-row');
     const key = r && g.rowRenderer.keyOf(r);
+    // A press never released here (let go outside the window) gives way to this one.
+    if (d && !d.on) d = null;
     if (d || e.button || !e.isPrimary || g.editor || key == null || rows().indexOf(key) < 0) return;
     const why = off();
     if (why) return void say(T(why));
