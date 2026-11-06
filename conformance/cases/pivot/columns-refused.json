@@ -1,0 +1,84 @@
+{
+  "id": "columns-refused",
+  "suite": "pivot",
+  "description": "Pivot columns the grid does not know, given twice, marked `groupable: false` or already grouping the rows: dropped, told by id (pivot.md 15).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "z",
+        "groupable": false
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "Nord",
+        "y": "2025",
+        "z": "q",
+        "v": 1
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "nope",
+        "g",
+        "y",
+        "y",
+        "z"
+      ]
+    }
+  },
+  "expected": {
+    "headers": [
+      "2025"
+    ],
+    "shown": [
+      "[Nord] (1) 1/2 {2025=1 | v=1}",
+      "Σ* 2/2 {2025=1 | v=1}"
+    ],
+    "count": 1,
+    "problems": [
+      {
+        "code": "unknown-column",
+        "severity": "warning",
+        "path": "pivot.columns",
+        "detail": "nope"
+      },
+      {
+        "code": "invalid-setting",
+        "severity": "warning",
+        "path": "pivot.columns",
+        "detail": "g"
+      },
+      {
+        "code": "invalid-setting",
+        "severity": "warning",
+        "path": "pivot.columns",
+        "detail": "y"
+      },
+      {
+        "code": "invalid-setting",
+        "severity": "warning",
+        "path": "pivot.columns",
+        "detail": "z"
+      }
+    ]
+  }
+}

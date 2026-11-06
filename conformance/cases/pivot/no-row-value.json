@@ -1,0 +1,71 @@
+{
+  "id": "no-row-value",
+  "suite": "pivot",
+  "description": "A pivot column holding names: the limit tells a count, a total that throws tells its column; no problem carries a name (pivot.md « Health data »).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "name"
+      },
+      {
+        "id": "v",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "x",
+        "name": "SECRET-Fatima",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "g": "x",
+        "name": "SECRET-Omar",
+        "v": 2
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "name"
+      ],
+      "values": {
+        "v": {
+          "fn": "throws"
+        }
+      },
+      "maxColumns": 1
+    }
+  },
+  "expected": {
+    "headers": [],
+    "shown": [
+      "[x] (2) 1/2",
+      "Σ* 2/2"
+    ],
+    "count": 2,
+    "problems": [
+      {
+        "code": "pivot-too-many",
+        "severity": "warning",
+        "path": "pivot.columns",
+        "detail": "2"
+      },
+      {
+        "code": "agg-threw",
+        "severity": "warning",
+        "path": "columns.v.aggFunc"
+      }
+    ]
+  }
+}

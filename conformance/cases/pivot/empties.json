@@ -1,0 +1,72 @@
+{
+  "id": "empties",
+  "suite": "pivot",
+  "description": "Empty, missing and blank texts are one crossing, « (Vide) » (the application's word), always last (pivot.md 4, 5).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "A",
+        "y": "x",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "g": "A",
+        "y": null,
+        "v": 2
+      },
+      {
+        "id": "c",
+        "g": "A",
+        "y": "",
+        "v": 3
+      },
+      {
+        "id": "d",
+        "g": "B",
+        "v": 4
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y"
+      ],
+      "labels": {
+        "blank": "(Vide)"
+      }
+    }
+  },
+  "expected": {
+    "headers": [
+      "x",
+      "(Vide)"
+    ],
+    "shown": [
+      "[A] (3) 1/3 {x=1 (Vide)=5 | v=6}",
+      "[B] (1) 2/3 {(Vide)=4 | v=4}",
+      "Σ* 3/3 {x=1 (Vide)=9 | v=10}"
+    ],
+    "count": 2,
+    "problems": []
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "pivot-absent",
+  "suite": "grid-state",
+  "description": "A grid without the pivot ignores a saved `pivot` and writes none (grid-state.md « Pivot » 4).",
+  "refs": [
+    "docs/behaviors/grid-state.md",
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward"
+      }
+    ],
+    "restore": {
+      "v": 1,
+      "pivot": {
+        "on": true,
+        "columns": [
+          "ward"
+        ]
+      }
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": ""
+    }
+  }
+}

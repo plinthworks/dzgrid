@@ -1,0 +1,82 @@
+{
+  "id": "sort-total",
+  "suite": "pivot",
+  "description": "A sort on a created column orders the groups by that total, descending here; a group without that crossing last (pivot.md 10).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "Nord",
+        "y": "2025",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "g": "Sud",
+        "y": "2025",
+        "v": 9
+      },
+      {
+        "id": "c",
+        "g": "Est",
+        "y": "2026",
+        "v": 5
+      },
+      {
+        "id": "d",
+        "g": "Ouest",
+        "y": "2025",
+        "v": 4
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y"
+      ]
+    },
+    "steps": [
+      {
+        "sort": [
+          [
+            "~p1:y5:t20251:v",
+            "desc"
+          ]
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "headers": [
+      "2025",
+      "2026"
+    ],
+    "shown": [
+      "[Sud] (1) 1/5 {2025=9 | v=9}",
+      "[Ouest] (1) 2/5 {2025=4 | v=4}",
+      "[Nord] (1) 3/5 {2025=1 | v=1}",
+      "[Est] (1) 4/5 {2026=5 | v=5}",
+      "Σ* 5/5 {2025=14 2026=5 | v=19}"
+    ],
+    "count": 2,
+    "problems": []
+  }
+}

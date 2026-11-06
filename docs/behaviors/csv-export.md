@@ -152,3 +152,7 @@ walk reads `DisplayedRows.held`, never ten million positions, and loading rows a
 go to the host's `exportAll` with the server's part of the query, as server pages (no page, no `blocks`; `count` the
 query's). The request's and the event's `count` for `displayed` is the number of rows held written. The same for Excel
 (the same request). Built: the bounded walk (step 4), the rest checked at step 5.
+
+## Pivot (Phase 10, `pivot.md`; plan D18 A; built in the DOM batch)
+What the screen shows: the label column, the created columns with their **full chain** as header (« 2025 › Janv. ›
+Montant »), the row totals, the grand total row. One header line, as always.

@@ -15,6 +15,8 @@ export interface Totals {
   readonly grand: Readonly<Record<string, unknown>>;
   readonly columns: readonly string[];
   readonly problems: readonly Problem[];
+  /** What they were made of (`totalsOf`'s `last`). */
+  readonly k?: readonly unknown[];
 }
 
 /** What a grouping hands its totals: each group's level and leaf range over the all-open order. */
@@ -26,7 +28,13 @@ interface Ranges {
   readonly leaves: Uint32Array;
 }
 
-const NAMES = ['sum', 'avg', 'min', 'max', 'count', 'first', 'last'];
+export const NAMES = ['sum', 'avg', 'min', 'max', 'count', 'first', 'last'];
+
+/** Whether a built-in total fits a column's type (aggregation.md 3); a function always does. */
+export const fits = <T>(col: ResolvedColumn<T>, fn: unknown): boolean => {
+  const t = col.type;
+  return fn === 'sum' || fn === 'avg' ? t === 'number' : fn === 'min' || fn === 'max' ? /^(number|day|instant|text)$/.test(t) : true;
+};
 
 /**
  * The totals (aggregation.md 1–8, 15): for each visible column with a total (the options' `aggFuncs` winning over the
@@ -35,17 +43,15 @@ const NAMES = ['sum', 'avg', 'min', 'max', 'count', 'first', 'last'];
  * `rangeStats`); empty values skipped but by `count`, which counts rows. A total that does not fit its column's type, an
  * unknown name or column, a function that throws: told by column and name, never a value.
  */
-export function totalsOf<T>(s: Ranges, env: ColumnEnv<T>, aggFuncs: Readonly<Record<string, AggFuncName | AggFn>> | undefined): Totals {
-  const problems: Problem[] = [];
+export function totalsOf<T>(s: Ranges, env: ColumnEnv<T>, aggFuncs: Readonly<Record<string, AggFuncName | AggFn>> | undefined, base?: Totals, last?: Totals): Totals {
+  const problems: Problem[] = [...(base?.problems ?? [])];
   const specs: { col: ResolvedColumn<T>; fn: AggFuncName | AggFn }[] = [];
   const take = (col: ResolvedColumn<T>, fn: unknown): void => {
     if (fn === undefined) return;
     const path = `columns.${col.id}.aggFunc`;
     if (typeof fn == 'function') return void specs.push({ col, fn: fn as AggFn });
     if (!NAMES.includes(fn as string)) return void problems.push(problem('invalid-setting', 'warning', path, typeof fn == 'string' ? fn : typeof fn));
-    const t = col.type;
-    const fits = fn === 'sum' || fn === 'avg' ? t === 'number' : fn === 'min' || fn === 'max' ? /^(number|day|instant|text)$/.test(t) : true;
-    if (fits) specs.push({ col, fn: fn as AggFuncName });
+    if (fits(col, fn)) specs.push({ col, fn: fn as AggFuncName });
     else problems.push(problem('agg-type', 'warning', path, fn as string));
   };
   const own = (id: string) => aggFuncs !== undefined && Object.hasOwn(aggFuncs, id);
@@ -59,8 +65,13 @@ export function totalsOf<T>(s: Ranges, env: ColumnEnv<T>, aggFuncs: Readonly<Rec
   }
 
   const { G, lv, lo, hi, leaves } = s;
-  const at: Record<string, unknown>[] = Array.from({ length: G }, () => ({}));
-  const grand: Record<string, unknown> = {};
+  // The same groups, rows, language and totals as the last ones (another column changed: Phase 10 fact 5): kept, so a
+  // column's new object does not read its keys again.
+  const k = [lo, leaves, env.source, env.reader.version, env.ctx, base, ...specs.flatMap((x) => [x.col.def, x.fn])];
+  if (last?.k?.length === k.length && last.k.every((v, i) => v === k[i])) return last;
+  // A pivot's crossings (`base`) sit under the totals: each record reads through to its group's cells.
+  const at: Record<string, unknown>[] = Array.from({ length: G }, (_, g) => (base ? Object.create(base.at[g]!) : {}));
+  const grand: Record<string, unknown> = base ? Object.create(base.grand) : {};
   for (const { col, fn } of specs) {
     const id = col.id;
     let threw = false;
@@ -113,5 +124,5 @@ export function totalsOf<T>(s: Ranges, env: ColumnEnv<T>, aggFuncs: Readonly<Rec
     grand[id] = one(0, leaves.length, null);
     if (threw) problems.push(problem('agg-threw', 'warning', `columns.${id}.aggFunc`));
   }
-  return { at, grand, columns: specs.map((x) => x.col.id), problems };
+  return { at, grand, columns: specs.map((x) => x.col.id), problems, k };
 }

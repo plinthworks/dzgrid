@@ -1,0 +1,97 @@
+{
+  "id": "limit",
+  "suite": "pivot",
+  "description": "More created columns than `maxColumns`: none is made, the rows stay grouped with their row totals, told by the count only (pivot.md 9).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "m"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Jan",
+        "v": 10
+      },
+      {
+        "id": "r2",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Feb",
+        "v": 5
+      },
+      {
+        "id": "r3",
+        "g": "Sud",
+        "y": "2025",
+        "m": "Jan",
+        "v": 2
+      },
+      {
+        "id": "r4",
+        "g": "Nord",
+        "y": "2026",
+        "m": "Jan",
+        "v": 1
+      },
+      {
+        "id": "r5",
+        "g": "Sud",
+        "y": "2026",
+        "m": "Jan",
+        "v": 4
+      },
+      {
+        "id": "r6",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Jan",
+        "v": 3
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y",
+        "m"
+      ],
+      "maxColumns": 2
+    }
+  },
+  "expected": {
+    "headers": [],
+    "shown": [
+      "[Nord] (4) 1/3 {| v=19}",
+      "[Sud] (2) 2/3 {| v=6}",
+      "Σ* 3/3 {| v=25}"
+    ],
+    "count": 3,
+    "problems": [
+      {
+        "code": "pivot-too-many",
+        "severity": "warning",
+        "path": "pivot.columns",
+        "detail": "3"
+      }
+    ]
+  }
+}

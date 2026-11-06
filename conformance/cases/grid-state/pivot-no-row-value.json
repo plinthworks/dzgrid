@@ -1,0 +1,116 @@
+{
+  "id": "pivot-no-row-value",
+  "suite": "grid-state",
+  "description": "A pivot on names, the user sorting and sizing a created column: the state holds the pivot's column ids, never a created column, its size or its sort — no name reaches it (grid-state.md « Pivot » 2; pivot.md « Health data »).",
+  "refs": [
+    "docs/behaviors/grid-state.md",
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward"
+      },
+      {
+        "id": "name"
+      },
+      {
+        "id": "amount",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "ward": "N",
+        "name": "SECRET-Fatima",
+        "amount": 1
+      },
+      {
+        "id": "r2",
+        "ward": "N",
+        "name": "SECRET-Omar",
+        "amount": 2
+      }
+    ],
+    "pivot": {
+      "by": [
+        "ward"
+      ],
+      "columns": [
+        "name"
+      ]
+    },
+    "before": [
+      {
+        "type": "query.set",
+        "query": {
+          "sort": [
+            {
+              "column": "~p4:name14:tSECRET-Fatima6:amount",
+              "dir": "desc"
+            }
+          ],
+          "filter": {},
+          "quick": ""
+        }
+      },
+      {
+        "type": "column.resize",
+        "column": "~p4:name12:tSECRET-Omar6:amount",
+        "width": 200,
+        "finished": true
+      }
+    ],
+    "restore": {
+      "v": 1
+    }
+  },
+  "expected": {
+    "problems": [],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "name",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "amount",
+          "order": 2,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": [
+        "ward"
+      ],
+      "pivot": {
+        "on": true,
+        "columns": [
+          "name"
+        ],
+        "values": {
+          "amount": "sum"
+        }
+      }
+    },
+    "leaks": false,
+    "shown": [
+      "[N]",
+      "Σ"
+    ],
+    "by": [
+      "ward"
+    ]
+  }
+}

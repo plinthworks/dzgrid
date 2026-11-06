@@ -1,0 +1,84 @@
+{
+  "id": "turned-on",
+  "suite": "pivot",
+  "description": "The application turns pivot mode on: the same grid becomes the cross table (pivot.md 1).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "Nord",
+        "y": "2025",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "g": "Sud",
+        "y": "2025",
+        "v": 9
+      },
+      {
+        "id": "c",
+        "g": "Est",
+        "y": "2026",
+        "v": 5
+      },
+      {
+        "id": "d",
+        "g": "Ouest",
+        "y": "2025",
+        "v": 4
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y"
+      ],
+      "on": false,
+      "values": {
+        "v": "sum"
+      }
+    },
+    "steps": [
+      {
+        "expandAll": true
+      },
+      {
+        "on": true
+      }
+    ]
+  },
+  "expected": {
+    "headers": [
+      "2025",
+      "2026"
+    ],
+    "shown": [
+      "[Est] (1) 1/5 {2026=5 | v=5}",
+      "[Nord] (1) 2/5 {2025=1 | v=1}",
+      "[Ouest] (1) 3/5 {2025=4 | v=4}",
+      "[Sud] (1) 4/5 {2025=9 | v=9}",
+      "Σ* 5/5 {2025=14 2026=5 | v=19}"
+    ],
+    "count": 2,
+    "problems": []
+  }
+}

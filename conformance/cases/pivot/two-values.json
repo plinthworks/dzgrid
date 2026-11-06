@@ -1,0 +1,84 @@
+{
+  "id": "two-values",
+  "suite": "pivot",
+  "description": "Two values: a band per crossing over one column per value, in the order given (the value's header, else its id); « Nombre » counts the crossing's rows, empty values included; a sum of empty values only shows nothing (pivot.md 3, 7).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "header": "Amount"
+      },
+      {
+        "id": "w",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "Nord",
+        "y": "2025",
+        "v": 10,
+        "w": 1
+      },
+      {
+        "id": "b",
+        "g": "Nord",
+        "y": "2025",
+        "v": null,
+        "w": null
+      },
+      {
+        "id": "c",
+        "g": "Nord",
+        "y": "2026",
+        "v": 4,
+        "w": 2
+      },
+      {
+        "id": "d",
+        "g": "Sud",
+        "y": "2026",
+        "v": 6,
+        "w": null
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y"
+      ],
+      "values": {
+        "v": "sum",
+        "w": "count"
+      }
+    }
+  },
+  "expected": {
+    "headers": [
+      "2025/Amount",
+      "2025/w",
+      "2026/Amount",
+      "2026/w"
+    ],
+    "shown": [
+      "[Nord] (3) 1/3 {2025/Amount=10 2025/w=2 2026/Amount=4 2026/w=1 | v=14 w=3}",
+      "[Sud] (1) 2/3 {2026/Amount=6 2026/w=1 | v=6 w=1}",
+      "Σ* 3/3 {2025/Amount=10 2025/w=2 2026/Amount=10 2026/w=2 | v=20 w=4}"
+    ],
+    "count": 4,
+    "problems": []
+  }
+}

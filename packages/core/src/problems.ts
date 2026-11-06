@@ -76,9 +76,10 @@ export type XlsxProblemCode = 'xlsx-early-day' | 'xlsx-text-cut' | 'xlsx-outline
 
 /**
  * `@dzgrid/core/grouping`'s own (Phase 7, aggregation.md 3, 15): a total that does not fit its column's type, an
- * application's total function that threw; path `columns.<id>.aggFunc`, never a value. A type only.
+ * application's total function that threw; path `columns.<id>.aggFunc`, never a value. `@dzgrid/core/pivot`'s (Phase 10,
+ * pivot.md 9): more created columns than `maxColumns`, path `pivot.columns`, the count only. Types only.
  */
-export type GroupProblemCode = 'agg-type' | 'agg-threw';
+export type GroupProblemCode = 'agg-type' | 'agg-threw' | 'pivot-too-many';
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | 'print-too-many' | 'unknown-ui-key'
   /** A block of cells over rows a list loaded in blocks does not hold yet: its copy, cut, paste or erase refused (Phase 8). */

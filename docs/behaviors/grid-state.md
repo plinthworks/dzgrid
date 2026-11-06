@@ -203,3 +203,18 @@ kept between the dock's `min` and `max`; unknown panels kept for later); `float`
 (`state-field`, detail `float`). A grid without the dock neither writes nor applies it (its text unchanged). A dock change
 is a gesture (`stateChanged` after the pause); `reset()` puts it back as the options placed it; a state restored before
 the dock is set up (gridState listed first) applies at its setup.
+
+## Pivot (Phase 10, `pivot.md` 14; owner Q-P10 A)
+With `pivot()`, the part `pivot` (`StatePart` `'pivot'`): `{ on: boolean, columns: string[], values?: { [id]:
+'sum' | 'avg' | 'min' | 'max' | 'count' | 'first' | 'last' } }` — column ids and function names only.
+1. Captured only on a grid with the pivot (through `StateEnv.pivot`); a grid without it writes no `pivot`.
+2. **Never a created column**: the columns the pivot made (`StateEnv.pivot.made(id)`) are left out of `columns` (the
+   others numbered without them), and a sort on one is left out of `sort`. Their bands are never collapsible, so never in
+   `groups`. A test plants a value in a pivot column and reads the state, its text and every problem.
+3. Restored after `rowGroups` and the dock, before the query; checked by `@dzgrid/core/pivot`'s `checkPivot`: not an
+   object, `state-field` at `pivot`, nothing applied; `on` not a boolean, `state-field` at `pivot.on` (the mode kept); a
+   pivot column the grid does not know, `state-column` (path `pivot.columns.<i>`, the id); not a text, twice or
+   `groupable: false`, `state-field` at `pivot.columns.<i>`; `columns` not a list, `state-field` at `pivot.columns`; a
+   value column the grid does not know, `state-column` at `pivot.values` (the id); a function that is not one of the
+   seven names, `state-field` at `pivot.values.<id>`. An application's own function is never saved (it has no name).
+4. A grid without the pivot ignores the part (nothing told).

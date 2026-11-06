@@ -54,7 +54,7 @@ export const named = (v: unknown): string => (typeof v == 'string' || typeof v =
 const BY_KEY = /^(number|day|instant|boolean)$/;
 
 /** What a row is grouped by in a column (D3, Q-G3 A): its sort key (NaN when empty) or its export text (null when empty). */
-const identity = <T>(c: ResolvedColumn<T>, env: ColumnEnv<T>): ((src: number) => unknown) => {
+export const identity = <T>(c: ResolvedColumn<T>, env: ColumnEnv<T>): ((src: number) => unknown) => {
   if (BY_KEY.test(c.type)) {
     const k = env.cache.keys(c, env).keys;
     return (s) => k[s];
@@ -71,7 +71,7 @@ const FOOTERS = ['none', 'group', 'grand', 'both'];
  * parent (-1: none), a row holding its value, and its value's identity; children sorted by value; the leaves of the
  * all-open order, each group's a contiguous range of them.
  */
-interface Groups<T> {
+export interface Groups<T> {
   readonly snap: RowSnapshot<T>;
   readonly order: Uint32Array | null;
   readonly cols: readonly ResolvedColumn<T>[];
@@ -95,12 +95,155 @@ interface Groups<T> {
   byKey?: Map<string, number>;
 }
 
+/** Groups `order` (null: every row in source order) by `cols` (row-grouping.md 1–4). */
+export const group = <T>(env: ColumnEnv<T>, order: Uint32Array | null, cols: readonly ResolvedColumn<T>[], desc: string): Groups<T> => {
+  const snap = env.source;
+  const N = order ? order.length : snap.count;
+  const L = cols.length;
+  const ident = cols.map((c) => identity(c, env));
+  const up: number[] = [];
+  const lv: number[] = [];
+  const first: number[] = [];
+  const gid: unknown[] = [];
+  const maps: Map<unknown, number>[] = [];
+  const deep = new Int32Array(N);
+  for (let k = 0; k < N; k++) {
+    const s = order ? order[k]! : k;
+    let g = -1;
+    for (let l = 0; l < L; l++) {
+      const m = (maps[g + 1] ??= new Map());
+      const v = ident[l]!(s);
+      let c = m.get(v);
+      if (c === undefined) m.set(v, (c = up.push(g) - 1)), lv.push(l), first.push(s), gid.push(v);
+      g = c;
+    }
+    deep[k] = g;
+  }
+  const G = up.length;
+  // Children by parent (index 0: the root), in the order met, then sorted by value (row-grouping.md 4).
+  const ks = new Int32Array(G + 2);
+  for (let g = 0; g < G; g++) ks[up[g]! + 2] = ks[up[g]! + 2]! + 1;
+  for (let x = 1; x < G + 2; x++) ks[x] = ks[x]! + ks[x - 1]!;
+  const fill = ks.slice(0, G + 1);
+  const kids = new Int32Array(G);
+  for (let g = 0; g < G; g++) kids[fill[up[g]! + 1]!] = g, (fill[up[g]! + 1] = fill[up[g]! + 1]! + 1);
+  // A group's sort key: the column's own (a number, or a text's rank under the collation, shared with the sort's
+  // cache), NaN for the empty group, which stays last both ways; collation ties (distinct values) by code units.
+  const sk = new Float64Array(G);
+  const sorters = cols.map((c) => (c.codec.keyKind === 'number' ? env.cache.keys(c, env).keys : env.cache.ranks(c, env).ranks));
+  for (let g = 0; g < G; g++) sk[g] = sorters[lv[g]!]![first[g]!]!;
+  for (let x = 0; x <= G; x++) {
+    const from = ks[x]!;
+    const to = ks[x + 1]!;
+    if (to - from < 2) continue;
+    const dir = desc[lv[kids[from]!]!] === '1' ? -1 : 1;
+    const part = Array.from(kids.subarray(from, to));
+    part.sort((a, b) => {
+      const p = sk[a]!;
+      const q = sk[b]!;
+      if (p !== p || q !== q) return p !== p ? (q !== q ? 0 : 1) : -1;
+      const x2 = gid[a] as string;
+      const y2 = gid[b] as string;
+      return (p - q) * dir || (x2 < y2 ? -1 : x2 > y2 ? 1 : 0);
+    });
+    kids.set(part, from);
+  }
+  // Leaf ranges: each group's rows counted, then placed depth first in the sorted order.
+  const n = new Int32Array(G);
+  for (let k = 0; k < N; k++) if (deep[k]! >= 0) n[deep[k]!] = n[deep[k]!]! + 1;
+  const lo = new Int32Array(G);
+  const hi = new Int32Array(G);
+  let at = 0;
+  const place = (x: number): void => {
+    for (let c = ks[x]!; c < ks[x + 1]!; c++) {
+      const g = kids[c]!;
+      lo[g] = at;
+      if (lv[g] === L - 1) at += n[g]!;
+      else place(g + 1);
+      hi[g] = at;
+    }
+  };
+  place(0);
+  let leaves: Uint32Array;
+  if (L) {
+    leaves = new Uint32Array(N);
+    const pos = lo.slice();
+    for (let k = 0; k < N; k++) leaves[pos[deep[k]!]!] = order ? order[k]! : k, (pos[deep[k]!] = pos[deep[k]!]! + 1);
+  } else leaves = order ?? Uint32Array.from({ length: N }, (_, k) => k);
+  // Values, labels and keys: one read per group; a key is its parent's and its own column and value (D3).
+  const val: unknown[] = [];
+  const label: string[] = [];
+  const key: RowKey[] = [];
+  const segs: string[][] = [];
+  for (let g = 0; g < G; g++) {
+    const c = cols[lv[g]!]!;
+    const v = valueAt(c, env, first[g]!);
+    val[g] = v;
+    label[g] = v === null ? '' : c.codec.format(v as never, env.ctx);
+    // Parents are numbered before their children: theirs is ready.
+    segs[g] = [...(up[g]! < 0 ? [] : segs[up[g]!]!), c.id, v === null ? '' : c.type[0] + c.codec.toExport(v as never)];
+    key[g] = groupKey(segs[g]!);
+  }
+  return { snap, order, cols, G, lv: Int32Array.from(lv), up: Int32Array.from(up), ks, kids, lo, hi, leaves, val, label, key, gid };
+};
+
+/** The deepest group of each row, by source index (-1: not in the grouping). */
+export const ofRows = <T>(S: Groups<T>): Int32Array => {
+  const of = new Int32Array(S.snap.count).fill(-1);
+  for (let g = 0; g < S.G; g++) if (S.lv[g] === S.cols.length - 1) for (let j = S.lo[g]!; j < S.hi[g]!; j++) of[S.leaves[j]!] = g;
+  return of;
+};
+
+/**
+ * Whether a new generation of the rows keeps every row in its group (Q-T A): same rows in the same order (an update),
+ * and each changed row's grouping values unchanged. Then the grouping is kept and only the totals follow.
+ */
+export const keeps = <T>(S: Groups<T>, env: ColumnEnv<T>, order: Uint32Array | null): boolean => {
+  const was = S.snap;
+  const now = env.source;
+  const o = S.order;
+  // Another list of the same rows in the same order (a filter run again after a column change, a sort that moves
+  // nothing) keeps them too; no list is every row in source order.
+  const n = order ? order.length : now.count;
+  if (now.ids !== was.ids || now.count !== was.count || (o ? o.length : was.count) !== n) return false;
+  if (order !== o) for (let i = 0; i < n; i++) if ((order ? order[i] : i) !== (o ? o[i] : i)) return false;
+  const of = (S.of ??= ofRows(S));
+  let ident: ((src: number) => unknown)[] | undefined;
+  for (let s = 0; s < now.count; s++) {
+    if (now.rows[s] === was.rows[s] || of[s]! < 0) continue;
+    // Up the chain from its deepest group: each level's identity read again on the new row.
+    for (let g = of[s]!; g >= 0; g = S.up[g]!) if (!Object.is((ident ??= S.cols.map((c) => identity(c, env)))[S.lv[g]!]!(s), S.gid[g])) return false;
+  }
+  return true;
+};
+
 /**
  * The grouping (D2, owner answers 2026-11-04): a row shape over the filtered, sorted rows. Each stage keeps its result
  * while its inputs keep their identity: opening a group only flattens again; a live update or an edit that moves no
  * grouping value totals again without regrouping.
  */
 export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
+  return grouped(o);
+}
+
+/**
+ * What a pivot adds to a grouping (Phase 10, `@dzgrid/core/pivot`; internal): read at each build, so the pivot turns on
+ * and off without a new shape.
+ */
+export interface Seam<T> {
+  /** The deepest groups are the last rows: no data row under them, never open. */
+  flat(): boolean;
+  /** The totals' functions now (absent: the options'). */
+  fns(env: ColumnEnv<T>): Readonly<Record<string, AggFuncName | AggFn>> | undefined;
+  /** Each group's crossings, under its totals (by created column id), and what they told. */
+  cells(s: Groups<T>, env: ColumnEnv<T>): Totals | undefined;
+  /** The groups' order among their siblings (absent: by value), after the totals. */
+  kids(s: Groups<T>, t: Totals): Int32Array | undefined;
+  /** Moved when the cells must be made again. */
+  v: number;
+}
+
+export function grouped<T>(o: GroupingOptions, x?: Seam<T>): GroupShape<T> {
   const d = { builds: 0, aggs: 0, flattens: 0 };
   const told: Problem[] = [];
   const bad = (path: string, v: unknown): void => void told.push(problem('invalid-setting', 'warning', `grouping.${path}`, named(v)));
@@ -127,8 +270,8 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
   let pending = false;
   /** The grouping columns as used and what refusing others told, for the `by` and the columns they were read under. */
   let used: { byV: number; cols: unknown; dv: number; list: ResolvedColumn<T>[]; ps: Problem[] } | null = null;
-  let S: (Groups<T> & { byV: number; ctx: string; colsRef: unknown; dv: number; desc: string }) | null = null;
-  let A: { S: Groups<T>; reader: number; snap: RowSnapshot<T>; t: Totals } | null = null;
+  let S: (Groups<T> & { byV: number; ctx: string; desc: string }) | null = null;
+  let A: { S: Groups<T>; reader: number; snap: RowSnapshot<T>; v: number | undefined; t: Totals } | null = null;
   let open: Uint8Array | null = null;
   let last: GroupedRows<T> | null = null;
   let all: GroupedRows<T> | null = null;
@@ -151,122 +294,6 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
     return used.list;
   };
 
-  /** Groups `order` (null: every row in source order) by `cols` (row-grouping.md 1–4). */
-  const group = (env: ColumnEnv<T>, order: Uint32Array | null, cols: readonly ResolvedColumn<T>[], desc: string): Groups<T> => {
-    d.builds++;
-    const snap = env.source;
-    const N = order ? order.length : snap.count;
-    const L = cols.length;
-    const ident = cols.map((c) => identity(c, env));
-    const up: number[] = [];
-    const lv: number[] = [];
-    const first: number[] = [];
-    const gid: unknown[] = [];
-    const maps: Map<unknown, number>[] = [];
-    const deep = new Int32Array(N);
-    for (let k = 0; k < N; k++) {
-      const s = order ? order[k]! : k;
-      let g = -1;
-      for (let l = 0; l < L; l++) {
-        const m = (maps[g + 1] ??= new Map());
-        const v = ident[l]!(s);
-        let c = m.get(v);
-        if (c === undefined) m.set(v, (c = up.push(g) - 1)), lv.push(l), first.push(s), gid.push(v);
-        g = c;
-      }
-      deep[k] = g;
-    }
-    const G = up.length;
-    // Children by parent (index 0: the root), in the order met, then sorted by value (row-grouping.md 4).
-    const ks = new Int32Array(G + 2);
-    for (let g = 0; g < G; g++) ks[up[g]! + 2] = ks[up[g]! + 2]! + 1;
-    for (let x = 1; x < G + 2; x++) ks[x] = ks[x]! + ks[x - 1]!;
-    const fill = ks.slice(0, G + 1);
-    const kids = new Int32Array(G);
-    for (let g = 0; g < G; g++) kids[fill[up[g]! + 1]!] = g, (fill[up[g]! + 1] = fill[up[g]! + 1]! + 1);
-    // A group's sort key: the column's own (a number, or a text's rank under the collation, shared with the sort's
-    // cache), NaN for the empty group, which stays last both ways; collation ties (distinct values) by code units.
-    const sk = new Float64Array(G);
-    const sorters = cols.map((c) => (c.codec.keyKind === 'number' ? env.cache.keys(c, env).keys : env.cache.ranks(c, env).ranks));
-    for (let g = 0; g < G; g++) sk[g] = sorters[lv[g]!]![first[g]!]!;
-    for (let x = 0; x <= G; x++) {
-      const from = ks[x]!;
-      const to = ks[x + 1]!;
-      if (to - from < 2) continue;
-      const dir = desc[lv[kids[from]!]!] === '1' ? -1 : 1;
-      const part = Array.from(kids.subarray(from, to));
-      part.sort((a, b) => {
-        const p = sk[a]!;
-        const q = sk[b]!;
-        if (p !== p || q !== q) return p !== p ? (q !== q ? 0 : 1) : -1;
-        const x2 = gid[a] as string;
-        const y2 = gid[b] as string;
-        return (p - q) * dir || (x2 < y2 ? -1 : x2 > y2 ? 1 : 0);
-      });
-      kids.set(part, from);
-    }
-    // Leaf ranges: each group's rows counted, then placed depth first in the sorted order.
-    const n = new Int32Array(G);
-    for (let k = 0; k < N; k++) if (deep[k]! >= 0) n[deep[k]!] = n[deep[k]!]! + 1;
-    const lo = new Int32Array(G);
-    const hi = new Int32Array(G);
-    let at = 0;
-    const place = (x: number): void => {
-      for (let c = ks[x]!; c < ks[x + 1]!; c++) {
-        const g = kids[c]!;
-        lo[g] = at;
-        if (lv[g] === L - 1) at += n[g]!;
-        else place(g + 1);
-        hi[g] = at;
-      }
-    };
-    place(0);
-    let leaves: Uint32Array;
-    if (L) {
-      leaves = new Uint32Array(N);
-      const pos = lo.slice();
-      for (let k = 0; k < N; k++) leaves[pos[deep[k]!]!] = order ? order[k]! : k, (pos[deep[k]!] = pos[deep[k]!]! + 1);
-    } else leaves = order ?? Uint32Array.from({ length: N }, (_, k) => k);
-    // Values, labels and keys: one read per group; a key is its parent's and its own column and value (D3).
-    const val: unknown[] = [];
-    const label: string[] = [];
-    const key: RowKey[] = [];
-    const segs: string[][] = [];
-    for (let g = 0; g < G; g++) {
-      const c = cols[lv[g]!]!;
-      const v = valueAt(c, env, first[g]!);
-      val[g] = v;
-      label[g] = v === null ? '' : c.codec.format(v as never, env.ctx);
-      // Parents are numbered before their children: theirs is ready.
-      segs[g] = [...(up[g]! < 0 ? [] : segs[up[g]!]!), c.id, v === null ? '' : c.type[0] + c.codec.toExport(v as never)];
-      key[g] = groupKey(segs[g]!);
-    }
-    return { snap, order, cols, G, lv: Int32Array.from(lv), up: Int32Array.from(up), ks, kids, lo, hi, leaves, val, label, key, gid };
-  };
-
-  /**
-   * Whether a new generation of the rows keeps every row in its group (Q-T A): same rows in the same order (an update),
-   * and each changed row's grouping values unchanged. Then the grouping is kept and only the totals follow.
-   */
-  const keeps = (S: Groups<T>, env: ColumnEnv<T>, order: Uint32Array | null): boolean => {
-    const was = S.snap;
-    const now = env.source;
-    if (order !== S.order || now.ids !== was.ids || now.count !== was.count) return false;
-    const of = (S.of ??= ofRows(S));
-    const ident = S.cols.map((c) => identity(c, env));
-    for (let s = 0; s < now.count; s++) {
-      if (now.rows[s] === was.rows[s] || of[s]! < 0) continue;
-      // Up the chain from its deepest group: each level's identity read again on the new row.
-      for (let g = of[s]!; g >= 0; g = S.up[g]!) if (!Object.is(ident[S.lv[g]!]!(s), S.gid[g])) return false;
-    }
-    return true;
-  };
-  const ofRows = (S: Groups<T>): Int32Array => {
-    const of = new Int32Array(S.snap.count).fill(-1);
-    for (let g = 0; g < S.G; g++) if (S.lv[g] === S.cols.length - 1) for (let j = S.lo[g]!; j < S.hi[g]!; j++) of[S.leaves[j]!] = g;
-    return of;
-  };
-
   /** The columns a grid sorts descending among the grouping columns, as '0' / '1' per level. */
   const descOf = (cols: readonly ResolvedColumn<T>[]): string => {
     const sort = model?.query.sort ?? [];
@@ -279,10 +306,12 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
     const desc = descOf(cols);
     // An edited grouping value is applied at the next whole run only (K.14): while the order is stale, kept.
     const regroup = pending && !model?.orderStale;
-    if (!S || regroup || S.byV !== byV || S.ctx !== ctx || S.colsRef !== env.columns || S.dv !== env.columns.dataVersion || S.desc !== desc || (S.snap !== env.source || S.order !== order ? !keeps(S, env, order) : false)) {
+    // Keyed on the definitions of the columns it groups by (Phase 10 fact 5): another column's change keeps the groups.
+    if (!S || regroup || S.byV !== byV || S.ctx !== ctx || S.cols.length !== cols.length || cols.some((c, i) => c.def !== S!.cols[i]!.def) || S.desc !== desc || (S.snap !== env.source || S.order !== order ? !keeps(S, env, order) : false)) {
       pending = false;
-      S = { ...group(env, order, cols, desc), byV, ctx, colsRef: env.columns, dv: env.columns.dataVersion, desc };
-    } else if (S.snap !== env.source) S = { ...S, snap: env.source };
+      d.builds++;
+      S = { ...group(env, order, cols, desc), byV, ctx, desc };
+    } else if (S.snap !== env.source || S.order !== order || S.cols !== cols) S = { ...S, snap: env.source, order, cols };
     return S;
   };
 
@@ -332,34 +361,42 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
       // At the first load (no build yet), the groups of every row; afterwards, the last build's.
       const s = S && (shown || !env || S.snap === snap) ? S : env ? groupsOf(env, null) : null;
       const out: RowKey[] = [];
-      if (s) for (let g = 0; g < s.G; g++) if (s.lv[g]! < depth) out.push(s.key[g]!);
+      if (s) for (let g = 0; g < s.G; g++) if (s.lv[g]! < depth && !deep(s, g)) out.push(s.key[g]!);
       return out;
     },
     isOpen: (key) => {
       const g = S ? gOf(S, key) : -1;
       return g >= 0 && open?.[g] === 1;
     },
-    opens: (key) => (S ? gOf(S, key) >= 0 : false),
+    opens: (key) => {
+      const g = S ? gOf(S, key) : -1;
+      return g >= 0 && !deep(S!, g);
+    },
     refresh() {
       S = A = null;
     },
     build(i: ShapeInput<T>): GroupedRows<T> {
       const env = i.env!;
       const s = groupsOf(env, i.order);
-      if (A?.S !== s || A.reader !== env.reader.version || A.snap !== env.source) {
-        d.aggs++;
-        A = { S: s, reader: env.reader.version, snap: env.source, t: off ? { at: [], grand: {}, columns: [], problems: [] } : totalsOf(s, env, aggFuncs) };
+      if (A?.S !== s || A.reader !== env.reader.version || A.snap !== env.source || A.v !== x?.v) {
+        const t = off ? { at: [], grand: {}, columns: [], problems: [] } : totalsOf(s, env, x?.fns(env) ?? aggFuncs, x?.cells(s, env), A?.t);
+        if (t !== A?.t) d.aggs++;
+        A = { S: s, reader: env.reader.version, snap: env.source, v: x?.v, t };
       }
       const t = A.t;
+      const kids = x?.kids(s, t) ?? s.kids;
       const isOpen = new Uint8Array(s.G);
-      for (let g = 0; g < s.G; g++) isOpen[g] = +i.expansion.has(s.key[g]!);
+      for (let g = 0; g < s.G; g++) isOpen[g] = +(i.expansion.has(s.key[g]!) && !deep(s, g));
       open = isOpen;
-      flat = (every) => flatten(s, t, every ? null : isOpen, i.version, footG, footT, top);
+      const fl = !!x?.flat();
+      flat = (every) => flatten(s, t, every ? null : isOpen, i.version, footG, footT, top, fl, kids);
       all = null;
       return (last = flat(false));
     },
     all: () => (all ??= flat(true)),
   };
+  /** A deepest group of a pivot's: a last row, never open. */
+  const deep = (s: Groups<T>, g: number): boolean => !!x?.flat() && s.lv[g] === s.cols.length - 1;
   const gOf = (s: Groups<T>, key: RowKey): number => {
     if (!s.byKey) {
       s.byKey = new Map();
@@ -369,9 +406,9 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
   };
 
   /** The rows shown: groups in order, each open one's children (groups or rows), its footer, the grand total. */
-  const flatten = (s: Groups<T>, t: Totals, isOpen: Uint8Array | null, version: number, fg: boolean, ft: boolean, atTop: boolean): GroupedRows<T> => {
+  const flatten = (s: Groups<T>, t: Totals, isOpen: Uint8Array | null, version: number, fg: boolean, ft: boolean, atTop: boolean, fl: boolean, kids: Int32Array): GroupedRows<T> => {
     d.flattens++;
-    const { G, lv, ks, kids, lo, hi, leaves, snap } = s;
+    const { G, lv, ks, lo, hi, leaves, snap } = s;
     const L = s.cols.length;
     const N = leaves.length;
     const grand = ft && N > 0;
@@ -385,8 +422,10 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
     let data = 0;
     const emit = (c: number, l: number, p: number, z: number): void => void ((at[m] = c), (lev[m] = l), (pos[m] = p), (size[m++] = z));
     const GT = -1 - 2 * G;
-    const topSize = (L ? ks[1]! - ks[0]! : N) + 1;
-    const kidsOfG = (g: number): number => (lv[g] === L - 1 ? hi[g]! - lo[g]! : ks[g + 2]! - ks[g + 1]!);
+    const topSize = (L ? ks[1]! - ks[0]! : fl ? 0 : N) + 1;
+    // A pivot's deepest groups (`fl`) hold no row: no children, never open.
+    const shut = (g: number): boolean => fl && lv[g] === L - 1;
+    const kidsOfG = (g: number): number => (lv[g] === L - 1 ? (fl ? 0 : hi[g]! - lo[g]!) : ks[g + 2]! - ks[g + 1]!);
     const walk = (x: number): void => {
       const g = x - 1;
       const foot = g >= 0 && fg ? 1 : 0;
@@ -396,7 +435,7 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
       if (shift) emit(GT, 0, 1, topSize);
       if (g >= 0 ? lv[g] === L - 1 : !L) {
         const a = g < 0 ? 0 : lo[g]!;
-        const b = g < 0 ? N : hi[g]!;
+        const b = fl ? a : g < 0 ? N : hi[g]!;
         const z = b - a + foot + extra;
         for (let j = a; j < b; j++) emit(leaves[j]!, L, j - a + 1 + shift, z), data++;
       } else {
@@ -404,7 +443,7 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
         for (let c = ks[x]!; c < ks[x + 1]!; c++) {
           const h = kids[c]!;
           emit(-1 - h, lv[h]!, c - ks[x]! + 1 + shift, z);
-          if (!isOpen || isOpen[h]) walk(h + 1);
+          if ((!isOpen || isOpen[h]) && !shut(h)) walk(h + 1);
         }
       }
       // A footer is its group's children's last sibling; the grand total the first level's.
@@ -485,7 +524,7 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
       },
       expandedAt: (i) => {
         const c = check(i);
-        return c < 0 && c > -1 - G && (!isOpen || isOpen[-1 - c] === 1);
+        return c < 0 && c > -1 - G && (!isOpen || isOpen[-1 - c] === 1) && !shut(-1 - c);
       },
       matchedAt: (i) => (check(i), true),
     };

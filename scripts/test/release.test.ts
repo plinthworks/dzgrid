@@ -255,12 +255,17 @@ describe('1.6.0, the four packages', () => {
     expect(dom['./dock']).toEqual({ types: './src/dock.ts', default: './src/dock.ts' });
     for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-dock`]).toEqual({ types: `./src/locales/${g}-dock.ts`, default: `./src/locales/${g}-dock.ts` });
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
-    expect(build).toMatch(/'\.\/row-drag', '\.\/dock'\]/);
+    expect(build).toMatch(/'\.\/row-drag', '\.\/dock'[,\]]/); // Phase 10: './pivot' after it in the core
     expect(build).toMatch(/'\.\/row-drag', '\.\/dock', '\.\/motion-gsap'/);
     expect(build).toMatch(/'\.\/locales\/ar-row-drag', '\.\/locales\/en-dock', '\.\/locales\/fr-dock', '\.\/locales\/ar-dock'\]/);
     const theme = pkg('theme');
     for (const f of ['dock.css', 'dock.unlayered.css', 'dock.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'row-drag', 'dock'\]/);
+  });
+
+  it('export the Phase 10 pivot core (@dzgrid/core/pivot), built like the others', () => {
+    expect(pkg('core').exports['./pivot']).toEqual({ types: './src/pivot.ts', default: './src/pivot.ts' });
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/row-drag', '\.\/dock', '\.\/pivot'\]/);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

@@ -1085,3 +1085,19 @@ langue. F6 n'est pas proposé (décisions « Dock — owner B ») : essayer F6 u
 
 Règle de décision : un focus perdu (195, 196, 197), un état ou une valeur non dits (194, 195) ou un ordre de Tab qui ne
 suit pas l'écran (193) se corrigent avant la clôture de la Phase 9.
+
+## 29. Étapes — tableau croisé (Phase 10 ; à écouter au lot DOM, non bloquant pour le propriétaire)
+
+Fiche `docs/behaviors/pivot.md`. Grille en mode pivot, regroupée par service puis médecin, en colonnes par année puis
+mois, deux valeurs (Montant, Nombre), `spans()` chargé.
+
+198. **Les en-têtes.** Flèche haut depuis une cellule : « 2025 », puis « Janv. », puis « Montant », chacun dit comme
+     en-tête de colonne avec sa largeur en colonnes ; une cellule dit sa chaîne d'en-têtes et sa valeur.
+199. **Les lignes.** Une ligne du dernier niveau ne dit ni « développé » ni « réduit » ; une ligne au-dessus le dit.
+200. **La bande « Colonnes ».** Tab jusqu'à la bande ; « + » : « Ajouter une colonne, menu » ; `Entrée`, flèches,
+     `Entrée` : « Mis en colonnes : Mois » ; × sur l'étiquette : « Mois retiré des colonnes ».
+201. **La limite.** Une colonne pivot de 1 200 valeurs : « 1 200 colonnes : trop pour l'écran ; retirez une colonne »,
+     dit une fois.
+
+Règle de décision : un en-tête non dit (198), un état faux (199) ou un chemin sans glisser manquant (200) se corrigent
+avant la clôture de la Phase 10.

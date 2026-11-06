@@ -1,0 +1,126 @@
+{
+  "id": "series",
+  "suite": "pivot",
+  "description": "`series()`: the first level's groups in the order shown, one series per created column of the first value, named by its headers' chain, empty cells as null (pivot.md 16).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "m"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Jan",
+        "v": 10
+      },
+      {
+        "id": "r2",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Feb",
+        "v": 5
+      },
+      {
+        "id": "r3",
+        "g": "Sud",
+        "y": "2025",
+        "m": "Jan",
+        "v": 2
+      },
+      {
+        "id": "r4",
+        "g": "Nord",
+        "y": "2026",
+        "m": "Jan",
+        "v": 1
+      },
+      {
+        "id": "r5",
+        "g": "Sud",
+        "y": "2026",
+        "m": "Jan",
+        "v": 4
+      },
+      {
+        "id": "r6",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Jan",
+        "v": 3
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y",
+        "m"
+      ]
+    },
+    "series": {}
+  },
+  "expected": {
+    "headers": [
+      "2025/Feb",
+      "2025/Jan",
+      "2026/Jan"
+    ],
+    "shown": [
+      "[Nord] (4) 1/3 {2025/Feb=5 2025/Jan=13 2026/Jan=1 | v=19}",
+      "[Sud] (2) 2/3 {2025/Jan=2 2026/Jan=4 | v=6}",
+      "Σ* 3/3 {2025/Feb=5 2025/Jan=15 2026/Jan=5 | v=25}"
+    ],
+    "count": 3,
+    "series": {
+      "categories": [
+        "Nord",
+        "Sud"
+      ],
+      "series": [
+        {
+          "id": "~p1:y5:t20251:m4:tFeb1:v",
+          "name": "2025 › Feb",
+          "values": [
+            5,
+            null
+          ]
+        },
+        {
+          "id": "~p1:y5:t20251:m4:tJan1:v",
+          "name": "2025 › Jan",
+          "values": [
+            13,
+            2
+          ]
+        },
+        {
+          "id": "~p1:y5:t20261:m4:tJan1:v",
+          "name": "2026 › Jan",
+          "values": [
+            1,
+            4
+          ]
+        }
+      ]
+    },
+    "problems": []
+  }
+}

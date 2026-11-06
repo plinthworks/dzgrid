@@ -1240,3 +1240,29 @@ decisions and measures `docs/phase-8-steps/decisions.md`.
   check:size 0 over; check:api additions only.
 - For the owner: the version (CHANGELOG « Unreleased — 1.5.0 » carries Phases 7 and 8); K.8 has 24 B left; the listening
   §27; Q-SE on his screens.
+
+## Phase 10 — pivot (started 2026-11-06)
+
+Plan `docs/phase-10-plan.md`; owner « ★ partout, tailles OK » (2026-11-06, `docs/phase-10-steps/questions.md`); the lead's
+decisions and measures `docs/phase-10-steps/decisions.md`. Batches decided with the lead: the core first, then the DOM
+after a report to the owner.
+
+- [x] **Step 1 — sheets** (2026-11-06, not committed): `pivot.md`; amendments to `aggregation.md` (16–18), `grid-state.md`
+  (« Pivot »), `group-drop-zone`, `column-menu`, `csv-export`, `xlsx-export`, `print`, `header-groups`; a11y protocol §29
+  (198–201); `questions.md` in French.
+- [x] **Step 2 — the grouping's seams** (not committed): the grouping keyed on the definitions of the columns it groups
+  by and an order compared by content (a host column change: one build, `grouping-seams.test.ts`); the totals kept when no
+  totalled column changed; an internal `grouped(o, seam)` (`flat`, `fns`, `cells`, `kids`, `v`); `core/grouping` 4 776 /
+  4 950.
+- [x] **Step 3 — `@dzgrid/core/pivot`** (not committed): `pivotShape`, crossings as a grouping of the grouped rows, the
+  bucketed pass, created columns and bands (stable ids, `generated().key`), sub-totals, the limit (`pivot-too-many`), sort
+  by a total, `series()`, `checkPivot`, `pivotState`. Conformance `pivot` (21, new suite) by hand; `pivot.test.ts` (500
+  seeded cases against a hand-written oracle). Perf (node, minified, machine warm): cold **103.3 ms** (exit criterion
+  ≤ 150; one grouping build, one crossing pass), pivot columns changed 65.7, one-row update 12.4 (lines 114, 72.5, 14).
+  Size 3 409, line 3 750 (measure + 10 %).
+- [x] **Step 6, core part — state** (not committed): `GridState.pivot`, `StatePart` `'pivot'`, `StateEnv.pivot`; created
+  columns, their sizes and sorts never captured (`grid-state/pivot-*`, 5 cases, a planted name); `core/state` 1 587 /
+  1 601 (+2 %).
+- [ ] Steps 4–5 (the DOM: `@dzgrid/dom/pivot`, the « Colonnes » band and « + » lists, the menu items, texts, Chrome),
+  step 6's DOM part (CSV header chain, Excel and print checked), step 7 (demo, close).
+

@@ -1,0 +1,93 @@
+{
+  "id": "avg-exact",
+  "suite": "pivot",
+  "description": "A mean per crossing is over the crossing's rows at every level, never a mean of the sub-groups' means (30, not 37.5); the count counts rows, empty ones too; the deepest groups have no chevron (pivot.md 2, 7; aggregation.md 16).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "h",
+        "type": "number"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "k"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "Nord",
+        "h": 1,
+        "y": "2025",
+        "v": 10,
+        "k": "x"
+      },
+      {
+        "id": "b",
+        "g": "Nord",
+        "h": 1,
+        "y": "2025",
+        "v": 20,
+        "k": "x"
+      },
+      {
+        "id": "c",
+        "g": "Nord",
+        "h": 2,
+        "y": "2025",
+        "v": 60,
+        "k": null
+      },
+      {
+        "id": "e",
+        "g": "Nord",
+        "h": 2,
+        "y": "2026",
+        "v": 1,
+        "k": "x"
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g",
+        "h"
+      ],
+      "columns": [
+        "y"
+      ],
+      "values": {
+        "v": "avg",
+        "k": "count"
+      },
+      "expanded": "all"
+    }
+  },
+  "expected": {
+    "headers": [
+      "2025/v",
+      "2025/k",
+      "2026/v",
+      "2026/k"
+    ],
+    "shown": [
+      "[Nord] (4) 1/2 - {2025/v=30 2025/k=3 2026/v=1 2026/k=1 | v=22.75 k=4}",
+      ". [1] (2) 1/2 {2025/v=15 2025/k=2 | v=15 k=2}",
+      ". [2] (2) 2/2 {2025/v=60 2025/k=1 2026/v=1 2026/k=1 | v=30.5 k=2}",
+      "Σ* 2/2 {2025/v=30 2025/k=3 2026/v=1 2026/k=1 | v=22.75 k=4}"
+    ],
+    "count": 4,
+    "problems": []
+  }
+}

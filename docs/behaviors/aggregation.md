@@ -55,3 +55,14 @@ date; reads the grand total at the end; edits a cell and checks the total moved.
 ## Tests
 `conformance/cases/group-agg/agg-*` (each function × each type, empties, the 0.1 series, `agg-type`, edit then
 reapply), `packages/core/test/grouping*.test.ts`; display at step 5.
+
+## Crossings (Phase 10, `pivot.md`; owner Q-P4 A, Q-P8 A)
+16. **A crossing's cell** is the total of the rows of one group **and** one pivot crossing, by the same rules as 2–7
+    and 15: one rule at every level and for the grand total, compensated sums, means over the numbers present (never a
+    mean of the crossings' means), min / max by the column's order, first / last in the group's order. **Nombre counts the
+    crossing's rows** (empties included). An empty crossing shows nothing, never « 0 ».
+17. **One pass** computes every crossing of every group: each row is visited once per value, and adds into its deepest
+    group, every group above it and the grand total, at its crossing (and its pivot groups' sub-totals when asked).
+    The cost does not grow with the number of crossings; the application's function is called once per non-empty cell.
+18. **Row totals** in pivot mode are the group's totals of 1–8 (over all its rows): the value columns are totalled even
+    when the data columns are folded away.

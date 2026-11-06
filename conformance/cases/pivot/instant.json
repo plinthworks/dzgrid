@@ -1,0 +1,60 @@
+{
+  "id": "instant",
+  "suite": "pivot",
+  "description": "An instant column's crossings by instant: three spellings of one instant are one column (pivot.md 4).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "i",
+        "type": "instant"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "i": "2026-03-05T10:00:00Z",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "i": "2026-03-05T11:00:00+01:00",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "i": 1772704800000,
+        "v": 4
+      },
+      {
+        "id": "e",
+        "i": "2026-03-06T12:30:00Z",
+        "v": 8
+      }
+    ],
+    "pivot": {
+      "by": [],
+      "columns": [
+        "i"
+      ]
+    }
+  },
+  "expected": {
+    "headers": [
+      "03/05/2026, 10:00",
+      "03/06/2026, 12:30"
+    ],
+    "shown": [
+      "Σ* 1/1 {03/05/2026, 10:00=7 03/06/2026, 12:30=8 | v=15}"
+    ],
+    "count": 2,
+    "problems": []
+  }
+}

@@ -65,6 +65,10 @@
       "types": "./src/dock.ts",
       "default": "./src/dock.ts"
     },
+    "./pivot": {
+      "types": "./src/pivot.ts",
+      "default": "./src/pivot.ts"
+    },
     "./edit": {
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"

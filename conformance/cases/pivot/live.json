@@ -1,0 +1,95 @@
+{
+  "id": "live",
+  "suite": "pivot",
+  "description": "A live update and an edit of a pivot column move the row to its new crossing at once, without grouping again (pivot.md 7; aggregation.md 13–14).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "Nord",
+        "y": "2025",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "g": "Sud",
+        "y": "2025",
+        "v": 9
+      },
+      {
+        "id": "c",
+        "g": "Est",
+        "y": "2026",
+        "v": 5
+      },
+      {
+        "id": "d",
+        "g": "Ouest",
+        "y": "2025",
+        "v": 4
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y"
+      ]
+    },
+    "steps": [
+      {
+        "tx": {
+          "patch": [
+            {
+              "id": "a",
+              "set": {
+                "y": "2026"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "edit": [
+          "b",
+          "y",
+          "2026"
+        ]
+      }
+    ],
+    "builds": true
+  },
+  "expected": {
+    "headers": [
+      "2025",
+      "2026"
+    ],
+    "shown": [
+      "[Est] (1) 1/5 {2026=5 | v=5}",
+      "[Nord] (1) 2/5 {2026=1 | v=1}",
+      "[Ouest] (1) 3/5 {2025=4 | v=4}",
+      "[Sud] (1) 4/5 {2026=9 | v=9}",
+      "Σ* 5/5 {2025=4 2026=15 | v=19}"
+    ],
+    "count": 2,
+    "builds": 1,
+    "problems": []
+  }
+}

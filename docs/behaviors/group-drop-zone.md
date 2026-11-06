@@ -100,3 +100,8 @@ Escape, nested grids). Phase 7: the zone's own tests.
     in (`data-dzg-gap="before|after"` on the chip next to it, logical); released inside the band, one move, said
     (`zone.placed`); released outside, or Escape: nothing.
 17. A column no longer known (columns changed) or refused (`groupable: false`) shows no chip.
+
+## The « Colonnes » band (Phase 10, `pivot.md` 19; owner Q-P7 A; built in the DOM batch)
+A second band over the pivot's api, labelled « Colonnes », after « Regrouper par » in the same strip: same chips, keys,
+reorder, ×. Each band gains a « + » button listing the columns it accepts (a menu: the no-drag path, 2.5.7), because the
+data columns' headers are folded away in pivot mode.

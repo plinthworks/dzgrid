@@ -117,3 +117,7 @@ to left.
   (not `scale: -1`); `ButtonText` in forced colours. The group header carries `data-g` (its group id).
 - API: `groups().api(grid)` → `collapsible`, `isOpen`, `toggle(id, open?, { say, user })`, `reset`, `get`, `set`.
 - A block of cells touching a folded column is cleared, as for a hidden one (owner Q8-3 revised).
+
+## Pivot bands (Phase 10, `pivot.md` 3, 21)
+The pivot's bands are ordinary header groups made by the pivot (ids `~b…`), never collapsible; drawn by `spans()` with
+`aria-colspan`. Grouping no longer refuses `spans()` in pivot mode, only merged cells (DOM batch).

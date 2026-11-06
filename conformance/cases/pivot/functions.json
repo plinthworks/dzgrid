@@ -1,0 +1,95 @@
+{
+  "id": "functions",
+  "suite": "pivot",
+  "description": "Each value's function per crossing (aggregation.md 16): the application's told the cell's values in the group's order (empties as « - »), the latest day, the first non-empty text; an empty result shows nothing.",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "v",
+        "type": "number"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "t"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "g": "A",
+        "y": "2025",
+        "v": 1,
+        "d": "2026-01-05",
+        "t": null
+      },
+      {
+        "id": "b",
+        "g": "A",
+        "y": "2025",
+        "v": null,
+        "d": "2026-02-01",
+        "t": "p"
+      },
+      {
+        "id": "c",
+        "g": "A",
+        "y": "2026",
+        "v": 3,
+        "d": null,
+        "t": "q"
+      },
+      {
+        "id": "e",
+        "g": "B",
+        "y": "2025",
+        "v": 4,
+        "d": "2025-12-01",
+        "t": "r"
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y"
+      ],
+      "values": {
+        "v": {
+          "fn": "joined"
+        },
+        "d": "max",
+        "t": "first"
+      }
+    }
+  },
+  "expected": {
+    "headers": [
+      "2025/v",
+      "2025/d",
+      "2025/t",
+      "2026/v",
+      "2026/d",
+      "2026/t"
+    ],
+    "shown": [
+      "[A] (3) 1/3 {2025/v=1|- 2025/d=2026-02-01 2025/t=p 2026/v=3 2026/t=q | v=1|-|3 d=2026-02-01 t=p}",
+      "[B] (1) 2/3 {2025/v=4 2025/d=2025-12-01 2025/t=r | v=4 d=2025-12-01 t=r}",
+      "Σ* 3/3 {2025/v=1|-|4 2025/d=2026-02-01 2025/t=p 2026/v=3 2026/t=q | v=1|-|3|4 d=2026-02-01 t=p}"
+    ],
+    "count": 6,
+    "problems": []
+  }
+}

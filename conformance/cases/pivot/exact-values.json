@@ -1,0 +1,70 @@
+{
+  "id": "exact-values",
+  "suite": "pivot",
+  "description": "Equal means exactly equal (pivot.md 4): a number column's 1, '1' and 1.0 one crossing; a text column's number 1 and « 1 » one, « Alger » and « alger » two, side by side in code-unit order; without a grouping column the table is the grand total row alone (pivot.md 2).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "k",
+        "type": "number"
+      },
+      {
+        "id": "t"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "a",
+        "k": 1,
+        "t": "Alger",
+        "v": 1
+      },
+      {
+        "id": "b",
+        "k": "1",
+        "t": "alger",
+        "v": 2
+      },
+      {
+        "id": "c",
+        "k": 1.0,
+        "t": 1,
+        "v": 4
+      },
+      {
+        "id": "d",
+        "k": 2,
+        "t": "1",
+        "v": 8
+      }
+    ],
+    "pivot": {
+      "by": [],
+      "columns": [
+        "k",
+        "t"
+      ]
+    }
+  },
+  "expected": {
+    "headers": [
+      "1/1",
+      "1/Alger",
+      "1/alger",
+      "2/1"
+    ],
+    "shown": [
+      "Σ* 1/1 {1/1=4 1/Alger=1 1/alger=2 2/1=8 | v=15}"
+    ],
+    "count": 4,
+    "problems": []
+  }
+}

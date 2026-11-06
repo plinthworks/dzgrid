@@ -113,3 +113,7 @@ Numbered (step 7, 2026-11-05; `conformance/cases/xlsx/group-*`, `packages/core/t
 4. `tree: 'level'` writes CSV's level column instead of the outline; `'none'` flat lines with group rows still in;
    `groupRows: false` data rows only (CSV 5).
 5. `xlsxStyle` is called for totals cells too, with `row: null` and `header: false`.
+
+## Pivot (Phase 10, `pivot.md`; plan D18 A; checked in the DOM batch)
+The created bands are header groups: written as merged header rows, as any header group; cells typed by their value
+column (a count as a number).

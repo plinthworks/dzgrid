@@ -1,4 +1,4 @@
-import type { Side } from '../columns/defs.js';
+import type { AggFuncName, Side } from '../columns/defs.js';
 import type { ColumnModel, ColumnState } from '../columns/model.js';
 import type { DockState } from '../dock/layout.js';
 import type { FilterModel } from '../filter/model.js';
@@ -49,9 +49,18 @@ export interface GridState {
   readonly rowGroups?: readonly string[];
   /** Where the dock's panels stand (Phase 9, dock.md 11; `@dzgrid/core/dock`): on a grid with `dock()` only. */
   readonly dock?: DockState;
+  /** The pivot (Phase 10, owner Q-P10 A; `@dzgrid/core/pivot`): on a grid with the pivot only; never a created column. */
+  readonly pivot?: PivotState;
 }
 
-export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density' | 'rowGroups' | 'dock';
+/** A pivot as a state keeps it (grid-state.md « Pivot »): the mode, the pivot columns, the values' built-in functions. */
+export interface PivotState {
+  readonly on?: boolean;
+  readonly columns?: readonly string[];
+  readonly values?: Readonly<Record<string, AggFuncName>>;
+}
+
+export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density' | 'rowGroups' | 'dock' | 'pivot';
 /** Which parts a capture writes and a restore applies: every one by default. `page` stands for `page` and `pageSize`. */
 export interface StateOptions {
   readonly include?: readonly StatePart[];
@@ -87,6 +96,11 @@ export interface StateEnv {
   readonly rowGroups?: RowGroupsAdapter | undefined;
   /** Absent: a grid without the dock, which neither writes nor applies `dock` (`@dzgrid/dom/dock`; checked by `checkDock`). */
   readonly dock?: { get(): DockState | undefined; set(raw: unknown): readonly Problem[] } | undefined;
+  /**
+   * Absent: a grid without the pivot, which neither writes nor applies `pivot` (`@dzgrid/core/pivot`'s `pivotState`).
+   * `made`: the ids the pivot creates — left out of `columns` and `sort` (their ids hold row values).
+   */
+  readonly pivot?: { get(): PivotState | undefined; set(raw: unknown): readonly Problem[]; made(id: string): boolean } | undefined;
 }
 
 /** A column entry's fields: the test of a value, and what an absent one means (an order: its place in the list). */
@@ -97,6 +111,8 @@ const FIELDS: readonly [string, (v: any) => unknown, unknown][] = [
   ['pinned', (v) => v === null || v === 'start' || v === 'end', null],
 ];
 
+/** The parts a feature of the DOM keeps (an adapter in `StateEnv`), restored in this order after the density. */
+const PARTS = ['rowGroups', 'dock', 'pivot'] as const;
 const on = (o: StateOptions | undefined, p: StatePart): boolean => (!o?.include || o.include.includes(p)) && !o?.exclude?.includes(p);
 const isObj = (v: unknown): v is Record<string, any> => !!v && typeof v == 'object' && !Array.isArray(v);
 const whole = (n: unknown, min: number): n is number => Number.isInteger(n) && (n as number) >= min;
@@ -124,21 +140,22 @@ export function captureState<T>(k: GridKernel<T>, env: StateEnv = {}, opts?: Sta
   const m = k.columns;
   const q = k.query;
   const pg = k.rows.page;
+  // A pivot's created columns hold row values (pivot.md « Health data »): never in the state.
+  const mine = (id: string): boolean => !env.pivot?.made(id);
   const s: Record<string, unknown> = {
-    columns: fullOrder(m).map((c, order) => {
+    columns: fullOrder(m).filter((c) => mine(c.id)).map((c, order) => {
       const n = now(m, c);
       return { id: c.id, width: n.width, hidden: n.hidden || undefined, pinned: n.pinned, order };
     }),
     groups: env.groups?.get(),
-    sort: q.sort,
+    sort: q.sort.filter((x) => mine(x.column)),
     filter: q.filter,
     quick: q.quick,
     page: pg?.index,
     pageSize: pg?.size,
     density: env.density?.(),
-    rowGroups: env.rowGroups?.get(),
-    dock: env.dock?.get(),
   };
+  for (const p of PARTS) s[p] = env[p]?.get();
   for (const p in s) if (!on(opts, (p == 'pageSize' ? 'page' : p) as StatePart)) delete s[p];
   return JSON.parse(canonical({ ...s, v: 1 }));
 }
@@ -223,10 +240,9 @@ export function restoreState<T>(k: GridKernel<T>, raw: unknown, env: StateEnv = 
   }
   // The DOM's to check: not one of the three, refused (false) and told.
   if (has('density')) run.push(() => void (env.setDensity?.(s.density) === false && bad('density')));
-  // ---- the row grouping (Phase 7): the grouping checks its own columns (a grid without it ignores the part).
-  if (env.rowGroups && has('rowGroups')) run.push(() => void problems.push(...env.rowGroups!.set(s.rowGroups)));
-  // ---- the dock (Phase 9): its own checking; a grid without it ignores the part.
-  if (env.dock && has('dock')) run.push(() => void problems.push(...env.dock!.set(s.dock)));
+  // ---- the row grouping (Phase 7), the dock (Phase 9), the pivot (Phase 10): each checks its own part; a grid without
+  // it ignores the part.
+  for (const p of PARTS) if (env[p] && has(p)) run.push(() => void problems.push(...env[p]!.set(s[p])));
 
   // ---- the query (G 10, 11): unknown or removed columns dropped; what the state does not name stays the grid's.
   if (has('sort') || has('filter') || has('quick')) {

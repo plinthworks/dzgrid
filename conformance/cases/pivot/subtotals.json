@@ -1,0 +1,99 @@
+{
+  "id": "subtotals",
+  "suite": "pivot",
+  "description": "Sub-totals per pivot level when asked: « Total 2025 » after 2025's columns, beside its band (pivot.md 8).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "g"
+      },
+      {
+        "id": "y"
+      },
+      {
+        "id": "m"
+      },
+      {
+        "id": "v",
+        "type": "number",
+        "aggFunc": "sum"
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Jan",
+        "v": 10
+      },
+      {
+        "id": "r2",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Feb",
+        "v": 5
+      },
+      {
+        "id": "r3",
+        "g": "Sud",
+        "y": "2025",
+        "m": "Jan",
+        "v": 2
+      },
+      {
+        "id": "r4",
+        "g": "Nord",
+        "y": "2026",
+        "m": "Jan",
+        "v": 1
+      },
+      {
+        "id": "r5",
+        "g": "Sud",
+        "y": "2026",
+        "m": "Jan",
+        "v": 4
+      },
+      {
+        "id": "r6",
+        "g": "Nord",
+        "y": "2025",
+        "m": "Jan",
+        "v": 3
+      }
+    ],
+    "pivot": {
+      "by": [
+        "g"
+      ],
+      "columns": [
+        "y",
+        "m"
+      ],
+      "subtotals": true,
+      "labels": {
+        "total": "Total {name}"
+      }
+    }
+  },
+  "expected": {
+    "headers": [
+      "2025/Feb",
+      "2025/Jan",
+      "Total 2025",
+      "2026/Jan",
+      "Total 2026"
+    ],
+    "shown": [
+      "[Nord] (4) 1/3 {2025/Feb=5 2025/Jan=13 Total 2025=18 2026/Jan=1 Total 2026=1 | v=19}",
+      "[Sud] (2) 2/3 {2025/Jan=2 Total 2025=2 2026/Jan=4 Total 2026=4 | v=6}",
+      "Σ* 3/3 {2025/Feb=5 2025/Jan=15 Total 2025=20 2026/Jan=5 Total 2026=5 | v=25}"
+    ],
+    "count": 5,
+    "problems": []
+  }
+}

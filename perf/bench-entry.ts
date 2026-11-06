@@ -6,6 +6,7 @@ import { toCsv } from '../packages/core/src/csv.js';
 import { treeShape } from '../packages/core/src/tree.js';
 import { detailShape, sparseRowLayout } from '../packages/core/src/detail.js';
 import { groupShape } from '../packages/core/src/grouping.js';
+import { pivotShape } from '../packages/core/src/pivot.js';
 import { infiniteRows, type InfiniteModel } from '../packages/core/src/infinite.js';
 import { serverSideRows, type ServerSideModel } from '../packages/core/src/server-side.js';
 import { treeProfile, type TreeRow as MRow } from './profiles/tree.js';
@@ -266,6 +267,7 @@ export const CASES: Record<string, Case> = {
   ...layoutCases(),
   ...csvCases(),
   ...groupCases(),
+  ...pivotCases(),
   ...infiniteCases(),
   ...serverSideCases(),
 };
@@ -517,6 +519,59 @@ function groupCases(): Record<string, Case> {
     'group A by a text column of ~100 000 distinct values (cold, recorded)': {
       setup: () => (rows ??= datasetA()),
       run: (r: RowA[]) => clientRows<RowA>({ rows: r, getRowId: (x) => x.id, columns, ctx, shape: groupShape<RowA>({ by: ['t0'] }) }).displayed.count,
+    },
+  };
+}
+
+/**
+ * Phase 10 (plan §6 exit criterion: « A with 2 row columns, 2 pivot columns, 3 values ≤ 150 ms », minified, node). Dataset A
+ * grouped by a list column (6 values) then a number (100 values), ~600 groups; pivoted by two list columns (4 × 4 values,
+ * the empty one included: 16 crossings); values a sum, a mean, the latest day: 48 created columns. Cold: the model made
+ * with the pivot, then its created columns set beside the host's as the DOM does — one grouping build and one crossing
+ * pass, checked inside the case (a throw fails the bench). Beside it: the pivot columns changed, a one-row update.
+ */
+function pivotCases(): Record<string, Case> {
+  const opts = (values: string[]) => values.map((value) => ({ value, label: value.toUpperCase() }));
+  const DEFS = [
+    { id: 'e1', type: 'enum' as const, enumOptions: opts(['cardiology', 'pediatrics', 'radiology', 'oncology', 'dermatology', 'neurology']) },
+    { id: 'n2', type: 'number' as const },
+    { id: 'e0', type: 'enum' as const, enumOptions: opts(['pending', 'active', 'suspended', 'closed']) },
+    { id: 'e2', type: 'enum' as const, enumOptions: opts(['low', 'medium', 'high']) },
+    { id: 'n1', type: 'number' as const, aggFunc: 'sum' as const },
+    { id: 'n0', type: 'number' as const, aggFunc: 'avg' as const },
+    { id: 'd0', type: 'day' as const, aggFunc: 'max' as const },
+  ];
+  const ctx = localeCtx({ locale: 'fr-FR', timeZone: 'Africa/Algiers' });
+  let rows: RowA[] | null = null;
+  const load = (pivot: string[]) => {
+    rows ??= datasetA();
+    const columns = createColumnModel<RowA>(DEFS);
+    const shape = pivotShape<RowA>({ by: ['e1', 'n2'], columns: pivot });
+    const m = clientRows<RowA>({ rows, getRowId: (r) => r.id, columns, ctx, shape });
+    const sync = () => (columns.setDefs([...DEFS, ...shape.generated().columns]), m.setColumns(columns));
+    sync();
+    if (shape.diagnostics.builds !== 1 || shape.passes !== 1 || shape.generated().count !== 48) throw new Error(`pivot: ${shape.diagnostics.builds} builds, ${shape.passes} passes, ${shape.generated().count} columns`);
+    return { shape, m, sync };
+  };
+  let tick = 0;
+  return {
+    'pivot A: 2 row columns, 2 pivot columns, 3 values (cold: clientRows with the pivot, its created columns set; 100 000 rows)': {
+      setup: () => (rows ??= datasetA()),
+      run: () => load(['e0', 'e2']).m.displayed.count,
+    },
+    'pivot A: the pivot columns changed (setPivotBy, created columns set again)': {
+      setup: () => load(['e0', 'e2']),
+      run: (p: ReturnType<typeof load>) => (p.shape.setPivotBy(['e2', 'e0']), p.sync(), p.m.displayed.count),
+    },
+    // After a first update: that one also reads the value columns' keys again (the key cache knows a column by its object,
+    // and setting the created columns made new ones; decisions.md « Measures »).
+    'pivot A: transaction update 1 row, no grouping or pivot column touched (after a first one)': {
+      setup: () => {
+        const p = load(['e0', 'e2']);
+        p.m.applyTransaction({ patch: [{ id: 'r501', set: { n1: tick++ } }] });
+        return p;
+      },
+      run: (p: ReturnType<typeof load>) => p.m.applyTransaction({ patch: [{ id: 'r500', set: { n1: tick++ } }] }).version,
     },
   };
 }

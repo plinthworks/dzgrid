@@ -107,3 +107,6 @@ Numbered (step 7, 2026-11-05; `packages/dom/test/print-grouping.test.ts`, Chrome
 ## A list loaded in blocks (Phase 8, `infinite-scroll.md`, plan D15–D16; owner Q-EX A)
 Print prints the rows held, in order, 5 000 at most (`print-too-many` above, as today); loading and failed rows are never
 printed. The walk reads `DisplayedRows.held`, never ten million positions (step 4; tested on 10⁷ rows).
+
+## Pivot (Phase 10, `pivot.md`; plan D18 A; checked in the DOM batch)
+The created bands print as `th scope="colgroup"` rows when bands are on (`spans()`); `all` = every group open.

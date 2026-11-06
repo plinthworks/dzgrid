@@ -1,0 +1,147 @@
+{
+  "id": "pivot-checked",
+  "suite": "grid-state",
+  "description": "A saved `pivot` checked by `checkPivot`: what is wrong skipped and told by path (an unknown id as detail), the rest applied; functions merged with the grid's (grid-state.md « Pivot » 3).",
+  "refs": [
+    "docs/behaviors/grid-state.md",
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "month",
+        "header": "Month"
+      },
+      {
+        "id": "amount",
+        "type": "number",
+        "aggFunc": "sum"
+      },
+      {
+        "id": "code",
+        "groupable": false
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "ward": "N",
+        "month": "Jan",
+        "amount": 1
+      },
+      {
+        "id": "r2",
+        "ward": "S",
+        "month": "Feb",
+        "amount": 2
+      }
+    ],
+    "pivot": {
+      "by": [
+        "ward"
+      ],
+      "columns": [],
+      "values": {
+        "amount": "sum"
+      }
+    },
+    "restore": {
+      "v": 1,
+      "pivot": {
+        "on": "x",
+        "columns": [
+          "month",
+          "nope",
+          "code"
+        ],
+        "values": {
+          "amount": "median",
+          "gone": "sum"
+        }
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "pivot.on"
+      },
+      {
+        "code": "state-column",
+        "severity": "warning",
+        "path": "pivot.columns.1",
+        "detail": "nope"
+      },
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "pivot.columns.2"
+      },
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "pivot.values.amount"
+      },
+      {
+        "code": "state-column",
+        "severity": "warning",
+        "path": "pivot.values",
+        "detail": "gone"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "month",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "amount",
+          "order": 2,
+          "pinned": null
+        },
+        {
+          "id": "code",
+          "order": 3,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": [
+        "ward"
+      ],
+      "pivot": {
+        "on": true,
+        "columns": [
+          "month"
+        ],
+        "values": {
+          "amount": "sum"
+        }
+      }
+    },
+    "shown": [
+      "[N]",
+      "[S]",
+      "Σ"
+    ],
+    "by": [
+      "ward"
+    ]
+  }
+}

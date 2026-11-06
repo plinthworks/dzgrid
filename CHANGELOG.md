@@ -5,6 +5,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased — 1.7.0
+
+A minor in the making (`npm run check:api`: additions only). Phase 10, the pivot — first batch, the core only (the screen
+comes next). Sheets: `docs/behaviors/pivot.md` (owner Q-SC, Q-P1…Q-P12 A, 2026-11-06), amendments to `aggregation.md`
+16–18 and `grid-state.md` « Pivot ».
+
+### Added
+- `@dzgrid/core/pivot` (pure): `pivotShape({ by, columns, values, on, subtotals, maxColumns, width, labels, … })` — a
+  grouping with crossings: the deepest groups are the last rows, every crossing of every group totalled in one pass
+  (compensated sums, exact means, `count` of the crossing's rows), the created columns and their bands (`generated()`,
+  ids that hold their crossing, not their place), row totals, the grand total row, optional sub-totals, a limit of 200
+  created columns (`pivot-too-many`, a count only), groups ordered by a created column's total when sorted on it;
+  `setOn`, `setPivotBy`, `setValueFns`, `set`; `series()` for a chart; `checkPivot` and `pivotState` for a saved state.
+- `GridState.pivot` (`StatePart` `'pivot'`, `StateEnv.pivot`, type `PivotState`): the mode, the pivot columns, the values'
+  functions by name. The created columns, their sizes and a sort on one are never saved (their ids hold row values).
+- `GroupProblemCode` gains `pivot-too-many`.
+
+### Changed
+- Grouping: a column change that keeps the grouping columns' definitions no longer groups again, nor totals again when
+  no totalled column changed (a filter's new list of the same rows is the same order).
+
 ## [1.6.0] - 2026-11-06
 
 A minor: nothing of 1.5.0 is removed or narrowed (`npm run check:api`). Row dragging and the dock (Phase 9).

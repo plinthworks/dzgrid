@@ -1,0 +1,115 @@
+{
+  "id": "pivot-not-object",
+  "suite": "grid-state",
+  "description": "A `pivot` that is not an object: told at `pivot`, the grid's pivot kept (grid-state.md « Pivot » 3).",
+  "refs": [
+    "docs/behaviors/grid-state.md",
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      {
+        "id": "ward",
+        "header": "Ward"
+      },
+      {
+        "id": "month",
+        "header": "Month"
+      },
+      {
+        "id": "amount",
+        "type": "number",
+        "aggFunc": "sum"
+      },
+      {
+        "id": "code",
+        "groupable": false
+      }
+    ],
+    "rows": [
+      {
+        "id": "r1",
+        "ward": "N",
+        "month": "Jan",
+        "amount": 1
+      },
+      {
+        "id": "r2",
+        "ward": "S",
+        "month": "Feb",
+        "amount": 2
+      }
+    ],
+    "pivot": {
+      "by": [
+        "ward"
+      ],
+      "columns": [
+        "month"
+      ]
+    },
+    "restore": {
+      "v": 1,
+      "pivot": [
+        "month"
+      ]
+    }
+  },
+  "expected": {
+    "problems": [
+      {
+        "code": "state-field",
+        "severity": "warning",
+        "path": "pivot"
+      }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        {
+          "id": "ward",
+          "order": 0,
+          "pinned": null
+        },
+        {
+          "id": "month",
+          "order": 1,
+          "pinned": null
+        },
+        {
+          "id": "amount",
+          "order": 2,
+          "pinned": null
+        },
+        {
+          "id": "code",
+          "order": 3,
+          "pinned": null
+        }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": [
+        "ward"
+      ],
+      "pivot": {
+        "on": true,
+        "columns": [
+          "month"
+        ],
+        "values": {
+          "amount": "sum"
+        }
+      }
+    },
+    "shown": [
+      "[N]",
+      "[S]",
+      "Σ"
+    ],
+    "by": [
+      "ward"
+    ]
+  }
+}

@@ -280,3 +280,8 @@ Chrome fr light / ar RTL dark, forced colours, 200 % zoom and 320 px, axe 0.
 With `columnMenu({ use: { grouping } })`: « Regrouper par cette colonne » on a groupable column that is not grouped,
 « Ne plus regrouper par cette colonne » on one that is — the way to group without dragging (WCAG 2.5.7). The grouped
 column stays visible (Q-H A).
+
+## Pivot (Phase 10, `pivot.md` 20; owner Q-P8 A; built in the DOM batch)
+On a created column: sort, pin, size, hide, and « Total : Somme / Moyenne / Min / Max / Nombre » (changes its value
+column's function for all its columns); no « Regrouper par », no filter. On a data column while headers are shown:
+« Mettre en colonnes ».
