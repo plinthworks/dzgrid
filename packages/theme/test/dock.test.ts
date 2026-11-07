@@ -18,6 +18,8 @@ const css = existsSync(file) ? read('dock.css') : '';
 const s = sheet(css);
 const plain = (r: Rule) => r.at.length === 0;
 const decl = (sel: string, at: (r: Rule) => boolean = plain) => s.rules.filter((r) => r.selector.split(/,\s*/).includes(sel) && at(r)).map((r) => r.body).join(' ');
+/** A rule by its whole selector (one with a comma inside `:is()`). */
+const exact = (sel: string) => s.rules.filter((r) => r.selector === sel && plain(r)).map((r) => r.body).join(' ');
 const forced = (r: Rule) => r.at.some((a) => a.includes('forced-colors'));
 const spec = JSON.parse(read('contrast-pairs.json')) as { pairs: { fg: string; bg: string; min: number }[] };
 
@@ -33,14 +35,24 @@ describe('dock.css', () => {
 
   it('the surface, the edge muted then the accent, the shown tab underlined, the columns panel filling its area', () => {
     expect(decl('.dzg-dock')).toBe('color: var(--tz-fg); background: var(--tz-bg); accent-color: var(--tz-accent);');
-    expect(decl('.dzg-dock-sep::before')).toBe('background: var(--tz-fg-muted);');
+    // Owner 2026-11-07: no line and no grip at rest (the area's line divides; a grip at rest read as a stray scroll bar),
+    // the grip centred in the gutter, in the accent under the pointer and focused.
+    expect(decl('.dzg-dock-sep::before')).toBe('');
+    expect(decl('.dzg-dock-sep::after')).toMatch(/content: ""; position: absolute; inset-block-start: 50%; inset-inline-start: 50%;/);
+    expect(decl('.dzg-dock-sep::after')).not.toMatch(/background/);
+    expect(decl('.dzg-dock-sep::after')).not.toMatch(/left|right|translate/);
+    expect(exact('.dzg-dock-sep:is(:hover, :focus-visible)::after')).toBe('background: var(--tz-accent);');
     expect(decl('.dzg-dock-sep:focus-visible::before')).toBe('background: var(--tz-accent); inline-size: 3px;');
-    expect(decl('.dzg-dock-tab[aria-selected=true]')).toBe('font-weight: 600; box-shadow: inset 0 -2px 0 var(--tz-accent);');
+    expect(decl('.dzg-dock-tab[aria-selected=true]')).toBe('color: var(--tz-fg); font-weight: 600; box-shadow: inset 0 -2px 0 var(--tz-accent);');
+    // The head's buttons and tabs: the theme's quiet button (muted, no face; the text colour on the raised surface on hover), 24 px.
+    expect(decl('.dzg-dock-head button')).toBe('box-sizing: border-box; min-block-size: var(--dzg-target-min, 24px); padding: 0 0.375rem; border: var(--dzg-line, 1px) solid transparent; border-radius: var(--dzg-radius, 0.375rem); color: var(--tz-fg-muted); background: transparent; font: inherit; cursor: pointer;');
+    expect(decl('.dzg-dock-head button:hover')).toBe('color: var(--tz-fg); background: var(--tz-bg-raised);');
     expect(decl('.dzg-dock-box > .dzg-cp')).toBe('inline-size: auto; block-size: 100%; max-block-size: none; padding: 0.5rem;');
   });
 
   it('forced colours: the edge CanvasText, Highlight when focused; the shown tab Highlight', () => {
     expect(decl('.dzg-dock-sep::before', forced)).toBe('forced-color-adjust: none; background: CanvasText;');
+    expect(decl('.dzg-dock-sep::after', forced)).toBe('');
     expect(decl('.dzg-dock-sep:focus-visible::before', forced)).toBe('background: Highlight;');
     expect(decl('.dzg-dock-tab[aria-selected=true]', forced)).toBe('forced-color-adjust: none; box-shadow: inset 0 -2px 0 Highlight;');
   });

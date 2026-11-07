@@ -242,6 +242,8 @@ export interface GridContext<T> {
    * draws, the « Mode pivot » switch and the three parts; read by `columnsChooser()`.
    */
   panelTop?: (host: HTMLElement) => void;
+  /** Set by the pivot: a column's header as the application gave it (the columns panel's names, columns-chooser.md 9). */
+  colName?: (id: string) => string | undefined;
   /** Find's text in force (`@dzgrid/dom/find`), '' or absent: none — what a cell part is given (`search.find`). */
   findText?: string;
   msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey, params?: Readonly<Record<string, string | number>>): string;

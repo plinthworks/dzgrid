@@ -51,7 +51,15 @@ buttons and a named handle could not live inside it)
    indented inside, nested as in the definitions. The group has no tick of its own and does not fold in this
    phase (choice 1).
 9. A column hidden only because its collapsible group is closed (`header-groups.md`) stays checked and says
-   `chooser.inClosedGroup` in its description.
+   `chooser.inClosedGroup` in its description. A description is one line under the column's name (the name never cut
+   by it); cut with « … » when too long, its whole text in the row's tooltip (owner feedback 2026-11-07).
+   **In pivot mode** (owner, 2026-11-07, « c'est pas top »): the list holds the application's own columns only — never a
+   column or band the pivot made (`~p…`, `~b…`, the « Total » band), as the side panels of other grids; a data column
+   the pivot folds away (`pivot.md` 18) has no description (the sections above, « Lignes │ Colonnes │ Valeurs », say
+   where it is); its tick is still the user's hidden / shown, kept for pivot off and read by the search (`pivot.md` 25).
+   ▲ ▼ and the handle give the row's width to the name: with a pointer that hovers (`@media (hover: hover)`) they
+   show on the row's hover or focus-within only; without (touch) always; never removed for the keyboard (Alt+arrows)
+   or assistive technologies. Docked, the footer has no « Fermer » (the area's × closes; `dock.md`).
 10. Windowed above 200 columns (`aria-setsize` / `aria-posinset` on each `listitem`); below, all rendered.
 
 **Showing and hiding** (Q-C2: at once)

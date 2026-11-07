@@ -213,6 +213,26 @@ describe('the columns panel (pivot.md 35, 36)', () => {
     expect(chooser.api(t.g)!.isOpen).toBe(true);
   });
 
+  it('pivot mode: the list holds the application\'s columns only, no created column or band, no « folded » line; pivot off the same columns (columns-chooser.md 9, owner 2026-11-07)', () => {
+    const chooser = columnsChooser();
+    // Two values: the pivot's own headers read « sum(Amount) », « sum(Qty) ».
+    const t = bmake({ more: [chooser], pivot: { columns: ['month'], values: { amount: 'sum', qty: 'sum' } } });
+    chooser.api(t.g)!.open();
+    const rows = () => [...document.querySelectorAll<HTMLElement>('.dzg-cp-row')].map((r) => r.dataset['col']);
+    const groups = () => [...document.querySelectorAll('.dzg-cp-gl')].map((x) => x.textContent);
+    // The data columns (in the effective order: the pivot's strip of data columns, then the values under « Total »).
+    expect(rows()).toEqual(['title', 'region', 'month', 'sold', 'code', 'amount', 'qty']);
+    expect(groups()).toEqual([]);
+    // Each by the application's header, a value too (not the pivot's « sum(Amount) » under « Total »).
+    expect(document.querySelector('.dzg-cp-row[data-col="amount"] label')!.textContent).toBe('Amount');
+    expect(t.host.textContent).toContain('sum(Amount)');
+    expect(document.querySelector('.dzg-cp-row[data-col="title"] .dzg-cp-desc')).toBe(null);
+    // A new column set closes the dialog (columns-chooser.md): opened again.
+    t.papi().setOn(false);
+    chooser.api(t.g)!.open();
+    expect(rows()).toEqual(['title', 'region', 'month', 'amount', 'qty', 'sold', 'code']);
+  });
+
   it('`panel: false`: the panel as before', () => {
     const chooser = columnsChooser();
     const t = bmake({ more: [chooser], panel: false });

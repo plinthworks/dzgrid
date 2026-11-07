@@ -66,6 +66,17 @@ A minor in the making (`npm run check:api`: additions only). Phase 10, the pivot
   beside grouping); a group row without children has no `aria-expanded`.
 - `groupZone()`: a band places itself just above the rows, so two bands stack in the order of `features`.
 - Pivot mode with both bands emptied shows the table itself (the columns and the rows, the grand total kept) instead of a lone total row (owner, 2026-11-07).
+- Visual polish (owner feedback 2026-11-07, « ça fonctionne mais on sent que ce n'est pas pro »; no new feature): one
+  button look for the columns panel and the dock (`_controls.scss`: on the surface, outlined in the border colour, 24 px
+  at least; the quiet one in the dock's head and tabs; hover, press — `--dzg-control-active-bg`, derived —, focus ring, disabled); chips are
+  pills on a tint of the accent (tokens `--dzg-chip-bg`, `--dzg-chip-hover-bg`, derived from the palette, so the
+  bridges follow), their ×, ↑ / ↓ and « + » round quiet buttons; the columns panel's rows airy, the name on its own line
+  and the description one line under it (« … » and a tooltip), ▲ ▼ ⠿ smaller and muted, group names as section labels; the dock's head roomier, no second line at its edge; the pivot bar's part names as section labels, its rules inset. The base theme is unchanged.
+- The columns panel in pivot mode (owner, 2026-11-07): it lists the application's own columns only, by their own
+  headers (never a created column or band, never « somme(Montant) »), and a data column the pivot folds no longer says
+  « masquée par son groupe replié ». With a hovering pointer ▲ ▼ ⠿ show on the row's hover or focus only (the name gets
+  the row's width; touch: always). Docked, its footer has no « Fermer » (the area's × closes). The dock's edge grip
+  shows only under the pointer and focused.
 
 ## [1.6.0] - 2026-11-06
 

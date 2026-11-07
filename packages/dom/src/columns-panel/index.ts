@@ -69,7 +69,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
       const say = (t: string): void => (cur && region ? region : g.live).announce(t);
       const raf = g.env.raf ?? g.win;
       let frame = 0;
-      const name = (id: string): string => m.get(id)?.def.header ?? id;
+      const name = (id: string): string => g.colName?.(id) ?? m.get(id)?.def.header ?? id;
       const T = (k: string, id?: string, p?: Record<string, number>): string => g.msg(`chooser.${k}` as ColumnsChooserMessageKey, { column: id ? name(id) : '', ...p });
       const state = (patch: object[]): void => void kernel.dispatch({ type: 'column.state', patch: patch as never }, 'user');
       /** Hidden by the user (the box unticked); a column only its closed group hides stays ticked (Phase 6 step 7, 9). */
@@ -86,8 +86,10 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
       };
       /** Each column's header groups, outermost first, from the definitions' tree. */
       let chains = new Map<string, readonly { readonly id: string; readonly header?: string }[]>();
+      /** Made by the pivot (pivot.md 18): never listed, a band never a group here (columns-chooser.md 9). */
+      const made = (id: string): boolean => !!g.pivotState?.made(id);
       const walk = (defs: readonly ColumnOrGroup<unknown>[], up: readonly { id: string; header?: string }[]): void =>
-        defs.forEach((d) => void ('children' in d ? walk(d.children, [...up, d]) : chains.set(d.id, up)));
+        defs.forEach((d) => void ('children' in d ? walk(d.children, made(d.id) ? up : [...up, d]) : chains.set(d.id, up)));
       const path = (id: string): string[] => (chains.get(id) ?? []).map((x) => x.id);
       /** The column set: new definitions with another one close the dialog. */
       const set = (): string => m.state().map((s) => s.id).join('\n');
@@ -121,7 +123,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
         const shown = new Set(m.visible().map((c) => c.id));
         const hid = byUser();
         const side = sidesOf(m);
-        const rows = listOrder(m).filter((id) => listed(m)(id) && (!q || [name(id), ...(chains.get(id) ?? []).map((x) => x.header ?? '')].some((s) => fold(s).includes(q))));
+        const rows = listOrder(m).filter((id) => listed(m)(id) && !made(id) && (!q || [name(id), ...(chains.get(id) ?? []).map((x) => x.header ?? '')].some((s) => fold(s).includes(q))));
         if (!rov || !rows.includes(rov)) rov = rows[0];
         list.textContent = '';
         list.append(bar);
@@ -160,10 +162,13 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
           if (!canHide(m, id)) box.setAttribute('aria-disabled', 'true');
           mk('bdi', mk('label', li), '', name(id)).parentElement!.setAttribute('for', box.id);
           // Its pin, and why it cannot be hidden when it is the last one shown (O1).
-          const desc = [s && T(s === 'start' ? 'pinnedStart' : 'pinnedEnd'), shown.has(id) && shown.size < 2 && T('last'), m.folded.has(id) && !hid(id) && T('inClosedGroup')].filter(Boolean).join(', ');
+          // Folded by the pivot (pivot.md 18): no line, the sections above say it.
+          const desc = [s && T(s === 'start' ? 'pinnedStart' : 'pinnedEnd'), shown.has(id) && shown.size < 2 && T('last'), m.folded.has(id) && !hid(id) && !g.foldExtra?.has(id) && T('inClosedGroup')].filter(Boolean).join(', ');
           if (desc) {
-            mk('span', li, 'dzg-cp-desc', desc).id = `${box.id}d`;
-            box.setAttribute('aria-describedby', `${box.id}d`);
+            // One line under the name, cut with « … »: its whole text in the tooltip (columns-chooser.md 9).
+            const e = mk('span', li, 'dzg-cp-desc', desc);
+            e.title = desc;
+            box.setAttribute('aria-describedby', (e.id = box.id + 'd'));
           }
           // Reordering is off while searching (21).
           if (!q) {

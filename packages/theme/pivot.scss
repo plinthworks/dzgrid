@@ -9,6 +9,10 @@
 // pressed (reversed) in the text colour and bold (not colour alone: the arrow turns too). The switch: a track outlined in
 // the muted text colour with a knob at its start; on, the track filled in the accent and the knob in the accent's text
 // colour at its end, the button itself plain. Forced colours: system colours. No colour literal, no physical side (guards).
+//
+// Owner feedback 2026-11-07 (« pas pro »): each part's name a section label (small, muted, capitals); the rule between
+// parts stops short of the bar's edges; ↑ / ↓ a quiet round button as the chip's ×. In the columns panel the parts lose
+// the bar's surface and rules (the panel's own sections), a line under them.
 // ─────────────────────────────────────────────────────────────────────────────
 
 $layered: true !default;
@@ -35,23 +39,41 @@ $layered: true !default;
   }
 
   .dzg-pzone > .dzg-gzone {
+    margin-block: 0.25rem;
+    padding-block: 0;
+    padding-inline: 0.75rem;
     border-block-end: 0;
     border-color: var(--tz-border);
   }
 
   .dzg-ppart-name {
-    color: var(--tz-fg);
+    color: var(--tz-fg-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
   }
 
   .dzg-chip-o {
     border: 0;
-    border-radius: var(--dzg-radius, 4px);
+    border-radius: var(--dzg-pill-radius, 1em);
     background: transparent;
     color: var(--tz-fg-muted);
   }
 
   .dzg-chip-o:hover {
     color: var(--tz-fg);
+    background: var(--dzg-chip-hover-bg, color-mix(in srgb, var(--tz-accent) 28%, var(--tz-bg)));
+  }
+
+  .dzg-cp-top:not(:empty) {
+    padding-block-end: 0.5rem;
+    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+
+  .dzg-cp-top .dzg-pzone,
+  .dzg-cp-top .dzg-gzone {
+    padding-inline: 0;
+    border: 0;
+    background: none;
   }
 
   .dzg-chip-o[aria-pressed=true] {

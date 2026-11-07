@@ -33,9 +33,16 @@ describe('pivot.css', () => {
 
   it('the bar, its rules, the parts\' names, the order button', () => {
     expect(decl('.dzg-pzone')).toBe('color: var(--tz-fg); background: var(--dzg-header-bg, var(--tz-bg-raised)); border-block-end: var(--dzg-line, 1px) solid var(--tz-border);');
-    expect(decl('.dzg-pzone > .dzg-gzone')).toBe('border-block-end: 0; border-color: var(--tz-border);');
-    expect(decl('.dzg-ppart-name')).toBe('color: var(--tz-fg);');
-    expect(decl('.dzg-chip-o')).toBe('border: 0; border-radius: var(--dzg-radius, 4px); background: transparent; color: var(--tz-fg-muted);');
+    // Owner feedback 2026-11-07 (« pas pro »): the rules between parts stop short of the bar's edges; the parts' names
+    // section labels (muted, small capitals, 4.5:1 on the header's surface); ↑ / ↓ a round quiet button as the chip's ×.
+    expect(decl('.dzg-pzone > .dzg-gzone')).toBe('margin-block: 0.25rem; padding-block: 0; padding-inline: 0.75rem; border-block-end: 0; border-color: var(--tz-border);');
+    expect(decl('.dzg-ppart-name')).toBe('color: var(--tz-fg-muted); font-size: 0.75rem; text-transform: uppercase;');
+    expect(decl('.dzg-chip-o')).toBe('border: 0; border-radius: var(--dzg-pill-radius, 1em); background: transparent; color: var(--tz-fg-muted);');
+    expect(decl('.dzg-chip-o:hover')).toBe('color: var(--tz-fg); background: var(--dzg-chip-hover-bg, color-mix(in srgb, var(--tz-accent) 28%, var(--tz-bg)));');
+    // In the columns panel: the parts without the bar's surface and rules, a line under them.
+    expect(decl('.dzg-cp-top .dzg-pzone')).toBe('padding-inline: 0; border: 0; background: none;');
+    expect(decl('.dzg-cp-top .dzg-gzone')).toBe('padding-inline: 0; border: 0; background: none;');
+    expect(decl('.dzg-cp-top:not(:empty)')).toBe('padding-block-end: 0.5rem; border-block-end: var(--dzg-line, 1px) solid var(--tz-border);');
     expect(decl('.dzg-chip-o[aria-pressed=true]')).toBe('color: var(--tz-fg); font-weight: 600;');
   });
 

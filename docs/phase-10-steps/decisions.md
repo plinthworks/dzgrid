@@ -238,3 +238,7 @@ line: measured first; the bar's code in its own new entry rather than pushing a 
   switch and parts, band toggles, axe 0 (also with a value's menu open), Ctrl+Shift+ArrowDown moving Ville to
   « Colonnes » with the focus, no page error. Firefox and WebKit, Arabic, 1 400 and 320 px: the same layout; WebKit at
   320 px logs one « ResizeObserver loop completed » notice when the docked panel is closed (no visible fault; left).
+
+## Visual polish — owner « ok taille » (2026-11-07)
+
+columns-panel.css 1 000 → 1 400 (measured 1 359), dock.css 650 → 800 (759), grouping.css 587 → 650 (628), dom/columns-panel 4 520 → 4 600 (4 569). Base theme, DOM base and K.8 unchanged.

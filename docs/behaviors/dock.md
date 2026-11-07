@@ -107,3 +107,6 @@ Conformance `conformance/cases/grid-state/dock-*.json` (by hand). DOM `packages/
 ## Beside a pivot (follow-up, owner 2026-11-07)
 The docked columns panel shows the pivot's « Mode pivot » switch and its three parts at its top (`columns-chooser.md`
 « Beside a pivot », `pivot.md` 35–36). Nothing else of the dock changes.
+Owner 2026-11-07: the docked columns panel shows no « Fermer » in its footer (the area's × closes it; the dialog keeps
+its own); the edge's grip shows only under the pointer and while focused, in the accent, centred in the gutter (at rest
+the area's line alone marks the edge: a grip at rest read as a stray scroll bar beside the list).

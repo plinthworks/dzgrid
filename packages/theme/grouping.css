@@ -22,26 +22,31 @@
     outline-offset: -3px;
   }
   .dzg-gchip {
-    border: var(--dzg-line, 1px) solid var(--tz-fg-muted);
-    border-radius: var(--dzg-radius, 4px);
-    background: var(--tz-bg);
+    border: var(--dzg-line, 1px) solid transparent;
+    border-radius: var(--dzg-pill-radius, 1em);
+    background: var(--dzg-chip-bg, color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg)));
     cursor: grab;
   }
   .dzg-chip,
   .dzg-chip-x {
     border: 0;
-    border-radius: var(--dzg-radius, 4px);
+    border-radius: var(--dzg-pill-radius, 1em);
     background: transparent;
     color: var(--tz-fg);
   }
   .dzg-chip {
-    padding-inline: 0.5rem 0.25rem;
+    padding-inline: 0.625rem 0.375rem;
   }
   .dzg-chip-x {
     color: var(--tz-fg-muted);
   }
+  .dzg-chip:hover,
   .dzg-chip-x:hover {
     color: var(--tz-fg);
+    background: var(--dzg-chip-hover-bg, color-mix(in srgb, var(--tz-accent) 28%, var(--tz-bg)));
+  }
+  .dzg-zadd {
+    border: var(--dzg-line, 1px) dashed var(--tz-fg-muted);
   }
   .dzg-pswitch[aria-checked=true] {
     color: var(--tz-accent-fg);

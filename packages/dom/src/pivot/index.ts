@@ -280,6 +280,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
     const cut = (c: ResolvedColumn<unknown> | undefined): ResolvedColumn<unknown> | undefined => (c && chain.has(c.id) ? { ...c, def: { ...c.def, header: chain.get(c.id)! } } : c);
     return Object.create(m, { get: { value: (id: string) => cut(m.get(id)) }, visible: { value: () => m.visible().map(cut) } }) as ColumnLookup<unknown>;
   };
+  g.colName = (id) => defs.get(id)?.header;
   const st = pivotState(shape, m);
   g.pivotState = { ...st, initial: st.get() };
 
@@ -320,6 +321,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
       delete g.rowText;
       delete g.exportColumns;
       delete g.pivotState;
+      delete g.colName;
       delete g.foldExtra;
     },
   };

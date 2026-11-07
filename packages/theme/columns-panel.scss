@@ -12,7 +12,16 @@
 // (`touch-action: none` on it only: the list still scrolls elsewhere, O5). A 2 px bar marks the landing gap, in the
 // move bar's colour; the dragged row is dimmed. Groups indent by `padding-inline-start`. No colour literal, no
 // physical side (guards).
+//
+// Owner feedback 2026-11-07 (« pas pro »): the buttons take the theme's one look (`_controls.scss`); each row a grid, the
+// name on its own line and the description small on one line under it (cut with « … », its text in the tooltip), the
+// row tinted on hover; ▲ ▼ and the handle smaller shapes in the muted colour, in the text colour while the row is hovered
+// or holds the focus; with a hovering pointer they take no room until then (the name gets the row's width), never
+// removed for touch, the keyboard or assistive technologies; a group's name a
+// section label (small, muted, capitals); the search box outlined (3:1); one focus ring for the dialog's controls.
 // ─────────────────────────────────────────────────────────────────────────────
+
+@use 'controls' as c;
 
 $layered: true !default;
 
@@ -40,9 +49,18 @@ $layered: true !default;
     max-block-size: 70vh;
   }
 
-  .dzg-cp-title,
-  .dzg-cp-gl {
+  .dzg-cp-title {
+    font-size: 1rem;
     font-weight: 600;
+  }
+
+  .dzg-cp-gl {
+    display: block;
+    padding-block: 0.5rem 0.125rem;
+    color: var(--tz-fg-muted);
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
   }
 
   .dzg-cp-q {
@@ -53,7 +71,18 @@ $layered: true !default;
 
   .dzg-cp-q input {
     box-sizing: border-box;
-    min-block-size: var(--dzg-target-min, 24px);
+    min-block-size: 2rem;
+    padding-inline: 0.5rem;
+    border: var(--dzg-line, 1px) solid var(--tz-fg-muted);
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: inherit;
+    background: var(--tz-bg);
+    font: inherit;
+  }
+
+  .dzg-cp :focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: 1px;
   }
 
   .dzg-cp-list {
@@ -73,11 +102,23 @@ $layered: true !default;
     list-style: none;
   }
 
+  // The box and the buttons over both lines; the name on the first, the description on the second.
   .dzg-cp-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) repeat(3, auto);
     align-items: center;
-    gap: 0.25rem;
+    column-gap: 0;
     min-block-size: 32px;
+    padding: 0.25rem;
+    border-radius: var(--dzg-radius, 0.375rem);
+  }
+
+  .dzg-cp-row:hover {
+    background: c.$hover;
+  }
+
+  .dzg-cp-row > :is(input, button) {
+    grid-row: span 2;
   }
 
   // Above 200 rows only (the script marks the list): WebKit hit-tests a freshly drawn skipped row as its item.
@@ -86,33 +127,52 @@ $layered: true !default;
     contain-intrinsic-size: auto 32px;
   }
 
-  .dzg-cp-row label {
-    flex: 1 1 auto;
-    min-inline-size: 0;
+  .dzg-cp-row label,
+  .dzg-cp-desc {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  // Shrinks with the name in a narrow panel, never hides it.
+  .dzg-cp-row label,
   .dzg-cp-desc {
-    flex: 0 1 auto;
-    min-inline-size: 0;
+    padding-inline-start: 0.375rem;
+  }
+
+  // Under the name, never beside it: the name is never cut by it.
+  .dzg-cp-desc {
+    grid-area: 2 / 2;
     color: var(--tz-fg-muted);
-    font-size: 0.85em;
+    font-size: 0.8em;
   }
 
   .dzg-cp-row button {
     position: relative;
-    flex: none;
     inline-size: var(--dzg-target-min, 24px);
     block-size: var(--dzg-target-min, 24px);
     padding: 0;
     border: 0;
     border-radius: var(--dzg-radius, 0.375rem);
-    color: inherit;
+    color: var(--tz-fg-muted);
     background: none;
     cursor: pointer;
+  }
+
+  // `:where`: a disabled one keeps its muted colour.
+  .dzg-cp-row:where(:hover, :focus-within) button {
+    color: var(--tz-fg);
+  }
+
+  // With a hovering pointer (owner 2026-11-07): no room and no ink until the row is hovered or holds the focus; touch: always.
+  @media (hover: hover) {
+    .dzg-cp-row:not(:hover, :focus-within) button {
+      inline-size: 0;
+      opacity: 0;
+    }
+  }
+
+  .dzg-cp-row button:hover {
+    background: c.$active;
   }
 
   .dzg-cp-row button::before {
@@ -123,11 +183,11 @@ $layered: true !default;
   }
 
   .dzg-cp-row [data-act=up]::before {
-    clip-path: polygon(50% 30%, 80% 66%, 20% 66%);
+    clip-path: polygon(50% 36%, 72% 62%, 28% 62%);
   }
 
   .dzg-cp-row [data-act=down]::before {
-    clip-path: polygon(20% 34%, 80% 34%, 50% 70%);
+    clip-path: polygon(28% 38%, 72% 38%, 50% 64%);
   }
 
   .dzg-cp-row [data-act=drag]::before {
@@ -176,11 +236,11 @@ $layered: true !default;
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 0.5rem;
+    padding-block-start: 0.5rem;
+    border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
   }
 
-  .dzg-cp-foot button {
-    min-block-size: var(--dzg-target-min, 24px);
-  }
+  @include c.button('.dzg-cp-foot button');
 
   .dzg-cp-none:empty {
     display: none;

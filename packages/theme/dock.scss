@@ -8,7 +8,14 @@
 // boundary), in the accent under the pointer and while focused; the shown tab underlined in the accent; the buttons
 // flat, the focus a 2 px ring. The columns panel fills its area instead of its dialog's size. System colours in forced
 // colours. No colour literal, no physical side (guards).
+//
+// Owner feedback 2026-11-07 (« pas pro »): the head roomier, its title larger; its buttons and the tabs the quiet button of
+// `_controls.scss` (muted, the text colour and the raised surface on hover), the shown tab in the text colour; the area's
+// line alone divides it from the rows: the edge's own line and a grip in its middle show only under the pointer and
+// focused, in the accent (owner 2026-11-07: a grip at rest read as a stray scroll bar beside the list).
 // ─────────────────────────────────────────────────────────────────────────────
+
+@use 'controls' as c;
 
 $layered: true !default;
 
@@ -34,6 +41,8 @@ $layered: true !default;
   }
 
   .dzg-dock-head {
+    gap: 0.25rem;
+    padding: 0.375rem 0.5rem;
     border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
   }
 
@@ -53,14 +62,34 @@ $layered: true !default;
     border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
   }
 
-  .dzg-dock-sep::before {
-    background: var(--tz-fg-muted);
+  // The grip: a short bar across the gutter's middle.
+  .dzg-dock-sep::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: 4px;
+    block-size: 2rem;
+    margin-block-start: -1rem;
+    margin-inline-start: -2px;
+    border-radius: 2px;
+  }
+
+  [data-area='bottom'] > .dzg-dock-sep::after {
+    inline-size: 2rem;
+    block-size: 4px;
+    margin-block-start: -2px;
+    margin-inline-start: -1rem;
   }
 
   .dzg-dock-sep:hover::before,
   .dzg-dock-sep:focus-visible::before {
     background: var(--tz-accent);
     inline-size: 3px;
+  }
+
+  .dzg-dock-sep:is(:hover, :focus-visible)::after {
+    background: var(--tz-accent);
   }
 
   [data-area='bottom'] > .dzg-dock-sep:hover::before,
@@ -70,22 +99,14 @@ $layered: true !default;
   }
 
   .dzg-dock-title {
+    padding-inline-start: 0.25rem;
     font-weight: 600;
   }
 
-  .dzg-dock-head button {
-    border: 0;
-    border-radius: var(--dzg-radius, 0.375rem);
-    color: inherit;
-    background: none;
-    cursor: pointer;
-  }
-
-  .dzg-dock-head button:hover {
-    background: var(--tz-bg-raised);
-  }
+  @include c.button('.dzg-dock-head button', true, 0 0.375rem, false);
 
   .dzg-dock-tab[aria-selected='true'] {
+    color: var(--tz-fg);
     font-weight: 600;
     box-shadow: inset 0 -2px 0 var(--tz-accent);
   }
@@ -109,7 +130,8 @@ $layered: true !default;
     }
 
     .dzg-dock-sep:hover::before,
-    .dzg-dock-sep:focus-visible::before {
+    .dzg-dock-sep:focus-visible::before,
+    .dzg-dock-sep:is(:hover, :focus-visible)::after {
       background: Highlight;
     }
 

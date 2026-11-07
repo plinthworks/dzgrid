@@ -5,6 +5,8 @@
 }
 
 .dzg-dock-head {
+  gap: 0.25rem;
+  padding: 0.375rem 0.5rem;
   border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
 }
 
@@ -24,14 +26,33 @@
   border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
 }
 
-.dzg-dock-sep::before {
-  background: var(--tz-fg-muted);
+.dzg-dock-sep::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 4px;
+  block-size: 2rem;
+  margin-block-start: -1rem;
+  margin-inline-start: -2px;
+  border-radius: 2px;
+}
+
+[data-area=bottom] > .dzg-dock-sep::after {
+  inline-size: 2rem;
+  block-size: 4px;
+  margin-block-start: -2px;
+  margin-inline-start: -1rem;
 }
 
 .dzg-dock-sep:hover::before,
 .dzg-dock-sep:focus-visible::before {
   background: var(--tz-accent);
   inline-size: 3px;
+}
+
+.dzg-dock-sep:is(:hover, :focus-visible)::after {
+  background: var(--tz-accent);
 }
 
 [data-area=bottom] > .dzg-dock-sep:hover::before,
@@ -41,22 +62,33 @@
 }
 
 .dzg-dock-title {
+  padding-inline-start: 0.25rem;
   font-weight: 600;
 }
 
 .dzg-dock-head button {
-  border: 0;
+  box-sizing: border-box;
+  min-block-size: var(--dzg-target-min, 24px);
+  padding: 0 0.375rem;
+  border: var(--dzg-line, 1px) solid transparent;
   border-radius: var(--dzg-radius, 0.375rem);
-  color: inherit;
-  background: none;
+  color: var(--tz-fg-muted);
+  background: transparent;
+  font: inherit;
   cursor: pointer;
 }
 
 .dzg-dock-head button:hover {
+  color: var(--tz-fg);
   background: var(--tz-bg-raised);
 }
 
+.dzg-dock-head button:active {
+  background: var(--dzg-control-active-bg, color-mix(in srgb, var(--tz-fg) 12%, var(--tz-bg-raised)));
+}
+
 .dzg-dock-tab[aria-selected=true] {
+  color: var(--tz-fg);
   font-weight: 600;
   box-shadow: inset 0 -2px 0 var(--tz-accent);
 }
@@ -79,7 +111,8 @@
     background: CanvasText;
   }
   .dzg-dock-sep:hover::before,
-  .dzg-dock-sep:focus-visible::before {
+  .dzg-dock-sep:focus-visible::before,
+  .dzg-dock-sep:is(:hover, :focus-visible)::after {
     background: Highlight;
   }
   .dzg-dock-tab[aria-selected=true] {

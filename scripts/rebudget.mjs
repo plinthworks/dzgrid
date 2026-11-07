@@ -52,7 +52,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/en-group': 350,
   '@dzgrid/dom/locales/fr-group': 404,
   '@dzgrid/dom/locales/ar-group': 558,
-  '@dzgrid/theme/grouping.css': 587, // measured 533
+  '@dzgrid/theme/grouping.css': 650, // owner « ok taille » 2026-11-07 (visual polish, measured 628); before 587 (measured 533)
   '@dzgrid/core/detail': 1150, // owner step 16 (2026-10-29, « ok pour les hausses »): 1 050 → 1 150 (`isMaster`, measured 1 132); Phase 5 S2-O5: 1 000 → 1 050 (gzip noise over the grown core; its code unchanged)
   '@dzgrid/core/edit': 3160, // owner « set include only » (2026-10-29): 3 150 → 3 160 (`exclude: false` refused in compile); owner Q8-5 (2026-10-27): 3 150, compression with the fold seam; Phase 5 Q16: 3 000; owner S3-O4 (2026-10-23): 3 100 (the global refusal system)
   '@dzgrid/core/rules': 600, // Phase 5 close Q-C3 (2026-10-26): 550 → 600 by the close rule (the measure 512 + 10 %), accepted
@@ -161,7 +161,7 @@ const SIZE_CEILINGS = {
   // Phase 10 pivot, core batch (owner « ★ partout, tailles OK », 2026-11-06: new entries at their measure + 10 %): the
   // crossings, created columns, series and state adapter over core/grouping.
   '@dzgrid/core/pivot': 3750, // measured 3 409 over @dzgrid/core/grouping
-  '@dzgrid/theme/dock.css': 650, // measured 546
+  '@dzgrid/theme/dock.css': 800, // owner « ok taille » 2026-11-07 (visual polish, measured 759); before 650 (measured 546)
   // Phase 9 filters panel (filters-panel.md): the side panel over the DOM base, its -filters-panel texts, filters-panel.css; new lines at their measure + 10 %.
   '@dzgrid/dom/filters-panel': 3250,
   '@dzgrid/dom/locales/en-filters-panel': 250,
@@ -180,8 +180,8 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/menu.css': 750, // owner 2026-11-02: 500 → 750 (measured 716; the list's rules whole)
   // Phase 6 step 4 (owner Q-B, Q4-1, Q4-2, Q4-4): the column chooser over the popup host (4 000, up to 4 400 if needed);
   // its texts in the -columns bundles (500 / 600 / 800 kept), its look in its own columns-panel.css (measure + 10 %, ≤ 1 000).
-  '@dzgrid/dom/columns-panel': 4520, // Phase 10 follow-up (+2 % rule, measured 4 510): the panel's top for a pivot; Phase 9 dock (+2 % rule, measured 4 475): the panel `columns` in the dock, not modal; Q4-4: up to 4 400 used at the review of steps 3–4 (its own live status, auto-scroll loop: measured 4 282)
-  '@dzgrid/theme/columns-panel.css': 1000,
+  '@dzgrid/dom/columns-panel': 4600, // owner « ok taille » 2026-11-07 (pivot-mode list, measured 4 569); before 4520, Phase 10 follow-up (+2 % rule, measured 4 510): the panel's top for a pivot; Phase 9 dock (+2 % rule, measured 4 475): the panel `columns` in the dock, not modal; Q4-4: up to 4 400 used at the review of steps 3–4 (its own live status, auto-scroll loop: measured 4 282)
+  '@dzgrid/theme/columns-panel.css': 1400, // owner « ok taille » 2026-11-07 (visual polish, measured 1 359); before 1 000
   // Phase 6 step 5 (owner Q-B): the GridState feature, its storage and address helpers, over the DOM base (core/state outside it).
   '@dzgrid/dom/state': 1300, // Phase 10 DOM batch (+2 % rule, measured 1 292): the pivot's part and its reset; Phase 9 dock (+2 % rule, measured 1 273): the dock's part, a dock change is a gesture, reset puts it back; Phase 8 step 7 (+2 %): restored rowGroups handed to a server-side model inside the hold (measured 1 244); before 1 240; Phase 7 close (+2 %): rowGroups and a state restored before the grouping, measured 1 233; owner +2 % rule (step 16, 2026-10-29): 1 200 → 1 224 (`gridState({ initial })`, measured 1 211); owner « clearFilters/resetState » (2026-10-28): 1 150 → 1 200; before: owner E5-8 (2026-10-26): 800 → 1 150 (measured 1 058, one entry kept)
   '@dzgrid/theme': 2960, // Phase 8 step 4 (+2 % rule, plan §4 2 960): a block list's loading rows muted, their words over the empty cells (measured 2 913); before: 2907; 1.4.0 busy bar (+2 % rule, 2026-11-03, measured 2 907): 2 850; before: the owner's third look (2026-10-27, « Comfort stylesheet »): 2 750 → 2 850 (the pinned edge, the field's ring, the magnifier); T7: inside Q16's 2 900, up to 3 050 if needed; Phase 5 close Q-C2 (2026-10-26): up to 2 750 (the measure 2 494 + 10 %)

@@ -124,6 +124,15 @@ frameworks (Tailwind CSS 4.3.3 and 3.4.19, Bootstrap 5.3.8, root devDependencies
   palette's success, a hue 60° at least from the accent and from the flash), `--dzg-fresh-bg` (its tint, 14 %) and
   `--dzg-fresh-bar` (3 px): `clinic.css` and `contrast.css` (dark) set a violet (their success is near their accent,
   or is their flash), `bootstrap.css` its warning (its flash is its success).
+  `--dzg-chip-bg` and `--dzg-chip-hover-bg` (owner feedback 2026-11-07, « pas pro »: the chips of the group band, the
+  pivot bar and the columns panel's parts; defaults the accent at 14 % and 28 % on the surface, read with their fallback
+  at the point of use): a chip is a pill (`--dzg-pill-radius`) on the first, its name, × and ↑ / ↓ quiet round buttons
+  on the second under the pointer. Derived from the palette, so the bridges follow without a mapping.
+- **One button look for the panels** (owner feedback 2026-11-07): the partial `_controls.scss` gives the columns
+  panel's buttons and the dock's head the same button — on the surface, outlined in the border colour, at least 24 px
+  high; the quiet one (dock head, tabs) without face or outline, muted; hover the raised surface, press `--dzg-control-active-bg` (the
+  text colour at 12 % over the raised surface; derived), disabled muted and still. The base theme's own buttons (filters, pager, retry) are unchanged
+  (its size and the K.8 screen's are full).
 - **A showcase theme gives every colour by hand** (T2): the ten `--tz-*` colours, each a `light-dark()` pair,
   nothing computed from the main four. It may also set the shape knobs (`--dzg-radius`, `--dzg-pill-radius`,
   `--dzg-line`, `--dzg-cell-padding-inline`, `--dzg-font`). It lives in `dzgrid.skin`, declared on

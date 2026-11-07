@@ -28,8 +28,8 @@ export const DOCK_CSS =
   ':where(.dzg-dock-box){box-sizing:border-box;block-size:100%}' +
   // A panel made for a side of its own fills the area (the filters panel's width).
   ':where(.dzg-dock-box)>.dzg-fpanel{inline-size:auto;block-size:100%}' +
-  // Their own title and close button: the area's head says and does it.
-  ':where(.dzg-dock-box :is(.dzg-cp-title,.dzg-fp-head)){display:none}' +
+  // Their own title and close button (the columns panel's « Close » too): the area's head says and does it.
+  ':where(.dzg-dock-box :is(.dzg-cp-title,.dzg-fp-head,.dzg-cp-foot [data-act=close])){display:none}' +
   ':where(.dzg-dock[data-collapsed]>.dzg-dock-sep,.dzg-dock[data-collapsed] .dzg-dock-body){display:none}' +
   // Collapsed beside the rows: the head stands along the edge, its words written downward.
   ':where(.dzg-dock[data-collapsed]:not([data-area=bottom]) :is(.dzg-dock-head,.dzg-dock-tabs)){flex-direction:column;padding-inline:0}' +

@@ -358,11 +358,11 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('Phase 6 step 4 (owner Q-B, Q4-1, Q4-2, Q4-4): @dzgrid/dom/columns-panel 4 000 (up to 4 400) over the popup host; its texts in -columns (500 / 600 / 800 kept); columns-panel.css new, at most 1 000; the popup host 1 650; core and the DOM base unchanged', () => {
     const cap = ceilingFor('@dzgrid/dom/columns-panel');
     expect(cap).toBeGreaterThanOrEqual(4000);
-    expect(cap).toBeLessThanOrEqual(4520); // Phase 10 follow-up (+2 % rule, measured 4 510): the panel's top for a pivot; Phase 9 dock (+2 % rule over 4 400): the panel in the dock
+    expect(cap).toBeLessThanOrEqual(4600); // owner « ok taille » 2026-11-07 (measured 4 569); before 4520: Phase 10 follow-up (+2 % rule, measured 4 510): the panel's top for a pivot; Phase 9 dock (+2 % rule over 4 400): the panel in the dock
     expect(() => sizeBudget(cap + 1, cap)).toThrow(/ceiling/);
     const css = ceilingFor('@dzgrid/theme/columns-panel.css');
     expect(css).toBeGreaterThan(0);
-    expect(css).toBeLessThanOrEqual(1000);
+    expect(css).toBeLessThanOrEqual(1400); // owner « ok taille » 2026-11-07 (visual polish, measured 1 359); before 1 000
     expect(['@dzgrid/core', '@dzgrid/dom'].map(ceilingFor)).toEqual([CORE, DOM]);
     type Entry = { file?: string; maxGzip: number | null; over?: string; external?: string[] };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;

@@ -101,7 +101,9 @@ application). Its texts come in `locales/<lang>-pivot`.
 18. **The data columns are folded away** by a fold of the pivot's own (never `hidden`: the user's hidden / shown, the
     columns panel and the saved state never see pivot mode; a collapsible header group's fold and the pivot's are
     joined). The value columns stay shown, at the end, under a « Total » band: they are the row totals (8), with their
-    own width, pin and sort. Pivot off: the columns as the application gave them, nothing folded.
+    own width, pin and sort. Pivot off: the columns as the application gave them, nothing folded. The columns panel
+    lists the application's columns only, never the created ones, and gives a folded data column no description
+    (`columns-chooser.md` 9; owner 2026-11-07).
 19. **The « Colonnes » band**: `groupZone({ use: { grouping: p }, texts: 'pivot' })`, after « Regrouper par »: the same
     chips, keys, reorder and × as `group-drop-zone.md`, labelled « Colonnes du tableau croisé ». **Each band ends with a
     « + » button** (its texts given: `zone.add`, `pivot.add`) opening a menu of the columns it accepts — known,

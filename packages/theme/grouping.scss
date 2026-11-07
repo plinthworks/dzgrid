@@ -9,6 +9,10 @@
 // text colour, its name and × as 24 px targets, the focus ring in the accent; a header held over the band: a dashed
 // accent outline. The pivot (Phase 10, pivot.md 19, 23, 24): « + » drawn as a chip's ×, the « Tableau croisé » switch as
 // a chip's name, on in the accent; the limit's note muted. Forced colours: system colours. No colour literal, no physical side (guards).
+//
+// Owner feedback 2026-11-07 (« pas pro »): a chip is a pill on a light tint of the accent (`--dzg-chip-bg`), no outline
+// but in forced colours; its name, × (and ↑ in pivot.css) quiet round buttons, the stronger tint (`--dzg-chip-hover-bg`)
+// and the text colour under the pointer; « + » a round button outlined dashed in the muted colour (3:1).
 // ─────────────────────────────────────────────────────────────────────────────
 
 $layered: true !default;
@@ -55,30 +59,36 @@ $layered: true !default;
   }
 
   .dzg-gchip {
-    border: var(--dzg-line, 1px) solid var(--tz-fg-muted);
-    border-radius: var(--dzg-radius, 4px);
-    background: var(--tz-bg);
+    border: var(--dzg-line, 1px) solid transparent;
+    border-radius: var(--dzg-pill-radius, 1em);
+    background: var(--dzg-chip-bg, color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg)));
     cursor: grab;
   }
 
   .dzg-chip,
   .dzg-chip-x {
     border: 0;
-    border-radius: var(--dzg-radius, 4px);
+    border-radius: var(--dzg-pill-radius, 1em);
     background: transparent;
     color: var(--tz-fg);
   }
 
   .dzg-chip {
-    padding-inline: .5rem .25rem;
+    padding-inline: .625rem .375rem;
   }
 
   .dzg-chip-x {
     color: var(--tz-fg-muted);
   }
 
+  .dzg-chip:hover,
   .dzg-chip-x:hover {
     color: var(--tz-fg);
+    background: var(--dzg-chip-hover-bg, color-mix(in srgb, var(--tz-accent) 28%, var(--tz-bg)));
+  }
+
+  .dzg-zadd {
+    border: var(--dzg-line, 1px) dashed var(--tz-fg-muted);
   }
 
   .dzg-pswitch[aria-checked=true] {

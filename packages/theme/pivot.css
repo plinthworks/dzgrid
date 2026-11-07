@@ -6,20 +6,36 @@
     border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
   }
   .dzg-pzone > .dzg-gzone {
+    margin-block: 0.25rem;
+    padding-block: 0;
+    padding-inline: 0.75rem;
     border-block-end: 0;
     border-color: var(--tz-border);
   }
   .dzg-ppart-name {
-    color: var(--tz-fg);
+    color: var(--tz-fg-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
   }
   .dzg-chip-o {
     border: 0;
-    border-radius: var(--dzg-radius, 4px);
+    border-radius: var(--dzg-pill-radius, 1em);
     background: transparent;
     color: var(--tz-fg-muted);
   }
   .dzg-chip-o:hover {
     color: var(--tz-fg);
+    background: var(--dzg-chip-hover-bg, color-mix(in srgb, var(--tz-accent) 28%, var(--tz-bg)));
+  }
+  .dzg-cp-top:not(:empty) {
+    padding-block-end: 0.5rem;
+    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+  .dzg-cp-top .dzg-pzone,
+  .dzg-cp-top .dzg-gzone {
+    padding-inline: 0;
+    border: 0;
+    background: none;
   }
   .dzg-chip-o[aria-pressed=true] {
     color: var(--tz-fg);

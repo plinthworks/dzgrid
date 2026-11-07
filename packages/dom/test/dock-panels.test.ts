@@ -86,7 +86,8 @@ describe('the filters panel in the dock', () => {
     const a = t.area('end');
     expect([a.hidden, a.hasAttribute('data-collapsed')]).toEqual([false, true]);
     expect(a.querySelector('.dzg-dock-title')!.textContent).toBe('Filters');
-    expect(document.querySelector('style[data-dzgrid-dock]')!.textContent).toContain(':where(.dzg-dock-box :is(.dzg-cp-title,.dzg-fp-head)){display:none}');
+    expect(document.querySelector('style[data-dzgrid-dock]')!.textContent).toContain(':where(.dzg-dock-box :is(.dzg-cp-title,.dzg-fp-head,.dzg-cp-foot [data-act=close])){display:none}');
+    // Owner 2026-11-07: docked, the columns panel's « Close » goes too (the area's × closes; dock.md « Beside a pivot »).
     expect(t.fp().isOpen).toBe(false);
   });
 
