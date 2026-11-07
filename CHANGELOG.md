@@ -5,9 +5,19 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased — 1.7.0
+## [1.7.0] - 2026-11-07
 
-A minor in the making (`npm run check:api`: additions only). Phase 10, the pivot: the core, then the screen. Sheets:
+A minor: nothing of 1.6.0 is removed or narrowed (`npm run check:api`).
+
+### Upgrading from 1.6.0
+- Nothing to change. The pivot (`@dzgrid/core/pivot`, `@dzgrid/dom/pivot` handed to `grouping({ pivot })`,
+  `@dzgrid/dom/pivot-bar`, `pivot.css`) is off until the app asks.
+- The panels look more finished (buttons, chips, the columns list): an app that restyled `.dzg-cpanel-*`,
+  `.dzg-zone-*` or the dock head may want to look again. New tokens `--dzg-chip-bg`, `--dzg-chip-hover-bg`,
+  `--dzg-control-active-bg` come from the palette.
+
+### Details
+ Phase 10, the pivot: the core, then the screen. Sheets:
 `docs/behaviors/pivot.md` (owner Q-SC, Q-P1…Q-P12 A, 2026-11-06), amendments to `aggregation.md` 16–18, `grid-state.md`
 « Pivot », `group-drop-zone.md` 18–19, `find.md` 16, `quick-filter.md`, `row-grouping.md` 21.
 
