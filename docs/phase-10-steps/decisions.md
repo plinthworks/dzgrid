@@ -242,3 +242,68 @@ line: measured first; the bar's code in its own new entry rather than pushing a 
 ## Visual polish — owner « ok taille » (2026-11-07)
 
 columns-panel.css 1 000 → 1 400 (measured 1 359), dock.css 650 → 800 (759), grouping.css 587 → 650 (628), dom/columns-panel 4 520 → 4 600 (4 569). Base theme, DOM base and K.8 unchanged.
+
+## Server pivot — owner A (2026-11-07)
+
+Plan `docs/phase-10-steps/server-pivot-plan.md` (committed with this batch). **Owner: A to Q-SP1…Q-SP8** — now, a small
+clean version; a separate entry `@dzgrid/core/server-pivot`, used as `serverSideRows(data, { pivot: serverPivot() })`;
+the created columns' list sent once per query with the first block; above the limit the server sends the count only, no
+column, a message; a wrongly typed value refused and told (no value in the `Problem`), the same rule for server groups;
+a sort on a created column done by the server (`pivot.sort { crossing, column, dir }`, never a `~p` id on the wire);
+export « all » through the application's export function, « displayed » and print the groups held; sizes by today's rule
+(new entries measure + 10 %, `core/pivot` and `dom/pivot` +2 % at most; bases, Angular and K.8 unchanged). Sheet
+`docs/behaviors/server-pivot.md` (before the code); amendments to `pivot.md` 15 / 26, `server-side-groups.md`,
+`grid-state.md`, `csv-export.md`.
+
+### Decisions taken alone
+- **The seam** (S12): one optional member `PivotShape.serve?(link)` — the shape's changes go to `link.kick` (a new epoch),
+  its chart to `link.series`; it hands back the shape's own created-columns builder (`make`, factored out of `cells()`
+  in place, not moved to a module: one code for the browser and a server). The plug builds the value specs itself (named
+  functions that fit the column, with the grouping's `fits`): that kept `core/pivot` within +2 %.
+- **The model's hooks** (S3): `ServerSideOptions.pivot?`; `ServerSideModel.pivot?` (true when the plug linked to a pivot
+  shape: what `dom/grouping` reads to set the pivot up instead of refusing it) and `wireSort?` (the sort as the requests
+  carry it: an export's `server.sort`, found by the review — the grid's query held the created id). In pivot mode the
+  totals asked are the pivot's values, never the shown columns (the refetch loop closed; a mutation of that line fails
+  the guard test); the last level's groups never open nor ask.
+- **The value-type rule** (Q-SP5 A), `fitsColumn`: null; anything in a `custom` column; a number in `number` /
+  `instant`; a boolean in `boolean`; a text otherwise, a valid `YYYY-MM-DD` in `day` (an `enum` value is not checked
+  against its list). A refused group is shown as today's refused entries (a failed loading row), told by place. The
+  conformance case `ss-typed-keys-and-paths` and its unit test were rewritten to the new rule (behaviour change, in the
+  CHANGELOG); `1` vs `'1'` as two groups and two created columns is now tested in a `custom` column.
+- **The list** is the epoch's: a refresh (`invalidate()`, a transaction) is not a new epoch, so a list that moved is told
+  and the first kept (`invalidate({ purge: true })` asks again). A language change labels the crossings again without a
+  request. A first block without `pivot` while pivot columns were asked: told (`response.pivot`). Groups sent with no
+  row column: told by place. A crossing given twice: told, kept once.
+- **The limit**: the detail is the number of created columns (crossings × values), as the browser's; it stands in the
+  model's `problems` while the list does (a synchronous first answer is told before anyone listens) and is told once.
+- **Cells**: an index outside the list is told at `response.groups[j].cells` **without the index** (a key the server
+  wrote might hold anything); the cells of a refused crossing are left silently; no cell read without a list.
+- **The grand total row** shows only when the server sends totals (no empty row from an absent `pivot.totals`).
+- **Sort** (S9): the first sort item on a created column becomes `pivot.sort`; a created id the list does not hold is
+  dropped; `~p:rows` becomes the grouping columns; `sort` is sent as without the pivot (`[]` when nothing is left); a
+  descending sort on a pivot column joins `desc`.
+- **Values not given**: frozen at the link from the shown columns with an `aggFunc` (the browser's first-build rule).
+- **Exports**: the crossings known are the screen's (none above the limit); `ExportRequest.columns` and `query` stay the
+  grid's own (created ids included: the application's code, not the server's wire).
+- **`serverPivot()` takes no option** for now. The purity test lists `server-pivot` as a server-family entry; `test:perm`
+  runs the server-pivot walk.
+- **Fake server** `perf/fake-pivot-server.ts`: the cube of a query computed once (nested maps), modes `sync` / `timers` /
+  `hold` (`releaseAt` for permutations), planted cell, type and list.
+
+### Measures (2026-11-07)
+- Node (minified, `node scripts/bench.mjs "server pivot"`, three runs): root answer of 100 groups × 48 created columns
+  read, columns made, flattened **0.6 ms** (line 5); a group opened, its 100 children with cells **0.3** (5); a new sort
+  on a created column, first block asked in the same call, 0 old answers **0.2** (1).
+- **Chrome, the exit line** (local page, 10⁶ rows behind, 150 ms latency, two row columns, two pivot keys, two values,
+  20 new queries): painted at the first frame after the root answer **20 / 20**; the work after the answer median
+  **1.7 ms** (p95 2.8); answer to that frame median 16.9 ms (p95 **20.7 ≤ 25**). axe 0 in fr light and ar dark, before
+  and after opening a group; bands aligned with the pinned label column (mirrored in Arabic). Firefox / WebKit not run
+  (no layout change).
+- Seeded walk: 500 queries against the cube (the limit and sub-totals reached); 1 000 permutations of the gestures with
+  answers out of order: one first-level request per gesture, no stale answer.
+- Sizes (gzip): `core/server-pivot` **1 740** over `core/server-side` (new, line 1 950); `core/pivot` 3 672 → **3 810**
+  (line 3 750 → 3 825, +2 %); `core/server-side` 11 056 → 11 455 (line 12 160); `dom/pivot` 2 562 → 2 568 (2 600);
+  `dom/grouping` 4 966 → 4 973 (5 100); core base 29 258, `core/server` 6 151, DOM base 23 650, Angular 7 883,
+  **K.8 89 978 / 90 000** unchanged.
+- Gate (`npm run gate:step`, once): test:ci 612 files / 8 940 tests, test:tz ×2, typecheck, build, check:size (0 over),
+  check:api (additions only) — green.

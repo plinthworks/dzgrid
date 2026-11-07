@@ -5,6 +5,37 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased — 1.8.0
+
+A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one behaviour change for server groups.
+
+### Upgrading from 1.7.0
+- **Server groups' values are checked against their column's type** (owner Q-SP5 A): a group whose value does not fit
+  (a number in a text column, an instant in a day column, a text that is no day) is now left out and told
+  `invalid-page-response` at `response.groups[j].value` (never with the value); 1.7.0 showed it, labelled by its text.
+  A `custom` column takes any value. If your server sends ids as numbers for a text column, send texts, or type the
+  column.
+- Nothing else to change: the server pivot is off until the app passes `serverPivot()`.
+
+### Added
+- **The pivot over a server's rows** (`docs/behaviors/server-pivot.md`): `serverSideRows(data, { pivot: serverPivot() })`
+  with `serverPivot` from the new entry `@dzgrid/core/server-pivot`, and `grouping({ by, pivot: pivot({ … }) })` as in
+  the browser (the bar, the switch, ↑/↓, the ⋮ « Total » radios unchanged). Each request carries
+  `group.pivot { columns, desc?, subtotals?, limit, sort? }`; the first block of the first level answers
+  `pivot { crossings | count, totals }`, each group its sparse `cells` by crossing index. Cells and totals are the
+  server's; the list comes once per query; above the limit the server sends the count only (no created column, the
+  note says how many); a sort on a created column is sent as `pivot.sort { crossing, column, dir }`, never with a
+  created id; exports of « all » give the application's export function the pivot part and the crossings shown.
+- Types: `PivotPart`, `PivotCells`, `PivotResponse`, `ServerPivotPlug` (`@dzgrid/core/server-side`); `GroupPart.pivot?`;
+  `ServerSideOptions.pivot?`; `ServerSideModel.pivot?`, `wireSort?`; `PivotShape.serve?`, `PivotServe`, `PivotCrossings`
+  (`@dzgrid/core/pivot`, internal seams).
+- `perf/fake-pivot-server.ts`: a pivoting fake server (10⁶ rows computed from their index, the cube per query).
+
+### Changed
+- `dom/grouping` sets the pivot up beside a `serverSideRows` model that has the plug; beside `sourceRows`,
+  `infiniteRows` or `serverSideRows` without it, still refused (`unsupported-combination`, `source`, `pivot`).
+- An export's `server.sort` is the sort the model sends (no change without a pivot).
+
 ## [1.7.0] - 2026-11-07
 
 A minor: nothing of 1.6.0 is removed or narrowed (`npm run check:api`).

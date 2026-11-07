@@ -1,0 +1,146 @@
+{
+  "id": "sp-wrong-type-refused",
+  "suite": "server-pivot",
+  "description": "A crossing of the wrong type (a text in a number column), too long, or of no group type is refused by place with its cells, never with the value (planted « Ana »); a group value of the wrong type (a number in a text column) too (owner Q-SP5 A); a cells key outside the list is told by place, without the key.",
+  "refs": [
+    "docs/behaviors/server-pivot.md"
+  ],
+  "input": {
+    "pivot": {
+      "by": [
+        "region"
+      ],
+      "columns": [
+        "year"
+      ],
+      "values": {
+        "amount": "sum"
+      }
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "response": {
+          "groups": [
+            {
+              "value": "Nord",
+              "count": 3,
+              "aggs": {
+                "amount": 7
+              },
+              "cells": {
+                "0": {
+                  "amount": 3
+                },
+                "1": {
+                  "amount": 99
+                },
+                "4": {
+                  "amount": 4
+                },
+                "9": {
+                  "amount": 1
+                },
+                "Ana": {
+                  "amount": 1
+                }
+              }
+            },
+            {
+              "value": 42,
+              "count": 1
+            }
+          ],
+          "total": 2,
+          "pivot": {
+            "crossings": [
+              [
+                2025
+              ],
+              [
+                "2026"
+              ],
+              [
+                2027,
+                1
+              ],
+              [
+                {
+                  "x": "Ana"
+                }
+              ],
+              [
+                null
+              ]
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ]
+    ],
+    "told": [
+      "invalid-page-response response.pivot.crossings[1]",
+      "invalid-page-response response.pivot.crossings[2]",
+      "invalid-page-response response.pivot.crossings[3]",
+      "invalid-page-response response.groups[0].cells",
+      "invalid-page-response response.groups[0].cells",
+      "invalid-page-response response.groups[1].value"
+    ],
+    "final": {
+      "columns": [
+        "2,025 = ~p4:year5:n20256:amount",
+        "(blank) = ~p4:year0:6:amount"
+      ],
+      "count": 2,
+      "rows": [
+        [
+          "Nord",
+          {
+            "amount": 7,
+            "~p4:year5:n20256:amount": 3,
+            "~p4:year0:6:amount": 4
+          }
+        ],
+        [
+          "loading",
+          null
+        ]
+      ],
+      "problems": [],
+      "aggs": [
+        {
+          "column": "amount",
+          "fn": "sum"
+        }
+      ],
+      "export": {
+        "columns": [
+          "year"
+        ],
+        "limit": 200,
+        "crossings": [
+          [
+            2025
+          ],
+          [
+            null
+          ]
+        ]
+      }
+    }
+  }
+}

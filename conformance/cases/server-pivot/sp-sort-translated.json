@@ -1,0 +1,190 @@
+{
+  "id": "sp-sort-translated",
+  "suite": "server-pivot",
+  "description": "A sort on a created column is sent as pivot.sort (the typed crossing, its value column) and leaves sort; on the label column it is the grouping columns; on a row total it stays; on a created column the list does not hold, nothing is sent. No created id ever goes on the wire (owner Q-SP6 A).",
+  "refs": [
+    "docs/behaviors/server-pivot.md"
+  ],
+  "input": {
+    "pivot": {
+      "by": [
+        "region",
+        "city"
+      ],
+      "columns": [
+        "year"
+      ],
+      "values": {
+        "amount": "sum"
+      }
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "response": {
+          "groups": [
+            {
+              "value": "Nord",
+              "aggs": {
+                "amount": 1
+              }
+            }
+          ],
+          "total": 1,
+          "pivot": {
+            "crossings": [
+              [
+                2025
+              ],
+              [
+                2026
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "sort": [
+          [
+            "~p4:year5:n20266:amount",
+            "desc"
+          ]
+        ]
+      },
+      {
+        "sort": [
+          [
+            "~p:rows",
+            "asc"
+          ]
+        ]
+      },
+      {
+        "sort": [
+          [
+            "amount",
+            "desc"
+          ]
+        ]
+      },
+      {
+        "sort": [
+          [
+            "~p4:year5:n19996:amount",
+            "asc"
+          ]
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ],
+      [
+        "c2",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200,
+          "sort": {
+            "crossing": [
+              2026
+            ],
+            "column": "amount",
+            "dir": "desc"
+          }
+        },
+        []
+      ],
+      [
+        "c3",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        [
+          {
+            "column": "region",
+            "dir": "asc"
+          },
+          {
+            "column": "city",
+            "dir": "asc"
+          }
+        ]
+      ],
+      [
+        "c4",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        [
+          {
+            "column": "amount",
+            "dir": "desc"
+          }
+        ]
+      ],
+      [
+        "c5",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ]
+    ],
+    "told": [],
+    "final": {
+      "columns": [
+        "2,025 = ~p4:year5:n20256:amount",
+        "2,026 = ~p4:year5:n20266:amount"
+      ],
+      "count": 2,
+      "rows": [],
+      "problems": [],
+      "aggs": [
+        {
+          "column": "amount",
+          "fn": "sum"
+        }
+      ],
+      "export": {
+        "columns": [
+          "year"
+        ],
+        "limit": 200,
+        "crossings": [
+          [
+            2025
+          ],
+          [
+            2026
+          ]
+        ]
+      }
+    }
+  }
+}

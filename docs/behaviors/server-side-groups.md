@@ -79,6 +79,14 @@ Arabic.
   the window again with its rows kept; the first answer asked after the edit ends the mark.
 - A row id that names nothing is told (`invalid-row-id`, path `update[i]` / `patch[i]`), never with the row.
 
+## Server pivot and value types (2026-11-07, owner A to Q-SP1…Q-SP8)
+- With `serverSideRows(data, { pivot: serverPivot() })` the group part carries `pivot` and the answers `cells` and
+  `pivot`: `server-pivot.md`.
+- **A group's value must fit its column's type** (Q-SP5 A, also without a pivot): null, any value in a `custom` column, a
+  number in a `number` or `instant` column, a boolean in a `boolean` one, a text in the others (a valid `YYYY-MM-DD` in a
+  `day` one). Otherwise the group is left out and told `invalid-page-response` at `response.groups[j].value`, never with
+  the value. Before 1.8.0 such a group was shown, labelled by `String(value)`: a behaviour change, in the CHANGELOG.
+
 ## Tests (written before the code, steps 6–7)
 Conformance `server-side/*` (request per level, typed paths and keys, a custom aggregation refused, a planted wrong
 total shown as sent, a group reopened after a sort asks only when shown, eviction across levels, a group of unknown size

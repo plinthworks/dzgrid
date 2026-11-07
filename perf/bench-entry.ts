@@ -9,6 +9,7 @@ import { groupShape } from '../packages/core/src/grouping.js';
 import { pivotShape } from '../packages/core/src/pivot.js';
 import { infiniteRows, type InfiniteModel } from '../packages/core/src/infinite.js';
 import { serverSideRows, type ServerSideModel } from '../packages/core/src/server-side.js';
+import { serverPivot } from '../packages/core/src/server-pivot.js';
 import { treeProfile, type TreeRow as MRow } from './profiles/tree.js';
 import { runEnds } from '../packages/core/src/spans/merge.js';
 import { datasetA, type RowA } from './dataset.js';
@@ -270,7 +271,85 @@ export const CASES: Record<string, Case> = {
   ...pivotCases(),
   ...infiniteCases(),
   ...serverSideCases(),
+  ...serverPivotCases(),
 };
+
+/**
+ * 1.8.0, the server pivot (server-pivot.md, plan §4 « Time »): two row columns, two pivot columns (4 years × 12 months:
+ * 48 crossings), one value; the answers made in the setup and settled when the case says, so what is timed is the
+ * model's and the plug's work — the list read and made into created columns, the cells read, the flatten.
+ */
+type PRow = { readonly id: number; readonly region: string; readonly city: string; readonly year: number; readonly month: number; readonly amount: number };
+function serverPivotModel() {
+  const waiting: (() => void)[] = [];
+  const crossings = Array.from({ length: 48 }, (_, k) => [2023 + Math.floor(k / 12), 1 + (k % 12)]);
+  const cells = (g: number) => Object.fromEntries(crossings.map((_, k) => [k, { amount: g * 48 + k }]));
+  const groups = (n: number, at: number) => Array.from({ length: n }, (_, j) => ({ value: `v${at + j}`, count: 1000, aggs: { amount: j }, cells: cells(j) }));
+  const shape = pivotShape<PRow>({ by: ['region', 'city'], columns: ['year', 'month'], values: { amount: 'sum' } });
+  const m = serverSideRows<PRow>({
+    fetch: (req) => {
+      const p = req.page!;
+      const root = !req.group!.path.length;
+      const reply = { groups: groups(Math.max(0, Math.min(p.size, 100 - p.offset)), p.offset), total: 100, ...(root && p.offset === 0 && { pivot: { crossings, totals: cells(0) } }) };
+      return { then: (ok: (v: unknown) => void) => void waiting.push(() => ok(reply)) } as never; // a thenable the case settles
+    },
+  }, { blockSize: 100, pivot: serverPivot() }).create({
+    getRowId: (r) => r.id,
+    columns: createColumnModel<PRow>([{ id: 'region' }, { id: 'city' }, { id: 'year', type: 'number' }, { id: 'month', type: 'number' }, { id: 'amount', type: 'number' }]),
+    ctx: localeCtx({ locale: 'fr-FR' }),
+    shape,
+  }) as ServerSideModel<PRow>;
+  const fetches = (): number => m.diagnostics.fetches;
+  const release = (): void => {
+    while (waiting.length) for (const f of waiting.splice(0)) f();
+  };
+  return { m, shape, release, waiting, fetches };
+}
+function serverPivotCases(): Record<string, Case> {
+  return {
+    'server pivot: root answer of 100 groups × 48 created columns read, columns made, flattened': {
+      setup: () => serverPivotModel(),
+      run: (h: ReturnType<typeof serverPivotModel>) => {
+        h.release();
+        if (h.m.displayed.count !== 101 || h.shape.generated().count !== 48) throw new Error(`count ${h.m.displayed.count} / ${h.shape.generated().count}`);
+        return h.m.displayed.count;
+      },
+    },
+    'server pivot: a group opened, its 100 children with cells in': {
+      setup: () => {
+        const h = serverPivotModel();
+        h.release();
+        h.m.expand([h.m.displayed.keyAt(0 as never)], true);
+        h.m.want(0, 300);
+        return h;
+      },
+      run: (h: ReturnType<typeof serverPivotModel>) => {
+        h.release();
+        if (h.m.displayed.count !== 201) throw new Error(`count ${h.m.displayed.count}`);
+        return h.m.displayed.count;
+      },
+    },
+    // A sort on a created column: a new epoch — its first block asked in the same call, an old answer applied to nothing.
+    'server pivot: a new sort on a created column (first block asked in the same call, 0 old answers applied)': {
+      setup: () => {
+        const h = serverPivotModel();
+        h.release();
+        h.m.expand([h.m.displayed.keyAt(0 as never)], true);
+        h.m.want(0, 300);
+        return h;
+      },
+      run: (h: ReturnType<typeof serverPivotModel>) => {
+        const was = h.fetches();
+        const old = h.waiting.splice(0);
+        h.m.setQuery(makeQuery({ sort: [{ column: '~p4:year5:n20235:month2:n16:amount', dir: 'desc' }] }));
+        if (h.fetches() !== was + 1) throw new Error('first block not asked');
+        for (const f of old) f();
+        if (h.m.displayed.count !== 0) throw new Error(`stale answer applied: ${h.m.displayed.count}`);
+        return was;
+      },
+    },
+  };
+}
 
 /**
  * Phase 8 step 6 (server-side-groups.md, plan §4 « Time »): a server grouped by one column. The server answers when the case

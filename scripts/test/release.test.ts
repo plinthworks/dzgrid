@@ -277,7 +277,12 @@ describe('1.7.0, the four packages', () => {
 
   it('export the Phase 10 pivot core (@dzgrid/core/pivot), built like the others', () => {
     expect(pkg('core').exports['./pivot']).toEqual({ types: './src/pivot.ts', default: './src/pivot.ts' });
-    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/row-drag', '\.\/dock', '\.\/pivot'\]/);
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/row-drag', '\.\/dock', '\.\/pivot'[,\]]/); // 1.8.0: './server-pivot' after it
+  });
+
+  it('export the server pivot plug (@dzgrid/core/server-pivot, 1.8.0), built like the others', () => {
+    expect(pkg('core').exports['./server-pivot']).toEqual({ types: './src/server-pivot.ts', default: './src/server-pivot.ts' });
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/dock', '\.\/pivot', '\.\/server-pivot'\]/);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

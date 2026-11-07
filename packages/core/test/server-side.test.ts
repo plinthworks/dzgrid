@@ -121,20 +121,24 @@ describe('serverSideRows: the groups as nodes, and what a treegrid reads', () =>
     expect(w.childrenAt(w.indexOf(keyOf('Sud')) as DisplayIndex)).toBe(10 + 10);
   });
 
-  it('typed keys: 1 and « 1 », a day and an instant of that day, are two groups with two paths', () => {
-    const { fake, model, d } = setup({ by: ['region'] });
-    fake.calls[0]!.resolve({ groups: [{ value: 1 }, { value: '1' }, { value: '2026-03-04' }, { value: 1772582400000 }], total: 4 });
+  it('typed keys: a group value must fit its column (owner Q-SP5 A, 1.8.0): in a text column « 1 » and a day text are groups, 1 and an instant refused by place', () => {
+    const { fake, model, d, told } = setup({ by: ['region'] });
+    fake.calls[0]!.resolve({ groups: [{ value: 1 }, { value: '1' }, { value: '2026-03-04' }, { value: 1772582400000 }, { value: true }], total: 5 });
+    expect(told()).toEqual(['invalid-page-response response.groups[0].value', 'invalid-page-response response.groups[3].value', 'invalid-page-response response.groups[4].value']);
     const v = d();
-    const keys = Array.from({ length: 4 }, (_, i) => v.keyAt(i as DisplayIndex));
-    expect(new Set(keys).size).toBe(4);
-    expect(keys[0]).toBe(groupKey(['region', 'n1']));
-    expect(keys[1]).toBe(groupKey(['region', 's1']));
+    const keys = [1, 2].map((i) => v.keyAt(i as DisplayIndex));
+    expect(keys).toEqual([groupKey(['region', 's1']), groupKey(['region', 's2026-03-04'])]);
     model.expand(keys, true);
-    // Two at once: each answered, the next asked.
     model.want(0, 7);
     for (let k = 1; k < fake.calls.length; k++) fake.calls[k]!.resolve({ rows: [], total: 0 });
-    const paths = fake.calls.slice(1).map((c) => c.req.group!.path);
-    expect(paths).toEqual(expect.arrayContaining([[1], ['1'], ['2026-03-04'], [1772582400000]]));
+    expect(fake.calls.slice(1).map((c) => c.req.group!.path)).toEqual([['1'], ['2026-03-04']]);
+  });
+
+  it('typed keys in a day column: a valid day is a group; an instant, a text that is no day, refused by place', () => {
+    const { fake, d, told } = setup({ by: ['day'] });
+    fake.calls[0]!.resolve({ groups: [{ value: '2026-03-04' }, { value: 1772582400000 }, { value: '2026-02-30' }, { value: null }], total: 4 });
+    expect(told()).toEqual(['invalid-page-response response.groups[1].value', 'invalid-page-response response.groups[2].value']);
+    expect([0, 3].map((i) => d().keyAt(i as DisplayIndex))).toEqual([groupKey(['day', 's2026-03-04']), groupKey(['day', ''])]);
   });
 
   it('a value of no group type, a bad count or totals: told by place, never with the value', () => {

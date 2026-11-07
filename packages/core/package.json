@@ -69,6 +69,10 @@
       "types": "./src/pivot.ts",
       "default": "./src/pivot.ts"
     },
+    "./server-pivot": {
+      "types": "./src/server-pivot.ts",
+      "default": "./src/server-pivot.ts"
+    },
     "./edit": {
       "types": "./src/edit.ts",
       "default": "./src/edit.ts"

@@ -59,6 +59,9 @@
       "@dzgrid/core/pivot": [
         "./packages/core/src/pivot.ts"
       ],
+      "@dzgrid/core/server-pivot": [
+        "./packages/core/src/server-pivot.ts"
+      ],
       "@dzgrid/core/server-side": [
         "./packages/core/src/server-side.ts"
       ],

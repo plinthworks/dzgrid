@@ -588,6 +588,7 @@ Décisions du propriétaire (`decisions.md`) :
 - **Regroupement** : `spans` refusé seulement pour des cellules fusionnées ; pas d'`aria-expanded` sur un groupe sans enfants.
 - **Tailles** (règle du propriétaire) : `core/pivot` 3 750, `dom/pivot` 2 350, textes 450 / 500 / 650, `group-zone` 2 890, `find` 2 660, `core/state` 1 601, `dom/state` 1 300 ; bases du cœur et du DOM inchangées ; K.8 89 978 (+1 o : l'empreinte d'un nom de morceau).
 - **Critères de sortie** : tenus (ROADMAP « Phase 10 — close ») ; l'écoute §29 reste à programmer (propriétaire, non bloquante). Serveur (D19) et `rangeAsSeries` : plus tard.
+- **Pivot côté serveur (1.8.0, propriétaire A à Q-SP1…Q-SP8, 2026-11-07)** : nouvelle entrée `@dzgrid/core/server-pivot` (`serverPivot()`, donné à `serverSideRows(data, { pivot })`) ; le modèle serveur reçoit des crochets (partie `pivot` de la requête, totaux demandés = les valeurs, derniers groupes jamais ouverts) ; la forme pivot gagne une couture `serve` (le même constructeur de colonnes créées pour le navigateur et le serveur) ; `dom/grouping` monte le pivot à côté d'un modèle qui a la prise. Règle de type des valeurs de groupe serveur (Q-SP5 A). Fiche `server-pivot.md`, décisions `decisions.md` « Server pivot — owner A ».
 
 ## 0. Provenance, et limites de ce que j'ai lu
 

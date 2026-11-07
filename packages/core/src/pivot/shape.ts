@@ -74,6 +74,34 @@ export interface PivotShape<T> extends GroupShape<T> {
   series(o?: { readonly value?: string; readonly level?: number }): PivotSeries;
   /** Work done, for tests: crossing passes. */
   readonly passes: number;
+  /**
+   * @internal `@dzgrid/core/server-pivot`'s link (server-pivot.md): the shape's changes go to `link.kick` and its chart to
+   * `link.series`; the function returned makes the created columns from a server's crossings with this shape's own code
+   * (`values` those the server computes, each with its column; `depth` the pivot columns in use; `count` the server's
+   * number when it sent no list): `n` slots, each crossing's slot (-1: none), the ids by slot then value.
+   */
+  serve?(link: PivotServe): (C: PivotCrossings | null, values: readonly { readonly col: ResolvedColumn<T>; readonly fn: AggFuncName }[], depth: number, told: Problem[], count?: number) => { readonly n: number; readonly slot: ArrayLike<number>; readonly ids: readonly string[] };
+}
+
+/** @internal What a server's pivot gives the shape (`@dzgrid/core/server-pivot`). */
+export interface PivotServe {
+  kick(source: ChangeSource): void;
+  series(o: { readonly value?: string; readonly level?: number }): PivotSeries;
+}
+
+/**
+ * @internal Crossings as a tree (a server's list, or the browser's grouping of the rows by the pivot columns): `G` nodes
+ * numbered parents first, each with its level, typed value, label and key; the children of the root (index 0) and of node
+ * c (index c + 1) are `kids[ks[x] .. ks[x + 1])`, in order.
+ */
+export interface PivotCrossings {
+  readonly G: number;
+  readonly lv: ArrayLike<number>;
+  readonly ks: ArrayLike<number>;
+  readonly kids: ArrayLike<number>;
+  readonly val: readonly unknown[];
+  readonly label: readonly string[];
+  readonly key: readonly string[];
 }
 
 /** A created column's cells read nothing: the pivot hands them through its group's totals. */
@@ -119,18 +147,87 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
   let redraw: ((kind?: 'rows' | 'expand', source?: ChangeSource) => void) | null = null;
   let passes = 0;
   /** The last pass: its inputs, its cells, its columns (with each deepest crossing's leaves for `series`). */
-  let X: { k: unknown[]; t: Totals; specs: Spec<T>[]; leaves: { id: string; name: string; v: number }[]; of: Map<string, string> } | null = null;
+  let X: { k: unknown[]; t: Totals; readonly specs: readonly Spec<T>[]; leaves: { id: string; name: string; v: number }[]; of: Map<string, string> } | null = null;
   /** The crossings and what they were made of: kept while a live update moves no row's crossing (as groups, Q-T A). */
   let K: { k: unknown[]; C: Groups<T> } | null = null;
   let out: PivotColumns<T> = EMPTY;
   let last: { s: Groups<T>; t: Totals; k: Int32Array } | null = null;
+  /** A server's link (`serve`): null in the browser. */
+  let srv: PivotServe | null = null;
 
   const valuesOf = (env: ColumnEnv<T>): Fns =>
     (vals ??= { ...Object.fromEntries(env.columns.visible().filter((c) => c.def.aggFunc !== undefined).map((c) => [c.id, c.def.aggFunc!])), ...o.aggFuncs });
   const kick = (source: ChangeSource): void => {
     seam.v++;
-    if (model?.orderStale) model.reapply(source);
+    // On a server, the model asks again (one epoch); in the browser, a build.
+    if (srv) srv.kick(source);
+    else if (model?.orderStale) model.reapply(source);
     else redraw?.('rows', source);
+  };
+  /**
+   * The created columns from crossings `C` (pivot.md 3, 9, 13; one code for the browser and a server): bands and leaves in
+   * order, each deepest crossing's slot (and each band's, sub-totalled), the ids by slot then value; above the limit
+   * none, told by the count (`m`: a server's count when it sent no list).
+   */
+  const make = (C: PivotCrossings | null, specs: readonly Spec<T>[], PL: number, ps: Problem[], m?: number) => {
+    const V = specs.length;
+    let n = 0;
+    for (let c = 0; C && V && c < C.G; c++) n += +(sub || C.lv[c] === PL - 1);
+    const count = (m ?? n) * V;
+    const slot = new Int32Array(C ? C.G : 0).fill(-1);
+    const leafs: { id: string; name: string; v: number }[] = [];
+    let tree: ColumnOrGroup<T>[] = [];
+    const ids: string[] = [];
+    let key = '';
+    if (count > max) {
+      // Checked before any column or cell is made (pivot.md 9): told by the count.
+      ps.push(problem('pivot-too-many', 'warning', 'pivot.columns', String(count)));
+      key = `>${count}`;
+    } else if (C && n) {
+      const heads = specs.map((x) => x.col.def.header ?? x.col.id);
+      const label = (c: number): string => (C.val[c] === null ? blank : C.label[c]!);
+      const def = (id: string, header: string, x: Spec<T>): ColumnDef<T> => {
+        const d: Record<string, unknown> = { id, header, value: NONE, width, filter: false, groupable: false };
+        if (x.fn === 'count') d.type = 'number';
+        else for (const f of FORMAT) if (x.col.def[f] !== undefined) d[f] = x.col.def[f];
+        key += `\0${id}\0${header}\0${d.type}`;
+        return d as unknown as ColumnDef<T>;
+      };
+      // One slot per deepest crossing (and per band when sub-totalled), numbered in the order shown.
+      const cols = (c: number, pre: string, head: string, path: string[]): ColumnOrGroup<T>[] => {
+        const segs = C.key[c]!.slice(2);
+        slot[c] = ids.length / V;
+        const made = specs.map((x, v) => {
+          const id = pre + segs + seg(x.col.id);
+          ids.push(id);
+          if (pre == '~p') leafs.push({ id, name: path.join(' › '), v });
+          return def(id, V > 1 ? heads[v]! : head, x);
+        });
+        if (V < 2) return made;
+        key += `\0${pre}${segs}\0${head}`;
+        return [{ id: (pre == '~p' ? '~b' : pre) + segs, header: head, children: made }];
+      };
+      const walk = (x: number, path: string[]): ColumnOrGroup<T>[] => {
+        const list: ColumnOrGroup<T>[] = [];
+        for (let j = C.ks[x]!; j < C.ks[x + 1]!; j++) {
+          const c = C.kids[j]!;
+          const l = label(c);
+          if (C.lv[c] === PL - 1) list.push(...cols(c, '~p', l, [...path, l]));
+          else {
+            key += `\0~b${C.key[c]!.slice(2)}\0${l}`;
+            list.push({ id: `~b${C.key[c]!.slice(2)}`, header: l, children: walk(c + 1, [...path, l]) });
+            if (sub) list.push(...cols(c, '~t', total.replace('{name}', l), []));
+          }
+        }
+        return list;
+      };
+      tree = walk(0, []);
+    }
+    // Another list of columns only when it differs (pivot.md 13): the host sets columns again only then.
+    if (key !== out.key) out = { columns: tree, key, count };
+    // Its inputs and cells set by a browser build (a server's has none).
+    X = { specs, leaves: leafs, of: new Map(ids.map((id, i) => [id, specs[i % V]!.col.id])) } as never;
+    return { n, slot, ids };
   };
 
   const seam: Seam<T> = {
@@ -176,58 +273,10 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
         C = c0 && keeps(c0, env, leaves) ? { ...c0, snap: env.source } : group(env, leaves, pc, desc);
         K = { k: ck, C };
       }
-      const n = !C || !V ? 0 : sub ? C.G : C.lv.reduce((a, l) => a + +(l === PL - 1), 0);
-      const count = n * V;
+      const { n, slot, ids } = make(C, specs, PL, ps);
       const at: Record<string, unknown>[] = Array.from({ length: G }, () => ({}));
       const grand: Record<string, unknown> = {};
-      const leafs: { id: string; name: string; v: number }[] = [];
-      let tree: ColumnOrGroup<T>[] = [];
-      const ids: string[] = [];
-      let key = '';
-      if (count > max) {
-        // Checked before any column or cell is made (pivot.md 9): told by the count.
-        ps.push(problem('pivot-too-many', 'warning', 'pivot.columns', String(count)));
-        key = `>${count}`;
-      } else if (C && n) {
-        const slot = new Int32Array(C.G).fill(-1);
-        const heads = specs.map((x) => x.col.def.header ?? x.col.id);
-        const label = (c: number): string => (C.val[c] === null ? blank : C.label[c]!);
-        const def = (id: string, header: string, x: Spec<T>): ColumnDef<T> => {
-          const d: Record<string, unknown> = { id, header, value: NONE, width, filter: false, groupable: false };
-          if (x.fn === 'count') d.type = 'number';
-          else for (const f of FORMAT) if (x.col.def[f] !== undefined) d[f] = x.col.def[f];
-          key += `\0${id}\0${header}\0${d.type}`;
-          return d as unknown as ColumnDef<T>;
-        };
-        // One slot per deepest crossing (and per band when sub-totalled), numbered in the order shown.
-        const cols = (c: number, pre: string, head: string, path: string[]): ColumnOrGroup<T>[] => {
-          const segs = C.key[c]!.slice(2);
-          slot[c] = ids.length / V;
-          const made = specs.map((x, v) => {
-            const id = pre + segs + seg(x.col.id);
-            ids.push(id);
-            if (pre == '~p') leafs.push({ id, name: path.join(' › '), v });
-            return def(id, V > 1 ? heads[v]! : head, x);
-          });
-          if (V < 2) return made;
-          key += `\0${pre}${segs}\0${head}`;
-          return [{ id: (pre == '~p' ? '~b' : pre) + segs, header: head, children: made }];
-        };
-        const walk = (x: number, path: string[]): ColumnOrGroup<T>[] => {
-          const list: ColumnOrGroup<T>[] = [];
-          for (let j = C.ks[x]!; j < C.ks[x + 1]!; j++) {
-            const c = C.kids[j]!;
-            const l = label(c);
-            if (C.lv[c] === PL - 1) list.push(...cols(c, '~p', l, [...path, l]));
-            else {
-              key += `\0~b${C.key[c]!.slice(2)}\0${l}`;
-              list.push({ id: `~b${C.key[c]!.slice(2)}`, header: l, children: walk(c + 1, [...path, l]) });
-              if (sub) list.push(...cols(c, '~t', total.replace('{name}', l), []));
-            }
-          }
-          return list;
-        };
-        tree = walk(0, []);
+      if (C && ids.length) {
         // The bucketed pass: per value, per (group or grand total, slot) cell; the grand total is row G.
         const cells = (G + 1) * n;
         const xof = (C.of ??= ofRows(C));
@@ -318,10 +367,8 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
           if (threw) ps.push(problem('agg-threw', 'warning', `columns.${a.col.id}.aggFunc`));
         }
       }
-      // Another list of columns only when it differs (pivot.md 13): the host sets columns again only then.
-      if (key !== out.key) out = { columns: tree, key, count };
-      X = { k, t: { at, grand, columns: [], problems: ps }, specs, leaves: leafs, of: new Map(ids.map((id, i) => [id, specs[i % V]!.col.id])) };
-      return X.t;
+      X!.k = k;
+      return (X!.t = { at, grand, columns: [], problems: ps });
     },
     kids(s, t) {
       let k: Int32Array | undefined;
@@ -399,6 +446,7 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
       return g < 0 ? [] : Array.from(s.leaves.subarray(s.lo[g], s.hi[g]), (i) => s.snap.rows[i]!);
     },
     series(so: { readonly value?: string; readonly level?: number } = {}): PivotSeries {
+      if (srv) return srv.series(so);
       if (!on || !last || !X) return { categories: [], series: [] };
       const { s, t, k } = last;
       const L = s.cols.length;
@@ -421,6 +469,7 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
       };
     },
     get passes() { return passes; },
+    serve: (l: PivotServe) => ((srv = l), make),
   })) as PivotShape<T>;
   return shape;
 }

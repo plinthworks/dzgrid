@@ -1,0 +1,104 @@
+{
+  "id": "sp-function-refused",
+  "suite": "server-pivot",
+  "description": "An application's function among the values cannot run on a server: refused (agg-type, detail server), not asked, no created column for it; the other value goes on (Q-TOT A).",
+  "refs": [
+    "docs/behaviors/server-pivot.md"
+  ],
+  "input": {
+    "pivot": {
+      "by": [
+        "region"
+      ],
+      "columns": [
+        "year"
+      ],
+      "values": {
+        "amount": {
+          "function": true
+        },
+        "visits": "count"
+      }
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "response": {
+          "groups": [
+            {
+              "value": "Nord",
+              "aggs": {
+                "visits": 2
+              },
+              "cells": {
+                "0": {
+                  "visits": 2,
+                  "amount": 7
+                }
+              }
+            }
+          ],
+          "total": 1,
+          "pivot": {
+            "crossings": [
+              [
+                2025
+              ]
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ]
+    ],
+    "told": [],
+    "final": {
+      "columns": [
+        "2,025 = ~p4:year5:n20256:visits"
+      ],
+      "count": 1,
+      "rows": [
+        [
+          "Nord",
+          {
+            "visits": 2,
+            "~p4:year5:n20256:visits": 2
+          }
+        ]
+      ],
+      "problems": [
+        "agg-type columns.amount.aggFunc server"
+      ],
+      "aggs": [
+        {
+          "column": "visits",
+          "fn": "count"
+        }
+      ],
+      "export": {
+        "columns": [
+          "year"
+        ],
+        "limit": 200,
+        "crossings": [
+          [
+            2025
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -21,6 +21,7 @@ const alias = {
   '@dzgrid/core/row-drag': fileURLToPath(new URL('./packages/core/src/row-drag.ts', import.meta.url)),
   '@dzgrid/core/dock': fileURLToPath(new URL('./packages/core/src/dock.ts', import.meta.url)),
   '@dzgrid/core/pivot': fileURLToPath(new URL('./packages/core/src/pivot.ts', import.meta.url)),
+  '@dzgrid/core/server-pivot': fileURLToPath(new URL('./packages/core/src/server-pivot.ts', import.meta.url)),
   '@dzgrid/core/server-side': fileURLToPath(new URL('./packages/core/src/server-side.ts', import.meta.url)),
   '@dzgrid/core/edit': fileURLToPath(new URL('./packages/core/src/edit.ts', import.meta.url)),
   '@dzgrid/core/range': fileURLToPath(new URL('./packages/core/src/range.ts', import.meta.url)),

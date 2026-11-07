@@ -1,0 +1,144 @@
+{
+  "id": "sp-off-and-empty",
+  "suite": "server-pivot",
+  "description": "Each change of the pivot is one new request: off, the grouping as without the pivot (no pivot part, no created column); on again; the pivot columns emptied, the groups are still the last rows (pivot part with no column), the created columns gone.",
+  "refs": [
+    "docs/behaviors/server-pivot.md"
+  ],
+  "input": {
+    "pivot": {
+      "by": [
+        "region"
+      ],
+      "columns": [
+        "year"
+      ],
+      "values": {
+        "amount": "sum"
+      }
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "response": {
+          "groups": [
+            {
+              "value": "Nord",
+              "aggs": {
+                "amount": 5
+              },
+              "cells": {
+                "0": {
+                  "amount": 5
+                }
+              }
+            }
+          ],
+          "total": 1,
+          "pivot": {
+            "crossings": [
+              [
+                2025
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "set": {
+          "on": false
+        }
+      },
+      {
+        "set": {
+          "on": true
+        }
+      },
+      {
+        "set": {
+          "columns": []
+        }
+      },
+      {
+        "answer": "c4",
+        "response": {
+          "groups": [
+            {
+              "value": "Nord",
+              "aggs": {
+                "amount": 5
+              }
+            }
+          ],
+          "total": 1
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ],
+      [
+        "c2",
+        [],
+        null,
+        []
+      ],
+      [
+        "c3",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ],
+      [
+        "c4",
+        [],
+        {
+          "columns": [],
+          "limit": 200
+        },
+        []
+      ]
+    ],
+    "told": [],
+    "final": {
+      "columns": [],
+      "count": 0,
+      "rows": [
+        [
+          "Nord",
+          {
+            "amount": 5
+          }
+        ]
+      ],
+      "problems": [],
+      "aggs": [
+        {
+          "column": "amount",
+          "fn": "sum"
+        }
+      ],
+      "export": {
+        "columns": [],
+        "limit": 200,
+        "crossings": []
+      }
+    }
+  }
+}

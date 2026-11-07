@@ -4,5 +4,5 @@
  * `@dzgrid/core/infinite` (it shares the block store with the latter).
  */
 export { serverSideRows } from './server/server-side.js';
-export type { ServerSideDiagnostics, ServerSideModel, ServerSideOptions, ServerSideRows } from './server/server-side.js';
-export type { GroupPart, GroupResponse, GroupValue } from './server/source.js';
+export type { ServerPivotPlug, ServerSideDiagnostics, ServerSideModel, ServerSideOptions, ServerSideRows } from './server/server-side.js';
+export type { GroupPart, GroupResponse, GroupValue, PivotCells, PivotPart, PivotResponse } from './server/source.js';

@@ -187,7 +187,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
     if (r.layoutChanged) kernel.dispatch({ type: 'column.state', patch: [] }, 'host');
   };
   /** What the effective columns are made of: the created columns, the grouping, the values, the language, the searched columns. */
-  const sig = (): string => [shape.on, shape.generated().key, shape.reads!().join('\0'), Object.entries(shape.valueFns()).map((e) => e.join('\u0003')).join('\0'), g.settings.messages.locale, shownOf(leaves(host)).map((d) => d.id).join('\0')].join('\u0002');
+  const sig = (): string => [shape.on, shape.generated().key, g.grouped!.by().join('\0'), Object.entries(shape.valueFns()).map((e) => e.join('\u0003')).join('\0'), g.settings.messages.locale, shownOf(leaves(host)).map((d) => d.id).join('\0')].join('\u0002');
 
   /** The effective columns made again from the application's (pivot.md 17, 18, 29). */
   const derive = (): void => {
@@ -196,7 +196,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
     defs = new Map(all.map((d) => [d.id, d]));
     const gen = shape.generated();
     // Off, or both bands emptied: the application's columns back (owner, 2026-11-07).
-    if (!shape.on || (!shape.pivotBy.length && !shape.reads!().length)) {
+    if (!shape.on || (!shape.pivotBy.length && !g.grouped!.by().length)) {
       if (eff) (eff = null), (g.rowText = undefined), setTree(host), foldTo(new Set());
       return;
     }
@@ -205,7 +205,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
     const fn = o.valueHeaders === 'fn' || (o.valueHeaders !== 'name' && many);
     const folded = all.filter((d) => !vals.includes(d.id));
     const label: ColumnDef<unknown> = {
-      id: LABEL, header: shape.reads!().map(name).join(' / '), pinned: 'start', width: o.labelWidth ?? 200, movable: false, hideable: false, chooser: false,
+      id: LABEL, header: g.grouped!.by().map(name).join(' / '), pinned: 'start', width: o.labelWidth ?? 200, movable: false, hideable: false, chooser: false,
       filter: false, groupable: false, type: 'custom', codec, value: ID,
     } as ColumnDef<unknown>;
     // The row totals: the value columns under « Total », their headers the values' (38).
@@ -219,7 +219,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
       n.kind === 'group' || n.kind === 'footer'
         ? vis.map((c) => {
           const t = g.grouped!.cell(n, c);
-          return c.id === LABEL && n.kind === 'group' && n.level === shape.reads!().length - 1 ? [t, ...shape.rows(n.key).flatMap((r) => searched.map((id) => { const x = m.get(id); const v = x ? read(x, r) : null; return v === null ? '' : x!.codec.format(v as never, g.ctx); }))].join('\u0003') : t;
+          return c.id === LABEL && n.kind === 'group' && n.level === g.grouped!.by().length - 1 ? [t, ...shape.rows(n.key).flatMap((r) => searched.map((id) => { const x = m.get(id); const v = x ? read(x, r) : null; return v === null ? '' : x!.codec.format(v as never, g.ctx); }))].join('\u0003') : t;
         })
         : undefined;
     // Said once (pivot.md 23): above the limit, its count; after a user's change, how many columns were made.
@@ -292,7 +292,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
     desc: () => shape.pivotDesc,
     setDesc: (d, x) => gesture(x?.user, (s) => shape.set({ desc: d }, s)),
     name,
-    accepts: (id) => !!m.get(id) && m.get(id)!.def.groupable !== false && !shape.made(id) && !shape.reads!().includes(id),
+    accepts: (id) => !!m.get(id) && m.get(id)!.def.groupable !== false && !shape.made(id) && !g.grouped!.by().includes(id),
     values: () => shape.valueFns(),
     setValues: (v, x) => gesture(x?.user, (s) => shape.setValueFns(v, s)),
     valueColumn: (id) => (Object.hasOwn(shape.valueFns(), id) ? undefined : shape.valueColumn(id)),

@@ -1,0 +1,154 @@
+{
+  "id": "sp-subtotals",
+  "suite": "server-pivot",
+  "description": "Sub-totals asked: the band paths come in the list too; each band is followed by its « Total » column, its cells the server's (pivot.md 8).",
+  "refs": [
+    "docs/behaviors/server-pivot.md"
+  ],
+  "input": {
+    "pivot": {
+      "by": [
+        "region"
+      ],
+      "columns": [
+        "year",
+        "month"
+      ],
+      "values": {
+        "amount": "sum"
+      },
+      "subtotals": true
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "response": {
+          "groups": [
+            {
+              "value": "Nord",
+              "aggs": {
+                "amount": 35
+              },
+              "cells": {
+                "0": {
+                  "amount": 30
+                },
+                "1": {
+                  "amount": 10
+                },
+                "2": {
+                  "amount": 20
+                },
+                "3": {
+                  "amount": 5
+                },
+                "4": {
+                  "amount": 5
+                }
+              }
+            }
+          ],
+          "total": 1,
+          "pivot": {
+            "crossings": [
+              [
+                2025
+              ],
+              [
+                2025,
+                1
+              ],
+              [
+                2025,
+                2
+              ],
+              [
+                2026
+              ],
+              [
+                2026,
+                1
+              ]
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        {
+          "columns": [
+            "year",
+            "month"
+          ],
+          "subtotals": true,
+          "limit": 200
+        },
+        []
+      ]
+    ],
+    "told": [],
+    "final": {
+      "columns": [
+        "2,025 › 1 = ~p4:year5:n20255:month2:n16:amount",
+        "2,025 › 2 = ~p4:year5:n20255:month2:n26:amount",
+        "Total 2,025 = ~t4:year5:n20256:amount",
+        "2,026 › 1 = ~p4:year5:n20265:month2:n16:amount",
+        "Total 2,026 = ~t4:year5:n20266:amount"
+      ],
+      "count": 5,
+      "rows": [
+        [
+          "Nord",
+          {
+            "amount": 35,
+            "~t4:year5:n20256:amount": 30,
+            "~p4:year5:n20255:month2:n16:amount": 10,
+            "~p4:year5:n20255:month2:n26:amount": 20,
+            "~t4:year5:n20266:amount": 5,
+            "~p4:year5:n20265:month2:n16:amount": 5
+          }
+        ]
+      ],
+      "problems": [],
+      "aggs": [
+        {
+          "column": "amount",
+          "fn": "sum"
+        }
+      ],
+      "export": {
+        "columns": [
+          "year",
+          "month"
+        ],
+        "subtotals": true,
+        "limit": 200,
+        "crossings": [
+          [
+            2025
+          ],
+          [
+            2025,
+            1
+          ],
+          [
+            2025,
+            2
+          ],
+          [
+            2026
+          ],
+          [
+            2026,
+            1
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -1297,4 +1297,17 @@ after a report to the owner.
   (`valueHeaders`, `headerShort`). Chrome fr / ar, light / dark, 320 px, axe 0; Firefox and WebKit Arabic. Sizes and
   decisions: `docs/phase-10-steps/decisions.md` « Follow-up: the bar ».
 
+## Server pivot (1.8.0, 2026-11-07, not committed; owner A to Q-SP1…Q-SP8)
+
+- [x] Sheet `docs/behaviors/server-pivot.md` before the code; amendments to `pivot.md` 15 / 26, `server-side-groups.md`
+  (the value-type rule), `grid-state.md`, `csv-export.md`. Plan `docs/phase-10-steps/server-pivot-plan.md`.
+- [x] The model's hooks and the shape's seam (`serverPivot()`, `@dzgrid/core/server-pivot`); the two dangers each with a
+  guard test that fails first (and fails again when its fix is removed): created columns set → nothing asked; each pivot
+  gesture → one epoch.
+- [x] Conformance `server-pivot/*` (11 cases, by hand), the seeded walk against `perf/fake-pivot-server.ts`'s cube (500
+  queries), 1 000 permutations with answers out of order; node lines 0.6 / 0.3 / 0.2 ms (5 / 5 / 1).
+- [x] The DOM: the pivot beside a model with the plug; refusals kept; export « all » (`server.group.pivot` with the
+  crossings, `server.sort` translated), « displayed », find on the groups held.
+- [x] Chrome (local `playground/pivot-serveur.html`, not committed): first frame after the root answer 20 / 20, p95
+  20.7 ms; axe 0 fr / ar. Sizes and decisions: `docs/phase-10-steps/decisions.md` « Server pivot — owner A ».
 

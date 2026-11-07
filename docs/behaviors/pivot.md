@@ -55,7 +55,8 @@ bottom. Chooses which columns go « en colonnes » (a band beside « Regrouper p
 14. **Saved state** (Q-P10 A): the mode, the pivot columns, the value functions by name; never a created column, its
     band or a sort on it (their names hold row values). See `grid-state.md` « Pivot ».
 15. **Refused beside pivot** (Q-P11 A; `unsupported-combination`, never a throw): a server or block source (the grid as
-    grouping alone shows it), and whatever grouping refuses (a tree, master/detail, browser pages). A pivot column
+    grouping alone shows it) — except `serverSideRows(data, { pivot: serverPivot() })`, the server pivot
+    (`server-pivot.md`, owner 2026-11-07), and whatever grouping refuses (a tree, master/detail, browser pages). A pivot column
     that the grid does not know: dropped, `unknown-column` (path `pivot.columns`, the id); one marked
     `groupable: false`, given twice, or also a grouping column: dropped, `invalid-setting` (path `pivot.columns`, the
     id).
@@ -134,7 +135,8 @@ application). Its texts come in `locales/<lang>-pivot`.
     date's texts; a word without a digit may still meet the letters inside such a piece, « h » in « 12h30 »).
     **Find (Ctrl+F)** in pivot mode searches the cells shown (the labels and the totals as written) and, on a last-row
     group's label cell, the data columns' shown texts of its rows: a hit there is that group's label cell.
-26. **Refused** (15): beside a server or block source the pivot is not made (`unsupported-combination`, path `source`,
+26. **Refused** (15): beside a server or block source the pivot is not made (but beside `serverSideRows` with
+    `serverPivot()`: `server-pivot.md`) (`unsupported-combination`, path `source`,
     detail `pivot`), the grid as grouping alone shows it, `api()` null.
 27. **Exports** (D18 A): CSV writes the label column, each created column with its **full chain** as header (« 2025 ›
     Janv. › Montant »), the row totals as « Total › Montant », the grand total row; Excel writes the bands as merged

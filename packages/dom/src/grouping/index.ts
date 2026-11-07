@@ -20,7 +20,7 @@ export interface GroupingFeatureOptions extends GroupingOptions {
   readonly indent?: number;
   /** Group rows kept pinned under the header while their rows scroll, the nearest first: 0 none, 3 by default. */
   readonly sticky?: number;
-  /** A pivot table over the groups (`pivot()` from `@dzgrid/dom/pivot`, Phase 10, pivot.md 17–30); refused on a server (told). */
+  /** A pivot table over the groups (`pivot()` from `@dzgrid/dom/pivot`, pivot.md 17–30); on a server only with `serverPivot()` (told). */
   readonly pivot?: {
     make(o: GroupingOptions): GroupShape<unknown>;
     setup(g: GridContext<unknown>, s: GroupShape<unknown>): (FeatureHandle & { column(): string | undefined; by(): readonly string[] }) | null;
@@ -100,8 +100,8 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
   // Merged cells only (pivot.md 21): header bands are drawn beside grouping.
   const spans = has('spans') && (!!g.settings.fullWidth || g.columns.visible().some((c) => c.def.merge || c.def.rowSpan || c.def.colSpan));
   const told = groupConflicts({ tree, detail: has('detail'), spans, server });
-  // A pivot on a server (pivot.md 26): not made, the grid as grouping alone shows it.
-  if (o.pivot && g.rows.kind === 'source') told.push(problem('unsupported-combination', 'warning', 'source', 'pivot'));
+  // A pivot on a server (pivot.md 26): not made, the grid as grouping alone shows it — unless the server pivots (server-pivot.md).
+  if (o.pivot && g.rows.kind === 'source' && !side?.pivot) told.push(problem('unsupported-combination', 'warning', 'source', 'pivot'));
   if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
   if (!s || tree || server) return s?.off(), { destroy() {} };
   const shape: Pick<GroupShape<unknown>, 'by' | 'setBy' | 'reads' | 'totals'> = side ? { get by() { return side.by; }, setBy: (by, x) => side.setBy(by, x), reads: () => side.by, totals: () => side.totals() } : s;
@@ -285,8 +285,8 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
     cell.style.removeProperty(VAR);
   };
   const ROW_ATTRS = ['aria-level', 'aria-posinset', 'aria-setsize', 'aria-expanded'];
-  // The pivot beside it (browser rows only), once what it reads is set.
-  if (!side) pv = o.pivot?.setup(g, s) ?? null;
+  // The pivot beside it (browser rows, or a server that pivots), once what it reads is set.
+  if (!side || side.pivot) pv = o.pivot?.setup(g, s) ?? null;
   let decorated = new Set<HTMLElement>();
   let leveled = new Set<HTMLElement>();
 

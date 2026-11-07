@@ -221,3 +221,6 @@ means none.
    value column the grid does not know, `state-column` at `pivot.values` (the id); a function that is not one of the
    seven names, `state-field` at `pivot.values.<id>`. An application's own function is never saved (it has no name).
 4. A grid without the pivot ignores the part (nothing told).
+
+- **Server pivot** (`server-pivot.md` 11, 2026-11-07): nothing new — the same part, restored with `rowGroups` in one
+  request; the sort the grid translates for the server (`pivot.sort`) is never saved.

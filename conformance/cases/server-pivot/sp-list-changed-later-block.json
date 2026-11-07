@@ -1,0 +1,179 @@
+{
+  "id": "sp-list-changed-later-block",
+  "suite": "server-pivot",
+  "description": "The list comes once per query: a later block of the first level that sends another list is told and ignored; its cells read by the first list (owner Q-SP3 A).",
+  "refs": [
+    "docs/behaviors/server-pivot.md"
+  ],
+  "input": {
+    "pivot": {
+      "by": [
+        "region"
+      ],
+      "columns": [
+        "year"
+      ],
+      "values": {
+        "amount": "sum"
+      }
+    },
+    "blockSize": 2,
+    "steps": [
+      {
+        "answer": "c1",
+        "response": {
+          "groups": [
+            {
+              "value": "Est",
+              "aggs": {
+                "amount": 1
+              },
+              "cells": {
+                "0": {
+                  "amount": 1
+                }
+              }
+            },
+            {
+              "value": "Nord",
+              "aggs": {
+                "amount": 2
+              },
+              "cells": {
+                "1": {
+                  "amount": 2
+                }
+              }
+            }
+          ],
+          "total": 3,
+          "pivot": {
+            "crossings": [
+              [
+                2025
+              ],
+              [
+                2026
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "want": [
+          0,
+          3
+        ]
+      },
+      {
+        "answer": "c2",
+        "response": {
+          "groups": [
+            {
+              "value": "Sud",
+              "aggs": {
+                "amount": 3
+              },
+              "cells": {
+                "0": {
+                  "amount": 3
+                }
+              }
+            }
+          ],
+          "total": 3,
+          "pivot": {
+            "crossings": [
+              [
+                2026
+              ],
+              [
+                2025
+              ]
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ],
+      [
+        "c2",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ]
+    ],
+    "told": [
+      "invalid-page-response response.pivot.crossings"
+    ],
+    "final": {
+      "columns": [
+        "2,025 = ~p4:year5:n20256:amount",
+        "2,026 = ~p4:year5:n20266:amount"
+      ],
+      "count": 2,
+      "rows": [
+        [
+          "Est",
+          {
+            "amount": 1,
+            "~p4:year5:n20256:amount": 1
+          }
+        ],
+        [
+          "Nord",
+          {
+            "amount": 2,
+            "~p4:year5:n20266:amount": 2
+          }
+        ],
+        [
+          "Sud",
+          {
+            "amount": 3,
+            "~p4:year5:n20256:amount": 3
+          }
+        ]
+      ],
+      "problems": [],
+      "aggs": [
+        {
+          "column": "amount",
+          "fn": "sum"
+        }
+      ],
+      "export": {
+        "columns": [
+          "year"
+        ],
+        "limit": 200,
+        "crossings": [
+          [
+            2025
+          ],
+          [
+            2026
+          ]
+        ]
+      }
+    }
+  }
+}

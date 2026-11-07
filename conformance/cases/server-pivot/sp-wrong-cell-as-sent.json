@@ -1,0 +1,105 @@
+{
+  "id": "sp-wrong-cell-as-sent",
+  "suite": "server-pivot",
+  "description": "Cells and row totals are the server's, shown as sent: a planted wrong cell (999 under a row total of 1) is not corrected; a crossing absent from a group is an empty cell, never 0 (Q-TOT A).",
+  "refs": [
+    "docs/behaviors/server-pivot.md"
+  ],
+  "input": {
+    "pivot": {
+      "by": [
+        "region"
+      ],
+      "columns": [
+        "year"
+      ],
+      "values": {
+        "amount": "sum"
+      }
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "response": {
+          "groups": [
+            {
+              "value": "Nord",
+              "aggs": {
+                "amount": 1
+              },
+              "cells": {
+                "0": {
+                  "amount": 999
+                }
+              }
+            }
+          ],
+          "total": 1,
+          "pivot": {
+            "crossings": [
+              [
+                2025
+              ],
+              [
+                2026
+              ]
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        {
+          "columns": [
+            "year"
+          ],
+          "limit": 200
+        },
+        []
+      ]
+    ],
+    "told": [],
+    "final": {
+      "columns": [
+        "2,025 = ~p4:year5:n20256:amount",
+        "2,026 = ~p4:year5:n20266:amount"
+      ],
+      "count": 2,
+      "rows": [
+        [
+          "Nord",
+          {
+            "amount": 1,
+            "~p4:year5:n20256:amount": 999
+          }
+        ]
+      ],
+      "problems": [],
+      "aggs": [
+        {
+          "column": "amount",
+          "fn": "sum"
+        }
+      ],
+      "export": {
+        "columns": [
+          "year"
+        ],
+        "limit": 200,
+        "crossings": [
+          [
+            2025
+          ],
+          [
+            2026
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -105,6 +105,37 @@ export interface GroupPart {
   readonly by: readonly string[];
   readonly path: readonly GroupValue[];
   readonly aggs: readonly { readonly column: string; readonly fn: AggFuncName }[];
+  /** With `serverPivot()` (`@dzgrid/core/server-pivot`, server-pivot.md): the pivot asked, at every level and block. */
+  readonly pivot?: PivotPart;
+}
+
+/**
+ * The pivot part of a request (server-pivot.md): the pivot columns in use, the reversed ones, sub-totals asked, the most
+ * crossings the grid takes (`limit`; above it answer `count` alone), a sort on a crossing's total. Column ids and typed
+ * values only: never a created column's id.
+ */
+export interface PivotPart {
+  readonly columns: readonly string[];
+  readonly desc?: readonly string[];
+  readonly subtotals?: true;
+  readonly limit: number;
+  /** The groups ordered by one crossing's total: its typed path, its value column, the direction. */
+  readonly sort?: { readonly crossing: readonly GroupValue[]; readonly column: string; readonly dir: 'asc' | 'desc' };
+  /** In an export's `server.group` only: the crossings the screen shows, in order. */
+  readonly crossings?: readonly (readonly GroupValue[])[];
+}
+
+/** A crossing's cells by crossing index (its place in `pivot.crossings`), then by value column: sparse, an absent one empty. */
+export type PivotCells = Readonly<Record<string, Readonly<Record<string, Json>>>>;
+
+/**
+ * A server's answer at a level of groups with a pivot (server-pivot.md): each group's `cells`; the first level's first
+ * block also `pivot` — the crossings as typed paths in the order to show (or `count` alone above `limit`), and the grand
+ * total row's cells.
+ */
+export interface PivotResponse extends Omit<GroupResponse, 'groups'> {
+  readonly groups: readonly (GroupResponse['groups'][number] & { readonly cells?: PivotCells })[];
+  readonly pivot?: { readonly crossings?: readonly (readonly GroupValue[])[]; readonly count?: number; readonly totals?: PivotCells };
 }
 
 /** A server's answer at a level of groups: each group's value, row count and totals; `totals` the grand ones (any block may send them). */

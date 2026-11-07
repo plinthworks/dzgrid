@@ -1,4 +1,7 @@
-import type { AggFuncName } from '../columns/defs.js';
+import type { AggFuncName, ResolvedColumn } from '../columns/defs.js';
+import type { ColumnLookup } from '../columns/model.js';
+import type { SortItem } from '../sort/compile.js';
+import type { LocaleCtx } from '../value/locale.js';
 import { refusedValues, type ModelChange, type ModelEnv, type ModelStatus, type SearchWarmup, type SourceBinding, type SourceHandle } from '../model/client.js';
 import { splitQuery, type Operations, type ServerQuery } from '../model/operations.js';
 import { canonical, EMPTY_QUERY } from '../model/query.js';
@@ -14,7 +17,7 @@ import { createBlockStore } from './blocks.js';
 import { createGate, type GateDiagnostics, type Ticket } from './gate.js';
 import { isThenable, plainAbort, readAnswer, wireCache } from './shared.js';
 import { heldTransactions } from './tx.js';
-import type { DataRequest, DataSource, GroupPart, GroupValue, Json } from './source.js';
+import type { DataRequest, DataSource, GroupPart, GroupValue, Json, PivotPart } from './source.js';
 import { serverValues } from './values.js';
 import type { WireFilterModel } from './wire.js';
 
@@ -42,6 +45,36 @@ export interface ServerSideOptions {
   readonly params?: Readonly<Record<string, Json>>;
   /** Taken before the grid's: `() => new AbortController()` fits. */
   readonly abort?: () => AbortHandle;
+  /** `serverPivot()` of `@dzgrid/core/server-pivot`: the server pivots the groups (server-pivot.md); else a pivot is refused. */
+  readonly pivot?: ServerPivotPlug;
+}
+
+/** What `serverPivot()` gives: the model links it to its pivot shape (`grouping({ pivot })` of `@dzgrid/dom`). */
+export interface ServerPivotPlug {
+  /** @internal Null when the rows' shape is no pivot: the server groups as without it. */
+  link(env: ModelEnv<any>, model: ServerPivotHooks): ServerPivotLink | null;
+}
+
+/** @internal What the model lends its plug: ask again (a new epoch when the request moved), and what it shows and reads. */
+export interface ServerPivotHooks {
+  again(source: ChangeSource): void;
+  view(): TreeRows<any>;
+  columns(): ColumnLookup<any>;
+  ctx(): LocaleCtx;
+}
+
+/** @internal The plug at work (`@dzgrid/core/server-pivot`): the request's pivot part, then each answer read. */
+export interface ServerPivotLink {
+  /** The pivot part, the sort sent and the values, for this grouping and sort; null: pivot off or both bands empty. */
+  part(by: readonly string[], sort: readonly SortItem[] | undefined, told: Problem[]): { readonly pivot: PivotPart; readonly sort?: readonly SortItem[]; readonly fns: Readonly<Record<string, unknown>> } | null;
+  /** A first-level answer's `pivot` read (`first`: the epoch's first block): the grand total row's cells. */
+  root(raw: Readonly<Record<string, unknown>>, first: boolean, told: Problem[]): Readonly<Record<string, unknown>> | undefined;
+  /** A group's `cells` by created column id. */
+  cells(x: unknown, path: string, told: Problem[]): Readonly<Record<string, unknown>>;
+  /** The pivot part as an export carries it: with the crossings known. */
+  full(p: PivotPart): PivotPart;
+  /** What stands while the list does (above the limit: its count), as the browser pivot's problems. */
+  readonly problems: readonly Problem[];
 }
 
 export interface ServerSideDiagnostics {
@@ -62,6 +95,10 @@ export interface ServerSideModel<T> extends SourceHandle<T> {
   want(first: number, last: number, keep?: readonly number[]): void;
   /** The grouping columns in use (unknown and refused ones dropped). */
   readonly by: readonly string[];
+  /** Whether the server pivots (a `serverPivot()` linked to the rows' pivot shape; server-pivot.md). */
+  readonly pivot?: boolean;
+  /** The sort as the requests carry it (a server pivot's: no created column's id; an export's `server.sort`). */
+  readonly wireSort?: readonly SortItem[] | undefined;
   /** Groups by other columns on the server: a new epoch (the open groups kept, their keys name their columns). */
   setBy(by: readonly string[], source?: ChangeSource): void;
   /** The server's grand totals, as sent (`{}` until it sends them): never computed in the browser. */
@@ -139,9 +176,15 @@ interface Run {
 }
 
 /** A group value's own type tag: `1` and `'1'`, a day and an instant of that day, are two groups (server-side-groups.md). */
-const tag = (v: GroupValue): string => (v === null ? '' : (typeof v)[0] + String(v));
-const okValue = (v: unknown): v is GroupValue => v === null || typeof v == 'string' || typeof v == 'boolean' || (typeof v == 'number' && Number.isFinite(v));
-const plain = (v: unknown): v is Readonly<Record<string, Json>> => typeof v == 'object' && v !== null && !Array.isArray(v);
+export const tag = (v: GroupValue): string => (v === null ? '' : (typeof v)[0] + String(v));
+export const okValue = (v: unknown): v is GroupValue => v === null || typeof v == 'string' || typeof v == 'boolean' || (typeof v == 'number' && Number.isFinite(v));
+export const plain = (v: unknown): v is Readonly<Record<string, Json>> => typeof v == 'object' && v !== null && !Array.isArray(v);
+/**
+ * Whether a server's group (or crossing) value fits its column's type (owner Q-SP5 A): null; any in a `custom` column; a
+ * number in a `number` or `instant` one; a boolean in a `boolean` one; a text in the others, a valid day in a `day` one.
+ */
+export const fitsColumn = (c: ResolvedColumn<any>, v: GroupValue, ctx: LocaleCtx): boolean =>
+  v === null || c.type == 'custom' || (typeof v == (/^(number|instant)$/.test(c.type) ? 'number' : c.type == 'boolean' ? c.type : 'string') && (c.type != 'day' || c.codec.coerce(v, ctx) !== null));
 
 /**
  * A server's list, grouped on the server (`source: serverSideRows(data, …)`, Phase 8 steps 6–7, server-side-groups.md):
@@ -201,6 +244,10 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
   let byProblems: Problem[] = [];
   let aggs: GroupPart['aggs'] = [];
   let aggProblems: Problem[] = [];
+  // ---- the server pivot (server-pivot.md): its part, the sort sent (no created id), null when off ----
+  const pl = o.pivot?.link(env, { again: (s) => commit(rekey, s), view: () => view, columns: () => columns, ctx: () => ctx }) ?? null;
+  let pw: PivotPart | null = null;
+  let sent: readonly SortItem[] | undefined;
   /** The grouping columns in use and the totals asked, read again when the columns change. */
   const readGrouping = (): void => {
     byProblems = [];
@@ -220,13 +267,24 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       if (!NAMES.includes(fn as string)) return void aggProblems.push(problem('invalid-setting', 'warning', path, typeof fn == 'string' ? fn : typeof fn));
       out.push({ column: id, fn: fn as AggFuncName });
     };
-    const seen = new Set<string>();
-    for (const c of columns.visible()) seen.add(c.id), take(c.id, Object.hasOwn(own, c.id) ? own[c.id] : c.def.aggFunc, `columns.${c.id}.aggFunc`);
-    for (const id of Object.keys(own)) if (!seen.has(id)) columns.get(id) ? take(id, own[id], `columns.${id}.aggFunc`) : aggProblems.push(problem('unknown-column', 'warning', 'grouping.aggFuncs', id));
-    aggs = by.length ? out : [];
+    const w = pl?.part(by, server.sort, aggProblems) ?? null;
+    pw = w && w.pivot;
+    sent = w ? w.sort : server.sort;
+    // In pivot mode the totals asked are the values, never the shown columns' (a created column set asks nothing).
+    if (w) for (const [id, fn] of Object.entries(w.fns)) columns.get(id) ? take(id, fn, `columns.${id}.aggFunc`) : aggProblems.push(problem('unknown-column', 'warning', 'pivot.values', id));
+    else {
+      const seen = new Set<string>();
+      for (const c of columns.visible()) seen.add(c.id), take(c.id, Object.hasOwn(own, c.id) ? own[c.id] : c.def.aggFunc, `columns.${c.id}.aggFunc`);
+      for (const id of Object.keys(own)) if (!seen.has(id)) columns.get(id) ? take(id, own[id], `columns.${id}.aggFunc`) : aggProblems.push(problem('unknown-column', 'warning', 'grouping.aggFuncs', id));
+    }
+    aggs = grp() ? out : [];
   };
+  /** Grouped on the server: by columns, or pivoted (with no row column, the grand total row alone). */
+  const grp = (): boolean => by.length > 0 || !!pw;
+  /** A pivot's last level: its groups are the last rows (no children, never open, never asked). */
+  const deep = (level: number): boolean => !!pw && level >= by.length - 1;
   readGrouping();
-  const groupSig = (): string => canonical({ by, aggs });
+  const groupSig = (): string => canonical({ by, aggs, pw });
 
   // ---- levels and blocks ----
   let sids = 0;
@@ -252,7 +310,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
   };
   /** The first level: made by each epoch's start. */
   let root = null as unknown as Level;
-  const leaf = (lv: Level): boolean => lv.depth >= by.length;
+  const leaf = (lv: Level): boolean => !pw && lv.depth >= by.length;
   const lenOf = (lv: Level): number => lv.known ?? lv.reach + (lv.more ? size : 0);
   const idOf = (lv: Level, n: number): number => lv.sid * B + n;
 
@@ -323,7 +381,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     if (s.phase !== status.phase) mark('status');
     status = s;
   };
-  const problems = (): readonly Problem[] => [...fixed, ...byProblems, ...aggProblems, ...wireProblems, ...answerProblems];
+  const problems = (): readonly Problem[] => [...fixed, ...byProblems, ...aggProblems, ...wireProblems, ...answerProblems, ...(pw ? pl!.problems : [])];
   const commit = (fn: () => void, source: ChangeSource): void => {
     if (destroyed) return;
     depth++;
@@ -377,7 +435,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       if (!leaf(lv)) for (const b of bySidBlocks.get(lv.sid) ?? []) {
         rows.get(idOf(lv, b))!.forEach((x, j) => {
           const p = b * size + j;
-          if (x?.kind !== 'group' || p >= n || p < i || !open.has(x.key)) return;
+          if (x?.kind !== 'group' || p >= n || p < i || !open.has(x.key) || deep(x.level)) return;
           push({ len: p - i + 1, lv, from: i, kind: 0 });
           i = p + 1;
           const child = level(lv, x);
@@ -388,7 +446,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       push({ len: n - i, lv, from: i, kind: 0 });
       if (g && footG) push({ len: 1, lv, from: 0, kind: 2, g });
     };
-    const grand = footT && root.answered && !!root.totals && by.length > 0;
+    const grand = footT && root.answered && !!root.totals && grp();
     if (grand && top) push({ len: 1, lv: root, from: 0, kind: 3 });
     walk(root, null);
     if (grand && !top) push({ len: 1, lv: root, from: 0, kind: 3 });
@@ -428,7 +486,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       return got?.[p - b * size] ?? ({ key: `l:#${i}` as RowKey, kind: 'loading', level: lv.depth, parent: null, failed: failed.has(idOf(lv, b)) || !!got } satisfies BlockLoadingNode);
     };
     /** A row's place among its siblings, how many they are (-1 unknown), and its level's runs. */
-    const sizeOf = (lv: Level): number => (lv.known === null ? -1 : lv.known + (lv.key ? +footG : +(footT && !!root.totals && by.length > 0)));
+    const sizeOf = (lv: Level): number => (lv.known === null ? -1 : lv.known + (lv.key ? +footG : +(footT && !!root.totals && grp())));
     let at: Map<RowKey, number> | null = null;
     const where = new Map<RowKey, RowKey | null>();
     const keys = (): Map<RowKey, number> => {
@@ -461,7 +519,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     };
     const kidsOf = (g: GroupNode): number => {
       const lv = levels.get(g.key);
-      return lv?.answered ? lenOf(lv) : g.count ?? 1;
+      return deep(g.level) ? 0 : lv?.answered ? lenOf(lv) : g.count ?? 1;
     };
     return {
       version: ++version,
@@ -504,7 +562,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
         if (r.kind === 1) return 1;
         if (r.kind === 3) return top ? 1 : grandLen;
         if (r.kind === 2) return lenOf(levels.get(r.g!.key)!) + 1;
-        return r.from + i - r.at + 1 + +(r.lv === root && footT && top && !!root.totals && by.length > 0);
+        return r.from + i - r.at + 1 + +(r.lv === root && footT && top && !!root.totals && grp());
       },
       sizeAt(i) {
         const r = runAt(check(i));
@@ -523,7 +581,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       },
       expandedAt(i) {
         const g = groupAt(check(i));
-        return !!g && open.has(g.key);
+        return !!g && open.has(g.key) && !deep(g.level);
       },
       matchedAt: (i) => (check(i), true),
     };
@@ -532,7 +590,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
   const partsOf = (): { filter?: WireFilterModel; quick?: string; sort?: unknown; params: Readonly<Record<string, Json>>; zone: string } => ({
     ...(wire && { filter: wire }),
     ...(server.quick !== undefined && { quick: server.quick }),
-    ...(server.sort && { sort: server.sort }),
+    ...(sent && { sort: sent }),
     params,
     zone: ctx.timeZone,
   });
@@ -544,7 +602,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     if (!lv) return;
     const n = id % B;
     const ch = `block:${id}`;
-    const parts = { ...partsOf(), page: { index: n, size, offset: n * size, cursor: null }, blocks: true as const, ...(by.length && { group: { by, path: lv.path, aggs } }) };
+    const parts = { ...partsOf(), page: { index: n, size, offset: n * size, cursor: null }, blocks: true as const, ...(grp() && { group: { by, path: lv.path, aggs, ...(pw && { pivot: pw }) } }) };
     const key = canonical(parts);
     const { ticket, signal } = gate.begin(ch, key);
     tickets.set(id, ticket);
@@ -590,9 +648,12 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     if (!a.rows) return fail(lv, id, a.problems[0], asked);
     // Asked after the edit: in the server's order again.
     if (seq > staleAt) staleAt = -1;
-    // The grand totals as sent (Q-TOT A): any block of the first level may bring them.
-    if (lv === root && !isLeaf && raw && 'totals' in raw) {
-      if (plain(raw.totals)) root.totals = raw.totals;
+    const first = opening && lv === root;
+    // The grand totals as sent (Q-TOT A): any block of the first level may bring them; a pivot's column totals beside them.
+    if (lv === root && !isLeaf && raw) {
+      const gt = pw ? pl!.root(raw, first, told) : undefined;
+      if (!('totals' in raw)) gt && (root.totals = { ...root.totals, ...gt });
+      else if (plain(raw.totals)) root.totals = gt ? { ...raw.totals, ...gt } : raw.totals;
       else told.push(problem('invalid-page-response', 'warning', 'response.totals'));
     }
     const offset = n * size;
@@ -614,15 +675,15 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
         if (key) node = { key, kind: 'data', level: lv.depth, id: rid as DataNode<T>['id'], data: x as T };
         else told.push(problem('invalid-row-id', 'error', `response.rows[${j}]`));
       } else {
-        const g = x as { value?: unknown; count?: unknown; aggs?: unknown };
-        // An entry that is no record (null, a number): told by place (review 1: never a throw).
-        if (!plain(g)) {
+        const g = x as { value?: unknown; count?: unknown; aggs?: unknown; cells?: unknown };
+        // An entry that is no record (null, a number), or a group where none was asked (a pivot without row column): told by place.
+        if (!plain(g) || !column) {
           told.push(problem('invalid-page-response', 'warning', `response.groups[${j}]`));
           return void nodes.push(null);
         }
         const v = g.value ?? null;
         // A value of no group type, a count that is no count, totals that are no record: told by place, never with the value.
-        if (!okValue(v)) {
+        if (!okValue(v) || !fitsColumn(column, v, ctx)) {
           told.push(problem('invalid-page-response', 'warning', `response.groups[${j}].value`));
           return void nodes.push(null);
         }
@@ -638,7 +699,8 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
         key = groupKey([...lv.segs, col!, tag(v)]);
         node = {
           key, kind: 'group', level: lv.depth, label, path: [...lv.labels, label], column: col!, value: v,
-          ...(Number.isInteger(count) && (count as number) >= 0 && { count: count as number }), aggs: plain(g.aggs) ? g.aggs : {},
+          ...(Number.isInteger(count) && (count as number) >= 0 && { count: count as number }),
+          aggs: pw ? { ...(plain(g.aggs) && g.aggs), ...pl!.cells(g.cells, `response.groups[${j}].cells`, told) } : plain(g.aggs) ? g.aggs : {},
         } satisfies GroupNode;
       }
       const was = key ? index.get(key) : undefined;
@@ -657,7 +719,6 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       nodes.push(node);
     });
     const len = got.length;
-    const first = opening && lv === root;
     if (lv === root) opening = false;
     lv.answered = true;
     lv.failed = false;
@@ -678,7 +739,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     const w = server.filter ? wired.of(server.filter) : undefined;
     wire = w?.filter;
     wireProblems = w?.problems ?? [];
-    return canonical({ filter: wire, quick: server.quick, sort: server.sort, zone: ctx.timeZone, params, group: groupSig() });
+    return canonical({ filter: wire, quick: server.quick, sort: sent, zone: ctx.timeZone, params, group: groupSig() });
   };
   /** A new epoch: every block, level and request dropped; the open groups kept (Q-OPEN A); the first block asked now. */
   const restart = (key = keyNow()): void => {
@@ -775,7 +836,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     changed(all, moved, bad) {
       if (all.length) touch('rows');
       // Grouped, a row updated may have changed its group's count and totals: the server's to say (Q-TOT A).
-      if (moved || (all.length && by.length)) refresh();
+      if (moved || (all.length && grp())) refresh();
       told.push(...bad);
       tx = { kind: all.length || moved ? 'delta' : 'none', version: 0, added: [], updated: all, removed: [], problems: [] };
     },
@@ -786,7 +847,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
   /** Every group held above `depth`, in display order of their levels. */
   const groupsHeld = (depthBelow: number): RowKey[] => {
     const out: RowKey[] = [];
-    for (const b of [...store.blocks.values()].sort((x, y) => x.n - y.n)) for (const x of b.rows ?? []) if (x?.kind === 'group' && x.level < depthBelow) out.push(x.key);
+    for (const b of [...store.blocks.values()].sort((x, y) => x.n - y.n)) for (const x of b.rows ?? []) if (x?.kind === 'group' && x.level < depthBelow && !deep(x.level)) out.push(x.key);
     return out;
   };
 
@@ -798,7 +859,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
     get status() { return status; },
     get problems() { return problems(); },
     // Grouped, the rows' number is the groups' business: unknown here.
-    get counts() { return { total: unfiltered() && !by.length ? root.known : null, filtered: by.length ? null : root.known, displayed: view.count }; },
+    get counts() { return { total: unfiltered() && !grp() ? root.known : null, filtered: grp() ? null : root.known, displayed: view.count }; },
     selectAll: 'query',
     keeps: () => true,
     membershipOf(q) {
@@ -825,6 +886,8 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       else apply();
     },
     get by() { return by; },
+    pivot: !!pl,
+    get wireSort() { return sent; },
     setBy(next, source = 'api') {
       if (!Array.isArray(next)) return void commit(() => (told.push(problem('invalid-setting', 'warning', 'grouping.by', typeof next)), mark('status')), source);
       if (next.length === asked.length && next.every((c, i) => c === asked[i])) return;
@@ -834,7 +897,7 @@ function createServerSide<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Ser
       }, source);
     },
     totals: () => root.totals ?? {},
-    get group() { return by.length ? { by, path: [], aggs } : null; },
+    get group() { return grp() ? { by, path: [], aggs, ...(pw && { pivot: pl!.full(pw) }) } : null; },
     get expansion() { return open; },
     isExpanded: (key) => open.has(key),
     setExpansion(set, source = 'api') {

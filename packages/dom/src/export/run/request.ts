@@ -25,7 +25,9 @@ export async function serverPart(g: GridContext<unknown>): Promise<ServerPart> {
   const kinds = g.settings.filterKinds;
   if (s.filter) parts.filter = toWire(s.filter, { ctx: g.ctx, columns: g.columns, now: (g.settings.clock ?? Date.now)(), ...(kinds && { kinds: filterKindLookup(kinds).get }) }).filter;
   if (s.quick !== undefined) parts.quick = s.quick;
-  if (s.sort) parts.sort = s.sort;
+  // A server pivot's model sends no created column's id (server-pivot.md): its own sort, as it asks.
+  const so = (M as { wireSort?: ServerPart['sort'] }).wireSort ?? s.sort;
+  if (so) parts.sort = so;
   // Grouped on the server (`serverSideRows`): the groups and totals asked, without a block (server-side-groups.md).
   const gp = (M as { group?: ServerPart['group'] | null }).group;
   if (gp) parts.group = gp;

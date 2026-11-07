@@ -1,0 +1,135 @@
+{
+  "id": "sp-typed-ids",
+  "suite": "server-pivot",
+  "description": "In a custom column (any value fits): 1 and '1', a day and an instant of that day, are four created columns — the value's own type tag in the id; null is the empty crossing, headed as the host writes it.",
+  "refs": [
+    "docs/behaviors/server-pivot.md"
+  ],
+  "input": {
+    "pivot": {
+      "by": [
+        "region"
+      ],
+      "columns": [
+        "code"
+      ],
+      "values": {
+        "amount": "sum"
+      }
+    },
+    "steps": [
+      {
+        "answer": "c1",
+        "response": {
+          "groups": [
+            {
+              "value": "Nord",
+              "count": 4,
+              "aggs": {
+                "amount": 9
+              },
+              "cells": {
+                "0": {
+                  "amount": 1
+                },
+                "1": {
+                  "amount": 2
+                },
+                "4": {
+                  "amount": 6
+                }
+              }
+            }
+          ],
+          "total": 1,
+          "pivot": {
+            "crossings": [
+              [
+                1
+              ],
+              [
+                "1"
+              ],
+              [
+                "2026-03-04"
+              ],
+              [
+                1772582400000
+              ],
+              [
+                null
+              ]
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "calls": [
+      [
+        "c1",
+        [],
+        {
+          "columns": [
+            "code"
+          ],
+          "limit": 200
+        },
+        []
+      ]
+    ],
+    "told": [],
+    "final": {
+      "columns": [
+        "1 = ~p4:code2:n16:amount",
+        "1 = ~p4:code2:s16:amount",
+        "2026-03-04 = ~p4:code11:s2026-03-046:amount",
+        "1772582400000 = ~p4:code14:n17725824000006:amount",
+        "(blank) = ~p4:code0:6:amount"
+      ],
+      "count": 5,
+      "rows": [
+        [
+          "Nord",
+          {
+            "amount": 9,
+            "~p4:code2:n16:amount": 1,
+            "~p4:code2:s16:amount": 2,
+            "~p4:code0:6:amount": 6
+          }
+        ]
+      ],
+      "problems": [],
+      "aggs": [
+        {
+          "column": "amount",
+          "fn": "sum"
+        }
+      ],
+      "export": {
+        "columns": [
+          "code"
+        ],
+        "limit": 200,
+        "crossings": [
+          [
+            1
+          ],
+          [
+            "1"
+          ],
+          [
+            "2026-03-04"
+          ],
+          [
+            1772582400000
+          ],
+          [
+            null
+          ]
+        ]
+      }
+    }
+  }
+}

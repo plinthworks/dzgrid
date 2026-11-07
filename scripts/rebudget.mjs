@@ -160,7 +160,9 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/ar-dock': 350, // measured 276
   // Phase 10 pivot, core batch (owner « ★ partout, tailles OK », 2026-11-06: new entries at their measure + 10 %): the
   // crossings, created columns, series and state adapter over core/grouping.
-  '@dzgrid/core/pivot': 3750, // measured 3 409 over @dzgrid/core/grouping
+  '@dzgrid/core/pivot': 3825, // 1.8.0 server pivot (+2 % rule, measured 3 810): the `serve` seam; before 3 750, measured 3 409 over @dzgrid/core/grouping
+  // 1.8.0 server pivot (owner A to Q-SP8, 2026-11-07: a new entry at its measure + 10 %): the plug over core/server-side.
+  '@dzgrid/core/server-pivot': 1950, // measured 1 740 over @dzgrid/core/server-side
   '@dzgrid/theme/dock.css': 800, // owner « ok taille » 2026-11-07 (visual polish, measured 759); before 650 (measured 546)
   // Phase 9 filters panel (filters-panel.md): the side panel over the DOM base, its -filters-panel texts, filters-panel.css; new lines at their measure + 10 %.
   '@dzgrid/dom/filters-panel': 3250,
