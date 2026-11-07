@@ -235,7 +235,13 @@
     { "what": "grouping band: a chip's name", "fg": "--tz-fg", "bg": "--tz-bg", "min": 4.5 },
     { "what": "grouping band: a chip's ×", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
     { "what": "grouping band: the focus ring and the drop outline on the band", "fg": "--dzg-focus-ring", "bg": "--dzg-header-bg", "min": 3 },
-    { "what": "grouping band: the focus ring on a chip", "fg": "--dzg-focus-ring", "bg": "--tz-bg", "min": 3 }
+    { "what": "grouping band: the focus ring on a chip", "fg": "--dzg-focus-ring", "bg": "--tz-bg", "min": 3 },
+    { "what": "pivot bar (pivot.css): a part's name on the header's surface", "fg": "--tz-fg", "bg": "--dzg-header-bg", "min": 4.5 },
+    { "what": "pivot bar: the order button ↑ / ↓ on a chip", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 4.5 },
+    { "what": "pivot switch: the track's outline and the knob off, on the header's surface", "fg": "--tz-fg-muted", "bg": "--dzg-header-bg", "min": 3 },
+    { "what": "pivot switch: the track on, on the header's surface", "fg": "--tz-accent", "bg": "--dzg-header-bg", "min": 3 },
+    { "what": "pivot switch: the track on, in an application's toolbar", "fg": "--tz-accent", "bg": "--tz-bg", "min": 3 },
+    { "what": "pivot switch: the knob on the track on", "fg": "--tz-accent-fg", "bg": "--tz-accent", "min": 3 }
   ],
   "derived": {
     "--dzg-header-bg": "var(--tz-bg-raised)",

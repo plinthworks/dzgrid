@@ -18,6 +18,7 @@ export const AR_PIVOT = {
     'pivot.tooMany': "{n} عمود: كثيرة على الشاشة؛ أزل عمودًا",
     'pivot.switch': "جدول محوري",
     'pivot.fnSaid': "{column}: {fn}",
+    'pivot.valueChip': "{fn}({column})",
     'menu.pivotBy': "توزيع أعمدةً",
     'menu.pivotOff': "إيقاف التوزيع أعمدةً",
     'menu.total': "المجموع",

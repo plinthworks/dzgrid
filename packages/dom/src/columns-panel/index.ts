@@ -97,6 +97,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
       let list!: HTMLElement;
       let status!: HTMLElement;
       let bar!: HTMLElement;
+      let top!: HTMLElement;
       /** The folded search; the roving box's column; the drag. */
       let q = '';
       let rov: string | undefined;
@@ -177,6 +178,8 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
           }
         });
         status.textContent = rows.length ? '' : T('none');
+        // A pivot's switch and parts (pivot.md 36).
+        g.panelTop?.(top);
         if (had) focusBox(had);
       };
 
@@ -203,6 +206,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
         const p = doc.createElement('div');
         p.className = 'dzg-cp';
         mk('div', p, 'dzg-cp-title', T('title')).id = base;
+        top = mk('div', p, 'dzg-cp-top');
         search = mk('input', mk('label', p, 'dzg-cp-q', T('search')));
         search.type = 'search';
         status = mk('div', p, 'dzg-cp-none');
@@ -286,7 +290,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
           // Tab: search → the list's one stop → « Show all » → « Reset » → « Close », wrapping (165); the same in every
           // engine (WebKit's Tab skips buttons by default).
           if (k === 'Tab' && cur) {
-            const stops = [search, all.find((b) => b.tabIndex === 0), ...p.querySelectorAll<HTMLElement>('.dzg-cp-foot button')].filter((x): x is HTMLElement => !!x);
+            const stops = [...top.querySelectorAll<HTMLElement>('[tabindex="0"]'), search, all.find((b) => b.tabIndex === 0), ...p.querySelectorAll<HTMLElement>('.dzg-cp-foot button')].filter((x): x is HTMLElement => !!x);
             stop();
             return void stops[(stops.indexOf(t) + (e.shiftKey ? -1 : 1) + stops.length) % stops.length]!.focus();
           }

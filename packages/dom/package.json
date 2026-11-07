@@ -117,6 +117,10 @@
       "types": "./src/pivot.ts",
       "default": "./src/pivot.ts"
     },
+    "./pivot-bar": {
+      "types": "./src/pivot-bar.ts",
+      "default": "./src/pivot-bar.ts"
+    },
     "./row-numbers": {
       "types": "./src/row-numbers.ts",
       "default": "./src/row-numbers.ts"
@@ -448,6 +452,18 @@
     "./locales/ar-pivot": {
       "types": "./src/locales/ar-pivot.ts",
       "default": "./src/locales/ar-pivot.ts"
+    },
+    "./locales/en-pivot-bar": {
+      "types": "./src/locales/en-pivot-bar.ts",
+      "default": "./src/locales/en-pivot-bar.ts"
+    },
+    "./locales/fr-pivot-bar": {
+      "types": "./src/locales/fr-pivot-bar.ts",
+      "default": "./src/locales/fr-pivot-bar.ts"
+    },
+    "./locales/ar-pivot-bar": {
+      "types": "./src/locales/ar-pivot-bar.ts",
+      "default": "./src/locales/ar-pivot-bar.ts"
     },
     "./locales/en-row-numbers": {
       "types": "./src/locales/en-row-numbers.ts",

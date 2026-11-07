@@ -111,3 +111,11 @@ data columns' headers are folded away in pivot mode.
     pivot made. Enter / Space / a click on one adds it at the end, said as a drop (`zone.grouped` / `pivot.grouped`), the
     focus back on « + »; Escape closes the menu, the focus back on « + ». No column to offer: no « + ». Its text missing from an older bundle: no « + » (the column menu's item stays the way without drag).
 19. **Two bands** stack in the order of `features`: a band set up after another sits under it.
+
+## Beside a pivot: one bar (follow-up, owner 2026-11-07; `pivot.md` 31–37)
+With a pivot, `pivotBar()` (`@dzgrid/dom/pivot-bar`) draws the bands as named parts of one bar (« Lignes », « Colonnes »,
+« Valeurs »), with the same chips and keys (8–18) plus: a visible name per part (its toolbar's name), the ↑/↓ order
+button of a pivot chip, the values' chips, and Ctrl+Shift+ArrowUp / ArrowDown (or a chip released over another part) to
+move a column to another part. The bar keeps its own band code (`pivot-bar/index.ts`, owner 2026-11-07: rather than
+push `group-zone`'s line past +2 %), so `groupZone()` alone draws and behaves as before (no visible name, no new key, no
+byte); the two share the chip classes, the layout (`ZONE_CSS`) and the theme.

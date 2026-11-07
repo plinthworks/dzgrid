@@ -30,7 +30,7 @@ function leavesOf(tree: readonly ColumnOrGroup<Row>[], up: string[] = []): { id:
  * - `shown`: one string per row, a dot per level: a group `[label] (count) pos/size` (`+` / `-` when it can open), then
  *   `{chain=value … | col=total …}` (crossings, then the row totals); the grand total `Σ* pos/size {…}`;
  * - `count` (created columns, made or not), `problems`; `ids` when asked; `series` for `series` options; `builds`.
- * Steps: `{sort}`, `{filter}`, `{quick}`, `{expandAll, depth?}`, `{open: [[seg…]]}`, `{pivotBy}`, `{values}`, `{on}`,
+ * Steps: `{sort}`, `{filter}`, `{quick}`, `{expandAll, depth?}`, `{open: [[seg…]]}`, `{pivotBy}`, `{values}`, `{on}`, `{desc}`,
  * `{tx}`, `{edit: [id, col, value]}`, `{by}`.
  */
 export function runPivot(input: any) {
@@ -64,6 +64,7 @@ export function runPivot(input: any) {
     if (s.pivotBy) shape.setPivotBy(s.pivotBy, 'user');
     if (s.values) shape.setValueFns(fns(s.values)!, 'user');
     if (s.on !== undefined) shape.setOn(s.on, 'user');
+    if (s.desc) shape.set({ desc: s.desc }, 'user');
     if (s.tx) model.applyTransaction(s.tx as RowTransaction<Row>);
     if (s.edit) {
       edits.edit(s.edit[0], s.edit[1], s.edit[2]);

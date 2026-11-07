@@ -87,14 +87,17 @@ $layered: true !default;
   }
 
   .dzg-cp-row label {
-    flex: 1;
+    flex: 1 1 auto;
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
+  // Shrinks with the name in a narrow panel, never hides it.
   .dzg-cp-desc {
+    flex: 0 1 auto;
+    min-inline-size: 0;
     color: var(--tz-fg-muted);
     font-size: 0.85em;
   }

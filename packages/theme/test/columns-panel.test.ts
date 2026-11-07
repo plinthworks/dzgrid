@@ -74,6 +74,9 @@ describe('columns-panel.css', () => {
     expect(bar).toMatch(/background: var\(--dzg-move-bar, var\(--tz-accent\)\)/);
     expect(bar).toMatch(/pointer-events: none/);
     expect(decl(/^\.dzg-cp-desc$/)).toMatch(/color: var\(--tz-fg-muted\)/);
+    // A long description in a narrow panel (docked, 288 px) shrinks with the name, never hides it (follow-up 2026-11-07).
+    expect(decl(/^\.dzg-cp-desc$/)).toMatch(/flex: 0 1 auto; min-inline-size: 0;/);
+    expect(decl(/^\.dzg-cp-row label$/)).toMatch(/flex: 1 1 auto;/);
   });
 
   it('a disabled box (the last shown, `hideable: false`): not by colour alone — the box faded and a lock before its name (review of steps 3–4)', () => {

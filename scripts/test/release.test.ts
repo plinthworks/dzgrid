@@ -260,7 +260,19 @@ describe('1.6.0, the four packages', () => {
     expect(build).toMatch(/'\.\/locales\/ar-row-drag', '\.\/locales\/en-dock', '\.\/locales\/fr-dock', '\.\/locales\/ar-dock'[,\]]/); // Phase 10: the -pivot texts after them
     const theme = pkg('theme');
     for (const f of ['dock.css', 'dock.unlayered.css', 'dock.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'row-drag', 'dock'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'row-drag', 'dock'[,\]]/); // Phase 10 follow-up: 'pivot' after it
+  });
+
+  it('export the pivot bar (@dzgrid/dom/pivot-bar), its -pivot-bar texts and pivot.css, built like the others (Phase 10 follow-up)', () => {
+    const dom = pkg('dom').exports;
+    expect(dom['./pivot-bar']).toEqual({ types: './src/pivot-bar.ts', default: './src/pivot-bar.ts' });
+    for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-pivot-bar`]).toEqual({ types: `./src/locales/${g}-pivot-bar.ts`, default: `./src/locales/${g}-pivot-bar.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/pivot', '\.\/pivot-bar'/);
+    expect(build).toMatch(/'\.\/locales\/ar-pivot', '\.\/locales\/en-pivot-bar', '\.\/locales\/fr-pivot-bar', '\.\/locales\/ar-pivot-bar'\]/);
+    const theme = pkg('theme');
+    for (const f of ['pivot.css', 'pivot.unlayered.css', 'pivot.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'dock', 'pivot'\]/);
   });
 
   it('export the Phase 10 pivot core (@dzgrid/core/pivot), built like the others', () => {

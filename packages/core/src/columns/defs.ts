@@ -36,6 +36,8 @@ export interface ColumnDef<T, V = unknown> {
   readonly value?: (row: Readonly<T>) => V;
   /** Already translated by the host. */
   readonly header?: string;
+  /** A shorter header, without unit, where room is short (the pivot's created headers and chips, pivot.md 38); absent: `header`. */
+  readonly headerShort?: string;
   readonly type?: ColumnType;
   readonly codec?: ValueCodec<V>;
   readonly enumOptions?: readonly EnumOption[];

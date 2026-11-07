@@ -234,8 +234,15 @@ export interface GroupMessages {
  * `{n}` a count, `{name}` a band's header, `{fn}` a function's name. Never a value of a row but in the headers shown.
  */
 export type PivotMessageKey =
-  | `pivot.${'label' | 'empty' | 'remove' | 'grouped' | 'removed' | 'placed' | 'add' | 'total' | 'subtotal' | 'count' | 'tooMany' | 'switch' | 'fnSaid'}`
+  | `pivot.${'label' | 'empty' | 'remove' | 'grouped' | 'removed' | 'placed' | 'add' | 'total' | 'subtotal' | 'count' | 'tooMany' | 'switch' | 'fnSaid' | 'valueChip'}`
   | 'zone.add' | 'menu.pivotBy' | 'menu.pivotOff' | 'menu.total' | `fn.${'sum' | 'avg' | 'min' | 'max' | 'count'}`;
+/** The pivot bar's texts (`@dzgrid/dom/pivot-bar`, pivot.md 31–39), in their own bundles (`locales/<lang>-pivot-bar`). */
+export type PivotBarMessageKey = `pivot.${'rows' | 'columns' | 'values' | 'valuesEmpty' | 'addValue' | 'removeValue' | 'valueAdded' | 'valueRemoved' | 'valuePlaced' | 'order' | 'reversed' | 'ordered' | 'refused' | 'mode'}`;
+/** A pivot bar bundle, spread by the host into its messages after the -group and -pivot ones. */
+export interface PivotBarMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in PivotBarMessageKey]: MessageValue };
+}
 /** A pivot bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_GROUP.text, ...FR_PIVOT.text }`. */
 export interface PivotMessages {
   readonly locale: string;

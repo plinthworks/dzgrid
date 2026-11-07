@@ -206,11 +206,14 @@ the dock is set up (gridState listed first) applies at its setup.
 
 ## Pivot (Phase 10, `pivot.md` 14; owner Q-P10 A)
 With `pivot()`, the part `pivot` (`StatePart` `'pivot'`): `{ on: boolean, columns: string[], values?: { [id]:
-'sum' | 'avg' | 'min' | 'max' | 'count' | 'first' | 'last' } }` — column ids and function names only.
+'sum' | 'avg' | 'min' | 'max' | 'count' | 'first' | 'last' }, desc?: string[] }` — column ids and function names only.
+`desc` (follow-up, `pivot.md` 33): the pivot columns whose created columns run in reverse, written only when one does;
+restored like `columns` (an unknown id `state-column` at `pivot.desc.<i>`, not a text or twice `state-field`), absent
+means none.
 1. Captured only on a grid with the pivot (through `StateEnv.pivot`); a grid without it writes no `pivot`.
 2. **Never a created column**: the columns the pivot made (`StateEnv.pivot.made(id)`) are left out of `columns` (the
-   others numbered without them), and a sort on one is left out of `sort`. Their bands are never collapsible, so never in
-   `groups`. A test plants a value in a pivot column and reads the state, its text and every problem.
+   others numbered without them), and a sort on one is left out of `sort`. Their bands fold with `groups()` (follow-up,
+   `pivot.md` 34) but are left out of `groups` all the same (their ids hold row values). A test plants a value in a pivot column and reads the state, its text and every problem.
 3. Restored after `rowGroups` and the dock, before the query; checked by `@dzgrid/core/pivot`'s `checkPivot`: not an
    object, `state-field` at `pivot`, nothing applied; `on` not a boolean, `state-field` at `pivot.on` (the mode kept); a
    pivot column the grid does not know, `state-column` (path `pivot.columns.<i>`, the id); not a text, twice or

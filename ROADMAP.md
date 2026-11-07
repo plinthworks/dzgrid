@@ -1291,5 +1291,10 @@ after a report to the owner.
   header layout (0 px).
 - For the owner: K.8 89 978 (+1 B, a chunk name's hash, no audit code); the a11y listening §29 (198–201) to schedule;
   `test:real-app` not run (its page did not change).
+- Follow-up « the bar » (owner feedback 2026-11-07, « ok »; owner A for dom/pivot 2 600): `@dzgrid/dom/pivot-bar` — one
+  bar « Lignes │ Colonnes │ Valeurs », values' chips and menu, ↑/↓ order saved with the pivot (`desc`), moves between
+  parts, the panel's « Mode pivot » and parts, the switch placed by the app, folding created bands, readable headers
+  (`valueHeaders`, `headerShort`). Chrome fr / ar, light / dark, 320 px, axe 0; Firefox and WebKit Arabic. Sizes and
+  decisions: `docs/phase-10-steps/decisions.md` « Follow-up: the bar ».
 
 

@@ -18,6 +18,7 @@ export const FR_PIVOT = {
     'pivot.tooMany': "{n} colonnes : trop pour l'écran ; retirez une colonne",
     'pivot.switch': "Tableau croisé",
     'pivot.fnSaid': "{column} : {fn}",
+    'pivot.valueChip': "{fn}({column})",
     'menu.pivotBy': "Mettre en colonnes",
     'menu.pivotOff': "Ne plus mettre en colonnes",
     'menu.total': "Total",

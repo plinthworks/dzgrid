@@ -71,6 +71,12 @@ describe('pivotShape: the API', () => {
     expect(t.model.expandable()).toEqual([groupKey(['g', 'tNord']), groupKey(['g', 'tSud'])]);
   });
 
+  it('no pivot column: the deepest groups are still last rows, never open (HEAD\'s `flat()` call fixed)', () => {
+    const t = setup({ by: ['g'], columns: [] });
+    expect(t.shape.opens!(groupKey(['g', 'tNord']))).toBe(false);
+    expect(t.d().childrenAt(t.d().indexOf(groupKey(['g', 'tNord'])) as DisplayIndex)).toBe(0);
+  });
+
   it('created columns keep their ids when a crossing appears; the key changes, the old columns are the same ids', () => {
     const t = setup();
     const before = ids(t.shape.generated().columns);
@@ -118,6 +124,23 @@ describe('pivotShape: the API', () => {
     expect(m.problems.map((p) => `${p.path} ${p.detail}`)).toEqual(['pivot.on string', 'pivot.columns string', 'pivot.values number', 'pivot.maxColumns 0', 'pivot.width -1']);
     s.setPivotBy('y' as never); // untyped code
     expect(s.pivotBy).toEqual([]);
+  });
+
+  it('desc (pivot.md 33): set, told once as a `rows` change, the crossings regrouped, no group built again; bad ones told', () => {
+    const t = setup();
+    const kinds: string[] = [];
+    t.model.subscribe((c) => void kinds.push(`${c.kind}/${c.source}`));
+    t.shape.set({ desc: ['y'] }, 'user');
+    t.shape.set({ desc: ['y'] }, 'user');
+    expect(kinds).toEqual(['rows/user']);
+    t.sync();
+    expect([t.shape.pivotDesc, ids(t.shape.generated().columns)]).toEqual([['y'], ['~p1:y5:t20261:v', '~p1:y5:t20251:v']]);
+    expect(t.shape.diagnostics.builds).toBe(1);
+    t.shape.set({ desc: 'y' as never }); // untyped code
+    expect(t.shape.pivotDesc).toEqual(['y']);
+    const s = pivotShape<Row>({ desc: 3 as never }); // untyped code
+    const m = clientRows<Row>({ rows: ROWS, getRowId: (r) => r.id, columns: createColumnModel<Row>(DEFS), ctx, shape: s });
+    expect(m.problems.map((p) => `${p.path} ${p.detail}`)).toEqual(['pivot.desc number']);
   });
 
   it('series(): another value, another level', () => {
@@ -215,6 +238,12 @@ describe('checkPivot (grid-state.md « Pivot » 3)', () => {
       'state-field pivot.on ', 'state-column pivot.columns.1 nope', 'state-field pivot.columns.2 ', 'state-field pivot.columns.3 ',
       'state-field pivot.columns.4 ', 'state-field pivot.values.h ', 'state-column pivot.values gone',
     ]);
+  });
+  it('desc: the known groupable columns once each, the rest told by path; not a list told', () => {
+    const r = checkPivot({ desc: ['y', 'nope', 'z', 'y'] }, cols);
+    expect(r.pivot).toEqual({ desc: ['y'] });
+    expect(r.problems.map((p) => `${p.code} ${p.path} ${p.detail ?? ''}`)).toEqual(['state-column pivot.desc.1 nope', 'state-field pivot.desc.2 ', 'state-field pivot.desc.3 ']);
+    expect(checkPivot({ desc: 'y' }, cols).problems.map((p) => p.path)).toEqual(['pivot.desc']);
   });
   it('not an object: nothing applied; lists that are not lists: told', () => {
     expect(checkPivot([1], cols)).toEqual({ pivot: null, problems: [{ code: 'state-field', severity: 'warning', path: 'pivot' }] });

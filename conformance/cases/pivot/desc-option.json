@@ -1,0 +1,35 @@
+{
+  "id": "desc-option",
+  "suite": "pivot",
+  "description": "A pivot column given in `desc` runs its created columns in reverse, the empty crossing still last; the rows and their cells are unchanged (pivot.md 33).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      { "id": "g" },
+      { "id": "y" },
+      { "id": "v", "type": "number", "aggFunc": "sum" }
+    ],
+    "rows": [
+      { "id": "a", "g": "Nord", "y": "2025", "v": 1 },
+      { "id": "b", "g": "Nord", "y": "2026", "v": 2 },
+      { "id": "c", "g": "Sud", "y": null, "v": 4 }
+    ],
+    "pivot": {
+      "by": ["g"],
+      "columns": ["y"],
+      "desc": ["y"]
+    }
+  },
+  "expected": {
+    "headers": ["2026", "2025", ""],
+    "shown": [
+      "[Nord] (2) 1/3 {2026=2 2025=1 | v=3}",
+      "[Sud] (1) 2/3 {=4 | v=4}",
+      "Σ* 3/3 {2026=2 2025=1 =4 | v=7}"
+    ],
+    "count": 3,
+    "problems": []
+  }
+}

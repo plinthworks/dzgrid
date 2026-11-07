@@ -396,7 +396,7 @@ export function grouped<T>(o: GroupingOptions, x?: Seam<T>): GroupShape<T> {
     all: () => (all ??= flat(true)),
   };
   /** A deepest group of a pivot's: a last row, never open. */
-  const deep = (s: Groups<T>, g: number): boolean => !!x?.flat() && s.lv[g] === s.cols.length - 1;
+  const deep = (s: Groups<T>, g: number): boolean => !!x?.flat(s.G) && s.lv[g] === s.cols.length - 1;
   const gOf = (s: Groups<T>, key: RowKey): number => {
     if (!s.byKey) {
       s.byKey = new Map();

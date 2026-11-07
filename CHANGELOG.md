@@ -34,8 +34,32 @@ A minor in the making (`npm run check:api`: additions only). Phase 10, the pivot
 - In pivot mode the quick search still tests the data columns' values, and find searches the cells shown and the data
   of a last row's rows; CSV writes a created column's chain of headers (« 2025 › Janv. › Montant »).
 - `PivotShape.valueColumn(id)`, `PivotShape.rows(key)`; a sort on the label column orders the groups by value.
+- **The pivot bar** (owner feedback 2026-11-07, `pivot.md` 31–40): `@dzgrid/dom/pivot-bar`, `pivotBar({ use: { grouping,
+  pivot, columns? }, panel? })` — one bar « Lignes │ Colonnes │ Valeurs » above the rows (each part a toolbar named by its
+  visible name; stacked at 30 rem or less), replacing the two `groupZone()` bands beside a pivot (`groupZone()` alone is
+  unchanged). « Valeurs »: chips « somme(Montant) », a click opens the « Total » radios, × removes, « + » adds a column
+  that can be totalled. ↑ / ↓ on a « Colonnes » chip reverses that column's created columns. Ctrl+Shift+ArrowUp /
+  ArrowDown (or a chip dropped there) moves a column to another part. With `columnsChooser()` (docked or dialog), the
+  panel starts with a « Mode pivot » switch and the same three parts. Texts `locales/{en,fr,ar}-pivot-bar`; look
+  `@dzgrid/theme/pivot.css` (the bar, the order button, the switch's track and knob).
+- The reversed order is the pivot's: `pivot({ desc })`, `PivotShape.pivotDesc` / `set({ desc })`, `api.desc()` /
+  `setDesc()`, saved as `GridState.pivot.desc` (written only when a column is reversed; `checkPivot` checks it).
+- `pivot({ toggle })` takes `true` / `'inside'` (in the bar) or an element of the application's (its toolbar); the switch
+  is drawn as one (track and knob).
+- Readable created headers: `pivot({ valueHeaders: 'auto' | 'fn' | 'name' })` — with several values « somme(Montant) »
+  under each crossing and under « Total »; `ColumnDef.headerShort` (a short header without unit, used by the pivot's
+  headers and chips); without `width`, a created column as wide as its header needs (120–240 px); its full name as
+  tooltip. `api.name(id)`; `pivot.valueChip` in `locales/<lang>-pivot`.
+- Created header bands fold with `groups()` (Enter / Space, `aria-expanded`), keeping their first column; never saved.
 
 ### Changed
+- With several values, the pivot's value headers read « sum(Amount) » (they read « Amount »): on screen, in CSV
+  (« Jan › sum(Amount) ») and Excel.
+- The state's `groups` part leaves out the pivot's folded bands (their ids hold row values).
+- Pivot with no pivot column: the deepest groups are last rows again (never open); HEAD's seam change had left one call
+  without its argument.
+- The columns panel: a long description (« masquée par son groupe replié ») shrinks beside the column's name in a narrow
+  panel instead of hiding it.
 - Grouping: a column change that keeps the grouping columns' definitions no longer groups again, nor totals again when
   no totalled column changed (a filter's new list of the same rows is the same order).
 - Grouping: `spans()` is told refused only when a column merges cells or rows are full width (header bands are drawn

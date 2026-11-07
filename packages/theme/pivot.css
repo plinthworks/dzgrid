@@ -1,0 +1,81 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  .dzg-pzone {
+    color: var(--tz-fg);
+    background: var(--dzg-header-bg, var(--tz-bg-raised));
+    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
+  }
+  .dzg-pzone > .dzg-gzone {
+    border-block-end: 0;
+    border-color: var(--tz-border);
+  }
+  .dzg-ppart-name {
+    color: var(--tz-fg);
+  }
+  .dzg-chip-o {
+    border: 0;
+    border-radius: var(--dzg-radius, 4px);
+    background: transparent;
+    color: var(--tz-fg-muted);
+  }
+  .dzg-chip-o:hover {
+    color: var(--tz-fg);
+  }
+  .dzg-chip-o[aria-pressed=true] {
+    color: var(--tz-fg);
+    font-weight: 600;
+  }
+  .dzg-chip-o:focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: -2px;
+  }
+  .dzg-pswitch.dzg-pswitch[aria-checked=true] {
+    color: var(--tz-fg);
+    background: transparent;
+  }
+  .dzg-pswitch-track {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    box-sizing: border-box;
+    inline-size: 1.75rem;
+    block-size: 1rem;
+    margin-inline-end: 0.375rem;
+    border: var(--dzg-line, 1px) solid var(--tz-fg-muted);
+    border-radius: 1rem;
+  }
+  .dzg-pswitch-track::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-start: 2px;
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+    border-radius: 50%;
+    background: var(--tz-fg-muted);
+  }
+  .dzg-pswitch[aria-checked=true] .dzg-pswitch-track {
+    background: var(--tz-accent);
+    border-color: var(--tz-accent);
+  }
+  .dzg-pswitch[aria-checked=true] .dzg-pswitch-track::after {
+    background: var(--tz-accent-fg);
+    inset-inline-start: calc(100% - 0.75rem);
+  }
+  @media (forced-colors: active) {
+    .dzg-pswitch-track {
+      forced-color-adjust: none;
+      border-color: ButtonText;
+    }
+    .dzg-pswitch-track::after {
+      background: ButtonText;
+    }
+    .dzg-pswitch[aria-checked=true] .dzg-pswitch-track {
+      background: Highlight;
+      border-color: Highlight;
+    }
+    .dzg-pswitch[aria-checked=true] .dzg-pswitch-track::after {
+      background: HighlightText;
+    }
+  }
+}

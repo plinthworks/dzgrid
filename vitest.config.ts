@@ -55,6 +55,7 @@ const domAlias = {
   '@dzgrid/dom/find': fileURLToPath(new URL('./packages/dom/src/find.ts', import.meta.url)),
   '@dzgrid/dom/row-drag': fileURLToPath(new URL('./packages/dom/src/row-drag.ts', import.meta.url)),
   '@dzgrid/dom/dock': fileURLToPath(new URL('./packages/dom/src/dock.ts', import.meta.url)),
+  '@dzgrid/dom/pivot-bar': fileURLToPath(new URL('./packages/dom/src/pivot-bar.ts', import.meta.url)),
   '@dzgrid/dom/pivot': fileURLToPath(new URL('./packages/dom/src/pivot.ts', import.meta.url)),
   '@dzgrid/dom/filters-panel': fileURLToPath(new URL('./packages/dom/src/filters-panel.ts', import.meta.url)),
   '@dzgrid/dom/row-numbers': fileURLToPath(new URL('./packages/dom/src/row-numbers.ts', import.meta.url)),

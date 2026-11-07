@@ -1,0 +1,37 @@
+{
+  "id": "desc-step",
+  "suite": "pivot",
+  "description": "The reversed pivot columns set after the load: only the one named runs in reverse, the other keeps its order; an unknown id there changes nothing and is not told (pivot.md 33).",
+  "refs": [
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      { "id": "g" },
+      { "id": "y" },
+      { "id": "m" },
+      { "id": "v", "type": "number", "aggFunc": "sum" }
+    ],
+    "rows": [
+      { "id": "a", "g": "Nord", "y": "2025", "m": "Jan", "v": 1 },
+      { "id": "b", "g": "Nord", "y": "2025", "m": "Feb", "v": 2 },
+      { "id": "c", "g": "Nord", "y": "2026", "m": "Jan", "v": 4 }
+    ],
+    "pivot": {
+      "by": ["g"],
+      "columns": ["y", "m"]
+    },
+    "steps": [
+      { "desc": ["y", "nope"] }
+    ]
+  },
+  "expected": {
+    "headers": ["2026/Jan", "2025/Feb", "2025/Jan"],
+    "shown": [
+      "[Nord] (3) 1/2 {2026/Jan=4 2025/Feb=2 2025/Jan=1 | v=7}",
+      "Σ* 2/2 {2026/Jan=4 2025/Feb=2 2025/Jan=1 | v=7}"
+    ],
+    "count": 3,
+    "problems": []
+  }
+}

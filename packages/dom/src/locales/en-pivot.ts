@@ -18,6 +18,7 @@ export const EN_PIVOT = {
     'pivot.tooMany': "{n} columns: too many for the screen; remove a column",
     'pivot.switch': "Pivot table",
     'pivot.fnSaid': "{column}: {fn}",
+    'pivot.valueChip': "{fn}({column})",
     'menu.pivotBy': "Spread across columns",
     'menu.pivotOff': "Stop spreading across columns",
     'menu.total': "Total",

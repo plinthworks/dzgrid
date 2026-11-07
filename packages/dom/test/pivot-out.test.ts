@@ -78,15 +78,15 @@ describe('export of a pivoted grid (pivot.md 27)', () => {
     const t = pmake({ features: [exp], settings: { messages }, pivot: { columns: ['month'], values: { amount: 'sum', qty: 'sum' } } });
     expect(await exp.run('displayed')).toBe('done');
     expect(await files[0]!.blob!.text()).toBe([
-      'Level,Region,Feb › Amount,Feb › Qty,Jan › Amount,Jan › Qty,Total › Amount,Total › Qty',
+      'Level,Region,Feb › sum(Amount),Feb › sum(Qty),Jan › sum(Amount),Jan › sum(Qty),Total › sum(Amount),Total › sum(Qty)',
       '1,Nord (2),5,2,10,1,15,3',
       '1,Sud (2),,,6,4,6,4',
       '1,(Blank) (1),1,1,,,1,1',
       '1,Total,6,3,16,5,22,8',
       '',
     ].join('\r\n'));
-    // The screen keeps its short headers.
-    expect(t.ctx.columns.get(JAN.replace(/6:amount$/, '3:qty'))!.def.header).toBe('Qty');
+    // The screen keeps its short headers (several values: « sum(Qty) », pivot.md 38).
+    expect(t.ctx.columns.get(JAN.replace(/6:amount$/, '3:qty'))!.def.header).toBe('sum(Qty)');
   });
 });
 
@@ -180,7 +180,7 @@ describe('review of the DOM batch (2026-11-07)', () => {
     const s = readXlsx(new Uint8Array(await files[0]!.blob!.arrayBuffer()));
     const row = (n: number) => Object.keys(s.cells).filter((k) => k.replace(/[A-Z]+/, '') === String(n)).map((k) => s.cells[k]);
     expect(row(1)).toEqual(expect.arrayContaining(['Feb', 'Jan', 'Total']));
-    expect(row(2)).toEqual(expect.arrayContaining(['Amount', 'Qty']));
+    expect(row(2)).toEqual(expect.arrayContaining(['sum(Amount)', 'sum(Qty)']));
     expect(row(3)).toEqual(expect.arrayContaining(['Nord (2)', 5, 2, 10, 1, 15, 3]));
   });
 });

@@ -62,6 +62,9 @@
     "./dock.css": "./dock.css",
     "./dock.unlayered.css": "./dock.unlayered.css",
     "./dock.scss": "./dock.scss",
+    "./pivot.css": "./pivot.css",
+    "./pivot.unlayered.css": "./pivot.unlayered.css",
+    "./pivot.scss": "./pivot.scss",
     "./filters-panel.css": "./filters-panel.css",
     "./filters-panel.unlayered.css": "./filters-panel.unlayered.css",
     "./filters-panel.scss": "./filters-panel.scss",
@@ -78,7 +81,7 @@
     "./dzgrid.comfort.unlayered.css": "./dzgrid.comfort.unlayered.css",
     "./comfort.scss": "./comfort.scss"
   },
-  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css", "edit.css", "edit.unlayered.css", "edit.scss", "range.css", "range.unlayered.css", "range.scss", "fill.css", "fill.unlayered.css", "fill.scss", "columns.css", "columns.unlayered.css", "columns.scss", "_menu-list.scss", "menu.css", "menu.unlayered.css", "menu.scss", "columns-panel.css", "columns-panel.unlayered.css", "columns-panel.scss", "pinned-rows.css", "pinned-rows.unlayered.css", "pinned-rows.scss", "print.css", "print.unlayered.css", "print.scss", "fresh-rows.css", "fresh-rows.unlayered.css", "fresh-rows.scss", "find.css", "find.unlayered.css", "find.scss", "row-drag.css", "row-drag.unlayered.css", "row-drag.scss", "dock.css", "dock.unlayered.css", "dock.scss", "filters-panel.css", "filters-panel.unlayered.css", "filters-panel.scss", "row-numbers.css", "row-numbers.unlayered.css", "row-numbers.scss", "search.css", "search.unlayered.css", "search.scss", "grouping.css", "grouping.unlayered.css", "grouping.scss", "dzgrid.comfort.css", "dzgrid.comfort.unlayered.css", "comfort.scss"],
+  "files": ["dzgrid.css", "dzgrid.unlayered.css", "dzgrid.scss", "contrast.css", "contrast.unlayered.css", "contrast.scss", "contrast-pairs.json", "tailwind.css", "tailwind3.css", "bootstrap.css", "midnight.css", "clinic.css", "edit.css", "edit.unlayered.css", "edit.scss", "range.css", "range.unlayered.css", "range.scss", "fill.css", "fill.unlayered.css", "fill.scss", "columns.css", "columns.unlayered.css", "columns.scss", "_menu-list.scss", "menu.css", "menu.unlayered.css", "menu.scss", "columns-panel.css", "columns-panel.unlayered.css", "columns-panel.scss", "pinned-rows.css", "pinned-rows.unlayered.css", "pinned-rows.scss", "print.css", "print.unlayered.css", "print.scss", "fresh-rows.css", "fresh-rows.unlayered.css", "fresh-rows.scss", "find.css", "find.unlayered.css", "find.scss", "row-drag.css", "row-drag.unlayered.css", "row-drag.scss", "dock.css", "dock.unlayered.css", "dock.scss", "pivot.css", "pivot.unlayered.css", "pivot.scss", "filters-panel.css", "filters-panel.unlayered.css", "filters-panel.scss", "row-numbers.css", "row-numbers.unlayered.css", "row-numbers.scss", "search.css", "search.unlayered.css", "search.scss", "grouping.css", "grouping.unlayered.css", "grouping.scss", "dzgrid.comfort.css", "dzgrid.comfort.unlayered.css", "comfort.scss"],
   "sideEffects": ["*.css"],
   "sass": "./dzgrid.scss"
 }

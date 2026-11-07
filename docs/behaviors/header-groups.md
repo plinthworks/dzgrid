@@ -119,5 +119,5 @@ to left.
 - A block of cells touching a folded column is cleared, as for a hidden one (owner Q8-3 revised).
 
 ## Pivot bands (Phase 10, `pivot.md` 3, 21)
-The pivot's bands are ordinary header groups made by the pivot (ids `~b…`), never collapsible; drawn by `spans()` with
+The pivot's bands are ordinary header groups made by the pivot (ids `~b…`), collapsible since the follow-up (`pivot.md` 34: folded, the first column kept; never saved); drawn by `spans()` with
 `aria-colspan`. Grouping no longer refuses `spans()`, only merged cells and full-width rows (2026-11-07).

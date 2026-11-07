@@ -6,15 +6,23 @@ import type { FeatureHandle } from '../features.js';
 import type { PivotMessageKey } from '../part-texts.js';
 
 /** The texts `pivot()` needs, from `@dzgrid/dom/locales/<lang>-pivot`. */
-export const PIVOT_KEYS = ['pivot.total', 'pivot.subtotal', 'pivot.count', 'pivot.tooMany', 'pivot.switch'] as const satisfies readonly PivotMessageKey[];
+export const PIVOT_KEYS = ['pivot.total', 'pivot.subtotal', 'pivot.count', 'pivot.tooMany', 'pivot.switch', 'pivot.valueChip'] as const satisfies readonly PivotMessageKey[];
 
 type Fns = Readonly<Record<string, AggFuncName | AggFn>>;
 type Grid = { readonly kernel: GridKernel<any, any> };
 
 /** A pivot (docs/behaviors/pivot.md 17–30): `@dzgrid/core/pivot`'s options but the grouping's (given to `grouping()`) and the texts. */
 export interface PivotFeatureOptions extends Omit<PivotOptions, keyof GroupingOptions | 'labels'> {
-  /** A « Tableau croisé » switch above the rows, for the user (pivot.md 24; Q-P6 A: off by default, the mode the application's). */
-  readonly toggle?: boolean;
+  /**
+   * A « Tableau croisé » switch for the user (pivot.md 24, 35; Q-P6 A: none by default, the mode the application's):
+   * `true` or `'inside'` in the pivot's strip above the rows (in the bar with `pivotBar()`), an element: appended into it.
+   */
+  readonly toggle?: boolean | 'inside' | HTMLElement;
+  /**
+   * The value columns' headers (pivot.md 38): `'auto'` (default) « sum(Amount) » when there are several values, the short
+   * name otherwise; `'fn'` the function form always; `'name'` the short name (`headerShort`, else `header`) only.
+   */
+  readonly valueHeaders?: 'auto' | 'fn' | 'name';
   /** The label column's width (default 200). */
   readonly labelWidth?: number;
 }
@@ -28,6 +36,11 @@ export interface PivotApi {
   by(): readonly string[];
   /** Pivots by these columns at once; `user`: the number of created columns said. */
   setBy(by: readonly string[], o?: { readonly user?: boolean }): void;
+  /** The pivot columns whose created columns run in reverse (pivot.md 33). */
+  desc(): readonly string[];
+  setDesc(ids: readonly string[], o?: { readonly user?: boolean }): void;
+  /** A column's short name as the application gave it (`headerShort`, else `header`, else its id; pivot.md 38). */
+  name(id: string): string;
   /** Whether a column may become a pivot column: known, groupable, not one the pivot made, not grouping the rows. */
   accepts(id: string): boolean;
   /** The values and their functions. */
@@ -103,7 +116,16 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
   let made = '';
   let tell = false;
   let warned = '';
-  const name = (id: string): string => m.get(id)?.def.header ?? id;
+  /** The application's own definitions: the short names (pivot.md 38). */
+  let defs = new Map<string, ColumnDef<unknown>>();
+  const name = (id: string): string => { const d = defs.get(id); return d?.headerShort ?? d?.header ?? id; };
+  /** A value's header: « sum(Amount) » (`full`: the full header, for the tooltip) or its short name. */
+  const vhead = (id: string, fn: boolean, full?: boolean): string => {
+    const col = (full && defs.get(id)?.header) || name(id);
+    // The function's name (an application's own has none: the column alone).
+    const t = fn && g.settings.messages.text[`fn.${shape.valueFns()[id]}` as 'fn.sum'];
+    return typeof t == 'string' ? g.msg('pivot.valueChip', { fn: t.toLocaleLowerCase(g.settings.messages.locale), column: col }) : col;
+  };
   /** The user's or the definition's hidden (one read of the states per call: `sig` runs at each paint). */
   const shownOf = (ds: readonly ColumnDef<unknown>[]): ColumnDef<unknown>[] => {
     const st = new Map(m.state().map((x) => [x.id, x.hidden]));
@@ -140,7 +162,20 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
   };
   /** A created header as shown: the empty crossing's « (Vide) », a sub-total's « Total 2025 ». */
   const head = (h: string | undefined): string => (h === BLANK ? g.msg('group.blank') : h?.[0] === SUB ? g.msg('pivot.subtotal', { name: head(h.slice(1)) }) : h ?? '');
-  const relabel = (t: readonly ColumnOrGroup<unknown>[]): ColumnOrGroup<unknown>[] => t.map((n) => ({ ...n, header: head(n.header), ...('children' in n && { children: relabel(n.children) }) }));
+  /** The created tree as shown (pivot.md 34, 38): headers translated, the value headers, tooltips, widths, bands that fold. */
+  const relabel = (t: readonly ColumnOrGroup<unknown>[], fn: boolean, many: boolean, up: string[] = []): ColumnOrGroup<unknown>[] =>
+    t.map((n, i) => {
+      // A row total (under « Total ») is its own value.
+      const vc = shape.valueColumn(n.id) ?? (n.id[0] != '~' && n.id);
+      const own = vc == n.id;
+      // Several values or a row total: the value's header; one value: the crossing's label.
+      const h = vc && (many || own) ? vhead(vc, fn) : head(n.header);
+      const x: Record<string, unknown> = { ...n, header: h };
+      if ('children' in n) (x.children = relabel(n.children, fn, many, [...up, h])), (x.collapsible = true);
+      else if (vc) (x.headerTooltip = [...up, ...(many || own ? [] : [h]), vhead(vc, true, true)].join(' › ')), own || o.width || (x.width = Math.min(240, Math.max(120, h.length * 9 + 64)));
+      if (i && up.length && !own) x.groupShow = 'open';
+      return x as unknown as ColumnOrGroup<unknown>;
+    });
   const setTree = (t: readonly ColumnOrGroup<unknown>[]): void => {
     g.settings = { ...g.settings, columns: t as never };
     kernel.dispatch({ type: 'columns.set', defs: t }, 'host');
@@ -152,11 +187,13 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
     if (r.layoutChanged) kernel.dispatch({ type: 'column.state', patch: [] }, 'host');
   };
   /** What the effective columns are made of: the created columns, the grouping, the values, the language, the searched columns. */
-  const sig = (): string => [shape.on, shape.generated().key, shape.reads!().join('\0'), Object.keys(shape.valueFns()).join('\0'), g.settings.messages.locale, shownOf(leaves(host)).map((d) => d.id).join('\0')].join('\u0002');
+  const sig = (): string => [shape.on, shape.generated().key, shape.reads!().join('\0'), Object.entries(shape.valueFns()).map((e) => e.join('\u0003')).join('\0'), g.settings.messages.locale, shownOf(leaves(host)).map((d) => d.id).join('\0')].join('\u0002');
 
   /** The effective columns made again from the application's (pivot.md 17, 18, 29). */
   const derive = (): void => {
     made = sig();
+    const all = leaves(host);
+    defs = new Map(all.map((d) => [d.id, d]));
     const gen = shape.generated();
     // Off, or both bands emptied: the application's columns back (owner, 2026-11-07).
     if (!shape.on || (!shape.pivotBy.length && !shape.reads!().length)) {
@@ -164,15 +201,18 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
       return;
     }
     const vals = Object.keys(shape.valueFns()).filter((id) => m.get(id));
-    const all = leaves(host);
+    const many = vals.length > 1;
+    const fn = o.valueHeaders === 'fn' || (o.valueHeaders !== 'name' && many);
     const folded = all.filter((d) => !vals.includes(d.id));
     const label: ColumnDef<unknown> = {
       id: LABEL, header: shape.reads!().map(name).join(' / '), pinned: 'start', width: o.labelWidth ?? 200, movable: false, hideable: false, chooser: false,
       filter: false, groupable: false, type: 'custom', codec, value: ID,
     } as ColumnDef<unknown>;
-    const total = vals.length ? [{ id: '~b:total', header: g.msg('pivot.total'), children: all.filter((d) => vals.includes(d.id)) }] : [];
+    // The row totals: the value columns under « Total », their headers the values' (38).
+    const tot = g.msg('pivot.total');
+    const total = vals.length ? [{ id: '~b:total', header: tot, children: relabel(all.filter((d) => vals.includes(d.id)), fn, many, [tot]) }] : [];
     searched = shownOf(folded).map((d) => d.id);
-    setTree((eff = [label, ...strip(host, vals), ...relabel(gen.columns), ...total]));
+    setTree((eff = [label, ...strip(host, vals), ...relabel(gen.columns, fn, many), ...total]));
     foldTo(new Set(folded.map((d) => d.id)));
     // Find (pivot.md 25): the cells shown, and on a last row's label cell the data of its rows.
     g.rowText = (n, vis) =>
@@ -195,7 +235,11 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
   const bar = doc.createElement('div');
   // The bands' strip and look (`@dzgrid/theme/grouping.css`).
   bar.className = 'dzg-gzone dzg-pbar';
-  const sw = o.toggle ? bar.appendChild(doc.createElement('button')) : null;
+  // The switch (pivot.md 35): in the strip, in the application's element, or none; a track and a knob drawn by the theme.
+  const inside = o.toggle === true || o.toggle === 'inside';
+  const sw = o.toggle ? (inside ? bar : (o.toggle as HTMLElement)).appendChild(doc.createElement('button')) : null;
+  const track = doc.createElement('span');
+  track.className = 'dzg-pswitch-track';
   const note = bar.appendChild(doc.createElement('span'));
   note.className = 'dzg-pnote';
   if (sw) (sw.type = 'button'), (sw.className = 'dzg-chip dzg-pswitch'), sw.setAttribute('role', 'switch');
@@ -204,9 +248,9 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
     const gen = shape.generated();
     const t = gen.key[0] === '>' ? g.msg('pivot.tooMany', { n: gen.count }) : '';
     if (note.textContent !== t) note.textContent = t;
-    if (sw) sw.textContent = g.msg('pivot.switch'), sw.setAttribute('aria-checked', String(shape.on));
+    if (sw) sw.replaceChildren(track, g.msg('pivot.switch')), sw.setAttribute('aria-checked', String(shape.on));
     // The band's own `display` would beat `hidden`.
-    bar.hidden = !sw && !t;
+    bar.hidden = !inside && !t;
     bar.style.display = bar.hidden ? 'none' : '';
   };
   const gesture = (user: boolean | undefined, f: (source: 'user' | 'api') => void): void => {
@@ -244,6 +288,9 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
     setOn: (on, x) => gesture(x?.user, (s) => shape.setOn(on, s)),
     by: () => shape.pivotBy,
     setBy: (by, x) => gesture(x?.user, (s) => shape.setPivotBy(by, s)),
+    desc: () => shape.pivotDesc,
+    setDesc: (d, x) => gesture(x?.user, (s) => shape.set({ desc: d }, s)),
+    name,
     accepts: (id) => !!m.get(id) && m.get(id)!.def.groupable !== false && !shape.made(id) && !shape.reads!().includes(id),
     values: () => shape.valueFns(),
     setValues: (v, x) => gesture(x?.user, (s) => shape.setValueFns(v, s)),
@@ -269,6 +316,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
       off();
       apis.delete(kernel);
       bar.remove();
+      sw?.remove();
       delete g.rowText;
       delete g.exportColumns;
       delete g.pivotState;

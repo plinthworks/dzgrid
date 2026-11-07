@@ -1,0 +1,59 @@
+{
+  "id": "pivot-desc",
+  "suite": "grid-state",
+  "description": "The reversed pivot columns are saved with the pivot (`desc`, ids only), restored and checked like `columns`; a grid with none reversed writes no `desc` (grid-state.md « Pivot »; pivot.md 33).",
+  "refs": [
+    "docs/behaviors/grid-state.md",
+    "docs/behaviors/pivot.md"
+  ],
+  "input": {
+    "columns": [
+      { "id": "ward", "header": "Ward" },
+      { "id": "month", "header": "Month" },
+      { "id": "amount", "type": "number", "aggFunc": "sum" }
+    ],
+    "rows": [
+      { "id": "r1", "ward": "N", "month": "Jan", "amount": 1 }
+    ],
+    "pivot": {
+      "by": ["ward"],
+      "columns": ["month"],
+      "values": { "amount": "sum" }
+    },
+    "restore": {
+      "v": 1,
+      "pivot": {
+        "on": true,
+        "columns": ["month"],
+        "desc": ["month", "nope", "month", 3]
+      }
+    }
+  },
+  "expected": {
+    "problems": [
+      { "code": "state-column", "severity": "warning", "path": "pivot.desc.1", "detail": "nope" },
+      { "code": "state-field", "severity": "warning", "path": "pivot.desc.2" },
+      { "code": "state-field", "severity": "warning", "path": "pivot.desc.3" }
+    ],
+    "state": {
+      "v": 1,
+      "columns": [
+        { "id": "ward", "order": 0, "pinned": null },
+        { "id": "month", "order": 1, "pinned": null },
+        { "id": "amount", "order": 2, "pinned": null }
+      ],
+      "sort": [],
+      "filter": {},
+      "quick": "",
+      "rowGroups": ["ward"],
+      "pivot": {
+        "on": true,
+        "columns": ["month"],
+        "desc": ["month"],
+        "values": { "amount": "sum" }
+      }
+    },
+    "shown": ["[N]", "Σ"],
+    "by": ["ward"]
+  }
+}

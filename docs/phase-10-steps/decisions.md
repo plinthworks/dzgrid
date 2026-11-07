@@ -185,3 +185,56 @@ Code review and test analysis of the new code (`grouping/shape.ts`, `grouping/ag
 - Left: the export's functions with pivot mode **off** read the pivot's values (`g.grouped.aggFuncs`): only a count
   written under a non-number column could differ, not observable in any made-up case — not changed. The columns panel
   lists the folded data columns as shown (it reads the user's hidden, not the fold), as with collapsed header groups.
+
+## Follow-up: the bar (owner feedback 2026-11-07, « ok »)
+Sheets amended first: `pivot.md` 31–40, `grid-state.md` « Pivot » (`desc`), `header-groups.md`, `group-drop-zone.md`,
+`columns-chooser.md`, `dock.md`. Done, tests first: the core's `desc` (`pivot({ desc })`, `set({ desc })`, `pivotDesc`,
+`checkPivot`, `GridState.pivot.desc` written only when one is reversed; conformance `pivot/desc-option`, `desc-step`,
+`grid-state/pivot-desc`); the state's `groups` skips the pivot's ids; `ColumnDef.headerShort` (types only); `dom/pivot`:
+`toggle: true | 'inside' | element` (a real switch, track and knob), readable headers (`valueHeaders`, short names,
+estimated widths 9 px × characters + 64, 120–240 (Chrome: 8 + 56 cut « somme(Quantité) »), the full chain as `headerTooltip`), created bands collapsible (first
+column kept), `api.desc / setDesc / name`; `packages/dom/test/pivot-headers.test.ts`; two-value CSV / Excel expectations
+now « sum(Amount) ». Fixed on the way: `core/grouping/shape.ts` `deep` called `flat()` without its new argument (HEAD's
+type error). Measures: core/state 1 607 (line 1 601 → 1 610, +2 % rule), core/pivot 3 672 / 3 750, -pivot texts
+389 / 428 / 566. **Stopped: `dom/pivot` 2 546 B over its 2 350 line** (+2 % allows 2 397; measured 2 131 before): the
+headers ~250 B, tooltips and widths 60, folds 29, api 20, switch ~25. Not started: `pivotBar` (bar, values, ↑/↓, moves),
+the columns panel's sections and switch, `pivot.css`, the demo, browsers, gate.
+**Owner A (2026-11-07)**: the `dom/pivot` line raised 2 350 → 2 600 (measured 2 546); the batch goes on. For any other
+line: measured first; the bar's code in its own new entry rather than pushing a shared line past +2 %.
+
+### The bar: decisions taken alone (2026-11-07)
+- **Its own entry and its own band code.** `@dzgrid/dom/pivot-bar` (`pivotBar()`) draws the three parts with its own copy
+  of the band's logic (chips, roving, keys, chip drag, header drop, « + »), grown with the parts' needs; `group-zone` is
+  byte for byte unchanged (2 883 / 2 890, owner guidance). Shared: the chip classes, `ZONE_CSS` (imported, injected once)
+  and the theme. Two places now draw chips (group-zone and the bar): a rule changed in one must reach the other.
+- **Order of the parts**: Lignes, Colonnes, Valeurs in the bar **and** in the panel (the request listed the panel's as
+  Lignes / Valeurs / Colonnes: one order everywhere, so Ctrl+Shift+ArrowUp / ArrowDown mean the same in both).
+- **Moves between parts**: Ctrl+Shift+ArrowUp / ArrowDown (the reorder keys' vertical pair, free in both layouts); added
+  last, said as an add there; refused said (`pivot.refused`). A band's column is in one band only: moved or dropped onto
+  the other band, it leaves the first. A column may be a band's and a value's at once (counting regions is fine).
+- **Values**: « + » offers number columns and those with an `aggFunc`; a new one takes its `aggFunc` when it fits, else
+  `sum` (number) or `count`. The functions that fit: the column menu's rule (number: all; day, instant, text: min, max,
+  count; any: count) — written in both places (column menu, bar).
+- **The switch**: one name « Tableau croisé » (`pivot.switch`) for the pivot's own, « Mode pivot » (`pivot.mode`) in the
+  panel as asked; both in the dialog and the dock (the request named the dock; the dialog gets the same top).
+- **Panel seam**: `GridContext.panelTop(host)` (types only in the base), called by `columnsChooser()` at each draw on a
+  `.dzg-cp-top` under its title; the dialog's Tab goes through its `[tabindex="0"]` items first. A dialog's menus (« + »,
+  a value's) open over it without closing it.
+- **Created bands fold** by marking each pivot band `collapsible`, every child but the first `groupShow: 'open'`; the
+  « Total » band is not. **Short names**: `ColumnDef.headerShort` (types only, core). **Widths** 9 px × characters + 64.
+- **Exports** show the screen's headers (short names, « sum(Amount) »); the full names are the tooltips only.
+- **Fixed on the way** (test first, `packages/core/test/pivot.test.ts`): HEAD's `flat()` seam call in `deep` lacked its
+  argument — with no pivot column the deepest groups were openable. **Columns panel**: in a 288 px panel a description
+  hid the column's name (pre-existing, seen in the demo): the description now shrinks with the name (`columns-panel.css`).
+
+### The bar: measures (2026-11-07)
+- Sizes (gzip): dom/pivot-bar 4 855 (new, line 5 350); -pivot-bar texts 274 / 310 / 380 (350 / 350 / 450); pivot.css 599
+  (700); dom/pivot 2 548 / 2 600 (owner A); columns-panel 4 510 (line 4 488 → 4 520, +0.7 %); columns-panel.css 993 /
+  1 000; -pivot texts 389 / 428 / 566; core/pivot 3 672 / 3 750; core/state 1 607 (1 610); group-zone 2 883, core base
+  29 258, DOM base 23 650, K.8 89 978 unchanged. `check:contrast` 0 below (six new pairs).
+- Chrome (local demo, fr / ar × light / dark at 1 400 px, fr light and ar dark at 320 px): three named parts, one line
+  wide (the first at the right in Arabic), stacked full width at 320 px with no sideways scroll, 24 px targets, created
+  headers not cut (8 px + 56 cut « somme(Quantité) »: 9 + 64 kept), the switch in the page's toolbar, the docked panel's
+  switch and parts, band toggles, axe 0 (also with a value's menu open), Ctrl+Shift+ArrowDown moving Ville to
+  « Colonnes » with the focus, no page error. Firefox and WebKit, Arabic, 1 400 and 320 px: the same layout; WebKit at
+  320 px logs one « ResizeObserver loop completed » notice when the docked panel is closed (no visible fault; left).

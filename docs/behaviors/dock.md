@@ -103,3 +103,7 @@ d.api(grid)?.move('filters', 'bottom');
 ## Tests
 Conformance `conformance/cases/grid-state/dock-*.json` (by hand). DOM `packages/dom/test/dock*.test.ts`. Browsers
 `node scripts/browser-dock.mjs` (Chrome; Firefox and WebKit for layout and right to left; axe fr / ar).
+
+## Beside a pivot (follow-up, owner 2026-11-07)
+The docked columns panel shows the pivot's « Mode pivot » switch and its three parts at its top (`columns-chooser.md`
+« Beside a pivot », `pivot.md` 35–36). Nothing else of the dock changes.

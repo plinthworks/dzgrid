@@ -208,3 +208,6 @@ export function slotAt(e: { readonly clientX: number; readonly clientY: number }
   });
   return i < 0 ? boxes.length : i;
 }
+
+/** The element under a pointer event's point (the pivot bar's chip released over another part); null where the document draws nothing. */
+export const atPoint = (doc: Document, e: { readonly clientX: number; readonly clientY: number }): Element | null => doc.elementFromPoint?.(e.clientX, e.clientY) ?? null;

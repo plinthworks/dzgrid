@@ -200,3 +200,8 @@ shows it from the start): the same search, list, ticks, moves, drag and buttons,
 `aria-modal`, no focus trap (Tab is the page's), no live region of its own (the grid's); its title is the area's head.
 `open(anchor)` shows it (its search focused), « Fermer » and `close()` hide it, the focus back to what opened it;
 `isOpen` is « its body is seen »; new definitions redraw it (it stays). Without the dock: the dialog, unchanged.
+
+## Beside a pivot (follow-up, owner 2026-11-07; `pivot.md` 35–37)
+With `pivotBar()` (its `panel`, default true) the panel starts, under its title and above its search, with the « Mode
+pivot » switch and the three parts « Lignes », « Colonnes », « Valeurs » (the bar's, wrapped to the panel's width); in
+the dialog, Tab goes through the switch and each part's stop before the search. Without a pivot: unchanged.

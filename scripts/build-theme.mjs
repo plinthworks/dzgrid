@@ -16,6 +16,7 @@
  *   row-numbers.scss → row-numbers.css and row-numbers.unlayered.css, 1.4.0 (the row numbers' strip)
  *   row-drag.scss → row-drag.css and row-drag.unlayered.css, Phase 9 (moving rows: the grip, the line, the ghost)
  *   dock.scss → dock.css and dock.unlayered.css, Phase 9 (the dock: areas, edge, tabs)
+ *   pivot.scss → pivot.css and pivot.unlayered.css, Phase 10 follow-up (the pivot's bar and switch)
  *   search.scss   → search.css and search.unlayered.css, 1.4.0 (the quick search's words tinted in the cells)
  *   grouping.scss → grouping.css and grouping.unlayered.css, Phase 7 steps 5–6 (grouped rows, the « Regrouper par » band)
  *   comfort.scss  → dzgrid.comfort.css and dzgrid.comfort.unlayered.css, the owner's third look (decisions.md « Comfort stylesheet »)
@@ -31,7 +32,7 @@ const out = (source, file) => {
   writeFileSync(`${dir}${file}`, `${css}\n`);
   console.log(`build:theme: ${file}`);
 };
-for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows', 'find', 'filters-panel', 'row-numbers', 'search', 'grouping', 'row-drag', 'dock']) {
+for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows', 'find', 'filters-panel', 'row-numbers', 'search', 'grouping', 'row-drag', 'dock', 'pivot']) {
   out(`@use "${name}";`, `${name}.css`);
   out(`@use "${name}" with ($layered: false);`, `${name}.unlayered.css`);
 }

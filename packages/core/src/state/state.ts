@@ -57,6 +57,8 @@ export interface GridState {
 export interface PivotState {
   readonly on?: boolean;
   readonly columns?: readonly string[];
+  /** The pivot columns whose created columns run in reverse (pivot.md 33): written only when one does. */
+  readonly desc?: readonly string[];
   readonly values?: Readonly<Record<string, AggFuncName>>;
 }
 
@@ -147,7 +149,8 @@ export function captureState<T>(k: GridKernel<T>, env: StateEnv = {}, opts?: Sta
       const n = now(m, c);
       return { id: c.id, width: n.width, hidden: n.hidden || undefined, pinned: n.pinned, order };
     }),
-    groups: env.groups?.get(),
+    // A pivot's folded bands too (pivot.md 34): their ids hold row values.
+    groups: env.groups && Object.fromEntries(Object.entries(env.groups.get()).filter((e) => mine(e[0]))),
     sort: q.sort.filter((x) => mine(x.column)),
     filter: q.filter,
     quick: q.quick,

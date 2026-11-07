@@ -155,6 +155,9 @@
       "@dzgrid/dom/pivot": [
         "./packages/dom/src/pivot.ts"
       ],
+      "@dzgrid/dom/pivot-bar": [
+        "./packages/dom/src/pivot-bar.ts"
+      ],
       "@dzgrid/dom/dock": [
         "./packages/dom/src/dock.ts"
       ],

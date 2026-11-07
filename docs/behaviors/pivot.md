@@ -166,3 +166,91 @@ application). Its texts come in `locales/<lang>-pivot`.
 | `pivot.fnSaid` | {column}: {fn} | {column} : {fn} | {column}: {fn} |
 
 - **Both bands empty (owner, 2026-11-07):** with no grouping column and no pivot column, pivot mode shows the table itself — the application's columns and every row, the grand total row kept at the end. Putting a column back in either band makes the pivot again.
+
+## One bar, the values, the order, the folds (owner feedback 2026-11-07, « ok »; written before its code)
+The header area « looks unfinished »: three stacked strips, two bands whose purpose is unclear once filled, created headers
+cut. This follow-up (1.7.0) replaces them with one named bar and makes the created headers readable. Decisions taken alone
+are in `docs/phase-10-steps/decisions.md` « Follow-up: the bar ».
+
+31. **One bar** (`pivotBar({ use: { grouping, pivot, columns? }, panel? })`, `@dzgrid/dom/pivot-bar`, texts in
+    `locales/<lang>-pivot-bar`, look in `@dzgrid/theme/pivot.css`): one strip above the rows with three parts in this
+    order — « Lignes » (the grouping columns), « Colonnes » (the pivot columns), « Valeurs » (the values). Each part is a
+    `toolbar` named by its visible name (`aria-labelledby`), its own tab stop, the chips, keys, chip drag, header drop,
+    « + » and × of `group-drop-zone.md` 9, 14–18; empty, its hint. A thin rule separates the parts (at the inline start of
+    the second and third: the right side in Arabic). When the bar is 30 rem wide or less (its own width, a container
+    query: 320 px screens), the parts stack, one per line, the rule above each. The pivot's own strip (the switch when
+    `toggle` is `'inside'`, the limit's note) joins the bar at its end. It replaces the two `groupZone()` bands beside a
+    pivot; `groupZone()` alone (grouping without pivot) is unchanged (« Regrouper par » as before).
+32. **« Valeurs »**: a chip per value, in the values' order: « somme(Montant) » — `pivot.valueChip` `{fn}({column})`, the
+    function's name (`fn.*`) in the language's lower case and the column's short name (38); an application's own function
+    (no name) shows the column's name alone. The chip's button has `aria-haspopup="menu"`: Enter, Space or a click opens
+    the grid's menu, the radios « Total » of the functions that fit the column (20), the current one checked; choosing one
+    sets it for all its columns, said (`pivot.fnSaid`); the focus back on the chip (Escape too). × or Delete removes the
+    value, said (`pivot.valueRemoved`); the last one removed leaves the rows grouped with no created column.
+    Ctrl+Shift+arrows move a value one place (the order of the value columns under each crossing), said
+    (`pivot.valuePlaced`). « + » (`pivot.addValue`) lists the columns that can be totalled — known, not made by the pivot,
+    not a value yet, a number column or one with an `aggFunc` — by name in the grid's order; one chosen is added last with
+    its `aggFunc` when it names a function that fits, else `sum` for a number, `count` otherwise; said
+    (`pivot.valueAdded`). A header dropped on the part (with `columns()`) is added the same way.
+33. **The order of a pivot column's created columns**: each « Colonnes » chip carries, after its name, a button ↑ (the
+    order of 5) or ↓ (reversed, « (Vide) » still last), `aria-pressed` true when reversed, named `pivot.order`
+    (« Ordre inverse : Mois »); a click, Enter or Space flips it, said (`pivot.reversed` / `pivot.ordered`); it is an item
+    of the part's roving order (name, order, ×). The reversed pivot columns are the pivot's (`api.desc()`,
+    `setDesc(ids)`, `pivot({ desc })`), **saved with the pivot**: `GridState.pivot.desc` (ids, written only when one is
+    reversed; absent means none). A descending sort on the pivot column (5, through the API) reverses it too: either one
+    reverses. The created columns keep their ids, widths and folds (13).
+34. **Created bands fold** (with `groups()` and `spans()`): every band the pivot makes (a crossing over several columns,
+    `~b…`) is a collapsible header group, open at first: its header carries the toggle (`aria-expanded`), Enter or Space on
+    the band's header folds it (`header-groups.md` 8–11). Folded, it keeps its first column (the first value of its first
+    crossing) and folds the others away, joined with the pivot's own fold (18); a sub-total after it (`subtotals`) stays
+    beside it. The « Total » band does not fold. A folded created band is kept while it exists (by id: a new month keeps
+    the others' folds) and is **never saved** (its id holds row values: the state's `groups` skips the pivot's ids).
+    Without `groups()` the bands do not fold.
+35. **The switch** (`pivot({ toggle })`, replaces 24's placement): `true` or `'inside'`: in the pivot's strip (in the bar
+    with `pivotBar()`); an element: the switch is appended into it (the application's toolbar, beside its own buttons),
+    removed at destroy; absent: no switch. Always a `button` with `role="switch"`, `aria-checked` the mode, its visible
+    name `pivot.switch` beside a track and knob drawn by the theme (`pivot.css`), 24 px high. With `pivotBar()` and
+    `columnsChooser()`, the columns panel (docked or dialog) starts with a second switch « Mode pivot » (`pivot.mode`):
+    the same mode. Each flip is a gesture (28).
+36. **Sections in the columns panel** (`pivotBar({ panel })`, default true, with `columnsChooser()`, `columns-chooser.md`):
+    under its title and above its search, the switch (35) then the three parts of the bar (31–33), the same chips, keys,
+    menus and moves, wrapped to the panel's width. In the dialog, Tab goes switch → each part's stop → search → list →
+    buttons (still trapped).
+37. **Moving a column between parts** (the bar and the panel): Ctrl+Shift+ArrowUp / ArrowDown on a chip's item moves its
+    column to the previous / next part (Lignes, Colonnes, Valeurs; no wrap), added last there when that part accepts it
+    (Lignes and Colonnes: known, groupable, not made by the pivot; Valeurs: 32's rule), said as an add there
+    (`zone.grouped`, `pivot.grouped`, `pivot.valueAdded`), the focus on its chip in the new part; refused, nothing
+    changes, said `pivot.refused` (« Ventes ne peut pas aller dans Valeurs »). A chip dragged (mouse, pen) and released
+    over another part does the same; released elsewhere, nothing.
+38. **Readable created headers**: `pivot({ valueHeaders })` — `'auto'` (default): with several values, the value headers
+    under each crossing and under « Total » are `{fn}({column})` (« somme(Montant) »), with one value the crossing's
+    label alone (3) and « Total » over the column's short name; `'fn'`: the function form always (also under « Total »
+    with one value); `'name'`: the short name only. **The short name** is `ColumnDef.headerShort` when the application
+    gives it (« Montant » for « Montant (DA) »: no unit), else `header`; the chips of the three parts use it too. **Width**:
+    without `pivot({ width })`, a created column is as wide as its header needs, estimated without measuring: 9 px per
+    character plus 64 px (padding, resize grip and menu; measured in Chrome), at least 120, at most 240; a longer one is cut with « … ». **Tooltip**: each
+    created column and each row total carries its full name, the chain with the full headers (« Janv. › somme(Montant
+    (DA)) »).
+39. **Texts** `locales/<lang>-pivot-bar` (en / fr / ar):
+
+| key | en | fr | ar |
+|---|---|---|---|
+| `pivot.rows` | Rows | Lignes | الصفوف |
+| `pivot.columns` | Columns | Colonnes | الأعمدة |
+| `pivot.values` | Values | Valeurs | القيم |
+| `pivot.valuesEmpty` | Add a value to total | Ajoutez une valeur à totaliser | أضف قيمة لجمعها |
+| `pivot.addValue` | Add a value | Ajouter une valeur | إضافة قيمة |
+| `pivot.removeValue` | Remove {column} from the values | Retirer {column} des valeurs | إزالة {column} من القيم |
+| `pivot.valueAdded` | Value added: {column} | Valeur ajoutée : {column} | أُضيفت قيمة: {column} |
+| `pivot.valueRemoved` | {column} removed from the values | {column} retiré des valeurs | أُزيل {column} من القيم |
+| `pivot.valuePlaced` | {column}: place {n} of {total} | {column} : place {n} sur {total} | {column}: الموضع {n} من {total} |
+| `pivot.order` | Reverse order: {column} | Ordre inverse : {column} | ترتيب معكوس: {column} |
+| `pivot.reversed` | {column}: reverse order | {column} : ordre inverse | {column}: ترتيب معكوس |
+| `pivot.ordered` | {column}: usual order | {column} : ordre habituel | {column}: الترتيب المعتاد |
+| `pivot.refused` | {column} cannot go in {part} | {column} ne peut pas aller dans {part} | لا يمكن وضع {column} في {part} |
+| `pivot.mode` | Pivot mode | Mode pivot | الوضع المحوري |
+
+    And in `locales/<lang>-pivot`: `pivot.valueChip` `{fn}({column})` (the same in the three languages; Arabic
+    `{fn}({column})` too, the parentheses mirrored by the reading direction).
+40. **Health data**: the chips, the parts and the panel show column names and function names only; the created headers
+    and tooltips hold the crossings' values (as 17's bands do) and live only in the page; `desc` holds column ids.

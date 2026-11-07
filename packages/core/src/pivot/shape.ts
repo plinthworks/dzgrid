@@ -18,6 +18,8 @@ export interface PivotOptions extends GroupingOptions {
   readonly on?: boolean;
   /** The pivot columns' ids, the first band first. */
   readonly columns?: readonly string[];
+  /** The pivot columns whose created columns run in reverse, « (Vide) » still last (pivot.md 33). */
+  readonly desc?: readonly string[];
   /** The values and their functions, in order (default: the options' `aggFuncs`, then the shown columns with an `aggFunc`). */
   readonly values?: Fns;
   /** A sub-total after each pivot band, per value (pivot.md 8). */
@@ -53,11 +55,13 @@ export interface PivotShape<T> extends GroupShape<T> {
   /** The pivot columns as given (unknown or refused ones told, skipped). */
   readonly pivotBy: readonly string[];
   setPivotBy(columns: readonly string[], source?: ChangeSource): void;
+  /** The pivot columns run in reverse (pivot.md 33), as given. */
+  readonly pivotDesc: readonly string[];
   /** The values and their functions now. */
   valueFns(): Fns;
   setValueFns(values: Fns, source?: ChangeSource): void;
   /** Several at once, one build (a restored state); what is given is set, what is wrong told. */
-  set(p: { readonly on?: boolean; readonly columns?: readonly string[]; readonly values?: Fns }, source?: ChangeSource): void;
+  set(p: { readonly on?: boolean; readonly columns?: readonly string[]; readonly desc?: readonly string[]; readonly values?: Fns }, source?: ChangeSource): void;
   /** The created columns of the last build. */
   generated(): PivotColumns<T>;
   /** Whether an id is one the pivot makes (a created column, band or sub-total): kept out of the saved state. */
@@ -97,6 +101,9 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
   let by: readonly string[] = [];
   if (Array.isArray(o.columns)) by = o.columns.slice();
   else if (o.columns !== undefined) bad('columns', typeof o.columns);
+  let rev: readonly string[] = [];
+  if (Array.isArray(o.desc)) rev = o.desc.slice();
+  else if (o.desc !== undefined) bad('desc', typeof o.desc);
   let vals: Fns | undefined;
   if (isObj(o.values)) vals = { ...o.values };
   else if (o.values !== undefined) bad('values', typeof o.values);
@@ -149,7 +156,8 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
         if (col && (typeof fn == 'function' || (NAMES.includes(fn as string) && fits(col, fn)))) specs.push({ col, fn });
       }
       const sort = model?.query.sort ?? [];
-      const desc = pc.map((c) => +(sort.find((x) => x.column === c.id)?.dir === 'desc')).join('');
+      // Reversed by the pivot's own `desc` or by a descending sort on it (pivot.md 5, 33).
+      const desc = pc.map((c) => +(rev.includes(c.id) || sort.find((x) => x.column === c.id)?.dir === 'desc')).join('');
       const same = (a: unknown[] | undefined, b: unknown[]): boolean | undefined => a && a.length === b.length && a.every((v, i) => v === b[i]);
       const ck = [s.leaves, env.reader.version, ctxKey(env.ctx), desc, ...pc.map((c) => c.def)];
       const k = [s.snap, seam.v, ...ck, ...specs.flatMap((x) => [x.col.def, x.fn])];
@@ -360,10 +368,11 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
     get on() { return on; },
     setOn: (next: boolean, source?: ChangeSource) => shape.set({ on: next }, source),
     get pivotBy() { return by; },
+    get pivotDesc() { return rev; },
     setPivotBy: (next: readonly string[], source?: ChangeSource) => shape.set({ columns: next }, source),
     valueFns: () => vals ?? o.aggFuncs ?? {},
     setValueFns: (next: Fns, source?: ChangeSource) => shape.set({ values: next }, source),
-    set(p: { readonly on?: boolean; readonly columns?: readonly string[]; readonly values?: Fns }, source: ChangeSource = 'api') {
+    set(p: { readonly on?: boolean; readonly columns?: readonly string[]; readonly desc?: readonly string[]; readonly values?: Fns }, source: ChangeSource = 'api') {
       // Something told counts as a change: shown at the next build.
       const n = told.length;
       let moved = false;
@@ -371,6 +380,10 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
       if (p.columns !== undefined) {
         if (!Array.isArray(p.columns)) bad('columns', typeof p.columns);
         else if (p.columns.length !== by.length || p.columns.some((c, i) => c !== by[i])) (by = p.columns.slice()), (moved = true);
+      }
+      if (p.desc !== undefined) {
+        if (!Array.isArray(p.desc)) bad('desc', typeof p.desc);
+        else if (p.desc.length !== rev.length || p.desc.some((c, i) => c !== rev[i])) (rev = p.desc.slice()), (moved = true);
       }
       if (p.values !== undefined) isObj(p.values) ? ((vals = { ...p.values }), (moved = true)) : bad('values', typeof p.values);
       // One build for all of them (a restored state).
@@ -414,24 +427,27 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
 
 /**
  * A saved state's `pivot` (any JSON) checked against the grid's columns (grid-state.md « Pivot » 3): the mode, the known
- * groupable pivot columns once each in order, the values with a built-in function's name. Never a value of a row: a
+ * groupable pivot columns once each in order (and the reversed ones, `desc`), the values with a built-in function's name. Never a value of a row: a
  * state holds column ids and names only.
  */
 export function checkPivot<T>(raw: unknown, columns: Pick<ColumnLookup<T>, 'get'>): {
-  readonly pivot: { readonly on?: boolean; readonly columns?: readonly string[]; readonly values?: Readonly<Record<string, AggFuncName>> } | null;
+  readonly pivot: { readonly on?: boolean; readonly columns?: readonly string[]; readonly desc?: readonly string[]; readonly values?: Readonly<Record<string, AggFuncName>> } | null;
   readonly problems: readonly Problem[];
 } {
   const problems: Problem[] = [];
   const field = (path: string): void => void problems.push(problem('state-field', 'warning', path));
   if (!isObj(raw)) return { pivot: null, problems: [problem('state-field', 'warning', 'pivot')] };
   const r = raw as Record<string, unknown>;
-  const out: { on?: boolean; columns?: string[]; values?: Record<string, AggFuncName> } = {};
+  const out: { on?: boolean; columns?: string[]; desc?: string[]; values?: Record<string, AggFuncName> } = {};
   if (r.on !== undefined) typeof r.on == 'boolean' ? (out.on = r.on) : field('pivot.on');
-  if (r.columns !== undefined) {
-    if (!Array.isArray(r.columns)) field('pivot.columns');
+  // The pivot columns, and the reversed ones (pivot.md 33): known, groupable, once each.
+  for (const k of ['columns', 'desc'] as const) {
+    const list = r[k];
+    if (list === undefined) continue;
+    if (!Array.isArray(list)) field(`pivot.${k}`);
     else
-      out.columns = r.columns.filter((id, i, a) => {
-        const p = `pivot.columns.${i}`;
+      out[k] = list.filter((id, i, a) => {
+        const p = `pivot.${k}.${i}`;
         const col = typeof id == 'string' ? columns.get(id) : undefined;
         const ok = !!col && col.def.groupable !== false && a.indexOf(id) === i;
         if (!ok) typeof id == 'string' && !col ? problems.push(problem('state-column', 'warning', p, id)) : field(p);
@@ -463,10 +479,12 @@ export function pivotState<T>(shape: PivotShape<T>, columns: Pick<ColumnLookup<T
   made(id: string): boolean;
 } {
   return {
-    get: () => ({ on: shape.on, columns: shape.pivotBy, values: Object.fromEntries(Object.entries(shape.valueFns()).filter((e) => typeof e[1] == 'string')) as Record<string, AggFuncName> }),
+    // `desc` only when one is reversed: a state without it reads as before (pivot.md 33).
+    get: () => ({ on: shape.on, columns: shape.pivotBy, ...(shape.pivotDesc.length && { desc: shape.pivotDesc }), values: Object.fromEntries(Object.entries(shape.valueFns()).filter((e) => typeof e[1] == 'string')) as Record<string, AggFuncName> }),
     set(raw) {
       const r = checkPivot(raw, columns);
-      if (r.pivot) shape.set({ ...r.pivot, ...(r.pivot.values && { values: { ...shape.valueFns(), ...r.pivot.values } }) }, 'host');
+      // Absent `desc`: none reversed.
+      if (r.pivot) shape.set({ desc: [], ...r.pivot, ...(r.pivot.values && { values: { ...shape.valueFns(), ...r.pivot.values } }) }, 'host');
       return r.problems;
     },
     made: shape.made,
