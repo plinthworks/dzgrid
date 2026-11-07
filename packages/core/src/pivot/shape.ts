@@ -128,7 +128,8 @@ export function pivotShape<T>(o: PivotOptions = {}): PivotShape<T> {
 
   const seam: Seam<T> = {
     v: 0,
-    flat: () => on,
+    // Both bands empty (no pivot column, no group): the rows themselves, the grand total kept (owner, 2026-11-07).
+    flat: (G) => on && (by.length > 0 || G > 0),
     fns: (env) => (on ? { ...o.aggFuncs, ...valuesOf(env) } : undefined),
     cells(s, env) {
       if (!on) return told.length ? { at: Array(s.G).fill(E), grand: E, columns: [], problems: told } : undefined;

@@ -164,3 +164,5 @@ application). Its texts come in `locales/<lang>-pivot`.
 | `menu.total` | Total | Total | المجموع |
 | `fn.sum` / `fn.avg` / `fn.min` / `fn.max` / `fn.count` | Sum / Average / Min / Max / Count | Somme / Moyenne / Min / Max / Nombre | المجموع / المتوسط / الأدنى / الأقصى / العدد |
 | `pivot.fnSaid` | {column}: {fn} | {column} : {fn} | {column}: {fn} |
+
+- **Both bands empty (owner, 2026-11-07):** with no grouping column and no pivot column, pivot mode shows the table itself — the application's columns and every row, the grand total row kept at the end. Putting a column back in either band makes the pivot again.

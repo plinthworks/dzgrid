@@ -158,7 +158,8 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
   const derive = (): void => {
     made = sig();
     const gen = shape.generated();
-    if (!shape.on) {
+    // Off, or both bands emptied: the application's columns back (owner, 2026-11-07).
+    if (!shape.on || (!shape.pivotBy.length && !shape.reads!().length)) {
       if (eff) (eff = null), (g.rowText = undefined), setTree(host), foldTo(new Set());
       return;
     }

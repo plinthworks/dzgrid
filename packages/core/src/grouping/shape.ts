@@ -231,8 +231,8 @@ export function groupShape<T>(o: GroupingOptions = {}): GroupShape<T> {
  * and off without a new shape.
  */
 export interface Seam<T> {
-  /** The deepest groups are the last rows: no data row under them, never open. */
-  flat(): boolean;
+  /** The deepest groups are the last rows: no data row under them, never open (`groups`: how many groups there are). */
+  flat(groups: number): boolean;
   /** The totals' functions now (absent: the options'). */
   fns(env: ColumnEnv<T>): Readonly<Record<string, AggFuncName | AggFn>> | undefined;
   /** Each group's crossings, under its totals (by created column id), and what they told. */
@@ -388,7 +388,7 @@ export function grouped<T>(o: GroupingOptions, x?: Seam<T>): GroupShape<T> {
       const isOpen = new Uint8Array(s.G);
       for (let g = 0; g < s.G; g++) isOpen[g] = +(i.expansion.has(s.key[g]!) && !deep(s, g));
       open = isOpen;
-      const fl = !!x?.flat();
+      const fl = !!x?.flat(s.G);
       flat = (every) => flatten(s, t, every ? null : isOpen, i.version, footG, footT, top, fl, kids);
       all = null;
       return (last = flat(false));

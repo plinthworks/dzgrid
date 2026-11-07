@@ -41,6 +41,7 @@ A minor in the making (`npm run check:api`: additions only). Phase 10, the pivot
 - Grouping: `spans()` is told refused only when a column merges cells or rows are full width (header bands are drawn
   beside grouping); a group row without children has no `aria-expanded`.
 - `groupZone()`: a band places itself just above the rows, so two bands stack in the order of `features`.
+- Pivot mode with both bands emptied shows the table itself (the columns and the rows, the grand total kept) instead of a lone total row (owner, 2026-11-07).
 
 ## [1.6.0] - 2026-11-06
 

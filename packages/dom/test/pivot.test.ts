@@ -45,6 +45,19 @@ describe('pivot on screen (pivot.md 17, 18)', () => {
     expect(t.shown()).toEqual(['[Nord]', '[Feb]', '[Jan]', '[Sud]', '[Jan]', '[]', '[Feb]', 'Σ']);
   });
 
+  it('both bands emptied, the table comes back: the data columns and their rows, the grand total kept (owner, 2026-11-07)', () => {
+    const t = pmake();
+    t.papi().setBy([]);
+    t.api().setBy([]);
+    expect(t.visible()).toEqual(['title', 'region', 'month', 'amount', 'qty', 'sold']);
+    expect([...t.ctx.columns.folded]).toEqual([]);
+    expect(t.shown()).toEqual(['r1', 'r2', 'r3', 'r4', 'r5', 'Σ']);
+    // A column put back in a band makes the pivot again.
+    t.papi().setBy(['month']);
+    t.api().setBy(['region']);
+    expect(t.visible()).toEqual([LABEL, FEB, JAN, 'amount']);
+  });
+
   it('the data columns are folded, never hidden: the user\'s states untouched; pivot off gives them back as they were', () => {
     const t = pmake();
     const hidden = () => t.ctx.columns.state().filter((s) => s.hidden).map((s) => s.id);
