@@ -211,7 +211,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(ceilingFor('@dzgrid/core/edit')).toBe(3160); // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
     type Entry = { file?: string; maxGzip: number | null; over?: string };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
-    expect(e['@dzgrid/core/range']).toEqual({ file: 'packages/core/src/range.ts', maxGzip: 3264, over: '@dzgrid/core' }); // Phase 8 step 5 (+2 %): 3 264; Phase 5 close: 2 897 + 10 % (a lower)
+    expect(e['@dzgrid/core/range']).toEqual({ file: 'packages/core/src/range.ts', maxGzip: 3329, over: '@dzgrid/core' }); // Phase 11 R1 (+2 %): 3 329; Phase 8 step 5 (+2 %): 3 264; Phase 5 close: 2 897 + 10 % (a lower)
     expect(['@dzgrid/core', '@dzgrid/core/edit'].map((n) => e[n]?.maxGzip)).toEqual([CORE, 3160]); // Q8-5 // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
   });
 
@@ -299,7 +299,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(e['@dzgrid/dom/range']).toMatchObject({ file: 'packages/dom/src/range.ts', over: '@dzgrid/dom' });
     expect(['en', 'fr', 'ar'].map((l) => e[`@dzgrid/dom/locales/${l}-range`])).toEqual(['en', 'fr', 'ar'].map((l, i) => ({ file: `packages/dom/src/locales/${l}-range.ts`, maxGzip: [350, 400, 535][i] }))); // Phase 8 step 5: ar 535 (the owner decides)
     expect(e['@dzgrid/theme/range.css']).toEqual({ file: 'packages/theme/range.css', maxGzip: 500 });
-    expect(['@dzgrid/core', '@dzgrid/core/edit', '@dzgrid/core/range'].map((n) => e[n]?.maxGzip)).toEqual([CORE, 3160, 3264]); // Phase 8 step 5: core/range 3 264 (+2 %) // Q8-5: core/edit 3 150; // Phase 5 close: core/range 2 897 + 10 % (a lower) // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
+    expect(['@dzgrid/core', '@dzgrid/core/edit', '@dzgrid/core/range'].map((n) => e[n]?.maxGzip)).toEqual([CORE, 3160, 3329]); // Phase 11 R1: core/range 3 329 (+2 %) // Phase 8 step 5: core/range 3 264 (+2 %) // Q8-5: core/edit 3 150; // Phase 5 close: core/range 2 897 + 10 % (a lower) // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
     expect(e['@dzgrid/dom']!.maxGzip).toBeLessThanOrEqual(DOM);
   });
 

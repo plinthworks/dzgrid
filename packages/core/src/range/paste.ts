@@ -3,7 +3,7 @@ import type { CellInput } from '../edit/input.js';
 import type { RowKey } from '../ids.js';
 import type { DisplayedRows } from '../row/displayed.js';
 import { stripMarks } from '../value/digits.js';
-import type { RangeBox } from './box.js';
+import { boxAt, type RangeBox } from './box.js';
 
 /** One cell a paste, a fill or a bulk edit writes, given to the editing commit as it is. */
 export interface PlannedCell {
@@ -44,13 +44,17 @@ export function planPaste<T>(src: readonly (readonly CellInput[])[], at: RangeBo
   if (!w) return { cells: [], outside: 0, tooBig: false, box: null };
   const data = (i: number) => displayed.nodeAt(displayed.index(i)!).kind === 'data';
   let inside = 0;
-  for (let i = at.top; i <= at.bottom; i++) if (data(i)) inside++;
+  // A list in blocks: its rows held only, never ten million (R1).
+  for (const i of boxAt(at, displayed)) if (data(i)) inside++;
   const cols = at.end - at.start + 1;
   const tile = inside > 0 && inside % h === 0 && cols % w === 0;
   const H = tile ? inside : h;
   const W = tile ? cols : w;
   const rows: number[] = [];
-  for (let i = at.top; i < displayed.count && rows.length < H; i++) if (data(i)) rows.push(i);
+  for (const i of boxAt({ ...at, bottom: displayed.count - 1 }, displayed)) {
+    if (rows.length >= H) break;
+    if (data(i)) rows.push(i);
+  }
   const wide = Math.min(W, columns.length - at.start);
   if (rows.length * wide > (o?.max ?? PASTE_MAX)) return { cells: [], outside: 0, tooBig: true, box: null };
   const cells: PlannedCell[] = [];

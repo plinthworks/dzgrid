@@ -1775,10 +1775,10 @@ Règles : valeurs en chaînes ISO ou nombres ; `refs` cite le rapport public de 
 | `@dzgrid/theme` (CSS) | ≤ 9 kB (base 2,75 kB, Q-C2 ; `edit.css` 2,25 (1.1.0 étape 14), `range.css` 0,5, `fill.css` 0,46, thèmes vitrines 0,5 / 0,55, ponts 0,4 / 0,4 / 0,35) |
 | `@dzgrid/angular` | ≤ 8 kB (budget 7 kB, S9-Q6 ; mesuré 6 813 o) |
 | Dictionnaire de messages (par langue) | ≤ 2 kB |
-| **Profil « écran d'audit »** (cœur base + `/server` + DOM base + filtres + thème + Angular + une langue) | **≤ 85 kB** (garde de `check:size` 83 500 ; mesuré 82 986 o). Vraie construction Angular (`npm run example:bytes`) : plafond 92 500 (S12-Q10) |
+| **Profil « écran d'audit »** (cœur base + `/server` + DOM base + filtres + recherche + pagination + export CSV + thème + Angular + une langue ; découpé, chargement initial) | **≤ 90 000 o** (ligne de `check:size` ; mesuré 89 978 o le 2026-11-08 ; avant : 85 kB, garde 83 500, mesuré 82 986 à la Phase 3). Vraie construction Angular (`npm run example:bytes`) : plafond 92 500 (S12-Q10) |
 | **Tout, sans graphiques** | **≤ 150 kB** |
 
-`scripts/size.mjs` mesure chaque sous-chemin et échoue au-delà de son budget (`size-budget.json`, remis à la mesure + 10 % à chaque clôture de phase, jamais au-dessus des accords du propriétaire ; tableau complet dans ROADMAP « Final budgets (Phase 5) », celui de la Phase 4 avant lui). Chaque paquet est `sideEffects: false`. L'ordre de grandeur de comparaison (≈ 330 kB gz pour ag-Grid) vient de la note de cadrage Sehhaty, non de nous.
+**Ce tableau donne les plafonds de départ ; les lignes en vigueur sont celles de `size-budget.json`** (Phase 11 R11, 2026-11-08 : cœur base 29 300, DOM base 23 660, Angular 7 900, `core/range` 3 264, profil d'audit 90 000). `scripts/size.mjs` mesure chaque sous-chemin et échoue au-delà de son budget (`size-budget.json`, remis à la mesure + 10 % à chaque clôture de phase, jamais au-dessus des accords du propriétaire ; tableau complet dans ROADMAP « Final budgets (Phase 5) », celui de la Phase 4 avant lui). Chaque paquet est `sideEffects: false`. L'ordre de grandeur de comparaison (≈ 330 kB gz pour ag-Grid) vient de la note de cadrage Sehhaty, non de nous.
 
 ### 5.3 Budgets de temps (Chrome récent, ordinateur portable de milieu de gamme, bundle **minifié**)
 
@@ -2010,7 +2010,7 @@ dzgrid/
 └─ playground/   index.html (Angular) · vanilla.html · rtl.html · perf.html · a11y.html · server.html
 ```
 
-Scripts `package.json` : `test`, `test:ci` (1 worker), `test:watch`, `typecheck` (un `tsc` par paquet puis `tsconfig.spec.json`), `build`, `build:theme`, `check:contrast`, `check:size`, `bench`, `bench:browser`, `spike`, `start` (**Vite, port 4700**), `pack:local`, `publish:dry`, `docs:api`.
+Scripts `package.json` : `test`, `test:ci` (1 worker), `test:watch`, `typecheck` (un `tsc` par paquet puis `tsconfig.spec.json`), `build`, `build:theme`, `check:contrast`, `check:size`, `bench`, `bench:browser`, `spike`, `start` (**Vite, port 4700**), `pack:local`, `publish:dry`, `check:api` (la surface publique, `api/*.api.txt` ; il tient lieu du `docs:api` prévu ici, jamais construit — Phase 11 R11 ; une référence d'API lisible viendra avec le site), `gate:step`.
 Dépendances de développement : mêmes outils que tzslot et DzCalendar (vitest, jsdom, plugin Angular, ng-packagr, sass, playwright-core, esbuild, axe-core). **Aucune dépendance d'exécution** pour `core`, `dom`, `theme` (K.10).
 Config vitest : projets `core`, `conformance`, `theme` en `environment:'node'` ; `dom` en `jsdom` ; `angular` en `jsdom` avec le plugin Angular.
 

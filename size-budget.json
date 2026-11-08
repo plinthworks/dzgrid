@@ -87,7 +87,7 @@
     },
     "@dzgrid/core/range": {
       "file": "packages/core/src/range.ts",
-      "maxGzip": 3264,
+      "maxGzip": 3329,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/state": {

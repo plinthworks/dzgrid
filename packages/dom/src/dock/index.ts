@@ -443,7 +443,14 @@ function setup(g: GridContext<unknown>, o: DockOptions, apis: WeakMap<object, Do
     destroy() {
       for (const s of SIDES) A[s].el.remove(), root.style.removeProperty(`--dzg-dock-${s}`);
       root.removeAttribute('data-dzg-dock');
-      for (const c of cleanups) c();
+      // Each panel's cleanup runs, one that throws reported (R5).
+      for (const c of cleanups) {
+        try {
+          c();
+        } catch (err) {
+          g.report(err);
+        }
+      }
       if (g.dock === host) delete g.dock;
       apis.delete(k);
     },

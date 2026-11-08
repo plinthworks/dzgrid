@@ -94,6 +94,12 @@ d.api(grid)?.move('filters', 'bottom');
 - `DockApi`: `show(id, area?)`, `hide(id)`, `move(id, area)`, `collapse(area, on?)`, `resize(area, px)`,
   `layout()` (the state's part now), `setLayout(raw)` (problems). Each returns false when it did nothing.
 - `onChange(layout)`: after each change made by the user or the API (never a restore).
+- The grid going (Phase 11 R5): the areas leave, an open « Placer … » menu closes with the grid, every panel's
+  cleanup runs — one that throws is reported (`reportError`), the next ones still run.
+- Kept on purpose (Phase 11 R5): a state's `dock` restored before the dock is set up (a feature listed after the state)
+  tells its problems in a `problems` event when the dock comes, not in `setState`'s return; a state read before the
+  first paint may lack the features' panels (collected at the first paint) — the dock comes with the grid's features,
+  never before them.
 
 ## Where DzGrid differs on purpose
 - Inside the grid's box, not a page frame: an application's `#host > .dzg` rule keeps working.

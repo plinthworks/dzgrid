@@ -286,3 +286,5 @@ partial (`status.partial`, as a lazy tree's loading rows already are) — decisi
 never refused, it says what it counts. Inside rows held everything works as today. Ctrl+A with `range()` is a block of
 every row: its size is said from the rows held, its copy refused; every walk of a block (`boxRows`, the figures, the
 copy, the paste and fill plans) reads the rows held only (`@dzgrid/core/range` `boxHeld`), never ten million.
+`planPaste` called by a host (Phase 11 R1) walks the rows held too: a loading row counts for nothing, as in any plan,
+so a paste running past the rows held goes on in the next rows held — the DOM never asks it, refusing such a paste first.

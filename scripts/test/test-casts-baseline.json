@@ -26,7 +26,6 @@
     "packages/core/test/csv/audit-numbers.test.ts": 1,
     "packages/core/test/csv/audit-scopes.test.ts": 10,
     "packages/core/test/csv/audit-spans.test.ts": 2,
-    "packages/core/test/csv/rows.test.ts": 10,
     "packages/core/test/csv/tree.test.ts": 1,
     "packages/core/test/custom-filter-analysis.test.ts": 4,
     "packages/core/test/custom-filter-bugs.test.ts": 2,

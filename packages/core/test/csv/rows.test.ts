@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createColumnModel, dataKey, localeCtx, makeQuery, selectAll, selectOnly, NO_SELECTION, type RowKey } from '@dzgrid/core';
+import { createColumnModel, dataKey, localeCtx, makeQuery, selectAll, selectOnly, NO_SELECTION, type DisplayIndex, type DisplayedRows, type RowKey } from '@dzgrid/core';
 import { sourceRows, type DataSource } from '@dzgrid/core/server';
 import { csvRows, toCsv } from '@dzgrid/core/csv';
 import { fakeSource, rowsOf } from '../support/fake-source.js';
@@ -8,8 +8,12 @@ import { EN, grid } from './support.js';
 /** docs/behaviors/csv-export.md, scopes: which rows the file holds, and `ClientModel.allRows`. */
 
 const k = (id: string): RowKey => dataKey(id)!;
-const names = (rows: { count: number; nodeAt(i: never): { data: unknown } }, at: Uint32Array | null) =>
-  (at ? Array.from(at) : Array.from({ length: rows.count }, (_, i) => i)).map((i) => (rows.nodeAt(i as never).data as { n: string }).n);
+/** The `n` of each row of `rows` (every row, or the positions `at`), in order. */
+const names = (rows: DisplayedRows<unknown> | undefined, at: Uint32Array | null) =>
+  (at ? Array.from(at) : Array.from({ length: rows!.count }, (_, i) => i)).map((i) => {
+    const node = rows!.nodeAt(i as DisplayIndex);
+    return node.kind === 'data' ? (node.data as { n: string }).n : node.kind;
+  });
 
 /** Seven rows, n = a..g, v = 1..7; paged by 3, sorted by v descending, filtered to v != 4. */
 function paged() {
@@ -27,10 +31,10 @@ describe('ClientModel.allRows', () => {
   it('paged, holds every row the query matches, across pages, in screen order', () => {
     const g = paged();
     expect(g.model.displayed.count).toBe(3);
-    expect(names(g.model.allRows as never, null)).toEqual(['g', 'f', 'e', 'c', 'b', 'a']);
+    expect(names(g.model.allRows, null)).toEqual(['g', 'f', 'e', 'c', 'b', 'a']);
     g.model.setPage({ index: 1 });
-    expect(names(g.model.allRows as never, null)).toEqual(['g', 'f', 'e', 'c', 'b', 'a']);
-    expect(names(g.model.displayed as never, null)).toEqual(['c', 'b', 'a']);
+    expect(names(g.model.allRows, null)).toEqual(['g', 'f', 'e', 'c', 'b', 'a']);
+    expect(names(g.model.displayed, null)).toEqual(['c', 'b', 'a']);
   });
 
   it('is the same object until the rows or the query change, then follows them', () => {
@@ -39,14 +43,14 @@ describe('ClientModel.allRows', () => {
     expect(g.model.allRows).toBe(a);
     g.model.setQuery(makeQuery({ sort: [{ column: 'v', dir: 'asc' }] }));
     expect(g.model.allRows).not.toBe(a);
-    expect(names(g.model.allRows as never, null)).toEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
+    expect(names(g.model.allRows, null)).toEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
     g.model.applyTransaction({ remove: ['a'] });
-    expect(names(g.model.allRows as never, null)).toEqual(['b', 'c', 'd', 'e', 'f', 'g']);
+    expect(names(g.model.allRows, null)).toEqual(['b', 'c', 'd', 'e', 'f', 'g']);
   });
 
   it('paged without a sort or a filter, still holds every row', () => {
     const g = grid([{ id: 'n' }], ['a', 'b', 'c', 'd'].map((n) => ({ n })), EN, { pageSize: 3 });
-    expect(names(g.model.allRows as never, null)).toEqual(['a', 'b', 'c', 'd']);
+    expect(names(g.model.allRows, null)).toEqual(['a', 'b', 'c', 'd']);
   });
 });
 
@@ -70,7 +74,7 @@ describe('csvRows', () => {
   it('selected, include: the selected keys in screen order, on every page', () => {
     const g = paged();
     const r = csvRows(g.model, 'selected', selectOnly([k('a'), k('f'), k('c')]))!;
-    expect(names(r.rows as never, r.at)).toEqual(['f', 'c', 'a']);
+    expect(names(r.rows, r.at)).toEqual(['f', 'c', 'a']);
     expect(r.count).toBe(3);
   });
 
@@ -78,14 +82,14 @@ describe('csvRows', () => {
     const g = paged();
     const all = selectAll();
     const r = csvRows(g.model, 'selected', { mode: 'exclude', keys: new Set([k('e'), k('zz')]) })!;
-    expect(names(r.rows as never, r.at)).toEqual(['g', 'f', 'c', 'b', 'a']);
+    expect(names(r.rows, r.at)).toEqual(['g', 'f', 'c', 'b', 'a']);
     expect(csvRows(g.model, 'selected', all)!.count).toBe(6);
   });
 
   it('selected: a selected row the filter hides is not written (owner Q2)', () => {
     const g = paged();
     const r = csvRows(g.model, 'selected', selectOnly([k('d'), k('b')]))!;
-    expect(names(r.rows as never, r.at)).toEqual(['b']);
+    expect(names(r.rows, r.at)).toEqual(['b']);
     expect(r.count).toBe(1);
     expect(toCsv({ rows: r.rows, at: r.at, columns: g.columns, ctx: EN }, { bom: false })).toBe('N,V\r\nb,2\r\n');
   });

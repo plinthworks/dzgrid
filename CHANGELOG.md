@@ -36,6 +36,13 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   `infiniteRows` or `serverSideRows` without it, still refused (`unsupported-combination`, `source`, `pivot`).
 - An export's `server.sort` is the sort the model sends (no change without a pivot).
 
+### Fixed
+- `planPaste` (`@dzgrid/core/range`) called by an application on a list loaded in blocks walks the rows held only,
+  never the rows not loaded (the same plan as before, without walking millions of rows).
+- `*` in the group column (`dom/grouping`) beside a server's groups walks the rows held only: an open group of a million
+  rows no longer makes the key walk every loading row. The same groups open as before.
+- The dock's panels: when the grid goes, a panel cleanup that throws is reported and the next ones still run.
+
 ## [1.7.0] - 2026-11-07
 
 A minor: nothing of 1.6.0 is removed or narrowed (`npm run check:api`).

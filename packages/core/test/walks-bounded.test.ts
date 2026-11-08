@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createColumnModel, createKernel, dataKey, headerSelection, localeCtx, NO_OVERLAY, type DisplayIndex, type DisplayedRows, type RowKey, type RowModel, type RowNode } from '@dzgrid/core';
 import { setSelectionGate } from '@dzgrid/core/internal';
-import { boxHeld, boxRows, boxSize, rangeStats } from '@dzgrid/core/range';
+import { boxHeld, boxRows, boxSize, planPaste, rangeStats } from '@dzgrid/core/range';
 
 /**
  * Phase 8 step 2 (D15): a list loaded in blocks shows ten million rows and holds a few hundred. Every place of the core
@@ -99,5 +99,20 @@ describe('the block of cells reads the rows held (Phase 8 step 5, range-selectio
     expect(boxHeld(box(5_000_000, 5_000_099), p.d)).toBe(true);
     expect(boxHeld(box(90, 100), p.d)).toBe(false);
     expect(rangeStats(box(10, 19), p.d, cols, { ctx, reader: NO_OVERLAY as never }).partial).toBe(false); // never: as above
+  });
+
+  it('a host calling planPaste walks the rows held (Phase 11 R1): a bulk edit of every row, a paste past the rows held', () => {
+    const p = planted();
+    p.reset();
+    const all = planPaste([[{ text: 'x' }]], box(0, N - 1), p.d, cols);
+    expect(all.cells).toHaveLength(200);
+    expect(all.cells.at(-1)!.key).toBe(dataKey('r5000099'));
+    expect(p.calls()).toBeLessThan(10_000);
+    p.reset();
+    // Loading rows count for nothing, as everywhere in a plan: rows 95–99, then the next rows held.
+    const past = planPaste([['a'], ['b'], ['c'], ['d'], ['e'], ['f'], ['g']].map((r) => r.map((text) => ({ text }))), box(95, 95), p.d, cols);
+    expect(past.cells.map((c) => c.key)).toEqual([95, 96, 97, 98, 99, 5_000_000, 5_000_001].map((i) => dataKey(`r${i}`)));
+    expect(past.outside).toBe(0);
+    expect(p.calls()).toBeLessThan(10_000);
   });
 });

@@ -37,6 +37,9 @@ Arabic.
 - **The answer at a group level**: `{ groups: [{ value, count?, aggs? }], total?, hasNext?, totals? }`; at the leaf
   level `{ rows, total?, hasNext? }`. A group's key is Phase 7's typed key (column id, type tag, canonical value): `1`
   and `'1'`, or a day and an instant of that day, are two groups. A key, a path and a value never reach a `Problem`.
+- **A level's length** (Phase 11 R7, kept on purpose): as `infiniteRows` (infinite-scroll.md « The end »), a level whose
+  end or total is known keeps it on a later answer with `hasNext` and no total, until a short block, `hasNext: false`
+  or a total says otherwise.
 - **Totals (Q-TOT A)**: shown as sent, never recomputed in the browser (a wrong server total shows as sent); a custom
   aggregation function beside a server is refused (`agg-type`, detail `server`); footers show their group's `aggs`; the
   grand total row the root answer's `totals`.

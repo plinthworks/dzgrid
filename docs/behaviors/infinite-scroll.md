@@ -61,6 +61,10 @@ keyboard, in French and in Arabic.
   whatever a total said. An empty block past the end does the same. A total that shrinks under the view drops the
   blocks past it. An answer with neither `total` nor `hasNext` is read as pages read it (a full block: more follow) and
   told (`invalid-page-response`, warning, `response.hasNext`): the host should say which.
+  Kept on purpose (Phase 11 R7): once an end or a total is known, an answer with `hasNext` and no total does not move
+  it — a refresh keeps the older length, an end found does not grow again on a later full block — until a short block,
+  `hasNext: false` or a total says otherwise (the count never jumps on a guess; the host that sends `total` is exact).
+  The same holds for a level of `serverSideRows` (server-side-groups.md).
 - **Asking** (D6): after each paint the grid tells the model its window of rows (`rows.want(first, last, keep)`,
   `keep` the focused row). The model asks the focused row's block first, then the blocks the window touches, then one
   block ahead in the direction of the scroll; at most 2 requests run at once, the others wait in that order. When the

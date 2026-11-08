@@ -219,6 +219,23 @@ describe.each([
     expect(t.said()).toEqual([lang === 'en' ? '3 groups expanded' : 'تم توسيع 3 مجموعات']);
   });
 
+  it('`*` on two levels: the closed groups of its own parent only, never a cousin nor a deeper group (Phase 11 R2)', () => {
+    const by = { grouping: { by: ['region', 'fruit'] } };
+    const t = make(by);
+    t.focusKey(NORD);
+    t.press(forward);
+    t.focusKey(SUD);
+    t.press(forward);
+    t.focusKey(groupKey(['region', 'tSud', 'fruit', 'tapple']));
+    t.press('*');
+    expect(t.shown()).toEqual(['[Nord]', '[apple]', '[pear]', '[Sud]', '[apple]', 'r2', '[fig]', 'r5', '[]']);
+    const u = make(by);
+    u.focusKey(NORD);
+    u.press(forward);
+    u.press('*');
+    expect(u.expandedEvents().at(-1)!.rows).toEqual([SUD, BLANK]);
+  });
+
   it('with Ctrl, Alt or Meta held, the grouping claims nothing', () => {
     const t = make();
     t.focusKey(NORD);

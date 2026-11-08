@@ -130,6 +130,25 @@ describe('dock: the areas', () => {
     expect(t.gone).toEqual(['notes', 'help']);
     expect(t.d.api(t.g)).toBeNull();
   });
+  it('the grid going closes an open « Place » menu; a panel cleanup that throws is reported, the next ones still run (Phase 11 R5)', () => {
+    const gone: string[] = [];
+    const panels = ['a', 'b', 'c'].map((id) => ({ id, title: id, mount: () => () => { gone.push(id); if (id === 'a') throw new Error('cleanup'); } }));
+    const t = grid({ panels, open: { a: 'end' } });
+    t.place('end').click();
+    expect(document.querySelector('[role=menu]')).not.toBeNull();
+    const w = window as unknown as { reportError?: unknown };
+    const had = w.reportError;
+    const reported: unknown[] = [];
+    w.reportError = (e: unknown) => void reported.push(e);
+    try {
+      t.g.destroy();
+    } finally {
+      w.reportError = had;
+    }
+    expect(document.querySelector('[role=menu]')).toBeNull();
+    expect(gone).toEqual(['a', 'b', 'c']);
+    expect(reported.map((e) => (e as Error).message)).toEqual(['cleanup']);
+  });
 });
 
 describe('dock: tabs (two panels in one area)', () => {

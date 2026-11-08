@@ -1,5 +1,5 @@
 import { formattersFor, intentFor, problem, type ChangeSource, type DisplayIndex, type FocusPos, type GridKernel, type KeyOwner, type ResolvedColumn, type RowKey, type RowNode } from '@dzgrid/core';
-import { emit } from '@dzgrid/core/internal';
+import { emit, positions } from '@dzgrid/core/internal';
 import { checkRowGroups, groupConflicts, groupShape, type GroupedRows, type GroupingOptions, type GroupShape } from '@dzgrid/core/grouping';
 import type { ServerSideModel } from '@dzgrid/core/server-side';
 import type { GridContext } from '../context.js';
@@ -260,14 +260,17 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
   }
 
   /** `*`: every closed sibling group opens (tree-keys.md). */
+  // The closed sibling groups of a row (`*`): the rows held walked once, a parent's level ending a run (R2: a list from a
+  // server never walks its loading rows).
   const siblings = (d: Rows, i: DisplayIndex): void => {
     const level = d.levelAt(i);
-    let a: number = i;
-    while (a > 0 && d.levelAt((a - 1) as DisplayIndex) >= level) a--;
-    const out: RowKey[] = [];
-    for (let j = a; j < d.count && d.levelAt(j as DisplayIndex) >= level; j++) {
-      const x = j as DisplayIndex;
-      if (d.levelAt(x) === level && d.childrenAt(x) > 0 && !d.expandedAt(x)) out.push(d.keyAt(x));
+    let out: RowKey[] = [];
+    for (const j of positions(d)) {
+      const l = d.levelAt(j);
+      if (l < level) {
+        if (j > i) break;
+        out = [];
+      } else if (l === level && d.childrenAt(j) > 0 && !d.expandedAt(j)) out.push(d.keyAt(j));
     }
     if (out.length) expand(out, true);
   };

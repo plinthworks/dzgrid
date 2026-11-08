@@ -196,13 +196,13 @@ describe('layering of the base and the server entry', () => {
     expect(inputs.some((f) => f.endsWith('src/model/client.ts') || f.endsWith('src/kernel.ts') || f.endsWith('src/csv/chunks.ts'))).toBe(false);
   });
 
-  it('the range entry fits its line over the base (owner Q16 grant 4 000; the Phase 5 close: the measure 2 897 + 10 % = 3 200 B gz; Phase 8 step 5: +2 %, 3 264 — the walks bounded by the rows held), measured as check:size measures it; the base gains no byte (types only)', async () => {
+  it('the range entry fits its line over the base (owner Q16 grant 4 000; the Phase 5 close: the measure 2 897 + 10 % = 3 200 B gz; Phase 8 step 5: +2 %, 3 264 — the walks bounded by the rows held; Phase 11 R1: +2 %, 3 329 — the paste plan walks them too), measured as check:size measures it; the base gains no byte (types only)', async () => {
     const opts = { bundle: true, minify: true, format: 'esm', target: 'es2022', write: false, treeShaking: true, logLevel: 'silent' } as const;
     const gz = async (o: Parameters<typeof build>[0]) => gzipSync((await build({ ...o, ...opts })).outputFiles![0]!.contents, { level: 9 }).length;
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './range.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
     const entry = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core/range'];
-    expect(entry).toMatchObject({ file: 'packages/core/src/range.ts', maxGzip: 3264, over: '@dzgrid/core' });
+    expect(entry).toMatchObject({ file: 'packages/core/src/range.ts', maxGzip: 3329, over: '@dzgrid/core' });
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
     // The step's planned share (step10-plan « Sizes »): 2 200–3 000; more is a question, not a failure here.
     expect(both - alone).toBeGreaterThan(500);

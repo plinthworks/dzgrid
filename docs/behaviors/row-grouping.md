@@ -29,6 +29,8 @@ closes groups, sorts, filters, edits a cell.
    fixed order), a list column (enum) by its own order. When the user sorts a grouped column descending, its groups
    reverse; « (Vide) » stays last either way. Rows inside a group follow the grid's sort; without a sort, the order the
    application gave.
+   Kept on purpose (Phase 11 R8): a live change of one such text into the other (« Alger » → « alger ») is not a sort
+   move; the grouping's own check regroups the row (edits included), the « stale » mark stays on until `reapply`.
 5. **Opening and closing.** All groups start closed (Q-E1 A); the application may open all of them or down to a level
    (`expanded: 'all' | n`, 1 = the first level). Opening a group shows its children right under it; closing hides
    everything beneath it. What is open stays open after a sort, a filter, a search, a live update: a group is known by
@@ -44,7 +46,8 @@ closes groups, sorts, filters, edits a cell.
    grouping value is edited stays in its group, marked like an edited sort value, until « Réappliquer »; then it moves
    (into a group that is open, or a closed one). The totals change at once (`aggregation.md`).
 10. **Keys** (step 5, `tree-keys.md`): the tree's keys in the group column; forward opens, back closes or goes to the
-    parent, mirrored in Arabic; `*` opens the siblings; Enter on a group row opens or closes it (Q-K1 A).
+    parent, mirrored in Arabic; `*` opens the siblings (the closed groups of the same parent; from a server, among the rows held only —
+    its loading rows never walked, Phase 11 R2); Enter on a group row opens or closes it (Q-K1 A).
 11. **Accessibility** (step 5): the grid is a `treegrid` while it is grouped, a `grid` otherwise; group rows say their
     level (1 = the first grouping column), their place among their sibling groups and whether they are open; data rows
     sit at the level below the last group; totals rows (`aggregation.md`) have no `aria-expanded`.

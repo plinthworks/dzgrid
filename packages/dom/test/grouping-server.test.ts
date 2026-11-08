@@ -116,6 +116,34 @@ describe('grouping on a server-side model: the rows drawn', () => {
     // The window asked again (D10 A): the first level's block and the group's.
     expect(t.calls.slice(n).map((c) => c.req.group!.path)).toContainEqual(['Nord']);
   });
+  it('a group whose rows come without a total: its rows say an unknown set size, aria-setsize -1 (Phase 11 R6)', () => {
+    const t = make({ features: [grouping({ by: ['region'] })] });
+    t.groups(t.calls[0]!, ['Nord', 'Sud']);
+    t.g.kernel.dispatch({ type: 'rows.expand', rows: [t.g.kernel.rows.displayed.keyAt(0 as never)], expanded: true }, 'user'); // never: a position of the rows shown
+    // A full block (10) and more to come: the level's size unknown.
+    t.calls.at(-1)!.ok({ rows: Array.from({ length: 10 }, (_, j) => ({ id: `n${j}`, region: 'Nord', qty: j + 1 })), hasNext: true });
+    const r = t.row(2);
+    expect(cellText(r, 'qty')).toBe('2');
+    expect([r.getAttribute('aria-level'), r.getAttribute('aria-posinset'), r.getAttribute('aria-setsize')]).toEqual(['2', '2', '-1']);
+    expect(t.row(0).getAttribute('aria-setsize')).toBe('2');
+  });
+
+  it('`*` beside a group of a million rows, a few held: the closed siblings open, the loading rows never walked (Phase 11 R2)', () => {
+    const t = make({ features: [grouping({ by: ['region'] })] });
+    t.groups(t.calls[0]!, ['Nord', 'Sud', 'Est']);
+    const nord = t.g.kernel.rows.displayed.keyAt(0 as never); // never: a position of the rows shown
+    t.g.kernel.dispatch({ type: 'rows.expand', rows: [nord], expanded: true }, 'user');
+    t.calls.at(-1)!.ok({ rows: Array.from({ length: 10 }, (_, j) => ({ id: `n${j}`, region: 'Nord', qty: 1 })), total: 1_000_000 });
+    const d = t.g.kernel.rows.displayed as unknown as { levelAt(i: number): number; nodeAt(i: number): unknown }; // a grouped view's reads, counted
+    const level = vi.spyOn(d, 'levelAt');
+    const node = vi.spyOn(d, 'nodeAt');
+    t.g.kernel.dispatch({ type: 'focus.set', focus: { kind: 'cell', row: nord, column: 'region' } }, 'api');
+    const n = t.events.length;
+    t.row(0).querySelector<HTMLElement>('[data-col=region]')!.dispatchEvent(new KeyboardEvent('keydown', { key: '*', bubbles: true }));
+    const opened = t.events.slice(n).filter((e) => e.type === 'rowExpanded') as Extract<GridEvent<R>, { type: 'rowExpanded' }>[];
+    expect(opened.map((e) => [e.rows.length, e.expanded])).toEqual([[2, true]]);
+    expect(level.mock.calls.length + node.mock.calls.length).toBeLessThan(1_000);
+  });
 });
 
 describe('grouping on a server-side model: what is forwarded', () => {
