@@ -16,6 +16,8 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   A `custom` column takes any value. If your server sends ids as numbers for a text column, send texts, or type the
   column.
 - Nothing else to change: the server pivot is off until the app passes `serverPivot()`.
+- A part of slot `status` registered without `statusBar()` in `features` is now told once (`missing-feature`, path
+  `parts.<name>`, detail `statusbar`), as every other slot's part without its feature; it was silently not drawn.
 
 ### Added
 - **The pivot over a server's rows** (`docs/behaviors/server-pivot.md`): `serverSideRows(data, { pivot: serverPivot() })`
@@ -30,6 +32,8 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   `ServerSideOptions.pivot?`; `ServerSideModel.pivot?`, `wireSort?`; `PivotShape.serve?`, `PivotServe`, `PivotCrossings`
   (`@dzgrid/core/pivot`, internal seams).
 - `perf/fake-pivot-server.ts`: a pivoting fake server (10⁶ rows computed from their index, the cube per query).
+- Angular: the output `(rowMove)` (the `rowDrag()` feature's event, also in `(gridEvent)` as before) and
+  `DzgController.rowDrag()`, its api typed (null without the grid), as `grouping()`.
 
 ### Changed
 - `dom/grouping` sets the pivot up beside a `serverSideRows` model that has the plug; beside `sourceRows`,
@@ -42,6 +46,10 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
 - `*` in the group column (`dom/grouping`) beside a server's groups walks the rows held only: an open group of a million
   rows no longer makes the key walk every loading row. The same groups open as before.
 - The dock's panels: when the grid goes, a panel cleanup that throws is reported and the next ones still run.
+- `applyTransactionAsync` on a list loaded in blocks (`infiniteRows`, `serverSideRows`): when the delay came before the
+  frame, that frame no longer lands a batch begun since, earlier than its own delay or frame.
+- The column cache knows a column by its definition: new column definitions that keep a column's own (a pivot setting
+  its created columns, `update({ columns })` with the same objects) no longer read its cells again to sort or search.
 
 ## [1.7.0] - 2026-11-07
 

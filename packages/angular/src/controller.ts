@@ -6,6 +6,7 @@ import type { RangeApi } from '@dzgrid/dom/range';
 import type { FillApi } from '@dzgrid/dom/fill';
 import type { GridStateApi } from '@dzgrid/dom/state';
 import type { GroupingApi } from '@dzgrid/dom/grouping';
+import type { RowDragApi } from '@dzgrid/dom/row-drag';
 
 /** A model that takes a host's live changes: the client's, `infiniteRows`', `serverSideRows`'. */
 type Live<T> = { applyTransaction?(tx: RowTransaction<T>, source?: 'api'): TransactionResult; applyTransactionAsync?(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void };
@@ -114,6 +115,10 @@ export class DzgController<T = unknown> {
   /** The grid's row grouping (Phase 7): the `grouping()` feature given in `features` (`by`, `setBy`, `totals`…); null before, without it, after. */
   grouping(): GroupingApi | null {
     return this._by<GroupingApi>('grouping');
+  }
+  /** The grid's row moves (Phase 9): the `rowDrag()` feature given in `features` (`move`, `step`, `dropTargets`); null before, without it, after. */
+  rowDrag(): RowDragApi | null {
+    return this._by<RowDragApi>('row-drag');
   }
   /**
    * A feature's api for this grid (Phase 6 step 12): `use(chooser)?.open(button)`, `use(pins)?.set({ bottom })`,

@@ -127,4 +127,5 @@ and `EditorHandle`; Angular templates for it come at step 9.
   names `status.rows`, `status.filtered`, `status.selected`, `status.count`, `status.sum`, `status.avg`, `status.min`,
   `status.max`; a host's part of the same name replaces one; a host's dotless part may be listed. Context: `stats`
   (`RangeStats` and `avg`, null without a block), `busy`, `counts`, `selection.count`, `figure(name)`,
-  `format(n, column?)`. A `status` part registered without `statusBar()` is not drawn (not told: the base stays as it is).
+  `format(n, column?)`. A `status` part registered without `statusBar()` is not drawn, and told once: `missing-feature` (path `parts.<name>`,
+  detail `statusbar`; 1.8.0, Phase 11 L2).

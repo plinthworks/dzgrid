@@ -94,6 +94,13 @@ describe('missing-feature, by slot', () => {
     expect(u.problems().filter((x) => x.code === 'missing-feature')).toEqual([]);
   });
 
+  it('a status part without statusBar() is told too (R10, Phase 11 L2)', () => {
+    const p = (slot: string) => ({ slot, part: { mount: () => ({}) } }) as unknown as SlotPart; // unknown: a part of the test's own shape
+    expect(make([], { s: p('status') }).problems().filter((x) => x.code === 'missing-feature')).toEqual([
+      { code: 'missing-feature', severity: 'warning', path: 'parts.s', detail: 'statusbar' },
+    ]);
+  });
+
   it('tells a column asking for a floating filter or naming a filter kind without filters(), i over the leaves', () => {
     const t = make([], undefined, [{ id: 'g', children: [{ id: 'a' }, { id: 'n', type: 'number', filter: { floating: true } }] }, { id: 's', filter: { kind: 'text' } }, { id: 'z', filter: { floating: false } }]);
     expect(t.problems().filter((x) => x.code === 'missing-feature' && x.detail === 'filters')).toEqual([

@@ -1,6 +1,7 @@
-// Moving rows in Angular (Phase 9, row-move.md 24; row-drag-plan.md R4): nothing new in the wrapper (owner Q-RD11: no
-// byte in K.8) — `rowDrag()` goes in `[features]`; `(gridEvent)` carries `rowMove`; the application gives its rows back
-// with `moveRows` through `[rows]`; `ctl.use(feature)` is the feature's api (null without the grid). Expectations by hand.
+// Moving rows in Angular (Phase 9, row-move.md 24; row-drag-plan.md R4): `rowDrag()` goes in `[features]`; `(gridEvent)`
+// carries `rowMove`, and since Phase 11 L2 (R9, room made in K.8) `(rowMove)` too; the application gives its rows back
+// with `moveRows` through `[rows]`; `ctl.use(feature)` / `ctl.rowDrag()` is the feature's api (null without the grid).
+// Expectations by hand.
 import { it, expect, afterEach } from 'vitest';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -54,4 +55,39 @@ it('(gridEvent) carries rowMove; the application\'s [rows] give the new order; c
   const d = host.ctl!.kernel()!.rows.displayed;
   expect(Array.from({ length: d.count }, (_, i) => d.keyAt(d.index(i)!))).toEqual(['r1', 'r2', 'r3', 'r4', 'r0'].map((x) => dataKey(x)));
   expect(document.querySelectorAll('.dzg-grip')).toHaveLength(5);
+});
+
+// R9 (Phase 11 L2): the output of its own name and the controller's typed accessor, as `grouping()` has.
+@Component({
+  selector: 't-host-out',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows()" [columns]="columns" [getRowId]="id" [messages]="messages" [features]="features" (rowMove)="moved($event)" (gridReady)="ctl = $event"></dz-grid>`,
+})
+class HostOut {
+  readonly rows = signal(ROWS.slice(0, 3));
+  readonly columns = COLUMNS;
+  readonly id = rowId;
+  readonly messages = MSG;
+  readonly features: GridFeature[] = [rowDrag<R>()];
+  readonly seen: Moved[] = [];
+  ctl: DzgController<R> | null = null;
+  moved(e: Moved): void {
+    this.seen.push(e);
+    this.rows.set(moveRows(this.rows(), e, rowId));
+  }
+}
+
+it('(rowMove) is an output of its own; ctl.rowDrag() the api, null after the grid (R9)', () => {
+  TestBed.configureTestingModule({ providers: [fakeEnv().provider] });
+  const fixture = TestBed.createComponent(HostOut);
+  document.body.appendChild(fixture.nativeElement);
+  fixture.detectChanges();
+  const host = fixture.componentInstance;
+  const ctl = host.ctl!;
+  expect(ctl.rowDrag()!.step(dataKey('r2')!, 'start')).toBe('moved');
+  fixture.detectChanges();
+  expect(host.seen.map((e) => [e.via, e.keys])).toEqual([['api', [dataKey('r2')]]]);
+  expect(host.rows().map((r) => r.id)).toEqual(['r2', 'r0', 'r1']);
+  fixture.destroy();
+  expect(ctl.rowDrag()).toBeNull();
 });

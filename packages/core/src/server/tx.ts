@@ -86,9 +86,11 @@ export function heldTransactions<T, R extends Held>(env: ModelEnv<T>, ms: number
       batch.push([t, done]);
       if (!env.timer && !env.frame) return flush();
       if (batch.length > 1) return;
-      // `ms` or the next frame, whichever comes first (Q-TX A): the first cancels the other.
+      // `ms` or the next frame, whichever comes first (Q-TX A): the first cancels the other. A frame cannot be
+      // taken back: it flushes only its own batch (a landed one is replaced by a new list, R3).
+      const q = batch;
       off = env.timer?.(flush, ms) ?? null;
-      env.frame?.(flush);
+      env.frame?.(() => q === batch && flush());
     },
     stop(): void {
       off?.();

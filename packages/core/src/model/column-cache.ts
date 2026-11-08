@@ -36,6 +36,13 @@ function coerceCell<T>(col: ResolvedColumn<T>, raw: unknown, env: ColumnEnv<T>):
   return { v, bad: null, warn: col.codec.warning ? col.codec.warning(raw, env.ctx) : null };
 }
 
+/**
+ * A cached entry still answers: the same rows, reader and language, and the column's same definition — not the same
+ * resolved object, which a column change makes anew for every column (R4, Phase 11 L2: a pivot's created columns set).
+ */
+const fresh = <T, E extends { col: ResolvedColumn<T>; version: number; reader: number; ctx: string }>(hit: E | undefined, col: ResolvedColumn<T>, env: ColumnEnv<T>, ctx: string): hit is E =>
+  !!hit && hit.col.def === col.def && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx;
+
 /** At most this many invalid cells are reported per column; the rest are counted. */
 const MAX_CELL_PROBLEMS = 10;
 
@@ -113,7 +120,7 @@ export class ColumnCache<T> {
   keys(col: ResolvedColumn<T>, env: ColumnEnv<T>): { keys: Float64Array; blanks: number; problems: readonly Problem[] } {
     const ctx = `${env.ctx.locale}|${env.ctx.timeZone}`;
     const hit = this.#keys.get(col.id);
-    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return hit;
+    if (fresh(hit, col, env, ctx)) return hit;
     this.stats.keyBuilds++;
     const n = env.source.count;
     const keys = new Float64Array(n);
@@ -141,7 +148,7 @@ export class ColumnCache<T> {
     const ckey = collatorKey(env.ctx, spec);
     const id = `${col.id}|${ckey}`;
     const hit = this.#ranks.get(id);
-    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ckey) {
+    if (fresh(hit, col, env, ckey)) {
       hit.used = ++this.#clock;
       return hit;
     }
@@ -188,7 +195,7 @@ export class ColumnCache<T> {
     const id = `${kind}|${col.id}`;
     const ctx = listCtx(env);
     const hit = this.#lists.get(id);
-    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return hit.values;
+    if (fresh(hit, col, env, ctx)) return hit.values;
     const values = build();
     this.#lists.set(id, { col, version: env.source.version, reader: env.reader.version, ctx, values });
     return values;
@@ -211,7 +218,7 @@ export class ColumnCache<T> {
     const id = `${kind}|${col.id}`;
     const ctx = listCtx(env);
     const hit = this.#hays.get(id);
-    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return null;
+    if (fresh(hit, col, env, ctx)) return null;
     const version = env.source.version;
     const reader = env.reader.version;
     const n = env.source.count;
@@ -243,7 +250,7 @@ export class ColumnCache<T> {
     const id = `${kind}|${col.id}`;
     const ctx = listCtx(env);
     const hit = this.#hays.get(id);
-    if (hit && hit.col === col && hit.version === env.source.version && hit.reader === env.reader.version && hit.ctx === ctx) return hit.hay;
+    if (fresh(hit, col, env, ctx)) return hit.hay;
     if (kind === 'display') this.stats.displayBuilds++;
     else this.stats.foldBuilds++;
     const n = env.source.count;
@@ -292,6 +299,7 @@ export class ColumnCache<T> {
   distinct(col: ResolvedColumn<T>, env: ColumnEnv<T>, o: { readonly search?: string; readonly max?: number; readonly others?: OtherFilters; readonly selected?: readonly string[] | undefined }): ValueList {
     const ctx = `${listCtx(env)}|${collatorKey(env.ctx)}`;
     let ix = this.#index.get(col.id);
+    // Keyed by the column object, not its definition: another lookup (a column shown or hidden) recounts (client.ts).
     if (!ix || ix.col !== col || ix.version !== env.source.version || ix.reader !== env.reader.version || ix.ctx !== ctx) {
       this.stats.indexBuilds++;
       const ex = this.exports(col, env);

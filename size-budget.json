@@ -92,7 +92,7 @@
     },
     "@dzgrid/core/state": {
       "file": "packages/core/src/state.ts",
-      "maxGzip": 1610,
+      "maxGzip": 1615,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/row-gaps": {
@@ -1193,7 +1193,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 7900,
+      "maxGzip": 7950,
       "external": [
         "@angular/*",
         "@dzgrid/*",

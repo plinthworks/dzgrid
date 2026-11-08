@@ -480,6 +480,26 @@ describe('infiniteRows: step 5 — the frame, edits (D11, K.14)', () => {
     expect(frames).toHaveLength(1);
   });
 
+  it('async: when the timer wins, its frame (not cancellable) does not flush a batch begun since (R3, Phase 11 L2)', () => {
+    const frames: (() => void)[] = [];
+    const { fake, model, answer, changes, timers } = setup({ ahead: 0 }, { frame: (fn) => void frames.push(fn) });
+    answer(fake.calls[0]!, { total: 30 });
+    model.want(0, 9);
+    changes.length = 0;
+    model.applyTransactionAsync({ update: [{ id: 'r1', name: 'a' }] });
+    // The timer first: the batch lands; the frame it armed stays queued (the env cannot take it back).
+    for (const t of timers.splice(0)) if (!t.off) t.fn();
+    expect(changes).toHaveLength(1);
+    // A second batch begins: its own timer and frame.
+    model.applyTransactionAsync({ update: [{ id: 'r2', name: 'b' }] });
+    expect(frames).toHaveLength(2);
+    // The first batch's frame comes: it belongs to a batch already landed, the new one waits for its own turn.
+    frames.shift()!();
+    expect(changes).toHaveLength(1);
+    frames.shift()!();
+    expect(changes).toHaveLength(2);
+  });
+
   it('an edit of a column the server sorts by marks the order stale; reapply asks the window again, rows kept; its answer ends it', () => {
     const { fake, model, answer, changes } = setup({ ahead: 0, maxBlocks: 10 });
     answer(fake.calls[0]!, { total: 30 });

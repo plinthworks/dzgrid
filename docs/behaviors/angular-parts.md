@@ -109,6 +109,7 @@ are exactly these; anything else goes through `(gridEvent)` and its `type`:
 | `(densityChanged)` | `{ density, source }` | 1.1.0 |
 | `(selectionChanged)` | `{ selection: { mode, keys }, count, source }` — **keys, not ids** (below) | 1.1.0 |
 | `(groupByChange)` | the model's half of `[(groupBy)]` (below); `groupByChanged` `{ by, source }` comes through `(gridEvent)` | 1.5.0 |
+| `(rowMove)` | `{ via, keys, rows, target, parent, applied, source }` (`rowDrag()` in `[features]`, row-move.md 24); `ctl.rowDrag()` its api, null without the grid | 1.8.0 |
 
 Before 1.1.0, `(selectionChanged)` was such a silent DOM binding (the allergen app's « selected rows stay empty »); it is
 now a real output. Strict templates check `$event` on these: `$event.rows` on `(selectionChanged)` does not compile

@@ -34,7 +34,8 @@ on screen changes, a row is added or removed somewhere, fifty changes arrive in 
 - A row id that identifies nothing is told (`invalid-row-id`, path `update[i]` / `patch[i]`), never with the row.
 - The batch lands at the next frame when it comes before `batchMs` (the DOM gives the model its frame, `ModelEnv.frame`;
   a hidden page has no frames: the 50 ms then): one change of kind `rows`, its `transaction.updated` listing every key
-  the batch updated, one paint.
+  the batch updated, one paint. A frame cannot be taken back: when the 50 ms come first, that frame later lands
+  nothing — a batch begun since waits for its own frame or delay (Phase 11 L2, R3).
 - Edits (step 5, K.14): an edit changes the row held where it is shown; nothing moves. An edit of a column the server
   sorts, filters or searches by marks the order stale (`orderStale`); « Réappliquer » (`rows.reapply`) asks the window
   again with its rows kept (the thin busy line), the other blocks stale; the first answer asked after the edit ends the

@@ -46,7 +46,7 @@ const KEYS = [
   'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features', 'multiSort', 'sameRow',
 ] as const;
 /** Events with an output of their own name. */
-const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged', 'rangeChanged', 'rangeCopied', 'stateChanged', 'densityChanged', 'selectionChanged'];
+const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged', 'rangeChanged', 'rangeCopied', 'stateChanged', 'densityChanged', 'selectionChanged', 'rowMove'];
 
 /** What `membershipOf` reads of a query with no filter and no search. */
 const NONE = { filter: {}, quick: '' } as Query;
@@ -194,6 +194,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly densityChanged = output<Ev<T, 'densityChanged'>>();
   /** `{ selection: { mode, keys }, count, source }` (Phase 6 step 12); the `selected` model follows as before. */
   readonly selectionChanged = output<Ev<T, 'selectionChanged'>>();
+  /** Rows moved (`rowDrag()`, Phase 9): give `[rows]` back in the new order (`moveRows`), unless the feature applied it. */
+  readonly rowMove = output<Ev<T, 'rowMove'>>();
   readonly problems = output<readonly Problem[]>();
   readonly gridReady = output<DzgController<T>>();
 

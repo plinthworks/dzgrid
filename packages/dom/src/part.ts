@@ -353,7 +353,7 @@ export function featureParts(features: readonly GridFeature[] = [], own: () => R
 }
 
 /** The feature each slot needs; the cell is the base's. */
-const NEEDS: Partial<Record<WiredSlot, string>> = { header: 'slots', overlay: 'slots', busy: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', filterOption: 'filters', footer: 'pagination', detail: 'detail', editor: 'editors' };
+const NEEDS: Partial<Record<WiredSlot, string>> = { header: 'slots', overlay: 'slots', busy: 'slots', tooltip: 'slots', floating: 'filters', filter: 'filters', filterOption: 'filters', footer: 'pagination', detail: 'detail', editor: 'editors', status: 'statusbar' };
 /** A column's `ui` keys (feedback pass D: any other is said). */
 const UI = ['cell', 'header', 'tooltip', 'cellClass', 'headerClass', 'data'];
 const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t.flatMap((d) => (d && 'children' in d ? leaves(d.children) : [d]));

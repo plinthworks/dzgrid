@@ -180,7 +180,7 @@ new order: nothing added, updated or removed; the selection, the edits and the f
 - API: `api(grid).move(keys, target, { say })`, `api(grid).step(key, -1 | 1 | 'start' | 'end' | 'in' | 'out', { say })`
   (silent unless `say`), `api(grid).dropTargets.add(el, t)`; the menu's items by `feature.menuItems(c)` (the context
   menu's `items` hook). No `handle: 'row'` mode in V1 (the grip only, Q-RD2).
-- Angular: nothing new in the wrapper (no byte in K.8): `(gridEvent)` carries `rowMove`, `ctl.use(feature)` gives the api.
+- Angular: `(rowMove)` (and `(gridEvent)`) carries the event; `ctl.rowDrag()` (or `ctl.use(feature)`) gives the api, null without the grid (1.8.0, Phase 11 L2: room made in K.8).
 - A grip's own pointer capture (a finger: the browser captures to the pressed element) is handed to the grid's root; only
   the root's lost capture cancels.
 - The focused row travelling with a selected ancestor: the keys step that ancestor.
