@@ -152,6 +152,13 @@ $layered: true !default;
     background: var(--tz-bg);
   }
 
+  // Rows contain their layout, not their paint (Phase 11 L3): the clip of the injected `contain: content`, one per row,
+  // made Chrome layerize every sticky pinned segment apart (~34 ms a frame at 4× CPU in a scrollbar drag). The cells
+  // clip their own text; a spans row keeps the feature's own rule.
+  .dzg-row:where(:not([data-spans])) {
+    contain: layout style;
+  }
+
   // A row a tall cell meets (spans: `data-spans`) is hovered by the feature (`data-hover`, the
   // row under the pointer): `:hover` would light the row the tall cell lives in. Same weight
   // as the selection's rule below (`:where`), so a selected row stays selected under the pointer.

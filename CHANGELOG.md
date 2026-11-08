@@ -39,6 +39,11 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
 - `dom/grouping` sets the pivot up beside a `serverSideRows` model that has the plug; beside `sourceRows`,
   `infiniteRows` or `serverSideRows` without it, still refused (`unsupported-combination`, `source`, `pivot`).
 - An export's `server.sort` is the sort the model sends (no change without a pivot).
+- `npm run bench:browser -- --cpu 4`: the browser bench with Chrome's CPU slowed 4× (ARCHITECTURE §5.4), checked
+  against `perf/browser-budgets-4x.json`; `-- --only features` runs the lines added in Phase 11 (grouping, a 10 000-row
+  group opened, the pivot, typing in the floating row, a 20 000-value list, print of 5 000 rows, the infinite and
+  server-side scrolls, a server page's answer to its rows, `<dz-grid>` with templated cells); `-- --json <file>` keeps
+  the lines read.
 
 ### Fixed
 - `planPaste` (`@dzgrid/core/range`) called by an application on a list loaded in blocks walks the rows held only,
@@ -50,6 +55,14 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   frame, that frame no longer lands a batch begun since, earlier than its own delay or frame.
 - The column cache knows a column by its definition: new column definitions that keep a column's own (a pivot setting
   its created columns, `update({ columns })` with the same objects) no longer read its cells again to sort or search.
+- Performance on a slow CPU (Phase 11 L3, measured with Chrome's CPU slowed 4×; `docs/phase-11-steps/decisions.md`
+  « L3 »): the theme's rows contain their layout, not their paint (`contain: layout style` over the injected
+  `contain: content`), so Chrome no longer composites every pinned segment apart — a 2 000 px scrollbar drag over
+  dataset A: 71 → 41 ms a frame at 4×, 17.3 → 16.7 ms at 1×; a pivot grid sets its value columns again only when they
+  changed, so its crossing pass runs twice at creation instead of three times and a change of pivot columns reads the
+  value columns no more (pivot over dataset A at 4×: 501 → 436 ms); the floating row prepares the text filter in idle
+  time the first time one of its boxes takes focus (`filter-ui.md`), so the first keystroke no longer folds the whole
+  column in its frame (133 → 26 ms at 4×).
 
 ## [1.7.0] - 2026-11-07
 

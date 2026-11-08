@@ -45,6 +45,22 @@ async function mainA(): Promise<void> {
       return performance.now() - t0;
     },
     bodyRows: () => document.querySelectorAll('.dzg-layer .dzg-row').length,
+    /** The template views drawn (`&t=1`). */
+    templated: () => document.querySelectorAll('.dzg-layer .fx-t').length,
+    /** `step` px a frame on the body's scroller for `frames` frames (a scrollbar drag): the frame deltas. */
+    async scroll(step: number, frames: number) {
+      const vp = document.querySelector<HTMLElement>('.dzg-viewport')!;
+      const deltas: number[] = [];
+      let last = performance.now();
+      for (let f = 0; f < frames; f++) {
+        vp.scrollTop += step;
+        await frame();
+        const now = performance.now();
+        deltas.push(now - last);
+        last = now;
+      }
+      return deltas;
+    },
     /** `n` times: `<dz-grid>` created on 200 rows, then destroyed, each with its change detection. */
     async cycles(n: number) {
       app.rows.set(app.small);

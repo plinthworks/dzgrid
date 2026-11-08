@@ -140,3 +140,143 @@ Owner: « A — corriger la règle de mesure » so K.8 measures what a real prod
 The 1 555 B, measured: linking with the production defines −1 599 (the class metadata, ≈ 815 B above, and the linked
 declarations), Angular's advanced optimizations +44 (its classes wrapped for tree-shaking).
 The `@dzgrid/angular` line (7 950, the wrapper alone, not split) keeps its old measure: not part of this decision.
+
+## L3 — performance under a 4× slower CPU (2026-11-08)
+
+Machine: the owner's Mac (Apple M4 Max, macOS 26.2), Chrome 157.0.8103.38 headless (`channel: 'chrome'`), minified
+pages (`serve({ minify: true })`), one browser at a time, closed in a `finally`. **Not a quiet machine**: load average
+2.5–6.8 during the runs (the owner's Xcode git service, a virtual machine, Firefox); a fixed 2·10⁷-step loop read 60 ms
+at 1× and 248–261 ms at 4× (the throttle holds across the page's navigation). Owner's rule « travailler doucement »: each
+series run **once** (a line is the median of the samples inside one run, 3–30 as the line says), not the plan's « median
+of three runs »; one full run before the fixes and one after, at 1× and at 4×.
+
+### Tooling (0 B in the bundles)
+- `npm run bench:browser -- --cpu 4`: every page the script opens gets `Emulation.setCPUThrottlingRate` on its own target
+  before it loads; 1 and 4 only. Its budgets: `perf/browser-budgets-4x.json` (a missing file: every line « — »).
+  `-- --json <file>` saves the lines (name, value, unit, ok) with the Chrome version. Every scroll gesture gains a
+  « longest frame » line (the §5.4 « no frame over 100 ms »).
+- `-- --only features` (also in a full run): `packages/dom/test/browser/perf-features.html` (dataset A grouped by
+  `e1, n2` with a sum, a mean, the latest day; a ~10 000-row group opened by its chevron; the pivot by `e0, e2`, 48
+  created columns; typing in the floating row with `debounceMs: 0`, the worst a user can set; a set filter over 20 000
+  values opened and its list scrolled; `preparePrint` of 5 000 rows), the infinite page (10⁷ rows, 150 ms latency) and
+  the server-side groups page (a fruit of 500 shops open) scrolled 50 px a frame, server C (the audit screen, answers
+  held): an answer released to its rows written (« paged settle ») and the heap over 30 page changes (« paged-model
+  memory »), and the Angular fixture's `?a=1&t=1` (`<dz-grid>` on A with three `ng-template` cell parts) dragged
+  2 000 px a frame.
+- Lead's reading of the Phase 3 « not measured » list: « response to painted rows » and « paged settle » are one line
+  (server C, answer → rows written: 17.8 ms at 1×, 19.1 at 4×); « csv one chunk » is the CSV export's longest task and
+  animation frame, already read (now budgeted at 4×); the 20 000-value list, the typing, the templated drag and the
+  paged memory have their lines. A measuring mistake fixed on the way: the first server C line observed the first
+  `.dzg-layer` only and waited a frame too many (50 ms at both rates); it now observes the body's scroller.
+
+### Measures (before → after the fixes; ms unless said)
+| Line | 1× before | 1× after | 4× before | 4× after | 4× budget |
+|---|---|---|---|---|---|
+| scrollbar drag 2 000 px, median frame | 17.3 | 16.7 | **70.8** | 40.5 | 51.6 |
+| — p95 / longest frame | 22.5 / 26.6 | 17.8 / 36.8 | **79.4 / 104** | 52.1 / 81.2 | 70.5 / 100 |
+| `<dz-grid>` 3 templated columns, drag median | 20.5 | 16.7 | **84.1** | **55.1** | 51.6 |
+| — p95 / longest frame | 25.7 / 31.5 | 18.0 / 33.4 | **97.3 / 119.9** | 63.5 / 96.1 | 75 / 100 |
+| pivot A (2 + 2 columns, 3 values), grid made | 133.4 | 117.0 | **500.7** | 436.1 | 450 |
+| floating filter, first key 500 ms after the focus | — | 6.9 | **132.6**¹ | 25.8 | 35 |
+| floating filter, first key at once (recorded) | 30.0 | 26.6 | 125.6 | **100.7** | — |
+| A grouped by 2 columns + 3 aggregations | 50.0 | 50.0 | 181.9 | 183.3 | 247.5 |
+| a ~10 000-row group opened | 17.5 | 17.4 | 20.5 | 19.1 | 28 |
+| set filter, 20 000 values: warm open / list median frame | 16.9 / 16.6 | 8.2 / 16.7 | 36.1 / 16.8 | 35.3 / 16.6 | 49 / 23 |
+| print 5 000 rows: build / longest animation frame | 84.3 / 52.6 | 83.0 / 52.6 | 323.5 / 59.1 | 323.3 / 59.4 | 342 / 100 |
+| infinite, server-side: wheel median frame | 16.6, 16.7 | 16.7, 16.7 | 16.6, 16.7 | 16.6, 16.7 | 22.5, 23 |
+| CSV export of A: wall / longest task | 514 / 0 | 523 / 0 | 1 957 / 57 | 2 001 / 56 | 2 100 / 100 |
+| first render of A / of 10⁶ rows | 40.8 / 225 | 41.3 / 230 | 169 / 975 | 181 / 1 143² | 245 / 1 543 |
+| tree 10⁶: first render / expand all | 248 / 124 | 284 / 161² | 1 070 / 591 | **1 257 / 654**² | 1 156.5 / 649.5 |
+
+¹ From a separate « before » run of the feature lines (the fixes 2 and 3 stashed), load 6.8. ² The « after » runs had a
+load of 5.8 and 4.4; the tree's code is untouched, and an A/B of the row containment on the same tree page gave
+305 / 358 against 346 / 263 ms (no effect, noise). Each 4× budget: the measure + 35 % to the half-ms, capped by §5.4
+(the target × 3, or the 1× budget × 3), every longest frame 100 (`perf/browser-budgets-4x.json`'s comment). The 1×
+file gains the new lines by its own rule (measure + 35 %, a « to the next frame » line 23 at least, under §5.3); no
+older 1× line changed.
+
+The three worst at 4× against §5.4 (the target × 3, no frame over 100 ms): the templated drag (median ×1.63 of its cap,
+a 120 ms frame), the drag of A (×1.37, a 104 ms frame) — one cause — then the first keystroke (a 126–133 ms frame) and
+the pivot (×1.11).
+
+### Fix 1 — rows contain their layout, not their paint (theme)
+- Found by a trace of the drag at 4×: of a 72 ms frame, `Layerize` 34 ms, paint 13, layout 14, script 7. Removing the
+  sticky pinned segments took `Layerize` to 3 ms; so did `contain: layout style` (or none) on the rows: the paint
+  containment of the injected `contain: content` gives each row a clip, and Chrome then layerizes every sticky segment
+  under its own clip. `will-change` on the layer, `contain: strict` and a body `contain: paint` changed nothing.
+- No pixel changed: nine pages (grouping, tree, detail, range, pinned A with a focused cell, edit marks, server groups,
+  infinite, demos) screenshotted with and without, identical. The wheel and horizontal scrolls unchanged at 1× and 4×.
+  S11's Firefox finding was the `size` part (`size layout style` dropped the sticky segments, `content` / `paint` /
+  none kept them): `layout style` holds no `size`. **Firefox and WebKit not re-checked here** (Chrome only, the
+  owner's Mac): for the next three-engine pass (L4a's or L5's).
+- Where: **the theme** (`dzgrid.scss`: `.dzg-row:where(:not([data-spans])) { contain: layout style }`; a spans row keeps
+  the feature's `contain: style`), not `LAYOUT_CSS`: `LAYOUT_CSS` is public and carries its text as its type, so any
+  change is an API change for `check:api` (L2 « `LAYOUT_CSS` »). A grid without the theme keeps the slower drag.
+  **Owner option**: move the rule into `LAYOUT_CSS` (`contain: layout style` instead of `contain: content`, the theme
+  rule dropped, `infra.test.ts` and `row-containment.test.ts` changed), accepted with
+  `node scripts/api.mjs --accept … --only "@dzgrid/dom#LAYOUT_CSS"`.
+- Guard: `packages/theme/test/row-containment.test.ts` (failed before the theme was built again); the 4× lines « scrollbar
+  drag … median / p95 / longest frame » (70.8 / 79.4 / 104 before, over 51.6 / 75 / 100).
+- Size: theme 2 918 → 2 932 (line 2 960); K.8 +14.
+
+### Fix 2 — the floating row prepares the text filter (`dom/filters`)
+- The first keystroke in a text box folds the column's 100 000 cells (`fold`, the haystack: ≈ 25 ms in Node at 1×,
+  ≈ 100 ms at 4×); later keys read it warm (20 ms to the frame). `fold` is already per character through a table (a
+  run-based variant measured equal). The quick search has the cure: its idle preparation (`warmSearch`, D13) builds the
+  same `search` haystacks the text filter reads. The filters feature now holds it (as a bound search box does) and asks
+  for it when a box of the floating row first takes focus. Sheet first: `filter-ui.md` « Preparing the text filter ».
+- Cost: it prepares every textual column, not only the focused one (a column-first order needs `Warmup.want(column)`
+  in the DOM base, 3 B of room): idle time only, paused while scrolling. Typed within ≈ 0.1 s of the focus at 4×, the
+  first key still folds (100.7 ms, recorded): written, not budgeted.
+- Test first: `packages/dom/test/filters-warm.test.ts` (a focus then a keystroke folds nothing: failed, 1 fold; no focus:
+  one fold; a focus on a header cell asks nothing; destroyed while preparing). Mutant (the `.dzg-hextra` check removed):
+  killed. Guard: the 4× line « first keystroke, 500 ms after the focus » (132.6 before, 35 now).
+- Size: `dom/filters` 11 949 → 12 000 (line 12 000); K.8 +29 (with fix 1's theme bytes and the pivot's 0 in K.8:
+  88 442 → 88 485).
+
+### Fix 3 — a pivot keeps its value columns (`dom/pivot`)
+- Profiled warm at 4×: the pivot grid made is pure script (480 ms, no layout to speak of), spread (the value columns'
+  keys, the crossing pass, the grouping). Counted in jsdom: **three crossing passes and three totals at creation**
+  where Node's line makes one: each time the DOM sets the effective columns, `relabel` made new definitions for the
+  value columns under « Total » (`{ ...n, header }`), and the pass and the key cache know a column by its definition
+  (R4). Now a column equal to the one set last time, key by key, keeps its object. Two passes remain at creation (the
+  crossings must be known before the created columns can be set); a later change of the pivot columns makes one pass
+  and reads no value column again.
+- Test first: `packages/dom/test/pivot-passes.test.ts` (made: 2 passes, 6 key builds — failed with 3 passes; pivot
+  columns changed: one pass, no key build — failed with 2 passes). Guard: the 4× pivot line (500.7 before, cap 450).
+- Size: `dom/pivot` 2 569 → 2 623; its line 2 600 → **2 650** (+2 % rule). 0 B in K.8 (not in the audit screen).
+  The kept objects stay for the grid's life, one per column id ever set (a created column's too: ≤ 200 a pivot).
+
+### Misses written (no cap raised)
+- `<dz-grid>` with three templated columns, drag median **55.1 ms against 51.6** (p95 and longest frame within). Its
+  layout is 25 ms a frame against 14 ms on the plain page; the same page with a `serif` body font: 14 ms. The fixture's
+  `font: 14px system-ui` (a font with fallbacks for the Arabic columns) costs the text layout, not the templates
+  (without templates: 52.8 ms). `text-rendering`, kerning and ellipsis variants: no change. Owner's call (Q6 « targets
+  missed by far »: it is not far): accept, or a lighter fixture font.
+- The million-row tree's first render and expand-all sit at their caps (1× budget × 3); the quiet run is under, the
+  loaded one over. A CPU-bound line slows ≈ ×3.75 at 4×, and its 1× budget already holds 35 %: ×3 of that is the
+  measure × 4.05. Owner's call if a quiet run misses.
+- The first keystroke typed at once after the focus (above).
+- §5.4's ×3 applied to a CPU-bound line asks it to run at 1× under 0.75 × its target (pivot: 117 of 150 now).
+
+### Left
+- **R6** (DOM permutations with scroll gestures): the plan keeps it in L1, which sent it here (« L3 runs them anyway »);
+  `bench:browser` does not run the permutations. Not done; the audit screen's permutations are paged (a scroll loads
+  nothing), and the `aria-setsize` case it guards lives in the infinite and server-side lists, which
+  `browser-infinite.mjs` / `browser-server-groups.mjs` already scroll. For L9's review to place.
+- Node `bench`: not run (no core line changed; the fixes are in the DOM and the theme).
+
+### Sizes (L3)
+| Line | Before | After | Line |
+|---|---|---|---|
+| K.8 audit profile | 88 442 | **88 485** (+43) | 90 000 |
+| `@dzgrid/theme` | 2 918 | 2 932 | 2 960 |
+| `@dzgrid/dom/filters` | 11 949 | 12 000 | 12 000 |
+| `@dzgrid/dom/pivot` | 2 569 | 2 623 | 2 600 → 2 650 (+2 %) |
+| core base, DOM base | 29 224, 23 657 | unchanged | 29 300, 23 660 |
+
+`check:api`: nothing removed, changed or added.
+- Gate: `gate:step` run once — test:ci and test:tz green (8 961 tests), typecheck stopped on a test's model type
+  (`pivot-passes.test.ts` reading `diagnostics` on a `RowModel`; typed as `ClientModel`, no cast), then typecheck,
+  build, check:size (0 over) and check:api (nothing removed or narrowed) run again green; the tests were not run a
+  third time for a type-only change.

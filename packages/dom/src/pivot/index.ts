@@ -163,6 +163,7 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
   /** A created header as shown: the empty crossing's « (Vide) », a sub-total's « Total 2025 ». */
   const head = (h: string | undefined): string => (h === BLANK ? g.msg('group.blank') : h?.[0] === SUB ? g.msg('pivot.subtotal', { name: head(h.slice(1)) }) : h ?? '');
   /** The created tree as shown (pivot.md 34, 38): headers translated, the value headers, tooltips, widths, bands that fold. */
+  const kept = new Map<string, Record<string, unknown>>();
   const relabel = (t: readonly ColumnOrGroup<unknown>[], fn: boolean, many: boolean, up: string[] = []): ColumnOrGroup<unknown>[] =>
     t.map((n, i) => {
       // A row total (under « Total ») is its own value.
@@ -174,7 +175,9 @@ function setup(g: GridContext<unknown>, o: PivotFeatureOptions, shape: PivotShap
       if ('children' in n) (x.children = relabel(n.children, fn, many, [...up, h])), (x.collapsible = true);
       else if (vc) (x.headerTooltip = [...up, ...(many || own ? [] : [h]), vhead(vc, true, true)].join(' › ')), own || o.width || (x.width = Math.min(240, Math.max(120, h.length * 9 + 64)));
       if (i && up.length && !own) x.groupShow = 'open';
-      return x as unknown as ColumnOrGroup<unknown>;
+      // A column the same as last time keeps its object: the key cache and the pass know a column by it (L3).
+      const was = kept.get(n.id) ?? {};
+      return (Object.keys({ ...was, ...x }).some((k) => x[k] !== was[k]) ? (kept.set(n.id, x), x) : was) as unknown as ColumnOrGroup<unknown>;
     });
   const setTree = (t: readonly ColumnOrGroup<unknown>[]): void => {
     g.settings = { ...g.settings, columns: t as never };

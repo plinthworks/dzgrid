@@ -1,5 +1,5 @@
 {
-  "$comment": "Chrome, headless, dataset A at 1 280 × 720 (scripts/perf-browser.mjs). Phase 3 close (2026-10-21, owner decision step25-decisions.md Q2): each ms line is the median of three runs + 35 % rounded up to the half-ms, never above the targets of ARCHITECTURE §5.3 and phase-3-plan §4 (17.2 ms a frame is 58 fps); sub-ms lines (and 0 for no task over 50 ms), counts, percentages and megabytes keep their budget. Set by scripts/rebudget.mjs; history in ROADMAP.md. Phase 4 step 6 (2026-10-21): the tree lines (the million-row tree of perf/profiles/tree.ts, packages/dom/test/browser/perf-tree.html; `-- --only tree` runs them alone) set by the same rule from three runs; no older line changed. Phase 4, sticky parent rows (sticky-blueprint.md): one new line, the pinned parents worked out, at the owner's target 0.2 ms (no older line changed).",
+  "$comment": "Chrome, headless, dataset A at 1 280 × 720 (scripts/perf-browser.mjs). Phase 3 close (2026-10-21, owner decision step25-decisions.md Q2): each ms line is the median of three runs + 35 % rounded up to the half-ms, never above the targets of ARCHITECTURE §5.3 and phase-3-plan §4 (17.2 ms a frame is 58 fps); sub-ms lines (and 0 for no task over 50 ms), counts, percentages and megabytes keep their budget. Set by scripts/rebudget.mjs; history in ROADMAP.md. Phase 4 step 6 (2026-10-21): the tree lines (the million-row tree of perf/profiles/tree.ts, packages/dom/test/browser/perf-tree.html; `-- --only tree` runs them alone) set by the same rule from three runs; no older line changed. Phase 4, sticky parent rows (sticky-blueprint.md): one new line, the pinned parents worked out, at the owner's target 0.2 ms (no older line changed). Phase 11 L3 (2026-11-08, docs/phase-11-steps/decisions.md « L3 »): the lines left « not measured » since Phase 3 and the later features (packages/dom/test/browser/perf-features.html, the infinite and server-side pages, server C, `<dz-grid>` with three templated columns; `-- --only features` runs them alone), each the measure + 35 % to the half-ms (a « to the next frame » line 23 at least: a frame is 16.7 ms), never above its §5.3 target; one run before and one after the fixes (the owner's Mac, one run at a time), the larger of the two for a line no fix touched; longest frames recorded, without a line. No older line changed.",
   "budgets": {
     "first render of A": 52,
     "body nodes after first render": 1000,
@@ -52,6 +52,32 @@
     "tree 1 000 000 open: a toggle near the end to the next frame (median of 6)": 23,
     "tree 1 000 000 open: a toggle near the end, model and events (median of 6)": 11.5,
     "tree 1 000 000 open: pinned parents worked out (mean of 10 000 scroll tops)": 0.2,
-    "tree: page errors": 0
+    "tree: page errors": 0,
+    "A grouped by 2 columns + 3 aggregations: the grid made, to the second frame (median of 3)": 67.5,
+    "A grouped by a tenth of n2: a group of ~10 000 rows opened (chevron) to the next frame (median of 5)": 24,
+    "pivot A (2 row columns, 2 pivot columns, 3 values): the grid made, to the second frame (median of 3)": 150,
+    "floating filter (text, debounceMs 0): a keystroke over A to the next frame (median of 6)": 24,
+    "floating filter (text, debounceMs 0): the first keystroke, 500 ms after the focus, to the next frame": 23,
+    "floating filter (text, debounceMs 0): the longest keystroke to the next frame": 24.5,
+    "set filter, 20 000 values: a warm open to the options drawn": 23,
+    "set filter, 20 000 values: list scrolled 40 px a frame: median frame": 17.2,
+    "set filter, 20 000 values: list scrolled 40 px a frame: p95 frame": 24,
+    "print of 5 000 rows of A: preparePrint to the table built (median of 3)": 114,
+    "features: page errors": 0,
+    "infinite 10⁷ rows (150 ms latency): wheel-like scroll 50 px a frame: median frame": 17.2,
+    "infinite 10⁷ rows (150 ms latency): wheel-like scroll 50 px a frame: p95 frame": 23.5,
+    "infinite 10⁷ rows (150 ms latency): wheel-like scroll 50 px a frame: page errors": 0,
+    "server-side groups (150 ms latency), a fruit of 500 shops open: wheel-like scroll 50 px a frame: median frame": 17.2,
+    "server-side groups (150 ms latency), a fruit of 500 shops open: wheel-like scroll 50 px a frame: p95 frame": 25,
+    "server-side groups (150 ms latency), a fruit of 500 shops open: wheel-like scroll 50 px a frame: page errors": 0,
+    "server C: an answer (a page) released to its rows written, in the frame that paints them (median of 30)": 24.5,
+    "server C: heap growth over 30 page changes (paged model holds one page)": 1,
+    "server C: page errors": 0,
+    "<dz-grid> with 3 templated columns: first render of A": 57,
+    "<dz-grid> with 3 templated columns: scrollbar drag 2 000 px a frame: median frame": 17.2,
+    "<dz-grid> with 3 templated columns: scrollbar drag 2 000 px a frame: p95 frame": 24.5,
+    "<dz-grid> with 3 templated columns: wheel-like scroll 50 px a frame: median frame": 17.2,
+    "<dz-grid> with 3 templated columns: wheel-like scroll 50 px a frame: p95 frame": 24,
+    "<dz-grid> templated: page errors": 0
   }
 }

@@ -89,6 +89,10 @@
   background: var(--tz-bg);
 }
 
+.dzg-row:where(:not([data-spans])) {
+  contain: layout style;
+}
+
 .dzg-row:hover:where(:not([data-spans])),
 .dzg-row:hover:where(:not([data-spans])) .dzg-seg-start,
 .dzg-row:hover:where(:not([data-spans])) .dzg-seg-end,

@@ -6,23 +6,34 @@
  * indicative: K.8's figures are owed on a mid-range laptop, headed.
  * `-- --only tree`: the million-row tree alone (Phase 4 step 6, with its pinned parents); it runs last in a full run.
  * `-- --only range-b`: dataset B's editing gestures (Phase 5 step 12), indicative, no budget (Q17d, S12-Q7); never in a full run.
+ * `-- --only features`: the lines of Phase 11 L3 alone (the §5.3 lines left « not measured » since Phase 3 and the later
+ * features: grouping, a 10 000-row group opened, the pivot, typing in the floating row, a 20 000-value list, print, the
+ * infinite and server-side scrolls, server C's answer to the rows painted, `<dz-grid>` with templated cells).
+ * `-- --cpu 4` (ARCHITECTURE §5.4, Phase 11 L3): every page's CPU slowed 4× (CDP `Emulation.setCPUThrottlingRate`),
+ * checked against `perf/browser-budgets-4x.json` (§5.3 targets × 3, no frame over 100 ms). `-- --json <file>` saves
+ * the lines read.
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { serve, browser, median, percentile } from '../spikes/kit.mjs';
 import { buildFixture } from '../packages/angular/browser/build.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const budgets = JSON.parse(readFileSync(`${ROOT}perf/browser-budgets.json`, 'utf8')).budgets;
+const arg = (k) => (process.argv.includes(k) ? process.argv[process.argv.indexOf(k) + 1] : null);
+/** The CPU slowdown (§5.4): 1 (none) or 4, the low-end profile; its own budget file. */
+const cpu = Number(arg('--cpu') ?? 1);
+if (cpu !== 1 && cpu !== 4) throw new Error(`--cpu takes 1 or 4, not ${arg('--cpu')}`);
+const budgetFile = `${ROOT}perf/${cpu === 1 ? 'browser-budgets.json' : `browser-budgets-${cpu}x.json`}`;
+const budgets = existsSync(budgetFile) ? JSON.parse(readFileSync(budgetFile, 'utf8')).budgets : {};
 // Step 25 lines: the audit screen's server (C) and the CSV of A load tzslot through audit.html's
 // importmap (bundled once, as test:audit does); `<dz-grid>` runs on the Angular fixture's `?a=1`
 // page, built here (AOT, minified; `npm run build` first).
 await build({ entryPoints: { dom: '@tzslot/dom', core: '@tzslot/core', 'dom-lazy': '@tzslot/dom/lazy', 'core-lazy': '@tzslot/core/lazy' }, bundle: true, splitting: true, format: 'esm', outdir: `${ROOT}node_modules/.cache/dzgrid-browser`, absWorkingDir: ROOT, logLevel: 'error' });
-if (!process.argv.includes("--only")) await buildFixture();
+const only = arg('--only');
+if (!only || only === 'features') await buildFixture();
 // Minified, as a consumer ships it: never measure unminified code (§5.4).
 const site = await serve(import.meta.url, { minify: true });
-const only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
 const lines = [];
 let open = null;
 process.on('SIGINT', async () => { await open?.close().catch(() => {}); await site.close(); process.exit(130); });
@@ -30,7 +41,7 @@ process.on('SIGINT', async () => { await open?.close().catch(() => {}); await si
 const line = (name, value, unit, better = 'lower') => {
   const budget = budgets[name];
   const ok = budget === undefined || (better === 'lower' ? value <= budget : value >= budget);
-  lines.push({ name, value, ok });
+  lines.push({ name, value, unit, ok });
   console.log(`${ok ? 'ok  ' : 'OVER'} ${name}: ${Number.isInteger(value) ? value : value.toFixed(1)} ${unit} (budget ${budget ?? '—'})`);
 };
 
@@ -46,7 +57,46 @@ async function page(b, n) {
 
 const b = await browser('chrome');
 open = b;
+const chrome = b.version();
+// Every page of the run slowed alike: the throttle set on the page's own target, before it loads anything (it holds
+// across the page's navigations, checked below by a fixed loop).
+const newPage = b.newPage.bind(b);
+b.newPage = async (o) => {
+  const pg = await newPage(o);
+  if (cpu !== 1) await (await pg.context().newCDPSession(pg)).send('Emulation.setCPUThrottlingRate', { rate: cpu });
+  return pg;
+};
+/** In-page: `step` px a frame on the grid's scroller for `frames` frames; the frame deltas (as `perf.ts`'s `scroll`). */
+const scrollFrames = (pg, step, frames, axis = 'block') => pg.evaluate(async ([step, frames, axis]) => {
+  const vp = document.querySelector('.dzg-viewport');
+  const deltas = [];
+  let last = performance.now();
+  for (let f = 0; f < frames; f++) {
+    if (axis === 'block') vp.scrollTop += step;
+    else vp.scrollLeft += step;
+    await new Promise((r) => requestAnimationFrame(r));
+    const now = performance.now();
+    deltas.push(now - last);
+    last = now;
+  }
+  return deltas;
+}, [step, frames, axis]);
+const frameLines = (name, deltas) => {
+  const d = deltas.slice(2);
+  line(`${name}: median frame`, median(d), 'ms');
+  line(`${name}: p95 frame`, percentile(d, 95), 'ms');
+  line(`${name}: longest frame`, Math.max(...d), 'ms');
+};
+console.log(`       CPU ${cpu}× (${cpu === 1 ? 'no throttle' : 'Emulation.setCPUThrottlingRate'}), budgets ${budgetFile.slice(ROOT.length)}`);
 try {
+  {
+    // The throttle seen by the page: a fixed loop's time (printed; about cpu × the 1× figure).
+    const pg = await b.newPage();
+    await pg.goto(site.root('packages/dom/test/browser/perf.html'));
+    const loop = await pg.evaluate(() => { const t0 = performance.now(); let x = 0; for (let i = 0; i < 2e7; i++) x = (x + i * 7) % 1000003; return [performance.now() - t0, x]; });
+    console.log(`       a fixed loop (2·10⁷ steps) after the page's navigation: ${loop[0].toFixed(0)} ms`);
+    await pg.close();
+  }
   if (!only) {
     // ---- step 15: the set filter's popup with 2 000 values (first, so nothing before it warms it) ----
     {
@@ -86,6 +136,7 @@ try {
         const d = r.deltas.slice(2);
         line(`${name}: median frame`, median(d), 'ms');
         line(`${name}: p95 frame`, percentile(d, 95), 'ms');
+        line(`${name}: longest frame`, Math.max(...d), 'ms');
         line(`${name}: script per frame`, ((after.ScriptDuration - before.ScriptDuration) * 1000) / frames, 'ms');
         line(`${name}: layouts per frame`, (after.LayoutCount - before.LayoutCount) / frames, 'layouts');
         line(`${name}: frames without rows`, await pg.evaluate(([axis, step]) => window.p.coverage(axis, step, 60), [axis, step]), '%');
@@ -199,7 +250,136 @@ try {
       const r = await pg.evaluate(() => window.p.scroll('block', 50, 120));
       line('1 000 000 rows (scaled), wheel-like scroll: median frame', median(r.deltas.slice(2)), 'ms');
       line('1 000 000 rows (scaled), wheel-like scroll: p95 frame', percentile(r.deltas.slice(2), 95), 'ms');
+      line('1 000 000 rows (scaled), wheel-like scroll: longest frame', Math.max(...r.deltas.slice(2)), 'ms');
       line('1 000 000 rows (scaled): frames without rows', await pg.evaluate(() => window.p.coverage('block', 2000, 40)), '%');
+      await pg.close();
+    }
+  }
+
+  // ---- Phase 11 L3: the §5.3 lines « not measured » since Phase 3, and the later features (perf-features.ts) ----
+  if (!only || only === 'features') {
+    {
+      const pg = await b.newPage({ viewport: { width: 1300, height: 760 } });
+      const errors = [];
+      pg.on('pageerror', (e) => errors.push(e.message));
+      await pg.goto(site.root('packages/dom/test/browser/perf-features.html'));
+      await pg.waitForFunction(() => window.ready, null, { timeout: 60000 });
+      await pg.evaluate(() => window.p.prepare());
+      const groups = [];
+      for (let k = 0; k < 3; k++) groups.push(await pg.evaluate(() => window.p.group()));
+      line('A grouped by 2 columns + 3 aggregations: the grid made, to the second frame (median of 3)', median(groups.map((g) => g.ms)), 'ms');
+      const open = await pg.evaluate(() => window.p.openGroup(5));
+      console.log(`       a group of ~10 000 opened: ${open.shown} rows shown`);
+      line('A grouped by a tenth of n2: a group of ~10 000 rows opened (chevron) to the next frame (median of 5)', open.shown > 9000 ? median(open.ms) : Infinity, 'ms');
+      const pivots = [];
+      for (let k = 0; k < 3; k++) pivots.push(await pg.evaluate(() => window.p.pivot()));
+      console.log(`       pivot: ${pivots[0].columns} header cells drawn`);
+      line('pivot A (2 row columns, 2 pivot columns, 3 values): the grid made, to the second frame (median of 3)', median(pivots.map((x) => x.ms)), 'ms');
+      // A person's half second between the focus and the first key (the row prepares the text filter then, L3), and at once.
+      const typed = await pg.evaluate(() => window.p.typing(500));
+      console.log(`       typing: ${typed.ms.map((m) => m.toFixed(1)).join(' / ')} ms; ${typed.narrowed} rows under « ent », ${typed.shown} at the end`);
+      line('floating filter (text, debounceMs 0): a keystroke over A to the next frame (median of 6)', typed.narrowed > 0 && typed.narrowed < 100_000 ? median(typed.ms) : Infinity, 'ms');
+      line('floating filter (text, debounceMs 0): the first keystroke, 500 ms after the focus, to the next frame', typed.ms[0], 'ms');
+      line('floating filter (text, debounceMs 0): the longest keystroke to the next frame', Math.max(...typed.ms), 'ms');
+      const rushed = await pg.evaluate(() => window.p.typing(0));
+      line('floating filter (text, debounceMs 0): the first keystroke at once after the focus (recorded)', rushed.ms[0], 'ms');
+      const set = await pg.evaluate(() => window.p.setList(120));
+      console.log(`       value list: ${set.options} options drawn, scrolled ${Math.round(set.scrolled)} px`);
+      line('set filter, 20 000 values: a warm open to the options drawn', set.open, 'ms');
+      frameLines('set filter, 20 000 values: list scrolled 40 px a frame', set.deltas);
+      const prints = [];
+      for (let k = 0; k < 3; k++) prints.push(await pg.evaluate(() => window.p.print()));
+      console.log(`       print: ${prints.map((x) => `${Math.round(x.ms)} ms, ${x.rows} rows, longest task ${Math.round(x.longtask)}`).join('; ')}`);
+      line('print of 5 000 rows of A: preparePrint to the table built (median of 3)', prints.every((x) => x.rows === 5000) ? median(prints.map((x) => x.ms)) : Infinity, 'ms');
+      line('print of 5 000 rows of A: the longest animation frame', Math.max(...prints.map((x) => x.loaf)), 'ms');
+      line('features: page errors', errors.length, 'errors');
+      if (errors.length) console.log(`       ${JSON.stringify(errors).slice(0, 600)}`);
+      await pg.close();
+    }
+
+    // ---- data set C, infinite (10⁷ rows, 150 ms latency, total known) and server-side groups: wheel-like scroll ----
+    for (const [name, path, before] of [
+      ['infinite 10⁷ rows (150 ms latency): wheel-like scroll 50 px a frame', 'packages/dom/test/browser/infinite.html', null],
+      ['server-side groups (150 ms latency), a fruit of 500 shops open: wheel-like scroll 50 px a frame', 'packages/dom/test/browser/server-groups.html', 'open'],
+    ]) {
+      const pg = await b.newPage({ viewport: { width: 1300, height: 760 } });
+      const errors = [];
+      pg.on('pageerror', (e) => errors.push(e.message));
+      await pg.goto(site.root(path));
+      await pg.waitForFunction(() => window.ready && document.querySelector('.dzg-layer .dzg-row'), null, { timeout: 30000 });
+      if (before) {
+        await pg.click('.dzg-layer .dzg-row[data-kind=group] .dzg-toggle');
+        await pg.waitForFunction(() => document.querySelectorAll('.dzg-layer .dzg-row[aria-level="2"]').length > 5, null, { timeout: 30000 });
+      }
+      await pg.waitForTimeout(300);
+      frameLines(name, await scrollFrames(pg, 50, 300));
+      line(`${name}: page errors`, errors.length, 'errors');
+      await pg.close();
+    }
+
+    // ---- server C (audit screen, 10⁷ rows, total unknown, held answers): an answer released to its rows painted ----
+    {
+      const pg = await b.newPage({ viewport: { width: 1300, height: 760 } });
+      const errors = [];
+      pg.on('pageerror', (e) => errors.push(e.message));
+      await pg.goto(site.root('packages/dom/test/browser/audit.html'));
+      await pg.waitForFunction(() => window.ready, null, { timeout: 30000 });
+      await pg.evaluate(() => window.audit.mount({ config: 'server', lang: 'fr' }));
+      const settle = () => pg.evaluate(async () => {
+        for (let k = 0; k < 5; k++) {
+          const s = window.audit.server;
+          for (const e of s.pending()) s.release(e.seq);
+          await new Promise((r) => requestAnimationFrame(r));
+        }
+      });
+      await settle();
+      const cdp = await pg.context().newCDPSession(pg);
+      const heap = async () => (await cdp.send('HeapProfiler.collectGarbage'), (await cdp.send('Runtime.getHeapUsage')).usedSize);
+      const h0 = await heap();
+      const answers = [];
+      for (let k = 0; k < 30; k++) {
+        // « next », its request held; then the answer released, timed to the frame after the rows were written.
+        answers.push(await pg.evaluate(async () => {
+          const s = window.audit.server;
+          document.querySelector('.dzg-footer button[data-go="next"]').click();
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          // The body's scroller: its row layers (pinned and centre) take the new page's rows.
+          let wrote = 0;
+          const mo = new MutationObserver(() => { wrote ||= performance.now(); });
+          mo.observe(document.querySelector('.dzg-viewport'), { subtree: true, childList: true, characterData: true });
+          const t0 = performance.now();
+          for (const e of s.pending()) s.release(e.seq);
+          // The grid writes in its own frame callback, after this page's: the time to that write (as the transaction line).
+          while (!wrote && performance.now() - t0 < 2000) await new Promise((r) => requestAnimationFrame(r));
+          mo.disconnect();
+          return wrote ? wrote - t0 : Infinity;
+        }));
+        await settle();
+      }
+      const h1 = await heap();
+      line('server C: an answer (a page) released to its rows written, in the frame that paints them (median of 30)', median(answers), 'ms');
+      line('server C: heap growth over 30 page changes (paged model holds one page)', (h1 - h0) / 1024 / 1024, 'MB');
+      line('server C: page errors', errors.length, 'errors');
+      await pg.close();
+    }
+
+    // ---- <dz-grid> on A with three templated columns (an ng-template cell part): scrollbar drag ----
+    {
+      const pg = await b.newPage({ viewport: { width: 1300, height: 1030 } });
+      const errors = [];
+      pg.on('pageerror', (e) => errors.push(e.message));
+      pg.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+      await pg.goto(site.root('packages/angular/browser/build/index.html?a=1&t=1'));
+      await pg.waitForFunction(() => window.fxReady || window.fxError, null, { timeout: 30000 });
+      const boot = await pg.evaluate(() => window.fxError);
+      if (boot) throw new Error(boot);
+      line('<dz-grid> with 3 templated columns: first render of A', await pg.evaluate(() => window.fx.firstRender()), 'ms');
+      const views = await pg.evaluate(() => window.fx.templated());
+      console.log(`       ${views} template views drawn`);
+      frameLines('<dz-grid> with 3 templated columns: scrollbar drag 2 000 px a frame', views > 0 ? await pg.evaluate(() => window.fx.scroll(2000, 120)) : [Infinity, Infinity, Infinity]);
+      frameLines('<dz-grid> with 3 templated columns: wheel-like scroll 50 px a frame', await pg.evaluate(() => window.fx.scroll(50, 300)));
+      line('<dz-grid> templated: page errors', errors.length, 'errors');
+      if (errors.length) console.log(`       ${JSON.stringify(errors).slice(0, 600)}`);
       await pg.close();
     }
   }
@@ -289,5 +469,6 @@ try {
   await site.close();
 }
 const over = lines.filter((l) => !l.ok).length;
-console.log(`\nbench:browser: ${lines.length} lines, ${over} over budget (headless, indicative)`);
+if (arg('--json')) writeFileSync(arg('--json'), JSON.stringify({ cpu, chrome, lines }, null, 2) + '\n');
+console.log(`\nbench:browser (CPU ${cpu}×): ${lines.length} lines, ${over} over budget (headless, indicative)`);
 process.exit(over ? 1 : 0);

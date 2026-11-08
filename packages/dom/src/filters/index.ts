@@ -167,6 +167,9 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   // Shown or hidden live (floating-toggle.md): the row's spec in the header rows or not; a hide moves the grid's
   // focus off the row first. The paint reads the view's height before the header changes: one more reads it after.
   let again = false;
+  // The quick search's idle preparation (filter-ui.md « Preparing the text filter »), held with the feature and asked
+  // for when a box of the row first takes focus: the first keystroke reads the folded text ready (Phase 11 L3).
+  const free = g.warm.hold();
   shown.attach(g, o.floating === true || asked(g), (on, source) => {
     // Shown at its own place, in the features' order (only this row comes and goes; the others' are fixed).
     const rows = g.features.flatMap((h) => (h === handle ? (on ? [row.spec] : []) : h.headerRows ?? []));
@@ -179,6 +182,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   // The date kit (or the set chunk) fetched ahead: the pointer over the column's button, the focus on its header.
   const ahead = (e: Event): void => {
     const t = e.target as HTMLElement;
+    if (e.type == 'focusin' && t.closest('.dzg-hextra')) g.warm.want();
     const col = g.columns.get(t.closest<HTMLElement>('.dzg-hcell')?.dataset['col'] ?? '');
     const kind = col && popup.can(col) && resolve(col, 'filter').kind;
     if (e.type !== 'focusin' && !t.closest('.dzg-fbtn')) return;
@@ -226,6 +230,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
       popup.close();
       row.destroy();
       shown.detach(g);
+      free();
     },
   };
   return handle;
