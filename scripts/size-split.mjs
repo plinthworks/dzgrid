@@ -7,7 +7,7 @@
  */
 import { build } from 'esbuild';
 import { existsSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 const gz = (bytes) => gzipSync(bytes, { level: 9 }).length;
@@ -72,7 +72,32 @@ export function entryProblems(entry) {
   const problems = [];
   for (const [k, v] of Object.entries(entry.alias ?? {})) if (!shipped.includes(v)) problems.push(`alias ${k} -> ${v}: not listed in shipped`);
   for (const p of entry.external ?? []) if (dropsDzgrid(p)) problems.push(`external ${p}: matches @dzgrid/, its code would leave the count`);
+  if (entry.angular !== undefined && entry.angular !== 'production') problems.push(`angular ${entry.angular}: only "production" is known`);
   return problems;
+}
+
+/**
+ * `angular: 'production'` (L2, owner A, 2026-11-08): the profile built as `ng build` ships it in
+ * production. Every .js/.mjs input goes through Angular's own JavaScript transformer (the one its
+ * application builder uses: the linker for a partial-compiled package, then its advanced optimizations),
+ * and the bundle gets the defines and the `pure` list of Angular's code bundle (`ngDevMode` false: the
+ * TestBed-only class metadata is dropped). The text is left as esbuild writes it by default (`\uXXXX`
+ * for non-ASCII): the real example's build ships it so too.
+ */
+const NG_DEFINE = { ngDevMode: 'false', ngJitMode: 'false', ngServerMode: 'false', ngHmrMode: 'false' };
+async function angularProduction(root) {
+  const { JavaScriptTransformer } = await import('@angular/build/private');
+  const transformer = new JavaScriptTransformer({ sourcemap: false, advancedOptimizations: true, jit: false }, 1);
+  const plugin = {
+    name: 'dzg-angular-production',
+    setup(b) {
+      b.onLoad({ filter: /\.[cm]?js$/ }, async (args) => {
+        const { sideEffects } = await b.resolve(args.path, { kind: 'import-statement', resolveDir: root });
+        return { contents: await transformer.transformFile(args.path, false, sideEffects), loader: 'js', resolveDir: dirname(args.path) };
+      });
+    },
+  };
+  return { options: { define: NG_DEFINE, pure: ['forwardRef'], plugins: [plugin] }, close: () => transformer.close() };
 }
 
 /**
@@ -86,22 +111,29 @@ export async function measureSplitEntry(entry, root) {
 }
 
 /**
- * `entry`: `{ file, css?, external?, alias?, shipped? }`, paths from `root`. `external`: packages the
+ * `entry`: `{ file, css?, external?, alias?, shipped?, angular? }`, paths from `root`. `external`: packages the
  * application has anyway (Angular, rxjs), left out; `alias`: a specifier measured from a given file
- * (a package's shipped build), which `shipped` must list. Returns the initial files, the lazy
+ * (a package's shipped build), which `shipped` must list; `angular: 'production'`: built as `ng build`
+ * ships it (angularProduction). Returns the initial files, the lazy
  * ones, the CSS and the initial sum.
  */
 export async function measureSplit(entry, root) {
   const alias = Object.fromEntries(Object.entries(entry.alias ?? {}).map(([k, v]) => [k, root + v]));
-  const out = await build({
-    entryPoints: [root + entry.file], absWorkingDir: root, outdir: `${root}.size-split`, bundle: true, splitting: true,
-    external: entry.external ?? [], alias,
-    format: 'esm', target: 'es2022', minify: true, treeShaking: true, write: false, metafile: true, logLevel: 'error',
-  });
+  const ng = entry.angular === 'production' ? await angularProduction(root) : null;
+  let out;
+  try {
+    out = await build({
+      entryPoints: [root + entry.file], absWorkingDir: root, outdir: `${root}.size-split`, bundle: true, splitting: true,
+      external: entry.external ?? [], alias, ...ng?.options,
+      format: 'esm', target: 'es2022', minify: true, treeShaking: true, write: false, metafile: true, logLevel: 'error',
+    });
+  } finally {
+    await ng?.close();
+  }
   const bytes = new Map(out.outputFiles.map((f) => [f.path.slice(root.length), f.contents]));
   const outputs = out.metafile.outputs;
   const js = Object.keys(outputs).filter((p) => p.endsWith('.js'));
-  const file = (p) => ({ path: p, inputs: Object.keys(outputs[p].inputs).sort(), gz: gz(bytes.get(p)), min: bytes.get(p).length, label: outputs[p].entryPoint ?? null });
+  const file = (p) => ({ path: p, code: bytes.get(p), inputs: Object.keys(outputs[p].inputs).sort(), gz: gz(bytes.get(p)), min: bytes.get(p).length, label: outputs[p].entryPoint ?? null });
   const start = js.find((p) => outputs[p].entryPoint === entry.file);
   if (!start) throw new Error(`size-split: no output for ${entry.file}`);
   const seen = new Set([start]);

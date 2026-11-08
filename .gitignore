@@ -15,4 +15,6 @@ examples/angular-audit/out/
 examples/angular-audit/.angular/
 examples/angular-audit/package-lock.json
 !scripts/test/fixtures/split/shipped/dist/
+!scripts/test/fixtures/split/ng/dist/
 packages/core/test/.planted/
+.size-ref/

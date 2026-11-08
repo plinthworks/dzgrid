@@ -112,3 +112,31 @@ no test weakened, `check:api` nothing removed or narrowed.
 - The golf kept frees **31 B** in K.8 (the cache check, with R4), far from Q2 A's 1 000; the leftovers took 50 (R9 42,
   R10 8). Net +19. Room left **3 B**: the next base byte needs a decision. Further room needs either the owner's yardstick decision above (≈ 900 B), the `LAYOUT_CSS` accept
   (74 B), or raising the line (Q2 A: « on relève la ligne s'il manque encore »). Not raised here.
+
+## L2 — measuring rule, owner A (2026-11-08)
+
+Owner: « A — corriger la règle de mesure » so K.8 measures what a real production build ships; no library code changed.
+
+- **Angular metadata.** The K.8 entry (and « audit screen + motion », same yardstick) now says `"angular": "production"`
+  (`size-budget.json`). `scripts/size-split.mjs` then builds the profile the way `ng build` does in production, with
+  Angular's own mechanism, not a text edit: every `.js`/`.mjs` input goes through `@angular/build`'s
+  `JavaScriptTransformer` (the linker for the partial-compiled fesm2022, then its advanced optimizations), and the bundle
+  gets the code bundle's defines (`ngDevMode`, `ngJitMode`, `ngServerMode`, `ngHmrMode` false) and `pure: ['forwardRef']`.
+  The `ɵɵngDeclareClassMetadata` calls (TestBed only) are dropped; the partial declarations ship linked, as in the app.
+- **Charset: not changed.** The note above was wrong: the real example build (`examples/angular-audit/dist`) ships the
+  Arabic as `\uXXXX` escapes (no raw UTF-8 in any chunk; `@angular/build` sets no `charset`). The profile already
+  matches it.
+- **Tests** (`scripts/test/size-angular.test.ts`, failed first): a planted partial-compiled service
+  (`fixtures/split/ng/dist/ng.mjs`): its metadata is in the plain measure, absent from the production one, the service
+  itself linked and present; the measure equals a reference rebuild written apart (`fixtures/size-reference.mjs`: the
+  linker's Babel plugin and the advanced-optimization plugins called one by one, the same defines) within 4 B (equal);
+  the real K.8 profile within 8 B (equal, 88 442); an unknown `angular` value is a problem.
+
+| Line | Before | After | Line |
+|---|---|---|---|
+| K.8 audit profile | 89 997 | **88 442** (−1 555) | 90 000, kept (room 1 558, for future work) |
+| audit screen + motion (recorded) | 90 484 | 88 853 | none |
+
+The 1 555 B, measured: linking with the production defines −1 599 (the class metadata, ≈ 815 B above, and the linked
+declarations), Angular's advanced optimizations +44 (its classes wrapped for tree-shaking).
+The `@dzgrid/angular` line (7 950, the wrapper alone, not split) keeps its old measure: not part of this decision.
