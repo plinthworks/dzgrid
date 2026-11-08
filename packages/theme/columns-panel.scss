@@ -242,8 +242,10 @@ $layered: true !default;
 
   @include c.button('.dzg-cp-foot button');
 
+  // Empty, out of the flow (no gap) but in the accessibility tree: a live region hidden until it speaks is often not
+  // heard (WCAG 4.1.3, L4a).
   .dzg-cp-none:empty {
-    display: none;
+    position: absolute;
   }
 
   @media (forced-colors: active) {

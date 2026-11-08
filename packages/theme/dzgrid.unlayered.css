@@ -473,6 +473,8 @@
     border-inline-start-color: Highlight;
   }
   .dzg-row[aria-selected=true] > .dzg-seg-start::before {
+    forced-color-adjust: none;
+    inline-size: max(var(--dzg-select-bar, 0px), 0.25rem);
     background: Highlight;
   }
   .dzg-cell:focus {

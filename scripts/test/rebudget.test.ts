@@ -24,7 +24,7 @@ const CORE = 29300; // Phase 8 steps 2–3 (owner Q-B 2026-11-05, +2 % rule): 29
 /** @dzgrid/dom/range and /fill's ceilings: 4 950 and 3 000 until Phase 6 step 8b-2 (owner Q1: blocks and the fill in the pinned bands, up to ~5 200 and ~3 150). */
 const RANGE = 5200;
 const FILL = 3264; // Phase 8 step 5 (+2 %): 3 200 → 3 264; // Phase 9 (owner Q-CM4, 2026-11-02): 3 150 → 3 200 (the fill's `along` and `can`)
-const DOM = 23660; // Phase 8 step 4 (+2 % rule, a block list in the base): 23 290 → 23 660; 1.4.0 (+2 % rule): 22 440 → 22 880; the busy bar: 23 070; the busy part: 23 250; Phase 7 `shapeAfter`: 23 290
+const DOM = 23690; // Phase 11 L4a (+2 % rule, the window follows the focus): 23 660 → 23 690; Phase 8 step 4 (+2 % rule, a block list in the base): 23 290 → 23 660; 1.4.0 (+2 % rule): 22 440 → 22 880; the busy bar: 23 070; the busy part: 23 250; Phase 7 `shapeAfter`: 23 290
 
 describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('rounds up to the next 50 B', () => {
@@ -62,7 +62,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
       '@dzgrid/core/rules': 600, '@dzgrid/dom/parts': 800, // Q-C3 (Phase 5 close): the rule's raises accepted, now grants
       '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
       // Q7 (2026-10-21): « core/csv up to 2 000 », a grant the close keeps (1 847 + 10 % would be 2 050).
-      '@dzgrid/core/csv': 2080, // Phase 8 step 4 (+2 %): 2 040 → 2 080; Phase 7 close (+2 %): grouped files, 2 000 → 2 040
+      '@dzgrid/core/csv': 2085, // Phase 11 L4a (+2 %): 2 080 → 2 085; Phase 8 step 4 (+2 %): 2 040 → 2 080; Phase 7 close (+2 %): grouped files, 2 000 → 2 040
     };
     for (const [name, grant] of Object.entries(grants)) {
       expect(ceilingFor(name), name).toBe(grant);

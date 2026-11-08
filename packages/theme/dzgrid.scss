@@ -599,8 +599,11 @@ $layered: true !default;
       border-inline-start-color: Highlight;
     }
 
-    // A selected row's bar (a showcase theme's): the system's highlight.
+    // A selected row's bar: the system's highlight, and drawn whatever the theme's width (0 by default) — the
+    // system paints every background in Canvas, so without a box column it is the only mark (L4a).
     .dzg-row[aria-selected='true'] > .dzg-seg-start::before {
+      forced-color-adjust: none;
+      inline-size: max(var(--dzg-select-bar, 0px), 0.25rem);
       background: Highlight;
     }
 

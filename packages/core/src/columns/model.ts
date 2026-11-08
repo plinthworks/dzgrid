@@ -118,9 +118,13 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
       const ws = new PrefixSums(cols.map((c) => widths.get(c.id)!));
       return { columns: cols, widths: ws, width: ws.total };
     };
-    const s = slice(start);
-    const c = slice(center);
-    const e = slice(end);
+    // A view too narrow for its pins (pinned-columns.md, L4a): released into the centre, in screen order, while they
+    // would leave it less than its widest column; the state untouched.
+    const w = (cs: readonly ResolvedColumn<T>[]) => cs.reduce((t, x) => t + widths.get(x.id)!, 0);
+    const free = available !== undefined && (start.length || end.length) && available - w(start) - w(end) < Math.max(0, ...center.map((x) => widths.get(x.id)!));
+    const s = slice(free ? [] : start);
+    const c = slice(free ? [...start, ...center, ...end] : center);
+    const e = slice(free ? [] : end);
     layout = { start: s, center: c, end: e, totalWidth: s.width + c.width + e.width };
     visibleList = [...start, ...center, ...end];
   };

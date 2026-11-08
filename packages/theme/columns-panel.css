@@ -188,7 +188,7 @@
     cursor: default;
   }
   .dzg-cp-none:empty {
-    display: none;
+    position: absolute;
   }
   @media (forced-colors: active) {
     .dzg-cp-row button::before {

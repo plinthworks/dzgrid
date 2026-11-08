@@ -52,7 +52,7 @@ describe('@dzgrid/dom/parts', () => {
     expect(b['@dzgrid/dom/locales/fr-parts']).toEqual({ file: 'packages/dom/src/locales/fr-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/dom/locales/ar-parts']).toEqual({ file: 'packages/dom/src/locales/ar-parts.ts', maxGzip: 150 });
     expect(b['@dzgrid/theme']!.maxGzip).toBe(2960); // Phase 8 step 4: 2 960 (+2 % rule, loading rows); 1.4.0 busy bar (+2 % rule); // the owner's third look (decisions.md « Comfort stylesheet »); Phase 5 close (Q-C2): 2 750, the measure 2 494 + 10 %
-    expect(b['@dzgrid/dom']!.maxGzip).toBe(23660); // Phase 8 step 4: 23 660 (+2 % rule, a block list); Phase 7 `shapeAfter`: 23 290 (+2 % rule); 1.4.0 busy part: 23 250 (+2 % rule); busy bar: 23 070 (+2 % rule); // Phase 6 step 8b-1 (owner Q2): 22 400; before: Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
+    expect(b['@dzgrid/dom']!.maxGzip).toBe(23690); // Phase 11 L4a: 23 690 (+2 % rule, the window follows the focus); Phase 8 step 4: 23 660 (+2 % rule, a block list); Phase 7 `shapeAfter`: 23 290 (+2 % rule); 1.4.0 busy part: 23 250 (+2 % rule); busy bar: 23 070 (+2 % rule); // Phase 6 step 8b-1 (owner Q2): 22 400; before: Phase 5 close (Q-C2): the measure 21 565 + 10 %, capped at the T7 grant // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
     expect(b['@dzgrid/core']!.maxGzip).toBe(29300); // Phase 8: 29 300 (+2 % rule, bounded walks); Phase 7 step 2: 29 250 (+2 % rule, the grouping seams); Phase 6 step 8b-1 (owner Q2): 29 150; before: the owner's grant, Phase 4 close (Q17b)
   });
 

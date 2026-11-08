@@ -280,3 +280,66 @@ the pivot (×1.11).
   (`pivot-passes.test.ts` reading `diagnostics` on a `RowModel`; typed as `ClientModel`, no cast), then typecheck,
   build, check:size (0 over) and check:api (nothing removed or narrowed) run again green; the tests were not run a
   third time for a type-only change.
+
+## L4a — the missing automated accessibility checks (2026-11-08)
+
+Tool (0 B in the bundles): `node scripts/browser-a11y.mjs` (`--only <page>`, `--check axe|status|focus|targets|spacing|
+reflow|forced|motion`, `--engine chrome|firefox|webkit`). Pages: the browser suite's own — flat (`index.html`, floating
+row, popups, a pinned column, boxes), tree (sticky parents, pinned columns), grouping (band, footers, pinned columns),
+**pivot with its bar (new `pivot.html`, columns panel docked)**, dock (columns panel), filters panel (dock), row moves,
+list loaded in blocks — Chrome in fr / ar × light / dark; Firefox and WebKit fr light and ar dark, every check but axe
+and forced colours. Pinned rows: `browser-pinned-rows.mjs` already walks them (2.4.11) on the playground's page. One
+browser at a time, closed in `finally`; each series once (« travailler doucement »). Results: `docs/a11y/acr-results.md`.
+
+Taken alone (the lead), for the ACR to say:
+- **Reflow**: the test page's host made fluid (an app's layout, not the grid's); a data table scrolls in two directions
+  inside its own box (1.4.10's exception), the page must not.
+- **Text spacing**: text newly ending in « … » (cells, a narrow header's name, a dock tab or title) is listed, not
+  failed — the full text is the element's accessible name and the user widens the column or the area. Nothing was cut
+  in the block direction, nor cut without « … ».
+- **Target size**: every control and row-move grip measured; the controls under 24 px (a box in its cell, the pivot
+  bar's ×) pass by spacing.
+- **Forced colours** is Chrome / Edge only (no other engine emulates `forced-colors: active`); Firefox's and Safari's
+  own high-contrast modes are not tested.
+
+### Failures found and fixed (each a test that failed first)
+1. **The focus below the window at 400 % zoom** (every page, 320 × 256): the grid focuses without the browser's scroll
+   (S10), so a grid taller than the window moved its focus out of sight. `focusShown` (`render/viewport.ts`) focuses, then
+   scrolls the **window** only, on the block axis, by what it misses of the cell; the grid's scrollers untouched (the
+   rule « no physical side » kept: `top` / `bottom` only). Test `a11y-l4a.test.ts` (below, above, inside). Sheet
+   `reading-keyboard.md`.
+2. **A dock area covering the rows on a narrow screen** (dock, filters, pivot at 320 px): the focused cell entirely under
+   the panel (`dock.md` 14). The focus going into the rows now collapses an open side area to its strip (a user change,
+   told). Test `a11y-l4a.test.ts` (narrow, wide). **Owner yes** (2026-11-08; `dock.md` 14).
+3. **Forced colours, a selected row without a box column** (row moves, list in blocks): the system paints backgrounds
+   in Canvas, the row looked like the others. The selected bar is drawn there at `max(var(--dzg-select-bar), 0.25rem)`
+   in `Highlight`, `forced-color-adjust: none`. Test `theme/test/a11y-l4a.test.ts`; seen in the screenshots
+   (`packages/dom/test/browser/results/a11y/forced-*.png`).
+4. **The columns panel's « no match » status `display: none` while empty** (4.1.3: a live region out of the tree until
+   it speaks is often not heard): empty, it is now `position: absolute` (out of the flow, no gap, in the tree). Same test.
+5. **WebKit: « ResizeObserver loop completed with undelivered notifications »** on the dock's pages when the window
+   narrowed: the dock measured inside the observer's delivery and its room resized what it watched. Measured on the next
+   task now. Test `a11y-l4a.test.ts` (nothing moves inside the callback; the room after).
+6. **Pinned columns wider than the view** (flat, tree, grouping at 320 px; every engine, fr and ar): a centre cell was
+   entirely under them or outside the window. **Owner A** (2026-11-08): while the pins would leave the centre less than
+   its widest column, the core's column model releases them into the centre, in screen order; the state still says
+   pinned, nothing told or saved; they come back when the view widens. Sheet `pinned-columns.md` first; tests
+   `core/test/pinned-release.test.ts` (479 / 480 px, the state, widening) and `a11y-l4a.test.ts` (segments, both
+   directions). The script's line green: Chrome fr/ar light/dark, Firefox and WebKit, once each.
+
+### Left
+- `bench:browser` not run again (focus reads one box per key now; for L9's review if a key line moves).
+
+### Sizes (L4a)
+| Line | Before | After | Line |
+|---|---|---|---|
+| K.8 audit profile | 88 485 | **88 591** (+106) | 90 000 |
+| DOM base | 23 657 | 23 684 | 23 660 → **23 690** (+0.13 %) |
+| core base | — | 29 272 | 29 300 |
+| `core/spans`, `core/csv` (gzip over the base) | — | 4 062, 2 084 | 4 050 → 4 065, 2 080 → 2 085 (+0.4 %, +0.2 %) |
+| `@dzgrid/theme` | 2 932 | 2 946 | 2 960 |
+
+`check:api`: nothing removed or narrowed (`focusShown` is internal).
+- Gate: `gate:step` once over the whole batch — test:ci and test:tz green (8 974 tests); check:size stopped on
+  `core/spans` (+12 B) and `core/csv` (+4 B), gzip over the base that grew by the pinned release; their lines raised
+  (+2 % rule, pinned in `rebudget`), then check:size and check:api green. The tests were not run again for two numbers.

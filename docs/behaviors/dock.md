@@ -67,6 +67,10 @@ next day and finds them where they were.
     edge toward the rows widens the panel on either side; ← → move the edge the way they point.
 14. **Narrow screens (30 rem or less).** A side area open covers the rows (the whole width), its edge hidden; collapsed,
     it is its strip as on a wide screen.
+    The focus going into the rows (a cell or a header, by Tab or a click) collapses an open side area to its strip, so
+    the focused cell is never hidden under it (Phase 11 L4a, WCAG 2.4.11; told as a user change; owner yes, 2026-11-08). « Déplier » opens it
+    again. The grid's size is measured on the next task after a resize, never inside the observer's delivery (WebKit
+    reported a « ResizeObserver loop »).
 15. **Screen readers.** Each area is a `region` named « <panel>, <grid> » (« Colonnes, Patients »); its head's buttons
     and the edge are named with the panel's title; nothing is said on its own (the expanded state, the selected tab and
     the edge's value are heard on the control). Regions are in the page's Tab order: the start area before the grid,
@@ -108,7 +112,8 @@ d.api(grid)?.move('filters', 'bottom');
 
 ## Tests
 Conformance `conformance/cases/grid-state/dock-*.json` (by hand). DOM `packages/dom/test/dock*.test.ts`. Browsers
-`node scripts/browser-dock.mjs` (Chrome; Firefox and WebKit for layout and right to left; axe fr / ar).
+`node scripts/browser-dock.mjs` (Chrome; Firefox and WebKit for layout and right to left; axe fr / ar);
+`packages/dom/test/a11y-l4a.test.ts` and `node scripts/browser-a11y.mjs --only dock,filters,pivot` (narrow screens, the measure).
 
 ## Beside a pivot (follow-up, owner 2026-11-07)
 The docked columns panel shows the pivot's « Mode pivot » switch and its three parts at its top (`columns-chooser.md`

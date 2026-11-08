@@ -47,6 +47,17 @@ export function rowLayout<T>(g: GridContext<T>): RowLayout {
  * grid attributes, header, rows, then the focus that waited for its cell,
  * and the overlay.
  */
+/**
+ * Focused without the browser's scroll (S10), then the window moved, on the block axis only, by what the window misses
+ * of it: a grid taller than the window (400 % zoom) keeps its focused cell in sight (WCAG 2.4.11, L4a). The grid's own
+ * scrollers are never touched: the grid scrolled to the cell already.
+ */
+export function focusShown(t: HTMLElement): void {
+  t.focus({ preventScroll: true });
+  const w = t.ownerDocument.defaultView!, r = t.getBoundingClientRect(), y = r.top < 0 ? r.top : Math.max(0, r.bottom - w.innerHeight);
+  if (y) w.scrollBy({ top: y });
+}
+
 export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: DisplayedRows<T>, visible: readonly { id: string }[]): void }): Painter {
   const { el, columns, rows, kernel, scroll, headerRenderer, rowRenderer } = g;
   let epoch = 0;
@@ -348,7 +359,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       const target = 'header' in pending ? headerRenderer.cell(pending.header, pending.level ?? 0) : rowRenderer.cell(pending.row, pending.column);
       if (target) {
         g.pendingFocus = null;
-        target.focus({ preventScroll: true });
+        focusShown(target);
       }
     }
     paintOverlay(d.count, headerHeight);

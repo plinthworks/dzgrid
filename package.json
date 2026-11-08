@@ -29,6 +29,7 @@
     "test:browser": "node scripts/browser.mjs",
     "test:audit": "node scripts/audit-browser.mjs",
     "test:real-app": "node scripts/browser-real-app.mjs",
+    "test:a11y": "node scripts/browser-a11y.mjs",
     "bench:browser": "node scripts/perf-browser.mjs",
     "example:build": "node scripts/example.mjs build",
     "example:csv": "node scripts/example.mjs csv",

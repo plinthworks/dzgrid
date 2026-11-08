@@ -63,6 +63,15 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   value columns no more (pivot over dataset A at 4×: 501 → 436 ms); the floating row prepares the text filter in idle
   time the first time one of its boxes takes focus (`filter-ui.md`), so the first keystroke no longer folds the whole
   column in its frame (133 → 26 ms at 4×).
+- Accessibility (Phase 11 L4a, found by the new `node scripts/browser-a11y.mjs`; `docs/a11y/acr-results.md`): at 400 %
+  zoom a grid taller than the window moved its focus below the window's edge — the window now follows the focused cell
+  (block axis only, never the grid's own scrollers; WCAG 2.4.11); on a narrow screen the focus going into the rows
+  collapses an open side area of the dock that covered them (`dock.md` 14); in forced colours a selected row without a
+  box column now shows the selected bar in `Highlight` (0.25rem at least); the columns panel's empty « no match »
+  status stays in the accessibility tree (out of the flow instead of `display: none`, WCAG 4.1.3); the dock measures
+  the grid on the next task after a resize (WebKit reported a « ResizeObserver loop »); pinned columns that would leave
+  the centre less room than its widest column scroll with the others until the view widens (the state still says
+  pinned; `pinned-columns.md`).
 
 ## [1.7.0] - 2026-11-07
 

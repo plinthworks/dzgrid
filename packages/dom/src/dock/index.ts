@@ -405,8 +405,15 @@ function setup(g: GridContext<unknown>, o: DockOptions, apis: WeakMap<object, Do
     for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) a.sep.addEventListener(t, end);
   }
 
+  // Narrow screens (dock.md 14): an open side area covers the rows; the focus going into them collapses it to its
+  // strip, the focused cell never hidden under it (WCAG 2.4.11, L4a).
+  scope.on(g.el.viewport, 'focusin', () => {
+    if (g.win?.matchMedia?.('(max-width:30rem)').matches) for (const s of ['start', 'end'] as const) if (active(s) && !ar[s]?.collapsed) collapse(s, true, 'user');
+  });
   const RO = (g.win as (Window & typeof globalThis) | null)?.ResizeObserver;
-  const ro = RO && new RO(() => measure());
+  // Measured on the next task, never inside the observer's delivery: the room it writes resizes what it watches
+  // (WebKit: « ResizeObserver loop completed with undelivered notifications », L4a).
+  const ro = RO && new RO(() => void scope.timeout(measure, 0));
   ro?.observe(root, { box: 'border-box' });
   ro && scope.observe(ro);
 

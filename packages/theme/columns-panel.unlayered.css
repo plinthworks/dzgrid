@@ -219,7 +219,7 @@
 }
 
 .dzg-cp-none:empty {
-  display: none;
+  position: absolute;
 }
 
 @media (forced-colors: active) {

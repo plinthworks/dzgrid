@@ -2,7 +2,7 @@ import type { CellFocus, DisplayIndex, DisplayedRows, FocusPos, RowKey } from '@
 import { sameFocus } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import { CHECK_WIDTH } from '../render/rows.js';
-import { rowLayout } from '../render/viewport.js';
+import { focusShown, rowLayout } from '../render/viewport.js';
 
 export interface FocusControl<T> {
   focusCellAs(row: RowKey, column: string, source: 'api' | 'user'): void;
@@ -113,7 +113,7 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     const f = kernel.focus as CellFocus;
     // Mounted now, or at the next paint: the grid scrolls, then focuses without scrolling (S10).
     const cell = rowRenderer.cell(f.row, f.column);
-    if (cell && !g.queued) cell.focus({ preventScroll: true });
+    if (cell && !g.queued) focusShown(cell);
     else {
       g.pendingFocus = f;
       g.schedule();
@@ -127,7 +127,7 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     g.schedule();
     const level = to.level ?? 0;
     const cell = headerRenderer.cell(to.column, level);
-    if (cell && !g.queued) cell.focus({ preventScroll: true });
+    if (cell && !g.queued) focusShown(cell);
     else g.pendingFocus = { header: to.column, level };
   }
 
