@@ -1,0 +1,43 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/vertical-headers.css — column titles written upwards (1.9.0, docs/behaviors/vertical-headers.md):
+// loaded by the applications that use `@dzgrid/dom/vertical-headers`, after dzgrid.css; the base theme does not grow.
+// Compiled to vertical-headers.css (layered) and vertical-headers.unlayered.css ($layered: false) by `npm run build:theme`.
+//
+// The title turns a quarter counter-clockwise in both directions (vertical-rl, then half a turn): Latin reads upwards,
+// Arabic starts at the top. It sits at the header's foot, centred in the column; the other parts of the cell (sort mark,
+// buttons) stay as they are. Cut with « … » past the row's height (its name keeps the whole title). No colour, no
+// physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-hcell[data-vertical] {
+    align-items: flex-end;
+    justify-content: center;
+    padding-block: 0.5rem;
+  }
+
+  .dzg-hcell[data-vertical] > .dzg-hlabel {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    max-block-size: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

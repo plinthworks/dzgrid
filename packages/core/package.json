@@ -92,6 +92,14 @@
     "./compare": {
       "types": "./src/compare.ts",
       "default": "./src/compare.ts"
+    },
+    "./auto-columns": {
+      "types": "./src/auto-columns.ts",
+      "default": "./src/auto-columns.ts"
+    },
+    "./totals": {
+      "types": "./src/totals.ts",
+      "default": "./src/totals.ts"
     }
   }
 }

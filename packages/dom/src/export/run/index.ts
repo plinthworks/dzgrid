@@ -19,7 +19,7 @@ export interface RunArgs {
   readonly t0: number;
   readonly signal: AbortSignal;
   /** `'xlsx'`: the Excel file (Phase 9); CSV otherwise. */
-  readonly format?: 'csv' | 'xlsx' | undefined;
+  readonly format?: 'csv' | 'xlsx' | 'json' | undefined;
 }
 
 type Stage = NonNullable<Extract<GridEvent<unknown>, { type: 'exportFinished' }>['failure']>['stage'];
@@ -51,11 +51,13 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
   const { kernel: K, rows: M } = g;
   const { scope, signal } = r;
   const xl = r.format === 'xlsx';
+  // The file's kind, told in the request and the events unless CSV (json-export.md 2).
+  const fmt = r.format === 'csv' ? undefined : r.format;
   const gone = (): boolean => g.scope.isDisposed;
   // Events are told whatever a listener does (a host's onEvent is fenced by the grid already).
   const tell = (e: Record<string, unknown>): void => {
     try {
-      emit(K, { ...e, source: r.source, id: r.id, at: new Date().toISOString(), scope, ...(xl && { format: 'xlsx' }) } as GridEvent<unknown>);
+      emit(K, { ...e, source: r.source, id: r.id, at: new Date().toISOString(), scope, ...(fmt && { format: fmt }) } as GridEvent<unknown>);
     } catch (err) {
       g.report(err);
     }
@@ -127,7 +129,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
     }
 
     reached = 'build';
-    const { request, held, event } = await buildRequest(g, scope, r.columns, xl);
+    const { request, held, event } = await buildRequest(g, scope, r.columns, fmt);
     end.columns = request.columns.length;
     if (gone() || signal.aborted) return finish('cancelled');
     tell(event);
@@ -152,7 +154,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
     // "Exporting…" only if still running a second after the user asked.
     quiet = g.scope.timeout(() => say('announce.exportStarted'), Math.max(0, 1000 - (g.now() - r.t0)));
 
-    const ext = xl ? 'xlsx' : 'csv';
+    const ext = fmt ?? 'csv';
     const name = (given?: string): string => {
       const now = Date.now();
       try {
@@ -225,11 +227,16 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
         spans = { spans: buildSpanMap({ rows: held.rows, columns: g.columns, ctx: g.ctx, fullWidth: tree ? null : g.settings.fullWidth, treeColumn: tree?.(), acrossLevels: g.acrossLevels, apart: gapAt && ((i) => gapAt(held.rows, i)) }), spanColumns: g.columns.visible().map((c) => c.id) };
       }
       const env = { now: g.now, yield: yieldTo(g.win), aborted: () => signal.aborted };
+      // The totals row's line last (totals-row.md 10): CSV and Excel, never for the selected rows.
+      const rows = g.foot && scope != 'selected' && fmt != 'json' ? g.foot.with(held) : held;
+      const fns = g.grouped?.aggFuncs ?? g.foot?.fns;
       let sum;
-      if (xl) {
-        // The Excel file's code: a chunk of its own, loaded at the first Excel export (CSV's first download unchanged).
-        const x = await race(import('../xlsx/index.js'));
-        const made = await x.build(g, o, held, request.columns, spans, env, (n) => progress('building', Math.min(n, held.count), held.count));
+      if (fmt) {
+        // The Excel file's code and the JSON file's: chunks of their own, each loaded at its first export (CSV's first
+        // download unchanged).
+        const made = await (xl
+          ? race(import('../xlsx/index.js')).then((x) => x.build(g, o, rows, fns, request.columns, spans, env, (n) => progress('building', Math.min(n, held.count), held.count)))
+          : race(import('../json/index.js')).then((x) => x.build(g, o, held, request.columns, env)));
         if (!made) return finish('cancelled');
         sum = made.sum;
         if (sum.problems.length) emit(K, { type: 'problems', source: 'host', problems: sum.problems });
@@ -241,7 +248,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
         const gr = g.grouped;
         const tc = o.treeColumn ?? gr?.column();
         const it = csvChunks(
-          { rows: held.rows, at: held.at, columns: g.exportColumns?.() ?? g.columns, ctx: g.ctx, ...spans, ...(gr && { groupLabel: gr.label, aggFuncs: gr.aggFuncs }) },
+          { rows: rows.rows, at: rows.at, columns: g.exportColumns?.() ?? g.columns, ctx: g.ctx, ...spans, aggFuncs: fns, ...(gr && { groupLabel: gr.label }) },
           { ...o, ...(tc !== undefined && { treeColumn: tc }), ...(gr && { tree: o.tree ?? (gr.by().length ? 'level' : 'none') }), columns: request.columns, chunkRows: ROWS_PER_CHUNK },
         );
         const b = batcher();

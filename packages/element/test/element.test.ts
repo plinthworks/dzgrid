@@ -153,6 +153,14 @@ describe('<dz-grid> attributes (5, 6)', () => {
     expect(root().getAttribute('dir')).toBe('rtl');
   });
 
+  it('headers="hidden" hides the header row from the eyes (hidden-headers.md 1, 1.9.0); taken away, shown', () => {
+    const el = make('<dz-grid-test headers="hidden"></dz-grid-test>');
+    const root = () => el.querySelector('.dzg')!;
+    expect(root().getAttribute('data-headers')).toBe('hidden');
+    el.removeAttribute('headers');
+    expect(root().hasAttribute('data-headers')).toBe(false);
+  });
+
   it('row-height and density reach the rows', () => {
     const el = make('<dz-grid-test row-height="48"></dz-grid-test>');
     const h = () => (el.grid as unknown as { context: { rowHeight(): number } }).context.rowHeight(); // the grid's internal context, read for the height it paints

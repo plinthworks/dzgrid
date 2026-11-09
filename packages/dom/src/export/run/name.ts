@@ -14,7 +14,7 @@ const RESERVED = /^(con|prn|aux|nul|(com|lpt)[1-9\u00b9\u00b2\u00b3]|conin\$|con
 const fit = (s: string, ext: string): string => {
   for (let was = ''; was !== s; ) {
     was = s;
-    s = [...s.replace(/[.\s]+$/, '').replace(/\.(csv|xlsx)$/i, '')].slice(0, 119 - ext.length).join('');
+    s = [...s.replace(/[.\s]+$/, '').replace(/\.(csv|xlsx|json)$/i, '')].slice(0, 119 - ext.length).join('');
   }
   return s;
 };

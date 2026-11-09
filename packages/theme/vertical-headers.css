@@ -1,0 +1,16 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  .dzg-hcell[data-vertical] {
+    align-items: flex-end;
+    justify-content: center;
+    padding-block: 0.5rem;
+  }
+  .dzg-hcell[data-vertical] > .dzg-hlabel {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    max-block-size: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

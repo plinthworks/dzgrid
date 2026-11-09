@@ -504,6 +504,26 @@
     "./locales/ar-filters-panel": {
       "types": "./src/locales/ar-filters-panel.ts",
       "default": "./src/locales/ar-filters-panel.ts"
+    },
+    "./totals-row": {
+      "types": "./src/totals-row.ts",
+      "default": "./src/totals-row.ts"
+    },
+    "./vertical-headers": {
+      "types": "./src/vertical-headers.ts",
+      "default": "./src/vertical-headers.ts"
+    },
+    "./locales/en-totals": {
+      "types": "./src/locales/en-totals.ts",
+      "default": "./src/locales/en-totals.ts"
+    },
+    "./locales/fr-totals": {
+      "types": "./src/locales/fr-totals.ts",
+      "default": "./src/locales/fr-totals.ts"
+    },
+    "./locales/ar-totals": {
+      "types": "./src/locales/ar-totals.ts",
+      "default": "./src/locales/ar-totals.ts"
     }
   },
   "peerDependencies": {

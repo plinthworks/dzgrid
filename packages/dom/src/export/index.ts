@@ -28,7 +28,7 @@ export interface ExportProgress {
 }
 
 /** The file an export writes (Phase 9): CSV, or Excel when the `xlsx` option is set. */
-export type ExportFormat = 'csv' | 'xlsx';
+export type ExportFormat = 'csv' | 'xlsx' | 'json';
 /**
  * The Excel file's own options (docs/behaviors/xlsx-export.md); `text`, `enums`, `header`, `columns`, `levelHeader` and
  * `treeColumn` are the CSV options', shared. `sheetName` defaults to the `export.fileName` text, `rtl` to the grid's direction.
@@ -131,7 +131,7 @@ export function csvExport(o: CsvExportOptions): CsvExport {
         try {
           emit(grid.kernel, {
             type: 'exportFinished', source, id, at: new Date().toISOString(), scope, outcome, via: scope !== 'displayed' && !grid.rows.allRows ? 'server' : 'browser',
-            rows: null, columns: 0, bytes: null, fileName: null, durationMs: Math.round(grid.now() - t0), ...(ro.format === 'xlsx' && { format: 'xlsx' }),
+            rows: null, columns: 0, bytes: null, fileName: null, durationMs: Math.round(grid.now() - t0), ...(ro.format && ro.format != 'csv' && { format: ro.format }),
             // The error's name only when it is a short identifier (a class name): never data.
             ...(!cut && { failure: { stage: 'load', name: typeof n == 'string' && /^[a-z]\w{0,39}$/i.test(n) ? n : 'Error' } }),
           });

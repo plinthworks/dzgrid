@@ -42,7 +42,7 @@ type Ev<T, K extends GridEvent<T>['type']> = Extract<GridEvent<T>, { type: K }>;
 
 /** The settings read from the inputs, in this order; the defaults' keys fall back to `provideDzGrid`. */
 const KEYS = [
-  'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'rowHeight', 'overlay', 'busy', 'label', 'tooltips', 'overscan',
+  'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'headers', 'rowHeight', 'overlay', 'busy', 'label', 'tooltips', 'overscan',
   'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features', 'multiSort', 'sameRow',
 ] as const;
 /** Events with an output of their own name. */
@@ -108,6 +108,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly numerals = input<S<T>['numerals']>();
   readonly direction = input<S<T>['direction']>();
   readonly density = input<S<T>['density']>();
+  /** `'hidden'`: no header row on screen, kept for screen readers (hidden-headers.md, 1.9.0); live. */
+  readonly headers = input<S<T>['headers']>();
   /** Row height in px over the density's (owner D1, D3, virtual-scroll.md « Row height »); live. */
   readonly rowHeight = input<number>();
   readonly overlay = input<S<T>['overlay']>();

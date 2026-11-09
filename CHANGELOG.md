@@ -5,6 +5,36 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased — 1.9.0
+
+Lot A (owner « ★ partout », 2026-11-09). Additions only: nothing of 1.8.0 is removed or narrowed.
+
+### Added
+- **Columns made from the data** (`docs/behaviors/auto-columns.md`): `autoColumns(rows, { override, merge, hide, add,
+  order, header, sample })` from the new `@dzgrid/core/auto-columns` returns `{ columns, problems }` — one column per
+  field, typed by its values (number, boolean, `YYYY-MM-DD` day, ISO date-time **with** an offset as an instant, else
+  text; an offset-less date-time is never guessed). Pure; with server data, the guide shows the « first answer, then
+  stable » pattern (TypeScript and Angular).
+- **A totals row on a flat grid** (`docs/behaviors/totals-row.md`): `total: 'sum' | 'avg' | 'min' | 'max' | 'count' |
+  'first' | 'last' | fn` on a column and `totalsRow()` from `@dzgrid/dom/totals-row` (with `pinnedRows()`): one row at
+  the bottom, always in view, over the filtered rows and the edits, the group totals' rules (`columnTotals()`, new
+  `@dzgrid/core/totals`); written last in CSV and Excel (`displayed`, `all`; not `selected`), printed; not in JSON. With
+  server pages, the application gives the server's totals (`api.set`). Texts `locales/{en,fr,ar}-totals`.
+- **JSON export** (`docs/behaviors/json-export.md`): `csvExport()`'s third format, `run(scope, { format: 'json' })` /
+  `bind(button, { format: 'json' })` — raw values keyed by column id, its own lazy chunk; `request.format` and the
+  events say `'json'`.
+- **Vertical titles** (`docs/behaviors/vertical-headers.md`): `headerVertical: true` on a column with
+  `verticalHeaders({ maxHeight })` from `@dzgrid/dom/vertical-headers` and `@dzgrid/theme/vertical-headers.css`: the
+  title written upwards, the header row as tall as the longest one; keys and screen readers unchanged.
+- **No header row on screen** (`docs/behaviors/hidden-headers.md`): the setting `headers: 'hidden'` (live; Angular
+  `[headers]`, `<dz-grid headers="hidden">`): the header rows visually hidden, kept for screen readers, shown while the
+  keyboard is in them. `print(grid, { header: false })` leaves a print's header out (CSV and Excel had `header: false`).
+- A column's `total` or `headerVertical` without its feature is told once (`missing-feature`).
+
+### Changed
+- The pinned top band's offset is read from the header's height (a taller header, hidden headers), no longer a row per
+  header row.
+
 ## [1.8.0] - 2026-11-09
 
 A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one behaviour change for server groups.

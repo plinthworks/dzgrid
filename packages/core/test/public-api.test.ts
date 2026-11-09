@@ -11,6 +11,8 @@ import * as edit from '@dzgrid/core/edit';
 import * as range from '@dzgrid/core/range';
 import * as state from '@dzgrid/core/state';
 import * as rowGaps from '@dzgrid/core/row-gaps';
+import * as autoCols from '@dzgrid/core/auto-columns';
+import * as totals from '@dzgrid/core/totals';
 
 /**
  * The public surface, written out by hand: adding an export is a decision,
@@ -68,6 +70,12 @@ const STATE = ['STATE_UPGRADES', 'STATE_VERSION', 'captureState', 'checkState', 
 const ROW_GAPS = ['gapLayout', 'gapsOf', 'roots'];
 
 describe('the public surface', () => {
+  it('keeps the 1.9.0 entries apart: auto-columns and totals, nothing of them in the base', () => {
+    expect(Object.keys(autoCols)).toEqual(['autoColumns']);
+    expect(Object.keys(totals)).toEqual(['columnTotals']);
+    for (const name of ['autoColumns', 'columnTotals']) expect(name in core || name in internal, name).toBe(false);
+  });
+
   it('keeps the row-gaps entry apart (1.1.0 step 15)', () => {
     expect(Object.keys(rowGaps).sort()).toEqual([...ROW_GAPS].sort());
     for (const name of ROW_GAPS) expect(name in core || name in internal || name in server || name in spans || name in csv || name in rules || name in tree || name in detail || name in edit || name in range || name in state, name).toBe(false);

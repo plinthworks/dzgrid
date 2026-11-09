@@ -35,6 +35,11 @@ $line: var(--dzg-pinned-line, var(--tz-fg-muted));
     background: var(--dzg-pinned-bg, var(--tz-bg-raised));
   }
 
+  // The totals row (`@dzgrid/dom/totals-row`, 1.9.0): its figures in the header's weight.
+  :where(.dzg-pins) .dzg-row[data-kind="footer"] {
+    font-weight: 600;
+  }
+
   .dzg-pins-top::after,
   .dzg-pins-bottom::after {
     content: "";

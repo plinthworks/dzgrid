@@ -56,6 +56,21 @@ document.getElementById('selected')!.addEventListener('click', async () => {
 - The right-click menu offers the same: `contextMenu({ use: { csv: exporter, xlsx: exporter.xlsx } })`.
 - In Angular: `<button [dzgExport]="exporter" dzgExportScope="displayed">` (directive `DzgExport`).
 
+## JSON
+
+The same feature writes a JSON file: `run(scope, { format: 'json' })` or `bind(button, { format: 'json' })` — no option
+to switch it on, its code is fetched at the first JSON export. The file is one array of objects keyed by the column ids,
+in screen order, with raw values: numbers, `true` / `false`, days `'YYYY-MM-DD'`, instants as ISO UTC text with `Z`,
+enum codes, `null` for an empty cell (`text: 'display'` writes what the cells show). Group and totals rows are not
+written; `canExport` and `exportAll` see `request.format === 'json'`.
+
+```ts
+import type { CsvExport } from '@dzgrid/dom/export';
+
+declare const exporter: CsvExport;
+exporter.bind(document.getElementById('json')!, { scope: 'all', format: 'json' });
+```
+
 ## Print
 
 `print(grid, { title })` from `@dzgrid/dom/print` prints the rows as they are on screen — same columns, order, sort and
@@ -86,6 +101,7 @@ document.getElementById('print')!.addEventListener('click', () => void print(gri
 printOnMenu(grid, { title: 'Bells of the coast' });   // the browser's own Ctrl+P prints the whole grid too
 ```
 
-`print` is a function, not a feature: nothing is loaded until it is called. `printOnMenu(grid)` makes the browser's
+`print(grid, { header: false })` leaves the header rows out (they are printed by default, even on a grid with
+`headers: 'hidden'`). `print` is a function, not a feature: nothing is loaded until it is called. `printOnMenu(grid)` makes the browser's
 own print command (Ctrl+P, the File menu) print the whole grid as well; without it, that command prints only what the
 page shows. In Angular, pass `ctrl.grid()` to both.

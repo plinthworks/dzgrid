@@ -203,6 +203,84 @@ createGrid<Asteroid>(document.getElementById('asteroids')!, {
 - `refresh` (Angular `ctrl.refresh({})`, plain TypeScript `rows.refresh` command) asks again and keeps the rows shown
   meanwhile; the `busy` setting shows a thin bar while you reload.
 
+## Columns from the first answer
+
+`autoColumns()` ([Columns](columns.md#columns-made-from-the-data)) is a pure function: it does not know about sources.
+Call it on the rows of the **first** answer and set the grid's columns **once**; later answers do not change them (a
+filter that empties a page would otherwise take the columns away). The same place can hand the server's totals to the
+totals row, when your server sends them.
+
+```ts
+import { autoColumns } from '@dzgrid/core/auto-columns';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { createGrid, type GridInstance, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PINNED } from '@dzgrid/dom/locales/en-pinned';
+import { EN_TOTALS } from '@dzgrid/dom/locales/en-totals';
+
+type Comet = { id: string; name: string; period: number; seen: string };
+type Answer = DataResponse<Comet> & { totals?: Record<string, number> };
+
+const totals = totalsRow();
+let grid: GridInstance<Comet> | null = null;
+let columnsSet = false;
+
+async function fetchComets(req: DataRequest): Promise<Answer> {
+  const answer = await fetch('/api/comets', { method: 'POST', body: JSON.stringify({ page: req.page }), signal: req.signal as AbortSignal });
+  const json = (await answer.json()) as Answer;
+  if (!columnsSet && json.rows.length) {
+    columnsSet = true;
+    const { columns } = autoColumns(json.rows, { hide: ['id'], override: { period: { total: 'sum' } } });
+    grid?.update({ columns });
+  }
+  if (json.totals) totals.api(grid!)?.set(json.totals);   // the server's totals; the page's would mislead
+  return json;
+}
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_PINNED.text, ...EN_TOTALS.text } };
+grid = createGrid<Comet>(document.getElementById('comets')!, {
+  source: sourceRows<Comet>({ fetch: fetchComets }),
+  columns: [],
+  getRowId: (c) => c.id,
+  messages,
+  features: [pinnedRows<Comet>(), totals],
+});
+```
+
+In Angular, keep the columns in a signal set once from the same place:
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { autoColumns } from '@dzgrid/core/auto-columns';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Comet = { id: string; name: string; period: number; seen: string };
+
+@Component({
+  selector: 'app-comets',
+  imports: [DzGrid],
+  template: `<dz-grid [source]="source" [columns]="columns()" [getRowId]="rowId" [messages]="messages" />`,
+})
+export class Comets {
+  readonly columns = signal<DzgColumnOrGroup<Comet>[]>([]);
+  readonly rowId = (c: Comet) => c.id;
+  readonly messages = EN;
+  readonly source = sourceRows<Comet>({ fetch: (req) => this.load(req) });
+
+  private async load(req: DataRequest): Promise<DataResponse<Comet>> {
+    const answer = await fetch('/api/comets', { method: 'POST', body: JSON.stringify({ page: req.page }), signal: req.signal as AbortSignal });
+    const json = (await answer.json()) as DataResponse<Comet>;
+    // Once: the first answer with rows makes the columns; later answers leave them.
+    if (!this.columns().length && json.rows.length) this.columns.set(autoColumns(json.rows, { hide: ['id'] }).columns);
+    return json;
+  }
+}
+```
+
 ## Infinite scroll
 
 ```ts

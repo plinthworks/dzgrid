@@ -19,6 +19,11 @@ export interface GridSettings<T> {
   readonly direction?: 'auto' | 'ltr' | 'rtl';
   readonly density?: 'compact' | 'comfortable' | 'spacious';
   /**
+   * `'hidden'`: no header row on screen, kept for screen readers and shown while the keyboard is in it
+   * (docs/behaviors/hidden-headers.md, 1.9.0). Live. Default `'shown'`.
+   */
+  readonly headers?: 'shown' | 'hidden';
+  /**
    * False: one sort only — Shift+click, Shift+Enter and a header part's `toggleSort(true)` act as a plain
    * click (sort.md « One sort only »); the app's own `sort.set` of several is kept. True by default. Fixed.
    */

@@ -269,10 +269,10 @@ describe('1.8.0, the five packages', () => {
     for (const g of ['en', 'fr', 'ar']) expect(dom[`./locales/${g}-pivot-bar`]).toEqual({ types: `./src/locales/${g}-pivot-bar.ts`, default: `./src/locales/${g}-pivot-bar.ts` });
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
     expect(build).toMatch(/'\.\/pivot', '\.\/pivot-bar'/);
-    expect(build).toMatch(/'\.\/locales\/ar-pivot', '\.\/locales\/en-pivot-bar', '\.\/locales\/fr-pivot-bar', '\.\/locales\/ar-pivot-bar'\]/);
+    expect(build).toMatch(/'\.\/locales\/ar-pivot', '\.\/locales\/en-pivot-bar', '\.\/locales\/fr-pivot-bar', '\.\/locales\/ar-pivot-bar'[,\]]/); // 1.9.0: './totals-row' after it
     const theme = pkg('theme');
     for (const f of ['pivot.css', 'pivot.unlayered.css', 'pivot.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'dock', 'pivot'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'dock', 'pivot'[,\]]/); // 1.9.0: 'vertical-headers' after it
   });
 
   it('export the Phase 10 pivot core (@dzgrid/core/pivot), built like the others', () => {
@@ -282,7 +282,18 @@ describe('1.8.0, the five packages', () => {
 
   it('export the server pivot plug (@dzgrid/core/server-pivot, 1.8.0), built like the others', () => {
     expect(pkg('core').exports['./server-pivot']).toEqual({ types: './src/server-pivot.ts', default: './src/server-pivot.ts' });
-    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/dock', '\.\/pivot', '\.\/server-pivot'\]/);
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/dock', '\.\/pivot', '\.\/server-pivot'[,\]]/); // 1.9.0: './auto-columns' after it
+  });
+
+  it('export the 1.9.0 lot A entries (core auto-columns and totals; dom totals-row, vertical-headers, the -totals texts; vertical-headers.css), built like the others', () => {
+    for (const e of ['auto-columns', 'totals']) expect(pkg('core').exports[`./${e}`]).toEqual({ types: `./src/${e}.ts`, default: `./src/${e}.ts` });
+    for (const e of ['totals-row', 'vertical-headers', 'locales/en-totals', 'locales/fr-totals', 'locales/ar-totals']) expect(pkg('dom').exports[`./${e}`]).toEqual({ types: `./src/${e}.ts`, default: `./src/${e}.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/server-pivot', '\.\/auto-columns', '\.\/totals'\]/);
+    expect(build).toMatch(/'\.\/locales\/ar-pivot-bar', '\.\/totals-row', '\.\/vertical-headers', '\.\/locales\/en-totals', '\.\/locales\/fr-totals', '\.\/locales\/ar-totals'\]/);
+    const theme = pkg('theme');
+    for (const f of ['vertical-headers.css', 'vertical-headers.unlayered.css', 'vertical-headers.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pivot', 'vertical-headers'\]/);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

@@ -1,4 +1,4 @@
-import { assignKeys, pinnedKey, problem, type DataNode, type DisplayIndex, type DisplayedRows, type FocusPos, type GridKernel, type Problem, type RowKey } from '@dzgrid/core';
+import { assignKeys, pinnedKey, problem, type DataNode, type FooterNode, type DisplayIndex, type DisplayedRows, type FocusPos, type GridKernel, type Problem, type RowKey } from '@dzgrid/core';
 import { emit, setPinned } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { GridFeature } from '../features.js';
@@ -47,6 +47,8 @@ interface Band<T> {
   o: number;
   /** The focused key last seen: a new focus in the band brings its row into the band's window. */
   f: RowKey | null;
+  /** The totals row, last in the bottom band (`g.pinFoot`). */
+  foot?: FooterNode | null;
 }
 
 /** A band's rows as `DisplayedRows`: what the renderer, the keys and the editors read. */
@@ -109,11 +111,14 @@ export function pinnedRows<T = unknown>(o: PinnedRowsOptions<T> = {}): PinnedRow
         b.d = data;
         b.n = [];
         keys.forEach((key, i) => key && b.n.push({ key, kind: 'data', level: 0, id: ids[i]!, data: data[i]!, pinned: b.s }));
+        // The totals row last (totals-row.md 5): no data, its key its own.
+        if (b.foot) b.n.push(b.foot as never);
         b.k = b.n.map((n) => n.key);
         b.rows = shown(b.n);
         g.pins = [T.k.length, B.k.length];
         return [...problems, ...(data.length > 5 ? [problem('too-many-pinned-rows', 'warning', path)] : [])];
       };
+      g.pinFoot = (n) => void ((B.foot = n), fill(B, B.d), g.schedule());
       const tell = (problems: Problem[], source: 'host' | 'api'): void => void (problems.length && emit(kernel, { type: 'problems', source, problems }));
       tell([...fill(T, o.top ?? []), ...fill(B, o.bottom ?? [])], 'host');
       setPinned(kernel, (k) => of(k)?.n.find((n) => n.key === k));
@@ -123,8 +128,11 @@ export function pinnedRows<T = unknown>(o: PinnedRowsOptions<T> = {}): PinnedRow
       const geo = g.geometry;
       const read = geo.read;
       let view = 0;
+      // The header's height, read with the view (a taller header, vertical titles, hidden headers: 1.9.0).
+      let head = 0;
       geo.read = () => {
         const box = read();
+        head = el.header.offsetHeight;
         const h = g.rowHeight();
         view = box.block;
         [T.px, B.px] = bandHeights(T.k.length * h, B.k.length * h, view, h);
@@ -181,11 +189,12 @@ export function pinnedRows<T = unknown>(o: PinnedRowsOptions<T> = {}): PinnedRow
         }, wanted, fi >= 0 ? [fk!] : []);
         // Never selected (pinned-rows.md 7): the box column's cell kept (the columns line up), its box hidden.
         b.r.forEach((_, v) => v.check && ((v.check.firstChild as HTMLElement).hidden = true));
+        if (b === B) g.foot?.draw();
       };
       const paint = (f: Frame<T>): void => {
-        const h = g.rowHeight();
-        // Under every header row (no read: each is a row high); the bottom band at the grid's foot when the body is short (Q3).
-        setPx(T.el, 'inset-block-start', (g.bands.length + 1 + g.headerRows.length) * h);
+        // Under the header (its height read with the view); the bottom band at the grid's foot when the body is short (Q3).
+        // Without a layout (jsdom), each header row is a row high; hidden headers take no room (hidden-headers.md 7).
+        setPx(T.el, 'inset-block-start', head || (g.settings.headers == 'hidden' ? 0 : (g.bands.length + 1 + g.headerRows.length) * g.rowHeight()));
         setPx(B.el, 'margin-block-start', Math.max(0, view - T.px - B.px - (g.layout?.total ?? 0)));
         for (const b of bands) draw(b, f);
         last = f;
@@ -228,7 +237,7 @@ export function pinnedRows<T = unknown>(o: PinnedRowsOptions<T> = {}): PinnedRow
           setPinned(kernel);
           geo.read = read;
           g.step = step;
-          g.move = g.rowsOf = g.pins = g.pinTop = g.pinAt = undefined;
+          g.move = g.rowsOf = g.pins = g.pinTop = g.pinAt = g.pinFoot = undefined;
           for (const b of bands) b.r.clear(), b.el.remove();
         },
       };

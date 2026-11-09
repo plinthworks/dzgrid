@@ -334,8 +334,12 @@ describe('the DOM layer’s shape', () => {
       .filter((s) => !/: (@dzgrid\/core(\/internal|\/csv)?|\.\/[a-z]+\.js)$/.test(s));
     expect(offenders).toEqual([]);
     const dynamic = chunk.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/import\('([^']+)'\)/g)].map((m) => m[1]));
-    // Phase 9: the Excel chunk, by import() only, so a CSV export never downloads it.
-    expect(dynamic.sort()).toEqual(['../xlsx/index.js', '@dzgrid/core/server', '@dzgrid/core/spans']);
+    // Phase 9: the Excel chunk, by import() only, so a CSV export never downloads it; 1.9.0: the JSON chunk likewise.
+    expect(dynamic.sort()).toEqual(['../json/index.js', '../xlsx/index.js', '@dzgrid/core/server', '@dzgrid/core/spans']);
+    // The JSON chunk (json-export.md): the run chunk's slices only, nothing of the base.
+    const js = files(join(SRC, 'export/json'));
+    expect(js.map((f) => relative(SRC, f))).toEqual(['export/json/index.ts']);
+    expect(js.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]))).toEqual(['../run/slice.js']);
     // The Excel chunk: the xlsx entry and the run chunk's slices only; the core's xlsx entry nowhere else.
     const xl = files(join(SRC, 'export/xlsx'));
     expect(xl.map((f) => relative(SRC, f))).toEqual(['export/xlsx/index.ts']);

@@ -65,6 +65,16 @@ export interface ColumnDef<T, V = unknown> {
    */
   readonly aggFunc?: AggFuncName | AggFn<V>;
   /**
+   * Its total in the totals row of a flat grid (`@dzgrid/dom/totals-row`, docs/behaviors/totals-row.md; 1.9.0): the same
+   * built-ins and rules as `aggFunc`, or a function of the column's values (`level` null). Needs that feature.
+   */
+  readonly total?: AggFuncName | AggFn<V>;
+  /**
+   * Its header's title written upwards (`@dzgrid/dom/vertical-headers`, docs/behaviors/vertical-headers.md; 1.9.0): the
+   * header row grows to the longest such title. Needs that feature; keys and screen readers unchanged.
+   */
+  readonly headerVertical?: boolean;
+  /**
    * `false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a
    * custom kind's name). `floating`: a box in the floating filter row (`@dzgrid/dom/filters`; the
    * grid's `filters({ floating })` otherwise, `false` keeps this column out). `debounceMs`: the

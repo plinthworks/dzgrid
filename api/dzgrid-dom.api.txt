@@ -14,6 +14,7 @@
 # history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/locales/fr-range#FR_RANGE
 # history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/locales/ar-range#AR_RANGE
 # history: Phase 11 L6 (2026-11-09): the names the guide (docs/guide/) documents, guarded from now on; additions only, nothing removed or narrowed — @dzgrid/dom/dock#dock, @dzgrid/dom/dock#DockOptions, @dzgrid/dom/dock#DockApi, @dzgrid/dom/dock#DockFeature, @dzgrid/dom/dock#DockPanel, @dzgrid/dom/filters-base#filters, @dzgrid/dom/filters-base#FiltersOptions, @dzgrid/dom/filters-panel#filtersPanel, @dzgrid/dom/filters-panel#FiltersPanelOptions, @dzgrid/dom/filters-panel#FiltersPanelApi, @dzgrid/dom/filters-panel#FiltersPanelFeature, @dzgrid/dom/locales/en-dock#EN_DOCK, @dzgrid/dom/locales/en-filters-panel#EN_FILTERS_PANEL, @dzgrid/dom/locales/en-print#EN_PRINT, @dzgrid/dom/locales/en-group#EN_GROUP, @dzgrid/dom/locales/en-pivot#EN_PIVOT, @dzgrid/dom/locales/en-pivot-bar#EN_PIVOT_BAR, @dzgrid/dom/locales/en-context-menu#EN_CONTEXT_MENU, @dzgrid/dom/locales/en-row-drag#EN_ROW_DRAG, @dzgrid/dom/editors-base#editors, @dzgrid/dom/editors-base#EditorsOptions, @dzgrid/dom/print#print, @dzgrid/dom/print#PrintOptions, @dzgrid/dom/print-menu#printOnMenu, @dzgrid/dom/context-menu#contextMenu, @dzgrid/dom/grouping#grouping, @dzgrid/dom/grouping#GroupingFeatureOptions, @dzgrid/dom/grouping#GroupingApi, @dzgrid/dom/grouping#GroupingFeature, @dzgrid/dom/group-zone#groupZone, @dzgrid/dom/group-zone#GroupZoneOptions, @dzgrid/dom/pivot#pivot, @dzgrid/dom/pivot#PivotFeatureOptions, @dzgrid/dom/pivot#PivotApi, @dzgrid/dom/pivot#PivotFeature, @dzgrid/dom/pivot-bar#pivotBar, @dzgrid/dom/pivot-bar#PivotBarOptions, @dzgrid/dom/row-drag#rowDrag, @dzgrid/dom/row-drag#RowDragOptions, @dzgrid/dom/row-drag#RowDragApi, @dzgrid/dom/row-drag#RowDragFeature, @dzgrid/dom/find#find
+# history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): the names the guide documents for the new entries; additions only, nothing removed or narrowed — @dzgrid/dom/totals-row#totalsRow, @dzgrid/dom/locales/en-totals#EN_TOTALS, @dzgrid/dom/vertical-headers#verticalHeaders
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -3213,3 +3214,20 @@
 @ @dzgrid/dom/find
 ## find
   export declare function find(o?: FindOptions): FindFeature;
+
+@ @dzgrid/dom/totals-row
+## totalsRow
+  export declare function totalsRow(): TotalsRowFeature;
+
+@ @dzgrid/dom/locales/en-totals
+## EN_TOTALS
+  export declare const EN_TOTALS: {
+      locale: string;
+      text: {
+          'totals.label': string;
+      };
+  };
+
+@ @dzgrid/dom/vertical-headers
+## verticalHeaders
+  export declare function verticalHeaders(o?: VerticalHeadersOptions): GridFeature;

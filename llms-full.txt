@@ -548,6 +548,118 @@ export const columns: ColumnOrGroup<Parcel>[] = [
 'end'`, `hidden`, `align: 'start' | 'center' | 'end'`, `wrap` (several lines; rows grow with the `autoHeight()`
 feature from `@dzgrid/dom/auto-height`). Sides are logical: `start` is the left in English and the right in Arabic.
 
+**Filling the width**: there is no separate « fit to width » switch. Give the columns that should stretch a `flex`
+(and a `minWidth`, so they never get too narrow): they share the room the fixed columns leave, and follow the grid's
+width when the window is resized. With every column flexible, the columns always fill the grid exactly.
+
+## Columns made from the data
+
+`autoColumns(rows, options)` from `@dzgrid/core/auto-columns` makes the column list from the first rows: one column per
+field, typed by its values — numbers, yes / no, `YYYY-MM-DD` days, ISO date-times **with** an offset as instants (one
+without an offset stays text: its zone is never guessed), else text. It returns `{ columns, problems }`.
+
+```ts
+import { autoColumns } from '@dzgrid/core/auto-columns';
+import type { ColumnDef } from '@dzgrid/core';
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Booking = { ref: string; room: string; guests: number; paid: boolean; from: string; to: string; note: string };
+const rows: Booking[] = [
+  { ref: 'B-1', room: 'Lagoon', guests: 2, paid: true, from: '2026-07-01T14:00:00Z', to: '2026-07-04T10:00:00Z', note: '' },
+  { ref: 'B-2', room: 'Cliff', guests: 4, paid: false, from: '2026-07-02T14:00:00Z', to: '2026-07-09T10:00:00Z', note: 'Late arrival' },
+];
+const labels: Record<string, string> = { ref: 'Ref.', room: 'Room', guests: 'Guests', paid: 'Paid', stay: 'Stay' };
+const actions: ColumnDef<Booking> = { id: 'actions', header: 'Actions', sortable: false, filter: false };
+
+const { columns, problems } = autoColumns(rows, {
+  header: (field) => labels[field] ?? field,           // translation
+  override: { guests: { width: 90 } },                 // any part of a definition wins over the guess
+  merge: { stay: { from: ['from', 'to'], flex: 1 } },  // one column reading both fields; they are hidden
+  hide: ['note'],                                      // made, hidden (the columns chooser can show it)
+  add: [actions],                                      // columns absent from the data
+  order: ['room', 'stay'],                             // these first, the rest in the data's order
+});
+if (problems.length) console.warn(problems);           // a name at most, never a value
+
+createGrid<Booking>(document.getElementById('bookings')!, { rows, columns, getRowId: (b) => b.ref, messages: EN });
+```
+
+A merged column's value is its fields' non-empty values joined by « – »; give it your own `value`, `codec` or a cell
+part (`ui.cell`, which receives the whole row) for anything else. With server data, the columns come from the first
+answer and then stay: see [Server data](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/server-data.md#columns-from-the-first-answer).
+
+## Totals row
+
+`total` on a column — `'sum'`, `'avg'`, `'min'`, `'max'`, `'count'`, `'first'`, `'last'`, or your function of the
+column's values — and the `totalsRow()` feature from `@dzgrid/dom/totals-row` give a « Total » row at the bottom of the
+grid, always in view, over the rows that pass the filters (every page), edits included. It is a row of the pinned
+bottom band, so `pinnedRows()` is needed too (texts `-pinned` and `-totals`, CSS `pinned-rows.css`). The CSV and Excel
+files and the printed table end with it; a JSON file does not (it holds records only).
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PINNED } from '@dzgrid/dom/locales/en-pinned';
+import { EN_TOTALS } from '@dzgrid/dom/locales/en-totals';
+import '@dzgrid/theme/pinned-rows.css';
+
+type Harvest = { id: string; orchard: string; crates: number; sugar: number };
+const totals = totalsRow();
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_PINNED.text, ...EN_TOTALS.text } };
+
+const grid = createGrid<Harvest>(document.getElementById('harvest')!, {
+  rows: [{ id: 'h1', orchard: 'North slope', crates: 41, sugar: 14.2 }, { id: 'h2', orchard: 'Old mill', crates: 17, sugar: 12.8 }],
+  columns: [
+    { id: 'orchard', header: 'Orchard' },
+    { id: 'crates', header: 'Crates', type: 'number', total: 'sum' },
+    { id: 'sugar', header: 'Sugar (°Bx)', type: 'number', total: 'avg', numberFormat: { maximumFractionDigits: 1 } },
+  ],
+  getRowId: (h) => h.id,
+  messages,
+  features: [pinnedRows<Harvest>(), totals],
+});
+
+console.log(totals.api(grid)?.values());   // { crates: 58, sugar: 13.5 }
+```
+
+The same rules as the group totals (sums without drift, means over the numbers present, `count` counting every row). A
+total that does not fit its column (a sum of text) is told once as a problem. With server pages the grid holds one page,
+so it computes nothing: give the totals your server sends with `api.set({ crates: 1234 })`.
+
+## Vertical titles
+
+`headerVertical: true` on a column, with the `verticalHeaders()` feature from `@dzgrid/dom/vertical-headers` (CSS
+`vertical-headers.css`), writes its title upwards, so a grid of many narrow columns keeps them narrow. The header row
+grows to the longest such title (at most `maxHeight`, 240 px by default). Keys and screen readers are unchanged.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { verticalHeaders } from '@dzgrid/dom/vertical-headers';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/vertical-headers.css';
+
+type Plot = { id: string; bed: string; mon: boolean; tue: boolean; wed: boolean };
+const day = (id: 'mon' | 'tue' | 'wed', header: string) => ({ id, header, type: 'boolean' as const, width: 44, headerVertical: true });
+
+createGrid<Plot>(document.getElementById('watering')!, {
+  rows: [{ id: 'p1', bed: 'Herb spiral', mon: true, tue: false, wed: true }],
+  columns: [{ id: 'bed', header: 'Bed', flex: 1, minWidth: 140 }, day('mon', 'Monday'), day('tue', 'Tuesday'), day('wed', 'Wednesday')],
+  getRowId: (p) => p.id,
+  messages: EN,
+  features: [verticalHeaders({ maxHeight: 120 })],
+});
+```
+
+## No header row on screen
+
+The grid setting `headers: 'hidden'` (live; Angular `[headers]`, Web Component `headers="hidden"`) shows no header row.
+The headers stay in the page for screen readers, and appear while the keyboard is in them (ArrowUp from the first row),
+so sorting and the column menu still work from the keyboard. With the mouse, sort and filter through the cell menu, the
+dock's panels or your own controls. Print and the files keep their header row unless you pass `header: false`.
+
 ## Column groups
 
 A group has `children` and an optional `header`; `collapsible` groups fold to the columns marked
@@ -1495,6 +1607,84 @@ createGrid<Asteroid>(document.getElementById('asteroids')!, {
 - `refresh` (Angular `ctrl.refresh({})`, plain TypeScript `rows.refresh` command) asks again and keeps the rows shown
   meanwhile; the `busy` setting shows a thin bar while you reload.
 
+## Columns from the first answer
+
+`autoColumns()` ([Columns](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/columns.md#columns-made-from-the-data)) is a pure function: it does not know about sources.
+Call it on the rows of the **first** answer and set the grid's columns **once**; later answers do not change them (a
+filter that empties a page would otherwise take the columns away). The same place can hand the server's totals to the
+totals row, when your server sends them.
+
+```ts
+import { autoColumns } from '@dzgrid/core/auto-columns';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { createGrid, type GridInstance, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PINNED } from '@dzgrid/dom/locales/en-pinned';
+import { EN_TOTALS } from '@dzgrid/dom/locales/en-totals';
+
+type Comet = { id: string; name: string; period: number; seen: string };
+type Answer = DataResponse<Comet> & { totals?: Record<string, number> };
+
+const totals = totalsRow();
+let grid: GridInstance<Comet> | null = null;
+let columnsSet = false;
+
+async function fetchComets(req: DataRequest): Promise<Answer> {
+  const answer = await fetch('/api/comets', { method: 'POST', body: JSON.stringify({ page: req.page }), signal: req.signal as AbortSignal });
+  const json = (await answer.json()) as Answer;
+  if (!columnsSet && json.rows.length) {
+    columnsSet = true;
+    const { columns } = autoColumns(json.rows, { hide: ['id'], override: { period: { total: 'sum' } } });
+    grid?.update({ columns });
+  }
+  if (json.totals) totals.api(grid!)?.set(json.totals);   // the server's totals; the page's would mislead
+  return json;
+}
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_PINNED.text, ...EN_TOTALS.text } };
+grid = createGrid<Comet>(document.getElementById('comets')!, {
+  source: sourceRows<Comet>({ fetch: fetchComets }),
+  columns: [],
+  getRowId: (c) => c.id,
+  messages,
+  features: [pinnedRows<Comet>(), totals],
+});
+```
+
+In Angular, keep the columns in a signal set once from the same place:
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { autoColumns } from '@dzgrid/core/auto-columns';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Comet = { id: string; name: string; period: number; seen: string };
+
+@Component({
+  selector: 'app-comets',
+  imports: [DzGrid],
+  template: `<dz-grid [source]="source" [columns]="columns()" [getRowId]="rowId" [messages]="messages" />`,
+})
+export class Comets {
+  readonly columns = signal<DzgColumnOrGroup<Comet>[]>([]);
+  readonly rowId = (c: Comet) => c.id;
+  readonly messages = EN;
+  readonly source = sourceRows<Comet>({ fetch: (req) => this.load(req) });
+
+  private async load(req: DataRequest): Promise<DataResponse<Comet>> {
+    const answer = await fetch('/api/comets', { method: 'POST', body: JSON.stringify({ page: req.page }), signal: req.signal as AbortSignal });
+    const json = (await answer.json()) as DataResponse<Comet>;
+    // Once: the first answer with rows makes the columns; later answers leave them.
+    if (!this.columns().length && json.rows.length) this.columns.set(autoColumns(json.rows, { hide: ['id'] }).columns);
+    return json;
+  }
+}
+```
+
 ## Infinite scroll
 
 ```ts
@@ -1769,6 +1959,21 @@ document.getElementById('selected')!.addEventListener('click', async () => {
 - The right-click menu offers the same: `contextMenu({ use: { csv: exporter, xlsx: exporter.xlsx } })`.
 - In Angular: `<button [dzgExport]="exporter" dzgExportScope="displayed">` (directive `DzgExport`).
 
+## JSON
+
+The same feature writes a JSON file: `run(scope, { format: 'json' })` or `bind(button, { format: 'json' })` — no option
+to switch it on, its code is fetched at the first JSON export. The file is one array of objects keyed by the column ids,
+in screen order, with raw values: numbers, `true` / `false`, days `'YYYY-MM-DD'`, instants as ISO UTC text with `Z`,
+enum codes, `null` for an empty cell (`text: 'display'` writes what the cells show). Group and totals rows are not
+written; `canExport` and `exportAll` see `request.format === 'json'`.
+
+```ts
+import type { CsvExport } from '@dzgrid/dom/export';
+
+declare const exporter: CsvExport;
+exporter.bind(document.getElementById('json')!, { scope: 'all', format: 'json' });
+```
+
 ## Print
 
 `print(grid, { title })` from `@dzgrid/dom/print` prints the rows as they are on screen — same columns, order, sort and
@@ -1799,7 +2004,8 @@ document.getElementById('print')!.addEventListener('click', () => void print(gri
 printOnMenu(grid, { title: 'Bells of the coast' });   // the browser's own Ctrl+P prints the whole grid too
 ```
 
-`print` is a function, not a feature: nothing is loaded until it is called. `printOnMenu(grid)` makes the browser's
+`print(grid, { header: false })` leaves the header rows out (they are printed by default, even on a grid with
+`headers: 'hidden'`). `print` is a function, not a feature: nothing is loaded until it is called. `printOnMenu(grid)` makes the browser's
 own print command (Ctrl+P, the File menu) print the whole grid as well; without it, that command prints only what the
 page shows. In Angular, pass `ctrl.grid()` to both.
 

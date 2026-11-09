@@ -1,6 +1,6 @@
 import type { ColumnDef, ColumnOrGroup, Json, LocaleCtx, ModelStatus, NumberFormatSpec, PageState, PartSlot, Placement, Problem, ResolvedColumn, RowCounts, RowKey, SortItem, ValuesHandle, ValuesOptions } from '@dzgrid/core';
 import type { AppMessageKey, ExportMessageKey, FilterMessageKey, FilterRowsMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
-import type { GroupMessageKey, PivotMessageKey, PivotBarMessageKey, PartsMessageKey, DetailMessageKey, EditMessageKey, EditorsMessageKey, RulesMessageKey, TreeMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, DockMessageKey, RowNumbersMessageKey } from './part-texts.js';
+import type { GroupMessageKey, PivotMessageKey, PivotBarMessageKey, PartsMessageKey, DetailMessageKey, EditMessageKey, EditorsMessageKey, RulesMessageKey, TreeMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, TotalsMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, DockMessageKey, RowNumbersMessageKey } from './part-texts.js';
 import type { GridFeature } from './features.js';
 import type { GridSettings } from './settings.js';
 
@@ -28,7 +28,7 @@ export interface PartBase {
   readonly ctx: LocaleCtx;
   readonly dir: 'ltr' | 'rtl';
   /** The grid's messages, and the host's own `app.*` ones (a missing one shows its key, told once). */
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
   announce(text: string): void;
   readonly doc: Document;
   /** The application's `settings.context` (step 21): its own, beside `ctx`, the grid's language and zone. */
@@ -374,6 +374,9 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
     ...(s.selection?.canSelect ? missing('settings.selection.canSelect', 'rules', 'error') : []),
     ...leaves(s.columns).flatMap((d, i) => [
       ...(d?.filter && (d.filter.floating || d.filter.kind) ? missing(`columns[${i}].filter`, 'filters') : []),
+      // A column's total or vertical title without its feature (1.9.0, totals-row.md 5, vertical-headers.md 2).
+      ...(d?.total !== undefined ? missing(`columns[${i}].total`, 'totals-row') : []),
+      ...(d?.headerVertical ? missing(`columns[${i}].headerVertical`, 'vertical-headers') : []),
       ...Object.keys(d?.ui ?? {}).flatMap((k): Problem[] => {
         const at = `columns[${i}].ui.${k}`;
         const v = d!.ui![k as 'header'];

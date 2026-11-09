@@ -116,6 +116,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   // Stable, so a part's context compares equal from one paint to the next.
   const announce = (text: string): void => g.live.announce(text);
   const paintOverlay = overlayPainter(g);
+  // Hidden headers are shown while the focus is in them (hidden-headers.md 4): a paint when it comes and goes.
+  for (const t of ['focusin', 'focusout']) g.scope.on(el.header, t, () => g.settings.headers == 'hidden' && g.schedule());
 
   const partFor = (col: ResolvedColumn<any>): SlotPart<'cell'> | null => parts.byColumn.get(col.id) ?? null;
   function resolveParts(): void {
@@ -256,6 +258,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
 
     // ---- grid attributes ----
     setAttr(el.root, 'data-density', settings.density ?? 'comfortable');
+    setAttr(el.root, 'data-headers', settings.headers == 'hidden' ? 'hidden' : null);
     if (el.root.style.getPropertyValue('--dzg-row-height') !== `${h}px`) el.root.style.setProperty('--dzg-row-height', `${h}px`);
     // Every header row counts: the group rows, the column headers and those the features add; the pinned rows too (step
     // 8b-1): the body's rows are numbered after the top ones.
@@ -298,6 +301,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       keep: focus?.kind === 'header' ? { center: focusCenter, level: focus.level ?? 0 } : null,
       check, lead, selectAll: mode === 'multi', extra: g.headerRows, bands: g.bands,
     });
+    // Hidden headers (hidden-headers.md 1–4): out of the flow and clipped to nothing, written on the rows (nothing for a CSP;
+    // still read by screen readers), unless the focus is in them.
+    const hide = settings.headers == 'hidden' && !el.header.contains(root.activeElement);
+    for (const r of el.header.children) if (r.classList.contains('dzg-hrow')) Object.assign((r as HTMLElement).style, { position: hide ? 'absolute' : '', clipPath: hide ? 'inset(50%)' : '' });
     if (headerRenderer.checkName) {
       const text = g.msg('selection.column');
       if (headerRenderer.checkName.textContent !== text) headerRenderer.checkName.textContent = text;

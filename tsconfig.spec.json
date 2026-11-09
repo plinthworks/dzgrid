@@ -74,6 +74,12 @@
       "@dzgrid/core/state": [
         "./packages/core/src/state.ts"
       ],
+      "@dzgrid/core/auto-columns": [
+        "./packages/core/src/auto-columns.ts"
+      ],
+      "@dzgrid/core/totals": [
+        "./packages/core/src/totals.ts"
+      ],
       "@dzgrid/core/row-gaps": [
         "./packages/core/src/row-gaps.ts"
       ],
@@ -184,6 +190,21 @@
       ],
       "@dzgrid/dom/pinned-rows": [
         "./packages/dom/src/pinned-rows.ts"
+      ],
+      "@dzgrid/dom/totals-row": [
+        "./packages/dom/src/totals-row.ts"
+      ],
+      "@dzgrid/dom/vertical-headers": [
+        "./packages/dom/src/vertical-headers.ts"
+      ],
+      "@dzgrid/dom/locales/en-totals": [
+        "./packages/dom/src/locales/en-totals.ts"
+      ],
+      "@dzgrid/dom/locales/fr-totals": [
+        "./packages/dom/src/locales/fr-totals.ts"
+      ],
+      "@dzgrid/dom/locales/ar-totals": [
+        "./packages/dom/src/locales/ar-totals.ts"
       ],
       "@dzgrid/dom/row-gaps": [
         "./packages/dom/src/row-gaps.ts"

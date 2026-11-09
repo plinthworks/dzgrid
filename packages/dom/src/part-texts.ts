@@ -133,6 +133,14 @@ export interface PinnedMessages {
   readonly text: { readonly [K in PinnedMessageKey]: MessageValue };
 }
 
+/** The totals row's text (`@dzgrid/dom/totals-row`, 1.9.0), in its own bundles (`locales/<lang>-totals`): the row's label. Optional here, required by `totalsRow()`. */
+export type TotalsMessageKey = 'totals.label';
+/** A totals row bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_TOTALS.text }`. */
+export interface TotalsMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in TotalsMessageKey]: MessageValue };
+}
+
 /** The print table's texts (`@dzgrid/dom/print`, Phase 6 step 11), in their own bundles (`locales/<lang>-print`): the truncation line and a paged grid's place. Optional here, required by `preparePrint()` (a missing one told once, `missing-message`). */
 export type PrintMessageKey = 'print.truncated' | 'print.page';
 /** A print bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_PRINT.text }`. */

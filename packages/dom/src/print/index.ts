@@ -12,6 +12,8 @@ export interface PrintOptions {
   readonly maxRows?: number;
   /** The table's caption; the grid's accessible name otherwise. */
   readonly title?: string;
+  /** `false`: no header rows (hidden-headers.md 6); printed by default, a grid with `headers: 'hidden'` too. */
+  readonly header?: false;
 }
 
 /** A grid made by `createGrid` (its kernel is how the features find it). */
@@ -144,7 +146,7 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
   };
   const depth = Math.max(0, ...cols.map((c) => up.get(c.id)?.length ?? 0));
   if (depth) for (const [, span] of runs(0)) add('colgroup', table).span = span;
-  const head = add('thead', table);
+  const head = o.header === false ? doc.createDocumentFragment() : add('thead', table);
   for (let l = 0; l < depth; l++) {
     const tr = add('tr', head);
     for (const [grp, span] of runs(l)) {
@@ -161,7 +163,7 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
   const read = g.edit?.read ?? null;
   const map = g.spans?.map;
   const cellText = (j: number, node: RowNode<unknown>): string =>
-    node.kind == 'data' ? cellValue(cols[j]!, node.data, g.ctx, read, node.key).text : gr!.cell(node as GroupNode, cols[j]!);
+    node.kind == 'data' ? cellValue(cols[j]!, node.data, g.ctx, read, node.key).text : (node === g.foot?.node ? g.foot : gr)!.cell(node as never, cols[j]!);
   const row = (node: RowNode<unknown>, i: number): HTMLTableRowElement => {
     const tr = doc.createElement('tr');
     // A group or a totals row, set apart without colour; a totals row also marked as such, for the page breaks (11).

@@ -22,7 +22,7 @@ interface Open {
  * no Blob past ZIP's or Excel's limits. The problems are the caller's to tell.
  */
 export async function build(
-  g: GridContext<unknown>, o: CsvExportOptions, held: { readonly rows: DisplayedRows<unknown>; readonly at: Uint32Array | null }, columns: readonly string[],
+  g: GridContext<unknown>, o: CsvExportOptions, held: { readonly rows: DisplayedRows<unknown>; readonly at: Uint32Array | null }, aggFuncs: XlsxInput<unknown>['aggFuncs'], columns: readonly string[],
   spans: Partial<Pick<XlsxInput<unknown>, 'spans' | 'spanColumns'>>, env: SliceEnv, done: (rows: number) => void,
 ): Promise<{ readonly blob: Blob | null; readonly sum: XlsxSummary } | null> {
   const x = o.xlsx === true ? {} : o.xlsx!;
@@ -34,7 +34,7 @@ export async function build(
   // A grouped grid (xlsx-export.md « Grouped rows »): the screen's labels and totals, the outline; grouped by no column, flat.
   const gr = g.grouped;
   const it = xlsxParts(
-    { ...held, ...spans, columns: g.columns, ctx: g.ctx, widths, pinned: layout.start.columns.map((c) => c.id), groups: g.settings.columns, ...(gr && { groupLabel: gr.label, aggFuncs: gr.aggFuncs }) },
+    { ...held, ...spans, columns: g.columns, ctx: g.ctx, widths, pinned: layout.start.columns.map((c) => c.id), groups: g.settings.columns, aggFuncs, ...(gr && { groupLabel: gr.label }) },
     // CSV's options shared with Excel (its `tree`, `spans`, `instants` are CSV's own).
     {
       text: o.text, enums: o.enums, header: o.header, levelHeader: o.levelHeader, treeColumn: o.treeColumn ?? gr?.column(), groupRows: o.groupRows,

@@ -7,6 +7,8 @@
 # history: groupByChanged event added (owner 2026-11-05) — @dzgrid/core#GridEvent
 # history: Phase 9 row drag: GridEvent rowMove (owner 2026-11-06) — @dzgrid/core#GridEvent
 # history: Phase 11 L6 (2026-11-09): the names the guide (docs/guide/) documents, guarded from now on; additions only, nothing removed or narrowed — @dzgrid/core/server-side#serverSideRows, @dzgrid/core/server-side#ServerSideOptions, @dzgrid/core/server-pivot#serverPivot, @dzgrid/core/row-drag#moveRows, @dzgrid/core/row-drag#MoveRowsOptions, @dzgrid/core/row-drag#RowMove, @dzgrid/core/infinite#infiniteRows, @dzgrid/core/infinite#InfiniteOptions
+# history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): the names the guide documents for the new entries; additions only, nothing removed or narrowed — @dzgrid/core/auto-columns#autoColumns
+# history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): autoColumns returns plain ColumnDef[] (unreleased, accepted earlier in this lot) — @dzgrid/core/auto-columns#autoColumns
 
 @ @dzgrid/core
 ## AbortHandle
@@ -2471,3 +2473,10 @@
       readonly params?: Readonly<Record<string, Json>>;
       readonly abort?: () => AbortHandle;
   }
+
+@ @dzgrid/core/auto-columns
+## autoColumns
+  export declare function autoColumns<T>(rows: readonly T[], o?: AutoColumnsOptions<T>): {
+      columns: ColumnDef<T>[];
+      problems: Problem[];
+  };

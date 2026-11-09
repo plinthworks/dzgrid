@@ -26,6 +26,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   numerals: 'live',
   direction: 'live',
   density: 'live',
+  headers: 'live',
   rowHeight: 'live',
   selection: 'live',
   overlay: 'live',
