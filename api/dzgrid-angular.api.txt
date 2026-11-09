@@ -2,6 +2,7 @@
 # Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
 # history: 1.0.0 as published on npm (first baseline of the guard, 2026-10-29)
 # history: Phase 11 L6 (2026-11-09): the names the guide (docs/guide/) documents, guarded from now on; additions only, nothing removed or narrowed — @dzgrid/angular#DzgColumnOrGroup, @dzgrid/angular#selectedIds, @dzgrid/angular#DzGrid, @dzgrid/angular#DzgController
+# history: 1.8.0 fix (owner found on 1.7.0): DzGrid's selectionChanged reason typed through @dzgrid/core's exported SelectionReason instead of the unpublished @dzgrid/core/kernel — same type, nothing narrowed — @dzgrid/angular#DzGrid
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -23,8 +24,8 @@
       readonly messages: _angular_core.InputSignal<GridMessages | undefined>;
       readonly locale: _angular_core.InputSignal<string | undefined>;
       readonly timeZone: _angular_core.InputSignal<string | undefined>;
-      readonly numerals: _angular_core.InputSignal<"locale" | "latn" | undefined>;
-      readonly direction: _angular_core.InputSignal<"ltr" | "rtl" | "auto" | undefined>;
+      readonly numerals: _angular_core.InputSignal<"latn" | "locale" | undefined>;
+      readonly direction: _angular_core.InputSignal<"auto" | "ltr" | "rtl" | undefined>;
       readonly density: _angular_core.InputSignal<"compact" | "comfortable" | "spacious" | undefined>;
       readonly rowHeight: _angular_core.InputSignal<number | undefined>;
       readonly overlay: _angular_core.InputSignal<"loading" | "error" | null | undefined>;
@@ -181,7 +182,7 @@
           readonly count: number | null;
           readonly query: Query | null;
           readonly scope: _dzgrid_core.RowScope | null;
-          readonly reason: _dzgrid_core_kernel.SelectionReason | null;
+          readonly reason: _dzgrid_core.SelectionReason | null;
       }>;
       readonly rowMove: OutputEmitterRef<{
           readonly type: "rowMove";

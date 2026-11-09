@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one behaviour change for server groups.
 Phase 11 (hardening and ecosystem) and the server pivot. Five packages now: `@dzgrid/element` joins the four.
 
+
+### Fixed (found on 1.7.0)
+- `@dzgrid/angular`'s typings imported `@dzgrid/core/kernel`, an entry `@dzgrid/core` does not publish: an app's
+  Angular build stopped with « Cannot find module '@dzgrid/core/kernel' ». `SelectionReason` is now exported from
+  `@dzgrid/core`, and a test checks that every built typing imports only published entries. Workaround on 1.7.0: in
+  the app's tsconfig, `"paths": { "@dzgrid/core/kernel": ["./node_modules/@dzgrid/core/kernel.d.ts"] }`.
 ### Upgrading from 1.7.0
 - **Server groups' values are checked against their column's type** (owner Q-SP5 A): a group whose value does not fit
   (a number in a text column, an instant in a day column, a text that is no day) is now left out and told
