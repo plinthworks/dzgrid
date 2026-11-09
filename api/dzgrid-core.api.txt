@@ -6,6 +6,7 @@
 # history: Owner A (2026-11-03, phase-9-steps/decisions.md « Excel export »): the Excel export, additions only — @dzgrid/core/xlsx, ExportRequest.format, ExportTrace.format, XlsxProblemCode, csvExport({ xlsx }), use.xlsx and the optional ContextMenuXlsxKey — @dzgrid/core#ProblemCode, @dzgrid/core#ExportTrace, @dzgrid/core/csv#ExportRequest, @dzgrid/core/xlsx#XLSX_COLUMNS, @dzgrid/core/xlsx#XLSX_MIME, @dzgrid/core/xlsx#XLSX_ROWS, @dzgrid/core/xlsx#XlsxInput, @dzgrid/core/xlsx#XlsxOptions, @dzgrid/core/xlsx#XlsxPiece, @dzgrid/core/xlsx#XlsxStyle, @dzgrid/core/xlsx#XlsxStyleContext, @dzgrid/core/xlsx#XlsxSummary, @dzgrid/core/xlsx#ZipEntry, @dzgrid/core/xlsx#crc32, @dzgrid/core/xlsx#numFmtFor, @dzgrid/core/xlsx#serialOfDay, @dzgrid/core/xlsx#sheetNameOf, @dzgrid/core/xlsx#toXlsx, @dzgrid/core/xlsx#utf8, @dzgrid/core/xlsx#xlsxParts, @dzgrid/core/xlsx#zipFile
 # history: groupByChanged event added (owner 2026-11-05) — @dzgrid/core#GridEvent
 # history: Phase 9 row drag: GridEvent rowMove (owner 2026-11-06) — @dzgrid/core#GridEvent
+# history: Phase 11 L6 (2026-11-09): the names the guide (docs/guide/) documents, guarded from now on; additions only, nothing removed or narrowed — @dzgrid/core/server-side#serverSideRows, @dzgrid/core/server-side#ServerSideOptions, @dzgrid/core/server-pivot#serverPivot, @dzgrid/core/row-drag#moveRows, @dzgrid/core/row-drag#MoveRowsOptions, @dzgrid/core/row-drag#RowMove, @dzgrid/core/infinite#infiniteRows, @dzgrid/core/infinite#InfiniteOptions
 
 @ @dzgrid/core
 ## AbortHandle
@@ -2417,3 +2418,56 @@
       readonly parts: Uint8Array[];
       readonly problems: Problem[];
   };
+
+@ @dzgrid/core/server-side
+## serverSideRows
+  export declare function serverSideRows<T>(data: DataSource<T>, o?: ServerSideOptions): ServerSideRows<T>;
+## ServerSideOptions
+  export interface ServerSideOptions {
+      readonly blockSize?: number;
+      readonly maxBlocks?: number;
+      readonly ahead?: number;
+      readonly concurrency?: number;
+      readonly restMs?: number;
+      readonly batchMs?: number;
+      readonly by?: readonly string[];
+      readonly aggFuncs?: Readonly<Record<string, AggFuncName>>;
+      readonly footers?: 'none' | 'group' | 'grand' | 'both';
+      readonly grandTotal?: 'top' | 'bottom';
+      readonly params?: Readonly<Record<string, Json>>;
+      readonly abort?: () => AbortHandle;
+      readonly pivot?: ServerPivotPlug;
+  }
+
+@ @dzgrid/core/server-pivot
+## serverPivot
+  export declare function serverPivot(): ServerPivotPlug;
+
+@ @dzgrid/core/row-drag
+## moveRows
+  export declare function moveRows<T>(rows: readonly T[], move: RowMove, getRowId: (row: T) => RowIdInput, o?: MoveRowsOptions<T>): T[];
+## MoveRowsOptions
+  export interface MoveRowsOptions<T> {
+      readonly parentId?: (row: T) => RowIdInput | null | undefined;
+      readonly setParent?: (row: T, parent: RowIdInput | null) => T;
+  }
+## RowMove
+  export interface RowMove {
+      readonly keys: readonly RowKey[];
+      readonly target: RowDrop;
+  }
+
+@ @dzgrid/core/infinite
+## infiniteRows
+  export declare function infiniteRows<T>(data: DataSource<T>, o?: InfiniteOptions): InfiniteRows<T>;
+## InfiniteOptions
+  export interface InfiniteOptions {
+      readonly blockSize?: number;
+      readonly maxBlocks?: number;
+      readonly ahead?: number;
+      readonly concurrency?: number;
+      readonly restMs?: number;
+      readonly batchMs?: number;
+      readonly params?: Readonly<Record<string, Json>>;
+      readonly abort?: () => AbortHandle;
+  }

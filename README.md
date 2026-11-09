@@ -91,6 +91,8 @@ createGrid<Patient>(host, {
 
 ## Documentation
 
+- [`docs/guide/`](docs/guide/README.md) — **how to use it**: getting started (plain TypeScript, Angular, the Web Component) and one page per feature; every sample type-checked by a test.
+- [`llms.txt`](llms.txt) and [`llms-full.txt`](llms-full.txt) — the guide for a language model (an index, and the whole guide in one file), made from `docs/guide/` by `node scripts/llms.mjs`; `llms.txt` also ships in `@dzgrid/dom`.
 - [`docs/STATUS.md`](docs/STATUS.md) — where the work is, what comes next.
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — the design and every decision taken (in French).
 - [`ROADMAP.md`](ROADMAP.md) — phases, steps and measures.

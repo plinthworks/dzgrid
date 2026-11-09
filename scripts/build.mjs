@@ -54,6 +54,9 @@ function extras(name) {
     const source = existsSync(own) ? own : existsSync(top) ? top : null;
     if (source) cpSync(source, join(pkg(name), 'dist', file));
   }
+  // `llms.txt` (Phase 11 L6, owner Q8 A): the guide's index for a model, made by scripts/llms.mjs, shipped in the DOM
+  // package so an assistant reading node_modules finds it; its links are absolute.
+  if (name === 'dom') cpSync(join(root, 'llms.txt'), join(pkg(name), 'dist', 'llms.txt'));
 }
 
 function typescript(name) {

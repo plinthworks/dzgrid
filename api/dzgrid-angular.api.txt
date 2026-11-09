@@ -1,6 +1,7 @@
 # The accepted public type surface — written by scripts/api.mjs, checked by `npm run check:api`.
 # Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
 # history: 1.0.0 as published on npm (first baseline of the guard, 2026-10-29)
+# history: Phase 11 L6 (2026-11-09): the names the guide (docs/guide/) documents, guarded from now on; additions only, nothing removed or narrowed — @dzgrid/angular#DzgColumnOrGroup, @dzgrid/angular#selectedIds, @dzgrid/angular#DzGrid, @dzgrid/angular#DzgController
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -17,7 +18,7 @@
   declare class DzGrid<T> implements AfterContentInit {
       readonly rows: _angular_core.InputSignal<Iterable<T> | undefined>;
       readonly source: _angular_core.InputSignal<_dzgrid_core.SourceBinding<T> | undefined>;
-      readonly columns: _angular_core.InputSignal<readonly ColumnOrGroup<T>[]>;
+      readonly columns: _angular_core.InputSignal<DzgColumns<T> | readonly ColumnOrGroup<T>[]>;
       readonly getRowId: _angular_core.InputSignal<(row: T) => RowIdInput>;
       readonly messages: _angular_core.InputSignal<GridMessages | undefined>;
       readonly locale: _angular_core.InputSignal<string | undefined>;
@@ -27,6 +28,7 @@
       readonly density: _angular_core.InputSignal<"compact" | "comfortable" | "spacious" | undefined>;
       readonly rowHeight: _angular_core.InputSignal<number | undefined>;
       readonly overlay: _angular_core.InputSignal<"loading" | "error" | null | undefined>;
+      readonly busy: _angular_core.InputSignal<boolean | undefined>;
       readonly label: _angular_core.InputSignal<string | undefined>;
       readonly tooltips: _angular_core.InputSignal<{
           readonly delayMs?: number;
@@ -64,12 +66,20 @@
       readonly injectStyles: _angular_core.InputSignal<boolean | undefined>;
       readonly nonce: _angular_core.InputSignal<string | undefined>;
       readonly features: _angular_core.InputSignal<readonly GridFeature[] | undefined>;
+      readonly multiSort: _angular_core.InputSignal<boolean | undefined>;
+      readonly sameRow: _angular_core.InputSignal<((a: T, b: T) => boolean) | undefined>;
       readonly floatingFilters: _angular_core.InputSignal<boolean | undefined>;
       readonly save: _angular_core.InputSignal<SaveHandler<T> | undefined>;
+      readonly state: _angular_core.InputSignal<GridState | null | undefined>;
+      readonly pinnedRows: _angular_core.InputSignal<{
+          readonly top?: readonly T[];
+          readonly bottom?: readonly T[];
+      } | undefined>;
       readonly quick: _angular_core.ModelSignal<string | undefined>;
       readonly filter: _angular_core.ModelSignal<Readonly<Record<string, _dzgrid_core.ColumnFilter>> | undefined>;
       readonly selected: _angular_core.ModelSignal<SelectionState | undefined>;
       readonly expanded: _angular_core.ModelSignal<ReadonlySet<RowKey> | undefined>;
+      readonly groupBy: _angular_core.ModelSignal<readonly string[] | undefined>;
       readonly gridEvent: OutputEmitterRef<GridEvent<T>>;
       readonly cellClicked: OutputEmitterRef<{
           readonly type: "cellClicked";
@@ -154,6 +164,38 @@
           readonly cells: number;
           readonly cut: boolean;
       }>;
+      readonly stateChanged: OutputEmitterRef<{
+          readonly type: "stateChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly state: GridState;
+      }>;
+      readonly densityChanged: OutputEmitterRef<{
+          readonly type: "densityChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly density: "compact" | "comfortable" | "spacious";
+      }>;
+      readonly selectionChanged: OutputEmitterRef<{
+          readonly type: "selectionChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly selection: SelectionState;
+          readonly count: number | null;
+          readonly query: Query | null;
+          readonly scope: _dzgrid_core.RowScope | null;
+          readonly reason: _dzgrid_core_kernel.SelectionReason | null;
+      }>;
+      readonly rowMove: OutputEmitterRef<{
+          readonly type: "rowMove";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly via: "pointer" | "keys" | "menu" | "api";
+          readonly keys: readonly RowKey[];
+          readonly rows: readonly T[];
+          readonly target: {
+              readonly key: RowKey | null;
+              readonly where: "before" | "after" | "inside";
+          };
+          readonly parent: RowKey | null;
+          readonly applied: boolean;
+      }>;
       readonly problems: OutputEmitterRef<readonly Problem[]>;
       readonly gridReady: OutputEmitterRef<DzgController<T>>;
       readonly controller: DzgController<T>;
@@ -173,6 +215,8 @@
       private _last;
       private _gone;
       private _saves;
+      private _st?;
+      private _sn?;
       private _early;
       private _seen?;
       private _pend;
@@ -184,6 +228,9 @@
       private _write;
       private _shut;
       private _save;
+      private _miss;
+      private _state;
+      private _group;
       private _nest;
       private _open;
       private _tell;
@@ -252,6 +299,11 @@
           };
           "overlay": {
               "alias": "overlay";
+              "required": false;
+              "isSignal": true;
+          };
+          "busy": {
+              "alias": "busy";
               "required": false;
               "isSignal": true;
           };
@@ -340,6 +392,16 @@
               "required": false;
               "isSignal": true;
           };
+          "multiSort": {
+              "alias": "multiSort";
+              "required": false;
+              "isSignal": true;
+          };
+          "sameRow": {
+              "alias": "sameRow";
+              "required": false;
+              "isSignal": true;
+          };
           "floatingFilters": {
               "alias": "floatingFilters";
               "required": false;
@@ -347,6 +409,16 @@
           };
           "save": {
               "alias": "save";
+              "required": false;
+              "isSignal": true;
+          };
+          "state": {
+              "alias": "state";
+              "required": false;
+              "isSignal": true;
+          };
+          "pinnedRows": {
+              "alias": "pinnedRows";
               "required": false;
               "isSignal": true;
           };
@@ -370,11 +442,17 @@
               "required": false;
               "isSignal": true;
           };
+          "groupBy": {
+              "alias": "groupBy";
+              "required": false;
+              "isSignal": true;
+          };
       }, {
           "quick": "quickChange";
           "filter": "filterChange";
           "selected": "selectedChange";
           "expanded": "expandedChange";
+          "groupBy": "groupByChange";
           "gridEvent": "gridEvent";
           "cellClicked": "cellClicked";
           "rowClicked": "rowClicked";
@@ -388,6 +466,10 @@
           "undoChanged": "undoChanged";
           "rangeChanged": "rangeChanged";
           "rangeCopied": "rangeCopied";
+          "stateChanged": "stateChanged";
+          "densityChanged": "densityChanged";
+          "selectionChanged": "selectionChanged";
+          "rowMove": "rowMove";
           "problems": "problems";
           "gridReady": "gridReady";
       }, [
@@ -413,13 +495,28 @@
       dispatch(cmd: GridCommand): GridCommandResult;
       focusCell(row: RowKey, column: string): void;
       ensureVisible(row: RowKey, column?: string): void;
+      ensureColumnVisible(column: string): void;
       refresh(): void;
+      refresh(o: {
+          readonly purge?: boolean;
+      }): void;
+      applyTransaction(tx: RowTransaction<T>): TransactionResult | null;
+      applyTransactionAsync(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void;
       announce(text: string): void;
       openFilter(column: string): boolean;
       closeFilter(): void;
+      clearFilters(): boolean;
+      resetState(): Problem[] | null;
       edit(): EditApi<T> | null;
       range(): RangeApi | null;
       fill(): FillApi | null;
+      grouping(): GroupingApi | null;
+      rowDrag(): RowDragApi | null;
+      use<A>(feature: {
+          api(grid: GridInstance<T, RowModel<T>>): A | null;
+      }): A | null;
+      grid(): GridInstance<T, RowModel<T>> | null;
+      _by<A>(id: string): A | null;
       static ɵfac: _angular_core.ɵɵFactoryDeclaration<DzgController<any>, never>;
       static ɵprov: _angular_core.ɵɵInjectableDeclaration<DzgController<any>>;
   }
@@ -519,3 +616,11 @@
   declare function fromObservable<T>(fetch: (req: DataRequest) => ObservableLike<DataResponse<T>>, values?: (req: ValuesRequest) => ObservableLike<ValuesResponse>): DataSource<T>;
 ## provideDzGrid
   declare function provideDzGrid(c: DzGridConfig): Provider[];
+## DzgColumnOrGroup
+  type DzgColumnOrGroup<T> = DzgColumnDef<T, any> | DzgColumnGroup<T>;
+## selectedIds
+  declare function selectedIds<T>(controller: DzgController<T>): {
+      readonly mode: 'include' | 'exclude';
+      readonly ids: string[];
+      readonly query: Query;
+  } | null;

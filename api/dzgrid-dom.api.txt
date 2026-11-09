@@ -13,6 +13,7 @@
 # history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/locales/en-range#EN_RANGE
 # history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/locales/fr-range#FR_RANGE
 # history: range.notLoaded optional key (owner 2026-11-05) — @dzgrid/dom/locales/ar-range#AR_RANGE
+# history: Phase 11 L6 (2026-11-09): the names the guide (docs/guide/) documents, guarded from now on; additions only, nothing removed or narrowed — @dzgrid/dom/dock#dock, @dzgrid/dom/dock#DockOptions, @dzgrid/dom/dock#DockApi, @dzgrid/dom/dock#DockFeature, @dzgrid/dom/dock#DockPanel, @dzgrid/dom/filters-base#filters, @dzgrid/dom/filters-base#FiltersOptions, @dzgrid/dom/filters-panel#filtersPanel, @dzgrid/dom/filters-panel#FiltersPanelOptions, @dzgrid/dom/filters-panel#FiltersPanelApi, @dzgrid/dom/filters-panel#FiltersPanelFeature, @dzgrid/dom/locales/en-dock#EN_DOCK, @dzgrid/dom/locales/en-filters-panel#EN_FILTERS_PANEL, @dzgrid/dom/locales/en-print#EN_PRINT, @dzgrid/dom/locales/en-group#EN_GROUP, @dzgrid/dom/locales/en-pivot#EN_PIVOT, @dzgrid/dom/locales/en-pivot-bar#EN_PIVOT_BAR, @dzgrid/dom/locales/en-context-menu#EN_CONTEXT_MENU, @dzgrid/dom/locales/en-row-drag#EN_ROW_DRAG, @dzgrid/dom/editors-base#editors, @dzgrid/dom/editors-base#EditorsOptions, @dzgrid/dom/print#print, @dzgrid/dom/print#PrintOptions, @dzgrid/dom/print-menu#printOnMenu, @dzgrid/dom/context-menu#contextMenu, @dzgrid/dom/grouping#grouping, @dzgrid/dom/grouping#GroupingFeatureOptions, @dzgrid/dom/grouping#GroupingApi, @dzgrid/dom/grouping#GroupingFeature, @dzgrid/dom/group-zone#groupZone, @dzgrid/dom/group-zone#GroupZoneOptions, @dzgrid/dom/pivot#pivot, @dzgrid/dom/pivot#PivotFeatureOptions, @dzgrid/dom/pivot#PivotApi, @dzgrid/dom/pivot#PivotFeature, @dzgrid/dom/pivot-bar#pivotBar, @dzgrid/dom/pivot-bar#PivotBarOptions, @dzgrid/dom/row-drag#rowDrag, @dzgrid/dom/row-drag#RowDragOptions, @dzgrid/dom/row-drag#RowDragApi, @dzgrid/dom/row-drag#RowDragFeature, @dzgrid/dom/find#find
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -2739,3 +2740,476 @@
   }
 ## ContextMenuXlsxKey
   export type ContextMenuXlsxKey = 'cmenu.exportXlsx';
+## contextMenu
+  export declare function contextMenu<T = unknown>(o?: ContextMenuOptions<T>): ContextMenuFeature<T>;
+
+@ @dzgrid/dom/dock
+## dock
+  export declare function dock(o?: DockOptions): DockFeature;
+## DockOptions
+  export interface DockOptions {
+      readonly open?: Readonly<Record<string, DockArea>>;
+      readonly panels?: readonly DockPanel[];
+      readonly sizes?: {
+          readonly min?: number;
+          readonly max?: number;
+      };
+      readonly onChange?: (layout: DockState) => void;
+  }
+## DockApi
+  export interface DockApi {
+      show(id: string, area?: DockArea): boolean;
+      hide(id: string): boolean;
+      move(id: string, area: DockArea): boolean;
+      collapse(area: DockArea, on?: boolean): boolean;
+      resize(area: DockArea, px: number): boolean;
+      layout(): DockState;
+      setLayout(layout: unknown): Problem[];
+  }
+## DockFeature
+  export interface DockFeature extends GridFeature {
+      api(grid: {
+          readonly kernel: GridKernel<any, any>;
+      }): DockApi | null;
+  }
+## DockPanel
+  export interface DockPanel {
+      readonly id: string;
+      readonly title: string | (() => string);
+      readonly area?: DockArea;
+      mount(host: HTMLElement): void | (() => void);
+  }
+
+@ @dzgrid/dom/filters-base
+## filters
+  export declare function filters(o?: FiltersOptions): FiltersFeature;
+## FiltersOptions
+  export interface FiltersOptions {
+      readonly floating?: boolean;
+      readonly debounceMs?: number;
+      readonly popup?: boolean;
+      readonly loadDates?: (kit: DateKitName) => Promise<DateKit>;
+      readonly dateMessages?: Readonly<Record<string, object>>;
+      readonly dateCalendar?: DateCalendarOptions;
+      readonly apply?: 'button' | 'live';
+      readonly dateZone?: boolean;
+      readonly busyFlash?: number;
+      readonly loadSet?: () => Promise<SetKit>;
+      readonly maxConditions?: number;
+      readonly matchCase?: boolean;
+  }
+
+@ @dzgrid/dom/filters-panel
+## filtersPanel
+  export declare function filtersPanel(o?: FiltersPanelOptions): FiltersPanelFeature;
+## FiltersPanelOptions
+  export interface FiltersPanelOptions {
+      readonly side?: 'start' | 'end';
+      readonly open?: boolean;
+      readonly button?: boolean;
+  }
+## FiltersPanelApi
+  export interface FiltersPanelApi {
+      open(column?: string): boolean;
+      close(): void;
+      toggle(): boolean;
+      readonly isOpen: boolean;
+  }
+## FiltersPanelFeature
+  export interface FiltersPanelFeature extends GridFeature {
+      api(grid: {
+          readonly kernel: GridKernel<any, any>;
+      }): FiltersPanelApi | null;
+  }
+
+@ @dzgrid/dom/locales/en-dock
+## EN_DOCK
+  export declare const EN_DOCK: {
+      locale: string;
+      text: {
+          'dock.region': string;
+          'dock.tabs': string;
+          'dock.collapse': string;
+          'dock.expand': string;
+          'dock.close': string;
+          'dock.place': string;
+          'dock.start': string;
+          'dock.end': string;
+          'dock.bottom': string;
+          'dock.width': string;
+          'dock.height': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/en-filters-panel
+## EN_FILTERS_PANEL
+  export declare const EN_FILTERS_PANEL: {
+      locale: string;
+      text: {
+          'fpanel.title': string;
+          'fpanel.close': string;
+          'fpanel.clearAll': string;
+          'fpanel.search': string;
+          'fpanel.none': string;
+          'fpanel.matches': string;
+          'fpanel.active': string;
+          'fpanel.count': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/en-print
+## EN_PRINT
+  export declare const EN_PRINT: {
+      locale: string;
+      text: {
+          'print.truncated': string;
+          'print.page': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/en-group
+## EN_GROUP
+  export declare const EN_GROUP: {
+      locale: string;
+      text: {
+          'group.label': string;
+          'group.blank': string;
+          'group.total': string;
+          'group.grandTotal': string;
+          'group.expanded': {
+              one: string;
+              other: string;
+          };
+          'group.collapsed': string;
+          'group.expandedSome': {
+              one: string;
+              other: string;
+          };
+          'zone.label': string;
+          'zone.empty': string;
+          'zone.remove': string;
+          'zone.grouped': string;
+          'zone.removed': string;
+          'zone.placed': string;
+          'menu.groupBy': string;
+          'menu.groupOff': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/en-pivot
+## EN_PIVOT
+  export declare const EN_PIVOT: {
+      locale: string;
+      text: {
+          'pivot.label': string;
+          'pivot.empty': string;
+          'pivot.remove': string;
+          'pivot.grouped': string;
+          'pivot.removed': string;
+          'pivot.placed': string;
+          'pivot.add': string;
+          'zone.add': string;
+          'pivot.total': string;
+          'pivot.subtotal': string;
+          'pivot.count': {
+              one: string;
+              other: string;
+          };
+          'pivot.tooMany': string;
+          'pivot.switch': string;
+          'pivot.fnSaid': string;
+          'pivot.valueChip': string;
+          'menu.pivotBy': string;
+          'menu.pivotOff': string;
+          'menu.total': string;
+          'fn.sum': string;
+          'fn.avg': string;
+          'fn.min': string;
+          'fn.max': string;
+          'fn.count': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/en-pivot-bar
+## EN_PIVOT_BAR
+  export declare const EN_PIVOT_BAR: {
+      locale: string;
+      text: {
+          'pivot.rows': string;
+          'pivot.columns': string;
+          'pivot.values': string;
+          'pivot.valuesEmpty': string;
+          'pivot.addValue': string;
+          'pivot.removeValue': string;
+          'pivot.valueAdded': string;
+          'pivot.valueRemoved': string;
+          'pivot.valuePlaced': string;
+          'pivot.order': string;
+          'pivot.reversed': string;
+          'pivot.ordered': string;
+          'pivot.refused': string;
+          'pivot.mode': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/en-context-menu
+## EN_CONTEXT_MENU
+  export declare const EN_CONTEXT_MENU: {
+      locale: string;
+      text: {
+          "menu.clearFilters"?: MessageValue;
+          "cmenu.clearFilters"?: MessageValue;
+          "cmenu.exportXlsx"?: MessageValue;
+          'cmenu.label': string;
+          'cmenu.copy': string;
+          'cmenu.copyHeaders': string;
+          'cmenu.cut': string;
+          'cmenu.paste': string;
+          'cmenu.useCopyKey': string;
+          'cmenu.usePasteKey': string;
+          'cmenu.fillDown': string;
+          'cmenu.fillEnd': string;
+          'cmenu.undo': string;
+          'cmenu.redo': string;
+          'cmenu.expand': string;
+          'cmenu.collapse': string;
+          'cmenu.pinTop': string;
+          'cmenu.pinBottom': string;
+          'cmenu.unpin': string;
+          'cmenu.pinnedTop': string;
+          'cmenu.pinnedBottom': string;
+          'cmenu.unpinned': string;
+          'cmenu.exportCsv': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/en-row-drag
+## EN_ROW_DRAG
+  export declare const EN_ROW_DRAG: {
+      locale: string;
+      text: {
+          'rmove.placed': string;
+          'rmove.placedLevel': string;
+          'rmove.many': string;
+          'rmove.hidden': string;
+          'rmove.edge': string;
+          'rmove.locked': string;
+          'rmove.sorted': string;
+          'rmove.grouped': string;
+          'rmove.refused': string;
+          'rmove.tooMany': string;
+          'rmove.cancelled': string;
+          'rmove.ghost': string;
+          'rmove.up': string;
+          'rmove.down': string;
+          'rmove.top': string;
+          'rmove.bottom': string;
+          'rmove.in': string;
+          'rmove.out': string;
+      };
+  };
+
+@ @dzgrid/dom/editors-base
+## editors
+  export declare function editors(o?: EditorsOptions): GridFeature;
+## EditorsOptions
+  export interface EditorsOptions {
+      readonly enterMoves?: 'down' | 'stay';
+      readonly tab?: 'cell' | 'grid';
+      readonly calendar?: boolean;
+      readonly loadCalendar?: () => Promise<CalendarKit>;
+      readonly dateMessages?: Readonly<Record<string, object>>;
+      readonly list?: ListEditor;
+  }
+
+@ @dzgrid/dom/print
+## print
+  export declare function print(grid: PrintableGrid, o?: PrintOptions): Promise<void>;
+## PrintOptions
+  export interface PrintOptions {
+      readonly maxRows?: number;
+      readonly title?: string;
+  }
+
+@ @dzgrid/dom/print-menu
+## printOnMenu
+  export declare function printOnMenu(grid: PrintableGrid, o?: PrintOptions): void;
+
+@ @dzgrid/dom/grouping
+## grouping
+  export declare function grouping(o?: GroupingFeatureOptions): GroupingFeature;
+## GroupingFeatureOptions
+  export interface GroupingFeatureOptions extends GroupingOptions {
+      readonly column?: string;
+      readonly indent?: number;
+      readonly sticky?: number;
+      readonly pivot?: {
+          make(o: GroupingOptions): GroupShape<unknown>;
+          setup(g: GridContext<unknown>, s: GroupShape<unknown>): (FeatureHandle & {
+              column(): string | undefined;
+              by(): readonly string[];
+          }) | null;
+      };
+  }
+## GroupingApi
+  export interface GroupingApi {
+      by(): readonly string[];
+      setBy(by: readonly string[], o?: {
+          readonly user?: boolean;
+          readonly host?: boolean;
+      }): void;
+      expandAll(depth?: number): void;
+      collapseAll(): void;
+      totals(): Readonly<Record<string, unknown>>;
+      accepts?(id: string): boolean;
+  }
+## GroupingFeature
+  export interface GroupingFeature extends GridFeature {
+      api(grid: {
+          readonly kernel: GridKernel<any, any>;
+      }): GroupingApi | null;
+  }
+
+@ @dzgrid/dom/group-zone
+## groupZone
+  export declare function groupZone(o: GroupZoneOptions): GridFeature;
+## GroupZoneOptions
+  export interface GroupZoneOptions {
+      readonly use: {
+          readonly grouping: {
+              api(grid: Grid): GroupingApiLike | null;
+          };
+          readonly columns?: {
+              api(grid: Grid): {
+                  readonly dropTargets: {
+                      add(el: Element, t: {
+                          accept(column: string): boolean;
+                          drop(column: string): void;
+                          readonly label?: string;
+                      }): () => void;
+                  };
+              } | null;
+          };
+      };
+      readonly texts?: 'pivot';
+  }
+
+@ @dzgrid/dom/pivot
+## pivot
+  export declare function pivot(o?: PivotFeatureOptions): PivotFeature;
+## PivotFeatureOptions
+  export interface PivotFeatureOptions extends Omit<PivotOptions, keyof GroupingOptions | 'labels'> {
+      readonly toggle?: boolean | 'inside' | HTMLElement;
+      readonly valueHeaders?: 'auto' | 'fn' | 'name';
+      readonly labelWidth?: number;
+  }
+## PivotApi
+  export interface PivotApi {
+      on(): boolean;
+      setOn(on: boolean, o?: {
+          readonly user?: boolean;
+      }): void;
+      by(): readonly string[];
+      setBy(by: readonly string[], o?: {
+          readonly user?: boolean;
+      }): void;
+      desc(): readonly string[];
+      setDesc(ids: readonly string[], o?: {
+          readonly user?: boolean;
+      }): void;
+      name(id: string): string;
+      accepts(id: string): boolean;
+      values(): Fns;
+      setValues(values: Fns, o?: {
+          readonly user?: boolean;
+      }): void;
+      valueColumn(id: string): string | undefined;
+      count(): number;
+      series(o?: {
+          readonly value?: string;
+          readonly level?: number;
+      }): PivotSeries;
+  }
+## PivotFeature
+  export interface PivotFeature {
+      readonly id: 'pivot';
+      api(grid: Grid): PivotApi | null;
+      make(o: GroupingOptions): GroupShape<unknown>;
+      setup(g: GridContext<unknown>, s: GroupShape<unknown>): (FeatureHandle & {
+          column(): string | undefined;
+          by(): readonly string[];
+      }) | null;
+  }
+
+@ @dzgrid/dom/pivot-bar
+## pivotBar
+  export declare function pivotBar(o: PivotBarOptions): GridFeature;
+## PivotBarOptions
+  export interface PivotBarOptions {
+      readonly use: {
+          readonly grouping: {
+              api(grid: Grid): {
+                  by(): readonly string[];
+                  setBy(by: readonly string[], o?: {
+                      readonly user?: boolean;
+                  }): void;
+              } | null;
+          };
+          readonly pivot: {
+              api(grid: Grid): PivotApi | null;
+          };
+          readonly columns?: {
+              api(grid: Grid): {
+                  readonly dropTargets: {
+                      add(el: Element, t: {
+                          accept(column: string): boolean;
+                          drop(column: string): void;
+                          readonly label?: string;
+                      }): () => void;
+                  };
+              } | null;
+          };
+      };
+      readonly panel?: boolean;
+  }
+
+@ @dzgrid/dom/row-drag
+## rowDrag
+  export declare function rowDrag<T = unknown>(o?: RowDragOptions<T>): RowDragFeature<T>;
+## RowDragOptions
+  export interface RowDragOptions<T = unknown> {
+      readonly column?: string;
+      readonly apply?: boolean;
+      readonly whenSorted?: 'refuse' | 'allow';
+      readonly canDrag?: (row: T) => boolean;
+      readonly canDrop?: (m: RowDropInfo<T>) => boolean;
+      readonly maxRows?: number;
+      readonly drag?: boolean;
+  }
+## RowDragApi
+  export interface RowDragApi {
+      move(keys: readonly RowKey[], target: RowDrop, o?: {
+          readonly say?: boolean;
+      }): RowMoveResult;
+      step(key: RowKey, by: MoveStep, o?: {
+          readonly say?: boolean;
+      }): RowMoveResult;
+      readonly dropTargets: {
+          add(el: Element, t: RowDropTarget): () => void;
+      };
+  }
+## RowDragFeature
+  export interface RowDragFeature<T = unknown> extends GridFeature {
+      api(grid: {
+          readonly kernel: GridKernel<any, any>;
+      }): RowDragApi | null;
+      menuItems<C extends {
+          readonly key: RowKey;
+          readonly grid: MenuGrid;
+      }>(c: C): MenuEntry<C>[];
+      readonly __rows?: T;
+  }
+
+@ @dzgrid/dom/find
+## find
+  export declare function find(o?: FindOptions): FindFeature;

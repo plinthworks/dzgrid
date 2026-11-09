@@ -48,6 +48,13 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   shadow root (the theme, the popups and the print table live in the document). Parts are `definePart` functions;
   `<template>` children are not read. Same tag as Angular's selector: an Angular app keeps `@dzgrid/angular`, a page
   with both calls `defineDzGrid('dz-grid-wc')`. `npm run test:element` checks it in Chrome.
+- **A usage guide** in `docs/guide/` (Phase 11 L6): getting started in plain TypeScript, Angular and the Web Component,
+  and one page per feature family (columns; sort, filter and search; selection and ranges; editing; tree; grouping;
+  pivot; server data and infinite scroll; row moves; dock and panels; export and print; state; theming and right to
+  left; accessibility, with the conformance report). Every sample is compiled by a test (`scripts/test/guide.test.ts`,
+  ngc with strict templates) and every DzGrid name it uses is in `api/*.api.txt`.
+- **`llms.txt` and `llms-full.txt`** at the repository's root (owner Q8 A), made from the guide by
+  `node scripts/llms.mjs` (a test fails when they are out of date); `llms.txt` also ships in `@dzgrid/dom`.
 
 ### Changed
 - `dom/grouping` sets the pivot up beside a `serverSideRows` model that has the plug; beside `sourceRows`,

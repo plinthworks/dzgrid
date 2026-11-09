@@ -1,0 +1,1896 @@
+# DzGrid
+
+> A data grid written from scratch in TypeScript: a pure core (`@dzgrid/core`), a DOM layer with every feature as its own entry (`@dzgrid/dom`), a CSS theme (`@dzgrid/theme`), an Angular wrapper (`@dzgrid/angular`) and a Web Component (`@dzgrid/element`). Right to left, time zones and screen readers are designed in. MIT, no runtime dependency.
+
+Only the names written in these pages exist; do not borrow option names from other grid libraries. Rows are identified by `getRowId`, never by position. Days (`YYYY-MM-DD`) and instants (epoch milliseconds, or ISO text with an offset) are different column types. Bad input never throws: it is reported as a `Problem` (`code`, `path`, `detail`). Every sample in the guide is type-checked against the published types.
+
+This file is the guide (https://github.com/plinthworks/dzgrid/blob/main/docs/guide/) in one piece, made by scripts/llms.mjs; do not edit it by hand.
+
+---
+
+<!-- docs/guide/getting-started-ts.md -->
+
+# Getting started in plain TypeScript
+
+`@dzgrid/dom` draws the grid in any page, with no framework. `@dzgrid/core` holds the calculations (no DOM) and
+`@dzgrid/theme` the CSS.
+
+## Install
+
+```sh
+npm install @dzgrid/core @dzgrid/dom @dzgrid/theme
+```
+
+`@dzgrid/dom/filters` and `@dzgrid/dom/editors` load a date calendar from `@tzslot/core` and `@tzslot/dom`; install
+them too when you use those two entries, or import the same functions from `@dzgrid/dom/filters-base` and
+`@dzgrid/dom/editors-base`, which have no calendar.
+
+## A first grid
+
+The grid fills its host element: give the host a height.
+
+```html
+<div id="books" style="block-size: 420px; display: flex; flex-direction: column"></div>
+```
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/dzgrid.css';
+
+type Book = { id: string; title: string; author: string; published: string; price: number };
+
+const rows: Book[] = [
+  { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
+  { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
+];
+
+const columns: ColumnOrGroup<Book>[] = [
+  { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
+  { id: 'author', header: 'Author', flex: 1 },
+  { id: 'published', header: 'Published', type: 'day', width: 130 },
+  { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+];
+
+const grid = createGrid<Book>(document.getElementById('books')!, {
+  rows,
+  columns,
+  getRowId: (b) => b.id,
+  messages: EN,
+  locale: 'en-GB',
+  label: 'Books',
+});
+```
+
+Three settings are required: `columns`, `getRowId` (a stable, unique id per row) and `messages` (the grid ships no
+language by default; `EN`, `FR` and `AR` are in `@dzgrid/dom/locales/*`). The grid's layout CSS is injected by the
+grid itself; `@dzgrid/theme/dzgrid.css` makes it look finished (borders, colours, focus ring).
+
+## Features and their texts
+
+Each feature is a function from its own entry, given once in `features`. A feature that shows text needs its text
+bundle merged into `messages`; a missing bundle throws at creation with the list of missing keys.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters-base';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Plant = { id: number; name: string; height: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 1, name: 'Blue fern', height: 40 }],
+  columns: [{ id: 'name', header: 'Name' }, { id: 'height', header: 'Height (cm)', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages,
+  pagination: { pageSize: 50 },
+  features: [filters(), pagination()],
+});
+```
+
+`features` is read once, when the grid is made. Most other settings are live (see below).
+
+## Events
+
+`onEvent` receives every grid event; switch on `type`. Problems (a bad column, a bad filter, a server answer that
+cannot be read) arrive as a `problems` event: log them while you develop.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tea = { id: string; name: string };
+
+createGrid<Tea>(document.getElementById('teas')!, {
+  rows: [{ id: 't1', name: 'Smoked oolong' }],
+  columns: [{ id: 'name', header: 'Tea' }],
+  getRowId: (t) => t.id,
+  messages: EN,
+  selection: { mode: 'multi', checkbox: true },
+  onEvent: (e) => {
+    if (e.type === 'rowClicked' && e.row.kind === 'data') console.log('clicked', e.row.data.name);
+    if (e.type === 'selectionChanged') console.log('selected', e.count);
+    if (e.type === 'problems') for (const p of e.problems) console.warn('dzgrid', p.code, p.path, p.detail);
+  },
+});
+```
+
+The same events can be heard later with `grid.kernel.subscribe(fn)`, which returns a function that stops listening.
+
+## Updating and driving the grid
+
+`grid.update(patch)` changes settings. Give new arrays and objects, never mutated ones: rows are matched by their
+id, so a new array keeps the focus, the selection and the open rows of the rows that are still there.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { dataKey } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Kite = { id: string; name: string; span: number };
+let kites: Kite[] = [{ id: 'k1', name: 'Red falcon', span: 120 }];
+
+const grid = createGrid<Kite>(document.getElementById('kites')!, {
+  rows: kites,
+  columns: [{ id: 'name', header: 'Kite' }, { id: 'span', header: 'Span (cm)', type: 'number' }],
+  getRowId: (k) => k.id,
+  messages: EN,
+});
+
+kites = [...kites, { id: 'k2', name: 'Paper moth', span: 80 }];
+grid.update({ rows: kites, density: 'compact' });
+
+grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'span', dir: 'desc' }] }, 'api');
+const key = dataKey('k2');
+if (key) grid.api.focusCell(key, 'name');
+
+// When the page goes away:
+grid.destroy();
+```
+
+Commands (`grid.kernel.dispatch`) take a `RowKey` (from `dataKey(id)`), never a position: positions change with
+every sort and filter.
+
+## Next
+
+- [Columns](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/columns.md) for every column key.
+- [Theming and right to left](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/theming-rtl.md) for the look.
+- [Angular](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/getting-started-angular.md) or the [Web Component](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/getting-started-element.md) for the wrappers.
+
+---
+
+<!-- docs/guide/getting-started-angular.md -->
+
+# Getting started with Angular
+
+`@dzgrid/angular` wraps the DOM grid in a standalone `<dz-grid>` component with signal inputs, for Angular 19 to 22,
+zoneless first (zone.js works too).
+
+## Install
+
+```sh
+npm install @dzgrid/core @dzgrid/dom @dzgrid/theme @dzgrid/angular
+```
+
+In `angular.json`, load the theme before your own global styles:
+
+```json
+"styles": ["node_modules/@dzgrid/theme/dzgrid.css", "src/styles.css"]
+```
+
+The `<dz-grid>` host is `display: contents` (it has no box of its own): size its parent, in **global** CSS (a
+component's emulated styles do not reach the grid's DOM).
+
+```css
+.grid-box { block-size: 480px; display: flex; flex-direction: column; }
+.grid-box > dz-grid > .dzg { flex: 1; }
+```
+
+## A first grid
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Comet = { id: string; name: string; seen: string; period: number };
+
+@Component({
+  selector: 'app-comets',
+  imports: [DzGrid],
+  template: `
+    <div class="grid-box">
+      <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="en-GB" label="Comets" />
+    </div>`,
+})
+export class Comets {
+  readonly rows: Comet[] = [
+    { id: 'c1', name: 'Vantor-Elm', seen: '2024-08-19', period: 71.4 },
+    { id: 'c2', name: 'Ossian Blue', seen: '2025-01-03', period: 6.2 },
+  ];
+  readonly columns: DzgColumnOrGroup<Comet>[] = [
+    { id: 'name', header: 'Comet', flex: 2 },
+    { id: 'seen', header: 'Last seen', type: 'day', width: 140 },
+    { id: 'period', header: 'Period (years)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
+  ];
+  readonly rowId = (c: Comet) => c.id;
+  readonly messages = EN;
+}
+```
+
+`columns`, `getRowId` and `messages` are required (`messages` may come from `provideDzGrid` instead). Type the
+column array `DzgColumnOrGroup<T>[]`: an untyped literal hides unknown keys.
+
+## Inputs are compared by identity
+
+Inputs are signals. Give a new array or object to change something (`rows.update((rs) => [...rs, x])`), never a
+mutated one. Keep functions (`getRowId`, `rowClass`) and the `features` array as class fields: `features` is read
+once, when the grid is made.
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { Problem } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Lamp = { id: number; model: string; watts: number };
+
+@Component({
+  selector: 'app-lamps',
+  imports: [DzGrid],
+  template: `
+    <button type="button" (click)="add()">Add a lamp</button>
+    <div class="grid-box">
+      <dz-grid [rows]="rows()" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
+        [selection]="{ mode: 'multi', checkbox: true }" [(quick)]="quick"
+        (selectionChanged)="count = $event.count" (problems)="onProblems($event)" />
+    </div>
+    <p>{{ count ?? 'some' }} selected</p>`,
+})
+export class Lamps {
+  readonly rows = signal<Lamp[]>([{ id: 1, model: 'Moth 3', watts: 40 }]);
+  readonly columns: DzgColumnOrGroup<Lamp>[] = [{ id: 'model', header: 'Model' }, { id: 'watts', header: 'Watts', type: 'number' }];
+  readonly rowId = (l: Lamp) => l.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+  readonly features = [filters()];
+  quick = '';
+  count: number | null = 0;
+  add() { this.rows.update((rs) => [...rs, { id: rs.length + 1, model: 'Heron 1', watts: 25 }]); }
+  onProblems(ps: readonly Problem[]) { for (const p of ps) console.warn('dzgrid', p.code, p.path, p.detail); }
+}
+```
+
+Two-way models: `[(quick)]`, `[(filter)]`, `[(selected)]`, `[(expanded)]`, `[(groupBy)]`. Left unbound, the grid
+owns that state.
+
+## App-wide defaults
+
+```ts
+import { ApplicationConfig } from '@angular/core';
+import { provideDzGrid } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDzGrid({ messages: FR, defaults: { locale: 'fr-FR', timeZone: 'Europe/Paris', density: 'compact' } })],
+};
+```
+
+A binding on the tag wins over a default.
+
+## The controller
+
+`(gridReady)` hands over a `DzgController`: commands, focus, transactions, and each feature's own api through `use`.
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, DzgController, selectedIds, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { dataKey } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Owl = { id: string; name: string; age: number };
+
+@Component({
+  selector: 'app-owls',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [selection]="{ mode: 'multi' }" (gridReady)="ctrl = $event" />
+    <button type="button" (click)="oldestFirst()">Oldest first</button>`,
+})
+export class Owls {
+  readonly rows: Owl[] = [{ id: 'o1', name: 'Pip', age: 3 }, { id: 'o2', name: 'Bramble', age: 9 }];
+  readonly columns: DzgColumnOrGroup<Owl>[] = [{ id: 'name', header: 'Owl' }, { id: 'age', header: 'Age', type: 'number' }];
+  readonly rowId = (o: Owl) => o.id;
+  readonly messages = EN;
+  ctrl: DzgController<Owl> | null = null;
+
+  oldestFirst() {
+    this.ctrl?.dispatch({ type: 'sort.set', sort: [{ column: 'age', dir: 'desc' }] });
+    const key = dataKey('o2');
+    if (key) {
+      this.ctrl?.ensureVisible(key, 'name');
+      this.ctrl?.dispatch({ type: 'selection.only', row: key });
+    }
+    this.ctrl?.applyTransaction({ patch: [{ id: 'o1', set: { age: 4 } }] });
+    const chosen = this.ctrl && selectedIds(this.ctrl);   // { mode, ids, query } — ids, ready for a server
+    console.log(chosen);
+  }
+}
+```
+
+## Parts as components
+
+A cell (or header, tooltip, editor, detail panel…) can be an Angular component with one signal input named `cell`.
+Instances are reused from row to row: derive everything from `cell()`.
+
+```ts
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup, type DzgPartContext } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Robot = { id: string; name: string; state: 'awake' | 'asleep' };
+
+@Component({
+  selector: 'app-robot-state',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<span>{{ cell().text }}</span>
+    <button type="button" (click)="cell().emit('wake', robot().id)">Wake</button>`,
+})
+export class RobotState {
+  readonly cell = input.required<DzgPartContext<'cell'>>();
+  robot(): Robot { return this.cell().row as Robot; }
+}
+
+@Component({
+  selector: 'app-robots',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    (cellAction)="last = $event.name + ' ' + $event.detail" />`,
+})
+export class Robots {
+  readonly rows: Robot[] = [{ id: 'r1', name: 'Tock', state: 'asleep' }];
+  readonly columns: DzgColumnOrGroup<Robot>[] = [{ id: 'name', header: 'Robot' }, { id: 'state', header: 'State', ui: { cell: RobotState } }];
+  readonly rowId = (r: Robot) => r.id;
+  readonly messages = EN;
+  last = '';
+}
+```
+
+Other ways to give a part: `componentPart(slot, Component)` in `[parts]` or `provideDzGrid({ parts })`; an
+`<ng-template dzgPart="name" [slot]="'header'" let-c>` inside `<dz-grid>` (import `DzgPart`); or a plain DOM
+part made with `definePart` from `@dzgrid/dom`.
+
+## Pitfalls
+
+- No `messages`: the page stays empty and the console says `dz-grid: messages are required`.
+- A feature whose texts are not merged into `messages` throws at creation, naming the missing keys.
+- An output that does not exist (`(selectionChange)`) never fires and says nothing: only the outputs listed by the
+  component exist; `(gridEvent)` carries every event.
+- `features` written in the template (`[features]="[filters()]"`) makes a new array on every check: keep it a field.
+
+---
+
+<!-- docs/guide/getting-started-element.md -->
+
+# Getting started with the Web Component
+
+`@dzgrid/element` defines `<dz-grid>` for plain HTML, a CMS, or any framework that can write a tag (React 19, Vue,
+Svelte…). It is the grid of `@dzgrid/dom`, drawn in the page (no shadow root, so the theme and your own CSS reach
+it); its settings are properties and attributes, its events `dzg-*` DOM events.
+
+An Angular application uses `@dzgrid/angular` instead: both name their tag `<dz-grid>`. A page that needs both defines
+the element under another name with `defineDzGrid('dz-grid-wc')`.
+
+## Install
+
+```sh
+npm install @dzgrid/core @dzgrid/dom @dzgrid/theme @dzgrid/element
+```
+
+## A first grid
+
+```html
+<link rel="stylesheet" href="/node_modules/@dzgrid/theme/dzgrid.css">
+<style>dz-grid > .dzg { block-size: 420px; }</style>
+
+<dz-grid locale="en-GB" density="compact" label="Moons"></dz-grid>
+
+<script type="module">
+  import '@dzgrid/element/define';
+  import { EN } from '@dzgrid/dom/locales/en';
+
+  const grid = document.querySelector('dz-grid');
+  grid.columns = [{ id: 'name', header: 'Moon' }, { id: 'found', header: 'Found', type: 'day' }];
+  grid.getRowId = (m) => m.id;
+  grid.messages = EN;
+  grid.rows = [{ id: 'm1', name: 'Quill', found: '2023-05-30' }];
+  grid.addEventListener('dzg-row-clicked', (e) => console.log(e.detail.row.key));
+</script>
+```
+
+The grid is drawn once the element is in the page and has `columns`, `getRowId` and `messages`. The element is
+`display: contents`, so size the grid itself: `dz-grid > .dzg { block-size: … }`.
+
+## In TypeScript
+
+The element class is generic over the row type; ask `querySelector` for it.
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import type { GridEvent } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Moon = { id: string; name: string; radius: number };
+
+const grid = document.querySelector<DzGridElement<Moon>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Moon' }, { id: 'radius', header: 'Radius (km)', type: 'number' }];
+grid.getRowId = (m) => m.id;
+grid.messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+grid.features = [filters()];
+grid.settings = { selection: { mode: 'single' } };
+grid.rows = [{ id: 'm1', name: 'Quill', radius: 812 }];
+
+grid.addEventListener('dzg-sort-changed', (e) => {
+  const event = (e as CustomEvent<GridEvent<Moon>>).detail;
+  console.log(event.type);
+});
+
+await grid.ready;   // resolved when first drawn
+grid.grid?.kernel.dispatch({ type: 'quick.set', text: 'quill' }, 'api');
+```
+
+## Properties
+
+| Property | What it is |
+|---|---|
+| `rows`, `source`, `columns`, `getRowId`, `messages`, `features`, `parts` | As `createGrid`'s settings. Live (by identity), except `getRowId` and `features`, read when the grid is made. |
+| `settings` | Every other setting (`selection`, `context`, `rowClass`, `pagination`…), compared key by key. |
+| `env` | The `GridEnv`, read when the grid is made. |
+| `grid` | The `GridInstance` (`kernel`, `api`, `update`) while drawn; `null` otherwise. |
+| `ready` | A promise: resolved when first drawn, rejected when the settings are refused. |
+| `problems` | The last 100 problems told. |
+| `update(patch)` | Same as `grid.update(patch)`. |
+
+Parts are functions made with `definePart` from `@dzgrid/dom`; `<template>` children are not read.
+
+## Attributes
+
+Live, and they win over `settings`; removing one puts the setting back to its default. A value the element cannot
+read is left out and reported (`invalid-setting`, path `attribute:<name>`).
+
+`locale`, `time-zone`, `numerals` (`latn` | `locale`), `direction` (`auto` | `ltr` | `rtl`; without it the grid follows
+the element's `dir`), `density` (`compact` | `comfortable` | `spacious`), `row-height`, `label`, `overlay` (`loading` |
+`error`), `busy`, `motion`, `multi-sort` (read when the grid is made). Booleans: present or `"true"` is on, `"false"` off.
+
+## Events
+
+Every grid event is dispatched on the element as `dzg-` plus its type in kebab case, with the event itself as
+`detail`: `dzg-cell-clicked`, `dzg-row-clicked`, `dzg-selection-changed`, `dzg-sort-changed`, `dzg-filter-changed`,
+`dzg-row-move`, `dzg-state-changed`, `dzg-problems`… They bubble and are composed. `dzg-ready` follows each making
+of the grid. The events of the grid's first drawing come a microtask later, so a listener added right after the last
+property still hears them.
+
+## In a framework
+
+React 19 and Vue pass properties to custom elements: bind `columns`, `rows`, `getRowId` and `messages` as
+properties, listen to `dzg-*` events. Keep `features` and `getRowId` stable (outside the render function, or memoised):
+they are read once.
+
+---
+
+<!-- docs/guide/columns.md -->
+
+# Columns
+
+A column is a plain object (`ColumnDef<T>` from `@dzgrid/core`). Only the keys below exist; an unknown key is
+reported as a problem, never guessed. Angular's `DzgColumnDef<T>` is the same object, and also takes component
+classes in `ui`.
+
+## Value and type
+
+```ts
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { textCodec } from '@dzgrid/core';
+
+type Parcel = {
+  id: number;
+  code: string;
+  sender: { name: string; town: string };
+  status: string;
+  weight: number;
+  sentOn: string;
+  arrivedAt: number | null;
+  insured: boolean;
+};
+
+const shout = { ...textCodec, format: (v: string) => v.toUpperCase() };
+
+export const columns: ColumnOrGroup<Parcel>[] = [
+  { id: 'code', header: 'Code', width: 110, pinned: 'start', codec: shout },
+  { id: 'sender', header: 'Sender', field: 'sender.name', flex: 2, minWidth: 160 },
+  { id: 'status', header: 'Status', type: 'enum', enumOptions: [{ value: 'open', label: 'Open' }, { value: 'done', label: 'Delivered' }] },
+  { id: 'weight', header: 'Weight', type: 'number', align: 'end', numberFormat: { maximumFractionDigits: 2 } },
+  { id: 'sentOn', header: 'Sent on', type: 'day' },
+  { id: 'arrivedAt', header: 'Arrived', type: 'instant', instantFormat: { date: true, time: true } },
+  { id: 'insured', header: 'Insured', type: 'boolean' },
+  { id: 'heavy', header: 'Heavy', type: 'boolean', value: (p) => p.weight > 20, sortable: false, filter: false },
+];
+```
+
+- `id` is required, unique and stable. The value is read from `field` (a dotted path, own properties only; by default
+  the `id`), or computed by `value(row)`.
+- `type`: `text` (default), `number`, `day`, `instant`, `boolean`, `enum`, `custom`.
+- A `day` is a `'YYYY-MM-DD'` string. An `instant` is epoch milliseconds or ISO text **with** an offset (`Z`,
+  `+02:00`). Text with no offset is ambiguous: the cell is blank and an `ambiguous-instant` problem is reported,
+  unless the column says which zone to read it in with `assumeZone: 'Europe/Paris'`. A JavaScript `Date` is not
+  read: pass `date.getTime()`.
+- What a cell shows comes from the type and `numberFormat`, `instantFormat`, `enumOptions`, or a whole `codec` (read,
+  format, sort). Instants are shown in the grid's `timeZone`.
+
+## Size and place
+
+`width`, `minWidth`, `maxWidth` (px), `flex` (a share of the room left), `resizable`, `movable`, `pinned: 'start' |
+'end'`, `hidden`, `align: 'start' | 'center' | 'end'`, `wrap` (several lines; rows grow with the `autoHeight()`
+feature from `@dzgrid/dom/auto-height`). Sides are logical: `start` is the left in English and the right in Arabic.
+
+## Column groups
+
+A group has `children` and an optional `header`; `collapsible` groups fold to the columns marked
+`groupShow: 'closed'`. Group header rows need the `spans()` feature.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Station = { id: string; name: string; tempMin: number; tempMax: number; rain: number };
+
+const columns: ColumnOrGroup<Station>[] = [
+  { id: 'name', header: 'Station' },
+  { id: 'weather', header: 'Weather', collapsible: true, children: [
+    { id: 'tempMin', header: 'Min °C', type: 'number' },
+    { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+    { id: 'rain', header: 'Rain (mm)', type: 'number' },
+  ] },
+];
+
+createGrid<Station>(document.getElementById('stations')!, {
+  rows: [{ id: 's1', name: 'Cape Lumen', tempMin: 4, tempMax: 17, rain: 2.5 }],
+  columns,
+  getRowId: (s) => s.id,
+  messages: EN,
+  features: [spans()],
+});
+```
+
+`spans()` also merges cells: `merge: true` on a column joins equal neighbours, `rowSpan(ctx)` and `colSpan(ctx)`
+decide from the data, and the `fullWidth` setting draws a row across every column.
+
+## Classes, tooltips, custom cells
+
+- `ui.cellClass(c)` returns a class for one cell; `ui.headerClass` a class for the header; the grid setting
+  `rowClass(c)` a class for a row.
+- `tooltip(value, row, context)` returns the text shown on hover and focus; `headerTooltip` the header's.
+- `ui.cell`, `ui.header`, `ui.tooltip` name a part (custom drawing, see below).
+
+```ts
+import { createGrid, definePart } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/dzgrid.css';
+
+type Bee = { id: string; hive: string; honey: number };
+
+const jar = definePart('cell', {
+  mount(host, c) {
+    const span = host.ownerDocument.createElement('span');
+    host.append(span);
+    const draw = (n: typeof c) => { span.textContent = n.value == null ? '' : `${n.text} kg`; };
+    draw(c);
+    return { update: draw, destroy: () => span.remove() };
+  },
+});
+
+createGrid<Bee>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', hive: 'Clover hill', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Hive', tooltip: (v) => (v ? `Hive ${v}` : null) },
+    { id: 'honey', header: 'Honey', type: 'number', ui: { cell: 'jar', cellClass: (c) => (Number(c.value) > 10 ? 'is-full' : null) } },
+  ],
+  getRowId: (b) => b.id,
+  messages: EN,
+  parts: { jar },
+  rowClass: (c) => (c.row.honey === 0 ? 'is-empty' : null),
+});
+```
+
+The grid never writes HTML strings: a part builds DOM in the host it is given, and the grid keeps the cell's role,
+focus and keyboard. Header, tooltip and overlay parts need the `slots()` feature from `@dzgrid/dom/slots`. Ready-made
+cells (`badge`, `cellBoolean`) are in `@dzgrid/dom/parts`.
+
+## Moving, resizing, hiding
+
+- `columns()` from `@dzgrid/dom/columns`: drag a header to move it, drag its edge to resize, double click the edge to
+  fit the content; the keyboard does the same (texts `-columns`, CSS `columns.css`).
+- `columnMenu()` from `@dzgrid/dom/column-menu`: the menu on each header (sort, pin, size, hide, group…; texts
+  `-column-menu`, CSS `menu.css`). Give it the other features it can drive in `use`.
+- `columnsChooser()` from `@dzgrid/dom/columns-panel`: a panel to show, hide and order columns (see
+  [Dock and panels](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/dock-panels.md)).
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/columns.css';
+import '@dzgrid/theme/menu.css';
+import '@dzgrid/theme/columns-panel.css';
+
+type Shell = { id: string; name: string; beach: string; size: number };
+
+const moves = columns();
+const chooser = columnsChooser();
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_COLUMNS.text, ...EN_COLUMN_MENU.text } };
+
+const grid = createGrid<Shell>(document.getElementById('shells')!, {
+  rows: [{ id: 'x1', name: 'Spiral cone', beach: 'Amber bay', size: 4.2 }],
+  columns: [{ id: 'name', header: 'Shell' }, { id: 'beach', header: 'Beach' }, { id: 'size', header: 'Size (cm)', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages,
+  features: [moves, chooser, columnMenu({ use: { columns: moves, chooser } })],
+});
+
+moves.api(grid)?.autoSizeAll();
+grid.kernel.dispatch({ type: 'column.state', patch: [{ id: 'beach', hidden: true }] }, 'api');
+```
+
+Every feature that has an api gives it through `feature.api(grid)` (in Angular, `ctrl.use(feature)`); it is `null`
+until the grid exists.
+
+---
+
+<!-- docs/guide/sort-filter-search.md -->
+
+# Sort, filter and search
+
+## Sorting
+
+Sorting needs no feature: a click on a header sorts, a second click reverses, Shift+click adds the column to the
+sort; from the keyboard, Enter and Shift+Enter on a header do the same. `sortable: false` on a column turns it off; the `multiSort: false` setting keeps one key.
+Text sorts follow the grid's `locale` (Arabic letters, accents, digits). Empty cells are last in both directions
+(`nulls: 'first'` in a sort item puts them first).
+
+There is no sort key on a column. Sort from code with a command, or set the first sort with the
+[state](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/state.md) feature (`gridState({ initial })`, which sends a single request to a server).
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type River = { id: string; name: string; length: number };
+
+const grid = createGrid<River>(document.getElementById('rivers')!, {
+  rows: [{ id: 'r1', name: 'Silverrun', length: 412 }, { id: 'r2', name: 'Oxbow', length: 96 }],
+  columns: [{ id: 'name', header: 'River' }, { id: 'length', header: 'Length (km)', type: 'number' }],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+
+grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'length', dir: 'desc' }] }, 'api');
+grid.kernel.dispatch({ type: 'sort.toggle', column: 'name', multi: true }, 'api');
+console.log(grid.kernel.query.sort);
+```
+
+## Column filters
+
+`filters()` adds a filter button to each header and a filter popup: text, number, day, instant, yes/no, and a value
+list (`kind: 'set'`). Import it from `@dzgrid/dom/filters` (date filters with a calendar, needs `@tzslot/*`) or
+`@dzgrid/dom/filters-base` (no calendar). Texts: `-filters`.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number; vegan: boolean };
+
+const columns: ColumnOrGroup<Recipe>[] = [
+  { id: 'name', header: 'Recipe', filter: { kind: 'text', debounceMs: 200 } },
+  { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set' } },
+  { id: 'minutes', header: 'Minutes', type: 'number', filter: { maxConditions: 2 } },
+  { id: 'vegan', header: 'Vegan', type: 'boolean' },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+
+const grid = createGrid<Recipe>(document.getElementById('recipes')!, {
+  rows: [{ id: 'c1', name: 'Moon soup', cuisine: 'Lunar', minutes: 25, vegan: true }],
+  columns,
+  getRowId: (r) => r.id,
+  messages,
+  features: [filters({ floating: true, apply: 'live' })],
+});
+
+grid.kernel.dispatch({ type: 'filter.column', column: 'minutes', filter: { type: 'number', op: 'lte', value: 30 } }, 'api');
+grid.kernel.dispatch({ type: 'filter.column', column: 'cuisine', filter: { type: 'set', include: ['Lunar'] } }, 'api');
+grid.kernel.dispatch({ type: 'filter.set', filter: {} }, 'api');   // clears every filter
+```
+
+- `floating: true` adds a row of small filter fields under the headers; `apply: 'button'` waits for the Apply
+  button instead of filtering as you type.
+- `filter: false` on a column removes its filter; `filter.ops` limits the operators offered.
+- A filter on a `day` or `instant` column is resolved in the grid's `timeZone`, half-open, to the millisecond —
+  also when it is sent to a server.
+- The filter shapes (`ColumnFilter`): `text`, `number`, `day`, `instant`, `boolean`, `set`, `combined` (`and` / `or`
+  of conditions), `custom` (your own kind, registered with the `filterKinds` setting).
+
+## The filters panel
+
+`filtersPanel()` from `@dzgrid/dom/filters-panel` lists every column's filter in a side panel (texts
+`-filters-panel`, CSS `filters-panel.css`). Inside a [dock](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/dock-panels.md) it becomes one of the dock's panels.
+
+## Quick search
+
+`quickSearch()` from `@dzgrid/dom/search` filters on every visible column at once, from an input you own; matches are
+highlighted (CSS `search.css`).
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { quickSearch } from '@dzgrid/dom/search';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/search.css';
+
+type Cloud = { id: string; name: string; height: number };
+
+const search = quickSearch({ highlight: true });
+createGrid<Cloud>(document.getElementById('clouds')!, {
+  rows: [{ id: 'n1', name: 'Cirrus feather', height: 9000 }],
+  columns: [{ id: 'name', header: 'Cloud' }, { id: 'height', header: 'Height (m)', type: 'number' }],
+  getRowId: (c) => c.id,
+  messages: EN,
+  features: [search],
+});
+search.bind(document.querySelector<HTMLInputElement>('#cloud-search')!, { debounceMs: 150 });
+```
+
+In Angular, `<input [dzgSearch]="search">` (directive `DzgSearch`) binds the same feature; the `[(quick)]` model holds
+the text. Searching follows the language: Arabic letters with or without hamza and short vowels, Arabic-Indic digits.
+
+## Find (Ctrl+F)
+
+`find()` from `@dzgrid/dom/find` replaces the browser's Ctrl+F inside the grid: it marks a text in the cells of every row the filters keep
+(rows inside closed tree nodes too) and walks the focus from hit to hit with Enter and Shift+Enter, without hiding any
+row (texts `-find`, CSS `find.css`).
+
+---
+
+<!-- docs/guide/selection-ranges.md -->
+
+# Selection and ranges
+
+Two different things: **rows** are selected (a set of rows, for an action on them), **cells** are taken in a
+**block** (a rectangle, for copy, paste and fill).
+
+## Selecting rows
+
+The `selection` setting turns it on; no feature is needed.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { idOfDataKey, type SelectionState } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Seed = { id: string; plant: string; packets: number };
+
+const grid = createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [{ id: 's1', plant: 'Moon squash', packets: 12 }, { id: 's2', plant: 'Glass bean', packets: 0 }],
+  columns: [{ id: 'plant', header: 'Plant' }, { id: 'packets', header: 'Packets', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: EN,
+  selection: { mode: 'multi', checkbox: true, keepOnFilter: true },
+  onEvent: (e) => {
+    if (e.type === 'selectionChanged') console.log(describe(e.selection), e.count);
+  },
+});
+
+function describe(s: SelectionState): string {
+  const ids = [...s.keys].map(idOfDataKey);
+  return s.mode === 'include' ? `only ${ids.join(', ')}` : `every row but ${ids.join(', ')}`;
+}
+
+grid.kernel.dispatch({ type: 'selection.all' }, 'api');
+```
+
+- `mode`: `none`, `single` or `multi`. `checkbox: true` adds a tick column with a header box; `click: false` leaves
+  clicks to focus only (select with Space or the box).
+- Click selects one row, Ctrl/Cmd+click toggles, Shift+click selects a run in screen order; Space toggles the focused
+  row, Ctrl+A selects all. The selection survives sorting and filtering.
+- The selection holds **row keys**, not your ids. `idOfDataKey(key)` gives the id back; in Angular,
+  `selectedIds(controller)` gives the ids of the whole selection with the query.
+- `mode: 'exclude'` means « every row the query matches, but these keys »: after « select all » on paged or server
+  rows, the grid cannot list them, your server can by replaying the query.
+- `canSelect(row, selection, context)` returns `false`, or a reason code, to refuse a row; it needs the `rules()`
+  feature from `@dzgrid/dom/rules` (texts `-rules`), which says why to the user.
+
+## Blocks of cells and the clipboard
+
+`range()` from `@dzgrid/dom/range` adds blocks: Shift+arrows, a drag, Ctrl+A. Ctrl+C copies the block as tab-separated
+text that spreadsheets read (numbers in the locale's form, formula starts guarded), Ctrl+X cuts, Ctrl+V pastes into
+editable cells, Delete empties them. Pasting and cutting need [editing](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/editing.md). Texts `-range`, CSS `range.css`.
+
+`fill(blocks)` from `@dzgrid/dom/fill` adds the fill handle at the block's corner: drag it to copy the block on, or to
+continue a series (1, 2, 3…; days by days); Ctrl+D and Ctrl+R fill down and right from the keyboard. Texts `-fill`, CSS
+`fill.css`. A fill or a paste is one save request and one undo.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { range } from '@dzgrid/dom/range';
+import { fill } from '@dzgrid/dom/fill';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import { EN_RANGE } from '@dzgrid/dom/locales/en-range';
+import { EN_FILL } from '@dzgrid/dom/locales/en-fill';
+import '@dzgrid/theme/edit.css';
+import '@dzgrid/theme/range.css';
+import '@dzgrid/theme/fill.css';
+
+type Shelf = { id: string; aisle: string; jars: number };
+
+const blocks = range();
+const handle = fill(blocks);
+const messages: GridMessages = {
+  ...EN,
+  text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, ...EN_RANGE.text, ...EN_FILL.text },
+};
+
+const grid = createGrid<Shelf>(document.getElementById('pantry')!, {
+  rows: [{ id: 'a1', aisle: 'Jam', jars: 14 }, { id: 'a2', aisle: 'Honey', jars: 9 }],
+  columns: [
+    { id: 'aisle', header: 'Aisle' },
+    { id: 'jars', header: 'Jars', type: 'number', editable: true },
+  ],
+  getRowId: (s) => s.id,
+  messages,
+  features: [edit<Shelf>(), editors(), blocks, handle],
+  onEvent: (e) => {
+    if (e.type === 'rangeCopied') console.log(`${e.cells} cells copied`);
+  },
+});
+
+const copied = blocks.api(grid)?.copy({ headers: true });   // the block as text, as Ctrl+C would
+console.log(copied);
+```
+
+The right-click menu (`contextMenu({ use: { range: blocks, fill: handle } })` from `@dzgrid/dom/context-menu`) offers
+the same actions to the mouse.
+
+---
+
+<!-- docs/guide/editing.md -->
+
+# Editing
+
+Two features: `edit()` from `@dzgrid/dom/edit` holds the edits (save, undo, refusals; texts `-edit`, CSS `edit.css`),
+`editors()` draws the fields (texts `-editors`). Take `editors` from `@dzgrid/dom/editors` (a date calendar from
+`@tzslot/*`, loaded on first use) or from `@dzgrid/dom/editors-base` (no calendar).
+
+F2, Enter, a double click or typing a character opens the field; Enter keeps the value and moves down (`enterMoves`),
+Tab moves to the next editable cell, Escape gives the old value back.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import type { SaveRequest } from '@dzgrid/core/edit';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/edit.css';
+
+type Gnome = { id: string; name: string; hat: string; height: number; painted: string; locked: boolean };
+
+const columns: ColumnOrGroup<Gnome>[] = [
+  { id: 'name', header: 'Name', editable: (g) => !g.locked, edit: { required: true, maxLength: 40 } },
+  { id: 'hat', header: 'Hat', type: 'enum', editable: true,
+    edit: { options: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }] } },
+  { id: 'height', header: 'Height (cm)', type: 'number', editable: true, edit: { min: 5, max: 120 },
+    validate: (v) => (typeof v === 'number' && v % 1 !== 0 ? 'whole' : null) },
+  { id: 'painted', header: 'Painted on', type: 'day', editable: true },
+];
+
+async function save(req: SaveRequest<Gnome>, signal: AbortSignal): Promise<void> {
+  const body = req.changes.map((c) => ({ id: c.row.id, column: c.column, value: c.value }));
+  const answer = await fetch('/api/gnomes', { method: 'PATCH', body: JSON.stringify(body), signal });
+  if (!answer.ok) throw Object.assign(new Error('refused'), { reason: await answer.text() });
+}
+
+// Not typed `GridMessages`: an app's own `validation.<code>` keys are extra keys.
+const messages = {
+  ...EN,
+  text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, 'validation.whole': 'a whole number' },
+};
+
+const grid = createGrid<Gnome>(document.getElementById('gnomes')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31, painted: '2025-04-02', locked: false }],
+  columns,
+  getRowId: (g) => g.id,
+  messages,
+  features: [edit<Gnome>({ save: (req, signal) => save(req, signal as AbortSignal) }), editors({ enterMoves: 'down' })],
+  onEvent: (e) => {
+    if (e.type === 'cellEdited') console.log(e.column, e.previous, '→', e.value, e.origin);
+    if (e.type === 'saveFailed') console.warn('not saved', e.column, e.reason);
+  },
+});
+```
+
+## Checks
+
+- `editable`: `true`, or a function `(row, context, info)`; a cell that cannot be edited answers « read-only ».
+- `edit`: `required`, `min`, `max`, `pattern`, `maxLength`, `options` (a list, or a function of the row), and
+  `editor` (the name of your own editor part).
+- `validate(value, row, context)` returns a code, or `null` when the value is fine. Give the code's sentence in
+  `messages` as `validation.<code>`; without it, a generic « invalid » is said.
+- A refused value stays in the open field, blinks, and is said to screen readers with the column's name and the reason.
+
+## Saving
+
+`save(request, signal)` receives one request per gesture (`request.changes`: `key`, `column`, `value`, `previous`,
+`row`; `request.origin` says whether it was an edit, a paste, a fill, an undo…). Resolve: saved. Reject or throw:
+refused — the cells go back, and an error with a string `reason` shows that reason. Without `save`, edits are kept in
+the grid only (you hear `cellEdited` and may apply it to your rows). While a save runs, the cell shows a moving
+border and says « saving » to screen readers. Saves of one cell go in order: a newer gesture waits for the older one.
+The grid never writes into your rows: a kept value is shown over the row until your rows (a new array, a transaction,
+a server answer) carry it. Hand `signal` on to `fetch`.
+
+## Undo and redo
+
+Ctrl+Z undoes, Ctrl+Y or Ctrl+Shift+Z redoes (Cmd on a Mac), over the last 100 gestures, each going through `save` again. From code:
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+
+type Note = { id: string; text: string };
+
+const editing = edit<Note>();
+const grid = createGrid<Note>(document.getElementById('notes')!, {
+  rows: [{ id: 'n1', text: 'Feed the dragon' }],
+  columns: [{ id: 'text', header: 'Note', editable: true }],
+  getRowId: (n) => n.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } },
+  features: [editing, editors()],
+  onEvent: (e) => {
+    if (e.type === 'undoChanged') console.log('can undo:', e.canUndo, 'can redo:', e.canRedo);
+  },
+});
+
+document.getElementById('undo')!.addEventListener('click', () => editing.api(grid)?.undo());
+```
+
+In Angular: `[save]="save"` on `<dz-grid>`, `(cellEdited)`, `(saveFailed)`, `(undoChanged)`, and
+`ctrl.edit()?.undo()`.
+
+## Your own editor
+
+An `editor` part draws the field; its context's `keep(input)` keeps a value (through the same checks and save),
+`cancel()` closes without one, `refuse(code)` refuses with a reason. Register it under
+a name and point the column's `edit.editor` at it (or name it `editor.<type>` to replace an editor for a whole type).
+A ready list editor with search is `listEditor()` from `@dzgrid/dom/editors-list`.
+
+---
+
+<!-- docs/guide/tree.md -->
+
+# Tree
+
+`tree()` from `@dzgrid/dom/tree` shows rows as a tree (a WAI-ARIA treegrid): the tree column is indented one step per
+level, a parent has a chevron, → opens it, ← closes it or goes to the parent (mirrored in right to left), `*` opens
+its siblings. Texts `-tree`. Tree rows are ordinary
+data rows with ordinary keys: selection, editing and export work on them as on flat rows.
+
+Give the hierarchy one of three ways:
+
+| Option | Your rows | Example |
+|---|---|---|
+| `parentId(row)` | flat, each with its parent's id (`null` at the top) | folders in a table |
+| `children(row)` | nested, each holding its children | a JSON document |
+| `path(row)` | flat, each with its path of names | `['Garden', 'Tools', 'Rake']` |
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Room = { id: string; parent: string | null; name: string; area: number };
+
+const rows: Room[] = [
+  { id: 'h', parent: null, name: 'Lighthouse', area: 120 },
+  { id: 'h1', parent: 'h', name: 'Lamp room', area: 14 },
+  { id: 'h2', parent: 'h', name: 'Keeper’s kitchen', area: 22 },
+  { id: 'h21', parent: 'h2', name: 'Pantry', area: 4 },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_TREE.text } };
+
+const rooms = tree<Room>({ parentId: (r) => r.parent, initial: 1, column: 'name', filter: 'ancestors' });
+const grid = createGrid<Room>(document.getElementById('rooms')!, {
+  rows,
+  columns: [{ id: 'name', header: 'Room', flex: 1 }, { id: 'area', header: 'Area (m²)', type: 'number' }],
+  getRowId: (r) => r.id,
+  messages,
+  features: [rooms],
+});
+
+grid.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'api');
+```
+
+- `initial`: `'none'` (all closed), `'all'`, or a depth (open down to that level).
+- `filter`: `'ancestors'` keeps the parents of a matching row (so it can be reached), `'subtree'` also keeps the
+  children of a matching parent.
+- A sort orders each parent's children among themselves; parents stay above their children. What is open stays open
+  after a sort, a filter or new rows.
+- `sticky: n` keeps the open parents of the rows in view pinned under the header, up to `n` levels.
+- `column` is the tree column (the first visible column by default); `indent` its step in pixels.
+- `rows.expand` and `rows.expandAll` commands open and close from code; `rowExpanded` events tell you. In Angular,
+  `[(expanded)]` holds the open keys.
+
+## Children loaded on demand
+
+`lazyChildren({ has, load })` from `@dzgrid/dom/tree-lazy` loads a parent's children when it is first opened: `has(row)`
+says whether a row may have children (it gets a chevron), `load(row, { signal })` returns them. While they load, a
+loading row stands under the parent; a failure there offers a retry.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { lazyChildren } from '@dzgrid/dom/tree-lazy';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Folder = { id: string; parent: string | null; name: string; folders: number };
+
+createGrid<Folder>(document.getElementById('folders')!, {
+  rows: [{ id: 'root', parent: null, name: 'Archive of maps', folders: 3 }],
+  columns: [{ id: 'name', header: 'Folder' }],
+  getRowId: (f) => f.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_TREE.text } },
+  features: [tree<Folder>({
+    parentId: (f) => f.parent,
+    lazy: lazyChildren<Folder>({
+      has: (f) => f.folders > 0,
+      load: async (f, { signal }) => (await fetch(`/api/folders/${f.id}`, { signal: signal as AbortSignal })).json(),
+    }),
+  })],
+});
+```
+
+## Master and detail
+
+`detail({ part, height })` from `@dzgrid/dom/detail` opens a panel under a row instead of child rows (texts `-detail`).
+The panel is a `detail` part; `nestedGrid({ settings })` makes that part a whole grid of its own. Nesting stops past
+three levels.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { detail, nestedGrid } from '@dzgrid/dom/detail';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
+
+type Trip = { id: string; date: string; km: number };
+type Bicycle = { id: string; name: string; trips: Trip[] };
+
+const messages = { ...EN, text: { ...EN.text, ...EN_DETAIL.text } };
+const trips = nestedGrid<Trip>({
+  settings: (c) => ({
+    rows: (c.row as Bicycle).trips,
+    columns: [{ id: 'date', header: 'Date', type: 'day' }, { id: 'km', header: 'km', type: 'number' }],
+    getRowId: (t) => t.id,
+    messages,
+  }),
+});
+
+createGrid<Bicycle>(document.getElementById('bicycles')!, {
+  rows: [{ id: 'b1', name: 'Blue heron', trips: [{ id: 't1', date: '2026-06-01', km: 42 }] }],
+  columns: [{ id: 'name', header: 'Bicycle' }],
+  getRowId: (b) => b.id,
+  messages,
+  features: [detail<Bicycle>({ part: trips, height: 200 })],
+});
+```
+
+In Angular the panel is a component given with `componentPart('detail', Component)`, and a `<dz-grid [dzgNested]>` inside
+it makes the nested grid.
+
+---
+
+<!-- docs/guide/grouping.md -->
+
+# Grouping
+
+`grouping({ by })` from `@dzgrid/dom/grouping` gathers rows under group rows, one level per column in `by`, with
+totals (texts `-group`, CSS `grouping.css`). The group rows are drawn in a group column; → and ← open and close them,
+Enter toggles.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { groupZone } from '@dzgrid/dom/group-zone';
+import { columns } from '@dzgrid/dom/columns';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/columns.css';
+import '@dzgrid/theme/menu.css';
+
+type Sale = { id: string; island: string; stall: string; fruit: string; crates: number; price: number };
+
+const cols: ColumnOrGroup<Sale>[] = [
+  { id: 'island', header: 'Island' },
+  { id: 'stall', header: 'Stall' },
+  { id: 'fruit', header: 'Fruit', aggFunc: 'count' },
+  { id: 'crates', header: 'Crates', type: 'number', aggFunc: 'sum' },
+  { id: 'price', header: 'Price (avg.)', type: 'number', aggFunc: 'avg', numberFormat: { maximumFractionDigits: 2 } },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_GROUP.text, ...EN_COLUMNS.text, ...EN_COLUMN_MENU.text } };
+
+const groups = grouping({ by: ['island', 'stall'], expanded: 1, footers: 'grand', grandTotal: 'bottom' });
+const moves = columns();
+const grid = createGrid<Sale>(document.getElementById('market')!, {
+  rows: [
+    { id: 's1', island: 'Maru', stall: 'North pier', fruit: 'Starfruit', crates: 4, price: 3.2 },
+    { id: 's2', island: 'Maru', stall: 'Old well', fruit: 'Guava', crates: 7, price: 2.1 },
+    { id: 's3', island: 'Teva', stall: 'Reef gate', fruit: 'Mango', crates: 2, price: 4.5 },
+  ],
+  columns: cols,
+  getRowId: (s) => s.id,
+  messages,
+  features: [moves, groups, groupZone({ use: { grouping: groups, columns: moves } }), columnMenu({ use: { grouping: groups, columns: moves } })],
+});
+
+const api = groups.api(grid);
+api?.setBy(['fruit']);
+api?.expandAll();
+console.log(api?.totals());
+```
+
+- `by`: the columns to group by, outermost first. Change it with `api.setBy(ids)`, or let the user do it: the drop
+  band `groupZone()` from `@dzgrid/dom/group-zone` (drag a header into it), or « Group by this column » in the column
+  menu. A column with `groupable: false` cannot be grouped by.
+- Totals: a column's `aggFunc` — `sum`, `avg`, `min`, `max`, `count`, `first`, `last`, or your own function — or
+  `aggFuncs: { column: fn }` in the options. A group row shows its totals in those columns.
+- `expanded`: `'none'`, `'all'` or a depth. `footers`: `'group'` adds a total row under each group, `'grand'` a grand
+  total, `'both'`. `grandTotal`: `'top'` or `'bottom'`.
+- `api.expandAll(depth?)`, `api.collapseAll()`; the `rows.expandAll` command does the same.
+- Sorting a grouped column sorts the groups; other sorts sort the rows inside each group.
+- In Angular, `[(groupBy)]` holds the grouped columns and `ctrl.grouping()` gives the api.
+
+## Groups on a server
+
+When the rows live on a server, `serverSideRows({ by })` from `@dzgrid/core/server-side` asks the server for one level
+at a time: see [Server data](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/server-data.md).
+
+---
+
+<!-- docs/guide/pivot.md -->
+
+# Pivot
+
+A pivot table adds an axis across [grouping](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/grouping.md): the rows are the groups, each value of the pivot columns
+becomes a column, and each cell totals the value columns where a group and a column meet. `pivot()` from
+`@dzgrid/dom/pivot` is given to `grouping({ pivot })`, which draws it (texts `-pivot`, CSS `pivot.css`). The value
+columns' headers need `spans()`.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { pivot } from '@dzgrid/dom/pivot';
+import { pivotBar } from '@dzgrid/dom/pivot-bar';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { columns } from '@dzgrid/dom/columns';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN_PIVOT } from '@dzgrid/dom/locales/en-pivot';
+import { EN_PIVOT_BAR } from '@dzgrid/dom/locales/en-pivot-bar';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/pivot.css';
+import '@dzgrid/theme/columns.css';
+
+type Ticket = { id: string; cinema: string; month: string; film: string; seats: number; takings: number };
+
+const cols: ColumnOrGroup<Ticket>[] = [
+  { id: 'cinema', header: 'Cinema' },
+  { id: 'month', header: 'Month' },
+  { id: 'film', header: 'Film' },
+  { id: 'seats', header: 'Seats', type: 'number' },
+  { id: 'takings', header: 'Takings', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+];
+const messages: GridMessages = {
+  ...EN,
+  text: { ...EN.text, ...EN_GROUP.text, ...EN_PIVOT.text, ...EN_PIVOT_BAR.text, ...EN_COLUMNS.text },
+};
+
+const cross = pivot({ columns: ['month'], values: { seats: 'sum', takings: 'sum' }, subtotals: true });
+const rowsBy = grouping({ by: ['cinema'], pivot: cross });
+const moves = columns();
+const grid = createGrid<Ticket>(document.getElementById('box-office')!, {
+  rows: [
+    { id: 't1', cinema: 'The Comet', month: '2026-01', film: 'Paper Tides', seats: 120, takings: 960 },
+    { id: 't2', cinema: 'The Comet', month: '2026-02', film: 'Paper Tides', seats: 80, takings: 640 },
+    { id: 't3', cinema: 'Orchard Hall', month: '2026-01', film: 'Nine Lanterns', seats: 45, takings: 405 },
+  ],
+  columns: cols,
+  getRowId: (t) => t.id,
+  messages,
+  features: [spans(), groups(), moves, rowsBy, pivotBar({ use: { grouping: rowsBy, pivot: cross, columns: moves } })],
+});
+
+const api = cross.api(grid);
+api?.setBy(['month', 'film']);                   // two levels of columns
+api?.setValues({ seats: 'avg', takings: 'sum' });
+const chart = api?.series({ value: 'takings' });  // { categories, series: [{ id, name, values }] }
+console.log(chart?.categories, chart?.series.length);
+```
+
+- `columns`: the pivot columns, outermost first; `values`: each value column and how it is totalled (`sum`, `avg`,
+  `min`, `max`, `count`, `first`, `last`). `desc` lists the pivot columns whose order is reversed.
+- `subtotals: true` adds a total column after each band. `maxColumns` (200 by default) caps how many columns are
+  made: past it, none is made, the rows stay grouped with their totals, and the grid says how many there would have
+  been (problem `pivot-too-many`). The row side is the grouping: its `by`, totals and opening rules hold.
+- `pivotBar()` from `@dzgrid/dom/pivot-bar` draws a bar « Rows │ Columns │ Values » where the user moves columns
+  between parts, reverses an order, or changes a value's function (texts `-pivot-bar`).
+- Pivot mode is the application's: `toggle: true` (or an element of yours) shows a switch to turn it on and off;
+  otherwise `api.setOn(on)`.
+- `api.series()` gives the numbers of one value column, ready for a chart library of your own: DzGrid draws no chart.
+
+## Pivot on a server
+
+`serverSideRows(data, { pivot: serverPivot() })`, with `serverPivot` from `@dzgrid/core/server-pivot`, lets the server
+compute the crossings; the request's `group` then carries the pivot columns in use and their limit. The features stay
+the same (`spans()`, `grouping({ by, pivot })`). See the behaviour sheet [`server-pivot.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/behaviors/server-pivot.md).
+
+---
+
+<!-- docs/guide/server-data.md -->
+
+# Server data and infinite scroll
+
+When the rows live on a server, give the grid a `source` instead of `rows`. Three sources, from `@dzgrid/core`:
+
+| Source | Entry | What the user gets |
+|---|---|---|
+| `sourceRows(data)` | `@dzgrid/core/server` | pages (with the pager footer), or every row the server's filter keeps |
+| `infiniteRows(data)` | `@dzgrid/core/infinite` | one long list, loaded in blocks while scrolling; blocks far away are let go |
+| `serverSideRows(data, { by })` | `@dzgrid/core/server-side` | groups computed by the server, each group's rows loaded in blocks |
+
+Each takes the same `DataSource`: a `fetch(request)` that returns (or resolves to) `{ rows, total?, hasNext?,
+nextCursor? }`, and optionally `values(request)` for the set filter's value list.
+
+## Pages
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { filters } from '@dzgrid/dom/filters-base';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Asteroid = { id: string; name: string; found: string; diameter: number };
+
+async function page(req: DataRequest): Promise<DataResponse<Asteroid>> {
+  const answer = await fetch('/api/asteroids', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ filter: req.filter, quick: req.quick, sort: req.sort, page: req.page, zone: req.zone }),
+    signal: req.signal as AbortSignal,
+  });
+  return answer.json();   // { rows, total }
+}
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
+
+createGrid<Asteroid>(document.getElementById('asteroids')!, {
+  source: sourceRows<Asteroid>({ fetch: page }, { params: { catalogue: 'made-up' } }),
+  columns: [
+    { id: 'name', header: 'Asteroid' },
+    { id: 'found', header: 'Found', type: 'day' },
+    { id: 'diameter', header: 'Diameter (km)', type: 'number' },
+  ],
+  getRowId: (a) => a.id,
+  messages,
+  operations: 'server',
+  pagination: { pageSize: 100, pageSizes: [50, 100, 200] },
+  features: [filters(), pagination()],
+  onEvent: (e) => {
+    if (e.type === 'fetchFailed') console.warn('the server did not answer', e.error);
+  },
+});
+```
+
+- The request: `filter` (in a wire form: days and instants already resolved in the grid's zone), `quick`, `sort`,
+  `page` (`offset` and `size`, or a cursor with `paging: 'cursor'`), your `params`, the `zone`, a `key` naming the
+  query, and a `signal`.
+- The answer: `rows`, and `total` when known; without a total, `hasNext` says whether there is more.
+- Only the answer to the latest request is shown, whatever order answers arrive in; older requests are aborted
+  through `signal`. A failure shows an error with a retry button and a `fetchFailed` event.
+- `operations` places each stage: `'server'` (the default with a source) sends filter, search, sort and page to the
+  server; `{ filter: 'client', sort: 'client', page: 'off' }` asks for every row once and finishes in the browser. Server
+  pages imply filter, search and sort on the server too.
+- `refresh` (Angular `ctrl.refresh({})`, plain TypeScript `rows.refresh` command) asks again and keeps the rows shown
+  meanwhile; the `busy` setting shows a thin bar while you reload.
+
+## Infinite scroll
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { infiniteRows } from '@dzgrid/core/infinite';
+import type { DataRequest } from '@dzgrid/core/server';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Star = { id: number; name: string; magnitude: number };
+
+const stars = infiniteRows<Star>({
+  fetch: async (req: DataRequest) => {
+    const at = req.page?.offset ?? 0;
+    const rows = Array.from({ length: 100 }, (_, i) => ({ id: at + i, name: `Star ${at + i}`, magnitude: (at + i) % 7 }));
+    return { rows, total: 1_000_000 };
+  },
+}, { blockSize: 100, maxBlocks: 20 });
+
+createGrid<Star>(document.getElementById('sky')!, {
+  source: stars,
+  columns: [{ id: 'name', header: 'Star' }, { id: 'magnitude', header: 'Magnitude', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: EN,
+});
+```
+
+Blocks arrive while the user scrolls (`ahead` blocks in advance, `concurrency` at a time); at most `maxBlocks` are
+kept. Rows not loaded yet show as loading rows; a failed block shows « retry » in its place. With an unknown total,
+Ctrl+End goes to the last row known, and further each time it is pressed.
+
+## Groups on the server
+
+`serverSideRows(data, { by, aggFuncs })` sends one request per level: the request's `group` says which level and which
+open path; the server answers that level's groups with their counts and totals, or a group's rows in blocks. The grid
+computes no total itself. The [`server-side-groups.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/behaviors/server-side-groups.md) sheet gives the request
+and answer shapes; [pivot on a server](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/pivot.md#pivot-on-a-server) builds on it.
+
+## Rows that change
+
+With `rows`, give a new array, or apply a transaction (rows are matched by id; the focus, selection and open rows stay):
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ClientModel } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Buoy = { id: string; sea: string; wave: number };
+
+const grid = createGrid<Buoy, ClientModel<Buoy>>(document.getElementById('buoys')!, {
+  rows: [{ id: 'y1', sea: 'Glass sea', wave: 1.2 }],
+  columns: [{ id: 'sea', header: 'Sea' }, { id: 'wave', header: 'Wave (m)', type: 'number' }],
+  getRowId: (b) => b.id,
+  messages: EN,
+});
+
+grid.kernel.rows.applyTransaction({ add: [{ id: 'y2', sea: 'Salt bay', wave: 0.4 }], patch: [{ id: 'y1', set: { wave: 2.8 } }] });
+```
+
+In Angular: `ctrl.applyTransaction(tx)` and `ctrl.applyTransactionAsync(tx)` (many small updates gathered into one).
+
+---
+
+<!-- docs/guide/row-moves.md -->
+
+# Row moves
+
+`rowDrag()` from `@dzgrid/dom/row-drag` lets the user move rows: drag the grip at the start of a cell, or press
+Alt+Shift+↑ / ↓ (Option+Shift on a Mac), Alt+Shift+Home / End, and in a tree Alt+Shift+→ / ← to indent or outdent; or
+use the right-click menu. Texts `-row-drag`, CSS `row-drag.css`. The grip takes mouse, pen and finger; the keys make
+dragging never the only way.
+
+The grid tells you where the rows go with a `rowMove` event; **your data decides**. `moveRows` from
+`@dzgrid/core/row-drag` applies a move to your array (or tree of parent ids) and returns a new one.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { moveRows } from '@dzgrid/core/row-drag';
+import { rowDrag } from '@dzgrid/dom/row-drag';
+import { contextMenu } from '@dzgrid/dom/context-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_ROW_DRAG } from '@dzgrid/dom/locales/en-row-drag';
+import { EN_CONTEXT_MENU } from '@dzgrid/dom/locales/en-context-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/menu.css';
+import '@dzgrid/theme/row-drag.css';
+
+type Chore = { id: string; title: string; done: boolean };
+
+let chores: Chore[] = [
+  { id: 'c1', title: 'Wind the clock tower', done: false },
+  { id: 'c2', title: 'Oil the weather vane', done: true },
+  { id: 'c3', title: 'Count the pigeons', done: false },
+];
+const id = (c: Chore) => c.id;
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_ROW_DRAG.text, ...EN_CONTEXT_MENU.text } };
+
+const moves = rowDrag<Chore>({ column: 'title', canDrag: (c) => !c.done });
+const grid = createGrid<Chore>(document.getElementById('chores')!, {
+  rows: chores,
+  columns: [{ id: 'title', header: 'Chore', flex: 1 }, { id: 'done', header: 'Done', type: 'boolean' }],
+  getRowId: id,
+  messages,
+  selection: { mode: 'multi' },
+  features: [moves, contextMenu<Chore>({ items: (c, defaults) => [...defaults, { separator: true }, ...moves.menuItems(c)] })],
+  onEvent: (e) => {
+    if (e.type === 'rowMove' && !e.applied) {
+      chores = moveRows(chores, e, id);
+      grid.update({ rows: chores });
+    }
+  },
+});
+```
+
+- `apply: true` lets the grid reorder flat browser rows itself (the event then says `applied: true`); with a store
+  (NgRx, signals) leave it off and apply the move where your state lives.
+- The grip of a **selected** row drags every selected row shown.
+- `canDrag(row)` and `canDrop({ keys, rows, target, parent })` refuse a move; `maxRows` caps how many rows move at once.
+- While the rows are sorted or grouped, a move is refused and the grid says why; `whenSorted: 'allow'` sends the event
+  anyway and lets you decide.
+- With a server source the grid only sends the event (`apply` is ignored): save the new order on the server, then
+  refresh.
+- In a [tree](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/tree.md), a row can be dropped inside another (`target.where: 'inside'`); `moveRows(rows, move, id, { parentId,
+  setParent })` rewrites the parent ids for you.
+- In Angular, the `(rowMove)` output carries the same event, and `ctrl.rowDrag()` the api (`move`, `step`).
+
+## Between grids, or onto your own element
+
+`moves.api(grid)?.dropTargets.add(element, { accept(keys), drop(keys) })` makes any element a place to drop rows: a
+bin, a folder list, another grid's box. Moving rows from one grid to another is two updates of your own data: take
+them out of one array and add them to the other.
+
+---
+
+<!-- docs/guide/dock-panels.md -->
+
+# Dock and panels
+
+Two panels come with DzGrid: the **columns chooser** (`columnsChooser()` from `@dzgrid/dom/columns-panel`: search,
+show, hide and order columns; texts `-columns`, CSS `columns-panel.css`) and the **filters panel** (`filtersPanel()` from
+`@dzgrid/dom/filters-panel`: every column's filter in one list; texts `-filters-panel`, CSS `filters-panel.css`).
+Without a dock, the chooser opens as a dialog and the filters panel stands at its own side.
+
+`dock()` from `@dzgrid/dom/dock` gives them, and panels of your own, a place beside or under the rows (texts `-dock`,
+CSS `dock.css`): areas `start` and `end` (beside the rows, logical sides) and `bottom`. Each area can be resized by its
+edge (also with the arrow keys), collapsed to a strip, closed, or moved to another area; two panels in one area become
+tabs.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { filters } from '@dzgrid/dom/filters-base';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DOCK } from '@dzgrid/dom/locales/en-dock';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_FILTERS_PANEL } from '@dzgrid/dom/locales/en-filters-panel';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/dock.css';
+import '@dzgrid/theme/columns-panel.css';
+import '@dzgrid/theme/filters-panel.css';
+import '@dzgrid/theme/menu.css';
+
+type Potion = { id: string; name: string; colour: string; doses: number };
+
+const messages: GridMessages = {
+  ...EN,
+  text: { ...EN.text, ...EN_DOCK.text, ...EN_COLUMNS.text, ...EN_FILTERS.text, ...EN_FILTERS_PANEL.text, ...EN_COLUMN_MENU.text },
+};
+
+const chooser = columnsChooser();
+const panels = dock({
+  open: { columns: 'end' },
+  sizes: { min: 200, max: 480 },
+  panels: [{
+    id: 'notes',
+    title: 'Notes',
+    area: 'bottom',
+    mount(host) {
+      const p = host.ownerDocument.createElement('p');
+      p.textContent = 'Shake before use.';
+      host.append(p);
+      return () => p.remove();
+    },
+  }],
+  onChange: (layout) => console.log('dock moved', layout),
+});
+
+const grid = createGrid<Potion>(document.getElementById('potions')!, {
+  rows: [{ id: 'p1', name: 'Fog in a bottle', colour: 'grey', doses: 3 }],
+  columns: [{ id: 'name', header: 'Potion' }, { id: 'colour', header: 'Colour' }, { id: 'doses', header: 'Doses', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages,
+  features: [filters(), chooser, filtersPanel(), columnMenu({ use: { chooser } }), panels],
+});
+
+panels.api(grid)?.show('notes');
+panels.api(grid)?.move('filters', 'start');
+```
+
+- The panels' ids: `columns` (the chooser), `filters` (the filters panel), and the ids of your own panels.
+- `open: { id: area }` shows a panel there at the start; otherwise the chooser waits at the end until opened (the
+  column menu's « Choose columns », or `chooser.api(grid)?.open()`), and your panels wait at their `area` (`end` by
+  default) until `api.show(id)`.
+- Your panel's `mount(host)` builds its content and may return a cleanup function.
+- `api`: `show`, `hide`, `move`, `collapse`, `resize`, `layout()`, `setLayout(layout)`. With the [state](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/state.md)
+  feature, where each panel stands is saved with the rest of the grid's state.
+- A floating window (area `float`) is planned, not there yet: it is refused with a warning.
+
+---
+
+<!-- docs/guide/export-print.md -->
+
+# Export and print
+
+## CSV and Excel
+
+`csvExport({ canExport })` from `@dzgrid/dom/export` writes the grid's rows to a CSV file, and to an Excel file
+(`.xlsx`) with `xlsx: true` (texts `-export`). The file holds the visible columns in their order, the sort and the
+filters; values are written as values (ISO days, instants in the grid's zone, numbers a spreadsheet can add up), or as
+the cells show them with `text: 'display'`.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { csvExport } from '@dzgrid/dom/export';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EXPORT } from '@dzgrid/dom/locales/en-export';
+
+type Kettle = { id: string; model: string; litres: number; boughtOn: string };
+
+const exporter = csvExport({
+  canExport: true,
+  xlsx: true,
+  separator: ';',
+  fileName: ({ scope }) => `kettles-${scope}`,
+});
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_EXPORT.text } };
+
+createGrid<Kettle>(document.getElementById('kettles')!, {
+  rows: [{ id: 'k1', model: 'Whistling Wren', litres: 1.7, boughtOn: '2024-12-01' }],
+  columns: [
+    { id: 'model', header: 'Model' },
+    { id: 'litres', header: 'Litres', type: 'number' },
+    { id: 'boughtOn', header: 'Bought on', type: 'day' },
+  ],
+  getRowId: (k) => k.id,
+  messages,
+  selection: { mode: 'multi' },
+  features: [exporter],
+});
+
+exporter.bind(document.getElementById('csv')!, { scope: 'displayed' });
+exporter.bind(document.getElementById('xlsx')!, { scope: 'displayed', format: 'xlsx' });
+document.getElementById('selected')!.addEventListener('click', async () => {
+  const outcome = await exporter.run('selected');   // 'done' | 'refused' | 'failed' | 'cancelled' | 'busy'
+  console.log(outcome);
+});
+```
+
+- Scopes: `'displayed'` (the rows shown now: the current page when paged), `'selected'`, `'all'` (every row the
+  query matches, on every page; the filters still apply).
+- `canExport: true`, or a function that may refuse (`{ ok: false, reason }`) — a place for your own permission rule.
+- A text starting like a formula (`=`, `+`, `-`, `@`) gets a leading `'` so a spreadsheet does not run it; a number
+  such as `-5` never does. `numbers: 'excel'` (the default) writes the locale's decimal mark when the separator is `;`,
+  `numbers: 'raw'` the machine form. `csv: 'text'` on a column keeps identifiers such as `0123` as text.
+- The file is built in chunks so the page never freezes; `exporter.cancel()` stops it, `onProgress` follows it.
+- With server data, the grid holds only some rows: give `exportAll(request, { signal, progress })`, which asks your
+  server for the file (the request carries the query in wire form) and returns `{ url }` or `{ blob }`.
+- The right-click menu offers the same: `contextMenu({ use: { csv: exporter, xlsx: exporter.xlsx } })`.
+- In Angular: `<button [dzgExport]="exporter" dzgExportScope="displayed">` (directive `DzgExport`).
+
+## Print
+
+`print(grid, { title })` from `@dzgrid/dom/print` prints the rows as they are on screen — same columns, order, sort and
+filters, not only the rows scrolled into view — as a real table: headers repeated on each page, no row cut in two,
+right to left in Arabic, a dark theme printed light (texts `-print`, CSS `print.css`). At most 5 000 rows (`maxRows`);
+beyond, a line says how many were printed. A grid with server pages prints the page shown.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { print } from '@dzgrid/dom/print';
+import { printOnMenu } from '@dzgrid/dom/print-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PRINT } from '@dzgrid/dom/locales/en-print';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/print.css';
+
+type Bell = { id: string; tower: string; note: string };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_PRINT.text } };
+const grid = createGrid<Bell>(document.getElementById('bells')!, {
+  rows: [{ id: 'b1', tower: 'Saltmarsh', note: 'F sharp' }],
+  columns: [{ id: 'tower', header: 'Tower' }, { id: 'note', header: 'Note' }],
+  getRowId: (b) => b.id,
+  messages,
+});
+
+document.getElementById('print')!.addEventListener('click', () => void print(grid, { title: 'Bells of the coast' }));
+printOnMenu(grid, { title: 'Bells of the coast' });   // the browser's own Ctrl+P prints the whole grid too
+```
+
+`print` is a function, not a feature: nothing is loaded until it is called. `printOnMenu(grid)` makes the browser's
+own print command (Ctrl+P, the File menu) print the whole grid as well; without it, that command prints only what the
+page shows. In Angular, pass `ctrl.grid()` to both.
+
+---
+
+<!-- docs/guide/state.md -->
+
+# State
+
+`gridState()` from `@dzgrid/dom/state` reads and restores the grid's state: the columns (order, width, hidden,
+pinned), header groups, sort, filters, quick search, page and page size, density, grouped columns, the dock's layout,
+the pivot. A state is a plain, versioned object (`{ v: 1, … }`) you can store anywhere. It never holds row data, but it does
+hold what the user typed into filters.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { gridState, type GridState } from '@dzgrid/dom/state';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Lantern = { id: string; street: string; lit: boolean; height: number };
+
+const state = gridState({
+  initial: { v: 1, sort: [{ column: 'street', dir: 'asc' }] },
+  persist: { key: 'lanterns-grid' },
+  debounce: 300,
+});
+
+const grid = createGrid<Lantern>(document.getElementById('lanterns')!, {
+  rows: [{ id: 'l1', street: 'Wick lane', lit: true, height: 3.5 }],
+  columns: [
+    { id: 'street', header: 'Street' },
+    { id: 'lit', header: 'Lit', type: 'boolean' },
+    { id: 'height', header: 'Height (m)', type: 'number' },
+  ],
+  getRowId: (l) => l.id,
+  messages: EN,
+  features: [state],
+  onEvent: (e) => {
+    if (e.type === 'stateChanged') save(e.state);
+  },
+});
+
+function save(s: GridState) { console.log(JSON.stringify(s)); }
+
+const api = state.api(grid);
+const saved = api?.state();
+if (saved) api?.setState(saved);   // returns the problems of a state it could not fully read
+api?.reset();                      // back to the columns and options the grid was made with
+```
+
+- `initial` is applied before the first paint, and on a server before the first request: one request at start.
+- `persist: { key, include? }` keeps the state in `localStorage` under that key and restores it at start; blocked or
+  full storage throws nothing (one `state-storage` warning). `persistLocal(grid, key)` does the same for a grid made
+  without the option.
+- `stateChanged` comes after a pause (`debounce`, 300 ms) following a user's change: a resized column, a sort, a
+  filter, a panel moved.
+- A restore never throws. Unknown or removed column ids are skipped (warning `state-column`), columns the state does
+  not name keep their settings and go after the named ones, a field of the wrong type is skipped; a state written by
+  a newer version (`v` higher) is refused whole (`state-version`).
+- Not saved: open rows, the selection, the focus, the scroll position, edits in progress.
+
+## In the address
+
+`toSearchParams(state)` and `fromSearchParams(params)` write the state as one compact parameter (`?grid=1.…`) and read
+it back. Typed filter values and the search may be names or record numbers, and an address reaches the browser
+history, server logs and `Referer` headers: they are left out unless you ask with `include: ['filter', 'quick']`.
+
+```ts
+import { toSearchParams, fromSearchParams, type GridState } from '@dzgrid/dom/state';
+
+export function writeAddress(state: GridState): void {
+  const { params } = toSearchParams(state, { name: 'grid' });
+  history.replaceState(null, '', `?${params.toString()}`);
+}
+
+export function readAddress(): GridState | null {
+  return fromSearchParams(new URLSearchParams(location.search), { name: 'grid' }).state;
+}
+```
+
+The helpers never touch `history` themselves: you choose `pushState` or `replaceState`. In Angular, `[state]` restores
+a state, `(stateChanged)` hears it, and `ctrl.resetState()` resets.
+
+---
+
+<!-- docs/guide/theming-rtl.md -->
+
+# Theming and right to left
+
+## The theme
+
+`@dzgrid/dom` injects the grid's layout CSS by itself; `@dzgrid/theme` makes it presentable (colours, lines, header,
+hover, selection, focus, popups), light and dark, checked for contrast. Each feature with a look has its own sheet,
+loaded after `dzgrid.css`: `columns.css`, `menu.css`, `grouping.css`, `pivot.css`, `edit.css`, `range.css`,
+`fill.css`, `dock.css`, `columns-panel.css`, `filters-panel.css`, `find.css`, `search.css`, `print.css`,
+`row-drag.css`, `pinned-rows.css`, `row-numbers.css`, `fresh-rows.css`.
+
+```ts
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/menu.css';
+import '@dzgrid/theme/contrast.css';   // more contrast when the system asks for it
+```
+
+- **Cascade layer.** Every rule sits in the layer `dzgrid`: your own classes win without `!important`. When you layer
+  your own CSS, name the order once, first: `@layer theme, base, dzgrid, components, utilities;`. With an unlayered
+  reset (Tailwind 3's preflight, Bootstrap's Reboot), load the `*.unlayered.css` copies instead.
+- **Bridges.** `tailwind.css` (Tailwind 4), `tailwind3.css`, `bootstrap.css` (5.3, follows `data-bs-theme`) map the
+  grid's colours, font and corners to your framework's.
+- **Showcase themes.** `midnight.css` and `clinic.css`, each with a light and a dark twin; `data-dzg-skin="midnight"`
+  on a container styles only that area.
+
+## Colours and sizes
+
+Colours are CSS variables only. The palette (shared with tzslot), each a `light-dark()` pair on `:root`: `--tz-bg`,
+`--tz-bg-raised`, `--tz-fg`, `--tz-fg-muted`, `--tz-border`, `--tz-accent`, `--tz-accent-fg`, `--tz-danger`,
+`--tz-warning`, `--tz-success`. What the grid derives, set on any ancestor of `.dzg`: `--dzg-font`, `--dzg-radius`,
+`--dzg-cell-padding-inline`, `--dzg-header-bg`, `--dzg-row-hover-bg`, `--dzg-row-selected-bg`, `--dzg-focus-ring`,
+`--dzg-line`, `--dzg-pill-radius`, `--dzg-header-size`, `--dzg-select-bar`, `--dzg-flash`, `--dzg-flash-color`.
+
+```css
+:root { --tz-accent: light-dark(#7c3aed, #c4b5fd); }
+.dzg { --dzg-radius: 6px; --dzg-font: "Atkinson Hyperlegible", system-ui, sans-serif; }
+.dzg-cell.is-late { color: var(--tz-danger); }
+```
+
+**Light and dark** follow the system; `data-theme="light"` or `data-theme="dark"` on any ancestor forces one.
+
+**Row height** comes from the `density` setting (`compact` 28 px, `comfortable` 32 px, the default, `spacious` 40 px)
+or `rowHeight` in pixels, which wins. Rows follow the reader's text zoom. The column menu can offer the density to the
+user (`columnMenu({ density: true })`), and the [state](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/state.md) keeps it.
+
+## Right to left
+
+Direction is designed in: pinned columns, scrolling, the arrow keys (in Arabic, → moves toward the start, which is on the right), popups, the
+tree's indent and the theme all follow it. Everything in DzGrid speaks of **start** and **end**, never left and right:
+`pinned: 'start'`, `align: 'end'`, the dock's `start` area.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { AR } from '@dzgrid/dom/locales/ar';
+
+type Souk = { id: string; name: string; stalls: number };
+
+const grid = createGrid<Souk>(document.getElementById('souks')!, {
+  rows: [{ id: 's1', name: 'سوق النجوم', stalls: 48 }],
+  columns: [
+    { id: 'name', header: 'السوق', pinned: 'start' },
+    { id: 'stalls', header: 'الدكاكين', type: 'number', align: 'end' },
+  ],
+  getRowId: (s) => s.id,
+  messages: AR,
+  locale: 'ar-DZ',
+  direction: 'rtl',
+  numerals: 'locale',
+});
+
+grid.update({ direction: 'auto' });   // follow the nearest `dir` attribute instead
+```
+
+- `direction`: `'ltr'`, `'rtl'`, or `'auto'` (the nearest ancestor's `dir`).
+- `numerals: 'locale'` shows the language's own digits (Arabic-Indic for `ar`); the default `'latn'` keeps 0–9.
+- Sorting and searching follow the language: hamza forms, short vowels and tatweel, Arabic-Indic digits.
+- Your own CSS should use logical properties as well: `margin-inline-start`, `inset-inline-end`, `text-align: start`.
+- Three languages ship: `EN`, `FR`, `AR` (`@dzgrid/dom/locales/*`), each feature with its own bundle, plural rules
+  included. Another language is a `GridMessages` object of your own with the same keys; `checkMessages(messages)` throws,
+  naming the keys that are missing.
+
+---
+
+<!-- docs/guide/accessibility.md -->
+
+# Accessibility
+
+DzGrid follows the WAI-ARIA grid pattern (a treegrid for trees and groups) and aims at WCAG 2.2 AA. The draft
+conformance report is [`docs/a11y/acr-wcag22.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/a11y/acr-wcag22.md): it says, criterion by criterion, what is
+checked and how. Its screen-reader listening is not done yet, so the criteria that rest on what a screen reader says
+are marked « partially supports » until then.
+
+## What the grid does
+
+- **One tab stop.** Tab enters the grid at the focused cell; the arrows, Page Up / Down, Home / End and Ctrl+Home /
+  End move inside; Tab leaves. The focus is never lost when rows are sorted, filtered, reloaded or scrolled away
+  (rows are virtualised: the focused row is kept).
+- **Roles and states.** `role="grid"` (or `treegrid`), real row and column counts (`aria-rowcount`, `aria-colcount`)
+  even when only some rows are drawn, `aria-sort` on sorted headers, `aria-selected` and `aria-expanded` on rows,
+  `aria-readonly` where editing is on.
+- **Announcements.** Sorting, filtering, a page change, an export, a refused edit, a row moved are said through a live
+  region, in the grid's language, with plurals.
+- **Every action has a keyboard way**: column moves and sizes, row moves (Alt+Shift+arrows), the fill (Ctrl+D /
+  Ctrl+R), the dock's edges and tabs, the menus (Shift+F10 or the Menu key). Dragging is never the only way.
+- **Targets** of 24 px at least; **contrast** of 4.5:1 for every text and 3:1 for every part, checked by script on
+  every colour pair, light and dark; **forced colours** (Windows High Contrast) use the system's colours; motion
+  follows `prefers-reduced-motion`.
+- **Zoom and text size.** Page zoom to 400 % works; at 320 CSS pixels wide nothing scrolls sideways outside the
+  grid; rows grow with the reader's default text size.
+
+## What is left to you
+
+- **A name.** Give the `label` setting (`label="Invoices"`, `[label]` in Angular), or every grid on the page has the same generic
+  name (« Data grid »).
+- **Translated texts.** Headers are your strings, already in the user's language; the grid's own sentences come from
+  `messages` (English, French and Arabic ship). A part's own texts go through its context's `msg('app.key')`.
+- **The page's language and direction** (`lang` and `dir` on `<html>`): the grid follows `direction: 'auto'` and
+  says its sentences in its `messages`' language.
+- **Custom parts keep their promises.** A cell part draws inside a cell the grid owns (role, focus, keys stay the
+  grid's); a button in it must be a real `<button type="button">` with a name. Do not move the focus yourself from a
+  part; say things with the context's `announce(text)`.
+- **Colours** only through the theme's variables (`--tz-*`, `--dzg-*`), so the contrast checks and the dark and
+  forced-colours modes keep working. Do not convey meaning by colour alone: a `badge` part writes its text too.
+- **Problems.** A `Problem` never carries row data (rows may be personal), only a code, a path and a short detail:
+  log them, do not show them to the user as they are.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Phare = { id: string; nom: string; portee: number };
+
+document.documentElement.lang = 'fr';
+document.documentElement.dir = 'ltr';
+
+const grid = createGrid<Phare>(document.getElementById('phares')!, {
+  rows: [{ id: 'p1', nom: 'Phare des Brumes', portee: 22 }],
+  columns: [{ id: 'nom', header: 'Phare' }, { id: 'portee', header: 'Portée (milles)', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages: FR,
+  locale: 'fr-FR',
+  label: 'Phares de la côte',
+  direction: 'auto',
+});
+
+grid.api.announce('Liste mise à jour');
+```
+
+The owner's hand-made listening route (keyboard and screen readers, the essential path) is
+[`docs/a11y/parcours-essentiel.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/a11y/parcours-essentiel.md).

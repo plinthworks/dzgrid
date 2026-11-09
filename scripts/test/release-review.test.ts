@@ -128,6 +128,10 @@ describe('1.7.0 as npm would receive it', () => {
       expect(m.license, n).toBe('MIT');
       expect(m.repository?.url, n).toBe('git+https://github.com/plinthworks/dzgrid.git');
     }
+    // Phase 11 L6 (owner Q8 A): `llms.txt` ships in the DOM package, the root's own (a pack older than L6 has none).
+    if (listOf('dom').includes('package/llms.txt')) {
+      expect(readFileSync(join(unpack('dom'), 'package/llms.txt'), 'utf8')).toBe(readFileSync(`${ROOT}llms.txt`, 'utf8'));
+    }
     const dom = manifestOf('dom');
     expect(Object.keys(dom.peerDependencies)).toEqual(expect.arrayContaining(['@dzgrid/core', 'gsap', '@tzslot/core', '@tzslot/dom']));
     expect(dom.peerDependencies['@dzgrid/core']).toBe(local ? V : '^1.7.0');

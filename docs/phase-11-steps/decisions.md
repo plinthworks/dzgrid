@@ -504,3 +504,23 @@ there, so its rest ran by hand: test:tz Auckland 8 998 passed, 4 timed out the s
 `filters-dates-gaps`, `row-height`, `sort-select`, `tzslot-agreement`), green alone in Auckland and Los Angeles with the
 element tests; the full Los Angeles run not repeated (the Mac heats); typecheck, build (five packages), check:size
 (K.8 88 595 / 90 000, element 1 587 / 1 750, 0 over), check:api (additions only) green.
+
+## L6 — documentation in the repo, `llms.txt` (2026-11-09)
+
+Scope from the lead's brief (wins over the plan's wording): the guide lives in `docs/guide/` (not `docs/guides/`);
+`llms-full.txt` is the guide concatenated (not the old sheet `docs/llm/fiche-dzgrid.md`, left as it is, 1.6.0); the
+README rewrite as a map and the docs website stay out (a link to the guide added to the root and DOM READMEs).
+
+### Decided taken alone (the lead; the owner may say otherwise)
+- **Names guarded by being documented.** The baseline `api/*.api.txt` held 1.0.0 plus a few accepted names, so most
+  features the guide shows (grouping, pivot, dock, row moves, print, infinite, server groups…) were not in it. Accepted
+  with `--only`, **additions only** (52 new exports, and `DzGrid` / `DzgController` re-read with their added members: each factory the guide uses, its options, its api and feature types,
+  the English text bundles it imports, Angular's `DzGrid`, `DzgController`, `DzgColumnOrGroup`, `selectedIds`);
+  `check:api` before and after: nothing removed or narrowed. A documented name can no longer vanish silently.
+- **Samples compiled by ngc** with strict templates (Angular's spec config), each block its own module; `html` blocks'
+  module scripts compiled as JavaScript (syntax only). Probed by hand: a wrong setting, a wrong template binding, an
+  unknown output, an unknown entry, function or `dzg-*` event each fail the test.
+- **`llms.txt` order** is the guide index's order; links absolute (GitHub) so the copy in `@dzgrid/dom` works from
+  `node_modules`. No clock in the generator.
+- Each sentence checked against its behaviour sheet; corrections made while writing (find marks, never filters; a
+  newer save waits for the older one; `maxColumns` makes no column past the cap; export `all` keeps the filters).
