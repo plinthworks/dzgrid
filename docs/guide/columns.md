@@ -163,6 +163,43 @@ The headers stay in the page for screen readers, and appear while the keyboard i
 so sorting and the column menu still work from the keyboard. With the mouse, sort and filter through the cell menu, the
 dock's panels or your own controls. Print and the files keep their header row unless you pass `header: false`.
 
+## Columns that collapse on narrow screens
+
+With the `responsive()` feature from `@dzgrid/dom/responsive`, columns that do not fit the view are taken out of the
+rows instead of making the grid scroll sideways: a chevron on each row's first cell opens « Title: value » lines under
+it (the detail rows' panel, so the `-detail` texts are needed). The last columns go first; `collapsePriority` on a
+column (higher goes first, `0` never) or `responsive({ priority: { id: n } })` change the order. The first column and
+pinned columns never collapse. A flexible column counts its `minWidth`. It follows every resize; the quick search, the
+filters, the files and print still see every column, and nothing is saved in the grid state.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { responsive } from '@dzgrid/dom/responsive';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
+
+type Hive = { id: string; name: string; apiary: string; frames: number; queen: string; checked: string };
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_DETAIL.text } };
+
+createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Clover', apiary: 'Hill', frames: 9, queen: 'Marked blue', checked: '2026-05-02' }],
+  columns: [
+    { id: 'name', header: 'Hive', width: 160 },
+    { id: 'apiary', header: 'Apiary', width: 140, collapsePriority: 2 },
+    { id: 'frames', header: 'Frames', type: 'number', width: 100, collapsePriority: 0 },
+    { id: 'queen', header: 'Queen', width: 180 },
+    { id: 'checked', header: 'Checked', type: 'day', width: 140 },
+  ],
+  getRowId: (h) => h.id,
+  messages,
+  features: [responsive()],
+});
+```
+
+On a row's first cell, Enter or Space opens and closes its lines (arrows too, as for detail rows). It is a detail rows
+feature: it cannot be combined with a tree, row grouping, header groups or your own `detail()` (told
+`unsupported-combination`).
+
 ## Column groups
 
 A group has `children` and an optional `header`; `collapsible` groups fold to the columns marked

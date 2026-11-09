@@ -100,6 +100,10 @@
     "./totals": {
       "types": "./src/totals.ts",
       "default": "./src/totals.ts"
+    },
+    "./import": {
+      "types": "./src/import.ts",
+      "default": "./src/import.ts"
     }
   }
 }

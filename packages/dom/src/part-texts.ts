@@ -133,6 +133,17 @@ export interface PinnedMessages {
   readonly text: { readonly [K in PinnedMessageKey]: MessageValue };
 }
 
+/**
+ * The file import's texts (`@dzgrid/dom/import`, 1.9.0, file-import.md 3, 11), in their own bundles (`locales/<lang>-import`):
+ * the drop zone's words, what is said once a file is read (`{rows}`, `{problems}`) or could not be. Required by `fileImport()`.
+ */
+export type ImportMessageKey = 'import.drop' | 'import.read' | 'import.failed';
+/** A file import bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_IMPORT.text }`. */
+export interface ImportMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in ImportMessageKey]: MessageValue };
+}
+
 /** The totals row's text (`@dzgrid/dom/totals-row`, 1.9.0), in its own bundles (`locales/<lang>-totals`): the row's label. Optional here, required by `totalsRow()`. */
 export type TotalsMessageKey = 'totals.label';
 /** A totals row bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_TOTALS.text }`. */

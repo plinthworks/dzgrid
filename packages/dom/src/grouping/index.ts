@@ -99,7 +99,7 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
   const server = g.rows.kind === 'source' && !side;
   // Merged cells only (pivot.md 21): header bands are drawn beside grouping.
   const spans = has('spans') && (!!g.settings.fullWidth || g.columns.visible().some((c) => c.def.merge || c.def.rowSpan || c.def.colSpan));
-  const told = groupConflicts({ tree, detail: has('detail'), spans, server });
+  const told = groupConflicts({ tree, detail: has('detail') || has('responsive'), spans, server });
   // A pivot on a server (pivot.md 26): not made, the grid as grouping alone shows it — unless the server pivots (server-pivot.md).
   if (o.pivot && g.rows.kind === 'source' && !side?.pivot) told.push(problem('unsupported-combination', 'warning', 'source', 'pivot'));
   if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });

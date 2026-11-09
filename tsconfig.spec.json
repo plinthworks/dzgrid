@@ -80,6 +80,9 @@
       "@dzgrid/core/totals": [
         "./packages/core/src/totals.ts"
       ],
+      "@dzgrid/core/import": [
+        "./packages/core/src/import.ts"
+      ],
       "@dzgrid/core/row-gaps": [
         "./packages/core/src/row-gaps.ts"
       ],
@@ -205,6 +208,21 @@
       ],
       "@dzgrid/dom/locales/ar-totals": [
         "./packages/dom/src/locales/ar-totals.ts"
+      ],
+      "@dzgrid/dom/responsive": [
+        "./packages/dom/src/responsive.ts"
+      ],
+      "@dzgrid/dom/import": [
+        "./packages/dom/src/import.ts"
+      ],
+      "@dzgrid/dom/locales/en-import": [
+        "./packages/dom/src/locales/en-import.ts"
+      ],
+      "@dzgrid/dom/locales/fr-import": [
+        "./packages/dom/src/locales/fr-import.ts"
+      ],
+      "@dzgrid/dom/locales/ar-import": [
+        "./packages/dom/src/locales/ar-import.ts"
       ],
       "@dzgrid/dom/row-gaps": [
         "./packages/dom/src/row-gaps.ts"

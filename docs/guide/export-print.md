@@ -71,6 +71,43 @@ declare const exporter: CsvExport;
 exporter.bind(document.getElementById('json')!, { scope: 'all', format: 'json' });
 ```
 
+## Import a file
+
+`fileImport({ onRows })` from `@dzgrid/dom/import` reads a CSV or Excel (`.xlsx`) file dropped on the grid, or picked
+with your own button (`api(grid).bind(button)`, the keyboard path), in the browser. The first non-empty line is the
+header, matched to your columns by title or id (case and accents aside); each cell goes through its column's type as
+if typed in the grid's language. **The grid never changes its rows**: `onRows(rows, problems, file)` gets one object
+per line, at each column's `field` (or id), and you decide — add them, replace, or show a preview. A refused cell is
+left out and told as a problem (`import-cell`, path `rows[3].qty`, its code), never with its value. Excel files are
+inflated by the browser's `DecompressionStream`; the reading code is fetched at the first file. Texts `-import`.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { fileImport } from '@dzgrid/dom/import';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_IMPORT } from '@dzgrid/dom/locales/en-import';
+
+type Jar = { id: string; flavour: string; grams: number };
+let jars: Jar[] = [{ id: 'j1', flavour: 'Fig', grams: 250 }];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_IMPORT.text } };
+const importer = fileImport({
+  accept: ['csv', 'xlsx'],
+  onRows: (rows, problems) => {
+    if (problems.length) console.warn(problems);
+    jars = [...jars, ...rows.map((r, i) => ({ ...(r as Omit<Jar, 'id'>), id: `new-${Date.now()}-${i}` }))];
+    grid.update({ rows: jars });
+  },
+});
+const grid = createGrid<Jar>(document.getElementById('jars')!, {
+  rows: jars,
+  columns: [{ id: 'flavour', header: 'Flavour' }, { id: 'grams', header: 'Grams', type: 'number' }],
+  getRowId: (j) => j.id,
+  messages,
+  features: [importer],
+});
+importer.api(grid)!.bind(document.getElementById('import-button')!);
+```
+
 ## Print
 
 `print(grid, { title })` from `@dzgrid/dom/print` prints the rows as they are on screen — same columns, order, sort and

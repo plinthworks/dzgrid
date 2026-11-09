@@ -75,6 +75,11 @@ export interface ColumnDef<T, V = unknown> {
    */
   readonly headerVertical?: boolean;
   /**
+   * With `@dzgrid/dom/responsive` (docs/behaviors/responsive-columns.md; 1.9.0): when the columns do not fit the view, which
+   * collapse under their rows first — the highest first, the last on screen among equals; 0 never. Default 1.
+   */
+  readonly collapsePriority?: number;
+  /**
    * `false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a
    * custom kind's name). `floating`: a box in the floating filter row (`@dzgrid/dom/filters`; the
    * grid's `filters({ floating })` otherwise, `false` keeps this column out). `debounceMs`: the

@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: collapsed columns, a file import</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/core/detail": "/packages/core/src/detail.ts",
+  "@dzgrid/core/import": "/packages/core/src/import.ts",
+  "@dzgrid/core/csv": "/packages/core/src/csv.ts",
+  "@dzgrid/core/xlsx": "/packages/core/src/xlsx.ts",
+  "@dzgrid/core/server": "/packages/core/src/server.ts",
+  "@dzgrid/core/spans": "/packages/core/src/spans.ts",
+  "@dzgrid/dom": "/packages/dom/src/index.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<link rel="stylesheet" href="/packages/theme/row-numbers.css">
+<style>
+  body { margin: 0; padding: 8px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); }
+  #host { block-size: 460px; display: flex; flex-direction: column; }
+  #host > .dzg { flex: 1 1 auto; }
+  h1 { font-size: 1rem; margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<main><h1>DzGrid</h1><button id="import" type="button">Import</button><div id="host"></div></main>
+<script type="module" src="./lot-b.ts"></script>
+</body>
+</html>

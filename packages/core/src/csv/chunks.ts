@@ -84,9 +84,9 @@ const SEPARATORS: readonly unknown[] = [',', ';', '\t'];
 /** `;` where the locale writes decimals with a comma (Excel splits on it there), `,` elsewhere. */
 export const csvSeparatorFor = (ctx: LocaleCtx): ',' | ';' => (separatorsFor(ctx).decimal === ',' ? ';' : ',');
 
-/** The columns of a file: the visible ones, or those named (an unknown id is skipped and told). */
+/** The columns of a file: the visible ones and those collapsed under their rows (responsive-columns.md 11), or those named (an unknown id is skipped and told). */
 export function csvColumns<T>(cols: ColumnLookup<T>, ids?: readonly string[]): { columns: ResolvedColumn<T>[]; problems: Problem[] } {
-  if (!ids) return { columns: [...cols.visible()], problems: [] };
+  if (!ids) return { columns: [...(cols.withCollapsed?.() ?? cols.visible())], problems: [] };
   const columns: ResolvedColumn<T>[] = [];
   const problems: Problem[] = [];
   ids.forEach((id, i) => {

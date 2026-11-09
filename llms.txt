@@ -12,7 +12,7 @@ Only the names written in these pages exist; do not borrow option names from oth
 
 ## Features
 
-- [Columns](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/columns.md): column definitions: values, types, formats, widths, pinning, groups, moving and resizing, the column menu; columns made from the data, the totals row, vertical titles, no header row
+- [Columns](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/columns.md): column definitions: values, types, formats, widths, pinning, groups, moving and resizing, the column menu; columns made from the data, the totals row, vertical titles, no header row, columns that collapse on narrow screens
 - [Sort, filter and search](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/sort-filter-search.md): sorting, column filters, the floating row, the filters panel, quick search, find
 - [Selection and ranges](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/selection-ranges.md): row selection, blocks of cells, the clipboard, the fill handle
 - [Editing](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/editing.md): editable cells, editors, validation, saving, undo and redo
@@ -22,7 +22,7 @@ Only the names written in these pages exist; do not borrow option names from oth
 - [Server data and infinite scroll](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/server-data.md): `sourceRows`, `infiniteRows`, `serverSideRows`; the request and its answer
 - [Row moves](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/row-moves.md): dragging rows, moving them with keys or a menu, applying the move
 - [Dock and panels](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/dock-panels.md): side panels: the columns chooser, the filters panel, your own panels
-- [Export and print](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/export-print.md): CSV, Excel and JSON files, printing, the browser's own print menu
+- [Export and print](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/export-print.md): CSV, Excel and JSON files, importing a CSV or Excel file, printing, the browser's own print menu
 - [State](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/state.md): saving and restoring sort, filters, columns; in storage or in the address
 - [Theming and right to left](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/theming-rtl.md): the theme's CSS, its variables, dark mode, density, direction
 - [Accessibility](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/accessibility.md): what the grid does for keyboards and screen readers, and what is left to you

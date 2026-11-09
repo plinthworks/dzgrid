@@ -81,7 +81,14 @@ export type XlsxProblemCode = 'xlsx-early-day' | 'xlsx-text-cut' | 'xlsx-outline
  */
 export type GroupProblemCode = 'agg-type' | 'agg-threw' | 'pivot-too-many';
 
-export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | 'print-too-many' | 'unknown-ui-key'
+/**
+ * `@dzgrid/core/import`'s own (1.9.0, file-import.md): a file not read (`detail`: `type`, `zip`, `sheet`, `deflate`,
+ * `header`, `many`), a header matching no column (or a column's second, `duplicate`), a refused cell (path
+ * `rows[i].<column>`, the refusal's code). Never a cell's text. A type only.
+ */
+export type ImportProblemCode = 'import-file' | 'import-header' | 'import-cell';
+
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | ImportProblemCode | 'print-too-many' | 'unknown-ui-key'
   /** A block of cells over rows a list loaded in blocks does not hold yet: its copy, cut, paste or erase refused (Phase 8). */
   | 'rows-not-loaded'
   /** `@dzgrid/dom`'s (Phase 11 L9, virtual-scroll.md): a viewport grown with its rows (the host without the layout), held to the window; path `host`. A type only. */

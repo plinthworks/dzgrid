@@ -11,6 +11,11 @@ export interface ColumnLookup<T> {
   readonly version: number;
   /** Bumped only when what the cells hold or which columns show changes: what sorting and filtering follow. */
   readonly dataVersion: number;
+  /**
+   * The shown columns and those collapsed under their rows (`@dzgrid/dom/responsive`, 1.9.0), in screen order: what the
+   * quick search reads and a file writes. Absent: `visible()`.
+   */
+  withCollapsed?(): readonly ResolvedColumn<T>[];
 }
 
 /** What the user (or the host) changed about a column. Sorting lives in the query, not here (D6). */
@@ -55,6 +60,14 @@ export interface ColumnModel<T> extends ColumnLookup<T> {
    * Refused, nothing changed, when it would leave no column shown (O1). Tells no event: its caller does.
    */
   fold(ids: ReadonlySet<string>): ColumnChange;
+  /** The centre columns collapsed under their rows for want of room (responsive-columns.md 1); empty while `collapse` is off. Optional in the type only (1.9.0, an addition): the grid's model has it. */
+  readonly collapsed?: ReadonlySet<string>;
+  /**
+   * Collapses centre columns, by `rank` (highest first, the last on screen among equals; 0 or less never), until the rest
+   * fit the room `setAvailableInline` gives; never the first shown column nor a pinned one. Decided again at each change;
+   * null: off. `state()`, `hidden`, `folded` and `dataVersion` untouched (responsive-columns.md 1, 5, 9).
+   */
+  collapse?(rank: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
 }
 
 const DEFAULT_WIDTH = 150;
@@ -71,6 +84,9 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
   let layout: ColumnLayout;
   let visibleList: readonly ResolvedColumn<T>[] = [];
   let folded: ReadonlySet<string> = new Set();
+  let rank: ((c: ResolvedColumn<T>) => number) | null = null;
+  let collapsed: ReadonlySet<string> = new Set();
+  let seen: readonly ResolvedColumn<T>[] = [];
 
   const setColumns = (defs: readonly ColumnOrGroup<T>[]): void => {
     const r = resolveColumns(defs);
@@ -92,7 +108,7 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
     const seg = (s: Side | null) =>
       shown.filter((c) => side(c) === s).sort((a, b) => order(a) - order(b) || asked(a) - asked(b) || pos.get(a.id)! - pos.get(b.id)!);
     const start = seg('start');
-    const center = seg(null);
+    let center = seg(null);
     const end = seg('end');
 
     const bounds = (c: ResolvedColumn<T>) => {
@@ -105,6 +121,24 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
     };
     const isFlex = (c: ResolvedColumn<T>) => (c.def.flex ?? 0) > 0 && user.get(c.id)?.width === undefined;
     const fixed = (c: ResolvedColumn<T>) => Math.round(clamp(c, user.get(c.id)?.width ?? c.def.width ?? DEFAULT_WIDTH));
+
+    // Columns collapsed under their rows (responsive-columns.md 1): each needs its width (a flexible one its minWidth, else
+    // its width); the centre's, highest rank first and the last among equals, go until the rest fit; never the first.
+    seen = [...start, ...center, ...end];
+    const gone = new Set<string>();
+    if (rank && available !== undefined) {
+      const needs = (c: ResolvedColumn<T>) => (isFlex(c) ? Math.round(clamp(c, c.def.minWidth ?? c.def.width ?? DEFAULT_WIDTH)) : fixed(c));
+      let need = 0;
+      for (const c of seen) need += needs(c);
+      const can = center.map((c, i) => [c, rank!(c), i] as const).filter(([c, r]) => r > 0 && c !== seen[0]).sort((a, b) => b[1] - a[1] || b[2] - a[2]);
+      for (const [c] of can) {
+        if (need <= available) break;
+        gone.add(c.id);
+        need -= needs(c);
+      }
+      center = center.filter((c) => !gone.has(c.id));
+    }
+    if ([...gone].join() !== [...collapsed].join()) collapsed = gone;
 
     const widths = new Map<string, number>();
     for (const c of [...start, ...center, ...end]) if (!isFlex(c)) widths.set(c.id, fixed(c));
@@ -136,7 +170,7 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
     JSON.stringify([layout.start, layout.center, layout.end].map((sl) => sl.columns.map((col, i) => [col.id, sl.widths.sizeAt(i)])));
 
   /** `problems` is read after `mutate`, so a change reports what it found, not what the last one did. */
-  const shownIds = (): string => visibleList.map((c) => c.id).sort().join(',');
+  const shownIds = (): string => seen.map((c) => c.id).sort().join(',');
   const change = (mutate: () => readonly string[], problems: () => readonly Problem[] = () => [], data = false): ColumnChange => {
     const before = signature();
     const shownBefore = shownIds();
@@ -154,8 +188,10 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
     get layout() { return layout; },
     get problems() { return defProblems; },
     get folded() { return folded; },
+    get collapsed() { return collapsed; },
     get: (id) => byId.get(id),
     visible: () => visibleList,
+    withCollapsed: () => seen,
     state: () => columns.map((col) => ({ id: col.id, ...user.get(col.id) })),
     apply(patch, _source) {
       const problems: Problem[] = [];
@@ -192,6 +228,12 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
         folded = ids;
         recompute();
         if (!visibleList.length) folded = was;
+        return [];
+      });
+    },
+    collapse(r) {
+      return change(() => {
+        rank = r;
         return [];
       });
     },

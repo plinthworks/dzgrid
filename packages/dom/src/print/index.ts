@@ -90,7 +90,8 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
   const clean = (stop = cleaner(box));
 
   // ---------- what is printed, gathered from the model's reads ----------
-  const cols = g.columns.visible();
+  // Every column, those collapsed under their rows too (responsive-columns.md 11).
+  const cols = g.columns.withCollapsed!();
   const n = cols.length;
   const D = M.displayed;
   const max = Number.isInteger(o.maxRows) && o.maxRows! > 0 ? o.maxRows! : 5000;

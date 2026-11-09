@@ -1,7 +1,7 @@
 import type { ColumnLookup } from '../columns/model.js';
 import type { FilterModel, Json } from '../filter/model.js';
 import type { AnyFilterKind } from '../filter/kind.js';
-import { NO_OVERLAY, type ValueReader } from '../columns/defs.js';
+import { NO_OVERLAY, type ResolvedColumn, type ValueReader } from '../columns/defs.js';
 import { compileFilter, filterIndices } from '../filter/compile.js';
 import { canNarrow, compileQuick, quickWords } from '../filter/quick.js';
 import { idOfDataKey, isDataKey, type RowIdInput, type RowKey } from '../ids.js';
@@ -311,6 +311,9 @@ export interface ClientModel<T> extends RowModel<T> {
  * One notification per change, synchronous. The rows a host gave are never
  * written to.
  */
+/** The columns a search reads: the shown ones and those collapsed under their rows (responsive-columns.md 9). */
+const seen = <T>(c: ColumnLookup<T>): readonly ResolvedColumn<T>[] => c.withCollapsed?.() ?? c.visible();
+
 export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   const store = createRowStore<T>(o.getRowId, o.sameRow);
   const cache = new ColumnCache<T>();
@@ -373,7 +376,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   };
   /** Whether `changed` (absent: any column) holds a column the sort, the applied filters or the search read. */
   const touches = (changed?: readonly string[]): boolean => {
-    const read = [...query.sort.map((s) => s.column), ...Object.keys(appliedOf(query.filter).m), ...(quickWords(query.quick).length ? columns.visible().map((c) => c.id) : []), ...(shape?.reads?.() ?? [])];
+    const read = [...query.sort.map((s) => s.column), ...Object.keys(appliedOf(query.filter).m), ...(quickWords(query.quick).length ? seen(columns).map((c) => c.id) : []), ...(shape?.reads?.() ?? [])];
     return changed ? changed.some((c) => read.includes(c)) : read.length > 0;
   };
 
@@ -396,8 +399,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     }
     return today?.day ?? '';
   };
-  /** The columns a search reads. */
-  const visibleIds = (): string => columns.visible().map((c) => c.id).join(',');
+  const visibleIds = (): string => seen(columns).map((c) => c.id).join(',');
   const inputs = (filter = canonical(query.filter)): Inputs => ({
     snap: store.snapshot.version,
     colsRef: columns,
@@ -428,7 +430,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       const f = compileFilter(query.filter, e, o.filterKinds);
       applied = { f: query.filter, in: now, m: f.applied, key: canonical(f.applied) };
       const words = quickWords(query.quick);
-      const q = compileQuick(query.quick, columns.visible(), e);
+      const q = compileQuick(query.quick, seen(columns), e);
       // Typing on: when only the search changed and its words narrow the old ones, search the old matches.
       const within = filtered && same(filtered.in, now, 'quick') && canNarrow(filtered.words, words) ? filtered.order : null;
       const order = filterIndices(store.snapshot.count, [f, q], within);
@@ -525,7 +527,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
         test: () => {
           const e = env();
           const f = compileFilter(others, e, o.filterKinds);
-          const qt = compileQuick(query.quick, columns.visible(), e);
+          const qt = compileQuick(query.quick, seen(columns), e);
           return f.active || qt.active ? (src) => f.test(src) && qt.test(src) : null;
         },
       },
@@ -574,13 +576,13 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // Stale, the mask is older than the edits: whether a row passed is read again, with them, on the old rows.
     const mask = filtered.mask;
     const oldF = stale && compileFilter(query.filter, oldSnap, o.filterKinds);
-    const oldQ = stale && compileQuick(query.quick, columns.visible(), oldSnap);
+    const oldQ = stale && compileQuick(query.quick, seen(columns), oldSnap);
     const passed = Array.from(delta.changedSrc!, (src) => (oldF && oldQ ? oldF.test(src) && oldQ.test(src) : !mask || mask[src] === 1));
     follow();
     const after = sortCols.map((c) => Array.from(delta.changedSrc!, (src) => keysOf(c)[src]));
     const e = env();
     const f = compileFilter(query.filter, e, o.filterKinds);
-    const q = compileQuick(query.quick, columns.visible(), e);
+    const q = compileQuick(query.quick, seen(columns), e);
     let moved = false;
     delta.changedSrc!.forEach((src, i) => {
       d.retested++;
@@ -656,7 +658,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     membershipOf: (q) => {
       const words = quickWords(q.quick);
       const filter = appliedKey(q.filter);
-      return canonical({ filter, app: appOf(filter), day: dayOf(q.filter), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? columns.visible().map((c) => c.id).sort().join(',') : null });
+      return canonical({ filter, app: appOf(filter), day: dayOf(q.filter), quick: words.join(' '), zone: ctx.timeZone, cols: words.length ? seen(columns).map((c) => c.id).sort().join(',') : null });
     },
     matches: (key) => {
       const src = store.snapshot.lookup(idOfDataKey(key) ?? '');
@@ -727,7 +729,7 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
       // What a word without digits searches: text and enum columns (enums by label and by value).
       const start = env();
       const builders: { step(n: number): boolean; readonly built: number; readonly total: number }[] = [];
-      for (const col of start.columns.visible()) {
+      for (const col of seen(start.columns)) {
         const textual = col.type === 'text' || col.type === 'enum' || (col.type === 'custom' && col.codec.keyKind === 'text');
         if (!textual) continue;
         for (const kind of col.type === 'enum' ? (['search', 'export'] as const) : (['search'] as const)) {

@@ -50,7 +50,8 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     s.textContent = CSS;
     ('head' in target ? target.head : target).append(s);
   }
-  const details = !!g.settings.features?.some((f) => f.id === 'detail');
+  // Detail panels, an application's or the collapsed columns' lines (`responsive`): not numbered.
+  const details = !!g.settings.features?.some((f) => f.id === 'detail' || f.id === 'responsive');
   /** The rows before a page's first (a paged grid's numbers go on, row-numbers.md 4). */
   const offset = (): number => (g.rows.page ? g.rows.page.index * g.rows.page.size : 0);
   /** With detail panels: per shown row, how many rows before it are panels (they are not counted), once per version. */

@@ -13,6 +13,7 @@ Pins columns to the start or the end of the grid, then scrolls sideways.
 ## What DzGrid does
 - Three segments per row, start, centre and end; start and end are `position: sticky` with logical insets, so right to left needs no mirrored code (S2).
 - Rows use `contain: content`, never `contain: strict`: size containment drops sticky segments in Firefox (S11).
+- **With columns that collapse** (`@dzgrid/dom/responsive`, 1.9.0, responsive-columns.md 12): pinned columns never collapse; centre columns collapse first, and the release above applies only when the columns that never collapse still do not fit.
 - The release is decided in the core's column model from the room it is given (`setAvailableInline`, the viewport's inline size): `start` and `end` segments empty, the released columns in the centre segment; no side is named (right to left is the same code).
 - More than six columns pinned on a side gives the warning `too-many-pinned`; the grid still renders them.
 - Screen readers get one `aria-colindex` order across the three segments, equal to the DOM order (S4).

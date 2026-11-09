@@ -524,6 +524,26 @@
     "./locales/ar-totals": {
       "types": "./src/locales/ar-totals.ts",
       "default": "./src/locales/ar-totals.ts"
+    },
+    "./responsive": {
+      "types": "./src/responsive.ts",
+      "default": "./src/responsive.ts"
+    },
+    "./import": {
+      "types": "./src/import.ts",
+      "default": "./src/import.ts"
+    },
+    "./locales/en-import": {
+      "types": "./src/locales/en-import.ts",
+      "default": "./src/locales/en-import.ts"
+    },
+    "./locales/fr-import": {
+      "types": "./src/locales/fr-import.ts",
+      "default": "./src/locales/fr-import.ts"
+    },
+    "./locales/ar-import": {
+      "types": "./src/locales/ar-import.ts",
+      "default": "./src/locales/ar-import.ts"
     }
   },
   "peerDependencies": {

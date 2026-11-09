@@ -289,11 +289,19 @@ describe('1.8.0, the five packages', () => {
     for (const e of ['auto-columns', 'totals']) expect(pkg('core').exports[`./${e}`]).toEqual({ types: `./src/${e}.ts`, default: `./src/${e}.ts` });
     for (const e of ['totals-row', 'vertical-headers', 'locales/en-totals', 'locales/fr-totals', 'locales/ar-totals']) expect(pkg('dom').exports[`./${e}`]).toEqual({ types: `./src/${e}.ts`, default: `./src/${e}.ts` });
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
-    expect(build).toMatch(/'\.\/server-pivot', '\.\/auto-columns', '\.\/totals'\]/);
-    expect(build).toMatch(/'\.\/locales\/ar-pivot-bar', '\.\/totals-row', '\.\/vertical-headers', '\.\/locales\/en-totals', '\.\/locales\/fr-totals', '\.\/locales\/ar-totals'\]/);
+    expect(build).toMatch(/'\.\/server-pivot', '\.\/auto-columns', '\.\/totals'[,\]]/); // lot B: './import' after it
+    expect(build).toMatch(/'\.\/locales\/ar-pivot-bar', '\.\/totals-row', '\.\/vertical-headers', '\.\/locales\/en-totals', '\.\/locales\/fr-totals', '\.\/locales\/ar-totals'[,\]]/); // lot B after it
     const theme = pkg('theme');
     for (const f of ['vertical-headers.css', 'vertical-headers.unlayered.css', 'vertical-headers.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pivot', 'vertical-headers'\]/);
+  });
+
+  it('export the 1.9.0 lot B entries (core import; dom responsive, import, the -import texts), built like the others', () => {
+    expect(pkg('core').exports['./import']).toEqual({ types: './src/import.ts', default: './src/import.ts' });
+    for (const e of ['responsive', 'import', 'locales/en-import', 'locales/fr-import', 'locales/ar-import']) expect(pkg('dom').exports[`./${e}`]).toEqual({ types: `./src/${e}.ts`, default: `./src/${e}.ts` });
+    const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
+    expect(build).toMatch(/'\.\/auto-columns', '\.\/totals', '\.\/import'\]/);
+    expect(build).toMatch(/'\.\/locales\/ar-totals', '\.\/responsive', '\.\/import', '\.\/locales\/en-import', '\.\/locales\/fr-import', '\.\/locales\/ar-import'\]/);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

@@ -31,6 +31,25 @@ Lot A (owner « ★ partout », 2026-11-09). Additions only: nothing of 1.8.0 is
   keyboard is in them. `print(grid, { header: false })` leaves a print's header out (CSV and Excel had `header: false`).
 - A column's `total` or `headerVertical` without its feature is told once (`missing-feature`).
 
+Lot B (owner « ★ partout », 2026-11-09). Additions only.
+- **Columns that collapse under their rows** (`docs/behaviors/responsive-columns.md`): `responsive({ priority })` from
+  `@dzgrid/dom/responsive` and `collapsePriority` on a column (higher first, `0` never, default 1, the last on screen
+  first among equals): when the columns do not fit the view, centre columns leave the rows and a chevron on each row's
+  first cell opens « Title: value » lines under it (detail rows: the `-detail` texts; Enter, Space and the arrows on
+  that cell; `aria-expanded`; the panel named after the row). Decided in the paint that lays the columns out (no frame
+  of sideways scroll); never the first column or a pinned one; nothing in the columns' state. The quick search, the
+  filters, CSV / Excel / JSON and print still read every column. Core: `ColumnModel.collapse(rank)`, `collapsed`,
+  `ColumnLookup.withCollapsed()`. Not with a tree, grouping, header groups or `detail()` (`unsupported-combination`).
+- **Import a CSV or Excel file** (`docs/behaviors/file-import.md`): `fileImport({ accept, onRows, drop })` from
+  `@dzgrid/dom/import` — a file dropped on the grid (a drop zone shown and said) or picked with the application's button
+  (`api(grid).bind(button)`, `open()`, `read(file)`), read in the browser (CSV: `,` `;` or TAB, UTF-8 or Windows-1252;
+  `.xlsx`: the first sheet, inflated by `DecompressionStream`), the header matched to the columns by title or id, each
+  cell through its column's codec; `onRows(rows, problems, file)` — the grid never changes its rows. Refused cells are
+  problems `import-cell` (path `rows[i].<column>`, the code, never the value); `import-header`, `import-file`. Pure
+  reading in the new `@dzgrid/core/import` (`readCsv`, `zipEntries`, `sheetPath`, `sharedStrings`, `readSheet`,
+  `importRows`), the reading in a lazy chunk; texts `locales/{en,fr,ar}-import`. `decodeTsv` takes a `sep`.
+- `collapsePriority` without `responsive()` is told once (`missing-feature`).
+
 ### Changed
 - The pinned top band's offset is read from the header's height (a taller header, hidden headers), no longer a row per
   header row.

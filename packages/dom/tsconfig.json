@@ -28,6 +28,7 @@
       "@dzgrid/core/state": ["../core/src/state.ts"],
       "@dzgrid/core/auto-columns": ["../core/src/auto-columns.ts"],
       "@dzgrid/core/totals": ["../core/src/totals.ts"],
+      "@dzgrid/core/import": ["../core/src/import.ts"],
       "@dzgrid/core/row-gaps": ["../core/src/row-gaps.ts"],
       "@dzgrid/core/server": ["../core/src/server.ts"],
       "@dzgrid/dom/internal": ["./src/internal.ts"],
