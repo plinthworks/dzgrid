@@ -11,6 +11,8 @@ export interface ViewportBox {
   readonly scrollInline: number;
   /** The browser's default text size (`font-size: medium`, never the page's root size): rows follow the reader's text size (WCAG 1.4.4). 16 when absent. */
   readonly remPx?: number;
+  /** The window's height: a view taller than it that shows every row has grown with its rows (`unbounded-viewport`). None or 0: not measured. */
+  readonly room?: number;
 }
 
 /**
@@ -34,6 +36,7 @@ export function domGeometry(viewport: HTMLElement, header: HTMLElement, dir: () 
       scrollTop: viewport.scrollTop,
       scrollInline: inlineScroll(viewport, dir(), conv()),
       remPx: parseFloat(viewport.ownerDocument.defaultView?.getComputedStyle(probe).fontSize ?? '') || 16,
+      room: viewport.ownerDocument.defaultView?.innerHeight ?? 0,
     }),
     writeScrollTop: (px) => { viewport.scrollTop = px; },
     writeScrollInline: (px) => setInlineScroll(viewport, px, dir(), conv()),

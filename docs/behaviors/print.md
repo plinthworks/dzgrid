@@ -94,6 +94,10 @@ What the user gets on paper, in Chrome, Firefox and Safari, also from the browse
     own (`afterprint`, else the first `focus` or `pointerdown`). A table already in the page (`print()`'s, or one the
     application prepared) is left as it is: it prints. It lasts as long as the grid (its destruction ends it; no stop
     handle of its own, to hold the size line). Opt-in: an application that never asks keeps today's behaviour.
+    Kept on purpose (L9 review): one print table in the page at a time, so two grids of one page that both call
+    `printOnMenu` print the first one listened (the second finds a table already there); a page with several grids
+    prints the one it means from a button (`print(grid)`). A value that throws while the table is built rejects that
+    build (reported by the browser, never swallowed); the table goes on `afterprint` and the next print slices again.
 11. **Page breaks.** No row cut across two pages (`tr { break-inside: avoid }`); the header rows — the groups, the
     pivot's bands, the column headers — at the top of every page (`thead` as a header group). Where the engine allows:
     a group's first row stays with its group row (`break-before: avoid` on a data row right after a group row), so a

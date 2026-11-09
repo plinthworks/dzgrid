@@ -83,7 +83,9 @@ export type GroupProblemCode = 'agg-type' | 'agg-threw' | 'pivot-too-many';
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | 'print-too-many' | 'unknown-ui-key'
   /** A block of cells over rows a list loaded in blocks does not hold yet: its copy, cut, paste or erase refused (Phase 8). */
-  | 'rows-not-loaded';
+  | 'rows-not-loaded'
+  /** `@dzgrid/dom`'s (Phase 11 L9, virtual-scroll.md): a viewport grown with its rows (the host without the layout), held to the window; path `host`. A type only. */
+  | 'unbounded-viewport';
 
 export type Severity = 'error' | 'warning';
 

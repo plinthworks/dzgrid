@@ -43,5 +43,36 @@ and a job title). The application may change either while the grid is shown.
 ### Tests (row height)
 `packages/dom/test/row-height.test.ts`; `npm run test:browser -- --only demos` (the HR demo, 52 px rows).
 
+## A host without the layout (unbounded viewport, Phase 11 L9)
+
+### What the application does
+Gives the host a height but not the layout the guide shows (the host a flex column, or the grid itself sized):
+the grid's `.dzg` is then as tall as its content, and its viewport grows with its rows instead of scrolling.
+
+### What the user observes
+- The grid stays fast whatever the number of rows: the view is held to the window's height and scrolls on its
+  own scrollbar; every row stays reachable. Before (1.7.0): every row was drawn (20 001 row elements for
+  20 000 rows), a sort of 100 000 rows took 37 s, a million rows took the tab to 16 GB.
+- The application is told once: a `problems` event, code `unbounded-viewport`, severity `warning`, path `host`,
+  no detail (never a row's data). The fix is the application's: the documented layout.
+
+### What DzGrid does
+- A paint finds the viewport **unbounded** when the view is taller than the window (`innerHeight`) and shows
+  every row with less than one row of room left beyond the body and the pinned rows: that is a view grown to
+  its rows. A grid sized taller than the window on purpose with fewer rows than its room is not touched.
+- From then on, for the grid's life: the viewport's `max-block-size` is set to the window's height (followed at
+  each paint, a resized window included), and the paint draws only what that height shows (never all rows,
+  even in the frame that found it). Told once per grid.
+- No window (a server, a test without one): nothing measured, nothing told.
+
+### Kept on purpose
+- A grid sized taller than the window whose rows fill it to within one row is held to the window too (the
+  same signal as a grown view); its rows stay reachable by the grid's own scrollbar, and the warning says why.
+- No text: problems are told to the application, never shown to the user (no message key).
+
+### Tests
+`packages/dom/test/unbounded-viewport.test.ts` (a planted geometry); Chrome once, a 100 000-row page without the
+layout (`scripts/browser-unbounded.mjs`).
+
 ## Tests
 `conformance/cases/layout-rows/*`, `packages/core/test/layout.test.ts`, `packages/dom/test/{grid,scroll}.test.ts`; `npm run test:browser` and `npm run bench:browser` (no frame without rows, 60 fps, a million rows).

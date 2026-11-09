@@ -5,9 +5,10 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased — 1.8.0
+## [1.8.0] - 2026-11-09
 
 A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one behaviour change for server groups.
+Phase 11 (hardening and ecosystem) and the server pivot. Five packages now: `@dzgrid/element` joins the four.
 
 ### Upgrading from 1.7.0
 - **Server groups' values are checked against their column's type** (owner Q-SP5 A): a group whose value does not fit
@@ -15,7 +16,17 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   `invalid-page-response` at `response.groups[j].value` (never with the value); 1.7.0 showed it, labelled by its text.
   A `custom` column takes any value. If your server sends ids as numbers for a text column, send texts, or type the
   column.
-- Nothing else to change: the server pivot is off until the app passes `serverPivot()`.
+- **A host with a height but without the documented layout** (the host a flex column, or the grid's `.dzg` sized):
+  1.7.0 drew every row there (no virtual scrolling: a sort of 100 000 rows took 37 s). The grid now holds its view
+  to the window's height, scrolls inside it, and tells a `problems` event once: code `unbounded-viewport`, severity
+  `warning`, path `host`. If you see it, give the host `display: flex; flex-direction: column` (getting started).
+- **Narrow screens**: pinned columns that would leave the centre less room than its widest column scroll with the
+  others until the view widens (the state still says pinned); the focus going into the rows collapses a dock side
+  area that covered them. Nothing to change; a screen tested only wide may look different on a phone.
+- The server pivot is off until the app passes `serverPivot()`; printing from the browser's own menu is off until the
+  app calls `printOnMenu(grid)` (`@dzgrid/dom/print-menu`).
+- **A new package**, `@dzgrid/element` (`<dz-grid>`): install it only for a page without Angular; its version follows
+  the others (`@dzgrid/core` and `@dzgrid/dom` peers at `^1.8.0`). An Angular app keeps `@dzgrid/angular`.
 - A part of slot `status` registered without `statusBar()` in `features` is now told once (`missing-feature`, path
   `parts.<name>`, detail `statusbar`), as every other slot's part without its feature; it was silently not drawn.
 
@@ -67,6 +78,11 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   the lines read.
 
 ### Fixed
+- A viewport that grows with its rows (a host with a height but not the documented layout; found by the public
+  benchmark, `docs/benchmark/README.md`) is held to the window's height and told once (`unbounded-viewport`,
+  `virtual-scroll.md` « A host without the layout »): 100 000 rows in such a page draw 24 rows and sort in 32 ms in
+  Chrome (1.7.0: every row, 37 s; a million rows took the tab to 16 GB). The `ViewportBox` read gains `room` (the
+  window's height).
 - `planPaste` (`@dzgrid/core/range`) called by an application on a list loaded in blocks walks the rows held only,
   never the rows not loaded (the same plan as before, without walking millions of rows).
 - `*` in the group column (`dom/grouping`) beside a server's groups walks the rows held only: an open group of a million

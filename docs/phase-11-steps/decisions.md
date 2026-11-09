@@ -524,3 +524,76 @@ README rewrite as a map and the docs website stay out (a link to the guide added
   `node_modules`. No clock in the generator.
 - Each sentence checked against its behaviour sheet; corrections made while writing (find marks, never filters; a
   newer save waits for the older one; `maxColumns` makes no column past the cap; export `all` keeps the filters).
+
+## L9 — close and release (2026-11-09)
+
+### The unbounded viewport (found by L8's benchmark; fixed first)
+- **The bug.** A host with a height but not the documented layout (no flex column, `.dzg` not sized): `.dzg` is as
+  tall as its content, so the viewport grows with the body the grid writes; 1.7.0 read that height as « the view »
+  and drew every row (20 001 row elements for 20 000 rows), told nothing; 100 000 rows sorted in 37 s, 10⁶ rows took
+  Chrome to 16 GB. Sheet first: `virtual-scroll.md` « A host without the layout »; a note in
+  `docs/guide/getting-started-ts.md` (`llms-full.txt` remade).
+- **Decided taken alone.** Detection in the paint: the view taller than the window (`ViewportBox.room`, the window's
+  `innerHeight`, a new optional field: an addition for `check:api`) **and** showing every row with less than one row of
+  room left past the body and the pinned rows — a view grown to its rows. A grid sized taller than the window on purpose
+  with room left is not touched (a test). Then, for the grid's life: the viewport's `max-block-size` set to the window's
+  height (followed at each paint), the paint drawing only that height even in the frame that found it, and
+  `unbounded-viewport` told once (`warning`, path `host`, no detail). Holding the view to the window (rather than only
+  drawing fewer rows) keeps every row reachable by the grid's own scrollbar. The code is a type-only member of
+  `ProblemCode` (0 B in the core); no message key (problems are told to the app, never shown).
+- **Test first** `packages/dom/test/unbounded-viewport.test.ts` (a planted geometry that follows the body's written
+  height): red on 1.7.0 code (20 000 rows drawn; the million-row case killed the worker), then green, 6 / 6.
+- **Chrome once** (`node scripts/browser-unbounded.mjs`, page `packages/dom/test/browser/unbounded.html`: host 600 px,
+  no flex, 100 000 rows, window 1 280 × 720): 24 rows drawn, the viewport 720 px and scrolling, told once; a sort to the
+  next frame 32 ms (1.7.0: 37 s); the last row reached in 32 ms; heap 19 MB; 6 / 6.
+- **Sizes.** DOM base 23 684 → **23 830** (+146 B gz; a literal problem instead of `problem()` saved 9): line 23 690 →
+  **23 850** (+0.7 %, the +2 % rule). K.8 88 595 → **88 742** / 90 000.
+
+### Code review (new code since 1.7.0: L7 element, L5 print-menu, L2 / L3 / L4a sources, the L9 fix)
+One review agent (read only), then the lead read the L3 / L4a diffs it had not reached (filters' idle hold, pivot's
+kept columns, released pins, dock focus, `focusShown`). Each fix: a test that failed first.
+- **Fixed — the unbounded check at a first paint** (`render/viewport.ts`): with no scroll mapper yet, the body's height
+  was taken as the window's, so a bounded view taller than the window by less than a row was held and told. Test
+  « a bounded view taller than the window by less than a row, at its first paint ».
+- **Fixed — `<dz-grid>` changed while out of the page** (a framework moving it): put back in the same task, the kept
+  grid now takes what changed (`connectedCallback` applies). Rules 4 and 10 amended.
+- **Fixed — a refused grid kept the element's elements but dropped its text** (`children` → `childNodes`). Rule 11.
+- **Fixed — `row-height=""` read as 0 and `"abc"` as NaN**: an empty or unreadable number is left out and told
+  (`attribute:row-height`, the raw value), as any value the element cannot read. Rule 5.
+- **Kept on purpose — one print table in the page** (`print.md` 10): two grids both with `printOnMenu` print the first
+  one listened; a page with several grids prints the one it means by its button.
+- **Checked, not a bug** — a value that throws during the menu's build: the throw lands in the build's async part, so
+  the slice is restored at once and the cleanup armed; the table goes on `afterprint`, the next print slices again (a
+  guard test kept). The sort-key cache without `numerals`: numbers are parsed in Latin digits whatever `numerals`
+  (`separatorsFor`), so no key depends on it. The dock's narrow-screen collapse told as a user change: `dock.md` 14,
+  the owner's yes.
+- Read and fine: the element's server-safe base class, properties set before the definition, `ready`, event names,
+  disconnect and move; `tx.ts`' frame cancel; the Angular controller and grid (no leak found); `print.scss` logical.
+- Places that recompute the same thing, for the rules Phase 11 changed: the released pins are a layout of the screen
+  only (export, print, clipboard and the server wire read the columns' order, which is the screen's in either case,
+  and the state keeps « pinned »); the server groups' value rule (Q-SP5) is the model's, read by screen, export and
+  print alike; the unbounded cap is the screen's only.
+
+### Architect check (against ARCHITECTURE Phase 11 and the plan's §6)
+Done by the architect agent (read only). Acted on: « Ajustements après la Phase 11 » in ARCHITECTURE (with §3.1, §5.2
+and §7.2 amended: the Web Component is done, DOM 23 850); the benchmark's bug sentence (fixed in 1.8.0); the ACR's
+product line names `@dzgrid/element` (not evaluated apart). **R6 kept as it is** (one line): the DOM permutations
+carry no scroll gesture; the `aria-setsize` −1 case they would guard lives in the block lists, which
+`browser-infinite.mjs` and `browser-server-groups.mjs` scroll in Chrome, and the DOM test of L1 pins it.
+Written as not met, for the owner (ROADMAP « Phase 11 — close »): the listening L4c; `<dz-grid>` in Firefox and WebKit
+and a React / Vue page (the plan's « three engines »); the 4× misses (owner's call); the benchmark on one day, its
+scripts outside the repo and unpublished; axe and forced colours in Chrome only; WebKit print by emulation only.
+
+### Release 1.8.0 prepared, and the checks (2026-11-09)
+- The five packages at 1.8.0, `@dzgrid` peers following, `version.ts`, the example's manifest, the release tests
+  (« the five packages »; the packed regex `1\.8\.0|1\.8\.1-local`); `CHANGELOG` dated with the upgrade notes;
+  `docs/release-1.8.0.md` (French; the element's first publish from the Mac, then its trusted publisher).
+- `release:check` first stopped: the real Angular build's DzGrid share **99 717 B against its line 99 500** (not
+  measured since the Phase 8 close: Phase 10's and 11's base seams, the server pivot, L9). Raised to **100 000** by the
+  +2 % rule (+0.5 %), as 1.4.0 did; the owner may say otherwise. Then « Release check: the 5 packages at 1.8.0 ».
+- `gate:step`, first run: 23 failures, all size pins of the DOM line (23 690 in six tests) and the packed tarballs
+  still 1.7.1-local (made fresh by `release:check`); fixed, then **one full run green**: test:ci, test:tz Auckland and
+  Los Angeles 9 025 / 9 025 each (no timeout), typecheck, build (five packages), check:size 0 over (DOM 23 830 /
+  23 850, K.8 88 742 / 90 000, element 1 614 / 1 750), check:api additions only (`ViewportBox.room`, the
+  `ProblemCode` member).
+- `test:real-app`: 58 / 58, every screenshot 0 px different.

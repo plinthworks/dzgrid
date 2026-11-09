@@ -590,6 +590,19 @@ Décisions du propriétaire (`decisions.md`) :
 - **Critères de sortie** : tenus (ROADMAP « Phase 10 — close ») ; l'écoute §29 reste à programmer (propriétaire, non bloquante). Serveur (D19) et `rangeAsSeries` : plus tard.
 - **Pivot côté serveur (1.8.0, propriétaire A à Q-SP1…Q-SP8, 2026-11-07)** : nouvelle entrée `@dzgrid/core/server-pivot` (`serverPivot()`, donné à `serverSideRows(data, { pivot })`) ; le modèle serveur reçoit des crochets (partie `pivot` de la requête, totaux demandés = les valeurs, derniers groupes jamais ouverts) ; la forme pivot gagne une couture `serve` (le même constructeur de colonnes créées pour le navigateur et le serveur) ; `dom/grouping` monte le pivot à côté d'un modèle qui a la prise. Règle de type des valeurs de groupe serveur (Q-SP5 A). Fiche `server-pivot.md`, décisions `decisions.md` « Server pivot — owner A ».
 
+### Ajustements après la Phase 11 (clôture le 2026-11-09 ; réponses du propriétaire `docs/phase-11-steps/questions.md`, décisions `decisions.md` L1–L9)
+- **Paquet** (Q3 A) : `@dzgrid/element`, le cinquième paquet : `<dz-grid>` défini par `@dzgrid/element/define` ou `defineDzGrid(nom)`, dans la page (pas de shadow root), événements `dzg-<type en kebab>`, parties par `definePart`, ses problèmes en `invalid-setting`. Fiche `web-component.md`. Vu dans Chrome seulement (Firefox, WebKit et une page React / Vue restent ouverts).
+- **Entrées** : `@dzgrid/dom/print-menu` (`printOnMenu`, sur `beforeprint` ; une table d'impression à la fois dans la page). Angular : `(rowMove)` et `DzgController.rowDrag()` (R9).
+- **Coutures** : le modèle de colonnes relâche dans le centre les colonnes épinglées qui ne laissent pas au centre sa plus large colonne (écran seulement, l'état garde « épinglé ») ; `focusShown` fait suivre la fenêtre au focus (400 %) ; le dock replie un côté ouvert sur écran étroit quand le focus entre dans les lignes ; le cache de clés connaît une colonne par sa définition (R4) ; la frame d'un lot ne pose que son lot (R3).
+- **Vue non bornée** (L9, trouvée par le banc) : `ViewportBox.room` (la hauteur de la fenêtre) et le code `unbounded-viewport` (un type seulement) ; une vue qui grandit avec ses lignes est tenue à la hauteur de la fenêtre et dite une fois (`virtual-scroll.md`).
+- **Thème** : `contain: layout style` sur les lignes, dans le thème et non dans `LAYOUT_CSS` (public : le changer est un choix du propriétaire).
+- **Mesure K.8** (propriétaire A, L2) : le profil Angular mesuré comme une construction de production le livre (89 997 → 88 442).
+- **Tailles en vigueur** (`size-budget.json`) : cœur 29 300, DOM 23 850 (L9), Angular 7 950, `core/range` 3 329, `dom/filters` 12 000, `dom/pivot` 2 650, `dom/print` 1 697, `@dzgrid/element` 1 750, thème 2 960, K.8 90 000.
+- **Outils** : `bench:browser -- --cpu 4` (`perf/browser-budgets-4x.json`), `test:element`, les vérifications d'accessibilité automatiques (`scripts/browser-a11y.mjs`), `scripts/browser-unbounded.mjs`.
+- **Documentation** : `docs/guide/` (exemples compilés par un test), `llms.txt` à la racine et dans `@dzgrid/dom`, `llms-full.txt` ; `check:api` tient lieu de `docs:api` ; brouillon d'ACR `docs/a11y/acr-wcag22.md`.
+- **Banc public** (Q4 B) : hors du dépôt (`~/Dev/dzgrid-bench`), méthode et chiffres dans `docs/benchmark/`.
+- **Critères de sortie** : tenus, sauf ceux écrits avec leur cause (ROADMAP « Phase 11 — close ») : l'écoute L4c (propriétaire), les écarts du profil 4× (propriétaire), `<dz-grid>` hors Chrome, R6 gardé tel quel, le banc sur un seul jour et ses scripts non publiés.
+
 ## 0. Provenance, et limites de ce que j'ai lu
 
 **Lu en entier ou presque** : `dzgrid/CLEANROOM.md` ; DzCalendar `ARCHITECTURE.md` (1352 lignes), `CLAUDE.md`, `ROADMAP.md` (120 premières lignes), `CLEANROOM.md` (via DzGrid, identique en esprit), `conformance/README.md`, `perf/budgets.json`, `vitest.config.ts`, `scripts/build.mjs`, `packages/theme/dzcalendar.scss` (110 premières lignes), liste de `packages/` ; tzslot `CLAUDE.md`, `ROADMAP.md` (80 lignes), `packages/theme/tzslot.scss` (120 lignes), `packages/angular/src/calendar.ts` (lignes 100-220) ; ngx-sheetgrid `cell-edits.ts`, `displayed-rows.ts`, `date-value.ts`, `event-target.ts`, `grid.types.ts`, `rule-engine.ts`, `cell-range.ts` (175 premières lignes) ; le plan `blueprint-0.2.0.md` ; la note de cadrage Sehhaty `grille-de-donnees.md`.
@@ -939,7 +952,7 @@ Chaque module est du code à nous, sans ag-Grid. Le tableau dit ce qu'il faut **
 | `@dzgrid/angular` | `<dz-grid>`, contrôleur, gabarits, fournisseurs | MIT | 3 |
 | `@dzgrid/conformance` | `cases/**/*.json`, schémas, runner | MIT | 1 |
 
-Les paquets Pro, `compat-aggrid` et les wrappers React / Vue / Web Component sont reportés (K.1, K.12). Un wrapper de plus doit consister en un fichier mince au-dessus de `@dzgrid/dom`, comme `@dzgrid/angular`.
+Les paquets Pro, `compat-aggrid` et les wrappers React / Vue sont reportés (K.1, K.12) ; le Web Component est fait en Phase 11 (`@dzgrid/element`). Un wrapper de plus doit consister en un fichier mince au-dessus de `@dzgrid/dom`, comme `@dzgrid/angular`.
 
 ### 3.2 Identités, indices typés, noeuds de ligne
 
@@ -1778,7 +1791,7 @@ Règles : valeurs en chaînes ISO ou nombres ; `refs` cite le rapport public de 
 | **Profil « écran d'audit »** (cœur base + `/server` + DOM base + filtres + recherche + pagination + export CSV + thème + Angular + une langue ; découpé, chargement initial) | **≤ 90 000 o** (ligne de `check:size` ; mesuré 89 978 o le 2026-11-08 ; avant : 85 kB, garde 83 500, mesuré 82 986 à la Phase 3). Vraie construction Angular (`npm run example:bytes`) : plafond 92 500 (S12-Q10) |
 | **Tout, sans graphiques** | **≤ 150 kB** |
 
-**Ce tableau donne les plafonds de départ ; les lignes en vigueur sont celles de `size-budget.json`** (Phase 11 R11, 2026-11-08 : cœur base 29 300, DOM base 23 660 → 23 690 en L4a (+0,13 %, la fenêtre suit le focus), Angular 7 900, `core/range` 3 264, profil d'audit 90 000). `scripts/size.mjs` mesure chaque sous-chemin et échoue au-delà de son budget (`size-budget.json`, remis à la mesure + 10 % à chaque clôture de phase, jamais au-dessus des accords du propriétaire ; tableau complet dans ROADMAP « Final budgets (Phase 5) », celui de la Phase 4 avant lui). Chaque paquet est `sideEffects: false`. L'ordre de grandeur de comparaison (≈ 330 kB gz pour ag-Grid) vient de la note de cadrage Sehhaty, non de nous.
+**Ce tableau donne les plafonds de départ ; les lignes en vigueur sont celles de `size-budget.json`** (Phase 11 R11, 2026-11-08 : cœur base 29 300, DOM base 23 660 → 23 690 en L4a (+0,13 %, la fenêtre suit le focus) → 23 850 en L9 (la vue non bornée), Angular 7 900, `core/range` 3 264, profil d'audit 90 000). `scripts/size.mjs` mesure chaque sous-chemin et échoue au-delà de son budget (`size-budget.json`, remis à la mesure + 10 % à chaque clôture de phase, jamais au-dessus des accords du propriétaire ; tableau complet dans ROADMAP « Final budgets (Phase 5) », celui de la Phase 4 avant lui). Chaque paquet est `sideEffects: false`. L'ordre de grandeur de comparaison (≈ 330 kB gz pour ag-Grid) vient de la note de cadrage Sehhaty, non de nous.
 
 ### 5.3 Budgets de temps (Chrome récent, ordinateur portable de milieu de gamme, bundle **minifié**)
 
@@ -1944,7 +1957,7 @@ Ordre : fondations de données → rendu en lecture seule → **serveur paginé 
 
 - **Graphiques intégrés** (K.13) ; seulement `rangeAsSeries` plus tard.
 - **Formules de tableur**, validation croisée de cellules à la tableur.
-- **Moteur de rendu canvas**, Web Components (planifié plus tard), React / Vue (plus tard).
+- **Moteur de rendu canvas**, React / Vue (plus tard ; le Web Component est fait en Phase 11).
 - **Modèle viewport** (K.5), **Web Workers** (réserve).
 - **Traducteur d'options ag-Grid** (K.12) et migration automatique.
 - **Récupération de données HTTP intégrée** : l'hôte fournit `fetch` et `save` (Promesses).

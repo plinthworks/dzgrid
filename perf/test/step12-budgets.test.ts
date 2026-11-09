@@ -16,10 +16,10 @@ describe('step 12 budgets', () => {
   });
 
   it('the real example 98 800 (+2 % rule at 1.4.0, measured 98 624; 1.3.0: 97 400; 1.2.0: 95 500; before 95 000: owner, decisions.md « Real Angular example line »: measured 94 596)', () => {
-    expect(/const K8 = ([\d_]+);/.exec(read('scripts/example.mjs'))?.[1]).toBe('99_500'); // +2 % rule at the Phase 8 close (measured 99 425); Phase 7 close (measured 98 833); 1.4.0 (measured 98 624); before at 1.3.0 (2026-11-02, measured 97 173)
+    expect(/const K8 = ([\d_]+);/.exec(read('scripts/example.mjs'))?.[1]).toBe('100_000'); // +2 % rule at the Phase 11 close (measured 99 717); Phase 8 close (measured 99 425); Phase 7 close (measured 98 833); 1.4.0 (measured 98 624); before at 1.3.0 (2026-11-02, measured 97 173)
   });
 
   it('no other line moves: column-menu 4 300, dom 22 400, core 29 150, dom/state 1 150', () => {
-    expect(['@dzgrid/dom/column-menu', '@dzgrid/dom', '@dzgrid/core', '@dzgrid/dom/state'].map((n) => b[n]!.maxGzip)).toEqual([4300, 23690, 29300, 1300]); // Phase 11 L4a: dom 23 690 (+2 % rule, the window follows the focus); Phase 10 DOM batch: dom/state 1 300 (+2 %) // Phase 9 dock: dom/state 1 289 (+2 %) // Phase 8 step 7: dom/state 1 264 (+2 %) // Phase 8 step 4: dom 23 660, core 29 300 (+2 % rule); dom/state 1 240 at the Phase 7 close (+2 %); Phase 7 step 2: core 29 250 (+2 % rule, the grouping seams); // 1.4.0 busy part: dom 23 250 (+2 % rule); busy bar: dom 23 070 (+2 % rule); // dom/state 1 224 (owner +2 % rule, step 16); 1 200 since « clearFilters/resetState » // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
+    expect(['@dzgrid/dom/column-menu', '@dzgrid/dom', '@dzgrid/core', '@dzgrid/dom/state'].map((n) => b[n]!.maxGzip)).toEqual([4300, 23850, 29300, 1300]); // Phase 11 L9: 23 850 (+2 % rule, the unbounded view); Phase 11 L4a: dom 23 690 (+2 % rule, the window follows the focus); Phase 10 DOM batch: dom/state 1 300 (+2 %) // Phase 9 dock: dom/state 1 289 (+2 %) // Phase 8 step 7: dom/state 1 264 (+2 %) // Phase 8 step 4: dom 23 660, core 29 300 (+2 % rule); dom/state 1 240 at the Phase 7 close (+2 %); Phase 7 step 2: core 29 250 (+2 % rule, the grouping seams); // 1.4.0 busy part: dom 23 250 (+2 % rule); busy bar: dom 23 070 (+2 % rule); // dom/state 1 224 (owner +2 % rule, step 16); 1 200 since « clearFilters/resetState » // 1.4.0: 22 440 → 22 880 (+2 % rule, the row numbers strip)
   });
 });

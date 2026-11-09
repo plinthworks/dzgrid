@@ -62,6 +62,36 @@ describe('printOnMenu: the browser\'s own print (print.md 10)', () => {
     expect(box()).toHaveLength(0);
   });
 
+  it('a value that throws during the menu\'s build: removed on afterprint, and the next print() slices again (review L9)', async () => {
+    let bad = true;
+    const columns = [{ id: 'name', header: 'Name', value: (r: { name: string }) => { if (bad) throw new Error('app bug'); return r.name; } }];
+    const m = emake({ rows: rowsOf(100), columns: columns as never, settings: { messages: MSG } }); // never: a column typed on the row's name only
+    printOnMenu(m.g);
+    bad = false;
+    m.g.update({});
+    bad = true;
+    const caught: unknown[] = [];
+    const onRej = (e: PromiseRejectionEvent) => (caught.push(e.reason), e.preventDefault());
+    window.addEventListener('unhandledrejection', onRej);
+    try {
+      window.dispatchEvent(new Event('beforeprint'));
+    } catch (e) {
+      caught.push(e);
+    }
+    await Promise.resolve();
+    window.dispatchEvent(new Event('afterprint'));
+    window.removeEventListener('unhandledrejection', onRej);
+    expect(box()).toHaveLength(0);
+    bad = false;
+    let t = 0;
+    vi.spyOn(window.performance, 'now').mockImplementation(() => (t += 1));
+    const p = preparePrint(m.g);
+    expect(rows()).toBeLessThanOrEqual(9);
+    const done = await p;
+    expect(rows()).toBe(100);
+    done!();
+  });
+
   it('a grid destroyed listens no more', () => {
     const n = emake({ rows: rowsOf(4), settings: { messages: MSG } });
     printOnMenu(n.g);

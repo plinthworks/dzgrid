@@ -179,6 +179,18 @@ describe('<dz-grid> attributes (5, 6)', () => {
     expect(el.grid).not.toBeNull();
   });
 
+  it('a row-height that is no number (empty, text) is left out and told, the density kept (review L9)', async () => {
+    const el = make('<dz-grid-test row-height="48"></dz-grid-test>');
+    const seen = problemsOf(el);
+    const h = () => (el.grid as unknown as { context: { rowHeight(): number } }).context.rowHeight(); // the grid's internal context, read for the height it paints
+    el.setAttribute('row-height', '');
+    expect(h()).toBe(32);
+    el.setAttribute('row-height', 'abc');
+    expect(h()).toBe(32);
+    await tick();
+    expect(seen.map((p) => [p.severity, p.path, p.detail])).toEqual([['warning', 'attribute:row-height', ''], ['warning', 'attribute:row-height', 'abc']]);
+  });
+
   it('without direction, the grid follows the element’s own dir', () => {
     const el = make('<dz-grid-test dir="rtl"></dz-grid-test>');
     expect(el.querySelector('.dzg')!.getAttribute('dir')).toBe('rtl');
@@ -216,6 +228,14 @@ describe('<dz-grid> events (7, 8, 9)', () => {
     await expect(el.ready).rejects.toBeInstanceOf(Error);
   });
 
+  it('a refused grid keeps the text beside it (rule 14, review L9)', async () => {
+    document.body.insertAdjacentHTML('beforeend', '<dz-grid-test>Villes<b>!</b></dz-grid-test>');
+    const el = document.body.lastElementChild as DzGridElement<R>;
+    Object.assign(el, { env, columns: COLUMNS, getRowId: (r: R) => r.id, messages: { locale: 'en', text: {} } });
+    await el.ready.catch(() => {});
+    expect(el.textContent).toBe('Villes!');
+  });
+
   it('update() is grid.update; nothing before the grid exists', () => {
     const early = document.createElement('dz-grid-test') as DzGridElement<R>;
     expect(() => early.update({ label: 'x' })).not.toThrow();
@@ -239,6 +259,18 @@ describe('<dz-grid> disconnect and reconnect (10)', () => {
     document.body.append(el);
     await tick();
     expect([el.grid !== null && el.grid !== first, texts(el), readies]).toEqual([true, ['Alger', 'Oran', 'Blida'], 1]);
+  });
+
+  it('changed while out of the page, put back in the same task: the change reaches the grid (rules 4, 10, review L9)', async () => {
+    const el = make();
+    const g = el.grid;
+    el.remove();
+    el.setAttribute('density', 'compact');
+    el.setAttribute('label', 'Villes');
+    document.body.append(el);
+    await tick();
+    const h = (el.grid as unknown as { context: { rowHeight(): number } }).context.rowHeight(); // the grid's internal context, read for the height it paints
+    expect([el.grid, h, el.querySelector('.dzg-viewport')!.getAttribute('aria-label')]).toEqual([g, 28, 'Villes']);
   });
 
   it('moved within the page in one task: the same grid, its sort kept', async () => {

@@ -72,7 +72,9 @@ others) and **first render of a million rows** (Tabulator is faster there). The 
 - **One machine, one browser.** A fast Apple chip hides differences that a slower machine shows.
 - **Found on the way (DzGrid).** With a host that has a height but not the documented flex layout, DzGrid 1.7.0 drew
   **every** row (20 001 row elements for 20 000 rows): no virtual scrolling and no `Problem` saying so; a sort of 100 000
-  rows then took 37 s to the next frame. The numbers above use the documented host. To be told to the owner as a bug.
+  rows then took 37 s to the next frame. The numbers above use the documented host. Fixed in 1.8.0 (Phase 11 L9): such
+  a view is held to the window's height and told once (`unbounded-viewport`); 100 000 rows draw 24 rows and sort in
+  32 ms in Chrome.
 
 ## For other maintainers — how to correct our setup
 

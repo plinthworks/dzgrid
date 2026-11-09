@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: a host without the layout</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); }
+  /* A height, but not the documented layout (no flex column): the grid's .dzg is as tall as its content. */
+  #host { inline-size: 1000px; block-size: 600px; }
+</style>
+</head>
+<body>
+<main><h1>DzGrid</h1><div id="host"></div></main>
+<script type="module" src="./unbounded.ts"></script>
+</body>
+</html>

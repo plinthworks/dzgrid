@@ -101,6 +101,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let context: unknown;
   let rowClass: GridSettings<any>['rowClass'];
   let lastH = 0;
+  // The window's height a grown view is held to (0: not held).
+  let cap = 0;
   // A part's messages: the host's own `app.*` keys, a missing one told once per bundle.
   let toldMessages = new Set<string>();
   const partMsg: PartBase['msg'] = (key, params) => {
@@ -161,9 +163,15 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     if (box !== seen && Math.abs((seen = box).scrollTop - scroll.physicalTop) > 1) scroll.onScroll();
     if (shown && shown.offset + shown.delta !== scroll.logicalTop) shown = { ...see(shown.displayed, shown.h, shown.layout), total: shown.total };
     const h = g.rowHeight();
+    // A view taller than the window that shows every row, with less than a row of room left past the body and the pinned
+    // rows, grew with its rows (a host without the layout, virtual-scroll.md): held to the window from now on, told once.
+    const room = box.room || 1 / 0, grown = box.block - (scroll.mapper?.physicalHeight ?? 1 / 0);
+    if (!cap && box.block > room && grown >= 0 && grown < h * (1 + (g.pins?.[0] ?? 0) + (g.pins?.[1] ?? 0))) (cap = room), emit(kernel, { type: 'problems', source: 'host', problems: [{ code: 'unbounded-viewport', severity: 'warning', path: 'host' }] });
+    if (cap) setPx(el.viewport, 'max-block-size', (cap = box.room || cap));
+    const block = cap ? Math.min(box.block, cap) : box.block;
     // One row layout for these rows (D7): a feature's (variable heights), or every row `h` tall.
     const layout = rowLayout(g);
-    g.viewBlock = box.block;
+    g.viewBlock = block;
     const L = columns.layout;
     const visible = columns.visible();
 
@@ -187,10 +195,10 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       epochKey = ek;
       epoch++;
     }
-    const mk = `${layout.total}|${h}|${box.block}`;
+    const mk = `${layout.total}|${h}|${block}`;
     if (!scroll.mapper || mk !== mapperKey) {
       mapperKey = mk;
-      const next = scrollMapper(layout.total, g.env.maxPhysical ?? MAX_PHYSICAL, box.block);
+      const next = scrollMapper(layout.total, g.env.maxPhysical ?? MAX_PHYSICAL, block);
       // The body grows first: a scroll written before would be clamped to the old height.
       setPx(el.body, 'block-size', next.physicalHeight);
       // Taller or shorter rows (text zoom): the same row stays at the top, at the same fraction (rows of
@@ -207,7 +215,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
         const f = kernel.focus;
         const i = (f?.kind === 'cell' && shown?.displayed === d ? d.indexOf(f.row) : -1) as DisplayIndex;
         const o = i < 0 ? 0 : was!.offsetOf(i);
-        if (i >= 0 && o + was!.heightOf(i) > top && o < top + box.block) g.reveal(i, box.block);
+        if (i >= 0 && o + was!.heightOf(i) > top && o < top + block) g.reveal(i, block);
       }
     }
     lastH = h;
@@ -237,7 +245,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     }
     anchorNext = null;
     const centerView = Math.max(0, box.inline - L.start.width - extra - L.end.width);
-    const w = windowAt(layout, L.center.widths, scroll.logicalTop, scroll.physicalTop, box.scrollInline, { block: box.block, inline: centerView }, {
+    const w = windowAt(layout, L.center.widths, scroll.logicalTop, scroll.physicalTop, box.scrollInline, { block, inline: centerView }, {
       // At rest a couple of rows (the body's node budget); more while scrolling fast.
       overscanRows: settings.overscan?.rows ?? overscanRows(g.now() - g.scrolledAt < 150 ? g.speed : 0, h, { min: OVERSCAN_ROWS, max: 40 }),
       overscanCols: settings.overscan?.cols ?? OVERSCAN_COLS,

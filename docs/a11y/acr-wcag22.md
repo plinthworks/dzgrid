@@ -6,7 +6,7 @@ the owner: `docs/a11y/acr-resume-fr.md`.
 
 | | |
 |---|---|
-| Name of product / version | DzGrid — `@dzgrid/dom`, `@dzgrid/theme`, `@dzgrid/angular`; 1.8.0 in preparation (main branch, commit `98bc9f8`, after Phase 11 lot L4a). Last published: 1.7.0. |
+| Name of product / version | DzGrid — `@dzgrid/dom`, `@dzgrid/theme`, `@dzgrid/angular`; 1.8.0 in preparation (main branch, commit `98bc9f8`, after Phase 11 lot L4a). Last published: 1.7.0. `@dzgrid/element` (`<dz-grid>`, added in 1.8.0) draws the same `@dzgrid/dom` grid and is not evaluated apart in this draft (its demo page: axe 0 in Chrome). |
 | Report date | 2026-11-08 |
 | Product description | A data grid for web applications: virtualised rows, sorting, filters, editing, cell blocks and clipboard, tree, row grouping, master / detail, pivot, column tools, a dock of side panels. `@dzgrid/dom` draws it and handles keys, focus and announcements; `@dzgrid/theme` gives its colours and layout rules; `@dzgrid/angular` wraps the same DOM grid for Angular. Right to left (Arabic) is part of the design. |
 | Contact | The project's repository owner. |

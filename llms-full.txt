@@ -33,6 +33,11 @@ The grid fills its host element: give the host a height.
 <div id="books" style="block-size: 420px; display: flex; flex-direction: column"></div>
 ```
 
+The `display: flex; flex-direction: column` matters: it stretches the grid to the host's height, so the grid
+scrolls inside it and draws only the rows in view. Without it the grid grows with its rows; it then holds its
+view to the window's height and tells a `problems` event with the code `unbounded-viewport` (path `host`) once.
+Seeing that code means: give the host this layout (or size the grid's `.dzg` yourself).
+
 ```ts
 import { createGrid } from '@dzgrid/dom';
 import type { ColumnOrGroup } from '@dzgrid/core';

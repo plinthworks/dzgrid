@@ -1317,3 +1317,23 @@ after a report to the owner.
   (`docs/behaviors/web-component.md`): properties, attributes, `dzg-*` events by one naming rule, light DOM, `definePart`
   parts; jsdom tests, Chrome `npm run test:element` 16 / 16 (tree and pivot, fr / ar, axe 0); 1 587 B over the DOM
   layer (line 1 750); the release scripts publish a fifth package. Left: Firefox, WebKit, a React / Vue smoke page.
+
+## Phase 11 — close (2026-11-09, not committed; 1.8.0 prepared, not published)
+
+Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check and code review at L9, findings fixed.
+- [x] L1 leftovers R1, R2, R5, R6 (DOM test; scroll gestures in the permutations kept as is), R7 / R8 kept on purpose,
+  R11. L2 golf (31 B) and R3, R4, R9, R10; K.8 measured as a production build ships it (owner A).
+- [x] L3 4× CPU profile (`bench:browser -- --cpu 4`, `perf/browser-budgets-4x.json`) and its three worst lines fixed;
+  misses written for the owner (`<dz-grid>` drag 55.1 / 51.6 ms, the million-row tree at its caps).
+- [x] L4a automated a11y checks and their fixes (Chrome); L4b the ACR draft `docs/a11y/acr-wcag22.md` and the listening
+  route `parcours-essentiel.md`. **L4c, the listening: the owner's, not done** (no `manual-*.md` yet).
+- [x] L5 print polish and `@dzgrid/dom/print-menu` (Chrome, Firefox as PDF text; WebKit by emulation only).
+- [x] L6 the guide `docs/guide/`, `llms.txt`, `llms-full.txt`; L7 `@dzgrid/element` (Chrome only: Firefox, WebKit and
+  a React / Vue page left); L8 the public benchmark outside the repo (one day; its scripts not published).
+- [x] L9 the unbounded viewport (found by L8): a view grown with its rows held to the window, `unbounded-viewport` told
+  once; 100 000 rows without the layout: 24 rows drawn, a sort in 32 ms (1.7.0: 37 s).
+- Sizes: DOM base 23 850, K.8 88 742 / 90 000, element 1 750, the real Angular build's line 100 000 (measured 99 717).
+- Checks: `gate:step` green (9 025 tests ×3), `release:check` « the 5 packages at 1.8.0 », `test:real-app` 58 / 58.
+- For the owner: publish 1.8.0 (the element's first publish from the Mac, then its trusted publisher); the listening
+  L4c; the 4× misses; `<dz-grid>` in Firefox and WebKit before or after the publish; the benchmark's second day.
+

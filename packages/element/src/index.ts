@@ -171,7 +171,8 @@ export class DzGridElement<T = unknown> extends Base {
     this.#wired = true;
     // Not a box of its own unless the page says so (an unknown element is inline): laid out as Angular's host.
     if (!this.style.display && this.ownerDocument.defaultView?.getComputedStyle(this).display === 'inline') this.style.display = 'contents';
-    if (!this.#grid) this.#mount();
+    // Changed while out of the page (a framework moving it): the grid kept takes what changed.
+    this.#apply();
   }
 
   disconnectedCallback(): void {
@@ -189,7 +190,11 @@ export class DzGridElement<T = unknown> extends Base {
     let v: unknown = undefined;
     if (now !== null) {
       if (kind === 'boolean') v = now !== 'false';
-      else if (kind === 'number') v = Number(now);
+      else if (kind === 'number') {
+        // An empty or unreadable number is left out and told, as any value it cannot read (`Number('')` is 0).
+        if (now.trim() && Number.isFinite(+now)) v = +now;
+        else this.#tell([problem('invalid-setting', 'warning', `attribute:${name}`, now)]);
+      }
       else if (kind === 'text') v = now;
       else if (now !== '') {
         const ok = kind === 'locale' ? takes(() => Intl.getCanonicalLocales(now)) : kind === 'zone' ? takes(() => new Intl.DateTimeFormat('en', { timeZone: now })) : kind.includes(now);
@@ -214,7 +219,7 @@ export class DzGridElement<T = unknown> extends Base {
       this.#grid = createGrid<T, RowModel<T>>(this, { ...(s as unknown as GridSettings<T>), onEvent: (e) => this.#hear(e) }, this.#env);
     } catch (e) {
       this.#early = null;
-      this.replaceChildren(...[...this.children].filter((c) => !c.classList.contains('dzg')));
+      this.replaceChildren(...[...this.childNodes].filter((c) => !(c as Element).classList?.contains('dzg')));
       this.#tell([problem('invalid-setting', 'error', 'element', 'refused')]);
       return this.#gaveUp(e);
     }

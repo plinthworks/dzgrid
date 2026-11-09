@@ -40,7 +40,7 @@ properties. It listens to `dzg-*` events.
    `label`, `overlay` (`loading` | `error`), `busy`, `motion`, `multi-sort` (fixed, read when the grid is made). A
    boolean attribute is on when present (or `"true"`), off with `"false"`. Taken away, the setting goes back to the
    grid's default (the key is updated to `undefined`). A value the element cannot read — an unknown word, a locale
-   or zone `Intl` refuses — is left out and told: `invalid-setting`, severity `warning`, path `attribute:<name>`,
+   or zone `Intl` refuses, a `row-height` empty or not a number — is left out and told: `invalid-setting`, severity `warning`, path `attribute:<name>`,
    detail the raw value (an attribute is the page's markup, never row data). A row height out of range is the grid's
    own warning (`settings.rowHeight`).
 6. **Direction.** Without `direction` the grid follows the element's own direction: `<dz-grid dir="rtl">`, or a
@@ -58,12 +58,13 @@ properties. It listens to `dzg-*` events.
    `{ grid }`) is dispatched then (after the creation events of rule 8). `grid` is the `GridInstance` (its `kernel`,
    `api`, `update`) while drawn, null otherwise. `update(patch)` is `grid.update` (nothing before the grid exists).
 10. **Disconnect and reconnect.** Taken out of the document, the element destroys its grid a microtask later,
-    unless it was put back in the meantime (a move within the page keeps the grid, its sort and scroll). Put back
+    unless it was put back in the meantime (a move within the page keeps the grid, its sort and scroll; what was
+    changed while it was out — an attribute, a property — reaches the grid when it is put back). Put back
     later, it makes a new grid from the same properties and attributes (what the user changed since — sort, filter,
     scroll — is not kept; `gridState()` with `persist` keeps it), and `dzg-ready` is dispatched again.
 11. **Bad input never throws.** A property of the wrong kind (`columns` not a list, `settings` not an object…) is
     refused and told: `invalid-setting`, severity `error`, path `property:<name>`. A grid `createGrid` refuses (its
-    texts incomplete) is not drawn, told (`invalid-setting`, path `element`, detail `refused`) and `ready` rejects
+    texts incomplete) is not drawn (the element's own children, text included, are kept), told (`invalid-setting`, path `element`, detail `refused`) and `ready` rejects
     with that error; an `update` the grid refuses (it throws) is told the same way with path `update`.
 12. **Light DOM only.** The grid is drawn inside the element, in the page: the theme's sheets (`@dzgrid/theme`,
     cascade layers), Tailwind or Bootstrap, the page's own rules and `--tz-*` / `--dzg-*` variables apply as they
