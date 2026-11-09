@@ -1,9 +1,9 @@
 /**
  * The release: check, publish, verify (1.0.0, 2026-10-28; docs/release-1.0.0.md).
  *
- *   npm run release:check [-- --tag v1.0.0]   the four built manifests agree with each other and with the tag
+ *   npm run release:check [-- --tag v1.0.0]   the five built manifests agree with each other and with the tag
  *   npm run publish:release [-- --dry-run]    publish what the registry does not have yet, then verify it arrived
- *   npm run publish:latest -- --otp=123456   the same from a laptop (as tzslot: one code, all four)
+ *   npm run publish:latest -- --otp=123456   the same from a laptop (as tzslot: one code, all five)
  *   npm run publish:verify                    the verification alone
  *
  * Run by .github/workflows/release.yml on a `v*` tag, after the gates, with npm's trusted publishing (OIDC): no
@@ -21,10 +21,10 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /** Dependencies before dependents. */
-export const ORDER = ['core', 'dom', 'theme', 'angular'];
+export const ORDER = ['core', 'dom', 'theme', 'angular', 'element'];
 
 /** Where each package is published from: the build output, the theme from its own folder (its `files`). */
-export const FOLDERS = { core: 'packages/core/dist', dom: 'packages/dom/dist', theme: 'packages/theme', angular: 'packages/angular/dist' };
+export const FOLDERS = { core: 'packages/core/dist', dom: 'packages/dom/dist', theme: 'packages/theme', angular: 'packages/angular/dist', element: 'packages/element/dist' };
 
 /**
  * Problems with a release, as sentences; empty when it can go. `manifests`: `{ '@dzgrid/core': manifest, … }` as
@@ -69,7 +69,7 @@ function check(tag) {
   const problems = releaseProblems(manifests, tag);
   for (const p of problems) console.error(`✖ ${p}`);
   if (problems.length) process.exit(1);
-  console.log(`Release check: the four packages at ${manifests['@dzgrid/core'].version}${tag ? `, tag ${tag}` : ''}.`);
+  console.log(`Release check: the ${ORDER.length} packages at ${manifests['@dzgrid/core'].version}${tag ? `, tag ${tag}` : ''}.`);
   return manifests['@dzgrid/core'].version;
 }
 
@@ -118,7 +118,7 @@ async function verify(version) {
     console.error(`\n${missing} of ${ORDER.length} packages are missing: the others ask for them, so they cannot be installed yet.`);
     process.exit(1);
   }
-  console.log('\nAll four are on npm.');
+  console.log(`\nAll ${ORDER.length} are on npm.`);
 }
 
 const main = async () => {
@@ -127,7 +127,7 @@ const main = async () => {
   const tag = tagArg ?? (process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME : undefined);
   const dryRun = rest.includes('--dry-run');
   const provenance = !rest.includes('--no-provenance');
-  // A laptop with two-factor auth on writes: one code for the four (tzslot's lesson: a prompt per package expires).
+  // A laptop with two-factor auth on writes: one code for them all (tzslot's lesson: a prompt per package expires).
   const otp = rest.find((a) => a.startsWith('--otp='))?.slice(6);
   if (command === 'check') return void check(tag);
   if (command === 'verify') return verify(check(tag));

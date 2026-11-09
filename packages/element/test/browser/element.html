@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: the Web Component</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/core/grouping": "/packages/core/src/grouping.ts",
+  "@dzgrid/core/pivot": "/packages/core/src/pivot.ts",
+  "@dzgrid/core/spans": "/packages/core/src/spans.ts",
+  "@dzgrid/core/rules": "/packages/core/src/rules.ts",
+  "@dzgrid/core/tree": "/packages/core/src/tree.ts",
+  "@dzgrid/core/tree-lazy": "/packages/core/src/tree-lazy.ts",
+  "@dzgrid/core/dock": "/packages/core/src/dock.ts",
+  "@dzgrid/core/state": "/packages/core/src/state.ts",
+  "@dzgrid/core/server": "/packages/core/src/server.ts",
+  "@dzgrid/core/server-side": "/packages/core/src/server-side.ts",
+  "@dzgrid/dom": "/packages/dom/src/index.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<link rel="stylesheet" href="/packages/theme/grouping.css">
+<link rel="stylesheet" href="/packages/theme/pivot.css">
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); }
+  section { inline-size: min(1000px, 100%); margin-block-end: 24px; }
+  dz-grid > .dzg { block-size: 360px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DzGrid</h1>
+  <section><h2 id="tree-title"></h2><dz-grid id="tree" density="compact"></dz-grid></section>
+  <section><h2 id="pivot-title"></h2><dz-grid id="pivot" row-height="36"></dz-grid></section>
+</main>
+<script type="module" src="./element.ts"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "@dzgrid/element",
+  "version": "1.7.0",
+  "description": "DzGrid as a Web Component: <dz-grid> for any page or framework, in the page (the theme applies); attributes, properties and dzg-* DOM events.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": [
+    "./define.js"
+  ],
+  "peerDependencies": {
+    "@dzgrid/core": "1.7.0",
+    "@dzgrid/dom": "1.7.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./define": {
+      "types": "./src/define.ts",
+      "default": "./src/define.ts"
+    }
+  }
+}

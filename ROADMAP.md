@@ -1311,3 +1311,9 @@ after a report to the owner.
 - [x] Chrome (local `playground/pivot-serveur.html`, not committed): first frame after the root answer 20 / 20, p95
   20.7 ms; axe 0 fr / ar. Sizes and decisions: `docs/phase-10-steps/decisions.md` « Server pivot — owner A ».
 
+## Phase 11 — hardening and ecosystem (started 2026-11-08; lots and measures in `docs/phase-11-steps/decisions.md`)
+
+- [x] L7, the second wrapper (owner Q3 A, 2026-11-09, not committed): `@dzgrid/element`, `<dz-grid>` as a Web Component
+  (`docs/behaviors/web-component.md`): properties, attributes, `dzg-*` events by one naming rule, light DOM, `definePart`
+  parts; jsdom tests, Chrome `npm run test:element` 16 / 16 (tree and pivot, fr / ar, axe 0); 1 587 B over the DOM
+  layer (line 1 750); the release scripts publish a fifth package. Left: Firefox, WebKit, a React / Vue smoke page.

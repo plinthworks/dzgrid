@@ -28,7 +28,7 @@ import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-export const PACKAGES = ['core', 'dom', 'angular'];
+export const PACKAGES = ['core', 'dom', 'angular', 'element'];
 export const baselineFile = (name) => join(root, 'api', `dzgrid-${name}.api.txt`);
 
 const printer = ts.createPrinter({ removeComments: true, newLine: ts.NewLineKind.LineFeed });

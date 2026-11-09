@@ -1,5 +1,5 @@
 /**
- * `npm run pack:local` (after `npm run build`): the four packages as tarballs in `packed/`, each with a version of its
+ * `npm run pack:local` (after `npm run build`): the five packages as tarballs in `packed/`, each with a version of its
  * own (app-feedback 15): the next patch with a prerelease stamped to the second, `0.3.1-local.20261027170509`, and every
  * `@dzgrid/*` range pinned to it. Same version, same `file:` path, and npm kept an application's old integrity hash and
  * old peer ranges; a new version each time, and `npm install` takes the new bytes. The sources keep their version: the
@@ -34,7 +34,7 @@ const main = () => {
   mkdirSync(tmp);
   const base = JSON.parse(readFileSync(join(root, 'packages/core/package.json'), 'utf8')).version;
   const version = localVersion(base);
-  const sources = { core: 'packages/core/dist', dom: 'packages/dom/dist', angular: 'packages/angular/dist', theme: 'packages/theme' };
+  const sources = { core: 'packages/core/dist', dom: 'packages/dom/dist', angular: 'packages/angular/dist', element: 'packages/element/dist', theme: 'packages/theme' };
   for (const [name, from] of Object.entries(sources)) {
     const dir = join(stage, name);
     // The theme's folder as npm would pack it (its `files`), without its tests.

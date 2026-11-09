@@ -15,13 +15,14 @@ describe('release.mjs', () => {
     '@dzgrid/dom': { name: '@dzgrid/dom', version: v, peerDependencies: { '@dzgrid/core': peer } },
     '@dzgrid/theme': { name: '@dzgrid/theme', version: v },
     '@dzgrid/angular': { name: '@dzgrid/angular', version: v, peerDependencies: { '@dzgrid/core': peer, '@dzgrid/dom': peer } },
+    '@dzgrid/element': { name: '@dzgrid/element', version: v, peerDependencies: { '@dzgrid/core': peer, '@dzgrid/dom': peer } },
   });
 
-  it('publishes dependencies before dependents: core, dom, theme, angular', () => {
-    expect(ORDER).toEqual(['core', 'dom', 'theme', 'angular']);
+  it('publishes dependencies before dependents: core, dom, theme, angular, element (Phase 11 L7)', () => {
+    expect(ORDER).toEqual(['core', 'dom', 'theme', 'angular', 'element']);
   });
 
-  it('accepts four manifests at the tag\'s version, peers on ^version', () => {
+  it('accepts five manifests at the tag\'s version, peers on ^version', () => {
     expect(releaseProblems(at('1.0.0'), 'v1.0.0')).toEqual([]);
     expect(releaseProblems(at('1.0.0'), undefined)).toEqual([]);
   });
@@ -30,13 +31,13 @@ describe('release.mjs', () => {
     expect(releaseProblems(at('1.0.0'), 'v1.0.1')).toEqual(['tag v1.0.1 is not v1.0.0, the packages\' version']);
     const mixed = { ...at('1.0.0'), '@dzgrid/theme': { name: '@dzgrid/theme', version: '0.3.0' } };
     expect(releaseProblems(mixed, 'v1.0.0')).toEqual(['@dzgrid/theme is 0.3.0, not 1.0.0']);
-    expect(releaseProblems(at('1.0.0', '^0.3.0'), 'v1.0.0')).toHaveLength(3);
+    expect(releaseProblems(at('1.0.0', '^0.3.0'), 'v1.0.0')).toHaveLength(5);
     expect(releaseProblems(at('1.0.1-local.20261028000000', '1.0.1-local.20261028000000'), undefined)[0]).toMatch(/prerelease/);
   });
 
   it('skips what the registry already has, publishes the rest in order', () => {
-    expect(toPublish('1.0.0', { core: ['1.0.0'], dom: [], theme: ['0.9.0'], angular: [] })).toEqual(['dom', 'theme', 'angular']);
-    expect(toPublish('1.0.0', { core: ['1.0.0'], dom: ['1.0.0'], theme: ['1.0.0'], angular: ['1.0.0'] })).toEqual([]);
+    expect(toPublish('1.0.0', { core: ['1.0.0'], dom: [], theme: ['0.9.0'], angular: [] })).toEqual(['dom', 'theme', 'angular', 'element']);
+    expect(toPublish('1.0.0', { core: ['1.0.0'], dom: ['1.0.0'], theme: ['1.0.0'], angular: ['1.0.0'], element: ['1.0.0'] })).toEqual([]);
   });
 
   it('the workflow publishes on a v* tag over OIDC, runs the gates first, stores no token', () => {

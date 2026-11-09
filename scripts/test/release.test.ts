@@ -10,11 +10,11 @@ import { mapProblems, publishProblems, repositoryProblems } from '../manifest.mj
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const pkg = (name: string) => JSON.parse(readFileSync(`${ROOT}packages/${name}/package.json`, 'utf8'));
-const NAMES = ['core', 'dom', 'angular', 'theme'];
+const NAMES = ['core', 'dom', 'angular', 'theme', 'element'];
 
 describe('1.7.0, the four packages', () => {
   it('share one version, 1.7.0', () => {
-    expect(NAMES.map((n) => pkg(n).version)).toEqual(['1.7.0', '1.7.0', '1.7.0', '1.7.0']);
+    expect(NAMES.map((n) => pkg(n).version)).toEqual(['1.7.0', '1.7.0', '1.7.0', '1.7.0', '1.7.0']);
   });
 
   it('name their @dzgrid peers at that version (build.mjs pins them to ^1.7.0)', () => {

@@ -38,6 +38,17 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   the File menu) prints the same table as `print()` — built at once on `beforeprint`, removed after. Opt-in; a table
   `print()` prepared is left as it is.
 
+- **A new package, `@dzgrid/element`: `<dz-grid>` as a Web Component** (`docs/behaviors/web-component.md`), for plain
+  HTML and any framework. `import '@dzgrid/element/define'` defines `<dz-grid>` (`@dzgrid/element` alone defines
+  nothing: `DzGridElement`, `defineDzGrid(name = 'dz-grid')`, never throws on a server). Properties `rows`, `source`,
+  `columns`, `getRowId`, `messages`, `features`, `parts`, `settings` (every other setting, compared key by key), `env`;
+  live through `update`. Attributes `locale`, `time-zone`, `numerals`, `direction`, `density`, `row-height`, `label`,
+  `overlay`, `busy`, `motion`, `multi-sort`. Every grid event as `dzg-<type in kebab case>` (`dzg-row-move`,
+  `dzg-selection-changed`…), `detail` the event; `dzg-ready`, `ready`, `grid`, `problems`. Drawn in the page, not in a
+  shadow root (the theme, the popups and the print table live in the document). Parts are `definePart` functions;
+  `<template>` children are not read. Same tag as Angular's selector: an Angular app keeps `@dzgrid/angular`, a page
+  with both calls `defineDzGrid('dz-grid-wc')`. `npm run test:element` checks it in Chrome.
+
 ### Changed
 - `dom/grouping` sets the pivot up beside a `serverSideRows` model that has the plug; beside `sourceRows`,
   `infiniteRows` or `serverSideRows` without it, still refused (`unsupported-combination`, `source`, `pivot`).

@@ -8,6 +8,7 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **Blocks of cells, the clipboard, the fill handle** (`@dzgrid/core/range`, `@dzgrid/dom/range`, `/fill`): Shift+arrows, a drag, Ctrl+A; copy, cut, paste and Delete in TSV that Excel and Sheets read (the locale's numbers, formula starts guarded); the fill handle, a click-then-click fill, the keyboard fill mode, Ctrl+D / Ctrl+R, Ctrl+Enter for a whole block — each one save and one undo, right to left included.
 - **A theme** (`@dzgrid/theme`): CSS custom properties in a cascade layer, light and dark, every text and part checked for contrast; two showcase themes (Midnight, Clinic) and bridges to Tailwind CSS 3 and 4 and Bootstrap 5.3.
 - **Angular** (`@dzgrid/angular`): `<dz-grid>` with signals, zoneless first, cells and other parts as Angular components or templates; Angular 19 to 22.
+- **A Web Component** (`@dzgrid/element`): `<dz-grid>` for plain HTML and any framework (React 19, Vue, Svelte…): properties and attributes, `dzg-*` DOM events, in the page so the theme applies.
 
 > **Status: 1.1.0 prepared (2026-10-28, the Phase 6 close; 1.0.0 is on npm; see [`CHANGELOG.md`](CHANGELOG.md)).** Phases 0 to 6 are done (core, DOM layer, theme, server, filters, export, Angular, tree, master/detail, editing, blocks of cells, the clipboard, the fill handle; moving columns, the column menu and chooser, the grid's state, collapsible header groups, editable pinned rows, automatic row height, printing). Still open by hand: input methods and phones (a11y 124a–b), real Excel / Google Sheets / Safari checks, screen-reader listening, the Arabic review. Next: Phases 7 to 11, then the documentation website — see [`docs/STATUS.md`](docs/STATUS.md). From 1.0.0 on, breaking changes need a major version.
 
@@ -26,6 +27,7 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 ```sh
 npm install @dzgrid/core @dzgrid/dom @dzgrid/theme
 npm install @dzgrid/angular            # with Angular 19 to 22
+npm install @dzgrid/element            # <dz-grid> as a Web Component, any page or framework
 ```
 
 ESM only, no runtime dependency (the Angular package: `tslib` only). Optional peers, only for the features that use them: `@tzslot/core` and
@@ -166,6 +168,7 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/theme/{midnight,clinic}.css` | the showcase themes | 446 / 472 |
 | `@dzgrid/theme/{tailwind,tailwind3,bootstrap}.css` | the framework bridges | 325 / 325 / 293 |
 | `@dzgrid/angular` | the Angular wrapper | 7 316 |
+| `@dzgrid/element` | the Web Component, over the DOM layer | 1 587 |
 | profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 84 912 |
 | the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`, at the Phase 6 close) | 94 609 |
 

@@ -212,6 +212,12 @@
       "@dzgrid/dom/locales/*": [
         "./packages/dom/src/locales/*.ts"
       ],
+      "@dzgrid/element": [
+        "./packages/element/src/index.ts"
+      ],
+      "@dzgrid/element/define": [
+        "./packages/element/src/define.ts"
+      ],
       "@dzgrid/angular": [
         "./packages/angular/src/index.ts"
       ]
@@ -226,6 +232,7 @@
   "exclude": [
     "**/dist/**",
     "**/node_modules/**",
-    "packages/dom/test/browser/**"
+    "packages/dom/test/browser/**",
+    "packages/element/test/browser/**"
   ]
 }

@@ -28,12 +28,14 @@ const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, stdio: 'in
 const PACKAGES = {
   core: ['.', './internal', './server', './spans', './csv', './xlsx', './rules', './tree', './tree-lazy', './detail', './compare', './edit', './range', './state', './row-gaps', './grouping', './infinite', './server-side', './row-drag', './dock', './pivot', './server-pivot'],
   dom: ['.', './internal', './popup', './spans', './groups', './slots', './search', './pagination', './export', './parts', './rules', './tree', './tree-lazy', './detail', './edit', './editors', './editors-base', './editors-list', './range', './fill', './columns', './column-menu', './columns-panel', './state', './pinned-rows', './auto-height', './row-gaps', './fresh-rows', './print', './print-menu', './context-menu', './statusbar', './find', './filters-panel', './row-numbers', './grouping', './group-zone', './row-drag', './dock', './motion-gsap', './pivot', './pivot-bar', './filters', './filters-base', './locales/en', './locales/fr', './locales/ar', './locales/en-filters', './locales/fr-filters', './locales/ar-filters', './locales/en-pagination', './locales/fr-pagination', './locales/ar-pagination', './locales/en-export', './locales/fr-export', './locales/ar-export', './locales/en-parts', './locales/fr-parts', './locales/ar-parts', './locales/en-rules', './locales/fr-rules', './locales/ar-rules', './locales/en-tree', './locales/fr-tree', './locales/ar-tree', './locales/en-detail', './locales/fr-detail', './locales/ar-detail', './locales/en-edit', './locales/fr-edit', './locales/ar-edit', './locales/en-editors', './locales/fr-editors', './locales/ar-editors', './locales/en-range', './locales/fr-range', './locales/ar-range', './locales/en-fill', './locales/fr-fill', './locales/ar-fill', './locales/en-columns', './locales/fr-columns', './locales/ar-columns', './locales/en-column-menu', './locales/fr-column-menu', './locales/ar-column-menu', './locales/en-context-menu', './locales/fr-context-menu', './locales/ar-context-menu', './locales/en-status', './locales/fr-status', './locales/ar-status', './locales/en-find', './locales/fr-find', './locales/ar-find', './locales/en-filters-panel', './locales/fr-filters-panel', './locales/ar-filters-panel', './locales/en-row-numbers', './locales/fr-row-numbers', './locales/ar-row-numbers', './locales/en-group', './locales/fr-group', './locales/ar-group', './locales/en-pinned', './locales/fr-pinned', './locales/ar-pinned', './locales/en-print', './locales/fr-print', './locales/ar-print', './locales/en-fresh', './locales/fr-fresh', './locales/ar-fresh', './locales/en-row-drag', './locales/fr-row-drag', './locales/ar-row-drag', './locales/en-dock', './locales/fr-dock', './locales/ar-dock', './locales/en-pivot', './locales/fr-pivot', './locales/ar-pivot', './locales/en-pivot-bar', './locales/fr-pivot-bar', './locales/ar-pivot-bar'],
+  // `<dz-grid>` (Phase 11 L7): the class and `defineDzGrid`; `./define` defines the element (its one side effect).
+  element: ['.', './define'],
 };
 /** Built after the TypeScript packages, against their dist/ declarations. */
 const ANGULAR = 'angular';
 
 /** Keywords a package adds to the shared ones. */
-const KEYWORDS = { core: ['headless', 'i18n', 'timezone'], dom: ['vanilla', 'i18n', 'accessibility'], angular: ['angular', 'signals', 'standalone'] };
+const KEYWORDS = { core: ['headless', 'i18n', 'timezone'], dom: ['vanilla', 'i18n', 'accessibility'], angular: ['angular', 'signals', 'standalone'], element: ['web-component', 'custom-element', 'vanilla'] };
 
 const shared = (name) => ({
   license: read(join(pkg(name), 'package.json')).license,
@@ -65,7 +67,8 @@ function typescript(name) {
     description: source.description,
     ...shared(name),
     type: 'module',
-    sideEffects: false,
+    // None, but where the source names them (`@dzgrid/element/define` defines `<dz-grid>`: a bundler must keep it).
+    sideEffects: source.sideEffects ?? false,
     main: './index.js',
     module: './index.js',
     types: './index.d.ts',

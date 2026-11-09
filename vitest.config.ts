@@ -112,6 +112,8 @@ export default defineConfig({
           setupFiles: ['packages/angular/test-zone/setup.ts'], include: ['packages/angular/test-zone/**/*.test.ts'],
         },
       },
+      // `<dz-grid>` (Phase 11 L7): the DOM layer's aliases, the element's own sources.
+      { resolve: { alias: { ...domAlias, '@dzgrid/element': fileURLToPath(new URL('./packages/element/src/index.ts', import.meta.url)) } }, test: { name: 'element', globals: true, environment: 'jsdom', include: ['packages/element/test/**/*.test.ts'] } },
       { test: { name: 'theme', globals: true, environment: 'node', include: ['packages/theme/test/**/*.test.ts'] } },
       { test: { name: 'tools', globals: true, environment: 'node', include: ['spikes/test/**/*.test.ts', 'scripts/test/**/*.test.ts', 'perf/test/**/*.test.ts'] } },
     ],

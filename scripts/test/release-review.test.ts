@@ -12,7 +12,7 @@ import { pinPeers, peerProblems } from '../manifest.mjs';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const pkg = (name: string) => JSON.parse(readFileSync(`${ROOT}packages/${name}/package.json`, 'utf8'));
-const NAMES = ['core', 'dom', 'angular', 'theme'];
+const NAMES = ['core', 'dom', 'angular', 'theme', 'element'];
 const VERSIONS = Object.fromEntries(NAMES.map((n) => [pkg(n).name, pkg(n).version]));
 
 describe('1.7.0 as npm would receive it', () => {
@@ -47,7 +47,9 @@ describe('1.7.0 as npm would receive it', () => {
   it.skipIf(!existsSync(packed))('the packed tarballs: no test sources, sideEffects as declared, version 1.7.0, every exported file present', () => {
     const tgz = readdirSync(packed).filter((f) => f.endsWith('.tgz'));
     expect(V).toMatch(/^(1\.7\.0|1\.7\.1-local\.\d{14})$/);
-    expect(tgz.sort()).toEqual(['angular', 'core', 'dom', 'theme'].map((n) => `dzgrid-${n}-${V}.tgz`));
+    // `@dzgrid/element` (Phase 11 L7) is packed from the first pack made after it: an older pack has the four.
+    const element = tgz.some((f) => f.startsWith('dzgrid-element-'));
+    expect(tgz.sort()).toEqual(['angular', 'core', 'dom', ...(element ? ['element'] : []), 'theme'].map((n) => `dzgrid-${n}-${V}.tgz`));
     for (const t of tgz) {
       const list = execFileSync('tar', ['-tzf', `${packed}/${t}`], { encoding: 'utf8' }).split('\n').filter(Boolean);
       expect(list.filter((f) => /(^|\/)(test|tests|__tests__|fixtures|playground|screenshots|results)\/|\.(test|spec)\.|\.d\.ts\.map$/.test(f)), t).toEqual([]);
@@ -59,7 +61,7 @@ describe('1.7.0 as npm would receive it', () => {
       const walk = (v: unknown): void => { if (typeof v === 'string') named.add(v.replace(/^\.\//, '')); else if (v && typeof v === 'object') Object.values(v).forEach(walk); };
       walk(m.exports);
       expect([...named].filter((f) => !list.includes(`package/${f}`)), t).toEqual([]);
-      expect(m.sideEffects, t).toEqual(t.includes('theme') ? ['*.css'] : false);
+      expect(m.sideEffects, t).toEqual(t.includes('theme') ? ['*.css'] : t.includes('element') ? ['./define.js'] : false);
     }
   });
 

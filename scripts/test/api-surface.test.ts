@@ -71,7 +71,8 @@ describe('api.mjs, what counts as a compatible change', () => {
   it('has a baseline for each package, with its history', () => {
     for (const name of PACKAGES) {
       const { surface, history } = parse(readFileSync(baselineFile(name), 'utf8'));
-      expect(history[0]).toMatch(/^1\.0\.0 as published on npm/);
+      // `@dzgrid/element` arrived after 1.0.0 (Phase 11 L7): its baseline starts with the new package.
+      expect(history[0]).toMatch(name === 'element' ? /^1\.8\.0 new package/ : /^1\.0\.0 as published on npm/);
       expect(Object.keys(surface).length).toBeGreaterThan(0);
     }
   });

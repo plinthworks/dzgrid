@@ -1,0 +1,73 @@
+# The accepted public type surface — written by scripts/api.mjs, checked by `npm run check:api`.
+# Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
+# history: 1.8.0 new package @dzgrid/element (Phase 11 L7, owner Q3 A: a Web Component; created alone, the other baselines untouched)
+
+@ @dzgrid/element
+## DzGridElement
+  export declare class DzGridElement<T = unknown> extends Base {
+      #private;
+      static readonly observedAttributes: string[];
+      readonly ready: Promise<void>;
+      constructor();
+      get grid(): GridInstance<T, RowModel<T>> | null;
+      get problems(): readonly Problem[];
+      get rows(): GridSettings<T>['rows'];
+      set rows(v: GridSettings<T>['rows']);
+      get source(): GridSettings<T>['source'];
+      set source(v: GridSettings<T>['source']);
+      get columns(): GridSettings<T>['columns'] | undefined;
+      set columns(v: GridSettings<T>['columns'] | undefined);
+      get getRowId(): GridSettings<T>['getRowId'] | undefined;
+      set getRowId(v: GridSettings<T>['getRowId'] | undefined);
+      get messages(): GridSettings<T>['messages'] | undefined;
+      set messages(v: GridSettings<T>['messages'] | undefined);
+      get features(): GridSettings<T>['features'];
+      set features(v: GridSettings<T>['features']);
+      get parts(): GridSettings<T>['parts'];
+      set parts(v: GridSettings<T>['parts']);
+      get settings(): Partial<GridSettings<T>>;
+      set settings(v: Partial<GridSettings<T>>);
+      get env(): GridEnv;
+      set env(v: GridEnv);
+      update(patch: Partial<GridSettings<T>>): void;
+      connectedCallback(): void;
+      disconnectedCallback(): void;
+      attributeChangedCallback(name: string, was: string | null, now: string | null): void;
+  }
+## defineDzGrid
+  export declare function defineDzGrid(name?: string): void;
+
+@ @dzgrid/element/define
+## DzGridElement
+  export declare class DzGridElement<T = unknown> extends Base {
+      #private;
+      static readonly observedAttributes: string[];
+      readonly ready: Promise<void>;
+      constructor();
+      get grid(): GridInstance<T, RowModel<T>> | null;
+      get problems(): readonly Problem[];
+      get rows(): GridSettings<T>['rows'];
+      set rows(v: GridSettings<T>['rows']);
+      get source(): GridSettings<T>['source'];
+      set source(v: GridSettings<T>['source']);
+      get columns(): GridSettings<T>['columns'] | undefined;
+      set columns(v: GridSettings<T>['columns'] | undefined);
+      get getRowId(): GridSettings<T>['getRowId'] | undefined;
+      set getRowId(v: GridSettings<T>['getRowId'] | undefined);
+      get messages(): GridSettings<T>['messages'] | undefined;
+      set messages(v: GridSettings<T>['messages'] | undefined);
+      get features(): GridSettings<T>['features'];
+      set features(v: GridSettings<T>['features']);
+      get parts(): GridSettings<T>['parts'];
+      set parts(v: GridSettings<T>['parts']);
+      get settings(): Partial<GridSettings<T>>;
+      set settings(v: Partial<GridSettings<T>>);
+      get env(): GridEnv;
+      set env(v: GridEnv);
+      update(patch: Partial<GridSettings<T>>): void;
+      connectedCallback(): void;
+      disconnectedCallback(): void;
+      attributeChangedCallback(name: string, was: string | null, now: string | null): void;
+  }
+## defineDzGrid
+  export declare function defineDzGrid(name?: string): void;

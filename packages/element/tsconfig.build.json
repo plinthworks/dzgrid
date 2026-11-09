@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": true,
+    "noEmit": false,
+    "inlineSources": true,
+    "paths": {
+      "@dzgrid/core": ["../core/dist/index.d.ts"],
+      "@dzgrid/dom": ["../dom/dist/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

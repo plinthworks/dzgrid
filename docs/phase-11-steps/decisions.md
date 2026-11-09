@@ -434,3 +434,73 @@ rule without the owner); `dom/print` exports only `preparePrint`, `print`, `PRIN
   `tree-walk` timed out under load (green alone); test:tz 2 timed out under load (`search-walk`, `tree-sticky-stack`,
   green alone in Auckland). After the move to the new entry: the print tests, typecheck, build, check:size, check:api
   run again, green.
+
+## L7 — the second wrapper: `@dzgrid/element`, a Web Component (2026-11-09)
+
+Owner Q3 A. Sheet first: `docs/behaviors/web-component.md` (14 rules). Package `packages/element` (version 1.7.0 like
+the others until L9; peers `@dzgrid/core`, `@dzgrid/dom`), entries `@dzgrid/element` and `@dzgrid/element/define`,
+README, `api/dzgrid-element.api.txt`, its size line. Follows DzCalendar's `@dzcalendar/element` (tag defined by
+`/define`, `define…(name)`, a server-safe base class, properties set before the definition taken, destroy a microtask
+after a disconnect, own problems a microtask later, `ready`, `problems` the last 100).
+
+### Decided taken alone (the lead; the owner may say otherwise)
+- **Tag `dz-grid`, the same as Angular's selector** (DzCalendar did the same with `dz-calendar`): only `/define`
+  defines it; `defineDzGrid('dz-grid-wc')` for a page holding both; an element finding a grid already drawn as its child
+  leaves it and tells `already-a-grid`.
+- **Light DOM only, no `shadow` attribute** (unlike DzCalendar): the theme's layered sheets, the popups and the print
+  table live in the document and the layout sheet is injected once per document; a shadow root would split them.
+- **`display: contents`** when the page left the element inline, as Angular's host: sized the same way
+  (`dz-grid > .dzg { block-size }`).
+- **Event names: one rule, no list** — `dzg-` + the grid event's type in kebab case, `detail` the event unchanged; the
+  element's own problems use `dzg-problems` with the grid's shape; `dzg-ready` after each making. `dzg-`, not `dz-`:
+  DzCalendar's events keep theirs.
+- **Parts: `definePart` functions only**; `<template>` children not read (they would need a binding language the grid
+  does not have; a part builds nodes, never HTML from data).
+- **Made when connected with `columns`, `getRowId`, `messages`; nothing told before** (a framework sets properties in
+  any order). Fixed keys changed later: the grid's own `unsupported-live-change` (as Angular), never a remake. Removed
+  and put back later: a new grid (the user's sort and filter not kept; `gridState()` keeps them).
+- **Attributes validated by the element** (enumerations, a locale or zone `Intl` refuses: left out, a warning with the
+  raw attribute value); `row-height` read as a number, its range the grid's own warning; `env` a property read once
+  (the tests' geometry, as Angular's `DZG_ENV`).
+- **Problem code `invalid-setting`** for every element problem (no new core code: the core's list and K.8 untouched).
+- **`sideEffects: ["./define.js"]`** in the built manifest (`build.mjs` takes a source's `sideEffects`, `false`
+  otherwise), as DzCalendar's: a bundler keeps `import '@dzgrid/element/define'`.
+- **Release scripts list a fifth package** (`release.mjs` ORDER after `angular`, `pack-local.mjs`, `pack:release`,
+  `release.yml` wording); the packed-tarball test accepts a pack made before the element (four files).
+- **The API baseline created alone** (`surfaceOf` + `format` for `element`), not by `--accept` without `--only`, which
+  would have rewritten the other three baselines with the unreleased 1.8.0 additions.
+- Left: Firefox and WebKit (the plan's three engines; the coordinator asked Chrome only), a React 19 / Vue 3 smoke page,
+  typed `addEventListener` overloads and an `HTMLElementTagNameMap` entry; review of the new code at L9.
+
+### Checks
+- Tests (jsdom, `packages/element/test`, project `element`): 21 + 1 (node: SSR) — define once, `/define`, Angular's
+  grid left alone; made when the three arrive, nothing told before; properties before the definition; rows live with
+  the sort kept; settings key by key (one `update` of the changed key); a part function draws; a fixed key told by the
+  grid; wrong kinds refused; attributes read, live, removed to the default, winning over settings; row height and
+  density; unreadable values warned with the raw value; `dir` followed; events bubbling and composed, `settings.onEvent`
+  after; creation problems a microtask later then `dzg-ready`; a refused grid told and `ready` rejected; `update`;
+  removed then put back; moved in one task kept. Red first (no source), then green; two expectations of mine corrected
+  (a part draws in `mount`; the first `dzg-ready` was still pending when the listener was added).
+- Chrome, `npm run test:element` (`scripts/browser-element.mjs`, page `packages/element/test/browser/element.html`: a
+  tree and a pivot as two `<dz-grid>`), fr light and ar dark: 16 / 16 — in the page, `display: contents`, `dir`,
+  labelled, sized by the page's rule (362 px: 360 + the theme's border), the theme's header colour, compact 28 px and
+  `row-height` 36 px, the pivot's four months, the tree opened by a click (20 → 50 rows), `dzg-ready` ×2,
+  `dzg-row-expanded`, `dzg-sort-changed` heard, removed and put back drawn again, **axe 0**, no page error.
+- Local demo `playground/element.html` (out of git, `.git/info/exclude`): the tree and the pivot, density and busy
+  switches, remove / put back, the `dzg-*` events listed; `?lang=ar&theme=dark`.
+
+### Sizes (L7)
+| Line | Measure | Line |
+|---|---|---|
+| `@dzgrid/element` (over `@dzgrid/dom`, new) | **1 587** (1 957 alone, `@dzgrid/*` external) | 1 750 (measure + 10 %, rounded up to 50) |
+| core and DOM bases, Angular, K.8 | unchanged (no base or Angular file touched) | — |
+
+`check:api`: the new baseline only (4 exports: `DzGridElement`, `defineDzGrid` in each entry); the other three
+unchanged.
+
+Gate: `gate:step` once. test:ci 8 995 passed, 3 timed out (`expanded-walk` seed 27, `range-cut` cut, `tree-sticky-gaps`
+sticky 1: each 900–1 050 s of wall time against a 5–20 s limit, the Mac pausing), green alone. The chain stopped
+there, so its rest ran by hand: test:tz Auckland 8 998 passed, 4 timed out the same way (950–990 s:
+`filters-dates-gaps`, `row-height`, `sort-select`, `tzslot-agreement`), green alone in Auckland and Los Angeles with the
+element tests; the full Los Angeles run not repeated (the Mac heats); typecheck, build (five packages), check:size
+(K.8 88 595 / 90 000, element 1 587 / 1 750, 0 over), check:api (additions only) green.
