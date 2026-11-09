@@ -32,3 +32,10 @@ describe('built typings import only published entries', () => {
     expect(bad).toEqual([]);
   });
 });
+
+describe('the real Angular example checks the published typings like a strict app', () => {
+  it('compiles with skipLibCheck off (an app with it off met « @dzgrid/core/kernel » on 1.7.0)', () => {
+    const ts = JSON.parse(readFileSync(join(root, 'examples/angular-audit/tsconfig.json'), 'utf8')) as { compilerOptions: { skipLibCheck?: boolean } };
+    expect(ts.compilerOptions.skipLibCheck).toBe(false);
+  });
+});
