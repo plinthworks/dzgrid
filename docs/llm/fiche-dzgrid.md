@@ -74,7 +74,7 @@ Inputs (all optional except the required three):
 - `rows: Iterable<T>` live (new array = reload, rows matched by id). `source: SourceBinding<T>` live (server, §7).
 - `columns: DzgColumnOrGroup<T>[]` **required**, live. `getRowId: (row: T) => string | number` **required**, fixed. `messages: GridMessages` required unless provided, live.
 - `locale: string` live (e.g. `'fr-FR'`). `timeZone: string` live (IANA, for instants). `numerals: 'latn' | 'locale'` live (default Latin digits).
-- `direction: 'ltr' | 'rtl' | 'auto'` live. `density: 'compact' | 'comfortable' | 'spacious'` live (28/32/40 px, default comfortable). `rowHeight: number` live (px, 24–1000, wins over density).
+- `direction: 'ltr' | 'rtl' | 'auto'` live. `density: 'compact' | 'comfortable' | 'spacious'` live (28/32/40 px, default comfortable). `rowHeight: number` live (px, 24–1000, wins over density). `headerHeight: number` live (px, 24–1000; column-header and group rows, the filter row keeps the row height; absent: the row height).
 - `overlay: 'loading' | 'error' | null` live. `busy: boolean` live (thin bar while reloading kept rows).
 - `label: string` (accessible name), `tooltips: { delayMs? }`, `overscan: { rows?, cols? }`, `searchWarmup: 'idle' | 'off'`.
 - `selection: { mode: 'none' | 'single' | 'multi'; checkbox?; click?; keepOnFilter?; canSelect?(row: DataNode<T>, sel, context) => boolean | string }` live. `canSelect` needs `rules()`.
@@ -354,7 +354,7 @@ Editing: `edit({ save })`, `save(req, signal)` gets `req.changes: { key, column,
 - `dzgrid.css` sits in CSS layer `dzgrid` (your classes win without `!important`); with an unlayered reset (Tailwind 3, Bootstrap Reboot) load `dzgrid.unlayered.css` instead. Framework bridges: `tailwind.css` (v4, via Tailwind, order line `@layer theme, base, dzgrid, components, utilities;`), `tailwind3.css`, `bootstrap.css`. Skins: `midnight.css`, `clinic.css`. `contrast.css`: more contrast.
 - Palette (each a `light-dark()` pair on `:root`): `--tz-bg`, `--tz-bg-raised`, `--tz-fg`, `--tz-fg-muted`, `--tz-border`, `--tz-accent`, `--tz-accent-fg`, `--tz-danger`, `--tz-warning`, `--tz-success`.
 - Grid tokens (set on any ancestor of `.dzg`): `--dzg-font`, `--dzg-radius`, `--dzg-cell-padding-inline`, `--dzg-header-bg`, `--dzg-row-hover-bg`, `--dzg-row-selected-bg`, `--dzg-focus-ring`, `--dzg-line`, `--dzg-pill-radius`, `--dzg-header-size`, `--dzg-select-bar`, `--dzg-flash`, `--dzg-flash-color`.
-- Row height: `[rowHeight]` or `[density]` (setting `--dzg-row-height` does nothing; no separate header height). Dark/light: follows the system, or `data-theme="dark" | "light"` on an ancestor. RTL: `[direction]="'rtl'"` or `'auto'` (follows ancestors' `dir`).
+- Row height: `[rowHeight]` or `[density]` (setting `--dzg-row-height` does nothing); a taller header: `[headerHeight]`. Dark/light: follows the system, or `data-theme="dark" | "light"` on an ancestor. RTL: `[direction]="'rtl'"` or `'auto'` (follows ancestors' `dir`).
 - Classes: `ui.cellClass`, `ui.headerClass`, `[rowClass]`. DOM: `.dzg`, `.dzg-row`, `.dzg-cell[data-col="id"]`, `.dzg-hcell`. Grid and popups are outside component style scope: style them in global CSS.
 
 ```css

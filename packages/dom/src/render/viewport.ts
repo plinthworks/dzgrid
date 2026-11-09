@@ -101,6 +101,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
   let context: unknown;
   let rowClass: GridSettings<any>['rowClass'];
   let lastH = 0;
+  // The header rows' total at the last paint (-1: none yet).
+  let lastHead = -1;
   // The window's height a grown view is held to (0: not held).
   let cap = 0;
   // A part's messages: the host's own `app.*` keys, a missing one told once per bundle.
@@ -259,7 +261,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     // ---- grid attributes ----
     setAttr(el.root, 'data-density', settings.density ?? 'comfortable');
     setAttr(el.root, 'data-headers', settings.headers == 'hidden' ? 'hidden' : null);
-    if (el.root.style.getPropertyValue('--dzg-row-height') !== `${h}px`) el.root.style.setProperty('--dzg-row-height', `${h}px`);
+    const H = g.headerHeight();
+    for (const [v, px] of [['--dzg-row-height', h], ['--dzg-header-height', H]] as const) if (el.root.style.getPropertyValue(v) !== `${px}px`) el.root.style.setProperty(v, `${px}px`);
     // Every header row counts: the group rows, the column headers and those the features add; the pinned rows too (step
     // 8b-1): the body's rows are numbered after the top ones.
     const pins = g.pins ?? [0, 0];
@@ -289,7 +292,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const sort = kernel.query.sort;
     g.partBase = { ctx, dir, doc: g.doc, msg: partMsg, announce, context };
     const headerHeight = headerRenderer.render({
-      layout: L, cols: w.cols, height: h, colIndex,
+      layout: L, cols: w.cols, height: H, rowHeight: h, colIndex,
       decorate: (col, cell) => {
         let label = decorateHeader(g, col, cell, sort);
         let keys = '';
@@ -301,6 +304,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
       keep: focus?.kind === 'header' ? { center: focusCenter, level: focus.level ?? 0 } : null,
       check, lead, selectAll: mode === 'multi', extra: g.headerRows, bands: g.bands,
     });
+    // A header of another height (`headerHeight` live, density.md « Header height » 6): this paint read the view and the
+    // header's place before it changed; one more reads them after (the body's view, the pinned rows' offset).
+    if (headerHeight !== lastHead) lastHead >= 0 && g.schedule(), (lastHead = headerHeight);
     // Hidden headers (hidden-headers.md 1–4): out of the flow and clipped to nothing, written on the rows (nothing for a CSP;
     // still read by screen readers), unless the focus is in them.
     const hide = settings.headers == 'hidden' && !el.header.contains(root.activeElement);

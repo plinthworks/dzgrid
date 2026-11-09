@@ -97,7 +97,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false, multiSort: initial.multiSort });
   if (initial.context !== undefined) kernel.dispatch({ type: 'context.app', value: initial.context }, 'host'); // editable rules, custom kinds (Q12)
   // Operations without a source run in the browser, and are told (a source's model tells its own); the filter kinds refused too.
-  const told = [...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems), ...rowHeightProblems(initial.rowHeight)];
+  const told = [...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems), ...rowHeightProblems(initial.rowHeight), ...rowHeightProblems(initial.headerHeight, 'headerHeight')];
 
   let dir: Dir = 'ltr';
   const geometry = env.geometry ?? domGeometry(viewport, header, () => dir, live.el);
@@ -118,8 +118,8 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     intentAt: -1e9, keyboardAt: -1e9, scrolledAt: -1e9, speed: 0, remPx: geometry.read().remPx ?? 16,
     schedule, report, restoreFocus: () => {}, warm: null!, reveal: null!, ensureVisible: null!, retip: null!, parts: featureParts(initial.features, () => g.settings.parts),
     now: () => win?.performance.now() ?? 0,
-    // `rowHeight` or the density's, at 16 px text, scaled with the default text size, whole px, ≥ 24 (WCAG 2.5.8).
     rowHeight: () => Math.max(24, Math.round(((rowPx(g.settings.rowHeight) ?? ROW_HEIGHT[g.settings.density ?? 'comfortable']) * g.remPx) / 16)),
+    headerHeight: () => (rowPx(g.settings.headerHeight) ? Math.max(24, Math.round((g.settings.headerHeight! * g.remPx) / 16)) : g.rowHeight()),
     msg: (key, params = {}) => msg(g.settings.messages, key, params, g.ctx),
   };
 

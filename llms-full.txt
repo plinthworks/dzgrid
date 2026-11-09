@@ -474,7 +474,7 @@ Live, and they win over `settings`; removing one puts the setting back to its de
 read is left out and reported (`invalid-setting`, path `attribute:<name>`).
 
 `locale`, `time-zone`, `numerals` (`latn` | `locale`), `direction` (`auto` | `ltr` | `rtl`; without it the grid follows
-the element's `dir`), `density` (`compact` | `comfortable` | `spacious`), `row-height`, `label`, `overlay` (`loading` |
+the element's `dir`), `density` (`compact` | `comfortable` | `spacious`), `row-height`, `header-height`, `label`, `overlay` (`loading` |
 `error`), `busy`, `motion`, `multi-sort` (read when the grid is made). Booleans: present or `"true"` is on, `"false"` off.
 
 ## Events
@@ -2210,6 +2210,12 @@ Colours are CSS variables only. The palette (shared with tzslot), each a `light-
 **Row height** comes from the `density` setting (`compact` 28 px, `comfortable` 32 px, the default, `spacious` 40 px)
 or `rowHeight` in pixels, which wins. Rows follow the reader's text zoom. The column menu can offer the density to the
 user (`columnMenu({ density: true })`), and the [state](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/state.md) keeps it.
+
+**Header height**: the header rows are one row high unless `headerHeight` (pixels, 24 at least, live) makes them
+taller — `{ rowHeight: 40, headerHeight: 70 }`, Angular `[headerHeight]="70"`, `<dz-grid header-height="70">`. It
+sets the column headers' row and the column-group rows above it (a 70 px header with one group row is 140 px); the
+filter row keeps the row height. It follows the text zoom as rows do; vertical titles still grow the row when they
+need more. The grid writes it on its root as `--dzg-header-height` (read-only, as `--dzg-row-height`).
 
 ## Right to left
 

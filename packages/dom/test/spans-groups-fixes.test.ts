@@ -228,8 +228,8 @@ describe('Up from a column-spanned cell into the group rows', () => {
 });
 
 describe('the hidden headers’ and the stretched headers’ CSS', () => {
-  it('a hidden header is out of sight and a stretched column header reaches up over its empty group cells', () => {
+  it('a hidden header is out of sight and a stretched column header reaches up over its empty group cells, the header’s height (headerHeight, 1.9.0)', () => {
     expect(SPANS_CSS).toContain(':where(.dzg-hslot){position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)}');
-    expect(SPANS_CSS).toContain(':where(.dzg-hcell[data-up]){inset-block-start:calc(-1*var(--dzg-up));block-size:calc(var(--dzg-row-height) + var(--dzg-up))}');
+    expect(SPANS_CSS).toContain(':where(.dzg-hcell[data-up]){inset-block-start:calc(-1*var(--dzg-up));block-size:calc(var(--dzg-header-height) + var(--dzg-up))}');
   });
 });

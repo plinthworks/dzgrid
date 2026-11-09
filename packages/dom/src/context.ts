@@ -138,7 +138,10 @@ export interface GridContext<T> {
   /** A host callback's error: reported, never swallowed, never stopping the grid. */
   report(err: unknown): void;
   now(): number;
+  /** `rowHeight` or the density's, at 16 px text, scaled with the default text size, whole px, ≥ 24 (WCAG 2.5.8). */
   rowHeight(): number;
+  /** The column headers' and the group rows' height: `headerHeight` scaled as `rowHeight`, else the row height (1.9.0). */
+  headerHeight(): number;
   /**
    * Scrolls (logically, no paint asked) so display row `i` is seen whole in a view `block` high, under the
    * pinned parents (WCAG 2.4.11): the stack drawn, or the room its own need, whichever is more. True when it moved.

@@ -573,7 +573,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 24050,
+      "maxGzip": 24200,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -1311,7 +1311,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 7975,
+      "maxGzip": 8000,
       "external": [
         "@angular/*",
         "@dzgrid/*",

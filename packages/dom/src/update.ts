@@ -4,8 +4,8 @@ import type { GridContext } from './context.js';
 import { checkMessages } from './messages.js';
 import { rowPx, type GridSettings } from './settings.js';
 
-/** A `rowHeight` the grid does not take, told (null and undefined are no value). */
-export const rowHeightProblems = (v: unknown): Problem[] => (v == null || rowPx(v) ? [] : [problem('invalid-setting', 'warning', 'settings.rowHeight', String(v))]);
+/** A `rowHeight` or `headerHeight` the grid does not take, told (null and undefined are no value). */
+export const rowHeightProblems = (v: unknown, key = 'rowHeight'): Problem[] => (v == null || rowPx(v) ? [] : [problem('invalid-setting', 'warning', `settings.${key}`, String(v))]);
 
 /**
  * Which settings change live and which a grid takes only at creation. The
@@ -28,6 +28,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   density: 'live',
   headers: 'live',
   rowHeight: 'live',
+  headerHeight: 'live',
   selection: 'live',
   overlay: 'live',
   busy: 'live',
@@ -83,7 +84,7 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
   for (const p of refused) delete patch[p.path.slice('settings.'.length) as keyof GridSettings<T>];
   // A row height the grid does not take is told, kept, and the density's used (not refused: its path stays).
   // `Object.is`: the same value again (NaN included) is not told again.
-  if ('rowHeight' in patch && !Object.is(patch.rowHeight, prev.rowHeight)) refused.push(...rowHeightProblems(patch.rowHeight));
+  for (const key of ['rowHeight', 'headerHeight'] as const) if (key in patch && !Object.is(patch[key], prev[key])) refused.push(...rowHeightProblems(patch[key], key));
   if (refused.length) emit(g.kernel, { type: 'problems', source: 'host', problems: refused });
   const open: GridSettings<T> = { ...prev, ...patch };
   const next = closed(open);

@@ -88,7 +88,7 @@ Live, and they win over `settings`; removing one puts the setting back to its de
 read is left out and reported (`invalid-setting`, path `attribute:<name>`).
 
 `locale`, `time-zone`, `numerals` (`latn` | `locale`), `direction` (`auto` | `ltr` | `rtl`; without it the grid follows
-the element's `dir`), `density` (`compact` | `comfortable` | `spacious`), `row-height`, `label`, `overlay` (`loading` |
+the element's `dir`), `density` (`compact` | `comfortable` | `spacious`), `row-height`, `header-height`, `label`, `overlay` (`loading` |
 `error`), `busy`, `motion`, `multi-sort` (read when the grid is made). Booleans: present or `"true"` is on, `"false"` off.
 
 ## Events

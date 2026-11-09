@@ -33,6 +33,7 @@ const ATTRIBUTES: Record<string, readonly [keyof GridSettings<unknown>, readonly
   density: ['density', ['compact', 'comfortable', 'spacious']],
   headers: ['headers', ['shown', 'hidden']],
   'row-height': ['rowHeight', 'number'],
+  'header-height': ['headerHeight', 'number'],
   label: ['label', 'text'],
   overlay: ['overlay', ['loading', 'error']],
   busy: ['busy', 'boolean'],

@@ -38,7 +38,8 @@ and a job title). The application may change either while the grid is shown.
   `settings.rowHeight`).
 
 ### What DzGrid does instead
-- The header is one row high, as with densities; a separate header height is not offered.
+- The header rows are one row high, as with densities, unless the application sets `headerHeight` (1.9.0,
+  `density.md` « Header height »).
 
 ### Tests (row height)
 `packages/dom/test/row-height.test.ts`; `npm run test:browser -- --only demos` (the HR demo, 52 px rows).

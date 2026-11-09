@@ -42,6 +42,12 @@ Colours are CSS variables only. The palette (shared with tzslot), each a `light-
 or `rowHeight` in pixels, which wins. Rows follow the reader's text zoom. The column menu can offer the density to the
 user (`columnMenu({ density: true })`), and the [state](state.md) keeps it.
 
+**Header height**: the header rows are one row high unless `headerHeight` (pixels, 24 at least, live) makes them
+taller — `{ rowHeight: 40, headerHeight: 70 }`, Angular `[headerHeight]="70"`, `<dz-grid header-height="70">`. It
+sets the column headers' row and the column-group rows above it (a 70 px header with one group row is 140 px); the
+filter row keeps the row height. It follows the text zoom as rows do; vertical titles still grow the row when they
+need more. The grid writes it on its root as `--dzg-header-height` (read-only, as `--dzg-row-height`).
+
 ## Right to left
 
 Direction is designed in: pinned columns, scrolling, the arrow keys (in Arabic, → moves toward the start, which is on the right), popups, the

@@ -36,10 +36,16 @@ export interface GridSettings<T> {
   readonly sameRow?: (a: T, b: T) => boolean;
   /**
    * The row height in px at 16 px text, over the density's (owner D1, virtual-scroll.md « Row height »):
-   * from 24 to 1 000, grown with the reader's text size; header rows follow. Anything else is told
-   * (`invalid-setting`, a warning) and the density's height is used. Live.
+   * from 24 to 1 000, grown with the reader's text size; header rows follow unless `headerHeight` is set. Anything else
+   * is told (`invalid-setting`, a warning) and the density's height is used. Live.
    */
   readonly rowHeight?: number;
+  /**
+   * The column headers' row and the column-group rows above it, in px at 16 px text (density.md « Header height »,
+   * 1.9.0): the same rule as `rowHeight` (24 to 1 000, grown with the text size, else told and ignored); a feature's
+   * row under the headers (the filter row) keeps the row height. Absent: the row height. Live.
+   */
+  readonly headerHeight?: number;
   /**
    * `keepOnFilter`: false clears the selection when a filter or the search changes (a sort or
    * a page never does); true by default, rows ticked stay ticked even once hidden. `canSelect`

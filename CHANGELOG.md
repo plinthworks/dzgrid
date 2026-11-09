@@ -49,6 +49,11 @@ Lot B (owner « ★ partout », 2026-11-09). Additions only.
   reading in the new `@dzgrid/core/import` (`readCsv`, `zipEntries`, `sheetPath`, `sharedStrings`, `readSheet`,
   `importRows`), the reading in a lazy chunk; texts `locales/{en,fr,ar}-import`. `decodeTsv` takes a `sep`.
 - `collapsePriority` without `responsive()` is told once (`missing-feature`).
+- **A header taller than the rows** (owner, 2026-11-09; `docs/behaviors/density.md` « Header height »): the live setting
+  `headerHeight` (px, 24 to 1 000, grown with the text size as `rowHeight`; else `invalid-setting`, ignored) sets the
+  column headers' row and the column-group rows; a filter row keeps the row height; vertical titles take the taller of
+  the two. Angular `[headerHeight]`, `<dz-grid header-height>`; the root's `--dzg-header-height` (read-only). Absent:
+  the header rows are a row high, as before.
 
 ### Changed
 - The pinned top band's offset is read from the header's height (a taller header, hidden headers), no longer a row per

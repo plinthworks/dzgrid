@@ -170,6 +170,16 @@ describe('<dz-grid> attributes (5, 6)', () => {
     expect(h()).toBe(40);
   });
 
+  it('header-height reaches the header rows, live; taken away, they follow the rows (density.md « Header height »)', () => {
+    const el = make('<dz-grid-test row-height="40" header-height="70"></dz-grid-test>');
+    const h = () => (el.grid as unknown as { context: { headerHeight(): number } }).context.headerHeight(); // the grid's internal context, read for the height it paints
+    expect(h()).toBe(70);
+    el.setAttribute('header-height', '56');
+    expect(h()).toBe(56);
+    el.removeAttribute('header-height');
+    expect(h()).toBe(40);
+  });
+
   it('a value it cannot read is left out and told as a warning with the raw value', async () => {
     const el = make('<dz-grid-test density="huge" locale="fr-FR"></dz-grid-test>');
     const seen = problemsOf(el);

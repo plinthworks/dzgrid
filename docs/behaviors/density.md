@@ -11,7 +11,7 @@ Picks « Compacte », « Normale » or « Aérée » in a column's ⋮ menu (whe
 or in the application's own toolbar.
 
 ## What they observe
-- Every row and header row takes the new height at once; the row at the top of the view stays there; the
+- Every row and header row takes the new height at once (the header rows keep `headerHeight` when it is set); the row at the top of the view stays there; the
   focused row stays in view.
 - The choice comes back next time when the application saves the grid's state.
 
@@ -65,3 +65,33 @@ Nothing specific (heights only).
 Read-only: written by the grid on its root from `rowHeight` or the density, read by the theme. A host stylesheet
 setting it changes nothing (the inline value wins and the rows are placed by the setting): use `rowHeight` (a number,
 24 at least) or `density`; Angular `[rowHeight]`. Test: `packages/dom/test/feedback-row-height.test.ts`.
+
+## Header height (`headerHeight`, 1.9.0, owner 2026-11-09)
+Written before the code. The owner wants the header taller than the rows (a 70 px header over 40 px rows).
+
+### What the application does
+Sets `headerHeight` (a number of px at 16 px text) in the settings, or later with `update()`; Angular
+`[headerHeight]`, `<dz-grid header-height="70">`.
+
+### Behaviours (numbered, each one a test: `packages/dom/test/header-height.test.ts`)
+1. The column headers' row is `headerHeight` tall; the data rows keep `rowHeight` or the density's height.
+2. Absent: every header row is one row high, as before 1.9.0.
+3. The column-group rows above the column headers (`columnGroups`, the pivot's) take it too: the header is one
+   height throughout (decided alone, 2026-11-09: a group title and the titles under it read as one block; a 70 px
+   header with groups is 140 px). A column header with no group above it, stretched up over the empty group cells,
+   covers that height.
+4. The rows a feature adds under the column headers (the filter row) keep the row height: they hold controls, as
+   cells do. A feature's row that gives its own height keeps it.
+5. The same rule as `rowHeight`: from 24 to 1 000 px, grown with the reader's text size, whole px, never under 24
+   (WCAG 1.4.4, 2.5.8). Anything else is ignored (the row height is used) and told: warning `invalid-setting`, path
+   `settings.headerHeight`; the same value sent again is not told again.
+6. Live: `update({ headerHeight })` changes the header at once; the body below it, the pinned top rows, the overlay,
+   the busy bar and the « Loading… » message start under the new height, the view's height shrinks or grows by the
+   difference (page keys, focus kept in view).
+7. Vertical titles (`vertical-headers.md`): the column headers' row is the taller of `headerHeight` and what the
+   longest title needs (capped by `maxHeight`).
+8. Hidden headers (`headers: 'hidden'`): take no room, whatever `headerHeight` says.
+9. A density chosen by the user changes the rows only while `headerHeight` is set; `headerHeight` is a setting, not
+   in `GridState`.
+10. The grid writes `--dzg-header-height` on its root (read-only, as `--dzg-row-height`): the column headers' row
+   height. Print: a table, no heights (unchanged).

@@ -40,7 +40,10 @@ export interface HeaderBandSpec {
 export interface HeaderPaint {
   readonly layout: ColumnLayout;
   readonly cols: { readonly first: number; readonly last: number } | null;
+  /** The column headers' and the group rows' height. */
   readonly height: number;
+  /** An extra row's height when its spec gives none (`headerHeight`, 1.9.0); absent: `height`. */
+  readonly rowHeight?: number;
   readonly colIndex: (id: string) => number;
   readonly decorate: (col: ResolvedColumn<any>, el: HTMLElement) => void;
   /** A part drawing a column header's label (the slots feature): true when it did, the grid's text otherwise. */
@@ -145,7 +148,7 @@ export class HeaderRenderer {
   /** A row's size, its place among the header rows, and its box column; returns its height. */
   #frame(view: HeaderRowView, p: HeaderPaint, depth: number): number {
     const { layout } = p;
-    const height = (view.spec ?? view.band)?.height ?? p.height;
+    const height = (view.spec ?? view.band)?.height ?? ((view.spec && p.rowHeight) || p.height);
     const extra = (p.check ? CHECK_WIDTH : 0) + (p.lead ?? 0);
     setAttr(view.el, 'aria-rowindex', String(view.level + depth + 1));
     setPx(view.el, 'block-size', height);

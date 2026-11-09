@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: the header height</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/core/spans": "/packages/core/src/spans.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<link rel="stylesheet" href="/packages/theme/pinned-rows.css">
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); }
+  #host { inline-size: 900px; block-size: 420px; display: flex; flex-direction: column; }
+  #host > .dzg { flex: 1 1 auto; }
+</style>
+</head>
+<body>
+<main><h1>DzGrid</h1><div id="host"></div></main>
+<script type="module" src="./header-height.ts"></script>
+</body>
+</html>

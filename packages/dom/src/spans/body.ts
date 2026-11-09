@@ -63,8 +63,8 @@ export function createBody(g: GridContext<unknown>): Body {
     frame = f;
     const root = el.root;
     // The label sticks under every header row; a full-width cell starts after the selection box.
-    const h = g.rowHeight();
-    setPx(root, '--dzg-header-h', [...g.bands, null, ...g.headerRows].reduce((s, r) => s + (r?.height ?? h), 0));
+    const h = g.rowHeight(), H = g.headerHeight();
+    setPx(root, '--dzg-header-h', [...g.bands, null].reduce((s, r) => s + (r?.height ?? H), 0) + g.headerRows.reduce((s, r) => s + (r.height ?? h), 0));
     const extra = (f.check ? CHECK_WIDTH : 0) + (f.lead ?? 0);
     setPx(root, '--dzg-check-w', extra);
     const now = new Map<HTMLElement, Drawn>();

@@ -28,7 +28,7 @@ class CtxCell {
   selector: 't-host',
   imports: [DzGrid],
   template: `<dz-grid #g="dzGrid" [rows]="rows()" [columns]="columns" [getRowId]="id" [messages]="messages()" [locale]="locale()" [direction]="direction()"
-    [density]="density()" [headers]="headers()" [rowHeight]="rowHeight()" [context]="context()" [parts]="parts" [features]="features" [selection]="selection()" [pagination]="paging()" [label]="label()"
+    [density]="density()" [headers]="headers()" [rowHeight]="rowHeight()" [headerHeight]="headerHeight()" [context]="context()" [parts]="parts" [features]="features" [selection]="selection()" [pagination]="paging()" [label]="label()"
     [(quick)]="quick" [(filter)]="filter" [(selected)]="selected"
     (gridEvent)="all.push($event)" (cellClicked)="clicks.push($event)" (rowClicked)="rowClicks.push($event)" (problems)="problems.push($event)"
     (gridReady)="ready.push($event)" />`,
@@ -42,6 +42,7 @@ class Host {
   readonly direction = signal<'auto' | 'ltr' | 'rtl' | undefined>(undefined);
   readonly density = signal<'compact' | 'comfortable' | 'spacious' | undefined>(undefined);
   readonly rowHeight = signal<number | undefined>(undefined);
+  readonly headerHeight = signal<number | undefined>(undefined);
   readonly headers = signal<'shown' | 'hidden' | undefined>(undefined);
   readonly context = signal<unknown>(undefined);
   readonly label = signal<string | undefined>(undefined);
@@ -172,6 +173,19 @@ describe('live and fixed inputs', () => {
     t.host.rowHeight.set(undefined);
     t.run();
     expect(h()).toBe('28px');
+  });
+
+  it('headerHeight reaches the header rows, live; cleared, they follow the rows (density.md « Header height »)', () => {
+    const t = mount();
+    const h = () => (t.el.querySelector('.dzg') as HTMLElement).style.getPropertyValue('--dzg-header-height');
+    t.host.rowHeight.set(40);
+    t.host.headerHeight.set(70);
+    t.run();
+    expect(h()).toBe('70px');
+    expect((t.el.querySelector('.dzg-hrow') as HTMLElement).style.getPropertyValue('block-size')).toBe('70px');
+    t.host.headerHeight.set(undefined);
+    t.run();
+    expect(h()).toBe('40px');
   });
 
   it('rowHeight from provideDzGrid’s defaults; a binding on the tag wins', () => {

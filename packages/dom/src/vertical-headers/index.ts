@@ -47,13 +47,13 @@ export function verticalHeaders(o: VerticalHeadersOptions = {}): GridFeature {
         },
         afterRows() {
           const titles = g.columns.visible().filter((c) => c.def.headerVertical).map((c) => c.def.header ?? c.id);
-          const h = g.rowHeight();
+          const h = g.headerHeight();
           const k = `${titles.join('\0')}\0${h}\0${el.root.getAttribute('data-density')}`;
           if (k !== key) {
             key = k;
             let len = 0;
             for (const t of titles) (label.textContent = t), (len = Math.max(len, label.offsetHeight));
-            // The title's length and the cell's padding, between a row's height and the cap.
+            // The title's length and the cell's padding, between the header row's height (`headerHeight`) and the cap.
             need = len && len + 16 > h ? Math.min(max, len + 16) : 0;
           }
           // The column headers' row: after the group rows above it.
