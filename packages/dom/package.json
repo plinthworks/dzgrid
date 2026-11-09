@@ -161,6 +161,10 @@
       "types": "./src/print.ts",
       "default": "./src/print.ts"
     },
+    "./print-menu": {
+      "types": "./src/print-menu.ts",
+      "default": "./src/print-menu.ts"
+    },
     "./fresh-rows": {
       "types": "./src/fresh-rows.ts",
       "default": "./src/fresh-rows.ts"

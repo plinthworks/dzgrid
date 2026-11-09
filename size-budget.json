@@ -983,8 +983,18 @@
     },
     "@dzgrid/dom/print": {
       "file": "packages/dom/src/print.ts",
-      "maxGzip": 1664,
+      "maxGzip": 1697,
       "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/print-menu": {
+      "file": "packages/dom/src/print-menu.ts",
+      "maxGzip": 100,
+      "over": "@dzgrid/dom/print",
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",

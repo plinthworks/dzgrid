@@ -25,7 +25,7 @@ import { groupsChecks } from './browser-groups.mjs';
 import { pinnedRowsChecks } from './browser-pinned-rows.mjs';
 import { autoHeightChecks } from './browser-auto-height.mjs';
 import { treeTablesChecks } from './browser-tree-tables.mjs';
-import { printChecks } from './browser-print.mjs';
+import { printChecks, paperChecks } from './browser-print.mjs';
 import { groupingChecks } from './browser-grouping.mjs';
 import { pagerGlyphChecks, treeGlyphChecks, inkOf, footerSelectionChecks } from './browser-glyphs.mjs';
 import { feedbackFilterChecks, periodChecks } from './browser-feedback.mjs';
@@ -4657,7 +4657,8 @@ async function runEngine(name) {
 }
 
 try {
-  for (const e of engines) await runEngine(e);
+  // `-- --only paper` (Phase 11 L5) opens its own browsers (Firefox's PDF printer is a launch preference), one at a time.
+  for (const e of engines) await (only === 'paper' ? paperChecks(e, H) : runEngine(e));
 } finally {
   await site.close();
 }

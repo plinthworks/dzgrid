@@ -791,6 +791,12 @@ $layered: true !default;
     .dzg-tooltip {
       display: none;
     }
+
+    // The screen grid printed as it is (no prepared table, print.md 13): the light scheme, never a dark theme's light
+    // text on white paper.
+    .dzg {
+      color-scheme: light;
+    }
   }
 
   // Another month's days in a filter popup, unfaded, in tzslot's panel and in the period form's own calendar

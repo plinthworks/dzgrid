@@ -8,6 +8,7 @@ import { pivot } from '/packages/dom/src/pivot.ts';
 import { spans } from '/packages/dom/src/spans.ts';
 import { filters } from '/packages/dom/src/filters.ts';
 import { preparePrint } from '/packages/dom/src/print.ts';
+import * as P from '/packages/dom/src/print-menu.ts';
 import { FR } from '/packages/dom/src/locales/fr.ts';
 import { FR_GROUP } from '/packages/dom/src/locales/fr-group.ts';
 import { FR_PIVOT } from '/packages/dom/src/locales/fr-pivot.ts';
@@ -191,6 +192,24 @@ const p = {
     const printed = document.querySelectorAll('table tbody tr').length;
     done?.();
     return { ms, rows: printed, ...r };
+  },
+  /**
+   * Phase 11 L5 (print.md 10): the browser's own print with `printOnMenu` — `beforeprint` builds the 5 000 rows at once,
+   * timed from the event sent to it returning; `afterprint` removes the table (the grid's destruction, the hook).
+   */
+  async menu(): Promise<{ ms: number; rows: number }> {
+    fresh();
+    make({});
+    await raf();
+    await raf();
+    await sleep(50);
+    (P as any).printOnMenu(grid!, { maxRows: 5000 }); // read by name: the check fails, not the page, before it exists
+    const t0 = performance.now();
+    dispatchEvent(new Event('beforeprint'));
+    const ms = performance.now() - t0;
+    const rows = document.querySelectorAll('table tbody tr').length;
+    dispatchEvent(new Event('afterprint'));
+    return { ms, rows };
   },
   destroy: fresh,
 };

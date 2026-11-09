@@ -11,11 +11,13 @@
 }
 
 @media print {
+  .dzg-printing .dzg-print {
+    color: black;
+    background: white;
+  }
   .dzg-printing .dzg-print table {
     border-collapse: collapse;
     inline-size: 100%;
-    color: black;
-    background: white;
     font-size: inherit;
   }
   .dzg-printing .dzg-print th,
@@ -41,5 +43,9 @@
   }
   .dzg-printing .dzg-print-group {
     font-weight: bold;
+  }
+  .dzg-print-group:not(.dzg-print-footer) + :not(.dzg-print-group),
+  .dzg-print-footer {
+    break-before: avoid;
   }
 }

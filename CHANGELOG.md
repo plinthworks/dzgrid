@@ -34,6 +34,9 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
 - `perf/fake-pivot-server.ts`: a pivoting fake server (10⁶ rows computed from their index, the cube per query).
 - Angular: the output `(rowMove)` (the `rowDrag()` feature's event, also in `(gridEvent)` as before) and
   `DzgController.rowDrag()`, its api typed (null without the grid), as `grouping()`.
+- `printOnMenu(grid, options?)` in the new entry `@dzgrid/dom/print-menu` (`docs/behaviors/print.md` 10): the browser's own print (Ctrl+P,
+  the File menu) prints the same table as `print()` — built at once on `beforeprint`, removed after. Opt-in; a table
+  `print()` prepared is left as it is.
 
 ### Changed
 - `dom/grouping` sets the pivot up beside a `serverSideRows` model that has the plug; beside `sourceRows`,
@@ -72,6 +75,11 @@ A minor: nothing of 1.7.0 is removed or narrowed (`npm run check:api`), with one
   the grid on the next task after a resize (WebKit reported a « ResizeObserver loop »); pinned columns that would leave
   the centre less room than its widest column scroll with the others until the view widens (the state still says
   pinned; `pinned-columns.md`).
+- Printing (Phase 11 L5, checked as PDF text in Chrome and Firefox, by print emulation in WebKit; `print.md` 11–13): the
+  print container is black on white whatever the page's theme (a dark page's truncation line printed light grey); a
+  grid printed as it is on screen, without a prepared table, is printed in the light scheme (`dzgrid.css`); a group's
+  first row stays on the page of its group row and a totals row on the page of the row before it (`print.css`; a
+  totals row also has the class `dzg-print-footer`).
 
 ## [1.7.0] - 2026-11-07
 

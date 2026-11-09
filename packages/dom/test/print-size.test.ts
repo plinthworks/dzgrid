@@ -12,7 +12,7 @@ describe('11. sizes: the new lines; the base, core, K.8 and Angular unchanged', 
   const budget = JSON.parse(readFileSync(`${ROOT}size-budget.json`, 'utf8')).entries as Record<string, { file?: string; maxGzip: number | null; over?: string; external?: string[] }>;
 
   it('@dzgrid/dom/print 1 632 over the DOM base (Phase 7 close, +2 %: group rows printed); -print texts 150 / 150 / 200; print.css 400 and its unlayered twin 400', () => {
-    expect(budget['@dzgrid/dom/print']).toEqual({ file: 'packages/dom/src/print.ts', maxGzip: 1664, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
+    expect(budget['@dzgrid/dom/print']).toEqual({ file: 'packages/dom/src/print.ts', maxGzip: 1697, over: '@dzgrid/dom', external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
     expect(['en', 'fr', 'ar'].map((l) => budget[`@dzgrid/dom/locales/${l}-print`]?.maxGzip)).toEqual([150, 150, 200]);
     expect(budget['@dzgrid/theme/print.css']).toEqual({ file: 'packages/theme/print.css', maxGzip: 400 });
     // The Phase 6 close: lowered to its measure + 10 % (292 → 350).

@@ -98,19 +98,29 @@ describe('print.css', () => {
     const td = (sel: string) => sel === '*' || /^\*/.test(sel) || sel === 'td' || /\.dzg-printing \.dzg-print td$/.test(sel);
     const th = (sel: string) => sel === '*' || /^\*/.test(sel) || sel === 'th' || /\.dzg-printing \.dzg-print th$/.test(sel);
     const tbl = (sel: string) => sel === '*' || /^\*/.test(sel) || sel === 'table' || /\.dzg-printing \.dzg-print table$/.test(sel);
+    // Black on white on the container since Phase 11 L5 (print.md 13: the caption and the truncation line too).
+    const boxSel = (sel: string) => sel === '*' || /^\*/.test(sel) || sel === 'div' || /\.dzg-printing \.dzg-print$/.test(sel);
     expect(winner(all, td, 'border')).toBe('1px solid black');
     expect(winner(all, th, 'border')).toBe('1px solid black');
     expect(winner(all, td, 'padding')).toBe('0.2em 0.4em');
     expect(winner(all, th, 'text-align')).toBe('start');
     expect(winner(all, tbl, 'border-collapse')).toBe('collapse');
-    expect(winner(all, tbl, 'color')).toBe('black');
-    expect(winner(all, tbl, 'background')).toBe('white');
+    expect(winner(all, boxSel, 'color')).toBe('black');
+    expect(winner(all, boxSel, 'background')).toBe('white');
     // The border shorthand wins over the reset's border-width by weight: ours is heavier than `*`.
     expect(beats(weight('.dzg-printing .dzg-print td'), weight('*'))).toBeGreaterThan(0);
   });
 
   it('the base theme\'s own print rule untouched (the resize grip and the tooltip hidden)', () => {
     expect(read('dzgrid.scss')).toMatch(/@media print \{[\s\S]*?\.dzg-resize[\s\S]*?\.dzg-tooltip/);
+  });
+
+  it('Phase 11 L5 (print.md 11, 13): a group\'s first row and a totals row break-before avoid; the base theme prints the screen grid light', () => {
+    const rules = sheet(css).rules.filter(inPrint);
+    const avoid = rules.filter((r) => /break-before:\s*avoid/.test(r.body)).map((r) => r.selector);
+    expect(avoid).toEqual(['.dzg-print-group:not(.dzg-print-footer) + :not(.dzg-print-group), .dzg-print-footer']);
+    expect(rules.some((r) => /break-after/.test(r.body))).toBe(false);
+    expect(read('dzgrid.scss')).toMatch(/@media print \{[\s\S]*?\.dzg \{\s*color-scheme: light;/);
   });
 
   it('no colour literal, no physical side, nothing animated', () => {

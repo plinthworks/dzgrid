@@ -461,9 +461,10 @@ describe('10. no row data kept; the texts (print.md 4, « Texts »)', () => {
 
   it('a module holding nothing after the cleanup: a row object can be collected (no reference from the print module)', async () => {
     const src = readFileSync(`${ROOT}packages/dom/src/print/index.ts`, 'utf8');
-    // Module state: a generation counter and the current cleanup only (the cleanup closes over the container, not the rows).
+    // Module state: the slice's length (a number; Phase 11 L5's `printOnMenu`), a generation counter and the current cleanup
+    // only (the cleanup closes over the container, not the rows).
     const top = src.split('\n').filter((l) => /^(let|var|const) /.test(l)).map((l) => l.replace(/[=:].*$/, '').trim());
-    expect(top.filter((l) => l.startsWith('let'))).toEqual(['let gen', 'let stop']);
+    expect(top.filter((l) => l.startsWith('let'))).toEqual(['let slice', 'let gen', 'let stop']);
     // The cleanup handed to the app is made by a module-level function of the container alone (not a closure of the build,
     // whose scope reads the rows): keeping it keeps no row.
     expect(src).toMatch(/^const cleaner = \(box: HTMLElement\)/m);

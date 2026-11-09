@@ -343,3 +343,94 @@ Taken alone (the lead), for the ACR to say:
 - Gate: `gate:step` once over the whole batch — test:ci and test:tz green (8 974 tests); check:size stopped on
   `core/spans` (+12 B) and `core/csv` (+4 B), gzip over the base that grew by the pinned release; their lines raised
   (+2 % rule, pinned in `rebudget`), then check:size and check:api green. The tests were not run again for two numbers.
+
+## L5 — print polish (2026-11-08)
+
+Sheet first: `docs/behaviors/print.md` « On paper » 10–14 (the browser's own print, page breaks, width, colours, right
+to left). Tool (0 B in the bundles): `npm run test:browser -- --only paper [--engine <e>]` (`paperChecks` in
+`scripts/browser-print.mjs`), on the browser suite's new page `packages/dom/test/browser/paper.html` (flat 1 200 / 5 001
+rows, wide, grouped — 300 teams, footers and the grand total —, pivot with month bands; fr / ar, light / dark; `menu=1`
+the hook). It opens its own browsers, one at a time, each closed in `finally`; `scripts/pdf-text.py` now also gives each
+line's colour and each page's width.
+
+Engines, said plainly:
+- **Chrome**: `page.pdf()` — it sends `beforeprint` and `afterprint`, so the browser's own print is checked with no
+  `print()` called. PDF read back as text.
+- **Firefox**: its own « Save to PDF » printer, silent, to a file (launch preferences; one Firefox per file), reached by
+  `window.print()` from the page — the same `beforeprint` / `afterprint` path as Ctrl+P. PDF read back as text.
+- **WebKit**: Playwright has no print to a file there. `beforeprint` sent by hand (the table must be whole at once), the
+  print media emulated, the computed rules checked, a screenshot kept (`results/paper-webkit-*.png`). **Not verified
+  in WebKit: pages, the header rows repeated, the breaks** (emulation has no pages).
+
+### Decided taken alone (the lead; the owner may say otherwise)
+- **The browser's own print: a `beforeprint` hook, not a note** (the plan's two answers; the sheet picks the smaller).
+  `printOnMenu(grid, options?)` in its own new entry `@dzgrid/dom/print-menu`: `beforeprint` builds the table at once (sliced,
+  it would be cut at its first slice), removed as `print()`'s (`afterprint`, else the first `focus` / `pointerdown`);
+  a table already in the page is left (it prints); it lasts as long as the grid (no stop handle: 14 B held). The note
+  would have needed a translated text written by the DOM base, carried by every grid.
+- **Width: words are never cut.** `overflow-wrap: anywhere` was tried (a test, red then green on the wide list): it
+  fits any table, but lowers every column's narrowest width to one letter, so Chrome narrowed every column together and
+  cut « Dossie|r », « C00|02 » on the ordinary 12-column list in portrait (seen in the PDF text). Left out. Limit, kept
+  and written in the sheet: a list whose words alone are wider than the page (28 columns of unbroken text in portrait:
+  183 lines past the edge in Chrome) needs the application's `@page { size: landscape }` or fewer columns. The pivot's
+  headers are single words (« somme(Montant) »): 13 columns do not fit portrait; the test page prints it in landscape.
+- **Breaks: a group's first row stays with its group row** (`break-before: avoid` on a data row right after one), a
+  totals row with the row before it. First tried: `break-after: avoid` on every group row — in a pivot every row is a
+  group row, the whole table became one unbreakable run and Chrome left page 1 empty (seen in the PDF). Nested group
+  rows are not tied (an outer group row may end a page above its first inner group).
+- **The fallback printed light**: without the hook, the screen grid prints as on screen (choice 1 kept), now in the
+  light scheme — in the base theme's own print rule (`.dzg { color-scheme: light }`, +4 B), so it holds without
+  `print.css` too.
+
+### Defects found and fixed (each a check that failed first)
+1. **A dark page's truncation line printed light grey** (Chrome PDF: colour 0.63): only the table was black on white.
+   The container is now (`print.css`), the caption and the note inherit. Check `paper dark-5001`.
+2. **Ctrl+P without the hook on a dark theme: the grid's text light grey on white paper** (34 of 34 cells read).
+   `.dzg { color-scheme: light }` in print (`dzgrid.css`). Check `paper fallback-dark`; WebKit by the computed colour.
+3. **No page break rule for groups**: 8 pages ended on a group row, 6 began with a totals row (Chrome, 300 teams). Now
+   0 / 0 (`print.css`; a totals row also carries `dzg-print-footer`, set by `dom/print`). Test `print-menu.test.ts`
+   (the classes), check `paper grouped`.
+4. **The browser's own print printed the screen only** (no hook). `printOnMenu`; tests `print-menu.test.ts` (built at
+   once under a clock that would slice it, `print()`'s table left alone, cleanup on `focus` / `pointerdown`, the grid
+   destroyed); checks `paper menu-fr`, `menu-ar` (Chrome, Firefox), WebKit by hand-sent `beforeprint`.
+
+### Timing at 4× CPU (Chrome, L3's tooling: `perf-features.html` minified, CDP throttle; the owner's Mac)
+5 000 rows × 30 columns of dataset A: `print()`'s sliced build 316–336 ms (median of 3, budget 342), longest animation
+frame 58–60 ms (budget 100); the hook's build at once 306–330 ms, one task — the dialog opens that much later.
+
+### Results
+`npm run test:browser -- --only paper`, once per engine after the fixes (harness corrections re-ran a group, noted):
+- **Chrome** 14 / 14: the hook (fr 45 pages, ar 28) every row once and whole, headers on every page, nothing left after;
+  dark 5 001 rows all black, the line included; the fallback dark; wide (16 columns, landscape) inside the page; grouped
+  0 pages ending on a group row, 0 beginning with a totals row (before: 8 / 6); pivot (landscape) the four month bands
+  on all 10 pages, 150 towns once. The limit (28 columns of unbroken text, portrait): 183 lines past the edge.
+- **Firefox** 11 / 13 then settled: the two failures were (a) my harness reading Firefox's PDF before it was written (it
+  writes a first %%EOF and pauses; one page read) — re-read alone after a 7.5 s still size: **201 pages, 5 000 rows,
+  0 light lines of 68 017**; the wait corrected; (b) **Firefox does not honour `break-before: avoid` between table rows**:
+  16 pages began with a totals row (0 ended on a group row) — the engine's limit, « where the engine allows », counted
+  and printed there, not checked. Firefox shrinks a too-wide page to fit by itself (`print.shrink_to_fit`): the
+  28-column limit case printed whole there.
+- **WebKit** (emulation) 5 / 6: the hook builds at once; thead a header group, rows `break-inside: avoid`, black on
+  white, the break rules computed, the fallback light. The pivot's table is a few px wider than its box at A4
+  landscape less the page's 16 px margins (Chrome's PDF has no page margin): the word-width limit of sheet 12, not
+  fixed. The first WebKit run failed « fits » on the two landscape pages measured at the 1 000 px viewport; measured
+  at 1 123 px since.
+
+### Sizes (L5)
+`printOnMenu` moved to its own entry `@dzgrid/dom/print-menu` (coordinator, 2026-11-09: keep `dom/print` under its
+rule without the owner); `dom/print` exports only `preparePrint`, `print`, `PRINT_KEYS` as before, the at-once build
+(`buildNow`) sits in its module unexported by it (tree-shaken out of it).
+
+| Line | Before | After | Line |
+|---|---|---|---|
+| `dom/print` (over the DOM) | 1 639 | **1 675** (the totals rows' class, the at-once build) | 1 664 → 1 697 (+2 %) |
+| `dom/print-menu` (over `dom/print`, new) | — | **75** | 100 (measure + 10 %, rounded up to 50) |
+| `@dzgrid/theme` (base) | 2 946 | 2 950 | 2 960 |
+| `theme/print.css` / unlayered | 340 / 299 | 369 / 326 | 400 / 350 (unchanged) |
+| K.8 | 88 591 | 88 595 (+4, the base theme) | 90 000 |
+
+`check:api`: additions only (the new entry's `printOnMenu`).
+- Gate: `gate:step` once — test:ci 8 973 passed, 3 failed: two size tests pinning 1 664 (moved to 1 697) and
+  `tree-walk` timed out under load (green alone); test:tz 2 timed out under load (`search-walk`, `tree-sticky-stack`,
+  green alone in Auckland). After the move to the new entry: the print tests, typecheck, build, check:size, check:api
+  run again, green.

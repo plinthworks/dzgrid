@@ -706,7 +706,7 @@ describe('the command: --dry by default, --write to save', () => {
   });
 
   it('Phase 6 step 11 (owner Q-B): @dzgrid/dom/print 1 600 over the DOM base, its -print texts 150 / 150 / 200, print.css and its unlayered twin 400 each; nothing else raised', () => {
-    expect(['@dzgrid/dom/print', '@dzgrid/dom/locales/en-print', '@dzgrid/dom/locales/fr-print', '@dzgrid/dom/locales/ar-print', '@dzgrid/theme/print.css', '@dzgrid/theme/print.unlayered.css'].map(ceilingFor)).toEqual([1664, 150, 150, 200, 400, 400]); // print 1 664 at Phase 8 step 4 (+2 %); // print 1 632 at the Phase 7 close (+2 %)
+    expect(['@dzgrid/dom/print', '@dzgrid/dom/locales/en-print', '@dzgrid/dom/locales/fr-print', '@dzgrid/dom/locales/ar-print', '@dzgrid/theme/print.css', '@dzgrid/theme/print.unlayered.css'].map(ceilingFor)).toEqual([1697, 150, 150, 200, 400, 400]); // print 1 697 at Phase 11 L5 (+2 %, the plan's cap; measured 1 675); print 1 664 at Phase 8 step 4 (+2 %); // print 1 632 at the Phase 7 close (+2 %)
     expect(['@dzgrid/dom', '@dzgrid/core', 'profile: audit screen (K.8)', '@dzgrid/angular'].map(ceilingFor)).toEqual([DOM, CORE, 90000, 7950]); // Phase 11 L2 (+2 % rule): 7 950, `(rowMove)` and `ctl.rowDrag()` (R9); // Angular 7 810 at the Phase 7 close; // K.8 and Angular raised at step 12 (Q12-1); K.8 84 950 (owner « set include only » (2026-10-29)); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
   });
 });

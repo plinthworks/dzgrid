@@ -539,6 +539,9 @@
     .dzg-tooltip {
       display: none;
     }
+    .dzg {
+      color-scheme: light;
+    }
   }
   .dzg-popup {
     --tz-cal-outside-opacity: 1;

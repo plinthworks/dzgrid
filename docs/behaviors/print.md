@@ -77,7 +77,49 @@ the start. Numbers and dates isolated as on screen.
 
 ## Choices to confirm (not settled by the decisions)
 1. The Ctrl+P of the browser, without `preparePrint`, prints only what is on screen (as today); no
-   `beforeprint` hook building the table by itself. Kept at step 11.
+   `beforeprint` hook building the table by itself. Kept at step 11. **Phase 11 L5**: an opt-in hook added
+   (`printOnMenu`, behaviour 10 below); without it, still the screen, now printed light (13).
+
+## On paper (Phase 11 L5, plan « L5 »; written before the code)
+What the user gets on paper, in Chrome, Firefox and Safari, also from the browser's own menu.
+
+10. **The browser's own print** (Ctrl+P, the File menu — no `print()` called). The plan offered two answers: a
+    `beforeprint` hook building the table, or a print-only line « use the Print button ». The hook is the smaller
+    (one listener; the line needs a translated text written by the DOM base, which a grid
+    that never prints would carry) and the user gets the whole list, so the hook, in its own entry
+    `@dzgrid/dom/print-menu` (a grid printed only by its button ships none of it). `printOnMenu(grid, options?)`: from
+    then on, `beforeprint` builds the same table as `preparePrint(grid, options)` **at once** (the browser lays the
+    pages out right after `beforeprint` returns: a table built in slices would be cut at its first slice; 5 000 rows at
+    4× CPU is one task of a few hundred ms, the dialog opens that much later), and it is removed as `print()` removes its
+    own (`afterprint`, else the first `focus` or `pointerdown`). A table already in the page (`print()`'s, or one the
+    application prepared) is left as it is: it prints. It lasts as long as the grid (its destruction ends it; no stop
+    handle of its own, to hold the size line). Opt-in: an application that never asks keeps today's behaviour.
+11. **Page breaks.** No row cut across two pages (`tr { break-inside: avoid }`); the header rows — the groups, the
+    pivot's bands, the column headers — at the top of every page (`thead` as a header group). Where the engine allows:
+    a group's first row stays with its group row (`break-before: avoid` on a data row right after a group row), so a
+    group row never ends a page above its rows, and a totals row never starts a page (`break-before: avoid`): it stays
+    with the row before it, the grand total alike. Not tied: a group row followed by another group row (an outer level,
+    a pivot's rows, a closed group) — tying every group row to the next made a pivot one unbreakable run (Chrome then
+    left page 1 empty). Group and totals rows keep `dzg-print-group`; a totals row also has `dzg-print-footer`.
+12. **Width.** The table takes the page's width (`inline-size: 100%`) and the browser shares it between the columns by
+    their content; a text wraps at its spaces and hyphens, **a word is never cut**. Tried and left out (L5):
+    `overflow-wrap: anywhere` fits any table, but it lowers every column's narrowest width to one letter, so the browser
+    narrows all of them together and cuts short words and ids (« Dossie|r », « C00|02 ») on an ordinary 12-column list
+    in portrait. Limit, kept: a list whose words alone are wider than the page (many columns of long unbroken text) runs
+    past the page's edge; the application prints it in landscape (`@page { size: landscape }`) or with fewer columns.
+    Long lists: one table, as many pages as needed (5 000 rows at most, 6).
+13. **Colours.** The print container is black on white whatever the page's theme (a dark page's light text would be
+    invisible on paper; the truncation line and the caption included). The screen grid printed without a prepared
+    table (an application without the hook) is printed in the light scheme (`color-scheme: light` in print): never
+    light text on white paper.
+14. **Right to left.** Unchanged (the table's `dir`): pages run top to bottom as in every language, the first column on
+    the right of each.
+
+Engines (`npm run test:browser -- --only paper --all`, `scripts/browser-print.mjs` « paper »): Chrome's `page.pdf()`
+(which sends `beforeprint` and `afterprint`, so 10 is checked without `print()`), Firefox's own « Save to PDF » printer
+reached by `window.print()` (silent, to a file), both read back as text (`scripts/pdf-text.py`, with each line's
+colour); WebKit has no print to a file in Playwright: its print media emulated (no pages), the computed rules
+checked and a screenshot kept — 11's repetition and breaks are not verified there.
 
 ## Tests
 `packages/dom/test/print.test.ts` (32: the table, caption, groups, `dir` / `lang`; rows in order after sort, filter and

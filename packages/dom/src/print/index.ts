@@ -17,8 +17,9 @@ export interface PrintOptions {
 /** A grid made by `createGrid` (its kernel is how the features find it). */
 export type PrintableGrid = { readonly kernel: GridKernel<any, any> };
 
-/** How long one slice of the build runs before the main thread is given back (ms). */
+/** How long one slice of the build runs before the main thread is given back (ms); endless for `printOnMenu`'s build. */
 const SLICE = 8;
+let slice = SLICE;
 const EM = ' ';
 /** The grids told their print texts are missing (once each). */
 const told = new WeakSet<object>();
@@ -163,8 +164,8 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
     node.kind == 'data' ? cellValue(cols[j]!, node.data, g.ctx, read, node.key).text : gr!.cell(node as GroupNode, cols[j]!);
   const row = (node: RowNode<unknown>, i: number): HTMLTableRowElement => {
     const tr = doc.createElement('tr');
-    // A group or a totals row, set apart without colour.
-    if ('aggs' in node) tr.className = 'dzg-print-group';
+    // A group or a totals row, set apart without colour; a totals row also marked as such, for the page breaks (11).
+    if ('aggs' in node) tr.className = 'dzg-print-group' + (node.kind == 'footer' ? ' dzg-print-footer' : '');
     const whole = i < 0 ? null : map?.ownerAt(i, 0);
     // A full-width row (or one cell across every column): one cell.
     if (whole && whole.row === i && whole.cols >= n) return (add('td', tr, cellText(0, node)).colSpan = n), tr;
@@ -182,7 +183,7 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
       const start = g.now();
       const part = doc.createDocumentFragment();
       do part.append(row(...jobs[k++]!));
-      while (k < jobs.length && g.now() - start < SLICE);
+      while (k < jobs.length && g.now() - start < slice);
       tb.append(part);
       if (k < jobs.length) {
         await pause(g.win);
@@ -206,6 +207,19 @@ export async function print(grid: PrintableGrid, o?: PrintOptions): Promise<void
   const w = (grid as unknown as { context: GridContext<unknown> }).context.win;
   if (!done || done !== stop) return;
   if (!w) return done();
-  for (const t of ['afterprint', 'focus', 'pointerdown']) w.addEventListener(t, done, { once: true });
+  later(w, done);
   w.print();
 }
+
+/** The cleanup after the print: on `afterprint`, else on the first `focus` or `pointerdown` (idempotent, so the later ones do nothing). */
+const later = (w: Window, done: () => void): void => {
+  for (const t of ['afterprint', 'focus', 'pointerdown']) w.addEventListener(t, done, { once: true });
+};
+
+/**
+ * For `@dzgrid/dom/print-menu` alone (print.md 10; not exported by `@dzgrid/dom/print`, so a grid that only prints by its
+ * button ships none of it): `preparePrint` built at once — no slice, the browser lays the pages out as soon as
+ * `beforeprint` returns — unless a table is already in the page; its cleanup armed as `print()`'s.
+ */
+export const buildNow = (grid: PrintableGrid, o: PrintOptions | undefined, w: Window): void =>
+  void (stop || ((slice = 1 / 0), preparePrint(grid, o), (slice = SLICE), later(w, stop!)));

@@ -140,7 +140,8 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/dom/auto-height` | rows as tall as their wrapped text (over the DOM) | 1 237 |
 | `@dzgrid/dom/row-gaps` | `rowGaps`: a space between categories (over the DOM) | 575 |
 | `@dzgrid/dom/fresh-rows` | `freshRows`: the rows a refresh brought, marked 5 s (over the DOM) | 544 |
-| `@dzgrid/dom/print` | `preparePrint`, `print` (over the DOM) | 1 599 |
+| `@dzgrid/dom/print` | `preparePrint`, `print` (over the DOM) | 1 675 |
+| `@dzgrid/dom/print-menu` | `printOnMenu`, the browser's own print (over print) | 75 |
 | `@dzgrid/dom/slots` | header, overlay and tooltip slots | 1 266 |
 | `@dzgrid/dom/parts` | `badge()`, `cellBoolean` | 689 |
 | `@dzgrid/dom/rules` | selection rules in the DOM | 654 |
@@ -161,7 +162,7 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/theme` | the stylesheet / its comfortable density (`dzgrid.comfort.css`) | 2 764 / 551 |
 | `@dzgrid/theme/{edit,range,fill}.css` | editing, blocks, the fill handle | 2 236 / 479 / 457 |
 | `@dzgrid/theme/{columns,columns-panel,pinned-rows}.css` | columns, the columns chooser, pinned rows | 1 111 / 991 / 301 |
-| `@dzgrid/theme/print.css` | printing / its unlayered copy | 334 / 292 |
+| `@dzgrid/theme/print.css` | printing / its unlayered copy | 369 / 326 |
 | `@dzgrid/theme/{midnight,clinic}.css` | the showcase themes | 446 / 472 |
 | `@dzgrid/theme/{tailwind,tailwind3,bootstrap}.css` | the framework bridges | 325 / 325 / 293 |
 | `@dzgrid/angular` | the Angular wrapper | 7 316 |

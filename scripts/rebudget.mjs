@@ -208,7 +208,8 @@ const SIZE_CEILINGS = {
   // 1.1.0 step 15 (owner Q15-9, 2026-10-29): the gaps between categories over the DOM base, core/row-gaps outside it.
   '@dzgrid/dom/row-gaps': 900,
   // Phase 6 step 11 (owner Q-B): print over the DOM base; its -print texts; print.css and its unlayered twin, 400 each.
-  '@dzgrid/dom/print': 1664, // Phase 8 step 4 (+2 % rule, plan §4): a block list's rows held printed (measured 1 642); before: 1632; Phase 7 close (+2 % rule): group and totals rows printed, measured 1 632
+  '@dzgrid/dom/print': 1697, // Phase 11 L5 (+2 % rule, the plan's cap): the totals rows' class and the at-once build, measured 1 675 (`printOnMenu` in its own entry); before: 1664, Phase 8 step 4 (+2 % rule, plan §4): a block list's rows held printed (measured 1 642); before: 1632; Phase 7 close (+2 % rule): group and totals rows printed, measured 1 632
+  '@dzgrid/dom/print-menu': 100, // Phase 11 L5, a new entry over @dzgrid/dom/print: measured 75, + 10 % rounded up to 50
   '@dzgrid/dom/locales/en-print': 150,
   '@dzgrid/dom/locales/fr-print': 150,
   '@dzgrid/dom/locales/ar-print': 200,
