@@ -11,6 +11,143 @@ When the rows live on a server, give the grid a `source` instead of `rows`. Thre
 Each takes the same `DataSource`: a `fetch(request)` that returns (or resolves to) `{ rows, total?, hasNext?,
 nextCursor? }`, and optionally `values(request)` for the set filter's value list.
 
+## How it works, in pictures
+
+The idea is simple once seen, and surprising the first time: **the grid builds the request itself and calls your
+back end**. You do not keep the filters, the sort or the page in a store, and you do not cache the rows: the grid
+owns them. The pictures below follow a made-up observatory's asteroid catalogue.
+
+### Who does what
+
+```text
+A grid that only displays                       DzGrid with a source
+──────────────────────────                      ────────────────────
+user filters ─► store (criteria)                user filters ─┐
+store ─► effect reads the criteria                            ▼
+effect ─► calls the back end                    the grid builds the request
+effect ─► cancels the older call                the grid calls source.fetch(request)
+effect ─► puts the rows in the store            the grid keeps the pages, the total,
+store ─► the grid shows them                    the loading bar, the error and Retry
+
+two copies of the same truth                    one place that knows
+```
+
+### The request, filled in as the user works
+
+Each gesture fills one part of the request; the grid sends it whole, once per change.
+
+```text
+the user types « Ves » in Name's filter   ─►  request.filter  = { name: { type: 'text', op: 'contains', value: 'Ves' } }
+the user sorts by Diameter, largest first ─►  request.sort    = [{ column: 'diameter', dir: 'desc' }]
+the user goes to page 3                   ─►  request.page    = { index: 2, size: 100, offset: 200 }
+your own values, from outside the grid    ─►  request.params  = { from: '2026-01-01', to: '2026-06-30' }
+the grid, to cancel an older call         ─►  request.signal
+```
+
+### `params`: what comes from outside the grid
+
+Say the page has an « observation window » picker **above** the grid, not a column filter. The window must reach the
+back end with every request, and changing it must start again from page 1. That is what `params` is for:
+
+```text
+window picker (outside the grid) ──► window (a signal)
+                                         │
+                                         ▼
+                         sourceRows(source, { params: { from, to } })
+                                         │   the grid puts params into EVERY request
+                                         ▼
+                         source.fetch(request)        request.params = { from, to }
+                                         │
+                                         ▼
+                         your translator ──► the body your back end expects:
+                                             { seenAfter: from, seenBefore: to, …the column filters }
+```
+
+Two things to see in this picture:
+
+1. `params` only **carries** the window to your code; **your translator** decides where it goes in the body.
+2. A new `params` **tells the grid the question changed**: back to page 1, the older call cancelled, the selection
+   cleared — on its own.
+
+The tempting shortcut is to read the window straight from your translator. The request would be right, but the grid
+would not know it changed: it would stay on page 5 and keep showing the old pages until something else moved.
+
+### The translator: your back end keeps its own format
+
+The grid sends filters in one well-defined shape; your back end may already speak another one. A small translator
+sits between them, and the back end does not change:
+
+```ts
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+
+type Asteroid = { id: string; name: string; found: string; diameter: number };
+type Filter = NonNullable<DataRequest['filter']>[string];
+
+/** The observatory's own format: one criterion per column, the operator in `op`. */
+type Criterion = { op: string; value?: unknown; values?: readonly unknown[] };
+
+function criterion(f: Filter): Criterion | null {
+  switch (f.type) {
+    case 'text': return { op: f.op, value: f.value };
+    case 'number': return f.op === 'between' ? { op: 'range', values: [f.value, f.valueTo] } : { op: f.op, value: f.value };
+    case 'day': return f.op === 'between' ? { op: 'range', values: [f.value, f.valueTo] } : { op: f.op, value: f.value };
+    case 'set': return { op: 'in', values: f.include ?? [] };
+    default: return null;
+  }
+}
+
+/** The grid's request → the observatory's body (the window from `params` first, the user's filters over it). */
+function body(req: DataRequest): Record<string, unknown> {
+  const criteria: Record<string, Criterion> = {};
+  const { from, to } = req.params as { from?: string; to?: string };
+  if (from && to) criteria['found'] = { op: 'range', values: [from, to] };
+  for (const [column, f] of Object.entries(req.filter ?? {})) {
+    const c = criterion(f);
+    if (c) criteria[column] = c;
+  }
+  const first = req.sort?.[0];
+  return { criteria, orderBy: first?.column ?? null, order: first?.dir ?? null };
+}
+
+async function fetchPage(req: DataRequest): Promise<DataResponse<Asteroid>> {
+  const answer = await fetch(`/api/catalogue?page=${req.page?.index ?? 0}&size=${req.page?.size ?? 100}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body(req)),
+    signal: req.signal as AbortSignal,
+  });
+  const json = (await answer.json()) as { items: Asteroid[]; count: number };
+  return { rows: json.items, total: json.count };
+}
+
+/** A new window = a new source with other params = a new question, from page 1. */
+export const catalogue = (from: string, to: string) => sourceRows<Asteroid>({ fetch: fetchPage }, { params: { from, to } });
+```
+
+### Cancelling: only the latest answer counts
+
+```text
+the user types  V      Ve      Ves
+requests        ──1──► ──2──►  ──3──►
+                  ✕ cancelled (signal)
+                         ✕ cancelled
+answers                               ◄──3── shown
+a late answer 2 that still arrives  ◄──2──  ignored: stale
+```
+
+Pass `request.signal` to your HTTP call so the network work stops too; the grid ignores a stale answer either way.
+
+### The first screen, in one call
+
+The default sort (newest first, say) and the starting window leave **with the very first request**: one round trip,
+never « unsorted, then sorted ». Give the sort with `gridState({ initial: { v: 1, sort: [...] } })` (Angular:
+`[state]`) and the window as `params` from the start.
+
+### What the grid then does on its own
+
+Loading, the thin « updating » bar, an error with Retry, the pages, stale answers, a selection that spans every page
+(« all that match », sent as the query and the rows left out) — without a store, an effect or a cache of yours.
+
 ## Pages
 
 ```ts
