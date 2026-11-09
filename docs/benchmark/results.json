@@ -1,0 +1,738 @@
+{
+  "lot": "Phase 11 L8",
+  "date": "2026-11-09",
+  "method": "docs/benchmark/README.md",
+  "machine": {
+    "cpu": "Apple M4 Max",
+    "memoryGB": 64,
+    "os": "macOS 26.2",
+    "node": "v24.22.1"
+  },
+  "browser": "Chrome 157.0.8103.38",
+  "window": {
+    "width": 1280,
+    "height": 720
+  },
+  "cpuThrottling": 1,
+  "runsPerScenario": 3,
+  "statistic": "median",
+  "units": {
+    "time": "ms",
+    "heap": "MB (JS heap used after load minus before, both after a forced GC)",
+    "bundle": "bytes, gzip -9, minus the harness-only page"
+  },
+  "dataSets": {
+    "A": {
+      "rows": 100000,
+      "columns": 20
+    },
+    "B": {
+      "rows": 1000000,
+      "columns": 10
+    }
+  },
+  "grids": {
+    "dzgrid": {
+      "version": "@dzgrid/core, @dzgrid/dom, @dzgrid/theme 1.7.0",
+      "bundleGzip": {
+        "js": 51132,
+        "css": 2931
+      },
+      "loadAverage1mAtStart": 2.89,
+      "sets": {
+        "A": {
+          "median": {
+            "load": {
+              "dom": 30.6,
+              "frame": 35
+            },
+            "jumpEnd": {
+              "dom": 13.2,
+              "frame": 28.7
+            },
+            "jumpTop": {
+              "dom": 16.6,
+              "frame": 32.5
+            },
+            "sort": {
+              "dom": 26.8,
+              "frame": 32.6
+            },
+            "filter": {
+              "dom": 21.2,
+              "frame": 22.2
+            },
+            "update": {
+              "dom": 8.3,
+              "frame": 24
+            },
+            "heapMB": 3.1
+          },
+          "runs": [
+            {
+              "load": {
+                "dom": 31.1,
+                "frame": 35.4
+              },
+              "heapMB": 3.098651885986328,
+              "jumpEnd": {
+                "dom": 15.9,
+                "frame": 31.9
+              },
+              "jumpTop": {
+                "dom": 16.6,
+                "frame": 32.6
+              },
+              "sort": {
+                "dom": 27.8,
+                "frame": 34.3
+              },
+              "filter": {
+                "dom": 17.7,
+                "frame": 18.5
+              },
+              "update": {
+                "dom": 7.6,
+                "frame": 22.9
+              }
+            },
+            {
+              "load": {
+                "dom": 30.6,
+                "frame": 35
+              },
+              "heapMB": 3.099018096923828,
+              "jumpEnd": {
+                "dom": 13.2,
+                "frame": 28.7
+              },
+              "jumpTop": {
+                "dom": 16.6,
+                "frame": 32.5
+              },
+              "sort": {
+                "dom": 26.8,
+                "frame": 32.5
+              },
+              "filter": {
+                "dom": 21.2,
+                "frame": 22.2
+              },
+              "update": {
+                "dom": 8.8,
+                "frame": 25.3
+              }
+            },
+            {
+              "load": {
+                "dom": 30.5,
+                "frame": 34.7
+              },
+              "heapMB": 3.099018096923828,
+              "jumpEnd": {
+                "dom": 2.8,
+                "frame": 18.2
+              },
+              "jumpTop": {
+                "dom": 16.8,
+                "frame": 32.5
+              },
+              "sort": {
+                "dom": 25.7,
+                "frame": 32.6
+              },
+              "filter": {
+                "dom": 22.3,
+                "frame": 23.1
+              },
+              "update": {
+                "dom": 8.3,
+                "frame": 24
+              }
+            }
+          ]
+        },
+        "B": {
+          "median": {
+            "load": {
+              "dom": 253.8,
+              "frame": 258
+            },
+            "jumpEnd": {
+              "dom": 8.6,
+              "frame": 24.3
+            },
+            "jumpTop": {
+              "dom": 17.2,
+              "frame": 33
+            },
+            "sort": {
+              "dom": 236,
+              "frame": 242.1
+            },
+            "filter": {
+              "dom": 107.5,
+              "frame": 108.6
+            },
+            "update": {
+              "dom": 13.7,
+              "frame": 28.3
+            },
+            "heapMB": 24.4
+          },
+          "runs": [
+            {
+              "load": {
+                "dom": 250.2,
+                "frame": 254.3
+              },
+              "heapMB": 24.400554656982422,
+              "jumpEnd": {
+                "dom": 1.3,
+                "frame": 16.4
+              },
+              "jumpTop": {
+                "dom": 17.2,
+                "frame": 33
+              },
+              "sort": {
+                "dom": 236.8,
+                "frame": 242.8
+              },
+              "filter": {
+                "dom": 107.5,
+                "frame": 108.6
+              },
+              "update": {
+                "dom": 13.7,
+                "frame": 27.1
+              }
+            },
+            {
+              "load": {
+                "dom": 262.7,
+                "frame": 266.9
+              },
+              "heapMB": 24.400554656982422,
+              "jumpEnd": {
+                "dom": 8.6,
+                "frame": 24.3
+              },
+              "jumpTop": {
+                "dom": 16.7,
+                "frame": 32.6
+              },
+              "sort": {
+                "dom": 236,
+                "frame": 242.1
+              },
+              "filter": {
+                "dom": 106.4,
+                "frame": 107.5
+              },
+              "update": {
+                "dom": 13.7,
+                "frame": 28.6
+              }
+            },
+            {
+              "load": {
+                "dom": 253.8,
+                "frame": 258
+              },
+              "heapMB": 24.400554656982422,
+              "jumpEnd": {
+                "dom": 13.4,
+                "frame": 28.7
+              },
+              "jumpTop": {
+                "dom": 17.2,
+                "frame": 33
+              },
+              "sort": {
+                "dom": 234.9,
+                "frame": 240.8
+              },
+              "filter": {
+                "dom": 107.9,
+                "frame": 109.5
+              },
+              "update": {
+                "dom": 13.8,
+                "frame": 28.3
+              }
+            }
+          ]
+        }
+      }
+    },
+    "aggrid": {
+      "version": "ag-grid-community 36.3.0",
+      "bundleGzip": {
+        "js": 329833,
+        "css": 0
+      },
+      "loadAverage1mAtStart": 3.29,
+      "sets": {
+        "A": {
+          "median": {
+            "load": {
+              "dom": 68,
+              "frame": 70.2
+            },
+            "jumpEnd": {
+              "dom": 5.1,
+              "frame": 7.9
+            },
+            "jumpTop": {
+              "dom": 4.1,
+              "frame": 15.4
+            },
+            "sort": {
+              "dom": 96.7,
+              "frame": 99.3
+            },
+            "filter": {
+              "dom": 46.9,
+              "frame": 47
+            },
+            "update": {
+              "dom": 42.9,
+              "frame": 43
+            },
+            "heapMB": 24
+          },
+          "runs": [
+            {
+              "load": {
+                "dom": 68,
+                "frame": 70.2
+              },
+              "heapMB": 23.97705841064453,
+              "jumpEnd": {
+                "dom": 5.1,
+                "frame": 11.9
+              },
+              "jumpTop": {
+                "dom": 4.1,
+                "frame": 14.6
+              },
+              "sort": {
+                "dom": 98.2,
+                "frame": 100.7
+              },
+              "filter": {
+                "dom": 46.9,
+                "frame": 47
+              },
+              "update": {
+                "dom": 42.9,
+                "frame": 43
+              }
+            },
+            {
+              "load": {
+                "dom": 67.6,
+                "frame": 69.7
+              },
+              "heapMB": 23.977035522460938,
+              "jumpEnd": {
+                "dom": 4.9,
+                "frame": 7.9
+              },
+              "jumpTop": {
+                "dom": 4.1,
+                "frame": 15.5
+              },
+              "sort": {
+                "dom": 96.7,
+                "frame": 99.3
+              },
+              "filter": {
+                "dom": 46.8,
+                "frame": 46.9
+              },
+              "update": {
+                "dom": 41.4,
+                "frame": 41.5
+              }
+            },
+            {
+              "load": {
+                "dom": 69.5,
+                "frame": 71.7
+              },
+              "heapMB": 23.977035522460938,
+              "jumpEnd": {
+                "dom": 5.3,
+                "frame": 7
+              },
+              "jumpTop": {
+                "dom": 4.1,
+                "frame": 15.4
+              },
+              "sort": {
+                "dom": 95.6,
+                "frame": 98.3
+              },
+              "filter": {
+                "dom": 47.2,
+                "frame": 47.3
+              },
+              "update": {
+                "dom": 42.9,
+                "frame": 43.9
+              }
+            }
+          ]
+        },
+        "B": {
+          "median": {
+            "load": {
+              "dom": 412.7,
+              "frame": 414.9
+            },
+            "jumpEnd": {
+              "dom": 5.6,
+              "frame": 9
+            },
+            "jumpTop": {
+              "dom": 4.1,
+              "frame": 15.8
+            },
+            "sort": {
+              "dom": 1046.7,
+              "frame": 1048.7
+            },
+            "filter": {
+              "dom": 353.1,
+              "frame": 353.2
+            },
+            "update": {
+              "dom": 339.9,
+              "frame": 341.1
+            },
+            "heapMB": 210.9
+          },
+          "runs": [
+            {
+              "load": {
+                "dom": 412.7,
+                "frame": 414.9
+              },
+              "heapMB": 210.85448837280273,
+              "jumpEnd": {
+                "dom": 5.7,
+                "frame": 7.6
+              },
+              "jumpTop": {
+                "dom": 4.1,
+                "frame": 15.9
+              },
+              "sort": {
+                "dom": 1046.7,
+                "frame": 1048.7
+              },
+              "filter": {
+                "dom": 388.3,
+                "frame": 388.4
+              },
+              "update": {
+                "dom": 344.6,
+                "frame": 345.9
+              }
+            },
+            {
+              "load": {
+                "dom": 408.7,
+                "frame": 410.9
+              },
+              "heapMB": 210.85329055786133,
+              "jumpEnd": {
+                "dom": 5.6,
+                "frame": 9
+              },
+              "jumpTop": {
+                "dom": 4,
+                "frame": 15.8
+              },
+              "sort": {
+                "dom": 1063.3,
+                "frame": 1065.5
+              },
+              "filter": {
+                "dom": 353.1,
+                "frame": 353.2
+              },
+              "update": {
+                "dom": 339.9,
+                "frame": 341.1
+              }
+            },
+            {
+              "load": {
+                "dom": 413.9,
+                "frame": 416
+              },
+              "heapMB": 210.8533592224121,
+              "jumpEnd": {
+                "dom": 5.6,
+                "frame": 12.3
+              },
+              "jumpTop": {
+                "dom": 4.3,
+                "frame": 15.7
+              },
+              "sort": {
+                "dom": 1030.1,
+                "frame": 1032.1
+              },
+              "filter": {
+                "dom": 348.1,
+                "frame": 348.1
+              },
+              "update": {
+                "dom": 332.5,
+                "frame": 333.8
+              }
+            }
+          ]
+        }
+      }
+    },
+    "tabulator": {
+      "version": "tabulator-tables 6.7.1",
+      "bundleGzip": {
+        "js": 106080,
+        "css": 3867
+      },
+      "loadAverage1mAtStart": 3.31,
+      "sets": {
+        "A": {
+          "median": {
+            "load": {
+              "dom": 68.6,
+              "frame": 68.8
+            },
+            "jumpEnd": {
+              "dom": 14.4,
+              "frame": 14.6
+            },
+            "jumpTop": {
+              "dom": 7.2,
+              "frame": 7.4
+            },
+            "sort": {
+              "dom": 123.6,
+              "frame": 123.7
+            },
+            "filter": {
+              "dom": 47.3,
+              "frame": 47.4
+            },
+            "update": {
+              "dom": 625,
+              "frame": 625.2
+            },
+            "heapMB": 17.2
+          },
+          "runs": [
+            {
+              "load": {
+                "dom": 69.9,
+                "frame": 70.4
+              },
+              "heapMB": 17.2021484375,
+              "jumpEnd": {
+                "dom": 14.5,
+                "frame": 14.6
+              },
+              "jumpTop": {
+                "dom": 7.2,
+                "frame": 7.3
+              },
+              "sort": {
+                "dom": 123.9,
+                "frame": 124
+              },
+              "filter": {
+                "dom": 51.7,
+                "frame": 51.8
+              },
+              "update": {
+                "dom": 630.7,
+                "frame": 631.1
+              }
+            },
+            {
+              "load": {
+                "dom": 68.2,
+                "frame": 68.4
+              },
+              "heapMB": 17.2021484375,
+              "jumpEnd": {
+                "dom": 14.4,
+                "frame": 14.6
+              },
+              "jumpTop": {
+                "dom": 7.4,
+                "frame": 7.4
+              },
+              "sort": {
+                "dom": 121.8,
+                "frame": 122
+              },
+              "filter": {
+                "dom": 47.3,
+                "frame": 47.4
+              },
+              "update": {
+                "dom": 625,
+                "frame": 625.2
+              }
+            },
+            {
+              "load": {
+                "dom": 68.6,
+                "frame": 68.8
+              },
+              "heapMB": 17.202136993408203,
+              "jumpEnd": {
+                "dom": 14.3,
+                "frame": 19.2
+              },
+              "jumpTop": {
+                "dom": 6.8,
+                "frame": 13.2
+              },
+              "sort": {
+                "dom": 123.6,
+                "frame": 123.7
+              },
+              "filter": {
+                "dom": 46.6,
+                "frame": 46.7
+              },
+              "update": {
+                "dom": 620.2,
+                "frame": 620.5
+              }
+            }
+          ]
+        },
+        "B": {
+          "median": {
+            "load": {
+              "dom": 175.1,
+              "frame": 175.3
+            },
+            "jumpEnd": {
+              "dom": 13.7,
+              "frame": 13.9
+            },
+            "jumpTop": {
+              "dom": 3.6,
+              "frame": 5.7
+            },
+            "sort": {
+              "dom": 1293.7,
+              "frame": 1293.8
+            },
+            "filter": {
+              "dom": 271.2,
+              "frame": 271.3
+            },
+            "update": {
+              "dom": 3534.3,
+              "frame": 3534.6
+            },
+            "heapMB": 162.3
+          },
+          "runs": [
+            {
+              "load": {
+                "dom": 175.1,
+                "frame": 175.3
+              },
+              "heapMB": 162.25065994262695,
+              "jumpEnd": {
+                "dom": 14.1,
+                "frame": 14.3
+              },
+              "jumpTop": {
+                "dom": 3.8,
+                "frame": 3.8
+              },
+              "sort": {
+                "dom": 1293.4,
+                "frame": 1293.4
+              },
+              "filter": {
+                "dom": 274.4,
+                "frame": 274.4
+              },
+              "update": {
+                "dom": 3544.1,
+                "frame": 3544.3
+              }
+            },
+            {
+              "load": {
+                "dom": 180.9,
+                "frame": 181
+              },
+              "heapMB": 162.25064849853516,
+              "jumpEnd": {
+                "dom": 13.7,
+                "frame": 13.9
+              },
+              "jumpTop": {
+                "dom": 3.6,
+                "frame": 5.7
+              },
+              "sort": {
+                "dom": 1293.7,
+                "frame": 1293.8
+              },
+              "filter": {
+                "dom": 268.5,
+                "frame": 268.5
+              },
+              "update": {
+                "dom": 3534.3,
+                "frame": 3534.6
+              }
+            },
+            {
+              "load": {
+                "dom": 174.8,
+                "frame": 175.1
+              },
+              "heapMB": 162.25065994262695,
+              "jumpEnd": {
+                "dom": 13.6,
+                "frame": 13.7
+              },
+              "jumpTop": {
+                "dom": 3.6,
+                "frame": 6.9
+              },
+              "sort": {
+                "dom": 1306.8,
+                "frame": 1306.8
+              },
+              "filter": {
+                "dom": 271.2,
+                "frame": 271.3
+              },
+              "update": {
+                "dom": 3483.9,
+                "frame": 3484.3
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
