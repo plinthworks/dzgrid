@@ -89,7 +89,7 @@ function walk(o: Opt, steps: number) {
           expect(tg, `${where}: toggle ${id}`).not.toBeNull();
           expect(tg!.hasAttribute('data-leaf'), `${where}: leaf ${id}`).toBe(!kids);
           expect(tg!.hasAttribute('data-open'), `${where}: open ${id}`).toBe(open);
-          expect(c.style.paddingInlineStart, `${where}: pad ${id}`).toBe(`calc(var(--dzg-cell-padding-inline, 0.5rem) + ${(level - 1) * 16}px)`);
+          expect(c.style.paddingInlineStart, `${where}: pad ${id}`).toBe(`calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + ${(level - 1) * 16}px)`);
           expect(c.textContent, `${where}: text ${id}`).toBe(col === 'name' ? t.g.kernel.rows.row(key)!.data.name : c.textContent);
         } else {
           expect(c.querySelector('.dzg-toggle'), `${where}: stale toggle ${id}/${c.dataset['col']}`).toBeNull();

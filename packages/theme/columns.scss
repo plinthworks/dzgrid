@@ -94,7 +94,7 @@ $layered: true !default;
     inline-size: var(--dzg-target-min, 24px);
     block-size: var(--dzg-target-min, 24px);
     margin-inline-start: auto;
-    margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem));
+    margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
     padding: 0;
     border: 0;
     border-radius: var(--dzg-radius, 0.375rem);
@@ -133,7 +133,7 @@ $layered: true !default;
 
   .dzg-reapply {
     order: 3;
-    margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem));
+    margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
   }
 
   @media (hover: none), (any-pointer: coarse) {

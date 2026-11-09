@@ -98,12 +98,12 @@ describe('tree({ structure }): the columns that feed the tree are read-only (Q13
 describe('the field in the tree column (behaviour 9–10)', () => {
   it('the cell carries its indent in --dzg-tree-pad; edit.css puts the field after the chevron (logical side)', () => {
     const t = tr();
-    const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${px}px)`;
+    const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + ${px}px)`;
     expect(t.cell('S0')!.style.getPropertyValue('--dzg-tree-pad')).toBe(pad(0));
     expect(t.cell('V1')!.style.getPropertyValue('--dzg-tree-pad')).toBe(pad(32));
     expect(t.cell('V1', 'n')!.style.getPropertyValue('--dzg-tree-pad')).toBe('');
     const css = readFileSync(`${process.cwd()}/packages/theme/edit.css`, 'utf8').replace(/\s+/g, ' ');
-    expect(css).toContain('.dzg-toggle ~ [data-dzg-owner] { --dzg-tree-at: calc(var(--dzg-tree-pad, var(--dzg-cell-padding-inline, 0.5rem)) + var(--dzg-target-min, 24px)); inset-inline-start: var(--dzg-tree-at); }');
+    expect(css).toContain('.dzg-toggle ~ [data-dzg-owner] { --dzg-tree-at: calc(var(--dzg-tree-pad, calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1))) + var(--dzg-target-min, 24px)); inset-inline-start: var(--dzg-tree-at); }');
     // A field whose own direction is not its cell's (dir=auto): the room at its other end.
     expect(css).toContain(':dir(rtl) > .dzg-toggle ~ :dir(ltr), :dir(ltr) > .dzg-toggle ~ :dir(rtl) { inset-inline: 0 var(--dzg-tree-at); }');
     // Given back plain when the column is no longer the tree's; the new tree column carries it.
@@ -115,7 +115,7 @@ describe('the field in the tree column (behaviour 9–10)', () => {
 
   it('per row (1.2.0, tree({ column }) a function): the field sits after the chevron in that row’s column', () => {
     const t = tr({ parentId: (r) => r.pid, column: (r) => (r.pid === null ? 'name' : 'n') });
-    const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${px}px)`;
+    const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + ${px}px)`;
     expect(t.cell('S0')!.style.getPropertyValue('--dzg-tree-pad')).toBe(pad(0));
     expect(t.cell('P1', 'n')!.style.getPropertyValue('--dzg-tree-pad')).toBe(pad(16));
     expect(t.cell('P1', 'name')!.style.getPropertyValue('--dzg-tree-pad')).toBe('');
@@ -297,7 +297,7 @@ describe('review gaps', () => {
     check();
     t.g.kernel.rows.applyTransaction({ update: [{ id: 'C', pid: null, name: 'C', n: 2, s: '', q: 0 } as never] });
     check();
-    expect(t.cell('C', 'name')!.style.getPropertyValue('--dzg-tree-pad')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 0px)');
+    expect(t.cell('C', 'name')!.style.getPropertyValue('--dzg-tree-pad')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 0px)');
   });
 
   it('a filler: kernel.editable false, api.commit refused read-only', () => {

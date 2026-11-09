@@ -25,7 +25,7 @@ properties. It listens to `dzg-*` events.
    Angular's) leaves it alone and tells `invalid-setting`, path `element`, detail `already-a-grid`.
 2. **Server-safe.** Importing either entry where `HTMLElement` and `customElements` do not exist (Node, a server
    render) never throws; defining does nothing there.
-3. **Properties.** `rows`, `source`, `columns`, `getRowId`, `messages`, `features`, `parts`, `env` (the `GridEnv`,
+3. **Properties.** `rows`, `source`, `columns`, `getRowId`, `messages`, `features`, `parts`, `theme`, `icons` (1.9.0, presentation-settings.md; with `theming()`), `env` (the `GridEnv`,
    read when the grid is made) and `settings` (every other `GridSettings` key: `selection`, `context`, `rowClass`,
    `pagination`, `operations`…). The grid is made when the element is connected and has `columns`, `getRowId` and
    `messages` (the grid bundles no language, D1); before that nothing is drawn and nothing is told (a framework sets

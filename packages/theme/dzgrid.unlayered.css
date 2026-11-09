@@ -66,7 +66,7 @@
 .dzg-cell,
 .dzg-check {
   box-sizing: border-box;
-  padding-inline: var(--dzg-cell-padding-inline, 0.5rem);
+  padding-inline: calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
   border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
 }
 
@@ -86,7 +86,7 @@
 .dzg-row .dzg-seg-start,
 .dzg-row .dzg-seg-end {
   color: var(--tz-fg);
-  background: var(--tz-bg);
+  background: var(--dzg-odd, var(--tz-bg));
 }
 
 .dzg-row:where(:not([data-spans])) {
@@ -543,7 +543,7 @@
 
 .dzg-cell.dzg-flash {
   border-inline-start: 3px solid color-mix(in srgb, var(--dzg-flash-color, var(--tz-warning)) calc(var(--dzg-flash, 1) * 100%), transparent);
-  padding-inline-start: calc(var(--dzg-cell-padding-inline, 0.5rem) - 3px);
+  padding-inline-start: calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) - 3px);
   background-color: color-mix(in srgb, var(--dzg-flash-color, var(--tz-warning)) calc(var(--dzg-flash, 1) * 18%), transparent);
 }
 

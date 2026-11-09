@@ -193,3 +193,11 @@ right-to-left checks in Firefox and WebKit with `--all`; then each framework set
 
 ## Phase 5 step 4: `edit.css`
 `@dzgrid/theme/edit.css` (and `edit.unlayered.css`, source `edit.scss`), loaded after the theme by the applications that edit (owner S4-O2): the save marks, the running border, the refusal blink, the muted row and the reapply button, in `dzgrid.theme`. Reserved colours `--dzg-saving-color`, `--dzg-saved-color` (new, `--tz-success` by default), `--dzg-refused-color`; a showcase theme or a bridge colours them through the palette.
+
+## 1.9.0: presentation settings
+Every presentation knob of `docs/presentation-review.md` (owner's answers, 2026-11-09) is a `--dzg-*` variable, read at
+its point of use with today's value as its fallback: the few the base must carry (alternate rows, the pinned shadow,
+equal-width digits, the density's padding) in `dzgrid.css` and the injected layout; the rest in the opt-in
+`@dzgrid/theme/variables.css` (layered in `dzgrid.theme`, after the base; an unlayered copy), so the audit screen (K.8)
+pays nothing for them. A `theme` setting writes them from code, an `icons` setting draws the application's icons (in
+their own layer `dzgrid.icons`, after `dzgrid.contrast`). The sheet: `presentation-settings.md`.

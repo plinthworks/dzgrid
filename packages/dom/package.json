@@ -513,6 +513,10 @@
       "types": "./src/vertical-headers.ts",
       "default": "./src/vertical-headers.ts"
     },
+    "./theme": {
+      "types": "./src/theme.ts",
+      "default": "./src/theme.ts"
+    },
     "./locales/en-totals": {
       "types": "./src/locales/en-totals.ts",
       "default": "./src/locales/en-totals.ts"

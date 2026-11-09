@@ -149,10 +149,10 @@ describe('edit.css: the field and the bubble (Phase 5 step 5, owner S5-O2)', () 
     expect(decl(/\[aria-selected='?true'?\] \.dzg-field/)).toMatch(/background: var\(--dzg-row-selected-bg/);
     expect(decl(/\[data-hover\] \.dzg-field/)).toMatch(/background: var\(--dzg-row-hover-bg/);
     expect(f).toMatch(/border: 0/);
-    expect(f).toMatch(/padding-inline: var\(--dzg-cell-padding-inline, 0\.5rem\)/);
+    expect(f).toMatch(/padding-inline: calc\(var\(--dzg-cell-padding-inline, 0\.5rem\) \* var\(--dzg-density, 1\)\)/); // the cell's, density included (1.9.0)
     expect(f).not.toMatch(/padding-left|padding-right/);
     const ring = decl(/^\.dzg-field:focus(-visible)?$/);
-    expect(ring).toMatch(/outline: 2px solid var\(--dzg-focus-ring, var\(--tz-accent\)\)/);
+    expect(ring).toMatch(/outline: 2px solid var\(--dzg-editor-border, var\(--dzg-focus-ring, var\(--tz-accent\)\)\)/); // `--dzg-editor-border` (1.9.0), the ring by default
     expect(ring).toMatch(/outline-offset: -2px/);
     expect(decl(/\.dzg-field\[inputmode=decimal\]/)).toMatch(/text-align: end/);
   });

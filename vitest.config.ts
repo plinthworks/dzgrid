@@ -74,6 +74,7 @@ const domAlias = {
   '@dzgrid/dom/locales/ar-totals': fileURLToPath(new URL('./packages/dom/src/locales/ar-totals.ts', import.meta.url)),
   '@dzgrid/dom/responsive': fileURLToPath(new URL('./packages/dom/src/responsive.ts', import.meta.url)),
   '@dzgrid/dom/import': fileURLToPath(new URL('./packages/dom/src/import.ts', import.meta.url)),
+  '@dzgrid/dom/theme': fileURLToPath(new URL('./packages/dom/src/theme.ts', import.meta.url)),
   '@dzgrid/dom/locales/en-import': fileURLToPath(new URL('./packages/dom/src/locales/en-import.ts', import.meta.url)),
   '@dzgrid/dom/locales/fr-import': fileURLToPath(new URL('./packages/dom/src/locales/fr-import.ts', import.meta.url)),
   '@dzgrid/dom/locales/ar-import': fileURLToPath(new URL('./packages/dom/src/locales/ar-import.ts', import.meta.url)),

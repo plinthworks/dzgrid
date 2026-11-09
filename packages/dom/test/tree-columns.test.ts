@@ -48,7 +48,7 @@ function make(tr: Partial<TreeFeatureOptions<T>> = {}, o: Partial<TMake> = {}) {
 const problems = (t: ReturnType<typeof make>) => t.events.filter((e) => e.type === 'problems').flatMap((e) => (e as unknown as { problems: Problem[] }).problems);
 const said = (t: ReturnType<typeof make>, path: string) => problems(t).filter((p) => p.path === path).map((p) => [p.code, p.detail]);
 const tog = (t: ReturnType<typeof make>, id: string, col: string) => t.cell(id, col)?.querySelector<HTMLElement>(':scope > .dzg-toggle') ?? null;
-const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${px}px)`;
+const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + ${px}px)`;
 const padOf = (c: HTMLElement | null) => c?.style.getPropertyValue('padding-inline-start') ?? null;
 
 describe('tree({ column: (row) => id }): each row its own tree column', () => {

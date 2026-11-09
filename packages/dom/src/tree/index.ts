@@ -329,7 +329,7 @@ function setup<T>(g: GridContext<unknown>, column: Col, indent: Indent, lazy: La
           } catch {}
           if (!(px === +px! && px >= 0 && px <= 1000)) bad('tree.indent'), (px = level * 16);
         }
-        const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${px}px)`;
+        const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + ${px}px)`;
         if (cell.style.getPropertyValue(PAD) !== pad) cell.style.setProperty(PAD, pad), cell.style.setProperty(VAR, pad);
       };
       for (const [key, v] of rowRenderer.mounted) decorate(key, v);

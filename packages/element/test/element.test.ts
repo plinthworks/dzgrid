@@ -4,6 +4,7 @@ import type { ColumnDef, DisplayIndex, Problem } from '@dzgrid/core';
 import type { GridEnv } from '@dzgrid/dom';
 import { definePart } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
+import { theming } from '@dzgrid/dom/theme';
 import { DzGridElement, defineDzGrid } from '../src/index.js';
 
 type R = { id: string; name: string; n: number };
@@ -178,6 +179,17 @@ describe('<dz-grid> attributes (5, 6)', () => {
     expect(h()).toBe(56);
     el.removeAttribute('header-height');
     expect(h()).toBe(40);
+  });
+
+  it('theme and icons are properties of their own, live (presentation-settings.md 20, 17)', () => {
+    const el = make(undefined, (e) => { e.features = [theming()]; e.theme = { rowOddBg: 'Canvas' }; });
+    const root = () => el.querySelector('.dzg') as HTMLElement;
+    expect(root().style.getPropertyValue('--dzg-row-odd-bg')).toBe('Canvas');
+    el.icons = { grip: '<svg xmlns="http://www.w3.org/2000/svg"><circle r="2"/></svg>' };
+    expect(root().getAttribute('data-dzg-icons')).toBe('grip');
+    el.theme = undefined;
+    expect(root().style.getPropertyValue('--dzg-row-odd-bg')).toBe('');
+    expect(el.theme).toBeUndefined();
   });
 
   it('a value it cannot read is left out and told as a warning with the raw value', async () => {

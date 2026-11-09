@@ -1,0 +1,148 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  .dzg {
+    border: var(--dzg-frame, var(--dzg-line, 1px) solid var(--tz-border));
+    border-radius: var(--dzg-frame-radius, var(--dzg-radius, 0.375rem));
+  }
+  .dzg-hcell,
+  .dzg-cell,
+  .dzg-check {
+    border-block-end: var(--dzg-row-line, var(--dzg-line, 1px) solid var(--tz-border));
+  }
+  .dzg-hcell,
+  .dzg-hrow .dzg-check {
+    border-block-end: var(--dzg-header-line, var(--dzg-line, 1px) solid var(--tz-border));
+  }
+  .dzg-cell,
+  .dzg-hcell:not(.dzg-hgroup) {
+    border-inline-end: var(--dzg-column-line, none);
+  }
+  :is(.dzg-seg-start, .dzg-seg-end) > :last-child {
+    border-inline-end: none;
+  }
+  .dzg-resize::after {
+    inset-block: calc((100% - var(--dzg-header-separator-height, 50%)) / 2);
+    inline-size: var(--dzg-header-separator-size, 2px);
+    background: var(--dzg-header-separator, var(--tz-border));
+  }
+  .dzg-seg-start:not(:empty)::after,
+  .dzg-seg-end:not(:empty)::after {
+    border-inline-end: var(--dzg-pinned-column-line, var(--dzg-line, 1px) solid var(--tz-border));
+  }
+  .dzg-dcell {
+    border-inline-start: var(--dzg-detail-line, 3px solid var(--tz-border));
+  }
+  .dzg-header {
+    color: var(--dzg-header-fg, var(--tz-fg));
+    font-weight: var(--dzg-header-weight, 600);
+  }
+  .dzg-hrow {
+    font-family: var(--dzg-header-font-family);
+    text-transform: var(--dzg-header-case);
+  }
+  .dzg-hcell {
+    align-items: var(--dzg-header-align-block, center);
+  }
+  .dzg-sortable:hover {
+    background: var(--dzg-header-hover-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
+  }
+  .dzg-cell {
+    font-size: var(--dzg-cell-font-size);
+    align-content: var(--dzg-cell-align-block);
+  }
+  .dzg-cell[data-wrap] {
+    padding-block: var(--dzg-cell-padding-block, 0);
+  }
+  .dzg-cell:focus:where(:not([data-dzg-quiet] *)),
+  .dzg-cell:focus-visible,
+  .dzg-dcell:focus-visible,
+  .dzg-hcell:focus-visible,
+  .dzg-check:focus-visible,
+  .dzg-box:focus-visible,
+  .dzg-fopt:focus-visible {
+    outline-width: max(2px, var(--dzg-focus-width, 2px));
+    outline-offset: calc(-1 * max(2px, var(--dzg-focus-width, 2px)));
+  }
+  .dzg-cell:focus:where(:not([data-dzg-quiet] *)) {
+    box-shadow: inset 0 0 0 calc(max(2px, var(--dzg-focus-width, 2px)) + 1px) var(--tz-bg);
+  }
+  .dzg-box {
+    inline-size: var(--dzg-box-size, 1rem);
+    block-size: var(--dzg-box-size, 1rem);
+    outline-color: var(--dzg-box-edge, var(--tz-fg-muted));
+    border-radius: var(--dzg-box-radius, 0.25rem);
+  }
+  .dzg-row[aria-selected=true] .dzg-box,
+  .dzg-fopt[aria-selected=true] .dzg-box,
+  .dzg-box[aria-checked=true],
+  .dzg-box[aria-checked=mixed] {
+    outline-color: var(--dzg-box-on-bg, var(--tz-accent));
+    background: var(--dzg-box-on-bg, var(--tz-accent));
+  }
+  .dzg .dzg-popup {
+    padding: calc(var(--dzg-space, 0.25rem) * 3);
+    background: var(--dzg-popup-bg, var(--tz-bg));
+    box-shadow: var(--dzg-popup-shadow, 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
+  }
+  .dzg-flistw > p {
+    background: var(--dzg-popup-bg, var(--tz-bg));
+  }
+  .dzg-tooltip {
+    padding-block: calc(var(--dzg-space, 0.25rem) * 1);
+    padding-inline: calc(var(--dzg-space, 0.25rem) * 2);
+    color: var(--dzg-tooltip-fg, var(--tz-bg));
+    background: var(--dzg-tooltip-bg, var(--tz-fg));
+  }
+  .dzg-finput,
+  .dzg-fop,
+  .dzg-fclear {
+    border-color: var(--dzg-input-border, var(--tz-fg-muted));
+    background: var(--dzg-input-bg, var(--tz-bg));
+  }
+  .dzg-overlay button,
+  .dzg-ffoot button,
+  .dzg-fadd,
+  .dzg-frm,
+  .dzg-fpreset,
+  .dzg-pbtn,
+  .dzg-retry,
+  .dzg-footer select {
+    border-color: var(--dzg-button-border, var(--tz-fg-muted));
+    background: var(--dzg-button-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
+  }
+  .dzg-hcell,
+  .dzg-check {
+    gap: calc(var(--dzg-space, 0.25rem) * 1);
+  }
+  .dzg-overlay {
+    gap: calc(var(--dzg-space, 0.25rem) * 2);
+  }
+  .dzg-footer {
+    padding-block: calc(var(--dzg-space, 0.25rem) * 1);
+    padding-inline: calc(var(--dzg-space, 0.25rem) * 2);
+  }
+  .dzg-dbody {
+    padding: calc(var(--dzg-space, 0.25rem) * 2);
+  }
+  .dzg-fjoin ~ .dzg-fcond {
+    padding-block-start: calc(var(--dzg-space, 0.25rem) * 3);
+  }
+  .dzg-retry {
+    margin-inline-start: calc(var(--dzg-space, 0.25rem) * 1);
+  }
+  .dzg-sort {
+    font-size: var(--dzg-icon-size, 0.75em);
+  }
+  .dzg-fbtn::before,
+  .dzg-fbtn::after {
+    inset-block: calc(50% - var(--dzg-icon-size, 12px) / 2) calc(50% - var(--dzg-icon-size, 12px) / 2 + var(--dzg-icon-size, 12px) / 12);
+    inset-inline: calc(50% - var(--dzg-icon-size, 12px) / 2);
+  }
+  .dzg-fbtn::after {
+    inset-block: calc(50% - var(--dzg-icon-size, 12px) / 3) 50%;
+    inset-inline: calc(50% - var(--dzg-icon-size, 12px) / 4);
+  }
+}
+.dzg-popup .tz-field__panel {
+  background: var(--dzg-popup-bg, var(--tz-bg));
+}

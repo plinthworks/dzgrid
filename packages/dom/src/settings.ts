@@ -3,6 +3,7 @@ import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, DataNode, Row
 import type { GridMessages } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { SlotPart } from './part.js';
+import type { GridIcons, GridTheme } from './look.js';
 
 /** What a host gives `createGrid` (D3: rows, not a row model, for the client case). */
 export interface GridSettings<T> {
@@ -110,6 +111,14 @@ export interface GridSettings<T> {
   readonly fullWidth?: (row: Readonly<T>) => boolean | { readonly part?: string };
   /** False: no motion (`@dzgrid/dom/motion-gsap` stops, `data-motion="off"` on the root for the theme). Live. */
   readonly motion?: boolean;
+  /**
+   * CSS variables written on the grid's root, by typed keys (`{ rowOddBg: '…', headerWeight: 500 }`;
+   * presentation-settings.md 20–22, 1.9.0). Needs `theming()` from `@dzgrid/dom/theme`; a bad key or value is told
+   * (`invalid-setting`) and skipped. Live.
+   */
+  readonly theme?: GridTheme;
+  /** The application's own icons for the grid's marks (presentation-settings.md 17–19). Needs `theming()`. Live. */
+  readonly icons?: GridIcons;
   /** Optional features (`filters()`, `pagination()`…), set up once with the grid. */
   readonly features?: readonly GridFeature[];
 }

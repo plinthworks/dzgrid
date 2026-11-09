@@ -30,10 +30,10 @@
   }
   .dzg-viewport {
     scrollbar-width: var(--dzg-scrollbar, thin);
-    scrollbar-color: var(--tz-border) transparent;
+    scrollbar-color: var(--dzg-scrollbar-thumb, var(--tz-border)) transparent;
   }
   .dzg:is(:hover, :focus-within) .dzg-viewport {
-    scrollbar-color: var(--tz-fg-muted) transparent;
+    scrollbar-color: var(--dzg-scrollbar-thumb-active, var(--tz-fg-muted)) transparent;
   }
   @container style(--dzg-scrollbar: auto) {
     .dzg-viewport {
@@ -48,10 +48,10 @@
       }
       .dzg-viewport::-webkit-scrollbar-thumb {
         border-radius: 4px;
-        background: var(--tz-border);
+        background: var(--dzg-scrollbar-thumb, var(--tz-border));
       }
       .dzg:is(:hover, :focus-within) .dzg-viewport::-webkit-scrollbar-thumb {
-        background: var(--tz-fg-muted);
+        background: var(--dzg-scrollbar-thumb-active, var(--tz-fg-muted));
       }
     }
   }

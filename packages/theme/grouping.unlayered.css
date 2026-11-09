@@ -1,7 +1,7 @@
 .dzg-row:is([data-kind=group], [data-kind=footer]) :is(.dzg-cell, .dzg-check, .dzg-lead) {
   color: var(--tz-fg);
   font-weight: 600;
-  background: var(--dzg-header-bg, var(--tz-bg-raised));
+  background: var(--dzg-group-row-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
 }
 
 .dzg-row[data-kind=footer] .dzg-cell {

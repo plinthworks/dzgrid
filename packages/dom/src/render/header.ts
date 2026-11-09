@@ -217,6 +217,8 @@ export class HeaderRenderer {
           const text = col.def.header ?? col.id;
           if (!p.content?.(col, label) && label.textContent !== text) label.textContent = text;
           p.decorate(col, el);
+          // The title over its cells (presentation-settings.md 3).
+          setAttr(el, 'data-align', col.def.headerAlign ?? col.def.align ?? (col.type === 'number' ? 'end' : null));
           // The host's classes for this column's header (showcase themes step 6).
           this.#cls.set(el, swapClasses(el, this.#cls.get(el) ?? '', col.def.ui?.headerClass ?? ''));
         }

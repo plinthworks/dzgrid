@@ -1,5 +1,5 @@
 {
-  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 90 000 (owner step 16, 2026-10-29: « ok pour les hausses » — K.8 84 950 → 90 000, set chunk 4 350 → 4 500, core/detail 1 050 → 1 150, Angular 7 350 → 7 450, core/compare 300 new; owner 2026-11-03: Angular 7 450 → 7 650 (component classes in ui.cell); before: owner « set include only » (2026-10-29): 84 900 → 84 950, set chunk 4 250 → 4 350, core/edit 3 150 → 3 160, core/state 1 500 → 1 510). A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ». Phase 7 close (2026-11-05, owner rule Q-B 2026-11-04): a new entry's line is its measure + 10 % rounded up to 50 (core/grouping 4 468 → 4 950, dom/grouping 4 612 → 5 100; group-zone, the -group locales and grouping.css as set at step 6); an existing line moves by 2 % at most (core/state 1 510 → 1 540, core/csv 2 000 → 2 040, core/xlsx 7 100 → 7 150, dom/print 1 600 → 1 632, export run 5 300 → 5 350, angular 7 665 → 7 810, dom/state 1 224 → 1 240): rowGroups, grouped files and print, [(groupBy)]. Phase 9 dock V1 + V2 (owner B, 2026-11-06): new entries at their measure + 10 % (core/dock 451 → 500, dom/dock 4 174 → 4 600, -dock texts 209 / 233 / 276 → 250 / 300 / 350, dock.css 546 → 650); existing lines +2 % at most (core/state 1 540 → 1 570, dom/state 1 264 → 1 289, columns-panel 4 400 → 4 488). Phase 10, core batch (owner « ★ partout, tailles OK », 2026-11-06; rule Q-B): the new entry @dzgrid/core/pivot measured over @dzgrid/core/grouping, 3 409 → 3 750 (+10 %, rounded up to 50; `series()` and the state adapter included); core/state 1 570 → 1 601 (+2 %: the `pivot` part, created columns skipped); core/grouping 4 776 under its 4 950 (seams, cache keyed by the columns it uses); base, DOM, K.8 untouched. Phase 10, DOM batch (2026-11-07, same rule): new entries at their measure + 10 %, rounded up to 50 (dom/pivot over dom/grouping 2 120 → 2 350; -pivot texts 369 / 411 / 548 → 450 / 500 / 650); existing lines +2 % at most (group-zone 2 834 → 2 890: the « + » list and the texts option; find 2 650 → 2 660: a pivot's rows searched; dom/state 1 289 → 1 300: the `pivot` part); dom/grouping 4 966, column-menu 3 487, groups 1 934, export run 5 406, grouping.css 573 under their lines; core and DOM bases untouched; K.8 89 978 (+1 B: the export run chunk's content hash in the split build's file names, measured 89 977 with the run reverted). Phase 10 follow-up, the bar (owner A, 2026-11-07): dom/pivot 2 350 → 2 600 (measured 2 546: readable headers, tooltips, widths, folding bands, the switch placed by the app); core/state 1 601 → 1 610 (+2 % rule, measured 1 607); new entries at their measure + 10 %, rounded up to 50: dom/pivot-bar 4 855 → 5 350 (its own band code, so group-zone keeps 2 883), -pivot-bar texts 274 / 310 / 380 → 350 / 350 / 450, pivot.css 599 → 700; columns-panel 4 488 → 4 520 (+0.7 %, measured 4 510: the panel's top for a pivot); columns-panel.css 993 under its 1 000 (a description no longer hides the name in a narrow panel); group-zone, the core and DOM bases, K.8 89 978 unchanged. Visual polish (owner feedback 2026-11-07, « pas pro »; +2 % rule): pivot.css 700 → 712 (part names as section labels, inset rules, the panel's parts), dom/columns-panel measured 4 569 over its owner ceiling 4 520 (`pivot.folded`, the description's tooltip), columns-panel.css (1 359), dock.css (759) and grouping.css (628) measured above their lines (+36 %, +17 %, +7 %): left for the owner's decision; base and K.8 unchanged (2 918, 89 978). 1.8.0, the server pivot (owner A to Q-SP1…Q-SP8, 2026-11-07; Q-SP8 A: today's rule): the new entry @dzgrid/core/server-pivot measured over @dzgrid/core/server-side, 1 740 → 1 950 (+10 %, rounded up to 50); core/pivot 3 750 → 3 825 (+2 %, measured 3 810: the `serve` seam, the created-columns builder shared with a server); core/server-side 11 455, dom/pivot 2 568, dom/grouping 4 973 under their lines; core and DOM bases, Angular and K.8 unchanged. L2 measuring rule (owner A, 2026-11-08): the K.8 profile and « audit screen + motion » are built as `ng build` ships them in production (`\"angular\": \"production\"`: Angular's JavaScriptTransformer — linker and advanced optimizations — and its production defines, `ngDevMode` false), so the wrapper's TestBed-only class metadata no longer counts; text stays `\\uXXXX` as the real build ships it. K.8 89 997 → 88 442, its line kept at 90 000 (docs/phase-11-steps/decisions.md « L2 — measuring rule, owner A »). Phase 11 L3 (2026-11-08, +2 % rule): dom/pivot 2 600 → 2 650 (measured 2 623: the effective columns keep a column unchanged since the last set, so the pass and the key cache stay warm); dom/filters 12 000 measured 12 000 (the floating row asks for the idle preparation); theme 2 932 under its 2 960 (rows `contain: layout style`); K.8 88 442 → 88 485 (docs/phase-11-steps/decisions.md « L3 »). Phase 11 L7 (2026-11-09, rule Q-B): the new entry @dzgrid/element (`<dz-grid>`) measured over @dzgrid/dom, 1 587 → 1 750 (+10 %, rounded up to 50); core and DOM bases, Angular and K.8 untouched (docs/phase-11-steps/decisions.md « L7 »). 1.9.0 lot A (owner « ★ partout », 2026-11-09; rule Q-B): new entries at their measure + 10 %, rounded up to 50 (core/auto-columns 860 → 950, core/totals 609 → 700, dom/totals-row 1 142 → 1 300, dom/vertical-headers 439 → 500, the export json chunk 760 → 850, -totals texts 91 / 91 / 111 → 150, vertical-headers.css 241 → 300); existing lines +2 % at most (DOM base 23 850 → 24 050 (+0.8 %), measured 24 013: the headers setting written on the header rows, missing-feature for total and headerVertical; dom/print 1 697 → 1 710, measured 1 699: print(grid, { header: false }) and the totals row's cells; Angular 7 950 → 7 975, measured 7 962: the [headers] input; export run 5 450 → 5 520, measured 5 517: the JSON chunk call and the totals line); pinned-rows 2 204, pinned-rows.css 332 under their lines; core base unchanged; K.8 88 742 → 88 951 under its 90 000. 1.9.0 lot B (owner « ★ partout », 2026-11-09; rule Q-B): new entries at their measure + 10 %, rounded up to 50 (core/import 2 051 → 2 300, dom/responsive 3 358 → 3 700 (the detail feature's code inside it), dom/import 1 086 → 1 200, its read chunk 778 → 900, -import texts 161 / 192 / 230 → 200 / 250 / 300); existing lines +2 % at most (core base 29 300 → 29 550 (+0.85 %), measured 29 507: columns that collapse in the column model, the search and a file's columns reading them; core/csv 2 085 → 2 110 (+1.2 %), measured 2 107: a file's columns with the collapsed ones; export run 5 520 → 5 550 (+0.5 %), measured 5 534: the same); core/spans 4 065 → 4 075 (+0.25 %), measured 4 066, and core/edit 3 160 → 3 175 (+0.5 %), measured 3 174 (its code unchanged: the base's gzip around it moved, 3 151 before); DOM base 24 038 under its 24 050 (the collapse priority's missing-feature), print 1 704, detail 4 149, core/detail 1 150, core/range 3 298 (decodeTsv's `sep`), grouping, row-numbers, row-gaps under their lines.",
+  "$comment": "Gzipped, minified bytes per entry, the whole entry bundled (external: what a consumer already has). Set by scripts/rebudget.mjs on 2026-10-28 (Phase 6 close): each budget is the measure + 10 %, rounded up to 50 B, never above the owner's grants (docs/phase-6-steps/decisions.md Q-B and the steps' grants; an entry without a grant keeps its line as its ceiling) or the plan's ceilings (ARCHITECTURE §5.2); the K.8 profile guard 90 000 (owner step 16, 2026-10-29: « ok pour les hausses » — K.8 84 950 → 90 000, set chunk 4 350 → 4 500, core/detail 1 050 → 1 150, Angular 7 350 → 7 450, core/compare 300 new; owner 2026-11-03: Angular 7 450 → 7 650 (component classes in ui.cell); before: owner « set include only » (2026-10-29): 84 900 → 84 950, set chunk 4 250 → 4 350, core/edit 3 150 → 3 160, core/state 1 500 → 1 510). A budget is raised only by a written decision; the history is in ROADMAP.md, « Phase 6 — close ». Phase 7 close (2026-11-05, owner rule Q-B 2026-11-04): a new entry's line is its measure + 10 % rounded up to 50 (core/grouping 4 468 → 4 950, dom/grouping 4 612 → 5 100; group-zone, the -group locales and grouping.css as set at step 6); an existing line moves by 2 % at most (core/state 1 510 → 1 540, core/csv 2 000 → 2 040, core/xlsx 7 100 → 7 150, dom/print 1 600 → 1 632, export run 5 300 → 5 350, angular 7 665 → 7 810, dom/state 1 224 → 1 240): rowGroups, grouped files and print, [(groupBy)]. Phase 9 dock V1 + V2 (owner B, 2026-11-06): new entries at their measure + 10 % (core/dock 451 → 500, dom/dock 4 174 → 4 600, -dock texts 209 / 233 / 276 → 250 / 300 / 350, dock.css 546 → 650); existing lines +2 % at most (core/state 1 540 → 1 570, dom/state 1 264 → 1 289, columns-panel 4 400 → 4 488). Phase 10, core batch (owner « ★ partout, tailles OK », 2026-11-06; rule Q-B): the new entry @dzgrid/core/pivot measured over @dzgrid/core/grouping, 3 409 → 3 750 (+10 %, rounded up to 50; `series()` and the state adapter included); core/state 1 570 → 1 601 (+2 %: the `pivot` part, created columns skipped); core/grouping 4 776 under its 4 950 (seams, cache keyed by the columns it uses); base, DOM, K.8 untouched. Phase 10, DOM batch (2026-11-07, same rule): new entries at their measure + 10 %, rounded up to 50 (dom/pivot over dom/grouping 2 120 → 2 350; -pivot texts 369 / 411 / 548 → 450 / 500 / 650); existing lines +2 % at most (group-zone 2 834 → 2 890: the « + » list and the texts option; find 2 650 → 2 660: a pivot's rows searched; dom/state 1 289 → 1 300: the `pivot` part); dom/grouping 4 966, column-menu 3 487, groups 1 934, export run 5 406, grouping.css 573 under their lines; core and DOM bases untouched; K.8 89 978 (+1 B: the export run chunk's content hash in the split build's file names, measured 89 977 with the run reverted). Phase 10 follow-up, the bar (owner A, 2026-11-07): dom/pivot 2 350 → 2 600 (measured 2 546: readable headers, tooltips, widths, folding bands, the switch placed by the app); core/state 1 601 → 1 610 (+2 % rule, measured 1 607); new entries at their measure + 10 %, rounded up to 50: dom/pivot-bar 4 855 → 5 350 (its own band code, so group-zone keeps 2 883), -pivot-bar texts 274 / 310 / 380 → 350 / 350 / 450, pivot.css 599 → 700; columns-panel 4 488 → 4 520 (+0.7 %, measured 4 510: the panel's top for a pivot); columns-panel.css 993 under its 1 000 (a description no longer hides the name in a narrow panel); group-zone, the core and DOM bases, K.8 89 978 unchanged. Visual polish (owner feedback 2026-11-07, « pas pro »; +2 % rule): pivot.css 700 → 712 (part names as section labels, inset rules, the panel's parts), dom/columns-panel measured 4 569 over its owner ceiling 4 520 (`pivot.folded`, the description's tooltip), columns-panel.css (1 359), dock.css (759) and grouping.css (628) measured above their lines (+36 %, +17 %, +7 %): left for the owner's decision; base and K.8 unchanged (2 918, 89 978). 1.8.0, the server pivot (owner A to Q-SP1…Q-SP8, 2026-11-07; Q-SP8 A: today's rule): the new entry @dzgrid/core/server-pivot measured over @dzgrid/core/server-side, 1 740 → 1 950 (+10 %, rounded up to 50); core/pivot 3 750 → 3 825 (+2 %, measured 3 810: the `serve` seam, the created-columns builder shared with a server); core/server-side 11 455, dom/pivot 2 568, dom/grouping 4 973 under their lines; core and DOM bases, Angular and K.8 unchanged. L2 measuring rule (owner A, 2026-11-08): the K.8 profile and « audit screen + motion » are built as `ng build` ships them in production (`\"angular\": \"production\"`: Angular's JavaScriptTransformer — linker and advanced optimizations — and its production defines, `ngDevMode` false), so the wrapper's TestBed-only class metadata no longer counts; text stays `\\uXXXX` as the real build ships it. K.8 89 997 → 88 442, its line kept at 90 000 (docs/phase-11-steps/decisions.md « L2 — measuring rule, owner A »). Phase 11 L3 (2026-11-08, +2 % rule): dom/pivot 2 600 → 2 650 (measured 2 623: the effective columns keep a column unchanged since the last set, so the pass and the key cache stay warm); dom/filters 12 000 measured 12 000 (the floating row asks for the idle preparation); theme 2 932 under its 2 960 (rows `contain: layout style`); K.8 88 442 → 88 485 (docs/phase-11-steps/decisions.md « L3 »). Phase 11 L7 (2026-11-09, rule Q-B): the new entry @dzgrid/element (`<dz-grid>`) measured over @dzgrid/dom, 1 587 → 1 750 (+10 %, rounded up to 50); core and DOM bases, Angular and K.8 untouched (docs/phase-11-steps/decisions.md « L7 »). 1.9.0 lot A (owner « ★ partout », 2026-11-09; rule Q-B): new entries at their measure + 10 %, rounded up to 50 (core/auto-columns 860 → 950, core/totals 609 → 700, dom/totals-row 1 142 → 1 300, dom/vertical-headers 439 → 500, the export json chunk 760 → 850, -totals texts 91 / 91 / 111 → 150, vertical-headers.css 241 → 300); existing lines +2 % at most (DOM base 23 850 → 24 050 (+0.8 %), measured 24 013: the headers setting written on the header rows, missing-feature for total and headerVertical; dom/print 1 697 → 1 710, measured 1 699: print(grid, { header: false }) and the totals row's cells; Angular 7 950 → 7 975, measured 7 962: the [headers] input; export run 5 450 → 5 520, measured 5 517: the JSON chunk call and the totals line); pinned-rows 2 204, pinned-rows.css 332 under their lines; core base unchanged; K.8 88 742 → 88 951 under its 90 000. 1.9.0 lot B (owner « ★ partout », 2026-11-09; rule Q-B): new entries at their measure + 10 %, rounded up to 50 (core/import 2 051 → 2 300, dom/responsive 3 358 → 3 700 (the detail feature's code inside it), dom/import 1 086 → 1 200, its read chunk 778 → 900, -import texts 161 / 192 / 230 → 200 / 250 / 300); existing lines +2 % at most (core base 29 300 → 29 550 (+0.85 %), measured 29 507: columns that collapse in the column model, the search and a file's columns reading them; core/csv 2 085 → 2 110 (+1.2 %), measured 2 107: a file's columns with the collapsed ones; export run 5 520 → 5 550 (+0.5 %), measured 5 534: the same); core/spans 4 065 → 4 075 (+0.25 %), measured 4 066, and core/edit 3 160 → 3 175 (+0.5 %), measured 3 174 (its code unchanged: the base's gzip around it moved, 3 151 before); DOM base 24 038 under its 24 050 (the collapse priority's missing-feature), print 1 704, detail 4 149, core/detail 1 150, core/range 3 298 (decodeTsv's `sep`), grouping, row-numbers, row-gaps under their lines. 1.9.0 presentation settings (owner 2026-11-09, answers to docs/presentation-review.md; rule Q-B): new entries at their measure + 10 %, rounded up to 50 (dom/theme 2 209 → 2 450: theming(), the theme object and the icons; variables.css 1 122 → 1 250: every knob beyond the base's, opt-in); existing lines +2 % at most (DOM base 24 200 → 24 550 (+1.4 %), measured 24 498: data-odd, the header's data-align, data-num, data-under-start / -end, the layout's header alignment, tabular digits, odd-row, density and pinned-shadow variables; theme 2 960 → 2 990 (+1 %), measured 2 963: the odd tint and the density factor read; edit.css 2 250 → 2 280 (+1.3 %), measured 2 266: the editor border and the density's padding; tree 4 200 → 4 250 (+1.2 %), measured 4 212, and detail 4 150 → 4 200 (+1.2 %), measured 4 156: the icon size, the density's padding; filters 12 000 → 12 050 (+0.4 %), measured 12 009: the funnel's gap for the grip at any density; Angular 8 000 → 8 100 (+1.25 %), measured 8 069: the [theme] and [icons] inputs); K.8 89 354 → 89 732 under its 90 000; groups, grouping, row-drag, columns.css, menu.css, dock.css, filters-panel.css, grouping.css, comfort, element under their lines.",
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
@@ -469,7 +469,7 @@
     },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
-      "maxGzip": 2960
+      "maxGzip": 2990
     },
     "@dzgrid/theme/dzgrid.comfort.css": {
       "file": "packages/theme/dzgrid.comfort.css",
@@ -497,7 +497,7 @@
     },
     "@dzgrid/theme/edit.css": {
       "file": "packages/theme/edit.css",
-      "maxGzip": 2250
+      "maxGzip": 2280
     },
     "@dzgrid/theme/range.css": {
       "file": "packages/theme/range.css",
@@ -526,6 +526,10 @@
     "@dzgrid/theme/vertical-headers.css": {
       "file": "packages/theme/vertical-headers.css",
       "maxGzip": 300
+    },
+    "@dzgrid/theme/variables.css": {
+      "file": "packages/theme/variables.css",
+      "maxGzip": 1250
     },
     "@dzgrid/theme/print.css": {
       "file": "packages/theme/print.css",
@@ -573,7 +577,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 24200,
+      "maxGzip": 24550,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -698,7 +702,7 @@
     },
     "@dzgrid/dom/tree": {
       "file": "packages/dom/src/tree.ts",
-      "maxGzip": 4200,
+      "maxGzip": 4250,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -759,7 +763,7 @@
     },
     "@dzgrid/dom/detail": {
       "file": "packages/dom/src/detail.ts",
-      "maxGzip": 4150,
+      "maxGzip": 4200,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -1023,6 +1027,16 @@
         "@dzgrid/dom/internal"
       ]
     },
+    "@dzgrid/dom/theme": {
+      "file": "packages/dom/src/theme.ts",
+      "maxGzip": 2450,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
     "@dzgrid/dom/responsive": {
       "file": "packages/dom/src/responsive.ts",
       "maxGzip": 3700,
@@ -1156,7 +1170,7 @@
     },
     "@dzgrid/dom/filters": {
       "file": "packages/dom/src/filters.ts",
-      "maxGzip": 12000,
+      "maxGzip": 12050,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -1311,7 +1325,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 8000,
+      "maxGzip": 8100,
       "external": [
         "@angular/*",
         "@dzgrid/*",

@@ -73,8 +73,8 @@ describe('the layer and its copies', () => {
     const t = make();
     t.scroll(2 * 32 + 5);
     const cell = (label: string) => t.copy(label).querySelector<HTMLElement>('.dzg-cell[data-col="name"]')!;
-    expect(cell('Service 0').style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 0px)');
-    expect(cell('Patient 0.0').style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 16px)');
+    expect(cell('Service 0').style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 0px)');
+    expect(cell('Patient 0.0').style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 16px)');
     const tg = cell('Patient 0.0').firstElementChild as HTMLElement;
     expect(tg.classList.contains('dzg-toggle')).toBe(true);
     expect(tg.hasAttribute('data-open')).toBe(true);

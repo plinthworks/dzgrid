@@ -42,7 +42,7 @@ type Ev<T, K extends GridEvent<T>['type']> = Extract<GridEvent<T>, { type: K }>;
 
 /** The settings read from the inputs, in this order; the defaults' keys fall back to `provideDzGrid`. */
 const KEYS = [
-  'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'headers', 'rowHeight', 'headerHeight', 'overlay', 'busy', 'label', 'tooltips', 'overscan',
+  'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'headers', 'rowHeight', 'headerHeight', 'theme', 'icons', 'overlay', 'busy', 'label', 'tooltips', 'overscan',
   'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features', 'multiSort', 'sameRow',
 ] as const;
 /** Events with an output of their own name. */
@@ -114,6 +114,9 @@ export class DzGrid<T> implements AfterContentInit {
   readonly rowHeight = input<number>();
   /** The header rows' height in px, over the row height (density.md « Header height », 1.9.0); live. */
   readonly headerHeight = input<number>();
+  /** CSS variables on the grid's root by typed keys, and the app's own icons (presentation-settings.md, 1.9.0; need `theming()`); live. */
+  readonly theme = input<S<T>['theme']>();
+  readonly icons = input<S<T>['icons']>();
   readonly overlay = input<S<T>['overlay']>();
   /** Rows reloaded and kept on screen (1.4.0, overlays.md « Busy bar »): `[busy]="loading()"`; live. */
   readonly busy = input<boolean>();

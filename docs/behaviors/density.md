@@ -95,3 +95,11 @@ Sets `headerHeight` (a number of px at 16 px text) in the settings, or later wit
    in `GridState`.
 10. The grid writes `--dzg-header-height` on its root (read-only, as `--dzg-row-height`): the column headers' row
    height. Print: a table, no heights (unchanged).
+
+## Paddings follow the density (1.9.0, owner 2026-11-09, review 11.2)
+Written before the code; the full sheet is `presentation-settings.md` 15. The layout sets `--dzg-density` from the
+root's `data-density` (compact .75, comfortable 1, spacious 1.25); the theme's cell side padding is
+`--dzg-cell-padding-inline` × it (cells, header cells, the box cell, a flash's mark, an editor's field, a tree's and a
+group column's indent, the header buttons' gap for the grip). Heights unchanged by it. With `rowHeight` set, the density
+still chooses the padding. `.dzg { --dzg-density: 1 }` in the application's CSS keeps paddings fixed. Tests:
+`packages/theme/test/presentation-theme.test.ts`, the tree and editor sheets' tests.

@@ -54,8 +54,36 @@ Lot B (owner « ★ partout », 2026-11-09). Additions only.
   column headers' row and the column-group rows; a filter row keeps the row height; vertical titles take the taller of
   the two. Angular `[headerHeight]`, `<dz-grid header-height>`; the root's `--dzg-header-height` (read-only). Absent:
   the header rows are a row high, as before.
+- **Presentation settings** (owner's answers to `docs/presentation-review.md`, 2026-11-09;
+  `docs/behaviors/presentation-settings.md`; the full table in the guide « Theming and right to left »):
+  - **Alternate rows**: each body row carries `data-odd` from its displayed place (right while scrolling, after a sort, a
+    filter, a group opened); `--dzg-row-odd-bg` tints them — not set, nothing changes.
+  - **A shadow at the pinned edge** only while content is under it: the root's `data-under-start` / `data-under-end`,
+    `--dzg-pinned-shadow` (written for the start side, mirrored by the grid; none by default).
+  - **Every look its own variable** in the new opt-in sheet `@dzgrid/theme/variables.css` (and its unlayered copy),
+    loaded after `dzgrid.css`, defaults today's look: frame, frame radius, row line, header line, header separators,
+    column lines (`--dzg-column-line`, none by default), pinned edge, detail rule; header weight, colour, font, case,
+    vertical place, hover; cell font size, block padding and place; box, focus width, popup, tooltip, inputs, buttons;
+    the spacing unit `--dzg-space`; `--dzg-icon-size` (the funnel drawn relative to it). In the feature sheets: menu item
+    height, group rows, panels, the editor's frame, the comfort sheet's scrollbar thumb. Every new colour is in
+    `contrast-pairs.json`.
+  - **`theme` setting** (live; Angular `[theme]`, `<dz-grid>`'s `theme` property) with `theming()` from the new
+    `@dzgrid/dom/theme`: typed keys (`accent`, `rowOddBg`, `headerWeight`…) written as the variables on the grid's
+    root; a bad key or value is told (`invalid-setting`) and skipped.
+  - **`icons` setting** (live; `[icons]`, `icons` property; same feature): `sortAsc`, `sortDesc`, `filter`,
+    `filterActive`, `menu`, `chevron`, `submenu`, `grip`, each an SVG string or element, cleaned (no script, style,
+    event attribute or outside link; else `invalid-setting` and the default kept), drawn as a mask in the mark's colour.
+    The grid's own marks stay the defaults. A page whose CSP forbids `data:` images keeps them.
+  - `headerAlign` (column): a header title's place over `align`.
+  - `theme` or `icons` without `theming()`: told once (`missing-feature`).
 
 ### Changed
+- **A header title follows its column's alignment** (owner, 2026-11-09): a number column's title now sits at the end, over
+  its numbers (`align`, else `end` for numbers); `headerAlign: 'start'` keeps the old place.
+- **Digits of equal width in number cells** (`font-variant-numeric: tabular-nums`); `--dzg-num-figures: normal` turns it
+  off.
+- **The density also sets the cells' side padding**: × 0.75 in `compact`, × 1.25 in `spacious` (`--dzg-density`, from
+  `data-density`); `comfortable` unchanged. An app wanting fixed paddings sets `.dzg { --dzg-density: 1 }`.
 - The pinned top band's offset is read from the header's height (a taller header, hidden headers), no longer a row per
   header row.
 

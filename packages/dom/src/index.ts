@@ -10,6 +10,7 @@ export { createGrid } from './grid.js';
 export type { GridApi, GridInstance } from './grid.js';
 export type { GridEnv } from './context.js';
 export type { GridSettings, RowClassContext } from './settings.js';
+export type { GridIcon, GridIcons, GridTheme, ThemeValue } from './look.js';
 /** Which settings `update` takes live and which only at creation (`@dzgrid/dom/detail` reads it: a nested grid made again only for a fixed one). */
 export { UPDATE_POLICY, type UpdatePolicy } from './update.js';
 export type { Geometry, ViewportBox } from './render/measure.js';

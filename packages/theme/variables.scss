@@ -1,0 +1,231 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/variables.css — every presentation knob of 1.9.0 (docs/behaviors/presentation-settings.md 8–16, owner
+// 2026-11-09 « B »), loaded after dzgrid.css by an application that changes one: the base's rules again, each value
+// read from its own `--dzg-*` variable whose fallback is today's value, so loading it changes nothing by itself. Its own
+// file: the base sheet is counted in the audit screen's size (K.8), which has no room for them. In `dzgrid.theme`, after
+// the base in source order (same weight, later wins). Compiled to variables.css (layered) and variables.unlayered.css
+// ($layered: false) by `npm run build:theme`; a test fails when they drift. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+/// `n` times the spacing unit (14): .25rem by default, the base's own steps.
+@function u($n) {
+  @return calc(var(--dzg-space, 0.25rem) * #{$n});
+}
+
+$line: var(--dzg-line, 1px) solid var(--tz-border);
+$focus: max(2px, var(--dzg-focus-width, 2px));
+$icon: var(--dzg-icon-size, 12px);
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  // ---- Lines (8, 9) ----
+  .dzg {
+    border: var(--dzg-frame, #{$line});
+    border-radius: var(--dzg-frame-radius, var(--dzg-radius, 0.375rem));
+  }
+
+  .dzg-hcell,
+  .dzg-cell,
+  .dzg-check {
+    border-block-end: var(--dzg-row-line, #{$line});
+  }
+
+  // Under every header row (the column headers, the group rows, a feature's row under them).
+  .dzg-hcell,
+  .dzg-hrow .dzg-check {
+    border-block-end: var(--dzg-header-line, #{$line});
+  }
+
+  // Between columns: none by default; a group header keeps its own end line; a pinned part's last cell draws none
+  // (the pinned edge is there).
+  .dzg-cell,
+  .dzg-hcell:not(.dzg-hgroup) {
+    border-inline-end: var(--dzg-column-line, none);
+  }
+
+  :is(.dzg-seg-start, .dzg-seg-end) > :last-child {
+    border-inline-end: none;
+  }
+
+  // The marks between resizable header cells (the grip's).
+  .dzg-resize::after {
+    inset-block: calc((100% - var(--dzg-header-separator-height, 50%)) / 2);
+    inline-size: var(--dzg-header-separator-size, 2px);
+    background: var(--dzg-header-separator, var(--tz-border));
+  }
+
+  .dzg-seg-start:not(:empty)::after,
+  .dzg-seg-end:not(:empty)::after {
+    border-inline-end: var(--dzg-pinned-column-line, #{$line});
+  }
+
+  .dzg-dcell {
+    border-inline-start: var(--dzg-detail-line, 3px solid var(--tz-border));
+  }
+
+  // ---- Header (10, 11) ----
+  .dzg-header {
+    color: var(--dzg-header-fg, var(--tz-fg));
+    font-weight: var(--dzg-header-weight, 600);
+  }
+
+  // Unset, inherited (the grid's font, no case change): no fallback needed.
+  .dzg-hrow {
+    font-family: var(--dzg-header-font-family);
+    text-transform: var(--dzg-header-case);
+  }
+
+  .dzg-hcell {
+    align-items: var(--dzg-header-align-block, center);
+  }
+
+  .dzg-sortable:hover {
+    background: var(--dzg-header-hover-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
+  }
+
+  // ---- Cells (11) ----
+  // Unset: the grid's size; `normal` content alignment (a wrapped cell's text from the top).
+  .dzg-cell {
+    font-size: var(--dzg-cell-font-size);
+    align-content: var(--dzg-cell-align-block);
+  }
+
+  .dzg-cell[data-wrap] {
+    padding-block: var(--dzg-cell-padding-block, 0);
+  }
+
+  // ---- Focus (12): never under 2 px (WCAG 2.4.13) ----
+  .dzg-cell:focus:where(:not([data-dzg-quiet] *)),
+  .dzg-cell:focus-visible,
+  .dzg-dcell:focus-visible,
+  .dzg-hcell:focus-visible,
+  .dzg-check:focus-visible,
+  .dzg-box:focus-visible,
+  .dzg-fopt:focus-visible {
+    outline-width: $focus;
+    outline-offset: calc(-1 * #{$focus});
+  }
+
+  .dzg-cell:focus:where(:not([data-dzg-quiet] *)) {
+    box-shadow: inset 0 0 0 calc(#{$focus} + 1px) var(--tz-bg);
+  }
+
+  // ---- The selection box (12) ----
+  .dzg-box {
+    inline-size: var(--dzg-box-size, 1rem);
+    block-size: var(--dzg-box-size, 1rem);
+    outline-color: var(--dzg-box-edge, var(--tz-fg-muted));
+    border-radius: var(--dzg-box-radius, 0.25rem);
+  }
+
+  .dzg-row[aria-selected='true'] .dzg-box,
+  .dzg-fopt[aria-selected='true'] .dzg-box,
+  .dzg-box[aria-checked='true'],
+  .dzg-box[aria-checked='mixed'] {
+    outline-color: var(--dzg-box-on-bg, var(--tz-accent));
+    background: var(--dzg-box-on-bg, var(--tz-accent));
+  }
+
+  // ---- Popups, tooltip, inputs, buttons (12, 14) ----
+  .dzg .dzg-popup {
+    padding: u(3);
+    background: var(--dzg-popup-bg, var(--tz-bg));
+    box-shadow: var(--dzg-popup-shadow, 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
+  }
+
+  .dzg-flistw > p {
+    background: var(--dzg-popup-bg, var(--tz-bg));
+  }
+
+  .dzg-tooltip {
+    padding-block: u(1);
+    padding-inline: u(2);
+    color: var(--dzg-tooltip-fg, var(--tz-bg));
+    background: var(--dzg-tooltip-bg, var(--tz-fg));
+  }
+
+  .dzg-finput,
+  .dzg-fop,
+  .dzg-fclear {
+    border-color: var(--dzg-input-border, var(--tz-fg-muted));
+    background: var(--dzg-input-bg, var(--tz-bg));
+  }
+
+  // Colours only: each button keeps its own padding (the pager's square arrows, the shortcuts). Apply keeps the accent (its rule weighs more).
+  .dzg-overlay button,
+  .dzg-ffoot button,
+  .dzg-fadd,
+  .dzg-frm,
+  .dzg-fpreset,
+  .dzg-pbtn,
+  .dzg-retry,
+  .dzg-footer select {
+    border-color: var(--dzg-button-border, var(--tz-fg-muted));
+    background: var(--dzg-button-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
+  }
+
+  // ---- The spacing unit (14) ----
+  .dzg-hcell,
+  .dzg-check {
+    gap: u(1);
+  }
+
+  .dzg-overlay {
+    gap: u(2);
+  }
+
+  .dzg-footer {
+    padding-block: u(1);
+    padding-inline: u(2);
+  }
+
+  .dzg-dbody {
+    padding: u(2);
+  }
+
+  .dzg-fjoin ~ .dzg-fcond {
+    padding-block-start: u(3);
+  }
+
+  .dzg-retry {
+    margin-inline-start: u(1);
+  }
+
+  // ---- Icons (16): the sort mark, and the funnel drawn relative to the icon size (12 px: today's 6 / 7 / 9 / 8 / 12 px
+  // insets in its 24 px button) ----
+  .dzg-sort {
+    font-size: var(--dzg-icon-size, 0.75em);
+  }
+
+  .dzg-fbtn::before,
+  .dzg-fbtn::after {
+    inset-block: calc(50% - #{$icon} / 2) calc(50% - #{$icon} / 2 + #{$icon} / 12);
+    inset-inline: calc(50% - #{$icon} / 2);
+  }
+
+  .dzg-fbtn::after {
+    inset-block: calc(50% - #{$icon} / 3) 50%;
+    inset-inline: calc(50% - #{$icon} / 4);
+  }
+}
+
+// tzslot's panel in a filter popup takes the popup's surface: unlayered beside tzslot's own sheets, as the base's rule
+// (docs/behaviors/theming.md « One exception »).
+.dzg-popup .tz-field__panel {
+  background: var(--dzg-popup-bg, var(--tz-bg));
+}

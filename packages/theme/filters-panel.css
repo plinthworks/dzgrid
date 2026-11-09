@@ -2,7 +2,7 @@
 @layer dzgrid.theme {
   .dzg-fside {
     color: var(--tz-fg);
-    background: var(--tz-bg);
+    background: var(--dzg-panel-bg, var(--tz-bg));
     accent-color: var(--tz-accent);
   }
   [data-dzg-fside=end] > .dzg-fside {

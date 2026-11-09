@@ -306,6 +306,8 @@ export class RowRenderer<T> {
         setPx(v.el, 'inset-block-start', top);
       }
       setAttr(v.el, 'aria-rowindex', String(f.headerRows + 1 + i));
+      // Alternate rows from the displayed place (presentation-settings.md 1): pooled rows take their new place's mark.
+      setAttr(v.el, 'data-odd', i % 2 ? '' : null);
       f.rowAttrs(k, v.el);
     }
     let cursor: ChildNode | null = this.#layer.firstChild;
@@ -566,6 +568,7 @@ export class RowRenderer<T> {
       setAttr(cell.el, 'data-col', col.id);
       setAttr(cell.el, 'data-align', col.def.align ?? (col.type === 'number' ? 'end' : null));
       setAttr(cell.el, 'data-wrap', col.def.wrap ? '' : null);
+      setAttr(cell.el, 'data-num', col.type === 'number' ? '' : null);
     }
     // The identity column is the frame's (it moves when columns are hidden or moved).
     setAttr(cell.el, 'role', col.id === f.rowHeader ? 'rowheader' : 'gridcell');

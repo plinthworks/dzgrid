@@ -25,7 +25,7 @@ describe('the value flash in the theme', () => {
     expect(rule).toMatch(/background-color: color-mix\(in srgb, var\(--dzg-flash-color, var\(--tz-warning\)\) calc\(var\(--dzg-flash, 1\) \* 18%\), transparent\);/);
     expect(rule).toMatch(/border-inline-start: 3px solid color-mix\(in srgb, var\(--dzg-flash-color, var\(--tz-warning\)\)/);
     expect(rule).toMatch(/border-inline-start: 3px solid/);
-    expect(rule).toMatch(/padding-inline-start: calc\(var\(--dzg-cell-padding-inline, 0\.5rem\) - 3px\);/);
+    expect(rule).toMatch(/padding-inline-start: calc\(var\(--dzg-cell-padding-inline, 0\.5rem\) \* var\(--dzg-density, 1\) - 3px\);/);
   });
 
   it('is not inside a motion media query: the still mark shows under reduced motion too', () => {

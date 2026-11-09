@@ -10,7 +10,7 @@ export const GROUPS_CSS =
   '@layer dzgrid.layout{' +
   ':where(.dzg-hgroup:has(>.dzg-gtoggle)){padding-inline-end:var(--dzg-target-min,24px)}' +
   ':where(.dzg-gtoggle){all:unset;position:absolute;inset-block:0;inset-inline-end:0;margin-block:auto;inline-size:var(--dzg-target-min,24px);block-size:var(--dzg-target-min,24px);display:grid;place-items:center;cursor:pointer;--dzg-gch:90deg}' +
-  ':where(.dzg-gtoggle)::before{content:"\\203a";font-size:1.25em;line-height:1;rotate:var(--dzg-gch)}' +
+  ':where(.dzg-gtoggle)::before{content:"\\203a";font-size:var(--dzg-icon-size,1.25em);line-height:1;rotate:var(--dzg-gch)}' +
   ':where([dir=rtl] .dzg-gtoggle){--dzg-gch:-90deg}:where(.dzg-gtoggle[aria-expanded=false]){--dzg-gch:0deg}' +
   '@media (forced-colors:active){:where(.dzg-gtoggle){color:ButtonText}}' +
   '}';

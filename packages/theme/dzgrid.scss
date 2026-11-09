@@ -122,11 +122,13 @@ $layered: true !default;
 
   // Border-box: the padding stays inside the width the grid gives (the selection box's cell
   // is exactly its column, or the cells after it move).
+  // The side padding follows the density (presentation-settings.md 15: `--dzg-density`, set by the layout from
+  // `data-density`; 1 by default).
   .dzg-hcell,
   .dzg-cell,
   .dzg-check {
     box-sizing: border-box;
-    padding-inline: var(--dzg-cell-padding-inline, 0.5rem);
+    padding-inline: calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
     border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
   }
 
@@ -144,12 +146,13 @@ $layered: true !default;
     line-height: calc(var(--dzg-row-height, 2rem) - var(--dzg-line, 1px));
   }
 
-  // Rows and the pinned segments are opaque: centre cells slide under them.
+  // Rows and the pinned segments are opaque: centre cells slide under them. An alternate row (`data-odd`) on
+  // `--dzg-row-odd-bg` through `--dzg-odd` (the layout's; presentation-settings.md 2): unset, the surface.
   .dzg-row,
   .dzg-row .dzg-seg-start,
   .dzg-row .dzg-seg-end {
     color: var(--tz-fg);
-    background: var(--tz-bg);
+    background: var(--dzg-odd, var(--tz-bg));
   }
 
   // Rows contain their layout, not their paint (Phase 11 L3): the clip of the injected `contain: content`, one per row,
@@ -695,7 +698,7 @@ $layered: true !default;
   // query here). The padding gives the mark's width back: the text does not move.
   .dzg-cell.dzg-flash {
     border-inline-start: 3px solid color-mix(in srgb, var(--dzg-flash-color, var(--tz-warning)) calc(var(--dzg-flash, 1) * 100%), transparent);
-    padding-inline-start: calc(var(--dzg-cell-padding-inline, 0.5rem) - 3px);
+    padding-inline-start: calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) - 3px);
     background-color: color-mix(in srgb, var(--dzg-flash-color, var(--tz-warning)) calc(var(--dzg-flash, 1) * 18%), transparent);
   }
 

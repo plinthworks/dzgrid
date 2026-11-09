@@ -17,6 +17,8 @@
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): the names the guide documents for the new entries; additions only, nothing removed or narrowed — @dzgrid/dom/totals-row#totalsRow, @dzgrid/dom/locales/en-totals#EN_TOTALS, @dzgrid/dom/vertical-headers#verticalHeaders
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot B): the names the guide documents for the new entries; additions only, nothing removed or narrowed — @dzgrid/dom/responsive#responsive, @dzgrid/dom/import#fileImport, @dzgrid/dom/locales/en-import#EN_IMPORT
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot B): the import options the guide names (onRows); an addition — @dzgrid/dom/import#FileImportOptions
+# history: Owner 2026-11-09 (1.9.0 presentation settings, answers to docs/presentation-review.md): the names the guide documents for the new entry; additions only, nothing removed or narrowed — @dzgrid/dom/theme#theming, @dzgrid/dom/theme#THEME_KEYS, @dzgrid/dom/theme#ICONS_CSS, @dzgrid/dom/theme#injectIconStyles, @dzgrid/dom#GridTheme, @dzgrid/dom#GridIcons, @dzgrid/dom#GridIcon, @dzgrid/dom#ThemeValue
+# history: owner 2026-11-09: LAYOUT_CSS gains 7 layout lines (odd rows, pinned shadow, header alignment) — @dzgrid/dom#LAYOUT_CSS
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -154,7 +156,7 @@
       readonly height?: number;
   }
 ## LAYOUT_CSS
-  export declare const LAYOUT_CSS = "@layer dzgrid.layout {\n:where(.dzg) { position: relative; display: flex; flex-direction: column; min-block-size: 0; min-inline-size: 0; }\n:where(.dzg-viewport) { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain; overflow-anchor: none; outline: none; }\n:where(.dzg-header) { position: sticky; inset-block-start: 0; z-index: 3; display: flex; flex-direction: column; }\n:where(.dzg-body) { position: relative; overflow: clip; }\n:where(.dzg-layer) { position: absolute; inset-inline-start: 0; }\n:where(.dzg-row) { position: absolute; inset-inline-start: 0; display: flex; contain: content; }\n:where(.dzg-seg) { display: flex; position: relative; }\n:where(.dzg-seg-start) { position: sticky; inset-inline-start: 0; z-index: 2; }\n:where(.dzg-seg-end) { position: sticky; inset-inline-end: 0; z-index: 2; }\n:where(.dzg-hcell, .dzg-cell[data-dzg-editing]) { position: relative; }\n:where([data-dzg-editing] > [data-dzg-owner=editor]) { position: absolute; inset: 0; box-sizing: border-box; }\n:where(.dzg-seg-center > .dzg-cell, .dzg-seg-center > .dzg-hcell) { position: absolute; inset-block: 0; }\n:where(.dzg-resize) { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: var(--dzg-target-min, 24px); max-inline-size: 50%; cursor: col-resize; touch-action: none; z-index: 1; }\n:where(.dzg-resize-start) { inset-inline-end: auto; inset-inline-start: 0; }\n:where(.dzg-cell, .dzg-hcell) { box-sizing: border-box; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }\n:where(.dzg-cell[data-align=end]) { text-align: end; }\n:where(.dzg-body .dzg-cell[data-wrap], .dzg-sticky .dzg-cell[data-wrap]) { white-space: normal; overflow-wrap: anywhere; }\n:where(.dzg-cell[data-align=center]) { text-align: center; }\n:where(.dzg-hrow) { display: flex; }\n:where(.dzg-row[data-kind=detail] > .dzg-seg) { display: none; }\n:where(.dzg-dcell) { position: sticky; inset-inline-start: 0; box-sizing: border-box; overflow: hidden; }\n:where(.dzg-free) { unicode-bidi: plaintext; }\n:where(.dzg-num) { unicode-bidi: isolate; direction: ltr; }\n:where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: var(--dzg-footer-size, 0px); display: grid; place-content: center; place-items: center; pointer-events: none; }\n:where(.dzg-overlay > *) { pointer-events: auto; }\n:where(.dzg-busy) { position: absolute; inset-inline: 0; block-size: 3px; overflow: hidden; z-index: 3; pointer-events: none; }\n:where(.dzg-busy)::before { content: ''; position: absolute; inset: 0; }\n:where(.dzg-tooltip) { position: fixed; margin: 0; z-index: 10; }\n:where(.dzg-overlay[hidden], .dzg-tooltip[hidden]) { display: none; }\n:where(.dzg-popup) { position: fixed; margin: 0; z-index: 10; }\n:where(.dzg-popup, .dzg-tooltip)[popover] { position: fixed; inset: auto; margin: 0; overflow: visible; border: 0; padding: 0; background: transparent; color: inherit; }\n:where(.dzg-sr) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }\n:where(.dzg-live) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }\n}\n";
+  export declare const LAYOUT_CSS = "@layer dzgrid.layout {\n:where(.dzg) { position: relative; display: flex; flex-direction: column; min-block-size: 0; min-inline-size: 0; }\n:where(.dzg-viewport) { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain; overflow-anchor: none; outline: none; }\n:where(.dzg-header) { position: sticky; inset-block-start: 0; z-index: 3; display: flex; flex-direction: column; }\n:where(.dzg-body) { position: relative; overflow: clip; }\n:where(.dzg-layer) { position: absolute; inset-inline-start: 0; }\n:where(.dzg-row) { position: absolute; inset-inline-start: 0; display: flex; contain: content; }\n:where(.dzg-seg) { display: flex; position: relative; }\n:where(.dzg-seg-start) { position: sticky; inset-inline-start: 0; z-index: 2; }\n:where(.dzg-seg-end) { position: sticky; inset-inline-end: 0; z-index: 2; }\n:where(.dzg-hcell, .dzg-cell[data-dzg-editing]) { position: relative; }\n:where([data-dzg-editing] > [data-dzg-owner=editor]) { position: absolute; inset: 0; box-sizing: border-box; }\n:where(.dzg-seg-center > .dzg-cell, .dzg-seg-center > .dzg-hcell) { position: absolute; inset-block: 0; }\n:where(.dzg-resize) { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: var(--dzg-target-min, 24px); max-inline-size: 50%; cursor: col-resize; touch-action: none; z-index: 1; }\n:where(.dzg-resize-start) { inset-inline-end: auto; inset-inline-start: 0; }\n:where(.dzg-cell, .dzg-hcell) { box-sizing: border-box; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }\n:where(.dzg-cell[data-align=end], .dzg-hcell[data-align=end] > .dzg-hlabel) { text-align: end; }\n:where(.dzg-hcell[data-align] > .dzg-hlabel) { flex: auto; }\n:where(.dzg-cell[data-num]) { font-variant-numeric: var(--dzg-num-figures, tabular-nums); }\n:where(.dzg-row[data-odd]) { --dzg-odd: var(--dzg-row-odd-bg); }\n:where(.dzg[data-density=compact]) { --dzg-density: .75; }\n:where(.dzg[data-density=spacious]) { --dzg-density: 1.25; }\n:where(.dzg[data-under-start] .dzg-seg-start, .dzg[data-under-end] .dzg-seg-end)::after { box-shadow: var(--dzg-pinned-shadow); }\n:where(.dzg-seg-start:dir(rtl), .dzg-seg-end:dir(ltr))::after { scale: -1 1; }\n:where(.dzg-body .dzg-cell[data-wrap], .dzg-sticky .dzg-cell[data-wrap]) { white-space: normal; overflow-wrap: anywhere; }\n:where(.dzg-cell[data-align=center], .dzg-hcell[data-align=center] > .dzg-hlabel) { text-align: center; }\n:where(.dzg-hrow) { display: flex; }\n:where(.dzg-row[data-kind=detail] > .dzg-seg) { display: none; }\n:where(.dzg-dcell) { position: sticky; inset-inline-start: 0; box-sizing: border-box; overflow: hidden; }\n:where(.dzg-free) { unicode-bidi: plaintext; }\n:where(.dzg-num) { unicode-bidi: isolate; direction: ltr; }\n:where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: var(--dzg-footer-size, 0px); display: grid; place-content: center; place-items: center; pointer-events: none; }\n:where(.dzg-overlay > *) { pointer-events: auto; }\n:where(.dzg-busy) { position: absolute; inset-inline: 0; block-size: 3px; overflow: hidden; z-index: 3; pointer-events: none; }\n:where(.dzg-busy)::before { content: ''; position: absolute; inset: 0; }\n:where(.dzg-tooltip) { position: fixed; margin: 0; z-index: 10; }\n:where(.dzg-overlay[hidden], .dzg-tooltip[hidden]) { display: none; }\n:where(.dzg-popup) { position: fixed; margin: 0; z-index: 10; }\n:where(.dzg-popup, .dzg-tooltip)[popover] { position: fixed; inset: auto; margin: 0; overflow: visible; border: 0; padding: 0; background: transparent; color: inherit; }\n:where(.dzg-sr) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }\n:where(.dzg-live) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }\n}\n";
 ## MESSAGE_KEYS
   export declare const MESSAGE_KEYS: readonly [
       "grid.label",
@@ -415,6 +417,123 @@
   export declare function injectStyles(target: Document | ShadowRoot, nonce?: string): void;
 ## msg
   export declare function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FilterRowsMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>, ctx?: LocaleCtx): string;
+## GridTheme
+  export interface GridTheme {
+      readonly bg?: ThemeValue;
+      readonly bgRaised?: ThemeValue;
+      readonly fg?: ThemeValue;
+      readonly fgMuted?: ThemeValue;
+      readonly border?: ThemeValue;
+      readonly accent?: ThemeValue;
+      readonly accentFg?: ThemeValue;
+      readonly danger?: ThemeValue;
+      readonly warning?: ThemeValue;
+      readonly success?: ThemeValue;
+      readonly font?: ThemeValue;
+      readonly radius?: ThemeValue;
+      readonly line?: ThemeValue;
+      readonly pillRadius?: ThemeValue;
+      readonly cellPaddingInline?: ThemeValue;
+      readonly cellPaddingBlock?: ThemeValue;
+      readonly space?: ThemeValue;
+      readonly targetMin?: ThemeValue;
+      readonly cellFontSize?: ThemeValue;
+      readonly numFigures?: ThemeValue;
+      readonly cellAlignBlock?: ThemeValue;
+      readonly headerBg?: ThemeValue;
+      readonly headerFg?: ThemeValue;
+      readonly headerSize?: ThemeValue;
+      readonly headerWeight?: ThemeValue;
+      readonly headerFontFamily?: ThemeValue;
+      readonly headerTracking?: ThemeValue;
+      readonly headerCase?: ThemeValue;
+      readonly headerAlignBlock?: ThemeValue;
+      readonly headerHoverBg?: ThemeValue;
+      readonly frame?: ThemeValue;
+      readonly frameRadius?: ThemeValue;
+      readonly rowLine?: ThemeValue;
+      readonly columnLine?: ThemeValue;
+      readonly headerLine?: ThemeValue;
+      readonly headerSeparator?: ThemeValue;
+      readonly headerSeparatorSize?: ThemeValue;
+      readonly headerSeparatorHeight?: ThemeValue;
+      readonly pinnedColumnLine?: ThemeValue;
+      readonly pinnedShadow?: ThemeValue;
+      readonly detailLine?: ThemeValue;
+      readonly rowOddBg?: ThemeValue;
+      readonly rowHoverBg?: ThemeValue;
+      readonly rowSelectedBg?: ThemeValue;
+      readonly rowActiveBg?: ThemeValue;
+      readonly cellActiveBg?: ThemeValue;
+      readonly focusRing?: ThemeValue;
+      readonly focusWidth?: ThemeValue;
+      readonly selectBar?: ThemeValue;
+      readonly staleFg?: ThemeValue;
+      readonly contextFg?: ThemeValue;
+      readonly toggleFg?: ThemeValue;
+      readonly detailBg?: ThemeValue;
+      readonly groupRowBg?: ThemeValue;
+      readonly pinnedBg?: ThemeValue;
+      readonly pinnedLine?: ThemeValue;
+      readonly busyBar?: ThemeValue;
+      readonly flashColor?: ThemeValue;
+      readonly freshColor?: ThemeValue;
+      readonly freshBg?: ThemeValue;
+      readonly freshBar?: ThemeValue;
+      readonly savingColor?: ThemeValue;
+      readonly savedColor?: ThemeValue;
+      readonly refusedColor?: ThemeValue;
+      readonly refusedBg?: ThemeValue;
+      readonly editorBorder?: ThemeValue;
+      readonly rangeBg?: ThemeValue;
+      readonly rangeEdge?: ThemeValue;
+      readonly fillHandle?: ThemeValue;
+      readonly moveBar?: ThemeValue;
+      readonly resizeMode?: ThemeValue;
+      readonly searchMark?: ThemeValue;
+      readonly findColor?: ThemeValue;
+      readonly findBg?: ThemeValue;
+      readonly findCurrentBg?: ThemeValue;
+      readonly findMark?: ThemeValue;
+      readonly findMarkCurrent?: ThemeValue;
+      readonly boxSize?: ThemeValue;
+      readonly boxRadius?: ThemeValue;
+      readonly boxOnBg?: ThemeValue;
+      readonly boxEdge?: ThemeValue;
+      readonly iconSize?: ThemeValue;
+      readonly popupBg?: ThemeValue;
+      readonly popupShadow?: ThemeValue;
+      readonly tooltipBg?: ThemeValue;
+      readonly tooltipFg?: ThemeValue;
+      readonly inputBg?: ThemeValue;
+      readonly inputBorder?: ThemeValue;
+      readonly buttonBg?: ThemeValue;
+      readonly buttonBorder?: ThemeValue;
+      readonly menuItemHeight?: ThemeValue;
+      readonly menuDisabled?: ThemeValue;
+      readonly panelBg?: ThemeValue;
+      readonly chipBg?: ThemeValue;
+      readonly chipHoverBg?: ThemeValue;
+      readonly controlActiveBg?: ThemeValue;
+      readonly scrollbar?: ThemeValue;
+      readonly scrollbarThumb?: ThemeValue;
+      readonly scrollbarThumbActive?: ThemeValue;
+  }
+## GridIcons
+  export interface GridIcons {
+      readonly sortAsc?: GridIcon;
+      readonly sortDesc?: GridIcon;
+      readonly filter?: GridIcon;
+      readonly filterActive?: GridIcon;
+      readonly menu?: GridIcon;
+      readonly chevron?: GridIcon;
+      readonly submenu?: GridIcon;
+      readonly grip?: GridIcon;
+  }
+## GridIcon
+  export type GridIcon = string | SVGElement;
+## ThemeValue
+  export type ThemeValue = string | number;
 
 @ @dzgrid/dom/popup
 ## PopupHost
@@ -3258,3 +3377,13 @@
           'import.failed': string;
       };
   };
+
+@ @dzgrid/dom/theme
+## theming
+  export declare function theming(): GridFeature;
+## THEME_KEYS
+  export declare const THEME_KEYS: readonly (keyof GridTheme)[];
+## ICONS_CSS
+  export declare const ICONS_CSS: string;
+## injectIconStyles
+  export declare function injectIconStyles(target: Document | ShadowRoot, nonce?: string): void;

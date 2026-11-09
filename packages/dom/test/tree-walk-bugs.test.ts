@@ -82,7 +82,7 @@ describe('decoration on pooled rows and a former tree column', () => {
         expect(lvl, `${top} ${id}`).toBe(id!.includes('-') ? 2 : 1);
         for (const c of r.querySelectorAll<HTMLElement>('.dzg-cell')) {
           const tree = c.dataset['col'] === 'name';
-          expect(c.style.paddingInlineStart, `${top} ${id}/${c.dataset['col']}`).toBe(tree ? `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${(lvl - 1) * 16}px)` : '');
+          expect(c.style.paddingInlineStart, `${top} ${id}/${c.dataset['col']}`).toBe(tree ? `calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + ${(lvl - 1) * 16}px)` : '');
           expect(!!c.querySelector('.dzg-toggle'), `${top} ${id}/${c.dataset['col']}`).toBe(tree);
         }
       }
@@ -98,7 +98,7 @@ describe('decoration on pooled rows and a former tree column', () => {
     expect(t.row('V1')!.getAttribute('aria-level')).toBe('3');
     t.g.kernel.dispatch({ type: 'column.state', patch: [{ id: 'name', hidden: false }] }, 'api');
     expect(t.toggle('P1')!.hasAttribute('data-open')).toBe(true);
-    expect(t.cell('V1')!.style.paddingInlineStart).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 32px)');
+    expect(t.cell('V1')!.style.paddingInlineStart).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 32px)');
   });
 
   it('pinning the tree column to the end and back keeps one toggle per tree cell', () => {

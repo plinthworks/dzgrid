@@ -34,7 +34,7 @@ describe('dock.css', () => {
   });
 
   it('the surface, the edge muted then the accent, the shown tab underlined, the columns panel filling its area', () => {
-    expect(decl('.dzg-dock')).toBe('color: var(--tz-fg); background: var(--tz-bg); accent-color: var(--tz-accent);');
+    expect(decl('.dzg-dock')).toBe('color: var(--tz-fg); background: var(--dzg-panel-bg, var(--tz-bg)); accent-color: var(--tz-accent);'); // `--dzg-panel-bg` (1.9.0)
     // Owner 2026-11-07: no line and no grip at rest (the area's line divides; a grip at rest read as a stray scroll bar),
     // the grip centred in the gutter, in the accent under the pointer and focused.
     expect(decl('.dzg-dock-sep::before')).toBe('');

@@ -215,6 +215,9 @@
       "@dzgrid/dom/import": [
         "./packages/dom/src/import.ts"
       ],
+      "@dzgrid/dom/theme": [
+        "./packages/dom/src/theme.ts"
+      ],
       "@dzgrid/dom/locales/en-import": [
         "./packages/dom/src/locales/en-import.ts"
       ],

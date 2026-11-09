@@ -7,19 +7,19 @@
  * ```
  *
  * In the page, never in a shadow root (the theme, the popups and the print table live in the document). Properties
- * for what is not text (rows, columns, getRowId, messages, features, parts, settings), attributes for the simple
+ * for what is not text (rows, columns, getRowId, messages, features, parts, theme, icons, settings), attributes for the simple
  * settings; every grid event re-dispatched as `dzg-<type in kebab case>`. Bad input never throws: `dzg-problems`.
  */
 import { problem, type GridEvent, type Problem, type RowModel } from '@dzgrid/core';
 import { createGrid, type GridEnv, type GridInstance, type GridSettings } from '@dzgrid/dom';
 
 /** The settings the element's own properties hold (everything else goes through `settings`). */
-const PROPS = ['rows', 'source', 'columns', 'getRowId', 'messages', 'features', 'parts'] as const;
+const PROPS = ['rows', 'source', 'columns', 'getRowId', 'messages', 'features', 'parts', 'theme', 'icons'] as const;
 type Prop = (typeof PROPS)[number];
 /** Without these three the grid cannot be made: the element waits for them. */
 const REQUIRED: readonly Prop[] = ['columns', 'getRowId', 'messages'];
 /** A property and what it must be (anything else is refused and told). */
-const KIND: Record<Prop | 'settings', 'list' | 'function' | 'object'> = { rows: 'object', source: 'object', columns: 'list', getRowId: 'function', messages: 'object', features: 'list', parts: 'object', settings: 'object' };
+const KIND: Record<Prop | 'settings', 'list' | 'function' | 'object'> = { rows: 'object', source: 'object', columns: 'list', getRowId: 'function', messages: 'object', features: 'list', parts: 'object', theme: 'object', icons: 'object', settings: 'object' };
 
 /**
  * An attribute and the setting it sets: a list of the words it takes, or how it is read. Attributes win over
@@ -115,6 +115,12 @@ export class DzGridElement<T = unknown> extends Base {
   set features(v: GridSettings<T>['features']) { this.#set('features', v); }
   get parts(): GridSettings<T>['parts'] { return this.#props.parts as never; }
   set parts(v: GridSettings<T>['parts']) { this.#set('parts', v); }
+  /** CSS variables on the grid's root, by typed keys (needs `theming()`, presentation-settings.md 20); live. */
+  get theme(): GridSettings<T>['theme'] { return this.#props.theme as never; }
+  set theme(v: GridSettings<T>['theme']) { this.#set('theme', v); }
+  /** The application's own icons (needs `theming()`, presentation-settings.md 17); live. */
+  get icons(): GridSettings<T>['icons'] { return this.#props.icons as never; }
+  set icons(v: GridSettings<T>['icons']) { this.#set('icons', v); }
   /** Every other setting (`selection`, `context`, `rowClass`, `pagination`…), compared key by key; the attributes win over it. */
   get settings(): Partial<GridSettings<T>> { return this.#settings; }
   set settings(v: Partial<GridSettings<T>>) {

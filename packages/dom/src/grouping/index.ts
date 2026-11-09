@@ -358,7 +358,7 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
           const text = labelOf(node);
           if (l.textContent !== text) l.textContent = text;
         } else l?.remove();
-        const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${tg ? level * indent : 0}px)`;
+        const pad = `calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + ${tg ? level * indent : 0}px)`;
         if (c.style.getPropertyValue(PAD) !== pad) c.style.setProperty(PAD, pad), c.style.setProperty(VAR, pad);
       };
       for (const [key, v] of rowRenderer.mounted) decorate(key, v);

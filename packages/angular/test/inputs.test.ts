@@ -3,7 +3,8 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { dataKey, type ColumnOrGroup, type FilterModel, type GridEvent, type SelectionState } from '@dzgrid/core';
-import type { GridFeature, SlotPart } from '@dzgrid/dom';
+import type { GridFeature, GridIcons, GridTheme, SlotPart } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
 import { FR } from '@dzgrid/dom/locales/fr';
 import { EN_RULES } from '@dzgrid/dom/locales/en-rules';
 import { rules } from '@dzgrid/dom/rules';
@@ -28,7 +29,7 @@ class CtxCell {
   selector: 't-host',
   imports: [DzGrid],
   template: `<dz-grid #g="dzGrid" [rows]="rows()" [columns]="columns" [getRowId]="id" [messages]="messages()" [locale]="locale()" [direction]="direction()"
-    [density]="density()" [headers]="headers()" [rowHeight]="rowHeight()" [headerHeight]="headerHeight()" [context]="context()" [parts]="parts" [features]="features" [selection]="selection()" [pagination]="paging()" [label]="label()"
+    [density]="density()" [headers]="headers()" [rowHeight]="rowHeight()" [headerHeight]="headerHeight()" [theme]="theme()" [icons]="icons()" [context]="context()" [parts]="parts" [features]="features" [selection]="selection()" [pagination]="paging()" [label]="label()"
     [(quick)]="quick" [(filter)]="filter" [(selected)]="selected"
     (gridEvent)="all.push($event)" (cellClicked)="clicks.push($event)" (rowClicked)="rowClicks.push($event)" (problems)="problems.push($event)"
     (gridReady)="ready.push($event)" />`,
@@ -43,6 +44,8 @@ class Host {
   readonly density = signal<'compact' | 'comfortable' | 'spacious' | undefined>(undefined);
   readonly rowHeight = signal<number | undefined>(undefined);
   readonly headerHeight = signal<number | undefined>(undefined);
+  readonly theme = signal<GridTheme | undefined>(undefined);
+  readonly icons = signal<GridIcons | undefined>(undefined);
   readonly headers = signal<'shown' | 'hidden' | undefined>(undefined);
   readonly context = signal<unknown>(undefined);
   readonly label = signal<string | undefined>(undefined);
@@ -186,6 +189,20 @@ describe('live and fixed inputs', () => {
     t.host.headerHeight.set(undefined);
     t.run();
     expect(h()).toBe('40px');
+  });
+
+  it('[theme] and [icons] reach the grid’s root, live (presentation-settings.md 20, 17)', () => {
+    const t = mount({ setup: (h) => { h.features = [theming()]; } });
+    const root = () => t.el.querySelector('.dzg') as HTMLElement;
+    t.host.theme.set({ rowOddBg: 'Canvas', headerWeight: 500 });
+    t.host.icons.set({ grip: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><circle cx="4" cy="4" r="2"/></svg>' });
+    t.run();
+    expect(root().style.getPropertyValue('--dzg-row-odd-bg')).toBe('Canvas');
+    expect(root().style.getPropertyValue('--dzg-header-weight')).toBe('500');
+    expect(root().getAttribute('data-dzg-icons')).toBe('grip');
+    t.host.theme.set(undefined);
+    t.run();
+    expect(root().style.getPropertyValue('--dzg-row-odd-bg')).toBe('');
   });
 
   it('rowHeight from provideDzGrid’s defaults; a binding on the tag wins', () => {

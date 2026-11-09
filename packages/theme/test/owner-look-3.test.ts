@@ -56,8 +56,8 @@ describe.each(comfort)('%s', (_, css) => {
   });
 
   it('near-invisible scroll bars by default, plainer on hover or focus; `--dzg-scrollbar: auto` the system’s; forced colours the system’s (app-feedback 35)', () => {
-    expect(rule(css, '.dzg-viewport')).toContain('scrollbar-width: var(--dzg-scrollbar, thin); scrollbar-color: var(--tz-border) transparent;');
-    expect(rule(css, '.dzg:is(:hover, :focus-within) .dzg-viewport')).toBe('scrollbar-color: var(--tz-fg-muted) transparent;');
+    expect(rule(css, '.dzg-viewport')).toContain('scrollbar-width: var(--dzg-scrollbar, thin); scrollbar-color: var(--dzg-scrollbar-thumb, var(--tz-border)) transparent;'); // 1.9.0: `--dzg-scrollbar-thumb`
+    expect(rule(css, '.dzg:is(:hover, :focus-within) .dzg-viewport')).toBe('scrollbar-color: var(--dzg-scrollbar-thumb-active, var(--tz-fg-muted)) transparent;');
     expect(css).toContain('@container style(--dzg-scrollbar: auto) { .dzg-viewport { scrollbar-color: auto; } }');
     expect(css).toMatch(/@supports not \(scrollbar-color: auto\) \{ @container not style\(--dzg-scrollbar: auto\) \{ \.dzg-viewport::-webkit-scrollbar \{ width: 8px; height: 8px; \}/);
     expect(css).toMatch(/@media \(forced-colors: active\) \{ \.dzg-viewport \{ scrollbar-width: auto; scrollbar-color: auto; \} \}/);
@@ -78,7 +78,7 @@ describe('the comfort sheet: built, exported, shipped, budgeted, not in K.8', ()
   });
   it('its own line, the measure + 10 % (551 → 650); the base theme 2 850, the date adapters 2 850, K.8 84 450', () => {
     expect(budget.entries['@dzgrid/theme/dzgrid.comfort.css']).toEqual({ file: 'packages/theme/dzgrid.comfort.css', maxGzip: 650 });
-    expect(budget.entries['@dzgrid/theme']!.maxGzip).toBe(2960); // Phase 8 step 4: 2 960 (+2 % rule, loading rows); 1.4.0 busy bar (+2 % rule)
+    expect(budget.entries['@dzgrid/theme']!.maxGzip).toBe(2990); // 1.9.0 presentation settings (+2 % rule): 2 990; Phase 8 step 4: 2 960 (+2 % rule, loading rows); 1.4.0 busy bar (+2 % rule)
     expect(budget.entries['@dzgrid/dom/filters: date adapters (lazy)']!.maxGzip).toBe(2850);
     expect(budget.entries['profile: audit screen (K.8)']!.maxGzip).toBe(90000); // owner step 16 « ok pour les hausses »: 90 000; 84 800 since step 12 (Q12-1); 84 950: owner « set include only » (2026-10-29)
   });

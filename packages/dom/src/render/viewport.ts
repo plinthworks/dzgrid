@@ -281,6 +281,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     setPx(el.body, 'block-size', mapper.physicalHeight);
     setPx(el.body, 'inline-size', L.totalWidth + extra);
     setAttr(el.root, 'data-motion', settings.motion === false ? 'off' : null);
+    // Content scrolled under a pinned part (presentation-settings.md 6): the theme's shadow at its edge.
+    setAttr(el.root, 'data-under-start', L.start.width + extra && box.scrollInline > 0 ? '' : null);
+    setAttr(el.root, 'data-under-end', L.end.width && box.scrollInline + box.inline < L.totalWidth + extra - 1 ? '' : null);
     setPx(el.layer, 'inset-block-start', w.placement.layerTop);
 
     const ciKey = columns.version * 4 + (check ? 1 : 0) + (lead ? 2 : 0);

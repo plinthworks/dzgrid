@@ -87,7 +87,7 @@ describe('columns.css', () => {
     expect(b).toMatch(/flex: none/);
     expect(b).toMatch(/inline-size: var\(--dzg-target-min, 24px\)/);
     expect(b).toMatch(/block-size: var\(--dzg-target-min, 24px\)/);
-    expect(b).toMatch(/margin-inline-end: calc\(var\(--dzg-target-min, 24px\) - var\(--dzg-cell-padding-inline, 0\.5rem\)\)/);
+    expect(b).toMatch(/margin-inline-end: calc\(var\(--dzg-target-min, 24px\) - var\(--dzg-cell-padding-inline, 0\.5rem\) \* var\(--dzg-density, 1\)\)/); // the density's padding (1.9.0)
     expect(decl(/^\.dzg-reapply$/)).toMatch(/order: 3/);
     // Its dots: a shape over currentColor, no glyph font.
     expect(decl(/^\.dzg-mbtn::before$/)).toMatch(/background: (currentColor|radial-gradient)/);
@@ -108,7 +108,7 @@ describe('columns.css', () => {
     expect(list).toMatch(/max-block-size: calc\(100dvh - 2rem\)/);
     expect(list).toMatch(/overflow-y: auto/);
     const item = decl(/^\.dzg-menu \[role\^=menuitem\]$/);
-    expect(item).toMatch(/min-block-size: 32px/);
+    expect(item).toMatch(/min-block-size: max\(var\(--dzg-target-min, 24px\), var\(--dzg-menu-item-height, 32px\)\)/); // 1.9.0: a variable, 32 px by default
     expect(item).toMatch(/padding-inline-start: /);
     expect(decl(/^\.dzg-menu \[aria-checked=true\]::before$/)).toMatch(/background: currentColor/);
     expect(decl(/^\.dzg-menu \[aria-disabled=true\]$/)).toMatch(/color: var\(--dzg-menu-disabled, var\(--tz-fg-muted\)\)/);

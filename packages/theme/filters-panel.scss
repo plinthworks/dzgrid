@@ -28,7 +28,7 @@ $layered: true !default;
 @include layer {
   .dzg-fside {
     color: var(--tz-fg);
-    background: var(--tz-bg);
+    background: var(--dzg-panel-bg, var(--tz-bg));
     accent-color: var(--tz-accent);
   }
 

@@ -16,7 +16,7 @@ export const FILTERS_CSS =
   ':where(.dzg-fclear){inline-size:24px;block-size:24px}' +
   // The header's filter button: a 24 px target after the label and the sort mark (the mark may come
   // later in the DOM: `order`, so a focused button is never moved), clear of the resize grip.
-  ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;margin-inline:auto calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem))}' +
+  ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;margin-inline:auto calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem)*var(--dzg-density,1))}' +
   // Beside a button the label gives way, cut with an ellipsis.
   ':where(.dzg-hcell>.dzg-hlabel){min-inline-size:0;overflow:hidden;text-overflow:ellipsis}' +
   // Step 21, `header.filterBox`: the name, then the box taking what is left.

@@ -370,6 +370,9 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
   return [
     ...Object.keys(s.parts ?? {}).flatMap((n) => missing(`parts.${n}`, NEEDS[s.parts![n]!.slot as WiredSlot])),
     ...(paged ? missing('settings.pagination', 'pagination') : []),
+    // The theme object and the app's icons (presentation-settings.md 23).
+    ...(s.theme ? missing('settings.theme', 'theme') : []),
+    ...(s.icons ? missing('settings.icons', 'theme') : []),
     // A selection rule without its feature (step 21): an error, the grid selects nothing (fail closed).
     ...(s.selection?.canSelect ? missing('settings.selection.canSelect', 'rules', 'error') : []),
     ...leaves(s.columns).flatMap((d, i) => [

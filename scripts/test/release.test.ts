@@ -293,7 +293,7 @@ describe('1.8.0, the five packages', () => {
     expect(build).toMatch(/'\.\/locales\/ar-pivot-bar', '\.\/totals-row', '\.\/vertical-headers', '\.\/locales\/en-totals', '\.\/locales\/fr-totals', '\.\/locales\/ar-totals'[,\]]/); // lot B after it
     const theme = pkg('theme');
     for (const f of ['vertical-headers.css', 'vertical-headers.unlayered.css', 'vertical-headers.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pivot', 'vertical-headers'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pivot', 'vertical-headers'[,\]]/); // presentation: 'variables' after it
   });
 
   it('export the 1.9.0 lot B entries (core import; dom responsive, import, the -import texts), built like the others', () => {
@@ -301,7 +301,15 @@ describe('1.8.0, the five packages', () => {
     for (const e of ['responsive', 'import', 'locales/en-import', 'locales/fr-import', 'locales/ar-import']) expect(pkg('dom').exports[`./${e}`]).toEqual({ types: `./src/${e}.ts`, default: `./src/${e}.ts` });
     const build = readFileSync(`${ROOT}scripts/build.mjs`, 'utf8');
     expect(build).toMatch(/'\.\/auto-columns', '\.\/totals', '\.\/import'\]/);
-    expect(build).toMatch(/'\.\/locales\/ar-totals', '\.\/responsive', '\.\/import', '\.\/locales\/en-import', '\.\/locales\/fr-import', '\.\/locales\/ar-import'\]/);
+    expect(build).toMatch(/'\.\/locales\/ar-totals', '\.\/responsive', '\.\/import', '\.\/locales\/en-import', '\.\/locales\/fr-import', '\.\/locales\/ar-import'[,\]]/); // presentation: './theme' after it
+  });
+
+  it('export the 1.9.0 presentation entries (dom theme; variables.css), built like the others', () => {
+    expect(pkg('dom').exports['./theme']).toEqual({ types: './src/theme.ts', default: './src/theme.ts' });
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/locales\/ar-import', '\.\/theme'\]/);
+    const theme = pkg('theme');
+    for (const f of ['variables.css', 'variables.unlayered.css', 'variables.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'vertical-headers', 'variables'\]/);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

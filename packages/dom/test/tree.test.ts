@@ -86,9 +86,9 @@ describe('the tree cell', () => {
   it('is the first visible column: indented per level, a decorative toggle first, no tab stop', () => {
     const t = tmake({ tree: { initial: 'all' } });
     const pad = (id: string) => t.cell(id)!.style.paddingInlineStart;
-    expect(pad('S0')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 0px)');
-    expect(pad('P1')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 16px)');
-    expect(pad('V1')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 32px)');
+    expect(pad('S0')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 0px)');
+    expect(pad('P1')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 16px)');
+    expect(pad('V1')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 32px)');
     const tg = t.toggle('S0')!;
     expect(t.cell('S0')!.firstChild).toBe(tg);
     expect(tg.getAttribute('aria-hidden')).toBe('true');
@@ -113,7 +113,7 @@ describe('the tree cell', () => {
 
   it('takes `indent` and `column`; a tree column that is not first is allowed and warned once', () => {
     const t = tmake({ tree: { indent: 20, column: 'n', initial: 'all' } });
-    expect(t.cell('P1', 'n')!.style.paddingInlineStart).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 20px)');
+    expect(t.cell('P1', 'n')!.style.paddingInlineStart).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 20px)');
     expect(t.cell('P1', 'n')!.querySelector('.dzg-toggle')).not.toBeNull();
     expect(t.cell('P1')!.querySelector('.dzg-toggle')).toBeNull();
     const warned = problemsOf(t.events).filter((p) => p.code === 'tree-column-not-first');

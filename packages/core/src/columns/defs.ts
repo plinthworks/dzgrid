@@ -98,6 +98,11 @@ export interface ColumnDef<T, V = unknown> {
   readonly hidden?: boolean;
   readonly align?: 'start' | 'center' | 'end';
   /**
+   * The header title's place (presentation-settings.md 3, 1.9.0): over `align`, which the title follows by default
+   * (a number column's title at the end, as its cells).
+   */
+  readonly headerAlign?: 'start' | 'center' | 'end';
+  /**
    * The cells' text wraps on several lines (Phase 6 step 9, docs/behaviors/auto-height.md 1): with `@dzgrid/dom/auto-height`
    * the row grows to its tallest wrapped cell; without it, or under a fixed `rowHeight`, the text wraps and is clipped.
    */

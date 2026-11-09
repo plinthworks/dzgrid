@@ -10,6 +10,10 @@
  * In the cascade layer `dzgrid.layout`, the first of the grid's (showcase themes, owner T1,
  * docs/behaviors/theming.md): the theme, a showcase theme and the application's own classes come
  * after it. The exported string carries the wrapper, for an app that loads it itself.
+ *
+ * Presentation settings (1.9.0, docs/behaviors/presentation-settings.md): a header title over its column's cells
+ * (3), equal-width digits in number cells (5), the alternate rows' and the density's variables the theme reads (2,
+ * 15), the pinned edge's shadow while content is under it, mirrored for the end side and in right to left (7).
  */
 export const LAYOUT_CSS = `@layer dzgrid.layout {
 :where(.dzg) { position: relative; display: flex; flex-direction: column; min-block-size: 0; min-inline-size: 0; }
@@ -27,9 +31,16 @@ export const LAYOUT_CSS = `@layer dzgrid.layout {
 :where(.dzg-resize) { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: var(--dzg-target-min, 24px); max-inline-size: 50%; cursor: col-resize; touch-action: none; z-index: 1; }
 :where(.dzg-resize-start) { inset-inline-end: auto; inset-inline-start: 0; }
 :where(.dzg-cell, .dzg-hcell) { box-sizing: border-box; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-:where(.dzg-cell[data-align=end]) { text-align: end; }
+:where(.dzg-cell[data-align=end], .dzg-hcell[data-align=end] > .dzg-hlabel) { text-align: end; }
+:where(.dzg-hcell[data-align] > .dzg-hlabel) { flex: auto; }
+:where(.dzg-cell[data-num]) { font-variant-numeric: var(--dzg-num-figures, tabular-nums); }
+:where(.dzg-row[data-odd]) { --dzg-odd: var(--dzg-row-odd-bg); }
+:where(.dzg[data-density=compact]) { --dzg-density: .75; }
+:where(.dzg[data-density=spacious]) { --dzg-density: 1.25; }
+:where(.dzg[data-under-start] .dzg-seg-start, .dzg[data-under-end] .dzg-seg-end)::after { box-shadow: var(--dzg-pinned-shadow); }
+:where(.dzg-seg-start:dir(rtl), .dzg-seg-end:dir(ltr))::after { scale: -1 1; }
 :where(.dzg-body .dzg-cell[data-wrap], .dzg-sticky .dzg-cell[data-wrap]) { white-space: normal; overflow-wrap: anywhere; }
-:where(.dzg-cell[data-align=center]) { text-align: center; }
+:where(.dzg-cell[data-align=center], .dzg-hcell[data-align=center] > .dzg-hlabel) { text-align: center; }
 :where(.dzg-hrow) { display: flex; }
 :where(.dzg-row[data-kind=detail] > .dzg-seg) { display: none; }
 :where(.dzg-dcell) { position: sticky; inset-inline-start: 0; box-sizing: border-box; overflow: hidden; }

@@ -10,7 +10,7 @@ export const TREE_CSS =
   // In the cascade layer dzgrid.layout, as the base's (owner T1, docs/behaviors/theming.md).
   '@layer dzgrid.layout{' +
   ':where(.dzg-toggle){display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;inline-size:var(--dzg-target-min,24px);block-size:var(--dzg-target-min,24px);margin-inline-end:.125rem;cursor:pointer}' +
-  ':where(.dzg-toggle)::before{content:"\\203a";font-size:1.25em;line-height:1;rotate:var(--dzg-chevron)}' +
+  ':where(.dzg-toggle)::before{content:"\\203a";font-size:var(--dzg-icon-size,1.25em);line-height:1;rotate:var(--dzg-chevron)}' +
   ':where(.dzg-toggle[data-open]){--dzg-chevron:90deg}:where([dir=rtl] .dzg-toggle[data-open]){--dzg-chevron:-90deg}' +
   ':where(.dzg-toggle[data-leaf]){visibility:hidden;cursor:auto}' +
   // Pinned parents (tree-sticky.md): no height (the header keeps its own), under the header rows, not printed.

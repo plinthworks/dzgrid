@@ -72,7 +72,7 @@ export interface RowDragFeature<T = unknown> extends GridFeature {
 const CSS =
   '@layer dzgrid.layout{' +
   ':where(.dzg-grip){display:inline-flex;flex:none;align-items:center;justify-content:center;vertical-align:middle;inline-size:var(--dzg-target-min,24px);block-size:var(--dzg-target-min,24px);margin-inline-end:.125rem;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}' +
-  ':where(.dzg-grip)::before{content:"\\283f";line-height:1}:where(.dzg-grip[data-dzg-off]){cursor:not-allowed}' +
+  ':where(.dzg-grip)::before{content:"\\283f";font-size:var(--dzg-icon-size);line-height:1}:where(.dzg-grip[data-dzg-off]){cursor:not-allowed}' +
   ':where(.dzg-rmove){position:absolute;inset:0;z-index:6;pointer-events:none}' +
   ':where(.dzg-rmove>*){position:absolute;box-sizing:border-box}' +
   ':where(.dzg-rmove-ghost){position:fixed;margin:0;inset:auto;max-inline-size:240px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-block-start:-.75em}' +

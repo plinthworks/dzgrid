@@ -12,7 +12,7 @@ afterEach(cleanup);
 
 /** S0 and S1 always open (SMALL: S0 › P1 › V1, V2; S0 › P2; S1 › P3; S2). */
 const top = (r: T) => r.id === 'S0' || r.id === 'S1';
-const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) + ${px}px)`;
+const pad = (px: number) => `calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + ${px}px)`;
 const hasToggle = (c: HTMLElement | null) => !!c && c.firstElementChild?.classList.contains('dzg-toggle') === true;
 
 describe('drawn: no chevron, no slot; the rest unchanged', () => {
@@ -131,7 +131,7 @@ describe('pooled cells and pinned copies', () => {
 describe('the editor field in a cell without a chevron (edit.css)', () => {
   it('starts at the indent (the cell padding taken off), the chevron rule still after it in the file', () => {
     const css = readFileSync(`${process.cwd()}/packages/theme/edit.css`, 'utf8').replace(/\s+/g, ' ');
-    const rule = '[style*="--dzg-tree-pad"] > [data-dzg-owner] { inset-inline-start: calc(var(--dzg-tree-pad) - var(--dzg-cell-padding-inline, 0.5rem)); }';
+    const rule = '[style*="--dzg-tree-pad"] > [data-dzg-owner] { inset-inline-start: calc(var(--dzg-tree-pad) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1)); }';
     expect(css).toContain(rule);
     // Same weight as the chevron's rule: that one wins by coming after.
     expect(css.indexOf(rule)).toBeLessThan(css.indexOf('.dzg-toggle ~ [data-dzg-owner] {'));
@@ -141,7 +141,7 @@ describe('the editor field in a cell without a chevron (edit.css)', () => {
 
   it('a field whose own direction is not its cell\'s (dir=auto: a Latin name in Arabic) takes the indent at its other end', () => {
     const css = readFileSync(`${process.cwd()}/packages/theme/edit.css`, 'utf8').replace(/\s+/g, ' ');
-    const rule = ':dir(rtl)[style*="--dzg-tree-pad"] > :dir(ltr), :dir(ltr)[style*="--dzg-tree-pad"] > :dir(rtl) { inset-inline: 0 calc(var(--dzg-tree-pad) - var(--dzg-cell-padding-inline, 0.5rem)); }';
+    const rule = ':dir(rtl)[style*="--dzg-tree-pad"] > :dir(ltr), :dir(ltr)[style*="--dzg-tree-pad"] > :dir(rtl) { inset-inline: 0 calc(var(--dzg-tree-pad) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1)); }';
     expect(css).toContain(rule);
     // Before the chevron's rules, which win in a cell with a chevron.
     expect(css.indexOf(rule)).toBeLessThan(css.indexOf('.dzg-toggle ~ [data-dzg-owner] {'));

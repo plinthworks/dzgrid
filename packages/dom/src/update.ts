@@ -50,6 +50,8 @@ export const UPDATE_POLICY: UpdatePolicy = {
   context: 'live',
   rowClass: 'live',
   motion: 'live',
+  theme: 'live',
+  icons: 'live',
   multiSort: 'fixed',
   sameRow: 'fixed',
 };

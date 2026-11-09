@@ -31,7 +31,7 @@ describe('filters-panel.css', () => {
   });
 
   it('the side on the grid\'s surface, a line toward the rows on either side', () => {
-    expect(decl('.dzg-fside')).toMatch(/background: var\(--tz-bg\)/);
+    expect(decl('.dzg-fside')).toMatch(/background: var\(--dzg-panel-bg, var\(--tz-bg\)\)/); // `--dzg-panel-bg` (1.9.0)
     expect(decl("[data-dzg-fside=end] > .dzg-fside")).toBe('border-inline-start: var(--dzg-line, 1px) solid var(--tz-border);');
     expect(decl("[data-dzg-fside=start] > .dzg-fside")).toBe('border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);');
   });

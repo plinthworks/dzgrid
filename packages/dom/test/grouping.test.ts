@@ -70,15 +70,15 @@ describe('group rows on screen (row-grouping.md 1, 2, 15, 16; aggregation.md 1)'
     expect(t.toggle('r1')!.hasAttribute('data-leaf')).toBe(true);
     expect(t.toggle(NORD)!.hasAttribute('data-leaf')).toBe(false);
     expect(t.toggle(NORD)!.hasAttribute('data-open')).toBe(true);
-    expect(t.cell(NORD)!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 0px)');
-    expect(t.cell('r1')!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 16px)');
+    expect(t.cell(NORD)!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 0px)');
+    expect(t.cell('r1')!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 16px)');
   });
 
   it('takes another group column and indent when asked', () => {
     const t = gmake({ grouping: { by: ['region'], column: 'fruit', indent: 20, expanded: 'all' } });
     expect(t.label(NORD, 'fruit')).toBe('Nord (3)');
     expect(t.label(NORD, 'name')).toBeNull();
-    expect(t.cell('r1', 'fruit')!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 20px)');
+    expect(t.cell('r1', 'fruit')!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 20px)');
   });
 });
 
@@ -101,8 +101,8 @@ describe('the treegrid (row-grouping.md 11, 19)', () => {
     expect(attrs(t.row(apple))).toEqual(['2', '1', '2', 'true']);
     expect(attrs(t.row('r3'))).toEqual(['3', '2', '2', null]);
     expect(text(t.cell(apple, 'qty'))).toBe('12.5');
-    expect(t.cell(apple)!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 16px)');
-    expect(t.cell('r1')!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) + 32px)');
+    expect(t.cell(apple)!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 16px)');
+    expect(t.cell('r1')!.style.getPropertyValue('padding-inline-start')).toBe('calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1) + 32px)');
   });
 
   it('is a grid again once ungrouped: no levels, no chevron, no label', () => {
