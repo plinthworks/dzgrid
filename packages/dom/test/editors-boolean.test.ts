@@ -104,7 +104,7 @@ for (const lang of ['fr', 'ar'] as const) {
       t.at('r3', 'ok');
       t.key(' ');
       expect(say).toHaveBeenLastCalledWith(t.value('r3', 'ok'));
-      expect(t.value('r3', 'ok')).toBe('true');
+      expect(t.value('r3', 'ok')).toBe(lang == 'fr' ? 'Oui' : 'نعم'); // 1.10.0: the grid's words (badge-boolean.md « Yes / no … »)
     });
 
     it('Space on another cell, Shift+Space, a read-only yes/no cell: the selection as before, nothing saved', () => {

@@ -9,6 +9,7 @@
 # history: Phase 11 L6 (2026-11-09): the names the guide (docs/guide/) documents, guarded from now on; additions only, nothing removed or narrowed — @dzgrid/core/server-side#serverSideRows, @dzgrid/core/server-side#ServerSideOptions, @dzgrid/core/server-pivot#serverPivot, @dzgrid/core/row-drag#moveRows, @dzgrid/core/row-drag#MoveRowsOptions, @dzgrid/core/row-drag#RowMove, @dzgrid/core/infinite#infiniteRows, @dzgrid/core/infinite#InfiniteOptions
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): the names the guide documents for the new entries; additions only, nothing removed or narrowed — @dzgrid/core/auto-columns#autoColumns
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): autoColumns returns plain ColumnDef[] (unreleased, accepted earlier in this lot) — @dzgrid/core/auto-columns#autoColumns
+# history: owner 2026-11-10 (yes / no fix, A): booleanCodecWith's labels become optional — wider for callers — @dzgrid/core#booleanCodecWith
 
 @ @dzgrid/core
 ## AbortHandle
@@ -1335,7 +1336,7 @@
 ## booleanCodec
   export declare const booleanCodec: ValueCodec<boolean>;
 ## booleanCodecWith
-  export declare function booleanCodecWith(labels: {
+  export declare function booleanCodecWith(labels?: {
       readonly true: string;
       readonly false: string;
   }): ValueCodec<boolean>;

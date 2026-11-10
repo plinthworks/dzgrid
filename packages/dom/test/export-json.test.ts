@@ -48,8 +48,8 @@ describe('JSON export', () => {
     const t = xmake({ rows: tins as R[], columns: cols as ColumnOrGroup<R>[], lang: 'en', options: { text: 'display' } });
     await t.feature.run('displayed', { format: 'json' });
     const first = JSON.parse((await json(t)).text)[0];
-    // The default yes / no codec formats with its raw words (the app gives `booleanCodecWith` for labels).
-    expect(first).toMatchObject({ name: 'Oolong', grams: '100.50', ok: 'true', kind: 'Green' });
+    // 1.10.0: the default yes / no codec shows the grid's words (badge-boolean.md « Yes / no … without a part »).
+    expect(first).toMatchObject({ name: 'Oolong', grams: '100.50', ok: 'Yes', kind: 'Green' });
   });
 
   it('the request and the events say json; columns asked are written in their order; the selected scope', async () => {

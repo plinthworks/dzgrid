@@ -76,6 +76,23 @@ describe('columnHover()', () => {
     expect(marked(m.host)).toEqual([]);
   });
 
+  it('a grid nested in a row (a detail panel) is not this grid: its cells neither move nor take the mark (1)', () => {
+    const f = frames();
+    const m = emake({ raf: f.raf, settings: { features: [columnHover()] } });
+    const inner = emake();
+    f.run();
+    // A nested grid with the same column ids, inside one of the outer grid's cells (as a detail row holds it).
+    m.cell('r1', 's')!.append(inner.host);
+    const root = m.host.querySelector<HTMLElement>('.dzg')!;
+    over(inner.cell('r2', 'n')!);
+    f.run();
+    expect(root.hasAttribute('data-hover-col')).toBe(false);
+    over(m.cell('r2', 'n')!);
+    f.run();
+    expect(root.getAttribute('data-hover-col')).toBe('n');
+    expect(inner.host.querySelectorAll('[data-col-hover]')).toHaveLength(0);
+  });
+
   it('cells mounted later (a scroll) are marked; destroyed: nothing left (4, 7)', () => {
     const f = frames();
     const m = emake({ raf: f.raf, settings: { features: [columnHover()] } });

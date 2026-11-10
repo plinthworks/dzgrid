@@ -13,6 +13,11 @@ export interface LocaleCtx {
   /** IANA zone used for instants only. Days have no zone. */
   readonly timeZone: string;
   readonly calendar: 'gregory';
+  /**
+   * The words for true and false in the grid's language (1.10.0, badge-boolean.md « Yes / no … without a part »): the
+   * type's boolean codec shows them; absent, its own `true` / `false`. Set by the DOM layer from its messages.
+   */
+  readonly yesNo?: readonly [yes: string, no: string];
 }
 
 /** A context, checked. A bad locale or zone is a programming error and throws RangeError. */
@@ -27,7 +32,7 @@ export function localeCtx(o: { locale: string; numerals?: 'latn' | 'locale'; tim
   return { locale: canonical, numerals, timeZone, calendar: 'gregory' };
 }
 
-export const ctxKey = (ctx: LocaleCtx): string => `${ctx.locale}|${ctx.numerals}|${ctx.timeZone}`;
+export const ctxKey = (ctx: LocaleCtx): string => `${ctx.locale}|${ctx.numerals}|${ctx.timeZone}|${ctx.yesNo}`;
 
 const tags = new Map<string, string>();
 

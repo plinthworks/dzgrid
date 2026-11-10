@@ -44,6 +44,9 @@ export function compileQuick<T>(text: string, columns: readonly ResolvedColumn<T
     if (col.type === 'text' || col.type === 'enum' || (col.type === 'custom' && col.codec.keyKind === 'text')) {
       always.push(env.cache.haystack('search', col, env));
       if (col.type === 'enum') always.push(env.cache.haystack('export', col, env));
+    } else if (col.type === 'boolean' && env.ctx.yesNo) {
+      // Its translated word (1.10.0, badge-boolean.md « Yes / no … »); without one, not searched (« true » is no one's word).
+      always.push(env.cache.haystack('display', col, env));
     } else if (digits && (col.type === 'number' || col.type === 'day' || col.type === 'instant')) {
       withDigits.push(env.cache.haystack('display', col, env), env.cache.haystack('export', col, env));
     }

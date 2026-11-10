@@ -1,2 +1,2 @@
 /** The package version, kept equal to package.json's by the toolchain test. */
-export const DZGRID_ANGULAR_VERSION = '1.9.0';
+export const DZGRID_ANGULAR_VERSION = '1.10.0';

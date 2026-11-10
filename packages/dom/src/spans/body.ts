@@ -63,8 +63,10 @@ export function createBody(g: GridContext<unknown>): Body {
     frame = f;
     const root = el.root;
     // The label sticks under every header row; a full-width cell starts after the selection box.
-    const h = g.rowHeight(), G = g.groupHeight();
-    setPx(root, '--dzg-header-h', g.bands.reduce((s, r) => s + (r.height ?? G), g.headerHeight()) + g.headerRows.reduce((s, r) => s + (r.height ?? h), 0));
+    // The column headers' row as drawn: a feature's need (wrapped or vertical titles, `render/header-need.ts`) over its height.
+    const h = g.rowHeight(), G = g.groupHeight(), H = Math.max(g.headerHeight(), ...Object.values(g.headerNeeds ?? {}));
+    setPx(root, '--dzg-header-row-h', H);
+    setPx(root, '--dzg-header-h', g.bands.reduce((s, r) => s + (r.height ?? G), H) + g.headerRows.reduce((s, r) => s + (r.height ?? h), 0));
     const extra = (f.check ? CHECK_WIDTH : 0) + (f.lead ?? 0);
     setPx(root, '--dzg-check-w', extra);
     const now = new Map<HTMLElement, Drawn>();

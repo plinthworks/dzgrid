@@ -20,6 +20,8 @@ const STATUS = [{ value: 'done', label: 'Done' }, { value: 'late', label: 'Late'
 const TONES: Readonly<Record<string, Tone>> = { done: 'success', late: 'danger', held: 'warning', info: 'info' };
 const join = (b: GridMessages, p: { text: object }): GridMessages => ({ ...b, text: { ...b.text, ...p.text } });
 const MESSAGES = join(EN, EN_PARTS);
+/** A bundle without the yes / no words (the base bundles carry them since 1.10.0): an app's own. */
+const BARE = { locale: 'en', text: Object.fromEntries(Object.entries(EN.text).filter(([k]) => !k.startsWith('cell.'))) } as unknown as GridMessages; // the stripped base keys typed back as a bundle
 
 let grids: GridInstance<R>[] = [];
 afterEach(() => {
@@ -218,7 +220,7 @@ describe('cellBoolean', () => {
   });
 
   it('a text that is no message key fails: the bundle without cell.yes throws (the grid reports it)', () => {
-    expect(() => mountAlone(cellBoolean, { value: true, text: 'true' }, EN)).toThrow(/cell\.yes/);
+    expect(() => mountAlone(cellBoolean, { value: true, text: 'true' }, BARE)).toThrow(/cell\.yes/);
   });
 });
 
@@ -320,7 +322,7 @@ describe('in the grid', () => {
   it('reports a bundle without the parts’ texts: the yes/no cells empty, the rest painted', () => {
     const reportError = vi.fn();
     (window as unknown as { reportError: unknown }).reportError = reportError;
-    const { cell } = make({ messages: EN }, rowsOf(3));
+    const { cell } = make({ messages: BARE }, rowsOf(3));
     expect(cell(2, 'ok').childNodes.length).toBe(0);
     expect(cell(3, 'ok').childNodes.length).toBe(0);
     expect(cell(2, 'status').textContent).toBe('✓Done');

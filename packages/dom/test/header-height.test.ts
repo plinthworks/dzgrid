@@ -159,6 +159,15 @@ describe('headerHeight: { columns, groups }', () => {
     expect(hrows(m.host).map(size)).toEqual(['40px', '40px']);
   });
 
+  it('a value JSON cannot write, an object without a prototype: told, never thrown (bad input never throws)', () => {
+    const m = grouped(70);
+    expect(() => m.g.update({ rowHeight: 10n as never })).not.toThrow(); // a bigint from an untyped host
+    const bare = Object.assign(Object.create(null) as object, { columns: 10 }); // an object without a prototype (a parser's)
+    expect(() => m.g.update({ headerHeight: bare })).not.toThrow();
+    expect(told(m.events).map((p) => [p.path, p.detail])).toEqual([['settings.rowHeight', '10'], ['settings.headerHeight.columns', '10']]);
+    expect(() => grouped(bare)).not.toThrow();
+  });
+
   it('grows with the text size; live; the pinned top rows under both (13, 14)', () => {
     const m = grouped({ columns: 70, groups: 30 });
     m.box.remPx = 20;

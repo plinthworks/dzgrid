@@ -32,5 +32,8 @@ export const AR = {
     'pinned.end': "مثبت في النهاية",
     'header.withSort': "{header}\u060C {priority}",
     'header.sortHint': "اضغط Enter للترتيب، وShift+Enter للإضافة إلى الترتيب",
+    // A boolean column's words (1.10.0, badge-boolean.md « Yes / no … without a part »); the -parts bundles carry them too.
+    'cell.yes': "نعم",
+    'cell.no': "لا",
   },
 } satisfies GridMessages;

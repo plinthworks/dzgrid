@@ -48,7 +48,7 @@ export const SPANS_CSS =
   ':where(.dzg-row[data-full]>.dzg-seg>.dzg-check){position:sticky;inset-inline-start:0;z-index:2}' +
   ':where(.dzg-hgroup){position:absolute;inset-block:0}' +
   ':where(.dzg-hslot){position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)}' +
-  ':where(.dzg-hcell[data-up]){inset-block-start:calc(-1*var(--dzg-up));block-size:calc(var(--dzg-header-height) + var(--dzg-up))}' +
+  ':where(.dzg-hcell[data-up]){inset-block-start:calc(-1*var(--dzg-up));block-size:calc(var(--dzg-header-row-h) + var(--dzg-up))}' +
   '}' +
   // Outside the layer, on purpose: an !important inside a layer would beat every unlayered !important, so
   // an app could no longer override it (review of the showcase themes, R5).

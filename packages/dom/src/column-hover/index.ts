@@ -41,10 +41,12 @@ export function columnHover(): GridFeature {
       let shown: string | null = null;
       let next: string | null = null;
       let frame = 0;
+      /** A cell of this grid, not of a grid nested in one of its rows (a detail panel), whose columns are its own. */
+      const ours = (c: Element | null | undefined): c is HTMLElement => !!c && c.closest('.dzg') === el.root;
       /** Every mounted cell of the grid marked or not (attributes only). */
       const mark = (): void => {
         setAttr(el.root, 'data-hover-col', shown);
-        for (const c of el.root.querySelectorAll<HTMLElement>('.dzg-cell[data-col], .dzg-hcell[data-col]')) setAttr(c, 'data-col-hover', shown !== null && c.dataset['col'] === shown && !c.classList.contains('dzg-hgroup') ? '' : null);
+        for (const c of el.root.querySelectorAll<HTMLElement>('.dzg-cell[data-col], .dzg-hcell[data-col]')) if (ours(c)) setAttr(c, 'data-col-hover', shown !== null && c.dataset['col'] === shown && !c.classList.contains('dzg-hgroup') ? '' : null);
       };
       const want = (id: string | null): void => {
         next = id;
@@ -55,7 +57,8 @@ export function columnHover(): GridFeature {
       };
       scope.on(el.root, 'pointerover', (e: PointerEvent) => {
         if (e.pointerType == 'touch') return;
-        want((e.target as Element).closest?.<HTMLElement>('.dzg-cell[data-col], .dzg-hcell[data-col]:not(.dzg-hgroup)')?.dataset['col'] ?? null);
+        const c = (e.target as Element).closest?.<HTMLElement>('.dzg-cell[data-col], .dzg-hcell[data-col]:not(.dzg-hgroup)');
+        want(ours(c) ? c.dataset['col']! : null);
       });
       scope.on(el.root, 'pointerleave', () => want(null));
       return {

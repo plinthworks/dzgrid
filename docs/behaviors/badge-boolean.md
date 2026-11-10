@@ -40,3 +40,23 @@ Reads a status column ("Done", "Late", "On hold") and a yes/no column, scrolls, 
 - A value whose text is only spaces is a blank: no badge frame is drawn.
 - A tone entry set to `undefined` falls back (`fallback`, then neutral), so a pooled cell never keeps the previous row's tone; only real tones have a glyph.
 - The yes/no drawing changes nothing else: quick search does not search boolean columns, and the CSV writes the codec's own text (`true` / `false`).
+
+## Yes / no in the grid's language without a part (1.10.0, owner 2026-11-10)
+Report: a `type: 'boolean'` column without `ui.cell` showed « true / false » whatever the language. Written before the code.
+
+1. The base bundles (`EN`, `FR`, `AR`) carry `cell.yes` / `cell.no` (Yes / No, Oui / Non, نعم / لا) — the same keys as
+   the `-parts` bundles, which stay. The grid hands both texts to its values' context (`LocaleCtx.yesNo`); the boolean
+   codec's text is then the translated word, so every place that shows the **displayed** text says it: the cell, the
+   print table, the set filter's labels, a CSV or Excel or JSON file written « as displayed », the group rows' labels.
+2. A bundle without one of the two keys (an app's own messages): the codec's own words (`true` / `false`), as before;
+   nothing thrown, nothing told.
+3. Quick search: a boolean column is searched by its translated word (« oui » finds the true rows in French) when the
+   labels are there; without them, not searched (as before).
+4. Kept on purpose — the **data** paths keep the codec's export text, so that a file or a paste reads back in any
+   language: the default CSV (`true` / `false`), the clipboard's text (the CSV's writers), the default JSON (a real
+   boolean), Excel (a real boolean cell, `t="b"`, which Excel shows in its own language). Pasting or typing « Oui »,
+   « Yes », « نعم », « 1 », « ✓ » still reads as true (the codec's parse, unchanged).
+5. `booleanCodecWith(labels)` (a column's own `codec`): its labels win over the grid's; `booleanCodec` (the type's
+   default) takes the grid's.
+6. The language changing (`update({ messages })`, `locale`): the texts, the search and the lists follow.
+7. `cellBoolean` (`'cell.boolean'`) unchanged: it draws ✓ / ✗ with the same words.

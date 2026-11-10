@@ -7,6 +7,8 @@ import type { ColumnDef, Problem } from '@dzgrid/core';
 import { cleanup, emake, type R } from './support-edit.js';
 import { wrappedHeaders } from '../src/wrapped-headers.js';
 import { verticalHeaders } from '../src/vertical-headers.js';
+import { spans } from '../src/spans.js';
+import { SPANS_CSS } from '../src/spans/styles.js';
 
 let measured = 0;
 /** Copies present at each read: all written before the first read. */
@@ -100,6 +102,17 @@ describe('wrappedHeaders()', () => {
     expect(headRow(m.host).style.getPropertyValue('min-block-size')).toBe('156px');
     m.g.update({ columns: [...cols(), { id: 's', header: 'x', headerVertical: true }] });
     expect(headRow(m.host).style.getPropertyValue('min-block-size')).toBe('68px');
+  });
+
+  it('under group rows: a header stretched over an empty group cell and the sticky labels follow the grown row (4, 5)', () => {
+    const tree = [{ id: 'g', header: 'G', children: cols().slice(1) }, cols()[0]!];
+    const m = emake({ columns: tree as never, settings: { headerHeight: 40, features: [spans(), wrappedHeaders()] } }); // a tree of columns: emake's columns are leaves
+    const root = m.host.querySelector<HTMLElement>('.dzg')!;
+    // The group row 40, the column headers' row grown to 68 (not its 40).
+    expect(root.style.getPropertyValue('--dzg-header-row-h')).toBe('68px');
+    expect(root.style.getPropertyValue('--dzg-header-h')).toBe('108px');
+    expect(hcell(m.host, 'name').hasAttribute('data-up')).toBe(true);
+    expect(SPANS_CSS).toContain('block-size:calc(var(--dzg-header-row-h) + var(--dzg-up))');
   });
 
   it('without the feature: told once per column, nothing marked (2)', () => {

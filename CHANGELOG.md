@@ -5,9 +5,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — 1.10.0
+## [1.10.0] - 2026-11-10
 
-A minor (owner's answers of 2026-11-10 to the presentation review, rows 1.4, 1.5, 1.8, 5.7, 6.5). Additions only.
+A minor: nothing of 1.9.0 is removed (`npm run check:api`). The owner's answers of 2026-11-10 to the presentation review
+(rows 1.4, 1.5, 1.8, 5.7, 6.5): group rows apart from the column headers, the filter row's own height, columns fitted
+at load, titles on several lines, the column under the pointer.
+
+### Upgrading from 1.9.0
+- **A boolean column shows Yes / No in the grid's language** (Oui / Non, نعم / لا) instead of `true` / `false`: the
+  cell, print, the set filter's labels, files written « as displayed », group rows; quick search now finds the word.
+  The data paths keep `true` / `false` (default CSV, the clipboard, Excel's real boolean, default JSON). The words are
+  `cell.yes` / `cell.no`, now in the base bundles too; an app's own bundle without them keeps `true` / `false`; a
+  column's `codec: booleanCodecWith(labels)` still wins. Tests that read « true » in a boolean cell need the new word.
+- **`EN`, `FR`, `AR` carry two more keys** (`cell.yes`, `cell.no`; optional in `GridMessages`): code that compares a
+  bundle's keys with `MESSAGE_KEYS` sees them.
+- **`GridSettings.headerHeight` is `number | HeaderHeights`** (and Angular's `[headerHeight]` input with it): code that
+  only sets it has nothing to do; code that reads it back as a number (`settings.headerHeight + 8`) must narrow it first.
+- **A column header stretched over empty group cells** (`spans()` with column groups) now reaches the bottom of the
+  column headers' row when that row grew (vertical titles, wrapped titles); before, it stopped at `headerHeight`. The
+  spans' sticky labels sit under the grown row too.
+- Every new feature is off until the app asks for it (`headerHeight: { columns, groups }`, `filters({ rowHeight })`,
+  `columns({ fitOnLoad })`, `wrappedHeaders()`, `columnHover()`).
 
 ### Added
 - **Group rows apart from the column headers**: `headerHeight: { columns: 70, groups: 30 }` (a number keeps its meaning:
@@ -25,12 +43,25 @@ A minor (owner's answers of 2026-11-10 to the presentation review, rows 1.4, 1.5
   `data-col-hover` on the column's cells, tinted by `--dzg-column-hover-bg` (unset: nothing drawn); mouse and pen only.
 
 ### Decided
+- **K.8 line 90 000 → 91 000 B gz** (owner 2026-11-10, « augmente la limite »: the translated yes / no words in the base;
+  measured 90 077). Every other size line still moves by +2 % at most (DOM base 24 550 → 24 750, core/detail 1 170,
+  dom/columns 4 250).
 - **The grid's height always comes from its container, never from its rows** (owner): no « as tall as its rows » mode
   (review row 1.6, won't do) — a page that jumps when a filter changes the count is worse. `virtual-scroll.md`, the guide.
 - Multiple sheets in one grid: parked (owner: too heavy); the plan stays in `docs/phase-12-steps/sheets-plan.md`.
 
-### Upgrading from 1.9.0
-- Nothing to change. Every addition is off until asked for.
+### Fixed (the 1.10.0 review, before release)
+- **Boolean columns in the grid's language** (report 2026-11-10; `docs/behaviors/badge-boolean.md` « Yes / no … without
+  a part »): `LocaleCtx.yesNo` (new, optional), set by the grid from `cell.yes` / `cell.no`; the type's
+  `booleanCodec` shows it; `booleanCodecWith(labels?)` (labels now optional; given, they win). The language changing
+  (`update({ messages })`) refreshes texts, search and lists.
+- **Group rows with a grown header row** (`@dzgrid/dom/spans`): a column header with no group above it was drawn
+  `headerHeight` tall over a row grown by vertical or wrapped titles (a gap under it), and the merged cells' sticky
+  labels slid under the header; both now follow the row as drawn (`--dzg-header-row-h`).
+- **`columnHover()` with a grid nested in a row** (a detail panel): the inner grid's cells no longer move the outer
+  grid's hovered column nor take its mark.
+- **A height setting that cannot be written as JSON** (`rowHeight: 10n`) or an object without a prototype as
+  `headerHeight` threw from `update()` / `createGrid()`; now told (`invalid-setting`), as any bad height.
 
 ## [1.9.0] - 2026-11-10
 

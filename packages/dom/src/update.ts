@@ -1,12 +1,12 @@
 import { liveChangeProblems, localeCtx, problem, type ClientModel, type LocaleCtx, type Problem, type SourceHandle } from '@dzgrid/core';
-import { emit } from '@dzgrid/core/internal';
+import { ctxKey, emit } from '@dzgrid/core/internal';
 import type { GridContext } from './context.js';
 import { checkMessages } from './messages.js';
 import { rowPx, type GridSettings } from './settings.js';
 
 /** A `rowHeight` or `headerHeight` the grid does not take, told (null and undefined are no value). */
 export const rowHeightProblems = (v: unknown, key = 'rowHeight'): Problem[] =>
-  v == null || rowPx(v) ? [] : key == 'headerHeight' && (v as object).constructor == Object ? ['columns', 'groups'].flatMap((k) => rowHeightProblems((v as Record<string, unknown>)[k], `${key}.${k}`)) : [problem('invalid-setting', 'warning', `settings.${key}`, String(v))];
+  v == null || rowPx(v) ? [] : key == 'headerHeight' && ((v as object).constructor ?? Object) == Object ? ['columns', 'groups'].flatMap((k) => rowHeightProblems((v as Record<string, unknown>)[k], `${key}.${k}`)) : [problem('invalid-setting', 'warning', `settings.${key}`, String(v))];
 
 /**
  * Which settings change live and which a grid takes only at creation. The
@@ -61,8 +61,12 @@ export const UPDATE_POLICY: UpdatePolicy = {
 export const closed = <T>(s: GridSettings<T>): GridSettings<T> =>
   s.selection?.canSelect && !s.features?.some((f) => f.id === 'rules') ? { ...s, selection: { ...s.selection, mode: 'none' } } : s;
 
-export const ctxOf = <T>(s: GridSettings<T>): LocaleCtx =>
-  localeCtx({ locale: s.locale ?? s.messages.locale, ...(s.timeZone && { timeZone: s.timeZone }), ...(s.numerals && { numerals: s.numerals }) });
+export const ctxOf = <T>(s: GridSettings<T>): LocaleCtx => {
+  const c = localeCtx({ locale: s.locale ?? s.messages.locale, ...(s.timeZone && { timeZone: s.timeZone }), ...(s.numerals && { numerals: s.numerals }) });
+  // Yes / no in the grid's language for the boolean codec (1.10.0, badge-boolean.md); a bundle without them: the codec's words.
+  const { 'cell.yes': y, 'cell.no': n } = s.messages.text as Record<string, unknown>;
+  return typeof y == 'string' && typeof n == 'string' ? { ...c, yesNo: [y, n] } : c;
+};
 
 export interface UpdateHooks {
   applyDir(): void;
@@ -87,8 +91,11 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
   for (const p of refused) delete patch[p.path.slice('settings.'.length) as keyof GridSettings<T>];
   // A row height the grid does not take is told, kept, and the density's used (not refused: its path stays).
   // `Object.is`: the same value again (NaN included) is not told again.
-  // An object of heights: by its numbers (a new literal with the same ones is not told again).
-  for (const key of ['rowHeight', 'headerHeight'] as const) if (key in patch && !Object.is(patch[key], prev[key]) && JSON.stringify(patch[key]) !== JSON.stringify(prev[key])) refused.push(...rowHeightProblems(patch[key], key));
+  // An object of heights: by what is told of it (a new literal with the same numbers is not told again; never a JSON of the value, which may throw).
+  for (const key of ['rowHeight', 'headerHeight'] as const) {
+    const now = key in patch && !Object.is(patch[key], prev[key]) ? rowHeightProblems(patch[key], key) : [];
+    if (JSON.stringify(now) !== JSON.stringify(rowHeightProblems(prev[key], key))) refused.push(...now);
+  }
   if (refused.length) emit(g.kernel, { type: 'problems', source: 'host', problems: refused });
   const open: GridSettings<T> = { ...prev, ...patch };
   const next = closed(open);
@@ -96,7 +103,7 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
   if (patch.messages) checkMessages(patch.messages);
   // `in`, not `!== undefined`: clearing a setting goes back to its default. Computed before
   // anything changes: a locale that does not exist throws and leaves the grid as it was.
-  const contextChanged = 'locale' in patch || 'timeZone' in patch || 'numerals' in patch || (!!patch.messages && patch.messages.locale !== prev.messages.locale && !next.locale);
+  const contextChanged = 'locale' in patch || 'timeZone' in patch || 'numerals' in patch || (!!patch.messages && ctxKey(ctxOf(next)) !== ctxKey(g.ctx)); // a language or its yes / no words
   const nextCtx = contextChanged ? ctxOf(next) : g.ctx;
   g.settings = next;
   if (patch.columns && patch.columns !== prev.columns) g.kernel.dispatch({ type: 'columns.set', defs: patch.columns }, 'host');

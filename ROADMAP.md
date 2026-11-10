@@ -1349,3 +1349,25 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
 - Checks: `gate:step` green (timeouts under load re-run alone), `test:real-app` 58 / 58, `release:check` « the 5
   packages at 1.9.0 ».
 - For the owner: commit and publish (`docs/release-1.9.0.md`).
+
+## 1.10.0 — release (2026-11-10, not committed; prepared, not published)
+
+- [x] The owner's answers to the presentation review (rows 1.4, 1.5, 1.8, 5.7, 6.5), commit c22b377 (CHANGELOG « [1.10.0] »);
+  1.6 won't do (the grid's height comes from its container); multiple sheets parked.
+- [x] Boolean columns in the grid's language (report 2026-11-10): `cell.yes` / `cell.no` in the base bundles,
+  `LocaleCtx.yesNo`, the type's codec shows it (cell, print, set filter labels, « as displayed » files, group rows, quick
+  search); data paths keep `true` / `false` (default CSV, clipboard, Excel's real boolean). Seen in Chrome fr / ar.
+- [x] Code review of the new code — each fix test first: a column header stretched over empty group cells and the
+  spans' sticky labels now follow a header row grown by vertical or wrapped titles (`--dzg-header-row-h`; seen in
+  Chrome); `columnHover()` ignores a grid nested in a row; a height setting no JSON can write (a bigint) or an object
+  without a prototype is told instead of thrown. Checked, nothing to fix: print and files (titles as text, the print
+  table wraps), fit on load (server status, hidden, flexible, `resizable: false`, RTL measured as drawn), hover (pinned
+  rows, spans, recycling re-marked after each paint, no layout read), Problems carry settings only, logical sides,
+  colours as variables.
+- Sizes: **K.8 line 90 000 → 91 000 (owner 2026-11-10, « augmente la limite »), measured 90 077**; +2 % rule otherwise:
+  DOM base 24 550 → 24 750 (measured 24 721), core/detail 1 150 → 1 170, dom/columns 4 200 → 4 250 (gzip noise), the
+  real Angular build 101 000 → 101 500 (measured 101 165).
+- Checks: `gate:step` — test:ci, test:tz, typecheck, build, check:size green (9 233 tests); **check:api: `EN`, `FR`, `AR`
+  reported « changed » (two keys added) — the owner accepts or not**; `test:real-app` 58 / 58 (references kept);
+  `release:check` « the 5 packages at 1.10.0 » (its bytes step re-run after the real-build line moved).
+- For the owner: commit and publish (`docs/release-1.10.0.md`).

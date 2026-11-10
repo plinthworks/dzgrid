@@ -20,6 +20,7 @@
 # history: Owner 2026-11-09 (1.9.0 presentation settings, answers to docs/presentation-review.md): the names the guide documents for the new entry; additions only, nothing removed or narrowed — @dzgrid/dom/theme#theming, @dzgrid/dom/theme#THEME_KEYS, @dzgrid/dom/theme#ICONS_CSS, @dzgrid/dom/theme#injectIconStyles, @dzgrid/dom#GridTheme, @dzgrid/dom#GridIcons, @dzgrid/dom#GridIcon, @dzgrid/dom#ThemeValue
 # history: owner 2026-11-09: LAYOUT_CSS gains 7 layout lines (odd rows, pinned shadow, header alignment) — @dzgrid/dom#LAYOUT_CSS
 # history: Owner 2026-11-10 (1.10.0, answers to docs/presentation-review.md rows 1.4, 1.5, 1.8, 5.7, 6.5): the names the guide documents for the new entries and options; additions only, nothing removed or narrowed — @dzgrid/dom/wrapped-headers#wrappedHeaders, @dzgrid/dom/wrapped-headers#WrappedHeadersOptions, @dzgrid/dom/wrapped-headers#WRAPPED_HEADERS_CSS, @dzgrid/dom/column-hover#columnHover, @dzgrid/dom/column-hover#COLUMN_HOVER_CSS, @dzgrid/dom/columns#ColumnsApi, @dzgrid/dom/columns#ColumnsOptions, @dzgrid/dom/filters#FiltersOptions, @dzgrid/dom/filters-base#FiltersOptions, @dzgrid/dom#HeaderHeights, @dzgrid/dom#GridSettings
+# history: owner 2026-11-10: yes / no words added to the base bundles — @dzgrid/dom/locales/en#EN, @dzgrid/dom/locales/fr#FR, @dzgrid/dom/locales/ar#AR
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -1574,6 +1575,8 @@
           'pinned.end': string;
           'header.withSort': string;
           'header.sortHint': string;
+          'cell.yes': string;
+          'cell.no': string;
       };
   };
 
@@ -1622,6 +1625,8 @@
           'pinned.end': string;
           'header.withSort': string;
           'header.sortHint': string;
+          'cell.yes': string;
+          'cell.no': string;
       };
   };
 
@@ -1679,6 +1684,8 @@
           'pinned.end': string;
           'header.withSort': string;
           'header.sortHint': string;
+          'cell.yes': string;
+          'cell.no': string;
       };
   };
 

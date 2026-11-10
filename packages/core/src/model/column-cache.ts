@@ -57,7 +57,7 @@ interface RankEntry<T> { col: ResolvedColumn<T>; version: number; reader: number
  */
 export type HayKind = 'search' | 'exact' | 'display' | 'export';
 
-const listCtx = <T>(env: ColumnEnv<T>): string => `${env.ctx.locale}|${env.ctx.numerals}|${env.ctx.timeZone}`;
+const listCtx = <T>(env: ColumnEnv<T>): string => `${env.ctx.locale}|${env.ctx.numerals}|${env.ctx.timeZone}|${env.ctx.yesNo}`;
 
 /** One cell's text for a haystack of `kind`, or null when blank or unreadable. */
 function hayCell<T>(kind: HayKind, col: ResolvedColumn<T>, env: ColumnEnv<T>, src: number): string | null {
