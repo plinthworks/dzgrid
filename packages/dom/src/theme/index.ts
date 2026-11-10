@@ -25,8 +25,8 @@ export const THEME_KEYS = Object.keys(K) as readonly (keyof GridTheme)[];
 /** The palette's keys: `--tz-*`, shared with tzslot. */
 const TZ = new Set(THEME_KEYS.slice(0, 10));
 const kebab = (k: string) => k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
-/** What could break out of a declaration or load something (21). */
-const BAD = /[;{}<\\!]|url\(/i;
+/** What could break out of a declaration or load something (21): `url(`, and an image's other spellings. */
+const BAD = /[;{}<\\!]|(url|src|image(-set)?)\(/i;
 const own = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
 
 /**

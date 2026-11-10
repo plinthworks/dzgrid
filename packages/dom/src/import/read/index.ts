@@ -18,12 +18,15 @@ const decode = (W: typeof globalThis, b: Uint8Array): string => {
   }
 };
 
+/** What the entries of one workbook may inflate to, together (file-import.md 6): a ZIP bomb stops there. */
+const INFLATED = 128 * 1024 * 1024;
+
 /**
  * A file's bytes into rows (file-import.md 4–10), in this chunk loaded at the first file: a ZIP's signature is Excel (its
- * first sheet, entries inflated by the browser's `DecompressionStream`), an old binary workbook is refused, the rest is
- * CSV; then the rows through the columns' codecs. Never throws: a file not read is a problem.
+ * first sheet, entries inflated by the browser's `DecompressionStream`, `max` bytes at most together), an old binary
+ * workbook is refused, the rest is CSV; then the rows through the columns' codecs. Never throws: a file not read is a problem.
  */
-export async function readFile(b: Uint8Array, accept: readonly ImportFormat[], columns: ColumnModel<unknown>, ctx: LocaleCtx, W: typeof globalThis): Promise<Read> {
+export async function readFile(b: Uint8Array, accept: readonly ImportFormat[], columns: ColumnModel<unknown>, ctx: LocaleCtx, W: typeof globalThis, max = INFLATED): Promise<Read> {
   const zip = b[0] === 0x50 && b[1] === 0x4b && b[2] === 3 && b[3] === 4;
   // An old binary workbook (its compound file's signature): neither format.
   const format: ImportFormat | null = zip ? 'xlsx' : b[0] === 0xd0 && b[1] === 0xcf && b[2] === 0x11 && b[3] === 0xe0 ? null : 'csv';
@@ -33,7 +36,8 @@ export async function readFile(b: Uint8Array, accept: readonly ImportFormat[], c
   if (!zip) return { format, ...importRows(readCsv(decode(W, b)), all, ctx) };
   const z = zipEntries(b);
   if (!z) return fail('zip');
-  /** An entry's text; null when absent; a throw when it cannot be inflated. */
+  let left = max;
+  /** An entry's text; null when absent; a throw when it cannot be inflated, or inflates past what is left. */
   const text = async (name: string): Promise<string | null> => {
     const e = z.get(name);
     if (!e) return null;
@@ -44,6 +48,10 @@ export async function readFile(b: Uint8Array, accept: readonly ImportFormat[], c
     for (const r = s.getReader(); ; ) {
       const { done, value } = await r.read();
       if (done) break;
+      if ((left -= value.length) < 0) {
+        void r.cancel().catch(() => {});
+        throw 'size';
+      }
       parts.push(value);
     }
     const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
@@ -56,6 +64,6 @@ export async function readFile(b: Uint8Array, accept: readonly ImportFormat[], c
     if (!sheet) return fail('sheet');
     return { format, ...importRows(readSheet(sheet, sharedStrings((await text('xl/sharedStrings.xml')) ?? '')), all, ctx) };
   } catch (err) {
-    return fail(err === 'deflate' ? 'deflate' : 'zip');
+    return fail(err === 'deflate' || err === 'size' ? err : 'zip');
   }
 }

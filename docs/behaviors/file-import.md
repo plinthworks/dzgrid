@@ -29,6 +29,10 @@ receives the rows read and decides what to do with them (add them, replace the g
 6. **Excel**: the first sheet of the workbook (its order, not the file names), shared strings, inline strings, numbers,
    booleans, ISO dates and error cells. ZIP entries stored or deflated (`DecompressionStream`); a browser without it, a
    broken or encrypted package, a workbook without a sheet: no rows, `import-file` (detail `deflate`, `zip`, `sheet`).
+   Bounded (1.9.0 review): the entries inflate to 128 MiB at most together (a ZIP bomb: detail `size`); a row past
+   Excel's 1 048 576 or a column past `XFD` is left out; a missing cell is not made (a hole, read as blank); the XML is
+   read in one forward pass (an element never closed ends the reading, never a quadratic search); a character
+   reference out of Unicode stays as written.
 7. **The first non-empty row is the header**, each of its cells matched to a column by its title or its id, without case,
    accents or surrounding spaces (the quick search's folding). A header matching no column: its cells are ignored,
    `import-header` (path `header[i]`); the same column twice: the second ignored, detail `duplicate`; no header matching

@@ -5,7 +5,46 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased — 1.9.0
+## [1.9.0] - 2026-11-10
+
+A minor: nothing of 1.8.0 is removed (`npm run check:api`). Columns from the data, a totals row, JSON export, vertical
+and hidden headers, columns that collapse under their rows, importing a CSV or Excel file, a taller header, and the
+presentation settings (a `theme` object, `variables.css`, alternate rows, header alignment, the pinned shadow, icons).
+
+### Upgrading from 1.8.0
+- **A header title follows its column's alignment**: a number column's title now sits at the end, over its numbers
+  (`align`, else `end` for a number column). To keep the old place: `headerAlign: 'start'` on the column.
+- **Number cells' digits are of equal width** (`tabular-nums`); `.dzg { --dzg-num-figures: normal }` turns it off.
+- **The density sets the cells' side padding too** (× 0.75 compact, × 1.25 spacious; comfortable unchanged). For fixed
+  paddings: `.dzg { --dzg-density: 1 }`.
+- **With `responsive()`, Enter and Space on a row's first cell open its collapsed lines** while columns are collapsed
+  (Space there no longer ticks the row while columns are collapsed; it still does on the other cells; F2 still edits). Without `responsive()`, nothing changes.
+- **`LAYOUT_CSS` (`@dzgrid/dom`) is a longer literal**: its type is the string itself, so `check:api` reports it as
+  changed. An app that only injects it (or loads it with `injectStyles: false`) has nothing to do; code that typed a
+  variable as `typeof LAYOUT_CSS` and assigned the 1.8.0 text to it must widen it to `string`.
+- The pinned top band's offset is read from the header's height: nothing to change.
+- Every new feature is off until the app asks for it (`autoColumns`, `totalsRow()`, `{ format: 'json' }`,
+  `verticalHeaders()`, `headers: 'hidden'`, `responsive()`, `fileImport()`, `headerHeight`, `theming()`,
+  `@dzgrid/theme/variables.css`).
+
+### Fixed (the 1.9.0 review, before release)
+- **Importing a hostile `.xlsx`** (`@dzgrid/dom/import`, `@dzgrid/core/import`): the entries inflate to 128 MiB at most
+  together (a ZIP bomb is refused, `import-file` detail `size`); a row past 1 048 576 or a column past `XFD` is left
+  out and a missing cell is a hole (a far reference no longer fills millions of blanks); the sheet's XML is read in one
+  forward pass (elements never closed no longer took quadratic time); a character reference out of Unicode stays as
+  written instead of throwing. `readSheet` now leaves a missing cell absent (read as blank) where it wrote `null`;
+  `<si/>` keeps the shared strings' places.
+- **Icons**: an attribute holding a CSS escape (`\`, which could spell `url(`) and an SVG with a DOCTYPE (entity
+  expansion) are refused (`invalid-setting`, details `link`, `parse`).
+- **`theme` values**: `image(`, `image-set(` (and `-webkit-image-set(`) and `src(` are refused like `url(`.
+- **The totals row with `responsive()`**: a collapsed column's total was missing from CSV and Excel; totals are now
+  computed for the collapsed columns too.
+
+### Added (the release guard)
+- `npm run release:check` now compiles one Angular component importing **every published entry** of the five packages
+  (read from their installed `exports` maps, so a new entry is covered by itself) with ngc, strict templates and
+  `skipLibCheck: false`, and checks every stylesheet / JSON entry's file exists (`node scripts/example.mjs entries`).
+  The real Angular example installs `@dzgrid/element` for it.
 
 Lot A (owner « ★ partout », 2026-11-09). Additions only: nothing of 1.8.0 is removed or narrowed.
 

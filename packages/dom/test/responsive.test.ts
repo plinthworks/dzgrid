@@ -164,6 +164,25 @@ describe('responsive() — collapse and lines', () => {
     expect(t.g.kernel.rows.displayed.count).toBe(1);
   });
 
+  it('the totals row of a collapsed column still reaches the file (1.9.0 review: every place)', async () => {
+    const { pinnedRows } = await import('../src/pinned-rows.js');
+    const { totalsRow } = await import('../src/totals-row.js');
+    const { EN_TOTALS } = await import('../src/locales/en-totals.js');
+    const { EN_PINNED } = await import('../src/locales/en-pinned.js');
+    const files: { blob?: Blob }[] = [];
+    const ex = csvExport({ canExport: true, deliver: (d) => void files.push(d), loadRun: () => import('../src/export/run/index.js') } as CsvExportOptions);
+    const totals = totalsRow();
+    const t = make({
+      inline: 300, features: [responsive(), totals, pinnedRows(), ex],
+      settings: { columns: COLUMNS.map((c) => (c.id === 'qty' ? { ...c, total: 'sum' as const } : c)), messages: { ...EN, text: { ...TEXT, ...EN_TOTALS.text, ...EN_PINNED.text } } },
+    });
+    expect(t.ctx.columns.collapsed!.has('qty')).toBe(true);
+    expect(totals.api(t.g)!.values()).toEqual({ qty: 1245 });
+    expect(await ex.run('displayed')).toBe('done');
+    const text = await files[0]!.blob!.text();
+    expect(text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean).at(-1)).toBe('Total,,1245,');
+  });
+
   it('CSV and print write every column; no panel row (11)', async () => {
     const files: { blob?: Blob }[] = [];
     const ex = csvExport({ canExport: true, deliver: (d) => void files.push(d), loadRun: () => import('../src/export/run/index.js') } as CsvExportOptions);

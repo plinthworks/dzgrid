@@ -48,13 +48,14 @@ describe('the workbook’s parts (file-import.md 6)', () => {
     expect(sharedStrings('<sst><si><t>Name</t></si><si><r><t>Fish </t></r><r><rPr/><t xml:space="preserve">&amp; chips</t></r><rPh><t>x</t></rPh></si><si><t/></si><si><t>&lt;a&gt; &#233;&#x41;</t></si></sst>')).toEqual(['Name', 'Fish & chips', '', '<a> éA']);
   });
 
-  it('a sheet: shared, inline and formula strings, numbers, booleans, errors, ISO dates; gaps are blank', () => {
+  it('a sheet: shared, inline and formula strings, numbers, booleans, errors, ISO dates; a missing row empty, a missing cell a hole (1.9.0 review: never filled)', () => {
     const xml = '<worksheet><sheetData>' +
       '<row r="1"><c r="A1" t="s"><v>0</v></c><c r="C1" t="inlineStr"><is><t>Qty</t></is></c></row>' +
       '<row r="3"><c r="A3" t="str"><f>A1</f><v>calc</v></c><c r="B3" t="b"><v>1</v></c><c r="C3"><v>12.5</v></c><c r="D3" t="e"><v>#DIV/0!</v></c><c r="E3" t="d"><v>2026-01-02</v></c></row>' +
       '</sheetData></worksheet>';
     expect(readSheet(xml, ['Name'])).toEqual([
-      ['Name', null, 'Qty'],
+      // A hole, not a null: a hostile far column costs nothing.
+      ['Name', , 'Qty'],
       [],
       ['calc', true, 12.5, { error: true }, '2026-01-02'],
     ]);
@@ -136,5 +137,33 @@ describe('rows from a table (file-import.md 7–10)', () => {
   it('no header matching any column: no rows, told; an empty table likewise', () => {
     expect(importRows([['a', 'b'], ['1', '2']], cols(DEFS), FR)).toEqual({ rows: [], problems: [{ code: 'import-file', severity: 'warning', path: 'file', detail: 'header' }] });
     expect(importRows([], cols(DEFS), FR).problems).toEqual([{ code: 'import-file', severity: 'warning', path: 'file', detail: 'header' }]);
+  });
+});
+
+describe('hostile files (1.9.0 review): bounded, never thrown', () => {
+  it('rows past Excel’s 1 048 576 and columns past XFD are left out; a missing cell is a hole, not a filled one', () => {
+    const t = readSheet('<row r="1048577"><c r="A1048577"><v>1</v></c></row><row r="1"><c r="XFE1"><v>2</v></c><c r="AAAA1"><v>4</v></c><c r="XFD1"><v>3</v></c></row>', []);
+    expect(t.length).toBe(1);
+    expect(t[0]!.length).toBe(16_384);
+    expect(t[0]![16_383]).toBe(3);
+    // Sparse: the 16 383 cells before it are not made.
+    expect(Object.keys(t[0]!)).toEqual(['16383']);
+  });
+
+  it('malformed XML (elements never closed) is read in linear time, not quadratic', () => {
+    const t0 = performance.now();
+    readSheet('<row r="1"><c r="A1"><v>1</v></c>'.repeat(20_000), []);
+    sharedStrings('<si><t>a'.repeat(20_000));
+    sheetPath(`<sheet r:id="x"${'<sheet'.repeat(20_000)}`, '<Relationship Id="x"'.repeat(20_000));
+    expect(performance.now() - t0).toBeLessThan(500);
+  });
+
+  it('a character reference out of Unicode or not a number is left as written, never thrown', () => {
+    expect(sharedStrings('<sst><si><t>&#xZZ;&#99999999;&#65;</t></si></sst>')).toEqual(['&#xZZ;&#99999999;A']);
+    expect(readSheet('<row r="1"><c r="A1" t="str"><v>&#x110000;</v></c></row>', [])).toEqual([['&#x110000;']]);
+  });
+
+  it('an empty shared string written `<si/>` keeps the others’ places', () => {
+    expect(sharedStrings('<sst><si/><si><t>b</t></si></sst>')).toEqual(['', 'b']);
   });
 });

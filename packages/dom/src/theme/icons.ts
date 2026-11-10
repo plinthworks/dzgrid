@@ -11,8 +11,8 @@ const MAX = 20000;
 /** Why an icon is refused (a Problem's detail: never the SVG itself). */
 export type IconRefusal = 'type' | 'size' | 'parse' | 'root' | 'element' | 'attribute' | 'link';
 
-/** `url(` not followed by `#` (an inner reference), and a script scheme. */
-const outward = (v: string): boolean => /javascript:/i.test(v) || [...v.matchAll(/url\(\s*['"]?\s*([^)'"\s])/gi)].some((m) => m[1] !== '#');
+/** `url(` not followed by `#` (an inner reference), a script scheme, and a CSS escape (which could spell either past this check). */
+const outward = (v: string): boolean => /javascript:|\\/i.test(v) || [...v.matchAll(/url\(\s*['"]?\s*([^)'"\s])/gi)].some((m) => m[1] !== '#');
 
 /** An icon's SVG text once cleaned, or why it is refused. A string or an `SVGElement` (copied: never moved, never changed). */
 export function cleanIcon(input: string | SVGElement): { ok: string } | { refused: IconRefusal } {
@@ -21,6 +21,8 @@ export function cleanIcon(input: string | SVGElement): { ok: string } | { refuse
   else if (input && typeof input == 'object' && (input as Node).nodeType === 1 && (input as Element).namespaceURI === SVG) text = new XMLSerializer().serializeToString(input.cloneNode(true));
   else return { refused: 'type' };
   if (text.length > MAX) return { refused: 'size' };
+  // A DOCTYPE declares entities (an expansion bomb, an outside one): none in an icon.
+  if (/<!DOCTYPE/i.test(text)) return { refused: 'parse' };
   // An SVG written inline in HTML often has no namespace: given its own.
   if (!/^\s*<svg\b[^>]*\sxmlns=/.test(text)) text = text.replace(/^\s*<svg\b/, `<svg xmlns="${SVG}"`);
   let root: Element | null;

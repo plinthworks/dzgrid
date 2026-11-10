@@ -51,6 +51,12 @@ describe('the theme object (20–23)', () => {
     expect(s.getPropertyValue('--dzg-row-height')).toBe('32px');
   });
 
+  it('refuses a value that loads an image without url( — image-set(), -webkit-image-set(), src() (21, 1.9.0 review)', () => {
+    const m = make({ theme: { rowOddBg: 'image-set("https://example.test/a.png" 1x)', headerBg: '-webkit-image-set("https://example.test/a.png" 1x)', panelBg: 'SRC("https://example.test/a.png")', bg: 'light-dark(white, black)' } });
+    expect(told(m.events).map((p) => p.path)).toEqual(['settings.theme.rowOddBg', 'settings.theme.headerBg', 'settings.theme.panelBg']);
+    expect(root(m.host).style.getPropertyValue('--tz-bg')).toBe('light-dark(white, black)');
+  });
+
   it('cuts a long refused value to 80 characters in the problem', () => {
     const m = make({ theme: { accent: `${'a'.repeat(100)};` } });
     expect(told(m.events)[0]!.detail).toBe('a'.repeat(80));
@@ -109,6 +115,10 @@ describe('cleanIcon (18)', () => {
       ['<svg xmlns="http://www.w3.org/2000/svg"><use href="javascript:alert(1)"/></svg>', 'link'],
       ['<svg xmlns="http://www.w3.org/2000/svg"><path fill="url(https://example.test/p)" d="M0 0"/></svg>', 'link'],
       ['<svg xmlns="http://www.w3.org/2000/svg"><path style="fill:url( \'x.svg#p\')" d="M0 0"/></svg>', 'link'],
+      // 1.9.0 review: a CSS escape spelling url( past the check; a DOCTYPE's entities (expansion bombs, outside entities).
+      ['<svg xmlns="http://www.w3.org/2000/svg"><path style="fill:u\\72l(https://example.test/p)" d="M0 0"/></svg>', 'link'],
+      ['<!DOCTYPE svg [<!ENTITY a "aaaaaaaaaa"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">]><svg xmlns="http://www.w3.org/2000/svg"><title>&b;&b;</title></svg>', 'parse'],
+      ['<svg xmlns="http://www.w3.org/2000/svg"><!DOCTYPE x><path d="M0 0"/></svg>', 'parse'],
       ['<div xmlns="http://www.w3.org/1999/xhtml"/>', 'root'],
       ['<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"></svg>', 'parse'],
       [`<svg xmlns="http://www.w3.org/2000/svg"><path d="${'M0 0'.repeat(6000)}"/></svg>`, 'size'],

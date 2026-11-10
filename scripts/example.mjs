@@ -7,6 +7,8 @@
  *       the stamp does not match the packages (release:check)
  *   node scripts/example.mjs csv                  the Arabic CSV sample → examples/angular-audit/out/audit-ar.csv
  *   node scripts/example.mjs ssr [--lang ar] [--screen stock] [--json] [--dir <example>]   renderApplication on the server build
+ *   node scripts/example.mjs entries              every published entry of the five installed packages (their exports
+ *       maps) imported by one component, compiled by ngc (strict templates, skipLibCheck false); the others' files exist
  *   node scripts/example.mjs bytes                K.8 from the real build (default less baseline)
  *   node scripts/example.mjs browser              headless Chrome: the client builds (default, zone), fr and ar, the zone demo
  *   node scripts/example.mjs smoke <19|22> [--keep]   by hand: a copy in a scratch folder on that major, build + SSR
@@ -19,18 +21,20 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dropStamp, forgetLocalPacks, indexOf, measureExample, measureLazy, stampProblem, writeStamp } from './example-lib.mjs';
+import { dropStamp, entriesSource, forgetLocalPacks, indexOf, measureExample, measureLazy, publishedEntries, stampProblem, writeStamp } from './example-lib.mjs';
 import { measureSplit } from './size-split.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const EXAMPLE = join(ROOT, 'examples/angular-audit');
-const K8 = 100_000; // +2 % rule, Phase 11 close 2026-11-09 (measured 99 717: Phase 11 and the server pivot in the base, the unbounded view); Phase 8 close 2026-11-05 (measured 99 425: the block seams of the base, the controller's methods); Phase 7 close 2026-11-05 (measured 98 833: the base seams, [(groupBy)]); 2026-11-04 (1.4.0: measured 98 624); 2026-11-02 (1.3.0: measured 97 173 → 97 400; 1.2.0: 95 054 → 95 500); owner 2026-10-28 (Phase 6 step 12, decisions.md « Real Angular example line »: measured 94 596; the build had been broken since 1.0.0); owner S12-Q10 92 500 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
+const K8 = 101_000; // +2 % rule, 1.9.0 release 2026-11-10 (measured 100 752: lots A, B and the presentation settings in the base); Phase 11 close 2026-11-09 (measured 99 717: Phase 11 and the server pivot in the base, the unbounded view); Phase 8 close 2026-11-05 (measured 99 425: the block seams of the base, the controller's methods); Phase 7 close 2026-11-05 (measured 98 833: the base seams, [(groupBy)]); 2026-11-04 (1.4.0: measured 98 624); 2026-11-02 (1.3.0: measured 97 173 → 97 400; 1.2.0: 95 054 → 95 500); owner 2026-10-28 (Phase 6 step 12, decisions.md « Real Angular example line »: measured 94 596; the build had been broken since 1.0.0); owner S12-Q10 92 500 (2026-10-26: the stock screen's blocks and fill, measured 92 059); S9-Q7 92 000 (the on-demand stock screen splits the build); Q17a 90 000, Q14 87 000, before it 85 000
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(`--${name}`);
 const option = (name, fallback) => {
   const i = args.indexOf(`--${name}`);
   return i >= 0 && args[i + 1] ? args[i + 1] : fallback;
 };
+/** The five packages, all installed in the example (`@dzgrid/element` for the entries check only: the screens never import it). */
+const PACKAGES = ['core', 'dom', 'angular', 'theme', 'element'];
 const ENV = { ...process.env, NG_CLI_ANALYTICS: 'false', NO_COLOR: '1', FORCE_COLOR: '0', CI: '1' };
 
 /** A command; its output printed, and returned. Throws on a non-zero exit unless `allowFail`. */
@@ -52,7 +56,7 @@ function quiet(out) {
 
 function installed(dir) {
   const bad = [];
-  for (const p of ['core', 'dom', 'angular', 'theme']) {
+  for (const p of PACKAGES) {
     const at = join(dir, 'node_modules/@dzgrid', p);
     if (!existsSync(at)) bad.push(`@dzgrid/${p} is not installed`);
     else if (lstatSync(at).isSymbolicLink()) bad.push(`@dzgrid/${p} is a link, not a copy`);
@@ -71,12 +75,12 @@ function build() {
   // Their lock entries too: the old tarball's integrity made npm reinstall its cached copy (step 11).
   const lockFile = join(EXAMPLE, 'package-lock.json');
   if (existsSync(lockFile)) writeFileSync(lockFile, JSON.stringify(forgetLocalPacks(JSON.parse(readFileSync(lockFile, 'utf8'))), null, 2) + '\n');
-  // The manifest names the release tarballs (`packed/dzgrid-*-1.8.0.tgz`, `pack:release`); `pack:local` stamps its own
-  // version (1.8.1-local.<time>): npm is pointed at the tarballs packed, the manifest given back as it was after.
+  // The manifest names the release tarballs (`packed/dzgrid-*-1.9.0.tgz`, `pack:release`); `pack:local` stamps its own
+  // version (1.9.1-local.<time>): npm is pointed at the tarballs packed, the manifest given back as it was after.
   const manifest = join(EXAMPLE, 'package.json');
   const kept = readFileSync(manifest, 'utf8');
   const packs = readdirSync(join(ROOT, 'packed'));
-  writeFileSync(manifest, kept.replace(/file:\.\.\/\.\.\/packed\/dzgrid-(core|dom|angular|theme)-[^"]+\.tgz/g, (all, p) => {
+  writeFileSync(manifest, kept.replace(/file:\.\.\/\.\.\/packed\/dzgrid-(core|dom|angular|theme|element)-[^"]+\.tgz/g, (all, p) => {
     const f = packs.find((x) => x.startsWith(`dzgrid-${p}-`) && x.endsWith('.tgz'));
     return f ? `file:../../packed/${f}` : all;
   }));
@@ -103,6 +107,27 @@ function build() {
   console.log(`  installed @dzgrid/* as copies: ${installed(EXAMPLE).length === 0 ? 'yes' : 'no'}`);
   if (report.every((r) => r.ok)) writeStamp(EXAMPLE, ROOT);
   else process.exitCode = 1;
+}
+
+/**
+ * The permanent guard (owner, after 1.7.0's typings imported an entry @dzgrid/core does not publish): one component
+ * importing every published entry of the installed packages, read from their exports maps (a new entry is covered by
+ * itself), compiled by the example's ngc with its strict settings and no emit; every other entry's file must exist.
+ */
+function entries() {
+  const manifests = PACKAGES.map((p) => JSON.parse(readFileSync(join(EXAMPLE, 'node_modules/@dzgrid', p, 'package.json'), 'utf8')));
+  const { typed, files } = publishedEntries(manifests);
+  const missing = files.filter((f) => !existsSync(join(EXAMPLE, 'node_modules', f.file)));
+  const dir = join(EXAMPLE, 'out/entries');
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, 'entries.ts'), entriesSource(typed));
+  writeFileSync(join(dir, 'tsconfig.json'), JSON.stringify({ extends: '../../tsconfig.json', compilerOptions: { noEmit: true }, files: ['entries.ts'] }, null, 2) + '\n');
+  const r = sh(process.execPath, [join(EXAMPLE, 'node_modules/@angular/compiler-cli/bundles/src/bin/ngc.js'), '-p', join(dir, 'tsconfig.json'), '--noEmit'], EXAMPLE, { allowFail: true });
+  console.log(`\nentries (${manifests.map((m) => `${m.name.slice(8)} ${m.version}`).join(', ')}):`);
+  console.log(`  ${r.status === 0 ? 'ok  ' : 'FAIL'} ${typed.length} typed entries compiled by ngc (strict templates, skipLibCheck false)`);
+  console.log(`  ${missing.length ? 'FAIL' : 'ok  '} ${files.length} other entries' files present${missing.length ? `; missing: ${missing.map((f) => f.entry).join(', ')}` : ''}`);
+  if (r.status !== 0 || missing.length) process.exitCode = 1;
 }
 
 function csv() {
@@ -420,7 +445,7 @@ function smoke() {
   }
 }
 
-const commands = { build, csv, ssr, bytes, browser: browserCheck, smoke };
+const commands = { build, csv, ssr, entries, bytes, browser: browserCheck, smoke };
 const run = commands[args[0]];
 if (!run) {
   console.error(`usage: node scripts/example.mjs ${Object.keys(commands).join('|')}`);

@@ -96,7 +96,7 @@ CSS Fonts 4 (`font-variant-numeric`), CSS Masking 1 (`mask`), SVG 2 (what an ima
     the SVG's own fill), at the mark's size, mirrored where the default is.
 18. Cleaned before use: the root must be `<svg>`; no `<script>`, `<style>`, `<foreignObject>`, no other element than
     shapes, groups, definitions, gradients, `use`, `title` / `desc`; no `on…` attribute; a link (`href`) only to `#…`;
-    `url(…)` only to `#…`; at most 20 000 characters. Anything else: the icon is refused, the default drawn, a warning
+    `url(…)` only to `#…`; no `\` in a value (a CSS escape could spell `url(`) and no DOCTYPE (its entities): 1.9.0 review; at most 20 000 characters. Anything else: the icon is refused, the default drawn, a warning
     `invalid-setting` at `settings.icons.<name>` (detail: the reason, never the SVG). An unknown name: same, detail
     `unknown`. The icon is shown as an image (`mask`, a `data:` URL): nothing in it can run even if a rule were
     missed. A page whose CSP forbids `data:` images keeps the defaults.
@@ -107,7 +107,7 @@ CSS Fonts 4 (`font-variant-numeric`), CSS Masking 1 (`mask`), SVG 2 (what an ima
     `--tz-accent`, `bgRaised` → `--tz-bg-raised`…) and every `--dzg-*` knob of the guide's table in camel case
     (`rowOddBg` → `--dzg-row-odd-bg`). Written on the grid's root (so they win over the stylesheets for this grid only).
 21. A value is a string or a finite number (written as is: `600`, `0`); a key not in the list, or a value with `;`,
-    `{`, `}`, `<`, `\`, `!`, `url(`, or another type: not written, warning `invalid-setting` at `settings.theme.<key>`
+    `{`, `}`, `<`, `\`, `!`, `url(` (or an image's other spellings `image(`, `image-set(`, `src(`: 1.9.0 review), or another type: not written, warning `invalid-setting` at `settings.theme.<key>`
     (detail: the value as given, cut to 80 characters). Never throws.
 22. Live: `update({ theme })` writes the new set and takes away the variables the previous one wrote that the new one
     does not hold. Read-only variables (`--dzg-row-height`, `--dzg-header-height`, `--dzg-density`) are not keys.

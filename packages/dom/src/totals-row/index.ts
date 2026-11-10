@@ -65,7 +65,8 @@ export function totalsRow(): TotalsRowFeature {
         emit(kernel, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', 'totalsRow', 'pinned-rows')] });
         return { destroy: () => void apis.delete(kernel) };
       }
-      const totalled = (): ResolvedColumn<unknown>[] => g.columns.visible().filter((c) => c.def.total !== undefined);
+      // The columns collapsed under their rows (`responsive`) too: a file writes them (totals-row.md 10).
+      const totalled = (): ResolvedColumn<unknown>[] => (g.columns.withCollapsed?.() ?? g.columns.visible()).filter((c) => c.def.total !== undefined);
       const labelColumn = (): string | undefined => g.columns.visible().find((c) => c.def.total === undefined)?.id;
       /** The totals now: given, or computed when what they read changed (8); the row put in the band or taken out. */
       const update = (): void => {

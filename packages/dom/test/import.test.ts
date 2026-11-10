@@ -151,3 +151,17 @@ describe('fileImport()', () => {
     expect(t.f.api(t.g)).toBeNull();
   });
 });
+
+describe('a ZIP bomb (1.9.0 review)', () => {
+  it('the entries inflated together stop at the cap: no rows, import-file detail size', async () => {
+    const { readFile } = await import('../src/import/read/index.js');
+    const { createColumnModel, localeCtx } = await import('@dzgrid/core');
+    // 200 000 zeros deflate to a few hundred bytes: far over a cap of 10 000.
+    const big = `<worksheet><sheetData>${'0'.repeat(200_000)}</sheetData></worksheet>`;
+    const z = storedZip({ 'xl/workbook.xml': WB, 'xl/_rels/workbook.xml.rels': RELS, 'xl/worksheets/sheet1.xml': big }, 0, 8);
+    expect(z.length).toBeLessThan(2_000);
+    // COLUMNS is typed for the grid's rows; the reader takes the model of unknown rows.
+    const r = await readFile(z, ['xlsx'], createColumnModel<unknown>(COLUMNS as never), localeCtx({ locale: 'en-US', timeZone: 'UTC' }), globalThis, 10_000);
+    expect(r).toEqual({ format: 'xlsx', rows: [], problems: [{ code: 'import-file', severity: 'warning', path: 'file', detail: 'size' }] });
+  });
+});

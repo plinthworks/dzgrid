@@ -83,7 +83,7 @@ export type GroupProblemCode = 'agg-type' | 'agg-threw' | 'pivot-too-many';
 
 /**
  * `@dzgrid/core/import`'s own (1.9.0, file-import.md): a file not read (`detail`: `type`, `zip`, `sheet`, `deflate`,
- * `header`, `many`), a header matching no column (or a column's second, `duplicate`), a refused cell (path
+ * `header`, `many`, `size`), a header matching no column (or a column's second, `duplicate`), a refused cell (path
  * `rows[i].<column>`, the refusal's code). Never a cell's text. A type only.
  */
 export type ImportProblemCode = 'import-file' | 'import-header' | 'import-cell';

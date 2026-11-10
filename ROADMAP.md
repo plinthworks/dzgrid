@@ -1337,3 +1337,15 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
 - For the owner: publish 1.8.0 (the element's first publish from the Mac, then its trusted publisher); the listening
   L4c; the 4× misses; `<dz-grid>` in Firefox and WebKit before or after the publish; the benchmark's second day.
 
+## 1.9.0 — release (2026-11-10, not committed; prepared, not published)
+
+- [x] Lots A, B and the presentation settings (CHANGELOG « [1.9.0] »).
+- [x] Code review of the new code: hostile `.xlsx` (ZIP bomb capped at 128 MiB, Excel's row / column limits, sparse
+  cells, linear XML reading, bad character references), icons (CSS escapes, DOCTYPE), `theme` (`image(`, `image-set(`,
+  `src(`), the totals of a collapsed column in files — each fixed test first.
+- [x] The permanent guard: `release:check` compiles every published entry of the five packages in the real Angular
+  example (ngc, strict templates, `skipLibCheck: false`), from their exports maps.
+- Sizes: K.8 89 732 / 90 000; the real Angular build's line 100 000 → 101 000 (+2 % rule, measured 100 752).
+- Checks: `gate:step` green (timeouts under load re-run alone), `test:real-app` 58 / 58, `release:check` « the 5
+  packages at 1.9.0 ».
+- For the owner: commit and publish (`docs/release-1.9.0.md`).

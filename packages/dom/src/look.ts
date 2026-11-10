@@ -3,7 +3,7 @@
  * only: the base carries no code for them; `theming()` (`@dzgrid/dom/theme`) writes them.
  */
 
-/** A variable's value: a CSS value (no `;`, `{`, `}`, `<`, `\`, `!`, `url(`), or a number written as is (`600`). */
+/** A variable's value: a CSS value (no `;`, `{`, `}`, `<`, `\`, `!`, `url(`, `image(`, `image-set(`, `src(`), or a number written as is (`600`). */
 export type ThemeValue = string | number;
 
 /**
