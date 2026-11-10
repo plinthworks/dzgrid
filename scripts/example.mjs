@@ -75,7 +75,7 @@ function build() {
   // Their lock entries too: the old tarball's integrity made npm reinstall its cached copy (step 11).
   const lockFile = join(EXAMPLE, 'package-lock.json');
   if (existsSync(lockFile)) writeFileSync(lockFile, JSON.stringify(forgetLocalPacks(JSON.parse(readFileSync(lockFile, 'utf8'))), null, 2) + '\n');
-  // The manifest names the release tarballs (`packed/dzgrid-*-1.10.0.tgz`, `pack:release`); `pack:local` stamps its own
+  // The manifest names the release tarballs (`packed/dzgrid-*-1.10.1.tgz`, `pack:release`); `pack:local` stamps its own
   // version (1.9.1-local.<time>): npm is pointed at the tarballs packed, the manifest given back as it was after.
   const manifest = join(EXAMPLE, 'package.json');
   const kept = readFileSync(manifest, 'utf8');

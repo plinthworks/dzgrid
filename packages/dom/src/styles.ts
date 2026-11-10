@@ -14,9 +14,14 @@
  * Presentation settings (1.9.0, docs/behaviors/presentation-settings.md): a header title over its column's cells
  * (3), equal-width digits in number cells (5), the alternate rows' and the density's variables the theme reads (2,
  * 15), the pinned edge's shadow while content is under it, mirrored for the end side and in right to left (7).
+ *
+ * The root fills its container whatever its rows (1.10.1, virtual-scroll.md « The grid's height comes from its
+ * container »): a flex item that grows, 100 % of a host with a height, its border inside. A Web Component host
+ * (`[data-dzg-host]`) is no box of its own unless the page styles it (web-component.md 13).
  */
 export const LAYOUT_CSS = `@layer dzgrid.layout {
-:where(.dzg) { position: relative; display: flex; flex-direction: column; min-block-size: 0; min-inline-size: 0; }
+:where(.dzg) { position: relative; display: flex; flex-direction: column; box-sizing: border-box; block-size: 100%; flex: 1 1 auto; min-block-size: 0; min-inline-size: 0; }
+:where([data-dzg-host]) { display: contents; }
 :where(.dzg-viewport) { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain; overflow-anchor: none; outline: none; }
 :where(.dzg-header) { position: sticky; inset-block-start: 0; z-index: 3; display: flex; flex-direction: column; }
 :where(.dzg-body) { position: relative; overflow: clip; }

@@ -15,12 +15,11 @@ In `angular.json`, load the theme before your own global styles:
 "styles": ["node_modules/@dzgrid/theme/dzgrid.css", "src/styles.css"]
 ```
 
-The `<dz-grid>` host is `display: contents` (it has no box of its own): size its parent, in **global** CSS (a
-component's emulated styles do not reach the grid's DOM).
+The `<dz-grid>` host is `display: contents` (it has no box of its own): give its parent a height and the grid fills
+it, whatever its row count. Style the grid's own DOM in **global** CSS (a component's emulated styles do not reach it).
 
 ```css
 .grid-box { block-size: 480px; display: flex; flex-direction: column; }
-.grid-box > dz-grid > .dzg { flex: 1; }
 ```
 
 ## A first grid

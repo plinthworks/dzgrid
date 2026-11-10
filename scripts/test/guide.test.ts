@@ -123,6 +123,15 @@ describe('the guide', () => {
     expect([...missing]).toEqual([]);
   });
 
+  // 1.10.1: `filters-base` gives a day or instant column no filter (filter-ui.md « Without tzslot »); a page that
+  // offers it in its text says so, never « the same functions ».
+  it('every page that offers `@dzgrid/dom/filters-base` in its text says a day column gets no filter there', () => {
+    const prose = (f: string) => text(f).replace(/^```\w*\n[\s\S]*?^```$/gm, '');
+    const offering = pages.filter((p) => prose(p).includes('`@dzgrid/dom/filters-base`'));
+    expect(offering.length).toBeGreaterThan(0);
+    expect(offering.filter((p) => !/day[^.]*\*\*no filter\*\*/.test(prose(p).replace(/\s+/g, ' ')) || /the same functions/.test(prose(p)))).toEqual([]);
+  });
+
   it('llms.txt and llms-full.txt are what scripts/llms.mjs makes of the guide (node scripts/llms.mjs)', () => {
     const out = build(ROOT) as Record<string, string>;
     for (const [file, made] of Object.entries(out)) expect(readFileSync(join(ROOT, file), 'utf8'), file).toBe(made);

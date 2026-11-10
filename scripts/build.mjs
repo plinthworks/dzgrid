@@ -11,7 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ENGINES, entryProblems, manifestProblems, mapProblems, peerProblems, pinPeers, PUBLISH_CONFIG, publishProblems, REPOSITORY, repositoryProblems } from './manifest.mjs';
+import { ENGINES, entryProblems, manifestProblems, mapProblems, peerProblems, pinPeers, PUBLISH_CONFIG, publishedSideEffects, publishProblems, REPOSITORY, repositoryProblems } from './manifest.mjs';
 
 // fileURLToPath, not .pathname: a folder with a space would come back as %20.
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -71,7 +71,7 @@ function typescript(name) {
     ...shared(name),
     type: 'module',
     // None, but where the source names them (`@dzgrid/element/define` defines `<dz-grid>`: a bundler must keep it).
-    sideEffects: source.sideEffects ?? false,
+    sideEffects: publishedSideEffects(source.sideEffects),
     main: './index.js',
     module: './index.js',
     types: './index.d.ts',

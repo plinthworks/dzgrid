@@ -16,12 +16,20 @@ export function manifestProblems(name, manifest) {
   const problems = [];
   // A published manifest that points at src/ points at a file npm never
   // received: the install succeeds and the import fails.
-  const entries = JSON.stringify([manifest.main, manifest.module, manifest.types, manifest.typings, manifest.exports]);
+  const entries = JSON.stringify([manifest.main, manifest.module, manifest.types, manifest.typings, manifest.exports, manifest.sideEffects]);
   if (entries.includes('src/')) problems.push(`packages/${name}/dist/package.json still points at src/`);
   const allowed = ALLOWED_DEPENDENCIES[name] ?? [];
   const extra = Object.keys(manifest.dependencies ?? {}).filter((dep) => !allowed.includes(dep));
   if (extra.length > 0) problems.push(`packages/${name} has runtime dependencies: ${extra.join(', ')}`);
   return problems;
+}
+
+/**
+ * The published `sideEffects` from the source's (1.10.1): the source names its own files (`./src/define.ts`, so a build
+ * from the repo's sources keeps them), the published manifest the built ones (`./define.js`); a pattern (`*.css`) stays.
+ */
+export function publishedSideEffects(source) {
+  return Array.isArray(source) ? source.map((f) => f.replace(/^\.\/src\/(.*)\.ts$/, './$1.js')) : (source ?? false);
 }
 
 /**

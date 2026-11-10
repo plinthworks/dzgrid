@@ -10,8 +10,10 @@ npm install @dzgrid/core @dzgrid/dom @dzgrid/theme
 ```
 
 `@dzgrid/dom/filters` and `@dzgrid/dom/editors` load a date calendar from `@tzslot/core` and `@tzslot/dom`; install
-them too when you use those two entries, or import the same functions from `@dzgrid/dom/filters-base` and
-`@dzgrid/dom/editors-base`, which have no calendar.
+them too when you use those two entries. Without them, import from `@dzgrid/dom/filters-base` and
+`@dzgrid/dom/editors-base`, which have no calendar: with `filters-base` a day or instant column gets **no filter** (no
+button) and one `missing-feature` warning; with `editors-base` it is edited by typing. Day filters come from
+`@dzgrid/dom/filters` (or `filters-base` given `loadDates`).
 
 ## A first grid
 
@@ -21,10 +23,11 @@ The grid fills its host element: give the host a height.
 <div id="books" style="block-size: 420px; display: flex; flex-direction: column"></div>
 ```
 
-The `display: flex; flex-direction: column` matters: it stretches the grid to the host's height, so the grid
-scrolls inside it and draws only the rows in view. Without it the grid grows with its rows; it then holds its
-view to the window's height and tells a `problems` event with the code `unbounded-viewport` (path `host`) once.
-Seeing that code means: give the host this layout (or size the grid's `.dzg` yourself).
+The grid fills the host's height whatever its row count (3 rows or 10 000), scrolls inside it and draws only the
+rows in view. A fixed height, a flex or grid share all work; the flex column lets a bar sit above the grid. A host
+with no height (sized by its content) makes the grid grow with its rows; it then holds its view to the window's
+height and tells a `problems` event with the code `unbounded-viewport` (path `host`) once. Seeing that code means:
+give the host a height (or size the grid's `.dzg` yourself).
 
 ```ts
 import { createGrid } from '@dzgrid/dom';

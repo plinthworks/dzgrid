@@ -41,8 +41,8 @@ try {
         return { tree: one('tree'), pivot: one('pivot'), plain: getComputedStyle(document.body).backgroundColor };
       });
       const dir = ar ? 'rtl' : 'ltr';
-      check(`${tag}: both grids drawn in the page (no shadow root, display contents), ${dir}, labelled, 360 px from the page's rule + the theme's 1 px border each side`,
-        [drawn.tree, drawn.pivot].every((g) => !g.shadow && g.display === 'contents' && g.rows > 0 && g.dir === dir && Math.round(g.height) === 362) && drawn.tree.label === (ar ? 'المصالح' : 'Services') && drawn.pivot.label === (ar ? 'المبيعات' : 'Ventes'), drawn);
+      check(`${tag}: both grids drawn in the page (no shadow root, display contents), ${dir}, labelled, 360 px from the page's rule, the theme's border inside (1.10.1: border-box; before, 362)`,
+        [drawn.tree, drawn.pivot].every((g) => !g.shadow && g.display === 'contents' && g.rows > 0 && g.dir === dir && Math.round(g.height) === 360) && drawn.tree.label === (ar ? 'المصالح' : 'Services') && drawn.pivot.label === (ar ? 'المبيعات' : 'Ventes'), drawn);
       check(`${tag}: the theme reached the grids (header colour set, not transparent)`, drawn.tree.header !== 'rgba(0, 0, 0, 0)' && drawn.tree.header === drawn.pivot.header, drawn);
       check(`${tag}: attributes read: compact rows (28 px) in the tree, row-height 36 in the pivot`, Math.round(drawn.tree.rowH) === 28 && Math.round(drawn.pivot.rowH) === 36, drawn);
 

@@ -5,6 +5,40 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.1] - 2026-11-10
+
+A patch: four defects found while writing the documentation site (owner 2026-11-10, « A »). Nothing of 1.10.0 is
+removed (`npm run check:api`; `LAYOUT_CSS`'s longer literal accepted by the owner).
+
+### Upgrading from 1.10.0
+- **The grid's root now fills its container whatever its row count**: a grid with few rows in a host with a height (a
+  fixed one, a flex column, a share of one) is as tall as the host, no longer as tall as its rows; a host with a height
+  but no flex column is filled too (it used to make the grid grow with its rows and tell `unbounded-viewport`).
+- **The root's border is inside its height** (`box-sizing: border-box`): an app that sizes `.dzg` itself
+  (`dz-grid > .dzg { block-size: 360px }`) gets 360 px in all, 2 px less than before.
+- **`<dz-grid>` (the Web Component) carries a `data-dzg-host` attribute** once connected, and is `display: contents`
+  under any parent, a flex or grid one too (it stayed a block there): a page that wants the element as a box of its
+  own styles its `display` (any page rule wins). Angular's host is unchanged (`display: contents` inline).
+- **`LAYOUT_CSS` (`@dzgrid/dom`) is a longer literal**: its type is the string itself; code that typed a variable as
+  `typeof LAYOUT_CSS` and assigned the 1.10.0 text to it must widen it to `string`.
+
+### Fixed
+- **A grid with few rows did not fill its flex-column host** (the guide said it did): the root had no `flex-grow`. The
+  layout sheet now gives it `flex: 1 1 auto`, `block-size: 100%` and `box-sizing: border-box` (virtual-scroll.md « The
+  grid's height comes from its container »). Checked in Chrome, Firefox and WebKit with 3 and 10 000 rows, a fixed
+  height, a flex column and a share of one, through `createGrid`, Angular's host and the Web Component.
+- **`<dz-grid>` (`@dzgrid/element`) placed directly in a flex host stayed a block** (a flex parent makes an unknown
+  element a block, so the « still inline » check never gave it `display: contents`) and its grid did not fill the
+  height. The element now marks itself `data-dzg-host` and the layout sheet's zero-specificity
+  `:where([data-dzg-host]) { display: contents }` applies, under any parent; a page rule on the element still wins
+  (web-component.md 13).
+- **A build from the repo's sources dropped `import '@dzgrid/element/define'`**: the source manifest's `sideEffects`
+  named `./define.js`, not `./src/define.ts`. The source now names its own file and the build writes the built one
+  (`./define.js`, as published before); a published manifest whose `sideEffects` name `src/` is refused.
+- **The guide said `@dzgrid/dom/filters-base` gives « the same functions »**: it gives a day or instant column no
+  filter (no button) and one `missing-feature` warning. The guide and the site's getting-started page say so, and that
+  day filters come from `@dzgrid/dom/filters` (or `filters-base` with `loadDates`).
+
 ## [1.10.0] - 2026-11-10
 
 A minor: nothing of 1.9.0 is removed (`npm run check:api`). The owner's answers of 2026-11-10 to the presentation review

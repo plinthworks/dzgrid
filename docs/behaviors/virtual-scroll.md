@@ -51,11 +51,21 @@ reader's pointer — the « yo-yo »). So DzGrid has no « as tall as its rows �
 application gives the host a height (a fixed one, a share of a flex or grid layout, `100dvh` minus its bar), the rows
 scroll inside. A host sized by its content is the unbounded case below, held to the window and told.
 
-## A host without the layout (unbounded viewport, Phase 11 L9)
+**The root fills its container whatever its rows (1.10.1).** The layout sheet gives the grid's root `flex: 1 1 auto`
+(it grows in a flex-column host, or in a share of one), `block-size: 100%` (it fills a host with a height, flex or
+not), `box-sizing: border-box` (its border inside that height) and keeps `min-block-size: 0` (10 000 rows scroll
+inside, never grow the host). The same for `createGrid`, Angular's host and the Web Component (both `display:
+contents`: their parent is the container). Before 1.10.1 the root did not grow: with 3 rows in a 300 px flex-column
+host the grid was 130 px tall, and a host with a height but no flex column made the grid grow with its rows (the
+unbounded case below). Checked in Chrome, Firefox and WebKit: `scripts/browser-host-fill.mjs` (a fixed height, a flex
+column, a share of one; 3 and 10 000 rows; the three ways in); the CSS in `packages/dom/test/host-fill.test.ts`.
+
+## A host with no height (unbounded viewport, Phase 11 L9)
 
 ### What the application does
-Gives the host a height but not the layout the guide shows (the host a flex column, or the grid itself sized):
-the grid's `.dzg` is then as tall as its content, and its viewport grows with its rows instead of scrolling.
+Gives the host no height (it is sized by its content: no fixed height, no flex or grid share; before 1.10.1 also a
+height without a flex column): the grid's `.dzg` is then as tall as its content, and its viewport grows with its rows
+instead of scrolling.
 
 ### What the user observes
 - The grid stays fast whatever the number of rows: the view is held to the window's height and scrolls on its

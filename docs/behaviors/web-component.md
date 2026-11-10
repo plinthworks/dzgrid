@@ -71,9 +71,14 @@ properties. It listens to `dzg-*` events.
     do to `createGrid`. Not in a shadow root, because the grid's popups (filter, column menu, context menu) and the
     print table are placed in the document, its layout sheet is injected once per document, and a theme would have
     to be linked again inside every shadow root; a shadow root would split the grid from them.
-13. **Display.** An element still displayed `inline` (the browser's default for an unknown element) is given
-    `display: contents`, as Angular's host: the grid's box is laid out by the element's parent, and sized the same
-    way (`dz-grid > .dzg { block-size: … }`). A page that styles the element's `display` itself keeps its own.
+13. **Display.** The element has no box of its own, as Angular's host: the grid's box is laid out by the element's
+    parent and fills it whatever its rows (virtual-scroll.md « The grid's height comes from its container »), or is
+    sized itself (`dz-grid > .dzg { block-size: … }`). Connected, the element marks itself `data-dzg-host`; the layout
+    sheet's `:where([data-dzg-host]) { display: contents }` (zero specificity, layer `dzgrid.layout`) reads the mark,
+    also under a flex or grid parent, which makes an unknown element a block (1.10.1: before, the element stayed a
+    block there and its grid did not fill the host). An element still displayed `inline` before that sheet is in the
+    page is given `display: contents` inline. A page that styles the element's `display` itself keeps its own (any
+    page rule wins over the layer's). Angular's host takes `display: contents` inline, always.
 14. **Parts are functions.** Cells, headers, editors and the other slots take parts made with `definePart`
     (`parts` property, or a feature's own), as with `createGrid`. `<template>` children are not read: a template
     would need a binding language of its own (which field into which node, events, cleanup) that the grid does not

@@ -31,8 +31,10 @@ console.log(grid.kernel.query.sort);
 ## Column filters
 
 `filters()` adds a filter button to each header and a filter popup: text, number, day, instant, yes/no, and a value
-list (`kind: 'set'`). Import it from `@dzgrid/dom/filters` (date filters with a calendar, needs `@tzslot/*`) or
-`@dzgrid/dom/filters-base` (no calendar). Texts: `-filters`.
+list (`kind: 'set'`). Import it from `@dzgrid/dom/filters` (every kind; the day and instant forms use a calendar,
+needs `@tzslot/*`) or `@dzgrid/dom/filters-base` (no calendar: text, number, yes/no and the value list only — a day or
+instant column gets **no filter**, no button, and one `missing-feature` warning naming `@dzgrid/dom/filters`; give it
+`loadDates` to bring the date forms back). Texts: `-filters`.
 
 ```ts
 import { createGrid, type GridMessages } from '@dzgrid/dom';

@@ -1,7 +1,7 @@
 /**
  * A host without the documented layout in real Chrome (Phase 11 L9, docs/behaviors/virtual-scroll.md « A host without
  * the layout »): `node scripts/browser-unbounded.mjs`. The page `packages/dom/test/browser/unbounded.html` gives the host
- * a height but no flex column; 100 000 rows. Checked: a few rows drawn (not all), the viewport held to the window and
+ * no height (sized by its content; since 1.10.1 a host with a height is filled); 100 000 rows. Checked: a few rows drawn (not all), the viewport held to the window and
  * scrolling, `unbounded-viewport` told once, a sort and a jump to the end each answered within a second. One browser,
  * closed in finally.
  */

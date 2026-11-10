@@ -1372,6 +1372,23 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   `release:check` « the 5 packages at 1.10.0 » (its bytes step re-run after the real-build line moved).
 - For the owner: commit and publish (`docs/release-1.10.0.md`).
 
+## 1.10.1 — patch (2026-11-10, not committed; prepared, not published)
+
+- [x] Four defects found by the site's batch 1 (owner « A »), each test first: the grid's root grows to fill its
+  container whatever its rows (`flex: 1 1 auto`, `block-size: 100%`, `border-box` in the layout sheet; it had no
+  flex-grow); `<dz-grid>` marks itself `data-dzg-host` and the layout sheet makes it `display: contents` under a flex or
+  grid parent too (it was blockified, the « still inline » check never fired); the element's source `sideEffects` name
+  `./src/define.ts`, the build writes `./define.js` and refuses `src/`; the guide and the site say `filters-base` gives
+  day columns no filter. Sheets: virtual-scroll.md, web-component.md 13. Also the site's TypeScript page sizing text.
+- Browsers: `scripts/browser-host-fill.mjs` 20 / 20 in Chrome, Firefox and WebKit (3 and 10 000 rows; fixed height,
+  flex column, flex share; createGrid, Angular's host as Angular makes it, the element; a page rule on the element
+  wins); `browser-unbounded.mjs` (host now with no height) 6 / 6; `browser-element.mjs` 16 / 16 (360 px, border inside).
+- `check:api`: `LAYOUT_CSS` changed — accepted by the owner (« A »). Sizes: K.8 90 105 / 91 000, DOM base 24 749 /
+  24 750, real Angular build 101 197 / 101 500.
+- Checks: one `gate:step` green (9 257 tests); `test:real-app` 58 / 58 (0.2 % pixels differ, the 2 px border, references
+  kept); `release:check` « the 5 packages at 1.10.1 ».
+- For the owner: commit and publish (`docs/release-1.10.1.md`).
+
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 
 - **Batch 1 — skeleton (2026-11-10, not committed).** `website/` (Astro Starlight, versions pinned as DzCalendar's,

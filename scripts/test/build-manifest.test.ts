@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error a plain .mjs script
-import { entryProblems, manifestProblems, peerProblems, pinPeers } from '../manifest.mjs';
+import { entryProblems, manifestProblems, peerProblems, pinPeers, publishedSideEffects } from '../manifest.mjs';
 
 /**
  * What build.mjs refuses before a package leaves for npm. A manifest that
@@ -81,5 +81,25 @@ describe('the dzgrid peers of a published manifest', () => {
   });
   it('name a dzgrid package that does not exist', () => {
     expect(peerProblems('dom', { peerDependencies: { '@dzgrid/nope': '^1.0.0' } }, versions)).toEqual(['packages/dom peer @dzgrid/nope is not a workspace package']);
+  });
+});
+
+// 1.10.1: `import '@dzgrid/element/define'` kept by a bundler both from the repo's sources (the site, an app on the
+// workspace: the exports map points at src/define.ts) and once published (dist/define.js).
+describe('sideEffects, from the source to the published manifest', () => {
+  it('the repo\'s element manifest names the file its ./define export points at', async () => {
+    const { readFileSync } = await import('node:fs');
+    const m = JSON.parse(readFileSync(new URL('../../packages/element/package.json', import.meta.url), 'utf8'));
+    expect(m.exports['./define'].default).toBe('./src/define.ts');
+    expect(m.sideEffects).toEqual(['./src/define.ts']);
+  });
+  it('published: a source file becomes its built file; a pattern or none stays as it is', () => {
+    expect(publishedSideEffects(['./src/define.ts'])).toEqual(['./define.js']);
+    expect(publishedSideEffects(['*.css'])).toEqual(['*.css']);
+    expect(publishedSideEffects(undefined)).toBe(false);
+    expect(publishedSideEffects(false)).toBe(false);
+  });
+  it('refuses a published manifest whose sideEffects still name src/', () => {
+    expect(manifestProblems('element', { sideEffects: ['./src/define.ts'] })).toEqual(['packages/element/dist/package.json still points at src/']);
   });
 });

@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: the grid fills its container</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/dom": "/packages/dom/src/index.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); }
+  .box { inline-size: 600px; margin-block-end: 12px; }
+  /* Three ways to size a container: a fixed height, a flex column with a height, a share of a flex column. */
+  .fixed { block-size: 300px; }
+  .flex { block-size: 300px; display: flex; flex-direction: column; }
+  .share-parent { block-size: 300px; display: flex; flex-direction: column; }
+  .share-parent > .bar { block-size: 40px; flex: none; }
+  .share { flex: 1; min-block-size: 0; }
+  /* The page styles the element's display itself: it keeps its own (web-component.md 13). */
+  dz-grid-wc.own { display: block; block-size: 200px; }
+</style>
+</head>
+<body>
+<main id="main"></main>
+<script type="module" src="./host-fill.ts"></script>
+</body>
+</html>

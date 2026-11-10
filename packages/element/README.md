@@ -32,7 +32,7 @@ npm install @dzgrid/core @dzgrid/dom @dzgrid/theme @dzgrid/element
 ```
 
 The grid is drawn once the element is in the page and has `columns`, `getRowId` and `messages` (the grid bundles no
-language). The element is `display: contents`, as Angular's host: size the grid with `dz-grid > .dzg { block-size: … }`.
+language). The element is `display: contents`, as Angular's host (in a flex parent too): the grid fills its parent's height whatever its rows, or size it with `dz-grid > .dzg { block-size: … }`.
 
 ## Entries
 

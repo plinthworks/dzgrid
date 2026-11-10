@@ -73,6 +73,15 @@ describe('<dz-grid> properties (3, 4)', () => {
     await expect(el.ready).resolves.toBeUndefined();
   });
 
+  it('marked as a host for the layout sheet\'s `display: contents` (13, 1.10.1: also once blockified by a flex parent); a page rule wins', () => {
+    document.body.insertAdjacentHTML('beforeend', '<div style="display: flex; flex-direction: column"></div>');
+    const el = make('<dz-grid-test></dz-grid-test>');
+    document.body.firstElementChild!.append(el);
+    expect(el.hasAttribute('data-dzg-host')).toBe(true);
+    const own = make('<dz-grid-test style="display: block"></dz-grid-test>');
+    expect([own.hasAttribute('data-dzg-host'), own.style.display]).toEqual([true, 'block']);
+  });
+
   it('nothing drawn, nothing told, until the three required ones are there', async () => {
     document.body.insertAdjacentHTML('beforeend', '<dz-grid-test></dz-grid-test>');
     const el = document.body.lastElementChild as DzGridElement<R>;

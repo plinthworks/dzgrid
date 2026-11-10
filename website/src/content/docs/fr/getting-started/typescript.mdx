@@ -18,20 +18,24 @@ npm install @dzgrid/core @dzgrid/dom @dzgrid/theme
 ```
 
 `@dzgrid/dom/filters` et `@dzgrid/dom/editors` chargent un calendrier de dates venu de `@tzslot/core` et
-`@tzslot/dom` : installez-les aussi si vous utilisez ces deux entrées, ou importez les mêmes fonctions depuis
-`@dzgrid/dom/filters-base` et `@dzgrid/dom/editors-base`, qui n’ont pas de calendrier.
+`@tzslot/dom` : installez-les aussi si vous utilisez ces deux entrées. Sans eux, importez depuis
+`@dzgrid/dom/filters-base` et `@dzgrid/dom/editors-base`, qui n’ont pas de calendrier : avec `filters-base`, une
+colonne de jours ou d’instants n’a **aucun filtre** (pas de bouton) et un avertissement `missing-feature` ; avec
+`editors-base`, elle se modifie en tapant. Les filtres de jours viennent de `@dzgrid/dom/filters` (ou de
+`filters-base` muni de `loadDates`).
 
 ## Une première grille
 
-La grille remplit son élément hôte : donnez une hauteur à l’hôte, et disposez-le en colonne.
+La grille remplit son élément hôte, quel que soit son nombre de lignes : donnez une hauteur à l’hôte.
 
 ```html
 <div id="books" style="block-size: 320px; display: flex; flex-direction: column"></div>
 ```
 
-Le `display: flex; flex-direction: column` compte : il tient la grille dans la hauteur de l’hôte, si bien que la
-grille défile à l’intérieur et ne dessine que les lignes visibles. Sans lui, la grille grandit avec ses lignes ;
-elle limite alors sa vue à la hauteur de la fenêtre et signale une fois un événement `problems` de code
+Avec 3 lignes ou 10 000, la grille a la hauteur de l’hôte, défile à l’intérieur et ne dessine que les lignes
+visibles. Une hauteur fixe, une part de flex ou de grid conviennent toutes ; la colonne flex laisse une barre se
+placer au-dessus de la grille. Un hôte sans hauteur (dimensionné par son contenu) fait grandir la grille avec ses
+lignes ; elle limite alors sa vue à la hauteur de la fenêtre et signale une fois un événement `problems` de code
 `unbounded-viewport` (chemin `host`).
 
 <CodeTabs>

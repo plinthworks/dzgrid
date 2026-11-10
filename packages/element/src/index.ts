@@ -177,7 +177,10 @@ export class DzGridElement<T = unknown> extends Base {
 
   connectedCallback(): void {
     this.#wired = true;
-    // Not a box of its own unless the page says so (an unknown element is inline): laid out as Angular's host.
+    // Not a box of its own unless the page says so: laid out as Angular's host. The layout sheet's zero-specificity
+    // rule reads the mark (also under a flex or grid parent, which makes an inline element a block, 1.10.1); inline
+    // style before that sheet is in the page.
+    this.setAttribute('data-dzg-host', '');
     if (!this.style.display && this.ownerDocument.defaultView?.getComputedStyle(this).display === 'inline') this.style.display = 'contents';
     // Changed while out of the page (a framework moving it): the grid kept takes what changed.
     this.#apply();

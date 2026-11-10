@@ -34,8 +34,10 @@ npm install @dzgrid/core @dzgrid/dom @dzgrid/theme @dzgrid/element
 </script>
 ```
 
-The grid is drawn once the element is in the page and has `columns`, `getRowId` and `messages`. The element is
-`display: contents`, so size the grid itself: `dz-grid > .dzg { block-size: … }`.
+The grid is drawn once the element is in the page and has `columns`, `getRowId` and `messages`. The element has no
+box of its own (`display: contents`, as Angular's host, in a flex parent too): give its parent a height and the grid
+fills it, whatever its row count — or size the grid itself: `dz-grid > .dzg { block-size: … }`. A page that styles
+the element's `display` keeps its own.
 
 ## In TypeScript
 
