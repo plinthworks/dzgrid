@@ -1,0 +1,12 @@
+{
+  "//": "The site's tests run from the root (vitest, project « tools »), before website/ is installed (CI, release): they must not inherit astro/tsconfigs/strict from ../tsconfig.json, which only exists once website/node_modules does.",
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["./**/*.ts"]
+}
